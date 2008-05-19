@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual C++ Express 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameModel", "GameModel\GameModel.vcproj", "{BBCF69BD-1D02-4951-A5B1-BFC30566AAB4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0AAE025A-B593-4D40-8857-4730BDE0555D} = {0AAE025A-B593-4D40-8857-4730BDE0555D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utils", "Utils\Utils.vcproj", "{0AAE025A-B593-4D40-8857-4730BDE0555D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameControllerView", "GameControllerView\GameControllerView.vcproj", "{D4BCD5E7-0607-49C5-8567-777CB9EFF0E0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BBCF69BD-1D02-4951-A5B1-BFC30566AAB4} = {BBCF69BD-1D02-4951-A5B1-BFC30566AAB4}
+		{0AAE025A-B593-4D40-8857-4730BDE0555D} = {0AAE025A-B593-4D40-8857-4730BDE0555D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BiffBamBlammo", "BiffBamBlammo.vcproj", "{E2252DE0-F2DB-4AE4-8BB6-84DE10AEDA8C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0AAE025A-B593-4D40-8857-4730BDE0555D} = {0AAE025A-B593-4D40-8857-4730BDE0555D}
+		{BBCF69BD-1D02-4951-A5B1-BFC30566AAB4} = {BBCF69BD-1D02-4951-A5B1-BFC30566AAB4}
+		{D4BCD5E7-0607-49C5-8567-777CB9EFF0E0} = {D4BCD5E7-0607-49C5-8567-777CB9EFF0E0}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BBCF69BD-1D02-4951-A5B1-BFC30566AAB4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BBCF69BD-1D02-4951-A5B1-BFC30566AAB4}.Debug|Win32.Build.0 = Debug|Win32
+		{BBCF69BD-1D02-4951-A5B1-BFC30566AAB4}.Release|Win32.ActiveCfg = Release|Win32
+		{BBCF69BD-1D02-4951-A5B1-BFC30566AAB4}.Release|Win32.Build.0 = Release|Win32
+		{0AAE025A-B593-4D40-8857-4730BDE0555D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0AAE025A-B593-4D40-8857-4730BDE0555D}.Debug|Win32.Build.0 = Debug|Win32
+		{0AAE025A-B593-4D40-8857-4730BDE0555D}.Release|Win32.ActiveCfg = Release|Win32
+		{0AAE025A-B593-4D40-8857-4730BDE0555D}.Release|Win32.Build.0 = Release|Win32
+		{D4BCD5E7-0607-49C5-8567-777CB9EFF0E0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D4BCD5E7-0607-49C5-8567-777CB9EFF0E0}.Debug|Win32.Build.0 = Debug|Win32
+		{D4BCD5E7-0607-49C5-8567-777CB9EFF0E0}.Release|Win32.ActiveCfg = Release|Win32
+		{D4BCD5E7-0607-49C5-8567-777CB9EFF0E0}.Release|Win32.Build.0 = Release|Win32
+		{E2252DE0-F2DB-4AE4-8BB6-84DE10AEDA8C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E2252DE0-F2DB-4AE4-8BB6-84DE10AEDA8C}.Debug|Win32.Build.0 = Debug|Win32
+		{E2252DE0-F2DB-4AE4-8BB6-84DE10AEDA8C}.Release|Win32.ActiveCfg = Release|Win32
+		{E2252DE0-F2DB-4AE4-8BB6-84DE10AEDA8C}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
