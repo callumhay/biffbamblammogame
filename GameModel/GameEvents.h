@@ -5,9 +5,35 @@ class Point2D;
 class GameBall;
 class PlayerPaddle;
 class LevelPiece;
+class GameLevel;
+class GameWorld;
 
 class GameEvents {
 public:
+	// Global game events ****************************************************************
+
+	//virtual void GameStarted(...);
+	//virtual void GamePaused(...);
+	//virtual void GameUnpaused(...);
+	//virtual void GameCompleted(...);
+
+	/**
+	 * Event occurs when a new world is started (i.e., the player enters the new world
+	 * in the game). This event occurs once just as the world starts.
+	 * Arguements: world - The world that is being started.
+	 */
+	virtual void WorldStartedEvent(const GameWorld& world) = 0;
+	//virtual void WorldCompleted(...);
+
+	/**
+	 * Event occurs when a new level is started (i.e., the player enters the new level
+	 * in the game). This event occurs once just as the level starts.
+	 * Arguements: level - The level that is being started.
+	 */
+	virtual void LevelStartedEvent(const GameLevel& level) = 0;
+	//virtual void LevelCompleted(...);
+
+
 	// Paddle related events *************************************************************
 	
 	/**
@@ -60,6 +86,15 @@ public:
 	 *             paddle - The paddle as it is colliding with the ball.
    */
 	virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) = 0;
+
+	// Point Events (Destruction, Combos, etc.) ************************************************
+
+	/**
+	 * Event triggered when a typical block is destoryed (turned into an empty space). Only occurs
+	 * once as the block is being destroyed.
+	 * Arguements: block - The block being destroyed, just before it is destroyed.
+	 */
+	virtual void BlockDestroyedEvent(const LevelPiece& block) = 0;
 
 };
 

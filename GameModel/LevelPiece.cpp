@@ -1,4 +1,5 @@
 #include "LevelPiece.h"
+#include "GameEventManager.h"
 
 #include "../Utils/Vector.h"
 #include "../Utils/Shape2D.h"
@@ -142,6 +143,9 @@ void LevelPiece::BallCollisionOccurred() {
 		case Bomb:
 			return;
 		case GreenBreakable:
+			// EVENT: Block is being destoryed
+			GameEventManager::Instance()->ActionBlockDestroyed(*this);
+
 			// Make empty, eliminate bounding lines
 			this->DecrementPieceType();
 			this->UpdateBounds(NULL, NULL, NULL, NULL);

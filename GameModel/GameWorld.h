@@ -1,8 +1,11 @@
 #ifndef __GAMEWORLD_H__
 #define __GAMEWORLD_H__
 
+#include "GameEventManager.h"
+
 #include <vector>
 #include <string>
+#include <assert.h>
 
 class GameLevel;
 
@@ -34,11 +37,35 @@ public:
 	bool Unload();
 	
 	GameLevel* GetCurrentLevel() {
+		assert(isLoaded);
 		return this->loadedLevels[this->currentLevelNum];
 	}
 
+	unsigned int GetCurrentLevelNum() const {
+		assert(isLoaded);
+		return this->currentLevelNum;
+	}
+
 	WorldStyle GetStyle() const {
+		assert(isLoaded);
 		return this->style;
+	}
+
+	// Set the current level to the one given
+	void SetCurrentLevel(unsigned int levelNum) {
+		assert(isLoaded);
+		assert(levelNum < this->loadedLevels.size());
+		assert(levelNum >= 0);
+		this->currentLevelNum = levelNum;
+
+		// EVENT: New Level Started
+		GameEventManager::Instance()->ActionLevelStarted(*this->GetCurrentLevel());
+	}
+
+	// Returns whether the current level is the last level in this world.
+	bool IsLastLevel() const {
+		assert(isLoaded);
+		return this->currentLevelNum == (this->loadedLevels.size()-1);
 	}
 
 

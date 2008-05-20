@@ -13,6 +13,10 @@ public:
 	GameEventsListener(GameDisplay* d);
 	virtual ~GameEventsListener();
 
+	// Global / Game events
+	virtual void WorldStartedEvent(const GameWorld& world);
+	virtual void LevelStartedEvent(const GameLevel& level);
+
 	// Paddle related events
 	virtual void PaddleHitWallEvent(const Point2D& hitLoc);
 
@@ -22,6 +26,9 @@ public:
 	virtual void BallShotEvent(const GameBall& shotBall);
 	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
 	virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
+
+	// Point-gaining events
+	virtual void BlockDestroyedEvent(const LevelPiece& block);
 };
 
 #endif

@@ -20,9 +20,12 @@ GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameL
 model(model), assets(new GameAssets()), camera(new Camera(45.0f, 0.01f, 100.0f, initWidth, initHeight)) {
 	assert(model != NULL);
 
-	this->assets->LoadAssets(this->model->GetCurrentWorldStyle());
 	this->SetupActionListeners();
 	this->SetupRenderOptions();
+
+	// Start the game...
+	this->model->BeginOrRestartGame();
+	this->assets->LoadAssets(this->model->GetCurrentWorldStyle());
 }
 
 GameDisplay::~GameDisplay() {

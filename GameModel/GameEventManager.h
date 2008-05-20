@@ -27,6 +27,10 @@ public:
 	void ActionBallShot(const GameBall& shotBall);
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
+	void ActionBlockDestroyed(const LevelPiece& block);
+
+	void ActionWorldStarted(const GameWorld& world);
+	void ActionLevelStarted(const GameLevel& level);
 
 protected:
 	GameEventManager();

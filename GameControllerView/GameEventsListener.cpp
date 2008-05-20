@@ -14,6 +14,14 @@ GameEventsListener::GameEventsListener(GameDisplay* d) : display(d) {
 GameEventsListener::~GameEventsListener() {
 }
 
+void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
+	debug_output("EVENT: World started");
+}
+
+void GameEventsListener::LevelStartedEvent(const GameLevel& level) {
+	debug_output("EVENT: Level started");
+}
+
 void GameEventsListener::PaddleHitWallEvent(const Point2D& hitLoc) {
 	debug_output("EVENT: Paddle hit wall");
 }
@@ -31,9 +39,13 @@ void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 }
 
 void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) {
-	debug_output("EVENT: Ball-Block Collision");
+	debug_output("EVENT: Ball-block collision");
 }
 
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
-	debug_output("EVENT: Ball-Paddle Collision");
+	debug_output("EVENT: Ball-paddle collision");
+}
+
+void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
+	debug_output("EVENT: Block destroyed");
 }

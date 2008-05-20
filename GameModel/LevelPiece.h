@@ -41,6 +41,13 @@ public:
 	LevelPiece(unsigned int wLoc, unsigned int hLoc, LevelPieceType type);
 	~LevelPiece();
 
+	// Returns whether this is a piece that is vital to destroy in order
+	// to end the level.
+	bool MustBeDestoryedToEndLevel() const {
+		return this->pieceType == GreenBreakable || this->pieceType == YellowBreakable ||
+					 this->pieceType == OrangeBreakable || this->pieceType == RedBreakable;
+	}
+
 	// Obtain the type of level piece this is.
 	LevelPieceType GetType() const {
 		return this->pieceType;

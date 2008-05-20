@@ -1,5 +1,6 @@
 #include "GameWorld.h"
 #include "GameLevel.h"
+
 #include "../Utils/Includes.h"
 
 #include <iostream>
@@ -75,7 +76,12 @@ bool GameWorld::Load() {
 	}
 
 	this->isLoaded = true;
-	this->currentLevelNum = 0;
+
+	// EVENT: World started...
+	GameEventManager::Instance()->ActionWorldStarted(*this);
+
+	this->SetCurrentLevel(0);
+
 	return true;
 }
 
@@ -92,7 +98,7 @@ bool GameWorld::Unload() {
 	this->loadedLevels.clear();
 	this->isLoaded = false;
 	this->style = None;
-	this->currentLevelNum = 0;
+	this->currentLevelNum = -1;
 
 	return true;
 }

@@ -6,7 +6,8 @@
 #include <fstream>
 
 // Private constructor, requires all the pieces that make up the level
-GameLevel::GameLevel(std::vector<std::vector<LevelPiece*>> pieces): cachedInitialLevelPieces(pieces), currentLevelPieces(pieces){
+GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces): cachedInitialLevelPieces(pieces), currentLevelPieces(pieces),
+piecesLeft(numBlocks) {
 	assert(pieces.size() > 0);
 	this->width = pieces[0].size();
 	this->height = pieces.size();
@@ -58,6 +59,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 	}
 
 	std::vector<std::vector<LevelPiece*>> levelPieces;
+	unsigned int numVitalPieces = 0;
 
 	// Read in the values that make up the level
 	for (int h = 0; h < height; h++) {
@@ -85,6 +87,10 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 																					 static_cast<unsigned int>(height - 1 - h), 
 																					 static_cast<LevelPiece::LevelPieceType>(currBlock));
 			currentRowPieces.push_back(newPiece);
+	
+			if (newPiece->MustBeDestoryedToEndLevel()) {
+				numVitalPieces++;
+			}
 		}
 
 		levelPieces.insert(levelPieces.begin(), currentRowPieces);
@@ -99,7 +105,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		}
 	}
 
-	return new GameLevel(levelPieces);
+	return new GameLevel(numVitalPieces, levelPieces);
 }
 
 /**
@@ -142,9 +148,18 @@ void GameLevel::BallCollisionOccurred(size_t hIndex, size_t wIndex) {
 
 	// Update the current piece by executing the collision
 	LevelPiece* currPiece = this->currentLevelPieces[hIndex][wIndex];
+	bool isVitalBeforeCollision = currPiece->MustBeDestoryedToEndLevel();
 	currPiece->BallCollisionOccurred();
+	bool isVitalAfterCollision = currPiece->MustBeDestoryedToEndLevel();
 
-	// Update the neighbours...
+	// Update the number of pieces that need to be destoryed to end the level
+	if (isVitalBeforeCollision && !isVitalAfterCollision) {
+		// In this case a block that was vital has been destroyed
+		this->piecesLeft--;
+		assert(this->piecesLeft >= 0);
+	}
+
+	// Update the neighbour's bounds...
 	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex-1); // left
 	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex); // bottom
 	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1); // right
