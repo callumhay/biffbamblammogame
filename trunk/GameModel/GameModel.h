@@ -7,6 +7,8 @@
 #include "PlayerPaddle.h"
 #include "GameBall.h"
 #include "GameState.h"
+#include "GameLevel.h"
+#include "GameWorld.h"
 
 #include "../Utils/Vector.h"
 
@@ -46,12 +48,16 @@ public:
 	void Tick(double seconds);
 
 	// Level/World related queries *****************************************
+	void BeginOrRestartGame();
+
 	std::vector<std::vector<LevelPiece*>>& GetCurrentLevelPieces() {
 		return this->GetCurrentWorld()->GetCurrentLevel()->GetCurrentLevelLayout();
 	}
+	
 	GameWorld::WorldStyle GetCurrentWorldStyle() const {
 		return this->GetCurrentWorld()->GetStyle();
 	}
+	
 	Vector2D GetLevelUnitDimensions() const {
 		GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
 		assert(currLevel != NULL);

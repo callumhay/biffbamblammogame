@@ -73,3 +73,27 @@ void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const Pla
 		(*this->listenerIter)->BallPaddleCollisionEvent(ball, paddle);
 	}	
 }
+
+// Action for when a block is destroyed
+void GameEventManager::ActionBlockDestroyed(const LevelPiece& block) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->BlockDestroyedEvent(block);
+	}	
+}
+
+// Action for when a world starts in-game
+void GameEventManager::ActionWorldStarted(const GameWorld& world) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->WorldStartedEvent(world);
+	}		
+}
+
+// Action for when a level starts in-game
+void GameEventManager::ActionLevelStarted(const GameLevel& level) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->LevelStartedEvent(level);
+	}	
+}

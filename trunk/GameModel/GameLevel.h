@@ -14,10 +14,12 @@ private:
 	std::vector<std::vector<LevelPiece*>> cachedInitialLevelPieces;
 	// The current layout of the level, stored in row major format
 	std::vector<std::vector<LevelPiece*>> currentLevelPieces;
+	// Pieces left before the end of the level
+	unsigned int piecesLeft;
 	// Size values for the level
 	size_t width, height;
 
-	GameLevel(std::vector<std::vector<LevelPiece*> > pieces);
+	GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces);
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces, size_t hIndex, size_t wIndex);
 
