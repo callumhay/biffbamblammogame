@@ -25,7 +25,8 @@ model(model), assets(new GameAssets()), camera(new Camera(45.0f, 0.01f, 100.0f, 
 
 	// Start the game...
 	this->model->BeginOrRestartGame();
-	this->assets->LoadAssets(this->model->GetCurrentWorldStyle());
+	this->assets->LoadAllAssets();
+	this->assets->SetCurrentAssetStyle(this->model->GetCurrentWorldStyle());
 }
 
 GameDisplay::~GameDisplay() {

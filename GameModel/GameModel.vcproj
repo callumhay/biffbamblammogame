@@ -172,6 +172,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameCompleteState.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameEventManager.cpp"
 				>
 			</File>
@@ -227,6 +231,10 @@
 			</File>
 			<File
 				RelativePath=".\GameBall.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameCompleteState.h"
 				>
 			</File>
 			<File

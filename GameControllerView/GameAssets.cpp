@@ -5,7 +5,7 @@
 #include "../Utils/Includes.h"
 
 
-GameAssets::GameAssets(): playerPaddle(NULL), ball(NULL), block(NULL), currLoadedStyle(-1) {
+GameAssets::GameAssets(): ball(NULL), currLoadedStyle(GameWorld::None) {
 }
 
 GameAssets::~GameAssets() {
@@ -17,15 +17,25 @@ GameAssets::~GameAssets() {
  * Precondition: true.
  */
 void GameAssets::DeleteAssets() {
-	if (this->playerPaddle != NULL) {
-		delete this->playerPaddle;
-	}
 	if (this->ball != NULL) {
 		delete this->ball;
 	}
-	if (this->block != NULL) {
-		delete this->block;
+
+	this->meshIter = this->playerPaddles.begin();
+	for (; this->meshIter != this->playerPaddles.end(); this->meshIter++) {
+		if (this->meshIter->second != NULL) {
+			delete this->meshIter->second;
+		}
 	}
+	this->playerPaddles.clear();
+
+	this->meshIter = this->blocks.begin();
+	for (; this->meshIter != this->blocks.end(); this->meshIter++) {
+		if (this->meshIter->second != NULL) {
+			delete this->meshIter->second;
+		}
+	}
+	this->blocks.clear();
 }
 
 // Draw a piece of the level (block that you destory or that makes up part of the level
@@ -48,35 +58,35 @@ void GameAssets::DrawLevelPieceMesh(const LevelPiece &p) {
 			{
 				GLfloat redAmbAndDiff[] = {1.0f, 0.0f, 0.0f, 1.0f};
 				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, redAmbAndDiff);
-				this->block->Draw();
+				this->blocks[this->currLoadedStyle]->Draw();
 			}
 			break;			
 		case LevelPiece::OrangeBreakable: 
 			{
 				GLfloat orangeAmbAndDiff[] = {1.0f, 0.5f, 0.0f, 1.0f};
 				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, orangeAmbAndDiff);
-				this->block->Draw();
+				this->blocks[this->currLoadedStyle]->Draw();
 			}
 			break;
 		case LevelPiece::YellowBreakable: 
 			{
 				GLfloat yellowAmbAndDiff[] = {1.0f, 1.0f, 0.0f, 1.0f};
 				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, yellowAmbAndDiff);
-				this->block->Draw();
+				this->blocks[this->currLoadedStyle]->Draw();
 			}
 			break;
 		case LevelPiece::GreenBreakable:
 			{
 				GLfloat greenAmbAndDiff[] = {0.0f, 1.0f, 0.0f, 1.0f};
 				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, greenAmbAndDiff);
-				this->block->Draw();
+				this->blocks[this->currLoadedStyle]->Draw();
 			}
 			break;			
 		case LevelPiece::Solid:
 			{
 				GLfloat greyAmbAndDiff[] = {0.8f, 0.8f, 0.8f, 1.0f};
 				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, greyAmbAndDiff);
-				this->block->Draw();
+				this->blocks[this->currLoadedStyle]->Draw();
 			}
 			break;
 		case LevelPiece::Bomb:
@@ -118,7 +128,7 @@ void GameAssets::DrawPaddle(const PlayerPaddle& p) {
 
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1], 0);
-	this->playerPaddle->Draw();
+	this->playerPaddles[this->currLoadedStyle]->Draw();
 	p.DebugDraw();
 	glPopMatrix();
 }
@@ -129,26 +139,15 @@ void GameAssets::DrawPaddle(const PlayerPaddle& p) {
  * in-game.
  * Precondition: true.
  */
-void GameAssets::LoadAssets(GameWorld::WorldStyle assetSet) {
-	// Do nothing if we have already loaded the given style
-	if (assetSet == this->currLoadedStyle) {
-		return;
-	}
+void GameAssets::LoadAllAssets() {
 
 	// Delete all previously loaded assets
 	this->DeleteAssets();
 
 	// Load in the new asset set
-	switch(assetSet) {
-		case GameWorld::Deco:
-			this->LoadDecoStyleAssets();
-			break;
-		default:
-			assert(false);
-			return;
-	}
-
-	this->currLoadedStyle = assetSet;
+	this->ball = ObjReader::ReadMesh("resources/models/ball.obj");
+	this->LoadDecoStyleAssets();
+	this->LoadCyberpunkStyleAssets();
 }
 
 /*
@@ -156,8 +155,11 @@ void GameAssets::LoadAssets(GameWorld::WorldStyle assetSet) {
  * Precondition: true.
  */
 void GameAssets::LoadDecoStyleAssets() {
-	this->playerPaddle = ObjReader::ReadMesh("resources/models/deco_paddle.obj");
-	this->ball = ObjReader::ReadMesh("resources/models/ball.obj");
-	this->block = ObjReader::ReadMesh("resources/models/deco_block.obj");
+	this->playerPaddles[GameWorld::Deco]	= ObjReader::ReadMesh("resources/models/deco_paddle.obj");
+	this->blocks[GameWorld::Deco]					= ObjReader::ReadMesh("resources/models/deco_block.obj");
+}
 
+void GameAssets::LoadCyberpunkStyleAssets() {
+	this->playerPaddles[GameWorld::Cyberpunk] = ObjReader::ReadMesh("resources/models/deco_paddle.obj");
+	this->blocks[GameWorld::Cyberpunk]			  = ObjReader::ReadMesh("resources/models/deco_block.obj");	
 }

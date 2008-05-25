@@ -6,26 +6,36 @@
 #include "../GameModel/GameBall.h"
 #include "../GameModel/PlayerPaddle.h"
 
+#include <map>
+
 class Mesh;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
 
 private:
-	int currLoadedStyle;
+	GameWorld::WorldStyle currLoadedStyle;
 
-	Mesh* playerPaddle;
-	Mesh* block;
+	std::map<GameWorld::WorldStyle, Mesh*>::iterator meshIter;
+	std::map<GameWorld::WorldStyle, Mesh*> playerPaddles;
+	std::map<GameWorld::WorldStyle, Mesh*> blocks;
+
+	//Mesh* playerPaddle;
+	//Mesh* block;
 	Mesh* ball;
 
 	void DeleteAssets();
 	void LoadDecoStyleAssets();
+	void LoadCyberpunkStyleAssets();
 
 public:
 	GameAssets();
 	~GameAssets();
 
-	void LoadAssets(GameWorld::WorldStyle assetSet);
+	void LoadAllAssets();
+	void SetCurrentAssetStyle(GameWorld::WorldStyle style) {
+		this->currLoadedStyle = style;
+	}
 
 	void DrawLevelPieceMesh(const LevelPiece& p);
 	void DrawGameBall(const GameBall& b);

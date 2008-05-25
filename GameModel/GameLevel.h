@@ -59,6 +59,10 @@ public:
 		return this->height * temp->GetHalfHeight()*2.0f;
 	}
 
+	bool IsLevelComplete() const {
+		return this->piecesLeft == 0;
+	}
+
 	void BallCollisionOccurred(size_t hIndex, size_t wIndex);
 
 

@@ -30,13 +30,17 @@ private:
 
 	// Private getters and setters ****************************************
 	void SetCurrentWorld(unsigned int worldNum);
-	
+	void IncrementLevel();
+
 	GameWorld* GetCurrentWorld() const {
 		return this->worlds[this->currWorldNum];
 	}
 
 	void SetCurrentState(GameState* nextState) {
-		delete this->currState;
+		assert(nextState != NULL);
+		if (this->currState != NULL) {
+			delete this->currState;
+		}
 		this->currState = nextState;
 	}
 
@@ -63,6 +67,16 @@ public:
 		assert(currLevel != NULL);
 
 		return Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
+	}
+
+	bool IsLastWorld() const {
+		return this->currWorldNum == this->worlds.size()-1;
+	}
+
+	// Queries as to whether the current level is the last level of the game
+	// Return: true if the model is on the last level of the game, false otherwise.
+	bool IsOnLastLevelOfGame() const {
+		return this->IsLastWorld() && this->GetCurrentWorld()->IsLastLevel();
 	}
 
 

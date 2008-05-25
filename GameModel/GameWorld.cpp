@@ -112,6 +112,9 @@ bool GameWorld::IsValidWorldStyle(const std::string &s) {
 	if (s == "Deco") {
 		return true;
 	}
+	else if (s == "Cyberpunk") {
+		return true;
+	}
 	else {
 		return false;
 	}
@@ -125,7 +128,10 @@ bool GameWorld::IsValidWorldStyle(const std::string &s) {
 GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
 	GameWorld::WorldStyle ret = None;
 	if (s == "Deco") {
-		return ret = Deco;
+		ret = Deco;
+	}
+	else if (s == "Cyberpunk") {
+		ret = Cyberpunk;
 	}
 	return ret;
 }

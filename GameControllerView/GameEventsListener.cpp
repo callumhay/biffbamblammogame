@@ -14,13 +14,26 @@ GameEventsListener::GameEventsListener(GameDisplay* d) : display(d) {
 GameEventsListener::~GameEventsListener() {
 }
 
+void GameEventsListener::GameCompletedEvent() {
+	debug_output("EVENT: Game completed");
+}
+
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	debug_output("EVENT: World started");
+}
+
+void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
+	debug_output("EVENT: World completed");
 }
 
 void GameEventsListener::LevelStartedEvent(const GameLevel& level) {
 	debug_output("EVENT: Level started");
 }
+
+void GameEventsListener::LevelCompletedEvent(const GameLevel& level) {
+	debug_output("EVENT: Level completed");
+}
+
 
 void GameEventsListener::PaddleHitWallEvent(const Point2D& hitLoc) {
 	debug_output("EVENT: Paddle hit wall");
