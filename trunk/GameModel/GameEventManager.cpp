@@ -82,6 +82,14 @@ void GameEventManager::ActionBlockDestroyed(const LevelPiece& block) {
 	}	
 }
 
+// Action for when the game is completed
+void GameEventManager::ActionGameCompleted() {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->GameCompletedEvent();
+	}		
+}
+
 // Action for when a world starts in-game
 void GameEventManager::ActionWorldStarted(const GameWorld& world) {
 	this->listenerIter = this->eventListeners.begin();
@@ -90,10 +98,26 @@ void GameEventManager::ActionWorldStarted(const GameWorld& world) {
 	}		
 }
 
+// Action for when a world completes in-game
+void GameEventManager::ActionWorldCompleted(const GameWorld& world) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->WorldCompletedEvent(world);
+	}	
+}
+
 // Action for when a level starts in-game
 void GameEventManager::ActionLevelStarted(const GameLevel& level) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
 		(*this->listenerIter)->LevelStartedEvent(level);
+	}	
+}
+
+// Action for when a level completes in-game
+void GameEventManager::ActionLevelCompleted(const GameLevel& level) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->LevelCompletedEvent(level);
 	}	
 }

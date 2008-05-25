@@ -16,7 +16,7 @@ class GameLevel;
 class GameWorld {
 
 public:
-	enum WorldStyle { None = -1, Deco = 0 };
+	enum WorldStyle { None = -1, Deco = 0, Cyberpunk = 1 };
 
 	static bool IsValidWorldStyle(const std::string &s);
 	static WorldStyle GetWorldStyleFromString(const std::string &s);
@@ -49,6 +49,11 @@ public:
 	WorldStyle GetStyle() const {
 		assert(isLoaded);
 		return this->style;
+	}
+
+	void IncrementLevel() {
+		assert(isLoaded);
+		this->SetCurrentLevel(this->currentLevelNum + 1);
 	}
 
 	// Set the current level to the one given

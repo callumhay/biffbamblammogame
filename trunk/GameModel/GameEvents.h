@@ -15,7 +15,12 @@ public:
 	//virtual void GameStarted(...);
 	//virtual void GamePaused(...);
 	//virtual void GameUnpaused(...);
-	//virtual void GameCompleted(...);
+	
+	/**
+	 * Event occurs when the entire game has been completed by the player. Event only occurs
+	 * once, just as the game completes.
+	 */
+	virtual void GameCompletedEvent() = 0;
 
 	/**
 	 * Event occurs when a new world is started (i.e., the player enters the new world
@@ -23,7 +28,12 @@ public:
 	 * Arguements: world - The world that is being started.
 	 */
 	virtual void WorldStartedEvent(const GameWorld& world) = 0;
-	//virtual void WorldCompleted(...);
+	
+	/**
+	 * Event occurs when a world is finished. This event occurs once just as the world finishes.
+	 * Arguments: world - The world that is just finished.
+	 */
+	virtual void WorldCompletedEvent(const GameWorld& world) = 0;
 
 	/**
 	 * Event occurs when a new level is started (i.e., the player enters the new level
@@ -31,7 +41,12 @@ public:
 	 * Arguements: level - The level that is being started.
 	 */
 	virtual void LevelStartedEvent(const GameLevel& level) = 0;
-	//virtual void LevelCompleted(...);
+
+	/**
+	 * Event occurs when a level is finished. This event occurs once just as the level finishes.
+	 * Arguments: level - The level that is just finished.
+	 */
+	virtual void LevelCompletedEvent(const GameLevel& level) = 0;
 
 
 	// Paddle related events *************************************************************
