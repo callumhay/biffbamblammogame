@@ -25,8 +25,8 @@ MtlReader::~MtlReader() {
  * Postcondition: Returns a map of celshadingmaterials with the keys equal
  * to their respective names if all goes well, NULL otherwise.
  */
-std::map<std::string, CelShadingMaterial> MtlReader::ReadMaterialFile(const std::string &filepath) {
-	std::map<std::string, CelShadingMaterial> materials;
+std::map<std::string, CelShadingMaterial*> MtlReader::ReadMaterialFile(const std::string &filepath) {
+	std::map<std::string, CelShadingMaterial*> materials;
 	
 	// Start reading in the file
 	std::ifstream inFile;
@@ -48,7 +48,7 @@ std::map<std::string, CelShadingMaterial> MtlReader::ReadMaterialFile(const std:
 				debug_output("ERROR: Material name not provided with proper syntax in mtl file: " << filepath); 
 				return materials;
 			}
-			materials[matName] = CelShadingMaterial();
+			materials[matName] = new CelShadingMaterial();
 		}
 		else if (currStr == MTL_AMBIENT) {
 			// Ignore this for now...
@@ -59,7 +59,7 @@ std::map<std::string, CelShadingMaterial> MtlReader::ReadMaterialFile(const std:
 				debug_output("ERROR: could not read diffuse colour properly from mtl file: " << filepath); 
 				return materials;				
 			}
-			materials[matName].SetDiffuse(diff);
+			materials[matName]->SetDiffuse(diff);
 		}
 		else if (currStr == MTL_SPECULAR) {
 			Colour spec;
@@ -67,7 +67,7 @@ std::map<std::string, CelShadingMaterial> MtlReader::ReadMaterialFile(const std:
 				debug_output("ERROR: could not read specular colour properly from mtl file: " << filepath); 
 				return materials;				
 			}
-			materials[matName].SetSpecular(spec);		
+			materials[matName]->SetSpecular(spec);		
 		}
 		else if (currStr == MTL_SHININESS) {
 			float shininess;
@@ -75,7 +75,7 @@ std::map<std::string, CelShadingMaterial> MtlReader::ReadMaterialFile(const std:
 				debug_output("ERROR: could not read shininess properly from mtl file: " << filepath); 
 				return materials;		
 			}
-			materials[matName].SetShininess(shininess);
+			materials[matName]->SetShininess(shininess);
 		}
 		else if (currStr == MTL_DIFF_TEXTURE) {
 			// Read in the path to the texture file
@@ -85,11 +85,15 @@ std::map<std::string, CelShadingMaterial> MtlReader::ReadMaterialFile(const std:
 				return materials;						
 			}
 
-			// Create the texture and add it to the material on success
-			Texture2D newTex(texturePath);
-			if (newTex.IsInitialized()) {
-				materials[matName].SetTexture(newTex);
+			// Concatenate the directory to the texture
+			size_t pos = filepath.find_last_of("/");
+			if (pos == std::string::npos) {
+				pos = filepath.find_last_of("\\");
 			}
+			texturePath.insert(0, filepath.substr(0, pos+1));
+
+			// Create the texture and add it to the material on success
+			materials[matName]->SetTexture(texturePath);
 		}
 	}
 

@@ -21,10 +21,12 @@ struct TriFace {
 struct MaterialGroup {
 	
 	std::vector<TriFace> faces;
-	CelShadingMaterial material;
+	CelShadingMaterial* material;
 
-	MaterialGroup() {}
-	MaterialGroup(const std::vector<TriFace> &faces): faces(faces) {}
+	MaterialGroup(CelShadingMaterial* mat) : material(mat) {}
+	~MaterialGroup() {
+		delete this->material;
+	}
 };
 
 // Represents a mesh, made up of faces, grouped by material.
@@ -37,13 +39,13 @@ private:
 	std::vector<Point3D> vertices;
 	std::vector<Vector3D> normals;
 	std::vector<Point2D> texCoords;
-	std::map<std::string, MaterialGroup> matGrps;		// Material groups, listed by their face group name
+	std::map<std::string, MaterialGroup*> matGrps;		// Material groups, listed by their face group name
 
 	void CompileDisplayList();
 
 public:
 	Mesh(const std::string name, const std::vector<Point3D> &verts, const std::vector<Vector3D> &norms,
-		   const std::vector<Point2D> &texCoords, const std::map<std::string, MaterialGroup> &matGrps);
+		   const std::vector<Point2D> &texCoords, const std::map<std::string, MaterialGroup*> &matGrps);
 	virtual ~Mesh();
 
 	virtual void Draw() const {

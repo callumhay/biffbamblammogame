@@ -5,12 +5,14 @@
 
 #include "../Utils/Colour.h"
 
+#include <string>
+
 class CelShadingMaterial {
 private:
 
 	Colour diffuse, specular;
 	float shininess;
-	Texture2D texture;
+	Texture2D* texture;
 
 public:
 	CelShadingMaterial();
@@ -25,9 +27,18 @@ public:
 	void SetShininess(float s) {
 		this->shininess = s;
 	}
-	void SetTexture(const Texture2D& tex) {
-		this->texture = tex;
+	bool SetTexture(const std::string& filepath) {
+		this->texture = new Texture2D(filepath);
+		if (!this->texture->IsInitialized()) {
+			delete this->texture;
+			this->texture = NULL;
+			return false;
+		}
+		return true;
 	}
+
+	void DrawMaterial();
+	
 
 };
 
