@@ -57,17 +57,22 @@ void FrameRenderMain(int value) {
 }
 
 // Driver function for the game.
-void main(int argc, char **argv) {
+int main(int argc, char **argv) {
 	Randomizer::InitializeRandomizer();
 
 	// Set up the window using glut
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_ALPHA | GLUT_ACCUM | GLUT_STENCIL | GLUT_MULTISAMPLE | GLUT_DOUBLE | GLUT_RGBA);
-
 	glutInitWindowPosition(100,100); // TODO: make this the center of the screen if not fullscreen
-
 	glutInitWindowSize(INIT_WIDTH,INIT_HEIGHT);
 	glutCreateWindow(WINDOW_TITLE);
+
+	// Load extensions
+	GLenum err = glewInit();
+	if (GLEW_OK != err) {
+		std::cout << "Error loading extensions: " << glewGetErrorString(err) << std::endl;
+		return -1;
+	}
 
 	// Set the rendering functions for OGL
 	glutDisplayFunc(RenderSceneMain);
@@ -96,4 +101,5 @@ void main(int argc, char **argv) {
 	delete model;
 	delete display;
 	delete controller;
+	return 0;
 }

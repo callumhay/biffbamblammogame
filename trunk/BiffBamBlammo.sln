@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual C++ Express 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameModel", "GameModel\GameModel.vcproj", "{BBCF69BD-1D02-4951-A5B1-BFC30566AAB4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0AAE025A-B593-4D40-8857-4730BDE0555D} = {0AAE025A-B593-4D40-8857-4730BDE0555D}

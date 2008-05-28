@@ -160,6 +160,6 @@ void GameAssets::LoadDecoStyleAssets() {
 }
 
 void GameAssets::LoadCyberpunkStyleAssets() {
-	this->playerPaddles[GameWorld::Cyberpunk] = ObjReader::ReadMesh("resources/models/deco_paddle.obj");
-	this->blocks[GameWorld::Cyberpunk]			  = ObjReader::ReadMesh("resources/models/deco_block.obj");	
+	this->playerPaddles[GameWorld::Cyberpunk] = ObjReader::ReadMesh("resources/models/cyberpunk_paddle.obj");
+	this->blocks[GameWorld::Cyberpunk]			  = ObjReader::ReadMesh("resources/models/cyberpunk_block.obj");	
 }

@@ -1,9 +1,14 @@
 #include "ObjReader.h"
+#include "MtlReader.h"
 #include "Mesh.h"
+#include "CelShadingMaterial.h"
+
 #include "../Utils/Debug.h"
 
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <map>
 
 const std::string ObjReader::OBJ_EXTENSION = "obj";
 const std::string ObjReader::MTL_EXTENSION = "mtl";
@@ -42,36 +47,36 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 	while (inFile >> currStr) {
 		if (currStr == OBJ_MTLFILE) {
 			inFile >> mtlFilepath;
+			// Add the path to the obj to the path... the mtl file SHOULD be in the same dir
+			size_t pos = filepath.find_last_of("/");
+			if (pos == std::string::npos) {
+				pos = filepath.find_last_of("\\");
+			}
+			mtlFilepath.insert(0, filepath.substr(0, pos+1));
 			break;
 		}
 	}
 	
-	// Open the material file and make some materials
-	// TODO
+	// Figure out what materials to make and make them
+	std::map<std::string, CelShadingMaterial> meshMaterials;
+	assert(mtlFilepath != "");
+	meshMaterials = MtlReader::ReadMaterialFile(mtlFilepath);
 
-	if (mtlFilepath == "") {
-		// No material file was found, going to have to use a default material
-		// for everything...
-
-	}
-
-	std::string grpName  = "";
+	std::string grpName = "";
 	std::vector<Point3D> vertices;
 	std::vector<Vector3D> normals;
 	std::vector<Point2D> texCoords;
-	std::vector<TriFace> faces;
-	std::vector<MaterialGroup> matGrps;
-
-	// TODO... support material grouping
-
+	std::map<std::string, MaterialGroup> matGrps;	// material groups, mapped by their group name
+	
 	while (inFile >> currStr) {
 		
 		if (currStr == OBJ_GROUP) {
-			// Read in a new group, this is signified by an initialized group variable
+			// Read in a new group
 			if (!(inFile >> grpName)) {
 				debug_output("ERROR: Group name not provided with proper syntax in obj file: " << filepath); 
 				return NULL;
 			}
+			matGrps[grpName] = MaterialGroup();
 		}
 		else if (currStr == OBJ_VERTEX_COORD) {
 			// Read in a vertex coordinate
@@ -118,14 +123,26 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 				face.texCoordIndices[i]--;
 				face.normalIndices[i]--;
 			}
-			faces.push_back(face);
+			matGrps[grpName].faces.push_back(face);
 		}
 		else if (currStr == OBJ_USE_MATERIAL) {
-
+			// Obtain the material group name
+			std::string matName;
+			if (!(inFile >> matName)) {
+				debug_output("ERROR: Material name not provided with proper syntax in obj file: " << filepath); 
+				return NULL;
+			}
+			
+			// Look up the material name from the list of materials
+			std::map<std::string, CelShadingMaterial>::iterator valIter = meshMaterials.find(matName);
+			if (valIter == meshMaterials.end()) {
+				// Not good: the material was not found...
+				debug_output("ERROR: Material name in obj file with no matching material in mtl file: " << filepath); 
+				return NULL;
+			}
+			matGrps[grpName].material = valIter->second;
 		}
 	}
-	
-	MaterialGroup matGrp(faces);
-	matGrps.push_back(matGrp);
+
 	return new Mesh(grpName, vertices, normals, texCoords, matGrps);
 }

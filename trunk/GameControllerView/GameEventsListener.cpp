@@ -1,5 +1,6 @@
 #include "GameEventsListener.h"
 #include "GameDisplay.h"
+#include "GameAssets.h"
 
 #include "../GameModel/GameBall.h"
 #include "../GameModel/LevelPiece.h"
@@ -20,6 +21,9 @@ void GameEventsListener::GameCompletedEvent() {
 
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	debug_output("EVENT: World started");
+
+	// Set the new world style
+	this->display->GetAssets()->SetCurrentAssetStyle(world.GetStyle());
 }
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
