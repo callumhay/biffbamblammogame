@@ -23,7 +23,7 @@ private:
 
 public:
 	~MtlReader();
-	static std::map<std::string, CelShadingMaterial> ReadMaterialFile(const std::string &filepath);
+	static std::map<std::string, CelShadingMaterial*> ReadMaterialFile(const std::string &filepath);
 	
 };
 

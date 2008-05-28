@@ -50,6 +50,15 @@ void GameDisplay::SetupRenderOptions() {
 	glEnable(GL_LIGHTING);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 	glEnable(GL_LIGHT0);
+
+	// Textures
+	glEnable(GL_TEXTURE_2D);
+
+	// DevIL initialization
+	ilInit();
+	iluInit();
+	ilutRenderer(ILUT_OPENGL);
+	ilutEnable(ILUT_OPENGL_CONV);
 }
 
 void GameDisplay::ChangeDisplaySize(int w, int h) {
