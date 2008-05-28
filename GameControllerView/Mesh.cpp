@@ -1,7 +1,7 @@
 #include "Mesh.h"
 
 Mesh::Mesh(const std::string name, const std::vector<Point3D> &verts, const std::vector<Vector3D> &norms,
-					 const std::vector<Point2D> &texCoords, const std::vector<MaterialGroup> &matGrps):
+					 const std::vector<Point2D> &texCoords, const std::map<std::string, MaterialGroup> &matGrps):
 name(name), vertices(verts), normals(norms), texCoords(texCoords), matGrps(matGrps), displayListID(0) {
 	this->CompileDisplayList();
 }
@@ -24,9 +24,11 @@ void Mesh::CompileDisplayList() {
 	glNewList(this->displayListID, GL_COMPILE);
 
 	glBegin(GL_TRIANGLES);
+
 	// for each material group...
-	for (size_t i = 0; i < matGrps.size(); i++) {
-		MaterialGroup currMatGrp = this->matGrps[i];
+	std::map<std::string, MaterialGroup>::iterator matGrpIter = this->matGrps.begin();
+	for (; matGrpIter != this->matGrps.end(); matGrpIter++) {
+		MaterialGroup& currMatGrp = matGrpIter->second;
 		// for each face in the material group
 		for (size_t j = 0; j < currMatGrp.faces.size(); j++) {
 			TriFace currFace = currMatGrp.faces[j];

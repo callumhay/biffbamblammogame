@@ -45,5 +45,9 @@ public:
 	void ChangeDisplaySize(int w, int h);
 	void Render();
 
+	GameAssets* GetAssets() {
+		return this->assets;
+	}
+
 };
 #endif

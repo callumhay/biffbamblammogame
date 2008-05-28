@@ -1,10 +1,14 @@
 #ifndef __MESH_H__
 #define __MESH_H__
 
+#include "CelShadingMaterial.h"
+
 #include "../Utils/Includes.h"
 #include "../Utils/Point.h"
 #include "../Utils/Vector.h"
+
 #include <vector>
+#include <map>
 #include <string>
 
 // Represents a triangle face that makes up part of a material group.
@@ -17,10 +21,10 @@ struct TriFace {
 struct MaterialGroup {
 	
 	std::vector<TriFace> faces;
-	// Material...
+	CelShadingMaterial material;
 
-	MaterialGroup(const std::vector<TriFace> &faces): faces(faces){
-	}
+	MaterialGroup() {}
+	MaterialGroup(const std::vector<TriFace> &faces): faces(faces) {}
 };
 
 // Represents a mesh, made up of faces, grouped by material.
@@ -33,13 +37,13 @@ private:
 	std::vector<Point3D> vertices;
 	std::vector<Vector3D> normals;
 	std::vector<Point2D> texCoords;
-	std::vector<MaterialGroup> matGrps;
+	std::map<std::string, MaterialGroup> matGrps;		// Material groups, listed by their face group name
 
 	void CompileDisplayList();
 
 public:
 	Mesh(const std::string name, const std::vector<Point3D> &verts, const std::vector<Vector3D> &norms,
-		   const std::vector<Point2D> &texCoords, const std::vector<MaterialGroup> &matGrps);
+		   const std::vector<Point2D> &texCoords, const std::map<std::string, MaterialGroup> &matGrps);
 	virtual ~Mesh();
 
 	virtual void Draw() const {
