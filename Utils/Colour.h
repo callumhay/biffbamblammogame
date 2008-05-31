@@ -1,5 +1,5 @@
-#ifndef __COLOUR_H__
-#define __COLOUR_H__
+#ifndef __COLOUR_H___
+#define __COLOUR_H___
 
 #include <iostream>
 #include <assert.h>
@@ -32,12 +32,12 @@ public:
 	
 	float& operator[](size_t idx) {
 		assert(idx < 3);
-    return colours[ idx ];
+    return this->colours[ idx ];
   }
 
   float operator[](size_t idx) const {
 		assert(idx < 3);
-    return colours[ idx ];
+    return this->colours[ idx ];
   }
 
   float R() const { 
@@ -49,6 +49,7 @@ public:
   float B() const { 
     return colours[2];
   }
+
   const float* getColourVector() const {
     return colours;
   }
@@ -58,7 +59,7 @@ public:
 inline Colour operator *(float s, const Colour& a) {
 	assert(s >= 0);
   return Colour(std::min(1.0f, s*a.R()), std::min(1.0f, s*a.G()), std::min(1.0f, s*a.B()));
-}
+};
 
 // Multiplicative colouring
 inline Colour operator *(const Colour& a, const Colour& b) {
@@ -72,9 +73,10 @@ inline Colour operator +(const Colour& a, const Colour& b) {
   return Colour(std::max(0.0f, std::min(1.0f, a.R()+b.R())), 
   							std::max(0.0f, std::min(1.0f, a.G()+b.G())), 
   							std::max(0.0f, std::min(1.0f, a.B()+b.B())));
-}
+};
 
 inline std::ostream& operator <<(std::ostream& os, const Colour& c) {
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
-}
+};
+
 #endif

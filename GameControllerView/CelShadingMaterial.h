@@ -28,10 +28,8 @@ public:
 		this->shininess = s;
 	}
 	bool SetTexture(const std::string& filepath) {
-		this->texture = new Texture2D(filepath);
-		if (!this->texture->IsInitialized()) {
-			delete this->texture;
-			this->texture = NULL;
+		this->texture = Texture2D::CreateTexture2DFromImgFile(filepath);
+		if (this->texture == NULL) {
 			return false;
 		}
 		return true;

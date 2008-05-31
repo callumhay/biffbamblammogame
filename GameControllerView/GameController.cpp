@@ -31,7 +31,7 @@ GLUT_KEY_INSERT		Insert function key
 
 */
 
-GameController::GameController(GameModel* model): model(model) {
+GameController::GameController(GameModel* model, GameDisplay* display): model(model), display(display) {
 	for (int i = 0; i < NUM_KEYS; i++) {
 		this->keyPressed[i] = false;
 	}
@@ -55,6 +55,7 @@ void GameController::ProcessNormalKeys(unsigned char key, int x, int y) {
 	}
 
 	this->SetKeyPress(key, true);
+	this->display->KeyPressed(key);
 }
 
 void GameController::ProcessNormalKeysUp(unsigned char key, int x, int y) {

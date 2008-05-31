@@ -59,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glut32.lib opengl.lib glu.lib glew32s.lib glew32.lib DevIL.lib ILU.lib ILUT.lib"
+				AdditionalDependencies="glut32.lib opengl.lib glu.lib glew32s.lib glew32.lib cg.lib cgGL.lib DevIL.lib ILU.lib ILUT.lib freetype235.lib"
 				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Lib&quot;;&quot;$(SolutionDir)lib&quot;"
 				IgnoreDefaultLibraryNames="libc.lib"
 				GenerateDebugInformation="true"

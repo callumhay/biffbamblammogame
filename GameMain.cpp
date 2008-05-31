@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
 
 	model = new GameModel();
 	display = new GameDisplay(model, INIT_WIDTH, INIT_HEIGHT);
-	controller = new GameController(model);
+	controller = new GameController(model, display);
 
 	// Render loop...
 	glutTimerFunc(GameDisplay::FRAME_DT_MILLISEC, FrameRenderMain, 1);
