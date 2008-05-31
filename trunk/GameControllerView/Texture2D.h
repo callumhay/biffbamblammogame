@@ -3,6 +3,9 @@
 
 #include <string>
 
+#include "ft2build.h"
+#include FT_FREETYPE_H
+
 // Abstract Texture class
 class Texture {
 
@@ -14,7 +17,8 @@ protected:
 	unsigned int texID;
 	static TextureFilterType texFilter;
 
-	static void SetFilteringParams(int glTexType);
+	static void SetMipmapFilteringParams(int glTexType);
+	static void SetNonMipmapFilteringParams(int glTexType);
 
 public:
 	Texture(int textureType);
@@ -28,25 +32,23 @@ public:
 		return this->textureType;
 	}
 
-	bool IsInitialized() const {
-		return texID != 0;
-	}
-
 	static void SetTextureFiltering(TextureFilterType filterType) {
 		Texture::texFilter = filterType;
 	}
 };
 
-// 2D Texture class
+// Wraps a OpenGL 2D texture, takes care of texture ID and stuff like that
 class Texture2D : public Texture {
+private:
+	Texture2D();
+	bool LoadTexture2DFromImg(const std::string& filepath);
 
 public:
-	Texture2D();
-	Texture2D(const std::string& filepath);
 	virtual ~Texture2D();
 	
-	bool LoadTexture2D(const std::string& filepath);
-	
+	// Creator methods
+	static Texture2D* CreateTexture2DFromImgFile(const std::string& filepath);
+	static Texture2D* CreateTexture2DFromFTBMP(const FT_Bitmap& bmp);
 };
 
 #endif

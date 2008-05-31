@@ -40,6 +40,7 @@ inline float Trig::radiansToDegrees(float rads){
 namespace NumberFuncs {
 	int SignOf(int a);
 	int SignOf(float a);
+	int NextPowerOfTwo(int a);
 };
 
 inline int NumberFuncs::SignOf(int a) {
@@ -48,6 +49,16 @@ inline int NumberFuncs::SignOf(int a) {
 
 inline int NumberFuncs::SignOf(float a) {
 	return (a == 0) ? 0 : (a < 0 ? -1 : 1); 
+};
+
+// Returns the first power of 2 greater than or equal
+// to the given integer.
+inline int NumberFuncs::NextPowerOfTwo(int a) {
+	int temp = 1;
+	while (temp < a) {
+		temp <<= 1;
+	}
+	return temp;
 };
 
 namespace Randomizer {

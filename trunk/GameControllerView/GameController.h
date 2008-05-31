@@ -2,14 +2,24 @@
 #define __GAMECONTROLLER_H__
 
 class GameModel;
+class GameDisplay;
 
+/**
+ * All key inputs from the user go through this class and
+ * are processed and directed to the model and display from it.
+ */
 class GameController {
-private:
+
+public:
 	static const char SPACE_BAR_CHAR = ' ';
+	static const char ENTER_CHAR = 13;
 	static const char ESC_CHAR = 27;
+
+private:	
 	static const int NUM_KEYS = 256;
 
 	GameModel* model;
+	GameDisplay* display;
 
 	bool keyPressed[NUM_KEYS];
 	// Helper function for setting values in the keyPressed array.
@@ -19,7 +29,7 @@ private:
 	}
 
 public:
-	GameController(GameModel* model);
+	GameController(GameModel* model, GameDisplay* display);
 	
 	void ProcessNormalKeys(unsigned char key, int x, int y);
 	void ProcessNormalKeysUp(unsigned char key, int x, int y);

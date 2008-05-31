@@ -5,6 +5,10 @@
 #include "Camera.h"
 #include "GameEventsListener.h"
 
+// State includes
+#include "InGameDisplayState.h"
+
+// Model includes
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameEventManager.h"
@@ -16,9 +20,11 @@ float tempRot = 0;
 const double GameDisplay::FRAME_DT_SEC = 1.0/GameDisplay::FRAMERATE;
 const double GameDisplay::FRAME_DT_MILLISEC = 1000.0/GameDisplay::FRAMERATE;
 
-GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameListener(NULL),
-model(model), assets(new GameAssets()), camera(new Camera(45.0f, 0.01f, 100.0f, initWidth, initHeight)) {
+GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameListener(NULL), currState(NULL),
+model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
 	assert(model != NULL);
+
+	this->SetCurrentState(new InGameDisplayState(this));
 
 	this->SetupActionListeners();
 	this->SetupRenderOptions();
@@ -31,7 +37,6 @@ model(model), assets(new GameAssets()), camera(new Camera(45.0f, 0.01f, 100.0f, 
 
 GameDisplay::~GameDisplay() {
 	delete this->assets;
-	delete this->camera;
 	this->RemoveActionListeners();
 }
 
@@ -67,60 +72,22 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 	if(h == 0) {
 		h = 1;
 	}
-	this->camera->SetViewportAndProjectionTransform(w, h);
+
+	glViewport(0, 0, w, h);
+	this->width = w;
+	this->height = h;
 }
 
 void GameDisplay::Render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
-	
-	// Start drawing...
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(0, 0, -43.0f); // Eye transform
 
-	// Draw the scene...
-	glPushMatrix();
-
-	Vector2D levelDim = this->model->GetLevelUnitDimensions();
-	glTranslatef(-levelDim[0]/2.0f, -levelDim[1]/2.0f, 0.0f);
-
-	this->DrawLevelPieces();
-	this->DrawPlayerPaddle();
-	this->assets->DrawGameBall(this->model->GetGameBall());
-
-	glPopMatrix();
-	tempRot += 1.0f;
-	
-	//GameDisplay::DrawDebugUnitGrid(true, true, true, 15);
-	//GameDisplay::DrawDebugAxes();
+	// Render the current state
+	this->currState->RenderFrame();
 
 	glutSwapBuffers();
+
+	// Update the game model
 	this->model->Tick(GameDisplay::FRAME_DT_SEC);
-}
-
-/*
- * Helper function for drawing all the game pieces / blocks that make up the currently
- * loaded level. This does not include drawing the player, ball, effects or backgrounds.
- */
-void GameDisplay::DrawLevelPieces() {
-	std::vector<std::vector<LevelPiece*>> &pieces = this->model->GetCurrentLevelPieces();
-
-	// Go through each piece and draw
-	for (size_t h = 0; h < pieces.size(); h++) {
-		for (size_t w = 0; w < pieces[h].size(); w++) {
-			LevelPiece* currPiece = pieces[h][w];
-			this->assets->DrawLevelPieceMesh(*currPiece);
-			currPiece->DebugDraw();
-		}
-	}
-}
-
-/*
- * Helper function for drawing the player paddle.
- */
-void GameDisplay::DrawPlayerPaddle() {
-	PlayerPaddle paddle = this->model->GetPlayerPaddle();
-	this->assets->DrawPaddle(paddle);
 }
 
 

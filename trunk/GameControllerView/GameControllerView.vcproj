@@ -180,6 +180,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\InGameDisplayState.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MainMenuDisplayState.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Mesh.cpp"
 				>
 			</File>
@@ -210,6 +218,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DisplayState.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GameAssets.h"
 				>
 			</File>
@@ -223,6 +235,14 @@
 			</File>
 			<File
 				RelativePath=".\GameEventsListener.h"
+				>
+			</File>
+			<File
+				RelativePath=".\InGameDisplayState.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MainMenuDisplayState.h"
 				>
 			</File>
 			<File
