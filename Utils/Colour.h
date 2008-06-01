@@ -54,7 +54,7 @@ public:
     return colours;
   }
 };
-
+/*
 // Multiplicative colour based off a scalar
 inline Colour operator *(float s, const Colour& a) {
 	assert(s >= 0);
@@ -78,5 +78,5 @@ inline Colour operator +(const Colour& a, const Colour& b) {
 inline std::ostream& operator <<(std::ostream& os, const Colour& c) {
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
 };
-
+*/
 #endif

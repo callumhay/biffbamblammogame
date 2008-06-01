@@ -77,6 +77,15 @@ namespace Onomatoplex {
 		singleWordElectric.push_back("Sizzle");
 		Generator::simpleSingleWords[ELECTRIC] = singleWordElectric;
 
+		std::vector<std::string> singleWordSmoke;
+		singleWordSmoke.push_back("Puff");
+		singleWordSmoke.push_back("Poof");
+		singleWordSmoke.push_back("Psph");
+		singleWordSmoke.push_back("Smokey");
+		singleWordSmoke.push_back("Pffp");
+		singleWordSmoke.push_back("Fssp");
+		Generator::simpleSingleWords[SMOKE] = singleWordSmoke;
+
 		// First fixes
 		std::vector<std::string> firstFixExplosion;
 		firstFixExplosion.push_back("B");
@@ -105,6 +114,14 @@ namespace Onomatoplex {
 		firstFixElectric.push_back("Fiz");
 		Generator::firstFix[ELECTRIC] = firstFixElectric;
 
+		std::vector<std::string> firstFixSmoke;
+		firstFixSmoke.push_back("Pss");
+		firstFixSmoke.push_back("Puf");
+		firstFixSmoke.push_back("Poo");
+		firstFixSmoke.push_back("Fss");
+		Generator::firstFix[SMOKE] = firstFixSmoke;
+
+
 		// Second fixes
 		std::vector<std::string> secondFixExplosion;
 		secondFixExplosion.push_back("a");	
@@ -124,6 +141,14 @@ namespace Onomatoplex {
 		secondFixElectric.push_back("");
 		Generator::secondFix[ELECTRIC] = secondFixElectric;
 
+		std::vector<std::string> secondFixSmoke;
+		secondFixSmoke.push_back("f");
+		secondFixSmoke.push_back("fp");
+		secondFixSmoke.push_back("ph");
+		secondFixSmoke.push_back("t");
+		secondFixSmoke.push_back("");
+		Generator::secondFix[SMOKE] = secondFixSmoke;
+
 		// Third fixes
 		std::vector<std::string> thirdFixExplosion;
 		thirdFixExplosion.push_back("bl");
@@ -140,6 +165,10 @@ namespace Onomatoplex {
 		thirdFixElectric.push_back("kzz");
 		thirdFixElectric.push_back("");
 		Generator::thirdFix[ELECTRIC] = thirdFixElectric;
+
+		std::vector<std::string> thirdFixSmoke;
+		thirdFixSmoke.push_back("");
+		Generator::thirdFix[SMOKE] = thirdFixSmoke;
 
 		// End-fixes - these add a neat ending to an already ridiculous word, they may also
 		// be combined almost endlessly...
@@ -171,6 +200,13 @@ namespace Onomatoplex {
 		endFixElectric.push_back("zt");
 		Generator::endFix[ELECTRIC] = endFixElectric;
 
+		std::vector<std::string> endFixSmoke;
+		endFixSmoke.push_back("ft");
+		endFixSmoke.push_back("sh");
+		endFixSmoke.push_back("f");
+		endFixSmoke.push_back("pf");
+		Generator::endFix[SMOKE] = endFixSmoke;
+
 		// Super end-fixes
 		std::vector<std::string> superEndFixExplosion;
 		superEndFixExplosion.push_back("y");
@@ -187,11 +223,15 @@ namespace Onomatoplex {
 		Generator::superEndFix[BOUNCE] = superEndFixBounce;
 
 		std::vector<std::string> superEndFixElectric;
-		superEndFixElectric.push_back("zz");
-		superEndFixElectric.push_back("sst");
-		superEndFixElectric.push_back("sstt");
-		superEndFixElectric.push_back("zizt");
+		superEndFixElectric.push_back("");
 		Generator::superEndFix[ELECTRIC] = superEndFixElectric;
+
+		std::vector<std::string> superEndFixSmoke;
+		superEndFixSmoke.push_back("");
+		superEndFixSmoke.push_back("puff");
+		superEndFixSmoke.push_back("poof");
+		superEndFixSmoke.push_back("f");
+		Generator::superEndFix[SMOKE] = superEndFixSmoke;
 
 		// Uber end-fixes
 		std::vector<std::string> uberEndFixExplosion;
@@ -225,6 +265,13 @@ namespace Onomatoplex {
 		uberEndFixElectric.push_back("iple");
 		uberEndFixElectric.push_back("frazz");
 		Generator::uberEndFix[ELECTRIC] = uberEndFixElectric;
+
+		std::vector<std::string> uberEndFixSmoke;
+		uberEndFixSmoke.push_back(" Psssf");
+		uberEndFixSmoke.push_back(" Puff");
+		uberEndFixSmoke.push_back("oplex");
+		uberEndFixSmoke.push_back(" Poof");
+		Generator::uberEndFix[SMOKE] = uberEndFixSmoke;
 	}
 
 	// Destructor, deletes singleton, cleans up dictionaries

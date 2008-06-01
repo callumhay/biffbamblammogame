@@ -19,6 +19,6 @@ void CelShadingMaterial::DrawMaterial() {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	else {
-		glBindTexture(this->texture->GetTextureType(), this->texture->GetTextureID());
+		this->texture->BindTexture();
 	}
 }

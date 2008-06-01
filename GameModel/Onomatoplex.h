@@ -7,10 +7,10 @@
 
 namespace Onomatoplex {
 
-	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2};
+	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3};
 	enum Extremeness {WEAK = 0, NORMAL = 1, PRETTY_GOOD = 2, GOOD = 3, AWESOME = 4, SUPER_AWESOME = 5, UBER = 6};
 	
-	static const int NumSoundTypes = 3;
+	static const int NumSoundTypes = 4;
 	static const int NumExtremenessTypes = 7;
 	
 

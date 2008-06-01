@@ -59,6 +59,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="freetype235.lib"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;"
+				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -180,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameMenu.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\InGameDisplayState.cpp"
 				>
 			</File>
@@ -201,6 +208,10 @@
 			</File>
 			<File
 				RelativePath=".\Texture2D.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TextureFontSet.cpp"
 				>
 			</File>
 		</Filter>
@@ -238,6 +249,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameMenu.h"
+				>
+			</File>
+			<File
 				RelativePath=".\InGameDisplayState.h"
 				>
 			</File>
@@ -259,6 +274,10 @@
 			</File>
 			<File
 				RelativePath=".\Texture2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TextureFontSet.h"
 				>
 			</File>
 		</Filter>

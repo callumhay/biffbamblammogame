@@ -1,10 +1,5 @@
 #include "Texture2D.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-
-#include "../Utils/Includes.h"
 #include "../Utils/Algebra.h"
 
 Texture::TextureFilterType Texture::texFilter = Trilinear;
@@ -84,7 +79,7 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp) {
 	// First create the texture
 	Texture2D* newTex = new Texture2D();
 	glGenTextures(1, &newTex->texID);
-	if (!glIsTexture(newTex->texID)) {
+	if (newTex->texID == 0) {
 		delete newTex;
 		return NULL;
 	}
