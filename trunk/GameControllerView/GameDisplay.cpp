@@ -7,11 +7,14 @@
 
 // State includes
 #include "InGameDisplayState.h"
+#include "MainMenuDisplayState.h"
 
 // Model includes
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameEventManager.h"
+
+#include "../GameModel/Onomatoplex.h"
 
 #include "../Utils/Includes.h"
 #include "../Utils/Vector.h"
@@ -24,15 +27,33 @@ GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameL
 model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
 	assert(model != NULL);
 
-	this->SetCurrentState(new InGameDisplayState(this));
+	this->SetCurrentState(new MainMenuDisplayState(this));//InGameDisplayState(this));
 
 	this->SetupActionListeners();
 	this->SetupRenderOptions();
 
 	// Start the game...
 	this->model->BeginOrRestartGame();
-	this->assets->LoadAllAssets();
-	this->assets->SetCurrentAssetStyle(this->model->GetCurrentWorldStyle());
+
+	// TODO: Remove the following Test...
+	// Testing for the Onomatoplex --------------------------------------------------------
+	// This must be examined by eye, since it is not a formal sorta thing...
+	Randomizer::InitializeRandomizer();
+	for (int i = 0; i < Onomatoplex::NumExtremenessTypes; i++) {
+		Onomatoplex::Extremeness ext = static_cast<Onomatoplex::Extremeness>(i);
+		for (int j = 0; j < Onomatoplex::NumSoundTypes; j++) {
+			Onomatoplex::SoundType sound = static_cast<Onomatoplex::SoundType>(j);
+			std::cout << "Extremeness level: " << ext << " Sound type: " << sound << std::endl;
+			for (int k = 0; k < 50; k++) {
+				unsigned int randomSeed = static_cast<unsigned int>(Randomizer::RandomNumZeroToOne()*UINT_MAX);
+				std::string word = Onomatoplex::Generator::Instance()->Generate(sound, ext, k);
+				std::cout << word << std::endl;
+			}
+		}
+		std::cout << std::endl;
+	}
+	// ------------------------------------------------------------------------------------------
+
 }
 
 GameDisplay::~GameDisplay() {
@@ -84,6 +105,8 @@ void GameDisplay::Render() {
 	// Render the current state
 	this->currState->RenderFrame();
 
+	this->DrawDebugAxes();
+
 	glutSwapBuffers();
 
 	// Update the game model
@@ -111,6 +134,10 @@ void GameDisplay::RemoveActionListeners() {
 void GameDisplay::DrawDebugAxes() {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+
+	glPushMatrix();
+	glLoadIdentity();
 
 	glLineWidth(1.0f);
 	glColor3f(1,0,0);
@@ -156,6 +183,9 @@ void GameDisplay::DrawDebugAxes() {
 	glColor3f(0,0,0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);
+
+	glPopMatrix();
 }
 
 /*
@@ -168,7 +198,11 @@ void GameDisplay::DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks)
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
 	glColor3f(0, 1, 0);
+
+	glPushMatrix();
+	glLoadIdentity();
 
 	if (xy) {
 		for (int i = -numGridTicks; i <= numGridTicks; i++) {
@@ -207,4 +241,7 @@ void GameDisplay::DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks)
 	glColor3f(0, 0, 0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);
+
+	glPopMatrix();
 }

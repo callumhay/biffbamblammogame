@@ -23,8 +23,12 @@
 #include "IL/ilut.h"
 
 // Freetype library for loading free type fonts
+#define FREETYPE2_STATIC
 #include "ft2build.h"
 #include FT_FREETYPE_H
+#include FT_GLYPH_H
+#include FT_OUTLINE_H
+#include FT_TRIGONOMETRY_H
 
 // Custom Debug functionality
 #include "Debug.h"

@@ -176,6 +176,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameConstants.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameEventManager.cpp"
 				>
 			</File>

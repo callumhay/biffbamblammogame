@@ -1,6 +1,8 @@
 #ifndef __TEXTURE2D_H__
 #define __TEXTURE2D_H__
 
+#include "../Utils/Includes.h"
+
 #include <string>
 
 #include "ft2build.h"
@@ -30,6 +32,10 @@ public:
 	
 	int GetTextureType() const {
 		return this->textureType;
+	}
+
+	void BindTexture() const {
+		glBindTexture(this->textureType, this->texID);
 	}
 
 	static void SetTextureFiltering(TextureFilterType filterType) {

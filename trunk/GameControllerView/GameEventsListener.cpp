@@ -23,7 +23,7 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	debug_output("EVENT: World started");
 
 	// Set the new world style
-	this->display->GetAssets()->SetCurrentAssetStyle(world.GetStyle());
+	this->display->GetAssets()->LoadAssets(world.GetStyle());
 }
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
