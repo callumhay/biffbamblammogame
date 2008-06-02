@@ -35,6 +35,7 @@ model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
 	// Start the game...
 	this->model->BeginOrRestartGame();
 
+	/*
 	// TODO: Remove the following Test...
 	// Testing for the Onomatoplex --------------------------------------------------------
 	// This must be examined by eye, since it is not a formal sorta thing...
@@ -53,7 +54,7 @@ model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
 		std::cout << std::endl;
 	}
 	// ------------------------------------------------------------------------------------------
-
+	*/
 }
 
 GameDisplay::~GameDisplay() {
@@ -103,9 +104,8 @@ void GameDisplay::Render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
 
 	// Render the current state
-	this->currState->RenderFrame();
-
-	this->DrawDebugAxes();
+	this->currState->RenderFrame(GameDisplay::FRAME_DT_SEC);
+	//this->DrawDebugAxes();
 
 	glutSwapBuffers();
 

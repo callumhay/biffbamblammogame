@@ -15,8 +15,8 @@ class Mesh;
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
 public:
-	enum FontSize  { Small = 16, Medium = 32, Big = 64 };
-	enum FontStyle { GunBlam, ExplosionBoom, BloodCrunch }; //Decoish, Cyberpunkish };
+	enum FontSize  { Small = 16, Medium = 24, Big = 32, Huge = 60 };
+	enum FontStyle { GunBlam, ExplosionBoom, BloodCrunch, AllPurpose }; //Decoish, Cyberpunkish };
 
 private:
 	GameWorld::WorldStyle currLoadedStyle;
@@ -68,6 +68,8 @@ private:
 	static const std::string FONT_GUNBLAM;
 	static const std::string FONT_EXPLOSIONBOOM;
 	static const std::string FONT_BLOODCRUNCH;
+	static const std::string FONT_SMACKBOUNCE;
+	static const std::string FONT_ALLPURPOSE;
 	//static const std::string FONT_DECOISH;
 	//static const std::string FONT_CYBERPUNKISH;
 

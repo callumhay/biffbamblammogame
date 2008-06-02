@@ -15,6 +15,7 @@ const std::string GameAssets::MESH_DIR	= "models";
 const std::string GameAssets::FONT_GUNBLAM					= GameAssets::RESOURCE_DIR  + "/" + FONT_DIR + "/gunblam.ttf";
 const std::string GameAssets::FONT_EXPLOSIONBOOM		= GameAssets::RESOURCE_DIR  + "/" + FONT_DIR + "/explosionboom.ttf";
 const std::string GameAssets::FONT_BLOODCRUNCH			= GameAssets::RESOURCE_DIR  + "/" + FONT_DIR + "/bloodcrunch.ttf";
+const std::string GameAssets::FONT_ALLPURPOSE				= GameAssets::RESOURCE_DIR  + "/" + FONT_DIR + "/allpurpose.ttf";
 //const std::string FONT_DECOISH;
 //const std::string FONT_CYBERPUNKISH;
 
@@ -203,7 +204,9 @@ void GameAssets::LoadRegularFontAssets() {
 	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_GUNBLAM, Big);
 	assert(temp != NULL);
 	this->fonts[GunBlam][Big]	= temp;
-
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_GUNBLAM, Huge);
+	assert(temp != NULL);
+	this->fonts[GunBlam][Huge]	= temp;
 
 	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_EXPLOSIONBOOM, Small);
 	assert(temp != NULL);
@@ -214,6 +217,9 @@ void GameAssets::LoadRegularFontAssets() {
 	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_EXPLOSIONBOOM, Big);
 	assert(temp != NULL);
 	this->fonts[ExplosionBoom][Big]	= temp;
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_EXPLOSIONBOOM, Huge);
+	assert(temp != NULL);
+	this->fonts[ExplosionBoom][Huge]	= temp;
 
 	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_BLOODCRUNCH, Small);
 	assert(temp != NULL);
@@ -223,7 +229,23 @@ void GameAssets::LoadRegularFontAssets() {
 	this->fonts[BloodCrunch][Medium]	= temp; 
 	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_BLOODCRUNCH, Big);
 	assert(temp != NULL);
-	this->fonts[BloodCrunch][Big]	= temp; 
+	this->fonts[BloodCrunch][Big]	= temp;
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_BLOODCRUNCH, Huge);
+	assert(temp != NULL);
+	this->fonts[BloodCrunch][Huge]	= temp;
+
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ALLPURPOSE, Small);
+	assert(temp != NULL);
+	this->fonts[AllPurpose][Small]	= temp; 
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ALLPURPOSE, Medium);
+	assert(temp != NULL);
+	this->fonts[AllPurpose][Medium]	= temp; 
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ALLPURPOSE, Big);
+	assert(temp != NULL);
+	this->fonts[AllPurpose][Big]	= temp;
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ALLPURPOSE, Huge);
+	assert(temp != NULL);
+	this->fonts[AllPurpose][Huge]	= temp; 
 }
 
 /**
