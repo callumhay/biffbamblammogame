@@ -204,10 +204,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ModelUnitTester.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Onomatoplex.cpp"
 				>
 			</File>

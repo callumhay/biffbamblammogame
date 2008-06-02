@@ -77,6 +77,7 @@ void GameController::ProcessSpecialKeys(int key, int x, int y) {
 	//debug_output("Special Key Pressed: " << "\"" << key << "\""); 
 	if (key < 0 || key > NUM_KEYS) { return; }
 	this->SetKeyPress(key, true);
+	this->display->KeyPressed(key);
 }
 
 void GameController::ProcessSpecialKeysUp(int key, int x, int y) {

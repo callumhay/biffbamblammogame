@@ -24,7 +24,7 @@ private:
 	bool keyPressed[NUM_KEYS];
 	// Helper function for setting values in the keyPressed array.
 	void SetKeyPress(int key, bool isPressed) {
-		if (key < 0 || key > NUM_KEYS) { return; }
+		if (key < 0 || key >= NUM_KEYS) { return; }
 		this->keyPressed[key] = isPressed;
 	}
 

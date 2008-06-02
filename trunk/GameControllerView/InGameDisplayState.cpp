@@ -22,7 +22,8 @@ InGameDisplayState::~InGameDisplayState() {
 /**
  * This will render a frame of the actual game while it is in-play.
  */
-void InGameDisplayState::RenderFrame() {
+void InGameDisplayState::RenderFrame(double dT) {
+	
 	// Set the perspective projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -30,6 +31,9 @@ void InGameDisplayState::RenderFrame() {
 							   ((double)this->display->GetDisplayWidth()) / ((double)this->display->GetDisplayHeight()), 
 								 NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	
+	// Background
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
 	// TODO: Camera...
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

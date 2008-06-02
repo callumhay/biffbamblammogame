@@ -12,7 +12,7 @@ public:
 	DisplayState(GameDisplay* display) : display(display) {}
 	virtual ~DisplayState() {};
 
-	virtual void RenderFrame() = 0;
+	virtual void RenderFrame(double dT) = 0;
 	virtual void KeyPressed(unsigned char key) = 0;
 
 };

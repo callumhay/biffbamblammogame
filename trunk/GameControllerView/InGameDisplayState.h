@@ -22,7 +22,7 @@ public:
 	InGameDisplayState(GameDisplay* display);
 	virtual ~InGameDisplayState();
 
-	virtual void RenderFrame();
+	virtual void RenderFrame(double dT);
 	virtual void KeyPressed(unsigned char key) {
 		// Do nothing, key presses are interpretted completely by the game model,
 		// while the game is being played.
