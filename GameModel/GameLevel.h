@@ -17,7 +17,7 @@ private:
 	// Pieces left before the end of the level
 	unsigned int piecesLeft;
 	// Size values for the level
-	size_t width, height;
+	unsigned int width, height;
 
 	GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces);
 	

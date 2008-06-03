@@ -102,7 +102,7 @@ public:
    */
 	virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) = 0;
 
-	// Point Events (Destruction, Combos, etc.) ************************************************
+	// Misc Events (Destruction, Combos, etc.) ************************************************
 
 	/**
 	 * Event triggered when a typical block is destoryed (turned into an empty space). Only occurs
@@ -110,6 +110,12 @@ public:
 	 * Arguements: block - The block being destroyed, just before it is destroyed.
 	 */
 	virtual void BlockDestroyedEvent(const LevelPiece& block) = 0;
+
+	/**
+	 * Event triggered when there is a change to the player's score. Only occurs once per change.
+	 * Arguements: amt - The amount the score changed by.
+	 */
+	virtual void ScoreChangedEvent(int amt) = 0;
 
 };
 

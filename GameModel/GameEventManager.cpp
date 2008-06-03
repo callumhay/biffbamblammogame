@@ -82,6 +82,13 @@ void GameEventManager::ActionBlockDestroyed(const LevelPiece& block) {
 	}	
 }
 
+void GameEventManager::ActionScoreChanged(int amt) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ScoreChangedEvent(amt);
+	}	
+}
+
 // Action for when the game is completed
 void GameEventManager::ActionGameCompleted() {
 	this->listenerIter = this->eventListeners.begin();

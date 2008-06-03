@@ -1,5 +1,6 @@
 #include "LevelPiece.h"
 #include "GameEventManager.h"
+#include "GameConstants.h"
 
 #include "../Utils/Vector.h"
 #include "../Utils/Shape2D.h"
@@ -41,6 +42,23 @@ bool LevelPiece::IsValidBlockEnum(char c) {
 	}
 
 	return isValid;
+}
+
+int LevelPiece::GetPointValueForCollision() {
+	switch(this->pieceType) {
+		case GreenBreakable:
+		case YellowBreakable:
+		case OrangeBreakable:
+		case RedBreakable:
+			return GameConstants::POINTS_PER_BLOCK_HIT;
+		case Bomb:
+			break;
+		case Solid:
+			break;
+		default:
+			break;
+	}
+	return 0;
 }
 
 /**

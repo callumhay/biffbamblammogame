@@ -58,13 +58,11 @@ void BallInPlayState::Tick(double seconds) {
 				didCollide = currPiece->CollisionCheck(ball.GetBounds(), n, d);
 				if (didCollide) {
 					this->DoBallCollision(ball, n, d);
-
-					// EVENT: Ball-Block Collision
-					GameEventManager::Instance()->ActionBallBlockCollision(ball, *currPiece);
-
-					// Cause reactive collision with piece so as it effects the game world/model
-					GameLevel* currLevel = this->gameModel->GetCurrentWorld()->GetCurrentLevel();
-					currLevel->BallCollisionOccurred(h, w);
+					
+					// Tell the model that a ball collision occurred with currPiece
+					this->gameModel->BallCollisionOccurred(currPiece);
+					
+					// TODO: move this into the model
 					this->CheckForEndOfLevelAndWorldAndGame();
 
 					break;

@@ -27,7 +27,7 @@ private:
 
 public:
 	~TextureFontSet();
-	void OrthoPrint(const Point2D& topLeftCorner, const std::string& s) const;
+	float OrthoPrint(const Point2D& topLeftCorner, const std::string& s) const;
 
 	// Obtain the height of this font set, measured in pixels
 	unsigned int GetHeight() const {
