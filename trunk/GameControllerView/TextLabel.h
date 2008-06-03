@@ -25,9 +25,14 @@ private:
 	std::string text;
 
 public:
+	TextLabel2D();
 	TextLabel2D(const TextureFontSet* font, const std::string& text);
 	~TextLabel2D();
 
+	// Set the font of this label
+	void SetFont(const TextureFontSet* font) {
+		this->font = font;
+	}
 	// Set the text colour for this label
 	void SetColour(const Colour& c) {
 		this->colour = c;
@@ -43,17 +48,17 @@ public:
 	void SetText(const std::string& text) {
 		this->text = text;
 	}
-
-	// Obtain the height of this label
-	unsigned int GetHeight() const {
-		return this->font->GetHeight();
-	}
 	// Set the top left corner location where this label will be drawn
 	void SetTopLeftCorner(const Point2D& p) {
 		this->topLeftCorner = p;
 	}
 
-	void Draw();
+	// Obtain the height of this label
+	unsigned int GetHeight() const {
+		return this->font->GetHeight();
+	}
+
+	float Draw();
 };
 
 #endif

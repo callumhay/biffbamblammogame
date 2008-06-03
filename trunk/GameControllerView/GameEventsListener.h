@@ -30,8 +30,9 @@ public:
 	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
 	virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
 
-	// Point-gaining events
+	// Misc game events
 	virtual void BlockDestroyedEvent(const LevelPiece& block);
+	virtual void ScoreChangedEvent(int amt);
 };
 
 #endif

@@ -28,6 +28,7 @@ public:
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
 	void ActionBlockDestroyed(const LevelPiece& block);
+	void ActionScoreChanged(int amt);
 
 	void ActionGameCompleted();
 	void ActionWorldStarted(const GameWorld& world);

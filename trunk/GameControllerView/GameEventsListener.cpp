@@ -66,3 +66,7 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 	debug_output("EVENT: Block destroyed");
 }
+
+void GameEventsListener::ScoreChangedEvent(int amt) {
+	debug_output("Score Change: " << amt);
+}

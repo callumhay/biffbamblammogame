@@ -1,6 +1,7 @@
 #include "InGameDisplayState.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "TextureFontSet.h"
 
 // model stuffs
 #include "../GameModel/GameModel.h"
@@ -8,12 +9,30 @@
 #include "../Utils/Includes.h"
 #include "../Utils/Vector.h"
 
+const std::string InGameDisplayState::LIVES_LABEL_TEXT = "Lives: ";
+const unsigned int InGameDisplayState::HUD_X_INDENT = 10;	
+const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
 const float InGameDisplayState::FOV_ANGLE_IN_DEGS	= 45.0f;
 const float InGameDisplayState::NEAR_PLANE_DIST		= 0.01f;
 const float InGameDisplayState::FAR_PLANE_DIST		= 100.0f;
 
-InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
+InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display), rasterPointLen(0.0f) {
+	
+	// Set HUD display elements
+	float dropShadowAmt = 0.05f;
+	Colour shadowColourHUD(0, 0, 0);
+	Colour textColourHUD(1, 1, 1);
+	// Score display
+	this->scoreLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small), "0");
+	this->scoreLabel.SetColour(textColourHUD);
+	this->scoreLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
+	// Lives left display
+	this->livesLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small), LIVES_LABEL_TEXT);
+	this->livesLabel.SetColour(textColourHUD);
+	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
+
+
 }
 
 InGameDisplayState::~InGameDisplayState() {
@@ -39,7 +58,7 @@ void InGameDisplayState::RenderFrame(double dT) {
 	glLoadIdentity();
 	glTranslatef(0, 0, -43.0f); // Eye transform
 
-	// Draw the game scene
+	// Draw the game scene ----------------------------------------------------------
 	glPushMatrix();
 
 	Vector2D levelDim = this->display->GetModel()->GetLevelUnitDimensions();
@@ -50,6 +69,26 @@ void InGameDisplayState::RenderFrame(double dT) {
 	this->display->GetAssets()->DrawGameBall(this->display->GetModel()->GetGameBall());
 
 	glPopMatrix();
+	// -------------------------------------------------------------------------------
+
+	// Draw the HUD ------------------------------------------------------------------
+	// Draw the points in the top-right corner of the display
+	std::stringstream ptStrStream;
+	ptStrStream << this->display->GetModel()->GetScore();
+	this->scoreLabel.SetText(ptStrStream.str());
+	this->scoreLabel.SetTopLeftCorner(Point2D(this->display->GetDisplayWidth() - HUD_X_INDENT - this->rasterPointLen, 
+																			      this->display->GetDisplayHeight() - HUD_Y_INDENT));
+	this->rasterPointLen = this->scoreLabel.Draw();
+
+	// Draw the number of lives left in the top-left corner of the display
+	// TODO: figure out number of lives... also, perhaps sprites or models instead?
+	std::stringstream livesStrStream;
+	livesStrStream << LIVES_LABEL_TEXT << 10;
+	this->livesLabel.SetText(livesStrStream.str());
+
+	this->livesLabel.SetTopLeftCorner(Point2D(HUD_X_INDENT, this->display->GetDisplayHeight() - HUD_Y_INDENT));
+	this->livesLabel.Draw();
+	// -------------------------------------------------------------------------------
 }
 
 // Private helper functions ************************************************************

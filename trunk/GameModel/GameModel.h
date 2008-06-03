@@ -9,10 +9,12 @@
 #include "GameState.h"
 #include "GameLevel.h"
 #include "GameWorld.h"
+#include "GameEventManager.h"
 
 #include "../Utils/Vector.h"
 
 #include <vector>
+#include <algorithm>
 
 class GameModel {
 
@@ -27,6 +29,9 @@ private:
 	unsigned int currWorldNum;
 	std::vector<GameWorld*> worlds;
 
+	// Player score and life information
+	int currPlayerScore;
+	//int currScoreMultiplier;
 
 	// Private getters and setters ****************************************
 	void SetCurrentWorld(unsigned int worldNum);
@@ -42,6 +47,23 @@ private:
 			delete this->currState;
 		}
 		this->currState = nextState;
+	}
+
+	void BallCollisionOccurred(LevelPiece* p);
+
+	// Increment the player's score in the game
+	void IncrementScore(int amt) {
+		bool wasGreaterThanZero = this->currPlayerScore > 0;
+
+		this->currPlayerScore +=  amt;
+		if (this->currPlayerScore < 0) {
+				this->currPlayerScore = 0;
+		}
+
+		if (amt != 0 && wasGreaterThanZero){
+			// EVENT: Score was changed
+			GameEventManager::Instance()->ActionScoreChanged(amt);
+		}
 	}
 
 public:	
@@ -73,12 +95,15 @@ public:
 		return this->currWorldNum == this->worlds.size()-1;
 	}
 
+	int GetScore() const {
+		return this->currPlayerScore;
+	}
+
 	// Queries as to whether the current level is the last level of the game
 	// Return: true if the model is on the last level of the game, false otherwise.
 	bool IsOnLastLevelOfGame() const {
 		return this->IsLastWorld() && this->GetCurrentWorld()->IsLastLevel();
 	}
-
 
 	// Paddle and ball related queries **************************************
 	PlayerPaddle GetPlayerPaddle() const {

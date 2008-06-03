@@ -1,5 +1,4 @@
 #include "GameModel.h"
-#include "GameEventManager.h"
 #include "GameConstants.h"
 
 #include "BallOnPaddleState.h"
@@ -7,7 +6,7 @@
 
 #include "../Utils/Includes.h"
 
-GameModel::GameModel() : currWorldNum(0), currState(NULL) {
+GameModel::GameModel() : currWorldNum(0), currState(NULL), currPlayerScore(0) {
 	
 	// Initialize the worlds for the game
 	for (size_t i = 0; i < GameConstants::WORLD_PATHS.size(); i++) {
@@ -26,6 +25,9 @@ void GameModel::BeginOrRestartGame() {
 	// TODO: move stuff into states and don't keep it here!!
 	this->SetCurrentState(new BallOnPaddleState(this));
 	this->SetCurrentWorld(GameConstants::INITIAL_WORLD_NUM);
+
+	// Reset the score
+	this->currPlayerScore = 0;
 }
 
 void GameModel::SetCurrentWorld(unsigned int worldNum) {
@@ -80,4 +82,18 @@ void GameModel::IncrementLevel() {
 
 void GameModel::Tick(double seconds) {
 	this->currState->Tick(seconds);
+}
+
+void GameModel::BallCollisionOccurred(LevelPiece* p) {
+	// EVENT: Ball-Block Collision
+	GameEventManager::Instance()->ActionBallBlockCollision(ball, *p);
+	
+	// Set the score appropriately
+	this->IncrementScore(p->GetPointValueForCollision());
+
+	// Tell the level about the collision
+	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
+	currLevel->BallCollisionOccurred(p->GetHeightIndex(), p->GetWidthIndex());
+	
+	
 }

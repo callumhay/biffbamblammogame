@@ -23,8 +23,9 @@ TextureFontSet::~TextureFontSet() {
  * the string starts with its top-left corner at the point specified.
  * This prints in 2D, window coordinates.
  * Precondition: s cannot have any new lines in it!!
+ * Returns: The length of the printed text.
  */
-void TextureFontSet::OrthoPrint(const Point2D& topLeftCorner, const std::string& s) const {
+float TextureFontSet::OrthoPrint(const Point2D& topLeftCorner, const std::string& s) const {
 	assert(s.find('\n') == std::string::npos);
 	assert(s.find('\r') == std::string::npos);
 
@@ -45,19 +46,20 @@ void TextureFontSet::OrthoPrint(const Point2D& topLeftCorner, const std::string&
 	glPushMatrix();
 	glLoadIdentity();
 	glTranslatef(topLeftCorner[0], topLeftCorner[1]-this->heightInPixels, 0);
-	// glRasterPos2f(0,0);
+	glRasterPos2f(0,0);
 	glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
-	// float rpos[4];
-	// glGetFloatv(GL_CURRENT_RASTER_POSITION ,rpos);
-	// float len=x-rpos[0]; (Assuming No Rotations Have Happend)
 	
-
-
+	float rpos[4];
+	glGetFloatv(GL_CURRENT_RASTER_POSITION ,rpos);
+	float textLength = rpos[0] - topLeftCorner[0];
+	
 	glPopMatrix();
 	glPopAttrib();  
 
 	// Pop the projection matrix
 	Camera::PopWindowCoords();
+	
+	return textLength;
 }
 
 /**
@@ -171,7 +173,7 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 
 		// Increment The Raster Position As If We Were A Bitmap Font.
 		// (Only Needed If You Want To Calculate Text Length)
-		// glBitmap(0,0,0,0,face->glyph->advance.x >> 6,0,NULL);
+		glBitmap(0,0,0,0,face->glyph->advance.x >> 6,0,NULL);
 
 		// Finish The Display List
 		glEndList();

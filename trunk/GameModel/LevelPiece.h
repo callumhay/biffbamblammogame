@@ -66,15 +66,15 @@ public:
 		return this->hIndex;
 	}
 
-	// Obtain half-width
+	// Obtain half-width/height
 	float GetHalfWidth() const {
 		return this->currHalfWidth;
 	}
-
-	// Obtain half-height
 	float GetHalfHeight() const {
 		return this->currHalfHeight;
 	}
+
+	int GetPointValueForCollision();
 
 	// Collision related stuffs
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
