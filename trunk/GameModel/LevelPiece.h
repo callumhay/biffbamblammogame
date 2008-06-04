@@ -19,6 +19,8 @@ public:
 	static bool IsValidBlockEnum(char c);
 
 private:
+	static const int POINTS_PER_BLOCK_HIT = 1;
+
 	static const float PIECE_WIDTH;
 	static const float PIECE_HEIGHT;
 	static const float HALF_PIECE_WIDTH;

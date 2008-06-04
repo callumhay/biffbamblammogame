@@ -11,7 +11,7 @@
  * which will be loaded when they are required.
  */
 GameWorld::GameWorld(std::string worldFilepath) : 
-worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(0) {
+worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(-1) {
 }
 
 GameWorld::~GameWorld() {

@@ -258,6 +258,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameOverState.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GameState.h"
 				>
 			</File>

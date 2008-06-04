@@ -25,15 +25,13 @@ const double GameDisplay::FRAME_DT_MILLISEC = 1000.0/GameDisplay::FRAMERATE;
 
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameListener(NULL), currState(NULL),
 model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
+	
 	assert(model != NULL);
-
-	this->SetCurrentState(new MainMenuDisplayState(this));//InGameDisplayState(this));
 
 	this->SetupActionListeners();
 	this->SetupRenderOptions();
 
-	// Start the game...
-	this->model->BeginOrRestartGame();
+	this->SetCurrentState(new MainMenuDisplayState(this));
 
 	/*
 	// TODO: Remove the following Test...

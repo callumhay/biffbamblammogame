@@ -18,9 +18,10 @@ public:
 	// -------------------------------------------------
 
 	// IN-GAME CONSTANTS -------------------------------
-	static const int POINTS_PER_BLOCK_HIT = 1;
 	static const int DEFAULT_SCORE_MULTIPLIER = 1;
-	static const int MAX_SCORE_MULTIPLIER = 0;
+	static const int MAX_SCORE_MULTIPLIER = 5;			// Max multiplier a player can get in a streak of block hits
+	static const int INIT_SCORE = 0;								// Initial player score when starting a game
+	static const int INIT_LIVES = 3;								// Initial player lives when starting a game
 	// -------------------------------------------------
 
 private:

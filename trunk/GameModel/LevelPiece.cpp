@@ -1,6 +1,5 @@
 #include "LevelPiece.h"
 #include "GameEventManager.h"
-#include "GameConstants.h"
 
 #include "../Utils/Vector.h"
 #include "../Utils/Shape2D.h"
@@ -50,7 +49,7 @@ int LevelPiece::GetPointValueForCollision() {
 		case YellowBreakable:
 		case OrangeBreakable:
 		case RedBreakable:
-			return GameConstants::POINTS_PER_BLOCK_HIT;
+			return POINTS_PER_BLOCK_HIT;
 		case Bomb:
 			break;
 		case Solid:

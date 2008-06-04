@@ -32,6 +32,8 @@ private:
 	// Player score and life information
 	int currPlayerScore;
 	//int currScoreMultiplier;
+	int currLivesLeft;
+
 
 	// Private getters and setters ****************************************
 	void SetCurrentWorld(unsigned int worldNum);
@@ -50,6 +52,7 @@ private:
 	}
 
 	void BallCollisionOccurred(LevelPiece* p);
+	void PlayerDied();
 
 	// Increment the player's score in the game
 	void IncrementScore(int amt) {
@@ -97,6 +100,14 @@ public:
 
 	int GetScore() const {
 		return this->currPlayerScore;
+	}
+
+	int GetLivesLeft() const {
+		return this->currLivesLeft;
+	}
+
+	bool IsGameOver() const {
+		return this->currLivesLeft < 0;
 	}
 
 	// Queries as to whether the current level is the last level of the game

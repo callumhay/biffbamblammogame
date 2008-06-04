@@ -2,6 +2,10 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
+#include "GameOverDisplayState.h"
+#include "GameCompleteDisplayState.h"
+
+#include "../GameModel/GameModel.h"
 #include "../GameModel/GameBall.h"
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/PlayerPaddle.h"
@@ -17,6 +21,9 @@ GameEventsListener::~GameEventsListener() {
 
 void GameEventsListener::GameCompletedEvent() {
 	debug_output("EVENT: Game completed");
+
+	// Set the state to the end of game display
+	this->display->SetCurrentState(new GameCompleteDisplayState(this->display));
 }
 
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
@@ -43,8 +50,13 @@ void GameEventsListener::PaddleHitWallEvent(const Point2D& hitLoc) {
 	debug_output("EVENT: Paddle hit wall");
 }
 
-void GameEventsListener::BallDeathEvent(const GameBall& deadBall, unsigned int livesLeft) {
+void GameEventsListener::BallDeathEvent(const GameBall& deadBall, int livesLeft) {
 	debug_output("EVENT: Ball death, lives left: " << livesLeft);
+	
+	// Check to see if it's game over, and switch the display state appropriately
+	if (this->display->GetModel()->IsGameOver()) {
+		this->display->SetCurrentState(new GameOverDisplayState(this->display));
+	}
 }
 
 void GameEventsListener::BallSpawnEvent(const GameBall& spawnedBall) {
