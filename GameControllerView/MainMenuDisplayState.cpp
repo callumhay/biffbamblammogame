@@ -1,5 +1,5 @@
 #include "MainMenuDisplayState.h"
-#include "InGameDisplayState.h"
+#include "StartGameDisplayState.h"
 
 #include "GameController.h"
 #include "GameDisplay.h"
@@ -125,7 +125,7 @@ void MainMenuDisplayState::KeyPressed(unsigned char key) {
 				switch (selectedMenuItem) {
 					case NEW_GAME_INDEX:
 						debug_output("Selected " << NEW_GAME_MENUITEM << " from menu");
-						this->display->SetCurrentState(new InGameDisplayState(this->display));
+						this->display->SetCurrentState(new StartGameDisplayState(this->display));
 
 						break;
 					case PLAY_LEVEL_INDEX:

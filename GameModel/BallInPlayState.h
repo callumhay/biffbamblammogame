@@ -18,7 +18,6 @@ private:
 	
 	void DoBallCollision(GameBall& b, const Vector2D& n, float d);
 	void ModifyBallBasedOnPaddle(const PlayerPaddle& paddle, GameBall& ball);
-	void CheckForEndOfLevelAndWorldAndGame();
 
 public:
 	BallInPlayState(GameModel* gm);

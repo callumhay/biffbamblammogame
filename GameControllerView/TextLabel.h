@@ -18,6 +18,7 @@ struct DropShadow {
 class TextLabel2D {
 
 private:
+	float lastRasterWidth;
 	Colour colour;
 	DropShadow dropShadow;
 	Point2D topLeftCorner;
@@ -57,8 +58,11 @@ public:
 	unsigned int GetHeight() const {
 		return this->font->GetHeight();
 	}
+	float GetLastRasterWidth() const {
+		return this->lastRasterWidth;
+	}
 
-	float Draw();
+	void Draw();
 };
 
 #endif

@@ -171,6 +171,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameCompleteDisplayState.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameController.cpp"
 				>
 			</File>
@@ -184,6 +188,10 @@
 			</File>
 			<File
 				RelativePath=".\GameMenu.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameOverDisplayState.cpp"
 				>
 			</File>
 			<File
@@ -204,6 +212,10 @@
 			</File>
 			<File
 				RelativePath=".\ObjReader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StartGameDisplayState.cpp"
 				>
 			</File>
 			<File
@@ -241,6 +253,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameCompleteDisplayState.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GameController.h"
 				>
 			</File>
@@ -254,6 +270,10 @@
 			</File>
 			<File
 				RelativePath=".\GameMenu.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameOverDisplayState.h"
 				>
 			</File>
 			<File
@@ -274,6 +294,10 @@
 			</File>
 			<File
 				RelativePath=".\ObjReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StartGameDisplayState.h"
 				>
 			</File>
 			<File

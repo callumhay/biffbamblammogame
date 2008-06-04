@@ -22,14 +22,6 @@ GameLevel::~GameLevel() {
 		this->cachedInitialLevelPieces[i].clear();
 	}
 	this->cachedInitialLevelPieces.clear();
-
-	for (size_t i = 0; i < this->currentLevelPieces.size(); i++) {
-		for (size_t j = 0; j < this->currentLevelPieces[i].size(); j++) {
-			delete this->currentLevelPieces[i][j];
-		}
-		this->currentLevelPieces[i].clear();
-	}
-	this->currentLevelPieces.clear();
 }
 
 GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {

@@ -62,9 +62,6 @@ void BallInPlayState::Tick(double seconds) {
 					// Tell the model that a ball collision occurred with currPiece
 					this->gameModel->BallCollisionOccurred(currPiece);
 					
-					// TODO: move this into the model
-					this->CheckForEndOfLevelAndWorldAndGame();
-
 					break;
 				}
 			}
@@ -76,44 +73,10 @@ void BallInPlayState::Tick(double seconds) {
 	
 		// Check for death
 		if (ball.GetBounds().Center()[1] <= GameLevel::Y_COORD_OF_DEATH) {
-			// EVENT: Ball death
-			GameEventManager::Instance()->ActionBallDeath(ball, 0);	// TODO: fix lives left...
-			
-			// TODO: Have a death state?
-			this->gameModel->SetCurrentState(new BallOnPaddleState(this->gameModel));
+			this->gameModel->PlayerDied();
 		}
 	}
 
-}
-
-// Checks to see if the game/world/level have ended, and does necessary stuffs
-// to change things up
-void BallInPlayState::CheckForEndOfLevelAndWorldAndGame() {
-	GameLevel* currLevel = this->gameModel->GetCurrentWorld()->GetCurrentLevel();
-	
-	// Check to see if the level is done
-	if (currLevel->IsLevelComplete()) {
-		// EVENT: Level is complete
-		GameEventManager::Instance()->ActionLevelCompleted(*currLevel);
-		
-		// Check to see if the world is done
-		GameWorld* currWorld = this->gameModel->GetCurrentWorld();
-		if (currWorld->IsLastLevel()) {
-			// EVENT: World is complete
-			GameEventManager::Instance()->ActionWorldCompleted(*currWorld);
-
-			// Check to see if the game is done
-			if (this->gameModel->IsOnLastLevelOfGame()) {
-				// EVENT: Game is complete
-				GameEventManager::Instance()->ActionGameCompleted();
-			}
-		}
-
-		// The level was completed, increment the level - note this function
-		// is robust and will increment level, world and determine if we have finished
-		// the game all in one
-		this->gameModel->IncrementLevel();
-	}
 }
 
 // n must be normalized

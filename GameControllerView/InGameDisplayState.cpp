@@ -17,7 +17,7 @@ const float InGameDisplayState::FOV_ANGLE_IN_DEGS	= 45.0f;
 const float InGameDisplayState::NEAR_PLANE_DIST		= 0.01f;
 const float InGameDisplayState::FAR_PLANE_DIST		= 100.0f;
 
-InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display), rasterPointLen(0.0f) {
+InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
 	
 	// Set HUD display elements
 	float dropShadowAmt = 0.05f;
@@ -31,8 +31,6 @@ InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(disp
 	this->livesLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small), LIVES_LABEL_TEXT);
 	this->livesLabel.SetColour(textColourHUD);
 	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
-
-
 }
 
 InGameDisplayState::~InGameDisplayState() {
@@ -76,16 +74,15 @@ void InGameDisplayState::RenderFrame(double dT) {
 	std::stringstream ptStrStream;
 	ptStrStream << this->display->GetModel()->GetScore();
 	this->scoreLabel.SetText(ptStrStream.str());
-	this->scoreLabel.SetTopLeftCorner(Point2D(this->display->GetDisplayWidth() - HUD_X_INDENT - this->rasterPointLen, 
+	this->scoreLabel.SetTopLeftCorner(Point2D(this->display->GetDisplayWidth() - HUD_X_INDENT - this->scoreLabel.GetLastRasterWidth(), 
 																			      this->display->GetDisplayHeight() - HUD_Y_INDENT));
-	this->rasterPointLen = this->scoreLabel.Draw();
+	this->scoreLabel.Draw();
 
 	// Draw the number of lives left in the top-left corner of the display
 	// TODO: figure out number of lives... also, perhaps sprites or models instead?
 	std::stringstream livesStrStream;
-	livesStrStream << LIVES_LABEL_TEXT << 10;
+	livesStrStream << LIVES_LABEL_TEXT << this->display->GetModel()->GetLivesLeft();
 	this->livesLabel.SetText(livesStrStream.str());
-
 	this->livesLabel.SetTopLeftCorner(Point2D(HUD_X_INDENT, this->display->GetDisplayHeight() - HUD_Y_INDENT));
 	this->livesLabel.Draw();
 	// -------------------------------------------------------------------------------
