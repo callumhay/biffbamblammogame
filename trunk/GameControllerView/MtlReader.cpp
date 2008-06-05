@@ -22,11 +22,11 @@ MtlReader::~MtlReader() {
 /**
  * Read a .mtl file and create a celshading material from it.
  * filepath should be to an .mtl file on disk.
- * Postcondition: Returns a map of celshadingmaterials with the keys equal
+ * Postcondition: Returns a map of CgFxCelShading with the keys equal
  * to their respective names if all goes well, NULL otherwise.
  */
-std::map<std::string, CelShadingMaterial*> MtlReader::ReadMaterialFile(const std::string &filepath) {
-	std::map<std::string, CelShadingMaterial*> materials;
+std::map<std::string, CgFxCelShading*> MtlReader::ReadMaterialFile(const std::string &filepath) {
+	std::map<std::string, CgFxCelShading*> materials;
 	
 	// Start reading in the file
 	std::ifstream inFile;
@@ -48,7 +48,7 @@ std::map<std::string, CelShadingMaterial*> MtlReader::ReadMaterialFile(const std
 				debug_output("ERROR: Material name not provided with proper syntax in mtl file: " << filepath); 
 				return materials;
 			}
-			materials[matName] = new CelShadingMaterial();
+			materials[matName] = new CgFxCelShading();
 		}
 		else if (currStr == MTL_AMBIENT) {
 			// Ignore this for now...

@@ -3,7 +3,11 @@
 
 #include "GameControllerView/GameDisplay.h"
 #include "GameControllerView/GameController.h"
+#include "GameControllerView/CgShaderManager.h"
+
 #include "GameModel/GameModel.h"
+#include "GameModel/GameEventManager.h"
+
 
 static const char* WINDOW_TITLE = "Biff Bam Blammo";
 static const int INIT_WIDTH = 1024;
@@ -98,8 +102,14 @@ int main(int argc, char **argv) {
 	glutTimerFunc(GameDisplay::FRAME_DT_MILLISEC, FrameRenderMain, 1);
 	glutMainLoop();
 
+	// Clear up MVC
 	delete model;
 	delete display;
 	delete controller;
+
+	// Clear up singletons
+	GameEventManager::DeleteInstance();
+	CgShaderManager::DeleteInstance();
+
 	return 0;
 }

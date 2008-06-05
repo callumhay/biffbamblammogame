@@ -1,17 +1,49 @@
 #include "Mesh.h"
 
-Mesh::Mesh(const std::string name, const std::vector<Point3D> &verts, const std::vector<Vector3D> &norms,
-					 const std::vector<Point2D> &texCoords, const std::map<std::string, MaterialGroup*> &matGrps):
-name(name), vertices(verts), normals(norms), texCoords(texCoords), matGrps(matGrps), displayListID(0) {
-	this->CompileDisplayList();
+
+void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer, 
+														 const std::vector<Point3D>& vertexStream, 
+														 const std::vector<Vector3D>& normalStream,
+														 const std::vector<Point2D>& texCoordStream ) {
+
+	assert(indexer.normalIndices.size() == indexer.texCoordIndices.size());
+	assert(indexer.normalIndices.size() == indexer.vertexIndices.size());
+	assert(indexer.vertexIndices.size() == indexer.texCoordIndices.size());
+		
+	unsigned int numIndices = indexer.vertexIndices.size();
+	unsigned int polygrpArrayLen = numIndices * INTERLEAVED_MULTIPLIER;
+	this->polygroupArray = new float[polygrpArrayLen];
+	
+	// Go through each possible vertex and add it to the polygon group array
+	for (unsigned int i = 0, j = 0; i < polygrpArrayLen; i += INTERLEAVED_MULTIPLIER, j++) {
+		const Point3D& vertex		= vertexStream[indexer.vertexIndices[j]];
+		const Vector3D& normal	= normalStream[indexer.normalIndices[j]];
+		const Point2D& texCoord = texCoordStream[indexer.texCoordIndices[j]];
+
+		this->polygroupArray[i]			= texCoord[0];
+		this->polygroupArray[i + 1]	= texCoord[1];
+		this->polygroupArray[i + 2]	= normal[0];
+		this->polygroupArray[i + 3]	= normal[1];
+		this->polygroupArray[i + 4]	= normal[2];
+		this->polygroupArray[i + 5]	= vertex[0];
+		this->polygroupArray[i + 6]	= vertex[1];
+		this->polygroupArray[i + 7]	= vertex[2];
+	}
+
+	// Create a display list for the polygon group
+	this->displayListID = glGenLists(1);
+	glNewList(this->displayListID, GL_COMPILE);
+	glInterleavedArrays(GL_INTERLEAVED_FORMAT, INTERLEAVED_STRIDE, this->polygroupArray);
+	glDrawArrays(GL_TRIANGLES, 0, numIndices);
+	glEndList();
+
+}
+
+Mesh::Mesh(const std::string name, const std::map<std::string, MaterialGroup*> &matGrps):
+name(name), matGrps(matGrps) {
 }
 
 Mesh::~Mesh(){
-	glDeleteLists(this->displayListID, 1);
-	this->vertices.clear();
-	this->texCoords.clear();
-	this->normals.clear();
-
 	// Delete the material groups
 	std::map<std::string, MaterialGroup*>::iterator matGrpIter = this->matGrps.begin();
 	for (; matGrpIter != this->matGrps.end(); matGrpIter++) {
@@ -21,47 +53,11 @@ Mesh::~Mesh(){
 }
 
 /*
- * Create a display list that draws this mesh.
- * Precondition: This mesh has been initialized with appropriate indices etc.
- */
-void Mesh::CompileDisplayList() {
-	// Create a display list for the mesh
-	this->displayListID = glGenLists(1);
-	glNewList(this->displayListID, GL_COMPILE);
-
-
-	// for each material group...
-	std::map<std::string, MaterialGroup*>::iterator matGrpIter = this->matGrps.begin();
-	for (; matGrpIter != this->matGrps.end(); matGrpIter++) {
-		MaterialGroup* currMatGrp = matGrpIter->second;
-		currMatGrp->material->DrawMaterial();
-		
-		glBegin(GL_TRIANGLES);
-		// for each face in the material group
-		for (size_t j = 0; j < currMatGrp->faces.size(); j++) {
-			TriFace currFace = currMatGrp->faces[j];
-			
-			for (int k = 0; k < 3; k++) {
-				Point3D &currVert = this->vertices[currFace.vertexIndices[k]];
-				Vector3D &currNorm = this->normals[currFace.normalIndices[k]];
-				Point2D &currTexCoord = this->texCoords[currFace.texCoordIndices[k]];
-
-				glNormal3f(currNorm[0], currNorm[1], currNorm[2]);
-				glTexCoord2f(currTexCoord[0], currTexCoord[1]);
-				glVertex3f(currVert[0], currVert[1], currVert[2]);
-			}
-		}
-		glEnd();
-	}
-
-	glEndList();
-}
-
-/*
  * Calculates the max size of this mesh along the x, y and z axis.
  * Precondition: This mesh has been initialized with appropriate indices etc.
  * Return: A vector with the max sizes along each of the respective axes.
  */
+/*
 Vector3D Mesh::CalculateDimensions() {
 	if (this->vertices.size() < 2) {
 		return Vector3D(0.0f,0.0f,0.0f);
@@ -80,3 +76,4 @@ Vector3D Mesh::CalculateDimensions() {
 
 	return maxVals - minVals;
 }
+*/

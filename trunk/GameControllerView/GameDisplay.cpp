@@ -5,6 +5,8 @@
 #include "Camera.h"
 #include "GameEventsListener.h"
 
+#include "CgShaderManager.h"
+
 // State includes
 #include "InGameDisplayState.h"
 #include "MainMenuDisplayState.h"

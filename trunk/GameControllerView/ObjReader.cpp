@@ -1,7 +1,7 @@
 #include "ObjReader.h"
 #include "MtlReader.h"
 #include "Mesh.h"
-#include "CelShadingMaterial.h"
+#include "CgFxCelShading.h"
 
 #include "../Utils/Debug.h"
 
@@ -58,7 +58,7 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 	}
 	
 	// Figure out what materials to make and make them
-	std::map<std::string, CelShadingMaterial*> meshMaterials;
+	std::map<std::string, CgFxCelShading*> meshMaterials;
 	assert(mtlFilepath != "");
 	meshMaterials = MtlReader::ReadMaterialFile(mtlFilepath);
 
@@ -68,8 +68,9 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 	std::vector<Point3D> vertices;
 	std::vector<Vector3D> normals;
 	std::vector<Point2D> texCoords;
-	std::map<std::string, MaterialGroup*> matGrps;	// material groups, mapped by their group name
-	
+	std::map<std::string, MaterialGroup*> matGrps;		// Material groups, mapped by their group name
+	std::map<std::string, PolyGrpIndexer> polyGrps;		// Set of polygons associated with material group names
+
 
 	while (inFile >> currStr) {
 		
@@ -109,24 +110,32 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 			texCoords.push_back(texCoord);
 		}
 		else if (currStr == OBJ_FACE) {
+			assert(matName != "");
 			char trash;
-			// TODO: make it support cases where texcoord/normal are missing
-			// vertex / tex coord / normal
-			TriFace face;
-			for (size_t i = 0; i < 3; i++) {
-				inFile >> face.vertexIndices[i];
+
+			for (unsigned int i = 0; i < 3; i++) {
+				unsigned int vertexIndex;
+				unsigned int normalIndex;
+				unsigned int texCoordIndex;
+
+				inFile >> vertexIndex;
 				inFile >> trash;
-				inFile >> face.texCoordIndices[i];
+				inFile >> texCoordIndex;
 				inFile >> trash;
-				inFile >> face.normalIndices[i];
+				inFile >> normalIndex;
 
 				// Since indices read from an obj file start at index 1, we need to decrement
 				// for our zero index system
-				face.vertexIndices[i]--;
-				face.texCoordIndices[i]--;
-				face.normalIndices[i]--;
+				vertexIndex--;
+				texCoordIndex--;
+				normalIndex--;
+
+				// Add the indices to their respective lists
+				polyGrps[matName].vertexIndices.push_back(vertexIndex);
+				polyGrps[matName].normalIndices.push_back(normalIndex);
+				polyGrps[matName].texCoordIndices.push_back(texCoordIndex);
 			}
-			matGrps[matName]->faces.push_back(face);
+
 		}
 		else if (currStr == OBJ_USE_MATERIAL) {
 			// Obtain the material group name
@@ -141,7 +150,7 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 				// Inline: We are initializing the material for the first time
 
 				// Look up the material name from the list of materials
-				std::map<std::string, CelShadingMaterial*>::iterator valIter = meshMaterials.find(matName);
+				std::map<std::string, CgFxCelShading*>::iterator valIter = meshMaterials.find(matName);
 				if (valIter == meshMaterials.end()) {
 					// Not good: the material was not found...
 					debug_output("ERROR: Material name in obj file with no matching material in mtl file: " << filepath); 
@@ -153,5 +162,12 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 		}
 	}
 
-	return new Mesh(filepath, vertices, normals, texCoords, matGrps);
+	// Go through all the polygon groups and set the material groups
+	std::map<std::string, PolyGrpIndexer>::iterator polyGrpIter;
+	for (polyGrpIter = polyGrps.begin(); polyGrpIter != polyGrps.end(); polyGrpIter++) {
+		MaterialGroup* currMatGrp = matGrps[polyGrpIter->first];
+		currMatGrp->AddFaces(polyGrpIter->second, vertices, normals, texCoords);
+	}
+
+	return new Mesh(filepath, matGrps);
 }
