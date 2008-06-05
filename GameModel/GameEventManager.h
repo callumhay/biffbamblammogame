@@ -15,6 +15,7 @@ class GameEventManager {
 
 public:
 	static GameEventManager* Instance();
+	static void DeleteInstance();
 	
 	// Register functions and lists of registered listeners
 	void RegisterGameEventListener(GameEvents* listener);

@@ -24,6 +24,7 @@ private:
 	// Set of fonts for use in the game, indexed by their style and height
 	std::map<FontStyle, std::map<FontSize, TextureFontSet*>> fonts;
 
+	Mesh* background;
 	Mesh* playerPaddle;		// Currently loaded player paddle mesh
 	Mesh* block;					// Currently loaded breakable block mesh
 	Mesh* ball;						// Currently loaded ball mesh
@@ -44,6 +45,7 @@ public:
 	void DrawLevelPieceMesh(const LevelPiece& p);
 	void DrawGameBall(const GameBall& b);
 	void DrawPaddle(const PlayerPaddle& p);
+	void DrawBackground();
 
 	// Obtain a particular font
 	const TextureFontSet* GetFont(FontStyle style, FontSize height) const {
@@ -63,6 +65,10 @@ private:
 	static const std::string RESOURCE_DIR;
 	static const std::string FONT_DIR;
 	static const std::string MESH_DIR;
+	static const std::string SHADER_DIR;
+
+	// Shader assets
+	static const std::string CELSHADER_FILEPATH;
 
 	// Regular font assets
 	static const std::string FONT_GUNBLAM;
@@ -77,11 +83,13 @@ private:
 	static const std::string DECO_PADDLE_MESH;
 	static const std::string DECO_BALL_MESH;
 	static const std::string DECO_BREAKABLE_BLOCK_MESH;
+	static const std::string DECO_BACKGROUND_MESH;
 
 	// Cyberpunk assets
 	static const std::string CYBERPUNK_PADDLE_MESH;
 	static const std::string CYBERPUNK_BALL_MESH;
 	static const std::string CYBERPUNK_BREAKABLE_BLOCK_MESH;
+	static const std::string CYBERPUNK_BACKGROUND_MESH;
 
 };
 

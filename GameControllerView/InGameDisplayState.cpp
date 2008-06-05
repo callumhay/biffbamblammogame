@@ -15,7 +15,7 @@ const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
 const float InGameDisplayState::FOV_ANGLE_IN_DEGS	= 45.0f;
 const float InGameDisplayState::NEAR_PLANE_DIST		= 0.01f;
-const float InGameDisplayState::FAR_PLANE_DIST		= 100.0f;
+const float InGameDisplayState::FAR_PLANE_DIST		= 220.0f;
 
 InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
 	
@@ -41,54 +41,51 @@ InGameDisplayState::~InGameDisplayState() {
  */
 void InGameDisplayState::RenderFrame(double dT) {
 	
+	// TODO: Camera Stuff -----------------------------------------------------------
 	// Set the perspective projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(FOV_ANGLE_IN_DEGS, 
 							   ((double)this->display->GetDisplayWidth()) / ((double)this->display->GetDisplayHeight()), 
 								 NEAR_PLANE_DIST, FAR_PLANE_DIST);
-	
-	// Background
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-	// TODO: Camera...
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0, 0, -43.0f); // Eye transform
-
-	// Draw the game scene ----------------------------------------------------------
-	glPushMatrix();
-
-	Vector2D levelDim = this->display->GetModel()->GetLevelUnitDimensions();
-	glTranslatef(-levelDim[0]/2.0f, -levelDim[1]/2.0f, 0.0f);
-	
-	this->DrawLevelPieces();
-	this->DrawPlayerPaddle();
-	this->display->GetAssets()->DrawGameBall(this->display->GetModel()->GetGameBall());
-
-	glPopMatrix();
 	// -------------------------------------------------------------------------------
 
-	// Draw the HUD ------------------------------------------------------------------
-	// Draw the points in the top-right corner of the display
-	std::stringstream ptStrStream;
-	ptStrStream << this->display->GetModel()->GetScore();
-	this->scoreLabel.SetText(ptStrStream.str());
-	this->scoreLabel.SetTopLeftCorner(Point2D(this->display->GetDisplayWidth() - HUD_X_INDENT - this->scoreLabel.GetLastRasterWidth(), 
-																			      this->display->GetDisplayHeight() - HUD_Y_INDENT));
-	this->scoreLabel.Draw();
+	// Draw the game scene
+	this->DrawGameScene();
 
-	// Draw the number of lives left in the top-left corner of the display
-	// TODO: figure out number of lives... also, perhaps sprites or models instead?
-	std::stringstream livesStrStream;
-	livesStrStream << LIVES_LABEL_TEXT << this->display->GetModel()->GetLivesLeft();
-	this->livesLabel.SetText(livesStrStream.str());
-	this->livesLabel.SetTopLeftCorner(Point2D(HUD_X_INDENT, this->display->GetDisplayHeight() - HUD_Y_INDENT));
-	this->livesLabel.Draw();
-	// -------------------------------------------------------------------------------
+	// Draw the HUD
+	this->DrawGameHUD();
 }
 
 // Private helper functions ************************************************************
+
+/**
+ * Helper function for drawing the game scene - this includes background and foreground objects
+ * related to the game itself.
+ */
+void InGameDisplayState::DrawGameScene() {
+	// Background
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
+	// Foreground game objects
+	Vector2D levelDim = this->display->GetModel()->GetLevelUnitDimensions();
+
+	glPushMatrix();
+	
+	glTranslatef(0.0f, -levelDim[1]/2.0f, 0.0f);
+	this->display->GetAssets()->DrawBackground();
+
+	glTranslatef(-levelDim[0]/2.0f, 0, 0.0f);	
+	this->DrawLevelPieces();
+	this->display->GetAssets()->DrawPaddle(this->display->GetModel()->GetPlayerPaddle());
+	this->display->GetAssets()->DrawGameBall(this->display->GetModel()->GetGameBall());
+
+	glPopMatrix();
+}
 
 /*
  * Helper function for drawing all the game pieces / blocks that make up the currently
@@ -107,10 +104,24 @@ void InGameDisplayState::DrawLevelPieces() {
 	}
 }
 
-/*
- * Helper function for drawing the player paddle.
+/**
+ * Helper function for drawing the Heads-Up-Display (HUD) for the game, 
+ * including points, lives left, etc.
  */
-void InGameDisplayState::DrawPlayerPaddle() {
-	PlayerPaddle paddle = this->display->GetModel()->GetPlayerPaddle();
-	this->display->GetAssets()->DrawPaddle(paddle);
+void InGameDisplayState::DrawGameHUD() {
+	// Draw the points in the top-right corner of the display
+	std::stringstream ptStrStream;
+	ptStrStream << this->display->GetModel()->GetScore();
+	this->scoreLabel.SetText(ptStrStream.str());
+	this->scoreLabel.SetTopLeftCorner(Point2D(this->display->GetDisplayWidth() - HUD_X_INDENT - this->scoreLabel.GetLastRasterWidth(), 
+																			      this->display->GetDisplayHeight() - HUD_Y_INDENT));
+	this->scoreLabel.Draw();
+
+	// Draw the number of lives left in the top-left corner of the display
+	// TODO: figure out number of lives... also, perhaps sprites or models instead?
+	std::stringstream livesStrStream;
+	livesStrStream << LIVES_LABEL_TEXT << this->display->GetModel()->GetLivesLeft();
+	this->livesLabel.SetText(livesStrStream.str());
+	this->livesLabel.SetTopLeftCorner(Point2D(HUD_X_INDENT, this->display->GetDisplayHeight() - HUD_Y_INDENT));
+	this->livesLabel.Draw();
 }

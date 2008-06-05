@@ -16,6 +16,14 @@ GameEventManager* GameEventManager::Instance() {
 	}
 	return instance;
 }
+/**
+ * Used to clear the game event manager from memory.
+ */
+void GameEventManager::DeleteInstance() {
+	if (instance != NULL) {
+		delete instance;
+	}
+}
 
 // Functions for registering and unregistering listeners for game events
 void GameEventManager::RegisterGameEventListener(GameEvents* listener) {

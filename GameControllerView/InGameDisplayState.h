@@ -26,8 +26,9 @@ private:
 	static const float NEAR_PLANE_DIST;
 	static const float FAR_PLANE_DIST;
 
+	void DrawGameHUD();
+	void DrawGameScene();
 	void DrawLevelPieces();
-	void DrawPlayerPaddle();
 
 public:
 	InGameDisplayState(GameDisplay* display);

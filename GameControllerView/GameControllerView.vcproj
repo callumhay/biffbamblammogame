@@ -163,7 +163,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CelShadingMaterial.cpp"
+				RelativePath=".\CgFxCelShading.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CgShaderManager.cpp"
 				>
 			</File>
 			<File
@@ -241,7 +245,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CelShadingMaterial.h"
+				RelativePath=".\CgFxCelShading.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CgFxEffect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CgShaderManager.h"
 				>
 			</File>
 			<File

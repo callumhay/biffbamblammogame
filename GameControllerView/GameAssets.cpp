@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "ObjReader.h"
 #include "TextureFontSet.h"
+#include "CgShaderManager.h"
 
 #include "../Utils/Includes.h"
 
@@ -9,29 +10,37 @@
 const std::string GameAssets::RESOURCE_DIR = "resources";
 const std::string GameAssets::FONT_DIR	= "fonts";
 const std::string GameAssets::MESH_DIR	= "models";
+const std::string GameAssets::SHADER_DIR = "shaders";
 
+// Shader assets
+const std::string GameAssets::CELSHADER_FILEPATH	= GameAssets::RESOURCE_DIR + "/" + SHADER_DIR + "/CelShading.cgfx";
 
 // Regular font assets
-const std::string GameAssets::FONT_GUNBLAM					= GameAssets::RESOURCE_DIR  + "/" + FONT_DIR + "/gunblam.ttf";
-const std::string GameAssets::FONT_EXPLOSIONBOOM		= GameAssets::RESOURCE_DIR  + "/" + FONT_DIR + "/explosionboom.ttf";
-const std::string GameAssets::FONT_BLOODCRUNCH			= GameAssets::RESOURCE_DIR  + "/" + FONT_DIR + "/bloodcrunch.ttf";
-const std::string GameAssets::FONT_ALLPURPOSE				= GameAssets::RESOURCE_DIR  + "/" + FONT_DIR + "/allpurpose.ttf";
+const std::string GameAssets::FONT_GUNBLAM					= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/gunblam.ttf";
+const std::string GameAssets::FONT_EXPLOSIONBOOM		= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/explosionboom.ttf";
+const std::string GameAssets::FONT_BLOODCRUNCH			= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/bloodcrunch.ttf";
+const std::string GameAssets::FONT_ALLPURPOSE				= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/allpurpose.ttf";
 //const std::string FONT_DECOISH;
 //const std::string FONT_CYBERPUNKISH;
 
 // Deco assets
-const std::string GameAssets::DECO_PADDLE_MESH						= GameAssets::RESOURCE_DIR  + "/" + MESH_DIR + "/deco_paddle.obj";
-const std::string GameAssets::DECO_BALL_MESH							= GameAssets::RESOURCE_DIR  + "/" + MESH_DIR + "/ball.obj";
-const std::string GameAssets::DECO_BREAKABLE_BLOCK_MESH		= GameAssets::RESOURCE_DIR  + "/" + MESH_DIR + "/deco_block.obj";
+const std::string GameAssets::DECO_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_paddle.obj";
+const std::string GameAssets::DECO_BALL_MESH							= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/ball.obj";
+const std::string GameAssets::DECO_BREAKABLE_BLOCK_MESH		= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_block.obj";
+const std::string GameAssets::DECO_BACKGROUND_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_background.obj";
 
 // Cyberpunk assets
-const std::string GameAssets::CYBERPUNK_PADDLE_MESH						= GameAssets::RESOURCE_DIR  + "/" + MESH_DIR + "/cyberpunk_paddle.obj";
-const std::string GameAssets::CYBERPUNK_BALL_MESH							= GameAssets::RESOURCE_DIR  + "/" + MESH_DIR + "/ball.obj";
-const std::string GameAssets::CYBERPUNK_BREAKABLE_BLOCK_MESH	= GameAssets::RESOURCE_DIR  + "/" + MESH_DIR + "/cyberpunk_block.obj";
+const std::string GameAssets::CYBERPUNK_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_paddle.obj";
+const std::string GameAssets::CYBERPUNK_BALL_MESH							= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/ball.obj";
+const std::string GameAssets::CYBERPUNK_BREAKABLE_BLOCK_MESH	= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_block.obj";
+const std::string GameAssets::CYBERPUNK_BACKGROUND_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_background.obj";
 // *****************************************************
 
-GameAssets::GameAssets(): ball(NULL), playerPaddle(NULL), block(NULL), currLoadedStyle(GameWorld::None) {
+GameAssets::GameAssets(): ball(NULL), playerPaddle(NULL), block(NULL), background(NULL), currLoadedStyle(GameWorld::None) {
+	// Load Fonts
 	this->LoadRegularFontAssets();
+	// Load Shaders
+	CgShaderManager::Instance()->InitCgFx();
 }
 
 GameAssets::~GameAssets() {
@@ -146,6 +155,9 @@ void GameAssets::DrawGameBall(const GameBall& b) {
 	glPopMatrix();
 }
 
+/**
+ * Draw the player paddle mesh with materials and in correct position.
+ */
 void GameAssets::DrawPaddle(const PlayerPaddle& p) {
 	Point2D paddleCenter = p.GetCenterPosition();	
 
@@ -160,6 +172,19 @@ void GameAssets::DrawPaddle(const PlayerPaddle& p) {
 	this->playerPaddle->Draw();
 	p.DebugDraw();
 	glPopMatrix();
+}
+
+/**
+ * Draw the background / environment of the world type.
+ */
+void GameAssets::DrawBackground() {
+	GLfloat paddleSpecular[]   = {1.0f, 1.0f, 1.0f, 1.0f};
+	GLfloat paddleAmbAndDiff[] = {0.65f, 0.7f, 1.0f, 1.0f};
+	glMaterialf(GL_FRONT, GL_SHININESS, 80.0f);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, paddleSpecular);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, paddleAmbAndDiff);
+
+	this->background->Draw();
 }
 
 /*
@@ -258,7 +283,7 @@ void GameAssets::LoadDecoStyleAssets() {
 	this->ball					= ObjReader::ReadMesh(DECO_BALL_MESH);
 	this->playerPaddle	= ObjReader::ReadMesh(DECO_PADDLE_MESH);
 	this->block					= ObjReader::ReadMesh(DECO_BREAKABLE_BLOCK_MESH);
-
+	this->background		= ObjReader::ReadMesh(DECO_BACKGROUND_MESH);
 }
 
 /**
@@ -271,5 +296,5 @@ void GameAssets::LoadCyberpunkStyleAssets() {
 	this->ball					= ObjReader::ReadMesh(CYBERPUNK_BALL_MESH);
 	this->playerPaddle	= ObjReader::ReadMesh(CYBERPUNK_PADDLE_MESH);
 	this->block					= ObjReader::ReadMesh(CYBERPUNK_BREAKABLE_BLOCK_MESH);
-
+	this->background		= ObjReader::ReadMesh(CYBERPUNK_BACKGROUND_MESH);
 }

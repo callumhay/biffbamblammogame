@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include "CelShadingMaterial.h"
+#include "CgFxCelShading.h"
 
 /**
  * Reads a material file for an .obj defined mesh.
@@ -23,7 +23,7 @@ private:
 
 public:
 	~MtlReader();
-	static std::map<std::string, CelShadingMaterial*> ReadMaterialFile(const std::string &filepath);
+	static std::map<std::string, CgFxCelShading*> ReadMaterialFile(const std::string &filepath);
 	
 };
 
