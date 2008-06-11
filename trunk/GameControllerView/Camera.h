@@ -15,10 +15,23 @@ private:
 public:
 	Camera();
 
+	Matrix4x4 GetViewTransform() const {
+		return this->viewMatrix;
+	}
+
+	Matrix4x4 GetInvViewTransform() const {
+		return this->invViewMatrix;
+	}
+
+	void Reset() {
+		this->viewMatrix		= Matrix4x4();
+		this->invViewMatrix = Matrix4x4();
+	}
+
 	void Move(const Vector3D &v);
 	void Rotate(char axis, float degs);
 
-	void SetCameraTransform() {
+	void ApplyCameraTransform() {
 		glMultMatrixf(this->viewMatrix.begin());
 	}
 

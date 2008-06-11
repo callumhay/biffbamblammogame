@@ -9,6 +9,8 @@
 #include "../Utils/Includes.h"
 #include "../Utils/Vector.h"
 
+#include <sstream>
+
 const std::string InGameDisplayState::LIVES_LABEL_TEXT = "Lives: ";
 const unsigned int InGameDisplayState::HUD_X_INDENT = 10;	
 const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
@@ -31,6 +33,8 @@ InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(disp
 	this->livesLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small), LIVES_LABEL_TEXT);
 	this->livesLabel.SetColour(textColourHUD);
 	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
+
+	this->gameCamera.Move(Vector3D(0, 0, 43.0f));
 }
 
 InGameDisplayState::~InGameDisplayState() {
@@ -51,7 +55,10 @@ void InGameDisplayState::RenderFrame(double dT) {
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glTranslatef(0, 0, -43.0f); // Eye transform
+	//glTranslatef(0, 0, -43.0f); // Eye transform
+
+	this->gameCamera.ApplyCameraTransform();
+
 	// -------------------------------------------------------------------------------
 
 	// Draw the game scene
@@ -77,12 +84,12 @@ void InGameDisplayState::DrawGameScene() {
 	glPushMatrix();
 	
 	glTranslatef(0.0f, -levelDim[1]/2.0f, 0.0f);
-	this->display->GetAssets()->DrawBackground();
+	this->display->GetAssets()->DrawBackground(this->gameCamera);
 
 	glTranslatef(-levelDim[0]/2.0f, 0, 0.0f);	
 	this->DrawLevelPieces();
-	this->display->GetAssets()->DrawPaddle(this->display->GetModel()->GetPlayerPaddle());
-	this->display->GetAssets()->DrawGameBall(this->display->GetModel()->GetGameBall());
+	this->display->GetAssets()->DrawPaddle(this->display->GetModel()->GetPlayerPaddle(), this->gameCamera);
+	this->display->GetAssets()->DrawGameBall(this->display->GetModel()->GetGameBall(), this->gameCamera);
 
 	glPopMatrix();
 }
@@ -93,15 +100,7 @@ void InGameDisplayState::DrawGameScene() {
  */
 void InGameDisplayState::DrawLevelPieces() {
 	std::vector<std::vector<LevelPiece*>> &pieces = this->display->GetModel()->GetCurrentLevelPieces();
-
-	// Go through each piece and draw
-	for (size_t h = 0; h < pieces.size(); h++) {
-		for (size_t w = 0; w < pieces[h].size(); w++) {
-			LevelPiece* currPiece = pieces[h][w];
-			this->display->GetAssets()->DrawLevelPieceMesh(*currPiece);
-			currPiece->DebugDraw();
-		}
-	}
+	this->display->GetAssets()->DrawLevelPieces(pieces, this->gameCamera);
 }
 
 /**

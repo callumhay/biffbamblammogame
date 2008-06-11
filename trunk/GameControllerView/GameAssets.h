@@ -11,12 +11,13 @@
 
 class TextureFontSet;
 class Mesh;
+class Camera;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
 public:
 	enum FontSize  { Small = 16, Medium = 24, Big = 32, Huge = 60 };
-	enum FontStyle { GunBlam, ExplosionBoom, BloodCrunch, AllPurpose }; //Decoish, Cyberpunkish };
+	enum FontStyle { GunBlam, ExplosionBoom, BloodCrunch, ElectricZap, AllPurpose }; //Decoish, Cyberpunkish };
 
 private:
 	GameWorld::WorldStyle currLoadedStyle;
@@ -26,7 +27,8 @@ private:
 
 	Mesh* background;
 	Mesh* playerPaddle;		// Currently loaded player paddle mesh
-	Mesh* block;					// Currently loaded breakable block mesh
+	Mesh* solidBlock;
+	Mesh* breakableBlock;	// Currently loaded breakable block mesh
 	Mesh* ball;						// Currently loaded ball mesh
 
 	void DeleteStyleAssets();
@@ -42,10 +44,10 @@ public:
 
 	void LoadAssets(GameWorld::WorldStyle style);
 
-	void DrawLevelPieceMesh(const LevelPiece& p);
-	void DrawGameBall(const GameBall& b);
-	void DrawPaddle(const PlayerPaddle& p);
-	void DrawBackground();
+	void DrawLevelPieces(std::vector<std::vector<LevelPiece*>>& pieces, const Camera& camera);
+	void DrawGameBall(const GameBall& b, const Camera& camera);
+	void DrawPaddle(const PlayerPaddle& p, const Camera& camera);
+	void DrawBackground(const Camera& camera);
 
 	// Obtain a particular font
 	const TextureFontSet* GetFont(FontStyle style, FontSize height) const {
@@ -75,20 +77,23 @@ private:
 	static const std::string FONT_EXPLOSIONBOOM;
 	static const std::string FONT_BLOODCRUNCH;
 	static const std::string FONT_SMACKBOUNCE;
+	static const std::string FONT_ELECTRICZAP;
 	static const std::string FONT_ALLPURPOSE;
 	//static const std::string FONT_DECOISH;
 	//static const std::string FONT_CYBERPUNKISH;
 
+	// Regular mesh assets
+	static const std::string BALL_MESH;
+	static const std::string BLOCK_MESH;
+
 	// Deco assets
 	static const std::string DECO_PADDLE_MESH;
-	static const std::string DECO_BALL_MESH;
-	static const std::string DECO_BREAKABLE_BLOCK_MESH;
+	static const std::string DECO_SOLID_BLOCK_MESH;
 	static const std::string DECO_BACKGROUND_MESH;
 
 	// Cyberpunk assets
 	static const std::string CYBERPUNK_PADDLE_MESH;
-	static const std::string CYBERPUNK_BALL_MESH;
-	static const std::string CYBERPUNK_BREAKABLE_BLOCK_MESH;
+	static const std::string CYBERPUNK_SOLID_BLOCK_MESH;
 	static const std::string CYBERPUNK_BACKGROUND_MESH;
 
 };

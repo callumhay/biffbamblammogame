@@ -1,5 +1,5 @@
-#ifndef __CGFXCELSHADING_H__
-#define __CGFXCELSHADING_H__
+#ifndef __CGFXOUTLINEDPHONG_H__
+#define __CGFXOUTLINEDPHONG_H__
 
 #include "../Utils/Includes.h"
 #include "../Utils/Colour.h"
@@ -16,7 +16,7 @@ class Camera;
 /**
  * Represents CgFx CelShader material.
  */
-class CgFxCelShading : public CgFxEffect {
+class CgFxOutlinedPhong : public CgFxEffect {
 
 protected:
 	virtual void Load();
@@ -28,10 +28,9 @@ private:
 	static const std::string TEXTURED_TECHNIQUE_NAME;
 
 	// Cg Runtime Effect and its Techniques
-	static CGeffect cgCelShadingEffect;
-	static std::map<std::string, CGtechnique> cgCelShadingTechniques;
-
-	static bool isCelShadingEffectLoaded;
+	static CGeffect cgOutlinedPhongEffect;
+	static std::map<std::string, CGtechnique> cgOutlinedPhongTechniques;
+	static bool isOutlinedPhongEffectLoaded;
 
 	// Cg parameter pointers
 	// Transforms
@@ -42,23 +41,19 @@ private:
 
 	// Textures
 	static CGparameter texSamplerParam;
-	static CGparameter celSamplerParam;
 
 	// Material properties
 	static CGparameter diffuseColourParam;
-	static CGparameter shininessParam;
 	static CGparameter specularColourParam;
+	static CGparameter shininessParam;
 	
 	// Lights
 	static CGparameter diffuseLightPosParam;
 	static CGparameter diffuseLightColourParam;
-	
-	// Cel shading texture
-	static Texture1D* celDiffuseTexture;
 
 public:
-	CgFxCelShading(MaterialProperties* properties);
-	~CgFxCelShading();
+	CgFxOutlinedPhong(MaterialProperties* properties);
+	~CgFxOutlinedPhong();
 
 	virtual void SetupBeforePasses(const Camera& camera);
 

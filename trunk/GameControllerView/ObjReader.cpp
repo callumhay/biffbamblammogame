@@ -1,7 +1,7 @@
 #include "ObjReader.h"
 #include "MtlReader.h"
 #include "Mesh.h"
-#include "CgFxCelShading.h"
+#include "CgFxEffect.h"
 
 #include "../Utils/Debug.h"
 
@@ -58,7 +58,7 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 	}
 	
 	// Figure out what materials to make and make them
-	std::map<std::string, CgFxCelShading*> meshMaterials;
+	std::map<std::string, CgFxEffect*> meshMaterials;
 	assert(mtlFilepath != "");
 	meshMaterials = MtlReader::ReadMaterialFile(mtlFilepath);
 
@@ -150,7 +150,7 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 				// Inline: We are initializing the material for the first time
 
 				// Look up the material name from the list of materials
-				std::map<std::string, CgFxCelShading*>::iterator valIter = meshMaterials.find(matName);
+				std::map<std::string, CgFxEffect*>::iterator valIter = meshMaterials.find(matName);
 				if (valIter == meshMaterials.end()) {
 					// Not good: the material was not found...
 					debug_output("ERROR: Material name in obj file with no matching material in mtl file: " << filepath); 

@@ -2,56 +2,8 @@
 
 #include "../Utils/Algebra.h"
 
-Texture::TextureFilterType Texture::texFilter = Trilinear;
-
-Texture::Texture(int textureType) : textureType(textureType), texID(0) {
-}
-
-Texture::~Texture() {
-	glDeleteTextures(1, &this->texID);
-}
-
-void Texture::SetMipmapFilteringParams(int glTexType) {
-	switch(Texture::texFilter) {
-		case Nearest:
-			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-			break;
-		case Bilinear:
-			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-			break;
-		case Trilinear:
-			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			break;
-		default:
-			assert(false);
-	}
-}
-
-void Texture::SetNonMipmapFilteringParams(int glTexType) {
-	switch(Texture::texFilter) {
-		case Nearest:
-			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			break;
-		case Bilinear:
-			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			break;
-		case Trilinear:
-			// This is just bilinear - since you need mipmaps for trilinear
-			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			break;
-		default:
-			assert(false);
-	}
-}
-
 // Default constructor for 2D textures
-Texture2D::Texture2D() : Texture(GL_TEXTURE_2D) {
+Texture2D::Texture2D(TextureFilterType texFilter) : Texture(GL_TEXTURE_2D), texFilter(texFilter) {
 }
 
 Texture2D::~Texture2D() {
@@ -60,9 +12,9 @@ Texture2D::~Texture2D() {
 /**
  * Static creator for making a 2D texture from a given file path to an image file.
  */
-Texture2D* Texture2D::CreateTexture2DFromImgFile(const std::string& filepath) {
-	Texture2D* newTex = new Texture2D();
-	if (newTex->LoadTexture2DFromImg(filepath)) {
+Texture2D* Texture2D::CreateTexture2DFromImgFile(const std::string& filepath, TextureFilterType texFilter) {
+	Texture2D* newTex = new Texture2D(texFilter);
+	if (newTex->LoadTextureFromImg(filepath, texFilter, true)) {
 		return newTex;
 	}
 	else {
@@ -74,10 +26,10 @@ Texture2D* Texture2D::CreateTexture2DFromImgFile(const std::string& filepath) {
 /**
  * Static creator, for making a 2D texture given a true font bitmap.
  */
-Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp) {
+Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilterType texFilter) {
 
 	// First create the texture
-	Texture2D* newTex = new Texture2D();
+	Texture2D* newTex = new Texture2D(texFilter);
 	glGenTextures(1, &newTex->texID);
 	if (newTex->texID == 0) {
 		delete newTex;
@@ -104,7 +56,7 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp) {
 	
 	// Bind the texture and create it in all its glory
 	glBindTexture(GL_TEXTURE_2D, newTex->texID);
-	Texture::SetNonMipmapFilteringParams(newTex->textureType);
+	Texture::SetNonMipmapFilteringParams(texFilter, newTex->textureType);
 
 	// Fonts are 2 channel data, hence the use of GL_LUMINANCE_ALPHA
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
@@ -112,33 +64,4 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp) {
 
 	delete[] expandedData;
 	return newTex;
-}
-
-/**
- * Private helper for loading a 2D texture from an image file, given the
- * file path to that image on disk.
- */
-bool Texture2D::LoadTexture2DFromImg(const std::string& filepath) {
-
-	glEnable(this->textureType);
-
-	// Read in the texture, with mipmapping
-	int imageID =	ilGenImage();
-	ilBindImage(imageID);
-	ILboolean resultOfImageLoad = ilLoadImage(filepath.c_str());
-	if (!resultOfImageLoad) {
-		debug_output("Failed to load texture image from " << filepath);
-		return false;
-	}
-	this->texID = ilutGLBindMipmaps();
-
-	// Set 2D texture filter parameters
-	Texture::SetMipmapFilteringParams(this->textureType);
-
-	// Set 2D texture wrap/clamp params
-	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	ilDeleteImage(imageID);
-	return this->texID != 0;
 }

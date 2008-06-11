@@ -52,28 +52,18 @@ Mesh::~Mesh(){
 	this->matGrps.clear();
 }
 
-/*
- * Calculates the max size of this mesh along the x, y and z axis.
- * Precondition: This mesh has been initialized with appropriate indices etc.
- * Return: A vector with the max sizes along each of the respective axes.
+/**
+ * Set the overall colour of this mesh.
  */
-/*
-Vector3D Mesh::CalculateDimensions() {
-	if (this->vertices.size() < 2) {
-		return Vector3D(0.0f,0.0f,0.0f);
+void Mesh::SetColour(const Colour& c) {
+	
+	// Go through each of the material groups in this mesh and
+	// change their diffuse colour.
+	std::map<std::string, MaterialGroup*>::iterator matGrpIter = this->matGrps.begin();
+	for (; matGrpIter != matGrps.end(); matGrpIter++) {
+		CgFxEffect* currMaterial = matGrpIter->second->GetMaterial();
+		MaterialProperties* currMatProps = currMaterial->GetProperties();
+		currMatProps->diffuse = c;
 	}
 
-	Vector3D minVals(FLT_MAX, FLT_MAX, FLT_MAX);
-	Vector3D maxVals(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	for (size_t i = 0; i < this->vertices.size(); i++) {
-		Point3D currVertex = this->vertices[i];	
-
-		for (int j = 0; j < 3; j++) {
-			minVals[j] = min(minVals[j], currVertex[j]);
-			maxVals[j] = max(maxVals[j], currVertex[j]);
-		}
-	}
-
-	return maxVals - minVals;
 }
-*/

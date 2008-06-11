@@ -127,7 +127,7 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 		FT_Bitmap& bitmap = bitmap_glyph->bitmap;
 		
 		// Create a texture for the current character
-		Texture2D* newCharTexture = Texture2D::CreateTexture2DFromFTBMP(bitmap);
+		Texture2D* newCharTexture = Texture2D::CreateTexture2DFromFTBMP(bitmap, Texture::Trilinear);
 		if (newCharTexture == NULL) {
 			debug_output("Could not create texture from bitmap for character: " << i << " in font set file: " << ttfFilepath);
 			delete newFontSet;

@@ -167,6 +167,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CgFxOutlinedPhong.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CgShaderManager.cpp"
 				>
 			</File>
@@ -227,6 +231,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Texture.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Texture1D.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Texture2D.cpp"
 				>
 			</File>
@@ -250,6 +262,10 @@
 			</File>
 			<File
 				RelativePath=".\CgFxEffect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CgFxOutlinedPhong.h"
 				>
 			</File>
 			<File
@@ -314,6 +330,14 @@
 			</File>
 			<File
 				RelativePath=".\TextLabel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Texture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Texture1D.h"
 				>
 			</File>
 			<File

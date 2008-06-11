@@ -1,5 +1,8 @@
 #include "MtlReader.h"
 #include "Texture2D.h"
+#include "CgFxEffect.h"
+#include "CgFxCelShading.h"
+#include "CgFxOutlinedPhong.h"
 
 #include "../Utils/Includes.h"
 
@@ -13,6 +16,11 @@ const std::string MtlReader::MTL_SPECULAR			= "Ks";
 const std::string MtlReader::MTL_SHININESS		= "Ns";
 const std::string MtlReader::MTL_DIFF_TEXTURE	= "map_Kd";
 
+// Custom tags
+const std::string MtlReader::CUSTOM_MTL_MATTYPE			= "type";
+const std::string MaterialProperties::MATERIAL_CELBASIC_TYPE	= "outlinedcel";
+const std::string MaterialProperties::MATERIAL_CELPHONG_TYPE	= "outlinedphong";
+
 MtlReader::MtlReader() {
 }
 
@@ -25,8 +33,11 @@ MtlReader::~MtlReader() {
  * Postcondition: Returns a map of CgFxCelShading with the keys equal
  * to their respective names if all goes well, NULL otherwise.
  */
-std::map<std::string, CgFxCelShading*> MtlReader::ReadMaterialFile(const std::string &filepath) {
-	std::map<std::string, CgFxCelShading*> materials;
+std::map<std::string, CgFxEffect*> MtlReader::ReadMaterialFile(const std::string &filepath) {
+	
+	
+	std::map<std::string, CgFxEffect*> materials;
+	std::map<std::string, MaterialProperties*> matProperties;
 	
 	// Start reading in the file
 	std::ifstream inFile;
@@ -42,16 +53,17 @@ std::map<std::string, CgFxCelShading*> MtlReader::ReadMaterialFile(const std::st
 	std::string matName = "";
 
 	while (inFile >> currStr) {
+
 		if (currStr == MTL_NEWMATERIAL) {
 			// Read the material name
 			if (!(inFile >> matName)) {
 				debug_output("ERROR: Material name not provided with proper syntax in mtl file: " << filepath); 
 				return materials;
 			}
-			materials[matName] = new CgFxCelShading();
+			matProperties[matName] = new MaterialProperties();
 		}
 		else if (currStr == MTL_AMBIENT) {
-			// Ignore this for now...
+			// Ignore this
 		}
 		else if (currStr == MTL_DIFFUSE) {
 			Colour diff;
@@ -59,7 +71,7 @@ std::map<std::string, CgFxCelShading*> MtlReader::ReadMaterialFile(const std::st
 				debug_output("ERROR: could not read diffuse colour properly from mtl file: " << filepath); 
 				return materials;				
 			}
-			materials[matName]->SetDiffuse(diff);
+			matProperties[matName]->diffuse = diff;
 		}
 		else if (currStr == MTL_SPECULAR) {
 			Colour spec;
@@ -67,7 +79,7 @@ std::map<std::string, CgFxCelShading*> MtlReader::ReadMaterialFile(const std::st
 				debug_output("ERROR: could not read specular colour properly from mtl file: " << filepath); 
 				return materials;				
 			}
-			materials[matName]->SetSpecular(spec);		
+			matProperties[matName]->specular = spec;		
 		}
 		else if (currStr == MTL_SHININESS) {
 			float shininess;
@@ -75,14 +87,14 @@ std::map<std::string, CgFxCelShading*> MtlReader::ReadMaterialFile(const std::st
 				debug_output("ERROR: could not read shininess properly from mtl file: " << filepath); 
 				return materials;		
 			}
-			materials[matName]->SetShininess(shininess);
+			matProperties[matName]->shininess = shininess;
 		}
 		else if (currStr == MTL_DIFF_TEXTURE) {
 			// Read in the path to the texture file
 			std::string texturePath;
 			if (!(inFile >> texturePath)) {
 				debug_output("ERROR: could not read texture path properly from mtl file: " << filepath); 
-				return materials;						
+				return materials;
 			}
 
 			// Concatenate the directory to the texture
@@ -93,8 +105,38 @@ std::map<std::string, CgFxCelShading*> MtlReader::ReadMaterialFile(const std::st
 			texturePath.insert(0, filepath.substr(0, pos+1));
 
 			// Create the texture and add it to the material on success
-			materials[matName]->SetTexture(texturePath);
+			matProperties[matName]->diffuseTexture = Texture2D::CreateTexture2DFromImgFile(texturePath, Texture::Trilinear);
 		}
+		else if (currStr == CUSTOM_MTL_MATTYPE) {
+			std::string matTypeName;
+			if (!(inFile >> matTypeName)) {
+				debug_output("ERROR: could not read material type properly from mtl file: " << filepath); 
+				return materials;
+			}
+			matProperties[matName]->materialType = matTypeName;
+		}
+	}
+
+	// Create materials with the corresponding properties
+	std::map<std::string, MaterialProperties*>::iterator matPropIter;
+	for (matPropIter = matProperties.begin(); matPropIter != matProperties.end(); matPropIter++) {
+		CgFxEffect* currMaterial = NULL;
+	
+		// Figure out what material we should be using for each material group
+		if (matPropIter->second->materialType == MaterialProperties::MATERIAL_CELBASIC_TYPE) {
+			currMaterial = new CgFxCelShading(matPropIter->second);
+		}
+		else if (matPropIter->second->materialType == MaterialProperties::MATERIAL_CELPHONG_TYPE) {
+			currMaterial = new CgFxOutlinedPhong(matPropIter->second);
+		}
+		else {
+			// Default to using the cel shader for now
+			currMaterial = new CgFxCelShading(matPropIter->second);
+		}
+
+		// Inline: The material is set
+		assert(currMaterial != NULL);
+		materials[matPropIter->first] = currMaterial;
 	}
 
 	return materials;
