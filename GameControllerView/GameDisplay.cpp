@@ -31,8 +31,6 @@ model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
 	assert(model != NULL);
 
 	this->SetupActionListeners();
-	this->SetupRenderOptions();
-
 	this->SetCurrentState(new MainMenuDisplayState(this));
 
 	/*
@@ -64,28 +62,39 @@ GameDisplay::~GameDisplay() {
 
 // RENDER FUNCTIONS ****************************************************
 
-void GameDisplay::SetupRenderOptions() {
+void GameDisplay::SetInitialRenderOptions() {
 	glEnable(GL_NORMALIZE);
 
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-	glShadeModel(GL_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glEnable(GL_LINE_SMOOTH);
+
+	glEnable(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glPolygonMode(GL_FRONT, GL_FILL);
+}
+
+// Set the opengl state for drawing celshading outlines
+void GameDisplay::SetOutlineRenderAttribs(float outlineWidth) {
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_1D);
+	glDisable(GL_LIGHTING);
+	
 	glEnable(GL_BLEND);
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glBlendFunc(GL_SRC_ALPHA ,GL_ONE_MINUS_SRC_ALPHA);
+	
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 
-	// Lighting
-	glEnable(GL_LIGHTING);
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-	glEnable(GL_LIGHT0);
-
-	// Textures
-	glEnable(GL_TEXTURE_2D);
-
-	// DevIL initialization
-	ilInit();
-	iluInit();
-	ilutRenderer(ILUT_OPENGL);
-	ilutEnable(ILUT_OPENGL_CONV);
+	glPolygonMode (GL_BACK, GL_LINE);
+	glColor3f(0,0,0);
+	glLineWidth(outlineWidth);
+	
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 }
 
 void GameDisplay::ChangeDisplaySize(int w, int h) {
@@ -101,6 +110,8 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 }
 
 void GameDisplay::Render() {
+	SetInitialRenderOptions();
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
 
 	// Render the current state

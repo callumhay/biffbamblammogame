@@ -1,6 +1,7 @@
 #include "CgShaderManager.h"
 
 #include "CgFxCelShading.h"
+#include "CgFxOutlinedPhong.h"
 
 CgShaderManager* CgShaderManager::instance = NULL;
 
@@ -45,14 +46,8 @@ CgShaderManager* CgShaderManager::Instance() {
 void CgShaderManager::DeleteInstance() {
 	if (instance != NULL) {
 		delete instance;
+		instance = NULL;
 	}
-}
-
-/**
- * Initialize all CgFx, this MUST be called once OGL is initialized.
- */
-void CgShaderManager::InitCgFx() {
-	CgFxCelShading::Load();
 }
 
 /**

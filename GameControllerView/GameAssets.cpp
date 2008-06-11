@@ -3,6 +3,7 @@
 #include "ObjReader.h"
 #include "TextureFontSet.h"
 #include "CgShaderManager.h"
+#include "GameDisplay.h"
 
 #include "../Utils/Includes.h"
 
@@ -16,34 +17,50 @@ const std::string GameAssets::SHADER_DIR = "shaders";
 const std::string GameAssets::CELSHADER_FILEPATH	= GameAssets::RESOURCE_DIR + "/" + SHADER_DIR + "/CelShading.cgfx";
 
 // Regular font assets
-const std::string GameAssets::FONT_GUNBLAM					= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/gunblam.ttf";
-const std::string GameAssets::FONT_EXPLOSIONBOOM		= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/explosionboom.ttf";
-const std::string GameAssets::FONT_BLOODCRUNCH			= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/bloodcrunch.ttf";
-const std::string GameAssets::FONT_ALLPURPOSE				= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/allpurpose.ttf";
+const std::string GameAssets::FONT_GUNBLAM				= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/gunblam.ttf";
+const std::string GameAssets::FONT_EXPLOSIONBOOM	= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/explosionboom.ttf";
+const std::string GameAssets::FONT_BLOODCRUNCH		= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/bloodcrunch.ttf";
+const std::string GameAssets::FONT_ALLPURPOSE			= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/allpurpose.ttf";
+const std::string GameAssets::FONT_ELECTRICZAP		= GameAssets::RESOURCE_DIR + "/" + FONT_DIR + "/electriczap.ttf";
 //const std::string FONT_DECOISH;
 //const std::string FONT_CYBERPUNKISH;
 
+// Regular mesh asssets
+const std::string GameAssets::BALL_MESH		= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/ball.obj";
+const std::string GameAssets::BLOCK_MESH	= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/block.obj";
+
 // Deco assets
 const std::string GameAssets::DECO_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_paddle.obj";
-const std::string GameAssets::DECO_BALL_MESH							= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/ball.obj";
-const std::string GameAssets::DECO_BREAKABLE_BLOCK_MESH		= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_block.obj";
+const std::string GameAssets::DECO_SOLID_BLOCK_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_solid_block.obj";
 const std::string GameAssets::DECO_BACKGROUND_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_background.obj";
 
 // Cyberpunk assets
 const std::string GameAssets::CYBERPUNK_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_paddle.obj";
-const std::string GameAssets::CYBERPUNK_BALL_MESH							= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/ball.obj";
-const std::string GameAssets::CYBERPUNK_BREAKABLE_BLOCK_MESH	= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_block.obj";
+const std::string GameAssets::CYBERPUNK_SOLID_BLOCK_MESH			= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_block.obj";
 const std::string GameAssets::CYBERPUNK_BACKGROUND_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_background.obj";
 // *****************************************************
 
-GameAssets::GameAssets(): ball(NULL), playerPaddle(NULL), block(NULL), background(NULL), currLoadedStyle(GameWorld::None) {
+GameAssets::GameAssets(): ball(NULL), playerPaddle(NULL), breakableBlock(NULL), 
+solidBlock(NULL), background(NULL), currLoadedStyle(GameWorld::None) {
+	// Initialize DevIL
+	ilInit();
+	iluInit();
+	ilutRenderer(ILUT_OPENGL);
+	ilutEnable(ILUT_OPENGL_CONV);
+	
 	// Load Fonts
 	this->LoadRegularFontAssets();
-	// Load Shaders
-	CgShaderManager::Instance()->InitCgFx();
 }
 
 GameAssets::~GameAssets() {
+	// Delete regular mesh assets
+	if (this->ball != NULL) {
+		delete this->ball;
+	}
+	if (this->breakableBlock != NULL) {
+		delete this->breakableBlock;
+	}
+
 	// Delete the currently loaded style assets if there are any
 	this->DeleteStyleAssets();
 	
@@ -65,126 +82,159 @@ GameAssets::~GameAssets() {
  * Precondition: true.
  */
 void GameAssets::DeleteStyleAssets() {
-	if (this->ball != NULL) {
-		delete this->ball;
-	}
 	if (this->playerPaddle != NULL) {
 		delete this->playerPaddle;
 	}
-	if (this->block != NULL) {
-		delete this->block;
+
+	if (this->solidBlock != NULL) {
+		delete this->solidBlock;
 	}
 }
 
 // Draw a piece of the level (block that you destory or that makes up part of the level
 // outline), this is done by positioning it, drawing the correct material and then
 // drawing the mesh itself.
-void GameAssets::DrawLevelPieceMesh(const LevelPiece &p) {
-	Point2D loc = p.GetCenter();
-	
-	// Draw the piece with its appropriate transform
-	glPushMatrix();
-	glTranslatef(loc[0], loc[1], 0);
-	
-	// General material characteristics
-	glMaterialf(GL_FRONT, GL_SHININESS, 50.0f);
-	GLfloat blockSpecular[]   = {1.0f, 1.0f, 1.0f, 1.0f};
-	glMaterialfv(GL_FRONT, GL_SPECULAR, blockSpecular);
+void GameAssets::DrawLevelPieces(std::vector<std::vector<LevelPiece*>>& pieces, const Camera& camera) {
+	// Go through each piece and draw the basic material
+	for (size_t h = 0; h < pieces.size(); h++) {
+		for (size_t w = 0; w < pieces[h].size(); w++) {
 
-	switch(p.GetType()) {
-		case LevelPiece::RedBreakable:
-			{
-				GLfloat redAmbAndDiff[] = {1.0f, 0.0f, 0.0f, 1.0f};
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, redAmbAndDiff);
-				this->block->Draw();
+			LevelPiece* p = pieces[h][w];
+			Point2D loc = p->GetCenter();
+			
+			// Draw the piece with its appropriate transform
+			glPushMatrix();
+			glTranslatef(loc[0], loc[1], 0);
+
+			switch(p->GetType()) {
+				case LevelPiece::RedBreakable:
+					{
+						this->breakableBlock->SetColour(Colour(1, 0, 0));
+						this->breakableBlock->Draw(camera);
+					}
+					break;			
+				case LevelPiece::OrangeBreakable: 
+					{
+						this->breakableBlock->SetColour(Colour(1, 0.5f, 0));
+						this->breakableBlock->Draw(camera);
+					}
+					break;
+				case LevelPiece::YellowBreakable: 
+					{
+						this->breakableBlock->SetColour(Colour(1, 1, 0));
+						this->breakableBlock->Draw(camera);
+					}
+					break;
+				case LevelPiece::GreenBreakable:
+					{
+						this->breakableBlock->SetColour(Colour(0, 1, 0));
+						this->breakableBlock->Draw(camera);
+					}
+					break;			
+				case LevelPiece::Solid:
+						this->solidBlock->Draw(camera);
+					break;
+				case LevelPiece::Bomb:
+					// Nothing to draw here yet..
+					break;
+				default:
+					break;
 			}
-			break;			
-		case LevelPiece::OrangeBreakable: 
-			{
-				GLfloat orangeAmbAndDiff[] = {1.0f, 0.5f, 0.0f, 1.0f};
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, orangeAmbAndDiff);
-				this->block->Draw();
-			}
-			break;
-		case LevelPiece::YellowBreakable: 
-			{
-				GLfloat yellowAmbAndDiff[] = {1.0f, 1.0f, 0.0f, 1.0f};
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, yellowAmbAndDiff);
-				this->block->Draw();
-			}
-			break;
-		case LevelPiece::GreenBreakable:
-			{
-				GLfloat greenAmbAndDiff[] = {0.0f, 1.0f, 0.0f, 1.0f};
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, greenAmbAndDiff);
-				this->block->Draw();
-			}
-			break;			
-		case LevelPiece::Solid:
-			{
-				GLfloat greyAmbAndDiff[] = {0.8f, 0.8f, 0.8f, 1.0f};
-				glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, greyAmbAndDiff);
-				this->block->Draw();
-			}
-			break;
-		case LevelPiece::Bomb:
-			// Nothing to draw here yet..
-			break;
-		default:
-			break;
+
+			glPopMatrix();
+		}
 	}
 
-	glPopMatrix();
+	// Go through each piece and draw the outlines
+	glPushAttrib(GL_ENABLE_BIT || GL_POLYGON_BIT || GL_LINE_BIT || GL_TEXTURE_BIT);
+	GameDisplay::SetOutlineRenderAttribs();
+	
+	for (size_t h = 0; h < pieces.size(); h++) {
+		for (size_t w = 0; w < pieces[h].size(); w++) {
+
+			LevelPiece* p = pieces[h][w];
+			Point2D loc = p->GetCenter();
+			
+			// Draw the piece with its appropriate transform
+			glPushMatrix();
+			glTranslatef(loc[0], loc[1], 0);
+
+			switch(p->GetType()) {
+				case LevelPiece::RedBreakable:	
+				case LevelPiece::OrangeBreakable: 
+				case LevelPiece::YellowBreakable: 
+				case LevelPiece::GreenBreakable:
+					this->breakableBlock->FastDraw();
+					break;
+				case LevelPiece::Solid:
+					this->solidBlock->FastDraw();
+					break;
+				case LevelPiece::Bomb:
+					// Nothing to draw here yet..
+					break;
+				default:
+					break;
+			}
+			glPopMatrix();
+		}
+	}
+
+	glPopAttrib();
 }
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
 // draw the materials and draw the mesh.
-void GameAssets::DrawGameBall(const GameBall& b) {
+void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera) {
 	
-	// Ball material characteristics
-	GLfloat ballSpecular[]   = {1.0f, 1.0f, 1.0f, 1.0f};
-	GLfloat ballAmbAndDiff[] = {0.1f, 0.0f, 0.5f, 1.0f};
-	glMaterialf(GL_FRONT, GL_SHININESS, 100.0f);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, ballSpecular);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, ballAmbAndDiff);
-
 	Point2D loc = b.GetBounds().Center();
 	glPushMatrix();
 	glTranslatef(loc[0], loc[1], 0);
-	this->ball->Draw();
+	
+	// Draw the ball
+	this->ball->Draw(camera);
+	
+	// ... and its outlines
+	glPushAttrib(GL_ENABLE_BIT || GL_POLYGON_BIT || GL_LINE_BIT || GL_TEXTURE_BIT);
+	GameDisplay::SetOutlineRenderAttribs();
+	this->ball->FastDraw();
+	glPopAttrib();
+
 	glPopMatrix();
 }
 
 /**
  * Draw the player paddle mesh with materials and in correct position.
  */
-void GameAssets::DrawPaddle(const PlayerPaddle& p) {
+void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) {
 	Point2D paddleCenter = p.GetCenterPosition();	
-
-	GLfloat paddleSpecular[]   = {1.0f, 1.0f, 1.0f, 1.0f};
-	GLfloat paddleAmbAndDiff[] = {0.65f, 0.7f, 1.0f, 1.0f};
-	glMaterialf(GL_FRONT, GL_SHININESS, 80.0f);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, paddleSpecular);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, paddleAmbAndDiff);
 
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1], 0);
-	this->playerPaddle->Draw();
-	p.DebugDraw();
+	
+	// Draw the paddle
+	this->playerPaddle->Draw(camera);
+	
+	// ... and its outlines
+	glPushAttrib(GL_ENABLE_BIT || GL_POLYGON_BIT || GL_LINE_BIT || GL_TEXTURE_BIT);
+	GameDisplay::SetOutlineRenderAttribs();
+	this->playerPaddle->FastDraw();
+	glPopAttrib();
+
 	glPopMatrix();
 }
 
 /**
  * Draw the background / environment of the world type.
  */
-void GameAssets::DrawBackground() {
-	GLfloat paddleSpecular[]   = {1.0f, 1.0f, 1.0f, 1.0f};
-	GLfloat paddleAmbAndDiff[] = {0.65f, 0.7f, 1.0f, 1.0f};
-	glMaterialf(GL_FRONT, GL_SHININESS, 80.0f);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, paddleSpecular);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, paddleAmbAndDiff);
+void GameAssets::DrawBackground(const Camera& camera) {
+	// Draw the background
+	this->background->Draw(camera);
 
-	this->background->Draw();
+	// ... and its outlines
+	glPushAttrib(GL_ENABLE_BIT || GL_POLYGON_BIT || GL_LINE_BIT || GL_TEXTURE_BIT);
+	GameDisplay::SetOutlineRenderAttribs(2.5f);
+	this->background->FastDraw();
+	glPopAttrib();
 }
 
 /*
@@ -197,6 +247,14 @@ void GameAssets::LoadAssets(GameWorld::WorldStyle style) {
 	
 	// Delete all previously loaded assets
 	this->DeleteStyleAssets();
+
+	// Load regular mesh assets
+	if (this->ball == NULL) {
+		this->ball = ObjReader::ReadMesh(BALL_MESH);
+	}
+	if (this->breakableBlock == NULL) {
+		this->breakableBlock = ObjReader::ReadMesh(BLOCK_MESH);
+	}
 
 	// Load in the new asset set
 	switch (style) {
@@ -259,6 +317,19 @@ void GameAssets::LoadRegularFontAssets() {
 	assert(temp != NULL);
 	this->fonts[BloodCrunch][Huge]	= temp;
 
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ELECTRICZAP, Small);
+	assert(temp != NULL);
+	this->fonts[ElectricZap][Small]	= temp; 
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ELECTRICZAP, Medium);
+	assert(temp != NULL);
+	this->fonts[ElectricZap][Medium]	= temp; 
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ELECTRICZAP, Big);
+	assert(temp != NULL);
+	this->fonts[ElectricZap][Big]	= temp;
+	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ELECTRICZAP, Huge);
+	assert(temp != NULL);
+	this->fonts[ElectricZap][Huge]	= temp;
+
 	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ALLPURPOSE, Small);
 	assert(temp != NULL);
 	this->fonts[AllPurpose][Small]	= temp; 
@@ -280,10 +351,9 @@ void GameAssets::LoadDecoStyleAssets() {
 	debug_output("Loading deco style assets");
 
 	// Deco mesh assets
-	this->ball					= ObjReader::ReadMesh(DECO_BALL_MESH);
-	this->playerPaddle	= ObjReader::ReadMesh(DECO_PADDLE_MESH);
-	this->block					= ObjReader::ReadMesh(DECO_BREAKABLE_BLOCK_MESH);
-	this->background		= ObjReader::ReadMesh(DECO_BACKGROUND_MESH);
+	this->playerPaddle		= ObjReader::ReadMesh(DECO_PADDLE_MESH);
+	this->solidBlock			= ObjReader::ReadMesh(DECO_SOLID_BLOCK_MESH);
+	this->background			= ObjReader::ReadMesh(DECO_BACKGROUND_MESH);
 }
 
 /**
@@ -293,8 +363,7 @@ void GameAssets::LoadCyberpunkStyleAssets() {
 	debug_output("Loading cyberpunk style assets");
 	
 	// Cyberpunk mesh assets
-	this->ball					= ObjReader::ReadMesh(CYBERPUNK_BALL_MESH);
-	this->playerPaddle	= ObjReader::ReadMesh(CYBERPUNK_PADDLE_MESH);
-	this->block					= ObjReader::ReadMesh(CYBERPUNK_BREAKABLE_BLOCK_MESH);
-	this->background		= ObjReader::ReadMesh(CYBERPUNK_BACKGROUND_MESH);
+	this->playerPaddle		= ObjReader::ReadMesh(CYBERPUNK_PADDLE_MESH);
+	this->solidBlock			=	ObjReader::ReadMesh(CYBERPUNK_SOLID_BLOCK_MESH);
+	this->background			= ObjReader::ReadMesh(CYBERPUNK_BACKGROUND_MESH);
 }

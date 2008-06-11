@@ -2,7 +2,6 @@
 #define __GAMEDISPLAY_H__
 
 #include "../Utils/Debug.h"
-
 #include "DisplayState.h"
 
 class GameModel;
@@ -17,15 +16,14 @@ class GameEventsListener;
 class GameDisplay {
 
 private:
+
 	DisplayState* currState;
 	GameModel* model;
 	GameAssets* assets;
 	GameEventsListener* gameListener;
 
+	// Width and height of the viewport/display
 	int width, height;
-
-	// Render setup
-	void SetupRenderOptions();
 	
 	// Functions for Action Listeners
 	void SetupActionListeners();
@@ -55,6 +53,11 @@ public:
 	void ChangeDisplaySize(int w, int h);
 	void Render();
 
+	// Functions for setting up different types of render options
+	static void SetInitialRenderOptions();
+	static void SetOutlineRenderAttribs(float outlineWidth = 1.0f);
+
+	// Getters and Setters
 	GameAssets* GetAssets() {
 		return this->assets;
 	}

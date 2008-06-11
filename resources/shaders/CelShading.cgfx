@@ -1,0 +1,236 @@
+/**
+ * OutlinedPhong.cgfx
+ * Author: Callum Hay
+ * The following is a cel shader, it provides basic toon shading.
+ */
+
+float Script : STANDARDSGLOBAL <
+    string UIWidget = "none";
+    string ScriptClass = "object";
+    string ScriptOrder = "standard";
+    string ScriptOutput = "color";
+    string Script = "Technique=Basic;";
+> = 0.8;
+
+//// UN-TWEAKABLES - AUTOMATICALLY-TRACKED TRANSFORMS ////////////////
+
+float4x4 WorldITXf : WorldInverseTranspose < string UIWidget="None"; >;
+float4x4 WvpXf   : WorldViewProjection < string UIWidget="None"; >;
+float4x4 WorldXf : World < string UIWidget="None"; >;
+float4x4 ViewIXf : ViewInverse < string UIWidget="None"; >;
+
+//// TWEAKABLE PARAMETERS ////////////////////
+
+// Scene light - only one light affects this shader,
+// we don't care about its attenuation
+float3 SceneLightPos : Position <
+    string Object = "PointLight0";
+    string UIName =  "Diffuse Light Position";
+    string Space = "World";
+> = {-0.5f,2.0f,1.25f};
+
+float3 SceneLightColour : Specular <
+    string UIName =  "Diffuse Light Colour";
+    string Object = "Pointlight0";
+    string UIWidget = "Color";
+> = {1.0f,1.0f,1.0f};
+
+/*
+// Point Light 1 (Ball Light)
+float3 BallLightPos : Position <
+    string Object = "PointLight1";
+    string UIName =  "Ball Light Position";
+    string Space = "World";
+> = {-0.5f,2.0f,1.25f};
+
+float3 BallLightColour : Specular <
+    string UIName =  "Ball Light Colour";
+    string Object = "Pointlight1";
+    string UIWidget = "Color";
+> = {1.0f,1.0f,1.0f};
+
+float3 BallLightAtten <
+    string UIName = "Ball Light Attenuation";
+> = {1.0f, 0.1f, 0.0f};
+*/
+
+float3 DiffuseColour <
+    string UIName =  "Diffuse Colour";
+    string UIWidget = "Color";
+> = {0.40f,0.50f,1.00f};
+
+float3 SpecularColour <
+    string UIName =  "Specular Colour";
+    string UIWidget = "Color";
+> = {0.30f,0.30f,0.30f};
+
+float Shininess <
+    string UIWidget = "slider";
+    float UIMin = 1.0;
+    float UIMax = 128.0;
+    float UIStep = 1.0;
+    string UIName =  "Shininess";
+> = 128.0;
+
+//////// COLOR & TEXTURE /////////////////////
+
+texture ColorTexture  <
+    string ResourceName = "default_color.dds";
+    string UIName =  "Diffuse Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D ColorSampler = sampler_state {
+    Texture = <ColorTexture>;
+    //MinFilter = LinearMipMapLinear;
+    //MagFilter = Linear;
+    //WrapS = Repeat;
+    //WrapT = Repeat;
+};  
+
+texture CelShadingProgression  <
+    string ResourceName = "celshading_texture.png";
+    string UIName =  "Cel Texture";
+    string ResourceType = "1D";
+>;
+
+sampler1D CelSampler = sampler_state {
+    Texture = <CelShadingProgression>;
+    MinFilter = Nearest;
+    MagFilter = Nearest;
+    WrapS = Repeat;
+    WrapT = Repeat;
+};  
+
+//////// CONNECTOR DATA STRUCTURES ///////////
+
+/* data from application vertex buffer */
+struct appdata {
+    float3 Position	: POSITION;
+    float4 UV		: TEXCOORD0;
+    float4 Normal	: NORMAL;
+};
+
+/* data passed from vertex shader to pixel shader */
+struct vertexOutput {
+    float4 HPosition	     : POSITION;
+    float2 UV		           : TEXCOORD0;
+    float3 DiffuseLightVec : TEXCOORD1;
+    float3 WorldNormal     : TEXCOORD3;
+    float3 WorldView	     : TEXCOORD4;
+};
+ 
+struct vertexOutput_outlines {
+    float4 HPosition	: POSITION;
+};
+
+///////// VERTEX SHADING /////////////////////
+
+/*********** Generic Vertex Shader ******/
+
+vertexOutput celshading_VS(appdata IN) {
+    vertexOutput OUT = (vertexOutput)0;
+    OUT.WorldNormal = mul(WorldITXf,IN.Normal).xyz;
+
+    float4 Po = float4(IN.Position.xyz,1);
+    float3 Pw = mul(WorldXf,Po).xyz;
+    OUT.DiffuseLightVec = (SceneLightPos - Pw);
+    //OUT.BallLightVec    = (BallLightPos - Pw);
+    OUT.UV = IN.UV.xy;
+    
+    float3 VertToViewVec = float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w) - Pw;
+    OUT.WorldView = normalize(VertToViewVec);
+    OUT.HPosition = mul(WvpXf,Po);
+    return OUT;
+}
+
+///////// PIXEL SHADING //////////////////////
+
+float getAttenuation(float dist, float3 atten) {
+    return 1.0f / (atten.x + atten.y*dist + atten.z*dist*dist);
+}
+
+// Utility function for cel shading
+void cel_shading(float3 Nn, float3 LnDiffuse, float3 Vn,
+		             out float3 DiffuseContrib,
+		             out float3 SpecularContrib)
+{
+
+    // Calculate the scene light contribution
+    float3 HnDiffuse = normalize(Vn + LnDiffuse);
+    float4 LitDiff = lit(dot(LnDiffuse,Nn),dot(HnDiffuse,Nn), Shininess);
+    float3 SceneLightDiffContrib = tex1D(CelSampler, LitDiff.y).rgb * SceneLightColour;
+    float3 SceneLightSpecContrib = LitDiff.y * LitDiff.z * SceneLightColour;
+    
+    // Calculate the OTHER light contribution
+    // TODO...
+    
+    // Calculate total diffuse
+    DiffuseContrib = SceneLightDiffContrib;
+    
+    // Calculate total specular
+    SpecularContrib = SceneLightSpecContrib;
+}
+
+float4 celshading_textured_PS(vertexOutput IN) : COLOR {
+    float3 diffContrib;
+    float3 specContrib;
+    float3 LnDiffuse = normalize(IN.DiffuseLightVec);
+    //float3 LnBall    = normalize(IN.BallLightVec);
+    float3 Vn = normalize(IN.WorldView);
+    float3 Nn = normalize(IN.WorldNormal);
+    
+	  cel_shading(Nn,LnDiffuse,Vn,diffContrib,specContrib);
+      
+    float3 textureColour = tex2D(ColorSampler,IN.UV).rgb;
+    float3 result = SpecularColour*specContrib + DiffuseColour*textureColour*diffContrib;
+    return float4(result,1);
+}
+
+float4 celshading_PS(vertexOutput IN) : COLOR {
+    float3 diffContrib;
+    float3 specContrib;
+    
+    float3 LnDiffuse = normalize(IN.DiffuseLightVec);
+    //float3 LnBall    = normalize(IN.BallLightVec);
+    float3 Vn = normalize(IN.WorldView);
+    float3 Nn = normalize(IN.WorldNormal);
+    
+	  cel_shading(Nn,LnDiffuse,Vn,diffContrib,specContrib);
+      
+    float3 result = SpecularColour*specContrib + DiffuseColour*diffContrib;
+    return float4(result,1.0f);
+}
+
+///// TECHNIQUES /////////////////////////////
+// Both techniques feature 2 passes: the first pass does the
+// actual celshading (step-diffuse texture is used to give the celshading
+// look; the second pass creates outlines.
+
+technique Basic {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+        DepthTestEnable = true;
+        DepthFunc = Less;
+        CullFaceEnable = true;
+        CullFace = Back;
+        
+        VertexProgram = compile vp40 celshading_VS();        
+        FragmentProgram = compile fp40 celshading_PS();
+    }
+}
+
+technique Textured {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+
+        DepthTestEnable = true;
+        DepthFunc = Less;
+        CullFaceEnable = true;
+        CullFace = Back;
+        
+        VertexProgram = compile vp40 celshading_VS();        
+        FragmentProgram = compile fp40 celshading_textured_PS();
+    }  
+}
+/////////////////////////////////////// eof //

@@ -22,6 +22,7 @@ GameEventManager* GameEventManager::Instance() {
 void GameEventManager::DeleteInstance() {
 	if (instance != NULL) {
 		delete instance;
+		instance = NULL;
 	}
 }
 

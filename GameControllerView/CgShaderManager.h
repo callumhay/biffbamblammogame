@@ -33,7 +33,6 @@ public:
 	CGeffect LoadEffectFromCgFxFile(const std::string& cgfxFilepath);
 	std::map<std::string, CGtechnique> LoadTechniques(CGeffect effect);
 	//CGeffect GetEffect(const std::string& cgfxFilepath);
-	void InitCgFx();
 };
 
 #endif

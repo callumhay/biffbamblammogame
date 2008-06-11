@@ -1,10 +1,9 @@
 #ifndef __INGAMEDISPLAYSTATE_H__
 #define __INGAMEDISPLAYSTATE_H__
 
-#include <sstream>
 #include "DisplayState.h"
 #include "TextLabel.h"
-
+#include "Camera.h"
 
 /**
  * State for representing and rendering the display of the game as it is
@@ -20,11 +19,12 @@ private:
 	TextLabel2D scoreLabel;
 	TextLabel2D livesLabel;
 	
-
 	// Perspective values for the game projection
 	static const float FOV_ANGLE_IN_DEGS;
 	static const float NEAR_PLANE_DIST;
 	static const float FAR_PLANE_DIST;
+
+	Camera gameCamera;
 
 	void DrawGameHUD();
 	void DrawGameScene();
