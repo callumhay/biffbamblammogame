@@ -1,6 +1,6 @@
 #include "Texture1D.h"
 
-Texture1D::Texture1D(TextureFilterType texFilter) : Texture(GL_TEXTURE_1D), texFilter(texFilter) {
+Texture1D::Texture1D(TextureFilterType texFilter) : Texture(texFilter, GL_TEXTURE_1D) {
 }
 
 Texture1D::~Texture1D() {
@@ -11,7 +11,7 @@ Texture1D::~Texture1D() {
  */
 Texture1D* Texture1D::CreateTexture1DFromImgFile(const std::string& filepath, TextureFilterType texFilter, bool useMipmapping) {
 	Texture1D* newTex = new Texture1D(texFilter);
-	if (newTex->LoadTextureFromImg(filepath, texFilter, useMipmapping)) {
+	if (newTex->Load2DOr1DTextureFromImg(filepath, texFilter, useMipmapping)) {
 		return newTex;
 	}
 	else {
