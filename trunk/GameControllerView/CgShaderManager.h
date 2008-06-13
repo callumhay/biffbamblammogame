@@ -17,7 +17,6 @@ private:
 	
 	// Cg Runtime objects
 	CGcontext cgContext;
-	std::map<std::string, CGeffect> cgEffects;	// Hash of all CgEffects, hashed by their filepath
 
 	CgShaderManager();
 
@@ -29,10 +28,10 @@ public:
 	static void DeleteInstance();
 
 	void CheckForCgError(std::string situation);
-
 	CGeffect LoadEffectFromCgFxFile(const std::string& cgfxFilepath);
-	std::map<std::string, CGtechnique> LoadTechniques(CGeffect effect);
-	//CGeffect GetEffect(const std::string& cgfxFilepath);
+	void LoadEffectTechniques(CGeffect effect, std::map<std::string, CGtechnique>& techniques);
+	void LoadEffectTechnique(CGeffect effect, CGtechnique& technique);
+
 };
 
 #endif

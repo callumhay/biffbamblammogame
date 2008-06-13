@@ -17,14 +17,6 @@ CgShaderManager::CgShaderManager() : cgContext(NULL) {
 }
 
 CgShaderManager::~CgShaderManager() {
-	// Destroy each of the cg effects
-	std::map<std::string, CGeffect>::iterator cgEffectIter;
-	for (cgEffectIter = this->cgEffects.begin(); cgEffectIter != this->cgEffects.end(); cgEffectIter++) {
-		cgDestroyEffect(cgEffectIter->second);
-		this->CheckForCgError("Destroying cg effect");
-	}
-	this->cgEffects.clear();
-
 	// Destroy the cg context
 	cgDestroyContext(this->cgContext);
 	this->CheckForCgError("Destroying cg context");
@@ -71,22 +63,17 @@ CGeffect CgShaderManager::LoadEffectFromCgFxFile(const std::string& cgfxFilepath
 	// Load the effect using the Cg runtime
 	CGeffect temp = cgCreateEffectFromFile(this->cgContext, cgfxFilepath.c_str(), NULL);
 	this->CheckForCgError("Loading effect file");
-	
-	// Add the effect to the manager
-	assert(this->cgEffects.find(cgfxFilepath) == this->cgEffects.end());
-	this->cgEffects[cgfxFilepath] = temp;
-
 	return temp;
 }
 
 /**
- * Obtain the techniques for a given CGeffect.
- * Returns: A map of techniques hashed by their name.
+ * Loads the techniques for the given effect into the given
+ * map of techniques - these are hashed using their name as the key.
  */
-std::map<std::string, CGtechnique> CgShaderManager::LoadTechniques(CGeffect effect) {
-	std::map<std::string, CGtechnique> techniques;
+void CgShaderManager::LoadEffectTechniques(CGeffect effect, std::map<std::string, CGtechnique>& techniques) {
+	assert(effect != NULL);
 
-	// Obtain all the techniques associated with the given effect
+	// Obtain all the techniques associated with this effect
 	CGtechnique currTechnique = cgGetFirstTechnique(effect);
 	while (currTechnique) {
 		const char* techniqueName = cgGetTechniqueName(currTechnique);
@@ -100,7 +87,25 @@ std::map<std::string, CGtechnique> CgShaderManager::LoadTechniques(CGeffect effe
 	}
 
 	assert(techniques.size() != 0);
-	this->CheckForCgError("Loading techniques");
+	CgShaderManager::Instance()->CheckForCgError("Loading techniques");
+}
 
-	return techniques;
+void CgShaderManager::LoadEffectTechnique(CGeffect effect, CGtechnique& technique) {
+	assert(effect != NULL);
+
+	// Obtain all the techniques associated with this effect
+	CGtechnique currTechnique = cgGetFirstTechnique(effect);
+	if (currTechnique) {
+		const char* techniqueName = cgGetTechniqueName(currTechnique);
+		if (cgValidateTechnique(currTechnique) == CG_FALSE) {
+			debug_output("Could not validate Cg technique " << techniqueName);
+			assert(false);
+		}
+		else {
+			technique = currTechnique;
+		}
+	}
+
+	assert(technique != NULL);
+	CgShaderManager::Instance()->CheckForCgError("Loading technique");
 }

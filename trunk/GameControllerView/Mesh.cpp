@@ -1,24 +1,31 @@
 #include "Mesh.h"
 
+// Copy constructor
+PolygonGroup::PolygonGroup(const PolygonGroup& other) {
+	this->polygroupArray = new float[other.polygroupArrayLength];
+	for (unsigned int i = 0; i < other.polygroupArrayLength; i++) {
+		this->polygroupArray[i] = other.polygroupArray[i];
+	}
+	this->polygroupArrayLength = other.polygroupArrayLength;
+	this->numIndices = other.numIndices;
+}
 
-void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer, 
-														 const std::vector<Point3D>& vertexStream, 
-														 const std::vector<Vector3D>& normalStream,
-														 const std::vector<Point2D>& texCoordStream ) {
+PolygonGroup::PolygonGroup(const PolyGrpIndexer& faceIndexer, const std::vector<Point3D>& vertexStream, 
+													 const std::vector<Vector3D>& normalStream, const std::vector<Point2D>& texCoordStream) {
+	
+	assert(faceIndexer.normalIndices.size() == faceIndexer.texCoordIndices.size());
+	assert(faceIndexer.normalIndices.size() == faceIndexer.vertexIndices.size());
+	assert(faceIndexer.vertexIndices.size() == faceIndexer.texCoordIndices.size());
 
-	assert(indexer.normalIndices.size() == indexer.texCoordIndices.size());
-	assert(indexer.normalIndices.size() == indexer.vertexIndices.size());
-	assert(indexer.vertexIndices.size() == indexer.texCoordIndices.size());
-		
-	unsigned int numIndices = indexer.vertexIndices.size();
-	unsigned int polygrpArrayLen = numIndices * INTERLEAVED_MULTIPLIER;
-	this->polygroupArray = new float[polygrpArrayLen];
+	this->numIndices = faceIndexer.vertexIndices.size();
+	this->polygroupArrayLength = numIndices * INTERLEAVED_MULTIPLIER;
+	this->polygroupArray = new float[this->polygroupArrayLength];
 	
 	// Go through each possible vertex and add it to the polygon group array
-	for (unsigned int i = 0, j = 0; i < polygrpArrayLen; i += INTERLEAVED_MULTIPLIER, j++) {
-		const Point3D& vertex		= vertexStream[indexer.vertexIndices[j]];
-		const Vector3D& normal	= normalStream[indexer.normalIndices[j]];
-		const Point2D& texCoord = texCoordStream[indexer.texCoordIndices[j]];
+	for (unsigned int i = 0, j = 0; i < this->polygroupArrayLength; i += INTERLEAVED_MULTIPLIER, j++) {
+		const Point3D& vertex		= vertexStream[faceIndexer.vertexIndices[j]];
+		const Vector3D& normal	= normalStream[faceIndexer.normalIndices[j]];
+		const Point2D& texCoord = texCoordStream[faceIndexer.texCoordIndices[j]];
 
 		this->polygroupArray[i]			= texCoord[0];
 		this->polygroupArray[i + 1]	= texCoord[1];
@@ -29,14 +36,32 @@ void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer,
 		this->polygroupArray[i + 6]	= vertex[1];
 		this->polygroupArray[i + 7]	= vertex[2];
 	}
+}
+
+/**
+ * Translate this polygon group by the given vector.
+ */
+void PolygonGroup::Translate(const Vector3D& t) {
+	// Only need to transform the vertices
+	for (unsigned int i = 0; i < this->polygroupArrayLength; i += INTERLEAVED_MULTIPLIER) {
+		this->polygroupArray[i + 5] += t[0];
+		this->polygroupArray[i + 6] += t[1];
+		this->polygroupArray[i + 7] += t[2];
+	}
+}
+
+void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer, 
+														 const std::vector<Point3D>& vertexStream, 
+														 const std::vector<Vector3D>& normalStream,
+														 const std::vector<Point2D>& texCoordStream) {
+
+	this->polyGrp = new PolygonGroup(indexer, vertexStream, normalStream, texCoordStream);
 
 	// Create a display list for the polygon group
 	this->displayListID = glGenLists(1);
 	glNewList(this->displayListID, GL_COMPILE);
-	glInterleavedArrays(GL_INTERLEAVED_FORMAT, INTERLEAVED_STRIDE, this->polygroupArray);
-	glDrawArrays(GL_TRIANGLES, 0, numIndices);
+	this->polyGrp->Draw();
 	glEndList();
-
 }
 
 Mesh::Mesh(const std::string name, const std::map<std::string, MaterialGroup*> &matGrps):

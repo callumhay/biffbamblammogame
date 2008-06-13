@@ -17,7 +17,7 @@ const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
 const float InGameDisplayState::FOV_ANGLE_IN_DEGS	= 45.0f;
 const float InGameDisplayState::NEAR_PLANE_DIST		= 0.01f;
-const float InGameDisplayState::FAR_PLANE_DIST		= 220.0f;
+const float InGameDisplayState::FAR_PLANE_DIST		= 250.0f;
 
 InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
 	
@@ -55,8 +55,6 @@ void InGameDisplayState::RenderFrame(double dT) {
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	//glTranslatef(0, 0, -43.0f); // Eye transform
-
 	this->gameCamera.ApplyCameraTransform();
 
 	// -------------------------------------------------------------------------------
@@ -75,32 +73,23 @@ void InGameDisplayState::RenderFrame(double dT) {
  * related to the game itself.
  */
 void InGameDisplayState::DrawGameScene() {
-	// Background
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-
-	// Foreground game objects
 	Vector2D levelDim = this->display->GetModel()->GetLevelUnitDimensions();
 
 	glPushMatrix();
 	
+	// Draw the background scenery
 	glTranslatef(0.0f, -levelDim[1]/2.0f, 0.0f);
 	this->display->GetAssets()->DrawBackground(this->gameCamera);
-
+	
+	// Draw the foreground stuff (paddle, ball, pieces)
 	glTranslatef(-levelDim[0]/2.0f, 0, 0.0f);	
-	this->DrawLevelPieces();
 	this->display->GetAssets()->DrawPaddle(this->display->GetModel()->GetPlayerPaddle(), this->gameCamera);
 	this->display->GetAssets()->DrawGameBall(this->display->GetModel()->GetGameBall(), this->gameCamera);
 
 	glPopMatrix();
-}
 
-/*
- * Helper function for drawing all the game pieces / blocks that make up the currently
- * loaded level. This does not include drawing the player, ball, effects or backgrounds.
- */
-void InGameDisplayState::DrawLevelPieces() {
-	std::vector<std::vector<LevelPiece*>> &pieces = this->display->GetModel()->GetCurrentLevelPieces();
-	this->display->GetAssets()->DrawLevelPieces(pieces, this->gameCamera);
+	this->display->GetAssets()->DrawLevelPieces(this->gameCamera);
 }
 
 /**

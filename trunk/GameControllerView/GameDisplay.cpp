@@ -32,27 +32,6 @@ model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
-
-	/*
-	// TODO: Remove the following Test...
-	// Testing for the Onomatoplex --------------------------------------------------------
-	// This must be examined by eye, since it is not a formal sorta thing...
-	Randomizer::InitializeRandomizer();
-	for (int i = 0; i < Onomatoplex::NumExtremenessTypes; i++) {
-		Onomatoplex::Extremeness ext = static_cast<Onomatoplex::Extremeness>(i);
-		for (int j = 0; j < Onomatoplex::NumSoundTypes; j++) {
-			Onomatoplex::SoundType sound = static_cast<Onomatoplex::SoundType>(j);
-			std::cout << "Extremeness level: " << ext << " Sound type: " << sound << std::endl;
-			for (int k = 0; k < 50; k++) {
-				unsigned int randomSeed = static_cast<unsigned int>(Randomizer::RandomNumZeroToOne()*UINT_MAX);
-				std::string word = Onomatoplex::Generator::Instance()->Generate(sound, ext, k);
-				std::cout << word << std::endl;
-			}
-		}
-		std::cout << std::endl;
-	}
-	// ------------------------------------------------------------------------------------------
-	*/
 }
 
 GameDisplay::~GameDisplay() {
@@ -75,12 +54,12 @@ void GameDisplay::SetInitialRenderOptions() {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT, GL_FILL);
+
+	glDisable(GL_LIGHTING);
 }
 
 // Set the opengl state for drawing celshading outlines
 void GameDisplay::SetOutlineRenderAttribs(float outlineWidth) {
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_TEXTURE_1D);
 	glDisable(GL_LIGHTING);
 	
 	glEnable(GL_BLEND);
@@ -194,7 +173,6 @@ void GameDisplay::DrawDebugAxes() {
 	glColor3f(0,0,0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
-	glEnable(GL_TEXTURE_2D);
 
 	glPopMatrix();
 }
@@ -252,7 +230,6 @@ void GameDisplay::DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks)
 	glColor3f(0, 0, 0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
-	glEnable(GL_TEXTURE_2D);
 
 	glPopMatrix();
 }

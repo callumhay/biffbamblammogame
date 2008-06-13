@@ -28,7 +28,6 @@ private:
 
 	void DrawGameHUD();
 	void DrawGameScene();
-	void DrawLevelPieces();
 
 public:
 	InGameDisplayState(GameDisplay* display);

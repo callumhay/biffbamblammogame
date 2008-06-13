@@ -1,6 +1,7 @@
 #include "GameEventsListener.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
+#include "LevelMesh.h"
 
 #include "GameOverDisplayState.h"
 #include "GameCompleteDisplayState.h"
@@ -30,18 +31,19 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	debug_output("EVENT: World started");
 
 	// Set the new world style
-	this->display->GetAssets()->LoadAssets(world.GetStyle());
+	this->display->GetAssets()->LoadWorldAssets(world.GetStyle());
 }
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
 	debug_output("EVENT: World completed");
 }
 
-void GameEventsListener::LevelStartedEvent(const GameLevel& level) {
+void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLevel& level) {
 	debug_output("EVENT: Level started");
+	this->display->GetAssets()->LoadLevelAssets(world.GetStyle(), this->display->GetModel()->GetCurrentLevel());
 }
 
-void GameEventsListener::LevelCompletedEvent(const GameLevel& level) {
+void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
 	debug_output("EVENT: Level completed");
 }
 
@@ -69,6 +71,7 @@ void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 
 void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) {
 	debug_output("EVENT: Ball-block collision");
+	this->display->GetAssets()->GetLevelMesh()->ChangePiece(block);
 }
 
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
