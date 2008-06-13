@@ -11,7 +11,7 @@ const float PlayerPaddle::PADDLE_HEIGHT_TOTAL = 0.80f;
 const float PlayerPaddle::PADDLE_HALF_WIDTH = PADDLE_WIDTH_TOTAL / 2.0f;
 const float PlayerPaddle::PADDLE_HALF_HEIGHT = PADDLE_HEIGHT_TOTAL / 2.0f;
 
-const float PlayerPaddle::DEFAULT_SPEED = 15.0f;
+const float PlayerPaddle::DEFAULT_SPEED = 20.0f;
 
 PlayerPaddle::PlayerPaddle() : 
 	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 

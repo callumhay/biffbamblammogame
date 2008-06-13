@@ -64,7 +64,7 @@ public:
 		this->currentLevelNum = levelNum;
 
 		// EVENT: New Level Started
-		GameEventManager::Instance()->ActionLevelStarted(*this->GetCurrentLevel());
+		GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
 	}
 
 	// Returns whether the current level is the last level in this world.

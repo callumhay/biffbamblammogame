@@ -32,7 +32,8 @@ void BallInPlayState::Tick(double seconds) {
 	ball.Tick(seconds);
 
 	// Check for ball collisions with the pieces of the level and the paddle
-	std::vector<std::vector<LevelPiece*>> &levelPieces = this->gameModel->GetCurrentLevelPieces();
+	const GameLevel* currLevel = this->gameModel->GetCurrentLevel();
+	const std::vector<std::vector<LevelPiece*>> &levelPieces = currLevel->GetCurrentLevelLayout();
 	
 	// First check for ball-paddle collision
 	Vector2D n;

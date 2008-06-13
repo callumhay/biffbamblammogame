@@ -34,8 +34,8 @@ public:
 	void ActionGameCompleted();
 	void ActionWorldStarted(const GameWorld& world);
 	void ActionWorldCompleted(const GameWorld& world);
-	void ActionLevelStarted(const GameLevel& level);
-	void ActionLevelCompleted(const GameLevel& level);
+	void ActionLevelStarted(const GameWorld& world, const GameLevel& level);
+	void ActionLevelCompleted(const GameWorld& world, const GameLevel& level);
 
 
 protected:

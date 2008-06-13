@@ -78,11 +78,11 @@ public:
 
 	// Level/World related queries *****************************************
 	void BeginOrRestartGame();
-
-	std::vector<std::vector<LevelPiece*>>& GetCurrentLevelPieces() {
-		return this->GetCurrentWorld()->GetCurrentLevel()->GetCurrentLevelLayout();
-	}
 	
+	const GameLevel* GetCurrentLevel() const {
+		return this->worlds[this->currWorldNum]->GetCurrentLevel();
+	}
+
 	GameWorld::WorldStyle GetCurrentWorldStyle() const {
 		return this->GetCurrentWorld()->GetStyle();
 	}
