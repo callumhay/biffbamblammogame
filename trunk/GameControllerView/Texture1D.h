@@ -6,8 +6,6 @@
 class Texture1D : public Texture {
 
 private:
-	TextureFilterType texFilter;
-
 	Texture1D(TextureFilterType texFilter);
 
 public:

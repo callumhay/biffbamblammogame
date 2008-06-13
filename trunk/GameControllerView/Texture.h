@@ -10,16 +10,17 @@ public:
 	enum TextureFilterType { Nearest, Bilinear, Trilinear };
 
 protected:
+	TextureFilterType texFilter;
 	int textureType;
 	unsigned int texID;
 
 	static void SetMipmapFilteringParams(TextureFilterType texFilter, int glTexType);
 	static void SetNonMipmapFilteringParams(TextureFilterType texFilter, int glTexType);
 
-	bool LoadTextureFromImg(const std::string& filepath, TextureFilterType texFilter = Nearest, bool useMipmapping = false);
+	bool Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilterType texFilter = Nearest, bool useMipmapping = false);
 
 public:
-	Texture(int textureType);
+	Texture(TextureFilterType texFilter, int textureType);
 	virtual ~Texture();
 
 	unsigned int GetTextureID() const {
@@ -30,9 +31,18 @@ public:
 		return this->textureType;
 	}
 
+	// Functions for binding and unbinding the texture - these should
+	// ALWAYS be used over manually doing it - both
+	// help isolate problems with the OGL state
 	void BindTexture() const {
+		glEnable(this->textureType);
 		glBindTexture(this->textureType, this->texID);
 	}
+	void UnbindTexture() const {
+		glBindTexture(this->textureType, 0);
+		glDisable(this->textureType);
+	}
+
 };
 
 #endif
