@@ -71,7 +71,7 @@ void GameModel::IncrementLevel() {
 	GameLevel* currLevel = currWorld->GetCurrentLevel();
 
 	// EVENT: Level is complete
-	GameEventManager::Instance()->ActionLevelCompleted(*currLevel);
+	GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
 
 	if (currWorld->IsLastLevel()) {
 		// EVENT: World is complete

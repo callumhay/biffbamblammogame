@@ -54,6 +54,8 @@ public:
 	LevelPieceType GetType() const {
 		return this->pieceType;
 	}
+	
+	static LevelPieceType GetDecrementedPieceType(LevelPieceType pieceType);
 
 	// Obtain the center point of this piece.
 	Point2D GetCenter() const {

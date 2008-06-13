@@ -123,17 +123,17 @@ void GameEventManager::ActionWorldCompleted(const GameWorld& world) {
 }
 
 // Action for when a level starts in-game
-void GameEventManager::ActionLevelStarted(const GameLevel& level) {
+void GameEventManager::ActionLevelStarted(const GameWorld& world, const GameLevel& level) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
-		(*this->listenerIter)->LevelStartedEvent(level);
+		(*this->listenerIter)->LevelStartedEvent(world, level);
 	}	
 }
 
 // Action for when a level completes in-game
-void GameEventManager::ActionLevelCompleted(const GameLevel& level) {
+void GameEventManager::ActionLevelCompleted(const GameWorld& world, const GameLevel& level) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
-		(*this->listenerIter)->LevelCompletedEvent(level);
+		(*this->listenerIter)->LevelCompletedEvent(world, level);
 	}	
 }

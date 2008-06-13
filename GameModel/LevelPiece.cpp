@@ -61,28 +61,35 @@ int LevelPiece::GetPointValueForCollision() {
 }
 
 /**
- * Decrements the piece type (e.g., if this was a yellow block it would now be green).
+ * Find out what the next piece type is after the given piece
+ * type is hit by the ball.
  */
-void LevelPiece::DecrementPieceType() {
-	switch(this->pieceType) {
+LevelPiece::LevelPieceType LevelPiece::GetDecrementedPieceType(LevelPieceType pieceType) {
+	
+	switch(pieceType) {
 		case GreenBreakable:
-			this->pieceType = Empty;
-			break;
+			return Empty;
 		case YellowBreakable:
-			this->pieceType = GreenBreakable;
-			break;
+			return GreenBreakable;
 		case OrangeBreakable:
-			this->pieceType = YellowBreakable;
-			break;
+			return YellowBreakable;
 		case RedBreakable:
-			this->pieceType = OrangeBreakable;
-			break;
+			return OrangeBreakable;
+		case Solid:
+			return Solid;
 		case Bomb:
-			this->pieceType = Empty;
-			break;
+			return Empty;
 		default:
 			break;
 	}
+	return Empty;
+}
+
+/**
+ * Decrements the piece type (e.g., if this was a yellow block it would now be green).
+ */
+void LevelPiece::DecrementPieceType() {
+	this->pieceType = GetDecrementedPieceType(this->pieceType);
 }
 
 /**

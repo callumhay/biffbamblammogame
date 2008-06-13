@@ -38,15 +38,17 @@ public:
 	/**
 	 * Event occurs when a new level is started (i.e., the player enters the new level
 	 * in the game). This event occurs once just as the level starts.
-	 * Arguements: level - The level that is being started.
+	 * Arguements: world - The world of the level that just started.
+	 *             level - The level that is being started.
 	 */
-	virtual void LevelStartedEvent(const GameLevel& level) = 0;
+	virtual void LevelStartedEvent(const GameWorld& world, const GameLevel& level) = 0;
 
 	/**
 	 * Event occurs when a level is finished. This event occurs once just as the level finishes.
-	 * Arguments: level - The level that is just finished.
+	 * Arguments: world - The world of the level that just finished.
+	 *            level - The level that is just finished.
 	 */
-	virtual void LevelCompletedEvent(const GameLevel& level) = 0;
+	virtual void LevelCompletedEvent(const GameWorld& world, const GameLevel& level) = 0;
 
 
 	// Paddle related events *************************************************************

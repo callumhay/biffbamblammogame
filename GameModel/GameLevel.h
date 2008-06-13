@@ -35,7 +35,7 @@ public:
 	 * Obtain the set of pieces making up the current state of the level.
 	 * Return: Reference to the row major, 2D array of level pieces as they currently stand.
 	 */
-	std::vector<std::vector<LevelPiece*>>& GetCurrentLevelLayout() {
+	const std::vector<std::vector<LevelPiece*>>& GetCurrentLevelLayout() const {
 		return this->currentLevelPieces;
 	}
 
