@@ -177,6 +177,7 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 
 		// Finish The Display List
 		glEndList();
+		newCharTexture->UnbindTexture();
 		newFontSet->charDispLists.push_back(dList);
 	}
 	glPopMatrix();

@@ -4,6 +4,7 @@
 #include <string>
 
 class Mesh;
+class PolygonGroup;
 
 class ObjReader {
 
@@ -23,7 +24,9 @@ private:
 	ObjReader();
 
 public:
+
 	static Mesh* ReadMesh(const std::string &filepath);
+	static PolygonGroup* ReadPolygonGroup(const std::string &filepath);
 
 };
 #endif

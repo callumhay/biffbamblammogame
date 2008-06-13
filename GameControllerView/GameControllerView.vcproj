@@ -167,6 +167,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CgFxEffect.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CgFxOutlinedPhong.cpp"
 				>
 			</File>
@@ -207,6 +211,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LevelMesh.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MainMenuDisplayState.cpp"
 				>
 			</File>
@@ -220,6 +228,10 @@
 			</File>
 			<File
 				RelativePath=".\ObjReader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Skybox.cpp"
 				>
 			</File>
 			<File
@@ -240,6 +252,10 @@
 			</File>
 			<File
 				RelativePath=".\Texture2D.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TextureCube.cpp"
 				>
 			</File>
 			<File
@@ -309,6 +325,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LevelMesh.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MainMenuDisplayState.h"
 				>
 			</File>
@@ -322,6 +342,10 @@
 			</File>
 			<File
 				RelativePath=".\ObjReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Skybox.h"
 				>
 			</File>
 			<File
@@ -342,6 +366,10 @@
 			</File>
 			<File
 				RelativePath=".\Texture2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TextureCube.h"
 				>
 			</File>
 			<File

@@ -3,7 +3,7 @@
 #include "../Utils/Algebra.h"
 
 // Default constructor for 2D textures
-Texture2D::Texture2D(TextureFilterType texFilter) : Texture(GL_TEXTURE_2D), texFilter(texFilter) {
+Texture2D::Texture2D(TextureFilterType texFilter) : Texture(texFilter, GL_TEXTURE_2D) {
 }
 
 Texture2D::~Texture2D() {
@@ -14,7 +14,7 @@ Texture2D::~Texture2D() {
  */
 Texture2D* Texture2D::CreateTexture2DFromImgFile(const std::string& filepath, TextureFilterType texFilter) {
 	Texture2D* newTex = new Texture2D(texFilter);
-	if (newTex->LoadTextureFromImg(filepath, texFilter, true)) {
+	if (newTex->Load2DOr1DTextureFromImg(filepath, texFilter, true)) {
 		return newTex;
 	}
 	else {

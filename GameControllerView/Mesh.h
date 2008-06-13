@@ -20,25 +20,53 @@ struct PolyGrpIndexer {
 	std::vector<unsigned int> texCoordIndices;
 };
 
-class MaterialGroup {
-
+// Holds all of the indexed vertices, normals, etc. for a polygon group
+class PolygonGroup {
 private:
 	static const int INTERLEAVED_MULTIPLIER = 8;
 	static const GLint GL_INTERLEAVED_FORMAT = GL_T2F_N3F_V3F;
 	static const GLint INTERLEAVED_STRIDE = INTERLEAVED_MULTIPLIER * sizeof(float);
 
+	unsigned int polygroupArrayLength;
+	unsigned int numIndices;
 	float* polygroupArray;
+
+public:
+	PolygonGroup(const PolygonGroup& other);
+	PolygonGroup(const PolyGrpIndexer& faceIndexer, 
+							 const std::vector<Point3D>& vertexStream, 
+							 const std::vector<Vector3D>& normalStream,
+							 const std::vector<Point2D>& texCoordStream);
+
+	~PolygonGroup() {
+		delete[] this->polygroupArray;	
+	}
+
+	void Draw() const {
+		glInterleavedArrays(GL_INTERLEAVED_FORMAT, INTERLEAVED_STRIDE, this->polygroupArray);
+		glDrawArrays(GL_TRIANGLES, 0, this->numIndices);
+	};
+
+	void Translate(const Vector3D& t);
+
+};
+
+class MaterialGroup {
+
+private:
+	PolygonGroup* polyGrp;
 	CgFxEffect* material;
 	GLint displayListID;
 
 public:
-	MaterialGroup(CgFxEffect* mat) : material(mat), polygroupArray(NULL), displayListID(-1) {}
+	MaterialGroup(CgFxEffect* mat) : material(mat), displayListID(-1), polyGrp(NULL) {}
 	
 	~MaterialGroup() {
-		delete this->material;
-		if (this->polygroupArray != NULL) {
-			delete[] this->polygroupArray;
+		if (this->polyGrp != NULL) {
+			delete this->polyGrp;
 		}
+
+		delete this->material;
 		glDeleteLists(this->displayListID, 1);
 	}
 
@@ -59,12 +87,16 @@ public:
 		return this->material;
 	}
 
+	PolygonGroup* GetPolygonGroup() const {
+		return this->polyGrp;
+	}
+
 };
 
 // Represents a mesh, made up of faces, grouped by material.
 class Mesh {
 
-private:
+protected:
 	std::string name;
 	std::map<std::string, MaterialGroup*> matGrps;
 
@@ -83,11 +115,15 @@ public:
 	/**
 	 * Draw all of the mesh without the material.
 	 */
-	void FastDraw() const {
+	virtual void FastDraw() const {
 		std::map<std::string, MaterialGroup*>::const_iterator matGrpIter = this->matGrps.begin();
 		for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); matGrpIter++) {
 			matGrpIter->second->FastDraw();
 		}
+	}
+
+	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const {
+		return this->matGrps;
 	}
 
 	/**

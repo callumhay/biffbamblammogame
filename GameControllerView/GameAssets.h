@@ -12,6 +12,8 @@
 class TextureFontSet;
 class Mesh;
 class Camera;
+class LevelMesh;
+class Skybox;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -25,15 +27,23 @@ private:
 	// Set of fonts for use in the game, indexed by their style and height
 	std::map<FontStyle, std::map<FontSize, TextureFontSet*>> fonts;
 
-	Mesh* background;
+	// World-related meshes
+	Skybox* skybox;
+	Mesh* background;			// Meshes that make up the background scenery
 	Mesh* playerPaddle;		// Currently loaded player paddle mesh
-	Mesh* solidBlock;
-	Mesh* breakableBlock;	// Currently loaded breakable block mesh
-	Mesh* ball;						// Currently loaded ball mesh
 
-	void DeleteStyleAssets();
+	// Level-related meshes
+	LevelMesh* levelMesh;
+
+	// Regular meshes - these persist throughout the entire game
+	Mesh* ball;		// ball used to break blocks
+
+	void DeleteWorldAssets();
+	void DeleteLevelAssets();
+	void DeleteRegularMeshAssets();
 
 	// Asset loading helper functions
+	void LoadRegularMeshAssets();
 	void LoadRegularFontAssets();
 	void LoadDecoStyleAssets();
 	void LoadCyberpunkStyleAssets();
@@ -42,12 +52,17 @@ public:
 	GameAssets();
 	~GameAssets();
 
-	void LoadAssets(GameWorld::WorldStyle style);
+	void LoadWorldAssets(GameWorld::WorldStyle style);
+	void LoadLevelAssets(GameWorld::WorldStyle worldStyle, const GameLevel* level);
 
-	void DrawLevelPieces(std::vector<std::vector<LevelPiece*>>& pieces, const Camera& camera);
-	void DrawGameBall(const GameBall& b, const Camera& camera);
-	void DrawPaddle(const PlayerPaddle& p, const Camera& camera);
-	void DrawBackground(const Camera& camera);
+	void DrawLevelPieces(const Camera& camera) const;
+	void DrawGameBall(const GameBall& b, const Camera& camera) const;
+	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const;
+	void DrawBackground(const Camera& camera) const;
+
+	LevelMesh* GetLevelMesh() const {
+		return this->levelMesh;
+	}
 
 	// Obtain a particular font
 	const TextureFontSet* GetFont(FontStyle style, FontSize height) const {
@@ -61,14 +76,14 @@ public:
 		return NULL;
 	}
 
-
-private:
 	// Asset file path constants
 	static const std::string RESOURCE_DIR;
 	static const std::string FONT_DIR;
 	static const std::string MESH_DIR;
 	static const std::string SHADER_DIR;
+	static const std::string TEXTURE_DIR;
 
+private:
 	// Shader assets
 	static const std::string CELSHADER_FILEPATH;
 
@@ -84,18 +99,19 @@ private:
 
 	// Regular mesh assets
 	static const std::string BALL_MESH;
-	static const std::string BLOCK_MESH;
+	static const std::string SKYBOX_MESH;
 
 	// Deco assets
 	static const std::string DECO_PADDLE_MESH;
 	static const std::string DECO_SOLID_BLOCK_MESH;
 	static const std::string DECO_BACKGROUND_MESH;
+	static const std::string DECO_SKYBOX_TEXTURES[6];
 
 	// Cyberpunk assets
 	static const std::string CYBERPUNK_PADDLE_MESH;
 	static const std::string CYBERPUNK_SOLID_BLOCK_MESH;
 	static const std::string CYBERPUNK_BACKGROUND_MESH;
-
+	static const std::string CYBERPUNK_SKYBOX_TEXTURES[6];
 };
 
 #endif

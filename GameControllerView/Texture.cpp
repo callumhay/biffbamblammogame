@@ -2,7 +2,7 @@
 
 #include <string>
 
-Texture::Texture(int textureType) : textureType(textureType), texID(0) {
+Texture::Texture(TextureFilterType texFilter, int textureType) : texFilter(texFilter), textureType(textureType), texID(0) {
 }
 
 Texture::~Texture() {
@@ -48,10 +48,10 @@ void Texture::SetNonMipmapFilteringParams(TextureFilterType texFilter, int glTex
 	}
 }
 
-bool Texture::LoadTextureFromImg(const std::string& filepath, TextureFilterType texFilter, bool useMipmapping) {
-	glEnable(this->textureType);
+bool Texture::Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilterType texFilter, bool useMipmapping) {
+	assert(this->textureType == GL_TEXTURE_2D || this->textureType == GL_TEXTURE_1D);
 
-	// Read in the texture, with mipmapping
+	// Read in the texture
 	int imageID =	ilGenImage();
 	ilBindImage(imageID);
 	ILboolean resultOfImageLoad = ilLoadImage(filepath.c_str());
@@ -67,23 +67,25 @@ bool Texture::LoadTextureFromImg(const std::string& filepath, TextureFilterType 
 		// 1D Texture
 		ILubyte* texelData = ilGetData();
 		ILint width = ilGetInteger(IL_IMAGE_WIDTH);
+		ILint internalFormat = ilGetInteger(IL_IMAGE_BPP);
+		ILint imgFormat = ilGetInteger(IL_IMAGE_FORMAT);
 
 		glGenTextures(1, &this->texID);
 		glBindTexture(this->textureType, this->texID);
 
+
 		if (useMipmapping) {
-			GLint result = gluBuild1DMipmaps(this->textureType, GL_RGB, width, GL_RGB, GL_UNSIGNED_BYTE, texelData);
+			GLint result = gluBuild1DMipmaps(this->textureType, internalFormat, width, imgFormat, GL_UNSIGNED_BYTE, texelData);
 			
 			assert(result == 0);
 			if (result != 0) {
 				debug_output("Failed to load mipmaps for image " << filepath);
-				glDeleteTextures(1, &this->texID);
 				ilDeleteImage(imageID);
 				return false;
 			}
 		}
 		else {
-			glTexImage1D(this->textureType, 0, GL_RGB, width, 0, GL_RGB, GL_UNSIGNED_BYTE, texelData);
+			glTexImage1D(this->textureType, 0, internalFormat, width, 0, imgFormat, GL_UNSIGNED_BYTE, texelData);
 		}
 	}
 	else {

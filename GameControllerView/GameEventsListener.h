@@ -17,8 +17,8 @@ public:
 	virtual void GameCompletedEvent();
 	virtual void WorldStartedEvent(const GameWorld& world);
 	virtual void WorldCompletedEvent(const GameWorld& world);
-	virtual void LevelStartedEvent(const GameLevel& level);
-	virtual void LevelCompletedEvent(const GameLevel& level);
+	virtual void LevelStartedEvent(const GameWorld& world, const GameLevel& level);
+	virtual void LevelCompletedEvent(const GameWorld& world, const GameLevel& level);
 
 	// Paddle related events
 	virtual void PaddleHitWallEvent(const Point2D& hitLoc);

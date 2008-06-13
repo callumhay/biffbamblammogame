@@ -4,14 +4,17 @@
 #include "TextureFontSet.h"
 #include "CgShaderManager.h"
 #include "GameDisplay.h"
+#include "LevelMesh.h"
+#include "Skybox.h"
 
 #include "../Utils/Includes.h"
 
 // Asset file path constants ***************************
-const std::string GameAssets::RESOURCE_DIR = "resources";
-const std::string GameAssets::FONT_DIR	= "fonts";
-const std::string GameAssets::MESH_DIR	= "models";
-const std::string GameAssets::SHADER_DIR = "shaders";
+const std::string GameAssets::RESOURCE_DIR	= "resources";
+const std::string GameAssets::FONT_DIR			= "fonts";
+const std::string GameAssets::MESH_DIR			= "models";
+const std::string GameAssets::SHADER_DIR		= "shaders";
+const std::string GameAssets::TEXTURE_DIR		= "textures";
 
 // Shader assets
 const std::string GameAssets::CELSHADER_FILEPATH	= GameAssets::RESOURCE_DIR + "/" + SHADER_DIR + "/CelShading.cgfx";
@@ -27,43 +30,50 @@ const std::string GameAssets::FONT_ELECTRICZAP		= GameAssets::RESOURCE_DIR + "/"
 
 // Regular mesh asssets
 const std::string GameAssets::BALL_MESH		= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/ball.obj";
-const std::string GameAssets::BLOCK_MESH	= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/block.obj";
+const std::string GameAssets::SKYBOX_MESH	= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/skybox.obj";
 
 // Deco assets
 const std::string GameAssets::DECO_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_paddle.obj";
-const std::string GameAssets::DECO_SOLID_BLOCK_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_solid_block.obj";
 const std::string GameAssets::DECO_BACKGROUND_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_background.obj";
+const std::string GameAssets::DECO_SKYBOX_TEXTURES[6]			= {
+	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_x.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_x.png",
+	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_y.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_y.png",
+	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_z.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_z.png"
+};
 
 // Cyberpunk assets
 const std::string GameAssets::CYBERPUNK_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_paddle.obj";
-const std::string GameAssets::CYBERPUNK_SOLID_BLOCK_MESH			= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_block.obj";
 const std::string GameAssets::CYBERPUNK_BACKGROUND_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_background.obj";
+const std::string GameAssets::CYBERPUNK_SKYBOX_TEXTURES[6]		= {
+	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_x.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_x.png",
+	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_y.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_y.png",
+	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_z.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_z.png"
+};
+
 // *****************************************************
 
-GameAssets::GameAssets(): ball(NULL), playerPaddle(NULL), breakableBlock(NULL), 
-solidBlock(NULL), background(NULL), currLoadedStyle(GameWorld::None) {
+GameAssets::GameAssets(): ball(NULL), playerPaddle(NULL), skybox(NULL), background(NULL), levelMesh(NULL), currLoadedStyle(GameWorld::None) {
 	// Initialize DevIL
 	ilInit();
 	iluInit();
 	ilutRenderer(ILUT_OPENGL);
 	ilutEnable(ILUT_OPENGL_CONV);
 	
-	// Load Fonts
+	// Load regular fonts
 	this->LoadRegularFontAssets();
+
+	// Load regular meshes
+	this->LoadRegularMeshAssets();
 }
 
 GameAssets::~GameAssets() {
 	// Delete regular mesh assets
-	if (this->ball != NULL) {
-		delete this->ball;
-	}
-	if (this->breakableBlock != NULL) {
-		delete this->breakableBlock;
-	}
+	this->DeleteRegularMeshAssets();
 
-	// Delete the currently loaded style assets if there are any
-	this->DeleteStyleAssets();
-	
+	// Delete the currently loaded world and level assets if there are any
+	this->DeleteWorldAssets();
+	this->DeleteLevelAssets();
+
 	// Delete the regular fonts
 	std::map<FontStyle, std::map<FontSize, TextureFontSet*>>::iterator fontSetIter;
 	std::map<FontSize, TextureFontSet*>::iterator fontIter;
@@ -78,113 +88,53 @@ GameAssets::~GameAssets() {
 }
 
 /*
- * Delete any previously loaded assets.
- * Precondition: true.
+ * Delete any previously loaded assets related to the world.
  */
-void GameAssets::DeleteStyleAssets() {
+void GameAssets::DeleteWorldAssets() {
 	if (this->playerPaddle != NULL) {
 		delete this->playerPaddle;
+		this->playerPaddle = NULL;
 	}
+	if (this->skybox != NULL) {
+		delete this->skybox;
+		this->skybox = NULL;
+	}
+	if (this->background != NULL) {
+		delete this->background;
+		this->background = NULL;
+	}
+}
 
-	if (this->solidBlock != NULL) {
-		delete this->solidBlock;
+/*
+ * Delete any previously loaded assets related to the level.
+ */
+void GameAssets::DeleteLevelAssets() {
+	if (this->levelMesh != NULL) {
+		delete this->levelMesh;
+		this->levelMesh = NULL;
+	}
+}
+
+/**
+ * Delete any previously loaded regular assets.
+ */
+void GameAssets::DeleteRegularMeshAssets() {
+	if (this->ball != NULL) {
+		delete this->ball;
+		this->ball = NULL;
 	}
 }
 
 // Draw a piece of the level (block that you destory or that makes up part of the level
 // outline), this is done by positioning it, drawing the correct material and then
 // drawing the mesh itself.
-void GameAssets::DrawLevelPieces(std::vector<std::vector<LevelPiece*>>& pieces, const Camera& camera) {
-	// Go through each piece and draw the basic material
-	for (size_t h = 0; h < pieces.size(); h++) {
-		for (size_t w = 0; w < pieces[h].size(); w++) {
-
-			LevelPiece* p = pieces[h][w];
-			Point2D loc = p->GetCenter();
-			
-			// Draw the piece with its appropriate transform
-			glPushMatrix();
-			glTranslatef(loc[0], loc[1], 0);
-
-			switch(p->GetType()) {
-				case LevelPiece::RedBreakable:
-					{
-						this->breakableBlock->SetColour(Colour(1, 0, 0));
-						this->breakableBlock->Draw(camera);
-					}
-					break;			
-				case LevelPiece::OrangeBreakable: 
-					{
-						this->breakableBlock->SetColour(Colour(1, 0.5f, 0));
-						this->breakableBlock->Draw(camera);
-					}
-					break;
-				case LevelPiece::YellowBreakable: 
-					{
-						this->breakableBlock->SetColour(Colour(1, 1, 0));
-						this->breakableBlock->Draw(camera);
-					}
-					break;
-				case LevelPiece::GreenBreakable:
-					{
-						this->breakableBlock->SetColour(Colour(0, 1, 0));
-						this->breakableBlock->Draw(camera);
-					}
-					break;			
-				case LevelPiece::Solid:
-						this->solidBlock->Draw(camera);
-					break;
-				case LevelPiece::Bomb:
-					// Nothing to draw here yet..
-					break;
-				default:
-					break;
-			}
-
-			glPopMatrix();
-		}
-	}
-
-	// Go through each piece and draw the outlines
-	glPushAttrib(GL_ENABLE_BIT || GL_POLYGON_BIT || GL_LINE_BIT || GL_TEXTURE_BIT);
-	GameDisplay::SetOutlineRenderAttribs();
-	
-	for (size_t h = 0; h < pieces.size(); h++) {
-		for (size_t w = 0; w < pieces[h].size(); w++) {
-
-			LevelPiece* p = pieces[h][w];
-			Point2D loc = p->GetCenter();
-			
-			// Draw the piece with its appropriate transform
-			glPushMatrix();
-			glTranslatef(loc[0], loc[1], 0);
-
-			switch(p->GetType()) {
-				case LevelPiece::RedBreakable:	
-				case LevelPiece::OrangeBreakable: 
-				case LevelPiece::YellowBreakable: 
-				case LevelPiece::GreenBreakable:
-					this->breakableBlock->FastDraw();
-					break;
-				case LevelPiece::Solid:
-					this->solidBlock->FastDraw();
-					break;
-				case LevelPiece::Bomb:
-					// Nothing to draw here yet..
-					break;
-				default:
-					break;
-			}
-			glPopMatrix();
-		}
-	}
-
-	glPopAttrib();
+void GameAssets::DrawLevelPieces(const Camera& camera) const {
+	this->levelMesh->Draw(camera);
 }
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
 // draw the materials and draw the mesh.
-void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera) {
+void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera) const {
 	
 	Point2D loc = b.GetBounds().Center();
 	glPushMatrix();
@@ -194,7 +144,7 @@ void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera) {
 	this->ball->Draw(camera);
 	
 	// ... and its outlines
-	glPushAttrib(GL_ENABLE_BIT || GL_POLYGON_BIT || GL_LINE_BIT || GL_TEXTURE_BIT);
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	GameDisplay::SetOutlineRenderAttribs();
 	this->ball->FastDraw();
 	glPopAttrib();
@@ -205,7 +155,7 @@ void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera) {
 /**
  * Draw the player paddle mesh with materials and in correct position.
  */
-void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) {
+void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) const {
 	Point2D paddleCenter = p.GetCenterPosition();	
 
 	glPushMatrix();
@@ -215,7 +165,7 @@ void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) {
 	this->playerPaddle->Draw(camera);
 	
 	// ... and its outlines
-	glPushAttrib(GL_ENABLE_BIT || GL_POLYGON_BIT || GL_LINE_BIT || GL_TEXTURE_BIT);
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	GameDisplay::SetOutlineRenderAttribs();
 	this->playerPaddle->FastDraw();
 	glPopAttrib();
@@ -226,15 +176,24 @@ void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) {
 /**
  * Draw the background / environment of the world type.
  */
-void GameAssets::DrawBackground(const Camera& camera) {
+void GameAssets::DrawBackground(const Camera& camera) const {
+	// Draw the skybox
+	this->skybox->Draw();
+	
 	// Draw the background
 	this->background->Draw(camera);
 
 	// ... and its outlines
-	glPushAttrib(GL_ENABLE_BIT || GL_POLYGON_BIT || GL_LINE_BIT || GL_TEXTURE_BIT);
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	GameDisplay::SetOutlineRenderAttribs(2.5f);
 	this->background->FastDraw();
 	glPopAttrib();
+}
+
+void GameAssets::LoadRegularMeshAssets() {
+	if (this->ball == NULL) {
+		this->ball = ObjReader::ReadMesh(BALL_MESH);
+	}
 }
 
 /*
@@ -243,18 +202,10 @@ void GameAssets::DrawBackground(const Camera& camera) {
  * in-game.
  * Precondition: true.
  */
-void GameAssets::LoadAssets(GameWorld::WorldStyle style) {
+void GameAssets::LoadWorldAssets(GameWorld::WorldStyle style) {
 	
-	// Delete all previously loaded assets
-	this->DeleteStyleAssets();
-
-	// Load regular mesh assets
-	if (this->ball == NULL) {
-		this->ball = ObjReader::ReadMesh(BALL_MESH);
-	}
-	if (this->breakableBlock == NULL) {
-		this->breakableBlock = ObjReader::ReadMesh(BLOCK_MESH);
-	}
+	// Delete all previously loaded style-related assets
+	this->DeleteWorldAssets();
 
 	// Load in the new asset set
 	switch (style) {
@@ -269,6 +220,19 @@ void GameAssets::LoadAssets(GameWorld::WorldStyle style) {
 	}
 
 	this->currLoadedStyle = style;
+}
+
+/**
+ * Load the given level as a mesh.
+ */
+void GameAssets::LoadLevelAssets(GameWorld::WorldStyle worldStyle, const GameLevel* level) {
+	assert(level != NULL);
+
+	// Delete all previously loaded level-related assets
+	this->DeleteLevelAssets();
+	
+	// Load the given level
+	this->levelMesh = LevelMesh::CreateLevelMesh(worldStyle, level);
 }
 
 /**
@@ -352,8 +316,8 @@ void GameAssets::LoadDecoStyleAssets() {
 
 	// Deco mesh assets
 	this->playerPaddle		= ObjReader::ReadMesh(DECO_PADDLE_MESH);
-	this->solidBlock			= ObjReader::ReadMesh(DECO_SOLID_BLOCK_MESH);
 	this->background			= ObjReader::ReadMesh(DECO_BACKGROUND_MESH);
+	this->skybox					= Skybox::CreateSkybox(SKYBOX_MESH, DECO_SKYBOX_TEXTURES);
 }
 
 /**
@@ -364,6 +328,6 @@ void GameAssets::LoadCyberpunkStyleAssets() {
 	
 	// Cyberpunk mesh assets
 	this->playerPaddle		= ObjReader::ReadMesh(CYBERPUNK_PADDLE_MESH);
-	this->solidBlock			=	ObjReader::ReadMesh(CYBERPUNK_SOLID_BLOCK_MESH);
 	this->background			= ObjReader::ReadMesh(CYBERPUNK_BACKGROUND_MESH);
+	this->skybox					= Skybox::CreateSkybox(SKYBOX_MESH, CYBERPUNK_SKYBOX_TEXTURES);
 }
