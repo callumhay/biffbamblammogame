@@ -1,10 +1,10 @@
 /**
- * OutlinedPhong.cgfx
+ * CelShading.cgfx
  * Author: Callum Hay
  * The following is a cel shader, it provides basic toon shading.
  */
-
-float Script : STANDARDSGLOBAL <
+ 
+ float Script : STANDARDSGLOBAL <
     string UIWidget = "none";
     string ScriptClass = "object";
     string ScriptOrder = "standard";
@@ -74,18 +74,14 @@ float Shininess <
 
 //////// COLOR & TEXTURE /////////////////////
 
-texture ColorTexture  <
+texture ColourTexture  <
     string ResourceName = "default_color.dds";
     string UIName =  "Diffuse Texture";
     string ResourceType = "2D";
 >;
 
-sampler2D ColorSampler = sampler_state {
-    Texture = <ColorTexture>;
-    //MinFilter = LinearMipMapLinear;
-    //MagFilter = Linear;
-    //WrapS = Repeat;
-    //WrapT = Repeat;
+sampler2D ColourSampler = sampler_state {
+    Texture = <ColourTexture>;
 };  
 
 texture CelShadingProgression  <
@@ -176,30 +172,25 @@ float4 celshading_textured_PS(vertexOutput IN) : COLOR {
     float3 diffContrib;
     float3 specContrib;
     float3 LnDiffuse = normalize(IN.DiffuseLightVec);
-    //float3 LnBall    = normalize(IN.BallLightVec);
-    float3 Vn = normalize(IN.WorldView);
     float3 Nn = normalize(IN.WorldNormal);
     
-	  cel_shading(Nn,LnDiffuse,Vn,diffContrib,specContrib);
+	  cel_shading(Nn,LnDiffuse,IN.WorldView,diffContrib,specContrib);
       
-    float3 textureColour = tex2D(ColorSampler,IN.UV).rgb;
+    float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
     float3 result = SpecularColour*specContrib + DiffuseColour*textureColour*diffContrib;
-    return float4(result,1);
+    return float4(result, 1.0f);
 }
 
 float4 celshading_PS(vertexOutput IN) : COLOR {
     float3 diffContrib;
     float3 specContrib;
-    
     float3 LnDiffuse = normalize(IN.DiffuseLightVec);
-    //float3 LnBall    = normalize(IN.BallLightVec);
-    float3 Vn = normalize(IN.WorldView);
     float3 Nn = normalize(IN.WorldNormal);
     
-	  cel_shading(Nn,LnDiffuse,Vn,diffContrib,specContrib);
+	  cel_shading(Nn,LnDiffuse,IN.WorldView,diffContrib,specContrib);
       
     float3 result = SpecularColour*specContrib + DiffuseColour*diffContrib;
-    return float4(result,1.0f);
+    return float4(result, 1.0f);
 }
 
 ///// TECHNIQUES /////////////////////////////

@@ -56,35 +56,16 @@ float Shininess <
     string UIName =  "Shininess";
 > = 128.0;
 
-// The colour of the toon outlines
-float3 OutlineColour <
-    string UIName =  "Outline Colour";
-    string UIWidget = "Color";
-> = {0.00f,0.00f,0.00f};
-
-// Outline width (1.0 is avg)
-float OutlineWidth <
-    string UIWidget = "slider";
-    float UIMin = 0.0f;
-    float UIMax = 10.0f;
-    float UIStep = 0.1f;
-    string UIName =  "Outline Width";
-> = 1.5f;
-
 //////// COLOR & TEXTURE /////////////////////
 
-texture ColorTexture  <
+texture ColourTexture  <
     string ResourceName = "default_color.dds";
     string UIName =  "Diffuse Texture";
     string ResourceType = "2D";
 >;
 
-sampler2D ColorSampler = sampler_state {
-    Texture = <ColorTexture>;
-    //MinFilter = LinearMipMapLinear;
-    //MagFilter = Linear;
-    //WrapS = Repeat;
-    //WrapT = Repeat;
+sampler2D ColourSampler = sampler_state {
+    Texture = <ColourTexture>;
 };   
 
 //////// CONNECTOR DATA STRUCTURES ///////////
@@ -165,7 +146,7 @@ float4 phongshading_textured_PS(vertexOutput IN) : COLOR {
 	  
     phong_shading(Nn,Ln,Vn,diffContrib,specContrib);
     
-    float3 textureColour = tex2D(ColorSampler,IN.UV).rgb;
+    float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
     float3 result = SpecularColour*specContrib + DiffuseColour*textureColour*diffContrib;
     return float4(result,1);
 }
@@ -203,23 +184,6 @@ technique Basic {
         VertexProgram = compile vp40 phongshading_VS();        
         FragmentProgram = compile fp40 phongshading_PS();
     }
-
-    /*
-    pass p1 < string Script = "Draw=geometry;"; > {
-        DepthTestEnable = true;
-        DepthFunc = LEqual;
-        CullFaceEnable = true;
-        CullFace = Front;
-        
-        LineSmoothEnable = true;
-        BlendEnable = true;
-        PolygonMode = int2(Back, Line);
-        LineWidth = OutlineWidth;
-        
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
-    }
-    */
 }
 
 technique Textured {
@@ -233,21 +197,5 @@ technique Textured {
         VertexProgram = compile vp40 phongshading_VS();        
         FragmentProgram = compile fp40 phongshading_textured_PS();
     }  
-    /*
-    pass p1 < string Script = "Draw=geometry;"; > {
-        DepthTestEnable = true;
-        DepthFunc = LEqual;
-        CullFaceEnable = true;
-        CullFace = Front;
-        
-        LineSmoothEnable = true;
-        BlendEnable = true;
-        PolygonMode = int2(Back, Line);
-        LineWidth = OutlineWidth;
-        
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
-    }
-    */
 }
 /////////////////////////////////////// eof //
