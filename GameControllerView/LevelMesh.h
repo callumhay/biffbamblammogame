@@ -9,7 +9,6 @@
 
 #include "Mesh.h"
 #include "CgFxEffect.h"
-#include "CgFxCelShading.h"
 
 #include <vector>
 #include <map>
@@ -25,7 +24,7 @@ private:
 	static const std::string DECO_BLOCK_MESH_PATH;
 	static const std::string CYBERPUNK_BLOCK_MESH_PATH;
 
-	PolygonGroup* basicBlock;
+	Mesh* basicBlock;
 	Mesh* styleBlock;
 	
 	std::vector<std::vector<GLint>> pieceMeshes;

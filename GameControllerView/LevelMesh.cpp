@@ -25,7 +25,7 @@ LevelMesh::LevelMesh(GameWorld::WorldStyle worldStyle) : styleBlock(NULL), basic
 			break;
 	}
 	// Load the basic block
-	this->basicBlock = ObjReader::ReadPolygonGroup(BASIC_BLOCK_MESH_PATH);
+	this->basicBlock = ObjReader::ReadMesh(BASIC_BLOCK_MESH_PATH);
 	
 	// Make sure the block was loaded and that it has only one material on it
 	assert(this->styleBlock != NULL);
@@ -86,42 +86,51 @@ void LevelMesh::ChangePiece(const LevelPiece& piece) {
 
 void LevelMesh::Draw(const Camera& camera) const {
 
-	// WARNING: THIS IS A HUGE HACK FOR NOW... need it for the speed
-
 	// Obtain block material stuffs
-	CgFxEffect* material = this->styleBlock->GetMaterialGroups().begin()->second->GetMaterial();
-	//assert(dynamic_cast<CgFxCelShading*>(material) != NULL);
-	MaterialProperties* materialProps = material->GetProperties();
+	CgFxEffect* styleBlockMaterial = this->styleBlock->GetMaterialGroups().begin()->second->GetMaterial();
+	CgFxEffect* basicBlockMaterial = this->basicBlock->GetMaterialGroups().begin()->second->GetMaterial();
+
+	MaterialProperties* materialBasicProps = basicBlockMaterial->GetProperties();
 
 	// Set all of the required Cg parameters
 	// Set model-view-proj transform parameter
-	material->SetWorldViewProjMatrixParam();
+	styleBlockMaterial->SetWorldViewProjMatrixParam();
+	basicBlockMaterial->SetWorldViewProjMatrixParam();
 
 	glPushMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	// Set the model-view transform parameters
-	material->SetWorldInverseMatrixParam();
-	material->SetWorldMatrixParam();
+	styleBlockMaterial->SetWorldInverseMatrixParam();
+	styleBlockMaterial->SetWorldMatrixParam();
+	basicBlockMaterial->SetWorldInverseMatrixParam();
+	basicBlockMaterial->SetWorldMatrixParam();
 	
 	Matrix4x4 invViewXf = camera.GetInvViewTransform();
 	glMultMatrixf(invViewXf.begin());
+	
 	// Set the inverse view transform parameter
-	material->SetViewInverseMatrixParam();
+	styleBlockMaterial->SetViewInverseMatrixParam();
+	basicBlockMaterial->SetViewInverseMatrixParam();
 
 	glPopMatrix();
 
 	// Material properties
-	material->SetSpecularColourParam();
-	material->SetShininessParam();
+	styleBlockMaterial->SetSpecularColourParam();
+	styleBlockMaterial->SetShininessParam();
+	basicBlockMaterial->SetSpecularColourParam();
+	basicBlockMaterial->SetShininessParam();
 
 	// Textures
-	material->SetDiffuseTextureSamplerParam();
+	styleBlockMaterial->SetDiffuseTextureSamplerParam();
+	basicBlockMaterial->SetDiffuseTextureSamplerParam();
 
 	// Lights... TODO...
-	material->SetSceneLightColourParam(Colour());
-	material->SetSceneLightPositionParam(Point3D());
+	styleBlockMaterial->SetSceneLightColourParam(Colour(1, 1, 1));
+	styleBlockMaterial->SetSceneLightPositionParam(Point3D(0, 0, -20));
+	basicBlockMaterial->SetSceneLightColourParam(Colour(1, 1, 1));
+	basicBlockMaterial->SetSceneLightPositionParam(Point3D(0, 0, -20));
 
 	std::map<LevelPiece::LevelPieceType, std::vector<GLint>>::const_iterator pieceMatIter;
 	for (pieceMatIter = this->piecesByMaterial.begin(); pieceMatIter != this->piecesByMaterial.end(); pieceMatIter++) {
@@ -130,22 +139,22 @@ void LevelMesh::Draw(const Camera& camera) const {
 		const std::vector<GLint>& pieces = pieceMatIter->second;
 		
 		// Draw the current material
-		Colour currColour;
+		CGpass pass = cgGetFirstPass(basicBlockMaterial->GetCurrentTechnique());
 		switch(pieceType) {
 			case LevelPiece::RedBreakable:
-				currColour = Colour(1.0f, 0.0f, 0.0f);
+				materialBasicProps->diffuse = Colour(1.0f, 0.0f, 0.0f);
 				break;			
 			case LevelPiece::OrangeBreakable: 
-				currColour = Colour(1.0f, 0.5f,  0.0f);
+				materialBasicProps->diffuse = Colour(1.0f, 0.5f,  0.0f);
 				break;
 			case LevelPiece::YellowBreakable: 
-				currColour = Colour(1.0f, 1.0f, 0.0f);
+				materialBasicProps->diffuse = Colour(1.0f, 1.0f, 0.0f);
 				break;
 			case LevelPiece::GreenBreakable:
-				currColour = Colour(0.0f, 1.0f, 0.0f);
+				materialBasicProps->diffuse = Colour(0.0f, 1.0f, 0.0f);
 				break;			
 			case LevelPiece::Solid:
-				currColour = Colour(1.0f, 1.0f, 1.0f);
+				pass = cgGetFirstPass(styleBlockMaterial->GetCurrentTechnique());
 				break;
 			default:
 				assert(false);
@@ -153,11 +162,10 @@ void LevelMesh::Draw(const Camera& camera) const {
 		}
 
 		// Set the diffuse colour
-		materialProps->diffuse = currColour;
-		material->SetDiffuseColourParam();
+		styleBlockMaterial->SetDiffuseColourParam();
+		basicBlockMaterial->SetDiffuseColourParam();
 
 		// Draw the pieces of the current material
-		CGpass pass = cgGetFirstPass(material->GetCurrentTechnique());
 		cgSetPassState(pass);
 		for (size_t i = 0; i < pieces.size(); i++) {
 			glCallList(pieces[i]);
@@ -186,7 +194,7 @@ LevelMesh* LevelMesh::CreateLevelMesh(GameWorld::WorldStyle worldStyle, const Ga
 	LevelMesh* newLvlMesh = new LevelMesh(worldStyle);
 	
 	PolygonGroup* solidBlockPoly			= newLvlMesh->styleBlock->GetMaterialGroups().begin()->second->GetPolygonGroup();
-	PolygonGroup* breakableBlockPoly	= newLvlMesh->basicBlock;//->GetMaterialGroups().begin()->second->GetPolygonGroup();
+	PolygonGroup* breakableBlockPoly	= newLvlMesh->basicBlock->GetMaterialGroups().begin()->second->GetPolygonGroup();
 
 	const std::vector<std::vector<LevelPiece*>>& levelPieces = level->GetCurrentLevelLayout();
 	

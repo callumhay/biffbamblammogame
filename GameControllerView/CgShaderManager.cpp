@@ -1,8 +1,5 @@
 #include "CgShaderManager.h"
 
-#include "CgFxCelShading.h"
-#include "CgFxOutlinedPhong.h"
-
 CgShaderManager* CgShaderManager::instance = NULL;
 
 CgShaderManager::CgShaderManager() : cgContext(NULL) {

@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "ObjReader.h"
 #include "CgShaderManager.h"
+#include "Camera.h"
 
 // Skybox shader loading constants
 const std::string Skybox::SKYBOX_EFFECT_FILE	= "resources/shaders/Skybox.cgfx";
@@ -37,6 +38,7 @@ void Skybox::LoadSkyboxCgFxParameters() {
 	this->worldMatrixParam				= NULL;
 	this->skyboxCamParam					= NULL;
 	this->skyboxCubeSamplerParam	= NULL;
+	this->colourMultParam					= NULL;
 
 	// Transforms
 	this->wvpMatrixParam					=	cgGetNamedEffectParameter(this->cgEffect, "ModelViewProjXf");
@@ -45,23 +47,37 @@ void Skybox::LoadSkyboxCgFxParameters() {
 	this->skyboxCamParam					= cgGetNamedEffectParameter(this->cgEffect, "SkyCamPos");
 	// Cubemap for the skybox
 	this->skyboxCubeSamplerParam	= cgGetNamedEffectParameter(this->cgEffect, "SkyboxSampler");
-	
+	// Multiply colour for the skybox
+	this->colourMultParam					= cgGetNamedEffectParameter(this->cgEffect, "MultiplyColour");
+
 	CgShaderManager::Instance()->CheckForCgError("Getting parameters for Skybox effect");
 	assert(this->wvpMatrixParam && this->worldMatrixParam	&& this->skyboxCamParam && this->skyboxCubeSamplerParam);
 }
 
 /**
- * Draw the skybox... in all its skyboxey glory!
+ * Protected helper (can be inherited and overridden), used to set up the 
+ * cgfx parameters with their respective values.
  */
-void Skybox::Draw() {
-
-	// Set up the parameters with their respective values
+void Skybox::SetupCgFxParameters(double dT) {
 	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+
+	glPushMatrix();
+	glLoadIdentity();
 	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	cgGLSetParameter3f(this->skyboxCamParam, 0,0,0);
+	glPopMatrix();
+	
+	cgGLSetParameter3f(this->skyboxCamParam, 0, 0, 0);
 	cgGLSetTextureParameter(this->skyboxCubeSamplerParam, this->cubemap->GetTextureID());
 
 	CgShaderManager::Instance()->CheckForCgError("Setting parameters for Skybox effect");
+}
+
+/**
+ * Draw the skybox... in all its skyboxey glory!
+ */
+void Skybox::Draw(double dT, const Camera& camera) {
+
+	this->SetupCgFxParameters(dT);
 
 	// There should be only ONE pass for a skybox...
 	// Get the pass and draw away

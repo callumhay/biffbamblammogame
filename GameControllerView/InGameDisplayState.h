@@ -19,15 +19,8 @@ private:
 	TextLabel2D scoreLabel;
 	TextLabel2D livesLabel;
 	
-	// Perspective values for the game projection
-	static const float FOV_ANGLE_IN_DEGS;
-	static const float NEAR_PLANE_DIST;
-	static const float FAR_PLANE_DIST;
-
-	Camera gameCamera;
-
 	void DrawGameHUD();
-	void DrawGameScene();
+	void DrawGameScene(double dT);
 
 public:
 	InGameDisplayState(GameDisplay* display);

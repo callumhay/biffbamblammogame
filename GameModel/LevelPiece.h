@@ -13,6 +13,10 @@ class Vector2D;
 class LevelPiece {
 
 public:
+
+	static const float PIECE_WIDTH;
+	static const float PIECE_HEIGHT;
+
 	// These categorize the various types of blocks that make up a level
 	enum LevelPieceType { GreenBreakable = 'G', YellowBreakable = 'Y', OrangeBreakable = 'O', RedBreakable = 'R', 
 								        Solid = 'S', Bomb = 'B', Empty = 'E'}; 
@@ -21,8 +25,6 @@ public:
 private:
 	static const int POINTS_PER_BLOCK_HIT = 1;
 
-	static const float PIECE_WIDTH;
-	static const float PIECE_HEIGHT;
 	static const float HALF_PIECE_WIDTH;
 	static const float HALF_PIECE_HEIGHT;
 

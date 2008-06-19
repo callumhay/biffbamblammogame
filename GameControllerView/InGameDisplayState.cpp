@@ -15,10 +15,6 @@ const std::string InGameDisplayState::LIVES_LABEL_TEXT = "Lives: ";
 const unsigned int InGameDisplayState::HUD_X_INDENT = 10;	
 const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
-const float InGameDisplayState::FOV_ANGLE_IN_DEGS	= 45.0f;
-const float InGameDisplayState::NEAR_PLANE_DIST		= 0.01f;
-const float InGameDisplayState::FAR_PLANE_DIST		= 250.0f;
-
 InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
 	
 	// Set HUD display elements
@@ -33,8 +29,6 @@ InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(disp
 	this->livesLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small), LIVES_LABEL_TEXT);
 	this->livesLabel.SetColour(textColourHUD);
 	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
-
-	this->gameCamera.Move(Vector3D(0, 0, 43.0f));
 }
 
 InGameDisplayState::~InGameDisplayState() {
@@ -45,22 +39,16 @@ InGameDisplayState::~InGameDisplayState() {
  */
 void InGameDisplayState::RenderFrame(double dT) {
 	
-	// TODO: Camera Stuff -----------------------------------------------------------
-	// Set the perspective projection
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(FOV_ANGLE_IN_DEGS, 
-							   ((double)this->display->GetDisplayWidth()) / ((double)this->display->GetDisplayHeight()), 
-								 NEAR_PLANE_DIST, FAR_PLANE_DIST);
-
+	// Camera Stuff -----------------------------------------------------------------
+	this->display->GetCamera().SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	this->gameCamera.ApplyCameraTransform();
+	this->display->GetCamera().ApplyCameraTransform();
 
 	// -------------------------------------------------------------------------------
 
 	// Draw the game scene
-	this->DrawGameScene();
+	this->DrawGameScene(dT);
 
 	// Draw the HUD
 	this->DrawGameHUD();
@@ -72,7 +60,7 @@ void InGameDisplayState::RenderFrame(double dT) {
  * Helper function for drawing the game scene - this includes background and foreground objects
  * related to the game itself.
  */
-void InGameDisplayState::DrawGameScene() {
+void InGameDisplayState::DrawGameScene(double dT) {
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	Vector2D levelDim = this->display->GetModel()->GetLevelUnitDimensions();
 
@@ -80,16 +68,16 @@ void InGameDisplayState::DrawGameScene() {
 	
 	// Draw the background scenery
 	glTranslatef(0.0f, -levelDim[1]/2.0f, 0.0f);
-	this->display->GetAssets()->DrawBackground(this->gameCamera);
+	this->display->GetAssets()->DrawBackground(dT, this->display->GetCamera());
 	
 	// Draw the foreground stuff (paddle, ball, pieces)
 	glTranslatef(-levelDim[0]/2.0f, 0, 0.0f);	
-	this->display->GetAssets()->DrawPaddle(this->display->GetModel()->GetPlayerPaddle(), this->gameCamera);
-	this->display->GetAssets()->DrawGameBall(this->display->GetModel()->GetGameBall(), this->gameCamera);
+	this->display->GetAssets()->DrawPaddle(this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
+	this->display->GetAssets()->DrawGameBall(this->display->GetModel()->GetGameBall(), this->display->GetCamera());
 
 	glPopMatrix();
 
-	this->display->GetAssets()->DrawLevelPieces(this->gameCamera);
+	this->display->GetAssets()->DrawLevelPieces(this->display->GetCamera());
 }
 
 /**

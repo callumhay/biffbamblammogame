@@ -58,7 +58,7 @@ public:
 	void DrawLevelPieces(const Camera& camera) const;
 	void DrawGameBall(const GameBall& b, const Camera& camera) const;
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const;
-	void DrawBackground(const Camera& camera) const;
+	void DrawBackground(double dT, const Camera& camera) const;
 
 	LevelMesh* GetLevelMesh() const {
 		return this->levelMesh;
@@ -105,7 +105,6 @@ private:
 	static const std::string DECO_PADDLE_MESH;
 	static const std::string DECO_SOLID_BLOCK_MESH;
 	static const std::string DECO_BACKGROUND_MESH;
-	static const std::string DECO_SKYBOX_TEXTURES[6];
 
 	// Cyberpunk assets
 	static const std::string CYBERPUNK_PADDLE_MESH;

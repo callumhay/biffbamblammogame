@@ -8,6 +8,7 @@
 
 class TextureCube;
 class PolygonGroup;
+class Camera;
 
 /**
  * Encapsulates the polygons that make up the skybox and
@@ -15,7 +16,7 @@ class PolygonGroup;
  */
 class Skybox {
 
-private:
+protected:
 	static const std::string SKYBOX_EFFECT_FILE;
 	static const std::string TECHNIQUE_NAME;
 
@@ -36,21 +37,23 @@ private:
 	CGparameter skyboxCamParam;
 	// Cubemap for the skybox
 	CGparameter skyboxCubeSamplerParam;
+	// Colour multiply for the skybox
+	CGparameter colourMultParam;
 
 	// ----------------------------------------------------
 
 	Skybox(PolygonGroup* geom, TextureCube* tex);
 	void LoadSkyboxCgFxParameters();
+	virtual void SetupCgFxParameters(double dT);
 
 public:
-	~Skybox();
+	virtual ~Skybox();
 
-	void Draw();
+	void Draw(double dT, const Camera& camera);
 
 	// Static creators
 	static Skybox* CreateSkybox(const std::string& meshFilepath, 
 														  const std::string cubeTexFilepaths[6]);
-
 };
 
 #endif

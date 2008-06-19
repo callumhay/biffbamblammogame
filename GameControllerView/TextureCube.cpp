@@ -13,6 +13,9 @@ TextureCube::TextureCube(TextureFilterType texFilter) : Texture(texFilter, GL_TE
 TextureCube::~TextureCube() {
 }
 
+/**
+ * Create a cube map/texture from a set of 6 2D texture files.
+ */
 bool TextureCube::LoadCubeTextureFromImgs(const std::string filepaths[NUM_CUBE_FACES], TextureFilterType texFilter) {
 	
 	// Generate the cubemap texture and bind it
@@ -45,12 +48,14 @@ bool TextureCube::LoadCubeTextureFromImgs(const std::string filepaths[NUM_CUBE_F
 
 	// Set the filtering and wrap parameters
 	Texture::SetNonMipmapFilteringParams(texFilter, this->textureType);
-	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_R, GL_REPEAT);
+	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 	return true;
 }
+
+// Static creator methods ---------------------------------------------------------------------------
 
 TextureCube* TextureCube::CreateCubeTextureFromImgFiles(const std::string filepaths[NUM_CUBE_FACES], 
 		                                                    TextureFilterType texFilter) {

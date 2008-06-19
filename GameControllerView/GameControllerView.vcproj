@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DecoSkybox.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameAssets.cpp"
 				>
 			</File>
@@ -286,6 +290,10 @@
 			</File>
 			<File
 				RelativePath=".\CgShaderManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DecoSkybox.h"
 				>
 			</File>
 			<File

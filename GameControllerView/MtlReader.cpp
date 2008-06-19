@@ -18,8 +18,6 @@ const std::string MtlReader::MTL_DIFF_TEXTURE	= "map_Kd";
 
 // Custom tags
 const std::string MtlReader::CUSTOM_MTL_MATTYPE			= "type";
-const std::string MaterialProperties::MATERIAL_CELBASIC_TYPE	= "outlinedcel";
-const std::string MaterialProperties::MATERIAL_CELPHONG_TYPE	= "outlinedphong";
 
 MtlReader::MtlReader() {
 }

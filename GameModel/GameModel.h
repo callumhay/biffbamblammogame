@@ -128,11 +128,15 @@ public:
 
 	// Move the paddle a distance in either positive or negative X direction.
 	void MovePaddle(float dist) {
-		this->currState->MovePaddleKeyPressed(dist);
+		if (currState != NULL) {
+			this->currState->MovePaddleKeyPressed(dist);
+		}
 	}
 	// Release the ball from the paddle
 	void ReleaseBall() {
-		this->currState->BallReleaseKeyPressed();
+		if (currState != NULL) {
+			this->currState->BallReleaseKeyPressed();
+		}
 	}
 
 	// Befriend all state machine classes... 

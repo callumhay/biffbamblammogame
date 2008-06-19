@@ -4,6 +4,7 @@
 #include "../Utils/Includes.h"
 #include "../Utils/Matrix.h"
 #include "../Utils/Vector.h"
+#include "../Utils/Point.h"
 
 class Camera {
 
@@ -13,6 +14,13 @@ private:
 	Matrix4x4 invViewMatrix;
 
 public:
+	static const float FOV_ANGLE_IN_DEGS;
+	static const float NEAR_PLANE_DIST;
+	static const float FAR_PLANE_DIST;
+	static const Vector3D DEFAULT_FORWARD_VEC;
+	static const Vector3D DEFAULT_LEFT_VEC;
+	static const Vector3D DEFAULT_UP_VEC;
+
 	Camera();
 
 	Matrix4x4 GetViewTransform() const {
@@ -33,6 +41,17 @@ public:
 
 	void ApplyCameraTransform() {
 		glMultMatrixf(this->viewMatrix.begin());
+	}
+
+	Point3D GetCurrentCameraPosition() const {
+		return this->invViewMatrix.getTranslation();
+	}
+
+	// Function for setting the camera perspective
+	static void SetPerspective(int w, int h) {
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		gluPerspective(FOV_ANGLE_IN_DEGS, ((double)w) / ((double)h), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
 	// Functions for changing the current view transform to a full ortho2D,

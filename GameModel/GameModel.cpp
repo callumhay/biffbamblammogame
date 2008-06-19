@@ -31,7 +31,7 @@ void GameModel::BeginOrRestartGame() {
 	this->SetCurrentState(new BallOnPaddleState(this));
 	this->SetCurrentWorld(GameConstants::INITIAL_WORLD_NUM);
 
-	// Reset the score, lives
+	// Reset the score, lives, etc.
 	this->currPlayerScore = GameConstants::INIT_SCORE;
 	this->currLivesLeft		= GameConstants::INIT_LIVES;
 }

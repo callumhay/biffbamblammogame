@@ -26,7 +26,7 @@ GameWorld::~GameWorld() {
  */
 bool GameWorld::Load() {
 	if (this->isLoaded) {
-		return true; 
+		this->Unload();
 	}
 
 	std::ifstream inFile;

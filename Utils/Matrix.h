@@ -2,6 +2,7 @@
 #define __MATRIX_H__
 
 #include "Vector.h"
+#include "Point.h"
 
 #include <iostream>
 #include <algorithm>
@@ -69,6 +70,10 @@ public:
     return Vector4D(v_[col], v_[1+col], v_[2+col], v_[3+col]);
   }
 
+	Point3D getTranslation() const {
+		return Point3D(v_[13], v_[14], v_[15]);
+	}
+
   float& operator[](size_t idx) {
 		assert(idx < 16);
     return v_[ idx ];
@@ -128,6 +133,7 @@ public:
 			break;
 		default:
 			// Just return an identity matrix
+			assert(false);
 			break;
 		}
 
