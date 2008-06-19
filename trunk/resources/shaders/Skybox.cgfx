@@ -9,6 +9,8 @@ the cube map (skybox).
 float4x4 ModelViewProjXf;
 float4x4 WorldXf;
 float3 SkyCamPos;
+float3 MultiplyColour <
+> = {1.0f,1.0f,1.0f};
 
 texture skyEnvMap : Environment <
 	string ResourceType = "Cube";
@@ -18,6 +20,7 @@ samplerCUBE SkyboxSampler = sampler_state {
 	Texture = <skyEnvMap>;
 	WrapS = ClampToEdge;
 	WrapT = ClampToEdge;
+	WrapR = ClampToEdge;
 };
 
 
@@ -49,8 +52,8 @@ vertexOutput skybox_VS(appdata IN) {
 float4 skybox_PS(vertexOutput IN) : COLOR {
     // All we need to do is a look up in the cube map
     // using the vector from the eye to the fragment...
-     float4 SkyColour = texCUBE(SkyboxSampler, IN.WorldView);
-     return SkyColour;
+     float3 SkyColour = texCUBE(SkyboxSampler, IN.WorldView).xyz;
+     return float4(SkyColour * MultiplyColour, 1.0f);
 }
 
 technique Skybox

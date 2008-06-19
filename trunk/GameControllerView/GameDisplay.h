@@ -3,11 +3,11 @@
 
 #include "../Utils/Debug.h"
 #include "DisplayState.h"
+#include "Camera.h"
 
 class GameModel;
 class Mesh;
 class GameAssets;
-class Camera;
 class Point2D;
 class GameEventsListener;
 
@@ -16,6 +16,7 @@ class GameEventsListener;
 class GameDisplay {
 
 private:
+	Camera gameCamera;
 
 	DisplayState* currState;
 	GameModel* model;
@@ -69,6 +70,9 @@ public:
 	}
 	int GetDisplayHeight() const {
 		return this->height;
+	}
+	Camera& GetCamera() {
+		return this->gameCamera;
 	}
 
 	// Tells the display that a certain key was pressed

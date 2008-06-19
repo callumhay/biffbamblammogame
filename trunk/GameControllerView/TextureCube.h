@@ -17,7 +17,7 @@ private:
 
 	TextureCube(TextureFilterType texFilter);
 	bool LoadCubeTextureFromImgs(const std::string filepaths[NUM_CUBE_FACES], TextureFilterType texFilter);
-
+	bool LoadCubeTextureFromImgs(const std::string& filepath2d, TextureFilterType texFilter);
 
 public:
 	virtual ~TextureCube();
@@ -25,8 +25,6 @@ public:
 	// Static creators
 	static TextureCube* CreateCubeTextureFromImgFiles(const std::string filepaths[NUM_CUBE_FACES], 
 		                                                TextureFilterType texFilter);
-
-
 };
 
 #endif

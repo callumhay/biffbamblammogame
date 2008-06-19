@@ -4,6 +4,9 @@
 
 #include "../Utils/Matrix.h"
 
+const std::string MaterialProperties::MATERIAL_CELBASIC_TYPE	= "outlinedcel";
+const std::string MaterialProperties::MATERIAL_CELPHONG_TYPE	= "outlinedphong";
+
 CgFxEffect::CgFxEffect(const std::string& effectPath, MaterialProperties* props) : 
 properties(props), currTechnique(NULL), cgEffect(NULL)
 {

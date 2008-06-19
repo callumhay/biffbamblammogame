@@ -5,7 +5,9 @@
 #include "CgShaderManager.h"
 #include "GameDisplay.h"
 #include "LevelMesh.h"
+
 #include "Skybox.h"
+#include "DecoSkybox.h"
 
 #include "../Utils/Includes.h"
 
@@ -35,19 +37,14 @@ const std::string GameAssets::SKYBOX_MESH	= GameAssets::RESOURCE_DIR + "/" + MES
 // Deco assets
 const std::string GameAssets::DECO_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_paddle.obj";
 const std::string GameAssets::DECO_BACKGROUND_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_background.obj";
-const std::string GameAssets::DECO_SKYBOX_TEXTURES[6]			= {
-	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_x.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_x.png",
-	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_y.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_y.png",
-	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_z.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_z.png"
-};
 
 // Cyberpunk assets
 const std::string GameAssets::CYBERPUNK_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_paddle.obj";
 const std::string GameAssets::CYBERPUNK_BACKGROUND_MESH				= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/cyberpunk_background.obj";
 const std::string GameAssets::CYBERPUNK_SKYBOX_TEXTURES[6]		= {
-	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_x.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_x.png",
-	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_y.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_y.png",
-	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_positive_z.png", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/debug_negative_z.png"
+	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/deco_spirals1024x1024.jpg", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
+	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/deco_spirals1024x1024.jpg", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
+	GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/deco_spirals1024x1024.jpg", GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/deco_spirals1024x1024.jpg"
 };
 
 // *****************************************************
@@ -176,9 +173,9 @@ void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) const {
 /**
  * Draw the background / environment of the world type.
  */
-void GameAssets::DrawBackground(const Camera& camera) const {
+void GameAssets::DrawBackground(double dT, const Camera& camera) const {
 	// Draw the skybox
-	this->skybox->Draw();
+	this->skybox->Draw(dT, camera);
 	
 	// Draw the background
 	this->background->Draw(camera);
@@ -317,7 +314,7 @@ void GameAssets::LoadDecoStyleAssets() {
 	// Deco mesh assets
 	this->playerPaddle		= ObjReader::ReadMesh(DECO_PADDLE_MESH);
 	this->background			= ObjReader::ReadMesh(DECO_BACKGROUND_MESH);
-	this->skybox					= Skybox::CreateSkybox(SKYBOX_MESH, DECO_SKYBOX_TEXTURES);
+	this->skybox					= DecoSkybox::CreateDecoSkybox(SKYBOX_MESH);
 }
 
 /**

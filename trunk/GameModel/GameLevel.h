@@ -50,13 +50,11 @@ public:
 	}
 
 	float GetLevelUnitWidth() const {
-		LevelPiece* temp = this->cachedInitialLevelPieces[0][0];
-		return this->width * temp->GetHalfWidth()*2.0f;
+		return this->width * LevelPiece::PIECE_WIDTH;
 	}
 
 	float GetLevelUnitHeight() const {
-		LevelPiece* temp = this->cachedInitialLevelPieces[0][0];
-		return this->height * temp->GetHalfHeight()*2.0f;
+		return this->height * LevelPiece::PIECE_HEIGHT;
 	}
 
 	bool IsLevelComplete() const {

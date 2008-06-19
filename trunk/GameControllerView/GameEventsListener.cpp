@@ -30,7 +30,7 @@ void GameEventsListener::GameCompletedEvent() {
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	debug_output("EVENT: World started");
 
-	// Set the new world style
+	// Set the world assets
 	this->display->GetAssets()->LoadWorldAssets(world.GetStyle());
 }
 
@@ -40,7 +40,16 @@ void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
 
 void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLevel& level) {
 	debug_output("EVENT: Level started");
+
+	// Load the level assets
 	this->display->GetAssets()->LoadLevelAssets(world.GetStyle(), this->display->GetModel()->GetCurrentLevel());
+	
+	// Set up the initial game camera for the level - figure out where the camera
+	// should be to maximize view of all the game pieces
+	float distance = level.GetLevelUnitHeight() / (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f))) + 5.0f;
+	this->display->GetCamera().Reset();
+	this->display->GetCamera().Move(Vector3D(0, 0, distance));
+
 }
 
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
