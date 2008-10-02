@@ -5,5 +5,5 @@
  * Default action here is to just move the paddle around.
  */
 void GameState::MovePaddleKeyPressed(float dist) {
-	this->gameModel->playerPaddle.Move(dist);
+	this->gameModel->GetPlayerPaddle()->Move(dist);
 }

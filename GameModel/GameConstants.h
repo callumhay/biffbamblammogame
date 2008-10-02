@@ -18,10 +18,10 @@ public:
 	// -------------------------------------------------
 
 	// IN-GAME CONSTANTS -------------------------------
-	static const int DEFAULT_SCORE_MULTIPLIER = 1;
-	static const int MAX_SCORE_MULTIPLIER = 5;			// Max multiplier a player can get in a streak of block hits
-	static const int INIT_SCORE = 0;								// Initial player score when starting a game
-	static const int INIT_LIVES = 3;								// Initial player lives when starting a game
+	static const float PROB_OF_ITEM_DROP;			// Probability that an item will drop from a destroyed block
+	static const int DEFAULT_BLOCKS_HIT = 0;	// Initial number of blocks hit by a ball as it leaves the paddle
+	static const int INIT_SCORE = 0;					// Initial player score when starting a game
+	static const int INIT_LIVES = 3;					// Initial player lives when starting a game
 	// -------------------------------------------------
 
 private:

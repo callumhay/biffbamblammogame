@@ -11,7 +11,7 @@ const float PlayerPaddle::PADDLE_HEIGHT_TOTAL = 0.80f;
 const float PlayerPaddle::PADDLE_HALF_WIDTH = PADDLE_WIDTH_TOTAL / 2.0f;
 const float PlayerPaddle::PADDLE_HALF_HEIGHT = PADDLE_HEIGHT_TOTAL / 2.0f;
 
-const float PlayerPaddle::DEFAULT_SPEED = 20.0f;
+const float PlayerPaddle::DEFAULT_SPEED = 22.0f;
 
 PlayerPaddle::PlayerPaddle() : 
 	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 
@@ -21,9 +21,6 @@ PlayerPaddle::PlayerPaddle() :
 
 PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : speed(DEFAULT_SPEED), distTemp(0.0f), avgVel(0.0f), ticksSinceAvg(0), hitWall(false) {
 	this->SetMinMaxLevelBound(minBound, maxBound);
-	assert(minBound < maxBound);
-	this->ResetPaddle();
-	assert((maxBound - minBound) > PADDLE_WIDTH_TOTAL);
 }
 
 PlayerPaddle::~PlayerPaddle() {
@@ -50,7 +47,6 @@ void PlayerPaddle::SetDefaultDimensions() {
 }
 
 void PlayerPaddle::Tick(double seconds) {
-	this->ticksSinceAvg = (this->ticksSinceAvg + 1) % AVG_OVER_TICKS;
 
 	float newCenterX = this->centerPos[0] + (this->distTemp * seconds);
 	float minNewXPos = newCenterX - this->currHalfWidthTotal;
@@ -88,7 +84,13 @@ void PlayerPaddle::Tick(double seconds) {
 		this->hitWall = false;
 	}
 	
-	this->avgVel = this->distTemp;
+	if (this->ticksSinceAvg == 0) {
+		this->avgVel = this->distTemp;
+	}
+	else {
+		this->avgVel = (this->avgVel + this->distTemp) * 0.5f;
+	}
+	this->ticksSinceAvg = (this->ticksSinceAvg + 1) % AVG_OVER_TICKS;
 	this->distTemp = 0.0f;
 }
 

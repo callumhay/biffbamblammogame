@@ -1,6 +1,7 @@
 #ifndef __GAMEMODEL_H__
 #define __GAMEMODEL_H__
 
+#include "GameConstants.h"
 #include "LevelPiece.h"
 #include "GameWorld.h"
 #include "GameLevel.h"
@@ -22,8 +23,8 @@ private:
 	GameState* currState;		// The current game state
 
 	// Player-controllable game assets
-	PlayerPaddle playerPaddle;
-	GameBall ball;
+	PlayerPaddle *playerPaddle;
+	GameBall *ball;
 
 	// Current world and level information
 	unsigned int currWorldNum;
@@ -31,9 +32,8 @@ private:
 
 	// Player score and life information
 	int currPlayerScore;
-	//int currScoreMultiplier;
+	int numConsecutiveBlocksHit;
 	int currLivesLeft;
-
 
 	// Private getters and setters ****************************************
 	void SetCurrentWorld(unsigned int worldNum);
@@ -51,23 +51,42 @@ private:
 		this->currState = nextState;
 	}
 
-	void BallCollisionOccurred(LevelPiece* p);
+	void BallPieceCollisionOccurred(LevelPiece* p);
+	void BallPaddleCollisionOccurred();
 	void PlayerDied();
 
 	// Increment the player's score in the game
 	void IncrementScore(int amt) {
 		bool wasGreaterThanZero = this->currPlayerScore > 0;
-
-		this->currPlayerScore +=  amt;
+		int amtChanged = amt;
+			
+		this->currPlayerScore +=  amtChanged;
 		if (this->currPlayerScore < 0) {
 				this->currPlayerScore = 0;
 		}
 
 		if (amt != 0 && wasGreaterThanZero){
 			// EVENT: Score was changed
-			GameEventManager::Instance()->ActionScoreChanged(amt);
+			GameEventManager::Instance()->ActionScoreChanged(amtChanged);
 		}
 	}
+
+	// Set the number of consecutive blocks hit by the ball in the interrum between
+	// when it leaves and returns to the player paddle
+	void SetNumConsecutiveBlocksHit(int value) {
+		if (value < GameConstants::DEFAULT_BLOCKS_HIT) {
+			value = GameConstants::DEFAULT_BLOCKS_HIT;
+		}
+
+		if (value != this->numConsecutiveBlocksHit) {
+			int oldMultiplier = this->numConsecutiveBlocksHit;
+			this->numConsecutiveBlocksHit = value;
+			
+			// EVENT: The score multiplier has changed
+			GameEventManager::Instance()->ActionScoreMultiplierChanged(oldMultiplier, this->numConsecutiveBlocksHit);
+		}
+	}
+
 
 public:	
 	GameModel();
@@ -102,6 +121,10 @@ public:
 		return this->currPlayerScore;
 	}
 
+	int GetNumConsecutiveBlocksHit() const {
+		return this->numConsecutiveBlocksHit;
+	}
+
 	int GetLivesLeft() const {
 		return this->currLivesLeft;
 	}
@@ -117,10 +140,10 @@ public:
 	}
 
 	// Paddle and ball related queries **************************************
-	PlayerPaddle GetPlayerPaddle() const {
+	PlayerPaddle* GetPlayerPaddle() {
 		return this->playerPaddle;
 	}
-	GameBall GetGameBall() const {
+	GameBall* GetGameBall() {
 		return this->ball;
 	}
 

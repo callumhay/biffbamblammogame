@@ -14,9 +14,12 @@ BallOnPaddleState::~BallOnPaddleState() {
 }
 
 void BallOnPaddleState::UpdateBallPosition() {
-	Vector2D disp = Vector2D(0.0f, this->gameModel->ball.GetBounds().Radius() + this->gameModel->playerPaddle.GetHalfHeight() + 0.1f);
-	Point2D ballLoc = this->gameModel->playerPaddle.GetCenterPosition() + disp;
-	this->gameModel->ball.SetCenterPosition(ballLoc);
+	GameBall* ball				=  this->gameModel->GetGameBall();
+	PlayerPaddle* paddle	=  this->gameModel->GetPlayerPaddle();
+
+	Vector2D disp = Vector2D(0.0f, ball->GetBounds().Radius() + paddle->GetHalfHeight() + 0.1f);
+	Point2D ballLoc = paddle->GetCenterPosition() + disp;
+	ball->SetCenterPosition(ballLoc);
 }
 
 /**
@@ -25,7 +28,7 @@ void BallOnPaddleState::UpdateBallPosition() {
 void BallOnPaddleState::Tick(double seconds) {
 	// In this state the paddle can move around freely and the ball stays at
 	// its center without moving.
-	this->gameModel->playerPaddle.Tick(seconds);
+	this->gameModel->GetPlayerPaddle()->Tick(seconds);
 	this->UpdateBallPosition();
 	
 	// If this is the first tick of the current state, then the ball has just
@@ -33,7 +36,7 @@ void BallOnPaddleState::Tick(double seconds) {
 	if (this->firstTick) {
 		this->firstTick = false;
 		// EVENT: Ball (Re)spawning
-		GameEventManager::Instance()->ActionBallSpawn(this->gameModel->ball);
+		GameEventManager::Instance()->ActionBallSpawn(*this->gameModel->GetGameBall());
 	}
 }
 
@@ -41,27 +44,34 @@ void BallOnPaddleState::Tick(double seconds) {
  * When the player presses a control to release the ball from the paddle.
  */
 void BallOnPaddleState::BallReleaseKeyPressed() {
-	
-	// Add some randomness to the velocity by deviating a straight-up shot by some random angle
+
+	Vector2D ballReleaseDir = GameBall::STD_INIT_VEL_DIR;
 	Randomizer::InitializeRandomizer();
-	float randomAngleInDegs = static_cast<float>(Randomizer::RandomNumNegOneToOne()) * GameBall::RAND_DEG_ANG;
 
-	// Set the ball's initial velocity to be a bit in the direction of the 
-	// paddle velocity with its initial magnitude
-	int paddleDir = NumberFuncs::SignOf(this->gameModel->playerPaddle.GetAvgVelocity()[0]);
-	if (paddleDir < 0) {
-		randomAngleInDegs += PlayerPaddle::RAND_DEG_ANG;
+	// Get the paddle's avg. velocity
+	Vector2D avgPaddleVel = this->gameModel->GetPlayerPaddle()->GetAvgVelocity();
+	// Check to see if the paddle is moving, if not just use a random angle
+	if (fabs(avgPaddleVel[0]) <= EPSILON) {
+		// Add some randomness to the velocity by deviating a straight-up shot by some random angle
+		float randomAngleInDegs = static_cast<float>(Randomizer::RandomNumNegOneToOne()) * GameBall::STILL_RAND_RELEASE_DEG;		
+		ballReleaseDir = Rotate(randomAngleInDegs, ballReleaseDir);
 	}
-	else if (paddleDir > 0) {
-		randomAngleInDegs -= PlayerPaddle::RAND_DEG_ANG;
+	else {
+		// The paddle appears to be moving, modify the ball's release velocity
+		// to reflect some of this movement
+		float multiplier = PlayerPaddle::DEFAULT_SPEED / static_cast<float>(GameBall::NormalSpeed);
+		Vector2D newBallDir = Vector2D::Normalize(ballReleaseDir + multiplier * avgPaddleVel);
+		
+		// and, of course, add some randomness...
+		float randomAngleInDegs = static_cast<float>(Randomizer::RandomNumNegOneToOne()) * GameBall::MOVING_RAND_RELEASE_DEG;		
+		ballReleaseDir = Rotate(randomAngleInDegs, newBallDir);
 	}
 
-	Vector2D paddleVel = 0.5f*this->gameModel->playerPaddle.GetAvgVelocity();
-	Vector2D slightlyRandomBallVel = Rotate(randomAngleInDegs, GameBall::STD_INIT_VEL);
-	this->gameModel->ball.SetVelocity(slightlyRandomBallVel + paddleVel);
-	
+	ballReleaseDir.Normalize();
+	this->gameModel->GetGameBall()->SetVelocity(GameBall::NormalSpeed, ballReleaseDir);
+
 	// EVENT: Ball Shot
-	GameEventManager::Instance()->ActionBallShot(this->gameModel->ball);
+	GameEventManager::Instance()->ActionBallShot(*this->gameModel->GetGameBall());
 
 	// Now change the game model's state machine to have the ball in play
 	this->gameModel->SetCurrentState(new BallInPlayState(this->gameModel));

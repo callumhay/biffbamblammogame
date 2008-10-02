@@ -119,6 +119,14 @@ public:
 	 */
 	virtual void ScoreChangedEvent(int amt) = 0;
 
+	/**
+	 * Event triggered when there is a change to the player's score multiplier. 
+	 * Only occurs once per change.
+	 * Arguements: oldMultiplier - The multiplier before the change.
+	 * Arguements: newMultiplier - The multiplier after the change.
+	 */
+	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) = 0;
+
 };
 
 

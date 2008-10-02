@@ -13,7 +13,6 @@ class Vector2D;
 class LevelPiece {
 
 public:
-
 	static const float PIECE_WIDTH;
 	static const float PIECE_HEIGHT;
 
@@ -23,7 +22,9 @@ public:
 	static bool IsValidBlockEnum(char c);
 
 private:
-	static const int POINTS_PER_BLOCK_HIT = 1;
+	// TODO: work out the scoring...
+	static const int POINTS_PER_BLOCK_HIT = 5;
+	static const int POINTS_PER_BLOCK_DESTROYED = 10;
 
 	static const float HALF_PIECE_WIDTH;
 	static const float HALF_PIECE_HEIGHT;
@@ -50,6 +51,11 @@ public:
 	bool MustBeDestoryedToEndLevel() const {
 		return this->pieceType == GreenBreakable || this->pieceType == YellowBreakable ||
 					 this->pieceType == OrangeBreakable || this->pieceType == RedBreakable;
+	}
+
+	// Returns whether this piece can drop an item when it's hit by a ball
+	bool CanDropItem() const {
+		return this->pieceType == GreenBreakable;
 	}
 
 	// Obtain the type of level piece this is.
