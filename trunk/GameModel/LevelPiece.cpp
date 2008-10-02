@@ -46,6 +46,7 @@ bool LevelPiece::IsValidBlockEnum(char c) {
 int LevelPiece::GetPointValueForCollision() {
 	switch(this->pieceType) {
 		case GreenBreakable:
+			return POINTS_PER_BLOCK_DESTROYED;
 		case YellowBreakable:
 		case OrangeBreakable:
 		case RedBreakable:

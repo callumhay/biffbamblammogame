@@ -91,10 +91,19 @@ void GameEventManager::ActionBlockDestroyed(const LevelPiece& block) {
 	}	
 }
 
+// Action for when the player's score changes
 void GameEventManager::ActionScoreChanged(int amt) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
 		(*this->listenerIter)->ScoreChangedEvent(amt);
+	}	
+}
+
+// Action for when the score multiplier changes
+void GameEventManager::ActionScoreMultiplierChanged(int oldScoreMultiplier, int newScoreMultiplier) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ScoreMultiplierChangedEvent(oldScoreMultiplier, newScoreMultiplier);
 	}	
 }
 

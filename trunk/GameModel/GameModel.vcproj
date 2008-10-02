@@ -184,6 +184,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameItem.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameItemFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameLevel.cpp"
 				>
 			</File>
@@ -204,11 +212,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Onomatoplex.cpp"
+				RelativePath=".\PlayerPaddle.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PlayerPaddle.cpp"
+				RelativePath=".\SlowBallItem.cpp"
 				>
 			</File>
 		</Filter>
@@ -250,6 +258,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameItem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameItemFactory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GameLevel.h"
 				>
 			</File>
@@ -274,11 +290,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Onomatoplex.h"
+				RelativePath=".\PlayerPaddle.h"
 				>
 			</File>
 			<File
-				RelativePath=".\PlayerPaddle.h"
+				RelativePath=".\SlowBallItem.h"
 				>
 			</File>
 		</Filter>

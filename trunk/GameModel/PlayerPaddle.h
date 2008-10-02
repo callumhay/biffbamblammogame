@@ -20,7 +20,7 @@ private:
 	static const float PADDLE_HALF_WIDTH;
 	static const float PADDLE_HALF_HEIGHT;
 
-	static const int AVG_OVER_TICKS  = 15;
+	static const int AVG_OVER_TICKS  = 60;
 
 	float distTemp;			// A temporary store for the change in movement
 	float avgVel;				// Keeps the average velocity (over the past AVG_OVER_TICKS ticks) of the paddle at a given time
@@ -39,9 +39,15 @@ private:
 	
 	void SetDefaultDimensions();
 
+	// Reset the dimensions and position of this paddle (e.g., after death, start of a level).
+	void ResetPaddle() {
+		this->SetDefaultDimensions();
+		this->centerPos = Point2D((maxBound + minBound)/2.0f, this->currHalfHeight);
+	}
+
 public:
 	static const float DEFAULT_SPEED;
-	static const int RAND_DEG_ANG    = 40;
+	static const int RAND_DEG_ANG    = 20;
 
 	PlayerPaddle(float minBound, float maxBound);
 	PlayerPaddle();
@@ -61,17 +67,14 @@ public:
 		this->distTemp += dist;
 	}
 
-	// Reset the dimensions and position of this paddle (e.g., after death, start of a level).
-	void ResetPaddle() {
-		this->SetDefaultDimensions();
-		this->centerPos = Point2D((maxBound + minBound)/2.0f, this->currHalfHeight);
-	}
-
 	void SetMinMaxLevelBound(float min, float max) {
 		assert(min < max);
 		assert((max - min) > PADDLE_WIDTH_TOTAL);
 		this->minBound = min;
 		this->maxBound = max;
+
+		// Reset the paddle to the center of the new bounds
+		this->ResetPaddle();
 	}
 
 	float GetSpeed() const {

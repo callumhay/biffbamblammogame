@@ -9,15 +9,15 @@ class GameBall;
 class LineSeg2D;
 class Vector2D;
 class PlayerPaddle;
+class GameItem;
 
 class BallInPlayState : public GameState {
 
 private:
-	static const float MIN_BALL_ANGLE_IN_DEGS;
-	static const float MIN_BALL_ANGLE_IN_RADS;
-	
+	std::vector<GameItem*> currLiveItems;	// Items that are currently available to be picked up in-game
+
 	void DoBallCollision(GameBall& b, const Vector2D& n, float d);
-	void ModifyBallBasedOnPaddle(const PlayerPaddle& paddle, GameBall& ball);
+	void DoItemCollision();
 
 public:
 	BallInPlayState(GameModel* gm);
