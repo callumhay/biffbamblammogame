@@ -34,6 +34,8 @@ public:
 	virtual void BlockDestroyedEvent(const LevelPiece& block);
 	virtual void ScoreChangedEvent(int amt);
 	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier);
+	virtual void ItemSpawnedEvent(const GameItem& item);
+	virtual void ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle);
 };
 
 #endif

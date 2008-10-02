@@ -31,6 +31,8 @@ public:
 	void ActionBlockDestroyed(const LevelPiece& block);
 	void ActionScoreChanged(int amt);
 	void ActionScoreMultiplierChanged(int oldScoreMultiplier, int newScoreMultiplier);
+	void ActionItemSpawned(const GameItem& item);
+	void ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle);
 
 	void ActionGameCompleted();
 	void ActionWorldStarted(const GameWorld& world);

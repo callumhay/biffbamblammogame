@@ -33,6 +33,7 @@ const std::string GameAssets::FONT_ELECTRICZAP		= GameAssets::RESOURCE_DIR + "/"
 // Regular mesh asssets
 const std::string GameAssets::BALL_MESH		= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/ball.obj";
 const std::string GameAssets::SKYBOX_MESH	= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/skybox.obj";
+const std::string GameAssets::ITEM_MESH		= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/item.obj";
 
 // Deco assets
 const std::string GameAssets::DECO_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_paddle.obj";
@@ -49,7 +50,7 @@ const std::string GameAssets::CYBERPUNK_SKYBOX_TEXTURES[6]		= {
 
 // *****************************************************
 
-GameAssets::GameAssets(): ball(NULL), playerPaddle(NULL), skybox(NULL), background(NULL), levelMesh(NULL), currLoadedStyle(GameWorld::None) {
+GameAssets::GameAssets(): ball(NULL), item(NULL), playerPaddle(NULL), skybox(NULL), background(NULL), levelMesh(NULL), currLoadedStyle(GameWorld::None) {
 	// Initialize DevIL
 	ilInit();
 	iluInit();
@@ -120,6 +121,10 @@ void GameAssets::DeleteRegularMeshAssets() {
 		delete this->ball;
 		this->ball = NULL;
 	}
+	if (this->item != NULL) {
+		delete this->item;
+		this->item = NULL;
+	}
 }
 
 // Draw a piece of the level (block that you destory or that makes up part of the level
@@ -187,9 +192,23 @@ void GameAssets::DrawBackground(double dT, const Camera& camera) const {
 	glPopAttrib();
 }
 
+/**
+ * Draw a given item in the world.
+ */
+void GameAssets::DrawItem(const GameItem& gameItem, const Camera& camera) const {
+	Point2D center = gameItem.GetCenter();
+	glPushMatrix();
+	glTranslatef(center[0], center[1], 0.0f);
+	this->item->Draw(camera);
+	glPopMatrix();
+}
+
 void GameAssets::LoadRegularMeshAssets() {
 	if (this->ball == NULL) {
 		this->ball = ObjReader::ReadMesh(BALL_MESH);
+	}
+	if (this->item == NULL) {
+		this->item = ObjReader::ReadMesh(ITEM_MESH);
 	}
 }
 

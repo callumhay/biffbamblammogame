@@ -10,7 +10,8 @@
  * hands the new object to the caller.
  * NOTE: The caller will be responsible for its destruction!
  */
-GameItem* GameItemFactory::CreateRandomItem(GameModel *gameModel) {
+GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel) {
 	// TODO: more items go here...
-	return new SlowBallItem(gameModel);
+
+	return new SlowBallItem(spawnOrigin, gameModel);
 }

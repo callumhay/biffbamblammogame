@@ -8,6 +8,7 @@
 #include "../Utils/Algebra.h"
 
 BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(true) {
+	this->UpdateBallPosition();
 }
 
 BallOnPaddleState::~BallOnPaddleState() {

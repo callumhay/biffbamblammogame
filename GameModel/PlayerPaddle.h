@@ -61,6 +61,9 @@ public:
 	float GetHalfHeight() const {
 		return this->currHalfHeight;
 	}
+	float GetHalfWidthTotal() const {
+		return this->currHalfWidthTotal;
+	}
 
 	void Tick(double seconds);
 	void Move(float dist) {

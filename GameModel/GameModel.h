@@ -11,6 +11,7 @@
 #include "GameLevel.h"
 #include "GameWorld.h"
 #include "GameEventManager.h"
+#include "GameItem.h"
 
 #include "../Utils/Vector.h"
 
@@ -29,6 +30,9 @@ private:
 	// Current world and level information
 	unsigned int currWorldNum;
 	std::vector<GameWorld*> worlds;
+
+	// Items that are currently available to be picked up in-game
+	std::vector<GameItem*> currLiveItems;
 
 	// Player score and life information
 	int currPlayerScore;
@@ -87,6 +91,7 @@ private:
 		}
 	}
 
+	void ClearLiveItems();
 
 public:	
 	GameModel();
@@ -127,6 +132,10 @@ public:
 
 	int GetLivesLeft() const {
 		return this->currLivesLeft;
+	}
+
+	std::vector<GameItem*>& GetLiveItems() {
+		return this->currLiveItems;
 	}
 
 	bool IsGameOver() const {

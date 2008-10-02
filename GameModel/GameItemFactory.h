@@ -5,6 +5,7 @@
 
 class GameItem;
 class GameModel;
+class Point2D;
 
 /**
  * Class that follows the factory design pattern - used to hide the creation
@@ -22,7 +23,7 @@ public:
 	~GameItemFactory() {};
 
 	// Static factory functions for the creation of game items
-	static GameItem* CreateRandomItem(GameModel *gameModel);			// Could be either power-up or down
+	static GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel);			// Could be either power-up or down
 
 };
 #endif

@@ -1,6 +1,8 @@
 #ifndef __GAMEITEM_H__
 #define __GAMEITEM_H__
 
+#include <string>
+
 #include "../Utils/Includes.h"
 #include "../Utils/Point.h"
 
@@ -10,9 +12,9 @@ class GameModel;
 class GameItem {
 
 protected:
+	std::string name;			// Name of this item
 	GameModel* gameModel;	// Items have to be able to manipulate what happens in the game...
-
-	Point2D center;	// The center x,y coord that this item is located at
+	Point2D center;				// The center x,y coord that this item is located at
 	
 	// Height and Width for items
 	static const float ITEM_WIDTH;
@@ -24,7 +26,7 @@ protected:
 	static const float SPEED_OF_DESCENT;
 
 public:
-	GameItem(GameModel *gameModel);
+	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel);
 	virtual ~GameItem();
 
 	// For obtaining the center of this item
@@ -37,5 +39,10 @@ public:
 
 	virtual void Activate() = 0;
 
+	friend std::ostream& operator <<(std::ostream& os, const GameItem& item);
+};
+
+inline std::ostream& operator <<(std::ostream& os, const GameItem& item) {
+  return os << item.name;
 };
 #endif

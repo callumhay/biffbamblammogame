@@ -34,6 +34,9 @@ GameModel::~GameModel() {
 	this->ball = NULL;
 	delete this->playerPaddle;
 	this->playerPaddle = NULL;
+
+	// Delete all items
+	this->ClearLiveItems();
 }
 
 /**
@@ -225,4 +228,17 @@ void GameModel::PlayerDied() {
 	else {
 		this->SetCurrentState(new BallOnPaddleState(this));
 	}
+}
+
+/**
+ * Clears the list of items that are currently alive in a level.
+ */
+void GameModel::ClearLiveItems() {
+	// Destory any left-over game items
+	for(std::vector<GameItem*>::iterator iter = this->currLiveItems.begin(); iter != this->currLiveItems.end(); iter++) {
+		GameItem* currItem = *iter;
+		delete currItem;
+		currItem = NULL;
+	}
+	this->currLiveItems.clear();
 }

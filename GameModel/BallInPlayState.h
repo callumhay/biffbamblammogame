@@ -14,8 +14,6 @@ class GameItem;
 class BallInPlayState : public GameState {
 
 private:
-	std::vector<GameItem*> currLiveItems;	// Items that are currently available to be picked up in-game
-
 	void DoBallCollision(GameBall& b, const Vector2D& n, float d);
 	void DoItemCollision();
 
