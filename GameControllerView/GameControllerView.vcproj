@@ -235,6 +235,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Onomatoplex.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Skybox.cpp"
 				>
 			</File>
@@ -350,6 +354,10 @@
 			</File>
 			<File
 				RelativePath=".\ObjReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Onomatoplex.h"
 				>
 			</File>
 			<File

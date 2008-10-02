@@ -16,8 +16,6 @@
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameEventManager.h"
 
-#include "../GameModel/Onomatoplex.h"
-
 #include "../Utils/Includes.h"
 #include "../Utils/Vector.h"
 

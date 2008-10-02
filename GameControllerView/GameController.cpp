@@ -105,10 +105,10 @@ void GameController::Tick() {
 
 	// Paddle controls (NOTE: the else is to make the feedback slicker)
 	if (this->keyPressed[GLUT_KEY_LEFT]) {
-		this->model->MovePaddle(-this->model->GetPlayerPaddle().GetSpeed());
+		this->model->MovePaddle(-this->model->GetPlayerPaddle()->GetSpeed());
 	}
 	else if (this->keyPressed[GLUT_KEY_RIGHT]) {
-		this->model->MovePaddle(this->model->GetPlayerPaddle().GetSpeed());
+		this->model->MovePaddle(this->model->GetPlayerPaddle()->GetSpeed());
 	}
 
 	// Debug movement controls

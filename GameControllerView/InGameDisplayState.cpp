@@ -72,8 +72,8 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	
 	// Draw the foreground stuff (paddle, ball, pieces)
 	glTranslatef(-levelDim[0]/2.0f, 0, 0.0f);	
-	this->display->GetAssets()->DrawPaddle(this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
-	this->display->GetAssets()->DrawGameBall(this->display->GetModel()->GetGameBall(), this->display->GetCamera());
+	this->display->GetAssets()->DrawPaddle(*this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
+	this->display->GetAssets()->DrawGameBall(*this->display->GetModel()->GetGameBall(), this->display->GetCamera());
 
 	glPopMatrix();
 
