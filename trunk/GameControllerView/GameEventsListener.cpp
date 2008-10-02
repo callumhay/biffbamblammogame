@@ -121,9 +121,17 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 }
 
 void GameEventsListener::ScoreChangedEvent(int amt) {
-	debug_output("Score Change: " << amt);
+	debug_output("EVENT: Score Change: " << amt);
 }
 
 void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) {
-	debug_output("Score Multiplier Change - Old Value: " << oldMultiplier << " New Value: " << newMultiplier); 
+	debug_output("EVENT: Score Multiplier Change - Old Value: " << oldMultiplier << " New Value: " << newMultiplier); 
+}
+
+void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
+	debug_output("EVENT: Item Spawned: " << item);
+}
+
+void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) {
+	debug_output("EVENT: Item Obtained by Player: " << item);
 }

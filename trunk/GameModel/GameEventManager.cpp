@@ -107,6 +107,23 @@ void GameEventManager::ActionScoreMultiplierChanged(int oldScoreMultiplier, int 
 	}	
 }
 
+// Action for when a new item is spawned in the game
+void GameEventManager::ActionItemSpawned(const GameItem& item) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ItemSpawnedEvent(item);
+	}	
+}
+
+// Action for when an item and the player paddle collide
+void GameEventManager::ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ItemPaddleCollsionEvent(item, paddle);
+	}	
+}
+
+
 // Action for when the game is completed
 void GameEventManager::ActionGameCompleted() {
 	this->listenerIter = this->eventListeners.begin();

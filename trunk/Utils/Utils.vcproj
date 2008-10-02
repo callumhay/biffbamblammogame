@@ -175,10 +175,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Collision.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Matrix.cpp"
 				>
 			</File>
@@ -188,10 +184,6 @@
 			</File>
 			<File
 				RelativePath=".\UtilsUnitTester.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Vector.cpp"
 				>
 			</File>
 		</Filter>

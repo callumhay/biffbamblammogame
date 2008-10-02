@@ -2,6 +2,7 @@
 #include "GameModel.h"
 
 #include "../Utils/Vector.h"
+#include "../Utils/Collision.h"
 
 // Width and Height constants for items
 const float GameItem::ITEM_WIDTH	= 2.5f;
@@ -9,9 +10,10 @@ const float GameItem::ITEM_HEIGHT	= 1.0f;
 const float GameItem::HALF_ITEM_WIDTH		= ITEM_WIDTH / 2.0f;
 const float GameItem::HALF_ITEM_HEIGHT	= ITEM_HEIGHT / 2.0f;
 
-const float GameItem::SPEED_OF_DESCENT	= 15.0f;
+const float GameItem::SPEED_OF_DESCENT	= 5.0f;
 
-GameItem::GameItem(GameModel *gameModel) : gameModel(gameModel) {
+GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel) : 
+	name(name), center(spawnOrigin), gameModel(gameModel) {
 	assert(gameModel != NULL);
 }
 
@@ -37,5 +39,12 @@ void GameItem::Tick(double seconds) {
  * Returns: true on collision, false otherwise.
  */
 bool GameItem::CollisionCheck(const PlayerPaddle &paddle) {
-	return false;
+
+	// Create basic AABB for both paddle and item and then
+	// check for a collision in 2D.	
+	Collision::AABB2D paddleAABB(paddle.GetCenterPosition() - Vector2D(paddle.GetHalfWidthTotal(), paddle.GetHalfHeight()), 
+		                           paddle.GetCenterPosition() + Vector2D(paddle.GetHalfWidthTotal(), paddle.GetHalfHeight()));
+	Collision::AABB2D itemAABB(this->GetCenter() - Vector2D(HALF_ITEM_WIDTH, HALF_ITEM_HEIGHT), 
+														 this->GetCenter() + Vector2D(HALF_ITEM_WIDTH, HALF_ITEM_HEIGHT));
+	return Collision::IsCollision(paddleAABB, itemAABB);
 }

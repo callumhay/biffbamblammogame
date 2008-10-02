@@ -5,6 +5,7 @@
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/GameBall.h"
 #include "../GameModel/PlayerPaddle.h"
+#include "../GameModel/GameItem.h"
 
 #include <map>
 #include <string>
@@ -14,6 +15,7 @@ class Mesh;
 class Camera;
 class LevelMesh;
 class Skybox;
+class GameItem;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -36,7 +38,8 @@ private:
 	LevelMesh* levelMesh;
 
 	// Regular meshes - these persist throughout the entire game
-	Mesh* ball;		// ball used to break blocks
+	Mesh* ball;		// Ball used to break blocks
+	Mesh* item;		// Item, picked up by the player paddle
 
 	void DeleteWorldAssets();
 	void DeleteLevelAssets();
@@ -59,6 +62,7 @@ public:
 	void DrawGameBall(const GameBall& b, const Camera& camera) const;
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const;
 	void DrawBackground(double dT, const Camera& camera) const;
+	void DrawItem(const GameItem& gameItem, const Camera& camera) const;
 
 	LevelMesh* GetLevelMesh() const {
 		return this->levelMesh;
@@ -100,6 +104,7 @@ private:
 	// Regular mesh assets
 	static const std::string BALL_MESH;
 	static const std::string SKYBOX_MESH;
+	static const std::string ITEM_MESH;
 
 	// Deco assets
 	static const std::string DECO_PADDLE_MESH;

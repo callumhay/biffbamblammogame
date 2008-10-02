@@ -14,13 +14,7 @@ BallInPlayState::BallInPlayState(GameModel* gm) : GameState(gm) {
 }
 
 BallInPlayState::~BallInPlayState() {
-	// Destory any left-over game items
-	for(std::vector<GameItem*>::iterator iter = this->currLiveItems.begin(); iter < this->currLiveItems.end(); iter++) {
-		GameItem* currItem = *iter;
-		delete currItem;
-		currItem = NULL;
-	}
-	this->currLiveItems.clear();
+	this->gameModel->ClearLiveItems();
 }
 
 /**
@@ -39,20 +33,24 @@ void BallInPlayState::Tick(double seconds) {
 
 	// Update any items that may have been created
 	std::vector<unsigned int> removeIndices;
-	for(std::vector<GameItem*>::iterator itemIter = this->currLiveItems.begin(); itemIter < this->currLiveItems.end();) {
-		GameItem *currItem = *itemIter;
+	std::vector<GameItem*>& currLiveItems = this->gameModel->GetLiveItems();
+	for(unsigned int i = 0; i < currLiveItems.size(); i++) {
+		GameItem *currItem = currLiveItems[i];
 		currItem->Tick(seconds);
 		
 		// Check to see if any have left the playing area - if so destroy them
 		if (currItem->GetCenter()[1] <= GameLevel::Y_COORD_OF_DEATH) {
 			delete currItem;
 			currItem = NULL;
-			this->currLiveItems.erase(itemIter);
-		}
-		else {
-			itemIter++;
+			removeIndices.push_back(i);
 		}
 	}
+
+	// Delete any items that have left play
+	for (std::vector<unsigned int>::iterator iter = removeIndices.begin(); iter != removeIndices.end(); iter++) {
+		currLiveItems.erase(currLiveItems.begin() + *iter);
+	}
+
 
 	// Check for ball collisions with the pieces of the level and the paddle
 	const GameLevel *currLevel = this->gameModel->GetCurrentLevel();
@@ -88,16 +86,20 @@ void BallInPlayState::Tick(double seconds) {
 					
 					// Figure out whether we want to drop an item...
 					if (currPiece->CanDropItem()) {
-						// Now we will drop an item based on a combination of probablility
+						// Now we will drop an item based on a combination of variation/probablility
 						// and the number of consecutive blocks that have been hit on this set of ball bounces
 
-						int numBlocksAlreadyHit = this->gameModel->GetNumConsecutiveBlocksHit() + 1;
-						double itemDropProb = min(1.0, GameConstants::PROB_OF_ITEM_DROP * numBlocksAlreadyHit);
-						double randomNum = Randomizer::RandomNumZeroToOne();
+						double variation = 0.1 * sin(Randomizer::RandomNumZeroToOne() * 2.0 * M_PI);
+						double numBlocksAlreadyHit = static_cast<double>(this->gameModel->GetNumConsecutiveBlocksHit());
+						double itemDropProb = min(1.0, 0.05 * sqrt(numBlocksAlreadyHit) + GameConstants::PROB_OF_ITEM_DROP + variation);
+						debug_output("Probability of drop: " << itemDropProb);
 
-						if (randomNum <= itemDropProb) {
+						if (Randomizer::RandomNumZeroToOne() <= itemDropProb) {
 							// Drop an item - create a random item and add it to the list...
-							// TODO: this->currLiveItems.push_back(GameItemFactory::CreateRandomItem());
+							GameItem* newGameItem = GameItemFactory::CreateRandomItem(currPiece->GetCenter(), this->gameModel);
+							currLiveItems.push_back(newGameItem);
+							// EVENT: Item has been created and added to the game
+							GameEventManager::Instance()->ActionItemSpawned(*newGameItem);
 						}
 					}
 
@@ -123,22 +125,31 @@ void BallInPlayState::Tick(double seconds) {
  * the player paddle and carrying out the necessary activity if one did.
  */
 void BallInPlayState::DoItemCollision() {
+	std::vector<GameItem*>& currLiveItems = this->gameModel->GetLiveItems();
+	std::vector<unsigned int> removeIndices;
+
 	// Check to see if the paddle hit any items, if so, activate those items
-	for(std::vector<GameItem*>::iterator itemIter = this->currLiveItems.begin(); itemIter < this->currLiveItems.end();) {
-		GameItem *currItem = *itemIter;
+	for(unsigned int i = 0; i < currLiveItems.size(); i++) {
+		GameItem *currItem = currLiveItems[i];
 		
 		if (currItem->CollisionCheck(*this->gameModel->GetPlayerPaddle())) {
+			// EVENT: Item was obtained by the player paddle
+			GameEventManager::Instance()->ActionItemPaddleCollision(*currItem, *this->gameModel->GetPlayerPaddle());
+			
 			// There was a collision with the item and the player paddle: activate the item
 			// and then delete it.
 			currItem->Activate();
 			delete currItem;
 			currItem = NULL;
-			this->currLiveItems.erase(itemIter);
-		}
-		else {
-			itemIter++;
+			removeIndices.push_back(i);
 		}
 	}
+
+	// Delete any items that have been collided with
+	for (std::vector<unsigned int>::iterator iter = removeIndices.begin(); iter != removeIndices.end(); iter++) {
+		currLiveItems.erase(currLiveItems.begin() + *iter);
+	}
+
 }
 
 // n must be normalized

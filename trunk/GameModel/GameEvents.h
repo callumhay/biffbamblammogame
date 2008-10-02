@@ -7,6 +7,7 @@ class PlayerPaddle;
 class LevelPiece;
 class GameLevel;
 class GameWorld;
+class GameItem;
 
 class GameEvents {
 public:
@@ -123,10 +124,24 @@ public:
 	 * Event triggered when there is a change to the player's score multiplier. 
 	 * Only occurs once per change.
 	 * Arguements: oldMultiplier - The multiplier before the change.
-	 * Arguements: newMultiplier - The multiplier after the change.
+	 *             newMultiplier - The multiplier after the change.
 	 */
 	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) = 0;
 
+	/**
+	 * Event triggered when an item is spawned and becomes part of the game.
+	 * Only occurs once per spawn.
+	 * Arguements: item - The newly spawned item.
+	 */
+	virtual void ItemSpawnedEvent(const GameItem& item) = 0;
+
+	/**
+	 * Event triggered when an item hits the player paddle (i.e., the player gains the item).
+	 * Only occurs once at the happenstance of collision.
+	 * Arguements: item   - The item that has just been 'consumed' by the player.
+	 *             paddle - The paddle as it collides with the item.
+	 */
+	virtual void ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) = 0;
 };
 
 

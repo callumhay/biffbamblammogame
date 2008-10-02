@@ -5,6 +5,7 @@
 
 // model stuffs
 #include "../GameModel/GameModel.h"
+#include "../GameModel/GameItem.h"
 
 #include "../Utils/Includes.h"
 #include "../Utils/Vector.h"
@@ -70,10 +71,15 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	glTranslatef(0.0f, -levelDim[1]/2.0f, 0.0f);
 	this->display->GetAssets()->DrawBackground(dT, this->display->GetCamera());
 	
-	// Draw the foreground stuff (paddle, ball, pieces)
+	// Draw the foreground stuff (paddle, ball, items)
 	glTranslatef(-levelDim[0]/2.0f, 0, 0.0f);	
 	this->display->GetAssets()->DrawPaddle(*this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
 	this->display->GetAssets()->DrawGameBall(*this->display->GetModel()->GetGameBall(), this->display->GetCamera());
+
+	std::vector<GameItem*> &gameItems = this->display->GetModel()->GetLiveItems();
+	for (std::vector<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
+		this->display->GetAssets()->DrawItem((**iter), this->display->GetCamera());
+	}
 
 	glPopMatrix();
 
