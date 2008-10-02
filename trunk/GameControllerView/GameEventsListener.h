@@ -33,6 +33,7 @@ public:
 	// Misc game events
 	virtual void BlockDestroyedEvent(const LevelPiece& block);
 	virtual void ScoreChangedEvent(int amt);
+	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier);
 };
 
 #endif

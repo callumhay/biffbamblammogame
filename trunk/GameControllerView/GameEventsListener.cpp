@@ -2,6 +2,7 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 #include "LevelMesh.h"
+#include "Onomatoplex.h"
 
 #include "GameOverDisplayState.h"
 #include "GameCompleteDisplayState.h"
@@ -58,7 +59,8 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 
 
 void GameEventsListener::PaddleHitWallEvent(const Point2D& hitLoc) {
-	debug_output("EVENT: Paddle hit wall");
+	std::string soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::NORMAL);
+	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
 
 void GameEventsListener::BallDeathEvent(const GameBall& deadBall, int livesLeft) {
@@ -79,18 +81,49 @@ void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 }
 
 void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) {
+
 	debug_output("EVENT: Ball-block collision");
 	this->display->GetAssets()->GetLevelMesh()->ChangePiece(block);
 }
 
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
-	debug_output("EVENT: Ball-paddle collision");
+
+	// Use ball speed to determine amount of bounce sound
+	GameBall::BallSpeed ballSpd = ball.GetSpeed();
+	std::string soundText = "";
+
+	switch (ballSpd) {
+		case GameBall::ZeroSpeed :
+			// How the hell can there be a collision with no speed?
+			assert(false);
+			break;
+		case GameBall::SlowSpeed :
+			soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::NORMAL);
+			break;
+		case GameBall::NormalSpeed :
+			soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::GOOD);
+			break;
+		case GameBall::FastSpeed :
+			soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::AWESOME);
+			break;
+		default :
+			assert(false);
+			break;
+	}
+	debug_output("EVENT: Ball-paddle collision - " << soundText);
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
-	debug_output("EVENT: Block destroyed");
+
+	// TODO: Transmit data concerning the level of sound needed
+	std::string soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::EXPLOSION, Onomatoplex::NORMAL);
+	debug_output("EVENT: Block destroyed - " << soundText);
 }
 
 void GameEventsListener::ScoreChangedEvent(int amt) {
 	debug_output("Score Change: " << amt);
+}
+
+void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) {
+	debug_output("Score Multiplier Change - Old Value: " << oldMultiplier << " New Value: " << newMultiplier); 
 }
