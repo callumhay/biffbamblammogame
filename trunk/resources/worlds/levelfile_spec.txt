@@ -1,0 +1,19 @@
+The following specifies the .lvl format.
+
+// the start of the file begins with the width and height
+// in 'block' units, these are the building blocks of a level
+// The width and height here correspond to the interior of the
+// level (i.e., not including the walls and paddle)
+<w> <h>
+
+// Next is an array making up the interior of the level
+// The array consists of the following:
+
+// R - Red breakable block (requires 4 hits to break)
+// O = Orange breakable block (requires 3 hits to break)
+// Y - Yellow breakable block (requires 2 hits to break)
+// G - Green breakable block (requires 1 hit to break)
+// B - Bomb
+// S - A solid unbreakable block
+// E - Empty spot
+<block list in order of top-left to bottom-right>
