@@ -72,7 +72,19 @@ float Shininess <
     string UIName =  "Shininess";
 > = 128.0;
 
+float OutlineWidth <
+    string UIWidget = "slider";
+    float UIMin = 0.0f;
+    float UIMax = 10.0f;
+    float UIStep = 0.1f;
+    string UIName =  "Outline Width";
+> = 1.5f;
+
 //////// COLOR & TEXTURE /////////////////////
+float3 OutlineColour <
+    string UIName =  "Outline Colour";
+    string UIWidget = "Color";
+> = {0.00f,0.00f,0.00f};
 
 texture ColourTexture  <
     string ResourceName = "default_color.dds";
@@ -107,6 +119,11 @@ struct appdata {
     float4 Normal	: NORMAL;
 };
 
+struct appdata_outlines {
+    float3 Position	  : POSITION;
+    float4 Normal	    : NORMAL;
+};
+
 /* data passed from vertex shader to pixel shader */
 struct vertexOutput {
     float4 HPosition	     : POSITION;
@@ -139,6 +156,13 @@ vertexOutput celshading_VS(appdata IN) {
     OUT.HPosition = mul(WvpXf,Po);
     return OUT;
 }
+
+vertexOutput_outlines outline_VS(appdata_outlines IN) {
+    vertexOutput_outlines OUT = (vertexOutput_outlines)0;
+    OUT.HPosition = mul(WvpXf, float4(IN.Position, 1.0f));
+    return OUT;
+}
+
 
 ///////// PIXEL SHADING //////////////////////
 
@@ -193,35 +217,70 @@ float4 celshading_PS(vertexOutput IN) : COLOR {
     return float4(result, 1.0f);
 }
 
+float4 outline_PS() : COLOR {
+    return float4(OutlineColour.rgb, 1.0f);
+}
+
 ///// TECHNIQUES /////////////////////////////
 // Both techniques feature 2 passes: the first pass does the
 // actual celshading (step-diffuse texture is used to give the celshading
 // look; the second pass creates outlines.
 
 technique Basic {
-
     pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
         DepthTestEnable = true;
-        DepthFunc = Less;
+        DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
+        PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile vp40 celshading_VS();        
         FragmentProgram = compile fp40 celshading_PS();
+    }  
+     
+    pass p1 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Front;
+        LineWidth = OutlineWidth;
+        LineSmoothEnable = true;
+        PolygonMode = int2(Back, Line);
+        
+        VertexProgram = compile vp40 outline_VS();
+        FragmentProgram = compile fp40 outline_PS();
     }
 }
 
 technique Textured {
-
     pass p0 < string Script = "Draw=geometry;"; > {
-
+        BlendEnable = true;
         DepthTestEnable = true;
-        DepthFunc = Less;
+        DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
+        PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile vp40 celshading_VS();        
         FragmentProgram = compile fp40 celshading_textured_PS();
     }  
+     
+    pass p1 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Front;
+        LineWidth = OutlineWidth;
+        LineSmoothEnable = true;
+        PolygonMode = int2(Back, Line);
+        
+        VertexProgram = compile vp40 outline_VS();
+        FragmentProgram = compile fp40 outline_PS();
+    } 
 }
 /////////////////////////////////////// eof //

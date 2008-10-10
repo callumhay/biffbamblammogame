@@ -5,15 +5,15 @@
 #include "../Utils/Collision.h"
 
 // Width and Height constants for items
-const float GameItem::ITEM_WIDTH	= 2.5f;
+const float GameItem::ITEM_WIDTH	= 2.45f;
 const float GameItem::ITEM_HEIGHT	= 1.0f;
 const float GameItem::HALF_ITEM_WIDTH		= ITEM_WIDTH / 2.0f;
 const float GameItem::HALF_ITEM_HEIGHT	= ITEM_HEIGHT / 2.0f;
 
 const float GameItem::SPEED_OF_DESCENT	= 5.0f;
 
-GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel) : 
-	name(name), center(spawnOrigin), gameModel(gameModel) {
+GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const ItemType type) : 
+	name(name), center(spawnOrigin), gameModel(gameModel), type(type) {
 	assert(gameModel != NULL);
 }
 

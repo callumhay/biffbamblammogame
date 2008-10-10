@@ -24,13 +24,13 @@ struct MaterialProperties {
 	static const std::string MATERIAL_CELBASIC_TYPE;
 	static const std::string MATERIAL_CELPHONG_TYPE;
 
-	Colour diffuse, specular;
-	float shininess;
+	Colour diffuse, specular, outlineColour;
+	float shininess, outlineSize;
 	Texture2D* diffuseTexture;
 	std::string materialType;
 
 	MaterialProperties(): diffuseTexture(NULL), materialType(MATERIAL_CELBASIC_TYPE), 
-		diffuse(Colour(1,1,1)), specular(Colour(1,1,1)), shininess(128.0f) {}
+		diffuse(Colour(1,1,1)), specular(Colour(1,1,1)), outlineColour(Colour(0,0,0)), shininess(128.0f), outlineSize(1.0f) {}
 
 	~MaterialProperties() {
 		if (this->diffuseTexture != NULL) {
@@ -44,8 +44,6 @@ struct MaterialProperties {
  */
 class CgFxEffect {
 private:
-	void SetupBeforePasses(const Camera& camera);
-
 	/**
 	 * Draw the given display list in the given pass using
 	 * the Cg runtime.
@@ -59,6 +57,9 @@ private:
 	void LoadParameters();
 
 protected:
+
+	virtual void SetupBeforePasses(const Camera& camera);
+
 	// Cg Parameters shared by all effects
 	// Transforms
 	CGparameter worldITMatrixParam;
@@ -88,8 +89,6 @@ protected:
 	// Properties of this material
 	MaterialProperties* properties;
 	
-
-
 public:
 	CgFxEffect(const std::string& effectPath, MaterialProperties* props);
 	virtual ~CgFxEffect();
@@ -110,7 +109,7 @@ public:
 	}
 
 
-	MaterialProperties* GetProperties() const {
+	MaterialProperties* GetProperties() {
 		return this->properties;
 	}
 

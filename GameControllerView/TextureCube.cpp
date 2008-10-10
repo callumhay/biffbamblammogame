@@ -37,6 +37,18 @@ bool TextureCube::LoadCubeTextureFromImgs(const std::string filepaths[NUM_CUBE_F
 		ILubyte* texelData = ilGetData();
 		ILint height = ilGetInteger(IL_IMAGE_HEIGHT);
 		ILint width = ilGetInteger(IL_IMAGE_WIDTH);
+
+		// Assign width and height and make sure they are equal for all textures
+		// in the cube map
+		if (i == 0) {
+			this->width = width;
+			this->height = height;
+		}
+		else {
+			assert(this->width == width);
+			assert(this->height == height);
+		}
+
 		ILint internalFormat = ilGetInteger(IL_IMAGE_BPP);
 		ILint imgFormat = ilGetInteger(IL_IMAGE_FORMAT);
 

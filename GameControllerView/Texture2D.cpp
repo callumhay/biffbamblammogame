@@ -39,6 +39,8 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilt
 	// Obtain the proper power of two width/height of the font
 	int width = NumberFuncs::NextPowerOfTwo(bmp.width);
 	int height = NumberFuncs::NextPowerOfTwo(bmp.rows);
+	newTex->width = width;
+	newTex->height = height;
 
 	// Allocate Memory For The Texture Data.
 	GLubyte* expandedData = new GLubyte[ 2 * width * height];

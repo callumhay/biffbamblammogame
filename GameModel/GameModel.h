@@ -12,6 +12,7 @@
 #include "GameWorld.h"
 #include "GameEventManager.h"
 #include "GameItem.h"
+#include "GameItemTimer.h"
 
 #include "../Utils/Vector.h"
 
@@ -33,6 +34,8 @@ private:
 
 	// Items that are currently available to be picked up in-game
 	std::vector<GameItem*> currLiveItems;
+	// Timers that are currently active
+	std::vector<GameItemTimer*> activeTimers;
 
 	// Player score and life information
 	int currPlayerScore;
@@ -92,6 +95,7 @@ private:
 	}
 
 	void ClearLiveItems();
+	void ClearActiveTimers();
 
 public:	
 	GameModel();
@@ -136,6 +140,10 @@ public:
 
 	std::vector<GameItem*>& GetLiveItems() {
 		return this->currLiveItems;
+	}
+
+	std::vector<GameItemTimer*>& GetActiveTimers() {
+		return this->activeTimers;
 	}
 
 	bool IsGameOver() const {

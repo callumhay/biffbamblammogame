@@ -122,13 +122,12 @@ public:
 		}
 	}
 
+	// Obtain a reference to the listing of material groups for this mesh.
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const {
 		return this->matGrps;
 	}
 
-	/**
-	 * Set the colour of this mesh.
-	 */
+	void SetTextureForMaterial(const std::string& matGrpName, Texture2D* texToSet);
 	void SetColour(const Colour& c);
 };
 #endif

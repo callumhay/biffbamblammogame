@@ -25,6 +25,7 @@ private:
 
 	// Custom MTL statements
 	static const std::string CUSTOM_MTL_MATTYPE;
+	static const std::string CUSTOM_MTL_OUTLINESIZE;
 
 	MtlReader();
 

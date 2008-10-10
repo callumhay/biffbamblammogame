@@ -6,6 +6,7 @@
 #include "../GameModel/GameBall.h"
 #include "../GameModel/PlayerPaddle.h"
 #include "../GameModel/GameItem.h"
+#include "../GameModel/GameItemTimer.h"
 
 #include <map>
 #include <string>
@@ -16,6 +17,7 @@ class Camera;
 class LevelMesh;
 class Skybox;
 class GameItem;
+class Texture2D;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -41,6 +43,11 @@ private:
 	Mesh* ball;		// Ball used to break blocks
 	Mesh* item;		// Item, picked up by the player paddle
 
+	// Item related textures and drawlists
+	std::map<std::string, Texture2D*> itemTextures;
+	std::map<GameItemTimer::TimerType, Texture2D*> itemTimerTextures;
+	std::map<GameItemTimer::TimerType, Texture2D*> itemTimerFillerTextures;
+
 	void DeleteWorldAssets();
 	void DeleteLevelAssets();
 	void DeleteRegularMeshAssets();
@@ -50,6 +57,9 @@ private:
 	void LoadRegularFontAssets();
 	void LoadDecoStyleAssets();
 	void LoadCyberpunkStyleAssets();
+
+	void LoadItemTextures();
+	void UnloadItemTextures();
 
 public:
 	GameAssets();
@@ -63,6 +73,7 @@ public:
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const;
 	void DrawBackground(double dT, const Camera& camera) const;
 	void DrawItem(const GameItem& gameItem, const Camera& camera) const;
+	void DrawTimer(const GameItemTimer* timer);
 
 	LevelMesh* GetLevelMesh() const {
 		return this->levelMesh;
@@ -104,7 +115,16 @@ private:
 	// Regular mesh assets
 	static const std::string BALL_MESH;
 	static const std::string SKYBOX_MESH;
+	
 	static const std::string ITEM_MESH;
+	static const std::string ITEM_LABEL_MATGRP;
+	static const std::string ITEM_SLOWBALL_TEXTURE;
+	static const std::string ITEM_FASTBALL_TEXTURE;
+
+	static const std::string ITEM_TIMER_SLOWBALL_TEXTURE;
+	static const std::string ITEM_TIMER_FASTBALL_TEXTURE;
+
+	static const std::string ITEM_TIMER_FILLER_SPDBALL_TEXTURE;
 
 	// Deco assets
 	static const std::string DECO_PADDLE_MESH;

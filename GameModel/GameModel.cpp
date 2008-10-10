@@ -35,8 +35,9 @@ GameModel::~GameModel() {
 	delete this->playerPaddle;
 	this->playerPaddle = NULL;
 
-	// Delete all items
+	// Delete all items and timers
 	this->ClearLiveItems();
+	this->ClearActiveTimers();
 }
 
 /**
@@ -241,4 +242,15 @@ void GameModel::ClearLiveItems() {
 		currItem = NULL;
 	}
 	this->currLiveItems.clear();
+}
+/**
+ * Clears all of the active timers in the game.
+ */
+void GameModel::ClearActiveTimers() {
+	for(std::vector<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end(); iter++) {
+		GameItemTimer* currTimer = *iter;
+		delete currTimer;
+		currTimer = NULL;
+	}
+	this->activeTimers.clear();
 }

@@ -18,6 +18,7 @@ const std::string MtlReader::MTL_DIFF_TEXTURE	= "map_Kd";
 
 // Custom tags
 const std::string MtlReader::CUSTOM_MTL_MATTYPE			= "type";
+const std::string MtlReader::CUSTOM_MTL_OUTLINESIZE = "outlinesize";
 
 MtlReader::MtlReader() {
 }
@@ -103,6 +104,7 @@ std::map<std::string, CgFxEffect*> MtlReader::ReadMaterialFile(const std::string
 			texturePath.insert(0, filepath.substr(0, pos+1));
 
 			// Create the texture and add it to the material on success
+			// TODO: options for texture filtering...
 			matProperties[matName]->diffuseTexture = Texture2D::CreateTexture2DFromImgFile(texturePath, Texture::Trilinear);
 		}
 		else if (currStr == CUSTOM_MTL_MATTYPE) {
@@ -112,6 +114,14 @@ std::map<std::string, CgFxEffect*> MtlReader::ReadMaterialFile(const std::string
 				return materials;
 			}
 			matProperties[matName]->materialType = matTypeName;
+		}
+		else if (currStr == CUSTOM_MTL_OUTLINESIZE) {
+			float outlineSize = 1.0f;
+			if (!(inFile >> outlineSize)) {
+				debug_output("ERROR: could not read material outline size properly from mtl file: " << filepath); 
+				return materials;
+			}
+			matProperties[matName]->outlineSize = outlineSize;
 		}
 	}
 

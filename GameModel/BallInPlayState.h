@@ -16,6 +16,7 @@ class BallInPlayState : public GameState {
 private:
 	void DoBallCollision(GameBall& b, const Vector2D& n, float d);
 	void DoItemCollision();
+	void UpdateActiveTimers(double seconds);
 
 public:
 	BallInPlayState(GameModel* gm);

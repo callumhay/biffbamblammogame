@@ -20,9 +20,14 @@ private:
 	// Cel shading texture: parameter and texture objects
 	CGparameter celSamplerParam;
 	Texture1D* celDiffuseTexture;
+	
+	CGparameter outlineWidthParam;
+	CGparameter outlineColourParam;
+
+protected:
+	virtual void SetupBeforePasses(const Camera& camera);
 
 public:
-
 	CgFxCelShading(MaterialProperties* properties);
 	virtual ~CgFxCelShading();
 

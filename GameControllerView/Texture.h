@@ -13,6 +13,7 @@ protected:
 	TextureFilterType texFilter;
 	int textureType;
 	unsigned int texID;
+	unsigned int width, height;
 
 	static void SetMipmapFilteringParams(TextureFilterType texFilter, int glTexType);
 	static void SetNonMipmapFilteringParams(TextureFilterType texFilter, int glTexType);
@@ -29,6 +30,14 @@ public:
 	
 	int GetTextureType() const {
 		return this->textureType;
+	}
+
+	unsigned int GetWidth() const {
+		return this->width;
+	}
+
+	unsigned int GetHeight() const {
+		return this->height;
 	}
 
 	// Functions for binding and unbinding the texture - these should

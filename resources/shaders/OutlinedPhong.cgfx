@@ -56,7 +56,20 @@ float Shininess <
     string UIName =  "Shininess";
 > = 128.0;
 
+// Outline width (1.0 is pretty thin)
+float OutlineWidth <
+    string UIWidget = "slider";
+    float UIMin = 0.0f;
+    float UIMax = 10.0f;
+    float UIStep = 0.1f;
+    string UIName =  "Outline Width";
+> = 1.5f;
+
 //////// COLOR & TEXTURE /////////////////////
+float3 OutlineColour <
+    string UIName =  "Outline Colour";
+    string UIWidget = "Color";
+> = {0.00f,0.00f,0.00f};
 
 texture ColourTexture  <
     string ResourceName = "default_color.dds";
@@ -174,28 +187,61 @@ float4 outline_PS() : COLOR {
 // look; the second pass creates outlines.
 
 technique Basic {
-
     pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
         DepthTestEnable = true;
-        DepthFunc = Less;
+        DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
+        PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile vp40 phongshading_VS();        
         FragmentProgram = compile fp40 phongshading_PS();
+    }  
+     
+    pass p1 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Front;
+        LineWidth = OutlineWidth;
+        LineSmoothEnable = true;
+        PolygonMode = int2(Back, Line);
+        
+        VertexProgram = compile vp40 outline_VS();
+        FragmentProgram = compile fp40 outline_PS();
     }
 }
 
 technique Textured {
 
     pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
         DepthTestEnable = true;
-        DepthFunc = Less;
+        DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
+        PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile vp40 phongshading_VS();        
         FragmentProgram = compile fp40 phongshading_textured_PS();
     }  
+     
+    pass p1 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Front;
+        LineWidth = OutlineWidth;
+        LineSmoothEnable = true;
+        PolygonMode = int2(Back, Line);
+        
+        VertexProgram = compile vp40 outline_VS();
+        FragmentProgram = compile fp40 outline_PS();
+    } 
 }
 /////////////////////////////////////// eof //
