@@ -1,30 +1,30 @@
-#include "SlowBallItem.h"
 #include "FastBallItem.h"
+#include "SlowBallItem.h"
 
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
-const double SlowBallItem::SLOW_BALL_TIMER_IN_SECS	= 20.0;
-const std::string SlowBallItem::SLOW_BALL_ITEM_NAME = "Slow Ball (Power-up)";
+const double FastBallItem::FAST_BALL_TIMER_IN_SECS	= 20.0;
+const std::string FastBallItem::FAST_BALL_ITEM_NAME = "Fast Ball (Power-down)";
 
-SlowBallItem::SlowBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(SLOW_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::PowerUp) {
+FastBallItem::FastBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
+GameItem(FAST_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::PowerDown) {
 }
 
-SlowBallItem::~SlowBallItem() {
+FastBallItem::~FastBallItem() {
 }
 
 /**
- * Called to activate this item - the effect will be to slow down
+ * Called to activate this item - the effect will be to speed up
  * the game ball and start a timer for this effect to ware out.
  * Returns: A new timer associated with the effect.
  * NOTE: This function CREATES a new heap object and is not responsible
  * for its destruction, BECAREFUL!
  */
-GameItemTimer* SlowBallItem::Activate() {
-	// Activate the actual effect of the slow ball item
+GameItemTimer* FastBallItem::Activate() {
+	// Activate the actual effect of the fast ball item
 	GameBall* gameBall = this->gameModel->GetGameBall();
-	gameBall->DecreaseSpeed();
+	gameBall->IncreaseSpeed();
 
 	// Kill other ball speed timers
 	std::vector<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
@@ -50,18 +50,18 @@ GameItemTimer* SlowBallItem::Activate() {
 		// and set the ball to its regular speed, we just ignore the effect of this item
 		return new GameItemTimer(this, GameItemTimer::NoTimer, 0.0);
 	}
-	else if (gameBall->GetSpeed() > GameBall::NormalSpeed) {
-		return new GameItemTimer(this, GameItemTimer::FastBallTimer, FastBallItem::FAST_BALL_TIMER_IN_SECS);
+	else if (gameBall->GetSpeed() < GameBall::NormalSpeed) {
+		return new GameItemTimer(this, GameItemTimer::SlowBallTimer, SlowBallItem::SLOW_BALL_TIMER_IN_SECS);
 	}
 	else {
-		return new GameItemTimer(this, GameItemTimer::SlowBallTimer, SLOW_BALL_TIMER_IN_SECS);
+		return new GameItemTimer(this, GameItemTimer::FastBallTimer, FAST_BALL_TIMER_IN_SECS);
 	}
 }
 
 /**
  * Called to deactivate the effect of this timer.
  */
-void SlowBallItem::Deactivate() {
+void FastBallItem::Deactivate() {
 	GameBall* gameBall = this->gameModel->GetGameBall();
 	gameBall->SetSpeed(GameBall::NormalSpeed);
 }

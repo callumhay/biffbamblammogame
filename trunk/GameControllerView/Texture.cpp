@@ -61,18 +61,20 @@ bool Texture::Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilte
 	}
 
 	ILint height = ilGetInteger(IL_IMAGE_HEIGHT);
+	ILint width = ilGetInteger(IL_IMAGE_WIDTH);
+	this->width = width;
+	this->height = height;
+
 	if (height == 1) {
 		assert(this->textureType == GL_TEXTURE_1D);
 		
 		// 1D Texture
 		ILubyte* texelData = ilGetData();
-		ILint width = ilGetInteger(IL_IMAGE_WIDTH);
 		ILint internalFormat = ilGetInteger(IL_IMAGE_BPP);
 		ILint imgFormat = ilGetInteger(IL_IMAGE_FORMAT);
 
 		glGenTextures(1, &this->texID);
 		glBindTexture(this->textureType, this->texID);
-
 
 		if (useMipmapping) {
 			GLint result = gluBuild1DMipmaps(this->textureType, internalFormat, width, imgFormat, GL_UNSIGNED_BYTE, texelData);

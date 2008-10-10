@@ -63,6 +63,7 @@ inline int NumberFuncs::NextPowerOfTwo(int a) {
 
 namespace Randomizer {
 	void InitializeRandomizer();
+	int Random();
 	double RandomNumZeroToOne();
 	double RandomNumNegOneToOne();
 };
@@ -71,9 +72,14 @@ inline void Randomizer::InitializeRandomizer() {
 	srand(static_cast<unsigned int>(time(NULL)));
 };
 
+// A random value in [0, RAND_MAX]
+inline int Randomizer::Random() {
+	return rand();
+}
+
 // Return a random number in [0, 1]
 inline double Randomizer::RandomNumZeroToOne() {
-	return rand()/(static_cast<double>(RAND_MAX));
+	return static_cast<double>(rand())/(static_cast<double>(RAND_MAX));
 };
 
 // Return a random number in [-1, 1]

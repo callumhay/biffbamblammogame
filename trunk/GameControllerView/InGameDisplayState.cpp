@@ -5,7 +5,6 @@
 
 // model stuffs
 #include "../GameModel/GameModel.h"
-#include "../GameModel/GameItem.h"
 
 #include "../Utils/Includes.h"
 #include "../Utils/Vector.h"
@@ -106,4 +105,12 @@ void InGameDisplayState::DrawGameHUD() {
 	this->livesLabel.SetText(livesStrStream.str());
 	this->livesLabel.SetTopLeftCorner(Point2D(HUD_X_INDENT, this->display->GetDisplayHeight() - HUD_Y_INDENT));
 	this->livesLabel.Draw();
+
+	// Draw the timers that are currently in existance
+	const std::vector<GameItemTimer*>& activeTimers = this->display->GetModel()->GetActiveTimers();
+	std::vector<GameItemTimer*>::const_iterator timerIter = activeTimers.begin();
+	for(; timerIter != activeTimers.end(); timerIter++) {
+		const GameItemTimer* currTimer = *timerIter;
+		this->display->GetAssets()->DrawTimer(currTimer);
+	}
 }

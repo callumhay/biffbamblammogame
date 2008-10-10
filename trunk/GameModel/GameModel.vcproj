@@ -168,6 +168,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FastBallItem.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameBall.cpp"
 				>
 			</File>
@@ -189,6 +193,10 @@
 			</File>
 			<File
 				RelativePath=".\GameItemFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameItemTimer.cpp"
 				>
 			</File>
 			<File
@@ -238,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FastBallItem.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GameBall.h"
 				>
 			</File>
@@ -263,6 +275,10 @@
 			</File>
 			<File
 				RelativePath=".\GameItemFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameItemTimer.h"
 				>
 			</File>
 			<File

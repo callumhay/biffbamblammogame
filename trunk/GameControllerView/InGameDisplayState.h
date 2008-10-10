@@ -21,7 +21,7 @@ private:
 	
 	void DrawGameHUD();
 	void DrawGameScene(double dT);
-
+	
 public:
 	InGameDisplayState(GameDisplay* display);
 	virtual ~InGameDisplayState();

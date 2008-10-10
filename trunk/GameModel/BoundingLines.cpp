@@ -25,14 +25,19 @@ bool BoundingLines::Collide(const Circle2D& c, Vector2D& n, float &d) {
 	float sqRadius = c.Radius()*c.Radius();
 	d = 0.0f;
 
+	float minSqDist = FLT_MAX;	// Use this to ensure that we bounce off the most relevant side
+
 	// For each of the lines check for collision and how close the collision is to the line
 	for (size_t i = 0; i < this->lines.size(); i++) {
 		float sqDist = Collision::SqDistFromPtToLineSeg(this->lines[i], c.Center());
 	
 		// Check to see if there was a collision with the current line seg and circle
-		if (sqDist < sqRadius) {
+		// and that the collision is the most relevant
+		if (sqDist < sqRadius && sqDist <= (minSqDist + EPSILON)) {
+			
 			// Collision occurred add the normal to the list
 			collisionNorms.push_back(this->normals[i]);
+			minSqDist = sqDist;
 
 			d = sqrtf(sqDist);
 			if (Vector2D::Dot(this->normals[i], c.Center() - this->lines[i].P1()) < 0) {

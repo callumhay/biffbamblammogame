@@ -73,6 +73,7 @@ Mesh::~Mesh(){
 	std::map<std::string, MaterialGroup*>::iterator matGrpIter = this->matGrps.begin();
 	for (; matGrpIter != this->matGrps.end(); matGrpIter++) {
 		delete matGrpIter->second;
+		matGrpIter->second = NULL;
 	}
 	this->matGrps.clear();
 }
@@ -90,5 +91,21 @@ void Mesh::SetColour(const Colour& c) {
 		MaterialProperties* currMatProps = currMaterial->GetProperties();
 		currMatProps->diffuse = c;
 	}
+}
 
+/**
+ * Set the texture for the material group of the given name.
+ */
+void Mesh::SetTextureForMaterial(const std::string& matGrpName, Texture2D* texToSet) {
+
+	// Make sure the material group exists
+	std::map<std::string, MaterialGroup*>::iterator foundMatGrpIter = this->matGrps.find(matGrpName);
+	assert(foundMatGrpIter != this->matGrps.end());
+
+	// Change the texture for the found material group
+	MaterialGroup* foundMatGrp = foundMatGrpIter->second;
+	assert(foundMatGrp != NULL);
+	CgFxEffect* matEffect = foundMatGrp->GetMaterial();
+	MaterialProperties* matProps = matEffect->GetProperties();
+	matProps->diffuseTexture = texToSet;
 }

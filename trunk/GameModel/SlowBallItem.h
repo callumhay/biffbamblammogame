@@ -7,13 +7,16 @@
 class GameModel;
 
 class SlowBallItem : public GameItem {
-private:
-	static const std::string SLOW_BALL_ITEM_NAME;
+
 public:
+	static const double SLOW_BALL_TIMER_IN_SECS;
+	static const std::string SLOW_BALL_ITEM_NAME;
+
 	SlowBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
 	virtual ~SlowBallItem();
 
-	virtual void Activate();
+	virtual GameItemTimer* Activate();
+	virtual void Deactivate();
 
 };
 #endif

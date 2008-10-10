@@ -8,9 +8,10 @@
 class GameBall {
 
 public:
-	enum BallSpeed {ZeroSpeed = 0, SlowSpeed = 10, NormalSpeed = 17, FastSpeed = 22};
+	enum BallSpeed {ZeroSpeed = 0, SlowSpeed = 10, NormalSpeed = 15, FastSpeed = 21};
 
 private:
+
 	Circle2D bounds;			// The bounds of the ball, constantly updated to world space
 	Vector2D currDir;			// The current direction of movement of the ball
 	BallSpeed currSpeed;	// The current speed of the ball
@@ -45,14 +46,41 @@ public:
 	BallSpeed GetSpeed() const {
 		return this->currSpeed;
 	}
+	void SetSpeed(const BallSpeed speed) {
+		this->currSpeed = speed;
+	}
 
 	// Set the velocity of the ball; (0, 1) is up and (1, 0) is right
 	void SetVelocity(const BallSpeed &magnitude, const Vector2D& dir) {
 		this->currDir = Vector2D(dir);
 		this->currSpeed = magnitude;
 	}
-	void SetSpeed(const BallSpeed &spd) {
-		this->currSpeed = spd;
+
+	// Increases the Speed of the ball
+	void IncreaseSpeed() {
+		switch (this->currSpeed) {
+			case SlowSpeed :
+				this->currSpeed = NormalSpeed;
+				break;
+			case NormalSpeed :
+				this->currSpeed = FastSpeed;
+				break;
+			default:
+				break;
+		}
+	}
+	// Decreases the speed of the ball
+	void DecreaseSpeed() {
+		switch (this->currSpeed) {
+			case FastSpeed :
+				this->currSpeed = NormalSpeed;
+				break;
+			case NormalSpeed :
+				this->currSpeed = SlowSpeed;
+				break;
+			default:
+				break;
+		}	
 	}
 
 	void Tick(double seconds) {

@@ -5,9 +5,14 @@
 #include "CgShaderManager.h"
 #include "GameDisplay.h"
 #include "LevelMesh.h"
+#include "Texture2D.h"
 
 #include "Skybox.h"
 #include "DecoSkybox.h"
+
+// Includes for Item types
+#include "../GameModel/SlowBallItem.h"
+#include "../GameModel/FastBallItem.h"
 
 #include "../Utils/Includes.h"
 
@@ -33,7 +38,16 @@ const std::string GameAssets::FONT_ELECTRICZAP		= GameAssets::RESOURCE_DIR + "/"
 // Regular mesh asssets
 const std::string GameAssets::BALL_MESH		= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/ball.obj";
 const std::string GameAssets::SKYBOX_MESH	= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/skybox.obj";
-const std::string GameAssets::ITEM_MESH		= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/item.obj";
+
+const std::string GameAssets::ITEM_MESH							= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/item.obj";
+const std::string GameAssets::ITEM_LABEL_MATGRP			= "ItemLabel";	// Material group name for changing the label on the item mesh
+const std::string GameAssets::ITEM_SLOWBALL_TEXTURE	= GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/slowball_powerup512x128.jpg";
+const std::string GameAssets::ITEM_FASTBALL_TEXTURE	= GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/fastball_powerdown512x128.jpg";;
+
+const std::string GameAssets::ITEM_TIMER_SLOWBALL_TEXTURE	= GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/slowball_timer_hud128x64.png";
+const std::string GameAssets::ITEM_TIMER_FASTBALL_TEXTURE	= GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/fastball_timer_hud128x64.png";
+
+const std::string GameAssets::ITEM_TIMER_FILLER_SPDBALL_TEXTURE	= GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/ballspeed_timer_fill_hud128x64.png";
 
 // Deco assets
 const std::string GameAssets::DECO_PADDLE_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/deco_paddle.obj";
@@ -122,8 +136,10 @@ void GameAssets::DeleteRegularMeshAssets() {
 		this->ball = NULL;
 	}
 	if (this->item != NULL) {
+		this->item->SetTextureForMaterial(GameAssets::ITEM_LABEL_MATGRP, NULL);	// Make sure there is not texture assoc with item or we will delete it twice!!
 		delete this->item;
 		this->item = NULL;
+		this->UnloadItemTextures();
 	}
 }
 
@@ -144,12 +160,6 @@ void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera) const {
 	
 	// Draw the ball
 	this->ball->Draw(camera);
-	
-	// ... and its outlines
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	GameDisplay::SetOutlineRenderAttribs();
-	this->ball->FastDraw();
-	glPopAttrib();
 
 	glPopMatrix();
 }
@@ -166,12 +176,6 @@ void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) const {
 	// Draw the paddle
 	this->playerPaddle->Draw(camera);
 	
-	// ... and its outlines
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	GameDisplay::SetOutlineRenderAttribs();
-	this->playerPaddle->FastDraw();
-	glPopAttrib();
-
 	glPopMatrix();
 }
 
@@ -184,12 +188,6 @@ void GameAssets::DrawBackground(double dT, const Camera& camera) const {
 	
 	// Draw the background
 	this->background->Draw(camera);
-
-	// ... and its outlines
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	GameDisplay::SetOutlineRenderAttribs(2.5f);
-	this->background->FastDraw();
-	glPopAttrib();
 }
 
 /**
@@ -199,8 +197,126 @@ void GameAssets::DrawItem(const GameItem& gameItem, const Camera& camera) const 
 	Point2D center = gameItem.GetCenter();
 	glPushMatrix();
 	glTranslatef(center[0], center[1], 0.0f);
+
+	// Set material for the image based on the item name/type
+	std::string itemName	= gameItem.GetName();
+	std::map<std::string, Texture2D*>::const_iterator lookupIter = this->itemTextures.find(itemName);
+	assert(lookupIter != this->itemTextures.end());
+	Texture2D* itemTexture = lookupIter->second;
+	assert(itemTexture != NULL);
+	this->item->SetTextureForMaterial(GameAssets::ITEM_LABEL_MATGRP, itemTexture);
+	
+	// Draw the item
 	this->item->Draw(camera);
 	glPopMatrix();
+}
+
+/**
+ * Draw the HUD timer for the given timer type.
+ */
+void GameAssets::DrawTimer(const GameItemTimer* timer) {
+	// Check to see if a timer exists, if so then draw it
+	std::map<GameItemTimer::TimerType, Texture2D*>::iterator tempIterTimer = this->itemTimerTextures.find(timer->GetTimerType());
+	std::map<GameItemTimer::TimerType, Texture2D*>::iterator tempIterFiller = this->itemTimerFillerTextures.find(timer->GetTimerType());
+	
+	if (tempIterTimer != this->itemTimerTextures.end() && tempIterFiller != this->itemTimerFillerTextures.end()) {
+		
+		// Draw the timer
+		Texture2D* timerTex		= tempIterTimer->second;
+		Texture2D* fillerTex	= tempIterFiller->second;
+		
+		assert(timerTex != NULL);
+		assert(fillerTex != NULL);
+		
+		unsigned int width	= timerTex->GetWidth();
+		unsigned int height = timerTex->GetHeight();
+
+		// Make world coordinates equal window coordinates
+		Camera::PushWindowCoords();
+
+		// Prepare OGL for drawing the timer
+		glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | GL_TRANSFORM_BIT); 
+		glMatrixMode(GL_MODELVIEW);
+		glDisable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_2D);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
+
+		// Draw the timer
+		glPushMatrix();
+		glLoadIdentity();
+
+		//glTranslatef(?,?,0);
+
+		// Draw the filler for the timer (how much has elapsed)
+		float percentElapsed = timer->GetPercentTimeElapsed();
+		float fillerHeight    = height - (height * percentElapsed);
+		float fillerTexHeight = 1 - percentElapsed;
+		
+		fillerTex->BindTexture();
+		glColor4f(1.0f, 0.0f, 0.0f, 0.8f);	// TODO: different colours for different timers...
+		glBegin(GL_QUADS);
+		glTexCoord2d(0, 0); glVertex2f(0, 0);
+		glTexCoord2d(1, 0); glVertex2f(width, 0);
+		glTexCoord2d(1, fillerTexHeight); glVertex2f(width, fillerHeight);
+		glTexCoord2d(0, fillerTexHeight); glVertex2f(0, fillerHeight);
+		glEnd();
+
+		// TODO: make draw lists to speed this up...
+
+		timerTex->BindTexture();
+		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+		glBegin(GL_QUADS);
+		glTexCoord2d(0, 0); glVertex2f(0, 0);
+		glTexCoord2d(1, 0); glVertex2f(width, 0);
+		glTexCoord2d(1, 1); glVertex2f(width, height);
+		glTexCoord2d(0, 1); glVertex2f(0, height);
+		glEnd();
+
+		glPopMatrix();
+		glPopAttrib();  
+
+		// Pop the projection matrix
+		Camera::PopWindowCoords();
+	}
+	else {
+		assert(false);
+	}
+}
+
+/**
+ * Function for initializing the map for looking up item textures
+ * as well as timer textures.
+ */
+void GameAssets::LoadItemTextures() {
+	// Load the item textures
+	Texture2D* slowBallItemTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_SLOWBALL_TEXTURE, Texture::Trilinear);
+	Texture2D* fastBallItemTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_FASTBALL_TEXTURE, Texture::Trilinear);
+
+	assert(slowBallItemTex != NULL);
+	assert(fastBallItemTex != NULL);
+
+	this->itemTextures.insert(std::pair<std::string, Texture2D*>(SlowBallItem::SLOW_BALL_ITEM_NAME, slowBallItemTex));
+	this->itemTextures.insert(std::pair<std::string, Texture2D*>(FastBallItem::FAST_BALL_ITEM_NAME, fastBallItemTex));
+
+	// Load the timer textures
+	Texture2D* slowBallTimerTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_SLOWBALL_TEXTURE, Texture::Trilinear);
+	Texture2D* fastBallTimerTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_FASTBALL_TEXTURE, Texture::Trilinear);
+
+	assert(slowBallTimerTex != NULL);
+	assert(fastBallTimerTex != NULL);
+
+	this->itemTimerTextures.insert(std::pair<GameItemTimer::TimerType, Texture2D*>(GameItemTimer::SlowBallTimer, slowBallTimerTex));
+	this->itemTimerTextures.insert(std::pair<GameItemTimer::TimerType, Texture2D*>(GameItemTimer::FastBallTimer, fastBallTimerTex));
+
+	// Load the fillers for the timer textures (used to make the timer look like its ticking down)
+	Texture2D* ballSpdTimerFillerTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_FILLER_SPDBALL_TEXTURE, Texture::Trilinear);
+	
+	assert(ballSpdTimerFillerTex != NULL);
+
+	this->itemTimerFillerTextures.insert(std::pair<GameItemTimer::TimerType, Texture2D*>(GameItemTimer::SlowBallTimer, ballSpdTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<GameItemTimer::TimerType, Texture2D*>(GameItemTimer::FastBallTimer, ballSpdTimerFillerTex));
 }
 
 void GameAssets::LoadRegularMeshAssets() {
@@ -208,8 +324,42 @@ void GameAssets::LoadRegularMeshAssets() {
 		this->ball = ObjReader::ReadMesh(BALL_MESH);
 	}
 	if (this->item == NULL) {
+		// Load the mesh for items
 		this->item = ObjReader::ReadMesh(ITEM_MESH);
+		// Load all of the possible item labels
+		this->LoadItemTextures();
 	}
+}
+
+/**
+ * Function for unloading all the item textures.
+ */
+void GameAssets::UnloadItemTextures() {
+	// Unload item textures
+	std::map<std::string, Texture2D*>::iterator iter1 = this->itemTextures.begin();
+	for (; iter1 != this->itemTextures.end(); iter1++) {
+		delete iter1->second;
+		iter1->second = NULL;
+	}
+	this->itemTextures.clear();
+
+	// Unload timer textures
+	std::map<GameItemTimer::TimerType, Texture2D*>::iterator iter2 = this->itemTimerTextures.begin();
+	for (; iter2 != this->itemTimerTextures.end(); iter2++) {
+		delete iter2->second;
+		iter2->second = NULL;
+	}
+	this->itemTimerTextures.clear();
+
+	// Unload timer filler textures
+	std::map<GameItemTimer::TimerType, Texture2D*>::iterator iter3 = this->itemTimerFillerTextures.begin();
+	for (; iter3 != this->itemTimerFillerTextures.end(); iter3++) {
+		if (iter3->second != NULL) {
+			delete iter3->second;
+			iter3->second = NULL;
+		}
+	}
+	this->itemTimerFillerTextures.clear();
 }
 
 /*
