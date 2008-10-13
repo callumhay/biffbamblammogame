@@ -109,3 +109,20 @@ void Mesh::SetTextureForMaterial(const std::string& matGrpName, Texture2D* texTo
 	MaterialProperties* matProps = matEffect->GetProperties();
 	matProps->diffuseTexture = texToSet;
 }
+
+/**
+ * Set the colour for the specified material group of the given name.
+ */
+void Mesh::SetColourForMaterial(const std::string& matGrpName, const Colour& c) {
+	// Make sure the material group exists
+	std::map<std::string, MaterialGroup*>::iterator foundMatGrpIter = this->matGrps.find(matGrpName);
+	assert(foundMatGrpIter != this->matGrps.end());
+
+	// Change the texture for the found material group
+	MaterialGroup* foundMatGrp = foundMatGrpIter->second;
+	assert(foundMatGrp != NULL);
+
+	CgFxEffect* matEffect = foundMatGrp->GetMaterial();
+	MaterialProperties* matProps = matEffect->GetProperties();
+	matProps->diffuse = c;
+}

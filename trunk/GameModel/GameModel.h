@@ -8,11 +8,13 @@
 #include "PlayerPaddle.h"
 #include "GameBall.h"
 #include "GameState.h"
+#include "BallInPlayState.h"
 #include "GameLevel.h"
 #include "GameWorld.h"
 #include "GameEventManager.h"
 #include "GameItem.h"
 #include "GameItemTimer.h"
+#include "GameItemFactory.h"
 
 #include "../Utils/Vector.h"
 
@@ -168,16 +170,34 @@ public:
 
 	// Move the paddle a distance in either positive or negative X direction.
 	void MovePaddle(float dist) {
-		if (currState != NULL) {
+		if (this->currState != NULL) {
 			this->currState->MovePaddleKeyPressed(dist);
 		}
 	}
 	// Release the ball from the paddle
 	void ReleaseBall() {
-		if (currState != NULL) {
+		if (this->currState != NULL) {
 			this->currState->BallReleaseKeyPressed();
 		}
 	}
+
+	// Debug functions
+#ifndef NDEBUG
+	void DropFastBallItem() {
+		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
+		if (state != NULL) {
+			Vector2D levelDim = this->GetLevelUnitDimensions();
+			state->DebugDropItem(GameItemFactory::CreateFastBallItem(Point2D(0,0) + 0.5f*levelDim, this));
+		}
+	}
+	void DropSlowBallItem() {
+		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
+		if (state != NULL) {
+			Vector2D levelDim = this->GetLevelUnitDimensions();
+			state->DebugDropItem(GameItemFactory::CreateSlowBallItem(Point2D(0,0) + 0.5f*levelDim, this));
+		}
+	}
+#endif
 
 	// Befriend all state machine classes... 
 	// I know it's ugly but it's how the stupid pattern works

@@ -227,6 +227,10 @@
 				RelativePath=".\SlowBallItem.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\UberBallItem.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -311,6 +315,10 @@
 			</File>
 			<File
 				RelativePath=".\SlowBallItem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UberBallItem.h"
 				>
 			</File>
 		</Filter>

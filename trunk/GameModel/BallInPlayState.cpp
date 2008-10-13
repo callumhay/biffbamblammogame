@@ -19,6 +19,13 @@ BallInPlayState::~BallInPlayState() {
 	this->gameModel->ClearActiveTimers();
 }
 
+#ifndef NDEBUG
+void BallInPlayState::DebugDropItem(GameItem* item) {
+	assert(item != NULL);
+	this->debugItemDrops.push_back(item);
+}
+#endif
+
 /**
  * Since the ball is now in play this function will be doing A LOT, including:
  * - updating the ball's location and checking for collisions/death
@@ -83,24 +90,33 @@ void BallInPlayState::Tick(double seconds) {
 				LevelPiece *currPiece = levelPieces[h][w];
 				didCollide = currPiece->CollisionCheck(ball->GetBounds(), n, d);
 				if (didCollide) {
-					this->DoBallCollision(*ball, n, d);
+
+					// In the case that the ball is uber then there should be no reflection unless
+					// the piece is not breakable
+					if (ball->GetBallType() != GameBall::UberBall || !currPiece->MustBeDestoryedToEndLevel()) {
+						this->DoBallCollision(*ball, n, d);
+					}
 					
 					// Figure out whether we want to drop an item...
 					if (currPiece->CanDropItem()) {
 						// Now we will drop an item based on a combination of variation/probablility
 						// and the number of consecutive blocks that have been hit on this set of ball bounces
 
-						double variation = 0.05 * sin(Randomizer::RandomNumZeroToOne() * 2.0 * M_PI);
+						double variation = GameConstants::PROB_OF_ITEM_DROP * sin(Randomizer::RandomNumZeroToOne() * 2.0 * M_PI);
 						double numBlocksAlreadyHit = static_cast<double>(this->gameModel->GetNumConsecutiveBlocksHit());
-						double itemDropProb = min(1.0, 0.05 * sqrt(numBlocksAlreadyHit) + GameConstants::PROB_OF_ITEM_DROP + variation);
+						double itemDropProb = min(1.0, 0.02 * numBlocksAlreadyHit + GameConstants::PROB_OF_ITEM_DROP + variation);
 						debug_output("Probability of drop: " << itemDropProb);
+						double randomNum = Randomizer::RandomNumZeroToOne();
 
-						if (Randomizer::RandomNumZeroToOne()<= itemDropProb) {
+						if (randomNum <= itemDropProb) {
 							// Drop an item - create a random item and add it to the list...
 							GameItem* newGameItem = GameItemFactory::CreateRandomItem(currPiece->GetCenter(), this->gameModel);
 							currLiveItems.push_back(newGameItem);
 							// EVENT: Item has been created and added to the game
 							GameEventManager::Instance()->ActionItemSpawned(*newGameItem);
+
+							// For better randomness...
+							Randomizer::InitializeRandomizer(randomNum * RAND_MAX);
 						}
 					}
 
@@ -116,6 +132,18 @@ void BallInPlayState::Tick(double seconds) {
 			}
 		}
 	}
+
+	// Debug Item drops
+#ifndef NDEBUG
+	currLiveItems = this->gameModel->GetLiveItems();
+	for (std::vector<GameItem*>::iterator iter = this->debugItemDrops.begin(); iter != this->debugItemDrops.end(); iter++) {
+		GameItem* newItem = *iter;
+		currLiveItems.push_back(newItem);
+		// EVENT: Item has been created and added to the game
+		GameEventManager::Instance()->ActionItemSpawned(*newItem);
+	}
+	this->debugItemDrops.clear();
+#endif
 
 	// Check for item-paddle collisions
 	this->DoItemCollision();
@@ -171,6 +199,7 @@ void BallInPlayState::DoItemCollision() {
 			// and then delete it. If the item causes the creation of a timer then add the timer to the list
 			// of active timers.
 			GameItemTimer* newTimer = currItem->Activate();
+			assert(newTimer != NULL);
 			activeTimers.push_back(newTimer);	
 			removeIndices.push_back(i);
 		}
@@ -187,6 +216,7 @@ void BallInPlayState::DoItemCollision() {
 // d is the distance from the center of the ball to the line that was collided with
 // when d is negative the ball is inside the line, when positive it is outside
 void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
+
 	// Position the ball so that it is against the collision line, exactly
 	if (fabs(d) > EPSILON) {
 		int signDist = NumberFuncs::SignOf(d);

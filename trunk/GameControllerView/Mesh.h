@@ -128,6 +128,7 @@ public:
 	}
 
 	void SetTextureForMaterial(const std::string& matGrpName, Texture2D* texToSet);
+	void SetColourForMaterial(const std::string& matGrpName, const Colour& c);
 	void SetColour(const Colour& c);
 };
 #endif

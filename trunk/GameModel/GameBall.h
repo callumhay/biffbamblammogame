@@ -8,13 +8,14 @@
 class GameBall {
 
 public:
-	enum BallSpeed {ZeroSpeed = 0, SlowSpeed = 10, NormalSpeed = 15, FastSpeed = 21};
+	enum BallSpeed { ZeroSpeed = 0, SlowSpeed = 10, NormalSpeed = 15, FastSpeed = 21 };
+	enum BallType { NormalBall, UberBall };
 
 private:
-
 	Circle2D bounds;			// The bounds of the ball, constantly updated to world space
 	Vector2D currDir;			// The current direction of movement of the ball
 	BallSpeed currSpeed;	// The current speed of the ball
+	BallType currType;		// The current type of ball this is
 
 public:
 	// Minimum angle the ball can be reflected at
@@ -46,8 +47,16 @@ public:
 	BallSpeed GetSpeed() const {
 		return this->currSpeed;
 	}
+	// Set the current speed of this ball
 	void SetSpeed(const BallSpeed speed) {
 		this->currSpeed = speed;
+	}
+
+	BallType GetBallType() const {
+		return this->currType;
+	}
+	void SetBallType(const BallType type) {
+		this->currType = type;
 	}
 
 	// Set the velocity of the ball; (0, 1) is up and (1, 0) is right

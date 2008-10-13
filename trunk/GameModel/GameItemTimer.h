@@ -2,6 +2,7 @@
 #define __GAMEITEMTIMER_H__
 
 #include <string>
+#include <map>
 
 #include "GameItem.h"
 
@@ -18,7 +19,8 @@ public:
 	//             the timer architecture is universal and there are no exceptions for cases where a timer is not used.
 	// - SlowBallTimer : A timer related to an item that makes the ball go slower
 	// - FastBallTimer : A timer related to an item that makes the ball go faster
-	enum TimerType { NoTimer, SlowBallTimer, FastBallTimer };
+	// - UberBallTimer : A timer related to an item that makes the ball destroy stuff easier
+	enum TimerType { NoTimer, SlowBallTimer, FastBallTimer, UberBallTimer };
 
 private:
 	GameItem* assocGameItem;	// The game item associated with this timer
@@ -45,6 +47,10 @@ public:
 	 */
 	TimerType GetTimerType() const {
 		return this->type;
+	}
+
+	GameItem::ItemType GetTimerDisposition() const {
+		return this->assocGameItem->GetItemType();
 	}
 
 	/**

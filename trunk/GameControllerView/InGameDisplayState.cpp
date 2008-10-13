@@ -108,9 +108,8 @@ void InGameDisplayState::DrawGameHUD() {
 
 	// Draw the timers that are currently in existance
 	const std::vector<GameItemTimer*>& activeTimers = this->display->GetModel()->GetActiveTimers();
-	std::vector<GameItemTimer*>::const_iterator timerIter = activeTimers.begin();
-	for(; timerIter != activeTimers.end(); timerIter++) {
-		const GameItemTimer* currTimer = *timerIter;
-		this->display->GetAssets()->DrawTimer(currTimer);
-	}
+
+	
+	this->display->GetAssets()->DrawTimers(activeTimers, this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+
 }

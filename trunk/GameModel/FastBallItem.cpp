@@ -8,7 +8,7 @@ const double FastBallItem::FAST_BALL_TIMER_IN_SECS	= 20.0;
 const std::string FastBallItem::FAST_BALL_ITEM_NAME = "Fast Ball (Power-down)";
 
 FastBallItem::FastBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(FAST_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::PowerDown) {
+GameItem(FAST_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
 }
 
 FastBallItem::~FastBallItem() {
@@ -24,6 +24,8 @@ FastBallItem::~FastBallItem() {
 GameItemTimer* FastBallItem::Activate() {
 	// Activate the actual effect of the fast ball item
 	GameBall* gameBall = this->gameModel->GetGameBall();
+	assert(gameBall != NULL);
+
 	gameBall->IncreaseSpeed();
 
 	// Kill other ball speed timers
@@ -63,5 +65,6 @@ GameItemTimer* FastBallItem::Activate() {
  */
 void FastBallItem::Deactivate() {
 	GameBall* gameBall = this->gameModel->GetGameBall();
+	assert(gameBall != NULL);
 	gameBall->SetSpeed(GameBall::NormalSpeed);
 }

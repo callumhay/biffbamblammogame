@@ -1,6 +1,5 @@
 #include "GameItemTimer.h"
 
-
 GameItemTimer::GameItemTimer(GameItem* gameItem, const TimerType type, const double totalLengthInSecs) : 
 timeElapsedInSecs(0.0), timeLengthInSecs(totalLengthInSecs), type(type), assocGameItem(gameItem){
 	assert(gameItem != NULL);
@@ -8,9 +7,11 @@ timeElapsedInSecs(0.0), timeLengthInSecs(totalLengthInSecs), type(type), assocGa
 }
 
 GameItemTimer::~GameItemTimer() {
-	assert(this->assocGameItem != NULL);
-	delete this->assocGameItem;
-	this->assocGameItem = NULL;
+	//assert(this->assocGameItem != NULL);
+	if (this->assocGameItem != NULL) {
+		delete this->assocGameItem;
+		this->assocGameItem = NULL;
+	}
 }
 
 /**

@@ -9,7 +9,8 @@ const float GameBall::MIN_BALL_ANGLE_IN_RADS = Trig::degreesToRadians(MIN_BALL_A
 // Typical initial velocity for the ball when released from the player paddle
 const Vector2D GameBall::STD_INIT_VEL_DIR = Vector2D(0, GameBall::NormalSpeed);
 
-GameBall::GameBall() : bounds(Point2D(0.0f,0.0f), 0.5f), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed){
+GameBall::GameBall() : bounds(Point2D(0.0f,0.0f), 0.5f), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
+currType(GameBall::NormalBall) {
 }
 
 GameBall::~GameBall() {
