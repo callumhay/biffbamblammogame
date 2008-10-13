@@ -75,15 +75,14 @@ void GameDisplay::SetOutlineRenderAttribs(float outlineWidth) {
 }
 
 void GameDisplay::ChangeDisplaySize(int w, int h) {
-	// Prevent a divide by zero, when window is too short
-	// (you cant make a window of zero width).
-	if(h == 0) {
-		h = 1;
-	}
+	// Make sure minimum size is 800 x 600
+	h = max(600, h);
+	w = max(800, w);
 
 	glViewport(0, 0, w, h);
 	this->width = w;
 	this->height = h;
+	glutReshapeWindow(w, h);
 }
 
 void GameDisplay::Render() {

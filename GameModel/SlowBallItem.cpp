@@ -8,7 +8,7 @@ const double SlowBallItem::SLOW_BALL_TIMER_IN_SECS	= 20.0;
 const std::string SlowBallItem::SLOW_BALL_ITEM_NAME = "Slow Ball (Power-up)";
 
 SlowBallItem::SlowBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(SLOW_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::PowerUp) {
+GameItem(SLOW_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
 }
 
 SlowBallItem::~SlowBallItem() {
@@ -24,6 +24,8 @@ SlowBallItem::~SlowBallItem() {
 GameItemTimer* SlowBallItem::Activate() {
 	// Activate the actual effect of the slow ball item
 	GameBall* gameBall = this->gameModel->GetGameBall();
+	assert(gameBall != NULL);
+
 	gameBall->DecreaseSpeed();
 
 	// Kill other ball speed timers
@@ -63,5 +65,6 @@ GameItemTimer* SlowBallItem::Activate() {
  */
 void SlowBallItem::Deactivate() {
 	GameBall* gameBall = this->gameModel->GetGameBall();
+	assert(gameBall != NULL);
 	gameBall->SetSpeed(GameBall::NormalSpeed);
 }

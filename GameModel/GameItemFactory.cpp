@@ -27,3 +27,13 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 
 	return new SlowBallItem(spawnOrigin, gameModel);;
 }
+
+#ifndef NDEBUG
+GameItem* GameItemFactory::CreateFastBallItem(const Point2D &spawnOrigin, GameModel *gameModel) {
+	return new FastBallItem(spawnOrigin, gameModel);
+}
+
+GameItem* GameItemFactory::CreateSlowBallItem(const Point2D &spawnOrigin, GameModel *gameModel) {
+	return new SlowBallItem(spawnOrigin, gameModel);
+}
+#endif

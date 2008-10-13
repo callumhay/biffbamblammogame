@@ -8,6 +8,8 @@
 #include "../GameModel/GameItem.h"
 #include "../GameModel/GameItemTimer.h"
 
+#include "../Utils/Colour.h"
+
 #include <map>
 #include <string>
 
@@ -73,7 +75,7 @@ public:
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const;
 	void DrawBackground(double dT, const Camera& camera) const;
 	void DrawItem(const GameItem& gameItem, const Camera& camera) const;
-	void DrawTimer(const GameItemTimer* timer);
+	void DrawTimers(const std::vector<GameItemTimer*>& timers, int displayWidth, int displayHeight);
 
 	LevelMesh* GetLevelMesh() const {
 		return this->levelMesh;
@@ -118,6 +120,11 @@ private:
 	
 	static const std::string ITEM_MESH;
 	static const std::string ITEM_LABEL_MATGRP;
+	static const std::string ITEM_END_MATGRP;
+	static const Colour ITEM_GOOD_COLOUR;
+	static const Colour ITEM_BAD_COLOUR;
+	static const Colour ITEM_NEUTRAL_COLOUR;
+
 	static const std::string ITEM_SLOWBALL_TEXTURE;
 	static const std::string ITEM_FASTBALL_TEXTURE;
 

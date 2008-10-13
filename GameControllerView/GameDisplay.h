@@ -1,6 +1,8 @@
 #ifndef __GAMEDISPLAY_H__
 #define __GAMEDISPLAY_H__
 
+#include <algorithm>
+
 #include "../Utils/Debug.h"
 #include "DisplayState.h"
 #include "Camera.h"

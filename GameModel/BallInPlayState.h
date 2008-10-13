@@ -18,6 +18,10 @@ private:
 	void DoItemCollision();
 	void UpdateActiveTimers(double seconds);
 
+#ifndef NDEBUG
+	std::vector<GameItem*> debugItemDrops;
+#endif
+
 public:
 	BallInPlayState(GameModel* gm);
 	virtual ~BallInPlayState();
@@ -27,5 +31,8 @@ public:
 		// Do nothing, ball is already in play.
 	}
 
+#ifndef NDEBUG
+	void DebugDropItem(GameItem* item);
+#endif
 };
 #endif

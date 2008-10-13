@@ -25,6 +25,11 @@ public:
 
 	// Static factory functions for the creation of game items
 	static GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel);			// Could be either power-up or down
-
+	
+#ifndef NDEBUG
+	// Item specific creation methods for debugging
+	static GameItem* CreateFastBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	static GameItem* CreateSlowBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+#endif
 };
 #endif

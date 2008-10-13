@@ -39,8 +39,13 @@ const std::string GameAssets::FONT_ELECTRICZAP		= GameAssets::RESOURCE_DIR + "/"
 const std::string GameAssets::BALL_MESH		= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/ball.obj";
 const std::string GameAssets::SKYBOX_MESH	= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/skybox.obj";
 
-const std::string GameAssets::ITEM_MESH							= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/item.obj";
-const std::string GameAssets::ITEM_LABEL_MATGRP			= "ItemLabel";	// Material group name for changing the label on the item mesh
+const std::string GameAssets::ITEM_MESH						= GameAssets::RESOURCE_DIR + "/" + MESH_DIR + "/item.obj";
+const std::string GameAssets::ITEM_LABEL_MATGRP		= "ItemLabel";	// Material group name for changing the label on the item mesh
+const std::string GameAssets::ITEM_END_MATGRP			= "ColourEnd";	// Material group name for changing the colour on the item mesh
+const Colour GameAssets::ITEM_GOOD_COLOUR					= Colour(0.0f, 0.8f, 0.0f);
+const Colour GameAssets::ITEM_BAD_COLOUR					= Colour(0.8f, 0.0f, 0.0f);
+const Colour GameAssets::ITEM_NEUTRAL_COLOUR			= Colour(0.0f, 0.6f, 1.0f);
+
 const std::string GameAssets::ITEM_SLOWBALL_TEXTURE	= GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/slowball_powerup512x128.jpg";
 const std::string GameAssets::ITEM_FASTBALL_TEXTURE	= GameAssets::RESOURCE_DIR + "/" + TEXTURE_DIR + "/fastball_powerdown512x128.jpg";;
 
@@ -206,6 +211,23 @@ void GameAssets::DrawItem(const GameItem& gameItem, const Camera& camera) const 
 	assert(itemTexture != NULL);
 	this->item->SetTextureForMaterial(GameAssets::ITEM_LABEL_MATGRP, itemTexture);
 	
+	Colour itemEndColour;
+	switch (gameItem.GetItemType()) {
+		case GameItem::Good :
+			itemEndColour = GameAssets::ITEM_GOOD_COLOUR;
+			break;
+		case GameItem::Bad :
+			itemEndColour = GameAssets::ITEM_BAD_COLOUR;
+			break;		
+		case GameItem::Neutral:
+			itemEndColour = GameAssets::ITEM_NEUTRAL_COLOUR;
+			break;
+		default:
+			assert(false);
+			break;
+	}
+	this->item->SetColourForMaterial(GameAssets::ITEM_END_MATGRP, itemEndColour);
+	
 	// Draw the item
 	this->item->Draw(camera);
 	glPopMatrix();
@@ -214,74 +236,122 @@ void GameAssets::DrawItem(const GameItem& gameItem, const Camera& camera) const 
 /**
  * Draw the HUD timer for the given timer type.
  */
-void GameAssets::DrawTimer(const GameItemTimer* timer) {
-	// Check to see if a timer exists, if so then draw it
-	std::map<GameItemTimer::TimerType, Texture2D*>::iterator tempIterTimer = this->itemTimerTextures.find(timer->GetTimerType());
-	std::map<GameItemTimer::TimerType, Texture2D*>::iterator tempIterFiller = this->itemTimerFillerTextures.find(timer->GetTimerType());
-	
-	if (tempIterTimer != this->itemTimerTextures.end() && tempIterFiller != this->itemTimerFillerTextures.end()) {
+void GameAssets::DrawTimers(const std::vector<GameItemTimer*>& timers, int displayWidth, int displayHeight) {
+
+	// Spacing along the vertical between timer graphics
+	unsigned int TIMER_Y_SPACING_PX = 5;
+	// Spacing along the horizontal of timer graphics distanced from the right edge of the game window
+ 	unsigned int TIMER_X_SPACING_PX = displayWidth / 25;
+	// Width of timer graphic
+	unsigned int TIMER_WIDTH_PX			= (displayWidth / 5) - (2 * TIMER_X_SPACING_PX);
+	// Tracked height at which to draw the next timer graphic
+	unsigned int currHeight					= 2 * displayHeight / 3;
+
+	// Go through each timer and draw its appropriate graphic and current elapsed 'filler'
+	for(std::vector<GameItemTimer*>::const_iterator allTimerIter = timers.begin(); allTimerIter != timers.end(); allTimerIter++) {
+		const GameItemTimer* timer = *allTimerIter;
+
+		// Check to see if a timer exists, if so then draw it
+		std::map<GameItemTimer::TimerType, Texture2D*>::iterator tempIterTimer = this->itemTimerTextures.find(timer->GetTimerType());
+		std::map<GameItemTimer::TimerType, Texture2D*>::iterator tempIterFiller = this->itemTimerFillerTextures.find(timer->GetTimerType());
 		
-		// Draw the timer
-		Texture2D* timerTex		= tempIterTimer->second;
-		Texture2D* fillerTex	= tempIterFiller->second;
-		
-		assert(timerTex != NULL);
-		assert(fillerTex != NULL);
-		
-		unsigned int width	= timerTex->GetWidth();
-		unsigned int height = timerTex->GetHeight();
+		if (tempIterTimer != this->itemTimerTextures.end() && tempIterFiller != this->itemTimerFillerTextures.end()) {
+			
+			// Draw the timer
+			Texture2D* timerTex		= tempIterTimer->second;
+			Texture2D* fillerTex	= tempIterFiller->second;
+			
+			assert(timerTex != NULL);
+			assert(fillerTex != NULL);
+			
+			unsigned int width	= TIMER_WIDTH_PX;
+			unsigned int height = width * timerTex->GetHeight() / timerTex->GetWidth();
 
-		// Make world coordinates equal window coordinates
-		Camera::PushWindowCoords();
+			// Make world coordinates equal window coordinates
+			Camera::PushWindowCoords();
 
-		// Prepare OGL for drawing the timer
-		glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | GL_TRANSFORM_BIT); 
-		glMatrixMode(GL_MODELVIEW);
-		glDisable(GL_LIGHTING);
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
+			// Prepare OGL for drawing the timer
+			glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | GL_TRANSFORM_BIT); 
+			glMatrixMode(GL_MODELVIEW);
+			glDisable(GL_LIGHTING);
+			glEnable(GL_TEXTURE_2D);
+			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
 
-		// Draw the timer
-		glPushMatrix();
-		glLoadIdentity();
+			// Draw the timer...
+			glPushMatrix();
+			glLoadIdentity();
 
-		//glTranslatef(?,?,0);
+			// Do the transformation to setup the start location for where to draw the
+			// timer graphics (right-hand side of the screen)
 
-		// Draw the filler for the timer (how much has elapsed)
-		float percentElapsed = timer->GetPercentTimeElapsed();
-		float fillerHeight    = height - (height * percentElapsed);
-		float fillerTexHeight = 1 - percentElapsed;
-		
-		fillerTex->BindTexture();
-		glColor4f(1.0f, 0.0f, 0.0f, 0.8f);	// TODO: different colours for different timers...
-		glBegin(GL_QUADS);
-		glTexCoord2d(0, 0); glVertex2f(0, 0);
-		glTexCoord2d(1, 0); glVertex2f(width, 0);
-		glTexCoord2d(1, fillerTexHeight); glVertex2f(width, fillerHeight);
-		glTexCoord2d(0, fillerTexHeight); glVertex2f(0, fillerHeight);
-		glEnd();
+			glTranslatef(displayWidth - width - TIMER_X_SPACING_PX, currHeight, 0.0f);
 
-		// TODO: make draw lists to speed this up...
+			// Draw the filler for the timer (how much has elapsed)
+			float percentElapsed = timer->GetPercentTimeElapsed();
+			float fillerHeight    = height - (height * percentElapsed);
+			float fillerTexHeight = 1 - percentElapsed;
+			
+			// Back fill - so that the filler that has expired so far stands out
+			// from the background
+			fillerTex->BindTexture();
+			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+			glBegin(GL_QUADS);
+			glTexCoord2d(0, 0); glVertex2f(0, 0);
+			glTexCoord2d(1, 0); glVertex2f(width, 0);
+			glTexCoord2d(1, 1); glVertex2f(width, height);
+			glTexCoord2d(0, 1); glVertex2f(0, height);
+			glEnd();
 
-		timerTex->BindTexture();
-		glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-		glBegin(GL_QUADS);
-		glTexCoord2d(0, 0); glVertex2f(0, 0);
-		glTexCoord2d(1, 0); glVertex2f(width, 0);
-		glTexCoord2d(1, 1); glVertex2f(width, height);
-		glTexCoord2d(0, 1); glVertex2f(0, height);
-		glEnd();
+			// Figure out what colour to make the fill based on how it
+			// affects the player (red is bad, green is good, etc.)
+			GameItem::ItemType itemDisposition = timer->GetTimerDisposition();
+			switch (itemDisposition) {
+				case GameItem::Good:
+					glColor4f(ITEM_GOOD_COLOUR.R(), ITEM_GOOD_COLOUR.G(), ITEM_GOOD_COLOUR.B(), 1.0f);	// Deep Green
+					break;
+				case GameItem::Bad:
+					glColor4f(ITEM_BAD_COLOUR.R(), ITEM_BAD_COLOUR.G(), ITEM_BAD_COLOUR.B(), 1.0f);	// Deep Red
+					break;
+				case GameItem::Neutral:
+					glColor4f(ITEM_NEUTRAL_COLOUR.R(), ITEM_NEUTRAL_COLOUR.G(), ITEM_NEUTRAL_COLOUR.B(), 1.0f);	// Light Blue
+					break;
+				default:
+					assert(false);
+					break;
+			}
+			
+			// The actual filler, which is constantly decreasing to zero
+			glBegin(GL_QUADS);
+			glTexCoord2d(0, 0); glVertex2f(0, 0);
+			glTexCoord2d(1, 0); glVertex2f(width, 0);
+			glTexCoord2d(1, fillerTexHeight); glVertex2f(width, fillerHeight);
+			glTexCoord2d(0, fillerTexHeight); glVertex2f(0, fillerHeight);
+			glEnd();
 
-		glPopMatrix();
-		glPopAttrib();  
+			// TODO: make draw lists to speed this up...
 
-		// Pop the projection matrix
-		Camera::PopWindowCoords();
-	}
-	else {
-		assert(false);
+			timerTex->BindTexture();
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			glBegin(GL_QUADS);
+			glTexCoord2d(0, 0); glVertex2f(0, 0);
+			glTexCoord2d(1, 0); glVertex2f(width, 0);
+			glTexCoord2d(1, 1); glVertex2f(width, height);
+			glTexCoord2d(0, 1); glVertex2f(0, height);
+			glEnd();
+
+			glPopMatrix();
+			glPopAttrib();  
+
+			// Pop the projection matrix
+			Camera::PopWindowCoords();
+
+			currHeight -= (height + TIMER_Y_SPACING_PX);
+		}
+		else {
+			assert(false);
+		}
 	}
 }
 

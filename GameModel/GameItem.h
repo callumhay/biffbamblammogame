@@ -12,7 +12,7 @@ class GameItemTimer;
 
 class GameItem {
 public:
-	enum ItemType { PowerUp, PowerDown };
+	enum ItemType { Good, Bad, Neutral };
 
 protected:
 	std::string name;			// Name of this item

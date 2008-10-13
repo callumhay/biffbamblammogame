@@ -102,7 +102,6 @@ void GameController::ProcessPassiveMouseMotion(int x, int y){
  * This is called every frame.
  */
 void GameController::Tick() {
-
 	// Paddle controls (NOTE: the else is to make the feedback slicker)
 	if (this->keyPressed[GLUT_KEY_LEFT]) {
 		this->model->MovePaddle(-this->model->GetPlayerPaddle()->GetSpeed());
@@ -113,7 +112,7 @@ void GameController::Tick() {
 
 	// Debug movement controls
 #ifndef NDEBUG
-	else if (this->keyPressed['8']) {
+	if (this->keyPressed['8']) {
 		this->display->GetCamera().Move(Camera::DEFAULT_FORWARD_VEC);
 	}
 	else if (this->keyPressed['5']) {
@@ -131,6 +130,12 @@ void GameController::Tick() {
 	else if (this->keyPressed['9']) {
 		this->display->GetCamera().Rotate('y', -1.0f);
 	}
+	// Debug Item drops
+	else if (this->keyPressed['s']) {
+		this->model->DropSlowBallItem();
+	}
+	else if (this->keyPressed['q']) {
+		this->model->DropFastBallItem();
+	}
 #endif
-
 }
