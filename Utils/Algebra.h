@@ -63,6 +63,7 @@ inline int NumberFuncs::NextPowerOfTwo(int a) {
 
 namespace Randomizer {
 	void InitializeRandomizer();
+	void InitializeRandomizer(unsigned int seed);
 	int Random();
 	double RandomNumZeroToOne();
 	double RandomNumNegOneToOne();
@@ -70,6 +71,10 @@ namespace Randomizer {
 
 inline void Randomizer::InitializeRandomizer() {
 	srand(static_cast<unsigned int>(time(NULL)));
+};
+
+inline void Randomizer::InitializeRandomizer(unsigned int seed) {
+	srand(seed);
 };
 
 // A random value in [0, RAND_MAX]
