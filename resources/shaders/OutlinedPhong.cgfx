@@ -133,7 +133,6 @@ vertexOutput_outlines outline_VS(appdata_outlines IN) {
     return OUT;
 }
 
-
 ///////// PIXEL SHADING //////////////////////
 
 // Utility function for phong shading
@@ -190,18 +189,18 @@ technique Basic {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
         DepthTestEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
-        
+        PolygonSmoothEnable = true;
         VertexProgram = compile vp40 phongshading_VS();        
         FragmentProgram = compile fp40 phongshading_PS();
     }  
-     
+
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
@@ -224,6 +223,7 @@ technique Textured {
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
+        PolygonSmoothEnable = true;
         
         VertexProgram = compile vp40 phongshading_VS();        
         FragmentProgram = compile fp40 phongshading_textured_PS();
@@ -231,7 +231,6 @@ technique Textured {
      
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;

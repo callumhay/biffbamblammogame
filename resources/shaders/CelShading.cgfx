@@ -229,6 +229,7 @@ float4 outline_PS() : COLOR {
 technique Basic {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
@@ -241,7 +242,6 @@ technique Basic {
      
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
@@ -258,6 +258,7 @@ technique Basic {
 technique Textured {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
@@ -270,7 +271,6 @@ technique Textured {
      
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
