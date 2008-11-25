@@ -1,0 +1,6 @@
+#summary Events that get propagated in the game.
+
+= Game Events =
+
+|| *Event Name* || *Event Trigger* ||
+||
