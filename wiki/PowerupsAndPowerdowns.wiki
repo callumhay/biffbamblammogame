@@ -2,30 +2,30 @@
 
 = Power-ups =
 
-* Grow 
-* Uber-Ball
-* Multi-Ball
-* Blaster
-* Missile
-* 1-Up
-* Point Gain
-* Explody-Ball
-* Safety Net
-* Slow-Ball
-* Sticky Paddle
-* Elastic-Paddle-Ball?
-* Shield?
+  * Grow 
+  * Uber-Ball
+  * Multi-Ball
+  * Blaster
+  * Missile
+  * 1-Up
+  * Point Gain
+  * Explody-Ball
+  * Safety Net
+  * Slow-Ball
+  * Sticky Paddle
+  * Elastic-Paddle-Ball?
+  * Shield?
 
 = Power-downs =
 
-* Shrink
-* Weak-Ball
-* Ball Cam
-* Paddle Cam
-* Zoom Cam
-* Flip Level
-* Rotate Level
-* Fast-ball
-* Point Loss
-* Ghost-Ball
-* Invisi-Ball
+  * Shrink
+  * Weak-Ball
+  * Ball Cam
+  * Paddle Cam
+  * Zoom Cam
+  * Flip Level
+  * Rotate Level
+  * Fast-ball
+  * Point Loss
+  * Ghost-Ball
+  * Invisi-Ball
