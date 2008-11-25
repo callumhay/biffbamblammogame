@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+class GameBall;
+
 // Represents a game level, also deals with game level 'lvl' file reading.
 class GameLevel {
 
@@ -61,7 +63,7 @@ public:
 		return this->piecesLeft == 0;
 	}
 
-	void BallCollisionOccurred(size_t hIndex, size_t wIndex);
+	void BallCollisionOccurred(const GameBall& ball, size_t hIndex, size_t wIndex);
 
 
 };

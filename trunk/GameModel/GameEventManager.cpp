@@ -1,5 +1,5 @@
 #include "GameEventManager.h"
-#include "../Utils/Includes.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
 GameEventManager* GameEventManager::instance = NULL;
 
@@ -68,10 +68,10 @@ void GameEventManager::ActionBallShot(const GameBall& shotBall) {
 }
 
 // Action for when the ball collides with a block in the level
-void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block) {
+void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const LevelPiece& blockBefore, const LevelPiece& blockAfter) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
-		(*this->listenerIter)->BallBlockCollisionEvent(ball, block);
+		(*this->listenerIter)->BallBlockCollisionEvent(ball, blockBefore, blockAfter);
 	}	
 }
 

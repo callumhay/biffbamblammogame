@@ -1,9 +1,8 @@
+#include "../BlammoEngine/BlammoEngine.h"
+
 #include "GameLevel.h"
 #include "LevelPiece.h"
-#include "../Utils/Debug.h"
-
-#include <iostream>
-#include <fstream>
+#include "GameBall.h"
 
 // Private constructor, requires all the pieces that make up the level
 GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces): cachedInitialLevelPieces(pieces), currentLevelPieces(pieces),
@@ -134,14 +133,14 @@ void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces,
  * Call when a collision occurs with the ball and the level object at
  * the given index.
  */
-void GameLevel::BallCollisionOccurred(size_t hIndex, size_t wIndex) {
+void GameLevel::BallCollisionOccurred(const GameBall& ball, size_t hIndex, size_t wIndex) {
 	assert(hIndex >= 0 && hIndex < this->height);
 	assert(wIndex >= 0 && wIndex < this->width);
 
 	// Update the current piece by executing the collision
 	LevelPiece* currPiece = this->currentLevelPieces[hIndex][wIndex];
 	bool isVitalBeforeCollision = currPiece->MustBeDestoryedToEndLevel();
-	currPiece->BallCollisionOccurred();
+	currPiece->BallCollisionOccurred(ball);
 	bool isVitalAfterCollision = currPiece->MustBeDestoryedToEndLevel();
 
 	// Update the number of pieces that need to be destoryed to end the level

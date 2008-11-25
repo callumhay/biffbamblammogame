@@ -4,13 +4,13 @@
 #include "GameCompleteState.h"
 #include "GameOverState.h"
 
-#include "../Utils/Includes.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
-GameModel::GameModel() : currWorldNum(0), currState(NULL), currPlayerScore(0), currLivesLeft(0) {
+GameModel::GameModel() : currWorldNum(0), currState(NULL), currPlayerScore(0), currLivesLeft(0), gameIsPaused(false) {
 	
 	// Initialize the worlds for the game
-	for (size_t i = 0; i < GameConstants::WORLD_PATHS.size(); i++) {
-		this->worlds.push_back(new GameWorld(GameConstants::WORLD_PATHS[i]));
+	for (size_t i = 0; i < GameModelConstants::GetInstance()->WORLD_PATHS.size(); i++) {
+		this->worlds.push_back(new GameWorld(GameModelConstants::GetInstance()->WORLD_PATHS[i]));
 	}
 
 	// Initialize paddle and ball
@@ -47,12 +47,12 @@ GameModel::~GameModel() {
  */
 void GameModel::BeginOrRestartGame() {
 	this->SetCurrentState(new BallOnPaddleState(this));
-	this->SetCurrentWorld(GameConstants::INITIAL_WORLD_NUM);
+	this->SetCurrentWorld(GameModelConstants::GetInstance()->INITIAL_WORLD_NUM);
 
 	// Reset the score, lives, etc.
-	this->currPlayerScore					= GameConstants::INIT_SCORE;
-	this->currLivesLeft						= GameConstants::INIT_LIVES;
-	this->numConsecutiveBlocksHit = GameConstants::DEFAULT_BLOCKS_HIT;	// Don't use set here, we don't want an event
+	this->currPlayerScore					= GameModelConstants::GetInstance()->INIT_SCORE;
+	this->currLivesLeft						= GameModelConstants::GetInstance()->INIT_LIVES;
+	this->numConsecutiveBlocksHit = GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT;	// Don't use set here, we don't want an event
 }
 
 void GameModel::SetCurrentWorld(unsigned int worldNum) {
@@ -87,7 +87,7 @@ void GameModel::SetCurrentWorld(unsigned int worldNum) {
  */
 void GameModel::IncrementLevel() {
 	// Reset the multiplier
-	this->SetNumConsecutiveBlocksHit(GameConstants::DEFAULT_BLOCKS_HIT);
+	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
 
 	GameWorld* currWorld = this->GetCurrentWorld();
 	GameLevel* currLevel = currWorld->GetCurrentLevel();
@@ -124,7 +124,7 @@ void GameModel::IncrementLevel() {
 
 void GameModel::Tick(double seconds) {
 	
-	if (currState != NULL) {
+	if (currState != NULL && !this->gameIsPaused) {
 		this->currState->Tick(seconds);
 	}
 	
@@ -135,12 +135,11 @@ void GameModel::Tick(double seconds) {
  * Deals with all the important effects a collision could have on the game model.
  * Precondition: p != NULL
  */
-void GameModel::BallPieceCollisionOccurred(LevelPiece* p) {
+void GameModel::BallPieceCollisionOccurred(const GameBall& ball, LevelPiece* p) {
 	assert(p != NULL);
-
-	// EVENT: Ball-Block Collision
-	GameEventManager::Instance()->ActionBallBlockCollision(*this->ball, *p);
 	
+	LevelPiece pieceBefore = *p;
+
 	// Set the score appropriately
 	int pointValue = p->GetPointValueForCollision();
 	assert(pointValue >= 0);
@@ -148,12 +147,15 @@ void GameModel::BallPieceCollisionOccurred(LevelPiece* p) {
 
 	// Tell the level about the collision
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
-	currLevel->BallCollisionOccurred(p->GetHeightIndex(), p->GetWidthIndex());
+	currLevel->BallCollisionOccurred(ball, p->GetHeightIndex(), p->GetWidthIndex());
 
 	// If the piece was destroyed then increase the multiplier
 	if (p->GetType() == LevelPiece::Empty) {
 		this->SetNumConsecutiveBlocksHit(this->numConsecutiveBlocksHit+1);
 	}
+
+	// EVENT: Ball-Block Collision
+	GameEventManager::Instance()->ActionBallBlockCollision(*this->ball, pieceBefore, *p);
 
 	// Check to see if the level is done
 	if (currLevel->IsLevelComplete()) {
@@ -170,7 +172,7 @@ void GameModel::BallPaddleCollisionOccurred() {
 	GameEventManager::Instance()->ActionBallPaddleCollision(*this->ball, *this->playerPaddle);
 
 	// Reset the multiplier
-	this->SetNumConsecutiveBlocksHit(GameConstants::DEFAULT_BLOCKS_HIT);
+	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
 
 	// Modify the ball velocity using the current paddle velocity
 	Vector2D paddleVel = this->playerPaddle->GetAvgVelocity();
@@ -213,7 +215,7 @@ void GameModel::BallPaddleCollisionOccurred() {
  */
 void GameModel::PlayerDied() {
 	// Reset the multiplier
-	this->SetNumConsecutiveBlocksHit(GameConstants::DEFAULT_BLOCKS_HIT);
+	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
 	
 	// Decrement the number of lives left
 	this->currLivesLeft--;
@@ -236,7 +238,7 @@ void GameModel::PlayerDied() {
  */
 void GameModel::ClearLiveItems() {
 	// Destory any left-over game items
-	for(std::vector<GameItem*>::iterator iter = this->currLiveItems.begin(); iter != this->currLiveItems.end(); iter++) {
+	for(std::list<GameItem*>::iterator iter = this->currLiveItems.begin(); iter != this->currLiveItems.end(); iter++) {
 		GameItem* currItem = *iter;
 		delete currItem;
 		currItem = NULL;
@@ -247,8 +249,9 @@ void GameModel::ClearLiveItems() {
  * Clears all of the active timers in the game.
  */
 void GameModel::ClearActiveTimers() {
-	for(std::vector<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end(); iter++) {
+	for(std::list<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end(); iter++) {
 		GameItemTimer* currTimer = *iter;
+		currTimer->StopTimer();
 		delete currTimer;
 		currTimer = NULL;
 	}

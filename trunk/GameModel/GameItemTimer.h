@@ -13,44 +13,42 @@
  */
 class GameItemTimer {
 
-public:
-	// Timer type enumerator:
-	// - NoTimer : This is an immediate timer with ZERO totalLengthInSecs, this is just to ensure that
-	//             the timer architecture is universal and there are no exceptions for cases where a timer is not used.
-	// - SlowBallTimer : A timer related to an item that makes the ball go slower
-	// - FastBallTimer : A timer related to an item that makes the ball go faster
-	// - UberBallTimer : A timer related to an item that makes the ball destroy stuff easier
-	enum TimerType { NoTimer, SlowBallTimer, FastBallTimer, UberBallTimer };
-
 private:
 	GameItem* assocGameItem;	// The game item associated with this timer
 	double timeLengthInSecs;	// Total length of the timer in seconds
 	double timeElapsedInSecs;	// Amount of time elapsed on the timer so far
-	TimerType type;						// The type of timer that this represents
 
 public:
-	GameItemTimer(GameItem* gameItem, const TimerType type, const double totalLengthInSecs);
+	GameItemTimer(GameItem* gameItem);
 	~GameItemTimer();
 
 	void Tick(double seconds);
-	
+
 	/**
 	 * Returns whether or not this timer has expired.
 	 * Returns: true on expiration, false otherwise.
 	 */
 	bool HasExpired() const {
-		return (type == NoTimer) || (this->timeElapsedInSecs >= this->timeLengthInSecs);
+		return (this->timeElapsedInSecs >= this->timeLengthInSecs);
 	}
 
 	/**
 	 * For obtaining the type of timer of this.
 	 */
-	TimerType GetTimerType() const {
-		return this->type;
+	std::string GetTimerItemName() const {
+		return this->assocGameItem->GetName();
 	}
 
 	GameItem::ItemType GetTimerDisposition() const {
 		return this->assocGameItem->GetItemType();
+	}
+
+	/**
+	 * Stops the timer and the item effect associated with it.
+	 */
+	void StopTimer() {
+		this->assocGameItem->Deactivate();
+		this->timeElapsedInSecs = this->timeLengthInSecs;
 	}
 
 	/**

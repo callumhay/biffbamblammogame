@@ -1,8 +1,7 @@
 #include "GameItem.h"
 #include "GameModel.h"
 
-#include "../Utils/Vector.h"
-#include "../Utils/Collision.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
 // Width and Height constants for items
 const float GameItem::ITEM_WIDTH	= 2.45f;
@@ -13,7 +12,7 @@ const float GameItem::HALF_ITEM_HEIGHT	= ITEM_HEIGHT / 2.0f;
 const float GameItem::SPEED_OF_DESCENT	= 5.0f;
 
 GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const ItemType type) : 
-	name(name), center(spawnOrigin), gameModel(gameModel), type(type) {
+	name(name), center(spawnOrigin), gameModel(gameModel), type(type), isActive(false) {
 	assert(gameModel != NULL);
 }
 
