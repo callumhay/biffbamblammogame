@@ -1,13 +1,13 @@
-#include "Utils/Includes.h"
-#include "Utils/Algebra.h"
+#include "BlammoEngine/BlammoEngine.h"
 
-#include "GameControllerView/GameDisplay.h"
-#include "GameControllerView/GameController.h"
-#include "GameControllerView/CgShaderManager.h"
+#include "GameView/GameDisplay.h"
+#include "GameView/GameViewConstants.h"
 
 #include "GameModel/GameModel.h"
 #include "GameModel/GameEventManager.h"
+#include "GameModel/GameModelConstants.h"
 
+#include "GameController.h"
 
 static const char* WINDOW_TITLE = "Biff Bam Blammo";
 static const int INIT_WIDTH = 1024;
@@ -16,7 +16,6 @@ static const int INIT_HEIGHT = 768;
 static GameModel *model = NULL;
 static GameController *controller = NULL;
 static GameDisplay *display = NULL;
-
 
 void ProcessNormalKeysMain(unsigned char key, int x, int y) {
 	controller->ProcessNormalKeys(key, x, y);
@@ -57,13 +56,11 @@ void RenderSceneMain() {
 
 void FrameRenderMain(int value) {
 	glutPostRedisplay();
-	glutTimerFunc(GameDisplay::FRAME_DT_MILLISEC, FrameRenderMain, 1);
+	glutTimerFunc(GameDisplay::FRAME_SLEEP_MS, FrameRenderMain, 1);
 }
 
 // Driver function for the game.
 int main(int argc, char **argv) {
-	Randomizer::InitializeRandomizer();
-
 	// Set up the window using glut
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_ALPHA | GLUT_ACCUM | GLUT_STENCIL | GLUT_MULTISAMPLE | GLUT_DOUBLE | GLUT_RGBA);
@@ -83,6 +80,10 @@ int main(int argc, char **argv) {
 	glutIdleFunc(RenderSceneMain);
 	glutReshapeFunc(ChangeSizeMain);
 
+	// Turn off VSync
+	// TODO: VSync: option for this?
+	BlammoTime::SetVSync(NULL);
+
 	// Controller/input functions
 	glutKeyboardUpFunc(ProcessNormalKeysUpMain);
 	glutKeyboardFunc(ProcessNormalKeysMain);
@@ -99,7 +100,7 @@ int main(int argc, char **argv) {
 	controller = new GameController(model, display);
 
 	// Render loop...
-	glutTimerFunc(GameDisplay::FRAME_DT_MILLISEC, FrameRenderMain, 1);
+	glutTimerFunc(GameDisplay::FRAME_SLEEP_MS, FrameRenderMain, 1);
 	glutMainLoop();
 
 	// Clear up MVC
@@ -110,6 +111,9 @@ int main(int argc, char **argv) {
 	// Clear up singletons
 	GameEventManager::DeleteInstance();
 	CgShaderManager::DeleteInstance();
-
+	FBOManager::DeleteInstance();
+	GameModelConstants::DeleteInstance();
+	GameViewConstants::DeleteInstance();
+	
 	return 0;
 }
