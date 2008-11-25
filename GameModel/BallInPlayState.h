@@ -14,13 +14,12 @@ class GameItem;
 class BallInPlayState : public GameState {
 
 private:
+	GameItem* debugItemDrop;
+	bool lastBlockDroppedItem;
+
 	void DoBallCollision(GameBall& b, const Vector2D& n, float d);
 	void DoItemCollision();
 	void UpdateActiveTimers(double seconds);
-
-#ifndef NDEBUG
-	std::vector<GameItem*> debugItemDrops;
-#endif
 
 public:
 	BallInPlayState(GameModel* gm);
@@ -31,8 +30,6 @@ public:
 		// Do nothing, ball is already in play.
 	}
 
-#ifndef NDEBUG
 	void DebugDropItem(GameItem* item);
-#endif
 };
 #endif
