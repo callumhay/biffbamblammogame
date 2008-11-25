@@ -2,5 +2,21 @@
 
 = Game Events =
 
-|| *Event Name* || *Event Trigger* ||
-||
+||*Event Name*||*Event Trigger*||
+|| || 
+The ball intersects with the player's paddle.||
+
+|| || 
+The player's paddle intersects with a solid block (wall).||
+
+|| ||
+The ball intersects with a block.||
+
+|| ||
+The player's paddle intersects with an item (power-up or power-down).||
+
+|| ||
+The ball is lost (goes out of play and is destroyed).||
+
+|| ||
+The game is over.||
