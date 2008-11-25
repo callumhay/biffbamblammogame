@@ -1,9 +1,7 @@
 #include "PlayerPaddle.h"
 #include "GameEventManager.h"
 
-#include "../Utils/Includes.h"
-#include "../Utils/Algebra.h"
-#include "../Utils/Shape2D.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
 const float PlayerPaddle::PADDLE_WIDTH_FLAT_TOP = 3.5f;
@@ -52,7 +50,7 @@ void PlayerPaddle::Tick(double seconds) {
 	float minNewXPos = newCenterX - this->currHalfWidthTotal;
 	float maxNewXPos = newCenterX + this->currHalfWidthTotal;
 
-	if (minNewXPos < this->minBound) {
+	if (minNewXPos - EPSILON <= this->minBound) {
 		// The paddle bumped into the left wall
 		this->centerPos[0] = this->minBound + this->currHalfWidthTotal;
 		
@@ -66,7 +64,7 @@ void PlayerPaddle::Tick(double seconds) {
 
 		this->hitWall = true;
 	}
-	else if (maxNewXPos > this->maxBound) {
+	else if (maxNewXPos + EPSILON > this->maxBound) {
 		// The paddle bumped into the right wall
 		this->centerPos[0] = this->maxBound - this->currHalfWidthTotal;
 		
