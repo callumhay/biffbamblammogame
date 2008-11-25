@@ -1,9 +1,7 @@
 #ifndef __PLAYERPADDLE_H__
 #define __PLAYERPADDLE_H__
 
-#include <vector>
-
-#include "../Utils/Point.h"
+#include "../BlammoEngine/BlammoEngine.h"
 #include "BoundingLines.h"
 
 // Represents the player controlled paddle shaped as follows:
