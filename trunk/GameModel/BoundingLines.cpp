@@ -1,9 +1,6 @@
 #include "BoundingLines.h"
 
-#include "../Utils/Includes.h"
-#include "../Utils/Collision.h"
-#include "../Utils/Shape2D.h"
-#include "../Utils/Vector.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
 BoundingLines::BoundingLines(const std::vector<LineSeg2D>& lines, const std::vector<Vector2D>& norms) : 
 	lines(lines), normals(norms) {
