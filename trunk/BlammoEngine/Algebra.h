@@ -2,6 +2,7 @@
 #define __ALGEBRA_H__
 
 #include "BasicIncludes.h"
+#include "BlammoTime.h"
 
 // Define essential math constants
 #ifndef M_PI
@@ -60,7 +61,6 @@ inline int NumberFuncs::NextPowerOfTwo(int a) {
 };
 
 namespace Randomizer {
-	static unsigned int RANDOMIZE_VAR = 0;
 	void Initialize();
 	int Random();
 	double RandomNumZeroToOne();
@@ -69,7 +69,7 @@ namespace Randomizer {
 };
 
 inline unsigned int Randomizer::RandomTimeSeed() {
-	time_t now = time(NULL);
+	unsigned long now = time(NULL) + BlammoTime::GetSystemTimeInMillisecs();
 	unsigned char *p = (unsigned char *)&now;
 	unsigned int seed = 0;
 	size_t i;
@@ -82,22 +82,19 @@ inline unsigned int Randomizer::RandomTimeSeed() {
 
 // A random value in [0, RAND_MAX]
 inline int Randomizer::Random() {
-	srand(static_cast<unsigned int>(Randomizer::RandomTimeSeed()) * RANDOMIZE_VAR);
-	RANDOMIZE_VAR += rand();
+	srand(static_cast<unsigned int>(Randomizer::RandomTimeSeed()));
 	return rand();
 }
 
 // Return a random number in [0, 1]
 inline double Randomizer::RandomNumZeroToOne() {
-	srand(static_cast<unsigned int>(Randomizer::RandomTimeSeed()) * RANDOMIZE_VAR);
-	RANDOMIZE_VAR += rand();
+	srand(static_cast<unsigned int>(Randomizer::RandomTimeSeed()));
 	return static_cast<double>(rand())/(static_cast<double>(RAND_MAX));
 };
 
 // Return a random number in [-1, 1]
 inline double Randomizer::RandomNumNegOneToOne() {
-	srand(static_cast<unsigned int>(Randomizer::RandomTimeSeed()) * RANDOMIZE_VAR);
-	RANDOMIZE_VAR += rand();
+	srand(static_cast<unsigned int>(Randomizer::RandomTimeSeed()));
 	double randNum = rand()/(static_cast<double>(RAND_MAX));
 	double randomSign = -1.0;
 	if (rand() % 2 == 0) {

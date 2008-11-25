@@ -24,6 +24,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -40,7 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;&quot;$(ProjectDir)include&quot;"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)..\BlammoEngine&quot;"
+				PreprocessorDefinitions="ON_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -56,14 +58,15 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="true"
-				AdditionalDependencies="glut32.lib opengl.lib glu.lib glew32s.lib glew32.lib cg.lib cgGL.lib DevIL.lib ILU.lib ILUT.lib"
+				AdditionalDependencies="cg.lib cgGL.lib DevIL.lib EFX-Util.lib freetype235.lib glu.lib glut32.lib ILU.lib ILUT.lib OpenAL32.lib opengl.lib glew32s.lib"
 				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Lib&quot;;&quot;$(SolutionDir)lib&quot;"
 				IgnoreAllDefaultLibraries="false"
-				IgnoreDefaultLibraryNames="libc.lib, libcd.lib, msvcrtd.lib libcmt.lib, msvcrt.lib"
+				IgnoreDefaultLibraryNames="libc.lib;msvcrtd.lib"
 				GenerateDebugInformation="true"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -89,7 +92,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /Y &quot;$(ProjectDir)lib\*.dll&quot; &quot;$(TargetDir)&quot;"
+				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
@@ -102,6 +105,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -117,6 +121,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)..\BlammoEngine&quot;"
+				PreprocessorDefinitions="NDEBUG;ON_WINDOWS"
 				RuntimeLibrary="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -130,9 +136,13 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				CommandLine="xcopy /Y /R $(SolutionDir)..\..\BlammoEngine\$(ConfigurationName)\BlammoEngine.lib $(OutDir)"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="cg.lib cgGL.lib DevIL.lib EFX-Util.lib freetype235.lib glu.lib glut32.lib ILU.lib ILUT.lib OpenAL32.lib opengl.lib"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Lib&quot;;&quot;$(SolutionDir)lib&quot;"
+				IgnoreDefaultLibraryNames="msvcrtd.lib"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -160,6 +170,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -167,20 +178,600 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			Name="BlammoEngine"
 			>
-			<File
-				RelativePath=".\GameMain.cpp"
+			<Filter
+				Name="Header Files"
 				>
-			</File>
+				<File
+					RelativePath=".\BlammoEngine\Algebra.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\BasicIncludes.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\BlammoEngine.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\BlammoTime.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Camera.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgFxCelShading.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgFxEffect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgFxOutlinedPhong.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgFxPostRefract.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgShaderManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Collision.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Colour.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\FBOManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Matrix.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Mesh.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\MtlReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\ObjReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Point.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Shape2D.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Skybox.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\TextLabel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Texture.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Texture1D.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Texture2D.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\TextureCube.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\TextureFontSet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Vector.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath=".\BlammoEngine\Algebra.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Camera.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgFxCelShading.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgFxEffect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgFxOutlinedPhong.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgFxPostRefract.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\CgShaderManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\FBOManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Matrix.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Mesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\MtlReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\ObjReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Point.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Skybox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\TextLabel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Texture.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Texture1D.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Texture2D.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\TextureCube.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\TextureFontSet.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			Name="GameView"
 			>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath=".\GameView\DecoSkybox.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\DisplayState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameAssets.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameCompleteDisplayState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameDisplay.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameEventsListener.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameMenu.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameOverDisplayState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameViewConstants.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\InGameDisplayState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\LevelMesh.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\MainMenuDisplayState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\Onomatoplex.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\StartGameDisplayState.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath=".\GameView\DecoSkybox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameAssets.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameCompleteDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameDisplay.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameEventsListener.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameMenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameOverDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameViewConstants.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\InGameDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\LevelMesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\MainMenuDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\Onomatoplex.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\StartGameDisplayState.cpp"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="GameModel"
+			>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath=".\GameModel\BallInPlayState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BallOnPaddleState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BallSpeedItem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BoundingLines.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameBall.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameCompleteState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameEventManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameEvents.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameItem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameItemFactory.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameItemTimer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameLevel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameModel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameModelConstants.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameOverState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameWorld.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\InvisiBallItem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\LevelPiece.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\Onomatoplex.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\PlayerPaddle.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\UberBallItem.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath=".\GameModel\BallInPlayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BallOnPaddleState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BallSpeedItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\BlammoTime.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BoundingLines.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameBall.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameCompleteState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameEventManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameItemFactory.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameItemTimer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameLevel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameModelConstants.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameWorld.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\InvisiBallItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\LevelPiece.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\Onomatoplex.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\PlayerPaddle.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\UberBallItem.cpp"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="Main"
+			>
+			<Filter
+				Name="Source Files"
+				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+				UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+				>
+				<File
+					RelativePath=".\GameController.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameMain.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Header Files"
+				Filter="h;hpp;hxx;hm;inl;inc;xsd"
+				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+				>
+				<File
+					RelativePath=".\GameController.h"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="ESPEngine"
+			>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath=".\ESPEngine\ESP.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPAreaEmitter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPEmitter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticle.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleEffector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleVelocityEffector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPPointEmitter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPUtil.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath=".\ESPEngine\ESPAreaEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticle.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleVelocityEffector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPPointEmitter.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
