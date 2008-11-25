@@ -1,21 +1,22 @@
 #ifndef __GAMEBALL_H__
 #define __GAMEBALL_H__
 
-#include "../Utils/Point.h"
-#include "../Utils/Vector.h"
-#include "../Utils/Shape2D.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
 class GameBall {
 
 public:
 	enum BallSpeed { ZeroSpeed = 0, SlowSpeed = 10, NormalSpeed = 15, FastSpeed = 21 };
-	enum BallType { NormalBall, UberBall };
+	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010 };
 
 private:
 	Circle2D bounds;			// The bounds of the ball, constantly updated to world space
 	Vector2D currDir;			// The current direction of movement of the ball
 	BallSpeed currSpeed;	// The current speed of the ball
-	BallType currType;		// The current type of ball this is
+	int currType;					// The current type of this ball
+	
+	static const float MAX_ROATATION_SPEED;	// Speed of rotation in degrees/sec
+	Vector3D rotationInDegs;	// Used for random rotation of the ball, gives the view the option to use it
 
 public:
 	// Minimum angle the ball can be reflected at
@@ -29,6 +30,10 @@ public:
 
 	GameBall();
 	~GameBall();
+
+	Vector3D GetRotation() const {
+		return this->rotationInDegs;
+	}
 
 	Circle2D GetBounds() const {
 		return this->bounds;
@@ -52,11 +57,14 @@ public:
 		this->currSpeed = speed;
 	}
 
-	BallType GetBallType() const {
+	int GetBallType() const {
 		return this->currType;
 	}
-	void SetBallType(const BallType type) {
-		this->currType = type;
+	void AddBallType(const BallType type) {
+		this->currType = this->currType | type;
+	}
+	void RemoveBallType(const BallType type) {
+		this->currType = this->currType & ~type;
 	}
 
 	// Set the velocity of the ball; (0, 1) is up and (1, 0) is right
@@ -93,8 +101,13 @@ public:
 	}
 
 	void Tick(double seconds) {
+		// Update the position of the ball based on its velocity
 		Vector2D dDist = (static_cast<float>(seconds) * static_cast<float>(this->currSpeed) *this->currDir);
 		this->bounds.SetCenter(this->bounds.Center() + dDist);
+
+		// Update the rotation of the ball
+		float dRotSpd = GameBall::MAX_ROATATION_SPEED * static_cast<float>(seconds);
+		this->rotationInDegs = this->rotationInDegs + Vector3D(dRotSpd, dRotSpd, dRotSpd);
 	}
 
 };

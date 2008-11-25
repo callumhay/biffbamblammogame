@@ -1,10 +1,7 @@
 #ifndef __BOUNDINGLINES_H__
 #define __BOUNDINGLINES_H__
 
-#include <vector>
-
-#include "../Utils/Shape2D.h"
-#include "../Utils/Vector.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
 class BoundingLines {
 
