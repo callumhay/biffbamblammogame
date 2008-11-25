@@ -1,8 +1,8 @@
 #include "LevelPiece.h"
 #include "GameEventManager.h"
+#include "GameBall.h"
 
-#include "../Utils/Vector.h"
-#include "../Utils/Shape2D.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
 const float LevelPiece::PIECE_WIDTH = 2.5f;
 const float LevelPiece::PIECE_HEIGHT = 1.0f;
@@ -159,14 +159,22 @@ bool LevelPiece::CollisionCheck(const Circle2D& c, Vector2D& n, float &d) {
 	return this->bounds.Collide(c, n, d);
 }
 
-void LevelPiece::BallCollisionOccurred() {
-	// Nothing happens if this is just an empty space or solid block
+void LevelPiece::BallCollisionOccurred(const GameBall& ball) {
+	
+	// If the ball is an 'uber' ball then we decrement the piece type twice when possible
+	if (((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall) && this->pieceType != GreenBreakable) {
+		this->DecrementPieceType();
+	}
+	
 	switch(this->pieceType) {
 		case Empty:
 		case Solid:
+			// Nothing happens if this is just an empty space or solid block
 			return;
+
 		case Bomb:
 			return;
+
 		case GreenBreakable:
 			// EVENT: Block is being destoryed
 			GameEventManager::Instance()->ActionBlockDestroyed(*this);
@@ -174,8 +182,8 @@ void LevelPiece::BallCollisionOccurred() {
 			// Make empty, eliminate bounding lines
 			this->DecrementPieceType();
 			this->UpdateBounds(NULL, NULL, NULL, NULL);
-
 			break;
+
 		default:
 			this->DecrementPieceType();
 			break;

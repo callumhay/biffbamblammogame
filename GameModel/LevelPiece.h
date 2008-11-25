@@ -1,14 +1,13 @@
 #ifndef __LEVELPIECE_H__
 #define __LEVELPIECE_H__
 
-#include <vector>
-
-#include "../Utils/Point.h"
+#include "../BlammoEngine/BlammoEngine.h"
 #include "BoundingLines.h"
 
 class Circle2D;
 class LineSeg2D;
 class Vector2D;
+class GameBall;
 
 class LevelPiece {
 
@@ -92,7 +91,7 @@ public:
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 										const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor);
 	bool CollisionCheck(const Circle2D& c, Vector2D& n, float& d);
-	void BallCollisionOccurred();
+	void BallCollisionOccurred(const GameBall& ball);
 
 
 	// Debug Stuffs
