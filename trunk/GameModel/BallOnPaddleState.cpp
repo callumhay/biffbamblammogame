@@ -4,8 +4,7 @@
 #include "GameBall.h"
 #include "GameEventManager.h"
 
-#include "../Utils/Point.h"
-#include "../Utils/Algebra.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
 BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(true) {
 	this->UpdateBallPosition();
@@ -47,7 +46,6 @@ void BallOnPaddleState::Tick(double seconds) {
 void BallOnPaddleState::BallReleaseKeyPressed() {
 
 	Vector2D ballReleaseDir = GameBall::STD_INIT_VEL_DIR;
-	Randomizer::InitializeRandomizer();
 
 	// Get the paddle's avg. velocity
 	Vector2D avgPaddleVel = this->gameModel->GetPlayerPaddle()->GetAvgVelocity();

@@ -6,11 +6,9 @@
 #include "GameItem.h"
 #include "GameItemFactory.h"
 
-#include "../Utils/Includes.h"
-#include "../Utils/Vector.h"
-#include "../Utils/Point.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
-BallInPlayState::BallInPlayState(GameModel* gm) : GameState(gm) {
+BallInPlayState::BallInPlayState(GameModel* gm) : GameState(gm), lastBlockDroppedItem(false), debugItemDrop(NULL) {
 }
 
 BallInPlayState::~BallInPlayState() {
@@ -19,12 +17,16 @@ BallInPlayState::~BallInPlayState() {
 	this->gameModel->ClearActiveTimers();
 }
 
-#ifndef NDEBUG
 void BallInPlayState::DebugDropItem(GameItem* item) {
 	assert(item != NULL);
-	this->debugItemDrops.push_back(item);
+	if (this->debugItemDrop == NULL) {
+		this->debugItemDrop = item;
+	}
+	else {
+		delete item;
+		item = NULL;
+	}
 }
-#endif
 
 /**
  * Since the ball is now in play this function will be doing A LOT, including:
@@ -40,24 +42,38 @@ void BallInPlayState::Tick(double seconds) {
 	GameBall* ball = this->gameModel->GetGameBall();
 	ball->Tick(seconds);
 
+	// Check for item-paddle collisions
+	this->DoItemCollision();
+	// Update timers
+	this->UpdateActiveTimers(seconds);
+
 	// Update any items that may have been created
-	std::vector<unsigned int> removeIndices;
-	std::vector<GameItem*>& currLiveItems = this->gameModel->GetLiveItems();
-	for(unsigned int i = 0; i < currLiveItems.size(); i++) {
-		GameItem *currItem = currLiveItems[i];
+	std::vector<GameItem*> removeItems;
+	std::list<GameItem*>& currLiveItems = this->gameModel->GetLiveItems();
+	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); iter++) {
+		GameItem *currItem = *iter;
 		currItem->Tick(seconds);
 		
 		// Check to see if any have left the playing area - if so destroy them
 		if (currItem->GetCenter()[1] <= GameLevel::Y_COORD_OF_DEATH) {
-			delete currItem;
-			currItem = NULL;
-			removeIndices.push_back(i);
+			removeItems.push_back(currItem);
 		}
 	}
 
 	// Delete any items that have left play
-	for (std::vector<unsigned int>::iterator iter = removeIndices.begin(); iter != removeIndices.end(); iter++) {
-		currLiveItems.erase(currLiveItems.begin() + *iter);
+	for (unsigned int i = 0; i < removeItems.size(); i++) {
+		GameItem *currItem = removeItems[i];
+		currLiveItems.remove(currItem);
+		delete currItem;
+		currItem = NULL;
+	}
+
+	// Debug Item drop
+	if (this->debugItemDrop != NULL) {
+		currLiveItems.push_back(this->debugItemDrop);
+		// EVENT: Item has been created and added to the game
+		GameEventManager::Instance()->ActionItemSpawned(*this->debugItemDrop);
+		this->debugItemDrop = NULL;
 	}
 
 	// Check for ball collisions with the pieces of the level and the paddle
@@ -89,11 +105,13 @@ void BallInPlayState::Tick(double seconds) {
 				
 				LevelPiece *currPiece = levelPieces[h][w];
 				didCollide = currPiece->CollisionCheck(ball->GetBounds(), n, d);
+				
 				if (didCollide) {
-
-					// In the case that the ball is uber then there should be no reflection unless
-					// the piece is not breakable
-					if (ball->GetBallType() != GameBall::UberBall || !currPiece->MustBeDestoryedToEndLevel()) {
+					// In the case that the ball is uber then we only reflect if the ball is not green
+					if (((ball->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->GetType() == LevelPiece::GreenBreakable) {
+						// Ignore collision...
+					}
+					else {
 						this->DoBallCollision(*ball, n, d);
 					}
 					
@@ -101,12 +119,16 @@ void BallInPlayState::Tick(double seconds) {
 					if (currPiece->CanDropItem()) {
 						// Now we will drop an item based on a combination of variation/probablility
 						// and the number of consecutive blocks that have been hit on this set of ball bounces
-
-						double variation = GameConstants::PROB_OF_ITEM_DROP * sin(Randomizer::RandomNumZeroToOne() * 2.0 * M_PI);
 						double numBlocksAlreadyHit = static_cast<double>(this->gameModel->GetNumConsecutiveBlocksHit());
-						double itemDropProb = min(1.0, 0.02 * numBlocksAlreadyHit + GameConstants::PROB_OF_ITEM_DROP + variation);
-						debug_output("Probability of drop: " << itemDropProb);
+						double itemDropProb = min(1.0, 0.02 * numBlocksAlreadyHit + GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP);
 						double randomNum = Randomizer::RandomNumZeroToOne();
+
+						// Decrease the probability of a drop if the last block dropped an item
+						if (this->lastBlockDroppedItem) {
+							itemDropProb *= GameModelConstants::GetInstance()->PROB_OF_CONSECTUIVE_ITEM_DROP;
+						}
+
+						debug_output("Probability of drop: " << itemDropProb << " Number for deciding: " << randomNum);
 
 						if (randomNum <= itemDropProb) {
 							// Drop an item - create a random item and add it to the list...
@@ -115,13 +137,15 @@ void BallInPlayState::Tick(double seconds) {
 							// EVENT: Item has been created and added to the game
 							GameEventManager::Instance()->ActionItemSpawned(*newGameItem);
 
-							// For better randomness...
-							Randomizer::InitializeRandomizer(randomNum * RAND_MAX);
+							this->lastBlockDroppedItem = true;
+						}
+						else {
+							this->lastBlockDroppedItem = false;
 						}
 					}
 
 					// Tell the model that a ball collision occurred with currPiece
-					this->gameModel->BallPieceCollisionOccurred(currPiece);
+					this->gameModel->BallPieceCollisionOccurred(*ball, currPiece);	// THIS CALL CAN DELETE THIS OBJECT!!!
 					break;
 				}
 			}
@@ -132,24 +156,7 @@ void BallInPlayState::Tick(double seconds) {
 			}
 		}
 	}
-
-	// Debug Item drops
-#ifndef NDEBUG
-	currLiveItems = this->gameModel->GetLiveItems();
-	for (std::vector<GameItem*>::iterator iter = this->debugItemDrops.begin(); iter != this->debugItemDrops.end(); iter++) {
-		GameItem* newItem = *iter;
-		currLiveItems.push_back(newItem);
-		// EVENT: Item has been created and added to the game
-		GameEventManager::Instance()->ActionItemSpawned(*newItem);
-	}
-	this->debugItemDrops.clear();
-#endif
-
-	// Check for item-paddle collisions
-	this->DoItemCollision();
-	// Update timers
-	this->UpdateActiveTimers(seconds);
-
+	// DO NOT PLACE ANY EXTRA CODE HERE, STATE MAY BE SWITCHING !!!
 }
 
 /**
@@ -157,15 +164,13 @@ void BallInPlayState::Tick(double seconds) {
  * all expired timers.
  */
 void BallInPlayState::UpdateActiveTimers(double seconds) {
-	std::vector<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
-	std::vector<unsigned int> removeIndices;
-	for (unsigned int i = 0; i < activeTimers.size(); i++) {
-		GameItemTimer* currTimer = activeTimers[i];
+	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
+	std::vector<GameItemTimer*> removeTimers;
+	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
+		GameItemTimer* currTimer = *iter;
 		if (currTimer->HasExpired()) {
 			// Timer has expired, dispose of it
-			delete currTimer;
-			currTimer = NULL;
-			removeIndices.push_back(i);
+			removeTimers.push_back(currTimer);
 		}
 		else {
 			currTimer->Tick(seconds);
@@ -173,9 +178,13 @@ void BallInPlayState::UpdateActiveTimers(double seconds) {
 	}
 
 	// Delete any timers that have expired
-	for (std::vector<unsigned int>::iterator iter = removeIndices.begin(); iter != removeIndices.end(); iter++) {
-		activeTimers.erase(activeTimers.begin() + *iter);
+	for (unsigned int i = 0; i < removeTimers.size(); i++) {
+		GameItemTimer* currTimer = removeTimers[i];
+		activeTimers.remove(currTimer);
+		delete currTimer;
+		currTimer = NULL;
 	}
+
 }
 
 /**
@@ -183,13 +192,13 @@ void BallInPlayState::UpdateActiveTimers(double seconds) {
  * the player paddle and carrying out the necessary activity if one did.
  */
 void BallInPlayState::DoItemCollision() {
-	std::vector<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
-	std::vector<GameItem*>& currLiveItems			= this->gameModel->GetLiveItems();
-	std::vector<unsigned int> removeIndices;
+	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
+	std::list<GameItem*>& currLiveItems			= this->gameModel->GetLiveItems();
+	std::vector<GameItem*> removeItems;
 
 	// Check to see if the paddle hit any items, if so, activate those items
-	for(unsigned int i = 0; i < currLiveItems.size(); i++) {
-		GameItem *currItem = currLiveItems[i];
+	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); iter++) {
+		GameItem *currItem = *iter;
 		
 		if (currItem->CollisionCheck(*this->gameModel->GetPlayerPaddle())) {
 			// EVENT: Item was obtained by the player paddle
@@ -198,16 +207,17 @@ void BallInPlayState::DoItemCollision() {
 			// There was a collision with the item and the player paddle: activate the item
 			// and then delete it. If the item causes the creation of a timer then add the timer to the list
 			// of active timers.
-			GameItemTimer* newTimer = currItem->Activate();
+			GameItemTimer* newTimer = new GameItemTimer(currItem);
 			assert(newTimer != NULL);
 			activeTimers.push_back(newTimer);	
-			removeIndices.push_back(i);
+			removeItems.push_back(currItem);
 		}
 	}
 
-	// Delete any items that have been collided with
-	for (std::vector<unsigned int>::iterator iter = removeIndices.begin(); iter != removeIndices.end(); iter++) {
-		currLiveItems.erase(currLiveItems.begin() + *iter);
+	// Remove any items from the live items list if they have been collided with
+	for (unsigned int i = 0; i < removeItems.size(); i++) {
+		GameItem* currItem = removeItems[i];
+		currLiveItems.remove(currItem);
 	}
 
 }
