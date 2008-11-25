@@ -16,7 +16,7 @@ class Point2D;
 class GameItemFactory {
 
 private:
-	static const int TOTAL_NUM_OF_ITEMS = 2;
+	static const int TOTAL_NUM_OF_ITEMS = 4;
 	GameItemFactory() {};
 
 
@@ -30,6 +30,8 @@ public:
 	// Item specific creation methods for debugging
 	static GameItem* CreateFastBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
 	static GameItem* CreateSlowBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	static GameItem* CreateUberBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	static GameItem* CreateInvisiBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
 #endif
 };
 #endif

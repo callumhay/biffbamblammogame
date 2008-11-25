@@ -1,9 +1,8 @@
 #include "GameItemTimer.h"
 
-GameItemTimer::GameItemTimer(GameItem* gameItem, const TimerType type, const double totalLengthInSecs) : 
-timeElapsedInSecs(0.0), timeLengthInSecs(totalLengthInSecs), type(type), assocGameItem(gameItem){
+GameItemTimer::GameItemTimer(GameItem* gameItem) : assocGameItem(gameItem), timeElapsedInSecs(0.0) {
 	assert(gameItem != NULL);
-	assert(type != NoTimer || totalLengthInSecs == 0); // (type == NoTimer) implies (totalLengthInSecs == 0)
+	this->timeLengthInSecs = gameItem->Activate();
 }
 
 GameItemTimer::~GameItemTimer() {
@@ -29,7 +28,6 @@ void GameItemTimer::Tick(double seconds) {
 	// This should only happen once - obviously when a timer expires
 	// so must its associated game item's effect!
 	if (this->HasExpired()) {
-		this->timeElapsedInSecs = this->timeLengthInSecs;
-		this->assocGameItem->Deactivate();
+		this->StopTimer();
 	}
 }

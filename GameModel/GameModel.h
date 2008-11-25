@@ -1,7 +1,9 @@
 #ifndef __GAMEMODEL_H__
 #define __GAMEMODEL_H__
 
-#include "GameConstants.h"
+#include "../BlammoEngine/BlammoEngine.h"
+
+#include "GameModelConstants.h"
 #include "LevelPiece.h"
 #include "GameWorld.h"
 #include "GameLevel.h"
@@ -15,11 +17,6 @@
 #include "GameItem.h"
 #include "GameItemTimer.h"
 #include "GameItemFactory.h"
-
-#include "../Utils/Vector.h"
-
-#include <vector>
-#include <algorithm>
 
 class GameModel {
 
@@ -35,14 +32,17 @@ private:
 	std::vector<GameWorld*> worlds;
 
 	// Items that are currently available to be picked up in-game
-	std::vector<GameItem*> currLiveItems;
+	std::list<GameItem*> currLiveItems;
 	// Timers that are currently active
-	std::vector<GameItemTimer*> activeTimers;
+	std::list<GameItemTimer*> activeTimers;
 
 	// Player score and life information
 	int currPlayerScore;
 	int numConsecutiveBlocksHit;
 	int currLivesLeft;
+
+	// Whether or not the game is currently paused
+	bool gameIsPaused;
 
 	// Private getters and setters ****************************************
 	void SetCurrentWorld(unsigned int worldNum);
@@ -60,7 +60,7 @@ private:
 		this->currState = nextState;
 	}
 
-	void BallPieceCollisionOccurred(LevelPiece* p);
+	void BallPieceCollisionOccurred(const GameBall& ball, LevelPiece* p);
 	void BallPaddleCollisionOccurred();
 	void PlayerDied();
 
@@ -83,8 +83,8 @@ private:
 	// Set the number of consecutive blocks hit by the ball in the interrum between
 	// when it leaves and returns to the player paddle
 	void SetNumConsecutiveBlocksHit(int value) {
-		if (value < GameConstants::DEFAULT_BLOCKS_HIT) {
-			value = GameConstants::DEFAULT_BLOCKS_HIT;
+		if (value < GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT) {
+			value = GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT;
 		}
 
 		if (value != this->numConsecutiveBlocksHit) {
@@ -140,11 +140,11 @@ public:
 		return this->currLivesLeft;
 	}
 
-	std::vector<GameItem*>& GetLiveItems() {
+	std::list<GameItem*>& GetLiveItems() {
 		return this->currLiveItems;
 	}
 
-	std::vector<GameItemTimer*>& GetActiveTimers() {
+	std::list<GameItemTimer*>& GetActiveTimers() {
 		return this->activeTimers;
 	}
 
@@ -181,7 +181,13 @@ public:
 		}
 	}
 
+	// Pauses the game
+	void TogglePauseGame() {
+		this->gameIsPaused = !this->gameIsPaused;
+	}
+
 	// Debug functions
+	// TODO: have just one with a variable to determine which power up/down???
 #ifndef NDEBUG
 	void DropFastBallItem() {
 		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
@@ -195,6 +201,20 @@ public:
 		if (state != NULL) {
 			Vector2D levelDim = this->GetLevelUnitDimensions();
 			state->DebugDropItem(GameItemFactory::CreateSlowBallItem(Point2D(0,0) + 0.5f*levelDim, this));
+		}
+	}
+	void DropUberBallItem() {
+		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
+		if (state != NULL) {
+			Vector2D levelDim = this->GetLevelUnitDimensions();
+			state->DebugDropItem(GameItemFactory::CreateUberBallItem(Point2D(0,0) + 0.5f*levelDim, this));
+		}
+	}
+	void DropInvisiBallItem() {
+		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
+		if (state != NULL) {
+			Vector2D levelDim = this->GetLevelUnitDimensions();
+			state->DebugDropItem(GameItemFactory::CreateInvisiBallItem(Point2D(0,0) + 0.5f*levelDim, this));
 		}
 	}
 #endif

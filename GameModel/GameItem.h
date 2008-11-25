@@ -1,10 +1,7 @@
 #ifndef __GAMEITEM_H__
 #define __GAMEITEM_H__
 
-#include <string>
-
-#include "../Utils/Includes.h"
-#include "../Utils/Point.h"
+#include "../BlammoEngine/BlammoEngine.h"
 
 class PlayerPaddle;
 class GameModel;
@@ -19,6 +16,7 @@ protected:
 	GameModel* gameModel;	// Items have to be able to manipulate what happens in the game...
 	Point2D center;				// The center x,y coord that this item is located at
 	ItemType type;				// The type of item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
+	bool isActive;
 
 	// Height and Width for items
 	static const float ITEM_WIDTH;
@@ -51,7 +49,7 @@ public:
 	void Tick(double seconds);
 	bool CollisionCheck(const PlayerPaddle &paddle);
 
-	virtual GameItemTimer* Activate() = 0;
+	virtual double Activate() = 0;	// Returns the timer length for this item
 	virtual void Deactivate() = 0;
 
 	friend std::ostream& operator <<(std::ostream& os, const GameItem& item);

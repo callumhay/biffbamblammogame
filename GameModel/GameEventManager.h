@@ -26,7 +26,7 @@ public:
 	void ActionBallDeath(const GameBall& deadBall, int livesLeft);
 	void ActionBallSpawn(const GameBall& spawnBall);
 	void ActionBallShot(const GameBall& shotBall);
-	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
+	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& blockBefore, const LevelPiece& blockAfter);
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
 	void ActionBlockDestroyed(const LevelPiece& block);
 	void ActionScoreChanged(int amt);

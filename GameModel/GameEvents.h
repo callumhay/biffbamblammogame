@@ -92,10 +92,11 @@ public:
 	/**
 	 * Event triggered when the ball collides with a level block. Only occurs once as the ball
 	 * collides with the block.
-	 * Arguements: ball  - The ball as it is colliding with the block.
-	 *             block - The block before it is destroyed or affected by the ball.
+	 * Arguements: ball				 - The ball as it is colliding with the block.
+	 *             blockBefore - The block before it is destroyed or affected by the ball.
+	 *						 blockAfter  - The block after it is destroyed or affected by the ball.
 	 */
-	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) = 0;
+	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& blockBefore, const LevelPiece& blockAfter) = 0;
 
 	/**
 	 * Event triggered when the ball collides with the player paddle. Only occurs once as the ball
