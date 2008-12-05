@@ -1,12 +1,15 @@
 #include "ESPEmitter.h"
 
-ESPEmitter::ESPEmitter() : particleTexture(NULL), timeSinceLastSpawn(0.0f) {
+ESPEmitter::ESPEmitter() : particleTexture(NULL), timeSinceLastSpawn(0.0f), 
+particleAlignment(ESP::ViewPointAligned) {
 }
 
 ESPEmitter::~ESPEmitter() {
 	this->Flush();
+	
+	// Clear the effectors
+	this->effectors.clear();
 }
-
 
 /**
  * Private helper function for emptying this emitter of all particles and
@@ -14,12 +17,18 @@ ESPEmitter::~ESPEmitter() {
  */
 void ESPEmitter::Flush() {
 	// Delete particles
-	for (std::vector<ESPParticle*>::iterator iter = this->particles.begin(); iter != this->particles.end(); iter++) {
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
 		ESPParticle* currParticle = *iter;
 		delete currParticle;
 		currParticle = NULL;
 	}
-	this->particles.clear();
+	this->aliveParticles.clear();
+	for (std::list<ESPParticle*>::iterator iter = this->deadParticles.begin(); iter != this->deadParticles.end(); iter++) {
+		ESPParticle* currParticle = *iter;
+		delete currParticle;
+		currParticle = NULL;
+	}
+	this->deadParticles.clear();
 
 	// Delete particle textures
 	delete this->particleTexture;
@@ -38,6 +47,7 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, const std::string& imgF
 	// Clean up all previous emitter data
 	this->Flush();
 
+	// TODO: fix texture filtering...
 	this->particleTexture = Texture2D::CreateTexture2DFromImgFile(imgFilepath, Texture::Trilinear);
 	if (this->particleTexture == NULL) {
 		return false;
@@ -45,12 +55,17 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, const std::string& imgF
 
 	// Create each of the new particles
 	for (unsigned int i = 0; i < numParticles; i++) {
-		
-		// TODO: fix texture filtering...
-		this->particles.push_back(new ESPParticle());
+		this->deadParticles.push_back(new ESPParticle());
 	}
 
 	return true;
+}
+
+/**
+ * Sets the particle alignments for this emitter.
+ */
+void  ESPEmitter::SetParticleAlignment(const ESP::ESPAlignment alignment) {
+	this->particleAlignment = alignment;
 }
 
 /**
@@ -83,4 +98,20 @@ void ESPEmitter::SetParticleLife(const ESPInterval& particleLife) {
  */
 void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
 	this->particleSize = particleSize;
+}
+
+/**
+ * Adds a particle effector to this emitter.
+ */
+void ESPEmitter::AddEffector(ESPParticleEffector* effector) {
+	assert(effector != NULL);
+	this->effectors.push_back(effector);
+}
+
+/**
+ * Removes a previously added particle effector from this emitter.
+ */
+void ESPEmitter::RemoveEffector(ESPParticleEffector* const effector) {
+	assert(effector != NULL);
+	this->effectors.remove(effector);
 }

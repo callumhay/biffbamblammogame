@@ -13,7 +13,7 @@ public:
 	ESPParticleEffector(){};
 	virtual ~ESPParticleEffector(){};
 
-	virtual void EffectParticle(ESPParticle* particle) = 0;
+	virtual void AffectParticleOnTick(double dT, ESPParticle* particle) = 0;
 
 };
 #endif

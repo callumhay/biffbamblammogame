@@ -2,6 +2,14 @@
 #define __ESPUTIL_H__
 
 #include "../BlammoEngine/Algebra.h"
+#include "../BlammoEngine/Matrix.h"
+
+class Camera;
+
+namespace ESP {
+	// Possible alignment configurations for sprites and particles w.r.t. the viewer
+	enum ESPAlignment { ScreenAligned, ViewPlaneAligned, ViewPointAligned, AxisAligned };
+};
 
 // An interval pairing of values
 struct ESPInterval {
@@ -16,7 +24,7 @@ struct ESPInterval {
 	}
 
 	float RandomValueInInterval() {
-		return static_cast<float>(minValue + Randomizer::RandomNumZeroToOne()*(maxValue - minValue));
+		return static_cast<float>(minValue + Randomizer::GetInstance()->RandomNumZeroToOne()*(maxValue - minValue));
 	}
 };
 
