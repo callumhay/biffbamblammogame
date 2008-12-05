@@ -8,11 +8,17 @@
 
 #include "../BlammoEngine/BlammoEngine.h"
 
+
+
 const std::string InGameDisplayState::LIVES_LABEL_TEXT = "Lives: ";
 const unsigned int InGameDisplayState::HUD_X_INDENT = 10;	
 const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
-InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
+InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display), 
+mvEffector(Vector3D(0, -7, 0)),
+colourEffector(1, 0) {
+
+
 	// Render to texture setup
 	this->renderToTexBeforeBall = Texture2D::CreateEmptyTexture2D(Texture::Nearest, display->GetDisplayWidth(), display->GetDisplayHeight());
 	assert(this->renderToTexBeforeBall != NULL);
@@ -29,6 +35,20 @@ InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(disp
 	this->livesLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small), LIVES_LABEL_TEXT);
 	this->livesLabel.SetColour(textColourHUD);
 	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
+
+	// TODO: GET RID OF THIS
+	bool result = ptEmitTest.SetParticles(500, GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/Smoke_Puff1_64x64.png");
+	assert(result);
+
+	ptEmitTest.SetSpawnDelta(ESPInterval(0.01, 0.02));
+	ptEmitTest.SetInitialSpd(ESPInterval(3, 6));
+	ptEmitTest.SetParticleLife(ESPInterval(3, 5));
+	ptEmitTest.SetParticleSize(ESPInterval(1, 1.5));
+	ptEmitTest.SetEmitAngleInDegrees(40);
+	ptEmitTest.SetRadiusDeviationFromCenter(ESPInterval(0.3, 0.7));
+	ptEmitTest.SetParticleAlignment(ESP::ViewPointAligned);
+	ptEmitTest.AddEffector(&colourEffector);
+	ptEmitTest.AddEffector(&mvEffector);
 }
 
 InGameDisplayState::~InGameDisplayState() {
@@ -53,8 +73,8 @@ void InGameDisplayState::RenderFrame(double dT) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	this->display->GetCamera().ApplyCameraTransform();
-
 	// -------------------------------------------------------------------------------
+
 
 	// Draw the game scene
 	this->DrawGameScene(dT);
@@ -89,7 +109,7 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
 		this->display->GetAssets()->DrawItem((**iter), this->display->GetCamera());
 	}
-	
+
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(*this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
 	
@@ -98,6 +118,11 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	glPopMatrix();
 	
 	this->display->GetAssets()->DrawLevelPieces(this->display->GetCamera());
+
+
+	// TODO: get rid of this
+	ptEmitTest.Tick(dT);
+	ptEmitTest.Draw(this->display->GetCamera());
 }
 
 /**
