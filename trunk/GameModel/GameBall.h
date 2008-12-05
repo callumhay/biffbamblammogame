@@ -6,7 +6,7 @@
 class GameBall {
 
 public:
-	enum BallSpeed { ZeroSpeed = 0, SlowSpeed = 10, NormalSpeed = 15, FastSpeed = 21 };
+	enum BallSpeed { ZeroSpeed = 0, SlowSpeed = 10, NormalSpeed = 16, FastSpeed = 22 };
 	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010 };
 
 private:
