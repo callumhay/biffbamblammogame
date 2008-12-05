@@ -57,6 +57,12 @@ public:
 	void SetWarpAmountParam(float amt) {
 		this->warpAmount = amt;
 	}
+	/**
+	 * Set the index of refraction for the background.
+	 */
+	void SetIndexOfRefraction(float eta) {
+		this->indexOfRefraction = eta;
+	}
 };
 
 #endif

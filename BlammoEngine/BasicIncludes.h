@@ -52,6 +52,9 @@
 #include FT_OUTLINE_H
 #include FT_TRIGONOMETRY_H
 
+// Pseudo Random Number Generator (PRNG)
+#include "mtrand.h"
+
 // Custom Debug functionality
 #ifndef __DEBUG_H__
 #define __DEBUG_H__

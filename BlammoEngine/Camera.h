@@ -23,6 +23,16 @@ public:
 
 	Camera();
 
+	Vector3D GetNormalizedUpVector() const {
+		return Vector3D::Normalize(this->viewMatrix * DEFAULT_UP_VEC); 
+	}
+	Vector3D GetNormalizedViewVector() const {
+		return Vector3D::Normalize(this->viewMatrix * DEFAULT_FORWARD_VEC);
+	}
+	Vector3D GetNormalizedLeftVector() const {
+		return Vector3D::Normalize(this->viewMatrix * DEFAULT_LEFT_VEC);
+	}
+
 	Matrix4x4 GetViewTransform() const {
 		return this->viewMatrix;
 	}

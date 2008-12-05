@@ -9,8 +9,8 @@ const std::string CgFxPostRefract::BASIC_TECHNIQUE_NAME			= "PostRefractGeom";
 
 // Default constructor, builds default, white material
 CgFxPostRefract::CgFxPostRefract() : 
-CgFxEffectBase(EFFECT_FILE), invisiColour(Colour(1,1,1)), indexOfRefraction(1.1f), 
-warpAmount(50.0f), sceneTex(NULL) {
+CgFxEffectBase(EFFECT_FILE), invisiColour(Colour(1,1,1)), indexOfRefraction(1.00f), 
+warpAmount(1.0f), sceneTex(NULL) {
 	
 	// Set the technique
 	this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];

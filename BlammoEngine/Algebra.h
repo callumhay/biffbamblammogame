@@ -60,46 +60,35 @@ inline int NumberFuncs::NextPowerOfTwo(int a) {
 	return temp;
 };
 
-namespace Randomizer {
-	void Initialize();
-	int Random();
+class Randomizer {
+private:
+	static Randomizer* instance;
+
+	MTRand_int32  randomIntGen;			// Generates random 32-bit integers
+	MTRand_closed randomDoubleGen;	// Generates random double precision floating point numbers in [0, 1]
+
+	Randomizer();
+	~Randomizer(){};
+
+public:
+	
+	static Randomizer* GetInstance() {
+		if (Randomizer::instance == NULL) {
+			Randomizer::instance = new Randomizer();
+		}
+		return Randomizer::instance;
+	}
+
+	static void DeleteInstance() {
+		if (Randomizer::instance != NULL) {
+			delete Randomizer::instance;
+			Randomizer::instance = NULL;
+		}
+	}
+	
+	unsigned int RandomUnsignedInt();
+	int		 RandomNegativeOrPositive();
 	double RandomNumZeroToOne();
 	double RandomNumNegOneToOne();
-	unsigned int RandomTimeSeed();
-};
-
-inline unsigned int Randomizer::RandomTimeSeed() {
-	unsigned long now = time(NULL) + BlammoTime::GetSystemTimeInMillisecs();
-	unsigned char *p = (unsigned char *)&now;
-	unsigned int seed = 0;
-	size_t i;
-
-	for (i = 0; i < sizeof(now); i++) {
-		seed = seed * ( UCHAR_MAX + 2U ) + p[i];
-	}
-	return seed;
-}
-
-// A random value in [0, RAND_MAX]
-inline int Randomizer::Random() {
-	srand(static_cast<unsigned int>(Randomizer::RandomTimeSeed()));
-	return rand();
-}
-
-// Return a random number in [0, 1]
-inline double Randomizer::RandomNumZeroToOne() {
-	srand(static_cast<unsigned int>(Randomizer::RandomTimeSeed()));
-	return static_cast<double>(rand())/(static_cast<double>(RAND_MAX));
-};
-
-// Return a random number in [-1, 1]
-inline double Randomizer::RandomNumNegOneToOne() {
-	srand(static_cast<unsigned int>(Randomizer::RandomTimeSeed()));
-	double randNum = rand()/(static_cast<double>(RAND_MAX));
-	double randomSign = -1.0;
-	if (rand() % 2 == 0) {
-		randomSign = 1.0;
-	}
-	return randNum * randomSign;
 };
 #endif

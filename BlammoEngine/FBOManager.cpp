@@ -4,7 +4,7 @@
 
 FBOManager* FBOManager::instance = NULL;
 
-FBOManager::FBOManager() : fboID(0) {//, renderBuffID(0) {
+FBOManager::FBOManager() : fboID(0), renderBuffID(0) {
 	// Init the framebuffer and renderbuffer ID for binding, but don't bind yet
 	glGenFramebuffersEXT(1, &this->fboID);
 	glGenRenderbuffersEXT(1, &this->renderBuffID);
