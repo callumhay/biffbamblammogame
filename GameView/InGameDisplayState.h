@@ -4,6 +4,9 @@
 #include "DisplayState.h"
 #include "../BlammoEngine/BlammoEngine.h"
 
+// TODO: get rid of this?
+#include "../ESPEngine/ESP.h"
+
 /**
  * State for representing and rendering the display of the game as it is
  * being played by the user.
@@ -23,6 +26,10 @@ private:
 	void DrawGameHUD();
 	void DrawGameScene(double dT);
 	
+	ESPPointEmitter ptEmitTest;
+	ESPParticleColourEffector colourEffector;
+	ESPParticleVelocityEffector mvEffector;
+
 public:
 	InGameDisplayState(GameDisplay* display);
 	virtual ~InGameDisplayState();

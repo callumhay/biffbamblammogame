@@ -181,6 +181,8 @@ void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera, Texture2D
 	// Deal with the Invisiball power-down if applicable....
 	if ((b.GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall) {
 		this->invisiBallEffect->SetFBOTexture(sceneTex);
+		this->invisiBallEffect->SetWarpAmountParam(50.0f);
+		this->invisiBallEffect->SetIndexOfRefraction(1.33f);
 		ballInvisiEffectTemp = this->invisiBallEffect;
 	}
 
