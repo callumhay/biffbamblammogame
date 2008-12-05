@@ -1,36 +1,17 @@
 #include "ESPParticle.h"
 
-int			ESPParticle::NUM_INSTANCES					= 0;
-GLuint	ESPParticle::PARTICLE_QUAD_DISPLIST	= 0;
+#include "../BlammoEngine/Camera.h"
+
+const Vector3D ESPParticle::PARTICLE_UP_VEC				= Vector3D(0, 1, 0);
+const Vector3D ESPParticle::PARTICLE_NORMAL_VEC		= Vector3D(0, 0, 1);
+const Vector3D ESPParticle::PARTICLE_RIGHT_VEC		= Vector3D::cross(PARTICLE_UP_VEC, PARTICLE_NORMAL_VEC);
 
 // NOTE: All particles are created as if they were already dead
 ESPParticle::ESPParticle() : 
-totalLifespan(0.0), currLifeElapsed(0.0), size(1.0f) {
-	
-	if (ESPParticle::NUM_INSTANCES == 0) {
-		// Inline: Creation of the first ESPParticle instance
-		
-		// Create a display list of a unit quad, centered at the origin and
-		// facing in the z direction.
-		ESPParticle::PARTICLE_QUAD_DISPLIST = glGenLists(1); 
-		glNewList(ESPParticle::PARTICLE_QUAD_DISPLIST, GL_COMPILE);
-			glBegin(GL_TRIANGLES);
-				glTexCoord2d(0, 0); glVertex2f(-0.5f, -0.5f);
-				glTexCoord2d(1, 0); glVertex2f(0.5f, -0.5f);
-				glTexCoord2d(1, 1); glVertex2f(0.5f, 0.5f);
-				glTexCoord2d(0, 1); glVertex2f(-0.5f, 0.5f);
-			glEnd();
-		glEndList();
-	}
-	ESPParticle::NUM_INSTANCES++;
+totalLifespan(0.0), currLifeElapsed(0.0), size(1.0f), colour(1,1,1), alpha(1.0f) {
 }
 
 ESPParticle::~ESPParticle() {
-	if (ESPParticle::NUM_INSTANCES == 1) {
-		// Inline: Deleting the last ESPParticle instance
-		glDeleteLists(ESPParticle::PARTICLE_QUAD_DISPLIST, 1);
-	}
-	ESPParticle::NUM_INSTANCES--;
 }
 
 /**
@@ -63,14 +44,156 @@ void ESPParticle::Tick(const double dT) {
 /**
  * Draw this particle as it is currently.
  */
-void ESPParticle::Draw() {
+void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) {
 	// Don't draw if dead...
 	if (this->IsDead()) {
 		return;
 	}
 
+	// Transform and draw the particle
 	glPushMatrix();
-	glScalef(this->size, this->size, this->size);
-	glCallList(ESPParticle::PARTICLE_QUAD_DISPLIST);
+
+	// Move the particle into position
+	//glTranslatef(this->position[0], this->position[1], this->position[2]);
+
+	// Do any personal alignment transforms...
+	Matrix4x4 personalAlignXF = this->GetPersonalAlignmentTransform(camera, alignment);
+	personalAlignXF[12]  += this->position[0]; 
+  personalAlignXF[13]  += this->position[1]; 
+  personalAlignXF[14]  += this->position[2]; 
+	glMultMatrixf(personalAlignXF.begin());
+
+	float halfSize = 0.5f * this->size;
+	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
+	glBegin(GL_QUADS);
+		glNormal3i(PARTICLE_NORMAL_VEC[0], PARTICLE_NORMAL_VEC[1], PARTICLE_NORMAL_VEC[2]);
+		glTexCoord2i(0, 0); glVertex2f(-halfSize, -halfSize);
+		glTexCoord2i(1, 0); glVertex2f( halfSize, -halfSize);
+		glTexCoord2i(1, 1); glVertex2f( halfSize,  halfSize);
+		glTexCoord2i(0, 1); glVertex2f(-halfSize,  halfSize);
+	glEnd();
+
 	glPopMatrix();
+}
+
+/**
+ * Obtains the matrix transform for transforming particles
+ * to the given alignment.
+ * Returns: A transform matrix that will transform any particle such that it
+ * adheres to the given alignment.
+ */
+Matrix4x4 ESPParticle::GetAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment) {
+	Vector3D alignRightVec	= Vector3D(1, 0, 0);
+	Vector3D alignUpVec			= Vector3D(0, 1, 0);
+	Vector3D alignNormalVec	= Vector3D(0, 0, 1);
+
+	// Create the alignment transform matrix based off the given alignment...
+	switch(alignment) {
+		case ESP::ScreenAligned:
+			// The particle is aligned with the screen 
+			// - The normal is the negation of the view plane normal (in world space)
+			// - The up vector is the camera's up direction
+			// - The right vector is just a cross product of the above two...
+
+			alignNormalVec = -cam.GetNormalizedViewVector();
+			alignUpVec			= cam.GetNormalizedUpVector();
+			alignRightVec	= Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+			break;
+
+		case ESP::ViewPlaneAligned:
+			// The particle is aligned to the view plane...
+			// - The normal is the negation of the view plane normal (in world space)
+			// - The up vector is the up vector of the particle (in world space)
+			// - The right vector is just a cross product of the above two...
+
+			// FIX THIS!!!!
+			alignNormalVec = -cam.GetNormalizedViewVector();
+			alignUpVec			= PARTICLE_UP_VEC;
+
+			alignRightVec	= Vector3D::cross(alignUpVec, alignNormalVec);
+			if (alignRightVec == Vector3D(0,0,0)) {
+				alignRightVec = Vector3D::MollerHughesPerpendicular(alignNormalVec);
+			}
+			alignRightVec		= Vector3D::Normalize(alignRightVec);
+			alignUpVec			= Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
+			break;
+
+		// The rest of these are per-particle transforms...
+		case ESP::ViewPointAligned:
+		case ESP::AxisAligned:
+		default:
+			break;
+	}
+
+	return Matrix4x4(alignRightVec, alignUpVec, alignNormalVec);
+}
+
+// TODO: MAKE THIS WORK...
+Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment) {
+	Vector3D alignRightVec	= Vector3D(1, 0, 0);
+	Vector3D alignUpVec			= Vector3D(0, 1, 0);
+	Vector3D alignNormalVec	= Vector3D(0, 0, 1);
+	
+	float tempMVXfVals[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
+	
+	// Obtain JUST the world transform...
+	glPushMatrix();
+	glLoadIdentity();
+	glMultMatrixf(cam.GetInvViewTransform().begin());
+	glMultMatrixf(tempMVXfVals);
+	glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
+	glPopMatrix();
+
+	Matrix4x4 worldMatrix(tempMVXfVals);
+	Point3D currPos = worldMatrix *  this->position;
+	currPos = cam.GetCurrentCameraPosition() - Vector3D(currPos[0], currPos[1], currPos[2]);
+	
+	// The normal vector is from the particle center to the eye
+	alignNormalVec = Vector3D(currPos[0], currPos[1], currPos[2]);
+	// Make sure there is a normal...
+	if (alignNormalVec == Vector3D(0,0,0)) {
+		alignNormalVec = PARTICLE_NORMAL_VEC;
+	}
+	else {
+		alignNormalVec = Vector3D::Normalize(alignNormalVec);
+	}
+
+	// Create the alignment transform matrix based off the given alignment...
+	switch(alignment) {
+		case ESP::ViewPointAligned:
+			// The particle is aligned to the view-point
+			// - The up vector is the particle up vector
+			alignUpVec			= PARTICLE_UP_VEC;
+		
+			// Find out if up and normal are parallel and fix in that case...
+			alignRightVec		= Vector3D::cross(alignNormalVec, alignUpVec);
+			if (alignRightVec == Vector3D(0,0,0)) {
+				alignRightVec = Vector3D::MollerHughesPerpendicular(alignNormalVec);
+			}
+			alignRightVec		= Vector3D::Normalize(alignRightVec);
+			alignUpVec			= Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
+			break;
+
+		case ESP::AxisAligned:
+			// The particle is aligned to its axis of velocity
+			// - The normal vector is from the particle center to the eye	
+			// - The up vector is the velocity vector of this particle
+			alignUpVec			= Vector3D::Normalize(this->velocity);
+			alignRightVec		= Vector3D::cross(alignNormalVec, alignUpVec);
+			if (alignRightVec == Vector3D(0,0,0)) {
+				alignRightVec = Vector3D::MollerHughesPerpendicular(alignNormalVec);
+			}
+			alignRightVec		= Vector3D::Normalize(alignRightVec);
+			alignNormalVec	= Vector3D::Normalize(Vector3D::cross(alignRightVec, alignUpVec));
+			break;
+
+		// These are batch transforms...
+		case ESP::ScreenAligned:
+		case ESP::ViewPlaneAligned:
+		default:
+			break;
+	}
+
+	return Matrix4x4(alignRightVec, alignUpVec, alignNormalVec);
 }
