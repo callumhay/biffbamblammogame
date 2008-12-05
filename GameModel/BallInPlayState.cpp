@@ -121,7 +121,7 @@ void BallInPlayState::Tick(double seconds) {
 						// and the number of consecutive blocks that have been hit on this set of ball bounces
 						double numBlocksAlreadyHit = static_cast<double>(this->gameModel->GetNumConsecutiveBlocksHit());
 						double itemDropProb = min(1.0, 0.02 * numBlocksAlreadyHit + GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP);
-						double randomNum = Randomizer::RandomNumZeroToOne();
+						double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();
 
 						// Decrease the probability of a drop if the last block dropped an item
 						if (this->lastBlockDroppedItem) {

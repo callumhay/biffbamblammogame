@@ -15,7 +15,7 @@
 GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel) {
 	assert(gameModel != NULL);
 	
-	int randomValue = Randomizer::Random() % TOTAL_NUM_OF_ITEMS;
+	int randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % TOTAL_NUM_OF_ITEMS;
 	// TODO: more items go here...
 	switch (randomValue) {	// switch is faster than a for loop... trade-off dynamic for speed
 		case 0:
