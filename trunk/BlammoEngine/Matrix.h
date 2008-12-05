@@ -30,7 +30,7 @@ public:
 		}
 	}
 
-  Matrix4x4(const Vector4D row1, const Vector4D row2, const Vector4D row3, const Vector4D row4) {
+  Matrix4x4(const Vector4D& row1, const Vector4D& row2, const Vector4D& row3, const Vector4D& row4) {
     v_[0] = row1[0]; 
     v_[4] = row1[1]; 
     v_[8] = row1[2]; 
@@ -52,6 +52,28 @@ public:
     v_[15] = row4[3]; 
   }
 
+	Matrix4x4(const Vector3D& row1, const Vector3D& row2, const Vector3D& row3) {
+    v_[0]  = row1[0]; 
+    v_[4]  = row1[1]; 
+    v_[8]  = row1[2]; 
+    v_[12] = 0; 
+
+    v_[1]  = row2[0]; 
+    v_[5]  = row2[1]; 
+    v_[9]  = row2[2]; 
+    v_[13] = 0; 
+
+    v_[2]  = row3[0]; 
+    v_[6]  = row3[1]; 
+    v_[10] = row3[2]; 
+    v_[14] = 0; 
+
+    v_[3]  = 0; 
+    v_[7]  = 0; 
+    v_[11] = 0; 
+    v_[15] = 1; 
+	}
+
   Matrix4x4& operator=(const Matrix4x4& other)
   {
     std::copy(other.v_, other.v_+16, v_);
@@ -59,15 +81,17 @@ public:
   }
 
   Vector4D getRow(size_t row) const {
+		assert(row >= 0 && row <= 3);
     return Vector4D(v_[row], v_[row + 4], v_[row + 8], v_[row + 12]);
   }
 
   Vector4D getColumn(size_t col) const {
-    return Vector4D(v_[col], v_[1+col], v_[2+col], v_[3+col]);
+		assert(col >= 0 && col <= 3);
+    return Vector4D(v_[4*col], v_[1+4*col], v_[2+4*col], v_[3+4*col]);
   }
 
 	Point3D getTranslation() const {
-		return Point3D(v_[13], v_[14], v_[15]);
+		return Point3D(v_[12], v_[13], v_[14]);
 	}
 
   float& operator[](size_t idx) {
@@ -164,6 +188,40 @@ inline Matrix4x4 operator *(const Matrix4x4& a, const Matrix4x4& b)
   }
 
   return ret;
+}
+
+inline Vector3D operator *(const Matrix4x4& m, const Vector3D& v) {
+	Vector3D ret;
+
+	for (int i = 0; i < 3; i++) {
+
+		Vector4D currRow = m.getRow(i);
+		float sum = 0.0f;
+
+		for (int j = 0; j < 3; j++) {
+			sum += v[j] * currRow[j];
+		}
+		ret[i] = sum;
+	}
+
+	return ret;
+}
+
+inline Point3D operator *(const Matrix4x4& m, const Point3D& p) {
+	Point3D ret;
+	Vector4D temp = Vector4D(p[0], p[1], p[2], 1);
+	
+	for (int i = 0; i < 3; i++) {
+		Vector4D currRow = m.getRow(i);
+		float sum = 0.0f;
+
+		for (int j = 0; j < 4; j++) {
+			sum += temp[j] * currRow[j];
+		}
+		ret[i] = sum;
+	}
+
+	return ret;
 }
 
 #endif

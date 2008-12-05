@@ -163,8 +163,13 @@ public:
   }
 
   
-	//float normalize();
-	//static Vector3D normalize(const Vector3D &vec);
+	void Normalize() {
+		float magnitude = this->length();
+		assert(magnitude != 0);
+		this->v_[0] /= magnitude;
+		this->v_[1] /= magnitude;
+		this->v_[2] /= magnitude;
+	}
 
   Vector3D cross(const Vector3D& other) const {
     return Vector3D(v_[1]*other[2] - v_[2]*other[1],
@@ -177,6 +182,80 @@ public:
                     v1[2] * v2[0] - v1[0] * v2[2],
                     v1[0] * v2[1] - v1[1] * v2[0]);
   }
+
+	static Vector3D Normalize(const Vector3D& v) {
+		Vector3D temp(v);
+		temp.Normalize();
+		return temp;
+	}
+
+	/**
+	 * Finds the angle between two given vectors, in radians.
+	 * Precondition: v1 and v2 MUST be normalized for this to work!!
+	 * Returns: angle between v1 and v2 in radians.
+	 */
+	static float AngleBetweenInRadians(const Vector3D& v1, const Vector3D& v2) {
+		return acosf(v1.dot(v2));
+	}
+
+	/**
+	 * To create an 'imperfect' perpendicular vector to the one given we
+	 * find the smallest index coordinate component and set it to zero,
+	 * then we flip the other two coordinates and negate the first.
+	 * Returns: An 'imperfect' perpendicular vector to the given v.
+	 **/
+	static Vector3D MollerHughesPerpendicular(const Vector3D& v) {
+		Vector3D perpendicularMH = v;
+		int smallestIndex;
+		
+		// First we take the smallest coordinate component and set it to zero
+		if (v[0] < v[1]) {
+			if (v[0] < v[2]) {
+				smallestIndex = 0;
+				perpendicularMH[1] = -v[2];
+				perpendicularMH[2] =  v[1]; 
+			}
+			else {
+				smallestIndex = 2;
+				perpendicularMH[0] = -v[1];
+				perpendicularMH[1] =  v[0]; 
+			}
+		}
+		else {
+			if (v[1] < v[2]) {
+				smallestIndex = 1;
+				perpendicularMH[0] = -v[2];
+				perpendicularMH[2] =  v[0]; 
+			}
+			else {
+				smallestIndex = 2;
+				perpendicularMH[0] = -v[1];
+				perpendicularMH[1] =  v[0]; 
+			}
+		}
+
+		perpendicularMH[smallestIndex] = 0;
+		return perpendicularMH;
+	}
+
+
+	// Return spherical coords (r, theta (the angle to z-axis), phi (the angle to x-axis))
+	static Vector3D ToSphericalFromCartesian(const Vector3D& v) {
+		Vector3D sphericalCoords;
+		sphericalCoords[0] = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+		sphericalCoords[1] = acosf(v[2] / sphericalCoords[0]);
+		sphericalCoords[2] = atan2f(v[1], v[0]);
+		return sphericalCoords;
+	}
+
+	static Vector3D ToCartesianFromSpherical(const Vector3D& v) {
+		Vector3D cartesianCoords;
+		float rTimesSinTheta = v[2] * sinf(v[1]);
+		cartesianCoords[0] = rTimesSinTheta * cosf(v[2]);
+		cartesianCoords[1] = rTimesSinTheta * sinf(v[2]);
+		cartesianCoords[2] = v[2] * cosf(v[1]);
+		return cartesianCoords;
+	}
 };
 
 inline std::ostream& operator <<(std::ostream& os, const Vector3D& v) {
@@ -202,6 +281,14 @@ inline Vector3D operator -(const Vector3D& a) {
 
 inline Vector3D cross(const Vector3D& a, const Vector3D& b) {
   return a.cross(b);
+}
+
+inline bool operator ==(const Vector3D& a, const Vector3D& b) {
+	return (abs(a[0] - b[0]) < EPSILON) && (abs(a[1] - b[1]) < EPSILON) && (abs(a[2] - b[2]) < EPSILON);
+}
+
+inline bool operator !=(const Vector3D& a, const Vector3D& b) {
+	return !(a==b);
 }
 
 Vector3D operator *(const Matrix4x4& M, const Vector3D& v);

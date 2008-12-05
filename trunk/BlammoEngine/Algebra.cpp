@@ -1,58 +1,46 @@
-//#include "Algebra.h"
-//
-//
-//double Vector3D::normalize()
-//{
-//  double denom = 1.0;
-//  double x = (v_[0] > 0.0) ? v_[0] : -v_[0];
-//  double y = (v_[1] > 0.0) ? v_[1] : -v_[1];
-//  double z = (v_[2] > 0.0) ? v_[2] : -v_[2];
-//
-//  if(x > y) {
-//    if(x > z) {
-//      if(1.0 + x > 1.0) {
-//        y = y / x;
-//        z = z / x;
-//        denom = 1.0 / (x * sqrt(1.0 + y*y + z*z));
-//      }
-//    } else { // z > x > y 
-//      if(1.0 + z > 1.0) {
-//        y = y / z;
-//        x = x / z;
-//        denom = 1.0 / (z * sqrt(1.0 + y*y + x*x));
-//      }
-//    }
-//  } else {
-//    if(y > z) {
-//      if(1.0 + y > 1.0) {
-//        z = z / y;
-//        x = x / y;
-//        denom = 1.0 / (y * sqrt(1.0 + z*z + x*x));
-//      }
-//    } else {
-//      if(1.0 + z > 1.0) {
-//        y = y / z;
-//        x = x / z;
-//        denom = 1.0 / (z * sqrt(1.0 + y*y + x*x));
-//      }
-//    }
-//  }
-//
-//  if(1.0 + x + y + z > 1.0) {
-//    v_[0] *= denom;
-//    v_[1] *= denom;
-//    v_[2] *= denom;
-//    return 1.0 / denom;
-//  }
-//
-//  return 0.0;
-//}
-//
-//Vector3D Vector3D::normalize(const Vector3D &vec){
-//	Vector3D temp = vec;
-//	temp.normalize();
-//	return temp;
-//}
-//
-//
-//
+#include "Algebra.h"
+
+Randomizer* Randomizer::instance = NULL;
+
+Randomizer::Randomizer() : 
+randomIntGen(BlammoTime::GetSystemTimeInMillisecs()), 
+randomDoubleGen(BlammoTime::GetSystemTimeInMillisecs()) {
+}
+
+/**
+ * Get a random unsigned integer.
+ * Returns: Random uint.
+ */
+unsigned int Randomizer::RandomUnsignedInt() {
+	return this->randomIntGen();
+}
+
+/**
+ * Get a random negative or postivive unity integer.
+ * Returns: +1 or -1, randomly.
+ */
+int Randomizer::RandomNegativeOrPositive() {
+	int randomSign = -1;
+	if (this->randomIntGen() % 2 == 0) {
+		randomSign = 1;
+	}
+	return randomSign;
+}
+
+/**
+ * Get a random number in the interval [0,1]
+ * Returns: double in range [0,1].
+ */
+double Randomizer::RandomNumZeroToOne() {
+	return this->randomDoubleGen();
+}
+
+/**
+ * Get a random number in the interval [-1, 1]
+ * Returns: double in range [-1, 1]
+ */
+double Randomizer::RandomNumNegOneToOne() {
+	double randNum = this->randomDoubleGen();
+	double randomSign = this->RandomNegativeOrPositive();
+	return randNum * randomSign;
+}
