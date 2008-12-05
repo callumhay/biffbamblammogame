@@ -248,6 +248,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\mtrand.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\ObjReader.h"
 					>
 				</File>
@@ -337,6 +341,10 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\MtlReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\mtrand.cpp"
 					>
 				</File>
 				<File
@@ -732,6 +740,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPParticleColourEffector.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPParticleEffector.h"
 					>
 				</File>
@@ -764,11 +776,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPParticleColourEffector.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPParticleVelocityEffector.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPPointEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPUtil.cpp"
 					>
 				</File>
 			</Filter>

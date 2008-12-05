@@ -21,7 +21,6 @@ float4x4 WorldITXf : WorldInverseTranspose < string UIWidget="None"; >;
 float4x4 WvpXf     : WorldViewProjection < string UIWidget="None"; >;
 float4x4 WorldXf   : World < string UIWidget="None"; >;
 float4x4 ViewIXf   : ViewInverse < string UIWidget="None"; >;
-float4x4 ViewProjXf    : ViewProjection < string UIWidget="None"; >;
 
 //// TWEAKABLE PARAMETERS ////////////////////
 float WarpAmount <
@@ -124,16 +123,26 @@ float4 PostRefract_PS(vertexOutput IN) : COLOR {
     float3 nWorldNormal   = normalize(IN.WorldNormal.xyz);
     float3 nProjPos      = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
     
-    // Find the world space refraction vector
-    float3 refractionVec = refract(nWorldView, nWorldNormal, IndexOfRefraction);
-
+    // This is a hacked version of the Fresnel effect - it has fixed constants
+    // of 0.5 for the bias, 1 for the Scale and 1 for the power
+    // The reasoning is that I want a nicely blended bit of both reflection and refraction
+    // especially in cases of total internal refraction (which looks ugly and abrupt without this)
+    float fresnelCoeff = max(0, min(1, 1.5f + dot(nWorldView,nWorldNormal)));
+    // Find the world space reflection vector
+    float3 refractionVec = refract(nWorldView, nWorldNormal, IndexOfRefraction/1.0003);
+    // Find the world space refraction vector (IndexOfRefraction_Medium to air)
+    float3 reflectionVec = reflect(nWorldView, nWorldNormal);
+    
+    // Obtain the lookup vector which will be scaled/warped to get an offset for looking up
+    // the background/scene texture
+    float2 lookupVec = fresnelCoeff*reflectionVec.xy + (1-fresnelCoeff)*refractionVec.xy;
+    
     // Use the refraction and scale it to the screen size to get an offset for looking
     // up the texel in the scene texture
-    float2 lookupOffset = WarpAmount * refractionVec.xy * float2(1.0/SceneWidth, 1.0/SceneHeight);
+    float2 lookupOffset = WarpAmount * lookupVec.xy * float2(1.0/SceneWidth, 1.0/SceneHeight);
     float3 textureColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
  
     return float4(InvisiColour*textureColour, 1.0f);
-    //return float4(nProjPos, 1);
 }
 
 
