@@ -114,6 +114,7 @@ int main(int argc, char **argv) {
 	FBOManager::DeleteInstance();
 	GameModelConstants::DeleteInstance();
 	GameViewConstants::DeleteInstance();
+	Randomizer::DeleteInstance();
 	
 	return 0;
 }

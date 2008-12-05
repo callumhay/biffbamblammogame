@@ -149,5 +149,17 @@ void GameController::Tick() {
 	else if (this->keyPressed['9']) {
 		this->display->GetCamera().Rotate('y', -1.0f);
 	}
+	else if (this->keyPressed['/']) {
+		this->display->GetCamera().Rotate('x', 1.0f);
+	}
+	else if (this->keyPressed['*']) {
+		this->display->GetCamera().Rotate('x', -1.0f);
+	}
+	else if (this->keyPressed['1']) {
+		this->display->GetCamera().Rotate('z', 1.0f);
+	}
+	else if (this->keyPressed['3']) {
+		this->display->GetCamera().Rotate('z', -1.0f);
+	}
 #endif
 }
