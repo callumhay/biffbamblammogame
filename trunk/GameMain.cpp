@@ -9,6 +9,7 @@
 
 #include "GameController.h"
 
+// Initialization Constants for the application
 static const char* WINDOW_TITLE = "Biff Bam Blammo";
 static const int INIT_WIDTH = 1024;
 static const int INIT_HEIGHT = 768;
@@ -17,57 +18,112 @@ static GameModel *model = NULL;
 static GameController *controller = NULL;
 static GameDisplay *display = NULL;
 
-void ProcessNormalKeysMain(unsigned char key, int x, int y) {
-	controller->ProcessNormalKeys(key, x, y);
-}
-
-void ProcessNormalKeysUpMain(unsigned char key, int x, int y) {
-	controller->ProcessNormalKeysUp(key, x, y);
-}
-
-void ProcessSpecialKeysMain(int key, int x, int y) {
-	controller->ProcessSpecialKeys(key, x, y);
-}
-
-void ProcessSpecialKeysUpMain(int key, int x, int y) {
-	controller->ProcessSpecialKeysUp(key, x, y);
-}
-
-void ProcessMouseMain(int button, int state, int x, int y) {
-	controller->ProcessMouse(button, state, x, y);
-}
-
-void ProcessActiveMouseMotionMain(int x, int y) {
-	controller->ProcessActiveMouseMotion(x, y);
-}
-
-void ProcessPassiveMouseMotionMain(int x, int y) {
-	controller->ProcessPassiveMouseMotion(x, y);
-}
-
-void ChangeSizeMain(int w, int h) {
+void ResizeWindow(int w, int h) {
 	display->ChangeDisplaySize(w, h);
 }
 
-void RenderSceneMain() {
-	display->Render();
-	controller->Tick();
+static void KeyDownEventHandler(SDL_keysym* keysym) {
+	switch (keysym->sym) {
+	case SDLK_ESCAPE:
+		SDL_Quit();
+		exit(0);
+		break;
+	default:
+		controller->KeyDown(keysym->sym);
+		break;
+	}
 }
 
-void FrameRenderMain(int value) {
-	glutPostRedisplay();
-	glutTimerFunc(GameDisplay::FRAME_SLEEP_MS, FrameRenderMain, 1);
+static void KeyUpEventHandler(SDL_keysym* keysym) {
+	controller->KeyUp(keysym->sym);
+}
+
+static void ProcessEvents() {
+	//Our SDL event placeholder.
+	SDL_Event event;
+
+	// Grab all the events off the queue
+	while (SDL_PollEvent(&event)) {
+		switch (event.type) {
+			case SDL_KEYDOWN:
+				// Handle key presses
+				KeyDownEventHandler(&event.key.keysym);
+				break;
+			case SDL_KEYUP:
+				KeyUpEventHandler(&event.key.keysym);
+				break;
+			case SDL_VIDEORESIZE:
+				ResizeWindow(event.resize.w, event.resize.h);
+				break;
+			case SDL_QUIT:
+				// Handle quit requests (like Ctrl-c)
+				SDL_Quit();
+				exit(0);
+				break;
+		}
+	}
+}
+
+static void DrawScreen() {
+
+}
+
+/**
+ * Initialize SDL.
+ * Returns: true on success, false otherwise.
+ */
+bool InitSDLWindow() {
+	// Load SDL
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    std::cerr << "Unable to initialize SDL: " << SDL_GetError();
+    return false;
+  }
+
+	SDL_WM_SetCaption(WINDOW_TITLE, "");	// TODO: set the icon
+
+  // To use OpenGL, you need to get some information first,
+  const SDL_VideoInfo *info = SDL_GetVideoInfo();
+  if(!info) {
+    // This should never happen...
+		std::cerr << "Video query failed: " << SDL_GetError() << std::endl;
+    return false;
+  }
+  int bpp = info->vfmt->BitsPerPixel;
+
+  // Set colour bits...
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,  8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+  
+	// Set colour depth
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  // Double buffering
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	// .. OTHER STUFF HERE
+
+	// TODO: fix this... (make multisampling versatile...)
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, GameDisplay::NUM_MULTISAMPLES);
+
+
+  // Set the draw surface...
+	if (SDL_SetVideoMode(INIT_WIDTH, INIT_HEIGHT, bpp, SDL_OPENGL | SDL_SWSURFACE | SDL_RESIZABLE) == 0) {
+		std::cerr << "Unable to set video mode: " << SDL_GetError();
+    return false;
+  }
+
+	return true;
 }
 
 // Driver function for the game.
-int main(int argc, char **argv) {
-	// Set up the window using glut
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_ALPHA | GLUT_ACCUM | GLUT_STENCIL | GLUT_MULTISAMPLE | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(100,100); // TODO: make this the center of the screen if not fullscreen
-	glutInitWindowSize(INIT_WIDTH,INIT_HEIGHT);
-	glutCreateWindow(WINDOW_TITLE);
-
+int main(int argc, char *argv[]) {
+	// Setup the SDL window
+	if (!InitSDLWindow()) {
+		SDL_Quit();
+		return -1;
+	}
+	
 	// Load extensions
 	GLenum err = glewInit();
 	if (GLEW_OK != err) {
@@ -75,33 +131,35 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
-	// Set the rendering functions for OGL
-	glutDisplayFunc(RenderSceneMain);
-	glutIdleFunc(RenderSceneMain);
-	glutReshapeFunc(ChangeSizeMain);
-
-	// Turn off VSync
-	// TODO: VSync: option for this?
-	BlammoTime::SetVSync(NULL);
-
-	// Controller/input functions
-	glutKeyboardUpFunc(ProcessNormalKeysUpMain);
-	glutKeyboardFunc(ProcessNormalKeysMain);
-
-	glutSpecialFunc(ProcessSpecialKeysMain);	
-	glutSpecialUpFunc(ProcessSpecialKeysUpMain);
-
-	glutMouseFunc(ProcessMouseMain);
-	glutMotionFunc(ProcessActiveMouseMotionMain);
-	glutPassiveMotionFunc(ProcessPassiveMouseMotionMain);
-
+	// Create the MVC...
 	model = new GameModel();
 	display = new GameDisplay(model, INIT_WIDTH, INIT_HEIGHT);
 	controller = new GameController(model, display);
 
-	// Render loop...
-	glutTimerFunc(GameDisplay::FRAME_SLEEP_MS, FrameRenderMain, 1);
-	glutMainLoop();
+	// Turn off VSync
+	// TODO: VSync: option for this?
+	BlammoTime::SetVSync(1);
+
+	double frameTimeDelta = 0.0;
+
+	// Main render loop...
+	while(true) {
+		Uint32 startOfFrameTime = SDL_GetTicks();
+		
+		// Render what's currently being displayed by the game
+		display->Render(frameTimeDelta);
+		SDL_GL_SwapBuffers();
+		
+		SDL_Delay(GameDisplay::FRAME_SLEEP_MS);
+
+		// Process SDL events...
+		ProcessEvents();
+		// Controller sync...
+		controller->Tick();
+
+		// Calculate the frame delta...
+		frameTimeDelta = static_cast<double>(SDL_GetTicks() - startOfFrameTime) / 1000.0;
+	}
 
 	// Clear up MVC
 	delete model;
@@ -115,6 +173,6 @@ int main(int argc, char **argv) {
 	GameModelConstants::DeleteInstance();
 	GameViewConstants::DeleteInstance();
 	Randomizer::DeleteInstance();
-	
+
 	return 0;
 }

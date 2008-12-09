@@ -3,9 +3,10 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="BiffBamBlammo"
-	ProjectGUID="{E2252DE0-F2DB-4AE4-8BB6-84DE10AEDA8C}"
-	RootNamespace="BiffBamWammo"
-	TargetFrameworkVersion="131072"
+	ProjectGUID="{8678CEF2-B783-4BC0-90DD-DB71854CF646}"
+	RootNamespace="SDLTest"
+	Keyword="Win32Proj"
+	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
 		<Platform
@@ -20,11 +21,10 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -41,13 +41,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)..\BlammoEngine&quot;"
-				PreprocessorDefinitions="ON_WINDOWS"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
+				TreatWChar_tAsBuiltInType="false"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -58,18 +59,15 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
-				CommandLine=""
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LinkLibraryDependencies="true"
-				AdditionalDependencies="cg.lib cgGL.lib DevIL.lib EFX-Util.lib freetype235.lib glu.lib glut32.lib ILU.lib ILUT.lib OpenAL32.lib opengl.lib glew32s.lib"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Lib&quot;;&quot;$(SolutionDir)lib&quot;"
-				IgnoreAllDefaultLibraries="false"
-				IgnoreDefaultLibraryNames="libc.lib;msvcrtd.lib"
+				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib EFX-Util.lib freetype235.lib glu.lib glut32.lib ILU.lib ILUT.lib opengl.lib glew32s.lib SDL.lib"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(SolutionDir)lib"
+				IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrt.lib"
 				GenerateDebugInformation="true"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -100,12 +98,11 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="2"
+			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -121,11 +118,15 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)..\BlammoEngine&quot;"
-				PreprocessorDefinitions="NDEBUG;ON_WINDOWS"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				TreatWChar_tAsBuiltInType="false"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -136,18 +137,17 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
-				CommandLine="xcopy /Y /R $(SolutionDir)..\..\BlammoEngine\$(ConfigurationName)\BlammoEngine.lib $(OutDir)"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cg.lib cgGL.lib DevIL.lib EFX-Util.lib freetype235.lib glu.lib glut32.lib ILU.lib ILUT.lib OpenAL32.lib opengl.lib"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Lib&quot;;&quot;$(SolutionDir)lib&quot;"
-				IgnoreDefaultLibraryNames="msvcrtd.lib"
+				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib EFX-Util.lib freetype235.lib glu.lib glut32.lib ILU.lib ILUT.lib opengl.lib glew32s.lib SDL.lib"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(SolutionDir)lib"
+				IgnoreDefaultLibraryNames="libc.lib"
 				GenerateDebugInformation="true"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -177,6 +177,30 @@
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath=".\GameController.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameMain.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath=".\GameController.h"
+				>
+			</File>
+		</Filter>
 		<Filter
 			Name="BlammoEngine"
 			>
@@ -304,6 +328,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\BlammoTime.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\Camera.cpp"
 					>
 				</File>
@@ -381,6 +409,98 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\TextureFontSet.cpp"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="ESPEngine"
+			>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath=".\ESPEngine\ESP.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPAreaEmitter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPEmitter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPOnomataParticle.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticle.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleAccelEffector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleColourEffector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleEffector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleTransformEffector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPPointEmitter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPUtil.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath=".\ESPEngine\ESPAreaEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPOnomataParticle.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticle.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleAccelEffector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleColourEffector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleTransformEffector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPPointEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPUtil.cpp"
 					>
 				</File>
 			</Filter>
@@ -616,10 +736,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\BlammoTime.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\BoundingLines.cpp"
 					>
 				</File>
@@ -685,110 +801,6 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\UberBallItem.cpp"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="Main"
-			>
-			<Filter
-				Name="Source Files"
-				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-				UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-				>
-				<File
-					RelativePath=".\GameController.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameMain.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Header Files"
-				Filter="h;hpp;hxx;hm;inl;inc;xsd"
-				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-				>
-				<File
-					RelativePath=".\GameController.h"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="ESPEngine"
-			>
-			<Filter
-				Name="Header Files"
-				>
-				<File
-					RelativePath=".\ESPEngine\ESP.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPAreaEmitter.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPEmitter.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticle.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleColourEffector.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleEffector.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleVelocityEffector.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPPointEmitter.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPUtil.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Source Files"
-				>
-				<File
-					RelativePath=".\ESPEngine\ESPAreaEmitter.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPEmitter.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticle.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleColourEffector.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleVelocityEffector.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPPointEmitter.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPUtil.cpp"
 					>
 				</File>
 			</Filter>

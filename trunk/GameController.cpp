@@ -5,115 +5,41 @@
 
 #include "BlammoEngine/BlammoEngine.h"
 
-/*
-GLUT_KEY_F1		F1 function key
-GLUT_KEY_F2		F2 function key
-GLUT_KEY_F3		F3 function key
-GLUT_KEY_F4		F4 function key
-GLUT_KEY_F5		F5 function key
-GLUT_KEY_F6		F6 function key
-GLUT_KEY_F7		F7 function key
-GLUT_KEY_F8		F8 function key
-GLUT_KEY_F9		F9 function key
-GLUT_KEY_F10		F10 function key
-GLUT_KEY_F11		F11 function key
-GLUT_KEY_F12		F12 function key
-GLUT_KEY_LEFT		Left function key
-GLUT_KEY_RIGHT		Up function key
-GLUT_KEY_UP		Right function key
-GLUT_KEY_DOWN		Down function key
-GLUT_KEY_PAGE_UP	Page Up function key
-GLUT_KEY_PAGE_DOWN	Page Down function key
-GLUT_KEY_HOME		Home function key
-GLUT_KEY_END		End function key
-GLUT_KEY_INSERT		Insert function key
-
-*/
-
 GameController::GameController(GameModel* model, GameDisplay* display): model(model), display(display) {
 	for (int i = 0; i < NUM_KEYS; i++) {
 		this->keyPressed[i] = false;
 	}
 }
 
-/*
- * Process keys pressed within the context of the game.
- */
-void GameController::ProcessNormalKeys(unsigned char key, int x, int y) {
-	//debug_output("Key Pressed: " << "\"" << key << "\""); 
-
-	switch(key) {
-		case SPACE_BAR_CHAR:
-			this->model->ReleaseBall();
-			break;
-		case ESC_CHAR:
-			exit(0);
-			break;
-		default:
-			break;
-	}
-
+void GameController::KeyDown(SDLKey key) {
+	if (key < 0 || key > NUM_KEYS) { return; }
 	this->SetKeyPress(key, true);
 	this->display->KeyPressed(key);
-}
 
-void GameController::ProcessNormalKeysUp(unsigned char key, int x, int y) {
-	//debug_output("Key Released: " << "\"" << key << "\""); 
-	/*
-	switch(key) {
-		case SPACE_BAR_CHAR:
-			break;
-		case ESC_CHAR:
-			break;
-		default:
-			break;
-	}
-	*/
-	this->SetKeyPress(key, false);
-	
 #ifndef NDEBUG
 	// Debug Item drops
-	if (key == 's') {
+	if (key == SDLK_s) {
 		this->model->DropSlowBallItem();
 	}
-	else if (key == 'q') {
+	else if (key == SDLK_q) {
 		this->model->DropFastBallItem();
 	}
-	else if (key == 'u') {
+	else if (key == SDLK_u) {
 		this->model->DropUberBallItem();
 	}
-	else if (key == 'i') {
+	else if (key == SDLK_i) {
 		this->model->DropInvisiBallItem();
 	}
-	else if (key == 'p') {
+	else if (key == SDLK_p) {
 		this->model->TogglePauseGame();
 	}
 #endif
+
 }
 
-void GameController::ProcessSpecialKeys(int key, int x, int y) {
-	//debug_output("Special Key Pressed: " << "\"" << key << "\""); 
-	if (key < 0 || key > NUM_KEYS) { return; }
-	this->SetKeyPress(key, true);
-	this->display->KeyPressed(key);
-}
-
-void GameController::ProcessSpecialKeysUp(int key, int x, int y) {
-	//debug_output("Special Key Released: " << "\"" << key << "\"");
+void GameController::KeyUp(SDLKey key) {
 	if (key < 0 || key > NUM_KEYS) { return; }
 	this->SetKeyPress(key, false);
-
-}
-
-void GameController::ProcessMouse(int button, int state, int x, int y) {
-	// button can be GLUT_LEFT_BUTTON or GLUT_MIDDLE_BUTTON or GLUT_RIGHT_BUTTON
-	// state can be either GLUT_DOWN or GLUT_UP
-}
-
-void GameController::ProcessActiveMouseMotion(int x,int y) {
-}
-
-void GameController::ProcessPassiveMouseMotion(int x, int y){
 }
 
 /*
@@ -121,44 +47,48 @@ void GameController::ProcessPassiveMouseMotion(int x, int y){
  * This is called every frame.
  */
 void GameController::Tick() {
+
 	// Paddle controls (NOTE: the else is to make the feedback slicker)
-	if (this->keyPressed[GLUT_KEY_LEFT]) {
+	if (this->keyPressed[SDLK_LEFT]) {
 		this->model->MovePaddle(-this->model->GetPlayerPaddle()->GetSpeed());
 	}
-	else if (this->keyPressed[GLUT_KEY_RIGHT]) {
+	else if (this->keyPressed[SDLK_RIGHT]) {
 		this->model->MovePaddle(this->model->GetPlayerPaddle()->GetSpeed());
+	}
+	else if (this->keyPressed[SDLK_SPACE]) {
+		this->model->ReleaseBall();
 	}
 
 	// Debug movement controls
 #ifndef NDEBUG
-	if (this->keyPressed['8']) {
+	if (this->keyPressed[SDLK_KP8]) {
 		this->display->GetCamera().Move(Camera::DEFAULT_FORWARD_VEC);
 	}
-	else if (this->keyPressed['5']) {
+	else if (this->keyPressed[SDLK_KP5]) {
 		this->display->GetCamera().Move(-Camera::DEFAULT_FORWARD_VEC);
 	}
-	else if (this->keyPressed['4']) {
+	else if (this->keyPressed[SDLK_KP4]) {
 		this->display->GetCamera().Move(Camera::DEFAULT_LEFT_VEC);
 	}
-	else if (this->keyPressed['6']) {
+	else if (this->keyPressed[SDLK_KP6]) {
 		this->display->GetCamera().Move(-Camera::DEFAULT_LEFT_VEC);
 	}
-	else if (this->keyPressed['7']) {
+	else if (this->keyPressed[SDLK_KP7]) {
 		this->display->GetCamera().Rotate('y', 1.0f);
 	}
-	else if (this->keyPressed['9']) {
+	else if (this->keyPressed[SDLK_KP9]) {
 		this->display->GetCamera().Rotate('y', -1.0f);
 	}
-	else if (this->keyPressed['/']) {
+	else if (this->keyPressed[SDLK_KP_DIVIDE]) {
 		this->display->GetCamera().Rotate('x', 1.0f);
 	}
-	else if (this->keyPressed['*']) {
+	else if (this->keyPressed[SDLK_KP_MULTIPLY]) {
 		this->display->GetCamera().Rotate('x', -1.0f);
 	}
-	else if (this->keyPressed['1']) {
+	else if (this->keyPressed[SDLK_KP1]) {
 		this->display->GetCamera().Rotate('z', 1.0f);
 	}
-	else if (this->keyPressed['3']) {
+	else if (this->keyPressed[SDLK_KP3]) {
 		this->display->GetCamera().Rotate('z', -1.0f);
 	}
 #endif
