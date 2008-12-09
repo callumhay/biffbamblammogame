@@ -188,13 +188,14 @@ float4 outline_PS() : COLOR {
 technique Basic {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-        DepthTestEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
-        PolygonSmoothEnable = true;
+
+
         VertexProgram = compile vp40 phongshading_VS();        
         FragmentProgram = compile fp40 phongshading_PS();
     }  
@@ -218,12 +219,12 @@ technique Textured {
 
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
-        PolygonSmoothEnable = true;
         
         VertexProgram = compile vp40 phongshading_VS();        
         FragmentProgram = compile fp40 phongshading_textured_PS();
