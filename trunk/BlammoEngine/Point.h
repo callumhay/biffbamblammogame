@@ -120,12 +120,19 @@ public:
 		  			fabs(v_[1] - other[1]) < EPSILON &&
 		  			fabs(v_[2] - other[2]) < EPSILON;
 	}
+
+
+
 };
 
 inline std::ostream& operator <<(std::ostream& os, const Point3D& p)
 {
   return os << "p<" << p[0] << "," << p[1] << "," << p[2] << ">";
 }
+
+inline Point3D operator *(const float f, const Point3D& p) {
+		return Point3D(f*p[0], f*p[1], f*p[2]);
+};
 
 Point3D operator *(const Matrix4x4& M, const Point3D& p);
 Point3D operator +(const Point3D& a, const Vector3D& b);

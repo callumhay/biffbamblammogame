@@ -28,7 +28,7 @@ bool TextureCube::LoadCubeTextureFromImgs(const std::string filepaths[NUM_CUBE_F
 		// Read the image data using DevIL
 		int imageID =	ilGenImage();
 		ilBindImage(imageID);
-		ILboolean resultOfImageLoad = ilLoadImage(filepaths[i].c_str());
+		ILboolean resultOfImageLoad = ilLoadImage((const wchar_t*)filepaths[i].c_str());
 		if (!resultOfImageLoad) {
 			debug_output("Failed to load cube face texture image from " << filepaths[i]);
 			return false;

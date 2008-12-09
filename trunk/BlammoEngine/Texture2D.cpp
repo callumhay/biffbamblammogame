@@ -71,7 +71,6 @@ Texture2D* Texture2D::CreateEmptyTexture2D(TextureFilterType texFilter, int widt
 	glPushAttrib(GL_TEXTURE_BIT);
 	newTex->BindTexture();
 
-
 	if (texFilter != Texture::Nearest) {
 		GLint result = gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		

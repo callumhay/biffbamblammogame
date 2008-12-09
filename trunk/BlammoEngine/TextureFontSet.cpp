@@ -6,6 +6,7 @@
 #include "Algebra.h"
 
 const unsigned char TextureFontSet::MAX_NUM_CHARS = 128;
+const float TextureFontSet::TEXT_3D_SCALE	= 0.04;
 
 TextureFontSet::TextureFontSet() {
 }
@@ -16,6 +17,20 @@ TextureFontSet::~TextureFontSet() {
 		delete this->charTextures[i];
 	}
 	this->charTextures.clear();
+}
+
+/**
+ * Used to obtain the width of a hypothetical string using this font set.
+ * Returns: the width in pixels of a given string using this font set.
+ */
+float TextureFontSet::GetWidth(const std::string& s) const {
+	float totalWidth = 0;
+
+	for (std::string::const_iterator strIter = s.begin(); strIter != s.end(); strIter++) {
+		char currChar = (*strIter);
+		totalWidth += this->widthOfChars[currChar];
+	}
+	return totalWidth;
 }
 
 /**
@@ -60,6 +75,24 @@ float TextureFontSet::OrthoPrint(const Point2D& topLeftCorner, const std::string
 	Camera::PopWindowCoords();
 	
 	return textLength;
+}
+
+/** 
+ * A 3D version of printing text - this will print the text to a billboard that 
+ * it initially centered at the origin and pointing in the direction of the z-axis,
+ * with an up vector in the direction of +y.
+ * Returns: text length in units.
+ */
+void TextureFontSet::Print(const std::string& s) const {
+	assert(s.find('\n') == std::string::npos);
+	assert(s.find('\r') == std::string::npos);
+
+	// Draw the text
+	glPushMatrix();
+	glScalef(TextureFontSet::TEXT_3D_SCALE, TextureFontSet::TEXT_3D_SCALE, TextureFontSet::TEXT_3D_SCALE);
+	glListBase(this->charDispLists[0]);
+	glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
+	glPopMatrix();
 }
 
 /**
@@ -157,6 +190,8 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 		int height	= NumberFuncs::NextPowerOfTwo(bitmap.rows);
 		float x = static_cast<float>(bitmap.width) / static_cast<float>(width);
 		float y = static_cast<float>(bitmap.rows)  / static_cast<float>(height);
+
+		newFontSet->widthOfChars.push_back(bitmap_glyph->left + bitmap.width);
 
 		// Draw The Texturemapped Quads. The Bitmap That We Got From FreeType Was Not 
 		// Oriented Quite Like We Would Like It To Be, But We Link The Texture To The Quad
