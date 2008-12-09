@@ -4,15 +4,26 @@
 
 FBOManager* FBOManager::instance = NULL;
 
-FBOManager::FBOManager() : fboID(0), renderBuffID(0) {
+FBOManager::FBOManager() : 
+fboID(0), renderBuffID(0) { 
+//multisampleFBOID(0), multisampleRenderBuffID(0), multisampleColourBuffID(0) 
+	
 	// Init the framebuffer and renderbuffer ID for binding, but don't bind yet
 	glGenFramebuffersEXT(1, &this->fboID);
 	glGenRenderbuffersEXT(1, &this->renderBuffID);
+
+	//glGenFramebuffersEXT(1,  &this->multisampleFBOID);
+	//glGenRenderbuffersEXT(1, &this->multisampleRenderBuffID);
+	//glGenRenderbuffersEXT(1, &this->multisampleColourBuffID);
 }
 
 FBOManager::~FBOManager() {
 	glDeleteFramebuffersEXT(1, &this->fboID);
 	glDeleteRenderbuffersEXT(1, &this->renderBuffID);
+
+	//glDeleteFramebuffersEXT(1,  &this->multisampleFBOID);
+	//glDeleteRenderbuffersEXT(1, &this->multisampleRenderBuffID);
+	//glDeleteRenderbuffersEXT(1, &this->multisampleColourBuffID);
 }
 
 /**
@@ -21,15 +32,13 @@ FBOManager::~FBOManager() {
  * Returns: true on success, false otherwise.
  */
 bool FBOManager::SetupFBO(Texture& texture) {
-	// TODO: test without renderbuffer...
-
 	texture.BindTexture();
-
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, this->fboID);
+	
+	// Create the depth render buffer...
 	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->renderBuffID);
-
-	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, texture.GetWidth(), texture.GetHeight());
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, this->renderBuffID);
+	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, texture.GetWidth(), texture.GetHeight());
+	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,  GL_RENDERBUFFER_EXT, this->renderBuffID);
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture.GetTextureType(), texture.GetTextureID(), 0);
 
 	GLenum buffers[] = { GL_COLOR_ATTACHMENT0_EXT };
@@ -42,6 +51,34 @@ bool FBOManager::SetupFBO(Texture& texture) {
 	// Make sure everything FBO is good to go
 	return this->CheckFBOStatus();
 }		
+
+	/*
+bool FBOManager::SetupMultisampleFBO(int numSamples) {
+
+	// TODO: test without renderbuffer...
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, this->fboID);
+	
+	// Create the colour render buffer...
+	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->colourBuffID);
+	glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, NumMultisamples, GL_RGBA8, texture.GetWidth(), texture.GetHeight());
+	
+	// Create the depth render buffer...
+	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->renderBuffID);
+	glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, NumMultisamples, GL_DEPTH_COMPONENT24, texture.GetWidth(), texture.GetHeight());
+	
+	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, this->colourBuffID);
+	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,  GL_RENDERBUFFER_EXT, this->renderBuffID);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture.GetTextureType(), texture.GetTextureID(), 0);
+
+	GLenum buffers[] = { GL_COLOR_ATTACHMENT0_EXT };
+	glDrawBuffers(1, buffers);
+
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+	// Make sure everything FBO is good to go
+	return this->CheckFBOStatus();
+}
+	*/
 
 /**
  * Private helper function that checks the status of the frame buffer object and reports any errors.

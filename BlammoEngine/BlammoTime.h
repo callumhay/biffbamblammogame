@@ -18,20 +18,14 @@ public:
 	 * the system time (since machine start) in milliseconds.
 	 */
 	static unsigned long GetSystemTimeInMillisecs() {
-#ifdef WIN32
-		return GetTickCount();
-#endif
-		// TODO: other types of time...
+		return SDL_GetTicks();
 	}
 
 	/**
 	 * Platform independent sleep function for the current thread.
 	 */
 	static void SystemSleep(unsigned long ms) {
-#ifdef WIN32
-		Sleep(ms);
-#endif
-		// TODO: other types of sleep...
+		SDL_Delay(ms);
 	}
 
 	static void SetVSync(int vSyncOn);

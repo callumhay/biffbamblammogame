@@ -35,7 +35,7 @@ bool Texture::Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilte
 	// Read in the texture
 	int imageID =	ilGenImage();
 	ilBindImage(imageID);
-	ILboolean resultOfImageLoad = ilLoadImage(filepath.c_str());
+	ILboolean resultOfImageLoad = ilLoadImage((const wchar_t*)filepath.c_str());
 	if (!resultOfImageLoad) {
 		debug_output("Failed to load texture image from " << filepath);
 		return false;

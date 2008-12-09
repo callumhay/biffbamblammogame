@@ -5,6 +5,7 @@
 // -------------------------
 
 // C Library includes
+#include <cstdlib>
 #include <float.h>
 #include <time.h>
 #include <assert.h>
@@ -29,6 +30,13 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 #include "GL/glut.h"
+
+// SDL Includes
+#ifdef WIN32
+#pragma comment(lib, "SDL.lib")
+#pragma comment(lib, "SDLmain.lib")
+#endif
+#include "SDL.h"
 
 // Cg includes
 #include "Cg/cg.h"

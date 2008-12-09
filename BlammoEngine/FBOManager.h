@@ -18,8 +18,14 @@ class FBOManager {
 private:
 	static FBOManager* instance;	// Singleton instance for this class
 
-	GLuint fboID;					// OpenGL FBO ID
-	GLuint renderBuffID;	// OpenGL RBO ID
+	// Regular FBO and render buffer IDs
+	GLuint fboID;
+	GLuint renderBuffID;
+	
+	// Multisample FBO and render buffer IDs
+	//GLuint multisampleFBOID;
+	//GLuint multisampleRenderBuffID;
+	//GLuint multisampleColourBuffID;
 
 	bool CheckFBOStatus();
 
@@ -43,6 +49,7 @@ public:
 	}
 
 	bool SetupFBO(Texture& texture);
+	//bool SetupMultisampleFBO(int numSamples);
 
 	// Functions for binding/unbinding the FBO
 	void BindFBO() const {

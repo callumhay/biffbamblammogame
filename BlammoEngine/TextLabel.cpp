@@ -8,7 +8,7 @@ lastRasterWidth(0.0f) {
 
 TextLabel2D::TextLabel2D(const TextureFontSet* font, const std::string& text) : 
 colour(Colour(0, 0, 0)), topLeftCorner(Point2D(0, 0)), font(font), text(text),
-lastRasterWidth(0.0f) {
+lastRasterWidth(font->GetWidth(text)) {
 	assert(font != NULL);
 }
 
@@ -34,4 +34,5 @@ void TextLabel2D::Draw() {
 	// Draw coloured text part
 	glColor3f(this->colour.R(), this->colour.G(), this->colour.B());
 	this->lastRasterWidth = this->font->OrthoPrint(this->topLeftCorner, this->text);
+	float test = this->font->GetWidth(this->text);
 }
