@@ -108,6 +108,11 @@ void ESPEmitter::AddEffector(ESPParticleEffector* effector) {
 	this->effectors.push_back(effector);
 }
 
+void ESPEmitter::AddParticle(ESPParticle* particle) {
+	assert(particle != NULL);
+	this->deadParticles.push_back(particle);
+}
+
 /**
  * Removes a previously added particle effector from this emitter.
  */

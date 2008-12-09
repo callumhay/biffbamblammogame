@@ -13,14 +13,13 @@ class Camera;
 
 class ESPParticle {
 
-private:
+protected:
 	// Vectors defining the up, right and normal directions of
 	// any drawn particle
 	static const Vector3D PARTICLE_UP_VEC;
 	static const Vector3D PARTICLE_NORMAL_VEC;
 	static const Vector3D PARTICLE_RIGHT_VEC;
 
-protected:
 	// Total lifespan in seconds of this particle
 	double totalLifespan;
 	// Amount of time in seconds that have elapsed since this particle was created
@@ -50,10 +49,9 @@ public:
 		return this->currLifeElapsed >= this->totalLifespan;
 	}
 
-	void Revive(const Point3D& pos, const Vector3D& vel, const float size, const float totalLifespan);
-	
-	void Tick(const double dT);
-	void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
+	virtual void Revive(const Point3D& pos, const Vector3D& vel, const float size, const float totalLifespan);
+	virtual void Tick(const double dT);
+	virtual void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
 
 	static Matrix4x4 GetAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment);
 
@@ -63,6 +61,13 @@ public:
 	}
 	void SetPosition(const Point3D& p) {
 		this->position = p;
+	}
+
+	Vector3D GetVelocity() const {
+		return this->velocity;
+	}
+	void SetVelocity(const Vector3D& v) {
+		this->velocity = v;
 	}
 
 	void GetColour(Colour& rgb, float& alpha) {

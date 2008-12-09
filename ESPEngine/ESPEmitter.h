@@ -52,6 +52,7 @@ public:
 	
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);
+	void AddParticle(ESPParticle* particle);
 
 	virtual void Tick(const double dT) = 0;
 	virtual void Draw(const Camera& camera) = 0;
