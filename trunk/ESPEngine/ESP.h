@@ -6,8 +6,9 @@
 
 // Effectors
 #include "ESPParticleEffector.h"
-#include "ESPParticleVelocityEffector.h"
+#include "ESPParticleAccelEffector.h"
 #include "ESPParticleColourEffector.h"
+#include "ESPParticleTransformEffector.h"
 
 // Emitters and particles
 #include "ESPEmitter.h"

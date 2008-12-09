@@ -53,18 +53,13 @@ void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) 
 	// Transform and draw the particle
 	glPushMatrix();
 
-	// Move the particle into position
-	//glTranslatef(this->position[0], this->position[1], this->position[2]);
-
 	// Do any personal alignment transforms...
 	Matrix4x4 personalAlignXF = this->GetPersonalAlignmentTransform(camera, alignment);
-	personalAlignXF[12]  += this->position[0]; 
-  personalAlignXF[13]  += this->position[1]; 
-  personalAlignXF[14]  += this->position[2]; 
 	glMultMatrixf(personalAlignXF.begin());
 
 	float halfSize = 0.5f * this->size;
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
+	glTranslatef(this->position[0], this->position[1], this->position[2]); 
 	glBegin(GL_QUADS);
 		glNormal3i(PARTICLE_NORMAL_VEC[0], PARTICLE_NORMAL_VEC[1], PARTICLE_NORMAL_VEC[2]);
 		glTexCoord2i(0, 0); glVertex2f(-halfSize, -halfSize);
@@ -128,7 +123,6 @@ Matrix4x4 ESPParticle::GetAlignmentTransform(const Camera& cam, const ESP::ESPAl
 	return Matrix4x4(alignRightVec, alignUpVec, alignNormalVec);
 }
 
-// TODO: MAKE THIS WORK...
 Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment) {
 	Vector3D alignRightVec	= Vector3D(1, 0, 0);
 	Vector3D alignUpVec			= Vector3D(0, 1, 0);
@@ -140,15 +134,17 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 	// Obtain JUST the world transform...
 	glPushMatrix();
 	glLoadIdentity();
-	glMultMatrixf(cam.GetInvViewTransform().begin());
 	glMultMatrixf(tempMVXfVals);
+	glMultMatrixf(cam.GetInvViewTransform().begin());
 	glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
 	glPopMatrix();
 
 	Matrix4x4 worldMatrix(tempMVXfVals);
-	Point3D currPos = worldMatrix *  this->position;
-	currPos = cam.GetCurrentCameraPosition() - Vector3D(currPos[0], currPos[1], currPos[2]);
-	
+
+	// The camera starts facing the +z direction, the sprite starts facing the -z direction...
+	Point3D camPos = cam.GetCurrentCameraPosition();
+	Point3D currPos = -1.0f * Point3D(camPos[0], camPos[1], -camPos[2]);
+
 	// The normal vector is from the particle center to the eye
 	alignNormalVec = Vector3D(currPos[0], currPos[1], currPos[2]);
 	// Make sure there is a normal...
@@ -167,7 +163,7 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			alignUpVec			= PARTICLE_UP_VEC;
 		
 			// Find out if up and normal are parallel and fix in that case...
-			alignRightVec		= Vector3D::cross(alignNormalVec, alignUpVec);
+			alignRightVec		= Vector3D::cross(alignUpVec, alignNormalVec);
 			if (alignRightVec == Vector3D(0,0,0)) {
 				alignRightVec = Vector3D::MollerHughesPerpendicular(alignNormalVec);
 			}

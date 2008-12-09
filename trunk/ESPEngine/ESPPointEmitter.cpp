@@ -89,9 +89,19 @@ void ESPPointEmitter::Tick(const double dT) {
 		ESPParticle* currParticle = *iter;
 
 		// Check to see if the particle has died, if so place it among the dead
+		
 		if (currParticle->IsDead()) {
-			iter = this->aliveParticles.erase(iter);
-			this->deadParticles.push_back(currParticle);
+			// Strange issue with erase when there's only 1 particle in the alive list...
+			if (this->aliveParticles.size() == 1) {
+				this->aliveParticles.clear();
+				this->deadParticles.push_back(currParticle);
+				break;
+			}
+			else {
+				iter = this->aliveParticles.erase(iter);
+				this->deadParticles.push_back(currParticle);
+			}
+			
 		}
 		else {
 			currParticle->Tick(dT);
@@ -154,7 +164,9 @@ void ESPPointEmitter::Draw(const Camera& camera) {
 	glMultMatrixf(allParticleAlignXF.begin());
 	
 	// Bind the particle textures
-	this->particleTexture->BindTexture();
+	if (this->particleTexture != NULL) {
+		this->particleTexture->BindTexture();
+	}
 
 	// Go through each of the particles, revive any dead ones (based on spawn rate), and draw them
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
