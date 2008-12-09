@@ -19,7 +19,7 @@ const int GameDisplay::MAX_FRAMERATE						= 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameListener(NULL), currState(NULL),
-model(model), assets(new GameAssets()), width(initWidth), height(initHeight), deltaFrameTimeInMS(0) {
+model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
 	
 	assert(model != NULL);
 
@@ -77,28 +77,20 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 	glViewport(0, 0, w, h);
 	this->width = w;
 	this->height = h;
-	glutReshapeWindow(w, h);
 
 	this->currState->DisplaySizeChanged(w, h);
 }
 
-void GameDisplay::Render() {
-	unsigned long frameStartTimeInMS = BlammoTime::GetSystemTimeInMillisecs();
-	
+void GameDisplay::Render(double dT) {
 	SetInitialRenderOptions();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
 
 	// Render the current state
-	double deltaFrameTimeInS = static_cast<double>(this->deltaFrameTimeInMS) / 1000.0f;
-	this->currState->RenderFrame(deltaFrameTimeInS);
+	this->currState->RenderFrame(dT);
 	//this->DrawDebugAxes();
 
 	// Update the game model
-	this->model->Tick(deltaFrameTimeInS);
-
-	glutSwapBuffers();
-	BlammoTime::SystemSleep(GameDisplay::FRAME_SLEEP_MS);
-	this->deltaFrameTimeInMS = max(BlammoTime::GetSystemTimeInMillisecs() - frameStartTimeInMS, 0);
+	this->model->Tick(dT);
 }
 
 

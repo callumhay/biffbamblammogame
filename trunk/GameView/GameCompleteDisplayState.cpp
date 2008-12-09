@@ -28,7 +28,7 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
 
 }
 
-void GameCompleteDisplayState::KeyPressed(unsigned char key) {
+void GameCompleteDisplayState::KeyPressed(SDLKey key) {
 	this->display->SetCurrentState(new MainMenuDisplayState(this->display));
 }
 

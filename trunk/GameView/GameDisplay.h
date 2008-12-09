@@ -33,9 +33,9 @@ private:
 	static void DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks);
 
 public:
+	static const int NUM_MULTISAMPLES = 4;
 	static const int MAX_FRAMERATE;							// The maximum framerate possible for the game
 	static const unsigned long FRAME_SLEEP_MS;	// Time to sleep between frames (determined by MAX_FRAMERATE)
-	unsigned long deltaFrameTimeInMS;						// Time inbetween frames in milliseconds
 
 	GameDisplay(GameModel* model, int initWidth, int initHeight);
 	~GameDisplay();
@@ -50,7 +50,7 @@ public:
 	}
 
 	void ChangeDisplaySize(int w, int h);
-	void Render();
+	void Render(double dT);
 
 	// Functions for setting up different types of render options
 	static void SetInitialRenderOptions();
@@ -74,7 +74,7 @@ public:
 	}
 
 	// Tells the display that a certain key was pressed
-	void KeyPressed(unsigned char key) {
+	void KeyPressed(SDLKey key) {
 		this->currState->KeyPressed(key);
 	}
 

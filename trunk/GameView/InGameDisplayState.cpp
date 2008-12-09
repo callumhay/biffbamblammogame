@@ -15,9 +15,8 @@ const unsigned int InGameDisplayState::HUD_X_INDENT = 10;
 const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
 InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display), 
-mvEffector(Vector3D(0, -7, 0)),
+mvEffector(Vector3D(0, -2.5, 0)),
 colourEffector(1, 0) {
-
 
 	// Render to texture setup
 	this->renderToTexBeforeBall = Texture2D::CreateEmptyTexture2D(Texture::Nearest, display->GetDisplayWidth(), display->GetDisplayHeight());
@@ -37,44 +36,58 @@ colourEffector(1, 0) {
 	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
 
 	// TODO: GET RID OF THIS
-	bool result = ptEmitTest.SetParticles(500, GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/Smoke_Puff1_64x64.png");
-	assert(result);
+	//bool result = ptEmitTest.SetParticles(1, GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/test_textures/TestSprite.png");//Smoke_Puff1_64x64.png");
+	//assert(result);
 
-	ptEmitTest.SetSpawnDelta(ESPInterval(0.01, 0.02));
-	ptEmitTest.SetInitialSpd(ESPInterval(3, 6));
-	ptEmitTest.SetParticleLife(ESPInterval(3, 5));
-	ptEmitTest.SetParticleSize(ESPInterval(1, 1.5));
+	DropShadow dpTemp;
+	dpTemp.amountPercentage = 0.20f;
+	for (int i = 0; i < 50; i++) {
+		ESPOnomataParticle* newParticle = new ESPOnomataParticle(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small));
+
+		newParticle->SetDropShadow(dpTemp);
+		this->bunchOParticles.push_back(newParticle);
+		ptEmitTest.AddParticle(newParticle);
+	}
+
+	ptEmitTest.SetSpawnDelta(ESPInterval(1, 2));
+	ptEmitTest.SetInitialSpd(ESPInterval(1, 3));
+	ptEmitTest.SetParticleLife(ESPInterval(10, 10));
+	ptEmitTest.SetParticleSize(ESPInterval(1, 1));
 	ptEmitTest.SetEmitAngleInDegrees(40);
-	ptEmitTest.SetRadiusDeviationFromCenter(ESPInterval(0.3, 0.7));
+	ptEmitTest.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
 	ptEmitTest.SetParticleAlignment(ESP::ViewPointAligned);
-	ptEmitTest.AddEffector(&colourEffector);
-	ptEmitTest.AddEffector(&mvEffector);
+	//ptEmitTest.AddEffector(&colourEffector);
+	//ptEmitTest.AddEffector(&mvEffector);
 }
 
 InGameDisplayState::~InGameDisplayState() {
 	delete this->renderToTexBeforeBall;
+
+	// GET RID OF THIS
+	for (size_t i = 0; i < this->bunchOParticles.size(); i++) {
+		delete this->bunchOParticles[i];
+	}
 }
 
 /**
  * This will render a frame of the actual game while it is in-play.
  */
 void InGameDisplayState::RenderFrame(double dT) {
-	
+
 	// Attach the FBO
 	bool success = FBOManager::GetInstance()->SetupFBO(*this->renderToTexBeforeBall);
 	assert(success);
 	FBOManager::GetInstance()->BindFBO();
 
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-	// Camera Stuff -----------------------------------------------------------------
+	// Camera Stuff 
 	this->display->GetCamera().SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	this->display->GetCamera().ApplyCameraTransform();
-	// -------------------------------------------------------------------------------
-
 
 	// Draw the game scene
 	this->DrawGameScene(dT);
@@ -101,6 +114,9 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	FBOManager::GetInstance()->UnbindFBO();												// Unbind the FBO so that we can use the render to texture for special ball effects
 	this->renderToTexBeforeBall->RenderTextureToFullscreenQuad(); // Render the texture to a fullscreen quad
 
+	// Enable multisampling for the foreground rendering
+	glEnable(GL_MULTISAMPLE);
+
 	// Draw the foreground stuff (paddle, items, ball)
 	glTranslatef(-levelDim[0]/2.0f, 0, 0.0f);	
 
@@ -118,11 +134,15 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	glPopMatrix();
 	
 	this->display->GetAssets()->DrawLevelPieces(this->display->GetCamera());
-
+	
+	glDisable(GL_MULTISAMPLE);
 
 	// TODO: get rid of this
+	//glPushMatrix();
+	//glLoadIdentity();
 	ptEmitTest.Tick(dT);
 	ptEmitTest.Draw(this->display->GetCamera());
+	//glPopMatrix();
 }
 
 /**

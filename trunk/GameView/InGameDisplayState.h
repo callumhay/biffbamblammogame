@@ -6,6 +6,7 @@
 
 // TODO: get rid of this?
 #include "../ESPEngine/ESP.h"
+#include "../ESPEngine/ESPOnomataParticle.h"
 
 /**
  * State for representing and rendering the display of the game as it is
@@ -28,14 +29,15 @@ private:
 	
 	ESPPointEmitter ptEmitTest;
 	ESPParticleColourEffector colourEffector;
-	ESPParticleVelocityEffector mvEffector;
+	ESPParticleAccelEffector mvEffector;
+	std::vector<ESPParticle*> bunchOParticles;
 
 public:
 	InGameDisplayState(GameDisplay* display);
 	virtual ~InGameDisplayState();
 
 	virtual void RenderFrame(double dT);
-	virtual void KeyPressed(unsigned char key) {
+	virtual void KeyPressed(SDLKey key) {
 		// Do nothing, key presses are interpretted completely by the game model,
 		// while the game is being played.
 	};
