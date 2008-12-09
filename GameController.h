@@ -1,6 +1,8 @@
 #ifndef __GAMECONTROLLER_H__
 #define __GAMECONTROLLER_H__
 
+#include "../BlammoEngine/BasicIncludes.h"
+
 class GameModel;
 class GameDisplay;
 
@@ -10,18 +12,14 @@ class GameDisplay;
  */
 class GameController {
 
-public:
-	static const char SPACE_BAR_CHAR = ' ';
-	static const char ENTER_CHAR = 13;
-	static const char ESC_CHAR = 27;
-
 private:	
-	static const int NUM_KEYS = 256;
+	static const int NUM_KEYS = SDLK_LAST;
 
 	GameModel* model;
 	GameDisplay* display;
 
 	bool keyPressed[NUM_KEYS];
+	
 	// Helper function for setting values in the keyPressed array.
 	void SetKeyPress(int key, bool isPressed) {
 		if (key < 0 || key >= NUM_KEYS) { return; }
@@ -31,13 +29,8 @@ private:
 public:
 	GameController(GameModel* model, GameDisplay* display);
 	
-	void ProcessNormalKeys(unsigned char key, int x, int y);
-	void ProcessNormalKeysUp(unsigned char key, int x, int y);
-	void ProcessSpecialKeys(int key, int x, int y);
-	void ProcessSpecialKeysUp(int key, int x, int y);
-	void ProcessMouse(int button, int state, int x, int y);
-	void ProcessActiveMouseMotion(int x, int y);
-	void ProcessPassiveMouseMotion(int x, int y);
+	void KeyDown(SDLKey key);
+	void KeyUp(SDLKey key);
 
 	void Tick();
 };
