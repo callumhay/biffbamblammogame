@@ -20,7 +20,7 @@ public:
 	virtual ~GameCompleteDisplayState();
 
 	virtual void RenderFrame(double dT);
-	virtual void KeyPressed(unsigned char key);
+	virtual void KeyPressed(SDLKey key);
 	virtual void DisplaySizeChanged(int width, int height);
 };
 

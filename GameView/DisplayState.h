@@ -1,6 +1,8 @@
 #ifndef __DISPLAYSTATE_H__
 #define __DISPLAYSTATE_H__
 
+#include "../BlammoEngine/BasicIncludes.h"
+
 class GameDisplay;
 
 class DisplayState {
@@ -13,7 +15,7 @@ public:
 	virtual ~DisplayState() {};
 
 	virtual void RenderFrame(double dT) = 0;
-	virtual void KeyPressed(unsigned char key) = 0;
+	virtual void KeyPressed(SDLKey key) = 0;
 	virtual void DisplaySizeChanged(int width, int height) = 0;
 
 };

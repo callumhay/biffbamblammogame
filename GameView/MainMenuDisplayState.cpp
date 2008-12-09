@@ -79,7 +79,7 @@ void MainMenuDisplayState::InitializeMenu() {
  * Render the menu and any other stuff associated with it.
  */
 void MainMenuDisplayState::RenderFrame(double dT) {
-	
+	glEnable(GL_MULTISAMPLE);
 	// Set up a perspective projection for the menu background
 	// TODO
 
@@ -98,22 +98,23 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->menu->Draw();
 	//this->menu->DebugDraw();
 
+	glDisable(GL_MULTISAMPLE);
 }
 
 /**
  * Directly read key presses to manipulate the selections
  * in the main menu.
  */
-void MainMenuDisplayState::KeyPressed(unsigned char key) {
+void MainMenuDisplayState::KeyPressed(SDLKey key) {
 	// We only care about keys that manipulate the choice in the menu
 	switch(key) {
-		case GLUT_KEY_DOWN:
+		case SDLK_DOWN:
 			this->menu->DownAction();
 			break;
-		case GLUT_KEY_UP:
+		case SDLK_UP:
 			this->menu->UpAction();
 			break;
-		case GameController::ENTER_CHAR:
+		case SDLK_RETURN:
 			{
 				// On enter we select the menu item that is currently highlighted...
 				int selectedMenuItem = this->menu->GetHighlightedMenuItem();
