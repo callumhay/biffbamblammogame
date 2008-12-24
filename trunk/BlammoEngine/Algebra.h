@@ -60,6 +60,8 @@ inline int NumberFuncs::NextPowerOfTwo(int a) {
 	return temp;
 };
 
+
+
 class Randomizer {
 private:
 	static Randomizer* instance;

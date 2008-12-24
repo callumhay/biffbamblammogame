@@ -20,9 +20,6 @@
 // Texture and Material Includes
 #include "CgShaderManager.h"
 #include "CgFxEffect.h"
-#include "CgFxCelShading.h"
-#include "CgFxOutlinedPhong.h"
-#include "CgFxPostRefract.h"
 #include "Texture.h"
 #include "Texture1D.h"
 #include "Texture2D.h"

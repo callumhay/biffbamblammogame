@@ -7,7 +7,7 @@
 class Texture {
 
 public:
-	enum TextureFilterType { Nearest, NearestMipmap, Bilinear, Trilinear };
+	enum TextureFilterType { Nearest, Linear, NearestMipmap, Bilinear, Trilinear };
 
 protected:
 	TextureFilterType texFilter;
@@ -16,6 +16,9 @@ protected:
 	unsigned int width, height;
 
 	static void SetFilteringParams(TextureFilterType texFilter, int glTexType);
+	static bool IsMipmappedFilter(TextureFilterType texFilter) {
+		return !(texFilter == Nearest || texFilter == Linear);
+	}
 
 	bool Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilterType texFilter = Nearest);
 
