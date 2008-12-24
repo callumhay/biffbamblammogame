@@ -8,7 +8,6 @@
 #include "ESPParticleEffector.h"
 #include "ESPParticleAccelEffector.h"
 #include "ESPParticleColourEffector.h"
-#include "ESPParticleTransformEffector.h"
 
 // Emitters and particles
 #include "ESPEmitter.h"

@@ -42,6 +42,11 @@ public:
 	ESPEmitter();
 	virtual ~ESPEmitter();
 
+	bool IsDead() const {
+		return (this->aliveParticles.size() == 0) && 
+			     (this->timeSinceLastSpawn > this->particleLifetime.maxValue);
+	}
+
 	// Setter functions for typical attributes of emitters
 	bool SetParticles(unsigned int numParticles, const std::string& imgFilepath);
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);

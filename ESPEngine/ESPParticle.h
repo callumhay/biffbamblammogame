@@ -63,6 +63,15 @@ public:
 		this->position = p;
 	}
 
+	float GetScale() const {
+		return this->size;
+	}
+	void SetScale(float scale) {
+		this->size = scale;
+	}
+
+	
+
 	Vector3D GetVelocity() const {
 		return this->velocity;
 	}
