@@ -228,19 +228,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\CgFxCelShading.h"
-					>
-				</File>
-				<File
 					RelativePath=".\BlammoEngine\CgFxEffect.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\CgFxOutlinedPhong.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\CgFxPostRefract.h"
 					>
 				</File>
 				<File
@@ -276,6 +264,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Noise.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\ObjReader.h"
 					>
 				</File>
@@ -308,6 +300,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Texture3D.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\TextureCube.h"
 					>
 				</File>
@@ -336,19 +332,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\CgFxCelShading.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\BlammoEngine\CgFxEffect.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\CgFxOutlinedPhong.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\CgFxPostRefract.cpp"
 					>
 				</File>
 				<File
@@ -373,6 +357,10 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\mtrand.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Noise.cpp"
 					>
 				</File>
 				<File
@@ -401,6 +389,10 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\Texture2D.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Texture3D.cpp"
 					>
 				</File>
 				<File
@@ -452,10 +444,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ESPEngine\ESPParticleTransformEffector.h"
-					>
-				</File>
-				<File
 					RelativePath=".\ESPEngine\ESPPointEmitter.h"
 					>
 				</File>
@@ -492,10 +480,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ESPEngine\ESPParticleTransformEffector.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\ESPEngine\ESPPointEmitter.cpp"
 					>
 				</File>
@@ -512,7 +496,27 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\GameView\CgFxCelShading.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxOutlinedPhong.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxPostRefract.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxVolumetricEffect.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\DecoSkybox.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\DecoWorldAssets.h"
 					>
 				</File>
 				<File
@@ -548,6 +552,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\GameWorldAssets.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\InGameDisplayState.h"
 					>
 				</File>
@@ -560,10 +568,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\Onomatoplex.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\StartGameDisplayState.h"
 					>
 				</File>
@@ -572,7 +576,27 @@
 				Name="Source Files"
 				>
 				<File
+					RelativePath=".\GameView\CgFxCelShading.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxOutlinedPhong.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxPostRefract.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxVolumetricEffect.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\DecoSkybox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\DecoWorldAssets.cpp"
 					>
 				</File>
 				<File
@@ -604,6 +628,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\GameWorldAssets.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\InGameDisplayState.cpp"
 					>
 				</File>
@@ -613,10 +641,6 @@
 				</File>
 				<File
 					RelativePath=".\GameView\MainMenuDisplayState.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\Onomatoplex.cpp"
 					>
 				</File>
 				<File
