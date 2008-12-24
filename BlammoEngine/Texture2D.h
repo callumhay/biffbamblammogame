@@ -7,7 +7,6 @@
 // Wraps a OpenGL 2D texture, takes care of texture ID and stuff like that
 class Texture2D : public Texture {
 private:
-	TextureFilterType texFilter;
 	Texture2D(TextureFilterType texFilter);
 
 public:

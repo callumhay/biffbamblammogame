@@ -71,7 +71,7 @@ Texture2D* Texture2D::CreateEmptyTexture2D(TextureFilterType texFilter, int widt
 	glPushAttrib(GL_TEXTURE_BIT);
 	newTex->BindTexture();
 
-	if (texFilter != Texture::Nearest) {
+	if (Texture::IsMipmappedFilter(texFilter)) {
 		GLint result = gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		
 		if (result != 0) {
@@ -150,7 +150,7 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilt
 	glBindTexture(GL_TEXTURE_2D, newTex->texID);
 
 	// Fonts are 2 channel data, hence the use of GL_LUMINANCE_ALPHA
-	if (texFilter == Texture::Nearest) {
+	if (!Texture::IsMipmappedFilter(texFilter)) {
 		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
 									GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expandedData );
 	}

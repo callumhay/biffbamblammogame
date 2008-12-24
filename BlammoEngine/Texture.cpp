@@ -13,6 +13,10 @@ void Texture::SetFilteringParams(TextureFilterType texFilter, int glTexType) {
 			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			break;
+		case Linear:
+			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			break;
 		case NearestMipmap:
 			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
@@ -57,7 +61,7 @@ bool Texture::Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilte
 		glGenTextures(1, &this->texID);
 		glBindTexture(this->textureType, this->texID);
 
-		if (texFilter != Texture::Nearest) {
+		if (Texture::IsMipmappedFilter(texFilter)) {
 			GLint result = gluBuild1DMipmaps(this->textureType, internalFormat, width, imgFormat, GL_UNSIGNED_BYTE, texelData);
 			
 			assert(result == 0);
@@ -73,7 +77,7 @@ bool Texture::Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilte
 	}
 	else {
 		// 2D Texture
-		if (texFilter != Texture::Nearest) { 
+		if (Texture::IsMipmappedFilter(texFilter)) { 
 			this->texID = ilutGLBindMipmaps();
 		}
 		else {

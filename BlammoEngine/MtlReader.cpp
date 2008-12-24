@@ -1,8 +1,8 @@
 #include "MtlReader.h"
 #include "Texture2D.h"
 #include "CgFxEffect.h"
-#include "CgFxCelShading.h"
-#include "CgFxOutlinedPhong.h"
+#include "../GameView/CgFxCelShading.h"
+#include "../GameView/CgFxOutlinedPhong.h"
 
 #include "BasicIncludes.h"
 
