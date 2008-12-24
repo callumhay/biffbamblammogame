@@ -136,16 +136,22 @@ int main(int argc, char *argv[]) {
 	display = new GameDisplay(model, INIT_WIDTH, INIT_HEIGHT);
 	controller = new GameController(model, display);
 
-	// Turn off VSync
 	// TODO: VSync: option for this?
-	BlammoTime::SetVSync(1);
+	BlammoTime::SetVSync(0);
 
 	double frameTimeDelta = 0.0;
+	// Try to keep it at 60fps...
+	const double maxDelta = 1.0 / 60.0;
 
 	// Main render loop...
 	while(true) {
 		Uint32 startOfFrameTime = SDL_GetTicks();
 		
+		// Don't let the game run at less than 60 fps
+		if (frameTimeDelta > maxDelta) {
+			frameTimeDelta = maxDelta;
+		}
+
 		// Render what's currently being displayed by the game
 		display->Render(frameTimeDelta);
 		SDL_GL_SwapBuffers();
