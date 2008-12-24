@@ -7,13 +7,12 @@
 
 namespace Onomatoplex {
 
-	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3};
+	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3, BADSAD = 4};
 	enum Extremeness {WEAK = 0, NORMAL = 1, PRETTY_GOOD = 2, GOOD = 3, AWESOME = 4, SUPER_AWESOME = 5, UBER = 6};
 	
-	static const int NumSoundTypes = 4;
+	static const int NumSoundTypes = 5;
 	static const int NumExtremenessTypes = 7;
 	
-
 	// Singleton class for generating crazy words.
 	class Generator {
 

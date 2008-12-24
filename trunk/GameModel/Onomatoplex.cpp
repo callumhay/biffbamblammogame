@@ -86,6 +86,24 @@ namespace Onomatoplex {
 		singleWordSmoke.push_back("Fssp");
 		Generator::simpleSingleWords[SMOKE] = singleWordSmoke;
 
+		std::vector<std::string> singleWordBadSad;
+		singleWordBadSad.push_back("Aww");
+		singleWordBadSad.push_back("Ow");
+		singleWordBadSad.push_back("Eek");
+		singleWordBadSad.push_back("Ouch");
+		singleWordBadSad.push_back("Oof");
+		singleWordBadSad.push_back("Pain");
+		singleWordBadSad.push_back("Hurt");
+		singleWordBadSad.push_back("Cry");
+		singleWordBadSad.push_back("Tear");
+		singleWordBadSad.push_back("Sob");
+		singleWordBadSad.push_back("Boo");
+		singleWordBadSad.push_back("Gaak");
+		singleWordBadSad.push_back("Gah");
+		singleWordBadSad.push_back("Agh");
+		singleWordBadSad.push_back("Egad");
+		Generator::simpleSingleWords[BADSAD] = singleWordBadSad;
+
 		// First fixes
 		std::vector<std::string> firstFixExplosion;
 		firstFixExplosion.push_back("B");
@@ -121,6 +139,17 @@ namespace Onomatoplex {
 		firstFixSmoke.push_back("Fss");
 		Generator::firstFix[SMOKE] = firstFixSmoke;
 
+		std::vector<std::string> firstFixBadSad;
+		firstFixBadSad.push_back("Eeek");
+		firstFixBadSad.push_back("Agh");
+		firstFixBadSad.push_back("Gaak");
+		firstFixBadSad.push_back("Oof");
+		firstFixBadSad.push_back("Ouch");
+		firstFixBadSad.push_back("Pain");
+		firstFixBadSad.push_back("Ack");
+		firstFixBadSad.push_back("Cry");
+		firstFixBadSad.push_back("Owwch");
+		Generator::firstFix[BADSAD] = firstFixBadSad;
 
 		// Second fixes
 		std::vector<std::string> secondFixExplosion;
@@ -149,6 +178,17 @@ namespace Onomatoplex {
 		secondFixSmoke.push_back("");
 		Generator::secondFix[SMOKE] = secondFixSmoke;
 
+		std::vector<std::string> secondFixBadSad;
+		secondFixBadSad.push_back("gah");
+		secondFixBadSad.push_back("oof");
+		secondFixBadSad.push_back(" Cry");
+		secondFixBadSad.push_back(" Sob");
+		secondFixBadSad.push_back(" Pain");
+		secondFixBadSad.push_back(" ItHurts");
+		secondFixBadSad.push_back("gah");
+		secondFixBadSad.push_back("eek");
+		Generator::secondFix[BADSAD] = secondFixBadSad;
+
 		// Third fixes
 		std::vector<std::string> thirdFixExplosion;
 		thirdFixExplosion.push_back("bl");
@@ -169,6 +209,10 @@ namespace Onomatoplex {
 		std::vector<std::string> thirdFixSmoke;
 		thirdFixSmoke.push_back("");
 		Generator::thirdFix[SMOKE] = thirdFixSmoke;
+
+		std::vector<std::string> thirdFixBadSad;
+		thirdFixBadSad.push_back("");
+		Generator::thirdFix[BADSAD] = thirdFixBadSad;
 
 		// End-fixes - these add a neat ending to an already ridiculous word, they may also
 		// be combined almost endlessly...
@@ -207,6 +251,10 @@ namespace Onomatoplex {
 		endFixSmoke.push_back("pf");
 		Generator::endFix[SMOKE] = endFixSmoke;
 
+		std::vector<std::string> endFixBadSad;
+		endFixBadSad.push_back("");
+		Generator::endFix[BADSAD] = endFixBadSad;
+
 		// Super end-fixes
 		std::vector<std::string> superEndFixExplosion;
 		superEndFixExplosion.push_back("y");
@@ -232,6 +280,17 @@ namespace Onomatoplex {
 		superEndFixSmoke.push_back("poof");
 		superEndFixSmoke.push_back("f");
 		Generator::superEndFix[SMOKE] = superEndFixSmoke;
+
+		std::vector<std::string> superEndFixBadSad;
+		superEndFixBadSad.push_back("y");
+		superEndFixBadSad.push_back("eep");
+		superEndFixBadSad.push_back("Oof");
+		superEndFixBadSad.push_back(" ItHurts");
+		superEndFixBadSad.push_back(" LotsOfPain");
+		superEndFixBadSad.push_back(" MakeItStop");
+		superEndFixBadSad.push_back(" Hurting");
+		superEndFixBadSad.push_back("OwOw");
+		Generator::superEndFix[BADSAD] = superEndFixBadSad;
 
 		// Uber end-fixes
 		std::vector<std::string> uberEndFixExplosion;
@@ -272,6 +331,17 @@ namespace Onomatoplex {
 		uberEndFixSmoke.push_back("oplex");
 		uberEndFixSmoke.push_back(" Poof");
 		Generator::uberEndFix[SMOKE] = uberEndFixSmoke;
+
+		std::vector<std::string> uberEndFixBadSad;
+		uberEndFixBadSad.push_back(" MakeTheBadManStop");
+		uberEndFixBadSad.push_back(" HolyPainBatman");
+		uberEndFixBadSad.push_back("Eeeggads");
+		uberEndFixBadSad.push_back("Ouchyness");
+		uberEndFixBadSad.push_back(" ItHurtsSoMuch");
+		uberEndFixBadSad.push_back("OwOwOw");
+		uberEndFixBadSad.push_back("Agghh");
+		uberEndFixBadSad.push_back("eeEp");
+		Generator::uberEndFix[BADSAD] = uberEndFixBadSad;
 	}
 
 	// Destructor, deletes singleton, cleans up dictionaries
