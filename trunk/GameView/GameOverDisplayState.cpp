@@ -9,7 +9,7 @@
 const std::string GameOverDisplayState::GAME_OVER_TEXT = "Game Over";
 
 GameOverDisplayState::GameOverDisplayState(GameDisplay* display) : DisplayState(display) {
-	this->gameOverLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::BloodCrunch, GameAssets::Huge), GAME_OVER_TEXT);
+	this->gameOverLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::ExplosionBoom, GameAssets::Huge), GAME_OVER_TEXT);
 	this->gameOverLabel.SetColour(Colour(1, 0, 0));
 	this->gameOverLabel.SetDropShadow(Colour(1, 1, 1), 0.08f);
 }

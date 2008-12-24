@@ -18,12 +18,12 @@ const Colour DecoSkybox::COLOUR_CHANGE_LIST[NUM_COLOUR_CHANGES] = {
 };
 
 const std::string DecoSkybox::DECO_SKYBOX_TEXTURES[6]			= {
-	GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", 
-	GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
-	GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", 
-	GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
-	GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", 
-	GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg"
+	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", 
+	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
+	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", 
+	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
+	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", 
+	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg"
 };
 
 DecoSkybox::DecoSkybox(PolygonGroup* geom, TextureCube* tex) : Skybox(geom, tex), currColour(COLOUR_CHANGE_LIST[0]), currColourIndex(0) {
@@ -35,6 +35,10 @@ DecoSkybox::~DecoSkybox() {
 void DecoSkybox::SetupCgFxParameters(double dT) {
 	Skybox::SetupCgFxParameters(dT);
 	
+	if (dT > COLOUR_CHANGE_SPEED) {
+		dT = COLOUR_CHANGE_SPEED;
+	}
+
 	// Figure out what the colour of the background should be...
 	double colourChangeInc = dT * COLOUR_CHANGE_SPEED;
 	Colour nextColour = COLOUR_CHANGE_LIST[(this->currColourIndex + 1) % NUM_COLOUR_CHANGES];

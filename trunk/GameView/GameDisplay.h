@@ -34,7 +34,7 @@ private:
 
 public:
 	static const int NUM_MULTISAMPLES = 4;
-	static const int MAX_FRAMERATE;							// The maximum framerate possible for the game
+	static const int MAX_FRAMERATE;							// The maximum framerate possible for the game				
 	static const unsigned long FRAME_SLEEP_MS;	// Time to sleep between frames (determined by MAX_FRAMERATE)
 
 	GameDisplay(GameModel* model, int initWidth, int initHeight);
