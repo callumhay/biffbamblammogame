@@ -3,11 +3,11 @@
 #include "GameAssets.h"
 #include "GameViewConstants.h"
 
-// model stuffs
+// Game Model stuff
 #include "../GameModel/GameModel.h"
 
+// Engine stuff
 #include "../BlammoEngine/BlammoEngine.h"
-
 
 
 const std::string InGameDisplayState::LIVES_LABEL_TEXT = "Lives: ";
@@ -15,8 +15,7 @@ const unsigned int InGameDisplayState::HUD_X_INDENT = 10;
 const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
 InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display), 
-mvEffector(Vector3D(0, -2.5, 0)),
-colourEffector(1, 0) {
+mvEffector(Vector3D(0, -2.5, 0)), colourEffector(1, 0) {
 
 	// Render to texture setup
 	this->renderToTexBeforeBall = Texture2D::CreateEmptyTexture2D(Texture::Nearest, display->GetDisplayWidth(), display->GetDisplayHeight());
@@ -36,15 +35,16 @@ colourEffector(1, 0) {
 	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
 
 	// TODO: GET RID OF THIS
-	//bool result = ptEmitTest.SetParticles(1, GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/test_textures/TestSprite.png");//Smoke_Puff1_64x64.png");
+	//bool result = ptEmitTest.SetParticles(1, GameViewConstants::TEXTURE_DIR + "/test_textures/TestSprite.png");//Smoke_Puff1_64x64.png");
 	//assert(result);
 
 	DropShadow dpTemp;
-	dpTemp.amountPercentage = 0.20f;
+	dpTemp.amountPercentage = 0.10f;
 	for (int i = 0; i < 50; i++) {
-		ESPOnomataParticle* newParticle = new ESPOnomataParticle(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small));
-
+		ESPOnomataParticle* newParticle = new ESPOnomataParticle(this->display->GetAssets()->GetFont(GameAssets::ExplosionBoom, GameAssets::Medium));
 		newParticle->SetDropShadow(dpTemp);
+		newParticle->SetOnomatoplexSound(Onomatoplex::BADSAD, static_cast<Onomatoplex::Extremeness>(Randomizer::GetInstance()->RandomUnsignedInt() % Onomatoplex::NumExtremenessTypes));
+
 		this->bunchOParticles.push_back(newParticle);
 		ptEmitTest.AddParticle(newParticle);
 	}
@@ -137,12 +137,8 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	
 	glDisable(GL_MULTISAMPLE);
 
-	// TODO: get rid of this
-	//glPushMatrix();
-	//glLoadIdentity();
-	ptEmitTest.Tick(dT);
-	ptEmitTest.Draw(this->display->GetCamera());
-	//glPopMatrix();
+	// Draw particles / ESP effects
+	this->display->GetAssets()->DrawParticleEffects(dT, this->display->GetCamera());
 }
 
 /**

@@ -3,70 +3,49 @@
 #include "LevelMesh.h"
 #include "DecoSkybox.h"
 #include "GameViewConstants.h"
+#include "CgFxPostRefract.h"
+
+// Other asset classes
+#include "GameWorldAssets.h"
+
+// Blammo Engine includes
+#include "../BlammoEngine/Texture3D.h"
+
+// ESP Engine includes
+#include "../ESPEngine/ESPEmitter.h"
 
 // Includes for Item types
 #include "../GameModel/BallSpeedItem.h"
 #include "../GameModel/UberBallItem.h"
 #include "../GameModel/InvisiBallItem.h"
 
-
-// Shader assets
-const std::string GameAssets::CELSHADER_FILEPATH	= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->SHADER_DIR + "/CelShading.cgfx";
-
-// Regular font assets
-const std::string GameAssets::FONT_GUNBLAM				= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->FONT_DIR + "/gunblam.ttf";
-const std::string GameAssets::FONT_EXPLOSIONBOOM	= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->FONT_DIR + "/explosionboom.ttf";
-const std::string GameAssets::FONT_BLOODCRUNCH		= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->FONT_DIR + "/bloodcrunch.ttf";
-const std::string GameAssets::FONT_ALLPURPOSE			= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->FONT_DIR + "/allpurpose.ttf";
-const std::string GameAssets::FONT_ELECTRICZAP		= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->FONT_DIR + "/electriczap.ttf";
-//const std::string FONT_DECOISH;
-//const std::string FONT_CYBERPUNKISH;
-
-// Regular mesh asssets
-const std::string GameAssets::BALL_MESH					= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/ball.obj";
-const std::string GameAssets::SPIKEY_BALL_MESH	= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/spikey_ball.obj";
-const std::string GameAssets::SKYBOX_MESH				= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/skybox.obj";
-
-const std::string GameAssets::ITEM_MESH						= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/item.obj";
+const std::string GameAssets::ITEM_MESH						= GameViewConstants::GetInstance()->MESH_DIR + "/item.obj";
 const std::string GameAssets::ITEM_LABEL_MATGRP		= "ItemLabel";	// Material group name for changing the label on the item mesh
 const std::string GameAssets::ITEM_END_MATGRP			= "ColourEnd";	// Material group name for changing the colour on the item mesh
+
 const Colour GameAssets::ITEM_GOOD_COLOUR					= Colour(0.0f, 0.8f, 0.0f);
 const Colour GameAssets::ITEM_BAD_COLOUR					= Colour(0.8f, 0.0f, 0.0f);
 const Colour GameAssets::ITEM_NEUTRAL_COLOUR			= Colour(0.0f, 0.6f, 1.0f);
 
 // Item texture assets
-const std::string GameAssets::ITEM_SLOWBALL_TEXTURE		= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/slowball_powerup256x128.jpg";
-const std::string GameAssets::ITEM_FASTBALL_TEXTURE		= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/fastball_powerdown256x128.jpg";
-const std::string GameAssets::ITEM_UBERBALL_TEXTURE		= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/uberball_powerup256x128.jpg";
-const std::string GameAssets::ITEM_INVISIBALL_TEXTURE = GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/invisiball_powerdown256x128.jpg";
+const std::string GameAssets::ITEM_SLOWBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/slowball_powerup256x128.jpg";
+const std::string GameAssets::ITEM_FASTBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/fastball_powerdown256x128.jpg";
+const std::string GameAssets::ITEM_UBERBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/uberball_powerup256x128.jpg";
+const std::string GameAssets::ITEM_INVISIBALL_TEXTURE = GameViewConstants::GetInstance()->TEXTURE_DIR + "/invisiball_powerdown256x128.jpg";
 
-const std::string GameAssets::ITEM_TIMER_SLOWBALL_TEXTURE		= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/slowball_timer_hud128x64.png";
-const std::string GameAssets::ITEM_TIMER_FASTBALL_TEXTURE		= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/fastball_timer_hud128x64.png";
-const std::string GameAssets::ITEM_TIMER_UBERBALL_TEXTURE		= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/uberball_timer_hud256x128.png";
-const std::string GameAssets::ITEM_TIMER_INVISIBALL_TEXTURE = GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/invisiball_timer_hud256x128.png";
+const std::string GameAssets::ITEM_TIMER_SLOWBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/slowball_timer_hud128x64.png";
+const std::string GameAssets::ITEM_TIMER_FASTBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/fastball_timer_hud128x64.png";
+const std::string GameAssets::ITEM_TIMER_UBERBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/uberball_timer_hud256x128.png";
+const std::string GameAssets::ITEM_TIMER_INVISIBALL_TEXTURE = GameViewConstants::GetInstance()->TEXTURE_DIR + "/invisiball_timer_hud256x128.png";
 
-const std::string GameAssets::ITEM_TIMER_FILLER_SPDBALL_TEXTURE			= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/ballspeed_timer_fill_hud128x64.png";
-const std::string GameAssets::ITEM_TIMER_FILLER_UBERBALL_TEXTURE		= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/uberball_timer_fill_hud256x128.png";
-const std::string GameAssets::ITEM_TIMER_FILLER_INVISIBALL_TEXTURE	= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/invisiball_timer_fill_hud256x128.png";
-
-// Deco assets
-const std::string GameAssets::DECO_PADDLE_MESH						= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/deco_paddle.obj";
-const std::string GameAssets::DECO_BACKGROUND_MESH				= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/deco_background.obj";
-
-// Cyberpunk assets
-const std::string GameAssets::CYBERPUNK_PADDLE_MESH						= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/cyberpunk_paddle.obj";
-const std::string GameAssets::CYBERPUNK_BACKGROUND_MESH				= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/cyberpunk_background.obj";
-const std::string GameAssets::CYBERPUNK_SKYBOX_TEXTURES[6]		= {
-	GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
-	GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
-	GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg"
-};
+const std::string GameAssets::ITEM_TIMER_FILLER_SPDBALL_TEXTURE			= GameViewConstants::GetInstance()->TEXTURE_DIR + "/ballspeed_timer_fill_hud128x64.png";
+const std::string GameAssets::ITEM_TIMER_FILLER_UBERBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/uberball_timer_fill_hud256x128.png";
+const std::string GameAssets::ITEM_TIMER_FILLER_INVISIBALL_TEXTURE	= GameViewConstants::GetInstance()->TEXTURE_DIR + "/invisiball_timer_fill_hud256x128.png";
 
 // *****************************************************
 
-GameAssets::GameAssets(): 
-ball(NULL), spikeyBall(NULL), item(NULL), playerPaddle(NULL), skybox(NULL), 
-background(NULL), levelMesh(NULL), currLoadedStyle(GameWorld::None), invisiBallEffect(NULL) {
+GameAssets::GameAssets(): worldAssets(NULL),
+ball(NULL), spikeyBall(NULL), item(NULL), levelMesh(NULL), invisiBallEffect(NULL) {
 
 	// Initialize DevIL
 	ilInit();
@@ -112,17 +91,9 @@ GameAssets::~GameAssets() {
  * Delete any previously loaded assets related to the world.
  */
 void GameAssets::DeleteWorldAssets() {
-	if (this->playerPaddle != NULL) {
-		delete this->playerPaddle;
-		this->playerPaddle = NULL;
-	}
-	if (this->skybox != NULL) {
-		delete this->skybox;
-		this->skybox = NULL;
-	}
-	if (this->background != NULL) {
-		delete this->background;
-		this->background = NULL;
+	if (this->worldAssets != NULL) {
+		delete this->worldAssets;
+		this->worldAssets = NULL;
 	}
 }
 
@@ -158,9 +129,7 @@ void GameAssets::DeleteRegularMeshAssets() {
 
 
 
-// Draw a piece of the level (block that you destory or that makes up part of the level
-// outline), this is done by positioning it, drawing the correct material and then
-// drawing the mesh itself.
+// Draw the foreground level pieces...
 void GameAssets::DrawLevelPieces(const Camera& camera) const {
 	this->levelMesh->Draw(camera);
 }
@@ -201,27 +170,45 @@ void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera, Texture2D
  * Draw the player paddle mesh with materials and in correct position.
  */
 void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) const {
-	Point2D paddleCenter = p.GetCenterPosition();	
-
-	glPushMatrix();
-	glTranslatef(paddleCenter[0], paddleCenter[1], 0);
-	
-	// Draw the paddle
-	this->playerPaddle->Draw(camera);
-	
-	glPopMatrix();
+	this->worldAssets->DrawPaddle(p, camera);
 }
 
 /**
  * Draw the background / environment of the world type.
  */
-void GameAssets::DrawBackground(double dT, const Camera& camera) const {
-	// Draw the skybox
-	this->skybox->Draw(dT, camera);
-	
-	// Draw the background
-	this->background->Draw(camera);
+void GameAssets::DrawBackground(double dT, const Camera& camera) {
+	this->worldAssets->DrawBackground(dT, camera);
 }
+
+/**
+ * Draw any particles present in the game currently.
+ */
+void GameAssets::DrawParticleEffects(double dT, const Camera& camera) {
+	
+	// Go through all the particles and do book keeping and drawing
+	for (std::list<ESPEmitter*>::const_iterator iter = this->activeParticleEmitters.begin();
+		iter != this->activeParticleEmitters.end(); iter++) {
+	
+		ESPEmitter* curr = *iter;
+
+		// Check to see if dead, if so erase it...
+		if (curr->IsDead()) {	
+			iter = this->activeParticleEmitters.erase(iter);
+			delete curr;
+
+			if (this->activeParticleEmitters.size() == 0) {
+				break;
+			}
+		}
+		else {
+			// Not dead...
+			curr->Draw(camera);
+			curr->Tick(dT);
+		}
+	}
+
+}
+
 
 /**
  * Draw a given item in the world.
@@ -439,10 +426,10 @@ void GameAssets::LoadItemTextures() {
 
 void GameAssets::LoadRegularMeshAssets() {
 	if (this->ball == NULL) {
-		this->ball = ObjReader::ReadMesh(BALL_MESH);
+		this->ball = ObjReader::ReadMesh(GameViewConstants::GetInstance()->BALL_MESH);
 	}
 	if (this->spikeyBall == NULL) {
-		this->spikeyBall = ObjReader::ReadMesh(SPIKEY_BALL_MESH);
+		this->spikeyBall = ObjReader::ReadMesh(GameViewConstants::GetInstance()->SPIKEY_BALL_MESH);
 	}
 	if (this->item == NULL) {
 		// Load the mesh for items
@@ -457,10 +444,19 @@ void GameAssets::LoadRegularEffectAssets() {
 }
 
 void GameAssets::DeleteRegularEffectAssets() {
+	// Delete the invisiball effect
 	if (this->invisiBallEffect != NULL) {
 		delete this->invisiBallEffect;
 		this->invisiBallEffect = NULL;
 	}
+
+	// Delete any left behind particles
+	for(std::list<ESPEmitter*>::iterator iter = this->activeParticleEmitters.begin(); iter != this->activeParticleEmitters.end(); iter++) {
+		ESPEmitter* currEmitter = *iter;
+		delete currEmitter;
+		currEmitter = NULL;
+	}
+	this->activeParticleEmitters.clear();
 }
 
 /**
@@ -501,36 +497,23 @@ void GameAssets::UnloadItemTextures() {
  * Precondition: true.
  */
 void GameAssets::LoadWorldAssets(GameWorld::WorldStyle style) {
-	
 	// Delete all previously loaded style-related assets
 	this->DeleteWorldAssets();
-
-	// Load in the new asset set
-	switch (style) {
-		case GameWorld::Deco:
-			this->LoadDecoStyleAssets();
-			break;
-		case GameWorld::Cyberpunk:
-			this->LoadCyberpunkStyleAssets();
-			break;
-		default:
-			assert(false);
-	}
-
-	this->currLoadedStyle = style;
+	// Load up the new set of assets
+	this->worldAssets = GameWorldAssets::CreateWorldAssets(style);
 }
 
 /**
  * Load the given level as a mesh.
  */
-void GameAssets::LoadLevelAssets(GameWorld::WorldStyle worldStyle, const GameLevel* level) {
+void GameAssets::LoadLevelAssets(const GameLevel* level) {
 	assert(level != NULL);
+	assert(this->worldAssets != NULL);
 
 	// Delete all previously loaded level-related assets
 	this->DeleteLevelAssets();
-	
 	// Load the given level
-	this->levelMesh = LevelMesh::CreateLevelMesh(worldStyle, level);
+	this->levelMesh = LevelMesh::CreateLevelMesh(this->worldAssets, level);
 }
 
 /**
@@ -540,92 +523,55 @@ void GameAssets::LoadLevelAssets(GameWorld::WorldStyle worldStyle, const GameLev
 void GameAssets::LoadRegularFontAssets() {
 	debug_output("Loading regular font sets");
 
-	TextureFontSet* temp = TextureFontSet::CreateTextureFontFromTTF(FONT_GUNBLAM, Small);
+	TextureFontSet* temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Small);
 	assert(temp != NULL);
 	this->fonts[GunBlam][Small]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_GUNBLAM, Medium);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Medium);
 	assert(temp != NULL);
 	this->fonts[GunBlam][Medium]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_GUNBLAM, Big);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Big);
 	assert(temp != NULL);
 	this->fonts[GunBlam][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_GUNBLAM, Huge);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Huge);
 	assert(temp != NULL);
 	this->fonts[GunBlam][Huge]	= temp;
 
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_EXPLOSIONBOOM, Small);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Small);
 	assert(temp != NULL);
 	this->fonts[ExplosionBoom][Small]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_EXPLOSIONBOOM, Medium);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Medium);
 	assert(temp != NULL);
 	this->fonts[ExplosionBoom][Medium]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_EXPLOSIONBOOM, Big);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Big);
 	assert(temp != NULL);
 	this->fonts[ExplosionBoom][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_EXPLOSIONBOOM, Huge);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Huge);
 	assert(temp != NULL);
 	this->fonts[ExplosionBoom][Huge]	= temp;
 
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_BLOODCRUNCH, Small);
-	assert(temp != NULL);
-	this->fonts[BloodCrunch][Small]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_BLOODCRUNCH, Medium);
-	assert(temp != NULL);
-	this->fonts[BloodCrunch][Medium]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_BLOODCRUNCH, Big);
-	assert(temp != NULL);
-	this->fonts[BloodCrunch][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_BLOODCRUNCH, Huge);
-	assert(temp != NULL);
-	this->fonts[BloodCrunch][Huge]	= temp;
-
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ELECTRICZAP, Small);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Small);
 	assert(temp != NULL);
 	this->fonts[ElectricZap][Small]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ELECTRICZAP, Medium);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Medium);
 	assert(temp != NULL);
 	this->fonts[ElectricZap][Medium]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ELECTRICZAP, Big);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Big);
 	assert(temp != NULL);
 	this->fonts[ElectricZap][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ELECTRICZAP, Huge);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Huge);
 	assert(temp != NULL);
 	this->fonts[ElectricZap][Huge]	= temp;
 
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ALLPURPOSE, Small);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Small);
 	assert(temp != NULL);
 	this->fonts[AllPurpose][Small]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ALLPURPOSE, Medium);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Medium);
 	assert(temp != NULL);
 	this->fonts[AllPurpose][Medium]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ALLPURPOSE, Big);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Big);
 	assert(temp != NULL);
 	this->fonts[AllPurpose][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(FONT_ALLPURPOSE, Huge);
+	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Huge);
 	assert(temp != NULL);
 	this->fonts[AllPurpose][Huge]	= temp; 
-}
-
-/**
- * Load in the "Deco" assets for use in the game.
- */
-void GameAssets::LoadDecoStyleAssets() {
-	debug_output("Loading deco style assets");
-
-	// Deco mesh assets
-	this->playerPaddle		= ObjReader::ReadMesh(DECO_PADDLE_MESH);
-	this->background			= ObjReader::ReadMesh(DECO_BACKGROUND_MESH);
-	this->skybox					= DecoSkybox::CreateDecoSkybox(SKYBOX_MESH);
-}
-
-/**
- * Load in the "Cyberpunk" assets for use in the game.
- */
-void GameAssets::LoadCyberpunkStyleAssets() {
-	debug_output("Loading cyberpunk style assets");
-	
-	// Cyberpunk mesh assets
-	this->playerPaddle		= ObjReader::ReadMesh(CYBERPUNK_PADDLE_MESH);
-	this->background			= ObjReader::ReadMesh(CYBERPUNK_BACKGROUND_MESH);
-	this->skybox					= Skybox::CreateSkybox(SKYBOX_MESH, CYBERPUNK_SKYBOX_TEXTURES);
 }

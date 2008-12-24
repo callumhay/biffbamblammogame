@@ -7,14 +7,12 @@
 #include "../GameModel/GameLevel.h"
 #include "../GameModel/LevelPiece.h"
 
+class GameWorldAssets;
+
 class LevelMesh {
 
 private:
 	static const GLint NO_PIECE = -1;
-
-	static const std::string BASIC_BLOCK_MESH_PATH;
-	static const std::string DECO_BLOCK_MESH_PATH;
-	static const std::string CYBERPUNK_BLOCK_MESH_PATH;
 
 	Mesh* basicBlock;
 	Mesh* styleBlock;
@@ -22,7 +20,7 @@ private:
 	std::vector<std::vector<GLint>> pieceMeshes;
 	std::map<LevelPiece::LevelPieceType, std::vector<GLint>> piecesByMaterial;
 
-	LevelMesh(GameWorld::WorldStyle worldStyle);
+	LevelMesh(const GameWorldAssets* gameWorldAssets);
 
 public:
 	~LevelMesh();
@@ -31,7 +29,7 @@ public:
 	void Draw(const Camera& camera) const;
 
 	// Static creator
-	static LevelMesh* CreateLevelMesh(GameWorld::WorldStyle worldStyle, const GameLevel* level);
+	static LevelMesh* CreateLevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
 														 
 
 };

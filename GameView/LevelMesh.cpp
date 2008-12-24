@@ -1,28 +1,16 @@
 #include "LevelMesh.h"
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
+#include "GameWorldAssets.h"
 
 #include "../BlammoEngine/BlammoEngine.h"
 
-// Filepaths for block assets
-const std::string LevelMesh::BASIC_BLOCK_MESH_PATH			= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/block.obj";
-const std::string LevelMesh::DECO_BLOCK_MESH_PATH				= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/deco_block.obj";
-const std::string LevelMesh::CYBERPUNK_BLOCK_MESH_PATH	= GameViewConstants::GetInstance()->RESOURCE_DIR + "/" + GameViewConstants::GetInstance()->MESH_DIR + "/cyberpunk_block.obj";
-
-LevelMesh::LevelMesh(GameWorld::WorldStyle worldStyle) : styleBlock(NULL), basicBlock(NULL) {
-	
+LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets) : styleBlock(NULL), basicBlock(NULL) {
 	// Based on the world style read-in the appropriate block
-	switch(worldStyle) {
-		default:
-		case GameWorld::Deco:
-			this->styleBlock = ObjReader::ReadMesh(DECO_BLOCK_MESH_PATH);
-			break;
-		case GameWorld::Cyberpunk:
-			this->styleBlock = ObjReader::ReadMesh(CYBERPUNK_BLOCK_MESH_PATH);
-			break;
-	}
+	this->styleBlock = gameWorldAssets->GetWorldStyleBlock();
+	
 	// Load the basic block
-	this->basicBlock = ObjReader::ReadMesh(BASIC_BLOCK_MESH_PATH);
+	this->basicBlock = ObjReader::ReadMesh(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
 	
 	// Make sure the block was loaded and that it has only one material on it
 	assert(this->styleBlock != NULL);
@@ -31,7 +19,6 @@ LevelMesh::LevelMesh(GameWorld::WorldStyle worldStyle) : styleBlock(NULL), basic
 
 LevelMesh::~LevelMesh() {
 	// Delete all meshes
-	delete this->styleBlock;
 	delete this->basicBlock;
 
 	// Delete all the pieces
@@ -186,10 +173,10 @@ void LevelMesh::Draw(const Camera& camera) const {
 	
 }
 
-LevelMesh* LevelMesh::CreateLevelMesh(GameWorld::WorldStyle worldStyle, const GameLevel* level) {
+LevelMesh* LevelMesh::CreateLevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) {
 	assert(level != NULL);
 
-	LevelMesh* newLvlMesh = new LevelMesh(worldStyle);
+	LevelMesh* newLvlMesh = new LevelMesh(gameWorldAssets);
 	
 	PolygonGroup* solidBlockPoly			= newLvlMesh->styleBlock->GetMaterialGroups().begin()->second->GetPolygonGroup();
 	PolygonGroup* breakableBlockPoly	= newLvlMesh->basicBlock->GetMaterialGroups().begin()->second->GetPolygonGroup();
