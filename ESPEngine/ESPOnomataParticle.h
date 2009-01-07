@@ -34,7 +34,7 @@ public:
 	ESPOnomataParticle(const TextureFontSet* font);
 	virtual ~ESPOnomataParticle();
 
-	virtual void Revive(const Point3D& pos, const Vector3D& vel, const float size, const float totalLifespan);
+	virtual void Revive(const Point3D& pos, const Vector3D& vel, float size, float rot, float totalLifespan);
 	virtual void Tick(const double dT);
 	virtual void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
 

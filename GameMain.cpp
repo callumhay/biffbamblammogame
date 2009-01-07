@@ -2,6 +2,7 @@
 
 #include "GameView/GameDisplay.h"
 #include "GameView/GameViewConstants.h"
+#include "GameView/GameFontAssetsManager.h"
 
 #include "GameModel/GameModel.h"
 #include "GameModel/GameEventManager.h"
@@ -178,6 +179,7 @@ int main(int argc, char *argv[]) {
 	FBOManager::DeleteInstance();
 	GameModelConstants::DeleteInstance();
 	GameViewConstants::DeleteInstance();
+	GameFontAssetsManager::DeleteInstance();
 	Randomizer::DeleteInstance();
 
 	return 0;

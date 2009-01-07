@@ -33,9 +33,9 @@ void ESPOnomataParticle::SetRandomExtremeness() {
 /**
  * Revive this particle with the given lifespan length in seconds.
  */
-void ESPOnomataParticle::Revive(const Point3D& pos, const Vector3D& vel, const float size, const float totalLifespan) {
+void ESPOnomataParticle::Revive(const Point3D& pos, const Vector3D& vel, float size, float rot, float totalLifespan) {
 	// Set the members to reflect a 'new life'
-	ESPParticle::Revive(pos, vel, size, totalLifespan);
+	ESPParticle::Revive(pos, vel, size, rot, totalLifespan);
 	this->GenerateNewString();
 }
 
@@ -66,28 +66,25 @@ void ESPOnomataParticle::Draw(const Camera& camera, const ESP::ESPAlignment alig
 	float newXPos = this->position[0] - this->currHalfStrWidth;
 	float newYPos = this->position[1] - this->currHalfStrHeight;
 
-	glDisable(GL_DEPTH);
-
 	// If set, draw the shadow
 	if (this->dropShadow.isSet) {
 		float dropAmt = 2.0f * this->currHalfStrHeight * this->dropShadow.amountPercentage;
+		float dsScale = this->size * this->dropShadow.scale;
 		glPushMatrix();
 		glTranslatef(newXPos + dropAmt, newYPos - dropAmt, this->position[2]); 
-		glScalef(this->size, this->size, this->size);
-		glColor4f(this->dropShadow.colour.R(), this->dropShadow.colour.G(), this->dropShadow.colour.B(), 1.0f);
+		glScalef(dsScale, dsScale, dsScale);
+		glRotatef(this->rotation, 0, 0, -1);
+		glColor4f(this->dropShadow.colour.R(), this->dropShadow.colour.G(), this->dropShadow.colour.B(), this->alpha);
 		this->font->Print(this->currStr);
 		glPopMatrix();
 	}
 
 	// Draw the font
-	glPushMatrix();
-	glTranslatef(newXPos, newYPos, this->position[2]); 
+	glTranslatef(newXPos, newYPos, this->position[2]);
+	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size, this->size, this->size);
-	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
+	glColor4d(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
 	this->font->Print(this->currStr);
-	glPopMatrix();
-
-	glEnable(GL_DEPTH);
 
 	glPopMatrix();
 }

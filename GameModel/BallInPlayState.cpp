@@ -233,12 +233,12 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
 		if (signDist == -1) {
 			// The ball is on the other side of the collision line, fix its position so that
 			// it is exactly against the line
-			b.SetCenterPosition(b.GetBounds().Center() + (-d + b.GetBounds().Radius()) * n);
+			b.SetCenterPosition(b.GetBounds().Center() + (-d + (b.GetBounds().Radius() + EPSILON)) * n);
 		}
 		else {
 			// The ball is still on the out facing normal side of the line, but fix its position so that
 			// it is exactly against the line
-			b.SetCenterPosition(b.GetBounds().Center() + (b.GetBounds().Radius() - d) * n);
+			b.SetCenterPosition(b.GetBounds().Center() + (b.GetBounds().Radius() + EPSILON - d) * n);
 		}
 	}
 

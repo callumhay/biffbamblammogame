@@ -49,7 +49,6 @@ namespace Onomatoplex {
 	public:
 		static Generator* Instance();
 		std::string Generate(SoundType type, Extremeness amt);
-		std::string Generator::Generate(SoundType type, Extremeness amt, unsigned int seed);
 
 	};
 }

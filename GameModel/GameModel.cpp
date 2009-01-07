@@ -184,9 +184,9 @@ void GameModel::BallPaddleCollisionOccurred() {
 		float fractionOfSpeed = fabs(paddleVel[0]) / PlayerPaddle::DEFAULT_SPEED;
 		float angleChange = angleDecSgn * fractionOfSpeed * PlayerPaddle::RAND_DEG_ANG;
 
-		// Set the ball to be exactly on the paddle
+		// Set the ball to be just off the paddle
 		this->ball->SetCenterPosition(Point2D(this->ball->GetBounds().Center()[0], 
-			this->playerPaddle->GetCenterPosition()[1] + this->playerPaddle->GetHalfHeight() + this->ball->GetBounds().Radius()));
+			this->playerPaddle->GetCenterPosition()[1] + this->playerPaddle->GetHalfHeight() + this->ball->GetBounds().Radius() + EPSILON));
 
 		Vector2D ballVel    = this->ball->GetVelocity();
 		Vector2D ballVelHat = Vector2D::Normalize(ballVel);

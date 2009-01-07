@@ -13,14 +13,17 @@ protected:
 	ESPInterval radiusDeviationFromPt;	// Inclusive interval for how far from the emitPt this particle may spawn at
 
 	Vector3D CalculateRandomInitParticleDir() const;
+	void ReviveParticle();
+	void TickParticles(double dT);
 
 public:
 	ESPPointEmitter();
 	virtual ~ESPPointEmitter();
 
-	virtual void Tick(const double dT);
+	virtual void Tick(double dT);
 	virtual void Draw(const Camera& camera);
 
+	void SetEmitPosition(const Point3D& pt);
 	void SetEmitDirection(const Vector3D& dir);
 	void SetEmitAngleInDegrees(int degs);
 	void SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter);

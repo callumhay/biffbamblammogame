@@ -1,6 +1,6 @@
 #include "GameCompleteDisplayState.h"
 #include "MainMenuDisplayState.h"
-
+#include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
@@ -10,7 +10,7 @@ const std::string GameCompleteDisplayState::GAME_COMPLETE_TEXT = "YOU WIN!";
 
 GameCompleteDisplayState::GameCompleteDisplayState(GameDisplay* display) : DisplayState(display) {
 
-	this->gameCompleteLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::ExplosionBoom, GameAssets::Huge), GAME_COMPLETE_TEXT);
+	this->gameCompleteLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), GAME_COMPLETE_TEXT);
 	this->gameCompleteLabel.SetColour(Colour(0, 1, 0));
 	this->gameCompleteLabel.SetDropShadow(Colour(0, 0, 0), 0.08f);
 }

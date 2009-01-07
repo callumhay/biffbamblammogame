@@ -45,9 +45,12 @@ public:
 	const std::string CGFX_VOLUMEMETRIC_SHADER;
 
 	// Texture path constants *******************************
-
+	const std::string TEXTURE_BANG1;
+	const std::string TEXTURE_BANG2;
+	const std::string TEXTURE_BANG3;
 
 	// Font path constants **********************************
+	const std::string FONT_HAPPYGOOD;
 	const std::string FONT_GUNBLAM;
 	const std::string FONT_EXPLOSIONBOOM;
 	const std::string FONT_ELECTRICZAP;

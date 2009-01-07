@@ -2,6 +2,7 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 #include "GameViewConstants.h"
+#include "GameFontAssetsManager.h"
 
 // Game Model stuff
 #include "../GameModel/GameModel.h"
@@ -14,8 +15,7 @@ const std::string InGameDisplayState::LIVES_LABEL_TEXT = "Lives: ";
 const unsigned int InGameDisplayState::HUD_X_INDENT = 10;	
 const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
-InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display), 
-mvEffector(Vector3D(0, -2.5, 0)), colourEffector(1, 0) {
+InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
 
 	// Render to texture setup
 	this->renderToTexBeforeBall = Texture2D::CreateEmptyTexture2D(Texture::Nearest, display->GetDisplayWidth(), display->GetDisplayHeight());
@@ -26,47 +26,17 @@ mvEffector(Vector3D(0, -2.5, 0)), colourEffector(1, 0) {
 	Colour shadowColourHUD(0, 0, 0);
 	Colour textColourHUD(1, 1, 1);
 	// Score display
-	this->scoreLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small), "0");
+	this->scoreLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), "0");
 	this->scoreLabel.SetColour(textColourHUD);
 	this->scoreLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
 	// Lives left display
-	this->livesLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Small), LIVES_LABEL_TEXT);
+	this->livesLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), LIVES_LABEL_TEXT);
 	this->livesLabel.SetColour(textColourHUD);
 	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
-
-	// TODO: GET RID OF THIS
-	//bool result = ptEmitTest.SetParticles(1, GameViewConstants::TEXTURE_DIR + "/test_textures/TestSprite.png");//Smoke_Puff1_64x64.png");
-	//assert(result);
-
-	DropShadow dpTemp;
-	dpTemp.amountPercentage = 0.10f;
-	for (int i = 0; i < 50; i++) {
-		ESPOnomataParticle* newParticle = new ESPOnomataParticle(this->display->GetAssets()->GetFont(GameAssets::ExplosionBoom, GameAssets::Medium));
-		newParticle->SetDropShadow(dpTemp);
-		newParticle->SetOnomatoplexSound(Onomatoplex::BADSAD, static_cast<Onomatoplex::Extremeness>(Randomizer::GetInstance()->RandomUnsignedInt() % Onomatoplex::NumExtremenessTypes));
-
-		this->bunchOParticles.push_back(newParticle);
-		ptEmitTest.AddParticle(newParticle);
-	}
-
-	ptEmitTest.SetSpawnDelta(ESPInterval(1, 2));
-	ptEmitTest.SetInitialSpd(ESPInterval(1, 3));
-	ptEmitTest.SetParticleLife(ESPInterval(10, 10));
-	ptEmitTest.SetParticleSize(ESPInterval(1, 1));
-	ptEmitTest.SetEmitAngleInDegrees(40);
-	ptEmitTest.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	ptEmitTest.SetParticleAlignment(ESP::ViewPointAligned);
-	//ptEmitTest.AddEffector(&colourEffector);
-	//ptEmitTest.AddEffector(&mvEffector);
 }
 
 InGameDisplayState::~InGameDisplayState() {
 	delete this->renderToTexBeforeBall;
-
-	// GET RID OF THIS
-	for (size_t i = 0; i < this->bunchOParticles.size(); i++) {
-		delete this->bunchOParticles[i];
-	}
 }
 
 /**
@@ -104,11 +74,12 @@ void InGameDisplayState::RenderFrame(double dT) {
  */
 void InGameDisplayState::DrawGameScene(double dT) {
 
+	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
 	glPushMatrix();
 	
 	// Draw the background scenery
-	Vector2D levelDim = this->display->GetModel()->GetLevelUnitDimensions();
-	glTranslatef(0.0f, -levelDim[1]/2.0f, 0.0f);
+	
+	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
 	this->display->GetAssets()->DrawBackground(dT, this->display->GetCamera());
 	
 	FBOManager::GetInstance()->UnbindFBO();												// Unbind the FBO so that we can use the render to texture for special ball effects
@@ -118,7 +89,7 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	glEnable(GL_MULTISAMPLE);
 
 	// Draw the foreground stuff (paddle, items, ball)
-	glTranslatef(-levelDim[0]/2.0f, 0, 0.0f);	
+	glTranslatef(negHalfLevelDim[0], 0, 0.0f);	
 
 	// Items...
 	std::list<GameItem*>& gameItems = this->display->GetModel()->GetLiveItems();
@@ -138,7 +109,10 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	glDisable(GL_MULTISAMPLE);
 
 	// Draw particles / ESP effects
+	glPushMatrix();
+	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 	this->display->GetAssets()->DrawParticleEffects(dT, this->display->GetCamera());
+	glPopMatrix();
 }
 
 /**

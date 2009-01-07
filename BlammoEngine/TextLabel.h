@@ -10,8 +10,9 @@
 struct DropShadow {
 	bool isSet;
 	float amountPercentage;
+	float scale;
 	Colour colour;
-	DropShadow(): amountPercentage(0.0f), colour(Colour(0,0,0)), isSet(false) {}
+	DropShadow(): amountPercentage(0.0f), colour(Colour(0,0,0)), isSet(false), scale(1.0f) {}
 };
 
 class TextLabel2D {

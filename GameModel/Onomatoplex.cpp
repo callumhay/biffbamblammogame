@@ -1,6 +1,7 @@
 #include "Onomatoplex.h"
+#include "../BlammoEngine/Algebra.h"
+
 #include <stdlib.h>
-#include <time.h>
 #include <assert.h>
 
 namespace Onomatoplex {
@@ -60,12 +61,17 @@ namespace Onomatoplex {
 
 		std::vector<std::string> singleWordBounce;
 		singleWordBounce.push_back("Bounce");
-		singleWordBounce.push_back("Boing");
 		singleWordBounce.push_back("Boink");
 		singleWordBounce.push_back("Bipp");
 		singleWordBounce.push_back("Clang");
-		singleWordBounce.push_back("Bip");
 		singleWordBounce.push_back("Bop");
+		singleWordBounce.push_back("Pong");
+		singleWordBounce.push_back("Boing");
+		singleWordBounce.push_back("Pang");
+		singleWordBounce.push_back("Ping");
+		singleWordBounce.push_back("Bip");
+		singleWordBounce.push_back("Plong");
+		singleWordBounce.push_back("Boop");
 		Generator::simpleSingleWords[BOUNCE] = singleWordBounce;
 
 		std::vector<std::string> singleWordElectric;
@@ -234,6 +240,7 @@ namespace Onomatoplex {
 		endFixBounce.push_back("ong");
 		endFixBounce.push_back("onk");
 		endFixBounce.push_back("ang");
+		endFixBounce.push_back("ing");
 		Generator::endFix[BOUNCE] = endFixBounce;
 
 		std::vector<std::string> endFixElectric;
@@ -363,16 +370,6 @@ namespace Onomatoplex {
 	 * Returns: Onomatopoeia text.
 	 */
 	std::string Generator::Generate(SoundType type, Extremeness amt) {
-		return this->Generate(type, amt, static_cast<unsigned int>(time(NULL)));
-	}
-
-	/*
-	 * Generates crazy onomatopoeia based on the sound type given and the extremeness of the context.
-	 * Precondition: true.
-	 * Returns: Onomatopoeia text.
-	 */
-	std::string Generator::Generate(SoundType type, Extremeness amt, unsigned int seed) {
-		srand(seed);
 		std::string result = "";
 
 		switch(amt) {
@@ -429,7 +426,7 @@ namespace Onomatoplex {
 		// Check to see if the first endfix ends in a vowel and the second begins with one, in which
 		// case we must choose.
 		if (Generator::IsVowel(endFix1.at(endFix1.size()-1)) && Generator::IsVowel(endFix2.at(0))) {
-			unsigned int randomChoice = rand() % 2;
+			unsigned int randomChoice =  Randomizer::GetInstance()->RandomUnsignedInt() % 2;
 			if (randomChoice) {
 				// find the first non-vowel in endfix2 and append the rest
 				size_t indexOfNonVowel = endFix2.find_first_not_of("aAeEiIoOuU");
@@ -466,7 +463,7 @@ namespace Onomatoplex {
 	 */
 	std::string Generator::GenerateAbsurdPunctuation(SoundType type, Extremeness ex) {
 		unsigned int amount = static_cast<unsigned int>(abs(ex));
-		unsigned int randomAmt = rand() % (amount + 1);
+		unsigned int randomAmt =  Randomizer::GetInstance()->RandomUnsignedInt() % (amount + 1);
 
 		if (randomAmt > 3) {
 			randomAmt = 3;
@@ -485,7 +482,7 @@ namespace Onomatoplex {
 
 			if (randomAmt > 1) {
 				for (unsigned int i = 0; i < randomAmt - 1; i++) {
-					size_t randomIndex = rand() % Generator::endPunctuation.size();
+					size_t randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % Generator::endPunctuation.size();
 					punctuation = punctuation + Generator::endPunctuation[randomIndex];
 				}
 			}
@@ -494,7 +491,7 @@ namespace Onomatoplex {
 		switch(type) {
 			case ELECTRIC:
 			case BOUNCE:
-				if (punctuation.size() > 1 && (rand() % 2 == 1)) {
+				if (punctuation.size() > 1 && (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 1)) {
 					punctuation = Generator::DEFAULT_END_PUNCTUATION;
 				}
 				else {
@@ -516,20 +513,20 @@ namespace Onomatoplex {
 		std::string result = "";
 		size_t randomIndex = 0;
 		
-		randomIndex = rand() % 4;
+		randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % 4;
 		if (randomIndex < 3) {
 			// Just take the first fix and add an end fix, both random of course...
 			std::vector<std::string> firstFixes = Generator::firstFix[type];
-			randomIndex = rand() % firstFixes.size();
+			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
 			result = firstFixes[randomIndex];
 
 			std::vector<std::string> endFixes = Generator::endFix[type];
-			randomIndex = rand() % endFixes.size();
+			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
 			result = result + endFixes[randomIndex];
 		}
 		else {
 			std::vector<std::string> fullSimpleWords = Generator::simpleSingleWords[type];
-			randomIndex = rand() % fullSimpleWords.size();
+			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % fullSimpleWords.size();
 			result = fullSimpleWords[randomIndex];
 		}
 
@@ -560,16 +557,16 @@ namespace Onomatoplex {
 
 		// Take a first, end a super-end fix and put them together.
 		std::vector<std::string> firstFixes = this->firstFix[type];
-		randomIndex = rand() % firstFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
 		result = firstFixes[randomIndex];
 
 		std::string endFix1, endFix2;
 		std::vector<std::string> endFixes = Generator::endFix[type];
-		randomIndex = rand() % endFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
 		endFix1 = endFixes[randomIndex];
 
 		std::vector<std::string> superEndFixes = Generator::superEndFix[type];
-		randomIndex = rand() % superEndFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % superEndFixes.size();
 		endFix2 = superEndFixes[randomIndex];
 
 		result = result + Generator::JoinEndfixes(endFix1, endFix2);
@@ -588,19 +585,19 @@ namespace Onomatoplex {
 
 		// Use first, second and third fixes with an end fix
 		std::vector<std::string> firstFixes = this->firstFix[type];
-		randomIndex = rand() % firstFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
 		result = firstFixes[randomIndex];
 
 		std::vector<std::string> secondFixes = this->secondFix[type];
-		randomIndex = rand() % secondFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % secondFixes.size();
 		result = result + secondFixes[randomIndex];
 
 		std::vector<std::string> thirdFixes = this->thirdFix[type];
-		randomIndex = rand() % thirdFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % thirdFixes.size();
 		result = result + thirdFixes[randomIndex];
 
 		std::vector<std::string> endFixes = Generator::endFix[type];
-		randomIndex = rand() % endFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
 		result = result + endFixes[randomIndex];
 		
 		return result + this->GenerateAbsurdPunctuation(type, GOOD);
@@ -617,24 +614,24 @@ namespace Onomatoplex {
 
 		// Use first, second and third fixes with a end and super end fix
 		std::vector<std::string> firstFixes = this->firstFix[type];
-		randomIndex = rand() % firstFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
 		result = firstFixes[randomIndex];
 
 		std::vector<std::string> secondFixes = this->secondFix[type];
-		randomIndex = rand() % secondFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % secondFixes.size();
 		result = result + secondFixes[randomIndex];
 
 		std::vector<std::string> thirdFixes = this->thirdFix[type];
-		randomIndex = rand() % thirdFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % thirdFixes.size();
 		result = result + thirdFixes[randomIndex];
 
 		std::string endFix1, endFix2;
 		std::vector<std::string> endFixes = Generator::endFix[type];
-		randomIndex = rand() % endFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
 		endFix1 = endFixes[randomIndex];
 
 		std::vector<std::string> superEndFixes = Generator::superEndFix[type];
-		randomIndex = rand() % superEndFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % superEndFixes.size();
 		endFix2 = superEndFixes[randomIndex];
 
 		result = result + Generator::JoinEndfixes(endFix1, endFix2);
@@ -653,24 +650,24 @@ namespace Onomatoplex {
 
 		// Use first, second and third fixes with a end and uber end fix
 		std::vector<std::string> firstFixes = this->firstFix[type];
-		randomIndex = rand() % firstFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
 		result = firstFixes[randomIndex];
 
 		std::vector<std::string> secondFixes = this->secondFix[type];
-		randomIndex = rand() % secondFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % secondFixes.size();
 		result = result + secondFixes[randomIndex];
 
 		std::vector<std::string> thirdFixes = this->thirdFix[type];
-		randomIndex = rand() % thirdFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % thirdFixes.size();
 		result = result + thirdFixes[randomIndex];
 
 		std::string endFix1, endFix2;
 		std::vector<std::string> endFixes = Generator::endFix[type];
-		randomIndex = rand() % endFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
 		endFix1 = endFixes[randomIndex];
 
 		std::vector<std::string> uberEndFixes = Generator::uberEndFix[type];
-		randomIndex = rand() % uberEndFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % uberEndFixes.size();
 		endFix2 = uberEndFixes[randomIndex];
 
 		result = result + Generator::JoinEndfixes(endFix1, endFix2);
@@ -688,28 +685,28 @@ namespace Onomatoplex {
 		size_t randomIndex = 0;
 
 		std::vector<std::string> firstFixes = this->firstFix[type];
-		randomIndex = rand() % firstFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
 		result = firstFixes[randomIndex];
 
 		std::vector<std::string> secondFixes = this->secondFix[type];
-		randomIndex = rand() % secondFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % secondFixes.size();
 		result = result + secondFixes[randomIndex];
 
 		std::vector<std::string> thirdFixes = this->thirdFix[type];
-		randomIndex = rand() % thirdFixes.size();
+		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % thirdFixes.size();
 		result = result + thirdFixes[randomIndex];
 
 		std::string endFix1, endFix2, endFix3;
 		std::vector<std::string> endFixes = Generator::endFix[type];
-		randomIndex = rand() % endFixes.size();
+		randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
 		endFix1 = endFixes[randomIndex];
 
 		std::vector<std::string> superEndFixes = Generator::superEndFix[type];
-		randomIndex = rand() % superEndFixes.size();
+		randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % superEndFixes.size();
 		endFix2 = superEndFixes[randomIndex];
 
 		std::vector<std::string> uberEndFixes = Generator::uberEndFix[type];
-		randomIndex = rand() % uberEndFixes.size();
+		randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % uberEndFixes.size();
 		endFix3 = uberEndFixes[randomIndex];
 
 		result = result + Generator::JoinEndfixes(endFix1, Generator::JoinEndfixes(endFix2, endFix3));

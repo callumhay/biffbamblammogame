@@ -35,6 +35,8 @@ protected:
 	ESPInterval particleLifetime;
 	// Inclusive interval for size of particles (in units)
 	ESPInterval particleSize;
+	// Inclusive interval for the rotation of particles (in degrees)
+	ESPInterval particleRotation;
 
 	virtual void Flush();
 
@@ -48,18 +50,19 @@ public:
 	}
 
 	// Setter functions for typical attributes of emitters
-	bool SetParticles(unsigned int numParticles, const std::string& imgFilepath);
+	bool SetParticles(unsigned int numParticles, Texture2D* texture);
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);
 	void SetSpawnDelta(const ESPInterval& spawnDelta);
 	void SetInitialSpd(const ESPInterval& initialSpd);
 	void SetParticleLife(const ESPInterval& particleLife);
 	void SetParticleSize(const ESPInterval& particleSize);
+	void SetParticleRotation(const ESPInterval& particleRot);
 	
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);
 	void AddParticle(ESPParticle* particle);
 
-	virtual void Tick(const double dT) = 0;
+	virtual void Tick(double dT) = 0;
 	virtual void Draw(const Camera& camera) = 0;
 	
 };

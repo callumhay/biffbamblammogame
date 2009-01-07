@@ -444,6 +444,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPParticleScaleEffector.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPPointEmitter.h"
 					>
 				</File>
@@ -477,6 +481,10 @@
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPParticleColourEffector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleScaleEffector.cpp"
 					>
 				</File>
 				<File
@@ -536,7 +544,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\GameESPAssets.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\GameEventsListener.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameFontAssetsManager.h"
 					>
 				</File>
 				<File
@@ -612,7 +628,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\GameESPAssets.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\GameEventsListener.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameFontAssetsManager.cpp"
 					>
 				</File>
 				<File
