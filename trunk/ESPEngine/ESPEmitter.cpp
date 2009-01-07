@@ -30,8 +30,7 @@ void ESPEmitter::Flush() {
 	}
 	this->deadParticles.clear();
 
-	// Delete particle textures
-	delete this->particleTexture;
+	// Set texture to NULL
 	this->particleTexture = NULL;
 
 	// Reset appropriate variables
@@ -43,12 +42,12 @@ void ESPEmitter::Flush() {
  * Public function for setting the particles for this emitter.
  * Returns: true on success, false otherwise.
  */
-bool ESPEmitter::SetParticles(unsigned int numParticles, const std::string& imgFilepath) {
+bool ESPEmitter::SetParticles(unsigned int numParticles, Texture2D* texture) {
 	// Clean up all previous emitter data
 	this->Flush();
 
-	// TODO: fix texture filtering...
-	this->particleTexture = Texture2D::CreateTexture2DFromImgFile(imgFilepath, Texture::Trilinear);
+	assert(texture != NULL);
+	this->particleTexture = texture;
 	if (this->particleTexture == NULL) {
 		return false;
 	}
@@ -98,6 +97,14 @@ void ESPEmitter::SetParticleLife(const ESPInterval& particleLife) {
  */
 void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
 	this->particleSize = particleSize;
+}
+
+/**
+ * Sets the inclusive interval of random possible values that represent the initial
+ * rotation (in degrees) of particles in this emitter.
+ */
+void ESPEmitter::SetParticleRotation(const ESPInterval& particleRot) {
+	this->particleRotation = particleRot;
 }
 
 /**

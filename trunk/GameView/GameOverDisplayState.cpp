@@ -1,6 +1,6 @@
 #include "GameOverDisplayState.h"
 #include "MainMenuDisplayState.h"
-
+#include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
@@ -9,7 +9,7 @@
 const std::string GameOverDisplayState::GAME_OVER_TEXT = "Game Over";
 
 GameOverDisplayState::GameOverDisplayState(GameDisplay* display) : DisplayState(display) {
-	this->gameOverLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::ExplosionBoom, GameAssets::Huge), GAME_OVER_TEXT);
+	this->gameOverLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), GAME_OVER_TEXT);
 	this->gameOverLabel.SetColour(Colour(1, 0, 0));
 	this->gameOverLabel.SetDropShadow(Colour(1, 1, 1), 0.08f);
 }

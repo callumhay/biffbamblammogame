@@ -8,7 +8,7 @@ const Vector3D ESPParticle::PARTICLE_RIGHT_VEC		= Vector3D::cross(PARTICLE_UP_VE
 
 // NOTE: All particles are created as if they were already dead
 ESPParticle::ESPParticle() : 
-totalLifespan(0.0), currLifeElapsed(0.0), size(1.0f), colour(1,1,1), alpha(1.0f) {
+totalLifespan(0.0), currLifeElapsed(0.0), size(1.0f), initSize(1.0f), colour(1,1,1), alpha(1.0f), rotation(0.0f) {
 }
 
 ESPParticle::~ESPParticle() {
@@ -17,11 +17,13 @@ ESPParticle::~ESPParticle() {
 /**
  * Revive this particle with the given lifespan length in seconds.
  */
-void ESPParticle::Revive(const Point3D& pos, const Vector3D& vel, const float size, const float totalLifespan) {
+void ESPParticle::Revive(const Point3D& pos, const Vector3D& vel, float size, float rot, float totalLifespan) {
 	// Set the members to reflect a 'new life'
 	this->totalLifespan = totalLifespan;
 	this->currLifeElapsed = 0.0f;
 	this->size = size;
+	this->initSize = size;
+	this->rotation = rot;
 	this->position = pos;
 	this->velocity = vel;
 }
@@ -60,6 +62,7 @@ void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) 
 	float halfSize = 0.5f * this->size;
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
 	glTranslatef(this->position[0], this->position[1], this->position[2]); 
+	glRotatef(this->rotation, 0, 0, -1);
 	glBegin(GL_QUADS);
 		glNormal3i(PARTICLE_NORMAL_VEC[0], PARTICLE_NORMAL_VEC[1], PARTICLE_NORMAL_VEC[2]);
 		glTexCoord2i(0, 0); glVertex2f(-halfSize, -halfSize);

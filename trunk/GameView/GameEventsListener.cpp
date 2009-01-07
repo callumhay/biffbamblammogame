@@ -83,38 +83,28 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 	assert(blockBefore.GetHeightIndex() == blockAfter.GetHeightIndex());
 	assert(blockBefore.GetWidthIndex() == blockAfter.GetWidthIndex());
 
+	// Add the visual effect for when the ball hits a block (if it isn't an uber ball and a solid block)
+	if ((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall ||
+		blockAfter.GetType() == LevelPiece::Solid) {
+
+		this->display->GetAssets()->AddBallBounceESP(ball);
+	}
+
 	debug_output("EVENT: Ball-block collision");
 	this->display->GetAssets()->GetLevelMesh()->ChangePiece(blockBefore, blockAfter);
 }
 
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
 
-	// Use ball speed to determine amount of bounce sound
-	GameBall::BallSpeed ballSpd = ball.GetSpeed();
-	std::string soundText = "";
+	// Add the visual effect for when the ball hits the paddle
+	this->display->GetAssets()->AddBallBounceESP(ball);
 
-	switch (ballSpd) {
-		case GameBall::ZeroSpeed :
-			// How the hell can there be a collision with no speed?
-			assert(false);
-			break;
-		case GameBall::SlowSpeed :
-			soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::NORMAL);
-			break;
-		case GameBall::NormalSpeed :
-			soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::GOOD);
-			break;
-		case GameBall::FastSpeed :
-			soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::AWESOME);
-			break;
-		default :
-			assert(false);
-			break;
-	}
-	debug_output("EVENT: Ball-paddle collision - " << soundText);
+	debug_output("EVENT: Ball-paddle collision");
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
+	// Add the visual effect for when a ball breaks a typical block
+	this->display->GetAssets()->AddBasicBlockBreakEffect(block);
 
 	// TODO: Transmit data concerning the level of sound needed
 	std::string soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::EXPLOSION, Onomatoplex::NORMAL);

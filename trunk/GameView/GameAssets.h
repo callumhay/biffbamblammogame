@@ -9,23 +9,20 @@
 #include "../GameModel/GameItemTimer.h"
 
 class Texture3D;
-class GameWorldAssets;
 class LevelMesh;
 class CgFxPostRefract;
 class ESPEmitter;
 
+// Compositional classes for asssets
+#include "GameWorldAssets.h"
+#include "GameESPAssets.h"
+
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
-public:
-	enum FontSize  { Small = 16, Medium = 24, Big = 32, Huge = 60 };
-	enum FontStyle { GunBlam, ExplosionBoom, ElectricZap, AllPurpose }; //Decoish, Cyberpunkish };
 
 private:
-	// Set of fonts for use in the game, indexed by their style and height
-	std::map<FontStyle, std::map<FontSize, TextureFontSet*>> fonts;
-
-	// World-related meshes
-	GameWorldAssets* worldAssets;
+	GameWorldAssets* worldAssets;	// World-related assets
+	GameESPAssets* espAssets;			// Emitter/Sprite/Particle assets
 
 	// Level-related meshes
 	LevelMesh* levelMesh;
@@ -43,9 +40,6 @@ private:
 	std::map<std::string, Texture2D*> itemTimerTextures;
 	std::map<std::string, Texture2D*> itemTimerFillerTextures;
 
-	// Currently active particle systems
-	std::list<ESPEmitter*> activeParticleEmitters;
-
 	void DeleteWorldAssets();
 	void DeleteLevelAssets();
 	void DeleteRegularMeshAssets();
@@ -53,7 +47,6 @@ private:
 
 	// Asset loading helper functions
 	void LoadRegularMeshAssets();
-	void LoadRegularFontAssets();
 	void LoadRegularEffectAssets();
 
 	void LoadItemTextures();
@@ -78,21 +71,18 @@ public:
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
 	void DrawParticleEffects(double dT, const Camera& camera);
 
+	// Public Setter Functions **********************************************************************
+	void AddBallBounceESP(const GameBall& ball) {
+		this->espAssets->AddBallBounceESP(ball);
+	}
+
+	void AddBasicBlockBreakEffect(const LevelPiece& block) {
+		this->espAssets->AddBasicBlockBreakEffect(block);
+	}
+
 	// Public Getter Functions **********************************************************************
 	LevelMesh* GetLevelMesh() const {
 		return this->levelMesh;
-	}
-
-	// Obtain a particular font
-	const TextureFontSet* GetFont(FontStyle style, FontSize height) const {
-		std::map<FontStyle, std::map<FontSize, TextureFontSet*>>::const_iterator fontSetIter = this->fonts.find(style);
-		if (fontSetIter != this->fonts.end()) {
-			std::map<FontSize, TextureFontSet*>::const_iterator fontIter = fontSetIter->second.find(height);
-			if (fontIter != fontSetIter->second.end()) {
-				return fontIter->second;
-			}
-		}
-		return NULL;
 	}
 
 private:

@@ -9,7 +9,7 @@ public:
 	ESPAreaEmitter();
 	virtual ~ESPAreaEmitter();
 
-	virtual void Tick(const double dT);
+	virtual void Tick(double dT);
 	virtual void Draw(const Camera& camera);
 };
 #endif

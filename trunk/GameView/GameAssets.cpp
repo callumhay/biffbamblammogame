@@ -4,9 +4,7 @@
 #include "DecoSkybox.h"
 #include "GameViewConstants.h"
 #include "CgFxPostRefract.h"
-
-// Other asset classes
-#include "GameWorldAssets.h"
+#include "GameFontAssetsManager.h"
 
 // Blammo Engine includes
 #include "../BlammoEngine/Texture3D.h"
@@ -53,8 +51,11 @@ ball(NULL), spikeyBall(NULL), item(NULL), levelMesh(NULL), invisiBallEffect(NULL
 	ilutRenderer(ILUT_OPENGL);
 	ilutEnable(ILUT_OPENGL_CONV);
 	
-	// Load regular fonts
-	this->LoadRegularFontAssets();
+	// Load ESP assets...
+	this->espAssets = new GameESPAssets();
+
+	// Load minimal fonts
+	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
 
 	// Load regular meshes
 	this->LoadRegularMeshAssets();
@@ -73,18 +74,6 @@ GameAssets::~GameAssets() {
 	// Delete the currently loaded world and level assets if there are any
 	this->DeleteWorldAssets();
 	this->DeleteLevelAssets();
-
-	// Delete the regular fonts
-	std::map<FontStyle, std::map<FontSize, TextureFontSet*>>::iterator fontSetIter;
-	std::map<FontSize, TextureFontSet*>::iterator fontIter;
-	for (fontSetIter = this->fonts.begin(); fontSetIter != this->fonts.end(); fontSetIter++) {
-		std::map<FontSize, TextureFontSet*>& fontSet = fontSetIter->second;
-		for (fontIter = fontSet.begin(); fontIter != fontSet.end(); fontIter++) {
-			delete fontIter->second;
-		}
-		fontSet.clear();
-	}
-	this->fonts.clear();
 }
 
 /*
@@ -184,29 +173,7 @@ void GameAssets::DrawBackground(double dT, const Camera& camera) {
  * Draw any particles present in the game currently.
  */
 void GameAssets::DrawParticleEffects(double dT, const Camera& camera) {
-	
-	// Go through all the particles and do book keeping and drawing
-	for (std::list<ESPEmitter*>::const_iterator iter = this->activeParticleEmitters.begin();
-		iter != this->activeParticleEmitters.end(); iter++) {
-	
-		ESPEmitter* curr = *iter;
-
-		// Check to see if dead, if so erase it...
-		if (curr->IsDead()) {	
-			iter = this->activeParticleEmitters.erase(iter);
-			delete curr;
-
-			if (this->activeParticleEmitters.size() == 0) {
-				break;
-			}
-		}
-		else {
-			// Not dead...
-			curr->Draw(camera);
-			curr->Tick(dT);
-		}
-	}
-
+	this->espAssets->DrawParticleEffects(dT, camera);
 }
 
 
@@ -451,12 +418,10 @@ void GameAssets::DeleteRegularEffectAssets() {
 	}
 
 	// Delete any left behind particles
-	for(std::list<ESPEmitter*>::iterator iter = this->activeParticleEmitters.begin(); iter != this->activeParticleEmitters.end(); iter++) {
-		ESPEmitter* currEmitter = *iter;
-		delete currEmitter;
-		currEmitter = NULL;
+	if (this->espAssets != NULL) {
+		delete this->espAssets;
+		this->espAssets = NULL;
 	}
-	this->activeParticleEmitters.clear();
 }
 
 /**
@@ -514,64 +479,4 @@ void GameAssets::LoadLevelAssets(const GameLevel* level) {
 	this->DeleteLevelAssets();
 	// Load the given level
 	this->levelMesh = LevelMesh::CreateLevelMesh(this->worldAssets, level);
-}
-
-/**
- * Load the regular game fonts - these are always in memory since they are used
- * throughout the game in various places.
- */
-void GameAssets::LoadRegularFontAssets() {
-	debug_output("Loading regular font sets");
-
-	TextureFontSet* temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Small);
-	assert(temp != NULL);
-	this->fonts[GunBlam][Small]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Medium);
-	assert(temp != NULL);
-	this->fonts[GunBlam][Medium]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Big);
-	assert(temp != NULL);
-	this->fonts[GunBlam][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Huge);
-	assert(temp != NULL);
-	this->fonts[GunBlam][Huge]	= temp;
-
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Small);
-	assert(temp != NULL);
-	this->fonts[ExplosionBoom][Small]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Medium);
-	assert(temp != NULL);
-	this->fonts[ExplosionBoom][Medium]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Big);
-	assert(temp != NULL);
-	this->fonts[ExplosionBoom][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Huge);
-	assert(temp != NULL);
-	this->fonts[ExplosionBoom][Huge]	= temp;
-
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Small);
-	assert(temp != NULL);
-	this->fonts[ElectricZap][Small]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Medium);
-	assert(temp != NULL);
-	this->fonts[ElectricZap][Medium]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Big);
-	assert(temp != NULL);
-	this->fonts[ElectricZap][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Huge);
-	assert(temp != NULL);
-	this->fonts[ElectricZap][Huge]	= temp;
-
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Small);
-	assert(temp != NULL);
-	this->fonts[AllPurpose][Small]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Medium);
-	assert(temp != NULL);
-	this->fonts[AllPurpose][Medium]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Big);
-	assert(temp != NULL);
-	this->fonts[AllPurpose][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Huge);
-	assert(temp != NULL);
-	this->fonts[AllPurpose][Huge]	= temp; 
 }

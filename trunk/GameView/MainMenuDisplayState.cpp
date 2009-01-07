@@ -1,10 +1,11 @@
 #include "MainMenuDisplayState.h"
 #include "StartGameDisplayState.h"
-
-#include "../GameController.h"
+#include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameMenu.h"
 #include "GameAssets.h"
+
+#include "../GameController.h"
 
 #include "../BlammoEngine/BlammoEngine.h"
 
@@ -42,7 +43,7 @@ void MainMenuDisplayState::InitializeMenu() {
 	Colour dropShadowColour = Colour(0, 0, 0);
 
 	// Setup the title
-	this->titleLabel = new TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::ExplosionBoom, GameAssets::Huge), TITLE_TEXT);
+	this->titleLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), TITLE_TEXT);
 	this->titleLabel->SetTopLeftCorner(Point2D(MENU_X_INDENT, titleHeight));
 	this->titleLabel->SetDropShadow(dropShadowColour, dropShadowAmt);
 	this->titleLabel->SetColour(Colour(1, 0.8, 0));
@@ -59,7 +60,7 @@ void MainMenuDisplayState::InitializeMenu() {
 	this->menu->SetColourScheme(idleColour, highlightColour, selectColour);
 
 	// Add items to the menu in their order (first to last)
-	TextLabel2D tempLabel = TextLabel2D(this->display->GetAssets()->GetFont(GameAssets::AllPurpose, GameAssets::Big), NEW_GAME_MENUITEM);
+	TextLabel2D tempLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
 	tempLabel.SetDropShadow(dropShadowColour, dropShadowAmt);
 	this->menu->AddMenuItem(tempLabel);
 
