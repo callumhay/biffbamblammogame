@@ -24,8 +24,8 @@ protected:
 	double totalLifespan;
 	// Amount of time in seconds that have elapsed since this particle was created
 	double currLifeElapsed;
-	// Size of particle in units
-	float initSize, size;
+	// x,y,z Size of particle in units
+	Vector2D initSize, size;
 	// Rotation of particle in degrees
 	float rotation;
 	// The colour of the particle
@@ -40,6 +40,8 @@ protected:
 	Matrix4x4 GetPersonalAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment);
 
 public: 
+	static const int INFINITE_PARTICLE_LIFETIME = -1;
+
 	ESPParticle();
 	virtual ~ESPParticle();
 
@@ -48,14 +50,15 @@ public:
 	 * Returns: true if the particle is dead, false otherwise.
 	 */
 	bool IsDead() const {
-		return this->currLifeElapsed >= this->totalLifespan;
+		return this->totalLifespan != INFINITE_PARTICLE_LIFETIME && this->currLifeElapsed >= this->totalLifespan;
 	}
 
-	virtual void Revive(const Point3D& pos, const Vector3D& vel, float size, float rot, float totalLifespan);
+	virtual void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
 	virtual void Tick(const double dT);
 	virtual void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
-
-	static Matrix4x4 GetAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment);
+	virtual void Kill() {
+		this->currLifeElapsed = this->totalLifespan;
+	}
 
 	// Getter and setter functions (mostly used by Effector objects)
 	Point3D GetPosition() const {
@@ -65,14 +68,14 @@ public:
 		this->position = p;
 	}
 
-	float GetScale() const {
+	Vector2D GetScale() const {
 		return this->size;
 	}
-	void SetScale(float scale) {
+	void SetScale(const Vector2D& scale) {
 		this->size = scale;
 	}
 	void MultiplyInitSizeScale(float mult) {
-		this->size = this->initSize*mult;
+		this->size = mult * this->initSize;
 	}
 
 	

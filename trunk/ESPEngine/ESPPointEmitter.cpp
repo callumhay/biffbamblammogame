@@ -59,7 +59,12 @@ Vector3D ESPPointEmitter::CalculateRandomInitParticleDir() const {
 void ESPPointEmitter::ReviveParticle() {
 	// Let's spawn a particle!
 	// Figure out the properties we need to impart on the newly born particle...
-	Vector3D initalParticleVel =  this->particleInitialSpd.RandomValueInInterval() * this->CalculateRandomInitParticleDir();
+	Vector3D initalParticleVel(0,0,0);
+	float initialSpd = this->particleInitialSpd.RandomValueInInterval();
+	if (initialSpd != 0.0f) {
+		initalParticleVel = initialSpd * this->CalculateRandomInitParticleDir();
+	}
+
 	float randomPtX = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
 	float randomPtY = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
 	float randomPtZ = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
@@ -71,8 +76,10 @@ void ESPPointEmitter::ReviveParticle() {
 	this->deadParticles.pop_front();
 
 	// Revive the particle and put it in the group of living particles
-	zombie->Revive(initalPt, initalParticleVel, this->particleSize.RandomValueInInterval(), 
+	zombie->Revive(initalPt, initalParticleVel, Vector2D(this->particleSize[0].RandomValueInInterval(), this->particleSize[1].RandomValueInInterval()), 
 		             this->particleRotation.RandomValueInInterval(), this->particleLifetime.RandomValueInInterval()); 
+	zombie->SetColour(Colour(this->particleRed.RandomValueInInterval(), this->particleGreen.RandomValueInInterval(), 
+		this->particleBlue.RandomValueInInterval()), this->particleAlpha.RandomValueInInterval());
 	this->aliveParticles.push_back(zombie);
 }
 
@@ -198,9 +205,6 @@ void ESPPointEmitter::Draw(const Camera& camera) {
 	// Each particle needs to be transformed so that it adheres to
 	// how it faces the viewer (view-plane-aligned or view-point-aligned) 
 	glPushMatrix();
-
-	Matrix4x4 allParticleAlignXF = ESPParticle::GetAlignmentTransform(camera, this->particleAlignment);
-	glMultMatrixf(allParticleAlignXF.begin());
 	
 	// Bind the particle textures
 	if (this->particleTexture != NULL) {
