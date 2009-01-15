@@ -88,6 +88,13 @@ public:
 		return this->currTechnique;
 	}
 
+	void SetTechnique(const std::string& techniqueName) {
+		CGtechnique temp = this->techniques[techniqueName];
+		if (temp != NULL) {
+			this->currTechnique = temp;
+		}
+	}
+
 };
 
 

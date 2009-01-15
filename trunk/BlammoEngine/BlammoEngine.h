@@ -29,8 +29,5 @@
 #include "TextLabel.h"
 #include "TextureFontSet.h"
 
-// Camera Include
-#include "Camera.h"
-
 // Misc.
 #include "FBOManager.h"

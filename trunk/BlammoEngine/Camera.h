@@ -13,6 +13,29 @@ private:
 	Matrix4x4 viewMatrix;
 	Matrix4x4 invViewMatrix;
 
+	// Camera shake variables
+	double shakeVar;
+	double shakeTimeElapsed;
+	double shakeTimeTotal;
+	Vector3D shakeMagnitude;
+	unsigned int shakeSpeed;
+
+	void ApplyCameraShakeTransform(double dT) {
+		if (this->shakeTimeElapsed < this->shakeTimeTotal) {
+		
+			glTranslatef(this->shakeMagnitude[0]*sin(this->shakeVar), 
+									 this->shakeMagnitude[1]*sin(this->shakeVar), 
+									 this->shakeMagnitude[2]*sin(this->shakeVar));
+			
+			this->shakeVar += dT * shakeSpeed * Randomizer::GetInstance()->RandomNumZeroToOne();
+			if (this->shakeVar > 1.0) {
+				this->shakeVar -= 1.0;
+			}
+
+			this->shakeTimeElapsed += dT;
+		}
+	}
+
 public:
 	static const float FOV_ANGLE_IN_DEGS;
 	static const float NEAR_PLANE_DIST;
@@ -49,8 +72,20 @@ public:
 	void Move(const Vector3D &v);
 	void Rotate(char axis, float degs);
 
-	void ApplyCameraTransform() {
+	/**
+	 * Set the camera to shake for some specified period of time at a given
+	 * magnitude (in units) and speed (units/sec).
+	 */
+	void SetCameraShake(double lengthInSeconds, const Vector3D& shakeDirMag, unsigned int speed) {
+		this->shakeTimeElapsed = 0.0;
+		this->shakeTimeTotal	 = lengthInSeconds;
+		this->shakeMagnitude = shakeDirMag;
+		this->shakeSpeed = speed;
+	}
+
+	void ApplyCameraTransform(double dT) {
 		glMultMatrixf(this->viewMatrix.begin());
+		this->ApplyCameraShakeTransform(dT);
 	}
 
 	Point3D GetCurrentCameraPosition() const {
