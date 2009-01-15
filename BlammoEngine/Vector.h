@@ -42,12 +42,6 @@ public:
 		assert(idx < 2);
     return v_[ idx ];
   }
-  
-  // Robust equivalence
-	bool operator==(const Vector2D &other) {
-		return 	fabs(v_[0] - other[0]) < EPSILON &&
-		  			fabs(v_[1] - other[1]) < EPSILON;
-	}
 
 	static float Magnitude(const Vector2D& v1) {
 		return sqrtf(v1[0]*v1[0] + v1[1]*v1[1]);
@@ -91,6 +85,14 @@ inline Vector2D operator -(const Vector2D& a, const Vector2D& b) {
 
 inline Vector2D operator -(const Vector2D& a) {
   return Vector2D(-a[0], -a[1]);
+}
+
+inline bool operator ==(const Vector2D& a, const Vector2D& b) {
+	return (abs(a[0] - b[0]) < EPSILON) && (abs(a[1] - b[1]) < EPSILON);
+}
+
+inline bool operator !=(const Vector2D& a, const Vector2D& b) {
+	return !(a==b);
 }
 
 inline Vector2D Reflect(const Vector2D& v, const Vector2D& n) {
