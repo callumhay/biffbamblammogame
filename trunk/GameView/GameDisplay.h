@@ -2,7 +2,7 @@
 #define __GAMEDISPLAY_H__
 
 #include "../BlammoEngine/BlammoEngine.h"
-
+#include "../BlammoEngine/Camera.h"
 #include "DisplayState.h"
 
 class GameModel;

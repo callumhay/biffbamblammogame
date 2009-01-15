@@ -4,6 +4,7 @@
 #include "DecoSkybox.h"
 #include "GameViewConstants.h"
 #include "CgFxPostRefract.h"
+#include "CgFxVolumetricEffect.h"
 #include "GameFontAssetsManager.h"
 
 // Blammo Engine includes
@@ -43,7 +44,7 @@ const std::string GameAssets::ITEM_TIMER_FILLER_INVISIBALL_TEXTURE	= GameViewCon
 // *****************************************************
 
 GameAssets::GameAssets(): worldAssets(NULL),
-ball(NULL), spikeyBall(NULL), item(NULL), levelMesh(NULL), invisiBallEffect(NULL) {
+ball(NULL), spikeyBall(NULL), item(NULL), levelMesh(NULL), invisiBallEffect(NULL), ghostBallEffect(NULL) {
 
 	// Initialize DevIL
 	ilInit();
@@ -125,15 +126,14 @@ void GameAssets::DrawLevelPieces(const Camera& camera) const {
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
 // draw the materials and draw the mesh.
-void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera, Texture2D* sceneTex) const {
+void GameAssets::DrawGameBall(double dT, const GameBall& b, const Camera& camera, Texture2D* sceneTex) const {
 	
 	Point2D loc = b.GetBounds().Center();
 	glPushMatrix();
 	glTranslatef(loc[0], loc[1], 0);
 	Vector3D ballRot = b.GetRotation();
-	glRotatef(ballRot[0], 1.0f, 0.0f, 0.0f);
-	glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
-	glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
+
+	//this->ball->Draw(camera, ghostBallEffect);
 
 	CgFxEffectBase* ballInvisiEffectTemp = NULL;
 	// Deal with the Invisiball power-down if applicable....
@@ -143,8 +143,15 @@ void GameAssets::DrawGameBall(const GameBall& b, const Camera& camera, Texture2D
 		this->invisiBallEffect->SetIndexOfRefraction(1.33f);
 		ballInvisiEffectTemp = this->invisiBallEffect;
 	}
+	else if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+		// Draw when uber ball and not invisiball
+		this->espAssets->DrawUberBallEffects(dT, camera, b);
+	}
 
 	// Draw the ball based on its type...
+	glRotatef(ballRot[0], 1.0f, 0.0f, 0.0f);
+	glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
+	glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
 	if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
 		this->spikeyBall->Draw(camera, ballInvisiEffectTemp);
 	}
@@ -407,7 +414,20 @@ void GameAssets::LoadRegularMeshAssets() {
 }
 
 void GameAssets::LoadRegularEffectAssets() {
-	this->invisiBallEffect = new CgFxPostRefract();
+	if (this->invisiBallEffect == NULL) {
+		this->invisiBallEffect = new CgFxPostRefract();
+	}
+	if (this->ghostBallEffect == NULL) {
+		this->ghostBallEffect = new CgFxVolumetricEffect();
+		this->ghostBallEffect->SetTechnique(CgFxVolumetricEffect::GHOSTBALL_TECHNIQUE_NAME);
+		this->ghostBallEffect->SetColour(Colour(0.51f, 0.81f, 0.99f));
+		this->ghostBallEffect->SetConstantFactor(0.1f);
+		this->ghostBallEffect->SetFadeExponent(2.0f);
+		this->ghostBallEffect->SetScale(0.25f);
+		this->ghostBallEffect->SetFrequency(0.5f);
+		this->ghostBallEffect->SetAlphaMultiplier(0.8f);
+		this->ghostBallEffect->SetFlowDirection(Vector3D(0, 0, 1));
+	}
 }
 
 void GameAssets::DeleteRegularEffectAssets() {
@@ -415,6 +435,11 @@ void GameAssets::DeleteRegularEffectAssets() {
 	if (this->invisiBallEffect != NULL) {
 		delete this->invisiBallEffect;
 		this->invisiBallEffect = NULL;
+	}
+
+	if (this->ghostBallEffect != NULL) {
+		delete this->ghostBallEffect;
+		this->ghostBallEffect = NULL;
 	}
 
 	// Delete any left behind particles

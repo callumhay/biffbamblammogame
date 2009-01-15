@@ -11,6 +11,7 @@
 class Texture3D;
 class LevelMesh;
 class CgFxPostRefract;
+class CgFxVolumetricEffect;
 class ESPEmitter;
 
 // Compositional classes for asssets
@@ -34,6 +35,8 @@ private:
 
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
+	CgFxVolumetricEffect* ghostBallEffect;
+
 
 	// Item related textures and drawlists
 	std::map<std::string, Texture2D*> itemTextures;
@@ -66,18 +69,22 @@ public:
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const;
 	void DrawBackground(double dT, const Camera& camera);
 	void DrawLevelPieces(const Camera& camera) const;
-	void DrawGameBall(const GameBall& b, const Camera& camera, Texture2D* sceneTex) const;
+	void DrawGameBall(double dT, const GameBall& b, const Camera& camera, Texture2D* sceneTex) const;
 	void DrawItem(const GameItem& gameItem, const Camera& camera) const;
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
 	void DrawParticleEffects(double dT, const Camera& camera);
 
 	// Public Setter Functions **********************************************************************
-	void AddBallBounceESP(const GameBall& ball) {
-		this->espAssets->AddBallBounceESP(ball);
+	void AddBallBounceESP(const Camera& camera, const GameBall& ball) {
+		this->espAssets->AddBallBounceEffect(camera, ball);
 	}
 
-	void AddBasicBlockBreakEffect(const LevelPiece& block) {
-		this->espAssets->AddBasicBlockBreakEffect(block);
+	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block) {
+		this->espAssets->AddBasicBlockBreakEffect(camera, block);
+	}
+
+	void SetItemEffect(const GameItem& item, bool activate) {
+		this->espAssets->SetItemEffect(item, activate);
 	}
 
 	// Public Getter Functions **********************************************************************

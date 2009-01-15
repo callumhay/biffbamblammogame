@@ -1,4 +1,5 @@
 #include "GameMenu.h"
+#include "../BlammoEngine/Camera.h"
 
 // GameMenuItem Functions *******************************************
 

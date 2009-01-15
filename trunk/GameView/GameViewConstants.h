@@ -48,6 +48,7 @@ public:
 	const std::string TEXTURE_BANG1;
 	const std::string TEXTURE_BANG2;
 	const std::string TEXTURE_BANG3;
+	const std::string TEXTURE_CIRCLE_GRADIENT;
 
 	// Font path constants **********************************
 	const std::string FONT_HAPPYGOOD;
