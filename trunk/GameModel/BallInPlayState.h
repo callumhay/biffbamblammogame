@@ -15,7 +15,7 @@ class BallInPlayState : public GameState {
 
 private:
 	GameItem* debugItemDrop;
-	bool lastBlockDroppedItem;
+	bool droppedItemAfterLastPaddleHit;
 
 	void DoBallCollision(GameBall& b, const Vector2D& n, float d);
 	void DoItemCollision();

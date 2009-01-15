@@ -89,6 +89,8 @@ double BallSpeedItem::Activate() {
 	else {
 		this->SwitchSpeed(SlowBall);
 	}
+
+	GameItem::Activate();
 	return BallSpeedItem::BALL_SPEED_TIMER_IN_SECS;
 }
 
@@ -104,4 +106,5 @@ void BallSpeedItem::Deactivate() {
 	assert(gameBall != NULL);
 	gameBall->SetSpeed(GameBall::NormalSpeed);
 	this->isActive = false;
+	GameItem::Deactivate();
 }

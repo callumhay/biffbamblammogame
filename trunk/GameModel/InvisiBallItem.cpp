@@ -38,6 +38,8 @@ double InvisiBallItem::Activate() {
 
 	// Make the ball invisible!
 	ball->AddBallType(GameBall::InvisiBall);
+
+	GameItem::Activate();
 	return InvisiBallItem::INVISI_BALL_TIMER_IN_SECS;
 }
 
@@ -52,4 +54,5 @@ void InvisiBallItem::Deactivate() {
 	// Take away the ball's invisi-clock of doom!?
 	ball->RemoveBallType(GameBall::InvisiBall);
 	this->isActive = false;
+	GameItem::Deactivate();
 }

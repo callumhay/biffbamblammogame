@@ -143,6 +143,20 @@ public:
 	 *             paddle - The paddle as it collides with the item.
 	 */
 	virtual void ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) = 0;
+
+	/**
+	 * Event triggered when an item is activated (begins its timer or just starts its effect).
+	 * Only occurs once per item.
+	 * Arguements: item - The item that was just activated.
+	 */
+	virtual void ActionItemActivated(const GameItem& item)		= 0;
+
+	/**
+	 * Event triggered when an item is deactivated (ends its timer or is just ends its effect).
+	 * Only occurs once per item.
+	 * Arguements: item - The item that was just deactivated.
+	 */
+	virtual void ActionItemDeactivated(const GameItem& item)	= 0;
 };
 
 
