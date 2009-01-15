@@ -4,6 +4,7 @@
 #include "GameModel/GameModel.h"
 
 #include "BlammoEngine/BlammoEngine.h"
+#include "BlammoEngine/Camera.h"
 
 GameController::GameController(GameModel* model, GameDisplay* display): model(model), display(display) {
 	for (int i = 0; i < NUM_KEYS; i++) {
@@ -55,7 +56,7 @@ void GameController::Tick() {
 	else if (this->keyPressed[SDLK_RIGHT]) {
 		this->model->MovePaddle(this->model->GetPlayerPaddle()->GetSpeed());
 	}
-	else if (this->keyPressed[SDLK_SPACE]) {
+	if (this->keyPressed[SDLK_SPACE]) {
 		this->model->ReleaseBall();
 	}
 
