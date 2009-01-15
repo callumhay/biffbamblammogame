@@ -30,7 +30,7 @@ double UberBallItem::Activate() {
 			removeTimers.push_back(currTimer);
 		}
 	}
-	// Remove the uber/weak ball timers from the list of active timers
+	// Remove the uberball timers from the list of active timers
 	for (unsigned int i = 0; i < removeTimers.size(); i++) {
 			GameItemTimer* currTimer = removeTimers[i];
 			activeTimers.remove(currTimer);
@@ -40,6 +40,8 @@ double UberBallItem::Activate() {
 
 	// Make the ball das uber ball, ja!
 	ball->AddBallType(GameBall::UberBall);
+
+	GameItem::Activate();
 	return UberBallItem::UBER_BALL_TIMER_IN_SECS;
 }
 
@@ -54,4 +56,5 @@ void UberBallItem::Deactivate() {
 	// Make the ball normal again
 	ball->RemoveBallType(GameBall::UberBall);
 	this->isActive = false;
+	GameItem::Deactivate();
 }

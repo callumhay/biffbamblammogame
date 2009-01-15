@@ -33,6 +33,8 @@ public:
 	void ActionScoreMultiplierChanged(int oldScoreMultiplier, int newScoreMultiplier);
 	void ActionItemSpawned(const GameItem& item);
 	void ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle);
+	void ActionItemActivated(const GameItem& item);
+	void ActionItemDeactivated(const GameItem& item);
 
 	void ActionGameCompleted();
 	void ActionWorldStarted(const GameWorld& world);

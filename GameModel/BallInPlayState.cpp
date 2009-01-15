@@ -8,7 +8,7 @@
 
 #include "../BlammoEngine/BlammoEngine.h"
 
-BallInPlayState::BallInPlayState(GameModel* gm) : GameState(gm), lastBlockDroppedItem(false), debugItemDrop(NULL) {
+BallInPlayState::BallInPlayState(GameModel* gm) : GameState(gm), droppedItemAfterLastPaddleHit(false), debugItemDrop(NULL) {
 }
 
 BallInPlayState::~BallInPlayState() {
@@ -90,6 +90,9 @@ void BallInPlayState::Tick(double seconds) {
 		this->DoBallCollision(*ball, n, d);
 		// Tell the model that a ball collision occurred with the paddle
 		this->gameModel->BallPaddleCollisionOccurred();
+
+		// We hit the paddle again so reset the dropped item flag
+		this->droppedItemAfterLastPaddleHit = false;
 	}
 	else {	// No paddle collision with the ball
 
@@ -120,11 +123,11 @@ void BallInPlayState::Tick(double seconds) {
 						// Now we will drop an item based on a combination of variation/probablility
 						// and the number of consecutive blocks that have been hit on this set of ball bounces
 						double numBlocksAlreadyHit = static_cast<double>(this->gameModel->GetNumConsecutiveBlocksHit());
-						double itemDropProb = min(1.0, 0.02 * numBlocksAlreadyHit + GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP);
+						double itemDropProb = min(1.0, 0.01 * numBlocksAlreadyHit + GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP);
 						double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();
 
 						// Decrease the probability of a drop if the last block dropped an item
-						if (this->lastBlockDroppedItem) {
+						if (this->droppedItemAfterLastPaddleHit) {
 							itemDropProb *= GameModelConstants::GetInstance()->PROB_OF_CONSECTUIVE_ITEM_DROP;
 						}
 
@@ -137,10 +140,7 @@ void BallInPlayState::Tick(double seconds) {
 							// EVENT: Item has been created and added to the game
 							GameEventManager::Instance()->ActionItemSpawned(*newGameItem);
 
-							this->lastBlockDroppedItem = true;
-						}
-						else {
-							this->lastBlockDroppedItem = false;
+							this->droppedItemAfterLastPaddleHit = true;
 						}
 					}
 

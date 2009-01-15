@@ -44,6 +44,9 @@ public:
 		this->bounds.SetCenter(p);
 	}
 
+	Vector2D GetDirection() const {
+		return this->currDir;
+	}
 	// Obtain the current velocity of ball
 	Vector2D GetVelocity() const {
 		return static_cast<float>(this->currSpeed) * this->currDir;

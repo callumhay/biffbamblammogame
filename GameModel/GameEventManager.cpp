@@ -123,6 +123,19 @@ void GameEventManager::ActionItemPaddleCollision(const GameItem& item, const Pla
 	}	
 }
 
+void GameEventManager::ActionItemActivated(const GameItem& item) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ActionItemActivated(item);
+	}		
+}
+
+void GameEventManager::ActionItemDeactivated(const GameItem& item) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ActionItemDeactivated(item);
+	}		
+}
 
 // Action for when the game is completed
 void GameEventManager::ActionGameCompleted() {

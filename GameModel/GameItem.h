@@ -2,6 +2,7 @@
 #define __GAMEITEM_H__
 
 #include "../BlammoEngine/BlammoEngine.h"
+#include "GameEventManager.h"
 
 class PlayerPaddle;
 class GameModel;
@@ -49,8 +50,16 @@ public:
 	void Tick(double seconds);
 	bool CollisionCheck(const PlayerPaddle &paddle);
 
-	virtual double Activate() = 0;	// Returns the timer length for this item
-	virtual void Deactivate() = 0;
+	// Returns the timer length for this item
+	virtual double Activate(){
+		// Raise an event for this item being activated...
+		GameEventManager::Instance()->ActionItemActivated(*this);
+		return -1;
+	}	
+	virtual void Deactivate() {
+		// Raise an event for this item being deactivated
+		GameEventManager::Instance()->ActionItemDeactivated(*this);
+	}
 
 	friend std::ostream& operator <<(std::ostream& os, const GameItem& item);
 };
