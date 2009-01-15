@@ -6,7 +6,8 @@
 #include "../BlammoEngine/Noise.h"
 #include "../BlammoEngine/Texture3D.h"
 
-const std::string CgFxVolumetricEffect::BASIC_TECHNIQUE_NAME		= "Basic";
+const std::string CgFxVolumetricEffect::BASIC_TECHNIQUE_NAME			= "Basic";
+const std::string CgFxVolumetricEffect::GHOSTBALL_TECHNIQUE_NAME	= "GhostBall";
 
 // Default constructor
 CgFxVolumetricEffect::CgFxVolumetricEffect() : 

@@ -57,11 +57,11 @@ void InGameDisplayState::RenderFrame(double dT) {
 	this->display->GetCamera().SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	this->display->GetCamera().ApplyCameraTransform();
-
+	this->display->GetCamera().ApplyCameraTransform(dT);
+	
 	// Draw the game scene
 	this->DrawGameScene(dT);
-
+	
 	// Draw the HUD
 	this->DrawGameHUD();
 }
@@ -78,7 +78,6 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	glPushMatrix();
 	
 	// Draw the background scenery
-	
 	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
 	this->display->GetAssets()->DrawBackground(dT, this->display->GetCamera());
 	
@@ -101,7 +100,7 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	this->display->GetAssets()->DrawPaddle(*this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
 	
 	// Ball...
-	this->display->GetAssets()->DrawGameBall(*this->display->GetModel()->GetGameBall(), this->display->GetCamera(), this->renderToTexBeforeBall);
+	this->display->GetAssets()->DrawGameBall(dT, *this->display->GetModel()->GetGameBall(), this->display->GetCamera(), this->renderToTexBeforeBall);
 	glPopMatrix();
 	
 	this->display->GetAssets()->DrawLevelPieces(this->display->GetCamera());

@@ -59,6 +59,13 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 
 void GameEventsListener::PaddleHitWallEvent(const Point2D& hitLoc) {
 	std::string soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::NORMAL);
+
+	// Do a tiny shake to the camera...
+	this->display->GetCamera().SetCameraShake(0.15, Vector3D(0.25, 0.0, 0.0), 20);
+
+	// Add a smacking type effect...
+	// TODO
+
 	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
 
@@ -84,10 +91,20 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 	assert(blockBefore.GetWidthIndex() == blockAfter.GetWidthIndex());
 
 	// Add the visual effect for when the ball hits a block (if it isn't an uber ball and a solid block)
-	if ((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall ||
-		blockAfter.GetType() == LevelPiece::Solid) {
+	// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
+	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
+		  ((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall ||
+		  blockAfter.GetType() == LevelPiece::Solid)) {
 
-		this->display->GetAssets()->AddBallBounceESP(ball);
+			this->display->GetAssets()->AddBallBounceESP(this->display->GetCamera(), ball);
+	}
+
+	// We shake things up if the ball is uber and the block is solid...
+	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
+		  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall &&
+			blockAfter.GetType() == LevelPiece::Solid) {
+
+		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.1, 0.0), 100);
 	}
 
 	debug_output("EVENT: Ball-block collision");
@@ -97,14 +114,20 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
 
 	// Add the visual effect for when the ball hits the paddle
-	this->display->GetAssets()->AddBallBounceESP(ball);
+	this->display->GetAssets()->AddBallBounceESP(this->display->GetCamera(), ball);
+
+	// We shake things up if the ball is uber...
+	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
+		  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.9, 0.2, 0.0), 100);
+	}
 
 	debug_output("EVENT: Ball-paddle collision");
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 	// Add the visual effect for when a ball breaks a typical block
-	this->display->GetAssets()->AddBasicBlockBreakEffect(block);
+	this->display->GetAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
 
 	// TODO: Transmit data concerning the level of sound needed
 	std::string soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::EXPLOSION, Onomatoplex::NORMAL);
@@ -125,4 +148,18 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 
 void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) {
 	debug_output("EVENT: Item Obtained by Player: " << item);
+}
+
+void GameEventsListener::ActionItemActivated(const GameItem& item) {
+	// Activate the item's effect (if any)
+	this->display->GetAssets()->SetItemEffect(item, true);
+
+	debug_output("EVENT: Item Activated: " << item);
+}
+
+void GameEventsListener::ActionItemDeactivated(const GameItem& item) {
+	// Dectivate the item's effect (if any)
+	this->display->GetAssets()->SetItemEffect(item, true);
+
+	debug_output("EVENT: Item Deactivated: " << item);
 }

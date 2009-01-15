@@ -11,11 +11,12 @@ class Camera;
  * Represents CgFx CelShader material.
  */
 class CgFxVolumetricEffect : public CgFxEffectBase {
-
-private:
+public:
 	// Constants used for loading the CelShading effect
 	static const std::string BASIC_TECHNIQUE_NAME;
-	
+	static const std::string GHOSTBALL_TECHNIQUE_NAME;
+
+private:
 	// CG Transform params
 	CGparameter worldITMatrixParam;
 	CGparameter wvpMatrixParam;
