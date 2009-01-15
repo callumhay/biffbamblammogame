@@ -95,8 +95,9 @@ void ESPEmitter::SetParticleLife(const ESPInterval& particleLife) {
  * Sets the inclusive interval of random possible values that represent the
  * size (in units) of particles in this emitter.
  */
-void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
-	this->particleSize = particleSize;
+void ESPEmitter::SetParticleSize(const ESPInterval& particleSizeX, const ESPInterval& particleSizeY) {
+	this->particleSize[0] = particleSizeX;
+	this->particleSize[1] = particleSizeY;
 }
 
 /**
@@ -105,6 +106,16 @@ void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
  */
 void ESPEmitter::SetParticleRotation(const ESPInterval& particleRot) {
 	this->particleRotation = particleRot;
+}
+
+/**
+ * Sets the inclusive intervals of random possible values for the colour and alpha of particles.
+ */
+void ESPEmitter::SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha) {
+	this->particleRed = red;
+	this->particleGreen = green;
+	this->particleBlue = blue;
+	this->particleAlpha = alpha;
 }
 
 /**
@@ -126,4 +137,20 @@ void ESPEmitter::AddParticle(ESPParticle* particle) {
 void ESPEmitter::RemoveEffector(ESPParticleEffector* const effector) {
 	assert(effector != NULL);
 	this->effectors.remove(effector);
+}
+
+/**
+ * Reset this emitter to before any ticks were executed on it.
+ */
+void ESPEmitter::Reset() {
+	// Move all alive particles into the pool of dead particles (kill any ones still alive)
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+		ESPParticle* currParticle = *iter;
+		currParticle->Kill();
+		this->deadParticles.push_back(currParticle);
+	}
+	this->aliveParticles.clear();
+
+	// Reset time...
+	this->timeSinceLastSpawn = 0.0f;
 }

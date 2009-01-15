@@ -1,6 +1,7 @@
 #ifndef __ESPUTIL_H__
 #define __ESPUTIL_H__
 
+#include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Algebra.h"
 #include "../BlammoEngine/Matrix.h"
 
@@ -25,6 +26,25 @@ struct ESPInterval {
 
 	float RandomValueInInterval() {
 		return static_cast<float>(minValue + Randomizer::GetInstance()->RandomNumZeroToOne()*(maxValue - minValue));
+	}
+};
+
+// A function with a single variable
+class ESPFunc {
+public:
+	virtual float Func(float x);
+};
+
+// The sine function for a modifiable sine wave
+class ESPSineFunc : public ESPFunc {
+private:
+	float amplitude, phaseShift, freq, verticalShift;
+public:
+	ESPSineFunc(float amplitude, float phaseShift, float freq, float verticalShift) :
+		amplitude(amplitude), phaseShift(phaseShift), freq(freq), verticalShift(verticalShift) {}
+
+	virtual float Func(float x) {
+		return amplitude * sinf(freq*x + phaseShift) + verticalShift;
 	}
 };
 

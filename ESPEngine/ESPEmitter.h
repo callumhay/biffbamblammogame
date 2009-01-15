@@ -34,9 +34,11 @@ protected:
 	// Inclusive interval for lifetime (in seconds) of particles
 	ESPInterval particleLifetime;
 	// Inclusive interval for size of particles (in units)
-	ESPInterval particleSize;
+	ESPInterval particleSize[2];
 	// Inclusive interval for the rotation of particles (in degrees)
 	ESPInterval particleRotation;
+	// Inclusive intervals for the colour of particles
+	ESPInterval particleRed, particleGreen, particleBlue, particleAlpha;
 
 	virtual void Flush();
 
@@ -55,7 +57,8 @@ public:
 	void SetSpawnDelta(const ESPInterval& spawnDelta);
 	void SetInitialSpd(const ESPInterval& initialSpd);
 	void SetParticleLife(const ESPInterval& particleLife);
-	void SetParticleSize(const ESPInterval& particleSize);
+	void SetParticleSize(const ESPInterval& particleSizeX, const ESPInterval& particleSizeY);
+	void SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha);
 	void SetParticleRotation(const ESPInterval& particleRot);
 	
 	void AddEffector(ESPParticleEffector* effector);
@@ -64,6 +67,7 @@ public:
 
 	virtual void Tick(double dT) = 0;
 	virtual void Draw(const Camera& camera) = 0;
-	
+	virtual void Reset();
+
 };
 #endif
