@@ -25,12 +25,15 @@ class GameESPAssets {
 private:
 	// Currently active particle systems
 	std::list<ESPEmitter*> activeGeneralEmitters;
+	std::map<const GameItem*, std::list<ESPEmitter*>> activeItemDropEmitters; 
 
 	// Standard effectors for the various ESP effects
 	ESPParticleColourEffector particleFader;
 
 	ESPParticleColourEffector particleFaderUberballTrail;
 	ESPParticleScaleEffector particlePulseUberballAura;
+	ESPParticleScaleEffector particlePulseItemDropAura;
+	ESPParticleScaleEffector particleShrinkToNothing;
 
 	ESPParticleScaleEffector particleSmallGrowth;
 	ESPParticleScaleEffector particleMediumGrowth;
@@ -38,11 +41,14 @@ private:
 
 	// Various textures used as particles for various effects
 	std::vector<Texture2D*> bangTextures;
+	//std::vector<Texture2D*> smokeTextures;
 	Texture2D* circleGradientTex;
-	//Texture2D* starTex;
-	//Texture2D* starOutlineTex;
+	Texture2D* starTex;
+	Texture2D* starOutlineTex;
 	//Texture2D* circleBullseyeTex;
 	//Texture2D* circleOutlineTex;
+
+
 
 	// Standalone ESP effects
 	//ESPPointEmitter* ghostBallEmitterAura;
@@ -56,6 +62,8 @@ private:
 	void InitESPTextures();
 	void InitStandaloneESPEffects();
 
+	void InitUberBallESPEffects();
+
 public:
 	GameESPAssets();
 	~GameESPAssets();
@@ -66,12 +74,15 @@ public:
 	void AddItemAcquiredEffect(const Camera& camera, const GameItem& item);
 	void SetItemEffect(const GameItem& item, bool activate);
 
+	void AddItemDropEffect(const Camera& camera, const GameItem& item);
+	void RemoveItemDropEffect(const Camera& camera, const GameItem& item);
+
+	void KillAllActiveEffects();
 
 	// Draw functions for various particle effects in the game
 	void DrawParticleEffects(double dT, const Camera& camera);
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
-
 
 
 };

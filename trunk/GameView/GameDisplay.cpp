@@ -70,14 +70,9 @@ void GameDisplay::SetOutlineRenderAttribs(float outlineWidth) {
 }
 
 void GameDisplay::ChangeDisplaySize(int w, int h) {
-	// Make sure minimum size is 800 x 600
-	h = max(600, h);
-	w = max(800, w);
-
-	glViewport(0, 0, w, h);
 	this->width = w;
 	this->height = h;
-
+	this->gameCamera.SetPerspective(w, h);
 	this->currState->DisplaySizeChanged(w, h);
 }
 
