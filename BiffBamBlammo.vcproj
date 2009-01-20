@@ -452,6 +452,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPShaderParticle.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPUtil.h"
 					>
 				</File>
@@ -489,6 +493,10 @@
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPPointEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPShaderParticle.cpp"
 					>
 				</File>
 				<File
@@ -553,6 +561,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\GameFontAssetsManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameItemAssets.h"
 					>
 				</File>
 				<File
@@ -637,6 +649,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\GameFontAssetsManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameItemAssets.cpp"
 					>
 				</File>
 				<File
@@ -748,6 +764,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\GhostBallItem.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\InvisiBallItem.h"
 					>
 				</File>
@@ -829,6 +849,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\GameWorld.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GhostBallItem.cpp"
 					>
 				</File>
 				<File

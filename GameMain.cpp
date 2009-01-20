@@ -19,6 +19,10 @@ static GameModel *model = NULL;
 static GameController *controller = NULL;
 static GameDisplay *display = NULL;
 
+static const unsigned int DEFAULT_VIDEO_FLAGS = SDL_OPENGL | SDL_SWSURFACE | SDL_RESIZABLE;
+static int BitsPerPixel = 16;
+static SDL_Surface* VideoSurface = NULL;
+
 void ResizeWindow(int w, int h) {
 	display->ChangeDisplaySize(w, h);
 }
@@ -55,6 +59,7 @@ static void ProcessEvents() {
 				break;
 			case SDL_VIDEORESIZE:
 				ResizeWindow(event.resize.w, event.resize.h);
+				
 				break;
 			case SDL_QUIT:
 				// Handle quit requests (like Ctrl-c)
@@ -63,10 +68,6 @@ static void ProcessEvents() {
 				break;
 		}
 	}
-}
-
-static void DrawScreen() {
-
 }
 
 /**
@@ -89,7 +90,7 @@ bool InitSDLWindow() {
 		std::cerr << "Video query failed: " << SDL_GetError() << std::endl;
     return false;
   }
-  int bpp = info->vfmt->BitsPerPixel;
+  BitsPerPixel = info->vfmt->BitsPerPixel;
 
   // Set colour bits...
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
@@ -109,13 +110,15 @@ bool InitSDLWindow() {
 
 
   // Set the draw surface...
-	if (SDL_SetVideoMode(INIT_WIDTH, INIT_HEIGHT, bpp, SDL_OPENGL | SDL_SWSURFACE | SDL_RESIZABLE) == 0) {
+	VideoSurface = SDL_SetVideoMode(INIT_WIDTH, INIT_HEIGHT, BitsPerPixel, DEFAULT_VIDEO_FLAGS);
+	if (VideoSurface == NULL) {
 		std::cerr << "Unable to set video mode: " << SDL_GetError();
     return false;
   }
-
+	
 	return true;
 }
+
 
 // Driver function for the game.
 int main(int argc, char *argv[]) {
