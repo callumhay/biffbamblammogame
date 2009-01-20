@@ -113,39 +113,47 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		std::vector<Vector2D>  boundingNorms;
 
 		// Left boundry of the piece
-		if (leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l1(this->center + Vector2D(-this->currHalfWidth, this->currHalfHeight), 
-									 this->center + Vector2D(-this->currHalfWidth, -this->currHalfHeight));
-			Vector2D n1(-1, 0);
-			boundingLines.push_back(l1);
-			boundingNorms.push_back(n1);
+		if (leftNeighbor != NULL) {
+			if (leftNeighbor->IsNoBoundsPieceType() || (this->pieceType == LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Solid)) {
+				LineSeg2D l1(this->center + Vector2D(-this->currHalfWidth, this->currHalfHeight), 
+										 this->center + Vector2D(-this->currHalfWidth, -this->currHalfHeight));
+				Vector2D n1(-1, 0);
+				boundingLines.push_back(l1);
+				boundingNorms.push_back(n1);
+			}
 		}
 
 		// Bottom boundry of the piece
-		if (bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l2(this->center + Vector2D(-this->currHalfWidth, -this->currHalfHeight),
-									 this->center + Vector2D(this->currHalfWidth, -this->currHalfHeight));
-			Vector2D n2(0, -1);
-			boundingLines.push_back(l2);
-			boundingNorms.push_back(n2);
+		if (bottomNeighbor != NULL) {
+			if (bottomNeighbor->IsNoBoundsPieceType() || (this->pieceType == LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Solid)) {
+				LineSeg2D l2(this->center + Vector2D(-this->currHalfWidth, -this->currHalfHeight),
+										 this->center + Vector2D(this->currHalfWidth, -this->currHalfHeight));
+				Vector2D n2(0, -1);
+				boundingLines.push_back(l2);
+				boundingNorms.push_back(n2);
+			}
 		}
 
 		// Right boundry of the piece
-		if (rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l3(this->center + Vector2D(this->currHalfWidth, -this->currHalfHeight),
-									 this->center + Vector2D(this->currHalfWidth, this->currHalfHeight));
-			Vector2D n3(1, 0);
-			boundingLines.push_back(l3);
-			boundingNorms.push_back(n3);
+		if (rightNeighbor != NULL) {
+			if (rightNeighbor->IsNoBoundsPieceType() || (this->pieceType == LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Solid)) {
+				LineSeg2D l3(this->center + Vector2D(this->currHalfWidth, -this->currHalfHeight),
+										 this->center + Vector2D(this->currHalfWidth, this->currHalfHeight));
+				Vector2D n3(1, 0);
+				boundingLines.push_back(l3);
+				boundingNorms.push_back(n3);
+			}
 		}
 
 		// Top boundry of the piece
-		if (topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l4(this->center + Vector2D(this->currHalfWidth, this->currHalfHeight),
-									 this->center + Vector2D(-this->currHalfWidth, this->currHalfHeight));
-			Vector2D n4(0, 1);
-			boundingLines.push_back(l4);
-			boundingNorms.push_back(n4);
+		if (topNeighbor != NULL) {
+			if (topNeighbor->IsNoBoundsPieceType() || (this->pieceType == LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Solid)) {
+				LineSeg2D l4(this->center + Vector2D(this->currHalfWidth, this->currHalfHeight),
+										 this->center + Vector2D(-this->currHalfWidth, this->currHalfHeight));
+				Vector2D n4(0, 1);
+				boundingLines.push_back(l4);
+				boundingNorms.push_back(n4);
+			}
 		}
 
 		this->bounds = BoundingLines(boundingLines, boundingNorms);

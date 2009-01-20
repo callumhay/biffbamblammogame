@@ -47,6 +47,10 @@ public:
 	// IN-GAME CONSTANTS -------------------------------
 	const double PROB_OF_ITEM_DROP;							// Probability multiplier used for an item that drops from a destroyed block
 	const double PROB_OF_CONSECTUIVE_ITEM_DROP;	// Probability multiplier used for consecutive item drops
+	
+	const double PROB_OF_GHOSTBALL_BLOCK_MISS;	// Probablity the ball will go into ghost mode when it hits a block
+	const double LENGTH_OF_GHOSTMODE;						// Length of time in seconds of ghost mode
+
 	const int DEFAULT_BLOCKS_HIT;								// Initial number of blocks hit by a ball as it leaves the paddle
 	const int INIT_SCORE;												// Initial player score when starting a game
 	const int INIT_LIVES;												// Initial player lives when starting a game

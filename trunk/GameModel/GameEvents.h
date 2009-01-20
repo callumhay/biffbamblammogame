@@ -137,6 +137,13 @@ public:
 	virtual void ItemSpawnedEvent(const GameItem& item) = 0;
 
 	/**
+	 * Event triggered when an item drop is removed because it has either been
+	 * acquired by the player paddle or has left the game boundries.
+	 * Arguements: item - The removed item.
+	 */
+	virtual void ItemRemovedEvent(const GameItem& item) = 0;
+
+	/**
 	 * Event triggered when an item hits the player paddle (i.e., the player gains the item).
 	 * Only occurs once at the happenstance of collision.
 	 * Arguements: item   - The item that has just been 'consumed' by the player.
@@ -149,14 +156,14 @@ public:
 	 * Only occurs once per item.
 	 * Arguements: item - The item that was just activated.
 	 */
-	virtual void ActionItemActivated(const GameItem& item)		= 0;
+	virtual void ItemActivatedEvent(const GameItem& item)		= 0;
 
 	/**
 	 * Event triggered when an item is deactivated (ends its timer or is just ends its effect).
 	 * Only occurs once per item.
 	 * Arguements: item - The item that was just deactivated.
 	 */
-	virtual void ActionItemDeactivated(const GameItem& item)	= 0;
+	virtual void ItemDeactivatedEvent(const GameItem& item)	= 0;
 };
 
 

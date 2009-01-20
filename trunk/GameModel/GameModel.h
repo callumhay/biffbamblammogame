@@ -187,34 +187,12 @@ public:
 	}
 
 	// Debug functions
-	// TODO: have just one with a variable to determine which power up/down???
 #ifndef NDEBUG
-	void DropFastBallItem() {
+	void DropItem(const std::string& itemName) {
 		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
 		if (state != NULL) {
 			Vector2D levelDim = this->GetLevelUnitDimensions();
-			state->DebugDropItem(GameItemFactory::CreateFastBallItem(Point2D(0,0) + 0.5f*levelDim, this));
-		}
-	}
-	void DropSlowBallItem() {
-		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
-		if (state != NULL) {
-			Vector2D levelDim = this->GetLevelUnitDimensions();
-			state->DebugDropItem(GameItemFactory::CreateSlowBallItem(Point2D(0,0) + 0.5f*levelDim, this));
-		}
-	}
-	void DropUberBallItem() {
-		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
-		if (state != NULL) {
-			Vector2D levelDim = this->GetLevelUnitDimensions();
-			state->DebugDropItem(GameItemFactory::CreateUberBallItem(Point2D(0,0) + 0.5f*levelDim, this));
-		}
-	}
-	void DropInvisiBallItem() {
-		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
-		if (state != NULL) {
-			Vector2D levelDim = this->GetLevelUnitDimensions();
-			state->DebugDropItem(GameItemFactory::CreateInvisiBallItem(Point2D(0,0) + 0.5f*levelDim, this));
+			state->DebugDropItem(GameItemFactory::CreateItem(itemName, Point2D(0,0) + 0.5f*levelDim, this));
 		}
 	}
 #endif

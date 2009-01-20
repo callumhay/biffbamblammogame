@@ -6,6 +6,7 @@
 #include "BallSpeedItem.h"
 #include "UberBallItem.h"
 #include "InvisiBallItem.h"
+#include "GhostBallItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -26,6 +27,8 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new UberBallItem(spawnOrigin, gameModel);
 		case 3:
 			return new InvisiBallItem(spawnOrigin, gameModel);
+		case 4:
+			return new GhostBallItem(spawnOrigin, gameModel);
 		default:
 			assert(false);
 	}
@@ -34,17 +37,23 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 }
 
 #ifndef NDEBUG
-GameItem* GameItemFactory::CreateFastBallItem(const Point2D &spawnOrigin, GameModel *gameModel) {
-	return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);
-}
+GameItem* GameItemFactory::CreateItem(const std::string itemName, const Point2D &spawnOrigin, GameModel *gameModel) {
+	if (itemName == BallSpeedItem::FAST_BALL_ITEM_NAME) {
+		return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);
+	}
+	else if (itemName == BallSpeedItem::SLOW_BALL_ITEM_NAME) {
+		return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);
+	}
+	else if (itemName == UberBallItem::UBER_BALL_ITEM_NAME) {
+		return new UberBallItem(spawnOrigin, gameModel);
+	}
+	else if (itemName == InvisiBallItem::INVISI_BALL_ITEM_NAME) {
+		return new InvisiBallItem(spawnOrigin, gameModel);
+	}
+	else if (itemName == GhostBallItem::GHOST_BALL_ITEM_NAME) {
+		return new GhostBallItem(spawnOrigin, gameModel);
+	}
 
-GameItem* GameItemFactory::CreateSlowBallItem(const Point2D &spawnOrigin, GameModel *gameModel) {
-	return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);
-}
-GameItem* GameItemFactory::CreateUberBallItem(const Point2D &spawnOrigin, GameModel *gameModel) {
-	return new UberBallItem(spawnOrigin, gameModel);
-}
-GameItem* GameItemFactory::CreateInvisiBallItem(const Point2D &spawnOrigin, GameModel *gameModel) {
-	return new InvisiBallItem(spawnOrigin, gameModel);
+	return NULL;
 }
 #endif
