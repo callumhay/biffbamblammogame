@@ -7,6 +7,7 @@
 
 class ESPParticleColourEffector : public ESPParticleEffector {
 private:
+	bool useStartColour;
 	float startAlpha, endAlpha;
 	Colour startColour;
 public:

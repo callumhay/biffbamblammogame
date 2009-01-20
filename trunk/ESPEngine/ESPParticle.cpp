@@ -6,12 +6,46 @@ const Vector3D ESPParticle::PARTICLE_UP_VEC				= Vector3D(0, 1, 0);
 const Vector3D ESPParticle::PARTICLE_NORMAL_VEC		= Vector3D(0, 0, 1);
 const Vector3D ESPParticle::PARTICLE_RIGHT_VEC		= Vector3D::cross(PARTICLE_UP_VEC, PARTICLE_NORMAL_VEC);
 
+unsigned int ESPParticle::numberOfParticleInsts = 0;
+GLuint ESPParticle::particleDispList = 0;
+
 // NOTE: All particles are created as if they were already dead
 ESPParticle::ESPParticle() : 
 totalLifespan(0.0), currLifeElapsed(0.0), size(1.0f, 1.0f), initSize(1.0f, 1.0f), colour(1,1,1), alpha(1.0f), rotation(0.0f) {
+	if (ESPParticle::numberOfParticleInsts == 0) {
+		// First instance of a particle - make a display list for particles
+		ESPParticle::particleDispList = ESPParticle::GenerateParticleDispList();
+		assert(ESPParticle::particleDispList != 0);
+	}
+	ESPParticle::numberOfParticleInsts++;
 }
 
 ESPParticle::~ESPParticle() {
+	if (ESPParticle::numberOfParticleInsts == 1) {
+		// Last instance of a particle - destroy the display list
+		glDeleteLists(ESPParticle::particleDispList, 1);
+		ESPParticle::particleDispList = 0;
+	}
+	ESPParticle::numberOfParticleInsts--;
+}
+
+/**
+ * Static function for creating the display list for a particle.
+ * Returns: The display list ID, 0 on fail.
+ */
+GLuint ESPParticle::GenerateParticleDispList() {
+	GLuint dispListVal = glGenLists(1);
+	glNewList(dispListVal, GL_COMPILE);
+	glBegin(GL_QUADS);
+		glNormal3i(PARTICLE_NORMAL_VEC[0], PARTICLE_NORMAL_VEC[1], PARTICLE_NORMAL_VEC[2]);
+		glTexCoord2i(0, 0); glVertex2f(-0.5f, -0.5f);
+		glTexCoord2i(1, 0); glVertex2f( 0.5f, -0.5f);
+		glTexCoord2i(1, 1); glVertex2f( 0.5f,  0.5f);
+		glTexCoord2i(0, 1); glVertex2f(-0.5f,  0.5f);
+	glEnd();
+	glEndList();
+
+	return dispListVal;
 }
 
 /**
@@ -59,19 +93,12 @@ void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) 
 	Matrix4x4 personalAlignXF = this->GetPersonalAlignmentTransform(camera, alignment);
 	
 	glTranslatef(this->position[0], this->position[1], this->position[2]);
-	
 	glMultMatrixf(personalAlignXF.begin());
 	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size[0], this->size[1], 1.0f);
-
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
-	glBegin(GL_QUADS);
-		glNormal3i(PARTICLE_NORMAL_VEC[0], PARTICLE_NORMAL_VEC[1], PARTICLE_NORMAL_VEC[2]);
-		glTexCoord2i(0, 0); glVertex2f(-0.5f, -0.5f);
-		glTexCoord2i(1, 0); glVertex2f( 0.5f, -0.5f);
-		glTexCoord2i(1, 1); glVertex2f( 0.5f,  0.5f);
-		glTexCoord2i(0, 1); glVertex2f(-0.5f,  0.5f);
-	glEnd();
+	
+	glCallList(ESPParticle::particleDispList);
 
 	glPopMatrix();
 }

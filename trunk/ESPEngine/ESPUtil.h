@@ -17,6 +17,7 @@ struct ESPInterval {
 	float minValue, maxValue;
 
 	ESPInterval() : minValue(0.0f), maxValue(0.0f) {}
+	ESPInterval(float singleVal) : minValue(singleVal), maxValue(singleVal) {}
 	ESPInterval(float min, float max) : minValue(min), maxValue(max) {
 		if (min > max) {
 			this->minValue = 0;
@@ -32,7 +33,7 @@ struct ESPInterval {
 // A function with a single variable
 class ESPFunc {
 public:
-	virtual float Func(float x);
+	virtual float Func(float t);
 };
 
 // The sine function for a modifiable sine wave
@@ -43,8 +44,8 @@ public:
 	ESPSineFunc(float amplitude, float phaseShift, float freq, float verticalShift) :
 		amplitude(amplitude), phaseShift(phaseShift), freq(freq), verticalShift(verticalShift) {}
 
-	virtual float Func(float x) {
-		return amplitude * sinf(freq*x + phaseShift) + verticalShift;
+	virtual float Func(float t) {
+		return amplitude * sinf(freq*t + phaseShift) + verticalShift;
 	}
 };
 
