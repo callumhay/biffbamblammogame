@@ -14,21 +14,30 @@
 #include "../ESPEngine/ESP.h"
 
 GameESPAssets::GameESPAssets() : 
-particleFader(1, 0), particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0), particlePulseUberballAura(0,0),
-particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f),
-uberBallEmitterAura(NULL), uberBallEmitterTrail(NULL), circleGradientTex(NULL), oldBallDir(0,0) {
+particleFader(1, 0), 
+particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0), 
+
+particleShrinkToNothing(1, 0),
+particlePulseUberballAura(0, 0),
+particlePulseItemDropAura(0, 0),
+particleSmallGrowth(1.0f, 1.3f), 
+particleMediumGrowth(1.0f, 1.6f),
+
+uberBallEmitterAura(NULL), 
+uberBallEmitterTrail(NULL), 
+
+circleGradientTex(NULL), 
+starTex(NULL), 
+starOutlineTex(NULL), 
+
+oldBallDir(0,0) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
 }
 
 GameESPAssets::~GameESPAssets() {
-	// Delete any leftover emitters
-	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin();
-		iter != this->activeGeneralEmitters.end(); iter++) {
-			delete *iter;
-	}
-	this->activeGeneralEmitters.clear();
+	this->KillAllActiveEffects();
 
 	// Delete any effect textures
 	for (std::vector<Texture2D*>::iterator iter = this->bangTextures.begin();
@@ -39,6 +48,10 @@ GameESPAssets::~GameESPAssets() {
 
 	delete this->circleGradientTex;
 	this->circleGradientTex = NULL;
+	delete this->starTex;
+	this->starTex = NULL;
+	delete this->starOutlineTex;
+	this->starOutlineTex = NULL;
 
 	// Delete any standalone effects
 	delete this->uberBallEmitterAura;
@@ -49,9 +62,35 @@ GameESPAssets::~GameESPAssets() {
 }
 
 /**
+ * Kills all active effects currently being displayed in-game.
+ */
+void GameESPAssets::KillAllActiveEffects() {
+	// Delete any leftover emitters
+	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin();
+		iter != this->activeGeneralEmitters.end(); iter++) {
+			delete *iter;
+	}
+	this->activeGeneralEmitters.clear();
+
+	for (std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.begin();
+		iter != this->activeItemDropEmitters.end(); iter++) {
+	
+			std::list<ESPEmitter*> currEmitterList = (*iter).second;
+			for (std::list<ESPEmitter*>::iterator iter = currEmitterList.begin();
+				iter != currEmitterList.end(); iter++) {
+				delete *iter;
+			}
+			currEmitterList.clear();
+	}
+	this->activeItemDropEmitters.clear();
+
+}
+
+/**
  * Private helper function for initializing textures used in the ESP effects.
  */
 void GameESPAssets::InitESPTextures() {
+	debug_output("Loading ESP Textures...");
 	// Initialize bang textures (big boom thingys when there are explosions)
 	if (this->bangTextures.size() == 0) {
 		// TODO: fix texture filtering...
@@ -70,47 +109,66 @@ void GameESPAssets::InitESPTextures() {
 		this->circleGradientTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear);
 		assert(this->circleGradientTex != NULL);
 	}
+	if (this->starTex == NULL) {
+		this->starTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear);
+		assert(this->starTex != NULL);	
+	}
+	if (this->starOutlineTex == NULL) {
+		this->starOutlineTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear);
+		assert(this->starOutlineTex != NULL);
+	}
 }
+
+// Private helper function for initializing the uber ball's effects
+void GameESPAssets::InitUberBallESPEffects() {
+	// Initialize uberball effectors
+	ScaleEffect uberBallPulseSettings;
+	uberBallPulseSettings.pulseGrowthScale = 2.0f;
+	uberBallPulseSettings.pulseRate = 1.5f;
+	this->particlePulseUberballAura = ESPParticleScaleEffector(uberBallPulseSettings);
+
+	// Set up the uberball emitters...
+	this->uberBallEmitterAura = new ESPPointEmitter();
+	this->uberBallEmitterAura->SetSpawnDelta(ESPInterval(-1));
+	this->uberBallEmitterAura->SetInitialSpd(ESPInterval(0));
+	this->uberBallEmitterAura->SetParticleLife(ESPInterval(-1));
+	this->uberBallEmitterAura->SetParticleSize(ESPInterval(1.5f));
+	this->uberBallEmitterAura->SetEmitAngleInDegrees(0);
+	this->uberBallEmitterAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->uberBallEmitterAura->SetParticleAlignment(ESP::ViewPointAligned);
+	this->uberBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
+	this->uberBallEmitterAura->SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.75f));
+	this->uberBallEmitterAura->AddEffector(&this->particlePulseUberballAura);
+	this->uberBallEmitterAura->SetParticles(1, this->circleGradientTex);
+	
+	this->uberBallEmitterTrail = new ESPPointEmitter();
+	this->uberBallEmitterTrail->SetSpawnDelta(ESPInterval(0.02f));
+	this->uberBallEmitterTrail->SetInitialSpd(ESPInterval(5.0f));
+	this->uberBallEmitterTrail->SetParticleLife(ESPInterval(1.3f));
+	this->uberBallEmitterTrail->SetParticleSize(ESPInterval(1.3f), ESPInterval(1.3f));
+	this->uberBallEmitterTrail->SetEmitAngleInDegrees(0);
+	this->uberBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->uberBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
+	this->uberBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+	this->uberBallEmitterTrail->AddEffector(&this->particleFaderUberballTrail);
+	this->uberBallEmitterTrail->AddEffector(&this->particleShrinkToNothing);
+	this->uberBallEmitterTrail->SetParticles(40, this->circleGradientTex);
+}
+
 
 /**
  * Private helper function for initializing standalone ESP effects.
  */
 void GameESPAssets::InitStandaloneESPEffects() {
-	// Initialize effectors
-	ScaleEffect uberBallPulseSettings;
-	uberBallPulseSettings.pulseGrowthScale = 1.5f;
-	uberBallPulseSettings.pulseRate = 1.5f;
-	this->particlePulseUberballAura = ESPParticleScaleEffector(uberBallPulseSettings);
-	
-	// TODO: 
-	// - Shader particle effects
 
-	// Set up the uberball emitters...
-	this->uberBallEmitterAura = new ESPPointEmitter();
-	this->uberBallEmitterAura->SetSpawnDelta(ESPInterval(-1, -1));
-	this->uberBallEmitterAura->SetInitialSpd(ESPInterval(0, 0));
-	this->uberBallEmitterAura->SetParticleLife(ESPInterval(-1, -1));
-	this->uberBallEmitterAura->SetParticleSize(ESPInterval(1.3f, 1.3f), ESPInterval(1.3f, 1.3f));
-	this->uberBallEmitterAura->SetEmitAngleInDegrees(0);
-	this->uberBallEmitterAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	this->uberBallEmitterAura->SetParticleAlignment(ESP::ViewPointAligned);
-	this->uberBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
-	this->uberBallEmitterAura->SetParticleColour(ESPInterval(1, 1), ESPInterval(0, 0), ESPInterval(0, 0), ESPInterval(0.75f, 0.75f));
-	this->uberBallEmitterAura->AddEffector(&this->particlePulseUberballAura);
-	this->uberBallEmitterAura->SetParticles(1, this->circleGradientTex);
+	this->InitUberBallESPEffects();
+
+	ScaleEffect itemDropPulseSettings;
+	itemDropPulseSettings.pulseGrowthScale = 1.25f;
+	itemDropPulseSettings.pulseRate = 0.25f;
+	this->particlePulseItemDropAura = ESPParticleScaleEffector(itemDropPulseSettings);
 	
-	this->uberBallEmitterTrail = new ESPPointEmitter();
-	this->uberBallEmitterTrail->SetSpawnDelta(ESPInterval(0.05f, 0.05f));
-	this->uberBallEmitterTrail->SetInitialSpd(ESPInterval(4.0f, 4.0f));
-	this->uberBallEmitterTrail->SetParticleLife(ESPInterval(1.0f, 1.0f));
-	this->uberBallEmitterTrail->SetParticleSize(ESPInterval(1.3f, 1.3f), ESPInterval(1.3f, 1.3f));
-	this->uberBallEmitterTrail->SetEmitAngleInDegrees(0);
-	this->uberBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	this->uberBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
-	this->uberBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
-	this->uberBallEmitterTrail->AddEffector(&this->particleFaderUberballTrail);
-	this->uberBallEmitterTrail->SetParticles(20, this->circleGradientTex);	
-	
+	// TODO:  Shader particle effects
 }
 
 /**
@@ -263,11 +321,149 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 }
 
 /**
+ * Adds an effect for when an item is dropping and not yet acquired by the player.
+ */
+void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item) {
+
+	std::list<ESPEmitter*> itemDropEmitters;
+
+	ESPInterval redRandomColour(0.1f, 1.0f);
+	ESPInterval greenRandomColour(0.1f, 1.0f);
+	ESPInterval blueRandomColour(0.1f, 1.0f);
+	ESPInterval redColour(0), greenColour(0), blueColour(0);
+	ESPInterval alpha(1.0f);
+
+	switch (item.GetItemType()) {
+		case GameItem::Good:
+			greenRandomColour = ESPInterval(0.8f, 1.0f);
+			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
+			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
+			break;
+		case GameItem::Bad:
+			redRandomColour = ESPInterval(0.8f, 1.0f);
+			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
+			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
+			break;
+		case GameItem::Neutral:
+			blueRandomColour = ESPInterval(0.8f, 1.0f);
+			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
+			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
+		default:
+			break;
+	}
+
+	// Aura around the ends of the droping item
+	ESPPointEmitter* itemDropEmitterAura1 = new ESPPointEmitter();
+	itemDropEmitterAura1->SetSpawnDelta(ESPInterval(-1));
+	itemDropEmitterAura1->SetInitialSpd(ESPInterval(0));
+	itemDropEmitterAura1->SetParticleLife(ESPInterval(-1));
+	itemDropEmitterAura1->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 1), ESPInterval(GameItem::ITEM_HEIGHT + 1));
+	itemDropEmitterAura1->SetEmitAngleInDegrees(0);
+	itemDropEmitterAura1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	itemDropEmitterAura1->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterAura1->SetEmitPosition(Point3D(GameItem::HALF_ITEM_WIDTH, 0, 0));
+	itemDropEmitterAura1->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
+	itemDropEmitterAura1->AddEffector(&this->particlePulseItemDropAura);
+	itemDropEmitterAura1->SetParticles(1, this->circleGradientTex);
+	
+	ESPPointEmitter* itemDropEmitterAura2 = new ESPPointEmitter();
+	itemDropEmitterAura2->SetSpawnDelta(ESPInterval(-1));
+	itemDropEmitterAura2->SetInitialSpd(ESPInterval(0));
+	itemDropEmitterAura2->SetParticleLife(ESPInterval(-1));
+	itemDropEmitterAura2->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 1), ESPInterval(GameItem::ITEM_HEIGHT + 1));
+	itemDropEmitterAura2->SetEmitAngleInDegrees(0);
+	itemDropEmitterAura2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	itemDropEmitterAura2->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterAura2->SetEmitPosition(Point3D(-GameItem::HALF_ITEM_WIDTH, 0, 0));
+	itemDropEmitterAura2->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
+	itemDropEmitterAura2->AddEffector(&this->particlePulseItemDropAura);
+	itemDropEmitterAura2->SetParticles(1, this->circleGradientTex);
+
+	// Middle emitter emits solid stars
+	ESPPointEmitter* itemDropEmitterTrail1 = new ESPPointEmitter();
+	itemDropEmitterTrail1 = new ESPPointEmitter();
+	itemDropEmitterTrail1->SetSpawnDelta(ESPInterval(0.05f, 0.2f));
+	itemDropEmitterTrail1->SetInitialSpd(ESPInterval(3.0f, 5.0f));
+	itemDropEmitterTrail1->SetParticleLife(ESPInterval(1.2f, 2.0f));
+	itemDropEmitterTrail1->SetParticleSize(ESPInterval(0.6f, 1.4f));
+	itemDropEmitterTrail1->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
+	itemDropEmitterTrail1->SetEmitAngleInDegrees(25);
+	itemDropEmitterTrail1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	itemDropEmitterTrail1->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterTrail1->SetEmitDirection(Vector3D(0, 1, 0));
+	itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
+	itemDropEmitterTrail1->AddEffector(&this->particleFader);
+	itemDropEmitterTrail1->SetParticles(10, this->starTex);
+	
+	// Left emitter emits outlined stars
+	ESPPointEmitter* itemDropEmitterTrail2 = new ESPPointEmitter();
+	itemDropEmitterTrail2 = new ESPPointEmitter();
+	itemDropEmitterTrail2->SetSpawnDelta(ESPInterval(0.05f, 0.2f));
+	itemDropEmitterTrail2->SetInitialSpd(ESPInterval(2.5f, 4.0f));
+	itemDropEmitterTrail2->SetParticleLife(ESPInterval(1.5f, 2.2f));
+	itemDropEmitterTrail2->SetParticleSize(ESPInterval(0.4f, 1.1f));
+	itemDropEmitterTrail2->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
+	itemDropEmitterTrail2->SetEmitAngleInDegrees(10);
+	itemDropEmitterTrail2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	itemDropEmitterTrail2->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
+	itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
+	itemDropEmitterTrail2->AddEffector(&this->particleFader);
+	itemDropEmitterTrail2->SetParticles(8, this->starOutlineTex);
+	
+	// Right emitter emits outlined stars
+	ESPPointEmitter* itemDropEmitterTrail3 = new ESPPointEmitter();
+	itemDropEmitterTrail3 = new ESPPointEmitter();
+	itemDropEmitterTrail3->SetSpawnDelta(ESPInterval(0.05f, 0.2f));
+	itemDropEmitterTrail3->SetInitialSpd(ESPInterval(2.5f, 4.0f));
+	itemDropEmitterTrail3->SetParticleLife(ESPInterval(1.5f, 2.2f));
+	itemDropEmitterTrail3->SetParticleSize(ESPInterval(0.4f, 1.1f));
+	itemDropEmitterTrail3->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
+	itemDropEmitterTrail3->SetEmitAngleInDegrees(10);
+	itemDropEmitterTrail3->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	itemDropEmitterTrail3->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
+	itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
+	itemDropEmitterTrail3->AddEffector(&this->particleFader);
+	itemDropEmitterTrail3->SetParticles(8, this->starOutlineTex);
+
+	// Add all the emitters for the item
+	itemDropEmitters.push_back(itemDropEmitterAura1);
+	itemDropEmitters.push_back(itemDropEmitterAura2);
+	itemDropEmitters.push_back(itemDropEmitterTrail1);
+	itemDropEmitters.push_back(itemDropEmitterTrail2);
+	itemDropEmitters.push_back(itemDropEmitterTrail3);
+	this->activeItemDropEmitters[&item] = itemDropEmitters;
+}
+/**
+ * Removes an effect associated with a dropping item.
+ */
+void GameESPAssets::RemoveItemDropEffect(const Camera& camera, const GameItem& item) {
+	assert(this->activeItemDropEmitters.find(&item) != this->activeItemDropEmitters.end());
+	this->activeItemDropEmitters.erase(&item);
+}
+
+/**
  * Adds an effect for when a dropping item is acquired by the player paddle -
  * depending on the item type we create the effect.
  */
 void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const GameItem& item) {
 	// TODO.
+
+		/*
+	switch (item.GetItemType()) {
+		case GameItem::Good:
+			break;
+		case GameItem::Bad:
+			break;
+		case GameItem::Neutral:
+		default:
+			break;
+	}
+	*/
 }
 
 /**
@@ -313,13 +509,29 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
 
 /**
  * Draw the effects that occur as a item drops down towards the player paddle.
+ * NOTE: You must transform these effects to be where the item is first!
  */
 void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item) {
-	// TODO.
+	// Find the effects for the item we want to draw
+	std::map<const GameItem*, std::list<ESPEmitter*>>::iterator itemDropEffectIter = this->activeItemDropEmitters.find(&item);
+	
+	// If no effects were found then exit...
+	if (itemDropEffectIter == this->activeItemDropEmitters.end()) {
+		return;
+	}
+	
+	// Draw the appropriate effects
+	std::list<ESPEmitter*> itemDropEmitters = itemDropEffectIter->second;
+	for (std::list<ESPEmitter*>::iterator iter = itemDropEmitters.begin(); iter != itemDropEmitters.end(); iter++) {
+		ESPEmitter* currEmitter = *iter;
+		currEmitter->Draw(camera);
+		currEmitter->Tick(dT);
+	}
 }
 
 /**
  * Draw particle effects associated with the game ball.
+ * NOTE: You must transform these effects to be where the ball is first!
  */
 void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball) {
 	// Draw the basic aura around the ball

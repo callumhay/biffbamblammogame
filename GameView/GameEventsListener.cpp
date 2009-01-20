@@ -72,6 +72,9 @@ void GameEventsListener::PaddleHitWallEvent(const Point2D& hitLoc) {
 void GameEventsListener::BallDeathEvent(const GameBall& deadBall, int livesLeft) {
 	debug_output("EVENT: Ball death, lives left: " << livesLeft);
 	
+	// Kill all effects that may have previously been occuring...
+	this->display->GetAssets()->KillAllActiveEffects();
+		
 	// Check to see if it's game over, and switch the display state appropriately
 	if (this->display->GetModel()->IsGameOver()) {
 		this->display->SetCurrentState(new GameOverDisplayState(this->display));
@@ -143,21 +146,33 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newM
 }
 
 void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
+	// Spawn an item drop effect for the item...
+	this->display->GetAssets()->AddItemDropEffect(this->display->GetCamera(), item);
+
 	debug_output("EVENT: Item Spawned: " << item);
 }
 
+void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
+	// Remove any previous item drop effect
+	this->display->GetAssets()->RemoveItemDropEffect(this->display->GetCamera(), item);
+
+	debug_output("EVENT: Item Removed: " << item);
+}
+
 void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) {
+
+
 	debug_output("EVENT: Item Obtained by Player: " << item);
 }
 
-void GameEventsListener::ActionItemActivated(const GameItem& item) {
+void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 	// Activate the item's effect (if any)
 	this->display->GetAssets()->SetItemEffect(item, true);
 
 	debug_output("EVENT: Item Activated: " << item);
 }
 
-void GameEventsListener::ActionItemDeactivated(const GameItem& item) {
+void GameEventsListener::ItemDeactivatedEvent(const GameItem& item) {
 	// Dectivate the item's effect (if any)
 	this->display->GetAssets()->SetItemEffect(item, true);
 

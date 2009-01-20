@@ -35,9 +35,10 @@ public:
 	virtual void ScoreChangedEvent(int amt);
 	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier);
 	virtual void ItemSpawnedEvent(const GameItem& item);
+	virtual void ItemRemovedEvent(const GameItem& item);
 	virtual void ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle);
-	virtual void ActionItemActivated(const GameItem& item);
-	virtual void ActionItemDeactivated(const GameItem& item);
+	virtual void ItemActivatedEvent(const GameItem& item);
+	virtual void ItemDeactivatedEvent(const GameItem& item);
 };
 
 #endif

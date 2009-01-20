@@ -93,7 +93,7 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	// Items...
 	std::list<GameItem*>& gameItems = this->display->GetModel()->GetLiveItems();
 	for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
-		this->display->GetAssets()->DrawItem((**iter), this->display->GetCamera());
+		this->display->GetAssets()->DrawItem(dT, this->display->GetCamera(), (**iter));
 	}
 
 	// Paddle...
@@ -103,8 +103,8 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	this->display->GetAssets()->DrawGameBall(dT, *this->display->GetModel()->GetGameBall(), this->display->GetCamera(), this->renderToTexBeforeBall);
 	glPopMatrix();
 	
+	// Level pieces (blocks and stuff)...
 	this->display->GetAssets()->DrawLevelPieces(this->display->GetCamera());
-	
 	glDisable(GL_MULTISAMPLE);
 
 	// Draw particles / ESP effects
@@ -112,6 +112,18 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 	this->display->GetAssets()->DrawParticleEffects(dT, this->display->GetCamera());
 	glPopMatrix();
+
+	// Debug draw of boundries of each block...
+	//glPushMatrix();
+	//glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
+	//std::vector<std::vector<LevelPiece*>> pieces = this->display->GetModel()->GetCurrentLevel()->GetCurrentLevelLayout();
+	//for (size_t i = 0; i < pieces.size(); i++) {
+		//std::vector<LevelPiece*> setOfPieces = pieces[i];
+		//for (size_t j = 0; j < setOfPieces.size(); j++) {
+			//setOfPieces[j]->DebugDraw();
+		//}
+	//}
+	//glPopMatrix();
 }
 
 /**

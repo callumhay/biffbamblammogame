@@ -13,38 +13,20 @@
 // ESP Engine includes
 #include "../ESPEngine/ESPEmitter.h"
 
-// Includes for Item types
-#include "../GameModel/BallSpeedItem.h"
-#include "../GameModel/UberBallItem.h"
-#include "../GameModel/InvisiBallItem.h"
-
-const std::string GameAssets::ITEM_MESH						= GameViewConstants::GetInstance()->MESH_DIR + "/item.obj";
-const std::string GameAssets::ITEM_LABEL_MATGRP		= "ItemLabel";	// Material group name for changing the label on the item mesh
-const std::string GameAssets::ITEM_END_MATGRP			= "ColourEnd";	// Material group name for changing the colour on the item mesh
-
-const Colour GameAssets::ITEM_GOOD_COLOUR					= Colour(0.0f, 0.8f, 0.0f);
-const Colour GameAssets::ITEM_BAD_COLOUR					= Colour(0.8f, 0.0f, 0.0f);
-const Colour GameAssets::ITEM_NEUTRAL_COLOUR			= Colour(0.0f, 0.6f, 1.0f);
-
-// Item texture assets
-const std::string GameAssets::ITEM_SLOWBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/slowball_powerup256x128.jpg";
-const std::string GameAssets::ITEM_FASTBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/fastball_powerdown256x128.jpg";
-const std::string GameAssets::ITEM_UBERBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/uberball_powerup256x128.jpg";
-const std::string GameAssets::ITEM_INVISIBALL_TEXTURE = GameViewConstants::GetInstance()->TEXTURE_DIR + "/invisiball_powerdown256x128.jpg";
-
-const std::string GameAssets::ITEM_TIMER_SLOWBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/slowball_timer_hud128x64.png";
-const std::string GameAssets::ITEM_TIMER_FASTBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/fastball_timer_hud128x64.png";
-const std::string GameAssets::ITEM_TIMER_UBERBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/uberball_timer_hud256x128.png";
-const std::string GameAssets::ITEM_TIMER_INVISIBALL_TEXTURE = GameViewConstants::GetInstance()->TEXTURE_DIR + "/invisiball_timer_hud256x128.png";
-
-const std::string GameAssets::ITEM_TIMER_FILLER_SPDBALL_TEXTURE			= GameViewConstants::GetInstance()->TEXTURE_DIR + "/ballspeed_timer_fill_hud128x64.png";
-const std::string GameAssets::ITEM_TIMER_FILLER_UBERBALL_TEXTURE		= GameViewConstants::GetInstance()->TEXTURE_DIR + "/uberball_timer_fill_hud256x128.png";
-const std::string GameAssets::ITEM_TIMER_FILLER_INVISIBALL_TEXTURE	= GameViewConstants::GetInstance()->TEXTURE_DIR + "/invisiball_timer_fill_hud256x128.png";
-
 // *****************************************************
 
-GameAssets::GameAssets(): worldAssets(NULL),
-ball(NULL), spikeyBall(NULL), item(NULL), levelMesh(NULL), invisiBallEffect(NULL), ghostBallEffect(NULL) {
+GameAssets::GameAssets(): 
+
+worldAssets(NULL),
+espAssets(NULL),
+itemAssets(NULL),
+
+ball(NULL), 
+spikeyBall(NULL), 
+levelMesh(NULL), 
+
+invisiBallEffect(NULL), 
+ghostBallEffect(NULL) {
 
 	// Initialize DevIL
 	ilInit();
@@ -52,8 +34,13 @@ ball(NULL), spikeyBall(NULL), item(NULL), levelMesh(NULL), invisiBallEffect(NULL
 	ilutRenderer(ILUT_OPENGL);
 	ilutEnable(ILUT_OPENGL_CONV);
 	
-	// Load ESP assets...
+	// Load ESP assets
 	this->espAssets = new GameESPAssets();
+
+	// Load item assets
+	this->itemAssets = new GameItemAssets(this->espAssets);
+	bool didItemAssetsLoad = this->itemAssets->LoadItemAssets();
+	assert(didItemAssetsLoad);
 
 	// Load minimal fonts
 	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
@@ -75,6 +62,12 @@ GameAssets::~GameAssets() {
 	// Delete the currently loaded world and level assets if there are any
 	this->DeleteWorldAssets();
 	this->DeleteLevelAssets();
+
+	// Delete item assets
+	if (this->itemAssets != NULL) {
+		delete this->itemAssets;
+		this->itemAssets = NULL;
+	}
 }
 
 /*
@@ -109,12 +102,6 @@ void GameAssets::DeleteRegularMeshAssets() {
 		delete this->spikeyBall;
 		this->spikeyBall = NULL;
 	}
-	if (this->item != NULL) {
-		this->item->SetTextureForMaterial(GameAssets::ITEM_LABEL_MATGRP, NULL);	// Make sure there is not texture assoc with item or we will delete it twice!!
-		delete this->item;
-		this->item = NULL;
-		this->UnloadItemTextures();
-	}
 }
 
 
@@ -133,30 +120,34 @@ void GameAssets::DrawGameBall(double dT, const GameBall& b, const Camera& camera
 	glTranslatef(loc[0], loc[1], 0);
 	Vector3D ballRot = b.GetRotation();
 
-	//this->ball->Draw(camera, ghostBallEffect);
-
-	CgFxEffectBase* ballInvisiEffectTemp = NULL;
-	// Deal with the Invisiball power-down if applicable....
+	CgFxEffectBase* ballEffectTemp = NULL;
+	
+	// Ball shaders when applicable...
+	// The invisiball item always has priority
 	if ((b.GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall) {
 		this->invisiBallEffect->SetFBOTexture(sceneTex);
-		this->invisiBallEffect->SetWarpAmountParam(50.0f);
-		this->invisiBallEffect->SetIndexOfRefraction(1.33f);
-		ballInvisiEffectTemp = this->invisiBallEffect;
+		ballEffectTemp = this->invisiBallEffect;
 	}
-	else if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+	else if ((b.GetBallType() & GameBall::GhostBall) == GameBall::GhostBall) {
+		ballEffectTemp = this->ghostBallEffect;
+	}
+	
+	// Ball effects when applicable...
+	if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall &&
+			(b.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
 		// Draw when uber ball and not invisiball
 		this->espAssets->DrawUberBallEffects(dT, camera, b);
 	}
 
-	// Draw the ball based on its type...
+	// Ball model...
 	glRotatef(ballRot[0], 1.0f, 0.0f, 0.0f);
 	glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
 	glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
 	if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
-		this->spikeyBall->Draw(camera, ballInvisiEffectTemp);
+		this->spikeyBall->Draw(camera, ballEffectTemp);
 	}
 	else {
-		this->ball->Draw(camera, ballInvisiEffectTemp);
+		this->ball->Draw(camera, ballEffectTemp);
 	}
 
 	glPopMatrix();
@@ -187,215 +178,15 @@ void GameAssets::DrawParticleEffects(double dT, const Camera& camera) {
 /**
  * Draw a given item in the world.
  */
-void GameAssets::DrawItem(const GameItem& gameItem, const Camera& camera) const {
-	Point2D center = gameItem.GetCenter();
-	glPushMatrix();
-	glTranslatef(center[0], center[1], 0.0f);
-
-	// Set material for the image based on the item name/type
-	std::string itemName	= gameItem.GetName();
-	std::map<std::string, Texture2D*>::const_iterator lookupIter = this->itemTextures.find(itemName);
-	assert(lookupIter != this->itemTextures.end());
-	Texture2D* itemTexture = lookupIter->second;
-	assert(itemTexture != NULL);
-	this->item->SetTextureForMaterial(GameAssets::ITEM_LABEL_MATGRP, itemTexture);
-	
-	Colour itemEndColour;
-	switch (gameItem.GetItemType()) {
-		case GameItem::Good :
-			itemEndColour = GameAssets::ITEM_GOOD_COLOUR;
-			break;
-		case GameItem::Bad :
-			itemEndColour = GameAssets::ITEM_BAD_COLOUR;
-			break;		
-		case GameItem::Neutral:
-			itemEndColour = GameAssets::ITEM_NEUTRAL_COLOUR;
-			break;
-		default:
-			assert(false);
-			break;
-	}
-	this->item->SetColourForMaterial(GameAssets::ITEM_END_MATGRP, itemEndColour);
-	
-	// Draw the item
-	this->item->Draw(camera);
-	glPopMatrix();
+void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const {
+	this->itemAssets->DrawItem(dT, camera, gameItem);
 }
 
 /**
  * Draw the HUD timer for the given timer type.
  */
 void GameAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight) {
-
-	// Spacing along the vertical between timer graphics
-	unsigned int TIMER_Y_SPACING_PX = 5;
-	// Spacing along the horizontal of timer graphics distanced from the right edge of the game window
- 	unsigned int TIMER_X_SPACING_PX = displayWidth / 25;
-	// Width of timer graphic
-	unsigned int TIMER_WIDTH_PX			= (displayWidth / 5) - (2 * TIMER_X_SPACING_PX);
-	// Tracked height at which to draw the next timer graphic
-	unsigned int currHeight					= 2 * displayHeight / 3;
-
-	// Go through each timer and draw its appropriate graphic and current elapsed 'filler'
-	for(std::list<GameItemTimer*>::const_iterator allTimerIter = timers.begin(); allTimerIter != timers.end(); allTimerIter++) {
-		const GameItemTimer* timer = *allTimerIter;
-
-		// Check to see if a timer exists, if so then draw it
-		std::map<std::string, Texture2D*>::iterator tempIterTimer = this->itemTimerTextures.find(timer->GetTimerItemName());
-		std::map<std::string, Texture2D*>::iterator tempIterFiller = this->itemTimerFillerTextures.find(timer->GetTimerItemName());
-		
-		if (tempIterTimer != this->itemTimerTextures.end() && tempIterFiller != this->itemTimerFillerTextures.end()) {
-			
-			// Draw the timer
-			Texture2D* timerTex		= tempIterTimer->second;
-			Texture2D* fillerTex	= tempIterFiller->second;
-			
-			assert(timerTex != NULL);
-			assert(fillerTex != NULL);
-			
-			unsigned int width	= TIMER_WIDTH_PX;
-			unsigned int height = width * timerTex->GetHeight() / timerTex->GetWidth();
-
-			// Prepare OGL for drawing the timer
-			glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | GL_TRANSFORM_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-			
-			// Make world coordinates equal window coordinates
-			Camera::PushWindowCoords();
-			
-			glMatrixMode(GL_MODELVIEW);
-			glDisable(GL_LIGHTING);
-			glEnable(GL_TEXTURE_2D);
-			glDisable(GL_DEPTH_TEST);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
-
-			// Draw the timer...
-			glPushMatrix();
-			glLoadIdentity();
-
-			// Do the transformation to setup the start location for where to draw the
-			// timer graphics (right-hand side of the screen)
-			glTranslatef(displayWidth - width - TIMER_X_SPACING_PX, currHeight, 0.0f);
-
-			// Draw the filler for the timer (how much has elapsed)
-			float percentElapsed = timer->GetPercentTimeElapsed();
-			float fillerHeight    = height - (height * percentElapsed);
-			float fillerTexHeight = 1 - percentElapsed;
-			
-			// Back fill - so that the filler that has expired so far stands out
-			// from the background
-			fillerTex->BindTexture();
-			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-			glBegin(GL_QUADS);
-			glTexCoord2d(0, 0); glVertex2f(0, 0);
-			glTexCoord2d(1, 0); glVertex2f(width, 0);
-			glTexCoord2d(1, 1); glVertex2f(width, height);
-			glTexCoord2d(0, 1); glVertex2f(0, height);
-			glEnd();
-		
-			// Figure out what colour to make the fill based on how it
-			// affects the player (red is bad, green is good, etc.)
-			GameItem::ItemType itemDisposition = timer->GetTimerDisposition();
-			switch (itemDisposition) {
-				case GameItem::Good:
-					glColor4f(ITEM_GOOD_COLOUR.R(), ITEM_GOOD_COLOUR.G(), ITEM_GOOD_COLOUR.B(), 1.0f);	// Deep Green
-					break;
-				case GameItem::Bad:
-					glColor4f(ITEM_BAD_COLOUR.R(), ITEM_BAD_COLOUR.G(), ITEM_BAD_COLOUR.B(), 1.0f);	// Deep Red
-					break;
-				case GameItem::Neutral:
-					glColor4f(ITEM_NEUTRAL_COLOUR.R(), ITEM_NEUTRAL_COLOUR.G(), ITEM_NEUTRAL_COLOUR.B(), 1.0f);	// Light Blue
-					break;
-				default:
-					assert(false);
-					break;
-			}
-			
-			// The actual filler, which is constantly decreasing to zero
-			glBegin(GL_QUADS);
-			glTexCoord2d(0, 0); glVertex2f(0, 0);
-			glTexCoord2d(1, 0); glVertex2f(width, 0);
-			glTexCoord2d(1, fillerTexHeight); glVertex2f(width, fillerHeight);
-			glTexCoord2d(0, fillerTexHeight); glVertex2f(0, fillerHeight);
-			glEnd();
-			fillerTex->UnbindTexture();
-
-			// TODO: make draw lists to speed this up...
-
-			timerTex->BindTexture();
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			glBegin(GL_QUADS);
-			glTexCoord2d(0, 0); glVertex2f(0, 0);
-			glTexCoord2d(1, 0); glVertex2f(width, 0);
-			glTexCoord2d(1, 1); glVertex2f(width, height);
-			glTexCoord2d(0, 1); glVertex2f(0, height);
-			glEnd();
-			timerTex->UnbindTexture();
-
-			glPopMatrix();
-			glPopAttrib();  
-
-			// Pop the projection matrix
-			Camera::PopWindowCoords();
-
-			currHeight -= (height + TIMER_Y_SPACING_PX);
-		}
-		else {
-			assert(false);
-		}
-	}
-}
-
-/**
- * Function for initializing the map for looking up item textures
- * as well as timer textures.
- */
-void GameAssets::LoadItemTextures() {
-	// Load the item textures
-	Texture2D* slowBallItemTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_SLOWBALL_TEXTURE, Texture::Trilinear);
-	Texture2D* fastBallItemTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_FASTBALL_TEXTURE, Texture::Trilinear);
-	Texture2D* uberBallItemTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_UBERBALL_TEXTURE, Texture::Trilinear);
-	Texture2D* invisiBallItemTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_INVISIBALL_TEXTURE, Texture::Trilinear);
-
-	assert(slowBallItemTex		!= NULL);
-	assert(fastBallItemTex		!= NULL);
-	assert(uberBallItemTex		!= NULL);
-	assert(invisiBallItemTex	!= NULL);
-
-	this->itemTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,		slowBallItemTex));
-	this->itemTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::FAST_BALL_ITEM_NAME,		fastBallItemTex));
-	this->itemTextures.insert(std::pair<std::string, Texture2D*>(UberBallItem::UBER_BALL_ITEM_NAME,			uberBallItemTex));
-	this->itemTextures.insert(std::pair<std::string, Texture2D*>(InvisiBallItem::INVISI_BALL_ITEM_NAME, invisiBallItemTex));
-
-	// Load the timer textures
-	Texture2D* slowBallTimerTex		= Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_SLOWBALL_TEXTURE,		Texture::Trilinear);
-	Texture2D* fastBallTimerTex		= Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_FASTBALL_TEXTURE,		Texture::Trilinear);
-	Texture2D* uberBallTimerTex		= Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_UBERBALL_TEXTURE,		Texture::Trilinear);
-	Texture2D* invisiBallTimerTex	= Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_INVISIBALL_TEXTURE,	Texture::Trilinear);
-
-	assert(slowBallTimerTex		!= NULL);
-	assert(fastBallTimerTex		!= NULL);
-	assert(uberBallTimerTex		!= NULL);
-	assert(invisiBallTimerTex != NULL);
-
-	this->itemTimerTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,			slowBallTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::FAST_BALL_ITEM_NAME,			fastBallTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture2D*>(UberBallItem::UBER_BALL_ITEM_NAME,			uberBallTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture2D*>(InvisiBallItem::INVISI_BALL_ITEM_NAME,	invisiBallTimerTex));
-
-	// Load the fillers for the timer textures (used to make the timer look like its ticking down)
-	Texture2D* ballSpdTimerFillerTex		= Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_FILLER_SPDBALL_TEXTURE,		Texture::Trilinear);
-	Texture2D* uberBallTimerFillerTex		= Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_FILLER_UBERBALL_TEXTURE,		Texture::Trilinear);
-	Texture2D* invisiBallTimerFillerTex = Texture2D::CreateTexture2DFromImgFile(GameAssets::ITEM_TIMER_FILLER_INVISIBALL_TEXTURE, Texture::Trilinear);
-	
-	assert(ballSpdTimerFillerTex		!= NULL);
-	assert(uberBallTimerFillerTex		!= NULL);
-	assert(invisiBallTimerFillerTex != NULL);
-
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,			ballSpdTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::FAST_BALL_ITEM_NAME,			ballSpdTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(UberBallItem::UBER_BALL_ITEM_NAME,			uberBallTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(InvisiBallItem::INVISI_BALL_ITEM_NAME,	invisiBallTimerFillerTex));
+	this->itemAssets->DrawTimers(timers, displayWidth, displayHeight);
 }
 
 void GameAssets::LoadRegularMeshAssets() {
@@ -405,26 +196,22 @@ void GameAssets::LoadRegularMeshAssets() {
 	if (this->spikeyBall == NULL) {
 		this->spikeyBall = ObjReader::ReadMesh(GameViewConstants::GetInstance()->SPIKEY_BALL_MESH);
 	}
-	if (this->item == NULL) {
-		// Load the mesh for items
-		this->item = ObjReader::ReadMesh(ITEM_MESH);
-		// Load all of the possible item labels
-		this->LoadItemTextures();
-	}
 }
 
 void GameAssets::LoadRegularEffectAssets() {
 	if (this->invisiBallEffect == NULL) {
 		this->invisiBallEffect = new CgFxPostRefract();
+		this->invisiBallEffect->SetWarpAmountParam(50.0f);
+		this->invisiBallEffect->SetIndexOfRefraction(1.33f);
 	}
 	if (this->ghostBallEffect == NULL) {
 		this->ghostBallEffect = new CgFxVolumetricEffect();
 		this->ghostBallEffect->SetTechnique(CgFxVolumetricEffect::GHOSTBALL_TECHNIQUE_NAME);
-		this->ghostBallEffect->SetColour(Colour(0.51f, 0.81f, 0.99f));
-		this->ghostBallEffect->SetConstantFactor(0.1f);
+		this->ghostBallEffect->SetColour(Colour(0.80f, 0.90f, 0.99f));
+		this->ghostBallEffect->SetConstantFactor(0.05f);
 		this->ghostBallEffect->SetFadeExponent(2.0f);
-		this->ghostBallEffect->SetScale(0.25f);
-		this->ghostBallEffect->SetFrequency(0.5f);
+		this->ghostBallEffect->SetScale(0.2f);
+		this->ghostBallEffect->SetFrequency(0.8f);
 		this->ghostBallEffect->SetAlphaMultiplier(0.8f);
 		this->ghostBallEffect->SetFlowDirection(Vector3D(0, 0, 1));
 	}
@@ -447,37 +234,6 @@ void GameAssets::DeleteRegularEffectAssets() {
 		delete this->espAssets;
 		this->espAssets = NULL;
 	}
-}
-
-/**
- * Function for unloading all the item textures.
- */
-void GameAssets::UnloadItemTextures() {
-	// Unload item textures
-	std::map<std::string, Texture2D*>::iterator iter1 = this->itemTextures.begin();
-	for (; iter1 != this->itemTextures.end(); iter1++) {
-		delete iter1->second;
-		iter1->second = NULL;
-	}
-	this->itemTextures.clear();
-
-	// Unload timer textures
-	std::map<std::string, Texture2D*>::iterator iter2 = this->itemTimerTextures.begin();
-	for (; iter2 != this->itemTimerTextures.end(); iter2++) {
-		delete iter2->second;
-		iter2->second = NULL;
-	}
-	this->itemTimerTextures.clear();
-
-	// Unload timer filler textures
-	std::map<std::string, Texture2D*>::iterator iter3 = this->itemTimerFillerTextures.begin();
-	for (; iter3 != this->itemTimerFillerTextures.end(); iter3++) {
-		if (iter3->second != NULL) {
-			delete iter3->second;
-			iter3->second = NULL;
-		}
-	}
-	this->itemTimerFillerTextures.clear();
 }
 
 /*
