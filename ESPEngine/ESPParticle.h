@@ -14,6 +14,13 @@ class Camera;
 class ESPParticle {
 
 protected:
+	// Number of instances of particles
+	static unsigned int numberOfParticleInsts;
+
+	// OpenGL display list for particles
+	static GLuint particleDispList;
+	static GLuint GenerateParticleDispList();
+
 	// Vectors defining the up, right and normal directions of
 	// any drawn particle
 	static const Vector3D PARTICLE_UP_VEC;

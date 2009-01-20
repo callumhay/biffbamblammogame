@@ -36,14 +36,13 @@ void ESPParticleScaleEffector::AffectParticleOnTick(double dT, ESPParticle* part
 			// to the biggest size
 			if (pulseAmt > 1.0) {
 				this->effect.pulseTimeTracker = 0.0;
+				pulseAmt = 1.0;
 			}
-			else {
-				double twoTimesGS = 2 * this->effect.pulseGrowthScale;
-				amtOfScaling = (-twoTimesGS + 2)* pulseAmt + twoTimesGS - 1;
-			}
+
+			double twoTimesGS = 2 * this->effect.pulseGrowthScale;
+			amtOfScaling = (-twoTimesGS + 2)* pulseAmt + twoTimesGS - 1;
 		}
-		debug_output("scaling: " << amtOfScaling << " pulseAmt: " << pulseAmt);
-		particle->MultiplyInitSizeScale(1.0 + amtOfScaling);
+		particle->MultiplyInitSizeScale(amtOfScaling);
 		this->effect.pulseTimeTracker += dT;
 	}
 

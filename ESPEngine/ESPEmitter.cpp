@@ -1,7 +1,8 @@
 #include "ESPEmitter.h"
 
 ESPEmitter::ESPEmitter() : particleTexture(NULL), timeSinceLastSpawn(0.0f), 
-particleAlignment(ESP::ViewPointAligned) {
+particleAlignment(ESP::ViewPointAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
+makeSizeConstraintsEqual(true) {
 }
 
 ESPEmitter::~ESPEmitter() {
@@ -98,6 +99,12 @@ void ESPEmitter::SetParticleLife(const ESPInterval& particleLife) {
 void ESPEmitter::SetParticleSize(const ESPInterval& particleSizeX, const ESPInterval& particleSizeY) {
 	this->particleSize[0] = particleSizeX;
 	this->particleSize[1] = particleSizeY;
+	this->makeSizeConstraintsEqual = false;
+}
+void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
+	this->particleSize[0] = particleSize;
+	this->particleSize[1] = particleSize;
+	this->makeSizeConstraintsEqual = true;
 }
 
 /**

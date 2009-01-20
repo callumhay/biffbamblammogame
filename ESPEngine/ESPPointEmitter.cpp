@@ -76,8 +76,12 @@ void ESPPointEmitter::ReviveParticle() {
 	this->deadParticles.pop_front();
 
 	// Revive the particle and put it in the group of living particles
-	zombie->Revive(initalPt, initalParticleVel, Vector2D(this->particleSize[0].RandomValueInInterval(), this->particleSize[1].RandomValueInInterval()), 
-		             this->particleRotation.RandomValueInInterval(), this->particleLifetime.RandomValueInInterval()); 
+	Vector2D randomSizing(this->particleSize[0].RandomValueInInterval(), this->particleSize[1].RandomValueInInterval());
+	if (this->makeSizeConstraintsEqual) {
+		randomSizing[1] = randomSizing[0];
+	}
+
+	zombie->Revive(initalPt, initalParticleVel, randomSizing, this->particleRotation.RandomValueInInterval(), this->particleLifetime.RandomValueInInterval()); 
 	zombie->SetColour(Colour(this->particleRed.RandomValueInInterval(), this->particleGreen.RandomValueInInterval(), 
 		this->particleBlue.RandomValueInInterval()), this->particleAlpha.RandomValueInInterval());
 	this->aliveParticles.push_back(zombie);
