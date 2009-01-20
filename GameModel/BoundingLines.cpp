@@ -30,7 +30,7 @@ bool BoundingLines::Collide(const Circle2D& c, Vector2D& n, float &d) {
 	
 		// Check to see if there was a collision with the current line seg and circle
 		// and that the collision is the most relevant
-		if (sqDist < sqRadius && sqDist <= (minSqDist + EPSILON)) {
+		if (sqDist < sqRadius && sqDist <= minSqDist) {
 			
 			// Collision occurred add the normal to the list
 			collisionNorms.push_back(this->normals[i]);

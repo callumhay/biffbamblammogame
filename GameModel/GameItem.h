@@ -19,16 +19,16 @@ protected:
 	ItemType type;				// The type of item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
 	bool isActive;
 
+	// Speed of descent for items
+	static const float SPEED_OF_DESCENT;
+
+public:
 	// Height and Width for items
 	static const float ITEM_WIDTH;
 	static const float ITEM_HEIGHT;
 	static const float HALF_ITEM_WIDTH;
 	static const float HALF_ITEM_HEIGHT;
 
-	// Speed of descent for items
-	static const float SPEED_OF_DESCENT;
-
-public:
 	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const ItemType type);
 	virtual ~GameItem();
 

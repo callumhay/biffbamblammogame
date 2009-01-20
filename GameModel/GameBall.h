@@ -7,7 +7,7 @@ class GameBall {
 
 public:
 	enum BallSpeed { ZeroSpeed = 0, SlowSpeed = 10, NormalSpeed = 16, FastSpeed = 22 };
-	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010 };
+	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100 };
 
 private:
 	Circle2D bounds;			// The bounds of the ball, constantly updated to world space

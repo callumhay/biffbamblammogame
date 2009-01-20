@@ -115,6 +115,13 @@ void GameEventManager::ActionItemSpawned(const GameItem& item) {
 	}	
 }
 
+void GameEventManager::ActionItemRemoved(const GameItem& item) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ItemRemovedEvent(item);
+	}	
+}
+
 // Action for when an item and the player paddle collide
 void GameEventManager::ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle) {
 	this->listenerIter = this->eventListeners.begin();
@@ -126,14 +133,14 @@ void GameEventManager::ActionItemPaddleCollision(const GameItem& item, const Pla
 void GameEventManager::ActionItemActivated(const GameItem& item) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
-		(*this->listenerIter)->ActionItemActivated(item);
+		(*this->listenerIter)->ItemActivatedEvent(item);
 	}		
 }
 
 void GameEventManager::ActionItemDeactivated(const GameItem& item) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
-		(*this->listenerIter)->ActionItemDeactivated(item);
+		(*this->listenerIter)->ItemDeactivatedEvent(item);
 	}		
 }
 
