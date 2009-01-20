@@ -96,6 +96,7 @@ public:
 	static void SetPerspective(int w, int h) {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
+		glViewport(0, 0, w, h);
 		gluPerspective(FOV_ANGLE_IN_DEGS, ((double)w) / ((double)h), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
