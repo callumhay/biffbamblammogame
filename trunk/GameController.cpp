@@ -1,7 +1,12 @@
 #include "GameController.h"
 
 #include "GameView/GameDisplay.h"
+
 #include "GameModel/GameModel.h"
+#include "GameModel/BallSpeedItem.h"
+#include "GameModel/UberballItem.h"
+#include "GameModel/InvisiBallItem.h"
+#include "GameModel/GhostBallItem.h"
 
 #include "BlammoEngine/BlammoEngine.h"
 #include "BlammoEngine/Camera.h"
@@ -20,16 +25,19 @@ void GameController::KeyDown(SDLKey key) {
 #ifndef NDEBUG
 	// Debug Item drops
 	if (key == SDLK_s) {
-		this->model->DropSlowBallItem();
+		this->model->DropItem(BallSpeedItem::SLOW_BALL_ITEM_NAME);
 	}
 	else if (key == SDLK_q) {
-		this->model->DropFastBallItem();
+		this->model->DropItem(BallSpeedItem::FAST_BALL_ITEM_NAME);
 	}
 	else if (key == SDLK_u) {
-		this->model->DropUberBallItem();
+		this->model->DropItem(UberBallItem::UBER_BALL_ITEM_NAME);
 	}
 	else if (key == SDLK_i) {
-		this->model->DropInvisiBallItem();
+		this->model->DropItem(InvisiBallItem::INVISI_BALL_ITEM_NAME);
+	}
+	else if (key == SDLK_g) {
+		this->model->DropItem(GhostBallItem::GHOST_BALL_ITEM_NAME);
 	}
 	else if (key == SDLK_p) {
 		this->model->TogglePauseGame();
