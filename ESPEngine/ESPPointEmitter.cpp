@@ -27,10 +27,6 @@ Vector3D ESPPointEmitter::CalculateRandomInitParticleDir() const {
 	sphCoordEmitDir[1] += thetaVariation;
 	sphCoordEmitDir[2] += phiVariation;
 
-	// These MUST be true since the emitAngleInRads cannot be greater than pi
-	assert(sphCoordEmitDir[1] <= 2*M_PI && sphCoordEmitDir[1] >= -M_PI);
-	assert(sphCoordEmitDir[2] < 3*M_PI && sphCoordEmitDir[2] >= -M_PI);
-
 	// Make sure the values are still in range:
 	// (0 <= theta <= pi)
 
@@ -84,6 +80,8 @@ void ESPPointEmitter::ReviveParticle() {
 	zombie->Revive(initalPt, initalParticleVel, randomSizing, this->particleRotation.RandomValueInInterval(), this->particleLifetime.RandomValueInInterval()); 
 	zombie->SetColour(Colour(this->particleRed.RandomValueInInterval(), this->particleGreen.RandomValueInInterval(), 
 		this->particleBlue.RandomValueInInterval()), this->particleAlpha.RandomValueInInterval());
+	this->AssignRandomTextureToParticle(zombie);
+
 	this->aliveParticles.push_back(zombie);
 }
 
@@ -206,21 +204,15 @@ void ESPPointEmitter::Draw(const Camera& camera) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
 
-	// Each particle needs to be transformed so that it adheres to
-	// how it faces the viewer (view-plane-aligned or view-point-aligned) 
-	glPushMatrix();
-	
-	// Bind the particle textures
-	if (this->particleTexture != NULL) {
-		this->particleTexture->BindTexture();
-	}
-
 	// Go through each of the particles, revive any dead ones (based on spawn rate), and draw them
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
-		ESPParticle* currParticle = *iter;	
+		ESPParticle* currParticle = *iter;
+		std::map<ESPParticle*, Texture2D*>::iterator findIter = this->textureAssignments.find(currParticle);
+		if (findIter != this->textureAssignments.end()) {
+			findIter->second->BindTexture();
+		}
 		currParticle->Draw(camera, this->particleAlignment);
 	}
 	
-	glPopMatrix();
 	glPopAttrib();
 }

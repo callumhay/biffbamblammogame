@@ -15,3 +15,4 @@
 #include "ESPAreaEmitter.h"
 #include "ESPParticle.h"
 #include "ESPOnomataParticle.h"
+#include "ESPShaderParticle.h"

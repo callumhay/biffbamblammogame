@@ -8,7 +8,7 @@
 class ESPParticleAccelEffector : public ESPParticleEffector {
 
 private:
-	// The amount of velocity in m/s to apply to the particle it affects
+	// The amount of acceleration in m/s^2 to apply to the particle it affects
 	Vector3D accelAmount;
 
 public:
@@ -16,5 +16,9 @@ public:
 	virtual ~ESPParticleAccelEffector();
 
 	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
+
+	void SetAcceleration(const Vector3D& a) {
+		this->accelAmount = a;
+	}
 };
 #endif
