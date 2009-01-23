@@ -97,7 +97,6 @@ public:
 
 };
 
-
 /**
  * Base class for loading and dealing with CgFx material shaders.
  */
