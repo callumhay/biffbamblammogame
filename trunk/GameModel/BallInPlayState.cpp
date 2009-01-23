@@ -133,6 +133,7 @@ void BallInPlayState::Tick(double seconds) {
 						if (this->timeSinceGhost >= GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE &&
 							  Randomizer::GetInstance()->RandomNumZeroToOne() <= GameModelConstants::GetInstance()->PROB_OF_GHOSTBALL_BLOCK_MISS) {
 							this->timeSinceGhost = 0.0;
+							continue;
 						}
 					}
 
@@ -145,7 +146,7 @@ void BallInPlayState::Tick(double seconds) {
 					}
 					
 					// Figure out whether we want to drop an item...
-					if (currPiece->CanDropItem()) {
+					if (currPiece->CanDropItem() && currLiveItems.size() < GameModelConstants::GetInstance()->MAX_LIVE_ITEMS) {
 						// Now we will drop an item based on a combination of variation/probablility
 						// and the number of consecutive blocks that have been hit on this set of ball bounces
 						double numBlocksAlreadyHit = static_cast<double>(this->gameModel->GetNumConsecutiveBlocksHit());
@@ -154,7 +155,7 @@ void BallInPlayState::Tick(double seconds) {
 
 						// Decrease the probability of a drop if the last block dropped an item
 						int modDroppedItems = this->droppedItemsSincePaddle % 2;
-						if (modDroppedItems == 0) {
+						if (modDroppedItems == 1) {
 							itemDropProb *= pow(GameModelConstants::GetInstance()->PROB_OF_CONSECTUIVE_ITEM_DROP, modDroppedItems);
 							this->droppedItemsSincePaddle++;
 						}
