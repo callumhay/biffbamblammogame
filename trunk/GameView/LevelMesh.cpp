@@ -5,16 +5,21 @@
 
 #include "../BlammoEngine/BlammoEngine.h"
 
-LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets) : styleBlock(NULL), basicBlock(NULL) {
+LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets) : styleBlock(NULL), basicBlock(NULL), bombBlock(NULL) {
 	// Based on the world style read-in the appropriate block
 	this->styleBlock = gameWorldAssets->GetWorldStyleBlock();
-	
-	// Load the basic block
-	this->basicBlock = ObjReader::ReadMesh(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
-	
-	// Make sure the block was loaded and that it has only one material on it
+
+	// Make sure the style block was loaded and that it has only one material on it
 	assert(this->styleBlock != NULL);
 	assert(this->styleBlock->GetMaterialGroups().size() == 1);
+
+	// Load the basic block and all other block types that stay consistent between worlds
+	this->basicBlock = ObjReader::ReadMesh(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
+	this->bombBlock  = ObjReader::ReadMesh(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
+	
+	// Make sure all consistent blocks were loaded...
+	assert(this->basicBlock != NULL);
+	assert(this->bombBlock != NULL);
 }
 
 LevelMesh::~LevelMesh() {

@@ -3,12 +3,15 @@
 
 #include <list>
 
+#include "CgFXVolumetricEffect.h"
+
 #include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Camera.h"
 
 #include "../ESPEngine/ESPParticleColourEffector.h"
 #include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESPParticleAccelEffector.h"
 
 class LevelPiece;
 class GameBall;
@@ -16,6 +19,7 @@ class GameItem;
 class ESPEmitter;
 class ESPPointEmitter;
 class Texture2D;
+class ESPShaderParticle;
 
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
@@ -35,13 +39,15 @@ private:
 	ESPParticleScaleEffector particlePulseItemDropAura;
 	ESPParticleScaleEffector particleShrinkToNothing;
 
+	ESPParticleAccelEffector ghostBallAccel1;
+
 	ESPParticleScaleEffector particleSmallGrowth;
 	ESPParticleScaleEffector particleMediumGrowth;
 
 
 	// Various textures used as particles for various effects
 	std::vector<Texture2D*> bangTextures;
-	//std::vector<Texture2D*> smokeTextures;
+	std::vector<Texture2D*> smokeTextures;
 	Texture2D* circleGradientTex;
 	Texture2D* starTex;
 	Texture2D* starOutlineTex;
@@ -51,18 +57,26 @@ private:
 
 
 	// Standalone ESP effects
-	//ESPPointEmitter* ghostBallEmitterAura;
 	ESPPointEmitter* uberBallEmitterAura;
 	ESPPointEmitter* uberBallEmitterTrail;
+	
+	//ESPPointEmitter* ghostBallEmitterAura;
+
+	std::vector<ESPShaderParticle*> ghostSmokeParticles;
+	CgFxVolumetricEffect ghostBallSmoke;
+	ESPPointEmitter* ghostBallEmitterTrail;
+
 
 	// Used for tweaking...
 	Vector2D oldBallDir;
+	void EffectsToResetOnBallVelChange();
 
 	// Initialization functions for effect stuffs
 	void InitESPTextures();
 	void InitStandaloneESPEffects();
 
 	void InitUberBallESPEffects();
+	void InitGhostBallESPEffects();
 
 public:
 	GameESPAssets();
@@ -83,6 +97,7 @@ public:
 	void DrawParticleEffects(double dT, const Camera& camera);
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
+	void DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball);
 
 
 };

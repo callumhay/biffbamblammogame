@@ -6,6 +6,7 @@
 #include "../BlammoEngine/Vector.h"
 
 class Camera;
+class Texture2D;
 
 /**
  * Represents CgFx CelShader material.
@@ -15,6 +16,7 @@ public:
 	// Constants used for loading the CelShading effect
 	static const std::string BASIC_TECHNIQUE_NAME;
 	static const std::string GHOSTBALL_TECHNIQUE_NAME;
+	static const std::string SMOKESPRITE_TECHNIQUE_NAME;
 
 private:
 	// CG Transform params
@@ -23,8 +25,9 @@ private:
 	CGparameter worldMatrixParam;
 	CGparameter viewInvMatrixParam;
 
-	// Noise texture sampler param
-	CGparameter noiseSamplerParam;
+	
+	CGparameter noiseSamplerParam;	// Noise texture sampler param
+	CGparameter maskSamplerParam;		// Mask texture
 
 	// Timer paramter
 	CGparameter timerParam;
@@ -43,7 +46,8 @@ private:
 	float scale, freq, fadeExponent, constAmt, alphaMultiplier;
 	Colour colour;
 	Vector3D flowDir;
-	GLint noiseTexID;
+	GLint noiseTexID; 
+	Texture2D* maskTex;
 
 protected:
 	virtual void SetupBeforePasses(const Camera& camera);
@@ -51,6 +55,10 @@ protected:
 public:
 	CgFxVolumetricEffect();
 	virtual ~CgFxVolumetricEffect();
+
+	void SetMaskTexture(Texture2D* tex) {
+		this->maskTex = tex;
+	}
 
 	void SetScale(float s) {
 		this->scale = s;

@@ -2,6 +2,7 @@
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
 
+
 #include "../GameModel/GameBall.h"
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/GameItem.h"
@@ -10,6 +11,7 @@
 #include "../GameModel/InvisiBallItem.h"
 
 #include "../BlammoEngine/Texture2D.h"
+
 
 #include "../ESPEngine/ESP.h"
 
@@ -23,8 +25,11 @@ particlePulseItemDropAura(0, 0),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f),
 
+ghostBallAccel1(Vector3D(1,1,1)),
+
 uberBallEmitterAura(NULL), 
-uberBallEmitterTrail(NULL), 
+uberBallEmitterTrail(NULL),
+ghostBallEmitterTrail(NULL),
 
 circleGradientTex(NULL), 
 starTex(NULL), 
@@ -46,6 +51,12 @@ GameESPAssets::~GameESPAssets() {
 	}
 	this->bangTextures.clear();
 
+	for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
+		iter != this->smokeTextures.end(); iter++) {
+		delete *iter;
+	}
+	this->smokeTextures.clear();
+
 	delete this->circleGradientTex;
 	this->circleGradientTex = NULL;
 	delete this->starTex;
@@ -58,6 +69,13 @@ GameESPAssets::~GameESPAssets() {
 	this->uberBallEmitterAura = NULL;
 	delete this->uberBallEmitterTrail;
 	this->uberBallEmitterTrail = NULL;
+	delete this->ghostBallEmitterTrail;
+	this->ghostBallEmitterTrail = NULL;
+
+	for (std::vector<ESPShaderParticle*>::iterator iter = this->ghostSmokeParticles.begin(); iter != this->ghostSmokeParticles.end(); iter++) {
+		delete *iter;
+	}
+	this->ghostSmokeParticles.clear();
 
 }
 
@@ -90,10 +108,11 @@ void GameESPAssets::KillAllActiveEffects() {
  * Private helper function for initializing textures used in the ESP effects.
  */
 void GameESPAssets::InitESPTextures() {
+	// TODO: fix texture filtering...
 	debug_output("Loading ESP Textures...");
+	
 	// Initialize bang textures (big boom thingys when there are explosions)
 	if (this->bangTextures.size() == 0) {
-		// TODO: fix texture filtering...
 		Texture2D* temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear);
 		assert(temp != NULL);
 		this->bangTextures.push_back(temp);
@@ -105,6 +124,28 @@ void GameESPAssets::InitESPTextures() {
 		this->bangTextures.push_back(temp);
 	}
 	
+	// Initialize smoke textures (cartoony puffs of smoke)
+	if (this->smokeTextures.size() == 0) {
+		Texture2D* temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear);
+		assert(temp != NULL);
+		this->smokeTextures.push_back(temp);
+		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear);
+		assert(temp != NULL);
+		this->smokeTextures.push_back(temp);
+		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear);
+		assert(temp != NULL);
+		this->smokeTextures.push_back(temp);
+		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear);
+		assert(temp != NULL);
+		this->smokeTextures.push_back(temp);
+		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear);
+		assert(temp != NULL);
+		this->smokeTextures.push_back(temp);
+		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear);
+		assert(temp != NULL);
+		this->smokeTextures.push_back(temp);	
+	}
+
 	if (this->circleGradientTex == NULL) {
 		this->circleGradientTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear);
 		assert(this->circleGradientTex != NULL);
@@ -121,6 +162,9 @@ void GameESPAssets::InitESPTextures() {
 
 // Private helper function for initializing the uber ball's effects
 void GameESPAssets::InitUberBallESPEffects() {
+	assert(this->uberBallEmitterAura == NULL);
+	assert(this->uberBallEmitterTrail == NULL);
+
 	// Initialize uberball effectors
 	ScaleEffect uberBallPulseSettings;
 	uberBallPulseSettings.pulseGrowthScale = 2.0f;
@@ -139,8 +183,9 @@ void GameESPAssets::InitUberBallESPEffects() {
 	this->uberBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
 	this->uberBallEmitterAura->SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.75f));
 	this->uberBallEmitterAura->AddEffector(&this->particlePulseUberballAura);
-	this->uberBallEmitterAura->SetParticles(1, this->circleGradientTex);
-	
+	bool result = this->uberBallEmitterAura->SetParticles(1, this->circleGradientTex);
+	assert(result);
+
 	this->uberBallEmitterTrail = new ESPPointEmitter();
 	this->uberBallEmitterTrail->SetSpawnDelta(ESPInterval(0.02f));
 	this->uberBallEmitterTrail->SetInitialSpd(ESPInterval(5.0f));
@@ -152,9 +197,43 @@ void GameESPAssets::InitUberBallESPEffects() {
 	this->uberBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
 	this->uberBallEmitterTrail->AddEffector(&this->particleFaderUberballTrail);
 	this->uberBallEmitterTrail->AddEffector(&this->particleShrinkToNothing);
-	this->uberBallEmitterTrail->SetParticles(40, this->circleGradientTex);
+	result = this->uberBallEmitterTrail->SetParticles(40, this->circleGradientTex);
+	assert(result);
 }
 
+
+
+// Private helper function for initializing the ghost ball's effects
+void GameESPAssets::InitGhostBallESPEffects() {
+	assert(this->ghostBallEmitterTrail == NULL);
+
+	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
+	this->ghostBallSmoke.SetColour(Colour(1.00f, 1.00f, 1.00f));
+	this->ghostBallSmoke.SetScale(0.5f);
+	this->ghostBallSmoke.SetFrequency(0.25f);
+	this->ghostBallSmoke.SetFlowDirection(Vector3D(0, 0, 1));
+	this->ghostBallSmoke.SetMaskTexture(this->circleGradientTex);
+
+	this->ghostBallEmitterTrail = new ESPPointEmitter();
+	this->ghostBallEmitterTrail->SetSpawnDelta(ESPInterval(0.01f));
+	this->ghostBallEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
+	this->ghostBallEmitterTrail->SetParticleLife(ESPInterval(0.5f));
+	this->ghostBallEmitterTrail->SetParticleSize(ESPInterval(1.5f, 2.0f));
+	this->ghostBallEmitterTrail->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	this->ghostBallEmitterTrail->SetEmitAngleInDegrees(20);
+	this->ghostBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->ghostBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
+	this->ghostBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+	this->ghostBallEmitterTrail->AddEffector(&this->particleFader);
+	this->ghostBallEmitterTrail->AddEffector(&this->ghostBallAccel1);
+
+	for (int i = 0; i < 25; i++) {
+		ESPShaderParticle* temp = new ESPShaderParticle(&this->ghostBallSmoke);
+		this->ghostSmokeParticles.push_back(temp);
+		this->ghostBallEmitterTrail->AddParticle(temp);
+	}
+
+}
 
 /**
  * Private helper function for initializing standalone ESP effects.
@@ -162,6 +241,7 @@ void GameESPAssets::InitUberBallESPEffects() {
 void GameESPAssets::InitStandaloneESPEffects() {
 
 	this->InitUberBallESPEffects();
+	this->InitGhostBallESPEffects();
 
 	ScaleEffect itemDropPulseSettings;
 	itemDropPulseSettings.pulseGrowthScale = 1.25f;
@@ -530,10 +610,13 @@ void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const G
 }
 
 /**
- * Draw particle effects associated with the game ball.
- * NOTE: You must transform these effects to be where the ball is first!
+ * Draw particle effects associated with the uberball.
  */
 void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	glPushMatrix();
+	Point2D loc = ball.GetBounds().Center();
+	glTranslatef(loc[0], loc[1], 0);
+
 	// Draw the basic aura around the ball
 	this->uberBallEmitterAura->Draw(camera);
 	this->uberBallEmitterAura->Tick(dT);
@@ -541,11 +624,58 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 	// Create a kind of trail for the ball...
 	Vector2D ballDir    = ball.GetDirection();
 	if (this->oldBallDir != ballDir) {
-		this->uberBallEmitterTrail->Reset();
+		this->EffectsToResetOnBallVelChange();
 	}
 	this->oldBallDir = ballDir;
+	
+	// Draw the trail of the ghost ball...
 	Vector3D negBallDir = Vector3D(-ballDir[0], -ballDir[1], 0.0f);
 	this->uberBallEmitterTrail->SetEmitDirection(negBallDir);
 	this->uberBallEmitterTrail->Draw(camera);
 	this->uberBallEmitterTrail->Tick(dT);
+
+	glPopMatrix();
+}
+
+/**
+ * Draw particle effects associated with the ghostball.
+ */
+void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	glPushMatrix();
+	Point2D loc = ball.GetBounds().Center();
+	glTranslatef(loc[0], loc[1], 0);
+
+	Vector2D ballDir    = ball.GetDirection();
+	Vector3D negBallDir = Vector3D(-ballDir[0], -ballDir[1], 0.0f);
+
+	// Reset the trail effect when the ball suddenly changes velocity...
+	if (this->oldBallDir != ballDir) {
+		this->EffectsToResetOnBallVelChange();
+	}
+	this->oldBallDir = ballDir;
+
+	// Rotate the negative ball -vel direction by some random amount and then affect the particle's velocities
+	// by it, this gives the impression that the particles are waving around mysteriously (ghostlike... one might say)
+	double randomDegrees = Randomizer::GetInstance()->RandomNumNegOneToOne() * 90;
+	Vector3D accel = Matrix4x4::rotationMatrix('z', static_cast<float>(randomDegrees), true) * negBallDir;
+	accel = ball.GetSpeed() * 4.0 * accel;
+	this->ghostBallAccel1.SetAcceleration(accel);
+
+	// Create a kind of trail for the ball...
+	//this->ghostBallEmitterTrail->SetEmitPosition(Point3D(loc[0], loc[1], 0));
+	this->ghostBallEmitterTrail->Draw(camera);
+	this->ghostBallEmitterTrail->Tick(dT);
+	
+	glPopMatrix();
+}
+
+/**
+ * Private helper function that resets certain effects when the ball changes
+ * velocity - the reasoning behind this is that we want particles to stop moving
+ * based on previous ball velocity / directions in the case where they are based off
+ * such values.
+ */
+void GameESPAssets::EffectsToResetOnBallVelChange() {
+	this->ghostBallEmitterTrail->Reset();
+	this->uberBallEmitterTrail->Reset();
 }

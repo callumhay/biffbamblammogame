@@ -115,11 +115,6 @@ void GameAssets::DrawLevelPieces(const Camera& camera) const {
 // draw the materials and draw the mesh.
 void GameAssets::DrawGameBall(double dT, const GameBall& b, const Camera& camera, Texture2D* sceneTex) const {
 	
-	Point2D loc = b.GetBounds().Center();
-	glPushMatrix();
-	glTranslatef(loc[0], loc[1], 0);
-	Vector3D ballRot = b.GetRotation();
-
 	CgFxEffectBase* ballEffectTemp = NULL;
 	
 	// Ball shaders when applicable...
@@ -128,18 +123,27 @@ void GameAssets::DrawGameBall(double dT, const GameBall& b, const Camera& camera
 		this->invisiBallEffect->SetFBOTexture(sceneTex);
 		ballEffectTemp = this->invisiBallEffect;
 	}
-	else if ((b.GetBallType() & GameBall::GhostBall) == GameBall::GhostBall) {
-		ballEffectTemp = this->ghostBallEffect;
-	}
 	
 	// Ball effects when applicable...
+	if ((b.GetBallType() & GameBall::GhostBall) == GameBall::GhostBall &&
+			(b.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+		ballEffectTemp = this->ghostBallEffect;
+		this->espAssets->DrawGhostBallEffects(dT, camera, b);
+	}
+
 	if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall &&
 			(b.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
 		// Draw when uber ball and not invisiball
 		this->espAssets->DrawUberBallEffects(dT, camera, b);
 	}
 
+
 	// Ball model...
+	glPushMatrix();
+	Point2D loc = b.GetBounds().Center();
+	glTranslatef(loc[0], loc[1], 0);
+
+	Vector3D ballRot = b.GetRotation();
 	glRotatef(ballRot[0], 1.0f, 0.0f, 0.0f);
 	glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
 	glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
@@ -161,10 +165,24 @@ void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) const {
 }
 
 /**
- * Draw the background / environment of the world type.
+ * Draw the skybox for the current world type.
  */
-void GameAssets::DrawBackground(double dT, const Camera& camera) {
-	this->worldAssets->DrawBackground(dT, camera);
+void GameAssets::DrawSkybox(double dT, const Camera& camera) {
+	this->worldAssets->DrawSkybox(dT, camera);
+}
+
+/**
+ * Draw the background model for the current world type.
+ */
+void GameAssets::DrawBackgroundModel(double dT, const Camera& camera) {
+	this->worldAssets->DrawBackgroundModel(dT, camera);
+}
+
+/**
+ * Draw the background effects for the current world type.
+ */
+void GameAssets::DrawBackgroundEffects(double dT, const Camera& camera) {
+	this->worldAssets->DrawBackgroundEffects(dT, camera);
 }
 
 /**
@@ -207,12 +225,12 @@ void GameAssets::LoadRegularEffectAssets() {
 	if (this->ghostBallEffect == NULL) {
 		this->ghostBallEffect = new CgFxVolumetricEffect();
 		this->ghostBallEffect->SetTechnique(CgFxVolumetricEffect::GHOSTBALL_TECHNIQUE_NAME);
-		this->ghostBallEffect->SetColour(Colour(0.80f, 0.90f, 0.99f));
+		this->ghostBallEffect->SetColour(Colour(0.80f, 0.90f, 1.0f));
 		this->ghostBallEffect->SetConstantFactor(0.05f);
-		this->ghostBallEffect->SetFadeExponent(2.0f);
-		this->ghostBallEffect->SetScale(0.2f);
+		this->ghostBallEffect->SetFadeExponent(1.0f);
+		this->ghostBallEffect->SetScale(0.1f);
 		this->ghostBallEffect->SetFrequency(0.8f);
-		this->ghostBallEffect->SetAlphaMultiplier(0.8f);
+		this->ghostBallEffect->SetAlphaMultiplier(1.0f);
 		this->ghostBallEffect->SetFlowDirection(Vector3D(0, 0, 1));
 	}
 }
