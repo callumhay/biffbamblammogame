@@ -1,6 +1,6 @@
 #include "ESPEmitter.h"
 
-ESPEmitter::ESPEmitter() : particleTexture(NULL), timeSinceLastSpawn(0.0f), 
+ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), //particleTexture(NULL),
 particleAlignment(ESP::ViewPointAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
 makeSizeConstraintsEqual(true) {
 }
@@ -32,12 +32,30 @@ void ESPEmitter::Flush() {
 	this->deadParticles.clear();
 
 	// Set texture to NULL
-	this->particleTexture = NULL;
+	//this->particleTexture = NULL;
+	this->particleTextures.clear();
+	this->textureAssignments.clear();
 
 	// Reset appropriate variables
 	this->timeSinceLastSpawn = 0.0f;
 }
 
+/**
+ * Private helper function for assigning a random texture to a particle.
+ */
+void ESPEmitter::AssignRandomTextureToParticle(ESPParticle* particle) {
+	assert(particle != NULL);
+
+	// If there are no textures then just exit
+	if (this->particleTextures.size() == 0) {
+		return;
+	}
+	
+	// Choose a random texture index...
+	unsigned int randomTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->particleTextures.size();
+	this->textureAssignments[particle] = this->particleTextures[randomTexIndex];
+	assert(this->textureAssignments[particle] != NULL);
+}
 
 /**
  * Public function for setting the particles for this emitter.
@@ -48,18 +66,41 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, Texture2D* texture) {
 	this->Flush();
 
 	assert(texture != NULL);
-	this->particleTexture = texture;
-	if (this->particleTexture == NULL) {
-		return false;
-	}
+	this->particleTextures.push_back(texture);
 
 	// Create each of the new particles
 	for (unsigned int i = 0; i < numParticles; i++) {
-		this->deadParticles.push_back(new ESPParticle());
+		ESPParticle* newParticle = new ESPParticle();
+		this->deadParticles.push_back(newParticle);
+		this->textureAssignments[newParticle] = texture;
 	}
 
 	return true;
 }
+
+/**
+ * Public function for setting the particles for this emitter, the textures given
+ * are assigned to particles in this emitter at random.
+ * Returns: true on success, false otherwise.
+ */
+bool ESPEmitter::SetParticles(unsigned int numParticles, std::vector<Texture2D*> textures) {
+	// Clean up any previous emitter data
+	this->Flush();
+
+	this->particleTextures = textures;
+
+	// Create each of the new particles
+	for (unsigned int i = 0; i < numParticles; i++) {
+		ESPParticle* newParticle = new ESPParticle();
+		this->deadParticles.push_back(newParticle);
+
+		// Pick a random texture and assign it...
+		this->AssignRandomTextureToParticle(newParticle);
+	}
+
+	return true;
+}
+
 
 /**
  * Sets the particle alignments for this emitter.

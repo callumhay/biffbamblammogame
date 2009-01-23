@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 /**
  * ESPEmitter.h
@@ -18,10 +19,12 @@ class ESPEmitter {
 
 protected:
 	
-	Texture2D* particleTexture;										// Texture of particles in this emitter
-	std::list<ESPParticle*> aliveParticles;				// All the alive particles in this emitter
-	std::list<ESPParticle*> deadParticles;				// All the dead particles in this emitter
-	float timeSinceLastSpawn;											// Time since the last particle was spawned	
+	//Texture2D* particleTexture;													// Texture of particles in this emitter
+	std::vector<Texture2D*> particleTextures;
+	std::map<ESPParticle*, Texture2D*> textureAssignments;	// Mapping of particles to textures
+	std::list<ESPParticle*> aliveParticles;								// All the alive particles in this emitter
+	std::list<ESPParticle*> deadParticles;								// All the dead particles in this emitter
+	float timeSinceLastSpawn;															// Time since the last particle was spawned	
 
 	std::list<ESPParticleEffector*> effectors;	// All the particle effectors of this emitter
 	
@@ -43,6 +46,8 @@ protected:
 
 	virtual void Flush();
 
+	void AssignRandomTextureToParticle(ESPParticle* particle);
+
 public:
 	ESPEmitter();
 	virtual ~ESPEmitter();
@@ -54,6 +59,7 @@ public:
 
 	// Setter functions for typical attributes of emitters
 	bool SetParticles(unsigned int numParticles, Texture2D* texture);
+	bool SetParticles(unsigned int numParticles, std::vector<Texture2D*> textures);
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);
 	void SetSpawnDelta(const ESPInterval& spawnDelta);
 	void SetInitialSpd(const ESPInterval& initialSpd);
