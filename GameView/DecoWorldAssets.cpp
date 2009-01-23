@@ -122,9 +122,7 @@ void DecoWorldAssets::RotateSkybeams(double dT) {
 	}
 }
 
-void DecoWorldAssets::DrawBackground(double dT, const Camera& camera) {
-	GameWorldAssets::DrawBackground(dT, camera);
-	
+void DecoWorldAssets::DrawBackgroundEffects(double dT, const Camera& camera) {
 	// Add to the timer in the beam shader
 	this->beamEffect->AddToTimer(dT);
 	

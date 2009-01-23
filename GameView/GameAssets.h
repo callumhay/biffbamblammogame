@@ -60,7 +60,11 @@ public:
 
 	// Draw functions ******************************************************************************
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const;
-	void DrawBackground(double dT, const Camera& camera);
+	
+	void DrawSkybox(double dT, const Camera& camera);
+	void DrawBackgroundModel(double dT, const Camera& camera);
+	void DrawBackgroundEffects(double dT, const Camera& camera);
+
 	void DrawLevelPieces(const Camera& camera) const;
 	void DrawGameBall(double dT, const GameBall& b, const Camera& camera, Texture2D* sceneTex) const;
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const;

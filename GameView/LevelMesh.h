@@ -16,6 +16,7 @@ private:
 
 	Mesh* basicBlock;
 	Mesh* styleBlock;
+	Mesh* bombBlock;
 	
 	std::vector<std::vector<GLint>> pieceMeshes;
 	std::map<LevelPiece::LevelPieceType, std::vector<GLint>> piecesByMaterial;

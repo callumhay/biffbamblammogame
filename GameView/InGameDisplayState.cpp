@@ -79,13 +79,18 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	
 	// Draw the background scenery
 	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
-	this->display->GetAssets()->DrawBackground(dT, this->display->GetCamera());
+	this->display->GetAssets()->DrawSkybox(dT, this->display->GetCamera());
+	this->display->GetAssets()->DrawBackgroundModel(dT, this->display->GetCamera());
+	this->display->GetAssets()->DrawBackgroundEffects(dT, this->display->GetCamera());
 	
 	FBOManager::GetInstance()->UnbindFBO();												// Unbind the FBO so that we can use the render to texture for special ball effects
 	this->renderToTexBeforeBall->RenderTextureToFullscreenQuad(); // Render the texture to a fullscreen quad
 
 	// Enable multisampling for the foreground rendering
 	glEnable(GL_MULTISAMPLE);
+
+	// Redraw the background model using multisampling... too expensive...
+	//this->display->GetAssets()->DrawBackgroundModel(dT, this->display->GetCamera());
 
 	// Draw the foreground stuff (paddle, items, ball)
 	glTranslatef(negHalfLevelDim[0], 0, 0.0f);	

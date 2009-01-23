@@ -41,11 +41,13 @@ public:
 		return this->styleBlock;
 	}
 
-	virtual void DrawBackground(double dT, const Camera& camera) {
-		// Draw the skybox
+	virtual void DrawSkybox(double dT, const Camera& camera) {
 		this->skybox->Draw(dT, camera);
-		
-		// Draw the background
+	}
+
+	virtual void DrawBackgroundEffects(double dT, const Camera& camera) = 0;
+
+	virtual void DrawBackgroundModel(double dT, const Camera& camera) {
 		this->background->Draw(camera);
 	}
 

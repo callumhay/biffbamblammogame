@@ -49,6 +49,12 @@ public:
 	const std::string TEXTURE_BANG1;
 	const std::string TEXTURE_BANG2;
 	const std::string TEXTURE_BANG3;
+	const std::string TEXTURE_SMOKE1;
+	const std::string TEXTURE_SMOKE2;
+	const std::string TEXTURE_SMOKE3;
+	const std::string TEXTURE_SMOKE4;
+	const std::string TEXTURE_SMOKE5;
+	const std::string TEXTURE_SMOKE6;
 	const std::string TEXTURE_CIRCLE_GRADIENT;
 	const std::string TEXTURE_STAR;
 	const std::string TEXTURE_STAR_OUTLINE;
@@ -88,6 +94,7 @@ public:
 	const std::string BALL_MESH;
 	const std::string SPIKEY_BALL_MESH;
 	const std::string BASIC_BLOCK_MESH_PATH;
+	const std::string BOMB_BLOCK_MESH;
 	const std::string SKYBOX_MESH;
 	const std::string ITEM_MESH;
 

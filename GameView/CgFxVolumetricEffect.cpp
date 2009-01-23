@@ -5,16 +5,18 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/Noise.h"
 #include "../BlammoEngine/Texture3D.h"
+#include "../BlammoEngine/Texture2D.h"
 
-const std::string CgFxVolumetricEffect::BASIC_TECHNIQUE_NAME			= "Basic";
-const std::string CgFxVolumetricEffect::GHOSTBALL_TECHNIQUE_NAME	= "GhostBall";
+const std::string CgFxVolumetricEffect::BASIC_TECHNIQUE_NAME				= "Basic";
+const std::string CgFxVolumetricEffect::GHOSTBALL_TECHNIQUE_NAME		= "GhostBall";
+const std::string CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME	= "SmokeSprite";
 
 // Default constructor
 CgFxVolumetricEffect::CgFxVolumetricEffect() : 
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_VOLUMEMETRIC_SHADER), 
 scale(1.0f), freq(1.0f), fadeExponent(1),
 colour(1,1,1), flowDir(0, 0, 1), constAmt(0.0f), 
-noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
+noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL) {
 
 	// Set the technique
 	this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
@@ -27,6 +29,7 @@ noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
 
 	// Noise texture sampler param
 	this->noiseSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
+	this->maskSamplerParam  = cgGetNamedEffectParameter(this->cgEffect, "MaskSampler");
 
 	// Timer paramter
 	this->timerParam = cgGetNamedEffectParameter(this->cgEffect, "Timer");
@@ -84,4 +87,9 @@ void CgFxVolumetricEffect::SetupBeforePasses(const Camera& camera) {
 
 	// Set noise texture sampler...
 	cgGLSetTextureParameter(this->noiseSamplerParam, this->noiseTexID);
+
+	// Set the mask texture sampler if it exists
+	if (this->maskTex != NULL) {
+		cgGLSetTextureParameter(this->maskSamplerParam, this->maskTex->GetTextureID());
+	}
 }
