@@ -1,4 +1,4 @@
-#summary Types of Power-ups and Power-downs in BiffBamBlammo.
+#summary Types of Power-ups, Power-neutrals and Power-downs in BiffBamBlammo.
 
 = Power-ups =
 
