@@ -16,6 +16,10 @@
   * Elastic-Paddle-Ball?
   * Shield?
 
+= Power-neutrals =
+
+  * Ghost-Ball
+
 = Power-downs =
 
   * Shrink
@@ -27,5 +31,4 @@
   * Rotate Level
   * Fast-ball
   * Point Loss
-  * Ghost-Ball
   * Invisi-Ball
