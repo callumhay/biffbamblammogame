@@ -14,10 +14,8 @@ class GameItem;
 class BallInPlayState : public GameState {
 
 private:
-	GameItem* debugItemDrop;
-	
-	unsigned int droppedItemsSincePaddle;
-	double timeSinceGhost;	// The time since the ball stopped colliding with blocks
+	GameItem* debugItemDrop;	// Item to drop if debug drop is needed.
+	double timeSinceGhost;		// The time since the ball stopped colliding with blocks
 
 	void DoBallCollision(GameBall& b, const Vector2D& n, float d);
 	void DoItemCollision();

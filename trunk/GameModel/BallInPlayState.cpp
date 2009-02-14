@@ -9,8 +9,7 @@
 #include "../BlammoEngine/BlammoEngine.h"
 
 BallInPlayState::BallInPlayState(GameModel* gm) : 
-GameState(gm), droppedItemsSincePaddle(0), debugItemDrop(NULL), 
-timeSinceGhost(DBL_MAX) {
+GameState(gm), debugItemDrop(NULL), timeSinceGhost(DBL_MAX) {
 }
 
 BallInPlayState::~BallInPlayState() {
@@ -83,10 +82,6 @@ void BallInPlayState::Tick(double seconds) {
 		this->debugItemDrop = NULL;
 	}
 
-	// Check for ball collisions with the pieces of the level and the paddle
-	const GameLevel *currLevel = this->gameModel->GetCurrentLevel();
-	const std::vector<std::vector<LevelPiece*>> &levelPieces = currLevel->GetCurrentLevelLayout();
-	
 	// First check for ball-paddle collision
 	Vector2D n;
 	float d;
@@ -98,95 +93,59 @@ void BallInPlayState::Tick(double seconds) {
 		this->DoBallCollision(*ball, n, d);
 		// Tell the model that a ball collision occurred with the paddle
 		this->gameModel->BallPaddleCollisionOccurred();
-
-		// We hit the paddle again so reset the dropped item flag
-		this->droppedItemsSincePaddle = 0;
+		return;
 	}
-	else {	// No paddle collision with the ball
 
-		// Check for death
-		if (ball->GetBounds().Center()[1] <= GameLevel::Y_COORD_OF_DEATH) {
-			this->gameModel->PlayerDied();
-			return;
-		}
+	// Check for death (ball went out of bounds)
+	if (ball->GetBounds().Center()[1] <= GameLevel::Y_COORD_OF_DEATH) {
+		this->gameModel->PlayerDied();
+		return;
+	}
 
-		// Check for block collisions
-		for (size_t h = 0; h < levelPieces.size(); h++) {
-			for (size_t w = 0; w < levelPieces[h].size(); w++) {
+	// Check for ball-levelpiece collisions
+	const GameLevel *currLevel = this->gameModel->GetCurrentLevel();
+	const std::vector<std::vector<LevelPiece*>> &levelPieces = currLevel->GetCurrentLevelLayout();
+	
+	// Get the small set (maximum 4) of levelpieces based on the position of the ball...
+	std::set<LevelPiece*> collisionPieces = currLevel->GetCollisionCandidates(*ball);
+	for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); pieceIter++) {
+		
+		LevelPiece *currPiece = *pieceIter;
+		didCollideWithBlock = currPiece->CollisionCheck(ball->GetBounds(), n, d);
+		
+		if (didCollideWithBlock) {
+			
+			// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
+			// lose its ability to collide for 1 second, also check to see if we're already in ghost mode
+			// if so we won't collide with anything (except solid blocks)...
+			if ((ball->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && currPiece->GhostballPassesThrough()) {
 				
-				LevelPiece *currPiece = levelPieces[h][w];
-				didCollideWithBlock = currPiece->CollisionCheck(ball->GetBounds(), n, d);
-				
-				if (didCollideWithBlock) {
-					
-					// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
-					// lose its ability to collide for 1 second, also check to see if we're already in ghost mode
-					// if so we won't collide with anything (except solid blocks)...
-					if ((ball->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall &&
-							currPiece->GetType() != LevelPiece::Solid) {
-						
-						if (this->timeSinceGhost < GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE) {
-							continue;
-						}
+				if (this->timeSinceGhost < GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE) {
+					continue;
+				}
 
-						// If the ball is in ghost mode then it cannot hit anything other than the paddle and solid blocks...
-						if (this->timeSinceGhost >= GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE &&
-							  Randomizer::GetInstance()->RandomNumZeroToOne() <= GameModelConstants::GetInstance()->PROB_OF_GHOSTBALL_BLOCK_MISS) {
-							this->timeSinceGhost = 0.0;
-							continue;
-						}
-					}
-
-					// In the case that the ball is uber then we only reflect if the ball is not green
-					if (((ball->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->GetType() == LevelPiece::GreenBreakable) {
-						// Ignore collision...
-					}
-					else {
-						this->DoBallCollision(*ball, n, d);
-					}
-					
-					// Figure out whether we want to drop an item...
-					if (currPiece->CanDropItem() && currLiveItems.size() < GameModelConstants::GetInstance()->MAX_LIVE_ITEMS) {
-						// Now we will drop an item based on a combination of variation/probablility
-						// and the number of consecutive blocks that have been hit on this set of ball bounces
-						double numBlocksAlreadyHit = static_cast<double>(this->gameModel->GetNumConsecutiveBlocksHit());
-						double itemDropProb = min(1.0, 0.01 * numBlocksAlreadyHit + GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP);
-						double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();
-
-						// Decrease the probability of a drop if the last block dropped an item
-						int modDroppedItems = this->droppedItemsSincePaddle % 2;
-						if (modDroppedItems == 1) {
-							itemDropProb *= pow(GameModelConstants::GetInstance()->PROB_OF_CONSECTUIVE_ITEM_DROP, modDroppedItems);
-							this->droppedItemsSincePaddle++;
-						}
-
-						debug_output("Probability of drop: " << itemDropProb << " Number for deciding: " << randomNum);
-
-						if (randomNum <= itemDropProb) {
-							// Drop an item - create a random item and add it to the list...
-							GameItem* newGameItem = GameItemFactory::CreateRandomItem(currPiece->GetCenter(), this->gameModel);
-							currLiveItems.push_back(newGameItem);
-							// EVENT: Item has been created and added to the game
-							GameEventManager::Instance()->ActionItemSpawned(*newGameItem);
-
-							this->droppedItemsSincePaddle++;
-						}
-					}
-
-					// Tell the model that a ball collision occurred with currPiece
-					this->gameModel->BallPieceCollisionOccurred(*ball, currPiece);	// THIS CALL CAN DELETE THIS OBJECT!!!
-					break;
+				// If the ball is in ghost mode then it cannot hit anything other than the paddle and solid blocks...
+				if (this->timeSinceGhost >= GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE &&
+					  Randomizer::GetInstance()->RandomNumZeroToOne() <= GameModelConstants::GetInstance()->PROB_OF_GHOSTBALL_BLOCK_MISS) {
+					this->timeSinceGhost = 0.0;
+					continue;
 				}
 			}
-			
-			if (didCollideWithBlock) { 
-				// Now, get out of the loop in case of a collision
-				break;
-			}
-		}
 
+			// In the case that the ball is uber then we only reflect if the ball is not green
+			if (((ball->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->UberballBlastsThrough()) {
+				// Ignore collision...
+			}
+			else {
+				this->DoBallCollision(*ball, n, d);
+			}
+			
+			// Tell the model that a ball collision occurred with currPiece
+			this->gameModel->BallPieceCollisionOccurred(*ball, currPiece);	// WARNING: THIS CALL CAN DELETE THIS OBJECT!
+			return;
+		}
 	}
-	// DO NOT PLACE ANY EXTRA CODE HERE, STATE MAY BE SWITCHING !!!
+
 }
 
 /**
@@ -241,6 +200,7 @@ void BallInPlayState::DoItemCollision() {
 			assert(newTimer != NULL);
 			activeTimers.push_back(newTimer);	
 			removeItems.push_back(currItem);
+			GameEventManager::Instance()->ActionItemRemoved(*currItem);
 		}
 	}
 
@@ -248,7 +208,6 @@ void BallInPlayState::DoItemCollision() {
 	for (unsigned int i = 0; i < removeItems.size(); i++) {
 		GameItem* currItem = removeItems[i];
 		currLiveItems.remove(currItem);
-		GameEventManager::Instance()->ActionItemRemoved(*currItem);
 	}
 
 }

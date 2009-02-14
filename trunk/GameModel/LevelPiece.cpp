@@ -1,6 +1,10 @@
 #include "LevelPiece.h"
 #include "GameEventManager.h"
 #include "GameBall.h"
+#include "GameModel.h"
+#include "GameItem.h"
+#include "GameItemFactory.h"
+#include "GameModelConstants.h"
 
 #include "../BlammoEngine/BlammoEngine.h"
 
@@ -10,155 +14,48 @@ const float LevelPiece::HALF_PIECE_WIDTH = PIECE_WIDTH / 2.0f;
 const float LevelPiece::HALF_PIECE_HEIGHT = PIECE_HEIGHT / 2.0f;
 
 
-LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc, LevelPieceType type): pieceType(type),
-center(wLoc * PIECE_WIDTH + HALF_PIECE_WIDTH, hLoc * PIECE_HEIGHT + HALF_PIECE_HEIGHT),
-currHalfWidth(HALF_PIECE_WIDTH), currHalfHeight(HALF_PIECE_HEIGHT), wIndex(wLoc), hIndex(hLoc) {
-	this->UpdateBounds(NULL, NULL, NULL, NULL);
+LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc):
+center(wLoc * PIECE_WIDTH + HALF_PIECE_WIDTH, hLoc * PIECE_HEIGHT + HALF_PIECE_HEIGHT), wIndex(wLoc), hIndex(hLoc),
+colour(1,1,1) {
 }
 
 
 LevelPiece::~LevelPiece() {
 }
-/*
- * Determines if a given character is in the level piece enum.
- * Precondition: true.
- * Return: true if c is in the enum, false otherwise.
+
+/**
+ * Function for adding a possible item drop for the given level piece.
  */
-bool LevelPiece::IsValidBlockEnum(char c) {
-	bool isValid = true;
+void LevelPiece::AddPossibleItemDrop(GameModel *gameModel) {
+	assert(gameModel != NULL);
+
+	std::list<GameItem*>& currentItemsDropping = gameModel->GetLiveItems();
+	// Make sure we don't drop more items than the max allowable...
+	if (currentItemsDropping.size() >= GameModelConstants::GetInstance()->MAX_LIVE_ITEMS) {
+		return;
+	}
+
+	// We will drop an item based on probablility
+	// TODO: Add probability based off multiplier and score stuff...
+	double itemDropProb = GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP;
+	double randomNum    = Randomizer::GetInstance()->RandomNumZeroToOne();
 	
-	switch(c) {
-		case LevelPiece::RedBreakable:
-		case LevelPiece::OrangeBreakable:
-		case LevelPiece::YellowBreakable:
-		case LevelPiece::GreenBreakable:
-		case LevelPiece::Bomb:
-		case LevelPiece::Solid:
-		case LevelPiece::Empty:
-			break;
-		default:
-			isValid = false;
-	}
+	//debug_output("Probability of drop: " << itemDropProb << " Number for deciding: " << randomNum);
 
-	return isValid;
-}
-
-int LevelPiece::GetPointValueForCollision() {
-	switch(this->pieceType) {
-		case GreenBreakable:
-			return POINTS_PER_BLOCK_DESTROYED;
-		case YellowBreakable:
-		case OrangeBreakable:
-		case RedBreakable:
-			return POINTS_PER_BLOCK_HIT;
-		case Bomb:
-			break;
-		case Solid:
-			break;
-		default:
-			break;
+	if (randomNum <= itemDropProb) {
+		// Drop an item - create a random item and add it to the list...
+		GameItem* newGameItem = GameItemFactory::CreateRandomItem(this->GetCenter(), gameModel);
+		currentItemsDropping.push_back(newGameItem);
+		// EVENT: Item has been created and added to the game
+		GameEventManager::Instance()->ActionItemSpawned(*newGameItem);
 	}
-	return 0;
 }
 
 /**
- * Find out what the next piece type is after the given piece
- * type is hit by the ball.
+ * Check for a collision of a given circle with this block.
+ * Returns: true on collision as well as the normal of the line being collided with
+ * and the distance from that line of the given circle; false otherwise.
  */
-LevelPiece::LevelPieceType LevelPiece::GetDecrementedPieceType(LevelPieceType pieceType) {
-	
-	switch(pieceType) {
-		case GreenBreakable:
-			return Empty;
-		case YellowBreakable:
-			return GreenBreakable;
-		case OrangeBreakable:
-			return YellowBreakable;
-		case RedBreakable:
-			return OrangeBreakable;
-		case Solid:
-			return Solid;
-		case Bomb:
-			return Empty;
-		default:
-			break;
-	}
-	return Empty;
-}
-
-/**
- * Decrements the piece type (e.g., if this was a yellow block it would now be green).
- */
-void LevelPiece::DecrementPieceType() {
-	this->pieceType = GetDecrementedPieceType(this->pieceType);
-}
-
-/**
- * Update the boundry lines of this levelpiece by eliminating lines 
- * that are next to neighbors.
- */
-void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-									const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor) {
-
-		// Clear all the currently existing boundry lines first
-		this->bounds.Clear();
-
-		// We don't build a boundry outline if this piece is non-existant
-		if (this->pieceType == Empty) {
-			return;
-		}
-
-		// Set the bounding lines for a rectangular block
-		std::vector<LineSeg2D> boundingLines;
-		std::vector<Vector2D>  boundingNorms;
-
-		// Left boundry of the piece
-		if (leftNeighbor != NULL) {
-			if (leftNeighbor->IsNoBoundsPieceType() || (this->pieceType == LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Solid)) {
-				LineSeg2D l1(this->center + Vector2D(-this->currHalfWidth, this->currHalfHeight), 
-										 this->center + Vector2D(-this->currHalfWidth, -this->currHalfHeight));
-				Vector2D n1(-1, 0);
-				boundingLines.push_back(l1);
-				boundingNorms.push_back(n1);
-			}
-		}
-
-		// Bottom boundry of the piece
-		if (bottomNeighbor != NULL) {
-			if (bottomNeighbor->IsNoBoundsPieceType() || (this->pieceType == LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Solid)) {
-				LineSeg2D l2(this->center + Vector2D(-this->currHalfWidth, -this->currHalfHeight),
-										 this->center + Vector2D(this->currHalfWidth, -this->currHalfHeight));
-				Vector2D n2(0, -1);
-				boundingLines.push_back(l2);
-				boundingNorms.push_back(n2);
-			}
-		}
-
-		// Right boundry of the piece
-		if (rightNeighbor != NULL) {
-			if (rightNeighbor->IsNoBoundsPieceType() || (this->pieceType == LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Solid)) {
-				LineSeg2D l3(this->center + Vector2D(this->currHalfWidth, -this->currHalfHeight),
-										 this->center + Vector2D(this->currHalfWidth, this->currHalfHeight));
-				Vector2D n3(1, 0);
-				boundingLines.push_back(l3);
-				boundingNorms.push_back(n3);
-			}
-		}
-
-		// Top boundry of the piece
-		if (topNeighbor != NULL) {
-			if (topNeighbor->IsNoBoundsPieceType() || (this->pieceType == LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Solid)) {
-				LineSeg2D l4(this->center + Vector2D(this->currHalfWidth, this->currHalfHeight),
-										 this->center + Vector2D(-this->currHalfWidth, this->currHalfHeight));
-				Vector2D n4(0, 1);
-				boundingLines.push_back(l4);
-				boundingNorms.push_back(n4);
-			}
-		}
-
-		this->bounds = BoundingLines(boundingLines, boundingNorms);
-}
-
 bool LevelPiece::CollisionCheck(const Circle2D& c, Vector2D& n, float &d) {
 	if (this->IsNoBoundsPieceType()) {
 		return false;
@@ -167,38 +64,7 @@ bool LevelPiece::CollisionCheck(const Circle2D& c, Vector2D& n, float &d) {
 	return this->bounds.Collide(c, n, d);
 }
 
-void LevelPiece::BallCollisionOccurred(const GameBall& ball) {
-	
-	// If the ball is an 'uber' ball then we decrement the piece type twice when possible
-	if (((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall) && this->pieceType != GreenBreakable) {
-		this->DecrementPieceType();
-	}
-	
-	switch(this->pieceType) {
-		case Empty:
-		case Solid:
-			// Nothing happens if this is just an empty space or solid block
-			return;
-
-		case Bomb:
-			return;
-
-		case GreenBreakable:
-			// EVENT: Block is being destoryed
-			GameEventManager::Instance()->ActionBlockDestroyed(*this);
-
-			// Make empty, eliminate bounding lines
-			this->DecrementPieceType();
-			this->UpdateBounds(NULL, NULL, NULL, NULL);
-			break;
-
-		default:
-			this->DecrementPieceType();
-			break;
-	}
-	assert(LevelPiece::IsValidBlockEnum(this->pieceType));
-}
-
+// Draws the boundry lines and normals for this level piece.
 void LevelPiece::DebugDraw() const {
 	this->bounds.DebugDraw();
 }

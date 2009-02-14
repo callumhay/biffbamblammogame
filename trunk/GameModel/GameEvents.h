@@ -96,7 +96,7 @@ public:
 	 *             blockBefore - The block before it is destroyed or affected by the ball.
 	 *						 blockAfter  - The block after it is destroyed or affected by the ball.
 	 */
-	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& blockBefore, const LevelPiece& blockAfter) = 0;
+	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) = 0;
 
 	/**
 	 * Event triggered when the ball collides with the player paddle. Only occurs once as the ball
@@ -114,6 +114,15 @@ public:
 	 * Arguements: block - The block being destroyed, just before it is destroyed.
 	 */
 	virtual void BlockDestroyedEvent(const LevelPiece& block) = 0;
+
+	/**
+	 * Event triggered when a level piece / block changes from one type to another either within the same
+	 * object or to a different object. Only occurs once as the piece changes - this may be triggered along side
+	 * other similar events e.g., BlockDestroyedEvent, BallBlockCollisionEvent.
+	 * Arguements: pieceBefore - The LevelPiece object before the change.
+	 *						 pieceAfter  = The LevelPiece object after the change.
+	 */
+	virtual void LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) = 0;
 
 	/**
 	 * Event triggered when there is a change to the player's score. Only occurs once per change.

@@ -72,6 +72,11 @@ namespace Onomatoplex {
 		singleWordBounce.push_back("Bip");
 		singleWordBounce.push_back("Plong");
 		singleWordBounce.push_back("Boop");
+		singleWordBounce.push_back("Thunk");
+		singleWordBounce.push_back("Thonk");
+		singleWordBounce.push_back("Wack");
+		singleWordBounce.push_back("Wonk");
+		singleWordBounce.push_back("Bonk");
 		Generator::simpleSingleWords[BOUNCE] = singleWordBounce;
 
 		std::vector<std::string> singleWordElectric;
@@ -103,7 +108,7 @@ namespace Onomatoplex {
 		singleWordBadSad.push_back("Cry");
 		singleWordBadSad.push_back("Tear");
 		singleWordBadSad.push_back("Sob");
-		singleWordBadSad.push_back("Boo");
+		singleWordBadSad.push_back("Boom");
 		singleWordBadSad.push_back("Gaak");
 		singleWordBadSad.push_back("Gah");
 		singleWordBadSad.push_back("Agh");
@@ -128,6 +133,7 @@ namespace Onomatoplex {
 		firstFixBounce.push_back("B");
 		firstFixBounce.push_back("P");
 		firstFixBounce.push_back("Z");
+		firstFixBounce.push_back("Th");
 		Generator::firstFix[BOUNCE] = firstFixBounce;
 
 		std::vector<std::string> firstFixElectric;
@@ -241,6 +247,7 @@ namespace Onomatoplex {
 		endFixBounce.push_back("onk");
 		endFixBounce.push_back("ang");
 		endFixBounce.push_back("ing");
+		endFixBounce.push_back("ank");
 		Generator::endFix[BOUNCE] = endFixBounce;
 
 		std::vector<std::string> endFixElectric;
@@ -308,6 +315,7 @@ namespace Onomatoplex {
 		uberEndFixExplosion.push_back("ation");
 		uberEndFixExplosion.push_back("otron");
 		uberEndFixExplosion.push_back("atron");
+		uberEndFixExplosion.push_back("inator");
 		uberEndFixExplosion.push_back("plosion");
 		uberEndFixExplosion.push_back("frazz");
 		Generator::uberEndFix[EXPLOSION] = uberEndFixExplosion;

@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 class GameBall;
 
@@ -12,8 +13,14 @@ class GameBall;
 class GameLevel {
 
 private:	
-	// The initial layout of the level, stored in row major format (i.e., [row][col] or [height][width])
-	std::vector<std::vector<LevelPiece*>> cachedInitialLevelPieces;
+	static const char EMPTY_SPACE_CHAR;
+	static const char SOLID_BLOCK_CHAR;
+	static const char GREEN_BREAKABLE_CHAR;
+	static const char YELLOW_BREAKABLE_CHAR;
+	static const char ORANGE_BREAKABLE_CHAR;
+	static const char RED_BREAKABLE_CHAR;
+	static const char BOMB_CHAR;
+
 	// The current layout of the level, stored in row major format
 	std::vector<std::vector<LevelPiece*>> currentLevelPieces;
 	// Pieces left before the end of the level
@@ -41,14 +48,28 @@ public:
 		return this->currentLevelPieces;
 	}
 
+	std::set<LevelPiece*> GetCollisionCandidates(const GameBall& b) const;
+
+	/**
+	 * Obtain the LevelPiece at the given height and width indices.
+	 * Return: Pointer to LevelPiece at (h,w), NULL if no such index exists.
+	 */
+	LevelPiece* GetLevelPieceFromCurrentLayout(unsigned int hIndex, unsigned int wIndex) const {
+		// Make sure the provided indices are in the correct range
+		if (wIndex < 0 || wIndex >= this->currentLevelPieces[0].size() || hIndex <0 || hIndex >= this->currentLevelPieces.size()) {
+			return NULL;
+		}
+		return this->currentLevelPieces[hIndex][wIndex];
+	}
+
 	float GetPaddleMinBound() const {
-		LevelPiece* temp = this->cachedInitialLevelPieces[0][0];
-		return temp->GetCenter()[0] + temp->GetHalfWidth();
+		LevelPiece* temp = this->currentLevelPieces[0][0];
+		return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
 	}
 
 	float GetPaddleMaxBound() const {
-		LevelPiece* temp = this->cachedInitialLevelPieces[0][this->width-1];
-		return temp->GetCenter()[0] - temp->GetHalfWidth();	
+		LevelPiece* temp = this->currentLevelPieces[0][this->width-1];
+		return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;	
 	}
 
 	float GetLevelUnitWidth() const {
@@ -63,9 +84,7 @@ public:
 		return this->piecesLeft == 0;
 	}
 
-	void BallCollisionOccurred(const GameBall& ball, size_t hIndex, size_t wIndex);
-
-
+	void PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter);
 };
 #endif
 
