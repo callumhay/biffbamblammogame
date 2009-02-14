@@ -268,6 +268,10 @@ inline Vector3D operator *(float s, const Vector3D& v)
 {
   return Vector3D(s*v[0], s*v[1], s*v[2]);
 }
+inline Vector3D operator /(const Vector3D& v, float d) {
+	assert(d != 0);
+	return Vector3D(v[0]/d, v[1]/d, v[2]/d);
+}
 
 inline Vector3D operator +(const Vector3D& a, const Vector3D& b) {
   return Vector3D(a[0]+b[0], a[1]+b[1], a[2]+b[2]);

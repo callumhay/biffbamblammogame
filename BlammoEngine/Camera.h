@@ -22,10 +22,12 @@ private:
 
 	void ApplyCameraShakeTransform(double dT) {
 		if (this->shakeTimeElapsed < this->shakeTimeTotal) {
-		
-			glTranslatef(this->shakeMagnitude[0]*sin(this->shakeVar), 
-									 this->shakeMagnitude[1]*sin(this->shakeVar), 
-									 this->shakeMagnitude[2]*sin(this->shakeVar));
+
+			// Decrease the magnitude of the shake based on expired time (use linear interpolation)...
+			Vector3D lerpShakeMagMultiplier = this->shakeMagnitude - (this->shakeTimeElapsed  * this->shakeMagnitude / this->shakeTimeTotal);
+			glTranslatef(lerpShakeMagMultiplier[0]*sin(this->shakeVar), 
+									 lerpShakeMagMultiplier[1]*sin(this->shakeVar), 
+									 lerpShakeMagMultiplier[2]*sin(this->shakeVar));
 			
 			this->shakeVar += dT * shakeSpeed * Randomizer::GetInstance()->RandomNumZeroToOne();
 			if (this->shakeVar > 1.0) {
@@ -77,10 +79,19 @@ public:
 	 * magnitude (in units) and speed (units/sec).
 	 */
 	void SetCameraShake(double lengthInSeconds, const Vector3D& shakeDirMag, unsigned int speed) {
-		this->shakeTimeElapsed = 0.0;
-		this->shakeTimeTotal	 = lengthInSeconds;
-		this->shakeMagnitude = shakeDirMag;
-		this->shakeSpeed = speed;
+		// If we're still in the middle of a shake then we need to add this shake on top of it
+		if (this->shakeTimeElapsed <= this->shakeTimeTotal) {
+			this->shakeTimeTotal	 += lengthInSeconds;
+		}
+		else {
+			this->shakeTimeElapsed = 0.0;
+			this->shakeTimeTotal	 = lengthInSeconds;
+		}
+		
+		this->shakeMagnitude = Vector3D(NumberFuncs::MaxF(this->shakeMagnitude[0], shakeDirMag[0]), 
+																		NumberFuncs::MaxF(this->shakeMagnitude[1], shakeDirMag[1]), 
+																		NumberFuncs::MaxF(this->shakeMagnitude[2], shakeDirMag[2]));
+		this->shakeSpeed = NumberFuncs::MaxF(this->shakeSpeed, speed);
 	}
 
 	void ApplyCameraTransform(double dT) {
