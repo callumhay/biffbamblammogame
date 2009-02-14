@@ -61,6 +61,34 @@ float3 InvisiColour <
     string UIWidget = "Color";
 > = {1.00f, 1.00f, 1.00f};
 
+float Timer : TIME <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.01;
+    string UIName =  "Timer";
+> = 0;
+
+float Scale <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 4.0;
+    float UIStep = 0.1;
+    string UIName =  "Scale";
+> = 1;
+
+float Freq <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 10.0;
+    float UIStep = 0.1;
+    string UIName =  "Frequency";
+> = 1;
+
+float3 FlowDir <
+    string UIName = "Flow Direction";
+> = {0, 1, 1};
+
 //////// TEXTURE /////////////////////
 
 texture SceneTexture <
@@ -77,22 +105,38 @@ sampler2D SceneSampler = sampler_state {
     MagFilter = Linear;
 };   
 
+texture NoiseTexture  <
+    string ResourceName = "noiseL8_32x32x32.dds";
+    string UIName =  "Noise Texture";
+    string ResourceType = "3D";
+>;
+
+sampler3D NoiseSampler = sampler_state {
+    Texture = <NoiseTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+    WrapR = Repeat;
+    
+};  
 
 //////// CONNECTOR DATA STRUCTURES ///////////
 
 /* data from application vertex buffer */
 struct appdata {
     float3 Position	: POSITION;
-    float4 UV		     : TEXCOORD0;
+    float4 UV		    : TEXCOORD0;
     float4 Normal	  : NORMAL;
 };
 
 /* data passed from vertex shader to pixel shader */
 struct vertexOutput {
     float4 HPosition    : POSITION;
-    float3 WorldNormal   : TEXCOORD0;
+    float3 WorldNormal  : TEXCOORD0;
     float3 ProjPos      : TEXCOORD1;
-    float3 WorldView     : TEXCOORD2;
+    float3 WorldView    : TEXCOORD2;
+    float3 LocalPos     : TEXCOORD3;
 };
  
 ///////// VERTEX SHADING /////////////////////
@@ -111,6 +155,7 @@ vertexOutput PostRefract_VS(appdata IN) {
     
     float4 outPos  = mul(WvpXf,Po);
     OUT.HPosition  = outPos;
+    OUT.LocalPos   = Po.xyz;
     OUT.ProjPos    = outPos.xyz / outPos.w;   
     
     return OUT;
@@ -118,18 +163,19 @@ vertexOutput PostRefract_VS(appdata IN) {
 
 ///////// PIXEL SHADING //////////////////////
 
-float4 PostRefract_PS(vertexOutput IN) : COLOR {
-    float3 nWorldView     = normalize(IN.WorldView.xyz);
-    float3 nWorldNormal   = normalize(IN.WorldNormal.xyz);
-    float3 nProjPos      = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
-    
+/**
+ * Refract the given background texture - this will use a given world view and
+ * normal vector (both normalized) and find an offset for the lookup into the bg texture.
+ * Returns: (x,y) offset into the bg texture to mimic the set refraction.
+ */
+float2 GetRefractBGOffset(float3 nWorldView, float3 nWorldNormal) {
     // This is a hacked version of the Fresnel effect - it has fixed constants
     // of 0.5 for the bias, 1 for the Scale and 1 for the power
     // The reasoning is that I want a nicely blended bit of both reflection and refraction
     // especially in cases of total internal refraction (which looks ugly and abrupt without this)
-    float fresnelCoeff = max(0, min(1, 1.5f + dot(nWorldView,nWorldNormal)));
+    float fresnelCoeff = clamp(1.5f + dot(nWorldView,nWorldNormal), 0, 1);
     // Find the world space reflection vector
-    float3 refractionVec = refract(nWorldView, nWorldNormal, IndexOfRefraction/1.0003);
+    float3 refractionVec = refract(nWorldView, nWorldNormal, IndexOfRefraction/1.000);
     // Find the world space refraction vector (IndexOfRefraction_Medium to air)
     float3 reflectionVec = reflect(nWorldView, nWorldNormal);
     
@@ -139,10 +185,41 @@ float4 PostRefract_PS(vertexOutput IN) : COLOR {
     
     // Use the refraction and scale it to the screen size to get an offset for looking
     // up the texel in the scene texture
-    float2 lookupOffset = WarpAmount * lookupVec.xy * float2(1.0/SceneWidth, 1.0/SceneHeight);
+    return WarpAmount * lookupVec.xy * float2(1.0/SceneWidth, 1.0/SceneHeight);           
+}
+
+float4 PostRefract_PS(vertexOutput IN) : COLOR {
+    float3 nWorldView     = normalize(IN.WorldView.xyz);
+    float3 nWorldNormal   = normalize(IN.WorldNormal.xyz);
+    float3 nProjPos      = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
+    
+    float2 lookupOffset = GetRefractBGOffset(nWorldView, nWorldNormal);
     float3 textureColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
  
     return float4(InvisiColour*textureColour, 1.0f);
+}
+
+float4 VapourTrail_PS(vertexOutput IN) : COLOR {
+    float3 nWorldView     = normalize(IN.WorldView.xyz);
+    float3 nWorldNormal   = normalize(IN.WorldNormal.xyz);
+    float3 nProjPos      = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
+    
+    // Use noise to modify the normal... (using Perlin's method in GPU Gems 1)
+    const float3 epsilon = float3(1.0 / 128.0);
+    float3 sampleCoord = IN.LocalPos.xyz + Freq*Timer*FlowDir;
+    float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);   
+    
+    //float  UnmodifiedNoiseVal = (texVal.x + texVal.y + texVal.z + texVal.w + 0.03125) * 1.3f;
+    float UnmodifiedNoiseVal = texVal.x;
+    
+    UnmodifiedNoiseVal = clamp(UnmodifiedNoiseVal, 0, 1);
+    float3 NoiseValDiff = (UnmodifiedNoiseVal.xxx - epsilon) / epsilon;
+
+    nWorldNormal = normalize(nWorldNormal - NoiseValDiff);
+    
+    float2 lookupOffset = GetRefractBGOffset(nWorldView, nWorldNormal);
+    float3 textureColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
+    return float4(textureColour, UnmodifiedNoiseVal);
 }
 
 
@@ -160,6 +237,23 @@ technique PostRefractGeom {
         
         VertexProgram = compile vp40 PostRefract_VS();        
         FragmentProgram = compile fp40 PostRefract_PS();
+    }  
+}
+
+technique VapourTrail {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
+        
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+        
+        VertexProgram = compile vp40 PostRefract_VS();        
+        FragmentProgram = compile fp40 VapourTrail_PS();
     }  
 }
 /////////////////////////////////////// eof //
