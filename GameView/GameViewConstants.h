@@ -58,6 +58,8 @@ public:
 	const std::string TEXTURE_CIRCLE_GRADIENT;
 	const std::string TEXTURE_STAR;
 	const std::string TEXTURE_STAR_OUTLINE;
+	const std::string TEXTURE_EXPLOSION_CLOUD;
+	const std::string TEXTURE_EXPLOSION_RAYS;
 
 	const std::string TEXTURE_ITEM_SLOWBALL;
 	const std::string TEXTURE_ITEM_FASTBALL;

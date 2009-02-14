@@ -89,9 +89,6 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	// Enable multisampling for the foreground rendering
 	glEnable(GL_MULTISAMPLE);
 
-	// Redraw the background model using multisampling... too expensive...
-	//this->display->GetAssets()->DrawBackgroundModel(dT, this->display->GetCamera());
-
 	// Draw the foreground stuff (paddle, items, ball)
 	glTranslatef(negHalfLevelDim[0], 0, 0.0f);	
 
@@ -123,10 +120,10 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	//glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 	//std::vector<std::vector<LevelPiece*>> pieces = this->display->GetModel()->GetCurrentLevel()->GetCurrentLevelLayout();
 	//for (size_t i = 0; i < pieces.size(); i++) {
-		//std::vector<LevelPiece*> setOfPieces = pieces[i];
-		//for (size_t j = 0; j < setOfPieces.size(); j++) {
-			//setOfPieces[j]->DebugDraw();
-		//}
+	//	std::vector<LevelPiece*> setOfPieces = pieces[i];
+	//	for (size_t j = 0; j < setOfPieces.size(); j++) {
+	//		setOfPieces[j]->DebugDraw();
+	//	}
 	//}
 	//glPopMatrix();
 }

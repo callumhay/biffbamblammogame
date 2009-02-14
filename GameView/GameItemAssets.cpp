@@ -3,8 +3,10 @@
 #include "GameESPAssets.h"
 
 // Blammo Engine Includes
+#include "../BlammoEngine/Noise.h"
 #include "../BlammoEngine/Mesh.h"
 #include "../BlammoEngine/Texture2D.h"
+#include "../BlammoEngine/Texture3D.h"
 
 // Game Model Includes
 #include "../GameModel/GameItem.h"
@@ -244,7 +246,8 @@ void GameItemAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int dis
 			glEnable(GL_TEXTURE_2D);
 			glDisable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquation(GL_MULT);
 
 			// Draw the timer...
 			glPushMatrix();
@@ -302,9 +305,8 @@ void GameItemAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int dis
 			glTexCoord2d(0, fillerTexHeight); glVertex2f(0, fillerHeight);
 			glEnd();
 			fillerTex->UnbindTexture();
-
+			
 			// TODO: make draw lists to speed this up...
-
 			timerTex->BindTexture();
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			glBegin(GL_QUADS);

@@ -17,6 +17,8 @@
 
 GameESPAssets::GameESPAssets() : 
 particleFader(1, 0), 
+particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(1.0f, 0.0f, 0.0f, 0.0f)),
+particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
 particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0), 
 
 particleShrinkToNothing(1, 0),
@@ -24,6 +26,7 @@ particlePulseUberballAura(0, 0),
 particlePulseItemDropAura(0, 0),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f),
+particleLargeGrowth(1.0f, 2.2f),
 
 ghostBallAccel1(Vector3D(1,1,1)),
 
@@ -31,9 +34,14 @@ uberBallEmitterAura(NULL),
 uberBallEmitterTrail(NULL),
 ghostBallEmitterTrail(NULL),
 
+explosionRayRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
+explosionRayRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
+
 circleGradientTex(NULL), 
 starTex(NULL), 
-starOutlineTex(NULL), 
+starOutlineTex(NULL),
+explosionTex(NULL),
+explosionRayTex(NULL),
 
 oldBallDir(0,0) {
 
@@ -63,6 +71,10 @@ GameESPAssets::~GameESPAssets() {
 	this->starTex = NULL;
 	delete this->starOutlineTex;
 	this->starOutlineTex = NULL;
+	delete this->explosionTex;
+	this->explosionTex = NULL;
+	delete this->explosionRayTex;
+	this->explosionRayTex = NULL;
 
 	// Delete any standalone effects
 	delete this->uberBallEmitterAura;
@@ -71,12 +83,11 @@ GameESPAssets::~GameESPAssets() {
 	this->uberBallEmitterTrail = NULL;
 	delete this->ghostBallEmitterTrail;
 	this->ghostBallEmitterTrail = NULL;
-
+	
 	for (std::vector<ESPShaderParticle*>::iterator iter = this->ghostSmokeParticles.begin(); iter != this->ghostSmokeParticles.end(); iter++) {
 		delete *iter;
 	}
 	this->ghostSmokeParticles.clear();
-
 }
 
 /**
@@ -101,7 +112,6 @@ void GameESPAssets::KillAllActiveEffects() {
 			currEmitterList.clear();
 	}
 	this->activeItemDropEmitters.clear();
-
 }
 
 /**
@@ -158,6 +168,14 @@ void GameESPAssets::InitESPTextures() {
 		this->starOutlineTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear);
 		assert(this->starOutlineTex != NULL);
 	}
+	if (this->explosionTex == NULL) {
+		this->explosionTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD, Texture::Trilinear);
+		assert(this->explosionTex != NULL);
+	}
+	if (this->explosionRayTex == NULL) {
+		this->explosionRayTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS, Texture::Trilinear);
+		assert(this->explosionRayTex != NULL);
+	}
 }
 
 // Private helper function for initializing the uber ball's effects
@@ -208,7 +226,6 @@ void GameESPAssets::InitGhostBallESPEffects() {
 	assert(this->ghostBallEmitterTrail == NULL);
 
 	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
-	this->ghostBallSmoke.SetColour(Colour(1.00f, 1.00f, 1.00f));
 	this->ghostBallSmoke.SetScale(0.5f);
 	this->ghostBallSmoke.SetFrequency(0.25f);
 	this->ghostBallSmoke.SetFlowDirection(Vector3D(0, 0, 1));
@@ -227,12 +244,11 @@ void GameESPAssets::InitGhostBallESPEffects() {
 	this->ghostBallEmitterTrail->AddEffector(&this->particleFader);
 	this->ghostBallEmitterTrail->AddEffector(&this->ghostBallAccel1);
 
-	for (int i = 0; i < 25; i++) {
+	for (int i = 0; i < GameESPAssets::NUM_GHOST_SMOKE_PARTICLES; i++) {
 		ESPShaderParticle* temp = new ESPShaderParticle(&this->ghostBallSmoke);
 		this->ghostSmokeParticles.push_back(temp);
 		this->ghostBallEmitterTrail->AddParticle(temp);
 	}
-
 }
 
 /**
@@ -243,12 +259,19 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->InitUberBallESPEffects();
 	this->InitGhostBallESPEffects();
 
+	// Pulsing effect for particles
 	ScaleEffect itemDropPulseSettings;
 	itemDropPulseSettings.pulseGrowthScale = 1.25f;
 	itemDropPulseSettings.pulseRate = 0.25f;
 	this->particlePulseItemDropAura = ESPParticleScaleEffector(itemDropPulseSettings);
 	
-	// TODO:  Shader particle effects
+	// Fire effect used in various things - like explosions and such.
+	this->fireEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
+	this->fireEffect.SetColour(Colour(1.00f, 1.00f, 1.00f));
+	this->fireEffect.SetScale(0.5f);
+	this->fireEffect.SetFrequency(1.0f);
+	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
+	this->fireEffect.SetMaskTexture(this->circleGradientTex);
 }
 
 /**
@@ -307,7 +330,7 @@ void GameESPAssets::AddBallBounceEffect(const Camera& camera, const GameBall& ba
 	bounceEffect->AddParticle(bounceParticle);
 	
 	// Lastly, add the new emitter to the list of active emitters
-	this->activeGeneralEmitters.push_back(bounceEffect);
+	this->activeGeneralEmitters.push_front(bounceEffect);
 }
 
 /**
@@ -396,8 +419,104 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	bangOnoEffect->AddParticle(bangOnoParticle);
 
 	// Lastly, add the new emitters to the list of active emitters in order of back to front
-	this->activeGeneralEmitters.push_back(bangEffect);
+	this->activeGeneralEmitters.push_front(bangEffect);
 	this->activeGeneralEmitters.push_back(bangOnoEffect);
+}
+
+void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb) {
+	Point2D bombCenter  = bomb.GetCenter();
+	Point3D emitCenter  = Point3D(bombCenter[0], bombCenter[1], 0.0f);
+
+
+
+	// Explosion rays
+	ESPPointEmitter* bombExplodeRayEffect = new ESPPointEmitter();
+	bombExplodeRayEffect->SetSpawnDelta(ESPInterval(-1.0f));
+	bombExplodeRayEffect->SetInitialSpd(ESPInterval(0.0f));
+	bombExplodeRayEffect->SetParticleLife(ESPInterval(2.0f));
+	bombExplodeRayEffect->SetParticleSize(ESPInterval(5.0f));
+	bombExplodeRayEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	bombExplodeRayEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bombExplodeRayEffect->SetEmitPosition(emitCenter);
+	bombExplodeRayEffect->SetParticles(1, this->explosionRayTex);
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		bombExplodeRayEffect->AddEffector(&this->explosionRayRotatorCW);
+	}
+	else {
+		bombExplodeRayEffect->AddEffector(&this->explosionRayRotatorCCW);
+	}
+	bombExplodeRayEffect->AddEffector(&this->particleLargeGrowth);
+	bombExplodeRayEffect->AddEffector(&this->particleFader);
+
+	// Create the explosion cloud and fireyness for the bomb
+	/*
+	// TODO: Use this later for the fireball effect...
+	ESPPointEmitter* bombExplodeFireEffect1 = new ESPPointEmitter();
+	bombExplodeFireEffect1->SetSpawnDelta(ESPInterval(0.005f));
+	bombExplodeFireEffect1->SetNumParticleLives(1);
+	bombExplodeFireEffect1->SetInitialSpd(ESPInterval(3.0f, 3.5f));
+	bombExplodeFireEffect1->SetParticleLife(ESPInterval(0.25f, 4.0f));
+	bombExplodeFireEffect1->SetParticleSize(ESPInterval(1.0f, 3.0f));
+	bombExplodeFireEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	bombExplodeFireEffect1->SetParticleAlignment(ESP::ViewPointAligned);
+	bombExplodeFireEffect1->SetEmitPosition(emitCenter);
+	bombExplodeFireEffect1->SetEmitAngleInDegrees(180);
+	bombExplodeFireEffect1->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_SHADER_PARTICLES, &this->fireEffect);
+	bombExplodeFireEffect1->AddEffector(&this->particleFireColourFader);
+	bombExplodeFireEffect1->AddEffector(&this->particleLargeGrowth);
+	*/
+
+	ESPPointEmitter* bombExplodeFireEffect2 = new ESPPointEmitter();
+	bombExplodeFireEffect2->SetSpawnDelta(ESPInterval(0.005f));
+	bombExplodeFireEffect2->SetNumParticleLives(1);
+	bombExplodeFireEffect2->SetInitialSpd(ESPInterval(3.0f, 3.3f));
+	bombExplodeFireEffect2->SetParticleLife(ESPInterval(0.5f, 4.0f));
+	bombExplodeFireEffect2->SetParticleSize(ESPInterval(1.0f, 3.0f));
+	bombExplodeFireEffect2->SetRadiusDeviationFromCenter(ESPInterval(1.0f));
+	bombExplodeFireEffect2->SetParticleAlignment(ESP::ViewPointAligned);
+	bombExplodeFireEffect2->SetEmitPosition(emitCenter);
+	bombExplodeFireEffect2->SetEmitAngleInDegrees(180);
+	bombExplodeFireEffect2->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_CLOUD_PARTICLES, this->explosionTex);
+	bombExplodeFireEffect2->AddEffector(&this->particleFireColourFader);
+	bombExplodeFireEffect2->AddEffector(&this->particleLargeGrowth);
+
+	// Create an emitter for the sound of onomatopeia of the exploding bomb
+	ESPPointEmitter* bombOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	bombOnoEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	bombOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	bombOnoEffect->SetParticleLife(ESPInterval(2.0f, 2.5f));
+	bombOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
+	bombOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	bombOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+	bombOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bombOnoEffect->SetEmitPosition(emitCenter);
+	bombOnoEffect->SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
+	
+	// Add effectors...
+	bombOnoEffect->AddEffector(&this->particleFader);
+	bombOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single particle to the emitter...
+	DropShadow dpTemp;
+	dpTemp.colour = Colour(1,1,1);
+	dpTemp.amountPercentage = 0.10f;
+	ESPOnomataParticle* bombOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
+	bombOnoParticle->SetDropShadow(dpTemp);
+
+	// Set the severity of the effect...
+	Onomatoplex::Extremeness severity = Onomatoplex::SUPER_AWESOME;
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		severity = Onomatoplex::UBER;
+	}
+	bombOnoParticle->SetOnomatoplexSound(Onomatoplex::EXPLOSION, severity);
+	bombOnoEffect->AddParticle(bombOnoParticle);
+
+	// Lastly, add the new emitters to the list of active emitters
+	this->activeGeneralEmitters.push_front(bombExplodeFireEffect2);
+	this->activeGeneralEmitters.push_front(bombExplodeRayEffect);
+
+	this->activeGeneralEmitters.push_back(bombOnoEffect);
 }
 
 /**
@@ -582,7 +701,7 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
 	}
 
 	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin();
-		iter != removeElements.end(); iter++) {	
+		iter != removeElements.end(); iter++) {
 			this->activeGeneralEmitters.erase(*iter);
 	}
 }

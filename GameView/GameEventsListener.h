@@ -27,11 +27,12 @@ public:
 	virtual void BallDeathEvent(const GameBall& deadBall, int livesLeft);
 	virtual void BallSpawnEvent(const GameBall& spawnedBall);
 	virtual void BallShotEvent(const GameBall& shotBall);
-	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& blockBefore, const LevelPiece& blockAfter);
+	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
 	virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
 
 	// Misc game events
 	virtual void BlockDestroyedEvent(const LevelPiece& block);
+	virtual void LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	virtual void ScoreChangedEvent(int amt);
 	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier);
 	virtual void ItemSpawnedEvent(const GameItem& item);
