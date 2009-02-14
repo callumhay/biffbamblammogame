@@ -17,6 +17,7 @@ public:
 	static const std::string BASIC_TECHNIQUE_NAME;
 	static const std::string GHOSTBALL_TECHNIQUE_NAME;
 	static const std::string SMOKESPRITE_TECHNIQUE_NAME;
+	static const std::string FIRESPRITE_TECHNIQUE_NAME;
 
 private:
 	// CG Transform params

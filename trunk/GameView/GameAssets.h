@@ -78,6 +78,9 @@ public:
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block) {
 		this->espAssets->AddBasicBlockBreakEffect(camera, block);
 	}
+	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb) {
+		this->espAssets->AddBombBlockBreakEffect(camera, bomb);
+	}
 	void SetItemEffect(const GameItem& item, bool activate) {
 		this->espAssets->SetItemEffect(item, activate);
 	}

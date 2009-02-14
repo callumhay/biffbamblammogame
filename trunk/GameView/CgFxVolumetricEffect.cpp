@@ -10,6 +10,7 @@
 const std::string CgFxVolumetricEffect::BASIC_TECHNIQUE_NAME				= "Basic";
 const std::string CgFxVolumetricEffect::GHOSTBALL_TECHNIQUE_NAME		= "GhostBall";
 const std::string CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME	= "SmokeSprite";
+const std::string CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME		= "FireSprite";
 
 // Default constructor
 CgFxVolumetricEffect::CgFxVolumetricEffect() : 

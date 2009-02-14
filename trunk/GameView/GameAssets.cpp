@@ -276,6 +276,7 @@ void GameAssets::LoadLevelAssets(const GameLevel* level) {
 
 	// Delete all previously loaded level-related assets
 	this->DeleteLevelAssets();
+	
 	// Load the given level
-	this->levelMesh = LevelMesh::CreateLevelMesh(this->worldAssets, level);
+	this->levelMesh = new LevelMesh(this->worldAssets, level);
 }

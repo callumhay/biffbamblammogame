@@ -89,29 +89,23 @@ void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 	debug_output("EVENT: Ball shot");
 }
 
-void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& blockBefore, const LevelPiece& blockAfter) {
-	assert(blockBefore.GetHeightIndex() == blockAfter.GetHeightIndex());
-	assert(blockBefore.GetWidthIndex() == blockAfter.GetWidthIndex());
-
-	// Add the visual effect for when the ball hits a block (if it isn't an uber ball and a solid block)
+void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) {
+	// Add the visual effect for when the ball hits a block
 	// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-		  ((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall ||
-		  blockAfter.GetType() == LevelPiece::Solid)) {
+		((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.UberballBlastsThrough())) {
 
 			this->display->GetAssets()->AddBallBounceESP(this->display->GetCamera(), ball);
 	}
 
-	// We shake things up if the ball is uber and the block is solid...
+	// We shake things up if the ball is uber and the block is indestructible...
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-		  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall &&
-			blockAfter.GetType() == LevelPiece::Solid) {
+		  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.CanBeDestroyed()) {
 
 		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.1, 0.0), 100);
 	}
 
 	debug_output("EVENT: Ball-block collision");
-	this->display->GetAssets()->GetLevelMesh()->ChangePiece(blockBefore, blockAfter);
 }
 
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
@@ -122,19 +116,36 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 	// We shake things up if the ball is uber...
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
 		  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
-		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.9, 0.2, 0.0), 100);
+		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.2, 0.0), 100);
 	}
 
 	debug_output("EVENT: Ball-paddle collision");
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
-	// Add the visual effect for when a ball breaks a typical block
-	this->display->GetAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
+	
+	// Add the effects based on the type of block that is being destroyed...
+	switch (block.GetType()) {
+		case LevelPiece::Breakable:
+			// Typical break effect for basic breakable blocks
+			this->display->GetAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
+			break;
+		case LevelPiece::Bomb:
+			// Bomb effect - big explosion!
+			this->display->GetAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block);
+			this->display->GetCamera().SetCameraShake(1.2, Vector3D(1.0, 0.3, 0.1), 100);
+			break;
+		default:
+			break;
+	}
 
 	// TODO: Transmit data concerning the level of sound needed
-	std::string soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::EXPLOSION, Onomatoplex::NORMAL);
-	debug_output("EVENT: Block destroyed - " << soundText);
+	debug_output("EVENT: Block destroyed");
+}
+
+void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
+	this->display->GetAssets()->GetLevelMesh()->ChangePiece(pieceBefore, pieceAfter);
+	debug_output("EVENT: LevelPiece changed");
 }
 
 void GameEventsListener::ScoreChangedEvent(int amt) {
