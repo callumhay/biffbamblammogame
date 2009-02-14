@@ -1,8 +1,10 @@
 #include "ESPEmitter.h"
+#include "ESPShaderParticle.h"
+
 
 ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), //particleTexture(NULL),
 particleAlignment(ESP::ViewPointAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
-makeSizeConstraintsEqual(true) {
+particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES) {
 }
 
 ESPEmitter::~ESPEmitter() {
@@ -31,10 +33,10 @@ void ESPEmitter::Flush() {
 	}
 	this->deadParticles.clear();
 
-	// Set texture to NULL
-	//this->particleTexture = NULL;
+	// Clear other relevant particle information
 	this->particleTextures.clear();
 	this->textureAssignments.clear();
+	this->particleLivesLeft.clear();
 
 	// Reset appropriate variables
 	this->timeSinceLastSpawn = 0.0f;
@@ -62,6 +64,7 @@ void ESPEmitter::AssignRandomTextureToParticle(ESPParticle* particle) {
  * Returns: true on success, false otherwise.
  */
 bool ESPEmitter::SetParticles(unsigned int numParticles, Texture2D* texture) {
+	assert(numParticles > 0);
 	// Clean up all previous emitter data
 	this->Flush();
 
@@ -72,6 +75,10 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, Texture2D* texture) {
 	for (unsigned int i = 0; i < numParticles; i++) {
 		ESPParticle* newParticle = new ESPParticle();
 		this->deadParticles.push_back(newParticle);
+
+		// Assign the number of lives...
+		this->particleLivesLeft[newParticle] = this->numParticleLives;
+
 		this->textureAssignments[newParticle] = texture;
 	}
 
@@ -84,6 +91,7 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, Texture2D* texture) {
  * Returns: true on success, false otherwise.
  */
 bool ESPEmitter::SetParticles(unsigned int numParticles, std::vector<Texture2D*> textures) {
+	assert(numParticles > 0);
 	// Clean up any previous emitter data
 	this->Flush();
 
@@ -94,6 +102,9 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, std::vector<Texture2D*>
 		ESPParticle* newParticle = new ESPParticle();
 		this->deadParticles.push_back(newParticle);
 
+		// Assign the number of lives...
+		this->particleLivesLeft[newParticle] = this->numParticleLives;
+
 		// Pick a random texture and assign it...
 		this->AssignRandomTextureToParticle(newParticle);
 	}
@@ -101,6 +112,27 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, std::vector<Texture2D*>
 	return true;
 }
 
+/**
+ * Public function for setting particles for this emitter such that they are
+ * all shader particles of the given effect.
+ * Returns: true on success, false otherwise.
+ */
+bool ESPEmitter::SetParticles(unsigned int numParticles, CgFxEffectBase* effect) {
+	assert(numParticles > 0);
+	// Clean up previous emitter data
+	this->Flush();
+	
+	// Create each of the new particles
+	for (unsigned int i = 0; i < numParticles; i++) {
+		ESPShaderParticle* newParticle = new ESPShaderParticle(effect);
+		this->deadParticles.push_back(newParticle);
+
+		// Assign the number of lives...
+		this->particleLivesLeft[newParticle] = this->numParticleLives;
+	}
+
+	return true;
+}
 
 /**
  * Sets the particle alignments for this emitter.
@@ -166,6 +198,22 @@ void ESPEmitter::SetParticleColour(const ESPInterval& red, const ESPInterval& gr
 	this->particleAlpha = alpha;
 }
 
+void ESPEmitter::SetNumParticleLives(int lives) {
+	assert(lives >= ESPParticle::INFINITE_PARTICLE_LIVES);
+	
+	this->numParticleLives = lives;
+
+	// Go through any already assigned particles and set the lives...
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+		ESPParticle* currParticle = *iter;
+		this->particleLivesLeft[currParticle] = lives;
+	}
+	for (std::list<ESPParticle*>::iterator iter = this->deadParticles.begin(); iter != this->deadParticles.end(); iter++) {
+		ESPParticle* currParticle = *iter;
+		this->particleLivesLeft[currParticle] = lives;
+	}
+}
+
 /**
  * Adds a particle effector to this emitter.
  */
@@ -177,6 +225,9 @@ void ESPEmitter::AddEffector(ESPParticleEffector* effector) {
 void ESPEmitter::AddParticle(ESPParticle* particle) {
 	assert(particle != NULL);
 	this->deadParticles.push_back(particle);
+	
+	// Assign the number of lives...
+	this->particleLivesLeft[particle] = this->numParticleLives;
 }
 
 /**

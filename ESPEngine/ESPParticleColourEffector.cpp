@@ -2,15 +2,20 @@
 #include "ESPParticle.h"
 
 ESPParticleColourEffector::ESPParticleColourEffector(float startAlpha, float endAlpha) :
-startAlpha(startAlpha), endAlpha(endAlpha), startColour(1,1,1), useStartColour(false) {
+startAlpha(startAlpha), endAlpha(endAlpha), startColour(1,1,1), endColour(1,1,1), useStartColour(false) {
 }
 
-ESPParticleColourEffector::ESPParticleColourEffector(Colour colour, float startAlpha, float endAlpha) :
-startAlpha(startAlpha), endAlpha(endAlpha), startColour(colour), useStartColour(true) {
+ESPParticleColourEffector::ESPParticleColourEffector(const Colour& colour, float startAlpha, float endAlpha) :
+startAlpha(startAlpha), endAlpha(endAlpha), startColour(colour), endColour(colour), useStartColour(true) {
 }
 
-ESPParticleColourEffector::ESPParticleColourEffector(Colour colour, float alpha) :
-startAlpha(alpha), endAlpha(alpha), startColour(colour), useStartColour(true) {
+ESPParticleColourEffector::ESPParticleColourEffector(const Colour& colour, float alpha) :
+startAlpha(alpha), endAlpha(alpha), startColour(colour), endColour(colour), useStartColour(true) {
+}
+
+ESPParticleColourEffector::ESPParticleColourEffector(const ColourRGBA& start, const ColourRGBA& end) :
+startAlpha(start.A()), endAlpha(end.A()), startColour(start.R(), start.G(), start.B()), 
+endColour(end.R(), end.G(), end.B()), useStartColour(true) {
 }
 
 ESPParticleColourEffector::~ESPParticleColourEffector() {
@@ -27,14 +32,20 @@ void ESPParticleColourEffector::AffectParticleOnTick(double dT, ESPParticle* par
 	particle->GetColour(currColour, currAlpha);		
 
 	if (particleLifespan != ESPParticle::INFINITE_PARTICLE_LIFETIME) {
-		// Perform linear interpolation on the alpha of the particle
+		// Perform linear interpolation on the colour and alpha of the particle
 		// based on the particle's lifetime
+		if (this->useStartColour) {
+			currColour = this->startColour + particle->GetCurrentLifeElapsed() * 
+			(this->endColour - this->startColour) / particleLifespan;
+		}
+		
 		currAlpha = this->startAlpha + particle->GetCurrentLifeElapsed() * 
 			(this->endAlpha - this->startAlpha) / particleLifespan;
 	}
-	
-	if (this->useStartColour) {
-		currColour = startColour;
+	else {
+		if (this->useStartColour) {
+			currColour = startColour;
+		}
 	}
 
 	particle->SetColour(currColour, currAlpha);

@@ -94,8 +94,8 @@ void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) 
 	
 	glTranslatef(this->position[0], this->position[1], this->position[2]);
 	glMultMatrixf(personalAlignXF.begin());
-	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size[0], this->size[1], 1.0f);
+	glRotatef(this->rotation, 0, 0, -1);
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
 	
 	glCallList(ESPParticle::particleDispList);
