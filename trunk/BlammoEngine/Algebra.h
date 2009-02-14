@@ -40,6 +40,8 @@ namespace NumberFuncs {
 	int SignOf(int a);
 	int SignOf(float a);
 	int NextPowerOfTwo(int a);
+	float MinF(float a, float b);
+	float MaxF(float a, float b);
 };
 
 inline int NumberFuncs::SignOf(int a) {
@@ -60,7 +62,13 @@ inline int NumberFuncs::NextPowerOfTwo(int a) {
 	return temp;
 };
 
+inline float NumberFuncs::MinF(float a, float b) {
+	return a > b ? b : a;
+}
 
+inline float NumberFuncs::MaxF(float a, float b) {
+	return a > b ? a : b;
+}
 
 class Randomizer {
 private:

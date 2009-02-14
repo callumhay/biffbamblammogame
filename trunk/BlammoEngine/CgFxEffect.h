@@ -7,6 +7,8 @@
 
 #include "Texture2D.h"
 
+#include <list>
+
 class Camera;
 class PolygonGroup;
 
@@ -46,9 +48,16 @@ private:
 	 * Draw the given display list in the given pass using
 	 * the Cg runtime.
 	 */
-	void DrawPass(CGpass pass, GLint displayListID) {
+	void DrawPass(CGpass pass, GLuint displayListID) {
 		cgSetPassState(pass);
 		glCallList(displayListID);
+		cgResetPassState(pass);
+	}
+	void DrawPass(CGpass pass, const std::list<GLuint> &displayListIDs) {
+		cgSetPassState(pass);
+		for (std::list<GLuint>::const_iterator iter = displayListIDs.begin(); iter != displayListIDs.end(); iter++) {
+			glCallList(*iter);
+		}
 		cgResetPassState(pass);
 	}
 
@@ -70,13 +79,23 @@ public:
 	 * Draw the given display list with this effect
 	 * applied to it.
 	 */
-	void Draw(const Camera& camera, GLint displayListID) {
+	void Draw(const Camera& camera, GLuint displayListID) {
 		this->SetupBeforePasses(camera);
 		
 		// Draw each pass of this effect
 		CGpass currPass = cgGetFirstPass(this->currTechnique);
 		while (currPass) {
 			this->DrawPass(currPass, displayListID);
+			currPass = cgGetNextPass(currPass);
+		}
+	}
+	void Draw(const Camera& camera, const std::list<GLuint> &displayListIDs) {
+		this->SetupBeforePasses(camera);
+		
+		// Draw each pass of this effect
+		CGpass currPass = cgGetFirstPass(this->currTechnique);
+		while (currPass) {
+			this->DrawPass(currPass, displayListIDs);
 			currPass = cgGetNextPass(currPass);
 		}
 	}
