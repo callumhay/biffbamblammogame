@@ -68,10 +68,10 @@ void GameEventManager::ActionBallShot(const GameBall& shotBall) {
 }
 
 // Action for when the ball collides with a block in the level
-void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const LevelPiece& blockBefore, const LevelPiece& blockAfter) {
+void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
-		(*this->listenerIter)->BallBlockCollisionEvent(ball, blockBefore, blockAfter);
+		(*this->listenerIter)->BallBlockCollisionEvent(ball, block);
 	}	
 }
 
@@ -88,6 +88,14 @@ void GameEventManager::ActionBlockDestroyed(const LevelPiece& block) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
 		(*this->listenerIter)->BlockDestroyedEvent(block);
+	}	
+}
+
+// Action for when a level piece changes
+void GameEventManager::ActionLevelPieceChanged(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->LevelPieceChangedEvent(pieceBefore, pieceAfter);
 	}	
 }
 

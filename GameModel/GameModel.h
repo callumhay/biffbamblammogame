@@ -63,7 +63,8 @@ private:
 	void BallPieceCollisionOccurred(const GameBall& ball, LevelPiece* p);
 	void BallPaddleCollisionOccurred();
 	void PlayerDied();
-
+	
+		
 	// Increment the player's score in the game
 	void IncrementScore(int amt) {
 		bool wasGreaterThanZero = this->currPlayerScore > 0;
@@ -109,7 +110,7 @@ public:
 	// Level/World related queries *****************************************
 	void BeginOrRestartGame();
 	
-	const GameLevel* GetCurrentLevel() const {
+	GameLevel* GetCurrentLevel() const {
 		return this->worlds[this->currWorldNum]->GetCurrentLevel();
 	}
 
@@ -185,6 +186,8 @@ public:
 	void TogglePauseGame() {
 		this->gameIsPaused = !this->gameIsPaused;
 	}
+
+	void AddPossibleItemDrop(LevelPiece* p);
 
 	// Debug functions
 #ifndef NDEBUG

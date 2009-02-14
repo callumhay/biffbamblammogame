@@ -127,8 +127,8 @@ void GameModel::Tick(double seconds) {
 	if (currState != NULL && !this->gameIsPaused) {
 		this->currState->Tick(seconds);
 	}
-	
 }
+
 
 /**
  * Called when a collision occurs between the ball and a level piece.
@@ -138,24 +138,27 @@ void GameModel::Tick(double seconds) {
 void GameModel::BallPieceCollisionOccurred(const GameBall& ball, LevelPiece* p) {
 	assert(p != NULL);
 	
-	LevelPiece pieceBefore = *p;
+	LevelPiece* pieceBefore = p;
 
 	// Set the score appropriately
 	int pointValue = p->GetPointValueForCollision();
 	assert(pointValue >= 0);
 	this->IncrementScore(pointValue);
 
-	// Tell the level about the collision
+	// Collide the ball with the level piece directly, then if there was a change
+	// tell the level about it
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
-	currLevel->BallCollisionOccurred(ball, p->GetHeightIndex(), p->GetWidthIndex());
-
-	// If the piece was destroyed then increase the multiplier
-	if (p->GetType() == LevelPiece::Empty) {
-		this->SetNumConsecutiveBlocksHit(this->numConsecutiveBlocksHit+1);
-	}
+	LevelPiece* pieceAfterCollision = p->BallCollisionOccurred(this, ball);
 
 	// EVENT: Ball-Block Collision
-	GameEventManager::Instance()->ActionBallBlockCollision(*this->ball, pieceBefore, *p);
+	GameEventManager::Instance()->ActionBallBlockCollision(*this->ball, *pieceAfterCollision);
+
+
+	// TODO: figure out this multiplier stuffs...
+	// If the piece was destroyed then increase the multiplier
+	//if (p->GetType() == LevelPiece::Empty) {
+	//	this->SetNumConsecutiveBlocksHit(this->numConsecutiveBlocksHit+1);
+	//}
 
 	// Check to see if the level is done
 	if (currLevel->IsLevelComplete()) {

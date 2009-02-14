@@ -1,11 +1,25 @@
 #include "../BlammoEngine/BlammoEngine.h"
 
 #include "GameLevel.h"
-#include "LevelPiece.h"
 #include "GameBall.h"
 
+#include "GameEventManager.h"
+#include "LevelPiece.h"
+#include "EmptySpaceBlock.h"
+#include "SolidBlock.h"
+#include "BreakableBlock.h"
+#include "BombBlock.h"
+
+const char GameLevel::EMPTY_SPACE_CHAR				= 'E';
+const char GameLevel::SOLID_BLOCK_CHAR				= 'S';
+const char GameLevel::GREEN_BREAKABLE_CHAR		= 'G';
+const char GameLevel::YELLOW_BREAKABLE_CHAR		= 'Y';
+const char GameLevel::ORANGE_BREAKABLE_CHAR		= 'O';
+const char GameLevel::RED_BREAKABLE_CHAR			= 'R';
+const char GameLevel::BOMB_CHAR								= 'B';
+
 // Private constructor, requires all the pieces that make up the level
-GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces): cachedInitialLevelPieces(pieces), currentLevelPieces(pieces),
+GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces): currentLevelPieces(pieces),
 piecesLeft(numBlocks) {
 	assert(pieces.size() > 0);
 	this->width = pieces[0].size();
@@ -14,13 +28,15 @@ piecesLeft(numBlocks) {
 
 // Destructor, clean up heap stuffs
 GameLevel::~GameLevel() {
-	for (size_t i = 0; i < this->cachedInitialLevelPieces.size(); i++) {
-		for (size_t j = 0; j < this->cachedInitialLevelPieces[i].size(); j++) {
-			delete this->cachedInitialLevelPieces[i][j];
+
+	// TODO: FIX THIS STUFF??? IT CRASHES...
+	for (size_t i = 0; i < this->currentLevelPieces.size(); i++) {
+		for (size_t j = 0; j < this->currentLevelPieces[i].size(); j++) {
+			delete this->currentLevelPieces[i][j];
 		}
-		this->cachedInitialLevelPieces[i].clear();
+		this->currentLevelPieces[i].clear();
 	}
-	this->cachedInitialLevelPieces.clear();
+	this->currentLevelPieces.clear();
 }
 
 GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
@@ -66,17 +82,30 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					return NULL;	
 			}
 
-			// Validate the type of block
-			if (!LevelPiece::IsValidBlockEnum(currBlock)) {
+			// Validate the block type and create teh appropriate object for that block type...
+			LevelPiece* newPiece = NULL;
+			switch (currBlock) {
+				case EMPTY_SPACE_CHAR:
+					newPiece = new EmptySpaceBlock(static_cast<unsigned int>(w), static_cast<unsigned int>(height - 1 - h));
+					break;
+				case SOLID_BLOCK_CHAR:
+					newPiece = new SolidBlock(static_cast<unsigned int>(w), static_cast<unsigned int>(height - 1 - h));
+					break;
+				case GREEN_BREAKABLE_CHAR:
+				case YELLOW_BREAKABLE_CHAR:
+				case ORANGE_BREAKABLE_CHAR:
+				case RED_BREAKABLE_CHAR:
+					newPiece = new BreakableBlock(currBlock, static_cast<unsigned int>(w), static_cast<unsigned int>(height - 1 - h));
+					break;
+				case BOMB_CHAR:
+					newPiece = new BombBlock(static_cast<unsigned int>(w), static_cast<unsigned int>(height - 1 - h));
+					break;
+				default:
 					inFile.close();
 					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << w << ", height = " << h); 
-					return NULL;	
+					return NULL;
 			}
-		
-			// Create the level piece
-			LevelPiece* newPiece = new LevelPiece(static_cast<unsigned int>(w), 
-																					 static_cast<unsigned int>(height - 1 - h), 
-																					 static_cast<LevelPiece::LevelPieceType>(currBlock));
+			assert(newPiece != NULL);
 			currentRowPieces.push_back(newPiece);
 	
 			if (newPiece->MustBeDestoryedToEndLevel()) {
@@ -104,7 +133,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
  */
 void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces, size_t hIndex, size_t wIndex) {
 	
-	// Make the provided indices are in the correct range
+	// Make sure the provided indices are in the correct range
 	if (wIndex < 0 || wIndex >= pieces[0].size() || hIndex <0 || hIndex >= pieces.size()) {
 		return;
 	}
@@ -130,29 +159,112 @@ void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces,
 }
 
 /**
- * Call when a collision occurs with the ball and the level object at
- * the given index.
+ * Call this when a level piece changes in this level. This function is meant to 
+ * change the piece and manage the other level pieces accordingly.
  */
-void GameLevel::BallCollisionOccurred(const GameBall& ball, size_t hIndex, size_t wIndex) {
-	assert(hIndex >= 0 && hIndex < this->height);
-	assert(wIndex >= 0 && wIndex < this->width);
+void GameLevel::PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter) {
+	assert(pieceBefore != NULL);
+	assert(pieceAfter != NULL);
 
-	// Update the current piece by executing the collision
-	LevelPiece* currPiece = this->currentLevelPieces[hIndex][wIndex];
-	bool isVitalBeforeCollision = currPiece->MustBeDestoryedToEndLevel();
-	currPiece->BallCollisionOccurred(ball);
-	bool isVitalAfterCollision = currPiece->MustBeDestoryedToEndLevel();
+	// EVENT: Level piece has changed...
+	GameEventManager::Instance()->ActionLevelPieceChanged(*pieceBefore, *pieceAfter);
 
-	// Update the number of pieces that need to be destoryed to end the level
-	if (isVitalBeforeCollision && !isVitalAfterCollision) {
-		// In this case a block that was vital has been destroyed
-		this->piecesLeft--;
-		assert(this->piecesLeft >= 0);
+	if (pieceBefore != pieceAfter) {
+		// Find out if a vital piece was destroyed (i.e., the player is closer to finishing the level)
+		bool isVitalBeforeCollision = pieceBefore->MustBeDestoryedToEndLevel();
+		bool isVitalAfterCollision	= pieceAfter->MustBeDestoryedToEndLevel();
+
+		// Update the number of pieces that need to be destroyed to end the level
+		if (isVitalBeforeCollision && !isVitalAfterCollision) {
+			// In this case a block that was vital has been destroyed
+			this->piecesLeft--;
+			assert(this->piecesLeft >= 0);
+		}
+
+		// Replace the old piece with the new one...
+		assert(pieceBefore->GetHeightIndex() == pieceAfter->GetHeightIndex());
+		assert(pieceBefore->GetWidthIndex()  == pieceAfter->GetWidthIndex());
+		unsigned int hIndex = pieceAfter->GetHeightIndex();
+		unsigned int wIndex = pieceAfter->GetWidthIndex();
+		this->currentLevelPieces[hIndex][wIndex] = pieceAfter;
+
+		// Update the neighbour's bounds...
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex-1); // left
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex); // bottom
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1); // right
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex); // top
+	}
+	else {
+		// Inline: in this case there was a change within the piece object itself
+		// since both the before and after objects are the same.
+	}
+}
+
+/** 
+ * Public function for obtaining the level pieces that may currently be
+ * in collision with the given gameball.
+ * Returns: array of unique LevelPieces that are possibly colliding with b.
+ */
+std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const GameBall& b) const {
+	std::set<LevelPiece*> colliders;
+
+	// Get the ball boundry and use it to figure out what levelpieces are relevant
+	Circle2D ballBounds = b.GetBounds();
+	Point2D ballCenter = ballBounds.Center();
+
+	// Find the non-rounded max and min indices to look at along the x and y axis
+	float nonAdjustedIndex = ballCenter[0] / LevelPiece::PIECE_WIDTH;
+	int xIndexMax = static_cast<int>(floorf(nonAdjustedIndex + ballBounds.Radius())); 
+	int xIndexMin = static_cast<int>(floorf(nonAdjustedIndex - ballBounds.Radius()));
+	
+	// Do some correction of values if the ball goes out of bounds...
+	if (xIndexMin < 0 || xIndexMin >= static_cast<float>(this->width)) {
+		if (xIndexMax >= static_cast<float>(this->width) || xIndexMax < 0) {
+			return colliders;
+		}
+		xIndexMin = xIndexMax;
+	}
+	else if (xIndexMax >= static_cast<float>(this->width) || xIndexMax < 0) {
+		xIndexMax = xIndexMin;
 	}
 
-	// Update the neighbour's bounds...
-	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex-1); // left
-	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex); // bottom
-	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1); // right
-	GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex); // top
+	nonAdjustedIndex = ballCenter[1] / LevelPiece::PIECE_HEIGHT;
+	int yIndexMax = static_cast<int>(floorf(nonAdjustedIndex + ballBounds.Radius()));
+	int yIndexMin = static_cast<int>(floorf(nonAdjustedIndex - ballBounds.Radius()));
+	
+	// Do some correction of values if the ball goes out of bounds...
+	if (yIndexMin < 0 || yIndexMin >= static_cast<float>(this->height)) {
+		if (yIndexMax >= static_cast<float>(this->height) || yIndexMax < 0) {
+			return colliders;
+		}
+		yIndexMin = yIndexMax;
+	}
+	else if (yIndexMax >= static_cast<float>(this->height) || yIndexMax < 0) {
+		yIndexMax = yIndexMin;
+	}
+	
+	if (xIndexMax == xIndexMin) {
+		if (yIndexMax == yIndexMin) {
+			// Only one collision point
+			colliders.insert(this->currentLevelPieces[yIndexMin][xIndexMin]);
+		}
+		else {
+			// Two collisions along the y-axis
+			colliders.insert(this->currentLevelPieces[yIndexMin][xIndexMin]);
+			colliders.insert(this->currentLevelPieces[yIndexMax][xIndexMin]);
+		}
+	}
+	else {
+			// No matter what there are two collisions along the x-axis
+			colliders.insert(this->currentLevelPieces[yIndexMin][xIndexMin]);
+			colliders.insert(this->currentLevelPieces[yIndexMin][xIndexMax]);
+
+		if (yIndexMax != yIndexMin) {
+			// There will be a total of four collisions now, add the left overs
+			colliders.insert(this->currentLevelPieces[yIndexMax][xIndexMin]);
+			colliders.insert(this->currentLevelPieces[yIndexMax][xIndexMax]);
+		}
+	}
+
+	return colliders;
 }
