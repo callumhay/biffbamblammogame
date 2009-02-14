@@ -11,7 +11,8 @@
 #include "GameController.h"
 
 // Initialization Constants for the application
-static const char* WINDOW_TITLE = "Biff Bam Blammo";
+static const char* WINDOW_TITLE		= "Biff! Bam!! Blammo!?!";
+static const char* ICON_FILEPATH  = "resources/icons/BiffBamBlammoIcon.bmp"; 
 static const int INIT_WIDTH = 1024;
 static const int INIT_HEIGHT = 768;
 
@@ -81,7 +82,7 @@ bool InitSDLWindow() {
     return false;
   }
 
-	SDL_WM_SetCaption(WINDOW_TITLE, "");	// TODO: set the icon
+	SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);
 
   // To use OpenGL, you need to get some information first,
   const SDL_VideoInfo *info = SDL_GetVideoInfo();
@@ -116,6 +117,10 @@ bool InitSDLWindow() {
     return false;
   }
 	
+	SDL_Surface* icon = SDL_LoadBMP(ICON_FILEPATH);
+	SDL_SetColorKey(icon, SDL_SRCCOLORKEY, SDL_MapRGB(icon->format, 255, 0, 255));
+	SDL_WM_SetIcon(icon, NULL);
+
 	return true;
 }
 
