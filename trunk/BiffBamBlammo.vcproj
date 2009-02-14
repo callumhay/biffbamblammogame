@@ -200,6 +200,10 @@
 				RelativePath=".\GameController.h"
 				>
 			</File>
+			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="BlammoEngine"
@@ -444,6 +448,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPParticleRotateEffector.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPParticleScaleEffector.h"
 					>
 				</File>
@@ -485,6 +493,10 @@
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPParticleColourEffector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPParticleRotateEffector.cpp"
 					>
 				</File>
 				<File
@@ -708,7 +720,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\BombBlock.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\BoundingLines.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BreakableBlock.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\EmptySpaceBlock.h"
 					>
 				</File>
 				<File
@@ -784,6 +808,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\SolidBlock.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\UberBallItem.h"
 					>
 				</File>
@@ -804,7 +832,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\BombBlock.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\BoundingLines.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BreakableBlock.cpp"
 					>
 				</File>
 				<File
@@ -872,11 +908,27 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\SolidBlock.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\UberBallItem.cpp"
 					>
 				</File>
 			</Filter>
 		</Filter>
+		<File
+			RelativePath=".\resources\icons\BiffBamBlammo.ico"
+			>
+		</File>
+		<File
+			RelativePath=".\BiffBamBlammo.rc"
+			>
+		</File>
+		<File
+			RelativePath=".\resources\icons\BiffBamBlammoIcon.bmp"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
