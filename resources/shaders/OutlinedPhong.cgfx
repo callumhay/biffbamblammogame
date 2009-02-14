@@ -195,7 +195,6 @@ technique Basic {
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
 
-
         VertexProgram = compile vp40 phongshading_VS();        
         FragmentProgram = compile fp40 phongshading_PS();
     }  

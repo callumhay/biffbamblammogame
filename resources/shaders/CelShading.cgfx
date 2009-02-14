@@ -117,6 +117,7 @@ struct appdata {
     float3 Position	: POSITION;
     float4 UV		: TEXCOORD0;
     float4 Normal	: NORMAL;
+    float4 Colour   : COLOR0;
 };
 
 struct appdata_outlines {
@@ -131,6 +132,7 @@ struct vertexOutput {
     float3 DiffuseLightVec : TEXCOORD1;
     float3 WorldNormal     : TEXCOORD3;
     float3 WorldView	     : TEXCOORD4;
+    float4 Colour          : TEXCOORD5;
 };
  
 struct vertexOutput_outlines {
@@ -154,6 +156,7 @@ vertexOutput celshading_VS(appdata IN) {
     float3 VertToViewVec = float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w) - Pw;
     OUT.WorldView = normalize(VertToViewVec);
     OUT.HPosition = mul(WvpXf,Po);
+    OUT.Colour = IN.Colour;
     return OUT;
 }
 
@@ -201,7 +204,7 @@ float4 celshading_textured_PS(vertexOutput IN) : COLOR {
 	  cel_shading(Nn,LnDiffuse,IN.WorldView,diffContrib,specContrib);
       
     float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
-    float3 result = SpecularColour*specContrib + DiffuseColour*textureColour*diffContrib;
+    float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*textureColour*diffContrib;
     return float4(result, 1.0f);
 }
 
@@ -213,7 +216,7 @@ float4 celshading_PS(vertexOutput IN) : COLOR {
     
 	  cel_shading(Nn,LnDiffuse,IN.WorldView,diffContrib,specContrib);
       
-    float3 result = SpecularColour*specContrib + DiffuseColour*diffContrib;
+    float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*diffContrib;
     return float4(result, 1.0f);
 }
 

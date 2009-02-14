@@ -174,8 +174,7 @@ float4 smokey_PS(vertexOutput IN) : COLOR {
     float FadeAmt = dot(-nV, nN);
     float fadeAmtCoeff = pow(abs(FadeAmt), FadeExp);
     
-    // return as float4
-    float4 final = float4(Colour*totalTexVal.xxx,totalTexVal.x*fadeAmtCoeff*AlphaMultiplier + ConstAmount);
+    float4 final = float4(clamp(Colour*totalTexVal.xxx, 0, 1), clamp(totalTexVal.x*fadeAmtCoeff*AlphaMultiplier + ConstAmount, 0, 1));
     return float4(final);
 }
 
@@ -193,7 +192,27 @@ float4 smokey_sprite_PS(vertexOutput IN) : COLOR {
     float fadeAmtCoeff = maskTexVal.a;
     
     // return as float4
-    float4 final = IN.Colour * float4(Colour*totalTexVal.xxx, totalTexVal.x*fadeAmtCoeff);
+    float4 final = clamp(IN.Colour * float4(totalTexVal.rrr, totalTexVal.r*fadeAmtCoeff), 0, 1);
+    return float4(final);
+}
+
+float4 firey_sprite_PS(vertexOutput IN) : COLOR {
+    
+    float3 nN = normalize(IN.WorldNormal);
+    float3 nV = normalize(IN.WorldView);
+
+    float3 sampleCoord = IN.WorldPos.xyz + Freq*Timer*FlowDir;
+    
+    float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);
+    float totalTexVal = 8.0 * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
+                               abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
+    totalTexVal = clamp(totalTexVal, 0, 1);
+                          
+    float4 maskTexVal = tex2D(MaskSampler, IN.UV.xy).rgba;
+    float fadeAmtCoeff = maskTexVal.a;
+    
+    // return as float4
+    float4 final = clamp(IN.Colour * float4(1, 1, 1, totalTexVal*fadeAmtCoeff), 0, 1);
     return float4(final);
 }
 
@@ -251,6 +270,24 @@ technique SmokeSprite < string Script = "Pass=p0;"; > {
 
         VertexProgram = compile vp40 localpos_VS();            
         FragmentProgram = compile fp40 smokey_sprite_PS();
+    }
+}
+
+technique FireSprite < string Script = "Pass=p0;"; > {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
+		    BlendEquation = FuncAdd;
+            
+        PolygonMode = int2(Front, Fill);
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+		    DepthMask = false;
+		    CullFaceEnable = true;
+
+        VertexProgram = compile vp40 localpos_VS();            
+        FragmentProgram = compile fp40 firey_sprite_PS();
     }
 }
 
