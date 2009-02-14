@@ -11,6 +11,8 @@
 #include <string>
 #include <map>
 
+class CgFxEffectBase;
+
 /**
  * ESPEmitter.h
  * Abstract base class representing an Emitter of particles.
@@ -19,12 +21,15 @@ class ESPEmitter {
 
 protected:
 	
-	//Texture2D* particleTexture;													// Texture of particles in this emitter
+	//Texture2D* particleTexture;														// Texture of particles in this emitter
 	std::vector<Texture2D*> particleTextures;
 	std::map<ESPParticle*, Texture2D*> textureAssignments;	// Mapping of particles to textures
-	std::list<ESPParticle*> aliveParticles;								// All the alive particles in this emitter
-	std::list<ESPParticle*> deadParticles;								// All the dead particles in this emitter
-	float timeSinceLastSpawn;															// Time since the last particle was spawned	
+	std::map<ESPParticle*, int> particleLivesLeft;					// Number of lives left for each particle
+	std::list<ESPParticle*> aliveParticles;									// All the alive particles in this emitter
+	std::list<ESPParticle*> deadParticles;									// All the dead particles in this emitter
+	
+	float timeSinceLastSpawn;																// Time since the last particle was spawned	
+	int numParticleLives;
 
 	std::list<ESPParticleEffector*> effectors;	// All the particle effectors of this emitter
 	
@@ -60,6 +65,7 @@ public:
 	// Setter functions for typical attributes of emitters
 	bool SetParticles(unsigned int numParticles, Texture2D* texture);
 	bool SetParticles(unsigned int numParticles, std::vector<Texture2D*> textures);
+	bool SetParticles(unsigned int numParticles, CgFxEffectBase* effect);
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);
 	void SetSpawnDelta(const ESPInterval& spawnDelta);
 	void SetInitialSpd(const ESPInterval& initialSpd);
@@ -68,6 +74,7 @@ public:
 	void SetParticleSize(const ESPInterval& particleSize);
 	void SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha);
 	void SetParticleRotation(const ESPInterval& particleRot);
+	void SetNumParticleLives(int lives);
 	
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);

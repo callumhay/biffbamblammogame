@@ -48,6 +48,7 @@ protected:
 
 public: 
 	static const int INFINITE_PARTICLE_LIFETIME = -1;
+	static const int INFINITE_PARTICLE_LIVES		= -1;
 
 	ESPParticle();
 	virtual ~ESPParticle();
@@ -85,7 +86,6 @@ public:
 		this->size = mult * this->initSize;
 	}
 
-	
 
 	Vector3D GetVelocity() const {
 		return this->velocity;
@@ -108,6 +108,13 @@ public:
 	}
 	double GetCurrentLifeElapsed() const {
 		return this->currLifeElapsed;
+	}
+
+	float GetRotation() const {
+		return this->rotation;
+	}
+	void SetRotation(float r) {
+		this->rotation = r;
 	}
 
 };

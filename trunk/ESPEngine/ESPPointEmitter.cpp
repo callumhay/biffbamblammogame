@@ -54,6 +54,18 @@ Vector3D ESPPointEmitter::CalculateRandomInitParticleDir() const {
  */
 void ESPPointEmitter::ReviveParticle() {
 	// Let's spawn a particle!
+	// Remove a dead particle from the set of dead particles...
+	ESPParticle* zombie = this->deadParticles.front();
+	assert(zombie != NULL);
+	
+	// Check to see if the particle has any lives left
+	if (this->particleLivesLeft[zombie] == 0) {
+		// No lives left for the particle, therefore it gets no respawn.
+		return;
+	}
+	
+	this->deadParticles.pop_front();
+
 	// Figure out the properties we need to impart on the newly born particle...
 	Vector3D initalParticleVel(0,0,0);
 	float initialSpd = this->particleInitialSpd.RandomValueInInterval();
@@ -65,11 +77,6 @@ void ESPPointEmitter::ReviveParticle() {
 	float randomPtY = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
 	float randomPtZ = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
 	Point3D initalPt = this->emitPt + Vector3D(randomPtX, randomPtY, randomPtZ);
-	
-	// Remove a dead particle from the set of dead particles...
-	ESPParticle* zombie = this->deadParticles.front();
-	assert(zombie != NULL);
-	this->deadParticles.pop_front();
 
 	// Revive the particle and put it in the group of living particles
 	Vector2D randomSizing(this->particleSize[0].RandomValueInInterval(), this->particleSize[1].RandomValueInInterval());
@@ -83,6 +90,15 @@ void ESPPointEmitter::ReviveParticle() {
 	this->AssignRandomTextureToParticle(zombie);
 
 	this->aliveParticles.push_back(zombie);
+
+	// Subtract a life from the particle the lives are not infinite
+	int& livesLeftForRevivedParticle = this->particleLivesLeft[zombie];
+	if (livesLeftForRevivedParticle != ESPParticle::INFINITE_PARTICLE_LIVES) {
+		assert(livesLeftForRevivedParticle != 0);
+		livesLeftForRevivedParticle--;
+	}
+
+	this->timeSinceLastSpawn = 0.0f;
 }
 
 /**
@@ -90,24 +106,18 @@ void ESPPointEmitter::ReviveParticle() {
  * the movement between alive and dead particles.
  */
 void ESPPointEmitter::TickParticles(double dT) {
+	std::list<ESPParticle*> nowDead;
+
 	// Go through the alive iterators and figure out which ones have died and tick those that are still alive
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
 		// Give the particle time to do its thing...
 		ESPParticle* currParticle = *iter;
+		std::list<ESPParticle*>::iterator tempIter = iter;
 
 		// Check to see if the particle has died, if so place it among the dead
 		if (currParticle->IsDead()) {
-			// Strange issue with erase when there's only 1 particle in the alive list...
-			if (this->aliveParticles.size() == 1) {
-				this->aliveParticles.clear();
-				this->deadParticles.push_back(currParticle);
-				break;
-			}
-			else {
-				iter = this->aliveParticles.erase(iter);
-				this->deadParticles.push_back(currParticle);
-			}
-			
+			nowDead.push_back(currParticle);
+			this->deadParticles.push_back(currParticle);
 		}
 		else {
 			currParticle->Tick(dT);
@@ -117,6 +127,10 @@ void ESPPointEmitter::TickParticles(double dT) {
 				(*effIter)->AffectParticleOnTick(dT, currParticle);
 			}
 		}
+	}
+
+	for (std::list<ESPParticle*>::iterator iter = nowDead.begin(); iter != nowDead.end(); iter++) {
+		this->aliveParticles.remove(*iter);	
 	}
 }
 
@@ -130,13 +144,13 @@ void ESPPointEmitter::Tick(const double dT) {
 		
 		// We initialize all particles to living on the first run though
 		if (timeSinceLastSpawn == 0.0f) {
-			while(this->deadParticles.size() > 0) {
+			while(this->deadParticles.size() > 0 && this->numParticleLives != 0) {
 				this->ReviveParticle();
 			}
 		}
-
-		this->TickParticles(dT);
 		this->timeSinceLastSpawn += dT;
+		this->TickParticles(dT);
+
 	}
 	else {
 		// Inline: there is a variable respawn time
@@ -146,13 +160,12 @@ void ESPPointEmitter::Tick(const double dT) {
 		if (this->timeSinceLastSpawn >= allowableTimeToSpawn && this->deadParticles.size() > 0) {
 			// Let's spawn a particle!
 			this->ReviveParticle();
-			this->timeSinceLastSpawn = 0.0f;
 		}
 		else {
 			this->timeSinceLastSpawn += dT;
 		}
-
 		this->TickParticles(dT);
+
 	}
 }
 
@@ -202,7 +215,7 @@ void ESPPointEmitter::Draw(const Camera& camera) {
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendEquation(GL_FUNC_ADD);
+	//glBlendEquation(GL_FUNC_ADD);
 
 	// Go through each of the particles, revive any dead ones (based on spawn rate), and draw them
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {

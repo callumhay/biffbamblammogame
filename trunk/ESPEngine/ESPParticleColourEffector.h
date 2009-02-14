@@ -9,11 +9,13 @@ class ESPParticleColourEffector : public ESPParticleEffector {
 private:
 	bool useStartColour;
 	float startAlpha, endAlpha;
-	Colour startColour;
+	Colour startColour, endColour;
+
 public:
 	ESPParticleColourEffector(float startAlpha, float endAlpha);
-	ESPParticleColourEffector(Colour colour, float startAlpha, float endAlpha);
-	ESPParticleColourEffector(Colour colour, float alpha);
+	ESPParticleColourEffector(const Colour& colour, float startAlpha, float endAlpha);
+	ESPParticleColourEffector(const Colour& colour, float alpha);
+	ESPParticleColourEffector(const ColourRGBA& start, const ColourRGBA& end);
 	~ESPParticleColourEffector();
 
 	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
