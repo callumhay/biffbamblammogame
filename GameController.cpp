@@ -7,6 +7,7 @@
 #include "GameModel/UberballItem.h"
 #include "GameModel/InvisiBallItem.h"
 #include "GameModel/GhostBallItem.h"
+#include "GameModel/LaserPaddleItem.h"
 
 #include "BlammoEngine/BlammoEngine.h"
 #include "BlammoEngine/Camera.h"
@@ -21,6 +22,10 @@ void GameController::KeyDown(SDLKey key) {
 	if (key < 0 || key > NUM_KEYS) { return; }
 	this->SetKeyPress(key, true);
 	this->display->KeyPressed(key);
+
+	if (key == SDLK_SPACE) {
+		this->model->ReleaseBall();
+	}
 
 #ifndef NDEBUG
 	// Debug Item drops
@@ -39,8 +44,15 @@ void GameController::KeyDown(SDLKey key) {
 	else if (key == SDLK_g) {
 		this->model->DropItem(GhostBallItem::GHOST_BALL_ITEM_NAME);
 	}
+	else if (key == SDLK_l) {
+		this->model->DropItem(LaserPaddleItem::LASER_PADDLE_ITEM_NAME);
+	}
 	else if (key == SDLK_p) {
 		this->model->TogglePauseGame();
+	}
+	else if (key == SDLK_0) {
+		// Toggle multisampling
+		FBOManager::GetInstance()->SetAllowMultisamplingFBO(!FBOManager::GetInstance()->GetAllowMultisamplingFBO());
 	}
 #endif
 
@@ -63,9 +75,6 @@ void GameController::Tick() {
 	}
 	else if (this->keyPressed[SDLK_RIGHT]) {
 		this->model->MovePaddle(this->model->GetPlayerPaddle()->GetSpeed());
-	}
-	if (this->keyPressed[SDLK_SPACE]) {
-		this->model->ReleaseBall();
 	}
 
 	// Debug movement controls
