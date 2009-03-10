@@ -10,6 +10,7 @@ class Vector2D;
 class GameBall;
 class GameLevel;
 class GameModel;
+class Projectile;
 
 class LevelPiece {
 
@@ -39,7 +40,9 @@ public:
 	unsigned int GetWidthIndex() const { return this->wIndex; }
 	unsigned int GetHeightIndex() const { return this->hIndex; }
 	Colour GetColour() const { return this->colour; }
-	bool CollisionCheck(const Circle2D& c, Vector2D& n, float& d);
+	
+	bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
+	bool CollisionCheck(const Collision::AABB2D& aabb);
 
 	virtual int GetPointValueForCollision() = 0;
 
@@ -47,7 +50,8 @@ public:
 	virtual LevelPiece* Destroy(GameModel* gameModel) = 0;
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 		const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor) = 0;
-	virtual LevelPiece* BallCollisionOccurred(GameModel* gameModel, const GameBall& ball) = 0;
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) = 0;
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const Projectile& projectile) = 0;
 	
 
 	// Debug Stuffs

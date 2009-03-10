@@ -17,6 +17,7 @@
 #include "GameItem.h"
 #include "GameItemTimer.h"
 #include "GameItemFactory.h"
+#include "Projectile.h"
 
 class GameModel {
 
@@ -26,6 +27,9 @@ private:
 	// Player-controllable game assets
 	PlayerPaddle *playerPaddle;
 	GameBall *ball;
+
+	// Projectiles spawned via various means as the game is played
+	std::list<Projectile*> projectiles;
 
 	// Current world and level information
 	unsigned int currWorldNum;
@@ -60,7 +64,8 @@ private:
 		this->currState = nextState;
 	}
 
-	void BallPieceCollisionOccurred(const GameBall& ball, LevelPiece* p);
+	void CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& stateChanged);
+	void CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& stateChanged);
 	void BallPaddleCollisionOccurred();
 	void PlayerDied();
 	
@@ -97,6 +102,7 @@ private:
 		}
 	}
 
+	void ClearProjectiles();
 	void ClearLiveItems();
 	void ClearActiveTimers();
 
@@ -149,6 +155,10 @@ public:
 		return this->activeTimers;
 	}
 
+	std::list<Projectile*>& GetActiveProjectiles() {
+		return this->projectiles;
+	}
+
 	bool IsGameOver() const {
 		return this->currLivesLeft < 0;
 	}
@@ -188,6 +198,7 @@ public:
 	}
 
 	void AddPossibleItemDrop(LevelPiece* p);
+	void AddProjectile(Projectile::ProjectileType type, const Point2D& spawnLoc);
 
 	// Debug functions
 #ifndef NDEBUG

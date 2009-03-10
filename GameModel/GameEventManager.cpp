@@ -67,6 +67,14 @@ void GameEventManager::ActionBallShot(const GameBall& shotBall) {
 	}		
 }
 
+// Action for when a projectile collides with a block in the level
+void GameEventManager::ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ProjectileBlockCollisionEvent(projectile, block);
+	}	
+}
+
 // Action for when the ball collides with a block in the level
 void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block) {
 	this->listenerIter = this->eventListeners.begin();
@@ -138,6 +146,7 @@ void GameEventManager::ActionItemPaddleCollision(const GameItem& item, const Pla
 	}	
 }
 
+// Action for whan an item is activated (i.e, collected by the player paddle)
 void GameEventManager::ActionItemActivated(const GameItem& item) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
@@ -145,11 +154,27 @@ void GameEventManager::ActionItemActivated(const GameItem& item) {
 	}		
 }
 
+// Action for when an item deactivates (runs out of time or effect is spent)
 void GameEventManager::ActionItemDeactivated(const GameItem& item) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
 		(*this->listenerIter)->ItemDeactivatedEvent(item);
 	}		
+}
+
+// Action for when a projectile is fired/spawned
+void GameEventManager::ActionProjectileSpawned(const Projectile& projectile) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ProjectileSpawnedEvent(projectile);
+	}	
+}
+
+void GameEventManager::ActionProjectileRemoved(const Projectile& projectile) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ProjectileRemovedEvent(projectile);
+	}	
 }
 
 // Action for when the game is completed

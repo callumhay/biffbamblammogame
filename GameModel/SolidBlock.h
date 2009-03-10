@@ -52,7 +52,10 @@ public:
 													  const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor);
 	
 	// Doesn't matter if a ball collides with solid block, it does nothing to the block.
-	virtual LevelPiece* BallCollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+		return this->Destroy(gameModel);
+	}
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const Projectile& projectile) {
 		return this->Destroy(gameModel);
 	}
 };

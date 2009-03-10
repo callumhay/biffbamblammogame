@@ -56,12 +56,29 @@ void LevelPiece::AddPossibleItemDrop(GameModel *gameModel) {
  * Returns: true on collision as well as the normal of the line being collided with
  * and the distance from that line of the given circle; false otherwise.
  */
-bool LevelPiece::CollisionCheck(const Circle2D& c, Vector2D& n, float &d) {
+bool LevelPiece::CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float &d) {
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}
 
 	return this->bounds.Collide(c, n, d);
+}
+
+/**
+ * Check for a collision of a given AABB with this block.
+ * Returns: true on collision, false otherwise.
+ */
+bool LevelPiece::CollisionCheck(const Collision::AABB2D& aabb) {
+	if (this->IsNoBoundsPieceType()) {
+		return false;
+	}
+
+	// Make a 2D AABB for this piece
+	Collision::AABB2D pieceBounds(this->center - Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+																this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+
+	// See if there's a collision between this and the piece using AABBs
+	return Collision::IsCollision(pieceBounds, aabb);
 }
 
 // Draws the boundry lines and normals for this level piece.

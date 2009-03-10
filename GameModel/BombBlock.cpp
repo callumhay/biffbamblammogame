@@ -111,7 +111,7 @@ void BombBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* b
 		this->bounds.Clear();
 
 		// Set the bounding lines for a rectangular block
-		std::vector<LineSeg2D> boundingLines;
+		std::vector<Collision::LineSeg2D> boundingLines;
 		std::vector<Vector2D>  boundingNorms;
 
 		// We only create boundries for breakables in cases where neighbours exist AND they are empty 
@@ -119,7 +119,7 @@ void BombBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* b
 
 		// Left boundry of the piece
 		if (leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+			Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n1(-1, 0);
 			boundingLines.push_back(l1);
@@ -128,7 +128,7 @@ void BombBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* b
 
 		// Bottom boundry of the piece
 		if (bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+			Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n2(0, -1);
 			boundingLines.push_back(l2);
@@ -137,7 +137,7 @@ void BombBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* b
 
 		// Right boundry of the piece
 		if (rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+			Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n3(1, 0);
 			boundingLines.push_back(l3);
@@ -146,7 +146,7 @@ void BombBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* b
 
 		// Top boundry of the piece
 		if (topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+			Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n4(0, 1);
 			boundingLines.push_back(l4);
@@ -156,6 +156,13 @@ void BombBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* b
 		this->bounds = BoundingLines(boundingLines, boundingNorms);
 }
 
-LevelPiece* BombBlock::BallCollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
 	return this->Destroy(gameModel);
+}
+
+LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, const Projectile& projectile) {
+	if (projectile.GetType() == Projectile::PaddleLaserProjectile) {
+		return this->Destroy(gameModel);
+	}
+	return this;
 }

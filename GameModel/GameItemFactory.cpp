@@ -7,6 +7,7 @@
 #include "UberBallItem.h"
 #include "InvisiBallItem.h"
 #include "GhostBallItem.h"
+#include "LaserPaddleItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -29,6 +30,8 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new InvisiBallItem(spawnOrigin, gameModel);
 		case 4:
 			return new GhostBallItem(spawnOrigin, gameModel);
+		case 5:
+			return new LaserPaddleItem(spawnOrigin, gameModel);
 		default:
 			assert(false);
 	}
@@ -52,6 +55,9 @@ GameItem* GameItemFactory::CreateItem(const std::string itemName, const Point2D 
 	}
 	else if (itemName == GhostBallItem::GHOST_BALL_ITEM_NAME) {
 		return new GhostBallItem(spawnOrigin, gameModel);
+	}
+	else if (itemName == LaserPaddleItem::LASER_PADDLE_ITEM_NAME) {
+		return new LaserPaddleItem(spawnOrigin, gameModel);
 	}
 
 	return NULL;

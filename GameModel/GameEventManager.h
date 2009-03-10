@@ -26,6 +26,7 @@ public:
 	void ActionBallDeath(const GameBall& deadBall, int livesLeft);
 	void ActionBallSpawn(const GameBall& spawnBall);
 	void ActionBallShot(const GameBall& shotBall);
+	void ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block);
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
 	void ActionBlockDestroyed(const LevelPiece& block);
@@ -38,12 +39,15 @@ public:
 	void ActionItemActivated(const GameItem& item);
 	void ActionItemDeactivated(const GameItem& item);
 
+	void ActionProjectileSpawned(const Projectile& projectile);
+	void ActionProjectileRemoved(const Projectile& projectile);
+
 	void ActionGameCompleted();
 	void ActionWorldStarted(const GameWorld& world);
 	void ActionWorldCompleted(const GameWorld& world);
 	void ActionLevelStarted(const GameWorld& world, const GameLevel& level);
 	void ActionLevelCompleted(const GameWorld& world, const GameLevel& level);
-
+	
 
 protected:
 	GameEventManager();

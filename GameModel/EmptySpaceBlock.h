@@ -53,10 +53,14 @@ public:
 			this->bounds.Clear();
 	};
 
-	virtual LevelPiece* BallCollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
 		// Nothing happens when there's nothing to collide with...
 		return this->Destroy(gameModel);
 	}
 
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const Projectile& projectile) {
+		// Nothing happens when there's nothing to collide with...
+		return this->Destroy(gameModel);
+	}
 };
 #endif

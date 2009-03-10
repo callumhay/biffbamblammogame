@@ -200,24 +200,15 @@ void GameLevel::PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter) {
 	}
 }
 
-/** 
- * Public function for obtaining the level pieces that may currently be
- * in collision with the given gameball.
- * Returns: array of unique LevelPieces that are possibly colliding with b.
+/**
+ * Private helper function for finding a set of levelpieces within the given range of values
+ * indexing along the x and y axis.
+ * Return: Set of levelpieces included in the given bounds.
  */
-std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const GameBall& b) const {
+std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const {
 	std::set<LevelPiece*> colliders;
 
-	// Get the ball boundry and use it to figure out what levelpieces are relevant
-	Circle2D ballBounds = b.GetBounds();
-	Point2D ballCenter = ballBounds.Center();
-
-	// Find the non-rounded max and min indices to look at along the x and y axis
-	float nonAdjustedIndex = ballCenter[0] / LevelPiece::PIECE_WIDTH;
-	int xIndexMax = static_cast<int>(floorf(nonAdjustedIndex + ballBounds.Radius())); 
-	int xIndexMin = static_cast<int>(floorf(nonAdjustedIndex - ballBounds.Radius()));
-	
-	// Do some correction of values if the ball goes out of bounds...
+	// Do some correction of x-axis index values if the ball goes out of bounds...
 	if (xIndexMin < 0 || xIndexMin >= static_cast<float>(this->width)) {
 		if (xIndexMax >= static_cast<float>(this->width) || xIndexMax < 0) {
 			return colliders;
@@ -228,11 +219,7 @@ std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const GameBall& b) const
 		xIndexMax = xIndexMin;
 	}
 
-	nonAdjustedIndex = ballCenter[1] / LevelPiece::PIECE_HEIGHT;
-	int yIndexMax = static_cast<int>(floorf(nonAdjustedIndex + ballBounds.Radius()));
-	int yIndexMin = static_cast<int>(floorf(nonAdjustedIndex - ballBounds.Radius()));
-	
-	// Do some correction of values if the ball goes out of bounds...
+	// Do some correction of y-axis index values if the ball goes out of bounds...
 	if (yIndexMin < 0 || yIndexMin >= static_cast<float>(this->height)) {
 		if (yIndexMax >= static_cast<float>(this->height) || yIndexMax < 0) {
 			return colliders;
@@ -243,28 +230,77 @@ std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const GameBall& b) const
 		yIndexMax = yIndexMin;
 	}
 	
+	assert(xIndexMin <= xIndexMax);
+	assert(yIndexMin <= yIndexMax);
+	
 	if (xIndexMax == xIndexMin) {
 		if (yIndexMax == yIndexMin) {
 			// Only one collision point
 			colliders.insert(this->currentLevelPieces[yIndexMin][xIndexMin]);
 		}
 		else {
-			// Two collisions along the y-axis
-			colliders.insert(this->currentLevelPieces[yIndexMin][xIndexMin]);
-			colliders.insert(this->currentLevelPieces[yIndexMax][xIndexMin]);
+			// Some number of collisions along the y-axis
+			for (int y = yIndexMin; y <= yIndexMax; y++) {
+				colliders.insert(this->currentLevelPieces[y][xIndexMin]);
+			}
 		}
 	}
 	else {
-			// No matter what there are two collisions along the x-axis
-			colliders.insert(this->currentLevelPieces[yIndexMin][xIndexMin]);
-			colliders.insert(this->currentLevelPieces[yIndexMin][xIndexMax]);
+			// No matter what there are some number of collisions along the x-axis
+		for (int x = xIndexMin; x <= xIndexMax; x++) {
+			colliders.insert(this->currentLevelPieces[yIndexMin][x]);
+		}
 
 		if (yIndexMax != yIndexMin) {
-			// There will be a total of four collisions now, add the left overs
-			colliders.insert(this->currentLevelPieces[yIndexMax][xIndexMin]);
-			colliders.insert(this->currentLevelPieces[yIndexMax][xIndexMax]);
+			// Add the left overs...
+			for (int x = xIndexMin; x <= xIndexMax; x++) {
+				colliders.insert(this->currentLevelPieces[yIndexMax][x]);
+			}
 		}
 	}
 
 	return colliders;
+}
+
+/** 
+ * Public function for obtaining the level pieces that may currently be
+ * in collision with the given gameball.
+ * Returns: array of unique LevelPieces that are possibly colliding with b.
+ */
+std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const GameBall& b) const {
+
+	// Get the ball boundry and use it to figure out what levelpieces are relevant
+	Collision::Circle2D ballBounds = b.GetBounds();
+	Point2D ballCenter = ballBounds.Center();
+
+	// Find the non-rounded max and min indices to look at along the x and y axis
+	float xNonAdjustedIndex = ballCenter[0] / LevelPiece::PIECE_WIDTH;
+	int xIndexMax = static_cast<int>(floorf(xNonAdjustedIndex + ballBounds.Radius())); 
+	int xIndexMin = static_cast<int>(floorf(xNonAdjustedIndex - ballBounds.Radius()));
+	
+	float yNonAdjustedIndex = ballCenter[1] / LevelPiece::PIECE_HEIGHT;
+	int yIndexMax = static_cast<int>(floorf(yNonAdjustedIndex + ballBounds.Radius()));
+	int yIndexMin = static_cast<int>(floorf(yNonAdjustedIndex - ballBounds.Radius()));
+
+	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
+}
+
+/** 
+ * Public function for obtaining the level pieces that may currently be
+ * in collision with the given projectile.
+ * Returns: array of unique LevelPieces that are possibly colliding with p.
+ */
+std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const Projectile& p) const {
+	Point2D projectileCenter = p.GetPosition();
+
+	// Find the non-rounded max and min indices to look at along the x and y axis
+	float xNonAdjustedIndex = projectileCenter[0] / LevelPiece::PIECE_WIDTH;
+	int xIndexMax = static_cast<int>(floorf(xNonAdjustedIndex + p.GetHalfWidth())); 
+	int xIndexMin = static_cast<int>(floorf(xNonAdjustedIndex - p.GetHalfWidth()));
+	
+	float yNonAdjustedIndex = projectileCenter[1] / LevelPiece::PIECE_HEIGHT;
+	int yIndexMax = static_cast<int>(floorf(yNonAdjustedIndex + p.GetHalfHeight()));
+	int yIndexMin = static_cast<int>(floorf(yNonAdjustedIndex - p.GetHalfHeight()));
+
+	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
 }

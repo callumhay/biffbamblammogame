@@ -6,15 +6,15 @@
 class BoundingLines {
 
 private:
-	std::vector<LineSeg2D> lines;
+	std::vector<Collision::LineSeg2D> lines;
 	std::vector<Vector2D> normals;
 
 public:
 	BoundingLines(){};
-	BoundingLines(const std::vector<LineSeg2D>& lines, const std::vector<Vector2D>& norms);
+	BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms);
 	~BoundingLines();
 
-	bool Collide(const Circle2D& c, Vector2D& n, float &d);
+	bool Collide(const Collision::Circle2D& c, Vector2D& n, float &d);
 	
 	// Completely obliterates all the bounding lines for this
 	void Clear() {

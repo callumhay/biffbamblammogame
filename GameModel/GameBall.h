@@ -10,7 +10,7 @@ public:
 	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100 };
 
 private:
-	Circle2D bounds;			// The bounds of the ball, constantly updated to world space
+	Collision::Circle2D bounds;			// The bounds of the ball, constantly updated to world space
 	Vector2D currDir;			// The current direction of movement of the ball
 	BallSpeed currSpeed;	// The current speed of the ball
 	int currType;					// The current type of this ball
@@ -35,7 +35,7 @@ public:
 		return this->rotationInDegs;
 	}
 
-	Circle2D GetBounds() const {
+	Collision::Circle2D GetBounds() const {
 		return this->bounds;
 	}
 

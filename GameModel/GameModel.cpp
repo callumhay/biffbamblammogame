@@ -38,6 +38,7 @@ GameModel::~GameModel() {
 	// Delete all items and timers
 	this->ClearLiveItems();
 	this->ClearActiveTimers();
+	this->ClearProjectiles();
 }
 
 /**
@@ -129,13 +130,45 @@ void GameModel::Tick(double seconds) {
 	}
 }
 
+/**
+ * Called when a collision occurs between a projectile and a level piece.
+ * Deals with all the important effects a collision could have on the game model.
+ * Precondition: p != NULL
+ */
+void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& stateChanged) {
+	assert(p != NULL);
+	
+	int pointValue = p->GetPointValueForCollision();
+	assert(pointValue >= 0);
+	this->IncrementScore(pointValue);
+
+	// Collide the projectile with the piece...
+	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, *projectile); 	// WARNING: This can destroy p.
+
+	// EVENT: Ball-Block Collision
+	GameEventManager::Instance()->ActionProjectileBlockCollision(*projectile, *pieceAfterCollision);
+
+	// Check to see if the level is done
+	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
+	if (currLevel->IsLevelComplete()) {
+
+		// The level was completed, increment the level - note this function
+		// is robust and will increment level, world and determine if we have finished
+		// the game all in one
+		this->IncrementLevel();
+		stateChanged = true;
+	}
+	else {
+		stateChanged = false;
+	}
+}
 
 /**
  * Called when a collision occurs between the ball and a level piece.
  * Deals with all the important effects a collision could have on the game model.
  * Precondition: p != NULL
  */
-void GameModel::BallPieceCollisionOccurred(const GameBall& ball, LevelPiece* p) {
+void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& stateChanged) {
 	assert(p != NULL);
 	
 	LevelPiece* pieceBefore = p;
@@ -148,7 +181,7 @@ void GameModel::BallPieceCollisionOccurred(const GameBall& ball, LevelPiece* p) 
 	// Collide the ball with the level piece directly, then if there was a change
 	// tell the level about it
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
-	LevelPiece* pieceAfterCollision = p->BallCollisionOccurred(this, ball);
+	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, ball);	// WARNING: This can destroy p.
 
 	// EVENT: Ball-Block Collision
 	GameEventManager::Instance()->ActionBallBlockCollision(*this->ball, *pieceAfterCollision);
@@ -167,6 +200,10 @@ void GameModel::BallPieceCollisionOccurred(const GameBall& ball, LevelPiece* p) 
 		// is robust and will increment level, world and determine if we have finished
 		// the game all in one
 		this->IncrementLevel();
+		stateChanged = true;
+	}
+	else {
+		stateChanged = false;
 	}
 }
 
@@ -237,12 +274,26 @@ void GameModel::PlayerDied() {
 }
 
 /**
+ * Clears the list of all projectiles that are currently in existance in the game.
+ */
+void GameModel::ClearProjectiles() {
+	for (std::list<Projectile*>::iterator iter = this->projectiles.begin(); iter != this->projectiles.end(); iter++) {
+		Projectile* currProjectile = *iter;
+		GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
+		delete currProjectile;
+		currProjectile = NULL;
+	}
+	this->projectiles.clear();
+}
+
+/**
  * Clears the list of items that are currently alive in a level.
  */
 void GameModel::ClearLiveItems() {
-	// Destory any left-over game items
+	// Destroy any left-over game items
 	for(std::list<GameItem*>::iterator iter = this->currLiveItems.begin(); iter != this->currLiveItems.end(); iter++) {
 		GameItem* currItem = *iter;
+		GameEventManager::Instance()->ActionItemRemoved(*currItem);
 		delete currItem;
 		currItem = NULL;
 	}
@@ -259,4 +310,19 @@ void GameModel::ClearActiveTimers() {
 		currTimer = NULL;
 	}
 	this->activeTimers.clear();
+}
+
+/**
+ * Add a projectile of the given type at the given spawn location
+ */
+void GameModel::AddProjectile(Projectile::ProjectileType type, const Point2D& spawnLoc) {
+	// Create a new projectile based on values given
+	Projectile* addedProjectile = Projectile::CreateProjectile(type, spawnLoc);
+	assert(addedProjectile != NULL);
+
+	// Add it to the list of in-game projectiles
+	this->projectiles.push_back(addedProjectile);
+
+	// EVENT: Projectile creation
+	GameEventManager::Instance()->ActionProjectileSpawned(*addedProjectile);
 }
