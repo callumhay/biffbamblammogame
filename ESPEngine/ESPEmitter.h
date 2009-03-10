@@ -57,9 +57,15 @@ public:
 	ESPEmitter();
 	virtual ~ESPEmitter();
 
+	static const int ONLY_SPAWN_ONCE = -1;
+
 	bool IsDead() const {
 		return (this->aliveParticles.size() == 0) && 
 			     (this->timeSinceLastSpawn > this->particleLifetime.maxValue);
+	}
+
+	bool OnlySpawnsOnce() const {
+		return this->particleSpawnDelta.minValue == ESPEmitter::ONLY_SPAWN_ONCE;
 	}
 
 	// Setter functions for typical attributes of emitters
@@ -79,6 +85,10 @@ public:
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);
 	void AddParticle(ESPParticle* particle);
+
+
+	ESPInterval GetParticleSizeX() const { return this->particleSize[0]; }
+	ESPInterval GetParticleSizeY() const { return this->particleSize[1]; }
 
 	virtual void Tick(double dT) = 0;
 	virtual void Draw(const Camera& camera) = 0;

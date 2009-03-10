@@ -23,27 +23,21 @@ void ESPParticleScaleEffector::AffectParticleOnTick(double dT, ESPParticle* part
 		double amtOfScaling = 1.0;
 
 		// Determine if we are in a growth or shrink cycle...
-		double pulseAmt = this->effect.pulseRate * this->effect.pulseTimeTracker;
-		if (pulseAmt < 0.0) {
-			this->effect.pulseTimeTracker = 0.0;
-		}
-		else if (pulseAmt < 0.5) {
+		double pulseAmt = this->effect.pulseRate * particleLifeElapsed;
+		pulseAmt = pulseAmt - floor(pulseAmt);
+		assert(pulseAmt >= 0);
+		assert(pulseAmt < 1);
+
+		if (pulseAmt < 0.5) {
 			// Growth cycle...
 			amtOfScaling = 2 * (effect.pulseGrowthScale - 1.0) * pulseAmt + 1.0;
 		}
 		else if (pulseAmt >= 0.5) {
-			// Shrink cycle... if we exceed the rate then we should reset the pulse
-			// to the biggest size
-			if (pulseAmt > 1.0) {
-				this->effect.pulseTimeTracker = 0.0;
-				pulseAmt = 1.0;
-			}
-
+			// Shrink cycle...
 			double twoTimesGS = 2 * this->effect.pulseGrowthScale;
 			amtOfScaling = (-twoTimesGS + 2)* pulseAmt + twoTimesGS - 1;
 		}
 		particle->MultiplyInitSizeScale(amtOfScaling);
-		this->effect.pulseTimeTracker += dT;
 	}
 
 	// Only do interpolations for particles with discrete lifetimes
