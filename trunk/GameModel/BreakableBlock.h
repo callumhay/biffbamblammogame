@@ -80,7 +80,8 @@ public:
 	virtual LevelPiece* Destroy(GameModel* gameModel);	
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 													  const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor);
-	virtual LevelPiece* BallCollisionOccurred(GameModel* gameModel, const GameBall& ball);
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const Projectile& projectile);
 
 };
 #endif

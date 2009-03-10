@@ -2,7 +2,7 @@
 
 #include "../BlammoEngine/BlammoEngine.h"
 
-BoundingLines::BoundingLines(const std::vector<LineSeg2D>& lines, const std::vector<Vector2D>& norms) : 
+BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms) : 
 	lines(lines), normals(norms) {
 	assert(lines.size() == norms.size());
 }
@@ -17,7 +17,7 @@ BoundingLines::~BoundingLines() {
  * inside the line, postivie means outside - the outward normal pointing direction).
  * The boolean return value will be true if one or more collisions occured, false otherwise.
  */
-bool BoundingLines::Collide(const Circle2D& c, Vector2D& n, float &d) {
+bool BoundingLines::Collide(const Collision::Circle2D& c, Vector2D& n, float &d) {
 	std::vector<Vector2D> collisionNorms;
 	float sqRadius = c.Radius()*c.Radius();
 	d = 0.0f;
@@ -68,7 +68,7 @@ void BoundingLines::DebugDraw() const {
 	glColor3f(1,0,1);
 	glBegin(GL_LINES);
 	for (size_t i = 0; i < this->lines.size(); i++) {
-		LineSeg2D currLine = this->lines[i];
+		Collision::LineSeg2D currLine = this->lines[i];
 		glVertex2f(currLine.P1()[0], currLine.P1()[1]);
 		glVertex2f(currLine.P2()[0], currLine.P2()[1]);
 	}
@@ -79,7 +79,7 @@ void BoundingLines::DebugDraw() const {
 	glBegin(GL_LINES);
 	for (size_t i = 0; i < this->normals.size(); i++) {
 		Vector2D currNorm = this->normals[i];
-		LineSeg2D currLine = this->lines[i];
+		Collision::LineSeg2D currLine = this->lines[i];
 		
 		// Place normal at midpoint
 		Vector2D midPt = 0.5f * (Vector2D(currLine.P1()[0], currLine.P1()[1]) + Vector2D(currLine.P2()[0], currLine.P2()[1]));

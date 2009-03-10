@@ -14,13 +14,13 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		// or is another solid block.
 
 		// Set the bounding lines for a rectangular block
-		std::vector<LineSeg2D> boundingLines;
+		std::vector<Collision::LineSeg2D> boundingLines;
 		std::vector<Vector2D>  boundingNorms;
 
 		// Left boundry of the piece
 		if (leftNeighbor != NULL) {
 			if (leftNeighbor->GetType() != LevelPiece::Solid) {
-				LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+				Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 										 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 				Vector2D n1(-1, 0);
 				boundingLines.push_back(l1);
@@ -31,7 +31,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		// Bottom boundry of the piece
 		if (bottomNeighbor != NULL) {
 			if (bottomNeighbor->GetType() != LevelPiece::Solid) {
-				LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+				Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 										 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 				Vector2D n2(0, -1);
 				boundingLines.push_back(l2);
@@ -42,7 +42,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		// Right boundry of the piece
 		if (rightNeighbor != NULL) {
 			if (rightNeighbor->GetType() != LevelPiece::Solid) {
-				LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+				Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 										 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 				Vector2D n3(1, 0);
 				boundingLines.push_back(l3);
@@ -53,7 +53,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		// Top boundry of the piece
 		if (topNeighbor != NULL) {
 			if (topNeighbor->GetType() != LevelPiece::Solid) {
-				LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+				Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 										 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 				Vector2D n4(0, 1);
 				boundingLines.push_back(l4);

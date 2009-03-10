@@ -88,7 +88,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 		this->bounds.Clear();
 
 		// Set the bounding lines for a rectangular block
-		std::vector<LineSeg2D> boundingLines;
+		std::vector<Collision::LineSeg2D> boundingLines;
 		std::vector<Vector2D>  boundingNorms;
 
 		// We only create boundries for breakables in cases where neighbours exist AND they are empty 
@@ -96,7 +96,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 
 		// Left boundry of the piece
 		if (leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+			Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n1(-1, 0);
 			boundingLines.push_back(l1);
@@ -105,7 +105,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 
 		// Bottom boundry of the piece
 		if (bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+			Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n2(0, -1);
 			boundingLines.push_back(l2);
@@ -114,7 +114,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 
 		// Right boundry of the piece
 		if (rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+			Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n3(1, 0);
 			boundingLines.push_back(l3);
@@ -123,7 +123,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
 
 		// Top boundry of the piece
 		if (topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType()) {
-			LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+			Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n4(0, 1);
 			boundingLines.push_back(l4);
@@ -137,7 +137,7 @@ void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPie
  * Call this when a collision has actually occured with the ball and this block.
  * Returns: The resulting level piece that this has become.
  */
-LevelPiece* BreakableBlock::BallCollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
 
 	// If the ball is an 'uber' ball then we decrement the piece type twice when it is
 	// not the lowest kind of breakable block (i.e., green)
@@ -163,5 +163,32 @@ LevelPiece* BreakableBlock::BallCollisionOccurred(GameModel* gameModel, const Ga
 	}
 	assert(newPiece != NULL);
 	
+	return newPiece;
+}
+
+/**
+ * Call this when a collision has actually occured with a projectile and this block.
+ * Returns: The resulting level piece that this has become.
+ */
+LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const Projectile& projectile) {
+	LevelPiece* newPiece = this;
+
+	// For destructive projectile types...
+	if (projectile.GetType() == Projectile::PaddleLaserProjectile) {
+		switch(this->pieceType) {
+			case GreenBreakable:
+				newPiece = this->Destroy(gameModel);
+				break;
+
+			default:
+				this->DecrementPieceType();
+				{
+					GameLevel* level = gameModel->GetCurrentLevel();
+					level->PieceChanged(this, this);
+				}
+				newPiece = this;
+				break;				
+		}
+	}
 	return newPiece;
 }

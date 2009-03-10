@@ -4,11 +4,15 @@
 #include "../BlammoEngine/BlammoEngine.h"
 #include "BoundingLines.h"
 
+class GameModel;
+
 // Represents the player controlled paddle shaped as follows:
 //              -----------------
 //              |_______________|
 
 class PlayerPaddle {
+public:
+	enum PaddleType { NormalPaddle = 0x00000000, LaserPaddle = 0x00000001 };
 
 private:
 	// Default values for the dimensions of the paddle
@@ -20,10 +24,14 @@ private:
 
 	static const int AVG_OVER_TICKS  = 60;
 
+	static const float PADDLE_LASER_DELAY;	// Delay between shots of the laser
+
 	float distTemp;			// A temporary store for the change in movement
 	float avgVel;				// Keeps the average velocity (over the past AVG_OVER_TICKS ticks) of the paddle at a given time
 	int ticksSinceAvg;  // Keeps track of ticks since a sampling of the average velocity occurred
 	bool hitWall;				// True when the paddle hits a wall
+
+	int currType;		// An ORed together current type of this paddle (see PaddleType)
 
 	Point2D centerPos;						// Paddle position (at its center) in the game model
 	float currHalfHeight;					// Half the height of the paddle
@@ -34,7 +42,8 @@ private:
 	
 	BoundingLines bounds;					// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
 	
-	
+	float timeSinceLastLaserBlast;	// Time since the last laser projectile was fired
+
 	void SetDefaultDimensions();
 
 	// Reset the dimensions and position of this paddle (e.g., after death, start of a level).
@@ -86,7 +95,19 @@ public:
 		return Vector2D(this->avgVel, 0);
 	}
 
-	bool CollisionCheck(const Circle2D& c, Vector2D& n, float& d);
+	int GetPaddleType() const {
+		return this->currType;
+	}
+	void AddPaddleType(const PaddleType type) {
+		this->currType = this->currType | type;
+	}
+	void RemovePaddleType(const PaddleType type) {
+		this->currType = this->currType & ~type;
+	}
+
+	void Shoot(GameModel* gameModel);
+
+	bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
 	void DebugDraw() const;
 
 };

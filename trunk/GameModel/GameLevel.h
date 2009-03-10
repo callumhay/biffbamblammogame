@@ -2,6 +2,7 @@
 #define __GAMELEVEL_H__
 
 #include "LevelPiece.h"
+#include "Projectile.h"
 
 #include <string>
 #include <vector>
@@ -31,9 +32,11 @@ private:
 	GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces);
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces, size_t hIndex, size_t wIndex);
+	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;
 
 public:
-	static const int Y_COORD_OF_DEATH = -5;
+	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 5;
+	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;
 
 	~GameLevel();
 
@@ -49,6 +52,7 @@ public:
 	}
 
 	std::set<LevelPiece*> GetCollisionCandidates(const GameBall& b) const;
+	std::set<LevelPiece*> GetCollisionCandidates(const Projectile& p) const;
 
 	/**
 	 * Obtain the LevelPiece at the given height and width indices.

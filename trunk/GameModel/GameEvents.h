@@ -8,6 +8,7 @@ class LevelPiece;
 class GameLevel;
 class GameWorld;
 class GameItem;
+class Projectile;
 
 class GameEvents {
 public:
@@ -64,7 +65,6 @@ public:
 
 
 	// Ball related events ***************************************************************
-	//virtual void BallCollision(
 
 	/**
 	 * Event triggered when the ball falls below the death point in the level. This event
@@ -93,10 +93,17 @@ public:
 	 * Event triggered when the ball collides with a level block. Only occurs once as the ball
 	 * collides with the block.
 	 * Arguements: ball				 - The ball as it is colliding with the block.
-	 *             blockBefore - The block before it is destroyed or affected by the ball.
-	 *						 blockAfter  - The block after it is destroyed or affected by the ball.
+	 *             block       - The block being affected by the ball.
 	 */
 	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) = 0;
+
+	/**
+	 * Event triggered when a projectile collides with a level block. Only occurs once as the projectile
+	 * collides with the block.
+	 * Arguements: projectile - The projectile as it is colliding with the block.
+	 *             block      - The block being affected by the projectile.
+	 */
+	virtual void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) = 0;
 
 	/**
 	 * Event triggered when the ball collides with the player paddle. Only occurs once as the ball
@@ -173,6 +180,19 @@ public:
 	 * Arguements: item - The item that was just deactivated.
 	 */
 	virtual void ItemDeactivatedEvent(const GameItem& item)	= 0;
+	
+	/**
+	 * Event triggered when a projectile is spawned. Only occurs once per spawned projectile.
+	 * Arguements: projectile - The projectile that was just spawned.
+	 */
+	virtual void ProjectileSpawnedEvent(const Projectile& projectile) = 0;
+
+	/**
+	 * Event triggered when a projectile is removed. Only occurs once per removed projectile.
+	 * Arguements: projectile - The projectile that was just removed.
+	 */
+	virtual void ProjectileRemovedEvent(const Projectile& projectile) = 0;
+
 };
 
 
