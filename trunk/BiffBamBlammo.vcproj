@@ -118,8 +118,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="3"
 				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
@@ -144,7 +145,7 @@
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				IgnoreDefaultLibraryNames="libc.lib"
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -277,10 +278,6 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\Point.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\Shape2D.h"
 					>
 				</File>
 				<File
@@ -796,6 +793,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\LaserPaddleItem.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\LevelPiece.h"
 					>
 				</File>
@@ -805,6 +806,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\PlayerPaddle.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\Projectile.h"
 					>
 				</File>
 				<File
@@ -896,6 +901,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\LaserPaddleItem.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\LevelPiece.cpp"
 					>
 				</File>
@@ -905,6 +914,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\PlayerPaddle.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\Projectile.cpp"
 					>
 				</File>
 				<File
