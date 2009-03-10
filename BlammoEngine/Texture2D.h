@@ -17,7 +17,7 @@ public:
 	// Creator methods
 	static Texture2D* CreateTexture2DFromImgFile(const std::string& filepath, TextureFilterType texFilter);
 	static Texture2D* CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilterType texFilter);
-	static Texture2D* CreateEmptyTexture2D(TextureFilterType texFilter, int width, int height);
+	static Texture2D* CreateEmptyTextureRectangle(int width, int height);
 };
 
 #endif

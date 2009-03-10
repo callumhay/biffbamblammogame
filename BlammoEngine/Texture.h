@@ -53,6 +53,9 @@ public:
 		glBindTexture(this->textureType, 0);
 		glDisable(this->textureType);
 	}
+	void GenerateMipmaps() {
+		glGenerateMipmapEXT(this->textureType);
+	}
 
 };
 

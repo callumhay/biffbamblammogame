@@ -14,6 +14,8 @@ Skybox::Skybox(PolygonGroup* geom, TextureCube* tex) : cgEffect(NULL), technique
 	assert(geom != NULL);
 	assert(tex != NULL);
 	
+	this->currColour = Colour(1,1,1);
+
 	// Load the skybox effect, technique and its parameters
 	this->cgEffect = CgShaderManager::Instance()->LoadEffectFromCgFxFile(SKYBOX_EFFECT_FILE);
 	this->LoadSkyboxCgFxParameters();
@@ -58,7 +60,7 @@ void Skybox::LoadSkyboxCgFxParameters() {
  * Protected helper (can be inherited and overridden), used to set up the 
  * cgfx parameters with their respective values.
  */
-void Skybox::SetupCgFxParameters(double dT) {
+void Skybox::SetupCgFxParameters() {
 	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 
 	glPushMatrix();
@@ -68,6 +70,7 @@ void Skybox::SetupCgFxParameters(double dT) {
 	
 	cgGLSetParameter3f(this->skyboxCamParam, 0, 0, 0);
 	cgGLSetTextureParameter(this->skyboxCubeSamplerParam, this->cubemap->GetTextureID());
+	cgGLSetParameter3f(this->colourMultParam, this->currColour[0], this->currColour[1], this->currColour[2]);
 
 	CgShaderManager::Instance()->CheckForCgError("Setting parameters for Skybox effect");
 }
@@ -75,9 +78,9 @@ void Skybox::SetupCgFxParameters(double dT) {
 /**
  * Draw the skybox... in all its skyboxey glory!
  */
-void Skybox::Draw(double dT, const Camera& camera) {
+void Skybox::Draw(const Camera& camera) {
 
-	this->SetupCgFxParameters(dT);
+	this->SetupCgFxParameters();
 
 	// There should be only ONE pass for a skybox...
 	// Get the pass and draw away
