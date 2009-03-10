@@ -56,10 +56,6 @@ void LevelMesh::Flush() {
 
 			this->levelMaterials.erase(foundMaterial);
 		}
-		
-		// ... and delete the block itself
-		delete this->styleBlock;
-		this->styleBlock = NULL;
 	}
 	
 	// Delete each of the display lists loaded for the previous level and clear up the

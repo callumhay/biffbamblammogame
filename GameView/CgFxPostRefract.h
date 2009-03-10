@@ -7,16 +7,15 @@
 class Camera;
 
 /**
- * Represents CgFx CelShader material.
+ * Represents CgFx Post Refraction material.
  */
 class CgFxPostRefract : public CgFxEffectBase {
-
-private:
-
+public:
 	// Constants used for loading the CelShading effect
 	static const std::string BASIC_TECHNIQUE_NAME;
-	static const std::string TEXTURED_TECHNIQUE_NAME;
+	static const std::string VAPOUR_TRAIL_TECHNIQUE_NAME;
 
+private:
 	// CG Transform params
 	CGparameter worldITMatrixParam;
 	CGparameter wvpMatrixParam;
@@ -31,10 +30,24 @@ private:
 	CGparameter sceneWidthParam;
 	CGparameter sceneHeightParam;
 
+	// Special Noise parameters for vapour trail technique
+	CGparameter noiseSamplerParam;
+	CGparameter maskSamplerParam;
+	CGparameter timerParam;
+	CGparameter noiseScaleParam;
+	CGparameter noiseFreqParam;
+	CGparameter noiseFlowDirParam;
+
 	// Actual values for parameters
 	Colour invisiColour;
 	float indexOfRefraction, warpAmount;
 	Texture2D* sceneTex;
+	
+	double timer;
+	float scale, freq;
+	Vector3D flowDir;
+	GLint noiseTexID;
+	Texture2D* maskTex;
 
 protected:
 	virtual void SetupBeforePasses(const Camera& camera);
@@ -62,6 +75,22 @@ public:
 	 */
 	void SetIndexOfRefraction(float eta) {
 		this->indexOfRefraction = eta;
+	}
+
+	void SetScale(float s) {
+		this->scale = s;
+	}
+	void SetFrequency(float f) {
+		this->freq = f;
+	}
+	void SetFlowDirection(const Vector3D& v) {
+		this->flowDir = v;
+	}
+	void AddToTimer(double dT) {
+		this->timer += dT;
+	}
+	void SetMaskTexture(Texture2D* tex) {
+		this->maskTex = tex;
 	}
 };
 

@@ -26,15 +26,14 @@ const std::string DecoSkybox::DECO_SKYBOX_TEXTURES[6]			= {
 	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg"
 };
 
-DecoSkybox::DecoSkybox(PolygonGroup* geom, TextureCube* tex) : Skybox(geom, tex), currColour(COLOUR_CHANGE_LIST[0]), currColourIndex(0) {
+DecoSkybox::DecoSkybox(PolygonGroup* geom, TextureCube* tex) : Skybox(geom, tex), currColourIndex(0) {
+	this->currColour = COLOUR_CHANGE_LIST[0];
 }
 
 DecoSkybox::~DecoSkybox() {
 }
 
-void DecoSkybox::SetupCgFxParameters(double dT) {
-	Skybox::SetupCgFxParameters(dT);
-	
+void DecoSkybox::Tick(double dT) {
 	if (dT > COLOUR_CHANGE_SPEED) {
 		dT = COLOUR_CHANGE_SPEED;
 	}
@@ -66,8 +65,10 @@ void DecoSkybox::SetupCgFxParameters(double dT) {
 	if (transitionDone) {
 		this->currColourIndex = (this->currColourIndex + 1) % NUM_COLOUR_CHANGES;
 	}
+}
 
-	cgGLSetParameter3f(this->colourMultParam, this->currColour[0], this->currColour[1], this->currColour[2]);
+void DecoSkybox::SetupCgFxParameters() {
+	Skybox::SetupCgFxParameters();
 }
 
 DecoSkybox* DecoSkybox::CreateDecoSkybox(const std::string& meshFilepath) {

@@ -11,7 +11,8 @@
 class InGameDisplayState : public DisplayState {
 
 private:
-	Texture2D* renderToTexBeforeBall;	// Texture ID of the game scene rendered to texture before drawing the ball
+	Texture2D* renderToTexBackground;	// Texture of background in the game, rendered to texture
+	Texture2D* renderToTexEverything;	// Texture of the entire game scene, rendered to texture
 
 	// HUD related members
 	static const std::string LIVES_LABEL_TEXT;
@@ -22,6 +23,11 @@ private:
 	
 	void DrawGameHUD();
 	void DrawGameScene(double dT);
+
+	void DebugDrawLevelPieceBounds();
+	void RenderBackgroundToFBO();
+	void RenderFullSceneToFBO(double dT);
+	void DrawScene(double dT);
 
 public:
 	InGameDisplayState(GameDisplay* display);

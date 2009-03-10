@@ -41,26 +41,22 @@ public:
 		return this->styleBlock;
 	}
 
-	virtual void DrawSkybox(double dT, const Camera& camera) {
-		this->skybox->Draw(dT, camera);
+	virtual void Tick(double dT) {
+		this->skybox->Tick(dT);	
+	};
+
+	virtual void DrawSkybox(const Camera& camera) {
+		this->skybox->Draw(camera);
 	}
 
-	virtual void DrawBackgroundEffects(double dT, const Camera& camera) = 0;
+	virtual void DrawBackgroundEffects(const Camera& camera) = 0;
 
-	virtual void DrawBackgroundModel(double dT, const Camera& camera) {
+	virtual void DrawBackgroundModel(const Camera& camera) {
 		this->background->Draw(camera);
 	}
 
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const {
-		Point2D paddleCenter = p.GetCenterPosition();	
-
-		glPushMatrix();
-		glTranslatef(paddleCenter[0], paddleCenter[1], 0);
-		
-		// Draw the paddle
 		this->playerPaddle->Draw(camera);
-		
-		glPopMatrix();
 	}
 
 	// Factory methods

@@ -11,6 +11,7 @@
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/PlayerPaddle.h"
 #include "../GameModel/Onomatoplex.h"
+#include "../GameModel/Projectile.h"
 
 #include "../BlammoEngine/BlammoEngine.h"
 
@@ -87,6 +88,10 @@ void GameEventsListener::BallSpawnEvent(const GameBall& spawnedBall) {
 
 void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 	debug_output("EVENT: Ball shot");
+}
+
+void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) {
+	debug_output("EVENT: Projectile-block collision");
 }
 
 void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) {
@@ -184,8 +189,21 @@ void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 }
 
 void GameEventsListener::ItemDeactivatedEvent(const GameItem& item) {
-	// Dectivate the item's effect (if any)
-	this->display->GetAssets()->SetItemEffect(item, true);
+	// Deactivate the item's effect (if any)
+	this->display->GetAssets()->SetItemEffect(item, false);
 
 	debug_output("EVENT: Item Deactivated: " << item);
+}
+
+void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
+	// Add the projectile's effect
+	this->display->GetAssets()->AddProjectileEffect(this->display->GetCamera(), projectile); 
+
+	debug_output("EVENT: Projectile spawned");
+}
+
+void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
+	// Remove the projectile's effect
+	this->display->GetAssets()->RemoveProjectileEffect(this->display->GetCamera(), projectile); 
+	debug_output("EVENT: Projectile removed");
 }

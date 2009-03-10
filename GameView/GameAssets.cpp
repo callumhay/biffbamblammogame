@@ -23,7 +23,8 @@ itemAssets(NULL),
 
 ball(NULL), 
 spikeyBall(NULL), 
-levelMesh(NULL), 
+levelMesh(NULL),
+paddleLaserAttachment(NULL),
 
 invisiBallEffect(NULL), 
 ghostBallEffect(NULL) {
@@ -102,6 +103,10 @@ void GameAssets::DeleteRegularMeshAssets() {
 		delete this->spikeyBall;
 		this->spikeyBall = NULL;
 	}
+	if (this->paddleLaserAttachment != NULL) {
+		delete this->paddleLaserAttachment;
+		this->paddleLaserAttachment = NULL;
+	}
 }
 
 
@@ -147,6 +152,7 @@ void GameAssets::DrawGameBall(double dT, const GameBall& b, const Camera& camera
 	glRotatef(ballRot[0], 1.0f, 0.0f, 0.0f);
 	glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
 	glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
 		this->spikeyBall->Draw(camera, ballEffectTemp);
 	}
@@ -157,41 +163,53 @@ void GameAssets::DrawGameBall(double dT, const GameBall& b, const Camera& camera
 	glPopMatrix();
 }
 
+void GameAssets::Tick(double dT) {
+	this->worldAssets->Tick(dT);
+}
+
 /**
  * Draw the player paddle mesh with materials and in correct position.
  */
-void GameAssets::DrawPaddle(const PlayerPaddle& p, const Camera& camera) const {
+void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera) const {
+	Point2D paddleCenter = p.GetCenterPosition();	
+
+	glPushMatrix();
+	glTranslatef(paddleCenter[0], paddleCenter[1], 0);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
+	
 	this->worldAssets->DrawPaddle(p, camera);
+
+	// In the case of a laser paddle, we draw the laser attachment
+	if ((p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
+		this->paddleLaserAttachment->Draw(camera);
+		
+		// Draw glowy effects where the laser originates...
+		this->espAssets->DrawPaddleLaserEffects(dT, camera, p);
+	}
+
+	glPopMatrix();
 }
 
 /**
  * Draw the skybox for the current world type.
  */
-void GameAssets::DrawSkybox(double dT, const Camera& camera) {
-	this->worldAssets->DrawSkybox(dT, camera);
+void GameAssets::DrawSkybox(const Camera& camera) {
+	this->worldAssets->DrawSkybox(camera);
 }
 
 /**
  * Draw the background model for the current world type.
  */
-void GameAssets::DrawBackgroundModel(double dT, const Camera& camera) {
-	this->worldAssets->DrawBackgroundModel(dT, camera);
+void GameAssets::DrawBackgroundModel(const Camera& camera) {
+	this->worldAssets->DrawBackgroundModel(camera);
 }
 
 /**
  * Draw the background effects for the current world type.
  */
-void GameAssets::DrawBackgroundEffects(double dT, const Camera& camera) {
-	this->worldAssets->DrawBackgroundEffects(dT, camera);
+void GameAssets::DrawBackgroundEffects(const Camera& camera) {
+	this->worldAssets->DrawBackgroundEffects(camera);
 }
-
-/**
- * Draw any particles present in the game currently.
- */
-void GameAssets::DrawParticleEffects(double dT, const Camera& camera) {
-	this->espAssets->DrawParticleEffects(dT, camera);
-}
-
 
 /**
  * Draw a given item in the world.
@@ -213,6 +231,9 @@ void GameAssets::LoadRegularMeshAssets() {
 	}
 	if (this->spikeyBall == NULL) {
 		this->spikeyBall = ObjReader::ReadMesh(GameViewConstants::GetInstance()->SPIKEY_BALL_MESH);
+	}
+	if (this->paddleLaserAttachment == NULL) {
+		this->paddleLaserAttachment = ObjReader::ReadMesh(GameViewConstants::GetInstance()->PADDLE_LASER_ATTACHMENT_MESH);
 	}
 }
 

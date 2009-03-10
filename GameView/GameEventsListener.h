@@ -23,10 +23,11 @@ public:
 	// Paddle related events
 	virtual void PaddleHitWallEvent(const Point2D& hitLoc);
 
-	// Ball related events
+	// Ball/Block related events
 	virtual void BallDeathEvent(const GameBall& deadBall, int livesLeft);
 	virtual void BallSpawnEvent(const GameBall& spawnedBall);
 	virtual void BallShotEvent(const GameBall& shotBall);
+	virtual void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block);
 	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
 	virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
 
@@ -40,6 +41,8 @@ public:
 	virtual void ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle);
 	virtual void ItemActivatedEvent(const GameItem& item);
 	virtual void ItemDeactivatedEvent(const GameItem& item);
+	virtual void ProjectileSpawnedEvent(const Projectile& projectile);
+	virtual void ProjectileRemovedEvent(const Projectile& projectile);
 };
 
 #endif
