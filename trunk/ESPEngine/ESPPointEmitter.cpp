@@ -138,8 +138,8 @@ void ESPPointEmitter::TickParticles(double dT) {
  * Public function, called each frame to execute the emitter.
  */
 void ESPPointEmitter::Tick(const double dT) {
-	// Check for the special case of a single lifetime (interval values are -1)
-	if (this->particleSpawnDelta.minValue == -1) {
+	// Check for the special case of a single lifetime
+	if (this->OnlySpawnsOnce()) {
 		// Inline: Particles only have a single life time and are spawned immediately
 		
 		// We initialize all particles to living on the first run though
@@ -208,20 +208,25 @@ void ESPPointEmitter::SetRadiusDeviationFromCenter(const ESPInterval& distFromCe
  */
 void ESPPointEmitter::Draw(const Camera& camera) {
 	// Setup OpenGL for drawing the particles in this emitter...
-	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT  | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 	
+	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT  | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_MULTISAMPLE_BIT); 	
 	
+	glDisable(GL_MULTISAMPLE);
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendEquation(GL_FUNC_ADD);
+	glBlendEquation(GL_FUNC_ADD);
 
 	// Go through each of the particles, revive any dead ones (based on spawn rate), and draw them
+	if (this->textureAssignments.size() == 1) {
+		this->textureAssignments.begin()->second->BindTexture();
+	}
+
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
 		ESPParticle* currParticle = *iter;
 		std::map<ESPParticle*, Texture2D*>::iterator findIter = this->textureAssignments.find(currParticle);
-		if (findIter != this->textureAssignments.end()) {
+		if (this->textureAssignments.size() != 1 && findIter != this->textureAssignments.end()) {
 			findIter->second->BindTexture();
 		}
 		currParticle->Draw(camera, this->particleAlignment);
