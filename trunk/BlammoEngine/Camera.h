@@ -79,19 +79,17 @@ public:
 	 * magnitude (in units) and speed (units/sec).
 	 */
 	void SetCameraShake(double lengthInSeconds, const Vector3D& shakeDirMag, unsigned int speed) {
-		// If we're still in the middle of a shake then we need to add this shake on top of it
-		if (this->shakeTimeElapsed <= this->shakeTimeTotal) {
-			this->shakeTimeTotal	 += lengthInSeconds;
+		// If we're still in the middle of a shake check to see which has the bigger magnitude and go with whichever one does...
+		if (this->shakeTimeElapsed < this->shakeTimeTotal && this->shakeMagnitude.length2() > shakeDirMag.length2()) {
+			return;
 		}
-		else {
-			this->shakeTimeElapsed = 0.0;
-			this->shakeTimeTotal	 = lengthInSeconds;
-		}
+
+		// Change to the given shake...
+		this->shakeTimeElapsed = 0.0;
+		this->shakeTimeTotal	 = lengthInSeconds;
 		
-		this->shakeMagnitude = Vector3D(NumberFuncs::MaxF(this->shakeMagnitude[0], shakeDirMag[0]), 
-																		NumberFuncs::MaxF(this->shakeMagnitude[1], shakeDirMag[1]), 
-																		NumberFuncs::MaxF(this->shakeMagnitude[2], shakeDirMag[2]));
-		this->shakeSpeed = NumberFuncs::MaxF(this->shakeSpeed, speed);
+		this->shakeMagnitude = Vector3D(shakeDirMag[0], shakeDirMag[1], shakeDirMag[2]);
+		this->shakeSpeed = speed;
 	}
 
 	void ApplyCameraTransform(double dT) {

@@ -9,7 +9,6 @@
 #include "Matrix.h"
 #include "Point.h"
 #include "Vector.h"
-#include "Shape2D.h"
 
 // Mesh Construction and Creation Includes
 #include "Mesh.h"

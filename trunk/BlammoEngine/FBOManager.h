@@ -18,16 +18,22 @@ class FBOManager {
 private:
 	static FBOManager* instance;	// Singleton instance for this class
 
+	bool allowMultisampling;
+	int numSupportedSamples;
+
 	// Regular FBO and render buffer IDs
 	GLuint fboID;
-	GLuint renderBuffID;
+	GLuint depthBuffID;
 	
 	// Multisample FBO and render buffer IDs
-	//GLuint multisampleFBOID;
-	//GLuint multisampleRenderBuffID;
-	//GLuint multisampleColourBuffID;
+	GLuint multisampleFBOID;
+	GLuint colourBuffID;
 
-	bool CheckFBOStatus();
+	static bool CheckFBOStatus();
+	static bool IsFBOMultisamplingEnabled(int &maxFBOSamples);
+	
+	void SetupFBOWithMultisampling(const Texture& texture);
+	void SetupFBOWithoutMultisampling(const Texture& texture);
 
 	FBOManager();
 	~FBOManager();
@@ -48,16 +54,19 @@ public:
 		}
 	}
 
-	bool SetupFBO(Texture& texture);
-	//bool SetupMultisampleFBO(int numSamples);
+	bool SetupFBO(const Texture& texture);
+
+	void SetAllowMultisamplingFBO(bool allowMultisampling) {
+		this->allowMultisampling = allowMultisampling;
+	}
+	bool GetAllowMultisamplingFBO() const {
+		return this->allowMultisampling;
+	}
 
 	// Functions for binding/unbinding the FBO
 	void BindFBO() const {
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, this->fboID);
 	}
-	void UnbindFBO() const {
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	}
-
+	void UnbindFBO(const Texture& texture) const;
 };
 #endif

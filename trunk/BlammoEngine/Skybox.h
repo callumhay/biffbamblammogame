@@ -2,6 +2,7 @@
 #define __SKYBOX_H__
 
 #include "BasicIncludes.h"
+#include "../BlammoEngine/Colour.h"
 
 class TextureCube;
 class PolygonGroup;
@@ -37,16 +38,19 @@ protected:
 	// Colour multiply for the skybox
 	CGparameter colourMultParam;
 
+	Colour currColour;
+
 	// ----------------------------------------------------
 
 	Skybox(PolygonGroup* geom, TextureCube* tex);
 	void LoadSkyboxCgFxParameters();
-	virtual void SetupCgFxParameters(double dT);
+	virtual void SetupCgFxParameters();
 
 public:
 	virtual ~Skybox();
 
-	void Draw(double dT, const Camera& camera);
+	virtual void Tick(double dT){};
+	void Draw(const Camera& camera);
 
 	// Static creators
 	static Skybox* CreateSkybox(const std::string& meshFilepath, 

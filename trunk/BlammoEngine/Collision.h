@@ -3,18 +3,24 @@
 
 #include "Vector.h"
 #include "Point.h"
-#include "Shape2D.h"
 
 namespace Collision {
+
+	class Collidable {
+	public:
+		virtual ~Collidable(){};
+	};
 
 	/**
 	 * 2D Axis-Aligned Bounding Box for collision detection.
 	 */
-	class AABB2D {
+	class AABB2D : public Collidable {
 	private:
 		Point2D minCoord, maxCoord;
 	public:
-		AABB2D(const Point2D &min, const Point2D &max): minCoord(min), maxCoord(max) {}
+		AABB2D(const Point2D &min, const Point2D &max): Collidable(), minCoord(min), maxCoord(max) {}
+		virtual ~AABB2D() {}
+
 		Point2D GetMin() const {
 			return this->minCoord;
 		}
@@ -22,6 +28,55 @@ namespace Collision {
 			return this->maxCoord;
 		}
 	};
+
+	class LineSeg2D : public Collidable {
+
+	private:
+		Point2D p1, p2;
+
+	public:
+		LineSeg2D() {};
+		LineSeg2D(const Point2D& p1, const Point2D& p2) : Collidable(), p1(p1), p2(p2) {}
+		virtual ~LineSeg2D() {}
+
+
+		void SetP1(const Point2D& p) {
+			this->p1 = p;
+		}
+		Point2D P1() const {
+			return this->p1;
+		}
+
+		void SetP2(const Point2D& p) {
+			this->p2 = p;
+		}
+		Point2D P2() const {
+			return this->p2;
+		}
+
+	};
+
+	class Circle2D : public Collidable {
+	private:
+		Point2D center;
+		float radius;
+
+	public:
+		Circle2D(const Point2D& c, float r): Collidable(), center(c), radius(r) {}
+		virtual ~Circle2D(){}
+		
+		void SetCenter(const Point2D& c) {
+			this->center = c;
+		}
+		Point2D Center() const {
+			return this->center;
+		}
+		float Radius() const {
+			return this->radius;
+		}
+	};
+
+
 
 	/**
 	 * Calculates and returns the square distance from a given point to a given line segment.
@@ -46,6 +101,26 @@ namespace Collision {
 		
 		// Case where c projects onto ab
 		return Vector2D::Dot(ac, ac) - (e * e / f);
+	}
+
+	/**
+	 * Calculates and returns the square distance from a given point to an axis-aligned
+	 * bounding box, both in 2D.
+	 * Returns: Square distance from aabb to pt.
+	 */
+	static float SqDistFromPtToAABB(const AABB2D& aabb, const Point2D& pt) {
+		float sqDist = 0.0f;
+		
+		for (int i = 0; i < 2; i++) {
+			float v = pt[i];
+			if (v < aabb.GetMin()[i]) { 
+				sqDist += (aabb.GetMin()[i] - v) * (aabb.GetMin()[i] - v);
+			}
+			if (v > aabb.GetMax()[i]) {
+				sqDist += (v - aabb.GetMax()[i]) * (v - aabb.GetMax()[i]);
+			}
+		}
+		return sqDist;
 	}
 
 	/**

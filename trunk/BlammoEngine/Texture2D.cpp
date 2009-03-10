@@ -22,7 +22,7 @@ void Texture2D::RenderTextureToFullscreenQuad() {
 							 GL_TRANSFORM_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	Camera::PushWindowCoords();
 
-	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_BLEND);
 	glCullFace(GL_BACK);
@@ -37,10 +37,7 @@ void Texture2D::RenderTextureToFullscreenQuad() {
 	this->BindTexture();
 
 	// Set the appropriate parameters for rendering the single fullscreen quad
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	Texture::SetFilteringParams(Texture::Nearest, GL_TEXTURE_2D);
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	glBegin(GL_QUADS);
@@ -51,14 +48,34 @@ void Texture2D::RenderTextureToFullscreenQuad() {
 	glEnd();
 	this->UnbindTexture();
 
+	glDepthMask(GL_TRUE);
 	glPopMatrix();
 	glPopAttrib();
 	Camera::PopWindowCoords();
 }
 
-Texture2D* Texture2D::CreateEmptyTexture2D(TextureFilterType texFilter, int width, int height) {
-	Texture2D* newTex = new Texture2D(texFilter);
+Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height) {
 
+
+	// First check to see that rectangular textures are supported
+	int textureType = GL_TEXTURE_2D;
+		/*
+	if (glewGetExtension("GL_EXT_texture_rectangle") == GL_TRUE) {
+		textureType = GL_TEXTURE_RECTANGLE_EXT;
+	}
+	else if (glewGetExtension("GL_ARB_texture_rectangle") == GL_TRUE) {
+		textureType = GL_TEXTURE_RECTANGLE_ARB;
+	}
+	else {
+		return NULL;
+	}
+*/
+	
+	Texture2D* newTex = new Texture2D(Texture::Linear);
+	glDisable(GL_TEXTURE_2D);
+	newTex->textureType = textureType;
+	
+	glEnable(newTex->textureType);
 	glGenTextures(1, &newTex->texID);
 	if (newTex->texID == 0) {
 		delete newTex;
@@ -71,24 +88,15 @@ Texture2D* Texture2D::CreateEmptyTexture2D(TextureFilterType texFilter, int widt
 	glPushAttrib(GL_TEXTURE_BIT);
 	newTex->BindTexture();
 
-	if (Texture::IsMipmappedFilter(texFilter)) {
-		GLint result = gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-		
-		if (result != 0) {
-			debug_output("Failed to load mipmaps for empty texture.");
-			delete newTex;
-			glPopAttrib();
-			return NULL;
-		}
-	}
-	else {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	}
+	glTexImage2D(newTex->textureType, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-	Texture::SetFilteringParams(texFilter, newTex->textureType);
+	Texture::SetFilteringParams(newTex->texFilter, newTex->textureType);
 	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(newTex->textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(newTex->textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(newTex->textureType, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(newTex->textureType, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
 	newTex->UnbindTexture();
 
 	glPopAttrib();
