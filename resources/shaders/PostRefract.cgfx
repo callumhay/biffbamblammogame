@@ -121,6 +121,20 @@ sampler3D NoiseSampler = sampler_state {
     
 };  
 
+texture MaskTexture <
+    string ResourceName = "Circle_Gradient_64x64.png";
+    string UIName = "Mask Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D MaskSampler = sampler_state {
+    Texture = <MaskTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+};
+
 //////// CONNECTOR DATA STRUCTURES ///////////
 
 /* data from application vertex buffer */
@@ -137,6 +151,7 @@ struct vertexOutput {
     float3 ProjPos      : TEXCOORD1;
     float3 WorldView    : TEXCOORD2;
     float3 LocalPos     : TEXCOORD3;
+    float2 UV           : TEXCOORD4;
 };
  
 ///////// VERTEX SHADING /////////////////////
@@ -157,7 +172,7 @@ vertexOutput PostRefract_VS(appdata IN) {
     OUT.HPosition  = outPos;
     OUT.LocalPos   = Po.xyz;
     OUT.ProjPos    = outPos.xyz / outPos.w;   
-    
+    OUT.UV         = IN.UV.xy;
     return OUT;
 }
 
@@ -175,7 +190,7 @@ float2 GetRefractBGOffset(float3 nWorldView, float3 nWorldNormal) {
     // especially in cases of total internal refraction (which looks ugly and abrupt without this)
     float fresnelCoeff = clamp(1.5f + dot(nWorldView,nWorldNormal), 0, 1);
     // Find the world space reflection vector
-    float3 refractionVec = refract(nWorldView, nWorldNormal, IndexOfRefraction/1.000);
+    float3 refractionVec = refract(nWorldView, nWorldNormal, IndexOfRefraction);
     // Find the world space refraction vector (IndexOfRefraction_Medium to air)
     float3 reflectionVec = reflect(nWorldView, nWorldNormal);
     
@@ -205,21 +220,23 @@ float4 VapourTrail_PS(vertexOutput IN) : COLOR {
     float3 nProjPos      = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
     
     // Use noise to modify the normal... (using Perlin's method in GPU Gems 1)
-    const float3 epsilon = float3(1.0 / 128.0);
+    const float epsilon = 0.00001f;
     float3 sampleCoord = IN.LocalPos.xyz + Freq*Timer*FlowDir;
     float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);   
     
-    //float  UnmodifiedNoiseVal = (texVal.x + texVal.y + texVal.z + texVal.w + 0.03125) * 1.3f;
-    float UnmodifiedNoiseVal = texVal.x;
-    
-    UnmodifiedNoiseVal = clamp(UnmodifiedNoiseVal, 0, 1);
-    float3 NoiseValDiff = (UnmodifiedNoiseVal.xxx - epsilon) / epsilon;
+    float  UnmodifiedNoiseVal = 8.0f * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
+                               abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
+    //float UnmodifiedNoiseVal = texVal.x;
+    float3 NoiseValDiff = (UnmodifiedNoiseVal.xxx - epsilon.xxx) / epsilon;
 
     nWorldNormal = normalize(nWorldNormal - NoiseValDiff);
     
-    float2 lookupOffset = GetRefractBGOffset(nWorldView, nWorldNormal);
+    float3 refractionVec = refract(WarpAmount*nWorldView, nWorldNormal, IndexOfRefraction);
+    float2 lookupOffset  = refractionVec.xy * float2(1.0/SceneWidth, 1.0/SceneHeight);
     float3 textureColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
-    return float4(textureColour, UnmodifiedNoiseVal);
+    float maskTexVal = tex2D(MaskSampler, IN.UV.xy).a;
+    
+    return float4(textureColour, UnmodifiedNoiseVal*maskTexVal);
 }
 
 
@@ -229,6 +246,8 @@ technique PostRefractGeom {
 
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
+        
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
