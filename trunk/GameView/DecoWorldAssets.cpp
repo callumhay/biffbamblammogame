@@ -38,6 +38,15 @@ rotationStatebg2(RotateCCW)
 DecoWorldAssets::~DecoWorldAssets() {
 }
 
+void DecoWorldAssets::Tick(double dT) {
+	// Add to the timer in the beam shader
+	this->beamEffect->AddToTimer(dT);
+	// Rotate the background effect (sky beams)
+	this->RotateSkybeams(dT);
+
+	GameWorldAssets::Tick(dT);
+}
+
 /**
  * Private helper function for rotating the background skybeams.
  */
@@ -122,15 +131,8 @@ void DecoWorldAssets::RotateSkybeams(double dT) {
 	}
 }
 
-void DecoWorldAssets::DrawBackgroundEffects(double dT, const Camera& camera) {
-	// Add to the timer in the beam shader
-	this->beamEffect->AddToTimer(dT);
-	
-	// Rotate the sky beams
-	this->RotateSkybeams(dT);
-
-	// Draw deco background beams
-	
+void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
+	// Draw deco background beams:
 	// Back beams...
 	glPushMatrix();
 	glTranslatef(-25.0f, -50.0f, -63.0f);

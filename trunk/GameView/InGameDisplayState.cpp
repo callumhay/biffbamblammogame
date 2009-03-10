@@ -18,8 +18,10 @@ const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
 
 	// Render to texture setup
-	this->renderToTexBeforeBall = Texture2D::CreateEmptyTexture2D(Texture::Nearest, display->GetDisplayWidth(), display->GetDisplayHeight());
-	assert(this->renderToTexBeforeBall != NULL);
+	this->renderToTexBackground = Texture2D::CreateEmptyTextureRectangle(display->GetDisplayWidth(), display->GetDisplayHeight());
+	assert(this->renderToTexBackground != NULL);
+	this->renderToTexEverything = Texture2D::CreateEmptyTextureRectangle(display->GetDisplayWidth(), display->GetDisplayHeight());
+	assert(this->renderToTexEverything != NULL);
 
 	// Set HUD display elements
 	float dropShadowAmt = 0.05f;
@@ -36,7 +38,10 @@ InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(disp
 }
 
 InGameDisplayState::~InGameDisplayState() {
-	delete this->renderToTexBeforeBall;
+	delete this->renderToTexEverything;
+	this->renderToTexEverything = NULL;
+	delete this->renderToTexBackground;
+	this->renderToTexBackground = NULL;
 }
 
 /**
@@ -44,21 +49,16 @@ InGameDisplayState::~InGameDisplayState() {
  */
 void InGameDisplayState::RenderFrame(double dT) {
 
-	// Attach the FBO
-	bool success = FBOManager::GetInstance()->SetupFBO(*this->renderToTexBeforeBall);
-	assert(success);
-	FBOManager::GetInstance()->BindFBO();
-
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-
 	// Camera Stuff 
 	this->display->GetCamera().SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	this->display->GetCamera().ApplyCameraTransform(dT);
 	
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+
 	// Draw the game scene
 	this->DrawGameScene(dT);
 	
@@ -73,59 +73,107 @@ void InGameDisplayState::RenderFrame(double dT) {
  * related to the game itself.
  */
 void InGameDisplayState::DrawGameScene(double dT) {
+	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();		
+	
+	// Tick the assets (update them for amount of elapsed time dT).
+	this->display->GetAssets()->Tick(dT);
 
-	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
+	// Render the full scene into an FBO
+	//this->RenderFullSceneToFBO(dT);
+	this->RenderBackgroundToFBO();
+
+	// Redraw a multisampled background model, pieces, items, ball and paddle
+	this->DrawScene(dT);
+
 	glPushMatrix();
-	
-	// Draw the background scenery
-	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
-	this->display->GetAssets()->DrawSkybox(dT, this->display->GetCamera());
-	this->display->GetAssets()->DrawBackgroundModel(dT, this->display->GetCamera());
-	this->display->GetAssets()->DrawBackgroundEffects(dT, this->display->GetCamera());
-	
-	FBOManager::GetInstance()->UnbindFBO();												// Unbind the FBO so that we can use the render to texture for special ball effects
-	this->renderToTexBeforeBall->RenderTextureToFullscreenQuad(); // Render the texture to a fullscreen quad
+	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
-	// Enable multisampling for the foreground rendering
+	// Post-processing effects...
+	this->display->GetAssets()->DrawPostProcessingESPEffects(dT, this->display->GetCamera(), this->renderToTexEverything);
+	glPopMatrix();
+}
+
+/**
+ * Render the background of the current scene into the background FBO.
+ */
+void InGameDisplayState::RenderBackgroundToFBO() { 
+	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
+	
+	// Attach the background FBO
+	bool success = FBOManager::GetInstance()->SetupFBO(*this->renderToTexBackground);
+	assert(success);
+	FBOManager::GetInstance()->BindFBO();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
+	// Draw the background of the current scene
+	glPushMatrix();
+	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
+	this->display->GetAssets()->DrawBackgroundModel(this->display->GetCamera());
+	this->display->GetAssets()->DrawBackgroundEffects(this->display->GetCamera());
+	this->display->GetAssets()->DrawSkybox(this->display->GetCamera());
+	glPopMatrix();
+
+	// Unbind the background FBO
+	FBOManager::GetInstance()->UnbindFBO(*this->renderToTexBackground);
+}
+
+/**
+ * Render the entire scene (except for post processing effects / particles) into
+ * the 'everything' FBO.
+ */
+void InGameDisplayState::RenderFullSceneToFBO(double dT) {
+	// Attach the full scene FBO
+	bool success = FBOManager::GetInstance()->SetupFBO(*this->renderToTexEverything);
+	assert(success);
+	FBOManager::GetInstance()->BindFBO();
+
+	this->DrawScene(dT);
+
+	// Unbind the full scene FBO
+	FBOManager::GetInstance()->UnbindFBO(*this->renderToTexEverything);
+}
+
+/**
+ * Draw the entire game scene - this does not render to FBO and allows for multisampling/antialiasing.
+ */
+void InGameDisplayState::DrawScene(double dT) {
+	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
+
+	// Start by rendering a full screen quad of the scene background rendered using FBO and texture
+	this->renderToTexBackground->RenderTextureToFullscreenQuad();
+
+	// Now draw everything again, this time as multisampled
 	glEnable(GL_MULTISAMPLE);
 
-	// Draw the foreground stuff (paddle, items, ball)
-	glTranslatef(negHalfLevelDim[0], 0, 0.0f);	
+	// Level pieces...
+	this->display->GetAssets()->DrawLevelPieces(this->display->GetCamera());
 
+	// Background Model and effects...
+	glPushMatrix();
+	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
+	this->display->GetAssets()->DrawBackgroundModel(this->display->GetCamera());
+	this->display->GetAssets()->DrawBackgroundEffects(this->display->GetCamera());
+
+	glTranslatef(negHalfLevelDim[0], 0.0f, 0.0f);
+	
 	// Items...
 	std::list<GameItem*>& gameItems = this->display->GetModel()->GetLiveItems();
 	for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
 		this->display->GetAssets()->DrawItem(dT, this->display->GetCamera(), (**iter));
-	}
+	}	
 
 	// Paddle...
-	this->display->GetAssets()->DrawPaddle(*this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
-	
+	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
+
 	// Ball...
-	this->display->GetAssets()->DrawGameBall(dT, *this->display->GetModel()->GetGameBall(), this->display->GetCamera(), this->renderToTexBeforeBall);
-	glPopMatrix();
-	
-	// Level pieces (blocks and stuff)...
-	this->display->GetAssets()->DrawLevelPieces(this->display->GetCamera());
+	this->display->GetAssets()->DrawGameBall(dT, *this->display->GetModel()->GetGameBall(), this->display->GetCamera(), this->renderToTexBackground);
 	glDisable(GL_MULTISAMPLE);
 
-	// Draw particles / ESP effects
-	glPushMatrix();
-	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
+	// Typical Particle effects...
 	this->display->GetAssets()->DrawParticleEffects(dT, this->display->GetCamera());
 	glPopMatrix();
-
-	// Debug draw of boundries of each block...
-	//glPushMatrix();
-	//glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
-	//std::vector<std::vector<LevelPiece*>> pieces = this->display->GetModel()->GetCurrentLevel()->GetCurrentLevelLayout();
-	//for (size_t i = 0; i < pieces.size(); i++) {
-	//	std::vector<LevelPiece*> setOfPieces = pieces[i];
-	//	for (size_t j = 0; j < setOfPieces.size(); j++) {
-	//		setOfPieces[j]->DebugDraw();
-	//	}
-	//}
-	//glPopMatrix();
 }
 
 /**
@@ -156,6 +204,27 @@ void InGameDisplayState::DrawGameHUD() {
 }
 
 void InGameDisplayState::DisplaySizeChanged(int width, int height) {
-	delete this->renderToTexBeforeBall;
-	this->renderToTexBeforeBall = Texture2D::CreateEmptyTexture2D(Texture::Nearest, width, height);
+	delete this->renderToTexEverything;
+	this->renderToTexEverything = Texture2D::CreateEmptyTextureRectangle(width, height);
+	delete this->renderToTexBackground;
+	this->renderToTexBackground = Texture2D::CreateEmptyTextureRectangle(width, height);
+}
+
+/**
+ * Debugging function that draws the collision boundries of level pieces.
+ */
+void InGameDisplayState::DebugDrawLevelPieceBounds() {
+	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
+
+	// Debug draw of boundries of each block...
+	glPushMatrix();
+	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
+	std::vector<std::vector<LevelPiece*>> pieces = this->display->GetModel()->GetCurrentLevel()->GetCurrentLevelLayout();
+	for (size_t i = 0; i < pieces.size(); i++) {
+		std::vector<LevelPiece*> setOfPieces = pieces[i];
+		for (size_t j = 0; j < setOfPieces.size(); j++) {
+			setOfPieces[j]->DebugDraw();
+		}
+	}
+	glPopMatrix();
 }

@@ -25,7 +25,8 @@ public:
 	DecoWorldAssets();
 	virtual ~DecoWorldAssets();
 
-	virtual void DrawBackgroundEffects(double dT, const Camera& camera);
+	virtual void DrawBackgroundEffects(const Camera& camera);
+	virtual void Tick(double dT);
 
 };
 #endif

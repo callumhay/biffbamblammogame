@@ -34,6 +34,8 @@ private:
 	Mesh* ball;				// Ball used to break blocks
 	Mesh* spikeyBall;	// What happens to the ball when it becomes uber
 
+	Mesh* paddleLaserAttachment;	// Laser attachment for the paddle
+
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
 	CgFxVolumetricEffect* ghostBallEffect;
@@ -58,20 +60,27 @@ public:
 	// LoadStartScreenAssets(...)		// e.g., start-screen + minimal
 	// LoadPlayableGameAssets(...)	// e.g., Ball-related, Item-related, Timer-related 
 
+	void Tick(double dT);
+
 	// Draw functions ******************************************************************************
-	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const;
-	
-	void DrawSkybox(double dT, const Camera& camera);
-	void DrawBackgroundModel(double dT, const Camera& camera);
-	void DrawBackgroundEffects(double dT, const Camera& camera);
+	void DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera) const;
+
+	void DrawSkybox(const Camera& camera);
+	void DrawBackgroundModel(const Camera& camera);
+	void DrawBackgroundEffects(const Camera& camera);
 
 	void DrawLevelPieces(const Camera& camera) const;
 	void DrawGameBall(double dT, const GameBall& b, const Camera& camera, Texture2D* sceneTex) const;
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const;
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
-	void DrawParticleEffects(double dT, const Camera& camera);
 
 	// Public Effects-related functions ************************************************************
+	void DrawParticleEffects(double dT, const Camera& camera) {
+		this->espAssets->DrawParticleEffects(dT, camera);
+	}
+	void DrawPostProcessingESPEffects(double dT, const Camera& camera, Texture2D* sceneTex) {
+		this->espAssets->DrawPostProcessingESPEffects(dT, camera, sceneTex);
+	}
 	void AddBallBounceESP(const Camera& camera, const GameBall& ball) {
 		this->espAssets->AddBallBounceEffect(camera, ball);
 	}
@@ -90,6 +99,13 @@ public:
 	}
 	void RemoveItemDropEffect(const Camera& camera, const GameItem& item) {
 		this->espAssets->RemoveItemDropEffect(camera, item);
+	}
+
+	void AddProjectileEffect(const Camera& camera, const Projectile& projectile) {
+		this->espAssets->AddProjectileEffect(camera, projectile);
+	}
+	void RemoveProjectileEffect(const Camera& camera, const Projectile& projectile) {
+		this->espAssets->RemoveProjectileEffect(camera, projectile);
 	}
 
 	void KillAllActiveEffects() {
