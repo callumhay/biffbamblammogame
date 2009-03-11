@@ -167,8 +167,11 @@ void InGameDisplayState::DrawScene(double dT) {
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
 
-	// Ball...
-	this->display->GetAssets()->DrawGameBall(dT, *this->display->GetModel()->GetGameBall(), this->display->GetCamera(), this->renderToTexBackground);
+	// Balls...
+	const std::list<GameBall*>& gameBalls = this->display->GetModel()->GetGameBalls();
+	for (std::list<GameBall*>::const_iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+		this->display->GetAssets()->DrawGameBall(dT, **ballIter, this->display->GetCamera(), this->renderToTexBackground);
+	}
 	glDisable(GL_MULTISAMPLE);
 
 	// Typical Particle effects...

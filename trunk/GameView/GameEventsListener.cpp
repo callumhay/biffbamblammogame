@@ -70,7 +70,7 @@ void GameEventsListener::PaddleHitWallEvent(const Point2D& hitLoc) {
 	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
 
-void GameEventsListener::BallDeathEvent(const GameBall& deadBall, int livesLeft) {
+void GameEventsListener::BallDeathEvent(int livesLeft) {
 	debug_output("EVENT: Ball death, lives left: " << livesLeft);
 	
 	// Kill all effects that may have previously been occuring...
