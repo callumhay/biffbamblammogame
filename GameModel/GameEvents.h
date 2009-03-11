@@ -69,10 +69,9 @@ public:
 	/**
 	 * Event triggered when the ball falls below the death point in the level. This event
 	 * is triggered once per death.
-	 * Arguements: deadBall  - The ball, just as it dies.
-	 *             livesLeft - The number of lives/balls left for the player.
+	 * Arguements: livesLeft - The number of lives/balls left for the player.
 	 */
-	virtual void BallDeathEvent(const GameBall& deadBall, int livesLeft) = 0;
+	virtual void BallDeathEvent(int livesLeft) = 0;
 
 	/**
 	 * Event triggered whenever the ball respawns on the player paddle. Only occurs once

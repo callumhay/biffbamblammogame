@@ -15,8 +15,6 @@ UberBallItem::~UberBallItem() {
 
 double UberBallItem::Activate() {
 	this->isActive = true;
-	GameBall* ball = this->gameModel->GetGameBall();
-	assert(ball != NULL);
 
 	// Kill other uber ball timers
 	// TODO: cancel out weak ball timers...
@@ -38,8 +36,13 @@ double UberBallItem::Activate() {
 			currTimer = NULL;
 	}
 
-	// Make the ball das uber ball, ja!
-	ball->AddBallType(GameBall::UberBall);
+	// Make the balls das uber ball, ja!
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+		GameBall* currBall = *ballIter;
+		assert(currBall != NULL);
+		currBall->AddBallType(GameBall::UberBall);
+	}
 
 	GameItem::Activate();
 	return UberBallItem::UBER_BALL_TIMER_IN_SECS;
@@ -50,11 +53,14 @@ void UberBallItem::Deactivate() {
 		return;
 	}
 
-	GameBall* ball = this->gameModel->GetGameBall();
-	assert(ball != NULL);
-	
-	// Make the ball normal again
-	ball->RemoveBallType(GameBall::UberBall);
+	// Make all the balls normal again
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+		GameBall* currBall = *ballIter;
+		assert(currBall != NULL);
+		currBall->RemoveBallType(GameBall::UberBall);
+	}
+
 	this->isActive = false;
 	GameItem::Deactivate();
 }

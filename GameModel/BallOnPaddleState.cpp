@@ -13,9 +13,24 @@ BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(t
 BallOnPaddleState::~BallOnPaddleState() {
 }
 
+/**
+ * Private helper function - since the model stores the game balls in a list we need to make sure
+ * that there is ONLY one ball and retrieve only that ball.
+ * Returns: The only game ball currently in existance within the game model.
+ */
+GameBall* BallOnPaddleState::GetGameBall() {
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+	assert(gameBalls.size() == 1);
+	return *gameBalls.begin();
+}
+
+/**
+ * Private helper function that updates the ball position based on the movement
+ * of the player paddle.
+ */
 void BallOnPaddleState::UpdateBallPosition() {
-	GameBall* ball				=  this->gameModel->GetGameBall();
-	PlayerPaddle* paddle	=  this->gameModel->GetPlayerPaddle();
+	GameBall* ball				= this->GetGameBall();
+	PlayerPaddle* paddle	= this->gameModel->GetPlayerPaddle();
 
 	Vector2D disp = Vector2D(0.0f, ball->GetBounds().Radius() + paddle->GetHalfHeight() + 0.1f);
 	Point2D ballLoc = paddle->GetCenterPosition() + disp;
@@ -35,8 +50,9 @@ void BallOnPaddleState::Tick(double seconds) {
 	// been spawned on the player paddle
 	if (this->firstTick) {
 		this->firstTick = false;
+
 		// EVENT: Ball (Re)spawning
-		GameEventManager::Instance()->ActionBallSpawn(*this->gameModel->GetGameBall());
+		GameEventManager::Instance()->ActionBallSpawn(*this->GetGameBall());
 	}
 }
 
@@ -67,10 +83,10 @@ void BallOnPaddleState::BallReleaseKeyPressed() {
 	}
 
 	ballReleaseDir.Normalize();
-	this->gameModel->GetGameBall()->SetVelocity(GameBall::NormalSpeed, ballReleaseDir);
+	this->GetGameBall()->SetVelocity(GameBall::NormalSpeed, ballReleaseDir);
 
 	// EVENT: Ball Shot
-	GameEventManager::Instance()->ActionBallShot(*this->gameModel->GetGameBall());
+	GameEventManager::Instance()->ActionBallShot(*this->GetGameBall());
 
 	// Now change the game model's state machine to have the ball in play
 	this->gameModel->SetCurrentState(new BallInPlayState(this->gameModel));

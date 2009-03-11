@@ -15,8 +15,6 @@ InvisiBallItem::~InvisiBallItem() {
 
 double InvisiBallItem::Activate() {
 	this->isActive = true;
-	GameBall* ball = this->gameModel->GetGameBall();
-	assert(ball != NULL);
 
 	// Kill all other invisiball timers
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
@@ -36,8 +34,13 @@ double InvisiBallItem::Activate() {
 			currTimer = NULL;
 	}
 
-	// Make the ball invisible!
-	ball->AddBallType(GameBall::InvisiBall);
+	// Make all the balls invisible!
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+		GameBall* currBall = *ballIter;
+		assert(currBall != NULL);
+		currBall->AddBallType(GameBall::InvisiBall);
+	}
 
 	GameItem::Activate();
 	return InvisiBallItem::INVISI_BALL_TIMER_IN_SECS;
@@ -48,11 +51,14 @@ void InvisiBallItem::Deactivate() {
 		return;
 	}
 
-	GameBall* ball = this->gameModel->GetGameBall();
-	assert(ball != NULL);
-	
-	// Take away the ball's invisi-clock of doom!?
-	ball->RemoveBallType(GameBall::InvisiBall);
+	// Take away all of the balls' invisi-clocks of doom!?
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+		GameBall* currBall = *ballIter;
+		assert(currBall != NULL);
+		currBall->RemoveBallType(GameBall::InvisiBall);
+	}
+
 	this->isActive = false;
 	GameItem::Deactivate();
 }
