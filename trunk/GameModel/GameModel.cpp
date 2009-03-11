@@ -13,9 +13,9 @@ GameModel::GameModel() : currWorldNum(0), currState(NULL), currPlayerScore(0), c
 		this->worlds.push_back(new GameWorld(GameModelConstants::GetInstance()->WORLD_PATHS[i]));
 	}
 
-	// Initialize paddle and ball
+	// Initialize paddle and the first ball
 	this->playerPaddle = new PlayerPaddle();
-	this->ball = new GameBall();
+	this->balls.push_back(new GameBall());
 }
 
 GameModel::~GameModel() {
@@ -29,9 +29,12 @@ GameModel::~GameModel() {
 	delete this->currState;
 	this->currState = NULL;
 
-	// Delete ball and paddle
-	delete this->ball;
-	this->ball = NULL;
+	// Delete balls and paddle
+	for (std::list<GameBall*>::iterator ballIter = this->balls.begin(); ballIter != this->balls.end(); ballIter++) {
+		GameBall* currBall = *ballIter;
+		delete currBall;
+		currBall = NULL;
+	}
 	delete this->playerPaddle;
 	this->playerPaddle = NULL;
 
@@ -184,7 +187,7 @@ void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& sta
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, ball);	// WARNING: This can destroy p.
 
 	// EVENT: Ball-Block Collision
-	GameEventManager::Instance()->ActionBallBlockCollision(*this->ball, *pieceAfterCollision);
+	GameEventManager::Instance()->ActionBallBlockCollision(ball, *pieceAfterCollision);
 
 
 	// TODO: figure out this multiplier stuffs...
@@ -207,9 +210,9 @@ void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& sta
 	}
 }
 
-void GameModel::BallPaddleCollisionOccurred() {
+void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 	// EVENT: Ball-paddle collision
-	GameEventManager::Instance()->ActionBallPaddleCollision(*this->ball, *this->playerPaddle);
+	GameEventManager::Instance()->ActionBallPaddleCollision(ball, *this->playerPaddle);
 
 	// Reset the multiplier
 	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
@@ -225,25 +228,25 @@ void GameModel::BallPaddleCollisionOccurred() {
 		float angleChange = angleDecSgn * fractionOfSpeed * PlayerPaddle::RAND_DEG_ANG;
 
 		// Set the ball to be just off the paddle
-		this->ball->SetCenterPosition(Point2D(this->ball->GetBounds().Center()[0], 
-			this->playerPaddle->GetCenterPosition()[1] + this->playerPaddle->GetHalfHeight() + this->ball->GetBounds().Radius() + EPSILON));
+		ball.SetCenterPosition(Point2D(ball.GetBounds().Center()[0], 
+			this->playerPaddle->GetCenterPosition()[1] + this->playerPaddle->GetHalfHeight() + ball.GetBounds().Radius() + EPSILON));
 
-		Vector2D ballVel    = this->ball->GetVelocity();
+		Vector2D ballVel    = ball.GetVelocity();
 		Vector2D ballVelHat = Vector2D::Normalize(ballVel);
-		GameBall::BallSpeed ballSpd = ball->GetSpeed(); 
+		GameBall::BallSpeed ballSpd = ball.GetSpeed(); 
 
 		// Rotate the ball's velocity vector to reflect the momentum of the paddle
-		ball->SetVelocity(ballSpd, Rotate(angleChange, ballVelHat));
+		ball.SetVelocity(ballSpd, Rotate(angleChange, ballVelHat));
 		
 		// Make sure the ball goes upwards (it can't reflect downwards off the paddle or the game would suck)
 		if (acosf(Vector2D::Dot(ballVelHat, Vector2D(0, 1))) > ((M_PI / 2.0f) - GameBall::MIN_BALL_ANGLE_IN_RADS)) {
 			// Inline: The ball either at a very sharp angle w.r.t. the paddle or it is aimed downwards
 			// even though the paddle has deflected it, adjust the angle to be suitable for the game
 			if (ballVel[0] < 0) {
-				this->ball->SetVelocity(ballSpd, Rotate(-GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(-1, 0)));
+				ball.SetVelocity(ballSpd, Rotate(-GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(-1, 0)));
 			}
 			else {
-				this->ball->SetVelocity(ballSpd, Rotate(GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(1, 0)));
+				ball.SetVelocity(ballSpd, Rotate(GameBall::MIN_BALL_ANGLE_IN_DEGS, Vector2D(1, 0)));
 			}
 		}
 	}
@@ -261,7 +264,7 @@ void GameModel::PlayerDied() {
 	this->currLivesLeft--;
 
 	// EVENT: Ball/Player death
-	GameEventManager::Instance()->ActionBallDeath(*this->ball, this->currLivesLeft);
+	GameEventManager::Instance()->ActionBallDeath(this->currLivesLeft);
 
 	// Set the appropriate state based on the number of lives left...
 	if (this->IsGameOver()) {

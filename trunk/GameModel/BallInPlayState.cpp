@@ -62,8 +62,13 @@ void BallInPlayState::Tick(double seconds) {
 	paddle->Tick(seconds);
 
 	// Update the ball's current position
-	GameBall* ball = this->gameModel->GetGameBall();
-	ball->Tick(seconds);
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); iter++) {
+		(*iter)->Tick(seconds);
+	}
+
+	// TODO: fix this to work for ALL balls...
+	GameBall* ball = *gameBalls.begin();
 
 	// Check for item-paddle collisions
 	this->DoItemCollision();
@@ -85,7 +90,7 @@ void BallInPlayState::Tick(double seconds) {
 		// Do ball-paddle collision
 		this->DoBallCollision(*ball, n, d);
 		// Tell the model that a ball collision occurred with the paddle
-		this->gameModel->BallPaddleCollisionOccurred();
+		this->gameModel->BallPaddleCollisionOccurred(*ball);
 		return;
 	}
 

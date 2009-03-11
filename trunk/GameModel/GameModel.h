@@ -25,8 +25,8 @@ private:
 	GameState* currState;		// The current game state
 
 	// Player-controllable game assets
-	PlayerPaddle *playerPaddle;
-	GameBall *ball;
+	PlayerPaddle* playerPaddle;
+	std::list<GameBall*> balls;
 
 	// Projectiles spawned via various means as the game is played
 	std::list<Projectile*> projectiles;
@@ -66,7 +66,7 @@ private:
 
 	void CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& stateChanged);
 	void CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& stateChanged);
-	void BallPaddleCollisionOccurred();
+	void BallPaddleCollisionOccurred(GameBall& ball);
 	void PlayerDied();
 	
 		
@@ -173,8 +173,8 @@ public:
 	PlayerPaddle* GetPlayerPaddle() {
 		return this->playerPaddle;
 	}
-	GameBall* GetGameBall() {
-		return this->ball;
+	std::list<GameBall*> GetGameBalls() {
+		return this->balls;
 	}
 
 	// Paddle and ball related manipulators *********************************

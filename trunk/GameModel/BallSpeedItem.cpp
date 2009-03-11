@@ -41,10 +41,6 @@ void BallSpeedItem::SwitchSpeed(BallSpeedType newSpd) {
 double BallSpeedItem::Activate() {
 	this->isActive = true;
 
-	// Activate the actual effect of the slow ball item
-	GameBall* gameBall = this->gameModel->GetGameBall();
-	assert(gameBall != NULL);
-
 	// Kill other ball speed timers
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	std::vector<GameItemTimer*> removeTimers;
@@ -64,31 +60,52 @@ double BallSpeedItem::Activate() {
 		currTimer = NULL;
 	}
 
-	// Figure out how the item will effect the ball's speed
-	switch (this->spdType) {
-		case FastBall:
-			gameBall->IncreaseSpeed();
-			break;
-		case SlowBall:
-			gameBall->DecreaseSpeed();
-			break;
-		default:
-			assert(false);
-			break;
+	// Activate the actual effect of this speed-ball item for all active balls
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+	bool allBallsNormalSpd = true;
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+		GameBall* currBall = *ballIter;
+		assert(currBall != NULL);
+
+		// Figure out how the item will effect the ball's speed
+		switch (this->spdType) {
+			case FastBall:
+				currBall->IncreaseSpeed();
+				break;
+			case SlowBall:
+				currBall->DecreaseSpeed();
+				break;
+			default:
+				assert(false);
+				break;
+		}
+		
+		if (currBall->GetSpeed() != GameBall::NormalSpeed) {
+			allBallsNormalSpd = false;
+		}
+
 	}
 
-	// Change the effect based on what the ball speed is after
-	// the originally intended effect has taken place
-	GameBall::BallSpeed ballSpd = gameBall->GetSpeed();
-	if (ballSpd == GameBall::NormalSpeed) {
-		return 0.0;
+	// If all the balls are normal speed then all previous power-ups/downs involving
+	// ball speed have been cancelled out an no item is active
+	if (allBallsNormalSpd) {
+		return GameItemTimer::ZERO_TIME_TIMER_IN_SECS;
 	}
-	else if (ballSpd > GameBall::NormalSpeed) {
-		this->SwitchSpeed(FastBall);
-	}
-	else {
-		this->SwitchSpeed(SlowBall);
-	}
+
+	// Old functionality...
+	//if (gameBalls.size() == 1) {
+	//		GameBall::BallSpeed ballSpd = currBall->GetSpeed();
+
+	//		if (ballSpd == GameBall::NormalSpeed) {
+	//			return GameItemTimer::ZERO_TIME_TIMER_IN_SECS;
+	//		}
+	//		else if (ballSpd > GameBall::NormalSpeed) {
+	//			this->SwitchSpeed(FastBall);
+	//		}
+	//		else {
+	//			this->SwitchSpeed(SlowBall);
+	//		}
+	//}
 
 	GameItem::Activate();
 	return BallSpeedItem::BALL_SPEED_TIMER_IN_SECS;
@@ -102,9 +119,14 @@ void BallSpeedItem::Deactivate() {
 		return;
 	}
 
-	GameBall* gameBall = this->gameModel->GetGameBall();
-	assert(gameBall != NULL);
-	gameBall->SetSpeed(GameBall::NormalSpeed);
+	// Shut off the item for each of the balls
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+		GameBall* currBall = *ballIter;
+		assert(currBall != NULL);
+		currBall->SetSpeed(GameBall::NormalSpeed);
+	}
+
 	this->isActive = false;
 	GameItem::Deactivate();
 }

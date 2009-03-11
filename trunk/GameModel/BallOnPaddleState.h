@@ -3,11 +3,15 @@
 
 #include "GameState.h"
 
+class GameBall;
+
 class BallOnPaddleState : public GameState {
 
 private:
 	bool firstTick;
 	void UpdateBallPosition();
+
+	GameBall* GetGameBall();
 
 public:
 	BallOnPaddleState(GameModel* gm);

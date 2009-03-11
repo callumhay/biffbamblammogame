@@ -19,6 +19,8 @@ private:
 	double timeElapsedInSecs;	// Amount of time elapsed on the timer so far
 
 public:
+	static const float ZERO_TIME_TIMER_IN_SECS;
+
 	GameItemTimer(GameItem* gameItem);
 	~GameItemTimer();
 
