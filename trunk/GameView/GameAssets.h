@@ -108,6 +108,9 @@ public:
 		this->espAssets->RemoveProjectileEffect(camera, projectile);
 	}
 
+	void KillAllActiveBallEffects(const GameBall& ball) {
+		this->espAssets->KillAllActiveBallEffects(ball);
+	}
 	void KillAllActiveEffects() {
 		this->espAssets->KillAllActiveEffects();
 	}

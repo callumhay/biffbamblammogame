@@ -68,6 +68,8 @@ public:
 	const std::string TEXTURE_ITEM_INVISIBALL;
 	const std::string TEXTURE_ITEM_GHOSTBALL;
 	const std::string TEXTURE_ITEM_PADDLELASER;
+	const std::string TEXTURE_ITEM_MULTIBALL3;
+	const std::string TEXTURE_ITEM_MULTIBALL5;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;

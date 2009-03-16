@@ -16,7 +16,7 @@
 #include "../GameModel/InvisiBallItem.h"
 #include "../GameModel/GhostBallItem.h"
 #include "../GameModel/LaserPaddleItem.h"
-
+#include "../GameModel/MultiBallItem.h"
 
 GameItemAssets::GameItemAssets(GameESPAssets* espAssets) : 
 espAssets(espAssets), item(NULL) {
@@ -86,6 +86,8 @@ bool GameItemAssets::LoadItemTextures() {
 	Texture2D* invisiBallItemTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_INVISIBALL,	Texture::Trilinear);
 	Texture2D* ghostBallItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_GHOSTBALL,		Texture::Trilinear);
 	Texture2D* laserPaddleItemTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_PADDLELASER,	Texture::Trilinear);
+	Texture2D* multiBall3ItemTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_MULTIBALL3,	Texture::Trilinear);
+	Texture2D* multiBall5ItemTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_MULTIBALL5,	Texture::Trilinear);
 
 	assert(slowBallItemTex		!= NULL);
 	assert(fastBallItemTex		!= NULL);
@@ -93,6 +95,8 @@ bool GameItemAssets::LoadItemTextures() {
 	assert(invisiBallItemTex	!= NULL);
 	assert(ghostBallItemTex		!= NULL);
 	assert(laserPaddleItemTex != NULL);
+	assert(multiBall3ItemTex	!= NULL);
+	assert(multiBall5ItemTex	!= NULL);
 
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,			slowBallItemTex));
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::FAST_BALL_ITEM_NAME,			fastBallItemTex));
@@ -100,6 +104,8 @@ bool GameItemAssets::LoadItemTextures() {
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(InvisiBallItem::INVISI_BALL_ITEM_NAME,		invisiBallItemTex));
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(GhostBallItem::GHOST_BALL_ITEM_NAME,			ghostBallItemTex));
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,	laserPaddleItemTex));
+	this->itemTextures.insert(std::pair<std::string, Texture2D*>(MultiBallItem::MULTI3_BALL_ITEM_NAME,		multiBall3ItemTex));
+	this->itemTextures.insert(std::pair<std::string, Texture2D*>(MultiBallItem::MULTI5_BALL_ITEM_NAME,		multiBall5ItemTex));
 
 	// Load the timer textures
 	Texture2D* slowBallTimerTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_SLOWBALL,		Texture::Trilinear);
@@ -232,6 +238,12 @@ void GameItemAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int dis
 	// Go through each timer and draw its appropriate graphic and current elapsed 'filler'
 	for(std::list<GameItemTimer*>::const_iterator allTimerIter = timers.begin(); allTimerIter != timers.end(); allTimerIter++) {
 		const GameItemTimer* timer = *allTimerIter;
+		assert(timer != NULL);
+
+		// If the timer has already expired then we don't draw it
+		if (timer->HasExpired()) {
+			continue;
+		}
 
 		// Check to see if a timer exists, if so then draw it
 		std::map<std::string, Texture2D*>::iterator tempIterTimer = this->itemTimerTextures.find(timer->GetTimerItemName());
