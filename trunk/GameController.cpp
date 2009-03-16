@@ -8,6 +8,7 @@
 #include "GameModel/InvisiBallItem.h"
 #include "GameModel/GhostBallItem.h"
 #include "GameModel/LaserPaddleItem.h"
+#include "GameModel/MultiBallItem.h"
 
 #include "BlammoEngine/BlammoEngine.h"
 #include "BlammoEngine/Camera.h"
@@ -46,6 +47,12 @@ void GameController::KeyDown(SDLKey key) {
 	}
 	else if (key == SDLK_l) {
 		this->model->DropItem(LaserPaddleItem::LASER_PADDLE_ITEM_NAME);
+	}
+	else if (key == SDLK_3) {
+		this->model->DropItem(MultiBallItem::MULTI3_BALL_ITEM_NAME);
+	}
+	else if (key == SDLK_5) {
+		this->model->DropItem(MultiBallItem::MULTI5_BALL_ITEM_NAME);
 	}
 	else if (key == SDLK_p) {
 		this->model->TogglePauseGame();
