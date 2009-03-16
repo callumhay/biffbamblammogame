@@ -67,11 +67,18 @@ public:
 	// Ball related events ***************************************************************
 
 	/**
-	 * Event triggered when the ball falls below the death point in the level. This event
-	 * is triggered once per death.
+	 * Event triggered when all balls have fallen below the death point in the level. This event
+	 * is triggered once per complete ball death.
 	 * Arguements: livesLeft - The number of lives/balls left for the player.
 	 */
-	virtual void BallDeathEvent(int livesLeft) = 0;
+	virtual void AllBallsDeadEvent(int livesLeft) = 0;
+
+	/**
+	 * Event triggered when one of the game balls has died. This event is triggered
+	 * once per ball death.
+	 * Arguements: deadBall - The ball that has died (just before it is deleted).
+	 */
+	virtual void BallDiedEvent(const GameBall& deadBall) = 0;
 
 	/**
 	 * Event triggered whenever the ball respawns on the player paddle. Only occurs once

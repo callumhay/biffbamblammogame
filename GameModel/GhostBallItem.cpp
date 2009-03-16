@@ -34,14 +34,11 @@ double GhostBallItem::Activate() {
 			currTimer = NULL;
 	}
 
-	// Make the balls all into ghost balls
+	// Make the last ball to hit the paddle into a ghost ball
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
-		GameBall* currBall = *ballIter;
-		assert(currBall != NULL);
-
-		currBall->AddBallType(GameBall::GhostBall);
-	}
+	GameBall* affectedBall = *gameBalls.begin();
+	assert(affectedBall != NULL);
+	affectedBall->AddBallType(GameBall::GhostBall);
 
 	GameItem::Activate();
 	return GhostBallItem::GHOST_BALL_TIMER_IN_SECS;

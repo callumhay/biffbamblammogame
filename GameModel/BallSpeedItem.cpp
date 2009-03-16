@@ -60,52 +60,29 @@ double BallSpeedItem::Activate() {
 		currTimer = NULL;
 	}
 
-	// Activate the actual effect of this speed-ball item for all active balls
+	// Activate the actual effect of this speed-ball item for the last ball to hit the paddle
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	bool allBallsNormalSpd = true;
-	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
-		GameBall* currBall = *ballIter;
-		assert(currBall != NULL);
+	GameBall* affectedBall = *gameBalls.begin();
+	assert(affectedBall != NULL);
 
-		// Figure out how the item will effect the ball's speed
-		switch (this->spdType) {
-			case FastBall:
-				currBall->IncreaseSpeed();
-				break;
-			case SlowBall:
-				currBall->DecreaseSpeed();
-				break;
-			default:
-				assert(false);
-				break;
-		}
-		
-		if (currBall->GetSpeed() != GameBall::NormalSpeed) {
-			allBallsNormalSpd = false;
-		}
-
+	// Figure out how the item will effect the ball's speed
+	switch (this->spdType) {
+		case FastBall:
+			affectedBall->IncreaseSpeed();
+			break;
+		case SlowBall:
+			affectedBall->DecreaseSpeed();
+			break;
+		default:
+			assert(false);
+			break;
 	}
 
 	// If all the balls are normal speed then all previous power-ups/downs involving
 	// ball speed have been cancelled out an no item is active
-	if (allBallsNormalSpd) {
+	if (affectedBall->GetSpeed() == GameBall::NormalSpeed) {
 		return GameItemTimer::ZERO_TIME_TIMER_IN_SECS;
 	}
-
-	// Old functionality...
-	//if (gameBalls.size() == 1) {
-	//		GameBall::BallSpeed ballSpd = currBall->GetSpeed();
-
-	//		if (ballSpd == GameBall::NormalSpeed) {
-	//			return GameItemTimer::ZERO_TIME_TIMER_IN_SECS;
-	//		}
-	//		else if (ballSpd > GameBall::NormalSpeed) {
-	//			this->SwitchSpeed(FastBall);
-	//		}
-	//		else {
-	//			this->SwitchSpeed(SlowBall);
-	//		}
-	//}
 
 	GameItem::Activate();
 	return BallSpeedItem::BALL_SPEED_TIMER_IN_SECS;

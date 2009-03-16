@@ -4,6 +4,7 @@
 #include "../BlammoEngine/BlammoEngine.h"
 
 #include "GameItem.h"
+#include "GameModel.h"
 
 class InvisiBallItem : public GameItem {
 public:
@@ -12,6 +13,11 @@ public:
 
 	InvisiBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
 	virtual ~InvisiBallItem();
+	
+	virtual const GameBall* GetBallAffected() const {
+		assert(this->gameModel->GetGameBalls().size() > 0);
+		return *this->gameModel->GetGameBalls().begin();
+	}
 
 	virtual double Activate();
 	virtual void Deactivate();

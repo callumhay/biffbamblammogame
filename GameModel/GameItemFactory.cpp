@@ -8,6 +8,7 @@
 #include "InvisiBallItem.h"
 #include "GhostBallItem.h"
 #include "LaserPaddleItem.h"
+#include "MultiBallItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -17,21 +18,26 @@
 GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel) {
 	assert(gameModel != NULL);
 	
-	int randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % TOTAL_NUM_OF_ITEMS;
+	unsigned int randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % TOTAL_NUM_OF_ITEMS;
+	
 	// TODO: more items go here...
 	switch (randomValue) {	// switch is faster than a for loop... trade-off dynamic for speed
 		case 0:
-			return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);
+			return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);					// bad
 		case 1:
-			return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);
+			return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);					// good
 		case 2:
-			return new UberBallItem(spawnOrigin, gameModel);
+			return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::ThreeMultiBalls);		// good
 		case 3:
-			return new InvisiBallItem(spawnOrigin, gameModel);
+			return new InvisiBallItem(spawnOrigin, gameModel);																	// bad
 		case 4:
-			return new GhostBallItem(spawnOrigin, gameModel);
+			return new GhostBallItem(spawnOrigin, gameModel);																		// neutral
 		case 5:
-			return new LaserPaddleItem(spawnOrigin, gameModel);
+			return new LaserPaddleItem(spawnOrigin, gameModel);																	// good
+		case 6:
+			return new UberBallItem(spawnOrigin, gameModel);																		// good
+		case 7:
+			return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::FiveMultiBalls);		// good
 		default:
 			assert(false);
 	}
@@ -59,7 +65,14 @@ GameItem* GameItemFactory::CreateItem(const std::string itemName, const Point2D 
 	else if (itemName == LaserPaddleItem::LASER_PADDLE_ITEM_NAME) {
 		return new LaserPaddleItem(spawnOrigin, gameModel);
 	}
+	else if (itemName == MultiBallItem::MULTI3_BALL_ITEM_NAME) {
+		return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::ThreeMultiBalls);
+	}
+	else if (itemName == MultiBallItem::MULTI5_BALL_ITEM_NAME) {
+		return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::FiveMultiBalls);
+	}
 
+	assert(false);
 	return NULL;
 }
 #endif

@@ -36,13 +36,11 @@ double UberBallItem::Activate() {
 			currTimer = NULL;
 	}
 
-	// Make the balls das uber ball, ja!
+	// Make the last ball to hit the paddle das uber ball, ja!
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
-		GameBall* currBall = *ballIter;
-		assert(currBall != NULL);
-		currBall->AddBallType(GameBall::UberBall);
-	}
+	GameBall* affectedBall = *gameBalls.begin();
+	assert(affectedBall != NULL);
+	affectedBall->AddBallType(GameBall::UberBall);
 
 	GameItem::Activate();
 	return UberBallItem::UBER_BALL_TIMER_IN_SECS;

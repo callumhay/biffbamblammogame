@@ -7,6 +7,7 @@
 class PlayerPaddle;
 class GameModel;
 class GameItemTimer;
+class GameBall;
 
 class GameItem {
 public:
@@ -31,6 +32,10 @@ public:
 
 	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const ItemType type);
 	virtual ~GameItem();
+
+	virtual const GameBall* GetBallAffected() const {
+		return NULL;
+	}
 
 	// For obtaining the name of this item
 	std::string GetName() const {
