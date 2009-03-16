@@ -16,7 +16,7 @@ class Point2D;
 class GameItemFactory {
 
 private:
-	static const int TOTAL_NUM_OF_ITEMS = 6;
+	static const unsigned int TOTAL_NUM_OF_ITEMS = 8;
 	GameItemFactory() {};
 
 

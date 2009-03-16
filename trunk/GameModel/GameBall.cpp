@@ -15,5 +15,9 @@ GameBall::GameBall() : bounds(Point2D(0.0f,0.0f), 0.5f), currDir(Vector2D(0.0f, 
 currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f) {
 }
 
+GameBall::GameBall(const GameBall& gameBall) : bounds(gameBall.bounds), currDir(gameBall.currDir), currSpeed(gameBall.currSpeed), 
+currType(gameBall.currType), rotationInDegs(gameBall.rotationInDegs) {
+}
+
 GameBall::~GameBall() {
 }

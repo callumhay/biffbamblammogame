@@ -93,6 +93,21 @@ void GameModel::IncrementLevel() {
 	// Reset the multiplier
 	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
 
+	// Set the number of balls that exist to just 1
+	if (this->balls.size() > 1) {
+		std::list<GameBall*>::iterator ballIter = this->balls.begin();
+		ballIter++;
+		for (; ballIter != this->balls.end(); ballIter++) {
+			GameBall* ballToDestroy = *ballIter;
+			delete ballToDestroy;
+			ballToDestroy = NULL;
+		}
+		GameBall* onlyBallLeft = (*this->balls.begin());
+		assert(onlyBallLeft != NULL);
+		this->balls.clear();
+		this->balls.push_back(onlyBallLeft);
+	}
+
 	GameWorld* currWorld = this->GetCurrentWorld();
 	GameLevel* currLevel = currWorld->GetCurrentLevel();
 
@@ -256,23 +271,38 @@ void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
  * Called when the player/ball dies (falls into the bottomless pit of doom). 
  * This will deal with all the effects a death has on the game model.
  */
-void GameModel::PlayerDied() {
-	// Reset the multiplier
-	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
-	
-	// Decrement the number of lives left
-	this->currLivesLeft--;
+void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
+	assert(deadBall != NULL);
 
-	// EVENT: Ball/Player death
-	GameEventManager::Instance()->ActionBallDeath(this->currLivesLeft);
+	// EVENT: A Ball has died
+	GameEventManager::Instance()->ActionBallDied(*deadBall);
 
-	// Set the appropriate state based on the number of lives left...
-	if (this->IsGameOver()) {
-		// Game Over
-		this->SetCurrentState(new GameOverState(this));
+	// Do nasty stuff to player only if that was the last ball left
+	if (this->balls.size() == 1) {
+
+		// Reset the multiplier
+		this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
+		
+		// Decrement the number of lives left
+		this->currLivesLeft--;
+
+		// EVENT: All Balls are dead
+		GameEventManager::Instance()->ActionAllBallsDead(this->currLivesLeft);
+
+		// Set the appropriate state based on the number of lives left...
+		if (this->IsGameOver()) {
+			// Game Over
+			this->SetCurrentState(new GameOverState(this));
+		}
+		else {
+			this->SetCurrentState(new BallOnPaddleState(this));
+		}
+		stateChanged = true;
 	}
 	else {
-		this->SetCurrentState(new BallOnPaddleState(this));
+		// There is still at least 1 ball left in play - delete the given dead ball from the game
+		
+		stateChanged = false;
 	}
 }
 

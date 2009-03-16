@@ -29,6 +29,7 @@ public:
 	static const int MOVING_RAND_RELEASE_DEG = 10;
 
 	GameBall();
+	GameBall(const GameBall& gameBall);
 	~GameBall();
 
 	Vector3D GetRotation() const {
@@ -68,6 +69,9 @@ public:
 	}
 	void RemoveBallType(const BallType type) {
 		this->currType = this->currType & ~type;
+	}
+	void ResetAllBallAttributesToDefault() {
+		
 	}
 
 	// Set the velocity of the ball; (0, 1) is up and (1, 0) is right

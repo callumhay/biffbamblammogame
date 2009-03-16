@@ -43,11 +43,20 @@ void GameEventManager::ActionPaddleHitWall(const Point2D& hitLoc) {
 		(*this->listenerIter)->PaddleHitWallEvent(hitLoc);
 	}
 }
-// Action for when the player ball dies (falls off screen)
-void GameEventManager::ActionBallDeath(int livesLeft) {
+
+// Action for when a ball has died (gone out of bounds)
+void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
-		(*this->listenerIter)->BallDeathEvent(livesLeft);
+		(*this->listenerIter)->BallDiedEvent(deadBall);
+	}	
+}
+
+// Action for when the all balls have died (gone out of bounds)
+void GameEventManager::ActionAllBallsDead(int livesLeft) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->AllBallsDeadEvent(livesLeft);
 	}	
 }
 

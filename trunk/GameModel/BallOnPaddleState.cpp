@@ -7,6 +7,7 @@
 #include "../BlammoEngine/BlammoEngine.h"
 
 BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(true) {
+	assert(gm != NULL);
 	this->UpdateBallPosition();
 }
 

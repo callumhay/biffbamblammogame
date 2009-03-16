@@ -67,9 +67,8 @@ private:
 	void CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& stateChanged);
 	void CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& stateChanged);
 	void BallPaddleCollisionOccurred(GameBall& ball);
-	void PlayerDied();
+	void BallDied(GameBall* deadBall, bool& stateChanged);
 	
-		
 	// Increment the player's score in the game
 	void IncrementScore(int amt) {
 		bool wasGreaterThanZero = this->currPlayerScore > 0;
@@ -173,7 +172,7 @@ public:
 	PlayerPaddle* GetPlayerPaddle() {
 		return this->playerPaddle;
 	}
-	std::list<GameBall*> GetGameBalls() {
+	std::list<GameBall*>& GetGameBalls() {
 		return this->balls;
 	}
 
