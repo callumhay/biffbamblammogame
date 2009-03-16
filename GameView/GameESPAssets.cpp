@@ -7,6 +7,7 @@
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/GameItem.h"
 #include "../GameModel/UberBallItem.h"
+#include "../GameModel/GhostBallItem.h"
 #include "../GameModel/BallSpeedItem.h"
 #include "../GameModel/InvisiBallItem.h"
 #include "../GameModel/LaserPaddleItem.h"
@@ -35,9 +36,6 @@ particleMediumShrink(1.0f, 0.25f),
 
 ghostBallAccel1(Vector3D(1,1,1)),
 
-uberBallEmitterAura(NULL), 
-uberBallEmitterTrail(NULL),
-ghostBallEmitterTrail(NULL),
 paddleLaserGlowAura(NULL),
 paddleLaserGlowSparks(NULL),
 
@@ -49,9 +47,7 @@ starTex(NULL),
 starOutlineTex(NULL),
 explosionTex(NULL),
 explosionRayTex(NULL),
-laserBeamTex(NULL),
-
-oldBallDir(0,0) {
+laserBeamTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -87,21 +83,10 @@ GameESPAssets::~GameESPAssets() {
 	this->laserBeamTex = NULL;
 
 	// Delete any standalone effects
-	delete this->uberBallEmitterAura;
-	this->uberBallEmitterAura = NULL;
-	delete this->uberBallEmitterTrail;
-	this->uberBallEmitterTrail = NULL;
-	delete this->ghostBallEmitterTrail;
-	this->ghostBallEmitterTrail = NULL;
 	delete this->paddleLaserGlowAura;
 	this->paddleLaserGlowAura = NULL;
 	delete this->paddleLaserGlowSparks;
 	this->paddleLaserGlowSparks = NULL;
-
-	for (std::vector<ESPShaderParticle*>::iterator iter = this->ghostSmokeParticles.begin(); iter != this->ghostSmokeParticles.end(); iter++) {
-		delete *iter;
-	}
-	this->ghostSmokeParticles.clear();
 }
 
 /**
@@ -133,7 +118,7 @@ void GameESPAssets::KillAllActiveEffects() {
 	for (std::map<const Projectile*, std::pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>>>::iterator iter1 = this->activeProjectileEmitters.begin();
 		iter1 != this->activeProjectileEmitters.end(); iter1++) {
 	
-			std::pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>> fgbgPair = (*iter1).second;
+			std::pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>>& fgbgPair = (*iter1).second;
 			
 			for (std::list<ESPPointEmitter*>::iterator iter2 = fgbgPair.first.begin();
 				iter2 != fgbgPair.first.end(); iter2++) {
@@ -151,6 +136,49 @@ void GameESPAssets::KillAllActiveEffects() {
 
 	}
 	this->activeProjectileEmitters.clear();
+
+	// Clear all ball emitters
+	for (std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); iter1++) {
+		std::map<std::string, std::vector<ESPPointEmitter*>>& currBallEffects = iter1->second;
+		for (std::map<std::string, std::vector<ESPPointEmitter*>>::iterator iter2 = currBallEffects.begin(); iter2 != currBallEffects.end(); iter2++) {
+			std::vector<ESPPointEmitter*>& effectList = iter2->second;
+			for (std::vector<ESPPointEmitter*>::iterator iter3 = effectList.begin(); iter3 != effectList.end(); iter3++) {
+				ESPPointEmitter* currEmitter = *iter3;
+				delete currEmitter;
+				currEmitter = NULL;
+			}
+			effectList.clear();
+		}
+		currBallEffects.clear();
+	}
+	this->ballEffects.clear();
+
+}
+
+/**
+ * Public function for destroying all effects associated with a given ball.
+ * (for when the ball dies or something like that).
+ */
+void GameESPAssets::KillAllActiveBallEffects(const GameBall& ball) {
+	// Check to see if there are any active effects for the ball, if not
+	// then just exit this function
+	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	if (foundBallEffects == this->ballEffects.end()) {
+		return;
+	}
+
+	// Iterate through all effects and delete them, then remove them from the list
+	for (std::map<std::string, std::vector<ESPPointEmitter*>>::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); iter++) {
+		std::vector<ESPPointEmitter*>& effectList = iter->second;
+		for (std::vector<ESPPointEmitter*>::iterator iter2 = effectList.begin(); iter2 != effectList.end(); iter2++) {
+			ESPPointEmitter* currEmitter = *iter2;
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		effectList.clear();
+	}
+
+	this->ballEffects.erase(foundBallEffects);
 }
 
 /**
@@ -222,75 +250,64 @@ void GameESPAssets::InitESPTextures() {
 }
 
 // Private helper function for initializing the uber ball's effects
-void GameESPAssets::InitUberBallESPEffects() {
-	assert(this->uberBallEmitterAura == NULL);
-	assert(this->uberBallEmitterTrail == NULL);
-
-
-	// Initialize uberball effectors
-	ScaleEffect uberBallPulseSettings;
-	uberBallPulseSettings.pulseGrowthScale = 2.0f;
-	uberBallPulseSettings.pulseRate = 1.5f;
-	this->particlePulseUberballAura = ESPParticleScaleEffector(uberBallPulseSettings);
+void GameESPAssets::AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList) {
+	assert(effectsList.size() == 0);
 
 	// Set up the uberball emitters...
-	this->uberBallEmitterAura = new ESPPointEmitter();
-	this->uberBallEmitterAura->SetSpawnDelta(ESPInterval(-1));
-	this->uberBallEmitterAura->SetInitialSpd(ESPInterval(0));
-	this->uberBallEmitterAura->SetParticleLife(ESPInterval(-1));
-	this->uberBallEmitterAura->SetParticleSize(ESPInterval(1.5f));
-	this->uberBallEmitterAura->SetEmitAngleInDegrees(0);
-	this->uberBallEmitterAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->uberBallEmitterAura->SetParticleAlignment(ESP::ScreenAligned);
-	this->uberBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
-	this->uberBallEmitterAura->SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.75f));
-	this->uberBallEmitterAura->AddEffector(&this->particlePulseUberballAura);
-	bool result = this->uberBallEmitterAura->SetParticles(1, this->circleGradientTex);
+	ESPPointEmitter* uberBallEmitterAura = new ESPPointEmitter();
+	uberBallEmitterAura->SetSpawnDelta(ESPInterval(-1));
+	uberBallEmitterAura->SetInitialSpd(ESPInterval(0));
+	uberBallEmitterAura->SetParticleLife(ESPInterval(-1));
+	uberBallEmitterAura->SetParticleSize(ESPInterval(1.5f));
+	uberBallEmitterAura->SetEmitAngleInDegrees(0);
+	uberBallEmitterAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	uberBallEmitterAura->SetParticleAlignment(ESP::ScreenAligned);
+	uberBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
+	uberBallEmitterAura->SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.75f));
+	uberBallEmitterAura->AddEffector(&this->particlePulseUberballAura);
+	bool result = uberBallEmitterAura->SetParticles(1, this->circleGradientTex);
 	assert(result);
 
-	this->uberBallEmitterTrail = new ESPPointEmitter();
-	this->uberBallEmitterTrail->SetSpawnDelta(ESPInterval(0.02f));
-	this->uberBallEmitterTrail->SetInitialSpd(ESPInterval(5.0f));
-	this->uberBallEmitterTrail->SetParticleLife(ESPInterval(1.3f));
-	this->uberBallEmitterTrail->SetParticleSize(ESPInterval(1.3f), ESPInterval(1.3f));
-	this->uberBallEmitterTrail->SetEmitAngleInDegrees(0);
-	this->uberBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->uberBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
-	this->uberBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
-	this->uberBallEmitterTrail->AddEffector(&this->particleFaderUberballTrail);
-	this->uberBallEmitterTrail->AddEffector(&this->particleShrinkToNothing);
-	result = this->uberBallEmitterTrail->SetParticles(40, this->circleGradientTex);
+	ESPPointEmitter* uberBallEmitterTrail = new ESPPointEmitter();
+	uberBallEmitterTrail->SetSpawnDelta(ESPInterval(0.005f));
+	uberBallEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
+	uberBallEmitterTrail->SetParticleLife(ESPInterval(0.5f));
+	uberBallEmitterTrail->SetParticleSize(ESPInterval(1.3f), ESPInterval(1.3f));
+	uberBallEmitterTrail->SetEmitAngleInDegrees(0);
+	uberBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	uberBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
+	uberBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+	uberBallEmitterTrail->AddEffector(&this->particleFaderUberballTrail);
+	uberBallEmitterTrail->AddEffector(&this->particleShrinkToNothing);
+	result = uberBallEmitterTrail->SetParticles(GameESPAssets::NUM_UBER_BALL_TRAIL_PARTICLES, this->circleGradientTex);
 	assert(result);
+	
+	effectsList.reserve(2);
+	effectsList.push_back(uberBallEmitterTrail);
+	effectsList.push_back(uberBallEmitterAura);
 }
 
 // Private helper function for initializing the ghost ball's effects
-void GameESPAssets::InitGhostBallESPEffects() {
-	assert(this->ghostBallEmitterTrail == NULL);
+void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList) {
+	assert(effectsList.size() == 0);
 
-	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
-	this->ghostBallSmoke.SetScale(0.5f);
-	this->ghostBallSmoke.SetFrequency(0.25f);
-	this->ghostBallSmoke.SetFlowDirection(Vector3D(0, 0, 1));
-	this->ghostBallSmoke.SetMaskTexture(this->circleGradientTex);
+	ESPPointEmitter* ghostBallEmitterTrail = new ESPPointEmitter();
+	ghostBallEmitterTrail->SetSpawnDelta(ESPInterval(0.01f));
+	ghostBallEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
+	ghostBallEmitterTrail->SetParticleLife(ESPInterval(0.5f));
+	ghostBallEmitterTrail->SetParticleSize(ESPInterval(1.5f, 2.0f));
+	ghostBallEmitterTrail->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	ghostBallEmitterTrail->SetEmitAngleInDegrees(20);
+	ghostBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	ghostBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
+	ghostBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+	ghostBallEmitterTrail->AddEffector(&this->particleFader);
+	ghostBallEmitterTrail->AddEffector(&this->ghostBallAccel1);
+	bool result = ghostBallEmitterTrail->SetParticles(GameESPAssets::NUM_GHOST_SMOKE_PARTICLES, &this->ghostBallSmoke);
+	assert(result);
 
-	this->ghostBallEmitterTrail = new ESPPointEmitter();
-	this->ghostBallEmitterTrail->SetSpawnDelta(ESPInterval(0.01f));
-	this->ghostBallEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
-	this->ghostBallEmitterTrail->SetParticleLife(ESPInterval(0.5f));
-	this->ghostBallEmitterTrail->SetParticleSize(ESPInterval(1.5f, 2.0f));
-	this->ghostBallEmitterTrail->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-	this->ghostBallEmitterTrail->SetEmitAngleInDegrees(20);
-	this->ghostBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->ghostBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
-	this->ghostBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
-	this->ghostBallEmitterTrail->AddEffector(&this->particleFader);
-	this->ghostBallEmitterTrail->AddEffector(&this->ghostBallAccel1);
-
-	for (int i = 0; i < GameESPAssets::NUM_GHOST_SMOKE_PARTICLES; i++) {
-		ESPShaderParticle* temp = new ESPShaderParticle(&this->ghostBallSmoke);
-		this->ghostSmokeParticles.push_back(temp);
-		this->ghostBallEmitterTrail->AddParticle(temp);
-	}
+	effectsList.reserve(1);
+	effectsList.push_back(ghostBallEmitterTrail);
 }
 
 /**
@@ -336,9 +353,6 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
  */
 void GameESPAssets::InitStandaloneESPEffects() {
 
-	this->InitUberBallESPEffects();
-	this->InitGhostBallESPEffects();
-	
 	this->InitLaserPaddleESPEffects();
 
 	// Pulsing effect for particles
@@ -352,6 +366,19 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	paddleLaserPulseSettings.pulseRate = 1.0f;
 	this->particlePulsePaddleLaser = ESPParticleScaleEffector(paddleLaserPulseSettings);
 	
+	// Initialize uberball effectors
+	ScaleEffect uberBallPulseSettings;
+	uberBallPulseSettings.pulseGrowthScale = 2.0f;
+	uberBallPulseSettings.pulseRate = 1.5f;
+	this->particlePulseUberballAura = ESPParticleScaleEffector(uberBallPulseSettings);
+
+	// Ghost smoke effect used for ghostball
+	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
+	this->ghostBallSmoke.SetScale(0.5f);
+	this->ghostBallSmoke.SetFrequency(0.25f);
+	this->ghostBallSmoke.SetFlowDirection(Vector3D(0, 0, 1));
+	this->ghostBallSmoke.SetMaskTexture(this->circleGradientTex);
+
 	// Fire effect used in various things - like explosions and such.
 	this->fireEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
 	this->fireEffect.SetColour(Colour(1.00f, 1.00f, 1.00f));
@@ -869,9 +896,22 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const GameItem& 
  * Adds an effect based on the given game item being activated or deactivated.
  */
 void GameESPAssets::SetItemEffect(const GameItem& item, bool activate) {
-	
 	if (item.GetName() == UberBallItem::UBER_BALL_ITEM_NAME && activate) {
-		this->uberBallEmitterAura->Reset();
+		const GameBall* ballAffected = item.GetBallAffected();
+		assert(ballAffected != NULL);
+
+		// If there are any effects assigned for the uber ball then we need
+		// to reset the trail
+		std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(ballAffected);
+		if (foundBallEffects != this->ballEffects.end()) {
+			std::map<std::string, std::vector<ESPPointEmitter*>>::iterator foundUberBallFX = foundBallEffects->second.find(UberBallItem::UBER_BALL_ITEM_NAME);
+			if (foundUberBallFX != foundBallEffects->second.end()) {
+				std::vector<ESPPointEmitter*>& uberBallEffectsList = foundUberBallFX->second;
+				assert(uberBallEffectsList.size() > 0);
+				uberBallEffectsList[0]->Reset();
+			}
+		}
+
 	}
 	else if (item.GetName() == LaserPaddleItem::LASER_PADDLE_ITEM_NAME && activate) {
 		this->paddleLaserGlowAura->Reset();
@@ -992,58 +1032,74 @@ void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const G
  * Draw particle effects associated with the uberball.
  */
 void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	// Check to see if the ball has any associated uber ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	
+	if (foundBallEffects == this->ballEffects.end()) {
+		// Didn't even find a ball ... add one
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<std::string, std::vector<ESPPointEmitter*>>())).first;
+	}
+
+	if (foundBallEffects->second.find(UberBallItem::UBER_BALL_ITEM_NAME) == foundBallEffects->second.end()) {
+		// Didn't find an associated uber ball effect, so add one
+		this->AddUberBallESPEffects(this->ballEffects[&ball][UberBallItem::UBER_BALL_ITEM_NAME]);
+	}
+	std::vector<ESPPointEmitter*>& uberBallEffectList = this->ballEffects[&ball][UberBallItem::UBER_BALL_ITEM_NAME];
+
+	Vector2D ballDir = ball.GetDirection();
+	Point2D ballPos  = ball.GetBounds().Center();
+
 	glPushMatrix();
 	Point2D loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);
 
-	// Draw the basic aura around the ball
-	this->uberBallEmitterAura->Draw(camera);
-	this->uberBallEmitterAura->Tick(dT);
-
-	// Create a kind of trail for the ball...
-	Vector2D ballDir    = ball.GetDirection();
-	if (this->oldBallDir != ballDir) {
-		this->EffectsToResetOnBallVelChange();
-	}
-	this->oldBallDir = ballDir;
-	
-	// Draw the trail of the ghost ball...
-	Vector3D negBallDir = Vector3D(-ballDir[0], -ballDir[1], 0.0f);
-	this->uberBallEmitterTrail->SetEmitDirection(negBallDir);
-	this->uberBallEmitterTrail->Draw(camera);
-	this->uberBallEmitterTrail->Tick(dT);
+	uberBallEffectList[1]->Draw(camera);
+	uberBallEffectList[1]->Tick(dT);
 
 	glPopMatrix();
+
+	// Draw the trail...
+	uberBallEffectList[0]->SetEmitPosition(Point3D(ballPos[0], ballPos[1], 0.0f));
+	uberBallEffectList[0]->Draw(camera);
+	uberBallEffectList[0]->Tick(dT);
 }
 
 /**
  * Draw particle effects associated with the ghostball.
  */
 void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	// Check to see if the ball has any associated ghost ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	
+	if (foundBallEffects == this->ballEffects.end()) {
+		// Didn't even find a ball ... add one
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<std::string, std::vector<ESPPointEmitter*>>())).first;
+	}
+
+	if (foundBallEffects->second.find(GhostBallItem::GHOST_BALL_ITEM_NAME) == foundBallEffects->second.end()) {
+		// Didn't find an associated uber ball effect, so add one
+		this->AddGhostBallESPEffects(this->ballEffects[&ball][GhostBallItem::GHOST_BALL_ITEM_NAME]);
+	}
+	std::vector<ESPPointEmitter*>& ghostBallEffectList = this->ballEffects[&ball][GhostBallItem::GHOST_BALL_ITEM_NAME];
+
 	glPushMatrix();
 	Point2D loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);
 
-	Vector2D ballDir    = ball.GetDirection();
-	Vector3D negBallDir = Vector3D(-ballDir[0], -ballDir[1], 0.0f);
-
-	// Reset the trail effect when the ball suddenly changes velocity...
-	if (this->oldBallDir != ballDir) {
-		this->EffectsToResetOnBallVelChange();
-	}
-	this->oldBallDir = ballDir;
-
 	// Rotate the negative ball -vel direction by some random amount and then affect the particle's velocities
 	// by it, this gives the impression that the particles are waving around mysteriously (ghostlike... one might say)
 	double randomDegrees = Randomizer::GetInstance()->RandomNumNegOneToOne() * 90;
+	Vector2D ballDir    = ball.GetDirection();
+	Vector3D negBallDir = Vector3D(-ballDir[0], -ballDir[1], 0.0f);
 	Vector3D accel = Matrix4x4::rotationMatrix('z', static_cast<float>(randomDegrees), true) * negBallDir;
 	accel = ball.GetSpeed() * 4.0 * accel;
 	this->ghostBallAccel1.SetAcceleration(accel);
 
 	// Create a kind of trail for the ball...
-	//this->ghostBallEmitterTrail->SetEmitPosition(Point3D(loc[0], loc[1], 0));
-	this->ghostBallEmitterTrail->Draw(camera);
-	this->ghostBallEmitterTrail->Tick(dT);
+	ghostBallEffectList[0]->Draw(camera);
+	ghostBallEffectList[0]->Tick(dT);
 	
 	glPopMatrix();
 }
@@ -1061,15 +1117,4 @@ void GameESPAssets::DrawPaddleLaserEffects(double dT, const Camera& camera, cons
 	this->paddleLaserGlowAura->Tick(dT);
 	this->paddleLaserGlowSparks->Draw(camera);
 	this->paddleLaserGlowSparks->Tick(dT);
-}
-
-/**
- * Private helper function that resets certain effects when the ball changes
- * velocity - the reasoning behind this is that we want particles to stop moving
- * based on previous ball velocity / directions in the case where they are based off
- * such values.
- */
-void GameESPAssets::EffectsToResetOnBallVelChange() {
-	this->ghostBallEmitterTrail->Reset();
-	this->uberBallEmitterTrail->Reset();
 }

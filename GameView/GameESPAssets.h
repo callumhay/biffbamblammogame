@@ -67,36 +67,30 @@ private:
 	Texture2D* explosionRayTex;
 	Texture2D* laserBeamTex;
 
-	// Standalone ESP effects
-	ESPPointEmitter* uberBallEmitterAura;
-	ESPPointEmitter* uberBallEmitterTrail;
-	
+	// Ball related ESP effects - stores each balls set of item-related (defined by unique string ID) effects
+	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>> ballEffects;
+
+	// Constants for the number of particles for particular effects
 	static const int NUM_PADDLE_LASER_SPARKS = 15;
+	static const int NUM_GHOST_SMOKE_PARTICLES = 23;
+	static const int NUM_UBER_BALL_TRAIL_PARTICLES = 35;
+	static const int NUM_EXPLOSION_FIRE_CLOUD_PARTICLES  = 25;
+	static const int NUM_LASER_VAPOUR_TRAIL_PARTICLES = 15;
+
 	ESPPointEmitter* paddleLaserGlowAura;
 	ESPPointEmitter* paddleLaserGlowSparks;
 
-	static const int NUM_GHOST_SMOKE_PARTICLES = 23;
-	std::vector<ESPShaderParticle*> ghostSmokeParticles;
 	CgFxVolumetricEffect ghostBallSmoke;
-	ESPPointEmitter* ghostBallEmitterTrail;
-
-	static const int NUM_EXPLOSION_FIRE_CLOUD_PARTICLES  = 25;
 	CgFxVolumetricEffect fireEffect;
-	
-	static const int NUM_LASER_VAPOUR_TRAIL_PARTICLES = 15;
 	CgFxPostRefract vapourTrailEffect;
-
-
-	// Used for tweaking...
-	Vector2D oldBallDir;
-	void EffectsToResetOnBallVelChange();
 
 	// Initialization functions for effect stuffs
 	void InitESPTextures();
 	void InitStandaloneESPEffects();
 
-	void InitUberBallESPEffects();
-	void InitGhostBallESPEffects();
+	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
+	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
+
 	void InitLaserPaddleESPEffects();
 
 	void AddLaserPaddleESPEffects(const Projectile& projectile);
@@ -121,14 +115,19 @@ public:
 	void RemoveProjectileEffect(const Camera& camera, const Projectile& projectile);
 
 	void KillAllActiveEffects();
+	void KillAllActiveBallEffects(const GameBall& ball);
 
 	// Draw functions for various particle effects in the game
 	void DrawParticleEffects(double dT, const Camera& camera);
 	void DrawPostProcessingESPEffects(double dT, const Camera& camera, Texture2D* sceneTex);
 
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
+
+
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball);
+	
+
 	void DrawPaddleLaserEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 
 };

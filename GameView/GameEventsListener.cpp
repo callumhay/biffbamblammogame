@@ -55,6 +55,9 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
 	debug_output("EVENT: Level completed");
+
+	// Kill all effects that may have previously been occuring...
+	this->display->GetAssets()->KillAllActiveEffects();
 }
 
 
@@ -70,7 +73,13 @@ void GameEventsListener::PaddleHitWallEvent(const Point2D& hitLoc) {
 	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
 
-void GameEventsListener::BallDeathEvent(int livesLeft) {
+void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
+	debug_output("EVENT: Ball died");
+	// TODO:
+	this->display->GetAssets()->KillAllActiveBallEffects(deadBall);
+}
+
+void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
 	debug_output("EVENT: Ball death, lives left: " << livesLeft);
 	
 	// Kill all effects that may have previously been occuring...

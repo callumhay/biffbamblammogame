@@ -24,7 +24,8 @@ public:
 	virtual void PaddleHitWallEvent(const Point2D& hitLoc);
 
 	// Ball/Block related events
-	virtual void BallDeathEvent(int livesLeft);
+	virtual void BallDiedEvent(const GameBall& deadBall);
+	virtual void AllBallsDeadEvent(int livesLeft);
 	virtual void BallSpawnEvent(const GameBall& spawnedBall);
 	virtual void BallShotEvent(const GameBall& shotBall);
 	virtual void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block);
