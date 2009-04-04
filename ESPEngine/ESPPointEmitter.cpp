@@ -67,16 +67,16 @@ void ESPPointEmitter::ReviveParticle() {
 	this->deadParticles.pop_front();
 
 	// Figure out the properties we need to impart on the newly born particle...
-	Vector3D initalParticleVel(0,0,0);
+	Vector3D initialParticleVel(0,0,0);
 	float initialSpd = this->particleInitialSpd.RandomValueInInterval();
 	if (initialSpd != 0.0f) {
-		initalParticleVel = initialSpd * this->CalculateRandomInitParticleDir();
+		initialParticleVel = initialSpd * this->CalculateRandomInitParticleDir();
 	}
 
 	float randomPtX = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
 	float randomPtY = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
 	float randomPtZ = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
-	Point3D initalPt = this->emitPt + Vector3D(randomPtX, randomPtY, randomPtZ);
+	Point3D initialPt = this->emitPt + Vector3D(randomPtX, randomPtY, randomPtZ);
 
 	// Revive the particle and put it in the group of living particles
 	Vector2D randomSizing(this->particleSize[0].RandomValueInInterval(), this->particleSize[1].RandomValueInInterval());
@@ -84,7 +84,23 @@ void ESPPointEmitter::ReviveParticle() {
 		randomSizing[1] = randomSizing[0];
 	}
 
-	zombie->Revive(initalPt, initalParticleVel, randomSizing, this->particleRotation.RandomValueInInterval(), this->particleLifetime.RandomValueInInterval()); 
+	// If the emitter is reversed then we must change the revive parameters for the particle
+	float randomLifetime = this->particleLifetime.RandomValueInInterval();
+	float randomRotation = this->particleRotation.RandomValueInInterval();
+	if (this->isReversed) {
+		// Figure out how far the particle will travel in its lifetime
+		Vector3D distVecDuringLife = randomLifetime * initialParticleVel;
+		initialPt = initialPt + distVecDuringLife;
+		
+		// Reverse its velocity
+		initialParticleVel = -initialParticleVel;
+
+		zombie->Revive(initialPt, initialParticleVel, randomSizing, randomRotation, randomLifetime); 
+	}
+	else {
+		zombie->Revive(initialPt, initialParticleVel, randomSizing, randomRotation, randomLifetime); 
+	}
+	
 	zombie->SetColour(Colour(this->particleRed.RandomValueInInterval(), this->particleGreen.RandomValueInInterval(), 
 		this->particleBlue.RandomValueInInterval()), this->particleAlpha.RandomValueInInterval());
 	this->AssignRandomTextureToParticle(zombie);
