@@ -71,6 +71,9 @@ namespace Collision {
 		Point2D Center() const {
 			return this->center;
 		}
+		void SetRadius(float r) {
+			this->radius = r;
+		}
 		float Radius() const {
 			return this->radius;
 		}

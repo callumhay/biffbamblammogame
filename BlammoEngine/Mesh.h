@@ -3,6 +3,7 @@
 
 #include "BasicIncludes.h"
 
+#include "Matrix.h"
 #include "Point.h"
 #include "Vector.h"
 #include "CgFxEffect.h"
@@ -44,7 +45,7 @@ public:
 	};
 
 	void Translate(const Vector3D& t);
-
+	void Transform(const Matrix4x4& m);
 };
 
 class MaterialGroup {

@@ -50,6 +50,22 @@ void PolygonGroup::Translate(const Vector3D& t) {
 	}
 }
 
+void PolygonGroup::Transform(const Matrix4x4& m) {
+	// Only need to transform the vertices
+	for (unsigned int i = 0; i < this->polygroupArrayLength; i += INTERLEAVED_MULTIPLIER) {
+		Point3D tempVert(this->polygroupArray[i + 5], this->polygroupArray[i + 6], this->polygroupArray[i + 7]);
+		Point3D resultVert = m * tempVert;
+		Vector3D tempNorm(this->polygroupArray[i + 2], this->polygroupArray[i + 3], this->polygroupArray[i + 4]);
+		Vector3D resultNorm = m * tempNorm;
+		this->polygroupArray[i + 2] = resultNorm[0];
+		this->polygroupArray[i + 3] = resultNorm[1];
+		this->polygroupArray[i + 4] = resultNorm[2];
+		this->polygroupArray[i + 5] = resultVert[0];
+		this->polygroupArray[i + 6] = resultVert[1];
+		this->polygroupArray[i + 7] = resultVert[2];
+	}
+}
+
 void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer, 
 														 const std::vector<Point3D>& vertexStream, 
 														 const std::vector<Vector3D>& normalStream,

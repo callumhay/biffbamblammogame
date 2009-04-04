@@ -20,9 +20,7 @@ TextLabel2D::~TextLabel2D() {
  * Return: The length of the drawn label.
  */
 void TextLabel2D::Draw() {
-	if (this->font == NULL) {
-		return;
-	}
+	assert(this->font != NULL);
 
 	// Draw drop shadow part
 	if (this->dropShadow.isSet) {

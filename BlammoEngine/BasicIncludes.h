@@ -36,7 +36,10 @@
 #pragma comment(lib, "SDL.lib")
 #pragma comment(lib, "SDLmain.lib")
 #endif
+
 #include "SDL.h"
+#include "SDL_thread.h"
+#include "SDL_mutex.h"
 
 // Cg includes
 #include "Cg/cg.h"

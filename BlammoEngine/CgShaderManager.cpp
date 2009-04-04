@@ -10,6 +10,8 @@ CgShaderManager::CgShaderManager() : cgContext(NULL) {
 	// Register OGL states for the context and allow texture mgmt
 	cgGLRegisterStates(this->cgContext);
 	cgGLSetManageTextureParameters(this->cgContext, true);
+	//cgGLEnableProfile(CG_PROFILE_FP40);
+	//cgGLEnableProfile(CG_PROFILE_VP40);
 	this->CheckForCgError("Registering OGL Cg Runtime");
 }
 
@@ -77,6 +79,7 @@ void CgShaderManager::LoadEffectTechniques(CGeffect effect, std::map<std::string
 		if (cgValidateTechnique(currTechnique) == CG_FALSE) {
 			debug_output("Could not validate Cg technique " << techniqueName);
 			assert(false);
+			currTechnique = cgGetNextTechnique(currTechnique);
 			continue;
 		}
 		techniques[std::string(techniqueName)] = currTechnique;

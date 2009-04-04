@@ -111,6 +111,15 @@ public:
 
 	// Functions for changing the current view transform to a full ortho2D,
 	// such that all coordinates are in window coords
+	//static void PushWindowCoords(int w, int h) {
+	//	glPushAttrib(GL_TRANSFORM_BIT);
+	//	glMatrixMode(GL_PROJECTION);
+	//	glPushMatrix();
+	//	glLoadIdentity();
+	//	glViewport(0, 0, w, h);
+	//	gluOrtho2D(0,0,w,h);
+	//	glPopAttrib();
+	//}
 	static void PushWindowCoords() {
 		glPushAttrib(GL_TRANSFORM_BIT);
 		GLint viewport[4];
