@@ -28,7 +28,7 @@ private:
 	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
 
 	// Level-related meshes
-	LevelMesh* levelMesh;
+	std::map<const GameLevel*, LevelMesh*> loadedLevelMeshes;
 
 	// Regular meshes - these persist throughout the entire game
 	Mesh* ball;				// Ball used to break blocks
@@ -41,7 +41,6 @@ private:
 	CgFxVolumetricEffect* ghostBallEffect;
 
 	void DeleteWorldAssets();
-	void DeleteLevelAssets();
 	void DeleteRegularMeshAssets();
 	void DeleteRegularEffectAssets();
 
@@ -53,12 +52,7 @@ public:
 	GameAssets();
 	~GameAssets();
 
-	void LoadWorldAssets(GameWorld::WorldStyle style);
-	void LoadLevelAssets(const GameLevel* level);
-
-	// LoadMinimalAssets(...)				// e.g., just font and load screen
-	// LoadStartScreenAssets(...)		// e.g., start-screen + minimal
-	// LoadPlayableGameAssets(...)	// e.g., Ball-related, Item-related, Timer-related 
+	void LoadWorldAssets(const GameWorld* world);
 
 	void Tick(double dT);
 
@@ -69,7 +63,7 @@ public:
 	void DrawBackgroundModel(const Camera& camera);
 	void DrawBackgroundEffects(const Camera& camera);
 
-	void DrawLevelPieces(const Camera& camera) const;
+	void DrawLevelPieces(const GameLevel* currLevel, const Camera& camera) const;
 	void DrawGameBall(double dT, const GameBall& b, const Camera& camera, Texture2D* sceneTex) const;
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const;
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
@@ -90,10 +84,15 @@ public:
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb) {
 		this->espAssets->AddBombBlockBreakEffect(camera, bomb);
 	}
-	void SetItemEffect(const GameItem& item, bool activate) {
-		this->espAssets->SetItemEffect(item, activate);
+	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc) {
+		this->espAssets->AddPaddleHitWallEffect(paddle, hitLoc);
 	}
-
+	void SetItemEffect(const GameItem& item) {
+		this->espAssets->SetItemEffect(item);
+	}
+	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item) {
+		this->espAssets->AddItemAcquiredEffect(camera, paddle, item);
+	}
 	void AddItemDropEffect(const Camera& camera, const GameItem& item) {
 		this->espAssets->AddItemDropEffect(camera, item);
 	}
@@ -116,8 +115,13 @@ public:
 	}
 
 	// Public Getter Functions **********************************************************************
-	LevelMesh* GetLevelMesh() const {
-		return this->levelMesh;
+	LevelMesh* GetLevelMesh(const GameLevel* currLevel) const {
+		std::map<const GameLevel*, LevelMesh*>::const_iterator iter = this->loadedLevelMeshes.find(currLevel);
+		if (iter == this->loadedLevelMeshes.end()) {
+			assert(false);
+			return NULL;
+		}
+		return iter->second;
 	}
 
 };

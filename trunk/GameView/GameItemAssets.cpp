@@ -17,6 +17,8 @@
 #include "../GameModel/GhostBallItem.h"
 #include "../GameModel/LaserPaddleItem.h"
 #include "../GameModel/MultiBallItem.h"
+#include "../GameModel/PaddleSizeItem.h"
+#include "../GameModel/BallSizeItem.h"
 
 GameItemAssets::GameItemAssets(GameESPAssets* espAssets) : 
 espAssets(espAssets), item(NULL) {
@@ -51,9 +53,10 @@ void GameItemAssets::UnloadItemTextures() {
 	// Unload timer filler textures
 	std::map<std::string, Texture2D*>::iterator iter3 = this->itemTimerFillerTextures.begin();
 	for (; iter3 != this->itemTimerFillerTextures.end(); iter3++) {
-		if (iter3->second != NULL) {
-			delete iter3->second;
-			iter3->second = NULL;
+		Texture2D* currTex = iter3->second;
+		if (currTex != NULL) {
+			delete currTex;
+			currTex = NULL;
 		}
 	}
 	this->itemTimerFillerTextures.clear();
@@ -80,23 +83,31 @@ bool GameItemAssets::LoadItemTextures() {
 	debug_output("Loading Item Textures...");
 
 	// Load the item textures
-	Texture2D* slowBallItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_SLOWBALL,		Texture::Trilinear);
-	Texture2D* fastBallItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_FASTBALL,		Texture::Trilinear);
-	Texture2D* uberBallItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_UBERBALL,		Texture::Trilinear);
-	Texture2D* invisiBallItemTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_INVISIBALL,	Texture::Trilinear);
-	Texture2D* ghostBallItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_GHOSTBALL,		Texture::Trilinear);
-	Texture2D* laserPaddleItemTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_PADDLELASER,	Texture::Trilinear);
-	Texture2D* multiBall3ItemTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_MULTIBALL3,	Texture::Trilinear);
-	Texture2D* multiBall5ItemTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_MULTIBALL5,	Texture::Trilinear);
+	Texture2D* slowBallItemTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_SLOWBALL,			Texture::Trilinear);
+	Texture2D* fastBallItemTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_FASTBALL,			Texture::Trilinear);
+	Texture2D* uberBallItemTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_UBERBALL,			Texture::Trilinear);
+	Texture2D* invisiBallItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_INVISIBALL,		Texture::Trilinear);
+	Texture2D* ghostBallItemTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_GHOSTBALL,			Texture::Trilinear);
+	Texture2D* laserPaddleItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_PADDLELASER,		Texture::Trilinear);
+	Texture2D* multiBall3ItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_MULTIBALL3,		Texture::Trilinear);
+	Texture2D* multiBall5ItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_MULTIBALL5,		Texture::Trilinear);
+	Texture2D* paddleGrowItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_PADDLEGROW,		Texture::Trilinear);
+	Texture2D* paddleShrinkItemTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_PADDLESHRINK,	Texture::Trilinear);
+	Texture2D* ballGrowItemTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_BALLGROW,			Texture::Trilinear);
+	Texture2D* ballShrinkItemTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_BALLSHRINK,		Texture::Trilinear);
 
-	assert(slowBallItemTex		!= NULL);
-	assert(fastBallItemTex		!= NULL);
-	assert(uberBallItemTex		!= NULL);
-	assert(invisiBallItemTex	!= NULL);
-	assert(ghostBallItemTex		!= NULL);
-	assert(laserPaddleItemTex != NULL);
-	assert(multiBall3ItemTex	!= NULL);
-	assert(multiBall5ItemTex	!= NULL);
+	assert(slowBallItemTex			!= NULL);
+	assert(fastBallItemTex			!= NULL);
+	assert(uberBallItemTex			!= NULL);
+	assert(invisiBallItemTex		!= NULL);
+	assert(ghostBallItemTex			!= NULL);
+	assert(laserPaddleItemTex		!= NULL);
+	assert(multiBall3ItemTex		!= NULL);
+	assert(multiBall5ItemTex		!= NULL);
+	assert(paddleGrowItemTex		!= NULL);
+	assert(paddleShrinkItemTex	!= NULL);
+	assert(ballGrowItemTex			!= NULL);
+	assert(ballShrinkItemTex		!= NULL);
 
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,			slowBallItemTex));
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::FAST_BALL_ITEM_NAME,			fastBallItemTex));
@@ -106,6 +117,10 @@ bool GameItemAssets::LoadItemTextures() {
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,	laserPaddleItemTex));
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(MultiBallItem::MULTI3_BALL_ITEM_NAME,		multiBall3ItemTex));
 	this->itemTextures.insert(std::pair<std::string, Texture2D*>(MultiBallItem::MULTI5_BALL_ITEM_NAME,		multiBall5ItemTex));
+	this->itemTextures.insert(std::pair<std::string, Texture2D*>(PaddleSizeItem::PADDLE_GROW_ITEM_NAME,		paddleGrowItemTex));
+	this->itemTextures.insert(std::pair<std::string, Texture2D*>(PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME,	paddleShrinkItemTex));
+	this->itemTextures.insert(std::pair<std::string, Texture2D*>(BallSizeItem::BALL_GROW_ITEM_NAME,				ballGrowItemTex));
+	this->itemTextures.insert(std::pair<std::string, Texture2D*>(BallSizeItem::BALL_SHRINK_ITEM_NAME,			ballShrinkItemTex));
 
 	// Load the timer textures
 	Texture2D* slowBallTimerTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_SLOWBALL,		Texture::Trilinear);
@@ -130,20 +145,22 @@ bool GameItemAssets::LoadItemTextures() {
 	this->itemTimerTextures.insert(std::pair<std::string, Texture2D*>(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,	laserPaddleTimerTex));
 
 	// Load the fillers for the timer textures (used to make the timer look like its ticking down)
-	Texture2D* ballSpdTimerFillerTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_SPDBALL,		 Texture::Trilinear);
+	Texture2D* ballSlowTimerFillerTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_SPDBALL,		 Texture::Trilinear);
+	Texture2D* ballFastTimerFillerTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_SPDBALL,		 Texture::Trilinear);
 	Texture2D* uberBallTimerFillerTex			= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_UBERBALL,		 Texture::Trilinear);
 	Texture2D* invisiBallTimerFillerTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_INVISIBALL,  Texture::Trilinear);
 	Texture2D* ghostBallTimerFillerTex		= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL,	 Texture::Trilinear);
 	Texture2D* laserPaddleTimerFillerTex	= Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_PADDLELASER, Texture::Trilinear);
 
-	assert(ballSpdTimerFillerTex			!= NULL);
+	assert(ballSlowTimerFillerTex			!= NULL);
+	assert(ballFastTimerFillerTex			!= NULL);
 	assert(uberBallTimerFillerTex			!= NULL);
 	assert(invisiBallTimerFillerTex		!= NULL);
 	assert(ghostBallTimerFillerTex		!= NULL);
 	assert(laserPaddleTimerFillerTex	!= NULL);
 
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,				ballSpdTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::FAST_BALL_ITEM_NAME,				ballSpdTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,				ballSlowTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(BallSpeedItem::FAST_BALL_ITEM_NAME,				ballFastTimerFillerTex));
 	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(UberBallItem::UBER_BALL_ITEM_NAME,				uberBallTimerFillerTex));
 	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(InvisiBallItem::INVISI_BALL_ITEM_NAME,		invisiBallTimerFillerTex));
 	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture2D*>(GhostBallItem::GHOST_BALL_ITEM_NAME,			ghostBallTimerFillerTex));

@@ -6,6 +6,7 @@
 #include "CgFxPostRefract.h"
 #include "CgFxVolumetricEffect.h"
 #include "GameFontAssetsManager.h"
+#include "LoadingScreen.h"
 
 // Blammo Engine includes
 #include "../BlammoEngine/Texture3D.h"
@@ -23,7 +24,6 @@ itemAssets(NULL),
 
 ball(NULL), 
 spikeyBall(NULL), 
-levelMesh(NULL),
 paddleLaserAttachment(NULL),
 
 invisiBallEffect(NULL), 
@@ -35,21 +35,28 @@ ghostBallEffect(NULL) {
 	ilutRenderer(ILUT_OPENGL);
 	ilutEnable(ILUT_OPENGL_CONV);
 	
+	// TODO: Have loading screen stuff before any of this...
+
 	// Load ESP assets
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading purdy pictures...");
 	this->espAssets = new GameESPAssets();
 
 	// Load item assets
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading game items...");
 	this->itemAssets = new GameItemAssets(this->espAssets);
 	bool didItemAssetsLoad = this->itemAssets->LoadItemAssets();
 	assert(didItemAssetsLoad);
 
-	// Load minimal fonts
-	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
+	// Load all fonts
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading fonts...");
+	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();	// TODO
 
 	// Load regular meshes
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading regular geometry...");
 	this->LoadRegularMeshAssets();
 
 	// Load regular effects
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading groovy effects...");
 	this->LoadRegularEffectAssets();
 }
 
@@ -62,7 +69,6 @@ GameAssets::~GameAssets() {
 
 	// Delete the currently loaded world and level assets if there are any
 	this->DeleteWorldAssets();
-	this->DeleteLevelAssets();
 
 	// Delete item assets
 	if (this->itemAssets != NULL) {
@@ -75,19 +81,18 @@ GameAssets::~GameAssets() {
  * Delete any previously loaded assets related to the world.
  */
 void GameAssets::DeleteWorldAssets() {
+	// Delete all the levels for the world that are currently loaded - THIS MUST BE CALLED BEFORE DELETING
+	// THE WORLD ASSETS!!!
+	for(std::map<const GameLevel*, LevelMesh*>::iterator iter = this->loadedLevelMeshes.begin(); iter != this->loadedLevelMeshes.end(); iter++) {
+		LevelMesh* currMesh = iter->second;
+		delete currMesh;
+		currMesh = NULL;
+	}
+	this->loadedLevelMeshes.clear();	
+	
 	if (this->worldAssets != NULL) {
 		delete this->worldAssets;
 		this->worldAssets = NULL;
-	}
-}
-
-/*
- * Delete any previously loaded assets related to the level.
- */
-void GameAssets::DeleteLevelAssets() {
-	if (this->levelMesh != NULL) {
-		delete this->levelMesh;
-		this->levelMesh = NULL;
 	}
 }
 
@@ -112,8 +117,10 @@ void GameAssets::DeleteRegularMeshAssets() {
 
 
 // Draw the foreground level pieces...
-void GameAssets::DrawLevelPieces(const Camera& camera) const {
-	this->levelMesh->Draw(camera);
+void GameAssets::DrawLevelPieces(const GameLevel* currLevel, const Camera& camera) const {
+	std::map<const GameLevel*, LevelMesh*>::const_iterator iter = this->loadedLevelMeshes.find(currLevel);
+	assert(iter != this->loadedLevelMeshes.end());
+	iter->second->Draw(camera);
 }
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
@@ -146,13 +153,19 @@ void GameAssets::DrawGameBall(double dT, const GameBall& b, const Camera& camera
 	// Ball model...
 	glPushMatrix();
 	Point2D loc = b.GetBounds().Center();
+	float ballScaleFactor = b.GetBallScaleFactor();
 	glTranslatef(loc[0], loc[1], 0);
+	
+	// Draw background effects for the ball
+	this->espAssets->DrawBackgroundBallEffects(dT, camera, b);
 
 	Vector3D ballRot = b.GetRotation();
 	glRotatef(ballRot[0], 1.0f, 0.0f, 0.0f);
 	glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
 	glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
+	glScalef(ballScaleFactor, ballScaleFactor, ballScaleFactor);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
 	if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
 		this->spikeyBall->Draw(camera, ballEffectTemp);
 	}
@@ -175,8 +188,11 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1], 0);
+
+	// Draw any effects on the paddle (e.g., item acquiring effects)
+	this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
+
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
-	
 	this->worldAssets->DrawPaddle(p, camera);
 
 	// In the case of a laser paddle, we draw the laser attachment
@@ -277,27 +293,30 @@ void GameAssets::DeleteRegularEffectAssets() {
 
 /*
  * This will load a set of assets for use in a game based off a
- * given world-style, after loading all assets will be available for use
- * in-game.
- * Precondition: true.
+ * given world-style, after loading all assets will be available for use in-game.
+ * Precondition: world != NULL.
  */
-void GameAssets::LoadWorldAssets(GameWorld::WorldStyle style) {
+void GameAssets::LoadWorldAssets(const GameWorld* world) {
+	assert(world != NULL);
+
 	// Delete all previously loaded style-related assets
 	this->DeleteWorldAssets();
+	
 	// Load up the new set of assets
-	this->worldAssets = GameWorldAssets::CreateWorldAssets(style);
-}
-
-/**
- * Load the given level as a mesh.
- */
-void GameAssets::LoadLevelAssets(const GameLevel* level) {
-	assert(level != NULL);
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading world assets...");
+	this->worldAssets = GameWorldAssets::CreateWorldAssets(world->GetStyle());
 	assert(this->worldAssets != NULL);
 
-	// Delete all previously loaded level-related assets
-	this->DeleteLevelAssets();
-	
-	// Load the given level
-	this->levelMesh = new LevelMesh(this->worldAssets, level);
+	// Load all of the level meshes for the world
+	const std::vector<GameLevel*>& levels = world->GetAllLevelsInWorld();
+	for (std::vector<GameLevel*>::const_iterator iter = levels.begin(); iter != levels.end(); iter++) {
+		const GameLevel* level = *iter;
+		assert(level != NULL);
+
+		LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
+
+		// Create a mesh for the level
+		LevelMesh* levelMesh = new LevelMesh(this->worldAssets, level);
+		this->loadedLevelMeshes.insert(std::pair<const GameLevel*, LevelMesh*>(level, levelMesh));
+	}
 }

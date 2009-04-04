@@ -80,7 +80,6 @@ void MainMenuDisplayState::InitializeMenu() {
  * Render the menu and any other stuff associated with it.
  */
 void MainMenuDisplayState::RenderFrame(double dT) {
-	glEnable(GL_MULTISAMPLE);
 	// Set up a perspective projection for the menu background
 	// TODO
 
@@ -98,8 +97,6 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->menu->SetTopLeftCorner(menuTopLeftCorner);
 	this->menu->Draw();
 	//this->menu->DebugDraw();
-
-	glDisable(GL_MULTISAMPLE);
 }
 
 /**

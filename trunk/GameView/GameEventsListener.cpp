@@ -2,7 +2,7 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 #include "LevelMesh.h"
-
+#include "LoadingScreen.h"
 #include "GameOverDisplayState.h"
 #include "GameCompleteDisplayState.h"
 
@@ -32,8 +32,11 @@ void GameEventsListener::GameCompletedEvent() {
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	debug_output("EVENT: World started");
 
-	// Set the world assets
-	this->display->GetAssets()->LoadWorldAssets(world.GetStyle());
+	// Show a loading screen for loading up the assets for the next in-game world...
+	unsigned int numLevelsInWorld = world.GetAllLevelsInWorld().size();
+	LoadingScreen::GetInstance()->StartShowLoadingScreen(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), numLevelsInWorld + 1);
+	this->display->GetAssets()->LoadWorldAssets(&world);
+	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 }
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
@@ -43,9 +46,6 @@ void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
 void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLevel& level) {
 	debug_output("EVENT: Level started");
 
-	// Load the level assets
-	this->display->GetAssets()->LoadLevelAssets(this->display->GetModel()->GetCurrentLevel());
-	
 	// Set up the initial game camera for the level - figure out where the camera
 	// should be to maximize view of all the game pieces
 	float distance = level.GetLevelUnitHeight() / (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f))) + 5.0f;
@@ -61,14 +61,42 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 }
 
 
-void GameEventsListener::PaddleHitWallEvent(const Point2D& hitLoc) {
-	std::string soundText = Onomatoplex::Generator::Instance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::NORMAL);
+void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc) {
+	std::string soundText = Onomatoplex::Generator::GetInstance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::NORMAL);
 
-	// Do a tiny shake to the camera...
-	this->display->GetCamera().SetCameraShake(0.15, Vector3D(0.25, 0.0, 0.0), 20);
-
+	// Do a camera shake based on the size of the paddle...
+	PlayerPaddle::PaddleSize paddleSize = paddle.GetPaddleSize();
+	float shakeMagnitude = 0.0f;
+	float shakeLength = 0.0f;
+	switch(paddleSize) {
+		case PlayerPaddle::SmallestSize:
+			shakeMagnitude = 0.0f;
+			shakeLength = 0.0f;
+			break;
+		case PlayerPaddle::SmallerSize:
+			shakeMagnitude = 0.1f;
+			shakeLength = 0.1f;
+			break;
+		case PlayerPaddle::NormalSize:
+			shakeMagnitude = 0.2f;
+			shakeLength = 0.15f;
+			break;
+		case PlayerPaddle::BiggerSize:
+			shakeMagnitude = 0.33f;
+			shakeLength = 0.2f;
+			break;
+		case PlayerPaddle::BiggestSize:
+			shakeMagnitude = 0.5f;
+			shakeLength = 0.25f;
+			break;
+		default:
+			assert(false);
+			break;
+	}
+	this->display->GetCamera().SetCameraShake(shakeLength, Vector3D(shakeMagnitude, 0.0, 0.0), 20);
+	
 	// Add a smacking type effect...
-	// TODO
+	this->display->GetAssets()->AddPaddleHitWallEffect(paddle, hitLoc);
 
 	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
@@ -158,7 +186,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 }
 
 void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
-	this->display->GetAssets()->GetLevelMesh()->ChangePiece(pieceBefore, pieceAfter);
+	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
+	this->display->GetAssets()->GetLevelMesh(currLevel)->ChangePiece(pieceBefore, pieceAfter);
 	debug_output("EVENT: LevelPiece changed");
 }
 
@@ -185,22 +214,19 @@ void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
 }
 
 void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) {
-
-
+	
+	this->display->GetAssets()->AddItemAcquiredEffect(this->display->GetCamera(), paddle, item);
 	debug_output("EVENT: Item Obtained by Player: " << item);
 }
 
 void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 	// Activate the item's effect (if any)
-	this->display->GetAssets()->SetItemEffect(item, true);
+	this->display->GetAssets()->SetItemEffect(item);
 
 	debug_output("EVENT: Item Activated: " << item);
 }
 
 void GameEventsListener::ItemDeactivatedEvent(const GameItem& item) {
-	// Deactivate the item's effect (if any)
-	this->display->GetAssets()->SetItemEffect(item, false);
-
 	debug_output("EVENT: Item Deactivated: " << item);
 }
 

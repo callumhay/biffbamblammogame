@@ -1,0 +1,231 @@
+#include "LoadingScreen.h"
+#include "GameFontAssetsManager.h"
+
+#include "../ESPEngine/ESPUtil.h"
+#include "../BlammoEngine/Camera.h"
+
+LoadingScreen* LoadingScreen::instance = NULL;
+
+const std::string LoadingScreen::LOADING_TEXT = "Loading ...";
+const float LoadingScreen::GAP_PIXELS	= 20.0f;
+
+const std::string LoadingScreen::ABSURD_LOADING_DESCRIPTION = "ABSURD";
+
+LoadingScreen::LoadingScreen() : loadingScreenOn(false), width(0), height(0), numExpectedUpdates(0), numCallsToUpdate(0),
+loadingBarTotalWidth(0), loadingBarTotalHeight(0) {
+
+	// At the very least we need fonts to display info on the loading screen...
+	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
+
+	// Create our various labels...
+	const TextureFontSet* loadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big);
+	this->loadingLabel = TextLabel2D(loadingFont, LoadingScreen::LOADING_TEXT);
+	this->loadingLabel.SetColour(Colour(0.457, 0.695, 0.863));
+	this->loadingLabel.SetDropShadow(Colour(0,0,0), 0.10);
+
+	this->loadingBarTotalWidth  = this->loadingLabel.GetLastRasterWidth();
+	this->loadingBarTotalHeight = this->loadingLabel.GetHeight() / 2.0f;
+
+	const TextureFontSet* itemLoadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small);
+	this->itemLoadingLabel = TextLabel2D(itemLoadingFont, "");
+	this->itemLoadingLabel.SetColour(Colour(0, 0, 0));
+	this->itemLoadingLabel.SetDropShadow(Colour(0,0,0), 0.08);
+
+	// Load the absurd descriptions...
+	this->absurdLoadingDescriptions.reserve(6);
+	this->absurdLoadingDescriptions.push_back("Generating mind-numbing onamotapoeia ...");
+	this->absurdLoadingDescriptions.push_back("Initializing blocky stuffs ...");
+	this->absurdLoadingDescriptions.push_back("Loading balls of doom ...");
+	this->absurdLoadingDescriptions.push_back("Loading extraneous punctuation ...");
+	this->absurdLoadingDescriptions.push_back("Pulling Levers ...");
+	this->absurdLoadingDescriptions.push_back("Pushing buttons ...");
+	this->absurdLoadingDescriptions.push_back("Generating distracting colours ...");
+	this->absurdLoadingDescriptions.push_back("Baking cake ...");
+	this->absurdLoadingDescriptions.push_back("Eating cake ... Om nom nom");
+	this->absurdLoadingDescriptions.push_back("Compiling sounds to words ...");
+	this->absurdLoadingDescriptions.push_back("Contacting Skynet ...");
+	this->absurdLoadingDescriptions.push_back("Communicating with the MCP ...");
+	this->absurdLoadingDescriptions.push_back("Nomming your cpu ...");
+	this->absurdLoadingDescriptions.push_back("Affixing suffixes and prefixes...");
+
+	this->lastRandomAbsurdity = Randomizer::GetInstance()->RandomUnsignedInt() % this->absurdLoadingDescriptions.size();
+}
+
+/**
+ * Static private helper function for initializing a very basic opengl state
+ * for the loading screen.
+ */
+void LoadingScreen::InitOpenGLForLoadingScreen() {
+// Initialize a very basic OpenGL context...
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	glDisable(GL_TEXTURE_1D);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_3D);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	
+	glDepthFunc(GL_LESS);
+	glCullFace(GL_BACK);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+/**
+ * Function used to initialize and start the loading screen, this MUST be called before any other
+ * loading screen functions and should end with a call to EndShowingLoadingScreen.
+ */
+void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int numExpectedUpdates) {
+	assert(!this->loadingScreenOn);
+	if (this->loadingScreenOn) {
+		return;
+	}
+
+	debug_output("Loading Screen start...");
+
+	this->numCallsToUpdate = 0;
+	this->numExpectedUpdates = numExpectedUpdates;
+	this->width = width;
+	this->height = height;
+	this->loadingLabel.SetTopLeftCorner(Point2D((width - this->loadingLabel.GetLastRasterWidth())/2, (height + this->loadingLabel.GetHeight())/2));
+	
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	
+	// Initialize basic OpenGL state
+	LoadingScreen::InitOpenGLForLoadingScreen();
+
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	
+	this->loadingLabel.Draw();
+	this->loadingBarTotalWidth  = this->loadingLabel.GetLastRasterWidth();
+	this->DrawLoadingBar();
+
+	SDL_GL_SwapBuffers();
+
+	glPopAttrib();
+
+	this->loadingScreenOn = true;
+	
+#ifndef _DEBUG
+	// Just to get things up and running initially, give time for user to see loading screen
+	SDL_Delay(500);
+#endif
+}
+
+/**
+ * Called in the middle of showing the loading screen - a call MUST be made to
+ * StartShowLoadingScreen before calling this function. This will update the loading
+ * screen to a certain percentage based on the numExpectedUpdates and the number of
+ * calls to this function so far.
+ */
+void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
+	assert(this->loadingScreenOn);
+	if (!this->loadingScreenOn) { 
+		return; 
+	}
+
+	// If the loading string asks for absurdity then make it something absurd...
+	if (loadingStr == LoadingScreen::ABSURD_LOADING_DESCRIPTION) {
+		assert(this->lastRandomAbsurdity >= 0 && this->lastRandomAbsurdity < this->absurdLoadingDescriptions.size());
+		loadingStr = this->absurdLoadingDescriptions[this->lastRandomAbsurdity];
+		this->lastRandomAbsurdity = (this->lastRandomAbsurdity + 1) % this->absurdLoadingDescriptions.size();
+	}
+
+	// Increment the counter of updates and make sure we are under what is expected
+	this->numCallsToUpdate++;
+	assert(this->numCallsToUpdate <= this->numExpectedUpdates);
+
+	ESPInterval randColour(0.25f, 0.85f);
+	this->itemLoadingLabel.SetColour(Colour(randColour.RandomValueInInterval(), randColour.RandomValueInInterval(), randColour.RandomValueInInterval()));
+	this->itemLoadingLabel.SetText(loadingStr);
+	this->itemLoadingLabel.SetTopLeftCorner(Point2D(0 + GAP_PIXELS, this->itemLoadingLabel.GetHeight() + GAP_PIXELS));
+
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	
+	// Initialize basic OpenGL state
+	LoadingScreen::InitOpenGLForLoadingScreen();
+
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	
+	// Draw labels for loading screen
+	this->loadingLabel.Draw();
+	this->itemLoadingLabel.Draw();
+
+	// Draw the loading/progress bar
+	this->DrawLoadingBar();
+
+	SDL_GL_SwapBuffers();
+
+	glPopAttrib();
+}
+
+/**
+ * Called at the very end, when we want to retire the loading screen. This MUST be called
+ * at the very end and calls to StartShowLoadingScreen and UpdateLoadingScreen MUST be
+ * made before it.
+ */
+void LoadingScreen::EndShowingLoadingScreen() {
+	assert(this->loadingScreenOn);
+	if (!this->loadingScreenOn) { 
+		return; 
+	}
+
+
+	this->loadingScreenOn = false;
+	this->numCallsToUpdate = 0;
+	this->numExpectedUpdates = 0;
+
+}
+
+/**
+ * Private helper function for drawing the loading bar for the loading screen.
+ */
+void LoadingScreen::DrawLoadingBar() {
+	// Figure out what estimated percentage of loading is complete and fill the bar based on that percentage
+	float percentageDone			= NumberFuncs::MinF(1.0f, static_cast<float>(this->numCallsToUpdate) / static_cast<float>(this->numExpectedUpdates));
+	float lengthOfLoadingBar	= percentageDone * this->loadingBarTotalWidth;
+
+	Point2D loadingBarUpperLeft = Point2D((this->width - this->loadingBarTotalWidth) / 2.0f, 
+		((this->height - this->loadingBarTotalHeight) / 2.0f) - (this->loadingLabel.GetHeight() + GAP_PIXELS));
+
+	// Draw the loading bar:
+	// a) Loading bar fill
+	Camera::PushWindowCoords();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	// b) Outline of loading bar
+	glLineWidth(3.0f);
+	glPointSize(3.0f);
+
+	glPolygonMode(GL_FRONT, GL_LINE);
+	glColor4f(0, 0, 0, 1);
+	glBegin(GL_QUADS);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
+	glVertex2f(loadingBarUpperLeft[0] + this->loadingBarTotalWidth, loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
+	glVertex2f(loadingBarUpperLeft[0] + this->loadingBarTotalWidth, loadingBarUpperLeft[1]);
+	glEnd();
+	
+	glBegin(GL_POINTS);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
+	glVertex2f(loadingBarUpperLeft[0] + this->loadingBarTotalWidth, loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
+	glVertex2f(loadingBarUpperLeft[0] + this->loadingBarTotalWidth, loadingBarUpperLeft[1]);
+	glEnd();
+
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glColor4f(1, 0, 0, 1);
+	glBegin(GL_QUADS);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
+	glVertex2f(loadingBarUpperLeft[0] + lengthOfLoadingBar, loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
+	glVertex2f(loadingBarUpperLeft[0] + lengthOfLoadingBar, loadingBarUpperLeft[1]);
+	glEnd();
+
+	glPopMatrix();
+	Camera::PopWindowCoords();
+}

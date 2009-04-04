@@ -20,11 +20,14 @@ const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMER
 
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameListener(NULL), currState(NULL),
 model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
-	
 	assert(model != NULL);
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
+
+#ifndef NDEBUG
+	this->drawDebug = false;
+#endif
 }
 
 GameDisplay::~GameDisplay() {
@@ -51,24 +54,6 @@ void GameDisplay::SetInitialRenderOptions() {
 	glDisable(GL_LIGHTING);
 }
 
-// Set the opengl state for drawing celshading outlines
-void GameDisplay::SetOutlineRenderAttribs(float outlineWidth) {
-	glDisable(GL_LIGHTING);
-	
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA ,GL_ONE_MINUS_SRC_ALPHA);
-	
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-
-	glPolygonMode (GL_BACK, GL_LINE);
-	glColor3f(0,0,0);
-	glLineWidth(outlineWidth);
-	
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-}
-
 void GameDisplay::ChangeDisplaySize(int w, int h) {
 	this->width = w;
 	this->height = h;
@@ -77,12 +62,12 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 }
 
 void GameDisplay::Render(double dT) {
-	SetInitialRenderOptions();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
+	SetInitialRenderOptions();	// TODO: Get rid of this it slows us down and does need to be called every frame!
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	// Render the current state
 	this->currState->RenderFrame(dT);
-	//this->DrawDebugAxes();
 
 	// Update the game model
 	this->model->Tick(dT);
@@ -100,13 +85,15 @@ void GameDisplay::RemoveActionListeners() {
 }
 
 // DEBUG FUNCTIONS ******************************************************
-
+#ifndef NDEBUG
 /*
  * Draws the x, y and z axes as red, yellow and blue lines, respectively.
  * The thicker half of the line is the positive direction.
  * Precondition: true.
  */
 void GameDisplay::DrawDebugAxes() {
+	if (!drawDebug) {return;}
+
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
@@ -169,6 +156,7 @@ void GameDisplay::DrawDebugAxes() {
  */
 void GameDisplay::DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks) {
 	assert(numGridTicks > 0);
+	if (!drawDebug) {return;}
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
@@ -218,3 +206,4 @@ void GameDisplay::DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks)
 
 	glPopMatrix();
 }
+#endif

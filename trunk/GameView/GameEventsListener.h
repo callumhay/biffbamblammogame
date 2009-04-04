@@ -21,7 +21,7 @@ public:
 	virtual void LevelCompletedEvent(const GameWorld& world, const GameLevel& level);
 
 	// Paddle related events
-	virtual void PaddleHitWallEvent(const Point2D& hitLoc);
+	virtual void PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc);
 
 	// Ball/Block related events
 	virtual void BallDiedEvent(const GameBall& deadBall);
