@@ -18,7 +18,7 @@ ESPOnomataParticle::~ESPOnomataParticle() {
 }
 
 void ESPOnomataParticle::GenerateNewString() {
-	this->currStr = Onomatoplex::Generator::Instance()->Generate(this->soundType, this->extremeness);
+	this->currStr = Onomatoplex::Generator::GetInstance()->Generate(this->soundType, this->extremeness);
 	this->currHalfStrWidth = TextureFontSet::TEXT_3D_SCALE * this->font->GetWidth(this->currStr) * 0.5f;
 }
 void ESPOnomataParticle::SetRandomSoundType() {

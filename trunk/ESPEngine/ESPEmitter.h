@@ -30,6 +30,8 @@ protected:
 	
 	float timeSinceLastSpawn;																// Time since the last particle was spawned	
 	int numParticleLives;
+	
+	bool isReversed;	// Whether this emitter is reversed (i.e., particles start where they die and die where they start)
 
 	std::list<ESPParticleEffector*> effectors;	// All the particle effectors of this emitter
 	
@@ -81,6 +83,7 @@ public:
 	void SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha);
 	void SetParticleRotation(const ESPInterval& particleRot);
 	void SetNumParticleLives(int lives);
+	void SetIsReversed(bool isReversed);
 	
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);

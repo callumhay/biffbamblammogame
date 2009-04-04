@@ -4,7 +4,8 @@
 
 ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), //particleTexture(NULL),
 particleAlignment(ESP::ViewPointAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
-particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES) {
+particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES),
+isReversed(false) {
 }
 
 ESPEmitter::~ESPEmitter() {
@@ -212,6 +213,14 @@ void ESPEmitter::SetNumParticleLives(int lives) {
 		ESPParticle* currParticle = *iter;
 		this->particleLivesLeft[currParticle] = lives;
 	}
+}
+
+/**
+ * Sets whether this emitter is reveresed (i.e., particles will be birthed where they usually
+ * would die and die where they usually would be birthed).
+ */
+void ESPEmitter::SetIsReversed(bool isReversed) {
+	this->isReversed = isReversed;
 }
 
 /**
