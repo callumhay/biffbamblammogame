@@ -22,7 +22,7 @@ public:
 	void UnregisterGameEventListener(GameEvents* listener);
 
 	// Action functions (when events happen, call these)
-	void ActionPaddleHitWall(const Point2D& hitLoc);
+	void ActionPaddleHitWall(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void ActionBallDied(const GameBall& deadBall);
 	void ActionAllBallsDead(int livesLeft);
 	void ActionBallSpawn(const GameBall& spawnBall);

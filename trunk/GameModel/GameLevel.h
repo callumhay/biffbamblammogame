@@ -12,8 +12,7 @@ class GameBall;
 
 // Represents a game level, also deals with game level 'lvl' file reading.
 class GameLevel {
-
-private:	
+public:
 	static const char EMPTY_SPACE_CHAR;
 	static const char SOLID_BLOCK_CHAR;
 	static const char GREEN_BREAKABLE_CHAR;
@@ -21,7 +20,14 @@ private:
 	static const char ORANGE_BREAKABLE_CHAR;
 	static const char RED_BREAKABLE_CHAR;
 	static const char BOMB_CHAR;
+	
+	static const char TRIANGLE_BLOCK_CHAR;
+	static const char TRI_UPPER_CORNER;
+	static const char TRI_LOWER_CORNER;
+	static const char TRI_LEFT_CORNER;
+	static const char TRI_RIGHT_CORNER;
 
+private:	
 	// The current layout of the level, stored in row major format
 	std::vector<std::vector<LevelPiece*>> currentLevelPieces;
 	// Pieces left before the end of the level

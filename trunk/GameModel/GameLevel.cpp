@@ -9,6 +9,7 @@
 #include "SolidBlock.h"
 #include "BreakableBlock.h"
 #include "BombBlock.h"
+#include "TriangleBlocks.h"
 
 const char GameLevel::EMPTY_SPACE_CHAR				= 'E';
 const char GameLevel::SOLID_BLOCK_CHAR				= 'S';
@@ -17,6 +18,12 @@ const char GameLevel::YELLOW_BREAKABLE_CHAR		= 'Y';
 const char GameLevel::ORANGE_BREAKABLE_CHAR		= 'O';
 const char GameLevel::RED_BREAKABLE_CHAR			= 'R';
 const char GameLevel::BOMB_CHAR								= 'B';
+
+const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
+const char GameLevel::TRI_UPPER_CORNER		= 'u';
+const char GameLevel::TRI_LOWER_CORNER		= 'l';
+const char GameLevel::TRI_LEFT_CORNER			= 'l';
+const char GameLevel::TRI_RIGHT_CORNER		= 'r';
 
 // Private constructor, requires all the pieces that make up the level
 GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces): currentLevelPieces(pieces),
@@ -84,25 +91,95 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 			// Validate the block type and create teh appropriate object for that block type...
 			LevelPiece* newPiece = NULL;
+			unsigned int pieceWLoc = static_cast<unsigned int>(w);
+			unsigned int pieceHLoc = static_cast<unsigned int>(height - 1 - h);
+
 			switch (currBlock) {
 				case EMPTY_SPACE_CHAR:
-					newPiece = new EmptySpaceBlock(static_cast<unsigned int>(w), static_cast<unsigned int>(height - 1 - h));
+					newPiece = new EmptySpaceBlock(pieceWLoc, pieceHLoc);
 					break;
 				case SOLID_BLOCK_CHAR:
-					newPiece = new SolidBlock(static_cast<unsigned int>(w), static_cast<unsigned int>(height - 1 - h));
+					newPiece = new SolidBlock(pieceWLoc, pieceHLoc);
 					break;
 				case GREEN_BREAKABLE_CHAR:
 				case YELLOW_BREAKABLE_CHAR:
 				case ORANGE_BREAKABLE_CHAR:
 				case RED_BREAKABLE_CHAR:
-					newPiece = new BreakableBlock(currBlock, static_cast<unsigned int>(w), static_cast<unsigned int>(height - 1 - h));
+					newPiece = new BreakableBlock(currBlock, pieceWLoc, pieceHLoc);
 					break;
 				case BOMB_CHAR:
-					newPiece = new BombBlock(static_cast<unsigned int>(w), static_cast<unsigned int>(height - 1 - h));
+					newPiece = new BombBlock(pieceWLoc, pieceHLoc);
+					break;
+				case TRIANGLE_BLOCK_CHAR:
+					{
+						// T(x,p) - Triangle block, 
+						// x: type of block from the above, can be any of the following: {R, O, Y, G, S}
+						// p: the orientation of the triangle (where the outer corner is located), can be any of the following: {ul, ur, ll, lr}
+						// i.e., upper-left = ul, lower-right = lr, etc.
+						char tempChar;
+						inFile >> tempChar;
+						if (tempChar != '(') {
+							debug_output("ERROR: poorly formed triangle block syntax, missing '('");
+							break;
+						}
+
+						// Read in 'x'
+						char typeOfBlock;
+						inFile >> typeOfBlock;
+						if (!BreakableBlock::IsValidBreakablePieceType(typeOfBlock) && typeOfBlock != SOLID_BLOCK_CHAR) {
+							debug_output("ERROR: Triangle block has invalid block type specified in descriptor: " << typeOfBlock);
+							break;
+						}
+
+						inFile >> tempChar;
+						if (tempChar != ',') {
+							debug_output("ERROR: poorly formed triangle block syntax, missing ','");
+							break;
+						}
+
+						// Read in 'p'
+						char orient1, orient2;
+						inFile >> orient1;
+						inFile >> orient2;
+
+						TriangleBlock::Orientation orientation;
+						if (orient1 == TRI_UPPER_CORNER) {
+							if (orient2 == TRI_RIGHT_CORNER) {
+								// Upper-right
+								orientation = TriangleBlock::UpperRight;
+							}
+							else if (orient2 == TRI_LEFT_CORNER) {
+								// Upper-left
+								orientation = TriangleBlock::UpperLeft;
+							}
+						}
+						else if (orient1 == TRI_LOWER_CORNER) {
+							if (orient2 == TRI_RIGHT_CORNER) {
+								// Lower-right
+								orientation = TriangleBlock::LowerRight;
+							}
+							else if (orient2 == TRI_LEFT_CORNER) {
+								// Lower-left
+								orientation = TriangleBlock::LowerLeft;
+							}
+						}
+
+						// Create a new class called triangle block that contains either a solid or breakable block as well
+						// as an orientation on top of it and overrides the proper functions...
+						if (typeOfBlock == SOLID_BLOCK_CHAR) {
+							newPiece = new SolidTriangleBlock(orientation, pieceWLoc, pieceHLoc);
+						}
+						else {
+							newPiece = new BreakableTriangleBlock(typeOfBlock, orientation, pieceWLoc, pieceHLoc);
+						}
+
+						// Read in the closing bracket
+						inFile >> tempChar;
+					}
 					break;
 				default:
 					inFile.close();
-					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << w << ", height = " << h); 
+					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc); 
 					return NULL;
 			}
 			assert(newPiece != NULL);

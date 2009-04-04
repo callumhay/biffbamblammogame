@@ -6,21 +6,29 @@
 
 #include "../BlammoEngine/BlammoEngine.h"
 
+// Default values for the size of the paddle
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
-const float PlayerPaddle::PADDLE_WIDTH_FLAT_TOP = 3.5f;
+const float PlayerPaddle::PADDLE_WIDTH_FLAT_TOP = 2.0f;
+const float PlayerPaddle::PADDLE_WIDTH_ANGLED_SIDE = (PADDLE_WIDTH_TOTAL - PADDLE_WIDTH_FLAT_TOP) / 2.0f;
 const float PlayerPaddle::PADDLE_HEIGHT_TOTAL = 0.80f;
 const float PlayerPaddle::PADDLE_HALF_WIDTH = PADDLE_WIDTH_TOTAL / 2.0f;
 const float PlayerPaddle::PADDLE_HALF_HEIGHT = PADDLE_HEIGHT_TOTAL / 2.0f;
 
-const float PlayerPaddle::DEFAULT_SPEED = 24.0f;
+// The difference in width per size change of the paddle
+const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.8f;
 
+// Number of seconds it takes for the paddle to change between sizes
+// (bigger is slower, smaller is faster)
+const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
+
+const float PlayerPaddle::DEFAULT_SPEED = 24.0f;
 const float PlayerPaddle::PADDLE_LASER_DELAY = 0.25f;
 
 PlayerPaddle::PlayerPaddle() : 
 	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 
 	avgVel(0.0f), ticksSinceAvg(0), timeSinceLastLaserBlast(PADDLE_LASER_DELAY), 
-	hitWall(false), currType(NormalPaddle) {
-	this->SetDefaultDimensions();
+	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize) {
+	this->SetDimensions(PlayerPaddle::NormalSize);
 }
 
 PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : speed(DEFAULT_SPEED), distTemp(0.0f), avgVel(0.0f), ticksSinceAvg(0), hitWall(false) {
@@ -30,24 +38,62 @@ PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : speed(DEFAULT_SPEED
 PlayerPaddle::~PlayerPaddle() {
 }
 
-void PlayerPaddle::SetDefaultDimensions() {
-	// Reestablish dimensions of paddle
-	this->currHalfHeight = PADDLE_HALF_HEIGHT;
-	this->currHalfWidthFlat = PADDLE_HALF_WIDTH;
-	this->currHalfWidthTotal = PADDLE_HALF_WIDTH;
+/**
+ * Set the dimensions of the paddle based on an enumerated paddle size given.
+ * This will change the scale factor and bounds of the paddle.
+ */
+void PlayerPaddle::SetDimensions(PlayerPaddle::PaddleSize size) {
+	int diffFromNormalSize = static_cast<int>(size) - static_cast<int>(PlayerPaddle::NormalSize);
+	this->SetDimensions((PADDLE_WIDTH_TOTAL + diffFromNormalSize * PlayerPaddle::WIDTH_DIFF_PER_SIZE) / PADDLE_WIDTH_TOTAL);
+}
 
+/**
+ * Set the dimensions of the paddle based on a scale factor given.
+ * This will change the scale factor and bounds of the paddle.
+ */
+void PlayerPaddle::SetDimensions(float newScaleFactor) {
+	this->currScaleFactor = newScaleFactor;
+	assert(this->currScaleFactor > 0.0f);
+
+	this->currHalfHeight			= this->currScaleFactor * PADDLE_HALF_HEIGHT;
+	this->currHalfWidthTotal	= this->currScaleFactor * PADDLE_HALF_WIDTH;
+	this->currHalfWidthFlat		= this->currScaleFactor * PADDLE_WIDTH_FLAT_TOP * 0.5f;
+	
 	// Reset the bounds of the paddle (in paddle-space)
 	std::vector<Collision::LineSeg2D> lineBounds;
 	std::vector<Vector2D>  lineNorms;
 	
 	// Top boundry
-	Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, this->currHalfHeight),
-		           Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
+	Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
 	Vector2D n1(0, 1);
 	lineBounds.push_back(l1);
 	lineNorms.push_back(n1);
 
+	// Side boundries
+	Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
+	Vector2D sideNormal1(1, 1);
+	lineBounds.push_back(sideLine1);
+	lineNorms.push_back(sideNormal1);
+	
+	Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+	Vector2D sideNormal2(-1, 1);
+	lineBounds.push_back(sideLine2);
+	lineNorms.push_back(sideNormal2);
+
 	this->bounds = BoundingLines(lineBounds, lineNorms);
+}
+
+/**
+ * Sets what the 'future' paddle size will be - this function does not immediately
+ * change the size of the paddle but will cause the paddle to 'grow'/'shrink' to that
+ * size as the tick function is called.
+ */
+void PlayerPaddle::SetPaddleSize(PlayerPaddle::PaddleSize size) {
+	// If the current size is already the size being set then just exit
+	if (this->currSize == size) {
+		return;
+	}
+	this->currSize = size;
 }
 
 void PlayerPaddle::Tick(double seconds) {
@@ -68,7 +114,7 @@ void PlayerPaddle::Tick(double seconds) {
 		}
 		else {
 			// EVENT: paddle hit left wall for first time
-			GameEventManager::Instance()->ActionPaddleHitWall(this->centerPos + Vector2D(-this->currHalfWidthTotal, 0));
+			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-this->currHalfWidthTotal, 0));
 		}
 
 		this->hitWall = true;
@@ -82,7 +128,7 @@ void PlayerPaddle::Tick(double seconds) {
 		}
 		else {
 			// EVENT: paddle hit right wall for first time
-			GameEventManager::Instance()->ActionPaddleHitWall(this->centerPos + Vector2D(this->currHalfWidthTotal, 0));
+			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(this->currHalfWidthTotal, 0));
 		}
 		this->hitWall = true;
 	}
@@ -99,6 +145,14 @@ void PlayerPaddle::Tick(double seconds) {
 	}
 	this->ticksSinceAvg = (this->ticksSinceAvg + 1) % AVG_OVER_TICKS;
 	this->distTemp = 0.0f;
+
+	// Change the size gradually (lerp based on some constant time) if need be...
+	int diffFromNormalSize = static_cast<int>(this->currSize) - static_cast<int>(PlayerPaddle::NormalSize);
+	float targetScaleFactor = (PADDLE_WIDTH_TOTAL + diffFromNormalSize * PlayerPaddle::WIDTH_DIFF_PER_SIZE) / PADDLE_WIDTH_TOTAL;
+	float scaleFactorDiff = targetScaleFactor - this->currScaleFactor;
+	if (scaleFactorDiff != 0.0f) {
+		this->SetDimensions(this->currScaleFactor + ((scaleFactorDiff * seconds) / SECONDS_TO_CHANGE_SIZE));
+	}
 }
 
 /**
@@ -130,5 +184,8 @@ bool PlayerPaddle::CollisionCheck(const Collision::Circle2D& c, Vector2D& n, flo
 }
 
 void PlayerPaddle::DebugDraw() const {
+	glPushMatrix();
+	glTranslatef(this->centerPos[0], this->centerPos[1], 0.0f);
 	this->bounds.DebugDraw();
+	glPopMatrix();
 }

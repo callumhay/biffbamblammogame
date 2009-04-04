@@ -8,6 +8,9 @@
 
 BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(true) {
 	assert(gm != NULL);
+	
+	this->gameModel->GetPlayerPaddle()->ResetPaddle();
+	this->GetGameBall()->ResetBallAttributes();
 	this->UpdateBallPosition();
 }
 

@@ -279,7 +279,6 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 
 	// Do nasty stuff to player only if that was the last ball left
 	if (this->balls.size() == 1) {
-
 		// Reset the multiplier
 		this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
 		
@@ -288,6 +287,8 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 
 		// EVENT: All Balls are dead
 		GameEventManager::Instance()->ActionAllBallsDead(this->currLivesLeft);
+
+		deadBall->ResetBallAttributes();
 
 		// Set the appropriate state based on the number of lives left...
 		if (this->IsGameOver()) {

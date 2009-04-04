@@ -37,10 +37,10 @@ void GameEventManager::UnregisterGameEventListener(GameEvents* listener) {
 }
 
 // Action for when the player paddle hits a wall
-void GameEventManager::ActionPaddleHitWall(const Point2D& hitLoc) {
+void GameEventManager::ActionPaddleHitWall(const PlayerPaddle& paddle, const Point2D& hitLoc) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
-		(*this->listenerIter)->PaddleHitWallEvent(hitLoc);
+		(*this->listenerIter)->PaddleHitWallEvent(paddle, hitLoc);
 	}
 }
 

@@ -3,8 +3,7 @@
 
 #include "../BlammoEngine/BlammoEngine.h"
 #include "GameItem.h"
-
-class GameModel;
+#include "GameModel.h"
 
 class BallSpeedItem : public GameItem {
 

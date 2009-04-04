@@ -7,16 +7,28 @@ class GameBall {
 
 public:
 	enum BallSpeed { ZeroSpeed = 0, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 24 };
+	enum BallSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100 };
-
-private:
-	Collision::Circle2D bounds;			// The bounds of the ball, constantly updated to world space
-	Vector2D currDir;			// The current direction of movement of the ball
-	BallSpeed currSpeed;	// The current speed of the ball
-	int currType;					// The current type of this ball
 	
-	static const float MAX_ROATATION_SPEED;	// Speed of rotation in degrees/sec
+private:
+	Collision::Circle2D bounds;	// The bounds of the ball, constantly updated to world space
+	Vector2D currDir;						// The current direction of movement of the ball
+	BallSpeed currSpeed;				// The current speed of the ball
+	int currType;								// The current type of this ball
+
+	BallSize currSize;					// The current size of this ball
+	float currScaleFactor;			// The scale difference between the ball's current size and its default size
+
+	static const float DEFAULT_BALL_RADIUS;			// Default radius of the ball
+	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
+	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink
+	static const float RADIUS_DIFF_PER_SIZE;		// The difference in radius per size change of the ball
+
 	Vector3D rotationInDegs;	// Used for random rotation of the ball, gives the view the option to use it
+
+	void SetDimensions(float newScaleFactor);
+	void SetDimensions(GameBall::BallSize size);
+	void SetBallSize(GameBall::BallSize size);
 
 public:
 	// Minimum angle the ball can be reflected at
@@ -31,6 +43,8 @@ public:
 	GameBall();
 	GameBall(const GameBall& gameBall);
 	~GameBall();
+
+	void ResetBallAttributes();
 
 	Vector3D GetRotation() const {
 		return this->rotationInDegs;
@@ -70,8 +84,39 @@ public:
 	void RemoveBallType(const BallType type) {
 		this->currType = this->currType & ~type;
 	}
-	void ResetAllBallAttributesToDefault() {
+
+	// Ball size modifying / querying functions
+	BallSize GetBallSize() const {
+		return this->currSize;
+	}
+	float GetBallScaleFactor() const {
+		return this->currScaleFactor;
+	}
+
+	/**
+	 * Increases the paddle size if it can.
+	 * Returns: true if there was an increase in size, false otherwise.
+	 */
+	bool IncreaseBallSize() {
+		if (this->currSize == BiggestSize) { 
+			return false; 
+		}
 		
+		this->SetBallSize(static_cast<BallSize>(this->currSize + 1));
+		return true;
+	}
+
+	/**
+	 * Decreases the paddle size if it can.
+	 * Returns: true if there was an decrease in size, false otherwise.
+	 */
+	bool DecreaseBallSize() {
+		if (this->currSize == SmallestSize) { 
+			return false; 
+		}
+
+		this->SetBallSize(static_cast<BallSize>(this->currSize - 1));
+		return true;
 	}
 
 	// Set the velocity of the ball; (0, 1) is up and (1, 0) is right
@@ -107,16 +152,7 @@ public:
 		}	
 	}
 
-	void Tick(double seconds) {
-		// Update the position of the ball based on its velocity
-		Vector2D dDist = (static_cast<float>(seconds) * static_cast<float>(this->currSpeed) *this->currDir);
-		this->bounds.SetCenter(this->bounds.Center() + dDist);
-
-		// Update the rotation of the ball
-		float dRotSpd = GameBall::MAX_ROATATION_SPEED * static_cast<float>(seconds);
-		this->rotationInDegs = this->rotationInDegs + Vector3D(dRotSpd, dRotSpd, dRotSpd);
-	}
-
+	void Tick(double seconds);
 };
 
 #endif

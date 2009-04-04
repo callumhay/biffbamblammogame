@@ -7,7 +7,8 @@
 
 namespace Onomatoplex {
 
-	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3, BADSAD = 4};
+	// TODO: Shooting, GoodHappy
+	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3, BADSAD = 4, SHOT = 5};
 	enum Extremeness {WEAK = 0, NORMAL = 1, PRETTY_GOOD = 2, GOOD = 3, AWESOME = 4, SUPER_AWESOME = 5, UBER = 6};
 	
 	static const int NumSoundTypes = 5;
@@ -22,13 +23,10 @@ namespace Onomatoplex {
 		~Generator();
 
 		// Dictionaries for word creation
-		static std::map<SoundType, std::vector<std::string>> simpleSingleWords;
-		static std::map<SoundType, std::vector<std::string>> firstFix;
-		static std::map<SoundType, std::vector<std::string>> secondFix;
-		static std::map<SoundType, std::vector<std::string>> thirdFix;
-		static std::map<SoundType, std::vector<std::string>> endFix;
-		static std::map<SoundType, std::vector<std::string>> superEndFix;
-		static std::map<SoundType, std::vector<std::string>> uberEndFix;
+		std::map<SoundType, std::vector<std::string>> simpleSingleWords;
+		std::map<SoundType, std::vector<std::string>> goodSingleWords;
+		std::map<SoundType, std::vector<std::string>> awesomeSingleWords;
+		std::map<SoundType, std::vector<std::string>> uberSingleWords;
 
 		// Punctuation structures and functions
 		static const std::string DEFAULT_END_PUNCTUATION;
@@ -47,9 +45,26 @@ namespace Onomatoplex {
 		std::string GenerateUberSoundText(SoundType type);
 
 	public:
-		static Generator* Instance();
-		std::string Generate(SoundType type, Extremeness amt);
+		/* 
+		 * Obtain the singleton instance of the generator.
+		 * Precondition: true.
+		 * Returns: The singleton of the Generator class.
+		 */
+		static Generator* Generator::GetInstance() {
+			if (Generator::instance == NULL) {
+				Generator::instance = new Generator();
+			}
+			return Generator::instance;
+		}
 
+		static void DeleteInstance() {
+			if (Generator::instance != NULL) {
+				delete Generator::instance;
+				Generator::instance = NULL;
+			}
+		}
+
+		std::string Generate(SoundType type, Extremeness amt);
 	};
 }
 #endif

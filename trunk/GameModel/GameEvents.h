@@ -59,9 +59,10 @@ public:
 	 * This event occurs whenever a player smacks the paddle into a wall - it only happens
 	 * ONCE per smack (they then have to remove the paddle and hit the wall again to trigger
 	 * another one of these events).
-	 * Arguements: hitLoc - The central location where the paddle smacked into the wall.
+	 * Arguements: paddle - The paddle that just hit the wall.
+	 *             hitLoc - The central location where the paddle smacked into the wall.
 	 */
-	virtual void PaddleHitWallEvent(const Point2D& hitLoc) = 0;
+	virtual void PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc) = 0;
 
 
 	// Ball related events ***************************************************************
