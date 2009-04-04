@@ -162,6 +162,34 @@ public:
 		return r;
 	}
 
+	static Matrix4x4 reflectionMatrix(char axis) {
+		Vector4D row1 = Vector4D(1, 0, 0, 0);
+		Vector4D row2 = Vector4D(0, 1, 0, 0);
+		Vector4D row3 = Vector4D(0, 0, 1, 0);
+		Vector4D row4 = Vector4D(0, 0, 0, 1);
+
+		switch (axis){
+		case 'x':
+			row2[1] = -1;
+			row3[2] = -1;
+			break;
+		case 'y':
+			row1[0] = -1;
+			row3[2] = -1;
+			break;
+		case 'z':
+			row1[0] = -1;
+			row2[1] = -1;
+			break;
+		default:
+			// Just return an identity matrix
+			assert(false);
+			break;
+		}
+				
+		return Matrix4x4(row1, row2, row3, row4);
+	}
+
 	static Matrix4x4 scaleMatrix(const Vector3D &scale) {
 		// Pretty easy, scales just make up the diagonal of the matrix
 		Matrix4x4 s(Vector4D(scale[0], 0, 0, 0),
