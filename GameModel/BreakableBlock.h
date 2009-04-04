@@ -4,7 +4,7 @@
 #include "LevelPiece.h"
 
 class BreakableBlock : public LevelPiece {
-private:
+protected:
 	static const int POINTS_ON_BLOCK_HIT				= 5;		// Points obtained when you just hit a breakable block
 	static const int POINTS_ON_BLOCK_DESTROYED = 10;		// Points obtained when you destory a breakable block
 

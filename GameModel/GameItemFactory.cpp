@@ -9,6 +9,8 @@
 #include "GhostBallItem.h"
 #include "LaserPaddleItem.h"
 #include "MultiBallItem.h"
+#include "PaddleSizeItem.h"
+#include "BallSizeItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -19,6 +21,12 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 	assert(gameModel != NULL);
 	
 	unsigned int randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % TOTAL_NUM_OF_ITEMS;
+	
+	// Avoid insane numbers of balls, if we're going to spawn more balls and there's already a lot
+	// of them try to pick another item...
+	if (gameModel->GetGameBalls().size() > 3 && randomValue == 7) {
+		randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % TOTAL_NUM_OF_ITEMS;
+	}
 	
 	// TODO: more items go here...
 	switch (randomValue) {	// switch is faster than a for loop... trade-off dynamic for speed
@@ -38,6 +46,14 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new UberBallItem(spawnOrigin, gameModel);																		// good
 		case 7:
 			return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::FiveMultiBalls);		// good
+		case 8:
+			return new PaddleSizeItem(PaddleSizeItem::ShrinkPaddle, spawnOrigin, gameModel);		// bad
+		case 9:
+			return new PaddleSizeItem(PaddleSizeItem::GrowPaddle, spawnOrigin, gameModel);			// good
+		case 10:
+			return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, gameModel);					// bad
+		case 11:
+			return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, gameModel);						// good
 		default:
 			assert(false);
 	}
@@ -70,6 +86,18 @@ GameItem* GameItemFactory::CreateItem(const std::string itemName, const Point2D 
 	}
 	else if (itemName == MultiBallItem::MULTI5_BALL_ITEM_NAME) {
 		return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::FiveMultiBalls);
+	}
+	else if (itemName == PaddleSizeItem::PADDLE_GROW_ITEM_NAME) {
+		return new PaddleSizeItem(PaddleSizeItem::GrowPaddle, spawnOrigin, gameModel);
+	}
+	else if (itemName == PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME) {
+		return new PaddleSizeItem(PaddleSizeItem::ShrinkPaddle, spawnOrigin, gameModel);
+	}
+	else if (itemName == BallSizeItem::BALL_SHRINK_ITEM_NAME) {
+			return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, gameModel);
+	}
+	else if (itemName == BallSizeItem::BALL_GROW_ITEM_NAME) {
+			return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, gameModel);
 	}
 
 	assert(false);

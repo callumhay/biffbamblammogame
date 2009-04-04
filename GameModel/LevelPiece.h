@@ -1,7 +1,11 @@
 #ifndef __LEVELPIECE_H__
 #define __LEVELPIECE_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Point.h"
+#include "../BlammoEngine/Vector.h"
+#include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Matrix.h"
 #include "BoundingLines.h"
 
 class Circle2D;
@@ -15,13 +19,14 @@ class Projectile;
 class LevelPiece {
 
 public:
+
 	// All level pieces must conform to these measurements...
 	static const float PIECE_WIDTH;
 	static const float PIECE_HEIGHT;
 	static const float HALF_PIECE_WIDTH;
 	static const float HALF_PIECE_HEIGHT;
 
-	enum LevelPieceType { Breakable, Solid, Empty, Bomb };
+	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle };
 	virtual LevelPieceType GetType() const = 0;
 
 protected:
@@ -43,6 +48,13 @@ public:
 	
 	bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
 	bool CollisionCheck(const Collision::AABB2D& aabb);
+
+	virtual Matrix4x4 GetPieceToLevelTransform() const {
+		return Matrix4x4::translationMatrix(Vector3D(this->center[0], this->center[1], 0.0f));
+	}
+	virtual Matrix4x4 GetPieceToLevelInvTransform() const {
+		return Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
+	}
 
 	virtual int GetPointValueForCollision() = 0;
 

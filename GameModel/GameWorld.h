@@ -36,6 +36,10 @@ public:
 	bool Load();
 	bool Unload();
 	
+	const std::vector<GameLevel*>& GetAllLevelsInWorld() const {
+		return this->loadedLevels;
+	}
+
 	GameLevel* GetCurrentLevel() {
 		assert(isLoaded);
 		return this->loadedLevels[this->currentLevelNum];

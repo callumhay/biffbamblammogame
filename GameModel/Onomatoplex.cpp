@@ -9,55 +9,34 @@ namespace Onomatoplex {
 	// Singleton instance
 	Generator* Generator::instance = NULL;
 
-	// Static dictionaries for word creation lookup
-	std::map<SoundType, std::vector<std::string>> Generator::simpleSingleWords;
-	std::map<SoundType, std::vector<std::string>> Generator::firstFix;
-	std::map<SoundType, std::vector<std::string>> Generator::secondFix;
-	std::map<SoundType, std::vector<std::string>> Generator::thirdFix;
-	std::map<SoundType, std::vector<std::string>> Generator::endFix;
-	std::map<SoundType, std::vector<std::string>> Generator::superEndFix;
-	std::map<SoundType, std::vector<std::string>> Generator::uberEndFix;
-
 	const std::string Generator::DEFAULT_END_PUNCTUATION = "!";
 	std::vector<std::string> Generator::endPunctuation;
-
-	/* 
-	 * Obtain the singleton instance of the generator.
-	 * Precondition: true.
-	 * Returns: The singleton of the Generator class.
-	 */
-	Generator* Generator::Instance() {
-		if (Generator::instance == NULL) {
-			Generator::instance = new Generator();
-		}
-		return Generator::instance;
-	}
 
 	/*
 	 * Sets up all the dictionaries of pre/mid/post strings for making up words.
 	 * This should only ever be called ONCE.
 	 */
 	Generator::Generator() {
-		Generator::simpleSingleWords.clear();
-		Generator::firstFix.clear();
-		Generator::secondFix.clear();
-		Generator::thirdFix.clear();
-		Generator::endFix.clear();
-		Generator::superEndFix.clear();
-		Generator::uberEndFix.clear();
-		Generator::endPunctuation.clear();
+
+		this->simpleSingleWords.clear();
+		this->goodSingleWords.clear();
+		this->awesomeSingleWords.clear();
+		this->uberSingleWords.clear();
 
 		Generator::endPunctuation.push_back(Generator::DEFAULT_END_PUNCTUATION);
 		Generator::endPunctuation.push_back("?");
 
-		// Single words
+		// simple single words
 		std::vector<std::string> singleWordExplosion;
 		singleWordExplosion.push_back("Biff");
 		singleWordExplosion.push_back("Boom");
 		singleWordExplosion.push_back("Blam");
 		singleWordExplosion.push_back("Pow");
 		singleWordExplosion.push_back("Ppfft");
-		Generator::simpleSingleWords[EXPLOSION] = singleWordExplosion;
+		singleWordExplosion.push_back("Bam");
+		singleWordExplosion.push_back("Floom");
+		singleWordExplosion.push_back("Zam");
+		this->simpleSingleWords[EXPLOSION] = singleWordExplosion;
 
 		std::vector<std::string> singleWordBounce;
 		singleWordBounce.push_back("Bounce");
@@ -77,7 +56,7 @@ namespace Onomatoplex {
 		singleWordBounce.push_back("Wack");
 		singleWordBounce.push_back("Wonk");
 		singleWordBounce.push_back("Bonk");
-		Generator::simpleSingleWords[BOUNCE] = singleWordBounce;
+		this->simpleSingleWords[BOUNCE] = singleWordBounce;
 
 		std::vector<std::string> singleWordElectric;
 		singleWordElectric.push_back("Bzzt");
@@ -86,7 +65,7 @@ namespace Onomatoplex {
 		singleWordElectric.push_back("Crackle");
 		singleWordElectric.push_back("Fizz");
 		singleWordElectric.push_back("Sizzle");
-		Generator::simpleSingleWords[ELECTRIC] = singleWordElectric;
+		this->simpleSingleWords[ELECTRIC] = singleWordElectric;
 
 		std::vector<std::string> singleWordSmoke;
 		singleWordSmoke.push_back("Puff");
@@ -95,7 +74,8 @@ namespace Onomatoplex {
 		singleWordSmoke.push_back("Smokey");
 		singleWordSmoke.push_back("Pffp");
 		singleWordSmoke.push_back("Fssp");
-		Generator::simpleSingleWords[SMOKE] = singleWordSmoke;
+		singleWordSmoke.push_back("Ploom");
+		this->simpleSingleWords[SMOKE] = singleWordSmoke;
 
 		std::vector<std::string> singleWordBadSad;
 		singleWordBadSad.push_back("Aww");
@@ -113,199 +93,194 @@ namespace Onomatoplex {
 		singleWordBadSad.push_back("Gah");
 		singleWordBadSad.push_back("Agh");
 		singleWordBadSad.push_back("Egad");
-		Generator::simpleSingleWords[BADSAD] = singleWordBadSad;
+		this->simpleSingleWords[BADSAD] = singleWordBadSad;
 
-		// First fixes
-		std::vector<std::string> firstFixExplosion;
-		firstFixExplosion.push_back("B");
-		firstFixExplosion.push_back("Bl");
-		firstFixExplosion.push_back("Fl");
-		firstFixExplosion.push_back("Kph");
-		firstFixExplosion.push_back("Kabl");
-		firstFixExplosion.push_back("Kab");
-		firstFixExplosion.push_back("Z");
-		firstFixExplosion.push_back("Pph");
-		firstFixExplosion.push_back("Pow");
-		firstFixExplosion.push_back("Splz");
-		Generator::firstFix[EXPLOSION] = firstFixExplosion;
+		std::vector<std::string> shotSingleWords;
+		shotSingleWords.push_back("Pew pew pew");
+		shotSingleWords.push_back("Blam Blam");
+		shotSingleWords.push_back("Bang Bang");
+		shotSingleWords.push_back("Pow pow");
+		shotSingleWords.push_back("Blasty");
+		shotSingleWords.push_back("Blasto");
+		shotSingleWords.push_back("Blammo");
+		shotSingleWords.push_back("Zap");
+		shotSingleWords.push_back("Shooty");
+		shotSingleWords.push_back("Pew");
+		shotSingleWords.push_back("Ploop");
+		shotSingleWords.push_back("Spew");
+		this->simpleSingleWords[SHOT]		= shotSingleWords;
+		this->goodSingleWords[SHOT]			= shotSingleWords;
+		this->awesomeSingleWords[SHOT]	= shotSingleWords;
+		this->uberSingleWords[SHOT]			= shotSingleWords;
 
-		std::vector<std::string> firstFixBounce;
-		firstFixBounce.push_back("B");
-		firstFixBounce.push_back("P");
-		firstFixBounce.push_back("Z");
-		firstFixBounce.push_back("Th");
-		Generator::firstFix[BOUNCE] = firstFixBounce;
+		// Good single words
+		std::vector<std::string> goodSingleWordExplosion;
+		goodSingleWordExplosion.push_back("Blaam");
+		goodSingleWordExplosion.push_back("Kabloom");
+		goodSingleWordExplosion.push_back("Kaboom");
+		goodSingleWordExplosion.push_back("Floomo");
+		goodSingleWordExplosion.push_back("Kablamm");
+		goodSingleWordExplosion.push_back("Zaam");
+		goodSingleWordExplosion.push_back("Kazaam");
+		goodSingleWordExplosion.push_back("Blammo");
+		goodSingleWordExplosion.push_back("Explodo");
+		goodSingleWordExplosion.push_back("Ziff");
+		goodSingleWordExplosion.push_back("Biff");
+		goodSingleWordExplosion.push_back("Boomy");
+		goodSingleWordExplosion.push_back("Splazoom");
+		goodSingleWordExplosion.push_back("Powy");
+		goodSingleWordExplosion.push_back("Pphhoom");
+		this->goodSingleWords[EXPLOSION] = goodSingleWordExplosion;
 
-		std::vector<std::string> firstFixElectric;
-		firstFixElectric.push_back("Pss");
-		firstFixElectric.push_back("Pzz");
-		firstFixElectric.push_back("Bzz");
-		firstFixElectric.push_back("Fzz");
-		firstFixElectric.push_back("Fiz");
-		Generator::firstFix[ELECTRIC] = firstFixElectric;
+		std::vector<std::string> goodSingleWordBounce;
+		goodSingleWordBounce.push_back("Bouncy");
+		goodSingleWordBounce.push_back("Boingy");
+		goodSingleWordBounce.push_back("Boinky");
+		goodSingleWordBounce.push_back("BopBoing");
+		goodSingleWordBounce.push_back("BipBop");
+		goodSingleWordBounce.push_back("Plonky");
+		goodSingleWordBounce.push_back("Poingo");
+		goodSingleWordBounce.push_back("Thonky");
+		goodSingleWordBounce.push_back("Clonk");
+		goodSingleWordBounce.push_back("Pingy");
+		goodSingleWordBounce.push_back("Ponk");
+		goodSingleWordBounce.push_back("Clangy");
+		goodSingleWordBounce.push_back("Clonk");
+		goodSingleWordBounce.push_back("Smack");
+		goodSingleWordBounce.push_back("Whaop");
+		goodSingleWordBounce.push_back("Bloop");
+		goodSingleWordBounce.push_back("Poang");
+		goodSingleWordBounce.push_back("Bangy");
+		this->goodSingleWords[BOUNCE] = goodSingleWordBounce;
 
-		std::vector<std::string> firstFixSmoke;
-		firstFixSmoke.push_back("Pss");
-		firstFixSmoke.push_back("Puf");
-		firstFixSmoke.push_back("Poo");
-		firstFixSmoke.push_back("Fss");
-		Generator::firstFix[SMOKE] = firstFixSmoke;
+		std::vector<std::string> goodSingleWordElectric;
+		goodSingleWordElectric.push_back("BzzaAap");
+		goodSingleWordElectric.push_back("ZZzZap");
+		goodSingleWordElectric.push_back("Crackley");
+		goodSingleWordElectric.push_back("Sparky");
+		goodSingleWordElectric.push_back("Sizzlizzle");
+		goodSingleWordElectric.push_back("Fizzle");
+		goodSingleWordElectric.push_back("Zaap");
+		goodSingleWordElectric.push_back("PzZztt");
+		goodSingleWordElectric.push_back("PssZztt");
+		goodSingleWordElectric.push_back("Zappy");
+		goodSingleWordElectric.push_back("BzZsstt");
+		goodSingleWordElectric.push_back("Fzzstt");
+		this->goodSingleWords[ELECTRIC] = goodSingleWordElectric;
 
-		std::vector<std::string> firstFixBadSad;
-		firstFixBadSad.push_back("Eeek");
-		firstFixBadSad.push_back("Agh");
-		firstFixBadSad.push_back("Gaak");
-		firstFixBadSad.push_back("Oof");
-		firstFixBadSad.push_back("Ouch");
-		firstFixBadSad.push_back("Pain");
-		firstFixBadSad.push_back("Ack");
-		firstFixBadSad.push_back("Cry");
-		firstFixBadSad.push_back("Owwch");
-		Generator::firstFix[BADSAD] = firstFixBadSad;
+		std::vector<std::string> goodSingleWordSmoke;
+		goodSingleWordSmoke.push_back("Poofy");
+		goodSingleWordSmoke.push_back("Floommo");
+		goodSingleWordSmoke.push_back("Smokey");
+		goodSingleWordSmoke.push_back("Puffoo");
+		goodSingleWordSmoke.push_back("Floofo");
+		goodSingleWordSmoke.push_back("Psssppff");
+		goodSingleWordSmoke.push_back("Psshh");
+		goodSingleWordSmoke.push_back("Ploof");
+		goodSingleWordSmoke.push_back("PuffPuff");
+		goodSingleWordSmoke.push_back("Ploommo");
+		this->goodSingleWords[SMOKE] = goodSingleWordSmoke;
 
-		// Second fixes
-		std::vector<std::string> secondFixExplosion;
-		secondFixExplosion.push_back("a");	
-		secondFixExplosion.push_back("aa");
-		secondFixExplosion.push_back("oo");
-		Generator::secondFix[EXPLOSION] = secondFixExplosion;
+		std::vector<std::string> goodSingleWordBadSad;
+		goodSingleWordBadSad.push_back("Eeek");
+		goodSingleWordBadSad.push_back("Agh");
+		goodSingleWordBadSad.push_back("Gaak");
+		goodSingleWordBadSad.push_back("Oof Oww");
+		goodSingleWordBadSad.push_back("Ouchy");
+		goodSingleWordBadSad.push_back("Pain");
+		goodSingleWordBadSad.push_back("Acky");
+		goodSingleWordBadSad.push_back("CryCry");
+		goodSingleWordBadSad.push_back("Owwch");
+		goodSingleWordBadSad.push_back("Owwchy");
+		goodSingleWordBadSad.push_back("Sob Cry");
+		goodSingleWordBadSad.push_back("Eeepp");
+		goodSingleWordBadSad.push_back("Egads");
+		goodSingleWordBadSad.push_back("Gaah");
+		goodSingleWordBadSad.push_back("OwOw");
+		this->goodSingleWords[BADSAD] = goodSingleWordBadSad;
 
-		std::vector<std::string> secondFixBounce;
-		secondFixBounce.push_back("");
-		Generator::secondFix[BOUNCE] = secondFixBounce;
+		// Awesome single words
+		std::vector<std::string> awesomeSingleWordExplosion;
+		awesomeSingleWordExplosion.push_back("BiffBlammo");
+		awesomeSingleWordExplosion.push_back("Kabblaamo");
+		awesomeSingleWordExplosion.push_back("Blooommoo");
+		awesomeSingleWordExplosion.push_back("Wablaammy");
+		awesomeSingleWordExplosion.push_back("Kaaboomy");
+		awesomeSingleWordExplosion.push_back("Kabblaamy");
+		awesomeSingleWordExplosion.push_back("BiffBammy");
+		awesomeSingleWordExplosion.push_back("Flamblam");
+		awesomeSingleWordExplosion.push_back("Explosiony");
+		awesomeSingleWordExplosion.push_back("Explodo");
+		awesomeSingleWordExplosion.push_back("Pphoommy");
+		awesomeSingleWordExplosion.push_back("Kablaamosion");
+		awesomeSingleWordExplosion.push_back("Kazaammo");
+		this->awesomeSingleWords[EXPLOSION] = awesomeSingleWordExplosion;
+
+		std::vector<std::string> awesomeSingleWordBounce;
+		awesomeSingleWordBounce.push_back("BouncyBounce");
+		awesomeSingleWordBounce.push_back("Booiiinng");
+		awesomeSingleWordBounce.push_back("Pooonnk");
+		awesomeSingleWordBounce.push_back("Clonky");
+		awesomeSingleWordBounce.push_back("ClangBang");
+		awesomeSingleWordBounce.push_back("BangyBong");
+		awesomeSingleWordBounce.push_back("Walloop");
+		awesomeSingleWordBounce.push_back("Whoomp");
+		awesomeSingleWordBounce.push_back("Klaangg");
+		awesomeSingleWordBounce.push_back("Floong");
+		awesomeSingleWordBounce.push_back("Baassh");
+		awesomeSingleWordBounce.push_back("BaaAAam");
+		awesomeSingleWordBounce.push_back("Thwaaak");
+		awesomeSingleWordBounce.push_back("Smaaakky");
+		awesomeSingleWordBounce.push_back("Bloncko");
+		awesomeSingleWordBounce.push_back("Whhaaap");
+		this->awesomeSingleWords[BOUNCE] = awesomeSingleWordBounce;
+
+		std::vector<std::string> awesomeSingleWordElectric;
+		awesomeSingleWordElectric.push_back("Siizzzzley");
+		awesomeSingleWordElectric.push_back("Electrofry");
+		awesomeSingleWordElectric.push_back("ElectroBzzzz");
+		awesomeSingleWordElectric.push_back("Biizzzzaaap");
+		awesomeSingleWordElectric.push_back("Zaaapyyy");
+		awesomeSingleWordElectric.push_back("PzZzZAatt");
+		awesomeSingleWordElectric.push_back("FiizzZlle");
+		awesomeSingleWordElectric.push_back("Electrocuty");
+		awesomeSingleWordElectric.push_back("Sparkzzz");
+		awesomeSingleWordElectric.push_back("Craaacckle");
+		this->awesomeSingleWords[ELECTRIC] = awesomeSingleWordElectric;
+
+		std::vector<std::string> awesomeSingleWordSmoke;
+		awesomeSingleWordSmoke.push_back("Puffpuff");
+		awesomeSingleWordSmoke.push_back("Flooomoo");
+		awesomeSingleWordSmoke.push_back("PoofPuffy");
+		awesomeSingleWordSmoke.push_back("Smokesalot");
+		awesomeSingleWordSmoke.push_back("Ppphhfffft");
+		awesomeSingleWordSmoke.push_back("FloomPloom");
+		awesomeSingleWordSmoke.push_back("Smokahol");
+		awesomeSingleWordSmoke.push_back("PoOOoOofFf");
+		awesomeSingleWordSmoke.push_back("BilloOowwy");
+		awesomeSingleWordSmoke.push_back("PoofPoof");
+		awesomeSingleWordSmoke.push_back("FloofyPoof");
+		this->awesomeSingleWords[SMOKE] = awesomeSingleWordSmoke;
+	
+		std::vector<std::string> awesomeSingleWordBadSad;
+		awesomeSingleWordBadSad.push_back("OuchOuch");
+		awesomeSingleWordBadSad.push_back("Owwwwww");
+		awesomeSingleWordBadSad.push_back("Owwwwwwyy");
+		awesomeSingleWordBadSad.push_back("Ooowf Ack");
+		awesomeSingleWordBadSad.push_back("It Hurts");
+		awesomeSingleWordBadSad.push_back("LotsOfPain");
+		awesomeSingleWordBadSad.push_back("MakeItStop");
+		awesomeSingleWordBadSad.push_back("OwwHurting");
+		awesomeSingleWordBadSad.push_back("EeEeeppp");
+		awesomeSingleWordBadSad.push_back("OwOwOw");
+		awesomeSingleWordBadSad.push_back("Oooucchy");
+		awesomeSingleWordBadSad.push_back("Paaaiin");
+		awesomeSingleWordBadSad.push_back("GaAAaahh");
+		awesomeSingleWordBadSad.push_back("Aaggghh");
+		this->awesomeSingleWords[BADSAD] = awesomeSingleWordBadSad;
 		
-		std::vector<std::string> secondFixElectric;
-		secondFixElectric.push_back("izz");
-		secondFixElectric.push_back("shh");
-		secondFixElectric.push_back("azz");
-		secondFixElectric.push_back("sst");
-		secondFixElectric.push_back("");
-		Generator::secondFix[ELECTRIC] = secondFixElectric;
-
-		std::vector<std::string> secondFixSmoke;
-		secondFixSmoke.push_back("f");
-		secondFixSmoke.push_back("fp");
-		secondFixSmoke.push_back("ph");
-		secondFixSmoke.push_back("t");
-		secondFixSmoke.push_back("");
-		Generator::secondFix[SMOKE] = secondFixSmoke;
-
-		std::vector<std::string> secondFixBadSad;
-		secondFixBadSad.push_back("gah");
-		secondFixBadSad.push_back("oof");
-		secondFixBadSad.push_back(" Cry");
-		secondFixBadSad.push_back(" Sob");
-		secondFixBadSad.push_back(" Pain");
-		secondFixBadSad.push_back(" ItHurts");
-		secondFixBadSad.push_back("gah");
-		secondFixBadSad.push_back("eek");
-		Generator::secondFix[BADSAD] = secondFixBadSad;
-
-		// Third fixes
-		std::vector<std::string> thirdFixExplosion;
-		thirdFixExplosion.push_back("bl");
-		thirdFixExplosion.push_back("b");
-		thirdFixExplosion.push_back("z");
-		Generator::thirdFix[EXPLOSION] = thirdFixExplosion;
-
-		std::vector<std::string> thirdFixBounce;
-		thirdFixBounce.push_back("");
-		Generator::thirdFix[BOUNCE] = thirdFixBounce;
-
-		std::vector<std::string> thirdFixElectric;
-		thirdFixElectric.push_back("bzz");
-		thirdFixElectric.push_back("kzz");
-		thirdFixElectric.push_back("");
-		Generator::thirdFix[ELECTRIC] = thirdFixElectric;
-
-		std::vector<std::string> thirdFixSmoke;
-		thirdFixSmoke.push_back("");
-		Generator::thirdFix[SMOKE] = thirdFixSmoke;
-
-		std::vector<std::string> thirdFixBadSad;
-		thirdFixBadSad.push_back("");
-		Generator::thirdFix[BADSAD] = thirdFixBadSad;
-
-		// End-fixes - these add a neat ending to an already ridiculous word, they may also
-		// be combined almost endlessly...
-
-		// Basic end-fixes
-		std::vector<std::string> endFixExplosion;
-		endFixExplosion.push_back("oom");
-		endFixExplosion.push_back("aam");
-		endFixExplosion.push_back("am");
-		endFixExplosion.push_back("oof");
-		endFixExplosion.push_back("ash");
-		endFixExplosion.push_back("osh");
-		Generator::endFix[EXPLOSION] =  endFixExplosion;
-		
-		std::vector<std::string> endFixBounce;
-		endFixBounce.push_back("lop");
-		endFixBounce.push_back("oing");
-		endFixBounce.push_back("ip");
-		endFixBounce.push_back("ong");
-		endFixBounce.push_back("onk");
-		endFixBounce.push_back("ang");
-		endFixBounce.push_back("ank");
-		Generator::endFix[BOUNCE] = endFixBounce;
-
-		std::vector<std::string> endFixElectric;
-		endFixElectric.push_back("t");
-		endFixElectric.push_back("z");
-		endFixElectric.push_back("st");
-		endFixElectric.push_back("tt");
-		endFixElectric.push_back("zt");
-		Generator::endFix[ELECTRIC] = endFixElectric;
-
-		std::vector<std::string> endFixSmoke;
-		endFixSmoke.push_back("ft");
-		endFixSmoke.push_back("sh");
-		endFixSmoke.push_back("f");
-		endFixSmoke.push_back("pf");
-		Generator::endFix[SMOKE] = endFixSmoke;
-
-		std::vector<std::string> endFixBadSad;
-		endFixBadSad.push_back("");
-		Generator::endFix[BADSAD] = endFixBadSad;
-
-		// Super end-fixes
-		std::vector<std::string> superEndFixExplosion;
-		superEndFixExplosion.push_back("y");
-		superEndFixExplosion.push_back("o");
-		superEndFixExplosion.push_back("bo");
-		superEndFixExplosion.push_back("po");
-		superEndFixExplosion.push_back("");
-		Generator::superEndFix[EXPLOSION] = superEndFixExplosion;
-		
-		std::vector<std::string> superEndFixBounce;
-		superEndFixBounce.push_back("y");
-		superEndFixBounce.push_back("");
-		superEndFixBounce.push_back("");
-		Generator::superEndFix[BOUNCE] = superEndFixBounce;
-
-		std::vector<std::string> superEndFixElectric;
-		superEndFixElectric.push_back("");
-		Generator::superEndFix[ELECTRIC] = superEndFixElectric;
-
-		std::vector<std::string> superEndFixSmoke;
-		superEndFixSmoke.push_back("");
-		superEndFixSmoke.push_back("puff");
-		superEndFixSmoke.push_back("poof");
-		superEndFixSmoke.push_back("f");
-		Generator::superEndFix[SMOKE] = superEndFixSmoke;
-
-		std::vector<std::string> superEndFixBadSad;
-		superEndFixBadSad.push_back("y");
-		superEndFixBadSad.push_back("eep");
-		superEndFixBadSad.push_back("Oof");
-		superEndFixBadSad.push_back(" ItHurts");
-		superEndFixBadSad.push_back(" LotsOfPain");
-		superEndFixBadSad.push_back(" MakeItStop");
-		superEndFixBadSad.push_back(" Hurting");
-		superEndFixBadSad.push_back("OwOw");
-		Generator::superEndFix[BADSAD] = superEndFixBadSad;
-
-		// Uber end-fixes
+		// Uber single words
+		std::vector<std::string> uberSingleWordExplosion;
 		std::vector<std::string> uberEndFixExplosion;
 		uberEndFixExplosion.push_back("oplex");
 		uberEndFixExplosion.push_back("oise");
@@ -317,8 +292,22 @@ namespace Onomatoplex {
 		uberEndFixExplosion.push_back("inator");
 		uberEndFixExplosion.push_back("plosion");
 		uberEndFixExplosion.push_back("frazz");
-		Generator::uberEndFix[EXPLOSION] = uberEndFixExplosion;
 
+		for (std::vector<std::string>::iterator iterEnd = uberEndFixExplosion.begin(); iterEnd != uberEndFixExplosion.end(); iterEnd++) {
+			for (std::vector<std::string>::iterator iter = singleWordExplosion.begin(); iter != singleWordExplosion.end(); iter++) {
+				uberSingleWordExplosion.push_back(JoinEndfixes(*iter, *iterEnd));
+			}
+			for (std::vector<std::string>::iterator iter = goodSingleWordExplosion.begin(); iter != goodSingleWordExplosion.end(); iter++) {
+				uberSingleWordExplosion.push_back(JoinEndfixes(*iter, *iterEnd));
+			}
+			for (std::vector<std::string>::iterator iter = awesomeSingleWordExplosion.begin(); iter != awesomeSingleWordExplosion.end(); iter++) {
+				uberSingleWordExplosion.push_back(JoinEndfixes(*iter, *iterEnd));
+			}
+		}
+		this->uberSingleWords[EXPLOSION] = uberSingleWordExplosion;
+
+
+		std::vector<std::string> uberSingleWordBounce;
 		std::vector<std::string> uberEndFixBounce;
 		uberEndFixBounce.push_back(" Zonk");
 		uberEndFixBounce.push_back(" Bip");
@@ -326,8 +315,27 @@ namespace Onomatoplex {
 		uberEndFixBounce.push_back(" Clonk");
 		uberEndFixBounce.push_back(" Clank");
 		uberEndFixBounce.push_back(" Bop");
-		Generator::uberEndFix[BOUNCE] = uberEndFixBounce;
+		uberEndFixBounce.push_back(" Boink");
+		uberEndFixBounce.push_back(" Bang");
+		uberEndFixBounce.push_back(" Boing");
+		uberEndFixBounce.push_back(" Blip");
+		uberEndFixBounce.push_back(" Pong");
+		uberEndFixBounce.push_back(" Ponk");
 
+		for (std::vector<std::string>::iterator iterEnd = uberEndFixBounce.begin(); iterEnd != uberEndFixBounce.end(); iterEnd++) {
+			for (std::vector<std::string>::iterator iter = singleWordBounce.begin(); iter != singleWordBounce.end(); iter++) {
+				uberSingleWordBounce.push_back(JoinEndfixes(*iter, *iterEnd));
+			}
+			for (std::vector<std::string>::iterator iter = goodSingleWordBounce.begin(); iter != goodSingleWordBounce.end(); iter++) {
+				uberSingleWordBounce.push_back(JoinEndfixes(*iter, *iterEnd));
+			}
+			for (std::vector<std::string>::iterator iter = awesomeSingleWordBounce.begin(); iter != awesomeSingleWordBounce.end(); iter++) {
+				uberSingleWordBounce.push_back(JoinEndfixes(*iter, *iterEnd));
+			}
+		}
+		this->uberSingleWords[BOUNCE] = uberSingleWordBounce;
+
+		std::vector<std::string> uberSingleWordElectric;
 		std::vector<std::string> uberEndFixElectric;
 		uberEndFixElectric.push_back("kizzap");
 		uberEndFixElectric.push_back("zizat");
@@ -337,38 +345,53 @@ namespace Onomatoplex {
 		uberEndFixElectric.push_back("aple");
 		uberEndFixElectric.push_back("iple");
 		uberEndFixElectric.push_back("frazz");
-		Generator::uberEndFix[ELECTRIC] = uberEndFixElectric;
 
-		std::vector<std::string> uberEndFixSmoke;
-		uberEndFixSmoke.push_back(" Psssf");
-		uberEndFixSmoke.push_back(" Puff");
-		uberEndFixSmoke.push_back("oplex");
-		uberEndFixSmoke.push_back(" Poof");
-		Generator::uberEndFix[SMOKE] = uberEndFixSmoke;
+		for (std::vector<std::string>::iterator iterEnd = uberEndFixElectric.begin(); iterEnd != uberEndFixElectric.end(); iterEnd++) {
+			for (std::vector<std::string>::iterator iter = singleWordElectric.begin(); iter != singleWordElectric.end(); iter++) {
+				uberSingleWordElectric.push_back(JoinEndfixes(*iter, *iterEnd));
+			}
+			for (std::vector<std::string>::iterator iter = goodSingleWordElectric.begin(); iter != goodSingleWordElectric.end(); iter++) {
+				uberSingleWordElectric.push_back(JoinEndfixes(*iter, *iterEnd));
+			}
+			for (std::vector<std::string>::iterator iter = awesomeSingleWordElectric.begin(); iter != awesomeSingleWordElectric.end(); iter++) {
+				uberSingleWordElectric.push_back(JoinEndfixes(*iter, *iterEnd));
+			}
+		}
+		this->uberSingleWords[ELECTRIC] = uberSingleWordElectric;
 
-		std::vector<std::string> uberEndFixBadSad;
-		uberEndFixBadSad.push_back(" MakeTheBadManStop");
-		uberEndFixBadSad.push_back(" HolyPainBatman");
-		uberEndFixBadSad.push_back("Eeeggads");
-		uberEndFixBadSad.push_back("Ouchyness");
-		uberEndFixBadSad.push_back(" ItHurtsSoMuch");
-		uberEndFixBadSad.push_back("OwOwOw");
-		uberEndFixBadSad.push_back("Agghh");
-		uberEndFixBadSad.push_back("eeEp");
-		Generator::uberEndFix[BADSAD] = uberEndFixBadSad;
+		std::vector<std::string> uberSingleWordSmoke;
+		uberSingleWordSmoke.push_back("Smokearama");
+		uberSingleWordSmoke.push_back("SmokeSmokePoof");
+		uberSingleWordSmoke.push_back("SootPoofPloom");
+		uberSingleWordSmoke.push_back("PoOOoOofFfy");
+		uberSingleWordSmoke.push_back("PoofPoofyFloom");
+		uberSingleWordSmoke.push_back("Poofoplex");
+		uberSingleWordSmoke.push_back("BillowBillowSmokey");
+		uberSingleWordSmoke.push_back("FloomooPlumeoo");
+		this->uberSingleWords[SMOKE] = uberSingleWordSmoke;
+
+		std::vector<std::string> uberSingleWordBadSad;
+		uberSingleWordBadSad.push_back("MakeTheBadManStop");
+		uberSingleWordBadSad.push_back("HolyPainBatman");
+		uberSingleWordBadSad.push_back("Eeeggads");
+		uberSingleWordBadSad.push_back("Ouchyness");
+		uberSingleWordBadSad.push_back("OuchOuchOuch");
+		uberSingleWordBadSad.push_back("OwOwOwOw");
+		uberSingleWordBadSad.push_back("Aggghhhhh");
+		uberSingleWordBadSad.push_back("ItHurtsOhSoBad");
+		uberSingleWordBadSad.push_back("ItHurtsSoMuch");
+		uberSingleWordBadSad.push_back("BadNewsBears");
+		uberSingleWordBadSad.push_back("Eeeekkkk");
+		uberSingleWordBadSad.push_back("MakeThePainStop");
+		this->uberSingleWords[BADSAD] = uberSingleWordBadSad;
 	}
 
 	// Destructor, deletes singleton, cleans up dictionaries
 	Generator::~Generator() {
-		Generator::simpleSingleWords.clear();
-		Generator::firstFix.clear();
-		Generator::secondFix.clear();
-		Generator::thirdFix.clear();
-		Generator::endFix.clear();
-		Generator::superEndFix.clear();
-		Generator::uberEndFix.clear();
-		Generator::endPunctuation.clear();
-		delete Generator::instance;
+		this->simpleSingleWords.clear();
+		this->goodSingleWords.clear();
+		this->awesomeSingleWords.clear();
+		this->uberSingleWords.clear();
 	}
 
 	/*
@@ -517,27 +540,8 @@ namespace Onomatoplex {
 	 * Returns: Weak/simple crazy word text.
 	 */
 	std::string Generator::GenerateWeakSoundText(SoundType type) {
-		std::string result = "";
-		size_t randomIndex = 0;
-		
-		randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % 4;
-		if (randomIndex == 1) {
-			// Just take the first fix and add an end fix, both random of course...
-			std::vector<std::string> &firstFixes = Generator::firstFix[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
-			result = firstFixes[randomIndex];
-
-			std::vector<std::string> &endFixes = Generator::endFix[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
-			result = result + endFixes[randomIndex];
-		}
-		else {
-			std::vector<std::string> &fullSimpleWords = Generator::simpleSingleWords[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % fullSimpleWords.size();
-			result = fullSimpleWords[randomIndex];
-		}
-
-		return result;
+		unsigned int randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % this->simpleSingleWords[type].size();
+		return this->simpleSingleWords[type][randomIndex];
 	}
 
 	/*
@@ -546,10 +550,8 @@ namespace Onomatoplex {
 	 * Returns: Crazy word text.
 	 */
 	std::string Generator::GenerateNormalSoundText(SoundType type) {
-		std::string result = "";
-		
 		// These are just weak words but with the possiblity of end punctuation.
-		result = this->GenerateWeakSoundText(type);
+		std::string result = this->GenerateWeakSoundText(type);
 		return result + this->GenerateAbsurdPunctuation(type, NORMAL);
 	}
 
@@ -559,31 +561,9 @@ namespace Onomatoplex {
 	 * Returns: Crazy word text.
 	 */
 	std::string Generator::GeneratePrettyGoodSoundText(SoundType type) {
-		std::string result = "";
-		size_t randomIndex = 0;
-
-		if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-			// Take a first, and a super-end fix and put them together.
-			std::vector<std::string> &firstFixes = this->firstFix[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
-			result = firstFixes[randomIndex];
-
-			std::string endFix1, endFix2;
-			std::vector<std::string> &endFixes = Generator::endFix[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
-			endFix1 = endFixes[randomIndex];
-
-			std::vector<std::string> &superEndFixes = Generator::superEndFix[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % superEndFixes.size();
-			endFix2 = superEndFixes[randomIndex];
-
-			result = result + Generator::JoinEndfixes(endFix1, endFix2);
-		}
-		else {
-			std::vector<std::string> &fullSimpleWords = Generator::simpleSingleWords[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % fullSimpleWords.size();
-			result = fullSimpleWords[randomIndex];
-		}
+		std::vector<std::string> &fullSimpleWords = this->goodSingleWords[type];
+		unsigned int randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % fullSimpleWords.size();
+		std::string result = fullSimpleWords[randomIndex];
 		return result + this->GenerateAbsurdPunctuation(type, PRETTY_GOOD);
 	}
 
@@ -593,33 +573,10 @@ namespace Onomatoplex {
 	 * Returns: Crazy word text.
 	 */
 	std::string Generator::GenerateGoodSoundText(SoundType type) {
-		std::string result = "";
-		size_t randomIndex = 0;
 
-		if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-			// Use first, second and third fixes with an end fix
-			std::vector<std::string> &firstFixes = this->firstFix[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
-			result = firstFixes[randomIndex];
-
-			std::vector<std::string> &secondFixes = this->secondFix[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % secondFixes.size();
-			result = result + secondFixes[randomIndex];
-
-			std::vector<std::string> &thirdFixes = this->thirdFix[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % thirdFixes.size();
-			result = result + thirdFixes[randomIndex];
-
-			std::vector<std::string> &endFixes = Generator::endFix[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
-			result = result + endFixes[randomIndex];
-		}
-		else {
-			std::vector<std::string> &fullSimpleWords = Generator::simpleSingleWords[type];
-			randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % fullSimpleWords.size();
-			result = fullSimpleWords[randomIndex] + " " + this->GeneratePrettyGoodSoundText(type);
-		}
-		
+		std::vector<std::string> &fullSimpleWords = this->goodSingleWords[type];
+		unsigned int randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % fullSimpleWords.size();
+		std::string result = fullSimpleWords[randomIndex];
 		return result + this->GenerateAbsurdPunctuation(type, GOOD);
 	}
 
@@ -629,33 +586,9 @@ namespace Onomatoplex {
 	 * Returns: Crazy word text.
 	 */
 	std::string Generator::GenerateAwesomeSoundText(SoundType type) {
-		std::string result = "";
-		size_t randomIndex = 0;
-
-		// Use first, second and third fixes with a end and super end fix
-		std::vector<std::string> &firstFixes = this->firstFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
-		result = firstFixes[randomIndex];
-
-		std::vector<std::string> &secondFixes = this->secondFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % secondFixes.size();
-		result = result + secondFixes[randomIndex];
-
-		std::vector<std::string> &thirdFixes = this->thirdFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % thirdFixes.size();
-		result = result + thirdFixes[randomIndex];
-
-		std::string endFix1, endFix2;
-		std::vector<std::string> &endFixes = Generator::endFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
-		endFix1 = endFixes[randomIndex];
-
-		std::vector<std::string> &superEndFixes = Generator::superEndFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % superEndFixes.size();
-		endFix2 = superEndFixes[randomIndex];
-
-		result = result + Generator::JoinEndfixes(endFix1, endFix2);
-
+		std::vector<std::string> &fullSimpleWords = this->awesomeSingleWords[type];
+		unsigned int randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % fullSimpleWords.size();
+		std::string result = fullSimpleWords[randomIndex];
 		return result + this->GenerateAbsurdPunctuation(type, AWESOME);
 	}
 
@@ -665,33 +598,9 @@ namespace Onomatoplex {
 	 * Returns: Crazy word text.
 	 */
 	std::string Generator::GenerateSuperAwesomeSoundText(SoundType type) {
-		std::string result = "";
-		size_t randomIndex = 0;
-
-		// Use first, second and third fixes with a end and uber end fix
-		std::vector<std::string> &firstFixes = this->firstFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
-		result = firstFixes[randomIndex];
-
-		std::vector<std::string> &secondFixes = this->secondFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % secondFixes.size();
-		result = result + secondFixes[randomIndex];
-
-		std::vector<std::string> &thirdFixes = this->thirdFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % thirdFixes.size();
-		result = result + thirdFixes[randomIndex];
-
-		std::string endFix1, endFix2;
-		std::vector<std::string> &endFixes = Generator::endFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
-		endFix1 = endFixes[randomIndex];
-
-		std::vector<std::string> &uberEndFixes = Generator::uberEndFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % uberEndFixes.size();
-		endFix2 = uberEndFixes[randomIndex];
-
-		result = result + Generator::JoinEndfixes(endFix1, endFix2);
-
+		std::vector<std::string> &fullSimpleWords = this->awesomeSingleWords[type];
+		unsigned int randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % fullSimpleWords.size();
+		std::string result = fullSimpleWords[randomIndex];
 		return result + this->GenerateAbsurdPunctuation(type, SUPER_AWESOME);
 	}
 
@@ -701,36 +610,9 @@ namespace Onomatoplex {
 	 * Returns: Crazy word text.
 	 */
 	std::string Generator::GenerateUberSoundText(SoundType type) {
-		std::string result = "";
-		size_t randomIndex = 0;
-
-		std::vector<std::string> &firstFixes = this->firstFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % firstFixes.size();
-		result = firstFixes[randomIndex];
-
-		std::vector<std::string> &secondFixes = this->secondFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % secondFixes.size();
-		result = result + secondFixes[randomIndex];
-
-		std::vector<std::string> &thirdFixes = this->thirdFix[type];
-		randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % thirdFixes.size();
-		result = result + thirdFixes[randomIndex];
-
-		std::string endFix1, endFix2, endFix3;
-		std::vector<std::string> &endFixes = Generator::endFix[type];
-		randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % endFixes.size();
-		endFix1 = endFixes[randomIndex];
-
-		std::vector<std::string> &superEndFixes = Generator::superEndFix[type];
-		randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % superEndFixes.size();
-		endFix2 = superEndFixes[randomIndex];
-
-		std::vector<std::string> &uberEndFixes = Generator::uberEndFix[type];
-		randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % uberEndFixes.size();
-		endFix3 = uberEndFixes[randomIndex];
-
-		result = result + Generator::JoinEndfixes(endFix1, Generator::JoinEndfixes(endFix2, endFix3));
-
+		std::vector<std::string> &fullSimpleWords = this->uberSingleWords[type];
+		unsigned int randomIndex =  Randomizer::GetInstance()->RandomUnsignedInt() % fullSimpleWords.size();
+		std::string result = fullSimpleWords[randomIndex];
 		return result + this->GenerateAbsurdPunctuation(type, UBER);
 	}
 
