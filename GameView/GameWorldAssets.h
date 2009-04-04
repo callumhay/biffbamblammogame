@@ -56,7 +56,11 @@ public:
 	}
 
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const {
+		glPushMatrix();
+		float paddleScaleFactor = p.GetPaddleScaleFactor();
+		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
 		this->playerPaddle->Draw(camera);
+		glPopMatrix();
 	}
 
 	// Factory methods

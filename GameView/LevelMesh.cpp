@@ -6,17 +6,22 @@
 #include "../BlammoEngine/BlammoEngine.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : 
-levelDimensions(0, 0), styleBlock(NULL), basicBlock(NULL), bombBlock(NULL) {
+levelDimensions(0, 0), styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
-	this->basicBlock = ObjReader::ReadMesh(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
-	this->bombBlock  = ObjReader::ReadMesh(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
+	this->basicBlock			= ObjReader::ReadMesh(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
+	this->bombBlock				= ObjReader::ReadMesh(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
+	this->triangleBlockUR = ObjReader::ReadMesh(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
 
 	// Add the typical level meshes to the list of materials...
-	std::map<std::string, MaterialGroup*> basicBlockMatGrps = this->basicBlock->GetMaterialGroups();
-	std::map<std::string, MaterialGroup*> bombBlockMatGrps  = this->bombBlock->GetMaterialGroups();
+	std::map<std::string, MaterialGroup*> basicBlockMatGrps			= this->basicBlock->GetMaterialGroups();
+	std::map<std::string, MaterialGroup*> triangleBlockMatGrps	= this->triangleBlockUR->GetMaterialGroups();
+	std::map<std::string, MaterialGroup*> bombBlockMatGrps			= this->bombBlock->GetMaterialGroups();
 	
 	for (std::map<std::string, MaterialGroup*>::iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); iter++) {
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+	}
+	for (std::map<std::string, MaterialGroup*>::iterator iter = triangleBlockMatGrps.begin(); iter != triangleBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
 	for (std::map<std::string, MaterialGroup*>::iterator iter = bombBlockMatGrps.begin(); iter != bombBlockMatGrps.end(); iter++) {
@@ -31,6 +36,8 @@ LevelMesh::~LevelMesh() {
 	// Delete all meshes
 	delete this->basicBlock;
 	this->basicBlock = NULL;
+	delete this->triangleBlockUR;
+	this->triangleBlockUR = NULL;
 	delete this->bombBlock;
 	this->bombBlock = NULL;
 
@@ -114,11 +121,11 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 			Point2D pieceLoc			= currPiece->GetCenter();
 
 			// Set the appropriate transform to be applied to the piece
-			glPushMatrix();
-			glTranslatef(pieceLoc[0], pieceLoc[1], 0);
+			//glPushMatrix();
+			//glTranslatef(pieceLoc[0], pieceLoc[1], 0);
 			float worldTransformVals[16];
 			glGetFloatv(GL_MODELVIEW_MATRIX, worldTransformVals);
-			glPopMatrix();
+			//glPopMatrix();
 
 			// Create the appropriate display lists for the piece...
 			Vector3D translation(worldTransformVals[12], worldTransformVals[13], worldTransformVals[14]);
@@ -156,7 +163,7 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(-this->levelDimensions[0]/2.0f, -this->levelDimensions[1]/2.0f, 0.0f);
-	glTranslatef(changedPieceLoc[0], changedPieceLoc[1], 0);
+	//glTranslatef(changedPieceLoc[0], changedPieceLoc[1], 0);
 	float worldTransformVals[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, worldTransformVals);
 	glPopMatrix();
@@ -201,15 +208,24 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		assert(currPolyGrp  != NULL);
 
 		// Transform the polygon group to its position in the level, draw it and then transform it back
-		currPolyGrp->Translate(worldTranslation);
-
+		Matrix4x4 worldTransform = Matrix4x4::translationMatrix(worldTranslation);
+		Matrix4x4 localTransform = piece->GetPieceToLevelTransform();
+		Matrix4x4 fullTransform =  worldTransform * localTransform;
+		
+		currPolyGrp->Transform(fullTransform);
+		
+		// TODO: other local transform operations to the mesh e.g., reflect, rotate, etc.
 		GLuint newDisplayList = glGenLists(1);
 		glNewList(newDisplayList, GL_COMPILE);
 		glColor3f(currColour.R(), currColour.G(), currColour.B());
 		currPolyGrp->Draw();
 		glEndList();
 	
-		currPolyGrp->Translate(-1*worldTranslation);
+		Matrix4x4 localInvTransform = piece->GetPieceToLevelInvTransform();
+		Matrix4x4 worldInvTransform = Matrix4x4::translationMatrix(-worldTranslation);
+		Matrix4x4 fullInvTransform = localInvTransform * worldInvTransform;
+		
+		currPolyGrp->Transform(fullInvTransform);
 
 		// Insert the new display list into the list of display lists...
 		this->pieceDisplayLists[piece].insert(std::make_pair<CgFxMaterialEffect*, GLuint>(currMaterial, newDisplayList));
@@ -230,8 +246,14 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 		case LevelPiece::Solid :
 			returnValue = this->styleBlock->GetMaterialGroups();
 			break;
+		case LevelPiece::SolidTriangle:
+			returnValue = this->triangleBlockUR->GetMaterialGroups();
+			break;
 		case LevelPiece::Breakable :
 			returnValue = this->basicBlock->GetMaterialGroups();
+			break;
+		case LevelPiece::BreakableTriangle:
+			returnValue = this->triangleBlockUR->GetMaterialGroups();
 			break;
 		case LevelPiece::Bomb :
 			returnValue = this->bombBlock->GetMaterialGroups();

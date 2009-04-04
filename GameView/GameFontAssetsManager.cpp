@@ -33,6 +33,7 @@ void GameFontAssetsManager::LoadMinimalFonts() {
 	
 	debug_output("Loading minimal font sets");
 
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	TextureFontSet* temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, Small);
 	assert(temp != NULL);
 	this->fonts[HappyGood][Small]	= temp;
@@ -45,19 +46,6 @@ void GameFontAssetsManager::LoadMinimalFonts() {
 	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, Huge);
 	assert(temp != NULL);
 	this->fonts[HappyGood][Huge]	= temp;
-
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Small);
-	assert(temp != NULL);
-	this->fonts[GunBlam][Small]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Medium);
-	assert(temp != NULL);
-	this->fonts[GunBlam][Medium]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Big);
-	assert(temp != NULL);
-	this->fonts[GunBlam][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_GUNBLAM, Huge);
-	assert(temp != NULL);
-	this->fonts[GunBlam][Huge]	= temp;
 
 	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Small);
 	assert(temp != NULL);
@@ -98,5 +86,6 @@ void GameFontAssetsManager::LoadMinimalFonts() {
 	assert(temp != NULL);
 	this->fonts[AllPurpose][Huge]	= temp;
 
+	glPopAttrib();
 	this->minimalFontsLoaded = true;
 }

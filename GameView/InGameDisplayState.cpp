@@ -91,6 +91,10 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	// Post-processing effects...
 	this->display->GetAssets()->DrawPostProcessingESPEffects(dT, this->display->GetCamera(), this->renderToTexEverything);
 	glPopMatrix();
+
+#ifndef NDEBUG
+	this->DebugDrawBounds();
+#endif
 }
 
 /**
@@ -104,7 +108,7 @@ void InGameDisplayState::RenderBackgroundToFBO() {
 	assert(success);
 	FBOManager::GetInstance()->BindFBO();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
 	// Draw the background of the current scene
@@ -148,7 +152,8 @@ void InGameDisplayState::DrawScene(double dT) {
 	glEnable(GL_MULTISAMPLE);
 
 	// Level pieces...
-	this->display->GetAssets()->DrawLevelPieces(this->display->GetCamera());
+	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
+	this->display->GetAssets()->DrawLevelPieces(currLevel, this->display->GetCamera());
 
 	// Background Model and effects...
 	glPushMatrix();
@@ -213,15 +218,21 @@ void InGameDisplayState::DisplaySizeChanged(int width, int height) {
 	this->renderToTexBackground = Texture2D::CreateEmptyTextureRectangle(width, height);
 }
 
+#ifndef NDEBUG
 /**
  * Debugging function that draws the collision boundries of level pieces.
  */
-void InGameDisplayState::DebugDrawLevelPieceBounds() {
+void InGameDisplayState::DebugDrawBounds() {
+	if (!this->display->IsDrawDebugOn()) { return; }
 	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
 
-	// Debug draw of boundries of each block...
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
+
+	// Debug draw boundry of paddle...
+	this->display->GetModel()->GetPlayerPaddle()->DebugDraw();
+	
+	// Debug draw of boundries of each block...
 	std::vector<std::vector<LevelPiece*>> pieces = this->display->GetModel()->GetCurrentLevel()->GetCurrentLevelLayout();
 	for (size_t i = 0; i < pieces.size(); i++) {
 		std::vector<LevelPiece*> setOfPieces = pieces[i];
@@ -230,4 +241,6 @@ void InGameDisplayState::DebugDrawLevelPieceBounds() {
 		}
 	}
 	glPopMatrix();
+
 }
+#endif

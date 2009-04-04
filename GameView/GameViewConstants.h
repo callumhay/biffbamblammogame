@@ -61,6 +61,7 @@ public:
 	const std::string TEXTURE_EXPLOSION_CLOUD;
 	const std::string TEXTURE_EXPLOSION_RAYS;
 	const std::string TEXTURE_LASER_BEAM;
+	const std::string TEXTURE_UP_ARROW;
 
 	const std::string TEXTURE_ITEM_SLOWBALL;
 	const std::string TEXTURE_ITEM_FASTBALL;
@@ -70,6 +71,10 @@ public:
 	const std::string TEXTURE_ITEM_PADDLELASER;
 	const std::string TEXTURE_ITEM_MULTIBALL3;
 	const std::string TEXTURE_ITEM_MULTIBALL5;
+	const std::string TEXTURE_ITEM_PADDLEGROW;
+	const std::string TEXTURE_ITEM_PADDLESHRINK;
+	const std::string TEXTURE_ITEM_BALLGROW;
+	const std::string TEXTURE_ITEM_BALLSHRINK;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -86,7 +91,6 @@ public:
 
 	// Font path constants **********************************
 	const std::string FONT_HAPPYGOOD;
-	const std::string FONT_GUNBLAM;
 	const std::string FONT_EXPLOSIONBOOM;
 	const std::string FONT_ELECTRICZAP;
 	const std::string FONT_ALLPURPOSE;
@@ -102,6 +106,7 @@ public:
 	const std::string BALL_MESH;
 	const std::string SPIKEY_BALL_MESH;
 	const std::string BASIC_BLOCK_MESH_PATH;
+	const std::string TRIANGLE_BLOCK_MESH_PATH;
 	const std::string BOMB_BLOCK_MESH;
 	const std::string SKYBOX_MESH;
 	const std::string ITEM_MESH;

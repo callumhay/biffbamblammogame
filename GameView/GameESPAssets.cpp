@@ -2,20 +2,21 @@
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
 
-
 #include "../GameModel/GameBall.h"
 #include "../GameModel/LevelPiece.h"
+#include "../GameModel/Projectile.h"
+#include "../GameModel/PlayerPaddle.h"
+
 #include "../GameModel/GameItem.h"
 #include "../GameModel/UberBallItem.h"
 #include "../GameModel/GhostBallItem.h"
 #include "../GameModel/BallSpeedItem.h"
 #include "../GameModel/InvisiBallItem.h"
 #include "../GameModel/LaserPaddleItem.h"
-#include "../GameModel/Projectile.h"
-#include "../GameModel/PlayerPaddle.h"
+#include "../GameModel/PaddleSizeItem.h"
+#include "../GameModel/BallSizeItem.h"
 
 #include "../BlammoEngine/Texture2D.h"
-
 
 #include "../ESPEngine/ESP.h"
 
@@ -47,7 +48,8 @@ starTex(NULL),
 starOutlineTex(NULL),
 explosionTex(NULL),
 explosionRayTex(NULL),
-laserBeamTex(NULL) {
+laserBeamTex(NULL),
+upArrowTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -81,6 +83,8 @@ GameESPAssets::~GameESPAssets() {
 	this->explosionRayTex = NULL;
 	delete this->laserBeamTex;
 	this->laserBeamTex = NULL;
+	delete this->upArrowTex;
+	this->upArrowTex = NULL;
 
 	// Delete any standalone effects
 	delete this->paddleLaserGlowAura;
@@ -97,18 +101,39 @@ void GameESPAssets::KillAllActiveEffects() {
 	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin();
 		iter != this->activeGeneralEmitters.end(); iter++) {
 			delete *iter;
+			*iter = NULL;
 	}
 	this->activeGeneralEmitters.clear();
 	
+	// Clear paddle BG emitters
+	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin(); 
+		iter != this->activePaddleEmitters.end(); iter++) {
+		delete *iter;
+		*iter = NULL;
+	}
+	this->activePaddleEmitters.clear();
+
+	// Clear ball BG emiiters
+	for (std::map<const GameBall*, std::list<ESPEmitter*>>::iterator iter = this->activeBallBGEmitters.begin(); 
+		iter != this->activeBallBGEmitters.end(); iter++) {
+
+		std::list<ESPEmitter*>& currEmitterList = iter->second;
+		for (std::list<ESPEmitter*>::iterator iter2 = currEmitterList.begin(); iter2 != currEmitterList.end(); iter2++) {
+				delete *iter2;
+				*iter2 = NULL;
+		}
+		currEmitterList.clear();
+	}
+	this->activeBallBGEmitters.clear();
+
 	// Clear item drop emitters
 	for (std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.begin();
 		iter != this->activeItemDropEmitters.end(); iter++) {
 	
-			std::list<ESPEmitter*> currEmitterList = (*iter).second;
-			for (std::list<ESPEmitter*>::iterator iter = currEmitterList.begin();
-				iter != currEmitterList.end(); iter++) {
-				delete *iter;
-				*iter = NULL;
+			std::list<ESPEmitter*>& currEmitterList = iter->second;
+			for (std::list<ESPEmitter*>::iterator iter2 = currEmitterList.begin(); iter2 != currEmitterList.end(); iter2++) {
+				delete *iter2;
+				*iter2 = NULL;
 			}
 			currEmitterList.clear();
 	}
@@ -246,6 +271,10 @@ void GameESPAssets::InitESPTextures() {
 	if (this->laserBeamTex == NULL) {
 		this->laserBeamTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM, Texture::Trilinear);
 		assert(this->laserBeamTex != NULL);
+	}
+	if (this->upArrowTex == NULL) {
+		this->upArrowTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear);
+		assert(this->upArrowTex != NULL);
 	}
 }
 
@@ -409,11 +438,12 @@ void GameESPAssets::AddBallBounceEffect(const Camera& camera, const GameBall& ba
 	bounceEffect->SetSpawnDelta(ESPInterval(-1, -1));
 	bounceEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
 	bounceEffect->SetParticleLife(ESPInterval(1.2f, 1.5f));
-	bounceEffect->SetParticleSize(ESPInterval(0.7f, 0.9f), ESPInterval(1.0f, 1.0f));
+	bounceEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));//, ESPInterval(1.0f, 1.0f));
 	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	bounceEffect->SetEmitAngleInDegrees(10);
 	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
 	bounceEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bounceEffect->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1));
 	
 	Vector2D ballVelocity = ball.GetVelocity();
 	bounceEffect->SetEmitDirection(Vector3D(ballVelocity[0], ballVelocity[1], 0.0f));
@@ -435,17 +465,17 @@ void GameESPAssets::AddBallBounceEffect(const Camera& camera, const GameBall& ba
 	GameBall::BallSpeed ballSpd = ball.GetSpeed();
 	switch (ballSpd) {
 		case GameBall::SlowSpeed :
-			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::NORMAL);
+			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::WEAK);
 			break;
 		case GameBall::NormalSpeed :
-			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::AWESOME);
+			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::GOOD);
 			break;
 		case GameBall::FastSpeed :
-			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::SUPER_AWESOME);
+			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::AWESOME);
 			break;
 		default :
 			assert(false);
-			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::WEAK);
+			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::SUPER_AWESOME);
 			break;
 	}
 	
@@ -643,6 +673,111 @@ void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPie
 }
 
 /**
+ * Adds the effect for a paddle hitting a wall.
+ */
+void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc) {
+	
+	// Figure out which direction to shoot stuff...
+	Vector2D dirOfWallHit2D = hitLoc - paddle.GetCenterPosition();
+	Vector3D dirOfWallHit3D = Vector3D(dirOfWallHit2D[0], dirOfWallHit2D[1], 0.0f);
+	Point3D hitPos3D = Point3D(hitLoc[0], hitLoc[1], 0.0f);
+
+	// Onomatopeia for the hit...
+	ESPPointEmitter* paddleWallOnoEffect = new ESPPointEmitter();
+	paddleWallOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	paddleWallOnoEffect->SetInitialSpd(ESPInterval(1.0f, 1.75f));
+	paddleWallOnoEffect->SetParticleLife(ESPInterval(1.5f, 2.0f));
+
+	if (dirOfWallHit2D[0] < 0) {
+		paddleWallOnoEffect->SetParticleRotation(ESPInterval(-45.0f, -15.0f));
+	}
+	else {
+		paddleWallOnoEffect->SetParticleRotation(ESPInterval(15.0f, 45.0f));
+	}
+
+	paddleWallOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	paddleWallOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	paddleWallOnoEffect->SetEmitPosition(hitPos3D);
+	paddleWallOnoEffect->SetEmitDirection(dirOfWallHit3D);
+	paddleWallOnoEffect->SetEmitAngleInDegrees(40);
+	paddleWallOnoEffect->SetParticleColour(ESPInterval(0.5f, 1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(1));
+
+	paddleWallOnoEffect->AddEffector(&this->particleFader);
+	paddleWallOnoEffect->AddEffector(&this->particleSmallGrowth);
+	
+	// Add the single particle to the emitter...
+	DropShadow dpTemp;
+	dpTemp.colour = Colour(0,0,0);
+	dpTemp.amountPercentage = 0.10f;
+	ESPOnomataParticle* paddleWallOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small));
+	paddleWallOnoParticle->SetDropShadow(dpTemp);
+
+	// Set the severity of the effect...
+	Onomatoplex::Extremeness severity;
+	ESPInterval size;
+	switch(paddle.GetPaddleSize()) {
+		case PlayerPaddle::SmallestSize:
+			severity = Onomatoplex::WEAK;
+			size.maxValue = 0.75f;
+			size.minValue = 0.6f;
+			break;
+		case PlayerPaddle::SmallerSize:
+			severity = Onomatoplex::GOOD;
+			size.maxValue = 1.0f;
+			size.minValue = 0.75f;
+			break;
+		case PlayerPaddle::NormalSize:
+			severity = Onomatoplex::AWESOME;
+			size.maxValue = 1.2f;
+			size.minValue = 0.75f;
+			break;
+		case PlayerPaddle::BiggerSize:
+			severity = Onomatoplex::SUPER_AWESOME;
+			size.maxValue = 1.5f;
+			size.minValue = 1.0f;
+			break;
+		case PlayerPaddle::BiggestSize:
+			severity = Onomatoplex::UBER;
+			size.maxValue = 1.75f;
+			size.minValue = 1.25f;
+			break;
+		default:
+			assert(false);
+			break;
+	}
+	paddleWallOnoEffect->SetParticleSize(size);
+	paddleWallOnoParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, severity);
+	paddleWallOnoEffect->AddParticle(paddleWallOnoParticle);
+
+	// Smashy star texture particle
+	ESPPointEmitter* paddleWallStarEmitter = new ESPPointEmitter();
+	paddleWallStarEmitter = new ESPPointEmitter();
+	paddleWallStarEmitter->SetSpawnDelta(ESPInterval(-1));
+	paddleWallStarEmitter->SetInitialSpd(ESPInterval(1.5f, 3.0f));
+	paddleWallStarEmitter->SetParticleLife(ESPInterval(1.2f, 2.0f));
+	paddleWallStarEmitter->SetParticleSize(size);
+	paddleWallStarEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
+	paddleWallStarEmitter->SetEmitAngleInDegrees(35);
+	paddleWallStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.25f));
+	paddleWallStarEmitter->SetParticleAlignment(ESP::ViewPlaneAligned);
+	paddleWallStarEmitter->SetEmitDirection(dirOfWallHit3D);
+	paddleWallStarEmitter->SetEmitPosition(hitPos3D);
+
+	if (dirOfWallHit2D[0] < 0) {
+		paddleWallStarEmitter->AddEffector(&this->explosionRayRotatorCCW);
+	}
+	else {
+		paddleWallStarEmitter->AddEffector(&this->explosionRayRotatorCW);
+	}
+
+	paddleWallStarEmitter->AddEffector(&this->particleFader);
+	paddleWallStarEmitter->SetParticles(3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 3), this->starTex);
+		
+	this->activeGeneralEmitters.push_back(paddleWallStarEmitter);
+	this->activeGeneralEmitters.push_back(paddleWallOnoEffect);
+}
+
+/**
  * Adds an effect for when an item is dropping and not yet acquired by the player.
  */
 void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item) {
@@ -801,9 +936,38 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 	Point2D projectilePos2D = projectile.GetPosition();
 	Point3D projectilePos3D = Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f);
 	float projectileSpd     = projectile.GetVelocityMagnitude();
-	Vector2D projectileDir  = projectile.GetVelocityDirection();
+	Vector2D projectileDir		= projectile.GetVelocityDirection();
+	Vector3D projectileDir3D	= Vector3D(projectileDir[0], projectileDir[1], 0.0f);
 
-	// Create the basic laser beam (top-most effect)
+	// Create laser onomatopiea
+	ESPPointEmitter* laserOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	laserOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	laserOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
+	laserOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
+	laserOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.9f));
+	laserOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	laserOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	laserOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	laserOnoEffect->SetEmitPosition(projectilePos3D);
+	laserOnoEffect->SetEmitDirection(projectileDir3D);
+	laserOnoEffect->SetEmitAngleInDegrees(45);
+	laserOnoEffect->SetParticleColour(ESPInterval(0.25f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	
+	// Add effectors...
+	laserOnoEffect->AddEffector(&this->particleFader);
+	laserOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single particle to the emitter...
+	DropShadow dpTemp;
+	dpTemp.colour = Colour(0,0,0);
+	dpTemp.amountPercentage = 0.10f;
+	ESPOnomataParticle* laserOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ElectricZap, GameFontAssetsManager::Small));
+	laserOnoParticle->SetDropShadow(dpTemp);
+	laserOnoParticle->SetOnomatoplexSound(Onomatoplex::SHOT, Onomatoplex::GOOD);
+	laserOnoEffect->AddParticle(laserOnoParticle);
+
+	// Create the basic laser beam
 	ESPPointEmitter* laserBeamEmitter = new ESPPointEmitter();
 	laserBeamEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	laserBeamEmitter->SetInitialSpd(ESPInterval(0));
@@ -870,33 +1034,211 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 	laserEmittersFG.push_back(laserAuraEmitter);
 	laserEmittersFG.push_back(laserBeamEmitter);
 	this->activeProjectileEmitters[&projectile] = std::make_pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>>(laserEmittersFG, laserEmittersBG);
+
+	this->activeGeneralEmitters.push_back(laserOnoEffect);
 }
 
 /**
  * Adds an effect for when a dropping item is acquired by the player paddle -
  * depending on the item type we create the effect.
  */
-void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const GameItem& item) {
-	// TODO.
+void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item) {
+	ESPInterval redRandomColour(0.1f, 1.0f);
+	ESPInterval greenRandomColour(0.1f, 1.0f);
+	ESPInterval blueRandomColour(0.1f, 1.0f);
+	ESPInterval redColour(0), greenColour(0), blueColour(0);
+	ESPInterval alpha(1.0f);
 
-		/*
 	switch (item.GetItemType()) {
 		case GameItem::Good:
+			greenRandomColour = ESPInterval(0.8f, 1.0f);
+			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
+			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
 			break;
 		case GameItem::Bad:
+			redRandomColour = ESPInterval(0.8f, 1.0f);
+			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
+			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
 			break;
 		case GameItem::Neutral:
+			blueRandomColour = ESPInterval(0.8f, 1.0f);
+			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
+			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
 		default:
 			break;
 	}
-	*/
+
+	// Pulsing aura
+	ESPPointEmitter* paddlePulsingAura = new ESPPointEmitter();
+	paddlePulsingAura->SetSpawnDelta(ESPInterval(-1));
+	paddlePulsingAura->SetInitialSpd(ESPInterval(0));
+	paddlePulsingAura->SetParticleLife(ESPInterval(1.0f));
+	paddlePulsingAura->SetParticleSize(ESPInterval(2.0f * paddle.GetHalfWidthTotal()), ESPInterval(4.0f * paddle.GetHalfHeight()));
+	paddlePulsingAura->SetEmitAngleInDegrees(0);
+	paddlePulsingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	paddlePulsingAura->SetParticleAlignment(ESP::ViewPointAligned);
+	paddlePulsingAura->SetEmitPosition(Point3D(0, 0, 0));
+	paddlePulsingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
+	paddlePulsingAura->AddEffector(&this->particleLargeGrowth);
+	paddlePulsingAura->AddEffector(&this->particleFader);
+	paddlePulsingAura->SetParticles(1, this->circleGradientTex);
+
+	// Ray emitter....
+	// TODO
+
+	this->activePaddleEmitters.push_back(paddlePulsingAura);
 }
+
+/**
+ * Add the effect for when the paddle grows.
+ */
+void GameESPAssets::AddPaddleGrowEffect() {
+	std::list<ESPPointEmitter*> paddleGrowEmitters;
+	std::vector<Vector3D> directions;
+	directions.push_back(Vector3D(0,1,0));
+	directions.push_back(Vector3D(0,-1,0));
+	directions.push_back(Vector3D(1,0,0));
+	directions.push_back(Vector3D(-1,0,0));
+
+	for (unsigned int i = 0; i < 4; i++) {
+		ESPPointEmitter* paddleGrowEffect = new ESPPointEmitter();
+		paddleGrowEffect->SetSpawnDelta(ESPInterval(0.005));
+		paddleGrowEffect->SetNumParticleLives(1);
+		paddleGrowEffect->SetInitialSpd(ESPInterval(2.0f, 3.5f));
+		paddleGrowEffect->SetParticleLife(ESPInterval(0.8f, 2.00f));
+		paddleGrowEffect->SetParticleSize(ESPInterval(0.25f, 1.0f));
+		paddleGrowEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		paddleGrowEffect->SetParticleAlignment(ESP::AxisAligned);
+		paddleGrowEffect->SetEmitPosition(Point3D(0,0,0));
+		paddleGrowEffect->SetEmitDirection(directions[i]);
+		paddleGrowEffect->SetEmitAngleInDegrees(23);
+		paddleGrowEffect->SetParticleColour(ESPInterval(0.0f, 0.5f), ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
+		paddleGrowEffect->SetParticles(GameESPAssets::NUM_PADDLE_SIZE_CHANGE_PARTICLES/4, this->upArrowTex);
+		paddleGrowEffect->AddEffector(&this->particleFader);
+		paddleGrowEffect->AddEffector(&this->particleMediumGrowth);
+
+		paddleGrowEmitters.push_back(paddleGrowEffect);
+	}
+
+	for (std::list<ESPPointEmitter*>::iterator iter = paddleGrowEmitters.begin(); iter != paddleGrowEmitters.end(); iter++) {
+		this->activePaddleEmitters.push_back(*iter);
+	}
+}
+
+/**
+ * Add the effect for when the paddle shrinks.
+ */
+void GameESPAssets::AddPaddleShrinkEffect() {
+
+	std::list<ESPPointEmitter*> paddleShrinkEmitters;
+	std::vector<Vector3D> directions;
+	directions.push_back(Vector3D(0,1,0));
+	directions.push_back(Vector3D(0,-1,0));
+	directions.push_back(Vector3D(1,0,0));
+	directions.push_back(Vector3D(-1,0,0));
+
+	for (unsigned int i = 0; i < 4; i++) {
+		ESPPointEmitter* paddleShrinkEffect = new ESPPointEmitter();
+		paddleShrinkEffect->SetSpawnDelta(ESPInterval(0.005));
+		paddleShrinkEffect->SetNumParticleLives(1);
+		paddleShrinkEffect->SetInitialSpd(ESPInterval(2.0f, 3.0f));
+		paddleShrinkEffect->SetParticleLife(ESPInterval(0.8f, 1.25f));
+		paddleShrinkEffect->SetParticleSize(ESPInterval(0.75f, 1.5f));
+		paddleShrinkEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		paddleShrinkEffect->SetParticleAlignment(ESP::AxisAligned);
+		paddleShrinkEffect->SetEmitPosition(Point3D(0,0,0));
+		paddleShrinkEffect->SetEmitDirection(directions[i]);
+		paddleShrinkEffect->SetEmitAngleInDegrees(23);
+		paddleShrinkEffect->SetIsReversed(true);
+		paddleShrinkEffect->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f) , ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
+		paddleShrinkEffect->SetParticles(GameESPAssets::NUM_PADDLE_SIZE_CHANGE_PARTICLES/4, this->upArrowTex);
+		paddleShrinkEffect->AddEffector(&this->particleFader);
+		paddleShrinkEffect->AddEffector(&this->particleMediumShrink);
+
+		paddleShrinkEmitters.push_back(paddleShrinkEffect);
+	}
+
+	for (std::list<ESPPointEmitter*>::iterator iter = paddleShrinkEmitters.begin(); iter != paddleShrinkEmitters.end(); iter++) {
+		this->activePaddleEmitters.push_back(*iter);
+	}
+}
+
+void GameESPAssets::AddBallGrowEffect(const GameBall* ball) {
+	std::list<ESPPointEmitter*> ballGrowEmitters;
+	std::vector<Vector3D> directions;
+	directions.push_back(Vector3D(0,1,0));
+	directions.push_back(Vector3D(0,-1,0));
+	directions.push_back(Vector3D(1,0,0));
+	directions.push_back(Vector3D(-1,0,0));
+
+	for (unsigned int i = 0; i < 4; i++) {
+		ESPPointEmitter* ballGrowEffect = new ESPPointEmitter();
+		ballGrowEffect->SetSpawnDelta(ESPInterval(0.005));
+		ballGrowEffect->SetNumParticleLives(1);
+		ballGrowEffect->SetInitialSpd(ESPInterval(1.5f, 2.5f));
+		ballGrowEffect->SetParticleLife(ESPInterval(0.8f, 2.00f));
+		ballGrowEffect->SetParticleSize(ESPInterval(0.2f, 0.8f));
+		ballGrowEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		ballGrowEffect->SetParticleAlignment(ESP::AxisAligned);
+		ballGrowEffect->SetEmitPosition(Point3D(0,0,0));
+		ballGrowEffect->SetEmitDirection(directions[i]);
+		ballGrowEffect->SetEmitAngleInDegrees(23);
+		ballGrowEffect->SetParticleColour(ESPInterval(0.0f, 0.5f), ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
+		ballGrowEffect->SetParticles(GameESPAssets::NUM_PADDLE_SIZE_CHANGE_PARTICLES/4, this->upArrowTex);
+		ballGrowEffect->AddEffector(&this->particleFader);
+		ballGrowEffect->AddEffector(&this->particleMediumGrowth);
+
+		ballGrowEmitters.push_back(ballGrowEffect);
+	}
+
+	for (std::list<ESPPointEmitter*>::iterator iter = ballGrowEmitters.begin(); iter != ballGrowEmitters.end(); iter++) {
+		this->activeBallBGEmitters[ball].push_back(*iter);
+	}
+}
+
+void GameESPAssets::AddBallShrinkEffect(const GameBall* ball) {
+	std::list<ESPPointEmitter*> ballShrinkEmitters;
+	std::vector<Vector3D> directions;
+	directions.push_back(Vector3D(0,1,0));
+	directions.push_back(Vector3D(0,-1,0));
+	directions.push_back(Vector3D(1,0,0));
+	directions.push_back(Vector3D(-1,0,0));
+
+	for (unsigned int i = 0; i < 4; i++) {
+		ESPPointEmitter* ballShrinkEffect = new ESPPointEmitter();
+		ballShrinkEffect->SetSpawnDelta(ESPInterval(0.005));
+		ballShrinkEffect->SetNumParticleLives(1);
+		ballShrinkEffect->SetInitialSpd(ESPInterval(1.0f, 2.0f));
+		ballShrinkEffect->SetParticleLife(ESPInterval(0.8f, 1.25f));
+		ballShrinkEffect->SetParticleSize(ESPInterval(0.5f, 1.25f));
+		ballShrinkEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		ballShrinkEffect->SetParticleAlignment(ESP::AxisAligned);
+		ballShrinkEffect->SetEmitPosition(Point3D(0,0,0));
+		ballShrinkEffect->SetEmitDirection(directions[i]);
+		ballShrinkEffect->SetEmitAngleInDegrees(23);
+		ballShrinkEffect->SetIsReversed(true);
+		ballShrinkEffect->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f) , ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
+		ballShrinkEffect->SetParticles(GameESPAssets::NUM_BALL_SIZE_CHANGE_PARTICLES/4, this->upArrowTex);
+		ballShrinkEffect->AddEffector(&this->particleFader);
+		ballShrinkEffect->AddEffector(&this->particleMediumShrink);
+
+		ballShrinkEmitters.push_back(ballShrinkEffect);
+	}
+
+	for (std::list<ESPPointEmitter*>::iterator iter = ballShrinkEmitters.begin(); iter != ballShrinkEmitters.end(); iter++) {
+		this->activeBallBGEmitters[ball].push_back(*iter);
+	}
+}
+
 
 /**
  * Adds an effect based on the given game item being activated or deactivated.
  */
-void GameESPAssets::SetItemEffect(const GameItem& item, bool activate) {
-	if (item.GetName() == UberBallItem::UBER_BALL_ITEM_NAME && activate) {
+void GameESPAssets::SetItemEffect(const GameItem& item) {
+	if (item.GetName() == UberBallItem::UBER_BALL_ITEM_NAME) {
 		const GameBall* ballAffected = item.GetBallAffected();
 		assert(ballAffected != NULL);
 
@@ -913,9 +1255,21 @@ void GameESPAssets::SetItemEffect(const GameItem& item, bool activate) {
 		}
 
 	}
-	else if (item.GetName() == LaserPaddleItem::LASER_PADDLE_ITEM_NAME && activate) {
+	else if (item.GetName() == LaserPaddleItem::LASER_PADDLE_ITEM_NAME) {
 		this->paddleLaserGlowAura->Reset();
 		this->paddleLaserGlowSparks->Reset();
+	}
+	else if (item.GetName() == PaddleSizeItem::PADDLE_GROW_ITEM_NAME) {
+		this->AddPaddleGrowEffect();
+	}
+	else if (item.GetName() == PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME) {
+		this->AddPaddleShrinkEffect();
+	}
+	else if (item.GetName() == BallSizeItem::BALL_GROW_ITEM_NAME) {
+		this->AddBallGrowEffect(item.GetBallAffected());
+	}
+	else if (item.GetName() == BallSizeItem::BALL_SHRINK_ITEM_NAME) {
+		this->AddBallShrinkEffect(item.GetBallAffected());
 	}
 }
 
@@ -947,7 +1301,10 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
 
 	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin();
 		iter != removeElements.end(); iter++) {
+			ESPEmitter* currEmitter = (**iter);
 			this->activeGeneralEmitters.erase(*iter);
+			delete currEmitter;
+			currEmitter = NULL;
 	}
 
 	this->DrawProjectileEffects(dT, camera);
@@ -1102,6 +1459,82 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 	ghostBallEffectList[0]->Tick(dT);
 	
 	glPopMatrix();
+}
+
+
+
+/**
+ * Draw particle effects associated with the ball, which get drawn behind the ball.
+ */
+void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	std::list<std::list<ESPEmitter*>::iterator> removeElements;
+
+	// Find the emitters corresponding to the given ball
+	std::map<const GameBall*, std::list<ESPEmitter*>>::iterator tempIter = this->activeBallBGEmitters.find(&ball);
+	if (tempIter == this->activeBallBGEmitters.end()) {
+		return;
+	}
+
+	std::list<ESPEmitter*>& ballEmitters = tempIter->second;
+
+	// Go through all the particles and do book keeping and drawing
+	for (std::list<ESPEmitter*>::iterator iter = ballEmitters.begin(); iter != ballEmitters.end(); iter++) {
+	
+		ESPEmitter* curr = *iter;
+
+		// Check to see if dead, if so erase it...
+		if (curr->IsDead()) {
+			removeElements.push_back(iter);
+		}
+		else {
+			// Not dead yet so we draw and tick
+			curr->Draw(camera);
+			curr->Tick(dT);
+		}
+	}
+
+	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin(); iter != removeElements.end(); iter++) {
+			ESPEmitter* currEmitter = (**iter);
+			tempIter->second.erase(*iter);
+			delete currEmitter;
+			currEmitter = NULL;
+	}
+
+	if (tempIter->second.size() == 0) {
+		this->activeBallBGEmitters.erase(tempIter);
+	}
+}
+
+/**
+ * Draw particle effects associated with the paddle, which get drawn behind the paddle.
+ */
+void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+	std::list<std::list<ESPEmitter*>::iterator> removeElements;
+
+	// Go through all the particles and do book keeping and drawing
+	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin();
+		iter != this->activePaddleEmitters.end(); iter++) {
+	
+		ESPEmitter* curr = *iter;
+
+		// Check to see if dead, if so erase it...
+		if (curr->IsDead()) {
+			removeElements.push_back(iter);
+		}
+		else {
+			// Not dead yet so we draw and tick
+			curr->Draw(camera);
+			curr->Tick(dT);
+		}
+	}
+
+	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin();
+		iter != removeElements.end(); iter++) {
+			ESPEmitter* currEmitter = (**iter);
+			this->activePaddleEmitters.erase(*iter);
+			delete currEmitter;
+			currEmitter = NULL;
+	}
 }
 
 /**

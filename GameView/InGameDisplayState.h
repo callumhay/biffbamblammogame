@@ -24,10 +24,13 @@ private:
 	void DrawGameHUD();
 	void DrawGameScene(double dT);
 
-	void DebugDrawLevelPieceBounds();
 	void RenderBackgroundToFBO();
 	void RenderFullSceneToFBO(double dT);
 	void DrawScene(double dT);
+
+#ifndef NDEBUG
+	void DebugDrawBounds();
+#endif
 
 public:
 	InGameDisplayState(GameDisplay* display);

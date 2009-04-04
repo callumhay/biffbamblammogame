@@ -18,6 +18,8 @@ private:
 	// Meshes for all types of level pieces
 	Mesh* basicBlock;
 	Mesh* bombBlock;
+	Mesh* triangleBlockUR;	// Triangle block (default position in upper-right)
+
 	Mesh* styleBlock;
 
 	// The unique identifiers of, and associated materials of the level piece meshes

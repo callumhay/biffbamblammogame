@@ -28,9 +28,13 @@ private:
 	void SetupActionListeners();
 	void RemoveActionListeners();
 
+#ifndef NDEBUG
+	bool drawDebug;
 	// Debug draw stuff
-	static void DrawDebugAxes();
-	static void DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks);
+	void DrawDebugAxes();
+	void DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks);
+
+#endif
 
 public:
 	static const int NUM_MULTISAMPLES = 4;
@@ -54,7 +58,6 @@ public:
 
 	// Functions for setting up different types of render options
 	static void SetInitialRenderOptions();
-	static void SetOutlineRenderAttribs(float outlineWidth = 1.0f);
 
 	// Getters and Setters
 	GameAssets* GetAssets() {
@@ -77,6 +80,15 @@ public:
 	void KeyPressed(SDLKey key) {
 		this->currState->KeyPressed(key);
 	}
+
+#ifndef NDEBUG
+	void ToggleDrawDebugGeometry() {
+		this->drawDebug = !this->drawDebug;
+	}
+	bool IsDrawDebugOn() const {
+		return this->drawDebug;
+	}
+#endif
 
 	// Be friends with the state classes
 	//friend class InGameDisplayState;

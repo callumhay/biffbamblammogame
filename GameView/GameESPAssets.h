@@ -33,8 +33,11 @@ class GameESPAssets {
 private:
 	// Currently active particle systems
 	std::list<ESPEmitter*> activeGeneralEmitters;
+	std::list<ESPEmitter*> activePaddleEmitters;
+	std::map<const GameBall*, std::list<ESPEmitter*>>		activeBallBGEmitters;
 	std::map<const GameItem*, std::list<ESPEmitter*>>		activeItemDropEmitters; 
 	std::map<const Projectile*, std::pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>>> activeProjectileEmitters;
+	
 
 	// Standard effectors for the various ESP effects
 	ESPParticleColourEffector particleFader;
@@ -66,6 +69,7 @@ private:
 	Texture2D* explosionTex;
 	Texture2D* explosionRayTex;
 	Texture2D* laserBeamTex;
+	Texture2D* upArrowTex;
 
 	// Ball related ESP effects - stores each balls set of item-related (defined by unique string ID) effects
 	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>> ballEffects;
@@ -76,6 +80,8 @@ private:
 	static const int NUM_UBER_BALL_TRAIL_PARTICLES = 35;
 	static const int NUM_EXPLOSION_FIRE_CLOUD_PARTICLES  = 25;
 	static const int NUM_LASER_VAPOUR_TRAIL_PARTICLES = 15;
+	static const int NUM_PADDLE_SIZE_CHANGE_PARTICLES = 24;
+	static const int NUM_BALL_SIZE_CHANGE_PARTICLES = 20;
 
 	ESPPointEmitter* paddleLaserGlowAura;
 	ESPPointEmitter* paddleLaserGlowSparks;
@@ -91,11 +97,18 @@ private:
 	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 
+	void AddPaddleGrowEffect();
+	void AddPaddleShrinkEffect();
+	void AddBallGrowEffect(const GameBall* ball);
+	void AddBallShrinkEffect(const GameBall* ball);
+
 	void InitLaserPaddleESPEffects();
 
 	void AddLaserPaddleESPEffects(const Projectile& projectile);
 	void DrawProjectileEffects(double dT, const Camera& camera);
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, ESPPointEmitter* projectileEmitter);
+
+
 
 public:
 	GameESPAssets();
@@ -105,12 +118,11 @@ public:
 	void AddBallBounceEffect(const Camera& camera, const GameBall& ball);
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
-	void AddItemAcquiredEffect(const Camera& camera, const GameItem& item);
-	void SetItemEffect(const GameItem& item, bool activate);
-
+	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
+	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
+	void SetItemEffect(const GameItem& item);
 	void AddItemDropEffect(const Camera& camera, const GameItem& item);
 	void RemoveItemDropEffect(const Camera& camera, const GameItem& item);
-
 	void AddProjectileEffect(const Camera& camera, const Projectile& projectile);
 	void RemoveProjectileEffect(const Camera& camera, const Projectile& projectile);
 
@@ -123,11 +135,11 @@ public:
 
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
 
-
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	
-
+	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
+	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 	void DrawPaddleLaserEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 
 };
