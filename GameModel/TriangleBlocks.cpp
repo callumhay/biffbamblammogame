@@ -88,7 +88,7 @@ BoundingLines TriangleBlock::CreateTriangleBounds(Orientation triOrient, const P
 			shortSide = Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 									 center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			
-			if (bottomNeighborEmpty && rightNeighborEmpty) {
+			if (bottomNeighborEmpty || rightNeighborEmpty) {
 				hypSideNorm		= Vector2D(1, -1);
 				hypSide		= Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 											center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -107,7 +107,7 @@ BoundingLines TriangleBlock::CreateTriangleBounds(Orientation triOrient, const P
 			shortSide = Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 										center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));			
 			
-			if (bottomNeighborEmpty && leftNeighborEmpty) {
+			if (bottomNeighborEmpty || leftNeighborEmpty) {
 				hypSideNorm		= Vector2D(-1, -1);
 				hypSide		= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 											center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -126,7 +126,7 @@ BoundingLines TriangleBlock::CreateTriangleBounds(Orientation triOrient, const P
 			shortSide = Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 									 center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			
-			if (topNeighborEmpty && rightNeighborEmpty) {
+			if (topNeighborEmpty || rightNeighborEmpty) {
 				hypSideNorm		= Vector2D(1, 1);
 				hypSide		= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 											center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -144,7 +144,7 @@ BoundingLines TriangleBlock::CreateTriangleBounds(Orientation triOrient, const P
 			shortSide = Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 									 center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			
-			if (topNeighborEmpty && leftNeighborEmpty) {
+			if (topNeighborEmpty || leftNeighborEmpty) {
 				hypSideNorm		= Vector2D(-1, 1);
 				hypSide		= Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 											center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));

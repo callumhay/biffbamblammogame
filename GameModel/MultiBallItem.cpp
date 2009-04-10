@@ -28,26 +28,26 @@ double MultiBallItem::Activate() {
 
 	float currRotationInDegs = 0.0f;
 
-	// Go through each game ball making 'numBalls' copies of it and setting those copies
-	// with the appropriate characteristics
+	// Go through the first game ball making 'numBalls' copies of it and setting that copy with the appropriate characteristics
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	std::vector<GameBall*> newBalls;
-	newBalls.reserve(gameBalls.size() * this->numNewSpawnedBalls);
-	for (std::list<GameBall*>::const_iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
-		const GameBall* currBall = *ballIter;
-	
-		// Create all the copies of the current ball
-		for (unsigned int copyNum = 0; copyNum < this->numNewSpawnedBalls; copyNum++) {
-			GameBall* newBall = new GameBall(*currBall);
-			
-			// We need to change the moving direction of the copied ball to something random but also reasonable:
-			Vector2D ballDir = currBall->GetDirection();
-			currRotationInDegs += MultiBallItem::MIN_SPLIT_DEGREES + Randomizer::GetInstance()->RandomNumZeroToOne()*maxDegreesDiff;
-			newBall->SetVelocity(currBall->GetSpeed(), Rotate(currRotationInDegs, ballDir));
+	GameBall* affectedBall = *gameBalls.begin();
+	assert(affectedBall != NULL);
 
-			newBalls.push_back(newBall);
-		}
+	std::vector<GameBall*> newBalls;
+	newBalls.reserve(1 * this->numNewSpawnedBalls);
+
+	// Create all the copies of the current ball
+	for (unsigned int copyNum = 0; copyNum < this->numNewSpawnedBalls; copyNum++) {
+		GameBall* newBall = new GameBall(*affectedBall);
+		
+		// We need to change the moving direction of the copied ball to something random but also reasonable:
+		Vector2D ballDir = affectedBall->GetDirection();
+		currRotationInDegs += MultiBallItem::MIN_SPLIT_DEGREES + Randomizer::GetInstance()->RandomNumZeroToOne()*maxDegreesDiff;
+		newBall->SetVelocity(affectedBall->GetSpeed(), Rotate(currRotationInDegs, ballDir));
+
+		newBalls.push_back(newBall);
 	}
+
 
 	// Now add all the newly created balls into the game model's list of balls
 	for (std::vector<GameBall*>::iterator iter = newBalls.begin(); iter != newBalls.end(); iter++) {

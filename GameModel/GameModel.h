@@ -200,7 +200,7 @@ public:
 	void AddProjectile(Projectile::ProjectileType type, const Point2D& spawnLoc);
 
 	// Debug functions
-#ifndef NDEBUG
+#ifdef _DEBUG
 	void DropItem(const std::string& itemName) {
 		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
 		if (state != NULL) {

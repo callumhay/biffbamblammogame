@@ -91,6 +91,7 @@ bool GameWorld::Load() {
 bool GameWorld::Unload() {
 	for (size_t i = 0; i < this->loadedLevels.size(); i++) {
 		delete this->loadedLevels[i];
+		this->loadedLevels[i] = NULL;
 	}
 	this->loadedLevels.clear();
 	this->isLoaded = false;

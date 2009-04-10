@@ -9,7 +9,7 @@
 #include "../BlammoEngine/BlammoEngine.h"
 
 BallInPlayState::BallInPlayState(GameModel* gm) : 
-GameState(gm), debugItemDrop(NULL), timeSinceGhost(DBL_MAX) {
+GameState(gm), timeSinceGhost(DBL_MAX) {
 }
 
 BallInPlayState::~BallInPlayState() {
@@ -19,15 +19,13 @@ BallInPlayState::~BallInPlayState() {
 	this->gameModel->ClearActiveTimers();
 }
 
+/**
+ * Drop an item manually via debug hot keys and commands.
+ */
 void BallInPlayState::DebugDropItem(GameItem* item) {
 	assert(item != NULL);
-	if (this->debugItemDrop == NULL) {
-		this->debugItemDrop = item;
-	}
-	else {
-		delete item;
-		item = NULL;
-	}
+	this->gameModel->GetLiveItems().push_back(item);
+	GameEventManager::Instance()->ActionItemSpawned(*item);
 }
 
 /**
@@ -281,14 +279,6 @@ void BallInPlayState::UpdateActiveItemDrops(double seconds) {
 		GameEventManager::Instance()->ActionItemRemoved(*currItem);
 		delete currItem;
 		currItem = NULL;
-	}
-
-	// Debug Item drop
-	if (this->debugItemDrop != NULL) {
-		currLiveItems.push_back(this->debugItemDrop);
-		// EVENT: Item has been created and added to the game
-		GameEventManager::Instance()->ActionItemSpawned(*this->debugItemDrop);
-		this->debugItemDrop = NULL;
 	}
 }
 
