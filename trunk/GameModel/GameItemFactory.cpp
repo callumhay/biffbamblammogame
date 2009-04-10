@@ -61,7 +61,7 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 	return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);
 }
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 GameItem* GameItemFactory::CreateItem(const std::string itemName, const Point2D &spawnOrigin, GameModel *gameModel) {
 	if (itemName == BallSpeedItem::FAST_BALL_ITEM_NAME) {
 		return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);

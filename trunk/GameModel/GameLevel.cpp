@@ -40,6 +40,7 @@ GameLevel::~GameLevel() {
 	for (size_t i = 0; i < this->currentLevelPieces.size(); i++) {
 		for (size_t j = 0; j < this->currentLevelPieces[i].size(); j++) {
 			delete this->currentLevelPieces[i][j];
+			this->currentLevelPieces[i][j] = NULL;
 		}
 		this->currentLevelPieces[i].clear();
 	}

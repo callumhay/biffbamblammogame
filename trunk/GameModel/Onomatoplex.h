@@ -8,10 +8,10 @@
 namespace Onomatoplex {
 
 	// TODO: Shooting, GoodHappy
-	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3, BADSAD = 4, SHOT = 5};
+	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3, BADSAD = 4, SHOT = 5, GOODHAPPY = 6};
 	enum Extremeness {WEAK = 0, NORMAL = 1, PRETTY_GOOD = 2, GOOD = 3, AWESOME = 4, SUPER_AWESOME = 5, UBER = 6};
 	
-	static const int NumSoundTypes = 5;
+	static const int NumSoundTypes = 7;
 	static const int NumExtremenessTypes = 7;
 	
 	// Singleton class for generating crazy words.
@@ -27,6 +27,14 @@ namespace Onomatoplex {
 		std::map<SoundType, std::vector<std::string>> goodSingleWords;
 		std::map<SoundType, std::vector<std::string>> awesomeSingleWords;
 		std::map<SoundType, std::vector<std::string>> uberSingleWords;
+
+		void LoadExplosionWords();
+		void LoadBounceWords();
+		void LoadElectricWords();
+		void LoadSmokeWords();
+		void LoadBadSadWords();
+		void LoadShotWords();
+		void LoadGoodHappyWords();
 
 		// Punctuation structures and functions
 		static const std::string DEFAULT_END_PUNCTUATION;
