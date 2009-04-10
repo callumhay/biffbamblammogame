@@ -417,10 +417,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ESPEngine\ESPAreaEmitter.h"
-					>
-				</File>
-				<File
 					RelativePath=".\ESPEngine\ESPEmitter.h"
 					>
 				</File>
@@ -468,10 +464,6 @@
 			<Filter
 				Name="Source Files"
 				>
-				<File
-					RelativePath=".\ESPEngine\ESPAreaEmitter.cpp"
-					>
-				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPEmitter.cpp"
 					>
@@ -601,6 +593,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\LoadingScreen.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\MainMenuDisplayState.h"
 					>
 				</File>
@@ -689,6 +685,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\LoadingScreen.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\MainMenuDisplayState.cpp"
 					>
 				</File>
@@ -710,6 +710,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\BallOnPaddleState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BallSizeItem.h"
 					>
 				</File>
 				<File
@@ -809,6 +813,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\PaddleSizeItem.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\PlayerPaddle.h"
 					>
 				</File>
@@ -818,6 +826,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\SolidBlock.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\TriangleBlocks.h"
 					>
 				</File>
 				<File
@@ -834,6 +846,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\BallOnPaddleState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BallSizeItem.cpp"
 					>
 				</File>
 				<File
@@ -921,6 +937,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\PaddleSizeItem.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\PlayerPaddle.cpp"
 					>
 				</File>
@@ -930,6 +950,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\SolidBlock.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\TriangleBlocks.cpp"
 					>
 				</File>
 				<File

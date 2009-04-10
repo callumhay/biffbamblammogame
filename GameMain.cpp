@@ -3,10 +3,12 @@
 #include "GameView/GameDisplay.h"
 #include "GameView/GameViewConstants.h"
 #include "GameView/GameFontAssetsManager.h"
+#include "GameView/LoadingScreen.h"
 
 #include "GameModel/GameModel.h"
 #include "GameModel/GameEventManager.h"
 #include "GameModel/GameModelConstants.h"
+#include "GameModel/Onomatoplex.h"
 
 #include "GameController.h"
 
@@ -31,8 +33,7 @@ void ResizeWindow(int w, int h) {
 static void KeyDownEventHandler(SDL_keysym* keysym) {
 	switch (keysym->sym) {
 	case SDLK_ESCAPE:
-		SDL_Quit();
-		exit(0);
+		display->QuitGame();
 		break;
 	default:
 		controller->KeyDown(keysym->sym);
@@ -60,12 +61,10 @@ static void ProcessEvents() {
 				break;
 			case SDL_VIDEORESIZE:
 				ResizeWindow(event.resize.w, event.resize.h);
-				
 				break;
 			case SDL_QUIT:
 				// Handle quit requests (like Ctrl-c)
-				SDL_Quit();
-				exit(0);
+				display->QuitGame();
 				break;
 		}
 	}
@@ -109,7 +108,6 @@ bool InitSDLWindow() {
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, GameDisplay::NUM_MULTISAMPLES);
 
-
   // Set the draw surface...
 	VideoSurface = SDL_SetVideoMode(INIT_WIDTH, INIT_HEIGHT, BitsPerPixel, DEFAULT_VIDEO_FLAGS);
 	if (VideoSurface == NULL) {
@@ -124,36 +122,48 @@ bool InitSDLWindow() {
 	return true;
 }
 
-
 // Driver function for the game.
 int main(int argc, char *argv[]) {
+
+	// Memory dump debug info for detecting and finding memory leaks
+#ifdef _DEBUG
+	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetBreakAlloc(37316);
+#endif
+
 	// Setup the SDL window
 	if (!InitSDLWindow()) {
 		SDL_Quit();
 		return -1;
 	}
 	
+	debug_opengl_state();
+
 	// Load extensions
 	GLenum err = glewInit();
 	if (GLEW_OK != err) {
 		std::cout << "Error loading extensions: " << glewGetErrorString(err) << std::endl;
 		return -1;
 	}
+	
+	// TODO: VSync: option for this?
+	BlammoTime::SetVSync(0);
 
-	// Create the MVC...
+	// Create the MVC while showing the loading screen...
+	LoadingScreen::GetInstance()->StartShowLoadingScreen(INIT_WIDTH, INIT_HEIGHT, 5);
+
 	model = new GameModel();
 	display = new GameDisplay(model, INIT_WIDTH, INIT_HEIGHT);
 	controller = new GameController(model, display);
 
-	// TODO: VSync: option for this?
-	BlammoTime::SetVSync(0);
+	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 
 	double frameTimeDelta = 0.0;
 	// Try to keep it at 60fps...
 	const double maxDelta = 1.0 / 60.0;
 
 	// Main render loop...
-	while(true) {
+	while(!display->HasGameExited()) {
 		Uint32 startOfFrameTime = SDL_GetTicks();
 		
 		// Don't let the game run at less than 60 fps
@@ -178,10 +188,14 @@ int main(int argc, char *argv[]) {
 
 	// Clear up MVC
 	delete model;
+	model = NULL;
 	delete display;
+	display = NULL;
 	delete controller;
+	controller = NULL;
 
 	// Clear up singletons
+	Onomatoplex::Generator::DeleteInstance();
 	GameEventManager::DeleteInstance();
 	CgShaderManager::DeleteInstance();
 	FBOManager::DeleteInstance();
@@ -189,6 +203,10 @@ int main(int argc, char *argv[]) {
 	GameViewConstants::DeleteInstance();
 	GameFontAssetsManager::DeleteInstance();
 	Randomizer::DeleteInstance();
+	LoadingScreen::DeleteInstance();
+	Noise::DeleteInstance();
+
+	SDL_Quit();
 
 	return 0;
 }
