@@ -3,15 +3,19 @@
 
 #include "../BlammoEngine/Camera.h"
 
+#include "../GameModel/Onomatoplex.h"
+
 #include "ESPParticle.h"
 #include "ESPUtil.h"
 #include "ESPParticleEffector.h"
+#include "ESPParticleBatchMesh.h"
 
 #include <vector>
 #include <string>
 #include <map>
 
 class CgFxEffectBase;
+class TextLabel2D;
 
 /**
  * ESPEmitter.h
@@ -19,19 +23,18 @@ class CgFxEffectBase;
  */
 class ESPEmitter {
 
-protected:
-	
-	//Texture2D* particleTexture;														// Texture of particles in this emitter
-	std::vector<Texture2D*> particleTextures;
-	std::map<ESPParticle*, Texture2D*> textureAssignments;	// Mapping of particles to textures
-	std::map<ESPParticle*, int> particleLivesLeft;					// Number of lives left for each particle
+protected:			
+	Texture2D* particleTexture;		// Texture of particles in this emitter
+
+	std::map<const ESPParticle*, int> particleLivesLeft;		// Number of lives left for each particle
 	std::list<ESPParticle*> aliveParticles;									// All the alive particles in this emitter
 	std::list<ESPParticle*> deadParticles;									// All the dead particles in this emitter
 	
 	float timeSinceLastSpawn;																// Time since the last particle was spawned	
 	int numParticleLives;
 	
-	bool isReversed;	// Whether this emitter is reversed (i.e., particles start where they die and die where they start)
+	bool isReversed;		// Whether this emitter is reversed (i.e., particles start where they die and die where they start)
+	bool isPointSprite;	// Whether this emitter emits point sprites
 
 	std::list<ESPParticleEffector*> effectors;	// All the particle effectors of this emitter
 	
@@ -51,9 +54,7 @@ protected:
 	// Inclusive intervals for the colour of particles
 	ESPInterval particleRed, particleGreen, particleBlue, particleAlpha;
 
-	virtual void Flush();
-
-	void AssignRandomTextureToParticle(ESPParticle* particle);
+	void Flush();
 
 public:
 	ESPEmitter();
@@ -72,8 +73,9 @@ public:
 
 	// Setter functions for typical attributes of emitters
 	bool SetParticles(unsigned int numParticles, Texture2D* texture);
-	bool SetParticles(unsigned int numParticles, std::vector<Texture2D*> textures);
 	bool SetParticles(unsigned int numParticles, CgFxEffectBase* effect);
+	bool SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e);
+
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);
 	void SetSpawnDelta(const ESPInterval& spawnDelta);
 	void SetInitialSpd(const ESPInterval& initialSpd);
@@ -84,7 +86,8 @@ public:
 	void SetParticleRotation(const ESPInterval& particleRot);
 	void SetNumParticleLives(int lives);
 	void SetIsReversed(bool isReversed);
-	
+	void SetAsPointSpriteEmitter(bool isPointSprite);
+
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);
 	void AddParticle(ESPParticle* particle);
