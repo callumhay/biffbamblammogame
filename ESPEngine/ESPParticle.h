@@ -21,12 +21,6 @@ protected:
 	static GLuint particleDispList;
 	static GLuint GenerateParticleDispList();
 
-	// Vectors defining the up, right and normal directions of
-	// any drawn particle
-	static const Vector3D PARTICLE_UP_VEC;
-	static const Vector3D PARTICLE_NORMAL_VEC;
-	static const Vector3D PARTICLE_RIGHT_VEC;
-
 	// Total lifespan in seconds of this particle
 	double totalLifespan;
 	// Amount of time in seconds that have elapsed since this particle was created
@@ -44,14 +38,20 @@ protected:
 	Point3D  position;	// Position of the particle in world space
 	Vector3D velocity;
 
-	Matrix4x4 GetPersonalAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment);
-
 public: 
 	static const int INFINITE_PARTICLE_LIFETIME = -1;
 	static const int INFINITE_PARTICLE_LIVES		= -1;
 
+	// Vectors defining the up, right and normal directions of
+	// any drawn particle
+	static const Vector3D PARTICLE_UP_VEC;
+	static const Vector3D PARTICLE_NORMAL_VEC;
+	static const Vector3D PARTICLE_RIGHT_VEC;
+
 	ESPParticle();
 	virtual ~ESPParticle();
+
+	Matrix4x4 GetPersonalAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment);
 
 	/**
 	 * Is this particle dead or not.
@@ -64,6 +64,7 @@ public:
 	virtual void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
 	virtual void Tick(const double dT);
 	virtual void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
+	virtual void DrawAsPointSprite(const Camera& camera);
 	virtual void Kill() {
 		this->currLifeElapsed = this->totalLifespan;
 	}
@@ -98,6 +99,16 @@ public:
 		rgb = this->colour;
 		alpha = this->alpha;
 	}
+
+	Colour4D GetColour() const {
+		Colour4D c;
+		c.rgba[0] = this->colour[0];
+		c.rgba[1] = this->colour[1];
+		c.rgba[2] = this->colour[2];
+		c.rgba[3] = alpha;
+		return c;
+	}
+
 	void SetColour(const Colour& rgb, double alpha) {
 		this->colour = rgb;
 		this->alpha = alpha;

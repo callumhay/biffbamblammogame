@@ -103,6 +103,24 @@ void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) 
 	glPopMatrix();
 }
 
+void ESPParticle::DrawAsPointSprite(const Camera& camera) {
+	if (this->IsDead()) {
+		return;
+	}
+
+	// Calculate distance from sprite to camera and use it to adjust sprite size...
+	Point3D camPos = camera.GetCurrentCameraPosition();
+	Vector3D vecToCam = camPos - this->position;
+	
+	float dist = vecToCam.length();
+	glPointSize((1000.0f / dist) * this->size[0]);
+
+	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
+	glBegin(GL_POINTS);
+	glVertex3f(this->position[0], this->position[1], this->position[2]);
+	glEnd();
+}
+
 Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment) {
 	Vector3D alignRightVec	= Vector3D(1, 0, 0);
 	Vector3D alignUpVec			= Vector3D(0, 1, 0);
@@ -125,7 +143,7 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 		
 		// The camera starts facing the +z direction, the sprite starts facing the -z direction...
 		Point3D camPos = cam.GetCurrentCameraPosition();
-		Point3D currPos = -1.0f * Point3D(camPos[0], camPos[1], -camPos[2]);
+		Point3D currPos = Point3D(camPos[0], -camPos[1], camPos[2]);
 		
 		// The normal vector is from the particle center to the eye
 		alignNormalVec = Vector3D(currPos[0], currPos[1], currPos[2]);
@@ -158,8 +176,8 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			// The particle is aligned to its axis of velocity
 			// - The normal vector is from the particle center to the eye	
 			// - The up vector is the velocity vector of this particle
-			alignUpVec			= Vector3D::Normalize(this->velocity);
-			alignRightVec		= Vector3D::cross(alignNormalVec, alignUpVec);
+			alignUpVec			= Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], -this->velocity[2]));
+			alignRightVec		= Vector3D::cross(alignUpVec, alignNormalVec);
 			if (alignRightVec == Vector3D(0,0,0)) {
 				alignRightVec = Vector3D::MollerHughesPerpendicular(alignNormalVec);
 			}

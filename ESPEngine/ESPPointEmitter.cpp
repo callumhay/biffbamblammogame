@@ -103,11 +103,10 @@ void ESPPointEmitter::ReviveParticle() {
 	
 	zombie->SetColour(Colour(this->particleRed.RandomValueInInterval(), this->particleGreen.RandomValueInInterval(), 
 		this->particleBlue.RandomValueInInterval()), this->particleAlpha.RandomValueInInterval());
-	this->AssignRandomTextureToParticle(zombie);
 
 	this->aliveParticles.push_back(zombie);
 
-	// Subtract a life from the particle the lives are not infinite
+	// Subtract a life from the particle if the lives are not infinite
 	int& livesLeftForRevivedParticle = this->particleLivesLeft[zombie];
 	if (livesLeftForRevivedParticle != ESPParticle::INFINITE_PARTICLE_LIVES) {
 		assert(livesLeftForRevivedParticle != 0);
@@ -122,7 +121,7 @@ void ESPPointEmitter::ReviveParticle() {
  * the movement between alive and dead particles.
  */
 void ESPPointEmitter::TickParticles(double dT) {
-	std::list<ESPParticle*> nowDead;
+	std::list<std::list<ESPParticle*>::iterator> nowDead;
 
 	// Go through the alive iterators and figure out which ones have died and tick those that are still alive
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
@@ -132,7 +131,7 @@ void ESPPointEmitter::TickParticles(double dT) {
 
 		// Check to see if the particle has died, if so place it among the dead
 		if (currParticle->IsDead()) {
-			nowDead.push_back(currParticle);
+			nowDead.push_back(iter);
 			this->deadParticles.push_back(currParticle);
 		}
 		else {
@@ -145,8 +144,8 @@ void ESPPointEmitter::TickParticles(double dT) {
 		}
 	}
 
-	for (std::list<ESPParticle*>::iterator iter = nowDead.begin(); iter != nowDead.end(); iter++) {
-		this->aliveParticles.remove(*iter);	
+	for (std::list<std::list<ESPParticle*>::iterator>::iterator iter = nowDead.begin(); iter != nowDead.end(); iter++) {
+		this->aliveParticles.erase(*iter);	
 	}
 }
 
@@ -224,28 +223,47 @@ void ESPPointEmitter::SetRadiusDeviationFromCenter(const ESPInterval& distFromCe
  */
 void ESPPointEmitter::Draw(const Camera& camera) {
 	// Setup OpenGL for drawing the particles in this emitter...
-	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT  | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_MULTISAMPLE_BIT); 	
+	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | 
+		GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_MULTISAMPLE_BIT | GL_POINT_BIT); 	
 	
 	glDisable(GL_MULTISAMPLE);
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
 
 	// Go through each of the particles, revive any dead ones (based on spawn rate), and draw them
-	if (this->textureAssignments.size() == 1) {
-		this->textureAssignments.begin()->second->BindTexture();
+	if (this->particleTexture != NULL) {
+		this->particleTexture->BindTexture();
 	}
 
-	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
-		ESPParticle* currParticle = *iter;
-		std::map<ESPParticle*, Texture2D*>::iterator findIter = this->textureAssignments.find(currParticle);
-		if (this->textureAssignments.size() != 1 && findIter != this->textureAssignments.end()) {
-			findIter->second->BindTexture();
+	if (this->isPointSprite && GLEW_ARB_point_sprite) {
+		
+		// Draw things faster if we're doing point sprites
+		glEnable(GL_POINT_SPRITE);
+		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+		glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
+
+		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+			ESPParticle* currParticle = *iter;
+			currParticle->DrawAsPointSprite(camera);
 		}
-		currParticle->Draw(camera, this->particleAlignment);
+		glDisable(GL_POINT_SPRITE);
+		debug_opengl_state();
+	}
+	else {
+		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+			ESPParticle* currParticle = *iter;
+			currParticle->Draw(camera, this->particleAlignment);
+		}
+	}
+
+	if (this->particleTexture != NULL) {
+		this->particleTexture->UnbindTexture();
 	}
 	
 	glPopAttrib();

@@ -1,11 +1,13 @@
 #include "ESPEmitter.h"
 #include "ESPShaderParticle.h"
+#include "ESPOnomataParticle.h"
 
+#include "../BlammoEngine/TextLabel.h"
 
-ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), //particleTexture(NULL),
+ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), particleTexture(NULL),
 particleAlignment(ESP::ViewPointAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
 particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES),
-isReversed(false) {
+isReversed(false), isPointSprite(false) {
 }
 
 ESPEmitter::~ESPEmitter() {
@@ -20,6 +22,7 @@ ESPEmitter::~ESPEmitter() {
  * other heap information.
  */
 void ESPEmitter::Flush() {
+	assert(this->aliveParticles.size() + this->deadParticles.size() == this->particleLivesLeft.size());
 	// Delete particles
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
 		ESPParticle* currParticle = *iter;
@@ -27,6 +30,7 @@ void ESPEmitter::Flush() {
 		currParticle = NULL;
 	}
 	this->aliveParticles.clear();
+
 	for (std::list<ESPParticle*>::iterator iter = this->deadParticles.begin(); iter != this->deadParticles.end(); iter++) {
 		ESPParticle* currParticle = *iter;
 		delete currParticle;
@@ -35,29 +39,11 @@ void ESPEmitter::Flush() {
 	this->deadParticles.clear();
 
 	// Clear other relevant particle information
-	this->particleTextures.clear();
-	this->textureAssignments.clear();
 	this->particleLivesLeft.clear();
 
 	// Reset appropriate variables
 	this->timeSinceLastSpawn = 0.0f;
-}
-
-/**
- * Private helper function for assigning a random texture to a particle.
- */
-void ESPEmitter::AssignRandomTextureToParticle(ESPParticle* particle) {
-	assert(particle != NULL);
-
-	// If there are no textures then just exit
-	if (this->particleTextures.size() == 0) {
-		return;
-	}
-	
-	// Choose a random texture index...
-	unsigned int randomTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->particleTextures.size();
-	this->textureAssignments[particle] = this->particleTextures[randomTexIndex];
-	assert(this->textureAssignments[particle] != NULL);
+	this->particleTexture = NULL;
 }
 
 /**
@@ -70,7 +56,7 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, Texture2D* texture) {
 	this->Flush();
 
 	assert(texture != NULL);
-	this->particleTextures.push_back(texture);
+	this->particleTexture = texture;
 
 	// Create each of the new particles
 	for (unsigned int i = 0; i < numParticles; i++) {
@@ -79,35 +65,6 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, Texture2D* texture) {
 
 		// Assign the number of lives...
 		this->particleLivesLeft[newParticle] = this->numParticleLives;
-
-		this->textureAssignments[newParticle] = texture;
-	}
-
-	return true;
-}
-
-/**
- * Public function for setting the particles for this emitter, the textures given
- * are assigned to particles in this emitter at random.
- * Returns: true on success, false otherwise.
- */
-bool ESPEmitter::SetParticles(unsigned int numParticles, std::vector<Texture2D*> textures) {
-	assert(numParticles > 0);
-	// Clean up any previous emitter data
-	this->Flush();
-
-	this->particleTextures = textures;
-
-	// Create each of the new particles
-	for (unsigned int i = 0; i < numParticles; i++) {
-		ESPParticle* newParticle = new ESPParticle();
-		this->deadParticles.push_back(newParticle);
-
-		// Assign the number of lives...
-		this->particleLivesLeft[newParticle] = this->numParticleLives;
-
-		// Pick a random texture and assign it...
-		this->AssignRandomTextureToParticle(newParticle);
 	}
 
 	return true;
@@ -126,6 +83,32 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, CgFxEffectBase* effect)
 	// Create each of the new particles
 	for (unsigned int i = 0; i < numParticles; i++) {
 		ESPShaderParticle* newParticle = new ESPShaderParticle(effect);
+		this->deadParticles.push_back(newParticle);
+
+		// Assign the number of lives...
+		this->particleLivesLeft[newParticle] = this->numParticleLives;
+	}
+
+	return true;
+}
+
+/**
+ * Public function for setting particles for this emitter such that they are
+ * all onomatopoeia particles of the given text label and qualifications.
+ * Returns: true on success, false otherwise.
+ */
+bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e) {
+	assert(numParticles > 0);
+	// Clean up previous emitter data
+	this->Flush();
+	
+	// Create each of the new particles
+	for (unsigned int i = 0; i < numParticles; i++) {
+		// Initialize the particle and its attributes
+		ESPOnomataParticle* newParticle = new ESPOnomataParticle(text.GetFont());
+		newParticle->SetDropShadow(text.GetDropShadow());
+		newParticle->SetOnomatoplexSound(st, e);
+
 		this->deadParticles.push_back(newParticle);
 
 		// Assign the number of lives...
@@ -224,6 +207,13 @@ void ESPEmitter::SetIsReversed(bool isReversed) {
 }
 
 /**
+ * Sets whether this emitter emits point sprites or not.
+ */
+void ESPEmitter::SetAsPointSpriteEmitter(bool isPointSprite) {
+	this->isPointSprite = isPointSprite;
+}
+
+/**
  * Adds a particle effector to this emitter.
  */
 void ESPEmitter::AddEffector(ESPParticleEffector* effector) {
@@ -231,6 +221,7 @@ void ESPEmitter::AddEffector(ESPParticleEffector* effector) {
 	this->effectors.push_back(effector);
 }
 
+// TODO: Get rid of this function, replace with set particle for onomatopiea effects!!!
 void ESPEmitter::AddParticle(ESPParticle* particle) {
 	assert(particle != NULL);
 	this->deadParticles.push_back(particle);
