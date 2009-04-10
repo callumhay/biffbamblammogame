@@ -9,6 +9,8 @@
 #include "GameModel/GhostBallItem.h"
 #include "GameModel/LaserPaddleItem.h"
 #include "GameModel/MultiBallItem.h"
+#include "GameModel/PaddleSizeItem.h"
+#include "GameModel/BallSizeItem.h"
 
 #include "BlammoEngine/BlammoEngine.h"
 #include "BlammoEngine/Camera.h"
@@ -28,7 +30,7 @@ void GameController::KeyDown(SDLKey key) {
 		this->model->ReleaseBall();
 	}
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 	// Debug Item drops
 	if (key == SDLK_s) {
 		this->model->DropItem(BallSpeedItem::SLOW_BALL_ITEM_NAME);
@@ -54,13 +56,28 @@ void GameController::KeyDown(SDLKey key) {
 	else if (key == SDLK_5) {
 		this->model->DropItem(MultiBallItem::MULTI5_BALL_ITEM_NAME);
 	}
+	else if (key == SDLK_a) {
+		this->model->DropItem(PaddleSizeItem::PADDLE_GROW_ITEM_NAME);
+	}
+	else if (key == SDLK_z) {
+		this->model->DropItem(PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME);
+	}
+	else if (key == SDLK_k) {
+		this->model->DropItem(BallSizeItem::BALL_GROW_ITEM_NAME);
+	}
+	else if (key == SDLK_m) {
+		this->model->DropItem(BallSizeItem::BALL_SHRINK_ITEM_NAME);
+	}
 	else if (key == SDLK_p) {
 		this->model->TogglePauseGame();
 	}
-	else if (key == SDLK_0) {
-		// Toggle multisampling
-		FBOManager::GetInstance()->SetAllowMultisamplingFBO(!FBOManager::GetInstance()->GetAllowMultisamplingFBO());
+	else if (key == SDLK_w) {
+		this->display->ToggleDrawDebugGeometry();
 	}
+	//else if (key == SDLK_0) {
+		// Toggle multisampling
+	//	FBOManager::GetInstance()->SetAllowMultisamplingFBO(!FBOManager::GetInstance()->GetAllowMultisamplingFBO());
+	//}
 #endif
 
 }
@@ -85,7 +102,7 @@ void GameController::Tick() {
 	}
 
 	// Debug movement controls
-#ifndef NDEBUG
+#ifdef _DEBUG
 	if (this->keyPressed[SDLK_KP8]) {
 		this->display->GetCamera().Move(Camera::DEFAULT_FORWARD_VEC);
 	}
