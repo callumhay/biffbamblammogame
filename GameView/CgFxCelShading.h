@@ -13,10 +13,10 @@ private:
 	// Constants used for loading the CelShading effect
 	static const std::string BASIC_TECHNIQUE_NAME;
 	static const std::string TEXTURED_TECHNIQUE_NAME;
+	static Texture1D* CelDiffuseTexture;
 
 	// Cel shading texture: parameter and texture objects
 	CGparameter celSamplerParam;
-	Texture1D* celDiffuseTexture;
 	
 	CGparameter outlineWidthParam;
 	CGparameter outlineColourParam;

@@ -34,6 +34,7 @@ GameMenu::~GameMenu() {
 	// Delete all the menu items
 	for (size_t i = 0; i < this->menuItems.size(); i++) {
 		delete this->menuItems[i];
+		this->menuItems[i] = NULL;
 	}
 	this->menuItems.clear();
 }
@@ -89,4 +90,6 @@ void GameMenu::DebugDraw() {
 	glPopMatrix();
 	glPopAttrib(); 
 	Camera::PopWindowCoords();
+
+	debug_opengl_state();
 }

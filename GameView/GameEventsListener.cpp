@@ -31,7 +31,7 @@ void GameEventsListener::GameCompletedEvent() {
 
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	debug_output("EVENT: World started");
-
+	
 	// Show a loading screen for loading up the assets for the next in-game world...
 	unsigned int numLevelsInWorld = world.GetAllLevelsInWorld().size();
 	LoadingScreen::GetInstance()->StartShowLoadingScreen(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), numLevelsInWorld + 1);
@@ -103,7 +103,6 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 
 void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 	debug_output("EVENT: Ball died");
-	// TODO:
 	this->display->GetAssets()->KillAllActiveBallEffects(deadBall);
 }
 
@@ -168,10 +167,13 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 	
 	// Add the effects based on the type of block that is being destroyed...
 	switch (block.GetType()) {
+		
 		case LevelPiece::Breakable:
+		case LevelPiece::BreakableTriangle:
 			// Typical break effect for basic breakable blocks
 			this->display->GetAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
 			break;
+
 		case LevelPiece::Bomb:
 			// Bomb effect - big explosion!
 			this->display->GetAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block);

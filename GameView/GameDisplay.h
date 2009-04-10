@@ -24,11 +24,14 @@ private:
 	// Width and height of the viewport/display
 	int width, height;
 	
+	// Whether or not the game has been exited
+	bool gameExited;
+
 	// Functions for Action Listeners
 	void SetupActionListeners();
 	void RemoveActionListeners();
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 	bool drawDebug;
 	// Debug draw stuff
 	void DrawDebugAxes();
@@ -43,6 +46,9 @@ public:
 
 	GameDisplay(GameModel* model, int initWidth, int initHeight);
 	~GameDisplay();
+
+	bool HasGameExited() const { return this->gameExited; }
+	void QuitGame() { this->gameExited = true; }
 
 	// Change the current state of the display
 	void SetCurrentState(DisplayState* state) {
@@ -81,7 +87,7 @@ public:
 		this->currState->KeyPressed(key);
 	}
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 	void ToggleDrawDebugGeometry() {
 		this->drawDebug = !this->drawDebug;
 	}

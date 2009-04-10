@@ -6,6 +6,7 @@
 
 const std::string CgFxCelShading::BASIC_TECHNIQUE_NAME			= "Basic";
 const std::string CgFxCelShading::TEXTURED_TECHNIQUE_NAME		= "Textured";
+Texture1D* CgFxCelShading::CelDiffuseTexture = NULL;
 
 // Default constructor, builds default, white material
 CgFxCelShading::CgFxCelShading(MaterialProperties* properties) : 
@@ -15,8 +16,13 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties
 	this->celSamplerParam = NULL;
 	this->celSamplerParam	= cgGetNamedEffectParameter(this->cgEffect, "CelSampler");
 	assert(this->celSamplerParam);
-	this->celDiffuseTexture = Texture1D::CreateTexture1DFromImgFile("resources/textures/celshading_texture1x256.jpg", Texture::Nearest);
-	cgGLSetTextureParameter(this->celSamplerParam, this->celDiffuseTexture->GetTextureID());
+
+	// Initialize the static cel texture if it hasn't been already
+	if (this->CelDiffuseTexture  == NULL) {
+		this->CelDiffuseTexture = Texture1D::CreateTexture1DFromImgFile("resources/textures/celshading_texture1x256.jpg", Texture::Nearest);
+		assert(this->CelDiffuseTexture != NULL);
+	}
+	cgGLSetTextureParameter(this->celSamplerParam, this->CelDiffuseTexture->GetTextureID());
 
 	// Set up other cel-shading parameters
 	this->outlineWidthParam		= NULL;
@@ -36,7 +42,10 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties
 }
 
 CgFxCelShading::~CgFxCelShading() {
-	delete celDiffuseTexture;
+	if (this->CelDiffuseTexture != NULL) {
+		delete this->CelDiffuseTexture;
+		this->CelDiffuseTexture = NULL;
+	}
 }
 
 void CgFxCelShading::SetupBeforePasses(const Camera& camera) {
