@@ -35,6 +35,8 @@ InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(disp
 	this->livesLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), LIVES_LABEL_TEXT);
 	this->livesLabel.SetColour(textColourHUD);
 	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
+
+	debug_opengl_state();
 }
 
 InGameDisplayState::~InGameDisplayState() {
@@ -55,6 +57,8 @@ void InGameDisplayState::RenderFrame(double dT) {
 	glLoadIdentity();
 	this->display->GetCamera().ApplyCameraTransform(dT);
 	
+	debug_opengl_state();
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
@@ -91,8 +95,10 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	// Post-processing effects...
 	this->display->GetAssets()->DrawPostProcessingESPEffects(dT, this->display->GetCamera(), this->renderToTexEverything);
 	glPopMatrix();
+	
+	debug_opengl_state();
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 	this->DebugDrawBounds();
 #endif
 }
@@ -121,6 +127,7 @@ void InGameDisplayState::RenderBackgroundToFBO() {
 
 	// Unbind the background FBO
 	FBOManager::GetInstance()->UnbindFBO(*this->renderToTexBackground);
+	debug_opengl_state();
 }
 
 /**
@@ -137,6 +144,7 @@ void InGameDisplayState::RenderFullSceneToFBO(double dT) {
 
 	// Unbind the full scene FBO
 	FBOManager::GetInstance()->UnbindFBO(*this->renderToTexEverything);
+	debug_opengl_state();
 }
 
 /**
@@ -182,6 +190,7 @@ void InGameDisplayState::DrawScene(double dT) {
 	// Typical Particle effects...
 	this->display->GetAssets()->DrawParticleEffects(dT, this->display->GetCamera());
 	glPopMatrix();
+	debug_opengl_state();
 }
 
 /**
@@ -208,7 +217,7 @@ void InGameDisplayState::DrawGameHUD() {
 	// Draw the timers that are currently in existance
 	const std::list<GameItemTimer*>& activeTimers = this->display->GetModel()->GetActiveTimers();
 	this->display->GetAssets()->DrawTimers(activeTimers, this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
-
+	debug_opengl_state();
 }
 
 void InGameDisplayState::DisplaySizeChanged(int width, int height) {
@@ -216,9 +225,10 @@ void InGameDisplayState::DisplaySizeChanged(int width, int height) {
 	this->renderToTexEverything = Texture2D::CreateEmptyTextureRectangle(width, height);
 	delete this->renderToTexBackground;
 	this->renderToTexBackground = Texture2D::CreateEmptyTextureRectangle(width, height);
+	debug_opengl_state();
 }
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 /**
  * Debugging function that draws the collision boundries of level pieces.
  */
@@ -241,6 +251,6 @@ void InGameDisplayState::DebugDrawBounds() {
 		}
 	}
 	glPopMatrix();
-
+	debug_opengl_state();
 }
 #endif

@@ -23,12 +23,12 @@ private:
 	// Display-related members
 	static const std::string LOADING_TEXT;
 	static const float GAP_PIXELS;						// Gap between text and items on the load screen
+	
+	static const int LOADING_BAR_WIDTH;				// Width of the loading bar in pixels
+	static const int LOADING_BAR_HEIGHT;			// Height of the loading bar in pixels
 
 	TextLabel2D loadingLabel;					// Text label for "Loading..." 
 	TextLabel2D itemLoadingLabel;			// Text label for saying what is being currently loaded
-
-	float loadingBarTotalWidth;				// Width of loading bar
-	float loadingBarTotalHeight;			// Height of loading bar
 
 	LoadingScreen();
 	~LoadingScreen(){}

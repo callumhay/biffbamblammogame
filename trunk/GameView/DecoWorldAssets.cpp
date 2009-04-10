@@ -36,6 +36,13 @@ rotationStatebg2(RotateCCW)
 }
 
 DecoWorldAssets::~DecoWorldAssets() {
+	// Clean up deco specific background assets:
+	// Beam effect
+	delete this->beamEffect;
+	this->beamEffect = NULL;
+	// Beam geometry
+	delete this->skybeam;
+	this->skybeam = NULL;
 }
 
 void DecoWorldAssets::Tick(double dT) {

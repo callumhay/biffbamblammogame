@@ -28,7 +28,7 @@ private:
 	void RenderFullSceneToFBO(double dT);
 	void DrawScene(double dT);
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 	void DebugDrawBounds();
 #endif
 

@@ -127,46 +127,37 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->activeBallBGEmitters.clear();
 
 	// Clear item drop emitters
-	for (std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.begin();
-		iter != this->activeItemDropEmitters.end(); iter++) {
-	
-			std::list<ESPEmitter*>& currEmitterList = iter->second;
-			for (std::list<ESPEmitter*>::iterator iter2 = currEmitterList.begin(); iter2 != currEmitterList.end(); iter2++) {
-				delete *iter2;
-				*iter2 = NULL;
+	for (std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.begin();	iter != this->activeItemDropEmitters.end(); iter++) {
+			for (std::list<ESPEmitter*>::iterator iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++) {
+				ESPEmitter* currEmitter = *iter2;
+				delete currEmitter;
+				currEmitter = NULL;
 			}
-			currEmitterList.clear();
+			iter->second.clear();
 	}
 	this->activeItemDropEmitters.clear();
 
 	// Clear projectile emitters
-	for (std::map<const Projectile*, std::pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>>>::iterator iter1 = this->activeProjectileEmitters.begin();
+	for (std::map<const Projectile*, std::list<ESPEmitter*>>::iterator iter1 = this->activeProjectileEmitters.begin();
 		iter1 != this->activeProjectileEmitters.end(); iter1++) {
 	
-			std::pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>>& fgbgPair = (*iter1).second;
+			std::list<ESPEmitter*>& projEmitters = iter1->second;
 			
-			for (std::list<ESPPointEmitter*>::iterator iter2 = fgbgPair.first.begin();
-				iter2 != fgbgPair.first.end(); iter2++) {
+			for (std::list<ESPEmitter*>::iterator iter2 = projEmitters.begin(); iter2 != projEmitters.end(); iter2++) {
 				delete *iter2;
 				*iter2 = NULL;
 			}
-			fgbgPair.first.clear();
-			
-			for (std::list<ESPPointEmitter*>::iterator iter2 = fgbgPair.second.begin();
-				iter2 != fgbgPair.second.end(); iter2++) {
-				delete *iter2;
-				*iter2 = NULL;
-			}
-			fgbgPair.second.clear();
-
+			projEmitters.clear();
 	}
 	this->activeProjectileEmitters.clear();
 
 	// Clear all ball emitters
 	for (std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); iter1++) {
 		std::map<std::string, std::vector<ESPPointEmitter*>>& currBallEffects = iter1->second;
+		
 		for (std::map<std::string, std::vector<ESPPointEmitter*>>::iterator iter2 = currBallEffects.begin(); iter2 != currBallEffects.end(); iter2++) {
 			std::vector<ESPPointEmitter*>& effectList = iter2->second;
+
 			for (std::vector<ESPPointEmitter*>::iterator iter3 = effectList.begin(); iter3 != effectList.end(); iter3++) {
 				ESPPointEmitter* currEmitter = *iter3;
 				delete currEmitter;
@@ -276,6 +267,8 @@ void GameESPAssets::InitESPTextures() {
 		this->upArrowTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear);
 		assert(this->upArrowTex != NULL);
 	}
+
+	debug_opengl_state();
 }
 
 // Private helper function for initializing the uber ball's effects
@@ -353,7 +346,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleLaserGlowAura->SetParticleSize(ESPInterval(1.5f));
 	this->paddleLaserGlowAura->SetEmitAngleInDegrees(0);
 	this->paddleLaserGlowAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->paddleLaserGlowAura->SetParticleAlignment(ESP::ScreenAligned);
+	this->paddleLaserGlowAura->SetAsPointSpriteEmitter(true);
 	this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, 0, 0));
 	this->paddleLaserGlowAura->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->paddleLaserGlowAura->AddEffector(&this->particlePulsePaddleLaser);
@@ -368,13 +361,13 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleLaserGlowSparks->SetParticleColour(ESPInterval(0.5f, 0.9f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->paddleLaserGlowSparks->SetEmitAngleInDegrees(90);
 	this->paddleLaserGlowSparks->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->paddleLaserGlowSparks->SetParticleAlignment(ESP::ScreenAligned);
+	this->paddleLaserGlowSparks->SetAsPointSpriteEmitter(true);
 	this->paddleLaserGlowSparks->SetEmitPosition(Point3D(0, 0, 0));
 	this->paddleLaserGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
 	this->paddleLaserGlowSparks->AddEffector(&this->particleFader);
 	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, this->circleGradientTex);
 	assert(result);
-
+	
 }
 
 /**
@@ -519,15 +512,8 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	}
 	bangEffect->SetParticleRotation(ESPInterval(baseBangRotation - 10.0f, baseBangRotation + 10.0f));
 
-	// Four possible variations on reflection...
 	ESPInterval sizeIntervalX(3.5f, 3.8f);
 	ESPInterval sizeIntervalY(1.9f, 2.2f);
-	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-		sizeIntervalX = ESPInterval(-sizeIntervalX.maxValue, -sizeIntervalX.minValue);
-	}
-	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-		sizeIntervalY = ESPInterval(-sizeIntervalY.maxValue, - sizeIntervalY.minValue);
-	}
 	bangEffect->SetParticleSize(sizeIntervalX, sizeIntervalY);
 
 	// Add effectors to the bang effect
@@ -751,7 +737,6 @@ void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Poi
 
 	// Smashy star texture particle
 	ESPPointEmitter* paddleWallStarEmitter = new ESPPointEmitter();
-	paddleWallStarEmitter = new ESPPointEmitter();
 	paddleWallStarEmitter->SetSpawnDelta(ESPInterval(-1));
 	paddleWallStarEmitter->SetInitialSpd(ESPInterval(1.5f, 3.0f));
 	paddleWallStarEmitter->SetParticleLife(ESPInterval(1.2f, 2.0f));
@@ -781,9 +766,6 @@ void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Poi
  * Adds an effect for when an item is dropping and not yet acquired by the player.
  */
 void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item) {
-
-	std::list<ESPEmitter*> itemDropEmitters;
-
 	ESPInterval redRandomColour(0.1f, 1.0f);
 	ESPInterval greenRandomColour(0.1f, 1.0f);
 	ESPInterval blueRandomColour(0.1f, 1.0f);
@@ -820,7 +802,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	itemDropEmitterAura1->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 0.6f), ESPInterval(GameItem::ITEM_HEIGHT + 0.6f));
 	itemDropEmitterAura1->SetEmitAngleInDegrees(0);
 	itemDropEmitterAura1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterAura1->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterAura1->SetAsPointSpriteEmitter(true);
 	itemDropEmitterAura1->SetEmitPosition(Point3D(GameItem::HALF_ITEM_WIDTH, 0, 0));
 	itemDropEmitterAura1->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
 	itemDropEmitterAura1->AddEffector(&this->particlePulseItemDropAura);
@@ -833,23 +815,22 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	itemDropEmitterAura2->SetParticleSize(ESPInterval(GameItem::ITEM_HEIGHT + 0.6f), ESPInterval(GameItem::ITEM_HEIGHT + 0.6f));
 	itemDropEmitterAura2->SetEmitAngleInDegrees(0);
 	itemDropEmitterAura2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterAura2->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterAura2->SetAsPointSpriteEmitter(true);
 	itemDropEmitterAura2->SetEmitPosition(Point3D(-GameItem::HALF_ITEM_WIDTH, 0, 0));
 	itemDropEmitterAura2->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
 	itemDropEmitterAura2->AddEffector(&this->particlePulseItemDropAura);
 	itemDropEmitterAura2->SetParticles(1, this->circleGradientTex);
-
+	
 	// Middle emitter emits solid stars
 	ESPPointEmitter* itemDropEmitterTrail1 = new ESPPointEmitter();
-	itemDropEmitterTrail1 = new ESPPointEmitter();
-	itemDropEmitterTrail1->SetSpawnDelta(ESPInterval(0.05f, 0.2f));
+	itemDropEmitterTrail1->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
 	itemDropEmitterTrail1->SetInitialSpd(ESPInterval(3.0f, 5.0f));
 	itemDropEmitterTrail1->SetParticleLife(ESPInterval(1.2f, 2.0f));
 	itemDropEmitterTrail1->SetParticleSize(ESPInterval(0.6f, 1.4f));
 	itemDropEmitterTrail1->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
 	itemDropEmitterTrail1->SetEmitAngleInDegrees(25);
 	itemDropEmitterTrail1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterTrail1->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterTrail1->SetAsPointSpriteEmitter(true);
 	itemDropEmitterTrail1->SetEmitDirection(Vector3D(0, 1, 0));
 	itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
 	itemDropEmitterTrail1->AddEffector(&this->particleFader);
@@ -857,15 +838,14 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	
 	// Left emitter emits outlined stars
 	ESPPointEmitter* itemDropEmitterTrail2 = new ESPPointEmitter();
-	itemDropEmitterTrail2 = new ESPPointEmitter();
-	itemDropEmitterTrail2->SetSpawnDelta(ESPInterval(0.05f, 0.2f));
+	itemDropEmitterTrail2->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
 	itemDropEmitterTrail2->SetInitialSpd(ESPInterval(2.5f, 4.0f));
 	itemDropEmitterTrail2->SetParticleLife(ESPInterval(1.5f, 2.2f));
 	itemDropEmitterTrail2->SetParticleSize(ESPInterval(0.4f, 1.1f));
 	itemDropEmitterTrail2->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
 	itemDropEmitterTrail2->SetEmitAngleInDegrees(10);
 	itemDropEmitterTrail2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterTrail2->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterTrail2->SetAsPointSpriteEmitter(true);
 	itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
 	itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
 	itemDropEmitterTrail2->AddEffector(&this->particleFader);
@@ -873,33 +853,44 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	
 	// Right emitter emits outlined stars
 	ESPPointEmitter* itemDropEmitterTrail3 = new ESPPointEmitter();
-	itemDropEmitterTrail3 = new ESPPointEmitter();
-	itemDropEmitterTrail3->SetSpawnDelta(ESPInterval(0.05f, 0.2f));
+	itemDropEmitterTrail3->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
 	itemDropEmitterTrail3->SetInitialSpd(ESPInterval(2.5f, 4.0f));
 	itemDropEmitterTrail3->SetParticleLife(ESPInterval(1.5f, 2.2f));
 	itemDropEmitterTrail3->SetParticleSize(ESPInterval(0.4f, 1.1f));
 	itemDropEmitterTrail3->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
 	itemDropEmitterTrail3->SetEmitAngleInDegrees(10);
 	itemDropEmitterTrail3->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterTrail3->SetParticleAlignment(ESP::ViewPointAligned);
+	itemDropEmitterTrail3->SetAsPointSpriteEmitter(true);
 	itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
 	itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
 	itemDropEmitterTrail3->AddEffector(&this->particleFader);
 	itemDropEmitterTrail3->SetParticles(7, this->starOutlineTex);
 
 	// Add all the emitters for the item
-	itemDropEmitters.push_back(itemDropEmitterAura1);
-	itemDropEmitters.push_back(itemDropEmitterAura2);
-	itemDropEmitters.push_back(itemDropEmitterTrail1);
-	itemDropEmitters.push_back(itemDropEmitterTrail2);
-	itemDropEmitters.push_back(itemDropEmitterTrail3);
-	this->activeItemDropEmitters[&item] = itemDropEmitters;
+	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura1);
+	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura2);
+	this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail1);
+	this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail2);
+	this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail3);
+	
 }
 /**
  * Removes an effect associated with a dropping item.
  */
 void GameESPAssets::RemoveItemDropEffect(const Camera& camera, const GameItem& item) {
-	if (this->activeItemDropEmitters.find(&item) != this->activeItemDropEmitters.end()) {
+
+	// Try to find any effects associated with the given item
+	std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.find(&item);
+	if (iter != this->activeItemDropEmitters.end()) {
+		
+		// Delete all emitters associated with the item drop effect
+		for (std::list<ESPEmitter*>::iterator effectIter = iter->second.begin(); effectIter != iter->second.end(); effectIter++) {
+			ESPEmitter* currEmitter = *effectIter;
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		iter->second.clear();
+
 		this->activeItemDropEmitters.erase(&item);
 	}
 }
@@ -922,7 +913,18 @@ void GameESPAssets::AddProjectileEffect(const Camera& camera, const Projectile& 
  * Removes effects associated with the given projectile.
  */
 void GameESPAssets::RemoveProjectileEffect(const Camera& camera, const Projectile& projectile) {
-	if (this->activeProjectileEmitters.find(&projectile) != this->activeProjectileEmitters.end()) {
+	
+ 	std::map<const Projectile*, std::list<ESPEmitter*>>::iterator projIter = this->activeProjectileEmitters.find(&projectile);
+	if (projIter != this->activeProjectileEmitters.end()) {
+			
+		std::list<ESPEmitter*>& projEffects = projIter->second;
+		for (std::list<ESPEmitter*>::iterator effectIter = projEffects.begin(); effectIter != projEffects.end(); effectIter++) {
+			ESPEmitter* currEmitter = *effectIter;
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		projEffects.clear();
+
 		this->activeProjectileEmitters.erase(&projectile);
 	}
 }
@@ -996,7 +998,6 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 
 	// Create the trail effects
 	ESPPointEmitter* laserTrailSparks = new ESPPointEmitter();
-	laserTrailSparks = new ESPPointEmitter();
 	laserTrailSparks->SetSpawnDelta(ESPInterval(0.01f, 0.033f));
 	laserTrailSparks->SetInitialSpd(ESPInterval(projectileSpd));
 	laserTrailSparks->SetParticleLife(ESPInterval(0.5f, 0.6f));
@@ -1005,7 +1006,7 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 	laserTrailSparks->SetEmitAngleInDegrees(15);
 	laserTrailSparks->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
 	laserTrailSparks->SetRadiusDeviationFromCenter(ESPInterval(0.5f*PaddleLaser::PADDLELASER_HALF_WIDTH));
-	laserTrailSparks->SetParticleAlignment(ESP::ScreenAligned);
+	laserTrailSparks->SetAsPointSpriteEmitter(true);
 	laserTrailSparks->SetEmitPosition(projectilePos3D);
 	laserTrailSparks->AddEffector(&this->particleFader);
 	laserTrailSparks->AddEffector(&this->particleMediumShrink);
@@ -1026,14 +1027,10 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 	laserVapourTrail->SetParticles(GameESPAssets::NUM_LASER_VAPOUR_TRAIL_PARTICLES, &this->laserVapourTrailEffect);
 	laserVapourTrail->AddEffector(&this->particleFader);
 	*/
-	std::list<ESPPointEmitter*> laserEmittersFG;
-	std::list<ESPPointEmitter*> laserEmittersBG;
-	//laserEmittersBG.push_front(laserVapourTrail);
 
-	laserEmittersFG.push_back(laserTrailSparks);
-	laserEmittersFG.push_back(laserAuraEmitter);
-	laserEmittersFG.push_back(laserBeamEmitter);
-	this->activeProjectileEmitters[&projectile] = std::make_pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>>(laserEmittersFG, laserEmittersBG);
+	this->activeProjectileEmitters[&projectile].push_back(laserTrailSparks);
+	this->activeProjectileEmitters[&projectile].push_back(laserAuraEmitter);
+	this->activeProjectileEmitters[&projectile].push_back(laserBeamEmitter);
 
 	this->activeGeneralEmitters.push_back(laserOnoEffect);
 }
@@ -1096,7 +1093,6 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
  * Add the effect for when the paddle grows.
  */
 void GameESPAssets::AddPaddleGrowEffect() {
-	std::list<ESPPointEmitter*> paddleGrowEmitters;
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
 	directions.push_back(Vector3D(0,-1,0));
@@ -1120,11 +1116,7 @@ void GameESPAssets::AddPaddleGrowEffect() {
 		paddleGrowEffect->AddEffector(&this->particleFader);
 		paddleGrowEffect->AddEffector(&this->particleMediumGrowth);
 
-		paddleGrowEmitters.push_back(paddleGrowEffect);
-	}
-
-	for (std::list<ESPPointEmitter*>::iterator iter = paddleGrowEmitters.begin(); iter != paddleGrowEmitters.end(); iter++) {
-		this->activePaddleEmitters.push_back(*iter);
+		this->activePaddleEmitters.push_back(paddleGrowEffect);
 	}
 }
 
@@ -1132,8 +1124,6 @@ void GameESPAssets::AddPaddleGrowEffect() {
  * Add the effect for when the paddle shrinks.
  */
 void GameESPAssets::AddPaddleShrinkEffect() {
-
-	std::list<ESPPointEmitter*> paddleShrinkEmitters;
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
 	directions.push_back(Vector3D(0,-1,0));
@@ -1158,16 +1148,11 @@ void GameESPAssets::AddPaddleShrinkEffect() {
 		paddleShrinkEffect->AddEffector(&this->particleFader);
 		paddleShrinkEffect->AddEffector(&this->particleMediumShrink);
 
-		paddleShrinkEmitters.push_back(paddleShrinkEffect);
-	}
-
-	for (std::list<ESPPointEmitter*>::iterator iter = paddleShrinkEmitters.begin(); iter != paddleShrinkEmitters.end(); iter++) {
-		this->activePaddleEmitters.push_back(*iter);
+		this->activePaddleEmitters.push_back(paddleShrinkEffect);
 	}
 }
 
 void GameESPAssets::AddBallGrowEffect(const GameBall* ball) {
-	std::list<ESPPointEmitter*> ballGrowEmitters;
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
 	directions.push_back(Vector3D(0,-1,0));
@@ -1191,16 +1176,11 @@ void GameESPAssets::AddBallGrowEffect(const GameBall* ball) {
 		ballGrowEffect->AddEffector(&this->particleFader);
 		ballGrowEffect->AddEffector(&this->particleMediumGrowth);
 
-		ballGrowEmitters.push_back(ballGrowEffect);
-	}
-
-	for (std::list<ESPPointEmitter*>::iterator iter = ballGrowEmitters.begin(); iter != ballGrowEmitters.end(); iter++) {
-		this->activeBallBGEmitters[ball].push_back(*iter);
+		this->activeBallBGEmitters[ball].push_back(ballGrowEffect);
 	}
 }
 
 void GameESPAssets::AddBallShrinkEffect(const GameBall* ball) {
-	std::list<ESPPointEmitter*> ballShrinkEmitters;
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
 	directions.push_back(Vector3D(0,-1,0));
@@ -1225,11 +1205,7 @@ void GameESPAssets::AddBallShrinkEffect(const GameBall* ball) {
 		ballShrinkEffect->AddEffector(&this->particleFader);
 		ballShrinkEffect->AddEffector(&this->particleMediumShrink);
 
-		ballShrinkEmitters.push_back(ballShrinkEffect);
-	}
-
-	for (std::list<ESPPointEmitter*>::iterator iter = ballShrinkEmitters.begin(); iter != ballShrinkEmitters.end(); iter++) {
-		this->activeBallBGEmitters[ball].push_back(*iter);
+		this->activeBallBGEmitters[ball].push_back(ballShrinkEffect);
 	}
 }
 
@@ -1322,22 +1298,18 @@ void GameESPAssets::DrawPostProcessingESPEffects(double dT, const Camera& camera
  * Update and draw all projectile effects that are currently active.
  */
 void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
-	for (std::map<const Projectile*, std::pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>>>::iterator iter = this->activeProjectileEmitters.begin();
+	for (std::map<const Projectile*, std::list<ESPEmitter*>>::iterator iter = this->activeProjectileEmitters.begin();
 		iter != this->activeProjectileEmitters.end(); iter++) {
 		
 		const Projectile* currProjectile = iter->first;
-		std::pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>> fgbgPair = iter->second;
+		std::list<ESPEmitter*>& projEmitters = iter->second;
 
 		assert(currProjectile != NULL);
-
 		Point2D projectilePos2D		= currProjectile->GetPosition();
 
 		// Update and draw the emitters, background then foreground...
-		for (std::list<ESPPointEmitter*>::iterator emitIterBG = fgbgPair.second.begin(); emitIterBG != fgbgPair.second.end(); emitIterBG++) {
-			this->DrawProjectileEmitter(dT, camera, projectilePos2D, *emitIterBG);
-		}
-		for (std::list<ESPPointEmitter*>::iterator emitIterFG = fgbgPair.first.begin(); emitIterFG != fgbgPair.first.end(); emitIterFG++) {
-			this->DrawProjectileEmitter(dT, camera, projectilePos2D, *emitIterFG);
+		for (std::list<ESPEmitter*>::iterator emitIter = projEmitters.begin(); emitIter != projEmitters.end(); emitIter++) {
+			this->DrawProjectileEmitter(dT, camera, projectilePos2D, *emitIter);
 		}
 	}
 }
@@ -1345,14 +1317,16 @@ void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
 /**
  * Private helper function for drawing a single projectile at a given position.
  */
-void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, ESPPointEmitter* projectileEmitter) {
+void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, ESPEmitter* projectileEmitter) {
 	bool movesWithProjectile = projectileEmitter->OnlySpawnsOnce();
 	if (movesWithProjectile) {
 		glPushMatrix();
 		glTranslatef(projectilePos2D[0], projectilePos2D[1], 0.0f);
 	}
 	else {
-		projectileEmitter->SetEmitPosition(Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f));
+		ESPPointEmitter* temp = dynamic_cast<ESPPointEmitter*>(projectileEmitter);
+		assert(temp != NULL);
+		temp->SetEmitPosition(Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f));
 	}
 	
 	projectileEmitter->Draw(camera);
@@ -1377,8 +1351,8 @@ void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const G
 	}
 	
 	// Draw the appropriate effects
-	std::list<ESPEmitter*> itemDropEmitters = itemDropEffectIter->second;
-	for (std::list<ESPEmitter*>::iterator iter = itemDropEmitters.begin(); iter != itemDropEmitters.end(); iter++) {
+	assert(itemDropEffectIter->second.size() > 0);
+	for (std::list<ESPEmitter*>::iterator iter = itemDropEffectIter->second.begin(); iter != itemDropEffectIter->second.end(); iter++) {
 		ESPEmitter* currEmitter = *iter;
 		currEmitter->Draw(camera);
 		currEmitter->Tick(dT);
@@ -1528,8 +1502,7 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
 		}
 	}
 
-	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin();
-		iter != removeElements.end(); iter++) {
+	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin(); iter != removeElements.end(); iter++) {
 			ESPEmitter* currEmitter = (**iter);
 			this->activePaddleEmitters.erase(*iter);
 			delete currEmitter;

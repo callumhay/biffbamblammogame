@@ -9,27 +9,24 @@ LoadingScreen* LoadingScreen::instance = NULL;
 const std::string LoadingScreen::LOADING_TEXT = "Loading ...";
 const float LoadingScreen::GAP_PIXELS	= 20.0f;
 
+const int LoadingScreen::LOADING_BAR_WIDTH	= 550;
+const int LoadingScreen::LOADING_BAR_HEIGHT = 50;
 const std::string LoadingScreen::ABSURD_LOADING_DESCRIPTION = "ABSURD";
 
-LoadingScreen::LoadingScreen() : loadingScreenOn(false), width(0), height(0), numExpectedUpdates(0), numCallsToUpdate(0),
-loadingBarTotalWidth(0), loadingBarTotalHeight(0) {
-
+LoadingScreen::LoadingScreen() : loadingScreenOn(false), width(0), height(0), numExpectedUpdates(0), numCallsToUpdate(0) {
 	// At the very least we need fonts to display info on the loading screen...
 	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
-
+	
 	// Create our various labels...
-	const TextureFontSet* loadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big);
+	const TextureFontSet* loadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small);
 	this->loadingLabel = TextLabel2D(loadingFont, LoadingScreen::LOADING_TEXT);
 	this->loadingLabel.SetColour(Colour(0.457, 0.695, 0.863));
 	this->loadingLabel.SetDropShadow(Colour(0,0,0), 0.10);
 
-	this->loadingBarTotalWidth  = this->loadingLabel.GetLastRasterWidth();
-	this->loadingBarTotalHeight = this->loadingLabel.GetHeight() / 2.0f;
-
-	const TextureFontSet* itemLoadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small);
+	const TextureFontSet* itemLoadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium);
 	this->itemLoadingLabel = TextLabel2D(itemLoadingFont, "");
 	this->itemLoadingLabel.SetColour(Colour(0, 0, 0));
-	this->itemLoadingLabel.SetDropShadow(Colour(0,0,0), 0.08);
+	this->itemLoadingLabel.SetDropShadow(Colour(0,0,0), 0.05);
 
 	// Load the absurd descriptions...
 	this->absurdLoadingDescriptions.reserve(6);
@@ -56,7 +53,7 @@ loadingBarTotalWidth(0), loadingBarTotalHeight(0) {
  * for the loading screen.
  */
 void LoadingScreen::InitOpenGLForLoadingScreen() {
-// Initialize a very basic OpenGL context...
+	// Initialize a very basic OpenGL context...
 	glDisable(GL_LIGHTING);
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_1D);
@@ -65,10 +62,11 @@ void LoadingScreen::InitOpenGLForLoadingScreen() {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	
 	glDepthFunc(GL_LESS);
 	glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	debug_opengl_state();
 }
 
 /**
@@ -87,7 +85,7 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 	this->numExpectedUpdates = numExpectedUpdates;
 	this->width = width;
 	this->height = height;
-	this->loadingLabel.SetTopLeftCorner(Point2D((width - this->loadingLabel.GetLastRasterWidth())/2, (height + this->loadingLabel.GetHeight())/2));
+	this->loadingLabel.SetTopLeftCorner(Point2D(0 + GAP_PIXELS, this->loadingLabel.GetHeight() + GAP_PIXELS));
 	
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	
@@ -98,7 +96,6 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
 	this->loadingLabel.Draw();
-	this->loadingBarTotalWidth  = this->loadingLabel.GetLastRasterWidth();
 	this->DrawLoadingBar();
 
 	SDL_GL_SwapBuffers();
@@ -136,29 +133,33 @@ void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
 	this->numCallsToUpdate++;
 	assert(this->numCallsToUpdate <= this->numExpectedUpdates);
 
-	ESPInterval randColour(0.25f, 0.85f);
-	this->itemLoadingLabel.SetColour(Colour(randColour.RandomValueInInterval(), randColour.RandomValueInInterval(), randColour.RandomValueInInterval()));
+	ESPInterval randColourR(0.25f, 0.85f);
+	ESPInterval randColourG(0.25f, 0.85f);
+	ESPInterval randColourB(0.25f, 0.85f);
+	this->itemLoadingLabel.SetColour(Colour(randColourR.RandomValueInInterval(), randColourG.RandomValueInInterval(), randColourB.RandomValueInInterval()));
 	this->itemLoadingLabel.SetText(loadingStr);
-	this->itemLoadingLabel.SetTopLeftCorner(Point2D(0 + GAP_PIXELS, this->itemLoadingLabel.GetHeight() + GAP_PIXELS));
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	
 	// Initialize basic OpenGL state
 	LoadingScreen::InitOpenGLForLoadingScreen();
+	this->itemLoadingLabel.Draw(); // Draw once just to get the width...
+	this->itemLoadingLabel.SetTopLeftCorner(Point2D((this->width - this->itemLoadingLabel.GetLastRasterWidth()) / 2.0f, (this->height + LOADING_BAR_HEIGHT) / 2 + this->itemLoadingLabel.GetHeight() + GAP_PIXELS/2));
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	
-	// Draw labels for loading screen
-	this->loadingLabel.Draw();
-	this->itemLoadingLabel.Draw();
 
 	// Draw the loading/progress bar
 	this->DrawLoadingBar();
 
+	// Draw labels for loading screen
+	this->loadingLabel.Draw();
+	this->itemLoadingLabel.Draw();
+
 	SDL_GL_SwapBuffers();
 
 	glPopAttrib();
+	debug_opengl_state();
 }
 
 /**
@@ -185,10 +186,9 @@ void LoadingScreen::EndShowingLoadingScreen() {
 void LoadingScreen::DrawLoadingBar() {
 	// Figure out what estimated percentage of loading is complete and fill the bar based on that percentage
 	float percentageDone			= NumberFuncs::MinF(1.0f, static_cast<float>(this->numCallsToUpdate) / static_cast<float>(this->numExpectedUpdates));
-	float lengthOfLoadingBar	= percentageDone * this->loadingBarTotalWidth;
+	float lengthOfLoadingBar	= percentageDone * LOADING_BAR_WIDTH;
 
-	Point2D loadingBarUpperLeft = Point2D((this->width - this->loadingBarTotalWidth) / 2.0f, 
-		((this->height - this->loadingBarTotalHeight) / 2.0f) - (this->loadingLabel.GetHeight() + GAP_PIXELS));
+	Point2D loadingBarUpperLeft = Point2D((this->width - LOADING_BAR_WIDTH) / 2.0f, (this->height + LOADING_BAR_HEIGHT) / 2.0f);
 
 	// Draw the loading bar:
 	// a) Loading bar fill
@@ -205,27 +205,29 @@ void LoadingScreen::DrawLoadingBar() {
 	glColor4f(0, 0, 0, 1);
 	glBegin(GL_QUADS);
 	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
-	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
-	glVertex2f(loadingBarUpperLeft[0] + this->loadingBarTotalWidth, loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
-	glVertex2f(loadingBarUpperLeft[0] + this->loadingBarTotalWidth, loadingBarUpperLeft[1]);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
+	glVertex2f(loadingBarUpperLeft[0] + LOADING_BAR_WIDTH, loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
+	glVertex2f(loadingBarUpperLeft[0] + LOADING_BAR_WIDTH, loadingBarUpperLeft[1]);
 	glEnd();
 	
 	glBegin(GL_POINTS);
 	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
-	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
-	glVertex2f(loadingBarUpperLeft[0] + this->loadingBarTotalWidth, loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
-	glVertex2f(loadingBarUpperLeft[0] + this->loadingBarTotalWidth, loadingBarUpperLeft[1]);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
+	glVertex2f(loadingBarUpperLeft[0] + LOADING_BAR_WIDTH, loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
+	glVertex2f(loadingBarUpperLeft[0] + LOADING_BAR_WIDTH, loadingBarUpperLeft[1]);
 	glEnd();
 
 	glPolygonMode(GL_FRONT, GL_FILL);
 	glColor4f(1, 0, 0, 1);
 	glBegin(GL_QUADS);
 	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
-	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
-	glVertex2f(loadingBarUpperLeft[0] + lengthOfLoadingBar, loadingBarUpperLeft[1] - this->loadingBarTotalHeight);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
+	glVertex2f(loadingBarUpperLeft[0] + lengthOfLoadingBar, loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
 	glVertex2f(loadingBarUpperLeft[0] + lengthOfLoadingBar, loadingBarUpperLeft[1]);
 	glEnd();
 
 	glPopMatrix();
 	Camera::PopWindowCoords();
+
+	debug_opengl_state();
 }

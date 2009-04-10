@@ -34,6 +34,7 @@ void GameFontAssetsManager::LoadMinimalFonts() {
 	debug_output("Loading minimal font sets");
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	
 	TextureFontSet* temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, Small);
 	assert(temp != NULL);
 	this->fonts[HappyGood][Small]	= temp;
@@ -88,4 +89,6 @@ void GameFontAssetsManager::LoadMinimalFonts() {
 
 	glPopAttrib();
 	this->minimalFontsLoaded = true;
+
+	debug_opengl_state();
 }

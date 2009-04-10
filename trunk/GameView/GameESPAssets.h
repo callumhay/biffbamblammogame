@@ -36,9 +36,8 @@ private:
 	std::list<ESPEmitter*> activePaddleEmitters;
 	std::map<const GameBall*, std::list<ESPEmitter*>>		activeBallBGEmitters;
 	std::map<const GameItem*, std::list<ESPEmitter*>>		activeItemDropEmitters; 
-	std::map<const Projectile*, std::pair<std::list<ESPPointEmitter*>, std::list<ESPPointEmitter*>>> activeProjectileEmitters;
+	std::map<const Projectile*, std::list<ESPEmitter*>> activeProjectileEmitters;
 	
-
 	// Standard effectors for the various ESP effects
 	ESPParticleColourEffector particleFader;
 	ESPParticleColourEffector particleFireColourFader;
@@ -106,9 +105,7 @@ private:
 
 	void AddLaserPaddleESPEffects(const Projectile& projectile);
 	void DrawProjectileEffects(double dT, const Camera& camera);
-	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, ESPPointEmitter* projectileEmitter);
-
-
+	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, ESPEmitter* projectileEmitter);
 
 public:
 	GameESPAssets();

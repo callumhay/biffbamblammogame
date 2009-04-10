@@ -19,19 +19,30 @@ const int GameDisplay::MAX_FRAMERATE						= 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameListener(NULL), currState(NULL),
-model(model), assets(new GameAssets()), width(initWidth), height(initHeight) {
+model(model), assets(new GameAssets()), width(initWidth), height(initHeight), gameExited(false) {
 	assert(model != NULL);
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
 
-#ifndef NDEBUG
+#ifdef _DEBUG
 	this->drawDebug = false;
 #endif
 }
 
 GameDisplay::~GameDisplay() {
+	// Delete game assets
 	delete this->assets;
+	this->assets = NULL;
+	
+	// Delete any current state
+	assert(this->currState != NULL);
+	if (this->currState != NULL) {
+		delete this->currState;
+		this->currState = NULL;
+	}
+
+	// Remove any action listeners for the model
 	this->RemoveActionListeners();
 }
 
@@ -39,18 +50,11 @@ GameDisplay::~GameDisplay() {
 
 void GameDisplay::SetInitialRenderOptions() {
 	glEnable(GL_NORMALIZE);
-
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glEnable(GL_LINE_SMOOTH);
-
-	glEnable(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT, GL_FILL);
-
 	glDisable(GL_LIGHTING);
 }
 
@@ -62,12 +66,12 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 }
 
 void GameDisplay::Render(double dT) {
-	SetInitialRenderOptions();	// TODO: Get rid of this it slows us down and does need to be called every frame!
-
+	SetInitialRenderOptions();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	// Render the current state
 	this->currState->RenderFrame(dT);
+	debug_opengl_state();
 
 	// Update the game model
 	this->model->Tick(dT);
@@ -85,7 +89,7 @@ void GameDisplay::RemoveActionListeners() {
 }
 
 // DEBUG FUNCTIONS ******************************************************
-#ifndef NDEBUG
+#ifdef _DEBUG
 /*
  * Draws the x, y and z axes as red, yellow and blue lines, respectively.
  * The thicker half of the line is the positive direction.

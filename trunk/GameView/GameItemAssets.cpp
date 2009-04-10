@@ -53,11 +53,8 @@ void GameItemAssets::UnloadItemTextures() {
 	// Unload timer filler textures
 	std::map<std::string, Texture2D*>::iterator iter3 = this->itemTimerFillerTextures.begin();
 	for (; iter3 != this->itemTimerFillerTextures.end(); iter3++) {
-		Texture2D* currTex = iter3->second;
-		if (currTex != NULL) {
-			delete currTex;
-			currTex = NULL;
-		}
+		delete iter3->second;
+		iter3->second = NULL;
 	}
 	this->itemTimerFillerTextures.clear();
 }
@@ -69,7 +66,6 @@ void GameItemAssets::UnloadItemMeshes() {
 	if (this->item != NULL) {
 		// Make sure there is not texture assoc with item or we will delete it twice!!
 		this->item->SetTextureForMaterial(GameViewConstants::GetInstance()->ITEM_LABEL_MATGRP, NULL);
-
 		delete this->item;
 		this->item = NULL;
 	}
@@ -279,7 +275,7 @@ void GameItemAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int dis
 			unsigned int height = width * timerTex->GetHeight() / timerTex->GetWidth();
 
 			// Prepare OGL for drawing the timer
-			glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | GL_TRANSFORM_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+			glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 			
 			// Make world coordinates equal window coordinates
 			Camera::PushWindowCoords();
@@ -290,7 +286,6 @@ void GameItemAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int dis
 			glDisable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glBlendEquation(GL_MULT);
 
 			// Draw the timer...
 			glPushMatrix();

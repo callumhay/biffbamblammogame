@@ -26,7 +26,6 @@ private:
 	CGparameter worldMatrixParam;
 	CGparameter viewInvMatrixParam;
 
-	
 	CGparameter noiseSamplerParam;	// Noise texture sampler param
 	CGparameter maskSamplerParam;		// Mask texture
 

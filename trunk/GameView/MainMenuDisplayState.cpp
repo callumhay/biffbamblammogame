@@ -27,10 +27,12 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	// Dispose of the menu object
 	if (this->menu != NULL) {
 		delete this->menu;
+		this->menu = NULL;
 	}
 	// Dispose of title label
 	if (this->titleLabel != NULL) {
 		delete this->titleLabel;
+		this->titleLabel = NULL;
 	}
 }
 
@@ -74,15 +76,14 @@ void MainMenuDisplayState::InitializeMenu() {
 	this->menu->AddMenuItem(tempLabel);
 
 	this->menu->SetHighlightedMenuItem(0);
+
+	debug_opengl_state();
 }
 
 /**
  * Render the menu and any other stuff associated with it.
  */
 void MainMenuDisplayState::RenderFrame(double dT) {
-	// Set up a perspective projection for the menu background
-	// TODO
-
 	// Render the background
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	// TODO
@@ -97,6 +98,8 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->menu->SetTopLeftCorner(menuTopLeftCorner);
 	this->menu->Draw();
 	//this->menu->DebugDraw();
+
+	debug_opengl_state();
 }
 
 /**
@@ -133,7 +136,7 @@ void MainMenuDisplayState::KeyPressed(SDLKey key) {
 						break;
 					case EXIT_INDEX:
 						// TODO: Put a dialogue for "Are you sure..."
-						exit(0);
+						this->display->QuitGame();
 					default:
 						assert(false);
 						break;
