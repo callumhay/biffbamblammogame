@@ -111,6 +111,9 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 	FT_Library library;
 	if (FT_Init_FreeType(&library)) {
 		debug_output("Could not initialize a freetype font library!");
+		
+		FT_Done_FreeType(library);
+
 		delete newFontSet;
 		return NULL;
 	}
@@ -123,13 +126,25 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 	// As FT_New_Face Will Fail If The Font File Does Not Exist Or Is Somehow Broken.
 	if (FT_New_Face(library, ttfFilepath.c_str(), 0, &face)) {
 		debug_output("FT_New_Face failed - there is probably a problem with the font file: " << ttfFilepath);
+	
+		FT_Done_Face(face);
+		FT_Done_FreeType(library);
+		
 		delete newFontSet;
 		return NULL;
 	}
 
 	// FreeType Measures Font Size In Terms Of 1/64ths Of Pixels.  
 	// Thus, To Make A Font h Pixels High, We Need To Request A Size Of h*64.
-	FT_Set_Char_Size( face, heightInPixels << 6, heightInPixels << 6, 96, 96);
+	if (FT_Set_Char_Size(face, heightInPixels << 6, heightInPixels << 6, 96, 96)) {
+		debug_output("FT_Set_Char_Size failed - there is probably a problem with the font file: " << ttfFilepath);
+
+		FT_Done_Face(face);
+		FT_Done_FreeType(library);
+		
+		delete newFontSet;
+		return NULL;	
+	}
 	
 	// Create the font set by making the texture and display list for
 	// each character in the font
@@ -141,6 +156,7 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 		if(FT_Load_Glyph(face, FT_Get_Char_Index(face, i), FT_LOAD_DEFAULT )) {
 			debug_output("Could not load the glyph for character: " << i << " in font set file: " << ttfFilepath);
 			delete newFontSet;
+
 			return NULL;
 		}
 		
@@ -148,7 +164,14 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 		FT_Glyph glyph;
 		if (FT_Get_Glyph(face->glyph, &glyph)) {
 			debug_output("Could not get glyph for character: " << i << " in font set file: " << ttfFilepath);
+			
+			FT_Done_Glyph(glyph);
+			FT_Done_Face(face);
+			FT_Done_FreeType(library);
+
 			delete newFontSet;
+			newFontSet = NULL;
+			
 			return NULL;			
 		}
 
@@ -158,12 +181,20 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 
 		// This Reference Will Make Accessing The Bitmap Easier.
 		FT_Bitmap& bitmap = bitmap_glyph->bitmap;
-		
+
 		// Create a texture for the current character
 		Texture2D* newCharTexture = Texture2D::CreateTexture2DFromFTBMP(bitmap, Texture::Trilinear);
+
 		if (newCharTexture == NULL) {
 			debug_output("Could not create texture from bitmap for character: " << i << " in font set file: " << ttfFilepath);
+			
+			FT_Done_Glyph(glyph);
+			FT_Done_Face(face);
+			FT_Done_FreeType(library);
+
 			delete newFontSet;
+			newFontSet = NULL;
+
 			return NULL;
 		}
 		newFontSet->charTextures.push_back(newCharTexture);
@@ -203,7 +234,7 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 		glTexCoord2d(x, 0); glVertex2f(bitmap.width, bitmap.rows);
 		glEnd();
 		glPopMatrix();
-		
+
 		glTranslatef(face->glyph->advance.x >> 6, 0, 0);
 
 		// Increment The Raster Position As If We Were A Bitmap Font.
@@ -214,6 +245,8 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 		glEndList();
 		newCharTexture->UnbindTexture();
 		newFontSet->charDispLists.push_back(dList);
+
+		FT_Done_Glyph(glyph);
 	}
 	glPopMatrix();
 

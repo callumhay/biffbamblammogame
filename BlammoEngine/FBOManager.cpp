@@ -13,13 +13,16 @@ fboID(0), multisampleFBOID(0), depthBuffID(0), colourBuffID(0), numSupportedSamp
 	glGenRenderbuffersEXT(1, &this->colourBuffID);
 
 	FBOManager::IsFBOMultisamplingEnabled(this->numSupportedSamples);
+	debug_opengl_state();
 }
 
 FBOManager::~FBOManager() {
 	glDeleteFramebuffersEXT(1,  &this->fboID);
 	glDeleteFramebuffersEXT(1,  &this->multisampleFBOID);
 	glDeleteRenderbuffersEXT(1, &this->depthBuffID);
-	glDeleteRenderbuffersEXT(1, &this->colourBuffID);	
+	glDeleteRenderbuffersEXT(1, &this->colourBuffID);
+
+	debug_opengl_state();
 }
 
 /**
@@ -38,7 +41,7 @@ void FBOManager::SetupFBOWithoutMultisampling(const Texture& texture) {
 	texture.UnbindTexture();
 
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	
+	debug_opengl_state();	
 }
 
 /**
@@ -91,6 +94,7 @@ void FBOManager::SetupFBOWithMultisampling(const Texture& texture) {
 	texture.UnbindTexture();
 
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	debug_opengl_state();
 }
 
 /**
@@ -144,6 +148,7 @@ void FBOManager::UnbindFBO(const Texture& texture) const {
 		glBlitFramebufferEXT(0, 0, texture.GetWidth(), texture.GetHeight(), 0, 0, texture.GetWidth(), texture.GetHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
+	debug_opengl_state();
 }
 
 /**
@@ -151,6 +156,8 @@ void FBOManager::UnbindFBO(const Texture& texture) const {
  * Returns: true on successful status, false if badness.
  */
 bool FBOManager::CheckFBOStatus() {
+	debug_opengl_state();
+
 	int status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 	if (status != GL_FRAMEBUFFER_COMPLETE_EXT) {
 		switch (status) {

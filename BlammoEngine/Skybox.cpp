@@ -26,6 +26,11 @@ Skybox::Skybox(PolygonGroup* geom, TextureCube* tex) : cgEffect(NULL), technique
 
 Skybox::~Skybox() {
 	delete this->cubemap;
+	this->cubemap = NULL;
+
+	delete this->geometry;
+	this->geometry = NULL;
+
 	cgDestroyEffect(this->cgEffect);
 	CgShaderManager::Instance()->CheckForCgError("Destroying effect");
 }

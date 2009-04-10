@@ -13,12 +13,17 @@ CgFxEffectBase::CgFxEffectBase(const std::string& effectPath) : cgEffect(NULL), 
 }
 
 CgFxEffectBase::~CgFxEffectBase() {
+	// Delete the effect
 	cgDestroyEffect(this->cgEffect);
 	CgShaderManager::Instance()->CheckForCgError("Destroying effect");
+
 }
 
 const std::string MaterialProperties::MATERIAL_CELBASIC_TYPE	= "outlinedcel";
 const std::string MaterialProperties::MATERIAL_CELPHONG_TYPE	= "outlinedphong";
+
+const std::string MaterialProperties::MATERIAL_GEOM_FG_TYPE = "fg";
+const std::string MaterialProperties::MATERIAL_GEOM_BG_TYPE = "bg";
 
 CgFxMaterialEffect::CgFxMaterialEffect(const std::string& effectPath, MaterialProperties* props) : 
 CgFxEffectBase(effectPath), properties(props)

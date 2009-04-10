@@ -31,6 +31,6 @@ void TextLabel2D::Draw() {
 
 	// Draw coloured text part
 	glColor3f(this->colour.R(), this->colour.G(), this->colour.B());
-	this->lastRasterWidth = this->font->OrthoPrint(this->topLeftCorner, this->text);
-	float test = this->font->GetWidth(this->text);
+	this->font->OrthoPrint(this->topLeftCorner, this->text);
+	this->lastRasterWidth = this->font->GetWidth(this->text);
 }

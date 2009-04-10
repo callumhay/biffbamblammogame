@@ -13,6 +13,11 @@
 #include <time.h>
 #include <cmath>
 
+// Memory Leak Tracking Includes
+#include <crtdbg.h>
+#define CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC 
+
 // STL includes
 #include <algorithm>
 #include <vector>
@@ -30,6 +35,8 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 #include "GL/glut.h"
+
+#define BUFFER_OFFSET(bytes) ((GLubyte*)NULL + (bytes))
 
 // SDL Includes
 #ifdef WIN32
@@ -72,8 +79,17 @@
 
 #ifdef  NDEBUG
 #define debug_output(s) ((void)0)
+inline void debug_opengl_state() {}
 #else
 #define debug_output(s) std::cout << s << std::endl
+
+inline void debug_opengl_state() {
+	GLenum glErr = glGetError();
+	if (glErr == GL_NO_ERROR) {
+		return;
+	}
+	debug_output("OpenGL Error: " << glErr);
+}
 #endif
 
 #endif
