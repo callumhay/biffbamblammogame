@@ -18,14 +18,14 @@ void Texture::SetFilteringParams(TextureFilterType texFilter, int glTexType) {
 			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			break;
 		case NearestMipmap:
-			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 		case Bilinear:
-			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 			break;
 		case Trilinear:
-			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			break;
 		default:
@@ -93,5 +93,7 @@ bool Texture::Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilte
 	Texture::SetFilteringParams(texFilter, this->textureType);
 
 	ilDeleteImage(imageID);
+	
+	debug_opengl_state();
 	return this->texID != 0;
 }

@@ -62,6 +62,13 @@ public:
 		return this->lastRasterWidth;
 	}
 
+	const TextureFontSet* GetFont() const {
+		return this->font;
+	}
+	DropShadow GetDropShadow() const {
+		return this->dropShadow;
+	}
+
 	void Draw();
 };
 

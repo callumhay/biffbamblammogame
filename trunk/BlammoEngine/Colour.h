@@ -109,4 +109,7 @@ inline std::ostream& operator <<(std::ostream& os, const Colour& c) {
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
 };
 
+struct Colour4D {
+	float rgba[4];
+};
 #endif

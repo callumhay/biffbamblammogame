@@ -23,17 +23,24 @@ struct MaterialProperties {
 	static const std::string MATERIAL_CELBASIC_TYPE;
 	static const std::string MATERIAL_CELPHONG_TYPE;
 
+	// Geometry types
+	static const std::string MATERIAL_GEOM_FG_TYPE;
+	static const std::string MATERIAL_GEOM_BG_TYPE;
+
 	Colour diffuse, specular, outlineColour;
 	float shininess, outlineSize;
 	Texture2D* diffuseTexture;
+	
 	std::string materialType;
+	std::string geomType;
 
-	MaterialProperties(): diffuseTexture(NULL), materialType(MATERIAL_CELBASIC_TYPE), 
+	MaterialProperties(): diffuseTexture(NULL), materialType(MATERIAL_CELBASIC_TYPE), geomType(MATERIAL_GEOM_BG_TYPE),
 		diffuse(Colour(1,1,1)), specular(Colour(1,1,1)), outlineColour(Colour(0,0,0)), shininess(128.0f), outlineSize(1.0f) {}
 
 	~MaterialProperties() {
 		if (this->diffuseTexture != NULL) {
 			delete this->diffuseTexture;
+			this->diffuseTexture = NULL;
 		}
 	}
 };

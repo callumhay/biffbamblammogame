@@ -52,6 +52,8 @@ void Texture2D::RenderTextureToFullscreenQuad() {
 	glPopMatrix();
 	glPopAttrib();
 	Camera::PopWindowCoords();
+	
+	debug_opengl_state();
 }
 
 Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height) {
@@ -100,6 +102,8 @@ Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height) {
 	newTex->UnbindTexture();
 
 	glPopAttrib();
+	debug_opengl_state();
+
 	return newTex;
 }
 
@@ -133,7 +137,7 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilt
 	}
 
 	glPushAttrib(GL_TEXTURE_BIT);
-
+	
 	// Obtain the proper power of two width/height of the font
 	int width = NumberFuncs::NextPowerOfTwo(bmp.width);
 	int height = NumberFuncs::NextPowerOfTwo(bmp.rows);
@@ -153,7 +157,7 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilt
 				(i>=bmp.width || j>=bmp.rows) ? 0 : bmp.buffer[i + bmp.width*j];
 		}
 	}
-	
+
 	// Bind the texture and create it in all its glory
 	glBindTexture(GL_TEXTURE_2D, newTex->texID);
 
@@ -171,9 +175,12 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilt
 			newTex = NULL;
 		}	
 	}
-	
+
 	Texture::SetFilteringParams(texFilter, newTex->textureType);
 	glPopAttrib();
+
 	delete[] expandedData;
+	debug_opengl_state();
+
 	return newTex;
 }

@@ -9,6 +9,7 @@
 #include "Matrix.h"
 #include "Point.h"
 #include "Vector.h"
+#include "Noise.h"
 
 // Mesh Construction and Creation Includes
 #include "Mesh.h"

@@ -17,8 +17,9 @@ const std::string MtlReader::MTL_SHININESS		= "Ns";
 const std::string MtlReader::MTL_DIFF_TEXTURE	= "map_Kd";
 
 // Custom tags
-const std::string MtlReader::CUSTOM_MTL_MATTYPE			= "type";
-const std::string MtlReader::CUSTOM_MTL_OUTLINESIZE = "outlinesize";
+const std::string MtlReader::CUSTOM_MTL_MATTYPE				= "type";
+const std::string MtlReader::CUSTOM_MTL_OUTLINESIZE		= "outlinesize";
+const std::string MtlReader::CUSTOM_MTL_GEOMETRYTYPE	= "geomtype";
 
 MtlReader::MtlReader() {
 }
@@ -57,6 +58,7 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFile(const std
 			// Read the material name
 			if (!(inFile >> matName)) {
 				debug_output("ERROR: Material name not provided with proper syntax in mtl file: " << filepath); 
+				inFile.close();
 				return materials;
 			}
 			matProperties[matName] = new MaterialProperties();
@@ -67,7 +69,8 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFile(const std
 		else if (currStr == MTL_DIFFUSE) {
 			Colour diff;
 			if (!(inFile >> diff[0] && inFile >> diff[1] && inFile >> diff[2])) {
-				debug_output("ERROR: could not read diffuse colour properly from mtl file: " << filepath); 
+				debug_output("ERROR: could not read diffuse colour properly from mtl file: " << filepath);
+				inFile.close();
 				return materials;				
 			}
 			matProperties[matName]->diffuse = diff;
@@ -75,7 +78,8 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFile(const std
 		else if (currStr == MTL_SPECULAR) {
 			Colour spec;
 			if (!(inFile >> spec[0] && inFile >> spec[1] && inFile >> spec[2])) {
-				debug_output("ERROR: could not read specular colour properly from mtl file: " << filepath); 
+				debug_output("ERROR: could not read specular colour properly from mtl file: " << filepath);
+				inFile.close();
 				return materials;				
 			}
 			matProperties[matName]->specular = spec;		
@@ -83,7 +87,8 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFile(const std
 		else if (currStr == MTL_SHININESS) {
 			float shininess;
 			if (!(inFile >> shininess)) {
-				debug_output("ERROR: could not read shininess properly from mtl file: " << filepath); 
+				debug_output("ERROR: could not read shininess properly from mtl file: " << filepath);
+				inFile.close();
 				return materials;		
 			}
 			matProperties[matName]->shininess = shininess;
@@ -92,7 +97,8 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFile(const std
 			// Read in the path to the texture file
 			std::string texturePath;
 			if (!(inFile >> texturePath)) {
-				debug_output("ERROR: could not read texture path properly from mtl file: " << filepath); 
+				debug_output("ERROR: could not read texture path properly from mtl file: " << filepath);
+				inFile.close();
 				return materials;
 			}
 
@@ -108,22 +114,38 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFile(const std
 			matProperties[matName]->diffuseTexture = Texture2D::CreateTexture2DFromImgFile(texturePath, Texture::Trilinear);
 		}
 		else if (currStr == CUSTOM_MTL_MATTYPE) {
+			// Material type definition
 			std::string matTypeName;
 			if (!(inFile >> matTypeName)) {
-				debug_output("ERROR: could not read material type properly from mtl file: " << filepath); 
+				debug_output("ERROR: could not read material type properly from mtl file: " << filepath);
+				inFile.close();
 				return materials;
 			}
 			matProperties[matName]->materialType = matTypeName;
 		}
 		else if (currStr == CUSTOM_MTL_OUTLINESIZE) {
+			// Outline size definition
 			float outlineSize = 1.0f;
 			if (!(inFile >> outlineSize)) {
-				debug_output("ERROR: could not read material outline size properly from mtl file: " << filepath); 
+				debug_output("ERROR: could not read material outline size properly from mtl file: " << filepath);
+				inFile.close();
 				return materials;
 			}
 			matProperties[matName]->outlineSize = outlineSize;
 		}
+		else if (currStr == CUSTOM_MTL_GEOMETRYTYPE) {
+			// Geometry type (foreground/background)
+			std::string geomTypeName;
+			if (!(inFile >> geomTypeName)) {
+				debug_output("ERROR: could not read geometry type properly from mtl file: " << filepath);
+				inFile.close();
+				return materials;
+			}
+			matProperties[matName]->geomType = geomTypeName;
+		}
 	}
+
+	inFile.close();
 
 	// Create materials with the corresponding properties
 	std::map<std::string, MaterialProperties*>::iterator matPropIter;
@@ -140,6 +162,17 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFile(const std
 		else {
 			// Default to using the cel shader for now
 			currMaterial = new CgFxCelShading(matPropIter->second);
+		}
+
+		// Figure out the type of geometry we're dealing with, this determines how to light it
+		if (matPropIter->second->geomType == MaterialProperties::MATERIAL_GEOM_FG_TYPE) {
+			// TODO
+		}
+		else if (matPropIter->second->geomType == MaterialProperties::MATERIAL_GEOM_BG_TYPE) {
+			// TODO
+		}
+		else {
+			// TODO
 		}
 
 		// Inline: The material is set
