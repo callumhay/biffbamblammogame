@@ -44,7 +44,7 @@ noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(N
 	this->constAmtParam				= cgGetNamedEffectParameter(this->cgEffect, "ConstAmount");
 	this->alphaMultParam			= cgGetNamedEffectParameter(this->cgEffect, "AlphaMultiplier");
 
-	CgShaderManager::Instance()->CheckForCgError("Getting parameters for CgFxPostRefract");
+	CgShaderManager::Instance()->CheckForCgError("Getting parameters for CgFxVolumetricEffect");
 }
 
 CgFxVolumetricEffect::~CgFxVolumetricEffect() {

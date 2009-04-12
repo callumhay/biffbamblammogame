@@ -57,7 +57,7 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 	debug_output("EVENT: Level completed");
 
 	// Kill all effects that may have previously been occuring...
-	this->display->GetAssets()->KillAllActiveEffects();
+	this->display->GetAssets()->GetESPAssets()->KillAllActiveEffects();
 }
 
 
@@ -96,21 +96,21 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 	this->display->GetCamera().SetCameraShake(shakeLength, Vector3D(shakeMagnitude, 0.0, 0.0), 20);
 	
 	// Add a smacking type effect...
-	this->display->GetAssets()->AddPaddleHitWallEffect(paddle, hitLoc);
+	this->display->GetAssets()->GetESPAssets()->AddPaddleHitWallEffect(paddle, hitLoc);
 
 	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
 
 void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 	debug_output("EVENT: Ball died");
-	this->display->GetAssets()->KillAllActiveBallEffects(deadBall);
+	this->display->GetAssets()->GetESPAssets()->KillAllActiveBallEffects(deadBall);
 }
 
 void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
 	debug_output("EVENT: Ball death, lives left: " << livesLeft);
 	
 	// Kill all effects that may have previously been occuring...
-	this->display->GetAssets()->KillAllActiveEffects();
+	this->display->GetAssets()->GetESPAssets()->KillAllActiveEffects();
 		
 	// Check to see if it's game over, and switch the display state appropriately
 	if (this->display->GetModel()->IsGameOver()) {
@@ -136,7 +136,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
 		((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.UberballBlastsThrough())) {
 
-			this->display->GetAssets()->AddBallBounceESP(this->display->GetCamera(), ball);
+			this->display->GetAssets()->GetESPAssets()->AddBallBounceEffect(this->display->GetCamera(), ball);
 	}
 
 	// We shake things up if the ball is uber and the block is indestructible...
@@ -152,7 +152,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
 
 	// Add the visual effect for when the ball hits the paddle
-	this->display->GetAssets()->AddBallBounceESP(this->display->GetCamera(), ball);
+	this->display->GetAssets()->GetESPAssets()->AddBallBounceEffect(this->display->GetCamera(), ball);
 
 	// We shake things up if the ball is uber...
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
@@ -171,12 +171,12 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::Breakable:
 		case LevelPiece::BreakableTriangle:
 			// Typical break effect for basic breakable blocks
-			this->display->GetAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
+			this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
 			break;
 
 		case LevelPiece::Bomb:
 			// Bomb effect - big explosion!
-			this->display->GetAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block);
+			this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block);
 			this->display->GetCamera().SetCameraShake(1.2, Vector3D(1.0, 0.3, 0.1), 100);
 			break;
 		default:
@@ -203,27 +203,27 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newM
 
 void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 	// Spawn an item drop effect for the item...
-	this->display->GetAssets()->AddItemDropEffect(this->display->GetCamera(), item);
+	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(this->display->GetCamera(), item);
 
 	debug_output("EVENT: Item Spawned: " << item);
 }
 
 void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
 	// Remove any previous item drop effect
-	this->display->GetAssets()->RemoveItemDropEffect(this->display->GetCamera(), item);
+	this->display->GetAssets()->GetESPAssets()->RemoveItemDropEffect(this->display->GetCamera(), item);
 
 	debug_output("EVENT: Item Removed: " << item);
 }
 
 void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) {
 	
-	this->display->GetAssets()->AddItemAcquiredEffect(this->display->GetCamera(), paddle, item);
+	this->display->GetAssets()->GetESPAssets()->AddItemAcquiredEffect(this->display->GetCamera(), paddle, item);
 	debug_output("EVENT: Item Obtained by Player: " << item);
 }
 
 void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
 	// Activate the item's effect (if any)
-	this->display->GetAssets()->SetItemEffect(item);
+	this->display->GetAssets()->GetESPAssets()->SetItemEffect(item);
 
 	debug_output("EVENT: Item Activated: " << item);
 }
@@ -234,13 +234,13 @@ void GameEventsListener::ItemDeactivatedEvent(const GameItem& item) {
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
 	// Add the projectile's effect
-	this->display->GetAssets()->AddProjectileEffect(this->display->GetCamera(), projectile); 
+	this->display->GetAssets()->GetESPAssets()->AddProjectileEffect(this->display->GetCamera(), projectile); 
 
 	debug_output("EVENT: Projectile spawned");
 }
 
 void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	// Remove the projectile's effect
-	this->display->GetAssets()->RemoveProjectileEffect(this->display->GetCamera(), projectile); 
+	this->display->GetAssets()->GetESPAssets()->RemoveProjectileEffect(this->display->GetCamera(), projectile); 
 	debug_output("EVENT: Projectile removed");
 }

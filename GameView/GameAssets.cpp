@@ -58,6 +58,11 @@ ghostBallEffect(NULL) {
 	// Load regular effects
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading groovy effects...");
 	this->LoadRegularEffectAssets();
+
+	// Initialize default light values
+	this->keyLight  = PointLight(Point3D(-25.0f, 20.0f, 50.0f), Colour(0.932f, 1.0f, 0.755f), 0.0f);
+	this->fillLight = PointLight(Point3D(30.0f, 30.0f, 50.0f),  Colour(1.0f, 0.434f, 0.92f), 0.03f);
+	this->ballLight = PointLight(Point3D(0,0,50), Colour(1,1,1), 0.0f);
 }
 
 GameAssets::~GameAssets() {
@@ -120,7 +125,7 @@ void GameAssets::DeleteRegularMeshAssets() {
 void GameAssets::DrawLevelPieces(const GameLevel* currLevel, const Camera& camera) const {
 	std::map<const GameLevel*, LevelMesh*>::const_iterator iter = this->loadedLevelMeshes.find(currLevel);
 	assert(iter != this->loadedLevelMeshes.end());
-	iter->second->Draw(camera);
+	iter->second->Draw(camera, this->keyLight, this->fillLight, this->ballLight);
 }
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
@@ -167,10 +172,10 @@ void GameAssets::DrawGameBall(double dT, const GameBall& b, const Camera& camera
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 	if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
-		this->spikeyBall->Draw(camera, ballEffectTemp);
+		this->spikeyBall->Draw(camera, ballEffectTemp, this->keyLight, this->fillLight);
 	}
 	else {
-		this->ball->Draw(camera, ballEffectTemp);
+		this->ball->Draw(camera, ballEffectTemp, this->keyLight, this->fillLight);
 	}
 
 	glPopMatrix();
@@ -193,7 +198,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
-	this->worldAssets->DrawPaddle(p, camera);
+	this->worldAssets->DrawPaddle(p, camera, this->keyLight, this->fillLight, this->ballLight);
 
 	// In the case of a laser paddle, we draw the laser attachment
 	if ((p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
@@ -217,7 +222,7 @@ void GameAssets::DrawSkybox(const Camera& camera) {
  * Draw the background model for the current world type.
  */
 void GameAssets::DrawBackgroundModel(const Camera& camera) {
-	this->worldAssets->DrawBackgroundModel(camera);
+	this->worldAssets->DrawBackgroundModel(camera, this->keyLight, this->fillLight);
 }
 
 /**
@@ -319,4 +324,15 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 		LevelMesh* levelMesh = new LevelMesh(this->worldAssets, level);
 		this->loadedLevelMeshes.insert(std::pair<const GameLevel*, LevelMesh*>(level, levelMesh));
 	}
+}
+
+/**
+ * Debug function for drawing the lights that affect the game - draws them as
+ * coloured cubes.
+ */
+void GameAssets::DebugDrawLights() const {
+	this->keyLight.DebugDraw();
+	this->fillLight.DebugDraw();
+	this->ballLight.DebugDraw();
+
 }

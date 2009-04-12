@@ -93,13 +93,14 @@ void InGameDisplayState::DrawGameScene(double dT) {
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
 	// Post-processing effects...
-	this->display->GetAssets()->DrawPostProcessingESPEffects(dT, this->display->GetCamera(), this->renderToTexEverything);
+	this->display->GetAssets()->GetESPAssets()->DrawPostProcessingESPEffects(dT, this->display->GetCamera(), this->renderToTexEverything);
 	glPopMatrix();
 	
 	debug_opengl_state();
 
 #ifdef _DEBUG
 	this->DebugDrawBounds();
+	this->display->GetAssets()->DebugDrawLights();
 #endif
 }
 
@@ -188,7 +189,7 @@ void InGameDisplayState::DrawScene(double dT) {
 	glDisable(GL_MULTISAMPLE);
 
 	// Typical Particle effects...
-	this->display->GetAssets()->DrawParticleEffects(dT, this->display->GetCamera());
+	this->display->GetAssets()->GetESPAssets()->DrawParticleEffects(dT, this->display->GetCamera());
 	glPopMatrix();
 	debug_opengl_state();
 }

@@ -3,8 +3,8 @@
 
 #include "../BlammoEngine/CgShaderManager.h"
 
-const std::string CgFxOutlinedPhong::BASIC_TECHNIQUE_NAME			= "Basic";
-const std::string CgFxOutlinedPhong::TEXTURED_TECHNIQUE_NAME	= "Textured";
+const std::string CgFxOutlinedPhong::BASIC_BG_TECHNIQUE_NAME			= "BasicBG";
+const std::string CgFxOutlinedPhong::TEXTURED_BG_TECHNIQUE_NAME	= "TexturedBG";
 
 // Default constructor, builds default, white material
 CgFxOutlinedPhong::CgFxOutlinedPhong(MaterialProperties* properties) : 
@@ -18,10 +18,10 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_PHONG_SHADER, properti
 
 	// If there's a texture set the correct technique
 	if (this->properties->diffuseTexture != NULL) {
-		this->currTechnique = this->techniques[TEXTURED_TECHNIQUE_NAME];
+		this->currTechnique = this->techniques[TEXTURED_BG_TECHNIQUE_NAME];
 	}
 	else {
-		this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
+		this->currTechnique = this->techniques[BASIC_BG_TECHNIQUE_NAME];
 	}
 
 }
@@ -32,10 +32,10 @@ CgFxOutlinedPhong::~CgFxOutlinedPhong() {
 void CgFxOutlinedPhong::SetupBeforePasses(const Camera& camera) {
 	// If there's a texture set the correct technique
 	if (this->properties->diffuseTexture != NULL) {
-		this->currTechnique = this->techniques[TEXTURED_TECHNIQUE_NAME];
+		this->currTechnique = this->techniques[TEXTURED_BG_TECHNIQUE_NAME];
 	}
 	else {
-		this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
+		this->currTechnique = this->techniques[BASIC_BG_TECHNIQUE_NAME];
 	}
 
 	cgGLSetParameter1f(this->outlineWidthParam, this->properties->outlineSize);
