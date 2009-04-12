@@ -4,6 +4,7 @@
 #include "BasicIncludes.h"
 #include "Colour.h"
 #include "Point.h"
+#include "Light.h"
 
 #include "Texture2D.h"
 
@@ -149,8 +150,18 @@ protected:
 	CGparameter specularColourParam;
 	
 	// Lights
-	CGparameter sceneLightPosParam;
-	CGparameter sceneLightColourParam;
+	CGparameter keyPointLightPosParam;
+	CGparameter keyPointLightColourParam;
+	CGparameter fillPointLightPosParam;
+	CGparameter fillPointLightColourParam;
+	CGparameter fillPointLightAttenParam;
+	CGparameter ballPointLightPosParam;
+	CGparameter ballPointLightColourParam;
+	CGparameter ballPointLightAttenParam;
+
+	PointLight keyLight;
+	PointLight fillLight;
+	PointLight ballLight;
 
 	// Properties of this material
 	MaterialProperties* properties;
@@ -163,42 +174,15 @@ public:
 		return this->properties;
 	}
 
-	// Setter methods for the Cg parameters -------------------
-	void SetWorldInverseMatrixParam() {
-		cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
+	void SetKeyLight(const PointLight& keyLight) {
+		this->keyLight = keyLight;
 	}
-	void SetWorldViewProjMatrixParam() {
-		cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+	void SetFillLight(const PointLight& fillLight) {
+		this->fillLight = fillLight;
 	}
-	void SetWorldMatrixParam() {
-		cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
+	void SetBallLight(const PointLight& ballLight) {
+		this->ballLight = ballLight;
 	}
-	void SetViewInverseMatrixParam() {
-		cgGLSetStateMatrixParameter(this->viewInvMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	}
-	void SetDiffuseTextureSamplerParam() {
-		if (this->properties->diffuseTexture != NULL) {
-			cgGLSetTextureParameter(this->texSamplerParam, this->properties->diffuseTexture->GetTextureID());
-		}
-	}
-	void SetDiffuseColourParam() {
-		cgGLSetParameter3f(this->diffuseColourParam, this->properties->diffuse.R(), this->properties->diffuse.G(), this->properties->diffuse.B());
-	}
-	void SetSpecularColourParam() {
-		cgGLSetParameter3f(this->specularColourParam, this->properties->specular.R(), this->properties->specular.G(), this->properties->specular.B());
-	}
-	void SetShininessParam() {
-		cgGLSetParameter1f(this->shininessParam, this->properties->shininess);
-	}
-	void SetSceneLightPositionParam(const Point3D& pos) {
-		// TODO...
-		cgGLSetParameter3f(this->sceneLightPosParam, 0.0f, 20.0f, 50.0f);
-	}
-	void SetSceneLightColourParam(const Colour& colour) {
-		// TODO...
-		cgGLSetParameter3f(this->sceneLightColourParam, 1.0f, 1.0f, 1.0f);
-	}
-	// ---------------------------------------------------------
 
 };
 
