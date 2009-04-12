@@ -110,8 +110,8 @@ sampler2D MaskSampler = sampler_state {
 /* data from application vertex buffer */
 struct appdata {
     float3 Position	: POSITION;
-    float4 UV		    : TEXCOORD0;
-    float4 Normal	  : NORMAL;
+    float4 UV		: TEXCOORD0;
+    float4 Normal	: NORMAL;
     float4 Colour   : COLOR0;
 };
 
@@ -188,11 +188,10 @@ float4 smokey_sprite_PS(vertexOutput IN) : COLOR {
     float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);
     float totalTexVal = (texVal.x + texVal.y + texVal.z + texVal.w) * 2.0f;
     
-    float4 maskTexVal = tex2D(MaskSampler, IN.UV.xy).rgba;
-    float fadeAmtCoeff = maskTexVal.a;
+    float fadeAmtCoeff = tex2D(MaskSampler, IN.UV.xy).a;
     
     // return as float4
-    float4 final = clamp(IN.Colour * float4(totalTexVal.rrr, totalTexVal.r*fadeAmtCoeff), 0, 1);
+    float4 final =  IN.Colour * float4(totalTexVal.rrr, totalTexVal.r * fadeAmtCoeff);
     return float4(final);
 }
 
@@ -228,8 +227,8 @@ technique Basic < string Script = "Pass=p0;"; > {
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
         DepthFunc = LEqual;
-		    DepthMask = false;
-		    CullFaceEnable = true;//false;
+		DepthMask = false;
+		CullFaceEnable = true;//false;
 
         VertexProgram = compile vp40 std_VS();            
         FragmentProgram = compile fp40 smokey_PS();
@@ -246,8 +245,8 @@ technique GhostBall < string Script = "Pass=p0;"; > {
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
         DepthFunc = LEqual;
-		    DepthMask = false;
-		    CullFaceEnable = true;//false;
+		DepthMask = false;
+		CullFaceEnable = true;//false;
 
         VertexProgram = compile vp40 localpos_VS();            
         FragmentProgram = compile fp40 smokey_PS();
@@ -261,12 +260,13 @@ technique SmokeSprite < string Script = "Pass=p0;"; > {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
-		    
+		BlendEquation = FuncAdd;
+		
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
         DepthFunc = LEqual;
-		    DepthMask = false;
-		    CullFaceEnable = true;
+		DepthMask = false;
+	    CullFaceEnable = true;
 
         VertexProgram = compile vp40 localpos_VS();            
         FragmentProgram = compile fp40 smokey_sprite_PS();
@@ -278,7 +278,7 @@ technique FireSprite < string Script = "Pass=p0;"; > {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
-		    BlendEquation = FuncAdd;
+		BlendEquation = FuncAdd;
             
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
