@@ -14,13 +14,6 @@ class Camera;
 class ESPParticle {
 
 protected:
-	// Number of instances of particles
-	static unsigned int numberOfParticleInsts;
-
-	// OpenGL display list for particles
-	static GLuint particleDispList;
-	static GLuint GenerateParticleDispList();
-
 	// Total lifespan in seconds of this particle
 	double totalLifespan;
 	// Amount of time in seconds that have elapsed since this particle was created
