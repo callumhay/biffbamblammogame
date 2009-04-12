@@ -2,6 +2,7 @@
 
 #include "../BlammoEngine/CgFxEffect.h"
 #include "../BlammoEngine/Camera.h"
+#include "../BlammoEngine/GeometryMaker.h"
 
 ESPShaderParticle::ESPShaderParticle(CgFxEffectBase* effect) : ESPParticle(), shaderEffect(effect) {
 	assert(effect != NULL);
@@ -45,9 +46,9 @@ void ESPShaderParticle::Draw(const Camera& camera, const ESP::ESPAlignment align
 	glMultMatrixf(personalAlignXF.begin());
 	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size[0], this->size[1], 1.0f);
-	glColor4d(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
+	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
 
-	this->shaderEffect->Draw(camera, ESPParticle::particleDispList);
+	this->shaderEffect->Draw(camera, GeometryMaker::GetInstance()->GetQuadDL());
 
 	glPopMatrix();
 

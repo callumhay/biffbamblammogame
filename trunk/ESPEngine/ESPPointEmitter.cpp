@@ -235,6 +235,7 @@ void ESPPointEmitter::Draw(const Camera& camera) {
 	glCullFace(GL_BACK);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
+	glPolygonMode(GL_FRONT, GL_FILL);
 
 	// Go through each of the particles, revive any dead ones (based on spawn rate), and draw them
 	if (this->particleTexture != NULL) {
