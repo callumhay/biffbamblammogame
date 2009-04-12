@@ -304,7 +304,7 @@ void GameESPAssets::AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effects
 	result = uberBallEmitterTrail->SetParticles(GameESPAssets::NUM_UBER_BALL_TRAIL_PARTICLES, this->circleGradientTex);
 	assert(result);
 	
-	effectsList.reserve(2);
+	effectsList.reserve(effectsList.size() + 2);
 	effectsList.push_back(uberBallEmitterTrail);
 	effectsList.push_back(uberBallEmitterAura);
 }
@@ -328,7 +328,7 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 	bool result = ghostBallEmitterTrail->SetParticles(GameESPAssets::NUM_GHOST_SMOKE_PARTICLES, &this->ghostBallSmoke);
 	assert(result);
 
-	effectsList.reserve(1);
+	effectsList.reserve(effectsList.size() + 1);
 	effectsList.push_back(ghostBallEmitterTrail);
 }
 

@@ -1,6 +1,8 @@
 #ifndef __GAMEASSETS_H__
 #define __GAMEASSETS_H__
 
+#include "../BlammoEngine/Light.h"
+
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/GameBall.h"
@@ -33,8 +35,10 @@ private:
 	// Regular meshes - these persist throughout the entire game
 	Mesh* ball;				// Ball used to break blocks
 	Mesh* spikeyBall;	// What happens to the ball when it becomes uber
-
 	Mesh* paddleLaserAttachment;	// Laser attachment for the paddle
+
+	// In-game lights (all point lights): key, fill and ball
+	PointLight keyLight, fillLight, ballLight;
 
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
@@ -68,51 +72,7 @@ public:
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const;
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
 
-	// Public Effects-related functions ************************************************************
-	void DrawParticleEffects(double dT, const Camera& camera) {
-		this->espAssets->DrawParticleEffects(dT, camera);
-	}
-	void DrawPostProcessingESPEffects(double dT, const Camera& camera, Texture2D* sceneTex) {
-		this->espAssets->DrawPostProcessingESPEffects(dT, camera, sceneTex);
-	}
-	void AddBallBounceESP(const Camera& camera, const GameBall& ball) {
-		this->espAssets->AddBallBounceEffect(camera, ball);
-	}
-	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block) {
-		this->espAssets->AddBasicBlockBreakEffect(camera, block);
-	}
-	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb) {
-		this->espAssets->AddBombBlockBreakEffect(camera, bomb);
-	}
-	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc) {
-		this->espAssets->AddPaddleHitWallEffect(paddle, hitLoc);
-	}
-	void SetItemEffect(const GameItem& item) {
-		this->espAssets->SetItemEffect(item);
-	}
-	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item) {
-		this->espAssets->AddItemAcquiredEffect(camera, paddle, item);
-	}
-	void AddItemDropEffect(const Camera& camera, const GameItem& item) {
-		this->espAssets->AddItemDropEffect(camera, item);
-	}
-	void RemoveItemDropEffect(const Camera& camera, const GameItem& item) {
-		this->espAssets->RemoveItemDropEffect(camera, item);
-	}
-
-	void AddProjectileEffect(const Camera& camera, const Projectile& projectile) {
-		this->espAssets->AddProjectileEffect(camera, projectile);
-	}
-	void RemoveProjectileEffect(const Camera& camera, const Projectile& projectile) {
-		this->espAssets->RemoveProjectileEffect(camera, projectile);
-	}
-
-	void KillAllActiveBallEffects(const GameBall& ball) {
-		this->espAssets->KillAllActiveBallEffects(ball);
-	}
-	void KillAllActiveEffects() {
-		this->espAssets->KillAllActiveEffects();
-	}
+	void DebugDrawLights() const;
 
 	// Public Getter Functions **********************************************************************
 	LevelMesh* GetLevelMesh(const GameLevel* currLevel) const {
@@ -122,6 +82,10 @@ public:
 			return NULL;
 		}
 		return iter->second;
+	}
+
+	GameESPAssets* GetESPAssets() const {
+		return this->espAssets;
 	}
 
 };

@@ -4,6 +4,7 @@
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Mesh.h"
 #include "../BlammoEngine/Skybox.h"
+#include "../BlammoEngine/Light.h"
 
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/PlayerPaddle.h"
@@ -51,15 +52,15 @@ public:
 
 	virtual void DrawBackgroundEffects(const Camera& camera) = 0;
 
-	virtual void DrawBackgroundModel(const Camera& camera) {
-		this->background->Draw(camera);
+	virtual void DrawBackgroundModel(const Camera& camera, const PointLight& keyLight, const PointLight& fillLight) {
+		this->background->Draw(camera, keyLight, fillLight);
 	}
 
-	void DrawPaddle(const PlayerPaddle& p, const Camera& camera) const {
+	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
 		glPushMatrix();
 		float paddleScaleFactor = p.GetPaddleScaleFactor();
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
-		this->playerPaddle->Draw(camera);
+		this->playerPaddle->Draw(camera, keyLight, fillLight, ballLight);
 		glPopMatrix();
 	}
 

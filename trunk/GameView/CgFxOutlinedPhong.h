@@ -13,8 +13,8 @@ class CgFxOutlinedPhong : public CgFxMaterialEffect {
 private:
 
 	// Constants used for loading the CelShading effect
-	static const std::string BASIC_TECHNIQUE_NAME;
-	static const std::string TEXTURED_TECHNIQUE_NAME;
+	static const std::string BASIC_BG_TECHNIQUE_NAME;
+	static const std::string TEXTURED_BG_TECHNIQUE_NAME;
 
 	CGparameter outlineWidthParam;
 	CGparameter outlineColourParam;

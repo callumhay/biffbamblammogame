@@ -4,8 +4,8 @@
 #include "../BlammoEngine/CgShaderManager.h"
 #include "../BlammoEngine/Matrix.h"
 
-const std::string CgFxCelShading::BASIC_TECHNIQUE_NAME			= "Basic";
-const std::string CgFxCelShading::TEXTURED_TECHNIQUE_NAME		= "Textured";
+const std::string CgFxCelShading::BASIC_BG_TECHNIQUE_NAME				= "BasicBG";
+const std::string CgFxCelShading::TEXTURED_BG_TECHNIQUE_NAME		= "TexturedBG";
 Texture1D* CgFxCelShading::CelDiffuseTexture = NULL;
 
 // Default constructor, builds default, white material
@@ -14,7 +14,7 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties
 
 	// Set up the cel-shading texture parameter, unique to this material
 	this->celSamplerParam = NULL;
-	this->celSamplerParam	= cgGetNamedEffectParameter(this->cgEffect, "CelSampler");
+	this->celSamplerParam	= cgGetNamedEffectParameter(this->cgEffect, "CelShadingSampler");
 	assert(this->celSamplerParam);
 
 	// Initialize the static cel texture if it hasn't been already
@@ -33,10 +33,10 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties
 
 	// If there's a diffuse texture set the correct technique
 	if (this->properties->diffuseTexture != NULL) {
-		this->currTechnique = this->techniques[TEXTURED_TECHNIQUE_NAME];
+		this->currTechnique = this->techniques[TEXTURED_BG_TECHNIQUE_NAME];
 	}
 	else {
-		this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
+		this->currTechnique = this->techniques[BASIC_BG_TECHNIQUE_NAME];
 	}
 
 }
@@ -51,10 +51,10 @@ CgFxCelShading::~CgFxCelShading() {
 void CgFxCelShading::SetupBeforePasses(const Camera& camera) {
 	// If there's a texture set the correct technique
 	if (this->properties->diffuseTexture != NULL) {
-		this->currTechnique = this->techniques[TEXTURED_TECHNIQUE_NAME];
+		this->currTechnique = this->techniques[TEXTURED_BG_TECHNIQUE_NAME];
 	}
 	else {
-		this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
+		this->currTechnique = this->techniques[BASIC_BG_TECHNIQUE_NAME];
 	}
 	
 	cgGLSetParameter1f(this->outlineWidthParam, this->properties->outlineSize);

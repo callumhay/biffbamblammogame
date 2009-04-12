@@ -176,12 +176,16 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 /**
  * Draw the current level mesh.
  */
-void LevelMesh::Draw(const Camera& camera) const {
+void LevelMesh::Draw(const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::list<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
 		iter != this->displayListsPerMaterial.end(); iter++) {
-
-		iter->first->Draw(camera, iter->second);
+		
+		CgFxMaterialEffect* currEffect = iter->first;
+		currEffect->SetKeyLight(keyLight);
+		currEffect->SetFillLight(fillLight);
+		currEffect->SetBallLight(ballLight);
+		currEffect->Draw(camera, iter->second);
 	}
 }
 

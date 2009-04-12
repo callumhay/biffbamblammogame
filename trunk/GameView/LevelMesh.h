@@ -3,6 +3,7 @@
 
 #include "../BlammoEngine/CgFxEffect.h"
 #include "../BlammoEngine/ObjReader.h"
+#include "../BlammoEngine/Light.h"
 
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameLevel.h"
@@ -40,7 +41,7 @@ public:
 	~LevelMesh();
 	
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
-	void Draw(const Camera& camera) const;
+	void Draw(const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
 
 	void LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
 														 
