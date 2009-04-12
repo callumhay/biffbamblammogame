@@ -21,38 +21,63 @@ float4x4 ViewIXf : ViewInverse < string UIWidget="None"; >;
 
 //// TWEAKABLE PARAMETERS ////////////////////
 
-// Scene light - only one light affects this shader,
-// we don't care about its attenuation
-float3 SceneLightPos : Position <
+// Key Point Light ----------------------------------
+float3 KeyPointLightPos : Position <
     string Object = "PointLight0";
     string UIName =  "Diffuse Light Position";
     string Space = "World";
 > = {-0.5f,2.0f,1.25f};
 
-float3 SceneLightColour : Specular <
-    string UIName =  "Diffuse Light Colour";
+float3 KeyPointLightColour : Specular <
+    string UIName =  "Diffuse Light";
     string Object = "Pointlight0";
     string UIWidget = "Color";
 > = {1.0f,1.0f,1.0f};
+// --------------------------------------------------
 
-/*
-// Point Light 1 (Ball Light)
-float3 BallLightPos : Position <
+// Fill Point Light ---------------------------------
+float3 FillPointLightPos : Position <
     string Object = "PointLight1";
-    string UIName =  "Ball Light Position";
+    string UIName =  "Diffuse Light Position";
     string Space = "World";
 > = {-0.5f,2.0f,1.25f};
 
-float3 BallLightColour : Specular <
-    string UIName =  "Ball Light Colour";
+float3 FillPointLightColour : Specular <
+    string UIName =  "Diffuse Light";
     string Object = "Pointlight1";
     string UIWidget = "Color";
 > = {1.0f,1.0f,1.0f};
 
-float3 BallLightAtten <
-    string UIName = "Ball Light Attenuation";
-> = {1.0f, 0.1f, 0.0f};
-*/
+float FillPointLightLinearAtten <
+    string UIName =  "Fill Light Linear Attenuation";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
+    string UIWidget = "Slider";
+> = 1.0f;
+// --------------------------------------------------
+
+// Ball Point Light ---------------------------------
+float3 BallPointLightPos : Position <
+    string Object = "PointLight2";
+    string UIName =  "Diffuse Light Position";
+    string Space = "World";
+> = {-0.5f,2.0f,1.25f};
+
+float3 BallPointLightColour : Specular <
+    string UIName =  "Diffuse Light";
+    string Object = "Pointlight2";
+    string UIWidget = "Color";
+> = {1.0f,1.0f,1.0f};
+
+float BallPointLightLinearAtten <
+    string UIName =  "Ball Light Linear Attenuation";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
+    string UIWidget = "Slider";
+> = 1.0f;
+// --------------------------------------------------
 
 float3 DiffuseColour <
     string UIName =  "Diffuse Colour";
@@ -95,19 +120,19 @@ texture ColourTexture  <
 sampler2D ColourSampler = sampler_state {
     Texture = <ColourTexture>;
 };  
-
+	
 texture CelShadingProgression  <
-    string ResourceName = "celshading_texture.png";
+    string ResourceName = "celshading_texture.jpg";
     string UIName =  "Cel Texture";
     string ResourceType = "1D";
 >;
 
-sampler1D CelSampler = sampler_state {
+sampler1D CelShadingSampler = sampler_state {
     Texture = <CelShadingProgression>;
     MinFilter = Nearest;
     MagFilter = Nearest;
-    WrapS = Repeat;
-    WrapT = Repeat;
+    WrapS = Clamp;
+    WrapT = Clamp;
 };  
 
 //////// CONNECTOR DATA STRUCTURES ///////////
@@ -122,16 +147,16 @@ struct appdata {
 
 struct appdata_outlines {
     float3 Position	  : POSITION;
-    float4 Normal	    : NORMAL;
+    float4 Normal	  : NORMAL;
 };
 
 /* data passed from vertex shader to pixel shader */
 struct vertexOutput {
-    float4 HPosition	     : POSITION;
-    float2 UV		           : TEXCOORD0;
-    float3 DiffuseLightVec : TEXCOORD1;
+    float4 HPosition	   : POSITION;
+    float2 UV		       : TEXCOORD0;
+    float3 WorldPos        : TEXCOORD1;
     float3 WorldNormal     : TEXCOORD3;
-    float3 WorldView	     : TEXCOORD4;
+    float3 WorldView	   : TEXCOORD4;
     float4 Colour          : TEXCOORD5;
 };
  
@@ -143,14 +168,13 @@ struct vertexOutput_outlines {
 
 /*********** Generic Vertex Shader ******/
 
-vertexOutput celshading_VS(appdata IN) {
+vertexOutput celshading_bg_VS(appdata IN) {
     vertexOutput OUT = (vertexOutput)0;
     OUT.WorldNormal = mul(WorldITXf,IN.Normal).xyz;
 
     float4 Po = float4(IN.Position.xyz,1);
     float3 Pw = mul(WorldXf,Po).xyz;
-    OUT.DiffuseLightVec = (SceneLightPos - Pw);
-    //OUT.BallLightVec    = (BallLightPos - Pw);
+    OUT.WorldPos = Pw; //(KeyPointLightPos - Pw);
     OUT.UV = IN.UV.xy;
     
     float3 VertToViewVec = float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w) - Pw;
@@ -169,52 +193,48 @@ vertexOutput_outlines outline_VS(appdata_outlines IN) {
 
 ///////// PIXEL SHADING //////////////////////
 
-float getAttenuation(float dist, float3 atten) {
-    return 1.0f / (atten.x + atten.y*dist + atten.z*dist*dist);
-}
-
 // Utility function for cel shading
-void cel_shading(float3 Nn, float3 LnDiffuse, float3 Vn,
-		             out float3 DiffuseContrib,
-		             out float3 SpecularContrib)
+void CelShadingBG(float3 Nn, float3 WorldPos, float3 Vn,
+		         out float3 DiffuseContrib,
+		         out float3 SpecularContrib)
 {
+	float3 KeyLightVec  = KeyPointLightPos - WorldPos;
+	float3 FillLightVec = FillPointLightPos - WorldPos;
+	
+	float3 KeyLn  = normalize(KeyLightVec);
+	float3 FillLn = normalize(FillLightVec);
+	
+    float3 KeyHn = normalize(Vn + KeyLn);
+    float3 KeyLitV = lit(dot(KeyLn,Nn),dot(KeyHn,Nn),Shininess).xyz;
+    
+	float3 FillHn = normalize(Vn + FillLn);
+    float3 FillLitV = lit(dot(FillLn,Nn),dot(FillHn,Nn),Shininess).xyz;
+	
+	half FillLinearAtten = 1.0 / (FillPointLightLinearAtten * distance(FillPointLightPos, WorldPos));
+	FillLinearAtten = clamp(FillLinearAtten, 0, 1);
 
-    // Calculate the scene light contribution
-    float3 HnDiffuse = normalize(Vn + LnDiffuse);
-    float4 LitDiff = lit(dot(LnDiffuse,Nn),dot(HnDiffuse,Nn), Shininess);
-    float3 SceneLightDiffContrib = tex1D(CelSampler, LitDiff.y).rgb * SceneLightColour;
-    float3 SceneLightSpecContrib = LitDiff.y * LitDiff.z * SceneLightColour;
-    
-    // Calculate the OTHER light contribution
-    // TODO...
-    
-    // Calculate total diffuse
-    DiffuseContrib = SceneLightDiffContrib;
-    
-    // Calculate total specular
-    SpecularContrib = SceneLightSpecContrib;
+    DiffuseContrib  = (tex1D(CelShadingSampler, KeyLitV.y).rrr * KeyPointLightColour) + FillLinearAtten * (tex1D(CelShadingSampler, FillLitV.y).rrr * FillPointLightColour);
+    SpecularContrib = (KeyLitV.z * KeyPointLightColour) + FillLinearAtten * (FillLitV.z * FillPointLightColour);	
 }
 
-float4 celshading_textured_PS(vertexOutput IN) : COLOR {
+float4 celshading_textured_bg_PS(vertexOutput IN) : COLOR {
     float3 diffContrib;
     float3 specContrib;
-    float3 LnDiffuse = normalize(IN.DiffuseLightVec);
     float3 Nn = normalize(IN.WorldNormal);
     
-	  cel_shading(Nn,LnDiffuse,IN.WorldView,diffContrib,specContrib);
+	CelShadingBG(Nn, IN.WorldPos, IN.WorldView, diffContrib, specContrib);
       
     float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
     float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*textureColour*diffContrib;
     return float4(result, 1.0f);
 }
 
-float4 celshading_PS(vertexOutput IN) : COLOR {
+float4 celshading_bg_PS(vertexOutput IN) : COLOR {
     float3 diffContrib;
     float3 specContrib;
-    float3 LnDiffuse = normalize(IN.DiffuseLightVec);
     float3 Nn = normalize(IN.WorldNormal);
     
-	  cel_shading(Nn,LnDiffuse,IN.WorldView,diffContrib,specContrib);
+	CelShadingBG(Nn,IN.WorldPos,IN.WorldView,diffContrib,specContrib);
       
     float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*diffContrib;
     return float4(result, 1.0f);
@@ -229,18 +249,17 @@ float4 outline_PS() : COLOR {
 // actual celshading (step-diffuse texture is used to give the celshading
 // look; the second pass creates outlines.
 
-technique Basic {
+technique BasicBG {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
         
-        VertexProgram = compile vp40 celshading_VS();        
-        FragmentProgram = compile fp40 celshading_PS();
+        VertexProgram = compile vp40 celshading_bg_VS();        
+        FragmentProgram = compile fp40 celshading_bg_PS();
     }  
      
     pass p1 < string Script = "Draw=geometry;"; > {
@@ -258,18 +277,17 @@ technique Basic {
     }
 }
 
-technique Textured {
+technique TexturedBG {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
         
-        VertexProgram = compile vp40 celshading_VS();        
-        FragmentProgram = compile fp40 celshading_textured_PS();
+        VertexProgram = compile vp40 celshading_bg_VS();        
+        FragmentProgram = compile fp40 celshading_textured_bg_PS();
     }  
      
     pass p1 < string Script = "Draw=geometry;"; > {
@@ -284,6 +302,6 @@ technique Textured {
         
         VertexProgram = compile vp40 outline_VS();
         FragmentProgram = compile fp40 outline_PS();
-    } 
+    }     
 }
 /////////////////////////////////////// eof //
