@@ -3,7 +3,8 @@
 
 #include "../BlammoEngine/BlammoEngine.h"
 
-const float DecoSkybox::COLOUR_CHANGE_SPEED = 0.07f;
+const float DecoSkybox::COLOUR_CHANGE_TIME = 10.0f;	// Amount of time in seconds to change from one colour to the next
+
 const Colour DecoSkybox::COLOUR_CHANGE_LIST[NUM_COLOUR_CHANGES] = {
 	Colour(0.4375f, 0.5f, 0.5647f),							// slate greyish-blue
 	Colour(0.2745098f, 0.5098039f, 0.70588f),		// steel blue
@@ -26,45 +27,28 @@ const std::string DecoSkybox::DECO_SKYBOX_TEXTURES[6]			= {
 	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg"
 };
 
-DecoSkybox::DecoSkybox(PolygonGroup* geom, TextureCube* tex) : Skybox(geom, tex), currColourIndex(0) {
-	this->currColour = COLOUR_CHANGE_LIST[0];
+DecoSkybox::DecoSkybox(PolygonGroup* geom, TextureCube* tex) : Skybox(geom, tex), currColourAnim(&currColour) {
+	// Setup the colour interpolation member
+	const int colourChangesPlusOne = NUM_COLOUR_CHANGES + 1;
+	std::vector<double> timeValues;
+	timeValues.reserve(colourChangesPlusOne);
+	std::vector<Colour> colourValues;
+	colourValues.reserve(colourChangesPlusOne);
+
+	for (int i = 0; i < colourChangesPlusOne; i++) {
+		timeValues.push_back(i * DecoSkybox::COLOUR_CHANGE_TIME);
+		colourValues.push_back(DecoSkybox::COLOUR_CHANGE_LIST[i % NUM_COLOUR_CHANGES]);
+	}
+
+	currColourAnim.SetRepeat(true);
+	currColourAnim.SetLerp(timeValues, colourValues);
 }
 
 DecoSkybox::~DecoSkybox() {
 }
 
 void DecoSkybox::Tick(double dT) {
-	if (dT > COLOUR_CHANGE_SPEED) {
-		dT = COLOUR_CHANGE_SPEED;
-	}
-
-	// Figure out what the colour of the background should be...
-	double colourChangeInc = dT * COLOUR_CHANGE_SPEED;
-	Colour nextColour = COLOUR_CHANGE_LIST[(this->currColourIndex + 1) % NUM_COLOUR_CHANGES];
-	bool transitionDone = true;
-
-	// Find out if there is a significant difference in each colour channel,
-	// if there is then move towards the next target colour in that channel
-	if (fabs(currColour.R() - nextColour.R()) > COLOUR_CHANGE_SPEED) {
-		int changeSgn = NumberFuncs::SignOf(nextColour.R() - currColour.R());
-		this->currColour[0] += changeSgn*colourChangeInc;
-		transitionDone = false;
-	}
-	if (fabs(currColour.G() - nextColour.G()) > COLOUR_CHANGE_SPEED) {
-		int changeSgn = NumberFuncs::SignOf(nextColour.G() - currColour.G());
-		this->currColour[1] += changeSgn*colourChangeInc;
-		transitionDone = false;
-	}
-	if (fabs(currColour.B() - nextColour.B()) > COLOUR_CHANGE_SPEED) {
-		int changeSgn = NumberFuncs::SignOf(nextColour.B() - currColour.B());
-		this->currColour[2] += changeSgn*colourChangeInc;
-		transitionDone = false;
-	}
-
-	// If we're close enough to the next colour then move on to the next colour
-	if (transitionDone) {
-		this->currColourIndex = (this->currColourIndex + 1) % NUM_COLOUR_CHANGES;
-	}
+	currColourAnim.Tick(dT);
 }
 
 void DecoSkybox::SetupCgFxParameters() {

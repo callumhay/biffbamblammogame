@@ -3,6 +3,7 @@
 #include "GameAssets.h"
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
+#include "LivesLeftHUD.h"
 
 // Game Model stuff
 #include "../GameModel/GameModel.h"
@@ -31,10 +32,6 @@ InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(disp
 	this->scoreLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), "0");
 	this->scoreLabel.SetColour(textColourHUD);
 	this->scoreLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
-	// Lives left display
-	this->livesLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), LIVES_LABEL_TEXT);
-	this->livesLabel.SetColour(textColourHUD);
-	this->livesLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
 
 	debug_opengl_state();
 }
@@ -56,18 +53,17 @@ void InGameDisplayState::RenderFrame(double dT) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	this->display->GetCamera().ApplyCameraTransform(dT);
-	
+
 	debug_opengl_state();
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_TRUE);
-
+	glDepthFunc(GL_LEQUAL);
+	
 	// Draw the game scene
 	this->DrawGameScene(dT);
 	
 	// Draw the HUD
-	this->DrawGameHUD();
+	this->DrawGameHUD(dT);
 }
 
 // Private helper functions ************************************************************
@@ -122,8 +118,9 @@ void InGameDisplayState::RenderBackgroundToFBO() {
 	glPushMatrix();
 	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
 	this->display->GetAssets()->DrawBackgroundModel(this->display->GetCamera());
-	this->display->GetAssets()->DrawBackgroundEffects(this->display->GetCamera());
 	this->display->GetAssets()->DrawSkybox(this->display->GetCamera());
+	this->display->GetAssets()->DrawBackgroundEffects(this->display->GetCamera());
+	
 	glPopMatrix();
 
 	// Unbind the background FBO
@@ -160,17 +157,22 @@ void InGameDisplayState::DrawScene(double dT) {
 	// Now draw everything again, this time as multisampled
 	glEnable(GL_MULTISAMPLE);
 
-	// Level pieces...
-	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
-	this->display->GetAssets()->DrawLevelPieces(currLevel, this->display->GetCamera());
-
 	// Background Model and effects...
 	glPushMatrix();
 	glTranslatef(0.0f, negHalfLevelDim[1], 0.0f);
 	this->display->GetAssets()->DrawBackgroundModel(this->display->GetCamera());
 	this->display->GetAssets()->DrawBackgroundEffects(this->display->GetCamera());
+	glPopMatrix();
 
-	glTranslatef(negHalfLevelDim[0], 0.0f, 0.0f);
+	glPushMatrix();
+	Matrix4x4 gameTransform = this->display->GetModel()->GetTransformInfo().GetGameTransform();
+	glMultMatrixf(gameTransform.begin());
+
+	// Level pieces...
+	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
+	this->display->GetAssets()->DrawLevelPieces(dT, currLevel, this->display->GetCamera());
+
+	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 	
 	// Items...
 	std::list<GameItem*>& gameItems = this->display->GetModel()->GetLiveItems();
@@ -181,11 +183,9 @@ void InGameDisplayState::DrawScene(double dT) {
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
 
-	// Balls...
-	const std::list<GameBall*>& gameBalls = this->display->GetModel()->GetGameBalls();
-	for (std::list<GameBall*>::const_iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
-		this->display->GetAssets()->DrawGameBall(dT, **ballIter, this->display->GetCamera(), this->renderToTexBackground);
-	}
+	// Balls...	
+	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), this->display->GetCamera(), this->renderToTexBackground, negHalfLevelDim);
+
 	glDisable(GL_MULTISAMPLE);
 
 	// Typical Particle effects...
@@ -198,7 +198,7 @@ void InGameDisplayState::DrawScene(double dT) {
  * Helper function for drawing the Heads-Up-Display (HUD) for the game, 
  * including points, lives left, etc.
  */
-void InGameDisplayState::DrawGameHUD() {
+void InGameDisplayState::DrawGameHUD(double dT) {
 	// Draw the points in the top-right corner of the display
 	std::stringstream ptStrStream;
 	ptStrStream << this->display->GetModel()->GetScore();
@@ -208,13 +208,8 @@ void InGameDisplayState::DrawGameHUD() {
 	this->scoreLabel.Draw();
 
 	// Draw the number of lives left in the top-left corner of the display
-	// TODO: figure out number of lives... also, perhaps sprites or models instead?
-	std::stringstream livesStrStream;
-	livesStrStream << LIVES_LABEL_TEXT << this->display->GetModel()->GetLivesLeft();
-	this->livesLabel.SetText(livesStrStream.str());
-	this->livesLabel.SetTopLeftCorner(Point2D(HUD_X_INDENT, this->display->GetDisplayHeight() - HUD_Y_INDENT));
-	this->livesLabel.Draw();
-
+	this->display->GetAssets()->GetLifeHUD()->Draw(dT, this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	
 	// Draw the timers that are currently in existance
 	const std::list<GameItemTimer*>& activeTimers = this->display->GetModel()->GetActiveTimers();
 	this->display->GetAssets()->DrawTimers(activeTimers, this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
@@ -234,7 +229,7 @@ void InGameDisplayState::DisplaySizeChanged(int width, int height) {
  * Debugging function that draws the collision boundries of level pieces.
  */
 void InGameDisplayState::DebugDrawBounds() {
-	if (!this->display->IsDrawDebugOn()) { return; }
+	if (!GameDisplay::IsDrawDebugBoundsOn()) { return; }
 	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
 
 	glPushMatrix();

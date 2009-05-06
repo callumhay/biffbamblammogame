@@ -34,6 +34,8 @@ public:
 
 	// Misc game events
 	virtual void BlockDestroyedEvent(const LevelPiece& block);
+	virtual void BallSafetyNetCreatedEvent();
+	virtual void BallSafetyNetDestroyedEvent(const GameBall& ball);
 	virtual void LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	virtual void ScoreChangedEvent(int amt);
 	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier);
@@ -44,6 +46,7 @@ public:
 	virtual void ItemDeactivatedEvent(const GameItem& item);
 	virtual void ProjectileSpawnedEvent(const Projectile& projectile);
 	virtual void ProjectileRemovedEvent(const Projectile& projectile);
+	virtual void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
 };
 
 #endif

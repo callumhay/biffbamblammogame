@@ -1,10 +1,13 @@
 #ifndef __GAMEWORLDASSETS_H__
 #define __GAMEWORLDASSETS_H__
 
+#include "GameViewConstants.h"
+
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Mesh.h"
 #include "../BlammoEngine/Skybox.h"
 #include "../BlammoEngine/Light.h"
+#include "../BlammoEngine/ResourceManager.h"
 
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/PlayerPaddle.h"
@@ -20,26 +23,46 @@ protected:
 	Mesh* playerPaddle;		// Currently loaded player paddle mesh
 	Mesh* styleBlock;
 	
+	PointLight bgFillLight, bgKeyLight;
+		
 public:
 	GameWorldAssets(Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* styleBlock) : 
 			skybox(skybox), background(bg), playerPaddle(paddle), styleBlock(styleBlock) {
 		assert(skybox != NULL);
 		assert(bg != NULL);
 		assert(paddle != NULL);
+
+		// Initialize background key and fill lights
+		this->bgKeyLight	= PointLight(Point3D(-25.0f, 20.0f, 55.0f), GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR,   0.0f);
+		this->bgFillLight = PointLight(Point3D(30.0f, 11.0f, -15.0f), GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f);
 	}
 	virtual ~GameWorldAssets() {
 		delete this->skybox;
 		this->skybox = NULL;
-		delete this->background;
-		this->background = NULL;
-		delete this->playerPaddle;
-		this->playerPaddle = NULL;
-		delete this->styleBlock;
-		this->styleBlock = NULL;
+
+		// Tell the resource manager to release any of the loaded meshes
+		ResourceManager::GetInstance()->ReleaseMeshResource(this->background);
+		ResourceManager::GetInstance()->ReleaseMeshResource(this->playerPaddle);
+		ResourceManager::GetInstance()->ReleaseMeshResource(this->styleBlock);
+	}
+
+	void ToggleBackgroundLights(bool turnOn) {
+		if (turnOn) {
+			this->bgKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR);
+			this->bgFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR);
+		}
+		else {
+			this->bgKeyLight.SetDiffuseColour(Colour(0,0,0));
+			this->bgFillLight.SetDiffuseColour(Colour(0,0,0));
+		}
 	}
 
 	Mesh* GetWorldStyleBlock() const {
 		return this->styleBlock;
+	}
+
+	Skybox* GetSkybox() const {
+		return this->skybox;
 	}
 
 	virtual void Tick(double dT) {
@@ -52,9 +75,7 @@ public:
 
 	virtual void DrawBackgroundEffects(const Camera& camera) = 0;
 
-	virtual void DrawBackgroundModel(const Camera& camera, const PointLight& keyLight, const PointLight& fillLight) {
-		this->background->Draw(camera, keyLight, fillLight);
-	}
+	virtual void DrawBackgroundModel(const Camera& camera) = 0;
 
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
 		glPushMatrix();

@@ -5,6 +5,7 @@
 #include "LoadingScreen.h"
 #include "GameOverDisplayState.h"
 #include "GameCompleteDisplayState.h"
+#include "LivesLeftHUD.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameBall.h"
@@ -187,6 +188,28 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 	debug_output("EVENT: Block destroyed");
 }
 
+void GameEventsListener::BallSafetyNetCreatedEvent() {
+	// Tell the level mesh about it so it can show any effects for the creation
+	// of the safety net mesh
+	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
+	this->display->GetAssets()->GetLevelMesh(currLevel)->BallSafetyNetCreated();
+
+	debug_output("EVENT: Ball safety net created");
+}
+
+void GameEventsListener::BallSafetyNetDestroyedEvent(const GameBall& ball) {
+	
+	// Tell the level mesh about it so it can show any effects for the destruction
+	// of the safety net mesh
+	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
+	this->display->GetAssets()->GetLevelMesh(currLevel)->BallSafetyNetDestroyed(ball);
+
+	// Particle effects for when the safety net is destroyed
+	this->display->GetAssets()->GetESPAssets()->AddBallSafetyNetDestroyedEffect(ball);
+
+	debug_output("EVENT: Ball safety net destroyed");
+}
+
 void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
 	this->display->GetAssets()->GetLevelMesh(currLevel)->ChangePiece(pieceBefore, pieceAfter);
@@ -222,13 +245,18 @@ void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const Pla
 }
 
 void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
-	// Activate the item's effect (if any)
-	this->display->GetAssets()->GetESPAssets()->SetItemEffect(item);
+	
+	// Activate the item's effects (if any)
+	this->display->GetAssets()->ActivateItemEffects(*this->display->GetModel(), item, this->display->GetCamera());
 
 	debug_output("EVENT: Item Activated: " << item);
 }
 
 void GameEventsListener::ItemDeactivatedEvent(const GameItem& item) {
+
+	// Deactivate the item's effects (if any)
+	this->display->GetAssets()->DeactivateItemEffects(*this->display->GetModel(), item);
+
 	debug_output("EVENT: Item Deactivated: " << item);
 }
 
@@ -243,4 +271,21 @@ void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	// Remove the projectile's effect
 	this->display->GetAssets()->GetESPAssets()->RemoveProjectileEffect(this->display->GetCamera(), projectile); 
 	debug_output("EVENT: Projectile removed");
+}
+
+void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAfter) {
+	
+	// Tell the life HUD about the change in lives
+	int lifeDelta  = abs(livesLeftAfter - livesLeftBefore);
+	bool livesLost = livesLeftAfter < livesLeftBefore;
+	
+	LivesLeftHUD* lifeHUD = this->display->GetAssets()->GetLifeHUD();
+	if (livesLost) {
+		lifeHUD->LivesLost(lifeDelta);
+	}
+	else {
+		lifeHUD->LivesGained(lifeDelta);
+	}
+
+	debug_output("EVENT: Lives changed - Before: " << livesLeftBefore << " After: " << livesLeftAfter);
 }

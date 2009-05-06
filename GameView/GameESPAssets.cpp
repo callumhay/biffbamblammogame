@@ -1,7 +1,9 @@
 #include "GameESPAssets.h"
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
+#include "BallSafetyNetMesh.h"
 
+#include "../GameModel/GameModel.h"
 #include "../GameModel/GameBall.h"
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/Projectile.h"
@@ -15,8 +17,10 @@
 #include "../GameModel/LaserPaddleItem.h"
 #include "../GameModel/PaddleSizeItem.h"
 #include "../GameModel/BallSizeItem.h"
+#include "../GameModel/OneUpItem.h"
 
-#include "../BlammoEngine/Texture2D.h"
+#include "../BlammoEngine/ResourceManager.h"
+#include "../BlammoEngine/Texture.h"
 
 #include "../ESPEngine/ESP.h"
 
@@ -61,30 +65,34 @@ GameESPAssets::~GameESPAssets() {
 	// Delete any effect textures
 	for (std::vector<Texture2D*>::iterator iter = this->bangTextures.begin();
 		iter != this->bangTextures.end(); iter++) {
-		delete *iter;
+		
+		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		assert(removed);	
 	}
 	this->bangTextures.clear();
 
 	for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
 		iter != this->smokeTextures.end(); iter++) {
-		delete *iter;
+		
+		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		assert(removed);	
 	}
 	this->smokeTextures.clear();
 
-	delete this->circleGradientTex;
-	this->circleGradientTex = NULL;
-	delete this->starTex;
-	this->starTex = NULL;
-	delete this->starOutlineTex;
-	this->starOutlineTex = NULL;
-	delete this->explosionTex;
-	this->explosionTex = NULL;
-	delete this->explosionRayTex;
-	this->explosionRayTex = NULL;
-	delete this->laserBeamTex;
-	this->laserBeamTex = NULL;
-	delete this->upArrowTex;
-	this->upArrowTex = NULL;
+	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleGradientTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->starOutlineTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->explosionTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->explosionRayTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->laserBeamTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->upArrowTex);
+	assert(removed);
 
 	// Delete any standalone effects
 	delete this->paddleLaserGlowAura;
@@ -206,65 +214,65 @@ void GameESPAssets::InitESPTextures() {
 	
 	// Initialize bang textures (big boom thingys when there are explosions)
 	if (this->bangTextures.size() == 0) {
-		Texture2D* temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear);
+		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->bangTextures.push_back(temp);
-		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture::Trilinear);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture::Trilinear));
 		assert(temp != NULL);
 		this->bangTextures.push_back(temp);
-		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture::Trilinear);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture::Trilinear));
 		assert(temp != NULL);
 		this->bangTextures.push_back(temp);
 	}
 	
 	// Initialize smoke textures (cartoony puffs of smoke)
 	if (this->smokeTextures.size() == 0) {
-		Texture2D* temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear);
+		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);	
 	}
 
 	if (this->circleGradientTex == NULL) {
-		this->circleGradientTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear);
+		this->circleGradientTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
 		assert(this->circleGradientTex != NULL);
 	}
 	if (this->starTex == NULL) {
-		this->starTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear);
+		this->starTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear));
 		assert(this->starTex != NULL);	
 	}
 	if (this->starOutlineTex == NULL) {
-		this->starOutlineTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear);
+		this->starOutlineTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear));
 		assert(this->starOutlineTex != NULL);
 	}
 	if (this->explosionTex == NULL) {
-		this->explosionTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD, Texture::Trilinear);
+		this->explosionTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD, Texture::Trilinear));
 		assert(this->explosionTex != NULL);
 	}
 	if (this->explosionRayTex == NULL) {
-		this->explosionRayTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS, Texture::Trilinear);
+		this->explosionRayTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS, Texture::Trilinear));
 		assert(this->explosionRayTex != NULL);
 	}
 	if (this->laserBeamTex == NULL) {
-		this->laserBeamTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM, Texture::Trilinear);
+		this->laserBeamTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM, Texture::Trilinear));
 		assert(this->laserBeamTex != NULL);
 	}
 	if (this->upArrowTex == NULL) {
-		this->upArrowTex = Texture2D::CreateTexture2DFromImgFile(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear);
+		this->upArrowTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear));
 		assert(this->upArrowTex != NULL);
 	}
 
@@ -285,7 +293,10 @@ void GameESPAssets::AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effects
 	uberBallEmitterAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	uberBallEmitterAura->SetParticleAlignment(ESP::ScreenAligned);
 	uberBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
-	uberBallEmitterAura->SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.75f));
+	uberBallEmitterAura->SetParticleColour(ESPInterval(GameViewConstants::GetInstance()->UBER_BALL_COLOUR.R()), 
+																				 ESPInterval(GameViewConstants::GetInstance()->UBER_BALL_COLOUR.G()), 
+																				 ESPInterval(GameViewConstants::GetInstance()->UBER_BALL_COLOUR.B()), 
+																			   ESPInterval(0.75f));
 	uberBallEmitterAura->AddEffector(&this->particlePulseUberballAura);
 	bool result = uberBallEmitterAura->SetParticles(1, this->circleGradientTex);
 	assert(result);
@@ -318,7 +329,11 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 	ghostBallEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
 	ghostBallEmitterTrail->SetParticleLife(ESPInterval(0.5f));
 	ghostBallEmitterTrail->SetParticleSize(ESPInterval(1.5f, 2.0f));
-	ghostBallEmitterTrail->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	ghostBallEmitterTrail->SetParticleColour(ESPInterval(GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.R()), 
+																					 ESPInterval(GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.G()), 
+																					 ESPInterval(GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.B()), 
+																					 ESPInterval(1.0f));
+
 	ghostBallEmitterTrail->SetEmitAngleInDegrees(20);
 	ghostBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	ghostBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
@@ -399,7 +414,7 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->ghostBallSmoke.SetScale(0.5f);
 	this->ghostBallSmoke.SetFrequency(0.25f);
 	this->ghostBallSmoke.SetFlowDirection(Vector3D(0, 0, 1));
-	this->ghostBallSmoke.SetMaskTexture(this->circleGradientTex);
+	this->ghostBallSmoke.SetMaskTexture(dynamic_cast<Texture2D*>(this->circleGradientTex));
 
 	// Fire effect used in various things - like explosions and such.
 	this->fireEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
@@ -554,6 +569,86 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	// TODO
 	bangOnoParticle->SetOnomatoplexSound(Onomatoplex::EXPLOSION, Onomatoplex::NORMAL);
 	
+	bangOnoEffect->AddParticle(bangOnoParticle);
+
+	// Lastly, add the new emitters to the list of active emitters in order of back to front
+	this->activeGeneralEmitters.push_front(bangEffect);
+	this->activeGeneralEmitters.push_back(bangOnoEffect);
+}
+
+
+void GameESPAssets::AddBallSafetyNetDestroyedEffect(const GameBall& ball) {
+	assert(this->bangTextures.size() != 0);
+
+	// Choose a random bang texture
+	unsigned int randomBangTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->bangTextures.size();
+	Texture2D* randomBangTex = this->bangTextures[randomBangTexIndex];
+	
+	ESPInterval bangLifeInterval		= ESPInterval(0.8f, 1.1f);
+	ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.minValue + 0.3f, bangLifeInterval.maxValue + 0.3f);
+	
+	Point2D ballLoc = ball.GetBounds().Center();
+	Point3D emitCenter  = Point3D(ballLoc[0], ballLoc[1] - ball.GetBounds().Radius() - BallSafetyNetMesh::SAFETY_NET_HEIGHT/2.0f, 0.0f);
+
+	// Create an emitter for the bang texture
+	ESPPointEmitter* bangEffect = new ESPPointEmitter();
+	
+	// Set up the emitter...
+	bangEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	bangEffect->SetParticleLife(bangLifeInterval);
+	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	bangEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangEffect->SetEmitPosition(emitCenter);
+
+	// Figure out some random proper orientation...
+	// Two base rotations (for variety) : 180 or 0...
+	float baseBangRotation = 0.0f;
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		baseBangRotation = 180.0f;
+	}
+	bangEffect->SetParticleRotation(ESPInterval(baseBangRotation - 10.0f, baseBangRotation + 10.0f));
+
+	ESPInterval sizeIntervalX(2.5f, 3.2f);
+	ESPInterval sizeIntervalY(1.25f, 1.65f);
+	bangEffect->SetParticleSize(sizeIntervalX, sizeIntervalY);
+
+	// Add effectors to the bang effect
+	bangEffect->AddEffector(&this->particleFader);
+	bangEffect->AddEffector(&this->particleMediumGrowth);
+	
+	// Add the bang particle...
+	bool result = bangEffect->SetParticles(1, randomBangTex);
+	assert(result);
+	if (!result) {
+		delete bangEffect;
+		return;
+	}
+
+	// Create an emitter for the sound of onomatopeia of the breaking block
+	ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	bangOnoEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	bangOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
+	bangOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
+	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+	bangOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangOnoEffect->SetEmitPosition(emitCenter);
+	
+	// Add effectors...
+	bangOnoEffect->AddEffector(&this->particleFader);
+	bangOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single particle to the emitter...
+	DropShadow dpTemp;
+	dpTemp.amountPercentage = 0.10f;
+	ESPOnomataParticle* bangOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium));
+	bangOnoParticle->SetDropShadow(dpTemp);
+
+	// Set the severity of the effect...
+	bangOnoParticle->SetOnomatoplexSound(Onomatoplex::EXPLOSION, Onomatoplex::GOOD);
 	bangOnoEffect->AddParticle(bangOnoParticle);
 
 	// Lastly, add the new emitters to the list of active emitters in order of back to front
@@ -1070,7 +1165,7 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 
 	// Pulsing aura
 	ESPPointEmitter* paddlePulsingAura = new ESPPointEmitter();
-	paddlePulsingAura->SetSpawnDelta(ESPInterval(-1));
+	paddlePulsingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	paddlePulsingAura->SetInitialSpd(ESPInterval(0));
 	paddlePulsingAura->SetParticleLife(ESPInterval(1.0f));
 	paddlePulsingAura->SetParticleSize(ESPInterval(2.0f * paddle.GetHalfWidthTotal()), ESPInterval(4.0f * paddle.GetHalfHeight()));
@@ -1081,12 +1176,28 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 	paddlePulsingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
 	paddlePulsingAura->AddEffector(&this->particleLargeGrowth);
 	paddlePulsingAura->AddEffector(&this->particleFader);
-	paddlePulsingAura->SetParticles(1, this->circleGradientTex);
+	bool result = paddlePulsingAura->SetParticles(1, this->circleGradientTex);
+	assert(result);
 
-	// Ray emitter....
-	// TODO
-
+	// Absorb glow sparks
+	ESPPointEmitter* absorbGlowSparks = new ESPPointEmitter();
+	absorbGlowSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	absorbGlowSparks->SetInitialSpd(ESPInterval(3.0f, 4.5f));
+	absorbGlowSparks->SetParticleLife(ESPInterval(0.75f, 1.0f));
+	absorbGlowSparks->SetParticleSize(ESPInterval(0.1f, 0.75f));
+	absorbGlowSparks->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
+	absorbGlowSparks->SetEmitAngleInDegrees(180);
+	absorbGlowSparks->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	absorbGlowSparks->SetAsPointSpriteEmitter(true);
+	absorbGlowSparks->SetIsReversed(true);
+	absorbGlowSparks->SetEmitPosition(Point3D(0, 0, 0));
+	absorbGlowSparks->AddEffector(&this->particleFader);
+	absorbGlowSparks->AddEffector(&this->particleMediumShrink);
+	result = absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, this->circleGradientTex);
+	assert(result);
+	
 	this->activePaddleEmitters.push_back(paddlePulsingAura);
+	this->activePaddleEmitters.push_back(absorbGlowSparks);
 }
 
 /**
@@ -1152,6 +1263,9 @@ void GameESPAssets::AddPaddleShrinkEffect() {
 	}
 }
 
+/**
+ * Add the effect for when the ball grows - bunch of arrows that point and move outward around the ball.
+ */
 void GameESPAssets::AddBallGrowEffect(const GameBall* ball) {
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
@@ -1180,6 +1294,9 @@ void GameESPAssets::AddBallGrowEffect(const GameBall* ball) {
 	}
 }
 
+/**
+ * Add the effect for when the ball shrinks - bunch of arrows that point and move inward around the ball.
+ */
 void GameESPAssets::AddBallShrinkEffect(const GameBall* ball) {
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
@@ -1210,16 +1327,55 @@ void GameESPAssets::AddBallShrinkEffect(const GameBall* ball) {
 }
 
 
+
+/**
+ * Add the effect for when the player acquires a 1UP power-up.
+ */
+void GameESPAssets::AddOneUpEffect(const PlayerPaddle* paddle) {
+	
+	Point2D paddlePos2D = paddle->GetCenterPosition();
+	Point3D paddlePos3D = Point3D(paddlePos2D[0], paddlePos2D[1], 0.0f);
+
+	// Create an emitter for the 1UP text raising from the paddle
+	ESPPointEmitter* oneUpTextEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	oneUpTextEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	oneUpTextEffect->SetInitialSpd(ESPInterval(2.0f));
+	oneUpTextEffect->SetParticleLife(ESPInterval(2.0f));
+	oneUpTextEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
+	oneUpTextEffect->SetParticleRotation(ESPInterval(0.0f));
+	oneUpTextEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	oneUpTextEffect->SetParticleAlignment(ESP::ScreenAligned);
+	oneUpTextEffect->SetEmitPosition(paddlePos3D);
+	oneUpTextEffect->SetEmitDirection(Vector3D(0, 1, 0));
+	oneUpTextEffect->SetParticleColour(ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R()), 
+																		 ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G()),
+																		 ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B()), ESPInterval(1.0f));
+	// Add effectors...
+	oneUpTextEffect->AddEffector(&this->particleFader);
+	oneUpTextEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single particle to the emitter...
+	DropShadow dpTemp;
+	dpTemp.amountPercentage = 0.15f;
+	dpTemp.colour = Colour(1.0f, 1.0f, 1.0f);
+	ESPOnomataParticle* oneUpTextParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::HappyGood, GameFontAssetsManager::Medium), "1UP!");
+	oneUpTextParticle->SetDropShadow(dpTemp);
+	oneUpTextEffect->AddParticle(oneUpTextParticle);
+
+	// Lastly, add the new emitters to the list of active emitters in order of back to front
+	this->activeGeneralEmitters.push_back(oneUpTextEffect);
+}
+
 /**
  * Adds an effect based on the given game item being activated or deactivated.
  */
-void GameESPAssets::SetItemEffect(const GameItem& item) {
+void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameModel) {
 	if (item.GetName() == UberBallItem::UBER_BALL_ITEM_NAME) {
 		const GameBall* ballAffected = item.GetBallAffected();
 		assert(ballAffected != NULL);
 
-		// If there are any effects assigned for the uber ball then we need
-		// to reset the trail
+		// If there are any effects assigned for the uber ball then we need to reset the trail
 		std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(ballAffected);
 		if (foundBallEffects != this->ballEffects.end()) {
 			std::map<std::string, std::vector<ESPPointEmitter*>>::iterator foundUberBallFX = foundBallEffects->second.find(UberBallItem::UBER_BALL_ITEM_NAME);
@@ -1246,6 +1402,9 @@ void GameESPAssets::SetItemEffect(const GameItem& item) {
 	}
 	else if (item.GetName() == BallSizeItem::BALL_SHRINK_ITEM_NAME) {
 		this->AddBallShrinkEffect(item.GetBallAffected());
+	}
+	else if (item.GetName() == OneUpItem::ONE_UP_ITEM_NAME) {
+		this->AddOneUpEffect(gameModel.GetPlayerPaddle());
 	}
 }
 

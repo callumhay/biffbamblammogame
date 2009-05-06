@@ -62,6 +62,10 @@ public:
 	const std::string TEXTURE_EXPLOSION_RAYS;
 	const std::string TEXTURE_LASER_BEAM;
 	const std::string TEXTURE_UP_ARROW;
+	const std::string TEXTURE_BALL_LIFE_HUD;
+	const std::string TEXTURE_SPARKLE;
+
+	const std::string TEXTURE_BALL_SAFETY_NET;
 
 	const std::string TEXTURE_ITEM_SLOWBALL;
 	const std::string TEXTURE_ITEM_FASTBALL;
@@ -75,6 +79,10 @@ public:
 	const std::string TEXTURE_ITEM_PADDLESHRINK;
 	const std::string TEXTURE_ITEM_BALLGROW;
 	const std::string TEXTURE_ITEM_BALLSHRINK;
+	const std::string TEXTURE_ITEM_BLACKOUT;
+	const std::string TEXTURE_ITEM_UPSIDEDOWN;
+	const std::string TEXTURE_ITEM_BALLSAFETYNET;
+	const std::string TEXTURE_ITEM_1UP;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -82,12 +90,16 @@ public:
 	const std::string TEXTURE_ITEM_TIMER_INVISIBALL;
 	const std::string TEXTURE_ITEM_TIMER_GHOSTBALL;
 	const std::string TEXTURE_ITEM_TIMER_PADDLELASER;
+	const std::string TEXTURE_ITEM_TIMER_BLACKOUT;
+	const std::string TEXTURE_ITEM_TIMER_UPSIDEDOWN;
 
 	const std::string TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_INVISIBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_PADDLELASER;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_BLACKOUT;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN;
 
 	// Font path constants **********************************
 	const std::string FONT_HAPPYGOOD;
@@ -98,9 +110,19 @@ public:
 	// Item-related constants *******************************
 	const std::string ITEM_LABEL_MATGRP;
 	const std::string ITEM_END_MATGRP;
+
 	const Colour ITEM_GOOD_COLOUR;
 	const Colour ITEM_BAD_COLOUR;
 	const Colour ITEM_NEUTRAL_COLOUR;
+	
+	const float DEFAULT_BALL_LIGHT_ATTEN;
+	const Colour DEFAULT_FG_KEY_LIGHT_COLOUR;
+	const Colour DEFAULT_FG_FILL_LIGHT_COLOUR;
+	const Colour DEFAULT_BG_KEY_LIGHT_COLOUR;
+	const Colour DEFAULT_BG_FILL_LIGHT_COLOUR;
+	const Colour DEFAULT_BALL_LIGHT_COLOUR;
+	const Colour GHOST_BALL_COLOUR;
+	const Colour UBER_BALL_COLOUR;
 
 	// World specific path constants ************************
 	const std::string BALL_MESH;

@@ -4,8 +4,10 @@
 #include "../BlammoEngine/CgShaderManager.h"
 #include "../BlammoEngine/Matrix.h"
 
-const std::string CgFxCelShading::BASIC_BG_TECHNIQUE_NAME				= "BasicBG";
-const std::string CgFxCelShading::TEXTURED_BG_TECHNIQUE_NAME		= "TexturedBG";
+const std::string CgFxCelShading::BASIC_FG_TECHNIQUE_NAME			= "BasicFG";
+const std::string CgFxCelShading::TEXTURED_FG_TECHNIQUE_NAME	= "TexturedFG";
+const std::string CgFxCelShading::BASIC_BG_TECHNIQUE_NAME			= "BasicBG";
+const std::string CgFxCelShading::TEXTURED_BG_TECHNIQUE_NAME	= "TexturedBG";
 Texture1D* CgFxCelShading::CelDiffuseTexture = NULL;
 
 // Default constructor, builds default, white material
@@ -31,12 +33,23 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties
 	this->outlineColourParam	=	cgGetNamedEffectParameter(this->cgEffect, "OutlineColour");
 	assert(this->outlineWidthParam && this->outlineColourParam);
 
-	// If there's a diffuse texture set the correct technique
+	// Set the correct technique based on whether there's a texture and whether the
+	// geometry is in the foreground or background
 	if (this->properties->diffuseTexture != NULL) {
-		this->currTechnique = this->techniques[TEXTURED_BG_TECHNIQUE_NAME];
+		if (this->properties->geomType == MaterialProperties::MATERIAL_GEOM_FG_TYPE) {
+			this->currTechnique = this->techniques[TEXTURED_FG_TECHNIQUE_NAME];
+		}
+		else {
+			this->currTechnique = this->techniques[TEXTURED_BG_TECHNIQUE_NAME];
+		}
 	}
 	else {
-		this->currTechnique = this->techniques[BASIC_BG_TECHNIQUE_NAME];
+		if (this->properties->geomType == MaterialProperties::MATERIAL_GEOM_FG_TYPE) {
+			this->currTechnique = this->techniques[BASIC_FG_TECHNIQUE_NAME];
+		}
+		else {
+			this->currTechnique = this->techniques[BASIC_BG_TECHNIQUE_NAME];
+		}
 	}
 
 }
@@ -49,12 +62,23 @@ CgFxCelShading::~CgFxCelShading() {
 }
 
 void CgFxCelShading::SetupBeforePasses(const Camera& camera) {
-	// If there's a texture set the correct technique
+	// Set the correct technique based on whether there's a texture and whether the
+	// geometry is in the foreground or background
 	if (this->properties->diffuseTexture != NULL) {
-		this->currTechnique = this->techniques[TEXTURED_BG_TECHNIQUE_NAME];
+		if (this->properties->geomType == MaterialProperties::MATERIAL_GEOM_FG_TYPE) {
+			this->currTechnique = this->techniques[TEXTURED_FG_TECHNIQUE_NAME];
+		}
+		else {
+			this->currTechnique = this->techniques[TEXTURED_BG_TECHNIQUE_NAME];
+		}
 	}
 	else {
-		this->currTechnique = this->techniques[BASIC_BG_TECHNIQUE_NAME];
+		if (this->properties->geomType == MaterialProperties::MATERIAL_GEOM_FG_TYPE) {
+			this->currTechnique = this->techniques[BASIC_FG_TECHNIQUE_NAME];
+		}
+		else {
+			this->currTechnique = this->techniques[BASIC_BG_TECHNIQUE_NAME];
+		}
 	}
 	
 	cgGLSetParameter1f(this->outlineWidthParam, this->properties->outlineSize);
