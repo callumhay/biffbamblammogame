@@ -50,6 +50,10 @@ public:
     return colours[2];
   }
 
+	Colour GetComplementaryColour() const {
+		return Colour(1.0f - this->colours[0], 1.0f - this->colours[1], 1.0f - this->colours[2]);
+	}
+
   const float* getColourVector() const {
     return colours;
   }
@@ -60,6 +64,7 @@ private:
 	float alpha;
 
 public:
+	ColourRGBA() : Colour(), alpha(1.0f) {}
 	ColourRGBA(float r, float g, float b, float a): Colour(r,g,b), alpha(a) {}
 	ColourRGBA(const Colour &c, float a) : Colour(c), alpha(a) {}
 	ColourRGBA(const ColourRGBA& other) : alpha(other.alpha) {
@@ -78,6 +83,10 @@ public:
 
 	float A() const {
 		return this->alpha;
+	}
+
+	Colour GetColour() const {
+		return Colour(this->colours[0], this->colours[1], this->colours[2]);
 	}
 };
 
@@ -107,6 +116,34 @@ inline Colour operator -(const Colour& a, const Colour& b) {
 
 inline std::ostream& operator <<(std::ostream& os, const Colour& c) {
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
+};
+
+// Multiplicative colour based off a scalar
+inline ColourRGBA operator *(float s, const ColourRGBA& a) {
+	assert(s >= 0);
+	return ColourRGBA(s*a.R(), s*a.G(), s*a.B(), s*a.A());
+};
+inline ColourRGBA operator /(const ColourRGBA& a, float b) {
+	return ColourRGBA(a.R()/b, a.G()/b, a.B()/b, a.A()/b);
+}
+
+// Multiplicative colouring
+inline ColourRGBA operator *(const ColourRGBA& a, const ColourRGBA& b) {
+	return ColourRGBA(a.R()*b.R(), a.G()*b.G(), a.B()*b.B(), a.A()*b.A());
+}
+
+// Additive colouring
+inline ColourRGBA operator +(const ColourRGBA& a, const ColourRGBA& b) {
+	return ColourRGBA(a.R()+b.R(), a.G()+b.G(), a.B()+b.B(), a.A()+b.A());
+};
+
+// Subtractive colouring
+inline ColourRGBA operator -(const ColourRGBA& a, const ColourRGBA& b) {
+	return ColourRGBA(a.R()-b.R(), a.G()-b.G(), a.B()-b.B(), a.A()-b.A());
+};
+
+inline std::ostream& operator <<(std::ostream& os, const ColourRGBA& c) {
+  return os << "c<" << c.R() << "," << c.G() << "," << c.B() << "," << c.A() << ">";
 };
 
 struct Colour4D {

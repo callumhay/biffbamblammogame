@@ -21,6 +21,7 @@ protected:
 	}
 
 	bool Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilterType texFilter = Nearest);
+	bool Load2DOr1DTextureFromImg(PHYSFS_File* fileHandle, TextureFilterType texFilter = Nearest);
 
 public:
 	Texture(TextureFilterType texFilter, int textureType);

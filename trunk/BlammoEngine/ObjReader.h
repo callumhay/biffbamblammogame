@@ -23,9 +23,13 @@ private:
 
 	ObjReader();
 
+	static Mesh* ReadMeshFromStream(const std::string &filepath, std::istream &inFile);
+
 public:
 
 	static Mesh* ReadMesh(const std::string &filepath);
+	static Mesh* ReadMesh(const std::string &filepath, PHYSFS_File* fileHandle);
+
 	static PolygonGroup* ReadPolygonGroup(const std::string &filepath);
 
 };

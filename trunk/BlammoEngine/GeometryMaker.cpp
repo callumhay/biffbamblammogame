@@ -15,7 +15,9 @@ GeometryMaker::GeometryMaker() : quadDL(0), cubeDL(0) {
 GeometryMaker::~GeometryMaker() {
 	// Delete all the display lists
 	glDeleteLists(this->quadDL, 1);
+	this->quadDL = 0;
 	glDeleteLists(this->cubeDL, 1);
+	this->cubeDL = 0;
 }
 
 /**

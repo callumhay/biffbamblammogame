@@ -54,10 +54,10 @@ class MaterialGroup {
 private:
 	PolygonGroup* polyGrp;
 	CgFxMaterialEffect* material;
-	GLint displayListID;
+	GLuint displayListID;
 
 public:
-	MaterialGroup(CgFxMaterialEffect* mat) : material(mat), displayListID(-1), polyGrp(NULL) {}
+	MaterialGroup(CgFxMaterialEffect* mat) : material(mat), displayListID(0), polyGrp(NULL) {}
 	
 	~MaterialGroup() {
 		if (this->polyGrp != NULL) {
@@ -66,12 +66,17 @@ public:
 
 		delete this->material;
 		glDeleteLists(this->displayListID, 1);
+		this->displayListID = 0;
 	}
 
 	void AddFaces(const PolyGrpIndexer& faceIndexer, 
 							  const std::vector<Point3D>& vertexStream, 
 								const std::vector<Vector3D>& normalStream,
 								const std::vector<Point2D>& texCoordStream);
+
+	void SetDisplayListID(GLuint dispListID) {
+		this->displayListID = dispListID;
+	}
 
 	inline void Draw(const Camera& camera) const {
 		this->material->Draw(camera, this->displayListID);
@@ -109,6 +114,8 @@ class Mesh {
 protected:
 	std::string name;
 	std::map<std::string, MaterialGroup*> matGrps;
+
+	Mesh(const std::string name) : name(name) {}
 
 public:
 	Mesh(const std::string name, const std::map<std::string, MaterialGroup*> &matGrps);
@@ -202,5 +209,7 @@ public:
 	void SetTextureForMaterial(const std::string& matGrpName, Texture2D* texToSet);
 	void SetColourForMaterial(const std::string& matGrpName, const Colour& c);
 	void SetColour(const Colour& c);
+
+	void Flush();
 };
 #endif

@@ -109,12 +109,30 @@ Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height) {
 
 /**
  * Static creator for making a 2D texture from a given file path to an image file.
+ * Returns: 2D Texture with given image, NULL otherwise.
  */
 Texture2D* Texture2D::CreateTexture2DFromImgFile(const std::string& filepath, TextureFilterType texFilter) {
 	glPushAttrib(GL_TEXTURE_BIT);
 	
 	Texture2D* newTex = new Texture2D(texFilter);
 	if (!newTex->Load2DOr1DTextureFromImg(filepath, texFilter)) {
+		delete newTex;
+		newTex = NULL;
+	}
+
+	glPopAttrib();
+	return newTex;
+}
+/**
+ * Static creator for making a 2D texture from a given file path to an image file handle
+ * using physfs.
+ * Returns: 2D Texture with given image, NULL otherwise.
+ */
+Texture2D* Texture2D::CreateTexture2DFromImgFile(PHYSFS_File* fileHandle, TextureFilterType texFilter) {
+	glPushAttrib(GL_TEXTURE_BIT);
+	
+	Texture2D* newTex = new Texture2D(texFilter);
+	if (!newTex->Load2DOr1DTextureFromImg(fileHandle, texFilter)) {
 		delete newTex;
 		newTex = NULL;
 	}

@@ -28,10 +28,13 @@ private:
 
 	MtlReader();
 
+	static std::map<std::string, CgFxMaterialEffect*> ReadMaterialFileFromStream(const std::string &filepath, std::istream &inFile);
+
 public:
 	~MtlReader();
 
 	static std::map<std::string, CgFxMaterialEffect*> ReadMaterialFile(const std::string &filepath);
+	static std::map<std::string, CgFxMaterialEffect*> ReadMaterialFile(const std::string &filepath, PHYSFS_File* fileHandle);
 	
 };
 

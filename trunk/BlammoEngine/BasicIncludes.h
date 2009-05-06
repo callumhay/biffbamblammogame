@@ -23,6 +23,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <stack>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -73,6 +74,10 @@
 // Pseudo Random Number Generator (PRNG)
 #include "mtrand.h"
 
+// Physfs (ZIP/FileSystem Reader) Includes
+#define PHYSFS_SUPPORTS_ZIP 1
+#include "physfs.h"
+
 // Custom Debug functionality
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
@@ -80,8 +85,9 @@
 #ifdef  NDEBUG
 #define debug_output(s) ((void)0)
 inline void debug_opengl_state() {}
+inline void debug_physfs_state(int physfsReturnVal) {}
 #else
-#define debug_output(s) std::cout << s << std::endl
+#define debug_output(s) (std::cout << s << std::endl)
 
 inline void debug_opengl_state() {
 	GLenum glErr = glGetError();
@@ -89,7 +95,19 @@ inline void debug_opengl_state() {
 		return;
 	}
 	debug_output("OpenGL Error: " << glErr);
+	assert(false);
 }
-#endif
 
+inline void debug_physfs_state(int physfsReturnVal) {
+	if (physfsReturnVal == NULL) {
+		const char* error = PHYSFS_getLastError();
+		if (error == NULL) {
+			error = "?";
+		}
+		debug_output("PHYSFS ERROR: " << error);
+		assert(false);
+	}
+}
+
+#endif
 #endif
