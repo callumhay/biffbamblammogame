@@ -11,6 +11,10 @@
 #include "MultiBallItem.h"
 #include "PaddleSizeItem.h"
 #include "BallSizeItem.h"
+#include "BlackoutItem.h"
+#include "UpsideDownItem.h"
+#include "BallSafetyNetItem.h"
+#include "OneUpItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -54,6 +58,14 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, gameModel);					// bad
 		case 11:
 			return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, gameModel);						// good
+		case 12:
+			return new BlackoutItem(spawnOrigin, gameModel);																		// bad
+		case 13:
+			return new UpsideDownItem(spawnOrigin, gameModel);																	// bad
+		case 14:
+			return new BallSafetyNetItem(spawnOrigin, gameModel);																// good
+		case 15:
+			return new OneUpItem(spawnOrigin, gameModel);																				// good
 		default:
 			assert(false);
 	}
@@ -94,12 +106,23 @@ GameItem* GameItemFactory::CreateItem(const std::string itemName, const Point2D 
 		return new PaddleSizeItem(PaddleSizeItem::ShrinkPaddle, spawnOrigin, gameModel);
 	}
 	else if (itemName == BallSizeItem::BALL_SHRINK_ITEM_NAME) {
-			return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, gameModel);
+		return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, gameModel);
 	}
 	else if (itemName == BallSizeItem::BALL_GROW_ITEM_NAME) {
-			return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, gameModel);
+		return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, gameModel);
 	}
-
+	else if (itemName == BlackoutItem::BLACKOUT_ITEM_NAME) {
+		return new BlackoutItem(spawnOrigin, gameModel);
+	}
+	else if (itemName == UpsideDownItem::UPSIDEDOWN_ITEM_NAME) {
+		return new UpsideDownItem(spawnOrigin, gameModel);
+	}
+	else if (itemName == BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME) {
+		return new BallSafetyNetItem(spawnOrigin, gameModel);
+	}
+	else if (itemName == OneUpItem::ONE_UP_ITEM_NAME) {
+		return new OneUpItem(spawnOrigin, gameModel);
+	}
 	assert(false);
 	return NULL;
 }

@@ -8,7 +8,7 @@ const std::string BallSizeItem::BALL_GROW_ITEM_NAME		= "Ball Grow (Power-up)";
 const std::string BallSizeItem::BALL_SHRINK_ITEM_NAME = "Ball Shrink (Power-down)";
 
 BallSizeItem::BallSizeItem(const BallSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(((type == ShrinkBall) ? BALL_SHRINK_ITEM_NAME : BALL_GROW_ITEM_NAME), spawnOrigin, gameModel, 
+GameItem(((type == ShrinkBall) ? BallSizeItem::BALL_SHRINK_ITEM_NAME : BallSizeItem::BALL_GROW_ITEM_NAME), spawnOrigin, gameModel, 
 				 ((type == ShrinkBall) ? GameItem::Bad : GameItem::Good)), sizeChangeType(type) {
 }
 
@@ -48,4 +48,10 @@ double BallSizeItem::Activate() {
  * Does nothing since the paddle size item has no timer or way of being cancelled out.
  */
 void BallSizeItem::Deactivate() {
+	if (!this->isActive) {
+		return;
+	}
+
+	this->isActive = false;
+	GameItem::Deactivate();
 }

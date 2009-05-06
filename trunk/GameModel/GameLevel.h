@@ -28,12 +28,11 @@ public:
 	static const char TRI_RIGHT_CORNER;
 
 private:	
-	// The current layout of the level, stored in row major format
-	std::vector<std::vector<LevelPiece*>> currentLevelPieces;
-	// Pieces left before the end of the level
-	unsigned int piecesLeft;
-	// Size values for the level
-	unsigned int width, height;
+	std::vector<std::vector<LevelPiece*>> currentLevelPieces; // The current layout of the level, stored in row major format
+	unsigned int piecesLeft;																	// Pieces left before the end of the level
+	unsigned int width, height;																// Size values for the level
+	bool ballSafetyNetActive;
+	
 
 	GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces);
 	
@@ -57,8 +56,21 @@ public:
 		return this->currentLevelPieces;
 	}
 
-	std::set<LevelPiece*> GetCollisionCandidates(const GameBall& b) const;
-	std::set<LevelPiece*> GetCollisionCandidates(const Projectile& p) const;
+	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const GameBall& b) const;
+	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Projectile& p) const;
+	
+	// Get whether or not the ball safety net is currently active
+	bool IsBallSafetyNetActive() const {
+		return this->ballSafetyNetActive;
+	}
+	/**
+	 * Toggle whether the ball safety net is on or not.
+	 */
+	void ToggleBallSafetyNet(bool isActive) {
+		this->ballSafetyNetActive = isActive;
+	}
+	bool BallSafetyNetCollisionCheck(const GameBall& b, Vector2D& n, float& d);
+
 
 	/**
 	 * Obtain the LevelPiece at the given height and width indices.

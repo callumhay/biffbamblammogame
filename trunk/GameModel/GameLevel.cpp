@@ -27,7 +27,7 @@ const char GameLevel::TRI_RIGHT_CORNER		= 'r';
 
 // Private constructor, requires all the pieces that make up the level
 GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces): currentLevelPieces(pieces),
-piecesLeft(numBlocks) {
+piecesLeft(numBlocks), ballSafetyNetActive(false) {
 	assert(pieces.size() > 0);
 	this->width = pieces[0].size();
 	this->height = pieces.size();
@@ -345,7 +345,7 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
  * in collision with the given gameball.
  * Returns: array of unique LevelPieces that are possibly colliding with b.
  */
-std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const GameBall& b) const {
+std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const GameBall& b) const {
 
 	// Get the ball boundry and use it to figure out what levelpieces are relevant
 	Collision::Circle2D ballBounds = b.GetBounds();
@@ -368,7 +368,7 @@ std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const GameBall& b) const
  * in collision with the given projectile.
  * Returns: array of unique LevelPieces that are possibly colliding with p.
  */
-std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const Projectile& p) const {
+std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Projectile& p) const {
 	Point2D projectileCenter = p.GetPosition();
 
 	// Find the non-rounded max and min indices to look at along the x and y axis
@@ -381,4 +381,35 @@ std::set<LevelPiece*> GameLevel::GetCollisionCandidates(const Projectile& p) con
 	int yIndexMin = static_cast<int>(floorf(yNonAdjustedIndex - p.GetHalfHeight()));
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
+}
+
+/**
+ * Do a collision check with the ball safety net if it's active.
+ * Returns: true on collision (when active) and the normal and distance values, false otherwise.
+ */
+bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, Vector2D& n, float& d) {
+	if (!this->ballSafetyNetActive) {
+		return false;
+	}
+
+	// Create the safety net bounding line and check the ball against it
+	std::vector<Collision::LineSeg2D> lines;
+	lines.reserve(1);
+	Collision::LineSeg2D safetyNetLine(Point2D(0.0f, 0.0f), Point2D(this->GetLevelUnitWidth(), 0.0f));
+	lines.push_back(safetyNetLine);
+
+	std::vector<Vector2D> normals;
+	normals.reserve(1);
+	normals.push_back(Vector2D(0, 1));
+	
+	BoundingLines safetyNetBounds(lines, normals);
+
+	// Test for collision, if there was one then we kill the safety net
+	bool didCollide = safetyNetBounds.Collide(b.GetBounds(), n, d);
+	if (didCollide) {
+		this->ballSafetyNetActive = false;
+		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(b);
+	}
+
+	return didCollide;
 }

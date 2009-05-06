@@ -18,6 +18,7 @@
 #include "GameItemTimer.h"
 #include "GameItemFactory.h"
 #include "Projectile.h"
+#include "GameTransformMgr.h"
 
 class GameModel {
 
@@ -47,6 +48,13 @@ private:
 
 	// Whether or not the game is currently paused
 	bool gameIsPaused;
+
+	// Item related tracking variables *******************
+	bool areControlsFlipped;
+	bool isBlackoutActive;										// Is the game currently blacked out?
+	GameTransformMgr gameTransformInfo;		// The current transform information of the game
+	
+	// ***************************************************
 
 	// Private getters and setters ****************************************
 	void SetCurrentWorld(unsigned int worldNum);
@@ -145,6 +153,19 @@ public:
 	int GetLivesLeft() const {
 		return this->currLivesLeft;
 	}
+	void SetLivesLeft(int lives) {
+		assert(lives >= 0);
+
+		int livesLeftBefore = this->currLivesLeft;
+		this->currLivesLeft = lives;
+
+		if (this->currLivesLeft > GameModelConstants::GetInstance()->MAX_LIVES_LEFT) {
+			this->currLivesLeft = GameModelConstants::GetInstance()->MAX_LIVES_LEFT;
+		}
+		else {
+			GameEventManager::Instance()->ActionLivesChanged(livesLeftBefore, this->currLivesLeft);
+		}
+	}
 
 	std::list<GameItem*>& GetLiveItems() {
 		return this->currLiveItems;
@@ -159,7 +180,11 @@ public:
 	}
 
 	bool IsGameOver() const {
-		return this->currLivesLeft < 0;
+		return this->currLivesLeft == 0;
+	}
+
+	GameTransformMgr& GetTransformInfo() {
+		return this->gameTransformInfo;
 	}
 
 	// Queries as to whether the current level is the last level of the game
@@ -170,6 +195,9 @@ public:
 
 	// Paddle and ball related queries **************************************
 	PlayerPaddle* GetPlayerPaddle() {
+		return this->playerPaddle;
+	}
+	PlayerPaddle* GetPlayerPaddle() const {
 		return this->playerPaddle;
 	}
 	std::list<GameBall*>& GetGameBalls() {
@@ -195,6 +223,28 @@ public:
 	void TogglePauseGame() {
 		this->gameIsPaused = !this->gameIsPaused;
 	}
+
+	// Item effect related getters and setters ***************************
+
+	// Sets whether the game is currently blacked out or not
+	void SetBlackoutEffect(bool isActive) {
+		this->isBlackoutActive = isActive;
+	}
+	// Gets whether the game is currently blacked out or not
+	bool IsBlackoutEffectActive() const {
+		return this->isBlackoutActive;
+	}
+
+	// Sets whether the controls for the paddle are flipped or not
+	void SetFlippedControls(bool flippedControlsOn) {
+		this->areControlsFlipped = flippedControlsOn;
+	}
+	// Gets whether the controls for the paddle are flipped
+	bool AreControlsFlipped() const {
+		return this->areControlsFlipped;
+	}
+
+	// *******************************************************************
 
 	void AddPossibleItemDrop(LevelPiece* p);
 	void AddProjectile(Projectile::ProjectileType type, const Point2D& spawnLoc);

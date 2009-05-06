@@ -78,6 +78,9 @@ namespace Onomatoplex {
 		this->goodSingleWords[EXPLOSION] = goodSingleWordExplosion;
 
 		std::vector<std::string> awesomeSingleWordExplosion;
+		awesomeSingleWordExplosion.push_back("Kaafloom");
+		awesomeSingleWordExplosion.push_back("Kaafloomy");
+		awesomeSingleWordExplosion.push_back("Kaafloomo");
 		awesomeSingleWordExplosion.push_back("BiffBlammo");
 		awesomeSingleWordExplosion.push_back("Kabblaamo");
 		awesomeSingleWordExplosion.push_back("Blooommoo");
@@ -91,12 +94,12 @@ namespace Onomatoplex {
 		awesomeSingleWordExplosion.push_back("Pphoommy");
 		awesomeSingleWordExplosion.push_back("Kablaamosion");
 		awesomeSingleWordExplosion.push_back("Kazaammo");
+		awesomeSingleWordExplosion.push_back("Kazaammy");
 		this->awesomeSingleWords[EXPLOSION] = awesomeSingleWordExplosion;
 
 		std::vector<std::string> uberSingleWordExplosion;
 		std::vector<std::string> uberEndFixExplosion;
 		uberEndFixExplosion.push_back("oplex");
-		uberEndFixExplosion.push_back("oise");
 		uberEndFixExplosion.push_back("osity");
 		uberEndFixExplosion.push_back("etric");
 		uberEndFixExplosion.push_back("ation");
@@ -104,12 +107,9 @@ namespace Onomatoplex {
 		uberEndFixExplosion.push_back("atron");
 		uberEndFixExplosion.push_back("inator");
 		uberEndFixExplosion.push_back("plosion");
-		uberEndFixExplosion.push_back("frazz");
+		uberEndFixExplosion.push_back("afrazz");
 
 		for (std::vector<std::string>::iterator iterEnd = uberEndFixExplosion.begin(); iterEnd != uberEndFixExplosion.end(); iterEnd++) {
-			for (std::vector<std::string>::iterator iter = singleWordExplosion.begin(); iter != singleWordExplosion.end(); iter++) {
-				uberSingleWordExplosion.push_back(JoinEndfixes(*iter, *iterEnd));
-			}
 			for (std::vector<std::string>::iterator iter = goodSingleWordExplosion.begin(); iter != goodSingleWordExplosion.end(); iter++) {
 				uberSingleWordExplosion.push_back(JoinEndfixes(*iter, *iterEnd));
 			}
@@ -201,9 +201,6 @@ namespace Onomatoplex {
 		uberEndFixBounce.push_back(" Ponk");
 
 		for (std::vector<std::string>::iterator iterEnd = uberEndFixBounce.begin(); iterEnd != uberEndFixBounce.end(); iterEnd++) {
-			for (std::vector<std::string>::iterator iter = singleWordBounce.begin(); iter != singleWordBounce.end(); iter++) {
-				uberSingleWordBounce.push_back(JoinEndfixes(*iter, *iterEnd));
-			}
 			for (std::vector<std::string>::iterator iter = goodSingleWordBounce.begin(); iter != goodSingleWordBounce.end(); iter++) {
 				uberSingleWordBounce.push_back(JoinEndfixes(*iter, *iterEnd));
 			}
@@ -267,9 +264,6 @@ namespace Onomatoplex {
 		uberEndFixElectric.push_back("frazz");
 
 		for (std::vector<std::string>::iterator iterEnd = uberEndFixElectric.begin(); iterEnd != uberEndFixElectric.end(); iterEnd++) {
-			for (std::vector<std::string>::iterator iter = singleWordElectric.begin(); iter != singleWordElectric.end(); iter++) {
-				uberSingleWordElectric.push_back(JoinEndfixes(*iter, *iterEnd));
-			}
 			for (std::vector<std::string>::iterator iter = goodSingleWordElectric.begin(); iter != goodSingleWordElectric.end(); iter++) {
 				uberSingleWordElectric.push_back(JoinEndfixes(*iter, *iterEnd));
 			}
@@ -574,26 +568,15 @@ namespace Onomatoplex {
 
 		// Check to see if the first endfix ends in a vowel and the second begins with one, in which
 		// case we must choose.
-		if (Generator::IsVowel(endFix1.at(endFix1.size()-1)) && Generator::IsVowel(endFix2.at(0))) {
-			unsigned int randomChoice =  Randomizer::GetInstance()->RandomUnsignedInt() % 2;
-			if (randomChoice) {
-				// find the first non-vowel in endfix2 and append the rest
-				size_t indexOfNonVowel = endFix2.find_first_not_of("aAeEiIoOuU");
-				if (indexOfNonVowel == std::string::npos) {
-					return endFix1;
-				}
+		if (Generator::IsVowel(endFix1.at(endFix1.size()-1))) {
 
-				result = endFix1 + endFix2.substr(indexOfNonVowel);
+			// find the first non-vowel in endfix1 and append the rest
+			size_t indexOfNonVowel1 = endFix1.find_last_not_of("aAeEiIoOuU");
+			if (indexOfNonVowel1 == std::string::npos) {
+				return endFix2;
 			}
-			else {
-				// find the first non-vowel in endfix2 and append the rest
-				size_t indexOfNonVowel = endFix1.find_first_not_of("aAeEiIoOuU");
-				if (indexOfNonVowel == std::string::npos) {
-					return endFix2;
-				}
 
-				result = endFix1.substr(indexOfNonVowel) + endFix2;
-			}
+			result = endFix1.substr(0, indexOfNonVowel1) + endFix2;
 		}
 
 		return result;

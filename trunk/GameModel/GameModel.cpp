@@ -6,7 +6,9 @@
 
 #include "../BlammoEngine/BlammoEngine.h"
 
-GameModel::GameModel() : currWorldNum(0), currState(NULL), currPlayerScore(0), currLivesLeft(0), gameIsPaused(false) {
+GameModel::GameModel() : 
+currWorldNum(0), currState(NULL), currPlayerScore(0), 
+currLivesLeft(0), gameIsPaused(false), isBlackoutActive(false), areControlsFlipped(false) {
 	
 	// Initialize the worlds for the game
 	for (size_t i = 0; i < GameModelConstants::GetInstance()->WORLD_PATHS.size(); i++) {
@@ -54,8 +56,8 @@ void GameModel::BeginOrRestartGame() {
 	this->SetCurrentWorld(GameModelConstants::GetInstance()->INITIAL_WORLD_NUM);
 
 	// Reset the score, lives, etc.
-	this->currPlayerScore					= GameModelConstants::GetInstance()->INIT_SCORE;
-	this->currLivesLeft						= GameModelConstants::GetInstance()->INIT_LIVES;
+	this->currPlayerScore	= GameModelConstants::GetInstance()->INIT_SCORE;
+	this->SetLivesLeft(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
 	this->numConsecutiveBlocksHit = GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT;	// Don't use set here, we don't want an event
 }
 
@@ -141,11 +143,16 @@ void GameModel::IncrementLevel() {
 	}
 }
 
+/**
+ * Cause the game model to execute over the given amount of time in seconds.
+ */
 void GameModel::Tick(double seconds) {
 	
 	if (currState != NULL && !this->gameIsPaused) {
 		this->currState->Tick(seconds);
 	}
+
+	this->gameTransformInfo.Tick(seconds);
 }
 
 /**
@@ -283,7 +290,7 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 		this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
 		
 		// Decrement the number of lives left
-		this->currLivesLeft--;
+		this->SetLivesLeft(this->currLivesLeft-1);
 
 		// EVENT: All Balls are dead
 		GameEventManager::Instance()->ActionAllBallsDead(this->currLivesLeft);

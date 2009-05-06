@@ -54,7 +54,8 @@ public:
 
 	const int DEFAULT_BLOCKS_HIT;								// Initial number of blocks hit by a ball as it leaves the paddle
 	const int INIT_SCORE;												// Initial player score when starting a game
-	const int INIT_LIVES;												// Initial player lives when starting a game
+	const int INIT_LIVES_LEFT;									// Initial player lives when starting a game
+	const int MAX_LIVES_LEFT;										// Maximum number of lives that a player may have at a given time
 	// -------------------------------------------------
 
 };

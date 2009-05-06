@@ -18,7 +18,7 @@ BoundingLines::~BoundingLines() {
  * The boolean return value will be true if one or more collisions occured, false otherwise.
  */
 bool BoundingLines::Collide(const Collision::Circle2D& c, Vector2D& n, float &d) {
-	std::vector<Vector2D> collisionNorms;
+	bool collisionOccured = false;
 	float sqRadius = c.Radius()*c.Radius();
 	d = 0.0f;
 
@@ -29,11 +29,13 @@ bool BoundingLines::Collide(const Collision::Circle2D& c, Vector2D& n, float &d)
 		float sqDist = Collision::SqDistFromPtToLineSeg(this->lines[i], c.Center());
 	
 		// Check to see if there was a collision with the current line seg and circle
-		// and that the collision is the most relevant
-		if (sqDist < sqRadius && sqDist <= minSqDist) {
-			
-			// Collision occurred add the normal to the list
-			collisionNorms.push_back(this->normals[i]);
+		// and that the collision is the most relevant (i.e., the boundry line of the collision
+		// is the closest one so far to the center of the given circle).
+		if (sqDist < sqRadius && sqDist < minSqDist) {
+			collisionOccured = true;
+
+			// Collision occurred set the normal
+			n = this->normals[i];
 			minSqDist = sqDist;
 
 			d = sqrtf(sqDist);
@@ -43,20 +45,7 @@ bool BoundingLines::Collide(const Collision::Circle2D& c, Vector2D& n, float &d)
 		}
 	}
 
-	if (collisionNorms.size() == 0) {
-		return false;
-	}
-
-	// Average the normals
-	n = Vector2D(0,0);
-	for (size_t i = 0; i < collisionNorms.size(); i++) {
-		n = n + collisionNorms[i];
-	}
-	if (collisionNorms.size() > 1) {
-		n.Normalize();
-	}
-
-	return true;
+	return collisionOccured;
 }
 
 void BoundingLines::DebugDraw() const {

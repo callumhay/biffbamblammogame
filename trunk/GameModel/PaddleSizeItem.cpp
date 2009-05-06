@@ -45,4 +45,10 @@ double PaddleSizeItem::Activate() {
  * Does nothing since the paddle size item has no timer or way of being cancelled out.
  */
 void PaddleSizeItem::Deactivate() {
+	if (!this->isActive) {
+		return;
+	}
+
+	this->isActive = false;
+	GameItem::Deactivate();
 }

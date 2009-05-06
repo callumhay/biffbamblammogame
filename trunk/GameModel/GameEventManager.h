@@ -31,6 +31,8 @@ public:
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
 	void ActionBlockDestroyed(const LevelPiece& block);
+	void ActionBallSafetyNetCreated();
+	void ActionBallSafetyNetDestroyed(const GameBall& ball);
 	void ActionLevelPieceChanged(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void ActionScoreChanged(int amt);
 	void ActionScoreMultiplierChanged(int oldScoreMultiplier, int newScoreMultiplier);
@@ -49,6 +51,7 @@ public:
 	void ActionLevelStarted(const GameWorld& world, const GameLevel& level);
 	void ActionLevelCompleted(const GameWorld& world, const GameLevel& level);
 	
+	void ActionLivesChanged(int livesLeftBefore, int livesLeftAfter);
 
 protected:
 	GameEventManager();

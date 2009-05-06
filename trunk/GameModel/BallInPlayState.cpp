@@ -75,7 +75,7 @@ void BallInPlayState::Tick(double seconds) {
 	float d;
 	bool didCollideWithPaddle = false;
 	bool didCollideWithBlock = false;
-	const GameLevel *currLevel = this->gameModel->GetCurrentLevel();
+	GameLevel *currLevel = this->gameModel->GetCurrentLevel();
 
 	GameBall* ballToMoveToFront = NULL;																	// The last ball to hit the paddle is the one with priority for item effects
 	std::list<std::list<GameBall*>::iterator> ballsToRemove;						// The balls that are no longer in play and will be removed
@@ -120,7 +120,7 @@ void BallInPlayState::Tick(double seconds) {
 
 		// Check for ball collision with level pieces
 		// Get the small set (maximum 4) of levelpieces based on the position of the ball...
-		std::set<LevelPiece*> collisionPieces = currLevel->GetCollisionCandidates(*currBall);
+		std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(*currBall);
 		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); pieceIter++) {
 			
 			LevelPiece *currPiece = *pieceIter;
@@ -167,6 +167,12 @@ void BallInPlayState::Tick(double seconds) {
 				break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
 			}
 		}
+
+		// Ball Safety Net Collisions:
+		bool didCollideWithballSafetyNet = currLevel->BallSafetyNetCollisionCheck(*currBall, n, d);
+		if (didCollideWithballSafetyNet) {
+			this->DoBallCollision(*currBall, n, d);
+		}
 	}
 	
 	// Get rid of all the balls that went out of bounds / are now dead
@@ -183,7 +189,7 @@ void BallInPlayState::Tick(double seconds) {
 		gameBalls.push_front(ballToMoveToFront);
 	}
 
-	// Check for other misc. collisions (e.g., projectiles)
+	// Projectile Collisions:
 	// Grab a list of all paddle-related projectiles and test each one for collisions...
 	std::list<Projectile*>& gameProjectiles = gameModel->GetActiveProjectiles();
 	std::vector<std::list<Projectile*>::iterator> projectilesToDestroy;
@@ -192,7 +198,7 @@ void BallInPlayState::Tick(double seconds) {
 		Projectile* currProjectile = *iter;
 		
 		// Find the any level pieces that the current projectile may have collided with and test for collision
-		std::set<LevelPiece*> collisionPieces = currLevel->GetCollisionCandidates(*currProjectile);
+		std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(*currProjectile);
 		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); pieceIter++) {
 			LevelPiece *currPiece = *pieceIter;
 			
