@@ -130,6 +130,19 @@ public:
 	virtual void BlockDestroyedEvent(const LevelPiece& block) = 0;
 
 	/**
+	 * Event triggered when a ball safety net is created. Only occurs once as the safety net
+	 * becomes active.
+	 */
+	virtual void BallSafetyNetCreatedEvent() = 0;
+
+	/**
+	 * Event triggered when a ball collides with the safety net and the safety net is
+	 * destroyed by it.
+	 * Arguements: ball - The ball that collided and destroyed the safety net.
+	 */
+	virtual void BallSafetyNetDestroyedEvent(const GameBall& ball) = 0;
+
+	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same
 	 * object or to a different object. Only occurs once as the piece changes - this may be triggered along side
 	 * other similar events e.g., BlockDestroyedEvent, BallBlockCollisionEvent.
@@ -199,6 +212,14 @@ public:
 	 * Arguements: projectile - The projectile that was just removed.
 	 */
 	virtual void ProjectileRemovedEvent(const Projectile& projectile) = 0;
+
+	/**
+	 * Event triggered whenever the number of player lives changes. Only occurs once per life or
+	 * set of lives are added or removed.
+	 * Arguements: livesLeftBefore - Number of lives left before the change.
+	 *             livesLeftAfter  - Number of lives left after the change.
+	 */
+	virtual void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter) = 0;
 
 };
 

@@ -108,6 +108,21 @@ void GameEventManager::ActionBlockDestroyed(const LevelPiece& block) {
 	}	
 }
 
+void GameEventManager::ActionBallSafetyNetCreated() {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->BallSafetyNetCreatedEvent();
+	}		
+}
+
+// Action for when the ball safety net is destroyed
+void GameEventManager::ActionBallSafetyNetDestroyed(const GameBall& ball) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->BallSafetyNetDestroyedEvent(ball);
+	}	
+}
+
 // Action for when a level piece changes
 void GameEventManager::ActionLevelPieceChanged(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
 	this->listenerIter = this->eventListeners.begin();
@@ -223,5 +238,14 @@ void GameEventManager::ActionLevelCompleted(const GameWorld& world, const GameLe
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
 		(*this->listenerIter)->LevelCompletedEvent(world, level);
+	}	
+}
+
+// Action for when the number of player lives changes
+void GameEventManager::ActionLivesChanged(int livesLeftBefore, int livesLeftAfter) {
+	assert(livesLeftBefore != livesLeftAfter);
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->LivesChangedEvent(livesLeftBefore, livesLeftAfter);
 	}	
 }

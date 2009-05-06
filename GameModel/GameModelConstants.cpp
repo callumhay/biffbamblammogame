@@ -12,8 +12,10 @@ PROB_OF_GHOSTBALL_BLOCK_MISS(0.33),
 LENGTH_OF_GHOSTMODE(1.0),
 INITIAL_WORLD_NUM(0),
 DEFAULT_BLOCKS_HIT(0),
+
 INIT_SCORE(0),
-INIT_LIVES(3)
+INIT_LIVES_LEFT(3),
+MAX_LIVES_LEFT(10)
 {
 	this->WORLD0_PATH = this->RESOURCE_DIR + "/" + this->WORLD_DIR	+ "/0_deco/0_deco.wld";
 	this->WORLD1_PATH = this->RESOURCE_DIR + "/" + this->WORLD_DIR	+ "/1_cyberpunk/1_cyberpunk.wld";

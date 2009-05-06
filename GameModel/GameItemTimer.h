@@ -57,12 +57,12 @@ public:
 	 * Returns a the decimal percentage of elapsed time on the timer.
 	 * Returns: a number in [0,1] reflecting the amount of elapsed time.
 	 */
-	float GetPercentTimeElapsed() const {
+	double GetPercentTimeElapsed() const {
 		if (this->timeLengthInSecs == 0) { 
 			return 1.0f; 
 		}
 
-		float decPercent = this->timeElapsedInSecs / this->timeLengthInSecs;
+		double decPercent = this->timeElapsedInSecs / this->timeLengthInSecs;
 		assert(decPercent >= 0 && decPercent <= 1.0f);
 		return decPercent;
 	}

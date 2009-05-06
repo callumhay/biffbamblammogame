@@ -69,6 +69,12 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 	lineBounds.push_back(l1);
 	lineNorms.push_back(n1);
 
+	// Bottom boundry
+	Collision::LineSeg2D bottomLine(Point2D(this->currHalfWidthTotal, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+	Vector2D bottomNormal(0, -1);
+	lineBounds.push_back(bottomLine);
+	lineNorms.push_back(bottomNormal);
+
 	// Side boundries
 	Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
 	Vector2D sideNormal1(1, 1);

@@ -20,6 +20,7 @@ MultiBallItem::~MultiBallItem() {
  * multiball item's number of balls
  */
 double MultiBallItem::Activate() {
+	this->isActive = true;
 
 	// Calculate the average number of degrees (in 360) devoted to each ball...
 	float maxDegreesPerBall = 360.0f / (static_cast<float>(this->numNewSpawnedBalls) + 1.0f);
@@ -62,4 +63,10 @@ double MultiBallItem::Activate() {
  * Does nothing since the multiball has no timer or way of being cancelled out.
  */
 void MultiBallItem::Deactivate() {
+	if (!this->isActive) {
+		return;
+	}
+
+	this->isActive = false;
+	GameItem::Deactivate();
 }

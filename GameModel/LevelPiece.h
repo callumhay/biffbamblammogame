@@ -16,7 +16,16 @@ class GameLevel;
 class GameModel;
 class Projectile;
 
-class LevelPiece {
+class LevelCollidable {
+public:
+	LevelCollidable() {}
+	virtual ~LevelCollidable() {}
+
+	virtual bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d) = 0;
+	virtual bool CollisionCheck(const Collision::AABB2D& aabb) = 0;
+};
+
+class LevelPiece : public LevelCollidable {
 
 public:
 
@@ -32,9 +41,9 @@ public:
 protected:
 	Colour colour;								// The colour of this level piece
 	Point2D center;								// The exact center of this piece in the game model
-	BoundingLines bounds;			 		// The bounding box, rep. as lines forming the boundry of this, kept in world space
 	unsigned int wIndex, hIndex;	// The width and height index to where this block is in its level
-	
+	BoundingLines bounds;			 		// The bounding box, rep. as lines forming the boundry of this, kept in world space
+
 	void AddPossibleItemDrop(GameModel *gameModel);
 
 public:
@@ -45,9 +54,6 @@ public:
 	unsigned int GetWidthIndex() const { return this->wIndex; }
 	unsigned int GetHeightIndex() const { return this->hIndex; }
 	Colour GetColour() const { return this->colour; }
-	
-	bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
-	bool CollisionCheck(const Collision::AABB2D& aabb);
 
 	virtual Matrix4x4 GetPieceToLevelTransform() const {
 		return Matrix4x4::translationMatrix(Vector3D(this->center[0], this->center[1], 0.0f));
@@ -55,6 +61,9 @@ public:
 	virtual Matrix4x4 GetPieceToLevelInvTransform() const {
 		return Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
 	}
+
+	virtual bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
+	virtual bool CollisionCheck(const Collision::AABB2D& aabb);
 
 	virtual int GetPointValueForCollision() = 0;
 
@@ -65,7 +74,6 @@ public:
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) = 0;
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const Projectile& projectile) = 0;
 	
-
 	// Debug Stuffs
 	void DebugDraw() const;
 
