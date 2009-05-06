@@ -17,6 +17,8 @@ class TextureFontSet;
 
 class ESPOnomataParticle : public ESPParticle{
 protected:
+	bool useGivenString;
+
 	const TextureFontSet*		 font;
 	Onomatoplex::SoundType	 soundType;
 	Onomatoplex::Extremeness extremeness;
@@ -31,6 +33,7 @@ protected:
 	void GenerateNewString();
 
 public: 
+	ESPOnomataParticle(const TextureFontSet* font, const std::string& text);
 	ESPOnomataParticle(const TextureFontSet* font);
 	virtual ~ESPOnomataParticle();
 

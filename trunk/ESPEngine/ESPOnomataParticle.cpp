@@ -3,9 +3,14 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/TextureFontSet.h"
 
-ESPOnomataParticle::ESPOnomataParticle(const TextureFontSet* font) : ESPParticle(), font(font) {
+ESPOnomataParticle::ESPOnomataParticle(const TextureFontSet* font, const std::string& text) : ESPParticle(), font(font), currStr(text), useGivenString(true) {
 	assert(font != NULL);
+	this->currHalfStrHeight = TextureFontSet::TEXT_3D_SCALE * font->GetHeight() * 0.5f;
+	this->currHalfStrWidth = TextureFontSet::TEXT_3D_SCALE * this->font->GetWidth(this->currStr) * 0.5f;
+}
 
+ESPOnomataParticle::ESPOnomataParticle(const TextureFontSet* font) : ESPParticle(), font(font), useGivenString(false) {
+	assert(font != NULL);
 	this->currHalfStrHeight = TextureFontSet::TEXT_3D_SCALE * font->GetHeight() * 0.5f;
 
 	// Random sound type and extremeness
@@ -18,14 +23,17 @@ ESPOnomataParticle::~ESPOnomataParticle() {
 }
 
 void ESPOnomataParticle::GenerateNewString() {
+	assert(!this->useGivenString);
 	this->currStr = Onomatoplex::Generator::GetInstance()->Generate(this->soundType, this->extremeness);
 	this->currHalfStrWidth = TextureFontSet::TEXT_3D_SCALE * this->font->GetWidth(this->currStr) * 0.5f;
 }
 void ESPOnomataParticle::SetRandomSoundType() {
+	assert(!this->useGivenString);
 	unsigned int soundTypeRnd		= Randomizer::GetInstance()->RandomUnsignedInt() % Onomatoplex::NumSoundTypes;
 	this->soundType		= static_cast<Onomatoplex::SoundType>(soundTypeRnd);
 }
 void ESPOnomataParticle::SetRandomExtremeness() {
+	assert(!this->useGivenString);
 	unsigned int extremenessRnd	= Randomizer::GetInstance()->RandomUnsignedInt() % Onomatoplex::NumExtremenessTypes;
 	this->extremeness	= static_cast<Onomatoplex::Extremeness>(extremenessRnd);
 }
@@ -36,7 +44,10 @@ void ESPOnomataParticle::SetRandomExtremeness() {
 void ESPOnomataParticle::Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan) {
 	// Set the members to reflect a 'new life'
 	ESPParticle::Revive(pos, vel, size, rot, totalLifespan);
-	this->GenerateNewString();
+	
+	if (!this->useGivenString) {
+		this->GenerateNewString();
+	}
 }
 
 /**
