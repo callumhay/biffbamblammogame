@@ -15,6 +15,7 @@ public:
 	void RenderTextureToFullscreenQuad();
 
 	// Creator methods
+	static Texture2D* CreateTexture2DFromImgFile(PHYSFS_File* fileHandle, TextureFilterType texFilter);
 	static Texture2D* CreateTexture2DFromImgFile(const std::string& filepath, TextureFilterType texFilter);
 	static Texture2D* CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilterType texFilter);
 	static Texture2D* CreateEmptyTextureRectangle(int width, int height);

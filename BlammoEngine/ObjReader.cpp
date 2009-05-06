@@ -1,12 +1,7 @@
 #include "ObjReader.h"
-#include "MtlReader.h"
+#include "ResourceManager.h"
 #include "Mesh.h"
 #include "CgFxEffect.h"
-
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
 
 const std::string ObjReader::OBJ_EXTENSION = "obj";
 const std::string ObjReader::MTL_EXTENSION = "mtl";
@@ -37,6 +32,45 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 		return NULL;
 	}
 
+	Mesh* temp = ObjReader::ReadMeshFromStream(filepath, inFile);
+	inFile.close();
+	return temp;
+}
+
+/**
+ * Read the mesh using a PHYSFS file handle - for reading from zipped archives.
+ * Returns: A loaded mesh object, NULL on error.
+ */
+Mesh* ObjReader::ReadMesh(const std::string &filepath, PHYSFS_File* fileHandle) {
+	
+	// Get a byte buffer of the entire file and convert it into a string stream so it
+	// can be read in using the STL
+	PHYSFS_sint64 fileLength = PHYSFS_fileLength(fileHandle);
+	char* fileBuffer = new char[fileLength];
+	
+	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(char), fileLength);
+	if (readResult == NULL) {
+		delete[] fileBuffer;
+		fileBuffer = NULL;
+		debug_output("Error reading obj file to bytes: " << filepath);
+		assert(false);
+		return NULL;
+	}
+
+	// Convert the bytes to a string stream 
+	std::istringstream fileSS(std::string(fileBuffer), std::ios_base::in | std::ios_base::binary);
+	delete[] fileBuffer;
+	fileBuffer = NULL;
+
+	return ObjReader::ReadMeshFromStream(filepath, fileSS);
+}
+
+
+/**
+ * Private helper function for reading meshes with a given input stream.
+ * Returns: Mesh on successful read, NULL otherwise.
+ */
+Mesh* ObjReader::ReadMeshFromStream(const std::string &filepath, std::istream &inFile) {
 	std::string currStr = "";
 
 	// We first start by finding and reading the material file
@@ -57,7 +91,7 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath) {
 	// Figure out what materials to make and make them
 	std::map<std::string, CgFxMaterialEffect*> meshMaterials;
 	assert(mtlFilepath != "");
-	meshMaterials = MtlReader::ReadMaterialFile(mtlFilepath);
+	meshMaterials = ResourceManager::GetInstance()->GetMtlMeshResource(mtlFilepath);
 
 	std::string grpName = "";
 	std::string matName = "";

@@ -5,6 +5,7 @@
 #include "Colour.h"
 #include "Point.h"
 #include "Light.h"
+#include "ResourceManager.h"
 
 #include "Texture2D.h"
 
@@ -30,7 +31,7 @@ struct MaterialProperties {
 
 	Colour diffuse, specular, outlineColour;
 	float shininess, outlineSize;
-	Texture2D* diffuseTexture;
+	Texture* diffuseTexture;
 	
 	std::string materialType;
 	std::string geomType;
@@ -40,7 +41,8 @@ struct MaterialProperties {
 
 	~MaterialProperties() {
 		if (this->diffuseTexture != NULL) {
-			delete this->diffuseTexture;
+			bool resourceRemoved = ResourceManager::GetInstance()->ReleaseTextureResource(this->diffuseTexture);
+			assert(resourceRemoved);
 			this->diffuseTexture = NULL;
 		}
 	}
@@ -152,11 +154,13 @@ protected:
 	// Lights
 	CGparameter keyPointLightPosParam;
 	CGparameter keyPointLightColourParam;
+
 	CGparameter fillPointLightPosParam;
 	CGparameter fillPointLightColourParam;
 	CGparameter fillPointLightAttenParam;
+
 	CGparameter ballPointLightPosParam;
-	CGparameter ballPointLightColourParam;
+	CGparameter ballPointLightDiffuseParam;
 	CGparameter ballPointLightAttenParam;
 
 	PointLight keyLight;

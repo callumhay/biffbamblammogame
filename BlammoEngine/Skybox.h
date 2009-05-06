@@ -55,6 +55,10 @@ public:
 	// Static creators
 	static Skybox* CreateSkybox(const std::string& meshFilepath, 
 														  const std::string cubeTexFilepaths[6]);
+
+	Colour GetCurrentColour() const {
+		return this->currColour;
+	}
 };
 
 #endif

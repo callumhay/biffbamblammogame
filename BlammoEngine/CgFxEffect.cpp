@@ -38,6 +38,7 @@ ballLight(Point3D(0,0,0), Colour(1,1,1), 0.0f)
 
 CgFxMaterialEffect::~CgFxMaterialEffect() {
 	delete this->properties;
+	this->properties = NULL;
 }
 
 /**
@@ -56,14 +57,14 @@ void CgFxMaterialEffect::LoadParameters() {
 	this->shininessParam				= NULL;
 	this->specularColourParam		= NULL;
 	
-	this->keyPointLightPosParam			= NULL;
-	this->keyPointLightColourParam	= NULL;
-	this->fillPointLightPosParam		= NULL;
-	this->fillPointLightColourParam	= NULL;
-	this->fillPointLightAttenParam	= NULL;
-	this->ballPointLightPosParam		= NULL;
-	this->ballPointLightColourParam	= NULL;
-	this->ballPointLightAttenParam	= NULL;
+	this->keyPointLightPosParam				= NULL;
+	this->keyPointLightColourParam		= NULL;
+	this->fillPointLightPosParam			= NULL;
+	this->fillPointLightColourParam		= NULL;
+	this->fillPointLightAttenParam		= NULL;
+	this->ballPointLightPosParam			= NULL;
+	this->ballPointLightDiffuseParam	= NULL;
+	this->ballPointLightAttenParam		= NULL;
 
 	// Transforms
 	this->worldITMatrixParam	= cgGetNamedEffectParameter(this->cgEffect, "WorldITXf");
@@ -86,7 +87,7 @@ void CgFxMaterialEffect::LoadParameters() {
 	this->fillPointLightColourParam	= cgGetNamedEffectParameter(this->cgEffect, "FillPointLightColour");
 	this->fillPointLightAttenParam	= cgGetNamedEffectParameter(this->cgEffect, "FillPointLightLinearAtten");
 	this->ballPointLightPosParam		= cgGetNamedEffectParameter(this->cgEffect, "BallPointLightPos");
-	this->ballPointLightColourParam	= cgGetNamedEffectParameter(this->cgEffect, "BallPointLightColour");
+	this->ballPointLightDiffuseParam	= cgGetNamedEffectParameter(this->cgEffect, "BallPointLightDiffuse");
 	this->ballPointLightAttenParam	= cgGetNamedEffectParameter(this->cgEffect, "BallPointLightLinearAtten");
 
 	CgShaderManager::Instance()->CheckForCgError("Getting parameters for CgFxMaterialEffect");
@@ -94,7 +95,7 @@ void CgFxMaterialEffect::LoadParameters() {
 				 this->viewInvMatrixParam	&& this->texSamplerParam && this->diffuseColourParam &&
 				 this->shininessParam	&& this->specularColourParam && this->keyPointLightPosParam && 
 				 this->keyPointLightColourParam && this->fillPointLightPosParam && this->fillPointLightColourParam &&
-				 this->fillPointLightAttenParam && this->ballPointLightPosParam && this->ballPointLightColourParam &&
+				 this->fillPointLightAttenParam && this->ballPointLightPosParam && this->ballPointLightDiffuseParam &&
 				 this->ballPointLightAttenParam);
 }
 
@@ -133,14 +134,13 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	cgGLSetParameter3f(this->specularColourParam, this->properties->specular.R(), this->properties->specular.G(), this->properties->specular.B());
 	cgGLSetParameter1f(this->shininessParam, this->properties->shininess);
 	
-	
 	// Lights - depending on whether this is a foreground or background effect - no matter what there
 	// is always a key and a fill light
 	Point3D keyLightPos			= this->keyLight.GetPosition();
-	Colour  keyLightCol			= this->keyLight.GetColour();
+	Colour  keyLightCol			= this->keyLight.GetDiffuseColour();
 	Point3D fillLightPos		= this->fillLight.GetPosition();
-	Colour  fillLightCol		= this->fillLight.GetColour();
-	float fillLightLinAtten	= this->fillLight.GetLinearAttenuation();
+	Colour  fillLightCol		= this->fillLight.GetDiffuseColour();
+	float fillLightLinearAtten	= this->fillLight.GetLinearAttenuation();
 
 	// Key
 	cgGLSetParameter3f(this->keyPointLightPosParam,    keyLightPos[0], keyLightPos[1], keyLightPos[2]);
@@ -149,15 +149,19 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	// Fill
 	cgGLSetParameter3f(this->fillPointLightPosParam,    fillLightPos[0], fillLightPos[1], fillLightPos[2]);
 	cgGLSetParameter3f(this->fillPointLightColourParam, fillLightCol[0], fillLightCol[1], fillLightCol[2]);
-	cgGLSetParameter1f(this->fillPointLightAttenParam,  fillLightLinAtten);
+	cgGLSetParameter1f(this->fillPointLightAttenParam,  fillLightLinearAtten);
 
 	if (this->properties->geomType == MaterialProperties::MATERIAL_GEOM_FG_TYPE) {
 		// Foreground: also has a Ball light
 		
+		Point3D ballLightPos				= this->ballLight.GetPosition();
+		Colour ballLightDiffuse			= this->ballLight.GetDiffuseColour();
+		float ballLightLinearAtten	= this->ballLight.GetLinearAttenuation();
+
 		// Ball
-		//cgGLSetParameter3f(this->ballPointLightPosParam,    this->ballLightPos[0], this->ballLightPos[1], this->ballLightPos[2]);
-		//cgGLSetParameter3f(this->ballPointLightColourParam, this->ballLightColour[0], this->ballLightColour[1], this->ballLightColour[2]);
-		//cgGLSetParameter1f(this->ballPointLightAttenParam,  this->ballLightLinearAtten);	
+		cgGLSetParameter3f(this->ballPointLightPosParam,     ballLightPos[0], ballLightPos[1], ballLightPos[2]);
+		cgGLSetParameter3f(this->ballPointLightDiffuseParam, ballLightDiffuse[0], ballLightDiffuse[1], ballLightDiffuse[2]);
+		cgGLSetParameter1f(this->ballPointLightAttenParam,   ballLightLinearAtten);	
 	}
 
 	CgShaderManager::Instance()->CheckForCgError("Setting up CgFxEffect parameters");

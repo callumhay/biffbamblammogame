@@ -65,7 +65,20 @@ void PolygonGroup::Transform(const Matrix4x4& m) {
 		this->polygroupArray[i + 7] = resultVert[2];
 	}
 }
+/*
+PolygonGroup& PolygonGroup::operator=(const PolygonGroup &rhs) {
+	delete[] this->polygroupArray;
 
+	this->polygroupArray = new float[rhs.polygroupArrayLength];
+	for (unsigned int i = 0; i < rhs.polygroupArrayLength; i++) {
+		this->polygroupArray[i] = rhs.polygroupArray[i];
+	}
+	this->polygroupArrayLength = rhs.polygroupArrayLength;
+	this->numIndices = rhs.numIndices;
+
+	return *this;
+}
+*/
 void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer, 
 														 const std::vector<Point3D>& vertexStream, 
 														 const std::vector<Vector3D>& normalStream,
@@ -85,6 +98,13 @@ name(name), matGrps(matGrps) {
 }
 
 Mesh::~Mesh(){
+	this->Flush();
+}
+
+/**
+ * Clean out all the stuff that currently makes up this mesh.
+ */
+void Mesh::Flush() {
 	// Delete the material groups
 	std::map<std::string, MaterialGroup*>::iterator matGrpIter = this->matGrps.begin();
 	for (; matGrpIter != this->matGrps.end(); matGrpIter++) {

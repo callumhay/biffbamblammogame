@@ -19,3 +19,14 @@ Texture1D* Texture1D::CreateTexture1DFromImgFile(const std::string& filepath, Te
 	}
 	return NULL;
 }
+
+Texture1D* Texture1D::CreateTexture1DFromImgFile(PHYSFS_File* fileHandle, TextureFilterType texFilter) {
+	Texture1D* newTex = new Texture1D(texFilter);
+	if (newTex->Load2DOr1DTextureFromImg(fileHandle, texFilter)) {
+		return newTex;
+	}
+	else {
+		delete newTex;
+	}
+	return NULL;
+}
