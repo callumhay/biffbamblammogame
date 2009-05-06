@@ -2,16 +2,26 @@
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
 #include "GameWorldAssets.h"
+#include "BallSafetyNetMesh.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Vector.h"
+#include "../BlammoEngine/Matrix.h"
+#include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Point.h"
+#include "../BlammoEngine/ResourceManager.h"
 
-LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : 
-levelDimensions(0, 0), styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL) {
+#include "../GameModel/GameBall.h"
+
+LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : currLevel(NULL),
+styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), ballSafetyNet(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
-	this->basicBlock			= ObjReader::ReadMesh(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
-	this->bombBlock				= ObjReader::ReadMesh(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
-	this->triangleBlockUR = ObjReader::ReadMesh(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
+	this->basicBlock			= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
+	this->bombBlock				= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
+	this->triangleBlockUR = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
+
+	this->ballSafetyNet = new BallSafetyNetMesh();
 
 	// Add the typical level meshes to the list of materials...
 	std::map<std::string, MaterialGroup*> basicBlockMatGrps			= this->basicBlock->GetMaterialGroups();
@@ -29,17 +39,12 @@ levelDimensions(0, 0), styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), tria
 	}
 
 	this->LoadNewLevel(gameWorldAssets, level);
-
 }
 
 LevelMesh::~LevelMesh() {
 	// Delete all meshes
-	delete this->basicBlock;
-	this->basicBlock = NULL;
-	delete this->triangleBlockUR;
-	this->triangleBlockUR = NULL;
-	delete this->bombBlock;
-	this->bombBlock = NULL;
+	delete this->ballSafetyNet;
+	this->ballSafetyNet = NULL;
 
 	// Clean up all assets pertaining to the currently loaded
 	// level, if applicable.
@@ -72,14 +77,14 @@ void LevelMesh::Flush() {
 		
 		for (std::list<GLuint>::iterator dispListIter = iter->second.begin(); dispListIter != iter->second.end(); dispListIter++) {
 			glDeleteLists((*dispListIter), 1);
+			(*dispListIter) = 0;
 		}
 	}
 	this->displayListsPerMaterial.clear();
 	this->pieceDisplayLists.clear();
 
-	// Clear the level dimensions...
-	this->levelDimensions = Vector2D(0,0);
-
+	// Clear the current level pointer
+	this->currLevel = NULL;
 }
 
 /**
@@ -92,6 +97,9 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 	// Make sure any previous levels are cleared...
 	this->Flush();
 	
+	// Set the current level pointer
+	this->currLevel = level;
+
 	// Based on the world style read-in the appropriate block
 	this->styleBlock = gameWorldAssets->GetWorldStyleBlock();
 
@@ -103,14 +111,22 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 
 	// Load the actual level meshes as display lists...
 	const std::vector<std::vector<LevelPiece*>>& levelPieces = level->GetCurrentLevelLayout();
-	
+
 	glPushMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	// Get the proper vector to center the level
-	this->levelDimensions = Vector2D(level->GetLevelUnitWidth(), level->GetLevelUnitHeight());
-	glTranslatef(-this->levelDimensions[0]/2.0f, -this->levelDimensions[1]/2.0f, 0.0f);
+	Vector2D levelDimensions = Vector2D(level->GetLevelUnitWidth(), level->GetLevelUnitHeight());
+	
+	// Create the ball safety net for the level
+	this->ballSafetyNet->Regenerate(levelDimensions);
+
+	glTranslatef(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
+
+	// Get the appropriate transform to be applied to the piece
+	float worldTransformVals[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, worldTransformVals);
 
 	// Go through each piece and create an appropriate display list for it
 	for (size_t h = 0; h < levelPieces.size(); h++) {
@@ -118,14 +134,6 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 			
 			// Obtain the current level piece and create a display list for it if necessary
 			LevelPiece* currPiece	= levelPieces[h][w];
-			Point2D pieceLoc			= currPiece->GetCenter();
-
-			// Set the appropriate transform to be applied to the piece
-			//glPushMatrix();
-			//glTranslatef(pieceLoc[0], pieceLoc[1], 0);
-			float worldTransformVals[16];
-			glGetFloatv(GL_MODELVIEW_MATRIX, worldTransformVals);
-			//glPopMatrix();
 
 			// Create the appropriate display lists for the piece...
 			Vector3D translation(worldTransformVals[12], worldTransformVals[13], worldTransformVals[14]);
@@ -153,16 +161,20 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 		glDeleteLists(iter->second, 1);
 		// ... and remove it from other relevant maps/arrays/etc.
 		this->displayListsPerMaterial[iter->first].remove(iter->second);
+		
+		// Clean up
+		iter->second = 0;
 	}
 	this->pieceDisplayLists[&pieceBefore].clear();
 
 	Point2D changedPieceLoc = pieceAfter.GetCenter();
+	Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
 
 	// Obtain the world transform matrix for the piece
 	glPushMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glTranslatef(-this->levelDimensions[0]/2.0f, -this->levelDimensions[1]/2.0f, 0.0f);
+	glTranslatef(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
 	//glTranslatef(changedPieceLoc[0], changedPieceLoc[1], 0);
 	float worldTransformVals[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, worldTransformVals);
@@ -176,7 +188,7 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 /**
  * Draw the current level mesh.
  */
-void LevelMesh::Draw(const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
+void LevelMesh::Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::list<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
 		iter != this->displayListsPerMaterial.end(); iter++) {
@@ -186,6 +198,17 @@ void LevelMesh::Draw(const Camera& camera, const PointLight& keyLight, const Poi
 		currEffect->SetFillLight(fillLight);
 		currEffect->SetBallLight(ballLight);
 		currEffect->Draw(camera, iter->second);
+	}
+
+	// If the ball safety net is active then we draw it
+	assert(this->currLevel != NULL);
+	if (this->currLevel->IsBallSafetyNetActive() || this->ballSafetyNet->IsPlayingAnimation()) {
+		Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
+
+		glPushMatrix();
+		glTranslatef(-levelDimensions[0] / 2.0f, -(levelDimensions[1] / 2.0f + LevelPiece::HALF_PIECE_HEIGHT), 0.0f);
+		this->ballSafetyNet->Draw(dT, camera, keyLight, fillLight, ballLight);
+		glPopMatrix();
 	}
 }
 
@@ -269,4 +292,21 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 			break;
 	}
 	return returnValue;
+}
+
+/**
+ * Call when the ball safety net has been created. This will prompt any animations /
+ * effects associated with the mesh representing the safety net.
+ */
+void LevelMesh::BallSafetyNetCreated() {
+	this->ballSafetyNet->CreateBallSafetyNet();
+}
+
+/**
+ * Call when the ball safety net has been destroyed this will prompt any
+ * animations / effects associated with the mesh representing the safety net.
+ */
+void LevelMesh::BallSafetyNetDestroyed(const GameBall& ball) {
+	Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
+	this->ballSafetyNet->DestroyBallSafetyNet(levelDimensions, ball.GetBounds().Center()[0]);
 }

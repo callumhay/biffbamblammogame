@@ -32,7 +32,8 @@ private:
 	void RemoveActionListeners();
 
 #ifdef _DEBUG
-	bool drawDebug;
+	static bool drawDebugBounds;
+	static bool drawDebugLightGeometry;
 	// Debug draw stuff
 	void DrawDebugAxes();
 	void DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks);
@@ -88,11 +89,17 @@ public:
 	}
 
 #ifdef _DEBUG
-	void ToggleDrawDebugGeometry() {
-		this->drawDebug = !this->drawDebug;
+	static void ToggleDrawDebugBounds() {
+		drawDebugBounds = !drawDebugBounds;
 	}
-	bool IsDrawDebugOn() const {
-		return this->drawDebug;
+	static bool IsDrawDebugBoundsOn() {
+		return drawDebugBounds;
+	}
+	static void ToggleDrawDebugLightGeometry() {
+		drawDebugLightGeometry = !drawDebugLightGeometry;
+	}
+	static bool IsDrawDebugLightGeometryOn() {
+		return drawDebugLightGeometry;
 	}
 #endif
 

@@ -20,10 +20,11 @@ class GameBall;
 class GameItem;
 class ESPEmitter;
 class ESPPointEmitter;
-class Texture2D;
+class Texture;
 class ESPShaderParticle;
 class Projectile;
 class PlayerPaddle;
+class GameModel;
 
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
@@ -55,6 +56,7 @@ private:
 	ESPParticleScaleEffector particleMediumGrowth;
 	ESPParticleScaleEffector particleLargeGrowth;
 	ESPParticleScaleEffector particleMediumShrink;
+	//ESPParticleScaleEffector particleLargeStretch;
 
 	ESPParticleRotateEffector explosionRayRotatorCW;
 	ESPParticleRotateEffector explosionRayRotatorCCW;
@@ -81,6 +83,7 @@ private:
 	static const int NUM_LASER_VAPOUR_TRAIL_PARTICLES = 15;
 	static const int NUM_PADDLE_SIZE_CHANGE_PARTICLES = 24;
 	static const int NUM_BALL_SIZE_CHANGE_PARTICLES = 20;
+	static const int NUM_ITEM_ACQUIRED_SPARKS = 20;
 
 	ESPPointEmitter* paddleLaserGlowAura;
 	ESPPointEmitter* paddleLaserGlowSparks;
@@ -100,6 +103,7 @@ private:
 	void AddPaddleShrinkEffect();
 	void AddBallGrowEffect(const GameBall* ball);
 	void AddBallShrinkEffect(const GameBall* ball);
+	void AddOneUpEffect(const PlayerPaddle* paddle);
 
 	void InitLaserPaddleESPEffects();
 
@@ -115,9 +119,10 @@ public:
 	void AddBallBounceEffect(const Camera& camera, const GameBall& ball);
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
+	void AddBallSafetyNetDestroyedEffect(const GameBall& ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
-	void SetItemEffect(const GameItem& item);
+	void SetItemEffect(const GameItem& item, const GameModel& gameModel);
 	void AddItemDropEffect(const Camera& camera, const GameItem& item);
 	void RemoveItemDropEffect(const Camera& camera, const GameItem& item);
 	void AddProjectileEffect(const Camera& camera, const Projectile& projectile);

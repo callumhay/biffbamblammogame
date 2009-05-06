@@ -10,11 +10,12 @@
 #include "../GameModel/LevelPiece.h"
 
 class GameWorldAssets;
+class BallSafetyNetMesh;
 
 class LevelMesh {
 
 private:
-	Vector2D levelDimensions;
+	const GameLevel* currLevel;
 
 	// Meshes for all types of level pieces
 	Mesh* basicBlock;
@@ -22,6 +23,9 @@ private:
 	Mesh* triangleBlockUR;	// Triangle block (default position in upper-right)
 
 	Mesh* styleBlock;
+
+	// Misc. display lists and meshes for other geometry activated by items and such
+	BallSafetyNetMesh* ballSafetyNet;
 
 	// The unique identifiers of, and associated materials of the level piece meshes
 	std::map<std::string, CgFxMaterialEffect*> levelMaterials;
@@ -34,6 +38,7 @@ private:
 
 	std::map<std::string, MaterialGroup*> GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const;
 	void CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
+	void CreateDisplayListForBallSafetyNet(float levelWidth);
 	void Flush();	
 
 public:
@@ -41,9 +46,11 @@ public:
 	~LevelMesh();
 	
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
-	void Draw(const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
+	void Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
 
 	void LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
-														 
+
+	void BallSafetyNetCreated();
+	void BallSafetyNetDestroyed(const GameBall& ball);
 };
 #endif

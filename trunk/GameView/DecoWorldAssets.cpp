@@ -4,15 +4,15 @@
 #include "CgFxVolumetricEffect.h"
 
 #include "../BlammoEngine/Skybox.h"
-#include "../BlammoEngine/ObjReader.h"
+#include "../BlammoEngine/ResourceManager.h"
 
 // Basic constructor: Load all the basic assets for the deco world...
 DecoWorldAssets::DecoWorldAssets() : 
 GameWorldAssets(DecoSkybox::CreateDecoSkybox(GameViewConstants::GetInstance()->SKYBOX_MESH),
-								ObjReader::ReadMesh(GameViewConstants::GetInstance()->DECO_BACKGROUND_MESH),
-								ObjReader::ReadMesh(GameViewConstants::GetInstance()->DECO_PADDLE_MESH),
-								ObjReader::ReadMesh(GameViewConstants::GetInstance()->DECO_BLOCK_MESH_PATH)),
-skybeam(ObjReader::ReadMesh(GameViewConstants::GetInstance()->DECO_SKYBEAM_MESH)),
+								ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BACKGROUND_MESH),
+								ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_PADDLE_MESH),
+								ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BLOCK_MESH_PATH)),
+skybeam(ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_SKYBEAM_MESH)),
 beamEffect(new CgFxVolumetricEffect()),
 beamRotationfg1(0.0),
 beamRotationfg2(0.0),
@@ -40,9 +40,6 @@ DecoWorldAssets::~DecoWorldAssets() {
 	// Beam effect
 	delete this->beamEffect;
 	this->beamEffect = NULL;
-	// Beam geometry
-	delete this->skybeam;
-	this->skybeam = NULL;
 }
 
 void DecoWorldAssets::Tick(double dT) {
@@ -136,6 +133,14 @@ void DecoWorldAssets::RotateSkybeams(double dT) {
 			this->rotationStatebg2 = RotateCCW;
 		}
 	}
+}
+
+void DecoWorldAssets::DrawBackgroundModel(const Camera& camera) {
+	Colour currSkyboxColour = this->skybox->GetCurrentColour();
+	Colour currBGModelColour = currSkyboxColour.GetComplementaryColour();
+	
+	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), 1.0f);
+	this->background->Draw(camera, this->bgKeyLight, this->bgFillLight);
 }
 
 void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {

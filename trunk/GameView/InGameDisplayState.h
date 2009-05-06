@@ -19,9 +19,8 @@ private:
 	static const unsigned int HUD_X_INDENT;
 	static const unsigned int HUD_Y_INDENT;
 	TextLabel2D scoreLabel;
-	TextLabel2D livesLabel;
-	
-	void DrawGameHUD();
+
+	void DrawGameHUD(double dT);
 	void DrawGameScene(double dT);
 
 	void RenderBackgroundToFBO();

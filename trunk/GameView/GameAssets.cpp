@@ -7,9 +7,15 @@
 #include "CgFxVolumetricEffect.h"
 #include "GameFontAssetsManager.h"
 #include "LoadingScreen.h"
+#include "LivesLeftHUD.h"
+
+// Game Model includes
+#include "../GameModel/GameModel.h"
+#include "../GameModel/BlackoutItem.h"
 
 // Blammo Engine includes
 #include "../BlammoEngine/Texture3D.h"
+#include "../BlammoEngine/ResourceManager.h"
 
 // ESP Engine includes
 #include "../ESPEngine/ESPEmitter.h"
@@ -22,20 +28,14 @@ worldAssets(NULL),
 espAssets(NULL),
 itemAssets(NULL),
 
+lifeHUD(NULL),
+
 ball(NULL), 
 spikeyBall(NULL), 
 paddleLaserAttachment(NULL),
 
 invisiBallEffect(NULL), 
 ghostBallEffect(NULL) {
-
-	// Initialize DevIL
-	ilInit();
-	iluInit();
-	ilutRenderer(ILUT_OPENGL);
-	ilutEnable(ILUT_OPENGL_CONV);
-	
-	// TODO: Have loading screen stuff before any of this...
 
 	// Load ESP assets
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading purdy pictures...");
@@ -49,7 +49,7 @@ ghostBallEffect(NULL) {
 
 	// Load all fonts
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading fonts...");
-	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();	// TODO
+	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
 
 	// Load regular meshes
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading regular geometry...");
@@ -59,16 +59,14 @@ ghostBallEffect(NULL) {
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading groovy effects...");
 	this->LoadRegularEffectAssets();
 
+	// Initialize any HUD elements
+	this->lifeHUD = new LivesLeftHUD();
+
 	// Initialize default light values
-	this->keyLight  = PointLight(Point3D(-25.0f, 20.0f, 50.0f), Colour(0.932f, 1.0f, 0.755f), 0.0f);
-	this->fillLight = PointLight(Point3D(30.0f, 30.0f, 50.0f),  Colour(1.0f, 0.434f, 0.92f), 0.03f);
-	this->ballLight = PointLight(Point3D(0,0,50), Colour(1,1,1), 0.0f);
+	this->ToggleLights(true);
 }
 
 GameAssets::~GameAssets() {
-	// Delete regular mesh assets
-	this->DeleteRegularMeshAssets();
-
 	// Delete regular effect assets
 	this->DeleteRegularEffectAssets();
 
@@ -80,6 +78,10 @@ GameAssets::~GameAssets() {
 		delete this->itemAssets;
 		this->itemAssets = NULL;
 	}
+
+	// Delete the lives left HUD
+	delete this->lifeHUD;
+	this->lifeHUD = NULL;
 }
 
 /*
@@ -102,83 +104,162 @@ void GameAssets::DeleteWorldAssets() {
 }
 
 /**
- * Delete any previously loaded regular assets.
+ * Toggle the lights in the game either on or off (both foreground
+ * and background lights are affected).
  */
-void GameAssets::DeleteRegularMeshAssets() {
-	if (this->ball != NULL) {
-		delete this->ball;
-		this->ball = NULL;
+void GameAssets::ToggleLights(bool turnOn) {
+	if (turnOn) {
+		this->fgKeyLight  = PointLight(Point3D(-30.0f, 40.0f, 65.0f), GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0f);
+		this->fgFillLight = PointLight(Point3D(25.0f, 0.0f, 40.0f), GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,  0.037f);
+		this->ballLight		= PointLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, 
+																	 GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN);
+
+		this->ballKeyLight	= this->fgKeyLight;
+		this->ballKeyLight.SetDiffuseColour(Colour(0.9f, 0.9f, 0.9f));
+		this->ballFillLight	= this->fgFillLight;
+		this->ballFillLight.SetDiffuseColour(Colour(0,0,0));
+		this->paddleKeyLight = this->fgKeyLight;
+		this->paddleFillLight = this->fgFillLight;
 	}
-	if (this->spikeyBall != NULL) {
-		delete this->spikeyBall;
-		this->spikeyBall = NULL;
+	else {
+		// Turn off foreground lights...
+		this->fgKeyLight.SetDiffuseColour(Colour(0,0,0));
+		this->fgFillLight.SetDiffuseColour(Colour(0,0,0));
+
+		// Set the attenuation to be a smaller distance for the ball
+		this->ballLight.SetLinearAttenuation(0.8f);
 	}
-	if (this->paddleLaserAttachment != NULL) {
-		delete this->paddleLaserAttachment;
-		this->paddleLaserAttachment = NULL;
+
+	// Background lights...
+	if (this->worldAssets != NULL) {
+		this->worldAssets->ToggleBackgroundLights(turnOn);	
 	}
 }
 
-
-
 // Draw the foreground level pieces...
-void GameAssets::DrawLevelPieces(const GameLevel* currLevel, const Camera& camera) const {
+void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
 	std::map<const GameLevel*, LevelMesh*>::const_iterator iter = this->loadedLevelMeshes.find(currLevel);
 	assert(iter != this->loadedLevelMeshes.end());
-	iter->second->Draw(camera, this->keyLight, this->fillLight, this->ballLight);
+	iter->second->Draw(dT, camera, this->fgKeyLight, this->fgFillLight, this->ballLight);
 }
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
 // draw the materials and draw the mesh.
-void GameAssets::DrawGameBall(double dT, const GameBall& b, const Camera& camera, Texture2D* sceneTex) const {
+void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, Texture2D* sceneTex, const Vector2D& worldT) {
 	
-	CgFxEffectBase* ballEffectTemp = NULL;
-	
-	// Ball shaders when applicable...
-	// The invisiball item always has priority
-	if ((b.GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall) {
-		this->invisiBallEffect->SetFBOTexture(sceneTex);
-		ballEffectTemp = this->invisiBallEffect;
+	// Average values used to calculate the colour and position of the ball light
+	Point3D avgBallPosition(0,0,0);
+	Colour avgBallColour(0,0,0);
+	unsigned int visibleBallCount = 0;
+
+	// Go through each ball in the game, draw it accordingly
+	const std::list<GameBall*>& balls = gameModel.GetGameBalls();
+	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ballIter++) {
+		GameBall* currBall = *ballIter;
+		
+		CgFxEffectBase* ballEffectTemp = NULL;
+		Colour currBallColour(0,0,0);
+
+		Point2D ballPos = currBall->GetBounds().Center();
+
+		if (currBall->GetBallType() == GameBall::NormalBall) {
+			// Normal ball with a regular light
+			avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], 0.0f);
+			avgBallColour = avgBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
+			visibleBallCount++;
+		}
+		else {
+			// The ball has an item in effect on it... figure out what effect and render it appropriately
+
+			unsigned int numColoursApplied = 0;
+
+			// GHOST BALL CHECK
+			if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall &&
+					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+				
+				// Draw when the ghost ball is not an invisiball	
+				ballEffectTemp = this->ghostBallEffect;
+				this->espAssets->DrawGhostBallEffects(dT, camera, *currBall);
+				currBallColour = currBallColour +
+												 Colour(GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.R(),
+																GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.G(),
+																GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.B());
+				numColoursApplied++;
+			}
+
+			// UBER BALL CHECK
+			if ((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall &&
+					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+				
+				// Draw when uber ball and not invisiball
+				this->espAssets->DrawUberBallEffects(dT, camera, *currBall);
+				currBallColour = currBallColour + 
+												 Colour(GameViewConstants::GetInstance()->UBER_BALL_COLOUR.R(),
+																GameViewConstants::GetInstance()->UBER_BALL_COLOUR.G(),
+																GameViewConstants::GetInstance()->UBER_BALL_COLOUR.B());
+				numColoursApplied++;
+			}
+
+			// INVISIBALL CHECK
+			if ((currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall) {
+				this->invisiBallEffect->SetFBOTexture(sceneTex);
+				ballEffectTemp = this->invisiBallEffect;
+			}
+			else {
+				// We only take the average of visible balls.
+				avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], 0.0f);
+			
+				assert(numColoursApplied > 0);
+				avgBallColour = avgBallColour + (currBallColour / numColoursApplied);
+
+				visibleBallCount++;
+			}
+		}
+
+		// Draw the ball model...
+		glPushMatrix();
+		float ballScaleFactor = currBall->GetBallScaleFactor();
+		glTranslatef(ballPos[0], ballPos[1], 0);
+		
+		// Draw background effects for the ball
+		this->espAssets->DrawBackgroundBallEffects(dT, camera, *currBall);
+
+		Vector3D ballRot = currBall->GetRotation();
+		glRotatef(ballRot[0], 1.0f, 0.0f, 0.0f);
+		glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
+		glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
+		glScalef(ballScaleFactor, ballScaleFactor, ballScaleFactor);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+		if ((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+			this->spikeyBall->Draw(camera, ballEffectTemp, this->ballKeyLight, this->ballFillLight);
+		}
+		else {
+			this->ball->Draw(camera, ballEffectTemp, this->ballKeyLight, this->ballFillLight);
+		}
+
+		glPopMatrix();
 	}
-	
-	// Ball effects when applicable...
-	if ((b.GetBallType() & GameBall::GhostBall) == GameBall::GhostBall &&
-			(b.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
-		ballEffectTemp = this->ghostBallEffect;
-		this->espAssets->DrawGhostBallEffects(dT, camera, b);
-	}
 
-	if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall &&
-			(b.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
-		// Draw when uber ball and not invisiball
-		this->espAssets->DrawUberBallEffects(dT, camera, b);
-	}
+	// Calculate the average position and colour of all the visible balls in the game
+	if (visibleBallCount > 0) {
+		avgBallPosition = avgBallPosition / visibleBallCount;
+		avgBallPosition = avgBallPosition + Vector3D(worldT[0], worldT[1], 0.0f);
+		avgBallColour = avgBallColour / visibleBallCount;
+		
+		// Grab a trasform matrix from the game model to say where the ball light is
+		// if the level is flipped or some such thing
+		Point3D newAvgBallPos =  gameModel.GetTransformInfo().GetGameTransform() * avgBallPosition;
 
-
-	// Ball model...
-	glPushMatrix();
-	Point2D loc = b.GetBounds().Center();
-	float ballScaleFactor = b.GetBallScaleFactor();
-	glTranslatef(loc[0], loc[1], 0);
-	
-	// Draw background effects for the ball
-	this->espAssets->DrawBackgroundBallEffects(dT, camera, b);
-
-	Vector3D ballRot = b.GetRotation();
-	glRotatef(ballRot[0], 1.0f, 0.0f, 0.0f);
-	glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
-	glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
-	glScalef(ballScaleFactor, ballScaleFactor, ballScaleFactor);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	if ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
-		this->spikeyBall->Draw(camera, ballEffectTemp, this->keyLight, this->fillLight);
+		// Set the ball light to the correct position
+		this->ballLight.SetPosition(newAvgBallPos);
 	}
 	else {
-		this->ball->Draw(camera, ballEffectTemp, this->keyLight, this->fillLight);
+		avgBallColour = Colour(0,0,0);
 	}
 
-	glPopMatrix();
+	// Set the ball light to the correct diffuse colour
+	this->ballLight.SetDiffuseColour(avgBallColour);
 }
 
 void GameAssets::Tick(double dT) {
@@ -198,11 +279,11 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
-	this->worldAssets->DrawPaddle(p, camera, this->keyLight, this->fillLight, this->ballLight);
+	this->worldAssets->DrawPaddle(p, camera, this->paddleKeyLight, this->paddleFillLight, this->ballLight);
 
 	// In the case of a laser paddle, we draw the laser attachment
 	if ((p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
-		this->paddleLaserAttachment->Draw(camera);
+		this->paddleLaserAttachment->Draw(camera, this->paddleKeyLight, this->paddleFillLight);
 		
 		// Draw glowy effects where the laser originates...
 		this->espAssets->DrawPaddleLaserEffects(dT, camera, p);
@@ -222,7 +303,7 @@ void GameAssets::DrawSkybox(const Camera& camera) {
  * Draw the background model for the current world type.
  */
 void GameAssets::DrawBackgroundModel(const Camera& camera) {
-	this->worldAssets->DrawBackgroundModel(camera, this->keyLight, this->fillLight);
+	this->worldAssets->DrawBackgroundModel(camera);
 }
 
 /**
@@ -248,13 +329,13 @@ void GameAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int display
 
 void GameAssets::LoadRegularMeshAssets() {
 	if (this->ball == NULL) {
-		this->ball = ObjReader::ReadMesh(GameViewConstants::GetInstance()->BALL_MESH);
+		this->ball = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BALL_MESH);
 	}
 	if (this->spikeyBall == NULL) {
-		this->spikeyBall = ObjReader::ReadMesh(GameViewConstants::GetInstance()->SPIKEY_BALL_MESH);
+		this->spikeyBall = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->SPIKEY_BALL_MESH);
 	}
 	if (this->paddleLaserAttachment == NULL) {
-		this->paddleLaserAttachment = ObjReader::ReadMesh(GameViewConstants::GetInstance()->PADDLE_LASER_ATTACHMENT_MESH);
+		this->paddleLaserAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_LASER_ATTACHMENT_MESH);
 	}
 }
 
@@ -327,12 +408,43 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 }
 
 /**
+ * Activate the effect for a particular item - this can be anything from changing lighting to
+ * making pretty eye-candy-particles.
+ */
+void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem& item, const Camera& camera) {
+	// First deal with any particle related effects
+	this->espAssets->SetItemEffect(item, gameModel);
+
+	// Deal with any light changes...
+	if (item.GetName() == BlackoutItem::BLACKOUT_ITEM_NAME) {
+		// Turn the lights off and make only the paddle and ball visible.
+		assert(gameModel.IsBlackoutEffectActive());
+		this->ToggleLights(false);
+	}
+}
+
+/**
+ * Deactivate the effect for a particular item - this will clean up anything that was activated
+ * which needs manual clean up.
+ */
+void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameItem& item) {
+	
+	// Deal with any light changes...
+	if (item.GetName() == BlackoutItem::BLACKOUT_ITEM_NAME) {
+		// Turn the lights back on and revert lights back to their defaults
+		assert(!gameModel.IsBlackoutEffectActive());
+		this->ToggleLights(true);
+	}
+}
+
+/**
  * Debug function for drawing the lights that affect the game - draws them as
  * coloured cubes.
  */
 void GameAssets::DebugDrawLights() const {
-	this->keyLight.DebugDraw();
-	this->fillLight.DebugDraw();
-	this->ballLight.DebugDraw();
+	if (!GameDisplay::IsDrawDebugLightGeometryOn()) { return; }
 
+	this->fgKeyLight.DebugDraw();
+	this->fgFillLight.DebugDraw();
+	this->ballLight.DebugDraw();
 }

@@ -10,11 +10,13 @@
 #include "../GameModel/GameItem.h"
 #include "../GameModel/GameItemTimer.h"
 
+class GameModel;
 class Texture3D;
 class LevelMesh;
 class CgFxPostRefract;
 class CgFxVolumetricEffect;
 class ESPEmitter;
+class LivesLeftHUD;
 
 // Compositional classes for asssets
 #include "GameWorldAssets.h"
@@ -29,6 +31,8 @@ private:
 	GameESPAssets* espAssets;			// Emitter/Sprite/Particle assets
 	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
 
+	LivesLeftHUD* lifeHUD;
+
 	// Level-related meshes
 	std::map<const GameLevel*, LevelMesh*> loadedLevelMeshes;
 
@@ -37,27 +41,31 @@ private:
 	Mesh* spikeyBall;	// What happens to the ball when it becomes uber
 	Mesh* paddleLaserAttachment;	// Laser attachment for the paddle
 
-	// In-game lights (all point lights): key, fill and ball
-	PointLight keyLight, fillLight, ballLight;
+	// In-game lights for typical geometry: key, fill and ball
+	PointLight fgKeyLight, fgFillLight, ballLight;
+	// In-game lights just for the ball
+	PointLight ballKeyLight, ballFillLight;
+	// In-game lights just for the paddle
+	PointLight paddleKeyLight, paddleFillLight;
 
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
 	CgFxVolumetricEffect* ghostBallEffect;
 
 	void DeleteWorldAssets();
-	void DeleteRegularMeshAssets();
 	void DeleteRegularEffectAssets();
 
 	// Asset loading helper functions
 	void LoadRegularMeshAssets();
 	void LoadRegularEffectAssets();
 
+	void ToggleLights(bool turnOn);
+
 public:
 	GameAssets();
 	~GameAssets();
 
 	void LoadWorldAssets(const GameWorld* world);
-
 	void Tick(double dT);
 
 	// Draw functions ******************************************************************************
@@ -67,8 +75,8 @@ public:
 	void DrawBackgroundModel(const Camera& camera);
 	void DrawBackgroundEffects(const Camera& camera);
 
-	void DrawLevelPieces(const GameLevel* currLevel, const Camera& camera) const;
-	void DrawGameBall(double dT, const GameBall& b, const Camera& camera, Texture2D* sceneTex) const;
+	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
+	void DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, Texture2D* sceneTex, const Vector2D& worldT);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const;
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
 
@@ -84,8 +92,15 @@ public:
 		return iter->second;
 	}
 
+	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item, const Camera& camera);
+	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item);
+
 	GameESPAssets* GetESPAssets() const {
 		return this->espAssets;
+	}
+
+	LivesLeftHUD* GetLifeHUD() const {
+		return this->lifeHUD;
 	}
 
 };
