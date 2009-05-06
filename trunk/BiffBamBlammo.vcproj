@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(SolutionDir)include/physfs&quot;;&quot;$(SolutionDir)include/zlib&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -50,6 +50,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -90,7 +91,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)"
+				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BBBResources.zip $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
@@ -121,7 +122,7 @@
 				Optimization="3"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(SolutionDir)include/physfs&quot;;&quot;$(SolutionDir)include/zlib&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -129,6 +130,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -171,7 +173,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)"
+				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BBBResources.zip $(OutDir)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -217,6 +219,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Animation.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\BasicIncludes.h"
 					>
 				</File>
@@ -253,6 +259,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\GeometryMaker.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Light.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\Matrix.h"
 					>
 				</File>
@@ -277,7 +291,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Orientation.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\Point.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\ResourceManager.h"
 					>
 				</File>
 				<File
@@ -342,6 +364,10 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\FBOManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\GeometryMaker.cpp"
 					>
 				</File>
 				<File
@@ -513,6 +539,10 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\GameView\BallSafetyNetMesh.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CgFxCelShading.h"
 					>
 				</File>
@@ -593,6 +623,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\LivesLeftHUD.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\LoadingScreen.h"
 					>
 				</File>
@@ -608,6 +642,10 @@
 			<Filter
 				Name="Source Files"
 				>
+				<File
+					RelativePath=".\GameView\BallSafetyNetMesh.cpp"
+					>
+				</File>
 				<File
 					RelativePath=".\GameView\CgFxCelShading.cpp"
 					>
@@ -685,6 +723,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\LivesLeftHUD.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\LoadingScreen.cpp"
 					>
 				</File>
@@ -713,11 +755,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\BallSafetyNetItem.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\BallSizeItem.h"
 					>
 				</File>
 				<File
 					RelativePath=".\GameModel\BallSpeedItem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BlackoutItem.h"
 					>
 				</File>
 				<File
@@ -785,6 +835,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\GameTransformMgr.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\GameWorld.h"
 					>
 				</File>
@@ -806,6 +860,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\MultiBallItem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\OneUpItem.h"
 					>
 				</File>
 				<File
@@ -836,6 +894,10 @@
 					RelativePath=".\GameModel\UberBallItem.h"
 					>
 				</File>
+				<File
+					RelativePath=".\GameModel\UpsideDownItem.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
@@ -849,11 +911,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\BallSafetyNetItem.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\BallSizeItem.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\GameModel\BallSpeedItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\BlackoutItem.cpp"
 					>
 				</File>
 				<File
@@ -909,6 +979,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\GameTransformMgr.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\GameWorld.cpp"
 					>
 				</File>
@@ -933,6 +1007,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\OneUpItem.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\Onomatoplex.cpp"
 					>
 				</File>
@@ -949,6 +1027,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\ResourceManager.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\SolidBlock.cpp"
 					>
 				</File>
@@ -958,6 +1040,162 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\UberBallItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\UpsideDownItem.cpp"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="physfs"
+			>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath=".\include\physfs\physfs.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\physfs\physfs_casefolding.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\physfs\physfs_internal.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\physfs\physfs_platforms.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath=".\include\physfs\dir.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\physfs\physfs.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\physfs\physfs_byteorder.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\physfs\physfs_unicode.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\physfs\windows.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\physfs\zip.c"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="zlib"
+			>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath=".\include\zlib\adler32.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\compress.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\crc32.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\deflate.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\gzio.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\infback.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\inffast.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\inflate.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\inftrees.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\trees.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\uncompr.c"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\zutil.c"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath=".\include\zlib\crc32.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\deflate.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\inffast.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\inffixed.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\inflate.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\inftrees.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\trees.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\zconf.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\zlib.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\zlib\zutil.h"
 					>
 				</File>
 			</Filter>

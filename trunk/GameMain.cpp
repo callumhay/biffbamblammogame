@@ -1,4 +1,5 @@
-#include "BlammoEngine/BlammoEngine.h"
+#include "BlammoEngine/GeometryMaker.h"
+#include "BlammoEngine/ResourceManager.h"
 
 #include "GameView/GameDisplay.h"
 #include "GameView/GameViewConstants.h"
@@ -14,7 +15,8 @@
 
 // Initialization Constants for the application
 static const char* WINDOW_TITLE		= "Biff! Bam!! Blammo!?!";
-static const char* ICON_FILEPATH  = "resources/icons/BiffBamBlammoIcon.bmp"; 
+static const char* ICON_FILEPATH  = "resources/icons/BiffBamBlammoIcon.bmp";
+static const std::string RESOURCE_ZIP = "BBBResources.zip";
 static const int INIT_WIDTH = 1024;
 static const int INIT_HEIGHT = 768;
 
@@ -128,8 +130,11 @@ int main(int argc, char *argv[]) {
 	// Memory dump debug info for detecting and finding memory leaks
 #ifdef _DEBUG
 	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(37316);
+	//_CrtSetBreakAlloc(388);
 #endif
+
+	// Establish the resource manager
+	ResourceManager::InitResourceManager(RESOURCE_ZIP, argv[0]);
 
 	// Setup the SDL window
 	if (!InitSDLWindow()) {
@@ -145,7 +150,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "Error loading extensions: " << glewGetErrorString(err) << std::endl;
 		return -1;
 	}
-	
+
 	// TODO: VSync: option for this?
 	BlammoTime::SetVSync(0);
 
@@ -197,7 +202,6 @@ int main(int argc, char *argv[]) {
 	// Clear up singletons
 	Onomatoplex::Generator::DeleteInstance();
 	GameEventManager::DeleteInstance();
-	CgShaderManager::DeleteInstance();
 	FBOManager::DeleteInstance();
 	GameModelConstants::DeleteInstance();
 	GameViewConstants::DeleteInstance();
@@ -205,8 +209,13 @@ int main(int argc, char *argv[]) {
 	Randomizer::DeleteInstance();
 	LoadingScreen::DeleteInstance();
 	Noise::DeleteInstance();
+	GeometryMaker::DeleteInstance();
 
 	SDL_Quit();
+
+	// Clean up all file and shader resources, ORDER MATTERS HERE!
+	ResourceManager::DeleteInstance();
+	CgShaderManager::DeleteInstance();
 
 	return 0;
 }
