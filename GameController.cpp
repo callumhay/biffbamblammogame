@@ -11,6 +11,10 @@
 #include "GameModel/MultiBallItem.h"
 #include "GameModel/PaddleSizeItem.h"
 #include "GameModel/BallSizeItem.h"
+#include "GameModel/BlackoutItem.h"
+#include "GameModel/UpsideDownItem.h"
+#include "GameModel/BallSafetyNetItem.h"
+#include "GameModel/OneUpItem.h"
 
 #include "BlammoEngine/BlammoEngine.h"
 #include "BlammoEngine/Camera.h"
@@ -68,12 +72,28 @@ void GameController::KeyDown(SDLKey key) {
 	else if (key == SDLK_m) {
 		this->model->DropItem(BallSizeItem::BALL_SHRINK_ITEM_NAME);
 	}
+	else if (key == SDLK_0) {
+		this->model->DropItem(BlackoutItem::BLACKOUT_ITEM_NAME);
+	}
+	else if (key == SDLK_f) {
+		this->model->DropItem(UpsideDownItem::UPSIDEDOWN_ITEM_NAME);
+	}
+	else if (key == SDLK_n) {
+		this->model->DropItem(BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME);
+	}
+	else if (key == SDLK_1) {
+		this->model->DropItem(OneUpItem::ONE_UP_ITEM_NAME);
+	}
 	else if (key == SDLK_p) {
 		this->model->TogglePauseGame();
 	}
 	else if (key == SDLK_w) {
-		this->display->ToggleDrawDebugGeometry();
+		GameDisplay::ToggleDrawDebugBounds();
 	}
+	else if (key == SDLK_e) {
+		GameDisplay::ToggleDrawDebugLightGeometry();
+	}
+
 	//else if (key == SDLK_0) {
 		// Toggle multisampling
 	//	FBOManager::GetInstance()->SetAllowMultisamplingFBO(!FBOManager::GetInstance()->GetAllowMultisamplingFBO());
@@ -94,11 +114,12 @@ void GameController::KeyUp(SDLKey key) {
 void GameController::Tick() {
 
 	// Paddle controls (NOTE: the else is to make the feedback slicker)
+	int paddleDir = this->model->AreControlsFlipped() ? 1 : -1;
 	if (this->keyPressed[SDLK_LEFT]) {
-		this->model->MovePaddle(-this->model->GetPlayerPaddle()->GetSpeed());
+		this->model->MovePaddle(paddleDir * this->model->GetPlayerPaddle()->GetSpeed());
 	}
 	else if (this->keyPressed[SDLK_RIGHT]) {
-		this->model->MovePaddle(this->model->GetPlayerPaddle()->GetSpeed());
+		this->model->MovePaddle(-paddleDir * this->model->GetPlayerPaddle()->GetSpeed());
 	}
 
 	// Debug movement controls
