@@ -73,7 +73,7 @@ bool TextureCube::LoadCubeTextureFromImgs(const std::string filepaths[NUM_CUBE_F
 	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
+	glBindTexture(this->textureType, 0);
 	return true;
 }
 

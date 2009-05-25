@@ -2,6 +2,7 @@
 #define __GEOMETRYMAKER_H__
 
 #include "BasicIncludes.h"
+#include "Camera.h"
 
 /**
  * Singleton class for creating pre-made geometry (e.g., quad,
@@ -46,5 +47,34 @@ public:
 	// Draw a basic unit cube
 	inline void DrawCube() const { glCallList(this->cubeDL); }
 
+	inline void DrawFullScreenQuad(int width, int height, float depth = 0.0f) {
+		glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_TRANSFORM_BIT);
+		Camera::PushWindowCoords();
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glPolygonMode(GL_FRONT, GL_FILL);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_ALWAYS);
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glBegin(GL_QUADS);
+				glTexCoord2i(0, 0); glVertex3f(0, 0, depth);
+				glTexCoord2i(1, 0); glVertex3f(width, 0, depth);
+				glTexCoord2i(1, 1); glVertex3f(width, height, depth);
+				glTexCoord2i(0, 1); glVertex3f(0, height, depth);
+		glEnd();
+
+		glPopMatrix();
+
+		Camera::PopWindowCoords();
+		glPopAttrib();
+
+		debug_opengl_state();
+	};
 };
 #endif

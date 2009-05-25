@@ -27,6 +27,7 @@ public:
 
 	inline Colour GetAmbientColour() const { return this->ambientColour; }
 	inline Colour GetDiffuseColour() const { return this->diffuseColour; }
+	inline Colour* GetDiffuseColourPtr() { return &this->diffuseColour; }  
 	inline Point3D GetPosition() const { return this->position; }
 	inline float GetLinearAttenuation() const { return this->linearAttenuation; }
 	

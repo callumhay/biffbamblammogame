@@ -5,14 +5,13 @@
 #include "Colour.h"
 #include "Point.h"
 #include "Light.h"
-#include "ResourceManager.h"
-
+#include "Camera.h"
 #include "Texture2D.h"
 
-#include <list>
+#include "../ResourceManager.h"
 
-class Camera;
 class PolygonGroup;
+class FBObj;
 
 /**
  * Holds all of the possible material properties in every type of material,
@@ -23,7 +22,7 @@ struct MaterialProperties {
 	
 	// Material types
 	static const std::string MATERIAL_CELBASIC_TYPE;
-	static const std::string MATERIAL_CELPHONG_TYPE;
+	static const std::string MATERIAL_PHONG_TYPE;
 
 	// Geometry types
 	static const std::string MATERIAL_GEOM_FG_TYPE;
@@ -49,7 +48,41 @@ struct MaterialProperties {
 };
 
 /**
- * Base superclass for all CgFX effects.
+ * Superclass for post-processing CgFX effects.
+ */
+class CgFxPostProcessingEffect {
+
+protected:
+	// The Cg Effect pointer
+	CGeffect cgEffect;
+
+	// The current technique and a set of all techniques for this effect
+	CGtechnique currTechnique;
+	std::map<std::string, CGtechnique> techniques;
+
+	// Pointer to the scene FBO - this must be passed to the effect
+	FBObj* sceneFBO;
+
+public:
+	CgFxPostProcessingEffect(const std::string& effectPath, FBObj* sceneFBO) : sceneFBO(sceneFBO) {
+		assert(sceneFBO != NULL);
+		// Load the effect and its techniques from file
+		ResourceManager::GetInstance()->GetCgFxEffectResource(effectPath, this->cgEffect, this->techniques);
+		assert(this->cgEffect != NULL);
+		assert(this->techniques.size() > 0);
+	}
+
+	virtual ~CgFxPostProcessingEffect() {
+		// Release the effect resource
+		bool success = ResourceManager::GetInstance()->ReleaseCgFxEffectResource(this->cgEffect);
+		assert(success);
+	}
+
+	virtual void Draw(int screenWidth, int screenHeight) = 0;
+};
+
+/**
+ * Superclass for most CgFX effects.
  */
 class CgFxEffectBase {
 
@@ -58,12 +91,12 @@ private:
 	 * Draw the given display list in the given pass using
 	 * the Cg runtime.
 	 */
-	void DrawPass(CGpass pass, GLuint displayListID) {
+	static void DrawPass(CGpass pass, GLuint displayListID) {
 		cgSetPassState(pass);
 		glCallList(displayListID);
 		cgResetPassState(pass);
 	}
-	void DrawPass(CGpass pass, const std::list<GLuint> &displayListIDs) {
+	static void DrawPass(CGpass pass, const std::list<GLuint> &displayListIDs) {
 		cgSetPassState(pass);
 		for (std::list<GLuint>::const_iterator iter = displayListIDs.begin(); iter != displayListIDs.end(); iter++) {
 			glCallList(*iter);

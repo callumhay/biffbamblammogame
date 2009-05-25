@@ -1,7 +1,8 @@
 #include "ObjReader.h"
-#include "ResourceManager.h"
 #include "Mesh.h"
 #include "CgFxEffect.h"
+
+#include "../ResourceManager.h"
 
 const std::string ObjReader::OBJ_EXTENSION = "obj";
 const std::string ObjReader::MTL_EXTENSION = "mtl";

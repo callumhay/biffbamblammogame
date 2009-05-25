@@ -99,23 +99,18 @@ void TextureFontSet::Print(const std::string& s) const {
  * Creates a Texture font set from a given true type 
  * font file given as its filepath on disk. This function also requires
  * the height of the font in pixels - this will restrict the size of the font.
- * Returns: A new TextureFontSet of the particular font if all goes well, otherwise it will
- * return NULL.
+ * Returns: A mapping of the given heights to texture sets - returns empty map on error.
  */
-TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfFilepath, unsigned int heightInPixels) {
+std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfFilepath, const std::vector<unsigned int>& heightsInPixels) {
 	
-	TextureFontSet* newFontSet = new TextureFontSet();
-	newFontSet->heightInPixels = heightInPixels;
-	
+	std::map<unsigned int, TextureFontSet*> newFontSets;
+
 	// Create And Initilize A FreeType Font Library.
 	FT_Library library;
 	if (FT_Init_FreeType(&library)) {
 		debug_output("Could not initialize a freetype font library!");
-		
 		FT_Done_FreeType(library);
-
-		delete newFontSet;
-		return NULL;
+		return newFontSets;
 	}
 
 	// A Face Holds Information On A Given Font
@@ -126,24 +121,119 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 	// As FT_New_Face Will Fail If The Font File Does Not Exist Or Is Somehow Broken.
 	if (FT_New_Face(library, ttfFilepath.c_str(), 0, &face)) {
 		debug_output("FT_New_Face failed - there is probably a problem with the font file: " << ttfFilepath);
-	
 		FT_Done_Face(face);
 		FT_Done_FreeType(library);
-		
-		delete newFontSet;
-		return NULL;
+		return newFontSets;
 	}
+
+	// Go through each height and load that font
+	for (unsigned int i = 0; i < heightsInPixels.size(); i++) {
+		TextureFontSet* newFontSet = new TextureFontSet();
+		unsigned int currHeight = heightsInPixels[i];
+		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight);
+		
+		assert(newFontSet != NULL);
+		assert(newFontSets.find(currHeight) == newFontSets.end());
+		newFontSets[currHeight] = newFontSet;
+	}
+
+	// Clean-up the ttf library stuff
+	FT_Done_Face(face);
+	FT_Done_FreeType(library);
+
+	// Check to make sure creation went well
+	assert(newFontSets.size() == heightsInPixels.size());
+
+	return newFontSets;
+}
+
+/**
+ * Creates a Texture font set from a given true type font file handle given. This function also requires
+ * the height of the font in pixels - this will restrict the size of the font.
+ * Returns: A new TextureFontSet of the particular font if all goes well, otherwise it will
+ * return NULL.
+ */
+std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF(PHYSFS_File* fileHandle, const std::vector<unsigned int>& heightsInPixels) {
+	std::map<unsigned int, TextureFontSet*> newFontSets;
+
+	// Grab the in-memory buffer for the file from the physfs filehandle
+	PHYSFS_sint64 fileLength = PHYSFS_fileLength(fileHandle);
+	unsigned char* fileBuffer = new unsigned char[fileLength];
+	
+	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(unsigned char), fileLength);
+	if (readResult == NULL) {
+		delete[] fileBuffer;
+		fileBuffer = NULL;
+		debug_output("Error reading font file to bytes.");
+		assert(false);
+		return newFontSets;
+	}
+
+	// Create And Initilize A FreeType Font Library.
+	FT_Library library;
+	if (FT_Init_FreeType(&library)) {
+		debug_output("Could not initialize a freetype font library!");
+		FT_Done_FreeType(library);
+		delete[] fileBuffer;
+		fileBuffer = NULL;
+		return newFontSets;
+	}
+
+	// A Face Holds Information On A Given Font
+	FT_Face face;
+
+	// This Is Where We Load In The Font Information From The File.
+	// Of All The Places Where The Code Might Die, This Is The Most Likely,
+	// As FT_New_Face Will Fail If The Font File Does Not Exist Or Is Somehow Broken.
+	if (FT_New_Memory_Face(library, fileBuffer, fileLength, 0, &face)) {
+		debug_output("FT_New_Face failed - there is probably a problem with the physfs font.");
+		FT_Done_Face(face);
+		FT_Done_FreeType(library);
+		delete[] fileBuffer;
+		fileBuffer = NULL;
+		return newFontSets;
+	}
+
+	// Go through each height and load that font
+	for (unsigned int i = 0; i < heightsInPixels.size(); i++) {
+		TextureFontSet* newFontSet = new TextureFontSet();
+		unsigned int currHeight = heightsInPixels[i];
+		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight);
+		
+		assert(newFontSet != NULL);
+		assert(newFontSets.find(currHeight) == newFontSets.end());
+		newFontSets[currHeight] = newFontSet;
+	}
+
+	delete[] fileBuffer;
+	fileBuffer = NULL;
+
+	// Clean-up the ttf library stuff
+	FT_Done_Face(face);
+	FT_Done_FreeType(library);
+
+	// Check to make sure creation went well
+	assert(newFontSets.size() == heightsInPixels.size());
+
+	return newFontSets;
+}
+
+/**
+ * Private helper function for reading a font from a library already setup.
+ * Returns: A new TextureFontSet of the particular font if all goes well, otherwise it will
+ * return NULL.
+ */
+void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library, FT_Face face, unsigned int heightInPixels) {
+	assert(library != NULL);
+	assert(face != NULL);
+
+	newFontSet->heightInPixels = heightInPixels;
 
 	// FreeType Measures Font Size In Terms Of 1/64ths Of Pixels.  
 	// Thus, To Make A Font h Pixels High, We Need To Request A Size Of h*64.
 	if (FT_Set_Char_Size(face, heightInPixels << 6, heightInPixels << 6, 96, 96)) {
-		debug_output("FT_Set_Char_Size failed - there is probably a problem with the font file: " << ttfFilepath);
-
-		FT_Done_Face(face);
-		FT_Done_FreeType(library);
-		
-		delete newFontSet;
-		return NULL;	
+		debug_output("FT_Set_Char_Size failed - there is probably a problem with the font file.");
+		return;	
 	}
 	
 	// Create the font set by making the texture and display list for
@@ -154,25 +244,16 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 		// Render the current character into a bitmap
 		// Load the glyph for the character
 		if(FT_Load_Glyph(face, FT_Get_Char_Index(face, i), FT_LOAD_DEFAULT )) {
-			debug_output("Could not load the glyph for character: " << i << " in font set file: " << ttfFilepath);
-			delete newFontSet;
-
-			return NULL;
+			debug_output("Could not load the glyph for character: " << i << " in font set file.");
+			return;
 		}
 		
 		// Move The Face's Glyph Into A Glyph Object.
 		FT_Glyph glyph;
 		if (FT_Get_Glyph(face->glyph, &glyph)) {
-			debug_output("Could not get glyph for character: " << i << " in font set file: " << ttfFilepath);
-			
+			debug_output("Could not get glyph for character: " << i << " in font set file.");
 			FT_Done_Glyph(glyph);
-			FT_Done_Face(face);
-			FT_Done_FreeType(library);
-
-			delete newFontSet;
-			newFontSet = NULL;
-			
-			return NULL;			
+			return;			
 		}
 
 		// Convert The Glyph To A Bitmap.
@@ -186,16 +267,9 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 		Texture2D* newCharTexture = Texture2D::CreateTexture2DFromFTBMP(bitmap, Texture::Trilinear);
 
 		if (newCharTexture == NULL) {
-			debug_output("Could not create texture from bitmap for character: " << i << " in font set file: " << ttfFilepath);
-			
+			debug_output("Could not create texture from bitmap for character: " << i << " in font set file.");
 			FT_Done_Glyph(glyph);
-			FT_Done_Face(face);
-			FT_Done_FreeType(library);
-
-			delete newFontSet;
-			newFontSet = NULL;
-
-			return NULL;
+			return;
 		}
 		newFontSet->charTextures.push_back(newCharTexture);
 
@@ -250,10 +324,5 @@ TextureFontSet* TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfF
 	}
 	glPopMatrix();
 
-	// Clean up
-	FT_Done_Face(face);
-	FT_Done_FreeType(library);
-
 	assert(newFontSet->charDispLists.size() == newFontSet->charTextures.size());
-	return newFontSet;
 }

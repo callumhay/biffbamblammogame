@@ -6,7 +6,7 @@
 
 // Define essential math constants
 #ifndef M_PI
-#define M_PI 3.14159265358979323846f
+#define M_PI 3.14159265358979323846
 #endif
 
 #ifndef M_PI_DIV2
@@ -17,9 +17,10 @@
 #define M_PI_MULT2 M_PI * 2.0f
 #endif
 
+#define SQRT_2 1.4142135623730950488
 
 // Epsilon value for doing equivalence operations and the like
-#define EPSILON 0.0000001f
+#define EPSILON 0.000001f
 
 // Trigonometry namespace for functions that are nice to have
 // for basic conversions and trigonometric math stuffs

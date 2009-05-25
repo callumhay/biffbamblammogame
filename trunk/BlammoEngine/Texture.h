@@ -43,6 +43,10 @@ public:
 		return this->height;
 	}
 
+	TextureFilterType GetFilter() const {
+		return this->texFilter;
+	}
+
 	// Functions for binding and unbinding the texture - these should
 	// ALWAYS be used over manually doing it - both
 	// help isolate problems with the OGL state

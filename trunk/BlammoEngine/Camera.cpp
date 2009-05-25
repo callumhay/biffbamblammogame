@@ -1,8 +1,8 @@
 #include "Camera.h"
 
-const float Camera::FOV_ANGLE_IN_DEGS	= 45.0f;
+const float Camera::FOV_ANGLE_IN_DEGS	= 50.0f;
 const float Camera::NEAR_PLANE_DIST		= 0.01f;
-const float Camera::FAR_PLANE_DIST		= 250.0f;
+const float Camera::FAR_PLANE_DIST		= 300.0f;
 
 const Vector3D Camera::DEFAULT_FORWARD_VEC	= Vector3D(0, 0, -1);
 const Vector3D Camera::DEFAULT_LEFT_VEC			= Vector3D(-1, 0, 0);

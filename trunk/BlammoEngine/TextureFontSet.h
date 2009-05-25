@@ -24,6 +24,8 @@ private:
 	std::vector<Texture2D*> charTextures;				// Holds each character as a texture
 	std::vector<unsigned int> charDispLists;		// Holds display list IDs for each character
 
+	static void CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library, FT_Face face, unsigned int heightInPixels);
+
 public:
 	~TextureFontSet();
 	float OrthoPrint(const Point2D& topLeftCorner, const std::string& s) const;
@@ -36,7 +38,7 @@ public:
 	}
 
 	// Creator Functions
-	static TextureFontSet* CreateTextureFontFromTTF(const std::string& ttfFilepath, 
-																								  unsigned int heightInPixels);
+	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromTTF(PHYSFS_File* fileHandle, const std::vector<unsigned int>& heightsInPixels);
+	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromTTF(const std::string& ttfFilepath, const std::vector<unsigned int>& heightsInPixels);
 };
 #endif

@@ -93,6 +93,11 @@ public:
 	Point3D getTranslation() const {
 		return Point3D(v_[12], v_[13], v_[14]);
 	}
+	void setTranslation(const Point3D& t) {
+		v_[12] = t[0];
+		v_[13] = t[1]; 
+		v_[14] = t[2];
+	}
 
   float& operator[](size_t idx) {
 		assert(idx < 16);
