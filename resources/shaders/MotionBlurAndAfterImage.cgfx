@@ -1,0 +1,35 @@
+float BlurStrength <
+    string UIWidget = "slider";
+    float UIMin = 0.01;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "Weight";
+> = 0.2f;
+
+texture CurrFrameTex <
+    string ResourceName = "lasers.jpg";
+    string UIName = "Scene Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D CurrFrameSampler = sampler_state {
+	Texture = <CurrFrameTex>;	
+	WrapS = Clamp;
+	WrapT = Clamp;
+};
+
+float4 afterimage_PS(float2 UV : TEXCOORD0) : COLOR {
+	float4 finalColour;
+	
+	finalColour.rgb = tex2D(CurrFrameSampler, UV).rgb;
+	finalColour.a = BlurStrength;
+	return finalColour;
+}
+
+technique AfterImage {
+    pass p0 {
+		BlendEnable = true;
+		BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+    	FragmentProgram = compile arbfp1 afterimage_PS();
+    }
+}
