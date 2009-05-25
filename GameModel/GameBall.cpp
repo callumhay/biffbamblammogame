@@ -1,5 +1,4 @@
 #include "GameBall.h"
-#include "../BlammoEngine/BlammoEngine.h"
 
 // Default radius of the ball - for defining its boundries
 const float GameBall::DEFAULT_BALL_RADIUS = 0.5f;

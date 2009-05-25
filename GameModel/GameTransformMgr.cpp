@@ -1,7 +1,7 @@
 #include "GameTransformMgr.h"
 
 // speed of level flip transform lerp in degrees per second
-const float GameTransformMgr::SECONDS_TO_FLIP	= 1.25f;	
+const float GameTransformMgr::SECONDS_TO_FLIP	= 1.0f;	
 
 GameTransformMgr::GameTransformMgr() : currGameDegRotX(0.0f), currGameDegRotY(0.0f), isFlipped(false) {
 }

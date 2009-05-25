@@ -6,8 +6,6 @@
 #include "GameItemFactory.h"
 #include "GameModelConstants.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 const float LevelPiece::PIECE_WIDTH = 2.5f;
 const float LevelPiece::PIECE_HEIGHT = 1.0f;
 const float LevelPiece::HALF_PIECE_WIDTH = PIECE_WIDTH / 2.0f;

@@ -1,10 +1,12 @@
 #ifndef __UPSIDEDOWNITEM_H__
 #define __UPSIDEDOWNITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameItem.h"
 #include "GameModel.h"
+
+class Point2D;
 
 /**
  * Power-down item responsible for turning the level upside down.

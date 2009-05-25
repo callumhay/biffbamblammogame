@@ -1,7 +1,7 @@
 #ifndef __PADDLESIZEITEM_H__
 #define __PADDLESIZEITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameItem.h"
 #include "GameModel.h"

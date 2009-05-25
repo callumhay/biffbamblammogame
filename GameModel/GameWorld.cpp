@@ -1,7 +1,7 @@
 #include "GameWorld.h"
 #include "GameLevel.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../ResourceManager.h"
 
 /* 
  * Constructor for GameWorld class, requires a list of level text/filenames
@@ -26,39 +26,46 @@ bool GameWorld::Load() {
 		this->Unload();
 	}
 
-	std::ifstream inFile;
-	inFile.open(this->worldFilepath.c_str());
-	
-	// Make sure the file opened properly
-	if (!inFile.is_open()) {
-		debug_output("ERROR: Could not open world file: " << this->worldFilepath); 
+	std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(this->worldFilepath);
+	if (inFile == NULL) {
+		assert(false);
+		this->Unload();
 		return false;
 	}
 
 	// Figure out the world style
 	std::string worldStyleStr;
-	if (!(inFile >> worldStyleStr)) {
-		debug_output("ERROR: Could not find world style in world file: " << this->worldFilepath); 
+	if (!(*inFile >> worldStyleStr)) {
+		debug_output("ERROR: Could not find world style in world file: " << this->worldFilepath);
+		delete inFile;
+		inFile = NULL;
 		return false;		
 	}
 
 	this->style = GameWorld::GetWorldStyleFromString(worldStyleStr);
 	if (this->style == None) {
-		debug_output("ERROR: 'None' is not a valid world style in world file: " << this->worldFilepath); 
+		debug_output("ERROR: 'None' is not a valid world style in world file: " << this->worldFilepath);
+		delete inFile;
+		inFile = NULL;
 		return false;	
 	}
 
 	// Read all the level file names
 	std::vector<std::string> levelFileList;
 	std::string currLvlFile;
-	while (inFile >> currLvlFile) {
+	while (*inFile >> currLvlFile) {
 		levelFileList.push_back(currLvlFile);
 	}
 
 	if (levelFileList.size() == 0) {
-		debug_output("ERROR: There must be at least one level defined in world file: " << this->worldFilepath); 
+		debug_output("ERROR: There must be at least one level defined in world file: " << this->worldFilepath);
+		delete inFile;
+		inFile = NULL;
 		return false;			
 	}
+
+	delete inFile;
+	inFile = NULL;
 
 	// Load each of the levels
 	for (size_t i = 0; i < levelFileList.size(); i++) {
@@ -71,6 +78,7 @@ bool GameWorld::Load() {
 		}
 		this->loadedLevels.push_back(lvl);
 	}
+
 
 	this->isLoaded = true;
 

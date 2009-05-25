@@ -1,8 +1,6 @@
 #include "GameItem.h"
 #include "GameModel.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 // Width and Height constants for items
 const float GameItem::ITEM_WIDTH	= 2.45f;
 const float GameItem::ITEM_HEIGHT	= 1.0f;

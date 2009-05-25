@@ -1,7 +1,7 @@
 #ifndef __GAMEMODEL_H__
 #define __GAMEMODEL_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameModelConstants.h"
 #include "LevelPiece.h"

@@ -1,9 +1,11 @@
 #ifndef __GHOSTBALLITEM_H__
 #define __GHOSTBALLITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameItem.h"
+
+class Point2D;
 
 class GhostBallItem : public GameItem {
 public:

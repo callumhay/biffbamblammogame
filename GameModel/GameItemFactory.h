@@ -1,7 +1,7 @@
 #ifndef __GAMEITEMFACTORY_H__
 #define __GAMEITEMFACTORY_H__
 
-#include <vector>
+#include "../BlammoEngine/BasicIncludes.h"
 
 class GameItem;
 class GameModel;
@@ -16,7 +16,7 @@ class Point2D;
 class GameItemFactory {
 
 private:
-	static const unsigned int TOTAL_NUM_OF_ITEMS = 16;
+	static const unsigned int TOTAL_NUM_OF_ITEMS = 17;
 	GameItemFactory() {};
 
 public:

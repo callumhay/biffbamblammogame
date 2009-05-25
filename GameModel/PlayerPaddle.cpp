@@ -4,8 +4,6 @@
 #include "GameModelConstants.h"
 #include "Projectile.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 // Default values for the size of the paddle
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
 const float PlayerPaddle::PADDLE_WIDTH_FLAT_TOP = 2.0f;

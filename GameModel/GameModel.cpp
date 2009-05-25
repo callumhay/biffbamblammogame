@@ -4,8 +4,6 @@
 #include "GameCompleteState.h"
 #include "GameOverState.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 GameModel::GameModel() : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), 
 currLivesLeft(0), gameIsPaused(false), isBlackoutActive(false), areControlsFlipped(false) {

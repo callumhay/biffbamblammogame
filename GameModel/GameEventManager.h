@@ -1,9 +1,17 @@
 #ifndef __GAMEEVENTMANAGER_H__
 #define __GAMEEVENTMANAGER_H__
 
-#include <list>
+#include "../BlammoEngine/BasicIncludes.h"
 
-#include "GameEvents.h"
+class GameEvents;
+class GameBall;
+class Point2D;
+class PlayerPaddle;
+class LevelPiece;
+class GameItem;
+class GameWorld;
+class GameLevel;
+class Projectile;
 
 /**
  * This class is intended to provide hooks for any view that wants to know

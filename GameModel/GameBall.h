@@ -1,7 +1,10 @@
 #ifndef __GAMEBALL_H__
 #define __GAMEBALL_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Vector.h"
+#include "../BlammoEngine/Point.h"
+#include "../BlammoEngine/Collision.h"
 
 class GameBall {
 
