@@ -15,9 +15,17 @@
 #include "GameModel/UpsideDownItem.h"
 #include "GameModel/BallSafetyNetItem.h"
 #include "GameModel/OneUpItem.h"
+#include "GameModel/PoisonPaddleItem.h"
 
-#include "BlammoEngine/BlammoEngine.h"
 #include "BlammoEngine/Camera.h"
+
+#ifdef _DEBUG
+// TODO: have seperated debug functionality
+	float GameController::DEBUG_highlightThreshold	= 0.5f;
+	float GameController::DEBUG_sceneIntensity			= 0.9f;
+	float GameController::DEBUG_glowIntensity				= 0.7f;
+	float GameController::DEBUG_highlightIntensity	= 0.65f;
+#endif
 
 GameController::GameController(GameModel* model, GameDisplay* display): model(model), display(display) {
 	for (int i = 0; i < NUM_KEYS; i++) {
@@ -93,6 +101,41 @@ void GameController::KeyDown(SDLKey key) {
 	else if (key == SDLK_e) {
 		GameDisplay::ToggleDrawDebugLightGeometry();
 	}
+	else if (key == SDLK_x) {
+		this->model->DropItem(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME);
+	}
+	//else if (key == SDLK_6) {
+	//	// Highlight threshold for bloom
+	//	DEBUG_highlightThreshold += 0.01f;
+	//}
+	//else if (key == SDLK_y) {
+	//	// Highlight threshold for bloom
+	//	DEBUG_highlightThreshold -= 0.01f;
+	//}
+	//else if (key == SDLK_7) {
+	//	// Scene Intensity for bloom
+	//	DEBUG_sceneIntensity += 0.01f;
+	//}
+	//else if (key == SDLK_u) {
+	//	// Scene Intensity for bloom
+	//	DEBUG_sceneIntensity -= 0.01f;
+	//}
+	//else if (key == SDLK_8) {
+	//	// Glow intensity for bloom
+	//	DEBUG_glowIntensity += 0.01f;
+	//}
+	//else if (key == SDLK_i) {
+	//	// Glow intensity for bloom
+	//	DEBUG_glowIntensity -= 0.01f;
+	//}
+	//else if (key == SDLK_9) {
+	//	// Highlight intensity for bloom
+	//	DEBUG_highlightIntensity += 0.01f;
+	//}
+	//else if (key == SDLK_o) {
+	//	// Highlight intensity for bloom
+	//	DEBUG_highlightIntensity -= 0.01f;
+	//}
 
 	//else if (key == SDLK_0) {
 		// Toggle multisampling
