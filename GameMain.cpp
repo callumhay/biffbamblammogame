@@ -1,5 +1,6 @@
+#include "BlammoEngine/FBObj.h"
+#include "BlammoEngine/Noise.h"
 #include "BlammoEngine/GeometryMaker.h"
-#include "BlammoEngine/ResourceManager.h"
 
 #include "GameView/GameDisplay.h"
 #include "GameView/GameViewConstants.h"
@@ -12,10 +13,11 @@
 #include "GameModel/Onomatoplex.h"
 
 #include "GameController.h"
+#include "ResourceManager.h"
 
 // Initialization Constants for the application
 static const char* WINDOW_TITLE		= "Biff! Bam!! Blammo!?!";
-static const char* ICON_FILEPATH  = "resources/icons/BiffBamBlammoIcon.bmp";
+static const char* ICON_FILEPATH  = "BiffBamBlammoIcon.bmp";
 static const std::string RESOURCE_ZIP = "BBBResources.zip";
 static const int INIT_WIDTH = 1024;
 static const int INIT_HEIGHT = 768;
@@ -202,7 +204,6 @@ int main(int argc, char *argv[]) {
 	// Clear up singletons
 	Onomatoplex::Generator::DeleteInstance();
 	GameEventManager::DeleteInstance();
-	FBOManager::DeleteInstance();
 	GameModelConstants::DeleteInstance();
 	GameViewConstants::DeleteInstance();
 	GameFontAssetsManager::DeleteInstance();
@@ -215,7 +216,6 @@ int main(int argc, char *argv[]) {
 
 	// Clean up all file and shader resources, ORDER MATTERS HERE!
 	ResourceManager::DeleteInstance();
-	CgShaderManager::DeleteInstance();
 
 	return 0;
 }

@@ -1,10 +1,12 @@
 #ifndef __BALLSIZEITEM_H__
 #define __BALLSIZEITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameItem.h"
 #include "GameModel.h"
+
+class Point2D;
 
 class BallSizeItem : public GameItem {
 public:

@@ -27,6 +27,14 @@ private:
 	}
 
 public:
+#ifdef _DEBUG
+	// TODO: seperate this to debug functionality...
+	static float DEBUG_highlightThreshold;
+	static float DEBUG_sceneIntensity;
+	static float DEBUG_glowIntensity;
+	static float DEBUG_highlightIntensity;
+#endif
+
 	GameController(GameModel* model, GameDisplay* display);
 	
 	void KeyDown(SDLKey key);
