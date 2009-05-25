@@ -22,6 +22,8 @@ class TextLabel2D;
  * Abstract base class representing an Emitter of particles.
  */
 class ESPEmitter {
+private:
+	void TickParticles(double dT);
 
 protected:			
 	Texture2D* particleTexture;		// Texture of particles in this emitter
@@ -53,8 +55,14 @@ protected:
 	ESPInterval particleRotation;
 	// Inclusive intervals for the colour of particles
 	ESPInterval particleRed, particleGreen, particleBlue, particleAlpha;
+	// Inclusive interval for how far from the emitPt this particle may spawn at
+	ESPInterval radiusDeviationFromPt;	
 
 	void Flush();
+
+	virtual Vector3D CalculateRandomInitParticleDir() const = 0;
+	virtual Point3D  CalculateRandomInitParticlePos() const = 0;
+	void ReviveParticle();
 
 public:
 	ESPEmitter();
@@ -87,18 +95,18 @@ public:
 	void SetNumParticleLives(int lives);
 	void SetIsReversed(bool isReversed);
 	void SetAsPointSpriteEmitter(bool isPointSprite);
+	void SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter);
 
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);
 	void AddParticle(ESPParticle* particle);
 
-
 	ESPInterval GetParticleSizeX() const { return this->particleSize[0]; }
 	ESPInterval GetParticleSizeY() const { return this->particleSize[1]; }
 
-	virtual void Tick(double dT) = 0;
-	virtual void Draw(const Camera& camera) = 0;
-	virtual void Reset();
+	void Tick(double dT);
+	void Draw(const Camera& camera, bool enableDepth = false);
+	void Reset();
 
 };
 #endif

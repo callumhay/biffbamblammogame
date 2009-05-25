@@ -10,11 +10,12 @@ public:
 	enum RotationDirection { CLOCKWISE = 1, COUNTER_CLOCKWISE = -1 };
 
 private:
+	float rotationSpd;
 	float startRot, numRots;
 	RotationDirection rotDir;
 
 public:
-	
+	ESPParticleRotateEffector(float rotationSpd, RotationDirection dir);
 	ESPParticleRotateEffector(float initialRotation, float numRotations, RotationDirection dir);
 	virtual ~ESPParticleRotateEffector(){}
 
