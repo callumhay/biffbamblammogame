@@ -6,8 +6,6 @@
 #include "GameItem.h"
 #include "GameItemFactory.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 BallInPlayState::BallInPlayState(GameModel* gm) : 
 GameState(gm), timeSinceGhost(DBL_MAX) {
 }
@@ -358,7 +356,8 @@ void BallInPlayState::DoItemCollision() {
 void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
 
 	// Position the ball so that it is against the collision line, exactly
-	if (fabs(d) > EPSILON) {
+	static const float QUARTER_PIECE_DIST = LevelPiece::HALF_PIECE_HEIGHT / 2.0f;
+	if (fabs(d) >= QUARTER_PIECE_DIST) {
 		int signDist = NumberFuncs::SignOf(d);
 		if (signDist == -1) {
 			// The ball is on the other side of the collision line, fix its position so that
