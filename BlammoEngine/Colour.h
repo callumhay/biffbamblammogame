@@ -114,6 +114,13 @@ inline Colour operator -(const Colour& a, const Colour& b) {
   return Colour(a.R()-b.R(), a.G()-b.G(), a.B()-b.B());
 };
 
+inline bool operator ==(const Colour& a, const Colour& b) {
+	return (abs(a.R() - b.R()) < EPSILON) && (abs(a.G() - b.G()) < EPSILON) && (abs(a.B() - b.B()) < EPSILON);
+};
+inline bool operator !=(const Colour& a, const Colour& b) {
+	return !(a == b);
+};
+
 inline std::ostream& operator <<(std::ostream& os, const Colour& c) {
   return os << "c<" << c.R() << "," << c.G() << "," << c.B() << ">";
 };

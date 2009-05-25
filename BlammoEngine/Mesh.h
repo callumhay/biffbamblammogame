@@ -62,9 +62,12 @@ public:
 	~MaterialGroup() {
 		if (this->polyGrp != NULL) {
 			delete this->polyGrp;
+			this->polyGrp = NULL;
 		}
 
 		delete this->material;
+		this->material = NULL;
+
 		glDeleteLists(this->displayListID, 1);
 		this->displayListID = 0;
 	}

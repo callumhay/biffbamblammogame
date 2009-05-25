@@ -36,7 +36,7 @@ Texture3D* Texture3D::Create3DNoiseTexture(int size) {
 	glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
 	Texture::SetFilteringParams(Linear, newTex->textureType);
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, size, size, size, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
-	
+	newTex->UnbindTexture();
 	glPopAttrib();
 	delete[] texData;
 

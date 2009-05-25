@@ -92,6 +92,7 @@ bool Texture::Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilte
 	
 	// Set texture filtering
 	Texture::SetFilteringParams(texFilter, this->textureType);
+	glBindTexture(this->textureType, 0);
 
 	ilDeleteImage(imageID);
 	
@@ -175,6 +176,7 @@ bool Texture::Load2DOr1DTextureFromImg(PHYSFS_File* fileHandle, TextureFilterTyp
 	
 	// Set texture filtering
 	Texture::SetFilteringParams(texFilter, this->textureType);
+	glBindTexture(this->textureType, 0);
 
 	ilDeleteImage(imageID);
 	

@@ -1,7 +1,7 @@
 #include "Texture2D.h"
 #include "Camera.h"
-#include "FBOManager.h"
-
+#include "FBObj.h"
+#include "GeometryMaker.h"
 #include "Algebra.h"
 
 
@@ -16,51 +16,19 @@ Texture2D::~Texture2D() {
 /**
  * Renders this texture to a full screen quad in the viewport.
  */
-void Texture2D::RenderTextureToFullscreenQuad() {
-
-	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | 
-							 GL_TRANSFORM_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-	Camera::PushWindowCoords();
-
-	glDepthMask(GL_FALSE);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_BLEND);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
-	glPolygonMode(GL_FRONT, GL_FILL);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
+void Texture2D::RenderTextureToFullscreenQuad(float depth) const {
 	// Draw the full screen quad
 	this->BindTexture();
-
-	// Set the appropriate parameters for rendering the single fullscreen quad
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glBegin(GL_QUADS);
-			glTexCoord2i(0, 0); glVertex2i(0, 0);
-			glTexCoord2i(1, 0); glVertex2i(this->width, 0);
-			glTexCoord2i(1, 1); glVertex2i(this->width, this->height);
-			glTexCoord2i(0, 1); glVertex2i(0, this->height);
-	glEnd();
+	GeometryMaker::GetInstance()->DrawFullScreenQuad(this->width, this->height, depth);
 	this->UnbindTexture();
-
-	glDepthMask(GL_TRUE);
-	glPopMatrix();
-	glPopAttrib();
-	Camera::PopWindowCoords();
-	
 	debug_opengl_state();
 }
 
-Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height) {
+Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height, Texture::TextureFilterType filter) {
 
 
 	// First check to see that rectangular textures are supported
-	int textureType = GL_TEXTURE_2D;
+	int textureType = GL_TEXTURE_2D;//
 		/*
 	if (glewGetExtension("GL_EXT_texture_rectangle") == GL_TRUE) {
 		textureType = GL_TEXTURE_RECTANGLE_EXT;
@@ -72,9 +40,8 @@ Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height) {
 		return NULL;
 	}
 */
-	
-	Texture2D* newTex = new Texture2D(Texture::Linear);
-	glDisable(GL_TEXTURE_2D);
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
+	Texture2D* newTex = new Texture2D(filter);
 	newTex->textureType = textureType;
 	
 	glEnable(newTex->textureType);
@@ -87,18 +54,14 @@ Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height) {
 	newTex->width  = width;
 	newTex->height = height;
 	
-	glPushAttrib(GL_TEXTURE_BIT);
 	newTex->BindTexture();
-
 	glTexImage2D(newTex->textureType, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
 	Texture::SetFilteringParams(newTex->texFilter, newTex->textureType);
 	
-	glTexParameteri(newTex->textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(newTex->textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(newTex->textureType, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(newTex->textureType, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
+	// If it's mipmapped then we should generate the mipmaps
+	if (Texture::IsMipmappedFilter(newTex->texFilter)) {
+		glGenerateMipmapEXT(newTex->textureType);
+	}
 	newTex->UnbindTexture();
 
 	glPopAttrib();
@@ -112,7 +75,7 @@ Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height) {
  * Returns: 2D Texture with given image, NULL otherwise.
  */
 Texture2D* Texture2D::CreateTexture2DFromImgFile(const std::string& filepath, TextureFilterType texFilter) {
-	glPushAttrib(GL_TEXTURE_BIT);
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
 	
 	Texture2D* newTex = new Texture2D(texFilter);
 	if (!newTex->Load2DOr1DTextureFromImg(filepath, texFilter)) {
@@ -121,6 +84,8 @@ Texture2D* Texture2D::CreateTexture2DFromImgFile(const std::string& filepath, Te
 	}
 
 	glPopAttrib();
+	debug_opengl_state();
+
 	return newTex;
 }
 /**
@@ -129,7 +94,7 @@ Texture2D* Texture2D::CreateTexture2DFromImgFile(const std::string& filepath, Te
  * Returns: 2D Texture with given image, NULL otherwise.
  */
 Texture2D* Texture2D::CreateTexture2DFromImgFile(PHYSFS_File* fileHandle, TextureFilterType texFilter) {
-	glPushAttrib(GL_TEXTURE_BIT);
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
 	
 	Texture2D* newTex = new Texture2D(texFilter);
 	if (!newTex->Load2DOr1DTextureFromImg(fileHandle, texFilter)) {
@@ -138,6 +103,8 @@ Texture2D* Texture2D::CreateTexture2DFromImgFile(PHYSFS_File* fileHandle, Textur
 	}
 
 	glPopAttrib();
+	debug_opengl_state();
+
 	return newTex;
 }
 
@@ -195,6 +162,7 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilt
 	}
 
 	Texture::SetFilteringParams(texFilter, newTex->textureType);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopAttrib();
 
 	delete[] expandedData;

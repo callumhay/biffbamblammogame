@@ -91,7 +91,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BBBResources.zip $(OutDir)"
+				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BBBResources.zip $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BiffBamBlammoIcon.bmp $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -173,41 +173,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BBBResources.zip $(OutDir)"
+				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BBBResources.zip $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BiffBamBlammoIcon.bmp $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-			>
-			<File
-				RelativePath=".\GameController.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameMain.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath=".\GameController.h"
-				>
-			</File>
-			<File
-				RelativePath=".\resource.h"
-				>
-			</File>
-		</Filter>
 		<Filter
 			Name="BlammoEngine"
 			>
@@ -227,10 +199,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\BlammoEngine.h"
-					>
-				</File>
-				<File
 					RelativePath=".\BlammoEngine\BlammoTime.h"
 					>
 				</File>
@@ -243,10 +211,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\CgShaderManager.h"
-					>
-				</File>
-				<File
 					RelativePath=".\BlammoEngine\Collision.h"
 					>
 				</File>
@@ -255,7 +219,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\FBOManager.h"
+					RelativePath=".\BlammoEngine\FBObj.h"
 					>
 				</File>
 				<File
@@ -296,10 +260,6 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\Point.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\ResourceManager.h"
 					>
 				</File>
 				<File
@@ -359,11 +319,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\CgShaderManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\FBOManager.cpp"
+					RelativePath=".\BlammoEngine\FBObj.cpp"
 					>
 				</File>
 				<File
@@ -486,6 +442,10 @@
 					RelativePath=".\ESPEngine\ESPUtil.h"
 					>
 				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPVolumeEmitter.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
@@ -530,6 +490,10 @@
 					RelativePath=".\ESPEngine\ESPUtil.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPVolumeEmitter.cpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -543,11 +507,27 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\CgFxAfterImage.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxBloom.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CgFxCelShading.h"
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CgFxOutlinedPhong.h"
+					RelativePath=".\GameView\CgFxDecoSkybox.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxGaussianBlur.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxPhong.h"
 					>
 				</File>
 				<File
@@ -588,6 +568,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\GameEventsListener.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameFBOAssets.h"
 					>
 				</File>
 				<File
@@ -647,11 +631,27 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\CgFxAfterImage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxBloom.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CgFxCelShading.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CgFxOutlinedPhong.cpp"
+					RelativePath=".\GameView\CgFxDecoSkybox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxGaussianBlur.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxPhong.cpp"
 					>
 				</File>
 				<File
@@ -688,6 +688,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\GameEventsListener.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameFBOAssets.cpp"
 					>
 				</File>
 				<File
@@ -879,6 +883,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\PoisonPaddleItem.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\Projectile.h"
 					>
 				</File>
@@ -1023,11 +1031,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\Projectile.cpp"
+					RelativePath=".\GameModel\PoisonPaddleItem.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\ResourceManager.cpp"
+					RelativePath=".\GameModel\Projectile.cpp"
 					>
 				</File>
 				<File
@@ -1196,6 +1204,46 @@
 				</File>
 				<File
 					RelativePath=".\include\zlib\zutil.h"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="Main"
+			>
+			<Filter
+				Name="Header Files"
+				Filter="h;hpp;hxx;hm;inl;inc;xsd"
+				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+				>
+				<File
+					RelativePath=".\GameController.h"
+					>
+				</File>
+				<File
+					RelativePath=".\resource.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ResourceManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+				UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+				>
+				<File
+					RelativePath=".\GameController.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameMain.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ResourceManager.cpp"
 					>
 				</File>
 			</Filter>

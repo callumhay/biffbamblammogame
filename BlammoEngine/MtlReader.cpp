@@ -2,7 +2,7 @@
 #include "Texture2D.h"
 #include "CgFxEffect.h"
 #include "../GameView/CgFxCelShading.h"
-#include "../GameView/CgFxOutlinedPhong.h"
+#include "../GameView/CgFxPhong.h"
 
 #include "BasicIncludes.h"
 
@@ -182,8 +182,8 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFileFromStream
 		if (matPropIter->second->materialType == MaterialProperties::MATERIAL_CELBASIC_TYPE) {
 			currMaterial = new CgFxCelShading(matPropIter->second);
 		}
-		else if (matPropIter->second->materialType == MaterialProperties::MATERIAL_CELPHONG_TYPE) {
-			currMaterial = new CgFxOutlinedPhong(matPropIter->second);
+		else if (matPropIter->second->materialType == MaterialProperties::MATERIAL_PHONG_TYPE) {
+			currMaterial = new CgFxPhong(matPropIter->second);
 		}
 		else {
 			// Default to using the cel shader for now

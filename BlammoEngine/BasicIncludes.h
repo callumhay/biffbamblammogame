@@ -86,9 +86,15 @@
 #define debug_output(s) ((void)0)
 inline void debug_opengl_state() {}
 inline void debug_physfs_state(int physfsReturnVal) {}
+inline void debug_cg_state() {}
 #else
 #define debug_output(s) (std::cout << s << std::endl)
 
+
+/**
+ * Used to check for errors in opengl.
+ * This will print off the error in debug mode and pose an assertion.
+ */
 inline void debug_opengl_state() {
 	GLenum glErr = glGetError();
 	if (glErr == GL_NO_ERROR) {
@@ -98,6 +104,10 @@ inline void debug_opengl_state() {
 	assert(false);
 }
 
+/**
+ * Used to check for errors in the physfs library.
+ * This will print off the error in debug mode and pose an assertion.
+ */
 inline void debug_physfs_state(int physfsReturnVal) {
 	if (physfsReturnVal == NULL) {
 		const char* error = PHYSFS_getLastError();
@@ -105,6 +115,20 @@ inline void debug_physfs_state(int physfsReturnVal) {
 			error = "?";
 		}
 		debug_output("PHYSFS ERROR: " << error);
+		assert(false);
+	}
+}
+
+/**
+ * Used to check for errors in the Cg runtime.
+ * This will print off the error in debug mode and pose an assertion.
+ */
+inline void debug_cg_state() {
+	CGerror error = CG_NO_ERROR;
+	const char* errorStr = cgGetLastErrorString(&error);
+	
+	if (error != CG_NO_ERROR) {
+		debug_output("Cg Error: " << error << " - " << errorStr);
 		assert(false);
 	}
 }

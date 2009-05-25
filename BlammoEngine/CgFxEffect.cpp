@@ -1,26 +1,24 @@
 #include "CgFxEffect.h"
-#include "CgShaderManager.h"
 #include "Camera.h"
-
 #include "Matrix.h"
 
+#include "../ResourceManager.h"
 
 CgFxEffectBase::CgFxEffectBase(const std::string& effectPath) : cgEffect(NULL), currTechnique(NULL) {
-	// Load the effect from file
-	this->cgEffect = CgShaderManager::Instance()->LoadEffectFromCgFxFile(effectPath);
-	// Load the techniques
-	CgShaderManager::Instance()->LoadEffectTechniques(this->cgEffect, this->techniques);
+	// Load the effect and its techniques from file
+	ResourceManager::GetInstance()->GetCgFxEffectResource(effectPath, this->cgEffect, this->techniques);
+	assert(this->cgEffect != NULL);
+	assert(this->techniques.size() > 0);
 }
 
 CgFxEffectBase::~CgFxEffectBase() {
-	// Delete the effect
-	cgDestroyEffect(this->cgEffect);
-	CgShaderManager::Instance()->CheckForCgError("Destroying effect");
-
+	// Release the effect resource
+	bool success = ResourceManager::GetInstance()->ReleaseCgFxEffectResource(this->cgEffect);
+	assert(success);
 }
 
 const std::string MaterialProperties::MATERIAL_CELBASIC_TYPE	= "outlinedcel";
-const std::string MaterialProperties::MATERIAL_CELPHONG_TYPE	= "outlinedphong";
+const std::string MaterialProperties::MATERIAL_PHONG_TYPE	= "phong";
 
 const std::string MaterialProperties::MATERIAL_GEOM_FG_TYPE = "fg";
 const std::string MaterialProperties::MATERIAL_GEOM_BG_TYPE = "bg";
@@ -90,7 +88,7 @@ void CgFxMaterialEffect::LoadParameters() {
 	this->ballPointLightDiffuseParam	= cgGetNamedEffectParameter(this->cgEffect, "BallPointLightDiffuse");
 	this->ballPointLightAttenParam	= cgGetNamedEffectParameter(this->cgEffect, "BallPointLightLinearAtten");
 
-	CgShaderManager::Instance()->CheckForCgError("Getting parameters for CgFxMaterialEffect");
+	debug_cg_state();
 	assert(this->worldITMatrixParam	&& this->wvpMatrixParam	&& this->worldMatrixParam	&&
 				 this->viewInvMatrixParam	&& this->texSamplerParam && this->diffuseColourParam &&
 				 this->shininessParam	&& this->specularColourParam && this->keyPointLightPosParam && 
@@ -164,5 +162,5 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 		cgGLSetParameter1f(this->ballPointLightAttenParam,   ballLightLinearAtten);	
 	}
 
-	CgShaderManager::Instance()->CheckForCgError("Setting up CgFxEffect parameters");
+	debug_cg_state();
 }
