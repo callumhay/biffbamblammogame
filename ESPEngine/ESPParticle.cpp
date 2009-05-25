@@ -93,6 +93,8 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 	Vector3D alignUpVec			= Vector3D(0, 1, 0);
 	Vector3D alignNormalVec	= Vector3D(0, 0, 1);
 	
+	Point3D camPos = cam.GetCurrentCameraPosition();
+	/*
 	if (alignment == ESP::ViewPointAligned || alignment == ESP::AxisAligned) {
 		float tempMVXfVals[16];
 		glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
@@ -108,12 +110,8 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 		//Matrix4x4 worldMatrix(tempMVXfVals);
 		//Point3D worldSpacePosition = worldMatrix * this->position;
 		
-		// The camera starts facing the +z direction, the sprite starts facing the -z direction...
-		Point3D camPos = cam.GetCurrentCameraPosition();
-		Point3D currPos = Point3D(camPos[0], -camPos[1], camPos[2]);
-		
 		// The normal vector is from the particle center to the eye
-		alignNormalVec = Vector3D(currPos[0], currPos[1], currPos[2]);
+		alignNormalVec = Vector3D(camPos[0], camPos[1], camPos[2]);
 		// Make sure there is a normal...
 		if (alignNormalVec == Vector3D(0,0,0)) {
 			alignNormalVec = PARTICLE_NORMAL_VEC;
@@ -122,10 +120,21 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			alignNormalVec = Vector3D::Normalize(alignNormalVec);
 		}
 	}
-
+*/
 	// Create the alignment transform matrix based off the given alignment...
 	switch(alignment) {
 		case ESP::ViewPointAligned:
+
+			// The normal vector is from the particle center to the eye
+			alignNormalVec = Vector3D(-camPos[0], camPos[1], camPos[2]);
+			// Make sure there is a normal...
+			if (alignNormalVec == Vector3D(0,0,0)) {
+				alignNormalVec = PARTICLE_NORMAL_VEC;
+			}
+			else {
+				alignNormalVec = Vector3D::Normalize(alignNormalVec);
+			}
+
 			// The particle is aligned to the view-point
 			// - The up vector is the particle up vector
 			alignUpVec			= PARTICLE_UP_VEC;
@@ -140,6 +149,16 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			break;
 
 		case ESP::AxisAligned:
+			// The normal vector is from the particle center to the eye
+			alignNormalVec = Vector3D(camPos[0], -camPos[1], camPos[2]);
+			// Make sure there is a normal...
+			if (alignNormalVec == Vector3D(0,0,0)) {
+				alignNormalVec = PARTICLE_NORMAL_VEC;
+			}
+			else {
+				alignNormalVec = Vector3D::Normalize(alignNormalVec);
+			}
+
 			// The particle is aligned to its axis of velocity
 			// - The normal vector is from the particle center to the eye	
 			// - The up vector is the velocity vector of this particle

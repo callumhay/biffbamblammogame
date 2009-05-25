@@ -25,7 +25,7 @@ struct ESPInterval {
 		}
 	}
 
-	float RandomValueInInterval() {
+	float RandomValueInInterval() const {
 		return static_cast<float>(minValue + Randomizer::GetInstance()->RandomNumZeroToOne()*(maxValue - minValue));
 	}
 };

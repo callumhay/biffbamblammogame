@@ -47,6 +47,191 @@ void ESPEmitter::Flush() {
 }
 
 /**
+ * Private helper function for reviving a particle.
+ */
+void ESPEmitter::ReviveParticle() {
+	// Let's spawn a particle!
+	// Remove a dead particle from the set of dead particles...
+	ESPParticle* zombie = this->deadParticles.front();
+	assert(zombie != NULL);
+	
+	// Check to see if the particle has any lives left
+	if (this->particleLivesLeft[zombie] == 0) {
+		// No lives left for the particle, therefore it gets no respawn.
+		return;
+	}
+	
+	this->deadParticles.pop_front();
+
+	// Figure out the properties we need to impart on the newly born particle...
+	Vector3D initialParticleVel(0,0,0);
+	float initialSpd = this->particleInitialSpd.RandomValueInInterval();
+	if (initialSpd != 0.0f) {
+		initialParticleVel = initialSpd * this->CalculateRandomInitParticleDir();
+	}
+
+	Point3D initialPt = this->CalculateRandomInitParticlePos();
+
+	// Revive the particle and put it in the group of living particles
+	Vector2D randomSizing(this->particleSize[0].RandomValueInInterval(), this->particleSize[1].RandomValueInInterval());
+	if (this->makeSizeConstraintsEqual) {
+		randomSizing[1] = randomSizing[0];
+	}
+
+	// If the emitter is reversed then we must change the revive parameters for the particle
+	float randomLifetime = this->particleLifetime.RandomValueInInterval();
+	float randomRotation = this->particleRotation.RandomValueInInterval();
+	if (this->isReversed) {
+		// Figure out how far the particle will travel in its lifetime
+		Vector3D distVecDuringLife = randomLifetime * initialParticleVel;
+		initialPt = initialPt + distVecDuringLife;
+		
+		// Reverse its velocity
+		initialParticleVel = -initialParticleVel;
+
+		zombie->Revive(initialPt, initialParticleVel, randomSizing, randomRotation, randomLifetime); 
+	}
+	else {
+		zombie->Revive(initialPt, initialParticleVel, randomSizing, randomRotation, randomLifetime); 
+	}
+	
+	zombie->SetColour(Colour(this->particleRed.RandomValueInInterval(), this->particleGreen.RandomValueInInterval(), 
+		this->particleBlue.RandomValueInInterval()), this->particleAlpha.RandomValueInInterval());
+
+	this->aliveParticles.push_back(zombie);
+
+	// Subtract a life from the particle if the lives are not infinite
+	int& livesLeftForRevivedParticle = this->particleLivesLeft[zombie];
+	if (livesLeftForRevivedParticle != ESPParticle::INFINITE_PARTICLE_LIVES) {
+		assert(livesLeftForRevivedParticle != 0);
+		livesLeftForRevivedParticle--;
+	}
+
+	this->timeSinceLastSpawn = 0.0f;
+}
+
+
+/**
+ * Private helper function for ticking living particles and managing
+ * the movement between alive and dead particles.
+ */
+void ESPEmitter::TickParticles(double dT) {
+	std::list<std::list<ESPParticle*>::iterator> nowDead;
+
+	// Go through the alive iterators and figure out which ones have died and tick those that are still alive
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+		// Give the particle time to do its thing...
+		ESPParticle* currParticle = *iter;
+		std::list<ESPParticle*>::iterator tempIter = iter;
+
+		// Check to see if the particle has died, if so place it among the dead
+		if (currParticle->IsDead()) {
+			nowDead.push_back(iter);
+			this->deadParticles.push_back(currParticle);
+		}
+		else {
+			currParticle->Tick(dT);
+
+			// Have each of the effectors in this emitter affect the particle...
+			for (std::list<ESPParticleEffector*>::iterator effIter = this->effectors.begin(); effIter != this->effectors.end(); effIter++) {
+				(*effIter)->AffectParticleOnTick(dT, currParticle);
+			}
+		}
+	}
+
+	for (std::list<std::list<ESPParticle*>::iterator>::iterator iter = nowDead.begin(); iter != nowDead.end(); iter++) {
+		this->aliveParticles.erase(*iter);	
+	}
+}
+
+/**
+ * Public function, called each frame to execute the emitter.
+ */
+void ESPEmitter::Tick(const double dT) {
+	// Check for the special case of a single lifetime
+	if (this->OnlySpawnsOnce()) {
+		// Inline: Particles only have a single life time and are spawned immediately
+		
+		// We initialize all particles to living on the first run though
+		if (timeSinceLastSpawn == 0.0f) {
+			while(this->deadParticles.size() > 0 && this->numParticleLives != 0) {
+				this->ReviveParticle();
+			}
+		}
+		this->timeSinceLastSpawn += dT;
+		this->TickParticles(dT);
+
+	}
+	else {
+		// Inline: there is a variable respawn time
+
+		// Figure out if we can spawn a particle by bring it back from the dead (zombie particle... of doom)
+		float allowableTimeToSpawn = this->particleSpawnDelta.RandomValueInInterval();
+		if (this->timeSinceLastSpawn >= allowableTimeToSpawn && this->deadParticles.size() > 0) {
+			// Let's spawn a particle!
+			this->ReviveParticle();
+		}
+		else {
+			this->timeSinceLastSpawn += dT;
+		}
+		this->TickParticles(dT);
+
+	}
+}
+
+/**
+ * Draw this emitter.
+ */
+void ESPEmitter::Draw(const Camera& camera, bool enableDepth) {
+	// Setup OpenGL for drawing the particles in this emitter...
+	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | 
+		GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_MULTISAMPLE_BIT | GL_POINT_BIT); 	
+	
+	glDisable(GL_MULTISAMPLE);
+	glMatrixMode(GL_MODELVIEW);
+	glDisable(GL_LIGHTING);
+	enableDepth ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
+	glPolygonMode(GL_FRONT, GL_FILL);
+
+	// Go through each of the particles, revive any dead ones (based on spawn rate), and draw them
+	if (this->particleTexture != NULL) {
+		this->particleTexture->BindTexture();
+	}
+
+	if (this->isPointSprite && GLEW_ARB_point_sprite) {
+		
+		// Draw things faster if we're doing point sprites
+		glEnable(GL_POINT_SPRITE);
+		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+		glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
+
+		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+			ESPParticle* currParticle = *iter;
+			currParticle->DrawAsPointSprite(camera);
+		}
+		glDisable(GL_POINT_SPRITE);
+		debug_opengl_state();
+	}
+	else {
+		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+			ESPParticle* currParticle = *iter;
+			currParticle->Draw(camera, this->particleAlignment);
+		}
+	}
+
+	if (this->particleTexture != NULL) {
+		this->particleTexture->UnbindTexture();
+	}
+	
+	glPopAttrib();
+}
+
+/**
  * Public function for setting the particles for this emitter.
  * Returns: true on success, false otherwise.
  */
@@ -212,6 +397,14 @@ void ESPEmitter::SetIsReversed(bool isReversed) {
 void ESPEmitter::SetAsPointSpriteEmitter(bool isPointSprite) {
 	this->isPointSprite = isPointSprite;
 }
+
+/**
+ * Set the deviation from the center emit point where particles may spawn.
+ */
+void ESPEmitter::SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter) {
+	this->radiusDeviationFromPt = distFromCenter;
+}
+
 
 /**
  * Adds a particle effector to this emitter.

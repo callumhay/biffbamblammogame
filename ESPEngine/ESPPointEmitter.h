@@ -3,30 +3,26 @@
 
 #include "ESPEmitter.h"
 
+/** 
+ * A point emitter - emits sprites from a defined point in space.
+ */
 class ESPPointEmitter : public ESPEmitter {
 
-protected:
+private:
 	Point3D emitPt;					// The point from which all particles will be emitted from
 	Vector3D emitDir;				// The direction (in emitter coords) that the emitter fires towards on average
 	float emitAngleInRads;	// The angle of possible deviation from the emit dir
 
-	ESPInterval radiusDeviationFromPt;	// Inclusive interval for how far from the emitPt this particle may spawn at
-
-	Vector3D CalculateRandomInitParticleDir() const;
-	void ReviveParticle();
-	void TickParticles(double dT);
+protected:
+	virtual Vector3D CalculateRandomInitParticleDir() const;
+	virtual Point3D  CalculateRandomInitParticlePos() const;
 
 public:
 	ESPPointEmitter();
 	virtual ~ESPPointEmitter();
 
-	virtual void Tick(double dT);
-	virtual void Draw(const Camera& camera);
-
 	void SetEmitPosition(const Point3D& pt);
 	void SetEmitDirection(const Vector3D& dir);
 	void SetEmitAngleInDegrees(int degs);
-	void SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter);
-
 };
 #endif
