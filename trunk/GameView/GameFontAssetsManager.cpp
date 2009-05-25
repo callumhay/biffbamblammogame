@@ -1,6 +1,8 @@
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
 
+#include "../ResourceManager.h"
+
 GameFontAssetsManager* GameFontAssetsManager::instance = NULL;
 
 GameFontAssetsManager::GameFontAssetsManager() : minimalFontsLoaded(false) {
@@ -9,10 +11,10 @@ GameFontAssetsManager::GameFontAssetsManager() : minimalFontsLoaded(false) {
 
 GameFontAssetsManager::~GameFontAssetsManager() {
 	// Delete the regular fonts
-	std::map<FontStyle, std::map<FontSize, TextureFontSet*>>::iterator fontSetIter;
-	std::map<FontSize, TextureFontSet*>::iterator fontIter;
+	std::map<FontStyle, std::map<unsigned int, TextureFontSet*>>::iterator fontSetIter;
+	std::map<unsigned int, TextureFontSet*>::iterator fontIter;
 	for (fontSetIter = this->fonts.begin(); fontSetIter != this->fonts.end(); fontSetIter++) {
-		std::map<FontSize, TextureFontSet*>& fontSet = fontSetIter->second;
+		std::map<unsigned int, TextureFontSet*>& fontSet = fontSetIter->second;
 		for (fontIter = fontSet.begin(); fontIter != fontSet.end(); fontIter++) {
 			delete fontIter->second;
 		}
@@ -35,57 +37,19 @@ void GameFontAssetsManager::LoadMinimalFonts() {
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	
-	TextureFontSet* temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, Small);
-	assert(temp != NULL);
-	this->fonts[HappyGood][Small]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, Medium);
-	assert(temp != NULL);
-	this->fonts[HappyGood][Medium]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, Big);
-	assert(temp != NULL);
-	this->fonts[HappyGood][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, Huge);
-	assert(temp != NULL);
-	this->fonts[HappyGood][Huge]	= temp;
+	// Prepare all sizes of each font type
+	std::vector<unsigned int> sizeSet;
+	sizeSet.reserve(4);
 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Small);
-	assert(temp != NULL);
-	this->fonts[ExplosionBoom][Small]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Medium);
-	assert(temp != NULL);
-	this->fonts[ExplosionBoom][Medium]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Big);
-	assert(temp != NULL);
-	this->fonts[ExplosionBoom][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, Huge);
-	assert(temp != NULL);
-	this->fonts[ExplosionBoom][Huge]	= temp;
+	sizeSet.push_back(Small);
+	sizeSet.push_back(Medium);
+	sizeSet.push_back(Big);
+	sizeSet.push_back(Huge);
 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Small);
-	assert(temp != NULL);
-	this->fonts[ElectricZap][Small]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Medium);
-	assert(temp != NULL);
-	this->fonts[ElectricZap][Medium]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Big);
-	assert(temp != NULL);
-	this->fonts[ElectricZap][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, Huge);
-	assert(temp != NULL);
-	this->fonts[ElectricZap][Huge]	= temp;
-
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Small);
-	assert(temp != NULL);
-	this->fonts[AllPurpose][Small]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Medium);
-	assert(temp != NULL);
-	this->fonts[AllPurpose][Medium]	= temp; 
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Big);
-	assert(temp != NULL);
-	this->fonts[AllPurpose][Big]	= temp;
-	temp = TextureFontSet::CreateTextureFontFromTTF(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, Huge);
-	assert(temp != NULL);
-	this->fonts[AllPurpose][Huge]	= temp;
+	this->fonts[HappyGood]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, sizeSet);
+	this->fonts[ExplosionBoom]	= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, sizeSet);
+	this->fonts[ElectricZap]		= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, sizeSet);
+	this->fonts[AllPurpose]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, sizeSet);
 
 	glPopAttrib();
 	this->minimalFontsLoaded = true;

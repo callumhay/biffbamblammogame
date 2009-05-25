@@ -4,8 +4,6 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 const std::string GameOverDisplayState::GAME_OVER_TEXT = "Game Over";
 
 GameOverDisplayState::GameOverDisplayState(GameDisplay* display) : DisplayState(display) {

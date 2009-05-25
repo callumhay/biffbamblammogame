@@ -15,7 +15,7 @@ private:
 	static const std::string TEXTURED_FG_TECHNIQUE_NAME;
 	static const std::string BASIC_BG_TECHNIQUE_NAME;
 	static const std::string TEXTURED_BG_TECHNIQUE_NAME;
-	static Texture1D* CelDiffuseTexture;
+	static Texture* CelDiffuseTexture;
 
 	// Cel shading texture: parameter and texture objects
 	CGparameter celSamplerParam;

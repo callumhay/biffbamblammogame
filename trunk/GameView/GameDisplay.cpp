@@ -11,10 +11,6 @@
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameEventManager.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
-float tempRot = 0;
-
 #ifdef _DEBUG
 bool GameDisplay::drawDebugBounds = false;
 bool GameDisplay::drawDebugLightGeometry = false;
@@ -24,7 +20,7 @@ const int GameDisplay::MAX_FRAMERATE						= 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameListener(NULL), currState(NULL),
-model(model), assets(new GameAssets()), width(initWidth), height(initHeight), gameExited(false) {
+model(model), assets(new GameAssets(initWidth, initHeight)), width(initWidth), height(initHeight), gameExited(false) {
 	assert(model != NULL);
 
 	this->SetupActionListeners();

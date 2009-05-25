@@ -1,8 +1,12 @@
 #ifndef __GAMEOVERDISPLAYSTATE_H__
 #define __GAMEOVERDISPLAYSTATE_H__
 
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/TextLabel.h"
+
 #include "DisplayState.h"
-#include "../BlammoEngine/BlammoEngine.h"
+
+class GameDisplay;
 
 class GameOverDisplayState : public DisplayState {
 

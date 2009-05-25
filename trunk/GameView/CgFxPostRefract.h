@@ -41,7 +41,7 @@ private:
 	// Actual values for parameters
 	Colour invisiColour;
 	float indexOfRefraction, warpAmount;
-	Texture2D* sceneTex;
+	const Texture2D* sceneTex;
 	
 	double timer;
 	float scale, freq;
@@ -60,7 +60,7 @@ public:
 	 * Set the FBO texture (the texture where the scene thus far
 	 * has been rendered to).
 	 */
-	void SetFBOTexture(Texture2D* tex) {
+	void SetFBOTexture(const Texture2D* tex) {
 		this->sceneTex = tex;
 	}
 	/**

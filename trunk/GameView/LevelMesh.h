@@ -11,6 +11,8 @@
 
 class GameWorldAssets;
 class BallSafetyNetMesh;
+class Mesh;
+class MaterialGroup;
 
 class LevelMesh {
 

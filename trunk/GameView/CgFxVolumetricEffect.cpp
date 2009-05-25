@@ -1,7 +1,6 @@
 #include "CgFxVolumetricEffect.h"
 #include "GameViewConstants.h"
 
-#include "../BlammoEngine/CgShaderManager.h"
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/Noise.h"
 #include "../BlammoEngine/Texture3D.h"
@@ -16,7 +15,7 @@ const std::string CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME		= "FireSprite
 CgFxVolumetricEffect::CgFxVolumetricEffect() : 
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_VOLUMEMETRIC_SHADER), 
 scale(1.0f), freq(1.0f), fadeExponent(1),
-colour(1,1,1), flowDir(0, 0, 1), constAmt(0.0f), 
+colour(1,1,1), flowDir(0, 0, 1), 
 noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL) {
 
 	// Set the technique
@@ -41,10 +40,9 @@ noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(N
 	this->flowDirectionParam	= cgGetNamedEffectParameter(this->cgEffect, "FlowDir");
 	this->colourParam					= cgGetNamedEffectParameter(this->cgEffect, "Colour");
 	this->fadeExpParam				= cgGetNamedEffectParameter(this->cgEffect, "FadeExp");
-	this->constAmtParam				= cgGetNamedEffectParameter(this->cgEffect, "ConstAmount");
 	this->alphaMultParam			= cgGetNamedEffectParameter(this->cgEffect, "AlphaMultiplier");
 
-	CgShaderManager::Instance()->CheckForCgError("Getting parameters for CgFxVolumetricEffect");
+	debug_cg_state();
 }
 
 CgFxVolumetricEffect::~CgFxVolumetricEffect() {
@@ -76,9 +74,7 @@ void CgFxVolumetricEffect::SetupBeforePasses(const Camera& camera) {
 	cgGLSetParameter1f(this->scaleParam, this->scale);
 	cgGLSetParameter1f(this->freqParam, this->freq);
 	cgGLSetParameter1f(this->fadeExpParam, this->fadeExponent);
-	cgGLSetParameter1f(this->constAmtParam, this->constAmt);
 	cgGLSetParameter1f(this->alphaMultParam, this->alphaMultiplier);
-	cgGLSetParameter1f(this->timerParam, static_cast<float>(this->timer));
 	cgGLSetParameter3f(this->flowDirectionParam, this->flowDir[0], this->flowDir[1], this->flowDir[2]);
 	cgGLSetParameter3f(this->colourParam, this->colour[0], this->colour[1], this->colour[2]);
 

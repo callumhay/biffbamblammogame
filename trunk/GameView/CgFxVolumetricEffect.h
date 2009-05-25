@@ -38,12 +38,10 @@ private:
 	CGparameter flowDirectionParam;
 	CGparameter colourParam;
 	CGparameter fadeExpParam;
-	CGparameter constAmtParam;
 	CGparameter alphaMultParam;
 
 	// Actual values to be used for parameters in the shader
-	double timer;
-	float scale, freq, fadeExponent, constAmt, alphaMultiplier;
+	float scale, freq, fadeExponent, alphaMultiplier;
 	Colour colour;
 	Vector3D flowDir;
 	GLint noiseTexID; 
@@ -69,9 +67,6 @@ public:
 	void SetFadeExponent(float f) {
 		this->fadeExponent = f;
 	}
-	void SetConstantFactor(float c) {
-		this->constAmt = c;
-	}
 	void SetColour(const Colour& c) {
 		this->colour = c;
 	}
@@ -80,9 +75,6 @@ public:
 	}
 	void SetAlphaMultiplier(float a) {
 		this->alphaMultiplier = a;
-	}
-	void AddToTimer(double dT) {
-		this->timer += dT;
 	}
 };
 

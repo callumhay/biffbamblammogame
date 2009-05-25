@@ -19,10 +19,11 @@
 #include "../GameModel/BallSizeItem.h"
 #include "../GameModel/OneUpItem.h"
 
-#include "../BlammoEngine/ResourceManager.h"
 #include "../BlammoEngine/Texture.h"
 
 #include "../ESPEngine/ESP.h"
+
+#include "../ResourceManager.h"
 
 GameESPAssets::GameESPAssets() : 
 particleFader(1, 0), 
@@ -1449,7 +1450,7 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
  * Render the post processing emitter/sprite/particle effects - these require a
  * provided render to texture of the scene.
  */
-void GameESPAssets::DrawPostProcessingESPEffects(double dT, const Camera& camera, Texture2D* sceneTex) {
+void GameESPAssets::DrawPostProcessingESPEffects(double dT, const Camera& camera, const Texture2D* sceneTex) {
 	// TODO.
 }
 

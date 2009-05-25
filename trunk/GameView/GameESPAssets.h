@@ -133,7 +133,7 @@ public:
 
 	// Draw functions for various particle effects in the game
 	void DrawParticleEffects(double dT, const Camera& camera);
-	void DrawPostProcessingESPEffects(double dT, const Camera& camera, Texture2D* sceneTex);
+	void DrawPostProcessingESPEffects(double dT, const Camera& camera, const Texture2D* sceneTex);
 
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
 

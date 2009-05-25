@@ -9,7 +9,7 @@
 
 class Camera;
 class PointLight;
-class CgFxOutlinedPhong;
+class CgFxPhong;
 
 class BallSafetyNetMesh {
 private:
@@ -17,7 +17,7 @@ private:
 
 	BallSafetyNetAnimation currAnimation;
 
-	CgFxOutlinedPhong* shadingMaterial;
+	CgFxPhong* shadingMaterial;
 	GLuint displayListID;
 	
 	// Destruction animation values 
