@@ -64,7 +64,7 @@ float3 BallPointLightPos : Position <
     string Space = "World";
 > = {-0.5f,2.0f,1.25f};
 
-float3 BallPointLightColour : Specular <
+float3 BallPointLightDiffuse : Specular <
     string UIName =  "Diffuse Light";
     string Object = "Pointlight2";
     string UIWidget = "Color";
@@ -142,12 +142,12 @@ struct appdata {
     float3 Position	: POSITION;
     float4 UV		: TEXCOORD0;
     float4 Normal	: NORMAL;
-    float4 Colour   : COLOR0;
+    float4 Colour       : COLOR0;
 };
 
 struct appdata_outlines {
     float3 Position	  : POSITION;
-    float4 Normal	  : NORMAL;
+    float4 Colour	  : COLOR0;
 };
 
 /* data passed from vertex shader to pixel shader */
@@ -162,19 +162,20 @@ struct vertexOutput {
  
 struct vertexOutput_outlines {
     float4 HPosition	: POSITION;
+    float Alpha		    : TEXCOORD0;
 };
 
 ///////// VERTEX SHADING /////////////////////
 
 /*********** Generic Vertex Shader ******/
 
-vertexOutput celshading_bg_VS(appdata IN) {
+vertexOutput celshading_VS(appdata IN) {
     vertexOutput OUT = (vertexOutput)0;
     OUT.WorldNormal = mul(WorldITXf,IN.Normal).xyz;
 
     float4 Po = float4(IN.Position.xyz,1);
     float3 Pw = mul(WorldXf,Po).xyz;
-    OUT.WorldPos = Pw; //(KeyPointLightPos - Pw);
+    OUT.WorldPos = Pw;
     OUT.UV = IN.UV.xy;
     
     float3 VertToViewVec = float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w) - Pw;
@@ -187,9 +188,9 @@ vertexOutput celshading_bg_VS(appdata IN) {
 vertexOutput_outlines outline_VS(appdata_outlines IN) {
     vertexOutput_outlines OUT = (vertexOutput_outlines)0;
     OUT.HPosition = mul(WvpXf, float4(IN.Position, 1.0f));
+    OUT.Alpha = IN.Colour.a;
     return OUT;
 }
-
 
 ///////// PIXEL SHADING //////////////////////
 
@@ -210,11 +211,63 @@ void CelShadingBG(float3 Nn, float3 WorldPos, float3 Vn,
 	float3 FillHn = normalize(Vn + FillLn);
     float3 FillLitV = lit(dot(FillLn,Nn),dot(FillHn,Nn),Shininess).xyz;
 	
-	half FillLinearAtten = 1.0 / (FillPointLightLinearAtten * distance(FillPointLightPos, WorldPos));
+	float FillLinearAtten = clamp(1.0f / (FillPointLightLinearAtten * distance(FillPointLightPos, WorldPos)), 0, 1);
 	FillLinearAtten = clamp(FillLinearAtten, 0, 1);
 
     DiffuseContrib  = (tex1D(CelShadingSampler, KeyLitV.y).rrr * KeyPointLightColour) + FillLinearAtten * (tex1D(CelShadingSampler, FillLitV.y).rrr * FillPointLightColour);
     SpecularContrib = (KeyLitV.z * KeyPointLightColour) + FillLinearAtten * (FillLitV.z * FillPointLightColour);	
+}
+
+// Same as Background shading but with one more light source (ball)
+void CelShadingFG(float3 Nn, float3 WorldPos, float3 Vn,
+		         out float3 DiffuseContrib,
+		         out float3 SpecularContrib)
+{
+	CelShadingBG(Nn, WorldPos, Vn, DiffuseContrib, SpecularContrib);
+	
+	float3 BallLn = normalize(BallPointLightPos - WorldPos);
+	float3 BallHn = normalize(Vn + BallLn);
+	float3 BallLitV = lit(dot(BallLn,Nn), dot(BallHn,Nn), Shininess).xyz;
+	
+	float BallLinearAtten =  clamp(1.0f / (BallPointLightLinearAtten * distance(BallPointLightPos, WorldPos)), 0, 1);
+	
+	// Ball adds a specular, diffuse and ambient light - the ambient is made part of the diffuse component
+	DiffuseContrib  += BallLinearAtten * tex1D(CelShadingSampler, BallLitV.y).rrr * BallPointLightDiffuse;
+	SpecularContrib += BallLinearAtten * BallLitV.z * BallPointLightDiffuse;
+}
+
+float4 celshading_fg_PS(vertexOutput IN) : COLOR {
+    float3 diffContrib;
+    float3 specContrib;
+    float3 Nn = normalize(IN.WorldNormal);
+    
+	CelShadingFG(Nn,IN.WorldPos,IN.WorldView,diffContrib,specContrib);
+      
+    float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*diffContrib;
+    return float4(result, IN.Colour.a);
+}
+
+float4 celshading_bg_PS(vertexOutput IN) : COLOR {
+    float3 diffContrib;
+    float3 specContrib;
+    float3 Nn = normalize(IN.WorldNormal);
+    
+	CelShadingBG(Nn,IN.WorldPos,IN.WorldView,diffContrib,specContrib);
+      
+    float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*diffContrib;
+    return float4(result, IN.Colour.a);
+}
+
+float4 celshading_textured_fg_PS(vertexOutput IN) : COLOR {
+    float3 diffContrib;
+    float3 specContrib;
+    float3 Nn = normalize(IN.WorldNormal);
+    
+	CelShadingFG(Nn, IN.WorldPos, IN.WorldView, diffContrib, specContrib);
+      
+    float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
+    float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*textureColour*diffContrib;
+    return float4(result, IN.Colour.a);
 }
 
 float4 celshading_textured_bg_PS(vertexOutput IN) : COLOR {
@@ -226,22 +279,11 @@ float4 celshading_textured_bg_PS(vertexOutput IN) : COLOR {
       
     float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
     float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*textureColour*diffContrib;
-    return float4(result, 1.0f);
+    return float4(result, IN.Colour.a);
 }
 
-float4 celshading_bg_PS(vertexOutput IN) : COLOR {
-    float3 diffContrib;
-    float3 specContrib;
-    float3 Nn = normalize(IN.WorldNormal);
-    
-	CelShadingBG(Nn,IN.WorldPos,IN.WorldView,diffContrib,specContrib);
-      
-    float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*diffContrib;
-    return float4(result, 1.0f);
-}
-
-float4 outline_PS() : COLOR {
-    return float4(OutlineColour.rgb, 1.0f);
+float4 outline_PS(vertexOutput_outlines IN) : COLOR {
+    return float4(OutlineColour.rgb, IN.Alpha);
 }
 
 ///// TECHNIQUES /////////////////////////////
@@ -252,18 +294,52 @@ float4 outline_PS() : COLOR {
 technique BasicBG {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
+	BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
+		PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
-        VertexProgram = compile vp40 celshading_bg_VS();        
+        VertexProgram = compile vp40 celshading_VS();        
         FragmentProgram = compile fp40 celshading_bg_PS();
     }  
      
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
+	BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Front;
+        LineWidth = OutlineWidth;
+        LineSmoothEnable = true;
+        PolygonMode = int2(Back, Line);
+        
+        VertexProgram = compile vp40 outline_VS();
+        FragmentProgram = compile fp40 outline_PS();
+    }
+}
+
+technique BasicFG {
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+	BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+	PolygonSmoothEnable = true;
+        PolygonMode = int2(Front, Fill);
+        
+        VertexProgram = compile vp40 celshading_VS();        
+        FragmentProgram = compile fp40 celshading_fg_PS();
+    }  
+     
+    pass p1 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+	BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
@@ -280,18 +356,52 @@ technique BasicBG {
 technique TexturedBG {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
+	BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
+	PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
-        VertexProgram = compile vp40 celshading_bg_VS();        
+        VertexProgram = compile vp40 celshading_VS();        
         FragmentProgram = compile fp40 celshading_textured_bg_PS();
     }  
      
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
+	BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Front;
+        LineWidth = OutlineWidth;
+        LineSmoothEnable = true;
+        PolygonMode = int2(Back, Line);
+        
+        VertexProgram = compile vp40 outline_VS();
+        FragmentProgram = compile fp40 outline_PS();
+    }     
+}
+
+technique TexturedFG {
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+	BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+	PolygonSmoothEnable = true;
+        PolygonMode = int2(Front, Fill);
+	
+        VertexProgram = compile vp40 celshading_VS();        
+        FragmentProgram = compile fp40 celshading_textured_fg_PS();
+    }  
+     
+    pass p1 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+	BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;

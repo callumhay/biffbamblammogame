@@ -1,7 +1,5 @@
 #include "BoundingLines.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms) : 
 	lines(lines), normals(norms) {
 	assert(lines.size() == norms.size());

@@ -47,14 +47,6 @@ float FadeExp <
     string UIName =  "Fade Exponent";
 > = 1;
 
-float ConstAmount <
-    string UIWidget = "slider";
-    float UIMin = 0.0;
-    float UIMax = 1.0;
-    float UIStep = 0.01;
-    string UIName =  "Constant Amount";
-> = 0;
-
 float AlphaMultiplier <
     string UIWidget = "slider";
     float UIMin = 0.0;
@@ -169,12 +161,11 @@ float4 smokey_PS(vertexOutput IN) : COLOR {
     float3 sampleCoord = IN.WorldPos.xyz + Freq*Timer*FlowDir;
     
     float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);
-    float totalTexVal = (texVal.x + texVal.y + texVal.z + texVal.w + 0.03125) * 1.7f;
+    float totalTexVal = (texVal.x + texVal.y + texVal.z + texVal.w + 0.03125) * 2.2f;
     
     float FadeAmt = dot(-nV, nN);
     float fadeAmtCoeff = pow(abs(FadeAmt), FadeExp);
-    
-    float4 final = float4(clamp(Colour*totalTexVal.xxx, 0, 1), clamp(totalTexVal.x*fadeAmtCoeff*AlphaMultiplier + ConstAmount, 0, 1));
+    float4 final = float4(clamp(Colour*totalTexVal.xxx, 0, 1), clamp(totalTexVal.x*fadeAmtCoeff*AlphaMultiplier, 0, 1));
     return float4(final);
 }
 
@@ -245,8 +236,8 @@ technique GhostBall < string Script = "Pass=p0;"; > {
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
         DepthFunc = LEqual;
-		DepthMask = false;
-		CullFaceEnable = true;//false;
+	DepthMask = false;
+	CullFaceEnable = true;//false;
 
         VertexProgram = compile vp40 localpos_VS();            
         FragmentProgram = compile fp40 smokey_PS();
