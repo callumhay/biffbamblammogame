@@ -1,7 +1,10 @@
 #ifndef __PLAYERPADDLE_H__
 #define __PLAYERPADDLE_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Point.h"
+#include "../BlammoEngine/Vector.h"
+
 #include "BoundingLines.h"
 
 class GameModel;
@@ -12,17 +15,18 @@ class GameModel;
 
 class PlayerPaddle {
 public:
-	enum PaddleType { NormalPaddle = 0x00000000, LaserPaddle = 0x00000001 };
+	static const float PADDLE_HEIGHT_TOTAL;
+	static const float PADDLE_WIDTH_TOTAL;
+	static const float PADDLE_HALF_WIDTH;
+	static const float PADDLE_HALF_HEIGHT;
+
+	enum PaddleType { NormalPaddle = 0x00000000, LaserPaddle = 0x00000001, PoisonPaddle = 0x00000010 };
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
 private:
 	// Default values for the dimensions of the paddle
-	static const float PADDLE_WIDTH_TOTAL;
 	static const float PADDLE_WIDTH_FLAT_TOP;
 	static const float PADDLE_WIDTH_ANGLED_SIDE;
-	static const float PADDLE_HEIGHT_TOTAL;
-	static const float PADDLE_HALF_WIDTH;
-	static const float PADDLE_HALF_HEIGHT;
 	static const float WIDTH_DIFF_PER_SIZE;
 	static const float SECONDS_TO_CHANGE_SIZE;
 

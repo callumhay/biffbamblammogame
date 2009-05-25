@@ -15,6 +15,7 @@
 #include "UpsideDownItem.h"
 #include "BallSafetyNetItem.h"
 #include "OneUpItem.h"
+#include "PoisonPaddleItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -66,6 +67,8 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new BallSafetyNetItem(spawnOrigin, gameModel);																// good
 		case 15:
 			return new OneUpItem(spawnOrigin, gameModel);																				// good
+		case 16:
+			return new PoisonPaddleItem(spawnOrigin, gameModel);																// bad
 		default:
 			assert(false);
 	}
@@ -122,6 +125,9 @@ GameItem* GameItemFactory::CreateItem(const std::string itemName, const Point2D 
 	}
 	else if (itemName == OneUpItem::ONE_UP_ITEM_NAME) {
 		return new OneUpItem(spawnOrigin, gameModel);
+	}
+	else if (itemName == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
+		return new PoisonPaddleItem(spawnOrigin, gameModel);
 	}
 	assert(false);
 	return NULL;

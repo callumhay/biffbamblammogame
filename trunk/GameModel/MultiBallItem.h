@@ -1,9 +1,11 @@
 #ifndef __MULTIBALLITEM_H__
 #define __MULTIBALLITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameItem.h"
+
+class Point2D;
 
 class MultiBallItem : public GameItem {
 public:

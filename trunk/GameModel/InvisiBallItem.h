@@ -1,10 +1,12 @@
 #ifndef __INVISIBALLITEM_H__
 #define __INVISIBALLITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameItem.h"
 #include "GameModel.h"
+
+class Point2D;
 
 class InvisiBallItem : public GameItem {
 public:

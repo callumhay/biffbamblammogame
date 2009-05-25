@@ -1,5 +1,3 @@
-#include "../BlammoEngine/BlammoEngine.h"
-
 #include "GameLevel.h"
 #include "GameBall.h"
 
@@ -10,6 +8,8 @@
 #include "BreakableBlock.h"
 #include "BombBlock.h"
 #include "TriangleBlocks.h"
+
+#include "../ResourceManager.h"
 
 const char GameLevel::EMPTY_SPACE_CHAR				= 'E';
 const char GameLevel::SOLID_BLOCK_CHAR				= 'S';
@@ -48,28 +48,28 @@ GameLevel::~GameLevel() {
 }
 
 GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
-	std::ifstream inFile;
-	inFile.open(filepath.c_str());
 	
-	// Make sure the file opened properly
-	if (!inFile.is_open()) {
-		debug_output("ERROR: Could not open level file: " << filepath); 
+	std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(filepath);
+	if (inFile == NULL) {
+		assert(false);
 		return NULL;
 	}
 
 	// Read in the file width and height
 	int width = 0;
 	int height = 0;
-	if (!(inFile >> width && inFile >> height)) {
-		inFile.close();
-		debug_output("ERROR: Error reading in width/height for file: " << filepath); 
+	if (!(*inFile >> width && *inFile >> height)) {
+		debug_output("ERROR: Error reading in width/height for file: " << filepath);
+		delete inFile;
+		inFile = NULL;
 		return NULL;
 	}
 	
 	// Ensure width and height are valid
 	if (width <= 0 || height <= 0) {
-		inFile.close();
-		debug_output("ERROR: Invalid width/height values for file: " << filepath); 
+		debug_output("ERROR: Invalid width/height values for file: " << filepath);
+		delete inFile;
+		inFile = NULL;
 		return NULL;	
 	}
 
@@ -84,9 +84,10 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 			char currBlock;
 			
 			// Read in the current level piece / block
-			if (!(inFile >> currBlock)) {
-					inFile.close();
-					debug_output("ERROR: Could not properly read level interior value at width = " << w << ", height = " << h); 
+			if (!(*inFile >> currBlock)) {
+					debug_output("ERROR: Could not properly read level interior value at width = " << w << ", height = " << h);
+					delete inFile;
+					inFile = NULL;
 					return NULL;	
 			}
 
@@ -118,7 +119,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						// p: the orientation of the triangle (where the outer corner is located), can be any of the following: {ul, ur, ll, lr}
 						// i.e., upper-left = ul, lower-right = lr, etc.
 						char tempChar;
-						inFile >> tempChar;
+						*inFile >> tempChar;
 						if (tempChar != '(') {
 							debug_output("ERROR: poorly formed triangle block syntax, missing '('");
 							break;
@@ -126,13 +127,13 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 						// Read in 'x'
 						char typeOfBlock;
-						inFile >> typeOfBlock;
+						*inFile >> typeOfBlock;
 						if (!BreakableBlock::IsValidBreakablePieceType(typeOfBlock) && typeOfBlock != SOLID_BLOCK_CHAR) {
 							debug_output("ERROR: Triangle block has invalid block type specified in descriptor: " << typeOfBlock);
 							break;
 						}
 
-						inFile >> tempChar;
+						*inFile >> tempChar;
 						if (tempChar != ',') {
 							debug_output("ERROR: poorly formed triangle block syntax, missing ','");
 							break;
@@ -140,8 +141,8 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 						// Read in 'p'
 						char orient1, orient2;
-						inFile >> orient1;
-						inFile >> orient2;
+						*inFile >> orient1;
+						*inFile >> orient2;
 
 						TriangleBlock::Orientation orientation;
 						if (orient1 == TRI_UPPER_CORNER) {
@@ -175,12 +176,13 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						}
 
 						// Read in the closing bracket
-						inFile >> tempChar;
+						*inFile >> tempChar;
 					}
 					break;
 				default:
-					inFile.close();
-					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc); 
+					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc);
+					delete inFile;
+					inFile = NULL;
 					return NULL;
 			}
 			assert(newPiece != NULL);
@@ -194,7 +196,8 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		levelPieces.insert(levelPieces.begin(), currentRowPieces);
 	}
 
-	inFile.close();
+	delete inFile;
+	inFile = NULL;
 
 	// Go through all the pieces and initialize their bounding values appropriately
 	for (size_t h = 0; h < levelPieces.size(); h++) {
@@ -395,7 +398,7 @@ bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, Vector2D& n, floa
 	// Create the safety net bounding line and check the ball against it
 	std::vector<Collision::LineSeg2D> lines;
 	lines.reserve(1);
-	Collision::LineSeg2D safetyNetLine(Point2D(0.0f, 0.0f), Point2D(this->GetLevelUnitWidth(), 0.0f));
+	Collision::LineSeg2D safetyNetLine(Point2D(0.0f, -LevelPiece::HALF_PIECE_HEIGHT), Point2D(this->GetLevelUnitWidth(), -LevelPiece::HALF_PIECE_HEIGHT));
 	lines.push_back(safetyNetLine);
 
 	std::vector<Vector2D> normals;

@@ -1,5 +1,5 @@
 #include "GameEventManager.h"
-#include "../BlammoEngine/BlammoEngine.h"
+#include "GameEvents.h"
 
 GameEventManager* GameEventManager::instance = NULL;
 

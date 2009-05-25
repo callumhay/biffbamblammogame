@@ -1,7 +1,9 @@
 #ifndef __GAMEITEM_H__
 #define __GAMEITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Point.h"
+
 #include "GameEventManager.h"
 
 class PlayerPaddle;

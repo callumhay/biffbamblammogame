@@ -1,7 +1,10 @@
 #ifndef __BOUNDINGLINES_H__
 #define __BOUNDINGLINES_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Point.h"
+#include "../BlammoEngine/Vector.h"
+#include "../BlammoEngine/Collision.h"
 
 class BoundingLines {
 

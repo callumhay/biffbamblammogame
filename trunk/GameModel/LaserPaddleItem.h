@@ -1,9 +1,11 @@
 #ifndef __LASERPADDLEITEM_H__
 #define __LASERPADDLEITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameItem.h"
+
+class Point2D;
 
 class LaserPaddleItem : public GameItem {
 public:

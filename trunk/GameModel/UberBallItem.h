@@ -1,7 +1,8 @@
 #ifndef __UBERBALLITEM_H__
 #define __UBERBALLITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Point.h"
 
 #include "GameItem.h"
 #include "GameModel.h"
