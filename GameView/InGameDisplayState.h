@@ -1,8 +1,13 @@
 #ifndef __INGAMEDISPLAYSTATE_H__
 #define __INGAMEDISPLAYSTATE_H__
 
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/TextLabel.h"
+#include "../BlammoEngine/FBObj.h"
+
 #include "DisplayState.h"
-#include "../BlammoEngine/BlammoEngine.h"
+
+class Texture2D;
 
 /**
  * State for representing and rendering the display of the game as it is
@@ -11,9 +16,6 @@
 class InGameDisplayState : public DisplayState {
 
 private:
-	Texture2D* renderToTexBackground;	// Texture of background in the game, rendered to texture
-	Texture2D* renderToTexEverything;	// Texture of the entire game scene, rendered to texture
-
 	// HUD related members
 	static const std::string LIVES_LABEL_TEXT;
 	static const unsigned int HUD_X_INDENT;
@@ -23,9 +25,9 @@ private:
 	void DrawGameHUD(double dT);
 	void DrawGameScene(double dT);
 
-	void RenderBackgroundToFBO();
-	void RenderFullSceneToFBO(double dT);
-	void DrawScene(double dT);
+	void RenderBackgroundToFBO(double dT);
+	void RenderForegroundWithBackgroundToFBO(double dT);
+	void RenderFinalGather(double dT);
 
 #ifdef _DEBUG
 	void DebugDrawBounds();

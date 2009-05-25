@@ -1,7 +1,9 @@
 #ifndef __GAMEMENU_H__
 #define __GAMEMENU_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/TextLabel.h"
 
 /**
  * An item in a game menu that may be highlighted and selected

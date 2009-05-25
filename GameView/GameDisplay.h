@@ -1,7 +1,7 @@
 #ifndef __GAMEDISPLAY_H__
 #define __GAMEDISPLAY_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Camera.h"
 #include "DisplayState.h"
 

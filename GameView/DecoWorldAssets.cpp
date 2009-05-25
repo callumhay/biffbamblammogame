@@ -1,14 +1,27 @@
 #include "DecoWorldAssets.h"
 #include "GameViewConstants.h"
-#include "DecoSkybox.h"
 #include "CgFxVolumetricEffect.h"
+#include "DecoSkybox.h"
 
-#include "../BlammoEngine/Skybox.h"
-#include "../BlammoEngine/ResourceManager.h"
+#include "../ResourceManager.h"
+
+const float DecoWorldAssets::COLOUR_CHANGE_TIME = 10.0f;	// Amount of time in seconds to change from one colour to the next
+const Colour DecoWorldAssets::COLOUR_CHANGE_LIST[DecoWorldAssets::NUM_COLOUR_CHANGES] = {
+	Colour(0.4375f, 0.5f, 0.5647f),							// slate greyish-blue
+	Colour(0.2745098f, 0.5098039f, 0.70588f),		// steel blue
+	Colour(0.28235f, 0.2392f, 0.545098f),				// slate purple-blue
+	Colour(0.51372549f, 0.4352941f, 1.0f),			// slate purple
+	Colour(0.8588235f, 0.439215686f, 0.57647f),	// pale violet
+	Colour(1.0f, 0.75686f, 0.75686f),						// rosy brown 
+	Colour(0.7215686f, 0.52549f, 0.043f),				// goldenrod
+	Colour(0.4196f, 0.5568627f, 0.1372549f),		// olive
+	Colour(0.4f, 0.8039215f, 0.666667f),				// deep aquamarine
+	Colour(0.3725f, 0.6196078f, 0.62745098f)		// cadet (olive-) blue
+};
 
 // Basic constructor: Load all the basic assets for the deco world...
 DecoWorldAssets::DecoWorldAssets() : 
-GameWorldAssets(DecoSkybox::CreateDecoSkybox(GameViewConstants::GetInstance()->SKYBOX_MESH),
+	GameWorldAssets(new DecoSkybox(),
 								ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BACKGROUND_MESH),
 								ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_PADDLE_MESH),
 								ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BLOCK_MESH_PATH)),
@@ -24,15 +37,37 @@ rotationLimitbg(10.0),
 rotationStatefg1(RotateCCW),
 rotationStatefg2(RotateCW),
 rotationStatebg1(RotateCW),
-rotationStatebg2(RotateCCW)
+rotationStatebg2(RotateCCW),
+spiralTexSm(NULL),
+spiralTexMed(NULL),
+spiralTexLg(NULL),
+rotateEffectorCW(0, 5, ESPParticleRotateEffector::CLOCKWISE),
+rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
 {
 	// Setup the beam effect
 	this->beamEffect->SetColour(Colour(1, 1, 1));
-	this->beamEffect->SetConstantFactor(0.0f);
 	this->beamEffect->SetFadeExponent(2.0f);
 	this->beamEffect->SetScale(0.05f);
-	this->beamEffect->SetFrequency(5.0f);
-	this->beamEffect->SetAlphaMultiplier(0.60f);
+	this->beamEffect->SetFrequency(4.0f);
+	this->beamEffect->SetAlphaMultiplier(0.55f);
+
+	// Setup the colour animations for the background mesh
+	const int colourChangesPlusOne = DecoWorldAssets::NUM_COLOUR_CHANGES + 1;
+	std::vector<double> timeValues;
+	timeValues.reserve(colourChangesPlusOne);
+	std::vector<Colour> colourValues;
+	colourValues.reserve(colourChangesPlusOne);
+
+	for (int i = 0; i < colourChangesPlusOne; i++) {
+		timeValues.push_back(i * DecoWorldAssets::COLOUR_CHANGE_TIME);
+		colourValues.push_back(DecoWorldAssets::COLOUR_CHANGE_LIST[i % DecoWorldAssets::NUM_COLOUR_CHANGES]);
+	}
+
+	this->currBGMeshColourAnim.SetRepeat(true);
+	this->currBGMeshColourAnim.SetLerp(timeValues, colourValues);
+
+	// Setup the background emitters
+	this->InitializeEmitters();
 }
 
 DecoWorldAssets::~DecoWorldAssets() {
@@ -40,14 +75,118 @@ DecoWorldAssets::~DecoWorldAssets() {
 	// Beam effect
 	delete this->beamEffect;
 	this->beamEffect = NULL;
+
+	// Textures
+	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->spiralTexSm);
+	assert(success);
+	success = ResourceManager::GetInstance()->ReleaseTextureResource(this->spiralTexMed);
+	assert(success);
+	success = ResourceManager::GetInstance()->ReleaseTextureResource(this->spiralTexLg);
+	assert(success);
+}
+
+/**
+ * Initialize the emitters in the background.
+ */
+void DecoWorldAssets::InitializeEmitters() {
+	// Load the textures for the emitter particles
+	assert(this->spiralTexSm == NULL);
+	this->spiralTexSm = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_SMALL, Texture::Trilinear, GL_TEXTURE_2D));
+	assert(this->spiralTexSm != NULL);
+	
+	assert(this->spiralTexMed == NULL);
+	this->spiralTexMed = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_MEDIUM, Texture::Trilinear, GL_TEXTURE_2D));
+	assert(this->spiralTexMed != NULL);
+
+	assert(this->spiralTexLg == NULL);
+	this->spiralTexLg = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_LARGE, Texture::Trilinear, GL_TEXTURE_2D));
+	assert(this->spiralTexLg != NULL);
+
+	// Setup the spiral emitters that come out at the very back, behind the buildings
+	ESPInterval spiralSpawn(0.6f, 1.2f);
+	ESPInterval spiralLife(20.0f, 25.0f);
+	ESPInterval spiralSpd(5.0f, 7.0f);
+
+	Colour spiralColour = COLOUR_CHANGE_LIST[0];
+
+	Point3D spiralMinPt(-70.0f, -30.0f, -70.0f);
+	Point3D spiralMaxPt(70.0f, -25.0f, -65.0f);
+
+	this->spiralEmitterSm.SetSpawnDelta(spiralSpawn);
+	this->spiralEmitterSm.SetInitialSpd(spiralSpd);
+	this->spiralEmitterSm.SetParticleLife(spiralLife);
+	this->spiralEmitterSm.SetParticleSize(ESPInterval(2.5f, 4.0f));
+	this->spiralEmitterSm.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->spiralEmitterSm.SetEmitVolume(spiralMinPt, spiralMaxPt);
+	this->spiralEmitterSm.SetEmitDirection(Vector3D(0, 1, 0));
+	this->spiralEmitterSm.SetParticleAlignment(ESP::ViewPointAligned);
+	this->spiralEmitterSm.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		this->spiralEmitterSm.AddEffector(&this->rotateEffectorCW);
+	}
+	else {
+		this->spiralEmitterSm.AddEffector(&this->rotateEffectorCCW);
+	}
+	this->spiralEmitterSm.SetParticles(25, this->spiralTexSm);
+	
+	this->spiralEmitterMed.SetSpawnDelta(spiralSpawn);
+	this->spiralEmitterMed.SetInitialSpd(spiralSpd);
+	this->spiralEmitterMed.SetParticleLife(spiralLife);
+	this->spiralEmitterMed.SetParticleSize(ESPInterval(4.5f, 5.5f));
+	this->spiralEmitterMed.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->spiralEmitterMed.SetEmitVolume(spiralMinPt, spiralMaxPt);
+	this->spiralEmitterMed.SetEmitDirection(Vector3D(0, 1, 0));
+	this->spiralEmitterMed.SetParticleAlignment(ESP::ViewPointAligned);
+	this->spiralEmitterMed.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		this->spiralEmitterMed.AddEffector(&this->rotateEffectorCW);
+	}
+	else {
+		this->spiralEmitterMed.AddEffector(&this->rotateEffectorCCW);
+	}
+	this->spiralEmitterMed.SetParticles(25, this->spiralTexMed);
+
+	this->spiralEmitterLg.SetSpawnDelta(spiralSpawn);
+	this->spiralEmitterLg.SetInitialSpd(spiralSpd);
+	this->spiralEmitterLg.SetParticleLife(spiralLife);
+	this->spiralEmitterLg.SetParticleSize(ESPInterval(6.0f, 7.0f));
+	this->spiralEmitterLg.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->spiralEmitterLg.SetEmitVolume(spiralMinPt, spiralMaxPt);
+	this->spiralEmitterLg.SetEmitDirection(Vector3D(0, 1, 0));
+	this->spiralEmitterLg.SetParticleAlignment(ESP::ViewPointAligned);
+	this->spiralEmitterLg.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		this->spiralEmitterLg.AddEffector(&this->rotateEffectorCW);
+	}
+	else {
+		this->spiralEmitterLg.AddEffector(&this->rotateEffectorCCW);
+	}
+	this->spiralEmitterLg.SetParticles(25, this->spiralTexLg);
+
+	// Tick all the emitters for a bit to get them to look like they've been spawning for awhile
+	for (unsigned int i = 0; i < 60; i++) {
+		this->spiralEmitterSm.Tick(0.5);
+		this->spiralEmitterMed.Tick(0.5);
+		this->spiralEmitterLg.Tick(0.5);
+	}
 }
 
 void DecoWorldAssets::Tick(double dT) {
-	// Add to the timer in the beam shader
-	this->beamEffect->AddToTimer(dT);
 	// Rotate the background effect (sky beams)
 	this->RotateSkybeams(dT);
 
+	// Interpolate the colour animation
+	this->currBGMeshColourAnim.Tick(dT);
+
+	// Tick the effects
+	Colour spiralColour = this->currBGMeshColourAnim.GetInterpolantValue();
+	this->spiralEmitterSm.Tick(dT);
+	this->spiralEmitterSm.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
+	this->spiralEmitterMed.Tick(dT);
+	this->spiralEmitterMed.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
+	this->spiralEmitterLg.Tick(dT);
+	this->spiralEmitterLg.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
+	
 	GameWorldAssets::Tick(dT);
 }
 
@@ -136,15 +275,20 @@ void DecoWorldAssets::RotateSkybeams(double dT) {
 }
 
 void DecoWorldAssets::DrawBackgroundModel(const Camera& camera) {
-	Colour currSkyboxColour = this->skybox->GetCurrentColour();
-	Colour currBGModelColour = currSkyboxColour.GetComplementaryColour();
-	
+	// Draw spiral effects behind the background model
+	this->spiralEmitterSm.Draw(camera);
+	this->spiralEmitterMed.Draw(camera);
+	this->spiralEmitterLg.Draw(camera);
+
+	Colour currBGModelColour = this->currBGMeshColourAnim.GetInterpolantValue();
 	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), 1.0f);
 	this->background->Draw(camera, this->bgKeyLight, this->bgFillLight);
 }
 
 void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 	// Draw deco background beams:
+	glColor4f(1, 1, 1, 1);
+
 	// Back beams...
 	glPushMatrix();
 	glTranslatef(-25.0f, -50.0f, -63.0f);

@@ -6,7 +6,6 @@
 #include "../BlammoEngine/Noise.h"
 #include "../BlammoEngine/Mesh.h"
 #include "../BlammoEngine/Texture.h"
-#include "../BlammoEngine/ResourceManager.h"
 
 // Game Model Includes
 #include "../GameModel/GameItem.h"
@@ -23,6 +22,9 @@
 #include "../GameModel/UpsideDownItem.h"
 #include "../GameModel/BallSafetyNetItem.h"
 #include "../GameModel/OneUpItem.h"
+#include "../GameModel/PoisonPaddleItem.h"
+
+#include "../ResourceManager.h"
 
 GameItemAssets::GameItemAssets(GameESPAssets* espAssets) : 
 espAssets(espAssets), item(NULL) {
@@ -97,7 +99,8 @@ bool GameItemAssets::LoadItemTextures() {
 	Texture* upsideDownItemTex		= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_UPSIDEDOWN,		Texture::Trilinear);
 	Texture* ballSafetyNetItemTex	= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_BALLSAFETYNET,	Texture::Trilinear);
 	Texture* oneUpItemTex					= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_1UP,						Texture::Trilinear);
-	
+	Texture* poisonPaddleItemTex	= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_POISON,				Texture::Trilinear);
+
 	assert(slowBallItemTex			!= NULL);
 	assert(fastBallItemTex			!= NULL);
 	assert(uberBallItemTex			!= NULL);
@@ -114,6 +117,7 @@ bool GameItemAssets::LoadItemTextures() {
 	assert(upsideDownItemTex		!= NULL);
 	assert(ballSafetyNetItemTex != NULL);
 	assert(oneUpItemTex					!= NULL);
+	assert(poisonPaddleItemTex	!= NULL);
 
 	this->itemTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,						slowBallItemTex));
 	this->itemTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::FAST_BALL_ITEM_NAME,						fastBallItemTex));
@@ -131,6 +135,7 @@ bool GameItemAssets::LoadItemTextures() {
 	this->itemTextures.insert(std::pair<std::string, Texture*>(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,					upsideDownItemTex));
 	this->itemTextures.insert(std::pair<std::string, Texture*>(BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME,	ballSafetyNetItemTex));
 	this->itemTextures.insert(std::pair<std::string, Texture*>(OneUpItem::ONE_UP_ITEM_NAME,										oneUpItemTex));
+	this->itemTextures.insert(std::pair<std::string, Texture*>(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,			poisonPaddleItemTex));
 
 	// Load the timer textures
 	Texture* slowBallTimerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_SLOWBALL,		Texture::Trilinear);
@@ -141,6 +146,7 @@ bool GameItemAssets::LoadItemTextures() {
 	Texture* laserPaddleTimerTex	= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_PADDLELASER,	Texture::Trilinear);
 	Texture* blackoutTimerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_BLACKOUT,		Texture::Trilinear);
 	Texture* upsideDownTimerTex		= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_UPSIDEDOWN,	Texture::Trilinear);
+	Texture* poisonPaddleTimerTex	= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_POISON,			Texture::Trilinear);
 
 	assert(slowBallTimerTex			!= NULL);
 	assert(fastBallTimerTex			!= NULL);
@@ -150,25 +156,28 @@ bool GameItemAssets::LoadItemTextures() {
 	assert(laserPaddleTimerTex	!= NULL);
 	assert(blackoutTimerTex			!= NULL);
 	assert(upsideDownTimerTex		!= NULL);
+	assert(poisonPaddleTimerTex != NULL);
 
-	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,				slowBallTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::FAST_BALL_ITEM_NAME,				fastBallTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(UberBallItem::UBER_BALL_ITEM_NAME,				uberBallTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(InvisiBallItem::INVISI_BALL_ITEM_NAME,		invisiBallTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(GhostBallItem::GHOST_BALL_ITEM_NAME,			ghostBallTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,	laserPaddleTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(BlackoutItem::BLACKOUT_ITEM_NAME,					blackoutTimerTex));
-	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,			upsideDownTimerTex));
+	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,					slowBallTimerTex));
+	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::FAST_BALL_ITEM_NAME,					fastBallTimerTex));
+	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(UberBallItem::UBER_BALL_ITEM_NAME,					uberBallTimerTex));
+	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(InvisiBallItem::INVISI_BALL_ITEM_NAME,			invisiBallTimerTex));
+	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(GhostBallItem::GHOST_BALL_ITEM_NAME,				ghostBallTimerTex));
+	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,		laserPaddleTimerTex));
+	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(BlackoutItem::BLACKOUT_ITEM_NAME,						blackoutTimerTex));
+	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,				upsideDownTimerTex));
+	this->itemTimerTextures.insert(std::pair<std::string, Texture*>(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,	poisonPaddleTimerTex));
 
 	// Load the fillers for the timer textures (used to make the timer look like its ticking down)
-	Texture* ballSlowTimerFillerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_SPDBALL,		 Texture::Bilinear);
-	Texture* ballFastTimerFillerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_SPDBALL,		 Texture::Bilinear);
-	Texture* uberBallTimerFillerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_UBERBALL,		 Texture::Bilinear);
-	Texture* invisiBallTimerFillerTex		= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_INVISIBALL,  Texture::Bilinear);
-	Texture* ghostBallTimerFillerTex		= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL,	 Texture::Bilinear);
-	Texture* laserPaddleTimerFillerTex	= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_PADDLELASER, Texture::Bilinear);
-	Texture* blackoutTimerFillerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_BLACKOUT,		 Texture::Bilinear);
+	Texture* ballSlowTimerFillerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_SPDBALL,			Texture::Bilinear);
+	Texture* ballFastTimerFillerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_SPDBALL,			Texture::Bilinear);
+	Texture* uberBallTimerFillerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_UBERBALL,			Texture::Bilinear);
+	Texture* invisiBallTimerFillerTex		= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_INVISIBALL,		Texture::Bilinear);
+	Texture* ghostBallTimerFillerTex		= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL,		Texture::Bilinear);
+	Texture* laserPaddleTimerFillerTex	= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_PADDLELASER,	Texture::Bilinear);
+	Texture* blackoutTimerFillerTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_BLACKOUT,			Texture::Bilinear);
 	Texture* upsideDownTimerFillerTex		= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN,		Texture::Bilinear);
+	Texture* poisonPaddleTimerFillerTex	= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_TIMER_FILLER_POISON,				Texture::Bilinear);
 
 	assert(ballSlowTimerFillerTex			!= NULL);
 	assert(ballFastTimerFillerTex			!= NULL);
@@ -178,15 +187,17 @@ bool GameItemAssets::LoadItemTextures() {
 	assert(laserPaddleTimerFillerTex	!= NULL);
 	assert(blackoutTimerFillerTex			!= NULL);
 	assert(upsideDownTimerFillerTex		!= NULL);
+	assert(poisonPaddleTimerFillerTex != NULL);
 
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,				ballSlowTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::FAST_BALL_ITEM_NAME,				ballFastTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(UberBallItem::UBER_BALL_ITEM_NAME,				uberBallTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(InvisiBallItem::INVISI_BALL_ITEM_NAME,		invisiBallTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(GhostBallItem::GHOST_BALL_ITEM_NAME,			ghostBallTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,	laserPaddleTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(BlackoutItem::BLACKOUT_ITEM_NAME,					blackoutTimerFillerTex));
-	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,			upsideDownTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::SLOW_BALL_ITEM_NAME,					ballSlowTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(BallSpeedItem::FAST_BALL_ITEM_NAME,					ballFastTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(UberBallItem::UBER_BALL_ITEM_NAME,					uberBallTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(InvisiBallItem::INVISI_BALL_ITEM_NAME,			invisiBallTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(GhostBallItem::GHOST_BALL_ITEM_NAME,				ghostBallTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,		laserPaddleTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(BlackoutItem::BLACKOUT_ITEM_NAME,						blackoutTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,				upsideDownTimerFillerTex));
+	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,	poisonPaddleTimerFillerTex));
 
 	return true;
 }

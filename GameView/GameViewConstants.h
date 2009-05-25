@@ -44,6 +44,10 @@ public:
 	const std::string CGFX_PHONG_SHADER;
 	const std::string CGFX_POSTREFRACT_SHADER;
 	const std::string CGFX_VOLUMEMETRIC_SHADER;
+	const std::string CGFX_DECOSKYBOX_SHADER;
+	const std::string CGFX_GAUSSIAN_SHADER;
+	const std::string CGFX_AFTERIMAGE_SHADER;
+	const std::string CGFX_BLOOM_SHADER;
 
 	// Texture path constants *******************************
 	const std::string TEXTURE_BANG1;
@@ -64,6 +68,11 @@ public:
 	const std::string TEXTURE_UP_ARROW;
 	const std::string TEXTURE_BALL_LIFE_HUD;
 	const std::string TEXTURE_SPARKLE;
+	const std::string TEXTURE_SPIRAL_SMALL;
+	const std::string TEXTURE_SPIRAL_MEDIUM;
+	const std::string TEXTURE_SPIRAL_LARGE;
+
+	const std::string TEXTURE_STARFIELD;
 
 	const std::string TEXTURE_BALL_SAFETY_NET;
 
@@ -83,6 +92,7 @@ public:
 	const std::string TEXTURE_ITEM_UPSIDEDOWN;
 	const std::string TEXTURE_ITEM_BALLSAFETYNET;
 	const std::string TEXTURE_ITEM_1UP;
+	const std::string TEXTURE_ITEM_POISON;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -92,6 +102,7 @@ public:
 	const std::string TEXTURE_ITEM_TIMER_PADDLELASER;
 	const std::string TEXTURE_ITEM_TIMER_BLACKOUT;
 	const std::string TEXTURE_ITEM_TIMER_UPSIDEDOWN;
+	const std::string TEXTURE_ITEM_TIMER_POISON;
 
 	const std::string TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
@@ -100,6 +111,7 @@ public:
 	const std::string TEXTURE_ITEM_TIMER_FILLER_PADDLELASER;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_BLACKOUT;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_POISON;
 
 	// Font path constants **********************************
 	const std::string FONT_HAPPYGOOD;
@@ -116,11 +128,15 @@ public:
 	const Colour ITEM_NEUTRAL_COLOUR;
 	
 	const float DEFAULT_BALL_LIGHT_ATTEN;
+	const Colour DEFAULT_BALL_KEY_LIGHT_COLOUR;
 	const Colour DEFAULT_FG_KEY_LIGHT_COLOUR;
 	const Colour DEFAULT_FG_FILL_LIGHT_COLOUR;
 	const Colour DEFAULT_BG_KEY_LIGHT_COLOUR;
 	const Colour DEFAULT_BG_FILL_LIGHT_COLOUR;
 	const Colour DEFAULT_BALL_LIGHT_COLOUR;
+	const Colour BLACKOUT_LIGHT_COLOUR;
+	const Colour POISON_LIGHT_DEEP_COLOUR;
+	const Colour POISON_LIGHT_LIGHT_COLOUR;
 	const Colour GHOST_BALL_COLOUR;
 	const Colour UBER_BALL_COLOUR;
 

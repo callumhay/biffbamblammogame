@@ -1,7 +1,6 @@
 #include "CgFxPostRefract.h"
 #include "GameViewConstants.h"
 
-#include "../BlammoEngine/CgShaderManager.h"
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Noise.h"
@@ -44,7 +43,7 @@ timer(0.0), warpAmount(1.0f), sceneTex(NULL), noiseTexID(Noise::GetInstance()->G
 	// The rendered scene background texture
 	this->sceneSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
 	
-	CgShaderManager::Instance()->CheckForCgError("Getting parameters for CgFxPostRefract");
+	debug_cg_state();
 }
 
 CgFxPostRefract::~CgFxPostRefract() {

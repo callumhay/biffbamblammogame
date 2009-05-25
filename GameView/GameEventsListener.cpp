@@ -14,8 +14,6 @@
 #include "../GameModel/Onomatoplex.h"
 #include "../GameModel/Projectile.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 GameEventsListener::GameEventsListener(GameDisplay* d) : display(d) {
 	assert(d != NULL);
 }

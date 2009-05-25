@@ -1,75 +1,53 @@
 #include "DecoSkybox.h"
 #include "GameViewConstants.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/Camera.h"
+#include "../BlammoEngine/GeometryMaker.h"
 
-const float DecoSkybox::COLOUR_CHANGE_TIME = 10.0f;	// Amount of time in seconds to change from one colour to the next
+#include "../ResourceManager.h"
 
-const Colour DecoSkybox::COLOUR_CHANGE_LIST[NUM_COLOUR_CHANGES] = {
-	Colour(0.4375f, 0.5f, 0.5647f),							// slate greyish-blue
-	Colour(0.2745098f, 0.5098039f, 0.70588f),		// steel blue
-	Colour(0.28235f, 0.2392f, 0.545098f),				// slate purple-blue
-	Colour(0.51372549f, 0.4352941f, 1.0f),			// slate purple
-	Colour(0.8588235f, 0.439215686f, 0.57647f),	// pale violet
-	Colour(1.0f, 0.75686f, 0.75686f),						// rosy brown 
-	Colour(0.7215686f, 0.52549f, 0.043f),				// goldenrod
-	Colour(0.4196f, 0.5568627f, 0.1372549f),		// olive
-	Colour(0.4f, 0.8039215f, 0.666667f),				// deep aquamarine
-	Colour(0.3725f, 0.6196078f, 0.62745098f)		// cadet (olive-) blue
-};
+DecoSkybox::DecoSkybox() : 
+Skybox(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear)),
+decoSkyboxEffect(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear)),
+skyboxDispList(0) {
 
-const std::string DecoSkybox::DECO_SKYBOX_TEXTURES[6]			= {
-	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", 
-	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
-	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", 
-	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg",
-	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg", 
-	GameViewConstants::GetInstance()->TEXTURE_DIR + "/deco_spirals1024x1024.jpg"
-};
+	// Create a display list for the skybox geometry
+	this->skyboxDispList = glGenLists(1);
+	assert(this->skyboxDispList != 0);
 
-DecoSkybox::DecoSkybox(PolygonGroup* geom, TextureCube* tex) : Skybox(geom, tex), currColourAnim(&currColour) {
-	// Setup the colour interpolation member
-	const int colourChangesPlusOne = NUM_COLOUR_CHANGES + 1;
-	std::vector<double> timeValues;
-	timeValues.reserve(colourChangesPlusOne);
-	std::vector<Colour> colourValues;
-	colourValues.reserve(colourChangesPlusOne);
-
-	for (int i = 0; i < colourChangesPlusOne; i++) {
-		timeValues.push_back(i * DecoSkybox::COLOUR_CHANGE_TIME);
-		colourValues.push_back(DecoSkybox::COLOUR_CHANGE_LIST[i % NUM_COLOUR_CHANGES]);
-	}
-
-	currColourAnim.SetRepeat(true);
-	currColourAnim.SetLerp(timeValues, colourValues);
+	glNewList(this->skyboxDispList, GL_COMPILE);
+	Skybox::DrawSkyboxGeometry(4, (Camera::FAR_PLANE_DIST - 1.0f) / SQRT_2);
+	glEndList();
 }
 
 DecoSkybox::~DecoSkybox() {
+	// Clean up the display list for the skybox
+	glDeleteLists(this->skyboxDispList, 1);
+	this->skyboxDispList = 0;
 }
 
-void DecoSkybox::Tick(double dT) {
-	currColourAnim.Tick(dT);
-}
+void DecoSkybox::Draw(const Camera& camera) {
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+  glLoadIdentity();
 
-void DecoSkybox::SetupCgFxParameters() {
-	Skybox::SetupCgFxParameters();
-}
+	Vector3D camView = camera.GetNormalizedViewVector();
+	Matrix4x4 camTransform = camera.GetViewTransform();
+	camTransform.setTranslation(Point3D(0,0,0));
+	glMultMatrixf(camTransform.begin());
 
-DecoSkybox* DecoSkybox::CreateDecoSkybox(const std::string& meshFilepath) {
-	// Start by making the cubemap texture
-	TextureCube* skyboxTex = TextureCube::CreateCubeTextureFromImgFiles(DECO_SKYBOX_TEXTURES, Texture::Trilinear);
-	if (skyboxTex == NULL) {
-		return NULL;
-	}
+	glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_DEPTH_BUFFER_BIT);
+  glDisable(GL_LIGHTING);
+	glDisable(GL_DEPTH_TEST);
+	
+	this->skyboxTex->BindTexture();
+	glTexParameteri(this->skyboxTex->GetTextureType(), GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(this->skyboxTex->GetTextureType(), GL_TEXTURE_WRAP_T, GL_REPEAT);
+	this->decoSkyboxEffect.Draw(camera, this->skyboxDispList);
+	this->skyboxTex->UnbindTexture();
 
-	// Now load the polygon group associated with the skybox
-	PolygonGroup* skyboxGeom = ObjReader::ReadPolygonGroup(meshFilepath);
-	// TODO: (OPTIMIZATION) Have ONLY the position geometry being loaded... THIS WILL REQUIRE MODIFICATIONS
-	// TO THE OBJREADER AND POLYGONGROUP CLASSES
-	if (skyboxGeom == NULL) {
-		return NULL;
-	}
+	glPopAttrib();
+	glPopMatrix();
 
-	DecoSkybox* newSkybox = new DecoSkybox(skyboxGeom, skyboxTex);
-	return newSkybox;
+	debug_cg_state();
 }

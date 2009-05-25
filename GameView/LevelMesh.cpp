@@ -9,7 +9,8 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Point.h"
-#include "../BlammoEngine/ResourceManager.h"
+
+#include "../ResourceManager.h"
 
 #include "../GameModel/GameBall.h"
 

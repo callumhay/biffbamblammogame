@@ -4,10 +4,11 @@
 #include "GameViewConstants.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Mesh.h"
 #include "../BlammoEngine/Skybox.h"
 #include "../BlammoEngine/Light.h"
-#include "../BlammoEngine/ResourceManager.h"
+#include "../ResourceManager.h"
 
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/PlayerPaddle.h"
@@ -24,6 +25,8 @@ protected:
 	Mesh* styleBlock;
 	
 	PointLight bgFillLight, bgKeyLight;
+	std::list<AnimationLerp<Colour>> colourAnims;
+
 		
 public:
 	GameWorldAssets(Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* styleBlock) : 
@@ -47,14 +50,15 @@ public:
 	}
 
 	void ToggleBackgroundLights(bool turnOn) {
-		if (turnOn) {
-			this->bgKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR);
-			this->bgFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR);
-		}
-		else {
-			this->bgKeyLight.SetDiffuseColour(Colour(0,0,0));
-			this->bgFillLight.SetDiffuseColour(Colour(0,0,0));
-		}
+		this->colourAnims.clear();
+
+		// Add animations to dim and turn off the lights or turn the lights back on
+		AnimationLerp<Colour> keyLightColAnim(this->bgKeyLight.GetDiffuseColourPtr());
+		keyLightColAnim.SetLerp(1.0f, turnOn ? GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR : GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR);
+		this->colourAnims.push_back(keyLightColAnim);
+		AnimationLerp<Colour> fillLightColAnim(this->bgFillLight.GetDiffuseColourPtr());
+		fillLightColAnim.SetLerp(1.0f, turnOn ? GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR : GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR);
+		this->colourAnims.push_back(fillLightColAnim);
 	}
 
 	Mesh* GetWorldStyleBlock() const {
@@ -66,7 +70,20 @@ public:
 	}
 
 	virtual void Tick(double dT) {
-		this->skybox->Tick(dT);	
+		this->skybox->Tick(dT);
+
+		// Tick any animations
+		std::list<std::list<AnimationLerp<Colour>>::iterator> toRemove;
+		for (std::list<AnimationLerp<Colour>>::iterator animIter = this->colourAnims.begin(); 
+			animIter != this->colourAnims.end();) {
+				bool isFinished = animIter->Tick(dT);
+				if (isFinished) {
+					animIter = this->colourAnims.erase(animIter);
+				}
+				else {
+					animIter++;
+				}
+		}
 	};
 
 	virtual void DrawSkybox(const Camera& camera) {

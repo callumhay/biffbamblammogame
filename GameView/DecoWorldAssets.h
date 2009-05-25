@@ -1,13 +1,28 @@
 #ifndef __DECOWORLDASSETS_H__
 #define __DECOWORLDASSETS_H__
 
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Animation.h"
+
 #include "GameWorldAssets.h"
-#include "../ESPEngine/ESP.h"
+
+#include "../ESPEngine/ESPVolumeEmitter.h"
+#include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESPParticleColourEffector.h"
+#include "../ESPEngine/ESPParticleRotateEffector.h"
 
 class CgFxVolumetricEffect;
 
 class DecoWorldAssets : public GameWorldAssets {
+
 private:
+	static const float COLOUR_CHANGE_TIME;
+	static const int NUM_COLOUR_CHANGES = 10;
+	static const Colour COLOUR_CHANGE_LIST[NUM_COLOUR_CHANGES];
+
+	AnimationMultiLerp<Colour> currBGMeshColourAnim;	// Colour animation progression of the background mesh
+
 	enum RotationState { RotateCW, RotateCCW };		// CCW is moving in postive degrees, CW is negative...
 
 	double rotationLimitfg, rotationLimitbg;		// Limit of the arc of rotation for the beams
@@ -20,9 +35,14 @@ private:
 	// Background meshes and effects specific to deco world
 	Mesh* skybeam;
 	CgFxVolumetricEffect* beamEffect;
-	//std::vector<ESPPointEmitter> sparkleEmitters;
+
+	Texture2D* spiralTexSm;
+	Texture2D* spiralTexMed;
+	Texture2D* spiralTexLg;
+	ESPVolumeEmitter spiralEmitterSm, spiralEmitterMed, spiralEmitterLg;
+	ESPParticleRotateEffector rotateEffectorCW, rotateEffectorCCW;
 	
-	//void InitializeEmitters();
+	void InitializeEmitters();
 	void RotateSkybeams(double dT);
 
 public:

@@ -1,11 +1,12 @@
 #ifndef __MAINMENUDISPLAYSTATE_H__
 #define __MAINMENUDISPLAYSTATE_H__
 
+#include "../BlammoEngine/BasicIncludes.h"
+
 #include "DisplayState.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 class GameMenu;
+class TextLabel2D;
 
 /**
  * State for displaying the main, out of game menu. This is the first 

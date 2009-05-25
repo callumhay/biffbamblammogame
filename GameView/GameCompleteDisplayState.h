@@ -1,8 +1,10 @@
 #ifndef __GAMECOMPLETEDISPLAYSTATE_H__
 #define __GAMECOMPLETEDISPLAYSTATE_H__
 
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/TextLabel.h"
+
 #include "DisplayState.h"
-#include "../BlammoEngine/BlammoEngine.h"
 
 /**
  * State for displaying the completion of the game animation and

@@ -2,6 +2,7 @@
 #define __GAMEASSETS_H__
 
 #include "../BlammoEngine/Light.h"
+#include "../BlammoEngine/Animation.h"
 
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/LevelPiece.h"
@@ -22,6 +23,7 @@ class LivesLeftHUD;
 #include "GameWorldAssets.h"
 #include "GameESPAssets.h"
 #include "GameItemAssets.h"
+#include "GameFBOAssets.h"
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -30,6 +32,7 @@ private:
 	GameWorldAssets* worldAssets;	// World-related assets
 	GameESPAssets* espAssets;			// Emitter/Sprite/Particle assets
 	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
+	GameFBOAssets* fboAssets;			// Framebuffer Object related assets
 
 	LivesLeftHUD* lifeHUD;
 
@@ -47,6 +50,11 @@ private:
 	PointLight ballKeyLight, ballFillLight;
 	// In-game lights just for the paddle
 	PointLight paddleKeyLight, paddleFillLight;
+	// Storage for light colours - e.g., when lights are turned out these keep the values
+	// used to restore the light
+	Colour fgKeyLightColour, fgFillLightColour, ballKeyLightColour;
+	// Animations for when the lights change
+	std::list<AnimationLerp<Colour>> lightColourAnims;
 
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
@@ -60,9 +68,11 @@ private:
 	void LoadRegularEffectAssets();
 
 	void ToggleLights(bool turnOn);
+	void ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour& fgFillLightCol, const Colour& ballKeyLightCol, float changeTime = 1.0f);
+
 
 public:
-	GameAssets();
+	GameAssets(int screenWidth, int screenHeight);
 	~GameAssets();
 
 	void LoadWorldAssets(const GameWorld* world);
@@ -76,11 +86,13 @@ public:
 	void DrawBackgroundEffects(const Camera& camera);
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
-	void DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, Texture2D* sceneTex, const Vector2D& worldT);
+	void DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Texture2D* sceneTex, const Vector2D& worldT);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const;
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
 
+#ifdef _DEBUG
 	void DebugDrawLights() const;
+#endif
 
 	// Public Getter Functions **********************************************************************
 	LevelMesh* GetLevelMesh(const GameLevel* currLevel) const {
@@ -97,6 +109,10 @@ public:
 
 	GameESPAssets* GetESPAssets() const {
 		return this->espAssets;
+	}
+
+	GameFBOAssets* GetFBOAssets() {
+		return this->fboAssets;
 	}
 
 	LivesLeftHUD* GetLifeHUD() const {

@@ -1,7 +1,6 @@
 #include "GameAssets.h"
 #include "GameDisplay.h"
 #include "LevelMesh.h"
-#include "DecoSkybox.h"
 #include "GameViewConstants.h"
 #include "CgFxPostRefract.h"
 #include "CgFxVolumetricEffect.h"
@@ -12,21 +11,23 @@
 // Game Model includes
 #include "../GameModel/GameModel.h"
 #include "../GameModel/BlackoutItem.h"
+#include "../GameModel/PoisonPaddleItem.h"
 
 // Blammo Engine includes
 #include "../BlammoEngine/Texture3D.h"
-#include "../BlammoEngine/ResourceManager.h"
-
 // ESP Engine includes
 #include "../ESPEngine/ESPEmitter.h"
 
+#include "../ResourceManager.h"
+
 // *****************************************************
 
-GameAssets::GameAssets(): 
+GameAssets::GameAssets(int screenWidth, int screenHeight): 
 
 worldAssets(NULL),
 espAssets(NULL),
 itemAssets(NULL),
+fboAssets(NULL),
 
 lifeHUD(NULL),
 
@@ -35,11 +36,19 @@ spikeyBall(NULL),
 paddleLaserAttachment(NULL),
 
 invisiBallEffect(NULL), 
-ghostBallEffect(NULL) {
+ghostBallEffect(NULL),
+
+fgKeyLightColour(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR),
+fgFillLightColour(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR),
+ballKeyLightColour(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_COLOUR)
+{
 
 	// Load ESP assets
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading purdy pictures...");
 	this->espAssets = new GameESPAssets();
+
+	// Load FBO assets
+	this->fboAssets = new GameFBOAssets(screenWidth, screenHeight);
 
 	// Load item assets
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading game items...");
@@ -63,7 +72,17 @@ ghostBallEffect(NULL) {
 	this->lifeHUD = new LivesLeftHUD();
 
 	// Initialize default light values
-	this->ToggleLights(true);
+	this->fgKeyLight  = PointLight(Point3D(-30.0f, 40.0f, 65.0f), this->fgKeyLightColour, 0.0f);
+	this->fgFillLight = PointLight(Point3D(25.0f, 0.0f, 40.0f), this->fgFillLightColour,  0.037f);
+	this->ballLight		= PointLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, 
+																GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN);
+
+	this->ballKeyLight	= this->fgKeyLight;
+	this->ballKeyLight.SetDiffuseColour(this->ballKeyLightColour);
+	this->ballFillLight	= this->fgFillLight;
+	this->ballFillLight.SetDiffuseColour(Colour(0,0,0));
+	this->paddleKeyLight = this->fgKeyLight;
+	this->paddleFillLight = this->fgFillLight;
 }
 
 GameAssets::~GameAssets() {
@@ -78,6 +97,9 @@ GameAssets::~GameAssets() {
 		delete this->itemAssets;
 		this->itemAssets = NULL;
 	}
+
+	delete this->fboAssets;
+	this->fboAssets = NULL;
 
 	// Delete the lives left HUD
 	delete this->lifeHUD;
@@ -108,23 +130,28 @@ void GameAssets::DeleteWorldAssets() {
  * and background lights are affected).
  */
 void GameAssets::ToggleLights(bool turnOn) {
+	this->lightColourAnims.clear();
 	if (turnOn) {
-		this->fgKeyLight  = PointLight(Point3D(-30.0f, 40.0f, 65.0f), GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0f);
-		this->fgFillLight = PointLight(Point3D(25.0f, 0.0f, 40.0f), GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,  0.037f);
-		this->ballLight		= PointLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, 
-																	 GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN);
+		// Add animation to turn the lights back on
+		AnimationLerp<Colour> keyLightColAnim(this->fgKeyLight.GetDiffuseColourPtr());
+		keyLightColAnim.SetLerp(1.0f, this->fgKeyLightColour);
+		this->lightColourAnims.push_back(keyLightColAnim);
+		AnimationLerp<Colour> fillLightColAnim(this->fgFillLight.GetDiffuseColourPtr());
+		fillLightColAnim.SetLerp(1.0f, this->fgFillLightColour);
+		this->lightColourAnims.push_back(fillLightColAnim);
 
-		this->ballKeyLight	= this->fgKeyLight;
-		this->ballKeyLight.SetDiffuseColour(Colour(0.9f, 0.9f, 0.9f));
-		this->ballFillLight	= this->fgFillLight;
-		this->ballFillLight.SetDiffuseColour(Colour(0,0,0));
-		this->paddleKeyLight = this->fgKeyLight;
-		this->paddleFillLight = this->fgFillLight;
+		this->fgFillLight.SetLinearAttenuation(0.037f);
+		this->ballLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR);
+		this->ballLight.SetLinearAttenuation(GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN);
 	}
 	else {
-		// Turn off foreground lights...
-		this->fgKeyLight.SetDiffuseColour(Colour(0,0,0));
-		this->fgFillLight.SetDiffuseColour(Colour(0,0,0));
+		// Add animation to dim then turn off the lights
+		AnimationLerp<Colour> keyLightColAnim(this->fgKeyLight.GetDiffuseColourPtr());
+		keyLightColAnim.SetLerp(1.0f, GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR);
+		this->lightColourAnims.push_back(keyLightColAnim);
+		AnimationLerp<Colour> fillLightColAnim(this->fgFillLight.GetDiffuseColourPtr());
+		fillLightColAnim.SetLerp(1.0f, GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR);
+		this->lightColourAnims.push_back(fillLightColAnim);
 
 		// Set the attenuation to be a smaller distance for the ball
 		this->ballLight.SetLinearAttenuation(0.8f);
@@ -133,6 +160,45 @@ void GameAssets::ToggleLights(bool turnOn) {
 	// Background lights...
 	if (this->worldAssets != NULL) {
 		this->worldAssets->ToggleBackgroundLights(turnOn);	
+	}
+}
+
+/**
+ * Changes the light colour in the level, while making sure it doesn't change the light colour
+ * if the lights are blacked out (i.e., it doesn't turn lights back on).
+ */
+void GameAssets::ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour& fgFillLightCol, const Colour& ballKeyLightCol, float changeTime) {
+	this->lightColourAnims.clear();
+	this->fgKeyLightColour  = fgKeyLightCol;
+	this->fgFillLightColour	= fgFillLightCol;
+
+	// Set the light colours for the foreground key light and paddle key light if not blacked-out
+	if (this->fgKeyLight.GetDiffuseColour() != GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR) {
+		AnimationLerp<Colour> keyLightColAnim(this->fgKeyLight.GetDiffuseColourPtr());
+		keyLightColAnim.SetLerp(changeTime, fgKeyLightCol);
+		this->lightColourAnims.push_back(keyLightColAnim);
+
+		AnimationLerp<Colour> paddleKeyLightColAnim(this->paddleKeyLight.GetDiffuseColourPtr());
+		paddleKeyLightColAnim.SetLerp(changeTime, fgKeyLightCol);
+		this->lightColourAnims.push_back(paddleKeyLightColAnim);
+	}
+
+	// Set the light colours for the foreground fill light and paddle fill light if not blacked-out
+	if (this->fgFillLight.GetDiffuseColour() != GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR) {
+		AnimationLerp<Colour> fillLightColAnim(this->fgFillLight.GetDiffuseColourPtr());
+		fillLightColAnim.SetLerp(changeTime, fgFillLightCol);
+		this->lightColourAnims.push_back(fillLightColAnim);
+
+		AnimationLerp<Colour> paddleFillLightColAnim(this->paddleFillLight.GetDiffuseColourPtr());
+		paddleFillLightColAnim.SetLerp(changeTime, fgFillLightCol);
+		this->lightColourAnims.push_back(paddleFillLightColAnim);
+	}
+
+	// Set the light colours for the ball key light if not blacked-out
+	if (this->ballKeyLight.GetDiffuseColour() != GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR) {
+		AnimationLerp<Colour> ballKeyLightColAnim(this->ballKeyLight.GetDiffuseColourPtr());
+		ballKeyLightColAnim.SetLerp(changeTime, ballKeyLightCol);
+		this->lightColourAnims.push_back(ballKeyLightColAnim);
 	}
 }
 
@@ -145,7 +211,7 @@ void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Ca
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
 // draw the materials and draw the mesh.
-void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, Texture2D* sceneTex, const Vector2D& worldT) {
+void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Texture2D* sceneTex, const Vector2D& worldT) {
 	
 	// Average values used to calculate the colour and position of the ball light
 	Point3D avgBallPosition(0,0,0);
@@ -264,6 +330,19 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 void GameAssets::Tick(double dT) {
 	this->worldAssets->Tick(dT);
+
+	// Tick all light animations
+	std::list<std::list<AnimationLerp<Colour>>::iterator> toRemove;
+	for (std::list<AnimationLerp<Colour>>::iterator animIter = this->lightColourAnims.begin(); 
+		animIter != this->lightColourAnims.end();) {
+			bool isFinished = animIter->Tick(dT);
+			if (isFinished) {
+				animIter = this->lightColourAnims.erase(animIter);
+			}
+			else {
+				animIter++;
+			}
+	}
 }
 
 /**
@@ -272,8 +351,10 @@ void GameAssets::Tick(double dT) {
 void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera) const {
 	Point2D paddleCenter = p.GetCenterPosition();	
 
+	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (p.GetPaddleScaleFactor() - 1);
+
 	glPushMatrix();
-	glTranslatef(paddleCenter[0], paddleCenter[1], 0);
+	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
 
 	// Draw any effects on the paddle (e.g., item acquiring effects)
 	this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
@@ -349,7 +430,6 @@ void GameAssets::LoadRegularEffectAssets() {
 		this->ghostBallEffect = new CgFxVolumetricEffect();
 		this->ghostBallEffect->SetTechnique(CgFxVolumetricEffect::GHOSTBALL_TECHNIQUE_NAME);
 		this->ghostBallEffect->SetColour(Colour(0.80f, 0.90f, 1.0f));
-		this->ghostBallEffect->SetConstantFactor(0.05f);
 		this->ghostBallEffect->SetFadeExponent(1.0f);
 		this->ghostBallEffect->SetScale(0.1f);
 		this->ghostBallEffect->SetFrequency(0.8f);
@@ -421,6 +501,16 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 		assert(gameModel.IsBlackoutEffectActive());
 		this->ToggleLights(false);
 	}
+	else if (item.GetName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
+		// The poison item will make the lights turn a sickly green colour
+		assert((gameModel.GetPlayerPaddle()->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle);
+		this->ChangeLightsOnColour(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 
+															 GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR,
+															 GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR);
+		
+		// Poison also causes the bloom to strobe and the blur filter to cause double vision
+		// TODO
+	}
 }
 
 /**
@@ -435,8 +525,18 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		assert(!gameModel.IsBlackoutEffectActive());
 		this->ToggleLights(true);
 	}
+	else if (item.GetName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
+		// Restore the light colours
+		this->ChangeLightsOnColour(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 
+															 GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,
+															 GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_COLOUR);
+		
+		// Restore the post-process effects for bloom and blur
+		// TODO
+	}
 }
 
+#ifdef _DEBUG
 /**
  * Debug function for drawing the lights that affect the game - draws them as
  * coloured cubes.
@@ -448,3 +548,4 @@ void GameAssets::DebugDrawLights() const {
 	this->fgFillLight.DebugDraw();
 	this->ballLight.DebugDraw();
 }
+#endif

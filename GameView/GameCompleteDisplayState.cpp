@@ -4,8 +4,6 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 const std::string GameCompleteDisplayState::GAME_COMPLETE_TEXT = "YOU WIN!";
 
 GameCompleteDisplayState::GameCompleteDisplayState(GameDisplay* display) : DisplayState(display) {

@@ -7,8 +7,6 @@
 
 #include "../GameController.h"
 
-#include "../BlammoEngine/BlammoEngine.h"
-
 // TODO: this will eventually be replaced by 3 sprites
 // for "Biff" "Bam" and "Blammo" respectively
 const std::string MainMenuDisplayState::TITLE_TEXT = "BIFF! BAM!! BLAMMO!?!";
@@ -126,7 +124,6 @@ void MainMenuDisplayState::KeyPressed(SDLKey key) {
 					case NEW_GAME_INDEX:
 						debug_output("Selected " << NEW_GAME_MENUITEM << " from menu");
 						this->display->SetCurrentState(new StartGameDisplayState(this->display));
-
 						break;
 					case PLAY_LEVEL_INDEX:
 						debug_output("Selected " << PLAY_LEVEL_MENUITEM << " from menu");
@@ -137,6 +134,7 @@ void MainMenuDisplayState::KeyPressed(SDLKey key) {
 					case EXIT_INDEX:
 						// TODO: Put a dialogue for "Are you sure..."
 						this->display->QuitGame();
+						break;
 					default:
 						assert(false);
 						break;

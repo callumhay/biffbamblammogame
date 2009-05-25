@@ -1,11 +1,11 @@
 #include "BallSafetyNetMesh.h"
 #include "GameViewConstants.h"
 #include "CgFxCelShading.h"
-#include "CgFxOutlinedPhong.h"
+#include "CgFxPhong.h"
 
 #include "../GameModel/LevelPiece.h"
 
-#include "../BlammoEngine/ResourceManager.h"
+#include "../ResourceManager.h"
 #include "../BlammoEngine/CgFxEffect.h"
 #include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/Camera.h"
@@ -68,12 +68,10 @@ void BallSafetyNetMesh::InitializeMaterials() {
 	matProps->specular			= Colour(0.3, 0.3, 0.3);
 	matProps->shininess			= 50.0f;
 	matProps->geomType			= MaterialProperties::MATERIAL_GEOM_FG_TYPE;
-	matProps->materialType	= MaterialProperties::MATERIAL_CELPHONG_TYPE;	// Not really necessary, but just for brevity
-	matProps->outlineColour = Colour(0, 0, 0);
-	matProps->outlineSize		= 2.0f;
+	matProps->materialType	= MaterialProperties::MATERIAL_PHONG_TYPE;	// Not really necessary, but just for brevity
 
 	// Associate material properties with appropriate shading technique
-	this->shadingMaterial = new CgFxOutlinedPhong(matProps);
+	this->shadingMaterial = new CgFxPhong(matProps);
 }
 
 /**
