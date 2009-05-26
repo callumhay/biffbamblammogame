@@ -34,7 +34,7 @@ CgFxAfterImage::~CgFxAfterImage() {
 	this->prevFrameFBO = NULL;
 }
 
-void CgFxAfterImage::Draw(int screenWidth, int screenHeight) {
+void CgFxAfterImage::Draw(int screenWidth, int screenHeight, double dT) {
 	// Step 0: Establish uniform parameter(s)
 	cgGLSetTextureParameter(this->currFrameSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
 	cgGLSetParameter1f(this->blurStrengthParam, this->blurStrength);

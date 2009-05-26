@@ -2,6 +2,7 @@
 #define __CGFXGAUSSIANBLUR_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/CgFxEffect.h"
 
 class FBObj;
@@ -23,12 +24,16 @@ private:
 	CGparameter sceneWidthParam;
 	CGparameter sceneHeightParam;
 
+	enum BlurAnimations { PoisonAnimation };
+	std::map<BlurAnimations, AnimationMultiLerp<float>> blurAnims;
+
 public:
 	CgFxGaussianBlur(BlurType blurType, FBObj* sceneFBO);
 	virtual ~CgFxGaussianBlur();
 
-	void SetBlurType(BlurType type);
-	virtual void Draw(int screenWidth, int screenHeight);
+	void SetPoisonBlurAnimation(bool on);
 
+	void SetBlurType(BlurType type);
+	virtual void Draw(int screenWidth, int screenHeight, double dT);
 };
 #endif

@@ -2,6 +2,7 @@
 #define __CGFXBLOOM_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/CgFxEffect.h"
 
 class FBObj;
@@ -13,6 +14,11 @@ private:
 	static const std::string BRIGHT_DOWNSAMPLE_LVL3_TECHNIQUE_NAME;
 	static const std::string BRIGHT_DOWNSAMPLE_LVL4_TECHNIQUE_NAME;
 	static const std::string BLOOM_COMPOSITION_TECHNIQUE_NAME;
+
+	static const float DEFAULT_HIGHLIGHT_THRESHOLD;
+	static const float DEFAULT_SCENE_INTENSITY;
+	static const float DEFAULT_GLOW_INTENSITY;
+	static const float DEFAULT_HIGHLIGHT_INTENSITY;
 	
 	// CG parameters
 	CGparameter sceneSamplerParam;
@@ -45,6 +51,7 @@ public:
 	CgFxBloom(FBObj* sceneFBO);
 	virtual ~CgFxBloom();
 
-	virtual void Draw(int screenWidth, int screenHeight);
+	virtual void Draw(int screenWidth, int screenHeight, double dT);
+	std::list<AnimationMultiLerp<float>> GetPulseAnimation(float pulseLengthInSec, float pulseAmount);
 };
 #endif

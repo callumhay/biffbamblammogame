@@ -78,7 +78,7 @@ public:
 		assert(success);
 	}
 
-	virtual void Draw(int screenWidth, int screenHeight) = 0;
+	virtual void Draw(int screenWidth, int screenHeight, double dT) = 0;
 };
 
 /**

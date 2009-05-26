@@ -54,7 +54,7 @@ private:
 	// used to restore the light
 	Colour fgKeyLightColour, fgFillLightColour, ballKeyLightColour;
 	// Animations for when the lights change
-	std::list<AnimationLerp<Colour>> lightColourAnims;
+	std::list<AnimationMultiLerp<Colour>> lightColourAnims;
 
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
@@ -68,8 +68,7 @@ private:
 	void LoadRegularEffectAssets();
 
 	void ToggleLights(bool turnOn);
-	void ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour& fgFillLightCol, const Colour& ballKeyLightCol, float changeTime = 1.0f);
-
+	void ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour& fgFillLightCol, const Colour& ballKeyLightCol, float changeTime = 1.0f, bool pulse = false);
 
 public:
 	GameAssets(int screenWidth, int screenHeight);

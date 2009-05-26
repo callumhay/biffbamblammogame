@@ -147,7 +147,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	fullSceneFBO->UnbindFBObj();
 
 	// Do a gaussian blur on the foreground for a softer feeling
-	this->display->GetAssets()->GetFBOAssets()->RenderFullSceneBlur(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	this->display->GetAssets()->GetFBOAssets()->RenderFullSceneBlur(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
 
 	debug_opengl_state();
 }
@@ -156,9 +156,9 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	GameFBOAssets* fboAssets = this->display->GetAssets()->GetFBOAssets();
 
 	// Do some purdy bloom - this adds a nice contrasty highlighted touch to the entire scene
-	fboAssets->RenderBloom(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	fboAssets->RenderBloom(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
 	// Add motion blur / afterimage effect 
-	fboAssets->RenderAfterImage(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	fboAssets->RenderAfterImage(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
 
 	// Render all effects that do not go through all the post-processing filters...
 	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
