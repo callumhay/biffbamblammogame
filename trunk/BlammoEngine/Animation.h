@@ -192,8 +192,10 @@ public:
 	 * Reset the animation back to the start.
 	 */
 	void ResetToStart() {
+		assert(this->interpolationPts.size() > 0);
 		this->x = 0.0;
 		this->tracker = 0;
+		this->SetInterpolantValue(this->interpolationPts[0]);
 	}
 	void SetInterpolantValue(T value) {
 		(*this->interpolant) = value;
@@ -223,6 +225,24 @@ public:
 		this->tracker = 0;
 		this->timePts = times;
 		this->interpolationPts = interpolations;
+	}
+
+	/**
+	 * Simplifed setup of the linear interpolation values - this will only accept the final time and the
+	 * final value for the interpolant. The initial time will be set to zero and the initial value
+	 * of the interpolant will be set to the interpolant's current value.
+	 */
+	void SetLerp(double finalTime, T finalValue) {
+		this->x = 0.0;
+		this->tracker = 0;
+
+		this->timePts.reserve(2);
+		this->timePts.push_back(x);
+		this->timePts.push_back(finalTime);
+
+		this->interpolationPts.reserve(2);
+		this->interpolationPts.push_back(*interpolant);
+		this->interpolationPts.push_back(finalValue);
 	}
 
 	/**

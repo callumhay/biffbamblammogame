@@ -11,12 +11,20 @@ const std::string CgFxBloom::BRIGHT_DOWNSAMPLE_LVL3_TECHNIQUE_NAME	= "BrightDown
 const std::string CgFxBloom::BRIGHT_DOWNSAMPLE_LVL4_TECHNIQUE_NAME	= "BrightDownsampleBlur4";
 const std::string CgFxBloom::BLOOM_COMPOSITION_TECHNIQUE_NAME				= "CompositeBloom";
 
+const float CgFxBloom::DEFAULT_HIGHLIGHT_THRESHOLD	= 0.55f;
+const float CgFxBloom::DEFAULT_SCENE_INTENSITY			= 0.85f;
+const float CgFxBloom::DEFAULT_GLOW_INTENSITY				= 0.3f;
+const float CgFxBloom::DEFAULT_HIGHLIGHT_INTENSITY	= 0.2f;
+
 CgFxBloom::CgFxBloom(FBObj* sceneFBO) : 
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_BLOOM_SHADER, sceneFBO),
 sceneSamplerParam(NULL), brightDownSampler2Param(NULL), brightDownSampler3Param(NULL), 
 brightDownSampler4Param(NULL), brightComposite2Param(NULL), brightComposite3Param(NULL), brightComposite4Param(NULL),
 highlightThresholdParam(NULL), sceneWidthParam(NULL), 
-sceneIntensity(0.85f), glowIntensity(0.3f), highlightIntensity(0.2f), highlightThreshold(0.55f),
+sceneIntensity(CgFxBloom::DEFAULT_SCENE_INTENSITY), 
+glowIntensity(CgFxBloom::DEFAULT_GLOW_INTENSITY), 
+highlightIntensity(CgFxBloom::DEFAULT_HIGHLIGHT_INTENSITY), 
+highlightThreshold(CgFxBloom::DEFAULT_HIGHLIGHT_THRESHOLD),
 sceneHeightParam(NULL), sceneIntensityParam(NULL), glowIntensityParam(NULL), highlightIntensityParam(NULL),
 bloomFilterFBO(NULL), blurFBO(NULL), downsampleBlur2FBO(NULL),
 downsampleBlur3FBO(NULL), downsampleBlur4FBO(NULL) {
@@ -80,7 +88,7 @@ CgFxBloom::~CgFxBloom() {
 	this->downsampleBlur4FBO = NULL;
 }
 
-void CgFxBloom::Draw(int screenWidth, int screenHeight) {
+void CgFxBloom::Draw(int screenWidth, int screenHeight, double dT) {
 	// Step 0: Setup necessary cg parameters
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
 
@@ -150,4 +158,66 @@ void CgFxBloom::DoDownsampledBlur(int screenWidth, int screenHeight, const std::
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);	
 	downsampleFBO->UnbindFBObj();
+}
+
+/**
+ * Obtain an animation that will pulse this bloom effect, where
+ * each pulse will be of the given length of time in seconds and with
+ * a magnitude (strength of pulse) of the given amount.
+ * Returns: Animation for the bloom that pulses it (gives a kind of sickly feeling).
+ */
+std::list<AnimationMultiLerp<float>> CgFxBloom::GetPulseAnimation(float pulseLengthInSec, float pulseAmount) {
+	assert(pulseLengthInSec > 0);
+	assert(pulseAmount > 0);
+
+	// Set up the animation for the highlight intensity - this will pulse the intensity of the highlight of this
+	// bloom effect over the given time of pulseLengthInSec
+	AnimationMultiLerp<float> pulseHighlightAnim(&this->highlightIntensity);
+
+	std::vector<float> intensityValues;
+	intensityValues.reserve(5);
+	intensityValues.push_back(this->highlightIntensity);
+	intensityValues.push_back(this->highlightIntensity + pulseAmount);
+	intensityValues.push_back(this->highlightIntensity);
+	intensityValues.push_back(this->highlightIntensity - pulseAmount);
+	intensityValues.push_back(this->highlightIntensity);
+	
+	std::vector<double> timeValues1;
+	timeValues1.reserve(5);
+	timeValues1.push_back(0.0);
+	timeValues1.push_back(pulseLengthInSec);
+	timeValues1.push_back(2.0 * pulseLengthInSec);
+	timeValues1.push_back(3.0 * pulseLengthInSec);
+	timeValues1.push_back(4.0 * pulseLengthInSec);
+
+	pulseHighlightAnim.SetLerp(timeValues1, intensityValues);
+	pulseHighlightAnim.SetRepeat(true);
+
+	// Setup the animation for the glow intensity - similar to the above but for glow intensity parameter.
+	AnimationMultiLerp<float> pulseGlowAnim(&this->glowIntensity);
+
+	std::vector<float> glowValues;
+	glowValues.reserve(5);
+	glowValues.push_back(this->glowIntensity);
+	glowValues.push_back(this->glowIntensity + pulseAmount);
+	glowValues.push_back(this->glowIntensity);
+	glowValues.push_back(this->glowIntensity - pulseAmount);
+	glowValues.push_back(this->glowIntensity);
+	
+	std::vector<double> timeValues2;
+	timeValues2.reserve(5);
+	timeValues2.push_back(0.0);
+	timeValues2.push_back(pulseLengthInSec);
+	timeValues2.push_back(2.0 * pulseLengthInSec);
+	timeValues2.push_back(3.0 * pulseLengthInSec);
+	timeValues2.push_back(4.0 * pulseLengthInSec);
+
+	pulseGlowAnim.SetLerp(timeValues2, glowValues);
+	pulseGlowAnim.SetRepeat(true);	
+
+	std::list<AnimationMultiLerp<float>> retVal;
+	retVal.push_back(pulseHighlightAnim);
+	retVal.push_back(pulseGlowAnim);
+
+	return retVal;
 }

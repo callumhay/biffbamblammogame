@@ -22,7 +22,7 @@ public:
 	CgFxAfterImage(FBObj* currFrameFBO);
 	virtual ~CgFxAfterImage();
 
-	virtual void Draw(int screenWidth, int screenHeight);
+	virtual void Draw(int screenWidth, int screenHeight, double dT);
 	
 	/**
 	 * Set the blur amount for the after image,

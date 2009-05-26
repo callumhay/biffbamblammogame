@@ -150,9 +150,9 @@ half4 blur7x7_cols_PS(float2 UV : TEXCOORD0, uniform sampler2D BloomSampler) : C
 	return total;
 }
 
-half4 composite_bloom_PS(float2 UV : TEXCOORD0) : COLOR {   
+float4 composite_bloom_PS(float2 UV : TEXCOORD0) : COLOR {   
 	
-	half4 origScene = tex2D(SceneSampler, UV);
+	float4 origScene = tex2D(SceneSampler, UV);
 	
 	half4 blurLvl2 = tex2D(BrightCompositeLvl2Sampler, UV);
 	half4 blurLvl3 = tex2D(BrightCompositeLvl3Sampler, UV);
