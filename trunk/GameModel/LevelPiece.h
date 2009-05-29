@@ -35,7 +35,7 @@ public:
 	static const float HALF_PIECE_WIDTH;
 	static const float HALF_PIECE_HEIGHT;
 
-	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle };
+	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink };
 	virtual LevelPieceType GetType() const = 0;
 
 protected:
@@ -70,7 +70,8 @@ public:
 	// Collision related stuffs
 	virtual LevelPiece* Destroy(GameModel* gameModel) = 0;
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-		const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor) = 0;
+		const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor);
+
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) = 0;
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const Projectile& projectile) = 0;
 	
