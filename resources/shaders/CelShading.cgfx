@@ -302,8 +302,8 @@ technique BasicBG {
 		PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
-        VertexProgram = compile vp40 celshading_VS();        
-        FragmentProgram = compile fp40 celshading_bg_PS();
+        VertexProgram = compile arbvp1 celshading_VS();        
+        FragmentProgram = compile arbfp1 celshading_bg_PS();
     }  
      
     pass p1 < string Script = "Draw=geometry;"; > {
@@ -317,8 +317,8 @@ technique BasicBG {
         LineSmoothEnable = true;
         PolygonMode = int2(Back, Line);
         
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
+        VertexProgram = compile arbvp1 outline_VS();
+        FragmentProgram = compile arbfp1 outline_PS();
     }
 }
 
@@ -333,8 +333,8 @@ technique BasicFG {
 	PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
-        VertexProgram = compile vp40 celshading_VS();        
-        FragmentProgram = compile fp40 celshading_fg_PS();
+        VertexProgram = compile arbvp1 celshading_VS();        
+        FragmentProgram = compile arbfp1 celshading_fg_PS();
     }  
      
     pass p1 < string Script = "Draw=geometry;"; > {
@@ -348,8 +348,8 @@ technique BasicFG {
         LineSmoothEnable = true;
         PolygonMode = int2(Back, Line);
         
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
+        VertexProgram = compile arbvp1 outline_VS();
+        FragmentProgram = compile arbfp1 outline_PS();
     }
 }
 
@@ -364,8 +364,8 @@ technique TexturedBG {
 	PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
-        VertexProgram = compile vp40 celshading_VS();        
-        FragmentProgram = compile fp40 celshading_textured_bg_PS();
+        VertexProgram = compile arbvp1 celshading_VS();        
+        FragmentProgram = compile arbfp1 celshading_textured_bg_PS();
     }  
      
     pass p1 < string Script = "Draw=geometry;"; > {
@@ -379,8 +379,8 @@ technique TexturedBG {
         LineSmoothEnable = true;
         PolygonMode = int2(Back, Line);
         
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
+        VertexProgram = compile arbvp1 outline_VS();
+        FragmentProgram = compile arbfp1 outline_PS();
     }     
 }
 
@@ -395,8 +395,8 @@ technique TexturedFG {
 	PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
 	
-        VertexProgram = compile vp40 celshading_VS();        
-        FragmentProgram = compile fp40 celshading_textured_fg_PS();
+        VertexProgram = compile arbvp1 celshading_VS();        
+        FragmentProgram = compile arbfp1 celshading_textured_fg_PS();
     }  
      
     pass p1 < string Script = "Draw=geometry;"; > {
@@ -410,8 +410,8 @@ technique TexturedFG {
         LineSmoothEnable = true;
         PolygonMode = int2(Back, Line);
         
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
+        VertexProgram = compile arbvp1 outline_VS();
+        FragmentProgram = compile arbfp1 outline_PS();
     }     
 }
 /////////////////////////////////////// eof //

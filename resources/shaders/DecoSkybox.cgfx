@@ -104,8 +104,6 @@ float4 deco_skybox_PS(vertexOutput IN) : COLOR {
 
 technique DecoSkybox {
     pass pass0 {
-		BlendEnable = true;
-		BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
     	PolygonMode = int2(Front, Fill);
         CullFaceEnable = true;
         CullFace = Back;
