@@ -851,6 +851,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\InkBlock.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\InvisiBallItem.h"
 					>
 				</File>
@@ -996,6 +1000,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\GhostBallItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\InkBlock.cpp"
 					>
 				</File>
 				<File
