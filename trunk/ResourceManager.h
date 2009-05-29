@@ -24,8 +24,8 @@ private:
 	ResourceManager(const std::string& resourceZip, const char* argv0);
 	~ResourceManager();
 
-	std::map<std::string, Mesh*> loadedMeshes;					// Meshes already loaded into the blammo engine
-	
+	std::map<std::string, Mesh*> loadedMeshes;					// Meshes already loaded into the blammo engine from file
+
 	std::map<std::string, Texture*> loadedTextures;			// Textures already loaded into the blammo engine
 	std::map<Texture*, unsigned int> numRefPerTexture;	// Number of references per texture handed out
 
