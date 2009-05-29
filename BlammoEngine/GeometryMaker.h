@@ -11,6 +11,9 @@
 class GeometryMaker {
 
 private:
+	static const unsigned int NUM_SPHERE_STACKS = 12;
+	static const unsigned int NUM_SPHERE_SLICES = 12;
+
 	static GeometryMaker* instance;
 
 	GeometryMaker();
@@ -19,9 +22,11 @@ private:
 	// Display list IDs
 	GLuint quadDL;
 	GLuint cubeDL;
+	GLuint sphereDL;
 
 	bool InitializeQuadDL();
 	bool InitializeCubeDL();
+	bool InitializeSphereDL();
 
 public:
 
@@ -46,6 +51,11 @@ public:
 	
 	// Draw a basic unit cube
 	inline void DrawCube() const { glCallList(this->cubeDL); }
+	inline GLuint GetCubeDL() const { return this->cubeDL; }
+
+	inline void DrawSphere() const { glCallList(this->sphereDL); }
+	inline GLuint GetSphereDL() const { return this->sphereDL; }
+	static GLuint CreateSphereDL(unsigned int stacks, unsigned int slices);
 
 	inline void DrawFullScreenQuad(int width, int height, float depth = 0.0f) {
 		glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_TRANSFORM_BIT);
