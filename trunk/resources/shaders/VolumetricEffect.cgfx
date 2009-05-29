@@ -218,11 +218,11 @@ technique Basic < string Script = "Pass=p0;"; > {
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
         DepthFunc = LEqual;
-		DepthMask = false;
-		CullFaceEnable = true;//false;
+	DepthMask = false;
+	CullFaceEnable = true;
 
-        VertexProgram = compile vp40 std_VS();            
-        FragmentProgram = compile fp40 smokey_PS();
+        VertexProgram = compile arbvp1 std_VS();            
+        FragmentProgram = compile arbfp1 smokey_PS();
     }
 }
 
@@ -236,11 +236,11 @@ technique GhostBall < string Script = "Pass=p0;"; > {
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
         DepthFunc = LEqual;
-	DepthMask = false;
-	CullFaceEnable = true;//false;
+		DepthMask = false;
+		CullFaceEnable = true;
 
-        VertexProgram = compile vp40 localpos_VS();            
-        FragmentProgram = compile fp40 smokey_PS();
+        VertexProgram = compile arbvp1 localpos_VS();            
+        FragmentProgram = compile arbfp1 smokey_PS();
     }
 }
 
@@ -259,8 +259,8 @@ technique SmokeSprite < string Script = "Pass=p0;"; > {
 		DepthMask = false;
 	    CullFaceEnable = true;
 
-        VertexProgram = compile vp40 localpos_VS();            
-        FragmentProgram = compile fp40 smokey_sprite_PS();
+        VertexProgram = compile arbvp1 localpos_VS();            
+        FragmentProgram = compile arbfp1 smokey_sprite_PS();
     }
 }
 
@@ -274,11 +274,11 @@ technique FireSprite < string Script = "Pass=p0;"; > {
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
         DepthFunc = LEqual;
-		    DepthMask = false;
-		    CullFaceEnable = true;
+		DepthMask = false;
+		CullFaceEnable = true;
 
-        VertexProgram = compile vp40 localpos_VS();            
-        FragmentProgram = compile fp40 firey_sprite_PS();
+        VertexProgram = compile arbvp1 localpos_VS();            
+        FragmentProgram = compile arbfp1 firey_sprite_PS();
     }
 }
 

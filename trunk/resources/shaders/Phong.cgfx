@@ -306,8 +306,8 @@ technique BasicBG {
         LineSmoothEnable = true;
         PolygonMode = int2(Back, Line);
         
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
+        VertexProgram = compile arbvp1 outline_VS();
+        FragmentProgram = compile arbfp1 outline_PS();
     } 	
 }
 
@@ -337,8 +337,8 @@ technique BasicFG {
         LineSmoothEnable = true;
         PolygonMode = int2(Back, Line);
         
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
+        VertexProgram = compile arbvp1 outline_VS();
+        FragmentProgram = compile arbfp1 outline_PS();
     } 		
 	
 }
@@ -370,8 +370,8 @@ technique TexturedBG {
         LineSmoothEnable = true;
         PolygonMode = int2(Back, Line);
         
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
+        VertexProgram = compile arbvp1 outline_VS();
+        FragmentProgram = compile arbfp1 outline_PS();
     } 		
 	
 }
@@ -403,8 +403,8 @@ technique TexturedFG {
         LineSmoothEnable = true;
         PolygonMode = int2(Back, Line);
         
-        VertexProgram = compile vp40 outline_VS();
-        FragmentProgram = compile fp40 outline_PS();
+        VertexProgram = compile arbvp1 outline_VS();
+        FragmentProgram = compile arbfp1 outline_PS();
     } 		
 }
 /////////////////////////////////////// eof //
