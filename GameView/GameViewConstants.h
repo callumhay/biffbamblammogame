@@ -1,7 +1,7 @@
 #ifndef __GAMEVIEWCONSTANTS_H__
 #define __GAMEVIEWCONSTANTS_H__
 
-#include <string>
+#include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Colour.h"
 
 class GameViewConstants {
@@ -9,9 +9,57 @@ class GameViewConstants {
 private:
 	static GameViewConstants* Instance;
 
-	void InitConstants();
 	GameViewConstants();
 	~GameViewConstants();
+
+	// Maps of the item identifiers and their corresponding textures for
+	// the items that drop in the game and timers and their fillers
+	std::map<std::string, std::string> itemTextures;
+	std::map<std::string, std::string> itemTimerTextures;
+	std::map<std::string, std::string> itemTimerFillerTextures;
+
+	// Initializer methods for filling the item texture arrays
+	void InitItemTextures();
+	void InitItemTimerTextures();
+	void InitItemTimerFillerTextures();
+	
+	// Item drop, timer and filler textures ************************
+	const std::string TEXTURE_ITEM_SLOWBALL;
+	const std::string TEXTURE_ITEM_FASTBALL;
+	const std::string TEXTURE_ITEM_UBERBALL;
+	const std::string TEXTURE_ITEM_INVISIBALL;
+	const std::string TEXTURE_ITEM_GHOSTBALL;
+	const std::string TEXTURE_ITEM_PADDLELASER;
+	const std::string TEXTURE_ITEM_MULTIBALL3;
+	const std::string TEXTURE_ITEM_MULTIBALL5;
+	const std::string TEXTURE_ITEM_PADDLEGROW;
+	const std::string TEXTURE_ITEM_PADDLESHRINK;
+	const std::string TEXTURE_ITEM_BALLGROW;
+	const std::string TEXTURE_ITEM_BALLSHRINK;
+	const std::string TEXTURE_ITEM_BLACKOUT;
+	const std::string TEXTURE_ITEM_UPSIDEDOWN;
+	const std::string TEXTURE_ITEM_BALLSAFETYNET;
+	const std::string TEXTURE_ITEM_1UP;
+	const std::string TEXTURE_ITEM_POISON;
+
+	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
+	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
+	const std::string TEXTURE_ITEM_TIMER_UBERBALL;
+	const std::string TEXTURE_ITEM_TIMER_INVISIBALL;
+	const std::string TEXTURE_ITEM_TIMER_GHOSTBALL;
+	const std::string TEXTURE_ITEM_TIMER_PADDLELASER;
+	const std::string TEXTURE_ITEM_TIMER_BLACKOUT;
+	const std::string TEXTURE_ITEM_TIMER_UPSIDEDOWN;
+	const std::string TEXTURE_ITEM_TIMER_POISON;
+
+	const std::string TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_INVISIBALL;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_PADDLELASER;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_BLACKOUT;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_POISON;
 
 public:
 	
@@ -29,6 +77,11 @@ public:
 			GameViewConstants::Instance = NULL;
 		}
 	}
+
+	// Getter functions for the item texture mappings
+	const std::map<std::string, std::string>& GetItemTextures() const { return this->itemTextures; }
+	const std::map<std::string, std::string>& GetItemTimerTextures() const { return this->itemTimerTextures; }
+	const std::map<std::string, std::string>& GetItemTimerFillerTextures() const { return this->itemTimerFillerTextures; }
 
 	// Constant listing...
 
@@ -75,43 +128,6 @@ public:
 	const std::string TEXTURE_STARFIELD;
 
 	const std::string TEXTURE_BALL_SAFETY_NET;
-
-	const std::string TEXTURE_ITEM_SLOWBALL;
-	const std::string TEXTURE_ITEM_FASTBALL;
-	const std::string TEXTURE_ITEM_UBERBALL;
-	const std::string TEXTURE_ITEM_INVISIBALL;
-	const std::string TEXTURE_ITEM_GHOSTBALL;
-	const std::string TEXTURE_ITEM_PADDLELASER;
-	const std::string TEXTURE_ITEM_MULTIBALL3;
-	const std::string TEXTURE_ITEM_MULTIBALL5;
-	const std::string TEXTURE_ITEM_PADDLEGROW;
-	const std::string TEXTURE_ITEM_PADDLESHRINK;
-	const std::string TEXTURE_ITEM_BALLGROW;
-	const std::string TEXTURE_ITEM_BALLSHRINK;
-	const std::string TEXTURE_ITEM_BLACKOUT;
-	const std::string TEXTURE_ITEM_UPSIDEDOWN;
-	const std::string TEXTURE_ITEM_BALLSAFETYNET;
-	const std::string TEXTURE_ITEM_1UP;
-	const std::string TEXTURE_ITEM_POISON;
-
-	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
-	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
-	const std::string TEXTURE_ITEM_TIMER_UBERBALL;
-	const std::string TEXTURE_ITEM_TIMER_INVISIBALL;
-	const std::string TEXTURE_ITEM_TIMER_GHOSTBALL;
-	const std::string TEXTURE_ITEM_TIMER_PADDLELASER;
-	const std::string TEXTURE_ITEM_TIMER_BLACKOUT;
-	const std::string TEXTURE_ITEM_TIMER_UPSIDEDOWN;
-	const std::string TEXTURE_ITEM_TIMER_POISON;
-
-	const std::string TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
-	const std::string TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
-	const std::string TEXTURE_ITEM_TIMER_FILLER_INVISIBALL;
-	const std::string TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL;
-	const std::string TEXTURE_ITEM_TIMER_FILLER_PADDLELASER;
-	const std::string TEXTURE_ITEM_TIMER_FILLER_BLACKOUT;
-	const std::string TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN;
-	const std::string TEXTURE_ITEM_TIMER_FILLER_POISON;
 
 	// Font path constants **********************************
 	const std::string FONT_HAPPYGOOD;

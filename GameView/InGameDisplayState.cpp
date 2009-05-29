@@ -114,8 +114,11 @@ void InGameDisplayState::RenderBackgroundToFBO(double dT) {
 void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
 
-	FBObj* fullSceneFBO = this->display->GetAssets()->GetFBOAssets()->GetFullSceneFBO();
-	FBObj* backgroundFBO = this->display->GetAssets()->GetFBOAssets()->GetBackgroundFBO();
+	GameFBOAssets* fboAssets = this->display->GetAssets()->GetFBOAssets();
+	assert(fboAssets != NULL);
+
+	FBObj* fullSceneFBO = fboAssets->GetFullSceneFBO();
+	FBObj* backgroundFBO = fboAssets->GetBackgroundFBO();
 	assert(fullSceneFBO != NULL);
 	assert(backgroundFBO != NULL);
 
@@ -135,6 +138,14 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	this->display->GetAssets()->DrawLevelPieces(dT, currLevel, this->display->GetCamera());
 
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
+
+	// Draw the dropping items if not in the last pass
+	if (!fboAssets->DrawItemsInLastPass()) {
+		std::list<GameItem*>& gameItems = this->display->GetModel()->GetLiveItems();
+		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
+			this->display->GetAssets()->DrawItem(dT, this->display->GetCamera(), (**iter));
+		}				
+	}
 
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
@@ -167,11 +178,14 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	glMultMatrixf(gameTransform.begin());
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 	
-	// Items...
-	std::list<GameItem*>& gameItems = this->display->GetModel()->GetLiveItems();
-	for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
-		this->display->GetAssets()->DrawItem(dT, this->display->GetCamera(), (**iter));
-	}	
+	// Draw the dropping items if in the last pass
+	if (fboAssets->DrawItemsInLastPass()) {
+		std::list<GameItem*>& gameItems = this->display->GetModel()->GetLiveItems();
+		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
+			this->display->GetAssets()->DrawItem(dT, this->display->GetCamera(), (**iter));
+		}			
+	}
+
 
 	// Typical Particle effects...
 	this->display->GetAssets()->GetESPAssets()->DrawParticleEffects(dT, this->display->GetCamera());

@@ -19,7 +19,11 @@ const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.8f;
 // (bigger is slower, smaller is faster)
 const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 
+// Default speed of the paddle
 const float PlayerPaddle::DEFAULT_SPEED = 24.0f;
+// Speed amount taken off the paddle when poisoned
+const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_SPEED / 2.75f;
+// Delay between shots of the laser
 const float PlayerPaddle::PADDLE_LASER_DELAY = 0.25f;
 
 PlayerPaddle::PlayerPaddle() : 

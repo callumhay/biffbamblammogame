@@ -60,6 +60,7 @@ private:
 
 public:
 	static const float DEFAULT_SPEED;
+	static const float POISON_SPEED_DIMINISH;
 	static const int RAND_DEG_ANG    = 20;
 
 	PlayerPaddle(float minBound, float maxBound);
@@ -101,7 +102,11 @@ public:
 	}
 
 	float GetSpeed() const {
-		return this->speed;
+		float currSpeed = this->speed;
+		if ((this->currType & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle) {
+			currSpeed -= PlayerPaddle::POISON_SPEED_DIMINISH;
+		}
+		return currSpeed;
 	}
 
 	Vector2D GetAvgVelocity() const {

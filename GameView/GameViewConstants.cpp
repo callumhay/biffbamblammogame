@@ -1,5 +1,20 @@
 #include "GameViewConstants.h"
 
+#include "../GameModel/GameItem.h"
+#include "../GameModel/BallSpeedItem.h"
+#include "../GameModel/UberBallItem.h"
+#include "../GameModel/InvisiBallItem.h"
+#include "../GameModel/GhostBallItem.h"
+#include "../GameModel/LaserPaddleItem.h"
+#include "../GameModel/MultiBallItem.h"
+#include "../GameModel/PaddleSizeItem.h"
+#include "../GameModel/BallSizeItem.h"
+#include "../GameModel/BlackoutItem.h"
+#include "../GameModel/UpsideDownItem.h"
+#include "../GameModel/BallSafetyNetItem.h"
+#include "../GameModel/OneUpItem.h"
+#include "../GameModel/PoisonPaddleItem.h"
+
 GameViewConstants* GameViewConstants::Instance = NULL;
 
 #define RESOURCE_DIRECTORY "resources"
@@ -73,8 +88,8 @@ TEXTURE_ITEM_1UP(TEXTURE_DIRECTORY					"/1up_powerup256x128.jpg"),
 TEXTURE_ITEM_POISON(TEXTURE_DIRECTORY				"/poison_powerdown_256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
-TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud128x64.png"),
-TEXTURE_ITEM_TIMER_FASTBALL(TEXTURE_DIRECTORY			"/fastball_timer_hud128x64.png"),
+TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud256x128.png"),
+TEXTURE_ITEM_TIMER_FASTBALL(TEXTURE_DIRECTORY			"/fastball_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_UBERBALL(TEXTURE_DIRECTORY			"/uberball_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_INVISIBALL(TEXTURE_DIRECTORY		"/invisiball_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_GHOSTBALL(TEXTURE_DIRECTORY		"/ghostball_timer_hud256x128.png"),
@@ -84,7 +99,7 @@ TEXTURE_ITEM_TIMER_UPSIDEDOWN(TEXTURE_DIRECTORY		"/upsidedown_timer_hud256x128.p
 TEXTURE_ITEM_TIMER_POISON(TEXTURE_DIRECTORY				"/poison_timer_hud256x128.png"),
 
 // Item Timer (Fill) Texture Asset Paths
-TEXTURE_ITEM_TIMER_FILLER_SPDBALL(TEXTURE_DIRECTORY			"/ballspeed_timer_fill_hud128x64.png"),
+TEXTURE_ITEM_TIMER_FILLER_SPDBALL(TEXTURE_DIRECTORY			"/ballspeed_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_UBERBALL(TEXTURE_DIRECTORY		"/uberball_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_INVISIBALL(TEXTURE_DIRECTORY	"/invisiball_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL(TEXTURE_DIRECTORY		"/ghostball_timer_fill_hud256x128.png"),
@@ -115,8 +130,8 @@ DEFAULT_BG_KEY_LIGHT_COLOUR(0.7f, 0.75f, 0.75f),
 DEFAULT_BG_FILL_LIGHT_COLOUR(0.6f, 0.6f, 0.6f),
 DEFAULT_BALL_LIGHT_COLOUR(0.85f, 0.85f, 0.95f),
 BLACKOUT_LIGHT_COLOUR(0.0f, 0.0f, 0.0f),
-POISON_LIGHT_DEEP_COLOUR(0.13f, 0.545f, 0.13f),
-POISON_LIGHT_LIGHT_COLOUR(0.5f, 1.0f, 0.0f),
+POISON_LIGHT_DEEP_COLOUR(0.10f, 0.50f, 0.10f),
+POISON_LIGHT_LIGHT_COLOUR(0.75f, 1.0f, 0.0f),
 GHOST_BALL_COLOUR(0.643f, 0.725f, 0.843f),
 UBER_BALL_COLOUR(1.0f, 0.0f, 0.0f),
 
@@ -137,10 +152,54 @@ DECO_SKYBEAM_MESH(MESH_DIRECTORY "/deco_background_beam.obj"),
 DECO_BLOCK_MESH_PATH(MESH_DIRECTORY "/deco_block.obj")
 {
 
+	// Initialize the timer texture arrays
+	this->InitItemTextures();
+	this->InitItemTimerTextures();
+	this->InitItemTimerFillerTextures();
+}
 
+void GameViewConstants::InitItemTextures() {
+	this->itemTextures.insert(std::make_pair(BallSpeedItem::SLOW_BALL_ITEM_NAME,						this->TEXTURE_ITEM_SLOWBALL));
+	this->itemTextures.insert(std::make_pair(BallSpeedItem::FAST_BALL_ITEM_NAME,						this->TEXTURE_ITEM_FASTBALL));
+	this->itemTextures.insert(std::make_pair(UberBallItem::UBER_BALL_ITEM_NAME,							this->TEXTURE_ITEM_UBERBALL));
+	this->itemTextures.insert(std::make_pair(InvisiBallItem::INVISI_BALL_ITEM_NAME,					this->TEXTURE_ITEM_INVISIBALL));
+	this->itemTextures.insert(std::make_pair(GhostBallItem::GHOST_BALL_ITEM_NAME,						this->TEXTURE_ITEM_GHOSTBALL));
+	this->itemTextures.insert(std::make_pair(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,				this->TEXTURE_ITEM_PADDLELASER));
+	this->itemTextures.insert(std::make_pair(MultiBallItem::MULTI3_BALL_ITEM_NAME,					this->TEXTURE_ITEM_MULTIBALL3));
+	this->itemTextures.insert(std::make_pair(MultiBallItem::MULTI5_BALL_ITEM_NAME,					this->TEXTURE_ITEM_MULTIBALL5));
+	this->itemTextures.insert(std::make_pair(PaddleSizeItem::PADDLE_GROW_ITEM_NAME,					this->TEXTURE_ITEM_PADDLEGROW));
+	this->itemTextures.insert(std::make_pair(PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME,				this->TEXTURE_ITEM_PADDLESHRINK));
+	this->itemTextures.insert(std::make_pair(BallSizeItem::BALL_GROW_ITEM_NAME,							this->TEXTURE_ITEM_BALLGROW));
+	this->itemTextures.insert(std::make_pair(BallSizeItem::BALL_SHRINK_ITEM_NAME,						this->TEXTURE_ITEM_BALLSHRINK));
+	this->itemTextures.insert(std::make_pair(BlackoutItem::BLACKOUT_ITEM_NAME,							this->TEXTURE_ITEM_BLACKOUT));
+	this->itemTextures.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,					this->TEXTURE_ITEM_UPSIDEDOWN));
+	this->itemTextures.insert(std::make_pair(BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME,	this->TEXTURE_ITEM_BALLSAFETYNET));
+	this->itemTextures.insert(std::make_pair(OneUpItem::ONE_UP_ITEM_NAME,										this->TEXTURE_ITEM_1UP));
+	this->itemTextures.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,			this->TEXTURE_ITEM_POISON));
+}
 
+void GameViewConstants::InitItemTimerTextures() {
+	this->itemTimerTextures.insert(std::make_pair(BallSpeedItem::SLOW_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_SLOWBALL));
+	this->itemTimerTextures.insert(std::make_pair(BallSpeedItem::FAST_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_FASTBALL));
+	this->itemTimerTextures.insert(std::make_pair(UberBallItem::UBER_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_UBERBALL));
+	this->itemTimerTextures.insert(std::make_pair(InvisiBallItem::INVISI_BALL_ITEM_NAME,			this->TEXTURE_ITEM_TIMER_INVISIBALL));
+	this->itemTimerTextures.insert(std::make_pair(GhostBallItem::GHOST_BALL_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_GHOSTBALL));
+	this->itemTimerTextures.insert(std::make_pair(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,		this->TEXTURE_ITEM_TIMER_PADDLELASER));
+	this->itemTimerTextures.insert(std::make_pair(BlackoutItem::BLACKOUT_ITEM_NAME,						this->TEXTURE_ITEM_TIMER_BLACKOUT));
+	this->itemTimerTextures.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_UPSIDEDOWN));
+	this->itemTimerTextures.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_POISON));
+}
 
-
+void GameViewConstants::InitItemTimerFillerTextures() {
+	this->itemTimerFillerTextures.insert(std::make_pair(BallSpeedItem::SLOW_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_FILLER_SPDBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(BallSpeedItem::FAST_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_FILLER_SPDBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(UberBallItem::UBER_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_FILLER_UBERBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(InvisiBallItem::INVISI_BALL_ITEM_NAME,			this->TEXTURE_ITEM_TIMER_FILLER_INVISIBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(GhostBallItem::GHOST_BALL_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,		this->TEXTURE_ITEM_TIMER_FILLER_PADDLELASER));
+	this->itemTimerFillerTextures.insert(std::make_pair(BlackoutItem::BLACKOUT_ITEM_NAME,						this->TEXTURE_ITEM_TIMER_FILLER_BLACKOUT));
+	this->itemTimerFillerTextures.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN));
+	this->itemTimerFillerTextures.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_FILLER_POISON));
 }
 
 GameViewConstants::~GameViewConstants() {
