@@ -2,14 +2,15 @@
 
 GeometryMaker* GeometryMaker::instance = NULL;
 
-GeometryMaker::GeometryMaker() : quadDL(0), cubeDL(0) {
+GeometryMaker::GeometryMaker() : quadDL(0), cubeDL(0), sphereDL(0) {
 	
 	// Initialize all the geometry display lists
 	bool result = this->InitializeQuadDL();
 	assert(result);
 	result = this->InitializeCubeDL();
 	assert(result);
-
+	result = this->InitializeSphereDL();
+	assert(result);
 }
 
 GeometryMaker::~GeometryMaker() {
@@ -18,11 +19,14 @@ GeometryMaker::~GeometryMaker() {
 	this->quadDL = 0;
 	glDeleteLists(this->cubeDL, 1);
 	this->cubeDL = 0;
+	glDeleteLists(this->sphereDL, 1);
+	this->sphereDL = 0;
 }
 
 /**
  * Initializes the display list for a simple quad -
  * has basic texture coordinates and a normal pointing out at (0,0,1).
+ * Returns: true on success, false otherwise.
  */
 bool GeometryMaker::InitializeQuadDL() {
 	this->quadDL = glGenLists(1);
@@ -40,6 +44,11 @@ bool GeometryMaker::InitializeQuadDL() {
 	return this->quadDL != 0;
 }
 
+/**
+ * Initializes the display list for a simple, unit cube -
+ * has no texture coordinates, but has normals set.
+ * Returns: true on success, false otherwise.
+ */
 bool GeometryMaker::InitializeCubeDL() {
 	
 	this->cubeDL = glGenLists(1);
@@ -85,4 +94,83 @@ bool GeometryMaker::InitializeCubeDL() {
 	glEnd();
 	glEndList();
 	return this->cubeDL != 0;
+}
+
+/**
+ * Initializes the display list for a simple, unit sphere -
+ * has no texture coordinates, but has normals set.
+ * Returns: true on success, false otherwise.
+ */
+bool GeometryMaker::InitializeSphereDL() {
+	this->sphereDL = GeometryMaker::CreateSphereDL(GeometryMaker::NUM_SPHERE_STACKS, GeometryMaker::NUM_SPHERE_SLICES);
+	return this->sphereDL != 0;
+}
+
+/**
+ * Creates a display list for a simple, unit sphere -
+ * has no texture coordinates, but has normals set. Also will have the tesselation specified.
+ * Returns: The drawlist generated for the sphere.
+ */
+GLuint GeometryMaker::CreateSphereDL(unsigned int stacks, unsigned int slices) {
+		// Number of vertices used for the sphere
+	const unsigned int vertexCount = 2 * stacks * (slices + 1);
+
+	// Create arrays to hold temporary geometry data
+	std::vector<Vector3D> vertices;
+	vertices.reserve(vertexCount);
+	std::vector<Vector3D> normals;
+	normals.reserve(vertexCount);
+	std::vector<Vector2D> texCoords;
+	texCoords.reserve(vertexCount);
+
+	// Constants used to generate the sphere
+	const float deltaRingAngle = (M_PI / stacks);
+  const float deltaSegAngle  = (2.0f * M_PI / static_cast<float>(slices));
+
+	unsigned int currVertexCount = 0;
+
+ // Generate the group of rings for the sphere
+	for (unsigned int ring = 0; ring < stacks; ring++) {
+		float r0 = sin(ring * deltaRingAngle);
+		float r1 = sin((ring + 1) * deltaRingAngle);
+		float y0 = cos(ring * deltaRingAngle);
+		float y1 = cos((ring + 1) * deltaRingAngle);
+
+		// Generate the group of segments for the current ring
+		for (unsigned int seg = 0; seg < (slices + 1); seg++) { 
+			float x0 =  r0 * sin(seg * deltaSegAngle);
+			float z0 =  r0 * cos(seg * deltaSegAngle);
+			float x1 =  r1 * sin(seg * deltaSegAngle);
+			float z1 =  r1 * cos(seg * deltaSegAngle);
+
+			vertices.push_back(Vector3D(x0/2.0f, y0/2.0f, z0/2.0f));
+			normals.push_back(Vector3D(x0/2.0f, y0/2.0f, z0/2.0f));
+			texCoords.push_back(Vector2D((static_cast<float>(slices) - seg) / static_cast<float>(slices),
+																	  static_cast<float>(ring) / static_cast<float>(stacks))); 
+			currVertexCount++;
+
+			vertices.push_back(Vector3D(x1/2.0f, y1/2.0f, z1/2.0f));
+			normals.push_back(Vector3D(x1/2.0f, y1/2.0f, z1/2.0f));
+			texCoords.push_back(Vector2D((static_cast<float>(slices) - seg) / static_cast<float>(slices),
+																	 static_cast<float>(ring + 1) / static_cast<float>(stacks))); 
+			currVertexCount++;
+		}
+	}	
+
+	// Draw as a triangle strip
+	GLuint sphereDrawList = glGenLists(1);
+	assert(sphereDrawList != 0);
+	glNewList(sphereDrawList, GL_COMPILE);
+
+	glBegin(GL_TRIANGLE_STRIP);
+
+	for (unsigned int i = 0; i < vertexCount; i++) {
+		glTexCoord2f(texCoords[i][0], texCoords[i][1]);
+		glNormal3f(normals[i][0], normals[i][1], normals[i][2]);
+		glVertex3f(vertices[i][0], vertices[i][1], vertices[i][2]);
+	}
+
+	glEnd();
+	glEndList();
+	return sphereDrawList;
 }
