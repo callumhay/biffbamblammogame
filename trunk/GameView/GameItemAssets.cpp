@@ -82,6 +82,62 @@ void GameItemAssets::UnloadItemMeshes() {
 bool GameItemAssets::LoadItemTextures() {
 	debug_output("Loading Item Textures...");
 
+	const std::map<std::string, std::string>& itemTextureNames						= GameViewConstants::GetInstance()->GetItemTextures();
+	const std::map<std::string, std::string>& itemTimerTextureNames				= GameViewConstants::GetInstance()->GetItemTimerTextures();
+	const std::map<std::string, std::string>& itemTimerFillerTextureNames	= GameViewConstants::GetInstance()->GetItemTimerFillerTextures();
+
+	// Initialize/load all the item drop textures
+	for (std::map<std::string, std::string>::const_iterator iter = itemTextureNames.begin(); iter != itemTextureNames.end(); iter++) {
+		// Grab the item ID and its corresponding texture filepath
+		std::string currItemID			= iter->first;
+		std::string currTexFilepath	= iter->second;
+		
+		// Load a texture for the item, make sure it isn't null
+		Texture* currItemTex = ResourceManager::GetInstance()->GetImgTextureResource(currTexFilepath,	Texture::Trilinear);
+		if (currItemTex == NULL) {
+			assert(false);
+			return false;
+		}
+
+		// Insert the texture into a map of the item ID to that texture
+		this->itemTextures.insert(std::make_pair(currItemID, currItemTex));
+	}
+
+	// Initialize/load all the item HUD timer textures
+	for (std::map<std::string, std::string>::const_iterator iter = itemTimerTextureNames.begin(); iter != itemTimerTextureNames.end(); iter++) {
+		// Grab the item ID and its corresponding texture filepath
+		std::string currItemID			= iter->first;
+		std::string currTexFilepath	= iter->second;
+
+		// Load a texture for the item, make sure it isn't null
+		Texture* currItemTimerTex = ResourceManager::GetInstance()->GetImgTextureResource(currTexFilepath,	Texture::Trilinear);
+		if (currItemTimerTex == NULL) {
+			assert(false);
+			return false;
+		}
+
+		// Insert the texture into a map of the item ID to that texture
+		this->itemTimerTextures.insert(std::make_pair(currItemID, currItemTimerTex));
+	}
+
+	// Initialize/load all the item HUD timer filler textures
+	for (std::map<std::string, std::string>::const_iterator iter = itemTimerFillerTextureNames.begin(); iter != itemTimerFillerTextureNames.end(); iter++) {
+		// Grab the item ID and its corresponding texture filepath
+		std::string currItemID			= iter->first;
+		std::string currTexFilepath	= iter->second;
+
+		// Load a texture for the item, make sure it isn't null
+		Texture* currItemTimerFillerTex = ResourceManager::GetInstance()->GetImgTextureResource(currTexFilepath,	Texture::Bilinear);
+		if (currItemTimerFillerTex == NULL) {
+			assert(false);
+			return false;
+		}
+
+		// Insert the texture into a map of the item ID to that texture
+		this->itemTimerFillerTextures.insert(std::make_pair(currItemID, currItemTimerFillerTex));
+	}
+
+/*
 	// Load the item textures
 	Texture* slowBallItemTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_SLOWBALL,			Texture::Trilinear);
 	Texture* fastBallItemTex			= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ITEM_FASTBALL,			Texture::Trilinear);
@@ -198,7 +254,7 @@ bool GameItemAssets::LoadItemTextures() {
 	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(BlackoutItem::BLACKOUT_ITEM_NAME,						blackoutTimerFillerTex));
 	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,				upsideDownTimerFillerTex));
 	this->itemTimerFillerTextures.insert(std::pair<std::string, Texture*>(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,	poisonPaddleTimerFillerTex));
-
+*/
 	return true;
 }
 

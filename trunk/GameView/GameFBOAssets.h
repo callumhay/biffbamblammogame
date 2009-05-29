@@ -26,6 +26,8 @@ private:
 	CgFxBloom* bloomEffect;
 	CgFxAfterImage* afterImageEffect;
 
+	bool drawItemsInLastPass;	// Whether or not items get drawn in the final pass
+
 	enum FBOAnimationType { PoisonAnimationType };
 	enum FBOAnimationItem { None };
 	std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float>>> fboAnimations;
@@ -55,6 +57,8 @@ public:
 	inline FBObj* GetBackgroundFBO() { return this->bgFBO; }
 	inline FBObj* GetFullSceneFBO() { return this->fgAndBgFBO; }
 	
+	inline bool DrawItemsInLastPass() const { return this->drawItemsInLastPass; }
+
 	inline void RenderFullSceneBlur(int width, int height, double dT) {
 		this->fgAndBgBlurEffect->Draw(width, height, dT);
 	}

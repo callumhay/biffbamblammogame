@@ -68,21 +68,24 @@ void CgFxGaussianBlur::SetBlurType(BlurType type) {
  * blur effect - kind of like being drunk, if needed.
  */
 void CgFxGaussianBlur::Draw(int screenWidth, int screenHeight, double dT) {
+	
+	float revisedWidth  = screenWidth;
+	float revisedHeight = screenHeight;
+	
 	// Check for any animations
-	float revisedWidth = screenWidth;
-	std::map<BlurAnimations, AnimationMultiLerp<float>>::iterator animFind = this->blurAnims.find(PoisonAnimation);
-	if (animFind != this->blurAnims.end()) {
-		revisedWidth = animFind->second.GetInterpolantValue();
-		bool isDone = animFind->second.Tick(dT);
+	std::map<BlurAnimations, AnimationMultiLerp<float>>::iterator animWidthFind = this->blurAnims.find(PoisonWidthBlurAnimation);
+	if (animWidthFind != this->blurAnims.end()) {
+		revisedWidth = animWidthFind->second.GetInterpolantValue();
+		bool isDone = animWidthFind->second.Tick(dT);
 		if (isDone) {
-			this->blurAnims.erase(animFind);
+			this->blurAnims.erase(animWidthFind);
 		}
 	}
 
 	// Step 0: Establish uniform parameter(s)
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
 	cgGLSetParameter1f(this->sceneWidthParam,  revisedWidth);
-	cgGLSetParameter1f(this->sceneHeightParam, screenHeight);
+	cgGLSetParameter1f(this->sceneHeightParam, revisedHeight);
 
 	// Step 1: Bind the temporary FBO and draw a fullscreen quad with the first pass of the effect.
 	this->tempFBO->BindFBObj();
@@ -131,23 +134,23 @@ void CgFxGaussianBlur::SetPoisonBlurAnimation(bool on) {
 		blurWidthAnim.SetLerp(timeVals, blurVals);
 		blurWidthAnim.SetRepeat(true);
 
-		this->blurAnims[PoisonAnimation] = blurWidthAnim;
+		this->blurAnims[PoisonWidthBlurAnimation] = blurWidthAnim;
 	}
 	else {
-		// Grab the already existing (previously active) poison animation
-		std::map<BlurAnimations, AnimationMultiLerp<float>>::iterator animFind = this->blurAnims.find(PoisonAnimation);
-		assert(animFind != this->blurAnims.end());
-		
+		// Grab the already existing (previously active) poison animations
+		std::map<BlurAnimations, AnimationMultiLerp<float>>::iterator animWidthFind = this->blurAnims.find(PoisonWidthBlurAnimation);
+		assert(animWidthFind  != this->blurAnims.end());
+	
 		// Fade back to normal and take off repeat/looping so that the animation dies when complete
 		timeVals.reserve(2);
 		timeVals.push_back(0.0f);
-		timeVals.push_back(5.0f);
+		timeVals.push_back(3.0f);
 		
 		blurVals.reserve(2);
-		blurVals.push_back(animFind->second.GetInterpolantValue());
+		blurVals.push_back(animWidthFind->second.GetInterpolantValue());
 		blurVals.push_back(this->sceneFBO->GetFBOTexture()->GetWidth());
 
-		animFind->second.SetLerp(timeVals, blurVals);
-		animFind->second.SetRepeat(false);	
+		animWidthFind->second.SetLerp(timeVals, blurVals);
+		animWidthFind->second.SetRepeat(false);	
 	}
 }

@@ -168,6 +168,7 @@ void GameAssets::ToggleLights(bool turnOn) {
  * if the lights are blacked out (i.e., it doesn't turn lights back on).
  */
 void GameAssets::ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour& fgFillLightCol, const Colour& ballKeyLightCol, float changeTime, bool pulse) {
+	assert(changeTime >= 0.0f);
 	this->lightColourAnims.clear();
 
 	// Used in the case of a pulse animation light change
@@ -181,85 +182,105 @@ void GameAssets::ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour&
 
 	// Set the light colours for the foreground key light and paddle key light if not blacked-out
 	if (this->fgKeyLight.GetDiffuseColour() != GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR) {
-		AnimationMultiLerp<Colour> keyLightColAnim(this->fgKeyLight.GetDiffuseColourPtr());
-		AnimationMultiLerp<Colour> paddleKeyLightColAnim(this->paddleKeyLight.GetDiffuseColourPtr());
 		
-		if (pulse) {
-			std::vector<Colour> tempColourVals;
-			tempColourVals.reserve(3);
-			tempColourVals.push_back(this->fgKeyLight.GetDiffuseColour());
-			tempColourVals.push_back(fgKeyLightCol);
-			tempColourVals.push_back(this->fgKeyLight.GetDiffuseColour());
-
-			keyLightColAnim.SetLerp(timeVals, tempColourVals);
-			keyLightColAnim.SetRepeat(true);
-
-			tempColourVals[0] = this->paddleKeyLight.GetDiffuseColour();
-			tempColourVals[1] = fgKeyLightCol;
-			tempColourVals[2] = this->paddleKeyLight.GetDiffuseColour();
-
-			paddleKeyLightColAnim.SetLerp(timeVals, tempColourVals);
-			paddleKeyLightColAnim.SetRepeat(true);
-		}
+		if (changeTime < EPSILON) {
+			this->fgKeyLight.SetDiffuseColour(fgKeyLightCol);
+			this->paddleKeyLight.SetDiffuseColour(fgKeyLightCol);
+		}	
 		else {
-			keyLightColAnim.SetLerp(changeTime, fgKeyLightCol);
-			paddleKeyLightColAnim.SetLerp(changeTime, fgKeyLightCol);
-		}
+			AnimationMultiLerp<Colour> keyLightColAnim(this->fgKeyLight.GetDiffuseColourPtr());
+			AnimationMultiLerp<Colour> paddleKeyLightColAnim(this->paddleKeyLight.GetDiffuseColourPtr());
+			
+			if (pulse) {
+				std::vector<Colour> tempColourVals;
+				tempColourVals.reserve(3);
+				tempColourVals.push_back(this->fgKeyLight.GetDiffuseColour());
+				tempColourVals.push_back(fgKeyLightCol);
+				tempColourVals.push_back(this->fgKeyLight.GetDiffuseColour());
 
-		this->lightColourAnims.push_back(keyLightColAnim);
-		this->lightColourAnims.push_back(paddleKeyLightColAnim);
+				keyLightColAnim.SetLerp(timeVals, tempColourVals);
+				keyLightColAnim.SetRepeat(true);
+
+				tempColourVals[0] = this->paddleKeyLight.GetDiffuseColour();
+				tempColourVals[1] = fgKeyLightCol;
+				tempColourVals[2] = this->paddleKeyLight.GetDiffuseColour();
+
+				paddleKeyLightColAnim.SetLerp(timeVals, tempColourVals);
+				paddleKeyLightColAnim.SetRepeat(true);
+			}
+			else {
+				keyLightColAnim.SetLerp(changeTime, fgKeyLightCol);
+				paddleKeyLightColAnim.SetLerp(changeTime, fgKeyLightCol);
+			}
+
+			this->lightColourAnims.push_back(keyLightColAnim);
+			this->lightColourAnims.push_back(paddleKeyLightColAnim);
+		}
 	}
 
 	// Set the light colours for the foreground fill light and paddle fill light if not blacked-out
 	if (this->fgFillLight.GetDiffuseColour() != GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR) {
-		AnimationMultiLerp<Colour> fillLightColAnim(this->fgFillLight.GetDiffuseColourPtr());
-		AnimationMultiLerp<Colour> paddleFillLightColAnim(this->paddleFillLight.GetDiffuseColourPtr());
-
-		if (pulse) {
-			std::vector<Colour> tempColourVals;
-			tempColourVals.reserve(3);
-			tempColourVals.push_back(this->fgFillLight.GetDiffuseColour());
-			tempColourVals.push_back(fgFillLightCol);
-			tempColourVals.push_back(this->fgFillLight.GetDiffuseColour());
-
-			fillLightColAnim.SetLerp(timeVals, tempColourVals);
-			fillLightColAnim.SetRepeat(true);
-
-			tempColourVals[0] = this->paddleFillLight.GetDiffuseColour();
-			tempColourVals[1] = fgFillLightCol;
-			tempColourVals[2] = this->paddleFillLight.GetDiffuseColour();
-
-			paddleFillLightColAnim.SetLerp(timeVals, tempColourVals);
-			paddleFillLightColAnim.SetRepeat(true);
-		}
+		
+		if (changeTime < EPSILON) {
+			this->fgFillLight.SetDiffuseColour(fgFillLightCol);
+			this->paddleFillLight.SetDiffuseColour(fgFillLightCol);
+		}	
 		else {
-			fillLightColAnim.SetLerp(changeTime, fgFillLightCol);
-			paddleFillLightColAnim.SetLerp(changeTime, fgFillLightCol);
-		}
+			AnimationMultiLerp<Colour> fillLightColAnim(this->fgFillLight.GetDiffuseColourPtr());
+			AnimationMultiLerp<Colour> paddleFillLightColAnim(this->paddleFillLight.GetDiffuseColourPtr());
 
-		this->lightColourAnims.push_back(fillLightColAnim);
-		this->lightColourAnims.push_back(paddleFillLightColAnim);
+			if (pulse) {
+				std::vector<Colour> tempColourVals;
+				tempColourVals.reserve(3);
+				tempColourVals.push_back(this->fgFillLight.GetDiffuseColour());
+				tempColourVals.push_back(fgFillLightCol);
+				tempColourVals.push_back(this->fgFillLight.GetDiffuseColour());
+
+				fillLightColAnim.SetLerp(timeVals, tempColourVals);
+				fillLightColAnim.SetRepeat(true);
+
+				tempColourVals[0] = this->paddleFillLight.GetDiffuseColour();
+				tempColourVals[1] = fgFillLightCol;
+				tempColourVals[2] = this->paddleFillLight.GetDiffuseColour();
+
+				paddleFillLightColAnim.SetLerp(timeVals, tempColourVals);
+				paddleFillLightColAnim.SetRepeat(true);
+			}
+			else {
+				fillLightColAnim.SetLerp(changeTime, fgFillLightCol);
+				paddleFillLightColAnim.SetLerp(changeTime, fgFillLightCol);
+			}
+
+			this->lightColourAnims.push_back(fillLightColAnim);
+			this->lightColourAnims.push_back(paddleFillLightColAnim);
+		}
 	}
 
 	// Set the light colours for the ball key light if not blacked-out
 	if (this->ballKeyLight.GetDiffuseColour() != GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR) {
-		AnimationMultiLerp<Colour> ballKeyLightColAnim(this->ballKeyLight.GetDiffuseColourPtr());
 		
-		if (pulse) {
-			std::vector<Colour> tempColourVals;
-			tempColourVals.reserve(3);
-			tempColourVals.push_back(this->ballKeyLight.GetDiffuseColour());
-			tempColourVals.push_back(ballKeyLightCol);
-			tempColourVals.push_back(this->ballKeyLight.GetDiffuseColour());
-
-			ballKeyLightColAnim.SetLerp(timeVals, tempColourVals);
-			ballKeyLightColAnim.SetRepeat(true);
-		}
+		if (changeTime < EPSILON) {
+			this->ballKeyLight.SetDiffuseColour(ballKeyLightCol);
+		}	
 		else {
-			ballKeyLightColAnim.SetLerp(changeTime, ballKeyLightCol);
-		}
+			AnimationMultiLerp<Colour> ballKeyLightColAnim(this->ballKeyLight.GetDiffuseColourPtr());
+			
+			if (pulse) {
+				std::vector<Colour> tempColourVals;
+				tempColourVals.reserve(3);
+				tempColourVals.push_back(this->ballKeyLight.GetDiffuseColour());
+				tempColourVals.push_back(ballKeyLightCol);
+				tempColourVals.push_back(this->ballKeyLight.GetDiffuseColour());
 
-		this->lightColourAnims.push_back(ballKeyLightColAnim);
+				ballKeyLightColAnim.SetLerp(timeVals, tempColourVals);
+				ballKeyLightColAnim.SetRepeat(true);
+			}
+			else {
+				ballKeyLightColAnim.SetLerp(changeTime, ballKeyLightCol);
+			}
+
+			this->lightColourAnims.push_back(ballKeyLightColAnim);
+		}
 	}
 
 	this->fgKeyLightColour  = fgKeyLightCol;
@@ -575,6 +596,10 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 	else if (item.GetName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
 		// The poison item will make the lights turn a sickly green colour
 		assert((gameModel.GetPlayerPaddle()->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle);
+		this->ChangeLightsOnColour(GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 
+															 GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,
+															 GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 0.0f, false);
+		
 		this->ChangeLightsOnColour(GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 
 														   GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR,
 															 GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f, true);

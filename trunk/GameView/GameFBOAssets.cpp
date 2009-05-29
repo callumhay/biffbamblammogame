@@ -6,7 +6,7 @@
 #include "../GameModel/PoisonPaddleItem.h"
 
 GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), finalFBO(NULL),
-fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL) {
+fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), drawItemsInLastPass(true) {
 	
 	// Framebuffer object setup
 	this->fgAndBgFBO		= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
@@ -85,6 +85,9 @@ void GameFBOAssets::ActivateItemEffects(const GameItem& item) {
 	if (item.GetName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
 		// Poison items cause the blur to get fuzzier, tell the blur to do this
 		this->fgAndBgBlurEffect->SetPoisonBlurAnimation(true);
+		this->afterImageEffect->SetBlurAmount(0.4f);
+		// Make items also blurry - in order to do this they must be drawn before the post-processing effects
+		this->drawItemsInLastPass = false;
 	}
 }
 
@@ -97,5 +100,7 @@ void GameFBOAssets::DeactivateItemEffects(const GameItem& item) {
 	if (item.GetName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
 		// Turn off the poison blur effect
 		this->fgAndBgBlurEffect->SetPoisonBlurAnimation(false);
+		this->afterImageEffect->SetBlurAmount(CgFxAfterImage::AFTERIMAGE_BLURSTRENGTH_DEFAULT);
+		this->drawItemsInLastPass = true;
 	}
 }

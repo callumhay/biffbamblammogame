@@ -36,7 +36,7 @@ void DecoSkybox::Draw(const Camera& camera) {
 	camTransform.setTranslation(Point3D(0,0,0));
 	glMultMatrixf(camTransform.begin());
 
-	glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_DEPTH_BUFFER_BIT);
+	glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT);
   glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
 	

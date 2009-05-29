@@ -24,7 +24,7 @@ private:
 	CGparameter sceneWidthParam;
 	CGparameter sceneHeightParam;
 
-	enum BlurAnimations { PoisonAnimation };
+	enum BlurAnimations { PoisonWidthBlurAnimation };
 	std::map<BlurAnimations, AnimationMultiLerp<float>> blurAnims;
 
 public:
