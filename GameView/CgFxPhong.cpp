@@ -9,6 +9,7 @@ const std::string CgFxPhong::TEXTURED_BG_TECHNIQUE_NAME		= "TexturedBG";
 // Default constructor, builds default, white material
 CgFxPhong::CgFxPhong(MaterialProperties* properties) : 
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_PHONG_SHADER, properties) {
+	assert(properties->materialType == MaterialProperties::MATERIAL_PHONG_TYPE);
 
 	// Set the correct technique based on whether there's a texture and whether the
 	// geometry is in the foreground or background
