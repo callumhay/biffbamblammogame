@@ -21,6 +21,7 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), ball
 	this->basicBlock			= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
 	this->bombBlock				= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
 	this->triangleBlockUR = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
+	this->inkBlock				= ResourceManager::GetInstance()->GetInkBlockMeshResource();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
@@ -28,6 +29,7 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), ball
 	std::map<std::string, MaterialGroup*> basicBlockMatGrps			= this->basicBlock->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> triangleBlockMatGrps	= this->triangleBlockUR->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> bombBlockMatGrps			= this->bombBlock->GetMaterialGroups();
+	std::map<std::string, MaterialGroup*> inkBlockMatGrps				= this->inkBlock->GetMaterialGroups();
 	
 	for (std::map<std::string, MaterialGroup*>::iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
@@ -36,6 +38,9 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), ball
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
 	for (std::map<std::string, MaterialGroup*>::iterator iter = bombBlockMatGrps.begin(); iter != bombBlockMatGrps.end(); iter++) {
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+	}
+	for (std::map<std::string, MaterialGroup*>::iterator iter = inkBlockMatGrps.begin(); iter != inkBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
 
@@ -233,17 +238,19 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		Colour currColour									= piece->GetColour();
 
 		assert(currMaterial != NULL);
-		assert(currPolyGrp  != NULL);
+		assert(currPolyGrp != NULL);
 
 		// Transform the polygon group to its position in the level, draw it and then transform it back
 		Matrix4x4 worldTransform = Matrix4x4::translationMatrix(worldTranslation);
 		Matrix4x4 localTransform = piece->GetPieceToLevelTransform();
 		Matrix4x4 fullTransform =  worldTransform * localTransform;
 		
+		GLuint newDisplayList = glGenLists(1);
+		assert(newDisplayList != 0);
+
 		currPolyGrp->Transform(fullTransform);
 		
 		// TODO: other local transform operations to the mesh e.g., reflect, rotate, etc.
-		GLuint newDisplayList = glGenLists(1);
 		glNewList(newDisplayList, GL_COMPILE);
 		glColor3f(currColour.R(), currColour.G(), currColour.B());
 		currPolyGrp->Draw();
@@ -254,7 +261,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		Matrix4x4 fullInvTransform = localInvTransform * worldInvTransform;
 		
 		currPolyGrp->Transform(fullInvTransform);
-
+	
 		// Insert the new display list into the list of display lists...
 		this->pieceDisplayLists[piece].insert(std::make_pair<CgFxMaterialEffect*, GLuint>(currMaterial, newDisplayList));
 		this->displayListsPerMaterial[currMaterial].push_back(newDisplayList);
@@ -277,14 +284,17 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 		case LevelPiece::SolidTriangle:
 			returnValue = this->triangleBlockUR->GetMaterialGroups();
 			break;
-		case LevelPiece::Breakable :
+		case LevelPiece::Breakable:
 			returnValue = this->basicBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::BreakableTriangle:
 			returnValue = this->triangleBlockUR->GetMaterialGroups();
 			break;
-		case LevelPiece::Bomb :
+		case LevelPiece::Bomb:
 			returnValue = this->bombBlock->GetMaterialGroups();
+			break;
+		case LevelPiece::Ink:
+			returnValue = this->inkBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Empty :
 			break;

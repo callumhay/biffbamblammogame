@@ -48,7 +48,7 @@ void InGameDisplayState::RenderFrame(double dT) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	
+
 	// Draw the game scene
 	this->DrawGameScene(dT);
 	
@@ -63,8 +63,7 @@ void InGameDisplayState::RenderFrame(double dT) {
  * related to the game itself.
  */
 void InGameDisplayState::DrawGameScene(double dT) {
-	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();		
-	
+
 	// Tick the assets (update them for amount of elapsed time dT).
 	this->display->GetAssets()->Tick(dT);
 
@@ -104,6 +103,11 @@ void InGameDisplayState::RenderBackgroundToFBO(double dT) {
 	this->display->GetAssets()->DrawBackgroundEffects(this->display->GetCamera());
 
 	glPopMatrix();
+
+	//glPushMatrix();
+	//glScalef(5,5,5);
+	//GeometryMaker::GetInstance()->DrawSphere();
+	//glPopMatrix();
 
 	// Unbind the background FBO
 	backgroundFBO->UnbindFBObj();

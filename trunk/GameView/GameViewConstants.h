@@ -95,6 +95,7 @@ public:
 	// Shader path constants ********************************
 	const std::string CGFX_CEL_SHADER;
 	const std::string CGFX_PHONG_SHADER;
+	const std::string CGFX_INKBLOCK_SHADER;
 	const std::string CGFX_POSTREFRACT_SHADER;
 	const std::string CGFX_VOLUMEMETRIC_SHADER;
 	const std::string CGFX_DECOSKYBOX_SHADER;

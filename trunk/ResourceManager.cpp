@@ -1,16 +1,23 @@
 #include "ResourceManager.h"
+
 #include "BlammoEngine/ObjReader.h"
 #include "BlammoEngine/MtlReader.h"
 #include "BlammoEngine/CgFxEffect.h"
-
+#include "BlammoEngine/GeometryMaker.h"
 #include "BlammoEngine/Mesh.h"
 #include "BlammoEngine/Texture1D.h"
 #include "BlammoEngine/Texture2D.h"
 #include "BlammoEngine/TextureFontSet.h"
 
+#include "GameModel/LevelPiece.h"
+
+#include "GameView/CgFxInkBlock.h"
+#include "GameView/GameViewConstants.h"
+
 ResourceManager* ResourceManager::instance = NULL;
 
-ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : cgContext(NULL) {
+ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
+cgContext(NULL), inkBlockMesh(NULL) {
 	// Initialize DevIL and make sure it loaded correctly
 	ilInit();
 	iluInit();
@@ -40,6 +47,11 @@ ResourceManager::~ResourceManager() {
 		iter->second = NULL;
 	}
 	this->loadedMeshes.clear();
+
+	if (this->inkBlockMesh != NULL) {
+		delete this->inkBlockMesh;
+		this->inkBlockMesh = NULL;
+	}
 
 	// Clean up all loaded effects - technically we shouldn't have to do this since
 	// whoever is using the resource should have released it by now
@@ -83,8 +95,6 @@ void ResourceManager::InitCgContext() {
 	// Register OGL states for the context and allow texture mgmt
 	cgGLRegisterStates(this->cgContext);
 	cgGLSetManageTextureParameters(this->cgContext, true);
-	//cgGLEnableProfile(CG_PROFILE_FP40);
-	//cgGLEnableProfile(CG_PROFILE_VP40);
 	debug_cg_state();
 }
 
@@ -98,6 +108,46 @@ void ResourceManager::InitResourceManager(const std::string& resourceZip, const 
 	if (ResourceManager::instance == NULL) {
 		ResourceManager::instance = new ResourceManager(resourceZip, argv0);
 	}
+}
+
+/**
+ * Obtain the mesh resource for the ink block, load it into memory
+ * if it hasn't been loaded already.
+ * Returns: Mesh resource for the game's ink block.
+ */
+Mesh* ResourceManager::GetInkBlockMeshResource() {
+	// If it exists, return a pointer to it
+	if (this->inkBlockMesh != NULL) {
+		return this->inkBlockMesh;
+	}
+
+	// Otherwise, we load it into memory:
+	// Create the geometry (eliptical pill shape) using the ball geometry
+	Mesh* ballMesh = this->GetObjMeshResource(GameViewConstants::GetInstance()->BALL_MESH);
+	PolygonGroup* inkBlockPolyGrp = new PolygonGroup(*ballMesh->GetMaterialGroups().begin()->second->GetPolygonGroup());
+	Matrix4x4 scaleMatrix = Matrix4x4::scaleMatrix(Vector3D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT, 1.0f));
+	inkBlockPolyGrp->Transform(scaleMatrix);
+	assert(inkBlockPolyGrp != NULL);
+
+	// Create the material properties and effect (ink block cgfx shader - makes the ink block all wiggly and stuff)
+	MaterialProperties* inkMatProps = new MaterialProperties();
+	inkMatProps->materialType	= MaterialProperties::MATERIAL_INKBLOCK_TYPE;
+	inkMatProps->geomType			= MaterialProperties::MATERIAL_GEOM_FG_TYPE;
+	inkMatProps->diffuse			= Colour(0.111f, 0.137f, 0.289f);
+	inkMatProps->specular			= Colour(0.33f, 0.33f, 0.33f);
+	inkMatProps->shininess		= 95.0f;
+	CgFxInkBlock* inkBlockEffect = new CgFxInkBlock(inkMatProps);
+
+	// Create the material group and its geometry (as defined above)
+	MaterialGroup* inkMatGrp = new MaterialGroup(inkBlockEffect);
+	inkMatGrp->SetPolygonGroup(inkBlockPolyGrp);
+
+	std::map<std::string, MaterialGroup*> inkBlockMatGrps;
+	inkBlockMatGrps.insert(std::make_pair("Ink Material", inkMatGrp));
+
+	// Insert the material and its geometry it into the mesh
+	this->inkBlockMesh = new Mesh("Ink Block", inkBlockMatGrps);
+	return this->inkBlockMesh;
 }
 
 /**

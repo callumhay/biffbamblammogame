@@ -1,4 +1,5 @@
 #include "GeometryMaker.h"
+#include "Mesh.h"
 
 GeometryMaker* GeometryMaker::instance = NULL;
 
@@ -102,7 +103,7 @@ bool GeometryMaker::InitializeCubeDL() {
  * Returns: true on success, false otherwise.
  */
 bool GeometryMaker::InitializeSphereDL() {
-	this->sphereDL = GeometryMaker::CreateSphereDL(GeometryMaker::NUM_SPHERE_STACKS, GeometryMaker::NUM_SPHERE_SLICES);
+	this->sphereDL = GeometryMaker::CreateSphereDL(0.5f, 0.5f, GeometryMaker::NUM_SPHERE_STACKS, GeometryMaker::NUM_SPHERE_SLICES);
 	return this->sphereDL != 0;
 }
 
@@ -111,30 +112,28 @@ bool GeometryMaker::InitializeSphereDL() {
  * has no texture coordinates, but has normals set. Also will have the tesselation specified.
  * Returns: The drawlist generated for the sphere.
  */
-GLuint GeometryMaker::CreateSphereDL(unsigned int stacks, unsigned int slices) {
-		// Number of vertices used for the sphere
+GLuint GeometryMaker::CreateSphereDL(float horizRadius, float vertRadius, unsigned int stacks, unsigned int slices) {
+	// Number of vertices used for the sphere
 	const unsigned int vertexCount = 2 * stacks * (slices + 1);
 
 	// Create arrays to hold temporary geometry data
-	std::vector<Vector3D> vertices;
+	std::vector<Point3D> vertices;
 	vertices.reserve(vertexCount);
 	std::vector<Vector3D> normals;
 	normals.reserve(vertexCount);
-	std::vector<Vector2D> texCoords;
+	std::vector<Point2D> texCoords;
 	texCoords.reserve(vertexCount);
 
 	// Constants used to generate the sphere
 	const float deltaRingAngle = (M_PI / stacks);
   const float deltaSegAngle  = (2.0f * M_PI / static_cast<float>(slices));
 
-	unsigned int currVertexCount = 0;
-
- // Generate the group of rings for the sphere
+	// Generate the group of rings for the sphere
 	for (unsigned int ring = 0; ring < stacks; ring++) {
-		float r0 = sin(ring * deltaRingAngle);
-		float r1 = sin((ring + 1) * deltaRingAngle);
-		float y0 = cos(ring * deltaRingAngle);
-		float y1 = cos((ring + 1) * deltaRingAngle);
+		float r0 = horizRadius * sin(ring * deltaRingAngle);
+		float r1 = horizRadius * sin((ring + 1) * deltaRingAngle);
+		float y0 = vertRadius * cos(ring * deltaRingAngle);
+		float y1 = vertRadius * cos((ring + 1) * deltaRingAngle);
 
 		// Generate the group of segments for the current ring
 		for (unsigned int seg = 0; seg < (slices + 1); seg++) { 
@@ -143,17 +142,15 @@ GLuint GeometryMaker::CreateSphereDL(unsigned int stacks, unsigned int slices) {
 			float x1 =  r1 * sin(seg * deltaSegAngle);
 			float z1 =  r1 * cos(seg * deltaSegAngle);
 
-			vertices.push_back(Vector3D(x0/2.0f, y0/2.0f, z0/2.0f));
+			vertices.push_back(Point3D(x0/2.0f, y0/2.0f, z0/2.0f));
 			normals.push_back(Vector3D(x0/2.0f, y0/2.0f, z0/2.0f));
-			texCoords.push_back(Vector2D((static_cast<float>(slices) - seg) / static_cast<float>(slices),
-																	  static_cast<float>(ring) / static_cast<float>(stacks))); 
-			currVertexCount++;
+			texCoords.push_back(Point2D((static_cast<float>(slices) - seg) / static_cast<float>(slices),
+																	 1.0f - (static_cast<float>(ring) / static_cast<float>(stacks)))); 
 
-			vertices.push_back(Vector3D(x1/2.0f, y1/2.0f, z1/2.0f));
+			vertices.push_back(Point3D(x1/2.0f, y1/2.0f, z1/2.0f));
 			normals.push_back(Vector3D(x1/2.0f, y1/2.0f, z1/2.0f));
-			texCoords.push_back(Vector2D((static_cast<float>(slices) - seg) / static_cast<float>(slices),
-																	 static_cast<float>(ring + 1) / static_cast<float>(stacks))); 
-			currVertexCount++;
+			texCoords.push_back(Point2D((static_cast<float>(slices) - seg) / static_cast<float>(slices),
+																	 1.0f - (static_cast<float>(ring + 1) / static_cast<float>(stacks)))); 
 		}
 	}	
 

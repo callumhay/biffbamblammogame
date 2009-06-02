@@ -8,6 +8,7 @@
 #include "BreakableBlock.h"
 #include "BombBlock.h"
 #include "TriangleBlocks.h"
+#include "InkBlock.h"
 
 #include "../ResourceManager.h"
 
@@ -18,6 +19,7 @@ const char GameLevel::YELLOW_BREAKABLE_CHAR		= 'Y';
 const char GameLevel::ORANGE_BREAKABLE_CHAR		= 'O';
 const char GameLevel::RED_BREAKABLE_CHAR			= 'R';
 const char GameLevel::BOMB_CHAR								= 'B';
+const char GameLevel::INKBLOCK_CHAR						= 'I';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -111,6 +113,9 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					break;
 				case BOMB_CHAR:
 					newPiece = new BombBlock(pieceWLoc, pieceHLoc);
+					break;
+				case INKBLOCK_CHAR:
+					newPiece = new InkBlock(pieceWLoc, pieceHLoc);
 					break;
 				case TRIANGLE_BLOCK_CHAR:
 					{

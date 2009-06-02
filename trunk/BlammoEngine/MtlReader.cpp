@@ -187,6 +187,7 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFileFromStream
 		}
 		else {
 			// Default to using the cel shader for now
+			matPropIter->second->materialType = MaterialProperties::MATERIAL_CELBASIC_TYPE;
 			currMaterial = new CgFxCelShading(matPropIter->second);
 		}
 

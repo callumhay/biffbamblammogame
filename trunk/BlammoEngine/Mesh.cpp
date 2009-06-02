@@ -8,6 +8,7 @@ PolygonGroup::PolygonGroup(const PolygonGroup& other) {
 	}
 	this->polygroupArrayLength = other.polygroupArrayLength;
 	this->numIndices = other.numIndices;
+	this->polyType   = other.polyType;
 }
 
 PolygonGroup::PolygonGroup(const PolyGrpIndexer& faceIndexer, const std::vector<Point3D>& vertexStream, 
@@ -17,6 +18,7 @@ PolygonGroup::PolygonGroup(const PolyGrpIndexer& faceIndexer, const std::vector<
 	assert(faceIndexer.normalIndices.size() == faceIndexer.vertexIndices.size());
 	assert(faceIndexer.vertexIndices.size() == faceIndexer.texCoordIndices.size());
 
+	this->polyType	 = faceIndexer.polyType;
 	this->numIndices = faceIndexer.vertexIndices.size();
 	this->polygroupArrayLength = numIndices * INTERLEAVED_MULTIPLIER;
 	this->polygroupArray = new float[this->polygroupArrayLength];
