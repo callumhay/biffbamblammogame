@@ -13,9 +13,12 @@ class Camera;
 
 // Represents the set of indices 
 struct PolyGrpIndexer {
+	GLenum polyType;
 	std::vector<unsigned int> vertexIndices;
 	std::vector<unsigned int> normalIndices;
 	std::vector<unsigned int> texCoordIndices;
+
+	PolyGrpIndexer() : polyType(GL_TRIANGLES) {};
 };
 
 // Holds all of the indexed vertices, normals, etc. for a polygon group
@@ -25,6 +28,7 @@ private:
 	static const GLint GL_INTERLEAVED_FORMAT = GL_T2F_N3F_V3F;
 	static const GLint INTERLEAVED_STRIDE = INTERLEAVED_MULTIPLIER * sizeof(float);
 
+	GLenum polyType;
 	unsigned int polygroupArrayLength;
 	unsigned int numIndices;
 	float* polygroupArray;
@@ -42,7 +46,7 @@ public:
 
 	void Draw() const {
 		glInterleavedArrays(GL_INTERLEAVED_FORMAT, INTERLEAVED_STRIDE, this->polygroupArray);
-		glDrawArrays(GL_TRIANGLES, 0, this->numIndices);
+		glDrawArrays(this->polyType, 0, this->numIndices);
 	};
 
 	void Translate(const Vector3D& t);
@@ -77,8 +81,18 @@ public:
 								const std::vector<Vector3D>& normalStream,
 								const std::vector<Point2D>& texCoordStream);
 
+	void SetPolygonGroup(PolygonGroup* polyGrp) {
+		if (this->polyGrp != NULL) {
+			delete this->polyGrp;
+		}
+		this->polyGrp = polyGrp;
+	}
+
 	void SetDisplayListID(GLuint dispListID) {
 		this->displayListID = dispListID;
+	}
+	GLuint GetDisplayListID() const {
+		return this->displayListID;
 	}
 
 	inline void Draw(const Camera& camera) const {

@@ -178,6 +178,11 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 			this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block);
 			this->display->GetCamera().SetCameraShake(1.2, Vector3D(1.0, 0.3, 0.1), 100);
 			break;
+
+		case LevelPiece::Ink:
+			// TODO: Emit goo from ink block and make onomata
+			// TODO: Cover camera in ink with a fullscreen splatter effect
+			break;
 		default:
 			break;
 	}

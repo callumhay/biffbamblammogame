@@ -3,6 +3,13 @@
 #include "GameModel.h"
 #include "EmptySpaceBlock.h"
 
+InkBlock::InkBlock(unsigned int wLoc, unsigned int hLoc) :
+LevelPiece(wLoc, hLoc) {
+}
+
+InkBlock::~InkBlock() {
+}
+
 /**
  * The ink block is destroyed and replaced by an empty space.
  * Returns: A new empty space block.

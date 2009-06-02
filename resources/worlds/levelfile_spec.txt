@@ -22,7 +22,7 @@ The following specifies the .lvl format.
 // p: the orientation of the triangle (where the outer corner is located), can be any of the following: {ul, ur, ll, lr}
 // i.e., upper-left = ul, lower-right = lr, etc.
 
-
+// I - Ink block
 
 
 <block list in order of top-left to bottom-right>

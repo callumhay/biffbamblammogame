@@ -4,6 +4,8 @@
 #include "BasicIncludes.h"
 #include "Camera.h"
 
+class PolygonGroup;
+
 /**
  * Singleton class for creating pre-made geometry (e.g., quad,
  * cube, etc.).
@@ -55,7 +57,7 @@ public:
 
 	inline void DrawSphere() const { glCallList(this->sphereDL); }
 	inline GLuint GetSphereDL() const { return this->sphereDL; }
-	static GLuint CreateSphereDL(unsigned int stacks, unsigned int slices);
+	static GLuint CreateSphereDL(float horizRadius, float vertRadius, unsigned int stacks, unsigned int slices);
 
 	inline void DrawFullScreenQuad(int width, int height, float depth = 0.0f) {
 		glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_TRANSFORM_BIT);

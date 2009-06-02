@@ -527,6 +527,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\CgFxInkBlock.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CgFxPhong.h"
 					>
 				</File>
@@ -648,6 +652,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\CgFxGaussianBlur.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxInkBlock.cpp"
 					>
 				</File>
 				<File
