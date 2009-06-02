@@ -13,6 +13,7 @@ Texture* CgFxCelShading::CelDiffuseTexture = NULL;
 // Default constructor, builds default, white material
 CgFxCelShading::CgFxCelShading(MaterialProperties* properties) : 
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties) {
+	assert(properties->materialType == MaterialProperties::MATERIAL_CELBASIC_TYPE);
 
 	// Set up the cel-shading texture parameter, unique to this material
 	this->celSamplerParam = NULL;
