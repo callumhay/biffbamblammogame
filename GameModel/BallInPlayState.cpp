@@ -171,6 +171,17 @@ void BallInPlayState::Tick(double seconds) {
 		if (didCollideWithballSafetyNet) {
 			this->DoBallCollision(*currBall, n, d);
 		}
+
+		// Ball-ball collisions - doesn't work nicely... collision issues
+		//std::list<GameBall*>::iterator nextIter = iter;
+		//nextIter++;
+		//for (; nextIter != gameBalls.end(); nextIter++) {
+		//	GameBall* otherBall = *nextIter;
+		//	assert(currBall != otherBall);
+		//	if (currBall->CollisionCheck(*otherBall)) {
+		//		this->DoBallCollision(*currBall, *otherBall);
+		//	}
+		//}
 	}
 	
 	// Get rid of all the balls that went out of bounds / are now dead
@@ -405,6 +416,37 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
 	// Reflect the ball off the normal
 	b.SetVelocity(reflSpd, reflVecHat);
 }
+
+/**
+ * Private helper function to calculate the new velocities for two balls that just
+ * collided with each other.
+ */
+/*
+void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
+	
+	Collision::Circle2D ball1Bounds = ball1.GetBounds();
+	Collision::Circle2D ball2Bounds = ball2.GetBounds();
+
+	// Compute the vectors to move the balls along so that they are on each other's boundries
+	Vector2D ball1CorrectionVec = ball1Bounds.Center() - ball2Bounds.Center();
+	if (ball1CorrectionVec == Vector2D(0, 0)) {
+		ball1CorrectionVec = ball1.GetDirection();
+	}
+	ball1CorrectionVec.Normalize();
+	Vector2D ball2CorrectionVec = -ball1CorrectionVec;
+
+	// Set the velocity vectors for each ball as a result of the collision
+	Vector2D ball1NewVel = Vector2D::Normalize(Reflect(ball1.GetDirection(), ball1CorrectionVec));
+	Vector2D ball2NewVel = Vector2D::Normalize(Reflect(ball2.GetDirection(), ball2CorrectionVec));
+
+	float totalRadius = ball1Bounds.Radius() + ball2Bounds.Radius() + EPSILON;
+	ball1.SetCenterPosition(ball1Bounds.Center() + totalRadius * ball1CorrectionVec);
+	ball2.SetCenterPosition(ball2Bounds.Center() + totalRadius * ball2CorrectionVec);
+
+	ball1.SetVelocity(ball1.GetSpeed(), ball1NewVel);
+	ball2.SetVelocity(ball2.GetSpeed(), ball2NewVel);
+}
+*/
 
 /**
  * Private helper function to determine if the given position is

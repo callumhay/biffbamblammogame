@@ -166,14 +166,13 @@ int main(int argc, char *argv[]) {
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 
 	double frameTimeDelta = 0.0;
-	// Try to keep it at 60fps...
-	const double maxDelta = 1.0 / 60.0;
+	const double maxDelta = 1.0 / 30.0;
 
 	// Main render loop...
 	while(!display->HasGameExited()) {
 		Uint32 startOfFrameTime = SDL_GetTicks();
 		
-		// Don't let the game run at less than 60 fps
+		// Don't let the game run at less than 30 fps
 		if (frameTimeDelta > maxDelta) {
 			frameTimeDelta = maxDelta;
 		}

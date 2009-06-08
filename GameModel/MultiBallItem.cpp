@@ -37,6 +37,8 @@ double MultiBallItem::Activate() {
 	std::vector<GameBall*> newBalls;
 	newBalls.reserve(1 * this->numNewSpawnedBalls);
 
+	//const float distToMoveOut = 2 * affectedBall->GetBounds().Radius() / Trig::degreesToRadians(MultiBallItem::MIN_SPLIT_DEGREES);
+
 	// Create all the copies of the current ball
 	for (unsigned int copyNum = 0; copyNum < this->numNewSpawnedBalls; copyNum++) {
 		GameBall* newBall = new GameBall(*affectedBall);
@@ -45,6 +47,7 @@ double MultiBallItem::Activate() {
 		Vector2D ballDir = affectedBall->GetDirection();
 		currRotationInDegs += MultiBallItem::MIN_SPLIT_DEGREES + Randomizer::GetInstance()->RandomNumZeroToOne()*maxDegreesDiff;
 		newBall->SetVelocity(affectedBall->GetSpeed(), Rotate(currRotationInDegs, ballDir));
+		//newBall->SetCenterPosition(newBall->GetBounds().Center() + (distToMoveOut * newBall->GetDirection()));
 
 		newBalls.push_back(newBall);
 	}

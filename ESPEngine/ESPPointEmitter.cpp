@@ -37,10 +37,10 @@ Vector3D ESPPointEmitter::CalculateRandomInitParticleDir() const {
 	}
 	// (0 <= phi < 2*pi)
 	if (sphCoordEmitDir[2] >= static_cast<float>(2.0*M_PI)) {
-		sphCoordEmitDir[1] = sphCoordEmitDir[1] - static_cast<float>(2.0*M_PI);
+		sphCoordEmitDir[2] = sphCoordEmitDir[2] - static_cast<float>(2.0*M_PI);
 	}
 	else if (sphCoordEmitDir[2] < 0) {
-		sphCoordEmitDir[1] = -sphCoordEmitDir[1];// + static_cast<float>(2.0*M_PI);
+		sphCoordEmitDir[2] = -sphCoordEmitDir[2];// + static_cast<float>(2.0*M_PI);
 	}
 
 	// Convert back to cartesian Coordinates

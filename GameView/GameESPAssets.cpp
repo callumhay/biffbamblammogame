@@ -4,6 +4,7 @@
 #include "BallSafetyNetMesh.h"
 
 #include "../GameModel/GameModel.h"
+#include "../GameModel/GameLevel.h"
 #include "../GameModel/GameBall.h"
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/Projectile.h"
@@ -47,6 +48,8 @@ paddleLaserGlowSparks(NULL),
 
 explosionRayRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
 explosionRayRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
+smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
+smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 
 circleGradientTex(NULL), 
 starTex(NULL), 
@@ -54,7 +57,8 @@ starOutlineTex(NULL),
 explosionTex(NULL),
 explosionRayTex(NULL),
 laserBeamTex(NULL),
-upArrowTex(NULL) {
+upArrowTex(NULL),
+ballTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -93,6 +97,8 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->laserBeamTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->upArrowTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballTex);
 	assert(removed);
 
 	// Delete any standalone effects
@@ -275,6 +281,10 @@ void GameESPAssets::InitESPTextures() {
 	if (this->upArrowTex == NULL) {
 		this->upArrowTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear));
 		assert(this->upArrowTex != NULL);
+	}
+	if (this->ballTex == NULL) {
+		this->ballTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear));
+		assert(this->ballTex != NULL);
 	}
 
 	debug_opengl_state();
@@ -752,6 +762,148 @@ void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPie
 	this->activeGeneralEmitters.push_front(bombExplodeRayEffect);
 
 	this->activeGeneralEmitters.push_back(bombOnoEffect);
+}
+
+/**
+ * Add the effect for when an Ink block gets hit - splortch!
+ */
+void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level) {
+	Point2D inkBlockCenter  = inkBlock.GetCenter();
+	Point3D emitCenter  = Point3D(inkBlockCenter[0], inkBlockCenter[1], 0.0f);
+	
+	Colour inkBlockColour					= GameViewConstants::GetInstance()->INK_BLOCK_COLOUR;
+	Colour lightInkBlockColour		= inkBlockColour + Colour(0.15f, 0.15f, 0.15f);
+	Colour lighterInkBlockColour	= lightInkBlockColour + Colour(0.2f, 0.2f, 0.2f);
+
+	unsigned int randomSmoke1 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
+	unsigned int randomSmoke2 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
+	unsigned int randomSmoke3 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
+
+	// Inky clouds
+	ESPPointEmitter* inkyClouds1 = new ESPPointEmitter();
+	inkyClouds1->SetSpawnDelta(ESPInterval(0.0f));
+	inkyClouds1->SetNumParticleLives(1);
+	inkyClouds1->SetInitialSpd(ESPInterval(2.0f, 2.5f));
+	inkyClouds1->SetParticleLife(ESPInterval(1.5f, 2.0f));
+	inkyClouds1->SetParticleSize(ESPInterval(0.75f, 2.25f));
+	inkyClouds1->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
+	inkyClouds1->SetParticleAlignment(ESP::ViewPointAligned);
+	inkyClouds1->SetEmitPosition(emitCenter);
+	inkyClouds1->SetEmitAngleInDegrees(180);
+	inkyClouds1->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
+	inkyClouds1->SetParticles(GameESPAssets::NUM_INK_CLOUD_PART_PARTICLES, this->smokeTextures[randomSmoke1]);
+	inkyClouds1->AddEffector(&this->particleFader);
+	inkyClouds1->AddEffector(&this->particleMediumGrowth);
+	
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		inkyClouds1->AddEffector(&this->smokeRotatorCW);
+	}
+	else {
+		inkyClouds1->AddEffector(&this->smokeRotatorCCW);
+	}
+
+	ESPPointEmitter* inkyClouds2 = new ESPPointEmitter();
+	inkyClouds2->SetSpawnDelta(ESPInterval(0.0f));
+	inkyClouds2->SetNumParticleLives(1);
+	inkyClouds2->SetInitialSpd(ESPInterval(2.0f, 2.5f));
+	inkyClouds2->SetParticleLife(ESPInterval(1.5f, 2.0f));
+	inkyClouds2->SetParticleSize(ESPInterval(0.75f, 2.25f));
+	inkyClouds2->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
+	inkyClouds2->SetParticleAlignment(ESP::ViewPointAligned);
+	inkyClouds2->SetEmitPosition(emitCenter);
+	inkyClouds2->SetEmitAngleInDegrees(180);
+	inkyClouds2->SetParticleColour(ESPInterval(lightInkBlockColour.R()), ESPInterval(lightInkBlockColour.G()), ESPInterval(lightInkBlockColour.B()), ESPInterval(1.0f));
+	inkyClouds2->SetParticles(GameESPAssets::NUM_INK_CLOUD_PART_PARTICLES, this->smokeTextures[randomSmoke2]);
+	inkyClouds2->AddEffector(&this->particleFader);
+	inkyClouds2->AddEffector(&this->particleMediumGrowth);
+	
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		inkyClouds2->AddEffector(&this->smokeRotatorCW);
+	}
+	else {
+		inkyClouds2->AddEffector(&this->smokeRotatorCCW);
+	}
+
+	ESPPointEmitter* inkyClouds3 = new ESPPointEmitter();
+	inkyClouds3->SetSpawnDelta(ESPInterval(0.0f));
+	inkyClouds3->SetNumParticleLives(1);
+	inkyClouds3->SetInitialSpd(ESPInterval(2.0f, 2.5f));
+	inkyClouds3->SetParticleLife(ESPInterval(1.5f, 2.0f));
+	inkyClouds3->SetParticleSize(ESPInterval(0.75f, 2.25f));
+	inkyClouds3->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
+	inkyClouds3->SetParticleAlignment(ESP::ViewPointAligned);
+	inkyClouds3->SetEmitPosition(emitCenter);
+	inkyClouds3->SetEmitAngleInDegrees(180);
+	inkyClouds3->SetParticleColour(ESPInterval(lighterInkBlockColour.R()), ESPInterval(lighterInkBlockColour.G()), ESPInterval(lighterInkBlockColour.B()), ESPInterval(1.0f));
+	inkyClouds3->SetParticles(GameESPAssets::NUM_INK_CLOUD_PART_PARTICLES, this->smokeTextures[randomSmoke3]);
+	inkyClouds3->AddEffector(&this->particleFader);
+	inkyClouds3->AddEffector(&this->particleMediumGrowth);
+	
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		inkyClouds3->AddEffector(&this->smokeRotatorCW);
+	}
+	else {
+		inkyClouds3->AddEffector(&this->smokeRotatorCCW);
+	}
+
+	Point3D currCamPos = camera.GetCurrentCameraPosition();
+	Vector3D negHalfLevelDim = -0.5 * Vector3D(level.GetLevelUnitWidth(), level.GetLevelUnitHeight(), 0.0f);
+	Point3D emitCenterWorldCoords = emitCenter + negHalfLevelDim;
+	Vector3D inkySprayDir = Vector3D::Normalize(currCamPos - emitCenterWorldCoords);
+
+	// Inky spray at the camera
+	ESPPointEmitter* inkySpray = new ESPPointEmitter();
+	inkySpray->SetSpawnDelta(ESPInterval(0.01f));
+	inkySpray->SetNumParticleLives(1);
+	inkySpray->SetInitialSpd(ESPInterval(18.0f, 20.0f));
+	inkySpray->SetParticleLife(ESPInterval(4.0f, 6.0f));
+	inkySpray->SetParticleSize(ESPInterval(0.75f, 2.25f));
+	inkySpray->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
+	inkySpray->SetParticleAlignment(ESP::ViewPointAligned);
+	inkySpray->SetEmitPosition(emitCenter);
+	inkySpray->SetEmitDirection(inkySprayDir);
+	inkySpray->SetEmitAngleInDegrees(10);
+	inkySpray->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
+	inkySpray->SetParticles(GameESPAssets::NUM_INK_SPRAY_PARTICLES, this->ballTex);
+	inkySpray->AddEffector(&this->particleFader);
+	inkySpray->AddEffector(&this->particleMediumGrowth);
+
+	// Create an emitter for the sound of onomatopeia of the bursting ink block
+	ESPPointEmitter* inkOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	inkOnoEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	inkOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	inkOnoEffect->SetParticleLife(ESPInterval(2.0f, 2.5f));
+	inkOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
+	inkOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	inkOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+	inkOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	inkOnoEffect->SetEmitPosition(emitCenter);
+	inkOnoEffect->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
+	
+	// Add effectors...
+	inkOnoEffect->AddEffector(&this->particleFader);
+	inkOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single particle to the emitter...
+	DropShadow dpTemp;
+	dpTemp.colour = Colour(1.0f, 1.0f, 1.0f);
+	dpTemp.amountPercentage = 0.12f;
+	ESPOnomataParticle* inkOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::SadBadGoo, GameFontAssetsManager::Big));
+	inkOnoParticle->SetDropShadow(dpTemp);
+
+	// Set the severity of the effect...
+	Onomatoplex::Extremeness severity = Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::GOOD, Onomatoplex::UBER);
+	inkOnoParticle->SetOnomatoplexSound(Onomatoplex::GOO, severity);
+	inkOnoEffect->AddParticle(inkOnoParticle);
+
+	this->activeGeneralEmitters.push_back(inkyClouds1);
+	this->activeGeneralEmitters.push_back(inkyClouds2);
+	this->activeGeneralEmitters.push_back(inkyClouds3);
+
+	this->activeGeneralEmitters.push_back(inkySpray);
+
+	this->activeGeneralEmitters.push_back(inkOnoEffect);
 }
 
 /**

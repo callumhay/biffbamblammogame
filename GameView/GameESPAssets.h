@@ -25,6 +25,7 @@ class ESPShaderParticle;
 class Projectile;
 class PlayerPaddle;
 class GameModel;
+class GameLevel;
 
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
@@ -60,6 +61,8 @@ private:
 
 	ESPParticleRotateEffector explosionRayRotatorCW;
 	ESPParticleRotateEffector explosionRayRotatorCCW;
+	ESPParticleRotateEffector smokeRotatorCW;
+	ESPParticleRotateEffector smokeRotatorCCW;
 
 	// Various textures used as particles for various effects
 	std::vector<Texture2D*> bangTextures;
@@ -71,6 +74,7 @@ private:
 	Texture2D* explosionRayTex;
 	Texture2D* laserBeamTex;
 	Texture2D* upArrowTex;
+	Texture2D* ballTex;
 
 	// Ball related ESP effects - stores each balls set of item-related (defined by unique string ID) effects
 	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>> ballEffects;
@@ -84,6 +88,8 @@ private:
 	static const int NUM_PADDLE_SIZE_CHANGE_PARTICLES = 24;
 	static const int NUM_BALL_SIZE_CHANGE_PARTICLES = 20;
 	static const int NUM_ITEM_ACQUIRED_SPARKS = 20;
+	static const int NUM_INK_CLOUD_PART_PARTICLES = 5;
+	static const int NUM_INK_SPRAY_PARTICLES = 20;
 
 	ESPPointEmitter* paddleLaserGlowAura;
 	ESPPointEmitter* paddleLaserGlowSparks;
@@ -119,6 +125,7 @@ public:
 	void AddBallBounceEffect(const Camera& camera, const GameBall& ball);
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
+	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level);
 	void AddBallSafetyNetDestroyedEffect(const GameBall& ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);

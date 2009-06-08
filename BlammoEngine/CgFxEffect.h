@@ -97,11 +97,14 @@ private:
 		glCallList(displayListID);
 		cgResetPassState(pass);
 	}
-	static void DrawPass(CGpass pass, const std::list<GLuint> &displayListIDs) {
+	static void DrawPass(CGpass pass, const std::vector<GLuint> &displayListIDs) {
+		assert(displayListIDs.size() > 0);
 		cgSetPassState(pass);
-		for (std::list<GLuint>::const_iterator iter = displayListIDs.begin(); iter != displayListIDs.end(); iter++) {
-			glCallList(*iter);
-		}
+		glListBase(0);
+		glCallLists(displayListIDs.size(), GL_UNSIGNED_INT, &displayListIDs[0]);
+		//for (std::vector<GLuint>::const_iterator iter = displayListIDs.begin(); iter != displayListIDs.end(); ++iter) {
+		//	glCallList(*iter);
+		//}
 		cgResetPassState(pass);
 	}
 
@@ -133,7 +136,7 @@ public:
 			currPass = cgGetNextPass(currPass);
 		}
 	}
-	void Draw(const Camera& camera, const std::list<GLuint> &displayListIDs) {
+	void Draw(const Camera& camera, const std::vector<GLuint> &displayListIDs) {
 		this->SetupBeforePasses(camera);
 		
 		// Draw each pass of this effect

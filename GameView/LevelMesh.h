@@ -33,7 +33,7 @@ private:
 	std::map<std::string, CgFxMaterialEffect*> levelMaterials;
 
 	// Which display lists correspond to a given material
-	std::map<CgFxMaterialEffect*, std::list<GLuint>> displayListsPerMaterial;
+	std::map<CgFxMaterialEffect*, std::vector<GLuint>> displayListsPerMaterial;
 
 	// The display lists associated with each level piece
 	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint>> pieceDisplayLists;
