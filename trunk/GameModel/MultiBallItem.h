@@ -32,7 +32,7 @@ private:
 	}
 
 public:
-	static const unsigned int MAX_NUM_SPLITBALLS = 10;	// Maximum number of balls that can split off in a multiball
+	static const unsigned int MAX_NUM_SPLITBALLS = 9;	// Maximum number of balls that can split off in a multiball
 	static const unsigned int MIN_NUM_SPLITBALLS = 1;		// Minimum number of balls that can split off in a multiball
 	static const float MIN_SPLIT_DEGREES;								// Minimum number of degrees between balls when splitting
 

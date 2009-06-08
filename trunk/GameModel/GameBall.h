@@ -57,6 +57,18 @@ public:
 		return this->bounds;
 	}
 
+	/**
+	 * Check to see if this ball collided with another.
+	 * Returns: true if there was a collision between this ball and otherball, false otherwise.
+	 */
+	bool CollisionCheck(const GameBall& otherBall) {
+		Vector2D lengthVec = this->bounds.Center() - otherBall.bounds.Center();
+		float sqLength = Vector2D::Dot(lengthVec, lengthVec);
+		float radiiSum = this->bounds.Radius() + otherBall.bounds.Radius();
+		float sqRadii = radiiSum * radiiSum;
+		return sqLength < sqRadii;
+	}
+
 	// Set the center position of the ball
 	void SetCenterPosition(const Point2D& p) {
 		this->bounds.SetCenter(p);

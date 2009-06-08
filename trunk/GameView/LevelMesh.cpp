@@ -78,10 +78,10 @@ void LevelMesh::Flush() {
 	
 	// Delete each of the display lists loaded for the previous level and clear up the
 	// relevant mappings to those display lists.
-	for (std::map<CgFxMaterialEffect*, std::list<GLuint>>::iterator iter = this->displayListsPerMaterial.begin(); 
+	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::iterator iter = this->displayListsPerMaterial.begin(); 
 		iter != this->displayListsPerMaterial.end(); iter++) {
 		
-		for (std::list<GLuint>::iterator dispListIter = iter->second.begin(); dispListIter != iter->second.end(); dispListIter++) {
+		for (std::vector<GLuint>::iterator dispListIter = iter->second.begin(); dispListIter != iter->second.end(); dispListIter++) {
 			glDeleteLists((*dispListIter), 1);
 			(*dispListIter) = 0;
 		}
@@ -165,9 +165,19 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 		
 		// Delete any previous display list...
 		glDeleteLists(iter->second, 1);
+
 		// ... and remove it from other relevant maps/arrays/etc.
-		this->displayListsPerMaterial[iter->first].remove(iter->second);
-		
+		std::vector<GLuint>& displayLists = this->displayListsPerMaterial[iter->first];
+		for(std::vector<GLuint>::iterator iterDL = displayLists.begin(); iterDL != displayLists.end(); ++iterDL) {
+			if (*iterDL == iter->second)	{
+				displayLists.erase(iterDL);
+				break;
+			}
+		}
+		if (displayLists.size() == 0) {
+			this->displayListsPerMaterial.erase(iter->first);
+		}
+
 		// Clean up
 		iter->second = 0;
 	}
@@ -196,7 +206,7 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
  */
 void LevelMesh::Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
 	// Go through each material and draw all the display lists corresponding to it
-	for (std::map<CgFxMaterialEffect*, std::list<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
+	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
 		iter != this->displayListsPerMaterial.end(); iter++) {
 		
 		CgFxMaterialEffect* currEffect = iter->first;
@@ -264,6 +274,8 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 	
 		// Insert the new display list into the list of display lists...
 		this->pieceDisplayLists[piece].insert(std::make_pair<CgFxMaterialEffect*, GLuint>(currMaterial, newDisplayList));
+
+		this->displayListsPerMaterial[currMaterial].reserve(this->displayListsPerMaterial[currMaterial].size() + 1);
 		this->displayListsPerMaterial[currMaterial].push_back(newDisplayList);
 	}
 }

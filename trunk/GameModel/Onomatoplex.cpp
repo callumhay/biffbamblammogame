@@ -33,6 +33,7 @@ namespace Onomatoplex {
 		this->LoadBadSadWords();
 		this->LoadShotWords();
 		this->LoadGoodHappyWords();
+		this->LoadGooWords();
 	}
 
 	// Destructor, deletes singleton, cleans up dictionaries
@@ -507,6 +508,69 @@ namespace Onomatoplex {
 		this->uberSingleWords[GOODHAPPY] = uberHappyGoodWords;
 	}
 
+	
+	/**
+	 * Private helper function for loading goo type words.
+	 */
+	void Generator::LoadGooWords() {
+		std::vector<std::string> gooSimpleSingleWords;
+		gooSimpleSingleWords.reserve(12);
+		gooSimpleSingleWords.push_back("Splat");
+		gooSimpleSingleWords.push_back("Goo");
+		gooSimpleSingleWords.push_back("Gack");
+		gooSimpleSingleWords.push_back("Plop");
+		gooSimpleSingleWords.push_back("Gloop");
+		gooSimpleSingleWords.push_back("Ploop");
+		gooSimpleSingleWords.push_back("Gloop");
+		gooSimpleSingleWords.push_back("Gob");
+		gooSimpleSingleWords.push_back("Glob");
+		gooSimpleSingleWords.push_back("Glop");
+		gooSimpleSingleWords.push_back("Goop");
+		gooSimpleSingleWords.push_back("Blob");
+		gooSimpleSingleWords.push_back("Blop");
+		this->simpleSingleWords[GOO] = gooSimpleSingleWords;
+
+		std::vector<std::string> gooGoodSingleWords;
+		gooGoodSingleWords.reserve(9 + gooSimpleSingleWords.size());
+		gooGoodSingleWords.push_back("Splotch");
+		gooGoodSingleWords.push_back("Splatter");
+		gooGoodSingleWords.push_back("Gooey");
+		gooGoodSingleWords.push_back("Spewy");
+		gooGoodSingleWords.push_back("Goober");
+		gooGoodSingleWords.push_back("Gloopy");
+		gooGoodSingleWords.push_back("Bloop");
+		gooGoodSingleWords.push_back("Splortch");
+		gooGoodSingleWords.push_back("Globber");
+		gooGoodSingleWords.insert(gooGoodSingleWords.end(), gooSimpleSingleWords.begin(), gooSimpleSingleWords.end());
+		this->goodSingleWords[GOO] = gooGoodSingleWords;
+
+		std::vector<std::string> gooAwesomeSingleWords;
+		gooAwesomeSingleWords.reserve(3 + gooSimpleSingleWords.size()*gooSimpleSingleWords.size() - gooSimpleSingleWords.size());
+		gooAwesomeSingleWords.push_back("Gobbledygook");
+		gooAwesomeSingleWords.push_back("Goobergack");
+		gooAwesomeSingleWords.push_back("Gooey Kablewy");
+		for (unsigned int i = 0; i < gooSimpleSingleWords.size(); i++) {
+			for (unsigned int j = 0; j < gooSimpleSingleWords.size(); j++) {
+				if (i == j) { continue; }
+				gooAwesomeSingleWords.push_back(gooSimpleSingleWords[i] + " " + gooSimpleSingleWords[j]);
+			}
+		}
+		this->awesomeSingleWords[GOO] = gooAwesomeSingleWords;
+
+		std::vector<std::string> gooUberSingleWords;
+		gooUberSingleWords.reserve(4 + gooGoodSingleWords.size() * gooSimpleSingleWords.size());
+		gooUberSingleWords.push_back("SplattyMcGoo");
+		gooUberSingleWords.push_back("Splatterama");
+		gooUberSingleWords.push_back("Gobbledygook");
+		gooUberSingleWords.push_back("EwwGooSplat");
+		for (unsigned int i = 0; i < gooGoodSingleWords.size(); i++) {
+			for (unsigned int j = 0; j < gooSimpleSingleWords.size(); j++) {
+				gooUberSingleWords.push_back(gooGoodSingleWords[i] + " " +  gooSimpleSingleWords[j]);
+			}
+		}
+		this->uberSingleWords[GOO] = gooUberSingleWords;
+
+	}
 	/*
 	 * Generates crazy onomatopoeia based on the sound type given and the extremeness of the context.
 	 * Precondition: true.

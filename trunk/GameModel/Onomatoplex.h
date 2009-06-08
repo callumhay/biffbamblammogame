@@ -1,17 +1,15 @@
 #ifndef __ONOMATAGENERATOR_H__
 #define __ONOMATAGENERATOR_H__
 
-#include <string>
-#include <map>
-#include <vector>
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Algebra.h"
 
 namespace Onomatoplex {
 
-	// TODO: Shooting, GoodHappy
-	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3, BADSAD = 4, SHOT = 5, GOODHAPPY = 6};
+	enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3, BADSAD = 4, SHOT = 5, GOODHAPPY = 6, GOO = 7};
 	enum Extremeness {WEAK = 0, NORMAL = 1, PRETTY_GOOD = 2, GOOD = 3, AWESOME = 4, SUPER_AWESOME = 5, UBER = 6};
 	
-	static const int NumSoundTypes = 7;
+	static const int NumSoundTypes = 8;
 	static const int NumExtremenessTypes = 7;
 	
 	// Singleton class for generating crazy words.
@@ -35,6 +33,7 @@ namespace Onomatoplex {
 		void LoadBadSadWords();
 		void LoadShotWords();
 		void LoadGoodHappyWords();
+		void LoadGooWords();
 
 		// Punctuation structures and functions
 		static const std::string DEFAULT_END_PUNCTUATION;
@@ -73,6 +72,16 @@ namespace Onomatoplex {
 		}
 
 		std::string Generate(SoundType type, Extremeness amt);
+
+		/**
+		 * Obtain a random extremeness in the given interval of min and max extremenesses.
+		 * Result: random extremeness value in [min, max].
+		 */
+		inline Extremeness Generator::GetRandomExtremeness(Extremeness min, Extremeness max) {
+			assert(min < max);
+			return static_cast<Extremeness>(min + (Randomizer::GetInstance()->RandomUnsignedInt() % (max - min + 1)));
+		}
+
 	};
 }
 #endif

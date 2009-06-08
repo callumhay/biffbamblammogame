@@ -180,7 +180,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 			break;
 
 		case LevelPiece::Ink:
-			// TODO: Emit goo from ink block and make onomata
+			// Emit goo from ink block and make onomata effects
+			this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel());
 			// TODO: Cover camera in ink with a fullscreen splatter effect
 			break;
 		default:

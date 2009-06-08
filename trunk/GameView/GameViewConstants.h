@@ -131,6 +131,7 @@ public:
 	const std::string TEXTURE_BALL_SAFETY_NET;
 
 	// Font path constants **********************************
+	const std::string FONT_SADBAD;
 	const std::string FONT_HAPPYGOOD;
 	const std::string FONT_EXPLOSIONBOOM;
 	const std::string FONT_ELECTRICZAP;
@@ -156,6 +157,7 @@ public:
 	const Colour POISON_LIGHT_LIGHT_COLOUR;
 	const Colour GHOST_BALL_COLOUR;
 	const Colour UBER_BALL_COLOUR;
+	const Colour INK_BLOCK_COLOUR;
 
 	// World specific path constants ************************
 	const std::string BALL_MESH;

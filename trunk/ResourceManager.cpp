@@ -133,7 +133,7 @@ Mesh* ResourceManager::GetInkBlockMeshResource() {
 	MaterialProperties* inkMatProps = new MaterialProperties();
 	inkMatProps->materialType	= MaterialProperties::MATERIAL_INKBLOCK_TYPE;
 	inkMatProps->geomType			= MaterialProperties::MATERIAL_GEOM_FG_TYPE;
-	inkMatProps->diffuse			= Colour(0.111f, 0.137f, 0.289f);
+	inkMatProps->diffuse			= GameViewConstants::GetInstance()->INK_BLOCK_COLOUR;
 	inkMatProps->specular			= Colour(0.33f, 0.33f, 0.33f);
 	inkMatProps->shininess		= 95.0f;
 	CgFxInkBlock* inkBlockEffect = new CgFxInkBlock(inkMatProps);

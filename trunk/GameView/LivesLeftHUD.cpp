@@ -17,7 +17,7 @@ const Colour LivesLeftHUD::ELEMENT_BASE_COLOURS[] = { Colour(1.0f, 0.0f, 0.0f), 
 
 LivesLeftHUD::LivesLeftHUD() : currNumLivesLeft(0), ballLifeHUDTex(NULL) {
 	// Load ball life HUD texture
-	this->ballLifeHUDTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Bilinear);
+	this->ballLifeHUDTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear);
 	assert(this->ballLifeHUDTex != NULL);
 
 	this->InitIdleColourInterpolations();
