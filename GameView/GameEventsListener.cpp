@@ -268,12 +268,23 @@ void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
 	// Add the projectile's effect
 	this->display->GetAssets()->GetESPAssets()->AddProjectileEffect(this->display->GetCamera(), projectile); 
 
+	// Add any other view-related effects for the given projectile
+	switch (projectile.GetType()) {
+		case Projectile::PaddleLaserProjectile:
+			// Have the laser gun attachment move downwards in reaction to the laser being shot
+			this->display->GetAssets()->AnimatePaddleLaserAttachment(*this->display->GetModel()->GetPlayerPaddle());
+			break;
+		default:
+			break;
+	}
+
 	debug_output("EVENT: Projectile spawned");
 }
 
 void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	// Remove the projectile's effect
-	this->display->GetAssets()->GetESPAssets()->RemoveProjectileEffect(this->display->GetCamera(), projectile); 
+	this->display->GetAssets()->GetESPAssets()->RemoveProjectileEffect(this->display->GetCamera(), projectile);
+
 	debug_output("EVENT: Projectile removed");
 }
 

@@ -438,7 +438,7 @@ void GameAssets::Tick(double dT) {
 /**
  * Draw the player paddle mesh with materials and in correct position.
  */
-void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera) const {
+void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera) {
 	Point2D paddleCenter = p.GetCenterPosition();	
 
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (p.GetPaddleScaleFactor() - 1);
@@ -452,12 +452,15 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
 	this->worldAssets->DrawPaddle(p, camera, this->paddleKeyLight, this->paddleFillLight, this->ballLight);
 
-	// In the case of a laser paddle, we draw the laser attachment
+	// In the case of a laser paddle, we draw the laser attachment and its related effects
 	if ((p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
-		this->paddleLaserAttachment->Draw(camera, this->paddleKeyLight, this->paddleFillLight);
-		
 		// Draw glowy effects where the laser originates...
 		this->espAssets->DrawPaddleLaserEffects(dT, camera, p);
+		
+		// Draw attachment (gun) mesh
+		this->laserFireAttachmentAnim.Tick(dT);
+		glTranslatef(0, 0, this->laserFireAttachmentAnim.GetInterpolantValue());
+		this->paddleLaserAttachment->Draw(camera, this->paddleKeyLight, this->paddleFillLight);
 	}
 
 	glPopMatrix();
@@ -487,7 +490,7 @@ void GameAssets::DrawBackgroundEffects(const Camera& camera) {
 /**
  * Draw a given item in the world.
  */
-void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const {
+void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem) {
 	this->itemAssets->DrawItem(dT, camera, gameItem);
 }
 
@@ -507,6 +510,7 @@ void GameAssets::LoadRegularMeshAssets() {
 	}
 	if (this->paddleLaserAttachment == NULL) {
 		this->paddleLaserAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_LASER_ATTACHMENT_MESH);
+		this->laserFireAttachmentAnim.SetInterpolantValue(0.0f);
 	}
 }
 
@@ -545,6 +549,25 @@ void GameAssets::DeleteRegularEffectAssets() {
 		delete this->espAssets;
 		this->espAssets = NULL;
 	}
+}
+
+/**
+ * Cause the laser paddle attachment to animate - like it's reacting to shooting
+ * a bullet or something.
+ */
+void GameAssets::AnimatePaddleLaserAttachment(const PlayerPaddle& paddle) {
+		// Setup any animations for the laser attachment
+		std::vector<float> translateVals;
+		translateVals.reserve(3);
+		translateVals.push_back(0);
+		translateVals.push_back(paddle.GetHalfHeight());
+		translateVals.push_back(0);
+		std::vector<double> timeVals;
+		timeVals.reserve(3);
+		timeVals.push_back(0);
+		timeVals.push_back(0.1f);
+		timeVals.push_back(0.2f);
+		this->laserFireAttachmentAnim.SetLerp(timeVals, translateVals);
 }
 
 /*
