@@ -173,15 +173,15 @@ void BallInPlayState::Tick(double seconds) {
 		}
 
 		// Ball-ball collisions - doesn't work nicely... collision issues
-		//std::list<GameBall*>::iterator nextIter = iter;
-		//nextIter++;
-		//for (; nextIter != gameBalls.end(); nextIter++) {
-		//	GameBall* otherBall = *nextIter;
-		//	assert(currBall != otherBall);
-		//	if (currBall->CollisionCheck(*otherBall)) {
-		//		this->DoBallCollision(*currBall, *otherBall);
-		//	}
-		//}
+		std::list<GameBall*>::iterator nextIter = iter;
+		nextIter++;
+		for (; nextIter != gameBalls.end(); nextIter++) {
+			GameBall* otherBall = *nextIter;
+			assert(currBall != otherBall);
+			if (currBall->CollisionCheck(*otherBall)) {
+				this->DoBallCollision(*currBall, *otherBall);
+			}
+		}
 	}
 	
 	// Get rid of all the balls that went out of bounds / are now dead
@@ -421,32 +421,56 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
  * Private helper function to calculate the new velocities for two balls that just
  * collided with each other.
  */
-/*
+
 void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
-	
 	Collision::Circle2D ball1Bounds = ball1.GetBounds();
 	Collision::Circle2D ball2Bounds = ball2.GetBounds();
+	
+	Vector2D s = ball2Bounds.Center() - ball1Bounds.Center();
+	Vector2D v = ball2.GetVelocity() - ball1.GetVelocity();
+	float r = ball2Bounds.Radius() + ball1Bounds.Radius();
+	float c = Vector2D::Dot(s, s) - (r * r);
 
-	// Compute the vectors to move the balls along so that they are on each other's boundries
-	Vector2D ball1CorrectionVec = ball1Bounds.Center() - ball2Bounds.Center();
-	if (ball1CorrectionVec == Vector2D(0, 0)) {
-		ball1CorrectionVec = ball1.GetDirection();
+	assert(c < 0.0f);	// It should always be the case that there is a collision
+	
+	float a = Vector2D::Dot(v, v);
+	if (a < EPSILON) { 
+		return; 
+	}
+
+	float b = Vector2D::Dot(v, s);
+	float d = b * b - a * c;
+	if (d < 0.0f) { 
+		return; 
+	}
+
+	float t = (-b - sqrt(d)) / a;
+	assert(t <= 0.0f);	// Since the collision has already happened, t must be negative
+
+	// Figure out what the centers of the two balls were at collision
+	Point2D ball1CollisionCenter = ball1Bounds.Center() + t * ball1.GetVelocity();
+	Point2D ball2CollisionCenter = ball2Bounds.Center() + t * ball2.GetVelocity();
+
+	// Figure out the new velocity after the collision
+	Vector2D ball1CorrectionVec = ball1CollisionCenter - ball2CollisionCenter;
+	if (ball1CorrectionVec == Vector2D(0,0)) {
+		return;
 	}
 	ball1CorrectionVec.Normalize();
 	Vector2D ball2CorrectionVec = -ball1CorrectionVec;
 
-	// Set the velocity vectors for each ball as a result of the collision
 	Vector2D ball1NewVel = Vector2D::Normalize(Reflect(ball1.GetDirection(), ball1CorrectionVec));
 	Vector2D ball2NewVel = Vector2D::Normalize(Reflect(ball2.GetDirection(), ball2CorrectionVec));
-
-	float totalRadius = ball1Bounds.Radius() + ball2Bounds.Radius() + EPSILON;
-	ball1.SetCenterPosition(ball1Bounds.Center() + totalRadius * ball1CorrectionVec);
-	ball2.SetCenterPosition(ball2Bounds.Center() + totalRadius * ball2CorrectionVec);
-
 	ball1.SetVelocity(ball1.GetSpeed(), ball1NewVel);
 	ball2.SetVelocity(ball2.GetSpeed(), ball2NewVel);
+
+	// Set the correct center positions so that they still remain at the current time, but
+	// it is as if the balls had originally collided
+	float positiveT = -t;
+	ball1.SetCenterPosition(ball1CollisionCenter + positiveT * ball1NewVel);
+	ball2.SetCenterPosition(ball2CollisionCenter + positiveT * ball2NewVel);
 }
-*/
+
 
 /**
  * Private helper function to determine if the given position is

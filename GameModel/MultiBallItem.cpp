@@ -5,6 +5,8 @@ const std::string MultiBallItem::MULTI3_BALL_ITEM_NAME	= "Multi Ball 3 (power-up
 const std::string MultiBallItem::MULTI5_BALL_ITEM_NAME	= "Multi Ball 5 (power-up)";
 const double MultiBallItem::MULTI_BALL_TIMER_IN_SECS	= 0.0;
 
+// Warning: if you make MAX_NUM_SPLITBALLS too big then the deviation from the center will be huge to keep the balls
+// from colliding when they are initially spawned and could result in collision issues
 const float MultiBallItem::MIN_SPLIT_DEGREES = 360.0f / (static_cast<float>(MAX_NUM_SPLITBALLS) + 1.0f);
 
 MultiBallItem::MultiBallItem(const Point2D &spawnOrigin, GameModel *gameModel, NumMultiBalls numBalls) : 
@@ -37,7 +39,7 @@ double MultiBallItem::Activate() {
 	std::vector<GameBall*> newBalls;
 	newBalls.reserve(1 * this->numNewSpawnedBalls);
 
-	//const float distToMoveOut = 2 * affectedBall->GetBounds().Radius() / Trig::degreesToRadians(MultiBallItem::MIN_SPLIT_DEGREES);
+	const float distToMoveOut = 2 * affectedBall->GetBounds().Radius() / Trig::degreesToRadians(MultiBallItem::MIN_SPLIT_DEGREES);
 
 	// Create all the copies of the current ball
 	for (unsigned int copyNum = 0; copyNum < this->numNewSpawnedBalls; copyNum++) {
@@ -47,7 +49,7 @@ double MultiBallItem::Activate() {
 		Vector2D ballDir = affectedBall->GetDirection();
 		currRotationInDegs += MultiBallItem::MIN_SPLIT_DEGREES + Randomizer::GetInstance()->RandomNumZeroToOne()*maxDegreesDiff;
 		newBall->SetVelocity(affectedBall->GetSpeed(), Rotate(currRotationInDegs, ballDir));
-		//newBall->SetCenterPosition(newBall->GetBounds().Center() + (distToMoveOut * newBall->GetDirection()));
+		newBall->SetCenterPosition(newBall->GetBounds().Center() + (distToMoveOut * newBall->GetDirection()));
 
 		newBalls.push_back(newBall);
 	}

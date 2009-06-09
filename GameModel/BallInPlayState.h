@@ -20,7 +20,7 @@ private:
 	bool IsOutOfGameBounds(const Point2D& pos);
 
 	void DoBallCollision(GameBall& b, const Vector2D& n, float d);
-	//void DoBallCollision(GameBall& ball1, GameBall& ball2);
+	void DoBallCollision(GameBall& ball1, GameBall& ball2);
 	void DoItemCollision();
 	
 	void UpdateActiveTimers(double seconds);
