@@ -859,7 +859,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkySpray->SetSpawnDelta(ESPInterval(0.01f));
 	inkySpray->SetNumParticleLives(1);
 	inkySpray->SetInitialSpd(ESPInterval(distToCamera - 2.0f, distToCamera + 2.0f));
-	inkySpray->SetParticleLife(ESPInterval(2.0f, 2.5f));
+	inkySpray->SetParticleLife(ESPInterval(1.0f, 2.0f));
 	inkySpray->SetParticleSize(ESPInterval(0.75f, 2.25f));
 	inkySpray->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	inkySpray->SetParticleAlignment(ESP::ScreenAligned);

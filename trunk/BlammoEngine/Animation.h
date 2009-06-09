@@ -250,8 +250,11 @@ public:
 	 * Returns: true if the animation is complete, false otherwise.
 	 */
 	bool Tick(double dT) {
-		assert(this->timePts.size() >= 2);
 		assert(this->timePts.size() == this->interpolationPts.size());	
+		// As a safety precaution exit if the animation isn't setup
+		if (this->timePts.size() < 2 || this->timePts.size() != this->interpolationPts.size()) {
+			return true;
+		}
 
 		// Check to see if we've reached the end of the animation
 		if (this->tracker == this->timePts.size()-1) {

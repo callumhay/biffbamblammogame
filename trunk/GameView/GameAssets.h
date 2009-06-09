@@ -53,8 +53,10 @@ private:
 	// Storage for light colours - e.g., when lights are turned out these keep the values
 	// used to restore the light
 	Colour fgKeyLightColour, fgFillLightColour, ballKeyLightColour;
+	
 	// Animations for when the lights change
 	std::list<AnimationMultiLerp<Colour>> lightColourAnims;
+	AnimationMultiLerp<float> laserFireAttachmentAnim;
 
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
@@ -78,7 +80,7 @@ public:
 	void Tick(double dT);
 
 	// Draw functions ******************************************************************************
-	void DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera) const;
+	void DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera);
 
 	void DrawSkybox(const Camera& camera);
 	void DrawBackgroundModel(const Camera& camera);
@@ -86,7 +88,7 @@ public:
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Texture2D* sceneTex, const Vector2D& worldT);
-	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const;
+	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
 
 #ifdef _DEBUG
@@ -117,6 +119,8 @@ public:
 	LivesLeftHUD* GetLifeHUD() const {
 		return this->lifeHUD;
 	}
+
+	void AnimatePaddleLaserAttachment(const PlayerPaddle& paddle);
 
 };
 
