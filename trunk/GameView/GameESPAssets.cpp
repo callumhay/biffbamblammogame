@@ -784,8 +784,8 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds1->SetSpawnDelta(ESPInterval(0.0f));
 	inkyClouds1->SetNumParticleLives(1);
 	inkyClouds1->SetInitialSpd(ESPInterval(2.0f, 2.5f));
-	inkyClouds1->SetParticleLife(ESPInterval(1.5f, 2.0f));
-	inkyClouds1->SetParticleSize(ESPInterval(0.75f, 2.25f));
+	inkyClouds1->SetParticleLife(ESPInterval(2.5f, 3.0f));
+	inkyClouds1->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	inkyClouds1->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
 	inkyClouds1->SetParticleAlignment(ESP::ViewPointAligned);
 	inkyClouds1->SetEmitPosition(emitCenter);
@@ -806,8 +806,8 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds2->SetSpawnDelta(ESPInterval(0.0f));
 	inkyClouds2->SetNumParticleLives(1);
 	inkyClouds2->SetInitialSpd(ESPInterval(2.0f, 2.5f));
-	inkyClouds2->SetParticleLife(ESPInterval(1.5f, 2.0f));
-	inkyClouds2->SetParticleSize(ESPInterval(0.75f, 2.25f));
+	inkyClouds2->SetParticleLife(ESPInterval(2.5f, 3.0f));
+	inkyClouds2->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	inkyClouds2->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
 	inkyClouds2->SetParticleAlignment(ESP::ViewPointAligned);
 	inkyClouds2->SetEmitPosition(emitCenter);
@@ -828,8 +828,8 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds3->SetSpawnDelta(ESPInterval(0.0f));
 	inkyClouds3->SetNumParticleLives(1);
 	inkyClouds3->SetInitialSpd(ESPInterval(2.0f, 2.5f));
-	inkyClouds3->SetParticleLife(ESPInterval(1.5f, 2.0f));
-	inkyClouds3->SetParticleSize(ESPInterval(0.75f, 2.25f));
+	inkyClouds3->SetParticleLife(ESPInterval(2.5f, 3.0f));
+	inkyClouds3->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	inkyClouds3->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
 	inkyClouds3->SetParticleAlignment(ESP::ViewPointAligned);
 	inkyClouds3->SetEmitPosition(emitCenter);
@@ -849,20 +849,23 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	Point3D currCamPos = camera.GetCurrentCameraPosition();
 	Vector3D negHalfLevelDim = -0.5 * Vector3D(level.GetLevelUnitWidth(), level.GetLevelUnitHeight(), 0.0f);
 	Point3D emitCenterWorldCoords = emitCenter + negHalfLevelDim;
-	Vector3D inkySprayDir = Vector3D::Normalize(currCamPos - emitCenterWorldCoords);
+	Vector3D sprayVec = currCamPos - emitCenterWorldCoords;
+	Vector3D inkySprayDir = Vector3D::Normalize(sprayVec);
+
+	float distToCamera = sprayVec.length();
 
 	// Inky spray at the camera
 	ESPPointEmitter* inkySpray = new ESPPointEmitter();
 	inkySpray->SetSpawnDelta(ESPInterval(0.01f));
 	inkySpray->SetNumParticleLives(1);
-	inkySpray->SetInitialSpd(ESPInterval(18.0f, 20.0f));
-	inkySpray->SetParticleLife(ESPInterval(4.0f, 6.0f));
+	inkySpray->SetInitialSpd(ESPInterval(distToCamera - 2.0f, distToCamera + 2.0f));
+	inkySpray->SetParticleLife(ESPInterval(2.0f, 2.5f));
 	inkySpray->SetParticleSize(ESPInterval(0.75f, 2.25f));
-	inkySpray->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
-	inkySpray->SetParticleAlignment(ESP::ViewPointAligned);
+	inkySpray->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	inkySpray->SetParticleAlignment(ESP::ScreenAligned);
 	inkySpray->SetEmitPosition(emitCenter);
 	inkySpray->SetEmitDirection(inkySprayDir);
-	inkySpray->SetEmitAngleInDegrees(10);
+	inkySpray->SetEmitAngleInDegrees(15);
 	inkySpray->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
 	inkySpray->SetParticles(GameESPAssets::NUM_INK_SPRAY_PARTICLES, this->ballTex);
 	inkySpray->AddEffector(&this->particleFader);
