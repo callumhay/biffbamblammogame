@@ -1,38 +1,45 @@
 #include "GameFBOAssets.h"
 
-#include "../BlammoEngine/FBObj.h"
-
 #include "../GameModel/GameItem.h"
 #include "../GameModel/PoisonPaddleItem.h"
 
-GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), finalFBO(NULL),
-fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), drawItemsInLastPass(true) {
+GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), 
+initialFSEffectFBO(NULL), finalFSEffectFBO(NULL),
+fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), 
+drawItemsInLastPass(true) {
 	
 	// Framebuffer object setup
-	this->fgAndBgFBO		= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->bgFBO					= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->finalFBO			= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment); // TODO: no attachment...
+	this->fgAndBgFBO					= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
+	this->bgFBO								= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
+	this->initialFSEffectFBO	= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment); // TODO: no attachment...
+	this->finalFSEffectFBO		= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment); // TODO: no attachment...
 
 	// Effects setup
 	this->fgAndBgBlurEffect	= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
 	this->bloomEffect				= new CgFxBloom(this->fgAndBgFBO);
-	this->afterImageEffect	= new CgFxAfterImage(this->fgAndBgFBO);
+	this->afterImageEffect	= new CgFxAfterImage(this->fgAndBgFBO, this->initialFSEffectFBO);
+	this->inkSplatterEffect = new CgFxInkSplatter(this->finalFSEffectFBO);
 }
 
 GameFBOAssets::~GameFBOAssets() {
-	delete bgFBO;	
-	bgFBO = NULL;
-	delete fgAndBgFBO;
-	fgAndBgFBO = NULL;
-	delete finalFBO;
-	finalFBO = NULL;
+	delete this->bgFBO;	
+	this->bgFBO = NULL;
+	delete this->fgAndBgFBO;
+	this->fgAndBgFBO = NULL;
 
-	delete fgAndBgBlurEffect;
-	fgAndBgBlurEffect = NULL;
-	delete bloomEffect;
-	bloomEffect = NULL;
-	delete afterImageEffect;
-	afterImageEffect = NULL;
+	delete this->initialFSEffectFBO;
+	this->initialFSEffectFBO = NULL;
+	delete this->finalFSEffectFBO;
+	this->finalFSEffectFBO = NULL;
+
+	delete this->fgAndBgBlurEffect;
+	this->fgAndBgBlurEffect = NULL;
+	delete this->bloomEffect;
+	this->bloomEffect = NULL;
+	delete this->afterImageEffect;
+	this->afterImageEffect = NULL;
+	delete this->inkSplatterEffect;
+	this->inkSplatterEffect = NULL;
 }
 
 /**
@@ -63,15 +70,20 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	this->bgFBO = new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 	delete this->fgAndBgFBO;
 	this->fgAndBgFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
-	delete this->finalFBO;
-	this->finalFBO			= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);	// TODO: no attachment...
+	
+	delete this->finalFSEffectFBO;
+	this->finalFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);	// TODO: no attachment...
+	delete this->finalFSEffectFBO;
+	this->finalFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment); // TODO: no attachment...
 
 	delete this->fgAndBgBlurEffect;
 	delete this->bloomEffect;
 	delete this->afterImageEffect;
+	delete this->inkSplatterEffect;
 	this->fgAndBgBlurEffect = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
 	this->bloomEffect				= new CgFxBloom(this->fgAndBgFBO);
-	this->afterImageEffect = new CgFxAfterImage(this->fgAndBgFBO);
+	this->afterImageEffect	= new CgFxAfterImage(this->fgAndBgFBO, this->initialFSEffectFBO);
+	this->inkSplatterEffect	= new CgFxInkSplatter(this->finalFSEffectFBO);
 
 	debug_opengl_state();
 }
@@ -89,6 +101,7 @@ void GameFBOAssets::ActivateItemEffects(const GameItem& item) {
 		// Make items also blurry - in order to do this they must be drawn before the post-processing effects
 		this->drawItemsInLastPass = false;
 	}
+
 }
 
 /**

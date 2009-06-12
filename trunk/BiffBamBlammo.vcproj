@@ -531,6 +531,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\CgFxInkSplatter.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CgFxPhong.h"
 					>
 				</File>
@@ -656,6 +660,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\CgFxInkBlock.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxInkSplatter.cpp"
 					>
 				</File>
 				<File

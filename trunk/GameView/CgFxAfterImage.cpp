@@ -6,9 +6,11 @@
 const std::string CgFxAfterImage::AFTERIMAGE_TECHNIQUE_NAME = "AfterImage";
 const float CgFxAfterImage::AFTERIMAGE_BLURSTRENGTH_DEFAULT	= 0.64f;
 
-CgFxAfterImage::CgFxAfterImage(FBObj* currFrameFBO) :
+CgFxAfterImage::CgFxAfterImage(FBObj* currFrameFBO, FBObj* outputFBO) :
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_AFTERIMAGE_SHADER, currFrameFBO), 
-prevFrameFBO(NULL), blurStrength(CgFxAfterImage::AFTERIMAGE_BLURSTRENGTH_DEFAULT) {
+prevFrameFBO(NULL), outputFBO(outputFBO), blurStrength(CgFxAfterImage::AFTERIMAGE_BLURSTRENGTH_DEFAULT) {
+
+	assert(outputFBO != NULL);
 
 	// Create cleared temporary buffers
 	this->prevFrameFBO = new FBObj(sceneFBO->GetFBOTexture()->GetWidth(), 
@@ -51,7 +53,10 @@ void CgFxAfterImage::Draw(int screenWidth, int screenHeight, double dT) {
 	cgResetPassState(currPass);
 
 	this->prevFrameFBO->UnbindFBObj();
-	this->prevFrameFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
 
+	// Render the result into the output FBO
+	this->outputFBO->BindFBObj();
+	this->prevFrameFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+	this->outputFBO->UnbindFBObj();
 	debug_cg_state();
 }

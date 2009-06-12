@@ -62,6 +62,9 @@ void BallOnPaddleState::Tick(double seconds) {
  * When the player presses a control to release the ball from the paddle.
  */
 void BallOnPaddleState::BallReleaseKeyPressed() {
+	
+	// Make sure the ball's position is updated first
+	this->UpdateBallPosition();
 
 	Vector2D ballReleaseDir = GameBall::STD_INIT_VEL_DIR;
 

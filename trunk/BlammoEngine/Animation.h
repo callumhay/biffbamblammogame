@@ -204,6 +204,13 @@ public:
 		return *this->interpolant;
 	}
 
+	std::vector<T> GetInterpolationValues() const {
+		return this->interpolationPts;
+	}
+	std::vector<double> GetTimeValues() const {
+		return this->timePts;
+	}
+
 	/**
 	 * Set whether the animation is on repeat or not.
 	 */
