@@ -11,6 +11,7 @@ private:
 	static const std::string AFTERIMAGE_TECHNIQUE_NAME;
 
 	FBObj* prevFrameFBO;
+	FBObj* outputFBO;
 	float blurStrength;
 
 	// CgFx Parameters
@@ -19,7 +20,7 @@ private:
 
 public:
 	static const float AFTERIMAGE_BLURSTRENGTH_DEFAULT;
-	CgFxAfterImage(FBObj* currFrameFBO);
+	CgFxAfterImage(FBObj* currFrameFBO, FBObj* outputFBO);
 	virtual ~CgFxAfterImage();
 
 	virtual void Draw(int screenWidth, int screenHeight, double dT);

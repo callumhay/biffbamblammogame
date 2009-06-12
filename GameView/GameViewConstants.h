@@ -102,6 +102,7 @@ public:
 	const std::string CGFX_GAUSSIAN_SHADER;
 	const std::string CGFX_AFTERIMAGE_SHADER;
 	const std::string CGFX_BLOOM_SHADER;
+	const std::string CGFX_INKSPLATTER_SHADER;
 
 	// Texture path constants *******************************
 	const std::string TEXTURE_BANG1;
@@ -127,6 +128,8 @@ public:
 	const std::string TEXTURE_SPIRAL_LARGE;
 
 	const std::string TEXTURE_STARFIELD;
+	
+	const std::string TEXTURE_INKSPLATTER;
 
 	const std::string TEXTURE_BALL_SAFETY_NET;
 

@@ -2,12 +2,13 @@
 #define __GAMEFBOASSETS_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/FBObj.h"
 
 #include "CgFxGaussianBlur.h"
 #include "CgFxAfterImage.h"
 #include "CgFxBloom.h"
+#include "CgFxInkSplatter.h"
 
-class FBObj;
 class GameItem;
 
 /**
@@ -19,12 +20,15 @@ private:
 	// FBO assets for the game pipeline
 	FBObj* bgFBO;			
 	FBObj* fgAndBgFBO;
-	FBObj* finalFBO;
+
+	FBObj* initialFSEffectFBO;
+	FBObj* finalFSEffectFBO;
 
 	// Post-processing / fullscreen filters and effects used with the FBOs
 	CgFxGaussianBlur* fgAndBgBlurEffect;
 	CgFxBloom* bloomEffect;
 	CgFxAfterImage* afterImageEffect;
+	CgFxInkSplatter* inkSplatterEffect;
 
 	bool drawItemsInLastPass;	// Whether or not items get drawn in the final pass
 
@@ -57,18 +61,39 @@ public:
 	inline FBObj* GetBackgroundFBO() { return this->bgFBO; }
 	inline FBObj* GetFullSceneFBO() { return this->fgAndBgFBO; }
 	
+	inline FBObj* GetFinalFullScreenFBO()	{ return this->finalFSEffectFBO; }
+
+	
 	inline bool DrawItemsInLastPass() const { return this->drawItemsInLastPass; }
 
 	inline void RenderFullSceneBlur(int width, int height, double dT) {
 		this->fgAndBgBlurEffect->Draw(width, height, dT);
 	}
 
-	inline void RenderBloom(int width, int height, double dT) {
+	/**
+	 * Render all fullscreen effects that are required before
+	 * particles and items are drawn.
+	 */
+	inline FBObj* RenderInitialFullscreenEffects(int width, int height, double dT) {
+		// Do some purdy bloom - this adds a nice contrasty highlighted touch to the entire scene
 		this->bloomEffect->Draw(width, height, dT);
+		// Add motion blur / afterimage effect 
+		this->afterImageEffect->Draw(width, height, dT);
+
+		return this->initialFSEffectFBO;
 	}
 
-	inline void RenderAfterImage(int width, int height, double dT) {
-		this->afterImageEffect->Draw(width, height, dT);
+	/**
+	 * Render all fullscreen effects that are required at the very
+	 * end of the 3D pipeline.
+	 */
+	inline void RenderFinalFullscreenEffects(int width, int height, double dT) {
+		if (this->inkSplatterEffect->IsActive()) {
+			this->inkSplatterEffect->Draw(width, height, dT);
+		}
+		else {
+			this->finalFSEffectFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+		}
 	}
 
 	void Tick(double dT);
@@ -76,5 +101,14 @@ public:
 
 	void ActivateItemEffects(const GameItem& item);
 	void DeactivateItemEffects(const GameItem& item);
+	
+	/**
+	 * Activates the ink splatter effect - a full screen effect drawn
+	 * at the end of the engine pipeline.
+	 */
+	void ActivateInkSplatterEffect() {
+		this->inkSplatterEffect->Activate();
+	}
+
 };
 #endif

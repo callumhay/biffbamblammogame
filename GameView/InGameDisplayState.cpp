@@ -170,10 +170,16 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 void InGameDisplayState::RenderFinalGather(double dT) {
 	GameFBOAssets* fboAssets = this->display->GetAssets()->GetFBOAssets();
 
-	// Do some purdy bloom - this adds a nice contrasty highlighted touch to the entire scene
-	fboAssets->RenderBloom(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
-	// Add motion blur / afterimage effect 
-	fboAssets->RenderAfterImage(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
+	// Render fullscreen effects 
+	FBObj* initialFBO = fboAssets->RenderInitialFullscreenEffects(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
+	assert(initialFBO != NULL);
+
+	FBObj* finalFBO = fboAssets->GetFinalFullScreenFBO();
+	assert(finalFBO != NULL);
+
+	// Final non-fullscreen draw pass - draw the falling items and particles
+	finalFBO->BindFBObj();
+	initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
 
 	// Render all effects that do not go through all the post-processing filters...
 	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
@@ -190,11 +196,13 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 		}			
 	}
 
-
 	// Typical Particle effects...
 	this->display->GetAssets()->GetESPAssets()->DrawParticleEffects(dT, this->display->GetCamera());
-	// Post-processing effects...
-	this->display->GetAssets()->GetESPAssets()->DrawPostProcessingESPEffects(dT, this->display->GetCamera(), fboAssets->GetFullSceneFBO()->GetFBOTexture());
+
+	finalFBO->UnbindFBObj();
+
+	// Render the final fullscreen effects
+	fboAssets->RenderFinalFullscreenEffects(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
 
 	glPopMatrix();
 	debug_opengl_state();

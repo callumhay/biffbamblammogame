@@ -1602,14 +1602,6 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
 }
 
 /**
- * Render the post processing emitter/sprite/particle effects - these require a
- * provided render to texture of the scene.
- */
-void GameESPAssets::DrawPostProcessingESPEffects(double dT, const Camera& camera, const Texture2D* sceneTex) {
-	// TODO.
-}
-
-/**
  * Update and draw all projectile effects that are currently active.
  */
 void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
