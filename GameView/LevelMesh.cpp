@@ -9,7 +9,6 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Point.h"
-#include "../BlammoEngine/VBOBatch.h"
 
 #include "../ResourceManager.h"
 
@@ -118,7 +117,6 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 
 	// Load the actual level meshes as precomputed batches for speed...
 	const std::vector<std::vector<LevelPiece*>>& levelPieces = level->GetCurrentLevelLayout();
-
 
 	// Get the proper vector to center the level
 	Vector2D levelDimensions = Vector2D(level->GetLevelUnitWidth(), level->GetLevelUnitHeight());
