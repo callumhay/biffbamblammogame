@@ -295,10 +295,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\VBOBatch.h"
-					>
-				</File>
-				<File
 					RelativePath=".\BlammoEngine\Vector.h"
 					>
 				</File>
@@ -388,10 +384,6 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\TextureFontSet.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\VBOBatch.cpp"
 					>
 				</File>
 			</Filter>

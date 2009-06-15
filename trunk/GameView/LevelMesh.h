@@ -13,7 +13,6 @@ class GameWorldAssets;
 class BallSafetyNetMesh;
 class Mesh;
 class MaterialGroup;
-class VBOBatch;
 
 class LevelMesh {
 
