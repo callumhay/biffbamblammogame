@@ -32,10 +32,10 @@
 
 // OpenGL includes
 #define GLEW_STATIC
-#include "GL/glew.h"
-#include "GL/gl.h"
-#include "GL/glu.h"
-#include "GL/glut.h"
+#include <gl/glew.h>
+#include <gl/gl.h>
+#include <gl/glu.h>
+#include <gl/glut.h>
 
 #define BUFFER_OFFSET(bytes) ((GLubyte*)NULL + (bytes))
 

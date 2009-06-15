@@ -13,7 +13,9 @@ public:
 	
 	static const std::string MULTI3_BALL_ITEM_NAME;
 	static const std::string MULTI5_BALL_ITEM_NAME;
+	
 	static const double MULTI_BALL_TIMER_IN_SECS;
+	static const double BALL_COLLISIONS_DISABLED_DURATION;
 
 private:
 	unsigned int numNewSpawnedBalls;	// The number of balls created for each preexisting gameball in play

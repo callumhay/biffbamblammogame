@@ -11,6 +11,15 @@
 
 class Camera;
 
+/*
+struct Vertex32 {
+	float x, y, z;		// Vertex
+	float nx, ny, nz;	// Normal
+	float s, t;				// Texture coordinate
+	float r, g, b, a;	// Colour
+};
+*/
+
 // Represents the set of indices 
 struct PolyGrpIndexer {
 	GLenum polyType;
@@ -51,6 +60,8 @@ public:
 
 	void Translate(const Vector3D& t);
 	void Transform(const Matrix4x4& m);
+
+	unsigned int GetDataArrays(std::vector<float>& vertexArray, std::vector<float>& normalArray, std::vector<float>& texCoordArray) const;
 };
 
 class MaterialGroup {
@@ -72,8 +83,7 @@ public:
 		delete this->material;
 		this->material = NULL;
 
-		glDeleteLists(this->displayListID, 1);
-		this->displayListID = 0;
+		this->DeleteDisplayList();
 	}
 
 	void AddFaces(const PolyGrpIndexer& faceIndexer, 
@@ -95,7 +105,13 @@ public:
 		return this->displayListID;
 	}
 
+	void DeleteDisplayList() {
+		glDeleteLists(this->displayListID, 1);
+		this->displayListID = 0;	
+	}
+
 	inline void Draw(const Camera& camera) const {
+		assert(this->displayListID != 0);
 		this->material->Draw(camera, this->displayListID);
 	}
 	inline void Draw(const Camera& camera, const PointLight& keyLight, const PointLight& fillLight) {
@@ -108,10 +124,12 @@ public:
 		this->Draw(camera, keyLight, fillLight);
 	}
 	inline void Draw(const Camera& camera, CgFxEffectBase* replacementMat) const {
+		assert(this->displayListID != 0);
 		replacementMat->Draw(camera, this->displayListID);
 	}
 
 	inline void FastDraw() const {
+		assert(this->displayListID != 0);
 		glCallList(this->displayListID);
 	}
 

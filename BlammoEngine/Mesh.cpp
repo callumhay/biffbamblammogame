@@ -67,20 +67,35 @@ void PolygonGroup::Transform(const Matrix4x4& m) {
 		this->polygroupArray[i + 7] = resultVert[2];
 	}
 }
-/*
-PolygonGroup& PolygonGroup::operator=(const PolygonGroup &rhs) {
-	delete[] this->polygroupArray;
 
-	this->polygroupArray = new float[rhs.polygroupArrayLength];
-	for (unsigned int i = 0; i < rhs.polygroupArrayLength; i++) {
-		this->polygroupArray[i] = rhs.polygroupArray[i];
+/**
+ * Obtain arrays of the vertex, normal and texture coordinate data for this polygon group.
+ * Returns: The number of vertices in the data.
+ */
+unsigned int PolygonGroup::GetDataArrays(std::vector<float>& vertexArray, std::vector<float>& normalArray, std::vector<float>& texCoordArray) const {
+	const float numVerts = static_cast<float>(this->polygroupArrayLength) / static_cast<float>(INTERLEAVED_MULTIPLIER);
+
+	vertexArray.reserve(3 * numVerts);
+	normalArray.reserve(3 * numVerts);
+	texCoordArray.reserve(2 * numVerts);
+
+	for (unsigned int i = 0; i < this->polygroupArrayLength; i += INTERLEAVED_MULTIPLIER) {
+		
+		texCoordArray.push_back(this->polygroupArray[i]);
+		texCoordArray.push_back(this->polygroupArray[i + 1]);
+
+		normalArray.push_back(this->polygroupArray[i + 2]);
+		normalArray.push_back(this->polygroupArray[i + 3]);
+		normalArray.push_back(this->polygroupArray[i + 4]);
+
+		vertexArray.push_back(this->polygroupArray[i + 5]);
+		vertexArray.push_back(this->polygroupArray[i + 6]);
+		vertexArray.push_back(this->polygroupArray[i + 7]);
 	}
-	this->polygroupArrayLength = rhs.polygroupArrayLength;
-	this->numIndices = rhs.numIndices;
 
-	return *this;
+	return numVerts;
 }
-*/
+
 void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer, 
 														 const std::vector<Point3D>& vertexStream, 
 														 const std::vector<Vector3D>& normalStream,

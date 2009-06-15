@@ -19,13 +19,13 @@ const float GameBall::MAX_ROATATION_SPEED	= 70;
 const Vector2D GameBall::STD_INIT_VEL_DIR = Vector2D(0, GameBall::NormalSpeed);
 
 GameBall::GameBall() : bounds(Point2D(0.0f, 0.0f), DEFAULT_BALL_RADIUS), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
-currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize) {
+currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballCollisionsDisabledTimer(0.0) {
 	this->ResetBallAttributes();
 }
 
 GameBall::GameBall(const GameBall& gameBall) : bounds(gameBall.bounds), currDir(gameBall.currDir), currSpeed(gameBall.currSpeed), 
 currType(gameBall.currType), currSize(gameBall.currSize), currScaleFactor(gameBall.currScaleFactor), 
-rotationInDegs(gameBall.rotationInDegs) {
+rotationInDegs(gameBall.rotationInDegs), ballCollisionsDisabledTimer(0.0) {
 }
 
 GameBall::~GameBall() {
@@ -93,4 +93,13 @@ void GameBall::Tick(double seconds) {
 	if (scaleFactorDiff != 0.0f) {
 		this->SetDimensions(this->currScaleFactor + ((scaleFactorDiff * seconds) / SECONDS_TO_CHANGE_SIZE));
 	}
+
+	// Decrement the collision disabled timer if necessary
+	if (this->ballCollisionsDisabledTimer >= EPSILON) {
+		this->ballCollisionsDisabledTimer -= seconds;
+	}
+	if (this->ballCollisionsDisabledTimer < EPSILON) {
+		this->ballCollisionsDisabledTimer = 0.0;
+	}
+
 }

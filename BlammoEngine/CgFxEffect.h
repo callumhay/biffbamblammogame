@@ -7,6 +7,7 @@
 #include "Light.h"
 #include "Camera.h"
 #include "Texture2D.h"
+#include "VBOBatch.h"
 
 #include "../ResourceManager.h"
 
@@ -102,9 +103,11 @@ private:
 		cgSetPassState(pass);
 		glListBase(0);
 		glCallLists(displayListIDs.size(), GL_UNSIGNED_INT, &displayListIDs[0]);
-		//for (std::vector<GLuint>::const_iterator iter = displayListIDs.begin(); iter != displayListIDs.end(); ++iter) {
-		//	glCallList(*iter);
-		//}
+		cgResetPassState(pass);
+	}
+	static void DrawPass(CGpass pass, const VBOBatch* batch) {
+		cgSetPassState(pass);
+		batch->Draw();
 		cgResetPassState(pass);
 	}
 
@@ -132,7 +135,7 @@ public:
 		// Draw each pass of this effect
 		CGpass currPass = cgGetFirstPass(this->currTechnique);
 		while (currPass) {
-			this->DrawPass(currPass, displayListID);
+			CgFxEffectBase::DrawPass(currPass, displayListID);
 			currPass = cgGetNextPass(currPass);
 		}
 	}
@@ -142,9 +145,19 @@ public:
 		// Draw each pass of this effect
 		CGpass currPass = cgGetFirstPass(this->currTechnique);
 		while (currPass) {
-			this->DrawPass(currPass, displayListIDs);
+			CgFxEffectBase::DrawPass(currPass, displayListIDs);
 			currPass = cgGetNextPass(currPass);
 		}
+	}
+	void Draw(const Camera& camera, const VBOBatch* batch) {
+		this->SetupBeforePasses(camera);
+		
+		// Draw each pass of this effect
+		CGpass currPass = cgGetFirstPass(this->currTechnique);
+		while (currPass) {
+			CgFxEffectBase::DrawPass(currPass, batch);
+			currPass = cgGetNextPass(currPass);
+		}		
 	}
 
 	/**
