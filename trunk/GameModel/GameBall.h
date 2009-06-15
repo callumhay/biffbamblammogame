@@ -22,6 +22,8 @@ private:
 	BallSize currSize;					// The current size of this ball
 	float currScaleFactor;			// The scale difference between the ball's current size and its default size
 
+	double ballCollisionsDisabledTimer;	// If > 0 then collisions are disabled
+
 	static const float DEFAULT_BALL_RADIUS;			// Default radius of the ball
 	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
 	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink
@@ -62,11 +64,24 @@ public:
 	 * Returns: true if there was a collision between this ball and otherball, false otherwise.
 	 */
 	bool CollisionCheck(const GameBall& otherBall) {
+		// If the collisions are disabled then we only return false
+		if (ballCollisionsDisabledTimer > EPSILON) {
+			return false;
+		}
+
 		Vector2D lengthVec = this->bounds.Center() - otherBall.bounds.Center();
 		float sqLength = Vector2D::Dot(lengthVec, lengthVec);
 		float radiiSum = this->bounds.Radius() + otherBall.bounds.Radius();
 		float sqRadii = radiiSum * radiiSum;
 		return sqLength < sqRadii;
+	}
+
+	/** 
+	 * Set ball-ball collisions for this ball to be diabled for the given duration in seconds.
+	 */
+	void SetBallCollisionsDisabled(double durationInSecs) {
+		assert(durationInSecs > EPSILON);
+		this->ballCollisionsDisabledTimer = durationInSecs;
 	}
 
 	// Set the center position of the ball

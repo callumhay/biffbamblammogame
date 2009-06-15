@@ -95,8 +95,8 @@ float4 ink_splatter_PS(float2 UV : TEXCOORD0) : COLOR {
 	float lerpAmt = splatterColour.a * Fade;
 	
 	// Make sure the noise value is in the range [-1,1]
-	float noiseVal = clamp((noise.z - 0.05f) * 5.0f, 0, 1);
-	noiseVal = (noiseVal * 2.0f) - 1.0f;
+	float noiseVal = clamp((noise.z + noise.w) * 7.0f, 0, 1);
+	noiseVal = (clamp(noiseVal, 0, 1) * 2.0f) - 1.0f;
 	
 	// Calculate the distortion of the ink
 	float3 distortedSceneColour = InkColour * tex2D(SceneSampler, UV + fadeDisplacement*float2(noiseVal)).rgb;

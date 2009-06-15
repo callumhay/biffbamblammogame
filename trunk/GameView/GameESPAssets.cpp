@@ -850,8 +850,8 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	Vector3D negHalfLevelDim = -0.5 * Vector3D(level.GetLevelUnitWidth(), level.GetLevelUnitHeight(), 0.0f);
 	Point3D emitCenterWorldCoords = emitCenter + negHalfLevelDim;
 	Vector3D sprayVec = currCamPos - emitCenterWorldCoords;
+	
 	Vector3D inkySprayDir = Vector3D::Normalize(sprayVec);
-
 	float distToCamera = sprayVec.length();
 
 	// Inky spray at the camera
@@ -865,7 +865,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkySpray->SetParticleAlignment(ESP::ScreenAligned);
 	inkySpray->SetEmitPosition(emitCenter);
 	inkySpray->SetEmitDirection(inkySprayDir);
-	inkySpray->SetEmitAngleInDegrees(15);
+	inkySpray->SetEmitAngleInDegrees(5);
 	inkySpray->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
 	inkySpray->SetParticles(GameESPAssets::NUM_INK_SPRAY_PARTICLES, this->ballTex);
 	inkySpray->AddEffector(&this->particleFader);

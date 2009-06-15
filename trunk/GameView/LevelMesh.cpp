@@ -9,6 +9,7 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Point.h"
+#include "../BlammoEngine/VBOBatch.h"
 
 #include "../ResourceManager.h"
 
@@ -115,12 +116,9 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
 
-	// Load the actual level meshes as display lists...
+	// Load the actual level meshes as precomputed batches for speed...
 	const std::vector<std::vector<LevelPiece*>>& levelPieces = level->GetCurrentLevelLayout();
 
-	glPushMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 
 	// Get the proper vector to center the level
 	Vector2D levelDimensions = Vector2D(level->GetLevelUnitWidth(), level->GetLevelUnitHeight());
@@ -128,11 +126,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 	// Create the ball safety net for the level
 	this->ballSafetyNet->Regenerate(levelDimensions);
 
-	glTranslatef(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
-
-	// Get the appropriate transform to be applied to the piece
-	float worldTransformVals[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, worldTransformVals);
+	Vector3D worldTransform(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
 
 	// Go through each piece and create an appropriate display list for it
 	for (size_t h = 0; h < levelPieces.size(); h++) {
@@ -142,11 +136,9 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 			LevelPiece* currPiece	= levelPieces[h][w];
 
 			// Create the appropriate display lists for the piece...
-			Vector3D translation(worldTransformVals[12], worldTransformVals[13], worldTransformVals[14]);
-			this->CreateDisplayListsForPiece(currPiece, translation);
+			this->CreateDisplayListsForPiece(currPiece, worldTransform);
 		}
 	}
-	glPopMatrix();
 }
 
 /**
@@ -155,6 +147,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
  * (Do not call > 1 per frame!!)
  */
 void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
+
 	// Find the changed piece and change its display list...
 	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint>>::iterator pieceInfoIter = this->pieceDisplayLists.find(&pieceBefore);
 	assert(pieceInfoIter != this->pieceDisplayLists.end());
@@ -181,23 +174,13 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 		// Clean up
 		iter->second = 0;
 	}
-	this->pieceDisplayLists[&pieceBefore].clear();
-
-	Point2D changedPieceLoc = pieceAfter.GetCenter();
-	Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
-
-	// Obtain the world transform matrix for the piece
-	glPushMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glTranslatef(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
-	//glTranslatef(changedPieceLoc[0], changedPieceLoc[1], 0);
-	float worldTransformVals[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, worldTransformVals);
-	glPopMatrix();
+	pieceInfoIter->second.clear();
+	this->pieceDisplayLists.erase(pieceInfoIter);
 
 	// Based on the new piece type we re-create a display list
-	Vector3D translation(worldTransformVals[12], worldTransformVals[13], worldTransformVals[14]);
+	Point2D changedPieceLoc = pieceAfter.GetCenter();
+	Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
+	Vector3D translation(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
 	this->CreateDisplayListsForPiece(&pieceAfter, translation);
 }
 
@@ -205,6 +188,7 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
  * Draw the current level mesh.
  */
 void LevelMesh::Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
+	
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
 		iter != this->displayListsPerMaterial.end(); iter++) {
