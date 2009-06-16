@@ -11,8 +11,8 @@ drawItemsInLastPass(true) {
 	// Framebuffer object setup
 	this->fgAndBgFBO					= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 	this->bgFBO								= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->initialFSEffectFBO	= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment); // TODO: no attachment...
-	this->finalFSEffectFBO		= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment); // TODO: no attachment...
+	this->initialFSEffectFBO	= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::NoAttachment);
+	this->finalFSEffectFBO		= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 
 	// Effects setup
 	this->fgAndBgBlurEffect	= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
@@ -72,9 +72,9 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	this->fgAndBgFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 	
 	delete this->finalFSEffectFBO;
-	this->finalFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);	// TODO: no attachment...
+	this->finalFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::NoAttachment);
 	delete this->finalFSEffectFBO;
-	this->finalFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment); // TODO: no attachment...
+	this->finalFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 
 	delete this->fgAndBgBlurEffect;
 	delete this->bloomEffect;

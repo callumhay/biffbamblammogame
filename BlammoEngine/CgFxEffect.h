@@ -7,7 +7,6 @@
 #include "Light.h"
 #include "Camera.h"
 #include "Texture2D.h"
-#include "VBOBatch.h"
 
 #include "../ResourceManager.h"
 
@@ -105,12 +104,13 @@ private:
 		glCallLists(displayListIDs.size(), GL_UNSIGNED_INT, &displayListIDs[0]);
 		cgResetPassState(pass);
 	}
+	/*
 	static void DrawPass(CGpass pass, const VBOBatch* batch) {
 		cgSetPassState(pass);
 		batch->Draw();
 		cgResetPassState(pass);
 	}
-
+	*/
 protected:
 	// The Cg Effect pointer
 	CGeffect cgEffect;
@@ -149,6 +149,7 @@ public:
 			currPass = cgGetNextPass(currPass);
 		}
 	}
+	/*
 	void Draw(const Camera& camera, const VBOBatch* batch) {
 		this->SetupBeforePasses(camera);
 		
@@ -159,6 +160,7 @@ public:
 			currPass = cgGetNextPass(currPass);
 		}		
 	}
+	*/
 
 	/**
 	 * Obtain the current technique for this effect.

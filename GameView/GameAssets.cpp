@@ -651,6 +651,14 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 	}
 }
 
+/**
+ * Deactivate all misc. effects in the view that may not be deactivated from items alone.
+ */
+void GameAssets::DeactivateMiscEffects() {
+	this->fboAssets->DeactivateInkSplatterEffect();
+	this->espAssets->KillAllActiveEffects();
+}
+
 #ifdef _DEBUG
 /**
  * Debug function for drawing the lights that affect the game - draws them as

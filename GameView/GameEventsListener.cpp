@@ -56,7 +56,7 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 	debug_output("EVENT: Level completed");
 
 	// Kill all effects that may have previously been occuring...
-	this->display->GetAssets()->GetESPAssets()->KillAllActiveEffects();
+	this->display->GetAssets()->DeactivateMiscEffects();
 }
 
 
@@ -113,6 +113,10 @@ void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
 		
 	// Check to see if it's game over, and switch the display state appropriately
 	if (this->display->GetModel()->IsGameOver()) {
+		
+		// Kill absolutely all remaining visual effects...
+		this->display->GetAssets()->DeactivateMiscEffects();
+		
 		this->display->SetCurrentState(new GameOverDisplayState(this->display));
 	}
 }

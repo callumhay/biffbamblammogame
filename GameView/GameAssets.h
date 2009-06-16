@@ -107,6 +107,7 @@ public:
 
 	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item, const Camera& camera);
 	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item);
+	void DeactivateMiscEffects();
 
 	GameESPAssets* GetESPAssets() const {
 		return this->espAssets;
