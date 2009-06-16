@@ -109,6 +109,12 @@ public:
 	void ActivateInkSplatterEffect() {
 		this->inkSplatterEffect->Activate();
 	}
+	/**
+	 * Deactivates the ink splatter effect.
+	 */
+	void DeactivateInkSplatterEffect() {
+		this->inkSplatterEffect->Deactivate();
+	}
 
 };
 #endif
