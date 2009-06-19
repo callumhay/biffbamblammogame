@@ -3,6 +3,7 @@
 #include "GameEventManager.h"
 #include "GameModelConstants.h"
 #include "Projectile.h"
+#include "GameBall.h"
 
 // Default values for the size of the paddle
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
@@ -29,7 +30,7 @@ const float PlayerPaddle::PADDLE_LASER_DELAY = 0.25f;
 PlayerPaddle::PlayerPaddle() : 
 	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 
 	avgVel(0.0f), ticksSinceAvg(0), timeSinceLastLaserBlast(PADDLE_LASER_DELAY), 
-	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize) {
+	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), attachedBall(NULL) {
 	this->SetDimensions(PlayerPaddle::NormalSize);
 }
 
@@ -108,6 +109,19 @@ void PlayerPaddle::SetPaddleSize(PlayerPaddle::PaddleSize size) {
 	this->currSize = size;
 }
 
+/**
+ * Private helper function that shoots the ball attached to the player paddle.
+ */
+void PlayerPaddle::FireAttachedBall() {
+	assert(this->attachedBall != NULL);
+
+	// TODO : Set the ball's new trajectory in order for it to leave the paddle
+
+
+	// Remove the ball from the paddle
+	this->attachedBall = NULL;
+}
+
 void PlayerPaddle::Tick(double seconds) {
 	if (this->timeSinceLastLaserBlast < PADDLE_LASER_DELAY) {
 		this->timeSinceLastLaserBlast += seconds;
@@ -165,6 +179,9 @@ void PlayerPaddle::Tick(double seconds) {
 	if (scaleFactorDiff != 0.0f) {
 		this->SetDimensions(this->currScaleFactor + ((scaleFactorDiff * seconds) / SECONDS_TO_CHANGE_SIZE));
 	}
+
+	// If there is a ball attached then we need to move it around with the paddle
+	// TODO
 }
 
 /**
@@ -172,9 +189,20 @@ void PlayerPaddle::Tick(double seconds) {
  * exist then this function does nothing.
  */
 void PlayerPaddle::Shoot(GameModel* gameModel) {
-	// Check for laser paddle power-up
+	// Check for the various paddle types and react appropriately for each
+	
+	// Sticky paddle ball shot takes priority (we don't fire lasers and other power-ups simulataneously
+	// with the ball from the sticky paddle)...
+	if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+		// Sticky paddle means that if there's a ball attached to the paddle then we release it and exit
+		if (this->HasBallAttached()) {
+			this->FireAttachedBall();
+			return;
+		}
+	}
+	
+	// Check for laser paddle
 	if ((this->GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
-		
 		// Make sure we are allowed to fire a new laser blast
 		if (this->timeSinceLastLaserBlast >= PADDLE_LASER_DELAY) {
 			// Fire ze laser! - tell the model about it
@@ -186,7 +214,23 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 	}
 
 	// TODO: other paddle shooting abilities go here...
+}
 
+/**
+ * Attaches the given ball to the paddle if there is no ball already attached
+ * to the paddle.
+ * Returns: true if the ball was successfully attached, false otherwise.
+ */
+bool PlayerPaddle::AttachBall(GameBall* ball) {
+	assert(ball != NULL);
+
+	// If the paddle already has a ball attached then we do nothing
+	if (this->HasBallAttached()) {
+		return false;
+	}
+
+	this->attachedBall = ball;
+	return true;
 }
 
 bool PlayerPaddle::CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d) {

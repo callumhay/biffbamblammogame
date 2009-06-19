@@ -4,6 +4,7 @@
 #include "BlammoEngine/BasicIncludes.h"
 #include "BlammoEngine/Texture.h"
 
+class ConfigOptions;
 class Mesh;
 class CgFxMaterialEffect;
 class TextureFontSet;
@@ -17,7 +18,6 @@ class TextureFontSet;
  * all memory creation and destruction for these.
  */
 class ResourceManager {
-
 private:
 	static ResourceManager* instance;
 
@@ -34,6 +34,8 @@ private:
 	std::map<std::string, CGeffect> loadedEffects;																	// Effects already loaded into the blammo engine
 	std::map<CGeffect, std::map<std::string, CGtechnique>> loadedEffectTechniques;	// Techniques associated with each effect
 	std::map<CGeffect, unsigned int> numRefPerEffect;																// Number of references per effect
+
+	ConfigOptions* configOptions;	// The configuration options read from the game's ini file
 
 	void InitCgContext();
 	static void LoadEffectTechniques(const CGeffect effect, std::map<std::string, CGtechnique>& techniques);
@@ -73,14 +75,13 @@ public:
 	void GetCgFxEffectResource(const std::string& filepath, CGeffect &effect, std::map<std::string, CGtechnique> &techniques);
 	bool ReleaseCgFxEffectResource(CGeffect &effect);
 
+	// Initialization configuration loading
+	ConfigOptions ReadConfigurationOptions(bool forceReadFromFile);
+	bool WriteConfigurationOptionsToFile(const ConfigOptions& cfgOptions);
+
 	// Basic loading functions ****************************************************************************************************
-
-	// Font loading functions
 	static std::map<unsigned int, TextureFontSet*> LoadFont(const std::string &filepath, const std::vector<unsigned int> &heights);
-
-
 	static std::istringstream* FilepathToInStream(const std::string &filepath);
-
 };
 
 #endif

@@ -37,13 +37,6 @@ private:
 	// The display lists associated with each level piece
 	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint>> pieceDisplayLists;
 	
-	/*
-	// The VBO batches associated with each material
-	std::map<CgFxMaterialEffect*, VBOBatch*> materialBatches;
-	// The VBO IDs associated with each level piece and their respective material
-	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, unsigned int>> pieceVBOIDs;
-	*/
-
 	std::map<std::string, MaterialGroup*> GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const;
 	void CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateDisplayListForBallSafetyNet(float levelWidth);

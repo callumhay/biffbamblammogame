@@ -17,16 +17,20 @@ class MainMenuDisplayState : public DisplayState {
 private:
 	// Title and menu text
 	static const std::string TITLE_TEXT;
+	static const std::string TITLE_BIFF_TEXT;
+	static const std::string TITLE_BAM_TEXT;
+	static const std::string TITLE_BLAMMO_TEXT;
+
 	static const std::string NEW_GAME_MENUITEM;
 	static const std::string PLAY_LEVEL_MENUITEM;
 	static const std::string OPTIONS_MENUITEM;
 	static const std::string EXIT_MENUITEM;
 
 	// Indices for the menu
-	static const int NEW_GAME_INDEX		= 0;
-	static const int PLAY_LEVEL_INDEX = 1;
-	static const int OPTIONS_INDEX		= 2;
-	static const int EXIT_INDEX				= 3;
+	int newGameMenuItemIndex;
+	int playLevelMenuItemIndex;
+	int optionsMenuItemIndex;
+	int exitGameMenuItemIndex;
 
 	// Indents and spacing
 	static const unsigned int MENU_X_INDENT = 50;

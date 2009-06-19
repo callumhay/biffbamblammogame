@@ -254,8 +254,8 @@ technique PostRefractGeom {
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
         
-        VertexProgram = compile vp40 PostRefract_VS();        
-        FragmentProgram = compile fp40 PostRefract_PS();
+        VertexProgram = compile arbvp1 PostRefract_VS();        
+        FragmentProgram = compile arbfp1 PostRefract_PS();
     }  
 }
 
@@ -271,8 +271,8 @@ technique VapourTrail {
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
         
-        VertexProgram = compile vp40 PostRefract_VS();        
-        FragmentProgram = compile fp40 VapourTrail_PS();
+        VertexProgram = compile arbvp1 PostRefract_VS();        
+        FragmentProgram = compile arbfp1 VapourTrail_PS();
     }  
 }
 /////////////////////////////////////// eof //
