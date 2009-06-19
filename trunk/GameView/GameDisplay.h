@@ -24,8 +24,8 @@ private:
 	// Width and height of the viewport/display
 	int width, height;
 	
-	// Whether or not the game has been exited
-	bool gameExited;
+	bool gameReinitialized;		// Whether or not we should reinitialize the whole game (recreate the window, etc.)
+	bool gameExited;  				// Whether or not the game has been exited
 
 	// Functions for Action Listeners
 	void SetupActionListeners();
@@ -49,7 +49,10 @@ public:
 	~GameDisplay();
 
 	bool HasGameExited() const { return this->gameExited; }
+	bool ShouldGameReinitialize() const { return this->gameReinitialized; }
+
 	void QuitGame() { this->gameExited = true; }
+	void ReinitializeGame() { this->gameReinitialized = true; }
 
 	// Change the current state of the display
 	void SetCurrentState(DisplayState* state) {

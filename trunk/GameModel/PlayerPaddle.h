@@ -8,6 +8,7 @@
 #include "BoundingLines.h"
 
 class GameModel;
+class GameBall;
 
 // Represents the player controlled paddle shaped as follows:
 //                -------------
@@ -20,7 +21,7 @@ public:
 	static const float PADDLE_HALF_WIDTH;
 	static const float PADDLE_HALF_HEIGHT;
 
-	enum PaddleType { NormalPaddle = 0x00000000, LaserPaddle = 0x00000001, PoisonPaddle = 0x00000010 };
+	enum PaddleType { NormalPaddle = 0x00000000, LaserPaddle = 0x00000001, PoisonPaddle = 0x00000010, StickyPaddle = 0x00000100 };
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
 private:
@@ -48,15 +49,18 @@ private:
 	float currHalfWidthTotal;			// Half of the total width of the paddle
 	float minBound, maxBound;			// The current level's boundries along its width for the paddle
 	float speed;									// Speed of the paddle in units per second
-	float currScaleFactor;			// The scale difference between the paddle's current size and its default size
+	float currScaleFactor;				// The scale difference between the paddle's current size and its default size
 	
-	BoundingLines bounds;					// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
+	BoundingLines bounds;						// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
 	
 	float timeSinceLastLaserBlast;	// Time since the last laser projectile was fired
+
+	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
 
 	void SetDimensions(float newScaleFactor);
 	void SetDimensions(PlayerPaddle::PaddleSize size);
 	void SetPaddleSize(PlayerPaddle::PaddleSize size);
+	void FireAttachedBall();
 
 public:
 	static const float DEFAULT_SPEED;
@@ -159,6 +163,16 @@ public:
 	}
 
 	void Shoot(GameModel* gameModel);
+
+	bool AttachBall(GameBall* ball);
+	
+	/** 
+	 * Whether or not this paddle has a ball currently attached to it.
+	 * Returns: true if there's a ball resting on the paddle, false otherwise.
+	 */
+	bool HasBallAttached() const { 
+		return this->attachedBall != NULL; 
+	}
 
 	bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
 	void DebugDraw() const;

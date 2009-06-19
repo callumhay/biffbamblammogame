@@ -14,23 +14,22 @@
 
 #include "GameController.h"
 #include "ResourceManager.h"
+#include "ConfigOptions.h"
 
 // Initialization Constants for the application
 static const char* WINDOW_TITLE		= "Biff! Bam!! Blammo!?!";
 static const char* ICON_FILEPATH  = "BiffBamBlammoIcon.bmp";
 static const std::string RESOURCE_ZIP = "BBBResources.zip";
-static const int INIT_WIDTH = 1024;
-static const int INIT_HEIGHT = 768;
 
 static GameModel *model = NULL;
 static GameController *controller = NULL;
 static GameDisplay *display = NULL;
 
-static const unsigned int DEFAULT_VIDEO_FLAGS = SDL_OPENGL | SDL_SWSURFACE | SDL_RESIZABLE;
-static int BitsPerPixel = 16;
+static const unsigned int DEFAULT_VIDEO_FLAGS = SDL_OPENGL | SDL_SWSURFACE;
+static int bitsPerPixel = 16;
 static SDL_Surface* VideoSurface = NULL;
 
-void ResizeWindow(int w, int h) {
+static void ResizeWindow(int w, int h) {
 	display->ChangeDisplaySize(w, h);
 }
 
@@ -78,7 +77,7 @@ static void ProcessEvents() {
  * Initialize SDL.
  * Returns: true on success, false otherwise.
  */
-bool InitSDLWindow() {
+static bool InitSDLWindow(int windowWidth, int windowHeight, unsigned int videoFlags) {
 	// Load SDL
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     std::cerr << "Unable to initialize SDL: " << SDL_GetError();
@@ -94,7 +93,7 @@ bool InitSDLWindow() {
 		std::cerr << "Video query failed: " << SDL_GetError() << std::endl;
     return false;
   }
-  BitsPerPixel = info->vfmt->BitsPerPixel;
+  bitsPerPixel = info->vfmt->BitsPerPixel;
 
   // Set colour bits...
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
@@ -113,7 +112,7 @@ bool InitSDLWindow() {
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, GameDisplay::NUM_MULTISAMPLES);
 
   // Set the draw surface...
-	VideoSurface = SDL_SetVideoMode(INIT_WIDTH, INIT_HEIGHT, BitsPerPixel, DEFAULT_VIDEO_FLAGS);
+	VideoSurface = SDL_SetVideoMode(windowWidth, windowHeight, bitsPerPixel, videoFlags);
 	if (VideoSurface == NULL) {
 		std::cerr << "Unable to set video mode: " << SDL_GetError();
     return false;
@@ -126,50 +125,36 @@ bool InitSDLWindow() {
 	return true;
 }
 
-// Driver function for the game.
-int main(int argc, char *argv[]) {
-
-	// Memory dump debug info for detecting and finding memory leaks
-#ifdef _DEBUG
-	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(388);
-#endif
-
-	// Establish the resource manager
-	ResourceManager::InitResourceManager(RESOURCE_ZIP, argv[0]);
-
-	// Setup the SDL window
-	if (!InitSDLWindow()) {
-		SDL_Quit();
-		return -1;
-	}
-	
-	debug_opengl_state();
-
-	// Load extensions
-	GLenum err = glewInit();
-	if (GLEW_OK != err) {
-		std::cout << "Error loading extensions: " << glewGetErrorString(err) << std::endl;
-		return -1;
+/**
+ * Clean up the ModelViewController classes that run the game.
+ */
+static void CleanUpMVC() {
+	if (model != NULL) {
+		delete model;
+		model = NULL;
 	}
 
-	// TODO: VSync: option for this?
-	BlammoTime::SetVSync(0);
+	if (display != NULL) {
+		delete display;
+		display = NULL;
+	}
 
-	// Create the MVC while showing the loading screen...
-	LoadingScreen::GetInstance()->StartShowLoadingScreen(INIT_WIDTH, INIT_HEIGHT, 5);
+	if (controller != NULL) {
+		delete controller;
+		controller = NULL;
+	}
+}
 
-	model = new GameModel();
-	display = new GameDisplay(model, INIT_WIDTH, INIT_HEIGHT);
-	controller = new GameController(model, display);
-
-	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
-
+/**
+ * Run the main game loop - this will continuously draw the game until
+ * either the game is quit or reinitialization (e.g., to switch video size) occurs.
+ */
+static void GameRenderLoop() {
 	double frameTimeDelta = 0.0;
 	const double maxDelta = 1.0 / 30.0;
 
 	// Main render loop...
-	while(!display->HasGameExited()) {
+	while (!display->HasGameExited() && !display->ShouldGameReinitialize()) {
 		Uint32 startOfFrameTime = SDL_GetTicks();
 		
 		// Don't let the game run at less than 30 fps
@@ -191,14 +176,89 @@ int main(int argc, char *argv[]) {
 		// Calculate the frame delta...
 		frameTimeDelta = static_cast<double>(SDL_GetTicks() - startOfFrameTime) / 1000.0;
 	}
+}
 
-	// Clear up MVC
-	delete model;
-	model = NULL;
-	delete display;
-	display = NULL;
-	delete controller;
-	controller = NULL;
+static void Kill() {
+
+}
+
+// Driver function for the game.
+int main(int argc, char *argv[]) {
+
+	// Memory dump debug info for detecting and finding memory leaks
+#ifdef _DEBUG
+	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetBreakAlloc(388);
+#endif
+
+	// One-Time Initialization stuff **************************************
+
+	// Establish the resource manager
+	ResourceManager::InitResourceManager(RESOURCE_ZIP, argv[0]);
+	
+	// We show the initial loading screen on the first time initializing the game
+	bool showInitialLoadingScreen = true;
+
+	// Set the default config options - these will be read from and written to
+	// the .ini file as we need them
+	ConfigOptions initCfgOptions;
+
+	// ********************************************************************
+
+	// We continue to run the game until a definitive quit has been issued
+	// in this case we will break from the loop
+	bool quitGame = false;
+	while (!quitGame) {
+
+		// Read the .ini file options (used to initialize various settings in the game)
+		initCfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
+
+		// Setup the SDL window
+		if (!InitSDLWindow(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), DEFAULT_VIDEO_FLAGS)) {
+			quitGame = true;
+			break;
+		}
+
+		// Load extensions
+		GLenum err = glewInit();
+		if (GLEW_OK != err) {
+			std::cout << "Error loading extensions: " << glewGetErrorString(err) << std::endl;
+			quitGame = true;
+			break;
+		}
+
+		// TODO: VSync: option for this?
+		BlammoTime::SetVSync(0);
+
+		// Create the MVC while showing the loading screen...
+		if (showInitialLoadingScreen) {
+			LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 5);
+		}
+
+		model = new GameModel();
+		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
+		controller = new GameController(model, display);
+
+		if (showInitialLoadingScreen) {
+			LoadingScreen::GetInstance()->EndShowingLoadingScreen();
+		}
+
+		debug_opengl_state();
+
+		// This will run the game until quit or reinitialization
+		GameRenderLoop();
+
+		// Set whether the game has quit or not - if the game has not
+		// quit then we must be reinitializing it
+		quitGame = display->HasGameExited();
+
+		// Clear up MVC
+		CleanUpMVC();
+
+		// No longer show the initial loading screen (in the case that we are
+		// repeating the loop - i.e., reinitializing the window)
+		showInitialLoadingScreen = false;
+	}
 
 	// Clear up singletons
 	Onomatoplex::Generator::DeleteInstance();
@@ -213,8 +273,19 @@ int main(int argc, char *argv[]) {
 
 	SDL_Quit();
 
+	// One-Time Deletion Stuff (only on exit) *****************************
+
 	// Clean up all file and shader resources, ORDER MATTERS HERE!
+	
+	// Write whatever the current state of the configuration is back to the config (.ini) file
+	initCfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
+	bool iniWriteResult = ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(initCfgOptions);
+	assert(iniWriteResult);
+
+	// Clean up the resource manager last
 	ResourceManager::DeleteInstance();
+
+	// ********************************************************************
 
 	return 0;
 }

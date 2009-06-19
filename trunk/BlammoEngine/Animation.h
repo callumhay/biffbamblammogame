@@ -253,6 +253,17 @@ public:
 	}
 
 	/**
+	 * Completely clear the interpolation animation values (i.e., next time
+	 * tick is called nothing will happen).
+	 */
+	void ClearLerp() {
+		this->x = 0.0;
+		this->tracker = 0;
+		this->timePts.clear();
+		this->interpolationPts.clear();
+	}
+
+	/**
 	 * Tick the animation (i.e., animate it using linear interpolation).
 	 * Returns: true if the animation is complete, false otherwise.
 	 */

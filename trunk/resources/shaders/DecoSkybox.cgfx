@@ -109,8 +109,8 @@ technique DecoSkybox {
         CullFace = Back;
         DepthTestEnable = true;
 		
-        VertexProgram = compile vp40 deco_skybox_VS();
-        FragmentProgram = compile fp40 deco_skybox_PS();
+        VertexProgram = compile arbvp1 deco_skybox_VS();
+        FragmentProgram = compile arbfp1 deco_skybox_PS();
     }
 }
 

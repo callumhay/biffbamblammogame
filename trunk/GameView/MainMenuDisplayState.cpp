@@ -9,7 +9,10 @@
 
 // TODO: this will eventually be replaced by 3 sprites
 // for "Biff" "Bam" and "Blammo" respectively
-const std::string MainMenuDisplayState::TITLE_TEXT = "BIFF! BAM!! BLAMMO!?!";
+const std::string MainMenuDisplayState::TITLE_TEXT = "Biff! Bam!! Blammo!?!";
+const std::string MainMenuDisplayState::TITLE_BIFF_TEXT			= "Biff!";
+const std::string MainMenuDisplayState::TITLE_BAM_TEXT			= "Bam!!";
+const std::string MainMenuDisplayState::TITLE_BLAMMO_TEXT		= "Blammo!?!";
 
 // Menu items
 const std::string MainMenuDisplayState::NEW_GAME_MENUITEM		= "New Game";
@@ -62,18 +65,18 @@ void MainMenuDisplayState::InitializeMenu() {
 	// Add items to the menu in their order (first to last)
 	TextLabel2D tempLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
 	tempLabel.SetDropShadow(dropShadowColour, dropShadowAmt);
-	this->menu->AddMenuItem(tempLabel);
+	this->newGameMenuItemIndex = this->menu->AddMenuItem(tempLabel);
 
 	tempLabel.SetText(PLAY_LEVEL_MENUITEM);
-	this->menu->AddMenuItem(tempLabel);
+	this->playLevelMenuItemIndex = this->menu->AddMenuItem(tempLabel);
 
 	tempLabel.SetText(OPTIONS_MENUITEM);
-	this->menu->AddMenuItem(tempLabel);
+	this->optionsMenuItemIndex = this->menu->AddMenuItem(tempLabel);
 
 	tempLabel.SetText(EXIT_MENUITEM);
-	this->menu->AddMenuItem(tempLabel);
+	this->exitGameMenuItemIndex = this->menu->AddMenuItem(tempLabel);
 
-	this->menu->SetHighlightedMenuItem(0);
+	this->menu->SetSelectedMenuItem(this->newGameMenuItemIndex);
 
 	debug_opengl_state();
 }
@@ -94,7 +97,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	// Render the menu
 	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, titleHeight - this->titleLabel->GetHeight() - MENU_Y_INDENT);
 	this->menu->SetTopLeftCorner(menuTopLeftCorner);
-	this->menu->Draw();
+	this->menu->Draw(dT);
 	//this->menu->DebugDraw();
 
 	debug_opengl_state();
@@ -113,36 +116,30 @@ void MainMenuDisplayState::KeyPressed(SDLKey key) {
 		case SDLK_UP:
 			this->menu->UpAction();
 			break;
-		case SDLK_RETURN:
-			{
-				// On enter we select the menu item that is currently highlighted...
-				int selectedMenuItem = this->menu->GetHighlightedMenuItem();
-				
-				// TODO: animation or something for item and stuff...
+		case SDLK_RETURN: {
+			// On enter we select the menu item that is currently highlighted...
+			int selectedMenuItem = this->menu->GetSelectedMenuItem();
+			
+			// TODO: animation or something for item and stuff...
 
-				switch (selectedMenuItem) {
-					case NEW_GAME_INDEX:
-						debug_output("Selected " << NEW_GAME_MENUITEM << " from menu");
-						this->display->SetCurrentState(new StartGameDisplayState(this->display));
-						break;
-					case PLAY_LEVEL_INDEX:
-						debug_output("Selected " << PLAY_LEVEL_MENUITEM << " from menu");
-						break;
-					case OPTIONS_INDEX:
-						debug_output("Selected " << OPTIONS_MENUITEM << " from menu");
-						break;
-					case EXIT_INDEX:
-						// TODO: Put a dialogue for "Are you sure..."
-						this->display->QuitGame();
-						break;
-					default:
-						assert(false);
-						break;
-				}
+			if (selectedMenuItem == this->newGameMenuItemIndex) {
+				debug_output("Selected " << NEW_GAME_MENUITEM << " from menu");
+				this->display->SetCurrentState(new StartGameDisplayState(this->display));
 			}
-			break;
-		default:
-			break;
+			else if (selectedMenuItem == this->playLevelMenuItemIndex) {
+				debug_output("Selected " << PLAY_LEVEL_MENUITEM << " from menu");
+			}
+			else if (selectedMenuItem == this->optionsMenuItemIndex) {
+				debug_output("Selected " << OPTIONS_MENUITEM << " from menu");
+			}
+			else if (selectedMenuItem == this->exitGameMenuItemIndex) {
+				// TODO: Put a dialogue for "Are you sure..."
+				this->display->QuitGame();
+			}
+			else {
+				assert(false);
+			}
+		}
 	}
 }
 

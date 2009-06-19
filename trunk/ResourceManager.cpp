@@ -1,4 +1,5 @@
 #include "ResourceManager.h"
+#include "ConfigOptions.h"
 
 #include "BlammoEngine/ObjReader.h"
 #include "BlammoEngine/MtlReader.h"
@@ -17,7 +18,7 @@
 ResourceManager* ResourceManager::instance = NULL;
 
 ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
-cgContext(NULL), inkBlockMesh(NULL) {
+cgContext(NULL), inkBlockMesh(NULL), configOptions(NULL) {
 	// Initialize DevIL and make sure it loaded correctly
 	ilInit();
 	iluInit();
@@ -78,6 +79,10 @@ ResourceManager::~ResourceManager() {
 	}
 	this->loadedTextures.clear();
 	this->numRefPerTexture.clear();
+
+	// Clean up configuration options
+	delete this->configOptions;
+	this->configOptions = NULL;
 }
 
 /**
@@ -109,6 +114,9 @@ void ResourceManager::InitResourceManager(const std::string& resourceZip, const 
 		ResourceManager::instance = new ResourceManager(resourceZip, argv0);
 	}
 }
+
+
+
 
 /**
  * Obtain the mesh resource for the ink block, load it into memory
@@ -554,6 +562,69 @@ bool ResourceManager::ReleaseCgFxEffectResource(CGeffect &effect) {
 	return true;
 }
 
+/**
+ * Read the initialization configuration options in from the .ini file off disk
+ * (should be in the same directory as the game). If the file has already been loaded
+ * and force read is false then the options cached in memory will be given.
+ * Returns: configuration options object according to values in .ini file; in cases
+ * where the file could not be read a new one is created with default settings and
+ * the values from it will be returned.
+ */
+ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile) {
+	
+	// If we don't have to read from file and we already
+	// loaded the configuration options then return them immediately
+	if (!forceReadFromFile && this->configOptions != NULL) {
+		return *this->configOptions;
+	}
+
+	// No matter what we need to read the configuration options from file
+	
+	// If any config options exist we must delete and overwrite them
+	if (this->configOptions != NULL) {
+		delete this->configOptions;
+		this->configOptions = NULL;
+	}
+	
+	this->configOptions = ConfigOptions::ReadConfigOptionsFromFile();
+	if (this->configOptions == NULL) {
+		// Couldn't find, open or properly read the file so try to make a 
+		// new one with the default settings and values in it
+		
+		this->configOptions = new ConfigOptions(); // By calling the default construtor 
+																							 // we populate the object with default settings
+
+		bool writeResult = this->configOptions->WriteConfigOptionsToFile();
+		assert(writeResult);
+	}
+
+	// Try to return configuration options no matter what
+	assert(this->configOptions != NULL);
+	return *this->configOptions;
+}
+
+/**
+ * Write the given configuration options to the .ini file for the game.
+ * Returns: true on successful write to .ini; false otherwise.
+ */
+bool ResourceManager::WriteConfigurationOptionsToFile(const ConfigOptions& cfgOptions) {
+	// First thing we do is update the configuration options
+	// that have already been loaded (or not)
+	if (this->configOptions == NULL) {
+		this->configOptions = new ConfigOptions(cfgOptions);
+	}
+	else {
+		*this->configOptions = cfgOptions;
+	}
+
+	// Now write to file
+	bool writeResult = this->configOptions->WriteConfigOptionsToFile();
+	return writeResult;
+}
+
+/**
+ * Convert a file stored in the resource zip filesystem into an input stream using physfs.
+ */ 
 std::istringstream* ResourceManager::FilepathToInStream(const std::string &filepath) {
 	std::istringstream* inFile = NULL;
 
