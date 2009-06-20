@@ -16,27 +16,32 @@ private:
 	// The variable (initialization string) names for the various values in the .ini file
 	static const std::string WINDOW_HEIGHT_VAR;
 	static const std::string WINDOW_WIDTH_VAR;
+	static const std::string WINDOW_FULLSCREEN_VAR;
 
 	// Default values for each initialization variable
-	static const int DEFAULT_WINDOW_WIDTH;
-	static const int DEFAULT_WINDOW_HEIGHT;
+	static const int  DEFAULT_WINDOW_WIDTH;
+	static const int  DEFAULT_WINDOW_HEIGHT;
+	static const bool DEFAULT_FULLSCREEN_TOGGLE;
 
 	// Boundry values for each variable
 	static const int MIN_WINDOW_SIZE;
-	static const int MAX_WINDOW_SIZE;
+	static const int MAX_WINDOW_SIZE; 
 
 	// Variables for storing the configuration values in memory
 	int windowWidth, windowHeight;
+	bool fullscreenIsOn;
 
 	static ConfigOptions* ReadConfigOptionsFromFile();
 	bool WriteConfigOptionsToFile() const;
 
 public:
-	ConfigOptions() : windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT) {}
+	ConfigOptions();
+	~ConfigOptions() {}
 	
 	// Accessor functions for all of the configuration options
-	inline int GetWindowWidth() const { return this->windowWidth; }
-	inline int GetWindowHeight() const { return this->windowHeight; }
+	inline int  GetWindowWidth() const { return this->windowWidth; }
+	inline int  GetWindowHeight() const { return this->windowHeight; }
+	inline bool GetIsFullscreenOn() const { return this->fullscreenIsOn; }
 
 	// Befriend the reading and writing functions in the resource manager - we want the
 	// resource manager to be able to use this class easily

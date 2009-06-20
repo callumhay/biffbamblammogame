@@ -20,16 +20,23 @@ const std::string MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Play Level";
 const std::string MainMenuDisplayState::OPTIONS_MENUITEM		= "Options";
 const std::string MainMenuDisplayState::EXIT_MENUITEM				= "Exit Game";
 
-MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : DisplayState(display), menu(NULL), titleLabel(NULL) {
+MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
+DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), titleLabel(NULL) {
 	this->InitializeMenu();
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
 	// Dispose of the menu object
-	if (this->menu != NULL) {
-		delete this->menu;
-		this->menu = NULL;
+	if (this->mainMenu != NULL) {
+		delete this->mainMenu;
+		this->mainMenu = NULL;
 	}
+
+	if (this->optionsSubMenu != NULL) {
+		delete this->optionsSubMenu;
+		this->optionsSubMenu = NULL;
+	}
+
 	// Dispose of title label
 	if (this->titleLabel != NULL) {
 		delete this->titleLabel;
@@ -57,27 +64,34 @@ void MainMenuDisplayState::InitializeMenu() {
 	Colour idleColour(0.8f, 0.8f, 0.8f);
 	Colour highlightColour(1, 1, 0);
 	Colour selectColour(1, 0, 0);
+	Colour greyedColour(0.7f, 0.7f, 0.7f);
 
-	this->menu = new GameMenu(menuTopLeftCorner);
-	this->menu->SetPaddingBetweenMenuItems(MENU_ITEM_PADDING);
-	this->menu->SetColourScheme(idleColour, highlightColour, selectColour);
+	this->mainMenu = new GameMenu(menuTopLeftCorner);
+	this->mainMenu->SetPaddingBetweenMenuItems(MENU_ITEM_PADDING);
+	this->mainMenu->SetColourScheme(idleColour, highlightColour, selectColour, greyedColour);
 
 	// Add items to the menu in their order (first to last)
-	TextLabel2D tempLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
-	tempLabel.SetDropShadow(dropShadowColour, dropShadowAmt);
-	this->newGameMenuItemIndex = this->menu->AddMenuItem(tempLabel);
+	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),  NEW_GAME_MENUITEM);
+	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Huge), NEW_GAME_MENUITEM);
 
-	tempLabel.SetText(PLAY_LEVEL_MENUITEM);
-	this->playLevelMenuItemIndex = this->menu->AddMenuItem(tempLabel);
+	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmt);
+	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmt);
 
-	tempLabel.SetText(OPTIONS_MENUITEM);
-	this->optionsMenuItemIndex = this->menu->AddMenuItem(tempLabel);
+	this->newGameMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 
-	tempLabel.SetText(EXIT_MENUITEM);
-	this->exitGameMenuItemIndex = this->menu->AddMenuItem(tempLabel);
+	tempLabelSm.SetText(PLAY_LEVEL_MENUITEM);
+	tempLabelLg.SetText(PLAY_LEVEL_MENUITEM);
+	this->playLevelMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 
-	this->menu->SetSelectedMenuItem(this->newGameMenuItemIndex);
+	tempLabelSm.SetText(OPTIONS_MENUITEM);
+	tempLabelLg.SetText(OPTIONS_MENUITEM);
+	this->optionsMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 
+	tempLabelSm.SetText(EXIT_MENUITEM);
+	tempLabelLg.SetText(EXIT_MENUITEM);
+	this->exitGameMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+
+	this->mainMenu->SetSelectedMenuItem(this->newGameMenuItemIndex);
 	debug_opengl_state();
 }
 
@@ -96,9 +110,9 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	// Render the menu
 	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, titleHeight - this->titleLabel->GetHeight() - MENU_Y_INDENT);
-	this->menu->SetTopLeftCorner(menuTopLeftCorner);
-	this->menu->Draw(dT);
-	//this->menu->DebugDraw();
+	this->mainMenu->SetTopLeftCorner(menuTopLeftCorner);
+	this->mainMenu->Draw(dT);
+	//this->mainMenu->DebugDraw();
 
 	debug_opengl_state();
 }
@@ -108,20 +122,15 @@ void MainMenuDisplayState::RenderFrame(double dT) {
  * in the main menu.
  */
 void MainMenuDisplayState::KeyPressed(SDLKey key) {
+	// Tell the main menu about the key pressed event
+	this->mainMenu->KeyPressed(key);
+
 	// We only care about keys that manipulate the choice in the menu
 	switch(key) {
-		case SDLK_DOWN:
-			this->menu->DownAction();
-			break;
-		case SDLK_UP:
-			this->menu->UpAction();
-			break;
 		case SDLK_RETURN: {
 			// On enter we select the menu item that is currently highlighted...
-			int selectedMenuItem = this->menu->GetSelectedMenuItem();
+			int selectedMenuItem = this->mainMenu->GetSelectedMenuItem();
 			
-			// TODO: animation or something for item and stuff...
-
 			if (selectedMenuItem == this->newGameMenuItemIndex) {
 				debug_output("Selected " << NEW_GAME_MENUITEM << " from menu");
 				this->display->SetCurrentState(new StartGameDisplayState(this->display));
@@ -140,6 +149,7 @@ void MainMenuDisplayState::KeyPressed(SDLKey key) {
 				assert(false);
 			}
 		}
+
 	}
 }
 
