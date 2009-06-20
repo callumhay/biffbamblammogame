@@ -2,14 +2,20 @@
 
 const std::string ConfigOptions::INI_FILEPATH				= "BiffBamBlammo.ini";
 
-const std::string ConfigOptions::WINDOW_HEIGHT_VAR	= "window_height";
-const std::string ConfigOptions::WINDOW_WIDTH_VAR		= "window_width";
+const std::string ConfigOptions::WINDOW_HEIGHT_VAR			= "window_height";
+const std::string ConfigOptions::WINDOW_WIDTH_VAR				= "window_width";
+const std::string ConfigOptions::WINDOW_FULLSCREEN_VAR	= "fullscreen";
 
-const int ConfigOptions::DEFAULT_WINDOW_WIDTH		= 1024;
-const int ConfigOptions::DEFAULT_WINDOW_HEIGHT	= 768;
+const int  ConfigOptions::DEFAULT_WINDOW_WIDTH				= 1024;
+const int  ConfigOptions::DEFAULT_WINDOW_HEIGHT				= 768;
+const bool ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE		= false;
 
 const int ConfigOptions::MIN_WINDOW_SIZE	= 480;
 const int ConfigOptions::MAX_WINDOW_SIZE	= 2048;
+
+ConfigOptions::ConfigOptions() : windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT),
+fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE) {
+}
 
 /**
  * Reads the configuration options from the .ini file on disk.
@@ -36,27 +42,44 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 	char skipEquals;			// temporary variable for throwing away the '='
 
 	while (inFile >> currStr) {
-
+		
+		// Window width config
 		if (currStr == ConfigOptions::WINDOW_WIDTH_VAR) {
 			inFile >> skipEquals;
 
 			// Read the window width
-			int tempWinWidth = -1;
+			int tempWinWidth = ConfigOptions::DEFAULT_WINDOW_WIDTH;
 			inFile >> tempWinWidth;
 
 			if (tempWinWidth <= ConfigOptions::MAX_WINDOW_SIZE && tempWinWidth >= ConfigOptions::MIN_WINDOW_SIZE) {
 				cfgOptions->windowWidth = tempWinWidth;
 			}
 		}
+		// Window height config
 		else if (currStr == ConfigOptions::WINDOW_HEIGHT_VAR) {
 			inFile >> skipEquals;
 
 			// Read the window width
-			int tempWinHeight = -1;
+			int tempWinHeight = ConfigOptions::DEFAULT_WINDOW_HEIGHT;
 			inFile >> tempWinHeight;
 
 			if (tempWinHeight <= ConfigOptions::MAX_WINDOW_SIZE && tempWinHeight >= ConfigOptions::MIN_WINDOW_SIZE) {
 				cfgOptions->windowHeight = tempWinHeight;
+			}
+		}
+		// Fullscreen config
+		else if (currStr == ConfigOptions::WINDOW_FULLSCREEN_VAR) {
+			inFile >> skipEquals;
+
+			// Read whether the window is fullscreen or not
+			int isFullscreen = ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE ? 1 : 0;
+			inFile >> isFullscreen;
+
+			if (isFullscreen == 0) {
+				cfgOptions->fullscreenIsOn = false;
+			}
+			else {
+				cfgOptions->fullscreenIsOn = true;
 			}
 		}
 
@@ -83,17 +106,23 @@ bool ConfigOptions::WriteConfigOptionsToFile() const {
 	// Write all the configuration values (and comments along with them):
 	// Write a description of what this file is for...
 	outFile << "// This is the Biff! Bam!! Blammo!?! game configuration file, it is used to initialize"	<< std::endl;
-	outFile << "// various game options (video, audio, etc.) at startup. To change the options"					<< std::endl; 
-	outFile << "// you may configure them manually in-game via the \"Options\" menu or manually, by"		<< std::endl;
-	outFile << "// following the guidelines below."																											<< std::endl;
+	outFile << "// various game options (video, audio, etc.) at startup. To change the options you may"	<< std::endl; 
+	outFile << "// configure them manually in-game via the \"Options\" menu or manually, by following"	<< std::endl;
+	outFile << "// the guidelines below."																																<< std::endl;
 	outFile << "// Remember to always leave spaces between '=' characters!"															<< std::endl;
 	outFile << std::endl;
 	
 	// Write the window dimensions
-	outFile << "// Window pixel dimensions." << std::endl;
+	outFile << "// Window pixel dimensions" << std::endl;
 	outFile << ConfigOptions::WINDOW_WIDTH_VAR  << " = " << this->windowWidth  << std::endl;
 	outFile << ConfigOptions::WINDOW_HEIGHT_VAR << " = " << this->windowHeight << std::endl;
-	
+	outFile << std::endl;
+
+	// Fullscreen option
+	outFile << "// Fullscreen mode (0 - off, 1 - on)" << std::endl;
+	outFile << ConfigOptions::WINDOW_FULLSCREEN_VAR << " = " << (this->fullscreenIsOn ? "1" : "0") << std::endl;
+	outFile << std::endl;
+
 	outFile.close();
 	return true;
 }

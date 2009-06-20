@@ -83,6 +83,13 @@ static bool InitSDLWindow(int windowWidth, int windowHeight, unsigned int videoF
     std::cerr << "Unable to initialize SDL: " << SDL_GetError();
     return false;
   }
+	
+	// Don't show the mouse cursor unless we're in debug mode
+#ifdef _DEBUG
+	SDL_ShowCursor(0);
+#else
+	SDL_ShowCursor(1);
+#endif
 
 	SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);
 
@@ -212,9 +219,12 @@ int main(int argc, char *argv[]) {
 
 		// Read the .ini file options (used to initialize various settings in the game)
 		initCfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
+		
+		const unsigned int fullscreenFlag = (initCfgOptions.GetIsFullscreenOn() ? SDL_FULLSCREEN : 0x00000000);
+		const unsigned int videoFlags = DEFAULT_VIDEO_FLAGS | fullscreenFlag;
 
 		// Setup the SDL window
-		if (!InitSDLWindow(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), DEFAULT_VIDEO_FLAGS)) {
+		if (!InitSDLWindow(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), videoFlags)) {
 			quitGame = true;
 			break;
 		}

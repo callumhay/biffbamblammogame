@@ -3,8 +3,16 @@
 
 // GameMenuItem Functions *******************************************
 
-GameMenuItem::GameMenuItem(const TextLabel2D& textLabel) : textLabel(textLabel) {
+GameMenuItem::GameMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameMenu* subMenu) : 
+smTextLabel(smLabel), lgTextLabel(lgLabel), subMenu(subMenu) {
+	
+	this->currLabel = &this->smTextLabel;
 	this->wiggleAnimation.SetInterpolantValue(0.0f);
+
+	// Set up the characteristics of the submenu based on this item
+	if (subMenu != NULL) {
+		subMenu->SetTopLeftCorner(lgLabel.GetTopLeftCorner() + Vector2D(lgLabel.GetLastRasterWidth(), 0.0f));
+	}
 }
 
 GameMenuItem::~GameMenuItem() {
@@ -12,11 +20,11 @@ GameMenuItem::~GameMenuItem() {
 
 // Return the height of this menu item
 unsigned int GameMenuItem::GetHeight() const {
-	return this->textLabel.GetHeight();
+	return this->currLabel->GetHeight();
 }
 
 unsigned int GameMenuItem::GetWidth() const {
-	return this->textLabel.GetLastRasterWidth();
+	return this->currLabel->GetLastRasterWidth();
 }
 
 /**
@@ -27,8 +35,8 @@ unsigned int GameMenuItem::GetWidth() const {
 void GameMenuItem::Draw(double dT, const Point2D& topLeftCorner) {
 	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
 		
-	this->textLabel.SetTopLeftCorner(topLeftCorner + Vector2D(wiggleAmount, 0.0f));
-	this->textLabel.Draw();
+	this->currLabel->SetTopLeftCorner(topLeftCorner + Vector2D(wiggleAmount, 0.0f));
+	this->currLabel->Draw();
 
 	// Animate the wiggle (if there is any animation loaded)
 	this->wiggleAnimation.Tick(dT);
@@ -67,10 +75,11 @@ void GameMenuItem::ToggleWiggleAnimationOff() {
 
 // GameMenu Functions **********************************************
 
-const float GameMenu::UP_DOWN_ARROW_PADDING = 10.0f;
+const float GameMenu::UP_DOWN_ARROW_TOP_PADDING		 = 8.0f;
+const float GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING = 16.0f;
 
 GameMenu::GameMenu(const Point2D& topLeftCorner) : menuItemPadding(1), topLeftCorner(topLeftCorner),
-selectedMenuItemIndex(-1) {
+selectedMenuItemIndex(-1), isSelectedItemActivated(false) {
 }
 
 GameMenu::~GameMenu() {
@@ -91,16 +100,19 @@ void GameMenu::DrawUpDownArrows(const Point2D& itemPos, const GameMenuItem& menu
 
 	const float ARROW_X = itemPos[0] + (menuItem.GetWidth() - ARROW_WIDTH) / 2.0f;
 
-	const float TOP_ARROW_BOTTOM_Y	= GameMenu::UP_DOWN_ARROW_PADDING + itemPos[1];
+	const float TOP_ARROW_BOTTOM_Y	= GameMenu::UP_DOWN_ARROW_TOP_PADDING + itemPos[1];
 	const float TOP_ARROW_TOP_Y			= TOP_ARROW_BOTTOM_Y + ARROW_HEIGHT;
 	
-	const float BOTTOM_ARROW_TOP_Y		= itemPos[1] - menuItem.GetHeight() - GameMenu::UP_DOWN_ARROW_PADDING;
+	const float BOTTOM_ARROW_TOP_Y		= itemPos[1] - menuItem.GetHeight() - GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING;
 	const float BOTTOM_ARROW_BOTTOM_Y	= BOTTOM_ARROW_TOP_Y - ARROW_HEIGHT;
 
 	// Make world coordinates equal window coordinates
 	Camera::PushWindowCoords();
 
-	glColor4f(0, 0, 0, 1);
+	// Draw the outlines of the arrows
+	glPolygonMode(GL_FRONT, GL_LINE);
+	glLineWidth(2.0f);
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 	glBegin(GL_TRIANGLES);
 	
 	// Top arrow
@@ -115,6 +127,24 @@ void GameMenu::DrawUpDownArrows(const Point2D& itemPos, const GameMenuItem& menu
 
 	glEnd();
 
+	// Fill in the arrows
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glColor4f(1.0f, 0.6f, 0.0f, 1.0f);
+	glBegin(GL_TRIANGLES);
+	
+	// Top arrow
+	glVertex2f(ARROW_X, TOP_ARROW_BOTTOM_Y);
+	glVertex2f(ARROW_X + ARROW_WIDTH, TOP_ARROW_BOTTOM_Y);
+	glVertex2f(ARROW_X + ARROW_WIDTH / 2.0f, TOP_ARROW_TOP_Y);
+
+	// Bottom arrow
+	glVertex2f(ARROW_X + ARROW_WIDTH / 2.0f, BOTTOM_ARROW_BOTTOM_Y);
+	glVertex2f(ARROW_X + ARROW_WIDTH, BOTTOM_ARROW_TOP_Y);
+	glVertex2f(ARROW_X, BOTTOM_ARROW_TOP_Y);
+
+	glEnd();
+
+
 	Camera::PopWindowCoords();
 }
 
@@ -128,18 +158,88 @@ void GameMenu::Draw(double dT) {
 	for (size_t i = 0; i < this->menuItems.size(); i++) {
 		GameMenuItem* currItem = this->menuItems[i];
 		
+		// Check to see if we are iterating on the selected/highlighted menu item
 		if (i == this->selectedMenuItemIndex) {
-			currItem->SetTextColour(this->highlightColour);
-			this->DrawUpDownArrows(currPos, *currItem);
+
+			// Check to see if the highlighted item is activated
+			if (this->isSelectedItemActivated) {
+				// Since the item is activated we need to check for a submenu,
+				// if the item has a submenu then we draw it (this can lead to a nest of menu/submenus)
+				GameMenu* subMenu = currItem->GetSubMenu();
+				if (subMenu != NULL) {
+					subMenu->Draw(dT);
+				}
+			}
+			else {
+				// The item has not been activated
+				this->DrawUpDownArrows(currPos, *currItem);
+			}
 		}
 		else {
 			currItem->SetTextColour(this->idleColour);
 		}
 		
 		currItem->Draw(dT, currPos);
-		currPos = currPos - Vector2D(0, currItem->GetHeight() + this->menuItemPadding + 2 * GameMenu::UP_DOWN_ARROW_PADDING);
+		currPos = currPos - Vector2D(0, currItem->GetHeight() + this->menuItemPadding + GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING + GameMenu::UP_DOWN_ARROW_TOP_PADDING);
 	}
 
+}
+
+/**
+ * Sets the currently highlighted/selected menu item in this
+ * game menu. This will change its properties to make it obvious that
+ * it has been highlighted.
+ */
+void GameMenu::SetSelectedMenuItem(int index) {
+	assert(index >= 0 && index < static_cast<int>(this->menuItems.size()));
+	
+	// Deselect the previous selection if necessary
+	if (this->selectedMenuItemIndex >= 0 && this->selectedMenuItemIndex < static_cast<int>(this->menuItems.size())) {
+		this->menuItems[this->selectedMenuItemIndex]->ToggleWiggleAnimationOff();
+		this->menuItems[this->selectedMenuItemIndex]->SetSize(false);
+	}
+
+	// Select the new selection
+	this->selectedMenuItemIndex = index;
+	this->menuItems[index]->ToggleWiggleAnimationOn(5.0f, 0.10f);
+	this->menuItems[index]->SetSize(true);
+	this->menuItems[index]->SetTextColour(this->highlightColour);
+}
+
+/**
+ * Activate the currently selected menu item. This will cause a submenu (if it has one)
+ * to appear and change the properties of the previous menu to reflect the change.
+ */
+void GameMenu::ActivateSelectedMenuItem() {
+	this->isSelectedItemActivated = true;
+	this->menuItems[this->selectedMenuItemIndex]->SetTextColour(this->activateColour);
+	
+	// Go through all the menu items except the selected one and grey them out
+	for (size_t i = 0; i < this->menuItems.size(); i++) {	
+		if (i == this->selectedMenuItemIndex) { continue; }
+		this->menuItems[i]->SetTextColour(this->greyedOutColour);
+	}
+}
+
+/**
+ * Capture input from the keyboard for a key pressed event
+ * and navigate or change the menu based on the given key input.
+ */
+void GameMenu::KeyPressed(SDLKey key) {
+
+	// Handle the input by changing the menu according to the key pressed
+	switch(key) {
+		case SDLK_DOWN:
+			this->DownAction();
+			break;
+
+		case SDLK_UP:
+			this->UpAction();
+			break;
+	
+		default:
+			break;
+	}
 }
 
 /**

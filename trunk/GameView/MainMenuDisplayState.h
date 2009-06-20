@@ -39,7 +39,10 @@ private:
 	static const unsigned int MENU_ITEM_PADDING = 15;
 
 	TextLabel2D* titleLabel;
-	GameMenu* menu;
+	GameMenu* mainMenu;
+	GameMenu* optionsSubMenu;
+
+
 	void InitializeMenu();
 
 public:

@@ -43,7 +43,7 @@ public:
 	virtual void Draw(int screenWidth, int screenHeight, double dT);
 
 	void Activate();
-	
+
 	/**
    * Deactivates this effect completely.
 	 */

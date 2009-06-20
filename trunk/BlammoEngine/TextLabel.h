@@ -53,6 +53,9 @@ public:
 	void SetTopLeftCorner(const Point2D& p) {
 		this->topLeftCorner = p;
 	}
+	Point2D GetTopLeftCorner() const {
+		return this->topLeftCorner;
+	}
 
 	// Obtain the height of this label
 	unsigned int GetHeight() const {
