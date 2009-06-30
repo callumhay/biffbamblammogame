@@ -1,3 +1,14 @@
+/**
+ * BallInPlayState.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "BallInPlayState.h"
 #include "BallOnPaddleState.h"
 #include "GameCompleteState.h"
@@ -104,6 +115,16 @@ void BallInPlayState::Tick(double seconds) {
 		// Check for ball collision with the player's paddle
 		didCollideWithPaddle = paddle->CollisionCheck(currBall->GetBounds(), n, d);
 		if (didCollideWithPaddle) {
+			
+			// If the sticky paddle power-up is activated then the ball will simply be attached to
+			// the player paddle (if there are no balls already attached)
+			if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+				bool couldAttach = this->gameModel->GetPlayerPaddle()->AttachBall(currBall);
+				if (couldAttach) {
+					continue;
+				}
+			}
+
 			// Do ball-paddle collision
 			this->DoBallCollision(*currBall, n, d);
 			// Tell the model that a ball collision occurred with the paddle
@@ -172,12 +193,14 @@ void BallInPlayState::Tick(double seconds) {
 			this->DoBallCollision(*currBall, n, d);
 		}
 
-		// Ball-ball collisions - doesn't work nicely... collision issues
+		// Ball-ball collisions
 		std::list<GameBall*>::iterator nextIter = iter;
 		nextIter++;
 		for (; nextIter != gameBalls.end(); nextIter++) {
 			GameBall* otherBall = *nextIter;
 			assert(currBall != otherBall);
+
+			// Make sure to check if both balls collide with each other
 			if (currBall->CollisionCheck(*otherBall)) {
 				this->DoBallCollision(*currBall, *otherBall);
 			}
@@ -365,25 +388,11 @@ void BallInPlayState::DoItemCollision() {
 // d is the distance from the center of the ball to the line that was collided with
 // when d is negative the ball is inside the line, when positive it is outside
 void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
-
 	// Position the ball so that it is against the collision line, exactly
-	static const float QUARTER_PIECE_DIST = LevelPiece::HALF_PIECE_HEIGHT / 2.0f;
-	if (fabs(d) >= QUARTER_PIECE_DIST) {
-		int signDist = NumberFuncs::SignOf(d);
-		if (signDist == -1) {
-			// The ball is on the other side of the collision line, fix its position so that
-			// it is exactly against the line
-			b.SetCenterPosition(b.GetBounds().Center() + (-d + (b.GetBounds().Radius() + EPSILON)) * n);
-		}
-		else {
-			// The ball is still on the out facing normal side of the line, but fix its position so that
-			// it is exactly against the line
-			b.SetCenterPosition(b.GetBounds().Center() + (b.GetBounds().Radius() + EPSILON - d) * n);
-		}
-	}
+	b.SetCenterPosition(b.GetBounds().Center() + (b.GetBounds().Radius() + EPSILON - d) * -b.GetDirection());
 
 	// Figure out the reflection vector and speed
-	Vector2D reflVecHat					= Vector2D::Normalize(Reflect(b.GetVelocity(), n));
+	Vector2D reflVecHat					= Vector2D::Normalize(Reflect(b.GetDirection(), n));
 	GameBall::BallSpeed reflSpd	= b.GetSpeed();
 	
 	// This should NEVER happen
@@ -459,16 +468,25 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	ball1CorrectionVec.Normalize();
 	Vector2D ball2CorrectionVec = -ball1CorrectionVec;
 
-	Vector2D ball1NewVel = Vector2D::Normalize(Reflect(ball1.GetDirection(), ball1CorrectionVec));
-	Vector2D ball2NewVel = Vector2D::Normalize(Reflect(ball2.GetDirection(), ball2CorrectionVec));
-	ball1.SetVelocity(ball1.GetSpeed(), ball1NewVel);
-	ball2.SetVelocity(ball2.GetSpeed(), ball2NewVel);
-
-	// Set the correct center positions so that they still remain at the current time, but
-	// it is as if the balls had originally collided
+	Vector2D reflectBall1Vec = Reflect(ball1.GetDirection(), ball1CorrectionVec);
+	Vector2D reflectBall2Vec = Reflect(ball2.GetDirection(), ball2CorrectionVec);
 	float positiveT = -t;
-	ball1.SetCenterPosition(ball1CollisionCenter + positiveT * ball1NewVel);
-	ball2.SetCenterPosition(ball2CollisionCenter + positiveT * ball2NewVel);
+
+	// NOTE: we need to make sure the new velocities are not zero
+
+	// Set the new velocities and the correct center positions so that they 
+	// still remain at the current time, but it is as if the balls had originally collided
+	if (reflectBall1Vec != Vector2D(0, 0)) {
+		Vector2D ball1NewVel = Vector2D::Normalize(reflectBall1Vec);
+		ball1.SetVelocity(ball1.GetSpeed(), ball1NewVel);
+		ball1.SetCenterPosition(ball1CollisionCenter + positiveT * ball1NewVel);
+	}
+
+	if (reflectBall2Vec != Vector2D(0, 0)) {
+		Vector2D ball2NewVel = Vector2D::Normalize(reflectBall2Vec);
+		ball2.SetVelocity(ball2.GetSpeed(), ball2NewVel);
+		ball2.SetCenterPosition(ball2CollisionCenter + positiveT * ball2NewVel);
+	}	
 }
 
 

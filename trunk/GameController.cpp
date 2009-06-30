@@ -16,6 +16,7 @@
 #include "GameModel/BallSafetyNetItem.h"
 #include "GameModel/OneUpItem.h"
 #include "GameModel/PoisonPaddleItem.h"
+#include "GameModel/StickyPaddleItem.h"
 
 #include "BlammoEngine/Camera.h"
 
@@ -103,6 +104,9 @@ void GameController::KeyDown(SDLKey key) {
 	}
 	else if (key == SDLK_x) {
 		this->model->DropItem(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME);
+	}
+	else if (key == SDLK_y) {
+		this->model->DropItem(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME);
 	}
 	//else if (key == SDLK_6) {
 	//	// Highlight threshold for bloom

@@ -1,3 +1,14 @@
+/**
+ * GameMain.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "BlammoEngine/FBObj.h"
 #include "BlammoEngine/Noise.h"
 #include "BlammoEngine/GeometryMaker.h"
@@ -35,9 +46,11 @@ static void ResizeWindow(int w, int h) {
 
 static void KeyDownEventHandler(SDL_keysym* keysym) {
 	switch (keysym->sym) {
+	/*
 	case SDLK_ESCAPE:
 		display->QuitGame();
 		break;
+	*/
 	default:
 		controller->KeyDown(keysym->sym);
 		break;
@@ -86,9 +99,9 @@ static bool InitSDLWindow(int windowWidth, int windowHeight, unsigned int videoF
 	
 	// Don't show the mouse cursor unless we're in debug mode
 #ifdef _DEBUG
-	SDL_ShowCursor(0);
-#else
 	SDL_ShowCursor(1);
+#else
+	SDL_ShowCursor(0);
 #endif
 
 	SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);

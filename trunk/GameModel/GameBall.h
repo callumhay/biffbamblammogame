@@ -65,7 +65,7 @@ public:
 	 */
 	bool CollisionCheck(const GameBall& otherBall) {
 		// If the collisions are disabled then we only return false
-		if (ballCollisionsDisabledTimer > EPSILON) {
+		if (this->ballCollisionsDisabledTimer > EPSILON || otherBall.ballCollisionsDisabledTimer > EPSILON) {
 			return false;
 		}
 
@@ -82,6 +82,13 @@ public:
 	void SetBallCollisionsDisabled(double durationInSecs) {
 		assert(durationInSecs > EPSILON);
 		this->ballCollisionsDisabledTimer = durationInSecs;
+	}
+	void SetBallCollisionsDisabled() {
+		// Set the ball collisions to be disabled forever (until they are re-enabled)
+		this->ballCollisionsDisabledTimer = DBL_MAX;
+	}
+	void SetBallCollisionsEnabled() {
+		this->ballCollisionsDisabledTimer = 0.0;
 	}
 
 	// Set the center position of the ball

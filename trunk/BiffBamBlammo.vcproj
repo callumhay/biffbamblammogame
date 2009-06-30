@@ -1297,7 +1297,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\resources\icons\BiffBamBlammoIcon.bmp"
+			RelativePath=".\BiffBamBlammoIcon.bmp"
 			>
 		</File>
 	</Files>

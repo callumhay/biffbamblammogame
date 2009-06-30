@@ -1,3 +1,14 @@
+/**
+ * PlayerPaddle.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "PlayerPaddle.h"
 #include "GameModel.h"
 #include "GameEventManager.h"
@@ -115,8 +126,37 @@ void PlayerPaddle::SetPaddleSize(PlayerPaddle::PaddleSize size) {
 void PlayerPaddle::FireAttachedBall() {
 	assert(this->attachedBall != NULL);
 
-	// TODO : Set the ball's new trajectory in order for it to leave the paddle
+	// Set the ball's new trajectory in order for it to leave the paddle
+	Vector2D ballReleaseDir = GameBall::STD_INIT_VEL_DIR;
 
+	// Get the paddle's avg. velocity
+	Vector2D avgPaddleVel = this->GetAvgVelocity();
+
+	// Check to see if the paddle is moving, if not just use a random angle
+	if (fabs(avgPaddleVel[0]) <= EPSILON) {
+		// Add some randomness to the velocity by deviating a straight-up shot by some random angle
+		float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::STILL_RAND_RELEASE_DEG;		
+		ballReleaseDir = Rotate(randomAngleInDegs, ballReleaseDir);
+	}
+	else {
+		// The paddle appears to be moving, modify the ball's release velocity
+		// to reflect some of this movement
+		float multiplier = PlayerPaddle::DEFAULT_SPEED / static_cast<float>(GameBall::NormalSpeed);
+		Vector2D newBallDir = Vector2D::Normalize(ballReleaseDir + multiplier * avgPaddleVel);
+		
+		// and, of course, add some randomness...
+		float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::MOVING_RAND_RELEASE_DEG;		
+		ballReleaseDir = Rotate(randomAngleInDegs, newBallDir);
+	}
+
+	ballReleaseDir.Normalize();
+
+	// Set the ball velocity (tragectory it will leave the paddle on) and re-enable its collisions
+	this->attachedBall->SetVelocity(GameBall::NormalSpeed, ballReleaseDir);
+	this->attachedBall->SetBallCollisionsEnabled();
+
+	// EVENT: Ball Shot
+	GameEventManager::Instance()->ActionBallShot(*this->attachedBall);
 
 	// Remove the ball from the paddle
 	this->attachedBall = NULL;
@@ -181,7 +221,11 @@ void PlayerPaddle::Tick(double seconds) {
 	}
 
 	// If there is a ball attached then we need to move it around with the paddle
-	// TODO
+	if (this->attachedBall != NULL) {
+		Vector2D disp = Vector2D(0.0f, this->attachedBall->GetBounds().Radius() + this->GetHalfHeight() + 0.1f);
+		Point2D ballLoc = this->GetCenterPosition() + disp;
+		this->attachedBall->SetCenterPosition(ballLoc);
+	}
 }
 
 /**
@@ -191,14 +235,10 @@ void PlayerPaddle::Tick(double seconds) {
 void PlayerPaddle::Shoot(GameModel* gameModel) {
 	// Check for the various paddle types and react appropriately for each
 	
-	// Sticky paddle ball shot takes priority (we don't fire lasers and other power-ups simulataneously
-	// with the ball from the sticky paddle)...
-	if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
-		// Sticky paddle means that if there's a ball attached to the paddle then we release it and exit
-		if (this->HasBallAttached()) {
-			this->FireAttachedBall();
-			return;
-		}
+	// If there's a ball attached to the paddle then we release it and exit
+	if (this->HasBallAttached()) {
+		this->FireAttachedBall();
+		return;
 	}
 	
 	// Check for laser paddle
@@ -229,7 +269,25 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 		return false;
 	}
 
+	// Attach the ball
 	this->attachedBall = ball;
+
+	// Make sure the position of the ball is sitting on-top of the paddle
+	Vector2D normal;
+	float distance;
+	bool onPaddle = this->CollisionCheck(this->attachedBall->GetBounds(), normal, distance);
+	if (onPaddle) {
+		// Position the ball so that it is against the collision line, exactly
+		Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
+		this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() + EPSILON - distance) * -this->attachedBall->GetDirection());
+	}
+
+	// Remove the ball's velocity
+	this->attachedBall->SetVelocity(GameBall::ZeroSpeed, Vector2D(0, 0));
+
+	// Disable collisions for the ball (reenable them when the ball is detached)
+	this->attachedBall->SetBallCollisionsDisabled();
+
 	return true;
 }
 
