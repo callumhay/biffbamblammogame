@@ -41,6 +41,7 @@ private:
 	const std::string TEXTURE_ITEM_BALLSAFETYNET;
 	const std::string TEXTURE_ITEM_1UP;
 	const std::string TEXTURE_ITEM_POISON;
+	const std::string TEXTURE_ITEM_STICKYPADDLE;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -51,6 +52,7 @@ private:
 	const std::string TEXTURE_ITEM_TIMER_BLACKOUT;
 	const std::string TEXTURE_ITEM_TIMER_UPSIDEDOWN;
 	const std::string TEXTURE_ITEM_TIMER_POISON;
+	const std::string TEXTURE_ITEM_TIMER_STICKYPADDLE;
 
 	const std::string TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
@@ -60,6 +62,7 @@ private:
 	const std::string TEXTURE_ITEM_TIMER_FILLER_BLACKOUT;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_POISON;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE;
 
 public:
 	
