@@ -70,9 +70,13 @@ inline std::ostream& operator <<(std::ostream& os, const Vector2D& v) {
   return os << "v<" << v[0] << "," << v[1] << ">";
 }
 
-inline Vector2D operator *(float s, const Vector2D& v)
-{
+inline Vector2D operator *(float s, const Vector2D& v) {
   return Vector2D(s*v[0], s*v[1]);
+}
+
+inline Vector2D operator /(const Vector2D& v, float d) {
+	assert(d != 0);
+	return Vector2D(v[0]/d, v[1]/d);
 }
 
 inline Vector2D operator +(const Vector2D& a, const Vector2D& b) {

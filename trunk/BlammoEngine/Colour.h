@@ -81,6 +81,24 @@ public:
     return *this;
   }
 
+	float& operator[](size_t idx) {
+		assert(idx < 4);
+		if (idx == 3) {
+			return this->alpha;
+		}
+
+    return this->colours[ idx ];
+  }
+
+  float operator[](size_t idx) const {
+		assert(idx < 4);
+		if (idx == 3) {
+			return this->alpha;
+		}
+
+    return this->colours[ idx ];
+  }
+
 	float A() const {
 		return this->alpha;
 	}

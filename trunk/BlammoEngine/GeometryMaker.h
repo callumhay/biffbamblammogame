@@ -2,6 +2,7 @@
 #define __GEOMETRYMAKER_H__
 
 #include "BasicIncludes.h"
+#include "Colour.h"
 #include "Camera.h"
 
 class PolygonGroup;
@@ -59,7 +60,7 @@ public:
 	inline GLuint GetSphereDL() const { return this->sphereDL; }
 	static GLuint CreateSphereDL(float horizRadius, float vertRadius, unsigned int stacks, unsigned int slices);
 
-	inline void DrawFullScreenQuad(int width, int height, float depth = 0.0f) {
+	inline void DrawFullScreenQuad(int width, int height, float depth = 0.0f, const ColourRGBA& colour = ColourRGBA(1,1,1,1)) {
 		glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_TRANSFORM_BIT);
 		Camera::PushWindowCoords();
 
@@ -73,7 +74,7 @@ public:
 		glPushMatrix();
 		glLoadIdentity();
 
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glColor4f(colour.R(), colour.G(), colour.B(), colour.A());
 		glBegin(GL_QUADS);
 				glTexCoord2i(0, 0); glVertex3f(0, 0, depth);
 				glTexCoord2i(1, 0); glVertex3f(width, 0, depth);
@@ -88,5 +89,6 @@ public:
 
 		debug_opengl_state();
 	};
+
 };
 #endif

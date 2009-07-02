@@ -41,7 +41,12 @@ DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), titleLabel(NULL),
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), changeToPlayGameState(false) {
 	this->mainMenuEventHandler		= new MainMenuEventHandler(this);
 	this->optionsMenuEventHandler = new OptionsSubMenuEventHandler(this);
+	
 	this->InitializeMainMenu();
+
+	// Setup the fade-in animation
+	this->fadeAnimation.SetLerp(0.0, 3.0, 1.0f, 0.0f);
+	this->fadeAnimation.SetRepeat(false);
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
@@ -171,7 +176,6 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	// Render the background
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	// TODO
 
 	// Render the title
 	unsigned int titleHeight = this->display->GetDisplayHeight() - TITLE_Y_INDENT;
@@ -184,7 +188,16 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->mainMenu->Draw(dT);
 	//this->mainMenu->DebugDraw();
 
+	// Fade-in/out overlay
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GeometryMaker::GetInstance()->DrawFullScreenQuad(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), 1.0f, 
+																									 ColourRGBA(1, 1, 1, this->fadeAnimation.GetInterpolantValue()));
+	glDisable(GL_BLEND);
+
 	debug_opengl_state();
+
+	this->fadeAnimation.Tick(dT);
 }
 
 /**

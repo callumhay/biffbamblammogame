@@ -19,7 +19,7 @@ class TextLabel2D {
 
 private:
 	float lastRasterWidth;
-	Colour colour;
+	ColourRGBA colour;
 	DropShadow dropShadow;
 	Point2D topLeftCorner;
 	const TextureFontSet* font;
@@ -36,8 +36,12 @@ public:
 	}
 	// Set the text colour for this label
 	void SetColour(const Colour& c) {
+		this->colour = ColourRGBA(c, 1.0f);
+	}
+	void SetColour(const ColourRGBA& c) {
 		this->colour = c;
 	}
+
 	// Set drop shadow for the label - the colour and amount it drops
 	// from the text as a percentage of the text height
 	void SetDropShadow(const Colour& c, float percentAmt) {
@@ -70,6 +74,9 @@ public:
 	}
 	DropShadow GetDropShadow() const {
 		return this->dropShadow;
+	}
+	ColourRGBA GetColour() const {
+		return this->colour;
 	}
 
 	void Draw();
