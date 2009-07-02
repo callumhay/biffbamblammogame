@@ -19,6 +19,8 @@
 #include "DisplayState.h"
 
 class TextLabel2D;
+class FBObj;
+class CgFxBloom;
 
 /**
  * State for displaying the main, out of game menu. This is the first 
@@ -60,6 +62,10 @@ private:
 	static const unsigned int TITLE_Y_INDENT = 30;
 	static const unsigned int MENU_ITEM_PADDING = 15;
 
+	CgFxBloom* bloomEffect;
+	FBObj* menuFBO;
+
+
 	TextLabel2D* titleLabel;
 	GameMenu* mainMenu;
 	GameSubMenu* optionsSubMenu;
@@ -70,6 +76,8 @@ private:
 
 	void InitializeMainMenu();
 	void InitializeOptionsSubMenu();
+
+	void SetupBloomEffect();
 
 public:
 	MainMenuDisplayState(GameDisplay* display);

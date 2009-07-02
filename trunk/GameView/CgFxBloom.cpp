@@ -104,8 +104,8 @@ void CgFxBloom::Draw(int screenWidth, int screenHeight, double dT) {
 	// render it into a temporary FBO - this will grab all the very bright parts
 	// of the screen
 	this->bloomFilterFBO->BindFBObj();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	CGpass currPass = cgGetFirstPass(this->techniques[CgFxBloom::BLOOM_FILTER_TECHNIQUE_NAME]);
 	cgSetPassState(currPass);

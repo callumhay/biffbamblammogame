@@ -75,9 +75,18 @@ public:
  * that can be scrolled though and selected.
  */
 class SelectionListMenuItem : public GameMenuItem {
+private:
+	static const int NO_SELECTION = -1;
+
+	int selectedIndex;												// Index in the list that's currently selected 
+	std::vector<std::string> selectionList;		// List of items that can be selected
+	std::string baseLabelStr;									// The label of this item (this text always appears on the item)
+
 public:
-	SelectionListMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel);
+	SelectionListMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, const std::vector<std::string>& items);
 	virtual ~SelectionListMenuItem();
+
+	void SetSelectionList(const std::vector<std::string>& items);
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner);
 	virtual void KeyPressed(SDLKey key);
