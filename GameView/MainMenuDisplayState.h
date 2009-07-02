@@ -13,6 +13,7 @@
 #define __MAINMENUDISPLAYSTATE_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Animation.h"
 
 #include "GameMenu.h"
 #include "DisplayState.h"
@@ -62,6 +63,8 @@ private:
 	TextLabel2D* titleLabel;
 	GameMenu* mainMenu;
 	GameSubMenu* optionsSubMenu;
+
+	AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value
 
 	bool changeToPlayGameState;
 

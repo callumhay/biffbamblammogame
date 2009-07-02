@@ -17,88 +17,24 @@
 
 #include "../ResourceManager.h"
 
-const float GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE	= 8.0f;
-const float GameMenuItem::MENU_ITEM_WOBBLE_AMT_SMALL	= 4.0f;
-const float GameMenuItem::MENU_ITEM_WOBBLE_FREQ				= 0.1f;
-const float GameMenuItem::SUB_MENU_PADDING						= 15.0f;
-
-// GameMenuItem Functions *******************************************
-
-GameMenuItem::GameMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameMenu* subMenu) : 
-smTextLabel(smLabel), lgTextLabel(lgLabel), subMenu(subMenu) {
-	
-	this->currLabel = &this->smTextLabel;
-	this->wiggleAnimation.SetInterpolantValue(0.0f);
-}
-
-GameMenuItem::~GameMenuItem() {
-}
-
-// Return the height of this menu item
-unsigned int GameMenuItem::GetHeight() const {
-	return this->currLabel->GetHeight();
-}
-
-unsigned int GameMenuItem::GetWidth() const {
-	return this->currLabel->GetLastRasterWidth();
-}
-
-/**
- * Draw this menu item on the screen with the given coordinate
- * point specifying the top-left corner location where it will
- * be drawn, in window coordinates.
- */
-void GameMenuItem::Draw(double dT, const Point2D& topLeftCorner) {
-	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
-
-	this->currLabel->SetTopLeftCorner(topLeftCorner + Vector2D(wiggleAmount, 0.0f));
-	this->currLabel->Draw();
-
-	// Animate the wiggle and/or pulse (if there are any animations loaded)
-	this->wiggleAnimation.Tick(dT);
-
-	if (subMenu != NULL) {
-		const float PAD_AMT = GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE + GameMenuItem::SUB_MENU_PADDING + GameSubMenu::BACKGROUND_PADDING + 2*GameSubMenu::HALF_ARROW_WIDTH;
-		subMenu->SetTopLeftCorner(topLeftCorner + Vector2D(this->lgTextLabel.GetLastRasterWidth() + PAD_AMT, 0.0f));
-	}
-}
-
-/** 
- * Toggles the wiggle animation for this menu item on with the
- * given amplitude and frequency of wiggle given.
- */
-void GameMenuItem::ToggleWiggleAnimationOn(float amplitude, float frequency) {
-
-	std::vector<float> wiggleValues;
-	wiggleValues.reserve(5);
-	wiggleValues.push_back(0.0f);
-	wiggleValues.push_back(amplitude);
-	wiggleValues.push_back(0.0f);
-	wiggleValues.push_back(-amplitude);
-	wiggleValues.push_back(0.0f);
-
-	std::vector<double> timeValues;
-	timeValues.reserve(5);
-	timeValues.push_back(0.0);
-	timeValues.push_back(frequency);
-	timeValues.push_back(2*frequency);
-	timeValues.push_back(3*frequency);
-	timeValues.push_back(4*frequency);
-
-	this->wiggleAnimation.SetLerp(timeValues, wiggleValues);
-	this->wiggleAnimation.SetRepeat(true);
-}
-
-void GameMenuItem::ToggleWiggleAnimationOff() {
-	this->wiggleAnimation.ClearLerp();
-	this->wiggleAnimation.SetRepeat(false);
-	this->wiggleAnimation.SetInterpolantValue(0.0f);
-}
-
 // GameMenu Functions **********************************************
 
 const float GameMenu::UP_DOWN_ARROW_TOP_PADDING		 = 8.0f;
 const float GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING = 16.0f;
+
+const Colour GameMenu::RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS] = {
+	Colour(0.4375f, 0.5f, 0.5647f),							// slate greyish-blue
+	Colour(0.2745098f, 0.5098039f, 0.70588f),		// steel blue
+	Colour(0.28235f, 0.2392f, 0.545098f),				// slate purple-blue
+	Colour(0.51372549f, 0.4352941f, 1.0f),			// slate purple
+	Colour(0.8588235f, 0.439215686f, 0.57647f),	// pale violet
+	Colour(1.0f, 0.75686f, 0.75686f),						// rosy brown 
+	Colour(0.7215686f, 0.52549f, 0.043f),				// goldenrod
+	Colour(0.4196f, 0.5568627f, 0.1372549f),		// olive
+	Colour(0.4f, 0.8039215f, 0.666667f),				// deep aquamarine
+	Colour(0.3725f, 0.6196078f, 0.62745098f)		// cadet (olive-) blue
+};
+
 
 GameMenu::GameMenu() : menuItemPadding(1), topLeftCorner(Point2D(0,0)),
 selectedMenuItemIndex(-1), isSelectedItemActivated(false) {
@@ -189,7 +125,7 @@ void GameMenu::Draw(double dT) {
 	GameMenu* subMenu = NULL;
 
 	// Draw the background of the menu
-	this->DrawMenuBackground();
+	this->DrawMenuBackground(dT);
 
 	// Draw the menu items
 	for (size_t i = 0; i < this->menuItems.size(); i++) {
@@ -213,7 +149,7 @@ void GameMenu::Draw(double dT) {
 			currItem->SetTextColour(this->idleColour);
 		}
 		
-		currItem->Draw(dT, currPos);
+		this->DrawMenuItem(dT, currPos, *currItem);
 		currPos = currPos - Vector2D(0, currItem->GetHeight() + this->GetMenuItemPadding());
 	}
 	
@@ -250,8 +186,13 @@ void GameMenu::SetSelectedMenuItem(int index) {
  */
 void GameMenu::ActivateSelectedMenuItem() {
 	this->isSelectedItemActivated = true;
-	this->menuItems[this->selectedMenuItemIndex]->SetTextColour(this->activateColour);
-	this->menuItems[this->selectedMenuItemIndex]->ToggleWiggleAnimationOff();
+	GameMenuItem* activatedItem = this->menuItems[this->selectedMenuItemIndex];
+	activatedItem->SetTextColour(this->activateColour);
+	activatedItem->ToggleWiggleAnimationOff();
+	
+	if (activatedItem->GetSubMenu() != NULL) {
+		activatedItem->GetSubMenu()->AnimateMenuOpen();
+	}
 	
 	// Go through all the menu items except the selected one and grey them out
 	for (size_t i = 0; i < this->menuItems.size(); i++) {	
@@ -285,9 +226,13 @@ void GameMenu::KeyPressed(SDLKey key) {
 	// to pass the key pressed event
 	GameMenu* currentMenu = this;
 	if (this->isSelectedItemActivated) {
-		currentMenu = this->menuItems[this->selectedMenuItemIndex]->GetSubMenu();
+		GameMenuItem* activatedMenuItem = this->menuItems[this->selectedMenuItemIndex];
+		currentMenu = activatedMenuItem->GetSubMenu();
+		
 		if (currentMenu == NULL) {
-			currentMenu = this;
+			// In this case we are dealing with a menu item that takes input,
+			// give that menu item the input
+			activatedMenuItem->KeyPressed(key);
 		}
 	}
 	
@@ -394,6 +339,33 @@ GameSubMenu::GameSubMenu() : GameMenu(), arrowTex(NULL), menuWidth(0.0f), menuHe
 
 	this->arrowBounceAnim.SetRepeat(true);
 	this->arrowSquishAnim.SetRepeat(true);
+
+	// Set the background open animations	
+	std::vector<double> openTimeVals;
+	openTimeVals.reserve(3);
+	openTimeVals.push_back(0.0);
+	openTimeVals.push_back(0.25);
+	openTimeVals.push_back(0.4);
+
+	std::vector<Vector2D> bgScaleAmts;
+	bgScaleAmts.reserve(3);
+	bgScaleAmts.push_back(Vector2D(EPSILON, EPSILON));
+	bgScaleAmts.push_back(Vector2D(1, 1));
+	bgScaleAmts.push_back(Vector2D(1, 1));
+
+	std::vector<float> itemFadeAmts;
+	itemFadeAmts.reserve(3);
+	itemFadeAmts.push_back(0.0f);
+	itemFadeAmts.push_back(0.0f);
+	itemFadeAmts.push_back(1.0f);
+
+	this->menuBGOpenAnim.SetLerp(openTimeVals, bgScaleAmts);
+	this->menuItemOpenFadeIn.SetLerp(openTimeVals, itemFadeAmts);
+	this->menuBGOpenAnim.SetRepeat(false);
+	this->menuItemOpenFadeIn.SetRepeat(false);
+
+	const int randColourIdx = Randomizer::GetInstance()->RandomUnsignedInt() % GameMenu::NUM_RAND_COLOURS;
+	this->randBGColour = GameMenu::RAND_COLOUR_LIST[randColourIdx];
 }
 
 GameSubMenu::~GameSubMenu() {
@@ -413,11 +385,17 @@ float GameSubMenu::GetMenuItemPadding() const {
 /**
  * Draw an outline around the menu with a colourful plain background.
  */
-void GameSubMenu::DrawMenuBackground() {
-	const Point2D bgTopLeftCorner = this->topLeftCorner + Vector2D(-BACKGROUND_PADDING, BACKGROUND_PADDING);
+void GameSubMenu::DrawMenuBackground(double dT) {
 
-	const float currMenuWidth = this->menuWidth + 2 * BACKGROUND_PADDING + 2 * GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE;
-	const float currMenuHeight = this->menuHeight + 2 * BACKGROUND_PADDING;
+	const Vector2D openAnimScale = this->menuBGOpenAnim.GetInterpolantValue();
+
+	const float MENU_WIDTH = (this->menuWidth + 2 * BACKGROUND_PADDING + 2 * GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE) * openAnimScale[0];
+	const float MENU_HEIGHT = (this->menuHeight + 2 * BACKGROUND_PADDING) * openAnimScale[1];
+	
+	const float MENU_WIDTH_DIV2		= MENU_WIDTH / 2.0f;
+	const float MENU_HEIGHT_DIV2	= MENU_HEIGHT / 2.0f;
+		
+	const Point2D bgTopLeftCorner = this->topLeftCorner + Vector2D(-BACKGROUND_PADDING + MENU_WIDTH_DIV2, BACKGROUND_PADDING - MENU_HEIGHT_DIV2);
 
 	// Make world coordinates equal window coordinates
 	Camera::PushWindowCoords();
@@ -430,25 +408,32 @@ void GameSubMenu::DrawMenuBackground() {
 	glLineWidth(3.0f);
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(bgTopLeftCorner[0], bgTopLeftCorner[1], -0.5f);
+
 	glBegin(GL_QUADS);
-		glVertex3f(bgTopLeftCorner[0], bgTopLeftCorner[1], -0.5f);
-		glVertex3f(bgTopLeftCorner[0], bgTopLeftCorner[1] - currMenuHeight, -0.5f);
-		glVertex3f(bgTopLeftCorner[0] + currMenuWidth, bgTopLeftCorner[1] - currMenuHeight, -0.5f);
-		glVertex3f(bgTopLeftCorner[0] + currMenuWidth, bgTopLeftCorner[1], -0.5f);
+		glVertex2f(-MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
+		glVertex2f(-MENU_WIDTH_DIV2, -MENU_HEIGHT_DIV2);
+		glVertex2f(MENU_WIDTH_DIV2, -MENU_HEIGHT_DIV2);
+		glVertex2f(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
 	glEnd();
 
 	// Fill in the background
 	glPolygonMode(GL_FRONT, GL_FILL);
-	glColor4f(1.0f, 0.6f, 0.0f, 1.0f); // TODO: pick another colour...
+	glColor4f(this->randBGColour.R(), this->randBGColour.G(), this->randBGColour.B(), 1.0f);
 
 	glBegin(GL_QUADS);
-		glVertex3f(bgTopLeftCorner[0], bgTopLeftCorner[1], -0.5f);
-		glVertex3f(bgTopLeftCorner[0], bgTopLeftCorner[1] - currMenuHeight, -0.5f);
-		glVertex3f(bgTopLeftCorner[0] + currMenuWidth, bgTopLeftCorner[1] - currMenuHeight, -0.5f);
-		glVertex3f(bgTopLeftCorner[0] + currMenuWidth, bgTopLeftCorner[1], -0.5f);
+		glVertex2f(-MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
+		glVertex2f(-MENU_WIDTH_DIV2, -MENU_HEIGHT_DIV2);
+		glVertex2f(MENU_WIDTH_DIV2, -MENU_HEIGHT_DIV2);
+		glVertex2f(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
 	glEnd();
-
+	
+	glPopMatrix();
 	Camera::PopWindowCoords();
+
+	this->menuBGOpenAnim.Tick(dT);
 }
 
 /**
@@ -497,6 +482,15 @@ void GameSubMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, cons
 	this->arrowSquishAnim.Tick(dT);
 }
 
+void GameSubMenu::DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem) {
+	ColourRGBA textColour = menuItem.GetTextColour();
+	textColour[3] = this->menuItemOpenFadeIn.GetInterpolantValue();
+	menuItem.SetTextColour(textColour);
+	menuItem.Draw(dT, pos);
+
+	this->menuItemOpenFadeIn.Tick(dT);
+}
+
 void GameSubMenu::SetSelectedMenuItem(int index) {
 	assert(index >= 0 && index < static_cast<int>(this->menuItems.size()));
 	
@@ -511,4 +505,18 @@ void GameSubMenu::SetSelectedMenuItem(int index) {
 	this->menuItems[index]->ToggleWiggleAnimationOn(GameMenuItem::MENU_ITEM_WOBBLE_AMT_SMALL, GameMenuItem::MENU_ITEM_WOBBLE_FREQ);
 	this->menuItems[index]->SetSize(true);
 	this->menuItems[index]->SetTextColour(this->highlightColour);
+}
+
+/** 
+ * Start the animation to open up this submenu. This will animate the scale
+ * of the background for the menu as well as the alpha of the items in the menu.
+ */
+void GameSubMenu::AnimateMenuOpen() {
+	// Restart the animations to open the menu and fade in its items
+	this->menuBGOpenAnim.ResetToStart();
+	this->menuItemOpenFadeIn.ResetToStart();
+	
+	// Choose a new colour for the menu
+	const int randColourIdx = Randomizer::GetInstance()->RandomUnsignedInt() % GameMenu::NUM_RAND_COLOURS;
+	this->randBGColour = GameMenu::RAND_COLOUR_LIST[randColourIdx];
 }

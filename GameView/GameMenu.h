@@ -18,8 +18,8 @@
 #include "../BlammoEngine/Animation.h"
 
 #include "GameFontAssetsManager.h"
+#include "GameMenuItem.h"
 
-class GameMenu;
 class Texture;
 
 /**
@@ -46,57 +46,15 @@ public:
 };
 
 /**
- * An item in a game menu that may be highlighted and selected
- * by the user.
- */
-class GameMenuItem {
-private:
-	TextLabel2D* currLabel;
-	TextLabel2D smTextLabel, lgTextLabel;
-
-	AnimationMultiLerp<float> wiggleAnimation;
-
-	GameMenu* subMenu;
-
-public:
-	static const float MENU_ITEM_WOBBLE_AMT_LARGE;
-	static const float MENU_ITEM_WOBBLE_AMT_SMALL;
-	static const float MENU_ITEM_WOBBLE_FREQ;
-	static const float SUB_MENU_PADDING;
-
-	GameMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameMenu* subMenu);
-	~GameMenuItem();
-
-	void Draw(double dT, const Point2D& topLeftCorner);
-	unsigned int GetHeight() const;
-	unsigned int GetWidth() const;
-	GameMenu* GetSubMenu() { return this->subMenu; }
-
-	void ToggleWiggleAnimationOn(float amplitude, float frequency);
-	void ToggleWiggleAnimationOff();
-
-	inline void SetSize(bool isLarge) {
-		if (isLarge) {
-			this->currLabel = &this->lgTextLabel;
-		}
-		else {
-			this->currLabel = &this->smTextLabel;
-		}
-	}
-
-	inline void SetTextColour(const Colour& c) {
-		this->currLabel->SetColour(c);
-	}
-
-};
-
-/**
  * An organized set of menu items, formated for selection by the
  * user.
  */
 class GameMenu {
 
 protected:
+	static const int NUM_RAND_COLOURS = 10;
+	static const Colour RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS];
+
 	static const float UP_DOWN_ARROW_TOP_PADDING;
 	static const float UP_DOWN_ARROW_BOTTOM_PADDING;
 
@@ -115,7 +73,8 @@ protected:
 	Colour greyedOutColour;			// Colour when item is not in the current menu level
 
 	virtual float GetMenuItemPadding() const;
-	virtual void DrawMenuBackground() {}
+	virtual void DrawMenuBackground(double dT) {}
+	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem) { menuItem.Draw(dT, pos); }
 	virtual void DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem);
 	
 	// Tell the menu that the user has moved their selection up 1 item
@@ -137,7 +96,7 @@ protected:
 public:
 	GameMenu();
 	GameMenu(const Point2D& topLeftCorner);
-	~GameMenu();
+	virtual ~GameMenu();
 
 	void AddEventHandler(GameMenuEventHandler* eventHandler) {
 		assert(eventHandler != NULL);
@@ -170,7 +129,7 @@ public:
 	 * as a possible submenu for that item (allowed to be NULL).
 	 * Returns: The index of the item added in this menu.
 	 */
-	virtual int AddMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameMenu* subMenu) {
+	virtual int AddMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameSubMenu* subMenu) {
 		this->menuItems.push_back(new GameMenuItem(smLabel, lgLabel, subMenu));
 		return this->menuItems.size() - 1;
 	}
@@ -202,20 +161,26 @@ private:
 
 	AnimationMultiLerp<float> arrowBounceAnim;
 	AnimationMultiLerp<float> arrowSquishAnim;
+	
+	AnimationMultiLerp<Vector2D> menuBGOpenAnim;
+	AnimationMultiLerp<float> menuItemOpenFadeIn;
+
+	Colour randBGColour;
 
 protected:
 	virtual float GetMenuItemPadding() const;
-	virtual void DrawMenuBackground();
+	virtual void DrawMenuBackground(double dT);
 	virtual void DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem);
+	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem);
 
 public:
 	static const float HALF_ARROW_WIDTH;
 	static const float BACKGROUND_PADDING;
 
 	GameSubMenu();
-	~GameSubMenu();
+	virtual ~GameSubMenu();
 
-	virtual int AddMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameMenu* subMenu) {
+	virtual int AddMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameSubMenu* subMenu) {
 		this->menuItems.push_back(new GameMenuItem(smLabel, lgLabel, subMenu));
 		
 		this->menuHeight += smLabel.GetHeight() + this->GetMenuItemPadding();
@@ -225,6 +190,8 @@ public:
 	}
 
 	virtual void SetSelectedMenuItem(int index);
+
+	void AnimateMenuOpen();
 
 };
 

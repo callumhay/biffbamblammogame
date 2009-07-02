@@ -45,16 +45,20 @@ static void ResizeWindow(int w, int h) {
 }
 
 static void KeyDownEventHandler(SDL_keysym* keysym) {
+		/*
 	switch (keysym->sym) {
-	/*
+
 	case SDLK_ESCAPE:
 		display->QuitGame();
 		break;
-	*/
+	
 	default:
+	*/
 		controller->KeyDown(keysym->sym);
+	/*
 		break;
 	}
+	*/
 }
 
 static void KeyUpEventHandler(SDL_keysym* keysym) {
