@@ -22,6 +22,8 @@ const float GameMenuItem::SUB_MENU_PADDING						= 15.0f;
 GameMenuItem::GameMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameSubMenu* subMenu) : 
 smTextLabel(smLabel), lgTextLabel(lgLabel), subMenu(subMenu) {
 	
+	assert(smLabel.GetText() == lgLabel.GetText());
+
 	this->currLabel = &this->smTextLabel;
 	this->wiggleAnimation.SetInterpolantValue(0.0f);
 }
@@ -92,11 +94,24 @@ void GameMenuItem::ToggleWiggleAnimationOff() {
 
 // SelectionListMenuItem Functions ***************************************************************************
 
-SelectionListMenuItem::SelectionListMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel) :
-GameMenuItem(smLabel, lgLabel, NULL) {
+SelectionListMenuItem::SelectionListMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, const std::vector<std::string>& items) :
+GameMenuItem(smLabel, lgLabel, NULL), selectionList(items), selectedIndex(SelectionListMenuItem::NO_SELECTION),
+baseLabelStr(lgLabel.GetText()) {
+
+	this->SetSelectionList(items);
 }
 
 SelectionListMenuItem::~SelectionListMenuItem() {
+}
+
+/**
+ * Sets the list of selectable items in this menu item.
+ */
+void SelectionListMenuItem::SetSelectionList(const std::vector<std::string>& items) {
+	if (items.size() > 0 && this->selectedIndex == SelectionListMenuItem::NO_SELECTION) {
+		this->selectedIndex = 0;
+	}
+	this->selectionList = items;
 }
 
 void SelectionListMenuItem::Draw(double dT, const Point2D& topLeftCorner) {

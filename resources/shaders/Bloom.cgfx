@@ -154,13 +154,13 @@ float4 composite_bloom_PS(float2 UV : TEXCOORD0) : COLOR {
 	
 	float4 origScene = tex2D(SceneSampler, UV);
 	
-	half4 blurLvl2 = tex2D(BrightCompositeLvl2Sampler, UV);
-	half4 blurLvl3 = tex2D(BrightCompositeLvl3Sampler, UV);
-	half4 blurLvl4 = tex2D(BrightCompositeLvl4Sampler, UV);
+	float4 blurLvl2 = tex2D(BrightCompositeLvl2Sampler, UV);
+	float4 blurLvl3 = tex2D(BrightCompositeLvl3Sampler, UV);
+	float4 blurLvl4 = tex2D(BrightCompositeLvl4Sampler, UV);
 	
-	half4 blurTotal = blurLvl2 + blurLvl3 + blurLvl4;
+	float4 blurTotal = clamp(blurLvl2 + blurLvl3 + blurLvl4, 0, 1);
 	
-	return SceneIntensity*origScene + GlowIntensity*blurTotal + HighlightIntensity*blurTotal.a;
+	return float4(SceneIntensity*origScene.rgb + GlowIntensity*blurTotal.rgb + HighlightIntensity*blurTotal.aaa, 1);
 }  
 
 technique BloomFilter {
@@ -200,6 +200,8 @@ technique BrightDownsampleBlur4 {
 
 technique CompositeBloom {
 	pass bloomComposite {
+		BlendEnable = true;
+		BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
 		FragmentProgram = compile arbfp1 composite_bloom_PS();  
 	}
 }

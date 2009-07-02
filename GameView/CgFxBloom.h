@@ -53,5 +53,20 @@ public:
 
 	virtual void Draw(int screenWidth, int screenHeight, double dT);
 	std::list<AnimationMultiLerp<float>> GetPulseAnimation(float pulseLengthInSec, float pulseAmount);
+
+
+	inline void SetHighlightThreshold(float hlgtThreshold) {
+		this->highlightThreshold = hlgtThreshold;
+	}
+	inline void SetSceneIntensity(float sceneIntensity) {
+		this->sceneIntensity = sceneIntensity;
+	}
+	inline void SetGlowIntensity(float glowIntensity) {
+		this->glowIntensity = glowIntensity;
+	}
+	inline void SetHighlightIntensity(float hlgtIntensity) {
+		this->highlightIntensity = hlgtIntensity;
+	}
+
 };
 #endif

@@ -78,6 +78,9 @@ public:
 	ColourRGBA GetColour() const {
 		return this->colour;
 	}
+	std::string GetText() const {
+		return this->text;
+	}
 
 	void Draw();
 };

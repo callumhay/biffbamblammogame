@@ -15,6 +15,9 @@
 #include "GameDisplay.h"
 #include "GameMenu.h"
 #include "GameAssets.h"
+#include "CgFxBloom.h"
+
+#include "../BlammoEngine/FBObj.h"
 
 #include "../GameController.h"
 
@@ -38,7 +41,8 @@ const Colour MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.7f, 0.7f, 
 
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
 DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), titleLabel(NULL),
-mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), changeToPlayGameState(false) {
+mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), changeToPlayGameState(false),
+menuFBO(NULL), bloomEffect(NULL) {
 	this->mainMenuEventHandler		= new MainMenuEventHandler(this);
 	this->optionsMenuEventHandler = new OptionsSubMenuEventHandler(this);
 	
@@ -47,6 +51,9 @@ mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), changeToPlayGameState
 	// Setup the fade-in animation
 	this->fadeAnimation.SetLerp(0.0, 3.0, 1.0f, 0.0f);
 	this->fadeAnimation.SetRepeat(false);
+
+	this->menuFBO			= new FBObj(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), Texture::Nearest, FBObj::NoAttachment);
+	this->SetupBloomEffect();
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
@@ -71,6 +78,11 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	this->mainMenuEventHandler = NULL;
 	delete this->optionsMenuEventHandler;
 	this->optionsMenuEventHandler = NULL;
+
+	delete this->menuFBO;
+	this->menuFBO = NULL;
+	delete this->bloomEffect;
+	this->bloomEffect = NULL;
 }
 
 /**
@@ -165,6 +177,20 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	this->optionsSubMenu->SetSelectedMenuItem(this->optionsFullscreenIndex);
 }
 
+void MainMenuDisplayState::SetupBloomEffect() {
+	if (this->bloomEffect != NULL) {
+		delete this->bloomEffect;
+	}
+
+	// Create the new bloom effect and set its parameters appropriately
+	this->bloomEffect = new CgFxBloom(this->menuFBO);
+
+	this->bloomEffect->SetHighlightThreshold(0.4f);
+	this->bloomEffect->SetSceneIntensity(0.6f);
+	this->bloomEffect->SetGlowIntensity(0.3f);
+	this->bloomEffect->SetHighlightIntensity(0.1f);
+}
+
 /**
  * Render the menu and any other stuff associated with it.
  */
@@ -173,12 +199,18 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 		this->display->SetCurrentState(new StartGameDisplayState(this->display));
 		return;
 	}
+	
+	const int DISPLAY_WIDTH		= this->display->GetDisplayWidth();
+	const int DISPLAY_HEIGHT	= this->display->GetDisplayHeight();
+
+	this->menuFBO->BindFBObj();
 
 	// Render the background
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 	// Render the title
-	unsigned int titleHeight = this->display->GetDisplayHeight() - TITLE_Y_INDENT;
+	unsigned int titleHeight = DISPLAY_HEIGHT - TITLE_Y_INDENT;
 	this->titleLabel->SetTopLeftCorner(Point2D(MENU_X_INDENT, titleHeight));
 	this->titleLabel->Draw();
 
@@ -186,14 +218,19 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, titleHeight - this->titleLabel->GetHeight() - MENU_Y_INDENT);
 	this->mainMenu->SetTopLeftCorner(menuTopLeftCorner);
 	this->mainMenu->Draw(dT);
-	//this->mainMenu->DebugDraw();
 
 	// Fade-in/out overlay
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	GeometryMaker::GetInstance()->DrawFullScreenQuad(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), 1.0f, 
+	GeometryMaker::GetInstance()->DrawFullScreenQuad(DISPLAY_WIDTH, DISPLAY_HEIGHT, 1.0f, 
 																									 ColourRGBA(1, 1, 1, this->fadeAnimation.GetInterpolantValue()));
 	glDisable(GL_BLEND);
+	
+	this->menuFBO->UnbindFBObj();
+
+	// Do bloom on the menu screen and draw it
+	this->bloomEffect->Draw(DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
+	this->menuFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
 
 	debug_opengl_state();
 
@@ -210,6 +247,9 @@ void MainMenuDisplayState::KeyPressed(SDLKey key) {
 }
 
 void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
+	delete this->menuFBO;
+	this->menuFBO = new FBObj(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), Texture::Nearest, FBObj::NoAttachment);
+	this->SetupBloomEffect();
 }
 
 /**
