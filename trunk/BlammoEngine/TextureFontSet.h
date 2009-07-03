@@ -14,6 +14,7 @@ class Texture2D;
 class TextureFontSet {
 public:
 	static const float TEXT_3D_SCALE;
+
 private:
 	TextureFontSet();
 

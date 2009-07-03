@@ -81,7 +81,7 @@ void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const G
 
 	// Draw the outlines of the arrows
 	glPolygonMode(GL_FRONT, GL_LINE);
-	glLineWidth(2.0f);
+	glLineWidth(3.0f);
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 	glBegin(GL_TRIANGLES);
 	
@@ -232,11 +232,17 @@ void GameMenu::KeyPressed(SDLKey key) {
 		if (currentMenu == NULL) {
 			// In this case we are dealing with a menu item that takes input,
 			// give that menu item the input
-			activatedMenuItem->KeyPressed(key);
+			activatedMenuItem->KeyPressed(this, key);
 		}
+		else {
+			// Recursively tell the menu about the key press
+			currentMenu->KeyPressed(key);
+		}
+		return;
 	}
 	
-	// Handle the input by changing the menu according to the key pressed
+	// If we managed to get here then the key press is specific to this menu,
+	// handle the input by changing the menu according to the key pressed.
 	switch(key) {
 		
 		case SDLK_DOWN:
@@ -247,7 +253,7 @@ void GameMenu::KeyPressed(SDLKey key) {
 			currentMenu->UpAction();
 			break;
 	
-		case SDLK_RETURN: 
+		case SDLK_RETURN:
 			currentMenu->ActivateSelectedMenuItem();
 			break;
 

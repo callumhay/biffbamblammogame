@@ -129,8 +129,13 @@ public:
 	 * as a possible submenu for that item (allowed to be NULL).
 	 * Returns: The index of the item added in this menu.
 	 */
-	virtual int AddMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameSubMenu* subMenu) {
+	virtual int AddMenuItem(TextLabel2D& smLabel, TextLabel2D& lgLabel, GameSubMenu* subMenu) {
 		this->menuItems.push_back(new GameMenuItem(smLabel, lgLabel, subMenu));
+		return this->menuItems.size() - 1;
+	}
+	virtual int AddMenuItem(GameMenuItem* menuItem) {
+		assert(menuItem != NULL);
+		this->menuItems.push_back(menuItem);
 		return this->menuItems.size() - 1;
 	}
 	
@@ -180,11 +185,22 @@ public:
 	GameSubMenu();
 	virtual ~GameSubMenu();
 
-	virtual int AddMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameSubMenu* subMenu) {
+	virtual int AddMenuItem(TextLabel2D& smLabel, TextLabel2D& lgLabel, GameSubMenu* subMenu) {
 		this->menuItems.push_back(new GameMenuItem(smLabel, lgLabel, subMenu));
 		
 		this->menuHeight += smLabel.GetHeight() + this->GetMenuItemPadding();
+		
+		//lgLabel.Draw();
 		this->menuWidth = std::max<float>(lgLabel.GetLastRasterWidth(), this->menuWidth);
+
+		return this->menuItems.size() - 1;
+	}
+	virtual int AddMenuItem(GameMenuItem* menuItem) {
+		assert(menuItem != NULL);
+		this->menuItems.push_back(menuItem);
+
+		this->menuHeight += menuItem->GetHeight() + this->GetMenuItemPadding();
+		this->menuWidth = std::max<float>(menuItem->GetWidth(), this->menuWidth);
 
 		return this->menuItems.size() - 1;
 	}

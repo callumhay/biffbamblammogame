@@ -12,6 +12,8 @@
 #include "GameMenuItem.h"
 #include "GameMenu.h"
 
+#include "../BlammoEngine/Camera.h"
+
 const float GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE	= 8.0f;
 const float GameMenuItem::MENU_ITEM_WOBBLE_AMT_SMALL	= 4.0f;
 const float GameMenuItem::MENU_ITEM_WOBBLE_FREQ				= 0.2f;
@@ -94,9 +96,12 @@ void GameMenuItem::ToggleWiggleAnimationOff() {
 
 // SelectionListMenuItem Functions ***************************************************************************
 
+const float SelectionListMenuItem::INTERIOR_PADDING				= 10.0f;  // The padding between the text and arrows in the item
+const float SelectionListMenuItem::SELECTION_ARROW_WIDTH	= 15.0f;	// The width of the arrows for indicating movement through the list
+
 SelectionListMenuItem::SelectionListMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, const std::vector<std::string>& items) :
 GameMenuItem(smLabel, lgLabel, NULL), selectionList(items), selectedIndex(SelectionListMenuItem::NO_SELECTION),
-baseLabelStr(lgLabel.GetText()) {
+baseLabelStr(lgLabel.GetText()), maxWidth(0.0f) {
 
 	this->SetSelectionList(items);
 }
@@ -112,23 +117,166 @@ void SelectionListMenuItem::SetSelectionList(const std::vector<std::string>& ite
 		this->selectedIndex = 0;
 	}
 	this->selectionList = items;
+
+	// Try to figure out what the maximum width of this item is
+	this->lgTextLabel.SetText(this->baseLabelStr);
+	//this->lgTextLabel.Draw();
+	const float BASE_LABEL_WIDTH = this->lgTextLabel.GetLastRasterWidth();
+	
+	TextLabel2D tempLabel = this->lgTextLabel;
+	for (size_t i = 0; i < items.size(); i++) {
+		
+		tempLabel.SetText(this->selectionList[i]);
+		//tempLabel.Draw();
+		
+		const float CURR_ITEM_WIDTH = BASE_LABEL_WIDTH + 2*SelectionListMenuItem::INTERIOR_PADDING + 
+																	2 * SelectionListMenuItem::SELECTION_ARROW_WIDTH + tempLabel.GetLastRasterWidth();
+		this->maxWidth = std::max<float>(this->maxWidth, CURR_ITEM_WIDTH);
+	}
 }
 
 void SelectionListMenuItem::Draw(double dT, const Point2D& topLeftCorner) {
-	// TODO
+	// Obtain the latest interpolated wiggle value
+	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
+	
+	// Animate the wiggle and/or pulse (if there are any animations loaded)
+	this->wiggleAnimation.Tick(dT);
+
+	// Draw the base label portion of the item
+	Point2D wiggleTopLeftCorner = topLeftCorner + Vector2D(wiggleAmount, 0.0f);
+	this->currLabel->SetText(this->baseLabelStr);
+	this->currLabel->SetTopLeftCorner(wiggleTopLeftCorner);
+	this->currLabel->Draw();
+
+	// Exit after the base label if there's no item selected
+	if (this->selectedIndex == NO_SELECTION || this->selectionList.size() == 0) {
+		return;
+	}
+
+	// Draw the currently selected item with arrows on either side of it
+	const float BASE_LABEL_WIDTH = this->currLabel->GetLastRasterWidth();
+	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(BASE_LABEL_WIDTH + SelectionListMenuItem::INTERIOR_PADDING, 0.0f);
+
+	// Draw the left pointing arrow
+	this->DrawSelectionArrow(wiggleTopLeftCorner, this->currLabel->GetHeight(), true);
+	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(SelectionListMenuItem::SELECTION_ARROW_WIDTH + SelectionListMenuItem::INTERIOR_PADDING, 0.0f);
+
+	// Draw the text for the currently selected item
+	const std::string CURR_SEL_ITEM_STR = this->selectionList[this->selectedIndex];
+	this->currLabel->SetText(CURR_SEL_ITEM_STR);
+	this->currLabel->SetTopLeftCorner(wiggleTopLeftCorner);
+	this->currLabel->Draw();
+
+	const float SEL_ITEM_LABEL_WIDTH = this->currLabel->GetLastRasterWidth();
+	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(SEL_ITEM_LABEL_WIDTH + SelectionListMenuItem::INTERIOR_PADDING, 0.0f);
+
+	// Draw the right pointing arrow
+	this->DrawSelectionArrow(wiggleTopLeftCorner, this->currLabel->GetHeight(), false);
 }
 
-void SelectionListMenuItem::KeyPressed(SDLKey key) {
+/**
+ * Private helper function for drawing the selection arrows for the item.
+ */
+void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing) {
+	const float HALF_ARROW_HEIGHT = arrowHeight / 2.0f;
+	const float HALF_ARROW_WIDTH	= SelectionListMenuItem::SELECTION_ARROW_WIDTH / 2.0f;
+	
+	// Arrow vertices, centered on the origin
+	const Point2D APEX_POINT		= (isLeftPointing ? Point2D(-HALF_ARROW_WIDTH, 0.0f) : Point2D(HALF_ARROW_WIDTH, 0.0f));
+	const Point2D TOP_POINT			= (isLeftPointing ? Point2D(HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT) : Point2D(-HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT));
+	const Point2D BOTTOM_POINT	= (isLeftPointing ? Point2D(HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT) : Point2D(-HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT));
+
+	// We set the alpha of the arrows based on the text
+	const ColourRGBA currTextColour = this->currLabel->GetColour();
+
+	Camera::PushWindowCoords();
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Draw the outlines of the arrows
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glPolygonMode(GL_FRONT, GL_LINE);
+	glLineWidth(2.0f);
+	glColor4f(0.0f, 0.0f, 0.0f, currTextColour.A());
+	
+	glPushMatrix();
+	glTranslatef(topLeftCorner[0] + HALF_ARROW_WIDTH, topLeftCorner[1] - HALF_ARROW_HEIGHT, 0.0f);
+
+	if (isLeftPointing) {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+		glEnd();
+	}
+	else {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+		glEnd();
+	}
+
+	// Fill in the arrows
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glColor4f(1.0f, 0.6f, 0.0f, currTextColour.A());
+	
+	if (isLeftPointing) {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+		glEnd();
+	}
+	else {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+		glEnd();
+	}
+	
+	glPopMatrix();
+	glDisable(GL_BLEND);
+	Camera::PopWindowCoords();
+}
+
+/**
+ * Called from the parent menu of this item when a key is pressed and this item
+ * is the one currently selected and relevant.
+ */
+void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
+	assert(parent != NULL);
+
+	// Key pressing does nothing if there's nothing to select from
+	if (this->selectionList.size() == 0) {
+		return;
+	}
+
 	switch (key) {
 		case SDLK_LEFT:
-			// TODO
+			// Move the selection down one item
+			this->selectedIndex--;
+			if (this->selectedIndex < 0) {
+				this->selectedIndex = this->selectionList.size() - 1;
+			}
 			break;
 
 		case SDLK_RIGHT:
-			// TODO
+			// Move the selection up one item
+			this->selectedIndex = (this->selectedIndex + 1) % this->selectionList.size();
+			break;
+
+		case SDLK_ESCAPE:
+			// If the user hits ESC then we deselect the currently selected item (i.e., this one)
+			parent->DeactivateSelectedMenuItem();
 			break;
 
 		default:
 			break;
 	}
+
+	assert(this->selectedIndex >= 0 && this->selectedIndex < static_cast<int>(this->selectionList.size()));
 }

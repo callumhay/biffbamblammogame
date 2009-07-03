@@ -17,6 +17,7 @@
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/Animation.h"
 
+class GameMenu;
 class GameSubMenu;
 
 /**
@@ -40,10 +41,10 @@ public:
 	virtual ~GameMenuItem();
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner);
-	virtual void KeyPressed(SDLKey key) {};
+	virtual void KeyPressed(GameMenu* parent, SDLKey key) {};
 
 	unsigned int GetHeight() const;
-	unsigned int GetWidth() const;
+	virtual unsigned int GetWidth() const;
 	
 	GameSubMenu* GetSubMenu() { return this->subMenu; }
 
@@ -78,9 +79,16 @@ class SelectionListMenuItem : public GameMenuItem {
 private:
 	static const int NO_SELECTION = -1;
 
+	static const float INTERIOR_PADDING;
+	static const float SELECTION_ARROW_WIDTH;
+
 	int selectedIndex;												// Index in the list that's currently selected 
 	std::vector<std::string> selectionList;		// List of items that can be selected
 	std::string baseLabelStr;									// The label of this item (this text always appears on the item)
+	
+	float maxWidth;	// The maximum width of this menu item
+
+	void DrawSelectionArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing);
 
 public:
 	SelectionListMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, const std::vector<std::string>& items);
@@ -89,7 +97,9 @@ public:
 	void SetSelectionList(const std::vector<std::string>& items);
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner);
-	virtual void KeyPressed(SDLKey key);
+	virtual void KeyPressed(GameMenu* parent, SDLKey key);
+
+	virtual unsigned int GetWidth() const { return this->maxWidth; }
 };
 
 #endif
