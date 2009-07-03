@@ -14,6 +14,7 @@
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameMenu.h"
+#include "GameMenuItem.h"
 #include "GameAssets.h"
 #include "CgFxBloom.h"
 
@@ -51,6 +52,7 @@ menuFBO(NULL), bloomEffect(NULL) {
 	// Setup the fade-in animation
 	this->fadeAnimation.SetLerp(0.0, 3.0, 1.0f, 0.0f);
 	this->fadeAnimation.SetRepeat(false);
+	this->fadeAnimation.SetInterpolantValue(1.0f);
 
 	this->menuFBO			= new FBObj(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
@@ -146,8 +148,8 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	const float dropShadowAmt = 0.08f;
 	const Colour dropShadowColour = Colour(0, 0, 0);
 
-	TextLabel2D subMenuLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),  "TODO: Fullscreen:");
-	TextLabel2D subMenuLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "TODO: Fullscreen:");
+	TextLabel2D subMenuLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),  "Fullscreen");
+	TextLabel2D subMenuLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "Fullscreen");
 	subMenuLabelSm.SetDropShadow(dropShadowColour, dropShadowAmt);
 	subMenuLabelLg.SetDropShadow(dropShadowColour, dropShadowAmt);
 
@@ -161,12 +163,46 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	// Add the toggle fullscreen item
 	//subMenuLabelSm.SetText("TODO: Fullscreen:");
 	//subMenuLabelLg.SetText("TODO: Fullscreen:");
-	this->optionsFullscreenIndex = this->optionsSubMenu->AddMenuItem(subMenuLabelSm, subMenuLabelLg, NULL);
+	std::vector<std::string> fullscreenOptions;
+	fullscreenOptions.reserve(2);
+	fullscreenOptions.push_back("Off");
+	fullscreenOptions.push_back("On");
+	SelectionListMenuItem* fullscreenMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, fullscreenOptions);
+	//fullscreenMenuItem->SetCurrSelection(/*TODO*/);
+	this->optionsFullscreenIndex = this->optionsSubMenu->AddMenuItem(fullscreenMenuItem);
+
+	// Add the vertical sync toggle item
+	subMenuLabelSm.SetText("Vertical Sync");
+	subMenuLabelLg.SetText("Vertical Sync");
+	std::vector<std::string> vSyncOptions;
+	vSyncOptions.reserve(2);
+	vSyncOptions.push_back("Off");
+	vSyncOptions.push_back("On");
+	SelectionListMenuItem* vSyncMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, vSyncOptions);
+	//vSyncMenuItem->SetCurrSelection(/*TODO*/);
+	this->optionsVSyncIndex = this->optionsSubMenu->AddMenuItem(vSyncMenuItem);
 
 	// Add the resolution selection item
-	subMenuLabelSm.SetText("TODO: Resolution:");
-	subMenuLabelLg.SetText("TODO: Resolution:");
-	this->optionsResolutionIndex = this->optionsSubMenu->AddMenuItem(subMenuLabelSm, subMenuLabelLg, NULL);
+	subMenuLabelSm.SetText("Resolution");
+	subMenuLabelLg.SetText("Resolution");
+	
+	std::vector<std::string> resolutionOptions;
+	resolutionOptions.reserve(12);
+	resolutionOptions.push_back("800x600");
+	resolutionOptions.push_back("1024x768");
+	resolutionOptions.push_back("1152x864");
+	resolutionOptions.push_back("1280x800");
+	resolutionOptions.push_back("1280x960");
+	resolutionOptions.push_back("1280x1024");
+	resolutionOptions.push_back("1360x768");
+	resolutionOptions.push_back("1440x900");
+	resolutionOptions.push_back("1600x1200");
+	resolutionOptions.push_back("1680x1050");
+	resolutionOptions.push_back("1920x1080");
+	resolutionOptions.push_back("1920x1200");
+	SelectionListMenuItem* resolutionMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, resolutionOptions);
+	//resolutionMenuItem->SetCurrSelection(/*TODO*/);
+	this->optionsResolutionIndex = this->optionsSubMenu->AddMenuItem(resolutionMenuItem);
 
 	// Add an option for getting out of the menu
 	subMenuLabelSm.SetText("Back");

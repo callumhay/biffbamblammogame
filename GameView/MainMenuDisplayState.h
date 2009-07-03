@@ -54,6 +54,7 @@ private:
 	// Indices for the options submenu
 	int optionsBackIndex;
 	int optionsFullscreenIndex;
+	int optionsVSyncIndex;
 	int optionsResolutionIndex;
 
 	// Indents and spacing

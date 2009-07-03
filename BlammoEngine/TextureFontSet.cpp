@@ -235,7 +235,7 @@ void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Lib
 		debug_output("FT_Set_Char_Size failed - there is probably a problem with the font file.");
 		return;	
 	}
-	
+
 	// Create the font set by making the texture and display list for
 	// each character in the font
 	glPushMatrix();
@@ -296,7 +296,7 @@ void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Lib
 		float x = static_cast<float>(bitmap.width) / static_cast<float>(width);
 		float y = static_cast<float>(bitmap.rows)  / static_cast<float>(height);
 
-		newFontSet->widthOfChars.push_back(bitmap_glyph->left + bitmap.width);
+		newFontSet->widthOfChars.push_back(face->glyph->advance.x >> 6);
 
 		// Draw The Texturemapped Quads. The Bitmap That We Got From FreeType Was Not 
 		// Oriented Quite Like We Would Like It To Be, But We Link The Texture To The Quad
@@ -313,7 +313,7 @@ void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Lib
 
 		// Increment The Raster Position As If We Were A Bitmap Font.
 		// (Only Needed If You Want To Calculate Text Length)
-		glBitmap(0,0,0,0,face->glyph->advance.x >> 6,0,NULL);
+		glBitmap(0,0,0,0,face->glyph->advance.x >> 6, 0, NULL);
 
 		// Finish The Display List
 		glEndList();
