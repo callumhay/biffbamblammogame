@@ -22,9 +22,8 @@
 
 #include "../GameController.h"
 
-// TODO: this will eventually be replaced by 3 sprites
-// for "Biff" "Bam" and "Blammo" respectively
-const std::string MainMenuDisplayState::TITLE_TEXT = "Biff! Bam!! Blammo!?!";
+
+// 3 sprites for "Biff" "Bam" and "Blammo" respectively
 const std::string MainMenuDisplayState::TITLE_BIFF_TEXT			= "Biff!";
 const std::string MainMenuDisplayState::TITLE_BAM_TEXT			= "Bam!!";
 const std::string MainMenuDisplayState::TITLE_BLAMMO_TEXT		= "Blammo!?!";
@@ -38,15 +37,27 @@ const std::string MainMenuDisplayState::EXIT_MENUITEM				= "Exit Game";
 const Colour MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR		= Colour(0.8f, 0.8f, 0.8f);;
 const Colour MainMenuDisplayState::MENU_ITEM_SEL_COLOUR			= Colour(1, 1, 0);
 const Colour MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
-const Colour MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.7f, 0.7f, 0.7f);
+const Colour MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
 
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
-DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), titleLabel(NULL),
+DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), 
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), changeToPlayGameState(false),
-menuFBO(NULL), bloomEffect(NULL) {
+menuFBO(NULL), bloomEffect(NULL), bangTexture1(NULL), bangTexture2(NULL), bangTexture3(NULL) {
+
+	// Setup any textures for rendering the menu screen
+	this->bangTexture1 = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture2D::Trilinear, GL_TEXTURE_2D);
+	this->bangTexture2 = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture2D::Trilinear, GL_TEXTURE_2D);
+	this->bangTexture3 = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture2D::Trilinear, GL_TEXTURE_2D);
+
+	// Setup any emitter/sprite/particle effects
+	this->InitializeESPEffects();
+
+	// Read the configuration file to figure out how to initialize each of the options
+	this->cfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
+
+	// Setup handlers for menus and initialize the menus
 	this->mainMenuEventHandler		= new MainMenuEventHandler(this);
-	this->optionsMenuEventHandler = new OptionsSubMenuEventHandler(this);
-	
+	this->optionsMenuEventHandler = new OptionsSubMenuEventHandler(this);	
 	this->InitializeMainMenu();
 
 	// Setup the fade-in animation
@@ -54,7 +65,8 @@ menuFBO(NULL), bloomEffect(NULL) {
 	this->fadeAnimation.SetRepeat(false);
 	this->fadeAnimation.SetInterpolantValue(1.0f);
 
-	this->menuFBO			= new FBObj(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), Texture::Nearest, FBObj::NoAttachment);
+	// Setup any fullscreen effects
+	this->menuFBO = new FBObj(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
 }
 
@@ -70,12 +82,6 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 		this->optionsSubMenu = NULL;
 	}
 
-	// Dispose of title label
-	if (this->titleLabel != NULL) {
-		delete this->titleLabel;
-		this->titleLabel = NULL;
-	}
-
 	delete this->mainMenuEventHandler;
 	this->mainMenuEventHandler = NULL;
 	delete this->optionsMenuEventHandler;
@@ -85,29 +91,100 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	this->menuFBO = NULL;
 	delete this->bloomEffect;
 	this->bloomEffect = NULL;
+
+	// Release texture assets that we no longer need
+	ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTexture1);
+	ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTexture2);
+	ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTexture3);
+}
+
+/**
+ * Private helper to initialize any particle, sprite or general effects for the foreground
+ * and background of the menu screen.
+ */
+void MainMenuDisplayState::InitializeESPEffects() {
+
+	// "Biff!" Bang Title Text
+	this->biffEmitter.SetSpawnDelta(ESPInterval(-1, -1));
+	this->biffEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	this->biffEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+	this->biffEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	this->biffEmitter.SetParticleAlignment(ESP::ScreenAligned);
+	this->biffEmitter.SetParticleRotation(ESPInterval(-10));
+	this->biffEmitter.SetParticleSize(ESPInterval(10), ESPInterval(5));
+	this->biffEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTexture1));
+
+	this->biffTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
+	this->biffTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	this->biffTextEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+	this->biffTextEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	this->biffTextEmitter.SetParticleAlignment(ESP::ScreenAligned);
+	this->biffTextEmitter.SetParticleRotation(ESPInterval(-10));
+	this->biffTextEmitter.SetParticleSize(ESPInterval(1), ESPInterval(1));
+	
+	TextLabel2D biffTitleText(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), MainMenuDisplayState::TITLE_BIFF_TEXT);
+	biffTitleText.SetDropShadow(Colour(0,0,0), 0.1f);
+	this->biffTextEmitter.SetParticles(1, biffTitleText);
+
+	// "Bam!!" Bang title text
+	this->bamEmitter.SetSpawnDelta(ESPInterval(-1, -1));
+	this->bamEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	this->bamEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+	this->bamEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	this->bamEmitter.SetParticleAlignment(ESP::ScreenAligned);
+	this->bamEmitter.SetParticleRotation(ESPInterval(-15));
+	this->bamEmitter.SetParticleSize(ESPInterval(11.0f), ESPInterval(5.0f));
+	this->bamEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTexture2));
+
+	this->bamTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
+	this->bamTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	this->bamTextEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+	this->bamTextEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	this->bamTextEmitter.SetParticleAlignment(ESP::ScreenAligned);
+	this->bamTextEmitter.SetParticleRotation(ESPInterval(-15));
+	this->bamTextEmitter.SetParticleSize(ESPInterval(1), ESPInterval(1));
+
+	TextLabel2D bamTitleText(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), MainMenuDisplayState::TITLE_BAM_TEXT);
+	bamTitleText.SetDropShadow(Colour(0,0,0), 0.1f);
+	this->bamTextEmitter.SetParticles(1, bamTitleText);
+
+	// "Blammo!?!" Bang title text
+	this->blammoEmitter.SetSpawnDelta(ESPInterval(-1, -1));
+	this->blammoEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	this->blammoEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+	this->blammoEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	this->blammoEmitter.SetParticleAlignment(ESP::ScreenAligned);
+	this->blammoEmitter.SetParticleRotation(ESPInterval(-8));
+	this->blammoEmitter.SetParticleSize(ESPInterval(12.0f), ESPInterval(6.5f));
+	this->blammoEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTexture3));
+
+	this->blammoTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
+	this->blammoTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	this->blammoTextEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+	this->blammoTextEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	this->blammoTextEmitter.SetParticleAlignment(ESP::ScreenAligned);
+	this->blammoTextEmitter.SetParticleRotation(ESPInterval(-8));
+	this->blammoTextEmitter.SetParticleSize(ESPInterval(1), ESPInterval(1));
+
+	TextLabel2D blammoTitleText(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), 
+		MainMenuDisplayState::TITLE_BLAMMO_TEXT);
+	blammoTitleText.SetDropShadow(Colour(0,0,0), 0.1f);
+	this->blammoTextEmitter.SetParticles(1, blammoTitleText);
 }
 
 /**
  * Used as a private helper method to initialize the menu and other related display stuffs.
  */
 void MainMenuDisplayState::InitializeMainMenu() {
-	unsigned int titleHeight = this->display->GetDisplayHeight() - TITLE_Y_INDENT;
 	const float dropShadowAmt = 0.08f;
 	const Colour dropShadowColour = Colour(0, 0, 0);
 
-	// Setup the title
-	this->titleLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), TITLE_TEXT);
-	this->titleLabel->SetTopLeftCorner(Point2D(MENU_X_INDENT, titleHeight));
-	this->titleLabel->SetDropShadow(dropShadowColour, dropShadowAmt);
-	this->titleLabel->SetColour(Colour(1, 0.8, 0));
-
 	// Setup the main menu attributes
-	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, titleHeight - this->titleLabel->GetHeight() - MENU_Y_INDENT);
+	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, this->display->GetDisplayHeight() - MENU_Y_INDENT);
 
 	// Setup the main menu (top-most menu)
 	this->mainMenu = new GameMenu(menuTopLeftCorner);
 	this->mainMenu->AddEventHandler(this->mainMenuEventHandler);
-	this->mainMenu->SetPaddingBetweenMenuItems(MENU_ITEM_PADDING);
 	this->mainMenu->SetColourScheme(MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR, MainMenuDisplayState::MENU_ITEM_SEL_COLOUR, 
 																	MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR, MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR);
 
@@ -165,22 +242,24 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	//subMenuLabelLg.SetText("TODO: Fullscreen:");
 	std::vector<std::string> fullscreenOptions;
 	fullscreenOptions.reserve(2);
-	fullscreenOptions.push_back("Off");
 	fullscreenOptions.push_back("On");
-	SelectionListMenuItem* fullscreenMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, fullscreenOptions);
-	//fullscreenMenuItem->SetCurrSelection(/*TODO*/);
-	this->optionsFullscreenIndex = this->optionsSubMenu->AddMenuItem(fullscreenMenuItem);
+	fullscreenOptions.push_back("Off");
+
+	this->fullscreenMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, fullscreenOptions);
+	this->fullscreenMenuItem->SetSelectedItem(this->cfgOptions.GetIsFullscreenOn() ? MENU_SEL_ON_INDEX : MENU_SEL_OFF_INDEX);
+	this->optionsFullscreenIndex = this->optionsSubMenu->AddMenuItem(this->fullscreenMenuItem);
 
 	// Add the vertical sync toggle item
 	subMenuLabelSm.SetText("Vertical Sync");
 	subMenuLabelLg.SetText("Vertical Sync");
 	std::vector<std::string> vSyncOptions;
 	vSyncOptions.reserve(2);
-	vSyncOptions.push_back("Off");
 	vSyncOptions.push_back("On");
-	SelectionListMenuItem* vSyncMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, vSyncOptions);
-	//vSyncMenuItem->SetCurrSelection(/*TODO*/);
-	this->optionsVSyncIndex = this->optionsSubMenu->AddMenuItem(vSyncMenuItem);
+	vSyncOptions.push_back("Off");
+	
+	this->vSyncMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, vSyncOptions);
+	this->vSyncMenuItem->SetSelectedItem(this->cfgOptions.GetIsVSyncOn() ? MENU_SEL_ON_INDEX : MENU_SEL_OFF_INDEX);
+	this->optionsVSyncIndex = this->optionsSubMenu->AddMenuItem(this->vSyncMenuItem);
 
 	// Add the resolution selection item
 	subMenuLabelSm.SetText("Resolution");
@@ -188,21 +267,41 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	
 	std::vector<std::string> resolutionOptions;
 	resolutionOptions.reserve(12);
-	resolutionOptions.push_back("800x600");
-	resolutionOptions.push_back("1024x768");
-	resolutionOptions.push_back("1152x864");
-	resolutionOptions.push_back("1280x800");
-	resolutionOptions.push_back("1280x960");
-	resolutionOptions.push_back("1280x1024");
-	resolutionOptions.push_back("1360x768");
-	resolutionOptions.push_back("1440x900");
-	resolutionOptions.push_back("1600x1200");
-	resolutionOptions.push_back("1680x1050");
-	resolutionOptions.push_back("1920x1080");
-	resolutionOptions.push_back("1920x1200");
-	SelectionListMenuItem* resolutionMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, resolutionOptions);
-	//resolutionMenuItem->SetCurrSelection(/*TODO*/);
-	this->optionsResolutionIndex = this->optionsSubMenu->AddMenuItem(resolutionMenuItem);
+	resolutionOptions.push_back("800 x 600");
+	resolutionOptions.push_back("1024 x 768");
+	resolutionOptions.push_back("1152 x 864");
+	resolutionOptions.push_back("1280 x 800");
+	resolutionOptions.push_back("1280 x 960");
+	resolutionOptions.push_back("1280 x 1024");
+	resolutionOptions.push_back("1360 x 768");
+	resolutionOptions.push_back("1440 x 900");
+	resolutionOptions.push_back("1600 x 1200");
+	resolutionOptions.push_back("1680 x 1050");
+	resolutionOptions.push_back("1920 x 1080");
+	resolutionOptions.push_back("1920 x 1200");
+
+	// Try to figure out what index the resolution is set to (so we can set the menu item
+	// to the appropriate index
+	std::string cfgResolution = this->cfgOptions.GetResolutionString();
+	int resIndex = -1;
+	for (size_t i = 0; i < resolutionOptions.size(); i++) {
+		if (resolutionOptions[i] == cfgResolution) {
+			resIndex = i;
+			break;
+		}
+	}
+
+	// If we couldn't find the index to set then add a new
+	// option to the menu and set it
+	if (resIndex == -1) {
+		resolutionOptions.reserve(resolutionOptions.size() + 1);
+		resolutionOptions.push_back(cfgResolution);
+		resIndex = resolutionOptions.size() - 1;
+	}
+
+	this->resolutionMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, resolutionOptions);
+	this->resolutionMenuItem->SetSelectedItem(resIndex);
+	this->optionsResolutionIndex = this->optionsSubMenu->AddMenuItem(this->resolutionMenuItem);
 
 	// Add an option for getting out of the menu
 	subMenuLabelSm.SetText("Back");
@@ -222,7 +321,7 @@ void MainMenuDisplayState::SetupBloomEffect() {
 	this->bloomEffect = new CgFxBloom(this->menuFBO);
 
 	this->bloomEffect->SetHighlightThreshold(0.4f);
-	this->bloomEffect->SetSceneIntensity(0.6f);
+	this->bloomEffect->SetSceneIntensity(0.70f);
 	this->bloomEffect->SetGlowIntensity(0.3f);
 	this->bloomEffect->SetHighlightIntensity(0.1f);
 }
@@ -241,17 +340,16 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	this->menuFBO->BindFBObj();
 
-	// Render the background
+	// Render background stuffs (behind the menu)
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+	this->RenderBackgroundEffects(dT);
+
 	// Render the title
-	unsigned int titleHeight = DISPLAY_HEIGHT - TITLE_Y_INDENT;
-	this->titleLabel->SetTopLeftCorner(Point2D(MENU_X_INDENT, titleHeight));
-	this->titleLabel->Draw();
+	this->RenderTitle();
 
 	// Render the menu
-	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, titleHeight - this->titleLabel->GetHeight() - MENU_Y_INDENT);
+	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT);
 	this->mainMenu->SetTopLeftCorner(menuTopLeftCorner);
 	this->mainMenu->Draw(dT);
 
@@ -271,6 +369,117 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	debug_opengl_state();
 
 	this->fadeAnimation.Tick(dT);
+}
+
+/**
+ * Renders the title for the menu screen.
+ */
+void MainMenuDisplayState::RenderTitle() {
+	const float CAM_DIST_FROM_ORIGIN = 20.0f;
+	
+	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
+	const float MAX_X_COORD = static_cast<float>(this->display->GetDisplayWidth()) /  static_cast<float>(this->display->GetDisplayHeight()) * MAX_Y_COORD;
+	const float MIN_X_COORD = -MAX_X_COORD;
+
+	Camera tempCamera;
+	tempCamera.SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	tempCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	tempCamera.ApplyCameraTransform(0.0);
+
+	const int TEST_WIDTH = 15;
+	const int TEST_HEIGHT = 15;
+	glLineWidth(1.0f);
+	glColor3f(1, 0, 0);
+	glBegin(GL_LINES);
+	for (int x = -TEST_WIDTH; x < TEST_WIDTH; x++) {
+			glVertex2f(x, TEST_HEIGHT);
+			glVertex2f(x, -TEST_HEIGHT);
+	}
+	for (int y = -TEST_HEIGHT; y < TEST_HEIGHT; y++) {
+			glVertex2f(-TEST_WIDTH, y);
+			glVertex2f(TEST_WIDTH, y);
+	}
+	glEnd();
+
+	// Draw the "Biff!" Text
+	const Point3D BIFF_EMIT_COORD = Point3D(MIN_X_COORD + 5.0f, MAX_Y_COORD - 2.5f, 0);
+
+	this->biffEmitter.SetEmitPosition(BIFF_EMIT_COORD);
+	this->biffEmitter.Tick(0.1);
+	this->biffEmitter.Draw(tempCamera);
+
+	this->biffTextEmitter.SetEmitPosition(BIFF_EMIT_COORD);
+	this->biffTextEmitter.Tick(0.1);
+	this->biffTextEmitter.Draw(tempCamera);
+
+	// Draw the "Bam!!" Text
+	const Point3D BAM_EMIT_COORD = Point3D(MIN_X_COORD + 10.5f, MAX_Y_COORD - 4.0f, 0);
+
+	this->bamEmitter.SetEmitPosition(BAM_EMIT_COORD);
+	this->bamEmitter.Tick(0.1);
+	this->bamEmitter.Draw(tempCamera);
+	
+	this->bamTextEmitter.SetEmitPosition(BAM_EMIT_COORD);
+	this->bamTextEmitter.Tick(0.1);
+	this->bamTextEmitter.Draw(tempCamera);
+
+	// Draw the "Blammo!?!" Text
+	const Point3D BLAMMO_EMIT_COORD = Point3D(MIN_X_COORD + 16.0f, MAX_Y_COORD - 6.0f, 0);
+
+	this->blammoEmitter.SetEmitPosition(BLAMMO_EMIT_COORD);
+	this->blammoEmitter.Tick(0.1);
+	this->blammoEmitter.Draw(tempCamera);
+
+	this->blammoTextEmitter.SetEmitPosition(BLAMMO_EMIT_COORD);
+	this->blammoTextEmitter.Tick(0.1);
+	this->blammoTextEmitter.Draw(tempCamera);
+
+	glPopMatrix();
+}
+
+/**
+ * Renders the background effects for the menu screen. These include
+ * random bangs and booms, etc. going off all over the place.
+ */
+void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
+	// Insert a bunch of bang-onomatopiea effects for drawing if we're running low on them
+	//while (this->randomBGParicles.size() < 20) {
+		// TODO
+	//}
+
+	const float CAM_DIST_FROM_ORIGIN = 20.0f;
+	
+	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
+	const float MAX_X_COORD = static_cast<float>(this->display->GetDisplayWidth()) /  static_cast<float>(this->display->GetDisplayHeight()) * MAX_Y_COORD;
+	const float MIN_X_COORD = -MAX_X_COORD;
+
+	Camera tempCamera;
+	tempCamera.SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	tempCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	tempCamera.ApplyCameraTransform(0.0);
+
+	// Go through all the active emitters and tick/draw them
+	for (std::list<ESPPointEmitter>::iterator iter = this->randomBGParicles.begin(); iter != this->randomBGParicles.end();) {
+		iter->Tick(dT);
+		iter->Draw(tempCamera);
+
+		if (iter->IsDead()) {
+			iter = this->randomBGParicles.erase(iter);
+		}
+		else {
+			iter++;
+		}
+	}
+
+	glPopMatrix();
 }
 
 /**
@@ -327,8 +536,6 @@ void MainMenuDisplayState::MainMenuEventHandler::EscMenu() {
  * Handle activation events for items in the options menu.
  */
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {
-	// TODO... going to need another parameter for certain options...
-
 	if (itemIndex == this->mainMenuState->optionsBackIndex) {
 		// Go back to the main menu (deactivate any previously activated menu items)
 		this->mainMenuState->optionsSubMenu->DeactivateSelectedMenuItem();
@@ -336,7 +543,49 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemActivatedEven
 
 		this->mainMenuState->mainMenu->DeactivateSelectedMenuItem();
 	}
+}
 
+/**
+ * Handle changes in the options for the game.
+ */
+void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
+	if (itemIndex == this->mainMenuState->optionsFullscreenIndex) {
+		int currSelectionIdx = this->mainMenuState->fullscreenMenuItem->GetSelectedItemIndex();
+
+		// Make sure the changed fs option is the opposite of what is currently set
+		assert(this->mainMenuState->cfgOptions.GetIsFullscreenOn() == (currSelectionIdx == MainMenuDisplayState::MENU_SEL_OFF_INDEX));
+	
+		// TODO
+	}
+	else if (itemIndex == this->mainMenuState->optionsVSyncIndex) {
+		int currSelectionIdx = this->mainMenuState->vSyncMenuItem->GetSelectedItemIndex();
+		
+		// Make sure the changed vSync option is the opposite of what is currently set
+		assert(this->mainMenuState->cfgOptions.GetIsVSyncOn() == (currSelectionIdx == MainMenuDisplayState::MENU_SEL_OFF_INDEX));
+
+		if (currSelectionIdx == MainMenuDisplayState::MENU_SEL_ON_INDEX) {
+			BlammoTime::SetVSync(1);
+			this->mainMenuState->cfgOptions.SetIsVSyncOn(true);
+		}
+		else {
+			BlammoTime::SetVSync(0);
+			this->mainMenuState->cfgOptions.SetIsVSyncOn(false);
+		}
+	}
+	else if (itemIndex == this->mainMenuState->optionsResolutionIndex) {
+		std::string currSelectionStr = this->mainMenuState->resolutionMenuItem->GetSelectedItemText();
+
+		// Make sure the resolution option is different from what is currently set
+		assert(this->mainMenuState->cfgOptions.GetResolutionString() != currSelectionStr);
+
+		// TODO
+	}
+	else {
+		assert(false);
+	}
+
+	// A configuration option has changed - rewrite the configuration file to accomodate the change
+	ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->mainMenuState->cfgOptions);
 }
 
 void MainMenuDisplayState::OptionsSubMenuEventHandler::EscMenu() {

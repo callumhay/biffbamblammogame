@@ -35,15 +35,24 @@ double MultiBallItem::Activate() {
 	std::vector<GameBall*> newBalls;
 	newBalls.reserve(this->numNewSpawnedBalls);
 
-	const Vector2D ballDir = affectedBall->GetDirection();
+	// Get the ball direction for the affected ball, if its a null vector then just make it up (no pun intended)
+	Vector2D ballDir = affectedBall->GetDirection();
+	if (ballDir == Vector2D(0, 0)) {
+		ballDir = Vector2D(0, 1);
+	}
+	GameBall::BallSpeed ballSpd = affectedBall->GetSpeed();
+	if (ballSpd == GameBall::ZeroSpeed) {
+		assert(false);
+		ballSpd = GameBall::NormalSpeed;
+	}
 
 	// Create all the copies of the current ball
 	for (unsigned int copyNum = 0; copyNum < this->numNewSpawnedBalls; copyNum++) {
 		GameBall* newBall = new GameBall(*affectedBall);
-		
+
 		// We need to change the moving direction of the copied ball to something random but also reasonable:
 		currRotationInDegs += MultiBallItem::MIN_SPLIT_DEGREES;
-		newBall->SetVelocity(affectedBall->GetSpeed(), Rotate(currRotationInDegs, ballDir));
+		newBall->SetVelocity(ballSpd, Rotate(currRotationInDegs, ballDir));
 
 		newBalls.push_back(newBall);
 	}
@@ -58,7 +67,9 @@ double MultiBallItem::Activate() {
 	// a brief amount of time until they are all seperated
 	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); iter++) {
 		GameBall* currBall = *iter;
-		currBall->SetBallCollisionsDisabled(MultiBallItem::BALL_COLLISIONS_DISABLED_DURATION);
+		if (currBall->CanCollide()) {
+			currBall->SetBallCollisionsDisabled(MultiBallItem::BALL_COLLISIONS_DISABLED_DURATION);
+		}
 	}
 
 	GameItem::Activate();

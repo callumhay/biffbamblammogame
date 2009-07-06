@@ -19,29 +19,46 @@
 
 // GameMenu Functions **********************************************
 
-const float GameMenu::UP_DOWN_ARROW_TOP_PADDING		 = 8.0f;
-const float GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING = 16.0f;
+const float GameMenu::UP_DOWN_ARROW_HEIGHT					= 12.0f;	
+const float GameMenu::UP_DOWN_ARROW_TOP_PADDING			= 8.0f;
+const float GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING	= 12.0f;
+const float GameMenu::BACKGROUND_PADDING						= 15.0f;
 
 const Colour GameMenu::RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS] = {
-	Colour(0.4375f, 0.5f, 0.5647f),							// slate greyish-blue
-	Colour(0.2745098f, 0.5098039f, 0.70588f),		// steel blue
-	Colour(0.28235f, 0.2392f, 0.545098f),				// slate purple-blue
-	Colour(0.51372549f, 0.4352941f, 1.0f),			// slate purple
-	Colour(0.8588235f, 0.439215686f, 0.57647f),	// pale violet
-	Colour(1.0f, 0.75686f, 0.75686f),						// rosy brown 
-	Colour(0.7215686f, 0.52549f, 0.043f),				// goldenrod
-	Colour(0.4196f, 0.5568627f, 0.1372549f),		// olive
-	Colour(0.4f, 0.8039215f, 0.666667f),				// deep aquamarine
-	Colour(0.3725f, 0.6196078f, 0.62745098f)		// cadet (olive-) blue
+	Colour(0.89f, 0.149f, 0.2118f),								// 0: Alizarin Red
+	Colour(0.6f, 0.4f, 0.8f),											// 1: Amethyst Purple
+	Colour(0.5f, 1.0f, 0.83f),										// 2: Aquamarine
+	Colour(0.0f, 0.5f, 1.0f),											// 3: Azure Blue
+	Colour(0.5f, 1.0f, 0.0f),											// 4: Chartreuse
+	Colour(0.8588235f, 0.439215686f, 0.57647f),		// 5: Pale Violet
+	Colour(1.0f, 0.3333f, 0.639f),								// 6: Rose
+	Colour(1.0f, 0.7176f, 0.77f),									// 7: Light Pink
+	Colour(0.39f, 0.5843f, 0.9294f),							// 8: Cornflower Blue
+	Colour(0.4f, 0.69f, 0.196f),									// 9: Puke Green
+	Colour(0.988f, 0.76078f, 0.0f),								// 10: Gold
+	Colour(0.596f, 1.0f, 0.596f),									// 11: Mint Green
+	Colour(1.0f, 0.8f, 0.0f),											// 12: Tangerine Yellow
+	Colour(0.0f, 1.0f, 0.5f),											// 13: Spring Green
+	Colour(0.8745f, 0.451f, 1.0f),								// 14: Pinkish-Purple (Heliotrope)
+	Colour(0.251f, 0.8784f, 0.815686f),						// 15: Turquoise
+	Colour(0.3137f, 0.7843f, 0.47f),							// 16: Emerald Green
+	Colour(1.0f, 0.6f, 0.4f),											// 17: Grapefruit pink
+	Colour(0.57647f, 0.4392f, 0.8588f),						// 18: Medium Purple
+	Colour(1.0f, 0.270588f, 0.0f)									// 19: Orange-Red
 };
 
-
-GameMenu::GameMenu() : menuItemPadding(1), topLeftCorner(Point2D(0,0)),
-selectedMenuItemIndex(-1), isSelectedItemActivated(false) {
+GameMenu::GameMenu() : topLeftCorner(Point2D(0,0)), menuItemPadding(0.0f),
+selectedMenuItemIndex(-1), isSelectedItemActivated(false), menuWidth(0.0f), menuHeight(0.0f)  {
+	
+	this->bgColour = Colour(0.45098f, 0.76078f, 0.98431f);	// Maya Blue
+	this->SetupAnimations();
 }
 
-GameMenu::GameMenu(const Point2D& topLeftCorner) : menuItemPadding(1), topLeftCorner(topLeftCorner),
-selectedMenuItemIndex(-1), isSelectedItemActivated(false) {
+GameMenu::GameMenu(const Point2D& topLeftCorner) : topLeftCorner(topLeftCorner), menuItemPadding(0.0f),
+selectedMenuItemIndex(-1), isSelectedItemActivated(false), menuWidth(0.0f), menuHeight(0.0f)  {
+	
+	this->bgColour = Colour(0.45098f, 0.76078f, 0.98431f);	// Maya Blue
+	this->SetupAnimations();
 }
 
 GameMenu::~GameMenu() {
@@ -54,67 +71,155 @@ GameMenu::~GameMenu() {
 }
 
 /**
+ * Private helper function for setting up the game menu animations (e.g., selection
+ * arrows pulsing).
+ */
+void GameMenu::SetupAnimations() {
+	const double SEL_ARROW_PULSE_TIME = 0.6;
+	
+	std::vector<double> timeVals;
+	timeVals.reserve(3);
+	timeVals.push_back(0.0);
+	timeVals.push_back(SEL_ARROW_PULSE_TIME);
+	timeVals.push_back(2 * SEL_ARROW_PULSE_TIME);
+
+	std::vector<float> scaleVals;
+	scaleVals.reserve(3);
+	scaleVals.push_back(1.0f);
+	scaleVals.push_back(0.5f);
+	scaleVals.push_back(1.0f);
+
+	std::vector<float> fadeVals;
+	fadeVals.reserve(3);
+	fadeVals.push_back(1.0f);
+	fadeVals.push_back(0.5f);
+	fadeVals.push_back(1.0f);
+
+	this->selArrowScaleAnim.SetLerp(timeVals, scaleVals);
+	this->selArrowFadeAnim.SetLerp(timeVals, fadeVals);
+	this->selArrowScaleAnim.SetRepeat(true);
+	this->selArrowFadeAnim.SetRepeat(true);
+}
+
+/**
  * Determine the amount of padding between menu items when drawing
  * this menu.
  */
 float GameMenu::GetMenuItemPadding() const {
-	return this->menuItemPadding + GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING + GameMenu::UP_DOWN_ARROW_TOP_PADDING;
+	return this->menuItemPadding + GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING + GameMenu::UP_DOWN_ARROW_TOP_PADDING + GameMenu::UP_DOWN_ARROW_HEIGHT;
+}
+
+void GameMenu::DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight) {
+	glBegin(GL_QUADS);
+		glVertex2f(-halfMenuWidth, halfMenuHeight);
+		glVertex2f(-halfMenuWidth, -halfMenuHeight);
+		glVertex2f(halfMenuWidth, -halfMenuHeight);
+		glVertex2f(halfMenuWidth, halfMenuHeight);
+	glEnd();
+}
+
+/**
+ * Draw an outline around the menu with a colourful plain background.
+ */
+void GameMenu::DrawMenuBackground(double dT) {
+
+	const float APPLY_PADDING_WIDTH				= 2 * BACKGROUND_PADDING + 2 * GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE;
+	const float APPLY_PADDING_WIDTH_DIV2  = APPLY_PADDING_WIDTH / 2.0f;
+	const float APPLY_PADDING_HEIGHT			= 2 * BACKGROUND_PADDING + GameMenu::UP_DOWN_ARROW_HEIGHT;
+	const float APPLY_PADDING_HEIGHT_DIV2	= APPLY_PADDING_HEIGHT / 2.0f;
+
+	const float MENU_WIDTH = (this->menuWidth + APPLY_PADDING_WIDTH);
+	const float MENU_HEIGHT = (this->menuHeight + APPLY_PADDING_HEIGHT);
+	
+	const float MENU_WIDTH_DIV2		= MENU_WIDTH / 2.0f;
+	const float MENU_HEIGHT_DIV2	= MENU_HEIGHT / 2.0f;
+
+	// Make world coordinates equal window coordinates
+	Camera::PushWindowCoords();
+
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(this->topLeftCorner[0] + MENU_WIDTH_DIV2 - APPLY_PADDING_WIDTH_DIV2, this->topLeftCorner[1] - MENU_HEIGHT_DIV2 + APPLY_PADDING_HEIGHT_DIV2 + GameMenu::UP_DOWN_ARROW_HEIGHT, -0.5f);
+	
+	// Draw the outline of the background
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glPolygonMode(GL_FRONT, GL_LINE);
+	glLineWidth(6.0f);
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
+
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+	glPolygonMode(GL_FRONT, GL_POINT);
+	glPointSize(6.0f);
+	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
+
+	// Fill in the background
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glColor4f(this->bgColour.R(), this->bgColour.G(), this->bgColour.B(), 1.0f);
+	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
+	
+	glPopMatrix();
+	Camera::PopWindowCoords();
 }
 
 /**
  * Draw up and down arrows around a menu item at the given position.
  */
 void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem) {
-	const float ARROW_HEIGHT = 12;
-	const float ARROW_WIDTH  = 40;
+	const float ARROW_WIDTH				= 40;
+	const float HALF_ARROW_WIDTH	= ARROW_WIDTH / 2.0f;
+	const float HALF_ARROW_HEIGHT	= GameMenu::UP_DOWN_ARROW_HEIGHT / 2.0f;
 
-	const float ARROW_X = itemPos[0] + (menuItem.GetWidth() - ARROW_WIDTH) / 2.0f;
-
-	const float TOP_ARROW_BOTTOM_Y	= GameMenu::UP_DOWN_ARROW_TOP_PADDING + itemPos[1];
-	const float TOP_ARROW_TOP_Y			= TOP_ARROW_BOTTOM_Y + ARROW_HEIGHT;
+	const float ARROW_X = (menuItem.GetWidth() - ARROW_WIDTH) / 2.0f;
+	const float TOP_ARROW_BOTTOM_Y	= GameMenu::UP_DOWN_ARROW_TOP_PADDING;
 	
-	const float BOTTOM_ARROW_TOP_Y		= itemPos[1] - menuItem.GetHeight() - GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING;
-	const float BOTTOM_ARROW_BOTTOM_Y	= BOTTOM_ARROW_TOP_Y - ARROW_HEIGHT;
+	const float BOTTOM_ARROW_TOP_Y		=  -1.0f * (static_cast<float>(menuItem.GetHeight()) + GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING);
+	const float BOTTOM_ARROW_BOTTOM_Y	= BOTTOM_ARROW_TOP_Y - GameMenu::UP_DOWN_ARROW_HEIGHT;
+
+	float selArrowPulseScale = this->selArrowScaleAnim.GetInterpolantValue();
+	float selArrowPulseFade	 = this->selArrowFadeAnim.GetInterpolantValue();
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Make world coordinates equal window coordinates
 	Camera::PushWindowCoords();
 
-	// Draw the outlines of the arrows
-	glPolygonMode(GL_FRONT, GL_LINE);
-	glLineWidth(3.0f);
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	glBegin(GL_TRIANGLES);
-	
-	// Top arrow
-	glVertex2f(ARROW_X, TOP_ARROW_BOTTOM_Y);
-	glVertex2f(ARROW_X + ARROW_WIDTH, TOP_ARROW_BOTTOM_Y);
-	glVertex2f(ARROW_X + ARROW_WIDTH / 2.0f, TOP_ARROW_TOP_Y);
-
-	// Bottom arrow
-	glVertex2f(ARROW_X + ARROW_WIDTH / 2.0f, BOTTOM_ARROW_BOTTOM_Y);
-	glVertex2f(ARROW_X + ARROW_WIDTH, BOTTOM_ARROW_TOP_Y);
-	glVertex2f(ARROW_X, BOTTOM_ARROW_TOP_Y);
-
-	glEnd();
+	// Draw the top arrow first
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(itemPos[0] + ARROW_X + HALF_ARROW_WIDTH, itemPos[1] + TOP_ARROW_BOTTOM_Y + HALF_ARROW_HEIGHT, 0.0f);
+	glScalef(selArrowPulseScale, selArrowPulseScale, selArrowPulseScale);
 
 	// Fill in the arrows
 	glPolygonMode(GL_FRONT, GL_FILL);
-	glColor4f(1.0f, 0.6f, 0.0f, 1.0f);
-	glBegin(GL_TRIANGLES);
+	glColor4f(1.0f, 0.6f, 0.0f, selArrowPulseFade);
 	
-	// Top arrow
-	glVertex2f(ARROW_X, TOP_ARROW_BOTTOM_Y);
-	glVertex2f(ARROW_X + ARROW_WIDTH, TOP_ARROW_BOTTOM_Y);
-	glVertex2f(ARROW_X + ARROW_WIDTH / 2.0f, TOP_ARROW_TOP_Y);
-
-	// Bottom arrow
-	glVertex2f(ARROW_X + ARROW_WIDTH / 2.0f, BOTTOM_ARROW_BOTTOM_Y);
-	glVertex2f(ARROW_X + ARROW_WIDTH, BOTTOM_ARROW_TOP_Y);
-	glVertex2f(ARROW_X, BOTTOM_ARROW_TOP_Y);
-
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT);
+	glVertex2f(HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT);
+	glVertex2f(0.0f, HALF_ARROW_HEIGHT);
 	glEnd();
 
+	glLoadIdentity();
+	glTranslatef(itemPos[0] + ARROW_X + HALF_ARROW_WIDTH, itemPos[1] + BOTTOM_ARROW_TOP_Y - HALF_ARROW_HEIGHT, 0.0f);
+	glScalef(selArrowPulseScale, selArrowPulseScale, selArrowPulseScale);
+	
+	glBegin(GL_TRIANGLES);
+	glVertex2f(0.0f, -HALF_ARROW_HEIGHT);
+	glVertex2f(HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT);
+	glVertex2f(-HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT);
+	glEnd();
+
+	glPopMatrix();
 	Camera::PopWindowCoords();
+
+	glDisable(GL_BLEND);
+
+	this->selArrowScaleAnim.Tick(dT);
+	this->selArrowFadeAnim.Tick(dT);
 }
 
 /**
@@ -189,6 +294,7 @@ void GameMenu::ActivateSelectedMenuItem() {
 	GameMenuItem* activatedItem = this->menuItems[this->selectedMenuItemIndex];
 	activatedItem->SetTextColour(this->activateColour);
 	activatedItem->ToggleWiggleAnimationOff();
+	activatedItem->Activate();
 	
 	if (activatedItem->GetSubMenu() != NULL) {
 		activatedItem->GetSubMenu()->AnimateMenuOpen();
@@ -209,6 +315,7 @@ void GameMenu::ActivateSelectedMenuItem() {
 void GameMenu::DeactivateSelectedMenuItem() {
 	this->isSelectedItemActivated = false;
 	this->SetSelectedMenuItem(this->selectedMenuItemIndex);
+	this->menuItems[this->selectedMenuItemIndex]->Deactivate();
 
 	// Go through all the menu items except the selected one and set their idle colours
 	for (size_t i = 0; i < this->menuItems.size(); i++) {	
@@ -303,13 +410,12 @@ void GameMenu::DebugDraw() {
 // GameSubMenu Functions *************************************************************
 
 const float GameSubMenu::HALF_ARROW_WIDTH		= 20.0f;
-const float GameSubMenu::BACKGROUND_PADDING = 10.0f;
 
 const double GameSubMenu::ARROW_ANIM_FREQ		= 0.2;															// Frequency of arrow bouncing and squishing
 const float GameSubMenu::ARROW_BOUNCE_AMT		= GameSubMenu::BACKGROUND_PADDING;	// How far the arrow deviates when bouncing
 const float GameSubMenu::ARROW_SQUISH_AMT		= 0.60f;														// How much the arrow will smoosh
 
-GameSubMenu::GameSubMenu() : GameMenu(), arrowTex(NULL), menuWidth(0.0f), menuHeight(0.0f) {
+GameSubMenu::GameSubMenu() : GameMenu(), arrowTex(NULL) {
 
 	// Obtain the arrow texture briefly from the texture manager
 	this->arrowTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Bilinear, GL_TEXTURE_2D);
@@ -348,20 +454,17 @@ GameSubMenu::GameSubMenu() : GameMenu(), arrowTex(NULL), menuWidth(0.0f), menuHe
 
 	// Set the background open animations	
 	std::vector<double> openTimeVals;
-	openTimeVals.reserve(3);
+	openTimeVals.reserve(2);
 	openTimeVals.push_back(0.0);
-	openTimeVals.push_back(0.25);
 	openTimeVals.push_back(0.4);
 
 	std::vector<Vector2D> bgScaleAmts;
-	bgScaleAmts.reserve(3);
+	bgScaleAmts.reserve(2);
 	bgScaleAmts.push_back(Vector2D(EPSILON, EPSILON));
-	bgScaleAmts.push_back(Vector2D(1, 1));
 	bgScaleAmts.push_back(Vector2D(1, 1));
 
 	std::vector<float> itemFadeAmts;
-	itemFadeAmts.reserve(3);
-	itemFadeAmts.push_back(0.0f);
+	itemFadeAmts.reserve(2);
 	itemFadeAmts.push_back(0.0f);
 	itemFadeAmts.push_back(1.0f);
 
@@ -370,8 +473,22 @@ GameSubMenu::GameSubMenu() : GameMenu(), arrowTex(NULL), menuWidth(0.0f), menuHe
 	this->menuBGOpenAnim.SetRepeat(false);
 	this->menuItemOpenFadeIn.SetRepeat(false);
 
-	const int randColourIdx = Randomizer::GetInstance()->RandomUnsignedInt() % GameMenu::NUM_RAND_COLOURS;
-	this->randBGColour = GameMenu::RAND_COLOUR_LIST[randColourIdx];
+	// When the sub menu opens it has a 'ghost' that keeps opening but fades out
+	openTimeVals.reserve(openTimeVals.size() + 1);
+	openTimeVals.push_back(0.7);
+	bgScaleAmts.reserve(bgScaleAmts.size() + 1);
+	bgScaleAmts.push_back(Vector2D(1.4f, 1.4f));
+
+	std::vector<float> ghostFadeAmts;
+	ghostFadeAmts.reserve(openTimeVals.size());
+	ghostFadeAmts.push_back(0.0f);
+	ghostFadeAmts.push_back(1.0f);
+	ghostFadeAmts.push_back(0.0f);
+
+	this->menuBGOpenGhostScale.SetLerp(openTimeVals, bgScaleAmts);
+	this->menuBGOpenGhostFade.SetLerp(openTimeVals, ghostFadeAmts);
+	this->menuBGOpenGhostScale.SetRepeat(false);
+	this->menuBGOpenGhostFade.SetRepeat(false);
 }
 
 GameSubMenu::~GameSubMenu() {
@@ -401,45 +518,73 @@ void GameSubMenu::DrawMenuBackground(double dT) {
 	const float MENU_WIDTH_DIV2		= MENU_WIDTH / 2.0f;
 	const float MENU_HEIGHT_DIV2	= MENU_HEIGHT / 2.0f;
 		
+	const float GHOST_MENU_WIDTH_DIV2		= (MENU_WIDTH * this->menuBGOpenGhostScale.GetInterpolantValue()[0]) / 2.0f;
+	const float GHOST_MENU_HEIGHT_DIV2	= (MENU_HEIGHT * this->menuBGOpenGhostScale.GetInterpolantValue()[1]) / 2.0f;
+
 	const Point2D bgTopLeftCorner = this->topLeftCorner + Vector2D(-BACKGROUND_PADDING + MENU_WIDTH_DIV2, BACKGROUND_PADDING - MENU_HEIGHT_DIV2);
+	const Point2D ghostBGTopLeftCorner = this->topLeftCorner + Vector2D(-BACKGROUND_PADDING + GHOST_MENU_WIDTH_DIV2, BACKGROUND_PADDING - GHOST_MENU_HEIGHT_DIV2);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Make world coordinates equal window coordinates
 	Camera::PushWindowCoords();
-
-	// Draw the outline of the background
-	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-	glPolygonMode(GL_FRONT, GL_LINE);
-	glLineWidth(3.0f);
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-
+	
 	glPushMatrix();
 	glLoadIdentity();
 	glTranslatef(bgTopLeftCorner[0], bgTopLeftCorner[1], -0.5f);
 
-	glBegin(GL_QUADS);
-		glVertex2f(-MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
-		glVertex2f(-MENU_WIDTH_DIV2, -MENU_HEIGHT_DIV2);
-		glVertex2f(MENU_WIDTH_DIV2, -MENU_HEIGHT_DIV2);
-		glVertex2f(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
-	glEnd();
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glPolygonMode(GL_FRONT, GL_LINE);
+	glLineWidth(4.0f);
 
-	// Fill in the background
+	// Draw the outline of the ghost background
+	if (this->menuBGOpenGhostFade.GetInterpolantValue() != 0) {
+		glPushMatrix();
+		glLoadIdentity();
+		glTranslatef(ghostBGTopLeftCorner[0], ghostBGTopLeftCorner[1], 0.0f);
+		
+		glColor4f(0, 0, 0, this->menuBGOpenGhostFade.GetInterpolantValue());
+		GameMenu::DrawBackgroundQuad(GHOST_MENU_WIDTH_DIV2, GHOST_MENU_HEIGHT_DIV2);
+		
+		glPopMatrix();
+	}
+	// Draw the outline of the actual background
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
+	
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+	glPolygonMode(GL_FRONT, GL_POINT);
+	glPointSize(4.0f);
+	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
+
 	glPolygonMode(GL_FRONT, GL_FILL);
-	glColor4f(this->randBGColour.R(), this->randBGColour.G(), this->randBGColour.B(), 1.0f);
 
-	glBegin(GL_QUADS);
-		glVertex2f(-MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
-		glVertex2f(-MENU_WIDTH_DIV2, -MENU_HEIGHT_DIV2);
-		glVertex2f(MENU_WIDTH_DIV2, -MENU_HEIGHT_DIV2);
-		glVertex2f(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
-	glEnd();
+	// Draw the fill of the ghost background
+	if (this->menuBGOpenGhostFade.GetInterpolantValue() != 0) {
+		glPushMatrix();
+		glLoadIdentity();
+		glTranslatef(ghostBGTopLeftCorner[0], ghostBGTopLeftCorner[1], 0.0f);
+
+		glColor4f(this->bgColour.R(), this->bgColour.G(), this->bgColour.B(), this->menuBGOpenGhostFade.GetInterpolantValue());
+		GameMenu::DrawBackgroundQuad(GHOST_MENU_WIDTH_DIV2, GHOST_MENU_HEIGHT_DIV2);
+
+		glPopMatrix();
+	}
+	// Fill in the actual background
+	glColor4f(this->bgColour.R(), this->bgColour.G(), this->bgColour.B(), 1.0f);
+	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
 	
 	glPopMatrix();
 	Camera::PopWindowCoords();
 
+	glDisable(GL_BLEND);
+
 	this->menuBGOpenAnim.Tick(dT);
+	this->menuBGOpenGhostFade.Tick(dT);
+	this->menuBGOpenGhostScale.Tick(dT);
 }
 
 /**
@@ -521,8 +666,11 @@ void GameSubMenu::AnimateMenuOpen() {
 	// Restart the animations to open the menu and fade in its items
 	this->menuBGOpenAnim.ResetToStart();
 	this->menuItemOpenFadeIn.ResetToStart();
+
+	this->menuBGOpenGhostScale.ResetToStart();
+	this->menuBGOpenGhostFade.ResetToStart();
 	
 	// Choose a new colour for the menu
 	const int randColourIdx = Randomizer::GetInstance()->RandomUnsignedInt() % GameMenu::NUM_RAND_COLOURS;
-	this->randBGColour = GameMenu::RAND_COLOUR_LIST[randColourIdx];
+	this->bgColour = GameMenu::RAND_COLOUR_LIST[randColourIdx];
 }

@@ -116,6 +116,11 @@ void BallInPlayState::Tick(double seconds) {
 		didCollideWithPaddle = paddle->CollisionCheck(currBall->GetBounds(), n, d);
 		if (didCollideWithPaddle) {
 			
+			// Don't do anything if this ball is the one attached to the paddle
+			if (paddle->GetAttachedBall() == currBall) {
+				continue;
+			}
+
 			// If the sticky paddle power-up is activated then the ball will simply be attached to
 			// the player paddle (if there are no balls already attached)
 			if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
@@ -388,6 +393,7 @@ void BallInPlayState::DoItemCollision() {
 // d is the distance from the center of the ball to the line that was collided with
 // when d is negative the ball is inside the line, when positive it is outside
 void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
+	
 	// Position the ball so that it is against the collision line, exactly
 	b.SetCenterPosition(b.GetBounds().Center() + (b.GetBounds().Radius() + EPSILON - d) * -b.GetDirection());
 

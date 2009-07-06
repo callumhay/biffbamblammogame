@@ -38,7 +38,7 @@ unsigned int GameMenuItem::GetHeight() const {
 	return this->currLabel->GetHeight();
 }
 
-unsigned int GameMenuItem::GetWidth() const {
+float GameMenuItem::GetWidth() const {
 	return this->currLabel->GetLastRasterWidth();
 }
 
@@ -57,7 +57,7 @@ void GameMenuItem::Draw(double dT, const Point2D& topLeftCorner) {
 	this->wiggleAnimation.Tick(dT);
 
 	if (subMenu != NULL) {
-		const float PAD_AMT = GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE + GameMenuItem::SUB_MENU_PADDING + GameSubMenu::BACKGROUND_PADDING + 2*GameSubMenu::HALF_ARROW_WIDTH;
+		const float PAD_AMT = GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE + GameMenuItem::SUB_MENU_PADDING + GameMenu::BACKGROUND_PADDING + 2*GameSubMenu::HALF_ARROW_WIDTH;
 		subMenu->SetTopLeftCorner(topLeftCorner + Vector2D(this->lgTextLabel.GetLastRasterWidth() + PAD_AMT, 0.0f));
 	}
 }
@@ -101,7 +101,7 @@ const float SelectionListMenuItem::SELECTION_ARROW_WIDTH	= 15.0f;	// The width o
 
 SelectionListMenuItem::SelectionListMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, const std::vector<std::string>& items) :
 GameMenuItem(smLabel, lgLabel, NULL), selectionList(items), selectedIndex(SelectionListMenuItem::NO_SELECTION),
-baseLabelStr(lgLabel.GetText()), maxWidth(0.0f) {
+previouslySelectedIndex(SelectionListMenuItem::NO_SELECTION), baseLabelStr(lgLabel.GetText()), maxWidth(0.0f) {
 
 	this->SetSelectionList(items);
 }
@@ -120,16 +120,13 @@ void SelectionListMenuItem::SetSelectionList(const std::vector<std::string>& ite
 
 	// Try to figure out what the maximum width of this item is
 	this->lgTextLabel.SetText(this->baseLabelStr);
-	//this->lgTextLabel.Draw();
 	const float BASE_LABEL_WIDTH = this->lgTextLabel.GetLastRasterWidth();
 	
 	TextLabel2D tempLabel = this->lgTextLabel;
 	for (size_t i = 0; i < items.size(); i++) {
 		
 		tempLabel.SetText(this->selectionList[i]);
-		//tempLabel.Draw();
-		
-		const float CURR_ITEM_WIDTH = BASE_LABEL_WIDTH + 2*SelectionListMenuItem::INTERIOR_PADDING + 
+		const float CURR_ITEM_WIDTH = BASE_LABEL_WIDTH + 2 * SelectionListMenuItem::INTERIOR_PADDING + 
 																	2 * SelectionListMenuItem::SELECTION_ARROW_WIDTH + tempLabel.GetLastRasterWidth();
 		this->maxWidth = std::max<float>(this->maxWidth, CURR_ITEM_WIDTH);
 	}
@@ -269,8 +266,19 @@ void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			this->selectedIndex = (this->selectedIndex + 1) % this->selectionList.size();
 			break;
 
+		case SDLK_RETURN:
+			// When return is hit, the selection is locked and results in a change in the menu item
+			// tell the parent about this in order to send out a change event
+			if (this->selectedIndex != this->previouslySelectedIndex) {
+				parent->SelectedMenuItemChanged();
+			}
+			parent->DeactivateSelectedMenuItem();
+			break;
+
 		case SDLK_ESCAPE:
 			// If the user hits ESC then we deselect the currently selected item (i.e., this one)
+			// and we make sure the selection inside the item doesn't change
+			this->selectedIndex = this->previouslySelectedIndex;
 			parent->DeactivateSelectedMenuItem();
 			break;
 
@@ -279,4 +287,13 @@ void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 	}
 
 	assert(this->selectedIndex >= 0 && this->selectedIndex < static_cast<int>(this->selectionList.size()));
+}
+
+/**
+ * Tell this menu item to become selected. This function must be called
+ * in order to ensure this item is properly activated.
+ */
+void SelectionListMenuItem::Activate() {
+	// Set the previous index to the current one (so we keep track of it)
+	this->previouslySelectedIndex = this->selectedIndex;
 }

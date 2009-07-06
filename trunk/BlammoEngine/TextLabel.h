@@ -52,6 +52,7 @@ public:
 	// Set the text for this label
 	void SetText(const std::string& text) {
 		this->text = text;
+		this->lastRasterWidth = this->font->GetWidth(this->text);
 	}
 	// Set the top left corner location where this label will be drawn
 	void SetTopLeftCorner(const Point2D& p) {

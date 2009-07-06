@@ -38,6 +38,12 @@ public:
 	 */
 	virtual void GameMenuItemActivatedEvent(int itemIndex) = 0;
 
+	/**
+	 * Event called when a menu item has changed (e.g., a new selection is made).
+	 * Parameters: itemInde
+	 */
+	virtual void GameMenuItemChangedEvent(int itemIndex) = 0;
+
 	/** 
 	 * Event called when the user tries to quickly escape from a menu
 	 * (by hitting Esc key).
@@ -50,21 +56,25 @@ public:
  * user.
  */
 class GameMenu {
+private:
+	void SetupAnimations();
 
 protected:
-	static const int NUM_RAND_COLOURS = 10;
+	static const int NUM_RAND_COLOURS = 20;
 	static const Colour RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS];
 
+	static const float UP_DOWN_ARROW_HEIGHT;
 	static const float UP_DOWN_ARROW_TOP_PADDING;
 	static const float UP_DOWN_ARROW_BOTTOM_PADDING;
 
 	std::list<GameMenuEventHandler*> eventHandlers;	// Event handlers for this game menu
-
+	
+	float menuItemPadding;
+	float menuWidth, menuHeight;
 	int selectedMenuItemIndex;			// The currently selected menu item
 	bool isSelectedItemActivated;		// Whether the currently selected menu item has been activated
 
 	Point2D topLeftCorner;
-	unsigned int menuItemPadding;						// Padding space between items in the menu
 	std::vector<GameMenuItem*> menuItems;		// The set of items in the menu
 
 	Colour idleColour;					// Colour of menu items when they are left alone
@@ -72,8 +82,15 @@ protected:
 	Colour activateColour;			// Colour of menu items when they are selected
 	Colour greyedOutColour;			// Colour when item is not in the current menu level
 
+	Colour bgColour;	// Colour assigned to the background for this menu
+
+	AnimationMultiLerp<float> selArrowScaleAnim;
+	AnimationMultiLerp<float> selArrowFadeAnim;
+
+	static void DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight);
+
 	virtual float GetMenuItemPadding() const;
-	virtual void DrawMenuBackground(double dT) {}
+	virtual void DrawMenuBackground(double dT);
 	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem) { menuItem.Draw(dT, pos); }
 	virtual void DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem);
 	
@@ -94,6 +111,8 @@ protected:
 	}
 
 public:
+	static const float BACKGROUND_PADDING;
+
 	GameMenu();
 	GameMenu(const Point2D& topLeftCorner);
 	virtual ~GameMenu();
@@ -129,21 +148,29 @@ public:
 	 * as a possible submenu for that item (allowed to be NULL).
 	 * Returns: The index of the item added in this menu.
 	 */
-	virtual int AddMenuItem(TextLabel2D& smLabel, TextLabel2D& lgLabel, GameSubMenu* subMenu) {
+	int AddMenuItem(TextLabel2D& smLabel, TextLabel2D& lgLabel, GameSubMenu* subMenu) {
 		this->menuItems.push_back(new GameMenuItem(smLabel, lgLabel, subMenu));
+		
+		this->menuHeight += smLabel.GetHeight() + this->GetMenuItemPadding();
+		this->menuWidth = std::max<float>(lgLabel.GetLastRasterWidth(), this->menuWidth);
+
 		return this->menuItems.size() - 1;
 	}
-	virtual int AddMenuItem(GameMenuItem* menuItem) {
+	int AddMenuItem(GameMenuItem* menuItem) {
 		assert(menuItem != NULL);
 		this->menuItems.push_back(menuItem);
+
+		this->menuHeight += menuItem->GetHeight() + this->GetMenuItemPadding();
+		this->menuWidth = std::max<float>(menuItem->GetWidth(), this->menuWidth);
+
 		return this->menuItems.size() - 1;
 	}
-	
+
 	// Sets the padding between menu items, measured in pixels
 	void SetPaddingBetweenMenuItems(unsigned int paddingInPixels) {
 		this->menuItemPadding = paddingInPixels;
 	}
-	
+
 	// Sets the top-left corner of the menu
 	void SetTopLeftCorner(const Point2D& p) {
 		this->topLeftCorner = p;
@@ -153,12 +180,24 @@ public:
 	void DebugDraw();
 
 	void KeyPressed(SDLKey key);
+
+	/**
+	 * Tell this menu that the currently selected menu item has changed
+	 */
+	inline void SelectedMenuItemChanged() {
+		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
+			(*iter)->GameMenuItemChangedEvent(this->selectedMenuItemIndex);
+		}
+	}
 };
 
+/**
+ * A menu for a particular menu item in the GameMenu - this menu is a sub menu
+ * associated with items in a parent menu.
+ */
 class GameSubMenu : public GameMenu {
 private:
 	Texture* arrowTex;
-	float menuWidth, menuHeight;
 
 	static const double ARROW_ANIM_FREQ;
 	static const float ARROW_BOUNCE_AMT;
@@ -170,7 +209,8 @@ private:
 	AnimationMultiLerp<Vector2D> menuBGOpenAnim;
 	AnimationMultiLerp<float> menuItemOpenFadeIn;
 
-	Colour randBGColour;
+	AnimationMultiLerp<Vector2D> menuBGOpenGhostScale;
+	AnimationMultiLerp<float> menuBGOpenGhostFade;
 
 protected:
 	virtual float GetMenuItemPadding() const;
@@ -180,30 +220,9 @@ protected:
 
 public:
 	static const float HALF_ARROW_WIDTH;
-	static const float BACKGROUND_PADDING;
-
+	
 	GameSubMenu();
 	virtual ~GameSubMenu();
-
-	virtual int AddMenuItem(TextLabel2D& smLabel, TextLabel2D& lgLabel, GameSubMenu* subMenu) {
-		this->menuItems.push_back(new GameMenuItem(smLabel, lgLabel, subMenu));
-		
-		this->menuHeight += smLabel.GetHeight() + this->GetMenuItemPadding();
-		
-		//lgLabel.Draw();
-		this->menuWidth = std::max<float>(lgLabel.GetLastRasterWidth(), this->menuWidth);
-
-		return this->menuItems.size() - 1;
-	}
-	virtual int AddMenuItem(GameMenuItem* menuItem) {
-		assert(menuItem != NULL);
-		this->menuItems.push_back(menuItem);
-
-		this->menuHeight += menuItem->GetHeight() + this->GetMenuItemPadding();
-		this->menuWidth = std::max<float>(menuItem->GetWidth(), this->menuWidth);
-
-		return this->menuItems.size() - 1;
-	}
 
 	virtual void SetSelectedMenuItem(int index);
 
