@@ -290,6 +290,30 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, CgFxEffectBase* effect)
 
 /**
  * Public function for setting particles for this emitter such that they are
+ * all of a certain text label.
+ */
+bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text) {
+	assert(numParticles > 0);
+	// Clean up previous emitter data
+	this->Flush();
+
+	// Create each of the new particles
+	for (unsigned int i = 0; i < numParticles; i++) {
+		// Initialize the particle and its attributes
+		ESPOnomataParticle* newParticle = new ESPOnomataParticle(text.GetFont(), text.GetText());
+		newParticle->SetDropShadow(text.GetDropShadow());
+
+		this->deadParticles.push_back(newParticle);
+
+		// Assign the number of lives...
+		this->particleLivesLeft[newParticle] = this->numParticleLives;
+	}
+
+	return true;
+}
+
+/**
+ * Public function for setting particles for this emitter such that they are
  * all onomatopoeia particles of the given text label and qualifications.
  * Returns: true on success, false otherwise.
  */

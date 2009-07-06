@@ -60,6 +60,13 @@ public:
 	}
 
 	/**
+	 * Whether or not this ball can collide with anything.
+	 */
+	bool CanCollide() const {
+		return this->ballCollisionsDisabledTimer <= EPSILON;
+	}
+
+	/**
 	 * Check to see if this ball collided with another.
 	 * Returns: true if there was a collision between this ball and otherball, false otherwise.
 	 */

@@ -82,6 +82,7 @@ public:
 	// Setter functions for typical attributes of emitters
 	bool SetParticles(unsigned int numParticles, Texture2D* texture);
 	bool SetParticles(unsigned int numParticles, CgFxEffectBase* effect);
+	bool SetParticles(unsigned int numParticles, const TextLabel2D& text);
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e);
 
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);

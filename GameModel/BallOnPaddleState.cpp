@@ -14,9 +14,9 @@ BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(t
 
 	paddle->ResetPaddle();
 	ball->ResetBallAttributes();
-	paddle->AttachBall(ball);
 
-	this->UpdateBallPosition();
+	this->UpdateBallPosition();	// This must be called before attaching the ball - makes sure the ball position is synced to the paddle!!
+	paddle->AttachBall(ball);
 }
 
 BallOnPaddleState::~BallOnPaddleState() {
@@ -52,6 +52,7 @@ void BallOnPaddleState::UpdateBallPosition() {
 void BallOnPaddleState::Tick(double seconds) {
 	// In this state the paddle can move around freely and the ball stays at
 	// its center without moving.
+	this->UpdateBallPosition();
 	this->gameModel->GetPlayerPaddle()->Tick(seconds);
 
 	// If this is the first tick of the current state, then the ball has just

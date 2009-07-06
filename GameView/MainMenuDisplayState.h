@@ -15,8 +15,13 @@
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Animation.h"
 
+#include "../ESPEngine/ESPPointEmitter.h"
+//#include "../ESPEngine/ESPVolumeEmitter.h"
+
 #include "GameMenu.h"
 #include "DisplayState.h"
+
+#include "../ConfigOptions.h"
 
 class TextLabel2D;
 class FBObj;
@@ -45,6 +50,12 @@ private:
 	static const Colour MENU_ITEM_ACTIVE_COLOUR;
 	static const Colour MENU_ITEM_GREYED_COLOUR;
 
+	static const int MENU_SEL_ON_INDEX	= 0;
+	static const int MENU_SEL_OFF_INDEX	= 1;
+
+	// The configuration options for the game
+	ConfigOptions cfgOptions;
+
 	// Indices for the main menu
 	int newGameMenuItemIndex;
 	int playLevelMenuItemIndex;
@@ -59,26 +70,40 @@ private:
 
 	// Indents and spacing
 	static const unsigned int MENU_X_INDENT = 50;
-	static const unsigned int MENU_Y_INDENT = 100;
-	static const unsigned int TITLE_Y_INDENT = 30;
+	static const unsigned int MENU_Y_INDENT = 320;
 	static const unsigned int MENU_ITEM_PADDING = 15;
 
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
 
+	ESPPointEmitter biffEmitter, bamEmitter, blammoEmitter;
+	ESPPointEmitter biffTextEmitter, bamTextEmitter, blammoTextEmitter;
+	std::list<ESPPointEmitter> randomBGParicles;
 
-	TextLabel2D* titleLabel;
-	GameMenu* mainMenu;
-	GameSubMenu* optionsSubMenu;
+	Texture* bangTexture1;
+	Texture* bangTexture2;
+	Texture* bangTexture3;
+	
+	GameMenu* mainMenu;						// Main (top-most/parent) menu
+	GameSubMenu* optionsSubMenu;	// Options sub-menu
+
+	// Pointers for tracking the menu items in the options menu
+	SelectionListMenuItem* fullscreenMenuItem;
+	SelectionListMenuItem* resolutionMenuItem;
+	SelectionListMenuItem* vSyncMenuItem;
 
 	AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value
 
 	bool changeToPlayGameState;
 
+	void InitializeESPEffects();
 	void InitializeMainMenu();
 	void InitializeOptionsSubMenu();
 
 	void SetupBloomEffect();
+
+	void RenderTitle();
+	void RenderBackgroundEffects(double dT);
 
 public:
 	MainMenuDisplayState(GameDisplay* display);
@@ -95,6 +120,7 @@ public:
 		MainMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
 		virtual ~MainMenuEventHandler() {}
 		virtual void GameMenuItemActivatedEvent(int itemIndex);
+		virtual void GameMenuItemChangedEvent(int itemIndex) {};
 		virtual void EscMenu();
 	};
 
@@ -105,6 +131,7 @@ public:
 		OptionsSubMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
 		virtual ~OptionsSubMenuEventHandler() {}
 		virtual void GameMenuItemActivatedEvent(int itemIndex);
+		virtual void GameMenuItemChangedEvent(int itemIndex);
 		virtual void EscMenu();
 	};
 

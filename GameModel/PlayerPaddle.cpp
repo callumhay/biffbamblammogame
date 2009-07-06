@@ -152,7 +152,7 @@ void PlayerPaddle::FireAttachedBall() {
 	ballReleaseDir.Normalize();
 
 	// Set the ball velocity (tragectory it will leave the paddle on) and re-enable its collisions
-	this->attachedBall->SetVelocity(GameBall::NormalSpeed, ballReleaseDir);
+	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), ballReleaseDir);
 	this->attachedBall->SetBallCollisionsEnabled();
 
 	// EVENT: Ball Shot
@@ -167,34 +167,58 @@ void PlayerPaddle::Tick(double seconds) {
 		this->timeSinceLastLaserBlast += seconds;
 	}
 
+	float distanceTravelled = this->distTemp * seconds;
 	float newCenterX = this->centerPos[0] + (this->distTemp * seconds);
 	float minNewXPos = newCenterX - this->currHalfWidthTotal;
 	float maxNewXPos = newCenterX + this->currHalfWidthTotal;
+	Point2D oldPaddleCenter = this->centerPos;
+	
+	float halfWidthTotalWithBallMin = this->currHalfWidthTotal;
+	float halfWidthTotalWithBallMax = this->currHalfWidthTotal;
+
+	// If a ball is attached, it could affect the min and max x boundries of the paddle so 
+	// adjust the boundries based on the position of the ball on the paddle
+	if (this->attachedBall != NULL) {	
+		float ballX = this->attachedBall->GetBounds().Center()[0] + distanceTravelled;
+		float ballMinX = ballX - this->attachedBall->GetBounds().Radius();
+		float ballMaxX = ballX + this->attachedBall->GetBounds().Radius();
+		
+		// If it's the case that the ball increases the size of the paddle on the -x dir
+		// then accomodate this, same goes for +x direction
+		if (ballMinX < minNewXPos) {
+			halfWidthTotalWithBallMin += (minNewXPos - ballMinX);
+			minNewXPos = ballMinX;
+		}
+		else if (ballMaxX > maxNewXPos) {
+			halfWidthTotalWithBallMax += (ballMaxX - maxNewXPos);
+			maxNewXPos = ballMaxX;
+		}
+	}
 
 	if (minNewXPos - EPSILON <= this->minBound) {
 		// The paddle bumped into the left wall
-		this->centerPos[0] = this->minBound + this->currHalfWidthTotal;
+		this->centerPos[0] = this->minBound + halfWidthTotalWithBallMin;
 		
 		if (this->hitWall) {
 			this->distTemp = 0.0f;
 		}
 		else {
 			// EVENT: paddle hit left wall for first time
-			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-this->currHalfWidthTotal, 0));
+			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-halfWidthTotalWithBallMin, 0));
 		}
 
 		this->hitWall = true;
 	}
 	else if (maxNewXPos + EPSILON > this->maxBound) {
 		// The paddle bumped into the right wall
-		this->centerPos[0] = this->maxBound - this->currHalfWidthTotal;
+		this->centerPos[0] = this->maxBound - halfWidthTotalWithBallMax;
 		
 		if (this->hitWall) {
 			this->distTemp = 0.0f;
 		}
 		else {
 			// EVENT: paddle hit right wall for first time
-			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(this->currHalfWidthTotal, 0));
+			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(halfWidthTotalWithBallMax, 0));
 		}
 		this->hitWall = true;
 	}
@@ -222,9 +246,10 @@ void PlayerPaddle::Tick(double seconds) {
 
 	// If there is a ball attached then we need to move it around with the paddle
 	if (this->attachedBall != NULL) {
-		Vector2D disp = Vector2D(0.0f, this->attachedBall->GetBounds().Radius() + this->GetHalfHeight() + 0.1f);
-		Point2D ballLoc = this->GetCenterPosition() + disp;
-		this->attachedBall->SetCenterPosition(ballLoc);
+		// We need to figure out what the distance is from the paddle center-top to the ball center
+		Vector2D paddleTopCenterToBallCenter = this->attachedBall->GetBounds().Center() - (oldPaddleCenter + Vector2D(0, this->GetHalfHeight()));
+		// Maintain the vector obtained above in the new position of the paddle
+		this->attachedBall->SetCenterPosition(this->centerPos + Vector2D(0, this->GetHalfHeight()) + paddleTopCenterToBallCenter);
 	}
 }
 
@@ -279,11 +304,11 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	if (onPaddle) {
 		// Position the ball so that it is against the collision line, exactly
 		Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
-		this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() + EPSILON - distance) * -this->attachedBall->GetDirection());
+		this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() - distance - 5 * EPSILON) * - this->attachedBall->GetDirection());
 	}
 
-	// Remove the ball's velocity
-	this->attachedBall->SetVelocity(GameBall::ZeroSpeed, Vector2D(0, 0));
+	// Remove the ball's direction but not its speed
+	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), Vector2D(0, 0));
 
 	// Disable collisions for the ball (reenable them when the ball is detached)
 	this->attachedBall->SetBallCollisionsDisabled();

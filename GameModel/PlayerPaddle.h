@@ -184,6 +184,9 @@ public:
 	bool HasBallAttached() const { 
 		return this->attachedBall != NULL; 
 	}
+	GameBall* GetAttachedBall() const {
+		return this->attachedBall;
+	}
 
 	bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
 	void DebugDraw() const;

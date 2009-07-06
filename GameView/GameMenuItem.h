@@ -44,10 +44,8 @@ public:
 	virtual void KeyPressed(GameMenu* parent, SDLKey key) {};
 
 	unsigned int GetHeight() const;
-	virtual unsigned int GetWidth() const;
+	virtual float GetWidth() const;
 	
-	GameSubMenu* GetSubMenu() { return this->subMenu; }
-
 	void ToggleWiggleAnimationOn(float amplitude, float frequency);
 	void ToggleWiggleAnimationOff();
 
@@ -59,6 +57,11 @@ public:
 			this->currLabel = &this->smTextLabel;
 		}
 	}
+
+	virtual void Activate() {};
+	virtual void Deactivate() {};
+
+	GameSubMenu* GetSubMenu() { return this->subMenu; }
 
 	inline void SetTextColour(const Colour& c) {
 		this->currLabel->SetColour(c);
@@ -82,6 +85,7 @@ private:
 	static const float INTERIOR_PADDING;
 	static const float SELECTION_ARROW_WIDTH;
 
+	int previouslySelectedIndex;							// The index that was selected before this item was activated and possibly changed
 	int selectedIndex;												// Index in the list that's currently selected 
 	std::vector<std::string> selectionList;		// List of items that can be selected
 	std::string baseLabelStr;									// The label of this item (this text always appears on the item)
@@ -95,11 +99,25 @@ public:
 	virtual ~SelectionListMenuItem();
 
 	void SetSelectionList(const std::vector<std::string>& items);
+	
+	inline void SetSelectedItem(int index) {
+		assert(index >= 0 && index < static_cast<int>(this->selectionList.size()));
+		this->selectedIndex = index;
+	}
+	inline int GetSelectedItemIndex() const {
+		return this->selectedIndex;
+	}
+	inline std::string GetSelectedItemText() const {
+		assert(this->selectedIndex >= 0 && this->selectedIndex < static_cast<int>(this->selectionList.size()));
+		return this->selectionList[this->selectedIndex];
+	}
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner);
 	virtual void KeyPressed(GameMenu* parent, SDLKey key);
 
-	virtual unsigned int GetWidth() const { return this->maxWidth; }
+	virtual float GetWidth() const { return this->maxWidth; }
+
+	virtual void Activate();
 };
 
 #endif
