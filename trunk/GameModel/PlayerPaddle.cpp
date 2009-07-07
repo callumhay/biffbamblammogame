@@ -226,7 +226,8 @@ void PlayerPaddle::Tick(double seconds) {
 		this->centerPos[0] = newCenterX;
 		this->hitWall = false;
 	}
-	
+
+	// TODO: Fix this to work nicer
 	if (this->ticksSinceAvg == 0) {
 		this->avgVel = this->distTemp;
 	}

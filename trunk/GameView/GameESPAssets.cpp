@@ -570,17 +570,12 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	bangOnoEffect->AddEffector(&this->particleFader);
 	bangOnoEffect->AddEffector(&this->particleSmallGrowth);
 
-	// Add the single particle to the emitter...
-	DropShadow dpTemp;
-	dpTemp.amountPercentage = 0.10f;
-	ESPOnomataParticle* bangOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium));
-	bangOnoParticle->SetDropShadow(dpTemp);
-
-	// Set the severity of the effect...
-	// TODO
-	bangOnoParticle->SetOnomatoplexSound(Onomatoplex::EXPLOSION, Onomatoplex::NORMAL);
-	
-	bangOnoEffect->AddParticle(bangOnoParticle);
+	// Add the single text particle to the emitter with the severity of the effect...
+	TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+	bangTextLabel.SetColour(Colour(1, 1, 1));
+	bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+	// TODO: make the severity more dynamic!!
+	bangOnoEffect->SetParticles(1, bangTextLabel, Onomatoplex::EXPLOSION, Onomatoplex::NORMAL);
 
 	// Lastly, add the new emitters to the list of active emitters in order of back to front
 	this->activeGeneralEmitters.push_front(bangEffect);

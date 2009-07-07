@@ -403,6 +403,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPMultiColourEffector.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPOnomataParticle.h"
 					>
 				</File>
@@ -452,6 +456,10 @@
 				>
 				<File
 					RelativePath=".\ESPEngine\ESPEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPMultiColourEffector.cpp"
 					>
 				</File>
 				<File

@@ -16,7 +16,9 @@
 #include "../BlammoEngine/Animation.h"
 
 #include "../ESPEngine/ESPPointEmitter.h"
-//#include "../ESPEngine/ESPVolumeEmitter.h"
+#include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESPParticleColourEffector.h"
+#include "../ESPEngine/ESPMultiColourEffector.h"
 
 #include "GameMenu.h"
 #include "DisplayState.h"
@@ -76,13 +78,18 @@ private:
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
 
+	// Particle-related variables
 	ESPPointEmitter biffEmitter, bamEmitter, blammoEmitter;
 	ESPPointEmitter biffTextEmitter, bamTextEmitter, blammoTextEmitter;
-	std::list<ESPPointEmitter> randomBGParicles;
+	
+	std::list<ESPPointEmitter*> randomBGParicles;
+	//ESPParticleColourEffector particleFader;
+	ESPMultiColourEffector particleFadeInAndOut;
+	ESPParticleScaleEffector particleSmallGrowth;
+	ESPParticleScaleEffector particleMediumGrowth;
 
-	Texture* bangTexture1;
-	Texture* bangTexture2;
-	Texture* bangTexture3;
+
+	std::vector<Texture*> bangTextures;
 	
 	GameMenu* mainMenu;						// Main (top-most/parent) menu
 	GameSubMenu* optionsSubMenu;	// Options sub-menu
@@ -104,6 +111,9 @@ private:
 
 	void RenderTitle();
 	void RenderBackgroundEffects(double dT);
+
+	void InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
+	//void InsertZapEffectIntoBGEffects();
 
 public:
 	MainMenuDisplayState(GameDisplay* display);
