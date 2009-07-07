@@ -42,12 +42,15 @@ const Colour MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
 DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), 
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), changeToPlayGameState(false),
-menuFBO(NULL), bloomEffect(NULL), bangTexture1(NULL), bangTexture2(NULL), bangTexture3(NULL) {
+menuFBO(NULL), bloomEffect(NULL),
+/*particleFader(0, 1),*/ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
+{
 
 	// Setup any textures for rendering the menu screen
-	this->bangTexture1 = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture2D::Trilinear, GL_TEXTURE_2D);
-	this->bangTexture2 = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture2D::Trilinear, GL_TEXTURE_2D);
-	this->bangTexture3 = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture2D::Trilinear, GL_TEXTURE_2D);
+	this->bangTextures.reserve(3);
+	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture2D::Trilinear, GL_TEXTURE_2D));
+	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture2D::Trilinear, GL_TEXTURE_2D));
+	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture2D::Trilinear, GL_TEXTURE_2D));
 
 	// Setup any emitter/sprite/particle effects
 	this->InitializeESPEffects();
@@ -93,9 +96,16 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	this->bloomEffect = NULL;
 
 	// Release texture assets that we no longer need
-	ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTexture1);
-	ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTexture2);
-	ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTexture3);
+	for (size_t i = 0; i < this->bangTextures.size(); i++) {
+		bool releaseTexSuccess = ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTextures[i]);
+		assert(releaseTexSuccess);
+	}
+
+	// Clean up any left over emitters
+	for (std::list<ESPPointEmitter*>::iterator iter = this->randomBGParicles.begin(); iter != this->randomBGParicles.end(); iter++) {
+		delete *iter;
+	}
+	this->randomBGParicles.clear();
 }
 
 /**
@@ -103,6 +113,15 @@ MainMenuDisplayState::~MainMenuDisplayState() {
  * and background of the menu screen.
  */
 void MainMenuDisplayState::InitializeESPEffects() {
+	assert(this->bangTextures.size() == 3);
+	
+	// Setup any particle effectors
+	std::vector<ColourRGBA> fadeInOutColours;
+	fadeInOutColours.reserve(3);
+	fadeInOutColours.push_back(ColourRGBA(1, 1, 1, 0));
+	fadeInOutColours.push_back(ColourRGBA(1, 1, 1, 1));
+	fadeInOutColours.push_back(ColourRGBA(1, 1, 1, 0));
+	this->particleFadeInAndOut.SetColours(fadeInOutColours);
 
 	// "Biff!" Bang Title Text
 	this->biffEmitter.SetSpawnDelta(ESPInterval(-1, -1));
@@ -112,7 +131,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 	this->biffEmitter.SetParticleAlignment(ESP::ScreenAligned);
 	this->biffEmitter.SetParticleRotation(ESPInterval(-10));
 	this->biffEmitter.SetParticleSize(ESPInterval(10), ESPInterval(5));
-	this->biffEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTexture1));
+	this->biffEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTextures[0]));
 
 	this->biffTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
 	this->biffTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
@@ -134,7 +153,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 	this->bamEmitter.SetParticleAlignment(ESP::ScreenAligned);
 	this->bamEmitter.SetParticleRotation(ESPInterval(-15));
 	this->bamEmitter.SetParticleSize(ESPInterval(11.0f), ESPInterval(5.0f));
-	this->bamEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTexture2));
+	this->bamEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTextures[1]));
 
 	this->bamTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
 	this->bamTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
@@ -156,7 +175,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 	this->blammoEmitter.SetParticleAlignment(ESP::ScreenAligned);
 	this->blammoEmitter.SetParticleRotation(ESPInterval(-8));
 	this->blammoEmitter.SetParticleSize(ESPInterval(12.0f), ESPInterval(6.5f));
-	this->blammoEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTexture3));
+	this->blammoEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTextures[2]));
 
 	this->blammoTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
 	this->blammoTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
@@ -389,7 +408,9 @@ void MainMenuDisplayState::RenderTitle() {
 	glPushMatrix();
 	glLoadIdentity();
 	tempCamera.ApplyCameraTransform(0.0);
-
+	
+	/*
+	// Draw debug grid for coordinates system
 	const int TEST_WIDTH = 15;
 	const int TEST_HEIGHT = 15;
 	glLineWidth(1.0f);
@@ -404,6 +425,7 @@ void MainMenuDisplayState::RenderTitle() {
 			glVertex2f(TEST_WIDTH, y);
 	}
 	glEnd();
+	*/
 
 	// Draw the "Biff!" Text
 	const Point3D BIFF_EMIT_COORD = Point3D(MIN_X_COORD + 5.0f, MAX_Y_COORD - 2.5f, 0);
@@ -446,16 +468,23 @@ void MainMenuDisplayState::RenderTitle() {
  * random bangs and booms, etc. going off all over the place.
  */
 void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
-	// Insert a bunch of bang-onomatopiea effects for drawing if we're running low on them
-	//while (this->randomBGParicles.size() < 20) {
-		// TODO
-	//}
-
-	const float CAM_DIST_FROM_ORIGIN = 20.0f;
+	const float CAM_DIST_FROM_ORIGIN = 20.0f;	
 	
+	const float MAX_Z_COORD = CAM_DIST_FROM_ORIGIN / 4.0f;
+	const float MIN_Z_COORD = -MAX_Z_COORD;
 	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
+	const float MIN_Y_COORD = -MAX_Y_COORD;
 	const float MAX_X_COORD = static_cast<float>(this->display->GetDisplayWidth()) /  static_cast<float>(this->display->GetDisplayHeight()) * MAX_Y_COORD;
-	const float MIN_X_COORD = -MAX_X_COORD;
+	const float MIN_X_COORD = -MAX_X_COORD;	
+	
+	// Insert a bunch of bang-onomatopiea effects for drawing if we're running low on them
+	const float MAX_Y_COORD_BG_EFFECTS = (MAX_Y_COORD - 6.0f);
+	while (this->randomBGParicles.size() < 20) {
+		this->InsertBangEffectIntoBGEffects(MIN_X_COORD, MAX_X_COORD, MIN_Y_COORD, MAX_Y_COORD_BG_EFFECTS, MIN_Z_COORD, MAX_Z_COORD);
+	}
+
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	Camera tempCamera;
 	tempCamera.SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
@@ -467,12 +496,15 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
 	tempCamera.ApplyCameraTransform(0.0);
 
 	// Go through all the active emitters and tick/draw them
-	for (std::list<ESPPointEmitter>::iterator iter = this->randomBGParicles.begin(); iter != this->randomBGParicles.end();) {
-		iter->Tick(dT);
-		iter->Draw(tempCamera);
+	for (std::list<ESPPointEmitter*>::iterator iter = this->randomBGParicles.begin(); iter != this->randomBGParicles.end();) {
+		ESPPointEmitter* currEmitter = *iter;
+		currEmitter->Tick(dT);
+		currEmitter->Draw(tempCamera);
 
-		if (iter->IsDead()) {
+		if (currEmitter->IsDead()) {
 			iter = this->randomBGParicles.erase(iter);
+			delete currEmitter;
+			currEmitter = NULL;
 		}
 		else {
 			iter++;
@@ -480,6 +512,87 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
 	}
 
 	glPopMatrix();
+	//glDisable(GL_BLEND);
+}
+
+/**
+ * Insert bang effect into the background.
+ */
+void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ) {
+	// Choose a random bang texture
+	unsigned int randomBangTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->bangTextures.size();
+	Texture2D* randomBangTex = dynamic_cast<Texture2D*>(this->bangTextures[randomBangTexIndex]);
+	
+	// Establish some of the values we will use to create the emitter for a 'BANG!" effect
+	ESPInterval bangLifeInterval(1.5f, 3.0f);
+	ESPInterval randomSpawnInterval(0.5f, 2.0f);
+	ESPInterval xCoordInterval(minX, maxX);
+	ESPInterval yCoordInterval(minY, maxY);
+	ESPInterval zCoordInterval(minZ, maxZ);
+	Point3D emitCenter  = Point3D(xCoordInterval.RandomValueInInterval(), yCoordInterval.RandomValueInInterval(), zCoordInterval.RandomValueInInterval());
+	
+	float randomSpawn = randomSpawnInterval.RandomValueInInterval();
+	float randomLife  = bangLifeInterval.RandomValueInInterval();
+
+	// Create an emitter for the bang texture
+	ESPPointEmitter* bangEffect = new ESPPointEmitter();
+	
+	// Set up the emitter...
+	bangEffect->SetSpawnDelta(ESPInterval(randomSpawn));
+	bangEffect->SetNumParticleLives(1);
+	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	bangEffect->SetParticleLife(ESPInterval(randomLife));
+	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	bangEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangEffect->SetEmitPosition(emitCenter);
+
+	// Figure out some random proper orientation...
+	// Two base rotations (for variety) : 180 or 0...
+	float baseBangRotation = 0.0f;
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		baseBangRotation = 180.0f;
+	}
+	bangEffect->SetParticleRotation(ESPInterval(baseBangRotation - 10.0f, baseBangRotation + 10.0f));
+
+	ESPInterval sizeIntervalX(3.5f, 3.8f);
+	ESPInterval sizeIntervalY(1.9f, 2.2f);
+	bangEffect->SetParticleSize(sizeIntervalX, sizeIntervalY);
+
+	// Add effectors to the bang effect
+	bangEffect->AddEffector(&this->particleFadeInAndOut);
+	bangEffect->AddEffector(&this->particleMediumGrowth);
+	
+	// Add the bang particle...
+	bangEffect->SetParticles(1, randomBangTex);
+
+	// Create an emitter for the sound of onomatopeia of the breaking block
+	ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	bangOnoEffect->SetSpawnDelta(ESPInterval(randomSpawn));
+	bangOnoEffect->SetNumParticleLives(1);
+	bangOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	bangOnoEffect->SetParticleLife(ESPInterval(randomLife));
+	bangOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
+	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+	bangOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangOnoEffect->SetEmitPosition(emitCenter);
+	
+	// Add effectors...
+	bangOnoEffect->AddEffector(&this->particleFadeInAndOut);
+	bangOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single text particle to the emitter with the severity of the effect...
+	TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+	bangTextLabel.SetColour(Colour(1, 1, 1));
+	bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+	
+	Onomatoplex::Extremeness randomExtremeness = Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::WEAK, Onomatoplex::UBER);
+	bangOnoEffect->SetParticles(1, bangTextLabel, Onomatoplex::EXPLOSION, randomExtremeness);
+
+	// Add the particles to the list of background effects
+	this->randomBGParicles.push_back(bangEffect);
+	this->randomBGParicles.push_back(bangOnoEffect);
 }
 
 /**

@@ -1,6 +1,10 @@
 #include "ESPParticleColourEffector.h"
 #include "ESPParticle.h"
 
+ESPParticleColourEffector::ESPParticleColourEffector() : 
+startAlpha(1), endAlpha(1), startColour(1,1,1), endColour(1,1,1), useStartColour(false) {
+}
+
 ESPParticleColourEffector::ESPParticleColourEffector(float startAlpha, float endAlpha) :
 startAlpha(startAlpha), endAlpha(endAlpha), startColour(1,1,1), endColour(1,1,1), useStartColour(false) {
 }

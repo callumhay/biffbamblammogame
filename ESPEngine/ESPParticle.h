@@ -102,6 +102,11 @@ public:
 		return c;
 	}
 
+	void SetColour(const ColourRGBA& rgba) {
+		this->colour = rgba.GetColour();
+		this->alpha = rgba.A();
+	}
+
 	void SetColour(const Colour& rgb, double alpha) {
 		this->colour = rgb;
 		this->alpha = alpha;

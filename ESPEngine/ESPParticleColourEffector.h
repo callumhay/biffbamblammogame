@@ -12,11 +12,12 @@ private:
 	Colour startColour, endColour;
 
 public:
+	ESPParticleColourEffector();
 	ESPParticleColourEffector(float startAlpha, float endAlpha);
 	ESPParticleColourEffector(const Colour& colour, float startAlpha, float endAlpha);
 	ESPParticleColourEffector(const Colour& colour, float alpha);
 	ESPParticleColourEffector(const ColourRGBA& start, const ColourRGBA& end);
-	~ESPParticleColourEffector();
+	virtual ~ESPParticleColourEffector();
 
 	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
 };

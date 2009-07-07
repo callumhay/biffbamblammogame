@@ -70,9 +70,21 @@ public:
 
 	static const int ONLY_SPAWN_ONCE = -1;
 
+	bool ParticlesHaveNoLivesLeft() const {
+		if (this->numParticleLives != ESPParticle::INFINITE_PARTICLE_LIVES) {
+			for (std::map<const ESPParticle*, int>::const_iterator iter = this->particleLivesLeft.begin(); iter != this->particleLivesLeft.end(); iter++) {
+				if (iter->second != 0) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
 	bool IsDead() const {
 		return (this->aliveParticles.size() == 0) && 
-			     (this->timeSinceLastSpawn > this->particleLifetime.maxValue);
+			     (this->timeSinceLastSpawn > this->particleLifetime.maxValue || this->ParticlesHaveNoLivesLeft());
 	}
 
 	bool OnlySpawnsOnce() const {
