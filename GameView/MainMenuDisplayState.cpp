@@ -195,7 +195,8 @@ void MainMenuDisplayState::InitializeESPEffects() {
  * Used as a private helper method to initialize the menu and other related display stuffs.
  */
 void MainMenuDisplayState::InitializeMainMenu() {
-	const float dropShadowAmt = 0.08f;
+	const float dropShadowAmtSm = 0.15f;
+	const float dropShadowAmtLg = 0.15f;
 	const Colour dropShadowColour = Colour(0, 0, 0);
 
 	// Setup the main menu attributes
@@ -214,8 +215,8 @@ void MainMenuDisplayState::InitializeMainMenu() {
 	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  NEW_GAME_MENUITEM);
 	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
 
-	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmt);
-	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmt);
+	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
+	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
 
 	this->newGameMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 
@@ -241,13 +242,14 @@ void MainMenuDisplayState::InitializeMainMenu() {
  */
 void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	// Setup the options menu attributes
-	const float dropShadowAmt = 0.08f;
+	const float dropShadowAmtSm = 0.10f;
+	const float dropShadowAmtLg = 0.15f;
 	const Colour dropShadowColour = Colour(0, 0, 0);
 
 	TextLabel2D subMenuLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),  "Fullscreen");
 	TextLabel2D subMenuLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "Fullscreen");
-	subMenuLabelSm.SetDropShadow(dropShadowColour, dropShadowAmt);
-	subMenuLabelLg.SetDropShadow(dropShadowColour, dropShadowAmt);
+	subMenuLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
+	subMenuLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
 
 	// Options Menu
 	this->optionsSubMenu = new GameSubMenu();
@@ -483,9 +485,6 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
 		this->InsertBangEffectIntoBGEffects(MIN_X_COORD, MAX_X_COORD, MIN_Y_COORD, MAX_Y_COORD_BG_EFFECTS, MIN_Z_COORD, MAX_Z_COORD);
 	}
 
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	Camera tempCamera;
 	tempCamera.SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
 	tempCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
@@ -512,7 +511,6 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
 	}
 
 	glPopMatrix();
-	//glDisable(GL_BLEND);
 }
 
 /**
@@ -525,7 +523,7 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	
 	// Establish some of the values we will use to create the emitter for a 'BANG!" effect
 	ESPInterval bangLifeInterval(1.5f, 3.0f);
-	ESPInterval randomSpawnInterval(0.5f, 2.0f);
+	ESPInterval randomSpawnInterval(0.0f, 2.5f);
 	ESPInterval xCoordInterval(minX, maxX);
 	ESPInterval yCoordInterval(minY, maxY);
 	ESPInterval zCoordInterval(minZ, maxZ);

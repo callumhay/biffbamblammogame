@@ -4,6 +4,9 @@
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/TextLabel.h"
 
+class FBObj;
+class CgFxBloom;
+
 /**
  * Static class that will spawn a thread to render a loading screen for
  * the game.
@@ -30,11 +33,15 @@ private:
 	TextLabel2D loadingLabel;					// Text label for "Loading..." 
 	TextLabel2D itemLoadingLabel;			// Text label for saying what is being currently loaded
 
+	FBObj* loadingScreenFBO;
+	CgFxBloom* bloomEffect;
+
 	LoadingScreen();
-	~LoadingScreen(){}
+	~LoadingScreen();
 
 	inline static void InitOpenGLForLoadingScreen();
 	
+	void SetupFullscreenEffect(int width, int height);
 	void DrawLoadingBar();
 
 public:

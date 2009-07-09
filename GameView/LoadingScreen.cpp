@@ -1,8 +1,11 @@
 #include "LoadingScreen.h"
 #include "GameFontAssetsManager.h"
+#include "CgFxBloom.h"
 
 #include "../ESPEngine/ESPUtil.h"
+
 #include "../BlammoEngine/Camera.h"
+#include "../BlammoEngine/FBObj.h"
 
 LoadingScreen* LoadingScreen::instance = NULL;
 
@@ -13,7 +16,8 @@ const int LoadingScreen::LOADING_BAR_WIDTH	= 550;
 const int LoadingScreen::LOADING_BAR_HEIGHT = 50;
 const std::string LoadingScreen::ABSURD_LOADING_DESCRIPTION = "ABSURD";
 
-LoadingScreen::LoadingScreen() : loadingScreenOn(false), width(0), height(0), numExpectedUpdates(0), numCallsToUpdate(0) {
+LoadingScreen::LoadingScreen() : loadingScreenOn(false), width(0), height(0), 
+numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(NULL) {
 	// At the very least we need fonts to display info on the loading screen...
 	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
 	
@@ -46,6 +50,18 @@ LoadingScreen::LoadingScreen() : loadingScreenOn(false), width(0), height(0), nu
 	this->absurdLoadingDescriptions.push_back("Affixing suffixes and prefixes...");
 
 	this->lastRandomAbsurdity = Randomizer::GetInstance()->RandomUnsignedInt() % this->absurdLoadingDescriptions.size();
+
+}
+
+LoadingScreen::~LoadingScreen() {
+	if (this->loadingScreenFBO != NULL) {
+		delete this->loadingScreenFBO;
+		this->loadingScreenFBO = NULL;
+	}
+	if (this->bloomEffect != NULL) {
+		delete this->bloomEffect;
+		this->bloomEffect = NULL;
+	}
 }
 
 /**
@@ -69,6 +85,24 @@ void LoadingScreen::InitOpenGLForLoadingScreen() {
 	debug_opengl_state();
 }
 
+void LoadingScreen::SetupFullscreenEffect(int width, int height) {
+	// Setup the FBO for the loading screen
+	if (this->loadingScreenFBO != NULL) {
+		delete this->loadingScreenFBO;
+	}
+	this->loadingScreenFBO = new FBObj(width, height, Texture::Nearest, FBObj::NoAttachment);
+
+	// Setup the bloom effect and its parameters
+	if (this->bloomEffect != NULL) {
+		delete this->bloomEffect;
+	}
+	this->bloomEffect = new CgFxBloom(this->loadingScreenFBO);
+	this->bloomEffect->SetHighlightThreshold(0.4f);
+	this->bloomEffect->SetSceneIntensity(0.70f);
+	this->bloomEffect->SetGlowIntensity(0.3f);
+	this->bloomEffect->SetHighlightIntensity(0.1f);
+}
+
 /**
  * Function used to initialize and start the loading screen, this MUST be called before any other
  * loading screen functions and should end with a call to EndShowingLoadingScreen.
@@ -81,6 +115,9 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 
 	debug_output("Loading Screen start...");
 
+	// Setup the FBO and bloom CgFx Effect
+	this->SetupFullscreenEffect(width, height);
+
 	this->numCallsToUpdate = 0;
 	this->numExpectedUpdates = numExpectedUpdates;
 	this->width = width;
@@ -92,11 +129,16 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 	// Initialize basic OpenGL state
 	LoadingScreen::InitOpenGLForLoadingScreen();
 
+	this->loadingScreenFBO->BindFBObj();
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
 	this->loadingLabel.Draw();
 	this->DrawLoadingBar();
+
+	this->loadingScreenFBO->UnbindFBObj();
+	this->bloomEffect->Draw(width, height, 0.0f);
+	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
 
 	SDL_GL_SwapBuffers();
 
@@ -133,9 +175,9 @@ void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
 	this->numCallsToUpdate++;
 	assert(this->numCallsToUpdate <= this->numExpectedUpdates);
 
-	ESPInterval randColourR(0.25f, 0.85f);
-	ESPInterval randColourG(0.25f, 0.85f);
-	ESPInterval randColourB(0.25f, 0.85f);
+	ESPInterval randColourR(0.25f, 0.8f);
+	ESPInterval randColourG(0.25f, 0.8f);
+	ESPInterval randColourB(0.25f, 0.8f);
 	this->itemLoadingLabel.SetColour(Colour(randColourR.RandomValueInInterval(), randColourG.RandomValueInInterval(), randColourB.RandomValueInInterval()));
 	this->itemLoadingLabel.SetText(loadingStr);
 
@@ -143,8 +185,10 @@ void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
 	
 	// Initialize basic OpenGL state
 	LoadingScreen::InitOpenGLForLoadingScreen();
-	this->itemLoadingLabel.Draw(); // Draw once just to get the width...
 	this->itemLoadingLabel.SetTopLeftCorner(Point2D((this->width - this->itemLoadingLabel.GetLastRasterWidth()) / 2.0f, (this->height + LOADING_BAR_HEIGHT) / 2 + this->itemLoadingLabel.GetHeight() + GAP_PIXELS/2));
+
+	// Bind the FBO so we draw the loading screen into it
+	this->loadingScreenFBO->BindFBObj();
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -155,6 +199,11 @@ void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
 	// Draw labels for loading screen
 	this->loadingLabel.Draw();
 	this->itemLoadingLabel.Draw();
+
+	// Unbind the FBO, add bloom and draw it as a texture on a full screen quad
+	this->loadingScreenFBO->UnbindFBObj();
+	this->bloomEffect->Draw(width, height, 0.0f);
+	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
 
 	SDL_GL_SwapBuffers();
 
@@ -191,19 +240,33 @@ void LoadingScreen::DrawLoadingBar() {
 	Point2D loadingBarUpperLeft = Point2D((this->width - LOADING_BAR_WIDTH) / 2.0f, (this->height + LOADING_BAR_HEIGHT) / 2.0f);
 
 	// Draw the loading bar:
-	// a) Loading bar fill
 	Camera::PushWindowCoords();
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 
-	// b) Outline of loading bar
-	glLineWidth(3.0f);
-	glPointSize(3.0f);
+	// Loading bar fill
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glColor4f(1, 0, 0, 1);
+	glBegin(GL_QUADS);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
+	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
+	glVertex2f(loadingBarUpperLeft[0] + lengthOfLoadingBar, loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
+	glVertex2f(loadingBarUpperLeft[0] + lengthOfLoadingBar, loadingBarUpperLeft[1]);
+	glEnd();
+
+	// Outline of loading bar
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 
 	glPolygonMode(GL_FRONT, GL_LINE);
+	glLineWidth(4.0f);
+	glPointSize(3.0f);
 	glColor4f(0, 0, 0, 1);
-	glBegin(GL_QUADS);
+	
+	glBegin(GL_LINE_LOOP);
 	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
 	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
 	glVertex2f(loadingBarUpperLeft[0] + LOADING_BAR_WIDTH, loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
@@ -218,14 +281,6 @@ void LoadingScreen::DrawLoadingBar() {
 	glEnd();
 
 	glPolygonMode(GL_FRONT, GL_FILL);
-	glColor4f(1, 0, 0, 1);
-	glBegin(GL_QUADS);
-	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
-	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
-	glVertex2f(loadingBarUpperLeft[0] + lengthOfLoadingBar, loadingBarUpperLeft[1] - LOADING_BAR_HEIGHT);
-	glVertex2f(loadingBarUpperLeft[0] + lengthOfLoadingBar, loadingBarUpperLeft[1]);
-	glEnd();
-
 	glPopMatrix();
 	Camera::PopWindowCoords();
 
