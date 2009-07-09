@@ -44,7 +44,7 @@ const Colour GameMenu::RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS] = {
 	Colour(0.3137f, 0.7843f, 0.47f),							// 16: Emerald Green
 	Colour(1.0f, 0.6f, 0.4f),											// 17: Grapefruit pink
 	Colour(0.57647f, 0.4392f, 0.8588f),						// 18: Medium Purple
-	Colour(1.0f, 0.270588f, 0.0f)									// 19: Orange-Red
+	Colour(0.45098f, 0.76078f, 0.98431f)					// 19: Maya Blue
 };
 
 GameMenu::GameMenu() : topLeftCorner(Point2D(0,0)), menuItemPadding(0.0f),
@@ -122,7 +122,7 @@ void GameMenu::DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight) {
  * Draw an outline around the menu with a colourful plain background.
  */
 void GameMenu::DrawMenuBackground(double dT) {
-
+/*
 	const float APPLY_PADDING_WIDTH				= 2 * BACKGROUND_PADDING + 2 * GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE;
 	const float APPLY_PADDING_WIDTH_DIV2  = APPLY_PADDING_WIDTH / 2.0f;
 	const float APPLY_PADDING_HEIGHT			= 2 * BACKGROUND_PADDING + GameMenu::UP_DOWN_ARROW_HEIGHT;
@@ -162,6 +162,7 @@ void GameMenu::DrawMenuBackground(double dT) {
 	
 	glPopMatrix();
 	Camera::PopWindowCoords();
+	*/
 }
 
 /**

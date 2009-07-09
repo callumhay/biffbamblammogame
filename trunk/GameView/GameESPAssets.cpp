@@ -54,6 +54,8 @@ smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESP
 circleGradientTex(NULL), 
 starTex(NULL), 
 starOutlineTex(NULL),
+evilStarTex(NULL),
+evilStarOutlineTex(NULL),
 explosionTex(NULL),
 explosionRayTex(NULL),
 laserBeamTex(NULL),
@@ -89,6 +91,10 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->starOutlineTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->evilStarTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->evilStarOutlineTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->explosionTex);
 	assert(removed);
@@ -265,6 +271,14 @@ void GameESPAssets::InitESPTextures() {
 	if (this->starOutlineTex == NULL) {
 		this->starOutlineTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear));
 		assert(this->starOutlineTex != NULL);
+	}
+	if (this->evilStarTex == NULL) {
+		this->evilStarTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR, Texture::Trilinear));
+		assert(this->evilStarTex != NULL);	
+	}
+	if (this->evilStarOutlineTex == NULL) {
+		this->evilStarOutlineTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR_OUTLINE, Texture::Trilinear));
+		assert(this->evilStarOutlineTex != NULL);		
 	}
 	if (this->explosionTex == NULL) {
 		this->explosionTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD, Texture::Trilinear));
@@ -1018,6 +1032,11 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	ESPInterval redColour(0), greenColour(0), blueColour(0);
 	ESPInterval alpha(1.0f);
 
+	// We choose a specific kind of sprite graphic based on whether we are dealing with a power-down or not
+	// (evil stars for bad items!!)
+	Texture2D* itemSpecificFillStarTex = this->starTex;
+	Texture2D* itemSpecificOutlineStarTex = this->starOutlineTex;
+
 	switch (item.GetItemType()) {
 		case GameItem::Good:
 			greenRandomColour = ESPInterval(0.8f, 1.0f);
@@ -1025,12 +1044,20 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
 			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
 			break;
+
 		case GameItem::Bad:
-			redRandomColour = ESPInterval(0.8f, 1.0f);
+			redRandomColour		= ESPInterval(0.8f, 1.0f);
+			greenRandomColour = ESPInterval(0.0f, 0.70f);
+			blueRandomColour	= ESPInterval(0.0f, 0.70f);
+
 			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
 			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
 			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
+
+			itemSpecificFillStarTex		 = this->evilStarTex;
+			itemSpecificOutlineStarTex = this->evilStarOutlineTex;
 			break;
+
 		case GameItem::Neutral:
 			blueRandomColour = ESPInterval(0.8f, 1.0f);
 			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
@@ -1080,7 +1107,8 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	itemDropEmitterTrail1->SetEmitDirection(Vector3D(0, 1, 0));
 	itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
 	itemDropEmitterTrail1->AddEffector(&this->particleFader);
-	itemDropEmitterTrail1->SetParticles(8, this->starTex);
+	//itemDropEmitterTrail1->AddEffector(&this->smokeRotatorCW);
+	itemDropEmitterTrail1->SetParticles(8, itemSpecificFillStarTex);
 	
 	// Left emitter emits outlined stars
 	ESPPointEmitter* itemDropEmitterTrail2 = new ESPPointEmitter();
@@ -1095,7 +1123,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
 	itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
 	itemDropEmitterTrail2->AddEffector(&this->particleFader);
-	itemDropEmitterTrail2->SetParticles(7, this->starOutlineTex);
+	itemDropEmitterTrail2->SetParticles(7, itemSpecificOutlineStarTex);
 	
 	// Right emitter emits outlined stars
 	ESPPointEmitter* itemDropEmitterTrail3 = new ESPPointEmitter();
@@ -1110,7 +1138,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
 	itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
 	itemDropEmitterTrail3->AddEffector(&this->particleFader);
-	itemDropEmitterTrail3->SetParticles(7, this->starOutlineTex);
+	itemDropEmitterTrail3->SetParticles(7, itemSpecificOutlineStarTex);
 
 	// Add all the emitters for the item
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura1);

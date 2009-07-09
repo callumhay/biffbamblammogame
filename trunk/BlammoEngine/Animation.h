@@ -307,7 +307,7 @@ public:
 			x += dT;
 			return false;
 		}
-		else if (x > timeEnd) {
+		else if (x >= timeEnd) {
 			x = timeEnd;
 			(*this->interpolant) = valueEnd;
 			this->tracker++;
