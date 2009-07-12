@@ -38,16 +38,22 @@ sampler2D SceneSampler = sampler_state {
 float4 gauss3x3_rows_PS(float2 UV : TEXCOORD0) : COLOR {
 	float tapUV = 1.0f / SceneWidth;
 	float4 total = tex2D(SceneSampler, UV);
-	total += 0.368 * tex2D(SceneSampler, UV + float2(tapUV, 0));
-	total += 0.368 * tex2D(SceneSampler, UV + float2(-tapUV, 0));
-	return total / 1.736f;
+	//total += 0.368 * tex2D(SceneSampler, UV + float2(tapUV, 0));
+	//total += 0.368 * tex2D(SceneSampler, UV + float2(-tapUV, 0));
+	//return total / 1.736f;
+	total += 0.3 * tex2D(SceneSampler, UV + float2(tapUV, 0));
+	total += 0.3 * tex2D(SceneSampler, UV + float2(-tapUV, 0));
+	return total / 1.6f;	
 }
 float4 gauss3x3_cols_PS(float2 UV : TEXCOORD0) : COLOR {
 	float tapUV = 1.0f / SceneHeight;
 	float4 total   = tex2D(SceneSampler, UV);
-	total += 0.368 * tex2D(SceneSampler, UV + float2(0, tapUV));
-	total += 0.368 * tex2D(SceneSampler, UV + float2(0, -tapUV));
-	return total / 1.736f;
+	//total += 0.368 * tex2D(SceneSampler, UV + float2(0, tapUV));
+	//total += 0.368 * tex2D(SceneSampler, UV + float2(0, -tapUV));
+	//return total / 1.736f;
+	total += 0.3 * tex2D(SceneSampler, UV + float2(0, tapUV));
+	total += 0.3 * tex2D(SceneSampler, UV + float2(0, -tapUV));
+	return total / 1.6f;	
 }
 
 float4 gauss5x5_rows_PS(float2 UV : TEXCOORD0) : COLOR {

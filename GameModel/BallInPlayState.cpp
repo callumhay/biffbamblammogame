@@ -198,7 +198,8 @@ void BallInPlayState::Tick(double seconds) {
 			this->DoBallCollision(*currBall, n, d);
 		}
 
-		// Ball-ball collisions
+		// Ball-ball collisions - choose the next set of balls after this one
+		// so that collisions are not duplicated
 		std::list<GameBall*>::iterator nextIter = iter;
 		nextIter++;
 		for (; nextIter != gameBalls.end(); nextIter++) {
@@ -207,6 +208,8 @@ void BallInPlayState::Tick(double seconds) {
 
 			// Make sure to check if both balls collide with each other
 			if (currBall->CollisionCheck(*otherBall)) {
+				// EVENT: Two balls have collided
+				GameEventManager::Instance()->ActionBallBallCollision(*currBall, *otherBall);
 				this->DoBallCollision(*currBall, *otherBall);
 			}
 		}

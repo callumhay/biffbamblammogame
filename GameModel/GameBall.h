@@ -6,6 +6,8 @@
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Collision.h"
 
+#include "Onomatoplex.h"
+
 class GameBall {
 
 public:
@@ -195,6 +197,8 @@ public:
 				break;
 		}	
 	}
+
+	Onomatoplex::Extremeness GetOnomatoplexExtremeness() const;
 
 	void Tick(double seconds);
 };

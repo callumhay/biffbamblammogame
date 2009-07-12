@@ -34,16 +34,18 @@ const std::string MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Play Level";
 const std::string MainMenuDisplayState::OPTIONS_MENUITEM		= "Options";
 const std::string MainMenuDisplayState::EXIT_MENUITEM				= "Exit Game";
 
-const Colour MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR		= Colour(0.8f, 0.8f, 0.8f);;
+const Colour MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR		= Colour(1, 0.65f, 0);
 const Colour MainMenuDisplayState::MENU_ITEM_SEL_COLOUR			= Colour(1, 1, 0);
-const Colour MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
+const Colour MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR	= Colour(0.49f, 0.98f, 1.0f);
 const Colour MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
+const Colour MainMenuDisplayState::SUBMENU_ITEM_IDLE_COLOUR		= Colour(0.75f, 0.75f, 0.75f);
+const Colour MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
 
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
 DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), 
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), changeToPlayGameState(false),
 menuFBO(NULL), bloomEffect(NULL),
-/*particleFader(0, 1),*/ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
+particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 {
 
 	// Setup any textures for rendering the menu screen
@@ -255,8 +257,8 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	this->optionsSubMenu = new GameSubMenu();
 	this->optionsSubMenu->AddEventHandler(this->optionsMenuEventHandler);
 	this->optionsSubMenu->SetPaddingBetweenMenuItems(MENU_ITEM_PADDING);
-	this->optionsSubMenu->SetColourScheme(MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR, MainMenuDisplayState::MENU_ITEM_SEL_COLOUR, 
-																				MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR, MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR);
+	this->optionsSubMenu->SetColourScheme(MainMenuDisplayState::SUBMENU_ITEM_IDLE_COLOUR, MainMenuDisplayState::MENU_ITEM_SEL_COLOUR, 
+																				MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR, MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR);
 
 	// Add the toggle fullscreen item
 	//subMenuLabelSm.SetText("TODO: Fullscreen:");

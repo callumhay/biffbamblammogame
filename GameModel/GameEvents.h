@@ -120,6 +120,13 @@ public:
    */
 	virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) = 0;
 
+	/**
+	 * Event triggered when two balls collide. Only occurs once as a ball collides with another.
+	 * Arguements: ball1 - A ball in the collision.
+	 *             ball2 - The other ball in the collision.
+	 */
+	virtual void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) = 0;
+
 	// Misc Events (Destruction, Combos, etc.) ************************************************
 
 	/**

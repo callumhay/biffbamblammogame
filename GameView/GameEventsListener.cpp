@@ -139,7 +139,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
 		((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.UberballBlastsThrough())) {
 
-			this->display->GetAssets()->GetESPAssets()->AddBallBounceEffect(this->display->GetCamera(), ball);
+			this->display->GetAssets()->GetESPAssets()->AddBounceLevelPieceEffect(this->display->GetCamera(), ball, block);
 	}
 
 	// We shake things up if the ball is uber and the block is indestructible...
@@ -155,7 +155,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
 
 	// Add the visual effect for when the ball hits the paddle
-	this->display->GetAssets()->GetESPAssets()->AddBallBounceEffect(this->display->GetCamera(), ball);
+	this->display->GetAssets()->GetESPAssets()->AddBouncePaddleEffect(this->display->GetCamera(), ball, paddle);
 
 	// We shake things up if the ball is uber...
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
@@ -164,6 +164,13 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 	}
 
 	debug_output("EVENT: Ball-paddle collision");
+}
+
+void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) {
+	// Add the effect for ball-ball collision
+	this->display->GetAssets()->GetESPAssets()->AddBounceBallBallEffect(this->display->GetCamera(), ball1, ball2);
+
+	debug_output("EVENT: Ball-ball collision");
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {

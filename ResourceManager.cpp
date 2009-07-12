@@ -13,12 +13,13 @@
 #include "GameModel/LevelPiece.h"
 
 #include "GameView/CgFxInkBlock.h"
+#include "GameView/CgFxStickyPaddle.h"
 #include "GameView/GameViewConstants.h"
 
 ResourceManager* ResourceManager::instance = NULL;
 
 ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
-cgContext(NULL), inkBlockMesh(NULL), configOptions(NULL) {
+cgContext(NULL), inkBlockMesh(NULL), stickyPaddleGooMesh(NULL), configOptions(NULL) {
 	// Initialize DevIL and make sure it loaded correctly
 	ilInit();
 	iluInit();
@@ -52,6 +53,10 @@ ResourceManager::~ResourceManager() {
 	if (this->inkBlockMesh != NULL) {
 		delete this->inkBlockMesh;
 		this->inkBlockMesh = NULL;
+	}
+	if (this->stickyPaddleGooMesh != NULL) {
+		delete this->stickyPaddleGooMesh;
+		this->stickyPaddleGooMesh = NULL;
 	}
 
 	// Clean up all loaded effects - technically we shouldn't have to do this since
@@ -115,9 +120,6 @@ void ResourceManager::InitResourceManager(const std::string& resourceZip, const 
 	}
 }
 
-
-
-
 /**
  * Obtain the mesh resource for the ink block, load it into memory
  * if it hasn't been loaded already.
@@ -130,8 +132,11 @@ Mesh* ResourceManager::GetInkBlockMeshResource() {
 	}
 
 	// Otherwise, we load it into memory:
+	
 	// Create the geometry (eliptical pill shape) using the ball geometry
 	Mesh* ballMesh = this->GetObjMeshResource(GameViewConstants::GetInstance()->BALL_MESH);
+	assert(ballMesh != NULL);
+
 	PolygonGroup* inkBlockPolyGrp = new PolygonGroup(*ballMesh->GetMaterialGroups().begin()->second->GetPolygonGroup());
 	Matrix4x4 scaleMatrix = Matrix4x4::scaleMatrix(Vector3D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT, 1.0f));
 	inkBlockPolyGrp->Transform(scaleMatrix);
@@ -156,6 +161,44 @@ Mesh* ResourceManager::GetInkBlockMeshResource() {
 	// Insert the material and its geometry it into the mesh
 	this->inkBlockMesh = new Mesh("Ink Block", inkBlockMatGrps);
 	return this->inkBlockMesh;
+}
+
+/**
+ * Obtain the mesh resource for the sticky paddle goo that resides ontop
+ * of the player paddle; load it into memory if it hasn't already been loaded.
+ * Returns: Mesh resource for the game's sticky paddle goo.
+ */
+Mesh* ResourceManager::GetStickyPaddleMeshResource() {
+	// If we've already loaded it, just return a pointer to it
+	if (this->stickyPaddleGooMesh != NULL) {
+		return this->stickyPaddleGooMesh;
+	}
+
+	// Otherwise, we load it into memory:
+	// Load the special geometry for it...
+	Mesh* stickyGooMesh = this->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_STICKY_ATTACHMENT_MESH);
+	assert(stickyGooMesh != NULL);
+	PolygonGroup* stickyGooPolyGrp = new PolygonGroup(*stickyGooMesh->GetMaterialGroups().begin()->second->GetPolygonGroup());
+
+	// Create the material properties and effect (sticky paddle cgfx shader - makes the goo all wiggly, refractive and stuff)
+	MaterialProperties* gooMatProps = new MaterialProperties();
+	gooMatProps->materialType	= MaterialProperties::MATERIAL_STICKYGOO_TYPE;
+	gooMatProps->geomType			= MaterialProperties::MATERIAL_GEOM_FG_TYPE;
+	gooMatProps->diffuse			= GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR;
+	gooMatProps->specular			= Colour(0.75f, 0.75f, 0.75f);
+	gooMatProps->shininess		= 100.0f;
+	CgFxStickyPaddle* stickyGooEffect = new CgFxStickyPaddle(gooMatProps);
+
+	// Create the material group and its geometry (as defined above)
+	MaterialGroup* stickyGooMatGrp = new MaterialGroup(stickyGooEffect);
+	stickyGooMatGrp->SetPolygonGroup(stickyGooPolyGrp);
+
+	std::map<std::string, MaterialGroup*> stickyGooMatGrps;
+	stickyGooMatGrps.insert(std::make_pair("Sticky Goo", stickyGooMatGrp));
+
+	// Insert the material and its geometry it into the mesh
+	this->stickyPaddleGooMesh = new Mesh("Sticky Paddle Goo", stickyGooMatGrps);
+	return this->stickyPaddleGooMesh;
 }
 
 /**

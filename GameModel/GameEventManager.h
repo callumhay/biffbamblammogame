@@ -38,6 +38,7 @@ public:
 	void ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block);
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
+	void ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2);
 	void ActionBlockDestroyed(const LevelPiece& block);
 	void ActionBallSafetyNetCreated();
 	void ActionBallSafetyNetDestroyed(const GameBall& ball);

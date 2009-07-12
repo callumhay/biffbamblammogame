@@ -15,6 +15,8 @@
 #include "../ESPEngine/ESPParticleAccelEffector.h"
 #include "../ESPEngine/ESPParticleRotateEffector.h"
 
+#include "../GameModel/Onomatoplex.h"
+
 class LevelPiece;
 class GameBall;
 class GameItem;
@@ -125,7 +127,14 @@ public:
 	~GameESPAssets();
 
 	// Specific effects that can be made to occur in the game
-	void AddBallBounceEffect(const Camera& camera, const GameBall& ball);
+	//void AddBallBounceEffect(const Camera& camera, const GameBall& ball);	
+	// TODO: 
+	ESPPointEmitter* CreateBallBounceEffect(const GameBall& ball, Onomatoplex::SoundType soundType); 
+	void AddBounceLevelPieceEffect(const Camera& camera, const GameBall& ball, const LevelPiece& block);
+	void AddBouncePaddleEffect(const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
+	void AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2);
+	
+
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level);

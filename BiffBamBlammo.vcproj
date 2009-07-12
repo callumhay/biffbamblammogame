@@ -551,6 +551,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\CgFxStickyPaddle.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CgFxVolumetricEffect.h"
 					>
 				</File>
@@ -684,6 +688,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\CgFxPostRefract.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CgFxStickyPaddle.cpp"
 					>
 				</File>
 				<File

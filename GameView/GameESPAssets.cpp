@@ -459,19 +459,17 @@ void GameESPAssets::InitStandaloneESPEffects() {
 }
 
 /**
- * Adds a ball bouncing ESP - the effect that occurs when a ball typically
- * bounces off some object (e.g., block, paddle).
+ * Creator method for making the onomata particle effect for when the ball hits various things.
  */
-void GameESPAssets::AddBallBounceEffect(const Camera& camera, const GameBall& ball) {
-	// In this case the effect is a basic onomatopeia word that occurs at the
-	// position of the ball
-
+ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Onomatoplex::SoundType soundType) {
+	
+	// The effect is a basic onomatopeia word that occurs at the position of the ball
 	ESPPointEmitter* bounceEffect = new ESPPointEmitter();
 	// Set up the emitter...
 	bounceEffect->SetSpawnDelta(ESPInterval(-1, -1));
 	bounceEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
 	bounceEffect->SetParticleLife(ESPInterval(1.2f, 1.5f));
-	bounceEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));//, ESPInterval(1.0f, 1.0f));
+	bounceEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));
 	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	bounceEffect->SetEmitAngleInDegrees(10);
 	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
@@ -488,34 +486,65 @@ void GameESPAssets::AddBallBounceEffect(const Camera& camera, const GameBall& ba
 	bounceEffect->AddEffector(&this->particleFader);
 	bounceEffect->AddEffector(&this->particleSmallGrowth);
 
-	// Add the single particle to the emitter...
+	// Add the single particle to the emitter
 	DropShadow dpTemp;
 	dpTemp.amountPercentage = 0.10f;
-	ESPOnomataParticle* bounceParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small));
-	bounceParticle->SetDropShadow(dpTemp);
 
-	// Set the severity of the effect...
-	GameBall::BallSpeed ballSpd = ball.GetSpeed();
-	switch (ballSpd) {
-		case GameBall::SlowSpeed :
-			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::WEAK);
+	// Font style is based off the type of sound
+	GameFontAssetsManager::FontStyle fontStyle;
+	switch (soundType) {
+		case Onomatoplex::BOUNCE:
+			fontStyle = GameFontAssetsManager::ExplosionBoom;
 			break;
-		case GameBall::NormalSpeed :
-			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::GOOD);
+		case Onomatoplex::GOO:
+			fontStyle = GameFontAssetsManager::SadBadGoo;
 			break;
-		case GameBall::FastSpeed :
-			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::AWESOME);
-			break;
-		default :
-			assert(false);
-			bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, Onomatoplex::SUPER_AWESOME);
+		default:
+			fontStyle = GameFontAssetsManager::ExplosionBoom;
 			break;
 	}
-	
+
+	ESPOnomataParticle* bounceParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(fontStyle, GameFontAssetsManager::Small));
+	bounceParticle->SetDropShadow(dpTemp);
+	bounceParticle->SetOnomatoplexSound(soundType, ball.GetOnomatoplexExtremeness());
 	bounceEffect->AddParticle(bounceParticle);
-	
-	// Lastly, add the new emitter to the list of active emitters
-	this->activeGeneralEmitters.push_front(bounceEffect);
+
+	return bounceEffect;
+}
+
+/**
+ * Adds a ball bouncing ESP - the effect that occurs when a ball typically
+ * bounces off a level piece (e.g., a block).
+ */
+void GameESPAssets::AddBounceLevelPieceEffect(const Camera& camera, const GameBall& ball, const LevelPiece& block) {
+	// We don't do the effect for certain types of blocks...
+	if (block.GetType() == LevelPiece::Bomb || block.GetType() == LevelPiece::Ink) {
+		return;
+	}
+
+	// Add the new emitter to the list of active emitters
+	this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::BOUNCE));
+}
+
+/**
+ * Adds ball bouncing effect when the ball bounces off the player paddle.
+ */
+void GameESPAssets::AddBouncePaddleEffect(const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
+	if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+		// The sticky paddle should make a spongy gooey sound when hit by the ball...
+		this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::GOO));
+	}
+	else {
+		// Typical paddle bounce, similar to a regular block bounce effect
+		this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::BOUNCE));
+	}
+}
+
+/**
+ * Adds the effect that occurs when two balls bounce off of each other.
+ */
+void GameESPAssets::AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2) {
+	// TODO
 }
 
 /**

@@ -24,6 +24,7 @@ struct MaterialProperties {
 	static const std::string MATERIAL_CELBASIC_TYPE;
 	static const std::string MATERIAL_PHONG_TYPE;
 	static const std::string MATERIAL_INKBLOCK_TYPE;
+	static const std::string MATERIAL_STICKYGOO_TYPE;
 
 	// Geometry types
 	static const std::string MATERIAL_GEOM_FG_TYPE;

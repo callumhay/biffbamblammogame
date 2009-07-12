@@ -100,6 +100,14 @@ void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const Pla
 	}	
 }
 
+// Action for when a ball collides with another ball
+void GameEventManager::ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->BallBallCollisionEvent(ball1, ball2);
+	}	
+}
+
 // Action for when a block is destroyed
 void GameEventManager::ActionBlockDestroyed(const LevelPiece& block) {
 	this->listenerIter = this->eventListeners.begin();
