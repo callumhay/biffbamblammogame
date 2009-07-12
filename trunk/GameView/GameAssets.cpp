@@ -34,6 +34,7 @@ lifeHUD(NULL),
 ball(NULL), 
 spikeyBall(NULL), 
 paddleLaserAttachment(NULL),
+paddleStickyAttachment(NULL),
 
 invisiBallEffect(NULL), 
 ghostBallEffect(NULL),
@@ -442,6 +443,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	Point2D paddleCenter = p.GetCenterPosition();	
 
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (p.GetPaddleScaleFactor() - 1);
+	float paddleScaleFactor = p.GetPaddleScaleFactor();
 
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
@@ -459,8 +461,25 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 		
 		// Draw attachment (gun) mesh
 		this->laserFireAttachmentAnim.Tick(dT);
+		
+		glPushMatrix();
 		glTranslatef(0, 0, this->laserFireAttachmentAnim.GetInterpolantValue());
+		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
+		
 		this->paddleLaserAttachment->Draw(camera, this->paddleKeyLight, this->paddleFillLight);
+		
+		glPopMatrix();
+	}
+
+	// When the paddle has the 'sticky' power-up we attach sticky goo to its top
+	if ((p.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+		// TODO: fix this up - use a shader instead
+		glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
+		
+		glPushMatrix();
+		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
+		this->paddleStickyAttachment->Draw(camera, this->paddleKeyLight, this->paddleFillLight);
+		glPopMatrix();
 	}
 
 	glPopMatrix();
@@ -511,6 +530,9 @@ void GameAssets::LoadRegularMeshAssets() {
 	if (this->paddleLaserAttachment == NULL) {
 		this->paddleLaserAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_LASER_ATTACHMENT_MESH);
 		this->laserFireAttachmentAnim.SetInterpolantValue(0.0f);
+	}
+	if (this->paddleStickyAttachment == NULL) {
+		this->paddleStickyAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_STICKY_ATTACHMENT_MESH);
 	}
 }
 

@@ -31,6 +31,7 @@ public:
 	virtual void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block);
 	virtual void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
 	virtual void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
+	virtual void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2);
 
 	// Misc game events
 	virtual void BlockDestroyedEvent(const LevelPiece& block);

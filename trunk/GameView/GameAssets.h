@@ -43,6 +43,7 @@ private:
 	Mesh* ball;				// Ball used to break blocks
 	Mesh* spikeyBall;	// What happens to the ball when it becomes uber
 	Mesh* paddleLaserAttachment;	// Laser attachment for the paddle
+	Mesh* paddleStickyAttachment;	// Sticky goo attachment for the paddle
 
 	// In-game lights for typical geometry: key, fill and ball
 	PointLight fgKeyLight, fgFillLight, ballLight;

@@ -77,6 +77,47 @@ void GameBall::SetBallSize(GameBall::BallSize size) {
 	this->currSize = size;
 }
 
+Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
+	Onomatoplex::Extremeness result;
+
+	if ((this->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+		switch (this->GetSpeed()) {
+			case GameBall::SlowSpeed :
+				result = Onomatoplex::AWESOME;
+				break;
+			case GameBall::NormalSpeed :
+				result =  Onomatoplex::SUPER_AWESOME;
+				break;
+			case GameBall::FastSpeed :
+				result =  Onomatoplex::UBER;
+				break;
+			default :
+				assert(false);
+				result = Onomatoplex::AWESOME;
+				break;
+		}	
+	}
+	else {
+		switch (this->GetSpeed()) {
+			case GameBall::SlowSpeed :
+				result = Onomatoplex::WEAK;
+				break;
+			case GameBall::NormalSpeed :
+				result = Onomatoplex::GOOD;
+				break;
+			case GameBall::FastSpeed :
+				result = Onomatoplex::AWESOME;
+				break;
+			default :
+				assert(false);
+				result = Onomatoplex::WEAK;
+				break;
+		}
+	}
+
+	return result;
+}
+
 void GameBall::Tick(double seconds) {
 	// Update the position of the ball based on its velocity
 	Vector2D dDist = (static_cast<float>(seconds) * static_cast<float>(this->currSpeed) *this->currDir);

@@ -106,6 +106,7 @@ public:
 	const std::string CGFX_AFTERIMAGE_SHADER;
 	const std::string CGFX_BLOOM_SHADER;
 	const std::string CGFX_INKSPLATTER_SHADER;
+	const std::string CGFX_STICKYPADDLE_SHADER;
 
 	// Texture path constants *******************************
 	const std::string TEXTURE_BANG1;
@@ -166,6 +167,7 @@ public:
 	const Colour GHOST_BALL_COLOUR;
 	const Colour UBER_BALL_COLOUR;
 	const Colour INK_BLOCK_COLOUR;
+	const Colour STICKYPADDLE_GOO_COLOUR;
 
 	// World specific path constants ************************
 	const std::string BALL_MESH;
@@ -176,6 +178,7 @@ public:
 	const std::string SKYBOX_MESH;
 	const std::string ITEM_MESH;
 	const std::string PADDLE_LASER_ATTACHMENT_MESH;
+	const std::string PADDLE_STICKY_ATTACHMENT_MESH;
 
 	// DECO WORLD
 	const std::string DECO_PADDLE_MESH;
