@@ -231,8 +231,6 @@ void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& sta
 }
 
 void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
-	// EVENT: Ball-paddle collision
-	GameEventManager::Instance()->ActionBallPaddleCollision(ball, *this->playerPaddle);
 
 	// Reset the multiplier
 	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);

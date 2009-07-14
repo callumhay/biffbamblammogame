@@ -11,7 +11,7 @@ drawItemsInLastPass(true) {
 	// Framebuffer object setup
 	this->fgAndBgFBO					= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 	this->bgFBO								= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->initialFSEffectFBO	= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::NoAttachment);
+	this->initialFSEffectFBO	= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 	this->finalFSEffectFBO		= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 
 	// Effects setup
@@ -71,8 +71,8 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	delete this->fgAndBgFBO;
 	this->fgAndBgFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 	
-	delete this->finalFSEffectFBO;
-	this->finalFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::NoAttachment);
+	delete this->initialFSEffectFBO;
+	this->initialFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 	delete this->finalFSEffectFBO;
 	this->finalFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 

@@ -131,6 +131,9 @@ namespace Onomatoplex {
 		singleWordBounce.push_back("Boink");
 		singleWordBounce.push_back("Bipp");
 		singleWordBounce.push_back("Clang");
+		singleWordBounce.push_back("Clonk");
+		singleWordBounce.push_back("Conk");
+		singleWordBounce.push_back("Thwack");
 		singleWordBounce.push_back("Bop");
 		singleWordBounce.push_back("Pong");
 		singleWordBounce.push_back("Boing");
@@ -144,6 +147,7 @@ namespace Onomatoplex {
 		singleWordBounce.push_back("Wack");
 		singleWordBounce.push_back("Wonk");
 		singleWordBounce.push_back("Bonk");
+		singleWordBounce.push_back("Smack");
 		this->simpleSingleWords[BOUNCE] = singleWordBounce;
 
 		std::vector<std::string> goodSingleWordBounce;
@@ -165,6 +169,7 @@ namespace Onomatoplex {
 		goodSingleWordBounce.push_back("Bloop");
 		goodSingleWordBounce.push_back("Poang");
 		goodSingleWordBounce.push_back("Bangy");
+		goodSingleWordBounce.push_back("Smash");
 		this->goodSingleWords[BOUNCE] = goodSingleWordBounce;
 
 		std::vector<std::string> awesomeSingleWordBounce;

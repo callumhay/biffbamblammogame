@@ -18,6 +18,8 @@ class CgFxPostRefract;
 class CgFxVolumetricEffect;
 class ESPEmitter;
 class LivesLeftHUD;
+class StickyPaddleGoo;
+class LaserPaddleGun;
 
 // Compositional classes for asssets
 #include "GameWorldAssets.h"
@@ -40,10 +42,11 @@ private:
 	std::map<const GameLevel*, LevelMesh*> loadedLevelMeshes;
 
 	// Regular meshes - these persist throughout the entire game
-	Mesh* ball;				// Ball used to break blocks
-	Mesh* spikeyBall;	// What happens to the ball when it becomes uber
-	Mesh* paddleLaserAttachment;	// Laser attachment for the paddle
-	Mesh* paddleStickyAttachment;	// Sticky goo attachment for the paddle
+	Mesh* ball;																// Ball used to break blocks
+	Mesh* spikeyBall;													// What happens to the ball when it becomes uber
+
+	LaserPaddleGun* paddleLaserAttachment;		// Laser attachment for the paddle
+	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
 
 	// In-game lights for typical geometry: key, fill and ball
 	PointLight fgKeyLight, fgFillLight, ballLight;
@@ -57,7 +60,6 @@ private:
 	
 	// Animations for when the lights change
 	std::list<AnimationMultiLerp<Colour>> lightColourAnims;
-	AnimationMultiLerp<float> laserFireAttachmentAnim;
 
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
@@ -122,7 +124,7 @@ public:
 		return this->lifeHUD;
 	}
 
-	void AnimatePaddleLaserAttachment(const PlayerPaddle& paddle);
+	void FirePaddleLaser(const PlayerPaddle& paddle);
 
 };
 

@@ -60,7 +60,7 @@ public:
 
 	inline FBObj* GetBackgroundFBO() { return this->bgFBO; }
 	inline FBObj* GetFullSceneFBO() { return this->fgAndBgFBO; }
-	
+	inline FBObj* GetInitialFullScreenFBO() { return this->initialFSEffectFBO; }
 	inline FBObj* GetFinalFullScreenFBO()	{ return this->finalFSEffectFBO; }
 
 	

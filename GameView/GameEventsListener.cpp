@@ -284,7 +284,7 @@ void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
 	switch (projectile.GetType()) {
 		case Projectile::PaddleLaserProjectile:
 			// Have the laser gun attachment move downwards in reaction to the laser being shot
-			this->display->GetAssets()->AnimatePaddleLaserAttachment(*this->display->GetModel()->GetPlayerPaddle());
+			this->display->GetAssets()->FirePaddleLaser(*this->display->GetModel()->GetPlayerPaddle());
 			break;
 		default:
 			break;
