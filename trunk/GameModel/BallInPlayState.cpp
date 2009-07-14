@@ -121,6 +121,9 @@ void BallInPlayState::Tick(double seconds) {
 				continue;
 			}
 
+			// EVENT: Ball-paddle collision
+			GameEventManager::Instance()->ActionBallPaddleCollision(*currBall, *paddle);
+
 			// If the sticky paddle power-up is activated then the ball will simply be attached to
 			// the player paddle (if there are no balls already attached)
 			if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {

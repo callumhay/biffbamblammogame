@@ -58,11 +58,21 @@ public:
 		glDrawArrays(this->polyType, 0, this->numIndices);
 	};
 
+	GLuint GenerateDisplayList() const {
+		GLuint displayListID = glGenLists(1);
+		glNewList(displayListID, GL_COMPILE);
+		this->Draw();
+		glEndList();
+		return displayListID;
+	}
+
 	void Translate(const Vector3D& t);
 	void Transform(const Matrix4x4& m);
 
 	unsigned int GetDataArrays(std::vector<float>& vertexArray, std::vector<float>& normalArray, std::vector<float>& texCoordArray) const;
 };
+
+class Mesh;
 
 class MaterialGroup {
 
@@ -70,6 +80,13 @@ private:
 	PolygonGroup* polyGrp;
 	CgFxMaterialEffect* material;
 	GLuint displayListID;
+
+	// Deletes only the effect/material for this material group
+	void ReplaceMaterialEffect(CgFxMaterialEffect* material) {
+		assert(material != NULL);
+		delete this->material;
+		this->material = material;
+	}
 
 public:
 	MaterialGroup(CgFxMaterialEffect* mat) : material(mat), displayListID(0), polyGrp(NULL) {}
@@ -141,6 +158,7 @@ public:
 		return this->polyGrp;
 	}
 
+	friend class Mesh;
 };
 
 // Represents a mesh, made up of faces, grouped by material.
@@ -206,8 +224,7 @@ public:
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Special override of the draw function - this will take the given material
 	 * and apply it to the entire mesh, regardless of the material groups, also applies given lights
@@ -245,6 +262,7 @@ public:
 	void SetColourForMaterial(const std::string& matGrpName, const Colour& c);
 	void SetColour(const Colour& c);
 
+	void ReplaceMaterial(CgFxMaterialEffect* replacementMat);
 	void Flush();
 };
 #endif

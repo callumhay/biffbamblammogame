@@ -52,6 +52,10 @@ public:
 		return 	fabs(v_[0] - other[0]) < EPSILON &&
 		  			fabs(v_[1] - other[1]) < EPSILON;
 	}
+
+	static Point2D GetMidPoint(const Point2D& p1, const Point2D& p2) {
+		return Point2D((p1[0] + p2[0]) / 2.0f, (p1[1] + p2[1]) / 2.0f);
+	}
 };
 
 // 2D Point output function for debugging purposes

@@ -19,7 +19,7 @@
 ResourceManager* ResourceManager::instance = NULL;
 
 ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
-cgContext(NULL), inkBlockMesh(NULL), stickyPaddleGooMesh(NULL), configOptions(NULL) {
+cgContext(NULL), inkBlockMesh(NULL), configOptions(NULL) {
 	// Initialize DevIL and make sure it loaded correctly
 	ilInit();
 	iluInit();
@@ -53,10 +53,6 @@ ResourceManager::~ResourceManager() {
 	if (this->inkBlockMesh != NULL) {
 		delete this->inkBlockMesh;
 		this->inkBlockMesh = NULL;
-	}
-	if (this->stickyPaddleGooMesh != NULL) {
-		delete this->stickyPaddleGooMesh;
-		this->stickyPaddleGooMesh = NULL;
 	}
 
 	// Clean up all loaded effects - technically we shouldn't have to do this since
@@ -161,44 +157,6 @@ Mesh* ResourceManager::GetInkBlockMeshResource() {
 	// Insert the material and its geometry it into the mesh
 	this->inkBlockMesh = new Mesh("Ink Block", inkBlockMatGrps);
 	return this->inkBlockMesh;
-}
-
-/**
- * Obtain the mesh resource for the sticky paddle goo that resides ontop
- * of the player paddle; load it into memory if it hasn't already been loaded.
- * Returns: Mesh resource for the game's sticky paddle goo.
- */
-Mesh* ResourceManager::GetStickyPaddleMeshResource() {
-	// If we've already loaded it, just return a pointer to it
-	if (this->stickyPaddleGooMesh != NULL) {
-		return this->stickyPaddleGooMesh;
-	}
-
-	// Otherwise, we load it into memory:
-	// Load the special geometry for it...
-	Mesh* stickyGooMesh = this->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_STICKY_ATTACHMENT_MESH);
-	assert(stickyGooMesh != NULL);
-	PolygonGroup* stickyGooPolyGrp = new PolygonGroup(*stickyGooMesh->GetMaterialGroups().begin()->second->GetPolygonGroup());
-
-	// Create the material properties and effect (sticky paddle cgfx shader - makes the goo all wiggly, refractive and stuff)
-	MaterialProperties* gooMatProps = new MaterialProperties();
-	gooMatProps->materialType	= MaterialProperties::MATERIAL_STICKYGOO_TYPE;
-	gooMatProps->geomType			= MaterialProperties::MATERIAL_GEOM_FG_TYPE;
-	gooMatProps->diffuse			= GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR;
-	gooMatProps->specular			= Colour(0.75f, 0.75f, 0.75f);
-	gooMatProps->shininess		= 100.0f;
-	CgFxStickyPaddle* stickyGooEffect = new CgFxStickyPaddle(gooMatProps);
-
-	// Create the material group and its geometry (as defined above)
-	MaterialGroup* stickyGooMatGrp = new MaterialGroup(stickyGooEffect);
-	stickyGooMatGrp->SetPolygonGroup(stickyGooPolyGrp);
-
-	std::map<std::string, MaterialGroup*> stickyGooMatGrps;
-	stickyGooMatGrps.insert(std::make_pair("Sticky Goo", stickyGooMatGrp));
-
-	// Insert the material and its geometry it into the mesh
-	this->stickyPaddleGooMesh = new Mesh("Sticky Paddle Goo", stickyGooMatGrps);
-	return this->stickyPaddleGooMesh;
 }
 
 /**

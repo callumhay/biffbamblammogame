@@ -544,7 +544,54 @@ void GameESPAssets::AddBouncePaddleEffect(const Camera& camera, const GameBall& 
  * Adds the effect that occurs when two balls bounce off of each other.
  */
 void GameESPAssets::AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2) {
-	// TODO
+	// Obtain a reasonably centered position to show the effect
+	const Point2D ball1Center = ball1.GetBounds().Center();
+	const Point2D ball2Center = ball2.GetBounds().Center();
+	const Point2D emitPoint2D = Point2D::GetMidPoint(ball1Center, ball2Center);
+	const Point3D emitPoint3D(emitPoint2D[0], emitPoint2D[1], 0.0f);
+	
+	// Small 'bang' star that appears at the position of the ball-ball collision
+	// Create an emitter for the bang texture
+	ESPPointEmitter* bangEffect = new ESPPointEmitter();
+	bangEffect->SetSpawnDelta(ESPInterval(-1));
+	bangEffect->SetInitialSpd(ESPInterval(0.0f));
+	bangEffect->SetParticleLife(ESPInterval(0.8f, 1.1f));
+	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	bangEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangEffect->SetEmitPosition(emitPoint3D);
+	bangEffect->SetParticleRotation(ESPInterval(0.0f, 360.0f));
+	bangEffect->SetParticleSize(ESPInterval(0.75f, 1.25f));
+	bangEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.75f, 1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
+	bangEffect->AddEffector(&this->particleFader);
+	bangEffect->AddEffector(&this->particleMediumGrowth);
+	bangEffect->SetParticles(1, this->evilStarTex);
+
+	// Basic onomatopeia word that occurs at the position of the ball-ball collision
+	ESPPointEmitter* bounceEffect = new ESPPointEmitter();
+	bounceEffect->SetSpawnDelta(ESPInterval(-1));
+	bounceEffect->SetInitialSpd(ESPInterval(0.0f));
+	bounceEffect->SetParticleLife(ESPInterval(1.2f, 1.5f));
+	bounceEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));
+	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
+	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
+	bounceEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bounceEffect->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1));
+	bounceEffect->SetEmitPosition(emitPoint3D);
+	
+	// Add effectors...
+	bounceEffect->AddEffector(&this->particleFader);
+	bounceEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single particle to the emitter
+	DropShadow dpTemp;
+	dpTemp.amountPercentage = 0.10f;
+	ESPOnomataParticle* bounceParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small));
+	bounceParticle->SetDropShadow(dpTemp);
+	bounceParticle->SetOnomatoplexSound(Onomatoplex::BOUNCE, std::max<Onomatoplex::Extremeness>(ball1.GetOnomatoplexExtremeness(), ball2.GetOnomatoplexExtremeness()));
+	bounceEffect->AddParticle(bounceParticle);
+
+	this->activeGeneralEmitters.push_front(bangEffect);
+	this->activeGeneralEmitters.push_front(bounceEffect);
 }
 
 /**

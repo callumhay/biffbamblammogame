@@ -7,6 +7,8 @@
 #include "GameFontAssetsManager.h"
 #include "LoadingScreen.h"
 #include "LivesLeftHUD.h"
+#include "StickyPaddleGoo.h"
+#include "LaserPaddleGun.h"
 
 // Game Model includes
 #include "../GameModel/GameModel.h"
@@ -98,6 +100,11 @@ GameAssets::~GameAssets() {
 		delete this->itemAssets;
 		this->itemAssets = NULL;
 	}
+
+	delete this->paddleLaserAttachment;
+	this->paddleLaserAttachment = NULL;
+	delete this->paddleStickyAttachment;
+	this->paddleStickyAttachment = NULL;
 
 	delete this->fboAssets;
 	this->fboAssets = NULL;
@@ -460,26 +467,17 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 		this->espAssets->DrawPaddleLaserEffects(dT, camera, p);
 		
 		// Draw attachment (gun) mesh
-		this->laserFireAttachmentAnim.Tick(dT);
-		
-		glPushMatrix();
-		glTranslatef(0, 0, this->laserFireAttachmentAnim.GetInterpolantValue());
-		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
-		
-		this->paddleLaserAttachment->Draw(camera, this->paddleKeyLight, this->paddleFillLight);
-		
-		glPopMatrix();
+		this->paddleLaserAttachment->Draw(dT, p, camera, this->paddleKeyLight, this->paddleFillLight);
 	}
 
 	// When the paddle has the 'sticky' power-up we attach sticky goo to its top
-	if ((p.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
-		// TODO: fix this up - use a shader instead
-		glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
-		
-		glPushMatrix();
-		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
-		this->paddleStickyAttachment->Draw(camera, this->paddleKeyLight, this->paddleFillLight);
-		glPopMatrix();
+	if ((p.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {	
+		// Set the texture for the refraction in the goo - be careful here, we can't get
+		// the 'full scene' fbo because we are currently in the middle of drawing to it
+		this->paddleStickyAttachment->SetSceneTexture(this->fboAssets->GetInitialFullScreenFBO()->GetFBOTexture());
+
+		// Draw the sticky goo
+		this->paddleStickyAttachment->Draw(p, camera, this->paddleKeyLight, this->paddleFillLight, this->ballLight);
 	}
 
 	glPopMatrix();
@@ -528,11 +526,10 @@ void GameAssets::LoadRegularMeshAssets() {
 		this->spikeyBall = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->SPIKEY_BALL_MESH);
 	}
 	if (this->paddleLaserAttachment == NULL) {
-		this->paddleLaserAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_LASER_ATTACHMENT_MESH);
-		this->laserFireAttachmentAnim.SetInterpolantValue(0.0f);
+		this->paddleLaserAttachment = new LaserPaddleGun();
 	}
 	if (this->paddleStickyAttachment == NULL) {
-		this->paddleStickyAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_STICKY_ATTACHMENT_MESH);
+		this->paddleStickyAttachment = new StickyPaddleGoo();
 	}
 }
 
@@ -577,19 +574,8 @@ void GameAssets::DeleteRegularEffectAssets() {
  * Cause the laser paddle attachment to animate - like it's reacting to shooting
  * a bullet or something.
  */
-void GameAssets::AnimatePaddleLaserAttachment(const PlayerPaddle& paddle) {
-		// Setup any animations for the laser attachment
-		std::vector<float> translateVals;
-		translateVals.reserve(3);
-		translateVals.push_back(0);
-		translateVals.push_back(paddle.GetHalfHeight());
-		translateVals.push_back(0);
-		std::vector<double> timeVals;
-		timeVals.reserve(3);
-		timeVals.push_back(0);
-		timeVals.push_back(0.1f);
-		timeVals.push_back(0.2f);
-		this->laserFireAttachmentAnim.SetLerp(timeVals, translateVals);
+void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
+	this->paddleLaserAttachment->FirePaddleLaserGun(paddle);
 }
 
 /*

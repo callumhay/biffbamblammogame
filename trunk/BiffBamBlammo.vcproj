@@ -627,6 +627,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\LaserPaddleGun.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\LevelMesh.h"
 					>
 				</File>
@@ -644,6 +648,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\StartGameDisplayState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\StickyPaddleGoo.h"
 					>
 				</File>
 			</Filter>
@@ -763,6 +771,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\LaserPaddleGun.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\LevelMesh.cpp"
 					>
 				</File>
@@ -780,6 +792,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\StartGameDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\StickyPaddleGoo.cpp"
 					>
 				</File>
 			</Filter>

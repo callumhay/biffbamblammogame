@@ -179,3 +179,12 @@ void Mesh::SetColourForMaterial(const std::string& matGrpName, const Colour& c) 
 	MaterialProperties* matProps = matEffect->GetProperties();
 	matProps->diffuse = c;
 }
+
+/**
+ * Replace the one and only material group in this mesh with the given material group.
+ */
+void Mesh::ReplaceMaterial(CgFxMaterialEffect* replacementMat) {
+	assert(replacementMat != NULL);
+	assert(this->matGrps.size() == 1);
+	this->matGrps.begin()->second->ReplaceMaterialEffect(replacementMat);
+}
