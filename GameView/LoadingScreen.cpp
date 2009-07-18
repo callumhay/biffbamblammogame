@@ -159,7 +159,6 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
  * calls to this function so far.
  */
 void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
-	assert(this->loadingScreenOn);
 	if (!this->loadingScreenOn) { 
 		return; 
 	}

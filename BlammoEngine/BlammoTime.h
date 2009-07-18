@@ -28,6 +28,6 @@ public:
 		SDL_Delay(ms);
 	}
 
-	static void SetVSync(int vSyncOn);
+	static void SetVSync(bool vSyncOn);
 };
 #endif
