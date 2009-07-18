@@ -21,6 +21,7 @@
 #include "../BlammoEngine/FBObj.h"
 
 #include "../GameController.h"
+#include "../WindowManager.h"
 
 
 // 3 sprites for "Biff" "Bam" and "Blammo" respectively
@@ -667,8 +668,15 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 
 		// Make sure the changed fs option is the opposite of what is currently set
 		assert(this->mainMenuState->cfgOptions.GetIsFullscreenOn() == (currSelectionIdx == MainMenuDisplayState::MENU_SEL_OFF_INDEX));
-	
-		// TODO
+		
+		// Set the fullscreen option and toggle fullscreen for the window
+		this->mainMenuState->cfgOptions.SetIsFullscreenOn(currSelectionIdx == MainMenuDisplayState::MENU_SEL_ON_INDEX);
+		bool toggleSuccess = WindowManager::GetInstance()->ToggleFullscreen();
+
+		// The toggle usually fails - doesn't work in windows, so we need to reinitialize the whole windowing system
+		if (!toggleSuccess) {
+			this->mainMenuState->display->ReinitializeGame();
+		}
 	}
 	else if (itemIndex == this->mainMenuState->optionsVSyncIndex) {
 		int currSelectionIdx = this->mainMenuState->vSyncMenuItem->GetSelectedItemIndex();
@@ -691,7 +699,10 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 		// Make sure the resolution option is different from what is currently set
 		assert(this->mainMenuState->cfgOptions.GetResolutionString() != currSelectionStr);
 
-		// TODO
+		// Set the configuration options
+		this->mainMenuState->cfgOptions.SetResolutionByString(currSelectionStr);
+		// Restart the application
+		this->mainMenuState->display->ReinitializeGame();
 	}
 	else {
 		assert(false);

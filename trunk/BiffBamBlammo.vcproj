@@ -1304,6 +1304,10 @@
 					RelativePath=".\ResourceManager.h"
 					>
 				</File>
+				<File
+					RelativePath=".\WindowManager.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
@@ -1324,6 +1328,10 @@
 				</File>
 				<File
 					RelativePath=".\ResourceManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\WindowManager.cpp"
 					>
 				</File>
 			</Filter>

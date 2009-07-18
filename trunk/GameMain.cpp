@@ -25,24 +25,19 @@
 
 #include "GameController.h"
 #include "ResourceManager.h"
+#include "WindowManager.h"
 #include "ConfigOptions.h"
 
 // Initialization Constants for the application
-static const char* WINDOW_TITLE		= "Biff! Bam!! Blammo!?!";
-static const char* ICON_FILEPATH  = "BiffBamBlammoIcon.bmp";
 static const std::string RESOURCE_ZIP = "BBBResources.zip";
 
 static GameModel *model = NULL;
 static GameController *controller = NULL;
 static GameDisplay *display = NULL;
 
-static const unsigned int DEFAULT_VIDEO_FLAGS = SDL_OPENGL | SDL_SWSURFACE;
-static int bitsPerPixel = 16;
-static SDL_Surface* VideoSurface = NULL;
-
-static void ResizeWindow(int w, int h) {
-	display->ChangeDisplaySize(w, h);
-}
+//static void ResizeWindow(int w, int h) {
+//	display->ChangeDisplaySize(w, h);
+//}
 
 static void KeyDownEventHandler(SDL_keysym* keysym) {
 		/*
@@ -80,7 +75,7 @@ static void ProcessEvents() {
 				KeyUpEventHandler(&event.key.keysym);
 				break;
 			case SDL_VIDEORESIZE:
-				ResizeWindow(event.resize.w, event.resize.h);
+				assert(false);
 				break;
 			case SDL_QUIT:
 				// Handle quit requests (like Ctrl-c)
@@ -88,65 +83,6 @@ static void ProcessEvents() {
 				break;
 		}
 	}
-}
-
-/**
- * Initialize SDL.
- * Returns: true on success, false otherwise.
- */
-static bool InitSDLWindow(int windowWidth, int windowHeight, unsigned int videoFlags) {
-	// Load SDL
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    std::cerr << "Unable to initialize SDL: " << SDL_GetError();
-    return false;
-  }
-	
-	// Don't show the mouse cursor unless we're in debug mode
-#ifdef _DEBUG
-	SDL_ShowCursor(1);
-#else
-	SDL_ShowCursor(0);
-#endif
-
-	SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);
-
-  // To use OpenGL, you need to get some information first,
-  const SDL_VideoInfo *info = SDL_GetVideoInfo();
-  if(!info) {
-    // This should never happen...
-		std::cerr << "Video query failed: " << SDL_GetError() << std::endl;
-    return false;
-  }
-  bitsPerPixel = info->vfmt->BitsPerPixel;
-
-  // Set colour bits...
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,  8);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-  
-	// Set colour depth
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-  // Double buffering
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	// .. OTHER STUFF HERE
-
-	// TODO: fix this... (make multisampling versatile...)
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, GameDisplay::NUM_MULTISAMPLES);
-
-  // Set the draw surface...
-	VideoSurface = SDL_SetVideoMode(windowWidth, windowHeight, bitsPerPixel, videoFlags);
-	if (VideoSurface == NULL) {
-		std::cerr << "Unable to set video mode: " << SDL_GetError();
-    return false;
-  }
-	
-	SDL_Surface* icon = SDL_LoadBMP(ICON_FILEPATH);
-	SDL_SetColorKey(icon, SDL_SRCCOLORKEY, SDL_MapRGB(icon->format, 255, 0, 255));
-	SDL_WM_SetIcon(icon, NULL);
-
-	return true;
 }
 
 /**
@@ -202,8 +138,28 @@ static void GameRenderLoop() {
 	}
 }
 
-static void Kill() {
+/**
+ * Kills everything related to the graphics (opengl) and the window.
+ */
+static void KillGraphicsAndWindow(bool gameIsQuiting) {
+	// Clear up MVC
+	CleanUpMVC();
+	
+	// Clear up singletons
+	GameFontAssetsManager::DeleteInstance();
+	LoadingScreen::DeleteInstance();
+	Noise::DeleteInstance();
+	GeometryMaker::DeleteInstance();
 
+	// Only delete the resource manager if we aren't quitting (we need the
+	// resource manager to write out the config file otherwise - it needs to be
+	// the last thing destroyed)
+	if (!gameIsQuiting) {
+		ResourceManager::DeleteInstance();
+	}
+
+	// Shut down the window
+	WindowManager::GetInstance()->Shutdown();
 }
 
 // Driver function for the game.
@@ -217,8 +173,7 @@ int main(int argc, char *argv[]) {
 
 	// One-Time Initialization stuff **************************************
 
-	// Establish the resource manager
-	ResourceManager::InitResourceManager(RESOURCE_ZIP, argv[0]);
+
 	
 	// We show the initial loading screen on the first time initializing the game
 	bool showInitialLoadingScreen = true;
@@ -233,15 +188,14 @@ int main(int argc, char *argv[]) {
 	// in this case we will break from the loop
 	bool quitGame = false;
 	while (!quitGame) {
+		// Establish the resource manager
+		ResourceManager::InitResourceManager(RESOURCE_ZIP, argv[0]);
 
 		// Read the .ini file options (used to initialize various settings in the game)
 		initCfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
 		
-		const unsigned int fullscreenFlag = (initCfgOptions.GetIsFullscreenOn() ? SDL_FULLSCREEN : 0x00000000);
-		const unsigned int videoFlags = DEFAULT_VIDEO_FLAGS | fullscreenFlag;
-
-		// Setup the SDL window
-		if (!InitSDLWindow(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), videoFlags)) {
+		// Setup the window
+		if (!WindowManager::GetInstance()->Init(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), initCfgOptions.GetIsFullscreenOn())) {
 			quitGame = true;
 			break;
 		}
@@ -255,7 +209,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		// TODO: VSync: option for this?
-		BlammoTime::SetVSync(0);
+		BlammoTime::SetVSync(initCfgOptions.GetIsVSyncOn());
 
 		// Create the MVC while showing the loading screen...
 		if (showInitialLoadingScreen) {
@@ -279,26 +233,20 @@ int main(int argc, char *argv[]) {
 		// quit then we must be reinitializing it
 		quitGame = display->HasGameExited();
 
-		// Clear up MVC
-		CleanUpMVC();
-
 		// No longer show the initial loading screen (in the case that we are
 		// repeating the loop - i.e., reinitializing the window)
 		showInitialLoadingScreen = false;
+		
+		// Kill everything graphics related
+		KillGraphicsAndWindow(quitGame);
 	}
 
-	// Clear up singletons
-	Onomatoplex::Generator::DeleteInstance();
-	GameEventManager::DeleteInstance();
 	GameModelConstants::DeleteInstance();
 	GameViewConstants::DeleteInstance();
-	GameFontAssetsManager::DeleteInstance();
+	GameEventManager::DeleteInstance();
+	Onomatoplex::Generator::DeleteInstance();
 	Randomizer::DeleteInstance();
-	LoadingScreen::DeleteInstance();
-	Noise::DeleteInstance();
-	GeometryMaker::DeleteInstance();
-
-	SDL_Quit();
+	WindowManager::DeleteInstance();
 
 	// One-Time Deletion Stuff (only on exit) *****************************
 
