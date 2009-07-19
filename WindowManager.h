@@ -42,6 +42,8 @@ public:
 
 	bool ToggleFullscreen();
 
+	std::vector<std::string> GetPossibleResolutionsList();
+
 private:
 	static WindowManager* instance;
 

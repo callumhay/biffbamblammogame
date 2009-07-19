@@ -226,7 +226,7 @@ void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const G
 /**
  * Draw this game menu in its current state.
  */
-void GameMenu::Draw(double dT) {
+void GameMenu::Draw(double dT, int windowWidth, int windowHeight) {
 	Point2D currPos = this->topLeftCorner;
 	GameMenu* subMenu = NULL;
 
@@ -255,13 +255,13 @@ void GameMenu::Draw(double dT) {
 			currItem->SetTextColour(this->idleColour);
 		}
 		
-		this->DrawMenuItem(dT, currPos, *currItem);
+		this->DrawMenuItem(dT, currPos, *currItem, windowWidth, windowHeight);
 		currPos = currPos - Vector2D(0, currItem->GetHeight() + this->GetMenuItemPadding());
 	}
 	
 	// If there was a submenu then we draw it (this can lead to a nest of menu/submenus)
 	if (subMenu != NULL) {
-		subMenu->Draw(dT);
+		subMenu->Draw(dT, windowWidth, windowHeight);
 	}
 }
 
@@ -634,11 +634,11 @@ void GameSubMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, cons
 	this->arrowSquishAnim.Tick(dT);
 }
 
-void GameSubMenu::DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem) {
+void GameSubMenu::DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem, int windowWidth, int windowHeight) {
 	ColourRGBA textColour = menuItem.GetTextColour();
 	textColour[3] = this->menuItemOpenFadeIn.GetInterpolantValue();
 	menuItem.SetTextColour(textColour);
-	menuItem.Draw(dT, pos);
+	menuItem.Draw(dT, pos, windowWidth, windowHeight);
 
 	this->menuItemOpenFadeIn.Tick(dT);
 }

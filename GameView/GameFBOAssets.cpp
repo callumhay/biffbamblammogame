@@ -4,20 +4,21 @@
 #include "../GameModel/PoisonPaddleItem.h"
 
 GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), 
-initialFSEffectFBO(NULL), finalFSEffectFBO(NULL),
+postFgAndBgFBO(NULL), initialFSEffectFBO(NULL), finalFSEffectFBO(NULL),
 fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), 
 drawItemsInLastPass(true) {
 	
 	// Framebuffer object setup
 	this->fgAndBgFBO					= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 	this->bgFBO								= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
+	this->postFgAndBgFBO			= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 	this->initialFSEffectFBO	= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 	this->finalFSEffectFBO		= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 
 	// Effects setup
-	this->fgAndBgBlurEffect	= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
-	this->bloomEffect				= new CgFxBloom(this->fgAndBgFBO);
-	this->afterImageEffect	= new CgFxAfterImage(this->fgAndBgFBO, this->initialFSEffectFBO);
+	this->fgAndBgBlurEffect	= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
+	this->bloomEffect				= new CgFxBloom(this->postFgAndBgFBO);
+	this->afterImageEffect	= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
 	this->inkSplatterEffect = new CgFxInkSplatter(this->finalFSEffectFBO);
 }
 
@@ -26,6 +27,8 @@ GameFBOAssets::~GameFBOAssets() {
 	this->bgFBO = NULL;
 	delete this->fgAndBgFBO;
 	this->fgAndBgFBO = NULL;
+	delete this->postFgAndBgFBO;
+	this->postFgAndBgFBO = NULL;
 
 	delete this->initialFSEffectFBO;
 	this->initialFSEffectFBO = NULL;
@@ -70,6 +73,8 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	this->bgFBO = new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 	delete this->fgAndBgFBO;
 	this->fgAndBgFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
+	delete this->postFgAndBgFBO;
+	this->postFgAndBgFBO = new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
 	
 	delete this->initialFSEffectFBO;
 	this->initialFSEffectFBO	= new FBObj(width, height, Texture::Nearest, FBObj::DepthAttachment);
@@ -80,9 +85,9 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	delete this->bloomEffect;
 	delete this->afterImageEffect;
 	delete this->inkSplatterEffect;
-	this->fgAndBgBlurEffect = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->fgAndBgFBO);
-	this->bloomEffect				= new CgFxBloom(this->fgAndBgFBO);
-	this->afterImageEffect	= new CgFxAfterImage(this->fgAndBgFBO, this->initialFSEffectFBO);
+	this->fgAndBgBlurEffect = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
+	this->bloomEffect				= new CgFxBloom(this->postFgAndBgFBO);
+	this->afterImageEffect	= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
 	this->inkSplatterEffect	= new CgFxInkSplatter(this->finalFSEffectFBO);
 
 	debug_opengl_state();

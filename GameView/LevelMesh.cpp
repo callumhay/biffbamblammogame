@@ -186,7 +186,7 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
  * Draw the current level mesh.
  */
 void LevelMesh::Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
-	
+
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
 		iter != this->displayListsPerMaterial.end(); iter++) {

@@ -5,6 +5,7 @@ Texture::Texture(TextureFilterType texFilter, int textureType) : texFilter(texFi
 
 Texture::~Texture() {
 	glDeleteTextures(1, &this->texID);
+	this->texID = 0;
 }
 
 void Texture::SetFilteringParams(TextureFilterType texFilter, int glTexType) {

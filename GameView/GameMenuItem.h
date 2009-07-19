@@ -40,7 +40,7 @@ public:
 	GameMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameSubMenu* subMenu);
 	virtual ~GameMenuItem();
 
-	virtual void Draw(double dT, const Point2D& topLeftCorner);
+	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
 	virtual void KeyPressed(GameMenu* parent, SDLKey key) {};
 
 	unsigned int GetHeight() const;
@@ -112,7 +112,7 @@ public:
 		return this->selectionList[this->selectedIndex];
 	}
 
-	virtual void Draw(double dT, const Point2D& topLeftCorner);
+	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
 	virtual void KeyPressed(GameMenu* parent, SDLKey key);
 
 	virtual float GetWidth() const { return this->maxWidth; }
@@ -120,4 +120,36 @@ public:
 	virtual void Activate();
 };
 
+/**
+ * A menu item that causes a dialog asking you to verify your choice.
+ */
+class VerifyMenuItem : public GameMenuItem {
+
+public:
+	VerifyMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel);
+	virtual ~VerifyMenuItem();
+
+	enum VerifyMenuOption { Confirm, Cancel };
+	
+	void SetSelectedVerifyMenuOption(VerifyMenuOption option);
+	// Gets the currently selected/highlighted verify menu option
+	VerifyMenuOption GetSelectedVerifyMenuOption() const {
+		return this->selectedOption;
+	}
+
+	void SetVerifyMenuText(const std::string& descriptionText, const std::string& confirmText, const std::string& cancelText);
+
+	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
+	virtual void KeyPressed(GameMenu* parent, SDLKey key);
+
+private:
+	static const float VERIFY_MENU_PADDING;
+	static const float VERIFY_MENU_OPTION_HSPACING;
+	static const float VERIFY_MENU_OPTION_VSPACING;
+
+	float verifyMenuWidth, verifyMenuHeight;
+	TextLabel2D descriptionLabel, confirmLabel, cancelLabel;	// Labels for the verify menu
+	VerifyMenuOption selectedOption;													// The option currently selecteded/highlighted in the verify menu
+
+};
 #endif

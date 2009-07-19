@@ -30,6 +30,7 @@ private:
 	Mesh* inkBlockMesh;
 
 	std::map<std::string, Texture*> loadedTextures;			// Textures already loaded into the blammo engine
+	Texture* celShadingTexture;													// Cel-shading 1D texture
 	std::map<Texture*, unsigned int> numRefPerTexture;	// Number of references per texture handed out
 
 	// Cg Runtime objects and helper functions
@@ -73,6 +74,7 @@ public:
 	// Texture Resource Functions
 	Texture* GetImgTextureResource(const std::string &filepath, Texture::TextureFilterType filter, GLenum textureType = GL_TEXTURE_2D);
 	bool ReleaseTextureResource(Texture* texture);
+	Texture* GetCelShadingTexture();
 	
 	// Effects Resource Functions
 	void GetCgFxEffectResource(const std::string& filepath, CGeffect &effect, std::map<std::string, CGtechnique> &techniques);

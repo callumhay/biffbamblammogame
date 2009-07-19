@@ -26,7 +26,7 @@ double InvisiBallItem::Activate() {
 			removeTimers.push_back(currTimer);
 		}
 	}
-	// Remove the uber/weak ball timers from the list of active timers
+	// Remove the invisiball timers from the list of active timers
 	for (unsigned int i = 0; i < removeTimers.size(); i++) {
 			GameItemTimer* currTimer = removeTimers[i];
 			activeTimers.remove(currTimer);

@@ -142,14 +142,16 @@ static void GameRenderLoop() {
  * Kills everything related to the graphics (opengl) and the window.
  */
 static void KillGraphicsAndWindow(bool gameIsQuiting) {
-	// Clear up MVC
-	CleanUpMVC();
-	
+
 	// Clear up singletons
 	GameFontAssetsManager::DeleteInstance();
 	LoadingScreen::DeleteInstance();
 	Noise::DeleteInstance();
 	GeometryMaker::DeleteInstance();
+	LoadingScreen::DeleteInstance();
+
+	// Clear up MVC
+	CleanUpMVC();
 
 	// Only delete the resource manager if we aren't quitting (we need the
 	// resource manager to write out the config file otherwise - it needs to be
@@ -172,12 +174,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 	// One-Time Initialization stuff **************************************
-
-
 	
-	// We show the initial loading screen on the first time initializing the game
-	bool showInitialLoadingScreen = true;
-
 	// Set the default config options - these will be read from and written to
 	// the .ini file as we need them
 	ConfigOptions initCfgOptions;
@@ -193,7 +190,7 @@ int main(int argc, char *argv[]) {
 
 		// Read the .ini file options (used to initialize various settings in the game)
 		initCfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
-		
+
 		// Setup the window
 		if (!WindowManager::GetInstance()->Init(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), initCfgOptions.GetIsFullscreenOn())) {
 			quitGame = true;
@@ -212,18 +209,13 @@ int main(int argc, char *argv[]) {
 		BlammoTime::SetVSync(initCfgOptions.GetIsVSyncOn());
 
 		// Create the MVC while showing the loading screen...
-		if (showInitialLoadingScreen) {
-			LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 5);
-		}
+		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 5);
 
 		model = new GameModel();
 		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
 		controller = new GameController(model, display);
 
-		if (showInitialLoadingScreen) {
-			LoadingScreen::GetInstance()->EndShowingLoadingScreen();
-		}
-
+		LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 		debug_opengl_state();
 
 		// This will run the game until quit or reinitialization
@@ -232,10 +224,6 @@ int main(int argc, char *argv[]) {
 		// Set whether the game has quit or not - if the game has not
 		// quit then we must be reinitializing it
 		quitGame = display->HasGameExited();
-
-		// No longer show the initial loading screen (in the case that we are
-		// repeating the loop - i.e., reinitializing the window)
-		showInitialLoadingScreen = false;
 		
 		// Kill everything graphics related
 		KillGraphicsAndWindow(quitGame);
@@ -246,7 +234,6 @@ int main(int argc, char *argv[]) {
 	GameEventManager::DeleteInstance();
 	Onomatoplex::Generator::DeleteInstance();
 	Randomizer::DeleteInstance();
-	WindowManager::DeleteInstance();
 
 	// One-Time Deletion Stuff (only on exit) *****************************
 
@@ -257,9 +244,9 @@ int main(int argc, char *argv[]) {
 	bool iniWriteResult = ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(initCfgOptions);
 	assert(iniWriteResult);
 
-	// Clean up the resource manager last
+	// Clean up the resource manager and finally the window
 	ResourceManager::DeleteInstance();
-
+	WindowManager::DeleteInstance();
 	// ********************************************************************
 
 	return 0;

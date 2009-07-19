@@ -87,11 +87,11 @@ protected:
 	AnimationMultiLerp<float> selArrowScaleAnim;
 	AnimationMultiLerp<float> selArrowFadeAnim;
 
-	static void DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight);
-
 	virtual float GetMenuItemPadding() const;
 	virtual void DrawMenuBackground(double dT);
-	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem) { menuItem.Draw(dT, pos); }
+	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem, int windowWidth, int windowHeight) { 
+		menuItem.Draw(dT, pos, windowWidth, windowHeight); 
+	}
 	virtual void DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem);
 	
 	// Tell the menu that the user has moved their selection up 1 item
@@ -116,6 +116,8 @@ public:
 	GameMenu();
 	GameMenu(const Point2D& topLeftCorner);
 	virtual ~GameMenu();
+
+	static void DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight);
 
 	void AddEventHandler(GameMenuEventHandler* eventHandler) {
 		assert(eventHandler != NULL);
@@ -176,7 +178,7 @@ public:
 		this->topLeftCorner = p;
 	}
 
-	void Draw(double dT);
+	void Draw(double dT, int windowWidth, int windowHeight);
 	void DebugDraw();
 
 	void KeyPressed(SDLKey key);
@@ -216,7 +218,7 @@ protected:
 	virtual float GetMenuItemPadding() const;
 	virtual void DrawMenuBackground(double dT);
 	virtual void DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem);
-	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem);
+	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem, int windowWidth, int windowHeight);
 
 public:
 	static const float HALF_ARROW_WIDTH;

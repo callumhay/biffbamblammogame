@@ -20,12 +20,9 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties
 	this->celSamplerParam	= cgGetNamedEffectParameter(this->cgEffect, "CelShadingSampler");
 	assert(this->celSamplerParam);
 
-	// Initialize the static cel texture if it hasn't been already
-	if (CgFxCelShading::CelDiffuseTexture == NULL) {
-		CgFxCelShading::CelDiffuseTexture = ResourceManager::GetInstance()->GetImgTextureResource("resources/textures/celshading_texture1x256.jpg", Texture::Nearest, GL_TEXTURE_1D);
-		assert(CgFxCelShading::CelDiffuseTexture != NULL);
-	}
-	cgGLSetTextureParameter(this->celSamplerParam, CgFxCelShading::CelDiffuseTexture->GetTextureID());
+	// Initialize the static cel gradient texture
+	CgFxCelShading::CelDiffuseTexture = ResourceManager::GetInstance()->GetCelShadingTexture();
+	assert(CgFxCelShading::CelDiffuseTexture != NULL);
 
 	// Set up other cel-shading parameters
 	this->outlineWidthParam		= NULL;
@@ -56,7 +53,6 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_CEL_SHADER, properties
 }
 
 CgFxCelShading::~CgFxCelShading() {
-	ResourceManager::GetInstance()->ReleaseTextureResource(CgFxCelShading::CelDiffuseTexture);
 }
 
 void CgFxCelShading::SetupBeforePasses(const Camera& camera) {
@@ -78,7 +74,8 @@ void CgFxCelShading::SetupBeforePasses(const Camera& camera) {
 			this->currTechnique = this->techniques[BASIC_BG_TECHNIQUE_NAME];
 		}
 	}
-	
+
+	cgGLSetTextureParameter(this->celSamplerParam, CgFxCelShading::CelDiffuseTexture->GetTextureID());
 	cgGLSetParameter1f(this->outlineWidthParam, this->properties->outlineSize);
 	cgGLSetParameter3f(this->outlineColourParam, this->properties->outlineColour.R(),this->properties->outlineColour.G(), this->properties->outlineColour.B());
 

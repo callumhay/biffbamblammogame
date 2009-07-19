@@ -47,7 +47,7 @@ float GameMenuItem::GetWidth() const {
  * point specifying the top-left corner location where it will
  * be drawn, in window coordinates.
  */
-void GameMenuItem::Draw(double dT, const Point2D& topLeftCorner) {
+void GameMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight) {
 	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
 
 	this->currLabel->SetTopLeftCorner(topLeftCorner + Vector2D(wiggleAmount, 0.0f));
@@ -132,7 +132,7 @@ void SelectionListMenuItem::SetSelectionList(const std::vector<std::string>& ite
 	}
 }
 
-void SelectionListMenuItem::Draw(double dT, const Point2D& topLeftCorner) {
+void SelectionListMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight) {
 	// Obtain the latest interpolated wiggle value
 	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
 	
@@ -296,4 +296,108 @@ void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 void SelectionListMenuItem::Activate() {
 	// Set the previous index to the current one (so we keep track of it)
 	this->previouslySelectedIndex = this->selectedIndex;
+}
+
+// VerifyMenuItem Functions ***************************************************************************
+
+const float VerifyMenuItem::VERIFY_MENU_PADDING					= 15.0f;	// Padding along the border of the verify menu
+const float VerifyMenuItem::VERIFY_MENU_OPTION_HSPACING	= 10.0f;	// Horizontal padding/spacing between options in verify menu
+const float VerifyMenuItem::VERIFY_MENU_OPTION_VSPACING	= 10.0f;	// Vertical padding/spacing between options in verify menu
+
+VerifyMenuItem::VerifyMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel) :
+GameMenuItem(smLabel, lgLabel, NULL), selectedOption(VerifyMenuItem::Confirm),
+descriptionLabel(smLabel), confirmLabel(smLabel), cancelLabel(smLabel),
+verifyMenuWidth(0), verifyMenuHeight(0) {
+
+	// Initialize the text for the verify menu to something sensible
+	this->SetVerifyMenuText("Are you sure?", "Yes", "No");
+}
+
+VerifyMenuItem::~VerifyMenuItem() {
+}
+
+/**
+ * Sets the currently selected/highlighted verify menu option.
+ */
+void VerifyMenuItem::SetSelectedVerifyMenuOption(VerifyMenuItem::VerifyMenuOption option) {
+	this->selectedOption = option;
+	if (option == VerifyMenuItem::Confirm) {
+		this->confirmLabel.SetFont(this->lgTextLabel.GetFont());
+		this->cancelLabel.SetFont(this->smTextLabel.GetFont());
+	}
+	else {
+		this->confirmLabel.SetFont(this->smTextLabel.GetFont());
+		this->cancelLabel.SetFont(this->lgTextLabel.GetFont());			
+	}
+}
+
+/**
+ * Sets the text for the verify menu - this is what will be displayed after the user
+ * activates this menu item and is asked to verify their selection.
+ */
+void VerifyMenuItem::SetVerifyMenuText(const std::string& descriptionText, const std::string& confirmText, const std::string& cancelText) {
+	this->descriptionLabel.SetText(descriptionText);
+	this->confirmLabel.SetText(confirmText);
+	this->cancelLabel.SetText(cancelText);
+
+	// Figure out the maximum width of the verify menu now - to do this we
+	// need to set the labels to their largest size
+	this->descriptionLabel.SetFont(this->lgTextLabel.GetFont());
+	this->confirmLabel.SetFont(this->lgTextLabel.GetFont());
+	this->cancelLabel.SetFont(this->lgTextLabel.GetFont());
+	
+	// Calculate the width and height - use the maximum possible in each case
+	this->verifyMenuWidth = std::max<float>(this->descriptionLabel.GetLastRasterWidth(), 
+		this->confirmLabel.GetLastRasterWidth() + this->cancelLabel.GetLastRasterWidth() + VerifyMenuItem::VERIFY_MENU_OPTION_HSPACING);
+	this->verifyMenuWidth += 2 * VerifyMenuItem::VERIFY_MENU_PADDING;
+
+	this->verifyMenuHeight = this->descriptionLabel.GetHeight() + VerifyMenuItem::VERIFY_MENU_OPTION_VSPACING	+
+		std::max<float>(this->confirmLabel.GetHeight(), this->cancelLabel.GetHeight()) + 2 * VerifyMenuItem::VERIFY_MENU_PADDING;
+
+	// Reset the labels and set the selected option in the menu
+	this->descriptionLabel.SetFont(this->smTextLabel.GetFont());
+	this->SetSelectedVerifyMenuOption(this->selectedOption);
+}
+
+/**
+ * Draw the verify menu - this overlays all other menus and sits ontop of all things currently displayed,
+ * it allows the user one last chance to cancel their selection (or confirm it).
+ */
+void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight) {
+	const Point2D verifyMenuTopLeft((windowWidth - this->verifyMenuWidth) / 2.0f, 
+																	windowHeight - ((windowHeight - this->verifyMenuHeight) / 2.0f));
+
+	const float HALF_VERIFY_MENU_WIDTH	= this->verifyMenuWidth / 2.0f;
+	const float HALF_VERIFY_MENU_HEIGHT	= this->verifyMenuHeight / 2.0f;
+
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(verifyMenuTopLeft[0] + HALF_VERIFY_MENU_WIDTH, verifyMenuTopLeft[1] - HALF_VERIFY_MENU_HEIGHT, 0.0f);
+
+	GameMenu::DrawBackgroundQuad(HALF_VERIFY_MENU_WIDTH, HALF_VERIFY_MENU_HEIGHT);
+	
+	glPopMatrix();
+}
+
+void VerifyMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
+	switch (key) {
+		case SDLK_LEFT:
+		case SDLK_RIGHT:
+			// Change the selected item in the verify menu
+			// TODO
+			break;
+
+		case SDLK_RETURN:
+			// Item currently highlighted in the verify menu has just been activated...
+			// TODO
+			break;
+
+		case SDLK_ESCAPE:
+			// User has indicated that they aren't sure...
+			// TODO
+			break;
+
+		default:
+			break;
+	}
 }
