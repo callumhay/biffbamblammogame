@@ -121,8 +121,11 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	GameFBOAssets* fboAssets = this->display->GetAssets()->GetFBOAssets();
 	assert(fboAssets != NULL);
 
+	FBObj* postFullSceneFBO = fboAssets->GetPostFullSceneFBO();
 	FBObj* fullSceneFBO = fboAssets->GetFullSceneFBO();
 	FBObj* backgroundFBO = fboAssets->GetBackgroundFBO();
+	
+	assert(postFullSceneFBO != NULL);
 	assert(fullSceneFBO != NULL);
 	assert(backgroundFBO != NULL);
 
@@ -157,11 +160,21 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	// Balls...	
 	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), this->display->GetCamera(), backgroundFBO->GetFBOTexture(), negHalfLevelDim);
 
+	fullSceneFBO->UnbindFBObj();
+	
+	// Draw Post-Fullscene effects
+	postFullSceneFBO->BindFBObj();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	fullSceneFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1);
+	// Render any post-processing effects for various items/objects in the game
+	this->display->GetAssets()->DrawPaddlePostEffects(dT, *this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
+
+	postFullSceneFBO->UnbindFBObj();
+
 	glPopMatrix();
 
-	fullSceneFBO->UnbindFBObj();
-
-	// Do a gaussian blur on the foreground for a softer feeling
+	// Do a gaussian blur for a softer feeling
 	this->display->GetAssets()->GetFBOAssets()->RenderFullSceneBlur(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
 
 	debug_opengl_state();

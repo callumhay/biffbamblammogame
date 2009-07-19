@@ -289,20 +289,7 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	subMenuLabelSm.SetText("Resolution");
 	subMenuLabelLg.SetText("Resolution");
 	
-	std::vector<std::string> resolutionOptions;
-	resolutionOptions.reserve(12);
-	resolutionOptions.push_back("800 x 600");
-	resolutionOptions.push_back("1024 x 768");
-	resolutionOptions.push_back("1152 x 864");
-	resolutionOptions.push_back("1280 x 800");
-	resolutionOptions.push_back("1280 x 960");
-	resolutionOptions.push_back("1280 x 1024");
-	resolutionOptions.push_back("1360 x 768");
-	resolutionOptions.push_back("1440 x 900");
-	resolutionOptions.push_back("1600 x 1200");
-	resolutionOptions.push_back("1680 x 1050");
-	resolutionOptions.push_back("1920 x 1080");
-	resolutionOptions.push_back("1920 x 1200");
+	std::vector<std::string> resolutionOptions = WindowManager::GetInstance()->GetPossibleResolutionsList();
 
 	// Try to figure out what index the resolution is set to (so we can set the menu item
 	// to the appropriate index
@@ -375,7 +362,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	// Render the menu
 	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT);
 	this->mainMenu->SetTopLeftCorner(menuTopLeftCorner);
-	this->mainMenu->Draw(dT);
+	this->mainMenu->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 	// Fade-in/out overlay
 	glEnable(GL_BLEND);

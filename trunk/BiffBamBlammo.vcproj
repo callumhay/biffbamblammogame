@@ -935,6 +935,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\PaddleCamItem.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\PaddleSizeItem.h"
 					>
 				</File>
@@ -1088,6 +1092,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\Onomatoplex.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\PaddleCamItem.cpp"
 					>
 				</File>
 				<File

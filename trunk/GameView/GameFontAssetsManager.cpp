@@ -17,6 +17,7 @@ GameFontAssetsManager::~GameFontAssetsManager() {
 		std::map<unsigned int, TextureFontSet*>& fontSet = fontSetIter->second;
 		for (fontIter = fontSet.begin(); fontIter != fontSet.end(); fontIter++) {
 			delete fontIter->second;
+			fontIter->second = NULL;
 		}
 		fontSet.clear();
 	}

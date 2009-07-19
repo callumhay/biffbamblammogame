@@ -42,6 +42,7 @@ private:
 	const std::string TEXTURE_ITEM_1UP;
 	const std::string TEXTURE_ITEM_POISON;
 	const std::string TEXTURE_ITEM_STICKYPADDLE;
+	const std::string TEXTURE_ITEM_PADDLECAM;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -53,6 +54,7 @@ private:
 	const std::string TEXTURE_ITEM_TIMER_UPSIDEDOWN;
 	const std::string TEXTURE_ITEM_TIMER_POISON;
 	const std::string TEXTURE_ITEM_TIMER_STICKYPADDLE;
+	const std::string TEXTURE_ITEM_TIMER_PADDLECAM;
 
 	const std::string TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
@@ -63,6 +65,7 @@ private:
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_POISON;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_PADDLECAM;
 
 public:
 	
@@ -138,6 +141,8 @@ public:
 	const std::string TEXTURE_INKSPLATTER;
 
 	const std::string TEXTURE_BALL_SAFETY_NET;
+
+	const std::string TEXTURE_CEL_GRADIENT;
 
 	// Font path constants **********************************
 	const std::string FONT_SADBAD;

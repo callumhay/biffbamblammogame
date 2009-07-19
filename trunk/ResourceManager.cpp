@@ -19,7 +19,7 @@
 ResourceManager* ResourceManager::instance = NULL;
 
 ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
-cgContext(NULL), inkBlockMesh(NULL), configOptions(NULL) {
+cgContext(NULL), inkBlockMesh(NULL), configOptions(NULL), celShadingTexture(NULL) {
 	// Initialize DevIL and make sure it loaded correctly
 	ilInit();
 	iluInit();
@@ -80,6 +80,12 @@ ResourceManager::~ResourceManager() {
 	}
 	this->loadedTextures.clear();
 	this->numRefPerTexture.clear();
+
+	// Clean up the cel-texture
+	if (this->celShadingTexture != NULL) {
+		delete this->celShadingTexture;
+		this->celShadingTexture = NULL;
+	}
 
 	// Clean up configuration options
 	delete this->configOptions;
@@ -372,6 +378,36 @@ bool ResourceManager::ReleaseTextureResource(Texture* texture) {
 	
 	texture = NULL;
 	return true;
+}
+
+/**
+ * Return the cel-shader texture used as the step function for cel-shading.
+ * Returns: cel shading texture.
+ */
+Texture* ResourceManager::GetCelShadingTexture() {
+	// If we've already loaded the texture, just return it
+	if (this->celShadingTexture != NULL) {
+		return this->celShadingTexture;
+	}
+
+	const char* filepath = GameViewConstants::GetInstance()->TEXTURE_CEL_GRADIENT.c_str();
+	int doesExist = PHYSFS_exists(filepath);
+	if (doesExist == NULL) {
+		debug_output("Texture file not found: " << filepath);
+		debug_physfs_state(NULL);
+		return NULL;
+	}
+	// Open the file for reading
+	PHYSFS_File* fileHandle = PHYSFS_openRead(filepath);
+	if (fileHandle == NULL) {
+		assert(false);
+		return NULL;
+	}
+
+	this->celShadingTexture = Texture1D::CreateTexture1DFromImgFile(fileHandle, Texture::Nearest);
+	assert(this->celShadingTexture != NULL);
+
+	return this->celShadingTexture;
 }
 
 /**

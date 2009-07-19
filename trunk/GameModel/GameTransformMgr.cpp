@@ -1,7 +1,9 @@
 #include "GameTransformMgr.h"
 
-// speed of level flip transform lerp in degrees per second
-const float GameTransformMgr::SECONDS_TO_FLIP	= 1.0f;	
+// Time of level flip transform lerp
+const double GameTransformMgr::SECONDS_TO_FLIP	= 1.0;	
+// Time of camera entering or exiting the paddle camera mode
+const double GameTransformMgr::SECONDS_TO_ENTEROREXIT_PADDLECAM = 0.75;
 
 GameTransformMgr::GameTransformMgr() : currGameDegRotX(0.0f), currGameDegRotY(0.0f), isFlipped(false) {
 }
@@ -33,6 +35,16 @@ void GameTransformMgr::FlipGameUpsideDown() {
 	this->animations[UpsideDownFlip].push_back(flipAnimationRotX);
 	this->animations[UpsideDownFlip].push_back(flipAnimationRotY);
 	this->isFlipped = !this->isFlipped;
+}
+
+/**
+ * This will either enable the paddle camera or stop the paddle camera.
+ * Based on the given parameter this will make sure the transforms are made
+ * to either place the camera in the paddle or take it out and put it in
+ * its default, normal place.
+ */
+void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle) {
+	// TODO
 }
 
 /**

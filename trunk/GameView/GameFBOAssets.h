@@ -20,7 +20,7 @@ private:
 	// FBO assets for the game pipeline
 	FBObj* bgFBO;			
 	FBObj* fgAndBgFBO;
-
+	FBObj* postFgAndBgFBO;
 	FBObj* initialFSEffectFBO;
 	FBObj* finalFSEffectFBO;
 
@@ -60,6 +60,7 @@ public:
 
 	inline FBObj* GetBackgroundFBO() { return this->bgFBO; }
 	inline FBObj* GetFullSceneFBO() { return this->fgAndBgFBO; }
+	inline FBObj* GetPostFullSceneFBO() { return this->postFgAndBgFBO; }
 	inline FBObj* GetInitialFullScreenFBO() { return this->initialFSEffectFBO; }
 	inline FBObj* GetFinalFullScreenFBO()	{ return this->finalFSEffectFBO; }
 

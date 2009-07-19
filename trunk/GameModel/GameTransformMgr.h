@@ -16,8 +16,10 @@
 class GameTransformMgr {
 
 private:
-	enum TransformAnimationType { UpsideDownFlip };
-	static const float SECONDS_TO_FLIP;
+	enum TransformAnimationType { UpsideDownFlip, PaddleCam };
+
+	static const double SECONDS_TO_FLIP;
+	static const double SECONDS_TO_ENTEROREXIT_PADDLECAM;
 
 	bool isFlipped;
 	float currGameDegRotX, currGameDegRotY;
@@ -28,6 +30,8 @@ public:
 	~GameTransformMgr();
 
 	void FlipGameUpsideDown();
+	void SetPaddleCamera(bool putCamInsidePaddle);
+
 	void Tick(double dT);
 
 	Matrix4x4 GetGameTransform() const;

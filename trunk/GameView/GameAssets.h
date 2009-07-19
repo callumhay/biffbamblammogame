@@ -84,6 +84,7 @@ public:
 
 	// Draw functions ******************************************************************************
 	void DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera);
+	void DrawPaddlePostEffects(double dT, const PlayerPaddle& p, const Camera& camera);
 
 	void DrawSkybox(const Camera& camera);
 	void DrawBackgroundModel(const Camera& camera);

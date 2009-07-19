@@ -15,6 +15,7 @@
 #include "../GameModel/OneUpItem.h"
 #include "../GameModel/PoisonPaddleItem.h"
 #include "../GameModel/StickyPaddleItem.h"
+#include "../GameModel/PaddleCamItem.h"
 
 GameViewConstants* GameViewConstants::Instance = NULL;
 
@@ -76,6 +77,8 @@ TEXTURE_INKSPLATTER(TEXTURE_DIRECTORY "/ink_splatter_1024x512.png"),
 
 TEXTURE_BALL_SAFETY_NET(TEXTURE_DIRECTORY "/warning_platform_128x64.jpg"),
 
+TEXTURE_CEL_GRADIENT(TEXTURE_DIRECTORY "/celshading_texture1x256.jpg"),
+
 // Item Drop Texture Asset Paths
 TEXTURE_ITEM_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_powerup256x128.jpg"),
 TEXTURE_ITEM_FASTBALL(TEXTURE_DIRECTORY			"/fastball_powerdown256x128.jpg"),
@@ -95,6 +98,7 @@ TEXTURE_ITEM_BALLSAFETYNET(TEXTURE_DIRECTORY "/ballsafetynet_powerup256x128.jpg"
 TEXTURE_ITEM_1UP(TEXTURE_DIRECTORY					"/1up_powerup256x128.jpg"),
 TEXTURE_ITEM_POISON(TEXTURE_DIRECTORY				"/poison_powerdown256x128.jpg"),
 TEXTURE_ITEM_STICKYPADDLE(TEXTURE_DIRECTORY "/stickypaddle_powerup256x128.jpg"),
+TEXTURE_ITEM_PADDLECAM(TEXTURE_DIRECTORY		"/paddlecam_powerdown_256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
 TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud256x128.png"),
@@ -107,6 +111,7 @@ TEXTURE_ITEM_TIMER_BLACKOUT(TEXTURE_DIRECTORY			"/blackout_timer_hud256x128.png"
 TEXTURE_ITEM_TIMER_UPSIDEDOWN(TEXTURE_DIRECTORY		"/upsidedown_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_POISON(TEXTURE_DIRECTORY				"/poison_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_STICKYPADDLE(TEXTURE_DIRECTORY "/stickypaddle_timer_hud256x128.png"),
+TEXTURE_ITEM_TIMER_PADDLECAM(TEXTURE_DIRECTORY		"/cam_timer_hud256x128.png"),
 
 // Item Timer (Fill) Texture Asset Paths
 TEXTURE_ITEM_TIMER_FILLER_SPDBALL(TEXTURE_DIRECTORY				"/ballspeed_timer_fill_hud256x128.png"),
@@ -118,6 +123,7 @@ TEXTURE_ITEM_TIMER_FILLER_BLACKOUT(TEXTURE_DIRECTORY			"/blackout_timer_fill_hud
 TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN(TEXTURE_DIRECTORY		"/upsidedown_timer_fill256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_POISON(TEXTURE_DIRECTORY				"/poison_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE(TEXTURE_DIRECTORY	"/stickypaddle_timer_fill_hud256x128.png"),
+TEXTURE_ITEM_TIMER_FILLER_PADDLECAM(TEXTURE_DIRECTORY			"/cam_timer_fill_hud256x128.png"),
 
 // Font Asset Paths
 FONT_SADBAD(FONT_DIRECTORY				"/sadbad.ttf"),
@@ -166,8 +172,7 @@ DECO_BACKGROUND_MESH(MESH_DIRECTORY "/deco_background.obj"),
 DECO_SKYBEAM_MESH(MESH_DIRECTORY "/deco_background_beam.obj"),
 DECO_BLOCK_MESH_PATH(MESH_DIRECTORY "/deco_block.obj")
 {
-
-	// Initialize the timer texture arrays
+	// Initialize the item and timer texture arrays
 	this->InitItemTextures();
 	this->InitItemTimerTextures();
 	this->InitItemTimerFillerTextures();
@@ -192,6 +197,7 @@ void GameViewConstants::InitItemTextures() {
 	this->itemTextures.insert(std::make_pair(OneUpItem::ONE_UP_ITEM_NAME,										this->TEXTURE_ITEM_1UP));
 	this->itemTextures.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,			this->TEXTURE_ITEM_POISON));
 	this->itemTextures.insert(std::make_pair(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME,			this->TEXTURE_ITEM_STICKYPADDLE));
+	this->itemTextures.insert(std::make_pair(PaddleCamItem::PADDLE_CAM_ITEM_NAME,						this->TEXTURE_ITEM_PADDLECAM));
 }
 
 void GameViewConstants::InitItemTimerTextures() {
@@ -205,6 +211,7 @@ void GameViewConstants::InitItemTimerTextures() {
 	this->itemTimerTextures.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_UPSIDEDOWN));
 	this->itemTimerTextures.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_POISON));
 	this->itemTimerTextures.insert(std::make_pair(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_STICKYPADDLE));
+	this->itemTimerTextures.insert(std::make_pair(PaddleCamItem::PADDLE_CAM_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_PADDLECAM));
 }
 
 void GameViewConstants::InitItemTimerFillerTextures() {
@@ -218,7 +225,11 @@ void GameViewConstants::InitItemTimerFillerTextures() {
 	this->itemTimerFillerTextures.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN));
 	this->itemTimerFillerTextures.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_FILLER_POISON));
 	this->itemTimerFillerTextures.insert(std::make_pair(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE));
+	this->itemTimerFillerTextures.insert(std::make_pair(PaddleCamItem::PADDLE_CAM_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_FILLER_PADDLECAM));
 }
 
 GameViewConstants::~GameViewConstants() {
+	this->itemTextures.clear();
+	this->itemTimerTextures.clear();
+	this->itemTimerFillerTextures.clear();
 }

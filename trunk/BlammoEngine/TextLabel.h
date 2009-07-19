@@ -33,6 +33,7 @@ public:
 	// Set the font of this label
 	void SetFont(const TextureFontSet* font) {
 		this->font = font;
+		this->lastRasterWidth = this->font->GetWidth(this->text);
 	}
 	// Set the text colour for this label
 	void SetColour(const Colour& c) {

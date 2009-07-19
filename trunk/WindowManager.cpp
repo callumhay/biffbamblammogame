@@ -103,3 +103,65 @@ bool WindowManager::ToggleFullscreen() {
 	int success = SDL_WM_ToggleFullScreen(this->videoSurface);
 	return (success == 1);
 }
+
+
+// CPP Function for sorting resolutions
+static bool resolutionCompare(const std::string& res1, const std::string& res2) {
+	std::stringstream res1SS(res1);
+	std::stringstream res2SS(res2);
+
+	int resolution1Width, resolution2Width, resolution1Height, resolution2Height;
+	res1SS >> resolution1Width;
+	res2SS >> resolution2Width;
+
+	if (resolution1Width < resolution2Width) {
+		return true;
+	}
+	else if (resolution1Width > resolution2Width) {
+		return false;
+	}
+	else {
+		char temp;
+		res1SS >> temp;
+		res2SS >> temp;
+
+		res1SS >> resolution1Height;
+		res2SS >> resolution2Height;
+
+		if (resolution1Height < resolution2Height) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Obtain a list of possible resolutions for the display device
+ * being used to display the game.
+ */
+std::vector<std::string> WindowManager::GetPossibleResolutionsList() {
+	std::set<std::string> resolutionSet;
+	std::vector<std::string> resolutionVec;
+
+	// cross-compatibility issue
+#ifdef WIN32
+	DEVMODE devMode;
+	DWORD count = 0;
+	
+	while (EnumDisplaySettings(NULL, count, &devMode) != NULL) {
+		std::stringstream resolutionStrStream;
+		resolutionStrStream << devMode.dmPelsWidth << " x " << devMode.dmPelsHeight;
+		
+		// We use the set as a detector for unique resolutions, and we only insert
+		// unique ones into the vector that we will be returning
+		resolutionSet.insert(resolutionStrStream.str());
+
+		count++;
+	}
+#endif
+
+	resolutionVec.insert(resolutionVec.begin(), resolutionSet.begin(), resolutionSet.end());
+	sort(resolutionVec.begin(), resolutionVec.end(), resolutionCompare);
+	
+	return resolutionVec;
+}

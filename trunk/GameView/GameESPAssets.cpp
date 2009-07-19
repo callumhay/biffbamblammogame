@@ -386,7 +386,6 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleLaserGlowAura->SetParticleSize(ESPInterval(1.5f));
 	this->paddleLaserGlowAura->SetEmitAngleInDegrees(0);
 	this->paddleLaserGlowAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	this->paddleLaserGlowAura->SetAsPointSpriteEmitter(true);
 	this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, 0, 0));
 	this->paddleLaserGlowAura->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->paddleLaserGlowAura->AddEffector(&this->particlePulsePaddleLaser);

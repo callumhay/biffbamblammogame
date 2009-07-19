@@ -448,10 +448,9 @@ void GameAssets::Tick(double dT) {
  */
 void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera) {
 	Point2D paddleCenter = p.GetCenterPosition();	
-
-	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (p.GetPaddleScaleFactor() - 1);
 	float paddleScaleFactor = p.GetPaddleScaleFactor();
-
+	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
+	
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
 
@@ -463,21 +462,38 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 
 	// In the case of a laser paddle, we draw the laser attachment and its related effects
 	if ((p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
-		// Draw glowy effects where the laser originates...
-		this->espAssets->DrawPaddleLaserEffects(dT, camera, p);
-		
 		// Draw attachment (gun) mesh
 		this->paddleLaserAttachment->Draw(dT, p, camera, this->paddleKeyLight, this->paddleFillLight);
 	}
 
+	glPopMatrix();
+}
+
+/**
+ * Used to draw any relevant post-processing-related effects for the paddle.
+ */
+void GameAssets::DrawPaddlePostEffects(double dT, const PlayerPaddle& p, const Camera& camera) {
+	Point2D paddleCenter = p.GetCenterPosition();
+	float paddleScaleFactor = p.GetPaddleScaleFactor();
+	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
+
+	glPushMatrix();
+	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
+
 	// When the paddle has the 'sticky' power-up we attach sticky goo to its top
 	if ((p.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {	
 		// Set the texture for the refraction in the goo - be careful here, we can't get
-		// the 'full scene' fbo because we are currently in the middle of drawing to it
-		this->paddleStickyAttachment->SetSceneTexture(this->fboAssets->GetInitialFullScreenFBO()->GetFBOTexture());
+		// the 'post full scene' fbo because we are currently in the middle of drawing to it
+		this->paddleStickyAttachment->SetSceneTexture(this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 
 		// Draw the sticky goo
 		this->paddleStickyAttachment->Draw(p, camera, this->paddleKeyLight, this->paddleFillLight, this->ballLight);
+	}
+
+	if ((p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
+		// Draw glowy effects where the laser originates...
+		this->espAssets->DrawPaddleLaserEffects(dT, camera, p);
 	}
 
 	glPopMatrix();

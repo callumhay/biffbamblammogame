@@ -11,7 +11,7 @@ CgFxStickyPaddle::CgFxStickyPaddle(MaterialProperties* properties) :
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_STICKYPADDLE_SHADER, properties),
 timerParam(NULL), displacementParam(NULL), speedParam(NULL), waveScaleParam(NULL), refractScaleParam(NULL),
 sceneWidthParam(NULL), sceneHeightParam(NULL), sceneSamplerParam(NULL),
-timer(0.0f), displacement(0.1f), speed(1.6f), waveScale(3.0f), refractScale(40.0f), noiseScale(3.0f), 
+timer(0.0f), displacement(0.1f), speed(1.6f), waveScale(3.0f), refractScale(10.0f), noiseScale(3.0f), 
 sceneTex(NULL) {
 
 	assert(properties->materialType == MaterialProperties::MATERIAL_STICKYGOO_TYPE);
