@@ -1,10 +1,14 @@
-#ifndef __SLOWBALLITEM_H__
-#define __SLOWBALLITEM_H__
+#ifndef __BALLSPEEDITEM_H__
+#define __BALLSPEEDITEM_H__
 
-#include "../BlammoEngine/BlammoEngine.h"
+#include "../BlammoEngine/BasicIncludes.h"
+
 #include "GameItem.h"
 #include "GameModel.h"
 
+/**
+ * Item associated with speeding up or slowing down the ball.
+ */
 class BallSpeedItem : public GameItem {
 
 public:
