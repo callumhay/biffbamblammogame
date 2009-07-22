@@ -48,7 +48,7 @@ float TextureFontSet::OrthoPrint(const Point2D& topLeftCorner, const std::string
 	Camera::PushWindowCoords();
 
 	// Prepare OGL for drawing the text
-	glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | GL_TRANSFORM_BIT ); 
+	glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT ); 
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);

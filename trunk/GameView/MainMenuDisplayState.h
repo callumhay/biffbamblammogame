@@ -101,6 +101,8 @@ private:
 	SelectionListMenuItem* resolutionMenuItem;
 	SelectionListMenuItem* vSyncMenuItem;
 
+	// 
+
 	AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value
 
 	bool changeToPlayGameState;
@@ -130,10 +132,11 @@ public:
 		MainMenuDisplayState* mainMenuState;
 	public:
 		MainMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
-		virtual ~MainMenuEventHandler() {}
-		virtual void GameMenuItemActivatedEvent(int itemIndex);
-		virtual void GameMenuItemChangedEvent(int itemIndex) {};
-		virtual void EscMenu();
+		~MainMenuEventHandler() {}
+		void GameMenuItemActivatedEvent(int itemIndex);
+		void GameMenuItemChangedEvent(int itemIndex) {};
+		void GameMenuItemVerifiedEvent(int itemIndex);
+		void EscMenu();
 	};
 
 	class OptionsSubMenuEventHandler : public GameMenuEventHandler {
@@ -141,10 +144,11 @@ public:
 		MainMenuDisplayState* mainMenuState;
 	public:
 		OptionsSubMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
-		virtual ~OptionsSubMenuEventHandler() {}
-		virtual void GameMenuItemActivatedEvent(int itemIndex);
-		virtual void GameMenuItemChangedEvent(int itemIndex);
-		virtual void EscMenu();
+		~OptionsSubMenuEventHandler() {}
+		void GameMenuItemActivatedEvent(int itemIndex);
+		void GameMenuItemChangedEvent(int itemIndex);
+		void GameMenuItemVerifiedEvent(int itemIndex) {};
+		void EscMenu();
 	};
 
 private:

@@ -115,6 +115,7 @@ public:
 	const std::string TEXTURE_BANG1;
 	const std::string TEXTURE_BANG2;
 	const std::string TEXTURE_BANG3;
+	const std::string TEXTURE_SPLAT1;
 	const std::string TEXTURE_SMOKE1;
 	const std::string TEXTURE_SMOKE2;
 	const std::string TEXTURE_SMOKE3;

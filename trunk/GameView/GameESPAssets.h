@@ -68,6 +68,7 @@ private:
 
 	// Various textures used as particles for various effects
 	std::vector<Texture2D*> bangTextures;
+	std::vector<Texture2D*> splatTextures;
 	std::vector<Texture2D*> smokeTextures;
 	
 	Texture2D* circleGradientTex;

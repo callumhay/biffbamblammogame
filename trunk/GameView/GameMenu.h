@@ -40,9 +40,15 @@ public:
 
 	/**
 	 * Event called when a menu item has changed (e.g., a new selection is made).
-	 * Parameters: itemInde
+	 * Parameters: itemIndex - the index of the item that changed/was selected.
 	 */
 	virtual void GameMenuItemChangedEvent(int itemIndex) = 0;
+
+	/**
+	 * Event called when a menu item has both been activated and then verified (via a verify menu).
+	 * Parameters: itemIndex - the index of the item that has been verified.
+	 */
+	virtual void GameMenuItemVerifiedEvent(int itemIndex) = 0;
 
 	/** 
 	 * Event called when the user tries to quickly escape from a menu
@@ -60,9 +66,6 @@ private:
 	void SetupAnimations();
 
 protected:
-	static const int NUM_RAND_COLOURS = 20;
-	static const Colour RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS];
-
 	static const float UP_DOWN_ARROW_HEIGHT;
 	static const float UP_DOWN_ARROW_TOP_PADDING;
 	static const float UP_DOWN_ARROW_BOTTOM_PADDING;
@@ -112,6 +115,8 @@ protected:
 
 public:
 	static const float BACKGROUND_PADDING;
+	static const int NUM_RAND_COLOURS = 20;
+	static const Colour RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS];
 
 	GameMenu();
 	GameMenu(const Point2D& topLeftCorner);
@@ -184,11 +189,20 @@ public:
 	void KeyPressed(SDLKey key);
 
 	/**
-	 * Tell this menu that the currently selected menu item has changed
+	 * Tell this menu that the currently activated menu item has changed
 	 */
-	inline void SelectedMenuItemChanged() {
+	inline void ActivatedMenuItemChanged() {
 		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
 			(*iter)->GameMenuItemChangedEvent(this->selectedMenuItemIndex);
+		}
+	}
+
+	/**
+	 * Tell this menu that the currently activated menu item has been verified
+	 */
+	inline void ActivatedMenuItemVerified() {
+		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
+			(*iter)->GameMenuItemVerifiedEvent(this->selectedMenuItemIndex);
 		}
 	}
 };

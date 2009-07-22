@@ -283,7 +283,7 @@ vertexData ink_block_VS(appData IN) {
     
 	// Displacement along normal
     float ni = pow(abs(i),Sharpness);
-    float3 Nn = normalize(mul(WorldITXf, IN.Normal).xyz);
+    float3 Nn = normalize(IN.Normal.xyz);
     float3 NewPos = Pos.xyz - (Nn * (ni-0.5) * Displacement);
 	
 	float3 Pw = mul(WorldXf, Pos).xyz;
@@ -291,7 +291,7 @@ vertexData ink_block_VS(appData IN) {
 
 	OUT.WorldPos	= Pw;
 	OUT.WorldView   = normalize(viewToVert);
-	OUT.WorldNormal = Nn;
+	OUT.WorldNormal = normalize(mul(WorldITXf, IN.Normal).xyz);
 	OUT.HPosition 	= mul(WvpXf, float4(NewPos, 1));
 	OUT.Noise = i;
     return OUT;
@@ -303,7 +303,7 @@ vertexOutput_outlines outline_VS(appdata_outlines IN) {
 	float3 noisePos = TurbDensity * (IN.Position + (Speed*Timer));
 	float i = (noise(noisePos, NTab) + 1.0f) * 0.5f;
     float ni = pow(abs(i),Sharpness);
-    float3 Nn = normalize(mul(WorldITXf, IN.Normal).xyz);
+    float3 Nn = normalize(IN.Normal.xyz);
     float3 NewPos = IN.Position - (Nn * (ni-0.5) * Displacement);
 	
     OUT.HPosition = mul(WvpXf, float4(NewPos, 1));

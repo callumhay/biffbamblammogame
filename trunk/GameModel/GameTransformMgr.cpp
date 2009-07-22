@@ -1,4 +1,5 @@
 #include "GameTransformMgr.h"
+#include "GameModel.h"
 
 // Time of level flip transform lerp
 const double GameTransformMgr::SECONDS_TO_FLIP	= 1.0;	
@@ -51,7 +52,7 @@ void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle) {
  * This will cause interpolation among any transforms that are taking
  * place within this class.
  */
-void GameTransformMgr::Tick(double dT) {
+void GameTransformMgr::Tick(double dT, const GameModel& gameModel) {
 
 	// Holder for any animations that are completed and will need to be deleted and removed
 	std::list<std::map<TransformAnimationType, std::list<AnimationLerp<float>>>::iterator> toRemove;

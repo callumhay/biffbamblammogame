@@ -90,6 +90,43 @@
 #define PHYSFS_SUPPORTS_ZIP 1
 #include "physfs.h"
 
+#ifndef _SORTINGFUNCTIONS_NAMESPACE__
+#define _SORTINGFUNCTIONS_NAMESPACE__
+namespace SortingFunctions {
+
+// Function for sorting resolutions
+inline static bool ResolutionCompare(const std::string& res1, const std::string& res2) {
+	std::stringstream res1SS(res1);
+	std::stringstream res2SS(res2);
+
+	int resolution1Width, resolution2Width, resolution1Height, resolution2Height;
+	res1SS >> resolution1Width;
+	res2SS >> resolution2Width;
+
+	if (resolution1Width < resolution2Width) {
+		return true;
+	}
+	else if (resolution1Width > resolution2Width) {
+		return false;
+	}
+	else {
+		char temp;
+		res1SS >> temp;
+		res2SS >> temp;
+
+		res1SS >> resolution1Height;
+		res2SS >> resolution2Height;
+
+		if (resolution1Height < resolution2Height) {
+			return true;
+		}
+	}
+	return false;
+}
+
+};
+#endif
+
 // Custom Debug functionality
 #ifndef __DEBUG_H__
 #define __DEBUG_H__

@@ -126,7 +126,8 @@ public:
 class VerifyMenuItem : public GameMenuItem {
 
 public:
-	VerifyMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel);
+	VerifyMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, const TextureFontSet* verifyDescFont, 
+		const TextureFontSet* verifyIdleFont, const TextureFontSet* verifySelFont);
 	virtual ~VerifyMenuItem();
 
 	enum VerifyMenuOption { Confirm, Cancel };
@@ -138,18 +139,32 @@ public:
 	}
 
 	void SetVerifyMenuText(const std::string& descriptionText, const std::string& confirmText, const std::string& cancelText);
+	void SetVerifyMenuColours(const Colour& descTxtColour, const Colour& idleColour, const Colour& selColour);
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
 	virtual void KeyPressed(GameMenu* parent, SDLKey key);
 
 private:
-	static const float VERIFY_MENU_PADDING;
+	static const float VERIFY_MENU_HPADDING;
+	static const float VERIFY_MENU_VPADDING;
 	static const float VERIFY_MENU_OPTION_HSPACING;
 	static const float VERIFY_MENU_OPTION_VSPACING;
 
+	bool verifyMenuActive;																		// Whether or not the verify menu is active or not
 	float verifyMenuWidth, verifyMenuHeight;
 	TextLabel2D descriptionLabel, confirmLabel, cancelLabel;	// Labels for the verify menu
 	VerifyMenuOption selectedOption;													// The option currently selecteded/highlighted in the verify menu
+	
+	const TextureFontSet* verifyDescFont;
+	const TextureFontSet* verifyIdleFont;
+	const TextureFontSet* verifySelFont;
+
+	Colour randomMenuBGColour;																// Random colour assigned to the background of the verify menu
+	Colour idleColour, selectionColour;												// Colours used for confirm/cancel items when idle and selected
+	
+
+	virtual void Activate();
+	virtual void Deactivate();
 
 };
 #endif
