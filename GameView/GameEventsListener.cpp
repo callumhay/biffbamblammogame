@@ -58,7 +58,7 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 
 	// Set up the initial game camera for the level - figure out where the camera
 	// should be to maximize view of all the game pieces
-	float distance = level.GetLevelUnitHeight() / (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f))) + 5.0f;
+	float distance = std::max<float>(level.GetLevelUnitHeight(), level.GetLevelUnitWidth()) / (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f))) + 5.0f;
 	this->display->GetCamera().Reset();
 	this->display->GetCamera().Move(Vector3D(0, 0, distance));
 }

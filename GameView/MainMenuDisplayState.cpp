@@ -234,7 +234,12 @@ void MainMenuDisplayState::InitializeMainMenu() {
 	
 	tempLabelSm.SetText(EXIT_MENUITEM);
 	tempLabelLg.SetText(EXIT_MENUITEM);
-	this->exitGameMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+	// TODO...
+	VerifyMenuItem* exitMenuItem = new VerifyMenuItem(tempLabelSm, tempLabelLg, GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
+	exitMenuItem->SetVerifyMenuColours(Colour(1,1,1), MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
+	this->exitGameMenuItemIndex = this->mainMenu->AddMenuItem(exitMenuItem);
 
 	this->mainMenu->SetSelectedMenuItem(this->newGameMenuItemIndex);
 	debug_opengl_state();
@@ -613,11 +618,19 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 		debug_output("Selected " << OPTIONS_MENUITEM << " from menu");
 	}
 	else if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
-		// TODO: Put a dialogue for "Are you sure..."
-		this->mainMenuState->display->QuitGame();
+		// We don't do anything since the user is currently being asked
+		// for verification to quit the game
+		debug_output("Selected " << EXIT_MENUITEM << " from menu");
 	}
 	else {
 		assert(false);
+	}
+}
+
+void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
+	if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
+		// We exit the game if the exit game item has both been activated and verified...
+		this->mainMenuState->display->QuitGame();
 	}
 }
 

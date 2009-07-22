@@ -78,6 +78,14 @@ GameESPAssets::~GameESPAssets() {
 	}
 	this->bangTextures.clear();
 
+	for (std::vector<Texture2D*>::iterator iter = this->splatTextures.begin();
+		iter != this->splatTextures.end(); iter++) {
+		
+		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		assert(removed);	
+	}
+	this->splatTextures.clear();
+
 	for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
 		iter != this->smokeTextures.end(); iter++) {
 		
@@ -227,6 +235,7 @@ void GameESPAssets::InitESPTextures() {
 	
 	// Initialize bang textures (big boom thingys when there are explosions)
 	if (this->bangTextures.size() == 0) {
+		this->bangTextures.reserve(3);
 		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->bangTextures.push_back(temp);
@@ -238,8 +247,17 @@ void GameESPAssets::InitESPTextures() {
 		this->bangTextures.push_back(temp);
 	}
 	
+	// Initialize splat textures (splatty thingys when ink blocks and other messy, gooey things explode)
+	if (this->splatTextures.size() == 0) {
+		this->splatTextures.reserve(1);
+		Texture2D* temp =  dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPLAT1, Texture::Trilinear));
+		assert(temp != NULL);
+		this->splatTextures.push_back(temp);
+	}
+
 	// Initialize smoke textures (cartoony puffs of smoke)
 	if (this->smokeTextures.size() == 0) {
+		this->smokeTextures.reserve(6);
 		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
@@ -868,7 +886,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds1->SetSpawnDelta(ESPInterval(0.0f));
 	inkyClouds1->SetNumParticleLives(1);
 	inkyClouds1->SetInitialSpd(ESPInterval(2.0f, 2.5f));
-	inkyClouds1->SetParticleLife(ESPInterval(2.5f, 3.0f));
+	inkyClouds1->SetParticleLife(ESPInterval(3.0f, 4.0f));
 	inkyClouds1->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	inkyClouds1->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
 	inkyClouds1->SetParticleAlignment(ESP::ViewPointAligned);
@@ -890,7 +908,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds2->SetSpawnDelta(ESPInterval(0.0f));
 	inkyClouds2->SetNumParticleLives(1);
 	inkyClouds2->SetInitialSpd(ESPInterval(2.0f, 2.5f));
-	inkyClouds2->SetParticleLife(ESPInterval(2.5f, 3.0f));
+	inkyClouds2->SetParticleLife(ESPInterval(3.0f, 4.0f));
 	inkyClouds2->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	inkyClouds2->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
 	inkyClouds2->SetParticleAlignment(ESP::ViewPointAligned);
@@ -912,7 +930,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds3->SetSpawnDelta(ESPInterval(0.0f));
 	inkyClouds3->SetNumParticleLives(1);
 	inkyClouds3->SetInitialSpd(ESPInterval(2.0f, 2.5f));
-	inkyClouds3->SetParticleLife(ESPInterval(2.5f, 3.0f));
+	inkyClouds3->SetParticleLife(ESPInterval(3.0f, 4.0f));
 	inkyClouds3->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	inkyClouds3->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
 	inkyClouds3->SetParticleAlignment(ESP::ViewPointAligned);
@@ -958,38 +976,64 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	// Create an emitter for the sound of onomatopeia of the bursting ink block
 	ESPPointEmitter* inkOnoEffect = new ESPPointEmitter();
 	// Set up the emitter...
-	inkOnoEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	inkOnoEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
 	inkOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	inkOnoEffect->SetParticleLife(ESPInterval(2.0f, 2.5f));
+	inkOnoEffect->SetParticleLife(ESPInterval(2.25f));
 	inkOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
 	inkOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	inkOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
 	inkOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
 	inkOnoEffect->SetEmitPosition(emitCenter);
-	inkOnoEffect->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
+	inkOnoEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
 	
 	// Add effectors...
 	inkOnoEffect->AddEffector(&this->particleFader);
 	inkOnoEffect->AddEffector(&this->particleSmallGrowth);
 
-	// Add the single particle to the emitter...
-	DropShadow dpTemp;
-	dpTemp.colour = Colour(1.0f, 1.0f, 1.0f);
-	dpTemp.amountPercentage = 0.12f;
-	ESPOnomataParticle* inkOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::SadBadGoo, GameFontAssetsManager::Big));
-	inkOnoParticle->SetDropShadow(dpTemp);
-
-	// Set the severity of the effect...
+	// Set the onomata particle
+	TextLabel2D splatTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+	splatTextLabel.SetColour(Colour(1, 1, 1));
+	splatTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
 	Onomatoplex::Extremeness severity = Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::GOOD, Onomatoplex::UBER);
-	inkOnoParticle->SetOnomatoplexSound(Onomatoplex::GOO, severity);
-	inkOnoEffect->AddParticle(inkOnoParticle);
+	inkOnoEffect->SetParticles(1, splatTextLabel, Onomatoplex::GOO, severity);
+
+	// Create the splat graphic for the ink block (analogous to the bang star for exploding blocks)
+	assert(this->splatTextures.size() != 0);
+
+	// Choose a random bang texture
+	unsigned int randomSplatTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->splatTextures.size();
+	Texture2D* randomSplatTex = this->splatTextures[randomSplatTexIndex];
+
+	// Create an emitter for the bang texture
+	ESPPointEmitter* splatEffect = new ESPPointEmitter();
+	splatEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+	splatEffect->SetInitialSpd(ESPInterval(0.0f));
+	splatEffect->SetParticleLife(ESPInterval(1.75f));
+	splatEffect->SetRadiusDeviationFromCenter(ESPInterval(0));
+	splatEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	splatEffect->SetEmitPosition(emitCenter);
+	splatEffect->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
+
+	// Figure out some random proper orientation...
+	// Two base rotations (for variety) : 180 or 0...
+	float baseSplatRotation = 0.0f;
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		baseSplatRotation = 180.0f;
+	}
+	splatEffect->SetParticleRotation(ESPInterval(baseSplatRotation - 10.0f, baseSplatRotation + 10.0f));
+	splatEffect->SetParticleSize(ESPInterval(4.0f, 4.5f), ESPInterval(2.0f, 2.5f));
+
+	// Add effectors to the bang effect
+	splatEffect->AddEffector(&this->particleFader);
+	splatEffect->AddEffector(&this->particleMediumGrowth);
+	bool result = splatEffect->SetParticles(1, randomSplatTex);
+	assert(result);
 
 	this->activeGeneralEmitters.push_back(inkyClouds1);
 	this->activeGeneralEmitters.push_back(inkyClouds2);
 	this->activeGeneralEmitters.push_back(inkyClouds3);
-
 	this->activeGeneralEmitters.push_back(inkySpray);
-
+	this->activeGeneralEmitters.push_back(splatEffect);
 	this->activeGeneralEmitters.push_back(inkOnoEffect);
 }
 

@@ -158,7 +158,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
 
 	// Balls...	
-	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), this->display->GetCamera(), backgroundFBO->GetFBOTexture(), negHalfLevelDim);
+	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), this->display->GetCamera(), negHalfLevelDim);
 
 	fullSceneFBO->UnbindFBObj();
 	

@@ -305,7 +305,7 @@ void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Ca
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
 // draw the materials and draw the mesh.
-void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Texture2D* sceneTex, const Vector2D& worldT) {
+void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Vector2D& worldT) {
 	
 	// Average values used to calculate the colour and position of the ball light
 	Point3D avgBallPosition(0,0,0);
@@ -362,7 +362,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 			// INVISIBALL CHECK
 			if ((currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall) {
-				this->invisiBallEffect->SetFBOTexture(sceneTex);
+				this->invisiBallEffect->SetFBOTexture(this->fboAssets->GetBackgroundFBO()->GetFBOTexture());
 				ballEffectTemp = this->invisiBallEffect;
 			}
 			else {

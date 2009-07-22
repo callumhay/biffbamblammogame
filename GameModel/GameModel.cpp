@@ -150,7 +150,7 @@ void GameModel::Tick(double seconds) {
 		this->currState->Tick(seconds);
 	}
 
-	this->gameTransformInfo.Tick(seconds);
+	this->gameTransformInfo.Tick(seconds, *this);
 }
 
 /**
