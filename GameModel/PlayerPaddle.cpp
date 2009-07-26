@@ -41,11 +41,16 @@ const float PlayerPaddle::PADDLE_LASER_DELAY = 0.25f;
 PlayerPaddle::PlayerPaddle() : 
 	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 
 	avgVel(0.0f), ticksSinceAvg(0), timeSinceLastLaserBlast(PADDLE_LASER_DELAY), 
-	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), attachedBall(NULL) {
+	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
+	attachedBall(NULL), isPaddleCamActive(false) {
+
 	this->SetDimensions(PlayerPaddle::NormalSize);
 }
 
-PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : speed(DEFAULT_SPEED), distTemp(0.0f), avgVel(0.0f), ticksSinceAvg(0), hitWall(false) {
+PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : 
+speed(DEFAULT_SPEED), distTemp(0.0f), avgVel(0.0f), ticksSinceAvg(0), 
+hitWall(false), isPaddleCamActive(false) {
+
 	this->SetMinMaxLevelBound(minBound, maxBound);
 }
 

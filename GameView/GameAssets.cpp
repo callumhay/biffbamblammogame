@@ -409,7 +409,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		
 		// Grab a trasform matrix from the game model to say where the ball light is
 		// if the level is flipped or some such thing
-		Point3D newAvgBallPos =  gameModel.GetTransformInfo().GetGameTransform() * avgBallPosition;
+		Point3D newAvgBallPos =  gameModel.GetTransformInfo()->GetGameTransform() * avgBallPosition;
 
 		// Set the ball light to the correct position
 		this->ballLight.SetPosition(newAvgBallPos);

@@ -37,7 +37,6 @@ InGameDisplayState::~InGameDisplayState() {
  * This will render a frame of the actual game while it is in-play.
  */
 void InGameDisplayState::RenderFrame(double dT) {
-
 	// Camera Stuff 
 	this->display->GetCamera().SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
 	glMatrixMode(GL_MODELVIEW);
@@ -137,7 +136,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	backgroundFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
 
 	glPushMatrix();
-	Matrix4x4 gameTransform = this->display->GetModel()->GetTransformInfo().GetGameTransform();
+	Matrix4x4 gameTransform = this->display->GetModel()->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 
 	// Level pieces...
@@ -197,7 +196,7 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	// Render all effects that do not go through all the post-processing filters...
 	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
 	glPushMatrix();
-	Matrix4x4 gameTransform = this->display->GetModel()->GetTransformInfo().GetGameTransform();
+	Matrix4x4 gameTransform = this->display->GetModel()->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 	

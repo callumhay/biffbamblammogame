@@ -6,11 +6,12 @@
 
 GameModel::GameModel() : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), 
-currLivesLeft(0), gameIsPaused(false), isBlackoutActive(false), areControlsFlipped(false) {
+currLivesLeft(0), gameIsPaused(false), isBlackoutActive(false), areControlsFlipped(false),
+gameTransformInfo(new GameTransformMgr()){
 	
 	// Initialize the worlds for the game
 	for (size_t i = 0; i < GameModelConstants::GetInstance()->WORLD_PATHS.size(); i++) {
-		this->worlds.push_back(new GameWorld(GameModelConstants::GetInstance()->WORLD_PATHS[i]));
+		this->worlds.push_back(new GameWorld(GameModelConstants::GetInstance()->WORLD_PATHS[i], *this->gameTransformInfo));
 	}
 
 	// Initialize paddle and the first ball
@@ -42,6 +43,10 @@ GameModel::~GameModel() {
 	this->ClearLiveItems();
 	this->ClearActiveTimers();
 	this->ClearProjectiles();
+
+	// Delete the transform manager
+	delete this->gameTransformInfo;
+	this->gameTransformInfo = NULL;
 }
 
 /**
@@ -150,7 +155,7 @@ void GameModel::Tick(double seconds) {
 		this->currState->Tick(seconds);
 	}
 
-	this->gameTransformInfo.Tick(seconds, *this);
+	this->gameTransformInfo->Tick(seconds, *this);
 }
 
 /**

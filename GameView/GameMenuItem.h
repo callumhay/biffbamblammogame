@@ -149,6 +149,7 @@ private:
 	static const float VERIFY_MENU_VPADDING;
 	static const float VERIFY_MENU_OPTION_HSPACING;
 	static const float VERIFY_MENU_OPTION_VSPACING;
+	static const float VERIFY_MENU_OPTION_WOBBLE_FREQ;	
 
 	bool verifyMenuActive;																		// Whether or not the verify menu is active or not
 	float verifyMenuWidth, verifyMenuHeight;
@@ -159,9 +160,12 @@ private:
 	const TextureFontSet* verifyIdleFont;
 	const TextureFontSet* verifySelFont;
 
-	Colour randomMenuBGColour;																// Random colour assigned to the background of the verify menu
-	Colour idleColour, selectionColour;												// Colours used for confirm/cancel items when idle and selected
+	Colour randomMenuBGColour;						// Random colour assigned to the background of the verify menu
+	Colour idleColour, selectionColour;		// Colours used for confirm/cancel items when idle and selected
 	
+	AnimationMultiLerp<float> optionItemWiggleAnim;	// Wiggle animation for verify menu items
+	AnimationMultiLerp<float> verifyMenuBGScaleAnim;
+	AnimationMultiLerp<float> verifyMenuBGFadeAnim;
 
 	virtual void Activate();
 	virtual void Deactivate();

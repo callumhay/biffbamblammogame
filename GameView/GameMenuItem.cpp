@@ -304,6 +304,7 @@ const float VerifyMenuItem::VERIFY_MENU_HPADDING				= 45.0f;	// Padding on the h
 const float VerifyMenuItem::VERIFY_MENU_VPADDING				= 40.0f;	// Padding on the vertical border of the verify menu
 const float VerifyMenuItem::VERIFY_MENU_OPTION_HSPACING	= 50.0f;	// Horizontal padding/spacing between options in verify menu
 const float VerifyMenuItem::VERIFY_MENU_OPTION_VSPACING	= 40.0f;	// Vertical padding/spacing between options in verify menu
+const float VerifyMenuItem::VERIFY_MENU_OPTION_WOBBLE_FREQ	= 0.2f;	// Frequency of wobble of menu items on selection	
 
 VerifyMenuItem::VerifyMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, 
 															 const TextureFontSet* verifyDescFont, const TextureFontSet* verifyIdleFont, const TextureFontSet* verifySelFont) :
@@ -315,6 +316,11 @@ verifyDescFont(verifyDescFont), verifyIdleFont(verifyIdleFont), verifySelFont(ve
 
 	// Initialize the text for the verify menu to something sensible
 	this->SetVerifyMenuText("Are you sure?", "Yes", "No");
+
+	// Setup the animations to their initial values
+	this->optionItemWiggleAnim.SetInterpolantValue(0.0f);
+	this->verifyMenuBGScaleAnim.SetInterpolantValue(0.0f);
+	this->verifyMenuBGFadeAnim.SetInterpolantValue(0.0f);
 }
 
 VerifyMenuItem::~VerifyMenuItem() {
@@ -402,8 +408,10 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	const Point2D verifyMenuTopLeft((windowWidth - this->verifyMenuWidth) / 2.0f, 
 																	windowHeight - ((windowHeight - this->verifyMenuHeight) / 2.0f));
 
-	const float HALF_VERIFY_MENU_WIDTH	= this->verifyMenuWidth / 2.0f;
-	const float HALF_VERIFY_MENU_HEIGHT	= this->verifyMenuHeight / 2.0f;
+	const float HALF_VERIFY_MENU_WIDTH	= (this->verifyMenuWidth / 2.0f);
+	const float HALF_VERIFY_MENU_HEIGHT	= (this->verifyMenuHeight / 2.0f);
+	const float HALF_ANIM_WIDTH	 = this->verifyMenuBGScaleAnim.GetInterpolantValue() * HALF_VERIFY_MENU_WIDTH;
+	const float HALF_ANIM_HEIGHT = this->verifyMenuBGScaleAnim.GetInterpolantValue() * HALF_VERIFY_MENU_HEIGHT;
 
 	// Make world coordinates equal window coordinates
 	Camera::PushWindowCoords();
@@ -416,23 +424,23 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 
 	// Fill in the background
 	glPolygonMode(GL_FRONT, GL_FILL);
-	glColor4f(this->randomMenuBGColour.R(), this->randomMenuBGColour.G(), this->randomMenuBGColour.B(), 1.0f);
-	GameMenu::DrawBackgroundQuad(HALF_VERIFY_MENU_WIDTH, HALF_VERIFY_MENU_HEIGHT);
+	glColor4f(this->randomMenuBGColour.R(), this->randomMenuBGColour.G(), this->randomMenuBGColour.B(), this->verifyMenuBGFadeAnim.GetInterpolantValue());
+	GameMenu::DrawBackgroundQuad(HALF_ANIM_WIDTH, HALF_ANIM_HEIGHT);
 
 	// Draw the outline of the background
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glPolygonMode(GL_FRONT, GL_LINE);
 	glLineWidth(6.0f);
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	GameMenu::DrawBackgroundQuad(HALF_VERIFY_MENU_WIDTH, HALF_VERIFY_MENU_HEIGHT);
+	glColor4f(0.0f, 0.0f, 0.0f, this->verifyMenuBGFadeAnim.GetInterpolantValue());
+	GameMenu::DrawBackgroundQuad(HALF_ANIM_WIDTH, HALF_ANIM_HEIGHT);
 	
 	// Draw points at each corner to get rid of ugly hard edges
 	glEnable(GL_POINT_SMOOTH);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	glPolygonMode(GL_FRONT, GL_POINT);
 	glPointSize(5.0f);
-	GameMenu::DrawBackgroundQuad(HALF_VERIFY_MENU_WIDTH, HALF_VERIFY_MENU_HEIGHT);
+	GameMenu::DrawBackgroundQuad(HALF_ANIM_WIDTH, HALF_ANIM_HEIGHT);
 	
 	glPopMatrix();
 
@@ -440,25 +448,54 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	glPolygonMode(GL_FRONT, GL_FILL);
 	glColor4f(1, 1, 1, 1);
 
+	float wiggleAmtConfirm = 0.0f;
+	float wiggleAmtCancel  = 0.0f;
+	if (this->selectedOption == VerifyMenuItem::Confirm) {
+		wiggleAmtConfirm = this->optionItemWiggleAnim.GetInterpolantValue();	
+	}
+	else {
+		wiggleAmtCancel = this->optionItemWiggleAnim.GetInterpolantValue();	
+	}
+
+	ColourRGBA temp;
 	// Draw the information/descriptive text for the menu
 	const Point2D DESC_TOP_LEFT_CORNER(MENU_MIDDLE_X - this->descriptionLabel.GetLastRasterWidth()/2.0f, 
 																		 verifyMenuTopLeft[1] - VerifyMenuItem::VERIFY_MENU_VPADDING); 
 	this->descriptionLabel.SetTopLeftCorner(DESC_TOP_LEFT_CORNER);
+	
+	temp = this->descriptionLabel.GetColour();
+	temp[3] = this->verifyMenuBGFadeAnim.GetInterpolantValue();
+	this->descriptionLabel.SetColour(temp);
+
 	this->descriptionLabel.Draw();
 	
 	// Draw the confirm option text
 	const Point2D CONFIRM_TOP_LEFT_CORNER(MENU_MIDDLE_X - VerifyMenuItem::VERIFY_MENU_OPTION_HSPACING/2.0f - this->confirmLabel.GetLastRasterWidth(), 
 																				DESC_TOP_LEFT_CORNER[1] - VerifyMenuItem::VERIFY_MENU_OPTION_VSPACING - this->descriptionLabel.GetHeight());
-	this->confirmLabel.SetTopLeftCorner(CONFIRM_TOP_LEFT_CORNER);
+	this->confirmLabel.SetTopLeftCorner(CONFIRM_TOP_LEFT_CORNER + Vector2D(0, wiggleAmtConfirm));
+	
+	temp = this->confirmLabel.GetColour();
+	temp[3] = this->verifyMenuBGFadeAnim.GetInterpolantValue();
+	this->confirmLabel.SetColour(temp);
+
 	this->confirmLabel.Draw();
 
 	// Draw the cancel option text
 	const Point2D CANCEL_TOP_LEFT_CORNER(MENU_MIDDLE_X + VerifyMenuItem::VERIFY_MENU_OPTION_HSPACING/2.0f,
 																			 CONFIRM_TOP_LEFT_CORNER[1]);
-	this->cancelLabel.SetTopLeftCorner(CANCEL_TOP_LEFT_CORNER);
+	this->cancelLabel.SetTopLeftCorner(CANCEL_TOP_LEFT_CORNER + Vector2D(wiggleAmtCancel, 0));
+	
+	temp = this->cancelLabel.GetColour();
+	temp[3] = this->verifyMenuBGFadeAnim.GetInterpolantValue();
+	this->cancelLabel.SetColour(temp);	
+	
 	this->cancelLabel.Draw();
 
 	Camera::PopWindowCoords();
+
+	this->optionItemWiggleAnim.Tick(dT);
+	this->verifyMenuBGScaleAnim.Tick(dT);
+	this->verifyMenuBGFadeAnim.Tick(dT);
 }
 
 void VerifyMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
@@ -514,6 +551,48 @@ void VerifyMenuItem::Activate() {
 	const int randomColourIdx = (Randomizer::GetInstance()->RandomUnsignedInt() % GameMenu::NUM_RAND_COLOURS);
 	this->randomMenuBGColour = GameMenu::RAND_COLOUR_LIST[randomColourIdx];
 
+	// Setup any animations that occur within the verify menu
+	float amplitude = std::min<float>(VerifyMenuItem::VERIFY_MENU_OPTION_HSPACING, VerifyMenuItem::VERIFY_MENU_OPTION_VSPACING) / 4.0f;
+	std::vector<float> wiggleValues;
+	wiggleValues.reserve(5);
+	wiggleValues.push_back(0.0f);
+	wiggleValues.push_back(amplitude);
+	wiggleValues.push_back(0.0f);
+	wiggleValues.push_back(-amplitude);
+	wiggleValues.push_back(0.0f);
+
+	std::vector<double> timeValues;
+	timeValues.reserve(5);
+	timeValues.push_back(0.0);
+	timeValues.push_back(VerifyMenuItem::VERIFY_MENU_OPTION_WOBBLE_FREQ);
+	timeValues.push_back(2*VerifyMenuItem::VERIFY_MENU_OPTION_WOBBLE_FREQ);
+	timeValues.push_back(3*VerifyMenuItem::VERIFY_MENU_OPTION_WOBBLE_FREQ);
+	timeValues.push_back(4*VerifyMenuItem::VERIFY_MENU_OPTION_WOBBLE_FREQ);
+
+	this->optionItemWiggleAnim.SetLerp(timeValues, wiggleValues);
+	this->optionItemWiggleAnim.SetRepeat(true);
+
+	// When the verify menu opens it has a 'ghost' that keeps opening but fades out
+	std::vector<double> openTimeVals;
+	openTimeVals.reserve(3);
+	openTimeVals.push_back(0.0);
+	openTimeVals.push_back(0.4);
+	
+	std::vector<float> bgScaleAmts;
+	bgScaleAmts.reserve(2);
+	bgScaleAmts.push_back(EPSILON);
+	bgScaleAmts.push_back(1.0f);
+
+	std::vector<float> bgFadeAmts;
+	bgFadeAmts.reserve(2);
+	bgFadeAmts.push_back(0.0f);
+	bgFadeAmts.push_back(1.0f);
+
+	this->verifyMenuBGFadeAnim.SetLerp(openTimeVals, bgFadeAmts);
+	this->verifyMenuBGScaleAnim.SetLerp(openTimeVals, bgScaleAmts);
+	this->verifyMenuBGFadeAnim.SetRepeat(false);
+	this->verifyMenuBGScaleAnim.SetRepeat(false);
+
 	// Activate the menu
 	this->verifyMenuActive = true;
 }
@@ -521,4 +600,15 @@ void VerifyMenuItem::Activate() {
 void VerifyMenuItem::Deactivate() {
 	// Deactivate the menu
 	this->verifyMenuActive = false;
+
+	// Turn off any animations that occur within the verify menu
+	this->optionItemWiggleAnim.ClearLerp();
+	this->optionItemWiggleAnim.SetRepeat(false);
+	this->optionItemWiggleAnim.SetInterpolantValue(0.0f);
+
+	this->verifyMenuBGFadeAnim.ClearLerp();
+	this->verifyMenuBGFadeAnim.SetInterpolantValue(0.0f);
+
+	this->verifyMenuBGScaleAnim.ClearLerp();
+	this->verifyMenuBGScaleAnim.SetInterpolantValue(0.0f);
 }

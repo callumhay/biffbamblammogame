@@ -234,11 +234,13 @@ void MainMenuDisplayState::InitializeMainMenu() {
 	
 	tempLabelSm.SetText(EXIT_MENUITEM);
 	tempLabelLg.SetText(EXIT_MENUITEM);
-	// TODO...
+
 	VerifyMenuItem* exitMenuItem = new VerifyMenuItem(tempLabelSm, tempLabelLg, GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),
 		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
 		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
+
 	exitMenuItem->SetVerifyMenuColours(Colour(1,1,1), MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
+	exitMenuItem->SetVerifyMenuText("Are you sure you want to quit?", "Well, obviously.", "Hell no.");
 	this->exitGameMenuItemIndex = this->mainMenu->AddMenuItem(exitMenuItem);
 
 	this->mainMenu->SetSelectedMenuItem(this->newGameMenuItemIndex);

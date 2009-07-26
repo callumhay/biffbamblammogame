@@ -66,11 +66,15 @@ public:
 		return this->invViewMatrix;
 	}
 
+	/**
+	 * Set the view matrix and its inverse to be the identity matrix.
+	 */
 	void Reset() {
 		this->viewMatrix		= Matrix4x4();
 		this->invViewMatrix = Matrix4x4();
 	}
 
+	void SetTransform(const Matrix4x4& m);
 	void Move(const Vector3D &v);
 	void Rotate(char axis, float degs);
 

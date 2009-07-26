@@ -1,5 +1,6 @@
 #include "GameWorld.h"
 #include "GameLevel.h"
+#include "GameTransformMgr.h"
 
 #include "../ResourceManager.h"
 
@@ -7,8 +8,9 @@
  * Constructor for GameWorld class, requires a list of level text/filenames
  * which will be loaded when they are required.
  */
-GameWorld::GameWorld(std::string worldFilepath) : 
-worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(-1) {
+GameWorld::GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr) : 
+worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(-1),
+transformMgr(transformMgr) {
 }
 
 GameWorld::~GameWorld() {
@@ -79,7 +81,6 @@ bool GameWorld::Load() {
 		this->loadedLevels.push_back(lvl);
 	}
 
-
 	this->isLoaded = true;
 
 	// EVENT: World started...
@@ -140,4 +141,23 @@ GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
 		ret = Cyberpunk;
 	}
 	return ret;
+}
+
+/**
+ * Set the current level to the one given. This will also establish
+ * various other properties required for the level - including making sure the
+ * camera is properly transformed to view it and raising an event that the level has
+ * been started.
+ */
+void GameWorld::SetCurrentLevel(unsigned int levelNum) {
+	assert(isLoaded);
+	assert(levelNum < this->loadedLevels.size());
+	assert(levelNum >= 0);
+	this->currentLevelNum = levelNum;
+
+	// Setup the default transforms for the new level
+	this->transformMgr.SetupLevelCameraDefaultPosition(*this->GetCurrentLevel());
+
+	// EVENT: New Level Started
+	GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
 }

@@ -1,12 +1,16 @@
 #include "GameTransformMgr.h"
 #include "GameModel.h"
+#include "PlayerPaddle.h"
+
+#include "../BlammoEngine/Camera.h"
 
 // Time of level flip transform lerp
 const double GameTransformMgr::SECONDS_TO_FLIP	= 1.0;	
 // Time of camera entering or exiting the paddle camera mode
 const double GameTransformMgr::SECONDS_TO_ENTEROREXIT_PADDLECAM = 0.75;
 
-GameTransformMgr::GameTransformMgr() : currGameDegRotX(0.0f), currGameDegRotY(0.0f), isFlipped(false) {
+GameTransformMgr::GameTransformMgr() : 
+currGameDegRotX(0.0f), currGameDegRotY(0.0f), isFlipped(false) {
 }
 
 GameTransformMgr::~GameTransformMgr() {
@@ -44,8 +48,39 @@ void GameTransformMgr::FlipGameUpsideDown() {
  * to either place the camera in the paddle or take it out and put it in
  * its default, normal place.
  */
-void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle) {
-	// TODO
+void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle, const PlayerPaddle& paddle) {
+
+	if (putCamInsidePaddle) {
+		// We are going into paddle camera mode... animate the camera from whereever
+		// it currently is, into the paddle and animate its orientation appropriately
+		const Point2D currPaddlePos = paddle.GetCenterPosition();
+
+		// We want to be in the paddle, looking up at the level
+		Orientation3D paddleOrientation(Vector3D(currPaddlePos[0], currPaddlePos[1], 0.0f), Vector3D(90.0f, 0, 0));
+		
+		// TODO
+	}
+	else {
+		// We are going out of paddle camera mode back to default - take the camera
+		// from whereever it is currently and move it back to the default position
+
+		
+
+	}
+}
+
+/**
+ * This needs to be called whenever a new level is being loaded - this will make sure
+ * that the default camera position is calculated and made available to the view.
+ */
+void GameTransformMgr::SetupLevelCameraDefaultPosition(const GameLevel& level) {
+	// Calculate the distance along the z axis that the camera needs to be from the origin in order
+	// to see the entire level - this will be the default translation for the camera
+	float distance = std::max<float>(level.GetLevelUnitHeight(), level.GetLevelUnitWidth()) / (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f))) + 5.0f;
+	
+	// Telling the world to translate by (0, 0, -distance), telling the camera to translate by (0, 0, distance)
+	this->defaultCamOrientation = Orientation3D(Vector3D(0, 0, distance), Vector3D(0,0,0));
+	this->currCamOrientation		= this->defaultCamOrientation;
 }
 
 /**
@@ -94,4 +129,13 @@ Matrix4x4 GameTransformMgr::GetGameTransform() const {
 	Matrix4x4 rotY = Matrix4x4::rotationMatrix('y', this->currGameDegRotY, true);
 
 	return rotY * rotX;
+}
+
+/**
+ * Grab the current transform for the camera.
+ */
+Matrix4x4 GameTransformMgr::GetCameraTransform() const {
+
+	// The inverse is returned because the camera transform is applied to the world matrix
+	return this->currCamOrientation.GetTransform().inverse();
 }
