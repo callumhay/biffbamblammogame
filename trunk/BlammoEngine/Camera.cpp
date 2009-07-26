@@ -12,6 +12,16 @@ Camera::Camera() : 	shakeVar(0.0), shakeTimeElapsed(0.0), shakeTimeTotal(0.0), s
 }
 
 /**
+ * Sets the camera transform based on the given m, m will become the
+ * transformation to get from camera to world coordinates and the inverse
+ * will become the view inverse matrix.
+ */
+void Camera::SetTransform(const Matrix4x4& m) {
+	this->viewMatrix = m;
+	this->invViewMatrix = m.inverse();
+}
+
+/**
  * Moves the camera along the given vector (in camera coords) without changing the view
  * direction or up direction.
  */

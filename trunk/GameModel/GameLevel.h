@@ -34,7 +34,6 @@ private:
 	unsigned int width, height;																// Size values for the level
 	bool ballSafetyNetActive;
 	
-
 	GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces);
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces, size_t hIndex, size_t wIndex);

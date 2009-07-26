@@ -1,13 +1,12 @@
 #ifndef __GAMEWORLD_H__
 #define __GAMEWORLD_H__
 
+#include "../BlammoEngine/BasicIncludes.h"
+
 #include "GameEventManager.h"
 
-#include <vector>
-#include <string>
-#include <assert.h>
-
 class GameLevel;
+class GameTransformMgr;
 
 // A set of levels makes up a game world, a game world
 // has its own distinct style. The GameWorld class acts as
@@ -29,8 +28,10 @@ private:
 
 	WorldStyle style;											// Style of the world loaded (None if no world is loaded)
 
+	GameTransformMgr& transformMgr;
+
 public:
-	GameWorld(std::string worldFilepath);
+	GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr);
 	~GameWorld();
 
 	bool Load();
@@ -60,16 +61,7 @@ public:
 		this->SetCurrentLevel(this->currentLevelNum + 1);
 	}
 
-	// Set the current level to the one given
-	void SetCurrentLevel(unsigned int levelNum) {
-		assert(isLoaded);
-		assert(levelNum < this->loadedLevels.size());
-		assert(levelNum >= 0);
-		this->currentLevelNum = levelNum;
-
-		// EVENT: New Level Started
-		GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
-	}
+	void SetCurrentLevel(unsigned int levelNum);
 
 	// Returns whether the current level is the last level in this world.
 	bool IsLastLevel() const {

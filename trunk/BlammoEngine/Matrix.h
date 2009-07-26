@@ -2,6 +2,7 @@
 #define __MATRIX_H__
 
 #include "BasicIncludes.h"
+#include "Algebra.h"
 #include "Vector.h"
 #include "Point.h"
 
@@ -113,6 +114,8 @@ public:
     return Matrix4x4(getColumn(0), getColumn(1), 
                       getColumn(2), getColumn(3));
   }
+
+	Matrix4x4 inverse() const;
 
   const float *begin() const {
     return (float*)v_;
@@ -255,6 +258,64 @@ inline Point3D operator *(const Matrix4x4& m, const Point3D& p) {
 	}
 
 	return ret;
+}
+
+inline Matrix4x4 Matrix4x4::inverse() const {
+  float fA0 = v_[ 0]*v_[ 5] - v_[ 1]*v_[ 4];
+  float fA1 = v_[ 0]*v_[ 6] - v_[ 2]*v_[ 4];
+  float fA2 = v_[ 0]*v_[ 7] - v_[ 3]*v_[ 4];
+  float fA3 = v_[ 1]*v_[ 6] - v_[ 2]*v_[ 5];
+  float fA4 = v_[ 1]*v_[ 7] - v_[ 3]*v_[ 5];
+  float fA5 = v_[ 2]*v_[ 7] - v_[ 3]*v_[ 6];
+  float fB0 = v_[ 8]*v_[13] - v_[ 9]*v_[12];
+  float fB1 = v_[ 8]*v_[14] - v_[10]*v_[12];
+  float fB2 = v_[ 8]*v_[15] - v_[11]*v_[12];
+  float fB3 = v_[ 9]*v_[14] - v_[10]*v_[13];
+  float fB4 = v_[ 9]*v_[15] - v_[11]*v_[13];
+  float fB5 = v_[10]*v_[15] - v_[11]*v_[14];
+
+  float fDet = fA0*fB5-fA1*fB4+fA2*fB3+fA3*fB2-fA4*fB1+fA5*fB0;
+  if (fabs(fDet) <= EPSILON) {
+      return Matrix4x4(Vector3D(0,0,0), Vector3D(0,0,0), Vector3D(0,0,0));
+  }
+
+  Matrix4x4 kInv;
+  kInv.v_[ 0] =  v_[ 5]*fB5 - v_[ 6]*fB4 + v_[ 7]*fB3;
+  kInv.v_[ 4] = -v_[ 4]*fB5 + v_[ 6]*fB2 - v_[ 7]*fB1;
+  kInv.v_[ 8] =  v_[ 4]*fB4 - v_[ 5]*fB2 + v_[ 7]*fB0;
+  kInv.v_[12] = -v_[ 4]*fB3 + v_[ 5]*fB1 - v_[ 6]*fB0;
+  kInv.v_[ 1] = -v_[ 1]*fB5 + v_[ 2]*fB4 - v_[ 3]*fB3;
+  kInv.v_[ 5] =  v_[ 0]*fB5 - v_[ 2]*fB2 + v_[ 3]*fB1;
+  kInv.v_[ 9] = -v_[ 0]*fB4 + v_[ 1]*fB2 - v_[ 3]*fB0;
+  kInv.v_[13] =  v_[ 0]*fB3 - v_[ 1]*fB1 + v_[ 2]*fB0;
+  kInv.v_[ 2] =  v_[13]*fA5 - v_[14]*fA4 + v_[15]*fA3;
+  kInv.v_[ 6] = -v_[12]*fA5 + v_[14]*fA2 - v_[15]*fA1;
+  kInv.v_[10] =  v_[12]*fA4 - v_[13]*fA2 + v_[15]*fA0;
+  kInv.v_[14] = -v_[12]*fA3 + v_[13]*fA1 - v_[14]*fA0;
+  kInv.v_[ 3] = -v_[ 9]*fA5 + v_[10]*fA4 - v_[11]*fA3;
+  kInv.v_[ 7] =  v_[ 8]*fA5 - v_[10]*fA2 + v_[11]*fA1;
+  kInv.v_[11] = -v_[ 8]*fA4 + v_[ 9]*fA2 - v_[11]*fA0;
+  kInv.v_[15] =  v_[ 8]*fA3 - v_[ 9]*fA1 + v_[10]*fA0;
+
+  float fInvDet = ((float)1.0)/fDet;
+  kInv.v_[ 0] *= fInvDet;
+  kInv.v_[ 1] *= fInvDet;
+  kInv.v_[ 2] *= fInvDet;
+  kInv.v_[ 3] *= fInvDet;
+  kInv.v_[ 4] *= fInvDet;
+  kInv.v_[ 5] *= fInvDet;
+  kInv.v_[ 6] *= fInvDet;
+  kInv.v_[ 7] *= fInvDet;
+  kInv.v_[ 8] *= fInvDet;
+  kInv.v_[ 9] *= fInvDet;
+  kInv.v_[10] *= fInvDet;
+  kInv.v_[11] *= fInvDet;
+  kInv.v_[12] *= fInvDet;
+  kInv.v_[13] *= fInvDet;
+  kInv.v_[14] *= fInvDet;
+  kInv.v_[15] *= fInvDet;
+
+  return kInv;
 }
 
 #endif

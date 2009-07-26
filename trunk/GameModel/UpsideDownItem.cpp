@@ -37,8 +37,8 @@ double UpsideDownItem::Activate() {
 	}
 
 	// Flip the game upside down...
-	GameTransformMgr& gameXFormInfo = this->gameModel->GetTransformInfo();
-	gameXFormInfo.FlipGameUpsideDown();
+	GameTransformMgr* gameXFormInfo = this->gameModel->GetTransformInfo();
+	gameXFormInfo->FlipGameUpsideDown();
 	
 	// Check to see if the game is actually flipped right-side up now
 	if (numItemsAlreadyActive > 0) {
@@ -62,8 +62,8 @@ void UpsideDownItem::Deactivate() {
 	}
 
 	// Reflip the game...
-	GameTransformMgr& gameXFormInfo = this->gameModel->GetTransformInfo();
-	gameXFormInfo.FlipGameUpsideDown();
+	GameTransformMgr* gameXFormInfo = this->gameModel->GetTransformInfo();
+	gameXFormInfo->FlipGameUpsideDown();
 	this->gameModel->SetFlippedControls(false);
 
 	this->isActive = false;

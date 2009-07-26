@@ -68,6 +68,8 @@ private:
 
 	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
 
+	bool isPaddleCamActive;	// Whether or not the camera is inside the paddle
+
 	void SetDimensions(float newScaleFactor);
 	void SetDimensions(PlayerPaddle::PaddleSize size);
 	void SetPaddleSize(PlayerPaddle::PaddleSize size);
@@ -173,8 +175,16 @@ public:
 		this->currType = this->currType & ~type;
 	}
 
-	void Shoot(GameModel* gameModel);
+	// Paddle camera set/get functions
+	void SetPaddleCamera(bool isPaddleCamOn) {
+		this->isPaddleCamActive = isPaddleCamOn;
+	}
+	bool GetIsPaddleCameraOn() const {
+		return this->isPaddleCamActive;
+	}
 
+	// Attach/detach ball functions
+	void Shoot(GameModel* gameModel);
 	bool AttachBall(GameBall* ball);
 	
 	/** 

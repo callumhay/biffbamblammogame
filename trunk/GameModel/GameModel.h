@@ -52,7 +52,7 @@ private:
 	// Item related tracking variables *******************
 	bool areControlsFlipped;
 	bool isBlackoutActive;										// Is the game currently blacked out?
-	GameTransformMgr gameTransformInfo;		// The current transform information of the game
+	GameTransformMgr* gameTransformInfo;		// The current transform information of the game
 	
 	// ***************************************************
 
@@ -183,7 +183,7 @@ public:
 		return this->currLivesLeft == 0;
 	}
 
-	GameTransformMgr& GetTransformInfo() {
+	GameTransformMgr* GetTransformInfo() const {
 		return this->gameTransformInfo;
 	}
 
