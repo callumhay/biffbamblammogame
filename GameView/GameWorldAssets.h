@@ -95,10 +95,19 @@ public:
 	virtual void DrawBackgroundModel(const Camera& camera) = 0;
 
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
+		ColourRGBA paddleColour = p.GetPaddleColour();
+		if (paddleColour.A() < EPSILON) {
+			return;
+		}
+
 		glPushMatrix();
+		
 		float paddleScaleFactor = p.GetPaddleScaleFactor();
+
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
+		glColor4f(paddleColour.R(), paddleColour.G(), paddleColour.B(), paddleColour.A());
 		this->playerPaddle->Draw(camera, keyLight, fillLight, ballLight);
+
 		glPopMatrix();
 	}
 

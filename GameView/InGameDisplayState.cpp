@@ -38,10 +38,16 @@ InGameDisplayState::~InGameDisplayState() {
  */
 void InGameDisplayState::RenderFrame(double dT) {
 	// Camera Stuff 
-	this->display->GetCamera().SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	Camera& camera = this->display->GetCamera();
+	camera.SetPerspectiveWithFOV(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), 
+															 this->display->GetModel()->GetTransformInfo()->GetCameraFOVAngle());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	this->display->GetCamera().ApplyCameraTransform(dT);
+	
+	// TODO: since we now reset the camera and reapply its transform each frame, we need to tell the MODEL about debug transforms!!
+	camera.SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
+	camera.ApplyCameraTransform(dT);
+	
 
 	debug_opengl_state();
 
@@ -139,9 +145,18 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	Matrix4x4 gameTransform = this->display->GetModel()->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 
-	// Level pieces...
+	// Level pieces
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
 	this->display->GetAssets()->DrawLevelPieces(dT, currLevel, this->display->GetCamera());
+
+	// Balls...
+	glPushMatrix();
+	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
+	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), this->display->GetCamera(), negHalfLevelDim);
+	glPopMatrix();
+
+	// Safety net (if active)
+	this->display->GetAssets()->DrawSafetyNetIfActive(dT, currLevel, this->display->GetCamera());
 
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
@@ -156,9 +171,6 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
 
-	// Balls...	
-	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), this->display->GetCamera(), negHalfLevelDim);
-
 	fullSceneFBO->UnbindFBObj();
 	
 	// Draw Post-Fullscene effects
@@ -168,7 +180,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	fullSceneFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1);
 	// Render any post-processing effects for various items/objects in the game
 	this->display->GetAssets()->DrawPaddlePostEffects(dT, *this->display->GetModel()->GetPlayerPaddle(), this->display->GetCamera());
-
+	
 	postFullSceneFBO->UnbindFBObj();
 
 	glPopMatrix();
@@ -210,6 +222,9 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 
 	// Typical Particle effects...
 	this->display->GetAssets()->GetESPAssets()->DrawParticleEffects(dT, this->display->GetCamera());
+
+	// Absolute final effects call for various object effects
+	this->display->GetAssets()->DrawGameBallsFinalEffects(dT, *this->display->GetModel(), this->display->GetCamera());
 
 	finalFBO->UnbindFBObj();
 

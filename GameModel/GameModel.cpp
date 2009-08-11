@@ -6,7 +6,7 @@
 
 GameModel::GameModel() : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), 
-currLivesLeft(0), gameIsPaused(false), isBlackoutActive(false), areControlsFlipped(false),
+currLivesLeft(0), pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false),
 gameTransformInfo(new GameTransformMgr()){
 	
 	// Initialize the worlds for the game
@@ -20,15 +20,19 @@ gameTransformInfo(new GameTransformMgr()){
 }
 
 GameModel::~GameModel() {
+	// Delete the state
+	delete this->currState;
+	this->currState = NULL;	
+	
+	// Delete the transform manager
+	delete this->gameTransformInfo;
+	this->gameTransformInfo = NULL;
+
 	// Delete all loaded worlds
 	for (size_t i = 0; i < this->worlds.size(); i++) {
 		delete this->worlds[i];
 		this->worlds[i] = NULL;
 	}
-	
-	// Delete the state
-	delete this->currState;
-	this->currState = NULL;
 
 	// Delete balls and paddle
 	for (std::list<GameBall*>::iterator ballIter = this->balls.begin(); ballIter != this->balls.end(); ballIter++) {
@@ -43,10 +47,6 @@ GameModel::~GameModel() {
 	this->ClearLiveItems();
 	this->ClearActiveTimers();
 	this->ClearProjectiles();
-
-	// Delete the transform manager
-	delete this->gameTransformInfo;
-	this->gameTransformInfo = NULL;
 }
 
 /**
@@ -62,6 +62,8 @@ void GameModel::BeginOrRestartGame() {
 	this->currPlayerScore	= GameModelConstants::GetInstance()->INIT_SCORE;
 	this->SetLivesLeft(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
 	this->numConsecutiveBlocksHit = GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT;	// Don't use set here, we don't want an event
+	this->gameTransformInfo->Reset();
+
 }
 
 void GameModel::SetCurrentWorld(unsigned int worldNum) {
@@ -87,7 +89,9 @@ void GameModel::SetCurrentWorld(unsigned int worldNum) {
 	GameLevel* currLevel = world->GetCurrentLevel();
 	assert(currLevel != NULL);
 
+	// Tell the paddle what the boundries of the level are and reset the paddle
 	this->playerPaddle->SetMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
+	this->playerPaddle->ResetPaddle();
 }
 
 /**
@@ -97,6 +101,8 @@ void GameModel::SetCurrentWorld(unsigned int worldNum) {
 void GameModel::IncrementLevel() {
 	// Reset the multiplier
 	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
+	// Reset the game transform manager
+	this->gameTransformInfo->Reset();
 
 	// Set the number of balls that exist to just 1
 	if (this->balls.size() > 1) {
@@ -150,9 +156,22 @@ void GameModel::IncrementLevel() {
  * Cause the game model to execute over the given amount of time in seconds.
  */
 void GameModel::Tick(double seconds) {
-	
-	if (currState != NULL && !this->gameIsPaused) {
-		this->currState->Tick(seconds);
+
+	// If the entire game has been paused then we exit immediately
+	if ((this->pauseBitField & GameModel::PauseGame) == GameModel::PauseGame) {
+		return;
+	}
+
+	if (currState != NULL) {
+		
+		if ((this->pauseBitField & GameModel::PauseState) == NULL) {
+			this->currState->Tick(seconds);
+		}
+
+		if (this->playerPaddle != NULL && (this->pauseBitField & GameModel::PausePaddle) == NULL) {
+			this->playerPaddle->Tick(seconds);
+		}
+
 	}
 
 	this->gameTransformInfo->Tick(seconds, *this);

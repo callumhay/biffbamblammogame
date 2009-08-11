@@ -31,11 +31,7 @@ double PaddleCamItem::Activate() {
 	}
 
 	// Activate the paddle camera effect
-	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
-	assert(paddle != NULL);
-	paddle->SetPaddleCamera(true);
-	this->gameModel->GetTransformInfo()->SetPaddleCamera(true, *paddle);
-
+	this->gameModel->GetTransformInfo()->SetPaddleCamera(true);
 	GameItem::Activate();
 
 	return PaddleCamItem::PADDLE_CAM_TIMER_IN_SECS;
@@ -47,10 +43,7 @@ void PaddleCamItem::Deactivate() {
 	}
 
 	// Deactivate the paddle camera effect
-	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
-	assert(paddle != NULL);
-	paddle->SetPaddleCamera(false);
-	this->gameModel->GetTransformInfo()->SetPaddleCamera(false, *paddle);
+	this->gameModel->GetTransformInfo()->SetPaddleCamera(false);
 
 	this->isActive = false;
 	GameItem::Deactivate();

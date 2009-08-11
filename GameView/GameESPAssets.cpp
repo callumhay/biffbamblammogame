@@ -19,6 +19,7 @@
 #include "../GameModel/PaddleSizeItem.h"
 #include "../GameModel/BallSizeItem.h"
 #include "../GameModel/OneUpItem.h"
+#include "../GameModel/PaddleCamItem.h"
 
 #include "../BlammoEngine/Texture.h"
 
@@ -50,6 +51,7 @@ explosionRayRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f
 explosionRayRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
 smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
+loopRotateEffectorCW(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 
 circleGradientTex(NULL), 
 starTex(NULL), 
@@ -60,7 +62,8 @@ explosionTex(NULL),
 explosionRayTex(NULL),
 laserBeamTex(NULL),
 upArrowTex(NULL),
-ballTex(NULL) {
+ballTex(NULL),
+ballTargetTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -114,6 +117,7 @@ GameESPAssets::~GameESPAssets() {
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballTex);
 	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballTargetTex);
 
 	// Delete any standalone effects
 	delete this->paddleLaserGlowAura;
@@ -318,6 +322,10 @@ void GameESPAssets::InitESPTextures() {
 		this->ballTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear));
 		assert(this->ballTex != NULL);
 	}
+	if (this->ballTargetTex == NULL) {
+		this->ballTargetTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALLTARGET, Texture::Trilinear));
+		assert(this->ballTargetTex != NULL);
+	}
 
 	debug_opengl_state();
 }
@@ -351,7 +359,7 @@ void GameESPAssets::AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effects
 	uberBallEmitterTrail->SetParticleSize(ESPInterval(1.3f), ESPInterval(1.3f));
 	uberBallEmitterTrail->SetEmitAngleInDegrees(0);
 	uberBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	uberBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
+	uberBallEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
 	uberBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
 	uberBallEmitterTrail->AddEffector(&this->particleFaderUberballTrail);
 	uberBallEmitterTrail->AddEffector(&this->particleShrinkToNothing);
@@ -379,7 +387,7 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 
 	ghostBallEmitterTrail->SetEmitAngleInDegrees(20);
 	ghostBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	ghostBallEmitterTrail->SetParticleAlignment(ESP::ViewPointAligned);
+	ghostBallEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
 	ghostBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
 	ghostBallEmitterTrail->AddEffector(&this->particleFader);
 	ghostBallEmitterTrail->AddEffector(&this->ghostBallAccel1);
@@ -388,6 +396,33 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 
 	effectsList.reserve(effectsList.size() + 1);
 	effectsList.push_back(ghostBallEmitterTrail);
+}
+
+/**
+ * Private helper function - sets up any ball effects that are associated with the paddle
+ * camera effect.
+ */
+void GameESPAssets::AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList) {
+	assert(effectsList.size() == 0);
+
+	ESPPointEmitter* ballTargetEffect = new ESPPointEmitter();
+	ballTargetEffect->SetSpawnDelta(ESPInterval(-1));
+	ballTargetEffect->SetInitialSpd(ESPInterval(0));
+	ballTargetEffect->SetParticleLife(ESPInterval(-1));
+	ballTargetEffect->SetParticleSize(ESPInterval(GameBall::NormalSize));
+	ballTargetEffect->SetEmitAngleInDegrees(0);
+	ballTargetEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	ballTargetEffect->SetParticleAlignment(ESP::ScreenAligned);
+	ballTargetEffect->SetEmitPosition(Point3D(0, 0, 0));
+	ballTargetEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.5f));
+
+	ballTargetEffect->AddEffector(&this->loopRotateEffectorCW);
+
+	bool result = ballTargetEffect->SetParticles(1, this->ballTargetTex);
+	assert(result);
+
+	effectsList.reserve(effectsList.size() + 1);
+	effectsList.push_back(ballTargetEffect);
 }
 
 /**
@@ -490,7 +525,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
 	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	bounceEffect->SetEmitAngleInDegrees(10);
 	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	bounceEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bounceEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bounceEffect->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1));
 	
 	Vector2D ballVelocity = ball.GetVelocity();
@@ -574,7 +609,7 @@ void GameESPAssets::AddBounceBallBallEffect(const Camera& camera, const GameBall
 	bangEffect->SetInitialSpd(ESPInterval(0.0f));
 	bangEffect->SetParticleLife(ESPInterval(0.8f, 1.1f));
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	bangEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bangEffect->SetEmitPosition(emitPoint3D);
 	bangEffect->SetParticleRotation(ESPInterval(0.0f, 360.0f));
 	bangEffect->SetParticleSize(ESPInterval(0.75f, 1.25f));
@@ -591,7 +626,7 @@ void GameESPAssets::AddBounceBallBallEffect(const Camera& camera, const GameBall
 	bounceEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));
 	bounceEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
 	bounceEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
-	bounceEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bounceEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bounceEffect->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1));
 	bounceEffect->SetEmitPosition(emitPoint3D);
 	
@@ -634,7 +669,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	bangEffect->SetParticleLife(bangLifeInterval);
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	bangEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bangEffect->SetEmitPosition(emitCenter);
 
 	// Figure out some random proper orientation...
@@ -670,7 +705,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	bangOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bangOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bangOnoEffect->SetEmitPosition(emitCenter);
 	
 	// Add effectors...
@@ -711,7 +746,7 @@ void GameESPAssets::AddBallSafetyNetDestroyedEffect(const GameBall& ball) {
 	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	bangEffect->SetParticleLife(bangLifeInterval);
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	bangEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bangEffect->SetEmitPosition(emitCenter);
 
 	// Figure out some random proper orientation...
@@ -747,7 +782,7 @@ void GameESPAssets::AddBallSafetyNetDestroyedEffect(const GameBall& ball) {
 	bangOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bangOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bangOnoEffect->SetEmitPosition(emitCenter);
 	
 	// Add effectors...
@@ -783,7 +818,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPie
 	bombExplodeRayEffect->SetParticleLife(ESPInterval(2.0f));
 	bombExplodeRayEffect->SetParticleSize(ESPInterval(5.0f));
 	bombExplodeRayEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	bombExplodeRayEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bombExplodeRayEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bombExplodeRayEffect->SetEmitPosition(emitCenter);
 	bombExplodeRayEffect->SetParticles(1, this->explosionRayTex);
 	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -805,7 +840,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPie
 	bombExplodeFireEffect1->SetParticleLife(ESPInterval(0.25f, 4.0f));
 	bombExplodeFireEffect1->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	bombExplodeFireEffect1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	bombExplodeFireEffect1->SetParticleAlignment(ESP::ViewPointAligned);
+	bombExplodeFireEffect1->SetParticleAlignment(ESP::ScreenAligned);
 	bombExplodeFireEffect1->SetEmitPosition(emitCenter);
 	bombExplodeFireEffect1->SetEmitAngleInDegrees(180);
 	bombExplodeFireEffect1->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_SHADER_PARTICLES, &this->fireEffect);
@@ -820,7 +855,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPie
 	bombExplodeFireEffect2->SetParticleLife(ESPInterval(0.5f, 4.0f));
 	bombExplodeFireEffect2->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	bombExplodeFireEffect2->SetRadiusDeviationFromCenter(ESPInterval(1.0f));
-	bombExplodeFireEffect2->SetParticleAlignment(ESP::ViewPointAligned);
+	bombExplodeFireEffect2->SetParticleAlignment(ESP::ScreenAligned);
 	bombExplodeFireEffect2->SetEmitPosition(emitCenter);
 	bombExplodeFireEffect2->SetEmitAngleInDegrees(180);
 	bombExplodeFireEffect2->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_CLOUD_PARTICLES, this->explosionTex);
@@ -836,7 +871,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPie
 	bombOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
 	bombOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bombOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bombOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bombOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bombOnoEffect->SetEmitPosition(emitCenter);
 	bombOnoEffect->SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
 	
@@ -889,7 +924,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds1->SetParticleLife(ESPInterval(3.0f, 4.0f));
 	inkyClouds1->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	inkyClouds1->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
-	inkyClouds1->SetParticleAlignment(ESP::ViewPointAligned);
+	inkyClouds1->SetParticleAlignment(ESP::ScreenAligned);
 	inkyClouds1->SetEmitPosition(emitCenter);
 	inkyClouds1->SetEmitAngleInDegrees(180);
 	inkyClouds1->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
@@ -911,7 +946,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds2->SetParticleLife(ESPInterval(3.0f, 4.0f));
 	inkyClouds2->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	inkyClouds2->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
-	inkyClouds2->SetParticleAlignment(ESP::ViewPointAligned);
+	inkyClouds2->SetParticleAlignment(ESP::ScreenAligned);
 	inkyClouds2->SetEmitPosition(emitCenter);
 	inkyClouds2->SetEmitAngleInDegrees(180);
 	inkyClouds2->SetParticleColour(ESPInterval(lightInkBlockColour.R()), ESPInterval(lightInkBlockColour.G()), ESPInterval(lightInkBlockColour.B()), ESPInterval(1.0f));
@@ -933,7 +968,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkyClouds3->SetParticleLife(ESPInterval(3.0f, 4.0f));
 	inkyClouds3->SetParticleSize(ESPInterval(1.0f, 3.0f));
 	inkyClouds3->SetRadiusDeviationFromCenter(ESPInterval(0.1f));
-	inkyClouds3->SetParticleAlignment(ESP::ViewPointAligned);
+	inkyClouds3->SetParticleAlignment(ESP::ScreenAligned);
 	inkyClouds3->SetEmitPosition(emitCenter);
 	inkyClouds3->SetEmitAngleInDegrees(180);
 	inkyClouds3->SetParticleColour(ESPInterval(lighterInkBlockColour.R()), ESPInterval(lighterInkBlockColour.G()), ESPInterval(lighterInkBlockColour.B()), ESPInterval(1.0f));
@@ -982,7 +1017,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	inkOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
 	inkOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	inkOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	inkOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	inkOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
 	inkOnoEffect->SetEmitPosition(emitCenter);
 	inkOnoEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
 	
@@ -1010,7 +1045,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	splatEffect->SetInitialSpd(ESPInterval(0.0f));
 	splatEffect->SetParticleLife(ESPInterval(1.75f));
 	splatEffect->SetRadiusDeviationFromCenter(ESPInterval(0));
-	splatEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	splatEffect->SetParticleAlignment(ESP::ScreenAligned);
 	splatEffect->SetEmitPosition(emitCenter);
 	splatEffect->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
 
@@ -1061,7 +1096,7 @@ void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Poi
 	}
 
 	paddleWallOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	paddleWallOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	paddleWallOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
 	paddleWallOnoEffect->SetEmitPosition(hitPos3D);
 	paddleWallOnoEffect->SetEmitDirection(dirOfWallHit3D);
 	paddleWallOnoEffect->SetEmitAngleInDegrees(40);
@@ -1144,12 +1179,13 @@ void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Poi
 /**
  * Adds an effect for when an item is dropping and not yet acquired by the player.
  */
-void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item) {
+void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item, bool showStars) {
 	ESPInterval redRandomColour(0.1f, 1.0f);
 	ESPInterval greenRandomColour(0.1f, 1.0f);
 	ESPInterval blueRandomColour(0.1f, 1.0f);
 	ESPInterval redColour(0), greenColour(0), blueColour(0);
-	ESPInterval alpha(1.0f);
+	float itemAlpha = item.GetItemColour().A();
+	ESPInterval alpha(itemAlpha*0.75f);
 
 	// We choose a specific kind of sprite graphic based on whether we are dealing with a power-down or not
 	// (evil stars for bad items!!)
@@ -1196,7 +1232,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	itemDropEmitterAura1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	itemDropEmitterAura1->SetAsPointSpriteEmitter(true);
 	itemDropEmitterAura1->SetEmitPosition(Point3D(GameItem::HALF_ITEM_WIDTH, 0, 0));
-	itemDropEmitterAura1->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
+	itemDropEmitterAura1->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f * itemAlpha));
 	itemDropEmitterAura1->AddEffector(&this->particlePulseItemDropAura);
 	itemDropEmitterAura1->SetParticles(1, this->circleGradientTex);
 	
@@ -1209,62 +1245,66 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	itemDropEmitterAura2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	itemDropEmitterAura2->SetAsPointSpriteEmitter(true);
 	itemDropEmitterAura2->SetEmitPosition(Point3D(-GameItem::HALF_ITEM_WIDTH, 0, 0));
-	itemDropEmitterAura2->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
+	itemDropEmitterAura2->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f * itemAlpha));
 	itemDropEmitterAura2->AddEffector(&this->particlePulseItemDropAura);
 	itemDropEmitterAura2->SetParticles(1, this->circleGradientTex);
 	
-	// Middle emitter emits solid stars
-	ESPPointEmitter* itemDropEmitterTrail1 = new ESPPointEmitter();
-	itemDropEmitterTrail1->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
-	itemDropEmitterTrail1->SetInitialSpd(ESPInterval(3.0f, 5.0f));
-	itemDropEmitterTrail1->SetParticleLife(ESPInterval(1.2f, 2.0f));
-	itemDropEmitterTrail1->SetParticleSize(ESPInterval(0.6f, 1.4f));
-	itemDropEmitterTrail1->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
-	itemDropEmitterTrail1->SetEmitAngleInDegrees(25);
-	itemDropEmitterTrail1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterTrail1->SetAsPointSpriteEmitter(true);
-	itemDropEmitterTrail1->SetEmitDirection(Vector3D(0, 1, 0));
-	itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
-	itemDropEmitterTrail1->AddEffector(&this->particleFader);
-	//itemDropEmitterTrail1->AddEffector(&this->smokeRotatorCW);
-	itemDropEmitterTrail1->SetParticles(8, itemSpecificFillStarTex);
-	
-	// Left emitter emits outlined stars
-	ESPPointEmitter* itemDropEmitterTrail2 = new ESPPointEmitter();
-	itemDropEmitterTrail2->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
-	itemDropEmitterTrail2->SetInitialSpd(ESPInterval(2.5f, 4.0f));
-	itemDropEmitterTrail2->SetParticleLife(ESPInterval(1.5f, 2.2f));
-	itemDropEmitterTrail2->SetParticleSize(ESPInterval(0.4f, 1.1f));
-	itemDropEmitterTrail2->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
-	itemDropEmitterTrail2->SetEmitAngleInDegrees(10);
-	itemDropEmitterTrail2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterTrail2->SetAsPointSpriteEmitter(true);
-	itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
-	itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
-	itemDropEmitterTrail2->AddEffector(&this->particleFader);
-	itemDropEmitterTrail2->SetParticles(7, itemSpecificOutlineStarTex);
-	
-	// Right emitter emits outlined stars
-	ESPPointEmitter* itemDropEmitterTrail3 = new ESPPointEmitter();
-	itemDropEmitterTrail3->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
-	itemDropEmitterTrail3->SetInitialSpd(ESPInterval(2.5f, 4.0f));
-	itemDropEmitterTrail3->SetParticleLife(ESPInterval(1.5f, 2.2f));
-	itemDropEmitterTrail3->SetParticleSize(ESPInterval(0.4f, 1.1f));
-	itemDropEmitterTrail3->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
-	itemDropEmitterTrail3->SetEmitAngleInDegrees(10);
-	itemDropEmitterTrail3->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	itemDropEmitterTrail3->SetAsPointSpriteEmitter(true);
-	itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
-	itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
-	itemDropEmitterTrail3->AddEffector(&this->particleFader);
-	itemDropEmitterTrail3->SetParticles(7, itemSpecificOutlineStarTex);
-
-	// Add all the emitters for the item
+	// Add the aura emitters
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura1);
 	this->activeItemDropEmitters[&item].push_back(itemDropEmitterAura2);
-	this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail1);
-	this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail2);
-	this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail3);
+
+	if (showStars) {
+		// Middle emitter emits solid stars
+		ESPPointEmitter* itemDropEmitterTrail1 = new ESPPointEmitter();
+		itemDropEmitterTrail1->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
+		itemDropEmitterTrail1->SetInitialSpd(ESPInterval(3.0f, 5.0f));
+		itemDropEmitterTrail1->SetParticleLife(ESPInterval(1.2f, 2.0f));
+		itemDropEmitterTrail1->SetParticleSize(ESPInterval(0.6f, 1.4f));
+		itemDropEmitterTrail1->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
+		itemDropEmitterTrail1->SetEmitAngleInDegrees(25);
+		itemDropEmitterTrail1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		itemDropEmitterTrail1->SetAsPointSpriteEmitter(true);
+		itemDropEmitterTrail1->SetEmitDirection(Vector3D(0, 1, 0));
+		itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
+		itemDropEmitterTrail1->AddEffector(&this->particleFader);
+		//itemDropEmitterTrail1->AddEffector(&this->smokeRotatorCW);
+		itemDropEmitterTrail1->SetParticles(8, itemSpecificFillStarTex);
+		
+		// Left emitter emits outlined stars
+		ESPPointEmitter* itemDropEmitterTrail2 = new ESPPointEmitter();
+		itemDropEmitterTrail2->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
+		itemDropEmitterTrail2->SetInitialSpd(ESPInterval(2.5f, 4.0f));
+		itemDropEmitterTrail2->SetParticleLife(ESPInterval(1.5f, 2.2f));
+		itemDropEmitterTrail2->SetParticleSize(ESPInterval(0.4f, 1.1f));
+		itemDropEmitterTrail2->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
+		itemDropEmitterTrail2->SetEmitAngleInDegrees(10);
+		itemDropEmitterTrail2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		itemDropEmitterTrail2->SetAsPointSpriteEmitter(true);
+		itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
+		itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
+		itemDropEmitterTrail2->AddEffector(&this->particleFader);
+		itemDropEmitterTrail2->SetParticles(7, itemSpecificOutlineStarTex);
+		
+		// Right emitter emits outlined stars
+		ESPPointEmitter* itemDropEmitterTrail3 = new ESPPointEmitter();
+		itemDropEmitterTrail3->SetSpawnDelta(ESPInterval(0.08f, 0.2f));
+		itemDropEmitterTrail3->SetInitialSpd(ESPInterval(2.5f, 4.0f));
+		itemDropEmitterTrail3->SetParticleLife(ESPInterval(1.5f, 2.2f));
+		itemDropEmitterTrail3->SetParticleSize(ESPInterval(0.4f, 1.1f));
+		itemDropEmitterTrail3->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, alpha);
+		itemDropEmitterTrail3->SetEmitAngleInDegrees(10);
+		itemDropEmitterTrail3->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		itemDropEmitterTrail3->SetAsPointSpriteEmitter(true);
+		itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
+		itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
+		itemDropEmitterTrail3->AddEffector(&this->particleFader);
+		itemDropEmitterTrail3->SetParticles(7, itemSpecificOutlineStarTex);
+
+		// Add all the star emitters
+		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail1);
+		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail2);
+		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail3);
+	}
 	
 }
 /**
@@ -1285,6 +1325,27 @@ void GameESPAssets::RemoveItemDropEffect(const Camera& camera, const GameItem& i
 		iter->second.clear();
 
 		this->activeItemDropEmitters.erase(&item);
+	}
+}
+
+/**
+ * Completely turn off the stars on the item drop emitters.
+ */
+void GameESPAssets::TurnOffCurrentItemDropStars(const Camera& camera) {
+
+	// Start by removing the effect for each item and then replace them with non-star effects
+	for (std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.begin(); 
+		iter != this->activeItemDropEmitters.end(); ++iter) {
+		
+		// Delete all emitters associated with the item drop effect
+		for (std::list<ESPEmitter*>::iterator effectIter = iter->second.begin(); effectIter != iter->second.end(); effectIter++) {
+			ESPEmitter* currEmitter = *effectIter;
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		iter->second.clear();
+	
+		this->AddItemDropEffect(camera, *iter->first, false);
 	}
 }
 
@@ -1343,7 +1404,7 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 	laserOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.9f));
 	laserOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	laserOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	laserOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	laserOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
 	laserOnoEffect->SetEmitPosition(projectilePos3D);
 	laserOnoEffect->SetEmitDirection(projectileDir3D);
 	laserOnoEffect->SetEmitAngleInDegrees(45);
@@ -1383,7 +1444,7 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 	laserAuraEmitter->SetParticleSize(ESPInterval(2*PaddleLaser::PADDLELASER_WIDTH), ESPInterval(1.8f*PaddleLaser::PADDLELASER_HEIGHT));
 	laserAuraEmitter->SetEmitAngleInDegrees(0);
 	laserAuraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	laserAuraEmitter->SetParticleAlignment(ESP::ViewPointAligned);
+	laserAuraEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	laserAuraEmitter->SetEmitPosition(Point3D(0,0,0));
 	laserAuraEmitter->SetParticleColour(ESPInterval(0.65f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	laserAuraEmitter->AddEffector(&this->particlePulsePaddleLaser);
@@ -1884,7 +1945,46 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 	glPopMatrix();
 }
 
+/**
+ * Draw effects associated with the ball when it has a target identifying itself
+ */
+void GameESPAssets::DrawTargetBallEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
+	// Check to see if the ball has any associated camera paddle ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	
+	if (foundBallEffects == this->ballEffects.end()) {
+		// Didn't even find a ball ... add one
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<std::string, std::vector<ESPPointEmitter*>>())).first;
+	}
 
+	if (foundBallEffects->second.find(PaddleCamItem::PADDLE_CAM_ITEM_NAME) == foundBallEffects->second.end()) {
+		// Didn't find an associated paddle camera ball effect, so add one
+		this->AddPaddleCamBallESPEffects(this->ballEffects[&ball][PaddleCamItem::PADDLE_CAM_ITEM_NAME]);
+	}
+	std::vector<ESPPointEmitter*>& paddleCamBallEffectList = this->ballEffects[&ball][PaddleCamItem::PADDLE_CAM_ITEM_NAME];
+
+	glPushMatrix();
+	Point2D ballLoc		= ball.GetBounds().Center();
+	Point2D paddleLoc	= paddle.GetCenterPosition();
+	
+	glTranslatef(ballLoc[0], ballLoc[1], 0);
+
+	// Change the colour and alpha of the target based on the proximity to the paddle
+	float distanceToPaddle = Point2D::Distance(ballLoc, paddleLoc);
+	const float MAX_DIST_AWAY = LevelPiece::PIECE_HEIGHT * 20.0f;
+	distanceToPaddle = std::min<float>(MAX_DIST_AWAY, distanceToPaddle);
+	
+	// Lerp the colour and alpha between 0 and MAX_DIST_AWAY 
+	Colour targetColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR + distanceToPaddle * (GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR - GameViewConstants::GetInstance()->ITEM_BAD_COLOUR) / MAX_DIST_AWAY;
+	float targetAlpha   = distanceToPaddle * 0.9f  / MAX_DIST_AWAY;
+	
+	paddleCamBallEffectList[0]->SetParticleColour(ESPInterval(targetColour.R()), ESPInterval(targetColour.G()), ESPInterval(targetColour.B()), ESPInterval(targetAlpha)), 
+	paddleCamBallEffectList[0]->Draw(camera);
+	paddleCamBallEffectList[0]->Tick(dT);
+
+	glPopMatrix();
+}
 
 /**
  * Draw particle effects associated with the ball, which get drawn behind the ball.

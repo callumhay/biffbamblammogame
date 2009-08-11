@@ -2,6 +2,7 @@
 #define __ANIMATION_H__
 
 #include "BasicIncludes.h"
+#include "Algebra.h"
 
 /**
  * Animates a given interpolant over time using basic linear interpolation.
@@ -20,8 +21,8 @@ private:
 
 public:	
 	AnimationLerp() : repeat(false), hasOwnInterpolant(true), interpolant(new T()), x(0), x0(0), x1(1) {}
-	AnimationLerp(T value) : repeat(false), hasOwnInterpolant(true), interpolant(new T(value)), x(0), x0(0), x1(1) {}
-	AnimationLerp(T* interpolant) : repeat(false), hasOwnInterpolant(false), interpolant(interpolant), x(0), x0(0), x1(1) {}
+	AnimationLerp(T value) : repeat(false), hasOwnInterpolant(true), interpolant(new T(value)), x(0), x0(0), x1(1), y0(value), y1(value) {}
+	AnimationLerp(T* interpolant) : repeat(false), hasOwnInterpolant(false), interpolant(interpolant), x(0), x0(0), x1(1), y0(*interpolant), y1(*interpolant) {}
 	AnimationLerp(const AnimationLerp& copy) : interpolant(NULL), x(copy.x), x0(copy.x0), x1(copy.x1), 
 		y0(copy.y0), y1(copy.y1), hasOwnInterpolant(copy.hasOwnInterpolant), repeat(copy.repeat) {
 			this->interpolant = this->hasOwnInterpolant ? new T(*copy.interpolant) : copy.interpolant;
@@ -103,13 +104,17 @@ public:
 	 * Returns: true if the animation is complete, false otherwise.
 	 */
 	bool Tick(double dT) {
-		assert((this->x1 - this->x0) != 0.0f);
+		if (fabs(this->x1 - this->x0) < EPSILON) {
+			return true;
+		}
 		
 		if (this->x >= this->x1) {
 			if (this->repeat) {
 				this->ResetToStart();
 			}
 			else {
+				(*this->interpolant) = this->y1;
+				this->x = this->x1;
 				return true;
 			}
 		}
@@ -128,7 +133,7 @@ public:
 			this->x += dT;
 			return false;
 		}
-		else if (this->x > this->x1) {
+		else if (this->x >= this->x1) {
 			this->x = this->x1;
 			(*this->interpolant) = this->y1;
 		}
@@ -298,6 +303,13 @@ public:
 		T &valueEnd   = this->interpolationPts[this->tracker+1];
 		double timeStart  = this->timePts[this->tracker];
 		double timeEnd		= this->timePts[this->tracker+1];
+
+		if (fabs(timeEnd - timeStart) < EPSILON) {
+			x = timeEnd;
+			(*this->interpolant) = valueEnd;
+			this->tracker++;
+			return !this->repeat;
+		}
 
 		// Linearly interpolate the given interpolate over the current value and time interval
 		(*this->interpolant) = valueStart + (x - timeStart) * (valueEnd - valueStart) / (timeEnd - timeStart);

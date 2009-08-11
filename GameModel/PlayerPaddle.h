@@ -15,6 +15,8 @@
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Vector.h"
+#include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Animation.h"
 
 #include "BoundingLines.h"
 
@@ -61,6 +63,9 @@ private:
 	float minBound, maxBound;			// The current level's boundries along its width for the paddle
 	float speed;									// Speed of the paddle in units per second
 	float currScaleFactor;				// The scale difference between the paddle's current size and its default size
+	
+	ColourRGBA colour;													// The colour multiply of the paddle, including its visibility/alpha
+	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
 	
 	BoundingLines bounds;						// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
 	
@@ -130,13 +135,26 @@ public:
 		return Vector2D(this->avgVel, 0);
 	}
 
-	// Paddle size modifying / querying functions
+	// Paddle size set/get functions
 	PaddleSize GetPaddleSize() const {
 		return this->currSize;
 	}
 	float GetPaddleScaleFactor() const {
 		return this->currScaleFactor;
 	}
+
+	// Paddle colour set/get functions
+	ColourRGBA GetPaddleColour() const {
+		return this->colour;
+	}
+	void SetPaddleColour(const Colour& c) {
+		this->colour = ColourRGBA(c, this->colour.A());
+	}
+	void SetPaddleVisiblity(float alpha) {
+		this->colour[3] = alpha;
+	}
+	void AnimatePaddleFade(bool fadeOut, double duration);
+
 
 	/**
 	 * Increases the paddle size if it can.

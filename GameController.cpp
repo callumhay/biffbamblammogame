@@ -17,6 +17,7 @@
 #include "GameModel/OneUpItem.h"
 #include "GameModel/PoisonPaddleItem.h"
 #include "GameModel/StickyPaddleItem.h"
+#include "GameModel/PaddleCamItem.h"
 
 #include "BlammoEngine/Camera.h"
 
@@ -94,7 +95,7 @@ void GameController::KeyDown(SDLKey key) {
 		this->model->DropItem(OneUpItem::ONE_UP_ITEM_NAME);
 	}
 	else if (key == SDLK_p) {
-		this->model->TogglePauseGame();
+		this->model->TogglePause(GameModel::PauseGame);
 	}
 	else if (key == SDLK_w) {
 		GameDisplay::ToggleDrawDebugBounds();
@@ -107,6 +108,9 @@ void GameController::KeyDown(SDLKey key) {
 	}
 	else if (key == SDLK_y) {
 		this->model->DropItem(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME);
+	}
+	else if (key == SDLK_c) {
+		this->model->DropItem(PaddleCamItem::PADDLE_CAM_ITEM_NAME);
 	}
 	//else if (key == SDLK_6) {
 	//	// Highlight threshold for bloom

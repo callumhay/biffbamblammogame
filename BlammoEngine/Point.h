@@ -56,6 +56,10 @@ public:
 	static Point2D GetMidPoint(const Point2D& p1, const Point2D& p2) {
 		return Point2D((p1[0] + p2[0]) / 2.0f, (p1[1] + p2[1]) / 2.0f);
 	}
+
+	static float Distance(const Point2D& p1, const Point2D& p2) {
+		return sqrt((p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1]));
+	}
 };
 
 // 2D Point output function for debugging purposes

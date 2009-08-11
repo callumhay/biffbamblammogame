@@ -171,10 +171,15 @@ public:
   
 	void Normalize() {
 		float magnitude = this->length();
-		assert(magnitude != 0);
-		this->v_[0] /= magnitude;
-		this->v_[1] /= magnitude;
-		this->v_[2] /= magnitude;
+		if (magnitude < EPSILON) {
+			assert(false);
+			this->v_[0] = this->v_[1] = this->v_[2] = 0;			
+		}
+		else {
+			this->v_[0] /= magnitude;
+			this->v_[1] /= magnitude;
+			this->v_[2] /= magnitude;
+		}
 	}
 
   Vector3D cross(const Vector3D& other) const {

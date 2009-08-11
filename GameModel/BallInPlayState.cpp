@@ -64,9 +64,9 @@ void BallInPlayState::Tick(double seconds) {
 		this->timeSinceGhost += seconds;
 	}	
 	
-	// The paddle can move while the ball is in play, of course
+	// Obtain some of the level pieces needed to figure out what is happening in the game
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
-	paddle->Tick(seconds);
+	GameLevel *currLevel = this->gameModel->GetCurrentLevel();
 
 	// Check for item-paddle collisions
 	this->DoItemCollision();
@@ -78,14 +78,12 @@ void BallInPlayState::Tick(double seconds) {
 	// Update any particles that are currently active in play
 	this->UpdateActiveProjectiles(seconds);
 
-	// First check for ball-paddle collision
-	
+	// Variables that will be needed for collision detection
 	Vector2D n;
 	float d;
 	bool didCollideWithPaddle = false;
 	bool didCollideWithBlock = false;
-	GameLevel *currLevel = this->gameModel->GetCurrentLevel();
-
+	
 	GameBall* ballToMoveToFront = NULL;																	// The last ball to hit the paddle is the one with priority for item effects
 	std::list<std::list<GameBall*>::iterator> ballsToRemove;						// The balls that are no longer in play and will be removed
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();	// The current set of balls in play

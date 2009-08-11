@@ -8,7 +8,8 @@ const Vector3D Camera::DEFAULT_FORWARD_VEC	= Vector3D(0, 0, -1);
 const Vector3D Camera::DEFAULT_LEFT_VEC			= Vector3D(-1, 0, 0);
 const Vector3D Camera::DEFAULT_UP_VEC				= Vector3D(0, 1, 0);
 
-Camera::Camera() : 	shakeVar(0.0), shakeTimeElapsed(0.0), shakeTimeTotal(0.0), shakeMagnitude(0,0,0), shakeSpeed(0) {
+Camera::Camera() : 	shakeVar(0.0), shakeTimeElapsed(0.0), shakeTimeTotal(0.0), 
+shakeMagnitude(0,0,0), shakeSpeed(0), fovAngleInDegrees(FOV_ANGLE_IN_DEGS) {
 }
 
 /**

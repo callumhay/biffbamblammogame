@@ -36,21 +36,39 @@ public:
 	float GetTX() const {
 		return this->translation[0];
 	}
+	void SetTX(float tx) {
+		this->translation[0] = tx;
+	}
 	float GetTY() const {
 		return this->translation[1];
 	}
+	void SetTY(float ty) {
+		this->translation[1] = ty;
+	}
 	float GetTZ() const {
 		return this->translation[2];
+	}
+	void SetTZ(float tz) {
+		this->translation[2] = tz;
 	}
 
 	float GetRX() const {
 		return this->rotation[0];
 	}
+	void SetRX(float rx) {
+		this->rotation[0] = rx;
+	}
 	float GetRY() const {
 		return this->rotation[1];
 	}
+	void SetRY(float ry) {
+		this->rotation[1] = ry;
+	}
 	float GetRZ() const {
 		return this->rotation[2];
+	}
+	void SetRZ(float rz) {
+		this->rotation[2] = rz;
 	}
 };
 
@@ -60,7 +78,7 @@ inline Matrix4x4 Orientation3D::GetTransform() const {
 	Matrix4x4 rotationMatY			= Matrix4x4::rotationMatrix('y', this->rotation[1], true);
 	Matrix4x4 rotationMatZ			= Matrix4x4::rotationMatrix('z', this->rotation[2], true);
 
-	return rotationMatX * rotationMatY * rotationMatZ * translationMat;
+	return translationMat * rotationMatX * rotationMatY * rotationMatZ;
 
 }
 

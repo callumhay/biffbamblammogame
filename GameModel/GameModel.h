@@ -46,8 +46,11 @@ private:
 	int numConsecutiveBlocksHit;
 	int currLivesLeft;
 
-	// Whether or not the game is currently paused
-	bool gameIsPaused;
+	// Holds the type of pausing that is currently being used on the game model (see PauseType enum)
+	int pauseBitField;
+
+	bool gameIsEntirelyPaused;
+	bool gameStateIsPaused;
 
 	// Item related tracking variables *******************
 	bool areControlsFlipped;
@@ -113,7 +116,15 @@ private:
 	void ClearLiveItems();
 	void ClearActiveTimers();
 
-public:	
+public:
+	// Pause functionality for the game:
+	// NoPause: no pauses at all in the game model execution.
+	// PauseState: Only the current state is paused - thus if the game is in play no movement of paddle, ball, items, etc. will occur.
+	// PausePaddle: Only pauses the paddle movement, animations, etc.
+	// PauseGame: Pauses the entire game - should be used when the user pauses the game.
+	// AllPause: All possible pauses are active
+	enum PauseType { NoPause = 0x00000000, PauseState = 0x00000001, PausePaddle = 0x00000002, PauseGame = 0x80000000, AllPause = 0xFFFFFFFF };
+
 	GameModel();
 	~GameModel();
 
@@ -208,20 +219,33 @@ public:
 
 	// Move the paddle a distance in either positive or negative X direction.
 	void MovePaddle(float dist) {
-		if (this->currState != NULL) {
+		// Can only move the paddle if the state exists and is not paused
+		if (this->currState != NULL && (this->pauseBitField & GameModel::AllPause) == NULL) {
 			this->currState->MovePaddleKeyPressed(dist);
 		}
 	}
 	// Release the ball from the paddle
 	void ReleaseBall() {
-		if (this->currState != NULL) {
+		// Can only release the ball if the state exists and is not paused
+		if (this->currState != NULL && (this->pauseBitField & GameModel::AllPause) == NULL) {
 			this->currState->BallReleaseKeyPressed();
 		}
 	}
 
 	// Pauses the game
-	void TogglePauseGame() {
-		this->gameIsPaused = !this->gameIsPaused;
+	void SetPause(PauseType pause) {
+		this->pauseBitField |= pause;
+	}
+	void UnsetPause(PauseType pause) {
+		this->pauseBitField &= ~pause;
+	}
+	void TogglePause(PauseType pause) {
+		if ((this->pauseBitField & pause) == pause) {
+			this->UnsetPause(pause);
+		}
+		else {
+			this->SetPause(pause);
+		}
 	}
 
 	// Item effect related getters and setters ***************************
