@@ -13,6 +13,9 @@ private:
 	Matrix4x4 viewMatrix;
 	Matrix4x4 invViewMatrix;
 
+	// Current field of view angle
+	float fovAngleInDegrees;
+
 	// Camera shake variables
 	double shakeVar;
 	double shakeTimeElapsed;
@@ -105,12 +108,21 @@ public:
 		return this->invViewMatrix.getTranslation();
 	}
 
-	// Function for setting the camera perspective
-	static void SetPerspective(int w, int h) {
+	// Functions for setting the camera perspective
+	void SetPerspectiveWithFOV(int w, int h, float fovAngleInDegs) {
+		this->fovAngleInDegrees = fovAngleInDegs;
+
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glViewport(0, 0, w, h);
-		gluPerspective(FOV_ANGLE_IN_DEGS, ((double)w) / ((double)h), NEAR_PLANE_DIST, FAR_PLANE_DIST);
+		gluPerspective(this->fovAngleInDegrees, ((double)w) / ((double)h), NEAR_PLANE_DIST, FAR_PLANE_DIST);
+	}
+
+	void SetPerspective(int w, int h) {
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glViewport(0, 0, w, h);
+		gluPerspective(this->fovAngleInDegrees, ((double)w) / ((double)h), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
 	// Functions for changing the current view transform to a full ortho2D,

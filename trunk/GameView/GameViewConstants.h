@@ -140,6 +140,7 @@ public:
 	const std::string TEXTURE_STARFIELD;
 	
 	const std::string TEXTURE_INKSPLATTER;
+	const std::string TEXTURE_BALLTARGET;
 
 	const std::string TEXTURE_BALL_SAFETY_NET;
 

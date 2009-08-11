@@ -14,6 +14,7 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/BlackoutItem.h"
 #include "../GameModel/PoisonPaddleItem.h"
+#include "../GameModel/PaddleCamItem.h"
 
 // Blammo Engine includes
 #include "../BlammoEngine/Texture3D.h"
@@ -298,9 +299,12 @@ void GameAssets::ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour&
 
 // Draw the foreground level pieces...
 void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
-	std::map<const GameLevel*, LevelMesh*>::const_iterator iter = this->loadedLevelMeshes.find(currLevel);
-	assert(iter != this->loadedLevelMeshes.end());
-	iter->second->Draw(dT, camera, this->fgKeyLight, this->fgFillLight, this->ballLight);
+	LevelMesh* currLevelMesh = this->GetLevelMesh(currLevel);
+	currLevelMesh->DrawPieces(dT, camera, this->fgKeyLight, this->fgFillLight, this->ballLight);
+}
+void GameAssets::DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera) {
+	LevelMesh* currLevelMesh = this->GetLevelMesh(currLevel);
+	currLevelMesh->DrawSafetyNet(dT, camera, this->fgKeyLight, this->fgFillLight, this->ballLight);
 }
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
@@ -422,6 +426,26 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 	this->ballLight.SetDiffuseColour(avgBallColour);
 }
 
+/**
+ * Draw the effects that take place after drawing everything (Except final fullscreen effects).
+ */
+void GameAssets::DrawGameBallsFinalEffects(double dT, GameModel& gameModel, const Camera& camera) {
+	
+	// Go through each ball and draw its post effects
+	const std::list<GameBall*>& balls = gameModel.GetGameBalls();
+
+	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ballIter++) {
+		GameBall* currBall = *ballIter;		
+		
+		// PADDLE CAMERA CHECK
+		PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+		if (paddle->GetIsPaddleCameraOn() && (currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+			// Draw a target around balls when in paddle camera mode AND ball is not invisible
+			this->espAssets->DrawTargetBallEffects(dT, camera, *currBall, *paddle);
+		}
+	}
+}
+
 void GameAssets::Tick(double dT) {
 	// Tick the world assets (e.g., for background animations)
 	this->worldAssets->Tick(dT);
@@ -451,17 +475,26 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	float paddleScaleFactor = p.GetPaddleScaleFactor();
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
 	
+	// We don't draw the paddle at all if the camera is inside the paddle
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
 
+	// When the paddle camera is on we just draw the paddle
+	if (p.GetIsPaddleCameraOn()) {
+		// Draw the paddle
+		this->worldAssets->DrawPaddle(p, camera, this->paddleKeyLight, this->paddleFillLight, this->ballLight);
+		glPopMatrix();
+		return;
+	}
+
 	// Draw any effects on the paddle (e.g., item acquiring effects)
 	this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
-
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
+	// Draw the paddle
 	this->worldAssets->DrawPaddle(p, camera, this->paddleKeyLight, this->paddleFillLight, this->ballLight);
 
 	// In the case of a laser paddle, we draw the laser attachment and its related effects
 	if ((p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		// Draw attachment (gun) mesh
 		this->paddleLaserAttachment->Draw(dT, p, camera, this->paddleKeyLight, this->paddleFillLight);
 	}
@@ -473,6 +506,11 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
  * Used to draw any relevant post-processing-related effects for the paddle.
  */
 void GameAssets::DrawPaddlePostEffects(double dT, const PlayerPaddle& p, const Camera& camera) {
+	// Do nothing if we are in paddle camera mode
+	if (p.GetIsPaddleCameraOn()) {
+		return;
+	}
+	
 	Point2D paddleCenter = p.GetCenterPosition();
 	float paddleScaleFactor = p.GetPaddleScaleFactor();
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
@@ -651,6 +689,15 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 														   GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR,
 															 GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f, true);
 	}
+	else if (item.GetName() == PaddleCamItem::PADDLE_CAM_ITEM_NAME) {
+		// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
+		// NOTE that this is not permanent and just does so for any currently falling items
+		this->espAssets->TurnOffCurrentItemDropStars(camera);
+		// We make the safety net invisible so that it doesn't obstruct the paddle cam
+		LevelMesh* currLevelMesh = this->GetLevelMesh(gameModel.GetCurrentLevel());
+		assert(currLevelMesh != NULL);
+		currLevelMesh->PaddleCameraActiveToggle(true);
+	}
 }
 
 /**
@@ -672,6 +719,12 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		this->ChangeLightsOnColour(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 
 															 GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,
 															 GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_COLOUR);
+	}
+	else if (item.GetName() == PaddleCamItem::PADDLE_CAM_ITEM_NAME) {
+		// We make the safety net visible (if activated) again
+		LevelMesh* currLevelMesh = this->GetLevelMesh(gameModel.GetCurrentLevel());
+		assert(currLevelMesh != NULL);
+		currLevelMesh->PaddleCameraActiveToggle(false);
 	}
 }
 

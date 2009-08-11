@@ -2,7 +2,7 @@
  * Phong.cgfx
  * Author: Callum Hay
  * The following is a basic phong shader with cel/toon-type
- * outlines. 
+ * outlines for some of its techniques. 
  */
 
 float Script : STANDARDSGLOBAL <
@@ -343,6 +343,22 @@ technique BasicFG {
 	
 }
 
+technique BasicFGNoOutline {
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+		PolygonSmoothEnable = true;
+        PolygonMode = int2(Front, Fill);
+
+        VertexProgram = compile arbvp1 phongshading_VS();        
+        FragmentProgram = compile arbfp1 phongshading_fg_PS();
+    }
+}
+
 technique TexturedBG {
 
     pass p0 < string Script = "Draw=geometry;"; > {
@@ -407,4 +423,20 @@ technique TexturedFG {
         FragmentProgram = compile arbfp1 outline_PS();
     } 		
 }
-/////////////////////////////////////// eof //
+
+technique TexturedFGNoOutline {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+		PolygonSmoothEnable = true;
+        PolygonMode = int2(Front, Fill);
+        
+        VertexProgram = compile arbvp1 phongshading_VS();        
+        FragmentProgram = compile arbfp1 phongshading_textured_fg_PS();
+    } 	
+}

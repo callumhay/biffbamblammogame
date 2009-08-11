@@ -47,11 +47,15 @@ public:
 	~LevelMesh();
 	
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
-	void Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
+	
+	void DrawPieces(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
+	void DrawSafetyNet(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
 
 	void LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
 
 	void BallSafetyNetCreated();
 	void BallSafetyNetDestroyed(const GameBall& ball);
+
+	void PaddleCameraActiveToggle(bool isActive);
 };
 #endif

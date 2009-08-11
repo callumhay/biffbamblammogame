@@ -26,6 +26,7 @@ private:
 	AnimationLerp<Orientation3D> leftPieceAnim, rightPieceAnim;
 
 	// Misc. animation values
+	float idleAlpha;
 	float pieceAlpha;
 	AnimationLerp<float> pieceFadeAnim;
 
@@ -46,6 +47,11 @@ public:
 
 	void CreateBallSafetyNet();
 	void DestroyBallSafetyNet(const Vector2D& levelDimensions, float destructionXPos);
+	void SetTransparency(float alpha) {
+		assert(alpha >= 0 && alpha <= 1);
+		this->idleAlpha = alpha;
+	}
+	
 
 	void Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight);
 };

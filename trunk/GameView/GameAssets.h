@@ -86,12 +86,16 @@ public:
 	void DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera);
 	void DrawPaddlePostEffects(double dT, const PlayerPaddle& p, const Camera& camera);
 
+	void DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Vector2D& worldT);
+	
+	void DrawGameBallsFinalEffects(double dT, GameModel& gameModel, const Camera& camera);
+
 	void DrawSkybox(const Camera& camera);
 	void DrawBackgroundModel(const Camera& camera);
 	void DrawBackgroundEffects(const Camera& camera);
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
-	void DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Vector2D& worldT);
+	void DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
 

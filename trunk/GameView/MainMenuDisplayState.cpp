@@ -538,7 +538,7 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	bangEffect->SetParticleLife(ESPInterval(randomLife));
 	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	bangEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bangEffect->SetEmitPosition(emitCenter);
 
 	// Figure out some random proper orientation...
@@ -570,7 +570,7 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	bangOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
-	bangOnoEffect->SetParticleAlignment(ESP::ViewPointAligned);
+	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
 	bangOnoEffect->SetEmitPosition(emitCenter);
 	
 	// Add effectors...

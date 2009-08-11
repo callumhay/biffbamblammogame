@@ -142,9 +142,12 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			// Find out if up and normal are parallel and fix in that case...
 			alignRightVec		= Vector3D::cross(alignUpVec, alignNormalVec);
 			if (alignRightVec == Vector3D(0,0,0)) {
-				alignRightVec = Vector3D::MollerHughesPerpendicular(alignNormalVec);
+				alignRightVec = Vector3D::cross(cam.GetNormalizedUpVector(), alignNormalVec);
+				if (alignRightVec == Vector3D(0,0,0)) {
+					alignRightVec = PARTICLE_RIGHT_VEC;
+				}
 			}
-			alignRightVec		= Vector3D::Normalize(alignRightVec);
+			alignRightVec = Vector3D::Normalize(alignRightVec);
 			alignUpVec			= Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
 			break;
 
@@ -165,9 +168,12 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			alignUpVec			= Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], -this->velocity[2]));
 			alignRightVec		= Vector3D::cross(alignUpVec, alignNormalVec);
 			if (alignRightVec == Vector3D(0,0,0)) {
-				alignRightVec = Vector3D::MollerHughesPerpendicular(alignNormalVec);
+				alignRightVec = Vector3D::cross(PARTICLE_RIGHT_VEC, alignNormalVec);
+				if (alignRightVec == Vector3D(0,0,0)) {
+					alignRightVec = Vector3D::cross(PARTICLE_NORMAL_VEC, alignNormalVec);
+				}
 			}
-			alignRightVec		= Vector3D::Normalize(alignRightVec);
+			alignRightVec = Vector3D::Normalize(alignRightVec);
 			alignNormalVec	= Vector3D::Normalize(Vector3D::cross(alignRightVec, alignUpVec));
 			break;
 
@@ -194,7 +200,10 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 
 			alignRightVec	= Vector3D::cross(alignUpVec, alignNormalVec);
 			if (alignRightVec == Vector3D(0,0,0)) {
-				alignRightVec = Vector3D::MollerHughesPerpendicular(alignNormalVec);
+				alignRightVec = Vector3D::cross(PARTICLE_RIGHT_VEC, alignNormalVec);
+				if (alignRightVec == Vector3D(0,0,0)) {
+					alignRightVec = Vector3D::cross(PARTICLE_NORMAL_VEC, alignNormalVec);
+				}
 			}
 			alignRightVec		= Vector3D::Normalize(alignRightVec);
 			alignUpVec			= Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));

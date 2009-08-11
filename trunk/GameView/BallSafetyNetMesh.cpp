@@ -15,7 +15,7 @@ const float BallSafetyNetMesh::SAFETY_NET_HEIGHT	= 1.0f;
 const float BallSafetyNetMesh::SAFETY_NET_DEPTH		= 1.25f;
 
 BallSafetyNetMesh::BallSafetyNetMesh() : shadingMaterial(NULL), displayListID(0), leftPieceDispListID(0),
-rightPieceDispListID(0), currAnimation(BallSafetyNetMesh::Dead),
+rightPieceDispListID(0), currAnimation(BallSafetyNetMesh::Dead), idleAlpha(1.0f),
 leftPieceAnim(&leftPieceOrient), rightPieceAnim(&rightPieceOrient), pieceFadeAnim(&pieceAlpha) {
 
 	this->displayListID = glGenLists(1);
@@ -216,7 +216,6 @@ void BallSafetyNetMesh::DestroyBallSafetyNet(const Vector2D& levelDimensions, fl
 	this->currAnimation = BallSafetyNetMesh::DestructionAnimation;
 }
 
-
 /**
  * Draw the active display lists for this mesh.
  */
@@ -234,7 +233,7 @@ void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const PointLight& 
 		case BallSafetyNetMesh::Idle:
 			assert(this->displayListID != 0);
 			// Draw the typical ball safety net
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			glColor4f(1.0f, 1.0f, 1.0f, this->idleAlpha);
 			this->shadingMaterial->Draw(camera, this->displayListID);
 			break;
 

@@ -36,6 +36,7 @@
 #include <list>
 #include <map>
 #include <stack>
+#include <queue>
 #include <string>
 #include <iostream>
 #include <fstream>

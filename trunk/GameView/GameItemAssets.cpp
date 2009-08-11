@@ -187,10 +187,10 @@ void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& g
 	
 	Colour itemEndColour;
 	switch (gameItem.GetItemType()) {
-		case GameItem::Good :
+		case GameItem::Good:
 			itemEndColour = GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR;
 			break;
-		case GameItem::Bad :
+		case GameItem::Bad:
 			itemEndColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR;
 			break;		
 		case GameItem::Neutral:
@@ -202,10 +202,14 @@ void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& g
 	}
 
 	this->item->SetColourForMaterial(GameViewConstants::GetInstance()->ITEM_END_MATGRP, itemEndColour);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	
 	// Draw the item's effect and the item itself
 	this->espAssets->DrawItemDropEffects(dT, camera, gameItem);
+	
+	// Set the colour multiply for the item - this allows the model to control the colour
+	// and transparency of the model based on the state of the game
+	ColourRGBA itemColourMultiply = gameItem.GetItemColour();
+	glColor4f(itemColourMultiply.R(), itemColourMultiply.G(), itemColourMultiply.B(), itemColourMultiply.A());	
 	this->item->Draw(camera);
 	glPopMatrix();
 }

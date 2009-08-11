@@ -3,6 +3,8 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Point.h"
+#include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Animation.h"
 
 #include "GameEventManager.h"
 
@@ -20,7 +22,11 @@ protected:
 	GameModel* gameModel;	// Items have to be able to manipulate what happens in the game...
 	Point2D center;				// The center x,y coord that this item is located at
 	ItemType type;				// The type of item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
-	bool isActive;
+	bool isActive;				// Whether or not this item is currently active (i.e., has been accquired and is effecting the game play)
+	
+	ColourRGBA colour;													// Colour multiply of the item
+	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
+	
 
 	// Speed of descent for items
 	static const float SPEED_OF_DESCENT;
@@ -31,6 +37,8 @@ public:
 	static const float ITEM_HEIGHT;
 	static const float HALF_ITEM_WIDTH;
 	static const float HALF_ITEM_HEIGHT;
+
+	static const float ALPHA_ON_PADDLE_CAM;
 
 	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const ItemType type);
 	virtual ~GameItem();
@@ -53,6 +61,18 @@ public:
 	ItemType GetItemType() const {
 		return this->type;
 	}
+
+	// Item colour set/get functions
+	ColourRGBA GetItemColour() const {
+		return this->colour;
+	}
+	void SetItemColour(const Colour& c) {
+		this->colour = ColourRGBA(c, this->colour.A());
+	}
+	void SetItemVisiblity(float alpha) {
+		this->colour[3] = alpha;
+	}
+	void AnimateItemFade(float endAlpha, double duration);
 
 	void Tick(double seconds);
 	bool CollisionCheck(const PlayerPaddle &paddle);

@@ -400,6 +400,12 @@ void ESPEmitter::SetParticleColour(const ESPInterval& red, const ESPInterval& gr
 	this->particleGreen = green;
 	this->particleBlue = blue;
 	this->particleAlpha = alpha;
+
+	// Go through any already assigned particles and set the colour...
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+		ESPParticle* currParticle = *iter;
+		currParticle->SetColour(ColourRGBA(red.RandomValueInInterval(), green.RandomValueInInterval(), blue.RandomValueInInterval(), alpha.RandomValueInInterval()));
+	}
 }
 
 void ESPEmitter::SetNumParticleLives(int lives) {

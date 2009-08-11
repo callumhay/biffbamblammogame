@@ -42,14 +42,20 @@ PlayerPaddle::PlayerPaddle() :
 	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 
 	avgVel(0.0f), ticksSinceAvg(0), timeSinceLastLaserBlast(PADDLE_LASER_DELAY), 
 	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
-	attachedBall(NULL), isPaddleCamActive(false) {
+	attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1) {
+
+	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
+	this->colourAnimation.SetRepeat(false);
 
 	this->SetDimensions(PlayerPaddle::NormalSize);
 }
 
 PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : 
 speed(DEFAULT_SPEED), distTemp(0.0f), avgVel(0.0f), ticksSinceAvg(0), 
-hitWall(false), isPaddleCamActive(false) {
+hitWall(false), isPaddleCamActive(false), colour(1,1,1,1) {
+
+	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
+	this->colourAnimation.SetRepeat(false);
 
 	this->SetMinMaxLevelBound(minBound, maxBound);
 }
@@ -168,6 +174,11 @@ void PlayerPaddle::FireAttachedBall() {
 }
 
 void PlayerPaddle::Tick(double seconds) {
+	// Tick any paddle-related animations
+	this->colourAnimation.Tick(seconds);
+
+	// Check to see if we need to increment seconds since the previous laser shot
+	// This makes sure the user can't consecutively fire lasers like some sort of mad person
 	if (this->timeSinceLastLaserBlast < PADDLE_LASER_DELAY) {
 		this->timeSinceLastLaserBlast += seconds;
 	}
@@ -326,6 +337,22 @@ bool PlayerPaddle::CollisionCheck(const Collision::Circle2D& c, Vector2D& n, flo
 	// Move the circle into paddle space
 	Collision::Circle2D temp = Collision::Circle2D(c.Center() - Vector2D(this->centerPos[0], this->centerPos[1]), c.Radius());
 	return this->bounds.Collide(temp, n, d);
+}
+
+/**
+ * Adds an animation to the paddle that fades it in or out based on the
+ * given parameter over the given amount of time.
+ */
+void PlayerPaddle::AnimatePaddleFade(bool fadeOut, double duration) {
+	ColourRGBA finalColour = this->colour;
+	if (fadeOut) {
+		finalColour[3] = 0.0f;
+	}
+	else {
+		finalColour[3] = 1.0f;
+	}
+
+	this->colourAnimation.SetLerp(duration, finalColour);
 }
 
 void PlayerPaddle::DebugDraw() const {

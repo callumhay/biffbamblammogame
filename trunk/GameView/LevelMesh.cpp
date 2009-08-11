@@ -183,9 +183,9 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 }
 
 /**
- * Draw the current level mesh.
+ * Draw the current level mesh pieces (i.e., blocks that make up the level).
  */
-void LevelMesh::Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
+void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
 
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
@@ -198,6 +198,14 @@ void LevelMesh::Draw(double dT, const Camera& camera, const PointLight& keyLight
 		currEffect->Draw(camera, iter->second);
 	}
 
+
+}
+
+/**
+ * Draw the ball safety net if it is currently active in the game (this
+ * appears at the bottom of the level).
+ */
+void LevelMesh::DrawSafetyNet(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
 	// If the ball safety net is active then we draw it
 	assert(this->currLevel != NULL);
 	if (this->currLevel->IsBallSafetyNetActive() || this->ballSafetyNet->IsPlayingAnimation()) {
@@ -314,4 +322,14 @@ void LevelMesh::BallSafetyNetCreated() {
 void LevelMesh::BallSafetyNetDestroyed(const GameBall& ball) {
 	Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
 	this->ballSafetyNet->DestroyBallSafetyNet(levelDimensions, ball.GetBounds().Center()[0]);
+}
+
+/**
+
+ */
+void LevelMesh::PaddleCameraActiveToggle(bool isActive) {
+	// Call to make the safety net visible or not when its activated. This is
+  // useful to avoid obstruction of the player's viewpoint e.g., when in paddle camera mode.
+	float safetyNetTransparency = isActive ? 0.5f : 1.0f;
+	this->ballSafetyNet->SetTransparency(safetyNetTransparency);
 }

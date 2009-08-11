@@ -65,6 +65,7 @@ private:
 	ESPParticleRotateEffector explosionRayRotatorCCW;
 	ESPParticleRotateEffector smokeRotatorCW;
 	ESPParticleRotateEffector smokeRotatorCCW;
+	ESPParticleRotateEffector loopRotateEffectorCW;
 
 	// Various textures used as particles for various effects
 	std::vector<Texture2D*> bangTextures;
@@ -81,6 +82,7 @@ private:
 	Texture2D* laserBeamTex;
 	Texture2D* upArrowTex;
 	Texture2D* ballTex;
+	Texture2D* ballTargetTex;
 
 	// Ball related ESP effects - stores each balls set of item-related (defined by unique string ID) effects
 	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>> ballEffects;
@@ -110,6 +112,7 @@ private:
 
 	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
+	void AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 
 	void AddPaddleGrowEffect();
 	void AddPaddleShrinkEffect();
@@ -135,7 +138,6 @@ public:
 	void AddBouncePaddleEffect(const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	void AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2);
 	
-
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level);
@@ -143,10 +145,12 @@ public:
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
 	void SetItemEffect(const GameItem& item, const GameModel& gameModel);
-	void AddItemDropEffect(const Camera& camera, const GameItem& item);
+	void AddItemDropEffect(const Camera& camera, const GameItem& item, bool showStars);
 	void RemoveItemDropEffect(const Camera& camera, const GameItem& item);
 	void AddProjectileEffect(const Camera& camera, const Projectile& projectile);
 	void RemoveProjectileEffect(const Camera& camera, const Projectile& projectile);
+
+	void TurnOffCurrentItemDropStars(const Camera& camera);
 
 	void KillAllActiveEffects();
 	void KillAllActiveBallEffects(const GameBall& ball);
@@ -158,6 +162,7 @@ public:
 
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball);
+	void DrawTargetBallEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);

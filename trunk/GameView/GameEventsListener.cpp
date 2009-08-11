@@ -57,8 +57,8 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 	debug_output("EVENT: Level started");
 
 	// Set up the initial game camera for the level
-	this->display->GetCamera().Reset();
-	this->display->GetCamera().SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
+	//this->display->GetCamera().Reset();
+	//this->display->GetCamera().SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
 }
 
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
@@ -250,8 +250,14 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newM
 }
 
 void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
+
+	// We don't show the stars coming off the dropping items if it gets in the way of playing
+	// the game - e.g., when in paddle camera mode
+	const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
+	bool showItemDropStars = !paddle->GetIsPaddleCameraOn();
+
 	// Spawn an item drop effect for the item...
-	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(this->display->GetCamera(), item);
+	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(this->display->GetCamera(), item, showItemDropStars);
 
 	debug_output("EVENT: Item Spawned: " << item);
 }
