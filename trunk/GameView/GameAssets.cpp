@@ -7,6 +7,7 @@
 #include "GameFontAssetsManager.h"
 #include "LoadingScreen.h"
 #include "LivesLeftHUD.h"
+#include "CrosshairHUD.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
 
@@ -33,6 +34,7 @@ itemAssets(NULL),
 fboAssets(NULL),
 
 lifeHUD(NULL),
+crosshairHUD(NULL),
 
 ball(NULL), 
 spikeyBall(NULL), 
@@ -73,7 +75,8 @@ ballKeyLightColour(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_COLO
 	this->LoadRegularEffectAssets();
 
 	// Initialize any HUD elements
-	this->lifeHUD = new LivesLeftHUD();
+	this->lifeHUD				= new LivesLeftHUD();
+	this->crosshairHUD	= new CrosshairHUD();
 
 	// Initialize default light values
 	this->fgKeyLight  = PointLight(Point3D(-30.0f, 40.0f, 65.0f), this->fgKeyLightColour, 0.0f);
@@ -110,9 +113,11 @@ GameAssets::~GameAssets() {
 	delete this->fboAssets;
 	this->fboAssets = NULL;
 
-	// Delete the lives left HUD
+	// Delete any HUD objects
 	delete this->lifeHUD;
 	this->lifeHUD = NULL;
+	delete this->crosshairHUD;
+	this->crosshairHUD = NULL;
 }
 
 /*
@@ -570,6 +575,18 @@ void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameI
  */
 void GameAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight) {
 	this->itemAssets->DrawTimers(timers, displayWidth, displayHeight);
+}
+
+/**
+ * Draw HUD elements for any of the active items when applicable.
+ */
+void GameAssets::DrawActiveItemHUDElements(const GameModel& gameModel, int displayWidth, int displayHeight) {
+	
+	// If the laser paddle is active and paddle camera is also active then we draw a crosshair overlay
+	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+	if (paddle->GetPaddleType() == PlayerPaddle::LaserPaddle && paddle->GetIsPaddleCameraOn()) {
+		this->crosshairHUD->Draw(displayWidth, displayHeight);
+	}
 }
 
 void GameAssets::LoadRegularMeshAssets() {

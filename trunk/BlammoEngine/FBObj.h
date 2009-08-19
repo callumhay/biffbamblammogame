@@ -34,5 +34,6 @@ public:
 	inline void UnbindFBObj() const {
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
+
 };
 #endif

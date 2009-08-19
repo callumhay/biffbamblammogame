@@ -531,6 +531,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\CgFxFullscreenGoo.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CgFxGaussianBlur.h"
 					>
 				</File>
@@ -556,6 +560,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\CgFxVolumetricEffect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CrosshairHUD.h"
 					>
 				</File>
 				<File
@@ -679,6 +687,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\CgFxFullscreenGoo.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CgFxGaussianBlur.cpp"
 					>
 				</File>
@@ -704,6 +716,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\CgFxVolumetricEffect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CrosshairHUD.cpp"
 					>
 				</File>
 				<File

@@ -18,6 +18,7 @@ class CgFxPostRefract;
 class CgFxVolumetricEffect;
 class ESPEmitter;
 class LivesLeftHUD;
+class CrosshairHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
 
@@ -37,6 +38,7 @@ private:
 	GameFBOAssets* fboAssets;			// Framebuffer Object related assets
 
 	LivesLeftHUD* lifeHUD;
+	CrosshairHUD* crosshairHUD;
 
 	// Level-related meshes
 	std::map<const GameLevel*, LevelMesh*> loadedLevelMeshes;
@@ -98,6 +100,8 @@ public:
 	void DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
+
+	void DrawActiveItemHUDElements(const GameModel& gameModel, int displayWidth, int displayHeight);
 
 #ifdef _DEBUG
 	void DebugDrawLights() const;

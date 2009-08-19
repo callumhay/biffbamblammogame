@@ -122,7 +122,7 @@ private:
 
 	void InitLaserPaddleESPEffects();
 
-	void AddLaserPaddleESPEffects(const Projectile& projectile);
+	void AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile);
 	void DrawProjectileEffects(double dT, const Camera& camera);
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, ESPEmitter* projectileEmitter);
 
@@ -147,7 +147,7 @@ public:
 	void SetItemEffect(const GameItem& item, const GameModel& gameModel);
 	void AddItemDropEffect(const Camera& camera, const GameItem& item, bool showStars);
 	void RemoveItemDropEffect(const Camera& camera, const GameItem& item);
-	void AddProjectileEffect(const Camera& camera, const Projectile& projectile);
+	void AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile);
 	void RemoveProjectileEffect(const Camera& camera, const Projectile& projectile);
 
 	void TurnOffCurrentItemDropStars(const Camera& camera);

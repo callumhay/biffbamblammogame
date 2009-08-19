@@ -7,8 +7,10 @@
 #include "CgFxGaussianBlur.h"
 #include "CgFxAfterImage.h"
 #include "CgFxBloom.h"
+#include "CgFxFullscreenGoo.h"
 #include "CgFxInkSplatter.h"
 
+class GameModel;
 class GameItem;
 
 /**
@@ -24,11 +26,14 @@ private:
 	FBObj* initialFSEffectFBO;
 	FBObj* finalFSEffectFBO;
 
+	FBObj* tempFBO;	// FBO used for temporary work
+
 	// Post-processing / fullscreen filters and effects used with the FBOs
 	CgFxGaussianBlur* fgAndBgBlurEffect;
 	CgFxBloom* bloomEffect;
 	CgFxAfterImage* afterImageEffect;
 	CgFxInkSplatter* inkSplatterEffect;
+	CgFxFullscreenGoo* stickyPaddleCamEffect;
 
 	bool drawItemsInLastPass;	// Whether or not items get drawn in the final pass
 
@@ -88,14 +93,7 @@ public:
 	 * Render all fullscreen effects that are required at the very
 	 * end of the 3D pipeline.
 	 */
-	inline void RenderFinalFullscreenEffects(int width, int height, double dT) {
-		if (this->inkSplatterEffect->IsActive()) {
-			this->inkSplatterEffect->Draw(width, height, dT);
-		}
-		else {
-			this->finalFSEffectFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
-		}
-	}
+	void RenderFinalFullscreenEffects(int width, int height, double dT, const GameModel& gameModel);
 
 	void Tick(double dT);
 	void ResizeFBOAssets(int width, int height);
@@ -108,13 +106,13 @@ public:
 	 * at the end of the engine pipeline.
 	 */
 	void ActivateInkSplatterEffect() {
-		this->inkSplatterEffect->Activate();
+		this->inkSplatterEffect->ActivateInkSplat();
 	}
 	/**
 	 * Deactivates the ink splatter effect.
 	 */
 	void DeactivateInkSplatterEffect() {
-		this->inkSplatterEffect->Deactivate();
+		this->inkSplatterEffect->DeactivateInkSplat();
 	}
 
 };
