@@ -1352,10 +1352,10 @@ void GameESPAssets::TurnOffCurrentItemDropStars(const Camera& camera) {
 /**
  * Adds an effect for a active projectile in-game.
  */
-void GameESPAssets::AddProjectileEffect(const Camera& camera, const Projectile& projectile) {
+void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile) {
 	switch (projectile.GetType()) {
 		case Projectile::PaddleLaserProjectile:
-			this->AddLaserPaddleESPEffects(projectile);
+			this->AddLaserPaddleESPEffects(gameModel, projectile);
 			break;
 		default:
 			assert(false);
@@ -1386,7 +1386,7 @@ void GameESPAssets::RemoveProjectileEffect(const Camera& camera, const Projectil
 /**
  * Private helper function for making and adding a laser blast effect for the laser paddle item.
  */
-void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
+void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile) {
 	assert(projectile.GetType() == Projectile::PaddleLaserProjectile);
 	
 	Point2D projectilePos2D = projectile.GetPosition();
@@ -1395,43 +1395,55 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 	Vector2D projectileDir		= projectile.GetVelocityDirection();
 	Vector3D projectileDir3D	= Vector3D(projectileDir[0], projectileDir[1], 0.0f);
 
-	// Create laser onomatopiea
-	ESPPointEmitter* laserOnoEffect = new ESPPointEmitter();
-	// Set up the emitter...
-	laserOnoEffect->SetSpawnDelta(ESPInterval(-1));
-	laserOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
-	laserOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
-	laserOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.9f));
-	laserOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
-	laserOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	laserOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
-	laserOnoEffect->SetEmitPosition(projectilePos3D);
-	laserOnoEffect->SetEmitDirection(projectileDir3D);
-	laserOnoEffect->SetEmitAngleInDegrees(45);
-	laserOnoEffect->SetParticleColour(ESPInterval(0.25f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-	
-	// Add effectors...
-	laserOnoEffect->AddEffector(&this->particleFader);
-	laserOnoEffect->AddEffector(&this->particleSmallGrowth);
+	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 
-	// Add the single particle to the emitter...
-	DropShadow dpTemp;
-	dpTemp.colour = Colour(0,0,0);
-	dpTemp.amountPercentage = 0.10f;
-	ESPOnomataParticle* laserOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ElectricZap, GameFontAssetsManager::Small));
-	laserOnoParticle->SetDropShadow(dpTemp);
-	laserOnoParticle->SetOnomatoplexSound(Onomatoplex::SHOT, Onomatoplex::GOOD);
-	laserOnoEffect->AddParticle(laserOnoParticle);
+	// We only do the laser onomatopiea if we aren't in a special camera mode...
+	if (!paddle->GetIsPaddleCameraOn()) {
+		// Create laser onomatopiea
+		ESPPointEmitter* laserOnoEffect = new ESPPointEmitter();
+		// Set up the emitter...
+		laserOnoEffect->SetSpawnDelta(ESPInterval(-1));
+		laserOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
+		laserOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
+		laserOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.9f));
+		laserOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+		laserOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		laserOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+		laserOnoEffect->SetEmitPosition(projectilePos3D);
+		laserOnoEffect->SetEmitDirection(projectileDir3D);
+		laserOnoEffect->SetEmitAngleInDegrees(45);
+		laserOnoEffect->SetParticleColour(ESPInterval(0.25f, 1.0f), ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+		
+		// Add effectors...
+		laserOnoEffect->AddEffector(&this->particleFader);
+		laserOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+		// Add the single particle to the emitter...
+		DropShadow dpTemp;
+		dpTemp.colour = Colour(0,0,0);
+		dpTemp.amountPercentage = 0.10f;
+		ESPOnomataParticle* laserOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ElectricZap, GameFontAssetsManager::Small));
+		laserOnoParticle->SetDropShadow(dpTemp);
+		laserOnoParticle->SetOnomatoplexSound(Onomatoplex::SHOT, Onomatoplex::GOOD);
+		laserOnoEffect->AddParticle(laserOnoParticle);
+		
+		this->activeGeneralEmitters.push_back(laserOnoEffect);
+	}
 
 	// Create the basic laser beam
 	ESPPointEmitter* laserBeamEmitter = new ESPPointEmitter();
 	laserBeamEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	laserBeamEmitter->SetInitialSpd(ESPInterval(0));
 	laserBeamEmitter->SetParticleLife(ESPInterval(-1));
-	laserBeamEmitter->SetParticleSize(ESPInterval(PaddleLaser::PADDLELASER_WIDTH), ESPInterval(PaddleLaser::PADDLELASER_HEIGHT));
+	if (paddle->GetIsPaddleCameraOn()) {
+		laserBeamEmitter->SetParticleSize(ESPInterval(std::min<float>(PaddleLaser::PADDLELASER_WIDTH, PaddleLaser::PADDLELASER_HEIGHT)));
+	}
+	else {
+		laserBeamEmitter->SetParticleSize(ESPInterval(PaddleLaser::PADDLELASER_WIDTH), ESPInterval(PaddleLaser::PADDLELASER_HEIGHT));
+	}
 	laserBeamEmitter->SetEmitAngleInDegrees(0);
 	laserBeamEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	laserBeamEmitter->SetParticleAlignment(ESP::ViewPointAligned);
+	laserBeamEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	laserBeamEmitter->SetEmitPosition(Point3D(0,0,0));
 	laserBeamEmitter->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	laserBeamEmitter->SetParticles(1, this->laserBeamTex);
@@ -1441,7 +1453,13 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 	laserAuraEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	laserAuraEmitter->SetInitialSpd(ESPInterval(0));
 	laserAuraEmitter->SetParticleLife(ESPInterval(-1));
-	laserAuraEmitter->SetParticleSize(ESPInterval(2*PaddleLaser::PADDLELASER_WIDTH), ESPInterval(1.8f*PaddleLaser::PADDLELASER_HEIGHT));
+	if (paddle->GetIsPaddleCameraOn()) {
+		laserAuraEmitter->SetParticleSize(ESPInterval(std::min<float>(2*PaddleLaser::PADDLELASER_WIDTH, 1.8f*PaddleLaser::PADDLELASER_HEIGHT)));
+	}
+	else {
+		laserAuraEmitter->SetParticleSize(ESPInterval(2*PaddleLaser::PADDLELASER_WIDTH), ESPInterval(1.8f*PaddleLaser::PADDLELASER_HEIGHT));
+	}
+	
 	laserAuraEmitter->SetEmitAngleInDegrees(0);
 	laserAuraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	laserAuraEmitter->SetParticleAlignment(ESP::ScreenAligned);
@@ -1466,27 +1484,9 @@ void GameESPAssets::AddLaserPaddleESPEffects(const Projectile& projectile) {
 	laserTrailSparks->AddEffector(&this->particleMediumShrink);
 	laserTrailSparks->SetParticles(10, this->circleGradientTex);
 
-	/*
-	// TODO: OPTIMIZE!! me.
-	ESPPointEmitter* laserVapourTrail = new ESPPointEmitter();
-	laserVapourTrail->SetSpawnDelta(ESPInterval(0.01f));
-	laserVapourTrail->SetInitialSpd(ESPInterval(projectileSpd));
-	laserVapourTrail->SetParticleLife(ESPInterval(0.5f));
-	laserVapourTrail->SetParticleSize(ESPInterval(1.5f*PaddleLaser::PADDLELASER_WIDTH));
-	laserVapourTrail->SetRadiusDeviationFromCenter(ESPInterval(0));
-	laserVapourTrail->SetParticleAlignment(ESP::ScreenAligned);
-	laserVapourTrail->SetEmitPosition(projectilePos3D);
-	laserVapourTrail->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
-	laserVapourTrail->SetEmitAngleInDegrees(10);
-	laserVapourTrail->SetParticles(GameESPAssets::NUM_LASER_VAPOUR_TRAIL_PARTICLES, &this->laserVapourTrailEffect);
-	laserVapourTrail->AddEffector(&this->particleFader);
-	*/
-
-	this->activeProjectileEmitters[&projectile].push_back(laserTrailSparks);
 	this->activeProjectileEmitters[&projectile].push_back(laserAuraEmitter);
 	this->activeProjectileEmitters[&projectile].push_back(laserBeamEmitter);
-
-	this->activeGeneralEmitters.push_back(laserOnoEffect);
+	this->activeProjectileEmitters[&projectile].push_back(laserTrailSparks);
 }
 
 /**

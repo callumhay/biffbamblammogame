@@ -81,6 +81,10 @@ public:
 	}
 
 	virtual void Draw(int screenWidth, int screenHeight, double dT) = 0;
+
+	inline void SetInputFBO(FBObj* sceneFBO) {
+		this->sceneFBO = sceneFBO;
+	}
 };
 
 /**

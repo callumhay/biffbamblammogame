@@ -48,7 +48,6 @@ void InGameDisplayState::RenderFrame(double dT) {
 	camera.SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
 	camera.ApplyCameraTransform(dT);
 	
-
 	debug_opengl_state();
 
 	glEnable(GL_DEPTH_TEST);
@@ -108,11 +107,6 @@ void InGameDisplayState::RenderBackgroundToFBO(double dT) {
 	this->display->GetAssets()->DrawBackgroundEffects(this->display->GetCamera());
 
 	glPopMatrix();
-
-	//glPushMatrix();
-	//glScalef(5,5,5);
-	//GeometryMaker::GetInstance()->DrawSphere();
-	//glPopMatrix();
 
 	// Unbind the background FBO
 	backgroundFBO->UnbindFBObj();
@@ -193,6 +187,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 
 void InGameDisplayState::RenderFinalGather(double dT) {
 	GameFBOAssets* fboAssets = this->display->GetAssets()->GetFBOAssets();
+	GameModel* gameModel = this->display->GetModel();
 
 	// Render fullscreen effects 
 	FBObj* initialFBO = fboAssets->RenderInitialFullscreenEffects(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
@@ -206,15 +201,15 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
 
 	// Render all effects that do not go through all the post-processing filters...
-	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
+	Vector2D negHalfLevelDim = -0.5 * gameModel->GetLevelUnitDimensions();
 	glPushMatrix();
-	Matrix4x4 gameTransform = this->display->GetModel()->GetTransformInfo()->GetGameTransform();
+	Matrix4x4 gameTransform = gameModel->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 	
 	// Draw the dropping items if in the last pass
 	if (fboAssets->DrawItemsInLastPass()) {
-		std::list<GameItem*>& gameItems = this->display->GetModel()->GetLiveItems();
+		std::list<GameItem*>& gameItems = gameModel->GetLiveItems();
 		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
 			this->display->GetAssets()->DrawItem(dT, this->display->GetCamera(), (**iter));
 		}			
@@ -224,12 +219,12 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	this->display->GetAssets()->GetESPAssets()->DrawParticleEffects(dT, this->display->GetCamera());
 
 	// Absolute final effects call for various object effects
-	this->display->GetAssets()->DrawGameBallsFinalEffects(dT, *this->display->GetModel(), this->display->GetCamera());
+	this->display->GetAssets()->DrawGameBallsFinalEffects(dT, *gameModel, this->display->GetCamera());
 
 	finalFBO->UnbindFBObj();
 
 	// Render the final fullscreen effects
-	fboAssets->RenderFinalFullscreenEffects(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT);
+	fboAssets->RenderFinalFullscreenEffects(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), dT, *gameModel);
 
 	glPopMatrix();
 	debug_opengl_state();
@@ -240,20 +235,29 @@ void InGameDisplayState::RenderFinalGather(double dT) {
  * including points, lives left, etc.
  */
 void InGameDisplayState::DrawGameHUD(double dT) {
+	
+	GameModel* gameModel = this->display->GetModel();
+
+	const int DISPLAY_WIDTH  = this->display->GetDisplayWidth();
+	const int DISPLAY_HEIGHT = this->display->GetDisplayHeight();
+
 	// Draw the points in the top-right corner of the display
 	std::stringstream ptStrStream;
-	ptStrStream << this->display->GetModel()->GetScore();
+	ptStrStream << gameModel->GetScore();
 	this->scoreLabel.SetText(ptStrStream.str());
-	this->scoreLabel.SetTopLeftCorner(Point2D(this->display->GetDisplayWidth() - HUD_X_INDENT - this->scoreLabel.GetLastRasterWidth(), 
-																			      this->display->GetDisplayHeight() - HUD_Y_INDENT));
+	this->scoreLabel.SetTopLeftCorner(Point2D(DISPLAY_WIDTH - HUD_X_INDENT - this->scoreLabel.GetLastRasterWidth(), DISPLAY_HEIGHT - HUD_Y_INDENT));
 	this->scoreLabel.Draw();
 
 	// Draw the number of lives left in the top-left corner of the display
-	this->display->GetAssets()->GetLifeHUD()->Draw(dT, this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	this->display->GetAssets()->GetLifeHUD()->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	
 	// Draw the timers that are currently in existance
 	const std::list<GameItemTimer*>& activeTimers = this->display->GetModel()->GetActiveTimers();
-	this->display->GetAssets()->DrawTimers(activeTimers, this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	this->display->GetAssets()->DrawTimers(activeTimers, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
+	// Draw any HUD special elements based on currently active items, etc.
+	this->display->GetAssets()->DrawActiveItemHUDElements(*gameModel, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
 	debug_opengl_state();
 }
 

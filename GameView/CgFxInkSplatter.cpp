@@ -5,51 +5,20 @@
 #include "../BlammoEngine/Texture3D.h"
 #include "../BlammoEngine/FBObj.h"
 
-#include "../ResourceManager.h"
-
-const std::string CgFxInkSplatter::INK_SPLATTER_TECHNIQUE_NAME = "InkSplatter";
-
-CgFxInkSplatter::CgFxInkSplatter(FBObj* sceneFBO) :
-CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_INKSPLATTER_SHADER, sceneFBO),
-timerParam(NULL), scaleParam(NULL), frequencyParam(NULL), displacementParam(NULL), fadeParam(NULL),
-inkColourParam(NULL), noiseSamplerParam(NULL), inkSplatterSamplerParam(NULL), sceneSamplerParam(NULL),
-scale(2.0f), frequency(0.01f), displacement(0.04f), inkColour(GameViewConstants::GetInstance()->INK_BLOCK_COLOUR),
-inkSplatterTex(NULL), isActivated(false), timer(0.0f) {
-	
-	// Make sure the technique is set
-	this->currTechnique = this->techniques[CgFxInkSplatter::INK_SPLATTER_TECHNIQUE_NAME];
-
-	// Initialize CG simple float parameters
-	this->timerParam					= cgGetNamedEffectParameter(this->cgEffect, "Timer");
-	this->scaleParam					= cgGetNamedEffectParameter(this->cgEffect, "Scale");
-	this->frequencyParam			= cgGetNamedEffectParameter(this->cgEffect, "Freq");
-	this->displacementParam		= cgGetNamedEffectParameter(this->cgEffect, "Displacement");
-	this->fadeParam						= cgGetNamedEffectParameter(this->cgEffect, "Fade");
-	this->inkColourParam			= cgGetNamedEffectParameter(this->cgEffect, "InkColour");
-
-	// Initialize the ink splatter texture
-	this->inkSplatterTex	= ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER, Texture::Trilinear, GL_TEXTURE_2D);
-	assert(this->inkSplatterTex != NULL);
-
-	// Initialize CG sampler parameters
-	this->noiseSamplerParam				= cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
-	this->inkSplatterSamplerParam	= cgGetNamedEffectParameter(this->cgEffect, "InkSplatterSampler");
-	this->sceneSamplerParam				= cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
-
-	debug_cg_state();
+CgFxInkSplatter::CgFxInkSplatter(FBObj* inputFBO, FBObj* outputFBO, const std::string& maskTexFilepath) : 
+CgFxFullscreenGoo(inputFBO, outputFBO), isInkSplatActivated(false) {
+	this->SetMask(maskTexFilepath);
+	this->SetColour(GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
 }
 
 CgFxInkSplatter::~CgFxInkSplatter() {
-	// Free the splatter texture
-	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->inkSplatterTex);
-	assert(success);
 }
 
 /**
  * Activates the ink splatter effect.
  */
-void CgFxInkSplatter::Activate() {
-	if (this->isActivated) {
+void CgFxInkSplatter::ActivateInkSplat() {
+	if (this->isInkSplatActivated) {
 		// Setup the animation for fading in and out the ink splatter
 		// such that it is a secondary ink splatter to occur
 		std::vector<double> timeVals;
@@ -64,7 +33,7 @@ void CgFxInkSplatter::Activate() {
 		fadeVals.push_back(1.0f); // Keep splatter until here
 		fadeVals.push_back(0.0f); // Fade splatter
 
-		this->fadeAnim.SetLerp(timeVals, fadeVals);		
+		this->inkSplatFadeAnim.SetLerp(timeVals, fadeVals);		
 	}
 	else {
 		// Setup the animation for fading in and out the ink splatter
@@ -85,16 +54,14 @@ void CgFxInkSplatter::Activate() {
 		fadeVals.push_back(1.0f); // Keep splatter until here
 		fadeVals.push_back(0.0f); // Fade splatter
 
-		this->fadeAnim.SetLerp(timeVals, fadeVals);
-		this->isActivated = true;
+		this->inkSplatFadeAnim.SetLerp(timeVals, fadeVals);
+		this->isInkSplatActivated = true;
 	}
 }
 
-
-
 void CgFxInkSplatter::Draw(int screenWidth, int screenHeight, double dT) {
 	// If this effect is not activated then leave
-	if (!this->isActivated) {
+	if (!this->isInkSplatActivated) {
 		return;
 	}
 
@@ -104,20 +71,24 @@ void CgFxInkSplatter::Draw(int screenWidth, int screenHeight, double dT) {
 	cgGLSetParameter1f(this->timerParam, this->timer);
 	cgGLSetParameter1f(this->scaleParam, this->scale);
 	cgGLSetParameter1f(this->frequencyParam, this->frequency);
-	cgGLSetParameter1f(this->fadeParam, this->fadeAnim.GetInterpolantValue());
 	cgGLSetParameter1f(this->displacementParam, this->displacement);
-	cgGLSetParameter3f(this->inkColourParam, this->inkColour.R(), this->inkColour.G(), this->inkColour.B());
+	cgGLSetParameter1f(this->fadeParam, this->inkSplatFadeAnim.GetInterpolantValue());
+	cgGLSetParameter3f(this->colourParam, this->colour.R(), this->colour.G(), this->colour.B());
 
-	cgGLSetTextureParameter(this->inkSplatterSamplerParam, this->inkSplatterTex->GetTextureID());
+	if (this->currTechnique == this->techniques[CgFxFullscreenGoo::MASK_SPLATTER_TECHNIQUE_NAME]) {
+		cgGLSetTextureParameter(this->maskSamplerParam, this->maskTex->GetTextureID());
+	}
 	cgGLSetTextureParameter(this->noiseSamplerParam, Noise::GetInstance()->GetNoise3DTexture()->GetTextureID());
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
 
-	// Draw a fullscreen quad with the effect applied
+	// Draw a fullscreen quad with the effect applied and draw it all into the result FBO
+	this->resultFBO->BindFBObj();
 	CGpass currPass = cgGetFirstPass(this->currTechnique);
 	cgSetPassState(currPass);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);
-
+	this->resultFBO->UnbindFBObj();
+	
 	// The effect will be active as long as the timer is not complete
-	this->isActivated = !this->fadeAnim.Tick(dT);
+	this->isInkSplatActivated = !this->inkSplatFadeAnim.Tick(dT);
 }
