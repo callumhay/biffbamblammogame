@@ -49,7 +49,7 @@ public:
 	DecoWorldAssets();
 	virtual ~DecoWorldAssets();
 
-	virtual void DrawBackgroundModel(const Camera& camera);
+	virtual void DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight);
 	virtual void DrawBackgroundEffects(const Camera& camera);
 	virtual void Tick(double dT);
 

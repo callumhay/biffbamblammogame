@@ -46,6 +46,31 @@ bool BoundingLines::Collide(const Collision::Circle2D& c, Vector2D& n, float &d)
 	return collisionOccured;
 }
 
+/**
+ * Calculate the closest point out of all the bounding lines in this object
+ * to the given point.
+ * Returns: Closest point on any of the bounding lines in this to pt.
+ */
+Point2D BoundingLines::ClosestPoint(const Point2D& pt) {
+	if (this->lines.size() == 0) {
+		return pt;
+	}
+
+	Point2D closestPt = Collision::ClosestPoint(pt, this->lines[0]);
+	float closestSqDist = Point2D::SqDistance(closestPt, pt);
+
+	for (size_t i = 1; i < this->lines.size(); i++) {
+		Point2D tempClosestPt		= Collision::ClosestPoint(pt, this->lines[i]);
+		float tempClosestSqDist	= Point2D::SqDistance(tempClosestPt, pt);
+		if (tempClosestSqDist < closestSqDist) {
+			closestSqDist = tempClosestSqDist;
+			closestPt = tempClosestPt;
+		}
+	}
+
+	return closestPt;
+}
+
 void BoundingLines::DebugDraw() const {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);

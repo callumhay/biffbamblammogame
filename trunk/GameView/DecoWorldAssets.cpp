@@ -274,7 +274,7 @@ void DecoWorldAssets::RotateSkybeams(double dT) {
 	}
 }
 
-void DecoWorldAssets::DrawBackgroundModel(const Camera& camera) {
+void DecoWorldAssets::DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight) {
 	// Draw spiral effects behind the background model
 	this->spiralEmitterSm.Draw(camera);
 	this->spiralEmitterMed.Draw(camera);
@@ -282,7 +282,7 @@ void DecoWorldAssets::DrawBackgroundModel(const Camera& camera) {
 
 	Colour currBGModelColour = this->currBGMeshColourAnim.GetInterpolantValue();
 	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), 1.0f);
-	this->background->Draw(camera, this->bgKeyLight, this->bgFillLight);
+	this->background->Draw(camera, bgKeyLight, bgFillLight);
 }
 
 void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {

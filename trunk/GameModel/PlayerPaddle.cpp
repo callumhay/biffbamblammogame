@@ -87,35 +87,58 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 	// Reset the bounds of the paddle (in paddle-space)
 	std::vector<Collision::LineSeg2D> lineBounds;
 	std::vector<Vector2D>  lineNorms;
-	lineBounds.reserve(4);
-	lineNorms.reserve(4);
+	lineBounds.reserve(3);
+	lineNorms.reserve(3);
 	
-	// Top boundry
-	Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
-	Vector2D n1(0, 1);
-	lineBounds.push_back(l1);
-	lineNorms.push_back(n1);
+	if (this->isPaddleCamActive) {
+		// When the paddle camera is active we compress the collision boundries down to the bottom of the paddle
+		// this help make for a better game experience since the collision seems more natural when it's on the camera's view plane
 
-	/*
-	// Bottom boundry
-	Collision::LineSeg2D bottomLine(Point2D(this->currHalfWidthTotal, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-	Vector2D bottomNormal(0, -1);
-	lineBounds.push_back(bottomLine);
-	lineNorms.push_back(bottomNormal);
-	*/
+		// 'Top' (flat) boundry
+		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthFlat, -this->currHalfHeight));
+		Vector2D n1(0, 1);
+		lineBounds.push_back(l1);
+		lineNorms.push_back(n1);
 
-	// Side boundries
-	Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
-	Vector2D sideNormal1(1, 1);
-	lineBounds.push_back(sideLine1);
-	lineNorms.push_back(sideNormal1);
-	
-	Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-	Vector2D sideNormal2(-1, 1);
-	lineBounds.push_back(sideLine2);
-	lineNorms.push_back(sideNormal2);
+		// 'Side' (oblique) boundries
+		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
+		Vector2D sideNormal1(1, 1);
+		lineBounds.push_back(sideLine1);
+		lineNorms.push_back(sideNormal1);
+		
+		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+		Vector2D sideNormal2(-1, 1);
+		lineBounds.push_back(sideLine2);
+		lineNorms.push_back(sideNormal2);
+	}
+	else {
+		// Top boundry
+		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
+		Vector2D n1(0, 1);
+		lineBounds.push_back(l1);
+		lineNorms.push_back(n1);
+
+		// Side boundries
+		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
+		Vector2D sideNormal1(1, 1);
+		lineBounds.push_back(sideLine1);
+		lineNorms.push_back(sideNormal1);
+		
+		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+		Vector2D sideNormal2(-1, 1);
+		lineBounds.push_back(sideLine2);
+		lineNorms.push_back(sideNormal2);
+	}
 
 	this->bounds = BoundingLines(lineBounds, lineNorms);
+
+	// We need to be careful when the collision boundries get changed the ball position could
+	// be compromised; we need to make sure the ball also moves to be on the 
+	// outside of the new paddle boundries
+	if (this->HasBallAttached()) {
+		assert(this->attachedBall != NULL);
+		// TODO
+	}
 }
 
 /**
@@ -171,6 +194,42 @@ void PlayerPaddle::FireAttachedBall() {
 
 	// Remove the ball from the paddle
 	this->attachedBall = NULL;
+}
+
+/**
+ * Private helper function used to solve the issue where a ball that is attached
+ * to the paddle when the paddle boundries change doesn't get moved to the new boundries.
+ * e.g., when in paddle cam mode and then changing back while the sticky paddle is active.
+ */
+void PlayerPaddle::MoveAttachedBallToNewBounds() {
+	if (!this->HasBallAttached()) {
+		return;
+	}
+
+	// Figure out if the ball is colliding with any of the boundries of the paddle
+	// if it is we can easily figure out where we have to move the ball to make 
+	// it accommodate those new boundries
+	Vector2D normal(0, 0);
+	float distance = 0.0f;
+	Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
+	bool isCollision = this->CollisionCheck(ballBounds, normal, distance);
+
+	if (isCollision) {
+		this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() - distance - 5 * EPSILON) * normal);
+	}
+	else {
+		// Evasive measures... just do whatever it takes to get the ball on the outside of the paddle...
+
+		// Move the ball into paddle space and find the closest point to the center
+		Point2D ballCenterInPaddleSpace = ballBounds.Center() - Vector2D(this->centerPos[0], this->centerPos[1]);
+		Point2D closestPtInPaddleSpace = this->bounds.ClosestPoint(ballCenterInPaddleSpace);
+		Vector2D closestPtDir   = Vector2D::Normalize(closestPtInPaddleSpace - ballCenterInPaddleSpace);
+
+		// Now we just attach the ball at the closest point on the paddle...
+		Point2D closestPtInWorldSpace = closestPtInPaddleSpace + Vector2D(this->centerPos[0], this->centerPos[1]);
+		this->attachedBall->SetCenterPosition(closestPtInWorldSpace + ballBounds.Radius() * closestPtDir);
+	}	
+
 }
 
 void PlayerPaddle::Tick(double seconds) {

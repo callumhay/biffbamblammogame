@@ -327,6 +327,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Light.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\Matrix.cpp"
 					>
 				</File>
@@ -611,6 +615,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\GameLightAssets.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\GameMenu.h"
 					>
 				</File>
@@ -760,6 +768,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\GameItemAssets.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\GameLightAssets.cpp"
 					>
 				</File>
 				<File

@@ -79,6 +79,7 @@ private:
 	void SetDimensions(PlayerPaddle::PaddleSize size);
 	void SetPaddleSize(PlayerPaddle::PaddleSize size);
 	void FireAttachedBall();
+	void MoveAttachedBallToNewBounds();
 
 public:
 	static const float DEFAULT_SPEED;
@@ -196,6 +197,13 @@ public:
 	// Paddle camera set/get functions
 	void SetPaddleCamera(bool isPaddleCamOn) {
 		this->isPaddleCamActive = isPaddleCamOn;
+		
+		// When the paddle camera is on, we change the collision boundries to
+		// be more natural to the vision of the paddle cam
+		this->SetDimensions(this->currSize);
+		if (!isPaddleCamOn) {
+			this->MoveAttachedBallToNewBounds();
+		}
 	}
 	bool GetIsPaddleCameraOn() const {
 		return this->isPaddleCamActive;
