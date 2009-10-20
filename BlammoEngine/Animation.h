@@ -212,6 +212,17 @@ public:
 	std::vector<T> GetInterpolationValues() const {
 		return this->interpolationPts;
 	}
+
+	void SetInitialInterpolationValue(const T& value) {
+		assert(this->interpolationPts.size() > 0);
+		this->interpolationPts[0] = value;
+	}
+
+	void SetFinalInterpolationValue(const T& value) {
+		assert(this->interpolationPts.size() > 0);
+		this->interpolationPts[this->interpolationPts.size()-1] = value;
+	}
+
 	std::vector<double> GetTimeValues() const {
 		return this->timePts;
 	}

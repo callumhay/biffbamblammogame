@@ -136,6 +136,26 @@ namespace Collision {
 		return true;
 	}
 
+	// Closest Point Computations ******************************************************
+	
+	/**
+	 * Calculate the closest point on the given line segment to the given point.
+	 * Returns: The closest point on lineSeg to pt.
+	 */
+	static Point2D ClosestPoint(const Point2D& pt, const LineSeg2D& lineSeg) {
+		Vector2D lineSegDir = lineSeg.P2() - lineSeg.P1();
+		float t = Vector2D::Dot(pt - lineSeg.P1(), lineSegDir) / Vector2D::Dot(lineSegDir, lineSegDir);
+
+		if (t < 0.0f) {
+			t = 0.0f;
+		}
+		else if (t > 1.0f) {
+			t = 1.0f;
+		}
+
+		return lineSeg.P1() + t * lineSegDir;
+	}
+
 };
 
 #endif

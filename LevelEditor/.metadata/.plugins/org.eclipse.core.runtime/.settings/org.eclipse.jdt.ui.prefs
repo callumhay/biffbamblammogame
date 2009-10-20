@@ -1,0 +1,19 @@
+#Sat Jun 27 13:05:43 EDT 2009
+spelling_locale_initialized=true
+content_assist_disabled_computers=org.eclipse.jdt.ui.javaNoTypeProposalCategory\u0000org.eclipse.jdt.ui.spellingProposalCategory\u0000org.eclipse.jdt.ui.textProposalCategory\u0000org.eclipse.jdt.ui.templateProposalCategory\u0000org.eclipse.jdt.ui.javaTypeProposalCategory\u0000
+org.eclipse.jdt.ui.text.templates_migrated=true
+useAnnotationsPrefPage=true
+eclipse.preferences.version=1
+org.eclipse.jface.textfont=1|Courier New|10.0|0|WINDOWS|1|0|0|0|0|0|0|0|0|1|0|0|0|0|Courier New;
+tabWidthPropagated=true
+org.eclipse.jdt.ui.editor.tab.width=
+fontPropagated=true
+org.eclipse.jdt.ui.text.custom_code_templates=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><templates/>
+org.eclipse.jdt.ui.javadoclocations.migrated=true
+proposalOrderMigrated=true
+org.eclipse.jdt.ui.formatterprofiles.version=11
+org.eclipse.jdt.internal.ui.navigator.layout=2
+useQuickDiffPrefPage=true
+org.eclipse.jdt.ui.text.custom_templates=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><templates/>
+content_assist_lru_history=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><history maxLHS\="100" maxRHS\="10"><lhs name\="javax.accessibility.Accessible"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JToolBar"/><rhs name\="javax.swing.ImageIcon"/><rhs name\="javax.swing.JMenuItem"/><rhs name\="javax.swing.JScrollPane"/></lhs><lhs name\="javax.swing.MenuElement"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JMenuItem"/></lhs><lhs name\="javax.swing.JMenuItem"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JMenuItem"/></lhs><lhs name\="javax.swing.AbstractButton"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JMenuItem"/></lhs><lhs name\="java.awt.ItemSelectable"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JMenuItem"/></lhs><lhs name\="javax.swing.SwingConstants"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JToolBar"/><rhs name\="javax.swing.JMenuItem"/></lhs><lhs name\="javax.swing.JComponent"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JToolBar"/><rhs name\="javax.swing.JMenuItem"/><rhs name\="javax.swing.JScrollPane"/></lhs><lhs name\="javax.swing.TransferHandler$HasGetTransferHandler"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JToolBar"/><rhs name\="javax.swing.JMenuItem"/><rhs name\="javax.swing.JScrollPane"/></lhs><lhs name\="java.awt.Container"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JToolBar"/><rhs name\="javax.swing.JMenuItem"/><rhs name\="javax.swing.JScrollPane"/></lhs><lhs name\="java.awt.Component"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JToolBar"/><rhs name\="javax.swing.JMenuItem"/><rhs name\="javax.swing.JScrollPane"/></lhs><lhs name\="java.awt.image.ImageObserver"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JToolBar"/><rhs name\="javax.swing.JMenuItem"/><rhs name\="javax.swing.JScrollPane"/></lhs><lhs name\="java.awt.MenuContainer"><rhs name\="javax.swing.JMenu"/><rhs name\="javax.swing.JToolBar"/><rhs name\="javax.swing.JMenuItem"/><rhs name\="javax.swing.JScrollPane"/></lhs><lhs name\="javax.swing.JMenu"><rhs name\="javax.swing.JMenu"/></lhs><lhs name\="javax.swing.JToolBar"><rhs name\="javax.swing.JToolBar"/></lhs><lhs name\="javax.swing.Icon"><rhs name\="javax.swing.ImageIcon"/></lhs><lhs name\="javax.swing.ImageIcon"><rhs name\="javax.swing.ImageIcon"/></lhs><lhs name\="javax.swing.ScrollPaneConstants"><rhs name\="javax.swing.JScrollPane"/></lhs><lhs name\="javax.swing.JScrollPane"><rhs name\="javax.swing.JScrollPane"/></lhs></history>
+org.eclipse.jdt.ui.text.code_templates_migrated=true

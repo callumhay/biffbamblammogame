@@ -60,6 +60,9 @@ public:
 	static float Distance(const Point2D& p1, const Point2D& p2) {
 		return sqrt((p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1]));
 	}
+	static float SqDistance(const Point2D& p1, const Point2D& p2) {
+		return (p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1]);
+	}
 };
 
 // 2D Point output function for debugging purposes

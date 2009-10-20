@@ -23,10 +23,6 @@ protected:
 	Mesh* background;			// Meshes that make up the background scenery
 	Mesh* playerPaddle;		// Currently loaded player paddle mesh
 	Mesh* styleBlock;
-	
-	PointLight bgFillLight, bgKeyLight;
-	std::list<AnimationLerp<Colour>> colourAnims;
-
 		
 public:
 	GameWorldAssets(Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* styleBlock) : 
@@ -34,11 +30,8 @@ public:
 		assert(skybox != NULL);
 		assert(bg != NULL);
 		assert(paddle != NULL);
-
-		// Initialize background key and fill lights
-		this->bgKeyLight	= PointLight(Point3D(-25.0f, 20.0f, 55.0f), GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR,   0.0f);
-		this->bgFillLight = PointLight(Point3D(30.0f, 11.0f, -15.0f), GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f);
 	}
+
 	virtual ~GameWorldAssets() {
 		delete this->skybox;
 		this->skybox = NULL;
@@ -47,18 +40,6 @@ public:
 		ResourceManager::GetInstance()->ReleaseMeshResource(this->background);
 		ResourceManager::GetInstance()->ReleaseMeshResource(this->playerPaddle);
 		ResourceManager::GetInstance()->ReleaseMeshResource(this->styleBlock);
-	}
-
-	void ToggleBackgroundLights(bool turnOn) {
-		this->colourAnims.clear();
-
-		// Add animations to dim and turn off the lights or turn the lights back on
-		AnimationLerp<Colour> keyLightColAnim(this->bgKeyLight.GetDiffuseColourPtr());
-		keyLightColAnim.SetLerp(1.0f, turnOn ? GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR : GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR);
-		this->colourAnims.push_back(keyLightColAnim);
-		AnimationLerp<Colour> fillLightColAnim(this->bgFillLight.GetDiffuseColourPtr());
-		fillLightColAnim.SetLerp(1.0f, turnOn ? GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR : GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR);
-		this->colourAnims.push_back(fillLightColAnim);
 	}
 
 	Mesh* GetWorldStyleBlock() const {
@@ -71,19 +52,6 @@ public:
 
 	virtual void Tick(double dT) {
 		this->skybox->Tick(dT);
-
-		// Tick any animations
-		std::list<std::list<AnimationLerp<Colour>>::iterator> toRemove;
-		for (std::list<AnimationLerp<Colour>>::iterator animIter = this->colourAnims.begin(); 
-			animIter != this->colourAnims.end();) {
-				bool isFinished = animIter->Tick(dT);
-				if (isFinished) {
-					animIter = this->colourAnims.erase(animIter);
-				}
-				else {
-					animIter++;
-				}
-		}
 	};
 
 	virtual void DrawSkybox(const Camera& camera) {
@@ -92,7 +60,7 @@ public:
 
 	virtual void DrawBackgroundEffects(const Camera& camera) = 0;
 
-	virtual void DrawBackgroundModel(const Camera& camera) = 0;
+	virtual void DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight) = 0;
 
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
 		ColourRGBA paddleColour = p.GetPaddleColour();

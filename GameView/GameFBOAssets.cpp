@@ -150,9 +150,11 @@ void GameFBOAssets::DeactivateItemEffects(const GameItem& item) {
  * end of the 3D pipeline.
  */
 void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double dT, const GameModel& gameModel) {
-	 FBObj* inputFBO	= this->finalFSEffectFBO;
-	 FBObj* outputFBO = this->tempFBO;
-	 FBObj* swapFBO		= NULL;
+	
+	// Use these to ping-pong our final fullscreen effect shader passes
+	FBObj* inputFBO		= this->finalFSEffectFBO;
+	FBObj* outputFBO	= this->tempFBO;
+	FBObj* swapFBO		= NULL;
 
 	if (this->inkSplatterEffect->IsInkSplatActive()) {
  		this->inkSplatterEffect->SetInputFBO(inputFBO);

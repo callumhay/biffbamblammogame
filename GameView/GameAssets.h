@@ -27,6 +27,7 @@ class LaserPaddleGun;
 #include "GameESPAssets.h"
 #include "GameItemAssets.h"
 #include "GameFBOAssets.h"
+#include "GameLightAssets.h"
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -36,6 +37,7 @@ private:
 	GameESPAssets* espAssets;			// Emitter/Sprite/Particle assets
 	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
 	GameFBOAssets* fboAssets;			// Framebuffer Object related assets
+	GameLightAssets* lightAssets; // Light assets in the foreground and background
 
 	LivesLeftHUD* lifeHUD;
 	CrosshairHUD* crosshairHUD;
@@ -50,19 +52,6 @@ private:
 	LaserPaddleGun* paddleLaserAttachment;		// Laser attachment for the paddle
 	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
 
-	// In-game lights for typical geometry: key, fill and ball
-	PointLight fgKeyLight, fgFillLight, ballLight;
-	// In-game lights just for the ball
-	PointLight ballKeyLight, ballFillLight;
-	// In-game lights just for the paddle
-	PointLight paddleKeyLight, paddleFillLight;
-	// Storage for light colours - e.g., when lights are turned out these keep the values
-	// used to restore the light
-	Colour fgKeyLightColour, fgFillLightColour, ballKeyLightColour;
-	
-	// Animations for when the lights change
-	std::list<AnimationMultiLerp<Colour>> lightColourAnims;
-
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
 	CgFxVolumetricEffect* ghostBallEffect;
@@ -74,8 +63,7 @@ private:
 	void LoadRegularMeshAssets();
 	void LoadRegularEffectAssets();
 
-	void ToggleLights(bool turnOn);
-	void ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour& fgFillLightCol, const Colour& ballKeyLightCol, float changeTime = 1.0f, bool pulse = false);
+	//void ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour& fgFillLightCol, const Colour& ballKeyLightCol, float changeTime = 1.0f, bool pulse = false);
 
 public:
 	GameAssets(int screenWidth, int screenHeight);
@@ -104,7 +92,7 @@ public:
 	void DrawActiveItemHUDElements(const GameModel& gameModel, int displayWidth, int displayHeight);
 
 #ifdef _DEBUG
-	void DebugDrawLights() const;
+	void DebugDrawLights() const { this->lightAssets->DebugDrawLights(); };
 #endif
 
 	// Public Getter Functions **********************************************************************
