@@ -3,9 +3,11 @@ package bbbleveleditor;
 import java.awt.*;
 import javax.swing.*;
 import java.io.*;
+import java.util.*;
+import java.util.List;
 
-public class BBBLevelEditorMain {
-
+public class BBBLevelEditorMain { 
+	
 	/**
 	 * @param args
 	 */
@@ -89,11 +91,11 @@ public class BBBLevelEditorMain {
 		JPanel selBlockInfoPanel = new JPanel(/* Layout? */);
 		
 		DefaultListModel blockList = new DefaultListModel();
-		
+
 		boolean blockListReadSuccess = false;
 		try {
 			File blockListFile = new File(BBBLevelEditorMain.class.getResource("resources/bbb_block_types.txt").toURI());
-			if (blockListFile.canRead()) {
+			//if (blockListFile.canRead()) {
 				
 				BufferedReader blockListFileIn = new BufferedReader(new FileReader(blockListFile));
 				blockListReadSuccess = true;
@@ -110,16 +112,14 @@ public class BBBLevelEditorMain {
 							// 3rd line will be the encoded value for that block in the BBB level file format
 							String blockSymbol = blockListFileIn.readLine();
 							
-							
-							
-							
+							blockList.addElement(new LevelPiece(blockName, blockSymbol, blockImgFilename));
 						}
 						// TODO: Read the format of the block file...
 					}
 				}
 				catch (Exception e) { }
 				finally { blockListFileIn.close(); }
-			}
+			//}
 		}
 		catch (Exception e) {}
 		
@@ -130,7 +130,9 @@ public class BBBLevelEditorMain {
 		// TODO: Add a list of blocks
 		
 		// Place the list in a scroll pane and insert it into the parent panel
-		JScrollPane blockListScrollPane = new JScrollPane(new JList(blockList));
+		JList blockListComponent = new JList(blockList);
+		blockListComponent.setCellRenderer(new LevelPieceListRenderer());
+		JScrollPane blockListScrollPane = new JScrollPane(blockListComponent);
 		blockListParentPanel.add(selBlockInfoPanel, BorderLayout.NORTH);
 		blockListParentPanel.add(blockListScrollPane, BorderLayout.CENTER);
 		
