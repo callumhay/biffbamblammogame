@@ -3,8 +3,6 @@ package bbbleveleditor;
 import java.awt.*;
 import javax.swing.*;
 import java.io.*;
-import java.util.*;
-import java.util.List;
 
 public class BBBLevelEditorMain { 
 	
@@ -92,13 +90,11 @@ public class BBBLevelEditorMain {
 		
 		DefaultListModel blockList = new DefaultListModel();
 
-		boolean blockListReadSuccess = false;
 		try {
 			File blockListFile = new File(BBBLevelEditorMain.class.getResource("resources/bbb_block_types.txt").toURI());
-			//if (blockListFile.canRead()) {
+			if (blockListFile.canRead()) {
 				
 				BufferedReader blockListFileIn = new BufferedReader(new FileReader(blockListFile));
-				blockListReadSuccess = true;
 				
 				try {
 					while (true) {
@@ -117,21 +113,33 @@ public class BBBLevelEditorMain {
 						// TODO: Read the format of the block file...
 					}
 				}
-				catch (Exception e) { }
-				finally { blockListFileIn.close(); }
-			//}
+				catch (Exception e) { 
+					blockList.removeAllElements();
+					JOptionPane.showMessageDialog(bbbLevelEditWin, 
+							"Invalid format found in the level piece definitions file (resources/bbb_block_types.txt)!", 
+							"Error", JOptionPane.ERROR_MESSAGE);
+				}
+				finally { 
+					blockListFileIn.close(); 
+				}
+			}
+			else {
+				JOptionPane.showMessageDialog(bbbLevelEditWin, 
+						"Could not read the level piece definitions file (resources/bbb_block_types.txt)!", 
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
-		catch (Exception e) {}
-		
-		if (!blockListReadSuccess) {
-			blockList.addElement("Block Type Definitions File not found.");
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(bbbLevelEditWin, 
+					"Could not open the level piece definitions file (resources/bbb_block_types.txt)!", 
+					"Error", JOptionPane.ERROR_MESSAGE);
 		}
-		
-		// TODO: Add a list of blocks
-		
+
 		// Place the list in a scroll pane and insert it into the parent panel
 		JList blockListComponent = new JList(blockList);
 		blockListComponent.setCellRenderer(new LevelPieceListRenderer());
+		blockListComponent.setEnabled(true);
+		
 		JScrollPane blockListScrollPane = new JScrollPane(blockListComponent);
 		blockListParentPanel.add(selBlockInfoPanel, BorderLayout.NORTH);
 		blockListParentPanel.add(blockListScrollPane, BorderLayout.CENTER);

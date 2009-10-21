@@ -30,7 +30,15 @@ public class LevelPieceListRenderer extends JLabel implements ListCellRenderer {
         }
         
         // Set the level piece image and name
-        LevelPiece levelPiece = (LevelPiece)value;
+        LevelPiece levelPiece = null;
+        try {
+        	levelPiece = (LevelPiece)value;
+        }
+        catch (Exception e) {
+        	levelPiece = null;
+        	assert false;
+        }
+        
         if (levelPiece == null) {
         	this.setText("ERROR");
         }
