@@ -1,6 +1,7 @@
 package bbbleveleditor;
 
 import java.awt.Component;
+import java.awt.Dimension;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -43,8 +44,12 @@ public class LevelPieceListRenderer extends JLabel implements ListCellRenderer {
         	this.setText("ERROR");
         }
         else {
-        	this.setText(levelPiece.getName());
-        	this.setIcon(new ImageIcon(levelPiece.getImage()));
+        	ImageIcon img = new ImageIcon(levelPiece.getImage());
+        	int imgWidth = img.getIconWidth();
+        	int imgHeight = img.getIconHeight();
+        	this.setIcon(img);
+        	this.setPreferredSize(new Dimension(imgWidth+10, imgHeight+10));
+        	this.setToolTipText(levelPiece.getName());
         }
 
 		return this;
