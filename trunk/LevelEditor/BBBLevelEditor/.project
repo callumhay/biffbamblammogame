@@ -16,9 +16,49 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>src/bbbleveleditor/resources/bbb_block_types.txt</name>
+			<name>src/bbbleveleditor/resources/solid_lr.png</name>
 			<type>1</type>
-			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/bbb_block_types.txt</location>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/solid_lr.png</location>
+		</link>
+		<link>
+			<name>src/bbbleveleditor/resources/selection_icon_16x16.png</name>
+			<type>1</type>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/selection_icon_16x16.png</location>
+		</link>
+		<link>
+			<name>src/bbbleveleditor/resources/paintbrush_icon_16x16.png</name>
+			<type>1</type>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/paintbrush_icon_16x16.png</location>
+		</link>
+		<link>
+			<name>src/bbbleveleditor/resources/eraser_icon_16x16.png</name>
+			<type>1</type>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/eraser_icon_16x16.png</location>
+		</link>
+		<link>
+			<name>src/bbbleveleditor/resources/solid_ll.png</name>
+			<type>1</type>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/solid_ll.png</location>
+		</link>
+		<link>
+			<name>src/bbbleveleditor/resources/solid_ul.png</name>
+			<type>1</type>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/solid_ul.png</location>
+		</link>
+		<link>
+			<name>src/bbbleveleditor/resources/empty.png</name>
+			<type>1</type>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/empty.png</location>
+		</link>
+		<link>
+			<name>src/bbbleveleditor/resources/solid_ur.png</name>
+			<type>1</type>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/solid_ur.png</location>
+		</link>
+		<link>
+			<name>src/bbbleveleditor/resources/ink.png</name>
+			<type>1</type>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/ink.png</location>
 		</link>
 	</linkedResources>
 </projectDescription>

@@ -19,139 +19,36 @@ public class BBBLevelEditorMain {
 		JPanel topMostPanel = new JPanel(new BorderLayout());
 		topMostPanel.setPreferredSize(new Dimension(800, 600));
 		
-		// Setup the menu bar *************************
-		JMenuBar menuBar = new JMenuBar();
-		
-		// File menu...
-		JMenu fileMenu = new JMenu("File");
-		
-		JMenuItem newMenuItem    = new JMenuItem("New");
-		JMenuItem openMenuItem   = new JMenuItem("Open");
-		JMenuItem closeMenuItem  = new JMenuItem("Close");
-		JMenuItem saveMenuItem   = new JMenuItem("Save");
-		JMenuItem saveAsMenuItem = new JMenuItem("Save As...");
-		JMenuItem exitMenuItem   = new JMenuItem("Exit");
-		
-		fileMenu.add(newMenuItem);
-		fileMenu.add(openMenuItem);
-		fileMenu.addSeparator();
-		fileMenu.add(closeMenuItem);
-		fileMenu.addSeparator();
-		fileMenu.add(saveMenuItem);
-		fileMenu.add(saveAsMenuItem);
-		fileMenu.addSeparator();
-		fileMenu.add(exitMenuItem);
-		
-		menuBar.add(fileMenu);
-		
-		// Edit menu...
-		JMenu editMenu = new JMenu("Edit");
-		
-		JMenuItem lvlDimItem   = new JMenuItem("Dimensions...");
-		JMenuItem lvlThemeItem = new JMenuItem("Theme...");
-		JMenuItem lvlItemsItem = new JMenuItem("Allowable Item Drops...");
-		
-		editMenu.add(lvlDimItem);
-		editMenu.add(lvlThemeItem);
-		editMenu.add(lvlItemsItem);
-		
-		menuBar.add(editMenu);
-		
-		// Add the menu to the frame
+		// Setup the menu bar and add the menu to the frame
+		JMenuBar menuBar = new BBBLevelEditorMenuBar();
 		bbbLevelEditWin.setJMenuBar(menuBar);
-		// ********************************************
 		
-		// Setup the toolbar **************************
-		JToolBar toolBar = new JToolBar();
-		
-		ImageIcon selectionIcon  = new ImageIcon(BBBLevelEditorMain.class.getResource("resources/selection_icon_16x16.png"));
-		JButton selectionBtn  = new JButton(selectionIcon);
-		ImageIcon paintBrushIcon = new ImageIcon(BBBLevelEditorMain.class.getResource("resources/paintbrush_icon_16x16.png"));
-		JButton paintBrushBtn = new JButton(paintBrushIcon);
-		ImageIcon eraserIcon     = new ImageIcon(BBBLevelEditorMain.class.getResource("resources/eraser_icon_16x16.png"));
-		JButton eraserBtn     = new JButton(eraserIcon);
-		
-		toolBar.add(selectionBtn);
-		toolBar.add(paintBrushBtn);
-		toolBar.add(eraserBtn);
-		
-		// Add the toolbar to the frame
+		// Setup the toolbar and add the toolbar to the frame
+		JToolBar toolBar = new BBBLevelEditorToolBar();
 		topMostPanel.add(toolBar, BorderLayout.NORTH);
-		// ********************************************
 		
-		// Setup the block list panel ****************************
-		
+		// Setup the block list panel:
 		// Parent panel for the entire block list area (hold info about the block selected and
 		// the list of all possible blocks for the level)
-		JPanel blockListParentPanel = new JPanel(new BorderLayout());
-		
-		// Block information panel (shows block selected block and its information)
-		JPanel selBlockInfoPanel = new JPanel(/* Layout? */);
-		
-		DefaultListModel blockList = new DefaultListModel();
-
-		try {
-			File blockListFile = new File(BBBLevelEditorMain.class.getResource("resources/bbb_block_types.txt").toURI());
-			if (blockListFile.canRead()) {
-				
-				BufferedReader blockListFileIn = new BufferedReader(new FileReader(blockListFile));
-				
-				try {
-					while (true) {
-						String currLine = blockListFileIn.readLine();
-						if (!currLine.isEmpty()) {
-							// Read the expected format:
-							// 1st line will be the name of the block type
-							String blockName = currLine;
-							// 2nd line will be the file path to the image of the block
-							String blockImgFilename = blockListFileIn.readLine();
-							// 3rd line will be the encoded value for that block in the BBB level file format
-							String blockSymbol = blockListFileIn.readLine();
-							
-							blockList.addElement(new LevelPiece(blockName, blockSymbol, blockImgFilename));
-						}
-						// TODO: Read the format of the block file...
-					}
-				}
-				catch (Exception e) { 
-					blockList.removeAllElements();
-					JOptionPane.showMessageDialog(bbbLevelEditWin, 
-							"Invalid format found in the level piece definitions file (resources/bbb_block_types.txt)!", 
-							"Error", JOptionPane.ERROR_MESSAGE);
-				}
-				finally { 
-					blockListFileIn.close(); 
-				}
-			}
-			else {
-				JOptionPane.showMessageDialog(bbbLevelEditWin, 
-						"Could not read the level piece definitions file (resources/bbb_block_types.txt)!", 
-						"Error", JOptionPane.ERROR_MESSAGE);
-			}
-		}
-		catch (Exception e) {
-			JOptionPane.showMessageDialog(bbbLevelEditWin, 
-					"Could not open the level piece definitions file (resources/bbb_block_types.txt)!", 
-					"Error", JOptionPane.ERROR_MESSAGE);
-		}
+		JPanel levelPieceListParentPanel = new JPanel(new BorderLayout());
 
 		// Place the list in a scroll pane and insert it into the parent panel
-		JList blockListComponent = new JList(blockList);
-		blockListComponent.setCellRenderer(new LevelPieceListRenderer());
-		blockListComponent.setEnabled(true);
+		DefaultListModel levelPieceList = SetupLevelPieceList(bbbLevelEditWin);
+		JList levelPieceListComponent = new JList(levelPieceList);
+		levelPieceListComponent.setCellRenderer(new LevelPieceListRenderer());
+		levelPieceListComponent.setEnabled(true);
+		levelPieceListComponent.setToolTipText("List of possible level pieces for composing a level.");
 		
-		JScrollPane blockListScrollPane = new JScrollPane(blockListComponent);
-		blockListParentPanel.add(selBlockInfoPanel, BorderLayout.NORTH);
-		blockListParentPanel.add(blockListScrollPane, BorderLayout.CENTER);
+		JScrollPane levelPieceListScrollPane = new JScrollPane(levelPieceListComponent);
+		JLabel levelPieceListTitle = new JLabel("Level Pieces");
+		levelPieceListParentPanel.add(levelPieceListTitle, BorderLayout.NORTH);
+		levelPieceListParentPanel.add(levelPieceListScrollPane, BorderLayout.CENTER);
 		
-		topMostPanel.add(blockListParentPanel, BorderLayout.EAST);
-		// *******************************************************
+		topMostPanel.add(levelPieceListParentPanel, BorderLayout.EAST);
 		
-		// Setup the edit level display ******************
-		
-		
-		// ***********************************************
-		
+		// Setup the edit level display
+		JDesktopPane levelEditDesktop = new JDesktopPane();
+		topMostPanel.add(levelEditDesktop, BorderLayout.CENTER);
 		
 		// Add the parent panel to the frame
 		bbbLevelEditWin.add(topMostPanel);
@@ -162,7 +59,67 @@ public class BBBLevelEditorMain {
 		
 	}
 
-	//private static void SetupLevelPieceList() {	
-	//}
+	/**
+	 * Read all the level piece definitions into a default list and return it.
+	 * @return A list will all the level piece types in it.
+	 */
+	public static DefaultListModel SetupLevelPieceList(JFrame mainFrame) {	
+		DefaultListModel levelPieceList = new DefaultListModel();
+
+		try {
+			File blockListFile = new File(BBBLevelEditorMain.class.getResource("resources/bbb_block_types.txt").toURI());
+			if (blockListFile.canRead()) {
+				
+				BufferedReader blockListFileIn = new BufferedReader(new FileReader(blockListFile));
+				String blockName = "";
+				String blockImgFilename = "";
+				String blockSymbol = "";
+				
+				try {
+					while (true) {
+						String currLine = blockListFileIn.readLine();
+						if (currLine == null) {
+							break;
+						}
+						if (!currLine.isEmpty()) {
+							// Read the expected format:
+							// 1st line will be the name of the block type
+							blockName = currLine;
+							// 2nd line will be the file path to the image of the block
+							blockImgFilename = blockListFileIn.readLine();
+							// 3rd line will be the encoded value for that block in the BBB level file format
+							blockSymbol = blockListFileIn.readLine();
+							
+							levelPieceList.addElement(new LevelPiece(blockName, blockSymbol, blockImgFilename));
+							blockImgFilename = "";
+						}
+						// TODO: Read the format of the block file...
+					}
+				}
+				catch (Exception e) { 
+					levelPieceList.removeAllElements();
+					JOptionPane.showMessageDialog(mainFrame, 
+							"Invalid format or image file found in the level piece definitions file (resources/bbb_block_types.txt)!\n" +
+							"Image name: " + blockImgFilename, 
+							"Error", JOptionPane.ERROR_MESSAGE);
+				}
+				finally { 
+					blockListFileIn.close(); 
+				}
+			}
+			else {
+				JOptionPane.showMessageDialog(mainFrame, 
+						"Could not read the level piece definitions file (resources/bbb_block_types.txt)!", 
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(mainFrame, 
+					"Could not open the level piece definitions file (resources/bbb_block_types.txt)!", 
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
+		
+		return levelPieceList;
+	}
 	
 }
