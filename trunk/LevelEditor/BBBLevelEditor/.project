@@ -51,14 +51,14 @@
 			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/empty.png</location>
 		</link>
 		<link>
-			<name>src/bbbleveleditor/resources/solid_ur.png</name>
-			<type>1</type>
-			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/solid_ur.png</location>
-		</link>
-		<link>
 			<name>src/bbbleveleditor/resources/ink.png</name>
 			<type>1</type>
 			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/ink.png</location>
+		</link>
+		<link>
+			<name>src/bbbleveleditor/resources/solid_ur.png</name>
+			<type>1</type>
+			<location>C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor/src/bbbleveleditor/resources/solid_ur.png</location>
 		</link>
 	</linkedResources>
 </projectDescription>
