@@ -44,7 +44,7 @@ public class LevelPieceListRenderer extends JLabel implements ListCellRenderer {
         	this.setText("ERROR");
         }
         else {
-        	ImageIcon img = new ImageIcon(levelPiece.getImage());
+        	ImageIcon img = levelPiece.getImageIcon();
         	int imgWidth = img.getIconWidth();
         	int imgHeight = img.getIconHeight();
         	this.setIcon(img);
