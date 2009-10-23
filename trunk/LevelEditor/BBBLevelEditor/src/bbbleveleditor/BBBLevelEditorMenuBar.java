@@ -3,13 +3,17 @@ package bbbleveleditor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 public class BBBLevelEditorMenuBar extends JMenuBar {
 
-	public BBBLevelEditorMenuBar() {
+	BBBLevelEditMainWindow levelEditWindow;
+	
+	public BBBLevelEditorMenuBar(BBBLevelEditMainWindow window) {
+		this.levelEditWindow = window;
 		this.addFileMenu();
 		this.addEditMenu();
 	}
@@ -65,7 +69,19 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getActionCommand().equals("new")) {
+				// Initiate the modal dialog for getting info about the new level being created
+				NewLevelEditDialog dlg = new NewLevelEditDialog(levelEditWindow);
+				dlg.pack();
+				dlg.setVisible(true);
 				
+				// If the user clicked "OK" in the dialog then we create the
+				// new level for editing
+				if (dlg.getExitedWithOK()) {
+					String levelName = dlg.getLevelName();
+					int levelWidth 	 = dlg.getLevelWidth();
+					int levelHeight  = dlg.getLevelHeight();
+					levelEditWindow.addNewLevelEditDocument(levelName, levelWidth, levelHeight);
+				}
 			}
 			else if (e.getActionCommand().equals("open")) {
 				
@@ -94,16 +110,11 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		lvlDimItem.setActionCommand("dimensions");
 		lvlDimItem.addActionListener(editMenuActionListener);
 		
-		JMenuItem lvlThemeItem = new JMenuItem("Theme...");
-		lvlThemeItem.setActionCommand("theme");
-		lvlThemeItem.addActionListener(editMenuActionListener);
-		
 		JMenuItem lvlItemsItem = new JMenuItem("Allowable Item Drops...");
 		lvlItemsItem.setActionCommand("item_drops");
 		lvlItemsItem.addActionListener(editMenuActionListener);
 		
 		editMenu.add(lvlDimItem);
-		editMenu.add(lvlThemeItem);
 		editMenu.add(lvlItemsItem);
 		
 		this.add(editMenu);
@@ -118,9 +129,6 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getActionCommand().equals("dimensions")) {
-				
-			}
-			else if (e.getActionCommand().equals("theme")) {
 				
 			}
 			else if (e.getActionCommand().equals("item_drops")) {
