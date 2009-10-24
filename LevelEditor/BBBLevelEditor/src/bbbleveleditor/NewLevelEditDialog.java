@@ -1,20 +1,17 @@
 package bbbleveleditor;
 
+import java.awt.Point;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.text.ParseException;
 
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import javax.swing.text.MaskFormatter;
 
 public class NewLevelEditDialog extends JDialog implements PropertyChangeListener {
-
+	private static final long serialVersionUID = -4318940725472874513L;
 	private JTextField levelNameTxtField;
 	private JTextField levelWidthTxtField;
 	private JTextField levelHeightTxtField;
@@ -42,8 +39,15 @@ public class NewLevelEditDialog extends JDialog implements PropertyChangeListene
 		this.optionPane = new JOptionPane(optionPaneItems, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null);
 		this.optionPane.addPropertyChangeListener(this);
 		this.setContentPane(this.optionPane);
+		this.pack();
 		
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		
+		this.setLocationRelativeTo(window);
+		int parentWidth = window.getWidth();
+		int parentHeight = window.getHeight();
+		
+		this.setLocation(new Point((parentWidth - this.getWidth()) / 2, (parentHeight - this.getHeight()) / 2));
 	}
 
 	@Override

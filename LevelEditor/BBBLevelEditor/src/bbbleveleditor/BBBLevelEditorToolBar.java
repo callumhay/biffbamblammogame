@@ -9,6 +9,8 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
 public class BBBLevelEditorToolBar extends JToolBar implements ActionListener {
+	private static final long serialVersionUID = 1L;
+
 	private BBBLevelEditMainWindow levelEditWindow;
 	
 	//private JToggleButton selectionBtn;

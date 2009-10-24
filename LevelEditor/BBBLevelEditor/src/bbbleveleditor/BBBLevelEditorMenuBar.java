@@ -2,15 +2,30 @@ package bbbleveleditor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 
 public class BBBLevelEditorMenuBar extends JMenuBar {
+	private static final long serialVersionUID = 1L;
 
-	BBBLevelEditMainWindow levelEditWindow;
+	private BBBLevelEditMainWindow levelEditWindow;
+	
+	// File menu
+	private JMenuItem newMenuItem;
+	private JMenuItem openMenuItem;
+	private JMenuItem closeMenuItem;
+	private JMenuItem saveMenuItem;
+	private JMenuItem saveAsMenuItem;
+	private JMenuItem exitMenuItem;
+	
+	// Edit menu
+	private JMenuItem lvlDimMenuItem;
+	private JMenuItem lvlItemsMenuItem;
+	
 	
 	public BBBLevelEditorMenuBar(BBBLevelEditMainWindow window) {
 		this.levelEditWindow = window;
@@ -23,39 +38,47 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		JMenu fileMenu = new JMenu("File");
 		FileMenuActionListener fileMenuActionListener = new FileMenuActionListener();
 		
-		JMenuItem newMenuItem    = new JMenuItem("New");
-		newMenuItem.setActionCommand("new");
-		newMenuItem.addActionListener(fileMenuActionListener);
+		this.newMenuItem = new JMenuItem("New");
+		this.newMenuItem.setActionCommand("new");
+		this.newMenuItem.addActionListener(fileMenuActionListener);
+		this.newMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+		this.newMenuItem.setEnabled(true);
 		
-		JMenuItem openMenuItem   = new JMenuItem("Open");
-		openMenuItem.setActionCommand("open");
-		openMenuItem.addActionListener(fileMenuActionListener);
+		this.openMenuItem   = new JMenuItem("Open...");
+		this.openMenuItem.setActionCommand("open");
+		this.openMenuItem.addActionListener(fileMenuActionListener);
+		this.openMenuItem.setEnabled(true);
 		
-		JMenuItem closeMenuItem  = new JMenuItem("Close");
-		closeMenuItem.setActionCommand("close");
-		closeMenuItem.addActionListener(fileMenuActionListener);
+		this.closeMenuItem  = new JMenuItem("Close");
+		this.closeMenuItem.setActionCommand("close");
+		this.closeMenuItem.addActionListener(fileMenuActionListener);
+		this.closeMenuItem.setEnabled(false);
 		
-		JMenuItem saveMenuItem   = new JMenuItem("Save");
-		saveMenuItem.setActionCommand("save");
-		saveMenuItem.addActionListener(fileMenuActionListener);
+		this.saveMenuItem   = new JMenuItem("Save");
+		this.saveMenuItem.setActionCommand("save");
+		this.saveMenuItem.addActionListener(fileMenuActionListener);
+		this.saveMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		this.saveMenuItem.setEnabled(false);
 		
-		JMenuItem saveAsMenuItem = new JMenuItem("Save As...");
-		saveAsMenuItem.setActionCommand("save_as");
-		saveAsMenuItem.addActionListener(fileMenuActionListener);
+		this.saveAsMenuItem = new JMenuItem("Save As...");
+		this.saveAsMenuItem.setActionCommand("save_as");
+		this.saveAsMenuItem.addActionListener(fileMenuActionListener);
+		this.saveAsMenuItem.setEnabled(false);
 		
-		JMenuItem exitMenuItem   = new JMenuItem("Exit");
-		exitMenuItem.setActionCommand("exit");
-		exitMenuItem.addActionListener(fileMenuActionListener);		
+		this.exitMenuItem   = new JMenuItem("Exit");
+		this.exitMenuItem.setActionCommand("exit");
+		this.exitMenuItem.addActionListener(fileMenuActionListener);
+		this.exitMenuItem.setEnabled(true);
 		
-		fileMenu.add(newMenuItem);
-		fileMenu.add(openMenuItem);
+		fileMenu.add(this.newMenuItem);
+		fileMenu.add(this.openMenuItem);
 		fileMenu.addSeparator();
-		fileMenu.add(closeMenuItem);
+		fileMenu.add(this.closeMenuItem);
 		fileMenu.addSeparator();
-		fileMenu.add(saveMenuItem);
-		fileMenu.add(saveAsMenuItem);
+		fileMenu.add(this.saveMenuItem);
+		fileMenu.add(this.saveAsMenuItem);
 		fileMenu.addSeparator();
-		fileMenu.add(exitMenuItem);
+		fileMenu.add(this.exitMenuItem);
 		
 		this.add(fileMenu);
 	}
@@ -84,16 +107,16 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 				}
 			}
 			else if (e.getActionCommand().equals("open")) {
-				
+				levelEditWindow.openLevelEditDocument();
 			}
 			else if (e.getActionCommand().equals("close")) {
-				
+				levelEditWindow.closeLevelEditDocument();
 			}
 			else if (e.getActionCommand().equals("save")) {
-				
+				levelEditWindow.saveLevelEditDocument();
 			}	
 			else if (e.getActionCommand().equals("save_as")) {
-				
+				levelEditWindow.saveAsLevelEditDocument();
 			}
 			else if (e.getActionCommand().equals("exit")) {
 				
@@ -106,16 +129,16 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		JMenu editMenu = new JMenu("Edit");
 		EditMenuActionListener editMenuActionListener = new EditMenuActionListener();
 		
-		JMenuItem lvlDimItem   = new JMenuItem("Dimensions...");
-		lvlDimItem.setActionCommand("dimensions");
-		lvlDimItem.addActionListener(editMenuActionListener);
+		this.lvlDimMenuItem   = new JMenuItem("Dimensions...");
+		this.lvlDimMenuItem.setActionCommand("dimensions");
+		this.lvlDimMenuItem.addActionListener(editMenuActionListener);
 		
-		JMenuItem lvlItemsItem = new JMenuItem("Allowable Item Drops...");
-		lvlItemsItem.setActionCommand("item_drops");
-		lvlItemsItem.addActionListener(editMenuActionListener);
+		this.lvlItemsMenuItem = new JMenuItem("Allowable Item Drops...");
+		this.lvlItemsMenuItem.setActionCommand("item_drops");
+		this.lvlItemsMenuItem.addActionListener(editMenuActionListener);
 		
-		editMenu.add(lvlDimItem);
-		editMenu.add(lvlItemsItem);
+		editMenu.add(this.lvlDimMenuItem);
+		editMenu.add(this.lvlItemsMenuItem);
 		
 		this.add(editMenu);
 	}
@@ -135,5 +158,16 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 				
 			}
 		}
-	}	
+	}
+	
+	public void UpdateEnabledMenuItems() {
+		BBBLevelEditDocumentWindow activeDoc = this.levelEditWindow.getActiveLevelDoc();
+		boolean activeDocExists = activeDoc != null;
+		
+		this.closeMenuItem.setEnabled(activeDocExists);
+		this.saveMenuItem.setEnabled(activeDocExists);
+		this.saveAsMenuItem.setEnabled(activeDocExists);
+		this.lvlDimMenuItem.setEnabled(activeDocExists);
+		this.lvlItemsMenuItem.setEnabled(activeDocExists);
+	}
 }
