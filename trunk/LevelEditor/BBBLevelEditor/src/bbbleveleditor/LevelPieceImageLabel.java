@@ -23,6 +23,7 @@ public class LevelPieceImageLabel extends JLabel {
 		ImageIcon icon = piece.getImageIcon();
 		this.image = icon.getImage();
 		this.imageObserver = icon.getImageObserver();
+		this.piece = piece;
 		
 		this.invalidate();
 		this.repaint();
