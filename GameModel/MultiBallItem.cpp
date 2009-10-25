@@ -1,8 +1,19 @@
+/**
+ * MultiBallItem.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "MultiBallItem.h"
 #include "GameModel.h"
 
-const std::string MultiBallItem::MULTI3_BALL_ITEM_NAME	= "Multi Ball 3 (power-up)";
-const std::string MultiBallItem::MULTI5_BALL_ITEM_NAME	= "Multi Ball 5 (power-up)";
+const std::string MultiBallItem::MULTI3_BALL_ITEM_NAME	= "MultiBall3";
+const std::string MultiBallItem::MULTI5_BALL_ITEM_NAME	= "MultiBall5";
 
 const double MultiBallItem::MULTI_BALL_TIMER_IN_SECS	= 0.0;
 const double MultiBallItem::BALL_COLLISIONS_DISABLED_DURATION = 0.5;

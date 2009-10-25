@@ -1,0 +1,58 @@
++ BallSafetyNet 
+Safety net is created below the paddle to stop the ball from going out of bounds.
+
++ BallGrow
+The ball increases in size.
+
++ SlowBall
+The ball decreases its speed.
+
++ LaserShotPaddle
+The paddle gains the ability to shoot small laser bullets that can destroy blocks.
+
++ MultiBall3
+Split the most recently touched ball into 3 balls.
+
++ MultiBall5
+Split the most recently touched ball into 5 balls.
+
++ 1Up
+Gain an extra life.
+
++ PaddleGrow
+The paddle increases in size.
+
++ StickyPaddle
+The paddle gains a sticky coating that makes a ball stick to it so that it may be manually re-fired by the player.
+
++ UberBall
+The ball gains the ability to blast through level pieces that only require one hit to destroy.
+
+
+~ GhostBall
+The ball will randomly phase through breakable blocks.
+
+
+- BallShrink
+The ball decreases in size.
+
+- FastBall
+The ball increases its speed.
+
+- Blackout
+All the lights go out making only the paddle and the ball visible.
+
+- InvisiBall
+The ball becomes partially invisible (blends into its surroundings), making it difficult to see.
+
+- PaddleCam
+The camera goes inside the paddle, looking up at the level.
+
+- PaddleShrink
+The paddle decreases in size.
+
+- PoisonPaddle
+The screen becomes blurry and difficult to see.
+
+- UpsideDown
+The entire level flips upside-down along with the paddle.

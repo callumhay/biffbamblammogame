@@ -1,11 +1,22 @@
+/**
+ * BallSpeedItem.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "BallSpeedItem.h"
 
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
 const double BallSpeedItem::BALL_SPEED_TIMER_IN_SECS	= 20.0;
-const std::string BallSpeedItem::SLOW_BALL_ITEM_NAME = "Slow Ball (Power-up)";
-const std::string BallSpeedItem::FAST_BALL_ITEM_NAME = "Fast Ball (Power-down)";
+const std::string BallSpeedItem::SLOW_BALL_ITEM_NAME = "SlowBall";
+const std::string BallSpeedItem::FAST_BALL_ITEM_NAME = "FastBall";
 
 BallSpeedItem::BallSpeedItem(const BallSpeedType type, const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem((type==SlowBall)?SLOW_BALL_ITEM_NAME:FAST_BALL_ITEM_NAME, spawnOrigin, gameModel, (type==SlowBall)?GameItem::Good:GameItem::Bad), spdType(type) {

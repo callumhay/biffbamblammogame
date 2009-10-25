@@ -12,7 +12,7 @@
 #include "StickyPaddleItem.h"
 #include "GameModel.h"
 
-const std::string StickyPaddleItem::STICKY_PADDLE_ITEM_NAME	= "Sticky Paddle (Power-up)";
+const std::string StickyPaddleItem::STICKY_PADDLE_ITEM_NAME	= "StickyPaddle";
 const double StickyPaddleItem::STICKY_PADDLE_TIMER_IN_SECS  = 20.0;
 
 StickyPaddleItem::StickyPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :

@@ -1,8 +1,19 @@
+/**
+ * BallSafetyNetItem.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "BallSafetyNetItem.h"
 #include "GameLevel.h"
 #include "GameEventManager.h"
 
-const std::string BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME	= "Ball Safety Net (power-up)";
+const std::string BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME	= "BallSafetyNet";
 const double BallSafetyNetItem::BALL_SAFETY_NET_TIMER_IN_SECS		= 0.0;
 
 BallSafetyNetItem::BallSafetyNetItem(const Point2D &spawnOrigin, GameModel *gameModel) :
