@@ -8,6 +8,7 @@ import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -122,8 +123,104 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		this.pack();
 	}
 	
+	public void setLevelDimensions(int newWidth, int newHeight) {
+		if (newWidth <= 0 || newHeight <= 0) {
+			assert(false);
+			return;
+		}
+		
+	
+		int windowHeight = this.getHeight();
+		int windowWidth = this.getWidth();
+		boolean wasMaximum = this.isMaximum();
+		
+		if (newWidth < this.currWidth) {
+			// Shrink the width from the right side
+			int widthDiff = this.currWidth - newWidth;
+			
+			for (int row = 0; row < this.currHeight; row++) {
+				ArrayList<LevelPieceImageLabel> currRow = this.pieces.get(row);
+				for (int i = 0; i < widthDiff; i++) {
+					int indexToRemove = currRow.size()-1-i;
+					currRow.remove(indexToRemove);
+				}
+			}
+			
+			// Setup the pieces again...
+			this.currWidth = newWidth;
+			this.resetPieces();
+		}
+		else if (newWidth > this.currWidth) {
+			// Grow the width from the right side
+			int widthDiff = newWidth - this.currWidth;
+			
+			for (int row = 0; row < this.currHeight; row++) {
+				ArrayList<LevelPieceImageLabel> currRow = this.pieces.get(row);
+				for (int i = 0; i < widthDiff; i++) {
+					LevelPieceImageLabel tempLabel = new LevelPieceImageLabel(LevelPiece.DefaultPiece);
+					tempLabel.setPreferredSize(new Dimension(LevelPiece.LEVEL_PIECE_WIDTH, LevelPiece.LEVEL_PIECE_HEIGHT));
+					tempLabel.setMinimumSize(new Dimension(LevelPiece.LEVEL_PIECE_WIDTH, LevelPiece.LEVEL_PIECE_HEIGHT));
+					tempLabel.setMaximumSize(new Dimension(LevelPiece.LEVEL_PIECE_WIDTH, LevelPiece.LEVEL_PIECE_HEIGHT));
+					currRow.add(tempLabel);
+				}
+			}
+			
+			// Setup the pieces again...
+			this.currWidth = newWidth;
+			this.resetPieces();
+		}
+		
+		if (newHeight < this.currHeight) {
+			// Shrink the height from the top
+			int heightDiff = this.currHeight - newHeight;
+			
+			for (int i = 0; i < heightDiff; i++) {
+				this.pieces.remove(0);
+			}
+		
+			// Setup the pieces again...
+			this.currHeight = newHeight;
+			this.resetPieces();	
+		}
+		else if (newHeight > this.currHeight) {
+			// Grow the height from the top
+			int heightDiff = newHeight - this.currHeight;
+		
+			for (int i = 0; i < heightDiff; i++) {
+				ArrayList<LevelPieceImageLabel> newRow = new ArrayList<LevelPieceImageLabel>(this.currWidth);
+				for (int j = 0; j < this.currWidth; j++) {
+					
+					LevelPieceImageLabel tempLabel = new LevelPieceImageLabel(LevelPiece.DefaultPiece);
+					tempLabel.setPreferredSize(new Dimension(LevelPiece.LEVEL_PIECE_WIDTH, LevelPiece.LEVEL_PIECE_HEIGHT));
+					tempLabel.setMinimumSize(new Dimension(LevelPiece.LEVEL_PIECE_WIDTH, LevelPiece.LEVEL_PIECE_HEIGHT));
+					tempLabel.setMaximumSize(new Dimension(LevelPiece.LEVEL_PIECE_WIDTH, LevelPiece.LEVEL_PIECE_HEIGHT));
+					
+					newRow.add(tempLabel);
+				}
+				this.pieces.add(0, newRow);
+			}
+			
+			// Setup the pieces again...
+			this.currHeight = newHeight;
+			this.resetPieces();
+		}
+		
+		this.pack();
+		this.setSize(new Dimension(windowWidth, windowHeight));
+		if (wasMaximum) {
+			try {
+				this.setMaximum(true);
+			} 
+			catch (PropertyVetoException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+		this.setTitle(this.fileName + " (" + this.currWidth + "x" + this.currHeight + ")");
 	}
 	public String getFileName() {
 		return this.fileName;
@@ -140,23 +237,21 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
 		
 		JFileChooser openDlg = new JFileChooser();
-		openDlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		openDlg.setFileFilter(new BBBLevelFileFilter());
 		openDlg.setFileHidingEnabled(true);
 		openDlg.setMultiSelectionEnabled(false);
+		openDlg.setAcceptAllFileFilterUsed(false);
 		
 		String openDir = prefs.get("lastOpenLocation", "");
 		if (!openDir.isEmpty()) {
-			openDlg.setSelectedFile(new File(openDir));
+			openDlg.setCurrentDirectory(new File(openDir));
 		}
 		
-		openDlg.setFileFilter(new BBBLevelFileFilter());
 		int result = openDlg.showOpenDialog(this.levelEditWindow);
-		
 		if (result == JFileChooser.APPROVE_OPTION) {
 			
 			String openDirToSave = openDlg.getSelectedFile().getPath();
-			prefs.put("lastOpenLocation", openDirToSave);
-			
+			prefs.put("lastOpenLocation", openDirToSave.substring(0, openDirToSave.lastIndexOf(File.separatorChar)+1));
 			this.savedFileOnDisk = openDlg.getSelectedFile();
 			if (this.savedFileOnDisk == null) {
 				assert(false);
@@ -214,6 +309,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				this.pack();
 				
 				this.fileName = this.savedFileOnDisk.getName();
+				this.fileName = this.fileName.substring(0, this.fileName.lastIndexOf('.'));
 				this.setTitle(this.fileName + " (" + this.currWidth + "x" + this.currHeight + ")");
 			} 
 			catch (FileNotFoundException e) {
@@ -236,6 +332,9 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				}
 			}
 		}
+		else {
+			return false;
+		}
 		return true;
 	}
 	
@@ -247,39 +346,56 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			JOptionPane.showMessageDialog(this, "Could not write to disk, please save to a writable file.", "Could not write", JOptionPane.ERROR_MESSAGE);
 			this.saveAs();
 		}
-		this.saveToFile();
-	}
-	
-	public void saveAs() {
-		// Use preferences to store and retrieve the last save location
-		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());	
-		
-		JFileChooser saveAsDlg = new JFileChooser();
-		
-		String saveAsDir = prefs.get("lastSaveAsLocation", "");
-		if (!saveAsDir.isEmpty()) {
-			saveAsDlg.setSelectedFile(new File(saveAsDir));
-		}	
-		
-		int result = saveAsDlg.showSaveDialog(this.levelEditWindow);
-		
-		if (result == JFileChooser.APPROVE_OPTION) {
-			String saveDirLoc = saveAsDlg.getSelectedFile().getPath();
-			prefs.put("lastSaveAsLocation", saveDirLoc);	
-			
-			this.savedFileOnDisk = saveAsDlg.getSelectedFile();
+		else {
 			this.saveToFile();
 		}
 	}
 	
-	private void saveToFile() {
-		// The savedFileOnDisk is not null and can be used to save the current
-		// state of this level edit document
-		if (this.savedFileOnDisk == null) {
-			assert(false);
-			return;
+	public boolean saveAs() {
+		this.fileName = BBBLevelFileFilter.changeExtensionToBBBLvlExt(this.fileName);
+		
+		// Use preferences to store and retrieve the last save location
+		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());	
+		
+		JFileChooser saveAsDlg = new JFileChooser();
+		saveAsDlg.setFileFilter(new BBBLevelFileFilter());
+		saveAsDlg.setAcceptAllFileFilterUsed(false);
+		
+		String saveAsDir = prefs.get("lastSaveAsLocation", "");
+		if (!saveAsDir.isEmpty()) {
+			saveAsDlg.setSelectedFile(new File(saveAsDir + this.fileName));
+		}
+		else {
+			saveAsDlg.setSelectedFile(new File(this.fileName));
 		}
 		
+		int result = saveAsDlg.showSaveDialog(this.levelEditWindow);
+		
+		if (result == JFileChooser.APPROVE_OPTION) {
+			this.savedFileOnDisk = saveAsDlg.getSelectedFile();
+			String renameToProperExt = BBBLevelFileFilter.changeExtensionToBBBLvlExt(this.savedFileOnDisk.getName());
+			this.savedFileOnDisk.renameTo(new File(renameToProperExt));
+			
+			if (this.savedFileOnDisk.exists()) {
+				int response = JOptionPane.showConfirmDialog (null,
+			               "Overwrite existing file?","Confirm Overwrite",
+			                JOptionPane.OK_CANCEL_OPTION,
+			                JOptionPane.QUESTION_MESSAGE);
+				if (response == JOptionPane.CANCEL_OPTION) {
+					return false;
+			    }
+			}
+			
+			String tempPath = this.savedFileOnDisk.getPath();
+			prefs.put("lastSaveAsLocation", tempPath.substring(0, tempPath.lastIndexOf(File.separatorChar)+1));	
+			
+			return this.saveToFile();
+		}
+		
+		return false;
+	}
+	
+	private boolean saveToFile() {
 		Writer levelFileWriter = null;
 		try {
 			levelFileWriter = new FileWriter(this.savedFileOnDisk);
@@ -298,9 +414,13 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				levelFileWriter.write("\r\n");
 			}
 			
+			this.fileName = this.savedFileOnDisk.getName();
+			this.fileName = this.fileName.substring(0, this.fileName.lastIndexOf('.'));
+			this.setTitle(this.fileName + " (" + this.currWidth + "x" + this.currHeight + ")");
 		} 
 		catch (Exception e) {
 			JOptionPane.showMessageDialog(this, "Failed to write to disk.", "Could not write", JOptionPane.ERROR_MESSAGE);
+			return false;
 		}
 		finally {
 			if (levelFileWriter != null) {
@@ -310,7 +430,29 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				catch (IOException e) {
 				}
 			}
-		}	
+		}
+		return true;
+	}
+	
+	private void resetPieces() {
+		this.levelDisplayPanel.removeAll();
+		this.levelDisplayPanel.setLayout(new GridLayout(this.currHeight, this.currWidth));
+		this.levelDisplayPanel.setPreferredSize(new Dimension(this.currWidth*LevelPiece.LEVEL_PIECE_WIDTH, 
+				this.currHeight*LevelPiece.LEVEL_PIECE_HEIGHT));
+		this.levelDisplayPanel.setMinimumSize(new Dimension(this.currWidth*LevelPiece.LEVEL_PIECE_WIDTH, 
+				this.currHeight*LevelPiece.LEVEL_PIECE_HEIGHT));
+		this.levelDisplayPanel.setMaximumSize(new Dimension(this.currWidth*LevelPiece.LEVEL_PIECE_WIDTH, 
+				this.currHeight*LevelPiece.LEVEL_PIECE_HEIGHT));	
+		
+		// Followed by the level pieces...
+		for (int row = 0; row < this.currHeight; row++) {
+			for (int col = 0; col < this.currWidth; col++) {
+				this.levelDisplayPanel.add(this.pieces.get(row).get(col));
+			}
+		}
+
+		this.setTitle(this.fileName + " (" + this.currWidth + "x" + this.currHeight + ")");
+		this.pack();
 	}
 	
 	private void paintPieces(Point p) {
@@ -406,8 +548,36 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	}
 
 	@Override
-	public void internalFrameClosing(InternalFrameEvent arg0) {
-		// TODO: save data...
+	public void internalFrameClosing(InternalFrameEvent e) {
+		this.closeAndCheckForSave();
+	}
+	
+	/**
+	 * Checks to make sure the user saves their document before the window closes.
+	 * @return true if the window will actually be closing, false otherwise.
+	 */
+	public boolean closeAndCheckForSave() {
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		if (this.savedFileOnDisk == null || !this.savedFileOnDisk.exists()) {
+			boolean didSave = false;
+			while (!didSave) {
+				
+				Object[] options = { "Yes", "No", "Cancel" };
+				int result = JOptionPane.showOptionDialog(this.levelEditWindow, "Would you like to save " + this.fileName + " before closing?", "Save Before Closing?", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[2]);
+				if (result == JOptionPane.YES_OPTION) {
+					didSave = this.saveAs();
+				}
+				else if (result == JOptionPane.CANCEL_OPTION) {
+					this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+					return false;
+				}
+				else {
+					return true;
+				}
+			}
+		}
+		
+		return true;
 	}
 
 	@Override

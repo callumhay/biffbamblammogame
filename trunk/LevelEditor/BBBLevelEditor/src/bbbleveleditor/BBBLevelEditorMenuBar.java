@@ -15,6 +15,7 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 	private BBBLevelEditMainWindow levelEditWindow;
 	
 	// File menu
+	private JMenu fileMenu;
 	private JMenuItem newMenuItem;
 	private JMenuItem openMenuItem;
 	private JMenuItem closeMenuItem;
@@ -23,6 +24,7 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 	private JMenuItem exitMenuItem;
 	
 	// Edit menu
+	private JMenu editMenu;
 	private JMenuItem lvlDimMenuItem;
 	private JMenuItem lvlItemsMenuItem;
 	
@@ -35,7 +37,7 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 	
 	private void addFileMenu() {
 		// File menu...
-		JMenu fileMenu = new JMenu("File");
+		this.fileMenu = new JMenu("File");
 		FileMenuActionListener fileMenuActionListener = new FileMenuActionListener();
 		
 		this.newMenuItem = new JMenuItem("New");
@@ -70,17 +72,17 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		this.exitMenuItem.addActionListener(fileMenuActionListener);
 		this.exitMenuItem.setEnabled(true);
 		
-		fileMenu.add(this.newMenuItem);
-		fileMenu.add(this.openMenuItem);
-		fileMenu.addSeparator();
-		fileMenu.add(this.closeMenuItem);
-		fileMenu.addSeparator();
-		fileMenu.add(this.saveMenuItem);
-		fileMenu.add(this.saveAsMenuItem);
-		fileMenu.addSeparator();
-		fileMenu.add(this.exitMenuItem);
+		this.fileMenu.add(this.newMenuItem);
+		this.fileMenu.add(this.openMenuItem);
+		this.fileMenu.addSeparator();
+		this.fileMenu.add(this.closeMenuItem);
+		this.fileMenu.addSeparator();
+		this.fileMenu.add(this.saveMenuItem);
+		this.fileMenu.add(this.saveAsMenuItem);
+		this.fileMenu.addSeparator();
+		this.fileMenu.add(this.exitMenuItem);
 		
-		this.add(fileMenu);
+		this.add(this.fileMenu);
 	}
 	
 	/**
@@ -94,7 +96,6 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 			if (e.getActionCommand().equals("new")) {
 				// Initiate the modal dialog for getting info about the new level being created
 				NewLevelEditDialog dlg = new NewLevelEditDialog(levelEditWindow);
-				dlg.pack();
 				dlg.setVisible(true);
 				
 				// If the user clicked "OK" in the dialog then we create the
@@ -126,21 +127,24 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 	
 	private void addEditMenu() {
 		// Edit menu...
-		JMenu editMenu = new JMenu("Edit");
+		this.editMenu = new JMenu("Edit");
 		EditMenuActionListener editMenuActionListener = new EditMenuActionListener();
 		
 		this.lvlDimMenuItem   = new JMenuItem("Dimensions...");
 		this.lvlDimMenuItem.setActionCommand("dimensions");
 		this.lvlDimMenuItem.addActionListener(editMenuActionListener);
+		this.lvlDimMenuItem.setEnabled(false);
 		
-		this.lvlItemsMenuItem = new JMenuItem("Allowable Item Drops...");
+		this.lvlItemsMenuItem = new JMenuItem("Item Drops...");
 		this.lvlItemsMenuItem.setActionCommand("item_drops");
 		this.lvlItemsMenuItem.addActionListener(editMenuActionListener);
+		this.lvlItemsMenuItem.setEnabled(false);
 		
-		editMenu.add(this.lvlDimMenuItem);
-		editMenu.add(this.lvlItemsMenuItem);
+		this.editMenu.add(this.lvlDimMenuItem);
+		this.editMenu.add(this.lvlItemsMenuItem);
+		this.editMenu.setEnabled(false);
 		
-		this.add(editMenu);
+		this.add(this.editMenu);
 	}
 	
 	/**
@@ -152,7 +156,19 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getActionCommand().equals("dimensions")) {
+				BBBLevelEditDocumentWindow currEditDoc = levelEditWindow.getActiveLevelDoc();
+				if (currEditDoc == null) {
+					assert(false);
+					return;
+				}
 				
+				EditDimensionsDialog dlg = new EditDimensionsDialog(levelEditWindow, 
+						currEditDoc.GetLevelWidth(), currEditDoc.GetLevelHeight());
+				dlg.setVisible(true);
+				
+				if (dlg.getExitedWithOK()) {
+					currEditDoc.setLevelDimensions(dlg.getNewWidth(), dlg.getNewHeight());
+				}
 			}
 			else if (e.getActionCommand().equals("item_drops")) {
 				
@@ -169,5 +185,8 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		this.saveAsMenuItem.setEnabled(activeDocExists);
 		this.lvlDimMenuItem.setEnabled(activeDocExists);
 		this.lvlItemsMenuItem.setEnabled(activeDocExists);
+		
+		boolean editMenuEnabled = this.lvlDimMenuItem.isEnabled() || this.lvlItemsMenuItem.isEnabled();
+		this.editMenu.setEnabled(editMenuEnabled);
 	}
 }
