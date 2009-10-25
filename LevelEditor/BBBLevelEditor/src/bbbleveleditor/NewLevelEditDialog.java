@@ -48,6 +48,7 @@ public class NewLevelEditDialog extends JDialog implements PropertyChangeListene
 		int parentHeight = window.getHeight();
 		
 		this.setLocation(new Point((parentWidth - this.getWidth()) / 2, (parentHeight - this.getHeight()) / 2));
+		this.pack();
 	}
 
 	@Override

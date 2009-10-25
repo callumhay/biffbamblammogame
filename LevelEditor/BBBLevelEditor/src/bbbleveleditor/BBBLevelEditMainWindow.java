@@ -3,6 +3,9 @@ package bbbleveleditor;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.beans.PropertyVetoException;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -19,7 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
 
-public class BBBLevelEditMainWindow extends JFrame {
+public class BBBLevelEditMainWindow extends JFrame implements WindowListener {
 	private static final long serialVersionUID = 1L;
 	private BBBLevelEditorMenuBar menuBar;
 	private BBBLevelEditorToolBar toolBar;
@@ -57,6 +60,8 @@ public class BBBLevelEditMainWindow extends JFrame {
 		
 		// Add the parent panel to the frame
 		this.add(this.topMostPanel);
+		
+		this.addWindowListener(this);
 	}
 	
 	public void setToolMode(ToolMode mode) {
@@ -189,7 +194,7 @@ public class BBBLevelEditMainWindow extends JFrame {
 		BBBLevelEditDocumentWindow newEditWindow = new BBBLevelEditDocumentWindow(this, fileName, width, height);
 		newEditWindow.setVisible(true);
 		this.levelEditDesktop.add(newEditWindow);
-		
+
 		try {
 			newEditWindow.setSelected(true);
 			newEditWindow.setMaximum(true);
@@ -220,7 +225,14 @@ public class BBBLevelEditMainWindow extends JFrame {
 	}
 	
 	public void closeLevelEditDocument() {
+		JInternalFrame currInternalFrame = this.levelEditDesktop.getSelectedFrame();
+		if (currInternalFrame == null) {
+			assert false;
+			return;
+		}
 		
+		BBBLevelEditDocumentWindow currLevelEditFrame = (BBBLevelEditDocumentWindow)currInternalFrame;
+		currLevelEditFrame.doDefaultCloseAction();
 	}
 	
 	public void saveLevelEditDocument() {
@@ -233,6 +245,7 @@ public class BBBLevelEditMainWindow extends JFrame {
 		BBBLevelEditDocumentWindow currLevelEditFrame = (BBBLevelEditDocumentWindow)currInternalFrame;
 		currLevelEditFrame.save();
 	}
+	
 	public void saveAsLevelEditDocument() {
 		JInternalFrame currInternalFrame = this.levelEditDesktop.getSelectedFrame();
 		if (currInternalFrame == null) {
@@ -242,5 +255,56 @@ public class BBBLevelEditMainWindow extends JFrame {
 		
 		BBBLevelEditDocumentWindow currLevelEditFrame = (BBBLevelEditDocumentWindow)currInternalFrame;
 		currLevelEditFrame.saveAs();		
+	}
+
+	@Override
+	public void windowActivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosed(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		JInternalFrame[] editDocs = this.levelEditDesktop.getAllFrames();
+		for (int i = 0; i < editDocs.length; i++) {
+			BBBLevelEditDocumentWindow bbbEditDoc = (BBBLevelEditDocumentWindow)editDocs[i];
+			bbbEditDoc.closeAndCheckForSave();
+			if (editDocs[i].getDefaultCloseOperation() == DO_NOTHING_ON_CLOSE) {
+				this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowIconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowOpened(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }
