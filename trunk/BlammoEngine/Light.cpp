@@ -3,14 +3,14 @@
 /**
  * Toggle the light on or off and fade it on or off over the given animation time frame.
  */ 
-void PointLight::SetLightOn(bool isOn, float animationTime) {
+void PointLight::SetLightOn(bool turnOn, float animationTime) {
 	// Clear any previous light intensity animation
 	this->lightIntensityAnim.clear();
 
 	float finalIntensity;
 
 	// Figure out the final colour based on whether we are turning the light on or off
-	if (this->isOn) {
+	if (turnOn) {
 		finalIntensity = 1.0f;
 	}
 	else {

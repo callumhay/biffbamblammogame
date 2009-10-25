@@ -17,7 +17,6 @@ const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
 InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
 
-
 	// Set HUD display elements
 	float dropShadowAmt = 0.05f;
 	Colour shadowColourHUD(0, 0, 0);
