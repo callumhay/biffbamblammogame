@@ -204,7 +204,9 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 			// INVISIBALL CHECK
 			if ((currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall) {
-				this->invisiBallEffect->SetFBOTexture(this->fboAssets->GetBackgroundFBO()->GetFBOTexture());
+				// Obtain the POST full screen rendering from the previous frame - this is
+				// a bit of a hack but it saves us from reading/writing to the same FBO simultaneously
+				this->invisiBallEffect->SetFBOTexture(this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
 				ballEffectTemp = this->invisiBallEffect;
 			}
 			else {
