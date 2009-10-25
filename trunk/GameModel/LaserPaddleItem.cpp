@@ -1,10 +1,21 @@
+/**
+ * LaserPaddleItem.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "LaserPaddleItem.h"
 
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
 const double LaserPaddleItem::LASER_PADDLE_TIMER_IN_SECS	= 10.0;
-const std::string LaserPaddleItem::LASER_PADDLE_ITEM_NAME = "Laser Paddle (Power-up)";
+const std::string LaserPaddleItem::LASER_PADDLE_ITEM_NAME = "LaserShotPaddle";
 
 LaserPaddleItem::LaserPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(LASER_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {

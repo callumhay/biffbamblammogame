@@ -1,7 +1,18 @@
+/**
+ * PaddleCamItem.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "PaddleCamItem.h"
 #include "GameModel.h"
 
-const std::string PaddleCamItem::PADDLE_CAM_ITEM_NAME	= "Paddle Cam (power-down)";
+const std::string PaddleCamItem::PADDLE_CAM_ITEM_NAME	= "PaddleCam";
 const double PaddleCamItem::PADDLE_CAM_TIMER_IN_SECS	= 20.0;
 
 PaddleCamItem::PaddleCamItem(const Point2D &spawnOrigin, GameModel *gameModel) : 

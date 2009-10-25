@@ -1,10 +1,21 @@
+/**
+ * GhostBallItem.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "GhostBallItem.h"
 
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
 const double GhostBallItem::GHOST_BALL_TIMER_IN_SECS	= 15.0;
-const std::string GhostBallItem::GHOST_BALL_ITEM_NAME = "Ghost Ball (Power-neutral)";
+const std::string GhostBallItem::GHOST_BALL_ITEM_NAME = "GhostBall";
 
 GhostBallItem::GhostBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(GHOST_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {

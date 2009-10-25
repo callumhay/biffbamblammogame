@@ -1,11 +1,22 @@
+/**
+ * PaddleSizeItem.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "PaddleSizeItem.h"
 #include "GameModel.h"
 #include "PlayerPaddle.h"
 
 const double PaddleSizeItem::PADDLE_SIZE_TIMER_IN_SECS	= 0.0;
 
-const std::string PaddleSizeItem::PADDLE_GROW_ITEM_NAME		= "Paddle Grow (Power-up)";
-const std::string PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME = "Paddle Shrink (Power-down)";
+const std::string PaddleSizeItem::PADDLE_GROW_ITEM_NAME		= "PaddleGrow";
+const std::string PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME = "PaddleShrink";
 
 PaddleSizeItem::PaddleSizeItem(const PaddleSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(((type == ShrinkPaddle) ? PADDLE_SHRINK_ITEM_NAME : PADDLE_GROW_ITEM_NAME), spawnOrigin, gameModel, 

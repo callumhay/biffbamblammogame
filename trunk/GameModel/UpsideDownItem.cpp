@@ -1,8 +1,19 @@
+/**
+ * UpsideDownItem.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "UpsideDownItem.h"
 #include "GameTransformMgr.h"
 #include "GameItemTimer.h"
 
-const std::string UpsideDownItem::UPSIDEDOWN_ITEM_NAME		= "Upside-down (power-down)";
+const std::string UpsideDownItem::UPSIDEDOWN_ITEM_NAME		= "UpsideDown";
 const double UpsideDownItem::UPSIDEDOWN_TIMER_IN_SECS			= 20.0;
 
 UpsideDownItem::UpsideDownItem(const Point2D &spawnOrigin, GameModel *gameModel) :
