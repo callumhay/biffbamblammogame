@@ -26,7 +26,7 @@ void PointLight::SetLightOn(bool turnOn, float animationTime) {
 	this->lightIntensityAnim.push_back(intensityAnim);
 
 	// Set whether the light is now on/off
-	this->isOn = isOn;
+	this->isOn = turnOn;
 }
 
 void PointLight::SetLightStrobeOn(const Colour& strobeEndColour, float strobeTime){
