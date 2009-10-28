@@ -3,24 +3,14 @@ package bbbleveleditor;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.PropertyVetoException;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import javax.swing.DefaultListModel;
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+import javax.swing.*;
 
 public class BBBLevelEditMainWindow extends JFrame implements WindowListener {
 	private static final long serialVersionUID = 1L;
@@ -57,6 +47,8 @@ public class BBBLevelEditMainWindow extends JFrame implements WindowListener {
 		
 		// Setup the level piece list panel
 		this.setupLevelPiecePanel();
+		// Setup the item lists
+		ItemDrop.readItemTypesFile();
 		
 		// Add the parent panel to the frame
 		this.add(this.topMostPanel);
@@ -257,6 +249,17 @@ public class BBBLevelEditMainWindow extends JFrame implements WindowListener {
 		currLevelEditFrame.saveAs();		
 	}
 
+	public void setItemDropsForLevelEditDocument(HashMap<String, Integer> settings) {
+		JInternalFrame currInternalFrame = this.levelEditDesktop.getSelectedFrame();
+		if (currInternalFrame == null) {
+			assert false;
+			return;
+		}
+		
+		BBBLevelEditDocumentWindow currLevelEditFrame = (BBBLevelEditDocumentWindow)currInternalFrame;
+		currLevelEditFrame.setItemDropSettings(settings);	
+	}
+	
 	@Override
 	public void windowActivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub

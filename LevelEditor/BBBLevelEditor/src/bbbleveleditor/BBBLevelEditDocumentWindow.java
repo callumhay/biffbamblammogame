@@ -1,25 +1,16 @@
 package bbbleveleditor;
 
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.beans.PropertyVetoException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.prefs.Preferences;
-import java.util.regex.Pattern;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -42,11 +33,15 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private int currWidth = -1;
 	private int currHeight = -1;
 	private File savedFileOnDisk = null;
+	private boolean hasBeenModified = false;
 	
 	private JPanel levelDisplayPanel; // panel where the level is displayed
 	
 	// access to the level piece names in this document [row (starting at the top)][col]
 	private ArrayList<ArrayList<LevelPieceImageLabel>> pieces;	
+	
+	// Settings for all the drop items in the level
+	private HashMap<String, Integer> itemDropSettings;
 	
 	public BBBLevelEditDocumentWindow(BBBLevelEditMainWindow window) {
 		super("", true, true, true, true);
@@ -56,15 +51,20 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		this.currWidth = 0;
 		this.currHeight = 0;
 		this.pieces = null;
+		this.itemDropSettings = ItemDrop.populateDefaultItemDropSettings();
+		this.hasBeenModified = true;
 	}	
 	
 	public BBBLevelEditDocumentWindow(BBBLevelEditMainWindow window, String fileName, int width, int height) {
 		super(fileName + " (" + width + "x" + height + ")", true, true, true, true);
 		
+		
 		this.levelEditWindow = window;
 		this.fileName = fileName;
 		this.currWidth = width;
 		this.currHeight = height;
+		this.itemDropSettings = ItemDrop.populateDefaultItemDropSettings();
+		this.hasBeenModified = true;
 		
 		this.setupUI();
 		this.initDefaultPieces();
@@ -127,9 +127,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		if (newWidth <= 0 || newHeight <= 0) {
 			assert(false);
 			return;
-		}
-		
-	
+		}	
 		int windowHeight = this.getHeight();
 		int windowWidth = this.getWidth();
 		boolean wasMaximum = this.isMaximum();
@@ -141,8 +139,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			for (int row = 0; row < this.currHeight; row++) {
 				ArrayList<LevelPieceImageLabel> currRow = this.pieces.get(row);
 				for (int i = 0; i < widthDiff; i++) {
-					int indexToRemove = currRow.size()-1-i;
-					currRow.remove(indexToRemove);
+					currRow.remove(currRow.size()-1);
 				}
 			}
 			
@@ -216,6 +213,15 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void setItemDropSettings(HashMap<String, Integer> settings) {
+		assert(settings.size() == this.itemDropSettings.size());
+		this.itemDropSettings = settings;
+		this.hasBeenModified = true;
+	}
+	public HashMap<String, Integer> getItemDropSettings() {
+		return this.itemDropSettings;
 	}
 	
 	public void setFileName(String fileName) {
@@ -308,6 +314,16 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				}
 				this.pack();
 				
+				// Read the various item likelihoods - this can be variable for backwards compatibility
+				while (levelFileScanner.hasNext()) {
+					String possibleItemDropName = levelFileScanner.next();
+					boolean itemExists = this.itemDropSettings.containsKey(possibleItemDropName);
+					if (itemExists) {
+						int likelihood = levelFileScanner.nextInt();
+						this.itemDropSettings.put(possibleItemDropName, likelihood);
+					}
+				}
+				
 				this.fileName = this.savedFileOnDisk.getName();
 				this.fileName = this.fileName.substring(0, this.fileName.lastIndexOf('.'));
 				this.setTitle(this.fileName + " (" + this.currWidth + "x" + this.currHeight + ")");
@@ -335,19 +351,21 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		else {
 			return false;
 		}
+		
+		this.hasBeenModified = false;
 		return true;
 	}
 	
-	public void save() {
+	public boolean save() {
 		if (this.savedFileOnDisk == null) {
-			this.saveAs();
+			return this.saveAs();
 		}
 		else if (!this.savedFileOnDisk.canWrite()) {
 			JOptionPane.showMessageDialog(this, "Could not write to disk, please save to a writable file.", "Could not write", JOptionPane.ERROR_MESSAGE);
-			this.saveAs();
+			return this.saveAs();
 		}
 		else {
-			this.saveToFile();
+			return this.saveToFile();
 		}
 	}
 	
@@ -363,17 +381,17 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		
 		String saveAsDir = prefs.get("lastSaveAsLocation", "");
 		if (!saveAsDir.isEmpty()) {
-			saveAsDlg.setSelectedFile(new File(saveAsDir + this.fileName));
-		}
-		else {
-			saveAsDlg.setSelectedFile(new File(this.fileName));
+			saveAsDlg.setCurrentDirectory(new File(saveAsDir));
 		}
 		
+		String temp = saveAsDlg.getCurrentDirectory().getPath() + File.separatorChar + this.fileName;
+		saveAsDlg.setSelectedFile(new File(temp));
+
 		int result = saveAsDlg.showSaveDialog(this.levelEditWindow);
 		
 		if (result == JFileChooser.APPROVE_OPTION) {
 			this.savedFileOnDisk = saveAsDlg.getSelectedFile();
-			String renameToProperExt = BBBLevelFileFilter.changeExtensionToBBBLvlExt(this.savedFileOnDisk.getName());
+			String renameToProperExt = BBBLevelFileFilter.changeExtensionToBBBLvlExt(this.savedFileOnDisk.getPath());
 			this.savedFileOnDisk.renameTo(new File(renameToProperExt));
 			
 			if (this.savedFileOnDisk.exists()) {
@@ -414,6 +432,14 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				levelFileWriter.write("\r\n");
 			}
 			
+			// And the item drop settings...
+			Iterator<String> itemDropIter = this.itemDropSettings.keySet().iterator();
+			while (itemDropIter.hasNext()) {
+				String itemDropName = itemDropIter.next();
+				Integer itemDropLikelihood = this.itemDropSettings.get(itemDropName);
+				levelFileWriter.write(itemDropName + " " + itemDropLikelihood + "\r\n");
+			}
+			
 			this.fileName = this.savedFileOnDisk.getName();
 			this.fileName = this.fileName.substring(0, this.fileName.lastIndexOf('.'));
 			this.setTitle(this.fileName + " (" + this.currWidth + "x" + this.currHeight + ")");
@@ -431,6 +457,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				}
 			}
 		}
+		this.hasBeenModified = false;
 		return true;
 	}
 	
@@ -453,6 +480,8 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 
 		this.setTitle(this.fileName + " (" + this.currWidth + "x" + this.currHeight + ")");
 		this.pack();
+		
+		this.hasBeenModified = true;
 	}
 	
 	private void paintPieces(Point p) {
@@ -496,6 +525,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		ArrayList<LevelPieceImageLabel> levelPieceRow = this.pieces.get(rowIndex);
 		LevelPieceImageLabel editPiece = levelPieceRow.get(colIndex);
 		editPiece.setLevelPiece(newPiece);
+		this.hasBeenModified = true;
 	}
 
 	@Override
@@ -558,14 +588,14 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	 */
 	public boolean closeAndCheckForSave() {
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		if (this.savedFileOnDisk == null || !this.savedFileOnDisk.exists()) {
+		if (this.savedFileOnDisk == null || !this.savedFileOnDisk.exists() || this.hasBeenModified) {
 			boolean didSave = false;
 			while (!didSave) {
 				
 				Object[] options = { "Yes", "No", "Cancel" };
 				int result = JOptionPane.showOptionDialog(this.levelEditWindow, "Would you like to save " + this.fileName + " before closing?", "Save Before Closing?", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[2]);
 				if (result == JOptionPane.YES_OPTION) {
-					didSave = this.saveAs();
+					didSave = this.save();
 				}
 				else if (result == JOptionPane.CANCEL_OPTION) {
 					this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);

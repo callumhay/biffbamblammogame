@@ -156,22 +156,34 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getActionCommand().equals("dimensions")) {
-				BBBLevelEditDocumentWindow currEditDoc = levelEditWindow.getActiveLevelDoc();
-				if (currEditDoc == null) {
+				BBBLevelEditDocumentWindow activeDoc = levelEditWindow.getActiveLevelDoc();
+				if (activeDoc == null) {
 					assert(false);
 					return;
 				}
 				
 				EditDimensionsDialog dlg = new EditDimensionsDialog(levelEditWindow, 
-						currEditDoc.GetLevelWidth(), currEditDoc.GetLevelHeight());
+						activeDoc.GetLevelWidth(), activeDoc.GetLevelHeight());
 				dlg.setVisible(true);
 				
 				if (dlg.getExitedWithOK()) {
-					currEditDoc.setLevelDimensions(dlg.getNewWidth(), dlg.getNewHeight());
+					activeDoc.setLevelDimensions(dlg.getNewWidth(), dlg.getNewHeight());
 				}
 			}
 			else if (e.getActionCommand().equals("item_drops")) {
+				BBBLevelEditDocumentWindow activeDoc = levelEditWindow.getActiveLevelDoc();
+				if (activeDoc == null) {
+					assert(false);
+					return;
+				}
 				
+				EditItemDropsDialog dlg = new EditItemDropsDialog(levelEditWindow);
+				dlg.setItemDropSettings(activeDoc.getItemDropSettings());
+				dlg.setVisible(true);
+				
+				if (dlg.getExitedWithOK()) {
+					activeDoc.setItemDropSettings(dlg.getItemDropSettings());
+				}
 			}
 		}
 	}
