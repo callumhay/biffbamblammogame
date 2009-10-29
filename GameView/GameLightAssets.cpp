@@ -6,14 +6,21 @@ GameLightAssets::GameLightAssets() {
 
 	// Initialize default light values
 	// Foreground lights:
-	this->fgKeyLight  = PointLight(Point3D(-30.0f, 40.0f, 65.0f), GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0f);
-	this->fgFillLight = PointLight(Point3D(25.0f, 0.0f, 40.0f), GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,  0.037f);
-	this->ballLight		= PointLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, 
-																GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN);
+	this->fgKeyLight  = PointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, 
+		GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0f);
+	this->fgFillLight = PointLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, 
+		GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,  0.037f);
+
+	this->ballLight		= PointLight(Point3D(0,0,0), 
+		GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, 
+		GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN);
 	
 	// Background lights:
-	this->bgKeyLight	= PointLight(Point3D(-25.0f, 20.0f, 55.0f), GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR,   0.0f);
-	this->bgFillLight = PointLight(Point3D(30.0f, 11.0f, -15.0f), GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f);
+	this->bgKeyLight	= PointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, 
+		GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.0f);
+
+	this->bgFillLight = PointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, 
+		GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f);
 
 	// Ball and paddle specific foreground lights
 	this->ballKeyLight	= this->fgKeyLight;
@@ -46,39 +53,6 @@ void GameLightAssets::ToggleLights(bool turnOn) {
 	else {
 		this->ballLight.SetLinearAttenuation(GameViewConstants::GetInstance()->BLACKOUT_BALL_LIGHT_ATTEN);
 	}
-	/*
-		this->lightColourAnims.clear();
-	if (turnOn) {
-		// Add animation to turn the lights back on
-		AnimationMultiLerp<Colour> keyLightColAnim(this->fgKeyLight.GetDiffuseColourPtr());
-		keyLightColAnim.SetLerp(1.0f, this->fgKeyLightColour);
-		this->lightColourAnims.push_back(keyLightColAnim);
-		AnimationMultiLerp<Colour> fillLightColAnim(this->fgFillLight.GetDiffuseColourPtr());
-		fillLightColAnim.SetLerp(1.0f, this->fgFillLightColour);
-		this->lightColourAnims.push_back(fillLightColAnim);
-
-		this->fgFillLight.SetLinearAttenuation(0.037f);
-		this->ballLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR);
-		this->ballLight.SetLinearAttenuation(GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN);
-	}
-	else {
-		// Add animation to dim then turn off the lights
-		AnimationMultiLerp<Colour> keyLightColAnim(this->fgKeyLight.GetDiffuseColourPtr());
-		keyLightColAnim.SetLerp(1.0f, GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR);
-		this->lightColourAnims.push_back(keyLightColAnim);
-		AnimationMultiLerp<Colour> fillLightColAnim(this->fgFillLight.GetDiffuseColourPtr());
-		fillLightColAnim.SetLerp(1.0f, GameViewConstants::GetInstance()->BLACKOUT_LIGHT_COLOUR);
-		this->lightColourAnims.push_back(fillLightColAnim);
-
-		// Set the attenuation to be a smaller distance for the ball
-		this->ballLight.SetLinearAttenuation(0.8f);
-	}
-
-	// Background lights...
-	if (this->worldAssets != NULL) {
-		this->worldAssets->ToggleBackgroundLights(turnOn);	
-	}
-	*/
 }
 
 /**
@@ -86,8 +60,9 @@ void GameLightAssets::ToggleLights(bool turnOn) {
  * if the lights are blacked out (i.e., it doesn't turn lights back on, you need to toggle the lights back on using
  * the toggleLight function instead).
  */
+/*
 void GameLightAssets::ChangeLightColour(GameLightType lightType, const Colour& newLightColour, float animationTime) {
-	assert(animationTime > 0.0f);
+	assert(animationTime >= 0.0f);
 
 	// Grab the object light associated with the given type
 	PointLight* light = this->GetLightFromType(lightType);
@@ -102,6 +77,7 @@ void GameLightAssets::ChangeLightColour(GameLightType lightType, const Colour& n
 		light->SetLightColourChange(newLightColour, animationTime);
 	}
 }
+*/
 
 /**
  * Sets the lights to strobe a particular colour at some strobe time interval.
@@ -131,21 +107,59 @@ void GameLightAssets::StopStrobeLight(GameLightType lightType) {
  * Moves the given light from its current position to the new position provided
  * in the amount of time given.
  */
-void GameLightAssets::MoveLight(GameLightType lightType, const Point3D& newPosition, float moveTime) {
-	assert(moveTime > 0.0f);
+void GameLightAssets::ChangeLightPosition(GameLightType lightType, const Point3D& newPosition, float changeTime) {
+	assert(changeTime >= 0.0f);
+	assert(lightType != GameLightAssets::FGBallLight);
 
 	// Grab the object light associated with the given type
 	PointLight* light = this->GetLightFromType(lightType);
 	assert(light != NULL);
 
-	if (moveTime == 0.0f) {
+	if (changeTime == 0.0f) {
 		// Just change the position, now
 		light->SetPosition(newPosition);
 	}
 	else {
 		// Change the light position and animate it
-		// TODO: light->SetLightPositionChange(newPosition, moveTime);
+		light->SetLightPositionChange(newPosition, changeTime);
 	}	
+}
+
+/**
+ * Called to restore the lights position to the default when it has been changed.
+ */
+void GameLightAssets::RestoreLightPosition(GameLightType lightType, float restoreTime) {
+	assert(restoreTime >= 0.0f);
+
+	switch (lightType) {
+		case FGKeyLight:
+			this->fgKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, restoreTime);
+			break;
+		case FGFillLight:
+			this->fgFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, restoreTime);
+			break;
+		case BGKeyLight:
+			this->bgKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, restoreTime);
+			break;
+		case BGFillLight:
+			this->bgFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, restoreTime);
+			break;
+		case BallKeyLight:
+			this->ballKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_POSITION, restoreTime);
+			break;
+		case BallFillLight:
+			this->ballFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_BALL_FILL_LIGHT_POSITION, restoreTime);
+			break;
+		case PaddleKeyLight:
+			this->paddleKeyLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_PADDLE_KEY_LIGHT_POSITION, restoreTime);
+			break;
+		case PaddleFillLight:
+			this->paddleFillLight.SetLightPositionChange(GameViewConstants::GetInstance()->DEFAULT_PADDLE_FILL_LIGHT_POSITION, restoreTime);
+			break;
+		default:
+			assert(false);
+			break;
+	}
 }
 
 /**

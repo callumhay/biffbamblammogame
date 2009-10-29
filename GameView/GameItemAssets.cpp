@@ -170,7 +170,9 @@ bool GameItemAssets::LoadItemAssets() {
 /**
  * Draw the given item as a item drop in-game.
  */
-void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const  {
+void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
+															const PointLight& fgKeyLight, const PointLight& fgFillLight, 
+															const PointLight& ballLight) const  {
 	Point2D center = gameItem.GetCenter();
 	glPushMatrix();
 	glTranslatef(center[0], center[1], 0.0f);
@@ -210,7 +212,7 @@ void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& g
 	// and transparency of the model based on the state of the game
 	ColourRGBA itemColourMultiply = gameItem.GetItemColour();
 	glColor4f(itemColourMultiply.R(), itemColourMultiply.G(), itemColourMultiply.B(), itemColourMultiply.A());	
-	this->item->Draw(camera);
+	this->item->Draw(camera, fgKeyLight, fgFillLight, ballLight);
 	glPopMatrix();
 }
 

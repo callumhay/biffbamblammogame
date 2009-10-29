@@ -34,10 +34,10 @@ private:
 #ifdef _DEBUG
 	static bool drawDebugBounds;
 	static bool drawDebugLightGeometry;
+	static bool detachedCamera;
 	// Debug draw stuff
 	void DrawDebugAxes();
 	void DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks);
-
 #endif
 
 public:
@@ -91,6 +91,7 @@ public:
 	}
 
 #ifdef _DEBUG
+
 	static void ToggleDrawDebugBounds() {
 		drawDebugBounds = !drawDebugBounds;
 	}
@@ -102,6 +103,12 @@ public:
 	}
 	static bool IsDrawDebugLightGeometryOn() {
 		return drawDebugLightGeometry;
+	}
+	static void ToggleDetachCamera() {
+		detachedCamera = !detachedCamera;
+	}
+	static bool IsCameraDetached() {
+		return detachedCamera;
 	}
 #endif
 

@@ -9,6 +9,7 @@ class GameESPAssets;
 class Camera;
 class GameItem;
 class GameItemTimer;
+class PointLight;
 
 /**
  * Manages assets related to items - including dropping items and items that are already
@@ -50,7 +51,9 @@ public:
 	~GameItemAssets();
 	
 	bool LoadItemAssets();
-	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem) const;
+	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
+		const PointLight& fgKeyLight, const PointLight& fgFillLight, const PointLight& ballLight) const;
+
 	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
 
 };

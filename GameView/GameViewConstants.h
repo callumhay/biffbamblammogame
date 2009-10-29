@@ -3,6 +3,7 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Point.h"
 
 class GameViewConstants {
 
@@ -177,6 +178,15 @@ public:
 	const Colour UBER_BALL_COLOUR;
 	const Colour INK_BLOCK_COLOUR;
 	const Colour STICKYPADDLE_GOO_COLOUR;
+
+	const Point3D DEFAULT_FG_KEY_LIGHT_POSITION;
+	const Point3D DEFAULT_FG_FILL_LIGHT_POSITION;
+	const Point3D DEFAULT_BG_KEY_LIGHT_POSITION;
+	const Point3D DEFAULT_BG_FILL_LIGHT_POSITION;
+	const Point3D DEFAULT_BALL_KEY_LIGHT_POSITION;
+	const Point3D DEFAULT_BALL_FILL_LIGHT_POSITION;
+	const Point3D DEFAULT_PADDLE_KEY_LIGHT_POSITION;
+	const Point3D DEFAULT_PADDLE_FILL_LIGHT_POSITION;
 
 	// World specific path constants ************************
 	const std::string BALL_MESH;
