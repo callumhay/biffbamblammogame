@@ -77,6 +77,8 @@ void PointLight::SetLightColourChange(const Colour& newColour, float changeTime)
 	this->lightColourChangeAnim.clear();
 
 	// Create the animation for the light colour
+	// NOTE: The reason we don't pass a reference here is because we need to change
+	// the diffuse colour in the case of a strobe as well - see Tick function.
 	AnimationMultiLerp<Colour> diffuseAnim(this->onDiffuseColour);
 	diffuseAnim.SetLerp(changeTime, newColour);
 	diffuseAnim.SetRepeat(false);
@@ -89,16 +91,33 @@ void PointLight::SetLightColourChange(const Colour& newColour, float changeTime)
  * Change the position of this light over the given time to the new position.
  */
 void PointLight::SetLightPositionChange(const Point3D& newPosition, float changeTime) {
-	// TODO
+	this->lightPositionAnim.clear();
+
+	AnimationMultiLerp<Point3D> positionAnim(&this->position);
+	positionAnim.SetLerp(changeTime, newPosition);
+	positionAnim.SetRepeat(false);
+
+	this->lightPositionAnim.push_back(positionAnim);
 }
 
 /**
  * Ticks away at any active aniamtions.
  */
 void PointLight::Tick(double dT) {
+	bool isFinished = false;
+
+	// Tick position animaton
+	for (std::list<AnimationMultiLerp<Point3D>>::iterator animIter = this->lightPositionAnim.begin(); animIter != this->lightPositionAnim.end();) {
+			isFinished = animIter->Tick(dT);
+			if (isFinished) {
+				animIter = this->lightPositionAnim.erase(animIter);
+			}
+			else {
+				++animIter;
+			}
+	}
 
 	// Tick the light animations that turn the light on or off (if any)
-	bool isFinished = false;
 	for (std::list<AnimationMultiLerp<float>>::iterator animIter = this->lightIntensityAnim.begin(); animIter != this->lightIntensityAnim.end();) {
 			isFinished = animIter->Tick(dT);
 			if (isFinished) {

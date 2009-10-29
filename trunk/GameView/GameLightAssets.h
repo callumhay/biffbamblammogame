@@ -27,10 +27,12 @@ public:
 	~GameLightAssets();
 
 	void ToggleLights(bool turnOn);
-	void ChangeLightColour(GameLightType lightType, const Colour& newLightColour, float animationTime);
+	//void ChangeLightColour(GameLightType lightType, const Colour& newLightColour, float animationTime);
 	void StartStrobeLight(GameLightType lightType, const Colour& strobeColour, float strobeTime);
 	void StopStrobeLight(GameLightType lightType);
-	void MoveLight(GameLightType lightType, const Point3D& newPosition, float moveTime);
+	
+	void ChangeLightPosition(GameLightType lightType, const Point3D& newPosition, float changeTime);
+	void RestoreLightPosition(GameLightType lightType, float restoreTime);
 
 	void Tick(double dT);
 

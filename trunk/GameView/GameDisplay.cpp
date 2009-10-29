@@ -12,8 +12,9 @@
 #include "../GameModel/GameEventManager.h"
 
 #ifdef _DEBUG
-bool GameDisplay::drawDebugBounds = false;
-bool GameDisplay::drawDebugLightGeometry = false;
+bool GameDisplay::drawDebugBounds					= false;
+bool GameDisplay::drawDebugLightGeometry	= false;
+bool GameDisplay::detachedCamera					= false;
 #endif
 
 const int GameDisplay::MAX_FRAMERATE						= 500;

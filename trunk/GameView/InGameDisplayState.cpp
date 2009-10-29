@@ -44,7 +44,13 @@ void InGameDisplayState::RenderFrame(double dT) {
 	glLoadIdentity();
 	
 	// TODO: since we now reset the camera and reapply its transform each frame, we need to tell the MODEL about debug transforms!!
+#ifdef _DEBUG
+	if (!GameDisplay::IsCameraDetached()) {
+		camera.SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
+	}
+#else
 	camera.SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
+#endif	
 	camera.ApplyCameraTransform(dT);
 	
 	debug_opengl_state();

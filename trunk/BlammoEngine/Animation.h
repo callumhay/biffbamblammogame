@@ -164,7 +164,7 @@ public:
 	AnimationMultiLerp() : hasOwnInterpolant(true), interpolant(new T()), repeat(false), x(0.0), tracker(0) {}
 	AnimationMultiLerp(T value) : hasOwnInterpolant(true), interpolant(new T(value)), repeat(false), x(0.0), tracker(0) {}
 	AnimationMultiLerp(T* interpolant) : hasOwnInterpolant(false), repeat(false), interpolant(interpolant), x(0.0), tracker(0) {}
-	AnimationMultiLerp(const AnimationMultiLerp& copy) : interpolant(NULL), repeat(copy.repeat), interpolationPts(copy.interpolationPts),
+	AnimationMultiLerp(const AnimationMultiLerp<T>& copy) : interpolant(NULL), repeat(copy.repeat), interpolationPts(copy.interpolationPts),
 		timePts(copy.timePts), x(copy.x), tracker(copy.tracker), hasOwnInterpolant(copy.hasOwnInterpolant){
 			this->interpolant = this->hasOwnInterpolant ? new T(*copy.interpolant) : copy.interpolant;
 	}

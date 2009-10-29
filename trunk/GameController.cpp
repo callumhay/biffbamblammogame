@@ -112,43 +112,9 @@ void GameController::KeyDown(SDLKey key) {
 	else if (key == SDLK_c) {
 		this->model->DropItem(PaddleCamItem::PADDLE_CAM_ITEM_NAME);
 	}
-	//else if (key == SDLK_6) {
-	//	// Highlight threshold for bloom
-	//	DEBUG_highlightThreshold += 0.01f;
-	//}
-	//else if (key == SDLK_y) {
-	//	// Highlight threshold for bloom
-	//	DEBUG_highlightThreshold -= 0.01f;
-	//}
-	//else if (key == SDLK_7) {
-	//	// Scene Intensity for bloom
-	//	DEBUG_sceneIntensity += 0.01f;
-	//}
-	//else if (key == SDLK_u) {
-	//	// Scene Intensity for bloom
-	//	DEBUG_sceneIntensity -= 0.01f;
-	//}
-	//else if (key == SDLK_8) {
-	//	// Glow intensity for bloom
-	//	DEBUG_glowIntensity += 0.01f;
-	//}
-	//else if (key == SDLK_i) {
-	//	// Glow intensity for bloom
-	//	DEBUG_glowIntensity -= 0.01f;
-	//}
-	//else if (key == SDLK_9) {
-	//	// Highlight intensity for bloom
-	//	DEBUG_highlightIntensity += 0.01f;
-	//}
-	//else if (key == SDLK_o) {
-	//	// Highlight intensity for bloom
-	//	DEBUG_highlightIntensity -= 0.01f;
-	//}
-
-	//else if (key == SDLK_0) {
-		// Toggle multisampling
-	//	FBOManager::GetInstance()->SetAllowMultisamplingFBO(!FBOManager::GetInstance()->GetAllowMultisamplingFBO());
-	//}
+	else if (key == SDLK_SLASH) {
+		GameDisplay::ToggleDetachCamera();
+	}
 #endif
 
 }

@@ -63,8 +63,6 @@ private:
 	void LoadRegularMeshAssets();
 	void LoadRegularEffectAssets();
 
-	//void ChangeLightsOnColour(const Colour& fgKeyLightCol, const Colour& fgFillLightCol, const Colour& ballKeyLightCol, float changeTime = 1.0f, bool pulse = false);
-
 public:
 	GameAssets(int screenWidth, int screenHeight);
 	~GameAssets();
@@ -122,7 +120,6 @@ public:
 	}
 
 	void FirePaddleLaser(const PlayerPaddle& paddle);
-
 };
 
 #endif

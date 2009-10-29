@@ -405,7 +405,9 @@ void GameAssets::DrawBackgroundEffects(const Camera& camera) {
  * Draw a given item in the world.
  */
 void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem) {
-	this->itemAssets->DrawItem(dT, camera, gameItem);
+	PointLight fgKeyLight, fgFillLight, ballLight;
+	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+	this->itemAssets->DrawItem(dT, camera, gameItem, fgKeyLight, fgFillLight, ballLight);
 }
 
 /**
@@ -551,8 +553,15 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 		assert(currLevelMesh != NULL);
 		currLevelMesh->PaddleCameraActiveToggle(true);
 
-		// Move the key light in the foreground so that it faces upwards with the camera
-		// TODO
+		// Move the key light in the foreground so that it is behind the camera when it goes into
+		// paddle cam mode.
+		float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
+
+		Point3D newFGKeyLightPos(0.0f, -(halfLevelHeight + 10.0f), 0.0f);
+		Point3D newFGFillLightPos(0.0f, (halfLevelHeight + 10.0f), 0.0f);
+		
+		this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
+		this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
 	}
 }
 
@@ -575,10 +584,6 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		this->lightAssets->StopStrobeLight(GameLightAssets::FGKeyLight);
 		this->lightAssets->StopStrobeLight(GameLightAssets::FGFillLight);
 		this->lightAssets->StopStrobeLight(GameLightAssets::BallKeyLight);
-
-		//this->lightAssets->ChangeLightColour(GameLightAssets::FGKeyLight, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR);
-		//this->lightAssets->ChangeLightColour(GameLightAssets::FGFillLight, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR);
-		//this->lightAssets->ChangeLightColour(GameLightAssets::BallKeyLight, GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_COLOUR);
 	}
 	else if (item.GetName() == PaddleCamItem::PADDLE_CAM_ITEM_NAME) {
 		// We make the safety net visible (if activated) again
@@ -586,8 +591,9 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		assert(currLevelMesh != NULL);
 		currLevelMesh->PaddleCameraActiveToggle(false);
 
-		// Move the foreground key light back to its default position...
-		// TODO
+		// Move the foreground key and fill lights back to their default positions...
+		this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
+		this->lightAssets->RestoreLightPosition(GameLightAssets::FGFillLight, 2.0f);
 	}
 }
 
