@@ -1,13 +1,9 @@
 package bbbleveleditor;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
+import javax.swing.*;
 
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
+import bbbleveleditor.BBBLevelEditMainWindow.ToolMode;
 
 public class BBBLevelEditorMenuBar extends JMenuBar {
 	private static final long serialVersionUID = 1L;
@@ -15,24 +11,30 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 	private BBBLevelEditMainWindow levelEditWindow;
 	
 	// File menu
-	private JMenu fileMenu;
-	private JMenuItem newMenuItem;
-	private JMenuItem openMenuItem;
-	private JMenuItem closeMenuItem;
-	private JMenuItem saveMenuItem;
-	private JMenuItem saveAsMenuItem;
-	private JMenuItem exitMenuItem;
+	private JMenu fileMenu				= null;
+	private JMenuItem newMenuItem		= null;
+	private JMenuItem openMenuItem		= null;
+	private JMenuItem closeMenuItem		= null;
+	private JMenuItem saveMenuItem		= null;
+	private JMenuItem saveAsMenuItem	= null;
+	private JMenuItem exitMenuItem		= null;
 	
 	// Edit menu
-	private JMenu editMenu;
-	private JMenuItem lvlDimMenuItem;
-	private JMenuItem lvlItemsMenuItem;
+	private JMenu editMenu				= null;
+	private JMenuItem lvlDimMenuItem	= null;
+	private JMenuItem lvlItemsMenuItem	= null;
+	
+	// Tools menu
+	private JMenu toolsMenu								= null;
+	private JRadioButtonMenuItem paintBrushMenuItem		= null;
+	private JRadioButtonMenuItem  eraserMenuItem		= null;
 	
 	
 	public BBBLevelEditorMenuBar(BBBLevelEditMainWindow window) {
 		this.levelEditWindow = window;
 		this.addFileMenu();
 		this.addEditMenu();
+		this.addToolsMenu();
 	}
 	
 	private void addFileMenu() {
@@ -147,6 +149,34 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		this.add(this.editMenu);
 	}
 	
+	private void addToolsMenu() {
+		this.toolsMenu = new JMenu("Tools");
+		ToolsMenuActionListener toolsMenuActionListener = new ToolsMenuActionListener();
+		
+		ImageIcon paintBrushIcon = new ImageIcon(BBBLevelEditorMain.class.getResource("resources/paintbrush_icon_16x16.png"));
+		this.paintBrushMenuItem = new JRadioButtonMenuItem("Paint Brush", paintBrushIcon);
+		this.paintBrushMenuItem.setActionCommand("paint");
+		this.paintBrushMenuItem.addActionListener(toolsMenuActionListener);
+		this.paintBrushMenuItem.setEnabled(true);
+		this.paintBrushMenuItem.setAccelerator(KeyStroke.getKeyStroke('b'));
+		
+		ImageIcon eraserIcon = new ImageIcon(BBBLevelEditorMain.class.getResource("resources/eraser_icon_16x16.png"));
+		this.eraserMenuItem = new JRadioButtonMenuItem("Eraser", eraserIcon);
+		this.eraserMenuItem.setActionCommand("eraser");
+		this.eraserMenuItem.addActionListener(toolsMenuActionListener);
+		this.eraserMenuItem.setEnabled(true);
+		this.eraserMenuItem.setAccelerator(KeyStroke.getKeyStroke('e'));
+		
+		ButtonGroup group = new ButtonGroup();
+	    group.add(this.paintBrushMenuItem);
+	    group.add(this.eraserMenuItem);
+		
+	    this.toolsMenu.add(this.paintBrushMenuItem);
+	    this.toolsMenu.add(this.eraserMenuItem);
+	    
+		this.add(this.toolsMenu);
+	}
+	
 	/**
 	 * Private class that will interpret action events from the edit menu.
 	 * @author Callum Hay
@@ -188,6 +218,19 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		}
 	}
 	
+	private class ToolsMenuActionListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (e.getActionCommand().equals("paint")) {
+				levelEditWindow.setToolMode(BBBLevelEditMainWindow.ToolMode.PAINT);
+			}
+			else if (e.getActionCommand().equals("eraser")) {
+				levelEditWindow.setToolMode(BBBLevelEditMainWindow.ToolMode.ERASE);
+			}
+		}
+	}
+	
 	public void UpdateEnabledMenuItems() {
 		BBBLevelEditDocumentWindow activeDoc = this.levelEditWindow.getActiveLevelDoc();
 		boolean activeDocExists = activeDoc != null;
@@ -200,5 +243,14 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		
 		boolean editMenuEnabled = this.lvlDimMenuItem.isEnabled() || this.lvlItemsMenuItem.isEnabled();
 		this.editMenu.setEnabled(editMenuEnabled);
+	}
+	
+	public void updateToolMode(ToolMode mode) {
+		if (mode == BBBLevelEditMainWindow.ToolMode.PAINT && this.paintBrushMenuItem != null) {
+			this.paintBrushMenuItem.setSelected(true);
+		}
+		else if (mode == BBBLevelEditMainWindow.ToolMode.ERASE && this.eraserMenuItem != null) {
+			this.eraserMenuItem.setSelected(true);
+		}
 	}
 }

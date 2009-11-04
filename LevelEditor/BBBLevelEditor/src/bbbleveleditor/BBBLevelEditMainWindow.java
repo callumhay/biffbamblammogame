@@ -16,6 +16,8 @@ public class BBBLevelEditMainWindow extends JFrame implements WindowListener {
 	private static final long serialVersionUID = 1L;
 	private BBBLevelEditorMenuBar menuBar;
 	private BBBLevelEditorToolBar toolBar;
+	private JToolBar levelPieceBar;
+	
 	private JPanel topMostPanel;
 	private JPanel levelPieceListParentPanel;
 	private JList levelPieceList;
@@ -43,7 +45,7 @@ public class BBBLevelEditMainWindow extends JFrame implements WindowListener {
 		
 		// Setup the toolbar and add the toolbar to the frame
 		this.toolBar = new BBBLevelEditorToolBar(this);
-		this.add(this.toolBar, BorderLayout.PAGE_START);
+		this.add(this.toolBar, BorderLayout.WEST);
 		
 		// Setup the level piece list panel
 		this.setupLevelPiecePanel();
@@ -54,10 +56,13 @@ public class BBBLevelEditMainWindow extends JFrame implements WindowListener {
 		this.add(this.topMostPanel);
 		
 		this.addWindowListener(this);
+		this.setToolMode(BBBLevelEditMainWindow.ToolMode.PAINT);
 	}
 	
 	public void setToolMode(ToolMode mode) {
 		this.currToolMode = mode;
+		this.menuBar.updateToolMode(mode);
+		this.toolBar.updateToolMode(mode);
 	}
 	public ToolMode getToolMode() {
 		return this.currToolMode;
@@ -102,7 +107,10 @@ public class BBBLevelEditMainWindow extends JFrame implements WindowListener {
 		this.levelPieceListParentPanel.add(levelPieceListTitle, BorderLayout.NORTH);
 		this.levelPieceListParentPanel.add(levelPieceListScrollPane, BorderLayout.CENTER);
 		
-		this.topMostPanel.add(this.levelPieceListParentPanel, BorderLayout.EAST);
+		//this.topMostPanel.add(this.levelPieceListParentPanel, BorderLayout.EAST);
+		this.levelPieceBar = new JToolBar(JToolBar.VERTICAL);
+		this.levelPieceBar.add(this.levelPieceListParentPanel);
+		this.add(this.levelPieceBar, BorderLayout.EAST);
 	}
 	
 	/**

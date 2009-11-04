@@ -98,6 +98,7 @@ public:
 	const std::string MESH_DIR;
 	const std::string SHADER_DIR;
 	const std::string TEXTURE_DIR;
+	const std::string SOUND_DIR;
 
 	// Shader path constants ********************************
 	const std::string CGFX_CEL_SHADER;
@@ -154,6 +155,10 @@ public:
 	const std::string FONT_EXPLOSIONBOOM;
 	const std::string FONT_ELECTRICZAP;
 	const std::string FONT_ALLPURPOSE;
+
+	// Sound Script File (.msf) path constants *********************************
+	const std::string GLOBAL_SOUND_SCRIPT;
+	const std::string DECO_SOUND_SCRIPT;
 
 	// Item-related constants *******************************
 	const std::string ITEM_LABEL_MATGRP;

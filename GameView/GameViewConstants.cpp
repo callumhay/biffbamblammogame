@@ -24,6 +24,7 @@ GameViewConstants* GameViewConstants::Instance = NULL;
 #define MESH_DIRECTORY RESOURCE_DIRECTORY "/models"
 #define SHADER_DIRECTORY RESOURCE_DIRECTORY "/shaders"
 #define TEXTURE_DIRECTORY RESOURCE_DIRECTORY "/textures"
+#define SOUND_DIRECTORY RESOURCE_DIRECTORY "/sounds"
 
 GameViewConstants::GameViewConstants() :
 // Basic Asset Paths
@@ -32,6 +33,7 @@ FONT_DIR(FONT_DIRECTORY),
 MESH_DIR(MESH_DIRECTORY),
 SHADER_DIR(SHADER_DIRECTORY),
 TEXTURE_DIR(TEXTURE_DIRECTORY),
+SOUND_DIR(SOUND_DIRECTORY),
 
 // Shader Asset Paths
 CGFX_CEL_SHADER(SHADER_DIRECTORY "/CelShading.cgfx"),
@@ -134,6 +136,10 @@ FONT_HAPPYGOOD(FONT_DIRECTORY			"/happygood.ttf"),
 FONT_EXPLOSIONBOOM(FONT_DIRECTORY "/explosionboom.ttf"),
 FONT_ELECTRICZAP(FONT_DIRECTORY		"/electriczap.ttf"),
 FONT_ALLPURPOSE(FONT_DIRECTORY		"/allpurpose.ttf"),
+
+// Sound script paths
+GLOBAL_SOUND_SCRIPT(SOUND_DIRECTORY "/global_sound.msf"),
+DECO_SOUND_SCRIPT(SOUND_DIRECTORY "/deco_sound.msf"),
 
 // Item-related constants
 ITEM_LABEL_MATGRP("ItemLabel"),	// Material group name for changing the label on the item mesh

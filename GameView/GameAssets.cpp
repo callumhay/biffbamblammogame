@@ -517,6 +517,9 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 		LevelMesh* levelMesh = new LevelMesh(this->worldAssets, level);
 		this->loadedLevelMeshes.insert(std::pair<const GameLevel*, LevelMesh*>(level, levelMesh));
 	}
+
+	// Load all of the music for the world
+	// this->soundAssets->LoadWorldSounds(world->GetStyle());
 }
 
 /**

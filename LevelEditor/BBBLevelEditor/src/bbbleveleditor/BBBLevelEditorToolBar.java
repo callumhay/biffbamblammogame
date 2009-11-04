@@ -8,18 +8,20 @@ import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
+import bbbleveleditor.BBBLevelEditMainWindow.ToolMode;
+
 public class BBBLevelEditorToolBar extends JToolBar implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
-	private BBBLevelEditMainWindow levelEditWindow;
+	private BBBLevelEditMainWindow levelEditWindow	= null;
 	
-	//private JToggleButton selectionBtn;
-	private JToggleButton paintBrushBtn;
-	private JToggleButton eraserBtn;
+	private JToggleButton paintBrushBtn	= null;
+	private JToggleButton eraserBtn		= null;
 	
 	public BBBLevelEditorToolBar(BBBLevelEditMainWindow window) {
+		super(JToolBar.VERTICAL);
 		this.levelEditWindow = window;
-		
+
 		ButtonGroup toolbarButtonGrp = new ButtonGroup();
 		
 		//ImageIcon selectionIcon  = new ImageIcon(BBBLevelEditorMain.class.getResource("resources/selection_icon_16x16.png"));
@@ -35,8 +37,6 @@ public class BBBLevelEditorToolBar extends JToolBar implements ActionListener {
 		this.paintBrushBtn.addActionListener(this);
 		this.paintBrushBtn.setSelected(true);
 		toolbarButtonGrp.add(this.paintBrushBtn);
-		
-		window.setToolMode(BBBLevelEditMainWindow.ToolMode.PAINT);
 		
 		ImageIcon eraserIcon = new ImageIcon(BBBLevelEditorMain.class.getResource("resources/eraser_icon_16x16.png"));
 		this.eraserBtn = new JToggleButton(eraserIcon);
@@ -62,6 +62,12 @@ public class BBBLevelEditorToolBar extends JToolBar implements ActionListener {
 		}
 	}
 	
-	
-	
+	public void updateToolMode(ToolMode mode) {
+		if (mode == BBBLevelEditMainWindow.ToolMode.PAINT && this.paintBrushBtn != null) {
+			this.paintBrushBtn.setSelected(true);
+		}
+		else if (mode == BBBLevelEditMainWindow.ToolMode.ERASE && this.eraserBtn != null) {
+			this.eraserBtn.setSelected(true);
+		}
+	}
 }
