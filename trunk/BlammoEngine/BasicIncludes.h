@@ -17,11 +17,10 @@
 
 // C Library includes
 #include <cstdlib>
-#include <float.h>
-#include <time.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cfloat>
+#include <ctime>
+#include <cassert>
+#include <cstdlib>
 #include <cmath>
 
 // Memory Leak Tracking Includes
@@ -43,7 +42,7 @@
 #include <sstream>
 #include <ostream>
 
-// OpenGL includes
+// OpenGL includes and defines
 #define GLEW_STATIC
 #include <gl/glew.h>
 #include <gl/gl.h>
@@ -51,6 +50,14 @@
 #include <gl/glut.h>
 
 #define BUFFER_OFFSET(bytes) ((GLubyte*)NULL + (bytes))
+
+// OpenAL includes
+#include <al/al.h>
+#include <al/alc.h>
+#include <al/alut.h>
+#include <al/efx.h>
+#include <al/efx-creative.h>
+#include <al/xram.h>
 
 // SDL Includes
 #ifdef WIN32

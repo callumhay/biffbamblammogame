@@ -77,7 +77,7 @@ public:
 	Texture* GetCelShadingTexture();
 	
 	// Effects Resource Functions
-	void GetCgFxEffectResource(const std::string& filepath, CGeffect &effect, std::map<std::string, CGtechnique> &techniques);
+	void GetCgFxEffectResource(const std::string &filepath, CGeffect &effect, std::map<std::string, CGtechnique> &techniques);
 	bool ReleaseCgFxEffectResource(CGeffect &effect);
 
 	// Initialization configuration loading
