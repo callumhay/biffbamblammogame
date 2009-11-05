@@ -138,7 +138,7 @@ FONT_ELECTRICZAP(FONT_DIRECTORY		"/electriczap.ttf"),
 FONT_ALLPURPOSE(FONT_DIRECTORY		"/allpurpose.ttf"),
 
 // Sound script paths
-GLOBAL_SOUND_SCRIPT(SOUND_DIRECTORY "/global_sound.msf"),
+MAIN_MENU_SOUND_SCRIPT(SOUND_DIRECTORY "/main_menu_sound.msf"),
 DECO_SOUND_SCRIPT(SOUND_DIRECTORY "/deco_sound.msf"),
 
 // Item-related constants

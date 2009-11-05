@@ -1,10 +1,15 @@
 #include "GameSoundAssets.h"
 
+#include <cassert>
+
 GameSoundAssets::GameSoundAssets() {
 	this->LoadGlobalSounds();
 }
 
 GameSoundAssets::~GameSoundAssets() {
+	this->UnloadMainMenuSounds();
+	this->UnloadWorldSounds();
+	this->UnloadGlobalSounds();
 }
 
 /**
@@ -25,9 +30,55 @@ void GameSoundAssets::LoadWorldSounds(int worldStyle) {
 }
 
 /**
+ * Unload any sounds associated with world style that may have previously been loaded.
+ */
+void GameSoundAssets::UnloadWorldSounds() {
+}
+
+/**
+ * Load the sounds associated with the main menu in the game.
+ */
+void GameSoundAssets::LoadMainMenuSounds() {
+}
+
+/**
+ * Unload the sounds associated with the main menu in the game that may have been previously loaded.
+ */
+void GameSoundAssets::UnloadMainMenuSounds() {
+}
+
+/**
+ * Play a sound associated with the main menu of the game. The sound may be an event or mask.
+ */
+void GameSoundAssets::PlayMainMenuSound(Sound::MainMenuSound sound) {
+	std::map<Sound::MainMenuSound, Sound*>::iterator foundSoundIter = this->mainMenuSounds.find(sound);
+	
+	// First make sure the sound exists, it should...
+	if (foundSoundIter == this->mainMenuSounds.end()) {
+		assert(false);
+		return;
+	}
+
+	Sound* foundSound = foundSoundIter->second;
+	//foundSound->play();
+	this->activeSounds.push_back(foundSound->second);
+}
+
+void GameSoundAssets::StopMainMenuSound(Sound::MainMenuSound sound) {
+}
+
+/**
  * Private helper function that will load all the global sound effects
  * for the game. Global sound effects are ALWAYS loaded.
  */
 void GameSoundAssets::LoadGlobalSounds() {
+	// TODO
+}
+
+/**
+ * Private helper function that will unload all the global sound effects
+ * for the game - this should only be called when the game is exiting.
+ */
+void GameSoundAssets::UnloadGlobalSounds() {
 	// TODO
 }

@@ -157,7 +157,7 @@ public:
 	const std::string FONT_ALLPURPOSE;
 
 	// Sound Script File (.msf) path constants *********************************
-	const std::string GLOBAL_SOUND_SCRIPT;
+	const std::string MAIN_MENU_SOUND_SCRIPT;
 	const std::string DECO_SOUND_SCRIPT;
 
 	// Item-related constants *******************************
