@@ -1382,12 +1382,32 @@
 					RelativePath=".\GameSound\GameSoundAssets.h"
 					>
 				</File>
+				<File
+					RelativePath=".\GameSound\MSFReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\Sound.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\SoundEvent.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\SoundMask.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
 				>
 				<File
 					RelativePath=".\GameSound\GameSoundAssets.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\MSFReader.cpp"
 					>
 				</File>
 			</Filter>
