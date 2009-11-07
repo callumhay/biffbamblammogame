@@ -18,7 +18,12 @@ GameSoundAssets::~GameSoundAssets() {
  * for updating sound effects over time.
  */
 void GameSoundAssets::Tick(double dT) {
-	// TODO
+	// Go through each active sound and tick it
+	Sound* currSound = NULL;
+	for (std::list<Sound*>::iterator iter = this->activeSounds.begin(); iter != this->activeSounds.end(); ++iter) {
+		currSound = *iter;
+		currSound->Tick(dT);
+	}
 }
 
 /**
@@ -60,8 +65,8 @@ void GameSoundAssets::PlayMainMenuSound(Sound::MainMenuSound sound) {
 	}
 
 	Sound* foundSound = foundSoundIter->second;
-	//foundSound->play();
-	this->activeSounds.push_back(foundSound->second);
+	foundSound->Play();
+	this->activeSounds.push_back(foundSound);
 }
 
 void GameSoundAssets::StopMainMenuSound(Sound::MainMenuSound sound) {

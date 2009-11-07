@@ -4,9 +4,16 @@
 #include "Sound.h"
 
 class SoundMask : public Sound {
+	friend class MSFReader;
+
 public:
-	SoundMask(){};
-	~SoundMask(){};
+	~SoundMask();
+
+	void Play();
+	void Tick(double dT);
+
+private:
+	SoundMask(const std::string& filepath);
 
 };
 
