@@ -1,7 +1,12 @@
 #ifndef _SOUND_H_
 #define _SOUND_H_
 
+#include "../BlammoEngine/BasicIncludes.h"
 
+/**
+ * Class to represent the abstract highlevel structure of a in-game sound.
+ * This class encapsulates much of the functionality for loading sounds.
+ */
 class Sound {
 
 public:
@@ -11,7 +16,7 @@ public:
 	// Main Menu Event and Mask Sounds
 	enum MainMenuSound { 
 		// Masks
-		MainMenuBGMask,
+		MainMenuBackgroundMask = 0,
 		// Events
 		MainMenuItemHighlightedEvent, 
 		MainMenuItemEnteredEvent, 
@@ -19,10 +24,13 @@ public:
 		MainMenuItemScrolledEvent 
 	};
 
-	Sound();
+	Sound(const std::string& filepath);
 	virtual ~Sound();
 	
-	//virtual void Play() = 0;
+	static bool IsSoundMask(int soundType);
+
+	virtual void Play()						= 0;
+	virtual void Tick(double dT)	= 0;
 
 };
 
