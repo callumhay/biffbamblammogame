@@ -19,7 +19,7 @@ public:
 	void Tick(double dT);
 
 private:
-	SoundMask(const std::string& filepath);
+	SoundMask(const std::string& name, const std::string& filepath);
 
 };
 

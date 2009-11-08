@@ -533,7 +533,7 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 	}
 
 	// Load all of the music for the world
-	// this->soundAssets->LoadWorldSounds(world->GetStyle());
+	this->soundAssets->LoadWorldSounds(world->GetStyle());
 }
 
 /**

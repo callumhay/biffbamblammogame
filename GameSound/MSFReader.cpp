@@ -9,17 +9,24 @@
 const char* MSFReader::OPEN_SOUND_DEFINTION_BLOCK			= "{";
 const char* MSFReader::CLOSE_SOUND_DEFINITION_BLOCK		= "}";
 
+const char* MSFReader::IGNORE_KEYWORD			= "ignore";
+
 const char* MSFReader::FILE_KEYWORD				= "file";
 const char* MSFReader::DELAY_KEYWORD			= "delay";
 const char* MSFReader::LOOPS_KEYWORD			= "loops";
 const char* MSFReader::FADE_IN_KEYWORD		= "fadein";
 const char* MSFReader::FADE_OUT_KEYWORD		= "fadeout";
 
-const char* MSFReader::MAIN_MENU_BG_MASK									= "MainMenuBackgroundMask";
-const char* MSFReader::MAIN_MENU_ITEM_HIGHLIGHTED_EVENT		= "MainMenuItemHighlightedEvent";
-const char* MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT				= "MainMenuItemEnteredEvent";
-const char* MSFReader::MAIN_MENU_ITEM_SELECTED_EVENT			= "MainMenuItemSelectedEvent";
-const char* MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT			= "MainMenuItemScrolledEvent";
+const char* MSFReader::MAIN_MENU_BG_MASK										= "MainMenuBackgroundMask";
+
+const char* MSFReader::MAIN_MENU_ITEM_HIGHLIGHTED_EVENT			= "MainMenuItemHighlightedEvent";
+const char* MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT				= "MainMenuBackgroundBangSmallEvent";
+const char* MSFReader::MAIN_MENU_BG_BANG_MEDIUM_EVENT				= "MainMenuBackgroundBangMediumEvent";
+const char* MSFReader::MAIN_MENU_BG_BANG_BIG_EVENT					= "MainMenuBackgroundBangBigEvent";
+const char* MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT					= "MainMenuItemEnteredEvent";
+const char* MSFReader::MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT	= "MainMenuItemBackAndCancelEvent";
+const char* MSFReader::MAIN_MENU_ITEM_SELECTED_EVENT				= "MainMenuItemSelectedEvent";
+const char* MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT				= "MainMenuItemScrolledEvent";
 
 bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& sounds) {
 
@@ -48,8 +55,26 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 	// Read through the music script file
 	while (*inStream >> currReadStr && !error) {
 
+		// Check for an ignored block defintion...
+		if (currReadStr == MSFReader::IGNORE_KEYWORD) {
+			// Read the whole block and just discard it
+			bool goodSyntax = false;
+			while (*inStream >> currReadStr) {
+				if (currReadStr == MSFReader::CLOSE_SOUND_DEFINITION_BLOCK) {
+					goodSyntax = true;
+					break;
+				}
+			}
+
+			// Make sure that the closing sound definition block bracket was found
+			if (!goodSyntax) {
+				error = true;
+				errorStr = "Ignored sound definition block was never properly closed with a completing bracket: missing '}'.";
+				continue;
+			}
+		}
 		// Check for the opening of a music defintion block...
-		if (currReadStr == MSFReader::OPEN_SOUND_DEFINTION_BLOCK) {
+		else if (currReadStr == MSFReader::OPEN_SOUND_DEFINTION_BLOCK) {
 			if (soundDefBlockOpen) {
 				error = true;
 				errorStr = "Tried to open another sound definition block inside an already open block: extra '{' found.";
@@ -57,7 +82,6 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 			}
 			// Reinitialize everything...
 			soundDefBlockOpen = true;
-			lastSoundType = "";
 			soundFilePath = "";
 
 			delay			= SoundEvent::DEFAULT_DELAY;
@@ -73,14 +97,15 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 				continue;
 			}
 			assert(soundType != MSFReader::INVALID_SOUND_TYPE);
+			assert(lastSoundType != "");
 			
 			// Create the sound object...
 			Sound* newSound = NULL;
 			if (soundIsMask) {
-				newSound = new SoundMask(soundFilePath);
+				newSound = new SoundMask(lastSoundType, soundFilePath);
 			}
 			else {
-				SoundEvent* newSoundEvent = new SoundEvent(soundFilePath);
+				SoundEvent* newSoundEvent = new SoundEvent(lastSoundType, soundFilePath);
 				newSoundEvent->SetDelay(delay);
 				newSoundEvent->SetLoops(loops);
 				newSoundEvent->SetFadein(fadein);
@@ -100,6 +125,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 			// Reset relevant variables for the next music definition block
 			soundType = MSFReader::INVALID_SOUND_TYPE;
 			soundDefBlockOpen = false;
+			lastSoundType = "";
 		}
 		else {
 			// Check to see if the sound definition block has been opened, if it has we will search for
@@ -259,11 +285,23 @@ int MSFReader::ConvertKeywordToSoundType(const std::string& soundName) {
 	if (soundName == MSFReader::MAIN_MENU_BG_MASK) {
 		return Sound::MainMenuBackgroundMask;
 	}
+	else if (soundName == MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT) {
+		return Sound::MainMenuBackgroundBangSmallEvent;
+	}
+	else if (soundName == MSFReader::MAIN_MENU_BG_BANG_MEDIUM_EVENT) {
+		return Sound::MainMenuBackgroundBangMediumEvent;
+	}
+	else if (soundName == MSFReader::MAIN_MENU_BG_BANG_BIG_EVENT) {
+		return Sound::MainMenuBackgroundBangBigEvent;
+	}
 	else if (soundName == MSFReader::MAIN_MENU_ITEM_HIGHLIGHTED_EVENT) {
 		return Sound::MainMenuItemHighlightedEvent;
 	}
 	else if (soundName == MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT) {
 		return Sound::MainMenuItemEnteredEvent;
+	}
+	else if (soundName == MSFReader::MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT) {
+		return Sound::MainMenuItemBackAndCancelEvent;
 	}
 	else if (soundName == MSFReader::MAIN_MENU_ITEM_SELECTED_EVENT) {
 		return Sound::MainMenuItemSelectedEvent;

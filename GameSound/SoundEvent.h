@@ -29,7 +29,7 @@ private:
 	int fadein;
 	int fadeout;
 
-	SoundEvent(const std::string& filepath);
+	SoundEvent(const std::string& name, const std::string& filepath);
 	
 };
 

@@ -17,6 +17,9 @@ private:
 	static const char* OPEN_SOUND_DEFINTION_BLOCK;
 	static const char* CLOSE_SOUND_DEFINITION_BLOCK;
 	
+	// Other keywords for the MSF
+	static const char* IGNORE_KEYWORD;
+
 	// Keyword parameters for the MSF definition blocks
 	static const char* FILE_KEYWORD;
 	static const char* DELAY_KEYWORD;
@@ -26,8 +29,12 @@ private:
 
 	// Sound string identifiers
 	static const char* MAIN_MENU_BG_MASK;
+	static const char* MAIN_MENU_BG_BANG_SMALL_EVENT;
+	static const char* MAIN_MENU_BG_BANG_MEDIUM_EVENT;
+	static const char* MAIN_MENU_BG_BANG_BIG_EVENT;
 	static const char* MAIN_MENU_ITEM_HIGHLIGHTED_EVENT;
 	static const char* MAIN_MENU_ITEM_ENTERED_EVENT;
+	static const char* MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT;
 	static const char* MAIN_MENU_ITEM_SELECTED_EVENT;
 	static const char* MAIN_MENU_ITEM_SCROLLED_EVENT;
 
@@ -35,7 +42,6 @@ private:
 	static const int INVALID_SOUND_TYPE = -1;
 
 	static int ConvertKeywordToSoundType(const std::string& soundName);
-
 	static bool FoundEqualsSyntax(bool& noEquals, std::string& errorStr, std::istringstream* inStream);
 
 };

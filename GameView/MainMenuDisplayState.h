@@ -133,6 +133,8 @@ public:
 	public:
 		MainMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
 		~MainMenuEventHandler() {}
+		void GameMenuItemHighlightedEvent(int itemIndex);
+		void GameMenuItemDeactivatedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex) {};
 		void GameMenuItemVerifiedEvent(int itemIndex);
@@ -145,6 +147,8 @@ public:
 	public:
 		OptionsSubMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
 		~OptionsSubMenuEventHandler() {}
+		void GameMenuItemHighlightedEvent(int itemIndex);
+		void GameMenuItemDeactivatedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex);
 		void GameMenuItemVerifiedEvent(int itemIndex) {};

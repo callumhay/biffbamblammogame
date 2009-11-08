@@ -284,6 +284,7 @@ void GameMenu::SetSelectedMenuItem(int index) {
 	this->menuItems[index]->ToggleWiggleAnimationOn(GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE, GameMenuItem::MENU_ITEM_WOBBLE_FREQ);
 	this->menuItems[index]->SetSize(true);
 	this->menuItems[index]->SetTextColour(this->highlightColour);
+	this->MenuItemHighlighted();
 }
 
 /**
@@ -323,6 +324,8 @@ void GameMenu::DeactivateSelectedMenuItem() {
 		if (i == this->selectedMenuItemIndex) { continue; }
 		this->menuItems[i]->SetTextColour(this->idleColour);
 	}
+
+	this->MenuItemDeactivated();
 }
 
 /**
@@ -657,6 +660,8 @@ void GameSubMenu::SetSelectedMenuItem(int index) {
 	this->menuItems[index]->ToggleWiggleAnimationOn(GameMenuItem::MENU_ITEM_WOBBLE_AMT_SMALL, GameMenuItem::MENU_ITEM_WOBBLE_FREQ);
 	this->menuItems[index]->SetSize(true);
 	this->menuItems[index]->SetTextColour(this->highlightColour);
+
+	this->MenuItemHighlighted();
 }
 
 /** 
