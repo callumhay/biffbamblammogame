@@ -30,10 +30,7 @@ gameExited(false), gameReinitialized(false) {
 }
 
 GameDisplay::~GameDisplay() {
-	// Delete game assets
-	delete this->assets;
-	this->assets = NULL;
-	
+
 	// Delete any current state
 	assert(this->currState != NULL);
 	if (this->currState != NULL) {
@@ -43,6 +40,12 @@ GameDisplay::~GameDisplay() {
 
 	// Remove any action listeners for the model
 	this->RemoveActionListeners();
+
+	// Delete game assets LAST!! (If you don't do this last
+	// then all the other things being destroyed in this destructor
+	// will try to access the assets that no longer exist).
+	delete this->assets;
+	this->assets = NULL;
 }
 
 // RENDER FUNCTIONS ****************************************************

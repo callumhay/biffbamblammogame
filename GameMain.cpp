@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
 		BlammoTime::SetVSync(initCfgOptions.GetIsVSyncOn());
 
 		// Create the MVC while showing the loading screen...
-		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 5);
+		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 6);
 
 		model = new GameModel();
 		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());

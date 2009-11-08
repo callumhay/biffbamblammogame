@@ -142,11 +142,11 @@ inline static bool ResolutionCompare(const std::string& res1, const std::string&
 #ifdef  NDEBUG
 #define debug_output(s) ((void)0)
 inline void debug_opengl_state() {}
+inline void debug_openal_state() {}
 inline void debug_physfs_state(int physfsReturnVal) {}
 inline void debug_cg_state() {}
 #else
 #define debug_output(s) (std::cout << s << std::endl)
-
 
 /**
  * Used to check for errors in opengl.
@@ -158,6 +158,15 @@ inline void debug_opengl_state() {
 		return;
 	}
 	debug_output("OpenGL Error: " << glErr);
+	assert(false);
+}
+
+inline void debug_openal_state() {
+	ALenum alErr = alGetError();
+	if (alErr == AL_NO_ERROR) {
+		return;
+	}
+	debug_output("OpenAL Error: " << alutGetErrorString(alErr) << " (" << alErr << ")");
 	assert(false);
 }
 

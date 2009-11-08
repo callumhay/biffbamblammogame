@@ -1,13 +1,11 @@
 #include "SoundEvent.h"
 
-SoundEvent::SoundEvent(const std::string& filepath, int delay, int loops, int fadein, int fadeout) :
-Sound(filepath) {
+SoundEvent::SoundEvent(const std::string& filepath) :
+Sound(filepath), startDelay(DEFAULT_DELAY), numLoops(DEFAULT_LOOPS), fadein(DEFAULT_FADEIN),
+fadeout(DEFAULT_FADEOUT) {
 }
 
 SoundEvent::~SoundEvent() {
-}
-
-void SoundEvent::Play() {
 }
 
 void SoundEvent::Tick(double dT) {

@@ -1,11 +1,10 @@
 #ifndef _GAMESOUNDASSETS_H_
 #define _GAMESOUNDASSETS_H_
 
-#include "SoundEvent.h"
-#include "SoundMask.h"
-
 #include <list>
 #include <map>
+
+#include "Sound.h"
 
 /**
  * Holder of all the sound assets for the Biff Bam Blammo game. This class is
@@ -31,17 +30,23 @@ public:
 	void StopMainMenuSound(Sound::MainMenuSound sound);
 
 private:
-	// World sound effect variables
-	std::map<Sound::WorldSound, Sound*> worldSounds;
+	static const ALfloat DEFAULT_LISTENER_POS[3];
+	static const ALfloat DEFAULT_LISTENER_VEL[3];
+	static const ALfloat DEFAULT_LISTENER_ORIENT[6];
 
-	// Main Menu sound effect variables
-	std::map<Sound::MainMenuSound, Sound*> mainMenuSounds;
+	// World sound effect variables - indexed using Sound::WorldSound enum
+	std::map<int, Sound*> worldSounds;
+
+	// Main Menu sound effect variables - indexed using Sound::MainMenuSound enum
+	std::map<int, Sound*> mainMenuSounds;
 
 	// Active sound variables - these hold sounds that are currently active (e.g., being played) in the game
 	std::list<Sound*> activeSounds;
 
 	void LoadGlobalSounds();
 	void UnloadGlobalSounds();
+
+	static void SetupOpenALListener();
 
 };
 #endif // _GAMESOUNDASSETS_H_

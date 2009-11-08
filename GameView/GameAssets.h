@@ -28,6 +28,7 @@ class LaserPaddleGun;
 #include "GameItemAssets.h"
 #include "GameFBOAssets.h"
 #include "GameLightAssets.h"
+#include "../GameSound/GameSoundAssets.h"
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -38,6 +39,8 @@ private:
 	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
 	GameFBOAssets* fboAssets;			// Framebuffer Object related assets
 	GameLightAssets* lightAssets; // Light assets in the foreground and background
+
+	GameSoundAssets* soundAssets;	// All the sound assets used throughout the game
 
 	LivesLeftHUD* lifeHUD;
 	CrosshairHUD* crosshairHUD;
@@ -117,6 +120,10 @@ public:
 
 	LivesLeftHUD* GetLifeHUD() const {
 		return this->lifeHUD;
+	}
+
+	GameSoundAssets* GetSoundAssets() {
+		return this->soundAssets;
 	}
 
 	void FirePaddleLaser(const PlayerPaddle& paddle);

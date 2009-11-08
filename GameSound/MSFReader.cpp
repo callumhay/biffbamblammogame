@@ -21,10 +21,10 @@ const char* MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT				= "MainMenuItemEnteredEve
 const char* MSFReader::MAIN_MENU_ITEM_SELECTED_EVENT			= "MainMenuItemSelectedEvent";
 const char* MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT			= "MainMenuItemScrolledEvent";
 
-bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenuSounds) {
+bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& sounds) {
 
 	// Grab a file in stream from the main manu music script file
-	std::istringstream* inStream = ResourceManager::GetInstance()->FilepathToInStream(GameViewConstants::GetInstance()->MAIN_MENU_SOUND_SCRIPT);
+	std::istringstream* inStream = ResourceManager::GetInstance()->FilepathToInStream(filepath);
 
 	// Stuff for capturing errors
 	bool error = false;
@@ -40,10 +40,10 @@ bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenu
 
 	int soundType = MSFReader::INVALID_SOUND_TYPE;
 	std::string soundFilePath = "";
-	int delay			= MSFReader::DEFAULT_DELAY;
-	int loops			= MSFReader::DEFAULT_LOOPS;
-	int fadein		= MSFReader::DEFAULT_FADEIN;
-	int fadeout		= MSFReader::DEFAULT_FADEOUT;
+	int delay			= SoundEvent::DEFAULT_DELAY;
+	int loops			= SoundEvent::DEFAULT_LOOPS;
+	int fadein		= SoundEvent::DEFAULT_FADEIN;
+	int fadeout		= SoundEvent::DEFAULT_FADEOUT;
 
 	// Read through the music script file
 	while (*inStream >> currReadStr && !error) {
@@ -59,11 +59,11 @@ bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenu
 			soundDefBlockOpen = true;
 			lastSoundType = "";
 			soundFilePath = "";
-			soundType = MSFReader::INVALID_SOUND_TYPE;
-			delay			= MSFReader::DEFAULT_DELAY;
-			loops			= MSFReader::DEFAULT_LOOPS;
-			fadein		= MSFReader::DEFAULT_FADEIN;
-			fadeout		= MSFReader::DEFAULT_FADEOUT;
+
+			delay			= SoundEvent::DEFAULT_DELAY;
+			loops			= SoundEvent::DEFAULT_LOOPS;
+			fadein		= SoundEvent::DEFAULT_FADEIN;
+			fadeout		= SoundEvent::DEFAULT_FADEOUT;
 		}
 		// Check for the closing of a music defintion block...
 		else if (currReadStr == MSFReader::CLOSE_SOUND_DEFINITION_BLOCK) {
@@ -74,15 +74,18 @@ bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenu
 			}
 			assert(soundType != MSFReader::INVALID_SOUND_TYPE);
 			
-			soundDefBlockOpen = false;
-			
 			// Create the sound object...
 			Sound* newSound = NULL;
 			if (soundIsMask) {
 				newSound = new SoundMask(soundFilePath);
 			}
 			else {
-				newSound = new SoundEvent(soundFilePath, delay, loops, fadein, fadeout);
+				SoundEvent* newSoundEvent = new SoundEvent(soundFilePath);
+				newSoundEvent->SetDelay(delay);
+				newSoundEvent->SetLoops(loops);
+				newSoundEvent->SetFadein(fadein);
+				newSoundEvent->SetFadeout(fadeout);
+				newSound = newSoundEvent;
 			}
 
 			if (newSound == NULL) {
@@ -92,7 +95,11 @@ bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenu
 			}
 
 			// Add the new sound to the mapping of sounds
-			mainMenuSounds.insert(std::make_pair(static_cast<Sound::MainMenuSound>(soundType), newSound));
+			sounds.insert(std::make_pair(soundType, newSound));
+
+			// Reset relevant variables for the next music definition block
+			soundType = MSFReader::INVALID_SOUND_TYPE;
+			soundDefBlockOpen = false;
 		}
 		else {
 			// Check to see if the sound definition block has been opened, if it has we will search for
@@ -117,6 +124,13 @@ bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenu
 						}
 
 						std::getline(*inStream, soundFilePath);
+						
+						// Clear all white space...
+						std::stringstream tempStringStr(soundFilePath);
+						soundFilePath = "";
+						while (tempStringStr >> soundFilePath) {}
+
+						soundFilePath = GameViewConstants::GetInstance()->SOUND_DIR + "/" + soundFilePath;
 					}
 				}
 				else {
@@ -128,9 +142,29 @@ bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenu
 						
 						// The rest of the line should contain the sound file path...
 						std::getline(*inStream, soundFilePath);
+
+						// Clear all white space...
+						std::stringstream tempStringStr(soundFilePath);
+						soundFilePath = "";
+						while (tempStringStr >> soundFilePath) {}
+
+						soundFilePath = GameViewConstants::GetInstance()->SOUND_DIR + "/" + soundFilePath;
 					}
 					else if (currReadStr == MSFReader::DELAY_KEYWORD) {
 						if (!FoundEqualsSyntax(error, errorStr, inStream)) {
+							continue;
+						}
+
+						if(*inStream >> delay) {
+							if (delay < 0 || delay > 60000) {
+								error = true;
+								errorStr = "Invalid delay value found. Delays must be in the range [0, 60000].";
+								continue;
+							}
+						}
+						else {
+							error = true;
+							errorStr = "Could not parse delay value.";
 							continue;
 						}
 
@@ -140,9 +174,35 @@ bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenu
 							continue;
 						}
 
+						if (*inStream >> loops) {
+							if (loops < 1 || loops > 99) {
+								error = true;
+								errorStr = "Invalid loops value found. The number of loops must be in the range [1, 99].";
+								continue;
+							}
+						}
+						else {
+							error = true;
+							errorStr = "Could not parse loops value.";
+							continue;
+						}
+
 					}
 					else if (currReadStr == MSFReader::FADE_IN_KEYWORD) {
 						if (!FoundEqualsSyntax(error, errorStr, inStream)) {
+							continue;
+						}
+
+						if (*inStream >> fadein) {
+							if (fadein < 0) {
+								error = true;
+								errorStr = "Invalid fadein value found. Fadein must be a value greater than or equal to zero.";
+								continue;
+							}
+						}
+						else {
+							error = true;
+							errorStr = "Could not parse fadein value.";
 							continue;
 						}
 
@@ -152,13 +212,24 @@ bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenu
 							continue;
 						}
 
+						if (*inStream >> fadeout) {
+							if (fadeout < 0) {
+								error = true;
+								errorStr = "Invalid fadeout value found. Fadeout must be a value greater than or equal to zero.";
+								continue;
+							}
+						}
+						else {
+							error = true;
+							errorStr = "Could not parse fadeout value.";
+							continue;
+						}
 					}
 				}
-
 			}
 			else {
 				// Sound definition block has not been opened yet, look for an identifier...
-				soundType = MSFReader::ConvertMainMenuKeywordToSoundType(currReadStr);
+				soundType = MSFReader::ConvertKeywordToSoundType(currReadStr);
 				lastSoundType = currReadStr;
 				if (soundType != MSFReader::INVALID_SOUND_TYPE) {
 					soundIsMask = Sound::IsSoundMask(soundType);
@@ -182,9 +253,9 @@ bool MSFReader::ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenu
 
 /**
  * Converts the given music script file keyword sound name into an enumerated sound type
- * for Main Menu sounds.
+ * for the various game sounds.
  */
-int MSFReader::ConvertMainMenuKeywordToSoundType(const std::string& soundName) {
+int MSFReader::ConvertKeywordToSoundType(const std::string& soundName) {
 	if (soundName == MSFReader::MAIN_MENU_BG_MASK) {
 		return Sound::MainMenuBackgroundMask;
 	}
