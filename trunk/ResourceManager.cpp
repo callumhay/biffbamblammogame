@@ -33,6 +33,7 @@ cgContext(NULL), inkBlockMesh(NULL), configOptions(NULL), celShadingTexture(NULL
 	debug_output("Supported OpenAL Sound MIME types:");
 	std::string mimeTypesStr(alutGetMIMETypes(ALUT_LOADER_BUFFER));
 	debug_output(mimeTypesStr);
+	debug_openal_state();
 
 	// Initialize Physfs and make sure everything loaded alright
 	int result = PHYSFS_init(argv0);
@@ -51,6 +52,7 @@ ResourceManager::~ResourceManager() {
 	// Check for errors and clean up OpenAL
 	ALboolean successfulOALExit = alutExit();
 	assert(successfulOALExit);
+	debug_openal_state();
 
 	// Clean up all loaded meshes - these must be deleted first so that the
 	// effects go with them and make the assertions below correct

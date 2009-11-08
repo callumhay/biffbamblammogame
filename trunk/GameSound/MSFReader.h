@@ -8,7 +8,7 @@
 class MSFReader {
 
 public:
-	static bool ReadMainMenuMSF(std::map<Sound::MainMenuSound, Sound*>& mainMenuSounds);
+	static bool ReadMSF(const std::string& filepath, std::map<int, Sound*>& sounds);
 
 private:
 	MSFReader(){}
@@ -33,12 +33,8 @@ private:
 
 	// Initializer/Default values
 	static const int INVALID_SOUND_TYPE = -1;
-	static const int DEFAULT_DELAY = 0;
-	static const int DEFAULT_LOOPS = 1;
-	static const int DEFAULT_FADEIN = 0;
-	static const int DEFAULT_FADEOUT = 0;
 
-	static int ConvertMainMenuKeywordToSoundType(const std::string& soundName);
+	static int ConvertKeywordToSoundType(const std::string& soundName);
 
 	static bool FoundEqualsSyntax(bool& noEquals, std::string& errorStr, std::istringstream* inStream);
 

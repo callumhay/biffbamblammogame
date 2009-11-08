@@ -33,6 +33,7 @@ espAssets(NULL),
 itemAssets(NULL),
 fboAssets(NULL),
 lightAssets(NULL),
+soundAssets(NULL),
 
 lifeHUD(NULL),
 crosshairHUD(NULL),
@@ -52,6 +53,10 @@ ghostBallEffect(NULL)
 
 	// Load FBO assets
 	this->fboAssets = new GameFBOAssets(screenWidth, screenHeight);
+
+	// Load sound assets
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
+	this->soundAssets = new GameSoundAssets();
 
 	// Load item assets
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading game items...");
@@ -97,11 +102,17 @@ GameAssets::~GameAssets() {
 	delete this->paddleStickyAttachment;
 	this->paddleStickyAttachment = NULL;
 
+	// Clear up the FrameBuffer Object assets
 	delete this->fboAssets;
 	this->fboAssets = NULL;
 
+	// Clear up the light assets
 	delete this->lightAssets;
 	this->lightAssets = NULL;
+
+	// Clear up sound assets
+	delete this->soundAssets;
+	this->soundAssets = NULL;
 
 	// Delete any HUD objects
 	delete this->lifeHUD;
@@ -298,6 +309,9 @@ void GameAssets::Tick(double dT) {
 
 	// Tick the light assets (light animations for strobing, changing colours, etc.)
 	this->lightAssets->Tick(dT);
+
+	// Tick the sound assets
+	this->soundAssets->Tick(dT);
 }
 
 /**

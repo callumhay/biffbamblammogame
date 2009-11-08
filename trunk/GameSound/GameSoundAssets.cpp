@@ -1,8 +1,19 @@
 #include "GameSoundAssets.h"
+#include "MSFReader.h"
+#include "../GameView/GameViewConstants.h"
 
 #include <cassert>
 
+// Position and velocity of the listener
+const ALfloat GameSoundAssets::DEFAULT_LISTENER_POS[3]	= {0.0, 0.0, 0.0};
+const ALfloat GameSoundAssets::DEFAULT_LISTENER_VEL[3]	= {0.0, 0.0, 0.0};
+// Orientation of the listener. (first 3 elements are "at", second 3 are "up")
+const ALfloat GameSoundAssets::DEFAULT_LISTENER_ORIENT[6]	= {0.0, 0.0, -1.0, 0.0, 1.0, 0.0};
+
+
 GameSoundAssets::GameSoundAssets() {
+	// Setup OpenAL listener and load any sounds that will always be in memory
+	GameSoundAssets::SetupOpenALListener();
 	this->LoadGlobalSounds();
 }
 
@@ -44,19 +55,37 @@ void GameSoundAssets::UnloadWorldSounds() {
  * Load the sounds associated with the main menu in the game.
  */
 void GameSoundAssets::LoadMainMenuSounds() {
+	// This shouldn't happen, but if it's the case that there are still main menu sounds loaded
+	// that weren't previously cleaned up, clean them up first.
+	if (this->mainMenuSounds.size() != 0) {
+		assert(false);
+		this->UnloadMainMenuSounds();
+	}
+
+	bool readSuccess = MSFReader::ReadMSF(GameViewConstants::GetInstance()->MAIN_MENU_SOUND_SCRIPT, this->mainMenuSounds);
+	if (!readSuccess) {
+		std::cerr << "Error reading main menu music script file: " << GameViewConstants::GetInstance()->MAIN_MENU_SOUND_SCRIPT << std::endl;
+		return;
+	}
 }
 
 /**
  * Unload the sounds associated with the main menu in the game that may have been previously loaded.
  */
 void GameSoundAssets::UnloadMainMenuSounds() {
+	for (std::map<int, Sound*>::iterator iter = this->mainMenuSounds.begin(); iter != this->mainMenuSounds.end(); ++iter) {
+		Sound* currSound = iter->second;
+		delete currSound;
+		currSound = NULL;
+	}
+	this->mainMenuSounds.clear();
 }
 
 /**
  * Play a sound associated with the main menu of the game. The sound may be an event or mask.
  */
 void GameSoundAssets::PlayMainMenuSound(Sound::MainMenuSound sound) {
-	std::map<Sound::MainMenuSound, Sound*>::iterator foundSoundIter = this->mainMenuSounds.find(sound);
+	std::map<int, Sound*>::iterator foundSoundIter = this->mainMenuSounds.find(sound);
 	
 	// First make sure the sound exists, it should...
 	if (foundSoundIter == this->mainMenuSounds.end()) {
@@ -70,6 +99,17 @@ void GameSoundAssets::PlayMainMenuSound(Sound::MainMenuSound sound) {
 }
 
 void GameSoundAssets::StopMainMenuSound(Sound::MainMenuSound sound) {
+	std::map<int, Sound*>::iterator foundSoundIter = this->mainMenuSounds.find(sound);
+	
+	// First make sure the sound exists, it should...
+	if (foundSoundIter == this->mainMenuSounds.end()) {
+		assert(false);
+		return;
+	}
+	
+	Sound* foundSound = foundSoundIter->second;
+	foundSound->Stop();
+	this->activeSounds.remove(foundSound);
 }
 
 /**
@@ -86,4 +126,14 @@ void GameSoundAssets::LoadGlobalSounds() {
  */
 void GameSoundAssets::UnloadGlobalSounds() {
 	// TODO
+}
+
+/**
+ * Private helper for setting up the OpenAL listener position, velocity and orientation,
+ * this determines where the sound is going to be interpretted in the game.
+ */
+void GameSoundAssets::SetupOpenALListener() {
+	alListenerfv(AL_POSITION,    GameSoundAssets::DEFAULT_LISTENER_POS);
+	alListenerfv(AL_VELOCITY,    GameSoundAssets::DEFAULT_LISTENER_VEL);
+	alListenerfv(AL_ORIENTATION, GameSoundAssets::DEFAULT_LISTENER_ORIENT);
 }

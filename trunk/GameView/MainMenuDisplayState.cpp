@@ -20,6 +20,8 @@
 
 #include "../BlammoEngine/FBObj.h"
 
+#include "../GameSound/GameSoundAssets.h"
+
 #include "../GameController.h"
 #include "../WindowManager.h"
 
@@ -74,6 +76,11 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 	// Setup any fullscreen effects
 	this->menuFBO = new FBObj(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
+
+	// Load all the sound assets associated with the main menu
+	GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+	soundAssets->LoadMainMenuSounds();
+	soundAssets->PlayMainMenuSound(Sound::MainMenuBackgroundMask);
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
@@ -109,6 +116,10 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 		delete *iter;
 	}
 	this->randomBGParicles.clear();
+
+	// Clear the main menu sounds from memory
+	GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+	soundAssets->UnloadMainMenuSounds();
 }
 
 /**
