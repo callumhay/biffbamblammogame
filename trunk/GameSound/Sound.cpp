@@ -6,7 +6,9 @@
 const ALfloat Sound::DEFAULT_SOURCE_POS[3]		= {0.0, 0.0, 0.0};
 const ALfloat Sound::DEFAULT_SOURCE_VEL[3]		= {0.0, 0.0, 0.0};
 
-Sound::Sound(const std::string& filepath) : isLooping(true) {
+Sound::Sound(const std::string& name, const std::string& filepath) : 
+soundName(name), soundFile(filepath), isLooping(true) {
+
 	// Try to load the given sound file into an OpenAL buffer
 	this->buffer = alutCreateBufferFromFile(filepath.c_str());
 
@@ -22,8 +24,6 @@ Sound::Sound(const std::string& filepath) : isLooping(true) {
 			alSourcef(this->source, AL_GAIN, 1.0f);
 			alSourcefv(this->source, AL_POSITION, Sound::DEFAULT_SOURCE_POS);
 			alSourcefv(this->source, AL_VELOCITY, Sound::DEFAULT_SOURCE_VEL);
-			alSourcei(this->source, AL_LOOPING, this->isLooping);
-
 		}
 	}
 

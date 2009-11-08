@@ -18,13 +18,17 @@ public:
 		// Masks
 		MainMenuBackgroundMask = 0,
 		// Events
+		MainMenuBackgroundBangSmallEvent,
+		MainMenuBackgroundBangMediumEvent,
+		MainMenuBackgroundBangBigEvent,
 		MainMenuItemHighlightedEvent, 
-		MainMenuItemEnteredEvent, 
+		MainMenuItemEnteredEvent,
+		MainMenuItemBackAndCancelEvent,
 		MainMenuItemSelectedEvent, 
 		MainMenuItemScrolledEvent 
 	};
 
-	Sound(const std::string& filepath);
+	Sound(const std::string& name, const std::string& filepath);
 	virtual ~Sound();
 	
 	static bool IsSoundMask(int soundType);
@@ -38,6 +42,9 @@ public:
 
 	virtual void Tick(double dT)	= 0;
 
+	std::string GetSoundName() const { return this->soundName; }
+	std::string GetSoundFilename() const { return this->soundFile; }
+
 protected:
 	static const ALfloat DEFAULT_SOURCE_POS[3];
 	static const ALfloat DEFAULT_SOURCE_VEL[3];
@@ -50,6 +57,8 @@ protected:
 	ALsizei frequency;		// The frequency of the loaded sound
 	ALboolean isLooping;	// Whether the sound is set to loop indefinitely or not
 
+	std::string soundName;
+	std::string soundFile;
 };
 
 #endif

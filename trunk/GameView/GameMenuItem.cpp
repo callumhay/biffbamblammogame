@@ -515,6 +515,7 @@ void VerifyMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			else {
 				this->SetSelectedVerifyMenuOption(VerifyMenuItem::Cancel);
 			}
+			parent->MenuItemHighlighted();
 			break;
 
 		case SDLK_RETURN:

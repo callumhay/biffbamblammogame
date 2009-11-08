@@ -47,6 +47,7 @@ private:
 	void UnloadGlobalSounds();
 
 	static void SetupOpenALListener();
+	static Sound* FindSound(std::map<int, Sound*>& soundMap, int soundID);
 
 };
 #endif // _GAMESOUNDASSETS_H_

@@ -85,29 +85,21 @@ void GameSoundAssets::UnloadMainMenuSounds() {
  * Play a sound associated with the main menu of the game. The sound may be an event or mask.
  */
 void GameSoundAssets::PlayMainMenuSound(Sound::MainMenuSound sound) {
-	std::map<int, Sound*>::iterator foundSoundIter = this->mainMenuSounds.find(sound);
-	
-	// First make sure the sound exists, it should...
-	if (foundSoundIter == this->mainMenuSounds.end()) {
-		assert(false);
+	Sound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
+	if (foundSound == NULL) {
 		return;
 	}
 
-	Sound* foundSound = foundSoundIter->second;
 	foundSound->Play();
 	this->activeSounds.push_back(foundSound);
 }
 
 void GameSoundAssets::StopMainMenuSound(Sound::MainMenuSound sound) {
-	std::map<int, Sound*>::iterator foundSoundIter = this->mainMenuSounds.find(sound);
-	
-	// First make sure the sound exists, it should...
-	if (foundSoundIter == this->mainMenuSounds.end()) {
-		assert(false);
+	Sound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
+	if (foundSound == NULL) {
 		return;
 	}
-	
-	Sound* foundSound = foundSoundIter->second;
+
 	foundSound->Stop();
 	this->activeSounds.remove(foundSound);
 }
@@ -136,4 +128,20 @@ void GameSoundAssets::SetupOpenALListener() {
 	alListenerfv(AL_POSITION,    GameSoundAssets::DEFAULT_LISTENER_POS);
 	alListenerfv(AL_VELOCITY,    GameSoundAssets::DEFAULT_LISTENER_VEL);
 	alListenerfv(AL_ORIENTATION, GameSoundAssets::DEFAULT_LISTENER_ORIENT);
+}
+
+/**
+ * Tries to find the given sound ID in the given sound map.
+ * Returns: The sound object found, if nothing was found then NULL is returned.
+ */
+Sound* GameSoundAssets::FindSound(std::map<int, Sound*>& soundMap, int soundID) {
+	std::map<int, Sound*>::iterator foundSoundIter = soundMap.find(soundID);
+	
+	// First make sure the sound exists, it should...
+	if (foundSoundIter == soundMap.end()) {
+		debug_output("Sound not found (sound id = " << soundID << ")");
+		return NULL;
+	}
+	
+	return foundSoundIter->second;
 }
