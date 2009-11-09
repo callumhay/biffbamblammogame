@@ -1,0 +1,126 @@
+
+float Weight <
+    string UIWidget = "slider";
+    float UIMin = 0.01;
+    float UIMax = 10.0;
+    float UIStep = 0.01;
+    string UIName =  "Weight";
+> = 0.368f;
+
+float SceneWidth <
+    string UIWidget = "slider";
+    float UIMin = 1;
+    float UIMax = 1680;
+    float UIStep = 1;
+    string UIName =  "Width";
+> = 1024.0f;
+
+float SceneHeight <
+    string UIWidget = "slider";
+    float UIMin = 1;
+    float UIMax = 1050;
+    float UIStep = 1;
+    string UIName =  "Height";
+> = 768.0f;
+
+texture SceneTex <
+    string ResourceName = "lasers.jpg";
+    string UIName = "Scene Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D SceneSampler = sampler_state {
+	Texture = <SceneTex>;	
+	WrapS = Clamp;
+	WrapT = Clamp;
+};
+
+float4 gauss3x3_rows_PS(float2 UV : TEXCOORD0) : COLOR {
+	float tapUV = 1.0f / SceneWidth;
+	float4 total = tex2D(SceneSampler, UV);
+	//total += 0.368 * tex2D(SceneSampler, UV + float2(tapUV, 0));
+	//total += 0.368 * tex2D(SceneSampler, UV + float2(-tapUV, 0));
+	//return total / 1.736f;
+	total += 0.3 * tex2D(SceneSampler, UV + float2(tapUV, 0));
+	total += 0.3 * tex2D(SceneSampler, UV + float2(-tapUV, 0));
+	return total / 1.6f;	
+}
+float4 gauss3x3_cols_PS(float2 UV : TEXCOORD0) : COLOR {
+	float tapUV = 1.0f / SceneHeight;
+	float4 total   = tex2D(SceneSampler, UV);
+	//total += 0.368 * tex2D(SceneSampler, UV + float2(0, tapUV));
+	//total += 0.368 * tex2D(SceneSampler, UV + float2(0, -tapUV));
+	//return total / 1.736f;
+	total += 0.3 * tex2D(SceneSampler, UV + float2(0, tapUV));
+	total += 0.3 * tex2D(SceneSampler, UV + float2(0, -tapUV));
+	return total / 1.6f;	
+}
+
+float4 gauss5x5_rows_PS(float2 UV : TEXCOORD0) : COLOR {
+	float tapUV = 1.0f / SceneHeight;
+	float4 total = tex2D(SceneSampler, UV);
+	total += 0.641 * tex2D(SceneSampler, UV + float2(tapUV, 0));
+	total += 0.641 * tex2D(SceneSampler, UV + float2(-tapUV, 0));
+	total += 0.368 * tex2D(SceneSampler, UV + float2(2*tapUV, 0));
+	total += 0.368 * tex2D(SceneSampler, UV + float2(-2*tapUV, 0));
+	return total / 3.018f;
+}
+float4 gauss5x5_cols_PS(float2 UV : TEXCOORD0) : COLOR {
+	float tapUV = 1.0f / SceneHeight;
+	float4 total = tex2D(SceneSampler, UV);
+	total += 0.641 * tex2D(SceneSampler, UV + float2(0, tapUV));
+	total += 0.641 * tex2D(SceneSampler, UV + float2(0, -tapUV));
+	total += 0.368 * tex2D(SceneSampler, UV + float2(0, 2*tapUV));
+	total += 0.368 * tex2D(SceneSampler, UV + float2(0, -2*tapUV));
+	return total / 3.018f;
+}
+
+float4 gauss7x7_rows_PS(float2 UV : TEXCOORD0) : COLOR {
+	float tapUV = 1.0f / SceneHeight;
+	float4 total = tex2D(SceneSampler, UV);
+	total += 0.895 * tex2D(SceneSampler, UV + float2(tapUV, 0));
+	total += 0.895 * tex2D(SceneSampler, UV + float2(-tapUV, 0));
+	total += 0.641 * tex2D(SceneSampler, UV + float2(2*tapUV, 0));
+	total += 0.641 * tex2D(SceneSampler, UV + float2(-2*tapUV, 0));
+	total += 0.368 * tex2D(SceneSampler, UV + float2(3*tapUV, 0));
+	total += 0.368 * tex2D(SceneSampler, UV + float2(-3*tapUV, 0));
+	return total / 4.808f;
+}
+float4 gauss7x7_cols_PS(float2 UV : TEXCOORD0) : COLOR {
+	float tapUV = 1.0f / SceneHeight;
+	float4 total = tex2D(SceneSampler, UV);
+	total += 0.895 * tex2D(SceneSampler, UV + float2(0, tapUV));
+	total += 0.895 * tex2D(SceneSampler, UV + float2(0, -tapUV));
+	total += 0.641 * tex2D(SceneSampler, UV + float2(0, 2*tapUV));
+	total += 0.641 * tex2D(SceneSampler, UV + float2(0, -2*tapUV));
+	total += 0.368 * tex2D(SceneSampler, UV + float2(0, 3*tapUV));
+	total += 0.368 * tex2D(SceneSampler, UV + float2(0, -3*tapUV));
+	return total / 4.808f;
+}
+
+technique GaussianBlur3x3 {
+    pass rows {
+    	FragmentProgram = compile arbfp1 gauss3x3_rows_PS();
+    }
+    pass cols {
+		FragmentProgram = compile arbfp1 gauss3x3_cols_PS();    	
+    }
+}
+
+technique GaussianBlur5x5 {
+	pass rows {
+		FragmentProgram = compile arbfp1 gauss5x5_rows_PS();
+	}
+	pass cols {
+		FragmentProgram = compile arbfp1 gauss5x5_cols_PS();  
+	}
+}
+
+technique GaussianBlur7x7 {
+	pass rows {
+		FragmentProgram = compile arbfp1 gauss7x7_rows_PS();
+	}
+	pass cols {
+		FragmentProgram = compile arbfp1 gauss7x7_cols_PS();  
+	}
+}

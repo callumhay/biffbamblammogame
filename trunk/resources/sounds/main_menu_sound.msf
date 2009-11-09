@@ -1,0 +1,39 @@
+MainMenuBackgroundMask {
+   file     = test/mask_test_sound.wav
+}
+
+ignore MainMenuBackgroundBangSmallEvent {
+   file     = 
+}
+
+ignore MainMenuBackgroundBangMediumEvent {
+   file     = test/event_test_sound.wav
+}
+
+ignore MainMenuBackgroundBangBigEvent {
+   file     = test/event_test_sound.wav
+}
+
+MainMenuItemHighlightedEvent {
+   file     = test/event_test_sound.wav
+   delay    = 0
+   loops    = 1
+   fadein   = 0
+   fadeout  = 0
+}
+
+MainMenuItemEnteredEvent {
+   file     = test/event_test_sound.wav
+}
+
+ignore MainMenuItemBackAndCancelEvent {
+}
+
+MainMenuItemVerifyAndSelectEvent {
+   file     = test/event_test_sound.wav
+}
+
+MainMenuItemScrolledEvent {
+   file     = test/event_test_sound.wav
+}
+
