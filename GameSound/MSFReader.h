@@ -42,7 +42,7 @@ private:
 	static const int INVALID_SOUND_TYPE = -1;
 
 	static int ConvertKeywordToSoundType(const std::string& soundName);
-	static bool FoundEqualsSyntax(bool& noEquals, std::string& errorStr, std::istringstream* inStream);
+	static bool FoundEqualsSyntax(bool& noEquals, std::string& errorStr, std::istream* inStream);
 
 };
 

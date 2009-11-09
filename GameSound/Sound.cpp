@@ -2,6 +2,8 @@
 #include "SoundEvent.h"
 #include "SoundMask.h"
 
+#include "../ResourceManager.h"
+
 // Default position and velocity of this sound in the game
 const ALfloat Sound::DEFAULT_SOURCE_POS[3]		= {0.0, 0.0, 0.0};
 const ALfloat Sound::DEFAULT_SOURCE_VEL[3]		= {0.0, 0.0, 0.0};
@@ -9,8 +11,15 @@ const ALfloat Sound::DEFAULT_SOURCE_VEL[3]		= {0.0, 0.0, 0.0};
 Sound::Sound(const std::string& name, const std::string& filepath) : 
 soundName(name), soundFile(filepath), isLooping(true) {
 
-	// Try to load the given sound file into an OpenAL buffer
+	// Try to load the given sound file into an OpenAL buffer - in debug mode we load right off disk,
+	// in release we load it from the zip file system
+#ifdef _DEBUG
 	this->buffer = alutCreateBufferFromFile(filepath.c_str());
+#else
+	int dataLength = 0;
+	char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
+	this->buffer = alutCreateBufferFromFileImage(soundMemData, dataLength);
+#endif
 
 	// Continue loading the sound if the buffer was loaded properly
 	if (this->buffer != AL_NONE) {
