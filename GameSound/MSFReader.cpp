@@ -25,7 +25,7 @@ const char* MSFReader::MAIN_MENU_BG_BANG_MEDIUM_EVENT				= "MainMenuBackgroundBa
 const char* MSFReader::MAIN_MENU_BG_BANG_BIG_EVENT					= "MainMenuBackgroundBangBigEvent";
 const char* MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT					= "MainMenuItemEnteredEvent";
 const char* MSFReader::MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT	= "MainMenuItemBackAndCancelEvent";
-const char* MSFReader::MAIN_MENU_ITEM_SELECTED_EVENT				= "MainMenuItemSelectedEvent";
+const char* MSFReader::MAIN_MENU_ITEM_VERIFY_AND_SEL_EVENT	= "MainMenuItemVerifyAndSelectEvent";
 const char* MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT				= "MainMenuItemScrolledEvent";
 
 bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& sounds) {
@@ -303,8 +303,8 @@ int MSFReader::ConvertKeywordToSoundType(const std::string& soundName) {
 	else if (soundName == MSFReader::MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT) {
 		return Sound::MainMenuItemBackAndCancelEvent;
 	}
-	else if (soundName == MSFReader::MAIN_MENU_ITEM_SELECTED_EVENT) {
-		return Sound::MainMenuItemSelectedEvent;
+	else if (soundName == MSFReader::MAIN_MENU_ITEM_VERIFY_AND_SEL_EVENT) {
+		return Sound::MainMenuItemVerifyAndSelectEvent;
 	}
 	else if (soundName == MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT) {
 		return Sound::MainMenuItemScrolledEvent;

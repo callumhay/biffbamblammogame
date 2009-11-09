@@ -46,8 +46,8 @@ const Colour MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
 
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
 DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), 
-mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), changeToPlayGameState(false),
-menuFBO(NULL), bloomEffect(NULL),
+mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NULL),
+changeToPlayGameState(false), menuFBO(NULL), bloomEffect(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 {
 
@@ -65,7 +65,8 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 
 	// Setup handlers for menus and initialize the menus
 	this->mainMenuEventHandler		= new MainMenuEventHandler(this);
-	this->optionsMenuEventHandler = new OptionsSubMenuEventHandler(this);	
+	this->optionsMenuEventHandler = new OptionsSubMenuEventHandler(this);
+	this->itemsEventHandler				= new AllMenuItemsEventHandler(this);
 	this->InitializeMainMenu();
 
 	// Setup the fade-in animation
@@ -99,6 +100,8 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	this->mainMenuEventHandler = NULL;
 	delete this->optionsMenuEventHandler;
 	this->optionsMenuEventHandler = NULL;
+	delete this->itemsEventHandler;
+	this->itemsEventHandler = NULL;
 
 	delete this->menuFBO;
 	this->menuFBO = NULL;
@@ -253,6 +256,7 @@ void MainMenuDisplayState::InitializeMainMenu() {
 
 	exitMenuItem->SetVerifyMenuColours(Colour(1,1,1), MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
 	exitMenuItem->SetVerifyMenuText("Are you sure you want to quit?", "Well, obviously.", "Hell no.");
+	exitMenuItem->SetEventHandler(this->itemsEventHandler);
 	this->exitGameMenuItemIndex = this->mainMenu->AddMenuItem(exitMenuItem);
 
 	this->mainMenu->SetSelectedMenuItem(this->newGameMenuItemIndex);
@@ -290,6 +294,7 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 
 	this->fullscreenMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, fullscreenOptions);
 	this->fullscreenMenuItem->SetSelectedItem(this->cfgOptions.GetIsFullscreenOn() ? MENU_SEL_ON_INDEX : MENU_SEL_OFF_INDEX);
+	this->fullscreenMenuItem->SetEventHandler(this->itemsEventHandler);
 	this->optionsFullscreenIndex = this->optionsSubMenu->AddMenuItem(this->fullscreenMenuItem);
 
 	// Add the vertical sync toggle item
@@ -302,6 +307,7 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	
 	this->vSyncMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, vSyncOptions);
 	this->vSyncMenuItem->SetSelectedItem(this->cfgOptions.GetIsVSyncOn() ? MENU_SEL_ON_INDEX : MENU_SEL_OFF_INDEX);
+	this->vSyncMenuItem->SetEventHandler(this->itemsEventHandler);
 	this->optionsVSyncIndex = this->optionsSubMenu->AddMenuItem(this->vSyncMenuItem);
 
 	// Add the resolution selection item
@@ -331,6 +337,7 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 
 	this->resolutionMenuItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, resolutionOptions);
 	this->resolutionMenuItem->SetSelectedItem(resIndex);
+	this->resolutionMenuItem->SetEventHandler(this->itemsEventHandler);
 	this->optionsResolutionIndex = this->optionsSubMenu->AddMenuItem(this->resolutionMenuItem);
 
 	// Add an option for getting out of the menu
@@ -623,12 +630,6 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(in
 	soundAssets->PlayMainMenuSound(Sound::MainMenuItemHighlightedEvent);
 }
 
-void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemDeactivatedEvent(int itemIndex) {
-	// Play the sound effect assoicated with menu item deactivation
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(Sound::MainMenuItemBackAndCancelEvent);
-}
-
 /**
  * Handle activation events for items in the main menu.
  */
@@ -639,22 +640,22 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 	// Do the actual selection of the item
 	if (itemIndex == this->mainMenuState->newGameMenuItemIndex) {
 		debug_output("Selected " << NEW_GAME_MENUITEM << " from menu");
-		soundAssets->PlayMainMenuSound(Sound::MainMenuItemSelectedEvent);
+		soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
 		this->mainMenuState->changeToPlayGameState = true;
 	}
 	else if (itemIndex == this->mainMenuState->playLevelMenuItemIndex) {
 		debug_output("Selected " << PLAY_LEVEL_MENUITEM << " from menu");
-		soundAssets->PlayMainMenuSound(Sound::MainMenuItemSelectedEvent);
+		soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
 	}
 	else if (itemIndex == this->mainMenuState->optionsMenuItemIndex) {
 		debug_output("Selected " << OPTIONS_MENUITEM << " from menu");
-		soundAssets->PlayMainMenuSound(Sound::MainMenuItemSelectedEvent);
+		soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
 	}
 	else if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
 		// We don't do anything since the user is currently being asked
 		// for verification to quit the game
 		debug_output("Selected " << EXIT_MENUITEM << " from menu");
-		soundAssets->PlayMainMenuSound(Sound::MainMenuItemBackAndCancelEvent);
+		soundAssets->PlayMainMenuSound(Sound::MainMenuItemEnteredEvent);
 	}
 	else {
 		assert(false);
@@ -686,12 +687,6 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemHighlightedEv
 	soundAssets->PlayMainMenuSound(Sound::MainMenuItemHighlightedEvent);
 }
 
-void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemDeactivatedEvent(int itemIndex) {
-	// Play the sound effect assoicated with menu item deactivation
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(Sound::MainMenuItemBackAndCancelEvent);
-}
-
 /**
  * Handle activation events for items in the options menu.
  */
@@ -702,16 +697,21 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemActivatedEven
 		this->mainMenuState->optionsSubMenu->SetSelectedMenuItem(0);
 		this->mainMenuState->mainMenu->DeactivateSelectedMenuItem();
 	}
+	else {
+		if (itemIndex == this->mainMenuState->optionsFullscreenIndex || 
+				itemIndex == this->mainMenuState->optionsResolutionIndex ||
+				itemIndex == this->mainMenuState->optionsVSyncIndex) {
+			// Play the entered sound if it's an enterable item...
+			GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+			soundAssets->PlayMainMenuSound(Sound::MainMenuItemEnteredEvent);
+		}
+	}
 }
 
 /**
  * Handle changes in the options for the game.
  */
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
-	// Play the verify sound...
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(Sound::MainMenuItemEnteredEvent);
-
 	if (itemIndex == this->mainMenuState->optionsFullscreenIndex) {
 		int currSelectionIdx = this->mainMenuState->fullscreenMenuItem->GetSelectedItemIndex();
 
@@ -771,4 +771,22 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::EscMenu() {
 	else {
 		this->mainMenuState->optionsSubMenu->ActivateSelectedMenuItem();
 	}
+}
+
+void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemScrolled() {
+	// Play the scroll sound...
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+	soundAssets->PlayMainMenuSound(Sound::MainMenuItemScrolledEvent);
+}
+
+void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemEnteredAndSet() {
+	// Play the verification sound...
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+	soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
+}
+
+void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemCancelled() {
+	// Play the cancel/back sound..
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+	soundAssets->PlayMainMenuSound(Sound::MainMenuItemBackAndCancelEvent);
 }

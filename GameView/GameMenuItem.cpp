@@ -22,7 +22,7 @@ const float GameMenuItem::SUB_MENU_PADDING						= 15.0f;
 // GameMenuItem Functions *******************************************
 
 GameMenuItem::GameMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameSubMenu* subMenu) : 
-smTextLabel(smLabel), lgTextLabel(lgLabel), subMenu(subMenu) {
+smTextLabel(smLabel), lgTextLabel(lgLabel), subMenu(subMenu), eventHandler(NULL) {
 	
 	assert(smLabel.GetText() == lgLabel.GetText());
 
@@ -259,11 +259,19 @@ void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			if (this->selectedIndex < 0) {
 				this->selectedIndex = this->selectionList.size() - 1;
 			}
+
+			if (this->eventHandler != NULL) {
+				this->eventHandler->MenuItemScrolled();
+			}
 			break;
 
 		case SDLK_RIGHT:
 			// Move the selection up one item
 			this->selectedIndex = (this->selectedIndex + 1) % this->selectionList.size();
+			
+			if (this->eventHandler != NULL) {
+				this->eventHandler->MenuItemScrolled();
+			}
 			break;
 
 		case SDLK_RETURN:
@@ -273,6 +281,10 @@ void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 				parent->ActivatedMenuItemChanged();
 			}
 			parent->DeactivateSelectedMenuItem();
+			
+			if (this->eventHandler != NULL) {
+				this->eventHandler->MenuItemEnteredAndSet();
+			}
 			break;
 
 		case SDLK_ESCAPE:
@@ -280,6 +292,10 @@ void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			// and we make sure the selection inside the item doesn't change
 			this->selectedIndex = this->previouslySelectedIndex;
 			parent->DeactivateSelectedMenuItem();
+
+			if (this->eventHandler != NULL) {
+				this->eventHandler->MenuItemCancelled();
+			}
 			break;
 
 		default:
@@ -523,6 +539,10 @@ void VerifyMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			if (this->selectedOption == VerifyMenuItem::Cancel) {
 				// If the user decided to cancel then just deactivate the item
 				parent->DeactivateSelectedMenuItem();
+				
+				if (this->eventHandler != NULL) {
+					this->eventHandler->MenuItemCancelled();
+				}
 			}
 			else {
 				// If the user decided to confirm then tell the parent that the activated
@@ -536,6 +556,10 @@ void VerifyMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			// if the item is already set to cancel then just cancel the verify menu
 			if (this->selectedOption == VerifyMenuItem::Cancel) {
 				parent->DeactivateSelectedMenuItem();
+
+				if (this->eventHandler != NULL) {
+					this->eventHandler->MenuItemCancelled();
+				}
 			}
 			else {
 				this->SetSelectedVerifyMenuOption(VerifyMenuItem::Cancel);

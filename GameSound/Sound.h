@@ -24,7 +24,7 @@ public:
 		MainMenuItemHighlightedEvent, 
 		MainMenuItemEnteredEvent,
 		MainMenuItemBackAndCancelEvent,
-		MainMenuItemSelectedEvent, 
+		MainMenuItemVerifyAndSelectEvent, 
 		MainMenuItemScrolledEvent 
 	};
 
