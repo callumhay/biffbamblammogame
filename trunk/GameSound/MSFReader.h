@@ -35,7 +35,7 @@ private:
 	static const char* MAIN_MENU_ITEM_HIGHLIGHTED_EVENT;
 	static const char* MAIN_MENU_ITEM_ENTERED_EVENT;
 	static const char* MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT;
-	static const char* MAIN_MENU_ITEM_SELECTED_EVENT;
+	static const char* MAIN_MENU_ITEM_VERIFY_AND_SEL_EVENT;
 	static const char* MAIN_MENU_ITEM_SCROLLED_EVENT;
 
 	// Initializer/Default values

@@ -39,12 +39,6 @@ public:
 	virtual void GameMenuItemHighlightedEvent(int itemIndex) = 0;
 
 	/**
-	 * Event called when the user cancels out of the selection of a menu item.
-	 * Parameters: itemIndex - the index of the item that was deactivated.
-	 */
-	virtual void GameMenuItemDeactivatedEvent(int itemIndex) = 0;
-
-	/**
 	 * Event called when a menu item has been activated.
 	 * Parameters: itemIndex - the index of the item that was activated.
 	 */
@@ -203,12 +197,6 @@ public:
 	inline void MenuItemHighlighted() {
 		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
 			(*iter)->GameMenuItemHighlightedEvent(this->selectedMenuItemIndex);
-		}
-	}
-
-	inline void MenuItemDeactivated() {
-		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
-			(*iter)->GameMenuItemDeactivatedEvent(this->selectedMenuItemIndex);
 		}
 	}
 

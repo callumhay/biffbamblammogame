@@ -134,7 +134,6 @@ public:
 		MainMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
 		~MainMenuEventHandler() {}
 		void GameMenuItemHighlightedEvent(int itemIndex);
-		void GameMenuItemDeactivatedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex) {};
 		void GameMenuItemVerifiedEvent(int itemIndex);
@@ -148,16 +147,28 @@ public:
 		OptionsSubMenuEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
 		~OptionsSubMenuEventHandler() {}
 		void GameMenuItemHighlightedEvent(int itemIndex);
-		void GameMenuItemDeactivatedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex);
 		void GameMenuItemVerifiedEvent(int itemIndex) {};
 		void EscMenu();
 	};
 
+	class AllMenuItemsEventHandler : public GameMenuItemEventHandler {
+	private:
+		MainMenuDisplayState* mainMenuState;
+	public:
+		AllMenuItemsEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
+		~AllMenuItemsEventHandler() {}
+
+		void MenuItemScrolled();
+		void MenuItemEnteredAndSet();
+		void MenuItemCancelled();
+	};
+
 private:
 	MainMenuEventHandler* mainMenuEventHandler;						// Event handler for the main (top-most) menu
 	OptionsSubMenuEventHandler* optionsMenuEventHandler;	// Event handler for the options sub-menu
+	AllMenuItemsEventHandler* itemsEventHandler;					// Event handler for more complicated items (e.g., scrollers, verify menus)
 };
 
 #endif

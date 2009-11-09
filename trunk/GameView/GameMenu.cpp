@@ -324,8 +324,6 @@ void GameMenu::DeactivateSelectedMenuItem() {
 		if (i == this->selectedMenuItemIndex) { continue; }
 		this->menuItems[i]->SetTextColour(this->idleColour);
 	}
-
-	this->MenuItemDeactivated();
 }
 
 /**

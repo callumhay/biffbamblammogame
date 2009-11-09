@@ -20,6 +20,14 @@
 class GameMenu;
 class GameSubMenu;
 
+
+class GameMenuItemEventHandler {
+public:
+	virtual void MenuItemScrolled() = 0;
+	virtual void MenuItemEnteredAndSet() = 0;
+	virtual void MenuItemCancelled() = 0;
+};
+
 /**
  * An item in a game menu that may be highlighted and selected
  * by the user.
@@ -30,6 +38,7 @@ protected:
 	TextLabel2D* currLabel;
 	TextLabel2D smTextLabel, lgTextLabel;
 	AnimationMultiLerp<float> wiggleAnimation;
+	GameMenuItemEventHandler* eventHandler;
 
 public:
 	static const float MENU_ITEM_WOBBLE_AMT_LARGE;
@@ -39,6 +48,11 @@ public:
 
 	GameMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, GameSubMenu* subMenu);
 	virtual ~GameMenuItem();
+
+	void SetEventHandler(GameMenuItemEventHandler* eventHandler) { 
+		assert(eventHandler != NULL);
+		this->eventHandler = eventHandler; 
+	}
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
 	virtual void KeyPressed(GameMenu* parent, SDLKey key) {};
