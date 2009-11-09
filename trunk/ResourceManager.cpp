@@ -676,20 +676,41 @@ bool ResourceManager::WriteConfigurationOptionsToFile(const ConfigOptions& cfgOp
  */ 
 std::istringstream* ResourceManager::FilepathToInStream(const std::string &filepath) {
 	std::istringstream* inFile = NULL;
+	int fileBufferlength = 0;
 
-	// First make sure the file exists in the archive
+	char* fileBuffer = ResourceManager::FilepathToMemoryBuffer(filepath, fileBufferlength);
+	if (fileBuffer == NULL) {
+		assert(false);
+		return NULL;
+	}
+	
+	// Convert the bytes to a string stream 
+	inFile = new std::istringstream(std::string(fileBuffer), std::ios_base::in | std::ios_base::binary);
+	
+	// Clean up
+	delete[] fileBuffer;
+	fileBuffer = NULL;
+
+	return inFile;
+}
+
+/**
+ * Convert a file stored in the resource zip filesystem into a memory stream of bytes.
+ */
+char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, int &length) {
+// First make sure the file exists in the archive
 	int doesExist = PHYSFS_exists(filepath.c_str());
 	if (doesExist == NULL) {
 		debug_output("File not found: " << filepath);
 		debug_physfs_state(NULL);
-		return inFile;
+		return NULL;
 	}
 
 	// Open the file for reading
 	PHYSFS_File* fileHandle = PHYSFS_openRead(filepath.c_str());
 	if (fileHandle == NULL) {
 		assert(false);
-		return inFile;
+		return NULL;
 	}
 
 	// Get a byte buffer of the entire file and convert it into a string stream so it
@@ -703,19 +724,14 @@ std::istringstream* ResourceManager::FilepathToInStream(const std::string &filep
 		fileBuffer = NULL;
 		debug_output("Error reading file to bytes: " << filepath);
 		assert(false);
-		return inFile;
+		return NULL;
 	}
 	fileBuffer[fileLength] = '\0';
 
-	// Convert the bytes to a string stream 
-	inFile = new std::istringstream(std::string(fileBuffer), std::ios_base::in | std::ios_base::binary);
-	
-	// Clean up
-	delete[] fileBuffer;
-	fileBuffer = NULL;
 	int closeWentWell = PHYSFS_close(fileHandle);
 	debug_physfs_state(closeWentWell);
 	fileHandle = NULL;
 
-	return inFile;
+	length = fileLength;
+	return fileBuffer;
 }

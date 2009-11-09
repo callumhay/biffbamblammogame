@@ -30,8 +30,17 @@ const char* MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT				= "MainMenuItemScrolledE
 
 bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& sounds) {
 
-	// Grab a file in stream from the main manu music script file
+	// Grab a file in stream from the main manu music script file:
+	// in debug mode we load right off disk, in release we load it from the zip file system
+#ifdef _DEBUG
+	std::ifstream* inStream = new std::ifstream(filepath.c_str());
+#else 
 	std::istringstream* inStream = ResourceManager::GetInstance()->FilepathToInStream(filepath);
+#endif
+
+	if (inStream == NULL) {
+		return false;
+	}
 
 	// Stuff for capturing errors
 	bool error = false;
@@ -317,7 +326,7 @@ int MSFReader::ConvertKeywordToSoundType(const std::string& soundName) {
  * Private helper function for finding whether an equals sign was present in the file
  * at the current read position.
  */
-bool MSFReader::FoundEqualsSyntax(bool& noEquals, std::string& errorStr, std::istringstream* inStream) {
+bool MSFReader::FoundEqualsSyntax(bool& noEquals, std::string& errorStr, std::istream* inStream) {
 	char equals = '\0';
 	*inStream >> equals;
 	if (equals != '=') {
