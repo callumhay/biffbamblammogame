@@ -1,0 +1,11 @@
+newmtl BlockMetal
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.440000 0.440000 0.440000
+Ns 90
+map_Kd resources/textures/bombmetal_512x256.jpg
+type outlinedcel
+outlinesize 1.5
+geomtype fg
+
+
