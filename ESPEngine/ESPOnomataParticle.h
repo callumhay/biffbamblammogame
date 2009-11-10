@@ -15,7 +15,7 @@
 
 class TextureFontSet;
 
-class ESPOnomataParticle : public ESPParticle{
+class ESPOnomataParticle : public ESPParticle {
 protected:
 	bool useGivenString;
 
@@ -50,6 +50,9 @@ public:
 		this->extremeness = e;
 		this->GenerateNewString();
 	}
+
+	Onomatoplex::SoundType GetSoundType() const { return this->soundType; }
+	Onomatoplex::Extremeness GetSoundExtremeness() const { return this->extremeness; }
 
 };
 #endif

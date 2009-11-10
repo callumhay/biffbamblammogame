@@ -19,6 +19,7 @@
 #include "../ESPEngine/ESPParticleScaleEffector.h"
 #include "../ESPEngine/ESPParticleColourEffector.h"
 #include "../ESPEngine/ESPMultiColourEffector.h"
+#include "../ESPEngine/ESPEmitterEventHandler.h"
 
 #include "GameMenu.h"
 #include "DisplayState.h"
@@ -165,10 +166,21 @@ public:
 		void MenuItemCancelled();
 	};
 
+	class BangParticleEventHandler : public ESPEmitterEventHandler {
+	private:
+		MainMenuDisplayState* mainMenuState;
+	public:
+		BangParticleEventHandler(MainMenuDisplayState *mainMenuState) : mainMenuState(mainMenuState) {}
+		~BangParticleEventHandler() {}
+
+		void ParticleSpawnedEvent(const ESPParticle* particle); 
+	};
+
 private:
 	MainMenuEventHandler* mainMenuEventHandler;						// Event handler for the main (top-most) menu
 	OptionsSubMenuEventHandler* optionsMenuEventHandler;	// Event handler for the options sub-menu
 	AllMenuItemsEventHandler* itemsEventHandler;					// Event handler for more complicated items (e.g., scrollers, verify menus)
+	BangParticleEventHandler* particleEventHandler;				// Event handler for the sound particles
 };
 
 #endif
