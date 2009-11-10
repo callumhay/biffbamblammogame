@@ -22,6 +22,8 @@
 
 #include "../GameSound/GameSoundAssets.h"
 
+#include "../ESPEngine/ESPOnomataParticle.h"
+
 #include "../GameController.h"
 #include "../WindowManager.h"
 
@@ -46,7 +48,7 @@ const Colour MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
 
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
 DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), 
-mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NULL),
+mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NULL), particleEventHandler(NULL),
 changeToPlayGameState(false), menuFBO(NULL), bloomEffect(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 {
@@ -67,6 +69,7 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 	this->mainMenuEventHandler		= new MainMenuEventHandler(this);
 	this->optionsMenuEventHandler = new OptionsSubMenuEventHandler(this);
 	this->itemsEventHandler				= new AllMenuItemsEventHandler(this);
+	this->particleEventHandler		= new BangParticleEventHandler(this);
 	this->InitializeMainMenu();
 
 	// Setup the fade-in animation
@@ -102,6 +105,8 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	this->optionsMenuEventHandler = NULL;
 	delete this->itemsEventHandler;
 	this->itemsEventHandler = NULL;
+	delete this->particleEventHandler;
+	this->particleEventHandler = NULL;
 
 	delete this->menuFBO;
 	this->menuFBO = NULL;
@@ -596,6 +601,9 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	bangOnoEffect->AddEffector(&this->particleFadeInAndOut);
 	bangOnoEffect->AddEffector(&this->particleSmallGrowth);
 
+	// Add event handler
+	bangOnoEffect->AddEventHandler(this->particleEventHandler);
+
 	// Add the single text particle to the emitter with the severity of the effect...
 	TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
 	bangTextLabel.SetColour(Colour(1, 1, 1));
@@ -789,4 +797,43 @@ void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemCancelled() {
 	// Play the cancel/back sound..
 	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	soundAssets->PlayMainMenuSound(Sound::MainMenuItemBackAndCancelEvent);
+}
+
+/**
+ * Triggered event when a sound onomatopiea particle spawns for the background 'bang' particle effects.
+ */
+void MainMenuDisplayState::BangParticleEventHandler::ParticleSpawnedEvent(const ESPParticle* particle) {
+	const ESPOnomataParticle* soundParticle = dynamic_cast<const ESPOnomataParticle*>(particle);
+	assert(soundParticle != NULL);
+
+	// Based on the extremeness of the onomata particle just spawned, we signify a sound event
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+	switch (soundParticle->GetSoundExtremeness()) {
+
+		// Small bang event...
+		case Onomatoplex::WEAK:
+		case Onomatoplex::NORMAL:
+			soundAssets->PlayMainMenuSound(Sound::MainMenuBackgroundBangSmallEvent);
+			//debug_output("Small bang");
+			break;
+
+		// Medium bang event...
+		case Onomatoplex::PRETTY_GOOD:
+		case Onomatoplex::GOOD:
+		case Onomatoplex::AWESOME:
+			soundAssets->PlayMainMenuSound(Sound::MainMenuBackgroundBangMediumEvent);
+			//debug_output("Medium bang");
+			break;
+
+		// Big bang event...
+		case Onomatoplex::SUPER_AWESOME:
+		case Onomatoplex::UBER:
+			soundAssets->PlayMainMenuSound(Sound::MainMenuBackgroundBangBigEvent);
+			//debug_output("Big bang");
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
 }

@@ -407,6 +407,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPEmitterEventHandler.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPMultiColourEffector.h"
 					>
 				</File>

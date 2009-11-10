@@ -12,6 +12,7 @@
 #include "ESPEmitter.h"
 #include "ESPShaderParticle.h"
 #include "ESPOnomataParticle.h"
+#include "ESPEmitterEventHandler.h"
 
 #include "../BlammoEngine/TextLabel.h"
 
@@ -26,6 +27,8 @@ ESPEmitter::~ESPEmitter() {
 	
 	// Clear the effectors
 	this->effectors.clear();
+	// Clear the event handlers
+	this->eventHandlers.clear();
 }
 
 /**
@@ -119,6 +122,11 @@ void ESPEmitter::ReviveParticle() {
 	}
 
 	this->timeSinceLastSpawn = 0.0f;
+
+	// Signify that a particle spawn event has occurred
+	for (std::list<ESPEmitterEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
+		(*iter)->ParticleSpawnedEvent(zombie);
+	}
 }
 
 
@@ -446,7 +454,6 @@ void ESPEmitter::SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter)
 	this->radiusDeviationFromPt = distFromCenter;
 }
 
-
 /**
  * Adds a particle effector to this emitter.
  */
@@ -470,6 +477,14 @@ void ESPEmitter::AddParticle(ESPParticle* particle) {
 void ESPEmitter::RemoveEffector(ESPParticleEffector* const effector) {
 	assert(effector != NULL);
 	this->effectors.remove(effector);
+}
+
+/**
+ * Adds an event handler to this emitter.
+ */
+void ESPEmitter::AddEventHandler(ESPEmitterEventHandler* eventHandler) {
+	assert(eventHandler != NULL);
+	this->eventHandlers.push_back(eventHandler);
 }
 
 /**

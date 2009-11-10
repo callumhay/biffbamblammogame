@@ -16,6 +16,7 @@
 
 class CgFxEffectBase;
 class TextLabel2D;
+class ESPEmitterEventHandler;
 
 /**
  * ESPEmitter.h
@@ -38,7 +39,8 @@ protected:
 	bool isReversed;		// Whether this emitter is reversed (i.e., particles start where they die and die where they start)
 	bool isPointSprite;	// Whether this emitter emits point sprites
 
-	std::list<ESPParticleEffector*> effectors;	// All the particle effectors of this emitter
+	std::list<ESPParticleEffector*> effectors;					// All the particle effectors of this emitter
+	std::list<ESPEmitterEventHandler*> eventHandlers;		// The event handlers attached to this emitter
 	
 	// The alignment of particles in this emitter w.r.t. the viewer
 	ESP::ESPAlignment particleAlignment;
@@ -112,6 +114,8 @@ public:
 
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);
+	void AddEventHandler(ESPEmitterEventHandler* eventHandler);
+
 	void AddParticle(ESPParticle* particle);
 
 	ESPInterval GetParticleSizeX() const { return this->particleSize[0]; }
