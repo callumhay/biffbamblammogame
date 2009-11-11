@@ -256,8 +256,7 @@ public:
 	 * of the interpolant will be set to the interpolant's current value.
 	 */
 	void SetLerp(double finalTime, T finalValue) {
-		this->x = 0.0;
-		this->tracker = 0;
+		this->ClearLerp();
 
 		this->timePts.reserve(2);
 		this->timePts.push_back(x);

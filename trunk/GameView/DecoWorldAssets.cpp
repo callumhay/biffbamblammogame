@@ -42,7 +42,8 @@ spiralTexSm(NULL),
 spiralTexMed(NULL),
 spiralTexLg(NULL),
 rotateEffectorCW(0, 5, ESPParticleRotateEffector::CLOCKWISE),
-rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
+rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
+bgFadeAnim(1)
 {
 	// Setup the beam effect
 	this->beamEffect->SetColour(Colour(1, 1, 1));
@@ -65,6 +66,9 @@ rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
 
 	this->currBGMeshColourAnim.SetRepeat(true);
 	this->currBGMeshColourAnim.SetLerp(timeValues, colourValues);
+
+	// No animation to start for the background fade (needs to be activated via the appropriate member function)
+	this->bgFadeAnim.SetRepeat(false);
 
 	// Setup the background emitters
 	this->InitializeEmitters();
@@ -177,15 +181,18 @@ void DecoWorldAssets::Tick(double dT) {
 
 	// Interpolate the colour animation
 	this->currBGMeshColourAnim.Tick(dT);
+	this->bgFadeAnim.Tick(dT);
 
-	// Tick the effects
+	// Tick the effects with the appropriate colour and alpha set...
 	Colour spiralColour = this->currBGMeshColourAnim.GetInterpolantValue();
+	float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+
 	this->spiralEmitterSm.Tick(dT);
-	this->spiralEmitterSm.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
+	this->spiralEmitterSm.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(currBGAlpha));
 	this->spiralEmitterMed.Tick(dT);
-	this->spiralEmitterMed.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
+	this->spiralEmitterMed.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(currBGAlpha));
 	this->spiralEmitterLg.Tick(dT);
-	this->spiralEmitterLg.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(1.0f));
+	this->spiralEmitterLg.SetParticleColour(ESPInterval(spiralColour.R()), ESPInterval(spiralColour.G()), ESPInterval(spiralColour.B()), ESPInterval(currBGAlpha));
 	
 	GameWorldAssets::Tick(dT);
 }
@@ -275,19 +282,29 @@ void DecoWorldAssets::RotateSkybeams(double dT) {
 }
 
 void DecoWorldAssets::DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight) {
+	float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+	if (currBGAlpha == 0) {
+		return;
+	}
+	
 	// Draw spiral effects behind the background model
 	this->spiralEmitterSm.Draw(camera);
 	this->spiralEmitterMed.Draw(camera);
 	this->spiralEmitterLg.Draw(camera);
 
 	Colour currBGModelColour = this->currBGMeshColourAnim.GetInterpolantValue();
-	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), 1.0f);
+	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), currBGAlpha);
 	this->background->Draw(camera, bgKeyLight, bgFillLight);
 }
 
 void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
+	float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+	if (currBGAlpha == 0) {
+		return;
+	}
+	
 	// Draw deco background beams:
-	glColor4f(1, 1, 1, 1);
+	glColor4f(1, 1, 1, currBGAlpha);
 
 	// Back beams...
 	glPushMatrix();
@@ -314,4 +331,18 @@ void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 	glRotated(this->beamRotationfg2, 0, 0, 1);
 	this->skybeam->Draw(camera, this->beamEffect);
 	glPopMatrix();
+}
+
+/**
+ * Fade the background out or in based on the given parameter, the fade
+ * will occur over the given amount of time.
+ */
+void DecoWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
+	// Set the appropriate end alpha based on whether we are fading out or not
+	float finalAlpha = 1.0f;
+	if (fadeout) {
+		finalAlpha = 0.0f;
+	}
+
+	this->bgFadeAnim.SetLerp(fadeTime, finalAlpha);
 }
