@@ -579,6 +579,9 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 		
 		this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
 		this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
+
+		// Fade out the background...
+		this->worldAssets->FadeBackground(true, 2.0f);
 	}
 }
 
@@ -611,6 +614,9 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		// Move the foreground key and fill lights back to their default positions...
 		this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
 		this->lightAssets->RestoreLightPosition(GameLightAssets::FGFillLight, 2.0f);
+
+		// Show the background once again...
+		this->worldAssets->FadeBackground(false, 2.0f);
 	}
 }
 

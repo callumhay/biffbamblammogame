@@ -165,7 +165,7 @@ float4 smokey_PS(vertexOutput IN) : COLOR {
     
     float FadeAmt = dot(-nV, nN);
     float fadeAmtCoeff = pow(abs(FadeAmt), FadeExp);
-    float4 final = float4(clamp(Colour*totalTexVal.xxx, 0, 1), clamp(totalTexVal.x*fadeAmtCoeff*AlphaMultiplier, 0, 1));
+    float4 final = IN.Colour * float4(clamp(Colour*totalTexVal.xxx, 0, 1), clamp(totalTexVal.x*fadeAmtCoeff*AlphaMultiplier, 0, 1));
     return float4(final);
 }
 

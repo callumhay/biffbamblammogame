@@ -74,7 +74,9 @@ void GameSoundAssets::LoadMainMenuSounds() {
  */
 void GameSoundAssets::UnloadMainMenuSounds() {
 	for (std::map<int, Sound*>::iterator iter = this->mainMenuSounds.begin(); iter != this->mainMenuSounds.end(); ++iter) {
+		// Stop each main menu sound and delete it
 		Sound* currSound = iter->second;
+		this->StopMainMenuSound(static_cast<Sound::MainMenuSound>(iter->first));
 		delete currSound;
 		currSound = NULL;
 	}

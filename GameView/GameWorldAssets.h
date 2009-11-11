@@ -59,8 +59,8 @@ public:
 	}
 
 	virtual void DrawBackgroundEffects(const Camera& camera) = 0;
-
 	virtual void DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight) = 0;
+	virtual void FadeBackground(bool fadeout, float fadeTime) = 0;
 
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
 		ColourRGBA paddleColour = p.GetPaddleColour();

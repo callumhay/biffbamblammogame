@@ -22,6 +22,7 @@ private:
 	static const Colour COLOUR_CHANGE_LIST[NUM_COLOUR_CHANGES];
 
 	AnimationMultiLerp<Colour> currBGMeshColourAnim;	// Colour animation progression of the background mesh
+	AnimationMultiLerp<float> bgFadeAnim;							// Fade animation (for the alpha) for when the background is being fadeded in/out
 
 	enum RotationState { RotateCW, RotateCCW };		// CCW is moving in postive degrees, CW is negative...
 
@@ -49,8 +50,10 @@ public:
 	DecoWorldAssets();
 	virtual ~DecoWorldAssets();
 
-	virtual void DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight);
-	virtual void DrawBackgroundEffects(const Camera& camera);
+	void DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight);
+	void DrawBackgroundEffects(const Camera& camera);
+	void FadeBackground(bool fadeout, float fadeTime);
+
 	virtual void Tick(double dT);
 
 };

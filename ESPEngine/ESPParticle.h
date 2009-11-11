@@ -25,7 +25,7 @@ protected:
 	// The colour of the particle
 	Colour colour;
 	// The alpha of the particle (0 is completely transparent, 1 is completely opaque)
-	double alpha;
+	float alpha;
 
 	// Kinematics variables for this particle
 	Point3D  position;	// Position of the particle in world space
@@ -88,7 +88,7 @@ public:
 		this->velocity = v;
 	}
 
-	void GetColour(Colour& rgb, double& alpha) {
+	void GetColour(Colour& rgb, float& alpha) {
 		rgb = this->colour;
 		alpha = this->alpha;
 	}
@@ -107,8 +107,12 @@ public:
 		this->alpha = rgba.A();
 	}
 
-	void SetColour(const Colour& rgb, double alpha) {
+	void SetColour(const Colour& rgb, float alpha) {
 		this->colour = rgb;
+		this->alpha = alpha;
+	}
+
+	void SetAlpha(float alpha) {
 		this->alpha = alpha;
 	}
 
