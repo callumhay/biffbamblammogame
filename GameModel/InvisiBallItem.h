@@ -14,14 +14,18 @@ public:
 	static const double INVISI_BALL_TIMER_IN_SECS;
 
 	InvisiBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~InvisiBallItem();
+	~InvisiBallItem();
 	
-	virtual const GameBall* GetBallAffected() const {
+	const GameBall* GetBallAffected() const {
 		assert(this->gameModel->GetGameBalls().size() > 0);
 		return *this->gameModel->GetGameBalls().begin();
 	}
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return GameItem::InvisiBallItem;
+	}
 };
 #endif

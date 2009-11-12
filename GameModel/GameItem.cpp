@@ -24,8 +24,8 @@ const float GameItem::SPEED_OF_DESCENT	= 5.0f;
 // The alpha of an item when the paddle camera is active
 const float GameItem::ALPHA_ON_PADDLE_CAM = 0.9f;
 
-GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const ItemType type) : 
-	name(name), center(spawnOrigin), gameModel(gameModel), type(type), isActive(false), colour(1, 1, 1, 1) {
+GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const GameItem::ItemDisposition disp) : 
+	name(name), center(spawnOrigin), gameModel(gameModel), disposition(disp), isActive(false), colour(1, 1, 1, 1) {
 	assert(gameModel != NULL);
 
 	// If the paddle camera is currently active then we must set the item

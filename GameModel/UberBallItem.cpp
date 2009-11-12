@@ -35,7 +35,7 @@ double UberBallItem::Activate() {
 
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemName() == UberBallItem::UBER_BALL_ITEM_NAME) {
+		if (currTimer->GetTimerItemType() == GameItem::UberBallItem) {
 			removeTimers.push_back(currTimer);
 		}
 	}

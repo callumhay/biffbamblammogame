@@ -30,9 +30,13 @@ public:
 	static const double PADDLE_SIZE_TIMER_IN_SECS;
 
 	PaddleSizeItem(const PaddleSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~PaddleSizeItem();
+	~PaddleSizeItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return (this->sizeChangeType == ShrinkPaddle) ? GameItem::PaddleShrinkItem : GameItem::PaddleGrowItem;
+	}
 };
 #endif

@@ -34,15 +34,16 @@ public:
 		return (this->timeElapsedInSecs >= this->timeLengthInSecs);
 	}
 
-	/**
-	 * For obtaining the type of timer of this.
-	 */
 	std::string GetTimerItemName() const {
 		return this->assocGameItem->GetName();
 	}
 
-	GameItem::ItemType GetTimerDisposition() const {
+	GameItem::ItemType GetTimerItemType() const {
 		return this->assocGameItem->GetItemType();
+	}
+
+	GameItem::ItemDisposition GetTimerDisposition() const {
+		return this->assocGameItem->GetItemDisposition();
 	}
 
 	/**

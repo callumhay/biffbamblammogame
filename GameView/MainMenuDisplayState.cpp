@@ -372,8 +372,16 @@ void MainMenuDisplayState::SetupBloomEffect() {
  * Render the menu and any other stuff associated with it.
  */
 void MainMenuDisplayState::RenderFrame(double dT) {
+
+	// Check to see if we're switching game states...
 	if (this->changeToPlayGameState) {
+		
+		// Turn off all the sounds first, then switch states
+		GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+		soundAssets->UnloadMainMenuSounds();
+
 		this->display->SetCurrentState(new StartGameDisplayState(this->display));
+		
 		return;
 	}
 	

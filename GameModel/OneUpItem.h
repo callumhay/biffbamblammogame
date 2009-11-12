@@ -24,9 +24,13 @@ public:
 	static const double ONE_UP_TIMER_IN_SECS;
 
 	OneUpItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~OneUpItem();
+	~OneUpItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return GameItem::OneUpItem;
+	}
 };
 #endif

@@ -15,10 +15,13 @@ public:
 	static const double BLACKOUT_TIMER_IN_SECS;
 
 	BlackoutItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~BlackoutItem();
+	~BlackoutItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
 
+	GameItem::ItemType GetItemType() const {
+		return GameItem::BlackoutItem;
+	}
 };
 #endif

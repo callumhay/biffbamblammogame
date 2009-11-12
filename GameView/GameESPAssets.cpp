@@ -10,17 +10,6 @@
 #include "../GameModel/Projectile.h"
 #include "../GameModel/PlayerPaddle.h"
 
-#include "../GameModel/GameItem.h"
-#include "../GameModel/UberBallItem.h"
-#include "../GameModel/GhostBallItem.h"
-#include "../GameModel/BallSpeedItem.h"
-#include "../GameModel/InvisiBallItem.h"
-#include "../GameModel/LaserPaddleItem.h"
-#include "../GameModel/PaddleSizeItem.h"
-#include "../GameModel/BallSizeItem.h"
-#include "../GameModel/OneUpItem.h"
-#include "../GameModel/PaddleCamItem.h"
-
 #include "../BlammoEngine/Texture.h"
 
 #include "../ESPEngine/ESP.h"
@@ -185,10 +174,10 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->activeProjectileEmitters.clear();
 
 	// Clear all ball emitters
-	for (std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); iter1++) {
-		std::map<std::string, std::vector<ESPPointEmitter*>>& currBallEffects = iter1->second;
+	for (std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); iter1++) {
+		std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>& currBallEffects = iter1->second;
 		
-		for (std::map<std::string, std::vector<ESPPointEmitter*>>::iterator iter2 = currBallEffects.begin(); iter2 != currBallEffects.end(); iter2++) {
+		for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter2 = currBallEffects.begin(); iter2 != currBallEffects.end(); iter2++) {
 			std::vector<ESPPointEmitter*>& effectList = iter2->second;
 
 			for (std::vector<ESPPointEmitter*>::iterator iter3 = effectList.begin(); iter3 != effectList.end(); iter3++) {
@@ -211,13 +200,13 @@ void GameESPAssets::KillAllActiveEffects() {
 void GameESPAssets::KillAllActiveBallEffects(const GameBall& ball) {
 	// Check to see if there are any active effects for the ball, if not
 	// then just exit this function
-	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
 	if (foundBallEffects == this->ballEffects.end()) {
 		return;
 	}
 
 	// Iterate through all effects and delete them, then remove them from the list
-	for (std::map<std::string, std::vector<ESPPointEmitter*>>::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); iter++) {
+	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); iter++) {
 		std::vector<ESPPointEmitter*>& effectList = iter->second;
 		for (std::vector<ESPPointEmitter*>::iterator iter2 = effectList.begin(); iter2 != effectList.end(); iter2++) {
 			ESPPointEmitter* currEmitter = *iter2;
@@ -1192,7 +1181,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 	Texture2D* itemSpecificFillStarTex = this->starTex;
 	Texture2D* itemSpecificOutlineStarTex = this->starOutlineTex;
 
-	switch (item.GetItemType()) {
+	switch (item.GetItemDisposition()) {
 		case GameItem::Good:
 			greenRandomColour = ESPInterval(0.8f, 1.0f);
 			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
@@ -1500,7 +1489,7 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 	ESPInterval redColour(0), greenColour(0), blueColour(0);
 	ESPInterval alpha(1.0f);
 
-	switch (item.GetItemType()) {
+	switch (item.GetItemDisposition()) {
 		case GameItem::Good:
 			greenRandomColour = ESPInterval(0.8f, 1.0f);
 			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
@@ -1730,40 +1719,59 @@ void GameESPAssets::AddOneUpEffect(const PlayerPaddle* paddle) {
  * Adds an effect based on the given game item being activated or deactivated.
  */
 void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameModel) {
-	if (item.GetName() == UberBallItem::UBER_BALL_ITEM_NAME) {
-		const GameBall* ballAffected = item.GetBallAffected();
-		assert(ballAffected != NULL);
+	switch(item.GetItemType()) {
 
-		// If there are any effects assigned for the uber ball then we need to reset the trail
-		std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(ballAffected);
-		if (foundBallEffects != this->ballEffects.end()) {
-			std::map<std::string, std::vector<ESPPointEmitter*>>::iterator foundUberBallFX = foundBallEffects->second.find(UberBallItem::UBER_BALL_ITEM_NAME);
-			if (foundUberBallFX != foundBallEffects->second.end()) {
-				std::vector<ESPPointEmitter*>& uberBallEffectsList = foundUberBallFX->second;
-				assert(uberBallEffectsList.size() > 0);
-				uberBallEffectsList[0]->Reset();
+		case GameItem::UberBallItem: {
+
+				const GameBall* ballAffected = item.GetBallAffected();
+				assert(ballAffected != NULL);
+
+				// If there are any effects assigned for the uber ball then we need to reset the trail
+				std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(ballAffected);
+				if (foundBallEffects != this->ballEffects.end()) {
+					std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator foundUberBallFX = foundBallEffects->second.find(GameItem::UberBallItem);
+					if (foundUberBallFX != foundBallEffects->second.end()) {
+						std::vector<ESPPointEmitter*>& uberBallEffectsList = foundUberBallFX->second;
+						assert(uberBallEffectsList.size() > 0);
+						uberBallEffectsList[0]->Reset();
+					}
+				}
 			}
-		}
+			break;
 
-	}
-	else if (item.GetName() == LaserPaddleItem::LASER_PADDLE_ITEM_NAME) {
-		this->paddleLaserGlowAura->Reset();
-		this->paddleLaserGlowSparks->Reset();
-	}
-	else if (item.GetName() == PaddleSizeItem::PADDLE_GROW_ITEM_NAME) {
-		this->AddPaddleGrowEffect();
-	}
-	else if (item.GetName() == PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME) {
-		this->AddPaddleShrinkEffect();
-	}
-	else if (item.GetName() == BallSizeItem::BALL_GROW_ITEM_NAME) {
-		this->AddBallGrowEffect(item.GetBallAffected());
-	}
-	else if (item.GetName() == BallSizeItem::BALL_SHRINK_ITEM_NAME) {
-		this->AddBallShrinkEffect(item.GetBallAffected());
-	}
-	else if (item.GetName() == OneUpItem::ONE_UP_ITEM_NAME) {
-		this->AddOneUpEffect(gameModel.GetPlayerPaddle());
+		case GameItem::LaserBulletPaddleItem: {
+				this->paddleLaserGlowAura->Reset();
+				this->paddleLaserGlowSparks->Reset();
+			}
+			break;
+
+		case GameItem::PaddleGrowItem: {
+				this->AddPaddleGrowEffect();
+			}
+			break;
+
+		case GameItem::PaddleShrinkItem: {
+				this->AddPaddleShrinkEffect();
+			}
+			break;
+
+		case GameItem::BallGrowItem: {
+				this->AddBallGrowEffect(item.GetBallAffected());
+			}
+			break;
+
+		case GameItem::BallShrinkItem: {
+				this->AddBallShrinkEffect(item.GetBallAffected());
+			}
+			break;
+
+		case GameItem::OneUpItem: {
+				this->AddOneUpEffect(gameModel.GetPlayerPaddle());
+			}
+			break;
+
+		default:
+			break;
 	}
 }
 
@@ -1875,18 +1883,18 @@ void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const G
 void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball) {
 	// Check to see if the ball has any associated uber ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
 	
 	if (foundBallEffects == this->ballEffects.end()) {
 		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<std::string, std::vector<ESPPointEmitter*>>())).first;
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>())).first;
 	}
 
-	if (foundBallEffects->second.find(UberBallItem::UBER_BALL_ITEM_NAME) == foundBallEffects->second.end()) {
+	if (foundBallEffects->second.find(GameItem::UberBallItem) == foundBallEffects->second.end()) {
 		// Didn't find an associated uber ball effect, so add one
-		this->AddUberBallESPEffects(this->ballEffects[&ball][UberBallItem::UBER_BALL_ITEM_NAME]);
+		this->AddUberBallESPEffects(this->ballEffects[&ball][GameItem::UberBallItem]);
 	}
-	std::vector<ESPPointEmitter*>& uberBallEffectList = this->ballEffects[&ball][UberBallItem::UBER_BALL_ITEM_NAME];
+	std::vector<ESPPointEmitter*>& uberBallEffectList = this->ballEffects[&ball][GameItem::UberBallItem];
 
 	Vector2D ballDir = ball.GetDirection();
 	Point2D ballPos  = ball.GetBounds().Center();
@@ -1912,18 +1920,18 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball) {
 	// Check to see if the ball has any associated ghost ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
 	
 	if (foundBallEffects == this->ballEffects.end()) {
 		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<std::string, std::vector<ESPPointEmitter*>>())).first;
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>())).first;
 	}
 
-	if (foundBallEffects->second.find(GhostBallItem::GHOST_BALL_ITEM_NAME) == foundBallEffects->second.end()) {
+	if (foundBallEffects->second.find(GameItem::GhostBallItem) == foundBallEffects->second.end()) {
 		// Didn't find an associated uber ball effect, so add one
-		this->AddGhostBallESPEffects(this->ballEffects[&ball][GhostBallItem::GHOST_BALL_ITEM_NAME]);
+		this->AddGhostBallESPEffects(this->ballEffects[&ball][GameItem::GhostBallItem]);
 	}
-	std::vector<ESPPointEmitter*>& ghostBallEffectList = this->ballEffects[&ball][GhostBallItem::GHOST_BALL_ITEM_NAME];
+	std::vector<ESPPointEmitter*>& ghostBallEffectList = this->ballEffects[&ball][GameItem::GhostBallItem];
 
 	glPushMatrix();
 	Point2D loc = ball.GetBounds().Center();
@@ -1951,18 +1959,18 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 void GameESPAssets::DrawTargetBallEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
 	// Check to see if the ball has any associated camera paddle ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
 	
 	if (foundBallEffects == this->ballEffects.end()) {
 		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<std::string, std::vector<ESPPointEmitter*>>())).first;
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>())).first;
 	}
 
-	if (foundBallEffects->second.find(PaddleCamItem::PADDLE_CAM_ITEM_NAME) == foundBallEffects->second.end()) {
+	if (foundBallEffects->second.find(GameItem::PaddleCamItem) == foundBallEffects->second.end()) {
 		// Didn't find an associated paddle camera ball effect, so add one
-		this->AddPaddleCamBallESPEffects(this->ballEffects[&ball][PaddleCamItem::PADDLE_CAM_ITEM_NAME]);
+		this->AddPaddleCamBallESPEffects(this->ballEffects[&ball][GameItem::PaddleCamItem]);
 	}
-	std::vector<ESPPointEmitter*>& paddleCamBallEffectList = this->ballEffects[&ball][PaddleCamItem::PADDLE_CAM_ITEM_NAME];
+	std::vector<ESPPointEmitter*>& paddleCamBallEffectList = this->ballEffects[&ball][GameItem::PaddleCamItem];
 
 	glPushMatrix();
 	Point2D ballLoc		= ball.GetBounds().Center();

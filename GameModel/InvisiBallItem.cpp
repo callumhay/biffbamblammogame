@@ -33,7 +33,7 @@ double InvisiBallItem::Activate() {
 
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemName() == InvisiBallItem::INVISI_BALL_ITEM_NAME) {
+		if (currTimer->GetTimerItemType() == GameItem::InvisiBallItem) {
 			removeTimers.push_back(currTimer);
 		}
 	}

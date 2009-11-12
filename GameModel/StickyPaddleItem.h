@@ -25,9 +25,13 @@ public:
 	static const double STICKY_PADDLE_TIMER_IN_SECS;
 
 	StickyPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~StickyPaddleItem();
+	~StickyPaddleItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return GameItem::StickyPaddleItem;
+	}
 };
 #endif

@@ -23,15 +23,19 @@ public:
 	static const std::string SLOW_BALL_ITEM_NAME;
 	static const std::string FAST_BALL_ITEM_NAME;
 
-	virtual const GameBall* GetBallAffected() const {
+	const GameBall* GetBallAffected() const {
 		assert(this->gameModel->GetGameBalls().size() > 0);
 		return *this->gameModel->GetGameBalls().begin();
 	}
 
 	BallSpeedItem(const BallSpeedType type, const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~BallSpeedItem();
+	~BallSpeedItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return (this->spdType == FastBall) ? GameItem::BallSpeedUpItem : GameItem::BallSlowDownItem;
+	}
 };
 #endif

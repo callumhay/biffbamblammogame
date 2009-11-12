@@ -31,7 +31,7 @@ double PaddleCamItem::Activate() {
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end();) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemName() == PaddleCamItem::PADDLE_CAM_ITEM_NAME) {
+		if (currTimer->GetTimerItemType() == GameItem::PaddleCamItem) {
 			iter = activeTimers.erase(iter);
 			delete currTimer;
 			currTimer = NULL;

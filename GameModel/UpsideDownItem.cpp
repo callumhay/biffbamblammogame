@@ -34,7 +34,7 @@ double UpsideDownItem::Activate() {
 
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemName() == UpsideDownItem::UPSIDEDOWN_ITEM_NAME) {
+		if (currTimer->GetTimerItemType() == GameItem::UpsideDownItem) {
 			removeTimers.push_back(currTimer);
 			numItemsAlreadyActive++;
 		}
