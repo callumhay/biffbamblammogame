@@ -978,6 +978,10 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameModel\BallCamItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\BallSafetyNetItem.h"
 						>
 					</File>
@@ -1053,6 +1057,10 @@
 				<Filter
 					Name="Source Files"
 					>
+					<File
+						RelativePath=".\GameModel\BallCamItem.cpp"
+						>
+					</File>
 					<File
 						RelativePath=".\GameModel\BallSafetyNetItem.cpp"
 						>

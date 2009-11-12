@@ -25,13 +25,12 @@ PaddleCamItem::~PaddleCamItem() {
 double PaddleCamItem::Activate() {
 	this->isActive = true;
 
-	// Deactivate any currently active paddle camera items and any other associated
-	// viewpoint changing items
+	// Deactivate any currently active paddle camera items and any other associated viewpoint changing items
 	// TODO: DONT FORGET ABOUT THIS (SEE COMMENT ABOVE) !!!
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end();) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemType() == GameItem::PaddleCamItem) {
+		if (currTimer->GetTimerItemType() == GameItem::PaddleCamItem || currTimer->GetTimerItemType() == GameItem::BallCamItem) {
 			iter = activeTimers.erase(iter);
 			delete currTimer;
 			currTimer = NULL;
