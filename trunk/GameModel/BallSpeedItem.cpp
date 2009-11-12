@@ -29,11 +29,11 @@ void BallSpeedItem::SwitchSpeed(BallSpeedType newSpd) {
 	this->spdType = newSpd;
 	switch (newSpd) {
 		case FastBall:
-			this->type = GameItem::Bad;
+			this->disposition = GameItem::Bad;
 			this->name = BallSpeedItem::FAST_BALL_ITEM_NAME;
 			break;
 		case SlowBall:
-			this->type = GameItem::Good;
+			this->disposition = GameItem::Good;
 			this->name = BallSpeedItem::SLOW_BALL_ITEM_NAME;
 			break;
 		default:
@@ -57,8 +57,7 @@ double BallSpeedItem::Activate() {
 	std::vector<GameItemTimer*> removeTimers;
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemName() == BallSpeedItem::SLOW_BALL_ITEM_NAME ||
-			  currTimer->GetTimerItemName() == BallSpeedItem::FAST_BALL_ITEM_NAME) {
+		if (currTimer->GetTimerItemType() == GameItem::BallSlowDownItem || currTimer->GetTimerItemType() == GameItem::BallSpeedUpItem) {
 			removeTimers.push_back(currTimer);
 		}
 	}

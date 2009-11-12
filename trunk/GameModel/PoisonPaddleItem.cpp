@@ -34,7 +34,7 @@ double PoisonPaddleItem::Activate() {
 
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
+		if (currTimer->GetTimerItemType() == GameItem::PoisonPaddleItem) {
 			removeTimers.push_back(currTimer);
 		}
 	}

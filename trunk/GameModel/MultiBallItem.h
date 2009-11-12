@@ -29,6 +29,7 @@ public:
 	static const double BALL_COLLISIONS_DISABLED_DURATION;
 
 private:
+	NumMultiBalls numBalls;
 	unsigned int numNewSpawnedBalls;	// The number of balls created for each preexisting gameball in play
 
 	static std::string NameFromNumBalls(NumMultiBalls n) {
@@ -50,9 +51,13 @@ public:
 	static const float MIN_SPLIT_DEGREES;								// Minimum number of degrees between balls when splitting
 
 	MultiBallItem(const Point2D &spawnOrigin, GameModel *gameModel, NumMultiBalls numBalls);
-	virtual ~MultiBallItem();
+	~MultiBallItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return (this->numBalls == ThreeMultiBalls) ? GameItem::MultiBall3Item : GameItem::MultiBall5Item;
+	}
 };
 #endif

@@ -275,11 +275,11 @@ public:
 
 	// Debug functions
 #ifdef _DEBUG
-	void DropItem(const std::string& itemName) {
+	void DropItem(GameItem::ItemType itemType) {
 		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
 		if (state != NULL) {
 			Vector2D levelDim = this->GetLevelUnitDimensions();
-			state->DebugDropItem(GameItemFactory::CreateItem(itemName, Point2D(0,0) + 0.5f*levelDim, this));
+			state->DebugDropItem(GameItemFactory::CreateItem(itemType, Point2D(0,0) + 0.5f*levelDim, this));
 		}
 	}
 #endif

@@ -15,9 +15,14 @@ public:
 	static const double BALL_SAFETY_NET_TIMER_IN_SECS;
 
 	BallSafetyNetItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~BallSafetyNetItem();
+	~BallSafetyNetItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return GameItem::BallSafetyNetItem;
+	}
+
 };
 #endif

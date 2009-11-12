@@ -3,7 +3,6 @@
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
-#include "../GameModel/PoisonPaddleItem.h"
 
 GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), 
 postFgAndBgFBO(NULL), initialFSEffectFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NULL),
@@ -121,14 +120,20 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
  */
 void GameFBOAssets::ActivateItemEffects(const GameItem& item) {
 
-	if (item.GetName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
-		// Poison items cause the blur to get fuzzier, tell the blur to do this
-		this->fgAndBgBlurEffect->SetPoisonBlurAnimation(true);
-		this->afterImageEffect->SetBlurAmount(0.4f);
-		// Make items also blurry - in order to do this they must be drawn before the post-processing effects
-		this->drawItemsInLastPass = false;
-	}
+	switch (item.GetItemType()) {
 
+		case GameItem::PoisonPaddleItem: {
+				// Poison items cause the blur to get fuzzier, tell the blur to do this
+				this->fgAndBgBlurEffect->SetPoisonBlurAnimation(true);
+				this->afterImageEffect->SetBlurAmount(0.4f);
+				// Make items also blurry - in order to do this they must be drawn before the post-processing effects
+				this->drawItemsInLastPass = false;
+			}
+			break;
+
+		default:
+			break;
+	}
 }
 
 /**
@@ -137,11 +142,18 @@ void GameFBOAssets::ActivateItemEffects(const GameItem& item) {
  */
 void GameFBOAssets::DeactivateItemEffects(const GameItem& item) {
 
-	if (item.GetName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
-		// Turn off the poison blur effect
-		this->fgAndBgBlurEffect->SetPoisonBlurAnimation(false);
-		this->afterImageEffect->SetBlurAmount(CgFxAfterImage::AFTERIMAGE_BLURSTRENGTH_DEFAULT);
-		this->drawItemsInLastPass = true;
+	switch (item.GetItemType()) {
+
+		case GameItem::PoisonPaddleItem: {
+				// Turn off the poison blur effect
+				this->fgAndBgBlurEffect->SetPoisonBlurAnimation(false);
+				this->afterImageEffect->SetBlurAmount(CgFxAfterImage::AFTERIMAGE_BLURSTRENGTH_DEFAULT);
+				this->drawItemsInLastPass = true;
+			}
+			break;
+
+		default:
+			break;
 	}
 }
 

@@ -30,7 +30,7 @@ double BlackoutItem::Activate() {
 
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemName() == BlackoutItem::BLACKOUT_ITEM_NAME) {
+		if (currTimer->GetTimerItemType() == GameItem::BlackoutItem) {
 			removeTimers.push_back(currTimer);
 		}
 	}

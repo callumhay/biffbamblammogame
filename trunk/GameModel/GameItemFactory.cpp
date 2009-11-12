@@ -94,65 +94,72 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 }
 
 #ifdef _DEBUG
-GameItem* GameItemFactory::CreateItem(const std::string itemName, const Point2D &spawnOrigin, GameModel *gameModel) {
-	if (itemName == BallSpeedItem::FAST_BALL_ITEM_NAME) {
-		return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);
+GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel) {
+	
+	switch (type) {
+
+		case GameItem::BallSpeedUpItem:
+			return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);
+		
+		case GameItem::BallSlowDownItem:
+			return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);
+
+		case GameItem::UberBallItem:
+			return new UberBallItem(spawnOrigin, gameModel);
+
+		case GameItem::InvisiBallItem:
+			return new InvisiBallItem(spawnOrigin, gameModel);
+
+		case GameItem::GhostBallItem:
+			return new GhostBallItem(spawnOrigin, gameModel);
+
+		case GameItem::LaserBulletPaddleItem:
+			return new LaserPaddleItem(spawnOrigin, gameModel);
+
+		case GameItem::MultiBall3Item:
+			return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::ThreeMultiBalls);
+	
+		case GameItem::MultiBall5Item:
+			return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::FiveMultiBalls);
+
+		case GameItem::PaddleGrowItem:
+			return new PaddleSizeItem(PaddleSizeItem::GrowPaddle, spawnOrigin, gameModel);
+
+		case GameItem::PaddleShrinkItem:
+			return new PaddleSizeItem(PaddleSizeItem::ShrinkPaddle, spawnOrigin, gameModel);
+
+		case GameItem::BallShrinkItem:
+			return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, gameModel);
+
+		case GameItem::BallGrowItem:
+			return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, gameModel);
+
+		case GameItem::BlackoutItem:
+			return new BlackoutItem(spawnOrigin, gameModel);
+		
+		case GameItem::UpsideDownItem:
+			return new UpsideDownItem(spawnOrigin, gameModel);
+
+		case GameItem::BallSafetyNetItem:
+			return new BallSafetyNetItem(spawnOrigin, gameModel);
+
+		case GameItem::OneUpItem:
+			return new OneUpItem(spawnOrigin, gameModel);
+
+		case GameItem::PoisonPaddleItem:
+			return new PoisonPaddleItem(spawnOrigin, gameModel);
+		
+		case GameItem::StickyPaddleItem:
+			return new StickyPaddleItem(spawnOrigin, gameModel);
+
+		case GameItem::PaddleCamItem:
+			return new PaddleCamItem(spawnOrigin, gameModel);
+		
+		default:
+			assert(false);
+			break;
 	}
-	else if (itemName == BallSpeedItem::SLOW_BALL_ITEM_NAME) {
-		return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);
-	}
-	else if (itemName == UberBallItem::UBER_BALL_ITEM_NAME) {
-		return new UberBallItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == InvisiBallItem::INVISI_BALL_ITEM_NAME) {
-		return new InvisiBallItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == GhostBallItem::GHOST_BALL_ITEM_NAME) {
-		return new GhostBallItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == LaserPaddleItem::LASER_PADDLE_ITEM_NAME) {
-		return new LaserPaddleItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == MultiBallItem::MULTI3_BALL_ITEM_NAME) {
-		return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::ThreeMultiBalls);
-	}
-	else if (itemName == MultiBallItem::MULTI5_BALL_ITEM_NAME) {
-		return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::FiveMultiBalls);
-	}
-	else if (itemName == PaddleSizeItem::PADDLE_GROW_ITEM_NAME) {
-		return new PaddleSizeItem(PaddleSizeItem::GrowPaddle, spawnOrigin, gameModel);
-	}
-	else if (itemName == PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME) {
-		return new PaddleSizeItem(PaddleSizeItem::ShrinkPaddle, spawnOrigin, gameModel);
-	}
-	else if (itemName == BallSizeItem::BALL_SHRINK_ITEM_NAME) {
-		return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, gameModel);
-	}
-	else if (itemName == BallSizeItem::BALL_GROW_ITEM_NAME) {
-		return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, gameModel);
-	}
-	else if (itemName == BlackoutItem::BLACKOUT_ITEM_NAME) {
-		return new BlackoutItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == UpsideDownItem::UPSIDEDOWN_ITEM_NAME) {
-		return new UpsideDownItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME) {
-		return new BallSafetyNetItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == OneUpItem::ONE_UP_ITEM_NAME) {
-		return new OneUpItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
-		return new PoisonPaddleItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == StickyPaddleItem::STICKY_PADDLE_ITEM_NAME) {
-		return new StickyPaddleItem(spawnOrigin, gameModel);
-	}
-	else if (itemName == PaddleCamItem::PADDLE_CAM_ITEM_NAME) {
-		return new PaddleCamItem(spawnOrigin, gameModel);
-	}
-	assert(false);
+
 	return NULL;
 }
 #endif

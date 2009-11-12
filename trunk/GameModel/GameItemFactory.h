@@ -2,8 +2,8 @@
 #define __GAMEITEMFACTORY_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "GameItem.h"
 
-class GameItem;
 class GameModel;
 class Point2D;
 
@@ -27,7 +27,7 @@ public:
 	
 #ifdef _DEBUG
 	// Item specific creation methods for debugging
-	static GameItem* CreateItem(const std::string itemName, const Point2D &spawnOrigin, GameModel *gameModel);
+	static GameItem* CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel);
 #endif
 };
 #endif

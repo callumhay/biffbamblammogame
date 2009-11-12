@@ -13,9 +13,13 @@ public:
 	static const double GHOST_BALL_TIMER_IN_SECS;
 
 	GhostBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~GhostBallItem();
+	~GhostBallItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return GameItem::GhostBallItem;
+	}
 };
 #endif

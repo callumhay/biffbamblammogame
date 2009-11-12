@@ -29,10 +29,13 @@ public:
 	static const double UPSIDEDOWN_TIMER_IN_SECS;
 
 	UpsideDownItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~UpsideDownItem();
+	~UpsideDownItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
 
+	GameItem::ItemType GetItemType() const {
+		return GameItem::UpsideDownItem;
+	}
 };
 #endif

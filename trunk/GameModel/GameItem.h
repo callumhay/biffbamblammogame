@@ -15,14 +15,18 @@ class GameBall;
 
 class GameItem {
 public:
-	enum ItemType { Good, Bad, Neutral };
+	enum ItemDisposition { Good, Bad, Neutral };
+	enum ItemType { BallSafetyNetItem, BallGrowItem, BallShrinkItem, BlackoutItem, GhostBallItem, 
+									InvisiBallItem, LaserBulletPaddleItem, MultiBall3Item, MultiBall5Item, 
+									OneUpItem, PaddleCamItem, PaddleGrowItem, PaddleShrinkItem, PoisonPaddleItem, 
+									StickyPaddleItem, UberBallItem, UpsideDownItem, BallSpeedUpItem, BallSlowDownItem };
 
 protected:
-	std::string name;			// Name of this item
-	GameModel* gameModel;	// Items have to be able to manipulate what happens in the game...
-	Point2D center;				// The center x,y coord that this item is located at
-	ItemType type;				// The type of item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
-	bool isActive;				// Whether or not this item is currently active (i.e., has been accquired and is effecting the game play)
+	std::string name;							// Name of this item
+	GameModel* gameModel;					// Items have to be able to manipulate what happens in the game...
+	Point2D center;								// The center x,y coord that this item is located at
+	ItemDisposition disposition;	// The disposition of the item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
+	bool isActive;								// Whether or not this item is currently active (i.e., has been accquired and is effecting the game play)
 	
 	ColourRGBA colour;													// Colour multiply of the item
 	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
@@ -40,7 +44,7 @@ public:
 
 	static const float ALPHA_ON_PADDLE_CAM;
 
-	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const ItemType type);
+	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const GameItem::ItemDisposition disp);
 	virtual ~GameItem();
 
 	virtual const GameBall* GetBallAffected() const {
@@ -58,9 +62,11 @@ public:
 	}
 
 	// For obtaining the type of item (e.g., power-up, power-down, ...)
-	ItemType GetItemType() const {
-		return this->type;
+	GameItem::ItemDisposition GetItemDisposition() const {
+		return this->disposition;
 	}
+
+	virtual GameItem::ItemType GetItemType() const = 0;
 
 	// Item colour set/get functions
 	ColourRGBA GetItemColour() const {

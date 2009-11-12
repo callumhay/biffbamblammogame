@@ -16,6 +16,7 @@
 #include "../ESPEngine/ESPParticleRotateEffector.h"
 
 #include "../GameModel/Onomatoplex.h"
+#include "../GameModel/GameItem.h"
 
 class LevelPiece;
 class GameBall;
@@ -84,8 +85,8 @@ private:
 	Texture2D* ballTex;
 	Texture2D* ballTargetTex;
 
-	// Ball related ESP effects - stores each balls set of item-related (defined by unique string ID) effects
-	std::map<const GameBall*, std::map<std::string, std::vector<ESPPointEmitter*>>> ballEffects;
+	// Ball related ESP effects - stores each balls set of item-related (defined by unique ID) effects
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects;
 
 	// Constants for the number of particles for particular effects
 	static const int NUM_PADDLE_LASER_SPARKS = 15;

@@ -27,9 +27,13 @@ public:
 	static const double POISON_PADDLE_TIMER_IN_SECS;
 
 	PoisonPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~PoisonPaddleItem();
+	~PoisonPaddleItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return GameItem::PoisonPaddleItem;
+	}
 };
 #endif

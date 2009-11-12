@@ -188,7 +188,7 @@ void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& g
 	this->item->SetTextureForMaterial(GameViewConstants::GetInstance()->ITEM_LABEL_MATGRP, itemTexture);
 	
 	Colour itemEndColour;
-	switch (gameItem.GetItemType()) {
+	switch (gameItem.GetItemDisposition()) {
 		case GameItem::Good:
 			itemEndColour = GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR;
 			break;
@@ -313,7 +313,7 @@ void GameItemAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int dis
 		
 			// Figure out what colour to make the fill based on how it
 			// affects the player (red is bad, green is good, etc.)
-			GameItem::ItemType itemDisposition = timer->GetTimerDisposition();
+			GameItem::ItemDisposition itemDisposition = timer->GetTimerDisposition();
 			switch (itemDisposition) {
 				case GameItem::Good:
 					glColor4f(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R(), 

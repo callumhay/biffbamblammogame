@@ -13,9 +13,13 @@ public:
 	static const double LASER_PADDLE_TIMER_IN_SECS;
 
 	LaserPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~LaserPaddleItem();
+	~LaserPaddleItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return GameItem::LaserBulletPaddleItem;
+	}
 };
 #endif

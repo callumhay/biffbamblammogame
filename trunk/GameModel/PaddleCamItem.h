@@ -26,9 +26,13 @@ public:
 	static const double PADDLE_CAM_TIMER_IN_SECS;
 
 	PaddleCamItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	virtual ~PaddleCamItem();
+	~PaddleCamItem();
 
-	virtual double Activate();
-	virtual void Deactivate();
+	double Activate();
+	void Deactivate();
+
+	GameItem::ItemType GetItemType() const {
+		return GameItem::PaddleCamItem;
+	}
 };
 #endif

@@ -13,9 +13,7 @@
 
 // Game Model includes
 #include "../GameModel/GameModel.h"
-#include "../GameModel/BlackoutItem.h"
-#include "../GameModel/PoisonPaddleItem.h"
-#include "../GameModel/PaddleCamItem.h"
+#include "../GameModel/GameItem.h"
 
 // Blammo Engine includes
 #include "../BlammoEngine/Texture3D.h"
@@ -547,41 +545,51 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 	this->fboAssets->ActivateItemEffects(item);
 
 	// Deal with any light changes...
-	if (item.GetName() == BlackoutItem::BLACKOUT_ITEM_NAME) {
-		// Turn the lights off and make only the paddle and ball visible.
-		assert(gameModel.IsBlackoutEffectActive());
-		this->lightAssets->ToggleLights(false);
-	}
-	else if (item.GetName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
-		// The poison item will make the lights turn a sickly green colour
-		assert((gameModel.GetPlayerPaddle()->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle);
+	switch (item.GetItemType()) {
+		case GameItem::BlackoutItem: {
+				// Turn the lights off and make only the paddle and ball visible.
+				assert(gameModel.IsBlackoutEffectActive());
+				this->lightAssets->ToggleLights(false);
+			}
+			break;
+			
+		case GameItem::PoisonPaddleItem: {
+				// The poison item will make the lights turn a sickly green colour
+				assert((gameModel.GetPlayerPaddle()->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle);
 
-		this->lightAssets->StartStrobeLight(GameLightAssets::FGKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
-		this->lightAssets->StartStrobeLight(GameLightAssets::FGFillLight, GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 1.0f);
-		this->lightAssets->StartStrobeLight(GameLightAssets::BallKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
-	}
-	else if (item.GetName() == PaddleCamItem::PADDLE_CAM_ITEM_NAME) {
-		// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
-		// NOTE that this is not permanent and just does so for any currently falling items
-		this->espAssets->TurnOffCurrentItemDropStars(camera);
-		
-		// We make the safety net transparent so that it doesn't obstruct the paddle cam... too much
-		LevelMesh* currLevelMesh = this->GetLevelMesh(gameModel.GetCurrentLevel());
-		assert(currLevelMesh != NULL);
-		currLevelMesh->PaddleCameraActiveToggle(true);
+				this->lightAssets->StartStrobeLight(GameLightAssets::FGKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
+				this->lightAssets->StartStrobeLight(GameLightAssets::FGFillLight, GameViewConstants::GetInstance()->POISON_LIGHT_DEEP_COLOUR, 1.0f);
+				this->lightAssets->StartStrobeLight(GameLightAssets::BallKeyLight, GameViewConstants::GetInstance()->POISON_LIGHT_LIGHT_COLOUR, 1.0f);
+			}
+		  break;
 
-		// Move the key light in the foreground so that it is behind the camera when it goes into
-		// paddle cam mode.
-		float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
+		case GameItem::PaddleCamItem: {
+				// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
+				// NOTE that this is not permanent and just does so for any currently falling items
+				this->espAssets->TurnOffCurrentItemDropStars(camera);
+				
+				// We make the safety net transparent so that it doesn't obstruct the paddle cam... too much
+				LevelMesh* currLevelMesh = this->GetLevelMesh(gameModel.GetCurrentLevel());
+				assert(currLevelMesh != NULL);
+				currLevelMesh->PaddleCameraActiveToggle(true);
 
-		Point3D newFGKeyLightPos(0.0f, -(halfLevelHeight + 10.0f), 0.0f);
-		Point3D newFGFillLightPos(0.0f, (halfLevelHeight + 10.0f), 0.0f);
-		
-		this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
-		this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
+				// Move the key light in the foreground so that it is behind the camera when it goes into
+				// paddle cam mode.
+				float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
 
-		// Fade out the background...
-		this->worldAssets->FadeBackground(true, 2.0f);
+				Point3D newFGKeyLightPos(0.0f, -(halfLevelHeight + 10.0f), 0.0f);
+				Point3D newFGFillLightPos(0.0f, (halfLevelHeight + 10.0f), 0.0f);
+				
+				this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
+				this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
+
+				// Fade out the background...
+				this->worldAssets->FadeBackground(true, 2.0f);
+			}
+			break;
+
+		default:
+			break;
 	}
 }
 
@@ -594,29 +602,39 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 	this->fboAssets->DeactivateItemEffects(item);
 
 	// Deal with any light changes...
-	if (item.GetName() == BlackoutItem::BLACKOUT_ITEM_NAME) {
-		// Turn the lights back on and revert lights back to their defaults
-		assert(!gameModel.IsBlackoutEffectActive());
-		this->lightAssets->ToggleLights(true);
-	}
-	else if (item.GetName() == PoisonPaddleItem::POISON_PADDLE_ITEM_NAME) {
-		// Stop strobing the lights
-		this->lightAssets->StopStrobeLight(GameLightAssets::FGKeyLight);
-		this->lightAssets->StopStrobeLight(GameLightAssets::FGFillLight);
-		this->lightAssets->StopStrobeLight(GameLightAssets::BallKeyLight);
-	}
-	else if (item.GetName() == PaddleCamItem::PADDLE_CAM_ITEM_NAME) {
-		// We make the safety net visible (if activated) again
-		LevelMesh* currLevelMesh = this->GetLevelMesh(gameModel.GetCurrentLevel());
-		assert(currLevelMesh != NULL);
-		currLevelMesh->PaddleCameraActiveToggle(false);
+	switch (item.GetItemType()) {
+		case GameItem::BlackoutItem: {
+				// Turn the lights back on and revert lights back to their defaults
+				assert(!gameModel.IsBlackoutEffectActive());
+				this->lightAssets->ToggleLights(true);
+			}
+		  break;
 
-		// Move the foreground key and fill lights back to their default positions...
-		this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
-		this->lightAssets->RestoreLightPosition(GameLightAssets::FGFillLight, 2.0f);
+		case GameItem::PoisonPaddleItem: {
+				// Stop strobing the lights
+				this->lightAssets->StopStrobeLight(GameLightAssets::FGKeyLight);
+				this->lightAssets->StopStrobeLight(GameLightAssets::FGFillLight);
+				this->lightAssets->StopStrobeLight(GameLightAssets::BallKeyLight);
+			}
+		  break;
 
-		// Show the background once again...
-		this->worldAssets->FadeBackground(false, 2.0f);
+		case GameItem::PaddleCamItem: {
+				// We make the safety net visible (if activated) again
+				LevelMesh* currLevelMesh = this->GetLevelMesh(gameModel.GetCurrentLevel());
+				assert(currLevelMesh != NULL);
+				currLevelMesh->PaddleCameraActiveToggle(false);
+
+				// Move the foreground key and fill lights back to their default positions...
+				this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
+				this->lightAssets->RestoreLightPosition(GameLightAssets::FGFillLight, 2.0f);
+
+				// Show the background once again...
+				this->worldAssets->FadeBackground(false, 2.0f);
+			}
+			break;
+
+		default:
+			break;
 	}
 }
 

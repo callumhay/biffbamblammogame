@@ -847,35 +847,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\BallSafetyNetItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BallSizeItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BallSpeedItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BlackoutItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BombBlock.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\BoundingLines.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BreakableBlock.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\EmptySpaceBlock.h"
 					>
 				</File>
 				<File
@@ -892,18 +864,6 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\GameEvents.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameItemFactory.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameItemTimer.h"
 					>
 				</File>
 				<File
@@ -935,43 +895,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\GhostBallItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\InkBlock.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\InvisiBallItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\LaserPaddleItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\LevelPiece.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\MultiBallItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\OneUpItem.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\Onomatoplex.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\PaddleCamItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\PaddleSizeItem.h"
 					>
 				</File>
 				<File
@@ -979,31 +903,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\PoisonPaddleItem.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\Projectile.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\SolidBlock.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\StickyPaddleItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\TriangleBlocks.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\UberBallItem.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\UpsideDownItem.h"
 					>
 				</File>
 			</Filter>
@@ -1019,31 +919,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\BallSafetyNetItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BallSizeItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BallSpeedItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BlackoutItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BombBlock.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\BoundingLines.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\BreakableBlock.cpp"
 					>
 				</File>
 				<File
@@ -1056,18 +932,6 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\GameEventManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameItemFactory.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\GameItemTimer.cpp"
 					>
 				</File>
 				<File
@@ -1095,43 +959,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\GhostBallItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\InkBlock.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\InvisiBallItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\LaserPaddleItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\LevelPiece.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\MultiBallItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\OneUpItem.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\Onomatoplex.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\PaddleCamItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\PaddleSizeItem.cpp"
 					>
 				</File>
 				<File
@@ -1139,33 +967,229 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\PoisonPaddleItem.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\Projectile.cpp"
 					>
 				</File>
-				<File
-					RelativePath=".\GameModel\SolidBlock.cpp"
+			</Filter>
+			<Filter
+				Name="Items"
+				>
+				<Filter
+					Name="Header Files"
 					>
-				</File>
-				<File
-					RelativePath=".\GameModel\StickyPaddleItem.cpp"
+					<File
+						RelativePath=".\GameModel\BallSafetyNetItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BallSizeItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BallSpeedItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BlackoutItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameItemFactory.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameItemTimer.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GhostBallItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\InvisiBallItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LaserPaddleItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\MultiBallItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\OneUpItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleCamItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleSizeItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PoisonPaddleItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\StickyPaddleItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\UberBallItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\UpsideDownItem.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
 					>
-				</File>
-				<File
-					RelativePath=".\GameModel\TriangleBlocks.cpp"
+					<File
+						RelativePath=".\GameModel\BallSafetyNetItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BallSizeItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BallSpeedItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BlackoutItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameItemFactory.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GameItemTimer.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GhostBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\InvisiBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LaserPaddleItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\MultiBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\OneUpItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleCamItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleSizeItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PoisonPaddleItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\StickyPaddleItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\UberBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\UpsideDownItem.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Level Pieces"
+				>
+				<Filter
+					Name="Header Files"
 					>
-				</File>
-				<File
-					RelativePath=".\GameModel\UberBallItem.cpp"
+					<File
+						RelativePath=".\GameModel\BombBlock.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BreakableBlock.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\EmptySpaceBlock.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\InkBlock.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LevelPiece.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\SolidBlock.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\TriangleBlocks.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
 					>
-				</File>
-				<File
-					RelativePath=".\GameModel\UpsideDownItem.cpp"
-					>
-				</File>
+					<File
+						RelativePath=".\GameModel\BombBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BreakableBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\InkBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LevelPiece.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\SolidBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\TriangleBlocks.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

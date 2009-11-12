@@ -33,7 +33,7 @@ double GhostBallItem::Activate() {
 
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemName() == GhostBallItem::GHOST_BALL_ITEM_NAME) {
+		if (currTimer->GetTimerItemType() == GameItem::GhostBallItem) {
 			removeTimers.push_back(currTimer);
 		}
 	}
