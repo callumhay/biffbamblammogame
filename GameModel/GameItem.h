@@ -18,8 +18,9 @@ public:
 	enum ItemDisposition { Good, Bad, Neutral };
 	enum ItemType { BallSafetyNetItem, BallGrowItem, BallShrinkItem, BlackoutItem, GhostBallItem, 
 									InvisiBallItem, LaserBulletPaddleItem, MultiBall3Item, MultiBall5Item, 
-									OneUpItem, PaddleCamItem, PaddleGrowItem, PaddleShrinkItem, PoisonPaddleItem, 
-									StickyPaddleItem, UberBallItem, UpsideDownItem, BallSpeedUpItem, BallSlowDownItem };
+									OneUpItem, PaddleCamItem, BallCamItem, PaddleGrowItem, PaddleShrinkItem, 
+									PoisonPaddleItem, StickyPaddleItem, UberBallItem, UpsideDownItem, BallSpeedUpItem, 
+									BallSlowDownItem };
 
 protected:
 	std::string name;							// Name of this item
