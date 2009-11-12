@@ -72,6 +72,7 @@ public:
 	// Effect functions for distorting the level's transform and the camera's transform
 	void FlipGameUpsideDown();
 	void SetPaddleCamera(bool putCamInsidePaddle);
+	void SetBallCamera(bool putCamInsideBall);
 
 	// Setup functions for telling the camera/level where it should be by default
 	void SetupLevelCameraDefaultPosition(const GameLevel& level);

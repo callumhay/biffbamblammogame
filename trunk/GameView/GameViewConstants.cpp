@@ -1,22 +1,5 @@
 #include "GameViewConstants.h"
 
-#include "../GameModel/GameItem.h"
-#include "../GameModel/BallSpeedItem.h"
-#include "../GameModel/UberBallItem.h"
-#include "../GameModel/InvisiBallItem.h"
-#include "../GameModel/GhostBallItem.h"
-#include "../GameModel/LaserPaddleItem.h"
-#include "../GameModel/MultiBallItem.h"
-#include "../GameModel/PaddleSizeItem.h"
-#include "../GameModel/BallSizeItem.h"
-#include "../GameModel/BlackoutItem.h"
-#include "../GameModel/UpsideDownItem.h"
-#include "../GameModel/BallSafetyNetItem.h"
-#include "../GameModel/OneUpItem.h"
-#include "../GameModel/PoisonPaddleItem.h"
-#include "../GameModel/StickyPaddleItem.h"
-#include "../GameModel/PaddleCamItem.h"
-
 GameViewConstants* GameViewConstants::Instance = NULL;
 
 #define RESOURCE_DIRECTORY "resources"
@@ -104,6 +87,7 @@ TEXTURE_ITEM_1UP(TEXTURE_DIRECTORY					"/1up_powerup256x128.jpg"),
 TEXTURE_ITEM_POISON(TEXTURE_DIRECTORY				"/poison_powerdown256x128.jpg"),
 TEXTURE_ITEM_STICKYPADDLE(TEXTURE_DIRECTORY "/stickypaddle_powerup256x128.jpg"),
 TEXTURE_ITEM_PADDLECAM(TEXTURE_DIRECTORY		"/paddlecam_powerdown_256x128.jpg"),
+TEXTURE_ITEM_BALLCAM(TEXTURE_DIRECTORY			"/ballcam_powerdown_256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
 TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud256x128.png"),
@@ -198,53 +182,55 @@ DECO_BLOCK_MESH_PATH(MESH_DIRECTORY "/deco_block.obj")
 }
 
 void GameViewConstants::InitItemTextures() {
-	this->itemTextures.insert(std::make_pair(BallSpeedItem::SLOW_BALL_ITEM_NAME,						this->TEXTURE_ITEM_SLOWBALL));
-	this->itemTextures.insert(std::make_pair(BallSpeedItem::FAST_BALL_ITEM_NAME,						this->TEXTURE_ITEM_FASTBALL));
-	this->itemTextures.insert(std::make_pair(UberBallItem::UBER_BALL_ITEM_NAME,							this->TEXTURE_ITEM_UBERBALL));
-	this->itemTextures.insert(std::make_pair(InvisiBallItem::INVISI_BALL_ITEM_NAME,					this->TEXTURE_ITEM_INVISIBALL));
-	this->itemTextures.insert(std::make_pair(GhostBallItem::GHOST_BALL_ITEM_NAME,						this->TEXTURE_ITEM_GHOSTBALL));
-	this->itemTextures.insert(std::make_pair(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,				this->TEXTURE_ITEM_PADDLELASER));
-	this->itemTextures.insert(std::make_pair(MultiBallItem::MULTI3_BALL_ITEM_NAME,					this->TEXTURE_ITEM_MULTIBALL3));
-	this->itemTextures.insert(std::make_pair(MultiBallItem::MULTI5_BALL_ITEM_NAME,					this->TEXTURE_ITEM_MULTIBALL5));
-	this->itemTextures.insert(std::make_pair(PaddleSizeItem::PADDLE_GROW_ITEM_NAME,					this->TEXTURE_ITEM_PADDLEGROW));
-	this->itemTextures.insert(std::make_pair(PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME,				this->TEXTURE_ITEM_PADDLESHRINK));
-	this->itemTextures.insert(std::make_pair(BallSizeItem::BALL_GROW_ITEM_NAME,							this->TEXTURE_ITEM_BALLGROW));
-	this->itemTextures.insert(std::make_pair(BallSizeItem::BALL_SHRINK_ITEM_NAME,						this->TEXTURE_ITEM_BALLSHRINK));
-	this->itemTextures.insert(std::make_pair(BlackoutItem::BLACKOUT_ITEM_NAME,							this->TEXTURE_ITEM_BLACKOUT));
-	this->itemTextures.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,					this->TEXTURE_ITEM_UPSIDEDOWN));
-	this->itemTextures.insert(std::make_pair(BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME,	this->TEXTURE_ITEM_BALLSAFETYNET));
-	this->itemTextures.insert(std::make_pair(OneUpItem::ONE_UP_ITEM_NAME,										this->TEXTURE_ITEM_1UP));
-	this->itemTextures.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,			this->TEXTURE_ITEM_POISON));
-	this->itemTextures.insert(std::make_pair(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME,			this->TEXTURE_ITEM_STICKYPADDLE));
-	this->itemTextures.insert(std::make_pair(PaddleCamItem::PADDLE_CAM_ITEM_NAME,						this->TEXTURE_ITEM_PADDLECAM));
+	this->itemTextures.insert(std::make_pair(GameItem::BallSlowDownItem,				this->TEXTURE_ITEM_SLOWBALL));
+	this->itemTextures.insert(std::make_pair(GameItem::BallSpeedUpItem,					this->TEXTURE_ITEM_FASTBALL));
+	this->itemTextures.insert(std::make_pair(GameItem::UberBallItem,						this->TEXTURE_ITEM_UBERBALL));
+	this->itemTextures.insert(std::make_pair(GameItem::InvisiBallItem,					this->TEXTURE_ITEM_INVISIBALL));
+	this->itemTextures.insert(std::make_pair(GameItem::GhostBallItem,						this->TEXTURE_ITEM_GHOSTBALL));
+	this->itemTextures.insert(std::make_pair(GameItem::LaserBulletPaddleItem,		this->TEXTURE_ITEM_PADDLELASER));
+	this->itemTextures.insert(std::make_pair(GameItem::MultiBall3Item,					this->TEXTURE_ITEM_MULTIBALL3));
+	this->itemTextures.insert(std::make_pair(GameItem::MultiBall5Item,					this->TEXTURE_ITEM_MULTIBALL5));
+	this->itemTextures.insert(std::make_pair(GameItem::PaddleGrowItem,					this->TEXTURE_ITEM_PADDLEGROW));
+	this->itemTextures.insert(std::make_pair(GameItem::PaddleShrinkItem,				this->TEXTURE_ITEM_PADDLESHRINK));
+	this->itemTextures.insert(std::make_pair(GameItem::BallGrowItem,						this->TEXTURE_ITEM_BALLGROW));
+	this->itemTextures.insert(std::make_pair(GameItem::BallShrinkItem,					this->TEXTURE_ITEM_BALLSHRINK));
+	this->itemTextures.insert(std::make_pair(GameItem::BlackoutItem,						this->TEXTURE_ITEM_BLACKOUT));
+	this->itemTextures.insert(std::make_pair(GameItem::UpsideDownItem,					this->TEXTURE_ITEM_UPSIDEDOWN));
+	this->itemTextures.insert(std::make_pair(GameItem::BallSafetyNetItem,				this->TEXTURE_ITEM_BALLSAFETYNET));
+	this->itemTextures.insert(std::make_pair(GameItem::OneUpItem,								this->TEXTURE_ITEM_1UP));
+	this->itemTextures.insert(std::make_pair(GameItem::PoisonPaddleItem,				this->TEXTURE_ITEM_POISON));
+	this->itemTextures.insert(std::make_pair(GameItem::StickyPaddleItem,				this->TEXTURE_ITEM_STICKYPADDLE));
+	this->itemTextures.insert(std::make_pair(GameItem::PaddleCamItem,						this->TEXTURE_ITEM_PADDLECAM));
+	this->itemTextures.insert(std::make_pair(GameItem::BallCamItem,							this->TEXTURE_ITEM_BALLCAM));
 }
 
 void GameViewConstants::InitItemTimerTextures() {
-	this->itemTimerTextures.insert(std::make_pair(BallSpeedItem::SLOW_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_SLOWBALL));
-	this->itemTimerTextures.insert(std::make_pair(BallSpeedItem::FAST_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_FASTBALL));
-	this->itemTimerTextures.insert(std::make_pair(UberBallItem::UBER_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_UBERBALL));
-	this->itemTimerTextures.insert(std::make_pair(InvisiBallItem::INVISI_BALL_ITEM_NAME,			this->TEXTURE_ITEM_TIMER_INVISIBALL));
-	this->itemTimerTextures.insert(std::make_pair(GhostBallItem::GHOST_BALL_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_GHOSTBALL));
-	this->itemTimerTextures.insert(std::make_pair(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,		this->TEXTURE_ITEM_TIMER_PADDLELASER));
-	this->itemTimerTextures.insert(std::make_pair(BlackoutItem::BLACKOUT_ITEM_NAME,						this->TEXTURE_ITEM_TIMER_BLACKOUT));
-	this->itemTimerTextures.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_UPSIDEDOWN));
-	this->itemTimerTextures.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_POISON));
-	this->itemTimerTextures.insert(std::make_pair(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_STICKYPADDLE));
-	this->itemTimerTextures.insert(std::make_pair(PaddleCamItem::PADDLE_CAM_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_PADDLECAM));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::BallSlowDownItem,				this->TEXTURE_ITEM_TIMER_SLOWBALL));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::BallSpeedUpItem,				this->TEXTURE_ITEM_TIMER_FASTBALL));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::UberBallItem,						this->TEXTURE_ITEM_TIMER_UBERBALL));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::InvisiBallItem,					this->TEXTURE_ITEM_TIMER_INVISIBALL));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::GhostBallItem,					this->TEXTURE_ITEM_TIMER_GHOSTBALL));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::LaserBulletPaddleItem,	this->TEXTURE_ITEM_TIMER_PADDLELASER));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::BlackoutItem,						this->TEXTURE_ITEM_TIMER_BLACKOUT));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::UpsideDownItem,					this->TEXTURE_ITEM_TIMER_UPSIDEDOWN));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::PoisonPaddleItem,				this->TEXTURE_ITEM_TIMER_POISON));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::StickyPaddleItem,				this->TEXTURE_ITEM_TIMER_STICKYPADDLE));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::PaddleCamItem,					this->TEXTURE_ITEM_TIMER_PADDLECAM));
+	// TODO: this->itemTimerTextures.insert(std::make_pair(GameItem::BallCamItem,					this->TEXTURE_ITEM_TIMER_BALLCAM));
 }
 
 void GameViewConstants::InitItemTimerFillerTextures() {
-	this->itemTimerFillerTextures.insert(std::make_pair(BallSpeedItem::SLOW_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_FILLER_SPDBALL));
-	this->itemTimerFillerTextures.insert(std::make_pair(BallSpeedItem::FAST_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_FILLER_SPDBALL));
-	this->itemTimerFillerTextures.insert(std::make_pair(UberBallItem::UBER_BALL_ITEM_NAME,					this->TEXTURE_ITEM_TIMER_FILLER_UBERBALL));
-	this->itemTimerFillerTextures.insert(std::make_pair(InvisiBallItem::INVISI_BALL_ITEM_NAME,			this->TEXTURE_ITEM_TIMER_FILLER_INVISIBALL));
-	this->itemTimerFillerTextures.insert(std::make_pair(GhostBallItem::GHOST_BALL_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL));
-	this->itemTimerFillerTextures.insert(std::make_pair(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,		this->TEXTURE_ITEM_TIMER_FILLER_PADDLELASER));
-	this->itemTimerFillerTextures.insert(std::make_pair(BlackoutItem::BLACKOUT_ITEM_NAME,						this->TEXTURE_ITEM_TIMER_FILLER_BLACKOUT));
-	this->itemTimerFillerTextures.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN));
-	this->itemTimerFillerTextures.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_FILLER_POISON));
-	this->itemTimerFillerTextures.insert(std::make_pair(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME,	this->TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE));
-	this->itemTimerFillerTextures.insert(std::make_pair(PaddleCamItem::PADDLE_CAM_ITEM_NAME,				this->TEXTURE_ITEM_TIMER_FILLER_PADDLECAM));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::BallSlowDownItem,				this->TEXTURE_ITEM_TIMER_FILLER_SPDBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::BallSpeedUpItem,				this->TEXTURE_ITEM_TIMER_FILLER_SPDBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::UberBallItem,						this->TEXTURE_ITEM_TIMER_FILLER_UBERBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::InvisiBallItem,					this->TEXTURE_ITEM_TIMER_FILLER_INVISIBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::GhostBallItem,					this->TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::LaserBulletPaddleItem,	this->TEXTURE_ITEM_TIMER_FILLER_PADDLELASER));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::BlackoutItem,						this->TEXTURE_ITEM_TIMER_FILLER_BLACKOUT));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::UpsideDownItem,					this->TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::PoisonPaddleItem,				this->TEXTURE_ITEM_TIMER_FILLER_POISON));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::StickyPaddleItem,				this->TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::PaddleCamItem,					this->TEXTURE_ITEM_TIMER_FILLER_PADDLECAM));
 }
 
 GameViewConstants::~GameViewConstants() {

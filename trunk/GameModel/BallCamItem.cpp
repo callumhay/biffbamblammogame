@@ -1,12 +1,13 @@
 #include "BallCamItem.h"
+#include "GameModel.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
 
-const std::string BallCamItem::BALL_CAM_ITEM_NAME	= "BallCam";
+const std::string BallCamItem::BALL_CAM_ITEM_NAME	= "EyeBall";
 const double BallCamItem::BALL_CAM_TIMER_IN_SECS	= 20.0;
 
 BallCamItem::BallCamItem(const Point2D &spawnOrigin, GameModel *gameModel) :
-GameItem(std::string BallCamItem::BALL_CAM_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
+GameItem(BallCamItem::BALL_CAM_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
 }
 
 BallCamItem::~BallCamItem() {
