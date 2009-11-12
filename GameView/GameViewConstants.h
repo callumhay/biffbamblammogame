@@ -5,6 +5,8 @@
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Point.h"
 
+#include "../GameModel/GameItem.h"
+
 class GameViewConstants {
 
 private:
@@ -15,9 +17,9 @@ private:
 
 	// Maps of the item identifiers and their corresponding textures for
 	// the items that drop in the game and timers and their fillers
-	std::map<std::string, std::string> itemTextures;
-	std::map<std::string, std::string> itemTimerTextures;
-	std::map<std::string, std::string> itemTimerFillerTextures;
+	std::map<GameItem::ItemType, std::string> itemTextures;
+	std::map<GameItem::ItemType, std::string> itemTimerTextures;
+	std::map<GameItem::ItemType, std::string> itemTimerFillerTextures;
 
 	// Initializer methods for filling the item texture arrays
 	void InitItemTextures();
@@ -44,6 +46,7 @@ private:
 	const std::string TEXTURE_ITEM_POISON;
 	const std::string TEXTURE_ITEM_STICKYPADDLE;
 	const std::string TEXTURE_ITEM_PADDLECAM;
+	const std::string TEXTURE_ITEM_BALLCAM;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -86,9 +89,9 @@ public:
 	}
 
 	// Getter functions for the item texture mappings
-	const std::map<std::string, std::string>& GetItemTextures() const { return this->itemTextures; }
-	const std::map<std::string, std::string>& GetItemTimerTextures() const { return this->itemTimerTextures; }
-	const std::map<std::string, std::string>& GetItemTimerFillerTextures() const { return this->itemTimerFillerTextures; }
+	const std::map<GameItem::ItemType, std::string>& GetItemTextures() const { return this->itemTextures; }
+	const std::map<GameItem::ItemType, std::string>& GetItemTimerTextures() const { return this->itemTimerTextures; }
+	const std::map<GameItem::ItemType, std::string>& GetItemTimerFillerTextures() const { return this->itemTimerFillerTextures; }
 
 	// Constant listing...
 

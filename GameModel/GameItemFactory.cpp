@@ -29,6 +29,7 @@
 #include "PoisonPaddleItem.h"
 #include "StickyPaddleItem.h"
 #include "PaddleCamItem.h"
+#include "BallCamItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -86,6 +87,8 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new StickyPaddleItem(spawnOrigin, gameModel);																// good
 		case 18:
 			return new PaddleCamItem(spawnOrigin, gameModel);																		// bad
+		//case 19:
+			//return new BallCamItem(spawnOrigin, gameModel);																		// bad
 		default:
 			assert(false);
 	}
@@ -155,6 +158,9 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 		case GameItem::PaddleCamItem:
 			return new PaddleCamItem(spawnOrigin, gameModel);
 		
+		case GameItem::BallCamItem:
+			return new BallCamItem(spawnOrigin, gameModel);
+
 		default:
 			assert(false);
 			break;

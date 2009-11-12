@@ -95,6 +95,16 @@ void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle) {
 }
 
 /**
+ * This will either enable the ball camera or stop the ball camera.
+ * Based on the given parameter this will make sure the transforms are made
+ * to either place the camera in the ball or take it out and put it in
+ * its default, normal place.
+ */
+void GameTransformMgr::SetBallCamera(bool putCamInsideBall) {
+	// TODO
+}
+
+/**
  * This needs to be called whenever a new level is being loaded - this will make sure
  * that the default camera position is calculated and made available to the view.
  */

@@ -3,11 +3,12 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 
+#include "../GameModel/GameItem.h"
+
 class Texture;
 class Mesh;
 class GameESPAssets;
 class Camera;
-class GameItem;
 class GameItemTimer;
 class PointLight;
 
@@ -22,9 +23,9 @@ private:
 	GameESPAssets* espAssets;	// Effect assets
 
 	// Mapping of item names to their respective texture assets
-	std::map<std::string, Texture*> itemTextures;
-	std::map<std::string, Texture*> itemTimerTextures;
-	std::map<std::string, Texture*> itemTimerFillerTextures;
+	std::map<GameItem::ItemType, Texture*> itemTextures;
+	std::map<GameItem::ItemType, Texture*> itemTimerTextures;
+	std::map<GameItem::ItemType, Texture*> itemTimerFillerTextures;
 
 	// Private helper load and unload functions for item assets
 	bool LoadItemTextures();
