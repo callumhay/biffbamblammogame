@@ -87,8 +87,8 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new StickyPaddleItem(spawnOrigin, gameModel);																// good
 		case 18:
 			return new PaddleCamItem(spawnOrigin, gameModel);																		// bad
-		//case 19:
-			//return new BallCamItem(spawnOrigin, gameModel);																		// bad
+		case 19:
+			return new BallCamItem(spawnOrigin, gameModel);																			// bad
 		default:
 			assert(false);
 	}

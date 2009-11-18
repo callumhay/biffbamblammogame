@@ -98,6 +98,9 @@ void GameController::KeyDown(SDLKey key) {
 	else if (key == SDLK_c) {
 		this->model->DropItem(GameItem::PaddleCamItem);
 	}
+	else if (key == SDLK_b) {
+		this->model->DropItem(GameItem::BallCamItem);
+	}
 	else if (key == SDLK_SLASH) {
 		GameDisplay::ToggleDetachCamera();
 	}

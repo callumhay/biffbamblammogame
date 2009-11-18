@@ -11,6 +11,7 @@
 
 class GameModel;
 class GameLevel;
+class GameBall;
 class PlayerPaddle;
 class Camera;
 
@@ -24,7 +25,9 @@ class GameTransformMgr {
 private:
 	// Each animation operates atomically, so we queue up animations as they are required
 	// and execute each in the order they come in, only
-	enum TransformAnimationType { LevelFlipAnimation, ToPaddleCamAnimation, FromPaddleCamAnimation};
+	enum TransformAnimationType { LevelFlipAnimation, ToPaddleCamAnimation, 
+																FromPaddleCamAnimation, ToBallCamAnimation,
+																FromBallCamAnimation };
 
 	struct TransformAnimation {
 		TransformAnimationType type;
@@ -40,9 +43,11 @@ private:
 	bool isFlipped;
 	float currGameDegRotX, currGameDegRotY;
 
-	// Paddle camera related variables
+	// Paddle and ball camera related variables
 	static const double SECONDS_PER_UNIT_PADDLECAM;
-	bool cameraInPaddle;
+	static const double SECONDS_PER_UNIT_BALLCAM;
+	PlayerPaddle* paddleWithCamera;	// Will be the paddle where the camera is in paddle cam mode, NULL otherwise
+	GameBall* ballWithCamera;				// Will be the ball where the camera is in ball cam mode, NULL otherwise
 	float cameraFOVAngle;
 
 	// Camera transformations
@@ -52,6 +57,7 @@ private:
 	// Active Animations
 	std::list<AnimationLerp<float>> levelFlipAnimations;
 	std::list<AnimationMultiLerp<Orientation3D>> paddleCamAnimations;
+	std::list<AnimationMultiLerp<Orientation3D>> ballCamAnimations;
 	std::list<AnimationMultiLerp<float>> camFOVAnimations;
 
 	bool TickLevelFlipAnimation(double dT);
@@ -62,7 +68,12 @@ private:
 	void StartPaddleCamAnimation(double dT, GameModel& gameModel);
 	void FinishPaddleCamAnimation(double dT, GameModel& gameModel);
 	
+	bool TickBallCamAnimation(double dT);
+	void StartBallCamAnimation(double dT, GameModel& gameModel);
+	void FinishBallCamAnimation(double dT, GameModel& gameModel);
+
 	void GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, float levelWidth, float levelHeight, Vector3D& paddleCamPos, float& fov);
+
 public:
 	GameTransformMgr();
 	~GameTransformMgr();

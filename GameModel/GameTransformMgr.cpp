@@ -12,15 +12,18 @@
 #include "GameTransformMgr.h"
 #include "GameModel.h"
 #include "PlayerPaddle.h"
+#include "GameBall.h"
 
 #include "../BlammoEngine/Camera.h"
 
 // Time of level flip transform lerp
-const double GameTransformMgr::SECONDS_TO_FLIP	= 0.8;
+const double GameTransformMgr::SECONDS_TO_FLIP						= 0.8;
 
 // Time of camera entering or exiting the paddle camera in seconds per unit distance travelled
 // This should be a fairly small value or else it will be extremely hard for the player to keep track of the ball
 const double GameTransformMgr::SECONDS_PER_UNIT_PADDLECAM = 0.025;
+// See above, except this applies to the ball camera
+const double GameTransformMgr::SECONDS_PER_UNIT_BALLCAM		= 0.025;
 
 GameTransformMgr::GameTransformMgr() {
 	this->Reset();
@@ -40,7 +43,8 @@ void GameTransformMgr::Reset() {
 	this->currGameDegRotX = 0.0f;
 	this->currGameDegRotY = 0.0f;
 	this->isFlipped = false;
-	this->cameraInPaddle = false;
+	this->paddleWithCamera = NULL;
+	this->ballWithCamera = NULL;
 	this->cameraFOVAngle = Camera::FOV_ANGLE_IN_DEGS;
 
 	this->levelFlipAnimations.clear();
@@ -83,8 +87,7 @@ void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle) {
 
 	// Add the paddle cam transform to the queue
 	TransformAnimation transformAnim(animType);
-	// Make sure we compress the last transform in the animation queue if it is
-	// also a paddle camera transform
+	// Make sure we compress the last transform in the animation queue if it is also a paddle camera transform
 	if (this->animationQueue.size() > 0) {
 		GameTransformMgr::TransformAnimationType previousType = this->animationQueue.back().type;
 		if (previousType == GameTransformMgr::ToPaddleCamAnimation || previousType == GameTransformMgr::FromPaddleCamAnimation) {
@@ -101,7 +104,24 @@ void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle) {
  * its default, normal place.
  */
 void GameTransformMgr::SetBallCamera(bool putCamInsideBall) {
-	// TODO
+	GameTransformMgr::TransformAnimationType animType;
+	if (putCamInsideBall) {
+		animType = GameTransformMgr::ToBallCamAnimation;	
+	}
+	else {
+		animType = GameTransformMgr::FromBallCamAnimation;
+	}
+
+	// Add the ball cam transform to the queue
+	TransformAnimation transformAnim(animType);
+	// Make sure we compress the last transform in the animation queue if it is also a ball camera transform
+	if (this->animationQueue.size() > 0) {
+		GameTransformMgr::TransformAnimationType previousType = this->animationQueue.back().type;
+		if (previousType == GameTransformMgr::ToBallCamAnimation || previousType == GameTransformMgr::FromBallCamAnimation) {
+			this->animationQueue.pop_back();
+		}
+	}
+	this->animationQueue.push_back(transformAnim);
 }
 
 /**
@@ -154,31 +174,64 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 				}
 				break;
 
+			case GameTransformMgr::ToBallCamAnimation:
+			case GameTransformMgr::FromBallCamAnimation:
+				if (currAnimation.hasStarted) {
+					bool finished = this->TickBallCamAnimation(dT);
+					if (finished) {
+						this->FinishBallCamAnimation(dT, gameModel);
+					}
+				}
+				else {
+					this->StartBallCamAnimation(dT, gameModel);
+				}
+				break;
+					
 			default:
 				assert(false);
 				break;
 		}
 	}
 
-	// We need to intelligently update where the camera is in relation to the paddle,
-	// if we're in paddle cam mode...
-	if (this->cameraInPaddle) {
-
+	// We need to intelligently update where the camera is in relation to the paddle/ball/...,
+	if (this->paddleWithCamera != NULL) {
 		// Calculate the location of the paddle in world space and get the FOV angle as well
-		PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 		GameLevel* currLevel = gameModel.GetCurrentLevel();
-		assert(paddle != NULL);
 		assert(currLevel != NULL);
 		
 		Vector3D worldSpaceTranslation;
-		this->GetPaddleCamPositionAndFOV(*paddle, currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight(), worldSpaceTranslation, this->cameraFOVAngle);
+		this->GetPaddleCamPositionAndFOV(*this->paddleWithCamera, currLevel->GetLevelUnitWidth(), 
+																			currLevel->GetLevelUnitHeight(), worldSpaceTranslation, 
+																			this->cameraFOVAngle);
+
 		Vector3D worldRotation(90, 0, 0);
 		worldRotation = this->GetGameTransform() * worldRotation;
 
 		// Update the camera position and rotation based on the movement of the paddle and the level transform
 		this->currCamOrientation.SetTranslation(worldSpaceTranslation);
 		this->currCamOrientation.SetRotation(worldRotation);
+
 	}
+	else if (this->ballWithCamera != NULL) {
+		// Calculate the location of the ball in world space
+		GameLevel* currLevel = gameModel.GetCurrentLevel();
+		assert(currLevel != NULL);
+
+		Point2D  ballCamPosition = this->ballWithCamera->GetBounds().Center();
+		Vector2D halfLevelDim	= 0.5 * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
+		Point2D  worldBallPos = ballCamPosition - halfLevelDim;
+		Vector3D worldBallTranslation(worldBallPos[0], worldBallPos[1], 0.0f);
+		worldBallTranslation = this->GetGameTransform() * worldBallTranslation;
+
+		// TODO: make the rotation a little more creative...
+		Vector3D worldBallRotation(-90, 0, 0);
+		worldBallRotation = this->GetGameTransform() * worldBallRotation;
+
+		// Update the camera position and rotation based on the movement of the ball and the level transform
+		this->currCamOrientation.SetTranslation(worldBallTranslation);
+		this->currCamOrientation.SetRotation(worldBallRotation);
+	}
+
 }
 
 /**
@@ -396,7 +449,7 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
 		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
 			(*iter)->AnimateItemFade(1.0f, timeToAnimate);
 		}
-		this->cameraInPaddle = false;
+		this->paddleWithCamera = NULL;
 	}
 
 	// The animation has now started
@@ -447,12 +500,151 @@ void GameTransformMgr::FinishPaddleCamAnimation(double dT, GameModel& gameModel)
 
 	// Tell the paddle whether it's in or out of paddle camera mode
 	if (paddleCamAnim.type == GameTransformMgr::ToPaddleCamAnimation) {
-		gameModel.GetPlayerPaddle()->SetPaddleCamera(true);
-		this->cameraInPaddle = true;
+		this->paddleWithCamera = gameModel.GetPlayerPaddle();
+		this->paddleWithCamera->SetPaddleCamera(true);
 	}
 	else {
 		gameModel.GetPlayerPaddle()->SetPaddleCamera(false);
-		this->cameraInPaddle = false;
+		this->paddleWithCamera = NULL;
+	}
+
+	// Pop the animation off the queue
+	this->animationQueue.pop_front();
+}
+
+void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
+	// Grab the current transform animation information from the front of the queue
+	TransformAnimation& ballCamAnim = this->animationQueue.front();
+	assert(ballCamAnim.type == GameTransformMgr::ToBallCamAnimation || ballCamAnim.type == GameTransformMgr::FromBallCamAnimation);
+	
+	// Make sure the game state is paused while we perform the ball camera animations
+	gameModel.SetPause(GameModel::PauseState);
+
+	// Clear any previous ball camera animations
+	this->ballCamAnimations.clear();
+
+	// Grab the affected ball position and other info, make sure the relevant values are in world coordinates
+	GameBall* ball = *(gameModel.GetGameBalls().begin());
+	GameLevel* currLevel = gameModel.GetCurrentLevel();
+	std::list<GameItem*>& items = gameModel.GetLiveItems();
+	assert(ball != NULL && currLevel != NULL);
+
+	Point2D ballPos2D = ball->GetBounds().Center();
+	Vector2D halfLevelDim	= 0.5 * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
+	Point2D ballWorldSpacePos = ballPos2D - halfLevelDim;
+
+	// This will store the actual world space position that we need to transform the camera to...
+	Vector3D worldSpaceBallPos(ballWorldSpacePos[0], ballWorldSpacePos[1], 0.0f);
+	worldSpaceBallPos = this->GetGameTransform() * worldSpaceBallPos;
+
+	if (ballCamAnim.type == GameTransformMgr::ToBallCamAnimation) {
+		// We are going into ball camera mode... animate the camera from whereever
+		// it currently is, into the ball and animate its orientation appropriately
+
+		// We want to be in the ball, looking down at the paddle
+		float finalCamRotationXDegs = this->isFlipped ? 90.0f : -90.0f;
+		Orientation3D intermediateOrientation(worldSpaceBallPos, Vector3D(0, 0, 0));
+		Orientation3D finalOrientation(worldSpaceBallPos, Vector3D(finalCamRotationXDegs, 0, 0));
+		
+		std::vector<Orientation3D> orientationValues;
+		orientationValues.reserve(3);
+		orientationValues.push_back(this->currCamOrientation);
+		orientationValues.push_back(intermediateOrientation);
+		orientationValues.push_back(finalOrientation);
+		
+		// Calculate the distance that will be travelled by the camera
+		Vector3D travelVec = finalOrientation.GetTranslation() - this->currCamOrientation.GetTranslation();
+		float distToTravel = travelVec.length();
+		double timeToMoveAnimate   = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_BALLCAM;
+		double timeToRotateAnimate = timeToMoveAnimate / 2.0;
+		double totalTimeToAnimate  = timeToMoveAnimate + timeToRotateAnimate;
+
+		// Create the animation to get from whereever the camera currently is to the paddle
+		// looking at the level
+		std::vector<double> timeValues;
+		timeValues.reserve(3);
+		timeValues.push_back(0.0);
+		timeValues.push_back(timeToMoveAnimate);
+		timeValues.push_back(totalTimeToAnimate);
+
+		AnimationMultiLerp<Orientation3D> toBallCamAnim(&this->currCamOrientation);
+		toBallCamAnim.SetRepeat(false);
+		toBallCamAnim.SetLerp(timeValues, orientationValues);
+		
+		this->ballCamAnimations.push_back(toBallCamAnim);
+	}
+	else {
+		// We are going out of ball camera mode back to default - take the camera
+		// from whereever it is currently and move it back to the default position
+		AnimationMultiLerp<Orientation3D> toDefaultCamAnim(&this->currCamOrientation);
+
+		// Calculate the distance that will be travelled by the camera
+		Vector3D travelVec = this->defaultCamOrientation.GetTranslation() - this->currCamOrientation.GetTranslation();
+		float distToTravel = travelVec.length();
+		double timeToAnimate = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_PADDLECAM;
+		
+		toDefaultCamAnim.SetLerp(timeToAnimate, this->defaultCamOrientation);
+		this->ballCamAnimations.push_back(toDefaultCamAnim);
+
+		// Make the camera's field of view angle normal again
+		AnimationMultiLerp<float> camFOVChangeAnim(&this->cameraFOVAngle);
+		camFOVChangeAnim.SetLerp(timeToAnimate, Camera::FOV_ANGLE_IN_DEGS);
+		this->camFOVAnimations.push_back(camFOVChangeAnim);
+
+		// Make the ball reappear
+		// TODO... similar to: paddle->AnimatePaddleFade(false, timeToAnimate);
+
+		// Make the items become opaque again
+		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
+			(*iter)->AnimateItemFade(1.0f, timeToAnimate);
+		}
+
+		this->ballWithCamera = NULL;
+	}
+
+	// The animation has now started
+	ballCamAnim.hasStarted = true;
+}
+
+/**
+ * Private helper function that ticks all the animations associated with the ball camera.
+ * Returns: true if all animations are complete, false otherwise.
+ */
+bool GameTransformMgr::TickBallCamAnimation(double dT) {
+	assert(this->ballCamAnimations.size() > 0);
+	
+	for (std::list<AnimationMultiLerp<Orientation3D>>::iterator iter = this->ballCamAnimations.begin(); iter != this->ballCamAnimations.end();) {
+		bool currAnimationFinished = iter->Tick(dT);
+		if (currAnimationFinished) {
+			iter = this->ballCamAnimations.erase(iter);
+		}
+		else {
+			++iter;
+		}
+	}
+	
+	return this->ballCamAnimations.size() == 0;
+}
+
+/**
+ * Private helper function that makes sure all is well at the end of the animation for going into/out of the
+ * ball camera mode.
+ */
+void GameTransformMgr::FinishBallCamAnimation(double dT, GameModel& gameModel) {
+	// Grab the current transform animation information from the front of the queue
+	TransformAnimation& ballCamAnim = this->animationQueue.front();
+	assert(ballCamAnim.type == GameTransformMgr::ToBallCamAnimation || ballCamAnim.type == GameTransformMgr::FromBallCamAnimation);
+		
+	// Unpause the game state since the camera should now be in the ball
+	gameModel.UnsetPause(GameModel::PauseState);
+
+	if (ballCamAnim.type == GameTransformMgr::ToBallCamAnimation) {
+		//gameModel.GetPlayerPaddle()->SetPaddleCamera(true);
+		this->ballWithCamera = *(gameModel.GetGameBalls().begin());
+	}
+	else {
+		//gameModel.GetPlayerPaddle()->SetPaddleCamera(false);
+		this->ballWithCamera = NULL;
 	}
 
 	// Pop the animation off the queue
