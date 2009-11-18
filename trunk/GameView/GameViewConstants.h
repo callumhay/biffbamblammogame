@@ -58,7 +58,7 @@ private:
 	const std::string TEXTURE_ITEM_TIMER_UPSIDEDOWN;
 	const std::string TEXTURE_ITEM_TIMER_POISON;
 	const std::string TEXTURE_ITEM_TIMER_STICKYPADDLE;
-	const std::string TEXTURE_ITEM_TIMER_PADDLECAM;
+	const std::string TEXTURE_ITEM_TIMER_EYE;
 
 	const std::string TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
@@ -69,7 +69,7 @@ private:
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_POISON;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE;
-	const std::string TEXTURE_ITEM_TIMER_FILLER_PADDLECAM;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_EYE;
 
 public:
 	
