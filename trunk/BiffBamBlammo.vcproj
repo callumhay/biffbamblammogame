@@ -267,6 +267,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\StringHelper.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\TextLabel.h"
 					>
 				</File>

@@ -18,7 +18,7 @@ GameSoundAssets::GameSoundAssets() {
 }
 
 GameSoundAssets::~GameSoundAssets() {
-	this->UnloadMainMenuSounds();
+	this->UnloadMainMenuSounds(true);
 	this->UnloadWorldSounds();
 	this->UnloadGlobalSounds();
 }
@@ -59,7 +59,7 @@ void GameSoundAssets::LoadMainMenuSounds() {
 	// that weren't previously cleaned up, clean them up first.
 	if (this->mainMenuSounds.size() != 0) {
 		assert(false);
-		this->UnloadMainMenuSounds();
+		this->UnloadMainMenuSounds(false);
 	}
 
 	bool readSuccess = MSFReader::ReadMSF(GameViewConstants::GetInstance()->MAIN_MENU_SOUND_SCRIPT, this->mainMenuSounds);
@@ -72,10 +72,16 @@ void GameSoundAssets::LoadMainMenuSounds() {
 /**
  * Unload the sounds associated with the main menu in the game that may have been previously loaded.
  */
-void GameSoundAssets::UnloadMainMenuSounds() {
+void GameSoundAssets::UnloadMainMenuSounds(bool waitForFinish) {
 	for (std::map<int, Sound*>::iterator iter = this->mainMenuSounds.begin(); iter != this->mainMenuSounds.end(); ++iter) {
-		// Stop each main menu sound and delete it
 		Sound* currSound = iter->second;
+
+		// If wait for finish is set then we wait for each song to finish playing
+		if (waitForFinish && !Sound::IsSoundMask(iter->first)) {
+			while (currSound->IsPlaying()) {}
+		}
+
+		// Stop the sound from being active and delete it
 		this->StopMainMenuSound(static_cast<Sound::MainMenuSound>(iter->first));
 		delete currSound;
 		currSound = NULL;

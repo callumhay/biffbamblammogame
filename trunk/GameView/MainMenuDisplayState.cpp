@@ -127,7 +127,7 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 
 	// Clear the main menu sounds from memory
 	GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
-	soundAssets->UnloadMainMenuSounds();
+	soundAssets->UnloadMainMenuSounds(true);
 }
 
 /**
@@ -376,9 +376,9 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	// Check to see if we're switching game states...
 	if (this->changeToPlayGameState) {
 		
-		// Turn off all the sounds first, then switch states
+		// Turn off all the sounds first (waiting for any unfinished sounds), then switch states
 		GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
-		soundAssets->UnloadMainMenuSounds();
+		soundAssets->UnloadMainMenuSounds(true);
 
 		this->display->SetCurrentState(new StartGameDisplayState(this->display));
 		
@@ -680,6 +680,12 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
 	if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
+		
+		// Play the sound effect associated with menu item selection/activation
+		// NOT WORKING PROPERLY...
+		GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+		soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
+
 		// We exit the game if the exit game item has both been activated and verified...
 		this->mainMenuState->display->QuitGame();
 	}

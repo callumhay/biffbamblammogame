@@ -31,16 +31,31 @@ public:
 	Sound(const std::string& name, const std::string& filepath);
 	virtual ~Sound();
 	
+	// Whether or not this sound is valid
+	// Returns: true if valid, false otherwise.
+	bool IsValid() const {
+		return (this->buffer != 0) && (this->source != 0);
+	}
+
 	static bool IsSoundMask(int soundType);
 
 	virtual void Play()	{
+		assert(this->IsValid());
 		alSourcePlay(this->source);
 	}
+
 	virtual void Stop() {
+		assert(this->IsValid());
 		alSourceStop(this->source);
 	}
 
 	virtual void Tick(double dT)	= 0;
+
+	bool IsPlaying() const {
+		ALint sourceState = AL_STOPPED;
+		alGetSourcei(this->source, AL_SOURCE_STATE, &sourceState);
+		return (sourceState == AL_PLAYING);
+	}
 
 	std::string GetSoundName() const { return this->soundName; }
 	std::string GetSoundFilename() const { return this->soundFile; }

@@ -32,7 +32,7 @@ void ESPParticleColourEffector::AffectParticleOnTick(double dT, ESPParticle* par
 	
 	// Obtain the current colour and alpha of the particle
 	Colour currColour;
-	double  currAlpha;
+	float currAlpha;
 	particle->GetColour(currColour, currAlpha);		
 
 	if (particleLifespan != ESPParticle::INFINITE_PARTICLE_LIFETIME) {

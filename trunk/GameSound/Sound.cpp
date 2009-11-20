@@ -10,6 +10,7 @@ const ALfloat Sound::DEFAULT_SOURCE_VEL[3]		= {0.0, 0.0, 0.0};
 
 Sound::Sound(const std::string& name, const std::string& filepath) : 
 soundName(name), soundFile(filepath), isLooping(true) {
+	debug_openal_state();
 
 	// Try to load the given sound file into an OpenAL buffer - in debug mode we load right off disk,
 	// in release we load it from the zip file system
@@ -22,11 +23,11 @@ soundName(name), soundFile(filepath), isLooping(true) {
 #endif
 
 	// Continue loading the sound if the buffer was loaded properly
-	if (this->buffer != AL_NONE) {
+	if (this->buffer != 0) {
 
 		// Load the source, only continue if it loads properly
 		alGenSources(1, &this->source);
-		if (this->source != AL_NONE) {
+		if (this->source != 0) {
 			// Setup the source with the appropriate default values
 			alSourcei(this->source, AL_BUFFER, this->buffer);
 			alSourcef(this->source, AL_PITCH, 1.0f);
@@ -40,12 +41,19 @@ soundName(name), soundFile(filepath), isLooping(true) {
 }
 
 Sound::~Sound() {
-	// Make sure the sound is stopped first
-	this->Stop();
+	if (this->IsValid()) {
+		// Make sure the sound is stopped first
+		this->Stop();
+	}
 
 	// Clean up the OpenAL sound source and buffer...
-	alDeleteSources(1, &this->source);
-	alDeleteBuffers(1, &this->buffer);
+	if (this->source != 0) {
+		alDeleteSources(1, &this->source);
+	}
+	if (this->buffer != 0) {
+		alDeleteBuffers(1, &this->buffer);
+	}
+
 	debug_openal_state();
 }
 
