@@ -6,6 +6,8 @@
 
 #include "../GameView/GameViewConstants.h"
 
+#include "../BlammoEngine/StringHelper.h"
+
 const char* MSFReader::OPEN_SOUND_DEFINTION_BLOCK			= "{";
 const char* MSFReader::CLOSE_SOUND_DEFINITION_BLOCK		= "}";
 
@@ -128,6 +130,14 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 				continue;
 			}
 
+			if (!newSound->IsValid()) {
+				delete newSound;
+				newSound = NULL;
+				error = true;
+				errorStr = "Invalid sound created for file: " + soundFilePath + ", file path is likely incorrect or file is missing.";
+				continue;
+			}
+
 			// Add the new sound to the mapping of sounds
 			sounds.insert(std::make_pair(soundType, newSound));
 
@@ -160,11 +170,8 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 
 						std::getline(*inStream, soundFilePath);
 						
-						// Clear all white space...
-						std::stringstream tempStringStr(soundFilePath);
-						soundFilePath = "";
-						while (tempStringStr >> soundFilePath) {}
-
+						// Clear all white space and prepend the proper filepath
+						soundFilePath = stringhelper::trim(soundFilePath);
 						soundFilePath = GameViewConstants::GetInstance()->SOUND_DIR + "/" + soundFilePath;
 					}
 				}
@@ -178,11 +185,8 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 						// The rest of the line should contain the sound file path...
 						std::getline(*inStream, soundFilePath);
 
-						// Clear all white space...
-						std::stringstream tempStringStr(soundFilePath);
-						soundFilePath = "";
-						while (tempStringStr >> soundFilePath) {}
-
+						// Clear all white space and prepend the proper filepath
+						soundFilePath = stringhelper::trim(soundFilePath);
 						soundFilePath = GameViewConstants::GetInstance()->SOUND_DIR + "/" + soundFilePath;
 					}
 					else if (currReadStr == MSFReader::DELAY_KEYWORD) {

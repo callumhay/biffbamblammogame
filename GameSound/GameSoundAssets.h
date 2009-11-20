@@ -25,7 +25,7 @@ public:
 	// play, playAtPosition, playAtPositionWithVelocity, stop, pauseall
 
 	void LoadMainMenuSounds();
-	void UnloadMainMenuSounds();
+	void UnloadMainMenuSounds(bool waitForFinish);
 	void PlayMainMenuSound(Sound::MainMenuSound sound);
 	void StopMainMenuSound(Sound::MainMenuSound sound);
 

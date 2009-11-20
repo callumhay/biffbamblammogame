@@ -167,7 +167,6 @@ inline void debug_openal_state() {
 		return;
 	}
 	debug_output("OpenAL Error: " << alutGetErrorString(alErr) << " (" << alErr << ")");
-	assert(false);
 }
 
 /**
