@@ -5,6 +5,7 @@
 #include <map>
 
 #include "GameItem.h"
+#include "GameEventManager.h"
 
 /**
  * Represents a timer for a game item, that is, it represents
@@ -30,35 +31,36 @@ public:
 	 * Returns whether or not this timer has expired.
 	 * Returns: true on expiration, false otherwise.
 	 */
-	bool HasExpired() const {
+	inline bool HasExpired() const {
 		return (this->timeElapsedInSecs >= this->timeLengthInSecs);
 	}
 
-	std::string GetTimerItemName() const {
+	inline std::string GetTimerItemName() const {
 		return this->assocGameItem->GetName();
 	}
 
-	GameItem::ItemType GetTimerItemType() const {
+	inline GameItem::ItemType GetTimerItemType() const {
 		return this->assocGameItem->GetItemType();
 	}
 
-	GameItem::ItemDisposition GetTimerDisposition() const {
+	inline GameItem::ItemDisposition GetTimerDisposition() const {
 		return this->assocGameItem->GetItemDisposition();
 	}
 
 	/**
 	 * Stops the timer and the item effect associated with it.
 	 */
-	void StopTimer() {
+	inline void StopTimer() {
 		this->assocGameItem->Deactivate();
 		this->timeElapsedInSecs = this->timeLengthInSecs;
+		GameEventManager::Instance()->ActionItemTimerStopped(*this);
 	}
 
 	/**
 	 * Returns a the decimal percentage of elapsed time on the timer.
 	 * Returns: a number in [0,1] reflecting the amount of elapsed time.
 	 */
-	double GetPercentTimeElapsed() const {
+	inline double GetPercentTimeElapsed() const {
 		if (this->timeLengthInSecs == 0) { 
 			return 1.0f; 
 		}
@@ -68,5 +70,12 @@ public:
 		return decPercent;
 	}
 
+	friend std::ostream& operator <<(std::ostream& os, const GameItemTimer& itemTimer);
 };
+
+
+inline std::ostream& operator <<(std::ostream& os, const GameItemTimer& itemTimer) {
+	return os << "Item Timer (Item: " << *itemTimer.assocGameItem << ", Duration: " << itemTimer.timeLengthInSecs << ")";
+};
+
 #endif

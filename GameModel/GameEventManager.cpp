@@ -205,6 +205,22 @@ void GameEventManager::ActionItemDeactivated(const GameItem& item) {
 	}		
 }
 
+// Action for when an item timer starts
+void GameEventManager::ActionItemTimerStarted(const GameItemTimer& itemTimer) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ItemTimerStartedEvent(itemTimer);
+	}		
+}
+
+// Action for when an item timer stops/expires
+void GameEventManager::ActionItemTimerStopped(const GameItemTimer& itemTimer) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->ItemTimerStoppedEvent(itemTimer);
+	}		
+}
+
 // Action for when a projectile is fired/spawned
 void GameEventManager::ActionProjectileSpawned(const Projectile& projectile) {
 	this->listenerIter = this->eventListeners.begin();

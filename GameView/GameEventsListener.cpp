@@ -44,7 +44,9 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	
 	// Show a loading screen for loading up the assets for the next in-game world...
 	unsigned int numLevelsInWorld = world.GetAllLevelsInWorld().size();
-	LoadingScreen::GetInstance()->StartShowLoadingScreen(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), numLevelsInWorld + 1);
+	const Camera& camera = this->display->GetCamera();
+
+	LoadingScreen::GetInstance()->StartShowLoadingScreen(camera.GetWindowWidth(), camera.GetWindowHeight(), numLevelsInWorld + 1);
 	this->display->GetAssets()->LoadWorldAssets(&world);
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 }
@@ -289,6 +291,18 @@ void GameEventsListener::ItemDeactivatedEvent(const GameItem& item) {
 	this->display->GetAssets()->DeactivateItemEffects(*this->display->GetModel(), item);
 
 	debug_output("EVENT: Item Deactivated: " << item);
+}
+
+void GameEventsListener::ItemTimerStartedEvent(const GameItemTimer& itemTimer){
+	this->display->GetAssets()->GetItemAssets()->TimerStarted(&itemTimer);
+
+	debug_output("EVENT: Item timer started: " << itemTimer);
+}
+
+void GameEventsListener::ItemTimerStoppedEvent(const GameItemTimer& itemTimer) {
+	this->display->GetAssets()->GetItemAssets()->TimerStopped(&itemTimer);
+
+	debug_output("EVENT: Item timer stopped/expired: " << itemTimer);
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {

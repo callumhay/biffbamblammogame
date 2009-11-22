@@ -21,8 +21,9 @@ const int GameDisplay::MAX_FRAMERATE						= 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): gameListener(NULL), currState(NULL),
-model(model), assets(new GameAssets(initWidth, initHeight)), width(initWidth), height(initHeight), 
-gameExited(false), gameReinitialized(false) {
+model(model), assets(new GameAssets(initWidth, initHeight)), 
+gameExited(false), gameReinitialized(false), 
+gameCamera(initWidth, initHeight) {
 	assert(model != NULL);
 
 	this->SetupActionListeners();
@@ -61,9 +62,8 @@ void GameDisplay::SetInitialRenderOptions() {
 }
 
 void GameDisplay::ChangeDisplaySize(int w, int h) {
-	this->width = w;
-	this->height = h;
-	this->gameCamera.SetPerspective(w, h);
+	this->gameCamera.SetWindowDimensions(w, h);
+	this->gameCamera.SetPerspective();
 	this->currState->DisplaySizeChanged(w, h);
 }
 

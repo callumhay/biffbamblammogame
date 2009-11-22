@@ -16,9 +16,11 @@ GameOverDisplayState::~GameOverDisplayState() {
 }
 
 void GameOverDisplayState::RenderFrame(double dT) {
+	const Camera& camera = this->display->GetCamera();
+	
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	this->gameOverLabel.SetTopLeftCorner(Point2D((static_cast<float>(this->display->GetDisplayWidth()) - this->gameOverLabel.GetLastRasterWidth()) * 0.5f, 
-																			         (static_cast<float>(this->display->GetDisplayHeight()) - this->gameOverLabel.GetHeight()) * 0.5f + this->gameOverLabel.GetHeight()));
+	this->gameOverLabel.SetTopLeftCorner(Point2D((static_cast<float>(camera.GetWindowWidth()) - this->gameOverLabel.GetLastRasterWidth()) * 0.5f, 
+																							 (static_cast<float>(camera.GetWindowHeight()) - this->gameOverLabel.GetHeight()) * 0.5f + this->gameOverLabel.GetHeight()));
 	this->gameOverLabel.Draw();
 }
 

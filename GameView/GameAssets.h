@@ -88,7 +88,7 @@ public:
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
-	void DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight);
+	void DrawTimers(int displayWidth, int displayHeight);
 
 	void DrawActiveItemHUDElements(const GameModel& gameModel, int displayWidth, int displayHeight);
 
@@ -109,6 +109,10 @@ public:
 	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item, const Camera& camera);
 	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item);
 	void DeactivateMiscEffects();
+
+	GameItemAssets* GetItemAssets() const {
+		return this->itemAssets;
+	}
 
 	GameESPAssets* GetESPAssets() const {
 		return this->espAssets;

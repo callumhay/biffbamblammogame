@@ -84,6 +84,7 @@ private:
 	Texture2D* upArrowTex;
 	Texture2D* ballTex;
 	Texture2D* ballTargetTex;
+	Texture2D* haloTex;
 
 	// Ball related ESP effects - stores each balls set of item-related (defined by unique ID) effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects;

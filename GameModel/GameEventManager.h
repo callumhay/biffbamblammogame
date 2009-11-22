@@ -9,6 +9,7 @@ class Point2D;
 class PlayerPaddle;
 class LevelPiece;
 class GameItem;
+class GameItemTimer;
 class GameWorld;
 class GameLevel;
 class Projectile;
@@ -50,6 +51,8 @@ public:
 	void ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle);
 	void ActionItemActivated(const GameItem& item);
 	void ActionItemDeactivated(const GameItem& item);
+	void ActionItemTimerStarted(const GameItemTimer& itemTimer);
+	void ActionItemTimerStopped(const GameItemTimer& itemTimer);
 
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);

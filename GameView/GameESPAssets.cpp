@@ -52,7 +52,8 @@ explosionRayTex(NULL),
 laserBeamTex(NULL),
 upArrowTex(NULL),
 ballTex(NULL),
-ballTargetTex(NULL) {
+ballTargetTex(NULL),
+haloTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -107,6 +108,9 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballTargetTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
+	assert(removed);
 
 	// Delete any standalone effects
 	delete this->paddleLaserGlowAura;
@@ -314,6 +318,10 @@ void GameESPAssets::InitESPTextures() {
 	if (this->ballTargetTex == NULL) {
 		this->ballTargetTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALLTARGET, Texture::Trilinear));
 		assert(this->ballTargetTex != NULL);
+	}
+	if (this->haloTex == NULL) {
+		this->haloTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+		assert(this->haloTex != NULL);
 	}
 
 	debug_opengl_state();
@@ -1483,11 +1491,10 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
  * depending on the item type we create the effect.
  */
 void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item) {
-	ESPInterval redRandomColour(0.1f, 1.0f);
-	ESPInterval greenRandomColour(0.1f, 1.0f);
-	ESPInterval blueRandomColour(0.1f, 1.0f);
+	ESPInterval redRandomColour(0.1f, 0.8f);
+	ESPInterval greenRandomColour(0.1f, 0.8f);
+	ESPInterval blueRandomColour(0.1f, 0.8f);
 	ESPInterval redColour(0), greenColour(0), blueColour(0);
-	ESPInterval alpha(1.0f);
 
 	switch (item.GetItemDisposition()) {
 		case GameItem::Good:
@@ -1511,41 +1518,86 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 			break;
 	}
 
-	// Pulsing aura
-	ESPPointEmitter* paddlePulsingAura = new ESPPointEmitter();
-	paddlePulsingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	paddlePulsingAura->SetInitialSpd(ESPInterval(0));
-	paddlePulsingAura->SetParticleLife(ESPInterval(1.0f));
-	paddlePulsingAura->SetParticleSize(ESPInterval(2.0f * paddle.GetHalfWidthTotal()), ESPInterval(4.0f * paddle.GetHalfHeight()));
-	paddlePulsingAura->SetEmitAngleInDegrees(0);
-	paddlePulsingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	paddlePulsingAura->SetParticleAlignment(ESP::ViewPointAligned);
-	paddlePulsingAura->SetEmitPosition(Point3D(0, 0, 0));
-	paddlePulsingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
-	paddlePulsingAura->AddEffector(&this->particleLargeGrowth);
-	paddlePulsingAura->AddEffector(&this->particleFader);
-	bool result = paddlePulsingAura->SetParticles(1, this->circleGradientTex);
-	assert(result);
+	if (paddle.GetIsPaddleCameraOn()) {
+		const float HEIGHT_TO_WIDTH_RATIO = static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(camera.GetWindowWidth());
+		const float HALO_WIDTH						= 2.5f * paddle.GetHalfWidthTotal();
+		const float HALO_HEIGHT						= HEIGHT_TO_WIDTH_RATIO * HALO_WIDTH;
 
-	// Absorb glow sparks
-	ESPPointEmitter* absorbGlowSparks = new ESPPointEmitter();
-	absorbGlowSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	absorbGlowSparks->SetInitialSpd(ESPInterval(3.0f, 4.5f));
-	absorbGlowSparks->SetParticleLife(ESPInterval(0.75f, 1.0f));
-	absorbGlowSparks->SetParticleSize(ESPInterval(0.1f, 0.75f));
-	absorbGlowSparks->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.6f));
-	absorbGlowSparks->SetEmitAngleInDegrees(180);
-	absorbGlowSparks->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	absorbGlowSparks->SetAsPointSpriteEmitter(true);
-	absorbGlowSparks->SetIsReversed(true);
-	absorbGlowSparks->SetEmitPosition(Point3D(0, 0, 0));
-	absorbGlowSparks->AddEffector(&this->particleFader);
-	absorbGlowSparks->AddEffector(&this->particleMediumShrink);
-	result = absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, this->circleGradientTex);
-	assert(result);
-	
-	this->activePaddleEmitters.push_back(paddlePulsingAura);
-	this->activePaddleEmitters.push_back(absorbGlowSparks);
+		// When the paddle camera is on we just display a halo on screen...
+		ESPPointEmitter* haloExpandingAura = new ESPPointEmitter();
+		haloExpandingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+		haloExpandingAura->SetInitialSpd(ESPInterval(0));
+		haloExpandingAura->SetParticleLife(ESPInterval(3.0f));
+		haloExpandingAura->SetParticleSize(ESPInterval(HALO_WIDTH), ESPInterval(HALO_HEIGHT));
+		haloExpandingAura->SetEmitAngleInDegrees(0);
+		haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
+		haloExpandingAura->SetEmitPosition(Point3D(0, 0, 0));
+		haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
+		haloExpandingAura->AddEffector(&this->particleLargeGrowth);
+		haloExpandingAura->AddEffector(&this->particleFader);
+		bool result = haloExpandingAura->SetParticles(1, this->haloTex);
+		assert(result);
+
+		this->activePaddleEmitters.push_back(haloExpandingAura);
+	}
+	else {
+		// We're not in paddle camera mode, so show the item acquired effect normally...
+
+		// Pulsing aura
+		ESPPointEmitter* paddlePulsingAura = new ESPPointEmitter();
+		paddlePulsingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+		paddlePulsingAura->SetInitialSpd(ESPInterval(0));
+		paddlePulsingAura->SetParticleLife(ESPInterval(1.0f));
+		paddlePulsingAura->SetParticleSize(ESPInterval(2.0f * paddle.GetHalfWidthTotal()), ESPInterval(4.0f * paddle.GetHalfHeight()));
+		paddlePulsingAura->SetEmitAngleInDegrees(0);
+		paddlePulsingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		paddlePulsingAura->SetParticleAlignment(ESP::ScreenAligned);
+		paddlePulsingAura->SetEmitPosition(Point3D(0, 0, 0));
+		paddlePulsingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.7f));
+		paddlePulsingAura->AddEffector(&this->particleLargeGrowth);
+		paddlePulsingAura->AddEffector(&this->particleFader);
+		bool result = paddlePulsingAura->SetParticles(1, this->circleGradientTex);
+		assert(result);
+
+		// Halo expanding aura
+		ESPPointEmitter* haloExpandingAura = new ESPPointEmitter();
+		haloExpandingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+		haloExpandingAura->SetInitialSpd(ESPInterval(0));
+		haloExpandingAura->SetParticleLife(ESPInterval(1.0f));
+		haloExpandingAura->SetParticleSize(ESPInterval(3.0f * paddle.GetHalfWidthTotal()), ESPInterval(5.0f * paddle.GetHalfHeight()));
+		haloExpandingAura->SetEmitAngleInDegrees(0);
+		haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
+		haloExpandingAura->SetEmitPosition(Point3D(0, 0, 0));
+		haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
+		haloExpandingAura->AddEffector(&this->particleLargeGrowth);
+		haloExpandingAura->AddEffector(&this->particleFader);
+		result = haloExpandingAura->SetParticles(1, this->haloTex);
+		assert(result);	
+
+		// Absorb glow sparks
+		ESPPointEmitter* absorbGlowSparks = new ESPPointEmitter();
+		absorbGlowSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+		absorbGlowSparks->SetInitialSpd(ESPInterval(2.5f, 4.0f));
+		absorbGlowSparks->SetParticleLife(ESPInterval(1.0f, 1.5f));
+		absorbGlowSparks->SetParticleSize(ESPInterval(0.3f, 0.8f));
+		absorbGlowSparks->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, ESPInterval(0.8f));
+		absorbGlowSparks->SetEmitAngleInDegrees(180);
+		absorbGlowSparks->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		absorbGlowSparks->SetAsPointSpriteEmitter(true);
+		absorbGlowSparks->SetParticleAlignment(ESP::ScreenAligned);
+		absorbGlowSparks->SetIsReversed(true);
+		absorbGlowSparks->SetEmitPosition(Point3D(0, 0, 0));
+		absorbGlowSparks->AddEffector(&this->particleFader);
+		absorbGlowSparks->AddEffector(&this->particleMediumShrink);
+		result = absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, this->circleGradientTex);
+		assert(result);
+		
+		this->activePaddleEmitters.push_back(haloExpandingAura);
+		this->activePaddleEmitters.push_back(paddlePulsingAura);
+		this->activePaddleEmitters.push_back(absorbGlowSparks);
+	}
 }
 
 /**
