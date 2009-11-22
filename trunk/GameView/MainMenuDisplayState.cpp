@@ -78,7 +78,8 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 	this->fadeAnimation.SetInterpolantValue(1.0f);
 
 	// Setup any fullscreen effects
-	this->menuFBO = new FBObj(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), Texture::Nearest, FBObj::NoAttachment);
+	const Camera& camera = this->display->GetCamera();
+	this->menuFBO = new FBObj(camera.GetWindowWidth(), camera.GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
 
 	// Load all the sound assets associated with the main menu
@@ -222,7 +223,8 @@ void MainMenuDisplayState::InitializeMainMenu() {
 	const Colour dropShadowColour = Colour(0, 0, 0);
 
 	// Setup the main menu attributes
-	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, this->display->GetDisplayHeight() - MENU_Y_INDENT);
+	const Camera& camera = this->display->GetCamera();
+	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, camera.GetWindowHeight() - MENU_Y_INDENT);
 
 	// Setup the main menu (top-most menu)
 	this->mainMenu = new GameMenu(menuTopLeftCorner);
@@ -372,9 +374,10 @@ void MainMenuDisplayState::SetupBloomEffect() {
  * Render the menu and any other stuff associated with it.
  */
 void MainMenuDisplayState::RenderFrame(double dT) {
+	bool finishFadeAnim = this->fadeAnimation.Tick(dT);
 
 	// Check to see if we're switching game states...
-	if (this->changeToPlayGameState) {
+	if (this->changeToPlayGameState && finishFadeAnim) {
 		
 		// Turn off all the sounds first (waiting for any unfinished sounds), then switch states
 		GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
@@ -385,8 +388,9 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 		return;
 	}
 	
-	const int DISPLAY_WIDTH		= this->display->GetDisplayWidth();
-	const int DISPLAY_HEIGHT	= this->display->GetDisplayHeight();
+	const Camera& camera			= this->display->GetCamera();
+	const int DISPLAY_WIDTH		= camera.GetWindowWidth();
+	const int DISPLAY_HEIGHT	= camera.GetWindowHeight();
 
 	this->menuFBO->BindFBObj();
 
@@ -418,21 +422,22 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 	debug_opengl_state();
 
-	this->fadeAnimation.Tick(dT);
+	
 }
 
 /**
  * Renders the title for the menu screen.
  */
 void MainMenuDisplayState::RenderTitle() {
+	const Camera& displayCam = this->display->GetCamera();
+
 	const float CAM_DIST_FROM_ORIGIN = 20.0f;
-	
 	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
-	const float MAX_X_COORD = static_cast<float>(this->display->GetDisplayWidth()) /  static_cast<float>(this->display->GetDisplayHeight()) * MAX_Y_COORD;
+	const float MAX_X_COORD = static_cast<float>(displayCam.GetWindowWidth()) /  static_cast<float>(displayCam.GetWindowHeight()) * MAX_Y_COORD;
 	const float MIN_X_COORD = -MAX_X_COORD;
 
-	Camera tempCamera;
-	tempCamera.SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	Camera tempCamera(displayCam.GetWindowWidth(), displayCam.GetWindowHeight());
+	tempCamera.SetPerspective();
 	tempCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
 
 	glMatrixMode(GL_MODELVIEW);
@@ -499,13 +504,14 @@ void MainMenuDisplayState::RenderTitle() {
  * random bangs and booms, etc. going off all over the place.
  */
 void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
+	const Camera& camera = this->display->GetCamera();
+
 	const float CAM_DIST_FROM_ORIGIN = 20.0f;	
-	
 	const float MAX_Z_COORD = CAM_DIST_FROM_ORIGIN / 4.0f;
 	const float MIN_Z_COORD = -MAX_Z_COORD;
 	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
 	const float MIN_Y_COORD = -MAX_Y_COORD;
-	const float MAX_X_COORD = static_cast<float>(this->display->GetDisplayWidth()) /  static_cast<float>(this->display->GetDisplayHeight()) * MAX_Y_COORD;
+	const float MAX_X_COORD = static_cast<float>(camera.GetWindowWidth()) /  static_cast<float>(camera.GetWindowHeight()) * MAX_Y_COORD;
 	const float MIN_X_COORD = -MAX_X_COORD;	
 	
 	// Insert a bunch of bang-onomatopiea effects for drawing if we're running low on them
@@ -514,8 +520,8 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
 		this->InsertBangEffectIntoBGEffects(MIN_X_COORD, MAX_X_COORD, MIN_Y_COORD, MAX_Y_COORD_BG_EFFECTS, MIN_Z_COORD, MAX_Z_COORD);
 	}
 
-	Camera tempCamera;
-	tempCamera.SetPerspective(this->display->GetDisplayWidth(), this->display->GetDisplayHeight());
+	Camera tempCamera(camera.GetWindowWidth(), camera.GetWindowHeight());
+	tempCamera.SetPerspective();
 	tempCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
 
 	glMatrixMode(GL_MODELVIEW);
@@ -635,8 +641,10 @@ void MainMenuDisplayState::KeyPressed(SDLKey key) {
 }
 
 void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
+	const Camera& camera = this->display->GetCamera();
+
 	delete this->menuFBO;
-	this->menuFBO = new FBObj(this->display->GetDisplayWidth(), this->display->GetDisplayHeight(), Texture::Nearest, FBObj::NoAttachment);
+	this->menuFBO = new FBObj(camera.GetWindowWidth(), camera.GetWindowHeight(), Texture::Nearest, FBObj::NoAttachment);
 	this->SetupBloomEffect();
 }
 
@@ -658,6 +666,8 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 		debug_output("Selected " << NEW_GAME_MENUITEM << " from menu");
 		soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
 		this->mainMenuState->changeToPlayGameState = true;
+		this->mainMenuState->fadeAnimation.SetLerp(0.0, 2.0, 0.0f, 1.0f);
+		this->mainMenuState->fadeAnimation.SetRepeat(false);
 	}
 	else if (itemIndex == this->mainMenuState->playLevelMenuItemIndex) {
 		debug_output("Selected " << PLAY_LEVEL_MENUITEM << " from menu");

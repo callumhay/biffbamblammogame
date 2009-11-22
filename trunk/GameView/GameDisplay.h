@@ -20,9 +20,6 @@ private:
 	GameModel* model;
 	GameAssets* assets;
 	GameEventsListener* gameListener;
-
-	// Width and height of the viewport/display
-	int width, height;
 	
 	bool gameReinitialized;		// Whether or not we should reinitialize the whole game (recreate the window, etc.)
 	bool gameExited;  				// Whether or not the game has been exited
@@ -74,12 +71,6 @@ public:
 	}
 	GameModel* GetModel() {
 		return this->model;
-	}
-	int GetDisplayWidth() const {
-		return this->width;
-	}
-	int GetDisplayHeight() const {
-		return this->height;
 	}
 	Camera& GetCamera() {
 		return this->gameCamera;

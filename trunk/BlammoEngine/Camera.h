@@ -23,6 +23,9 @@ private:
 	Vector3D shakeMagnitude;
 	unsigned int shakeSpeed;
 
+	int windowWidth;
+	int windowHeight;
+
 	void ApplyCameraShakeTransform(double dT) {
 		if (this->shakeTimeElapsed < this->shakeTimeTotal) {
 
@@ -45,11 +48,24 @@ public:
 	static const float FOV_ANGLE_IN_DEGS;
 	static const float NEAR_PLANE_DIST;
 	static const float FAR_PLANE_DIST;
+
 	static const Vector3D DEFAULT_FORWARD_VEC;
 	static const Vector3D DEFAULT_LEFT_VEC;
 	static const Vector3D DEFAULT_UP_VEC;
 
-	Camera();
+	Camera(int width, int height);
+
+	void SetWindowDimensions(int w, int h) {
+		assert(w > 0 && h > 0);
+		this->windowWidth = w;
+		this->windowHeight = h;
+	}
+	int GetWindowWidth() const {
+		return this->windowWidth;
+	}
+	int GetWindowHeight() const {
+		return this->windowHeight;
+	}
 
 	Vector3D GetNormalizedUpVector() const {
 		return Vector3D::Normalize(this->viewMatrix * DEFAULT_UP_VEC); 
@@ -109,20 +125,20 @@ public:
 	}
 
 	// Functions for setting the camera perspective
-	void SetPerspectiveWithFOV(int w, int h, float fovAngleInDegs) {
+	void SetPerspectiveWithFOV(float fovAngleInDegs) {
 		this->fovAngleInDegrees = fovAngleInDegs;
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glViewport(0, 0, w, h);
-		gluPerspective(this->fovAngleInDegrees, ((double)w) / ((double)h), NEAR_PLANE_DIST, FAR_PLANE_DIST);
+		glViewport(0, 0, this->windowWidth, this->windowHeight);
+		gluPerspective(this->fovAngleInDegrees, static_cast<double>(this->windowWidth) / static_cast<double>(this->windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
-	void SetPerspective(int w, int h) {
+	void SetPerspective() {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glViewport(0, 0, w, h);
-		gluPerspective(this->fovAngleInDegrees, ((double)w) / ((double)h), NEAR_PLANE_DIST, FAR_PLANE_DIST);
+		glViewport(0, 0, this->windowWidth, this->windowHeight);
+		gluPerspective(this->fovAngleInDegrees, static_cast<double>(this->windowWidth) / static_cast<double>(this->windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
 	// Functions for changing the current view transform to a full ortho2D,

@@ -8,6 +8,7 @@ class LevelPiece;
 class GameLevel;
 class GameWorld;
 class GameItem;
+class GameItemTimer;
 class Projectile;
 
 class GameEvents {
@@ -208,6 +209,20 @@ public:
 	 */
 	virtual void ItemDeactivatedEvent(const GameItem& item)	= 0;
 	
+	/**
+	 * Event triggered when an item's timer is started for the first time. Only occurs
+	 * once at item activation, when that item has an associated time period of activity.
+	 * Arguements: itemTimer - The item timer that just started.
+	 */
+	virtual void ItemTimerStartedEvent(const GameItemTimer& itemTimer) = 0;
+
+	/**
+	 * Event triggered when an item's timer stops. Only occurs once when an item runs
+	 * out of its active time and expires.
+	 * Arguements: itemTimer - The item timer that just stopped/expired.
+	 */
+	virtual void ItemTimerStoppedEvent(const GameItemTimer& itemTimer) = 0;
+
 	/**
 	 * Event triggered when a projectile is spawned. Only occurs once per spawned projectile.
 	 * Arguements: projectile - The projectile that was just spawned.

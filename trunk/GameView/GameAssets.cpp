@@ -308,6 +308,9 @@ void GameAssets::Tick(double dT) {
 	// Tick the light assets (light animations for strobing, changing colours, etc.)
 	this->lightAssets->Tick(dT);
 
+	// Tick the item assets (e.g., for animation of acquiring/destroying item timers in the HUD)
+	this->itemAssets->Tick(dT);
+
 	// Tick the sound assets
 	this->soundAssets->Tick(dT);
 }
@@ -327,22 +330,14 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
 
-	// When the paddle camera is on we just draw the paddle with no special effects
-	// the camera will fade based on its alpha (see world assets DrawPaddle function)
-	if (p.GetIsPaddleCameraOn()) {
-		// Just draw the paddle and finish
-		this->worldAssets->DrawPaddle(p, camera, paddleKeyLight, paddleFillLight, ballLight);
-		glPopMatrix();
-		return;
-	}
-
 	// Draw any effects on the paddle (e.g., item acquiring effects)
 	this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
 	// Draw the paddle
 	this->worldAssets->DrawPaddle(p, camera, paddleKeyLight, paddleFillLight, ballLight);
 
-	// In the case of a laser paddle, we draw the laser attachment and its related effects
-	if ((p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
+	// In the case of a laser paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
+	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
+	if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		// Draw attachment (gun) mesh
 		this->paddleLaserAttachment->Draw(dT, p, camera, paddleKeyLight, paddleFillLight);
@@ -425,8 +420,8 @@ void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameI
 /**
  * Draw the HUD timer for the given timer type.
  */
-void GameAssets::DrawTimers(const std::list<GameItemTimer*>& timers, int displayWidth, int displayHeight) {
-	this->itemAssets->DrawTimers(timers, displayWidth, displayHeight);
+void GameAssets::DrawTimers(int displayWidth, int displayHeight) {
+	this->itemAssets->DrawTimers(displayWidth, displayHeight);
 }
 
 /**
