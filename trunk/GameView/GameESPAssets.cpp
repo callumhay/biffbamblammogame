@@ -195,6 +195,18 @@ void GameESPAssets::KillAllActiveEffects() {
 	}
 	this->ballEffects.clear();
 
+	// Clear all the emitters for HUD Timers
+	for (std::map<GameItem::ItemType, std::list<ESPEmitter*>>::iterator iter1 = this->activeTimerHUDEmitters.begin(); iter1 != this->activeTimerHUDEmitters.end(); ++iter1) {
+		std::list<ESPEmitter*>& emitterList = iter1->second;
+		for (std::list<ESPEmitter*>::iterator iter2 = emitterList.begin(); iter2 != emitterList.end(); ++iter2) {
+			ESPEmitter* currEmitter = *iter2;
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		emitterList.clear();
+	}
+	this->activeTimerHUDEmitters.clear();
+
 }
 
 /**
@@ -1215,7 +1227,10 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
 			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
 			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
+			break;
+
 		default:
+			assert(false);
 			break;
 	}
 
@@ -1378,6 +1393,124 @@ void GameESPAssets::RemoveProjectileEffect(const Camera& camera, const Projectil
 
 		this->activeProjectileEmitters.erase(&projectile);
 	}
+}
+
+/**
+ * Adds a Timer HUD effect for the given item type.
+ */
+void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition) {
+	// Remove any previously active effects for the given item type
+	std::map<GameItem::ItemType, std::list<ESPEmitter*>>::iterator foundEffects = this->activeTimerHUDEmitters.find(type);
+	if (foundEffects != this->activeTimerHUDEmitters.end()) {
+		std::list<ESPEmitter*>& foundEmitters = foundEffects->second;
+		for (std::list<ESPEmitter*>::iterator iter = foundEmitters.begin(); iter != foundEmitters.end(); ++iter) {
+			ESPEmitter* currEmitter = *iter;
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		this->activeTimerHUDEmitters.erase(foundEffects);
+	}
+
+	ESPInterval redRandomColour(0.1f, 0.8f);
+	ESPInterval greenRandomColour(0.1f, 0.8f);
+	ESPInterval blueRandomColour(0.1f, 0.8f);
+	ESPInterval redColour(0), greenColour(0), blueColour(0);
+
+	// We choose a specific kind of sprite graphic based on whether we are dealing with a power-down or not
+	// (evil stars for bad items!!)
+	Texture2D* itemSpecificFillStarTex = this->starTex;
+	Texture2D* itemSpecificOutlineStarTex = this->starOutlineTex;
+
+	switch (disposition) {
+		case GameItem::Good:
+			greenRandomColour = ESPInterval(0.8f, 1.0f);
+			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
+			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
+			break;
+
+		case GameItem::Bad:
+			redRandomColour		= ESPInterval(0.8f, 1.0f);
+			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
+			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
+
+			itemSpecificFillStarTex		 = this->evilStarTex;
+			itemSpecificOutlineStarTex = this->evilStarOutlineTex;
+			break;
+
+		case GameItem::Neutral:
+			blueRandomColour = ESPInterval(0.8f, 1.0f);
+			redColour		= ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
+			blueColour	=	ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
+
+	const ESPInterval starSpawnDelta(0.02f, 0.06f);
+	const ESPInterval starInitialSpd(60.0f, 80.0f);
+	const ESPInterval starLife(2.0f, 2.5f);
+	const ESPInterval starSize(1.0f, 1.5f);
+
+	ESPPointEmitter* solidStarEmitter = new ESPPointEmitter();
+	solidStarEmitter->SetSpawnDelta(starSpawnDelta);
+	solidStarEmitter->SetInitialSpd(starInitialSpd);
+	solidStarEmitter->SetParticleLife(starLife);
+	solidStarEmitter->SetNumParticleLives(1);
+	solidStarEmitter->SetParticleSize(starSize);
+	solidStarEmitter->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, ESPInterval(1.0f));
+	solidStarEmitter->SetEmitAngleInDegrees(180);
+	solidStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	solidStarEmitter->SetAsPointSpriteEmitter(true);
+	solidStarEmitter->SetEmitDirection(Vector3D(0, 1, 0));
+	solidStarEmitter->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	solidStarEmitter->SetEmitPosition(Point3D(0, 0, 0));
+	solidStarEmitter->AddEffector(&this->particleFader);
+	bool result = solidStarEmitter->SetParticles(7, itemSpecificFillStarTex);
+	assert(result);
+
+	ESPPointEmitter* outlineStarEmitter = new ESPPointEmitter();
+	outlineStarEmitter->SetSpawnDelta(starSpawnDelta);
+	outlineStarEmitter->SetInitialSpd(starInitialSpd);
+	outlineStarEmitter->SetParticleLife(starLife);
+	outlineStarEmitter->SetNumParticleLives(1);
+	outlineStarEmitter->SetParticleSize(starSize);
+	outlineStarEmitter->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, ESPInterval(1.0f));
+	outlineStarEmitter->SetEmitAngleInDegrees(180);
+	outlineStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	outlineStarEmitter->SetAsPointSpriteEmitter(true);
+	outlineStarEmitter->SetEmitDirection(Vector3D(0, 1, 0));
+	outlineStarEmitter->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	outlineStarEmitter->SetEmitPosition(Point3D(0, 0, 0));
+	outlineStarEmitter->AddEffector(&this->particleFader);
+	result = outlineStarEmitter->SetParticles(7, itemSpecificOutlineStarTex);
+	assert(result);
+
+	ESPPointEmitter* haloExpandingAura = new ESPPointEmitter();
+	haloExpandingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	haloExpandingAura->SetInitialSpd(ESPInterval(0));
+	haloExpandingAura->SetParticleLife(ESPInterval(2.5f));
+	haloExpandingAura->SetParticleSize(ESPInterval(100), ESPInterval(75));
+	haloExpandingAura->SetEmitAngleInDegrees(0);
+	haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
+	haloExpandingAura->SetEmitPosition(Point3D(0, 0, 0));
+	haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
+	haloExpandingAura->AddEffector(&this->particleLargeGrowth);
+	haloExpandingAura->AddEffector(&this->particleFader);
+	result = haloExpandingAura->SetParticles(1, this->haloTex);
+	assert(result);
+
+	std::list<ESPEmitter*> timerHUDEmitters;
+	timerHUDEmitters.push_back(solidStarEmitter);
+	timerHUDEmitters.push_back(outlineStarEmitter);
+	timerHUDEmitters.push_back(haloExpandingAura);
+
+	this->activeTimerHUDEmitters.insert(std::make_pair(type, timerHUDEmitters));
 }
 
 /**
@@ -2132,4 +2265,37 @@ void GameESPAssets::DrawPaddleLaserEffects(double dT, const Camera& camera, cons
 	this->paddleLaserGlowAura->Tick(dT);
 	this->paddleLaserGlowSparks->Draw(camera);
 	this->paddleLaserGlowSparks->Tick(dT);
+}
+
+void GameESPAssets::DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type) {
+
+	// Try to find any emitters associated with the given item type
+	std::map<GameItem::ItemType, std::list<ESPEmitter*>>::iterator foundEmitters = this->activeTimerHUDEmitters.find(type);
+	if (foundEmitters == this->activeTimerHUDEmitters.end()) {
+		return;
+	}
+
+	// Go through all the particles and do book keeping and drawing
+	std::list<ESPEmitter*>& timerHUDEmitterList = foundEmitters->second;
+	for (std::list<ESPEmitter*>::iterator iter = timerHUDEmitterList.begin();	iter != timerHUDEmitterList.end();) {
+		ESPEmitter* currEmitter = *iter;
+
+		// Check to see if dead, if so erase it...
+		if (currEmitter->IsDead()) {
+			iter = timerHUDEmitterList.erase(iter);
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		else {
+			// Not dead yet so we draw and tick
+			currEmitter->Draw(camera);
+			currEmitter->Tick(dT);
+			++iter;
+		}
+	}
+
+	if (timerHUDEmitterList.size() == 0) {
+		this->activeTimerHUDEmitters.erase(foundEmitters);
+	}
+
 }

@@ -308,9 +308,6 @@ void GameAssets::Tick(double dT) {
 	// Tick the light assets (light animations for strobing, changing colours, etc.)
 	this->lightAssets->Tick(dT);
 
-	// Tick the item assets (e.g., for animation of acquiring/destroying item timers in the HUD)
-	this->itemAssets->Tick(dT);
-
 	// Tick the sound assets
 	this->soundAssets->Tick(dT);
 }
@@ -420,8 +417,8 @@ void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameI
 /**
  * Draw the HUD timer for the given timer type.
  */
-void GameAssets::DrawTimers(int displayWidth, int displayHeight) {
-	this->itemAssets->DrawTimers(displayWidth, displayHeight);
+void GameAssets::DrawTimers(double dT, const Camera& camera) {
+	this->itemAssets->DrawTimers(dT, camera);
 }
 
 /**

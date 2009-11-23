@@ -52,8 +52,7 @@ private:
 		ItemTimerHUDElement(GameItemAssets* itemAssets, const GameItemTimer* itemTimer);
 		~ItemTimerHUDElement();
 
-		void Tick(double dT);
-		void Draw(int x, int y, int width, int height) const;
+		void Draw(double dT, const Camera& camera, int x, int y, int width, int height);
 	
 		void StopTimer();
 
@@ -66,6 +65,7 @@ private:
 		const GameItem::ItemType GetItemType() const { return this->itemType; }
 
 	private:
+		GameItemAssets* itemAssets;
 		const GameItemTimer* itemTimer;	// Timer associated with this HUD timer element
 		
 		Colour timerColour;							// Cache of the timer colour to avoid looking it up each frame
@@ -79,6 +79,7 @@ private:
 		AnimationMultiLerp<float> scaleAnimation;								// Any active scale animation for this
 
 		void SetState(const TimerState& state);
+		void Tick(double dT);
 
 	};
 
@@ -93,9 +94,7 @@ public:
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
 		const PointLight& fgKeyLight, const PointLight& fgFillLight, const PointLight& ballLight) const;
 
-	void DrawTimers(int displayWidth, int displayHeight);
-
-	void Tick(double dT);
+	void DrawTimers(double dT, const Camera& camera);
 
 	// On Event functions for signalling the start/stop of timers
 	void TimerStarted(const GameItemTimer* timer);

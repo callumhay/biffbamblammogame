@@ -2,7 +2,7 @@
 
 
 ESPPointEmitter::ESPPointEmitter() : ESPEmitter(), emitPt(Point3D(0, 0, 0)),
-emitDir(Vector3D(0, 1, 0)),  emitAngleInRads(0.0f) {
+emitDir(Vector3D(0, 1, 0)),  emitAngleInRads(0.0f), emitOnPlane(false), planeNormal(0, 0, 1) {
 }
 
 ESPPointEmitter::~ESPPointEmitter() {
@@ -16,36 +16,46 @@ ESPPointEmitter::~ESPPointEmitter() {
 Vector3D ESPPointEmitter::CalculateRandomInitParticleDir() const {
 	// We start with the emit direction and transform it within the allowable
 	// angle range for this emitter.
+	if (this->emitOnPlane) {
 
-	// Convert to spherical coordinates to do this...
-	Vector3D sphCoordEmitDir = Vector3D::ToSphericalFromCartesian(this->emitDir);
-	
-	// Now just manipulate the theta and phi values based on the range (cone) of the emitter...
-	double thetaVariation = this->emitAngleInRads * Randomizer::GetInstance()->RandomNumNegOneToOne();
-	double phiVariation		= this->emitAngleInRads * Randomizer::GetInstance()->RandomNumNegOneToOne();
-	sphCoordEmitDir[1] += thetaVariation;
-	sphCoordEmitDir[2] += phiVariation;
+		// Calculate a rotation matrix based on a random angle to emit at
+		double randomAngleInRads = static_cast<double>(this->emitAngleInRads) * Randomizer::GetInstance()->RandomNumNegOneToOne();
+		Matrix4x4 rotationMatrix = Matrix4x4::rotationMatrix(randomAngleInRads, this->planeNormal);
 
-	// Make sure the values are still in range:
-	// (0 <= theta <= pi)
+		Vector3D randomEmitDir = Vector3D::Normalize(rotationMatrix * this->emitDir);
+		return randomEmitDir;
+	}
+	else {
+		// Convert to spherical coordinates to do this...
+		Vector3D sphCoordEmitDir = Vector3D::ToSphericalFromCartesian(this->emitDir);
+		
+		// Now just manipulate the theta and phi values based on the range (cone) of the emitter...
+		double thetaVariation = this->emitAngleInRads * Randomizer::GetInstance()->RandomNumNegOneToOne();
+		double phiVariation		= this->emitAngleInRads * Randomizer::GetInstance()->RandomNumNegOneToOne();
+		sphCoordEmitDir[1] += thetaVariation;
+		sphCoordEmitDir[2] += phiVariation;
 
-	if (sphCoordEmitDir[1] > static_cast<float>(M_PI)) {
-		sphCoordEmitDir[1] = sphCoordEmitDir[1] - static_cast<float>(M_PI);
-	}
-	else if (sphCoordEmitDir[1] < 0) {
-		sphCoordEmitDir[1] = sphCoordEmitDir[1] + static_cast<float>(M_PI);
-	}
-	// (0 <= phi < 2*pi)
-	if (sphCoordEmitDir[2] >= static_cast<float>(2.0*M_PI)) {
-		sphCoordEmitDir[2] = sphCoordEmitDir[2] - static_cast<float>(2.0*M_PI);
-	}
-	else if (sphCoordEmitDir[2] < 0) {
-		sphCoordEmitDir[2] = sphCoordEmitDir[2] + static_cast<float>(2.0*M_PI);
-	}
+		// Make sure the values are still in range:
+		// (0 <= theta <= pi)
 
-	// Convert back to cartesian Coordinates
-	Vector3D resultVec = Vector3D::ToCartesianFromSpherical(sphCoordEmitDir);
-	return Vector3D::Normalize(resultVec);
+		if (sphCoordEmitDir[1] > static_cast<float>(M_PI)) {
+			sphCoordEmitDir[1] = sphCoordEmitDir[1] - static_cast<float>(M_PI);
+		}
+		else if (sphCoordEmitDir[1] < 0) {
+			sphCoordEmitDir[1] = sphCoordEmitDir[1] + static_cast<float>(M_PI);
+		}
+		// (0 <= phi < 2*pi)
+		if (sphCoordEmitDir[2] >= static_cast<float>(2.0*M_PI)) {
+			sphCoordEmitDir[2] = sphCoordEmitDir[2] - static_cast<float>(2.0*M_PI);
+		}
+		else if (sphCoordEmitDir[2] < 0) {
+			sphCoordEmitDir[2] = sphCoordEmitDir[2] + static_cast<float>(2.0*M_PI);
+		}
+
+		// Convert back to cartesian Coordinates
+		Vector3D resultVec = Vector3D::ToCartesianFromSpherical(sphCoordEmitDir);
+		return Vector3D::Normalize(resultVec);
+	}
 }
 
 /** 
@@ -74,7 +84,33 @@ void ESPPointEmitter::SetEmitPosition(const Point3D& pt) {
  */
 void ESPPointEmitter::SetEmitDirection(const Vector3D& dir) {
 	this->emitDir = dir;
+	if (this->emitOnPlane) {
+		assert(Vector3D::cross(this->planeNormal, this->emitDir) != Vector3D(0,0,0));
+	}
 }
+
+/**
+ * Tell the emitter to only emit particles on the plane defined by the given plane normal,
+ * or tell it to not do any such thing.
+ */
+void ESPPointEmitter::SetToggleEmitOnPlane(bool emitOnPlane, const Vector3D& planeNormal) {
+	this->emitOnPlane = emitOnPlane;
+	this->planeNormal = planeNormal;
+	if (this->emitOnPlane && this->planeNormal == Vector3D(0,0,0)) {
+		assert(false);
+		this->planeNormal = Vector3D(0,0,1);
+	}
+	else {
+		this->planeNormal.Normalize();
+	}
+
+	// Check to see if the directional vector for emitting is perpendicular to the plane... if it is
+	// then we must change it...
+	if (this->emitOnPlane) {
+		assert(Vector3D::cross(this->planeNormal, this->emitDir) != Vector3D(0,0,0));
+	}
+}
+
 /**
  * Set the emit angle (in degrees) for this point emitter.
  */

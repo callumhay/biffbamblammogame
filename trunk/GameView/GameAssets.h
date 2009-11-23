@@ -88,7 +88,7 @@ public:
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
-	void DrawTimers(int displayWidth, int displayHeight);
+	void DrawTimers(double dT, const Camera& camera);
 
 	void DrawActiveItemHUDElements(const GameModel& gameModel, int displayWidth, int displayHeight);
 

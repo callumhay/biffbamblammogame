@@ -18,6 +18,7 @@ private:
 	GameItem* assocGameItem;	// The game item associated with this timer
 	double timeLengthInSecs;	// Total length of the timer in seconds
 	double timeElapsedInSecs;	// Amount of time elapsed on the timer so far
+	bool wasStopped;
 
 public:
 	static const float ZERO_TIME_TIMER_IN_SECS;
@@ -54,6 +55,7 @@ public:
 		this->assocGameItem->Deactivate();
 		this->timeElapsedInSecs = this->timeLengthInSecs;
 		GameEventManager::Instance()->ActionItemTimerStopped(*this);
+		this->wasStopped = true;
 	}
 
 	/**

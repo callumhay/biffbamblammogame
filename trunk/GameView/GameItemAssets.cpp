@@ -213,12 +213,15 @@ void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& g
 /**
  * Draw the HUD timer for the given timer type.
  */
-void GameItemAssets::DrawTimers(int displayWidth, int displayHeight) {
+void GameItemAssets::DrawTimers(double dT, const Camera& camera) {
 
 	// If there are no timers to draw then we don't draw any
 	if (this->activeItemTimers.size() == 0) {
 		return;
 	}
+
+	const int displayWidth = camera.GetWindowWidth();
+	const int displayHeight = camera.GetWindowHeight();
 
 	// Spacing along the vertical between timer graphics (in pixels)
 	// Spacing along the horizontal of timer graphics distanced from the right edge of the game window (in pixels)
@@ -262,7 +265,7 @@ void GameItemAssets::DrawTimers(int displayWidth, int displayHeight) {
 		currYPos -= halfHeight;
 
 		int currXPos = displayWidth - width - TIMER_HORIZONTAL_SPACING;
-		currHUDElement->Draw(currXPos, currYPos, width, height);
+		currHUDElement->Draw(dT, camera, currXPos, currYPos, width, height);
 
 		// Add spacing under the timer 
 		currYPos -= (halfHeight + ItemTimerHUDElement::TIMER_VERTICAL_SPACING);
@@ -272,19 +275,10 @@ void GameItemAssets::DrawTimers(int displayWidth, int displayHeight) {
 	glPopAttrib();
 	// Pop the projection matrix
 	Camera::PopWindowCoords();
-}
 
-/**
- * Called each frame with the delta time between frames to allow for animation
- * and other time-related functions for items/item timers.
- */
-void GameItemAssets::Tick(double dT) {
-	
-	// Tick all the HUD elements that are currently active
+	// Remove any dead HUD elements...
 	for (std::list<ItemTimerHUDElement*>::iterator iter = this->activeItemTimers.begin(); iter != this->activeItemTimers.end();) {
 		ItemTimerHUDElement* timerHUDElement = *iter;
-		timerHUDElement->Tick(dT);
-		
 		if (timerHUDElement->IsDead()) {
 			iter = this->activeItemTimers.erase(iter);
 			delete timerHUDElement;
@@ -294,6 +288,7 @@ void GameItemAssets::Tick(double dT) {
 			++iter;
 		}
 	}
+
 }
 
 /**
@@ -346,13 +341,12 @@ void GameItemAssets::TimerStopped(const GameItemTimer* timer) {
 // ***************************************************************************************************
 
 GameItemAssets::ItemTimerHUDElement::ItemTimerHUDElement(GameItemAssets* itemAssets, const GameItemTimer* itemTimer) : 
-itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL) {
+itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL), itemAssets(itemAssets) {
 	
 	assert(itemAssets != NULL);
 	assert(itemTimer != NULL);
 
 	this->itemType = itemTimer->GetTimerItemType();
-	this->SetState(ItemTimerHUDElement::TimerStarting);
 
 	// Figure out what colour to make the fill based on how it
 	// affects the player (red is bad, green is good, etc.)
@@ -387,6 +381,8 @@ itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL) {
 
 	assert(this->timerTexture != NULL);
 	assert(this->fillerTexture != NULL);
+
+	this->SetState(ItemTimerHUDElement::TimerStarting);
 }
 
 GameItemAssets::ItemTimerHUDElement::~ItemTimerHUDElement() {
@@ -443,7 +439,9 @@ void GameItemAssets::ItemTimerHUDElement::Tick(double dT) {
 /**
  * Draw the Item HUD element in its current state.
  */
-void GameItemAssets::ItemTimerHUDElement::Draw(int x, int y, int width, int height) const {
+void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, int x, int y, int width, int height) {
+	this->Tick(dT);
+
 	const float ITEM_SCALE = this->scaleAnimation.GetInterpolantValue();
 	const ColourRGBA ITEM_ADDITIVE_COLOUR = this->additiveColourAnimation.GetInterpolantValue();
 	const int HALF_WIDTH	 = width / 2;
@@ -463,10 +461,13 @@ void GameItemAssets::ItemTimerHUDElement::Draw(int x, int y, int width, int heig
 	double fillerHalfHeight = (height - (height * percentElapsed)) / 2.0;
 	double fillerTexHeight  = 1.0 - percentElapsed;
 	
-	// Back fill - so that the filler that has expired so far stands out
-	// from the background
+	// Back fill - so that the filler that has expired so far stands out from the background
 	glPushMatrix();
 	glTranslatef(TRANSLATE_X, y + HALF_HEIGHT, 0.0f);
+	
+	// Draw any effects currently active for this HUD element
+	this->itemAssets->espAssets->DrawTimerHUDEffect(dT, camera, this->itemType);
+
 	glScalef(ITEM_SCALE, ITEM_SCALE, 0.0f);
 
 	this->fillerTexture->BindTexture();
@@ -528,6 +529,8 @@ void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 		switch (state) {
 		
 		case ItemTimerHUDElement::TimerStarting: {
+				this->itemAssets->espAssets->AddTimerHUDEffect(this->itemType, this->itemTimer->GetTimerDisposition());
+
 				// Since the timer is starting up, we need to initialize animations for start of the timer
 				std::vector<double> timeValues;
 				timeValues.reserve(4);
@@ -599,12 +602,12 @@ void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 
 				std::vector<ColourRGBA> colourValues;
 				colourValues.reserve(2);
-				colourValues.push_back(ColourRGBA(0.0f, 0.0f, 0.0f, 1.0f));
+				colourValues.push_back(this->additiveColourAnimation.GetInterpolantValue());
 				colourValues.push_back(ColourRGBA(0.0f, 0.0f, 0.0f, 0.0f));
 
 				std::vector<float> scaleValues;
 				scaleValues.reserve(2);
-				scaleValues.push_back(1.0f);
+				scaleValues.push_back(this->scaleAnimation.GetInterpolantValue());
 				scaleValues.push_back(1.5f);
 
 				this->additiveColourAnimation.SetLerp(timeValues, colourValues);

@@ -42,6 +42,7 @@ private:
 	std::map<const GameBall*, std::list<ESPEmitter*>>		activeBallBGEmitters;
 	std::map<const GameItem*, std::list<ESPEmitter*>>		activeItemDropEmitters; 
 	std::map<const Projectile*, std::list<ESPEmitter*>> activeProjectileEmitters;
+	std::map<GameItem::ItemType, std::list<ESPEmitter*>> activeTimerHUDEmitters;
 	
 	// Standard effectors for the various ESP effects
 	ESPParticleColourEffector particleFader;
@@ -151,6 +152,7 @@ public:
 	void RemoveItemDropEffect(const Camera& camera, const GameItem& item);
 	void AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile);
 	void RemoveProjectileEffect(const Camera& camera, const Projectile& projectile);
+	void AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition);
 
 	void TurnOffCurrentItemDropStars(const Camera& camera);
 
@@ -170,5 +172,6 @@ public:
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 	void DrawPaddleLaserEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 
+	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };
 #endif
