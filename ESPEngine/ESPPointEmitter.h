@@ -10,8 +10,12 @@ class ESPPointEmitter : public ESPEmitter {
 
 private:
 	Point3D emitPt;					// The point from which all particles will be emitted from
-	Vector3D emitDir;				// The direction (in emitter coords) that the emitter fires towards on average
+	Vector3D emitDir;			// The direction (in emitter coords) that the emitter fires towards on average
+	
 	float emitAngleInRads;	// The angle of possible deviation from the emit dir
+	
+	bool emitOnPlane;				// Whether or not the emitter emits particles on a plane defined by planeNormal
+	Vector3D planeNormal;		// The normal vector defining the plane to emit on in the case of emitOnPlane == true
 
 protected:
 	virtual Vector3D CalculateRandomInitParticleDir() const;
@@ -23,6 +27,8 @@ public:
 
 	void SetEmitPosition(const Point3D& pt);
 	void SetEmitDirection(const Vector3D& dir);
+	void SetToggleEmitOnPlane(bool emitOnPlane, const Vector3D& planeNormal = Vector3D(0, 0, 1));
 	void SetEmitAngleInDegrees(int degs);
+	
 };
 #endif

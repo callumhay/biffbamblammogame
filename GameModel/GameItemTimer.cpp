@@ -13,16 +13,20 @@
 
 const float GameItemTimer::ZERO_TIME_TIMER_IN_SECS = 0.0f;
 
-GameItemTimer::GameItemTimer(GameItem* gameItem) : assocGameItem(gameItem), timeElapsedInSecs(0.0) {
+GameItemTimer::GameItemTimer(GameItem* gameItem) : assocGameItem(gameItem), timeElapsedInSecs(0.0), wasStopped(false) {
 	assert(gameItem != NULL);
 	this->timeLengthInSecs = gameItem->Activate();
-	if (this->timeLengthInSecs > GameItemTimer::ZERO_TIME_TIMER_IN_SECS) {
+	if ((this->timeLengthInSecs - GameItemTimer::ZERO_TIME_TIMER_IN_SECS) > EPSILON) {
 		GameEventManager::Instance()->ActionItemTimerStarted(*this);
 	}
 }
 
 GameItemTimer::~GameItemTimer() {
-	//assert(this->assocGameItem != NULL);
+	// Make sure the timer gets a stop event called when appropriate
+	if (!this->wasStopped && (this->timeLengthInSecs - GameItemTimer::ZERO_TIME_TIMER_IN_SECS) > EPSILON) {
+		GameEventManager::Instance()->ActionItemTimerStopped(*this);
+	}
+
 	if (this->assocGameItem != NULL) {
 		delete this->assocGameItem;
 		this->assocGameItem = NULL;

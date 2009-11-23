@@ -89,7 +89,7 @@ double BallSpeedItem::Activate() {
 	}
 
 	// If all the balls are normal speed then all previous power-ups/downs involving
-	// ball speed have been cancelled out an no item is active
+	// ball speed have been cancelled out and no item is active
 	if (affectedBall->GetSpeed() == GameBall::NormalSpeed) {
 		return GameItemTimer::ZERO_TIME_TIMER_IN_SECS;
 	}

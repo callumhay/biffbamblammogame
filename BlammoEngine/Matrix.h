@@ -170,6 +170,33 @@ public:
 		return r;
 	}
 
+	static Matrix4x4 rotationMatrix(float angleInRads, const Vector3D& rotationVec) {
+		Vector3D unitRotVec = Vector3D::Normalize(rotationVec);
+		if (unitRotVec == Vector3D(0,0,0)) {
+			assert(false);
+			return Matrix4x4();
+		}
+
+		float c = cos(angleInRads);
+		float s = sin(angleInRads);
+		float oneMinusC = (1.0f - c);
+		float uX = unitRotVec[0];
+		float uY = unitRotVec[1];
+		float uZ = unitRotVec[2];
+		float uXSq = uX * uX;
+		float uYSq = uY * uY;
+		float uZSq = uZ * uZ;
+
+		Vector4D row1 = Vector4D(uXSq + (1 - uXSq)*c, uX*uY*oneMinusC - uZ*s, uX*uZ*oneMinusC + uY*s, 0);
+		Vector4D row2 = Vector4D(uX*uY*oneMinusC + uZ*s, uYSq + (1 - uYSq)*c, uY*uZ*oneMinusC - uX*s, 0);
+		Vector4D row3 = Vector4D(uX*uZ*oneMinusC - uY*s, uY*uZ*oneMinusC + uX*s, uZSq + (1 - uZSq)*c, 0);
+		Vector4D row4 = Vector4D(0, 0, 0, 1);
+
+		// Create and return the matrix based on the values calculated
+		Matrix4x4 r(row1, row2, row3, row4);
+		return r;
+	}
+
 	static Matrix4x4 reflectionMatrix(char axis) {
 		Vector4D row1 = Vector4D(1, 0, 0, 0);
 		Vector4D row2 = Vector4D(0, 1, 0, 0);
