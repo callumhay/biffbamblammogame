@@ -52,13 +52,20 @@ void BallSpeedItem::SwitchSpeed(BallSpeedType newSpd) {
 double BallSpeedItem::Activate() {
 	this->isActive = true;
 
+	bool foundSlowDownActive = false;
+	bool foundSpeedUpActive  = false;
+
 	// Kill other ball speed timers
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	std::vector<GameItemTimer*> removeTimers;
-	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
+	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); ++iter) {
 		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemType() == GameItem::BallSlowDownItem || currTimer->GetTimerItemType() == GameItem::BallSpeedUpItem) {
+		bool foundSlowDown = currTimer->GetTimerItemType() == GameItem::BallSlowDownItem;
+		bool foundSpeedUp  = currTimer->GetTimerItemType() == GameItem::BallSpeedUpItem;
+		if (foundSlowDown || foundSpeedUp) {
 			removeTimers.push_back(currTimer);
+			foundSlowDownActive |= foundSlowDown;
+			foundSpeedUpActive |= foundSpeedUp;
 		}
 	}
 
@@ -68,6 +75,14 @@ double BallSpeedItem::Activate() {
 		activeTimers.remove(currTimer);
 		delete currTimer;
 		currTimer = NULL;
+	}
+
+	// Should never be able to find both active simulataneously
+	assert(!(foundSlowDownActive && foundSpeedUpActive));
+
+	// Check for the cases where this effect simply cancels out another
+	if (this->spdType == SlowBall && foundSpeedUpActive || this->spdType == FastBall && foundSlowDownActive) {
+		return GameItemTimer::ZERO_TIME_TIMER_IN_SECS;
 	}
 
 	// Activate the actual effect of this speed-ball item for the last ball to hit the paddle
@@ -86,12 +101,6 @@ double BallSpeedItem::Activate() {
 		default:
 			assert(false);
 			break;
-	}
-
-	// If all the balls are normal speed then all previous power-ups/downs involving
-	// ball speed have been cancelled out and no item is active
-	if (affectedBall->GetSpeed() == GameBall::NormalSpeed) {
-		return GameItemTimer::ZERO_TIME_TIMER_IN_SECS;
 	}
 
 	GameItem::Activate();
