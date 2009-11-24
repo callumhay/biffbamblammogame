@@ -45,7 +45,7 @@ private:
 	class ItemTimerHUDElement {
 		
 	public:
-		enum TimerState { TimerStarting, TimerRunning, TimerStopping, TimerDead };
+		enum TimerState { TimerStarting, TimerRunning, TimerAlmostDone, TimerStopping, TimerDead };
 
 		static const int TIMER_VERTICAL_SPACING = 5;
 
@@ -65,6 +65,8 @@ private:
 		const GameItem::ItemType GetItemType() const { return this->itemType; }
 
 	private:
+		static const double TIMER_ALMOST_DONE_PERCENTELAPSED;
+
 		GameItemAssets* itemAssets;
 		const GameItemTimer* itemTimer;	// Timer associated with this HUD timer element
 		

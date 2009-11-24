@@ -340,6 +340,9 @@ void GameItemAssets::TimerStopped(const GameItemTimer* timer) {
 // ItemTimerHUDElement Private Inner Class Functions *************************************************
 // ***************************************************************************************************
 
+// Amount of time in seconds that starts the 'almost done' state of the HUD
+const double GameItemAssets::ItemTimerHUDElement::TIMER_ALMOST_DONE_PERCENTELAPSED = 0.75;	
+
 GameItemAssets::ItemTimerHUDElement::ItemTimerHUDElement(GameItemAssets* itemAssets, const GameItemTimer* itemTimer) : 
 itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL), itemAssets(itemAssets) {
 	
@@ -408,9 +411,19 @@ void GameItemAssets::ItemTimerHUDElement::Tick(double dT) {
 
 		case ItemTimerHUDElement::TimerRunning: {
 				// Tick all the animations, these should be in a loop while running...
-				bool colourAnimationDone = this->additiveColourAnimation.Tick(dT);
-				bool scaleAnimationDone  = this->scaleAnimation.Tick(dT);
+				this->additiveColourAnimation.Tick(dT);
+				this->scaleAnimation.Tick(dT);
+
+				if (this->itemTimer->GetPercentTimeElapsed() >= ItemTimerHUDElement::TIMER_ALMOST_DONE_PERCENTELAPSED) {
+					this->SetState(ItemTimerHUDElement::TimerAlmostDone);
+				}
 			}
+			break;
+
+		case ItemTimerHUDElement::TimerAlmostDone:
+			// Tick all the animations, these should be in a loop while running...
+			this->additiveColourAnimation.Tick(dT);
+			this->scaleAnimation.Tick(dT);
 			break;
 
 		case ItemTimerHUDElement::TimerStopping: {
@@ -591,6 +604,33 @@ void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 				this->scaleAnimation.SetRepeat(true);
 			}
 			this->currState = ItemTimerHUDElement::TimerRunning;
+			break;
+
+		case ItemTimerHUDElement::TimerAlmostDone: {
+				std::vector<double> timeValues;
+				timeValues.reserve(3);
+				timeValues.push_back(0.0);
+				timeValues.push_back(0.2);
+				timeValues.push_back(0.4);
+
+				std::vector<ColourRGBA> colourValues;
+				colourValues.reserve(3);
+				colourValues.push_back(ColourRGBA(0.0f, 0.0f, 0.0f, 1.0f));
+				colourValues.push_back(ColourRGBA(0.75f, 0.75f, 0.75f, 1.0f));
+				colourValues.push_back(ColourRGBA(0.0f, 0.0f, 0.0f, 1.0f));
+
+				std::vector<float> scaleValues;
+				scaleValues.reserve(3);
+				scaleValues.push_back(1.0);
+				scaleValues.push_back(1.1f);
+				scaleValues.push_back(1.0);
+
+				this->additiveColourAnimation.SetLerp(timeValues, colourValues);
+				this->additiveColourAnimation.SetRepeat(true);
+				this->scaleAnimation.SetLerp(timeValues, scaleValues);
+				this->scaleAnimation.SetRepeat(true);
+			}
+			this->currState = ItemTimerHUDElement::TimerAlmostDone;
 			break;
 
 		case ItemTimerHUDElement::TimerStopping: {
