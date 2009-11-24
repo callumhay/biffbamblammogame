@@ -77,6 +77,12 @@ public:
 		return decPercent;
 	}
 
+	inline double GetTimeLeft() const {
+		double timeLeft = this->timeLengthInSecs - this->timeElapsedInSecs;
+		assert(timeLeft >= 0);
+		return timeLeft;
+	}
+
 	friend std::ostream& operator <<(std::ostream& os, const GameItemTimer& itemTimer);
 };
 
