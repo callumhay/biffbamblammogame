@@ -110,6 +110,8 @@ public:
 	}
 
 	void Tick(double seconds);
+	void Animate(double seconds);
+
 	void Move(float dist) {
 		this->distTemp += dist;
 	}
@@ -145,16 +147,16 @@ public:
 	}
 
 	// Paddle colour set/get functions
-	ColourRGBA GetPaddleColour() const {
+	ColourRGBA GetColour() const {
 		return this->colour;
 	}
-	void SetPaddleColour(const Colour& c) {
+	void SetColour(const Colour& c) {
 		this->colour = ColourRGBA(c, this->colour.A());
 	}
-	void SetPaddleVisiblity(float alpha) {
+	void SetVisiblity(float alpha) {
 		this->colour[3] = alpha;
 	}
-	void AnimatePaddleFade(bool fadeOut, double duration);
+	void AnimateFade(bool fadeOut, double duration);
 
 
 	/**

@@ -134,6 +134,7 @@ void PointLight::Tick(double dT) {
 			isFinished = animIter->Tick(dT);
 			newDiffuseColourChange = animIter->GetInterpolantValue();
 			if (isFinished) {
+				this->onDiffuseColour = newDiffuseColourChange;
 				animIter = this->lightColourChangeAnim.erase(animIter);
 			}
 			else {

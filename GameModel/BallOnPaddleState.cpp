@@ -65,6 +65,9 @@ void BallOnPaddleState::Tick(double seconds) {
 	// its center without moving.
 	this->UpdateBallPosition();
 
+	//GameBall* ball = this->GetGameBall();
+	//ball->Tick(seconds);
+
 	// If this is the first tick of the current state, then the ball has just
 	// been spawned on the player paddle
 	if (this->firstTick) {

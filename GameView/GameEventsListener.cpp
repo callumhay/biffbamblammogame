@@ -201,11 +201,18 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 			this->display->GetCamera().SetCameraShake(1.2, Vector3D(1.0, 0.3, 0.1), 100);
 			break;
 
-		case LevelPiece::Ink:
-			// Emit goo from ink block and make onomata effects
-			this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel());
-			// Cover camera in ink with a fullscreen splatter effect
-			this->display->GetAssets()->GetFBOAssets()->ActivateInkSplatterEffect();
+		case LevelPiece::Ink: {
+				const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
+
+				// We do not do any ink blotches while in ball or paddle camera modes
+				bool specialCamModeOn = paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn();
+				// Emit goo from ink block and make onomata effects
+				this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), !specialCamModeOn);
+				if (!specialCamModeOn) {
+					// Cover camera in ink with a fullscreen splatter effect
+					this->display->GetAssets()->GetFBOAssets()->ActivateInkSplatterEffect();
+				}
+			}
 			break;
 		default:
 			break;
@@ -256,7 +263,7 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 	// We don't show the stars coming off the dropping items if it gets in the way of playing
 	// the game - e.g., when in paddle camera mode
 	const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
-	bool showItemDropStars = !paddle->GetIsPaddleCameraOn();
+	bool showItemDropStars = !paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn();
 
 	// Spawn an item drop effect for the item...
 	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(this->display->GetCamera(), item, showItemDropStars);

@@ -234,7 +234,6 @@ void ESPEmitter::Draw(const Camera& camera, bool enableDepth) {
 			currParticle->DrawAsPointSprite(camera);
 		}
 		glDisable(GL_POINT_SPRITE);
-		debug_opengl_state();
 	}
 	else {
 		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
@@ -248,6 +247,7 @@ void ESPEmitter::Draw(const Camera& camera, bool enableDepth) {
 	}
 	
 	glPopAttrib();
+	debug_opengl_state();
 }
 
 /**

@@ -5,6 +5,8 @@
 #include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Collision.h"
+#include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Animation.h"
 
 #include "Onomatoplex.h"
 
@@ -26,7 +28,11 @@ private:
 
 	double ballCollisionsDisabledTimer;	// If > 0 then collisions are disabled
 
-	static const float DEFAULT_BALL_RADIUS;			// Default radius of the ball
+	ColourRGBA colour;													// The colour multiply of the paddle, including its visibility/alpha
+	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
+
+	static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL
+
 	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
 	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink
 	static const float RADIUS_DIFF_PER_SIZE;		// The difference in radius per size change of the ball
@@ -38,6 +44,9 @@ private:
 	void SetBallSize(GameBall::BallSize size);
 
 public:
+	// Default radius of the ball
+	static const float DEFAULT_BALL_RADIUS;
+
 	// Minimum angle the ball can be reflected at
 	static const float MIN_BALL_ANGLE_IN_DEGS;
 	static const float MIN_BALL_ANGLE_IN_RADS;
@@ -52,6 +61,18 @@ public:
 	~GameBall();
 
 	void ResetBallAttributes();
+
+	static void SetBallCamera(GameBall* ballCamBall) { 
+		GameBall::currBallCamBall = ballCamBall; 
+	}
+	static bool GetIsBallCameraOn() { return (GameBall::currBallCamBall != NULL); }
+	static const GameBall* GetBallCameraBall() { return GameBall::currBallCamBall; }
+
+	// Ball colour set/get functions
+	ColourRGBA GetColour() const {
+		return this->colour;
+	}
+	void AnimateFade(bool fadeOut, double duration);
 
 	Vector3D GetRotation() const {
 		return this->rotationInDegs;
@@ -201,6 +222,7 @@ public:
 	Onomatoplex::Extremeness GetOnomatoplexExtremeness() const;
 
 	void Tick(double seconds);
+	void Animate(double seconds);
 };
 
 #endif

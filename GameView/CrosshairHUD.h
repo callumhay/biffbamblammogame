@@ -10,7 +10,7 @@ public:
 	CrosshairHUD();
 	~CrosshairHUD();
 
-	void Draw(int screenWidth, int screenHeight) const;
+	void Draw(int screenWidth, int screenHeight, float alpha) const;
 
 private:
 	static const int CROSSHAIR_WIDTH				= 128;

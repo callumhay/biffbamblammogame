@@ -1,4 +1,4 @@
-MainMenuBackgroundMask {
+ignore MainMenuBackgroundMask {
    file     = test/mask_test_sound.wav
 }
 

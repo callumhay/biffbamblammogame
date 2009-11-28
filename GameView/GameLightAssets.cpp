@@ -28,7 +28,9 @@ GameLightAssets::GameLightAssets() {
 	this->ballFillLight	= this->fgFillLight;
 	this->ballFillLight.SetDiffuseColour(Colour(0,0,0));
 	this->paddleKeyLight = this->fgKeyLight;
+	this->paddleKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_PADDLE_KEY_LIGHT_COLOUR);
 	this->paddleFillLight = this->fgFillLight;
+	this->paddleFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_PADDLE_FILL_LIGHT_COLOUR);
 }
 
 GameLightAssets::~GameLightAssets() {
@@ -39,19 +41,26 @@ GameLightAssets::~GameLightAssets() {
  * and background lights are affected).
  */
 void GameLightAssets::ToggleLights(bool turnOn) {
+	static const float LIGHT_TOGGLE_TIME = 1.0f;
 	// For the fill and key lights of the foreground and background we simply
 	// turn them on or off...
-	this->fgKeyLight.SetLightOn(turnOn, 1.0f);
-	this->fgFillLight.SetLightOn(turnOn, 1.0f);
-	this->bgKeyLight.SetLightOn(turnOn, 1.0f);
-	this->bgFillLight.SetLightOn(turnOn, 1.0f);
+	this->fgKeyLight.SetLightOn(turnOn,  LIGHT_TOGGLE_TIME);
+	this->fgFillLight.SetLightOn(turnOn, LIGHT_TOGGLE_TIME);
+	this->bgKeyLight.SetLightOn(turnOn,  LIGHT_TOGGLE_TIME);
+	this->bgFillLight.SetLightOn(turnOn, LIGHT_TOGGLE_TIME);
 
 	// The ball light needs to change how much/well it illuminates the scene as well...
 	if (turnOn) {
 		this->ballLight.SetLinearAttenuation(GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN);
+		this->ballKeyLight.SetLightColourChange(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_COLOUR, LIGHT_TOGGLE_TIME);
+		this->paddleKeyLight.SetLightColourChange(GameViewConstants::GetInstance()->DEFAULT_PADDLE_KEY_LIGHT_COLOUR, LIGHT_TOGGLE_TIME);
+		this->paddleFillLight.SetLightColourChange(GameViewConstants::GetInstance()->DEFAULT_PADDLE_FILL_LIGHT_COLOUR, LIGHT_TOGGLE_TIME);
 	}
 	else {
 		this->ballLight.SetLinearAttenuation(GameViewConstants::GetInstance()->BLACKOUT_BALL_LIGHT_ATTEN);
+		this->ballKeyLight.SetLightColourChange(GameViewConstants::GetInstance()->BLACKOUT_BALL_KEY_LIGHT_COLOUR, LIGHT_TOGGLE_TIME);
+		this->paddleKeyLight.SetLightColourChange(GameViewConstants::GetInstance()->BLACKOUT_PADDLE_KEY_LIGHT_COLOUR, LIGHT_TOGGLE_TIME);
+		this->paddleFillLight.SetLightColourChange(GameViewConstants::GetInstance()->BLACKOUT_PADDLE_FILL_LIGHT_COLOUR, LIGHT_TOGGLE_TIME);
 	}
 }
 

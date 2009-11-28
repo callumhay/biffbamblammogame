@@ -23,6 +23,7 @@ const float GameItem::SPEED_OF_DESCENT	= 5.0f;
 
 // The alpha of an item when the paddle camera is active
 const float GameItem::ALPHA_ON_PADDLE_CAM = 0.9f;
+const float GameItem::ALPHA_ON_BALL_CAM		= 0.75f;
 
 GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const GameItem::ItemDisposition disp) : 
 	name(name), center(spawnOrigin), gameModel(gameModel), disposition(disp), isActive(false), colour(1, 1, 1, 1) {
@@ -34,6 +35,10 @@ GameItem::GameItem(const std::string& name, const Point2D &spawnOrigin, GameMode
 	if (paddle->GetIsPaddleCameraOn()) {
 		this->colour[3] = GameItem::ALPHA_ON_PADDLE_CAM;
 	}
+	else if (GameBall::GetIsBallCameraOn()) {
+		this->colour[3] = GameItem::ALPHA_ON_BALL_CAM;
+	}
+
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
 }

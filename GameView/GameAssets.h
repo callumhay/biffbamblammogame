@@ -75,11 +75,10 @@ public:
 
 	// Draw functions ******************************************************************************
 	void DrawPaddle(double dT, const PlayerPaddle& p, const Camera& camera);
-	void DrawPaddlePostEffects(double dT, const PlayerPaddle& p, const Camera& camera);
+	void DrawPaddlePostEffects(double dT, GameModel& gameModel, const Camera& camera);
 
 	void DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Vector2D& worldT);
-	
-	void DrawGameBallsFinalEffects(double dT, GameModel& gameModel, const Camera& camera);
+	void DrawGameBallsPostEffects(double dT, GameModel& gameModel, const Camera& camera);
 
 	void DrawSkybox(const Camera& camera);
 	void DrawBackgroundModel(const Camera& camera);

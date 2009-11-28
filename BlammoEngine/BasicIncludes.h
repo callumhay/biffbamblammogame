@@ -166,7 +166,13 @@ inline void debug_openal_state() {
 	if (alErr == AL_NO_ERROR) {
 		return;
 	}
-	debug_output("OpenAL Error: " << alutGetErrorString(alErr) << " (" << alErr << ")");
+	debug_output("OpenAL Error: " << alErr);
+
+	alErr = alutGetError();
+	if (alErr == AL_NO_ERROR) {
+		return;
+	}
+	debug_output("OpenAL (ALUT) Error: " << alutGetErrorString(alErr) << " (" << alErr << ")");
 }
 
 /**
