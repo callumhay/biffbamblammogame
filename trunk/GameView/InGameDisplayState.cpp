@@ -179,7 +179,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	
 	fullSceneFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1);
 	// Render any post-processing effects for various items/objects in the game
-	this->display->GetAssets()->DrawPaddlePostEffects(dT, *this->display->GetModel()->GetPlayerPaddle(), camera);
+	this->display->GetAssets()->DrawPaddlePostEffects(dT, *this->display->GetModel(), camera);
 	
 	postFullSceneFBO->UnbindFBObj();
 
@@ -225,8 +225,8 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	// Typical Particle effects...
 	this->display->GetAssets()->GetESPAssets()->DrawParticleEffects(dT, camera);
 
-	// Absolute final effects call for various object effects
-	this->display->GetAssets()->DrawGameBallsFinalEffects(dT, *gameModel, camera);
+	// Absolute post effects call for various object effects
+	this->display->GetAssets()->DrawGameBallsPostEffects(dT, *gameModel, camera);
 
 	finalFBO->UnbindFBObj();
 

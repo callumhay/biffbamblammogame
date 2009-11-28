@@ -230,6 +230,14 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		}
 
 		// Draw the ball model...
+		
+		// Obtain the colour of the ball from the model, if it's invisible
+		// then just skip the rest of the draw calls
+		ColourRGBA ballColour = currBall->GetColour();
+		if (ballColour.A() < EPSILON) {
+			continue;
+		}
+
 		glPushMatrix();
 		float ballScaleFactor = currBall->GetBallScaleFactor();
 		glTranslatef(ballPos[0], ballPos[1], 0);
@@ -242,7 +250,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
 		glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
 		glScalef(ballScaleFactor, ballScaleFactor, ballScaleFactor);
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glColor4f(ballColour.R(), ballColour.G(), ballColour.B(), ballColour.A());
 
 		PointLight ballKeyLight, ballFillLight;
 		this->lightAssets->GetBallAffectingLights(ballKeyLight, ballFillLight);
@@ -281,7 +289,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 /**
  * Draw the effects that take place after drawing everything (Except final fullscreen effects).
  */
-void GameAssets::DrawGameBallsFinalEffects(double dT, GameModel& gameModel, const Camera& camera) {
+void GameAssets::DrawGameBallsPostEffects(double dT, GameModel& gameModel, const Camera& camera) {
 	
 	// Go through each ball and draw its post effects
 	const std::list<GameBall*>& balls = gameModel.GetGameBalls();
@@ -291,9 +299,10 @@ void GameAssets::DrawGameBallsFinalEffects(double dT, GameModel& gameModel, cons
 		
 		// PADDLE CAMERA CHECK
 		PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-		if (paddle->GetIsPaddleCameraOn() && (currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+		if (paddle->GetIsPaddleCameraOn() && (currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
+			  !gameModel.IsBlackoutEffectActive()) {
 			// Draw a target around balls when in paddle camera mode AND ball is not invisible
-			this->espAssets->DrawTargetBallEffects(dT, camera, *currBall, *paddle);
+			this->espAssets->DrawPaddleCamEffects(dT, camera, *currBall, *paddle);
 		}
 	}
 }
@@ -346,14 +355,16 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 /**
  * Used to draw any relevant post-processing-related effects for the paddle.
  */
-void GameAssets::DrawPaddlePostEffects(double dT, const PlayerPaddle& p, const Camera& camera) {
+void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Camera& camera) {
+	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+
 	// Do nothing if we are in paddle camera mode
-	if (p.GetIsPaddleCameraOn()) {
+	if (paddle->GetIsPaddleCameraOn()) {
 		return;
 	}
 	
-	Point2D paddleCenter = p.GetCenterPosition();
-	float paddleScaleFactor = p.GetPaddleScaleFactor();
+	Point2D paddleCenter = paddle->GetCenterPosition();
+	float paddleScaleFactor = paddle->GetPaddleScaleFactor();
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
 
 	glPushMatrix();
@@ -361,7 +372,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, const PlayerPaddle& p, const C
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
 
 	// When the paddle has the 'sticky' power-up we attach sticky goo to its top
-	if ((p.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {	
+	if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {	
 		// Set the texture for the refraction in the goo - be careful here, we can't get
 		// the 'post full scene' fbo because we are currently in the middle of drawing to it
 		this->paddleStickyAttachment->SetSceneTexture(this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
@@ -371,15 +382,22 @@ void GameAssets::DrawPaddlePostEffects(double dT, const PlayerPaddle& p, const C
 		this->lightAssets->GetPaddleAffectingLights(paddleKeyLight, paddleFillLight, ballLight);
 
 		// Draw the sticky goo
-		this->paddleStickyAttachment->Draw(p, camera, paddleKeyLight, paddleFillLight, ballLight);
+		this->paddleStickyAttachment->Draw(*paddle, camera, paddleKeyLight, paddleFillLight, ballLight);
 	}
 
-	if ((p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
+	if ((paddle->GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
 		// Draw glowy effects where the laser originates...
-		this->espAssets->DrawPaddleLaserEffects(dT, camera, p);
+		this->espAssets->DrawPaddleLaserEffects(dT, camera, *paddle);
 	}
 
 	glPopMatrix();
+
+	// BALL CAMERA CHECK
+	if (GameBall::GetIsBallCameraOn() && !gameModel.IsBlackoutEffectActive()) {
+		const GameBall* ballWithCam = GameBall::GetBallCameraBall();
+		// Draw a target around balls when in paddle camera mode AND ball is not invisible
+		this->espAssets->DrawBallCamEffects(dT, camera, *ballWithCam, *paddle);
+	}
 }
 
 /**
@@ -429,7 +447,7 @@ void GameAssets::DrawActiveItemHUDElements(const GameModel& gameModel, int displ
 	// If the laser paddle is active and paddle camera is also active then we draw a crosshair overlay
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 	if (paddle->GetPaddleType() == PlayerPaddle::LaserPaddle && paddle->GetIsPaddleCameraOn()) {
-		this->crosshairHUD->Draw(displayWidth, displayHeight);
+		this->crosshairHUD->Draw(displayWidth, displayHeight, (1.0 - paddle->GetColour().A()));
 	}
 }
 
@@ -580,6 +598,14 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			}
 			break;
 
+		case GameItem::BallCamItem:
+			// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
+			// NOTE that this is not permanent and just does so for any currently falling items
+			this->espAssets->TurnOffCurrentItemDropStars(camera);
+			// Fade out the background...
+			this->worldAssets->FadeBackground(true, 2.0f);
+			break;
+
 		default:
 			break;
 	}
@@ -623,6 +649,11 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 				// Show the background once again...
 				this->worldAssets->FadeBackground(false, 2.0f);
 			}
+			break;
+
+		case GameItem::BallCamItem: 
+			// Show the background once again...
+			this->worldAssets->FadeBackground(false, 2.0f);
 			break;
 
 		default:

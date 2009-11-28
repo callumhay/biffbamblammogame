@@ -52,7 +52,7 @@ explosionRayTex(NULL),
 laserBeamTex(NULL),
 upArrowTex(NULL),
 ballTex(NULL),
-ballTargetTex(NULL),
+targetTex(NULL),
 haloTex(NULL) {
 
 	this->InitESPTextures();
@@ -107,7 +107,7 @@ GameESPAssets::~GameESPAssets() {
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballTex);
 	assert(removed);
-	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballTargetTex);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->targetTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
 	assert(removed);
@@ -194,6 +194,19 @@ void GameESPAssets::KillAllActiveEffects() {
 		currBallEffects.clear();
 	}
 	this->ballEffects.clear();
+
+	// Clear all the paddle emitters
+	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter1 = this->paddleEffects.begin(); iter1 != this->paddleEffects.end(); ++iter1) {
+		std::vector<ESPPointEmitter*>& currPaddleEffects = iter1->second;
+
+		for (std::vector<ESPPointEmitter*>::iterator iter2 = currPaddleEffects.begin(); iter2 != currPaddleEffects.end(); ++iter2) {
+			ESPPointEmitter* currEmitter = *iter2;
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		currPaddleEffects.clear();
+	}
+	this->paddleEffects.clear();
 
 	// Clear all the emitters for HUD Timers
 	for (std::map<GameItem::ItemType, std::list<ESPEmitter*>>::iterator iter1 = this->activeTimerHUDEmitters.begin(); iter1 != this->activeTimerHUDEmitters.end(); ++iter1) {
@@ -327,9 +340,9 @@ void GameESPAssets::InitESPTextures() {
 		this->ballTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear));
 		assert(this->ballTex != NULL);
 	}
-	if (this->ballTargetTex == NULL) {
-		this->ballTargetTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALLTARGET, Texture::Trilinear));
-		assert(this->ballTargetTex != NULL);
+	if (this->targetTex == NULL) {
+		this->targetTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALLTARGET, Texture::Trilinear));
+		assert(this->targetTex != NULL);
 	}
 	if (this->haloTex == NULL) {
 		this->haloTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
@@ -409,29 +422,22 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 
 /**
  * Private helper function - sets up any ball effects that are associated with the paddle
- * camera effect.
+ * camera mode.
  */
 void GameESPAssets::AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList) {
 	assert(effectsList.size() == 0);
-
-	ESPPointEmitter* ballTargetEffect = new ESPPointEmitter();
-	ballTargetEffect->SetSpawnDelta(ESPInterval(-1));
-	ballTargetEffect->SetInitialSpd(ESPInterval(0));
-	ballTargetEffect->SetParticleLife(ESPInterval(-1));
-	ballTargetEffect->SetParticleSize(ESPInterval(GameBall::NormalSize));
-	ballTargetEffect->SetEmitAngleInDegrees(0);
-	ballTargetEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	ballTargetEffect->SetParticleAlignment(ESP::ScreenAligned);
-	ballTargetEffect->SetEmitPosition(Point3D(0, 0, 0));
-	ballTargetEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.5f));
-
-	ballTargetEffect->AddEffector(&this->loopRotateEffectorCW);
-
-	bool result = ballTargetEffect->SetParticles(1, this->ballTargetTex);
-	assert(result);
-
 	effectsList.reserve(effectsList.size() + 1);
-	effectsList.push_back(ballTargetEffect);
+	effectsList.push_back(this->CreateSpinningTargetESPEffect());
+}
+
+/**
+ * Private helper function - sets up any paddle effects that are associated with the ball
+ * camera mode.
+ */
+void GameESPAssets::AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& effectsList) {
+	assert(effectsList.size() == 0);
+	effectsList.reserve(effectsList.size() + 1);
+	effectsList.push_back(this->CreateSpinningTargetESPEffect());
 }
 
 /**
@@ -447,6 +453,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleLaserGlowAura->SetParticleLife(ESPInterval(-1));
 	this->paddleLaserGlowAura->SetParticleSize(ESPInterval(1.5f));
 	this->paddleLaserGlowAura->SetEmitAngleInDegrees(0);
+	this->paddleLaserGlowAura->SetParticleAlignment(ESP::ScreenAligned);
 	this->paddleLaserGlowAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, 0, 0));
 	this->paddleLaserGlowAura->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
@@ -469,6 +476,31 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, this->circleGradientTex);
 	assert(result);
 	
+}
+
+/**
+ * Private helper function, called in order to create a spinning target effect that
+ * can be attached to a game object to make it stand out to the player (e.g., in paddle/ball
+ * cam mode attach it to the balls/paddle to make it more identifiable).
+ */
+ESPPointEmitter* GameESPAssets::CreateSpinningTargetESPEffect() {
+
+	ESPPointEmitter* spinningTarget = new ESPPointEmitter();
+	spinningTarget->SetSpawnDelta(ESPInterval(-1));
+	spinningTarget->SetInitialSpd(ESPInterval(0));
+	spinningTarget->SetParticleLife(ESPInterval(-1));
+	spinningTarget->SetParticleSize(ESPInterval(2));
+	spinningTarget->SetEmitAngleInDegrees(0);
+	spinningTarget->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	spinningTarget->SetParticleAlignment(ESP::ScreenAligned);
+	spinningTarget->SetEmitPosition(Point3D(0, 0, 0));
+	spinningTarget->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.5f));
+	spinningTarget->AddEffector(&this->loopRotateEffectorCW);
+
+	bool result = spinningTarget->SetParticles(1, this->targetTex);
+	assert(result);
+
+	return spinningTarget;
 }
 
 /**
@@ -913,7 +945,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPie
 /**
  * Add the effect for when an Ink block gets hit - splortch!
  */
-void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level) {
+void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray) {
 	Point2D inkBlockCenter  = inkBlock.GetCenter();
 	Point3D emitCenter  = Point3D(inkBlockCenter[0], inkBlockCenter[1], 0.0f);
 	
@@ -992,30 +1024,34 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 		inkyClouds3->AddEffector(&this->smokeRotatorCCW);
 	}
 
-	Point3D currCamPos = camera.GetCurrentCameraPosition();
-	Vector3D negHalfLevelDim = -0.5 * Vector3D(level.GetLevelUnitWidth(), level.GetLevelUnitHeight(), 0.0f);
-	Point3D emitCenterWorldCoords = emitCenter + negHalfLevelDim;
-	Vector3D sprayVec = currCamPos - emitCenterWorldCoords;
-	
-	Vector3D inkySprayDir = Vector3D::Normalize(sprayVec);
-	float distToCamera = sprayVec.length();
+	ESPPointEmitter* inkySpray = NULL;
+	if (shootSpray) {
+		Point3D currCamPos = camera.GetCurrentCameraPosition();
+		Vector3D negHalfLevelDim = -0.5 * Vector3D(level.GetLevelUnitWidth(), level.GetLevelUnitHeight(), 0.0f);
+		Point3D emitCenterWorldCoords = emitCenter + negHalfLevelDim;
+		Vector3D sprayVec = currCamPos - emitCenterWorldCoords;
+		
+		
+		Vector3D inkySprayDir = Vector3D::Normalize(sprayVec);
+		float distToCamera = sprayVec.length();
 
-	// Inky spray at the camera
-	ESPPointEmitter* inkySpray = new ESPPointEmitter();
-	inkySpray->SetSpawnDelta(ESPInterval(0.01f));
-	inkySpray->SetNumParticleLives(1);
-	inkySpray->SetInitialSpd(ESPInterval(distToCamera - 2.0f, distToCamera + 2.0f));
-	inkySpray->SetParticleLife(ESPInterval(1.0f, 2.0f));
-	inkySpray->SetParticleSize(ESPInterval(0.75f, 2.25f));
-	inkySpray->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	inkySpray->SetParticleAlignment(ESP::ScreenAligned);
-	inkySpray->SetEmitPosition(emitCenter);
-	inkySpray->SetEmitDirection(inkySprayDir);
-	inkySpray->SetEmitAngleInDegrees(5);
-	inkySpray->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
-	inkySpray->SetParticles(GameESPAssets::NUM_INK_SPRAY_PARTICLES, this->ballTex);
-	inkySpray->AddEffector(&this->particleFader);
-	inkySpray->AddEffector(&this->particleMediumGrowth);
+		// Inky spray at the camera
+		inkySpray = new ESPPointEmitter();
+		inkySpray->SetSpawnDelta(ESPInterval(0.01f));
+		inkySpray->SetNumParticleLives(1);
+		inkySpray->SetInitialSpd(ESPInterval(distToCamera - 2.0f, distToCamera + 2.0f));
+		inkySpray->SetParticleLife(ESPInterval(1.0f, 2.0f));
+		inkySpray->SetParticleSize(ESPInterval(0.75f, 2.25f));
+		inkySpray->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		inkySpray->SetParticleAlignment(ESP::ScreenAligned);
+		inkySpray->SetEmitPosition(emitCenter);
+		inkySpray->SetEmitDirection(inkySprayDir);
+		inkySpray->SetEmitAngleInDegrees(5);
+		inkySpray->SetParticleColour(ESPInterval(inkBlockColour.R()), ESPInterval(inkBlockColour.G()), ESPInterval(inkBlockColour.B()), ESPInterval(1.0f));
+		inkySpray->SetParticles(GameESPAssets::NUM_INK_SPRAY_PARTICLES, this->ballTex);
+		inkySpray->AddEffector(&this->particleFader);
+		inkySpray->AddEffector(&this->particleMediumGrowth);
+	}
 
 	// Create an emitter for the sound of onomatopeia of the bursting ink block
 	ESPPointEmitter* inkOnoEffect = new ESPPointEmitter();
@@ -1076,7 +1112,9 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	this->activeGeneralEmitters.push_back(inkyClouds1);
 	this->activeGeneralEmitters.push_back(inkyClouds2);
 	this->activeGeneralEmitters.push_back(inkyClouds3);
-	this->activeGeneralEmitters.push_back(inkySpray);
+	if (shootSpray) {
+		this->activeGeneralEmitters.push_back(inkySpray);
+	}
 	this->activeGeneralEmitters.push_back(splatEffect);
 	this->activeGeneralEmitters.push_back(inkOnoEffect);
 }
@@ -1528,7 +1566,7 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 
 	// We only do the laser onomatopiea if we aren't in a special camera mode...
-	if (!paddle->GetIsPaddleCameraOn()) {
+	if (!paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
 		// Create laser onomatopiea
 		ESPPointEmitter* laserOnoEffect = new ESPPointEmitter();
 		// Set up the emitter...
@@ -1565,7 +1603,7 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 	laserBeamEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	laserBeamEmitter->SetInitialSpd(ESPInterval(0));
 	laserBeamEmitter->SetParticleLife(ESPInterval(-1));
-	if (paddle->GetIsPaddleCameraOn()) {
+	if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
 		laserBeamEmitter->SetParticleSize(ESPInterval(std::min<float>(PaddleLaser::PADDLELASER_WIDTH, PaddleLaser::PADDLELASER_HEIGHT)));
 	}
 	else {
@@ -1583,7 +1621,7 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 	laserAuraEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	laserAuraEmitter->SetInitialSpd(ESPInterval(0));
 	laserAuraEmitter->SetParticleLife(ESPInterval(-1));
-	if (paddle->GetIsPaddleCameraOn()) {
+	if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
 		laserAuraEmitter->SetParticleSize(ESPInterval(std::min<float>(2*PaddleLaser::PADDLELASER_WIDTH, 1.8f*PaddleLaser::PADDLELASER_HEIGHT)));
 	}
 	else {
@@ -2139,9 +2177,10 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 }
 
 /**
- * Draw effects associated with the ball when it has a target identifying itself
+ * Draw effects associated with the ball when it has a target identifying itself - this happens in paddle camera mode
+ * to make it easier for the player to see the ball.
  */
-void GameESPAssets::DrawTargetBallEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
+void GameESPAssets::DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
 	// Check to see if the ball has any associated camera paddle ball effects, if not, then
 	// create the effect and add it to the ball first
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
@@ -2161,6 +2200,7 @@ void GameESPAssets::DrawTargetBallEffects(double dT, const Camera& camera, const
 	Point2D ballLoc		= ball.GetBounds().Center();
 	Point2D paddleLoc	= paddle.GetCenterPosition();
 	
+	// The only effect so far is a spinning target on the ball...
 	glTranslatef(ballLoc[0], ballLoc[1], 0);
 
 	// Change the colour and alpha of the target based on the proximity to the paddle
@@ -2173,8 +2213,45 @@ void GameESPAssets::DrawTargetBallEffects(double dT, const Camera& camera, const
 	float targetAlpha   = distanceToPaddle * 0.9f  / MAX_DIST_AWAY;
 	
 	paddleCamBallEffectList[0]->SetParticleColour(ESPInterval(targetColour.R()), ESPInterval(targetColour.G()), ESPInterval(targetColour.B()), ESPInterval(targetAlpha)), 
+	paddleCamBallEffectList[0]->SetParticleSize(ESPInterval(ball.GetBallSize()));
 	paddleCamBallEffectList[0]->Draw(camera);
 	paddleCamBallEffectList[0]->Tick(dT);
+
+	glPopMatrix();
+}
+
+/**
+ * Draw effects associated with the ball camera mode when it has a target identifying itself - this happens in ball camera mode
+ * to make it easier for the player to see the paddle.
+ */
+void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
+	// Check to see if the paddle has any associated ball cam effects, if not, then create the effect and add it to the paddle first
+	if (this->paddleEffects.find(GameItem::BallCamItem) == this->paddleEffects.end()) {
+		// Didn't find an associated ball camera effect, so add one
+		this->AddBallCamPaddleESPEffects(this->paddleEffects[GameItem::BallCamItem]);
+	}
+	std::vector<ESPPointEmitter*>& ballCamPaddleEffectList = this->paddleEffects[GameItem::BallCamItem];
+
+	glPushMatrix();
+	Point2D ballLoc		= ball.GetBounds().Center();
+	Point2D paddleLoc	= paddle.GetCenterPosition();
+	
+	// The only effect so far is a spinning target on the paddle...
+	glTranslatef(paddleLoc[0], paddleLoc[1], 0);
+
+	// Change the colour and alpha of the target based on the proximity to the paddle
+	float distanceToPaddle = Point2D::Distance(ballLoc, paddleLoc);
+	const float MAX_DIST_AWAY = LevelPiece::PIECE_HEIGHT * 20.0f;
+	distanceToPaddle = std::min<float>(MAX_DIST_AWAY, distanceToPaddle);
+	
+	// Lerp the colour and alpha between 0 and MAX_DIST_AWAY 
+	Colour targetColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR + distanceToPaddle * (GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR - GameViewConstants::GetInstance()->ITEM_BAD_COLOUR) / MAX_DIST_AWAY;
+	float targetAlpha   = distanceToPaddle * 0.9f  / MAX_DIST_AWAY;
+	
+	ballCamPaddleEffectList[0]->SetParticleColour(ESPInterval(targetColour.R()), ESPInterval(targetColour.G()), ESPInterval(targetColour.B()), ESPInterval(targetAlpha)), 
+	ballCamPaddleEffectList[0]->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal()*2));
+	ballCamPaddleEffectList[0]->Draw(camera);
+	ballCamPaddleEffectList[0]->Tick(dT);
 
 	glPopMatrix();
 }

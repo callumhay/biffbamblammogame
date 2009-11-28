@@ -164,7 +164,7 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 			case GameTransformMgr::ToPaddleCamAnimation:
 			case GameTransformMgr::FromPaddleCamAnimation:
 				if (currAnimation.hasStarted) {
-					bool finished = this->TickPaddleCamAnimation(dT);
+					bool finished = this->TickPaddleCamAnimation(dT, gameModel);
 					if (finished) {
 						this->FinishPaddleCamAnimation(dT, gameModel);
 					}
@@ -177,7 +177,7 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 			case GameTransformMgr::ToBallCamAnimation:
 			case GameTransformMgr::FromBallCamAnimation:
 				if (currAnimation.hasStarted) {
-					bool finished = this->TickBallCamAnimation(dT);
+					bool finished = this->TickBallCamAnimation(dT, gameModel);
 					if (finished) {
 						this->FinishBallCamAnimation(dT, gameModel);
 					}
@@ -217,26 +217,24 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 		GameLevel* currLevel = gameModel.GetCurrentLevel();
 		assert(currLevel != NULL);
 
-		Point2D  ballCamPosition = this->ballWithCamera->GetBounds().Center();
-		Vector2D halfLevelDim	= 0.5 * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
-		Point2D  worldBallPos = ballCamPosition - halfLevelDim;
-		Vector3D worldBallTranslation(worldBallPos[0], worldBallPos[1], 0.0f);
-		worldBallTranslation = this->GetGameTransform() * worldBallTranslation;
+		Vector3D worldSpaceTranslation;
+		this->GetBallCamPositionAndFOV(*this->ballWithCamera, currLevel->GetLevelUnitWidth(), 
+																	 currLevel->GetLevelUnitHeight(), worldSpaceTranslation,
+																	 this->cameraFOVAngle);
 
 		// TODO: make the rotation a little more creative...
-		Vector3D worldBallRotation(-90, 0, 0);
-		worldBallRotation = this->GetGameTransform() * worldBallRotation;
+		Vector3D worldRotation(-90, 0, 0);
+		worldRotation = this->GetGameTransform() * worldRotation;
 
 		// Update the camera position and rotation based on the movement of the ball and the level transform
-		this->currCamOrientation.SetTranslation(worldBallTranslation);
-		this->currCamOrientation.SetRotation(worldBallRotation);
+		this->currCamOrientation.SetTranslation(worldSpaceTranslation);
+		this->currCamOrientation.SetRotation(worldRotation);
 	}
 
 }
 
 /**
- * Private helper function to get the exact location of the paddle camera
- * in world space.
+ * Private helper function to get the exact location of the paddle camera in world space.
  */
 void GameTransformMgr::GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, float levelWidth, float levelHeight, Vector3D& paddleCamPos, float& fov) {
 	const float DIST_FROM_PADDLE = paddle.GetHalfWidthTotal();
@@ -248,6 +246,23 @@ void GameTransformMgr::GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, fl
 	
 	paddleCamPos = this->GetGameTransform() * worldSpaceTranslation;
 	fov = 2.0f * Trig::radiansToDegrees(atan(paddle.GetHalfWidthTotal() / DIST_FROM_PADDLE));
+}
+
+/**
+ * Private helper function to get the exact location of the ball camera in world space.
+ */
+void GameTransformMgr::GetBallCamPositionAndFOV(const GameBall& ball, float levelWidth, float levelHeight, Vector3D& ballCamPos, float& fov) {
+	Collision::Circle2D ballBounds = ball.GetBounds();
+
+	// Position the ball camera almost exactly at the bottom of the ball (we make sure we're at least a bit above that
+	// so that we don't get wierdo clipping issues)
+	Point2D  ballCamPosition = ballBounds.Center() - Vector2D(0, 0.8f*ballBounds.Radius());
+	Vector2D halfLevelDim	= 0.5 * Vector2D(levelWidth, levelHeight);
+	Point2D  worldSpaceBallPos = ballCamPosition - halfLevelDim;
+	Vector3D worldSpaceTranslation(worldSpaceBallPos[0], worldSpaceBallPos[1], 0.0f);
+
+	ballCamPos = this->GetGameTransform() * worldSpaceTranslation;
+	fov = 2.0f * Trig::radiansToDegrees(atan(ballBounds.Radius() / GameBall::DEFAULT_BALL_RADIUS));
 }
 
 /**
@@ -417,7 +432,7 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
 		this->camFOVAnimations.push_back(camFOVChangeAnim);
 
 		// Make the paddle disappear
-		paddle->AnimatePaddleFade(true, timeToMoveAnimate);
+		paddle->AnimateFade(true, timeToMoveAnimate);
 		
 		// Make the items become partially translucent
 		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
@@ -443,7 +458,7 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
 		this->camFOVAnimations.push_back(camFOVChangeAnim);
 
 		// Make the paddle reappear
-		paddle->AnimatePaddleFade(false, timeToAnimate);
+		paddle->AnimateFade(false, timeToAnimate);
 
 		// Make the items become opaque again
 		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
@@ -460,9 +475,15 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
  * Private helper function for ticking the paddle camera - related animations.
  * Returns: true when all camera animations are complete, false otherwise.
  */
-bool GameTransformMgr::TickPaddleCamAnimation(double dT) {
+bool GameTransformMgr::TickPaddleCamAnimation(double dT, GameModel& gameModel) {
 	assert(this->paddleCamAnimations.size() > 0);
 
+	// Animate the paddle itself
+	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+	assert(paddle != NULL);
+	paddle->Animate(dT);
+
+	// Animate any camera-related animations for the paddle cam
 	for (std::list<AnimationMultiLerp<Orientation3D>>::iterator iter = this->paddleCamAnimations.begin(); iter != this->paddleCamAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
@@ -543,9 +564,16 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 
 		// We want to be in the ball, looking down at the paddle
 		float finalCamRotationXDegs = this->isFlipped ? 90.0f : -90.0f;
-		Orientation3D intermediateOrientation(worldSpaceBallPos, Vector3D(0, 0, 0));
-		Orientation3D finalOrientation(worldSpaceBallPos, Vector3D(finalCamRotationXDegs, 0, 0));
+
+		// The values for the camera orientation during the ball camera animation...
+		// We want the camera to go into the ball and then turn towards the paddle
+		Vector3D finalPos;
+		float finalFOVAngle;
+		this->GetBallCamPositionAndFOV(*ball, currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight(), finalPos, finalFOVAngle);
 		
+		Orientation3D intermediateOrientation(worldSpaceBallPos, Vector3D(0, 0, 0));
+		Orientation3D finalOrientation(finalPos, Vector3D(finalCamRotationXDegs, 0, 0));
+
 		std::vector<Orientation3D> orientationValues;
 		orientationValues.reserve(3);
 		orientationValues.push_back(this->currCamOrientation);
@@ -572,6 +600,23 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 		toBallCamAnim.SetLerp(timeValues, orientationValues);
 		
 		this->ballCamAnimations.push_back(toBallCamAnim);
+
+		// The field of view angle of the camera must change to make sure it suits the ball camera
+		std::vector<float> fovValues;
+		fovValues.push_back(this->cameraFOVAngle);
+		fovValues.push_back(this->cameraFOVAngle);
+		fovValues.push_back(finalFOVAngle);
+		AnimationMultiLerp<float> camFOVChangeAnim(&this->cameraFOVAngle);
+		camFOVChangeAnim.SetLerp(timeValues, fovValues);
+		this->camFOVAnimations.push_back(camFOVChangeAnim);
+
+		// Make the ball disappear
+		ball->AnimateFade(true, timeToMoveAnimate);
+
+		// Make the items become partially translucent
+		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
+			(*iter)->AnimateItemFade(GameItem::ALPHA_ON_BALL_CAM, totalTimeToAnimate);
+		}
 	}
 	else {
 		// We are going out of ball camera mode back to default - take the camera
@@ -592,7 +637,7 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 		this->camFOVAnimations.push_back(camFOVChangeAnim);
 
 		// Make the ball reappear
-		// TODO... similar to: paddle->AnimatePaddleFade(false, timeToAnimate);
+		ball->AnimateFade(false, timeToAnimate);
 
 		// Make the items become opaque again
 		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
@@ -610,9 +655,15 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
  * Private helper function that ticks all the animations associated with the ball camera.
  * Returns: true if all animations are complete, false otherwise.
  */
-bool GameTransformMgr::TickBallCamAnimation(double dT) {
+bool GameTransformMgr::TickBallCamAnimation(double dT, GameModel& gameModel) {
 	assert(this->ballCamAnimations.size() > 0);
 	
+	// Animate the ball itself
+	GameBall* ball = *(gameModel.GetGameBalls().begin());
+	assert(ball != NULL);
+	ball->Animate(dT);
+
+	// Animate the camera
 	for (std::list<AnimationMultiLerp<Orientation3D>>::iterator iter = this->ballCamAnimations.begin(); iter != this->ballCamAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
@@ -622,8 +673,19 @@ bool GameTransformMgr::TickBallCamAnimation(double dT) {
 			++iter;
 		}
 	}
+
+	// Animate the field of view angle
+	for (std::list<AnimationMultiLerp<float>>::iterator iter = this->camFOVAnimations.begin(); iter != this->camFOVAnimations.end();) {
+		bool currAnimationFinished = iter->Tick(dT);
+		if (currAnimationFinished) {
+			iter = this->camFOVAnimations.erase(iter);
+		}
+		else {
+			iter++;
+		}
+	}
 	
-	return this->ballCamAnimations.size() == 0;
+	return (this->ballCamAnimations.size() == 0) && (this->camFOVAnimations.size() == 0);
 }
 
 /**
@@ -639,12 +701,12 @@ void GameTransformMgr::FinishBallCamAnimation(double dT, GameModel& gameModel) {
 	gameModel.UnsetPause(GameModel::PauseState);
 
 	if (ballCamAnim.type == GameTransformMgr::ToBallCamAnimation) {
-		//gameModel.GetPlayerPaddle()->SetPaddleCamera(true);
 		this->ballWithCamera = *(gameModel.GetGameBalls().begin());
+		GameBall::SetBallCamera(this->ballWithCamera);
 	}
 	else {
-		//gameModel.GetPlayerPaddle()->SetPaddleCamera(false);
 		this->ballWithCamera = NULL;
+		GameBall::SetBallCamera(NULL);
 	}
 
 	// Pop the animation off the queue

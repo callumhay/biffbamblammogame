@@ -44,6 +44,7 @@ public:
 	static const float HALF_ITEM_HEIGHT;
 
 	static const float ALPHA_ON_PADDLE_CAM;
+	static const float ALPHA_ON_BALL_CAM;
 
 	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const GameItem::ItemDisposition disp);
 	virtual ~GameItem();

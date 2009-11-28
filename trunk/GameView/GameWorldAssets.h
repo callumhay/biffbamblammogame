@@ -63,7 +63,7 @@ public:
 	virtual void FadeBackground(bool fadeout, float fadeTime) = 0;
 
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
-		ColourRGBA paddleColour = p.GetPaddleColour();
+		ColourRGBA paddleColour = p.GetColour();
 		if (paddleColour.A() < EPSILON) {
 			return;
 		}

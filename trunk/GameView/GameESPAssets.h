@@ -84,11 +84,12 @@ private:
 	Texture2D* laserBeamTex;
 	Texture2D* upArrowTex;
 	Texture2D* ballTex;
-	Texture2D* ballTargetTex;
+	Texture2D* targetTex;
 	Texture2D* haloTex;
 
-	// Ball related ESP effects - stores each balls set of item-related (defined by unique ID) effects
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects;
+	// Ball and paddle related ESP effects
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects; // stores each balls set of item-related (defined by unique ID) effects
+	std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>> paddleEffects;
 
 	// Constants for the number of particles for particular effects
 	static const int NUM_PADDLE_LASER_SPARKS = 15;
@@ -116,6 +117,7 @@ private:
 	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
+	void AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 
 	void AddPaddleGrowEffect();
 	void AddPaddleShrinkEffect();
@@ -124,6 +126,8 @@ private:
 	void AddOneUpEffect(const PlayerPaddle* paddle);
 
 	void InitLaserPaddleESPEffects();
+
+	ESPPointEmitter* CreateSpinningTargetESPEffect();
 
 	void AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile);
 	void DrawProjectileEffects(double dT, const Camera& camera);
@@ -143,7 +147,7 @@ public:
 	
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
-	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level);
+	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
 	void AddBallSafetyNetDestroyedEffect(const GameBall& ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
@@ -166,7 +170,8 @@ public:
 
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball);
-	void DrawTargetBallEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
+	void DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
+	void DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);

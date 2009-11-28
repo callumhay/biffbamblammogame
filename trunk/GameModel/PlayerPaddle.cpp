@@ -233,9 +233,6 @@ void PlayerPaddle::MoveAttachedBallToNewBounds() {
 }
 
 void PlayerPaddle::Tick(double seconds) {
-	// Tick any paddle-related animations
-	this->colourAnimation.Tick(seconds);
-
 	// Check to see if we need to increment seconds since the previous laser shot
 	// This makes sure the user can't consecutively fire lasers like some sort of mad person
 	if (this->timeSinceLastLaserBlast < PADDLE_LASER_DELAY) {
@@ -329,6 +326,11 @@ void PlayerPaddle::Tick(double seconds) {
 	}
 }
 
+void PlayerPaddle::Animate(double seconds) {
+	// Tick any paddle-related animations
+	this->colourAnimation.Tick(seconds);
+}
+
 /**
  * This will fire any weapons or abilities that paddle currently has - if none
  * exist then this function does nothing.
@@ -402,7 +404,7 @@ bool PlayerPaddle::CollisionCheck(const Collision::Circle2D& c, Vector2D& n, flo
  * Adds an animation to the paddle that fades it in or out based on the
  * given parameter over the given amount of time.
  */
-void PlayerPaddle::AnimatePaddleFade(bool fadeOut, double duration) {
+void PlayerPaddle::AnimateFade(bool fadeOut, double duration) {
 	ColourRGBA finalColour = this->colour;
 	if (fadeOut) {
 		finalColour[3] = 0.0f;

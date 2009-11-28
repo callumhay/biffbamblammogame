@@ -19,7 +19,7 @@ CrosshairHUD::~CrosshairHUD() {
  * Draw the crosshair on the screen as a HUD element (ontop of everything,
  * in screen coordinates, directly in the middle).
  */
-void CrosshairHUD::Draw(int screenWidth, int screenHeight) const {
+void CrosshairHUD::Draw(int screenWidth, int screenHeight, float alpha) const {
 	glPushAttrib(GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 	
 	
 	glDisable(GL_LIGHTING);
@@ -39,7 +39,7 @@ void CrosshairHUD::Draw(int screenWidth, int screenHeight) const {
 	
 	this->crosshairTex->BindTexture();
 	glBegin(GL_QUADS);
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glColor4f(1.0f, 1.0f, 1.0f, alpha);
 		glTexCoord2i(0, 0); glVertex2i(-CrosshairHUD::CROSSHAIR_HALF_WIDTH, -CrosshairHUD::CROSSHAIR_HALF_HEIGHT);
 		glTexCoord2i(1, 0); glVertex2i(CrosshairHUD::CROSSHAIR_HALF_WIDTH, -CrosshairHUD::CROSSHAIR_HALF_HEIGHT);
 		glTexCoord2i(1, 1); glVertex2i(CrosshairHUD::CROSSHAIR_HALF_WIDTH, CrosshairHUD::CROSSHAIR_HALF_HEIGHT);
