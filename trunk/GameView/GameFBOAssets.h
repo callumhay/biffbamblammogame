@@ -12,6 +12,7 @@
 
 class GameModel;
 class GameItem;
+class CgFxPostSmokey;
 
 /**
  * Storage class for framebuffer object assets used in the game graphics
@@ -34,6 +35,8 @@ private:
 	CgFxAfterImage* afterImageEffect;
 	CgFxInkSplatter* inkSplatterEffect;
 	CgFxFullscreenGoo* stickyPaddleCamEffect;
+	CgFxPostSmokey* smokeyCamEffect;
+
 
 	bool drawItemsInLastPass;	// Whether or not items get drawn in the final pass
 

@@ -335,10 +335,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BlammoEngine\Matrix.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\BlammoEngine\Mesh.cpp"
 					>
 				</File>
@@ -527,54 +523,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CgFxAfterImage.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxBloom.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxCelShading.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxDecoSkybox.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxFullscreenGoo.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxGaussianBlur.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxInkBlock.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxInkSplatter.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxPhong.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxPostRefract.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxStickyPaddle.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxVolumetricEffect.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\CrosshairHUD.h"
 					>
 				</File>
@@ -687,54 +635,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CgFxAfterImage.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxBloom.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxCelShading.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxDecoSkybox.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxFullscreenGoo.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxGaussianBlur.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxInkBlock.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxInkSplatter.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxPhong.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxPostRefract.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxStickyPaddle.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CgFxVolumetricEffect.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\CrosshairHUD.cpp"
 					>
 				</File>
@@ -834,6 +734,122 @@
 					RelativePath=".\GameView\StickyPaddleGoo.cpp"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="Shaders"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameView\CgFxAfterImage.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxBloom.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxCelShading.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxDecoSkybox.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxFullscreenGoo.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxGaussianBlur.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxInkBlock.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxInkSplatter.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPhong.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPostRefract.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPostSmokey.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxStickyPaddle.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxVolumetricEffect.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\GameView\CgFxAfterImage.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxBloom.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxCelShading.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxDecoSkybox.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxFullscreenGoo.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxGaussianBlur.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxInkBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxInkSplatter.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPhong.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPostRefract.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPostSmokey.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxStickyPaddle.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxVolumetricEffect.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

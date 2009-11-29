@@ -190,6 +190,20 @@ public:
 		return this->projectiles;
 	}
 
+	/**
+	 * Determines whether the given ball effect is active in the current state of the game or not.
+	 * Returns: true if the ball effect is active on any one of the balls in play, false otherwise.
+	 */
+	bool IsBallEffectActive(GameBall::BallType effectType) const {
+		for (std::list<GameBall*>::const_iterator ballIter = this->balls.begin(); ballIter != this->balls.end(); ++ballIter) {
+			const GameBall* currBall = *ballIter;
+			if ((currBall->GetBallType() & effectType) == effectType) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	bool IsGameOver() const {
 		return this->currLivesLeft == 0;
 	}

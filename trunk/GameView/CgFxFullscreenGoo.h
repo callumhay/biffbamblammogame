@@ -5,6 +5,10 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/CgFxEffect.h"
 
+/**
+ * Fullscreen goo - occurs when the player has activated paddle camera mode and
+ * also has the sticky paddle powerup active.
+ */
 class CgFxFullscreenGoo : public CgFxPostProcessingEffect {
 protected:
 	static const std::string MASK_SPLATTER_TECHNIQUE_NAME;
@@ -44,10 +48,10 @@ public:
 	}
 	void SetMask(const std::string& texMaskFilepath);
 
-	void SetOutputFBO(FBObj* renderOut) {
+	inline void SetOutputFBO(FBObj* renderOut) {
 		this->resultFBO = renderOut;
 	}
-	void SetFadeAlpha(float alpha) {
+	inline void SetFadeAlpha(float alpha) {
 		this->fade = alpha;
 	}
 

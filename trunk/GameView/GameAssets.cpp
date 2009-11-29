@@ -190,7 +190,12 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				
 				// Draw when the ghost ball is not an invisiball	
 				ballEffectTemp = this->ghostBallEffect;
-				this->espAssets->DrawGhostBallEffects(dT, camera, *currBall);
+
+				// We don't draw any of the effects if we're in ball camera mode
+				if (!GameBall::GetIsBallCameraOn()) {
+					this->espAssets->DrawGhostBallEffects(dT, camera, *currBall);
+				}
+				
 				currBallColour = currBallColour +
 												 Colour(GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.R(),
 																GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.G(),
@@ -263,6 +268,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		}
 
 		glPopMatrix();
+		debug_opengl_state();
 	}
 
 	// Calculate the average position and colour of all the visible balls in the game
@@ -284,6 +290,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 	// Set the ball light to the correct diffuse colour
 	this->lightAssets->GetBallLight().SetDiffuseColour(avgBallColour);
+	debug_opengl_state();
 }
 
 /**
@@ -305,6 +312,7 @@ void GameAssets::DrawGameBallsPostEffects(double dT, GameModel& gameModel, const
 			this->espAssets->DrawPaddleCamEffects(dT, camera, *currBall, *paddle);
 		}
 	}
+	debug_opengl_state();
 }
 
 void GameAssets::Tick(double dT) {
@@ -350,6 +358,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	}
 
 	glPopMatrix();
+	debug_opengl_state();
 }
 
 /**
@@ -398,6 +407,8 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		// Draw a target around balls when in paddle camera mode AND ball is not invisible
 		this->espAssets->DrawBallCamEffects(dT, camera, *ballWithCam, *paddle);
 	}
+
+	debug_opengl_state();
 }
 
 /**
