@@ -115,6 +115,7 @@ public:
 	const std::string CGFX_BLOOM_SHADER;
 	const std::string CGFX_FULLSCREENGOO_SHADER;
 	const std::string CGFX_STICKYPADDLE_SHADER;
+	const std::string CGFX_FULLSCREENSMOKEY_SHADER;
 
 	// Texture path constants *******************************
 	const std::string TEXTURE_BANG1;

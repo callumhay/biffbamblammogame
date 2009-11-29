@@ -1,12 +1,14 @@
 #include "GameFBOAssets.h"
 #include "GameViewConstants.h"
+#include "CgFxPostSmokey.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
 
 GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), 
 postFgAndBgFBO(NULL), initialFSEffectFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NULL),
-fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), stickyPaddleCamEffect(NULL),
+fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), 
+stickyPaddleCamEffect(NULL), smokeyCamEffect(NULL),
 drawItemsInLastPass(true) {
 	
 	// Framebuffer object setup
@@ -27,6 +29,8 @@ drawItemsInLastPass(true) {
 
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->finalFSEffectFBO, this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
+
+	this->smokeyCamEffect = new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
 }
 
 GameFBOAssets::~GameFBOAssets() {
@@ -55,6 +59,8 @@ GameFBOAssets::~GameFBOAssets() {
 	this->inkSplatterEffect = NULL;
 	delete this->stickyPaddleCamEffect;
 	this->stickyPaddleCamEffect = NULL;
+	delete this->smokeyCamEffect;
+	this->smokeyCamEffect = NULL;
 }
 
 /**
@@ -101,6 +107,7 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	delete this->afterImageEffect;
 	delete this->inkSplatterEffect;
 	delete this->stickyPaddleCamEffect;
+	delete this->smokeyCamEffect;
 
 	this->fgAndBgBlurEffect = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
 	this->bloomEffect				= new CgFxBloom(this->postFgAndBgFBO);
@@ -110,6 +117,8 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->finalFSEffectFBO, this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
+	
+	this->smokeyCamEffect = new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
 
 	debug_opengl_state();
 }
@@ -179,14 +188,29 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 	if (paddle->GetIsPaddleCameraOn() && (paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
-		// We take inverse of the alpha of the paddle to fade the sticky goo effect properly while in paddle cam
+		// We take inverse of the alpha of the paddle to fade the sticky goo effect properly while in paddle cam mode
 		float stickyGooAlpha = 1.0f - paddle->GetColour().A();
-
 		this->stickyPaddleCamEffect->SetFadeAlpha(stickyGooAlpha);
 		this->stickyPaddleCamEffect->SetInputFBO(inputFBO);
 		this->stickyPaddleCamEffect->SetOutputFBO(outputFBO);
 		this->stickyPaddleCamEffect->Draw(width, height, dT);
 
+		swapFBO = inputFBO;
+		inputFBO = outputFBO;
+		outputFBO = swapFBO;
+	}
+	else if (GameBall::GetIsBallCameraOn() && gameModel.IsBallEffectActive(GameBall::GhostBall)) {
+		// The ball camera is on and we're in ghost ball mode, make everything smokey/foggy for the player
+		const GameBall* camBall = GameBall::GetBallCameraBall();
+		assert(camBall != NULL);
+
+		// We take inverse of the alpha of the ball to fade the smokey effect properly while in ball cam mode
+		float smokeyAlpha = 1.0f - camBall->GetColour().A();
+		this->smokeyCamEffect->SetFadeAlpha(smokeyAlpha);
+		this->smokeyCamEffect->SetInputFBO(inputFBO);
+		this->smokeyCamEffect->SetOutputFBO(outputFBO);
+		this->smokeyCamEffect->Draw(width, height, dT);
+		
 		swapFBO = inputFBO;
 		inputFBO = outputFBO;
 		outputFBO = swapFBO;

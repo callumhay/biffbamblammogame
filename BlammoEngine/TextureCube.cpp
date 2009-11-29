@@ -1,11 +1,20 @@
+/**
+ * TextureCube.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "TextureCube.h"
 
 // Every array of cubemapped textures MUST be represented in this order
 const GLint TextureCube::CUBE_FACES[NUM_CUBE_FACES] = {GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
 																											 GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 																											 GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
-
-
 
 TextureCube::TextureCube(TextureFilterType texFilter) : Texture(texFilter, GL_TEXTURE_CUBE_MAP) {
 }
