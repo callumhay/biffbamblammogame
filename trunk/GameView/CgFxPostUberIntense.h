@@ -1,18 +1,18 @@
-#ifndef __CGFXPOSTSMOKEY_H__
-#define __CGFXPOSTSMOKEY_H__
+#ifndef __CGFXPOSTUBERINTENSE_H__
+#define __CGFXPOSTUBERINTENSE_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/CgFxEffect.h"
 
 /**
- * Fullscreen smokeyness - Makes the whole screen foggy/smokey; happens
- * when the player is in ball camera mode and also has the ghost ball active.
+ * Fullscreen intense shader - Makes the whole screen pulsing and intense; happens
+ * when the player is in ball camera mode and also has the uber ball active.
  */
-class CgFxPostSmokey : public CgFxPostProcessingEffect {
+class CgFxPostUberIntense : public CgFxPostProcessingEffect {
 
 public:
-	CgFxPostSmokey(FBObj* inputFBO, FBObj* outputFBO);
-	~CgFxPostSmokey();
+	CgFxPostUberIntense(FBObj* inputFBO, FBObj* outputFBO);
+	~CgFxPostUberIntense();
 
 	void Draw(int screenWidth, int screenHeight, double dT);
 
@@ -27,24 +27,21 @@ public:
 	}
 
 private:
-	static const std::string POSTSMOKEY_TECHNIQUE_NAME;
+	static const std::string POSTUBERINTENSE_TECHNIQUE_NAME;
 
 	// Cg parameters
 	CGparameter timerParam;
-	CGparameter scaleParam;
 	CGparameter frequencyParam;
 	CGparameter fadeParam;
 	CGparameter colourParam;
-	
-	CGparameter noiseSamplerParam;
+
 	CGparameter sceneSamplerParam;
 
 	float timer;
-	float scale;
 	float frequency;
 	float fade;
 	Colour colour;
 	FBObj* resultFBO;
-
 };
-#endif
+
+#endif // __CGFXPOSTUBERINTENSE_H__

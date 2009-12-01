@@ -786,6 +786,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxPostUberIntense.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxStickyPaddle.h"
 						>
 					</File>
@@ -839,6 +843,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxPostSmokey.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPostUberIntense.cpp"
 						>
 					</File>
 					<File
