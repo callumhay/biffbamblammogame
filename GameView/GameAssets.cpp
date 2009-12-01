@@ -188,7 +188,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall &&
 					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
 				
-				// Draw when the ghost ball is not an invisiball	
+				// Draw when the ghost ball is not an invisiball...	
 				ballEffectTemp = this->ghostBallEffect;
 
 				// We don't draw any of the effects if we're in ball camera mode
@@ -207,8 +207,12 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			if ((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall &&
 					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
 				
-				// Draw when uber ball and not invisiball
-				this->espAssets->DrawUberBallEffects(dT, camera, *currBall);
+				// Draw when uber ball and not invisiball...
+				// We don't draw any of the effects if we're in ball camera mode
+				if (!GameBall::GetIsBallCameraOn()) {
+					this->espAssets->DrawUberBallEffects(dT, camera, *currBall);
+				}
+
 				currBallColour = currBallColour + 
 												 Colour(GameViewConstants::GetInstance()->UBER_BALL_COLOUR.R(),
 																GameViewConstants::GetInstance()->UBER_BALL_COLOUR.G(),

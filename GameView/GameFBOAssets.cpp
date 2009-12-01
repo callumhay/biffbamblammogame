@@ -1,6 +1,7 @@
 #include "GameFBOAssets.h"
 #include "GameViewConstants.h"
 #include "CgFxPostSmokey.h"
+#include "CgFxPostUberIntense.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
@@ -8,7 +9,7 @@
 GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), 
 postFgAndBgFBO(NULL), initialFSEffectFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NULL),
 fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), 
-stickyPaddleCamEffect(NULL), smokeyCamEffect(NULL),
+stickyPaddleCamEffect(NULL), smokeyCamEffect(NULL), uberIntenseCamEffect(NULL),
 drawItemsInLastPass(true) {
 	
 	// Framebuffer object setup
@@ -21,16 +22,15 @@ drawItemsInLastPass(true) {
 	this->tempFBO = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 
 	// Effects setup
-	this->fgAndBgBlurEffect	= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
-	this->bloomEffect				= new CgFxBloom(this->postFgAndBgFBO);
-	this->afterImageEffect	= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
-
-	this->inkSplatterEffect	= new CgFxInkSplatter(this->finalFSEffectFBO, this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
-
+	this->fgAndBgBlurEffect			= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
+	this->bloomEffect						= new CgFxBloom(this->postFgAndBgFBO);
+	this->afterImageEffect			= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
+	this->inkSplatterEffect			= new CgFxInkSplatter(this->finalFSEffectFBO, this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->finalFSEffectFBO, this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
+	this->smokeyCamEffect				= new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
+	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->finalFSEffectFBO, this->tempFBO);
 
-	this->smokeyCamEffect = new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
 }
 
 GameFBOAssets::~GameFBOAssets() {
@@ -61,6 +61,8 @@ GameFBOAssets::~GameFBOAssets() {
 	this->stickyPaddleCamEffect = NULL;
 	delete this->smokeyCamEffect;
 	this->smokeyCamEffect = NULL;
+	delete this->uberIntenseCamEffect;
+	this->uberIntenseCamEffect = NULL;
 }
 
 /**
@@ -108,17 +110,16 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	delete this->inkSplatterEffect;
 	delete this->stickyPaddleCamEffect;
 	delete this->smokeyCamEffect;
+	delete this->uberIntenseCamEffect;
 
-	this->fgAndBgBlurEffect = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
-	this->bloomEffect				= new CgFxBloom(this->postFgAndBgFBO);
-	this->afterImageEffect	= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
-	
-	this->inkSplatterEffect	= new CgFxInkSplatter(this->finalFSEffectFBO, this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
-
+	this->fgAndBgBlurEffect			= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
+	this->bloomEffect						= new CgFxBloom(this->postFgAndBgFBO);
+	this->afterImageEffect			= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
+	this->inkSplatterEffect			= new CgFxInkSplatter(this->finalFSEffectFBO, this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->finalFSEffectFBO, this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
-	
-	this->smokeyCamEffect = new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
+	this->smokeyCamEffect				= new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
+	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->finalFSEffectFBO, this->tempFBO);
 
 	debug_opengl_state();
 }
@@ -199,21 +200,37 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 		inputFBO = outputFBO;
 		outputFBO = swapFBO;
 	}
-	else if (GameBall::GetIsBallCameraOn() && gameModel.IsBallEffectActive(GameBall::GhostBall)) {
-		// The ball camera is on and we're in ghost ball mode, make everything smokey/foggy for the player
+	else if (GameBall::GetIsBallCameraOn()) {
 		const GameBall* camBall = GameBall::GetBallCameraBall();
 		assert(camBall != NULL);
 
-		// We take inverse of the alpha of the ball to fade the smokey effect properly while in ball cam mode
-		float smokeyAlpha = 1.0f - camBall->GetColour().A();
-		this->smokeyCamEffect->SetFadeAlpha(smokeyAlpha);
-		this->smokeyCamEffect->SetInputFBO(inputFBO);
-		this->smokeyCamEffect->SetOutputFBO(outputFBO);
-		this->smokeyCamEffect->Draw(width, height, dT);
-		
-		swapFBO = inputFBO;
-		inputFBO = outputFBO;
-		outputFBO = swapFBO;
+		if (gameModel.IsBallEffectActive(GameBall::GhostBall)) {
+			// The ball camera is on and we're in ghost ball mode, make everything smokey/foggy for the player...
+			// We take inverse of the alpha of the ball to fade the smokey effect properly while in ball cam mode
+			float smokeyAlpha = 1.0f - camBall->GetColour().A();
+			this->smokeyCamEffect->SetFadeAlpha(smokeyAlpha);
+			this->smokeyCamEffect->SetInputFBO(inputFBO);
+			this->smokeyCamEffect->SetOutputFBO(outputFBO);
+			this->smokeyCamEffect->Draw(width, height, dT);
+			
+			swapFBO = inputFBO;
+			inputFBO = outputFBO;
+			outputFBO = swapFBO;
+		}
+
+		if (gameModel.IsBallEffectActive(GameBall::UberBall)) {
+			// The ball camera is on and we're in uber ball mode, make the screen pulse with intensity...
+			// We take inverse of the alpha of the ball to fade the smokey effect properly while in ball cam mode
+			float uberAlpha = 1.0f - camBall->GetColour().A();
+			this->uberIntenseCamEffect->SetFadeAlpha(uberAlpha);
+			this->uberIntenseCamEffect->SetInputFBO(inputFBO);
+			this->uberIntenseCamEffect->SetOutputFBO(outputFBO);
+			this->uberIntenseCamEffect->Draw(width, height, dT);
+			
+			swapFBO = inputFBO;
+			inputFBO = outputFBO;
+			outputFBO = swapFBO;
+		}
 	}
 
 	inputFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
