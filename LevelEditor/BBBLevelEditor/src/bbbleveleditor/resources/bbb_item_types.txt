@@ -48,6 +48,9 @@ The ball becomes partially invisible (blends into its surroundings), making it d
 - PaddleCam
 The camera goes inside the paddle, looking up at the level.
 
+- BallCam
+The camera goes inside the ball, looking down at the paddle.
+
 - PaddleShrink
 The paddle decreases in size.
 
