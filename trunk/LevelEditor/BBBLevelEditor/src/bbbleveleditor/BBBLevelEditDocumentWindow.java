@@ -431,6 +431,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				}
 				levelFileWriter.write("\r\n");
 			}
+			levelFileWriter.write("\r\n");
 			
 			// And the item drop settings...
 			Iterator<String> itemDropIter = this.itemDropSettings.keySet().iterator();
