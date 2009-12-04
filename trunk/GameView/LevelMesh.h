@@ -24,6 +24,7 @@ private:
 	Mesh* bombBlock;
 	Mesh* triangleBlockUR;	// Triangle block (default position in upper-right)
 	Mesh* inkBlock;
+	Mesh* prismBlock;
 	Mesh* styleBlock;
 
 	// Misc. display lists and meshes for other geometry activated by items and such

@@ -1,9 +1,7 @@
 The following specifies the .lvl format.
 
 // the start of the file begins with the width and height
-// in 'block' units, these are the building blocks of a level
-// The width and height here correspond to the interior of the
-// level (i.e., not including the walls and paddle)
+// in 'block' units, these are the building blocks of a level.
 <w> <h>
 
 // Next is an array making up the interior of the level
@@ -17,12 +15,13 @@ The following specifies the .lvl format.
 // S 	- A solid unbreakable block
 // E 	- Empty spot
 
-// T(x,p) - Triangle block, 
+// T(x,p) - Triangle block: 
 // x: type of block from the above, can be any of the following: {R, O, Y, G, S}
 // p: the orientation of the triangle (where the outer corner is located), can be any of the following: {ul, ur, ll, lr}
 // i.e., upper-left = ul, lower-right = lr, etc.
 
-// I - Ink block
+// I - Ink block   (If hit it splats all over the player's vision)
+// P - Prism block (Unbreakable, but if hit by any sort of laser it reflects/refracts the laser)
 
 
 <block list in order of top-left to bottom-right>

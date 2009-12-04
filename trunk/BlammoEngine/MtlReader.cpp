@@ -12,8 +12,10 @@
 #include "MtlReader.h"
 #include "Texture2D.h"
 #include "CgFxEffect.h"
+
 #include "../GameView/CgFxCelShading.h"
 #include "../GameView/CgFxPhong.h"
+#include "../GameView/CgFxPrism.h"
 
 #include "BasicIncludes.h"
 
@@ -195,6 +197,9 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFileFromStream
 		}
 		else if (matPropIter->second->materialType == MaterialProperties::MATERIAL_PHONG_TYPE) {
 			currMaterial = new CgFxPhong(matPropIter->second);
+		}
+		else if (matPropIter->second->materialType == MaterialProperties::MATERIAL_PRISM_TYPE) {
+			currMaterial = new CgFxPrism(matPropIter->second);
 		}
 		else {
 			// Default to using the cel shader for now

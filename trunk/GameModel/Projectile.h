@@ -50,7 +50,7 @@ public:
 };
 
 /**
- * Projectile representing laser beams fired by the player paddle.
+ * Projectile representing laser shots/bullets fired by the player paddle.
  */
 class PaddleLaser : public Projectile {
 private:

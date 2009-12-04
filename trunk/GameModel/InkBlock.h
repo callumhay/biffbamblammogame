@@ -51,6 +51,6 @@ public:
 	// Collision related stuffs
 	virtual LevelPiece* Destroy(GameModel* gameModel);	
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const Projectile& projectile);
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 };
 #endif

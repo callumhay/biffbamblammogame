@@ -26,7 +26,10 @@ BreakableTriangleBlock::~BreakableTriangleBlock() {
 }
 
 void BreakableTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-									const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor) {
+																					const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+																					const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+																					const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
 	this->bounds = TriangleBlock::CreateTriangleBounds(this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
 }
 
@@ -51,7 +54,10 @@ SolidTriangleBlock::~SolidTriangleBlock() {
 }
 
 void SolidTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-																			const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor) {
+																			const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+																			const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+																			const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
 	this->bounds = TriangleBlock::CreateTriangleBounds(this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
 }
 

@@ -19,12 +19,9 @@ private:
 	static const std::string BASIC_BG_TECHNIQUE_NAME;
 	static const std::string TEXTURED_BG_TECHNIQUE_NAME;
 
-protected:
-	virtual void SetupBeforePasses(const Camera& camera);
-
 public:
 	CgFxPhong(MaterialProperties* properties);
-	virtual ~CgFxPhong();
+	~CgFxPhong();
 
 };
 

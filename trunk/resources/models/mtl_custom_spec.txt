@@ -2,7 +2,7 @@ Other Custom Tags for Materials:
 
 # For determining the type of shader to use
 # you must use the "type" tag as follows
-type (outlinedcel|phong)
+type (outlinedcel|phong|prism)
 
 # For determining the outline size (in pixels)
 # when the material type is of the cel-shading persuasion

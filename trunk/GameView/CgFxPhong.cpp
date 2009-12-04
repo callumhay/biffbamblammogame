@@ -47,7 +47,3 @@ CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_PHONG_SHADER, properti
 
 CgFxPhong::~CgFxPhong() {
 }
-
-void CgFxPhong::SetupBeforePasses(const Camera& camera) {
-	CgFxMaterialEffect::SetupBeforePasses(camera);
-}
