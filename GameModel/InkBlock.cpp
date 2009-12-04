@@ -46,8 +46,8 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, const GameBall& ba
 	return this->Destroy(gameModel);
 }
 
-LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, const Projectile& projectile) {
-	if (projectile.GetType() == Projectile::PaddleLaserProjectile) {
+LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	if (projectile->GetType() == Projectile::PaddleLaserProjectile) {
 		return this->Destroy(gameModel);
 	}
 	return this;

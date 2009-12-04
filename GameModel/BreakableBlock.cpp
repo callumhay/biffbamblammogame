@@ -126,11 +126,11 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const GameBa
  * Call this when a collision has actually occured with a projectile and this block.
  * Returns: The resulting level piece that this has become.
  */
-LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const Projectile& projectile) {
+LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 	LevelPiece* newPiece = this;
 
 	// For destructive projectile types...
-	if (projectile.GetType() == Projectile::PaddleLaserProjectile) {
+	if (projectile->GetType() == Projectile::PaddleLaserProjectile) {
 		switch(this->pieceType) {
 			case GreenBreakable:
 				newPiece = this->Destroy(gameModel);

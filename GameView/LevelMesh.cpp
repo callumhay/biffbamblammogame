@@ -15,12 +15,13 @@
 #include "../GameModel/GameBall.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : currLevel(NULL),
-styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), ballSafetyNet(NULL) {
+styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), prismBlock(NULL), ballSafetyNet(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
 	this->basicBlock			= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
 	this->bombBlock				= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
 	this->triangleBlockUR = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
+	//this->prismBlock			= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PRISM_BLOCK_MESH);
 	this->inkBlock				= ResourceManager::GetInstance()->GetInkBlockMeshResource();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
@@ -30,6 +31,7 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), ball
 	std::map<std::string, MaterialGroup*> triangleBlockMatGrps	= this->triangleBlockUR->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> bombBlockMatGrps			= this->bombBlock->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> inkBlockMatGrps				= this->inkBlock->GetMaterialGroups();
+	//std::map<std::string, MaterialGroup*> prismBlockMatGrps		= this->prismBlock->GetMaterialGroups();
 	
 	for (std::map<std::string, MaterialGroup*>::iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
@@ -43,6 +45,11 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), ball
 	for (std::map<std::string, MaterialGroup*>::iterator iter = inkBlockMatGrps.begin(); iter != inkBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
+	/*
+	for (std::map<std::string, MaterialGroup*>::iterator iter = prismBlockMatGrps.begin(); iter != prismBlockMatGrps.end(); iter++) {
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+	}
+	*/
 
 	this->LoadNewLevel(gameWorldAssets, level);
 }
@@ -197,8 +204,6 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 		currEffect->SetBallLight(ballLight);
 		currEffect->Draw(camera, iter->second);
 	}
-
-
 }
 
 /**
@@ -264,8 +269,6 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 	
 		// Insert the new display list into the list of display lists...
 		this->pieceDisplayLists[piece].insert(std::make_pair<CgFxMaterialEffect*, GLuint>(currMaterial, newDisplayList));
-
-		this->displayListsPerMaterial[currMaterial].reserve(this->displayListsPerMaterial[currMaterial].size() + 1);
 		this->displayListsPerMaterial[currMaterial].push_back(newDisplayList);
 	}
 }
@@ -297,6 +300,9 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 			break;
 		case LevelPiece::Ink:
 			returnValue = this->inkBlock->GetMaterialGroups();
+			break;
+		case LevelPiece::Prism:
+			returnValue = this->prismBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Empty :
 			break;

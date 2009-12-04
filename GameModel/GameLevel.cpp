@@ -20,6 +20,7 @@
 #include "BombBlock.h"
 #include "TriangleBlocks.h"
 #include "InkBlock.h"
+#include "PrismBlock.h"
 
 #include "../ResourceManager.h"
 
@@ -31,6 +32,7 @@ const char GameLevel::ORANGE_BREAKABLE_CHAR		= 'O';
 const char GameLevel::RED_BREAKABLE_CHAR			= 'R';
 const char GameLevel::BOMB_CHAR								= 'B';
 const char GameLevel::INKBLOCK_CHAR						= 'I';
+const char GameLevel::PRISM_BLOCK_CHAR				= 'P';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -128,8 +130,10 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 				case INKBLOCK_CHAR:
 					newPiece = new InkBlock(pieceWLoc, pieceHLoc);
 					break;
-				case TRIANGLE_BLOCK_CHAR:
-					{
+				case PRISM_BLOCK_CHAR:
+					newPiece = new PrismBlock(pieceWLoc, pieceHLoc);
+					break;
+				case TRIANGLE_BLOCK_CHAR: {
 						// T(x,p) - Triangle block, 
 						// x: type of block from the above, can be any of the following: {R, O, Y, G, S}
 						// p: the orientation of the triangle (where the outer corner is located), can be any of the following: {ul, ur, ll, lr}
@@ -235,24 +239,50 @@ void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces,
 		return;
 	}
 	
-	LevelPiece* leftNeighbor = NULL;
-	LevelPiece* bottomNeighbor = NULL;
-	LevelPiece* rightNeighbor = NULL;
-	LevelPiece* topNeighbor = NULL;
+	LevelPiece* leftNeighbor				= NULL;
+	LevelPiece* bottomNeighbor			= NULL;
+	LevelPiece* rightNeighbor				= NULL;
+	LevelPiece* topNeighbor					= NULL;
+	LevelPiece* topLeftNeighbor			= NULL;
+	LevelPiece* topRightNeighbor		= NULL;
+	LevelPiece* bottomLeftNeighbor	= NULL;
+	LevelPiece* bottomRightNeighbor	= NULL;
+
 
 	if (wIndex != 0) {
-		leftNeighbor = pieces[hIndex][wIndex-1];
+		int leftIndex = wIndex-1;
+		leftNeighbor = pieces[hIndex][leftIndex];
+
+		if (hIndex != 0) {
+			bottomLeftNeighbor = pieces[hIndex-1][leftIndex];
+		}
+		if (hIndex != pieces.size()-1) {
+			topLeftNeighbor = pieces[hIndex+1][leftIndex];
+		}
 	}
+
 	if (wIndex != pieces[wIndex].size()-1) {
-		rightNeighbor = pieces[hIndex][wIndex+1];
+		int rightIndex = wIndex+1;
+		rightNeighbor = pieces[hIndex][rightIndex];
+
+		if (hIndex != 0) {
+			bottomRightNeighbor = pieces[hIndex-1][rightIndex];
+		}
+		if (hIndex != pieces.size()-1) {
+			topRightNeighbor = pieces[hIndex+1][rightIndex];
+		}
 	}
+
 	if (hIndex != 0) {
 		bottomNeighbor = pieces[hIndex-1][wIndex];
 	}
+
 	if (hIndex != pieces.size()-1) {
 		topNeighbor = pieces[hIndex+1][wIndex];
-	}	
-	pieces[hIndex][wIndex]->UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
+	}
+
+	pieces[hIndex][wIndex]->UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+																			 topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 /**

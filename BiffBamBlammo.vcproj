@@ -790,6 +790,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxPrism.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxStickyPaddle.h"
 						>
 					</File>
@@ -847,6 +851,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxPostUberIntense.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPrism.cpp"
 						>
 					</File>
 					<File
@@ -1190,6 +1198,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PrismBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\SolidBlock.h"
 						>
 					</File>
@@ -1215,6 +1227,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\LevelPiece.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PrismBlock.cpp"
 						>
 					</File>
 					<File

@@ -117,6 +117,7 @@ public:
 	const std::string CGFX_STICKYPADDLE_SHADER;
 	const std::string CGFX_FULLSCREENSMOKEY_SHADER;
 	const std::string CGFX_FULLSCREEN_UBERINTENSE_SHADER;
+	const std::string CGFX_PRISM_SHADER;
 
 	// Texture path constants *******************************
 	const std::string TEXTURE_BANG1;
@@ -209,6 +210,7 @@ public:
 	const std::string BASIC_BLOCK_MESH_PATH;
 	const std::string TRIANGLE_BLOCK_MESH_PATH;
 	const std::string BOMB_BLOCK_MESH;
+	const std::string PRISM_BLOCK_MESH;
 	const std::string SKYBOX_MESH;
 	const std::string ITEM_MESH;
 	const std::string PADDLE_LASER_ATTACHMENT_MESH;

@@ -60,13 +60,15 @@ public:
 	};
 
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-													  const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor);
+													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 	
 	// Doesn't matter if a ball collides with solid block, it does nothing to the block.
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
 		return this->Destroy(gameModel);
 	}
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const Projectile& projectile) {
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 		return this->Destroy(gameModel);
 	}
 };

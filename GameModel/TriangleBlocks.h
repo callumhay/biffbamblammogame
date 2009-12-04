@@ -52,7 +52,9 @@ public:
 	virtual Matrix4x4 GetPieceToLevelInvTransform() const;
 
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor);
+													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 };
 
@@ -76,7 +78,9 @@ public:
 	virtual Matrix4x4 GetPieceToLevelInvTransform() const;
 
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor);
+													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 };
 #endif

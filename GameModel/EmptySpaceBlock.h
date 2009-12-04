@@ -48,7 +48,9 @@ public:
 	};	
 	
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-		const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor) {
+													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 			// Empty spaces don't have bounds...
 			this->bounds.Clear();
 	};
@@ -58,7 +60,7 @@ public:
 		return this->Destroy(gameModel);
 	}
 
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const Projectile& projectile) {
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 		// Nothing happens when there's nothing to collide with...
 		return this->Destroy(gameModel);
 	}

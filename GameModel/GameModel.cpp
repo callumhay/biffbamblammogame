@@ -201,7 +201,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& s
 	this->IncrementScore(pointValue);
 
 	// Collide the projectile with the piece...
-	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, *projectile); 	// WARNING: This can destroy p.
+	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, projectile); 	// WARNING: This can destroy p.
 
 	// EVENT: Ball-Block Collision
 	GameEventManager::Instance()->ActionProjectileBlockCollision(*projectile, *pieceAfterCollision);

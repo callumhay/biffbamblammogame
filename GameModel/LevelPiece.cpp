@@ -97,7 +97,9 @@ void LevelPiece::AddPossibleItemDrop(GameModel *gameModel) {
  * the boundry will be placed there.
  */
 void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-														 const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor) {
+															const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 		// Clear all the currently existing boundry lines first
 		this->bounds.Clear();
 
