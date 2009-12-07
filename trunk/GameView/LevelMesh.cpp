@@ -3,6 +3,7 @@
 #include "GameViewConstants.h"
 #include "GameWorldAssets.h"
 #include "BallSafetyNetMesh.h"
+#include "PrismBlockMesh.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Vector.h"
@@ -21,7 +22,7 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), pris
 	this->basicBlock			= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
 	this->bombBlock				= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
 	this->triangleBlockUR = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
-	//this->prismBlock			= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PRISM_BLOCK_MESH);
+	this->prismBlock			= new PrismBlockMesh();
 	this->inkBlock				= ResourceManager::GetInstance()->GetInkBlockMeshResource();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
@@ -31,7 +32,7 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), pris
 	std::map<std::string, MaterialGroup*> triangleBlockMatGrps	= this->triangleBlockUR->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> bombBlockMatGrps			= this->bombBlock->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> inkBlockMatGrps				= this->inkBlock->GetMaterialGroups();
-	//std::map<std::string, MaterialGroup*> prismBlockMatGrps		= this->prismBlock->GetMaterialGroups();
+	std::map<std::string, MaterialGroup*> prismBlockMatGrps			= this->prismBlock->GetMaterialGroups();
 	
 	for (std::map<std::string, MaterialGroup*>::iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
@@ -45,11 +46,9 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), pris
 	for (std::map<std::string, MaterialGroup*>::iterator iter = inkBlockMatGrps.begin(); iter != inkBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	/*
 	for (std::map<std::string, MaterialGroup*>::iterator iter = prismBlockMatGrps.begin(); iter != prismBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	*/
 
 	this->LoadNewLevel(gameWorldAssets, level);
 }
@@ -192,7 +191,11 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 /**
  * Draw the current level mesh pieces (i.e., blocks that make up the level).
  */
-void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
+void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& keyLight, 
+													 const PointLight& fillLight, const PointLight& ballLight, const Texture2D* sceneTexture) {
+
+	// Set any appropriate parameters on the various meshes materials, etc.
+	this->prismBlock->SetSceneTexture(sceneTexture);
 
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 

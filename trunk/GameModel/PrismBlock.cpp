@@ -48,7 +48,7 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 				(bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
 			Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
 																	 this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
+			Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
 			n1.Normalize();
 
 			boundingLines.push_back(boundry);
@@ -62,7 +62,7 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 			Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
 															this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
+			Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
 			n1.Normalize();
 
 			boundingLines.push_back(boundry);

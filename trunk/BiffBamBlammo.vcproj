@@ -619,6 +619,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\PrismBlockMesh.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\StartGameDisplayState.h"
 					>
 				</File>
@@ -724,6 +728,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\MainMenuDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\PrismBlockMesh.cpp"
 					>
 				</File>
 				<File
