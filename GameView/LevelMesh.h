@@ -12,6 +12,7 @@
 class GameWorldAssets;
 class BallSafetyNetMesh;
 class Mesh;
+class PrismBlockMesh;
 class MaterialGroup;
 
 class LevelMesh {
@@ -24,7 +25,7 @@ private:
 	Mesh* bombBlock;
 	Mesh* triangleBlockUR;	// Triangle block (default position in upper-right)
 	Mesh* inkBlock;
-	Mesh* prismBlock;
+	PrismBlockMesh* prismBlock;
 	Mesh* styleBlock;
 
 	// Misc. display lists and meshes for other geometry activated by items and such
@@ -49,7 +50,8 @@ public:
 	
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	
-	void DrawPieces(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
+	void DrawPieces(double dT, const Camera& camera, const PointLight& keyLight, 
+									const PointLight& fillLight, const PointLight& ballLight, const Texture2D* sceneTexture);
 	void DrawSafetyNet(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
 
 	void LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level);

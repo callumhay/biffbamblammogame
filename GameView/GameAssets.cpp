@@ -144,8 +144,9 @@ void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Ca
 
 	PointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	currLevelMesh->DrawPieces(dT, camera, fgKeyLight, fgFillLight, ballLight);
+	currLevelMesh->DrawPieces(dT, camera, fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
 }
+
 void GameAssets::DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera) {
 	LevelMesh* currLevelMesh = this->GetLevelMesh(currLevel);
 
