@@ -61,6 +61,18 @@ bool LevelPiece::CollisionCheck(const Collision::AABB2D& aabb) {
 	return Collision::IsCollision(pieceBounds, aabb);	
 }
 
+/**
+ * Check for a collision of a given set of bounding lines with this block.
+ * Returns: true on collision, false otherwise.
+ */
+bool LevelPiece::CollisionCheck(const BoundingLines& boundingLines) {
+	if (this->IsNoBoundsPieceType()) {
+		return false;
+	}
+
+	return this->bounds.CollisionCheck(boundingLines);
+}
+
 
 /**
  * Function for adding a possible item drop for the given level piece.

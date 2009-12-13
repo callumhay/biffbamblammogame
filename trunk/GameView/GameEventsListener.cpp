@@ -141,6 +141,10 @@ void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 }
 
 void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) {
+
+	// Add any visual effects required for when a projectile hits the block
+	this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block);
+
 	debug_output("EVENT: Projectile-block collision");
 }
 
@@ -319,7 +323,7 @@ void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
 
 	// Add any other view-related effects for the given projectile
 	switch (projectile.GetType()) {
-		case Projectile::PaddleLaserProjectile:
+		case Projectile::PaddleLaserBulletProjectile:
 			// Have the laser gun attachment move downwards in reaction to the laser being shot
 			this->display->GetAssets()->FirePaddleLaser(*this->display->GetModel()->GetPlayerPaddle());
 			break;

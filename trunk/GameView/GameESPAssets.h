@@ -41,7 +41,7 @@ private:
 	std::list<ESPEmitter*> activePaddleEmitters;
 	std::map<const GameBall*, std::list<ESPEmitter*>>		activeBallBGEmitters;
 	std::map<const GameItem*, std::list<ESPEmitter*>>		activeItemDropEmitters; 
-	std::map<const Projectile*, std::list<ESPEmitter*>> activeProjectileEmitters;
+	std::map<const Projectile*, std::list<ESPPointEmitter*>> activeProjectileEmitters;
 	std::map<GameItem::ItemType, std::list<ESPEmitter*>> activeTimerHUDEmitters;
 	
 	// Standard effectors for the various ESP effects
@@ -86,6 +86,7 @@ private:
 	Texture2D* ballTex;
 	Texture2D* targetTex;
 	Texture2D* haloTex;
+	Texture2D* lensFlareTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -130,8 +131,11 @@ private:
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
 
 	void AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile);
+	void AddLaserHitPrismBlockEffect(const Point2D& loc);
+	void AddLaserHitWallEffect(const Point2D& loc);
+
 	void DrawProjectileEffects(double dT, const Camera& camera);
-	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, ESPEmitter* projectileEmitter);
+	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter);
 
 public:
 	GameESPAssets();
@@ -139,12 +143,13 @@ public:
 
 	// Specific effects that can be made to occur in the game
 	//void AddBallBounceEffect(const Camera& camera, const GameBall& ball);	
-	// TODO: 
+
 	ESPPointEmitter* CreateBallBounceEffect(const GameBall& ball, Onomatoplex::SoundType soundType); 
 	void AddBounceLevelPieceEffect(const Camera& camera, const GameBall& ball, const LevelPiece& block);
 	void AddBouncePaddleEffect(const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	void AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2);
-	
+	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
+
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);

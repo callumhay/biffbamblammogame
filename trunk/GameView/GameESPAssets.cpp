@@ -53,7 +53,8 @@ laserBeamTex(NULL),
 upArrowTex(NULL),
 ballTex(NULL),
 targetTex(NULL),
-haloTex(NULL) {
+haloTex(NULL),
+lensFlareTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -111,6 +112,7 @@ GameESPAssets::~GameESPAssets() {
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
 	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
 
 	// Delete any standalone effects
 	delete this->paddleLaserGlowAura;
@@ -164,12 +166,12 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->activeItemDropEmitters.clear();
 
 	// Clear projectile emitters
-	for (std::map<const Projectile*, std::list<ESPEmitter*>>::iterator iter1 = this->activeProjectileEmitters.begin();
+	for (std::map<const Projectile*, std::list<ESPPointEmitter*>>::iterator iter1 = this->activeProjectileEmitters.begin();
 		iter1 != this->activeProjectileEmitters.end(); iter1++) {
 	
-			std::list<ESPEmitter*>& projEmitters = iter1->second;
+			std::list<ESPPointEmitter*>& projEmitters = iter1->second;
 			
-			for (std::list<ESPEmitter*>::iterator iter2 = projEmitters.begin(); iter2 != projEmitters.end(); iter2++) {
+			for (std::list<ESPPointEmitter*>::iterator iter2 = projEmitters.begin(); iter2 != projEmitters.end(); iter2++) {
 				delete *iter2;
 				*iter2 = NULL;
 			}
@@ -347,6 +349,10 @@ void GameESPAssets::InitESPTextures() {
 	if (this->haloTex == NULL) {
 		this->haloTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 		assert(this->haloTex != NULL);
+	}
+	if (this->lensFlareTex == NULL) {
+		this->lensFlareTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear));
+		assert(this->lensFlareTex != NULL);
 	}
 
 	debug_opengl_state();
@@ -685,6 +691,50 @@ void GameESPAssets::AddBounceBallBallEffect(const Camera& camera, const GameBall
 
 	this->activeGeneralEmitters.push_front(bangEffect);
 	this->activeGeneralEmitters.push_front(bounceEffect);
+}
+
+/**
+ * Add effects based on what happens when a given projectile hits a given level piece.
+ */
+void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block) {
+	switch (projectile.GetType()) {
+		case Projectile::PaddleLaserBulletProjectile:
+			switch(block.GetType()) {
+				case LevelPiece::Prism: {
+						// A laser bullet just hit a prism block... cause the proper effect
+						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+						this->AddLaserHitPrismBlockEffect(midPoint);
+					} 
+					break;
+
+				case LevelPiece::Solid:
+				case LevelPiece::SolidTriangle:
+				case LevelPiece::Breakable:
+				case LevelPiece::BreakableTriangle: {
+						// A laser just hit a block and was disapated by it... show the particle disintegrate
+						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+						this->AddLaserHitWallEffect(midPoint);
+					}
+					break;
+
+				case LevelPiece::Ink:
+				case LevelPiece::Bomb:
+				case LevelPiece::Empty:
+					// Certain level pieces require no effects...
+					break;
+
+				default:
+					// If you get an assert fail here then you'll need to add a particle
+					// destruction effect for the new block type!
+					assert(false);
+					break;
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
 }
 
 /**
@@ -1404,7 +1454,7 @@ void GameESPAssets::TurnOffCurrentItemDropStars(const Camera& camera) {
  */
 void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile) {
 	switch (projectile.GetType()) {
-		case Projectile::PaddleLaserProjectile:
+		case Projectile::PaddleLaserBulletProjectile:
 			this->AddLaserPaddleESPEffects(gameModel, projectile);
 			break;
 		default:
@@ -1418,12 +1468,12 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
  */
 void GameESPAssets::RemoveProjectileEffect(const Camera& camera, const Projectile& projectile) {
 	
- 	std::map<const Projectile*, std::list<ESPEmitter*>>::iterator projIter = this->activeProjectileEmitters.find(&projectile);
+ 	std::map<const Projectile*, std::list<ESPPointEmitter*>>::iterator projIter = this->activeProjectileEmitters.find(&projectile);
 	if (projIter != this->activeProjectileEmitters.end()) {
 			
-		std::list<ESPEmitter*>& projEffects = projIter->second;
-		for (std::list<ESPEmitter*>::iterator effectIter = projEffects.begin(); effectIter != projEffects.end(); effectIter++) {
-			ESPEmitter* currEmitter = *effectIter;
+		std::list<ESPPointEmitter*>& projEffects = projIter->second;
+		for (std::list<ESPPointEmitter*>::iterator effectIter = projEffects.begin(); effectIter != projEffects.end(); effectIter++) {
+			ESPPointEmitter* currEmitter = *effectIter;
 			delete currEmitter;
 			currEmitter = NULL;
 		}
@@ -1555,7 +1605,7 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
  * Private helper function for making and adding a laser blast effect for the laser paddle item.
  */
 void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile) {
-	assert(projectile.GetType() == Projectile::PaddleLaserProjectile);
+	assert(projectile.GetType() == Projectile::PaddleLaserBulletProjectile);
 	
 	Point2D projectilePos2D = projectile.GetPosition();
 	Point3D projectilePos3D = Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f);
@@ -1655,6 +1705,88 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 	this->activeProjectileEmitters[&projectile].push_back(laserAuraEmitter);
 	this->activeProjectileEmitters[&projectile].push_back(laserBeamEmitter);
 	this->activeProjectileEmitters[&projectile].push_back(laserTrailSparks);
+}
+
+/**
+ * Add the proper particle effects for when a laser hits a prism block
+ * (big shiny reflection effect with partial lens flare).
+ */
+void GameESPAssets::AddLaserHitPrismBlockEffect(const Point2D& loc) {
+
+	// Create a short-lived shinny glow effect
+	ESPPointEmitter* shinyGlowEmitter = new ESPPointEmitter();
+	shinyGlowEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	shinyGlowEmitter->SetInitialSpd(ESPInterval(0));
+	shinyGlowEmitter->SetParticleLife(ESPInterval(0.5f));
+	shinyGlowEmitter->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH));
+	shinyGlowEmitter->SetEmitAngleInDegrees(0);
+	shinyGlowEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	shinyGlowEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	shinyGlowEmitter->SetEmitPosition(Point3D(loc[0], loc[1], 0.0f));
+	shinyGlowEmitter->SetParticleColour(ESPInterval(0.75f, 0.9f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	shinyGlowEmitter->AddEffector(&this->particleMediumShrink);
+	shinyGlowEmitter->AddEffector(Randomizer::GetInstance()->RandomNegativeOrPositive() < 0 ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
+	shinyGlowEmitter->SetParticles(1, this->circleGradientTex);
+
+	// Create a brief lens-flare effect
+	ESPPointEmitter* lensFlareEmitter = new ESPPointEmitter();
+	lensFlareEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	lensFlareEmitter->SetInitialSpd(ESPInterval(0));
+	lensFlareEmitter->SetParticleLife(ESPInterval(1.0f));
+	lensFlareEmitter->SetParticleSize(ESPInterval(2*LevelPiece::PIECE_WIDTH));
+	lensFlareEmitter->SetEmitAngleInDegrees(0);
+	lensFlareEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	lensFlareEmitter->SetEmitPosition(Point3D(loc[0], loc[1], 0.0f));
+	lensFlareEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	lensFlareEmitter->AddEffector(&this->particleFader);
+	lensFlareEmitter->AddEffector(&this->particleLargeGrowth);
+	lensFlareEmitter->AddEffector(Randomizer::GetInstance()->RandomNegativeOrPositive() < 0 ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
+	lensFlareEmitter->SetParticles(1, this->lensFlareTex);
+
+	this->activeGeneralEmitters.push_back(lensFlareEmitter);
+	this->activeGeneralEmitters.push_back(shinyGlowEmitter);
+}
+
+/**
+ * Adds an effect for when a laser bullet hits a wall and disintegrates.
+ */
+void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
+	const Point3D EMITTER_LOCATION = Point3D(loc[0], loc[1], 0.0f);
+
+	// Create a VERY brief lens-flare effect
+	ESPPointEmitter* lensFlareEmitter = new ESPPointEmitter();
+	lensFlareEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	lensFlareEmitter->SetInitialSpd(ESPInterval(0));
+	lensFlareEmitter->SetParticleLife(ESPInterval(0.9f));
+	lensFlareEmitter->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH));
+	lensFlareEmitter->SetEmitAngleInDegrees(0);
+	lensFlareEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	lensFlareEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	lensFlareEmitter->SetEmitPosition(EMITTER_LOCATION);
+	lensFlareEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	lensFlareEmitter->AddEffector(&this->particleFader);
+	lensFlareEmitter->AddEffector(&this->particleMediumGrowth);
+	lensFlareEmitter->AddEffector(Randomizer::GetInstance()->RandomNegativeOrPositive() < 0 ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
+	lensFlareEmitter->SetParticles(1, this->lensFlareTex);
+
+	// Create a disapation of particle bits
+	ESPPointEmitter* particleSparks = new ESPPointEmitter();
+	particleSparks->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
+	particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	particleSparks->SetInitialSpd(ESPInterval(1.0f, 4.0f));
+	particleSparks->SetParticleLife(ESPInterval(0.5f, 0.75f));
+	particleSparks->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 10.0f, LevelPiece::PIECE_WIDTH / 8.0f));
+	particleSparks->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	particleSparks->SetEmitAngleInDegrees(180);
+	particleSparks->SetAsPointSpriteEmitter(true);
+	particleSparks->SetEmitPosition(EMITTER_LOCATION);
+	particleSparks->AddEffector(&this->particleFader);
+	particleSparks->AddEffector(&this->particleMediumGrowth);
+	particleSparks->SetParticles(15, this->circleGradientTex);
+
+	this->activeGeneralEmitters.push_back(lensFlareEmitter);
+	this->activeGeneralEmitters.push_back(particleSparks);
 }
 
 /**
@@ -2004,7 +2136,8 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
  * shmancy type stuffs.
  */
 void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
-	
+	this->DrawProjectileEffects(dT, camera);
+
 	std::list<std::list<ESPEmitter*>::iterator> removeElements;
 
 	// Go through all the particles and do book keeping and drawing
@@ -2031,26 +2164,25 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
 			delete currEmitter;
 			currEmitter = NULL;
 	}
-
-	this->DrawProjectileEffects(dT, camera);
 }
 
 /**
  * Update and draw all projectile effects that are currently active.
  */
 void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
-	for (std::map<const Projectile*, std::list<ESPEmitter*>>::iterator iter = this->activeProjectileEmitters.begin();
+	for (std::map<const Projectile*, std::list<ESPPointEmitter*>>::iterator iter = this->activeProjectileEmitters.begin();
 		iter != this->activeProjectileEmitters.end(); iter++) {
 		
 		const Projectile* currProjectile = iter->first;
-		std::list<ESPEmitter*>& projEmitters = iter->second;
+		std::list<ESPPointEmitter*>& projEmitters = iter->second;
 
 		assert(currProjectile != NULL);
 		Point2D projectilePos2D		= currProjectile->GetPosition();
+		Vector2D projectileDir    = currProjectile->GetVelocityDirection();
 
 		// Update and draw the emitters, background then foreground...
-		for (std::list<ESPEmitter*>::iterator emitIter = projEmitters.begin(); emitIter != projEmitters.end(); emitIter++) {
-			this->DrawProjectileEmitter(dT, camera, projectilePos2D, *emitIter);
+		for (std::list<ESPPointEmitter*>::iterator emitIter = projEmitters.begin(); emitIter != projEmitters.end(); emitIter++) {
+			this->DrawProjectileEmitter(dT, camera, projectilePos2D, projectileDir, *emitIter);
 		}
 	}
 }
@@ -2058,16 +2190,27 @@ void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
 /**
  * Private helper function for drawing a single projectile at a given position.
  */
-void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, ESPEmitter* projectileEmitter) {
+void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, 
+																					const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter) {
+
+	// In the case where the particle only spawns once, we have a stationary particle that needs to move
+	// to its current position and have an orientation to its current direction
 	bool movesWithProjectile = projectileEmitter->OnlySpawnsOnce();
 	if (movesWithProjectile) {
 		glPushMatrix();
 		glTranslatef(projectilePos2D[0], projectilePos2D[1], 0.0f);
+		// Calculate the angle to rotate it about the z-axis
+		float angleToRotate = Trig::radiansToDegrees(acos(Vector2D::Dot(projectileDir, Vector2D(0, 1))));
+		if (projectileDir[0] > 0) {
+			angleToRotate *= -1.0;
+		}
+		glRotatef(angleToRotate, 0.0f, 0.0f, 1.0f);
 	}
 	else {
-		ESPPointEmitter* temp = dynamic_cast<ESPPointEmitter*>(projectileEmitter);
-		assert(temp != NULL);
-		temp->SetEmitPosition(Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f));
+		// We want all the emitting, moving particles attached to the projectile to move with the projectile and
+		// fire opposite its trajectory
+		projectileEmitter->SetEmitPosition(Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f));
+		projectileEmitter->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
 	}
 	
 	projectileEmitter->Draw(camera);

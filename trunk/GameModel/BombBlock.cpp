@@ -121,7 +121,7 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, const GameBall& b
 }
 
 LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-	if (projectile->GetType() == Projectile::PaddleLaserProjectile) {
+	if (projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
 		return this->Destroy(gameModel);
 	}
 	return this;

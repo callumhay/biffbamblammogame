@@ -23,7 +23,7 @@ Projectile::~Projectile() {
  */
 Projectile* Projectile::CreateProjectile(ProjectileType type, const Point2D& spawnLoc) {
 	switch (type) {
-		case Projectile::PaddleLaserProjectile:
+		case Projectile::PaddleLaserBulletProjectile:
 			return new PaddleLaser(spawnLoc);
 		default:
 			assert(false);
@@ -35,15 +35,18 @@ Projectile* Projectile::CreateProjectile(ProjectileType type, const Point2D& spa
 
 // PaddleLaser ===================================================================================================================
 const Vector2D PaddleLaser::PADDLELASER_VELOCITYDIR	= Vector2D(0, 1);	// Velocity of laser projectile in game units / second
+const Vector2D PaddleLaser::PADDLELASER_RIGHTDIR	  = Vector2D(1, 0);
 const float PaddleLaser::PADDLELASER_VELOCITYMAG	= 10.0f;
 const float PaddleLaser::PADDLELASER_HEIGHT				= 1.2f;							// Height of a laser projectile in game units
 const float PaddleLaser::PADDLELASER_WIDTH				= 0.5f;							// Width of a laser projectile in game units 
 const float PaddleLaser::PADDLELASER_HALF_HEIGHT	= PADDLELASER_HEIGHT / 2.0f;
 const float PaddleLaser::PADDLELASER_HALF_WIDTH		= PADDLELASER_WIDTH  / 2.0f;
 
-PaddleLaser::PaddleLaser(const Point2D& spawnLoc) : Projectile(Projectile::PaddleLaserProjectile, spawnLoc) {
+PaddleLaser::PaddleLaser(const Point2D& spawnLoc) : 
+Projectile(Projectile::PaddleLaserBulletProjectile, spawnLoc) {
 	this->velocityDir = PADDLELASER_VELOCITYDIR;
 	this->velocityMag = PADDLELASER_VELOCITYMAG;
+	this->rightVec    = PADDLELASER_RIGHTDIR;
 }
 
 PaddleLaser::~PaddleLaser() {

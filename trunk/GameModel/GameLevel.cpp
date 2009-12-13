@@ -420,14 +420,18 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const GameBall
 std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Projectile& p) const {
 	Point2D projectileCenter = p.GetPosition();
 
+	// TODO: try dividing the entire thing by the piece width/height...
+
 	// Find the non-rounded max and min indices to look at along the x and y axis
 	float xNonAdjustedIndex = projectileCenter[0] / LevelPiece::PIECE_WIDTH;
-	int xIndexMax = static_cast<int>(floorf(xNonAdjustedIndex + p.GetHalfWidth())); 
-	int xIndexMin = static_cast<int>(floorf(xNonAdjustedIndex - p.GetHalfWidth()));
+	float xDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[0]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[0]);
+	int xIndexMax = static_cast<int>(floorf(xNonAdjustedIndex + xDelta)); 
+	int xIndexMin = static_cast<int>(floorf(xNonAdjustedIndex - xDelta));
 	
 	float yNonAdjustedIndex = projectileCenter[1] / LevelPiece::PIECE_HEIGHT;
-	int yIndexMax = static_cast<int>(floorf(yNonAdjustedIndex + p.GetHalfHeight()));
-	int yIndexMin = static_cast<int>(floorf(yNonAdjustedIndex - p.GetHalfHeight()));
+	float yDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[1]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[1]);
+	int yIndexMax = static_cast<int>(floorf(yNonAdjustedIndex + yDelta));
+	int yIndexMin = static_cast<int>(floorf(yNonAdjustedIndex - yDelta));
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
 }

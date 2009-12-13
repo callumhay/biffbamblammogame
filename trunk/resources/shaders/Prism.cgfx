@@ -295,7 +295,7 @@ technique Prism {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Front;
-        LineWidth = 2.0f;
+        LineWidth = 2.5f;
         LineSmoothEnable = true;
         PolygonMode = int2(Back, Line);
         

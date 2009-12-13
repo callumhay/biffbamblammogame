@@ -19,6 +19,8 @@ public:
 
 	bool Collide(const Collision::Circle2D& c, Vector2D& n, float &d);
 	Point2D ClosestPoint(const Point2D& pt);
+
+	bool CollisionCheck(const BoundingLines& other) const;
 	
 	// Completely obliterates all the bounding lines for this
 	void Clear() {

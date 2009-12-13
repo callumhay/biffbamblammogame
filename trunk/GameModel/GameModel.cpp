@@ -200,11 +200,15 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& s
 	assert(pointValue >= 0);
 	this->IncrementScore(pointValue);
 
+	bool alreadyCollided = projectile->IsLastLevelPieceCollidedWith(p);
+
 	// Collide the projectile with the piece...
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, projectile); 	// WARNING: This can destroy p.
 
-	// EVENT: Ball-Block Collision
-	GameEventManager::Instance()->ActionProjectileBlockCollision(*projectile, *pieceAfterCollision);
+	// EVENT: First-time Projectile-Block Collision
+	if (!alreadyCollided) {
+		GameEventManager::Instance()->ActionProjectileBlockCollision(*projectile, *pieceAfterCollision);
+	}
 
 	// Check to see if the level is done
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
