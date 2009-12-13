@@ -82,6 +82,29 @@ Point2D BoundingLines::ClosestPoint(const Point2D& pt) {
 	return closestPt;
 }
 
+/**
+ * Check to see whether this collided with another set of bounding lines.
+ * Returns: true if any lines in this collided with any lines in the given BoundingLines object,
+ * false otherwise.
+ */
+bool BoundingLines::CollisionCheck(const BoundingLines& other) const {
+	// Do a line-line collision with every line in this verses every line in the given set of BoundingLines
+	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
+		const Collision::LineSeg2D& currThisLine = *thisIter;
+
+		for (std::vector<Collision::LineSeg2D>::const_iterator otherIter = other.lines.begin(); otherIter != other.lines.end(); ++otherIter) {
+			const Collision::LineSeg2D& currOtherLine = *otherIter;
+
+			if (Collision::IsCollision(currThisLine, currOtherLine)) {
+				return true;
+			}
+
+		}
+	}
+
+	return false;
+}
+
 void BoundingLines::DebugDraw() const {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);

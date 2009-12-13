@@ -90,14 +90,20 @@ namespace Collision {
 		}
 	};
 
-
+	/**
+	 * Helper function: computes two times the signed triangle area. The result is positive
+	 * if abc is ccw, negative if abc is cw, zero if abc is degenerate.
+	 */
+	inline float Signed2DTriArea(const Point2D& a, const Point2D& b, const Point2D& c) {
+		return (a[0] - c[0]) * (b[1] - c[1]) - (a[1] - c[1]) * (b[0] - c[0]);
+	}
 
 	/**
 	 * Calculates and returns the square distance from a given point to a given line segment.
 	 * This is for 2D lines and points.
 	 * Returns: Square distance from point to lineSeg.
 	 */
-	static float SqDistFromPtToLineSeg(const LineSeg2D& lineSeg, const Point2D& point) { 
+	inline float SqDistFromPtToLineSeg(const LineSeg2D& lineSeg, const Point2D& point) { 
 		Vector2D ab = lineSeg.P2() - lineSeg.P1();
 		Vector2D ac = point - lineSeg.P1();
 		Vector2D bc = point - lineSeg.P2();
@@ -122,7 +128,7 @@ namespace Collision {
 	 * bounding box, both in 2D.
 	 * Returns: Square distance from aabb to pt.
 	 */
-	static float SqDistFromPtToAABB(const AABB2D& aabb, const Point2D& pt) {
+	inline float SqDistFromPtToAABB(const AABB2D& aabb, const Point2D& pt) {
 		float sqDist = 0.0f;
 		
 		for (int i = 0; i < 2; i++) {
@@ -141,10 +147,29 @@ namespace Collision {
 	 * Figures out whether two 2D AABBs collide or not.
 	 * Returns: true on collision, false otherwise.
 	 */
-	static bool IsCollision(const AABB2D &a, const AABB2D &b) {
+	inline bool IsCollision(const AABB2D &a, const AABB2D &b) {
 		if (a.GetMax()[0] < b.GetMin()[0] || a.GetMin()[0] > b.GetMax()[0]) return false;
 		if (a.GetMax()[1] < b.GetMin()[1] || a.GetMin()[1] > b.GetMax()[1]) return false;
 		return true;
+	}
+
+	/**
+	 * Figures out if two 2D line segments collide or not.
+	 * Returns: true on collision, false otherwise.
+	 */
+	inline bool IsCollision(const LineSeg2D& l1, const LineSeg2D& l2) {
+		float a1 = Signed2DTriArea(l1.P1(), l1.P2(), l2.P2());
+		float a2 = Signed2DTriArea(l1.P1(), l1.P2(), l2.P1());
+
+		if (a1 * a2 < 0.0f) {
+			float a3 = Signed2DTriArea(l2.P1(), l2.P2(), l1.P1());
+			float a4 = a3 + a2 - a1;
+			if (a3 * a4 < 0.0f) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	// Closest Point Computations ******************************************************
@@ -153,7 +178,7 @@ namespace Collision {
 	 * Calculate the closest point on the given line segment to the given point.
 	 * Returns: The closest point on lineSeg to pt.
 	 */
-	static Point2D ClosestPoint(const Point2D& pt, const LineSeg2D& lineSeg) {
+	inline Point2D ClosestPoint(const Point2D& pt, const LineSeg2D& lineSeg) {
 		Vector2D lineSegDir = lineSeg.P2() - lineSeg.P1();
 		float t = Vector2D::Dot(pt - lineSeg.P1(), lineSegDir) / Vector2D::Dot(lineSegDir, lineSegDir);
 

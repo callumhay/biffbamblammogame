@@ -57,6 +57,8 @@ LevelMesh::~LevelMesh() {
 	// Delete all meshes
 	delete this->ballSafetyNet;
 	this->ballSafetyNet = NULL;
+	delete this->prismBlock;
+	this->prismBlock = NULL;
 
 	// Clean up all assets pertaining to the currently loaded
 	// level, if applicable.

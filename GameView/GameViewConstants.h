@@ -145,6 +145,7 @@ public:
 	const std::string TEXTURE_SPIRAL_MEDIUM;
 	const std::string TEXTURE_SPIRAL_LARGE;
 	const std::string TEXTURE_HALO;
+	const std::string TEXTURE_LENSFLARE;
 
 	const std::string TEXTURE_STARFIELD;
 	

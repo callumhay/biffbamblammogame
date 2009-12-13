@@ -13,7 +13,7 @@ class Texture2D;
 class CgFxPrism : public CgFxMaterialEffect {
 public:
 	CgFxPrism(MaterialProperties* properties);
-	~CgFxPrism();
+	virtual ~CgFxPrism();
 
 	/**
 	 * Set the FBO texture (the texture where the scene thus far

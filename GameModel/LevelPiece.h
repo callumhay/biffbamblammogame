@@ -62,8 +62,9 @@ public:
 		return Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
 	}
 
-	virtual bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
-	virtual bool CollisionCheck(const Collision::AABB2D& aabb);
+	bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
+	bool CollisionCheck(const Collision::AABB2D& aabb);
+	bool CollisionCheck(const BoundingLines& boundingLines);
 
 	virtual int GetPointValueForCollision() = 0;
 
@@ -85,5 +86,6 @@ public:
 	virtual bool CanBeDestroyed() const = 0;
 	virtual bool UberballBlastsThrough() const = 0;
 	virtual bool GhostballPassesThrough() const = 0;
+	virtual bool ProjectilePassesThrough(Projectile* projectile) = 0;
 };
 #endif

@@ -70,22 +70,22 @@ void Noise::InitNoise() {
 
 	for (i = 0; i < this->B; i++) {
 		Noise::p[i] = i;
-		Noise::g1[i] = (double)((Randomizer::GetInstance()->RandomUnsignedInt() % (this->B + this->B)) - this->B) / this->B;
+		Noise::g1[i] = (double)((rand() % (this->B + this->B)) - this->B) / this->B;
 
 		for (j = 0; j < 2; j++) {
-			Noise::g2[i][j] = (double)((Randomizer::GetInstance()->RandomUnsignedInt() % (this->B + this->B)) - this->B) / this->B;
+			Noise::g2[i][j] = (double)((rand() % (this->B + this->B)) - this->B) / this->B;
 		}
 		this->Normalize2(Noise::g2[i]);
 
 		for (j = 0; j < 3; j++) {
-			Noise::g3[i][j] = (double)((Randomizer::GetInstance()->RandomUnsignedInt() % (this->B + this->B)) - this->B) / this->B;
+			Noise::g3[i][j] = (double)((rand() % (this->B + this->B)) - this->B) / this->B;
 		}
 		this->Normalize3(Noise::g3[i]);
 	}
 
 	while (--i) {
 		k = Noise::p[i];
-		Noise::p[i] = Noise::p[j = Randomizer::GetInstance()->RandomUnsignedInt() % this->B];
+		Noise::p[i] = Noise::p[j = rand() % this->B];
 		Noise::p[j] = k;
 	}
 

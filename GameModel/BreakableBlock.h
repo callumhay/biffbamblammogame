@@ -60,6 +60,12 @@ public:
 		return true;
 	}
 
+	// No projectiles pass through breakable blocks
+	// Returns: false.
+	virtual bool ProjectilePassesThrough(Projectile* projectile) {
+		return false;
+	}
+
 	// Obtain the point value for a collision with this breakable block.
 	// Returns: point value.
 	virtual int GetPointValueForCollision() {

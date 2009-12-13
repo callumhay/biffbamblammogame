@@ -9,45 +9,51 @@ public:
 	EmptySpaceBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {}
 	virtual ~EmptySpaceBlock() {}
 
-	virtual LevelPieceType GetType() const { 
+	LevelPieceType GetType() const { 
 		return LevelPiece::Empty;
 	}
 
 	// Empty blocks have no bounds... they don't exist as physical entities
-	virtual bool IsNoBoundsPieceType() const {
+	bool IsNoBoundsPieceType() const {
 		return true;
 	}
 
 	// Empty spaces don't exist and cannot really be destroyed...
-	virtual bool MustBeDestoryedToEndLevel() const {
+	bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}
-	virtual bool CanBeDestroyed() const {
+	bool CanBeDestroyed() const {
 		return false;
 	}
 
 	// Any type of ball can blast through an empty space...
-	virtual bool UberballBlastsThrough() const {
+	bool UberballBlastsThrough() const {
 		return true;
 	}
 
 	// Whether or not the ghost ball can just pass through this block.
 	// Returns: true if it can, false otherwise.
-	virtual bool GhostballPassesThrough() const {
+	bool GhostballPassesThrough() const {
 		return true;
 	}
 
 	// You get no points for empty spaces...
-	virtual int GetPointValueForCollision() {
+	int GetPointValueForCollision() {
 		return 0;
 	}
 
 	// Collision related stuffs
-	virtual LevelPiece* Destroy(GameModel* gameModel){
+	LevelPiece* Destroy(GameModel* gameModel){
 		return this;
 	};	
 	
-	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+	// All projectiles pass through empty space
+	// Returns: true.
+	bool ProjectilePassesThrough(Projectile* projectile) {
+		return true;
+	}
+
+	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
@@ -55,12 +61,12 @@ public:
 			this->bounds.Clear();
 	};
 
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
 		// Nothing happens when there's nothing to collide with...
 		return this->Destroy(gameModel);
 	}
 
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 		// Nothing happens when there's nothing to collide with...
 		return this->Destroy(gameModel);
 	}

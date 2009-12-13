@@ -243,21 +243,45 @@ void BallInPlayState::Tick(double seconds) {
 		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); pieceIter++) {
 			LevelPiece *currPiece = *pieceIter;
 			
-			Collision::AABB2D projectileAABB(currProjectile->GetPosition() - Vector2D(currProjectile->GetHalfWidth(), currProjectile->GetHalfHeight()),
-																			 currProjectile->GetPosition() + Vector2D(currProjectile->GetHalfWidth(), currProjectile->GetHalfHeight()));
-			bool didCollide = currPiece->CollisionCheck(projectileAABB);
-			
+			const Vector2D UP_DIR			= currProjectile->GetVelocityDirection();
+			const Vector2D RIGHT_DIR	= currProjectile->GetRightVectorDirection();
+
+			Point2D topRight = currProjectile->GetPosition() + currProjectile->GetHalfHeight()*UP_DIR + currProjectile->GetHalfWidth()*RIGHT_DIR;
+			Point2D bottomRight = topRight - currProjectile->GetHeight()*UP_DIR;
+			Point2D topLeft = topRight - currProjectile->GetWidth()*RIGHT_DIR;
+			Point2D bottomLeft = topLeft - currProjectile->GetHeight()*UP_DIR;
+
+			std::vector<Collision::LineSeg2D> sideBounds;
+			sideBounds.reserve(2);
+			sideBounds.push_back(Collision::LineSeg2D(topLeft, bottomLeft));
+			sideBounds.push_back(Collision::LineSeg2D(topRight, bottomRight));
+			std::vector<Vector2D> normBounds;
+			normBounds.resize(2);
+
+			BoundingLines projectileBoundingLines(sideBounds, normBounds);
+
+			//bool didCollide = currPiece->CollisionCheck(projectileAABB);
+			bool didCollide = currPiece->CollisionCheck(projectileBoundingLines);
 			if (didCollide) {
 				bool stateChanged = true;
-				this->gameModel->CollisionOccurred(currProjectile, currPiece, stateChanged);	// WARNING: This will destroy the projectile.
-				
-				// Despose of the projectile...
-				projectilesToDestroy.push_back(iter);
+
+				// This needs to be before the call to CollisionOccurred or else the currPiece may already be destroyed.
+				bool destroyProjectile = !currPiece->ProjectilePassesThrough(currProjectile);
+
+				// WARNING: This can destroy everything.
+				this->gameModel->CollisionOccurred(currProjectile, currPiece, stateChanged);	
 
 				// If stateChanged is set to true then this has been deleted and we need to exit immediately.
 				if (stateChanged) {
 					return;
 				}
+
+				// Check to see if the collision is supposed to destroy the projectile
+				if (destroyProjectile) {
+					// Despose of the projectile...
+					projectilesToDestroy.push_back(iter);
+				}
+
 				break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
 			}
 		}

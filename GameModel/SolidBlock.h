@@ -55,6 +55,12 @@ public:
 		return 0;
 	}
 
+	// No projectiles pass through solid blocks
+	// Returns: false.
+	virtual bool ProjectilePassesThrough(Projectile* projectile) {
+		return false;
+	}
+
 	virtual LevelPiece* Destroy(GameModel* gameModel){
 		return this;
 	};

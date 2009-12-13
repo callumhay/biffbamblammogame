@@ -349,7 +349,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		// Make sure we are allowed to fire a new laser blast
 		if (this->timeSinceLastLaserBlast >= PADDLE_LASER_DELAY) {
 			// Fire ze laser! - tell the model about it
-			gameModel->AddProjectile(Projectile::PaddleLaserProjectile, this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + PaddleLaser::PADDLELASER_HALF_HEIGHT));
+			gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + PaddleLaser::PADDLELASER_HALF_HEIGHT));
 
 			// Reset the timer for the next laser blast
 			this->timeSinceLastLaserBlast = 0;

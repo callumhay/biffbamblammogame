@@ -60,6 +60,12 @@ public:
 		return 0;
 	}
 
+	// All projectiles pass through the prism block
+	// Returns: true.
+	virtual bool ProjectilePassesThrough(Projectile* projectile) {
+		return true;
+	}
+
 	virtual LevelPiece* Destroy(GameModel* gameModel){
 		return this;
 	};
@@ -70,7 +76,7 @@ public:
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 	
 	// Doesn't matter if a ball collides with a prism block, it does nothing to the block.
-	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
 		return this->Destroy(gameModel);
 	}
 

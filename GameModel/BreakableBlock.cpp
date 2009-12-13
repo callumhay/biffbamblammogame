@@ -130,7 +130,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 	LevelPiece* newPiece = this;
 
 	// For destructive projectile types...
-	if (projectile->GetType() == Projectile::PaddleLaserProjectile) {
+	if (projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
 		switch(this->pieceType) {
 			case GreenBreakable:
 				newPiece = this->Destroy(gameModel);

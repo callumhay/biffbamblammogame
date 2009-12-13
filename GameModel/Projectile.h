@@ -23,15 +23,17 @@ class LevelPiece;
  */
 class Projectile {
 public:
-	enum ProjectileType { PaddleLaserProjectile };
+	enum ProjectileType { PaddleLaserBulletProjectile };
 protected:
-	Projectile(ProjectileType type, const Point2D& spawnLoc) : type(type), position(spawnLoc) {}
+	Projectile(ProjectileType type, const Point2D& spawnLoc) : type(type), position(spawnLoc), lastPieceCollidedWith(NULL) {}
 	
 	ProjectileType type;
 
 	Point2D position;			// Position of the projectile in game units
 	Vector2D velocityDir;	// Velocity direction of the projectile
+	Vector2D rightVec;		// Unit vector pointing outwards to the right of the particle, perpendicular to the velocity direction
 	float velocityMag;		// Velocity magnitude of the projectile in game units / second
+	LevelPiece* lastPieceCollidedWith;
 
 public:
 	virtual ~Projectile();
@@ -43,8 +45,23 @@ public:
 	
 	ProjectileType GetType() const { return this->type; }
 	Point2D GetPosition() const { return this->position; }
+	void SetPosition(const Point2D& pos) { this->position = pos; } 
 	Vector2D GetVelocityDirection() const { return this->velocityDir; }
 	float GetVelocityMagnitude() const { return this->velocityMag; }
+	void SetVelocity(const Vector2D& velocityDir, float velocityMag) { 
+		this->velocityDir = velocityDir;
+		this->velocityMag = velocityMag;
+
+		// Set the right vector... (short cut which is a 90 degree rotation about the z axis)
+		this->rightVec = Vector2D(this->velocityDir[1], -this->velocityDir[0]);
+	}
+
+	Vector2D GetRightVectorDirection() const { return this->rightVec; }
+
+	// Functionality for storing the last level piece that the particle collided with
+	// and for querying it
+	void SetLastLevelPieceCollidedWith(LevelPiece* p) { this->lastPieceCollidedWith = p; }
+	bool IsLastLevelPieceCollidedWith(LevelPiece* p) { return this->lastPieceCollidedWith == p; }
 
 	static Projectile* CreateProjectile(ProjectileType type, const Point2D& spawnLoc);
 };
@@ -55,6 +72,7 @@ public:
 class PaddleLaser : public Projectile {
 private:
 	static const Vector2D PADDLELASER_VELOCITYDIR;
+	static const Vector2D PADDLELASER_RIGHTDIR;
 	static const float PADDLELASER_VELOCITYMAG;
 
 public:

@@ -535,9 +535,22 @@ void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, 
  * this is important since the pointer will be discarded while it stops and becomes dead.
  */
 void GameItemAssets::ItemTimerHUDElement::StopTimer() {
-	this->SetState(ItemTimerHUDElement::TimerStopping);
+	// If the timer is already dead or stopping then we shouldn't tell it to be stopping again
+	if (this->currState != ItemTimerHUDElement::TimerDead || this->currState != ItemTimerHUDElement::TimerStopping) {
+		this->SetState(ItemTimerHUDElement::TimerStopping);
+	}
 }
 
+/**
+ * Set the current state of the item timer HUD. The states of the HUD are expected to unfold in
+ * a very sequential particular order. For the typical, uninterrupted life of the HUD element
+ * the timer goes through the following sequence of states:
+ * TimerStarting -> TimerRunning -> TimerAlmostDone -> TimerStopping -> TimerDead
+ *
+ * However, the timer may be interrupted at anytime before the TimerStopping state is reached
+ * by some outside call to the StopTimer() function which results in a jump to the TimerStopping
+ * state.
+ */
 void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 		switch (state) {
 		
