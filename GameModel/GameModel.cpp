@@ -389,9 +389,10 @@ void GameModel::ClearActiveTimers() {
 }
 
 /**
- * Add a projectile of the given type at the given spawn location
+ * Add a projectile of the given type at the given spawn location.
+ * Returns: The newly created projectile now being managed by the gamemodel.
  */
-void GameModel::AddProjectile(Projectile::ProjectileType type, const Point2D& spawnLoc) {
+Projectile* GameModel::AddProjectile(Projectile::ProjectileType type, const Point2D& spawnLoc) {
 	// Create a new projectile based on values given
 	Projectile* addedProjectile = Projectile::CreateProjectile(type, spawnLoc);
 	assert(addedProjectile != NULL);
@@ -401,4 +402,6 @@ void GameModel::AddProjectile(Projectile::ProjectileType type, const Point2D& sp
 
 	// EVENT: Projectile creation
 	GameEventManager::Instance()->ActionProjectileSpawned(*addedProjectile);
+
+	return addedProjectile;
 }

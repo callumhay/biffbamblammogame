@@ -113,3 +113,19 @@ I
 Prism
 prism.png
 P
+
+Prism UL Triangle
+prism_ul.png
+T(P,ul)
+
+Prism UR Triangle
+prism_ur.png
+T(P,ur)
+
+Prism LL Triangle
+prism_ll.png
+T(P,ll)
+
+Prism LR Triangle
+prism_lr.png
+T(P,lr)

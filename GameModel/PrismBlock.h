@@ -66,7 +66,7 @@ public:
 		return true;
 	}
 
-	virtual LevelPiece* Destroy(GameModel* gameModel){
+	LevelPiece* Destroy(GameModel* gameModel){
 		return this;
 	};
 
@@ -76,7 +76,7 @@ public:
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 	
 	// Doesn't matter if a ball collides with a prism block, it does nothing to the block.
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
 		return this->Destroy(gameModel);
 	}
 

@@ -88,6 +88,18 @@ Point2D BoundingLines::ClosestPoint(const Point2D& pt) {
  * false otherwise.
  */
 bool BoundingLines::CollisionCheck(const BoundingLines& other) const {
+	return this->CollisionCheckIndex(other) != -1;
+}
+
+/**
+ * Test for a collision between this and the given set of lines and get the index of the first
+ * line in this that collided.
+ * Returns: the first index of the line in this that collided with the lines in other.
+ * Returns -1 if no collision occurred.
+ */
+int BoundingLines::CollisionCheckIndex(const BoundingLines& other) const {
+	int count = 0;
+
 	// Do a line-line collision with every line in this verses every line in the given set of BoundingLines
 	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
 		const Collision::LineSeg2D& currThisLine = *thisIter;
@@ -96,13 +108,40 @@ bool BoundingLines::CollisionCheck(const BoundingLines& other) const {
 			const Collision::LineSeg2D& currOtherLine = *otherIter;
 
 			if (Collision::IsCollision(currThisLine, currOtherLine)) {
-				return true;
+				return count;
 			}
-
 		}
+
+		count++;
 	}
 
-	return false;
+	return -1;
+}
+
+/**
+ * Obtain all of the line indices that are colliding with other, in this.
+ * Returns: a set of all line indices being collided with in this object.
+ */
+std::vector<int> BoundingLines::CollisionCheckIndices(const BoundingLines& other) const {
+	std::vector<int> indicesCollidedWith;
+	int count = 0;
+
+	// Do a line-line collision with every line in this verses every line in the given set of BoundingLines
+	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
+		const Collision::LineSeg2D& currThisLine = *thisIter;
+
+		for (std::vector<Collision::LineSeg2D>::const_iterator otherIter = other.lines.begin(); otherIter != other.lines.end(); ++otherIter) {
+			const Collision::LineSeg2D& currOtherLine = *otherIter;
+
+			if (Collision::IsCollision(currThisLine, currOtherLine)) {
+				indicesCollidedWith.push_back(count);
+			}
+		}
+
+		count++;
+	}
+
+	return indicesCollidedWith;
 }
 
 void BoundingLines::DebugDraw() const {

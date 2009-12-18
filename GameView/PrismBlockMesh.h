@@ -11,7 +11,9 @@
 class PrismBlockMesh {
 
 public:
-	PrismBlockMesh();
+	enum PrismBlockType { DiamondPrism, TrianglePrism };
+
+	PrismBlockMesh(PrismBlockType type);
 	~PrismBlockMesh();
 
 	/**
@@ -31,7 +33,7 @@ private:
 	Mesh* prismBlockGeometry;
 	CgFxPrism* prismEffect;
 
-	void LoadMesh();
+	void LoadMesh(PrismBlockType type);
 
 };
 #endif // __PRISMBLOCKMESH_H__

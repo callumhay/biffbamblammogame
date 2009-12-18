@@ -212,7 +212,8 @@ public:
 	const std::string BASIC_BLOCK_MESH_PATH;
 	const std::string TRIANGLE_BLOCK_MESH_PATH;
 	const std::string BOMB_BLOCK_MESH;
-	const std::string PRISM_BLOCK_MESH;
+	const std::string PRISM_DIAMOND_BLOCK_MESH;
+	const std::string PRISM_TRIANGLE_BLOCK_MESH;
 	const std::string SKYBOX_MESH;
 	const std::string ITEM_MESH;
 	const std::string PADDLE_LASER_ATTACHMENT_MESH;

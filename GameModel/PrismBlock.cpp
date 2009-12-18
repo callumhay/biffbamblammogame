@@ -11,6 +11,7 @@
 
 #include "PrismBlock.h"
 #include "Projectile.h"
+#include "GameModel.h"
 
 /**
  * Update the boundry lines of the prism block. The prism block is shaped like a diamond, meaning
@@ -94,46 +95,99 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 	if (projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
 		// Based on where the laser bullet hits, we change its direction
 		
-		// Need to figure out if this laser bullet already collided with this block... if it has
-		// then we just ignore it, if not then we need to change its trajectory once it goes through
-		// the center of this block based on its x-position relative to this block
+		// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
 		if (!projectile->IsLastLevelPieceCollidedWith(this)) {
 			
 			// Determine how the projectile will move through the prism based on where it hit...
 			const float PROJECTILE_VELOCITY_MAG			= projectile->GetVelocityMagnitude();
 			const Vector2D PROJECTILE_VELOCITY_DIR	= projectile->GetVelocityDirection();
 			const Vector2D OLD_PROJECTILE_DELTA			= projectile->GetPosition() - this->GetCenter();
-			const float MIDDLE_HALF_INTERVAL				= projectile->GetHalfWidth()*0.7f;
+
+			const float MIDDLE_HALF_INTERVAL_X			= projectile->GetHalfWidth();
+			const float MIDDLE_HALF_INTERVAL_Y			= projectile->GetHalfWidth() * 0.5f;
+			const float REFLECTION_REFRACTION_ANGLE	= 15.0f;
 			
-			if (fabs(OLD_PROJECTILE_DELTA[0]) < MIDDLE_HALF_INTERVAL) {
+			if (fabs(OLD_PROJECTILE_DELTA[0]) <= MIDDLE_HALF_INTERVAL_X) {
+
 				// Projectile is almost in the very center (reflect in 3 directions with smaller projectiles in each)
 				if (OLD_PROJECTILE_DELTA[1] < 0.0f) {
-					// Projectile is colliding with the lower-center
-
+					// Projectile is colliding with the lower-center - we only do special refraction stuff if the angle is
+					// almost perfectly perpendicular to the bottom
+					const Vector2D CURRENT_NORMAL = Vector2D(0.0f, -1.0f);
+					float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL)));
+					if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
+						// The current projectile will just fly through the block, we spawn two other projectiles to go out
+						// of the top right and left
+						const Vector2D TOP_RIGHT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
+						Projectile* newTopRightProjectile = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, projectile->GetPosition());
+						newTopRightProjectile->SetVelocity(TOP_RIGHT_NORMAL, projectile->GetVelocityMagnitude());
+						newTopRightProjectile->SetLastLevelPieceCollidedWith(this);	// If we don't do this then it will cause recursive doom
+						
+						const Vector2D TOP_LEFT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
+						Projectile* newTopLeftProjectile  = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, projectile->GetPosition());
+						newTopLeftProjectile->SetVelocity(TOP_LEFT_NORMAL, projectile->GetVelocityMagnitude());
+						newTopLeftProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
+					}
 				}
 				else {
-					// Projectile is colliding with the upper-center
-
+					// Projectile is colliding with the upper-center - we only do special refraction stuff if the angle is
+					// almost perfectly perpendicular to the top
+					const Vector2D CURRENT_NORMAL = Vector2D(0.0f, 1.0f);
+					float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL)));
+					if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
+						// The current projectile will just fly through the block, we spawn two other projectiles to go out
+						// of the bottom right and left
+						const Vector2D BOTTOM_RIGHT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
+						Projectile* newBottomRightProjectile = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, projectile->GetPosition());
+						newBottomRightProjectile->SetVelocity(BOTTOM_RIGHT_NORMAL, projectile->GetVelocityMagnitude());
+						newBottomRightProjectile->SetLastLevelPieceCollidedWith(this);	// If we don't do this then it will cause recursive doom
+						
+						const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
+						Projectile* newBottomLeftProjectile  = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, projectile->GetPosition());
+						newBottomLeftProjectile->SetVelocity(BOTTOM_LEFT_NORMAL, projectile->GetVelocityMagnitude());
+						newBottomLeftProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
+					}
 				}
+
 			}
 			else if (OLD_PROJECTILE_DELTA[0] < 0.0f){
 				// Projectile is on the left side of the center 
 
-				if (fabs(OLD_PROJECTILE_DELTA[1]) < MIDDLE_HALF_INTERVAL) {
-					// Projectile is colliding with the center-left
+				if (fabs(OLD_PROJECTILE_DELTA[1]) <= MIDDLE_HALF_INTERVAL_Y) {
+					// Projectile is colliding with the center-left - we only do special refraction stuff if the angle is
+					// almost perfectly perpendicular to the left
+					const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, 0.0f);
+					float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL)));
+					if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
+						// The current projectile will fly right through, we spawn two other projectiles to go out the
+						// top-right and bottom-right
+						const Vector2D BOTTOM_RIGHT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
+						Projectile* newBottomRightProjectile = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, this->GetCenter());
+						newBottomRightProjectile->SetVelocity(BOTTOM_RIGHT_NORMAL, projectile->GetVelocityMagnitude());
+						newBottomRightProjectile->SetLastLevelPieceCollidedWith(this);	// If we don't do this then it will cause recursive doom
+						
+						const Vector2D TOP_RIGHT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
+						Projectile* newTopRightProjectile  = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, this->GetCenter());
+						newTopRightProjectile->SetVelocity(TOP_RIGHT_NORMAL, projectile->GetVelocityMagnitude());
+						newTopRightProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom						
 
-
+						// Since the piece is wider than it is tall we place all the particles at the center for this
+						projectile->SetPosition(this->GetCenter());
+					}
 				}
-				if (OLD_PROJECTILE_DELTA[1] < 0.0f) {
+				else if (OLD_PROJECTILE_DELTA[1] < 0.0f) {
 					// Projectile is colliding with the lower-left boundry...
 
 					// Based on the angle of the laser it will either pass through or reflect
-					const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, -1.0f) / 1.414213562f;
+					const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
 					float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL)));
-					if (angleBetweenNormalAndLaser > 10) {
+					if (angleBetweenNormalAndLaser > REFLECTION_REFRACTION_ANGLE) {
 						// Reflect the laser in the normal
 						Vector2D newVelDir = Reflect(PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL);
 						newVelDir.Normalize();
+
+						// Move the projectile to where it collided and change its velocity to reflect
+						projectile->SetPosition(projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR);
 						projectile->SetVelocity(newVelDir, PROJECTILE_VELOCITY_MAG);
 					}
 				}
@@ -141,12 +195,15 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 					// Projectile is colliding with the upper-left boundry...
 
 					// Based on the angle of the laser it will either pass through or reflect
-					const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, 1.0f) / 1.414213562f;
+					const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
 					float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL)));
-					if (angleBetweenNormalAndLaser > 10) {
+					if (angleBetweenNormalAndLaser > REFLECTION_REFRACTION_ANGLE) {
 						// Reflect the laser in the normal
 						Vector2D newVelDir = Reflect(PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL);
 						newVelDir.Normalize();
+
+						// Move the projectile to where it collided and change its velocity to reflect
+						projectile->SetPosition(projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR);
 						projectile->SetVelocity(newVelDir, PROJECTILE_VELOCITY_MAG);
 					}
 				}
@@ -154,27 +211,61 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			else {
 				// Projecitle is on the right side of the center
 
-				if (fabs(OLD_PROJECTILE_DELTA[1]) < MIDDLE_HALF_INTERVAL) {
-					// Projectile is colliding with the center-right
+				if (fabs(OLD_PROJECTILE_DELTA[1]) <= MIDDLE_HALF_INTERVAL_Y) {
+					// Projectile is colliding with the center-right - we only do special refraction stuff if the angle is
+					// almost perfectly perpendicular to the left
+					const Vector2D CURRENT_NORMAL = Vector2D(1.0f, 0.0f);
+					float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL)));
+					if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
+						// The current projectile will fly right through, we spawn two other projectiles to go out the
+						// top-right and bottom-right
+						const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
+						Projectile* newBottomLeftProjectile = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, this->GetCenter());
+						newBottomLeftProjectile->SetVelocity(BOTTOM_LEFT_NORMAL, projectile->GetVelocityMagnitude());
+						newBottomLeftProjectile->SetLastLevelPieceCollidedWith(this);	// If we don't do this then it will cause recursive doom
+						
+						const Vector2D TOP_LEFT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
+						Projectile* newTopLeftProjectile  = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, this->GetCenter());
+						newTopLeftProjectile->SetVelocity(TOP_LEFT_NORMAL, projectile->GetVelocityMagnitude());
+						newTopLeftProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom						
+
+						// Since the piece is wider than it is tall we place all the particles at the center for this
+						projectile->SetPosition(this->GetCenter());
+					}
 
 				}
-				if (OLD_PROJECTILE_DELTA[1] < 0.0f) {
-					// Projectile is colliding with the lower-right boundry
+				else if (OLD_PROJECTILE_DELTA[1] < 0.0f) {
+					// Projectile is colliding with the lower-right boundry...
 
+					// Based on the angle of the laser it will either pass through or reflect
+					const Vector2D CURRENT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
+					float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL)));
+					if (angleBetweenNormalAndLaser > REFLECTION_REFRACTION_ANGLE) {
+						// Reflect the laser in the normal
+						Vector2D newVelDir = Reflect(PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL);
+						newVelDir.Normalize();
+
+						// Move the projectile to where it collided and change its velocity to reflect
+						projectile->SetPosition(projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR);
+						projectile->SetVelocity(newVelDir, PROJECTILE_VELOCITY_MAG);
+					}
 				}
 				else {
-					// Projectile is colliding with the upper-right boundry
+					// Projectile is colliding with the upper-right boundry...
 
+					// Based on the angle of the laser it will either pass through or reflect
+					const Vector2D CURRENT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
+					float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL)));
+					if (angleBetweenNormalAndLaser > REFLECTION_REFRACTION_ANGLE) {
+						// Reflect the laser in the normal
+						Vector2D newVelDir = Reflect(PROJECTILE_VELOCITY_DIR, CURRENT_NORMAL);
+						newVelDir.Normalize();
+
+						// Move the projectile to where it collided and change its velocity to reflect
+						projectile->SetPosition(projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR);
+						projectile->SetVelocity(newVelDir, PROJECTILE_VELOCITY_MAG);	
+					}
 				}
-
-
-				Vector2D newVelDir(-LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
-				newVelDir.Normalize();
-				projectile->SetVelocity(newVelDir, PROJECTILE_VELOCITY_MAG);
-
-				// Move the projectile to the proper location in the piece - from this location it will move 
-				// in its new reflected/refracted direction
-				//projectile->SetPosition(this->GetCenter() - Vector2D(LevelPiece::HALF_PIECE_WIDTH*0.5f, 0.0f));
 			}
 
 			// The projectile has now officially collided with this prism block, set it into the projectile
