@@ -16,6 +16,8 @@
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Vector.h"
 
+#include "BoundingLines.h"
+
 class LevelPiece;
 
 /**
@@ -42,6 +44,7 @@ public:
 	virtual float GetHeight() const = 0;
 	virtual float GetHalfWidth() const = 0;
 	virtual float GetHalfHeight() const = 0;
+	virtual BoundingLines BuildBoundingLines() const = 0;
 	
 	ProjectileType GetType() const { return this->type; }
 	Point2D GetPosition() const { return this->position; }
@@ -90,5 +93,6 @@ public:
 	virtual float GetHeight() const { return  PADDLELASER_HEIGHT; }
 	virtual float GetHalfWidth() const { return PADDLELASER_HALF_WIDTH; }
 	virtual float GetHalfHeight() const { return  PADDLELASER_HALF_HEIGHT; }
+	virtual BoundingLines BuildBoundingLines() const;
 };
 #endif

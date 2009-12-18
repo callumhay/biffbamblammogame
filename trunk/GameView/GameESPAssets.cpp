@@ -1770,11 +1770,11 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	lensFlareEmitter->AddEffector(Randomizer::GetInstance()->RandomNegativeOrPositive() < 0 ? &this->smokeRotatorCW : &this->smokeRotatorCCW);
 	lensFlareEmitter->SetParticles(1, this->lensFlareTex);
 
-	// Create a disapation of particle bits
+	// Create a dispertion of particle bits
 	ESPPointEmitter* particleSparks = new ESPPointEmitter();
 	particleSparks->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
 	particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	particleSparks->SetInitialSpd(ESPInterval(1.0f, 4.0f));
+	particleSparks->SetInitialSpd(ESPInterval(1.5f, 4.0f));
 	particleSparks->SetParticleLife(ESPInterval(0.5f, 0.75f));
 	particleSparks->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 10.0f, LevelPiece::PIECE_WIDTH / 8.0f));
 	particleSparks->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));

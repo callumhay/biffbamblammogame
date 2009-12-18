@@ -148,7 +148,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						// Read in 'x'
 						char typeOfBlock;
 						*inFile >> typeOfBlock;
-						if (!BreakableBlock::IsValidBreakablePieceType(typeOfBlock) && typeOfBlock != SOLID_BLOCK_CHAR) {
+						if (!BreakableBlock::IsValidBreakablePieceType(typeOfBlock) && typeOfBlock != SOLID_BLOCK_CHAR && typeOfBlock != PRISM_BLOCK_CHAR) {
 							debug_output("ERROR: Triangle block has invalid block type specified in descriptor: " << typeOfBlock);
 							break;
 						}
@@ -186,10 +186,12 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							}
 						}
 
-						// Create a new class called triangle block that contains either a solid or breakable block as well
-						// as an orientation on top of it and overrides the proper functions...
+						// Create a new class for the triangle block based on its type...
 						if (typeOfBlock == SOLID_BLOCK_CHAR) {
 							newPiece = new SolidTriangleBlock(orientation, pieceWLoc, pieceHLoc);
+						}
+						else if (typeOfBlock != PRISM_BLOCK_CHAR) {
+							newPiece = new PrismTriangleBlock(orientation, pieceWLoc, pieceHLoc);
 						}
 						else {
 							newPiece = new BreakableTriangleBlock(typeOfBlock, orientation, pieceWLoc, pieceHLoc);
@@ -420,18 +422,14 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const GameBall
 std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Projectile& p) const {
 	Point2D projectileCenter = p.GetPosition();
 
-	// TODO: try dividing the entire thing by the piece width/height...
-
 	// Find the non-rounded max and min indices to look at along the x and y axis
-	float xNonAdjustedIndex = projectileCenter[0] / LevelPiece::PIECE_WIDTH;
 	float xDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[0]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[0]);
-	int xIndexMax = static_cast<int>(floorf(xNonAdjustedIndex + xDelta)); 
-	int xIndexMin = static_cast<int>(floorf(xNonAdjustedIndex - xDelta));
+	int xIndexMax = static_cast<int>(floorf((projectileCenter[0] + xDelta) / LevelPiece::PIECE_WIDTH)); 
+	int xIndexMin = static_cast<int>(floorf((projectileCenter[0] - xDelta) / LevelPiece::PIECE_WIDTH));
 	
-	float yNonAdjustedIndex = projectileCenter[1] / LevelPiece::PIECE_HEIGHT;
 	float yDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[1]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[1]);
-	int yIndexMax = static_cast<int>(floorf(yNonAdjustedIndex + yDelta));
-	int yIndexMin = static_cast<int>(floorf(yNonAdjustedIndex - yDelta));
+	int yIndexMax = static_cast<int>(floorf((projectileCenter[1] + yDelta) / LevelPiece::PIECE_HEIGHT));
+	int yIndexMin = static_cast<int>(floorf((projectileCenter[1] - yDelta) / LevelPiece::PIECE_HEIGHT));
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
 }

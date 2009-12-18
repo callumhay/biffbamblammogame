@@ -1,20 +1,20 @@
 10 30
 S S S S S S S S S S 
-S E E E I B E E E S 
 S E E E E E E E E S 
+S I E E E E E E E S 
 S E E E E E E E E S 
 S G G G G G G G G S 
 S G R O B R Y G G S 
 S G G E E E E B G S 
 S G G E E E E G G S 
 S G G T(R,ll) E E T(Y,lr) G G S 
-S G I E E E E E G S 
 S G E E E E E E G S 
-S G E E E E E P G S 
-S G E P E E E E G S 
+S G E E E E E E G S 
+S G E P E P P E G S 
+S G E E E E E E G S 
 S G E E E E E B G S 
-S E P E E E P E B S 
-S E E E E E E E E S 
+S E E E E E E E B S 
+S E E E E P E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 

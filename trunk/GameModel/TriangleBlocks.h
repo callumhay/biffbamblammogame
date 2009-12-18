@@ -14,6 +14,7 @@
 
 #include "BreakableBlock.h"
 #include "SolidBlock.h"
+#include "PrismBlock.h"
 
 #include "../BlammoEngine/Matrix.h"
 
@@ -42,19 +43,19 @@ protected:
 
 public:
 	BreakableTriangleBlock(char type, TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc);
-	virtual ~BreakableTriangleBlock();
+	~BreakableTriangleBlock();
 
-	virtual LevelPieceType GetType() const {
+	LevelPieceType GetType() const {
 		return LevelPiece::BreakableTriangle;
 	}
 
-	virtual Matrix4x4 GetPieceToLevelTransform() const;
-	virtual Matrix4x4 GetPieceToLevelInvTransform() const;
+	Matrix4x4 GetPieceToLevelTransform() const;
+	Matrix4x4 GetPieceToLevelInvTransform() const;
 
-	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+									  const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 };
 
@@ -68,19 +69,47 @@ protected:
 
 public:
 	SolidTriangleBlock(TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc);
-	virtual ~SolidTriangleBlock();
+	~SolidTriangleBlock();
 
-	virtual LevelPieceType GetType() const {
+	LevelPieceType GetType() const {
 		return LevelPiece::SolidTriangle;
 	}
 
-	virtual Matrix4x4 GetPieceToLevelTransform() const;
-	virtual Matrix4x4 GetPieceToLevelInvTransform() const;
+	Matrix4x4 GetPieceToLevelTransform() const;
+	Matrix4x4 GetPieceToLevelInvTransform() const;
 
-	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 };
+
+/**
+ * Triangle block that acts like prism blocks - only it can reflect lasers based on its
+ * different shape and orientation.
+ */
+class PrismTriangleBlock : public PrismBlock {
+protected:
+	TriangleBlock::Orientation orient;	// Orientation of the triangle - i.e., where the apex corner is located
+
+public:
+	PrismTriangleBlock(TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc);
+	~PrismTriangleBlock();
+
+	LevelPieceType GetType() const {
+		return LevelPiece::PrismTriangle;
+	}
+
+	Matrix4x4 GetPieceToLevelTransform() const;
+	Matrix4x4 GetPieceToLevelInvTransform() const;
+
+	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+
+	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
+};
+
 #endif

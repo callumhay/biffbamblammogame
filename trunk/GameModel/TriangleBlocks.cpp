@@ -73,6 +73,69 @@ Matrix4x4 SolidTriangleBlock::GetPieceToLevelInvTransform() const {
 	return invOrient * invTranslation;
 }
 
+PrismTriangleBlock::PrismTriangleBlock(TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc) :
+PrismBlock(wLoc, hLoc), orient(orientation) {
+}
+
+PrismTriangleBlock::~PrismTriangleBlock() {
+}
+
+Matrix4x4 PrismTriangleBlock::GetPieceToLevelTransform() const {
+	Matrix4x4 translation =  Matrix4x4::translationMatrix(Vector3D(this->center[0], this->center[1], 0.0f));
+	Matrix4x4 orient = TriangleBlock::GetOrientationMatrix(this->orient);
+	return translation * orient;
+}
+
+Matrix4x4 PrismTriangleBlock::GetPieceToLevelInvTransform() const {
+	Matrix4x4 invTranslation =  Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
+	Matrix4x4 invOrient = TriangleBlock::GetInvOrientationMatrix(this->orient);
+	return invOrient * invTranslation;
+}
+
+void PrismTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+																			const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+																			const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+																			const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+	this->bounds = TriangleBlock::CreateTriangleBounds(this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
+}
+
+LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	if (projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
+	// Based on where the laser bullet hits, we change its direction
+		
+		// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
+		if (!projectile->IsLastLevelPieceCollidedWith(this)) {
+
+			// Obtain all the normals of the lines that the projectile is colliding with...
+			std::vector<int> collidingIndices = this->bounds.CollisionCheckIndices(projectile->BuildBoundingLines());
+			if (collidingIndices.size() > 2 || collidingIndices.size() == 0) {
+				// This should never happen...
+				assert(false);
+			}
+			else if (collidingIndices.size() == 2) {
+				// Special case - due to the impression of the collision algorithm 2 lines were found to be
+				// colliding with the projectile, we need to reconcile this...
+
+				// TODO
+
+			}
+			else {
+				// Only one collision line (collidingIndices.size() == 1)
+			}
+
+
+			// TODO...
+
+
+			// The projectile has now officially collided with this prism block, set it into the projectile
+			// so that it doesn't keep happening while the projectile is colliding with this block
+			projectile->SetLastLevelPieceCollidedWith(this);
+		}
+	}
+
+	return this;
+}
+
 // Triangle Block Namespace Functions ----------------------------------------------------------------
 
 /**

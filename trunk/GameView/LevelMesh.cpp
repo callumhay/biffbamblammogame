@@ -16,14 +16,16 @@
 #include "../GameModel/GameBall.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : currLevel(NULL),
-styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), prismBlock(NULL), ballSafetyNet(NULL) {
+styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), 
+prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
-	this->basicBlock			= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
-	this->bombBlock				= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
-	this->triangleBlockUR = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
-	this->prismBlock			= new PrismBlockMesh();
-	this->inkBlock				= ResourceManager::GetInstance()->GetInkBlockMeshResource();
+	this->basicBlock						= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
+	this->bombBlock							= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
+	this->triangleBlockUR				= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
+	this->prismBlockDiamond			= new PrismBlockMesh(PrismBlockMesh::DiamondPrism);
+	this->prismBlockTriangleUR	= new PrismBlockMesh(PrismBlockMesh::TrianglePrism);
+	this->inkBlock							= ResourceManager::GetInstance()->GetInkBlockMeshResource();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
@@ -32,7 +34,7 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), pris
 	std::map<std::string, MaterialGroup*> triangleBlockMatGrps	= this->triangleBlockUR->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> bombBlockMatGrps			= this->bombBlock->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> inkBlockMatGrps				= this->inkBlock->GetMaterialGroups();
-	std::map<std::string, MaterialGroup*> prismBlockMatGrps			= this->prismBlock->GetMaterialGroups();
+	std::map<std::string, MaterialGroup*> prismBlockMatGrps			= this->prismBlockDiamond->GetMaterialGroups();
 	
 	for (std::map<std::string, MaterialGroup*>::iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
@@ -57,8 +59,10 @@ LevelMesh::~LevelMesh() {
 	// Delete all meshes
 	delete this->ballSafetyNet;
 	this->ballSafetyNet = NULL;
-	delete this->prismBlock;
-	this->prismBlock = NULL;
+	delete this->prismBlockDiamond;
+	this->prismBlockDiamond = NULL;
+	delete this->prismBlockTriangleUR;
+	this->prismBlockTriangleUR = NULL;
 
 	// Clean up all assets pertaining to the currently loaded
 	// level, if applicable.
@@ -197,7 +201,8 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 													 const PointLight& fillLight, const PointLight& ballLight, const Texture2D* sceneTexture) {
 
 	// Set any appropriate parameters on the various meshes materials, etc.
-	this->prismBlock->SetSceneTexture(sceneTexture);
+	this->prismBlockDiamond->SetSceneTexture(sceneTexture);
+	this->prismBlockTriangleUR->SetSceneTexture(sceneTexture);
 
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
@@ -307,7 +312,8 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 			returnValue = this->inkBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Prism:
-			returnValue = this->prismBlock->GetMaterialGroups();
+		case LevelPiece::PrismTriangle:
+			returnValue = this->prismBlockDiamond->GetMaterialGroups();
 			break;
 		case LevelPiece::Empty :
 			break;

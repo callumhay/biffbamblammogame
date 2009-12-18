@@ -1,0 +1,5 @@
+# Important that this have the same material as the prism block.
+newmtl prism_material
+type prism
+
+
