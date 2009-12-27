@@ -65,18 +65,28 @@ bool GameSound::IsSoundMask(int soundType) {
 	return soundType == MainMenuBackgroundMask;
 }
 
+/**
+ * Play a sound from this game sound object.
+ */
 void GameSound::Play() {
+	// First of all stop any previous current sound from playing
+	this->Stop();
+
 	// We determine which sound to play based on their probabilities and a randomly generated number
 	double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();
 	for (std::vector<SoundProbabilityPair*>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
 		SoundProbabilityPair* currSoundProbPair = *iter;
 		if (randomNum >= currSoundProbPair->probabilityIntervalMin && randomNum < currSoundProbPair->probabilityIntervalMax) {
-			currSoundProbPair->sound->Play();
+			this->currentlyPlayingSound = currSoundProbPair->sound;
+			this->currentlyPlayingSound->Play();
 			break;
 		}
 	}
 }
 
+/**
+ * Stop any currently playing sound.
+ */
 void GameSound::Stop() {
 	// Make sure there's a currently playing sound and stop it
 	if (this->currentlyPlayingSound != NULL) {

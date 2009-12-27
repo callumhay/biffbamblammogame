@@ -170,7 +170,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, GameSound*>& 
 					// Split the line up into the probabilities and files
 					std::vector<std::string> tokens;
 					stringhelper::Tokenize(soundFileLine, tokens, std::string(MSFReader::OPEN_ENCLOSING_PROB_FILE_PAIR) +
-						std::string(MSFReader::CLOSE_ENCLOSING_PROB_FILE_PAIR) + std::string(MSFReader::PROB_DEFINITION_SYNTAX));
+						std::string(MSFReader::CLOSE_ENCLOSING_PROB_FILE_PAIR) + std::string(MSFReader::PROB_DEFINITION_SYNTAX) + std::string("\n\r\t "));
 					// Should be pairs of probabilities and file paths...
 					if (tokens.size() % 2 != 0) {
 						error = true;
@@ -320,6 +320,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, GameSound*>& 
 	}	// while
 
 	// Clean up and return whether there was an error while reading
+	inStream->close();
 	delete inStream;
 	inStream = NULL;
 
