@@ -14,26 +14,26 @@ ignore MainMenuBackgroundBangBigEvent {
    file     = (5 : test/event_test_sound.wav)
 }
 
-MainMenuItemHighlightedEvent {
-   file     = (5 : test/event_test_sound.wav)
+ignore MainMenuItemHighlightedEvent {
+   file     = (5 : test/event_test_sound.wav) (2 : test/laugh.wav) (3: test/gunsilenced.wav) (1 :test/waterdive.wav) (1: test/procupine.wav) (3: test/demo.wav)
    delay    = 0
    loops    = 1
    fadein   = 0
    fadeout  = 0
 }
 
-MainMenuItemEnteredEvent {
+ignore MainMenuItemEnteredEvent {
    file     = (5 : test/event_test_sound.wav)
 }
 
 ignore MainMenuItemBackAndCancelEvent {
 }
 
-MainMenuItemVerifyAndSelectEvent {
+ignore MainMenuItemVerifyAndSelectEvent {
    file     = ( 5: test/event_test_sound.wav)
 }
 
-MainMenuItemScrolledEvent {
+ignore MainMenuItemScrolledEvent {
    file     = (5: test/event_test_sound.wav )
 }
 
