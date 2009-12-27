@@ -3,12 +3,12 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 
-#include "Sound.h"
+class GameSound;
 
 class MSFReader {
 
 public:
-	static bool ReadMSF(const std::string& filepath, std::map<int, Sound*>& sounds);
+	static bool ReadMSF(const std::string& filepath, std::map<int, GameSound*>& sounds);
 
 private:
 	MSFReader(){}
@@ -16,7 +16,10 @@ private:
 	// Syntax symbols for the MSF
 	static const char* OPEN_SOUND_DEFINTION_BLOCK;
 	static const char* CLOSE_SOUND_DEFINITION_BLOCK;
-	
+	static const char* OPEN_ENCLOSING_PROB_FILE_PAIR;
+	static const char* CLOSE_ENCLOSING_PROB_FILE_PAIR;
+	static const char* PROB_DEFINITION_SYNTAX;
+
 	// Other keywords for the MSF
 	static const char* IGNORE_KEYWORD;
 

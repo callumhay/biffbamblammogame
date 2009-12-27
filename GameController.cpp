@@ -83,6 +83,9 @@ void GameController::KeyDown(SDLKey key) {
 	else if (key == SDLK_p) {
 		this->model->TogglePause(GameModel::PauseGame);
 	}
+	else if (key == SDLK_COMMA) {
+		this->model->TogglePause(GameModel::PauseBall);
+	}
 	else if (key == SDLK_w) {
 		GameDisplay::ToggleDrawDebugBounds();
 	}

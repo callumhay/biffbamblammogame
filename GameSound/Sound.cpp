@@ -1,6 +1,4 @@
 #include "Sound.h"
-#include "SoundEvent.h"
-#include "SoundMask.h"
 
 #include "../ResourceManager.h"
 
@@ -57,9 +55,3 @@ Sound::~Sound() {
 	debug_openal_state();
 }
 
-/**
- * Gets whether the given sound type is a sound mask or not.
- */
-bool Sound::IsSoundMask(int soundType) {
-	return soundType == MainMenuBackgroundMask;
-}

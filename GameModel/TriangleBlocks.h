@@ -23,14 +23,17 @@
  * multiple inheritance because stupid c++ doesn't have interfaces, le sigh.
  */
 namespace TriangleBlock {
-		enum Orientation { UpperLeft, UpperRight, LowerLeft, LowerRight };
+	enum SideType { ShortSide, LongSide, HypotenuseSide };
+	enum Orientation { UpperLeft, UpperRight, LowerLeft, LowerRight };
 		
-		static BoundingLines CreateTriangleBounds(Orientation triOrient, const Point2D& center,
-			const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-			const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor);
+	BoundingLines CreateTriangleBounds(Orientation triOrient, const Point2D& center,
+		const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+		const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor);
 
-		static Matrix4x4 GetOrientationMatrix(Orientation orient);
-		static Matrix4x4 GetInvOrientationMatrix(Orientation orient);
+	Matrix4x4 GetOrientationMatrix(Orientation orient);
+	Matrix4x4 GetInvOrientationMatrix(Orientation orient);
+
+	Vector2D GetSideNormal(SideType side, Orientation orient);
 };
 
 /**

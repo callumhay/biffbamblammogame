@@ -88,6 +88,11 @@ void BallInPlayState::Tick(double seconds) {
 	std::list<std::list<GameBall*>::iterator> ballsToRemove;						// The balls that are no longer in play and will be removed
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();	// The current set of balls in play
 
+#ifdef _DEBUG
+	// Pause the ball from moving
+	if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == NULL) {
+#endif
+
 	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); iter++) {
 		GameBall *currBall = *iter;
 
@@ -229,6 +234,10 @@ void BallInPlayState::Tick(double seconds) {
 		gameBalls.remove(ballToMoveToFront);
 		gameBalls.push_front(ballToMoveToFront);
 	}
+
+#ifdef _DEBUG
+	} // Pause ball
+#endif
 
 	// Projectile Collisions:
 	// Grab a list of all paddle-related projectiles and test each one for collisions...

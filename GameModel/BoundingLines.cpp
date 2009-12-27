@@ -123,7 +123,7 @@ int BoundingLines::CollisionCheckIndex(const BoundingLines& other) const {
  * Returns: a set of all line indices being collided with in this object.
  */
 std::vector<int> BoundingLines::CollisionCheckIndices(const BoundingLines& other) const {
-	std::vector<int> indicesCollidedWith;
+	std::set<int> indicesCollidedWith;
 	int count = 0;
 
 	// Do a line-line collision with every line in this verses every line in the given set of BoundingLines
@@ -134,14 +134,21 @@ std::vector<int> BoundingLines::CollisionCheckIndices(const BoundingLines& other
 			const Collision::LineSeg2D& currOtherLine = *otherIter;
 
 			if (Collision::IsCollision(currThisLine, currOtherLine)) {
-				indicesCollidedWith.push_back(count);
+				indicesCollidedWith.insert(count);
 			}
 		}
 
 		count++;
 	}
 
-	return indicesCollidedWith;
+
+	std::vector<int> tempVecOfIndices;
+	tempVecOfIndices.reserve(indicesCollidedWith.size());
+	for (std::set<int>::iterator iter = indicesCollidedWith.begin(); iter != indicesCollidedWith.end(); ++iter) {
+		tempVecOfIndices.push_back(*iter);
+	}
+
+	return tempVecOfIndices;
 }
 
 void BoundingLines::DebugDraw() const {

@@ -10,26 +10,8 @@
 class Sound {
 
 public:
-	// Per-World Event and Mask Sounds
-	enum WorldSound { TODO };
-	
-	// Main Menu Event and Mask Sounds
-	enum MainMenuSound { 
-		// Masks
-		MainMenuBackgroundMask = 0,
-		// Events
-		MainMenuBackgroundBangSmallEvent,
-		MainMenuBackgroundBangMediumEvent,
-		MainMenuBackgroundBangBigEvent,
-		MainMenuItemHighlightedEvent, 
-		MainMenuItemEnteredEvent,
-		MainMenuItemBackAndCancelEvent,
-		MainMenuItemVerifyAndSelectEvent, 
-		MainMenuItemScrolledEvent 
-	};
-
 	Sound(const std::string& name, const std::string& filepath);
-	virtual ~Sound();
+	~Sound();
 	
 	// Whether or not this sound is valid
 	// Returns: true if valid, false otherwise.
@@ -37,20 +19,21 @@ public:
 		return (this->buffer != 0) && (this->source != 0);
 	}
 
-	static bool IsSoundMask(int soundType);
-
-	virtual void Play()	{
+	// Plays the sound
+	void Play()	{
 		assert(this->IsValid());
 		alSourcePlay(this->source);
 	}
 
-	virtual void Stop() {
+	// Stops the sound from playing
+	void Stop() {
 		assert(this->IsValid());
 		alSourceStop(this->source);
 	}
 
-	virtual void Tick(double dT)	= 0;
+	void Tick(double dT) {};
 
+	// Returns: Whether this sound is playing or not
 	bool IsPlaying() const {
 		ALint sourceState = AL_STOPPED;
 		alGetSourcei(this->source, AL_SOURCE_STATE, &sourceState);
@@ -59,6 +42,12 @@ public:
 
 	std::string GetSoundName() const { return this->soundName; }
 	std::string GetSoundFilename() const { return this->soundFile; }
+
+	// Set whether the sound loops or not
+	void SetLooping(bool doesLoop) {
+		this->isLooping = doesLoop;
+		alSourcei(this->source, AL_LOOPING, this->isLooping);
+	}
 
 protected:
 	static const ALfloat DEFAULT_SOURCE_POS[3];

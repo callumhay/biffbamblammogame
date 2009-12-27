@@ -1467,6 +1467,10 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\GameSound\GameSound.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\GameSoundAssets.h"
 					>
 				</File>
@@ -1478,18 +1482,14 @@
 					RelativePath=".\GameSound\Sound.h"
 					>
 				</File>
-				<File
-					RelativePath=".\GameSound\SoundEvent.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameSound\SoundMask.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
 				>
+				<File
+					RelativePath=".\GameSound\GameSound.cpp"
+					>
+				</File>
 				<File
 					RelativePath=".\GameSound\GameSoundAssets.cpp"
 					>
@@ -1500,14 +1500,6 @@
 				</File>
 				<File
 					RelativePath=".\GameSound\Sound.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameSound\SoundEvent.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameSound\SoundMask.cpp"
 					>
 				</File>
 			</Filter>

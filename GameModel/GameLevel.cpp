@@ -190,7 +190,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						if (typeOfBlock == SOLID_BLOCK_CHAR) {
 							newPiece = new SolidTriangleBlock(orientation, pieceWLoc, pieceHLoc);
 						}
-						else if (typeOfBlock != PRISM_BLOCK_CHAR) {
+						else if (typeOfBlock == PRISM_BLOCK_CHAR) {
 							newPiece = new PrismTriangleBlock(orientation, pieceWLoc, pieceHLoc);
 						}
 						else {

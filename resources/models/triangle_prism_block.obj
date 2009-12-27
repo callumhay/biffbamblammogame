@@ -6,7 +6,7 @@ mtllib triangle_prism_block.mtl
 
 g Mesh1 Model
 
-usemtl prism_material
+usemtl prism_triangle_material
 v 1.25 -0.5 -0.55
 vt 21.6535 -19.685
 vn 1 0 9.25527e-017

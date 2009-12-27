@@ -1,5 +1,6 @@
 #include "GameSoundAssets.h"
 #include "MSFReader.h"
+
 #include "../GameView/GameViewConstants.h"
 
 #include <cassert>
@@ -30,8 +31,8 @@ GameSoundAssets::~GameSoundAssets() {
  */
 void GameSoundAssets::Tick(double dT) {
 	// Go through each active sound and tick it
-	Sound* currSound = NULL;
-	for (std::list<Sound*>::iterator iter = this->activeSounds.begin(); iter != this->activeSounds.end(); ++iter) {
+	GameSound* currSound = NULL;
+	for (std::list<GameSound*>::iterator iter = this->activeSounds.begin(); iter != this->activeSounds.end(); ++iter) {
 		currSound = *iter;
 		currSound->Tick(dT);
 	}
@@ -73,16 +74,16 @@ void GameSoundAssets::LoadMainMenuSounds() {
  * Unload the sounds associated with the main menu in the game that may have been previously loaded.
  */
 void GameSoundAssets::UnloadMainMenuSounds(bool waitForFinish) {
-	for (std::map<int, Sound*>::iterator iter = this->mainMenuSounds.begin(); iter != this->mainMenuSounds.end(); ++iter) {
-		Sound* currSound = iter->second;
+	for (std::map<int, GameSound*>::iterator iter = this->mainMenuSounds.begin(); iter != this->mainMenuSounds.end(); ++iter) {
+		GameSound* currSound = iter->second;
 
 		// If wait for finish is set then we wait for each song to finish playing
-		if (waitForFinish && !Sound::IsSoundMask(iter->first)) {
+		if (waitForFinish && !GameSound::IsSoundMask(iter->first)) {
 			while (currSound->IsPlaying()) {}
 		}
 
 		// Stop the sound from being active and delete it
-		this->StopMainMenuSound(static_cast<Sound::MainMenuSound>(iter->first));
+		this->StopMainMenuSound(static_cast<GameSound::MainMenuSound>(iter->first));
 		delete currSound;
 		currSound = NULL;
 	}
@@ -92,8 +93,8 @@ void GameSoundAssets::UnloadMainMenuSounds(bool waitForFinish) {
 /**
  * Play a sound associated with the main menu of the game. The sound may be an event or mask.
  */
-void GameSoundAssets::PlayMainMenuSound(Sound::MainMenuSound sound) {
-	Sound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
+void GameSoundAssets::PlayMainMenuSound(GameSound::MainMenuSound sound) {
+	GameSound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
 	if (foundSound == NULL) {
 		return;
 	}
@@ -102,8 +103,8 @@ void GameSoundAssets::PlayMainMenuSound(Sound::MainMenuSound sound) {
 	this->activeSounds.push_back(foundSound);
 }
 
-void GameSoundAssets::StopMainMenuSound(Sound::MainMenuSound sound) {
-	Sound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
+void GameSoundAssets::StopMainMenuSound(GameSound::MainMenuSound sound) {
+	GameSound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
 	if (foundSound == NULL) {
 		return;
 	}
@@ -142,8 +143,8 @@ void GameSoundAssets::SetupOpenALListener() {
  * Tries to find the given sound ID in the given sound map.
  * Returns: The sound object found, if nothing was found then NULL is returned.
  */
-Sound* GameSoundAssets::FindSound(std::map<int, Sound*>& soundMap, int soundID) {
-	std::map<int, Sound*>::iterator foundSoundIter = soundMap.find(soundID);
+GameSound* GameSoundAssets::FindSound(std::map<int, GameSound*>& soundMap, int soundID) {
+	std::map<int, GameSound*>::iterator foundSoundIter = soundMap.find(soundID);
 	
 	// First make sure the sound exists, it should...
 	if (foundSoundIter == soundMap.end()) {

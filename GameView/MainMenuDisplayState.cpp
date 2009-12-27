@@ -85,7 +85,7 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 	// Load all the sound assets associated with the main menu
 	GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
 	soundAssets->LoadMainMenuSounds();
-	soundAssets->PlayMainMenuSound(Sound::MainMenuBackgroundMask);
+	soundAssets->PlayMainMenuSound(GameSound::MainMenuBackgroundMask);
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
@@ -651,7 +651,7 @@ void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	// Play the sound effect assoicated with menu item highlighting
 	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(Sound::MainMenuItemHighlightedEvent);
+	soundAssets->PlayMainMenuSound(GameSound::MainMenuItemHighlightedEvent);
 }
 
 /**
@@ -664,24 +664,24 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 	// Do the actual selection of the item
 	if (itemIndex == this->mainMenuState->newGameMenuItemIndex) {
 		debug_output("Selected " << NEW_GAME_MENUITEM << " from menu");
-		soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
+		soundAssets->PlayMainMenuSound(GameSound::MainMenuItemVerifyAndSelectEvent);
 		this->mainMenuState->changeToPlayGameState = true;
 		this->mainMenuState->fadeAnimation.SetLerp(0.0, 2.0, 0.0f, 1.0f);
 		this->mainMenuState->fadeAnimation.SetRepeat(false);
 	}
 	else if (itemIndex == this->mainMenuState->playLevelMenuItemIndex) {
 		debug_output("Selected " << PLAY_LEVEL_MENUITEM << " from menu");
-		soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
+		soundAssets->PlayMainMenuSound(GameSound::MainMenuItemVerifyAndSelectEvent);
 	}
 	else if (itemIndex == this->mainMenuState->optionsMenuItemIndex) {
 		debug_output("Selected " << OPTIONS_MENUITEM << " from menu");
-		soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
+		soundAssets->PlayMainMenuSound(GameSound::MainMenuItemVerifyAndSelectEvent);
 	}
 	else if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
 		// We don't do anything since the user is currently being asked
 		// for verification to quit the game
 		debug_output("Selected " << EXIT_MENUITEM << " from menu");
-		soundAssets->PlayMainMenuSound(Sound::MainMenuItemEnteredEvent);
+		soundAssets->PlayMainMenuSound(GameSound::MainMenuItemEnteredEvent);
 	}
 	else {
 		assert(false);
@@ -694,7 +694,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemVerifiedEvent(int i
 		// Play the sound effect associated with menu item selection/activation
 		// NOT WORKING PROPERLY...
 		GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-		soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
+		soundAssets->PlayMainMenuSound(GameSound::MainMenuItemVerifyAndSelectEvent);
 
 		// We exit the game if the exit game item has both been activated and verified...
 		this->mainMenuState->display->QuitGame();
@@ -716,7 +716,7 @@ void MainMenuDisplayState::MainMenuEventHandler::EscMenu() {
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	// Play the sound effect assoicated with menu item highlighting
 	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(Sound::MainMenuItemHighlightedEvent);
+	soundAssets->PlayMainMenuSound(GameSound::MainMenuItemHighlightedEvent);
 }
 
 /**
@@ -735,7 +735,7 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemActivatedEven
 				itemIndex == this->mainMenuState->optionsVSyncIndex) {
 			// Play the entered sound if it's an enterable item...
 			GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-			soundAssets->PlayMainMenuSound(Sound::MainMenuItemEnteredEvent);
+			soundAssets->PlayMainMenuSound(GameSound::MainMenuItemEnteredEvent);
 		}
 	}
 }
@@ -808,19 +808,19 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::EscMenu() {
 void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemScrolled() {
 	// Play the scroll sound...
 	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(Sound::MainMenuItemScrolledEvent);
+	soundAssets->PlayMainMenuSound(GameSound::MainMenuItemScrolledEvent);
 }
 
 void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemEnteredAndSet() {
 	// Play the verification sound...
 	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(Sound::MainMenuItemVerifyAndSelectEvent);
+	soundAssets->PlayMainMenuSound(GameSound::MainMenuItemVerifyAndSelectEvent);
 }
 
 void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemCancelled() {
 	// Play the cancel/back sound..
 	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(Sound::MainMenuItemBackAndCancelEvent);
+	soundAssets->PlayMainMenuSound(GameSound::MainMenuItemBackAndCancelEvent);
 }
 
 /**
@@ -837,7 +837,7 @@ void MainMenuDisplayState::BangParticleEventHandler::ParticleSpawnedEvent(const 
 		// Small bang event...
 		case Onomatoplex::WEAK:
 		case Onomatoplex::NORMAL:
-			soundAssets->PlayMainMenuSound(Sound::MainMenuBackgroundBangSmallEvent);
+			soundAssets->PlayMainMenuSound(GameSound::MainMenuBackgroundBangSmallEvent);
 			//debug_output("Small bang");
 			break;
 
@@ -845,14 +845,14 @@ void MainMenuDisplayState::BangParticleEventHandler::ParticleSpawnedEvent(const 
 		case Onomatoplex::PRETTY_GOOD:
 		case Onomatoplex::GOOD:
 		case Onomatoplex::AWESOME:
-			soundAssets->PlayMainMenuSound(Sound::MainMenuBackgroundBangMediumEvent);
+			soundAssets->PlayMainMenuSound(GameSound::MainMenuBackgroundBangMediumEvent);
 			//debug_output("Medium bang");
 			break;
 
 		// Big bang event...
 		case Onomatoplex::SUPER_AWESOME:
 		case Onomatoplex::UBER:
-			soundAssets->PlayMainMenuSound(Sound::MainMenuBackgroundBangBigEvent);
+			soundAssets->PlayMainMenuSound(GameSound::MainMenuBackgroundBangBigEvent);
 			//debug_output("Big bang");
 			break;
 

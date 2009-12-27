@@ -700,7 +700,10 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 	switch (projectile.GetType()) {
 		case Projectile::PaddleLaserBulletProjectile:
 			switch(block.GetType()) {
-				case LevelPiece::Prism: {
+
+				case LevelPiece::PrismTriangle:
+				case LevelPiece::Prism: 
+					{
 						// A laser bullet just hit a prism block... cause the proper effect
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
 						this->AddLaserHitPrismBlockEffect(midPoint);
@@ -710,7 +713,8 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::Solid:
 				case LevelPiece::SolidTriangle:
 				case LevelPiece::Breakable:
-				case LevelPiece::BreakableTriangle: {
+				case LevelPiece::BreakableTriangle: 
+					{
 						// A laser just hit a block and was disapated by it... show the particle disintegrate
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
 						this->AddLaserHitWallEffect(midPoint);
