@@ -35,6 +35,7 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
 	std::map<std::string, MaterialGroup*> bombBlockMatGrps			= this->bombBlock->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> inkBlockMatGrps				= this->inkBlock->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> prismBlockMatGrps			= this->prismBlockDiamond->GetMaterialGroups();
+	std::map<std::string, MaterialGroup*> prismTriBlockMatGrps	= this->prismBlockTriangleUR->GetMaterialGroups();
 	
 	for (std::map<std::string, MaterialGroup*>::iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
@@ -49,6 +50,9 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
 	for (std::map<std::string, MaterialGroup*>::iterator iter = prismBlockMatGrps.begin(); iter != prismBlockMatGrps.end(); iter++) {
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+	}
+	for (std::map<std::string, MaterialGroup*>::iterator iter = prismTriBlockMatGrps.begin(); iter != prismTriBlockMatGrps.end(); iter++) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
 
@@ -312,8 +316,10 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 			returnValue = this->inkBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Prism:
-		case LevelPiece::PrismTriangle:
 			returnValue = this->prismBlockDiamond->GetMaterialGroups();
+			break;
+		case LevelPiece::PrismTriangle:
+			returnValue = this->prismBlockTriangleUR->GetMaterialGroups();
 			break;
 		case LevelPiece::Empty :
 			break;

@@ -10,13 +10,13 @@ S G G E E E E G G S
 S G G T(R,ll) E E T(Y,lr) G G S 
 S G E E E E E E G S 
 S G E E E E E E G S 
-S G E P E P P E G S 
+S G E T(P,ul) E T(P,ur) P E G S 
 S G E E E E E E G S 
 S G E E E E E B G S 
 S E E E E E E E B S 
-S E E E E P E E E S 
+S T(P,ul) E T(P,ll) E P E E T(P,ur) S 
 S E E E E E E E E S 
-S E E E E E E E E S 
+S E E E E E T(P,lr) E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
