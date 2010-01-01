@@ -36,12 +36,12 @@ LevelPiece::~LevelPiece() {
  * Returns: true on collision as well as the normal of the line being collided with
  * and the distance from that line of the given circle; false otherwise.
  */
-bool LevelPiece::CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float &d) {
+bool LevelPiece::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float &d) {
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}
 
-	return this->bounds.Collide(c, n, d);
+	return this->bounds.Collide(c, velocity, n, d);
 }
 
 /**

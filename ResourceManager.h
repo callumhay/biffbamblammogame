@@ -39,6 +39,9 @@ private:
 	std::map<CGeffect, std::map<std::string, CGtechnique>> loadedEffectTechniques;	// Techniques associated with each effect
 	std::map<CGeffect, unsigned int> numRefPerEffect;																// Number of references per effect
 
+	// OpenAL loaded sound buffers from file
+	std::map<std::string, ALuint> loadedSoundBuffers;
+
 	ConfigOptions* configOptions;	// The configuration options read from the game's ini file
 
 	void InitCgContext();
@@ -79,6 +82,10 @@ public:
 	// Effects Resource Functions
 	void GetCgFxEffectResource(const std::string &filepath, CGeffect &effect, std::map<std::string, CGtechnique> &techniques);
 	bool ReleaseCgFxEffectResource(CGeffect &effect);
+
+	// Sound Resource Functions
+	bool GetSoundResourceBuffer(const std::string &filepath, ALuint& soundBufferID);
+	bool ReleaseSoundResource(ALuint soundBufferID);
 
 	// Initialization configuration loading
 	ConfigOptions ReadConfigurationOptions(bool forceReadFromFile);

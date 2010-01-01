@@ -10,6 +10,8 @@
 
 #include "Onomatoplex.h"
 
+class LevelPiece;
+
 class GameBall {
 
 public:
@@ -32,6 +34,8 @@ private:
 	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
 
 	static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL
+
+	LevelPiece* lastPieceCollidedWith;
 
 	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
 	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink
@@ -223,6 +227,10 @@ public:
 
 	void Tick(double seconds);
 	void Animate(double seconds);
+
+	// Set and get for the last level piece that this ball collided with
+	void SetLastPieceCollidedWith(LevelPiece* p) { this->lastPieceCollidedWith = p; }
+	bool IsLastPieceCollidedWith(LevelPiece* p) const { return this->lastPieceCollidedWith == p; }
 };
 
 #endif

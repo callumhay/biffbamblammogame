@@ -116,7 +116,7 @@ void BallInPlayState::Tick(double seconds) {
 		}
 
 		// Check for ball collision with the player's paddle
-		didCollideWithPaddle = paddle->CollisionCheck(currBall->GetBounds(), n, d);
+		didCollideWithPaddle = paddle->CollisionCheck(currBall->GetBounds(), currBall->GetVelocity(), n, d);
 		if (didCollideWithPaddle) {
 			
 			// Don't do anything if this ball is the one attached to the paddle
@@ -154,8 +154,15 @@ void BallInPlayState::Tick(double seconds) {
 		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); pieceIter++) {
 			
 			LevelPiece *currPiece = *pieceIter;
-			didCollideWithBlock = currPiece->CollisionCheck(currBall->GetBounds(), n, d);
-			
+
+			// If the ball has already collided with this piece last then ignore the collision
+			//if (currBall->IsLastPieceCollidedWith(currPiece)) {
+			//	didCollideWithBlock = false;
+			//}
+			//else {
+			didCollideWithBlock = currPiece->CollisionCheck(currBall->GetBounds(), currBall->GetVelocity(), n, d);
+			//}
+
 			if (didCollideWithBlock) {
 				// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
 				// lose its ability to collide for 1 second, also check to see if we're already in ghost mode

@@ -26,35 +26,67 @@ BoundingLines::~BoundingLines() {
  * inside the line, postivie means outside - the outward normal pointing direction).
  * The boolean return value will be true if one or more collisions occured, false otherwise.
  */
-bool BoundingLines::Collide(const Collision::Circle2D& c, Vector2D& n, float &d) {
-	bool collisionOccured = false;
+bool BoundingLines::Collide(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float &d) {
 	float sqRadius = c.Radius()*c.Radius();
 	d = 0.0f;
 
+	// If there's no velocity then just exit with no collision (how can a non-moving object collide?)
+	if (velocity == Vector2D(0.0f, 0.0f)) {
+		return false;
+	}
+
+	Vector2D normalizedVel = Vector2D::Normalize(velocity);
 	float minSqDist = FLT_MAX;	// Use this to ensure that we bounce off the most relevant side
+
+	std::vector<Vector2D> collisionNormals;
+	float largestDistanceMag = FLT_MIN;
+	Vector2D largestDistMagNormal;
 
 	// For each of the lines check for collision and how close the collision is to the line
 	for (size_t i = 0; i < this->lines.size(); i++) {
-		float sqDist = Collision::SqDistFromPtToLineSeg(this->lines[i], c.Center());
-	
-		// Check to see if there was a collision with the current line seg and circle
-		// and that the collision is the most relevant (i.e., the boundry line of the collision
-		// is the closest one so far to the center of the given circle).
-		if (sqDist < sqRadius && sqDist < minSqDist) {
-			collisionOccured = true;
+		
+		// Collision candiates must be within a 90 degree angle of the normal for the line
+		// being collided with (otherwise they're mistakingly colliding with another line)
+		bool isCollisionCandidate = acos(Vector2D::Dot(-normalizedVel, this->normals[i])) < M_PI_DIV2;
+		if (isCollisionCandidate) {
+			float sqDist = Collision::SqDistFromPtToLineSeg(this->lines[i], c.Center());
+		
+			// Check to see if there was a collision between the current line seg and the given circle
+			if (sqDist < sqRadius) { //&& sqDist < minSqDist) {
 
-			// Collision occurred set the normal
-			n = this->normals[i];
-			minSqDist = sqDist;
-
-			d = sqrtf(sqDist);
-			if (Vector2D::Dot(this->normals[i], c.Center() - this->lines[i].P1()) < 0) {
-				d *= -1.0f; 
+				// Collision occurred set the normal
+				collisionNormals.push_back(this->normals[i]);
+				
+				float currDist = sqrtf(sqDist);
+				if (Vector2D::Dot(this->normals[i], c.Center() - this->lines[i].P1()) < 0) {
+					currDist *= -1.0f; 
+				}
+				
+				if (fabs(currDist) > fabs(largestDistanceMag)) {
+					largestDistanceMag = currDist;
+					largestDistMagNormal = this->normals[i];
+				}
 			}
 		}
 	}
 
-	return collisionOccured;
+	bool collisionOccurred = collisionNormals.size() > 0;
+	if (collisionOccurred) {
+		// There was a collision - find a weighted average of the normals and distances...
+		for (size_t i = 0; i < collisionNormals.size(); i++) {
+			// Check to see if the normal is ridiculously different...
+			if (acos(Vector2D::Dot(largestDistMagNormal, collisionNormals[i])) <= M_PI_DIV2) {
+				// Normal is within a reaonable range of the closest line collision's normal, so use it
+				// in the averaging process
+				n = n + collisionNormals[i];
+			}
+		}
+
+		n.Normalize();
+		d = largestDistanceMag;
+	}
+
+	return collisionOccurred;
 }
 
 /**

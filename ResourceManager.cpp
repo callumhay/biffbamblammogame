@@ -612,6 +612,70 @@ bool ResourceManager::ReleaseCgFxEffectResource(CGeffect &effect) {
 }
 
 /**
+ * Read the given filepath into an OpenAL sound buffer and set the given ID to be that buffer.
+ * Returns: true on success, false otherwise.
+ */
+bool ResourceManager::GetSoundResourceBuffer(const std::string &filepath, ALuint& soundBufferID) {
+	
+	// Try to find the sound in the loaded sounds first...
+	std::map<std::string, ALuint>::iterator loadedSoundIter = this->loadedSoundBuffers.find(filepath);
+	bool needToReadFromFile = loadedSoundIter == this->loadedSoundBuffers.end();
+
+	if (needToReadFromFile) {
+		// Create the sound buffer in OpenAL..
+		int dataLength = 0;
+		char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
+		if (soundMemData == NULL) {
+			return false;
+		}
+
+		soundBufferID = alutCreateBufferFromFileImage(soundMemData, dataLength);
+		delete[] soundMemData;
+		soundMemData = NULL;
+
+		if (soundBufferID == 0) {
+			return false;
+		}
+
+		// Insert into the list of sound buffer resources for future lookup
+		this->loadedSoundBuffers.insert(std::make_pair(filepath, soundBufferID));
+	}
+	else {
+		// Sound was already loaded, just grab and set the identifier for the sound buffer
+		soundBufferID = loadedSoundIter->second;
+	}
+
+	return true;
+}
+
+/**
+ * Release the given OpenAL sound buffer ID from the resources stored in the resource
+ * manager.
+ * Returns: true if the resource was found and removed, false otherwise.
+ */
+bool ResourceManager::ReleaseSoundResource(ALuint soundBufferID) {
+
+	// Find the sound buffer resource
+	std::map<std::string, ALuint>::iterator soundResourceIter = this->loadedSoundBuffers.begin();
+	for (; soundResourceIter != this->loadedSoundBuffers.end(); ++soundResourceIter) {
+		if (soundResourceIter->second == soundBufferID) {
+			break;
+		}
+	}
+
+	if (soundResourceIter == this->loadedSoundBuffers.end()) {
+		return false;
+	}
+	else {
+		assert(soundResourceIter->second == soundBufferID);
+		alDeleteBuffers(1, &soundBufferID);
+		this->loadedSoundBuffers.erase(soundResourceIter);
+	}
+
+	return true;
+}
+
+/**
  * Read the initialization configuration options in from the .ini file off disk
  * (should be in the same directory as the game). If the file has already been loaded
  * and force read is false then the options cached in memory will be given.

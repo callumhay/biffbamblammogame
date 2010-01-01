@@ -456,7 +456,7 @@ bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, Vector2D& n, floa
 	BoundingLines safetyNetBounds(lines, normals);
 
 	// Test for collision, if there was one then we kill the safety net
-	bool didCollide = safetyNetBounds.Collide(b.GetBounds(), n, d);
+	bool didCollide = safetyNetBounds.Collide(b.GetBounds(), b.GetVelocity(), n, d);
 	if (didCollide) {
 		this->ballSafetyNetActive = false;
 		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(b);
