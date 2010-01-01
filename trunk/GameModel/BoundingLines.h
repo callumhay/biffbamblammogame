@@ -17,7 +17,7 @@ public:
 	BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms);
 	~BoundingLines();
 
-	bool Collide(const Collision::Circle2D& c, Vector2D& n, float &d);
+	bool Collide(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float &d);
 	Point2D ClosestPoint(const Point2D& pt);
 
 	bool CollisionCheck(const BoundingLines& other) const;

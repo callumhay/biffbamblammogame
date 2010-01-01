@@ -102,12 +102,12 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 
 		// 'Side' (oblique) boundries
 		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal1(1, 1);
+		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
 		lineBounds.push_back(sideLine1);
 		lineNorms.push_back(sideNormal1);
 		
 		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal2(-1, 1);
+		Vector2D sideNormal2 = Vector2D(-1, 1) / SQRT_2;
 		lineBounds.push_back(sideLine2);
 		lineNorms.push_back(sideNormal2);
 	}
@@ -120,12 +120,12 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 
 		// Side boundries
 		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal1(1, 1);
+		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
 		lineBounds.push_back(sideLine1);
 		lineNorms.push_back(sideNormal1);
 		
 		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal2(-1, 1);
+		Vector2D sideNormal2 = Vector2D(-1, 1) / SQRT_2;
 		lineBounds.push_back(sideLine2);
 		lineNorms.push_back(sideNormal2);
 	}
@@ -212,7 +212,7 @@ void PlayerPaddle::MoveAttachedBallToNewBounds() {
 	Vector2D normal(0, 0);
 	float distance = 0.0f;
 	Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
-	bool isCollision = this->CollisionCheck(ballBounds, normal, distance);
+	bool isCollision = this->CollisionCheck(ballBounds, this->attachedBall->GetVelocity(), normal, distance);
 
 	if (isCollision) {
 		this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() - distance - 5 * EPSILON) * normal);
@@ -378,7 +378,7 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	// Make sure the position of the ball is sitting on-top of the paddle
 	Vector2D normal;
 	float distance;
-	bool onPaddle = this->CollisionCheck(this->attachedBall->GetBounds(), normal, distance);
+	bool onPaddle = this->CollisionCheck(this->attachedBall->GetBounds(), this->attachedBall->GetVelocity(), normal, distance);
 	if (onPaddle) {
 		// Position the ball so that it is against the collision line, exactly
 		Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
@@ -394,10 +394,10 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	return true;
 }
 
-bool PlayerPaddle::CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d) {
+bool PlayerPaddle::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) {
 	// Move the circle into paddle space
 	Collision::Circle2D temp = Collision::Circle2D(c.Center() - Vector2D(this->centerPos[0], this->centerPos[1]), c.Radius());
-	return this->bounds.Collide(temp, n, d);
+	return this->bounds.Collide(temp, velocity, n, d);
 }
 
 /**

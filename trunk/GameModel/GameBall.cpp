@@ -32,7 +32,8 @@ const Vector2D GameBall::STD_INIT_VEL_DIR = Vector2D(0, GameBall::NormalSpeed);
 GameBall* GameBall::currBallCamBall = NULL;
 
 GameBall::GameBall() : bounds(Point2D(0.0f, 0.0f), DEFAULT_BALL_RADIUS), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
-currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballCollisionsDisabledTimer(0.0) {
+currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballCollisionsDisabledTimer(0.0),
+lastPieceCollidedWith(NULL) {
 	this->ResetBallAttributes();
 
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
@@ -41,7 +42,7 @@ currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFacto
 
 GameBall::GameBall(const GameBall& gameBall) : bounds(gameBall.bounds), currDir(gameBall.currDir), currSpeed(gameBall.currSpeed), 
 currType(gameBall.currType), currSize(gameBall.currSize), currScaleFactor(gameBall.currScaleFactor), 
-rotationInDegs(gameBall.rotationInDegs), ballCollisionsDisabledTimer(0.0) {
+rotationInDegs(gameBall.rotationInDegs), ballCollisionsDisabledTimer(0.0), lastPieceCollidedWith(gameBall.lastPieceCollidedWith) {
 
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
@@ -60,6 +61,7 @@ void GameBall::ResetBallAttributes() {
 	this->currType  = NormalBall;
 	this->SetBallSize(NormalSize);
 	this->SetDimensions(NormalSize);
+	this->lastPieceCollidedWith = NULL;
 }
 
 /**

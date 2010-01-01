@@ -244,6 +244,9 @@ void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& sta
 	// tell the level about it
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, ball);	// WARNING: This can destroy p.
+	
+	// Tell the ball what the last piece it collided with was...
+	//ball.SetLastPieceCollidedWith(pieceAfterCollision);
 
 	// EVENT: Ball-Block Collision
 	GameEventManager::Instance()->ActionBallBlockCollision(ball, *pieceAfterCollision);

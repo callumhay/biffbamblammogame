@@ -21,7 +21,7 @@ public:
 	LevelCollidable() {}
 	virtual ~LevelCollidable() {}
 
-	virtual bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d) = 0;
+	virtual bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) = 0;
 	virtual bool CollisionCheck(const Collision::AABB2D& aabb) = 0;
 };
 
@@ -62,7 +62,7 @@ public:
 		return Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
 	}
 
-	bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
+	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d);
 	bool CollisionCheck(const Collision::AABB2D& aabb);
 	bool CollisionCheck(const BoundingLines& boundingLines);
 

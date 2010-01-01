@@ -226,7 +226,7 @@ public:
 		return this->attachedBall;
 	}
 
-	bool CollisionCheck(const Collision::Circle2D& c, Vector2D& n, float& d);
+	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d);
 	void DebugDraw() const;
 
 };

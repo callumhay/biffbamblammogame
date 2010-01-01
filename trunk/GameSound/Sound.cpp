@@ -15,9 +15,7 @@ soundName(name), soundFile(filepath), isLooping(true) {
 #ifdef _DEBUG
 	this->buffer = alutCreateBufferFromFile(filepath.c_str());
 #else
-	int dataLength = 0;
-	char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
-	this->buffer = alutCreateBufferFromFileImage(soundMemData, dataLength);
+	bool success = ResourceManager::GetInstance()->GetSoundResourceBuffer(filepath, this->buffer);
 #endif
 
 	// Continue loading the sound if the buffer was loaded properly
@@ -49,7 +47,12 @@ Sound::~Sound() {
 		alDeleteSources(1, &this->source);
 	}
 	if (this->buffer != 0) {
+#ifdef _DEBUG
 		alDeleteBuffers(1, &this->buffer);
+#else
+		ResourceManager::GetInstance()->ReleaseSoundResource(this->buffer);
+		this->buffer = 0;
+#endif
 	}
 
 	debug_openal_state();
