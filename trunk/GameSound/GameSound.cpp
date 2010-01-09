@@ -70,7 +70,7 @@ bool GameSound::IsSoundMask(int soundType) {
  */
 void GameSound::Play() {
 	// First of all stop any previous current sound from playing
-	this->Stop();
+	//this->Stop();
 
 	// We determine which sound to play based on their probabilities and a randomly generated number
 	double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();

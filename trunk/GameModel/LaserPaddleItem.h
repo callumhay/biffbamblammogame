@@ -7,6 +7,11 @@
 
 class Point2D;
 
+/**
+ * Represents the power-up item for the paddle's laser bullet ability -
+ * The paddle gains the ability to shoot laser bullets at the blocks to
+ * destroy them faster.
+ */
 class LaserPaddleItem : public GameItem {
 public:
 	static const std::string LASER_PADDLE_ITEM_NAME;

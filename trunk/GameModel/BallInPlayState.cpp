@@ -12,6 +12,7 @@
 #include "BallInPlayState.h"
 #include "BallOnPaddleState.h"
 #include "GameCompleteState.h"
+#include "BallDeathState.h"
 #include "GameModel.h"
 #include "GameEventManager.h"
 #include "GameItem.h"
@@ -22,10 +23,6 @@ GameState(gm), timeSinceGhost(DBL_MAX) {
 }
 
 BallInPlayState::~BallInPlayState() {
-	// If we are exiting being in play then clear all projectiles, items and timers
-	this->gameModel->ClearProjectiles();
-	this->gameModel->ClearLiveItems();
-	this->gameModel->ClearActiveTimers();
 }
 
 /**
@@ -93,7 +90,7 @@ void BallInPlayState::Tick(double seconds) {
 	if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == NULL) {
 #endif
 
-	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); iter++) {
+	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
 		GameBall *currBall = *iter;
 
 		// Update the current ball
@@ -101,13 +98,17 @@ void BallInPlayState::Tick(double seconds) {
 
 		// Check for death (ball went out of bounds)
 		if (this->IsOutOfGameBounds(currBall->GetBounds().Center())) {
-			bool stateChanged = true;
-			this->gameModel->BallDied(currBall, stateChanged);
-
-			if (stateChanged) {
-					// The player has lost all their balls...
+			if (gameBalls.size() == 1) {
+				this->gameModel->SetCurrentState(new BallDeathState(currBall, this->gameModel));
 				return;
 			}
+			//bool stateChanged = true;
+			//this->gameModel->BallDied(currBall, stateChanged);
+
+			//if (stateChanged) {
+			//		// The player has lost all their balls...
+			//	return;
+			//}
 			else {
 				// The ball is now dead an needs to be removed from the game
 				ballsToRemove.push_back(iter);

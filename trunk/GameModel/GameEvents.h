@@ -76,6 +76,20 @@ public:
 	virtual void AllBallsDeadEvent(int livesLeft) = 0;
 
 	/**
+	 * Event triggered before the last ball dies (i.e., before the camera follows the last ball
+	 * to its tragic death). This event is triggered once just as the last ball dies.
+	 * Arguements: lastBallToDie - The last ball left, which is now about to die.
+	 */
+	virtual void LastBallAboutToDieEvent(const GameBall& lastBallToDie) = 0;
+
+	/**
+	 * Event triggered when the last ball explodes in a blaze of horrible, horrible glory.
+	 * This event is triggered once just as the ball explodes (but is not officially dead yet).
+	 * Arguements: explodedBall - The ball that is exploding / just exploded.
+	 */
+	virtual void LastBallExploded(const GameBall& explodedBall) = 0;
+
+	/**
 	 * Event triggered when one of the game balls has died. This event is triggered
 	 * once per ball death.
 	 * Arguements: deadBall - The ball that has died (just before it is deleted).

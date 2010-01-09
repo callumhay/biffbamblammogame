@@ -883,11 +883,19 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\GameModel\BallDeathState.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\BallInPlayState.h"
 					>
 				</File>
 				<File
 					RelativePath=".\GameModel\BallOnPaddleState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\Beam.h"
 					>
 				</File>
 				<File
@@ -955,11 +963,19 @@
 				Name="Source Files"
 				>
 				<File
+					RelativePath=".\GameModel\BallDeathState.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\BallInPlayState.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\GameModel\BallOnPaddleState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\Beam.cpp"
 					>
 				</File>
 				<File
@@ -988,6 +1004,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\GameModelConstants.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameOverState.cpp"
 					>
 				</File>
 				<File
@@ -1059,6 +1079,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\InvisiBallItem.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LaserBeamPaddleItem.h"
 						>
 					</File>
 					<File
@@ -1139,6 +1163,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\InvisiBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LaserBeamPaddleItem.cpp"
 						>
 					</File>
 					<File

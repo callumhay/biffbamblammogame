@@ -109,6 +109,9 @@ public:
 	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item);
 	void DeactivateMiscEffects();
 
+	void ActivateLastBallDeathEffects(const GameBall& lastBall);
+	void DeactivateLastBallDeathEffects();
+
 	GameItemAssets* GetItemAssets() const {
 		return this->itemAssets;
 	}

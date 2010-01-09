@@ -68,7 +68,11 @@ namespace Onomatoplex {
 		singleWordExplosion.push_back("Ppfft");
 		singleWordExplosion.push_back("Bam");
 		singleWordExplosion.push_back("Floom");
+		singleWordExplosion.push_back("Ploom");
 		singleWordExplosion.push_back("Zam");
+		singleWordExplosion.push_back("Ziff");
+		singleWordExplosion.push_back("Poof");
+		singleWordExplosion.push_back("Ploof");
 		this->simpleSingleWords[EXPLOSION] = singleWordExplosion;
 
 		std::vector<std::string> goodSingleWordExplosion;
@@ -86,7 +90,11 @@ namespace Onomatoplex {
 		goodSingleWordExplosion.push_back("Boomy");
 		goodSingleWordExplosion.push_back("Splazoom");
 		goodSingleWordExplosion.push_back("Powy");
+		goodSingleWordExplosion.push_back("Splammo");
+		goodSingleWordExplosion.push_back("Sploom");
 		goodSingleWordExplosion.push_back("Pphhoom");
+		goodSingleWordExplosion.push_back("Kurfloom");
+		goodSingleWordExplosion.push_back("Kurflaam");
 		this->goodSingleWords[EXPLOSION] = goodSingleWordExplosion;
 
 		std::vector<std::string> awesomeSingleWordExplosion;
@@ -94,6 +102,7 @@ namespace Onomatoplex {
 		awesomeSingleWordExplosion.push_back("Kaafloomy");
 		awesomeSingleWordExplosion.push_back("Kaafloomo");
 		awesomeSingleWordExplosion.push_back("BiffBlammo");
+		awesomeSingleWordExplosion.push_back("BiffBamBlammo");
 		awesomeSingleWordExplosion.push_back("Kabblaamo");
 		awesomeSingleWordExplosion.push_back("Blooommoo");
 		awesomeSingleWordExplosion.push_back("Wablaammy");

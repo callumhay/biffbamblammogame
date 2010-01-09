@@ -182,7 +182,7 @@ vertexOutput prism_VS(appdata IN) {
 	OUT.WorldView = normalize(VertToViewVec);
     OUT.HPosition = outPos;
 	OUT.ProjPos   = outPos.xyz / outPos.w; 
-    OUT.Colour = float4(1,1,1,1);//IN.Colour;
+    OUT.Colour = IN.Colour;
     return OUT;
 }
 
@@ -257,6 +257,7 @@ float4 prism_PS(vertexOutput IN) : COLOR {
     PrismShading(nWorldNormal, IN.WorldPos, nWorldView, diffContrib, specContrib);
     float2 lookupOffset = GetRefractBGOffset(nWorldView, nWorldNormal);
     float3 refractColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
+	refractColour = max(0.1 * DiffuseColour, refractColour);
 
     float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*diffContrib;
     return float4(refractColour*result, IN.Colour.a);
@@ -265,7 +266,7 @@ float4 prism_PS(vertexOutput IN) : COLOR {
 vertexOutput_outlines outline_VS(appdata_outlines IN) {
     vertexOutput_outlines OUT = (vertexOutput_outlines)0;
     OUT.HPosition = mul(WvpXf, float4(IN.Position, 1.0f));
-    OUT.Alpha = 1;//IN.Colour.a;
+    OUT.Alpha = IN.Colour.a;
     return OUT;
 }
 

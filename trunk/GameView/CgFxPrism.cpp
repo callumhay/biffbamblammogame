@@ -8,7 +8,7 @@ const std::string CgFxPrism::DEFAULT_PRISM_TECHNIQUE_NAME = "Prism";
 CgFxPrism::CgFxPrism(MaterialProperties* properties) : 
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_PRISM_SHADER, properties),
 indexOfRefractionParam(NULL), warpAmountParam(NULL), sceneWidthParam(NULL), sceneHeightParam(NULL), 
-sceneSamplerParam(NULL), indexOfRefraction(1.6), warpAmount(50) {
+sceneSamplerParam(NULL), indexOfRefraction(1.6), warpAmount(200) {
 
 	assert(properties->materialType == MaterialProperties::MATERIAL_PRISM_TYPE);
 

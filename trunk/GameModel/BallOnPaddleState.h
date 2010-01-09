@@ -15,10 +15,10 @@ private:
 
 public:
 	BallOnPaddleState(GameModel* gm);
-	virtual ~BallOnPaddleState();
+	~BallOnPaddleState();
 
-	virtual void Tick(double seconds);
-	virtual void BallReleaseKeyPressed();
+	void Tick(double seconds);
+	void BallReleaseKeyPressed();
 
 };
 #endif

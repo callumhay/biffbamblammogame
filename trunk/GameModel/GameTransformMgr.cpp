@@ -24,15 +24,18 @@ const double GameTransformMgr::SECONDS_TO_FLIP						= 0.8;
 const double GameTransformMgr::SECONDS_PER_UNIT_PADDLECAM = 0.025;
 // See above, except this applies to the ball camera
 const double GameTransformMgr::SECONDS_PER_UNIT_BALLCAM		= 0.025;
+// .. applies to the ball death cam
+const double GameTransformMgr::SECONDS_PER_UNIT_DEATHCAM	= 0.015;
+
+// Distance between the camera and ball when in ball death camera mode
+const float GameTransformMgr::BALL_DEATH_CAM_DIST_TO_BALL = 20.0f;
 
 GameTransformMgr::GameTransformMgr() {
 	this->Reset();
 }
 
 GameTransformMgr::~GameTransformMgr() {
-	this->levelFlipAnimations.clear();
-	this->paddleCamAnimations.clear();
-	this->camFOVAnimations.clear();
+	this->Reset();
 }
 
 /** 
@@ -46,9 +49,12 @@ void GameTransformMgr::Reset() {
 	this->paddleWithCamera = NULL;
 	this->ballWithCamera = NULL;
 	this->cameraFOVAngle = Camera::FOV_ANGLE_IN_DEGS;
+	this->isBallDeathCamIsOn = false;
 
 	this->levelFlipAnimations.clear();
 	this->paddleCamAnimations.clear();
+	this->ballCamAnimations.clear();
+	this->ballDeathAnimations.clear();
 	this->camFOVAnimations.clear();
 }
 
@@ -125,6 +131,29 @@ void GameTransformMgr::SetBallCamera(bool putCamInsideBall) {
 }
 
 /**
+ * This will either enable the camera that focuses on the last ball as it dies or
+ * takes the focus off the last dieing ball.
+ * This will obliterate all other transforms occuring in the transform manager
+ * and ONLY play the animation for the camera at ball death.
+ */
+void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
+	GameTransformMgr::TransformAnimationType animType;
+	if (turnOnBallDeathCam) {
+		// Get rid of all other animations that may be in the queue - 
+		// ball death takes presedence over all other animations
+		this->animationQueue.clear();
+		animType = GameTransformMgr::ToBallDeathAnimation;	
+	}
+	else {
+		animType = GameTransformMgr::FromBallDeathAnimation;
+	}
+
+	// Add the ball cam transform to the queue
+	TransformAnimation transformAnim(animType);
+	this->animationQueue.push_back(transformAnim);
+}
+
+/**
  * This needs to be called whenever a new level is being loaded - this will make sure
  * that the default camera position is calculated and made available to the view.
  */
@@ -186,7 +215,20 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 					this->StartBallCamAnimation(dT, gameModel);
 				}
 				break;
-					
+
+			case GameTransformMgr::ToBallDeathAnimation:
+			case GameTransformMgr::FromBallDeathAnimation:
+				if (currAnimation.hasStarted) {
+					bool finished = this->TickBallDeathAnimation(dT, gameModel);
+					if (finished) {
+						this->FinishBallDeathAnimation(dT, gameModel);
+					}
+				}
+				else {
+					this->StartBallDeathAnimation(dT, gameModel);
+				}	
+				break;
+
 			default:
 				assert(false);
 				break;
@@ -229,6 +271,23 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 		// Update the camera position and rotation based on the movement of the ball and the level transform
 		this->currCamOrientation.SetTranslation(worldSpaceTranslation);
 		this->currCamOrientation.SetRotation(worldRotation);
+	}
+	else if (this->isBallDeathCamIsOn) {
+		// Follow the ball with the camera...
+		assert(gameModel.GetGameBalls().size() == 1);
+		const GameBall* deathBall = *(gameModel.GetGameBalls().begin());
+	
+		// Get the ball velocity and current camera worldspace position/translation
+		Vector2D ballVelocity2D = 0.8f * deathBall->GetVelocity();
+		Vector3D currCamTranslation = this->currCamOrientation.GetTranslation();
+		
+		// Calculate the distance the ball has moved so far (if it were travelling in a straight line), in worldspace
+		Point3D currCamPosition   = Point3D(currCamTranslation[0], currCamTranslation[1], currCamTranslation[2]);
+		Vector3D ballMoveDistance	= dT * Vector3D(ballVelocity2D[0], ballVelocity2D[1], 0.0f);
+		ballMoveDistance = this->GetGameTransform() * ballMoveDistance; 
+
+		currCamPosition  = currCamPosition + ballMoveDistance;
+		this->currCamOrientation.SetTranslation(Vector3D(currCamPosition[0], currCamPosition[1], currCamPosition[2]));
 	}
 
 }
@@ -546,7 +605,7 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 
 	// Grab the affected ball position and other info, make sure the relevant values are in world coordinates
 	GameBall* ball = *(gameModel.GetGameBalls().begin());
-	GameLevel* currLevel = gameModel.GetCurrentLevel();
+	const GameLevel* currLevel = gameModel.GetCurrentLevel();
 	std::list<GameItem*>& items = gameModel.GetLiveItems();
 	assert(ball != NULL && currLevel != NULL);
 
@@ -626,7 +685,7 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 		// Calculate the distance that will be travelled by the camera
 		Vector3D travelVec = this->defaultCamOrientation.GetTranslation() - this->currCamOrientation.GetTranslation();
 		float distToTravel = travelVec.length();
-		double timeToAnimate = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_PADDLECAM;
+		double timeToAnimate = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_BALLCAM;
 		
 		toDefaultCamAnim.SetLerp(timeToAnimate, this->defaultCamOrientation);
 		this->ballCamAnimations.push_back(toDefaultCamAnim);
@@ -707,6 +766,96 @@ void GameTransformMgr::FinishBallCamAnimation(double dT, GameModel& gameModel) {
 	else {
 		this->ballWithCamera = NULL;
 		GameBall::SetBallCamera(NULL);
+	}
+
+	// Pop the animation off the queue
+	this->animationQueue.pop_front();
+}
+
+bool GameTransformMgr::TickBallDeathAnimation(double dT, GameModel& gameModel) {
+	assert(this->ballDeathAnimations.size() > 0);
+
+	// Animate the camera
+	for (std::list<AnimationMultiLerp<Orientation3D>>::iterator iter = this->ballDeathAnimations.begin(); iter != this->ballDeathAnimations.end();) {
+		bool currAnimationFinished = iter->Tick(dT);
+		if (currAnimationFinished) {
+			iter = this->ballDeathAnimations.erase(iter);
+		}
+		else {
+			++iter;
+		}
+	}
+	
+	return (this->ballDeathAnimations.size() == 0);
+}
+
+void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) {
+	// Grab the current transform animation information from the front of the queue
+	TransformAnimation& ballDeathAnim = this->animationQueue.front();
+	assert(ballDeathAnim.type == GameTransformMgr::ToBallDeathAnimation || ballDeathAnim.type == GameTransformMgr::FromBallDeathAnimation);
+	assert(gameModel.GetGameBalls().size() == 1);
+
+	// Clear any previous ball death animations
+	this->ballDeathAnimations.clear();
+
+	// Based on the animation, set the animations for the camera's orientation
+	if (ballDeathAnim.type == GameTransformMgr::ToBallDeathAnimation) {
+		const GameBall* ball = *(gameModel.GetGameBalls().begin());
+		const GameLevel* currLevel = gameModel.GetCurrentLevel();
+
+		// Make sure the game state is paused while we move the camera
+		// into position to properly capture the ball death animation
+		gameModel.SetPause(GameModel::PauseState);
+
+		// Move the camera down to keep the ball in the center of the viewport
+		Point2D ballPos2D = ball->GetBounds().Center();
+		Vector2D halfLevelDim	= 0.5 * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
+		Point2D ballLevelSpacePos = ballPos2D - halfLevelDim;
+
+		// This will store the actual world space position that we need to transform the camera to...
+		Vector3D finalCamPosition(ballLevelSpacePos[0], ballLevelSpacePos[1], 0.0f);
+		finalCamPosition = this->GetGameTransform() * finalCamPosition;
+		finalCamPosition[2] = GameTransformMgr::BALL_DEATH_CAM_DIST_TO_BALL;
+
+		// Figure out the time to travel
+		Vector3D travelVec = this->currCamOrientation.GetTranslation() - finalCamPosition;
+		float distToTravel = travelVec.length();
+		double timeToAnimate = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_DEATHCAM;
+			
+		// Center the ball on the screen
+		AnimationMultiLerp<Orientation3D> toBallDeathAnim(&this->currCamOrientation);
+		Orientation3D finalOrientation(finalCamPosition, Vector3D(0, 0, 0));
+		toBallDeathAnim.SetLerp(timeToAnimate, finalOrientation);
+		this->ballDeathAnimations.push_back(toBallDeathAnim);
+	}
+	else {
+		// Leaving the death cam back to the default camera
+		AnimationMultiLerp<Orientation3D> toDefaultCamAnim(&this->currCamOrientation);
+
+		// Calculate the distance that will be travelled by the camera
+		Vector3D travelVec = this->defaultCamOrientation.GetTranslation() - this->currCamOrientation.GetTranslation();
+		float distToTravel = travelVec.length();
+		double timeToAnimate = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_DEATHCAM;
+		
+		toDefaultCamAnim.SetLerp(timeToAnimate, this->defaultCamOrientation);
+		this->ballDeathAnimations.push_back(toDefaultCamAnim);
+	}
+
+	ballDeathAnim.hasStarted = true;
+}
+
+void GameTransformMgr::FinishBallDeathAnimation(double dT, GameModel& gameModel) {
+	// Grab the current transform animation information from the front of the queue
+	TransformAnimation& ballDeathAnim = this->animationQueue.front();
+	assert(ballDeathAnim.type == GameTransformMgr::ToBallDeathAnimation || ballDeathAnim.type == GameTransformMgr::FromBallDeathAnimation);
+	
+	if (ballDeathAnim.type == GameTransformMgr::ToBallDeathAnimation) {
+		// Unpause the game state to watch the ball spiral to its doom
+		gameModel.UnsetPause(GameModel::PauseState);
+		this->isBallDeathCamIsOn = true;
+	}
+	else {
+		this->isBallDeathCamIsOn = false;
 	}
 
 	// Pop the animation off the queue

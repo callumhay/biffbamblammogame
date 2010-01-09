@@ -6,8 +6,8 @@
 class GameOverState : public GameState {
 
 public:
-	GameOverState(GameModel* gm) : GameState(gm) {};
-	virtual ~GameOverState(){};
+	GameOverState(GameModel* gm);
+	~GameOverState();
 
 	virtual void Tick(double seconds) {
 		// Do nothing, player is dead.
