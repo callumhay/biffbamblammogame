@@ -819,7 +819,10 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	this->activeGeneralEmitters.push_back(bangOnoEffect);
 }
 
-
+/**
+ * Add the effect for when something hits the active ball safety barrier/net and causes
+ * it to be destroyed.
+ */
 void GameESPAssets::AddBallSafetyNetDestroyedEffect(const GameBall& ball) {
 	assert(this->bangTextures.size() != 0);
 
@@ -897,6 +900,104 @@ void GameESPAssets::AddBallSafetyNetDestroyedEffect(const GameBall& ball) {
 	// Lastly, add the new emitters to the list of active emitters in order of back to front
 	this->activeGeneralEmitters.push_front(bangEffect);
 	this->activeGeneralEmitters.push_back(bangOnoEffect);
+}
+
+/**
+ * Add the effect for when the ball explodes (usually due to its death by falling
+ * off the level).
+ */
+void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
+	assert(ball != NULL);
+
+	float ballRadius = ball->GetBounds().Radius();
+	float smallSize  = 2 * ballRadius;
+	float bigSize    = 2 * smallSize;
+	Point2D ballCenter = ball->GetBounds().Center();
+	Point3D emitCenter(ballCenter[0], ballCenter[1], 0.0f);
+
+	// When a ball explodes there's a big bang star, with loud explosive onomatopiea
+	// and lots of smoke and stars
+
+	// Smokey firey clouds
+	ESPInterval smokeColour(0.3f, 0.8f);
+	for (int i = 0; i < 3; i++) {
+		size_t randomTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
+
+		ESPPointEmitter* smokeClouds = new ESPPointEmitter();
+		smokeClouds->SetSpawnDelta(ESPInterval(0.0f));
+		smokeClouds->SetNumParticleLives(1);
+		smokeClouds->SetInitialSpd(ESPInterval(2.0f, 8.0f));
+		smokeClouds->SetParticleLife(ESPInterval(0.5f, 2.0f));
+		smokeClouds->SetParticleSize(ESPInterval(smallSize, bigSize));
+		smokeClouds->SetRadiusDeviationFromCenter(ESPInterval(ballRadius));
+		smokeClouds->SetParticleAlignment(ESP::ScreenAligned);
+		smokeClouds->SetEmitPosition(emitCenter);
+		smokeClouds->SetEmitAngleInDegrees(180);
+		smokeClouds->SetParticles(GameESPAssets::NUM_EXPLOSION_SMOKE_PART_PARTICLES, this->smokeTextures[randomTexIndex]);
+		smokeClouds->AddEffector(&this->particleLargeGrowth);
+		smokeClouds->AddEffector(&this->particleFireColourFader);
+		
+		if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+			smokeClouds->AddEffector(&this->smokeRotatorCW);
+		}
+		else {
+			smokeClouds->AddEffector(&this->smokeRotatorCCW);
+		}
+		this->activeGeneralEmitters.push_back(smokeClouds);
+	}
+
+	// Bang star
+	unsigned int randomBangTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->bangTextures.size();
+	Texture2D* randomBangTex = this->bangTextures[randomBangTexIndex];
+
+	ESPPointEmitter* bangEffect = new ESPPointEmitter();
+	bangEffect->SetSpawnDelta(ESPInterval(-1));
+	bangEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	bangEffect->SetParticleLife(ESPInterval(1.5f));
+	bangEffect->SetRadiusDeviationFromCenter(ESPInterval(0));
+	bangEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangEffect->SetEmitPosition(emitCenter);
+	// Figure out some random proper orientation...
+	// Two base rotations (for variety) : 180 or 0...
+	float baseBangRotation = 0.0f;
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		baseBangRotation = 180.0f;
+	}
+	bangEffect->SetParticleRotation(ESPInterval(baseBangRotation - 10.0f, baseBangRotation + 10.0f));
+	bangEffect->SetParticleSize(ESPInterval(3 * bigSize), ESPInterval(2 * bigSize));
+	bangEffect->AddEffector(&this->particleFader);
+	bangEffect->AddEffector(&this->particleMediumGrowth);
+	bangEffect->SetParticles(1, randomBangTex);
+	
+	this->activeGeneralEmitters.push_back(bangEffect);
+
+	// Onomatopoeia for the explosion
+	ESPPointEmitter* explodeOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	explodeOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	explodeOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	explodeOnoEffect->SetParticleLife(ESPInterval(2.5f));
+	explodeOnoEffect->SetParticleSize(ESPInterval(1.0f), ESPInterval(1.0f));
+	explodeOnoEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
+	explodeOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	explodeOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	explodeOnoEffect->SetEmitPosition(emitCenter);
+	explodeOnoEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+	
+	// Add effectors...
+	explodeOnoEffect->AddEffector(&this->particleFader);
+	explodeOnoEffect->AddEffector(&this->particleMediumGrowth);
+
+	// Add the single particle to the emitter...
+	DropShadow dpTemp;
+	dpTemp.colour = Colour(0,0,0);
+	dpTemp.amountPercentage = 0.15f;
+	ESPOnomataParticle* explodeOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
+	explodeOnoParticle->SetDropShadow(dpTemp);
+	explodeOnoParticle->SetOnomatoplexSound(Onomatoplex::EXPLOSION, Onomatoplex::UBER);
+	explodeOnoEffect->AddParticle(explodeOnoParticle);
+
+	this->activeGeneralEmitters.push_back(explodeOnoEffect);
 }
 
 /**
@@ -1138,7 +1239,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	unsigned int randomSplatTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->splatTextures.size();
 	Texture2D* randomSplatTex = this->splatTextures[randomSplatTexIndex];
 
-	// Create an emitter for the bang texture
+	// Create an emitter for the splat
 	ESPPointEmitter* splatEffect = new ESPPointEmitter();
 	splatEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
 	splatEffect->SetInitialSpd(ESPInterval(0.0f));
@@ -1974,6 +2075,8 @@ void GameESPAssets::AddPaddleShrinkEffect() {
  * Add the effect for when the ball grows - bunch of arrows that point and move outward around the ball.
  */
 void GameESPAssets::AddBallGrowEffect(const GameBall* ball) {
+	assert(ball != NULL);
+
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
 	directions.push_back(Vector3D(0,-1,0));
@@ -2005,6 +2108,8 @@ void GameESPAssets::AddBallGrowEffect(const GameBall* ball) {
  * Add the effect for when the ball shrinks - bunch of arrows that point and move inward around the ball.
  */
 void GameESPAssets::AddBallShrinkEffect(const GameBall* ball) {
+	assert(ball != NULL);
+
 	std::vector<Vector3D> directions;
 	directions.push_back(Vector3D(0,1,0));
 	directions.push_back(Vector3D(0,-1,0));
@@ -2032,8 +2137,6 @@ void GameESPAssets::AddBallShrinkEffect(const GameBall* ball) {
 		this->activeBallBGEmitters[ball].push_back(ballShrinkEffect);
 	}
 }
-
-
 
 /**
  * Add the effect for when the player acquires a 1UP power-up.

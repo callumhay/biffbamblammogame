@@ -63,6 +63,22 @@ void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 	}	
 }
 
+// Action for when the last ball left is about to die - (before its spiralling death animations and explosion)
+void GameEventManager::ActionLastBallAboutToDie(const GameBall& ballAboutToDie) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->LastBallAboutToDieEvent(ballAboutToDie);
+	}	
+}
+
+// Action for when the last ball is exploding
+void GameEventManager::ActionLastBallExploded(const GameBall& explodedBall) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+		(*this->listenerIter)->LastBallExploded(explodedBall);
+	}	
+}
+
 // Action for when the all balls have died (gone out of bounds)
 void GameEventManager::ActionAllBallsDead(int livesLeft) {
 	this->listenerIter = this->eventListeners.begin();

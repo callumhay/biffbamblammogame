@@ -103,6 +103,7 @@ private:
 	static const int NUM_ITEM_ACQUIRED_SPARKS = 20;
 	static const int NUM_INK_CLOUD_PART_PARTICLES = 5;
 	static const int NUM_INK_SPRAY_PARTICLES = 20;
+	static const int NUM_EXPLOSION_SMOKE_PART_PARTICLES = 6;
 
 	ESPPointEmitter* paddleLaserGlowAura;
 	ESPPointEmitter* paddleLaserGlowSparks;
@@ -154,6 +155,7 @@ public:
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
 	void AddBallSafetyNetDestroyedEffect(const GameBall& ball);
+	void AddBallExplodedEffect(const GameBall* ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
 	void SetItemEffect(const GameItem& item, const GameModel& gameModel);

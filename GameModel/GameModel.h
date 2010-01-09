@@ -263,6 +263,9 @@ public:
 			this->SetPause(pause);
 		}
 	}
+	void SetPauseState(int pauseState) {
+		this->pauseBitField = pauseState;
+	}
 	int GetPauseState() const {
 		return this->pauseBitField;
 	}
@@ -308,6 +311,8 @@ public:
 	friend class GameState;
 	friend class BallOnPaddleState;
 	friend class BallInPlayState;
+	friend class BallDeathState;
+	friend class GameOverState;
 };
 
 #endif

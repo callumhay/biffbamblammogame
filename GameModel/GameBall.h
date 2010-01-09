@@ -21,6 +21,8 @@ public:
 	
 private:
 	Collision::Circle2D bounds;	// The bounds of the ball, constantly updated to world space
+	float zCenterPos;						// VERY occasionally (some animations), the ball needs a z-coordinate
+
 	Vector2D currDir;						// The current direction of movement of the ball
 	BallSpeed currSpeed;				// The current speed of the ball
 	int currType;								// The current type of this ball
@@ -76,6 +78,9 @@ public:
 	ColourRGBA GetColour() const {
 		return this->colour;
 	}
+	void SetColour(const ColourRGBA& c) {
+		this->colour = c;
+	}
 	void AnimateFade(bool fadeOut, double duration);
 
 	Vector3D GetRotation() const {
@@ -128,6 +133,17 @@ public:
 	// Set the center position of the ball
 	void SetCenterPosition(const Point2D& p) {
 		this->bounds.SetCenter(p);
+		this->zCenterPos = 0.0f;
+	}
+
+	// Occasionally we need to see the full 3D position of the ball
+	void SetCenterPosition(const Point3D& p) {
+		this->bounds.SetCenter(Point2D(p[0], p[1]));
+		this->zCenterPos = p[2];
+	}
+	Point3D GetCenterPosition() const {
+		Point2D center2D = this->bounds.Center();
+		return Point3D(center2D[0], center2D[1], this->zCenterPos);
 	}
 
 	Vector2D GetDirection() const {

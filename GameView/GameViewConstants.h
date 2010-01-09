@@ -47,6 +47,7 @@ private:
 	const std::string TEXTURE_ITEM_STICKYPADDLE;
 	const std::string TEXTURE_ITEM_PADDLECAM;
 	const std::string TEXTURE_ITEM_BALLCAM;
+	const std::string TEXTURE_ITEM_PADDLEBEAM;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -118,6 +119,7 @@ public:
 	const std::string CGFX_FULLSCREENSMOKEY_SHADER;
 	const std::string CGFX_FULLSCREEN_UBERINTENSE_SHADER;
 	const std::string CGFX_PRISM_SHADER;
+	const std::string CGFX_LASERBEAM_SHADER;
 
 	// Texture path constants *******************************
 	const std::string TEXTURE_BANG1;

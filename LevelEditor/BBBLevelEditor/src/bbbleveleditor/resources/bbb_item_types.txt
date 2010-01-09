@@ -8,7 +8,10 @@ The ball increases in size.
 The ball decreases its speed.
 
 + LaserShotPaddle
-The paddle gains the ability to shoot small laser bullets that can destroy blocks.
+The paddle gains the ability to shoot small laser bullets that can destroy blocks and cause chain reactions with certain blocks (e.g., prism block).
+
++ LaserBeamPaddle
+The paddle gains the ability to shoot a giant laser beam that can destroy blocks and cause chain reactions with certain blocks (e.g., prism block).
 
 + MultiBall3
 Split the most recently touched ball into 3 balls.

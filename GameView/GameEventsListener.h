@@ -36,6 +36,8 @@ public:
 
 	// Ball/Block related events
 	void BallDiedEvent(const GameBall& deadBall);
+	void LastBallAboutToDieEvent(const GameBall& lastBallToDie);
+	void LastBallExploded(const GameBall& explodedBall);
 	void AllBallsDeadEvent(int livesLeft);
 	void BallSpawnEvent(const GameBall& spawnedBall);
 	void BallShotEvent(const GameBall& shotBall);

@@ -116,10 +116,24 @@ void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveBallEffects(deadBall);
 }
 
+void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) {
+	debug_output("EVENT: Last ball is about to die.");
+
+	this->display->GetAssets()->ActivateLastBallDeathEffects(lastBallToDie);
+}
+
+void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
+	debug_output("EVENT: Last ball exploded.");
+
+	// Add a cool effect for when the ball explodes
+	this->display->GetAssets()->GetESPAssets()->AddBallExplodedEffect(&explodedBall);
+}
+
 void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
 	debug_output("EVENT: Ball death, lives left: " << livesLeft);
 	
 	// Kill all effects that may have previously been occuring...
+	this->display->GetAssets()->DeactivateLastBallDeathEffects();
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveEffects();
 		
 	// Check to see if it's game over, and switch the display state appropriately

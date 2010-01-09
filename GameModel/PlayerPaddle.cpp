@@ -344,8 +344,8 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		return;
 	}
 	
-	// Check for laser paddle
-	if ((this->GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
+	// Check for laser bullet paddle (shoots little laser bullets from the paddle)
+	if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 		// Make sure we are allowed to fire a new laser blast
 		if (this->timeSinceLastLaserBlast >= PADDLE_LASER_DELAY) {
 			// Fire ze laser! - tell the model about it

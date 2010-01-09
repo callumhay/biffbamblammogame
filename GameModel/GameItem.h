@@ -17,7 +17,7 @@ class GameItem {
 public:
 	enum ItemDisposition { Good, Bad, Neutral };
 	enum ItemType { BallSafetyNetItem, BallGrowItem, BallShrinkItem, BlackoutItem, GhostBallItem, 
-									InvisiBallItem, LaserBulletPaddleItem, MultiBall3Item, MultiBall5Item, 
+									InvisiBallItem, LaserBulletPaddleItem, LaserBeamPaddleItem, MultiBall3Item, MultiBall5Item, 
 									OneUpItem, PaddleCamItem, BallCamItem, PaddleGrowItem, PaddleShrinkItem, 
 									PoisonPaddleItem, StickyPaddleItem, UberBallItem, UpsideDownItem, BallSpeedUpItem, 
 									BallSlowDownItem };

@@ -38,7 +38,8 @@ private:
 	// and execute each in the order they come in, only
 	enum TransformAnimationType { LevelFlipAnimation, ToPaddleCamAnimation, 
 																FromPaddleCamAnimation, ToBallCamAnimation,
-																FromBallCamAnimation };
+																FromBallCamAnimation, ToBallDeathAnimation,
+																FromBallDeathAnimation };
 
 	struct TransformAnimation {
 		TransformAnimationType type;
@@ -57,11 +58,17 @@ private:
 	// Paddle and ball camera related variables
 	static const double SECONDS_PER_UNIT_PADDLECAM;
 	static const double SECONDS_PER_UNIT_BALLCAM;
+	static const double SECONDS_PER_UNIT_DEATHCAM;
+	
+	static const float BALL_DEATH_CAM_DIST_TO_BALL;
+
+	bool isBallDeathCamIsOn;
+
 	PlayerPaddle* paddleWithCamera;	// Will be the paddle where the camera is in paddle cam mode, NULL otherwise
 	GameBall* ballWithCamera;				// Will be the ball where the camera is in ball cam mode, NULL otherwise
-	float cameraFOVAngle;
-
+	
 	// Camera transformations
+	float cameraFOVAngle;
 	Orientation3D defaultCamOrientation;
 	Orientation3D currCamOrientation;
 
@@ -69,6 +76,7 @@ private:
 	std::list<AnimationLerp<float>> levelFlipAnimations;
 	std::list<AnimationMultiLerp<Orientation3D>> paddleCamAnimations;
 	std::list<AnimationMultiLerp<Orientation3D>> ballCamAnimations;
+	std::list<AnimationMultiLerp<Orientation3D>> ballDeathAnimations;
 	std::list<AnimationMultiLerp<float>> camFOVAnimations;
 
 	bool TickLevelFlipAnimation(double dT);
@@ -83,6 +91,10 @@ private:
 	void StartBallCamAnimation(double dT, GameModel& gameModel);
 	void FinishBallCamAnimation(double dT, GameModel& gameModel);
 
+	bool TickBallDeathAnimation(double dT, GameModel& gameModel);
+	void StartBallDeathAnimation(double dT, GameModel& gameModel);
+	void FinishBallDeathAnimation(double dT, GameModel& gameModel);
+
 	void GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, float levelWidth, float levelHeight, Vector3D& paddleCamPos, float& fov);
 	void GetBallCamPositionAndFOV(const GameBall& ball, float levelWidth, float levelHeight, Vector3D& ballCamPos, float& fov); 
 
@@ -96,6 +108,7 @@ public:
 	void FlipGameUpsideDown();
 	void SetPaddleCamera(bool putCamInsidePaddle);
 	void SetBallCamera(bool putCamInsideBall);
+	void SetBallDeathCamera(bool turnOnBallDeathCam);
 
 	// Setup functions for telling the camera/level where it should be by default
 	void SetupLevelCameraDefaultPosition(const GameLevel& level);

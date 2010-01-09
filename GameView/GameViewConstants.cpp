@@ -33,6 +33,7 @@ CGFX_STICKYPADDLE_SHADER(SHADER_DIRECTORY						"/StickyPaddle.cgfx"),
 CGFX_FULLSCREENSMOKEY_SHADER(SHADER_DIRECTORY				"/PostSmokey.cgfx"),
 CGFX_FULLSCREEN_UBERINTENSE_SHADER(SHADER_DIRECTORY "/PostUberIntense.cgfx"),
 CGFX_PRISM_SHADER(SHADER_DIRECTORY									"/Prism.cgfx"),
+CGFX_LASERBEAM_SHADER(SHADER_DIRECTORY						  "/LaserBeam.cgfx"),
 
 // Texture Asset Paths
 TEXTURE_BANG1(TEXTURE_DIRECTORY  "/Bang1_256x128.png"),
@@ -93,6 +94,7 @@ TEXTURE_ITEM_POISON(TEXTURE_DIRECTORY				"/poison_powerdown256x128.jpg"),
 TEXTURE_ITEM_STICKYPADDLE(TEXTURE_DIRECTORY "/stickypaddle_powerup256x128.jpg"),
 TEXTURE_ITEM_PADDLECAM(TEXTURE_DIRECTORY		"/paddlecam_powerdown_256x128.jpg"),
 TEXTURE_ITEM_BALLCAM(TEXTURE_DIRECTORY			"/ballcam_powerdown_256x128.jpg"),
+TEXTURE_ITEM_PADDLEBEAM(TEXTURE_DIRECTORY		"/laserbeampaddle_powerup_256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
 TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud256x128.png"),
@@ -215,6 +217,7 @@ void GameViewConstants::InitItemTextures() {
 	this->itemTextures.insert(std::make_pair(GameItem::StickyPaddleItem,				this->TEXTURE_ITEM_STICKYPADDLE));
 	this->itemTextures.insert(std::make_pair(GameItem::PaddleCamItem,						this->TEXTURE_ITEM_PADDLECAM));
 	this->itemTextures.insert(std::make_pair(GameItem::BallCamItem,							this->TEXTURE_ITEM_BALLCAM));
+	this->itemTextures.insert(std::make_pair(GameItem::LaserBeamPaddleItem,			this->TEXTURE_ITEM_PADDLEBEAM));
 }
 
 void GameViewConstants::InitItemTimerTextures() {

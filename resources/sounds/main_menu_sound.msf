@@ -1,5 +1,5 @@
-ignore MainMenuBackgroundMask {
-   file     = test/mask_test_sound.wav
+MainMenuBackgroundMask {
+   file     = (5: main_menu/BGpiano.wav)
 }
 
 ignore MainMenuBackgroundBangSmallEvent {
@@ -15,25 +15,24 @@ ignore MainMenuBackgroundBangBigEvent {
 }
 
 ignore MainMenuItemHighlightedEvent {
-   file     = (5 : test/event_test_sound.wav) (2 : test/laugh.wav) (3: test/gunsilenced.wav) (1 :test/waterdive.wav) (1: test/procupine.wav) (3: test/demo.wav)
-   delay    = 0
-   loops    = 1
+   file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
    fadein   = 0
    fadeout  = 0
 }
 
 ignore MainMenuItemEnteredEvent {
-   file     = (5 : test/event_test_sound.wav)
+   file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
 }
 
 ignore MainMenuItemBackAndCancelEvent {
+   file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
 }
 
 ignore MainMenuItemVerifyAndSelectEvent {
-   file     = ( 5: test/event_test_sound.wav)
+   file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
 }
 
 ignore MainMenuItemScrolledEvent {
-   file     = (5: test/event_test_sound.wav )
+   file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
 }
 

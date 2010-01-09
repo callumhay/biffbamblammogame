@@ -14,8 +14,8 @@
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
-const double LaserPaddleItem::LASER_PADDLE_TIMER_IN_SECS	= 10.0;
-const std::string LaserPaddleItem::LASER_PADDLE_ITEM_NAME = "LaserShotPaddle";
+const double LaserPaddleItem::LASER_PADDLE_TIMER_IN_SECS	= 15.0;
+const std::string LaserPaddleItem::LASER_PADDLE_ITEM_NAME = "LaserBulletPaddle";
 
 LaserPaddleItem::LaserPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(LASER_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {
@@ -48,7 +48,7 @@ double LaserPaddleItem::Activate() {
 	}
 
 	// Make the paddle have laser shooting abilities
-	paddle->AddPaddleType(PlayerPaddle::LaserPaddle);
+	paddle->AddPaddleType(PlayerPaddle::LaserBulletPaddle);
 
 	GameItem::Activate();
 	return LaserPaddleItem::LASER_PADDLE_TIMER_IN_SECS;
@@ -62,8 +62,8 @@ void LaserPaddleItem::Deactivate() {
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	assert(paddle != NULL);
 	
-	// Make the ball normal again
-	paddle->RemovePaddleType(PlayerPaddle::LaserPaddle);
+	// Make the paddle normal again
+	paddle->RemovePaddleType(PlayerPaddle::LaserBulletPaddle);
 	this->isActive = false;
 	GameItem::Deactivate();
 }

@@ -34,7 +34,8 @@ public:
 	static const float PADDLE_HALF_WIDTH;
 	static const float PADDLE_HALF_HEIGHT;
 
-	enum PaddleType { NormalPaddle = 0x00000000, LaserPaddle = 0x00000001, PoisonPaddle = 0x00000010, StickyPaddle = 0x00000100 };
+	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000010, 
+										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000 };
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
 private:

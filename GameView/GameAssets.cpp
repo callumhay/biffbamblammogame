@@ -172,11 +172,11 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		CgFxEffectBase* ballEffectTemp = NULL;
 		Colour currBallColour(0,0,0);
 
-		Point2D ballPos = currBall->GetBounds().Center();
+		Point3D ballPos = currBall->GetCenterPosition();
 
 		if (currBall->GetBallType() == GameBall::NormalBall) {
 			// Normal ball with a regular light
-			avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], 0.0f);
+			avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], ballPos[2]);
 			avgBallColour = avgBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
 			visibleBallCount++;
 		}
@@ -230,7 +230,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			}
 			else {
 				// We only take the average of visible balls.
-				avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], 0.0f);
+				avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], ballPos[2]);
 			
 				assert(numColoursApplied > 0);
 				avgBallColour = avgBallColour + (currBallColour / numColoursApplied);
@@ -250,7 +250,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 		glPushMatrix();
 		float ballScaleFactor = currBall->GetBallScaleFactor();
-		glTranslatef(ballPos[0], ballPos[1], 0);
+		glTranslatef(ballPos[0], ballPos[1], ballPos[2]);
 		
 		// Draw background effects for the ball
 		this->espAssets->DrawBackgroundBallEffects(dT, camera, *currBall);
@@ -356,7 +356,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 
 	// In the case of a laser paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
-	if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
+	if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		// Draw attachment (gun) mesh
 		this->paddleLaserAttachment->Draw(dT, p, camera, paddleKeyLight, paddleFillLight);
@@ -399,7 +399,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		this->paddleStickyAttachment->Draw(*paddle, camera, paddleKeyLight, paddleFillLight, ballLight);
 	}
 
-	if ((paddle->GetPaddleType() & PlayerPaddle::LaserPaddle) == PlayerPaddle::LaserPaddle) {
+	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 		// Draw glowy effects where the laser originates...
 		this->espAssets->DrawPaddleLaserEffects(dT, camera, *paddle);
 	}
@@ -462,7 +462,7 @@ void GameAssets::DrawActiveItemHUDElements(const GameModel& gameModel, int displ
 	
 	// If the laser paddle is active and paddle camera is also active then we draw a crosshair overlay
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-	if (paddle->GetPaddleType() == PlayerPaddle::LaserPaddle && paddle->GetIsPaddleCameraOn()) {
+	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle && paddle->GetIsPaddleCameraOn()) {
 		this->crosshairHUD->Draw(displayWidth, displayHeight, (1.0 - paddle->GetColour().A()));
 	}
 }
@@ -614,12 +614,23 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			}
 			break;
 
-		case GameItem::BallCamItem:
-			// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
-			// NOTE that this is not permanent and just does so for any currently falling items
-			this->espAssets->TurnOffCurrentItemDropStars(camera);
-			// Fade out the background...
-			this->worldAssets->FadeBackground(true, 2.0f);
+		case GameItem::BallCamItem: {
+				// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
+				// NOTE that this is not permanent and just does so for any currently falling items
+				this->espAssets->TurnOffCurrentItemDropStars(camera);
+
+				// Change the position of the key light so that it is facing down with the ball
+				float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
+
+				Point3D newFGKeyLightPos(0.0f, (halfLevelHeight + 10.0f), 0.0f);
+				Point3D newFGFillLightPos(0.0f, -(halfLevelHeight + 10.0f), 0.0f);
+				
+				this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
+				this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
+
+				// Fade out the background...
+				this->worldAssets->FadeBackground(true, 2.0f);
+			}
 			break;
 
 		default:
@@ -668,6 +679,10 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 			break;
 
 		case GameItem::BallCamItem: 
+			// Move the foreground key and fill lights back to their default positions...
+			this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
+			this->lightAssets->RestoreLightPosition(GameLightAssets::FGFillLight, 2.0f);
+
 			// Show the background once again...
 			this->worldAssets->FadeBackground(false, 2.0f);
 			break;
@@ -683,4 +698,23 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 void GameAssets::DeactivateMiscEffects() {
 	this->fboAssets->DeactivateInkSplatterEffect();
 	this->espAssets->KillAllActiveEffects();
+}
+
+/**
+ * Activate effects associated with the final ball about to die - this should
+ * be called just as the last ball is spiralling towards its death.
+ */
+void GameAssets::ActivateLastBallDeathEffects(const GameBall& lastBall) {
+	// Fade out the world background since the camera is going to be moving places we don't
+	// want the player to see
+	this->worldAssets->FadeBackground(true, 0.2f);
+}
+
+/**
+ * Deactivate any effects that need to be deactivated from when the last
+ * ball was dieing.
+ */
+void GameAssets::DeactivateLastBallDeathEffects() {
+	// Bring the world background back into view
+	this->worldAssets->FadeBackground(false, 2.0f);
 }
