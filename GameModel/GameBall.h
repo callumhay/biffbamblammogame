@@ -81,6 +81,9 @@ public:
 	void SetColour(const ColourRGBA& c) {
 		this->colour = c;
 	}
+	void SetAlpha(float alpha) {
+		this->colour[3] = alpha;
+	}
 	void AnimateFade(bool fadeOut, double duration);
 
 	Vector3D GetRotation() const {

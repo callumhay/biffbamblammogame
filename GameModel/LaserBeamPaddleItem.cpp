@@ -53,12 +53,6 @@ void LaserBeamPaddleItem::Deactivate() {
 	if (!this->isActive) {
 		return;
 	}
-
-	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
-	assert(paddle != NULL);
-	
-	// Make the paddle normal again - remove the laser beam power-up
-	paddle->RemovePaddleType(PlayerPaddle::LaserBeamPaddle);
 	this->isActive = false;
 	GameItem::Deactivate();
 }

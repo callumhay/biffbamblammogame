@@ -24,6 +24,8 @@ currAnimationState(BallDeathState::SpiralingToDeath) {
 	this->gameModel->SetPause(GameModel::PausePaddle);
 	// Move the camera to follow the ball as it dies
 	this->gameModel->GetTransformInfo()->SetBallDeathCamera(true);
+	// Make sure the ball is visible
+	this->lastBallToBeAlive->SetAlpha(1.0f);
 
 	// Setup any animations for the ball
 	this->spiralAnimation = AnimationLerp<float>(&this->spiralRadius);
@@ -39,7 +41,7 @@ BallDeathState::~BallDeathState() {
 	this->gameModel->ClearProjectiles();
 	this->gameModel->ClearLiveItems();
 	this->gameModel->ClearActiveTimers();
-
+	
 	// Allow the player to control the paddle again
 	this->gameModel->UnsetPause(GameModel::PausePaddle);
 }
@@ -103,7 +105,7 @@ void BallDeathState::ExecuteSpiralingToDeathState(double dT) {
 		GameEventManager::Instance()->ActionLastBallExploded(*this->lastBallToBeAlive);
 
 		// Make the ball disappear as it explodes
-		this->lastBallToBeAlive->SetColour(ColourRGBA(1,1,1,0));
+		this->lastBallToBeAlive->SetAlpha(0.0f);
 	}
 	else {
 		timeElapsed += dT;

@@ -56,6 +56,7 @@ void GameTransformMgr::Reset() {
 	this->ballCamAnimations.clear();
 	this->ballDeathAnimations.clear();
 	this->camFOVAnimations.clear();
+	this->animationQueue.clear();
 }
 
 /**
@@ -141,7 +142,7 @@ void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
 	if (turnOnBallDeathCam) {
 		// Get rid of all other animations that may be in the queue - 
 		// ball death takes presedence over all other animations
-		this->animationQueue.clear();
+		this->Reset();
 		animType = GameTransformMgr::ToBallDeathAnimation;	
 	}
 	else {
