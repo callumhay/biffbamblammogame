@@ -36,11 +36,13 @@ const float PlayerPaddle::DEFAULT_SPEED = 24.0f;
 // Speed amount taken off the paddle when poisoned
 const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_SPEED / 2.75f;
 // Delay between shots of the laser
-const float PlayerPaddle::PADDLE_LASER_DELAY = 0.25f;
+const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.25;
+// Time that the laser beam lasts for in seconds
+const double PlayerPaddle::PADDLE_LASER_BEAM_LENGTH = 5.0;
 
 PlayerPaddle::PlayerPaddle() : 
 	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 
-	avgVel(0.0f), ticksSinceAvg(0), timeSinceLastLaserBlast(PADDLE_LASER_DELAY), 
+	avgVel(0.0f), ticksSinceAvg(0), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
 	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
 	attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1) {
 
@@ -235,7 +237,7 @@ void PlayerPaddle::MoveAttachedBallToNewBounds() {
 void PlayerPaddle::Tick(double seconds) {
 	// Check to see if we need to increment seconds since the previous laser shot
 	// This makes sure the user can't consecutively fire lasers like some sort of mad person
-	if (this->timeSinceLastLaserBlast < PADDLE_LASER_DELAY) {
+	if (this->timeSinceLastLaserBlast < PADDLE_LASER_BULLET_DELAY) {
 		this->timeSinceLastLaserBlast += seconds;
 	}
 
@@ -250,7 +252,8 @@ void PlayerPaddle::Tick(double seconds) {
 
 	// If a ball is attached, it could affect the min and max x boundries of the paddle so 
 	// adjust the boundries based on the position of the ball on the paddle
-	if (this->attachedBall != NULL) {	
+	bool ballIsAttached = this->attachedBall != NULL;
+	if (ballIsAttached) {	
 		float ballX = this->attachedBall->GetBounds().Center()[0] + distanceTravelled;
 		float ballMinX = ballX - this->attachedBall->GetBounds().Radius();
 		float ballMaxX = ballX + this->attachedBall->GetBounds().Radius();
@@ -318,11 +321,23 @@ void PlayerPaddle::Tick(double seconds) {
 	}
 
 	// If there is a ball attached then we need to move it around with the paddle
-	if (this->attachedBall != NULL) {
+	if (ballIsAttached) {
 		// We need to figure out what the distance is from the paddle center-top to the ball center
 		Vector2D paddleTopCenterToBallCenter = this->attachedBall->GetBounds().Center() - (oldPaddleCenter + Vector2D(0, this->GetHalfHeight()));
 		// Maintain the vector obtained above in the new position of the paddle
 		this->attachedBall->SetCenterPosition(this->centerPos + Vector2D(0, this->GetHalfHeight()) + paddleTopCenterToBallCenter);
+	}
+	// Check for a laser beam - it will shoot as long as it is active
+	else if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
+		// If the timer has run out then disable the laser beam
+		if (this->laserBeamTimer <= 0.0) {
+			this->laserBeamTimer = 0.0;
+			this->RemovePaddleType(PlayerPaddle::LaserBeamPaddle);
+		}
+		else {
+			// Decrement the timer for the beam
+			this->laserBeamTimer -= seconds;
+		}
 	}
 }
 
@@ -344,11 +359,19 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		return;
 	}
 	
+	// Check for laser beam paddle (this has top priority)
+	if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
+		// This is a one-shot power-up, so shoot it and disable it
+		//gameModel->AddBeam(Beam::PaddleLaserBeam);
+
+		// Set the timer for the beam (it will last for this long)
+		this->laserBeamTimer = PlayerPaddle::PADDLE_LASER_BEAM_LENGTH;
+	}
 	// Check for laser bullet paddle (shoots little laser bullets from the paddle)
-	if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
-		// Make sure we are allowed to fire a new laser blast
-		if (this->timeSinceLastLaserBlast >= PADDLE_LASER_DELAY) {
-			// Fire ze laser! - tell the model about it
+	else if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
+		// Make sure we are allowed to fire a new laser bullet
+		if (this->timeSinceLastLaserBlast >= PADDLE_LASER_BULLET_DELAY) {
+			// Fire ze laser bullet! - tell the model about it
 			gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + PaddleLaser::PADDLELASER_HALF_HEIGHT));
 
 			// Reset the timer for the next laser blast

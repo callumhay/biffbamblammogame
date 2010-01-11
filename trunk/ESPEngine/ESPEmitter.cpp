@@ -205,8 +205,7 @@ void ESPEmitter::Draw(const Camera& camera, bool enableDepth) {
 	// Setup OpenGL for drawing the particles in this emitter...
 	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | 
 		GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_MULTISAMPLE_BIT | GL_POINT_BIT); 	
-	
-	glDisable(GL_MULTISAMPLE);
+
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_LIGHTING);
 	enableDepth ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);

@@ -47,7 +47,8 @@ private:
 
 	static const int AVG_OVER_TICKS  = 60;
 
-	static const float PADDLE_LASER_DELAY;	// Delay between shots of the laser
+	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
+	static const double PADDLE_LASER_BEAM_LENGTH;		// Time that the laser beam is active for
 
 	float distTemp;			// A temporary store for the change in movement
 	float avgVel;				// Keeps the average velocity (over the past AVG_OVER_TICKS ticks) of the paddle at a given time
@@ -70,7 +71,8 @@ private:
 	
 	BoundingLines bounds;						// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
 	
-	float timeSinceLastLaserBlast;	// Time since the last laser projectile was fired
+	double timeSinceLastLaserBlast;	// Time since the last laser projectile/bullet was fired
+	double laserBeamTimer;					// Time left on the laser beam power-up
 
 	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
 
@@ -93,9 +95,12 @@ public:
 
 	// Reset the dimensions and position of this paddle (e.g., after death, start of a level).
 	void ResetPaddle() {
+		this->timeSinceLastLaserBlast = 0.0;
+		this->laserBeamTimer = 0.0;
 		this->currSize = PlayerPaddle::NormalSize;
 		this->SetDimensions(PlayerPaddle::NormalSize);
 		this->centerPos = Point2D((maxBound + minBound)/2.0f, this->currHalfHeight);
+		this->currType = PlayerPaddle::NormalPaddle;
 	}
 
 	// Obtain the center position of this paddle.

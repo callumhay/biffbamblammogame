@@ -43,12 +43,6 @@ void BallInPlayState::BallReleaseKeyPressed() {
 	// Check for paddle items that use the action key...
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	paddle->Shoot(this->gameModel);
-
-	
-	// TODO: More action button related things go here...
-	// - stickypaddle
-	// - rocketpaddle
-	// ...
 }
 
 /**

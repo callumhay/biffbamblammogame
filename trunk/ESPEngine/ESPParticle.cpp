@@ -79,7 +79,7 @@ void ESPParticle::DrawAsPointSprite(const Camera& camera) {
 	Point3D camPos = camera.GetCurrentCameraPosition();
 	Vector3D vecToCam = camPos - this->position;
 	
-	float dist = vecToCam.length();
+	float dist = std::max<float>(1.0, vecToCam.length());
 	glPointSize((1000.0f / dist) * this->size[0]);
 
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);

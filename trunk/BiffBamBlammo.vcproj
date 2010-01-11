@@ -299,6 +299,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Tree.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\Vector.h"
 					>
 				</File>
