@@ -1,58 +1,52 @@
 #ifndef __TREE_H__
 #define __TREE_H__
 
-#include <vector>
+#include "Collision.h"
 
-template<class T> class Node {
+class QuadTree {
+
 public:
-	Node() {}
-	Node(T value) : value(value) {}
-	~Node() {
-		this->RemoveAllChildren();
-	}
 
-	size_t GetNumChildren() const { return this->children.size(); }
-	Node<T>* GetChildAt(size_t i) const { return this->children[i]; }
-	T GetValue() const { return this->value; }
-
-	void RemoveAllChildren() {
-		for (std::vector<Node<T>*>::iterator iter = this->children.begin(); iter != this->children.end(); ++iter) {
-			Node<T>* currNode = *iter;
-			delete currNode;
-			currNode = NULL;
+	struct QuadTreeNode {
+		enum ChildIndex { TopLeft = 0, TopRight = 1, BottomLeft = 2, BottomRight = 3 };
+		
+		Collision::AABB2D bounds;
+		QuadTreeNode* children[4];
+		
+		QuadTreeNode(const Collision::AABB2D bounds) : bounds(bounds) {
+			for (size_t i = 0; i < 4; i++) {
+				this->children[i] = NULL;
+			}
 		}
-	}
-	void AddChild(const Node<T>& child) {
-		this->children.push_back(child);
-	}
+		
+		~QuadTreeNode() {
+			for (size_t i = 0; i < 4; i++) {
+				if (this->children[i] != NULL) {
+					delete this->children[i];
+					this->children[i] = NULL;
+				}
+			}
+		}
 
-private:
-	T value;
-	std::vector<Node<T>*> children; 
-};
+		bool HasChildren() const {
+			return (this->children[0] == NULL || this->children[1] == NULL || this->children[2] == NULL || this->children[3] == NULL);
+		}
 
-template<class T> class Tree {
-public:
-	Tree() : root(NULL) {}
-	~Tree() {
-		this->SetRoot(NULL);
-	}
+	};
 
-	void SetRoot(Node<T>* root) { 
+	~QuadTree() {
 		if (this->root != NULL) {
 			delete this->root;
 		}
-		this->root = root; 
 	}
 
-	Node<T>* GetRoot() const { return this->root; }
+	QuadTree(const Collision::AABB2D& maxSizeBounds, const Vector2D& minDimensions);
+	std::list<const QuadTree::QuadTreeNode*> GetCollidingNodes(const Collision::Ray2D& ray) const;
 
 private:
-	Node<T>* root;
+	
+	QuadTreeNode* root;
 
-	// Disallow copying and assigning this class
-	Tree(const Tree& t);
-	Tree operator=(const Tree& t);
 };
 
 #endif

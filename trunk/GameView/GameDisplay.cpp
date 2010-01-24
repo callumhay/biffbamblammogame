@@ -77,6 +77,7 @@ void GameDisplay::Render(double dT) {
 
 	// Update the game model
 	this->model->Tick(dT);
+	this->model->UpdateState();
 }
 
 

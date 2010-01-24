@@ -9,6 +9,7 @@
 #include <set>
 
 class GameBall;
+class QuadTree;
 
 // Represents a game level, also deals with game level 'lvl' file reading.
 class GameLevel {
@@ -35,6 +36,8 @@ private:
 	unsigned int width, height;																// Size values for the level
 	bool ballSafetyNetActive;
 	
+	//QuadTree* levelTree;	// A quad tree representing the boundries of this entire level and all its pieces
+
 	GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces);
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces, size_t hIndex, size_t wIndex);
@@ -59,6 +62,8 @@ public:
 
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const GameBall& b) const;
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Projectile& p) const;
+
+	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, const LevelPiece* ignorePiece, float& rayT) const;
 	
 	// Get whether or not the ball safety net is currently active
 	bool IsBallSafetyNetActive() const {

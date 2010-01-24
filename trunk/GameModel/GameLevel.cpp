@@ -22,6 +22,8 @@
 #include "InkBlock.h"
 #include "PrismBlock.h"
 
+#include "../BlammoEngine/Tree.h"
+
 #include "../ResourceManager.h"
 
 const char GameLevel::EMPTY_SPACE_CHAR				= 'E';
@@ -44,14 +46,19 @@ const char GameLevel::TRI_RIGHT_CORNER		= 'r';
 GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces): currentLevelPieces(pieces),
 piecesLeft(numBlocks), ballSafetyNetActive(false) {
 	assert(pieces.size() > 0);
+	
+	// Set the dimensions of the level
 	this->width = pieces[0].size();
 	this->height = pieces.size();
+
+	// Set the quad tree for the level
+	Point2D levelMax(this->GetLevelUnitWidth(), this->GetLevelUnitHeight());
+	//this->levelTree = new QuadTree(Collision::AABB2D(Point2D(0, 0), levelMax), Vector2D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT));
 }
 
 // Destructor, clean up heap stuffs
 GameLevel::~GameLevel() {
-
-	// TODO: FIX THIS STUFF??? IT CRASHES...
+	// Clean up level pieces
 	for (size_t i = 0; i < this->currentLevelPieces.size(); i++) {
 		for (size_t j = 0; j < this->currentLevelPieces[i].size(); j++) {
 			delete this->currentLevelPieces[i][j];
@@ -60,6 +67,10 @@ GameLevel::~GameLevel() {
 		this->currentLevelPieces[i].clear();
 	}
 	this->currentLevelPieces.clear();
+
+	// Clean up the quad tree
+	//delete this->levelTree;
+	//this->levelTree = NULL;
 }
 
 GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
@@ -375,7 +386,7 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
 		}
 	}
 	else {
-			// No matter what there are some number of collisions along the x-axis
+		// No matter what there are some number of collisions along the x-axis
 		for (int x = xIndexMin; x <= xIndexMax; x++) {
 			colliders.insert(this->currentLevelPieces[yIndexMin][x]);
 		}
@@ -435,11 +446,56 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Projecti
 }
 
 /**
+ * Get the first piece in the level to collide with the given ray, if the ray does not collide
+ * with any piece in the level then NULL is returned.
+ * The given ray is in game world space.
+ * Returns: The first piece closest to the origin of the given ray that collides with it, NULL
+ * if no collision found.
+ */
+LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray, const LevelPiece* ignorePiece, float& rayT) const {
+	// Step along the ray - not a perfect algorithm but will result in something very reasonable
+	const float LEVEL_WIDTH					 = this->GetLevelUnitWidth();
+	const float LEVEL_HEIGHT				 = this->GetLevelUnitHeight();
+	const float LONGEST_POSSIBLE_RAY = sqrt(LEVEL_WIDTH*LEVEL_WIDTH + LEVEL_HEIGHT*LEVEL_HEIGHT);
+	const float STEP_SIZE						 = 0.9f * std::min<float>(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
+
+	int NUM_STEPS = static_cast<int>(LONGEST_POSSIBLE_RAY / STEP_SIZE);
+	for (int i = 0; i < NUM_STEPS; i++) {
+		Point2D currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
+
+		// Indices of the sampled level piece can be found using the point...
+		int wSampleIndex = static_cast<int>(floorf(currSamplePoint[0]) / LevelPiece::PIECE_WIDTH);
+		int hSampleIndex = static_cast<int>(floorf(currSamplePoint[1]) / LevelPiece::PIECE_HEIGHT);
+		
+		// Make sure the ray hasn't gone out of bounds
+		if (wSampleIndex < 0 || hSampleIndex < 0) {
+			continue;
+		}
+		else if (static_cast<size_t>(wSampleIndex) >= this->width || static_cast<size_t>(hSampleIndex) >= this->height) {
+			continue;
+		}
+
+		// Grab the piece at that index
+		LevelPiece* currSamplePiece = this->currentLevelPieces[hSampleIndex][wSampleIndex];
+		assert(currSamplePiece != NULL);
+
+		// Check to see if the piece can be collided with, if so try to collide the ray with
+		// the actual block bounds, if there's a collision we get out of here and just return the piece
+		if (currSamplePiece != ignorePiece && currSamplePiece->CollisionCheck(ray, rayT)) {
+			return currSamplePiece;
+		}
+
+	}
+
+	return NULL;
+}
+
+/**
  * Do a collision check with the ball safety net if it's active.
  * Returns: true on collision (when active) and the normal and distance values, false otherwise.
  */
 bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, Vector2D& n, float& d) {
-	if (!this->ballSafetyNetActive) {
+	if (!this->ballSafetyNetActive){ 
 		return false;
 	}
 

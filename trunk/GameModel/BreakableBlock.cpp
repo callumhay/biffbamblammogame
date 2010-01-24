@@ -18,7 +18,7 @@
 #include "GameEventManager.h"
 
 BreakableBlock::BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc) : 
-LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)) {
+LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLifePoints(PIECE_STARTING_LIFE_POINTS) {
 	assert(IsValidBreakablePieceType(type));
 
 	this->colour = BreakableBlock::GetColourOfBreakableType(this->pieceType);

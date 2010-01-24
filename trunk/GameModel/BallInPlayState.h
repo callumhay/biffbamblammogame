@@ -23,9 +23,11 @@ private:
 	void DoBallCollision(GameBall& ball1, GameBall& ball2);
 	void DoItemCollision();
 	
+	//void UpdateActiveBalls(double seconds);
 	void UpdateActiveTimers(double seconds);
 	void UpdateActiveItemDrops(double seconds);
 	void UpdateActiveProjectiles(double seconds);
+	void UpdateActiveBeams(double seconds);
 
 public:
 	BallInPlayState(GameModel* gm);

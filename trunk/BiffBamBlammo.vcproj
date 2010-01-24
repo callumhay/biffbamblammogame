@@ -327,6 +327,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Collision.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\FBObj.cpp"
 					>
 				</File>
@@ -392,6 +396,10 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\TextureFontSet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BlammoEngine\Tree.cpp"
 					>
 				</File>
 			</Filter>
@@ -951,6 +959,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\LevelCompleteState.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\Onomatoplex.h"
 					>
 				</File>
@@ -960,6 +972,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\Projectile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\WorldCompleteState.h"
 					>
 				</File>
 			</Filter>
@@ -1027,6 +1043,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\LevelCompleteState.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\Onomatoplex.cpp"
 					>
 				</File>
@@ -1036,6 +1056,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\Projectile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\WorldCompleteState.cpp"
 					>
 				</File>
 			</Filter>

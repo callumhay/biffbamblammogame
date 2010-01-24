@@ -24,13 +24,15 @@ class GameModel {
 
 private:
 	GameState* currState;		// The current game state
+	GameState* nextState;
 
 	// Player-controllable game assets
 	PlayerPaddle* playerPaddle;
 	std::list<GameBall*> balls;
 
-	// Projectiles spawned via various means as the game is played
-	std::list<Projectile*> projectiles;
+	
+	std::list<Projectile*> projectiles;		// Projectiles spawned as the game is played
+	std::list<Beam*> beams;								// Beams spawned as the game is played
 
 	// Current world and level information
 	unsigned int currWorldNum;
@@ -61,22 +63,21 @@ private:
 
 	// Private getters and setters ****************************************
 	void SetCurrentWorld(unsigned int worldNum);
-	void IncrementLevel();
 
 	GameWorld* GetCurrentWorld() const {
 		return this->worlds[this->currWorldNum];
 	}
 
-	void SetCurrentState(GameState* nextState) {
-		assert(nextState != NULL);
+	void SetCurrentStateImmediately(GameState* newState) {
+		assert(newState != NULL);
 		if (this->currState != NULL) {
 			delete this->currState;
 		}
-		this->currState = nextState;
+		this->currState = newState;
 	}
 
-	void CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& stateChanged);
-	void CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& stateChanged);
+	void CollisionOccurred(Projectile* projectile, LevelPiece* p);
+	void CollisionOccurred(const GameBall& ball, LevelPiece* p);
 	void BallPaddleCollisionOccurred(GameBall& ball);
 	void BallDied(GameBall* deadBall, bool& stateChanged);
 	
@@ -113,6 +114,7 @@ private:
 	}
 
 	void ClearProjectiles();
+	void ClearBeams();
 	void ClearLiveItems();
 	void ClearActiveTimers();
 
@@ -127,6 +129,21 @@ public:
 
 	GameModel();
 	~GameModel();
+
+	// The given next state will become the next state when update state is called
+	void SetNextState(GameState* nextState) {
+		if (this->nextState != NULL) {
+			delete this->nextState;
+		}
+		this->nextState = nextState;
+	}
+	// Update the current state to the next state if there is a next state set
+	void UpdateState() {
+		if (this->nextState != NULL) {
+			this->SetCurrentStateImmediately(this->nextState);
+			this->nextState = NULL;
+		}
+	}
 
 	// General public methods for the model ********************************
 	void Tick(double seconds);
@@ -188,6 +205,10 @@ public:
 
 	std::list<Projectile*>& GetActiveProjectiles() {
 		return this->projectiles;
+	}
+
+	std::list<Beam*>& GetActiveBeams() {
+		return this->beams;
 	}
 
 	/**
@@ -294,6 +315,7 @@ public:
 
 	void AddPossibleItemDrop(LevelPiece* p);
 	Projectile* AddProjectile(Projectile::ProjectileType type, const Point2D& spawnLoc);
+	void AddBeam(int beamType);
 
 	// Debug functions
 #ifdef _DEBUG
@@ -311,6 +333,9 @@ public:
 	friend class GameState;
 	friend class BallOnPaddleState;
 	friend class BallInPlayState;
+	friend class LevelCompleteState;
+	friend class WorldCompleteState;
+
 	friend class BallDeathState;
 	friend class GameOverState;
 };

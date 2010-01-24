@@ -30,6 +30,7 @@
 #include "StickyPaddleItem.h"
 #include "PaddleCamItem.h"
 #include "BallCamItem.h"
+#include "LaserBeamPaddleItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -89,6 +90,8 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new PaddleCamItem(spawnOrigin, gameModel);																		// bad
 		case 19:
 			return new BallCamItem(spawnOrigin, gameModel);																			// bad
+		case 20:
+			return new LaserBeamPaddleItem(spawnOrigin, gameModel);															// good
 		default:
 			assert(false);
 	}
@@ -160,6 +163,9 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 		
 		case GameItem::BallCamItem:
 			return new BallCamItem(spawnOrigin, gameModel);
+
+		case GameItem::LaserBeamPaddleItem:
+			return new LaserBeamPaddleItem(spawnOrigin, gameModel);
 
 		default:
 			assert(false);

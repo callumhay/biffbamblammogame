@@ -53,6 +53,12 @@ public:
 		return true;
 	}
 
+	// Empty blocks do not reflect or refract light.
+	// Returns: false
+	virtual bool IsLightReflectorRefractor() const {
+		return false;
+	}
+
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,

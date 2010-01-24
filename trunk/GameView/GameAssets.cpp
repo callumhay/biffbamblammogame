@@ -401,7 +401,11 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 
 	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 		// Draw glowy effects where the laser originates...
-		this->espAssets->DrawPaddleLaserEffects(dT, camera, *paddle);
+		this->espAssets->DrawPaddleLaserBulletEffects(dT, camera, *paddle);
+	}
+	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
+		// TODO: Draw glow and other related effects for when the laser is blasting its laser beam
+		//this->espAssets->DrawPaddleLaserBeamEffects(dT, camera, *paddle);
 	}
 
 	glPopMatrix();

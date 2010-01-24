@@ -54,6 +54,12 @@ public:
 		return false;
 	}
 
+	// Ink blocks do not reflect or refract light.
+	// Returns: false
+	virtual bool IsLightReflectorRefractor() const {
+		return false;
+	}
+
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel);	
 	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
