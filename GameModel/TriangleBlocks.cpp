@@ -106,6 +106,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 		// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
 		if (!projectile->IsLastLevelPieceCollidedWith(this)) {
 
+			/*
 			// Obtain all the normals of the lines that the projectile is colliding with...
 			std::vector<int> collidingIndices = this->bounds.CollisionCheckIndices(projectile->BuildBoundingLines());
 			Vector2D collisionNormal;
@@ -179,15 +180,120 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 				projectile->SetPosition(projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection());
 				projectile->SetVelocity(newVelDir, projectile->GetVelocityMagnitude());
 			}
+			*/
 
+			const float PROJECTILE_VELOCITY_MAG			= projectile->GetVelocityMagnitude();
+			const Vector2D PROJECTILE_VELOCITY_DIR	= projectile->GetVelocityDirection();
+			const Point2D IMPACT_POINT = projectile->GetPosition() + projectile->GetHalfHeight() * PROJECTILE_VELOCITY_DIR;
 
-			// The projectile has now officially collided with this prism triangle block, set it into the projectile
-			// so that it doesn't keep happening while the projectile is colliding with this block
+			std::list<Collision::Ray2D> rays = this->GetReflectionRefractionRays(IMPACT_POINT, PROJECTILE_VELOCITY_DIR);
+			assert(rays.size() >= 1);
+
+			std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
+			// The first ray is how the current projectile gets transmitted through this block...
+			projectile->SetPosition(rayIter->GetOrigin());
+			projectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
 			projectile->SetLastLevelPieceCollidedWith(this);
+
+			// All the other rays were created via refraction or some such thing, so spawn new particles for them
+			++rayIter;
+			for (; rayIter != rays.end(); ++rayIter) {
+				Projectile* newProjectile  = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, rayIter->GetOrigin());
+				newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
+				newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
+			}
 		}
 	}
 
 	return this;
+}
+
+/**
+ * Get the resulting reflection/refraction rays for the given hit point
+ * on this prism triangle block with the given impact velocity direction.
+ */
+std::list<Collision::Ray2D> PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const {
+	std::list<Collision::Ray2D> resultRays;
+	Collision::Ray2D defaultRay(hitPoint, impactDir);	// This is what happens to the original ray
+	Vector2D negImpactDir = -impactDir;
+
+	// Obtain all the normals of the lines that the hit point is closest to
+	std::vector<int> collidingIndices = this->bounds.ClosestCollisionIndices(hitPoint, LevelPiece::HALF_PIECE_HEIGHT);
+	Vector2D collisionNormal;
+
+			if (collidingIndices.size() == 2) {
+				// Special case - 2 lines were found to be colliding with the projectile, we need to reconcile this...
+				// Just figure out which normal is closest to the negative velocity of the projectile and use it
+ 				Vector2D normal0 = this->bounds.GetNormal(collidingIndices[0]);
+				Vector2D normal1 = this->bounds.GetNormal(collidingIndices[1]);
+
+				float angleBetween0 = Trig::radiansToDegrees(acos(Vector2D::Dot(negImpactDir, normal0)));
+				float angleBetween1 = Trig::radiansToDegrees(acos(Vector2D::Dot(negImpactDir, normal1)));
+
+				if (angleBetween0 < angleBetween1) {
+					collisionNormal = normal0;
+				}
+				else {
+					collisionNormal = normal1;
+				}
+
+			}
+			else if (collidingIndices.size() > 2 || collidingIndices.size() == 0) {
+				// This should never happen...
+				assert(false);
+				collisionNormal = negImpactDir;
+			}
+			else {
+				// Just one collision line, use it
+				collisionNormal = this->bounds.GetNormal(collidingIndices[0]);
+			}
+
+			// Send the laser flying out the hypotenuse side if it hit within a certain angle
+			const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(Vector2D::Dot(negImpactDir, collisionNormal)));
+			const float CUTOFF_ANGLE			 = 15.0f;
+
+			// Check to see if the collision was within the cut-off angle, if the laser
+			// almost hits the prism on the normal it will be refracted and/or split
+			// if it hits beyond the cut-off angle it will just be reflected
+			if (ANGLE_OF_INCIDENCE <= CUTOFF_ANGLE) {
+
+				if (fabs(collisionNormal[1]) < EPSILON || fabs(collisionNormal[0]) < EPSILON) {
+					// Dealing with either the x-axis short-side or the y-axis long-side of the triangle prism:
+					// Refract the laser out the hypotenuse side of the triangle
+					Vector2D hypNormal = TriangleBlock::GetSideNormal(TriangleBlock::HypotenuseSide, this->orient);
+					//defaultRay.SetOrigin(this->GetCenter());
+					defaultRay.SetUnitDirection(hypNormal);
+				}
+				else {
+					// Hypotenuse collision:
+					// Split the laser in two and send it out both the long and short side of the triangle
+					Vector2D shortSideNormal = TriangleBlock::GetSideNormal(TriangleBlock::ShortSide, this->orient);
+					Vector2D longSideNormal  = TriangleBlock::GetSideNormal(TriangleBlock::LongSide, this->orient);
+
+					defaultRay.SetUnitDirection(longSideNormal);
+					resultRays.push_back(Collision::Ray2D(hitPoint, shortSideNormal));
+
+					// Send the current projectile out the long side, spawn a new one for the short side
+					//Point2D splitPosition    = projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection();
+					//Projectile* newProjectile  = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, splitPosition);
+					//newProjectile->SetVelocity(shortSideNormal, projectile->GetVelocityMagnitude());
+					//newProjectile->SetLastLevelPieceCollidedWith(this);
+					//projectile->SetPosition(splitPosition);
+					//projectile->SetVelocity(longSideNormal, projectile->GetVelocityMagnitude());
+				}
+			}
+			else {
+				// Laser hit beyond the cut-off angle: reflect the laser
+				Vector2D newVelDir = Reflect(impactDir, collisionNormal);
+				newVelDir.Normalize();
+				defaultRay.SetUnitDirection(newVelDir);
+				
+				// Move the projectile to where it collided and change its velocity to reflect
+				//projectile->SetPosition(projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection());
+				//projectile->SetVelocity(newVelDir, projectile->GetVelocityMagnitude());
+			}
+			resultRays.push_front(defaultRay);
+			return resultRays;
 }
 
 // Triangle Block Namespace Functions ----------------------------------------------------------------

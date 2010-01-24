@@ -14,11 +14,13 @@
 #include "BallOnPaddleState.h"
 #include "GameCompleteState.h"
 #include "GameOverState.h"
+#include "LevelCompleteState.h"
+#include "Beam.h"
 
 GameModel::GameModel() : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), 
 currLivesLeft(0), pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false),
-gameTransformInfo(new GameTransformMgr()){
+gameTransformInfo(new GameTransformMgr()), nextState(NULL) {
 	
 	// Initialize the worlds for the game
 	for (size_t i = 0; i < GameModelConstants::GetInstance()->WORLD_PATHS.size(); i++) {
@@ -34,6 +36,10 @@ GameModel::~GameModel() {
 	// Delete the state
 	delete this->currState;
 	this->currState = NULL;	
+	if (this->nextState != NULL) {
+		delete this->nextState;
+		this->nextState = NULL;
+	}
 	
 	// Delete the transform manager
 	delete this->gameTransformInfo;
@@ -58,6 +64,7 @@ GameModel::~GameModel() {
 	this->ClearLiveItems();
 	this->ClearActiveTimers();
 	this->ClearProjectiles();
+	this->ClearBeams();
 }
 
 /**
@@ -66,7 +73,7 @@ GameModel::~GameModel() {
  * the first world, level, etc.
  */
 void GameModel::BeginOrRestartGame() {
-	this->SetCurrentState(new BallOnPaddleState(this));
+	this->SetNextState(new BallOnPaddleState(this));
 	this->SetCurrentWorld(GameModelConstants::GetInstance()->INITIAL_WORLD_NUM);
 
 	// Reset the score, lives, etc.
@@ -106,75 +113,15 @@ void GameModel::SetCurrentWorld(unsigned int worldNum) {
 }
 
 /**
- * Determines the next level to increment to and then loads the appropriate
- * level, world or end of game depending on what comes next.
- */
-void GameModel::IncrementLevel() {
-	// Reset the multiplier
-	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
-	// Reset the game transform manager
-	this->gameTransformInfo->Reset();
-
-	// Set the number of balls that exist to just 1
-	if (this->balls.size() > 1) {
-		std::list<GameBall*>::iterator ballIter = this->balls.begin();
-		ballIter++;
-		for (; ballIter != this->balls.end(); ballIter++) {
-			GameBall* ballToDestroy = *ballIter;
-			delete ballToDestroy;
-			ballToDestroy = NULL;
-		}
-		GameBall* onlyBallLeft = (*this->balls.begin());
-		assert(onlyBallLeft != NULL);
-		this->balls.clear();
-		this->balls.push_back(onlyBallLeft);
-	}
-
-	GameWorld* currWorld = this->GetCurrentWorld();
-	GameLevel* currLevel = currWorld->GetCurrentLevel();
-
-	// EVENT: Level is complete
-	GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
-
-	if (currWorld->IsLastLevel()) {
-		// EVENT: World is complete
-		GameEventManager::Instance()->ActionWorldCompleted(*currWorld);
-
-		// The last level of the world... need to check for end of the game state
-		if (this->IsLastWorld()) {
-			// EVENT: Game is complete
-			GameEventManager::Instance()->ActionGameCompleted();
-
-			// No more levels, just switch states
-			this->SetCurrentState(new GameCompleteState(this));
-		}
-		else {
-			// Increment to the next world
-			this->SetCurrentWorld(this->currWorldNum + 1); 
-			// Place the ball back on the paddle
-			this->SetCurrentState(new BallOnPaddleState(this));
-		}
-	}
-	else {
-		// Increment to the next level, the world hasn't changed
-		currWorld->IncrementLevel();
-		// Place the ball back on the paddle
-		this->SetCurrentState(new BallOnPaddleState(this));
-	}
-}
-
-/**
  * Cause the game model to execute over the given amount of time in seconds.
  */
 void GameModel::Tick(double seconds) {
-
 	// If the entire game has been paused then we exit immediately
 	if ((this->pauseBitField & GameModel::PauseGame) == GameModel::PauseGame) {
 		return;
 	}
 
 	if (currState != NULL) {
-		
 		if ((this->pauseBitField & GameModel::PauseState) == NULL) {
 			this->currState->Tick(seconds);
 		}
@@ -193,7 +140,7 @@ void GameModel::Tick(double seconds) {
  * Deals with all the important effects a collision could have on the game model.
  * Precondition: p != NULL
  */
-void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& stateChanged) {
+void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
 	assert(p != NULL);
 	
 	int pointValue = p->GetPointValueForCollision();
@@ -214,14 +161,8 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& s
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
 	if (currLevel->IsLevelComplete()) {
 
-		// The level was completed, increment the level - note this function
-		// is robust and will increment level, world and determine if we have finished
-		// the game all in one
-		this->IncrementLevel();
-		stateChanged = true;
-	}
-	else {
-		stateChanged = false;
+		// The level was completed, move to the level completed state
+		this->SetNextState(new LevelCompleteState(this));
 	}
 }
 
@@ -230,7 +171,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p, bool& s
  * Deals with all the important effects a collision could have on the game model.
  * Precondition: p != NULL
  */
-void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& stateChanged) {
+void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p) {
 	assert(p != NULL);
 	
 	LevelPiece* pieceBefore = p;
@@ -260,15 +201,8 @@ void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p, bool& sta
 
 	// Check to see if the level is done
 	if (currLevel->IsLevelComplete()) {
-
-		// The level was completed, increment the level - note this function
-		// is robust and will increment level, world and determine if we have finished
-		// the game all in one
-		this->IncrementLevel();
-		stateChanged = true;
-	}
-	else {
-		stateChanged = false;
+		// The level was completed, move to the level completed state
+		this->SetNextState(new LevelCompleteState(this));
 	}
 }
 
@@ -338,10 +272,10 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 		// Set the appropriate state based on the number of lives left...
 		if (this->IsGameOver()) {
 			// Game Over
-			this->SetCurrentState(new GameOverState(this));
+			this->SetNextState(new GameOverState(this));
 		}
 		else {
-			this->SetCurrentState(new BallOnPaddleState(this));
+			this->SetNextState(new BallOnPaddleState(this));
 		}
 		stateChanged = true;
 	}
@@ -363,6 +297,19 @@ void GameModel::ClearProjectiles() {
 		currProjectile = NULL;
 	}
 	this->projectiles.clear();
+}
+
+/**
+ * Clears the list of all beams that are currently in existance in the game.
+ */
+void GameModel::ClearBeams() {
+	for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); iter++) {
+		Beam* currBeam = *iter;
+		//GameEventManager::Instance()->ActionBeamRemoved(*currProjectile);
+		delete currBeam;
+		currBeam = NULL;
+	}
+	this->beams.clear();
 }
 
 /**
@@ -407,4 +354,30 @@ Projectile* GameModel::AddProjectile(Projectile::ProjectileType type, const Poin
 	GameEventManager::Instance()->ActionProjectileSpawned(*addedProjectile);
 
 	return addedProjectile;
+}
+
+/**
+ * Add a beam of the given type to the model - this will be updated and tested appropriate to
+ * its execution.
+ */
+void GameModel::AddBeam(int beamType) {
+
+	// Create the beam based on type...
+	Beam* addedBeam = NULL;
+	switch (beamType) {
+		case Beam::PaddleLaserBeam:
+			addedBeam = new PaddleLaserBeam(this->GetPlayerPaddle(), this->GetCurrentLevel());
+			break;
+
+		default:
+			assert(false);
+			return;
+	}
+	assert(addedBeam != NULL);
+
+	// Add the beam to the list of in-game beams
+	this->beams.push_back(addedBeam);
+
+	// EVENT: Beam creation
+	// TODO: GameEventManager::Instance()->ActionBeamSpawned(*addedBeam);
 }

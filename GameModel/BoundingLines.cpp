@@ -26,9 +26,10 @@ BoundingLines::~BoundingLines() {
  * inside the line, postivie means outside - the outward normal pointing direction).
  * The boolean return value will be true if one or more collisions occured, false otherwise.
  */
-bool BoundingLines::Collide(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float &d) {
+bool BoundingLines::Collide(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float &d) const {
 	float sqRadius = c.Radius()*c.Radius();
 	d = 0.0f;
+	n = Vector2D(0, 0);
 
 	// If there's no velocity then just exit with no collision (how can a non-moving object collide?)
 	if (velocity == Vector2D(0.0f, 0.0f)) {
@@ -40,7 +41,7 @@ bool BoundingLines::Collide(const Collision::Circle2D& c, const Vector2D& veloci
 
 	std::vector<Vector2D> collisionNormals;
 	float largestDistanceMag = FLT_MIN;
-	Vector2D largestDistMagNormal;
+	Vector2D largestDistMagNormal(0, 0);
 
 	// For each of the lines check for collision and how close the collision is to the line
 	for (size_t i = 0; i < this->lines.size(); i++) {
@@ -81,6 +82,13 @@ bool BoundingLines::Collide(const Collision::Circle2D& c, const Vector2D& veloci
 				n = n + collisionNormals[i];
 			}
 		}
+		
+		// Make sure n is something reasonable no matter what!!!
+		if (n == Vector2D(0, 0)) {
+			assert(false);
+			n = largestDistMagNormal;
+		}
+		assert(n != Vector2D(0, 0));
 
 		n.Normalize();
 		d = largestDistanceMag;
@@ -94,7 +102,7 @@ bool BoundingLines::Collide(const Collision::Circle2D& c, const Vector2D& veloci
  * to the given point.
  * Returns: Closest point on any of the bounding lines in this to pt.
  */
-Point2D BoundingLines::ClosestPoint(const Point2D& pt) {
+Point2D BoundingLines::ClosestPoint(const Point2D& pt) const {
 	if (this->lines.size() == 0) {
 		return pt;
 	}
@@ -183,9 +191,74 @@ std::vector<int> BoundingLines::CollisionCheckIndices(const BoundingLines& other
 	return tempVecOfIndices;
 }
 
+/**
+ * Obtain all of the line indices that are colliding with the given lineSegment and this.
+ * Returns: a set of all line indices being collided with in this object.
+ */
+std::vector<int> BoundingLines::CollisionCheckIndices(const Collision::LineSeg2D& lineSeg) const {
+	std::vector<int> indicesCollidedWith;
+	int count = 0;
+
+	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
+		const Collision::LineSeg2D& currThisLine = *thisIter;
+		
+		if (Collision::IsCollision(currThisLine, lineSeg)) {
+			indicesCollidedWith.push_back(count);
+		}
+		
+		count++;
+	}
+
+	return indicesCollidedWith;
+}
+
+/**
+ * Get the closest line segment indices to the given point.
+ * It is very unlikely that more than one index will be returned, in the case
+ * of multiple indices they are all very close (not perfectly) to the same distance
+ * from the given point.
+ */
+std::vector<int> BoundingLines::ClosestCollisionIndices(const Point2D& pt, float tolerance) const {
+	int count = 0;
+	float closestSqDist = FLT_MAX;
+	std::vector<int> closestIndices;
+
+	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
+		// Check the square distance between the point and the current line segment...
+		float currSqDist = Collision::SqDistFromPtToLineSeg(*thisIter, pt);
+
+		// Update the smallest distance line index - if there are multiple then add them to the array...
+		if (currSqDist < closestSqDist) {
+			closestIndices.clear();
+			closestIndices.push_back(count);
+			closestSqDist = currSqDist;
+		}
+		else if (fabs(currSqDist - closestSqDist) < tolerance) {
+			closestIndices.push_back(count);
+		}
+
+		count++;
+	}
+
+	return closestIndices;
+}
+
+/**
+ * Check to see whether this collided with a ray.
+ * Returns: true if any lines in this collided with the given ray, false otherwise.
+ */
+bool BoundingLines::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
+		if (Collision::IsCollision(ray, *thisIter, rayT)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void BoundingLines::DebugDraw() const {
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
 
 	// Draw bounding lines
 	glLineWidth(1.0f);
@@ -214,5 +287,4 @@ void BoundingLines::DebugDraw() const {
 	glEnd();
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
 }

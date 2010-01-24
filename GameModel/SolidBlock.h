@@ -40,24 +40,30 @@ public:
 
 	// Whether or not the uber ball can just blast right through this block.
 	// Returns: true if it can, false otherwise.
-	virtual bool UberballBlastsThrough() const {
+	bool UberballBlastsThrough() const {
 		return false;	// Cannot pass through solid blocks...
 	}
 
 	// Whether or not the ghost ball can just pass through this block.
 	// Returns: true if it can, false otherwise.
-	virtual bool GhostballPassesThrough() const {
+	bool GhostballPassesThrough() const {
 		return false; // Cannot pass through solid blocks... 
 	}
 
 	// You get no points for collisions with solid blocks...
-	virtual int GetPointValueForCollision() {
+	int GetPointValueForCollision() {
 		return 0;
 	}
 
 	// No projectiles pass through solid blocks
 	// Returns: false.
-	virtual bool ProjectilePassesThrough(Projectile* projectile) {
+	bool ProjectilePassesThrough(Projectile* projectile) {
+		return false;
+	}
+
+	// Solid blocks do not reflect or refract light.
+	// Returns: false
+	bool IsLightReflectorRefractor() const {
 		return false;
 	}
 

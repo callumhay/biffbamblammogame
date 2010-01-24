@@ -32,65 +32,62 @@ void GameController::KeyDown(SDLKey key) {
 
 #ifdef _DEBUG
 	// Debug Item drops
-	if (key == SDLK_s) {
-		this->model->DropItem(GameItem::BallSlowDownItem);
-	}
-	else if (key == SDLK_q) {
-		this->model->DropItem(GameItem::BallSpeedUpItem);
-	}
-	else if (key == SDLK_u) {
-		this->model->DropItem(GameItem::UberBallItem);
-	}
-	else if (key == SDLK_i) {
-		this->model->DropItem(GameItem::InvisiBallItem);
-	}
-	else if (key == SDLK_g) {
-		this->model->DropItem(GameItem::GhostBallItem);
-	}
-	else if (key == SDLK_l) {
-		this->model->DropItem(GameItem::LaserBulletPaddleItem);
-	}
-	else if (key == SDLK_3) {
-		this->model->DropItem(GameItem::MultiBall3Item);
-	}
-	else if (key == SDLK_5) {
-		this->model->DropItem(GameItem::MultiBall5Item);
-	}
-	else if (key == SDLK_a) {
+	if (key == SDLK_a) {
 		this->model->DropItem(GameItem::PaddleGrowItem);
 	}
-	else if (key == SDLK_z) {
-		this->model->DropItem(GameItem::PaddleShrinkItem);
+	else if (key == SDLK_b) {
+		this->model->DropItem(GameItem::BallCamItem);
 	}
-	else if (key == SDLK_k) {
-		this->model->DropItem(GameItem::BallGrowItem);
+	else if (key == SDLK_c) {
+		this->model->DropItem(GameItem::PaddleCamItem);
 	}
-	else if (key == SDLK_m) {
-		this->model->DropItem(GameItem::BallShrinkItem);
+	else if (key == SDLK_d) {
+		this->model->DropItem(GameItem::LaserBeamPaddleItem);
 	}
-	else if (key == SDLK_0) {
-		this->model->DropItem(GameItem::BlackoutItem);
+	else if (key == SDLK_e) {
+		GameDisplay::ToggleDrawDebugLightGeometry();
 	}
 	else if (key == SDLK_f) {
 		this->model->DropItem(GameItem::UpsideDownItem);
 	}
+	else if (key == SDLK_g) {
+		this->model->DropItem(GameItem::GhostBallItem);
+	}
+
+	else if (key == SDLK_i) {
+		this->model->DropItem(GameItem::InvisiBallItem);
+	}
+
+	else if (key == SDLK_k) {
+		this->model->DropItem(GameItem::BallGrowItem);
+	}
+	else if (key == SDLK_l) {
+		this->model->DropItem(GameItem::LaserBulletPaddleItem);
+	}
+	else if (key == SDLK_m) {
+		this->model->DropItem(GameItem::BallShrinkItem);
+	}
 	else if (key == SDLK_n) {
 		this->model->DropItem(GameItem::BallSafetyNetItem);
 	}
-	else if (key == SDLK_1) {
-		this->model->DropItem(GameItem::OneUpItem);
-	}
+
 	else if (key == SDLK_p) {
 		this->model->TogglePause(GameModel::PauseGame);
 	}
-	else if (key == SDLK_COMMA) {
-		this->model->TogglePause(GameModel::PauseBall);
+	else if (key == SDLK_q) {
+		this->model->DropItem(GameItem::BallSpeedUpItem);
 	}
+
+	else if (key == SDLK_s) {
+		this->model->DropItem(GameItem::BallSlowDownItem);
+	}
+
+	else if (key == SDLK_u) {
+		this->model->DropItem(GameItem::UberBallItem);
+	}
+
 	else if (key == SDLK_w) {
 		GameDisplay::ToggleDrawDebugBounds();
-	}
-	else if (key == SDLK_e) {
-		GameDisplay::ToggleDrawDebugLightGeometry();
 	}
 	else if (key == SDLK_x) {
 		this->model->DropItem(GameItem::PoisonPaddleItem);
@@ -98,15 +95,29 @@ void GameController::KeyDown(SDLKey key) {
 	else if (key == SDLK_y) {
 		this->model->DropItem(GameItem::StickyPaddleItem);
 	}
-	else if (key == SDLK_c) {
-		this->model->DropItem(GameItem::PaddleCamItem);
+	else if (key == SDLK_z) {
+		this->model->DropItem(GameItem::PaddleShrinkItem);
 	}
-	else if (key == SDLK_b) {
-		this->model->DropItem(GameItem::BallCamItem);
+	else if (key == SDLK_0) {
+		this->model->DropItem(GameItem::BlackoutItem);
 	}
+	else if (key == SDLK_1) {
+		this->model->DropItem(GameItem::OneUpItem);
+	}
+	else if (key == SDLK_3) {
+		this->model->DropItem(GameItem::MultiBall3Item);
+	}
+	else if (key == SDLK_5) {
+		this->model->DropItem(GameItem::MultiBall5Item);
+	}
+
 	else if (key == SDLK_SLASH) {
 		GameDisplay::ToggleDetachCamera();
 	}
+	else if (key == SDLK_COMMA) {
+		this->model->TogglePause(GameModel::PauseBall);
+	}
+
 #endif
 
 }

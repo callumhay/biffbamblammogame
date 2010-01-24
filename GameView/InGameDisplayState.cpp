@@ -10,6 +10,7 @@
 
 // Game Model stuff
 #include "../GameModel/GameModel.h"
+#include "../GameModel/Beam.h"
 
 const std::string InGameDisplayState::LIVES_LABEL_TEXT = "Lives: ";
 const unsigned int InGameDisplayState::HUD_X_INDENT = 10;	
@@ -287,10 +288,10 @@ void InGameDisplayState::DebugDrawBounds() {
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
-	// Debug draw boundry of paddle...
+	// Draw boundry of paddle...
 	this->display->GetModel()->GetPlayerPaddle()->DebugDraw();
 	
-	// Debug draw of boundries of each block...
+	// Draw of boundries of each block...
 	std::vector<std::vector<LevelPiece*>> pieces = this->display->GetModel()->GetCurrentLevel()->GetCurrentLevelLayout();
 	for (size_t i = 0; i < pieces.size(); i++) {
 		std::vector<LevelPiece*> setOfPieces = pieces[i];
@@ -298,6 +299,13 @@ void InGameDisplayState::DebugDrawBounds() {
 			setOfPieces[j]->DebugDraw();
 		}
 	}
+
+	// Draw any beam rays...
+	std::list<Beam*>& beams = this->display->GetModel()->GetActiveBeams();
+	for (std::list<Beam*>::const_iterator iter = beams.begin(); iter != beams.end(); ++iter) {
+		(*iter)->DebugDraw();
+	}
+
 	glPopMatrix();
 	debug_opengl_state();
 }

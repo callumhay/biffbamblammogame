@@ -182,7 +182,8 @@ public:
 	
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
-	void DrawPaddleLaserEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+	//void DrawPaddleLaserBeamEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 
 	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };

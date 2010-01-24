@@ -16,13 +16,14 @@
 #include "GameItem.h"
 #include "GameItemFactory.h"
 #include "GameModelConstants.h"
+#include "Beam.h"
 
 const float LevelPiece::PIECE_WIDTH = 2.5f;
 const float LevelPiece::PIECE_HEIGHT = 1.0f;
 const float LevelPiece::HALF_PIECE_WIDTH = PIECE_WIDTH / 2.0f;
 const float LevelPiece::HALF_PIECE_HEIGHT = PIECE_HEIGHT / 2.0f;
 
-LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc): LevelCollidable(),
+LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc):
 center(wLoc * PIECE_WIDTH + HALF_PIECE_WIDTH, hLoc * PIECE_HEIGHT + HALF_PIECE_HEIGHT), wIndex(wLoc), hIndex(hLoc),
 colour(1,1,1) {
 }
@@ -36,7 +37,7 @@ LevelPiece::~LevelPiece() {
  * Returns: true on collision as well as the normal of the line being collided with
  * and the distance from that line of the given circle; false otherwise.
  */
-bool LevelPiece::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float &d) {
+bool LevelPiece::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float &d) const {
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}
@@ -48,7 +49,7 @@ bool LevelPiece::CollisionCheck(const Collision::Circle2D& c, const Vector2D& ve
  * Check for a collision of a given AABB with this block.
  * Returns: true on collision, false otherwise.
  */
-bool LevelPiece::CollisionCheck(const Collision::AABB2D& aabb) {
+bool LevelPiece::CollisionCheck(const Collision::AABB2D& aabb) const {
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}
@@ -62,10 +63,23 @@ bool LevelPiece::CollisionCheck(const Collision::AABB2D& aabb) {
 }
 
 /**
+ * Check for a collision of a given ray with this block. Also, on collision, will
+ * set the value rayT to the value on the ray where the collision occurred.
+ * Returns: true on collision, false otherwise.
+ */
+bool LevelPiece::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	if (this->IsNoBoundsPieceType()) {
+		return false;
+	}
+
+	return this->bounds.CollisionCheck(ray, rayT);
+}
+
+/**
  * Check for a collision of a given set of bounding lines with this block.
  * Returns: true on collision, false otherwise.
  */
-bool LevelPiece::CollisionCheck(const BoundingLines& boundingLines) {
+bool LevelPiece::CollisionCheck(const BoundingLines& boundingLines) const {
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}
@@ -159,6 +173,22 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		}
 
 		this->bounds = BoundingLines(boundingLines, boundingNorms);
+}
+
+/**
+ * Hit this block with the given beam segment - if this block reflects or refracts
+ * the beam segment then this will return any new beam segments created by that reflection/
+ * refraction.
+ */
+std::list<Collision::Ray2D> LevelPiece::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const {
+	// The default behaviour is to just not do any reflection/refraction and return an empty list
+	std::list<Collision::Ray2D> result;
+	return result;
+}
+
+LevelPiece* LevelPiece::TickBeamCollision(double dT, const Beam* beam) {
+	assert(beam != NULL);
+	return this;
 }
 
 // Draws the boundry lines and normals for this level piece.

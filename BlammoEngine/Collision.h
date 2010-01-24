@@ -17,20 +17,15 @@
 
 namespace Collision {
 
-	class Collidable {
-	public:
-		virtual ~Collidable(){};
-	};
-
 	/**
 	 * 2D Axis-Aligned Bounding Box for collision detection.
 	 */
-	class AABB2D : public Collidable {
+	class AABB2D {
 	private:
 		Point2D minCoord, maxCoord;
 	public:
-		AABB2D(const Point2D &min, const Point2D &max): Collidable(), minCoord(min), maxCoord(max) {}
-		virtual ~AABB2D() {}
+		AABB2D(const Point2D &min, const Point2D &max): minCoord(min), maxCoord(max) {}
+		~AABB2D() {}
 
 		Point2D GetMin() const {
 			return this->minCoord;
@@ -40,15 +35,15 @@ namespace Collision {
 		}
 	};
 
-	class LineSeg2D : public Collidable {
+	class LineSeg2D {
 
 	private:
 		Point2D p1, p2;
 
 	public:
 		LineSeg2D() {};
-		LineSeg2D(const Point2D& p1, const Point2D& p2) : Collidable(), p1(p1), p2(p2) {}
-		virtual ~LineSeg2D() {}
+		LineSeg2D(const Point2D& p1, const Point2D& p2) : p1(p1), p2(p2) {}
+		~LineSeg2D() {}
 
 
 		void SetP1(const Point2D& p) {
@@ -67,14 +62,38 @@ namespace Collision {
 
 	};
 
-	class Circle2D : public Collidable {
+	class Ray2D {
+	public:
+		Ray2D() {};
+		Ray2D(const Point2D& origin, const Vector2D& dir) : origin(origin), unitDirection(dir) {
+			assert(Vector2D::Magnitude(dir) - 1.0f <= EPSILON);
+		}
+		~Ray2D() {};
+
+		Point2D GetOrigin() const { return this->origin; }
+		Vector2D GetUnitDirection() const { return this->unitDirection; }
+
+		void SetOrigin(const Point2D& origin) { this->origin = origin; }
+		void SetUnitDirection(const Vector2D& unitDir) { this->unitDirection = unitDir; }
+
+		// Obtain a point along the ray a given distance (dist) from the ray's origin
+		Point2D GetPointAlongRayFromOrigin(float dist) const {
+			return this->origin + (dist * this->unitDirection);
+		}
+
+	private:
+		Point2D origin;
+		Vector2D unitDirection;
+	};
+
+	class Circle2D {
 	private:
 		Point2D center;
 		float radius;
 
 	public:
-		Circle2D(const Point2D& c, float r): Collidable(), center(c), radius(r) {}
-		virtual ~Circle2D(){}
+		Circle2D(const Point2D& c, float r): center(c), radius(r) {}
+		~Circle2D(){}
 		
 		void SetCenter(const Point2D& c) {
 			this->center = c;
@@ -172,6 +191,66 @@ namespace Collision {
 		return false;
 	}
 
+	/**
+	 * Check for collision between a 2D ray and AABB, calculate the ray parameter for distance
+	 * multiplier from its origin.
+	 */
+	inline bool IsCollision(const Ray2D& ray, const AABB2D& aabb, float& tMin) {
+		const Point2D RAY_ORIGIN = ray.GetOrigin();
+		const Vector2D RAY_DIR   = ray.GetUnitDirection();
+		
+		const Point2D AABB_MIN   = aabb.GetMin();
+		const Point2D AABB_MAX	 = aabb.GetMax();
+
+		tMin = 0.0f;
+		float tMax = FLT_MAX;
+
+		for (int i = 0; i < 2; i++) {
+
+			if (fabs(RAY_DIR[i]) < EPSILON) {
+				if (RAY_ORIGIN[i] < AABB_MIN[i] || RAY_ORIGIN[i] > AABB_MAX[i]) {
+					return false;
+				}
+			}
+			else {
+				float ood = 1.0f / RAY_DIR[i];
+				float t1  = (AABB_MIN[i] - RAY_ORIGIN[i]) * ood;
+				float t2  = (AABB_MAX[i] - RAY_ORIGIN[i]) * ood;
+				if (t1 > t2) {
+					std::swap(t1, t2);
+				}
+				
+				tMin = std::max<float>(tMin, t1);
+				tMax = std::min<float>(tMax, t2);
+				if (tMin > tMax) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+
+	inline bool IsCollision(const Ray2D& ray, const LineSeg2D& lineSeg, float& rayT) {
+		// Create a parameteric equation for the line segment
+		Vector2D D1 = lineSeg.P2() - lineSeg.P1();
+		Vector2D D0  = ray.GetUnitDirection();
+			
+		Vector2D perpD1(D1[1], -D1[0]);
+		float dotPerpD1D0 = Vector2D::Dot(perpD1, D0);
+		if (fabs(dotPerpD1D0) < EPSILON) {
+			// Ray and line segment are parallel...
+			return false;
+		}
+
+		Vector2D perpD0(D0[1], -D0[0]);
+		Vector2D P1MinusP0 = lineSeg.P1() - ray.GetOrigin();
+		rayT = Vector2D::Dot(perpD1, P1MinusP0) / dotPerpD1D0;
+		float lineT = Vector2D::Dot(perpD0, P1MinusP0) / dotPerpD1D0;
+
+		return (rayT >= 0 && lineT >= 0 && lineT <= 1);
+	}
+
 	// Closest Point Computations ******************************************************
 	
 	/**
@@ -191,6 +270,7 @@ namespace Collision {
 
 		return lineSeg.P1() + t * lineSegDir;
 	}
+
 
 };
 

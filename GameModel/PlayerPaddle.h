@@ -48,7 +48,6 @@ private:
 	static const int AVG_OVER_TICKS  = 60;
 
 	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
-	static const double PADDLE_LASER_BEAM_LENGTH;		// Time that the laser beam is active for
 
 	float distTemp;			// A temporary store for the change in movement
 	float avgVel;				// Keeps the average velocity (over the past AVG_OVER_TICKS ticks) of the paddle at a given time
@@ -66,6 +65,8 @@ private:
 	float speed;									// Speed of the paddle in units per second
 	float currScaleFactor;				// The scale difference between the paddle's current size and its default size
 	
+	Vector2D upVector;						// The unit vector pointing upwards for the paddle
+
 	ColourRGBA colour;													// The colour multiply of the paddle, including its visibility/alpha
 	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
 	
@@ -113,6 +114,13 @@ public:
 	}
 	float GetHalfWidthTotal() const {
 		return this->currHalfWidthTotal;
+	}
+	float GetHalfFlatTopWidth() const {
+		return this->currHalfWidthFlat;
+	}
+
+	Vector2D GetUpVector() const {
+		return this->upVector;
 	}
 
 	void Tick(double seconds);

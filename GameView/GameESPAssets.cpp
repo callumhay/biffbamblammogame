@@ -2583,7 +2583,7 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
  * Draw particle effects associated with the laser paddle.
  * NOTE: You must transform these effects to be where the paddle is first!
  */
-void GameESPAssets::DrawPaddleLaserEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 	float effectPos = paddle.GetHalfHeight() + this->paddleLaserGlowAura->GetParticleSizeY().maxValue * 0.5f;
 	this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, effectPos, 0));
 	this->paddleLaserGlowSparks->SetEmitPosition(Point3D(0, effectPos, 0));

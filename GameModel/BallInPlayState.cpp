@@ -13,10 +13,12 @@
 #include "BallOnPaddleState.h"
 #include "GameCompleteState.h"
 #include "BallDeathState.h"
+#include "LevelCompleteState.h"
 #include "GameModel.h"
 #include "GameEventManager.h"
 #include "GameItem.h"
 #include "GameItemFactory.h"
+#include "Beam.h"
 
 BallInPlayState::BallInPlayState(GameModel* gm) : 
 GameState(gm), timeSinceGhost(DBL_MAX) {
@@ -62,12 +64,14 @@ void BallInPlayState::Tick(double seconds) {
 	// Check for item-paddle collisions
 	this->DoItemCollision();
 	
-	// Update any timers that are currently active in play
+	// Update any timers that are currently active
 	this->UpdateActiveTimers(seconds);
-	// Update any item drops that are currently active in play
+	// Update any item drops that are currently active
 	this->UpdateActiveItemDrops(seconds);
-	// Update any particles that are currently active in play
+	// Update any particles that are currently active
 	this->UpdateActiveProjectiles(seconds);
+	// Update any beams that are currently active
+	this->UpdateActiveBeams(seconds);
 
 	// Variables that will be needed for collision detection
 	Vector2D n;
@@ -78,6 +82,8 @@ void BallInPlayState::Tick(double seconds) {
 	GameBall* ballToMoveToFront = NULL;																	// The last ball to hit the paddle is the one with priority for item effects
 	std::list<std::list<GameBall*>::iterator> ballsToRemove;						// The balls that are no longer in play and will be removed
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();	// The current set of balls in play
+
+	// TODO: BEFORE DOING BEAMS ITS TIME TO REFACTOR THIS CRAP!!!!!
 
 #ifdef _DEBUG
 	// Pause the ball from moving
@@ -93,16 +99,9 @@ void BallInPlayState::Tick(double seconds) {
 		// Check for death (ball went out of bounds)
 		if (this->IsOutOfGameBounds(currBall->GetBounds().Center())) {
 			if (gameBalls.size() == 1) {
-				this->gameModel->SetCurrentState(new BallDeathState(currBall, this->gameModel));
+				this->gameModel->SetNextState(new BallDeathState(currBall, this->gameModel));
 				return;
 			}
-			//bool stateChanged = true;
-			//this->gameModel->BallDied(currBall, stateChanged);
-
-			//if (stateChanged) {
-			//		// The player has lost all their balls...
-			//	return;
-			//}
 			else {
 				// The ball is now dead an needs to be removed from the game
 				ballsToRemove.push_back(iter);
@@ -189,13 +188,7 @@ void BallInPlayState::Tick(double seconds) {
 				}
 				
 				// Tell the model that a ball collision occurred with currPiece
-				bool stateChanged = true;
-				this->gameModel->CollisionOccurred(*currBall, currPiece, stateChanged);
-
-				// If stateChanged is set to true then this has been deleted and we need to exit immediately.
-				if (stateChanged) {
-					return;
-				}
+				this->gameModel->CollisionOccurred(*currBall, currPiece);
 				break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
 			}
 		}
@@ -260,18 +253,9 @@ void BallInPlayState::Tick(double seconds) {
 			// Test for a collision between the projectile and current level piece
 			bool didCollide = currPiece->CollisionCheck(projectileBoundingLines);
 			if (didCollide) {
-				bool stateChanged = true;
-
 				// This needs to be before the call to CollisionOccurred or else the currPiece may already be destroyed.
 				bool destroyProjectile = !currPiece->ProjectilePassesThrough(currProjectile);
-
-				// WARNING: This can destroy everything.
-				this->gameModel->CollisionOccurred(currProjectile, currPiece, stateChanged);	
-
-				// If stateChanged is set to true then this has been deleted and we need to exit immediately.
-				if (stateChanged) {
-					return;
-				}
+				this->gameModel->CollisionOccurred(currProjectile, currPiece);	
 
 				// Check to see if the collision is supposed to destroy the projectile
 				if (destroyProjectile) {
@@ -356,63 +340,81 @@ void BallInPlayState::UpdateActiveItemDrops(double seconds) {
  */
 void BallInPlayState::UpdateActiveProjectiles(double seconds) {
 	// Tick all the active projectiles and check for ones which are out of bounds
-	std::vector<std::list<Projectile*>::iterator> removeProjectiles;
 	std::list<Projectile*>& currProjectiles = gameModel->GetActiveProjectiles();
-	for (std::list<Projectile*>::iterator iter = currProjectiles.begin(); iter != currProjectiles.end(); iter++) {
+	
+	for (std::list<Projectile*>::iterator iter = currProjectiles.begin(); iter != currProjectiles.end();) {
 		Projectile* currProjectile = *iter;
 		currProjectile->Tick(seconds);
 
 		// If the projectile is out of game bounds, destroy it
 		if (this->IsOutOfGameBounds(currProjectile->GetPosition())) {
-			removeProjectiles.push_back(iter);
+			iter = currProjectiles.erase(iter);
+
+			// EVENT: Projectile is being removed...
+			GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
+
+			delete currProjectile;
+			currProjectile = NULL;
+		}
+		else {
+			++iter;
 		}
 	}
 
-	// Remove any projectiles that are no longer active
-	for (std::vector<std::list<Projectile*>::iterator>::iterator iter = removeProjectiles.begin(); iter != removeProjectiles.end(); iter++) {
-		Projectile* currProjectile = (**iter);
-		currProjectiles.erase(*iter);
-		GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
-		delete currProjectile;
-		currProjectile = NULL;
-	}
 }
 
 /**
- * Private helper function for checking to see if an item collided with 
- * the player paddle and carrying out the necessary activity if one did.
+ * Private helper function for updating the collisions and effects of the various 
+ * active beams (if any) in the game during the current tick.
  */
-void BallInPlayState::DoItemCollision() {
-	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
-	std::list<GameItem*>& currLiveItems			= this->gameModel->GetLiveItems();
-	std::vector<GameItem*> removeItems;
+void BallInPlayState::UpdateActiveBeams(double seconds) {
+	
+	const GameLevel* currentLevel = this->gameModel->GetCurrentLevel();
+	std::list<Beam*>& activeBeams = this->gameModel->GetActiveBeams();
+	bool beamIsDead = false;
 
-	// Check to see if the paddle hit any items, if so, activate those items
-	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); iter++) {
-		GameItem *currItem = *iter;
-		
-		if (currItem->CollisionCheck(*this->gameModel->GetPlayerPaddle())) {
-			// EVENT: Item was obtained by the player paddle
-			GameEventManager::Instance()->ActionItemPaddleCollision(*currItem, *this->gameModel->GetPlayerPaddle());
+	for (std::list<Beam*>::iterator beamIter = activeBeams.begin(); beamIter != activeBeams.end();) {
+		// Get the current beam being iterated on and execute its effect on all the
+		// level pieces it affects...
+		Beam* currentBeam = *beamIter;
+		assert(currentBeam != NULL);
+
+		std::list<Beam::BeamSegment*>& beamParts = currentBeam->GetBeamParts();
+		for (std::list<Beam::BeamSegment*>::iterator segIter = beamParts.begin(); segIter != beamParts.end(); ++segIter) {
+			Beam::BeamSegment* currentBeamSeg = *segIter;
+			assert(currentBeamSeg != NULL);
+
+			// Cause the beam to collide for the given tick with the level piece, find out what
+			// happened to the level piece and act accordingly...
+			LevelPiece* collidingPiece = currentBeamSeg->GetCollidingPiece();
+			if (collidingPiece != NULL) {
+				LevelPiece* resultPiece = collidingPiece->TickBeamCollision(seconds, currentBeam);
 			
-			// There was a collision with the item and the player paddle: activate the item
-			// and then delete it. If the item causes the creation of a timer then add the timer to the list
-			// of active timers.
-			GameItemTimer* newTimer = new GameItemTimer(currItem);
-			assert(newTimer != NULL);
-			activeTimers.push_back(newTimer);	
-			removeItems.push_back(currItem);
-			GameEventManager::Instance()->ActionItemRemoved(*currItem);
+				// Check to see if the level is done
+				if (currentLevel->IsLevelComplete()) {
+					// The level was completed, move to the level completed state
+					this->gameModel->SetNextState(new LevelCompleteState(this->gameModel));
+				}
+			}
+		}
+
+		// Tick the beam, check for its death and clean up if necessary
+		beamIsDead = currentBeam->Tick(seconds);
+		if (beamIsDead) {
+			beamIter = activeBeams.erase(beamIter);
+			delete currentBeam;
+			currentBeam = NULL;
+		}
+		else {
+			// Update the beam collisions...
+			currentBeam->UpdateCollisions(currentLevel);
+			++beamIter;
 		}
 	}
 
-	// Remove any items from the live items list if they have been collided with
-	for (unsigned int i = 0; i < removeItems.size(); i++) {
-		GameItem* currItem = removeItems[i];
-		currLiveItems.remove(currItem);
-	}
-
 }
+
+
 
 // n must be normalized
 // d is the distance from the center of the ball to the line that was collided with
@@ -461,7 +463,6 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
  * Private helper function to calculate the new velocities for two balls that just
  * collided with each other.
  */
-
 void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	Collision::Circle2D ball1Bounds = ball1.GetBounds();
 	Collision::Circle2D ball2Bounds = ball2.GetBounds();
@@ -501,7 +502,7 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 
 	Vector2D reflectBall1Vec = Reflect(ball1.GetDirection(), ball1CorrectionVec);
 	Vector2D reflectBall2Vec = Reflect(ball2.GetDirection(), ball2CorrectionVec);
-	float positiveT = -t;
+	float positiveT = -NumberFuncs::SignOf(t) * (fabs(t) + 2*EPSILON);
 
 	// NOTE: we need to make sure the new velocities are not zero
 
@@ -520,6 +521,41 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	}	
 }
 
+/**
+ * Private helper function for checking to see if an item collided with 
+ * the player paddle and carrying out the necessary activity if one did.
+ */
+void BallInPlayState::DoItemCollision() {
+	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
+	std::list<GameItem*>& currLiveItems			= this->gameModel->GetLiveItems();
+	std::vector<GameItem*> removeItems;
+
+	// Check to see if the paddle hit any items, if so, activate those items
+	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); iter++) {
+		GameItem *currItem = *iter;
+		
+		if (currItem->CollisionCheck(*this->gameModel->GetPlayerPaddle())) {
+			// EVENT: Item was obtained by the player paddle
+			GameEventManager::Instance()->ActionItemPaddleCollision(*currItem, *this->gameModel->GetPlayerPaddle());
+			
+			// There was a collision with the item and the player paddle: activate the item
+			// and then delete it. If the item causes the creation of a timer then add the timer to the list
+			// of active timers.
+			GameItemTimer* newTimer = new GameItemTimer(currItem);
+			assert(newTimer != NULL);
+			activeTimers.push_back(newTimer);	
+			removeItems.push_back(currItem);
+			GameEventManager::Instance()->ActionItemRemoved(*currItem);
+		}
+	}
+
+	// Remove any items from the live items list if they have been collided with
+	for (unsigned int i = 0; i < removeItems.size(); i++) {
+		GameItem* currItem = removeItems[i];
+		currLiveItems.remove(currItem);
+	}
+
+}
 
 /**
  * Private helper function to determine if the given position is

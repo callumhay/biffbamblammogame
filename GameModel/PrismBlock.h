@@ -66,6 +66,12 @@ public:
 		return true;
 	}
 
+	// Prism blocks reflect and refract light.
+	// Returns: true
+	bool IsLightReflectorRefractor() const {
+		return true;
+	}
+
 	LevelPiece* Destroy(GameModel* gameModel){
 		return this;
 	};
@@ -81,6 +87,7 @@ public:
 	}
 
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
+	virtual std::list<Collision::Ray2D> GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const;
 
 };
 #endif // __PRISMBLOCK_H__

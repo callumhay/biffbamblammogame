@@ -5,8 +5,11 @@
 
 class BreakableBlock : public LevelPiece {
 protected:
+	static const int PIECE_STARTING_LIFE_POINTS = 100;	// Starting life points given to a breakable block
 	static const int POINTS_ON_BLOCK_HIT				= 5;		// Points obtained when you just hit a breakable block
-	static const int POINTS_ON_BLOCK_DESTROYED = 10;		// Points obtained when you destory a breakable block
+	static const int POINTS_ON_BLOCK_DESTROYED	= 10;		// Points obtained when you destory a breakable block
+
+	int currLifePoints;	// Current life points of this block
 
 	enum BreakablePieceType { GreenBreakable = 'G', YellowBreakable = 'Y', OrangeBreakable = 'O', RedBreakable = 'R' }; 
 	BreakablePieceType pieceType;
@@ -63,6 +66,12 @@ public:
 	// No projectiles pass through breakable blocks
 	// Returns: false.
 	virtual bool ProjectilePassesThrough(Projectile* projectile) {
+		return false;
+	}
+
+	// Breakable blocks do not reflect or refract light.
+	// Returns: false
+	bool IsLightReflectorRefractor() const {
 		return false;
 	}
 
