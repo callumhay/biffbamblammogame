@@ -244,17 +244,26 @@ std::vector<int> BoundingLines::ClosestCollisionIndices(const Point2D& pt, float
 }
 
 /**
- * Check to see whether this collided with a ray.
+ * Check to see whether this collided with a ray. Finds the closest collision among
+ * all the lines in these bounding lines and returns the parameter required to get the point
+ * of the collision by plugging it into the ray equation.
  * Returns: true if any lines in this collided with the given ray, false otherwise.
  */
 bool BoundingLines::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	rayT = FLT_MAX;
+	bool collisionFound = false;
+
 	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
-		if (Collision::IsCollision(ray, *thisIter, rayT)) {
-			return true;
+		float currentT;
+		if (Collision::IsCollision(ray, *thisIter, currentT)) {
+			collisionFound = true;
+			if (currentT < rayT) {
+				rayT = currentT;
+			}
 		}
 	}
 
-	return false;
+	return collisionFound;
 }
 
 void BoundingLines::DebugDraw() const {

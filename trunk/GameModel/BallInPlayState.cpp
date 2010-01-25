@@ -379,6 +379,10 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 		Beam* currentBeam = *beamIter;
 		assert(currentBeam != NULL);
 
+		// Update the beam collisions... this needs to be done before anything or there
+		// might be level pieces that were destroyed by the ball that we are trying to access in the beam
+		currentBeam->UpdateCollisions(currentLevel);
+
 		std::list<Beam::BeamSegment*>& beamParts = currentBeam->GetBeamParts();
 		for (std::list<Beam::BeamSegment*>::iterator segIter = beamParts.begin(); segIter != beamParts.end(); ++segIter) {
 			Beam::BeamSegment* currentBeamSeg = *segIter;
@@ -406,8 +410,6 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 			currentBeam = NULL;
 		}
 		else {
-			// Update the beam collisions...
-			currentBeam->UpdateCollisions(currentLevel);
 			++beamIter;
 		}
 	}
