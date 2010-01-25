@@ -457,15 +457,17 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray, c
 	const float LEVEL_WIDTH					 = this->GetLevelUnitWidth();
 	const float LEVEL_HEIGHT				 = this->GetLevelUnitHeight();
 	const float LONGEST_POSSIBLE_RAY = sqrt(LEVEL_WIDTH*LEVEL_WIDTH + LEVEL_HEIGHT*LEVEL_HEIGHT);
-	const float STEP_SIZE						 = 0.9f * std::min<float>(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
+
+	// NOTE: if the step size is too large then the ray might skip over entire sections of blocks - BECAREFUL!
+	const float STEP_SIZE						 = 0.5f * std::min<float>(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
 
 	int NUM_STEPS = static_cast<int>(LONGEST_POSSIBLE_RAY / STEP_SIZE);
 	for (int i = 0; i < NUM_STEPS; i++) {
 		Point2D currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
 
 		// Indices of the sampled level piece can be found using the point...
-		int wSampleIndex = static_cast<int>(floorf(currSamplePoint[0]) / LevelPiece::PIECE_WIDTH);
-		int hSampleIndex = static_cast<int>(floorf(currSamplePoint[1]) / LevelPiece::PIECE_HEIGHT);
+		int wSampleIndex = static_cast<int>(currSamplePoint[0] / LevelPiece::PIECE_WIDTH);
+		int hSampleIndex = static_cast<int>(currSamplePoint[1] / LevelPiece::PIECE_HEIGHT);
 		
 		// Make sure the ray hasn't gone out of bounds
 		if (wSampleIndex < 0 || hSampleIndex < 0) {

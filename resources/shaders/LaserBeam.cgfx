@@ -36,23 +36,6 @@ float Freq <
     string UIName =  "Frequency";
 > = 1;
 
-// Line points (origin and end) in world-space
-float3 LinePoint1 <
-    string UIName =  "LinePoint 1";
-> = {0.0f,-10.0f,0.0f};
-
-float3 LinePoint2 <
-    string UIName =  "LinePoint 2";
-> = {0.0f,10.0f,0.0f};
-
-float Radius <
-	string UIName =  "Radius";
-	string UIWidget = "slider";
-    float UIMin = 0.0;
-    float UIMax = 10.0;
-    float UIStep = 0.1;
-> = {1.0f};
-
 float3 BeamColour <
     string UIName =  "Beam Colour";
     string UIWidget = "Color";
@@ -72,12 +55,28 @@ sampler3D NoiseSampler = sampler_state {
     WrapT = Repeat;
     WrapR = Repeat;
     
-}; 
+};
+
+texture MaskTexture <
+    string ResourceName = "Circle_Gradient_64x64.png";
+    string UIName = "Mask Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D MaskSampler = sampler_state {
+    Texture = <MaskTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+};
 
 // Data from application vertex buffer
 struct appdata {
     float3 Position	: POSITION;
     float4 Normal	: NORMAL;
+	float4 Colour   : COLOR0;
+	float2 UV		: TEXCOORD0;
 };
 
 // Data passed from vertex shader to pixel shader
@@ -85,6 +84,8 @@ struct vertexOutput {
     float4 HPosition  : POSITION;
     float3 WorldPos	  : TEXCOORD0;
 	float3 WorldView  : TEXCOORD1;
+	float4 Colour     : TEXCOORD2;
+	float2 UV		  : TEXCOORD3;
 };
 
 // Vertex Shading
@@ -98,50 +99,29 @@ vertexOutput laserbeam_vs(appdata IN) {
     OUT.WorldPos = Pw;
     OUT.WorldView = normalize(float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w) - Pw);
 	OUT.HPosition = mul(WvpXf,Po);
+	OUT.Colour    = IN.Colour;
+	OUT.UV		  = IN.UV;
     return OUT;
 }
 
 // Pixel Shading
 
 float4 laserbeam_ps(vertexOutput IN) : COLOR {
-	float3 nWorldView = normalize(IN.WorldView);
+	float3 sampleCoord = IN.WorldPos.xyz - (Freq * Timer * float3(0, 0, 1));
+	float4 noiseTexVal = tex3D(NoiseSampler, Scale * sampleCoord);
+    float  totalNoiseTexVal  = 8.0 * (abs(noiseTexVal.x - 0.25)  + abs(noiseTexVal.y - 0.125) + 
+                               abs(noiseTexVal.z - 0.0625) + abs(noiseTexVal.w - 0.03125));
+	totalNoiseTexVal = noiseTexVal.x;
 	
-	// Figure out the distance between the current fragment and the
-	// center of the beam defined by LinePoint1, LinePoint2
-	float3 lineVec      = LinePoint2 - LinePoint1;
-	float3 nLineVec     = normalize(lineVec);
-	float lineVecLength = length(lineVec);
+	float4 maskTexVal = tex2D(MaskSampler, IN.UV.xy);
 	
-	// Do some ray casting into the beam - sample based on how close to the
-	// center of the beam we are (closer the stronger the beam colour)
-	float volumeAccumulateTotal = 0.0f;
-	const int NUM_STEPS = 16;
-	float invNumSteps = 1.0 / (float)NUM_STEPS;
-	float stepIncrement = Radius * invNumSteps;
-	float3 startPoint = IN.WorldPos - (1.414213562 * Radius - Radius) * nWorldView;
-	
-	for (int i = 0; i < NUM_STEPS; i++) {
-		float3 currWorldPos = startPoint - (float)i * stepIncrement * nWorldView;
-		float3 fragToLineVec = currWorldPos - LinePoint1;
-		float distFromFragToLine = length(cross(lineVec, fragToLineVec)) / lineVecLength;
-		float invDist = Radius - distFromFragToLine;
-		volumeAccumulateTotal = volumeAccumulateTotal + lerp(0, invNumSteps, invDist);
-	}
-	
-	float3 sampleCoord = IN.WorldPos.xyz - (Freq * Timer.xxx);
-	float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);
-    float totalTexVal = 8.0 * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
-                               abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
-							   
-	volumeAccumulateTotal = clamp(volumeAccumulateTotal, 0, 1);
-	float3 totalColour = clamp(texVal.x * volumeAccumulateTotal.xxx + BeamColour, 0, 1);
-	
-    return float4(totalColour, volumeAccumulateTotal.x);
+	float3 totalColour = clamp(totalNoiseTexVal * BeamColour, 0, 1);
+    return /*IN.Colour * */maskTexVal * float4(totalColour, totalNoiseTexVal);							   
 }
 
 ///// TECHNIQUES /////////////////////////////
 
-technique Main < string Script = "Pass=p0;"; > {
+technique LaserBeam < string Script = "Pass=p0;"; > {
     pass p0 < string Script = "Draw=geometry;"; > {
 		
         VertexProgram = compile arbvp1 laserbeam_vs();

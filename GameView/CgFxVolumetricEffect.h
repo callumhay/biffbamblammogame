@@ -44,7 +44,7 @@ private:
 	float scale, freq, fadeExponent, alphaMultiplier;
 	Colour colour;
 	Vector3D flowDir;
-	GLint noiseTexID; 
+	GLuint noiseTexID; 
 	Texture2D* maskTex;
 
 protected:
