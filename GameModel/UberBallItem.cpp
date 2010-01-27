@@ -33,7 +33,7 @@ double UberBallItem::Activate() {
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	std::vector<GameItemTimer*> removeTimers;
 
-	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
+	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); ++iter) {
 		GameItemTimer* currTimer = *iter;
 		if (currTimer->GetTimerItemType() == GameItem::UberBallItem) {
 			removeTimers.push_back(currTimer);
@@ -64,7 +64,7 @@ void UberBallItem::Deactivate() {
 
 	// Make all the balls normal again
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		assert(currBall != NULL);
 		currBall->RemoveBallType(GameBall::UberBall);

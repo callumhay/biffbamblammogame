@@ -164,7 +164,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	// Draw the dropping items if not in the last pass
 	if (!fboAssets->DrawItemsInLastPass()) {
 		std::list<GameItem*>& gameItems = this->display->GetModel()->GetLiveItems();
-		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
+		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); ++iter) {
 			this->display->GetAssets()->DrawItem(dT, camera, (**iter));
 		}				
 	}
@@ -218,7 +218,7 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	// Draw the dropping items if in the last pass
 	if (fboAssets->DrawItemsInLastPass()) {
 		std::list<GameItem*>& gameItems = gameModel->GetLiveItems();
-		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); iter++) {
+		for (std::list<GameItem*>::iterator iter = gameItems.begin(); iter != gameItems.end(); ++iter) {
 			this->display->GetAssets()->DrawItem(dT, camera, (**iter));
 		}			
 	}

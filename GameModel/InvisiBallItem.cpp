@@ -31,7 +31,7 @@ double InvisiBallItem::Activate() {
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	std::vector<GameItemTimer*> removeTimers;
 
-	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
+	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); ++iter) {
 		GameItemTimer* currTimer = *iter;
 		if (currTimer->GetTimerItemType() == GameItem::InvisiBallItem) {
 			removeTimers.push_back(currTimer);
@@ -62,7 +62,7 @@ void InvisiBallItem::Deactivate() {
 
 	// Take away all of the balls' invisi-clocks of doom!?
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		assert(currBall != NULL);
 		currBall->RemoveBallType(GameBall::InvisiBall);

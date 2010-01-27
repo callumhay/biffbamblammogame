@@ -28,12 +28,12 @@ private:
 	ESPVolumeEmitter::EmitVolume* emitVolume;	// The area to emit particles from
 
 protected:
-	virtual Vector3D CalculateRandomInitParticleDir() const;
-	virtual Point3D  CalculateRandomInitParticlePos() const;
+	Vector3D CalculateRandomInitParticleDir() const;
+	Point3D  CalculateRandomInitParticlePos() const;
 
 public:
 	ESPVolumeEmitter();
-	virtual ~ESPVolumeEmitter();
+	~ESPVolumeEmitter();
 
 	// Rectangle-prism volume setters
 	//void SetEmitArea(const Point3D& center, const Vector3D& rectHalfVert, const Vector3D& rectHalfHoriz);

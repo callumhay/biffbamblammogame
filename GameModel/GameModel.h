@@ -314,7 +314,7 @@ public:
 	// *******************************************************************
 
 	void AddPossibleItemDrop(LevelPiece* p);
-	Projectile* AddProjectile(Projectile::ProjectileType type, const Point2D& spawnLoc);
+	void AddProjectile(Projectile* projectile);
 	void AddBeam(int beamType);
 
 	// Debug functions

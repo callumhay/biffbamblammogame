@@ -207,7 +207,7 @@ Mesh* ObjReader::ReadMeshFromStream(const std::string &filepath, std::istream &i
 
 	// Go through all the polygon groups and set the material groups
 	std::map<std::string, PolyGrpIndexer>::iterator polyGrpIter;
-	for (polyGrpIter = polyGrps.begin(); polyGrpIter != polyGrps.end(); polyGrpIter++) {
+	for (polyGrpIter = polyGrps.begin(); polyGrpIter != polyGrps.end(); ++polyGrpIter) {
 		MaterialGroup* currMatGrp = matGrps[polyGrpIter->first];
 		currMatGrp->AddFaces(polyGrpIter->second, vertices, normals, texCoords);
 	}

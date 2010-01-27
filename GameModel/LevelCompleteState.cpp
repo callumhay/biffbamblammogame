@@ -35,8 +35,8 @@ void LevelCompleteState::Tick(double seconds) {
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
 	if (gameBalls.size() > 1) {
 		std::list<GameBall*>::iterator ballIter = gameBalls.begin();
-		ballIter++;
-		for (; ballIter != gameBalls.end(); ballIter++) {
+		++ballIter;
+		for (; ballIter != gameBalls.end(); ++ballIter) {
 			GameBall* ballToDestroy = *ballIter;
 			delete ballToDestroy;
 			ballToDestroy = NULL;

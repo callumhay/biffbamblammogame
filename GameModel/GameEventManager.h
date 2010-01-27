@@ -13,6 +13,7 @@ class GameItemTimer;
 class GameWorld;
 class GameLevel;
 class Projectile;
+class Beam;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
@@ -58,6 +59,10 @@ public:
 
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);
+
+	void ActionBeamSpawned(const Beam& beam);
+	void ActionBeamChanged(const Beam& beam);
+	void ActionBeamRemoved(const Beam& beam);
 
 	void ActionGameCompleted();
 	void ActionWorldStarted(const GameWorld& world);

@@ -145,7 +145,7 @@ void BallInPlayState::Tick(double seconds) {
 		// Check for ball collision with level pieces
 		// Get the small set (maximum 4) of levelpieces based on the position of the ball...
 		std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(*currBall);
-		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); pieceIter++) {
+		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
 			
 			LevelPiece *currPiece = *pieceIter;
 
@@ -203,7 +203,7 @@ void BallInPlayState::Tick(double seconds) {
 		// so that collisions are not duplicated
 		std::list<GameBall*>::iterator nextIter = iter;
 		nextIter++;
-		for (; nextIter != gameBalls.end(); nextIter++) {
+		for (; nextIter != gameBalls.end(); ++nextIter) {
 			GameBall* otherBall = *nextIter;
 			assert(currBall != otherBall);
 
@@ -217,7 +217,7 @@ void BallInPlayState::Tick(double seconds) {
 	}
 	
 	// Get rid of all the balls that went out of bounds / are now dead
-	for (std::list<std::list<GameBall*>::iterator>::iterator iter = ballsToRemove.begin(); iter != ballsToRemove.end(); iter++) {
+	for (std::list<std::list<GameBall*>::iterator>::iterator iter = ballsToRemove.begin(); iter != ballsToRemove.end(); ++iter) {
 		GameBall* ballToDestroy = (**iter);
 		gameBalls.erase(*iter);
 		delete ballToDestroy;
@@ -239,7 +239,7 @@ void BallInPlayState::Tick(double seconds) {
 	std::list<Projectile*>& gameProjectiles = gameModel->GetActiveProjectiles();
 	std::vector<std::list<Projectile*>::iterator> projectilesToDestroy;
 
-	for(std::list<Projectile*>::iterator iter = gameProjectiles.begin(); iter != gameProjectiles.end(); iter++) {
+	for(std::list<Projectile*>::iterator iter = gameProjectiles.begin(); iter != gameProjectiles.end(); ++iter) {
 		Projectile* currProjectile = *iter;
 		
 		// Grab bounding lines from the projectile to test for collision
@@ -247,7 +247,7 @@ void BallInPlayState::Tick(double seconds) {
 
 		// Find the any level pieces that the current projectile may have collided with and test for collision
 		std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(*currProjectile);
-		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); pieceIter++) {
+		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
 			LevelPiece *currPiece = *pieceIter;
 			
 			// Test for a collision between the projectile and current level piece
@@ -269,7 +269,7 @@ void BallInPlayState::Tick(double seconds) {
 	}
 
 	// Remove and delete all collided projectiles...
-	for (std::vector<std::list<Projectile*>::iterator>::iterator iter = projectilesToDestroy.begin(); iter != projectilesToDestroy.end(); iter++) {
+	for (std::vector<std::list<Projectile*>::iterator>::iterator iter = projectilesToDestroy.begin(); iter != projectilesToDestroy.end(); ++iter) {
 		Projectile* projectileToRemove = (**iter);
 		gameProjectiles.erase(*iter);
 		GameEventManager::Instance()->ActionProjectileRemoved(*projectileToRemove);
@@ -286,7 +286,7 @@ void BallInPlayState::Tick(double seconds) {
 void BallInPlayState::UpdateActiveTimers(double seconds) {
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	std::vector<GameItemTimer*> removeTimers;
-	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
+	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); ++iter) {
 		GameItemTimer* currTimer = *iter;
 		if (currTimer->HasExpired()) {
 			// Timer has expired, dispose of it
@@ -314,7 +314,7 @@ void BallInPlayState::UpdateActiveItemDrops(double seconds) {
 	// Update any items that may have been created
 	std::vector<GameItem*> removeItems;
 	std::list<GameItem*>& currLiveItems = this->gameModel->GetLiveItems();
-	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); iter++) {
+	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); ++iter) {
 		GameItem *currItem = *iter;
 		currItem->Tick(seconds);
 		
@@ -383,6 +383,9 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 		// might be level pieces that were destroyed by the ball that we are trying to access in the beam
 		currentBeam->UpdateCollisions(currentLevel);
 
+		// EVENT: Beam updated/changed
+		GameEventManager::Instance()->ActionBeamChanged(*currentBeam);
+
 		std::list<Beam::BeamSegment*>& beamParts = currentBeam->GetBeamParts();
 		for (std::list<Beam::BeamSegment*>::iterator segIter = beamParts.begin(); segIter != beamParts.end(); ++segIter) {
 			Beam::BeamSegment* currentBeamSeg = *segIter;
@@ -406,6 +409,10 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 		beamIsDead = currentBeam->Tick(seconds);
 		if (beamIsDead) {
 			beamIter = activeBeams.erase(beamIter);
+
+			// EVENT: Beam removed...
+			GameEventManager::Instance()->ActionBeamRemoved(*currentBeam);
+
 			delete currentBeam;
 			currentBeam = NULL;
 		}
@@ -533,7 +540,7 @@ void BallInPlayState::DoItemCollision() {
 	std::vector<GameItem*> removeItems;
 
 	// Check to see if the paddle hit any items, if so, activate those items
-	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); iter++) {
+	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); ++iter) {
 		GameItem *currItem = *iter;
 		
 		if (currItem->CollisionCheck(*this->gameModel->GetPlayerPaddle())) {

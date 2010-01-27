@@ -350,13 +350,28 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 	if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
 		// We add the beam to the game model, the rest will be taken care of by the beam and model
 		gameModel->AddBeam(Beam::PaddleLaserBeam);
+		// Beam only fires once
+		this->RemovePaddleType(PlayerPaddle::LaserBeamPaddle);
 	}
 	// Check for laser bullet paddle (shoots little laser bullets from the paddle)
 	else if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 		// Make sure we are allowed to fire a new laser bullet
 		if (this->timeSinceLastLaserBlast >= PADDLE_LASER_BULLET_DELAY) {
+
+			// Calculate the width and height of the laser bullet based on the size of the paddle...
+			float projectileWidth  = this->GetPaddleScaleFactor() * PaddleLaser::PADDLELASER_WIDTH_DEFAULT;
+			float projectileHeight = this->GetPaddleScaleFactor() * PaddleLaser::PADDLELASER_HEIGHT_DEFAULT;
+
+			// Create the right type of projectile in the right place
+			Projectile* newProjectile = Projectile::CreateProjectile(Projectile::PaddleLaserBulletProjectile, 
+				this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight));
+
+			// Modify the fired bullet based on the current paddle's properties...
+			newProjectile->SetWidth(projectileWidth);
+			newProjectile->SetHeight(projectileHeight);
+
 			// Fire ze laser bullet! - tell the model about it
-			gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + PaddleLaser::PADDLELASER_HALF_HEIGHT));
+			gameModel->AddProjectile(newProjectile);
 
 			// Reset the timer for the next laser blast
 			this->timeSinceLastLaserBlast = 0;

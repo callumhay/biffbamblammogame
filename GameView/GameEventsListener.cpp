@@ -355,6 +355,24 @@ void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	debug_output("EVENT: Projectile removed");
 }
 
+void GameEventsListener::BeamSpawnedEvent(const Beam& beam) {
+	// Add an effect for the new beam...
+	this->display->GetAssets()->GetESPAssets()->AddBeamEffect(beam);
+	debug_output("EVENT: Beam spawned");
+}
+
+void GameEventsListener::BeamChangedEvent(const Beam& beam) {
+	// Update the effect for the now changed beam...
+	this->display->GetAssets()->GetESPAssets()->UpdateBeamEffect(beam);
+	debug_output("EVENT: Beam changed");
+}
+
+void GameEventsListener::BeamRemovedEvent(const Beam& beam) {
+	// Remove the effect for the beam...
+	this->display->GetAssets()->GetESPAssets()->RemoveBeamEffect(beam);
+	debug_output("EVENT: Beam removed");
+}
+
 void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAfter) {
 	
 	// Tell the life HUD about the change in lives

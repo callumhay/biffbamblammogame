@@ -71,13 +71,13 @@ double MultiBallItem::Activate() {
 
 
 	// Now add all the newly created balls into the game model's list of balls
-	for (std::vector<GameBall*>::iterator iter = newBalls.begin(); iter != newBalls.end(); iter++) {
+	for (std::vector<GameBall*>::iterator iter = newBalls.begin(); iter != newBalls.end(); ++iter) {
 		gameBalls.push_back(*iter);
 	}
 
 	// Go through all the game balls and disable their ball-ball collisions for
 	// a brief amount of time until they are all seperated
-	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); iter++) {
+	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
 		GameBall* currBall = *iter;
 		if (currBall->CanCollide()) {
 			currBall->SetBallCollisionsDisabled(MultiBallItem::BALL_COLLISIONS_DISABLED_DURATION);

@@ -188,7 +188,7 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFileFromStream
 
 	// Create materials with the corresponding properties
 	std::map<std::string, MaterialProperties*>::iterator matPropIter;
-	for (matPropIter = matProperties.begin(); matPropIter != matProperties.end(); matPropIter++) {
+	for (matPropIter = matProperties.begin(); matPropIter != matProperties.end(); ++matPropIter) {
 		CgFxMaterialEffect* currMaterial = NULL;
 	
 		// Figure out what material we should be using for each material group

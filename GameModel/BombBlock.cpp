@@ -77,7 +77,7 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 		}
 		
 		// Remove any unwanted pieces...
-		for (std::list<std::set<LevelPiece*>::iterator>::iterator iter = toRemove.begin(); iter != toRemove.end(); iter++) {
+		for (std::list<std::set<LevelPiece*>::iterator>::iterator iter = toRemove.begin(); iter != toRemove.end(); ++iter) {
 			destroyedPieces.erase(*iter);
 		}
 	}

@@ -10,6 +10,7 @@ class GameWorld;
 class GameItem;
 class GameItemTimer;
 class Projectile;
+class Beam;
 
 class GameEvents {
 public:
@@ -248,6 +249,25 @@ public:
 	 * Arguements: projectile - The projectile that was just removed.
 	 */
 	virtual void ProjectileRemovedEvent(const Projectile& projectile) = 0;
+
+	/**
+	 * Event triggered when a new beam is spawned. Only occurs once per spawned beam.
+	 * Arguements: beam - the beam that was just spawned.
+	 */
+	virtual void BeamSpawnedEvent(const Beam& beam) = 0;
+
+	/**
+	 * Event triggered when a beam changes (i.e., new segments are created destroyed or change position).
+	 * Only occurs once per change.
+	 * Arguments: beam - The beam that just changed (in its new state after the change).
+	 */
+	virtual void BeamChangedEvent(const Beam& beam) = 0;
+
+	/**
+	 * Event triggered when a beam is removed from the game. Only occurs once right before removal of the beam.
+	 * Arguments: beam - The beam about to be removed / being removed.
+	 */
+	virtual void BeamRemovedEvent(const Beam& beam) = 0;
 
 	/**
 	 * Event triggered whenever the number of player lives changes. Only occurs once per life or

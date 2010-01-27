@@ -137,10 +137,14 @@ public:
 
 	
 	// Robust equivalence
-	bool operator==(const Point3D &other) {
+	inline bool operator==(const Point3D &other) {
 		return 	fabs(v_[0] - other[0]) < EPSILON &&
 		  			fabs(v_[1] - other[1]) < EPSILON &&
 		  			fabs(v_[2] - other[2]) < EPSILON;
+	}
+
+	inline bool operator!=(const Point3D &other) {
+		return !(*this == other);
 	}
 
 };

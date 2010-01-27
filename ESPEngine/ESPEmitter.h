@@ -74,7 +74,7 @@ public:
 
 	bool ParticlesHaveNoLivesLeft() const {
 		if (this->numParticleLives != ESPParticle::INFINITE_PARTICLE_LIVES) {
-			for (std::map<const ESPParticle*, int>::const_iterator iter = this->particleLivesLeft.begin(); iter != this->particleLivesLeft.end(); iter++) {
+			for (std::map<const ESPParticle*, int>::const_iterator iter = this->particleLivesLeft.begin(); iter != this->particleLivesLeft.end(); ++iter) {
 				if (iter->second != 0) {
 					return false;
 				}

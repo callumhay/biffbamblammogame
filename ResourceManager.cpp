@@ -56,7 +56,7 @@ ResourceManager::~ResourceManager() {
 
 	// Clean up all loaded meshes - these must be deleted first so that the
 	// effects go with them and make the assertions below correct
-	for (std::map<std::string, Mesh*>::iterator iter = this->loadedMeshes.begin(); iter != this->loadedMeshes.end(); iter++) {
+	for (std::map<std::string, Mesh*>::iterator iter = this->loadedMeshes.begin(); iter != this->loadedMeshes.end(); ++iter) {
 		delete iter->second;
 		iter->second = NULL;
 	}
@@ -71,7 +71,7 @@ ResourceManager::~ResourceManager() {
 	// whoever is using the resource should have released it by now
 	assert(this->numRefPerEffect.size() == 0);
 	assert(this->loadedEffects.size() == 0);
-	for (std::map<std::string, CGeffect>::iterator iter = this->loadedEffects.begin(); iter != this->loadedEffects.end(); iter++) {
+	for (std::map<std::string, CGeffect>::iterator iter = this->loadedEffects.begin(); iter != this->loadedEffects.end(); ++iter) {
 		cgDestroyEffect(iter->second);
 		iter->second = NULL;
 	}
@@ -86,7 +86,7 @@ ResourceManager::~ResourceManager() {
 	// Clean up all loaded textures
 	assert(this->numRefPerTexture.size() == 0);
 	assert(this->loadedTextures.size() == 0);
-	for (std::map<std::string, Texture*>::iterator iter = this->loadedTextures.begin(); iter != this->loadedTextures.end(); iter++) {
+	for (std::map<std::string, Texture*>::iterator iter = this->loadedTextures.begin(); iter != this->loadedTextures.end(); ++iter) {
 		delete iter->second;
 		iter->second = NULL;
 	}
@@ -269,7 +269,7 @@ bool ResourceManager::ReleaseMeshResource(Mesh* mesh) {
 
 	// Find the mesh resource
 	std::map<std::string, Mesh*>::iterator meshResourceIter = this->loadedMeshes.end();
-	for (std::map<std::string, Mesh*>::iterator iter = this->loadedMeshes.begin(); iter != this->loadedMeshes.end(); iter++) {
+	for (std::map<std::string, Mesh*>::iterator iter = this->loadedMeshes.begin(); iter != this->loadedMeshes.end(); ++iter) {
 		if (iter->second == mesh) {
 			meshResourceIter = iter;
 		}
@@ -362,7 +362,7 @@ bool ResourceManager::ReleaseTextureResource(Texture* texture) {
 
 	// Find the texture resource
 	std::map<std::string, Texture*>::iterator texResourceIter = this->loadedTextures.end();
-	for (std::map<std::string, Texture*>::iterator iter = this->loadedTextures.begin(); iter != this->loadedTextures.end(); iter++) {
+	for (std::map<std::string, Texture*>::iterator iter = this->loadedTextures.begin(); iter != this->loadedTextures.end(); ++iter) {
 		if (iter->second == texture) {
 			texResourceIter = iter;
 		}
@@ -574,7 +574,7 @@ bool ResourceManager::ReleaseCgFxEffectResource(CGeffect &effect) {
 
 	// Find the effect resource
 	std::map<std::string, CGeffect>::iterator effectResourceIter = this->loadedEffects.end();
-	for (std::map<std::string, CGeffect>::iterator iter = this->loadedEffects.begin(); iter != this->loadedEffects.end(); iter++) {
+	for (std::map<std::string, CGeffect>::iterator iter = this->loadedEffects.begin(); iter != this->loadedEffects.end(); ++iter) {
 		if (iter->second == effect) {
 			effectResourceIter = iter;
 		}

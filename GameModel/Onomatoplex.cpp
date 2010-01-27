@@ -130,11 +130,11 @@ namespace Onomatoplex {
 		uberEndFixExplosion.push_back("plosion");
 		uberEndFixExplosion.push_back("afrazz");
 
-		for (std::vector<std::string>::iterator iterEnd = uberEndFixExplosion.begin(); iterEnd != uberEndFixExplosion.end(); iterEnd++) {
-			for (std::vector<std::string>::iterator iter = goodSingleWordExplosion.begin(); iter != goodSingleWordExplosion.end(); iter++) {
+		for (std::vector<std::string>::iterator iterEnd = uberEndFixExplosion.begin(); iterEnd != uberEndFixExplosion.end(); ++iterEnd) {
+			for (std::vector<std::string>::iterator iter = goodSingleWordExplosion.begin(); iter != goodSingleWordExplosion.end(); ++iter) {
 				uberSingleWordExplosion.push_back(JoinEndfixes(*iter, *iterEnd));
 			}
-			for (std::vector<std::string>::iterator iter = awesomeSingleWordExplosion.begin(); iter != awesomeSingleWordExplosion.end(); iter++) {
+			for (std::vector<std::string>::iterator iter = awesomeSingleWordExplosion.begin(); iter != awesomeSingleWordExplosion.end(); ++iter) {
 				uberSingleWordExplosion.push_back(JoinEndfixes(*iter, *iterEnd));
 			}
 		}
@@ -226,11 +226,11 @@ namespace Onomatoplex {
 		uberEndFixBounce.push_back(" Pong");
 		uberEndFixBounce.push_back(" Ponk");
 
-		for (std::vector<std::string>::iterator iterEnd = uberEndFixBounce.begin(); iterEnd != uberEndFixBounce.end(); iterEnd++) {
-			for (std::vector<std::string>::iterator iter = goodSingleWordBounce.begin(); iter != goodSingleWordBounce.end(); iter++) {
+		for (std::vector<std::string>::iterator iterEnd = uberEndFixBounce.begin(); iterEnd != uberEndFixBounce.end(); ++iterEnd) {
+			for (std::vector<std::string>::iterator iter = goodSingleWordBounce.begin(); iter != goodSingleWordBounce.end(); ++iter) {
 				uberSingleWordBounce.push_back(JoinEndfixes(*iter, *iterEnd));
 			}
-			for (std::vector<std::string>::iterator iter = awesomeSingleWordBounce.begin(); iter != awesomeSingleWordBounce.end(); iter++) {
+			for (std::vector<std::string>::iterator iter = awesomeSingleWordBounce.begin(); iter != awesomeSingleWordBounce.end(); ++iter) {
 				uberSingleWordBounce.push_back(JoinEndfixes(*iter, *iterEnd));
 			}
 		}
@@ -289,11 +289,11 @@ namespace Onomatoplex {
 		uberEndFixElectric.push_back("iple");
 		uberEndFixElectric.push_back("frazz");
 
-		for (std::vector<std::string>::iterator iterEnd = uberEndFixElectric.begin(); iterEnd != uberEndFixElectric.end(); iterEnd++) {
-			for (std::vector<std::string>::iterator iter = goodSingleWordElectric.begin(); iter != goodSingleWordElectric.end(); iter++) {
+		for (std::vector<std::string>::iterator iterEnd = uberEndFixElectric.begin(); iterEnd != uberEndFixElectric.end(); ++iterEnd) {
+			for (std::vector<std::string>::iterator iter = goodSingleWordElectric.begin(); iter != goodSingleWordElectric.end(); ++iter) {
 				uberSingleWordElectric.push_back(JoinEndfixes(*iter, *iterEnd));
 			}
-			for (std::vector<std::string>::iterator iter = awesomeSingleWordElectric.begin(); iter != awesomeSingleWordElectric.end(); iter++) {
+			for (std::vector<std::string>::iterator iter = awesomeSingleWordElectric.begin(); iter != awesomeSingleWordElectric.end(); ++iter) {
 				uberSingleWordElectric.push_back(JoinEndfixes(*iter, *iterEnd));
 			}
 		}

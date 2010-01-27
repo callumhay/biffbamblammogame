@@ -70,7 +70,7 @@ GameFBOAssets::~GameFBOAssets() {
  */
 void GameFBOAssets::Tick(double dT) {
 	for (std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float>>>::iterator iter1 = this->fboAnimations.begin();
-		iter1 != this->fboAnimations.end(); iter1++) {
+		iter1 != this->fboAnimations.end(); ++iter1) {
 		
 		std::map<FBOAnimationItem, AnimationMultiLerp<float>>& currAnimSet = iter1->second;
 		for (std::map<FBOAnimationItem, AnimationMultiLerp<float>>::iterator iter2 = currAnimSet.begin(); iter2 != currAnimSet.end();) {
@@ -79,7 +79,7 @@ void GameFBOAssets::Tick(double dT) {
 				iter2 = currAnimSet.erase(iter2);
 			}
 			else {
-				iter2++;
+				++iter2;
 			}
 		}
 	}

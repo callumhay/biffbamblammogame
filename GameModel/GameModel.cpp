@@ -52,7 +52,7 @@ GameModel::~GameModel() {
 	}
 
 	// Delete balls and paddle
-	for (std::list<GameBall*>::iterator ballIter = this->balls.begin(); ballIter != this->balls.end(); ballIter++) {
+	for (std::list<GameBall*>::iterator ballIter = this->balls.begin(); ballIter != this->balls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		delete currBall;
 		currBall = NULL;
@@ -290,7 +290,7 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
  * Clears the list of all projectiles that are currently in existance in the game.
  */
 void GameModel::ClearProjectiles() {
-	for (std::list<Projectile*>::iterator iter = this->projectiles.begin(); iter != this->projectiles.end(); iter++) {
+	for (std::list<Projectile*>::iterator iter = this->projectiles.begin(); iter != this->projectiles.end(); ++iter) {
 		Projectile* currProjectile = *iter;
 		GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
 		delete currProjectile;
@@ -303,7 +303,7 @@ void GameModel::ClearProjectiles() {
  * Clears the list of all beams that are currently in existance in the game.
  */
 void GameModel::ClearBeams() {
-	for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); iter++) {
+	for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); ++iter) {
 		Beam* currBeam = *iter;
 		//GameEventManager::Instance()->ActionBeamRemoved(*currProjectile);
 		delete currBeam;
@@ -317,7 +317,7 @@ void GameModel::ClearBeams() {
  */
 void GameModel::ClearLiveItems() {
 	// Destroy any left-over game items
-	for(std::list<GameItem*>::iterator iter = this->currLiveItems.begin(); iter != this->currLiveItems.end(); iter++) {
+	for(std::list<GameItem*>::iterator iter = this->currLiveItems.begin(); iter != this->currLiveItems.end(); ++iter) {
 		GameItem* currItem = *iter;
 		GameEventManager::Instance()->ActionItemRemoved(*currItem);
 		delete currItem;
@@ -329,7 +329,7 @@ void GameModel::ClearLiveItems() {
  * Clears all of the active timers in the game.
  */
 void GameModel::ClearActiveTimers() {
-	for(std::list<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end(); iter++) {
+	for(std::list<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end(); ++iter) {
 		GameItemTimer* currTimer = *iter;
 		currTimer->StopTimer();
 		delete currTimer;
@@ -339,21 +339,16 @@ void GameModel::ClearActiveTimers() {
 }
 
 /**
- * Add a projectile of the given type at the given spawn location.
- * Returns: The newly created projectile now being managed by the gamemodel.
+ * Add a projectile to the game.
  */
-Projectile* GameModel::AddProjectile(Projectile::ProjectileType type, const Point2D& spawnLoc) {
-	// Create a new projectile based on values given
-	Projectile* addedProjectile = Projectile::CreateProjectile(type, spawnLoc);
-	assert(addedProjectile != NULL);
+void GameModel::AddProjectile(Projectile* projectile) {
+	assert(projectile != NULL);
 
 	// Add it to the list of in-game projectiles
-	this->projectiles.push_back(addedProjectile);
+	this->projectiles.push_back(projectile);
 
 	// EVENT: Projectile creation
-	GameEventManager::Instance()->ActionProjectileSpawned(*addedProjectile);
-
-	return addedProjectile;
+	GameEventManager::Instance()->ActionProjectileSpawned(*projectile);	
 }
 
 /**
@@ -379,5 +374,5 @@ void GameModel::AddBeam(int beamType) {
 	this->beams.push_back(addedBeam);
 
 	// EVENT: Beam creation
-	// TODO: GameEventManager::Instance()->ActionBeamSpawned(*addedBeam);
+	GameEventManager::Instance()->ActionBeamSpawned(*addedBeam);
 }
