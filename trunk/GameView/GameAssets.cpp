@@ -125,7 +125,7 @@ GameAssets::~GameAssets() {
 void GameAssets::DeleteWorldAssets() {
 	// Delete all the levels for the world that are currently loaded - THIS MUST BE CALLED BEFORE DELETING
 	// THE WORLD ASSETS!!!
-	for(std::map<const GameLevel*, LevelMesh*>::iterator iter = this->loadedLevelMeshes.begin(); iter != this->loadedLevelMeshes.end(); iter++) {
+	for(std::map<const GameLevel*, LevelMesh*>::iterator iter = this->loadedLevelMeshes.begin(); iter != this->loadedLevelMeshes.end(); ++iter) {
 		LevelMesh* currMesh = iter->second;
 		delete currMesh;
 		currMesh = NULL;
@@ -166,7 +166,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 	// Go through each ball in the game, draw it accordingly
 	const std::list<GameBall*>& balls = gameModel.GetGameBalls();
-	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ballIter++) {
+	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		
 		CgFxEffectBase* ballEffectTemp = NULL;
@@ -306,7 +306,7 @@ void GameAssets::DrawGameBallsPostEffects(double dT, GameModel& gameModel, const
 	// Go through each ball and draw its post effects
 	const std::list<GameBall*>& balls = gameModel.GetGameBalls();
 
-	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ballIter++) {
+	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;		
 		
 		// PADDLE CAMERA CHECK
@@ -402,10 +402,6 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 		// Draw glowy effects where the laser originates...
 		this->espAssets->DrawPaddleLaserBulletEffects(dT, camera, *paddle);
-	}
-	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
-		// TODO: Draw glow and other related effects for when the laser is blasting its laser beam
-		//this->espAssets->DrawPaddleLaserBeamEffects(dT, camera, *paddle);
 	}
 
 	glPopMatrix();
@@ -549,7 +545,7 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 
 	// Load all of the level meshes for the world
 	const std::vector<GameLevel*>& levels = world->GetAllLevelsInWorld();
-	for (std::vector<GameLevel*>::const_iterator iter = levels.begin(); iter != levels.end(); iter++) {
+	for (std::vector<GameLevel*>::const_iterator iter = levels.begin(); iter != levels.end(); ++iter) {
 		const GameLevel* level = *iter;
 		assert(level != NULL);
 

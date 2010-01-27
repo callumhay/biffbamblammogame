@@ -297,7 +297,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 
 	// Animate any animation values of the ball elements that require constant animation
 	for (std::vector<AnimationMultiLerp<Colour>>::iterator iter = this->idleColourAnimations.begin();
-		iter != this->idleColourAnimations.end(); iter++) {
+		iter != this->idleColourAnimations.end(); ++iter) {
 		iter->Tick(dT);
 	}
 

@@ -114,9 +114,11 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			// All the other rays were created via refraction or some such thing, so spawn new particles for them
 			++rayIter;
 			for (; rayIter != rays.end(); ++rayIter) {
-				Projectile* newProjectile  = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, rayIter->GetOrigin());
+				PaddleLaser* newProjectile = new PaddleLaser(*projectile);
+				newProjectile->SetPosition(rayIter->GetOrigin());
 				newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
 				newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
+				gameModel->AddProjectile(newProjectile);
 			}
 		}
 	}

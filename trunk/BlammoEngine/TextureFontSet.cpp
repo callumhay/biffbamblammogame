@@ -37,7 +37,7 @@ TextureFontSet::~TextureFontSet() {
 float TextureFontSet::GetWidth(const std::string& s) const {
 	float totalWidth = 0;
 
-	for (std::string::const_iterator strIter = s.begin(); strIter != s.end(); strIter++) {
+	for (std::string::const_iterator strIter = s.begin(); strIter != s.end(); ++strIter) {
 		char currChar = (*strIter);
 		totalWidth += this->widthOfChars[currChar];
 	}

@@ -117,7 +117,7 @@ void BallSpeedItem::Deactivate() {
 
 	// Shut off the item for each of the balls
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ballIter++) {
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		assert(currBall != NULL);
 		currBall->SetSpeed(GameBall::NormalSpeed);

@@ -38,14 +38,14 @@ ESPEmitter::~ESPEmitter() {
 void ESPEmitter::Flush() {
 	assert(this->aliveParticles.size() + this->deadParticles.size() == this->particleLivesLeft.size());
 	// Delete particles
-	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
 		delete currParticle;
 		currParticle = NULL;
 	}
 	this->aliveParticles.clear();
 
-	for (std::list<ESPParticle*>::iterator iter = this->deadParticles.begin(); iter != this->deadParticles.end(); iter++) {
+	for (std::list<ESPParticle*>::iterator iter = this->deadParticles.begin(); iter != this->deadParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
 		delete currParticle;
 		currParticle = NULL;
@@ -138,7 +138,7 @@ void ESPEmitter::TickParticles(double dT) {
 	std::list<std::list<ESPParticle*>::iterator> nowDead;
 
 	// Go through the alive iterators and figure out which ones have died and tick those that are still alive
-	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		// Give the particle time to do its thing...
 		ESPParticle* currParticle = *iter;
 		std::list<ESPParticle*>::iterator tempIter = iter;
@@ -152,13 +152,13 @@ void ESPEmitter::TickParticles(double dT) {
 			currParticle->Tick(dT);
 
 			// Have each of the effectors in this emitter affect the particle...
-			for (std::list<ESPParticleEffector*>::iterator effIter = this->effectors.begin(); effIter != this->effectors.end(); effIter++) {
+			for (std::list<ESPParticleEffector*>::iterator effIter = this->effectors.begin(); effIter != this->effectors.end(); ++effIter) {
 				(*effIter)->AffectParticleOnTick(dT, currParticle);
 			}
 		}
 	}
 
-	for (std::list<std::list<ESPParticle*>::iterator>::iterator iter = nowDead.begin(); iter != nowDead.end(); iter++) {
+	for (std::list<std::list<ESPParticle*>::iterator>::iterator iter = nowDead.begin(); iter != nowDead.end(); ++iter) {
 		this->aliveParticles.erase(*iter);	
 	}
 }
@@ -228,14 +228,14 @@ void ESPEmitter::Draw(const Camera& camera, bool enableDepth) {
 		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 		glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
 
-		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 			ESPParticle* currParticle = *iter;
 			currParticle->DrawAsPointSprite(camera);
 		}
 		glDisable(GL_POINT_SPRITE);
 	}
 	else {
-		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 			ESPParticle* currParticle = *iter;
 			currParticle->Draw(camera, this->particleAlignment);
 		}
@@ -409,7 +409,7 @@ void ESPEmitter::SetParticleColour(const ESPInterval& red, const ESPInterval& gr
 	this->particleAlpha = alpha;
 
 	// Go through any already assigned particles and set the colour...
-	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
 		currParticle->SetColour(ColourRGBA(red.RandomValueInInterval(), green.RandomValueInInterval(), blue.RandomValueInInterval(), alpha.RandomValueInInterval()));
 	}
@@ -418,7 +418,7 @@ void ESPEmitter::SetParticleColour(const ESPInterval& red, const ESPInterval& gr
 void ESPEmitter::SetParticleAlpha(const ESPInterval& alpha) {
 	this->particleAlpha = alpha;
 	// Go through any already assigned particles and set the alpha...
-	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
 		currParticle->SetAlpha(alpha.RandomValueInInterval());
 	}
@@ -430,11 +430,11 @@ void ESPEmitter::SetNumParticleLives(int lives) {
 	this->numParticleLives = lives;
 
 	// Go through any already assigned particles and set the lives...
-	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); iter++) {
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
 		this->particleLivesLeft[currParticle] = lives;
 	}
-	for (std::list<ESPParticle*>::iterator iter = this->deadParticles.begin(); iter != this->deadParticles.end(); iter++) {
+	for (std::list<ESPParticle*>::iterator iter = this->deadParticles.begin(); iter != this->deadParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
 		this->particleLivesLeft[currParticle] = lives;
 	}

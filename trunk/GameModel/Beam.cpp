@@ -111,8 +111,6 @@ Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::DAMAGE_PER_SECOND, PaddleLaserBeam:
 }
 
 PaddleLaserBeam::~PaddleLaserBeam() {
-	// Remove the laser beam effect from the paddle
-	paddle->RemovePaddleType(PlayerPaddle::LaserBeamPaddle);
 }
 
 /**

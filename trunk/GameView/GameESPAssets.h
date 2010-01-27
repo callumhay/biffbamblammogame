@@ -29,6 +29,7 @@ class Projectile;
 class PlayerPaddle;
 class GameModel;
 class GameLevel;
+class Beam;
 
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
@@ -42,6 +43,7 @@ private:
 	std::map<const GameBall*, std::list<ESPEmitter*>>		activeBallBGEmitters;
 	std::map<const GameItem*, std::list<ESPEmitter*>>		activeItemDropEmitters; 
 	std::map<const Projectile*, std::list<ESPPointEmitter*>> activeProjectileEmitters;
+	std::map<const Beam*, std::list<ESPEmitter*>> activeBeamEmitters;
 	std::map<GameItem::ItemType, std::list<ESPEmitter*>> activeTimerHUDEmitters;
 	
 	// Standard effectors for the various ESP effects
@@ -135,6 +137,7 @@ private:
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
 
+	void DrawBeamEffects(double dT, const Camera& camera);
 	void DrawProjectileEffects(double dT, const Camera& camera);
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter);
 
@@ -161,8 +164,14 @@ public:
 	void SetItemEffect(const GameItem& item, const GameModel& gameModel);
 	void AddItemDropEffect(const Camera& camera, const GameItem& item, bool showStars);
 	void RemoveItemDropEffect(const Camera& camera, const GameItem& item);
+
 	void AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile);
 	void RemoveProjectileEffect(const Camera& camera, const Projectile& projectile);
+
+	void AddBeamEffect(const Beam& beam);
+	void UpdateBeamEffect(const Beam& beam);
+	void RemoveBeamEffect(const Beam& beam);
+
 	void AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition);
 
 	void TurnOffCurrentItemDropStars(const Camera& camera);

@@ -32,7 +32,7 @@ double PoisonPaddleItem::Activate() {
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	std::vector<GameItemTimer*> removeTimers;
 
-	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); iter++) {
+	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end(); ++iter) {
 		GameItemTimer* currTimer = *iter;
 		if (currTimer->GetTimerItemType() == GameItem::PoisonPaddleItem) {
 			removeTimers.push_back(currTimer);

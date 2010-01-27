@@ -191,7 +191,7 @@ public:
 	virtual void Draw(const Camera& camera) const {
 		// Draw each material group
 		std::map<std::string, MaterialGroup*>::const_iterator matGrpIter = this->matGrps.begin();
-		for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); matGrpIter++) {
+		for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); ++matGrpIter) {
 			matGrpIter->second->Draw(camera);
 		}
 	}
@@ -202,7 +202,7 @@ public:
 	virtual void Draw(const Camera& camera, const PointLight& keyLight, const PointLight& fillLight) {
 		// Draw each material group
 		std::map<std::string, MaterialGroup*>::const_iterator matGrpIter = this->matGrps.begin();
-		for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); matGrpIter++) {
+		for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); ++matGrpIter) {
 			matGrpIter->second->Draw(camera, keyLight, fillLight);
 		}
 	}
@@ -213,7 +213,7 @@ public:
 	virtual void Draw(const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) {
 		// Draw each material group
 		std::map<std::string, MaterialGroup*>::const_iterator matGrpIter = this->matGrps.begin();
-		for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); matGrpIter++) {
+		for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); ++matGrpIter) {
 			matGrpIter->second->Draw(camera, keyLight, fillLight, ballLight);
 		}
 	}
@@ -230,7 +230,7 @@ public:
 		else {
 			// Draw each material group
 			std::map<std::string, MaterialGroup*>::const_iterator matGrpIter = this->matGrps.begin();
-			for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); matGrpIter++) {
+			for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); ++matGrpIter) {
 				matGrpIter->second->Draw(camera, replacementMat);
 			}
 		}
@@ -248,7 +248,7 @@ public:
 		else {
 			// Draw each material group
 			std::map<std::string, MaterialGroup*>::const_iterator matGrpIter = this->matGrps.begin();
-			for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); matGrpIter++) {
+			for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); ++matGrpIter) {
 				matGrpIter->second->Draw(camera, replacementMat);
 			}
 		}
@@ -259,7 +259,7 @@ public:
 	 */
 	virtual void FastDraw() const {
 		std::map<std::string, MaterialGroup*>::const_iterator matGrpIter = this->matGrps.begin();
-		for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); matGrpIter++) {
+		for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); ++matGrpIter) {
 			matGrpIter->second->FastDraw();
 		}
 	}

@@ -106,7 +106,6 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 		// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
 		if (!projectile->IsLastLevelPieceCollidedWith(this)) {
 
-			/*
 			// Obtain all the normals of the lines that the projectile is colliding with...
 			std::vector<int> collidingIndices = this->bounds.CollisionCheckIndices(projectile->BuildBoundingLines());
 			Vector2D collisionNormal;
@@ -163,9 +162,11 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 					Point2D splitPosition    = projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection();
 
 					// Send the current projectile out the long side, spawn a new one for the short side
-					Projectile* newProjectile  = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, splitPosition);
+					PaddleLaser* newProjectile  = new PaddleLaser(*projectile); 
+					newProjectile->SetPosition(splitPosition);
 					newProjectile->SetVelocity(shortSideNormal, projectile->GetVelocityMagnitude());
 					newProjectile->SetLastLevelPieceCollidedWith(this);
+					gameModel->AddProjectile(newProjectile);
 
 					projectile->SetPosition(splitPosition);
 					projectile->SetVelocity(longSideNormal, projectile->GetVelocityMagnitude());
@@ -180,28 +181,8 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 				projectile->SetPosition(projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection());
 				projectile->SetVelocity(newVelDir, projectile->GetVelocityMagnitude());
 			}
-			*/
 
-			const float PROJECTILE_VELOCITY_MAG			= projectile->GetVelocityMagnitude();
-			const Vector2D PROJECTILE_VELOCITY_DIR	= projectile->GetVelocityDirection();
-			const Point2D IMPACT_POINT = projectile->GetPosition() + projectile->GetHalfHeight() * PROJECTILE_VELOCITY_DIR;
-
-			std::list<Collision::Ray2D> rays = this->GetReflectionRefractionRays(IMPACT_POINT, PROJECTILE_VELOCITY_DIR);
-			assert(rays.size() >= 1);
-
-			std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
-			// The first ray is how the current projectile gets transmitted through this block...
-			projectile->SetPosition(rayIter->GetOrigin());
-			projectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
 			projectile->SetLastLevelPieceCollidedWith(this);
-
-			// All the other rays were created via refraction or some such thing, so spawn new particles for them
-			++rayIter;
-			for (; rayIter != rays.end(); ++rayIter) {
-				Projectile* newProjectile  = gameModel->AddProjectile(Projectile::PaddleLaserBulletProjectile, rayIter->GetOrigin());
-				newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
-				newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
-			}
 		}
 	}
 
@@ -218,7 +199,7 @@ std::list<Collision::Ray2D> PrismTriangleBlock::GetReflectionRefractionRays(cons
 	Vector2D negImpactDir = -impactDir;
 
 	// Obtain all the normals of the lines that the hit point is closest to
-	std::vector<int> collidingIndices = this->bounds.ClosestCollisionIndices(hitPoint, 0.5f*LevelPiece::HALF_PIECE_HEIGHT);
+	std::vector<int> collidingIndices = this->bounds.ClosestCollisionIndices(hitPoint, 0.01f);
 	Vector2D collisionNormal;
 
 	if (collidingIndices.size() >= 2) {

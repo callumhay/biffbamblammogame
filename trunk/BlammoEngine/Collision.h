@@ -43,7 +43,7 @@ namespace Collision {
 	public:
 		LineSeg2D() {};
 		LineSeg2D(const Point2D& p1, const Point2D& p2) : p1(p1), p2(p2) {}
-		~LineSeg2D() {}
+		virtual ~LineSeg2D() {}
 
 
 		void SetP1(const Point2D& p) {
@@ -58,6 +58,39 @@ namespace Collision {
 		}
 		Point2D P2() const {
 			return this->p2;
+		}
+
+	};
+
+
+	class LineSeg3D {
+
+	private:
+		Point3D p1, p2;
+
+	public:
+		LineSeg3D() {};
+		LineSeg3D(const Point3D& p1, const Point3D& p2) : p1(p1), p2(p2) {}
+		~LineSeg3D() {}
+
+		void SetP1(const Point3D& p) {
+			this->p1 = p;
+		}
+		Point3D P1() const {
+			return this->p1;
+		}
+
+		void SetP2(const Point3D& p) {
+			this->p2 = p;
+		}
+		Point3D P2() const {
+			return this->p2;
+		}
+
+		Vector3D GetUnitDirection() const {
+			Vector3D direction = p2 - p1;
+			direction.Normalize();
+			return direction;
 		}
 
 	};

@@ -37,22 +37,22 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
 	std::map<std::string, MaterialGroup*> prismBlockMatGrps			= this->prismBlockDiamond->GetMaterialGroups();
 	std::map<std::string, MaterialGroup*> prismTriBlockMatGrps	= this->prismBlockTriangleUR->GetMaterialGroups();
 	
-	for (std::map<std::string, MaterialGroup*>::iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); iter++) {
+	for (std::map<std::string, MaterialGroup*>::iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = triangleBlockMatGrps.begin(); iter != triangleBlockMatGrps.end(); iter++) {
+	for (std::map<std::string, MaterialGroup*>::iterator iter = triangleBlockMatGrps.begin(); iter != triangleBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = bombBlockMatGrps.begin(); iter != bombBlockMatGrps.end(); iter++) {
+	for (std::map<std::string, MaterialGroup*>::iterator iter = bombBlockMatGrps.begin(); iter != bombBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = inkBlockMatGrps.begin(); iter != inkBlockMatGrps.end(); iter++) {
+	for (std::map<std::string, MaterialGroup*>::iterator iter = inkBlockMatGrps.begin(); iter != inkBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = prismBlockMatGrps.begin(); iter != prismBlockMatGrps.end(); iter++) {
+	for (std::map<std::string, MaterialGroup*>::iterator iter = prismBlockMatGrps.begin(); iter != prismBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = prismTriBlockMatGrps.begin(); iter != prismTriBlockMatGrps.end(); iter++) {
+	for (std::map<std::string, MaterialGroup*>::iterator iter = prismTriBlockMatGrps.begin(); iter != prismTriBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
 
@@ -95,9 +95,9 @@ void LevelMesh::Flush() {
 	// Delete each of the display lists loaded for the previous level and clear up the
 	// relevant mappings to those display lists.
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::iterator iter = this->displayListsPerMaterial.begin(); 
-		iter != this->displayListsPerMaterial.end(); iter++) {
+		iter != this->displayListsPerMaterial.end(); ++iter) {
 		
-		for (std::vector<GLuint>::iterator dispListIter = iter->second.begin(); dispListIter != iter->second.end(); dispListIter++) {
+		for (std::vector<GLuint>::iterator dispListIter = iter->second.begin(); dispListIter != iter->second.end(); ++dispListIter) {
 			glDeleteLists((*dispListIter), 1);
 			(*dispListIter) = 0;
 		}
@@ -127,7 +127,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 
 	// Load the materials for the style block...
 	std::map<std::string, MaterialGroup*> styleBlockMatGrps  = this->styleBlock->GetMaterialGroups();
-	for (std::map<std::string, MaterialGroup*>::iterator iter = styleBlockMatGrps.begin(); iter != styleBlockMatGrps.end(); iter++) {
+	for (std::map<std::string, MaterialGroup*>::iterator iter = styleBlockMatGrps.begin(); iter != styleBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
 
@@ -168,7 +168,7 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 
 	// Go through each of the materials and clear up previous display lists and materials...
 	for (std::map<CgFxMaterialEffect*, GLuint>::iterator iter = pieceInfoIter->second.begin();
-		iter != pieceInfoIter->second.end(); iter++) {
+		iter != pieceInfoIter->second.end(); ++iter) {
 		
 		// Delete any previous display list...
 		glDeleteLists(iter->second, 1);
@@ -210,7 +210,7 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
-		iter != this->displayListsPerMaterial.end(); iter++) {
+		iter != this->displayListsPerMaterial.end(); ++iter) {
 		
 		CgFxMaterialEffect* currEffect = iter->first;
 		currEffect->SetKeyLight(keyLight);
@@ -246,7 +246,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 	std::map<std::string, MaterialGroup*> pieceMatGrps = this->GetMaterialGrpsForPieceType(piece->GetType());
 
 	// Go through each of the material groups ensuring that the material is associated with an appropriate display list
-	for (std::map<std::string, MaterialGroup*>::iterator iter = pieceMatGrps.begin(); iter != pieceMatGrps.end(); iter++) {
+	for (std::map<std::string, MaterialGroup*>::iterator iter = pieceMatGrps.begin(); iter != pieceMatGrps.end(); ++iter) {
 		
 		// Make sure that the material exists in our set of available level materials
 		std::map<std::string, CgFxMaterialEffect*>::iterator currMaterialIter = this->levelMaterials.find(iter->first);

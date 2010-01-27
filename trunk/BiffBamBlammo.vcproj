@@ -423,6 +423,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPLineEmitter.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPMultiColourEffector.h"
 					>
 				</File>
@@ -476,6 +480,10 @@
 				>
 				<File
 					RelativePath=".\ESPEngine\ESPEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPLineEmitter.cpp"
 					>
 				</File>
 				<File
@@ -794,10 +802,6 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameView\CgFxLaserBeam.h"
-						>
-					</File>
-					<File
 						RelativePath=".\GameView\CgFxPhong.h"
 						>
 					</File>
@@ -859,10 +863,6 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxInkSplatter.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\GameView\CgFxLaserBeam.cpp"
 						>
 					</File>
 					<File

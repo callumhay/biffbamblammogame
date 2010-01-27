@@ -50,7 +50,7 @@ void GameEventManager::UnregisterGameEventListener(GameEvents* listener) {
 // Action for when the player paddle hits a wall
 void GameEventManager::ActionPaddleHitWall(const PlayerPaddle& paddle, const Point2D& hitLoc) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->PaddleHitWallEvent(paddle, hitLoc);
 	}
 }
@@ -58,7 +58,7 @@ void GameEventManager::ActionPaddleHitWall(const PlayerPaddle& paddle, const Poi
 // Action for when a ball has died (gone out of bounds)
 void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallDiedEvent(deadBall);
 	}	
 }
@@ -66,7 +66,7 @@ void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 // Action for when the last ball left is about to die - (before its spiralling death animations and explosion)
 void GameEventManager::ActionLastBallAboutToDie(const GameBall& ballAboutToDie) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->LastBallAboutToDieEvent(ballAboutToDie);
 	}	
 }
@@ -74,7 +74,7 @@ void GameEventManager::ActionLastBallAboutToDie(const GameBall& ballAboutToDie) 
 // Action for when the last ball is exploding
 void GameEventManager::ActionLastBallExploded(const GameBall& explodedBall) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->LastBallExploded(explodedBall);
 	}	
 }
@@ -82,7 +82,7 @@ void GameEventManager::ActionLastBallExploded(const GameBall& explodedBall) {
 // Action for when the all balls have died (gone out of bounds)
 void GameEventManager::ActionAllBallsDead(int livesLeft) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->AllBallsDeadEvent(livesLeft);
 	}	
 }
@@ -90,7 +90,7 @@ void GameEventManager::ActionAllBallsDead(int livesLeft) {
 // Action for when the ball respawns on the player paddle
 void GameEventManager::ActionBallSpawn(const GameBall& spawnBall) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallSpawnEvent(spawnBall);
 	}	
 }
@@ -98,7 +98,7 @@ void GameEventManager::ActionBallSpawn(const GameBall& spawnBall) {
 // Action for when the ball is being shot off the player paddle
 void GameEventManager::ActionBallShot(const GameBall& shotBall) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallShotEvent(shotBall);
 	}		
 }
@@ -106,7 +106,7 @@ void GameEventManager::ActionBallShot(const GameBall& shotBall) {
 // Action for when a projectile collides with a block in the level
 void GameEventManager::ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ProjectileBlockCollisionEvent(projectile, block);
 	}	
 }
@@ -114,7 +114,7 @@ void GameEventManager::ActionProjectileBlockCollision(const Projectile& projecti
 // Action for when the ball collides with a block in the level
 void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallBlockCollisionEvent(ball, block);
 	}	
 }
@@ -122,7 +122,7 @@ void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const Leve
 // Action for when the ball collides with the player paddle
 void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallPaddleCollisionEvent(ball, paddle);
 	}	
 }
@@ -130,7 +130,7 @@ void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const Pla
 // Action for when a ball collides with another ball
 void GameEventManager::ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallBallCollisionEvent(ball1, ball2);
 	}	
 }
@@ -138,14 +138,14 @@ void GameEventManager::ActionBallBallCollision(const GameBall& ball1, const Game
 // Action for when a block is destroyed
 void GameEventManager::ActionBlockDestroyed(const LevelPiece& block) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BlockDestroyedEvent(block);
 	}	
 }
 
 void GameEventManager::ActionBallSafetyNetCreated() {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallSafetyNetCreatedEvent();
 	}		
 }
@@ -153,7 +153,7 @@ void GameEventManager::ActionBallSafetyNetCreated() {
 // Action for when the ball safety net is destroyed
 void GameEventManager::ActionBallSafetyNetDestroyed(const GameBall& ball) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallSafetyNetDestroyedEvent(ball);
 	}	
 }
@@ -161,7 +161,7 @@ void GameEventManager::ActionBallSafetyNetDestroyed(const GameBall& ball) {
 // Action for when a level piece changes
 void GameEventManager::ActionLevelPieceChanged(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->LevelPieceChangedEvent(pieceBefore, pieceAfter);
 	}	
 }
@@ -169,7 +169,7 @@ void GameEventManager::ActionLevelPieceChanged(const LevelPiece& pieceBefore, co
 // Action for when the player's score changes
 void GameEventManager::ActionScoreChanged(int amt) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ScoreChangedEvent(amt);
 	}	
 }
@@ -177,7 +177,7 @@ void GameEventManager::ActionScoreChanged(int amt) {
 // Action for when the score multiplier changes
 void GameEventManager::ActionScoreMultiplierChanged(int oldScoreMultiplier, int newScoreMultiplier) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ScoreMultiplierChangedEvent(oldScoreMultiplier, newScoreMultiplier);
 	}	
 }
@@ -185,14 +185,14 @@ void GameEventManager::ActionScoreMultiplierChanged(int oldScoreMultiplier, int 
 // Action for when a new item is spawned in the game
 void GameEventManager::ActionItemSpawned(const GameItem& item) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ItemSpawnedEvent(item);
 	}	
 }
 
 void GameEventManager::ActionItemRemoved(const GameItem& item) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ItemRemovedEvent(item);
 	}	
 }
@@ -200,7 +200,7 @@ void GameEventManager::ActionItemRemoved(const GameItem& item) {
 // Action for when an item and the player paddle collide
 void GameEventManager::ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ItemPaddleCollsionEvent(item, paddle);
 	}	
 }
@@ -208,7 +208,7 @@ void GameEventManager::ActionItemPaddleCollision(const GameItem& item, const Pla
 // Action for whan an item is activated (i.e, collected by the player paddle)
 void GameEventManager::ActionItemActivated(const GameItem& item) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ItemActivatedEvent(item);
 	}		
 }
@@ -216,7 +216,7 @@ void GameEventManager::ActionItemActivated(const GameItem& item) {
 // Action for when an item deactivates (runs out of time or effect is spent)
 void GameEventManager::ActionItemDeactivated(const GameItem& item) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ItemDeactivatedEvent(item);
 	}		
 }
@@ -224,7 +224,7 @@ void GameEventManager::ActionItemDeactivated(const GameItem& item) {
 // Action for when an item timer starts
 void GameEventManager::ActionItemTimerStarted(const GameItemTimer& itemTimer) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ItemTimerStartedEvent(itemTimer);
 	}		
 }
@@ -232,7 +232,7 @@ void GameEventManager::ActionItemTimerStarted(const GameItemTimer& itemTimer) {
 // Action for when an item timer stops/expires
 void GameEventManager::ActionItemTimerStopped(const GameItemTimer& itemTimer) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ItemTimerStoppedEvent(itemTimer);
 	}		
 }
@@ -240,22 +240,47 @@ void GameEventManager::ActionItemTimerStopped(const GameItemTimer& itemTimer) {
 // Action for when a projectile is fired/spawned
 void GameEventManager::ActionProjectileSpawned(const Projectile& projectile) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ProjectileSpawnedEvent(projectile);
 	}	
 }
 
+// Action for when a projectile is removed from the game
 void GameEventManager::ActionProjectileRemoved(const Projectile& projectile) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ProjectileRemovedEvent(projectile);
+	}	
+}
+
+// Action for when a beam is fired/spawned
+void GameEventManager::ActionBeamSpawned(const Beam& beam) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BeamSpawnedEvent(beam);
+	}	
+}
+
+// Action for when a beam changes shape/position
+void GameEventManager::ActionBeamChanged(const Beam& beam) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BeamChangedEvent(beam);
+	}	
+}
+
+// Action for when a beam is removed from the game
+void GameEventManager::ActionBeamRemoved(const Beam& beam) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BeamRemovedEvent(beam);
 	}	
 }
 
 // Action for when the game is completed
 void GameEventManager::ActionGameCompleted() {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->GameCompletedEvent();
 	}		
 }
@@ -263,7 +288,7 @@ void GameEventManager::ActionGameCompleted() {
 // Action for when a world starts in-game
 void GameEventManager::ActionWorldStarted(const GameWorld& world) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->WorldStartedEvent(world);
 	}		
 }
@@ -271,7 +296,7 @@ void GameEventManager::ActionWorldStarted(const GameWorld& world) {
 // Action for when a world completes in-game
 void GameEventManager::ActionWorldCompleted(const GameWorld& world) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->WorldCompletedEvent(world);
 	}	
 }
@@ -279,7 +304,7 @@ void GameEventManager::ActionWorldCompleted(const GameWorld& world) {
 // Action for when a level starts in-game
 void GameEventManager::ActionLevelStarted(const GameWorld& world, const GameLevel& level) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->LevelStartedEvent(world, level);
 	}	
 }
@@ -287,7 +312,7 @@ void GameEventManager::ActionLevelStarted(const GameWorld& world, const GameLeve
 // Action for when a level completes in-game
 void GameEventManager::ActionLevelCompleted(const GameWorld& world, const GameLevel& level) {
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->LevelCompletedEvent(world, level);
 	}	
 }
@@ -296,7 +321,7 @@ void GameEventManager::ActionLevelCompleted(const GameWorld& world, const GameLe
 void GameEventManager::ActionLivesChanged(int livesLeftBefore, int livesLeftAfter) {
 	assert(livesLeftBefore != livesLeftAfter);
 	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); this->listenerIter++) {
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->LivesChangedEvent(livesLeftBefore, livesLeftAfter);
 	}	
 }

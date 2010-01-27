@@ -121,7 +121,7 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	}
 
 	// Clean up any left over emitters
-	for (std::list<ESPPointEmitter*>::iterator iter = this->randomBGParicles.begin(); iter != this->randomBGParicles.end(); iter++) {
+	for (std::list<ESPPointEmitter*>::iterator iter = this->randomBGParicles.begin(); iter != this->randomBGParicles.end(); ++iter) {
 		delete *iter;
 	}
 	this->randomBGParicles.clear();
@@ -541,7 +541,7 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
 			currEmitter = NULL;
 		}
 		else {
-			iter++;
+			++iter;
 		}
 	}
 

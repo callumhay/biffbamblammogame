@@ -495,7 +495,7 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
 		paddle->AnimateFade(true, timeToMoveAnimate);
 		
 		// Make the items become partially translucent
-		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
+		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); ++iter) {
 			(*iter)->AnimateItemFade(GameItem::ALPHA_ON_PADDLE_CAM, totalTimeToAnimate);
 		}
 	}
@@ -521,7 +521,7 @@ void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) 
 		paddle->AnimateFade(false, timeToAnimate);
 
 		// Make the items become opaque again
-		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
+		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); ++iter) {
 			(*iter)->AnimateItemFade(1.0f, timeToAnimate);
 		}
 		this->paddleWithCamera = NULL;
@@ -550,7 +550,7 @@ bool GameTransformMgr::TickPaddleCamAnimation(double dT, GameModel& gameModel) {
 			iter = this->paddleCamAnimations.erase(iter);
 		}
 		else {
-			iter++;
+			++iter;
 		}
 	}
 
@@ -560,7 +560,7 @@ bool GameTransformMgr::TickPaddleCamAnimation(double dT, GameModel& gameModel) {
 			iter = this->camFOVAnimations.erase(iter);
 		}
 		else {
-			iter++;
+			++iter;
 		}
 	}
 
@@ -674,7 +674,7 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 		ball->AnimateFade(true, timeToMoveAnimate);
 
 		// Make the items become partially translucent
-		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
+		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); ++iter) {
 			(*iter)->AnimateItemFade(GameItem::ALPHA_ON_BALL_CAM, totalTimeToAnimate);
 		}
 	}
@@ -700,7 +700,7 @@ void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
 		ball->AnimateFade(false, timeToAnimate);
 
 		// Make the items become opaque again
-		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); iter++) {
+		for (std::list<GameItem*>::iterator iter = items.begin(); iter != items.end(); ++iter) {
 			(*iter)->AnimateItemFade(1.0f, timeToAnimate);
 		}
 
@@ -741,7 +741,7 @@ bool GameTransformMgr::TickBallCamAnimation(double dT, GameModel& gameModel) {
 			iter = this->camFOVAnimations.erase(iter);
 		}
 		else {
-			iter++;
+			++iter;
 		}
 	}
 	

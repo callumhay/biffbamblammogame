@@ -62,6 +62,9 @@ public:
 	void ItemTimerStoppedEvent(const GameItemTimer& itemTimer);
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
+	void BeamSpawnedEvent(const Beam& beam);
+	void BeamChangedEvent(const Beam& beam);
+	void BeamRemovedEvent(const Beam& beam);
 	void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
 };
 

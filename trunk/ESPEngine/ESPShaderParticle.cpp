@@ -39,7 +39,6 @@ void ESPShaderParticle::Draw(const Camera& camera, const ESP::ESPAlignment align
 	// Transform and draw the particle...
 	Matrix4x4 personalAlignXF = this->GetPersonalAlignmentTransform(camera, alignment);
 
-	// Draw the font itself
 	glPushMatrix();
 
 	glTranslatef(this->position[0], this->position[1], this->position[2]);

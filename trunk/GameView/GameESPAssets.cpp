@@ -9,6 +9,7 @@
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/Projectile.h"
 #include "../GameModel/PlayerPaddle.h"
+#include "../GameModel/Beam.h"
 
 #include "../BlammoEngine/Texture.h"
 
@@ -65,7 +66,7 @@ GameESPAssets::~GameESPAssets() {
 
 	// Delete any effect textures
 	for (std::vector<Texture2D*>::iterator iter = this->bangTextures.begin();
-		iter != this->bangTextures.end(); iter++) {
+		iter != this->bangTextures.end(); ++iter) {
 		
 		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
 		assert(removed);	
@@ -73,7 +74,7 @@ GameESPAssets::~GameESPAssets() {
 	this->bangTextures.clear();
 
 	for (std::vector<Texture2D*>::iterator iter = this->splatTextures.begin();
-		iter != this->splatTextures.end(); iter++) {
+		iter != this->splatTextures.end(); ++iter) {
 		
 		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
 		assert(removed);	
@@ -81,7 +82,7 @@ GameESPAssets::~GameESPAssets() {
 	this->splatTextures.clear();
 
 	for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
-		iter != this->smokeTextures.end(); iter++) {
+		iter != this->smokeTextures.end(); ++iter) {
 		
 		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
 		assert(removed);	
@@ -127,7 +128,7 @@ GameESPAssets::~GameESPAssets() {
 void GameESPAssets::KillAllActiveEffects() {
 	// Delete any leftover emitters
 	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin();
-		iter != this->activeGeneralEmitters.end(); iter++) {
+		iter != this->activeGeneralEmitters.end(); ++iter) {
 			delete *iter;
 			*iter = NULL;
 	}
@@ -135,7 +136,7 @@ void GameESPAssets::KillAllActiveEffects() {
 	
 	// Clear paddle BG emitters
 	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin(); 
-		iter != this->activePaddleEmitters.end(); iter++) {
+		iter != this->activePaddleEmitters.end(); ++iter) {
 		delete *iter;
 		*iter = NULL;
 	}
@@ -143,10 +144,10 @@ void GameESPAssets::KillAllActiveEffects() {
 
 	// Clear ball BG emiiters
 	for (std::map<const GameBall*, std::list<ESPEmitter*>>::iterator iter = this->activeBallBGEmitters.begin(); 
-		iter != this->activeBallBGEmitters.end(); iter++) {
+		iter != this->activeBallBGEmitters.end(); ++iter) {
 
 		std::list<ESPEmitter*>& currEmitterList = iter->second;
-		for (std::list<ESPEmitter*>::iterator iter2 = currEmitterList.begin(); iter2 != currEmitterList.end(); iter2++) {
+		for (std::list<ESPEmitter*>::iterator iter2 = currEmitterList.begin(); iter2 != currEmitterList.end(); ++iter2) {
 				delete *iter2;
 				*iter2 = NULL;
 		}
@@ -155,8 +156,8 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->activeBallBGEmitters.clear();
 
 	// Clear item drop emitters
-	for (std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.begin();	iter != this->activeItemDropEmitters.end(); iter++) {
-			for (std::list<ESPEmitter*>::iterator iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++) {
+	for (std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.begin();	iter != this->activeItemDropEmitters.end(); ++iter) {
+			for (std::list<ESPEmitter*>::iterator iter2 = iter->second.begin(); iter2 != iter->second.end(); ++iter2) {
 				ESPEmitter* currEmitter = *iter2;
 				delete currEmitter;
 				currEmitter = NULL;
@@ -167,11 +168,11 @@ void GameESPAssets::KillAllActiveEffects() {
 
 	// Clear projectile emitters
 	for (std::map<const Projectile*, std::list<ESPPointEmitter*>>::iterator iter1 = this->activeProjectileEmitters.begin();
-		iter1 != this->activeProjectileEmitters.end(); iter1++) {
+		iter1 != this->activeProjectileEmitters.end(); ++iter1) {
 	
 			std::list<ESPPointEmitter*>& projEmitters = iter1->second;
 			
-			for (std::list<ESPPointEmitter*>::iterator iter2 = projEmitters.begin(); iter2 != projEmitters.end(); iter2++) {
+			for (std::list<ESPPointEmitter*>::iterator iter2 = projEmitters.begin(); iter2 != projEmitters.end(); ++iter2) {
 				delete *iter2;
 				*iter2 = NULL;
 			}
@@ -179,14 +180,27 @@ void GameESPAssets::KillAllActiveEffects() {
 	}
 	this->activeProjectileEmitters.clear();
 
+	// Clear beam emitters
+	for (std::map<const Beam*, std::list<ESPEmitter*>>::iterator iter1 = this->activeBeamEmitters.begin();
+		iter1 != this->activeBeamEmitters.end(); ++iter1) {
+
+			std::list<ESPEmitter*>& beamEmitters = iter1->second;
+			for (std::list<ESPEmitter*>::iterator iter2 = beamEmitters.begin(); iter2 != beamEmitters.end(); ++iter2) {
+				delete *iter2;
+				*iter2 = NULL;
+			}
+			beamEmitters.clear();
+	}
+	this->activeBeamEmitters.clear();
+
 	// Clear all ball emitters
-	for (std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); iter1++) {
+	for (std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); ++iter1) {
 		std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>& currBallEffects = iter1->second;
 		
-		for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter2 = currBallEffects.begin(); iter2 != currBallEffects.end(); iter2++) {
+		for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter2 = currBallEffects.begin(); iter2 != currBallEffects.end(); ++iter2) {
 			std::vector<ESPPointEmitter*>& effectList = iter2->second;
 
-			for (std::vector<ESPPointEmitter*>::iterator iter3 = effectList.begin(); iter3 != effectList.end(); iter3++) {
+			for (std::vector<ESPPointEmitter*>::iterator iter3 = effectList.begin(); iter3 != effectList.end(); ++iter3) {
 				ESPPointEmitter* currEmitter = *iter3;
 				delete currEmitter;
 				currEmitter = NULL;
@@ -237,9 +251,9 @@ void GameESPAssets::KillAllActiveBallEffects(const GameBall& ball) {
 	}
 
 	// Iterate through all effects and delete them, then remove them from the list
-	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); iter++) {
+	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); ++iter) {
 		std::vector<ESPPointEmitter*>& effectList = iter->second;
-		for (std::vector<ESPPointEmitter*>::iterator iter2 = effectList.begin(); iter2 != effectList.end(); iter2++) {
+		for (std::vector<ESPPointEmitter*>::iterator iter2 = effectList.begin(); iter2 != effectList.end(); ++iter2) {
 			ESPPointEmitter* currEmitter = *iter2;
 			delete currEmitter;
 			currEmitter = NULL;
@@ -1522,7 +1536,7 @@ void GameESPAssets::RemoveItemDropEffect(const Camera& camera, const GameItem& i
 	if (iter != this->activeItemDropEmitters.end()) {
 		
 		// Delete all emitters associated with the item drop effect
-		for (std::list<ESPEmitter*>::iterator effectIter = iter->second.begin(); effectIter != iter->second.end(); effectIter++) {
+		for (std::list<ESPEmitter*>::iterator effectIter = iter->second.begin(); effectIter != iter->second.end(); ++effectIter) {
 			ESPEmitter* currEmitter = *effectIter;
 			delete currEmitter;
 			currEmitter = NULL;
@@ -1543,7 +1557,7 @@ void GameESPAssets::TurnOffCurrentItemDropStars(const Camera& camera) {
 		iter != this->activeItemDropEmitters.end(); ++iter) {
 		
 		// Delete all emitters associated with the item drop effect
-		for (std::list<ESPEmitter*>::iterator effectIter = iter->second.begin(); effectIter != iter->second.end(); effectIter++) {
+		for (std::list<ESPEmitter*>::iterator effectIter = iter->second.begin(); effectIter != iter->second.end(); ++effectIter) {
 			ESPEmitter* currEmitter = *effectIter;
 			delete currEmitter;
 			currEmitter = NULL;
@@ -1577,14 +1591,57 @@ void GameESPAssets::RemoveProjectileEffect(const Camera& camera, const Projectil
 	if (projIter != this->activeProjectileEmitters.end()) {
 			
 		std::list<ESPPointEmitter*>& projEffects = projIter->second;
-		for (std::list<ESPPointEmitter*>::iterator effectIter = projEffects.begin(); effectIter != projEffects.end(); effectIter++) {
+		for (std::list<ESPPointEmitter*>::iterator effectIter = projEffects.begin(); effectIter != projEffects.end(); ++effectIter) {
 			ESPPointEmitter* currEmitter = *effectIter;
 			delete currEmitter;
 			currEmitter = NULL;
 		}
 		projEffects.clear();
 
-		this->activeProjectileEmitters.erase(&projectile);
+		this->activeProjectileEmitters.erase(projIter);
+	}
+}
+
+// void GameESPAssets::SetPaddleLaserBeamEffect(const Beam& beam)
+
+void GameESPAssets::AddBeamEffect(const Beam& beam) {
+	switch (beam.GetBeamType()) {
+		case Beam::PaddleLaserBeam:
+			// TODO...
+			break;
+		default:
+			assert(false);
+			break;
+	}
+}
+
+void GameESPAssets::UpdateBeamEffect(const Beam& beam) {
+	std::map<const Beam*, std::list<ESPEmitter*>>::iterator foundBeamIter = this->activeBeamEmitters.find(&beam);
+	if (foundBeamIter != this->activeBeamEmitters.end()) {
+		// TODO...
+	}
+	else {
+		assert(false);
+	}
+}
+
+/**
+ * Remove all effects associated with the given beam if any exist.
+ */
+void GameESPAssets::RemoveBeamEffect(const Beam& beam) {
+	std::map<const Beam*, std::list<ESPEmitter*>>::iterator foundBeamIter = this->activeBeamEmitters.find(&beam);
+	if (foundBeamIter != this->activeBeamEmitters.end()) {
+		
+		std::list<ESPEmitter*>& beamEffects = foundBeamIter->second;
+		for (std::list<ESPEmitter*>::iterator effectIter = beamEffects.begin(); effectIter != beamEffects.end(); ++effectIter) {
+			ESPEmitter* currEmitter = *effectIter;
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		beamEffects.clear();
+
+		this->activeBeamEmitters.erase(foundBeamIter);	
+
 	}
 }
 
@@ -1759,10 +1816,10 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 	laserBeamEmitter->SetInitialSpd(ESPInterval(0));
 	laserBeamEmitter->SetParticleLife(ESPInterval(-1));
 	if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
-		laserBeamEmitter->SetParticleSize(ESPInterval(std::min<float>(PaddleLaser::PADDLELASER_WIDTH, PaddleLaser::PADDLELASER_HEIGHT)));
+		laserBeamEmitter->SetParticleSize(ESPInterval(std::min<float>(projectile.GetWidth(), projectile.GetHeight())));
 	}
 	else {
-		laserBeamEmitter->SetParticleSize(ESPInterval(PaddleLaser::PADDLELASER_WIDTH), ESPInterval(PaddleLaser::PADDLELASER_HEIGHT));
+		laserBeamEmitter->SetParticleSize(ESPInterval(projectile.GetWidth()), ESPInterval(projectile.GetHeight()));
 	}
 	laserBeamEmitter->SetEmitAngleInDegrees(0);
 	laserBeamEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -1777,10 +1834,10 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 	laserAuraEmitter->SetInitialSpd(ESPInterval(0));
 	laserAuraEmitter->SetParticleLife(ESPInterval(-1));
 	if (paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
-		laserAuraEmitter->SetParticleSize(ESPInterval(std::min<float>(2*PaddleLaser::PADDLELASER_WIDTH, 1.8f*PaddleLaser::PADDLELASER_HEIGHT)));
+		laserAuraEmitter->SetParticleSize(ESPInterval(std::min<float>(2*projectile.GetWidth(), 1.8f*projectile.GetHeight())));
 	}
 	else {
-		laserAuraEmitter->SetParticleSize(ESPInterval(2*PaddleLaser::PADDLELASER_WIDTH), ESPInterval(1.8f*PaddleLaser::PADDLELASER_HEIGHT));
+		laserAuraEmitter->SetParticleSize(ESPInterval(2*projectile.GetWidth()), ESPInterval(1.8f*projectile.GetHeight()));
 	}
 	
 	laserAuraEmitter->SetEmitAngleInDegrees(0);
@@ -1796,11 +1853,11 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 	laserTrailSparks->SetSpawnDelta(ESPInterval(0.01f, 0.033f));
 	laserTrailSparks->SetInitialSpd(ESPInterval(projectileSpd));
 	laserTrailSparks->SetParticleLife(ESPInterval(0.5f, 0.6f));
-	laserTrailSparks->SetParticleSize(ESPInterval(0.4f, 0.85f));
+	laserTrailSparks->SetParticleSize(ESPInterval(0.8f * projectile.GetHalfWidth(), 0.8f * projectile.GetWidth()));
 	laserTrailSparks->SetParticleColour(ESPInterval(0.5f, 0.8f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	laserTrailSparks->SetEmitAngleInDegrees(15);
 	laserTrailSparks->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
-	laserTrailSparks->SetRadiusDeviationFromCenter(ESPInterval(0.5f*PaddleLaser::PADDLELASER_HALF_WIDTH));
+	laserTrailSparks->SetRadiusDeviationFromCenter(ESPInterval(0.5f * projectile.GetHalfWidth()));
 	laserTrailSparks->SetAsPointSpriteEmitter(true);
 	laserTrailSparks->SetEmitPosition(projectilePos3D);
 	laserTrailSparks->AddEffector(&this->particleFader);
@@ -2243,33 +2300,48 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
  * shmancy type stuffs.
  */
 void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
+	// Projectiles and beams first...
 	this->DrawProjectileEffects(dT, camera);
+	this->DrawBeamEffects(dT, camera);
 
-	std::list<std::list<ESPEmitter*>::iterator> removeElements;
-
-	// Go through all the particles and do book keeping and drawing
-	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin();
-		iter != this->activeGeneralEmitters.end(); iter++) {
-	
+	// Go through all the other particles and do book keeping and drawing
+	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin(); iter != this->activeGeneralEmitters.end();) {
 		ESPEmitter* curr = *iter;
+		assert(curr != NULL);
 
 		// Check to see if dead, if so erase it...
 		if (curr->IsDead()) {
-			removeElements.push_back(iter);
+			iter = this->activeGeneralEmitters.erase(iter);
+			delete curr;
+			curr = NULL;
 		}
 		else {
 			// Not dead yet so we draw and tick
 			curr->Draw(camera);
 			curr->Tick(dT);
+			++iter;
 		}
 	}
+}
 
-	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin();
-		iter != removeElements.end(); iter++) {
-			ESPEmitter* currEmitter = (**iter);
-			this->activeGeneralEmitters.erase(*iter);
-			delete currEmitter;
-			currEmitter = NULL;
+/**
+ * Draw all the beams that are currently active in the game.
+ */
+void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera) {
+	for (std::map<const Beam*, std::list<ESPEmitter*>>::iterator iter = this->activeBeamEmitters.begin(); 
+		iter != this->activeBeamEmitters.end(); ++iter) {
+
+		const Beam* beam = iter->first;
+		std::list<ESPEmitter*>& beamEmitters = iter->second;
+		assert(beam != NULL);
+
+		// Update and draw the emitters...
+		for (std::list<ESPEmitter*>::iterator emitIter = beamEmitters.begin(); emitIter != beamEmitters.end(); ++emitIter) {
+			ESPEmitter* currentEmitter = *emitIter;
+			assert(currentEmitter != NULL);
+			currentEmitter->Draw(camera);
+			currentEmitter->Tick(dT);
+		}
 	}
 }
 
@@ -2278,7 +2350,7 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
  */
 void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
 	for (std::map<const Projectile*, std::list<ESPPointEmitter*>>::iterator iter = this->activeProjectileEmitters.begin();
-		iter != this->activeProjectileEmitters.end(); iter++) {
+		iter != this->activeProjectileEmitters.end(); ++iter) {
 		
 		const Projectile* currProjectile = iter->first;
 		std::list<ESPPointEmitter*>& projEmitters = iter->second;
@@ -2288,7 +2360,7 @@ void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
 		Vector2D projectileDir    = currProjectile->GetVelocityDirection();
 
 		// Update and draw the emitters, background then foreground...
-		for (std::list<ESPPointEmitter*>::iterator emitIter = projEmitters.begin(); emitIter != projEmitters.end(); emitIter++) {
+		for (std::list<ESPPointEmitter*>::iterator emitIter = projEmitters.begin(); emitIter != projEmitters.end(); ++emitIter) {
 			this->DrawProjectileEmitter(dT, camera, projectilePos2D, projectileDir, *emitIter);
 		}
 	}
@@ -2343,7 +2415,7 @@ void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const G
 	
 	// Draw the appropriate effects
 	assert(itemDropEffectIter->second.size() > 0);
-	for (std::list<ESPEmitter*>::iterator iter = itemDropEffectIter->second.begin(); iter != itemDropEffectIter->second.end(); iter++) {
+	for (std::list<ESPEmitter*>::iterator iter = itemDropEffectIter->second.begin(); iter != itemDropEffectIter->second.end(); ++iter) {
 		ESPEmitter* currEmitter = *iter;
 		currEmitter->Draw(camera);
 		currEmitter->Tick(dT);
@@ -2521,7 +2593,7 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
 	std::list<ESPEmitter*>& ballEmitters = tempIter->second;
 
 	// Go through all the particles and do book keeping and drawing
-	for (std::list<ESPEmitter*>::iterator iter = ballEmitters.begin(); iter != ballEmitters.end(); iter++) {
+	for (std::list<ESPEmitter*>::iterator iter = ballEmitters.begin(); iter != ballEmitters.end(); ++iter) {
 	
 		ESPEmitter* curr = *iter;
 
@@ -2536,7 +2608,7 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
 		}
 	}
 
-	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin(); iter != removeElements.end(); iter++) {
+	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin(); iter != removeElements.end(); ++iter) {
 			ESPEmitter* currEmitter = (**iter);
 			tempIter->second.erase(*iter);
 			delete currEmitter;
@@ -2556,7 +2628,7 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
 
 	// Go through all the particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin();
-		iter != this->activePaddleEmitters.end(); iter++) {
+		iter != this->activePaddleEmitters.end(); ++iter) {
 	
 		ESPEmitter* curr = *iter;
 
@@ -2571,7 +2643,7 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
 		}
 	}
 
-	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin(); iter != removeElements.end(); iter++) {
+	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin(); iter != removeElements.end(); ++iter) {
 			ESPEmitter* currEmitter = (**iter);
 			this->activePaddleEmitters.erase(*iter);
 			delete currEmitter;

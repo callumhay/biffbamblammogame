@@ -27,10 +27,13 @@ class Projectile {
 public:
 	enum ProjectileType { PaddleLaserBulletProjectile };
 protected:
-	Projectile(ProjectileType type, const Point2D& spawnLoc) : type(type), position(spawnLoc), lastPieceCollidedWith(NULL) {}
+	Projectile(ProjectileType type, const Point2D& spawnLoc, float width, float height);
+	Projectile(const Projectile& copy);
 	
 	ProjectileType type;
 
+	float currWidth;
+	float currHeight;
 	Point2D position;			// Position of the projectile in game units
 	Vector2D velocityDir;	// Velocity direction of the projectile
 	Vector2D rightVec;		// Unit vector pointing outwards to the right of the particle, perpendicular to the velocity direction
@@ -40,12 +43,15 @@ protected:
 public:
 	virtual ~Projectile();
 	virtual void Tick(double seconds) = 0;
-	virtual float GetWidth() const = 0;
-	virtual float GetHeight() const = 0;
-	virtual float GetHalfWidth() const = 0;
-	virtual float GetHalfHeight() const = 0;
 	virtual BoundingLines BuildBoundingLines() const = 0;
-	
+
+	float GetWidth() const { return this->currWidth; }
+	float GetHeight() const { return  this->currHeight; }
+	float GetHalfWidth() const { return 0.5f * this->currWidth; }
+	float GetHalfHeight() const { return  0.5f * this->currHeight; }
+	void SetWidth(float width) { this->currWidth = width; }
+	void SetHeight(float height) { this->currHeight = height; }
+
 	ProjectileType GetType() const { return this->type; }
 	Point2D GetPosition() const { return this->position; }
 	void SetPosition(const Point2D& pos) { this->position = pos; } 
@@ -79,20 +85,16 @@ private:
 	static const float PADDLELASER_VELOCITYMAG;
 
 public:
-	static const float PADDLELASER_HEIGHT;
-	static const float PADDLELASER_WIDTH;
-	static const float PADDLELASER_HALF_HEIGHT;
-	static const float PADDLELASER_HALF_WIDTH;
+	static const float PADDLELASER_HEIGHT_DEFAULT;
+	static const float PADDLELASER_WIDTH_DEFAULT;
 
 	PaddleLaser(const Point2D& spawnLoc);
-	virtual ~PaddleLaser();
+	PaddleLaser(const PaddleLaser& copy);
+	PaddleLaser(const Projectile& copy);
+	~PaddleLaser();
 
-	virtual void Tick(double seconds);
+	void Tick(double seconds);
+	BoundingLines BuildBoundingLines() const;
 
-	virtual float GetWidth() const { return PADDLELASER_WIDTH; }
-	virtual float GetHeight() const { return  PADDLELASER_HEIGHT; }
-	virtual float GetHalfWidth() const { return PADDLELASER_HALF_WIDTH; }
-	virtual float GetHalfHeight() const { return  PADDLELASER_HALF_HEIGHT; }
-	virtual BoundingLines BuildBoundingLines() const;
 };
 #endif
