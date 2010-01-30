@@ -137,7 +137,8 @@ private:
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
 
-	void DrawBeamEffects(double dT, const Camera& camera);
+	void AddPaddleLaserBeamEffect(const Beam& beam);
+
 	void DrawProjectileEffects(double dT, const Camera& camera);
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter);
 
@@ -192,7 +193,8 @@ public:
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
-	//void DrawPaddleLaserBeamEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+
+	void DrawBeamEffects(double dT, const Camera& camera);
 
 	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };

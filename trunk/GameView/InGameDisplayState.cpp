@@ -179,9 +179,13 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	fullSceneFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1);
+	
 	// Render any post-processing effects for various items/objects in the game
 	this->display->GetAssets()->DrawPaddlePostEffects(dT, *this->display->GetModel(), camera);
 	
+	// Render the beam effects - right now these are being rendered with the rest of the particles... is this acceptable???
+	this->display->GetAssets()->GetESPAssets()->DrawBeamEffects(dT, camera);
+
 	postFullSceneFBO->UnbindFBObj();
 
 	glPopMatrix();

@@ -2,6 +2,7 @@
 #define __ESPEMITTER_H__
 
 #include "../BlammoEngine/Camera.h"
+#include "../BlammoEngine/Plane.h"
 
 #include "../GameModel/Onomatoplex.h"
 
@@ -42,6 +43,8 @@ protected:
 	std::list<ESPParticleEffector*> effectors;					// All the particle effectors of this emitter
 	std::list<ESPEmitterEventHandler*> eventHandlers;		// The event handlers attached to this emitter
 	
+	Plane particleDeathPlane;
+
 	// The alignment of particles in this emitter w.r.t. the viewer
 	ESP::ESPAlignment particleAlignment;
 	// Inclusive interval of time between firing/spawning of particles in seconds
@@ -65,6 +68,8 @@ protected:
 	virtual Vector3D CalculateRandomInitParticleDir() const = 0;
 	virtual Point3D  CalculateRandomInitParticlePos() const = 0;
 	void ReviveParticle();
+
+	bool IsParticlePastDeathPlane(const ESPParticle& p);
 
 public:
 	ESPEmitter();
@@ -112,6 +117,7 @@ public:
 	void SetIsReversed(bool isReversed);
 	void SetAsPointSpriteEmitter(bool isPointSprite);
 	void SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter);
+	void SetParticleDeathPlane(const Plane& plane);
 
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);

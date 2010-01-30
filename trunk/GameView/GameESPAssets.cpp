@@ -12,6 +12,7 @@
 #include "../GameModel/Beam.h"
 
 #include "../BlammoEngine/Texture.h"
+#include "../BlammoEngine/Plane.h"
 
 #include "../ESPEngine/ESP.h"
 
@@ -1602,12 +1603,64 @@ void GameESPAssets::RemoveProjectileEffect(const Camera& camera, const Projectil
 	}
 }
 
-// void GameESPAssets::SetPaddleLaserBeamEffect(const Beam& beam)
+/**
+ * Set the beam emitters for the paddle laser beam effect.
+ */
+void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
+	assert(this->activeBeamEmitters.find(&beam) == this->activeBeamEmitters.end());
 
+	std::list<ESPEmitter*> beamEmitters;
+
+	// Each segment of the beam will have the same set of effects,
+	// Each beam ending will have the same general effect as well...
+	const std::list<Beam::BeamSegment*>& beamSegments = beam.GetBeamParts();
+	for (std::list<Beam::BeamSegment*>::const_iterator iter = beamSegments.begin(); iter != beamSegments.end(); ++iter) {
+
+		const Beam::BeamSegment* currentBeamSeg = *iter;
+		const float beamSegRadius							  = currentBeamSeg->GetRadius();
+		const Collision::Ray2D beamSegRay				= currentBeamSeg->GetBeamSegmentRay();
+		const unsigned int numBeamSegParticles  = (currentBeamSeg->GetLength() / (0.25 * beamSegRadius)) + 1;
+
+		const Vector3D beamSegDir3D(beamSegRay.GetUnitDirection());
+		const Point3D beamSegOrigin3D(beamSegRay.GetOrigin());
+		const Point3D beamSegEndPt3D(currentBeamSeg->GetEndPoint());
+
+		const float BEAM_SPD = currentBeamSeg->GetLength();
+		const float MAX_SPAWN_DELTA = 1.0f / static_cast<float>(numBeamSegParticles);
+
+		ESPPointEmitter* centralBeam = new ESPPointEmitter();
+		centralBeam->SetSpawnDelta(ESPInterval(MAX_SPAWN_DELTA));
+		centralBeam->SetInitialSpd(ESPInterval(BEAM_SPD));
+		centralBeam->SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+		centralBeam->SetParticleSize(ESPInterval(beamSegRadius));
+		centralBeam->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+		centralBeam->SetEmitAngleInDegrees(0);
+		centralBeam->SetRadiusDeviationFromCenter(ESPInterval(0));//, beamSegRadius / 8.0f));
+		centralBeam->SetAsPointSpriteEmitter(true);
+		centralBeam->SetEmitDirection(beamSegDir3D);
+		centralBeam->SetEmitPosition(beamSegOrigin3D);
+		centralBeam->SetParticleDeathPlane(Plane(-beamSegDir3D, beamSegEndPt3D));
+		centralBeam->SetParticles(numBeamSegParticles, circleGradientTex);
+		centralBeam->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+		// Distribute beams...
+		//centralBeam->SimulateTicking(1.0f);
+		
+		beamEmitters.push_back(centralBeam);
+	}
+
+	// Add all the beams to the active beams, associated with the given beam
+	this->activeBeamEmitters.insert(std::make_pair(&beam, beamEmitters));
+}
+
+/**
+ * Add a brand new set of effects for the given beam so that they are active and drawn
+ * in the game.
+ */
 void GameESPAssets::AddBeamEffect(const Beam& beam) {
+	std::list<ESPEmitter*> beamEmitters;
 	switch (beam.GetBeamType()) {
 		case Beam::PaddleLaserBeam:
-			// TODO...
+			this->AddPaddleLaserBeamEffect(beam);
 			break;
 		default:
 			assert(false);
@@ -1615,14 +1668,15 @@ void GameESPAssets::AddBeamEffect(const Beam& beam) {
 	}
 }
 
+/**
+ * Update the effects for the given beam - the beam must already have been added via
+ * the AddBeamEffect function. The beam's effects will not be recreated, but instead they
+ * will simply have their values changed (saves time - instead of deleting and creating heap stuffs).
+ */
 void GameESPAssets::UpdateBeamEffect(const Beam& beam) {
-	std::map<const Beam*, std::list<ESPEmitter*>>::iterator foundBeamIter = this->activeBeamEmitters.find(&beam);
-	if (foundBeamIter != this->activeBeamEmitters.end()) {
-		// TODO...
-	}
-	else {
-		assert(false);
-	}
+	// Clean up the effects and add a new one with the new updated parameters...
+	this->RemoveBeamEffect(beam);
+	this->AddBeamEffect(beam);
 }
 
 /**
@@ -1641,7 +1695,9 @@ void GameESPAssets::RemoveBeamEffect(const Beam& beam) {
 		beamEffects.clear();
 
 		this->activeBeamEmitters.erase(foundBeamIter);	
-
+	}
+	else {
+		assert(false);
 	}
 }
 
@@ -2300,9 +2356,8 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
  * shmancy type stuffs.
  */
 void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
-	// Projectiles and beams first...
+	// Projectiles first...
 	this->DrawProjectileEffects(dT, camera);
-	this->DrawBeamEffects(dT, camera);
 
 	// Go through all the other particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin(); iter != this->activeGeneralEmitters.end();) {
@@ -2320,27 +2375,6 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
 			curr->Draw(camera);
 			curr->Tick(dT);
 			++iter;
-		}
-	}
-}
-
-/**
- * Draw all the beams that are currently active in the game.
- */
-void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera) {
-	for (std::map<const Beam*, std::list<ESPEmitter*>>::iterator iter = this->activeBeamEmitters.begin(); 
-		iter != this->activeBeamEmitters.end(); ++iter) {
-
-		const Beam* beam = iter->first;
-		std::list<ESPEmitter*>& beamEmitters = iter->second;
-		assert(beam != NULL);
-
-		// Update and draw the emitters...
-		for (std::list<ESPEmitter*>::iterator emitIter = beamEmitters.begin(); emitIter != beamEmitters.end(); ++emitIter) {
-			ESPEmitter* currentEmitter = *emitIter;
-			assert(currentEmitter != NULL);
-			currentEmitter->Draw(camera);
-			currentEmitter->Tick(dT);
 		}
 	}
 }
@@ -2664,6 +2698,27 @@ void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera
 	this->paddleLaserGlowAura->Tick(dT);
 	this->paddleLaserGlowSparks->Draw(camera);
 	this->paddleLaserGlowSparks->Tick(dT);
+}
+
+/**
+ * Draw all the beams that are currently active in the game.
+ */
+void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera) {
+	for (std::map<const Beam*, std::list<ESPEmitter*>>::iterator iter = this->activeBeamEmitters.begin(); 
+		iter != this->activeBeamEmitters.end(); ++iter) {
+
+		const Beam* beam = iter->first;
+		std::list<ESPEmitter*>& beamEmitters = iter->second;
+		assert(beam != NULL);
+
+		// Update and draw the emitters...
+		for (std::list<ESPEmitter*>::iterator emitIter = beamEmitters.begin(); emitIter != beamEmitters.end(); ++emitIter) {
+			ESPEmitter* currentEmitter = *emitIter;
+			assert(currentEmitter != NULL);
+			currentEmitter->Draw(camera);
+			currentEmitter->Tick(dT);
+		}
+	}
 }
 
 void GameESPAssets::DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type) {
