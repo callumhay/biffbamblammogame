@@ -259,6 +259,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BlammoEngine\Plane.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BlammoEngine\Point.h"
 					>
 				</File>
@@ -296,10 +300,6 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\TextureFontSet.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\Tree.h"
 					>
 				</File>
 				<File
@@ -396,10 +396,6 @@
 				</File>
 				<File
 					RelativePath=".\BlammoEngine\TextureFontSet.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BlammoEngine\Tree.cpp"
 					>
 				</File>
 			</Filter>

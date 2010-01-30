@@ -22,7 +22,7 @@ void ESPLineEmitter::SetEmitLine(const Collision::LineSeg3D& line) {
 void ESPLineEmitter::SetEmitDirection(const Vector3D& dir) {
 	// The direction better be perpendicular to the line and non-zero!
 	assert(dir != Vector3D(0, 0, 0));
-	assert(fabs(dir.dot(this->emitLine.GetUnitDirection())) < EPSILON);
+	assert(fabs(Vector3D::Dot(dir, this->emitLine.GetUnitDirection())) < EPSILON);
 
 	this->emitDir = dir;
 }

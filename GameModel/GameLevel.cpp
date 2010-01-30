@@ -22,8 +22,6 @@
 #include "InkBlock.h"
 #include "PrismBlock.h"
 
-#include "../BlammoEngine/Tree.h"
-
 #include "../ResourceManager.h"
 
 const char GameLevel::EMPTY_SPACE_CHAR				= 'E';

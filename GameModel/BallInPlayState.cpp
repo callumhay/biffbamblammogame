@@ -383,9 +383,6 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 		// might be level pieces that were destroyed by the ball that we are trying to access in the beam
 		currentBeam->UpdateCollisions(currentLevel);
 
-		// EVENT: Beam updated/changed
-		GameEventManager::Instance()->ActionBeamChanged(*currentBeam);
-
 		std::list<Beam::BeamSegment*>& beamParts = currentBeam->GetBeamParts();
 		for (std::list<Beam::BeamSegment*>::iterator segIter = beamParts.begin(); segIter != beamParts.end(); ++segIter) {
 			Beam::BeamSegment* currentBeamSeg = *segIter;

@@ -19,7 +19,8 @@
 ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), particleTexture(NULL),
 particleAlignment(ESP::ViewPointAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
 particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES),
-isReversed(false), isPointSprite(false) {
+isReversed(false), isPointSprite(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)) {
+	// NOTE: The death plane has been setup so that it's impossible to be in the 'death-zone' of it
 }
 
 ESPEmitter::~ESPEmitter() {
@@ -129,6 +130,14 @@ void ESPEmitter::ReviveParticle() {
 	}
 }
 
+/**
+ * Determines whether the given particle is past the death plane (and thus should be killed).
+ * Returns: true if past the death plane, false otherwise.
+ */
+bool ESPEmitter::IsParticlePastDeathPlane(const ESPParticle& p) {
+	const Vector3D planeToParticle = p.GetPosition() - this->particleDeathPlane.GetPointOnPlane();
+	return (Vector3D::Dot(planeToParticle, this->particleDeathPlane.GetUnitNormal()) <= 0);
+}
 
 /**
  * Private helper function for ticking living particles and managing
@@ -144,7 +153,7 @@ void ESPEmitter::TickParticles(double dT) {
 		std::list<ESPParticle*>::iterator tempIter = iter;
 
 		// Check to see if the particle has died, if so place it among the dead
-		if (currParticle->IsDead()) {
+		if (currParticle->IsDead() || this->IsParticlePastDeathPlane(*currParticle)) {
 			nowDead.push_back(iter);
 			this->deadParticles.push_back(currParticle);
 		}
@@ -460,6 +469,15 @@ void ESPEmitter::SetAsPointSpriteEmitter(bool isPointSprite) {
  */
 void ESPEmitter::SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter) {
 	this->radiusDeviationFromPt = distFromCenter;
+}
+
+/**
+ * Sets the death plane for the particle, if the particle is ever on the negative
+ * side of this plane then it will die (the negative side is defined as the one opposite
+ * of the normal of the plane).
+ */
+void ESPEmitter::SetParticleDeathPlane(const Plane& plane) {
+	this->particleDeathPlane = plane;
 }
 
 /**

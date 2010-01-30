@@ -64,6 +64,10 @@ public:
 		  			fabs(v_[1] - other[1]) < EPSILON;
 	}
 
+	bool operator!=(const Point2D& other) {
+		return !(*this == other);
+	}
+
 	static Point2D GetMidPoint(const Point2D& p1, const Point2D& p2) {
 		return Point2D((p1[0] + p2[0]) / 2.0f, (p1[1] + p2[1]) / 2.0f);
 	}
@@ -111,6 +115,18 @@ public:
     v_[1] = y;
     v_[2] = z;
   }
+
+	Point3D(const Point2D& p, float z) {
+    v_[0] = p[0];
+    v_[1] = p[1];
+    v_[2] = z;		
+	}
+
+	explicit Point3D(const Point2D& p) {
+    v_[0] = p[0];
+    v_[1] = p[1];
+    v_[2] = 0.0f;		
+	}
 
   Point3D(const Point3D& other) {
     v_[0] = other.v_[0];

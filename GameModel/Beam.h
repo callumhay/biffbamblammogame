@@ -42,6 +42,12 @@ public:
 		Point2D GetEndPoint() const { return this->ray.GetPointAlongRayFromOrigin(this->endT); }
 		
 		float GetRadius() const { return this->radius; }
+		float GetLength() const { 
+			assert(this->endT >= 0);
+			return this->endT;
+		}
+
+		static bool Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg2);
 
 	private:
 		LevelPiece* ignorePiece;		// If a beam is originating inside a level piece then we want it to ignore all collisions with that piece...
@@ -63,6 +69,7 @@ public:
 	bool Tick(double dT);
 
 	std::list<Beam::BeamSegment*>& GetBeamParts() { return this->beamParts; }
+	const std::list<Beam::BeamSegment*>& GetBeamParts() const { return this->beamParts; }
 	
 	void DebugDraw() const;
 
@@ -77,7 +84,8 @@ protected:
 	double totalLifeTime;			// Total amount of time that the beam lives for in seconds
 	double currTimeElapsed;		// The amount of time elapsed for the beam so far in seconds
 
-	void CleanUpBeam();
+	void CleanUpBeam(std::list<Beam::BeamSegment*>& beamSegs);
+	bool BeamHasChanged(const std::list<Beam::BeamSegment*>& oldBeamSegs, const std::list<Beam::BeamSegment*>& newBeamSegs);
 
 	Beam(BeamType type, int dmgPerSec, double lifeTimeInSec);
 };

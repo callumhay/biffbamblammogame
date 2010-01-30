@@ -13,6 +13,7 @@
 #include "LevelPiece.h"
 #include "PlayerPaddle.h"
 #include "GameLevel.h"
+#include "GameEventManager.h"
 
 const float Beam::MIN_BEAM_RADIUS = 0.25f;
 
@@ -21,17 +22,39 @@ type(type), damagePerSecond(dmgPerSec), currTimeElapsed(0.0), totalLifeTime(life
 };
 
 Beam::~Beam() {
-	this->CleanUpBeam();
+	this->CleanUpBeam(this->beamParts);
 }
 
 // Deletes any beam segments currently associated with this beam
-void Beam::CleanUpBeam() {
-	for (std::list<Beam::BeamSegment*>::iterator iter = this->beamParts.begin(); iter != this->beamParts.end(); ++iter) {
+void Beam::CleanUpBeam(std::list<Beam::BeamSegment*>& beamSegs) {
+	for (std::list<Beam::BeamSegment*>::iterator iter = beamSegs.begin(); iter != beamSegs.end(); ++iter) {
 		Beam::BeamSegment* currSeg = *iter;
 		delete currSeg;
 		currSeg = NULL;
 	}
-	this->beamParts.clear();
+	beamSegs.clear();
+}
+
+/**
+ * Check to see if the given lists of beam segments are different...
+ * Returns: true if they are different, false otherwise.
+ */
+bool Beam::BeamHasChanged(const std::list<Beam::BeamSegment*>& oldBeamSegs, const std::list<Beam::BeamSegment*>& newBeamSegs) {
+	// First test is easy - just see if there are the same number of segments...
+	if (oldBeamSegs.size() != newBeamSegs.size()) {
+		return true;
+	}
+
+	// Now go through each segment in the old and new and compare...
+	std::list<Beam::BeamSegment*>::const_iterator oldIter = oldBeamSegs.begin();
+	std::list<Beam::BeamSegment*>::const_iterator newIter = newBeamSegs.begin();
+	for (; oldIter != oldBeamSegs.end() && newIter != newBeamSegs.end(); ++oldIter, ++newIter) {
+		if (!Beam::BeamSegment::Equals(**oldIter, **newIter)) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -101,7 +124,31 @@ LevelPiece* Beam::BeamSegment::FireBeamSegmentIntoLevel(const GameLevel* level) 
 	return this->collidingPiece;
 }
 
-const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS	= 5.0;
+/**
+ * Check to see if two beam segments are 'equal'.
+ * Returns: true if they are equal, false otherwise.
+ */
+bool Beam::BeamSegment::Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg2) {
+	if (beamSeg1.GetStartPoint() != beamSeg2.GetStartPoint()) {
+		return false;
+	}
+
+	if (beamSeg1.GetEndPoint() != beamSeg2.GetEndPoint()) {
+		return false;
+	}
+
+	if (fabs(beamSeg1.GetLength() - beamSeg2.GetLength()) > EPSILON) {
+		return false;
+	}
+
+	if (beamSeg1.GetCollidingPiece() != beamSeg2.GetCollidingPiece()) {
+		return false;
+	}
+
+	return true;
+}
+
+const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS	= 5000; // TODO: fix this to be 5 - 8 seconds
 const int PaddleLaserBeam::DAMAGE_PER_SECOND							= 100;	// Damage per second that the paddle laser does to blocks and stuff
 
 PaddleLaserBeam::PaddleLaserBeam(PlayerPaddle* paddle, const GameLevel* level) : 
@@ -119,8 +166,9 @@ PaddleLaserBeam::~PaddleLaserBeam() {
 void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 	assert(this->paddle != NULL);
 
-	// Redo all of the collisions: wipe out any previous beams
-	this->CleanUpBeam();
+	// Keep a copy of the old beam segments (for comparison afterwards)
+	std::list<Beam::BeamSegment*> oldBeamSegments = this->beamParts;
+	this->beamParts.clear();
 
 	// Create the very first beam part that shoots out of the paddle towards the level
 	const float INITIAL_BEAM_RADIUS  = this->paddle->GetHalfFlatTopWidth();
@@ -181,4 +229,18 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 		// setup, insert it into the list of beam segments associated with this beam
 		this->beamParts.push_back(currBeamSegment);
 	}
+
+	// If there were no old beam segments then this is the first spawn of this beam
+	// and we shouldn't proceed any further (other wise we will update a beam that doesn't exist yet)
+	if (oldBeamSegments.size() == 0) {
+		return;
+	}
+
+	// Check to see if there was any change...
+	if (this->BeamHasChanged(oldBeamSegments, this->beamParts)) {
+		// EVENT: Beam updated/changed
+		GameEventManager::Instance()->ActionBeamChanged(*this);
+	}
+	// Clean up the old beam
+	this->CleanUpBeam(oldBeamSegments);
 }

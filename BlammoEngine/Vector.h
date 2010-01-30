@@ -138,6 +138,18 @@ public:
     v_[2] = z;
   }
 
+	Vector3D(const Vector2D& v, float z) {
+		v_[0] = v[0];
+		v_[1] = v[1];
+		v_[2] = z;
+	}
+
+	explicit Vector3D(const Vector2D& v) {
+		v_[0] = v[0];
+		v_[1] = v[1];
+		v_[2] = 0.0f;
+	}
+
   Vector3D(const Vector3D& other) {
     v_[0] = other.v_[0];
     v_[1] = other.v_[1];
@@ -277,6 +289,11 @@ public:
 		cartesianCoords[1] = rTimesSinTheta * sinf(v[2]);
 		cartesianCoords[2] = v[2] * cosf(v[1]);
 		return cartesianCoords;
+	}
+
+
+	static float Dot(const Vector3D& v1, const Vector3D& v2) {
+		return v1.dot(v2);
 	}
 };
 
