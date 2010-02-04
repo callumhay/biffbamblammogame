@@ -77,6 +77,9 @@ public:
 	int GetWindowHeight() const {
 		return this->windowHeight;
 	}
+	float GetFOVAngleInDegrees() const {
+		return this->fovAngleInDegrees;
+	}
 
 	Vector3D GetNormalizedUpVector() const {
 		return Vector3D::Normalize(this->viewMatrix * DEFAULT_UP_VEC); 

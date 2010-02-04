@@ -89,6 +89,8 @@ public:
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
 	void DrawTimers(double dT, const Camera& camera);
 
+	void DrawBeams(double dT, const GameModel& gameModel, const Camera& camera);
+
 	void DrawActiveItemHUDElements(const GameModel& gameModel, int displayWidth, int displayHeight);
 
 #ifdef _DEBUG

@@ -368,7 +368,6 @@ void BallInPlayState::UpdateActiveProjectiles(double seconds) {
  * active beams (if any) in the game during the current tick.
  */
 void BallInPlayState::UpdateActiveBeams(double seconds) {
-	
 	const GameLevel* currentLevel = this->gameModel->GetCurrentLevel();
 	std::list<Beam*>& activeBeams = this->gameModel->GetActiveBeams();
 	bool beamIsDead = false;
@@ -383,22 +382,29 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 		// might be level pieces that were destroyed by the ball that we are trying to access in the beam
 		currentBeam->UpdateCollisions(currentLevel);
 
-		std::list<Beam::BeamSegment*>& beamParts = currentBeam->GetBeamParts();
-		for (std::list<Beam::BeamSegment*>::iterator segIter = beamParts.begin(); segIter != beamParts.end(); ++segIter) {
-			Beam::BeamSegment* currentBeamSeg = *segIter;
+		std::list<BeamSegment*>& beamParts = currentBeam->GetBeamParts();
+		for (std::list<BeamSegment*>::iterator segIter = beamParts.begin(); segIter != beamParts.end(); ++segIter) {
+			BeamSegment* currentBeamSeg = *segIter;
 			assert(currentBeamSeg != NULL);
 
 			// Cause the beam to collide for the given tick with the level piece, find out what
 			// happened to the level piece and act accordingly...
 			LevelPiece* collidingPiece = currentBeamSeg->GetCollidingPiece();
 			if (collidingPiece != NULL) {
-				LevelPiece* resultPiece = collidingPiece->TickBeamCollision(seconds, currentBeam);
-			
+				LevelPiece* resultPiece = collidingPiece->TickBeamCollision(seconds, currentBeamSeg, this->gameModel);
+				
 				// Check to see if the level is done
 				if (currentLevel->IsLevelComplete()) {
 					// The level was completed, move to the level completed state
 					this->gameModel->SetNextState(new LevelCompleteState(this->gameModel));
 				}
+
+				// HACK: If we destroy a piece get out of this loop - so that if the piece is attached to
+				// another beam segment we don't try to access it and we update collisions
+				if (resultPiece != collidingPiece) {
+					break;
+				}
+
 			}
 		}
 

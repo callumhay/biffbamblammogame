@@ -9,7 +9,7 @@ class Camera;
 
 namespace ESP {
 	// Possible alignment configurations for sprites and particles w.r.t. the viewer
-	enum ESPAlignment { ScreenAligned, ViewPlaneAligned, ViewPointAligned, AxisAligned };
+	enum ESPAlignment { ScreenAligned, ScreenAlignedFollowVelocity, ViewPlaneAligned, ViewPointAligned, AxisAligned };
 };
 
 // An interval pairing of values
@@ -28,6 +28,10 @@ struct ESPInterval {
 	float RandomValueInInterval() const {
 		return static_cast<float>(minValue + Randomizer::GetInstance()->RandomNumZeroToOne()*(maxValue - minValue));
 	}
+
+	float MeanValueInInterval() const {
+		return (minValue + maxValue) / 2.0f;
+	}	
 };
 
 // A function with a single variable

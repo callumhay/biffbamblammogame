@@ -70,6 +70,7 @@ public:
 	virtual LevelPiece* Destroy(GameModel* gameModel){
 		return this;
 	};
+	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,

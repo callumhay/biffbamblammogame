@@ -57,7 +57,7 @@ public:
 	virtual void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
 	virtual void Tick(const double dT);
 	virtual void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
-	virtual void DrawAsPointSprite(const Camera& camera);
+	virtual void DrawAsPointSprite(const Camera& camera, const Vector3D& translation);
 	virtual void Kill() {
 		this->currLifeElapsed = this->totalLifespan;
 	}
@@ -76,8 +76,9 @@ public:
 	void SetScale(const Vector2D& scale) {
 		this->size = scale;
 	}
-	void MultiplyInitSizeScale(float mult) {
-		this->size = mult * this->initSize;
+	void MultiplyInitSizeScale(const Vector2D& mult) {
+		this->size[0] = mult[0] * this->initSize[0];
+		this->size[1] = mult[1] * this->initSize[1];
 	}
 
 

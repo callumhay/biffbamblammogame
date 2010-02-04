@@ -361,6 +361,16 @@ void GameModel::AddBeam(int beamType) {
 	Beam* addedBeam = NULL;
 	switch (beamType) {
 		case Beam::PaddleLaserBeam:
+			// Remove any previous paddle laser beams and add the new one...
+			for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); ++iter) {
+				Beam* currBeam = *iter;
+				if (currBeam->GetBeamType() == Beam::PaddleLaserBeam) {
+					this->beams.erase(iter);
+					delete currBeam;
+					currBeam = NULL;
+					break;
+				}
+			}
 			addedBeam = new PaddleLaserBeam(this->GetPlayerPaddle(), this->GetCurrentLevel());
 			break;
 

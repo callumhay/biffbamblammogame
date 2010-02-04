@@ -14,6 +14,7 @@
 // Game Model includes
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
+#include "../GameModel/Beam.h"
 
 // Blammo Engine includes
 #include "../BlammoEngine/Texture3D.h"
@@ -453,6 +454,53 @@ void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameI
  */
 void GameAssets::DrawTimers(double dT, const Camera& camera) {
 	this->itemAssets->DrawTimers(dT, camera);
+}
+
+void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& camera) {
+	//Vector2D negHalfLevelDim = -0.5 * gameModel.GetLevelUnitDimensions();
+	
+	// Draw the beams as line segments...
+	glEnable(GL_DEPTH_TEST);
+	glPushMatrix();
+	glTranslatef(0, 0, 0);
+	glBegin(GL_QUADS);
+	glColor4f(0.33f, 1.0f, 1.0f, 1.0f);
+	
+	Point2D temp;
+	Point2D beamSegStart, beamSegEnd;
+	Vector2D beamRightVec;
+	float currRadius;
+	Vector2D tempRadiusOffset;
+	
+	const std::list<Beam*>& beams = gameModel.GetActiveBeams();
+	for (std::list<Beam*>::const_iterator beamIter = beams.begin(); beamIter != beams.end(); ++beamIter) {
+		const Beam* currentBeam = *beamIter;
+
+		const std::list<BeamSegment*>& beamSegments = currentBeam->GetBeamParts();
+		for (std::list<BeamSegment*>::const_iterator segIter = beamSegments.begin(); segIter != beamSegments.end(); ++segIter) {
+			const BeamSegment* currentSeg = *segIter;
+
+			beamSegStart = currentSeg->GetStartPoint();
+			beamSegEnd   = currentSeg->GetEndPoint();
+			currRadius   = currentSeg->GetRadius();
+
+			beamRightVec = currentSeg->GetBeamSegmentRay().GetUnitDirection();
+			beamRightVec = currRadius * Vector2D(beamRightVec[1], -beamRightVec[0]);
+
+			temp = beamSegStart - beamRightVec;
+			glVertex2f(temp[0], temp[1]);
+			temp = beamSegStart + beamRightVec;
+			glVertex2f(temp[0], temp[1]);
+			temp = beamSegEnd + beamRightVec;
+			glVertex2f(temp[0], temp[1]);
+			temp = beamSegEnd - beamRightVec;
+			glVertex2f(temp[0], temp[1]);
+		}
+	}
+	glEnd();
+	glPopMatrix();
+
+	debug_opengl_state();
 }
 
 /**

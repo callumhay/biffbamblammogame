@@ -20,8 +20,10 @@
 
 const float LevelPiece::PIECE_WIDTH = 2.5f;
 const float LevelPiece::PIECE_HEIGHT = 1.0f;
+const float LevelPiece::PIECE_DEPTH  = 1.30f;
 const float LevelPiece::HALF_PIECE_WIDTH = PIECE_WIDTH / 2.0f;
 const float LevelPiece::HALF_PIECE_HEIGHT = PIECE_HEIGHT / 2.0f;
+const float LevelPiece::HALF_PIECE_DEPTH  = PIECE_DEPTH / 2.0f;
 
 LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc):
 center(wLoc * PIECE_WIDTH + HALF_PIECE_WIDTH, hLoc * PIECE_HEIGHT + HALF_PIECE_HEIGHT), wIndex(wLoc), hIndex(hLoc),
@@ -186,8 +188,9 @@ std::list<Collision::Ray2D> LevelPiece::GetReflectionRefractionRays(const Point2
 	return result;
 }
 
-LevelPiece* LevelPiece::TickBeamCollision(double dT, const Beam* beam) {
-	assert(beam != NULL);
+LevelPiece* LevelPiece::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
+	assert(beamSegment != NULL);
+	assert(gameModel != NULL);
 	return this;
 }
 

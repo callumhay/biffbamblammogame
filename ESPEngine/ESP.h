@@ -12,6 +12,7 @@
 // Emitters and particles
 #include "ESPEmitter.h"
 #include "ESPPointEmitter.h"
+#include "ESPVolumeEmitter.h"
 #include "ESPParticle.h"
 #include "ESPOnomataParticle.h"
 #include "ESPShaderParticle.h"
