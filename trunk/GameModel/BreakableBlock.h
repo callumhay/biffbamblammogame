@@ -9,7 +9,7 @@ protected:
 	static const int POINTS_ON_BLOCK_HIT				= 5;		// Points obtained when you just hit a breakable block
 	static const int POINTS_ON_BLOCK_DESTROYED	= 10;		// Points obtained when you destory a breakable block
 
-	int currLifePoints;	// Current life points of this block
+	float currLifePoints;	// Current life points of this block
 
 	enum BreakablePieceType { GreenBreakable = 'G', YellowBreakable = 'Y', OrangeBreakable = 'O', RedBreakable = 'R' }; 
 	BreakablePieceType pieceType;
@@ -22,6 +22,8 @@ protected:
 		this->pieceType = BreakableBlock::GetDecrementedPieceType(this->pieceType);
 		this->colour    = BreakableBlock::GetColourOfBreakableType(this->pieceType);
 	}
+
+	LevelPiece* DiminishPiece(GameModel* gameModel);
 
 public:
 	BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc);
@@ -95,6 +97,6 @@ public:
 	virtual LevelPiece* Destroy(GameModel* gameModel);	
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
-
+	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 };
 #endif

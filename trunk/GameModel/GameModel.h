@@ -210,6 +210,9 @@ public:
 	std::list<Beam*>& GetActiveBeams() {
 		return this->beams;
 	}
+	const std::list<Beam*>& GetActiveBeams() const {
+		return this->beams;
+	}
 
 	/**
 	 * Determines whether the given ball effect is active in the current state of the game or not.

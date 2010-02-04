@@ -146,6 +146,18 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	Matrix4x4 gameTransform = this->display->GetModel()->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 
+	glPushMatrix();
+	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
+
+	// Paddle...
+	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), camera);
+
+	// Render the beam effects
+	this->display->GetAssets()->DrawBeams(dT, *this->display->GetModel(), camera);
+	//this->display->GetAssets()->GetESPAssets()->DrawBeamEffects(dT, camera, Vector3D(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f));
+
+	glPopMatrix();
+
 	// Level pieces
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
 	this->display->GetAssets()->DrawLevelPieces(dT, currLevel, camera);
@@ -169,9 +181,6 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 		}				
 	}
 
-	// Paddle...
-	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), camera);
-
 	fullSceneFBO->UnbindFBObj();
 	
 	// Draw Post-Fullscene effects
@@ -182,9 +191,6 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	
 	// Render any post-processing effects for various items/objects in the game
 	this->display->GetAssets()->DrawPaddlePostEffects(dT, *this->display->GetModel(), camera);
-	
-	// Render the beam effects - right now these are being rendered with the rest of the particles... is this acceptable???
-	this->display->GetAssets()->GetESPAssets()->DrawBeamEffects(dT, camera);
 
 	postFullSceneFBO->UnbindFBObj();
 
@@ -228,7 +234,7 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	}
 
 	// Typical Particle effects...
-	this->display->GetAssets()->GetESPAssets()->DrawParticleEffects(dT, camera);
+	this->display->GetAssets()->GetESPAssets()->DrawParticleEffects(dT, camera, Vector3D(negHalfLevelDim));
 
 	// Absolute post effects call for various object effects
 	this->display->GetAssets()->DrawGameBallsPostEffects(dT, *gameModel, camera);

@@ -23,6 +23,7 @@ class GameBall;
 class GameItem;
 class ESPEmitter;
 class ESPPointEmitter;
+class ESPVolumeEmitter;
 class Texture;
 class ESPShaderParticle;
 class Projectile;
@@ -55,15 +56,17 @@ private:
 	ESPParticleScaleEffector  particlePulseUberballAura;
 	ESPParticleScaleEffector  particlePulseItemDropAura;
 	ESPParticleScaleEffector  particlePulsePaddleLaser;
+	ESPParticleScaleEffector  beamEndPulse;
 	ESPParticleScaleEffector  particleShrinkToNothing;
 
 	ESPParticleAccelEffector ghostBallAccel1;
+	ESPParticleAccelEffector gravity;
 
 	ESPParticleScaleEffector particleSmallGrowth;
 	ESPParticleScaleEffector particleMediumGrowth;
 	ESPParticleScaleEffector particleLargeGrowth;
 	ESPParticleScaleEffector particleMediumShrink;
-	//ESPParticleScaleEffector particleLargeStretch;
+	ESPParticleScaleEffector particleLargeVStretch;
 
 	ESPParticleRotateEffector explosionRayRotatorCW;
 	ESPParticleRotateEffector explosionRayRotatorCCW;
@@ -89,6 +92,7 @@ private:
 	Texture2D* targetTex;
 	Texture2D* haloTex;
 	Texture2D* lensFlareTex;
+	Texture2D* sparkleTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -96,6 +100,7 @@ private:
 
 	// Constants for the number of particles for particular effects
 	static const int NUM_PADDLE_LASER_SPARKS = 15;
+	static const int NUM_PADDLE_BEAM_ORIGIN_PARTICLES = 35;
 	static const int NUM_GHOST_SMOKE_PARTICLES = 23;
 	static const int NUM_UBER_BALL_TRAIL_PARTICLES = 35;
 	static const int NUM_EXPLOSION_FIRE_CLOUD_PARTICLES  = 25;
@@ -107,8 +112,13 @@ private:
 	static const int NUM_INK_SPRAY_PARTICLES = 20;
 	static const int NUM_EXPLOSION_SMOKE_PART_PARTICLES = 6;
 
+	// Laser and beam effects
 	ESPPointEmitter* paddleLaserGlowAura;
 	ESPPointEmitter* paddleLaserGlowSparks;
+	ESPVolumeEmitter* paddleBeamOriginUp;
+	std::vector<ESPPointEmitter*> beamEndEmitters;
+	std::vector<ESPPointEmitter*> beamBlockOnlyEndEmitters;
+	std::vector<ESPPointEmitter*> beamFlareEmitters;
 
 	CgFxVolumetricEffect ghostBallSmoke;
 	CgFxVolumetricEffect fireEffect;
@@ -138,6 +148,10 @@ private:
 	void AddLaserHitWallEffect(const Point2D& loc);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
+	ESPPointEmitter* CreateBeamEndEffect();
+	ESPPointEmitter* CreateBeamEndBlockEffect();
+	ESPPointEmitter* CreateBeamFlareEffect();
+	void DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
 
 	void DrawProjectileEffects(double dT, const Camera& camera);
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter);
@@ -181,7 +195,7 @@ public:
 	void KillAllActiveBallEffects(const GameBall& ball);
 
 	// Draw functions for various particle effects in the game
-	void DrawParticleEffects(double dT, const Camera& camera);
+	void DrawParticleEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
 
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
 
@@ -192,9 +206,7 @@ public:
 	
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
-	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
-
-	void DrawBeamEffects(double dT, const Camera& camera);
+	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);	
 
 	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };

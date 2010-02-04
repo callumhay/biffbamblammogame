@@ -28,15 +28,19 @@ particleShrinkToNothing(1, 0),
 particlePulseUberballAura(0, 0),
 particlePulseItemDropAura(0, 0),
 particlePulsePaddleLaser(0, 0),
+beamEndPulse(0, 0),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f),
 particleLargeGrowth(1.0f, 2.2f),
 particleMediumShrink(1.0f, 0.25f),
+particleLargeVStretch(Vector2D(1.0f, 1.0f), Vector2D(1.0f, 4.0f)),
 
 ghostBallAccel1(Vector3D(1,1,1)),
+gravity(Vector3D(0, -9.8, 0)),
 
 paddleLaserGlowAura(NULL),
 paddleLaserGlowSparks(NULL),
+paddleBeamOriginUp(NULL),
 
 explosionRayRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
 explosionRayRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
@@ -56,7 +60,8 @@ upArrowTex(NULL),
 ballTex(NULL),
 targetTex(NULL),
 haloTex(NULL),
-lensFlareTex(NULL) {
+lensFlareTex(NULL),
+sparkleTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -115,12 +120,17 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTex);
+	assert(removed);
 
 	// Delete any standalone effects
 	delete this->paddleLaserGlowAura;
 	this->paddleLaserGlowAura = NULL;
 	delete this->paddleLaserGlowSparks;
 	this->paddleLaserGlowSparks = NULL;
+	delete this->paddleBeamOriginUp;
+	this->paddleBeamOriginUp = NULL;
 }
 
 /**
@@ -181,18 +191,26 @@ void GameESPAssets::KillAllActiveEffects() {
 	}
 	this->activeProjectileEmitters.clear();
 
-	// Clear beam emitters
-	for (std::map<const Beam*, std::list<ESPEmitter*>>::iterator iter1 = this->activeBeamEmitters.begin();
-		iter1 != this->activeBeamEmitters.end(); ++iter1) {
 
-			std::list<ESPEmitter*>& beamEmitters = iter1->second;
-			for (std::list<ESPEmitter*>::iterator iter2 = beamEmitters.begin(); iter2 != beamEmitters.end(); ++iter2) {
-				delete *iter2;
-				*iter2 = NULL;
-			}
-			beamEmitters.clear();
+	// Clear beam emitters
+	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamEndEmitters.begin(); iter != this->beamEndEmitters.end(); ++iter) {
+		ESPPointEmitter* currEmitter = *iter;
+		delete currEmitter;
+		currEmitter = NULL;
 	}
-	this->activeBeamEmitters.clear();
+	this->beamEndEmitters.clear();
+	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamBlockOnlyEndEmitters.begin(); iter != this->beamBlockOnlyEndEmitters.end(); ++iter) {
+		ESPPointEmitter* currEmitter = *iter;
+		delete currEmitter;
+		currEmitter = NULL;
+	}
+	this->beamBlockOnlyEndEmitters.clear();
+	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamFlareEmitters.begin(); iter != this->beamFlareEmitters.end(); ++iter) {
+		ESPPointEmitter* currEmitter = *iter;
+		delete currEmitter;
+		currEmitter = NULL;
+	}
+	this->beamFlareEmitters.clear();
 
 	// Clear all ball emitters
 	for (std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); ++iter1) {
@@ -369,6 +387,10 @@ void GameESPAssets::InitESPTextures() {
 		this->lensFlareTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear));
 		assert(this->lensFlareTex != NULL);
 	}
+	if (this->sparkleTex == NULL) {
+		this->sparkleTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+		assert(this->sparkleTex != NULL);
+	}
 
 	debug_opengl_state();
 }
@@ -497,6 +519,17 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, this->circleGradientTex);
 	assert(result);
 	
+	this->paddleBeamOriginUp = new ESPVolumeEmitter();
+	this->paddleBeamOriginUp->SetSpawnDelta(ESPInterval(0.01f));
+	this->paddleBeamOriginUp->SetInitialSpd(ESPInterval(3.0f, 8.0f));
+	this->paddleBeamOriginUp->SetParticleLife(ESPInterval(1.0f));
+	this->paddleBeamOriginUp->SetParticleColour(ESPInterval(0.9f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	this->paddleBeamOriginUp->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->paddleBeamOriginUp->SetAsPointSpriteEmitter(true);
+	this->paddleBeamOriginUp->SetEmitDirection(Vector3D(0, 1, 0));
+	this->paddleBeamOriginUp->AddEffector(&this->particleFader);
+	result = this->paddleBeamOriginUp->SetParticles(NUM_PADDLE_BEAM_ORIGIN_PARTICLES, this->sparkleTex);
+	assert(result);
 }
 
 /**
@@ -542,6 +575,11 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	paddleLaserPulseSettings.pulseRate = 1.0f;
 	this->particlePulsePaddleLaser = ESPParticleScaleEffector(paddleLaserPulseSettings);
 	
+	ScaleEffect beamPulseSettings;
+	beamPulseSettings.pulseGrowthScale = 1.25f;
+	beamPulseSettings.pulseRate        = 0.5f;
+	this->beamEndPulse = ESPParticleScaleEffector(beamPulseSettings);
+
 	// Initialize uberball effectors
 	ScaleEffect uberBallPulseSettings;
 	uberBallPulseSettings.pulseGrowthScale = 2.0f;
@@ -1488,7 +1526,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 		itemDropEmitterTrail1->SetEmitPosition(Point3D(0, 0, 0));
 		itemDropEmitterTrail1->AddEffector(&this->particleFader);
 		//itemDropEmitterTrail1->AddEffector(&this->smokeRotatorCW);
-		itemDropEmitterTrail1->SetParticles(8, itemSpecificFillStarTex);
+		itemDropEmitterTrail1->SetParticles(12, itemSpecificFillStarTex);
 		
 		// Left emitter emits outlined stars
 		ESPPointEmitter* itemDropEmitterTrail2 = new ESPPointEmitter();
@@ -1503,7 +1541,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 		itemDropEmitterTrail2->SetEmitDirection(Vector3D(0, 1, 0));
 		itemDropEmitterTrail2->SetEmitPosition(Point3D(-GameItem::ITEM_WIDTH/3, 0, 0));
 		itemDropEmitterTrail2->AddEffector(&this->particleFader);
-		itemDropEmitterTrail2->SetParticles(7, itemSpecificOutlineStarTex);
+		itemDropEmitterTrail2->SetParticles(10, itemSpecificOutlineStarTex);
 		
 		// Right emitter emits outlined stars
 		ESPPointEmitter* itemDropEmitterTrail3 = new ESPPointEmitter();
@@ -1518,7 +1556,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 		itemDropEmitterTrail3->SetEmitDirection(Vector3D(0, 1, 0));
 		itemDropEmitterTrail3->SetEmitPosition(Point3D(GameItem::ITEM_WIDTH/3, 0, 0));
 		itemDropEmitterTrail3->AddEffector(&this->particleFader);
-		itemDropEmitterTrail3->SetParticles(7, itemSpecificOutlineStarTex);
+		itemDropEmitterTrail3->SetParticles(10, itemSpecificOutlineStarTex);
 
 		// Add all the star emitters
 		this->activeItemDropEmitters[&item].push_back(itemDropEmitterTrail1);
@@ -1609,47 +1647,148 @@ void GameESPAssets::RemoveProjectileEffect(const Camera& camera, const Projectil
 void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 	assert(this->activeBeamEmitters.find(&beam) == this->activeBeamEmitters.end());
 
+	const std::list<BeamSegment*>& beamSegments = beam.GetBeamParts();
+	assert(beamSegments.size() > 0);
+
 	std::list<ESPEmitter*> beamEmitters;
 
-	// Each segment of the beam will have the same set of effects,
-	// Each beam ending will have the same general effect as well...
-	const std::list<Beam::BeamSegment*>& beamSegments = beam.GetBeamParts();
-	for (std::list<Beam::BeamSegment*>::const_iterator iter = beamSegments.begin(); iter != beamSegments.end(); ++iter) {
+	// The first laser has a cool blast for where it comes out of the paddle...
+	BeamSegment* startSegment = *beam.GetBeamParts().begin();
+	Point3D beamSegOrigin3D(startSegment->GetStartPoint());
 
-		const Beam::BeamSegment* currentBeamSeg = *iter;
-		const float beamSegRadius							  = currentBeamSeg->GetRadius();
-		const Collision::Ray2D beamSegRay				= currentBeamSeg->GetBeamSegmentRay();
-		const unsigned int numBeamSegParticles  = (currentBeamSeg->GetLength() / (0.25 * beamSegRadius)) + 1;
+	Vector3D beamRightVec(startSegment->GetBeamSegmentRay().GetUnitDirection());
+	beamRightVec = startSegment->GetRadius() * Vector3D(beamRightVec[1], -beamRightVec[0], 0.0f);
 
-		const Vector3D beamSegDir3D(beamSegRay.GetUnitDirection());
-		const Point3D beamSegOrigin3D(beamSegRay.GetOrigin());
-		const Point3D beamSegEndPt3D(currentBeamSeg->GetEndPoint());
+	this->paddleBeamOriginUp->SetEmitDirection(Vector3D(startSegment->GetBeamSegmentRay().GetUnitDirection()));
+	ESPInterval xSize(0.5f * startSegment->GetRadius(), 1.5f * startSegment->GetRadius());
+	this->paddleBeamOriginUp->SetParticleSize(xSize);
+	this->paddleBeamOriginUp->SetEmitVolume(beamSegOrigin3D - beamRightVec, beamSegOrigin3D + beamRightVec);
+	beamEmitters.push_back(this->paddleBeamOriginUp);
 
-		const float BEAM_SPD = currentBeamSeg->GetLength();
-		const float MAX_SPAWN_DELTA = 1.0f / static_cast<float>(numBeamSegParticles);
+	size_t beamEndCounter      = 0;
+	size_t beamFlareCounter    = 0;
+	size_t beamBlockEndCounter = 0;
+	for (std::list<BeamSegment*>::const_iterator iter = beamSegments.begin(); iter != beamSegments.end(); ++iter) {
+		const BeamSegment* currentBeamSeg = *iter;
 
-		ESPPointEmitter* centralBeam = new ESPPointEmitter();
-		centralBeam->SetSpawnDelta(ESPInterval(MAX_SPAWN_DELTA));
-		centralBeam->SetInitialSpd(ESPInterval(BEAM_SPD));
-		centralBeam->SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-		centralBeam->SetParticleSize(ESPInterval(beamSegRadius));
-		centralBeam->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-		centralBeam->SetEmitAngleInDegrees(0);
-		centralBeam->SetRadiusDeviationFromCenter(ESPInterval(0));//, beamSegRadius / 8.0f));
-		centralBeam->SetAsPointSpriteEmitter(true);
-		centralBeam->SetEmitDirection(beamSegDir3D);
-		centralBeam->SetEmitPosition(beamSegOrigin3D);
-		centralBeam->SetParticleDeathPlane(Plane(-beamSegDir3D, beamSegEndPt3D));
-		centralBeam->SetParticles(numBeamSegParticles, circleGradientTex);
-		centralBeam->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
-		// Distribute beams...
-		//centralBeam->SimulateTicking(1.0f);
+		// Each beam segment has a blasty thingying at the end of it, if it ends at a 
+		// prism block then it also has a lens flare...
 		
-		beamEmitters.push_back(centralBeam);
+		// Make sure there are enough buffered end effects for use...
+		while (this->beamEndEmitters.size() <= beamEndCounter) {
+			this->beamEndEmitters.push_back(this->CreateBeamEndEffect());
+		}
+
+		// Blasty thingy
+		ESPPointEmitter* beamEndEmitter = this->beamEndEmitters[beamEndCounter];
+		assert(beamEndEmitter != NULL);
+		beamEndEmitter->SetParticleSize(2.5 * currentBeamSeg->GetRadius());
+		beamEndEmitter->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
+		beamEndEmitter->Reset();
+		beamEmitters.push_back(beamEndEmitter);
+		beamEndCounter++;
+
+		// Lens flare
+		if (currentBeamSeg->GetCollidingPiece() != NULL) {
+			if (currentBeamSeg->GetCollidingPiece()->IsLightReflectorRefractor()) {
+				while (this->beamFlareEmitters.size() <= beamFlareCounter) {
+					this->beamFlareEmitters.push_back(this->CreateBeamFlareEffect());
+				}
+				ESPPointEmitter* beamStartFlare = this->beamFlareEmitters[beamFlareCounter];
+				assert(beamStartFlare != NULL);
+				beamStartFlare->SetParticleSize(5 * currentBeamSeg->GetRadius());
+				beamStartFlare->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
+				beamStartFlare->Reset();
+				beamEmitters.push_back(beamStartFlare);
+				beamFlareCounter++;
+			}
+			else {
+				// Add beam end block emitter
+				while (this->beamBlockOnlyEndEmitters.size() <= beamBlockEndCounter) {
+					this->beamBlockOnlyEndEmitters.push_back(this->CreateBeamEndBlockEffect());	
+				}
+				ESPPointEmitter* beamBlockEndEffect = this->beamBlockOnlyEndEmitters[beamBlockEndCounter];
+				assert(beamBlockEndEffect != NULL);
+				ESPInterval xSize(0.5f * currentBeamSeg->GetRadius(), 1.0f * currentBeamSeg->GetRadius());
+				ESPInterval ySize(xSize.maxValue);
+				beamBlockEndEffect->SetParticleSize(xSize, ySize);
+				beamBlockEndEffect->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
+				beamBlockEndEffect->SetEmitDirection(Vector3D(-currentBeamSeg->GetBeamSegmentRay().GetUnitDirection()));
+				//beamBlockEndEffect->Reset();
+				beamEmitters.push_back(beamBlockEndEffect);
+				beamBlockEndCounter++;
+			}
+		}
 	}
 
 	// Add all the beams to the active beams, associated with the given beam
+	this->activeBeamEmitters.erase(&beam);
 	this->activeBeamEmitters.insert(std::make_pair(&beam, beamEmitters));
+}
+
+/**
+ * Spawns a new beam end emitter effect.
+ */
+ESPPointEmitter* GameESPAssets::CreateBeamEndEffect() {
+	ESPPointEmitter* beamEndEffect = new ESPPointEmitter();
+	beamEndEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	beamEndEffect->SetInitialSpd(ESPInterval(0));
+	beamEndEffect->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+	beamEndEffect->SetEmitAngleInDegrees(0);
+	beamEndEffect->SetParticleAlignment(ESP::ScreenAligned);
+	beamEndEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	beamEndEffect->SetEmitPosition(Point3D(0, 0, 0));
+	beamEndEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	beamEndEffect->AddEffector(&this->beamEndPulse);
+	bool result = beamEndEffect->SetParticles(1, this->circleGradientTex);
+	assert(result);
+
+	return beamEndEffect;
+}
+
+/**
+ * Spawns a new beam end emitter effect for blocks that are not reflecting/refracting the beam.
+ */
+ESPPointEmitter* GameESPAssets::CreateBeamEndBlockEffect() {
+	ESPPointEmitter* beamBlockEndEffect = new ESPPointEmitter();
+	beamBlockEndEffect->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
+	beamBlockEndEffect->SetInitialSpd(ESPInterval(2.0f, 3.5f));
+	beamBlockEndEffect->SetParticleLife(ESPInterval(0.4f, 0.65f));
+	beamBlockEndEffect->SetEmitAngleInDegrees(87);
+	beamBlockEndEffect->SetAsPointSpriteEmitter(false);
+	beamBlockEndEffect->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+	beamBlockEndEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	beamBlockEndEffect->SetEmitPosition(Point3D(0, 0, 0));
+	beamBlockEndEffect->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	beamBlockEndEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	beamBlockEndEffect->AddEffector(&this->particleLargeVStretch);
+	//beamBlockEndEffect->AddEffector(&this->particleFader);
+	//beamBlockEndEffect->AddEffector(&this->gravity);
+	bool result = beamBlockEndEffect->SetParticles(35, this->circleGradientTex);
+	assert(result);
+
+	return beamBlockEndEffect;	
+
+}
+
+/**
+ * Spawns a new beam flare emitter for special places on the beam.
+ */
+ESPPointEmitter* GameESPAssets::CreateBeamFlareEffect() {
+	ESPPointEmitter* beamFlareEffect = new ESPPointEmitter();
+	beamFlareEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	beamFlareEffect->SetInitialSpd(ESPInterval(0));
+	beamFlareEffect->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+	beamFlareEffect->SetEmitAngleInDegrees(0);
+	beamFlareEffect->SetParticleAlignment(ESP::ScreenAligned);
+	beamFlareEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	beamFlareEffect->SetEmitPosition(Point3D(0, 0, 0));
+	beamFlareEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.8f));
+	beamFlareEffect->AddEffector(&this->beamEndPulse);
+	bool result = beamFlareEffect->SetParticles(1, this->lensFlareTex);
+	assert(result);
+
+	return beamFlareEffect;
 }
 
 /**
@@ -1685,15 +1824,6 @@ void GameESPAssets::UpdateBeamEffect(const Beam& beam) {
 void GameESPAssets::RemoveBeamEffect(const Beam& beam) {
 	std::map<const Beam*, std::list<ESPEmitter*>>::iterator foundBeamIter = this->activeBeamEmitters.find(&beam);
 	if (foundBeamIter != this->activeBeamEmitters.end()) {
-		
-		std::list<ESPEmitter*>& beamEffects = foundBeamIter->second;
-		for (std::list<ESPEmitter*>::iterator effectIter = beamEffects.begin(); effectIter != beamEffects.end(); ++effectIter) {
-			ESPEmitter* currEmitter = *effectIter;
-			delete currEmitter;
-			currEmitter = NULL;
-		}
-		beamEffects.clear();
-
 		this->activeBeamEmitters.erase(foundBeamIter);	
 	}
 	else {
@@ -2320,6 +2450,11 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 			}
 			break;
 
+		case GameItem::LaserBeamPaddleItem: {
+				this->paddleBeamOriginUp->Reset();
+			}
+			break;
+
 		case GameItem::PaddleGrowItem: {
 				this->AddPaddleGrowEffect();
 			}
@@ -2355,9 +2490,10 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
  * for the game. These are particle effects that require no render to texture or other fancy
  * shmancy type stuffs.
  */
-void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
+void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera, const Vector3D& worldTranslation) {
 	// Projectiles first...
 	this->DrawProjectileEffects(dT, camera);
+	this->DrawBeamEffects(dT, camera, worldTranslation);
 
 	// Go through all the other particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin(); iter != this->activeGeneralEmitters.end();) {
@@ -2703,7 +2839,7 @@ void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera
 /**
  * Draw all the beams that are currently active in the game.
  */
-void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera) {
+void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation) {
 	for (std::map<const Beam*, std::list<ESPEmitter*>>::iterator iter = this->activeBeamEmitters.begin(); 
 		iter != this->activeBeamEmitters.end(); ++iter) {
 
@@ -2715,7 +2851,7 @@ void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera) {
 		for (std::list<ESPEmitter*>::iterator emitIter = beamEmitters.begin(); emitIter != beamEmitters.end(); ++emitIter) {
 			ESPEmitter* currentEmitter = *emitIter;
 			assert(currentEmitter != NULL);
-			currentEmitter->Draw(camera);
+			currentEmitter->Draw(camera, worldTranslation, false);
 			currentEmitter->Tick(dT);
 		}
 	}

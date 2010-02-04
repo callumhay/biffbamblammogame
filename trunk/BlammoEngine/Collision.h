@@ -278,6 +278,7 @@ namespace Collision {
 
 		Vector2D perpD0(D0[1], -D0[0]);
 		Vector2D P1MinusP0 = lineSeg.P1() - ray.GetOrigin();
+		//P1MinusP0.Normalize();
 		rayT = Vector2D::Dot(perpD1, P1MinusP0) / dotPerpD1D0;
 		float lineT = Vector2D::Dot(perpD0, P1MinusP0) / dotPerpD1D0;
 

@@ -16,6 +16,7 @@
 #include "GameLevel.h"
 #include "GameBall.h"
 #include "GameEventManager.h"
+#include "Beam.h"
 
 BreakableBlock::BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLifePoints(PIECE_STARTING_LIFE_POINTS) {
@@ -89,19 +90,15 @@ Colour BreakableBlock::GetColourOfBreakableType(BreakableBlock::BreakablePieceTy
 	return Colour(1,1,1);
 }
 
-/**
- * Call this when a collision has actually occured with the ball and this block.
- * Returns: The resulting level piece that this has become.
+/** 
+ * This piece is officially dead in its current form, diminish it down
+ * to its next form (or officially destroy it if it's in its final form i.e., green).
+ * Returns: The resulting piece in its next form after being diminished from the
+ * current one.
  */
-LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
-
-	// If the ball is an 'uber' ball then we decrement the piece type twice when it is
-	// not the lowest kind of breakable block (i.e., green)
-	if (((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall) && this->pieceType != GreenBreakable) {
-		this->DecrementPieceType();
-	}
-	
-	LevelPiece* newPiece = NULL;
+LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel) {
+	assert(gameModel != NULL);
+	LevelPiece* newPiece = this;
 
 	switch(this->pieceType) {
 		case GreenBreakable:
@@ -118,7 +115,23 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const GameBa
 			break;
 	}
 	assert(newPiece != NULL);
+	return newPiece;
+}
+
+/**
+ * Call this when a collision has actually occured with the ball and this block.
+ * Returns: The resulting level piece that this has become.
+ */
+LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+	assert(gameModel != NULL);
+
+	// If the ball is an 'uber' ball then we decrement the piece type twice when it is
+	// not the lowest kind of breakable block (i.e., green)
+	if (((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall) && this->pieceType != GreenBreakable) {
+		this->DecrementPieceType();
+	}
 	
+	LevelPiece* newPiece = this->DiminishPiece(gameModel);
 	return newPiece;
 }
 
@@ -127,24 +140,32 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const GameBa
  * Returns: The resulting level piece that this has become.
  */
 LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	assert(gameModel != NULL);
+	assert(projectile != NULL);
 	LevelPiece* newPiece = this;
 
 	// For destructive projectile types...
 	if (projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
-		switch(this->pieceType) {
-			case GreenBreakable:
-				newPiece = this->Destroy(gameModel);
-				break;
-
-			default:
-				this->DecrementPieceType();
-				{
-					GameLevel* level = gameModel->GetCurrentLevel();
-					level->PieceChanged(this, this);
-				}
-				newPiece = this;
-				break;				
-		}
+		newPiece = this->DiminishPiece(gameModel);
 	}
+
+	return newPiece;
+}
+
+/**
+ * Called as this piece is being hit by the given beam over the given amount of time in seconds.
+ */
+LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
+	assert(beamSegment != NULL);
+	assert(gameModel != NULL);
+	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
+	
+	LevelPiece* newPiece = this;
+	if (currLifePoints <= 0) {
+		// The piece is dead... spawn the next one in sequence
+		this->currLifePoints = BreakableBlock::PIECE_STARTING_LIFE_POINTS;
+		newPiece = this->DiminishPiece(gameModel);
+	}
+
 	return newPiece;
 }

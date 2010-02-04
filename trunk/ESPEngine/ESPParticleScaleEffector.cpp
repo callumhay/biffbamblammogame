@@ -1,12 +1,16 @@
 #include "ESPParticleScaleEffector.h"
 #include "ESPParticle.h"
 
+ESPParticleScaleEffector::ESPParticleScaleEffector(const Vector2D& startScale, const Vector2D& endScale) :
+startScale(startScale), endScale(endScale) {
+}
+
 ESPParticleScaleEffector::ESPParticleScaleEffector(float startScale, float endScale) :
-effect(), startScale(startScale), endScale(endScale) {
+effect(), startScale(startScale, startScale), endScale(endScale, endScale) {
 }
 
 ESPParticleScaleEffector::ESPParticleScaleEffector(const ScaleEffect& effect) :
-effect(effect), startScale(1.0f), endScale(1.0f) {
+effect(effect), startScale(1.0f, 1.0f), endScale(1.0f, 1.0f) {
 	this->effect.isInit = true;
 }
 
@@ -37,7 +41,7 @@ void ESPParticleScaleEffector::AffectParticleOnTick(double dT, ESPParticle* part
 			double twoTimesGS = 2 * this->effect.pulseGrowthScale;
 			amtOfScaling = (-twoTimesGS + 2)* pulseAmt + twoTimesGS - 1;
 		}
-		particle->MultiplyInitSizeScale(amtOfScaling);
+		particle->MultiplyInitSizeScale(Vector2D(amtOfScaling, amtOfScaling));
 	}
 
 	// Only do interpolations for particles with discrete lifetimes
@@ -45,7 +49,7 @@ void ESPParticleScaleEffector::AffectParticleOnTick(double dT, ESPParticle* part
 	if (particleLifeSpan != ESPParticle::INFINITE_PARTICLE_LIFETIME) {
 		// Perform linear interpolation on the scale of the particle
 		// based on the particle's lifetime
-		double newScale = this->startScale + particleLifeElapsed * 
+		Vector2D newScale = this->startScale + particleLifeElapsed * 
 			(this->endScale - this->startScale) / particleLifeSpan;
 
 		particle->MultiplyInitSizeScale(newScale);

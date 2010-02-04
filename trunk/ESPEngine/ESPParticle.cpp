@@ -70,17 +70,18 @@ void ESPParticle::Draw(const Camera& camera, const ESP::ESPAlignment alignment) 
 	glPopMatrix();
 }
 
-void ESPParticle::DrawAsPointSprite(const Camera& camera) {
+void ESPParticle::DrawAsPointSprite(const Camera& camera, const Vector3D& translation) {
 	if (this->IsDead()) {
 		return;
 	}
 
 	// Calculate distance from sprite to camera and use it to adjust sprite size...
 	Point3D camPos = camera.GetCurrentCameraPosition();
-	Vector3D vecToCam = camPos - this->position;
+	Vector3D vecToCam = camPos - (this->position + translation);
 	
-	float dist = std::max<float>(1.0, vecToCam.length());
-	glPointSize((1000.0f / dist) * this->size[0]);
+	float dist = vecToCam.length();
+	float pointSize = (this->size[0] / 2.0) * static_cast<float>(camera.GetWindowHeight()) / (tan(Trig::degreesToRadians(camera.GetFOVAngleInDegrees() / 2.0)) * dist);
+	glPointSize(pointSize);
 
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
 	glBegin(GL_POINTS);
@@ -177,15 +178,21 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			alignNormalVec	= Vector3D::Normalize(Vector3D::cross(alignRightVec, alignUpVec));
 			break;
 
-	case ESP::ScreenAligned:
+		case ESP::ScreenAligned:
 			// The particle is aligned with the screen 
 			// - The normal is the negation of the view plane normal (in world space)
 			// - The up vector is the camera's up direction
 			// - The right vector is just a cross product of the above two...
 
 			alignNormalVec = -cam.GetNormalizedViewVector();
-			alignUpVec			= cam.GetNormalizedUpVector();
-			alignRightVec	= Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+			alignUpVec		 = cam.GetNormalizedUpVector();
+			alignRightVec	 = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+			break;
+
+		case ESP::ScreenAlignedFollowVelocity:
+			alignNormalVec = -cam.GetNormalizedViewVector();
+			alignUpVec     = Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], -this->velocity[2]));//-Vector3D::Normalize(this->GetVelocity());
+			alignRightVec	 = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
 			break;
 
 		case ESP::ViewPlaneAligned:

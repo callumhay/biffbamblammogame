@@ -128,8 +128,10 @@ public:
 	ESPInterval GetParticleSizeX() const { return this->particleSize[0]; }
 	ESPInterval GetParticleSizeY() const { return this->particleSize[1]; }
 
+	void SimulateTicking(double time);
+
 	void Tick(double dT);
-	void Draw(const Camera& camera, bool enableDepth = false);
+	void Draw(const Camera& camera, const Vector3D& worldTranslation = Vector3D(0,0,0), bool enableDepth = false);
 	void Reset();
 
 };

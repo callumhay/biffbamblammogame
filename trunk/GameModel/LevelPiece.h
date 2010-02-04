@@ -16,7 +16,7 @@ class GameBall;
 class GameLevel;
 class GameModel;
 class Projectile;
-class Beam;
+class BeamSegment;
 
 class LevelPiece {
 
@@ -25,8 +25,10 @@ public:
 	// All level pieces must conform to these measurements...
 	static const float PIECE_WIDTH;
 	static const float PIECE_HEIGHT;
+	static const float PIECE_DEPTH;
 	static const float HALF_PIECE_WIDTH;
 	static const float HALF_PIECE_HEIGHT;
+	static const float HALF_PIECE_DEPTH;
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, PrismTriangle };
 	virtual LevelPieceType GetType() const = 0;
@@ -57,7 +59,7 @@ public:
 
 	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) const;
 	bool CollisionCheck(const Collision::AABB2D& aabb) const;
-	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
+	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	bool CollisionCheck(const BoundingLines& boundingLines) const;
 
 	virtual int GetPointValueForCollision() = 0;
@@ -73,7 +75,7 @@ public:
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) = 0;
 
 	virtual std::list<Collision::Ray2D> GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const;
-	virtual LevelPiece* TickBeamCollision(double dT, const Beam* beam);
+	virtual LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 
 	// Debug Stuffs
 	void DebugDraw() const;

@@ -76,3 +76,12 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 		this->bounds = BoundingLines(boundingLines, boundingNorms);
 }
+
+bool SolidBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	if (this->IsNoBoundsPieceType()) {
+		return false;
+	}
+
+	return Collision::IsCollision(ray, Collision::AABB2D(this->GetCenter() + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+																this->GetCenter() +  Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT)), rayT);
+}

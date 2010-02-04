@@ -173,6 +173,60 @@ void ESPEmitter::TickParticles(double dT) {
 }
 
 /**
+ * Call this function in order to simulate the functionality equivalent to having
+ * called Tick at all the dT over the interval of the given time.
+ */
+void ESPEmitter::SimulateTicking(double time) {
+	double spawnInterval = time;
+	// Figure out how many particles should currently be spawned
+	if (this->particleLifetime.MeanValueInInterval() != ESPParticle::INFINITE_PARTICLE_LIFETIME) {
+		spawnInterval -= this->particleLifetime.maxValue;
+	}
+
+	// If the spawn interval is less than or equal to zero then the particle life
+	// is longer thant the given simulation - just tick away.
+	if (spawnInterval <= 0) {
+		this->Tick(spawnInterval);
+		return;
+	}
+
+	// If there's no spawn delta and particles only spawn once - then just spawn everything and be done
+	if (this->OnlySpawnsOnce()) {
+		this->Tick(spawnInterval);
+		return;
+	}
+
+	assert(this->particleSpawnDelta.minValue > EPSILON);
+	unsigned int numberOfSpawns = spawnInterval / this->particleSpawnDelta.minValue;
+	assert(numberOfSpawns >= 0);
+	
+	// If there were no spawns during the time interval then just tick...
+	if (numberOfSpawns == 0) {
+		this->Tick(spawnInterval);
+		return;
+	}
+
+	// Spawn the number of particles given and set all their proper values...
+	numberOfSpawns       = std::min<unsigned int>(numberOfSpawns, this->deadParticles.size());
+	double ticksPerSpawn = spawnInterval / static_cast<double>(numberOfSpawns);
+	double tickCounter   = numberOfSpawns * ticksPerSpawn;
+	for (unsigned int i = 0; i < numberOfSpawns; i++) {
+		assert(this->aliveParticles.size() == i);
+
+		this->ReviveParticle();
+		ESPParticle* newParticle = this->aliveParticles.back();
+		newParticle->Tick(tickCounter);
+		tickCounter -= ticksPerSpawn;
+		
+		assert(this->aliveParticles.size() == (i + 1));
+	}
+
+	double tickTimeLeft = spawnInterval - (numberOfSpawns * this->particleSpawnDelta.minValue);
+	assert(tickTimeLeft >= 0);
+	this->Tick(tickTimeLeft);
+}
+
+/**
  * Public function, called each frame to execute the emitter.
  */
 void ESPEmitter::Tick(const double dT) {
@@ -210,7 +264,7 @@ void ESPEmitter::Tick(const double dT) {
 /**
  * Draw this emitter.
  */
-void ESPEmitter::Draw(const Camera& camera, bool enableDepth) {
+void ESPEmitter::Draw(const Camera& camera, const Vector3D& worldTranslation, bool enableDepth) {
 	// Setup OpenGL for drawing the particles in this emitter...
 	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | 
 		GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_MULTISAMPLE_BIT | GL_POINT_BIT); 	
@@ -236,10 +290,12 @@ void ESPEmitter::Draw(const Camera& camera, bool enableDepth) {
 		glEnable(GL_POINT_SPRITE);
 		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 		glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
+		glPointParameterf(GL_POINT_SIZE_MAX, 9999.0f);
+		glPointParameterf(GL_POINT_SIZE_MIN, 0.0f);
 
 		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 			ESPParticle* currParticle = *iter;
-			currParticle->DrawAsPointSprite(camera);
+			currParticle->DrawAsPointSprite(camera, worldTranslation);
 		}
 		glDisable(GL_POINT_SPRITE);
 	}

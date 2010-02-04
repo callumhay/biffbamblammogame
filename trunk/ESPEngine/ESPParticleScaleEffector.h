@@ -2,6 +2,7 @@
 #define __ESPPARTICLESCALEEFFECTOR_H__
 
 #include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Vector.h"
 
 #include "ESPParticleEffector.h"
 
@@ -25,10 +26,11 @@ class ESPParticleScaleEffector : public ESPParticleEffector {
 
 private:
 	ScaleEffect effect;
-	float startScale, endScale;
+	Vector2D startScale, endScale;
 
 public:
 
+	ESPParticleScaleEffector(const Vector2D& startScale, const Vector2D& endScale);
 	ESPParticleScaleEffector(float startScale, float endScale);
 	ESPParticleScaleEffector(const ScaleEffect& effect);
 	~ESPParticleScaleEffector();
