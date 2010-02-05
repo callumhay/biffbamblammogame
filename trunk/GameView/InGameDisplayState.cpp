@@ -152,10 +152,6 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), camera);
 
-	// Render the beam effects
-	this->display->GetAssets()->DrawBeams(dT, *this->display->GetModel(), camera);
-	//this->display->GetAssets()->GetESPAssets()->DrawBeamEffects(dT, camera, Vector3D(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f));
-
 	glPopMatrix();
 
 	// Level pieces
@@ -180,6 +176,9 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 			this->display->GetAssets()->DrawItem(dT, camera, (**iter));
 		}				
 	}
+
+	// Render the beam effects
+	this->display->GetAssets()->DrawBeams(dT, *this->display->GetModel(), camera);
 
 	fullSceneFBO->UnbindFBObj();
 	

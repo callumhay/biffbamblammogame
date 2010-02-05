@@ -16,8 +16,16 @@
 #include "GameEventManager.h"
 #include "GameBall.h"
 #include "GameLevel.h"
+#include "Beam.h"
 
 #include <set>
+
+BombBlock::BombBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc),
+currLifePoints(BombBlock::PIECE_STARTING_LIFE_POINTS) {
+}
+
+BombBlock::~BombBlock() {
+}
 
 LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 	// Obtain the level from the model...
@@ -125,4 +133,25 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* proje
 		return this->Destroy(gameModel);
 	}
 	return this;
+}
+
+/**
+ * Tick the a collision with a beam - the beam will eat away at this bomb block until
+ * it is destroyed.
+ * Returns: The block that this block is/has become.
+ */
+LevelPiece* BombBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
+	assert(beamSegment != NULL);
+	assert(gameModel != NULL);
+	
+	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
+
+	LevelPiece* newPiece = this;
+	if (currLifePoints <= 0) {
+		// The piece is dead... destroy it
+		this->currLifePoints = 0;
+		newPiece = this->Destroy(gameModel);
+	}
+
+	return newPiece;
 }

@@ -1657,12 +1657,12 @@ void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 	Point3D beamSegOrigin3D(startSegment->GetStartPoint());
 
 	Vector3D beamRightVec(startSegment->GetBeamSegmentRay().GetUnitDirection());
-	beamRightVec = startSegment->GetRadius() * Vector3D(beamRightVec[1], -beamRightVec[0], 0.0f);
+	Vector3D beamDiagonalVec = startSegment->GetRadius() * Vector3D(beamRightVec[1], -beamRightVec[0], PlayerPaddle::PADDLE_HALF_DEPTH);
 
 	this->paddleBeamOriginUp->SetEmitDirection(Vector3D(startSegment->GetBeamSegmentRay().GetUnitDirection()));
 	ESPInterval xSize(0.5f * startSegment->GetRadius(), 1.5f * startSegment->GetRadius());
 	this->paddleBeamOriginUp->SetParticleSize(xSize);
-	this->paddleBeamOriginUp->SetEmitVolume(beamSegOrigin3D - beamRightVec, beamSegOrigin3D + beamRightVec);
+	this->paddleBeamOriginUp->SetEmitVolume(beamSegOrigin3D - beamDiagonalVec, beamSegOrigin3D + beamDiagonalVec);
 	beamEmitters.push_back(this->paddleBeamOriginUp);
 
 	size_t beamEndCounter      = 0;
