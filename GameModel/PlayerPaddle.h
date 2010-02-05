@@ -31,8 +31,10 @@ class PlayerPaddle {
 public:
 	static const float PADDLE_HEIGHT_TOTAL;
 	static const float PADDLE_WIDTH_TOTAL;
+	static const float PADDLE_DEPTH_TOTAL;
 	static const float PADDLE_HALF_WIDTH;
 	static const float PADDLE_HALF_HEIGHT;
+	static const float PADDLE_HALF_DEPTH;
 
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000010, 
 										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000 };

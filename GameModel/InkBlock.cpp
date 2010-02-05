@@ -13,9 +13,10 @@
 #include "GameEventManager.h"
 #include "GameModel.h"
 #include "EmptySpaceBlock.h"
+#include "Beam.h"
 
 InkBlock::InkBlock(unsigned int wLoc, unsigned int hLoc) :
-LevelPiece(wLoc, hLoc) {
+LevelPiece(wLoc, hLoc), currLifePoints(InkBlock::PIECE_STARTING_LIFE_POINTS) {
 }
 
 InkBlock::~InkBlock() {
@@ -51,4 +52,20 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 		return this->Destroy(gameModel);
 	}
 	return this;
+}
+
+LevelPiece* InkBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
+	assert(beamSegment != NULL);
+	assert(gameModel != NULL);
+	
+	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
+
+	LevelPiece* newPiece = this;
+	if (currLifePoints <= 0) {
+		// The piece is dead... destroy it
+		this->currLifePoints = 0;
+		newPiece = this->Destroy(gameModel);
+	}
+
+	return newPiece;
 }

@@ -458,13 +458,19 @@ void GameAssets::DrawTimers(double dT, const Camera& camera) {
 
 void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& camera) {
 	//Vector2D negHalfLevelDim = -0.5 * gameModel.GetLevelUnitDimensions();
-	
+	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+
 	// Draw the beams as line segments...
+	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
+
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
 	glBegin(GL_QUADS);
-	glColor4f(0.33f, 1.0f, 1.0f, 1.0f);
+	glColor4f(0.33f, 1.0f, 1.0f, 0.8f);
 	
 	Point2D temp;
 	Point2D beamSegStart, beamSegEnd;
@@ -477,8 +483,16 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 		const Beam* currentBeam = *beamIter;
 
 		const std::list<BeamSegment*>& beamSegments = currentBeam->GetBeamParts();
-		for (std::list<BeamSegment*>::const_iterator segIter = beamSegments.begin(); segIter != beamSegments.end(); ++segIter) {
-			const BeamSegment* currentSeg = *segIter;
+		std::list<BeamSegment*>::const_iterator segmentIter = beamSegments.begin();
+
+		// In the case of a paddle laser beam and we're in paddle camera mode, don't
+		// draw the first beam... We use a HUD element to do this instead
+		if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn()) {
+			++segmentIter;
+		}
+
+		for (; segmentIter != beamSegments.end(); ++segmentIter) {
+			const BeamSegment* currentSeg = *segmentIter;
 
 			beamSegStart = currentSeg->GetStartPoint();
 			beamSegEnd   = currentSeg->GetEndPoint();
@@ -499,6 +513,7 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 	}
 	glEnd();
 	glPopMatrix();
+	glPopAttrib();
 
 	debug_opengl_state();
 }

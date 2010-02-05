@@ -33,6 +33,14 @@ gameTransformInfo(new GameTransformMgr()), nextState(NULL) {
 }
 
 GameModel::~GameModel() {
+	// Delete all items and timers - make sure we do this first since
+	// destroying some of these objects causes them to shutdown/use other objects
+	// in the game model
+	this->ClearLiveItems();
+	this->ClearActiveTimers();
+	this->ClearProjectiles();
+	this->ClearBeams();
+
 	// Delete the state
 	delete this->currState;
 	this->currState = NULL;	
@@ -59,12 +67,6 @@ GameModel::~GameModel() {
 	}
 	delete this->playerPaddle;
 	this->playerPaddle = NULL;
-
-	// Delete all items and timers
-	this->ClearLiveItems();
-	this->ClearActiveTimers();
-	this->ClearProjectiles();
-	this->ClearBeams();
 }
 
 /**

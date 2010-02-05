@@ -6,8 +6,8 @@
 class BombBlock : public LevelPiece {
 
 public:
-	BombBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {}
-	virtual ~BombBlock() {}
+	BombBlock(unsigned int wLoc, unsigned int hLoc);
+	~BombBlock();
 
 	LevelPieceType GetType() const { 
 		return LevelPiece::Bomb;
@@ -58,6 +58,11 @@ public:
 	LevelPiece* Destroy(GameModel* gameModel);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
+	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
+
+protected:
+	static const int PIECE_STARTING_LIFE_POINTS = 120;	// Starting life points given to a bomb block
+	float currLifePoints;	// Current life points of this block
 
 };
 #endif

@@ -22,8 +22,10 @@ const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
 const float PlayerPaddle::PADDLE_WIDTH_FLAT_TOP = 2.0f;
 const float PlayerPaddle::PADDLE_WIDTH_ANGLED_SIDE = (PADDLE_WIDTH_TOTAL - PADDLE_WIDTH_FLAT_TOP) / 2.0f;
 const float PlayerPaddle::PADDLE_HEIGHT_TOTAL = 0.80f;
+const float PlayerPaddle::PADDLE_DEPTH_TOTAL = 1.0f;
 const float PlayerPaddle::PADDLE_HALF_WIDTH = PADDLE_WIDTH_TOTAL / 2.0f;
 const float PlayerPaddle::PADDLE_HALF_HEIGHT = PADDLE_HEIGHT_TOTAL / 2.0f;
+const float PlayerPaddle::PADDLE_HALF_DEPTH = PADDLE_DEPTH_TOTAL / 2.0f;
 
 // The difference in width per size change of the paddle
 const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.8f;

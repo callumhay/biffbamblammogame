@@ -149,7 +149,7 @@ bool BeamSegment::Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg
 }
 
 const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS	= 5000; // TODO: fix this to be 5 - 8 seconds
-const int PaddleLaserBeam::DAMAGE_PER_SECOND							= 120;	// Damage per second that the paddle laser does to blocks and stuff
+const int PaddleLaserBeam::DAMAGE_PER_SECOND							= 150;	// Damage per second that the paddle laser does to blocks and stuff
 
 PaddleLaserBeam::PaddleLaserBeam(PlayerPaddle* paddle, const GameLevel* level) : 
 Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), paddle(paddle) {

@@ -4,9 +4,6 @@
 #include "LevelPiece.h"
 
 class InkBlock : public LevelPiece {
-protected:
-	static const int POINTS_ON_BLOCK_DESTROYED = 15;		// Points obtained when you destory an ink block
-
 public:
 	InkBlock(unsigned int wLoc, unsigned int hLoc);
 	virtual ~InkBlock();
@@ -64,5 +61,13 @@ public:
 	LevelPiece* Destroy(GameModel* gameModel);	
 	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
+	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
+
+protected:
+	static const int POINTS_ON_BLOCK_DESTROYED = 15;	// Points obtained when you destory an ink block
+	static const int PIECE_STARTING_LIFE_POINTS = 80;	// Starting life points given to a ink block
+
+	float currLifePoints;	// Current life points of this block
+
 };
 #endif
