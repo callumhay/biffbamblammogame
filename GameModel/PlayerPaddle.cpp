@@ -86,6 +86,7 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 	this->currHalfHeight			= this->currScaleFactor * PADDLE_HALF_HEIGHT;
 	this->currHalfWidthTotal	= this->currScaleFactor * PADDLE_HALF_WIDTH;
 	this->currHalfWidthFlat		= this->currScaleFactor * PADDLE_WIDTH_FLAT_TOP * 0.5f;
+	this->currHalfDepthTotal  = this->currScaleFactor * PADDLE_HALF_DEPTH;
 	
 	// Reset the bounds of the paddle (in paddle-space)
 	std::vector<Collision::LineSeg2D> lineBounds;

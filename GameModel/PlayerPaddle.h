@@ -35,6 +35,7 @@ public:
 	static const float PADDLE_HALF_WIDTH;
 	static const float PADDLE_HALF_HEIGHT;
 	static const float PADDLE_HALF_DEPTH;
+	static const float PADDLE_WIDTH_FLAT_TOP;
 
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000010, 
 										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000 };
@@ -42,7 +43,6 @@ public:
 
 private:
 	// Default values for the dimensions of the paddle
-	static const float PADDLE_WIDTH_FLAT_TOP;
 	static const float PADDLE_WIDTH_ANGLED_SIDE;
 	static const float WIDTH_DIFF_PER_SIZE;
 	static const float SECONDS_TO_CHANGE_SIZE;
@@ -63,6 +63,7 @@ private:
 	float currHalfHeight;					// Half the height of the paddle
 	float currHalfWidthFlat;			// Half of the flat portion of the paddle
 	float currHalfWidthTotal;			// Half of the total width of the paddle
+	float currHalfDepthTotal;			// Half of the total depth of the paddle
 	float minBound, maxBound;			// The current level's boundries along its width for the paddle
 	float speed;									// Speed of the paddle in units per second
 	float currScaleFactor;				// The scale difference between the paddle's current size and its default size
@@ -119,6 +120,9 @@ public:
 	}
 	float GetHalfFlatTopWidth() const {
 		return this->currHalfWidthFlat;
+	}
+	float GetHalfDepthTotal() const {
+		return this->currHalfDepthTotal;
 	}
 
 	Vector2D GetUpVector() const {

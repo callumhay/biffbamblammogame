@@ -107,7 +107,7 @@ public:
 	void UpdateCollisions(const GameLevel* level);
 
 private:
-	static const int DAMAGE_PER_SECOND;
+	static const int BASE_DAMAGE_PER_SECOND;
 	PlayerPaddle* paddle;
 };
 

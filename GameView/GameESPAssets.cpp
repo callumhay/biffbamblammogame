@@ -1685,6 +1685,7 @@ void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 		beamEndEmitter->SetParticleSize(2.5 * currentBeamSeg->GetRadius());
 		beamEndEmitter->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
 		beamEndEmitter->Reset();
+		beamEndEmitter->Tick(1.0f);
 		beamEmitters.push_back(beamEndEmitter);
 		beamEndCounter++;
 
@@ -1699,6 +1700,7 @@ void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 				beamStartFlare->SetParticleSize(5 * currentBeamSeg->GetRadius());
 				beamStartFlare->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
 				beamStartFlare->Reset();
+				beamStartFlare->Tick(1.0f);
 				beamEmitters.push_back(beamStartFlare);
 				beamFlareCounter++;
 			}
@@ -1714,7 +1716,8 @@ void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 				beamBlockEndEffect->SetParticleSize(xSize, ySize);
 				beamBlockEndEffect->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
 				beamBlockEndEffect->SetEmitDirection(Vector3D(-currentBeamSeg->GetBeamSegmentRay().GetUnitDirection()));
-				//beamBlockEndEffect->Reset();
+				beamBlockEndEffect->Reset();
+				beamBlockEndEffect->Tick(1.0f);
 				beamEmitters.push_back(beamBlockEndEffect);
 				beamBlockEndCounter++;
 			}
