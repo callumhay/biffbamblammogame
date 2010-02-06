@@ -294,6 +294,7 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 void GameModel::ClearProjectiles() {
 	for (std::list<Projectile*>::iterator iter = this->projectiles.begin(); iter != this->projectiles.end(); ++iter) {
 		Projectile* currProjectile = *iter;
+		// EVENT: Projectile removed from the game
 		GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
 		delete currProjectile;
 		currProjectile = NULL;
@@ -307,7 +308,8 @@ void GameModel::ClearProjectiles() {
 void GameModel::ClearBeams() {
 	for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); ++iter) {
 		Beam* currBeam = *iter;
-		//GameEventManager::Instance()->ActionBeamRemoved(*currProjectile);
+		// EVENT: Beam is removed from the game
+		GameEventManager::Instance()->ActionBeamRemoved(*currBeam);
 		delete currBeam;
 		currBeam = NULL;
 	}
@@ -321,6 +323,7 @@ void GameModel::ClearLiveItems() {
 	// Destroy any left-over game items
 	for(std::list<GameItem*>::iterator iter = this->currLiveItems.begin(); iter != this->currLiveItems.end(); ++iter) {
 		GameItem* currItem = *iter;
+		// EVENT: Item removed from the game
 		GameEventManager::Instance()->ActionItemRemoved(*currItem);
 		delete currItem;
 		currItem = NULL;
@@ -368,6 +371,8 @@ void GameModel::AddBeam(int beamType) {
 				Beam* currBeam = *iter;
 				if (currBeam->GetBeamType() == Beam::PaddleLaserBeam) {
 					this->beams.erase(iter);
+					// EVENT: Beam was removed (being replaced)
+					GameEventManager::Instance()->ActionBeamRemoved(*currBeam);
 					delete currBeam;
 					currBeam = NULL;
 					break;

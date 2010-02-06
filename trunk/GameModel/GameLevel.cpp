@@ -73,7 +73,17 @@ GameLevel::~GameLevel() {
 
 GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 	
+#ifdef _DEBUG
+	// In debug mode we read directly off disk and not out of the resource manager
+	std::stringstream* inFile = NULL;
+	{
+		std::ifstream tempFileStream(filepath.c_str());
+		inFile = new std::stringstream();
+		*inFile << tempFileStream.rdbuf();
+	}
+#else
 	std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(filepath);
+#endif
 	if (inFile == NULL) {
 		assert(false);
 		return NULL;

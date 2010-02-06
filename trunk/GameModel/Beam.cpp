@@ -137,6 +137,10 @@ bool BeamSegment::Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg
 		return false;
 	}
 
+	if (beamSeg1.GetRadius() != beamSeg2.GetRadius()) {
+		return false;
+	}
+
 	if (fabs(beamSeg1.GetLength() - beamSeg2.GetLength()) > EPSILON) {
 		return false;
 	}
@@ -149,10 +153,11 @@ bool BeamSegment::Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg
 }
 
 const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS	= 5000; // TODO: fix this to be 5 - 8 seconds
-const int PaddleLaserBeam::DAMAGE_PER_SECOND							= 150;	// Damage per second that the paddle laser does to blocks and stuff
+const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND				  = 150;	// Damage per second that the paddle laser does to blocks and stuff
+																																	// NOTE: a typical block has about 100 life
 
 PaddleLaserBeam::PaddleLaserBeam(PlayerPaddle* paddle, const GameLevel* level) : 
-Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), paddle(paddle) {
+Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), paddle(paddle) {
 	assert((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle);
 	this->UpdateCollisions(level);
 }
@@ -174,6 +179,12 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 	const float INITIAL_BEAM_RADIUS  = this->paddle->GetHalfFlatTopWidth()/2.0f;
 	const Point2D BEAM_ORIGIN				 = this->paddle->GetCenterPosition() + Vector2D(0, this->paddle->GetHalfHeight());
 	const Vector2D BEAM_UNIT_DIR		 = this->paddle->GetUpVector();
+
+	// The current damage is determined by a ratio of the normal paddle width to its current width and
+	// the typical base-damage that this beam does
+	this->baseDamagePerSecond				 = ((2.0f * this->paddle->GetHalfFlatTopWidth()) / PlayerPaddle::PADDLE_WIDTH_FLAT_TOP) * PaddleLaserBeam::BASE_DAMAGE_PER_SECOND;
+	
+	// Create the first beam segment, emitting from the paddle
 	BeamSegment* firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, BEAM_UNIT_DIR), INITIAL_BEAM_RADIUS, this->baseDamagePerSecond, NULL);
 
 	// Now begin the possible recursion of adding more and more beams based on whether the first

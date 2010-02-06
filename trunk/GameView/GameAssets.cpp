@@ -457,24 +457,27 @@ void GameAssets::DrawTimers(double dT, const Camera& camera) {
 }
 
 void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& camera) {
-	//Vector2D negHalfLevelDim = -0.5 * gameModel.GetLevelUnitDimensions();
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+	const float QUARTER_PADDLE_DEPTH = paddle->GetHalfDepthTotal() / 2.0f;
 
 	// Draw the beams as line segments...
-	glPushAttrib(GL_ENABLE_BIT);
+	glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BITS);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendEquation(GL_FUNC_ADD);
 
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
 	glBegin(GL_QUADS);
-	glColor4f(0.33f, 1.0f, 1.0f, 0.8f);
-	
-	Point2D temp;
-	Point2D beamSegStart, beamSegEnd;
-	Vector2D beamRightVec;
+			
+	const float TYPICAL_BEAM_ALPHA = 0.4f;
+	Point3D temp;
+	Point3D beamSegStart, beamSegEnd;
+	Vector3D beamRightVec;
+	Vector3D beamUpVec;
+	Vector3D beamDepthVec;
 	float currRadius;
 	Vector2D tempRadiusOffset;
 	
@@ -485,34 +488,73 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 		const std::list<BeamSegment*>& beamSegments = currentBeam->GetBeamParts();
 		std::list<BeamSegment*>::const_iterator segmentIter = beamSegments.begin();
 
-		// In the case of a paddle laser beam and we're in paddle camera mode, don't
-		// draw the first beam... We use a HUD element to do this instead
-		if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn()) {
-			++segmentIter;
-		}
-
 		for (; segmentIter != beamSegments.end(); ++segmentIter) {
+
+			// In the case of a paddle laser beam and we're in paddle camera mode, don't
+			// draw the first beam segment... We use a HUD element to do this instead
+			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segmentIter == beamSegments.begin()) {
+				float beamAlpha = paddle->GetColour().A();
+				glColor4f(0.33f, 1.0f, 1.0f, std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
+			}
+			else {
+				glColor4f(0.33f, 1.0f, 1.0f, TYPICAL_BEAM_ALPHA);
+			}
+
 			const BeamSegment* currentSeg = *segmentIter;
 
-			beamSegStart = currentSeg->GetStartPoint();
-			beamSegEnd   = currentSeg->GetEndPoint();
+			beamSegStart = Point3D(currentSeg->GetStartPoint());
+			beamSegEnd   = Point3D(currentSeg->GetEndPoint());
 			currRadius   = currentSeg->GetRadius();
 
-			beamRightVec = currentSeg->GetBeamSegmentRay().GetUnitDirection();
-			beamRightVec = currRadius * Vector2D(beamRightVec[1], -beamRightVec[0]);
+			beamUpVec    = Vector3D(currentSeg->GetBeamSegmentRay().GetUnitDirection());
+			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
+			beamDepthVec = Vector3D(0, 0, QUARTER_PADDLE_DEPTH);
 
-			temp = beamSegStart - beamRightVec;
-			glVertex2f(temp[0], temp[1]);
-			temp = beamSegStart + beamRightVec;
-			glVertex2f(temp[0], temp[1]);
-			temp = beamSegEnd + beamRightVec;
-			glVertex2f(temp[0], temp[1]);
-			temp = beamSegEnd - beamRightVec;
-			glVertex2f(temp[0], temp[1]);
+			// Front face
+			temp = beamSegStart - beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegStart + beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd + beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd - beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+
+			// Back face
+			temp = beamSegStart - beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegStart + beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd + beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd - beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+
+			// Right face
+			temp = beamSegStart + beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegStart + beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd + beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd + beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+
+			// Left face
+			temp = beamSegStart - beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegStart - beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd - beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd - beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
 		}
 	}
 	glEnd();
 	glPopMatrix();
+
+	glPolygonMode(GL_FRONT, GL_FILL);
 	glPopAttrib();
 
 	debug_opengl_state();
