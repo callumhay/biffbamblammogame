@@ -45,7 +45,7 @@ PlayerPaddle::PlayerPaddle() :
 	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 
 	avgVel(0.0f), ticksSinceAvg(0), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
 	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
-	attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), upVector(0, 1) {
+	attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), upVector(0, 1), isFiringBeam(false) {
 
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
@@ -55,7 +55,7 @@ PlayerPaddle::PlayerPaddle() :
 
 PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : 
 speed(DEFAULT_SPEED), distTemp(0.0f), avgVel(0.0f), ticksSinceAvg(0), 
-hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), upVector(0, 1) {
+hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), upVector(0, 1), isFiringBeam(false) {
 
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
@@ -350,11 +350,12 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 	}
 	
 	// Check for laser beam paddle (this has top priority)
-	if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
+	if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !this->isFiringBeam) {
 		// We add the beam to the game model, the rest will be taken care of by the beam and model
 		gameModel->AddBeam(Beam::PaddleLaserBeam);
 		// Beam only fires once
-		this->RemovePaddleType(PlayerPaddle::LaserBeamPaddle);
+		this->isFiringBeam = true;
+		
 	}
 	// Check for laser bullet paddle (shoots little laser bullets from the paddle)
 	else if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {

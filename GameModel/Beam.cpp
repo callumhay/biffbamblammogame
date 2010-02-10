@@ -89,6 +89,10 @@ bool Beam::Tick(double dT) {
 		return true;
 	}
 	else {
+		// Tick all the segments...
+		for (std::list<BeamSegment*>::iterator iter = this->beamParts.begin(); iter != this->beamParts.end(); ++iter) {
+			(*iter)->Tick(dT);
+		}
 		this->currTimeElapsed += dT;
 	}
 	return false;
@@ -97,12 +101,30 @@ bool Beam::Tick(double dT) {
 BeamSegment::BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, int beamDmgPerSec, LevelPiece* ignorePiece) :
 timeSinceFired(0.0), ray(beamRay), radius(beamRadius), collidingPiece(NULL), endT(0.0f),
 ignorePiece(ignorePiece), damagePerSecond(beamDmgPerSec) {
+
+	std::vector<double> animationTimes;
+	animationTimes.push_back(0.0);
+	animationTimes.push_back(0.3);
+	animationTimes.push_back(0.6);
+	std::vector<float> animationRadii;
+	animationRadii.push_back(beamRadius);
+	animationRadii.push_back(0.9f * beamRadius);
+	animationRadii.push_back(beamRadius);
+
+	radiusPulseAnim = AnimationMultiLerp<float>(&this->radius);
+	radiusPulseAnim.SetLerp(animationTimes, animationRadii);
+	radiusPulseAnim.SetRepeat(true);
+
 }
 
 BeamSegment::~BeamSegment() {
 	if (this->collidingPiece != NULL) {
 		this->collidingPiece = NULL;
 	}
+}
+
+void BeamSegment::Tick(double dT) {
+	this->radiusPulseAnim.Tick(dT);
 }
 
 /**
@@ -137,14 +159,15 @@ bool BeamSegment::Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg
 		return false;
 	}
 
-	if (beamSeg1.GetRadius() != beamSeg2.GetRadius()) {
-		return false;
-	}
-
 	if (fabs(beamSeg1.GetLength() - beamSeg2.GetLength()) > EPSILON) {
 		return false;
 	}
 
+	// Make sure the base radii are the same
+	if (beamSeg1.radiusPulseAnim.GetInterpolationValues()[0] != beamSeg2.radiusPulseAnim.GetInterpolationValues()[0]) {
+		return false;
+	}
+		
 	if (beamSeg1.GetCollidingPiece() != beamSeg2.GetCollidingPiece()) {
 		return false;
 	}
@@ -163,6 +186,8 @@ Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaser
 }
 
 PaddleLaserBeam::~PaddleLaserBeam() {
+	// Remove the paddle laser beam...
+	this->paddle->RemovePaddleType(PlayerPaddle::LaserBeamPaddle);
 }
 
 /**
@@ -252,7 +277,14 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 	if (this->BeamHasChanged(oldBeamSegments, this->beamParts)) {
 		// EVENT: Beam updated/changed
 		GameEventManager::Instance()->ActionBeamChanged(*this);
+
+		// Clean up the old beam
+		this->CleanUpBeam(oldBeamSegments);
 	}
-	// Clean up the old beam
-	this->CleanUpBeam(oldBeamSegments);
+	else {
+		this->CleanUpBeam(this->beamParts);
+		this->beamParts = oldBeamSegments;
+	}
+
+	
 }

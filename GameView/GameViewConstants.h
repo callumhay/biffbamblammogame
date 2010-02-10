@@ -218,6 +218,7 @@ public:
 	const std::string SKYBOX_MESH;
 	const std::string ITEM_MESH;
 	const std::string PADDLE_LASER_ATTACHMENT_MESH;
+	const std::string PADDLE_BEAM_ATTACHMENT_MESH;
 	const std::string PADDLE_STICKY_ATTACHMENT_MESH;
 
 	// DECO WORLD

@@ -52,7 +52,8 @@ private:
 	Mesh* ball;																// Ball used to break blocks
 	Mesh* spikeyBall;													// What happens to the ball when it becomes uber
 
-	LaserPaddleGun* paddleLaserAttachment;		// Laser attachment for the paddle
+	Mesh* paddleBeamAttachment;								// Laser beam attachment for paddle
+	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
 	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
 
 	// Special effects - persistant special effects in the game

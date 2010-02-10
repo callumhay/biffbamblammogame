@@ -13,7 +13,7 @@
 #define __BEAM_H__
 
 #include "../BlammoEngine/Collision.h"
-//#include "../BlammoEngine/Tree.h"
+#include "../BlammoEngine/Animation.h"
 
 #include <list>
 
@@ -44,6 +44,8 @@ public:
 		return this->endT;
 	}
 
+	void Tick(double dT);
+
 	int GetDamagePerSecond() const { return this->damagePerSecond; }
 
 	static bool Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg2);
@@ -61,6 +63,8 @@ private:
 	Collision::Ray2D ray;		// The ray defining this part of the beam
 	float radius;						// Half-width of the beam segment
 	float endT;							// The value that when fed into the ray equation will give where this beam segment ends
+
+	AnimationMultiLerp<float> radiusPulseAnim;
 
 };
 

@@ -46,6 +46,7 @@ private:
 	std::map<const Projectile*, std::list<ESPPointEmitter*>> activeProjectileEmitters;
 	std::map<const Beam*, std::list<ESPEmitter*>> activeBeamEmitters;
 	std::map<GameItem::ItemType, std::list<ESPEmitter*>> activeTimerHUDEmitters;
+	//std::map<const LevelPiece*, std::list<ESPEmitter*>> activeLevelPieceEmitters;
 	
 	// Standard effectors for the various ESP effects
 	ESPParticleColourEffector particleFader;
@@ -113,11 +114,14 @@ private:
 	static const int NUM_EXPLOSION_SMOKE_PART_PARTICLES = 6;
 
 	// Laser and beam effects
-	ESPPointEmitter* paddleLaserGlowAura;
-	ESPPointEmitter* paddleLaserGlowSparks;
+	ESPPointEmitter*  paddleLaserGlowAura;
+	ESPPointEmitter*  paddleLaserGlowSparks;
+	ESPVolumeEmitter* paddleBeamGlowSparks;
 	ESPVolumeEmitter* paddleBeamOriginUp;
+
 	std::vector<ESPPointEmitter*> beamEndEmitters;
 	std::vector<ESPPointEmitter*> beamBlockOnlyEndEmitters;
+	std::vector<ESPPointEmitter*> beamEndFallingBitsEmitters;
 	std::vector<ESPPointEmitter*> beamFlareEmitters;
 
 	CgFxVolumetricEffect ghostBallSmoke;
@@ -150,6 +154,7 @@ private:
 	void AddPaddleLaserBeamEffect(const Beam& beam);
 	ESPPointEmitter* CreateBeamEndEffect();
 	ESPPointEmitter* CreateBeamEndBlockEffect();
+	ESPPointEmitter* CreateBeamFallingBitEffect();
 	ESPPointEmitter* CreateBeamFlareEffect();
 	void DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
 
@@ -206,7 +211,9 @@ public:
 	
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+
 	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);	
+	void DrawPaddleLaserBeamEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 
 	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };

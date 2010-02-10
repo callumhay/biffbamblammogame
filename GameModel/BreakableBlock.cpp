@@ -166,6 +166,11 @@ LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegment* beam
 		this->currLifePoints = BreakableBlock::PIECE_STARTING_LIFE_POINTS;
 		newPiece = this->DiminishPiece(gameModel);
 	}
+	else {
+		// If the piece is not quite dead yet then show the current damage to it...
+		this->colour = std::max<float>(this->currLifePoints / static_cast<float>(BreakableBlock::PIECE_STARTING_LIFE_POINTS), 0.1f) * 
+			BreakableBlock::GetColourOfBreakableType(this->pieceType);
+	}
 
 	return newPiece;
 }
