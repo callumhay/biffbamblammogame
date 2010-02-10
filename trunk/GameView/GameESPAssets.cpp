@@ -40,6 +40,7 @@ gravity(Vector3D(0, -9.8, 0)),
 
 paddleLaserGlowAura(NULL),
 paddleLaserGlowSparks(NULL),
+paddleBeamGlowSparks(NULL),
 paddleBeamOriginUp(NULL),
 
 explosionRayRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
@@ -129,6 +130,8 @@ GameESPAssets::~GameESPAssets() {
 	this->paddleLaserGlowAura = NULL;
 	delete this->paddleLaserGlowSparks;
 	this->paddleLaserGlowSparks = NULL;
+	delete this->paddleBeamGlowSparks;
+	this->paddleBeamGlowSparks = NULL;
 	delete this->paddleBeamOriginUp;
 	this->paddleBeamOriginUp = NULL;
 }
@@ -205,6 +208,12 @@ void GameESPAssets::KillAllActiveEffects() {
 		currEmitter = NULL;
 	}
 	this->beamBlockOnlyEndEmitters.clear();
+	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamEndFallingBitsEmitters.begin(); iter != this->beamEndFallingBitsEmitters.end(); ++iter) {
+		ESPPointEmitter* currEmitter = *iter;
+		delete currEmitter;
+		currEmitter = NULL;
+	}	
+	this->beamEndFallingBitsEmitters.clear();
 	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamFlareEmitters.begin(); iter != this->beamFlareEmitters.end(); ++iter) {
 		ESPPointEmitter* currEmitter = *iter;
 		delete currEmitter;
@@ -489,6 +498,8 @@ void GameESPAssets::AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& ef
 void GameESPAssets::InitLaserPaddleESPEffects() {
 	assert(this->paddleLaserGlowAura == NULL);
 	assert(this->paddleLaserGlowSparks == NULL);
+	assert(this->paddleBeamGlowSparks == NULL);
+	assert(this->paddleBeamOriginUp == NULL);
 
 	this->paddleLaserGlowAura = new ESPPointEmitter();
 	this->paddleLaserGlowAura->SetSpawnDelta(ESPInterval(-1));
@@ -519,6 +530,18 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, this->circleGradientTex);
 	assert(result);
 	
+	this->paddleBeamGlowSparks = new ESPVolumeEmitter();
+	this->paddleBeamGlowSparks->SetSpawnDelta(ESPInterval(0.005f, 0.01f));
+	this->paddleBeamGlowSparks->SetInitialSpd(ESPInterval(2.0f, 5.0f));
+	this->paddleBeamGlowSparks->SetParticleLife(ESPInterval(0.75f, 1.0f));
+	this->paddleBeamGlowSparks->SetParticleColour(ESPInterval(0.6f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	this->paddleBeamGlowSparks->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->paddleBeamGlowSparks->SetAsPointSpriteEmitter(true);
+	this->paddleBeamGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
+	this->paddleBeamGlowSparks->AddEffector(&this->particleFader);
+	result = this->paddleBeamGlowSparks->SetParticles(50, this->circleGradientTex);
+	assert(result);
+
 	this->paddleBeamOriginUp = new ESPVolumeEmitter();
 	this->paddleBeamOriginUp->SetSpawnDelta(ESPInterval(0.01f));
 	this->paddleBeamOriginUp->SetInitialSpd(ESPInterval(3.0f, 8.0f));
@@ -1719,6 +1742,19 @@ void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 				beamBlockEndEffect->Reset();
 				beamBlockEndEffect->Tick(1.0f);
 				beamEmitters.push_back(beamBlockEndEffect);
+
+				while (this->beamEndFallingBitsEmitters.size() <= beamBlockEndCounter) {
+					this->beamEndFallingBitsEmitters.push_back(this->CreateBeamFallingBitEffect());
+				}
+				ESPPointEmitter* beamFallingBitEffect = this->beamEndFallingBitsEmitters[beamBlockEndCounter];
+				assert(beamFallingBitEffect != NULL);
+				beamFallingBitEffect->SetParticleSize(xSize);
+				beamFallingBitEffect->SetEmitPosition(Point3D(currentBeamSeg->GetEndPoint()));
+				beamFallingBitEffect->SetEmitDirection(Vector3D(-currentBeamSeg->GetBeamSegmentRay().GetUnitDirection()));
+				beamFallingBitEffect->Reset();
+				beamFallingBitEffect->Tick(1.0f);
+				beamEmitters.push_back(beamFallingBitEffect);
+
 				beamBlockEndCounter++;
 			}
 		}
@@ -1750,11 +1786,12 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndEffect() {
 }
 
 /**
- * Spawns a new beam end emitter effect for blocks that are not reflecting/refracting the beam.
+ * Spawns a new beam end emitter effect for blocks that are not reflecting/refracting the beam -
+ * this effect looks like sparky stretched flashing rebounding off the block.
  */
 ESPPointEmitter* GameESPAssets::CreateBeamEndBlockEffect() {
 	ESPPointEmitter* beamBlockEndEffect = new ESPPointEmitter();
-	beamBlockEndEffect->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
+	beamBlockEndEffect->SetSpawnDelta(ESPInterval(0.005f, 0.015f));
 	beamBlockEndEffect->SetInitialSpd(ESPInterval(2.0f, 3.5f));
 	beamBlockEndEffect->SetParticleLife(ESPInterval(0.4f, 0.65f));
 	beamBlockEndEffect->SetEmitAngleInDegrees(87);
@@ -1772,6 +1809,29 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndBlockEffect() {
 
 	return beamBlockEndEffect;	
 
+}
+
+/**
+ * Spawns a new beam end emitter effect for blocks that are not reflecting/refracting the beam -
+ * this effect looks like little bits/sparks falling off the block.
+ */
+ESPPointEmitter* GameESPAssets::CreateBeamFallingBitEffect() {
+	ESPPointEmitter* beamFallingBitEffect = new ESPPointEmitter();
+	beamFallingBitEffect->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
+	beamFallingBitEffect->SetInitialSpd(ESPInterval(2.0f, 3.5f));
+	beamFallingBitEffect->SetParticleLife(ESPInterval(0.8f, 1.0f));
+	beamFallingBitEffect->SetEmitAngleInDegrees(90);
+	beamFallingBitEffect->SetAsPointSpriteEmitter(true);
+	beamFallingBitEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	beamFallingBitEffect->SetEmitPosition(Point3D(0, 0, 0));
+	beamFallingBitEffect->SetParticleColour(ESPInterval(0.9f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	beamFallingBitEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	beamFallingBitEffect->AddEffector(&this->particleMediumShrink);
+	beamFallingBitEffect->AddEffector(&this->gravity);
+	bool result = beamFallingBitEffect->SetParticles(25, this->circleGradientTex);
+	assert(result);
+
+	return beamFallingBitEffect;	
 }
 
 /**
@@ -2825,7 +2885,7 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera,
 }
 
 /**
- * Draw particle effects associated with the laser paddle.
+ * Draw particle effects associated with the laser bullet paddle.
  * NOTE: You must transform these effects to be where the paddle is first!
  */
 void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
@@ -2837,6 +2897,20 @@ void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera
 	this->paddleLaserGlowAura->Tick(dT);
 	this->paddleLaserGlowSparks->Draw(camera);
 	this->paddleLaserGlowSparks->Tick(dT);
+}
+
+/**
+ * Draw particle effects associated with the laser beam paddle.
+ * NOTE: You must transform these effects to be where the paddle is first!
+ */
+void GameESPAssets::DrawPaddleLaserBeamEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+	float tempXBound = 0.7f * paddle.GetHalfFlatTopWidth();
+	float tempZBound = 0.9f * paddle.GetHalfDepthTotal();
+	this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, 0, -tempZBound), Point3D(tempXBound, 0, tempZBound));
+	this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
+
+	this->paddleBeamGlowSparks->Draw(camera, Vector3D(0, 0, 0), true);
+	this->paddleBeamGlowSparks->Tick(dT);
 }
 
 /**

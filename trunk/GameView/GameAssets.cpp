@@ -39,6 +39,7 @@ crosshairHUD(NULL),
 
 ball(NULL), 
 spikeyBall(NULL), 
+paddleBeamAttachment(NULL),
 paddleLaserAttachment(NULL),
 paddleStickyAttachment(NULL),
 
@@ -95,6 +96,9 @@ GameAssets::~GameAssets() {
 		delete this->itemAssets;
 		this->itemAssets = NULL;
 	}
+
+	bool success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleBeamAttachment);
+	assert(success);
 
 	delete this->paddleLaserAttachment;
 	this->paddleLaserAttachment = NULL;
@@ -355,12 +359,16 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	// Draw the paddle
 	this->worldAssets->DrawPaddle(p, camera, paddleKeyLight, paddleFillLight, ballLight);
 
-	// In the case of a laser paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
+	// In the case of a laser bullet paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
 	if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		// Draw attachment (gun) mesh
 		this->paddleLaserAttachment->Draw(dT, p, camera, paddleKeyLight, paddleFillLight);
+	}
+	// Same goes for the laser beam paddle...
+	if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
+		this->paddleBeamAttachment->Draw(camera, paddleKeyLight, paddleFillLight);
 	}
 
 	glPopMatrix();
@@ -489,9 +497,71 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 		std::list<BeamSegment*>::const_iterator segmentIter = beamSegments.begin();
 
 		for (; segmentIter != beamSegments.end(); ++segmentIter) {
+			const BeamSegment* currentSeg = *segmentIter;
+
+			beamSegStart = Point3D(currentSeg->GetStartPoint());
+			beamSegEnd   = Point3D(currentSeg->GetEndPoint());
+			beamUpVec    = Vector3D(currentSeg->GetBeamSegmentRay().GetUnitDirection());
+
+			currRadius   = 0.5f * currentSeg->GetRadius();
+			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
+			beamDepthVec = Vector3D(0, 0, 0.5f * QUARTER_PADDLE_DEPTH);
 
 			// In the case of a paddle laser beam and we're in paddle camera mode, don't
 			// draw the first beam segment... We use a HUD element to do this instead
+			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segmentIter == beamSegments.begin()) {
+				float beamAlpha = paddle->GetColour().A();
+				glColor4f(0.75f, 1.0f, 1.0f, std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
+			}
+			else {
+				glColor4f(0.75f, 1.0f, 1.0f, TYPICAL_BEAM_ALPHA);
+			}
+
+			// Center of the beam (brighter in the center)
+			// Front face
+			temp = beamSegStart - beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegStart + beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd + beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd - beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+
+			// Back face
+			temp = beamSegStart - beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegStart + beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd + beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd - beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+
+			// Right face
+			temp = beamSegStart + beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegStart + beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd + beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd + beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+
+			// Left face
+			temp = beamSegStart - beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegStart - beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd - beamRightVec - beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+			temp = beamSegEnd - beamRightVec + beamDepthVec;
+			glVertex3f(temp[0], temp[1], temp[2]);
+
+			currRadius   = currentSeg->GetRadius();
+			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
+			beamDepthVec = Vector3D(0, 0, QUARTER_PADDLE_DEPTH);
+
 			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segmentIter == beamSegments.begin()) {
 				float beamAlpha = paddle->GetColour().A();
 				glColor4f(0.33f, 1.0f, 1.0f, std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
@@ -499,16 +569,6 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 			else {
 				glColor4f(0.33f, 1.0f, 1.0f, TYPICAL_BEAM_ALPHA);
 			}
-
-			const BeamSegment* currentSeg = *segmentIter;
-
-			beamSegStart = Point3D(currentSeg->GetStartPoint());
-			beamSegEnd   = Point3D(currentSeg->GetEndPoint());
-			currRadius   = currentSeg->GetRadius();
-
-			beamUpVec    = Vector3D(currentSeg->GetBeamSegmentRay().GetUnitDirection());
-			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
-			beamDepthVec = Vector3D(0, 0, QUARTER_PADDLE_DEPTH);
 
 			// Front face
 			temp = beamSegStart - beamRightVec - beamDepthVec;
@@ -557,6 +617,21 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 	glPolygonMode(GL_FRONT, GL_FILL);
 	glPopAttrib();
 
+	// Draw any effects coming out of the paddle when necessary
+	Point2D paddleCenter = paddle->GetCenterPosition();
+	float paddleScaleFactor = paddle->GetPaddleScaleFactor();
+	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
+
+	glPushMatrix();
+	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !paddle->GetIsLaserBeamFiring()) {
+		// Draw glowy beam origin when beam is able to fire but not actually firing yet
+		this->espAssets->DrawPaddleLaserBeamEffects(dT, camera, *paddle);
+	}
+	glPopMatrix();
+
 	debug_opengl_state();
 }
 
@@ -578,6 +653,9 @@ void GameAssets::LoadRegularMeshAssets() {
 	}
 	if (this->spikeyBall == NULL) {
 		this->spikeyBall = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->SPIKEY_BALL_MESH);
+	}
+	if (this->paddleBeamAttachment == NULL) {
+		this->paddleBeamAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_BEAM_ATTACHMENT_MESH);
 	}
 	if (this->paddleLaserAttachment == NULL) {
 		this->paddleLaserAttachment = new LaserPaddleGun();

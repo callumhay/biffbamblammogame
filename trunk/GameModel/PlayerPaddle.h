@@ -81,6 +81,7 @@ private:
 	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
 
 	bool isPaddleCamActive;	// Whether or not the camera is inside the paddle
+	bool isFiringBeam;			// Whether this paddle is firing the laser beam
 
 	void SetDimensions(float newScaleFactor);
 	void SetDimensions(PlayerPaddle::PaddleSize size);
@@ -105,6 +106,7 @@ public:
 		this->SetDimensions(PlayerPaddle::NormalSize);
 		this->centerPos = Point2D((maxBound + minBound)/2.0f, this->currHalfHeight);
 		this->currType = PlayerPaddle::NormalPaddle;
+		this->isFiringBeam = false;
 	}
 
 	// Obtain the center position of this paddle.
@@ -229,6 +231,9 @@ public:
 	}
 	bool GetIsPaddleCameraOn() const {
 		return this->isPaddleCamActive;
+	}
+	bool GetIsLaserBeamFiring() const {
+		return this->isFiringBeam;
 	}
 
 	// Attach/detach ball functions

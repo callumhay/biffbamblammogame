@@ -181,6 +181,7 @@ PRISM_TRIANGLE_BLOCK_MESH(MESH_DIRECTORY "/triangle_prism_block.obj"),
 SKYBOX_MESH(MESH_DIRECTORY "/skybox.obj"),
 ITEM_MESH(MESH_DIRECTORY "/item.obj"),
 PADDLE_LASER_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_laser_attachment.obj"),
+PADDLE_BEAM_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_beam_attachment.obj"),
 PADDLE_STICKY_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_sticky_attachment.obj"),
 
 // Deco Asset Paths
