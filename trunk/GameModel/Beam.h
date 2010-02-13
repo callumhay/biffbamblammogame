@@ -39,6 +39,8 @@ public:
 	Point2D GetEndPoint() const { return this->ray.GetPointAlongRayFromOrigin(this->endT); }
 	
 	float GetRadius() const { return this->radius; }
+	void SetRadius(float radius);
+
 	float GetLength() const { 
 		assert(this->endT >= 0);
 		return this->endT;
@@ -47,6 +49,7 @@ public:
 	void Tick(double dT);
 
 	int GetDamagePerSecond() const { return this->damagePerSecond; }
+	void SetDamagePerSecond(int dmgPerSec) { this->damagePerSecond = dmgPerSec; }
 
 	static bool Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg2);
 
@@ -112,6 +115,9 @@ public:
 
 private:
 	static const int BASE_DAMAGE_PER_SECOND;
+
+	bool reInitStickyPaddle;	// Indicates whether the beam should reinitialize its sticky paddle beams
+
 	PlayerPaddle* paddle;
 };
 

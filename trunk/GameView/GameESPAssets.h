@@ -118,6 +118,7 @@ private:
 	ESPPointEmitter*  paddleLaserGlowSparks;
 	ESPVolumeEmitter* paddleBeamGlowSparks;
 	ESPVolumeEmitter* paddleBeamOriginUp;
+	ESPPointEmitter* paddleBeamBlastBits;
 
 	std::vector<ESPPointEmitter*> beamEndEmitters;
 	std::vector<ESPPointEmitter*> beamBlockOnlyEndEmitters;
