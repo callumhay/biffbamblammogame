@@ -400,6 +400,15 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		// the 'post full scene' fbo because we are currently in the middle of drawing to it
 		this->paddleStickyAttachment->SetSceneTexture(this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 
+		// In the case where the paddle laser beam is also active then the beam will refract through the goo,
+		// illuminate the goo alot more
+		if ((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && paddle->GetIsLaserBeamFiring()) {
+			this->paddleStickyAttachment->SetPaddleLaserBeamIsActive(true);
+		}
+		else {
+			this->paddleStickyAttachment->SetPaddleLaserBeamIsActive(false);
+		}
+
 		// Obtain the lights that affect the paddle
 		PointLight paddleKeyLight, paddleFillLight, ballLight;
 		this->lightAssets->GetPaddleAffectingLights(paddleKeyLight, paddleFillLight, ballLight);
@@ -562,12 +571,13 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
 			beamDepthVec = Vector3D(0, 0, QUARTER_PADDLE_DEPTH);
 
+			Colour beamColour = GameViewConstants::GetInstance()->LASER_BEAM_COLOUR;
 			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segmentIter == beamSegments.begin()) {
 				float beamAlpha = paddle->GetColour().A();
-				glColor4f(0.33f, 1.0f, 1.0f, std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
+				glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
 			}
 			else {
-				glColor4f(0.33f, 1.0f, 1.0f, TYPICAL_BEAM_ALPHA);
+				glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), TYPICAL_BEAM_ALPHA);
 			}
 
 			// Front face

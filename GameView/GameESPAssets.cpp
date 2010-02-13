@@ -42,6 +42,7 @@ paddleLaserGlowAura(NULL),
 paddleLaserGlowSparks(NULL),
 paddleBeamGlowSparks(NULL),
 paddleBeamOriginUp(NULL),
+paddleBeamBlastBits(NULL),
 
 explosionRayRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::CLOCKWISE),
 explosionRayRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
@@ -134,6 +135,8 @@ GameESPAssets::~GameESPAssets() {
 	this->paddleBeamGlowSparks = NULL;
 	delete this->paddleBeamOriginUp;
 	this->paddleBeamOriginUp = NULL;
+	delete this->paddleBeamBlastBits;
+	this->paddleBeamBlastBits = NULL;
 }
 
 /**
@@ -500,6 +503,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	assert(this->paddleLaserGlowSparks == NULL);
 	assert(this->paddleBeamGlowSparks == NULL);
 	assert(this->paddleBeamOriginUp == NULL);
+	assert(this->paddleBeamBlastBits == NULL);
 
 	this->paddleLaserGlowAura = new ESPPointEmitter();
 	this->paddleLaserGlowAura->SetSpawnDelta(ESPInterval(-1));
@@ -528,7 +532,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleLaserGlowSparks->SetEmitDirection(Vector3D(0, 1, 0));
 	this->paddleLaserGlowSparks->AddEffector(&this->particleFader);
 	result = this->paddleLaserGlowSparks->SetParticles(NUM_PADDLE_LASER_SPARKS, this->circleGradientTex);
-	assert(result);
+	assert(result);		
 	
 	this->paddleBeamGlowSparks = new ESPVolumeEmitter();
 	this->paddleBeamGlowSparks->SetSpawnDelta(ESPInterval(0.005f, 0.01f));
@@ -553,6 +557,20 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleBeamOriginUp->AddEffector(&this->particleFader);
 	result = this->paddleBeamOriginUp->SetParticles(NUM_PADDLE_BEAM_ORIGIN_PARTICLES, this->sparkleTex);
 	assert(result);
+
+	this->paddleBeamBlastBits = new ESPPointEmitter();
+	this->paddleBeamBlastBits->SetSpawnDelta(ESPInterval(0.001f, 0.005f));
+	this->paddleBeamBlastBits->SetInitialSpd(ESPInterval(7.0f, 10.0f));
+	this->paddleBeamBlastBits->SetParticleLife(ESPInterval(0.75f, 1.0f));
+	this->paddleBeamBlastBits->SetEmitAngleInDegrees(20);
+	this->paddleBeamBlastBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->paddleBeamBlastBits->SetAsPointSpriteEmitter(true);
+	this->paddleBeamBlastBits->SetEmitPosition(Point3D(0, 0, 0));
+	this->paddleBeamBlastBits->SetParticleColour(ESPInterval(0.4f, 0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	this->paddleBeamBlastBits->AddEffector(&this->particleFader);
+	result = this->paddleBeamBlastBits->SetParticles(70, this->sparkleTex);
+	assert(result);	
+
 }
 
 /**
@@ -1688,6 +1706,10 @@ void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 	this->paddleBeamOriginUp->SetEmitVolume(beamSegOrigin3D - beamDiagonalVec, beamSegOrigin3D + beamDiagonalVec);
 	beamEmitters.push_back(this->paddleBeamOriginUp);
 
+	this->paddleBeamBlastBits->SetParticleSize(ESPInterval(startSegment->GetRadius(), 2.0f * startSegment->GetRadius()));
+	this->paddleBeamBlastBits->SetEmitPosition(beamSegOrigin3D);
+	beamEmitters.push_back(this->paddleBeamBlastBits);
+
 	size_t beamEndCounter      = 0;
 	size_t beamFlareCounter    = 0;
 	size_t beamBlockEndCounter = 0;
@@ -2515,6 +2537,7 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 
 		case GameItem::LaserBeamPaddleItem: {
 				this->paddleBeamOriginUp->Reset();
+				this->paddleBeamBlastBits->Reset();
 			}
 			break;
 
@@ -2906,6 +2929,7 @@ void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera
 void GameESPAssets::DrawPaddleLaserBeamEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 	float tempXBound = 0.7f * paddle.GetHalfFlatTopWidth();
 	float tempZBound = 0.9f * paddle.GetHalfDepthTotal();
+	
 	this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, 0, -tempZBound), Point3D(tempXBound, 0, tempZBound));
 	this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
 

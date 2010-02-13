@@ -47,5 +47,7 @@ public:
 		this->stickyGooMatEffect->SetSceneTexture(sceneTex);
 	}
 
+	void SetPaddleLaserBeamIsActive(bool isActive);
+
 };
 #endif

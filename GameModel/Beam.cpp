@@ -99,22 +99,26 @@ bool Beam::Tick(double dT) {
 }
 
 BeamSegment::BeamSegment(const Collision::Ray2D& beamRay, float beamRadius, int beamDmgPerSec, LevelPiece* ignorePiece) :
-timeSinceFired(0.0), ray(beamRay), radius(beamRadius), collidingPiece(NULL), endT(0.0f),
+timeSinceFired(0.0), ray(beamRay), collidingPiece(NULL), endT(0.0f),
 ignorePiece(ignorePiece), damagePerSecond(beamDmgPerSec) {
+
+	this->SetRadius(beamRadius);
+}
+void BeamSegment::SetRadius(float radius) { 
+	this->radius = radius;  
 
 	std::vector<double> animationTimes;
 	animationTimes.push_back(0.0);
 	animationTimes.push_back(0.3);
 	animationTimes.push_back(0.6);
 	std::vector<float> animationRadii;
-	animationRadii.push_back(beamRadius);
-	animationRadii.push_back(0.9f * beamRadius);
-	animationRadii.push_back(beamRadius);
+	animationRadii.push_back(this->radius);
+	animationRadii.push_back(0.9f * this->radius);
+	animationRadii.push_back(this->radius);
 
 	radiusPulseAnim = AnimationMultiLerp<float>(&this->radius);
 	radiusPulseAnim.SetLerp(animationTimes, animationRadii);
 	radiusPulseAnim.SetRepeat(true);
-
 }
 
 BeamSegment::~BeamSegment() {
@@ -180,7 +184,8 @@ const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND				  = 150;	// Damage per seco
 																																	// NOTE: a typical block has about 100 life
 
 PaddleLaserBeam::PaddleLaserBeam(PlayerPaddle* paddle, const GameLevel* level) : 
-Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), paddle(paddle) {
+Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), 
+paddle(paddle), reInitStickyPaddle(true) {
 	assert((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle);
 	this->UpdateCollisions(level);
 }
@@ -210,13 +215,52 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 	this->baseDamagePerSecond				 = ((2.0f * this->paddle->GetHalfFlatTopWidth()) / PlayerPaddle::PADDLE_WIDTH_FLAT_TOP) * PaddleLaserBeam::BASE_DAMAGE_PER_SECOND;
 	
 	// Create the first beam segment, emitting from the paddle
-	BeamSegment* firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, BEAM_UNIT_DIR), INITIAL_BEAM_RADIUS, this->baseDamagePerSecond, NULL);
+	BeamSegment* firstBeamSeg = NULL;
 
 	// Now begin the possible recursion of adding more and more beams based on whether the first
 	// beam hits a prism block (and if its children also do)
 	LevelPiece* lastCollisionPiece = NULL;
 	std::list<BeamSegment*> newBeamSegs;
-	newBeamSegs.push_back(firstBeamSeg);
+
+	// In the case where there's a sticky paddle the beam refracts through the sticky paddle a bit
+	if ((this->paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+		static int rotateBeamCenterBeamAmt;
+		static int rotateBeamRefract1Amt;
+		static int rotateBeamRefract2Amt;
+		
+		static float centerBeamRadiusAmt;
+		static float beamRefract1RadiusAmt;
+		static float beamRefract2RadiusAmt;
+
+		if (this->reInitStickyPaddle) {
+			rotateBeamCenterBeamAmt = static_cast<int>(Randomizer::GetInstance()->RandomNumNegOneToOne() * 20);
+			rotateBeamRefract1Amt   = rotateBeamCenterBeamAmt + 10 + static_cast<int>(Randomizer::GetInstance()->RandomNumZeroToOne() * 40);
+			rotateBeamRefract2Amt   = rotateBeamCenterBeamAmt - 10 - static_cast<int>(Randomizer::GetInstance()->RandomNumZeroToOne() * 40);
+			
+			centerBeamRadiusAmt   = (0.5f + 0.25f * Randomizer::GetInstance()->RandomNumZeroToOne()) ;
+			beamRefract1RadiusAmt = (0.2f + 0.4f * Randomizer::GetInstance()->RandomNumZeroToOne());
+			beamRefract2RadiusAmt = (0.2f + 0.4f * Randomizer::GetInstance()->RandomNumZeroToOne());
+
+			this->reInitStickyPaddle = false;
+		}
+
+		firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, Rotate(rotateBeamCenterBeamAmt, BEAM_UNIT_DIR)), centerBeamRadiusAmt * INITIAL_BEAM_RADIUS, 
+																	 centerBeamRadiusAmt * this->baseDamagePerSecond, NULL);
+
+		Vector2D adjustBeamOriginAmt(paddle->GetHalfFlatTopWidth()*0.5, 0.0f);
+		BeamSegment* refractSeg1 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN - adjustBeamOriginAmt, Rotate(rotateBeamRefract1Amt, BEAM_UNIT_DIR)), 
+																						   beamRefract1RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract1RadiusAmt * this->baseDamagePerSecond, NULL);
+		newBeamSegs.push_back(refractSeg1);
+		BeamSegment* refractSeg2 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN + adjustBeamOriginAmt, Rotate(rotateBeamRefract2Amt, BEAM_UNIT_DIR)), 
+																							 beamRefract2RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract2RadiusAmt * this->baseDamagePerSecond, NULL);
+		newBeamSegs.push_back(refractSeg2);
+	}
+	else {
+		firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, BEAM_UNIT_DIR), INITIAL_BEAM_RADIUS, this->baseDamagePerSecond, NULL);
+		this->reInitStickyPaddle = true;
+	}
+
+	newBeamSegs.push_front(firstBeamSeg);
 
 	// Keep track of the pieces collided with to watch out for bad loops (e.g., infinite loops of beams through prisms)
 	std::set<const LevelPiece*> piecesCollidedWith;
