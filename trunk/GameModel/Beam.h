@@ -83,7 +83,9 @@ public:
 
 	std::list<BeamSegment*>& GetBeamParts() { return this->beamParts; }
 	const std::list<BeamSegment*>& GetBeamParts() const { return this->beamParts; }
-	
+
+	virtual int GetNumBaseBeamSegments() const = 0;
+
 	void DebugDraw() const;
 
 protected:
@@ -112,6 +114,7 @@ public:
 	~PaddleLaserBeam();
 	
 	void UpdateCollisions(const GameLevel* level);
+	int GetNumBaseBeamSegments() const;
 
 private:
 	static const int BASE_DAMAGE_PER_SECOND;

@@ -18,7 +18,7 @@ class CgFxPostRefract;
 class CgFxVolumetricEffect;
 class ESPEmitter;
 class LivesLeftHUD;
-class CrosshairHUD;
+class CrosshairLaserHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
 
@@ -43,7 +43,7 @@ private:
 	GameSoundAssets* soundAssets;	// All the sound assets used throughout the game
 
 	LivesLeftHUD* lifeHUD;
-	CrosshairHUD* crosshairHUD;
+	CrosshairLaserHUD* crosshairHUD;
 
 	// Level-related meshes
 	std::map<const GameLevel*, LevelMesh*> loadedLevelMeshes;
@@ -92,7 +92,7 @@ public:
 
 	void DrawBeams(double dT, const GameModel& gameModel, const Camera& camera);
 
-	void DrawActiveItemHUDElements(const GameModel& gameModel, int displayWidth, int displayHeight);
+	void DrawActiveItemHUDElements(double dT, const GameModel& gameModel, int displayWidth, int displayHeight);
 
 #ifdef _DEBUG
 	void DebugDrawLights() const { this->lightAssets->DebugDrawLights(); };

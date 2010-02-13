@@ -20,6 +20,9 @@ currAnimationState(BallDeathState::SpiralingToDeath) {
 	this->initialBallVelocityDir = this->lastBallToBeAlive->GetDirection();
 	this->initialBallVelocityMag = this->lastBallToBeAlive->GetSpeed();
 
+	// Disable any effects currently on the ball...
+	this->lastBallToBeAlive->RemoveAllBallTypes();
+
 	// Completely pause the paddle since the ball death is a non-controllable happening
 	this->gameModel->SetPause(GameModel::PausePaddle);
 	// Move the camera to follow the ball as it dies

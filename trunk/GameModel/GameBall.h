@@ -168,6 +168,9 @@ public:
 	int GetBallType() const {
 		return this->currType;
 	}
+	void RemoveAllBallTypes() {
+		this->currType = GameBall::NormalBall;
+	}
 	void AddBallType(const BallType type) {
 		this->currType = this->currType | type;
 	}

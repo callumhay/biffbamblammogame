@@ -7,7 +7,7 @@
 #include "GameFontAssetsManager.h"
 #include "LoadingScreen.h"
 #include "LivesLeftHUD.h"
-#include "CrosshairHUD.h"
+#include "CrosshairLaserHUD.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
 
@@ -78,7 +78,7 @@ ghostBallEffect(NULL)
 
 	// Initialize any HUD elements
 	this->lifeHUD				= new LivesLeftHUD();
-	this->crosshairHUD	= new CrosshairHUD();
+	this->crosshairHUD	= new CrosshairLaserHUD();
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();
@@ -504,6 +504,9 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 
 		const std::list<BeamSegment*>& beamSegments = currentBeam->GetBeamParts();
 		std::list<BeamSegment*>::const_iterator segmentIter = beamSegments.begin();
+		
+		int segCounter = 0;
+		const int NUM_BASE_SEGMENTS = currentBeam->GetNumBaseBeamSegments();
 
 		for (; segmentIter != beamSegments.end(); ++segmentIter) {
 			const BeamSegment* currentSeg = *segmentIter;
@@ -518,7 +521,7 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 
 			// In the case of a paddle laser beam and we're in paddle camera mode, don't
 			// draw the first beam segment... We use a HUD element to do this instead
-			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segmentIter == beamSegments.begin()) {
+			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segCounter < NUM_BASE_SEGMENTS) {
 				float beamAlpha = paddle->GetColour().A();
 				glColor4f(0.75f, 1.0f, 1.0f, std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
 			}
@@ -572,7 +575,7 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 			beamDepthVec = Vector3D(0, 0, QUARTER_PADDLE_DEPTH);
 
 			Colour beamColour = GameViewConstants::GetInstance()->LASER_BEAM_COLOUR;
-			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segmentIter == beamSegments.begin()) {
+			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segCounter < NUM_BASE_SEGMENTS) {
 				float beamAlpha = paddle->GetColour().A();
 				glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
 			}
@@ -619,6 +622,8 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 			glVertex3f(temp[0], temp[1], temp[2]);
 			temp = beamSegEnd - beamRightVec + beamDepthVec;
 			glVertex3f(temp[0], temp[1], temp[2]);
+
+			segCounter++;
 		}
 	}
 	glEnd();
@@ -648,12 +653,15 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 /**
  * Draw HUD elements for any of the active items when applicable.
  */
-void GameAssets::DrawActiveItemHUDElements(const GameModel& gameModel, int displayWidth, int displayHeight) {
-	
-	// If the laser paddle is active and paddle camera is also active then we draw a crosshair overlay
+void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel, int displayWidth, int displayHeight) {
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle && paddle->GetIsPaddleCameraOn()) {
-		this->crosshairHUD->Draw(displayWidth, displayHeight, (1.0 - paddle->GetColour().A()));
+	assert(paddle != NULL);
+
+	// When in paddle camera mode, the user will see the effects currently in the paddle from a first-person
+	// perspective, we need to make these a bit more presentable...
+	if (paddle->GetIsPaddleCameraOn()) {
+		this->crosshairHUD->Tick(dT);
+		this->crosshairHUD->Draw(paddle, displayWidth, displayHeight, (1.0 - paddle->GetColour().A()));
 	}
 }
 

@@ -152,7 +152,8 @@ public:
 	
 	const std::string TEXTURE_INKSPLATTER;
 	const std::string TEXTURE_BALLTARGET;
-	const std::string TEXTURE_CROSSHAIR;
+	const std::string TEXTURE_BULLET_CROSSHAIR;
+	const std::string TEXTURE_BEAM_CROSSHAIR;
 
 	const std::string TEXTURE_BALL_SAFETY_NET;
 
