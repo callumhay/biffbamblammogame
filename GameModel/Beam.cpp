@@ -332,3 +332,13 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 
 	
 }
+
+/**
+ * Get the number of base beam segments (i.e., initial beams without any parents) for this beam.
+ */
+int PaddleLaserBeam::GetNumBaseBeamSegments() const {
+	if ((this->paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+		return 3;
+	}
+	return 1;
+}

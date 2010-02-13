@@ -1842,12 +1842,12 @@ ESPPointEmitter* GameESPAssets::CreateBeamFallingBitEffect() {
 	beamFallingBitEffect->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
 	beamFallingBitEffect->SetInitialSpd(ESPInterval(2.0f, 3.5f));
 	beamFallingBitEffect->SetParticleLife(ESPInterval(0.8f, 1.0f));
-	beamFallingBitEffect->SetEmitAngleInDegrees(90);
+	beamFallingBitEffect->SetEmitAngleInDegrees(80);
 	beamFallingBitEffect->SetAsPointSpriteEmitter(true);
 	beamFallingBitEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	beamFallingBitEffect->SetEmitPosition(Point3D(0, 0, 0));
 	beamFallingBitEffect->SetParticleColour(ESPInterval(0.9f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
-	beamFallingBitEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	//beamFallingBitEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	beamFallingBitEffect->AddEffector(&this->particleMediumShrink);
 	beamFallingBitEffect->AddEffector(&this->gravity);
 	bool result = beamFallingBitEffect->SetParticles(25, this->circleGradientTex);

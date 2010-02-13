@@ -535,7 +535,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CrosshairHUD.h"
+					RelativePath=".\GameView\CrosshairLaserHUD.h"
 					>
 				</File>
 				<File
@@ -651,7 +651,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CrosshairHUD.cpp"
+					RelativePath=".\GameView\CrosshairLaserHUD.cpp"
 					>
 				</File>
 				<File

@@ -273,7 +273,7 @@ void InGameDisplayState::DrawGameHUD(double dT) {
 	this->display->GetAssets()->DrawTimers(dT, camera);
 
 	// Draw any HUD special elements based on currently active items, etc.
-	this->display->GetAssets()->DrawActiveItemHUDElements(*gameModel, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	this->display->GetAssets()->DrawActiveItemHUDElements(dT, *gameModel, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 	debug_opengl_state();
 }
