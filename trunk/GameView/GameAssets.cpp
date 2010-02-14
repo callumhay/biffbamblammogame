@@ -359,6 +359,19 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	// Draw the paddle
 	this->worldAssets->DrawPaddle(p, camera, paddleKeyLight, paddleFillLight, ballLight);
 
+	if ((p.GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
+		if (p.GetIsLaserBeamFiring()) {
+			// Draw paddle blasty stuff when firing
+			if (!p.GetIsPaddleCameraOn()) {
+				this->espAssets->DrawPaddleLaserBeamFiringEffects(dT, camera, p);
+			}
+		}
+		else {
+			// Draw glowy beam origin when beam is able to fire but not actually firing yet
+			this->espAssets->DrawPaddleLaserBeamBeforeFiringEffects(dT, camera, p);
+		}
+	}
+
 	// In the case of a laser bullet paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
 	if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
@@ -523,6 +536,9 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 			// draw the first beam segment... We use a HUD element to do this instead
 			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segCounter < NUM_BASE_SEGMENTS) {
 				float beamAlpha = paddle->GetColour().A();
+				if (beamAlpha < EPSILON) {
+					continue;
+				}
 				glColor4f(0.75f, 1.0f, 1.0f, std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
 			}
 			else {
@@ -631,21 +647,6 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 
 	glPolygonMode(GL_FRONT, GL_FILL);
 	glPopAttrib();
-
-	// Draw any effects coming out of the paddle when necessary
-	Point2D paddleCenter = paddle->GetCenterPosition();
-	float paddleScaleFactor = paddle->GetPaddleScaleFactor();
-	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
-
-	glPushMatrix();
-	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !paddle->GetIsLaserBeamFiring()) {
-		// Draw glowy beam origin when beam is able to fire but not actually firing yet
-		this->espAssets->DrawPaddleLaserBeamEffects(dT, camera, *paddle);
-	}
-	glPopMatrix();
 
 	debug_opengl_state();
 }

@@ -75,6 +75,8 @@ private:
 	ESPParticleRotateEffector smokeRotatorCCW;
 	ESPParticleRotateEffector loopRotateEffectorCW;
 
+	ESPParticleColourEffector beamBlastColourEffector;
+
 	// Various textures used as particles for various effects
 	std::vector<Texture2D*> bangTextures;
 	std::vector<Texture2D*> splatTextures;
@@ -119,7 +121,7 @@ private:
 	ESPVolumeEmitter* paddleBeamGlowSparks;
 	ESPVolumeEmitter* paddleBeamOriginUp;
 	ESPPointEmitter* paddleBeamBlastBits;
-
+	
 	std::vector<ESPPointEmitter*> beamEndEmitters;
 	std::vector<ESPPointEmitter*> beamBlockOnlyEndEmitters;
 	std::vector<ESPPointEmitter*> beamEndFallingBitsEmitters;
@@ -213,8 +215,9 @@ public:
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 
-	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);	
-	void DrawPaddleLaserBeamEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+	void DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+	void DrawPaddleLaserBeamFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 
 	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };
