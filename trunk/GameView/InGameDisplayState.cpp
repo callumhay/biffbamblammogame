@@ -1,4 +1,5 @@
 #include "InGameDisplayState.h"
+#include "InGameMenuState.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
 #include "GameViewConstants.h"
@@ -63,6 +64,13 @@ void InGameDisplayState::RenderFrame(double dT) {
 	
 	// Draw the HUD
 	this->DrawGameHUD(dT);
+}
+
+void InGameDisplayState::KeyPressed(SDLKey key) {
+	// We only interpret one key press - when the user wants to access the in-game menu...
+	if (key == SDLK_ESCAPE) {
+		this->display->SetCurrentState(new InGameMenuState(this->display));
+	}
 }
 
 // Private helper functions ************************************************************

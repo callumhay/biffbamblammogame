@@ -48,14 +48,16 @@ const Colour GameMenu::RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS] = {
 };
 
 GameMenu::GameMenu() : topLeftCorner(Point2D(0,0)), menuItemPadding(0.0f),
-selectedMenuItemIndex(-1), isSelectedItemActivated(false), menuWidth(0.0f), menuHeight(0.0f)  {
+selectedMenuItemIndex(-1), isSelectedItemActivated(false), menuWidth(0.0f), menuHeight(0.0f),
+alignment(GameMenu::LeftJustified)  {
 	
 	this->bgColour = Colour(0.45098f, 0.76078f, 0.98431f);	// Maya Blue
 	this->SetupAnimations();
 }
 
 GameMenu::GameMenu(const Point2D& topLeftCorner) : topLeftCorner(topLeftCorner), menuItemPadding(0.0f),
-selectedMenuItemIndex(-1), isSelectedItemActivated(false), menuWidth(0.0f), menuHeight(0.0f)  {
+selectedMenuItemIndex(-1), isSelectedItemActivated(false), menuWidth(0.0f), menuHeight(0.0f),
+alignment(GameMenu::LeftJustified) {
 	
 	this->bgColour = Colour(0.45098f, 0.76078f, 0.98431f);	// Maya Blue
 	this->SetupAnimations();
@@ -224,11 +226,44 @@ void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const G
 }
 
 /**
+ * Sets this menu to be centered on the screen given the screen width and height.
+ */
+void GameMenu::SetCenteredOnScreen(int screenWidth, int screenHeight) {
+	assert(screenWidth > 0);
+	assert(screenHeight > 0);
+
+	// Grab the largest possible item
+	float maxHalfWidth = 0.0f;
+	float totalHeight  = 0.0f;
+	for (size_t i = 0; i < this->menuItems.size(); i++) {
+		GameMenuItem* currItem = this->menuItems[i];
+		maxHalfWidth = std::max<float>(currItem->GetWidth(), maxHalfWidth);
+		totalHeight  += currItem->GetHeight() + this->GetMenuItemPadding();
+	}
+	maxHalfWidth *= 0.5f;
+
+	this->topLeftCorner[0] = (screenWidth * 0.5f) - maxHalfWidth;
+	this->topLeftCorner[1] = (screenHeight + totalHeight) * 0.5f;
+}
+
+/**
  * Draw this game menu in its current state.
  */
 void GameMenu::Draw(double dT, int windowWidth, int windowHeight) {
 	Point2D currPos = this->topLeftCorner;
 	GameMenu* subMenu = NULL;
+
+	// In the case of a center alignment we need to know what menu item is the largest
+	// so that we can draw everything centered to it
+	float maxHalfWidth = 0.0f;
+	if (this->alignment == GameMenu::CenterJustified) {
+		for (size_t i = 0; i < this->menuItems.size(); i++) {
+			GameMenuItem* currItem = this->menuItems[i];
+			maxHalfWidth = std::max<float>(currItem->GetWidth(), maxHalfWidth);
+		}
+		maxHalfWidth *= 0.5f;
+		assert(maxHalfWidth > 0.0f);
+	}
 
 	// Draw the background of the menu
 	this->DrawMenuBackground(dT);
@@ -236,6 +271,17 @@ void GameMenu::Draw(double dT, int windowWidth, int windowHeight) {
 	// Draw the menu items
 	for (size_t i = 0; i < this->menuItems.size(); i++) {
 		GameMenuItem* currItem = this->menuItems[i];
+		
+		switch (this->alignment) {
+			case GameMenu::LeftJustified:
+				break;
+			case GameMenu::CenterJustified:
+				currPos = Point2D(this->topLeftCorner[0] + maxHalfWidth - (0.5f * currItem->GetWidth()), currPos[1]);
+				break;
+			default:
+				assert(false);
+				break;
+		}
 		
 		// Check to see if we are iterating on the selected/highlighted menu item
 		if (i == this->selectedMenuItemIndex) {

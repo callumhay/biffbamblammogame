@@ -35,14 +35,11 @@ private:
 
 public:
 	InGameDisplayState(GameDisplay* display);
-	virtual ~InGameDisplayState();
+	~InGameDisplayState();
 
-	virtual void RenderFrame(double dT);
-	virtual void KeyPressed(SDLKey key) {
-		// Do nothing, key presses are interpretted completely by the game model,
-		// while the game is being played.
-	};
-	virtual void DisplaySizeChanged(int width, int height);
+	void RenderFrame(double dT);
+	void KeyPressed(SDLKey key);
+	void DisplaySizeChanged(int width, int height);
 
 };
 
