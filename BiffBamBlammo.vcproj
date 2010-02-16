@@ -611,6 +611,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\InGameMenuState.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\LaserPaddleGun.h"
 					>
 				</File>
@@ -720,6 +724,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\InGameDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\InGameMenuState.cpp"
 					>
 				</File>
 				<File

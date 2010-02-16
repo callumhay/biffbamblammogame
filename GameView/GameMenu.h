@@ -68,58 +68,9 @@ public:
  * user.
  */
 class GameMenu {
-private:
-	void SetupAnimations();
-
-protected:
-	static const float UP_DOWN_ARROW_HEIGHT;
-	static const float UP_DOWN_ARROW_TOP_PADDING;
-	static const float UP_DOWN_ARROW_BOTTOM_PADDING;
-
-	std::list<GameMenuEventHandler*> eventHandlers;	// Event handlers for this game menu
-	
-	float menuItemPadding;
-	float menuWidth, menuHeight;
-	int selectedMenuItemIndex;			// The currently selected menu item
-	bool isSelectedItemActivated;		// Whether the currently selected menu item has been activated
-
-	Point2D topLeftCorner;
-	std::vector<GameMenuItem*> menuItems;		// The set of items in the menu
-
-	Colour idleColour;					// Colour of menu items when they are left alone
-	Colour highlightColour;			// Colour of menu items when they are highlighted
-	Colour activateColour;			// Colour of menu items when they are selected
-	Colour greyedOutColour;			// Colour when item is not in the current menu level
-
-	Colour bgColour;	// Colour assigned to the background for this menu
-
-	AnimationMultiLerp<float> selArrowScaleAnim;
-	AnimationMultiLerp<float> selArrowFadeAnim;
-
-	virtual float GetMenuItemPadding() const;
-	virtual void DrawMenuBackground(double dT);
-	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem, int windowWidth, int windowHeight) { 
-		menuItem.Draw(dT, pos, windowWidth, windowHeight); 
-	}
-	virtual void DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem);
-	
-	// Tell the menu that the user has moved their selection up 1 item
-	void UpAction() {
-		if (this->menuItems.size() == 0) {
-			return;
-		}
-		this->SetSelectedMenuItem((this->selectedMenuItemIndex + this->menuItems.size() - 1) % this->menuItems.size());
-	}
-
-	// Tell the menu that the user has moved their selection down 1 item
-	void DownAction() {
-		if (this->menuItems.size() == 0) {
-			return;
-		}
-		this->SetSelectedMenuItem((this->selectedMenuItemIndex + 1) % this->menuItems.size());
-	}
-
 public:
+	enum MenuAlignment { LeftJustified, CenterJustified };
+
 	static const float BACKGROUND_PADDING;
 	static const int NUM_RAND_COLOURS = 20;
 	static const Colour RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS];
@@ -129,6 +80,10 @@ public:
 	virtual ~GameMenu();
 
 	static void DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight);
+
+	void SetAlignment(MenuAlignment align) {
+		this->alignment = align;
+	}
 
 	void AddEventHandler(GameMenuEventHandler* eventHandler) {
 		assert(eventHandler != NULL);
@@ -188,6 +143,7 @@ public:
 	void SetTopLeftCorner(const Point2D& p) {
 		this->topLeftCorner = p;
 	}
+	void SetCenteredOnScreen(int screenWidth, int screenHeight);
 
 	void Draw(double dT, int windowWidth, int windowHeight);
 	void DebugDraw();
@@ -217,6 +173,59 @@ public:
 			(*iter)->GameMenuItemVerifiedEvent(this->selectedMenuItemIndex);
 		}
 	}
+
+protected:
+	static const float UP_DOWN_ARROW_HEIGHT;
+	static const float UP_DOWN_ARROW_TOP_PADDING;
+	static const float UP_DOWN_ARROW_BOTTOM_PADDING;
+
+	std::list<GameMenuEventHandler*> eventHandlers;	// Event handlers for this game menu
+	
+	float menuItemPadding;
+	float menuWidth, menuHeight;
+	int selectedMenuItemIndex;			// The currently selected menu item
+	bool isSelectedItemActivated;		// Whether the currently selected menu item has been activated
+
+	Point2D topLeftCorner;
+	std::vector<GameMenuItem*> menuItems;		// The set of items in the menu
+
+	Colour idleColour;					// Colour of menu items when they are left alone
+	Colour highlightColour;			// Colour of menu items when they are highlighted
+	Colour activateColour;			// Colour of menu items when they are selected
+	Colour greyedOutColour;			// Colour when item is not in the current menu level
+
+	Colour bgColour;	// Colour assigned to the background for this menu
+
+	AnimationMultiLerp<float> selArrowScaleAnim;
+	AnimationMultiLerp<float> selArrowFadeAnim;
+
+	MenuAlignment alignment;
+
+	virtual float GetMenuItemPadding() const;
+	virtual void DrawMenuBackground(double dT);
+	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem, int windowWidth, int windowHeight) { 
+		menuItem.Draw(dT, pos, windowWidth, windowHeight); 
+	}
+	virtual void DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem);
+	
+	// Tell the menu that the user has moved their selection up 1 item
+	void UpAction() {
+		if (this->menuItems.size() == 0) {
+			return;
+		}
+		this->SetSelectedMenuItem((this->selectedMenuItemIndex + this->menuItems.size() - 1) % this->menuItems.size());
+	}
+
+	// Tell the menu that the user has moved their selection down 1 item
+	void DownAction() {
+		if (this->menuItems.size() == 0) {
+			return;
+		}
+		this->SetSelectedMenuItem((this->selectedMenuItemIndex + 1) % this->menuItems.size());
+	}
+
+private:
+	void SetupAnimations();
 };
 
 /**
