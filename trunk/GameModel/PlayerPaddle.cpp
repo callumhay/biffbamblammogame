@@ -47,23 +47,34 @@ PlayerPaddle::PlayerPaddle() :
 	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
 	attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), upVector(0, 1), isFiringBeam(false) {
 
-	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
-	this->colourAnimation.SetRepeat(false);
-
+	this->SetupAnimations();
 	this->SetDimensions(PlayerPaddle::NormalSize);
 }
 
 PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : 
 speed(DEFAULT_SPEED), distTemp(0.0f), avgVel(0.0f), ticksSinceAvg(0), 
 hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), upVector(0, 1), isFiringBeam(false) {
-
-	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
-	this->colourAnimation.SetRepeat(false);
-
+	this->SetupAnimations();
 	this->SetMinMaxLevelBound(minBound, maxBound);
 }
 
 PlayerPaddle::~PlayerPaddle() {
+}
+
+/**
+ * Private helper/initializer function for the paddle animations.
+ */
+void PlayerPaddle::SetupAnimations() {
+	// The colour animation is used to change the colour or fade the paddle during 
+	// certain animation sequences
+	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
+	this->colourAnimation.SetRepeat(false);
+	
+	// The beam force downwards animation forces the paddle to move off the level/downwards
+	// the amount of units equal to its current interpolated value when the paddle is firing its
+	// laser beam power-up
+	this->beamForceDownAnimation.SetInterpolantValue(0.0f);
+	this->beamForceDownAnimation.SetRepeat(false);
 }
 
 /**
@@ -237,6 +248,12 @@ void PlayerPaddle::MoveAttachedBallToNewBounds() {
 }
 
 void PlayerPaddle::Tick(double seconds) {
+	
+	Point2D defaultCenterPos = this->GetDefaultCenterPosition();
+	// If the beam is firing its laser then we want to animate it being pushed down
+	this->centerPos[1] = defaultCenterPos[1] - this->beamForceDownAnimation.GetInterpolantValue();
+	this->beamForceDownAnimation.Tick(seconds);
+
 	// Check to see if we need to increment seconds since the previous laser shot
 	// This makes sure the user can't consecutively fire lasers like some sort of mad person
 	if (this->timeSinceLastLaserBlast < PADDLE_LASER_BULLET_DELAY) {
@@ -336,6 +353,29 @@ void PlayerPaddle::Animate(double seconds) {
 	this->colourAnimation.Tick(seconds);
 }
 
+void PlayerPaddle::SetIsLaserBeamFiring(bool isFiring) {
+	if (isFiring) {
+
+		// Start up the animation that pushes the paddle down (as if reacting to the sheer
+		// force of the beam pressing down on it)
+		std::vector<double> times;
+		times.reserve(2);
+		times.push_back(0.0f);
+		times.push_back(0.05f);
+
+		std::vector<float> values;
+		values.reserve(2);
+		values.push_back(0.0f);
+		values.push_back(PlayerPaddle::PADDLE_HEIGHT_TOTAL);
+
+		this->beamForceDownAnimation.SetLerp(times, values);
+	}
+	else {
+		this->beamForceDownAnimation.SetLerp(0.1, 0.0f);
+	}
+	this->isFiringBeam = isFiring;
+}
+
 /**
  * This will fire any weapons or abilities that paddle currently has - if none
  * exist then this function does nothing.
@@ -353,9 +393,6 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 	if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !this->isFiringBeam) {
 		// We add the beam to the game model, the rest will be taken care of by the beam and model
 		gameModel->AddBeam(Beam::PaddleLaserBeam);
-		// Beam only fires once
-		this->isFiringBeam = true;
-		
 	}
 	// Check for laser bullet paddle (shoots little laser bullets from the paddle)
 	else if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {

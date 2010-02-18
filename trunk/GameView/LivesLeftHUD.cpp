@@ -89,6 +89,17 @@ void LivesLeftHUD::InitIdleColourInterpolations() {
 }
 
 /**
+ * Reinitialize the HUD to have no animations and zero lives.
+ */
+void LivesLeftHUD::Reinitialize() {
+	this->creationAlphaAnimations.clear();
+	this->creationShiftAnimations.clear();
+	this->destructionColourAnimations.clear();
+	this->destructionFallAnimations.clear();
+	this->currNumLivesLeft = 0;
+}
+
+/**
  * Call this when a life or set of lives are lost in the game - this will
  * cause the HUD to update itself appropriately.
  */

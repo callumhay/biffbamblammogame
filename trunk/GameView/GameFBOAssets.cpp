@@ -233,5 +233,11 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 		}
 	}
 
+	assert(inputFBO != NULL);
+	assert(outputFBO != NULL);
+	assert(outputFBO != inputFBO);
 	inputFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+
+	this->finalFSEffectFBO = inputFBO;
+	this->tempFBO = outputFBO;
 }

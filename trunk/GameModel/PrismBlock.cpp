@@ -143,7 +143,7 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 	if (fabs(OLD_PROJECTILE_DELTA[0]) <= MIDDLE_HALF_INTERVAL_X) {
 
 		// Ray is almost in the very center (reflect in 3 directions with smaller projectiles in each)
-		if (OLD_PROJECTILE_DELTA[1] < 0.0f) {
+		if (OLD_PROJECTILE_DELTA[1] <= EPSILON) {
 
 			// Colliding with the lower-center - we only do special refraction stuff if the angle is
 			// almost perfectly perpendicular to the bottom
@@ -171,7 +171,7 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 			}
 		}
 	}
-	else if (OLD_PROJECTILE_DELTA[0] < 0.0f){
+	else if (OLD_PROJECTILE_DELTA[0] <= EPSILON){
 		// Ray is on the left side of the center 
 
 		if (fabs(OLD_PROJECTILE_DELTA[1]) <= MIDDLE_HALF_INTERVAL_Y) {
@@ -188,13 +188,13 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 				defaultRay.SetOrigin(this->GetCenter());
 			}
 		}
-		else if (OLD_PROJECTILE_DELTA[1] < 0.0f) {
+		else if (OLD_PROJECTILE_DELTA[1] <= EPSILON) {
 			// Ray is colliding with the lower-left boundry...
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
 			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
-			if (angleBetweenNormalAndLaser > REFLECTION_REFRACTION_ANGLE) {
+			if (angleBetweenNormalAndLaser >= REFLECTION_REFRACTION_ANGLE) {
 				// Reflect the laser in the normal
 				Vector2D newVelDir = Reflect(impactDir, CURRENT_NORMAL);
 				newVelDir.Normalize();
@@ -207,7 +207,7 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
 			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
-			if (angleBetweenNormalAndLaser > REFLECTION_REFRACTION_ANGLE) {
+			if (angleBetweenNormalAndLaser >= REFLECTION_REFRACTION_ANGLE) {
 				// Reflect the ray in the normal
 				Vector2D newVelDir = Reflect(impactDir, CURRENT_NORMAL);
 				newVelDir.Normalize();
@@ -232,13 +232,13 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 				defaultRay.SetOrigin(this->GetCenter());
 			}
 		}
-		else if (OLD_PROJECTILE_DELTA[1] < 0.0f) {
+		else if (OLD_PROJECTILE_DELTA[1] <= EPSILON) {
 			// Ray is colliding with the lower-right boundry...
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
 			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
-			if (angleBetweenNormalAndLaser > REFLECTION_REFRACTION_ANGLE) {
+			if (angleBetweenNormalAndLaser >= REFLECTION_REFRACTION_ANGLE) {
 				// Reflect the ray in the normal
 				Vector2D newVelDir = Reflect(impactDir, CURRENT_NORMAL);
 				newVelDir.Normalize();
@@ -251,7 +251,7 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
 			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
-			if (angleBetweenNormalAndLaser > REFLECTION_REFRACTION_ANGLE) {
+			if (angleBetweenNormalAndLaser >= REFLECTION_REFRACTION_ANGLE) {
 				// Reflect the ray in the normal
 				Vector2D newVelDir = Reflect(impactDir, CURRENT_NORMAL);
 				newVelDir.Normalize();

@@ -70,8 +70,9 @@ private:
 	
 	Vector2D upVector;						// The unit vector pointing upwards for the paddle
 
-	ColourRGBA colour;													// The colour multiply of the paddle, including its visibility/alpha
-	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
+	ColourRGBA colour;																// The colour multiply of the paddle, including its visibility/alpha
+	AnimationLerp<ColourRGBA> colourAnimation;				// Animation associated with the colour
+	AnimationMultiLerp<float> beamForceDownAnimation;		// Animation for when the paddle is being pushed down by the laser beam (away from the level)
 	
 	BoundingLines bounds;						// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
 	
@@ -82,6 +83,8 @@ private:
 
 	bool isPaddleCamActive;	// Whether or not the camera is inside the paddle
 	bool isFiringBeam;			// Whether this paddle is firing the laser beam
+
+	void SetupAnimations();
 
 	void SetDimensions(float newScaleFactor);
 	void SetDimensions(PlayerPaddle::PaddleSize size);
@@ -104,7 +107,7 @@ public:
 		this->laserBeamTimer = 0.0;
 		this->currSize = PlayerPaddle::NormalSize;
 		this->SetDimensions(PlayerPaddle::NormalSize);
-		this->centerPos = Point2D((maxBound + minBound)/2.0f, this->currHalfHeight);
+		this->centerPos = this->GetDefaultCenterPosition();
 		this->currType = PlayerPaddle::NormalPaddle;
 		this->isFiringBeam = false;
 	}
@@ -113,7 +116,10 @@ public:
 	Point2D GetCenterPosition() const {
 		return this->centerPos;
 	}
-	
+	Point2D GetDefaultCenterPosition() const {
+		return Point2D((this->maxBound + this->minBound)/2.0f, this->currHalfHeight);
+	}
+
 	float GetHalfHeight() const {
 		return this->currHalfHeight;
 	}
@@ -232,6 +238,8 @@ public:
 	bool GetIsPaddleCameraOn() const {
 		return this->isPaddleCamActive;
 	}
+
+	void SetIsLaserBeamFiring(bool isFiring);
 	bool GetIsLaserBeamFiring() const {
 		return this->isFiringBeam;
 	}

@@ -35,8 +35,11 @@ void InGameMenuState::RenderFrame(double dT) {
 			this->display->SetCurrentState(new InGameDisplayState(this->display));
 			return;
 		case InGameMenuState::ReturnToMainMenu:
+			this->display->GetAssets()->DeactivateMiscEffects();
+			this->display->SetCurrentState(new MainMenuDisplayState(this->display));
 			return;
 		case InGameMenuState::ExitToDesktop:
+			this->display->QuitGame();
 			return;
 		case InGameMenuState::Nothing:
 			break;
@@ -94,8 +97,8 @@ void InGameMenuState::InitTopMenu() {
 																 InGameMenuState::MENU_ITEM_ACTIVE_COLOUR, InGameMenuState::MENU_ITEM_GREYED_COLOUR);
 
 	// Prepare some of the properties of the text labels in the top level menu...
-	const float dropShadowAmtSm = 0.15f;
-	const float dropShadowAmtLg = 0.15f;
+	const float dropShadowAmtSm = 0.10f;
+	const float dropShadowAmtLg = 0.10f;
 	const Colour dropShadowColour = Colour(0.62f, 0.72f, 0.80f);
 
 	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  "Resume");
@@ -128,6 +131,12 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemHighlightedEvent(int item
 void InGameMenuState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {
 	if (itemIndex == this->inGameMenuState->resumeItem) {
 		this->inGameMenuState->nextAction = InGameMenuState::ResumeGame;
+	}
+	else if (itemIndex == this->inGameMenuState->returnToMainItem) {
+		this->inGameMenuState->nextAction = InGameMenuState::ReturnToMainMenu;
+	}
+	else if (itemIndex == this->inGameMenuState->exitToDesktopItem) {
+		this->inGameMenuState->nextAction = InGameMenuState::ExitToDesktop;
 	}
 }
 

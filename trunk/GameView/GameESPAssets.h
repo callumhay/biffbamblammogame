@@ -129,7 +129,6 @@ private:
 
 	CgFxVolumetricEffect ghostBallSmoke;
 	CgFxVolumetricEffect fireEffect;
-	CgFxPostRefract vapourTrailEffect;
 
 	// Initialization functions for effect stuffs
 	void InitESPTextures();
