@@ -28,11 +28,12 @@ CgFxEffectBase::~CgFxEffectBase() {
 	assert(success);
 }
 
-const std::string MaterialProperties::MATERIAL_CELBASIC_TYPE	= "outlinedcel";
-const std::string MaterialProperties::MATERIAL_PHONG_TYPE			= "phong";
-const std::string MaterialProperties::MATERIAL_INKBLOCK_TYPE	= "inkblock";
-const std::string MaterialProperties::MATERIAL_STICKYGOO_TYPE	= "stickygoo";
-const std::string MaterialProperties::MATERIAL_PRISM_TYPE			= "prism";
+const char* MaterialProperties::MATERIAL_CELBASIC_TYPE	= "outlinedcel";
+const char* MaterialProperties::MATERIAL_PHONG_TYPE			= "phong";
+const char* MaterialProperties::MATERIAL_INKBLOCK_TYPE	= "inkblock";
+const char* MaterialProperties::MATERIAL_STICKYGOO_TYPE	= "stickygoo";
+const char* MaterialProperties::MATERIAL_PRISM_TYPE			= "prism";
+const char* MaterialProperties::MATERIAL_PORTAL_TYPE		= "portal";
 
 const std::string MaterialProperties::MATERIAL_GEOM_FG_TYPE = "fg";
 const std::string MaterialProperties::MATERIAL_GEOM_BG_TYPE = "bg";

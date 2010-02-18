@@ -142,7 +142,6 @@ void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
 	if (turnOnBallDeathCam) {
 		// Get rid of all other animations that may be in the queue - 
 		// ball death takes presedence over all other animations
-		this->Reset();
 		animType = GameTransformMgr::ToBallDeathAnimation;	
 	}
 	else {
@@ -151,7 +150,7 @@ void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
 
 	// Add the ball cam transform to the queue
 	TransformAnimation transformAnim(animType);
-	this->animationQueue.push_back(transformAnim);
+	this->animationQueue.push_front(transformAnim);
 }
 
 /**

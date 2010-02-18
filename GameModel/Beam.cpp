@@ -179,7 +179,7 @@ bool BeamSegment::Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg
 	return true;
 }
 
-const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS	= 5000; // TODO: fix this to be 5 - 8 seconds
+const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS	= 10;		// Length of time for the beam to be firing
 const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND				  = 150;	// Damage per second that the paddle laser does to blocks and stuff
 																																	// NOTE: a typical block has about 100 life
 
@@ -187,12 +187,15 @@ PaddleLaserBeam::PaddleLaserBeam(PlayerPaddle* paddle, const GameLevel* level) :
 Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), 
 paddle(paddle), reInitStickyPaddle(true) {
 	assert((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle);
+	
 	this->UpdateCollisions(level);
+	paddle->SetIsLaserBeamFiring(true);
 }
 
 PaddleLaserBeam::~PaddleLaserBeam() {
 	// Remove the paddle laser beam...
 	this->paddle->RemovePaddleType(PlayerPaddle::LaserBeamPaddle);
+	this->paddle->SetIsLaserBeamFiring(false);
 }
 
 /**

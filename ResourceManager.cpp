@@ -19,7 +19,7 @@
 ResourceManager* ResourceManager::instance = NULL;
 
 ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
-cgContext(NULL), inkBlockMesh(NULL), configOptions(NULL), celShadingTexture(NULL) {
+cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), configOptions(NULL), celShadingTexture(NULL) {
 	// Initialize DevIL and make sure it loaded correctly
 	ilInit();
 	iluInit();
@@ -65,6 +65,10 @@ ResourceManager::~ResourceManager() {
 	if (this->inkBlockMesh != NULL) {
 		delete this->inkBlockMesh;
 		this->inkBlockMesh = NULL;
+	}
+	if (this->portalBlockMesh != NULL) {
+		delete this->portalBlockMesh;
+		this->portalBlockMesh = NULL;
 	}
 
 	// Clean up all loaded effects - technically we shouldn't have to do this since
@@ -175,6 +179,29 @@ Mesh* ResourceManager::GetInkBlockMeshResource() {
 	// Insert the material and its geometry it into the mesh
 	this->inkBlockMesh = new Mesh("Ink Block", inkBlockMatGrps);
 	return this->inkBlockMesh;
+}
+
+/**
+ * Obtain the mesh resource for the portal block, load it into memory if it
+ * hasn't already been created yet.
+ */
+Mesh* ResourceManager::GetPortalBlockMeshResource() {
+	// If we've already loaded it, return it
+	if (this->portalBlockMesh != NULL) {
+		return this->portalBlockMesh;
+	}
+
+	// Otherwise, load it...
+	// Use the typical level block mesh but modify its material
+	Mesh* levelMesh = this->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
+	assert(levelMesh != NULL);
+
+	PolygonGroup* portalBlockPolyGrp = new PolygonGroup(*levelMesh->GetMaterialGroups().begin()->second->GetPolygonGroup());
+
+
+	// TODO
+	return NULL;
+
 }
 
 /**

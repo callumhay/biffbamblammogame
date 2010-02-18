@@ -32,11 +32,12 @@ class FBObj;
 struct MaterialProperties {
 	
 	// Material types
-	static const std::string MATERIAL_CELBASIC_TYPE;
-	static const std::string MATERIAL_PHONG_TYPE;
-	static const std::string MATERIAL_INKBLOCK_TYPE;
-	static const std::string MATERIAL_STICKYGOO_TYPE;
-	static const std::string MATERIAL_PRISM_TYPE;
+	static const char* MATERIAL_CELBASIC_TYPE;
+	static const char* MATERIAL_PHONG_TYPE;
+	static const char* MATERIAL_INKBLOCK_TYPE;
+	static const char* MATERIAL_STICKYGOO_TYPE;
+	static const char* MATERIAL_PRISM_TYPE;
+	static const char* MATERIAL_PORTAL_TYPE;
 
 	// Geometry types
 	static const std::string MATERIAL_GEOM_FG_TYPE;

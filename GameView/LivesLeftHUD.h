@@ -44,6 +44,7 @@ public:
 	LivesLeftHUD();
 	~LivesLeftHUD();
 
+	void Reinitialize();
 	void LivesLost(int numLives);
 	void LivesGained(int numLives);
 	void Draw(double dT, int displayWidth, int displayHeight);

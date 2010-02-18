@@ -190,9 +190,17 @@ public:
 		if (this->currLivesLeft > GameModelConstants::GetInstance()->MAX_LIVES_LEFT) {
 			this->currLivesLeft = GameModelConstants::GetInstance()->MAX_LIVES_LEFT;
 		}
-		else {
+		
+		if (livesLeftBefore != this->currLivesLeft) {
+			// EVENT: Number of lives just changed
 			GameEventManager::Instance()->ActionLivesChanged(livesLeftBefore, this->currLivesLeft);
 		}
+	}
+	void SetInitialNumberOfLives(int lives) {
+		assert(lives <= GameModelConstants::GetInstance()->MAX_LIVES_LEFT);
+		this->currLivesLeft = lives;
+		// EVENT: Number of lives just changed
+		GameEventManager::Instance()->ActionLivesChanged(0, this->currLivesLeft);
 	}
 
 	std::list<GameItem*>& GetLiveItems() {

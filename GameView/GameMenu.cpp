@@ -77,7 +77,7 @@ GameMenu::~GameMenu() {
  * arrows pulsing).
  */
 void GameMenu::SetupAnimations() {
-	const double SEL_ARROW_PULSE_TIME = 0.6;
+	const double SEL_ARROW_PULSE_TIME = 0.45;
 	
 	std::vector<double> timeVals;
 	timeVals.reserve(3);
@@ -184,6 +184,8 @@ void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const G
 	float selArrowPulseScale = this->selArrowScaleAnim.GetInterpolantValue();
 	float selArrowPulseFade	 = this->selArrowFadeAnim.GetInterpolantValue();
 
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -220,6 +222,7 @@ void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const G
 	Camera::PopWindowCoords();
 
 	glDisable(GL_BLEND);
+	glPopAttrib();
 
 	this->selArrowScaleAnim.Tick(dT);
 	this->selArrowFadeAnim.Tick(dT);

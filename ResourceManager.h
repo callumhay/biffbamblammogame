@@ -28,6 +28,7 @@ private:
 	
 	// Independant meshes for specific special-material things in the game
 	Mesh* inkBlockMesh;
+	Mesh* portalBlockMesh;
 
 	std::map<std::string, Texture*> loadedTextures;			// Textures already loaded into the blammo engine
 	Texture* celShadingTexture;													// Cel-shading 1D texture
@@ -71,6 +72,7 @@ public:
 	// Mesh Resource Functions
 	Mesh* GetObjMeshResource(const std::string &filepath);
 	Mesh* GetInkBlockMeshResource();
+	Mesh* GetPortalBlockMeshResource();
 	std::map<std::string, CgFxMaterialEffect*> GetMtlMeshResource(const std::string &filepath);
 	bool ReleaseMeshResource(Mesh* mesh);
 

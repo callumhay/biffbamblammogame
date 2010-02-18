@@ -644,14 +644,6 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->fireEffect.SetFrequency(1.0f);
 	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
 	this->fireEffect.SetMaskTexture(this->circleGradientTex);
-
-	// Vapour trail - for cool noisy refraction
-	this->vapourTrailEffect.SetTechnique(CgFxPostRefract::VAPOUR_TRAIL_TECHNIQUE_NAME);
-	this->vapourTrailEffect.SetIndexOfRefraction(1.33f);
-	this->vapourTrailEffect.SetWarpAmountParam(4.0f);
-	this->vapourTrailEffect.SetScale(0.10f);
-	this->vapourTrailEffect.SetFrequency(2.0f);
-	this->vapourTrailEffect.SetMaskTexture(this->circleGradientTex);
 }
 
 /**

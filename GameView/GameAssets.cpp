@@ -77,8 +77,8 @@ ghostBallEffect(NULL)
 	this->LoadRegularEffectAssets();
 
 	// Initialize any HUD elements
-	this->lifeHUD				= new LivesLeftHUD();
 	this->crosshairHUD	= new CrosshairLaserHUD();
+	this->lifeHUD			  = new LivesLeftHUD();
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();
@@ -760,6 +760,9 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 
 	// Load all of the music for the world
 	this->soundAssets->LoadWorldSounds(world->GetStyle());
+
+	// Reinitialize the life HUD elements
+	this->lifeHUD->Reinitialize();
 }
 
 /**

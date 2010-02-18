@@ -7,14 +7,12 @@
 #include "../BlammoEngine/Texture3D.h"
 #include "../BlammoEngine/Texture2D.h"
 
-const std::string CgFxPostRefract::BASIC_TECHNIQUE_NAME			= "PostRefractGeom";
-const std::string CgFxPostRefract::VAPOUR_TRAIL_TECHNIQUE_NAME = "VapourTrail";
+const char* CgFxPostRefract::BASIC_TECHNIQUE_NAME = "PostRefractGeom";
 
 // Default constructor
 CgFxPostRefract::CgFxPostRefract() : 
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_POSTREFRACT_SHADER), 
-invisiColour(Colour(1,1,1)), indexOfRefraction(1.00f), scale(1.0f), freq(1.0f), flowDir(0, 0, 1),
-timer(0.0), warpAmount(1.0f), sceneTex(NULL), noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
+indexOfRefraction(1.00f), warpAmount(1.0f), sceneTex(NULL) {
 	
 	// Set the technique
 	this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
@@ -27,18 +25,9 @@ timer(0.0), warpAmount(1.0f), sceneTex(NULL), noiseTexID(Noise::GetInstance()->G
 
 	// Refraction parameters
 	this->indexOfRefactionParam = cgGetNamedEffectParameter(this->cgEffect, "IndexOfRefraction");
-	this->invisiColourParam			= cgGetNamedEffectParameter(this->cgEffect, "InvisiColour");
 	this->warpAmountParam			  = cgGetNamedEffectParameter(this->cgEffect, "WarpAmount");
 	this->sceneWidthParam				= cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
 	this->sceneHeightParam			= cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
-
-	// Vapour trail parameters
-	this->noiseScaleParam				= cgGetNamedEffectParameter(this->cgEffect, "Scale");
-	this->noiseFreqParam				= cgGetNamedEffectParameter(this->cgEffect, "Freq");
-	this->noiseFlowDirParam			= cgGetNamedEffectParameter(this->cgEffect, "FlowDir");
-	this->timerParam						= cgGetNamedEffectParameter(this->cgEffect, "Timer");
-	this->noiseSamplerParam			= cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
-	this->maskSamplerParam			= cgGetNamedEffectParameter(this->cgEffect, "MaskSampler");
 
 	// The rendered scene background texture
 	this->sceneSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
@@ -73,7 +62,6 @@ void CgFxPostRefract::SetupBeforePasses(const Camera& camera) {
 
 	// Refraction property setup
 	cgGLSetParameter1f(this->indexOfRefactionParam, this->indexOfRefraction);
-	cgGLSetParameter3f(this->invisiColourParam, this->invisiColour.R(), this->invisiColour.G(), this->invisiColour.B());
 	cgGLSetParameter1f(this->warpAmountParam,  this->warpAmount);
 
 	// Set the scene texture
@@ -82,19 +70,4 @@ void CgFxPostRefract::SetupBeforePasses(const Camera& camera) {
 		cgGLSetParameter1f(this->sceneHeightParam, this->sceneTex->GetHeight());	
 		cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneTex->GetTextureID());
 	}
-
-	// Noise property setup
-	if (this->currTechnique == this->techniques[VAPOUR_TRAIL_TECHNIQUE_NAME]) {
-		cgGLSetParameter1f(this->timerParam, this->timer);
-		cgGLSetParameter1f(this->noiseScaleParam, this->scale);
-		cgGLSetParameter1f(this->noiseFreqParam, this->freq);
-		cgGLSetParameter3f(this->noiseFlowDirParam, this->flowDir[0], this->flowDir[1], this->flowDir[2]);
-		cgGLSetTextureParameter(this->noiseSamplerParam, this->noiseTexID);
-
-		// Set the mask texture sampler if it exists
-		if (this->maskTex != NULL) {
-			cgGLSetTextureParameter(this->maskSamplerParam, this->maskTex->GetTextureID());
-		}
-	}
-
 }

@@ -80,7 +80,7 @@ void GameModel::BeginOrRestartGame() {
 
 	// Reset the score, lives, etc.
 	this->currPlayerScore	= GameModelConstants::GetInstance()->INIT_SCORE;
-	this->SetLivesLeft(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
+	this->SetInitialNumberOfLives(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
 	this->numConsecutiveBlocksHit = GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT;	// Don't use set here, we don't want an event
 	this->gameTransformInfo->Reset();
 
