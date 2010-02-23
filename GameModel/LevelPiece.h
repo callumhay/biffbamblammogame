@@ -30,7 +30,7 @@ public:
 	static const float HALF_PIECE_HEIGHT;
 	static const float HALF_PIECE_DEPTH;
 
-	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, PrismTriangle };
+	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, Portal, PrismTriangle };
 	virtual LevelPieceType GetType() const = 0;
 
 protected:
@@ -45,6 +45,8 @@ public:
 	LevelPiece(unsigned int wLoc, unsigned int hLoc);
 	virtual ~LevelPiece();
 
+	void SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc);
+
 	Point2D GetCenter() const {	return this->center; }
 	unsigned int GetWidthIndex() const { return this->wIndex; }
 	unsigned int GetHeightIndex() const { return this->hIndex; }
@@ -57,10 +59,10 @@ public:
 		return Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
 	}
 
-	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) const;
-	bool CollisionCheck(const Collision::AABB2D& aabb) const;
+	virtual bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) const;
+	virtual bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	bool CollisionCheck(const BoundingLines& boundingLines) const;
+	virtual bool CollisionCheck(const BoundingLines& boundingLines) const;
 
 	virtual int GetPointValueForCollision() = 0;
 

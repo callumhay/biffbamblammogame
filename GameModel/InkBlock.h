@@ -39,7 +39,7 @@ public:
 		return true;
 	}
 
-	// Obtain the point value for a collision with this breakable block.
+	// Obtain the point value for a collision with this block.
 	// Returns: point value.
 	int GetPointValueForCollision() {
 		return POINTS_ON_BLOCK_DESTROYED;
@@ -53,7 +53,7 @@ public:
 
 	// Ink blocks do not reflect or refract light.
 	// Returns: false
-	virtual bool IsLightReflectorRefractor() const {
+	bool IsLightReflectorRefractor() const {
 		return false;
 	}
 

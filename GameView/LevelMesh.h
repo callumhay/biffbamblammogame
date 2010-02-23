@@ -13,6 +13,7 @@ class GameWorldAssets;
 class BallSafetyNetMesh;
 class Mesh;
 class PrismBlockMesh;
+class PortalBlockMesh;
 class MaterialGroup;
 
 class LevelMesh {
@@ -25,6 +26,7 @@ private:
 	Mesh* bombBlock;
 	Mesh* triangleBlockUR;								// Triangle block (default position in upper-right)
 	Mesh* inkBlock;
+	PortalBlockMesh* portalBlock;
 	PrismBlockMesh* prismBlockDiamond;		// Prism diamond block
 	PrismBlockMesh* prismBlockTriangleUR;	// Prism triangle block in upper-right corner position
 	Mesh* styleBlock;

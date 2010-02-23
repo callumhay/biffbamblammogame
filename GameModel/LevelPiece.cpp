@@ -25,13 +25,18 @@ const float LevelPiece::HALF_PIECE_WIDTH = PIECE_WIDTH / 2.0f;
 const float LevelPiece::HALF_PIECE_HEIGHT = PIECE_HEIGHT / 2.0f;
 const float LevelPiece::HALF_PIECE_DEPTH  = PIECE_DEPTH / 2.0f;
 
-LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc):
-center(wLoc * PIECE_WIDTH + HALF_PIECE_WIDTH, hLoc * PIECE_HEIGHT + HALF_PIECE_HEIGHT), wIndex(wLoc), hIndex(hLoc),
-colour(1,1,1) {
+LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc) : colour(1,1,1) {
+	this->SetWidthAndHeightIndex(wLoc, hLoc);
 }
 
 
 LevelPiece::~LevelPiece() {
+}
+
+void LevelPiece::SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc) {
+	this->wIndex = wLoc;
+	this->hIndex = hLoc;
+	this->center = Point2D(wLoc * PIECE_WIDTH + HALF_PIECE_WIDTH, hLoc * PIECE_HEIGHT + HALF_PIECE_HEIGHT);
 }
 
 /**

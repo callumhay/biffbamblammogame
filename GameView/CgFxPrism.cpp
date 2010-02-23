@@ -35,6 +35,8 @@ void CgFxPrism::SetupBeforePasses(const Camera& camera) {
 	cgGLSetParameter1f(this->sceneHeightParam, camera.GetWindowHeight());
 	cgGLSetParameter1f(this->warpAmountParam, this->warpAmount);
 	cgGLSetParameter1f(this->indexOfRefractionParam, this->indexOfRefraction);
+	
+	assert(this->sceneTex != NULL);
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneTex->GetTextureID());
 
 	CgFxMaterialEffect::SetupBeforePasses(camera);
