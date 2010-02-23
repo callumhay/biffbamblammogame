@@ -13,6 +13,7 @@
 #include "GameModel/LevelPiece.h"
 
 #include "GameView/CgFxInkBlock.h"
+#include "GameView/CgFxPortalBlock.h"
 #include "GameView/CgFxStickyPaddle.h"
 #include "GameView/GameViewConstants.h"
 
@@ -197,11 +198,26 @@ Mesh* ResourceManager::GetPortalBlockMeshResource() {
 	assert(levelMesh != NULL);
 
 	PolygonGroup* portalBlockPolyGrp = new PolygonGroup(*levelMesh->GetMaterialGroups().begin()->second->GetPolygonGroup());
+	
+	// Create the material properties and effect (portal block cgfx shader)
+	MaterialProperties* portalMatProps = new MaterialProperties();
+	portalMatProps->materialType	= MaterialProperties::MATERIAL_PORTAL_TYPE;
+	portalMatProps->geomType			= MaterialProperties::MATERIAL_GEOM_FG_TYPE;
+	//portalMatProps->diffuse			= GameViewConstants::GetInstance()->INK_BLOCK_COLOUR;
+	//portalMatProps->specular			= Colour(0.44f, 0.44f, 0.44f);
+	//portalMatProps->shininess		= 95.0f;
+	CgFxPortalBlock* portalBlockEffect = new CgFxPortalBlock(portalMatProps);
+	
+	// Create the material group and its geometry (as defined above)
+	MaterialGroup* portalMatGrp = new MaterialGroup(portalBlockEffect);
+	portalMatGrp->SetPolygonGroup(portalBlockPolyGrp);
 
+	std::map<std::string, MaterialGroup*> portalBlockMatGrps;
+	portalBlockMatGrps.insert(std::make_pair("Portal Material", portalMatGrp));
 
-	// TODO
-	return NULL;
-
+	// Insert the material and its geometry it into the mesh
+	this->portalBlockMesh = new Mesh("Portal Block", portalBlockMatGrps);
+	return this->portalBlockMesh;
 }
 
 /**

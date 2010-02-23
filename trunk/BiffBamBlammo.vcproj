@@ -635,6 +635,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\PortalBlockMesh.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\PrismBlockMesh.h"
 					>
 				</File>
@@ -748,6 +752,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\MainMenuDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\PortalBlockMesh.cpp"
 					>
 				</File>
 				<File
@@ -1278,6 +1286,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PortalBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PrismBlock.h"
 						>
 					</File>
@@ -1307,6 +1319,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\LevelPiece.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PortalBlock.cpp"
 						>
 					</File>
 					<File

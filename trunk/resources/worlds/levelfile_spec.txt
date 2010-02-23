@@ -23,5 +23,10 @@ The following specifies the .lvl format.
 // I - Ink block   (If hit it splats all over the player's vision)
 // P - Prism block (Unbreakable, but if hit by any sort of laser it reflects/refracts the laser)
 
+// X(a,b) - Portal block:
+// a: A single character name for this portal block
+// b: The single character name of the sibling portal block that this portal block is
+// the enterance and exit for.
+
 
 <block list in order of top-left to bottom-right>

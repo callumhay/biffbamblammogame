@@ -21,6 +21,7 @@
 #include "TriangleBlocks.h"
 #include "InkBlock.h"
 #include "PrismBlock.h"
+#include "PortalBlock.h"
 
 #include "../ResourceManager.h"
 
@@ -33,6 +34,7 @@ const char GameLevel::RED_BREAKABLE_CHAR			= 'R';
 const char GameLevel::BOMB_CHAR								= 'B';
 const char GameLevel::INKBLOCK_CHAR						= 'I';
 const char GameLevel::PRISM_BLOCK_CHAR				= 'P';
+const char GameLevel::PORTAL_BLOCK_CHAR				= 'X';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -110,6 +112,9 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 	std::vector<std::vector<LevelPiece*>> levelPieces;
 	unsigned int numVitalPieces = 0;
 
+	// Keep track of named portal blocks...
+	std::map<char, PortalBlock*> portalBlocks;
+
 	// Read in the values that make up the level
 	for (int h = 0; h < height; h++) {
 		std::vector<LevelPiece*> currentRowPieces;
@@ -151,6 +156,74 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					break;
 				case PRISM_BLOCK_CHAR:
 					newPiece = new PrismBlock(pieceWLoc, pieceHLoc);
+					break;
+				case PORTAL_BLOCK_CHAR: {
+						// X(a,b) - Portal block:
+						// a: A single character name for this portal block
+						// b: The single character name of the sibling portal block that this portal block is
+						// the enterance and exit for.
+						char tempChar;
+						*inFile >> tempChar;
+						if (tempChar != '(') {
+							debug_output("ERROR: poorly formed portal block syntax, missing '('");
+							break;
+						}
+						
+						char portalName;
+						*inFile >> portalName;
+
+						*inFile >> tempChar;
+						if (tempChar != ',') {
+							debug_output("ERROR: poorly formed portal block syntax, missing ','");
+							break;
+						}				
+
+						char siblingName;
+						*inFile >> siblingName;
+
+						*inFile >> tempChar;
+						if (tempChar != ')') {
+							debug_output("ERROR: poorly formed portal block syntax, missing ')'");
+							break;
+						}
+
+						// First try to find either portal block in the current mapping
+						PortalBlock* currentPortalBlock = NULL;
+						PortalBlock* siblingPortalBlock = NULL;
+						std::map<char, PortalBlock*>::iterator findIter = portalBlocks.find(portalName);
+						std::pair<std::map<char, PortalBlock*>::iterator, bool> insertResult;
+
+						if (findIter != portalBlocks.end()) {
+							currentPortalBlock = findIter->second;
+						}
+						findIter = portalBlocks.find(siblingName);
+						if (findIter != portalBlocks.end()) {
+							siblingPortalBlock = findIter->second;
+						}
+
+						if (siblingPortalBlock == NULL) {
+							// No sibling exists yet, create one
+							siblingPortalBlock = new PortalBlock(-1, -1, NULL);
+							insertResult = portalBlocks.insert(std::make_pair(siblingName, siblingPortalBlock));
+							assert(insertResult.second);
+						}
+
+						if (currentPortalBlock == NULL) {
+							// No portal block has been created for the current name yet, create one.
+							currentPortalBlock = new PortalBlock(pieceWLoc, pieceHLoc, siblingPortalBlock);
+							insertResult = portalBlocks.insert(std::make_pair(portalName, currentPortalBlock));
+							assert(insertResult.second);
+						}
+						else {
+							// The portal block has previously been created and inserted into the map...
+							// Use that portal block, make sure it has the proper location and sibling
+							currentPortalBlock->SetWidthAndHeightIndex(pieceWLoc, pieceHLoc);
+							assert(currentPortalBlock->GetSiblingPortal() == NULL);
+							currentPortalBlock->SetSiblingPortal(siblingPortalBlock);
+						}
+
+						newPiece = currentPortalBlock;
+					}
 					break;
 				case TRIANGLE_BLOCK_CHAR: {
 						// T(x,p) - Triangle block, 
@@ -218,6 +291,10 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 						// Read in the closing bracket
 						*inFile >> tempChar;
+						if (tempChar != ')') {
+							debug_output("ERROR: poorly formed triangle block syntax, missing ')'");
+							break;
+						}
 					}
 					break;
 				default:
@@ -239,6 +316,18 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 	delete inFile;
 	inFile = NULL;
+
+	// Go through all of the portal blocks and make sure they loaded properly...
+	for (std::map<char, PortalBlock*>::iterator iter = portalBlocks.begin(); iter != portalBlocks.end(); ++iter) {
+		if (iter->second == NULL || iter->second->GetSiblingPortal() == NULL || iter->second->GetWidthIndex() < 0
+				|| iter->second->GetHeightIndex() < 0) {
+			debug_output("ERROR: Poorly formatted portal blocks.");
+			GameLevel* temp = new GameLevel(numVitalPieces, levelPieces);
+			delete temp;
+			temp = NULL;
+			return NULL;
+		}
+	}
 
 	// Go through all the pieces and initialize their bounding values appropriately
 	for (size_t h = 0; h < levelPieces.size(); h++) {

@@ -153,6 +153,15 @@ float3 FlowDir <
 > = {0, 1, 1};
 
 //////// TEXTURE /////////////////////
+texture ColourTexture  <
+    string ResourceName = "default_color.dds";
+    string UIName =  "Diffuse Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D ColourSampler = sampler_state {
+    Texture = <ColourTexture>;
+};  
 
 texture SceneTexture <
     string ResourceName = "scene_background_test.jpg";
@@ -214,7 +223,7 @@ vertexOutputPortalBlock PortalBlock_VS(appdata IN) {
     float4 outPos  = mul(WvpXf,Po);
     OUT.HPosition  = outPos;
     OUT.WorldPos   = Pw.xyz;
-    OUT.ProjPos    = outPos.xyz / outPos.w;   
+    OUT.ProjPos    = outPos.xyz / outPos.w;
 	OUT.Colour     = IN.Colour;
     return OUT;
 }
@@ -229,11 +238,11 @@ float2 GetRefractBGOffset(float3 nWorldView, float3 nWorldNormal) {
     // of 0.5 for the bias, 1 for the Scale and 1 for the power
     // The reasoning is that I want a nicely blended bit of both reflection and refraction
     // especially in cases of total internal refraction (which looks ugly and abrupt without this)
-    float fresnelCoeff = clamp(1.5f + dot(nWorldView,nWorldNormal), 0, 1);
-    // Find the world space reflection vector
-    float3 refractionVec = refract(nWorldView, nWorldNormal, IndexOfRefraction);
+    float fresnelCoeff = clamp(0.5f + dot(nWorldView, nWorldNormal), 0, 1);
     // Find the world space refraction vector (IndexOfRefraction_Medium to air)
-    float3 reflectionVec = reflect(nWorldView, nWorldNormal);
+    float3 refractionVec = refract(nWorldView, nWorldNormal, IndexOfRefraction);
+    // Find the world space reflection vector
+	float3 reflectionVec = reflect(nWorldView, nWorldNormal);
     
     // Obtain the lookup vector which will be scaled/warped to get an offset for looking up
     // the background/scene texture
@@ -244,10 +253,9 @@ float2 GetRefractBGOffset(float3 nWorldView, float3 nWorldNormal) {
     return WarpAmount * lookupVec.xy * float2(1.0/SceneWidth, 1.0/SceneHeight);           
 }
 
-float Turbulance (float4 noiseTexVal) {
-	return noiseTexVal.x;
-	//return 8.0f * (abs(noiseTexVal.x - 0.25)  + abs(noiseTexVal.y - 0.125) + 
-    //               abs(noiseTexVal.z - 0.0625) + abs(noiseTexVal.w - 0.03125));
+float Turbulance(float4 noiseTexVal) {
+	return 8.0f * (abs(noiseTexVal.x - 0.25)  + abs(noiseTexVal.y - 0.125) + 
+                   abs(noiseTexVal.z - 0.0625) + abs(noiseTexVal.w - 0.03125));
 }
 
 float4 PortalBlock_PS(vertexOutputPortalBlock IN) : COLOR {
@@ -270,9 +278,10 @@ float4 PortalBlock_PS(vertexOutputPortalBlock IN) : COLOR {
 
     float2 lookupOffset = GetRefractBGOffset(nWorldView, bumpedNormal);
     float3 textureColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
-	float3 haloColour = lerp(IN.Colour.xyz, float3(1), UnmodifiedNoiseVal.x);
+	float3 haloColour = lerp(IN.Colour.xyz, float3(0), UnmodifiedNoiseVal.x);
+	float haloFade = abs(pow(dot(nWorldView, nWorldNormal), 2));
 	
-    return float4(haloColour*textureColour, 1);
+    return float4(haloColour + textureColour, haloFade);
 }
 
 technique PortalBlock {

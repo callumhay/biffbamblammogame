@@ -54,12 +54,6 @@ protected:
 	virtual void SetupBeforePasses(const Camera& camera);
 
 private:
-	// CG Transform parameters
-	CGparameter worldITMatrixParam;
-	CGparameter wvpMatrixParam;
-	CGparameter worldMatrixParam;
-	CGparameter viewInvMatrixParam;
-
 	// CG Portal Block parameters
 	CGparameter sceneSamplerParam;
 	CGparameter indexOfRefactionParam;

@@ -14,9 +14,9 @@ S G E T(P,ul) E T(P,ur) P E G S
 S G E E E E E E G S 
 S G E E E E E B G S 
 S E E E E E E E B S 
-S T(P,ul) I T(P,ll) E P E E T(P,ur) S 
+S E I E E P E E T(P,ur) S 
 S E E E E E E E E S 
-S E E E E E T(P,lr) E E S 
+S X(a,b) E E E E E X(b,a) E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 

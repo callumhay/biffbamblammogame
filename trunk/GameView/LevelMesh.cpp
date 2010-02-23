@@ -4,6 +4,7 @@
 #include "GameWorldAssets.h"
 #include "BallSafetyNetMesh.h"
 #include "PrismBlockMesh.h"
+#include "PortalBlockMesh.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Vector.h"
@@ -16,7 +17,7 @@
 #include "../GameModel/GameBall.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : currLevel(NULL),
-styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), 
+styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
@@ -26,35 +27,40 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
 	this->prismBlockDiamond			= new PrismBlockMesh(PrismBlockMesh::DiamondPrism);
 	this->prismBlockTriangleUR	= new PrismBlockMesh(PrismBlockMesh::TrianglePrism);
 	this->inkBlock							= ResourceManager::GetInstance()->GetInkBlockMeshResource();
+	this->portalBlock						= new PortalBlockMesh();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
 	// Add the typical level meshes to the list of materials...
-	std::map<std::string, MaterialGroup*> basicBlockMatGrps			= this->basicBlock->GetMaterialGroups();
-	std::map<std::string, MaterialGroup*> triangleBlockMatGrps	= this->triangleBlockUR->GetMaterialGroups();
-	std::map<std::string, MaterialGroup*> bombBlockMatGrps			= this->bombBlock->GetMaterialGroups();
-	std::map<std::string, MaterialGroup*> inkBlockMatGrps				= this->inkBlock->GetMaterialGroups();
-	std::map<std::string, MaterialGroup*> prismBlockMatGrps			= this->prismBlockDiamond->GetMaterialGroups();
-	std::map<std::string, MaterialGroup*> prismTriBlockMatGrps	= this->prismBlockTriangleUR->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& basicBlockMatGrps		= this->basicBlock->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& triangleBlockMatGrps	= this->triangleBlockUR->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& bombBlockMatGrps			= this->bombBlock->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& inkBlockMatGrps			= this->inkBlock->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& prismBlockMatGrps		= this->prismBlockDiamond->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& prismTriBlockMatGrps	= this->prismBlockTriangleUR->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& portalBlockMatGrps   = this->portalBlock->GetMaterialGroups();
 	
-	for (std::map<std::string, MaterialGroup*>::iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); ++iter) {
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = triangleBlockMatGrps.begin(); iter != triangleBlockMatGrps.end(); ++iter) {
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = triangleBlockMatGrps.begin(); iter != triangleBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = bombBlockMatGrps.begin(); iter != bombBlockMatGrps.end(); ++iter) {
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = bombBlockMatGrps.begin(); iter != bombBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = inkBlockMatGrps.begin(); iter != inkBlockMatGrps.end(); ++iter) {
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = inkBlockMatGrps.begin(); iter != inkBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = prismBlockMatGrps.begin(); iter != prismBlockMatGrps.end(); ++iter) {
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = prismBlockMatGrps.begin(); iter != prismBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
-	for (std::map<std::string, MaterialGroup*>::iterator iter = prismTriBlockMatGrps.begin(); iter != prismTriBlockMatGrps.end(); ++iter) {
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = prismTriBlockMatGrps.begin(); iter != prismTriBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = portalBlockMatGrps.begin(); iter != portalBlockMatGrps.end(); ++iter) {
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+	}	
 
 	this->LoadNewLevel(gameWorldAssets, level);
 }
@@ -207,6 +213,8 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 	// Set any appropriate parameters on the various meshes materials, etc.
 	this->prismBlockDiamond->SetSceneTexture(sceneTexture);
 	this->prismBlockTriangleUR->SetSceneTexture(sceneTexture);
+	this->portalBlock->SetSceneTexture(sceneTexture);
+	this->portalBlock->Tick(dT);
 
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
@@ -320,6 +328,9 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 			break;
 		case LevelPiece::PrismTriangle:
 			returnValue = this->prismBlockTriangleUR->GetMaterialGroups();
+			break;
+		case LevelPiece::Portal:
+			returnValue = this->portalBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Empty :
 			break;
