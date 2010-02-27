@@ -52,7 +52,7 @@ piecesLeft(numBlocks), ballSafetyNetActive(false) {
 	this->height = pieces.size();
 
 	// Set the quad tree for the level
-	Point2D levelMax(this->GetLevelUnitWidth(), this->GetLevelUnitHeight());
+	//Point2D levelMax(this->GetLevelUnitWidth(), this->GetLevelUnitHeight());
 	//this->levelTree = new QuadTree(Collision::AABB2D(Point2D(0, 0), levelMax), Vector2D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT));
 }
 
@@ -114,6 +114,8 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 	// Keep track of named portal blocks...
 	std::map<char, PortalBlock*> portalBlocks;
+	// Reset the colours for the portal blocks
+	PortalBlock::ResetPortalColourGenerator();
 
 	// Read in the values that make up the level
 	for (int h = 0; h < height; h++) {
@@ -220,6 +222,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							currentPortalBlock->SetWidthAndHeightIndex(pieceWLoc, pieceHLoc);
 							assert(currentPortalBlock->GetSiblingPortal() == NULL);
 							currentPortalBlock->SetSiblingPortal(siblingPortalBlock);
+
+							// Set the same colour for both the current and sibling portal blocks
+							Colour portalBlockColour = PortalBlock::GeneratePortalColour();
+							currentPortalBlock->SetColour(portalBlockColour);
+							siblingPortalBlock->SetColour(portalBlockColour);
 						}
 
 						newPiece = currentPortalBlock;
