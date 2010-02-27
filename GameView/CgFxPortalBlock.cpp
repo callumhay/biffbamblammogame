@@ -12,7 +12,7 @@ const char* CgFxPortalBlock::PORTAL_BLOCK_TECHNIQUE_NAME = "PortalBlock";
 // Default constructor
 CgFxPortalBlock::CgFxPortalBlock(MaterialProperties* properties) : 
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_PORTALBLOCK_SHADER, properties), 
-indexOfRefraction(1.33f), scale(0.05f), freq(1.0f), flowDir(0, 0, 1),
+indexOfRefraction(1.55f), scale(0.05f), freq(1.0f), flowDir(0, 0, 1),
 timer(0.0), warpAmount(60.0f), sceneTex(NULL), noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
 	assert(properties->materialType == MaterialProperties::MATERIAL_PORTAL_TYPE);
 
