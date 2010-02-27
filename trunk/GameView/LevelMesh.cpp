@@ -6,6 +6,8 @@
 #include "PrismBlockMesh.h"
 #include "PortalBlockMesh.h"
 
+#include "../ESPEngine/ESPEmitter.h"
+
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Matrix.h"
@@ -73,6 +75,8 @@ LevelMesh::~LevelMesh() {
 	this->prismBlockDiamond = NULL;
 	delete this->prismBlockTriangleUR;
 	this->prismBlockTriangleUR = NULL;
+	delete this->portalBlock;
+	this->portalBlock = NULL;
 
 	// Clean up all assets pertaining to the currently loaded
 	// level, if applicable.
@@ -110,6 +114,20 @@ void LevelMesh::Flush() {
 	}
 	this->displayListsPerMaterial.clear();
 	this->pieceDisplayLists.clear();
+
+	// Delete all of the emitter effects for any of the level pieces
+	for (std::map<const LevelPiece*, std::list<ESPEmitter*>>::iterator pieceIter = this->pieceEmitterEffects.begin();
+		pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
+
+		std::list<ESPEmitter*>& emitterList = pieceIter->second;
+		for (std::list<ESPEmitter*>::iterator emitterIter = emitterList.begin(); emitterIter != emitterList.end(); ++emitterIter) {
+			ESPEmitter* emitter = *emitterIter;
+			delete emitter;
+			emitter = NULL;
+		}
+		emitterList.clear();
+	}
+	this->pieceEmitterEffects.clear();
 
 	// Clear the current level pointer
 	this->currLevel = NULL;
@@ -157,6 +175,8 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 
 			// Create the appropriate display lists for the piece...
 			this->CreateDisplayListsForPiece(currPiece, worldTransform);
+			// Create the emitters/effects for the piece...
+			this->CreateEmitterEffectsForPiece(currPiece, worldTransform);
 		}
 	}
 }
@@ -226,6 +246,20 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 		currEffect->SetBallLight(ballLight);
 		currEffect->Draw(camera, iter->second);
 	}
+
+	// Draw the piece effects
+	for (std::map<const LevelPiece*, std::list<ESPEmitter*>>::iterator pieceIter = this->pieceEmitterEffects.begin();
+		pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
+
+		std::list<ESPEmitter*>& emitterList = pieceIter->second;
+		ESPEmitter* emitter = NULL;
+		for (std::list<ESPEmitter*>::iterator emitterIter = emitterList.begin(); emitterIter != emitterList.end(); ++emitterIter) {
+			emitter = *emitterIter;
+			assert(emitter != NULL);
+			emitter->Tick(dT);
+			emitter->Draw(camera);
+		}
+	}
 }
 
 /**
@@ -250,7 +284,7 @@ void LevelMesh::DrawSafetyNet(double dT, const Camera& camera, const PointLight&
  * at the given translation in the world.
  */
 void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation) {
-	
+	assert(piece != NULL);
 	std::map<std::string, MaterialGroup*> pieceMatGrps = this->GetMaterialGrpsForPieceType(piece->GetType());
 
 	// Go through each of the material groups ensuring that the material is associated with an appropriate display list
@@ -293,6 +327,31 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		this->pieceDisplayLists[piece].insert(std::make_pair<CgFxMaterialEffect*, GLuint>(currMaterial, newDisplayList));
 		this->displayListsPerMaterial[currMaterial].push_back(newDisplayList);
 	}
+}
+
+/**
+ * Private helper function for creating emitter effects for certain level pieces and
+ * adding them to the piece emitter map.
+ */
+void LevelMesh::CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation) {
+	assert(piece != NULL);
+
+	Matrix4x4 worldTransform = Matrix4x4::translationMatrix(worldTranslation);
+	Matrix4x4 localTransform = piece->GetPieceToLevelTransform();
+	Matrix4x4 fullTransform =  worldTransform * localTransform;
+
+	std::list<ESPEmitter*> pieceEmitters;
+	switch (piece->GetType()) {
+		case LevelPiece::Portal:
+			// Portal block has special emitters that suck/spit particles and stuff
+			pieceEmitters = this->portalBlock->CreatePortalBlockEmitters(piece->GetColour(), fullTransform.getTranslation());
+			break;
+		default:
+			return;
+	}
+
+	assert(pieceEmitters.size() > 0);
+	this->pieceEmitterEffects.insert(std::make_pair(piece, pieceEmitters));
 }
 
 /**

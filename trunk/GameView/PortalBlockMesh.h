@@ -2,7 +2,14 @@
 #define __PORTAL_BLOCK_MESH_H__
 
 #include "../BlammoEngine/Mesh.h"
+#include "../BlammoEngine/Texture2D.h"
+
+#include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESPParticleColourEffector.h"
+
 #include "CgFxPortalBlock.h"
+
+class ESPEmitter;
 
 /**
  * Wraps up the mesh for the portal block and ensures it has the appropriately
@@ -30,9 +37,17 @@ public:
 		this->portalEffect->AddToTimer(dT);
 	}
 
+	std::list<ESPEmitter*> CreatePortalBlockEmitters(const Colour& colour, const Point3D &worldTranslation);
+
 private:
+	// Mesh variables
 	Mesh* portalBlockGeometry;
 	CgFxPortalBlock* portalEffect;
+
+	// Effect variables
+	ESPParticleScaleEffector haloExpandPulse;
+	ESPParticleColourEffector haloFader;
+	Texture2D* haloTexture;
 
 	void LoadMesh();
 
