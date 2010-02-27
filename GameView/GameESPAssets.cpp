@@ -813,6 +813,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::Ink:
 				case LevelPiece::Bomb:
 				case LevelPiece::Empty:
+				case LevelPiece::Portal:
 					// Certain level pieces require no effects...
 					break;
 

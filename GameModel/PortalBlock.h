@@ -82,8 +82,13 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	std::list<Collision::Ray2D> GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const;
 
+	static void ResetPortalColourGenerator();
+	static Colour GeneratePortalColour();
+
 protected:
 	const PortalBlock* sibling;
+
+	static bool portalGeneratorReset;
 
 };
 

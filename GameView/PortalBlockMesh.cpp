@@ -6,7 +6,7 @@
 #include "../ResourceManager.h"
 
 PortalBlockMesh::PortalBlockMesh() : portalBlockGeometry(NULL), portalEffect(NULL), haloTexture(NULL),
-haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.1f) {
+haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f) {
 	this->LoadMesh();
 	assert(this->portalBlockGeometry != NULL);
 	assert(this->portalEffect != NULL);
@@ -22,11 +22,14 @@ PortalBlockMesh::~PortalBlockMesh() {
 	assert(success);
 }
 
+/**
+ * Creates emitter effects for a portal block.
+ */
 std::list<ESPEmitter*> PortalBlockMesh::CreatePortalBlockEmitters(const Colour& colour, const Point3D &worldTranslation) {
 	std::list<ESPEmitter*> portalEmitters;
 
 	// Halo effect that pulses outwards
-	const float HALO_LIFETIME = 2.0f;
+	const float HALO_LIFETIME = 2.3f;
 	const int NUM_HALOS = 3;
 	ESPPointEmitter* haloExpandingPulse = new ESPPointEmitter();
 	haloExpandingPulse->SetSpawnDelta(ESPInterval(HALO_LIFETIME / static_cast<float>(NUM_HALOS)));
