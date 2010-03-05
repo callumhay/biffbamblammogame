@@ -24,9 +24,12 @@ void GameOverDisplayState::RenderFrame(double dT) {
 	this->gameOverLabel.Draw();
 }
 
-void GameOverDisplayState::KeyPressed(SDLKey key) {
+void GameOverDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
 	// Allow the player to exit the game over screen...
 	this->display->SetCurrentState(new MainMenuDisplayState(this->display));
+}
+
+void GameOverDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
 }
 
 void GameOverDisplayState::DisplaySizeChanged(int width, int height) {

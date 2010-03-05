@@ -72,6 +72,7 @@ private:
 	int optionsFullscreenIndex;
 	int optionsVSyncIndex;
 	int optionsResolutionIndex;
+	int optionsSoundVolumeIndex;
 
 	// Indents and spacing
 	static const unsigned int MENU_X_INDENT = 50;
@@ -101,6 +102,7 @@ private:
 	SelectionListMenuItem* fullscreenMenuItem;
 	SelectionListMenuItem* resolutionMenuItem;
 	SelectionListMenuItem* vSyncMenuItem;
+	AmountScrollerMenuItem* soundVolumeMenuItem;
 
 	// 
 
@@ -122,11 +124,12 @@ private:
 
 public:
 	MainMenuDisplayState(GameDisplay* display);
-	virtual ~MainMenuDisplayState();
+	~MainMenuDisplayState();
 
-	virtual void RenderFrame(double dT);
-	virtual void KeyPressed(SDLKey key);
-	virtual void DisplaySizeChanged(int width, int height);
+	void RenderFrame(double dT);
+	void KeyPressed(SDLKey key, SDLMod modifier);
+	void KeyReleased(SDLKey key, SDLMod modifier);
+	void DisplaySizeChanged(int width, int height);
 
 	class MainMenuEventHandler : public GameMenuEventHandler {
 	private:

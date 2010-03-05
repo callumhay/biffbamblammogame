@@ -2,21 +2,25 @@
 
 const std::string ConfigOptions::INI_FILEPATH				= "BiffBamBlammo.ini";
 
-const std::string ConfigOptions::WINDOW_HEIGHT_VAR			= "window_height";
-const std::string ConfigOptions::WINDOW_WIDTH_VAR				= "window_width";
-const std::string ConfigOptions::WINDOW_FULLSCREEN_VAR	= "fullscreen";
-const std::string ConfigOptions::WINDOW_VSYNC_VAR				= "vsync";
+const char* ConfigOptions::WINDOW_HEIGHT_VAR			= "window_height";
+const char* ConfigOptions::WINDOW_WIDTH_VAR				= "window_width";
+const char* ConfigOptions::WINDOW_FULLSCREEN_VAR	= "fullscreen";
+const char* ConfigOptions::WINDOW_VSYNC_VAR				= "vsync";
+const char* ConfigOptions::VOLUME_VAR							= "volume";
+
+const int ConfigOptions::MIN_WINDOW_SIZE	= 480;
+const int ConfigOptions::MAX_WINDOW_SIZE	= 2048;
+const int ConfigOptions::MIN_VOLUME				= 0;
+const int ConfigOptions::MAX_VOLUME				= 100;
 
 const int  ConfigOptions::DEFAULT_WINDOW_WIDTH				= 1024;
 const int  ConfigOptions::DEFAULT_WINDOW_HEIGHT				= 768;
 const bool ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE		= false;
 const bool ConfigOptions::DEFAULT_VSYNC_TOGGLE				= false;
-
-const int ConfigOptions::MIN_WINDOW_SIZE	= 480;
-const int ConfigOptions::MAX_WINDOW_SIZE	= 2048;
+const int  ConfigOptions::DEFAULT_VOLUME							= ConfigOptions::MAX_VOLUME;
 
 ConfigOptions::ConfigOptions() : windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT),
-fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE) {
+fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), volume(ConfigOptions::DEFAULT_VOLUME) {
 }
 
 /**
@@ -120,6 +124,14 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 				cfgOptions->vSyncIsOn = true;
 			}
 		}
+		else if (currStr == ConfigOptions::VOLUME_VAR) {
+			inFile >> skipEquals;
+
+			// Read in the sound/music volume for the game
+			int volume = ConfigOptions::DEFAULT_VOLUME;
+			inFile >> volume;
+			cfgOptions->volume = std::max<int>(ConfigOptions::MIN_VOLUME, std::min<int>(ConfigOptions::MAX_VOLUME, volume));
+		}
 	}
 	
 	inFile.close();
@@ -165,6 +177,11 @@ bool ConfigOptions::WriteConfigOptionsToFile() const {
 	outFile << ConfigOptions::WINDOW_VSYNC_VAR << " = " << (this->vSyncIsOn ? "1" : "0") << std::endl;
 	outFile << std::endl;
 
+	// Volume option
+	outFile << "// Volume (0 - mute, 100 - loudest)" << std::endl;
+	outFile << ConfigOptions::VOLUME_VAR << " = " << (this->volume) << std::endl;
+	outFile << std::endl;
+		
 	outFile.close();
 	return true;
 }

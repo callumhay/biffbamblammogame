@@ -179,11 +179,16 @@ void BallInPlayState::Tick(double seconds) {
 					}
 				}
 
-				// In the case that the ball is uber then we only reflect if the ball is not green
-				if (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->UberballBlastsThrough()) {
+				if (currPiece->IsNoBoundsPieceType()) {
+					// If the piece doesnt have bounds to bounce off of then don't bounce the ball
+					// Ignore collision...
+				}
+				else if (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->UberballBlastsThrough()) {
+					// In the case that the ball is uber then we only reflect if the ball is not green
 					// Ignore collision...
 				}
 				else {
+					// Make the ball react to the collision
 					this->DoBallCollision(*currBall, n, d);
 				}
 				

@@ -9,13 +9,16 @@
  */
 class PortalBlock : public LevelPiece {
 public:
-	PortalBlock(unsigned int wLoc, unsigned int hLoc, const PortalBlock* sibling);
+	PortalBlock(unsigned int wLoc, unsigned int hLoc, PortalBlock* sibling);
 	~PortalBlock();
 
 	const PortalBlock* GetSiblingPortal() const {
 		return this->sibling;
 	}
-	void SetSiblingPortal(const PortalBlock* sibling) {
+	PortalBlock* GetSiblingPortal() {
+		return this->sibling;
+	}
+	void SetSiblingPortal(PortalBlock* sibling) {
 		assert(sibling != NULL);
 		this->sibling = sibling;
 	}
@@ -27,7 +30,7 @@ public:
 	// Is this piece one without any boundries (i.e., no collision surface/line)?
 	// Return: true if non-collider, false otherwise.
 	bool IsNoBoundsPieceType() const {
-		return false;
+		return true;
 	}
 	
 	// Doesn't need to be destroyed to end the level - it's more just an
@@ -69,14 +72,14 @@ public:
 		return this;
 	}
 
-	//bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) const;
-	//bool CollisionCheck(const Collision::AABB2D& aabb) const;
-	//bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	//bool CollisionCheck(const BoundingLines& boundingLines) const;
-	//void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-	//									const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-	//									const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-	//									const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) const;
+	bool CollisionCheck(const Collision::AABB2D& aabb) const;
+	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
+	bool CollisionCheck(const BoundingLines& boundingLines) const;
+	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
@@ -86,7 +89,7 @@ public:
 	static Colour GeneratePortalColour();
 
 protected:
-	const PortalBlock* sibling;
+	PortalBlock* sibling;
 
 	static bool portalGeneratorReset;
 

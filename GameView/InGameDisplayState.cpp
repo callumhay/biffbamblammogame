@@ -66,11 +66,14 @@ void InGameDisplayState::RenderFrame(double dT) {
 	this->DrawGameHUD(dT);
 }
 
-void InGameDisplayState::KeyPressed(SDLKey key) {
+void InGameDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
 	// We only interpret one key press - when the user wants to access the in-game menu...
 	if (key == SDLK_ESCAPE) {
 		this->display->SetCurrentState(new InGameMenuState(this->display));
 	}
+}
+
+void InGameDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
 }
 
 // Private helper functions ************************************************************

@@ -30,18 +30,18 @@ TextLabel2D::~TextLabel2D() {
  * Draw the text label and any other effects attached to it.
  * Return: The length of the drawn label.
  */
-void TextLabel2D::Draw() {
+void TextLabel2D::Draw(bool depthTestOn, float depth) {
 	assert(this->font != NULL);
 
 	// Draw drop shadow part
 	if (this->dropShadow.isSet) {
 		float dropAmt = static_cast<float>(this->GetHeight()) * this->dropShadow.amountPercentage;
 		glColor4f(this->dropShadow.colour.R(), this->dropShadow.colour.G(), this->dropShadow.colour.B(), this->colour.A());
-		this->font->OrthoPrint(this->topLeftCorner + Vector2D(dropAmt, -dropAmt), this->text);
+		this->font->OrthoPrint(Point3D(this->topLeftCorner, depth - 0.01f) + Vector3D(dropAmt, -dropAmt, 0), this->text, depthTestOn);
 	}
 
 	// Draw coloured text part
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->colour.A());
-	this->font->OrthoPrint(this->topLeftCorner, this->text);
+	this->font->OrthoPrint(Point3D(this->topLeftCorner, depth), this->text, depthTestOn);
 	this->lastRasterWidth = this->font->GetWidth(this->text);
 }

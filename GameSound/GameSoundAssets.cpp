@@ -25,6 +25,15 @@ GameSoundAssets::~GameSoundAssets() {
 }
 
 /**
+ * Set the overall volume level of the game and all of its sound assets.
+ * The given volume level is in the interval [0, 100].
+ */
+void GameSoundAssets::SetGameVolume(int volumeLvl) {
+	float volumePercent = static_cast<float>(std::max<int>(0, std::min<int>(100, volumeLvl))) / 100.0f;
+	alListenerf(AL_GAIN, volumePercent);
+}
+
+/**
  * Called during the game event loop - this is passed the amount of
  * time passed since the previous frame of game play and is responsible
  * for updating sound effects over time.

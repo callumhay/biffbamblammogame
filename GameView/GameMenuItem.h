@@ -34,6 +34,7 @@ public:
  */
 class GameMenuItem {
 protected:
+	GameMenu* parent;
 	GameSubMenu* subMenu;
 	TextLabel2D* currLabel;
 	TextLabel2D smTextLabel, lgTextLabel;
@@ -55,13 +56,16 @@ public:
 	}
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	virtual void KeyPressed(GameMenu* parent, SDLKey key) {};
+	virtual void KeyPressed(SDLKey key, SDLMod modifier) {};
+	virtual void KeyReleased(SDLKey key, SDLMod modifier) {};
 
 	unsigned int GetHeight() const;
 	virtual float GetWidth() const;
 	
 	void ToggleWiggleAnimationOn(float amplitude, float frequency);
 	void ToggleWiggleAnimationOff();
+
+	void SetParent(GameMenu* parent) { this->parent = parent; }
 
 	inline void SetSize(bool isLarge) {
 		if (isLarge) {
@@ -127,11 +131,74 @@ public:
 	}
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	virtual void KeyPressed(GameMenu* parent, SDLKey key);
+	virtual void KeyPressed(SDLKey key, SDLMod modifier);
 
 	virtual float GetWidth() const { return this->maxWidth; }
 
 	virtual void Activate();
+};
+
+/**
+ * A menu item that allows the user to change the value from some minimum to some maximum
+ * as a filled bar.
+ */
+class AmountScrollerMenuItem : public GameMenuItem {
+public:
+	AmountScrollerMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, 
+		float minValue, float maxValue, float currentValue, float incrementAmt);
+	~AmountScrollerMenuItem();
+
+	inline float GetScrollerValue() const {
+		return this->currentValue;
+	}
+
+	// Allows the widget to constantly send update events everytime it is changed while active
+	// (not just after it is deactivated/set).
+	void SetConstantChangeFeedback(bool alwaysUpdate) {
+		this->alwaysSendChangeUpdates = alwaysUpdate;
+	}
+
+	// Inherited from GameMenuItem
+	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
+	void KeyPressed(SDLKey key, SDLMod modifier);
+	void KeyReleased(SDLKey key, SDLMod modifier);
+	float GetWidth() const { return this->maxWidth; }
+
+private:
+	static const float INTERIOR_PADDING_TEXT_ARROWS;
+	static const float INTERIOR_PADDING_ARROWS_SCROLLER;
+	static const float SCROLLER_ARROW_WIDTH;
+	static const float SCROLLER_WIDTH;
+
+	static const double INCREMENT_PULSE_TIME;
+
+	bool isActive;
+
+	float minValue;									// Minimum value the scroller can assume
+	float maxValue;									// Maximum value the scroller can assume
+	float currentValue;							// Current value of the scroller
+	float previouslySelectedValue;	// The value selected before this item was activated
+	
+	float incrementAmt;							// Amount that the scroller increments/decrements by with each change
+	float baseIncrementAmt;					// The base amount the scroller changes by
+
+	bool alwaysSendChangeUpdates;
+	float maxWidth;
+	std::string baseLabelStr;	// The label of this item (this text always appears on the item)
+
+	bool increaseValueButtonPressed;
+	bool decreaseValueButtonPressed;
+
+	void ChangeScrollerValue(float changeAmt);
+	void DrawScrollerArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing);
+	
+
+	void Activate() { 
+		this->isActive = true; 
+		this->previouslySelectedValue = this->currentValue;
+	}
+	void Deactivate() { this->isActive = false; }
+
 };
 
 /**
@@ -155,8 +222,8 @@ public:
 	void SetVerifyMenuText(const std::string& descriptionText, const std::string& confirmText, const std::string& cancelText);
 	void SetVerifyMenuColours(const Colour& descTxtColour, const Colour& idleColour, const Colour& selColour);
 
-	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	virtual void KeyPressed(GameMenu* parent, SDLKey key);
+	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
+	void KeyPressed(SDLKey key, SDLMod modifier);
 
 private:
 	static const float VERIFY_MENU_HPADDING;
@@ -181,8 +248,8 @@ private:
 	AnimationMultiLerp<float> verifyMenuBGScaleAnim;
 	AnimationMultiLerp<float> verifyMenuBGFadeAnim;
 
-	virtual void Activate();
-	virtual void Deactivate();
+	void Activate();
+	void Deactivate();
 
 };
 #endif

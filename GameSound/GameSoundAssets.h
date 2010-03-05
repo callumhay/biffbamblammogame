@@ -19,6 +19,8 @@ public:
 	GameSoundAssets();
 	~GameSoundAssets();
 
+	void SetGameVolume(int volumeLvl);
+
 	void Tick(double dT);
 
 	// Sound loader and unloaders

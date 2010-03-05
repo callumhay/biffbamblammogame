@@ -21,10 +21,10 @@ GameController::GameController(GameModel* model, GameDisplay* display): model(mo
 	}
 }
 
-void GameController::KeyDown(SDLKey key) {
+void GameController::KeyDown(SDLKey key, SDLMod modifier) {
 	if (key < 0 || key > NUM_KEYS) { return; }
 	this->SetKeyPress(key, true);
-	this->display->KeyPressed(key);
+	this->display->KeyPressed(key, modifier);
 
 	if (key == SDLK_SPACE) {
 		this->model->ReleaseBall();
@@ -122,9 +122,10 @@ void GameController::KeyDown(SDLKey key) {
 
 }
 
-void GameController::KeyUp(SDLKey key) {
+void GameController::KeyUp(SDLKey key, SDLMod modifier) {
 	if (key < 0 || key > NUM_KEYS) { return; }
 	this->SetKeyPress(key, false);
+	this->display->KeyReleased(key, modifier);
 }
 
 /*

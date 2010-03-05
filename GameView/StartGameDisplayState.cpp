@@ -21,9 +21,12 @@ void StartGameDisplayState::RenderFrame(double dT) {
 
 }
 
-void StartGameDisplayState::KeyPressed(SDLKey key) {
+void StartGameDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
 	// Allow the user to skip the animation by pressing a key
 	this->display->SetCurrentState(new InGameDisplayState(this->display));
+}
+
+void StartGameDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
 }
 
 void StartGameDisplayState::DisplaySizeChanged(int width, int height) {

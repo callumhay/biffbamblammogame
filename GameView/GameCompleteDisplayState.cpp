@@ -27,8 +27,11 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
 
 }
 
-void GameCompleteDisplayState::KeyPressed(SDLKey key) {
+void GameCompleteDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
 	this->display->SetCurrentState(new MainMenuDisplayState(this->display));
+}
+
+void GameCompleteDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
 }
 
 void GameCompleteDisplayState::DisplaySizeChanged(int width, int height) {
