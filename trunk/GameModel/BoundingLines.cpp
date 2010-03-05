@@ -123,6 +123,30 @@ Point2D BoundingLines::ClosestPoint(const Point2D& pt) const {
 }
 
 /**
+ * Determine whether the given point is inside this set of bounding lines or not.
+ */
+bool BoundingLines::IsInside(const Point2D& pt) const {
+	// Go through each line and do a half plane test using that line on the point
+	// based on the line's normal
+	for (size_t i = 0; i < this->lines.size(); i++) {
+		Vector2D fromLineToPt = pt - this->lines[i].P1();
+		if (fromLineToPt == Vector2D(0, 0)) {
+			fromLineToPt = pt - this->lines[i].P2();
+			assert(fromLineToPt != Vector2D(0, 0));
+		}
+
+		Vector2D normal = this->normals[i];
+		// If the dot product is negative then the point is inside...
+		float dotResult = Vector2D::Dot(fromLineToPt, normal);
+		if (dotResult >= 0.0f) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
  * Check to see whether this collided with another set of bounding lines.
  * Returns: true if any lines in this collided with any lines in the given BoundingLines object,
  * false otherwise.

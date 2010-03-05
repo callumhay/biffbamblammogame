@@ -7,6 +7,7 @@
 
 class GameModel;
 class GameAssets;
+class GameSoundAssets;
 class GameEventsListener;
 
 // The main display class, used to execute the main rendering loop
@@ -18,6 +19,7 @@ private:
 
 	DisplayState* currState;
 	GameModel* model;
+	GameSoundAssets* sounds;
 	GameAssets* assets;
 	GameEventsListener* gameListener;
 	
@@ -41,7 +43,7 @@ public:
 	static const int MAX_FRAMERATE;							// The maximum framerate possible for the game				
 	static const unsigned long FRAME_SLEEP_MS;	// Time to sleep between frames (determined by MAX_FRAMERATE)
 
-	GameDisplay(GameModel* model, int initWidth, int initHeight);
+	GameDisplay(GameModel* model, GameSoundAssets* sounds, int initWidth, int initHeight);
 	~GameDisplay();
 
 	bool HasGameExited() const { return this->gameExited; }
@@ -69,6 +71,9 @@ public:
 	GameAssets* GetAssets() {
 		return this->assets;
 	}
+	GameSoundAssets* GetSounds() {
+		return this->sounds;
+	}
 	GameModel* GetModel() {
 		return this->model;
 	}
@@ -76,10 +81,13 @@ public:
 		return this->gameCamera;
 	}
 
-	// Tells the display that a certain key was pressed
-	void KeyPressed(SDLKey key) {
-		this->currState->KeyPressed(key);
+	// Tells the display that a certain key was pressed/released
+	void KeyPressed(SDLKey key, SDLMod modifier) {
+		this->currState->KeyPressed(key, modifier);
 	}
+	void KeyReleased(SDLKey key, SDLMod modifier) {
+		this->currState->KeyReleased(key, modifier);
+	}	
 
 #ifdef _DEBUG
 

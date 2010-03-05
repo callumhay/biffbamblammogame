@@ -11,6 +11,7 @@
 
 #include "Beam.h"
 #include "LevelPiece.h"
+#include "PortalBlock.h"
 #include "PlayerPaddle.h"
 #include "GameLevel.h"
 #include "GameEventManager.h"
@@ -290,7 +291,16 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 				// The piece may generate a set of spawned beams based on whether or not it reflects/refracts light
 				const Collision::Ray2D currBeamRay = currBeamSegment->GetBeamSegmentRay();
 				std::list<Collision::Ray2D> spawnedRays = pieceCollidedWith->GetReflectionRefractionRays(currBeamSegment->GetEndPoint(), currBeamRay.GetUnitDirection());
-				
+
+				// In the case where a portal block is collided with then we need to account for its sibling
+				// as a collider for the new beam we spawn
+				if (pieceCollidedWith->GetType() == LevelPiece::Portal) {
+					PortalBlock* portalBlock = dynamic_cast<PortalBlock*>(pieceCollidedWith);
+					assert(portalBlock != NULL);
+					pieceCollidedWith = portalBlock->GetSiblingPortal();
+					insertResult = piecesCollidedWith.insert(pieceCollidedWith);
+				}
+
 				// We only allow a new ray to spawn if a) there is just one ray to spawn (in which case it will have the same radius as the current beam segment)
 				// or b) There are multiple new rays but the current beam segment has a suitable radius to be divided.
 				if (spawnedRays.size() == 1 || (spawnedRays.size() > 1 && currBeamSegment->GetRadius() > Beam::MIN_BEAM_RADIUS)) {

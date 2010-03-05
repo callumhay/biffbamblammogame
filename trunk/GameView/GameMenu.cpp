@@ -379,7 +379,7 @@ void GameMenu::DeactivateSelectedMenuItem() {
  * Capture input from the keyboard for a key pressed event
  * and navigate or change the menu based on the given key input.
  */
-void GameMenu::KeyPressed(SDLKey key) {
+void GameMenu::KeyPressed(SDLKey key, SDLMod modifier) {
 	// We check to see if we're in a sub menu - so that we know where
 	// to pass the key pressed event
 	GameMenu* currentMenu = this;
@@ -390,11 +390,11 @@ void GameMenu::KeyPressed(SDLKey key) {
 		if (currentMenu == NULL) {
 			// In this case we are dealing with a menu item that takes input,
 			// give that menu item the input
-			activatedMenuItem->KeyPressed(this, key);
+			activatedMenuItem->KeyPressed(key, modifier);
 		}
 		else {
 			// Recursively tell the menu about the key press
-			currentMenu->KeyPressed(key);
+			currentMenu->KeyPressed(key, modifier);
 		}
 		return;
 	}
@@ -423,6 +423,27 @@ void GameMenu::KeyPressed(SDLKey key) {
 
 		default:
 			break;
+	}
+}
+
+void GameMenu::KeyReleased(SDLKey key, SDLMod modifier) {
+	// We check to see if we're in a sub menu - so that we know where
+	// to pass the key released event
+	GameMenu* currentMenu = this;
+	if (this->isSelectedItemActivated) {
+		GameMenuItem* activatedMenuItem = this->menuItems[this->selectedMenuItemIndex];
+		currentMenu = activatedMenuItem->GetSubMenu();
+		
+		if (currentMenu == NULL) {
+			// In this case we are dealing with a menu item that takes input,
+			// give that menu item the input
+			activatedMenuItem->KeyReleased(key, modifier);
+		}
+		else {
+			// Recursively tell the menu about the key press
+			currentMenu->KeyReleased(key, modifier);
+		}
+		return;
 	}
 }
 

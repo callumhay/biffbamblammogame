@@ -16,10 +16,11 @@ private:
 
 public:
 	GameOverDisplayState(GameDisplay* display);
-	virtual ~GameOverDisplayState();
+	~GameOverDisplayState();
 
-	virtual void RenderFrame(double dT);
-	virtual void KeyPressed(SDLKey key);
-	virtual void DisplaySizeChanged(int width, int height);
+	void RenderFrame(double dT);
+	void KeyPressed(SDLKey key, SDLMod modifier);
+	void KeyReleased(SDLKey key, SDLMod modifier);
+	void DisplaySizeChanged(int width, int height);
 };
 #endif

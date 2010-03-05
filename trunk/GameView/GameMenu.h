@@ -117,7 +117,9 @@ public:
 	 * Returns: The index of the item added in this menu.
 	 */
 	int AddMenuItem(TextLabel2D& smLabel, TextLabel2D& lgLabel, GameSubMenu* subMenu) {
-		this->menuItems.push_back(new GameMenuItem(smLabel, lgLabel, subMenu));
+		GameMenuItem* newMenuItem = new GameMenuItem(smLabel, lgLabel, subMenu);
+		newMenuItem->SetParent(this);
+		this->menuItems.push_back(newMenuItem);
 		
 		this->menuHeight += smLabel.GetHeight() + this->GetMenuItemPadding();
 		this->menuWidth = std::max<float>(lgLabel.GetLastRasterWidth(), this->menuWidth);
@@ -126,6 +128,7 @@ public:
 	}
 	int AddMenuItem(GameMenuItem* menuItem) {
 		assert(menuItem != NULL);
+		menuItem->SetParent(this);
 		this->menuItems.push_back(menuItem);
 
 		this->menuHeight += menuItem->GetHeight() + this->GetMenuItemPadding();
@@ -148,7 +151,8 @@ public:
 	void Draw(double dT, int windowWidth, int windowHeight);
 	void DebugDraw();
 
-	void KeyPressed(SDLKey key);
+	void KeyPressed(SDLKey key, SDLMod modifier);
+	void KeyReleased(SDLKey key, SDLMod modifier);
 
 	inline void MenuItemHighlighted() {
 		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {

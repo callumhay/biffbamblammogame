@@ -23,6 +23,8 @@
 #include "GameModel/GameModelConstants.h"
 #include "GameModel/Onomatoplex.h"
 
+#include "GameSound/GameSoundAssets.h"
+
 #include "GameController.h"
 #include "ResourceManager.h"
 #include "WindowManager.h"
@@ -34,30 +36,18 @@ static const std::string RESOURCE_ZIP = "BBBResources.zip";
 static GameModel *model = NULL;
 static GameController *controller = NULL;
 static GameDisplay *display = NULL;
+static GameSoundAssets* sound = NULL;
 
 //static void ResizeWindow(int w, int h) {
 //	display->ChangeDisplaySize(w, h);
 //}
 
 static void KeyDownEventHandler(SDL_keysym* keysym) {
-		/*
-	switch (keysym->sym) {
-
-	case SDLK_ESCAPE:
-		display->QuitGame();
-		break;
-	
-	default:
-	*/
-		controller->KeyDown(keysym->sym);
-	/*
-		break;
-	}
-	*/
+	controller->KeyDown(keysym->sym, keysym->mod);
 }
 
 static void KeyUpEventHandler(SDL_keysym* keysym) {
-	controller->KeyUp(keysym->sym);
+	controller->KeyUp(keysym->sym, keysym->mod);
 }
 
 static void ProcessEvents() {
@@ -99,6 +89,11 @@ static void CleanUpMVC() {
 		display = NULL;
 	}
 
+	if (sound != NULL) {
+		delete sound;
+		sound = NULL;
+	}
+
 	if (controller != NULL) {
 		delete controller;
 		controller = NULL;
@@ -125,7 +120,10 @@ static void GameRenderLoop() {
 		// Render what's currently being displayed by the game
 		display->Render(frameTimeDelta);
 		SDL_GL_SwapBuffers();
-		
+
+		// Tick the sound assets...
+		sound->Tick(frameTimeDelta);
+
 		SDL_Delay(GameDisplay::FRAME_SLEEP_MS);
 
 		// Process SDL events...
@@ -211,8 +209,12 @@ int main(int argc, char *argv[]) {
 		// Create the MVC while showing the loading screen...
 		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 6);
 
+		LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
+		sound = new GameSoundAssets();
+		sound->SetGameVolume(initCfgOptions.GetVolume());
+
 		model = new GameModel();
-		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
+		display = new GameDisplay(model, sound, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
 		controller = new GameController(model, display);
 
 		LoadingScreen::GetInstance()->EndShowingLoadingScreen();

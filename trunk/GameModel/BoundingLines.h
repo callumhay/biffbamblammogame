@@ -19,6 +19,7 @@ public:
 
 	bool Collide(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float &d) const;
 	Point2D ClosestPoint(const Point2D& pt) const;
+	bool IsInside(const Point2D& pt) const;
 
 	bool CollisionCheck(const BoundingLines& other) const;
 	int CollisionCheckIndex(const BoundingLines& other) const;

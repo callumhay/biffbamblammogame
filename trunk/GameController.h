@@ -37,8 +37,8 @@ public:
 
 	GameController(GameModel* model, GameDisplay* display);
 	
-	void KeyDown(SDLKey key);
-	void KeyUp(SDLKey key);
+	void KeyDown(SDLKey key, SDLMod modifier);
+	void KeyUp(SDLKey key, SDLMod modifier);
 
 	void Tick();
 };

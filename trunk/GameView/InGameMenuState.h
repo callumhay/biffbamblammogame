@@ -18,7 +18,8 @@ public:
 	~InGameMenuState();
 
 	void RenderFrame(double dT);
-	void KeyPressed(SDLKey key);
+	void KeyPressed(SDLKey key, SDLMod modifier);
+	void KeyReleased(SDLKey key, SDLMod modifier);
 	void DisplaySizeChanged(int width, int height);
 
 private:
@@ -34,6 +35,7 @@ private:
 	// Top Level Menu variables
 	GameMenu* topMenu; // Main (top-most/parent) menu (features options "Return to Main Menu", etc.)
 	int resumeItem;
+	//int audioMenu;
 	int returnToMainItem;
 	int exitToDesktopItem;
 
@@ -53,7 +55,21 @@ private:
 		void EscMenu();
 	};
 
+	// Event handler for verify menus
+	class VerifyMenuEventHandler : public GameMenuItemEventHandler {
+	private:
+		InGameMenuState* inGameMenuState;
+	public:
+		VerifyMenuEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
+		~VerifyMenuEventHandler() {}
+
+		void MenuItemScrolled();
+		void MenuItemEnteredAndSet();
+		void MenuItemCancelled();
+	};
+
 	TopMenuEventHandler* topMenuEventHandler;
+	VerifyMenuEventHandler* verifyMenuEventHandler;
 
 };
 

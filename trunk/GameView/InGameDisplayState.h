@@ -38,7 +38,8 @@ public:
 	~InGameDisplayState();
 
 	void RenderFrame(double dT);
-	void KeyPressed(SDLKey key);
+	void KeyPressed(SDLKey key, SDLMod modifier);
+	void KeyReleased(SDLKey key, SDLMod modifier);
 	void DisplaySizeChanged(int width, int height);
 
 };

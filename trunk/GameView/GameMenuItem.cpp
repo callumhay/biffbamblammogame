@@ -51,7 +51,7 @@ void GameMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWidth
 	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
 
 	this->currLabel->SetTopLeftCorner(topLeftCorner + Vector2D(wiggleAmount, 0.0f));
-	this->currLabel->Draw();
+	this->currLabel->Draw(true);
 
 	// Animate the wiggle and/or pulse (if there are any animations loaded)
 	this->wiggleAnimation.Tick(dT);
@@ -244,7 +244,7 @@ void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, flo
  * Called from the parent menu of this item when a key is pressed and this item
  * is the one currently selected and relevant.
  */
-void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
+void SelectionListMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 	assert(parent != NULL);
 
 	// Key pressing does nothing if there's nothing to select from
@@ -277,10 +277,12 @@ void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 		case SDLK_RETURN:
 			// When return is hit, the selection is locked and results in a change in the menu item
 			// tell the parent about this in order to send out a change event
-			if (this->selectedIndex != this->previouslySelectedIndex) {
-				parent->ActivatedMenuItemChanged();
+			if (this->parent != NULL) {
+				if (this->selectedIndex != this->previouslySelectedIndex) {
+					this->parent->ActivatedMenuItemChanged();
+				}
+				parent->DeactivateSelectedMenuItem();
 			}
-			parent->DeactivateSelectedMenuItem();
 			
 			if (this->eventHandler != NULL) {
 				this->eventHandler->MenuItemEnteredAndSet();
@@ -291,7 +293,9 @@ void SelectionListMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			// If the user hits ESC then we deselect the currently selected item (i.e., this one)
 			// and we make sure the selection inside the item doesn't change
 			this->selectedIndex = this->previouslySelectedIndex;
-			parent->DeactivateSelectedMenuItem();
+			if (this->parent != NULL) {
+				this->parent->DeactivateSelectedMenuItem();
+			}
 
 			if (this->eventHandler != NULL) {
 				this->eventHandler->MenuItemCancelled();
@@ -313,6 +317,291 @@ void SelectionListMenuItem::Activate() {
 	// Set the previous index to the current one (so we keep track of it)
 	this->previouslySelectedIndex = this->selectedIndex;
 }
+
+// AmountScrollerMenuItem Functions *******************************************************************
+
+// The distance between the text and arrows 
+const float AmountScrollerMenuItem::INTERIOR_PADDING_TEXT_ARROWS = 10.0f;
+// The distance between the arrows and scroller
+const float AmountScrollerMenuItem::INTERIOR_PADDING_ARROWS_SCROLLER = 5.0f;
+// Width of the arrows on either side of the scroller widget
+const float AmountScrollerMenuItem::SCROLLER_ARROW_WIDTH = 10.0f;
+// Width of the value scroller widget in pixels
+const float AmountScrollerMenuItem::SCROLLER_WIDTH = 180.0f;
+
+// Time between pulses of incrementing when the increment button is being held
+// down by the user
+const double AmountScrollerMenuItem::INCREMENT_PULSE_TIME = 0.05;
+
+AmountScrollerMenuItem::AmountScrollerMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, 
+																							 float minValue, float maxValue, float currentValue, 
+																							 float incrementAmt) :
+GameMenuItem(smLabel, lgLabel, NULL),
+isActive(false),
+minValue(minValue),
+maxValue(maxValue),
+currentValue(currentValue),
+previouslySelectedValue(currentValue),
+incrementAmt(incrementAmt),
+baseIncrementAmt(incrementAmt),
+baseLabelStr(lgLabel.GetText()),
+alwaysSendChangeUpdates(false),
+increaseValueButtonPressed(false),
+decreaseValueButtonPressed(false)
+{
+	this->lgTextLabel.SetText(this->baseLabelStr);
+	this->maxWidth = this->lgTextLabel.GetLastRasterWidth() + AmountScrollerMenuItem::INTERIOR_PADDING_TEXT_ARROWS + 
+		2 * AmountScrollerMenuItem::SCROLLER_ARROW_WIDTH + 2 * AmountScrollerMenuItem::INTERIOR_PADDING_ARROWS_SCROLLER +
+		AmountScrollerMenuItem::SCROLLER_WIDTH;
+}
+
+AmountScrollerMenuItem::~AmountScrollerMenuItem() {
+}
+
+void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight) {
+	// Obtain the latest interpolated wiggle value
+	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
+	
+	// Animate the wiggle and/or pulse (if there are any animations loaded)
+	this->wiggleAnimation.Tick(dT);
+
+	// Draw the base label portion of the item
+	Point2D wiggleTopLeftCorner = topLeftCorner + Vector2D(wiggleAmount, 0.0f);
+	this->currLabel->SetText(this->baseLabelStr);
+	this->currLabel->SetTopLeftCorner(wiggleTopLeftCorner);
+	this->currLabel->Draw();
+
+	// If the item is not active then we don't draw any more of it
+	if (!this->isActive) {
+		return;
+	}
+
+	// Update the amount to increment by...
+	static double timeCounter = 0.0;
+	timeCounter += dT;
+	if (timeCounter >= AmountScrollerMenuItem::INCREMENT_PULSE_TIME) {
+		timeCounter = 0.0;
+		
+		if (this->increaseValueButtonPressed) {
+			this->ChangeScrollerValue(this->incrementAmt);
+		}
+		else if (this->decreaseValueButtonPressed) {
+			this->ChangeScrollerValue(-this->incrementAmt);
+		}
+	}
+
+	Camera::PushWindowCoords();
+	glPushAttrib(GL_ENABLE_BIT);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glDisable(GL_DEPTH_TEST);
+
+	// Draw the left pointing scroller arrow
+	const float BASE_LABEL_WIDTH  = this->currLabel->GetLastRasterWidth();
+	const float SCROLLER_HEIGHT = this->currLabel->GetHeight();
+
+	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(BASE_LABEL_WIDTH + AmountScrollerMenuItem::INTERIOR_PADDING_TEXT_ARROWS, 0.0);
+	this->DrawScrollerArrow(wiggleTopLeftCorner, SCROLLER_HEIGHT, true);
+
+	// Draw the scroller widget
+	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(AmountScrollerMenuItem::SCROLLER_ARROW_WIDTH + 
+																											 AmountScrollerMenuItem::INTERIOR_PADDING_ARROWS_SCROLLER, 0.0f);
+	
+	const float SCROLLER_X_WIDTH		  = wiggleTopLeftCorner[0] + SCROLLER_WIDTH;
+	const float SCROLLER_Y_HEIGHT		  = wiggleTopLeftCorner[1] - SCROLLER_HEIGHT;
+	const float SCROLLER_FILL_X_WIDTH = wiggleTopLeftCorner[0] + SCROLLER_WIDTH * ((this->currentValue - this->minValue) / (this->maxValue - this->minValue));
+	glPolygonMode(GL_FRONT, GL_FILL);
+	
+	glBegin(GL_QUADS);
+	
+	// Shadowy background
+	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+	glVertex2f(wiggleTopLeftCorner[0], wiggleTopLeftCorner[1]);
+	glVertex2f(wiggleTopLeftCorner[0], SCROLLER_Y_HEIGHT);
+	glVertex2f(SCROLLER_X_WIDTH, SCROLLER_Y_HEIGHT);
+	glVertex2f(SCROLLER_X_WIDTH, wiggleTopLeftCorner[1]);
+
+	// Scroller fill
+	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+	glVertex2f(wiggleTopLeftCorner[0], wiggleTopLeftCorner[1]);
+	glVertex2f(wiggleTopLeftCorner[0], SCROLLER_Y_HEIGHT);
+	glVertex2f(SCROLLER_FILL_X_WIDTH, SCROLLER_Y_HEIGHT);
+	glVertex2f(SCROLLER_FILL_X_WIDTH, wiggleTopLeftCorner[1]);
+
+	glEnd();
+
+	// Black outline around the scroller widget
+	glPolygonMode(GL_FRONT, GL_LINE);
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	glBegin(GL_QUADS);
+	glVertex2f(wiggleTopLeftCorner[0], wiggleTopLeftCorner[1]);
+	glVertex2f(wiggleTopLeftCorner[0], SCROLLER_Y_HEIGHT);
+	glVertex2f(SCROLLER_X_WIDTH, SCROLLER_Y_HEIGHT);
+	glVertex2f(SCROLLER_X_WIDTH, wiggleTopLeftCorner[1]);
+	glEnd();
+
+	// Draw the right pointing scroller arrow
+	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(AmountScrollerMenuItem::SCROLLER_WIDTH + 
+																											AmountScrollerMenuItem::INTERIOR_PADDING_ARROWS_SCROLLER, 0.0f);
+	this->DrawScrollerArrow(wiggleTopLeftCorner, SCROLLER_HEIGHT, false);
+
+	glPopAttrib();
+	Camera::PopWindowCoords();
+}
+
+void AmountScrollerMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
+	this->incrementAmt = this->baseIncrementAmt;
+
+	// If the user is holding down the shift key then we make the scroller scroll faster
+	if ((modifier & KMOD_LSHIFT) == KMOD_LSHIFT || (modifier & KMOD_RSHIFT) == KMOD_RSHIFT) {
+		this->incrementAmt = std::max<float>(0.05f * (this->maxValue - this->minValue), 2.0f * this->baseIncrementAmt);
+		assert(this->incrementAmt > 0);
+	}
+
+	switch (key) {
+		case SDLK_LEFT:
+		case SDLK_LEFTBRACKET:
+		case SDLK_LEFTPAREN:
+		case SDLK_KP4:
+			// Decrease the scroller value...
+			this->decreaseValueButtonPressed = true;
+			this->ChangeScrollerValue(-this->incrementAmt);
+			break;
+
+		case SDLK_RIGHT:
+		case SDLK_RIGHTBRACKET:
+		case SDLK_RIGHTPAREN:
+		case SDLK_KP6:
+			// Increase the scroller value...
+			this->increaseValueButtonPressed = true;
+			this->ChangeScrollerValue(this->incrementAmt);
+			break;
+
+		case SDLK_RETURN:
+			// When return is hit, the value is locked and results in a change in the menu item
+			// tell the parent about this in order to send out a change event
+			if (this->parent != NULL) {
+				if (this->currentValue != this->previouslySelectedValue) {
+					this->parent->ActivatedMenuItemChanged();
+				}
+				this->parent->DeactivateSelectedMenuItem();
+			}
+			if (this->eventHandler != NULL) {
+				this->eventHandler->MenuItemEnteredAndSet();
+			}
+			break;
+
+		case SDLK_ESCAPE:
+			// If the user hits ESC then we sure the selection inside the item doesn't change
+			this->ChangeScrollerValue(this->previouslySelectedValue - this->currentValue);
+			if (this->parent != NULL) {
+				this->parent->DeactivateSelectedMenuItem();
+			}
+
+			if (this->eventHandler != NULL) {
+				this->eventHandler->MenuItemCancelled();
+			}
+			break;
+
+		default:
+			// Do nothing
+			break;
+	}
+}
+
+void AmountScrollerMenuItem::KeyReleased(SDLKey key, SDLMod modifier) {
+	switch (key) {
+		case SDLK_LEFT:
+		case SDLK_LEFTBRACKET:
+		case SDLK_LEFTPAREN:
+		case SDLK_KP4:
+			this->decreaseValueButtonPressed = false;
+			break;
+
+		case SDLK_RIGHT:
+		case SDLK_RIGHTBRACKET:
+		case SDLK_RIGHTPAREN:
+		case SDLK_KP6:
+			this->increaseValueButtonPressed = false;
+			break;
+
+		default:
+			break;
+	}
+}
+
+void AmountScrollerMenuItem::ChangeScrollerValue(float changeAmt) {
+	if (fabs(changeAmt) < EPSILON) {
+		return;
+	}
+
+	float valueBefore = this->currentValue;
+	this->currentValue = std::max<float>(this->minValue, std::min<float>(this->maxValue, this->currentValue + changeAmt));
+
+	if (this->parent != NULL && this->alwaysSendChangeUpdates && this->currentValue != valueBefore) {
+		this->parent->ActivatedMenuItemChanged();
+	}
+}
+
+void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing) {
+	const float HALF_ARROW_HEIGHT = arrowHeight / 2.0f;
+	const float HALF_ARROW_WIDTH	= AmountScrollerMenuItem::SCROLLER_ARROW_WIDTH / 2.0f;
+
+	// Arrow vertices, centered on the origin
+	const Point2D APEX_POINT		= (isLeftPointing ? Point2D(-HALF_ARROW_WIDTH, 0.0f) : Point2D(HALF_ARROW_WIDTH, 0.0f));
+	const Point2D TOP_POINT			= (isLeftPointing ? Point2D(HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT) : Point2D(-HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT));
+	const Point2D BOTTOM_POINT	= (isLeftPointing ? Point2D(HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT) : Point2D(-HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT));
+
+	// We set the alpha of the arrows based on the text
+	const ColourRGBA currTextColour = this->currLabel->GetColour();
+	
+	// Draw the outlines of the arrows
+	glPolygonMode(GL_FRONT, GL_LINE);
+	glLineWidth(2.0f);
+	glColor4f(0.0f, 0.0f, 0.0f, currTextColour.A());
+	
+	glPushMatrix();
+	glTranslatef(topLeftCorner[0] + HALF_ARROW_WIDTH, topLeftCorner[1] - HALF_ARROW_HEIGHT, 0.0f);
+
+	if (isLeftPointing) {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+		glEnd();
+	}
+	else {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+		glEnd();
+	}
+
+	// Fill in the arrows
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glColor4f(1.0f, 0.6f, 0.0f, currTextColour.A());
+	
+	if (isLeftPointing) {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+		glEnd();
+	}
+	else {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+		glEnd();
+	}
+	
+	glPopMatrix();
+}
+
 
 // VerifyMenuItem Functions ***************************************************************************
 
@@ -372,6 +661,7 @@ void VerifyMenuItem::SetVerifyMenuText(const std::string& descriptionText, const
 
 	// Figure out the maximum width of the verify menu now - to do this we
 	// need to set the labels to their largest size
+	this->descriptionLabel.SetFont(this->verifyDescFont);
 	this->confirmLabel.SetFont(this->verifySelFont);
 	this->cancelLabel.SetFont(this->verifySelFont);
 	
@@ -436,7 +726,7 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	glLoadIdentity();
 	const float MENU_MIDDLE_X = verifyMenuTopLeft[0] + HALF_VERIFY_MENU_WIDTH;
 	const float MENU_MIDDLE_Y = verifyMenuTopLeft[1] - HALF_VERIFY_MENU_HEIGHT;
-	glTranslatef(MENU_MIDDLE_X, MENU_MIDDLE_Y, 0.0f);
+	glTranslatef(MENU_MIDDLE_X, MENU_MIDDLE_Y, 1.0f);
 
 	// Fill in the background
 	glPolygonMode(GL_FRONT, GL_FILL);
@@ -514,7 +804,7 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	this->verifyMenuBGFadeAnim.Tick(dT);
 }
 
-void VerifyMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
+void VerifyMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 	// If the verify menu is not active then we just exit... this shouldn't happen though
 	if (!this->verifyMenuActive) {
 		assert(false);
@@ -531,14 +821,18 @@ void VerifyMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			else {
 				this->SetSelectedVerifyMenuOption(VerifyMenuItem::Cancel);
 			}
-			parent->MenuItemHighlighted();
+			if (this->parent != NULL) {
+				this->parent->MenuItemHighlighted();
+			}
 			break;
 
 		case SDLK_RETURN:
 			// Item currently highlighted in the verify menu has just been activated...
 			if (this->selectedOption == VerifyMenuItem::Cancel) {
-				// If the user decided to cancel then just deactivate the item
-				parent->DeactivateSelectedMenuItem();
+				if (this->parent != NULL) {
+					// If the user decided to cancel then just deactivate the item
+					this->parent->DeactivateSelectedMenuItem();
+				}
 				
 				if (this->eventHandler != NULL) {
 					this->eventHandler->MenuItemCancelled();
@@ -547,7 +841,9 @@ void VerifyMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			else {
 				// If the user decided to confirm then tell the parent that the activated
 				// menu item has been verified
-				parent->ActivatedMenuItemVerified();
+				if (this->parent != NULL) {
+					this->parent->ActivatedMenuItemVerified();
+				}
 			}
 			break;
 
@@ -555,8 +851,9 @@ void VerifyMenuItem::KeyPressed(GameMenu* parent, SDLKey key) {
 			// User has indicated that they aren't sure... Set the selected item to cancel,
 			// if the item is already set to cancel then just cancel the verify menu
 			if (this->selectedOption == VerifyMenuItem::Cancel) {
-				parent->DeactivateSelectedMenuItem();
-
+				if (this->parent != NULL) {
+					this->parent->DeactivateSelectedMenuItem();
+				}
 				if (this->eventHandler != NULL) {
 					this->eventHandler->MenuItemCancelled();
 				}

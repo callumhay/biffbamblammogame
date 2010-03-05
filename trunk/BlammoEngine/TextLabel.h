@@ -95,7 +95,7 @@ public:
 		return this->text;
 	}
 
-	void Draw();
+	void Draw(bool depthTestOn = false, float depth = 0.0);
 };
 
 #endif

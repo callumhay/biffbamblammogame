@@ -14,7 +14,7 @@ const Colour InGameMenuState::MENU_ITEM_ACTIVE_COLOUR	= Colour(0.49f, 0.98f, 1.0
 const Colour InGameMenuState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
 
 InGameMenuState::InGameMenuState(GameDisplay* display) : DisplayState(display), nextAction(InGameMenuState::Nothing),
-topMenu(NULL), topMenuEventHandler(NULL) {
+topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL) {
 	this->InitTopMenu();
 }
 
@@ -23,6 +23,8 @@ InGameMenuState::~InGameMenuState() {
 	this->topMenu = NULL;
 	delete this->topMenuEventHandler;
 	this->topMenuEventHandler = NULL;
+	delete this->verifyMenuEventHandler;
+	this->verifyMenuEventHandler = NULL;
 }
 
 /**
@@ -60,22 +62,31 @@ void InGameMenuState::RenderFrame(double dT) {
 	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 0.0f, ColourRGBA(0.0f, 0.0f, 0.0f, 0.5f));
-	glPopAttrib();
-
+	GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), -1.0f, ColourRGBA(0.0f, 0.0f, 0.0f, 0.5f));
+	
 	// Draw the menus...
+	glEnable(GL_DEPTH_TEST);
 	this->topMenu->SetCenteredOnScreen(camera.GetWindowWidth(), camera.GetWindowHeight());
 	this->topMenu->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
+	glPopAttrib();
 }
 
 /**
  * Called whenever a key is pressed while in this state.
  */
-void InGameMenuState::KeyPressed(SDLKey key) {
+void InGameMenuState::KeyPressed(SDLKey key, SDLMod modifier) {
 	assert(this->topMenu != NULL);
-
 	// Tell the top-most menu about the key pressed event
-	this->topMenu->KeyPressed(key);
+	this->topMenu->KeyPressed(key, modifier);
+}
+
+/**
+ * Called whenever a key is released while in this state.
+ */
+void InGameMenuState::KeyReleased(SDLKey key, SDLMod modifier) {
+	assert(this->topMenu != NULL);
+	// Tell the top-most menu about the key released event
+	this->topMenu->KeyReleased(key, modifier);
 }
 
 void InGameMenuState::DisplaySizeChanged(int width, int height) {
@@ -88,8 +99,11 @@ void InGameMenuState::InitTopMenu() {
 
 	const Camera& camera = this->display->GetCamera();
 
+	// Set up the handlers
+	this->topMenuEventHandler			= new TopMenuEventHandler(this);
+	this->verifyMenuEventHandler	= new VerifyMenuEventHandler(this);
+
 	// Setup the top menu attributes
-	this->topMenuEventHandler = new TopMenuEventHandler(this);
 	this->topMenu = new GameMenu();
 	this->topMenu->SetAlignment(GameMenu::CenterJustified);
 	this->topMenu->AddEventHandler(this->topMenuEventHandler);
@@ -109,16 +123,35 @@ void InGameMenuState::InitTopMenu() {
 	// Add items to the menu in their order (first to last)
 	this->resumeItem = this->topMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 	
+	// The exit/return to main menu item has a verify menu...
 	tempLabelSm.SetText("Return to Main Menu");
 	tempLabelLg.SetText("Return to Main Menu");
 
-	// TODO: "Are you sure, lose saved progress" dialog
-	this->returnToMainItem = this->topMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+	VerifyMenuItem* returnToMainMenuItem = new VerifyMenuItem(tempLabelSm, tempLabelLg, 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
+
+	returnToMainMenuItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
+	returnToMainMenuItem->SetVerifyMenuText("All unsaved progress will be lost, exit to the main menu?", "Yes!", "NOoo!");
+	returnToMainMenuItem->SetEventHandler(this->verifyMenuEventHandler);
+
+	this->returnToMainItem = this->topMenu->AddMenuItem(returnToMainMenuItem);
 	
+	// The exit to desktop menu item has a verify menu...
 	tempLabelSm.SetText("Exit to Desktop");
 	tempLabelLg.SetText("Exit to Desktop");
-	// TODO: "Are you sure, lose saved progress" dialog
-	this->exitToDesktopItem = this->topMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+
+	VerifyMenuItem* exitToDesktopMenuItem = new VerifyMenuItem(tempLabelSm, tempLabelLg, 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
+
+	exitToDesktopMenuItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
+	exitToDesktopMenuItem->SetVerifyMenuText("All unsaved progress will be lost, exit to the desktop?", "Yes!", "NOoo!");
+	exitToDesktopMenuItem->SetEventHandler(this->verifyMenuEventHandler);
+
+	this->exitToDesktopItem = this->topMenu->AddMenuItem(exitToDesktopMenuItem);
 
 	this->topMenu->SetSelectedMenuItem(this->resumeItem);
 }
@@ -132,15 +165,17 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIn
 	if (itemIndex == this->inGameMenuState->resumeItem) {
 		this->inGameMenuState->nextAction = InGameMenuState::ResumeGame;
 	}
-	else if (itemIndex == this->inGameMenuState->returnToMainItem) {
-		this->inGameMenuState->nextAction = InGameMenuState::ReturnToMainMenu;
-	}
-	else if (itemIndex == this->inGameMenuState->exitToDesktopItem) {
-		this->inGameMenuState->nextAction = InGameMenuState::ExitToDesktop;
-	}
+
+
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
+	if (itemIndex == this->inGameMenuState->returnToMainItem) {
+		this->inGameMenuState->nextAction = InGameMenuState::ReturnToMainMenu;
+	}	
+	else if (itemIndex == this->inGameMenuState->exitToDesktopItem) {
+		this->inGameMenuState->nextAction = InGameMenuState::ExitToDesktop;
+	}
 }
 
 void InGameMenuState::TopMenuEventHandler::EscMenu() {
@@ -154,4 +189,14 @@ void InGameMenuState::TopMenuEventHandler::EscMenu() {
 	else {
 		topMenu->ActivateSelectedMenuItem();
 	}
+}
+
+// Verify Menu Event Handler ******************************************************
+void InGameMenuState::VerifyMenuEventHandler::MenuItemScrolled() {
+}
+
+void InGameMenuState::VerifyMenuEventHandler::MenuItemEnteredAndSet() {
+}
+
+void InGameMenuState::VerifyMenuEventHandler::MenuItemCancelled() {
 }
