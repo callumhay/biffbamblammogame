@@ -173,7 +173,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
  * Deals with all the important effects a collision could have on the game model.
  * Precondition: p != NULL
  */
-void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p) {
+void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	assert(p != NULL);
 	
 	LevelPiece* pieceBefore = p;
@@ -187,9 +187,6 @@ void GameModel::CollisionOccurred(const GameBall& ball, LevelPiece* p) {
 	// tell the level about it
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, ball);	// WARNING: This can destroy p.
-	
-	// Tell the ball what the last piece it collided with was...
-	//ball.SetLastPieceCollidedWith(pieceAfterCollision);
 
 	// EVENT: Ball-Block Collision
 	GameEventManager::Instance()->ActionBallBlockCollision(ball, *pieceAfterCollision);

@@ -67,7 +67,7 @@ public:
 			this->bounds.Clear();
 	};
 
-	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 		// Nothing happens when there's nothing to collide with...
 		return this->Destroy(gameModel);
 	}

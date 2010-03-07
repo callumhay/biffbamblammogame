@@ -26,72 +26,132 @@ BoundingLines::~BoundingLines() {
  * inside the line, postivie means outside - the outward normal pointing direction).
  * The boolean return value will be true if one or more collisions occured, false otherwise.
  */
-bool BoundingLines::Collide(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float &d) const {
-	float sqRadius = c.Radius()*c.Radius();
-	d = 0.0f;
+bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, double& timeSinceCollision) const {
 	n = Vector2D(0, 0);
+	timeSinceCollision = -1.0;
 
 	// If there's no velocity then just exit with no collision (how can a non-moving object collide?)
 	if (velocity == Vector2D(0.0f, 0.0f)) {
 		return false;
 	}
 
-	Vector2D normalizedVel = Vector2D::Normalize(velocity);
-	float minSqDist = FLT_MAX;	// Use this to ensure that we bounce off the most relevant side
+	float velocityMagnitude = Vector2D::Magnitude(velocity);
+	Vector2D normalizedVel = velocity / velocityMagnitude;
 
-	std::vector<Vector2D> collisionNormals;
-	float largestDistanceMag = FLT_MIN;
-	Vector2D largestDistMagNormal(0, 0);
+	// Use a square radius instead of using square root operations (it's faster.)
+	float sqRadius = c.Radius()*c.Radius();
+	bool collisionOccurred = false;
+	float smallestCollisionDistSq = FLT_MAX;
+	float movementDistOverDT = dT * velocityMagnitude;
+	Vector2D movementOverDT = dT * velocity;
+	Point2D previousCenter = c.Center() - movementOverDT;
+	Point2D closestCapsulePt, closestLinePt;
+	float collisionParamT;
 
-	// For each of the lines check for collision and how close the collision is to the line
-	for (size_t i = 0; i < this->lines.size(); i++) {
+	// Create lines for the center outer sides of the capsule and collide them with lines of this bounding line set
+	Collision::LineSeg2D centerRange(previousCenter, c.Center());
+	Collision::LineSeg2D extendedCenterRange(previousCenter - 5*c.Radius()*normalizedVel, c.Center());
+	Collision::LineSeg2D capsuleSide1(previousCenter + c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]), 
+											 c.Center() +  c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]));
+	Collision::LineSeg2D capsuleSide2(previousCenter - c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]), 
+											 c.Center() -  c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]));
+
+	int count = 0;
+	for (std::vector<Collision::LineSeg2D>::const_iterator lineIter = this->lines.begin(); lineIter != this->lines.end(); ++lineIter) {
+		const Collision::LineSeg2D& currLine = *lineIter;
+		const Vector2D& currNormal = this->normals[count];
+
+		// Cast a ray from the previous position of the circle center towards the colliding line
+		Collision::Ray2D circleCollisionRay(previousCenter, normalizedVel);
+		// Check to see if the ray collides with the current line segment
 		
-		// Collision candiates must be within a 90 degree angle of the normal for the line
-		// being collided with (otherwise they're mistakingly colliding with another line)
-		bool isCollisionCandidate = acos(Vector2D::Dot(-normalizedVel, this->normals[i])) < M_PI_DIV2;
-		if (isCollisionCandidate) {
-			float sqDist = Collision::SqDistFromPtToLineSeg(this->lines[i], c.Center());
-		
-			// Check to see if there was a collision between the current line seg and the given circle
-			if (sqDist < sqRadius) { //&& sqDist < minSqDist) {
+		if (Collision::IsCollision(circleCollisionRay, currLine, collisionParamT)) {
+			// NOTE: collisionParamT is gaurenteed to be positive here
+			assert(collisionParamT >= 0.0);
 
-				// Collision occurred set the normal
-				collisionNormals.push_back(this->normals[i]);
+			// Figure out what the value of the ray parameter was at the time of collision - this value might be positive or
+			// negative depending on how far/close the ball was from the collision line
+			double rayTCenterDuringCollision = collisionParamT - c.Radius();
+			// Now check to see if there was a collision within the last time interval dT
+			if (rayTCenterDuringCollision <= movementDistOverDT) {
+				Point2D centerOfCircleAtCollision = circleCollisionRay.GetPointAlongRayFromOrigin(rayTCenterDuringCollision);
 				
-				float currDist = sqrtf(sqDist);
-				if (Vector2D::Dot(this->normals[i], c.Center() - this->lines[i].P1()) < 0) {
-					currDist *= -1.0f; 
+				// Now figure out the distance between the current center circle position and the
+				// position of the center at collision
+				float distance = Point2D::Distance(c.Center(), centerOfCircleAtCollision);
+				float timeToCollision = distance / velocityMagnitude;
+				assert(timeToCollision >= 0.0);
+
+				if (timeToCollision > dT) {
+					timeToCollision = dT;
 				}
-				
-				if (fabs(currDist) > fabs(largestDistanceMag)) {
-					largestDistanceMag = currDist;
-					largestDistMagNormal = this->normals[i];
+
+				if (timeToCollision > timeSinceCollision) {
+					timeSinceCollision = timeToCollision;
+					collisionOccurred = true;
+					n = currNormal;
+				}
+			}			
+		}
+
+		// Test both sides of the capsule created by the ball over dT
+		float sqDist = Collision::ClosestPoint(capsuleSide1, currLine, closestCapsulePt, closestLinePt);
+		if (sqDist < EPSILON) {
+			// Now draw a line through the collision point on the capsule in the direction
+			// of the collision line normal and find its intersection with the middle line of the circle
+			
+			Collision::Ray2D collisionRay(closestCapsulePt, currNormal);
+			if (Collision::IsCollision(collisionRay, extendedCenterRange, collisionParamT)) {
+				// Calculate the collision center point
+				Point2D centerOfCircleAtCollision = collisionRay.GetPointAlongRayFromOrigin(collisionParamT);
+
+				// Now figure out the distance between the current center circle position and the
+				// position of the center at collision
+				float distance = Point2D::Distance(c.Center(), centerOfCircleAtCollision);
+				float timeToCollision = distance / velocityMagnitude;
+				assert(timeToCollision >= 0.0);
+
+				if (timeToCollision > dT) {
+					timeToCollision = dT;
+				}
+
+				if (timeToCollision > timeSinceCollision) {
+					timeSinceCollision = timeToCollision;
+					collisionOccurred = true;
+					n = currNormal;
+				}
+			}			
+		}
+
+		sqDist = Collision::ClosestPoint(capsuleSide2, currLine, closestCapsulePt, closestLinePt);
+		if (sqDist < EPSILON) {
+			// Now draw a line through the collision point on the capsule in the direction
+			// of the collision line normal and find its intersection with the middle line of the circle
+			
+			Collision::Ray2D collisionRay(closestCapsulePt, currNormal);
+			if (Collision::IsCollision(collisionRay, extendedCenterRange, collisionParamT)) {
+				// Calculate the collision center point
+				Point2D centerOfCircleAtCollision = collisionRay.GetPointAlongRayFromOrigin(collisionParamT);
+
+				// Now figure out the distance between the current center circle position and the
+				// position of the center at collision
+				float distance = Point2D::Distance(c.Center(), centerOfCircleAtCollision);
+				float timeToCollision = distance / velocityMagnitude;
+				assert(timeToCollision >= 0.0);
+
+				if (timeToCollision > dT) {
+					timeToCollision = dT;
+				}
+
+				if (timeToCollision > timeSinceCollision) {
+					timeSinceCollision = timeToCollision;
+					collisionOccurred = true;
+					n = currNormal;
 				}
 			}
 		}
-	}
 
-	bool collisionOccurred = collisionNormals.size() > 0;
-	if (collisionOccurred) {
-		// There was a collision - find a weighted average of the normals and distances...
-		for (size_t i = 0; i < collisionNormals.size(); i++) {
-			// Check to see if the normal is ridiculously different...
-			if (acos(Vector2D::Dot(largestDistMagNormal, collisionNormals[i])) <= M_PI_DIV2) {
-				// Normal is within a reaonable range of the closest line collision's normal, so use it
-				// in the averaging process
-				n = n + collisionNormals[i];
-			}
-		}
-		
-		// Make sure n is something reasonable no matter what!!!
-		if (n == Vector2D(0, 0)) {
-			assert(false);
-			n = largestDistMagNormal;
-		}
-		assert(n != Vector2D(0, 0));
-
-		n.Normalize();
-		d = largestDistanceMag;
+		count++;
 	}
 
 	return collisionOccurred;

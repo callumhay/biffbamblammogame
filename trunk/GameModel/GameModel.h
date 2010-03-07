@@ -77,7 +77,7 @@ private:
 	}
 
 	void CollisionOccurred(Projectile* projectile, LevelPiece* p);
-	void CollisionOccurred(const GameBall& ball, LevelPiece* p);
+	void CollisionOccurred(GameBall& ball, LevelPiece* p);
 	void BallPaddleCollisionOccurred(GameBall& ball);
 	void BallDied(GameBall* deadBall, bool& stateChanged);
 	

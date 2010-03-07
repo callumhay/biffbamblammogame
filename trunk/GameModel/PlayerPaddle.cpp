@@ -216,7 +216,7 @@ void PlayerPaddle::FireAttachedBall() {
  * to the paddle when the paddle boundries change doesn't get moved to the new boundries.
  * e.g., when in paddle cam mode and then changing back while the sticky paddle is active.
  */
-void PlayerPaddle::MoveAttachedBallToNewBounds() {
+void PlayerPaddle::MoveAttachedBallToNewBounds(double dT) {
 	if (!this->HasBallAttached()) {
 		return;
 	}
@@ -224,26 +224,16 @@ void PlayerPaddle::MoveAttachedBallToNewBounds() {
 	// Figure out if the ball is colliding with any of the boundries of the paddle
 	// if it is we can easily figure out where we have to move the ball to make 
 	// it accommodate those new boundries
-	Vector2D normal(0, 0);
-	float distance = 0.0f;
 	Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
-	bool isCollision = this->CollisionCheck(ballBounds, this->attachedBall->GetVelocity(), normal, distance);
+	// Move the ball into paddle space and find the closest point to the center
+	Point2D ballCenterInPaddleSpace = ballBounds.Center() - Vector2D(this->centerPos[0], this->centerPos[1]);
+	Point2D closestPtInPaddleSpace = this->bounds.ClosestPoint(ballCenterInPaddleSpace);
+	Vector2D closestPtDir   = Vector2D::Normalize(closestPtInPaddleSpace - ballCenterInPaddleSpace);
 
-	if (isCollision) {
-		this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() - distance - 5 * EPSILON) * normal);
-	}
-	else {
-		// Evasive measures... just do whatever it takes to get the ball on the outside of the paddle...
+	// Now we just attach the ball at the closest point on the paddle...
+	Point2D closestPtInWorldSpace = closestPtInPaddleSpace + Vector2D(this->centerPos[0], this->centerPos[1]);
+	this->attachedBall->SetCenterPosition(closestPtInWorldSpace + ballBounds.Radius() * closestPtDir);
 
-		// Move the ball into paddle space and find the closest point to the center
-		Point2D ballCenterInPaddleSpace = ballBounds.Center() - Vector2D(this->centerPos[0], this->centerPos[1]);
-		Point2D closestPtInPaddleSpace = this->bounds.ClosestPoint(ballCenterInPaddleSpace);
-		Vector2D closestPtDir   = Vector2D::Normalize(closestPtInPaddleSpace - ballCenterInPaddleSpace);
-
-		// Now we just attach the ball at the closest point on the paddle...
-		Point2D closestPtInWorldSpace = closestPtInPaddleSpace + Vector2D(this->centerPos[0], this->centerPos[1]);
-		this->attachedBall->SetCenterPosition(closestPtInWorldSpace + ballBounds.Radius() * closestPtDir);
-	}	
 
 }
 
@@ -437,15 +427,18 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 
 	// Attach the ball
 	this->attachedBall = ball;
+	// Reset the ball so that it has no previous record of the level piece it last hit
+	ball->SetLastPieceCollidedWith(NULL);
 
 	// Make sure the position of the ball is sitting on-top of the paddle
 	Vector2D normal;
-	float distance;
-	bool onPaddle = this->CollisionCheck(this->attachedBall->GetBounds(), this->attachedBall->GetVelocity(), normal, distance);
+	double timeSinceCollision;
+	bool onPaddle = this->CollisionCheck(*this->attachedBall, 0.0, normal, timeSinceCollision);
 	if (onPaddle) {
 		// Position the ball so that it is against the collision line, exactly
 		Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
-		this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() - distance - 5 * EPSILON) * - this->attachedBall->GetDirection());
+		//this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() - distance - 5 * EPSILON) * - this->attachedBall->GetDirection());
+		this->attachedBall->SetCenterPosition(ballBounds.Center() + (EPSILON + timeSinceCollision) * -this->attachedBall->GetVelocity());
 	}
 
 	// Remove the ball's direction but not its speed
@@ -457,10 +450,10 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	return true;
 }
 
-bool PlayerPaddle::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) {
+bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, double& timeSinceCollision) {
 	// Move the circle into paddle space
-	Collision::Circle2D temp = Collision::Circle2D(c.Center() - Vector2D(this->centerPos[0], this->centerPos[1]), c.Radius());
-	return this->bounds.Collide(temp, velocity, n, d);
+	Collision::Circle2D temp = Collision::Circle2D(ball.GetBounds().Center() - Vector2D(this->centerPos[0], this->centerPos[1]), ball.GetBounds().Radius());
+	return this->bounds.Collide(dT, temp, ball.GetVelocity(), n, timeSinceCollision);
 }
 
 /**

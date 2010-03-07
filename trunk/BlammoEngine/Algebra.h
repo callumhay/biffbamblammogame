@@ -54,6 +54,7 @@ namespace NumberFuncs {
 	int NextPowerOfTwo(int a);
 	float MinF(float a, float b);
 	float MaxF(float a, float b);
+	float Clamp(float n, float min, float max);
 };
 
 inline int NumberFuncs::SignOf(int a) {
@@ -80,6 +81,12 @@ inline float NumberFuncs::MinF(float a, float b) {
 
 inline float NumberFuncs::MaxF(float a, float b) {
 	return a > b ? a : b;
+}
+
+inline float NumberFuncs::Clamp(float n, float min, float max) {
+	if (n < min) { return min; }
+	if (n > max) { return max; }
+	return n;
 }
 
 class Randomizer {

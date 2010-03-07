@@ -96,6 +96,9 @@ inline Vector2D operator -(const Point2D& a, const Point2D& b) {
 inline Point2D operator -(const Point2D& a, const Vector2D& b) {
   return Point2D(a[0]-b[0], a[1]-b[1]);
 }
+inline Point2D operator *(float f, const Point2D& p) {
+	return Point2D(f*p[0], f*p[1]);
+}
 
 // Simple 3D Point --------------------------------
 class Point3D {

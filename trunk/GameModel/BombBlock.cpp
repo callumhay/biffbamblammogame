@@ -124,8 +124,9 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 	return emptyPieceForBomb;
 }
 
-LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
-	return this->Destroy(gameModel);
+LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+	LevelPiece* resultingPiece = this->Destroy(gameModel);
+	return resultingPiece;
 }
 
 LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {

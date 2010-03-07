@@ -122,7 +122,7 @@ LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel) {
  * Call this when a collision has actually occured with the ball and this block.
  * Returns: The resulting level piece that this has become.
  */
-LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	assert(gameModel != NULL);
 
 	// If the ball is an 'uber' ball then we decrement the piece type twice when it is
@@ -132,6 +132,16 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, const GameBa
 	}
 	
 	LevelPiece* newPiece = this->DiminishPiece(gameModel);
+
+	// Tell the ball what the last piece it collided with was (which will be the diminished
+	// piece if it hasn't become an empty/no bounds block yet...
+	if (!newPiece->IsNoBoundsPieceType()) {
+		ball.SetLastPieceCollidedWith(newPiece);
+	}
+	else {
+		ball.SetLastPieceCollidedWith(NULL);
+	}
+
 	return newPiece;
 }
 
