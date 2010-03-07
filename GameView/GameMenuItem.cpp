@@ -372,9 +372,9 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	this->currLabel->Draw();
 
 	// If the item is not active then we don't draw any more of it
-	if (!this->isActive) {
-		return;
-	}
+	//if (!this->isActive) {
+	//	return;
+	//}
 
 	// Update the amount to increment by...
 	static double timeCounter = 0.0;
@@ -546,6 +546,12 @@ void AmountScrollerMenuItem::ChangeScrollerValue(float changeAmt) {
 }
 
 void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing) {
+
+	// Increase the size of the approriate arrow if that button is pressed
+	float multiplier = 1.0f;
+	if ((this->decreaseValueButtonPressed && isLeftPointing) || (this->increaseValueButtonPressed && !isLeftPointing)) {
+		multiplier = 1.2f;
+	}
 	const float HALF_ARROW_HEIGHT = arrowHeight / 2.0f;
 	const float HALF_ARROW_WIDTH	= AmountScrollerMenuItem::SCROLLER_ARROW_WIDTH / 2.0f;
 
@@ -564,7 +570,9 @@ void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, flo
 	
 	glPushMatrix();
 	glTranslatef(topLeftCorner[0] + HALF_ARROW_WIDTH, topLeftCorner[1] - HALF_ARROW_HEIGHT, 0.0f);
+	glScalef(multiplier, multiplier, 0.0f);
 
+	// Draw the arrows
 	if (isLeftPointing) {
 		glBegin(GL_TRIANGLES);
 			glVertex2f(APEX_POINT[0], APEX_POINT[1]);

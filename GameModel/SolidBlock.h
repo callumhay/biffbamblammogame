@@ -13,6 +13,7 @@
 #define __SOLIDBLOCK_H__
 
 #include "LevelPiece.h"
+#include "GameBall.h"
 
 class SolidBlock : public LevelPiece {
 
@@ -78,8 +79,11 @@ public:
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 	
 	// Doesn't matter if a ball collides with solid block, it does nothing to the block.
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
-		return this->Destroy(gameModel);
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+		LevelPiece* resultingPiece = this->Destroy(gameModel);
+		// Tell the ball what the last piece it collided with was...
+		ball.SetLastPieceCollidedWith(/*resultingPiece*/NULL);
+		return resultingPiece;
 	}
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 		return this->Destroy(gameModel);

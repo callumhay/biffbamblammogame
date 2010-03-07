@@ -95,7 +95,7 @@ public:
 
 	// Collision related stuffs
 	virtual LevelPiece* Destroy(GameModel* gameModel);	
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 };

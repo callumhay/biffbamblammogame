@@ -67,12 +67,12 @@ public:
 		return true;
 	}
 
-	// Collision related stuffs
+	// Portal blocks are never destroyed.
 	LevelPiece* Destroy(GameModel* gameModel) {
 		return this;
 	}
 
-	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) const;
+	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, double& timeSinceCollision) const;
 	bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	bool CollisionCheck(const BoundingLines& boundingLines) const;
@@ -81,7 +81,7 @@ public:
 										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
-	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
+	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	std::list<Collision::Ray2D> GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const;
 

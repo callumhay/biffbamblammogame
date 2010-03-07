@@ -8,11 +8,11 @@
 #include "../BlammoEngine/Matrix.h"
 
 #include "BoundingLines.h"
+#include "GameBall.h"
 
 class Circle2D;
 class LineSeg2D;
 class Vector2D;
-class GameBall;
 class GameLevel;
 class GameModel;
 class Projectile;
@@ -60,7 +60,7 @@ public:
 		return Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
 	}
 
-	virtual bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) const;
+	virtual bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, double& timeSinceCollision) const;
 	virtual bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	virtual bool CollisionCheck(const BoundingLines& boundingLines) const;
@@ -74,7 +74,7 @@ public:
 														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) = 0;
+	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) = 0;
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) = 0;
 
 	virtual std::list<Collision::Ray2D> GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const;

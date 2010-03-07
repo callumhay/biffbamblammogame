@@ -29,8 +29,8 @@ GameSoundAssets::~GameSoundAssets() {
  * The given volume level is in the interval [0, 100].
  */
 void GameSoundAssets::SetGameVolume(int volumeLvl) {
-	float volumePercent = static_cast<float>(std::max<int>(0, std::min<int>(100, volumeLvl))) / 100.0f;
-	alListenerf(AL_GAIN, volumePercent);
+	float volumeFraction = static_cast<float>(std::max<int>(0, std::min<int>(100, volumeLvl))) / 100.0f;
+	alListenerf(AL_GAIN, volumeFraction);
 }
 
 /**

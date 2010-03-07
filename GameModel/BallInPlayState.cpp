@@ -75,7 +75,7 @@ void BallInPlayState::Tick(double seconds) {
 
 	// Variables that will be needed for collision detection
 	Vector2D n;
-	float d;
+	double timeSinceCollision;
 	bool didCollideWithPaddle = false;
 	bool didCollideWithBlock = false;
 	
@@ -110,9 +110,12 @@ void BallInPlayState::Tick(double seconds) {
 		}
 
 		// Check for ball collision with the player's paddle
-		didCollideWithPaddle = paddle->CollisionCheck(currBall->GetBounds(), currBall->GetVelocity(), n, d);
+		didCollideWithPaddle = paddle->CollisionCheck(*currBall, seconds, n, timeSinceCollision);
 		if (didCollideWithPaddle) {
 			
+			// The ball no longer has a last piece that it collided with - it gets reset when it hits the paddle
+			currBall->SetLastPieceCollidedWith(NULL);
+
 			// Don't do anything if this ball is the one attached to the paddle
 			if (paddle->GetAttachedBall() == currBall) {
 				continue;
@@ -131,7 +134,7 @@ void BallInPlayState::Tick(double seconds) {
 			}
 
 			// Do ball-paddle collision
-			this->DoBallCollision(*currBall, n, d);
+			this->DoBallCollision(*currBall, n, seconds, timeSinceCollision);
 			// Tell the model that a ball collision occurred with the paddle
 			this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
@@ -149,14 +152,7 @@ void BallInPlayState::Tick(double seconds) {
 			
 			LevelPiece *currPiece = *pieceIter;
 
-			// If the ball has already collided with this piece last then ignore the collision
-			//if (currBall->IsLastPieceCollidedWith(currPiece)) {
-			//	didCollideWithBlock = false;
-			//}
-			//else {
-			didCollideWithBlock = currPiece->CollisionCheck(currBall->GetBounds(), currBall->GetVelocity(), n, d);
-			//}
-
+			didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds, n, timeSinceCollision);
 			if (didCollideWithBlock) {
 				// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
 				// lose its ability to collide for 1 second, also check to see if we're already in ghost mode
@@ -189,7 +185,7 @@ void BallInPlayState::Tick(double seconds) {
 				}
 				else {
 					// Make the ball react to the collision
-					this->DoBallCollision(*currBall, n, d);
+					this->DoBallCollision(*currBall, n, seconds, timeSinceCollision);
 				}
 				
 				// Tell the model that a ball collision occurred with currPiece
@@ -199,9 +195,9 @@ void BallInPlayState::Tick(double seconds) {
 		}
 
 		// Ball Safety Net Collisions:
-		bool didCollideWithballSafetyNet = currLevel->BallSafetyNetCollisionCheck(*currBall, n, d);
+		bool didCollideWithballSafetyNet = currLevel->BallSafetyNetCollisionCheck(*currBall, seconds, n, timeSinceCollision);
 		if (didCollideWithballSafetyNet) {
-			this->DoBallCollision(*currBall, n, d);
+			this->DoBallCollision(*currBall, n, seconds, timeSinceCollision);
 		}
 
 		// Ball-ball collisions - choose the next set of balls after this one
@@ -436,10 +432,17 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 // n must be normalized
 // d is the distance from the center of the ball to the line that was collided with
 // when d is negative the ball is inside the line, when positive it is outside
-void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
+void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, double dT, double timeSinceCollision) {
 	
-	// Position the ball so that it is against the collision line, exactly
-	b.SetCenterPosition(b.GetBounds().Center() + (b.GetBounds().Radius() + EPSILON - d) * -b.GetDirection());
+	// Back the ball up to its position at collision, calculate the time of that and then the difference up to this point
+	// based on the velocity and then move it to that position...
+	double timeToMoveInReflectionDir = dT - timeSinceCollision;
+	if (timeToMoveInReflectionDir < EPSILON) {
+		timeToMoveInReflectionDir = EPSILON;
+	}
+
+	// Position the ball so that it is against the collision line, approximately
+	b.SetCenterPosition(b.GetBounds().Center() + (EPSILON + timeSinceCollision) * -b.GetVelocity());	
 
 	// Figure out the reflection vector and speed
 	Vector2D reflVecHat					= Vector2D::Normalize(Reflect(b.GetDirection(), n));
@@ -474,6 +477,8 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, float d) {
 
 	// Reflect the ball off the normal
 	b.SetVelocity(reflSpd, reflVecHat);
+	// Now move the ball in that direction over how ever much time was lost during the collision
+	b.SetCenterPosition(b.GetBounds().Center() + timeToMoveInReflectionDir * b.GetVelocity());
 }
 
 /**

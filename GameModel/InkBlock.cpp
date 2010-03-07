@@ -43,7 +43,7 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel) {
 	return emptyPiece;
 }
 
-LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
+LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	return this->Destroy(gameModel);
 }
 

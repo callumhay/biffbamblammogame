@@ -305,6 +305,67 @@ namespace Collision {
 		return lineSeg.P1() + t * lineSegDir;
 	}
 
+	/**
+	 * Calculate the closest points for two line segments.
+	 * Returns: The shortest square distance between two line segments and
+	 * the closest points on each corresponding segment.
+	 */
+	inline float ClosestPoint(const LineSeg2D& lineSeg1, const LineSeg2D& lineSeg2, 
+		Point2D& closestPtOnLineSeg1, Point2D& closestPtOnLineSeg2) {
+		
+			float s, t;
+
+			Vector2D d1 = lineSeg1.P2() - lineSeg1.P1();
+			Vector2D d2 = lineSeg2.P2() - lineSeg2.P1();
+			Vector2D r  = lineSeg1.P1() - lineSeg2.P1();
+
+			float a = Vector2D::Dot(d1, d1);
+			float e = Vector2D::Dot(d2, d2);
+			float f = Vector2D::Dot(d2, r);
+
+			if (a <= EPSILON && e <= EPSILON) {
+				closestPtOnLineSeg1 = lineSeg1.P1();
+				closestPtOnLineSeg2 = lineSeg2.P1();
+				return Vector2D::Dot(closestPtOnLineSeg1 - closestPtOnLineSeg2, closestPtOnLineSeg1 - closestPtOnLineSeg2);
+			}
+
+			if (a <= EPSILON) {
+				s = 0.0f;
+				t = NumberFuncs::Clamp(f / e, 0.0f, 1.0f);
+			}
+			else {
+				float c = Vector2D::Dot(d1, r);
+				if (e <= EPSILON) {
+					t = 0.0f;
+					s = NumberFuncs::Clamp(-c / a, 0.0f, 1.0f);
+				}
+				else {
+					float b = Vector2D::Dot(d1, d2);	
+					float denom = a*e - b*b;
+
+					if (denom != 0.0f) {
+						s = NumberFuncs::Clamp((b*f - c*e) / denom, 0.0f, 1.0f);
+					}
+					else {
+						s = 0.0f;
+					}
+					
+					t = (b*s + f) / e;
+					if (t < 0.0f) {
+						t = 0.0f;
+						s = NumberFuncs::Clamp(-c / a, 0.0f, 1.0f);
+					}
+					else if (t > 1.0f) {
+						t = 1.0f;
+						s = NumberFuncs::Clamp((b - c) / a, 0.0f, 1.0f);
+					}
+				}
+			}
+
+			closestPtOnLineSeg1 = lineSeg1.P1() + s * d1;
+			closestPtOnLineSeg2 = lineSeg2.P1() + t * d2;
+			return Vector2D::Dot(closestPtOnLineSeg1 - closestPtOnLineSeg2, closestPtOnLineSeg1 - closestPtOnLineSeg2);
+	}
 
 };
 

@@ -1,6 +1,7 @@
 
 #include "PortalBlock.h"
 #include "Projectile.h"
+#include "GameBall.h"
 
 PortalBlock::PortalBlock(unsigned int wLoc, unsigned int hLoc, PortalBlock* sibling) : LevelPiece(wLoc, hLoc), sibling(sibling) {
 }
@@ -13,9 +14,19 @@ PortalBlock::~PortalBlock() {
 // The portal block is a 'no-bounds' block, however it does still 'consider' collisions
 // since it needs to know if something hits it so that when it does it can move it to its sibling portal...
 
-bool PortalBlock::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d) const {
-	// Check to see if the circle is inside the bounding lines ...
-	return this->bounds.IsInside(c.Center());
+bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, double& timeSinceCollision) const {
+	// No collision if the ball has just previously collided with this portal block
+	if (ball.IsLastPieceCollidedWith(this)) {
+		return false;
+	}
+
+	// Create a line for the ball over time
+	const Point2D& currCenter = ball.GetBounds().Center();
+	Point2D previousCenter = currCenter - dT * ball.GetVelocity();
+	Collision::LineSeg2D sweptCenter(previousCenter, currCenter);
+
+	// Check to see if the circle is/was inside the bounding lines over the time interval dT
+	return (this->bounds.CollisionCheckIndices(sweptCenter).size() > 0);
 }
 
 bool PortalBlock::CollisionCheck(const Collision::AABB2D& aabb) const {
@@ -78,9 +89,18 @@ void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	this->bounds = BoundingLines(boundingLines, boundingNorms);
 }
 
-LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
-	//ball.TeleportViaPortal(this->sibling);
-	return this;
+LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+	// Tell the ball what the last piece it collided with was the sibling so it doesn't
+	// keep teleporting back and forth between this and its sibling...
+	ball.SetLastPieceCollidedWith(this->sibling);
+
+	// Teleport the ball to the sibling portal block:
+	// Find position difference between the point and center and map it over to the sibling portal
+	Vector2D toHitVec = ball.GetBounds().Center() - this->GetCenter();
+	Point2D newBallPosition = this->sibling->GetCenter() + toHitVec;
+	ball.SetCenterPosition(newBallPosition);
+
+	return this->Destroy(gameModel);
 }
 
 LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {

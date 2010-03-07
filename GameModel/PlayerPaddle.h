@@ -90,7 +90,7 @@ private:
 	void SetDimensions(PlayerPaddle::PaddleSize size);
 	void SetPaddleSize(PlayerPaddle::PaddleSize size);
 	void FireAttachedBall();
-	void MoveAttachedBallToNewBounds();
+	void MoveAttachedBallToNewBounds(double dT);
 
 public:
 	static const float DEFAULT_SPEED;
@@ -109,7 +109,9 @@ public:
 		this->SetDimensions(PlayerPaddle::NormalSize);
 		this->centerPos = this->GetDefaultCenterPosition();
 		this->currType = PlayerPaddle::NormalPaddle;
+		this->colour = ColourRGBA(1, 1, 1, 1);
 		this->isFiringBeam = false;
+		this->SetupAnimations();
 	}
 
 	// Obtain the center position of this paddle.
@@ -225,14 +227,14 @@ public:
 	}
 
 	// Paddle camera set/get functions
-	void SetPaddleCamera(bool isPaddleCamOn) {
+	void SetPaddleCamera(bool isPaddleCamOn, double dT) {
 		this->isPaddleCamActive = isPaddleCamOn;
 		
 		// When the paddle camera is on, we change the collision boundries to
 		// be more natural to the vision of the paddle cam
 		this->SetDimensions(this->currSize);
 		if (!isPaddleCamOn) {
-			this->MoveAttachedBallToNewBounds();
+			this->MoveAttachedBallToNewBounds(dT);
 		}
 	}
 	bool GetIsPaddleCameraOn() const {
@@ -259,7 +261,7 @@ public:
 		return this->attachedBall;
 	}
 
-	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, float& d);
+	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, double& timeSinceCollision);
 	void DebugDraw() const;
 
 };

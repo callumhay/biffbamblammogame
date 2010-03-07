@@ -82,8 +82,11 @@ public:
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 	
 	// Doesn't matter if a ball collides with a prism block, it does nothing to the block.
-	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball) {
-		return this->Destroy(gameModel);
+	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+		LevelPiece* resultingPiece = this->Destroy(gameModel);
+		// Tell the ball what the last piece it collided with was...
+		ball.SetLastPieceCollidedWith(resultingPiece);
+		return resultingPiece;
 	}
 
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);

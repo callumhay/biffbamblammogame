@@ -56,7 +56,7 @@ public:
 
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel);
-	LevelPiece* CollisionOccurred(GameModel* gameModel, const GameBall& ball);
+	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 
