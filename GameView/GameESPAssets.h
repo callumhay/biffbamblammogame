@@ -19,6 +19,7 @@
 #include "../GameModel/GameItem.h"
 
 class LevelPiece;
+class PortalBlock;
 class GameBall;
 class GameItem;
 class ESPEmitter;
@@ -96,6 +97,7 @@ private:
 	Texture2D* haloTex;
 	Texture2D* lensFlareTex;
 	Texture2D* sparkleTex;
+	Texture2D* spiralTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -149,6 +151,8 @@ private:
 
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
 
+	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
+
 	void AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile);
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
@@ -176,6 +180,7 @@ public:
 	void AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2);
 	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
 
+	void AddPortalTeleportEffect(const GameBall& ball, const PortalBlock& block);
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);

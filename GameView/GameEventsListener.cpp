@@ -170,7 +170,6 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 	// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
 		((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.UberballBlastsThrough())) {
-
 			this->display->GetAssets()->GetESPAssets()->AddBounceLevelPieceEffect(this->display->GetCamera(), ball, block);
 	}
 
@@ -203,6 +202,11 @@ void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const Gam
 	this->display->GetAssets()->GetESPAssets()->AddBounceBallBallEffect(this->display->GetCamera(), ball1, ball2);
 
 	debug_output("EVENT: Ball-ball collision");
+}
+
+void GameEventsListener::BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) {
+	this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball, enterPortal);
+	debug_output("EVENT: Ball teleported by portal block");
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {

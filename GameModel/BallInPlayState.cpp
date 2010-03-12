@@ -522,8 +522,18 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	ball1CorrectionVec.Normalize();
 	Vector2D ball2CorrectionVec = -ball1CorrectionVec;
 
-	Vector2D reflectBall1Vec = Reflect(ball1.GetDirection(), ball1CorrectionVec);
-	Vector2D reflectBall2Vec = Reflect(ball2.GetDirection(), ball2CorrectionVec);
+	Vector2D reflectBall1Vec = Vector2D::Normalize(Reflect(ball1.GetDirection(), ball1CorrectionVec));
+	Vector2D reflectBall2Vec = Vector2D::Normalize(Reflect(ball2.GetDirection(), ball2CorrectionVec));
+	
+	// Check to see how close the two velocities are to one another, if they're within
+	// some small threshold then make them dramatically different...
+	static const float CLOSE_TRAGECTORY_ANGLE = Trig::degreesToRadians(5.0f);
+	if (fabs(acos(Vector2D::Dot(reflectBall1Vec, reflectBall2Vec))) < CLOSE_TRAGECTORY_ANGLE) {
+		// Rotate them both 90 degrees away from each other
+		reflectBall1Vec = Vector2D(reflectBall1Vec[1], -reflectBall1Vec[0]);
+		reflectBall2Vec = Vector2D(-reflectBall2Vec[1], reflectBall2Vec[0]);
+	}
+
 	float positiveT = -NumberFuncs::SignOf(t) * (fabs(t) + 2*EPSILON);
 
 	// NOTE: we need to make sure the new velocities are not zero
@@ -531,15 +541,13 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	// Set the new velocities and the correct center positions so that they 
 	// still remain at the current time, but it is as if the balls had originally collided
 	if (reflectBall1Vec != Vector2D(0, 0)) {
-		Vector2D ball1NewVel = Vector2D::Normalize(reflectBall1Vec);
-		ball1.SetVelocity(ball1.GetSpeed(), ball1NewVel);
-		ball1.SetCenterPosition(ball1CollisionCenter + positiveT * ball1NewVel);
+		ball1.SetVelocity(ball1.GetSpeed(), reflectBall1Vec);
+		ball1.SetCenterPosition(ball1CollisionCenter + positiveT * reflectBall1Vec);
 	}
 
 	if (reflectBall2Vec != Vector2D(0, 0)) {
-		Vector2D ball2NewVel = Vector2D::Normalize(reflectBall2Vec);
-		ball2.SetVelocity(ball2.GetSpeed(), ball2NewVel);
-		ball2.SetCenterPosition(ball2CollisionCenter + positiveT * ball2NewVel);
+		ball2.SetVelocity(ball2.GetSpeed(), reflectBall2Vec);
+		ball2.SetCenterPosition(ball2CollisionCenter + positiveT * reflectBall2Vec);
 	}	
 }
 

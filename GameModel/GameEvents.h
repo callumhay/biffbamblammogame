@@ -5,6 +5,7 @@ class Point2D;
 class GameBall;
 class PlayerPaddle;
 class LevelPiece;
+class PortalBlock;
 class GameLevel;
 class GameWorld;
 class GameItem;
@@ -142,6 +143,15 @@ public:
 	 *             ball2 - The other ball in the collision.
 	 */
 	virtual void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) = 0;
+
+
+	/** 
+	 * Event triggered when a ball is teleported by a portal block. Only occurs once as the ball enters
+	 * the portal block, one frame before it is shown coming out of the sibling portal.
+	 * Arguments: ball				- The ball teleported.
+	 *            enterPortal	- The portal entered by the ball.
+	 */
+	virtual void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) = 0;
 
 	// Misc Events (Destruction, Combos, etc.) ************************************************
 

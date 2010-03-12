@@ -2,6 +2,7 @@
 #include "PortalBlock.h"
 #include "Projectile.h"
 #include "GameBall.h"
+#include "GameEventManager.h"
 
 PortalBlock::PortalBlock(unsigned int wLoc, unsigned int hLoc, PortalBlock* sibling) : LevelPiece(wLoc, hLoc), sibling(sibling) {
 }
@@ -93,6 +94,9 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	// Tell the ball what the last piece it collided with was the sibling so it doesn't
 	// keep teleporting back and forth between this and its sibling...
 	ball.SetLastPieceCollidedWith(this->sibling);
+
+	// EVENT: The ball has officially entered the portal...
+	GameEventManager::Instance()->ActionBallPortalBlockTeleport(ball, *this);
 
 	// Teleport the ball to the sibling portal block:
 	// Find position difference between the point and center and map it over to the sibling portal

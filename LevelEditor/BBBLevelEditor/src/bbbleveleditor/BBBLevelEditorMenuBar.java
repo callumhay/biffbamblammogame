@@ -23,6 +23,7 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 	private JMenu editMenu				= null;
 	private JMenuItem lvlDimMenuItem	= null;
 	private JMenuItem lvlItemsMenuItem	= null;
+	//private JMenuItem portalsMenuItem   = null;
 	
 	// Tools menu
 	private JMenu toolsMenu								= null;
@@ -142,8 +143,14 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		this.lvlItemsMenuItem.addActionListener(editMenuActionListener);
 		this.lvlItemsMenuItem.setEnabled(false);
 		
+		//this.portalsMenuItem  = new JMenuItem("Portals...");
+		//this.portalsMenuItem.setActionCommand("portals");
+		//this.portalsMenuItem.addActionListener(editMenuActionListener);
+		//this.portalsMenuItem.setEnabled(false);
+		
 		this.editMenu.add(this.lvlDimMenuItem);
 		this.editMenu.add(this.lvlItemsMenuItem);
+		//this.editMenu.add(this.portalsMenuItem);
 		this.editMenu.setEnabled(false);
 		
 		this.add(this.editMenu);
@@ -215,6 +222,20 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 					activeDoc.setItemDropSettings(dlg.getItemDropSettings());
 				}
 			}
+			/*
+			else if (e.getActionCommand().equals("portals")) {
+				BBBLevelEditDocumentWindow activeDoc = levelEditWindow.getActiveLevelDoc();
+				if (activeDoc == null) {
+					assert(false);
+					return;
+				}
+				
+				PortalDialog dlg = new PortalDialog(levelEditWindow, activeDoc);
+				dlg.setVisible(true);
+				// TODO ...
+				
+			}
+			*/
 		}
 	}
 	
