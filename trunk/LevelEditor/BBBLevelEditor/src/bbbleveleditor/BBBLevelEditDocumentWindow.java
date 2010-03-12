@@ -10,9 +10,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
 import javax.swing.Box;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
@@ -40,6 +43,9 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	// access to the level piece names in this document [row (starting at the top)][col]
 	private ArrayList<ArrayList<LevelPieceImageLabel>> pieces;	
 	
+	// A listing of all portal IDs present 
+	private Set<Character> portalIDs = new TreeSet<Character>();
+	
 	// Settings for all the drop items in the level
 	private HashMap<String, Integer> itemDropSettings;
 	
@@ -57,8 +63,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	public BBBLevelEditDocumentWindow(BBBLevelEditMainWindow window, String fileName, int width, int height) {
 		super(fileName + " (" + width + "x" + height + ")", true, true, true, true);
-		
-		
+
 		this.levelEditWindow = window;
 		this.fileName = fileName;
 		this.currWidth = width;
@@ -290,7 +295,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				// Now read in all the pieces in the level
 				//levelFileScanner.useDelimiter(Pattern.compile("\\s"));
 				String currLevelPieceSymbol = "";
-				LevelPiece currLevelPiece = null;
+				//LevelPiece currLevelPiece = null;
 				
 				this.setupUI();
 				
@@ -301,10 +306,12 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					for (int col = 0; col < this.currWidth; col++) {
 						
 						currLevelPieceSymbol = levelFileScanner.next();
-						currLevelPiece = LevelPiece.LevelPieceCache.get(currLevelPieceSymbol);
-						assert(currLevelPiece != null);
+						LevelPieceImageLabel tempLabel = new LevelPieceImageLabel(currLevelPieceSymbol);
 						
-						LevelPieceImageLabel tempLabel = new LevelPieceImageLabel(currLevelPiece);
+						if (tempLabel.getIsPortal()) {
+							this.portalIDs.add(tempLabel.GetPortalID());
+							this.portalIDs.add(tempLabel.getSiblingID());
+						}
 						
 						currRow.add(tempLabel);
 						this.levelDisplayPanel.add(tempLabel);
@@ -424,10 +431,28 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			// Followed by the level pieces...
 			for (int row = 0; row < this.currHeight; row++) {
 				for (int col = 0; col < this.currWidth; col++) {
-					LevelPiece currLvlPiece = this.pieces.get(row).get(col).getLevelPiece();
+					
+					LevelPieceImageLabel currPieceLbl = this.pieces.get(row).get(col);
+					LevelPiece currLvlPiece = currPieceLbl.getLevelPiece();
 					assert(currLvlPiece != null);
 					
-					levelFileWriter.write(currLvlPiece.getSymbol() + " ");
+					// If we're dealing with a portal block make sure its name and sibling are valid
+					if (currPieceLbl.getIsPortal()) {
+						if (currPieceLbl.GetPortalID() == LevelPieceImageLabel.INVALID_PORTAL_ID ||
+							currPieceLbl.getSiblingID() == LevelPieceImageLabel.INVALID_PORTAL_ID) {
+							JOptionPane.showMessageDialog(this, "Failed to write level file due to invalid portal ids.", 
+									"Level Format Error", JOptionPane.ERROR_MESSAGE);
+							throw new Exception();
+						}
+						
+						levelFileWriter.write(currLvlPiece.getSymbol() + "(" + currPieceLbl.GetPortalID() + 
+								"," + currPieceLbl.getSiblingID() + ")");
+					}
+					else {
+						levelFileWriter.write(currLvlPiece.getSymbol());
+					}
+					
+					levelFileWriter.write(" ");
 				}
 				levelFileWriter.write("\r\n");
 			}
@@ -525,8 +550,62 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		
 		ArrayList<LevelPieceImageLabel> levelPieceRow = this.pieces.get(rowIndex);
 		LevelPieceImageLabel editPiece = levelPieceRow.get(colIndex);
+		
+		// If we're getting rid of a portal block then remove its ID from the list...
+		if (editPiece.getIsPortal()) {
+			this.portalIDs.remove(editPiece.GetPortalID());
+		}
+		
+		LevelPiece oldPiece = editPiece.getLevelPiece();
 		editPiece.setLevelPiece(newPiece);
 		this.hasBeenModified = true;
+		
+		// In the case of a portal block we ask the user for a valid, unique character ID
+		if (editPiece.getIsPortal()) {
+			String portalID = "";
+			String siblingID = "";
+			boolean enteredData = true;
+			while(true) {
+				portalID = (String)JOptionPane.showInputDialog(
+                    this.levelEditWindow,
+                    "Enter a single, unique character name\r\nfor the portal:",
+                    "Portal Name Entry",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null, null, null);
+				if (portalID == null) {
+					enteredData = false;
+					break;
+				}
+				else if (portalID.length() == 1 && !this.portalIDs.contains(portalID.charAt(0))) {
+					
+					siblingID = (String)JOptionPane.showInputDialog(
+		                    this.levelEditWindow,
+		                    "Enter a single, unique character name\r\nfor the portal's sibling:",
+		                    "Portal Name Entry",
+		                    JOptionPane.PLAIN_MESSAGE,
+		                    null, null, null);
+					if (siblingID == null) {
+						enteredData = false;
+						break;
+					}
+					else if (siblingID.length() == 1 && !siblingID.equals(portalID)) {
+						enteredData = true;
+						break;
+					}	
+				}
+				JOptionPane.showMessageDialog(this.levelEditWindow, "Invalid value, must be a single, unique character!");
+			}
+			
+			if (enteredData) {
+				editPiece.setPortalID(portalID.charAt(0));
+				editPiece.setSiblingID(siblingID.charAt(0));
+				this.portalIDs.add(portalID.charAt(0));
+			}
+			else {
+				editPiece.setLevelPiece(oldPiece);
+			}
+		}
+		
 	}
 
 	@Override

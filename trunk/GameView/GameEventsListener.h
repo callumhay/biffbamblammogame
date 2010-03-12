@@ -45,6 +45,7 @@ public:
 	void BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block);
 	void BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle);
 	void BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2);
+	void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal);
 
 	// Misc game events
 	void BlockDestroyedEvent(const LevelPiece& block);

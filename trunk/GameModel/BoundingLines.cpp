@@ -51,17 +51,16 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 	// Create lines for the center outer sides of the capsule and collide them with lines of this bounding line set
 	Collision::LineSeg2D centerRange(previousCenter, c.Center());
 	Collision::LineSeg2D extendedCenterRange(previousCenter - 5*c.Radius()*normalizedVel, c.Center());
-	Collision::LineSeg2D capsuleSide1(previousCenter + c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]), 
-											 c.Center() +  c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]));
-	Collision::LineSeg2D capsuleSide2(previousCenter - c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]), 
-											 c.Center() -  c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]));
+
+	Collision::Ray2D capsuleSide1Ray(previousCenter + c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]), normalizedVel);
+	Collision::Ray2D capsuleSide2Ray(previousCenter - c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]), normalizedVel);
 
 	int count = 0;
 	for (std::vector<Collision::LineSeg2D>::const_iterator lineIter = this->lines.begin(); lineIter != this->lines.end(); ++lineIter) {
 		const Collision::LineSeg2D& currLine = *lineIter;
 		const Vector2D& currNormal = this->normals[count];
 
-		// Cast a ray from the previous position of the circle center towards the colliding line
+		// Cast a ray from the previous extent of circle towards the colliding line
 		Collision::Ray2D circleCollisionRay(previousCenter, normalizedVel);
 		// Check to see if the ray collides with the current line segment
 		
@@ -94,20 +93,9 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 			}			
 		}
 
-		// Test both sides of the capsule created by the ball over dT
-		float sqDist = Collision::ClosestPoint(capsuleSide1, currLine, closestCapsulePt, closestLinePt);
-		if (sqDist < EPSILON) {
-			// Now draw a line through the collision point on the capsule in the direction
-			// of the collision line normal and find its intersection with the middle line of the circle
-			
-			Collision::Ray2D collisionRay(closestCapsulePt, currNormal);
-			if (Collision::IsCollision(collisionRay, extendedCenterRange, collisionParamT)) {
-				// Calculate the collision center point
-				Point2D centerOfCircleAtCollision = collisionRay.GetPointAlongRayFromOrigin(collisionParamT);
-
-				// Now figure out the distance between the current center circle position and the
-				// position of the center at collision
-				float distance = Point2D::Distance(c.Center(), centerOfCircleAtCollision);
+		if (Collision::IsCollision(capsuleSide1Ray, currLine, collisionParamT)) {
+			if (collisionParamT <= movementDistOverDT) {
+				float distance = movementDistOverDT - collisionParamT;
 				float timeToCollision = distance / velocityMagnitude;
 				assert(timeToCollision >= 0.0);
 
@@ -120,22 +108,41 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 					collisionOccurred = true;
 					n = currNormal;
 				}
-			}			
+			}
+		}
+		if (Collision::IsCollision(capsuleSide2Ray, currLine, collisionParamT)) {
+			if (collisionParamT <= movementDistOverDT) {
+				float distance = movementDistOverDT - collisionParamT;
+				float timeToCollision = distance / velocityMagnitude;
+				assert(timeToCollision >= 0.0);
+
+				if (timeToCollision > dT) {
+					timeToCollision = dT;
+				}
+
+				if (timeToCollision > timeSinceCollision) {
+					timeSinceCollision = timeToCollision;
+					collisionOccurred = true;
+					n = currNormal;
+				}
+			}
 		}
 
-		sqDist = Collision::ClosestPoint(capsuleSide2, currLine, closestCapsulePt, closestLinePt);
-		if (sqDist < EPSILON) {
-			// Now draw a line through the collision point on the capsule in the direction
-			// of the collision line normal and find its intersection with the middle line of the circle
-			
-			Collision::Ray2D collisionRay(closestCapsulePt, currNormal);
-			if (Collision::IsCollision(collisionRay, extendedCenterRange, collisionParamT)) {
-				// Calculate the collision center point
-				Point2D centerOfCircleAtCollision = collisionRay.GetPointAlongRayFromOrigin(collisionParamT);
+		if (!collisionOccurred) {
+			// Lastly check the current circle bounds
+			float sqDist = Collision::SqDistFromPtToLineSeg(currLine, c.Center());
+			if (sqDist <= sqRadius) {
+				closestLinePt = Collision::ClosestPoint(c.Center(), currLine);
+				float distance = sqrt(sqDist);
 
-				// Now figure out the distance between the current center circle position and the
-				// position of the center at collision
-				float distance = Point2D::Distance(c.Center(), centerOfCircleAtCollision);
+				Vector2D toLine = closestLinePt - c.Center();
+				toLine.Normalize();
+				float theta = acos(Vector2D::Dot(toLine, -normalizedVel));
+				float sinTheta = sin(theta);
+				float alpha = asin(sinTheta*distance / c.Radius());
+				float phi   = M_PI - theta - alpha;
+				distance = sin(phi)*c.Radius() / sinTheta;
+			
 				float timeToCollision = distance / velocityMagnitude;
 				assert(timeToCollision >= 0.0);
 

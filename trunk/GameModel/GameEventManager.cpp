@@ -119,6 +119,14 @@ void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const Leve
 	}	
 }
 
+// Action for when the ball enters a portal block
+void GameEventManager::ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BallPortalBlockTeleportEvent(ball, enterPortal);
+	}	
+}
+
 // Action for when the ball collides with the player paddle
 void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle) {
 	this->listenerIter = this->eventListeners.begin();

@@ -68,7 +68,6 @@ void StickyPaddleItem::Deactivate() {
 	// may currently be 'stuck' to the paddle
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	assert(paddle != NULL);
-	assert((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle);
 
 	paddle->Shoot(this->gameModel);
 	paddle->RemovePaddleType(PlayerPaddle::StickyPaddle);

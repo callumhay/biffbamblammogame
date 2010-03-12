@@ -110,6 +110,10 @@ Ink
 ink.png
 I
 
+Portal
+portal.png
+X
+
 Prism
 prism.png
 P

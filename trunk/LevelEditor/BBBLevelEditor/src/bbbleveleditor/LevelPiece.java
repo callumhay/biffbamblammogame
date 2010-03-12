@@ -4,6 +4,8 @@ import java.util.HashMap;
 import javax.swing.ImageIcon;
 
 public class LevelPiece {
+	public static final String PORTAL_PIECE_NAME   = "Portal";
+	public static final String PORTAL_PIECE_SYMBOL = "X";
 	
 	public static LevelPiece DefaultPiece;
 	

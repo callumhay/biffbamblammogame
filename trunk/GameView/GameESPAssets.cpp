@@ -10,6 +10,7 @@
 #include "../GameModel/Projectile.h"
 #include "../GameModel/PlayerPaddle.h"
 #include "../GameModel/Beam.h"
+#include "../GameModel/PortalBlock.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
@@ -64,7 +65,8 @@ ballTex(NULL),
 targetTex(NULL),
 haloTex(NULL),
 lensFlareTex(NULL),
-sparkleTex(NULL) {
+sparkleTex(NULL),
+spiralTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -126,6 +128,7 @@ GameESPAssets::~GameESPAssets() {
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTex);
 	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->spiralTex);
 
 	// Delete any standalone effects
 	delete this->paddleLaserGlowAura;
@@ -403,6 +406,10 @@ void GameESPAssets::InitESPTextures() {
 	if (this->sparkleTex == NULL) {
 		this->sparkleTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
 		assert(this->sparkleTex != NULL);
+	}
+	if (this->spiralTex == NULL) {
+		this->spiralTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_TWISTED_SPIRAL, Texture::Trilinear));
+		assert(this->spiralTex != NULL);
 	}
 
 	debug_opengl_state();
@@ -829,6 +836,59 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			assert(false);
 			break;
 	}
+}
+
+ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling) {
+	Colour portalColour = block.GetColour();
+	// Create an emitter for the spirally teleportation texture
+	ESPPointEmitter* spiralEffect = new ESPPointEmitter();
+	spiralEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	spiralEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	spiralEffect->SetParticleLife(1.0f);
+	spiralEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	spiralEffect->SetParticleAlignment(ESP::ScreenAligned);
+	spiralEffect->SetEmitPosition(Point3D(center));
+	spiralEffect->SetParticleRotation(ESPInterval(0.0f, 359.999999f));
+	spiralEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_HEIGHT));
+	spiralEffect->SetParticleColour(ESPInterval(1.2f*portalColour.R()), ESPInterval(1.2f*portalColour.G()), ESPInterval(1.2f*portalColour.B()), ESPInterval(1));
+	spiralEffect->AddEffector(&this->particleFader);
+	spiralEffect->AddEffector(&this->particleLargeGrowth);
+
+	if (isSibling) {
+		spiralEffect->AddEffector(&this->smokeRotatorCCW);
+	}
+	else {
+		spiralEffect->AddEffector(&this->smokeRotatorCW);
+	}
+
+	bool result = spiralEffect->SetParticles(1, spiralTex);
+	assert(result);
+	if (!result) {
+		delete spiralEffect;
+		spiralEffect = NULL;
+	}
+	return spiralEffect;
+}
+
+/**
+ * Add an effect to bring the user's attention to the fact that something just went though
+ * a portal block and got teleported to its sibling.
+ */
+void GameESPAssets::AddPortalTeleportEffect(const GameBall& ball, const PortalBlock& block) {
+	ESPPointEmitter* enterEffect = this->CreateTeleportEffect(ball.GetBounds().Center(), block, false);
+	if (enterEffect == NULL) {
+		return;
+	}
+
+	Vector2D toBallFromBlock = ball.GetBounds().Center() - block.GetCenter();
+	ESPPointEmitter* exitEffect = this->CreateTeleportEffect(block.GetSiblingPortal()->GetCenter() + toBallFromBlock, *block.GetSiblingPortal(), true);
+	if (exitEffect == NULL) {
+		delete enterEffect;
+		return;
+	}
+
+	this->activeGeneralEmitters.push_back(enterEffect);
+	this->activeGeneralEmitters.push_back(exitEffect);
 }
 
 /**
