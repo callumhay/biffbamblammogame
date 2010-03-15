@@ -27,10 +27,8 @@ private:
 	GameState* nextState;
 
 	// Player-controllable game assets
-	PlayerPaddle* playerPaddle;
-	std::list<GameBall*> balls;
-
-	
+	PlayerPaddle* playerPaddle;						// The one and only player paddle
+	std::list<GameBall*> balls;						// Current set of balls active in the game
 	std::list<Projectile*> projectiles;		// Projectiles spawned as the game is played
 	std::list<Beam*> beams;								// Beams spawned as the game is played
 
