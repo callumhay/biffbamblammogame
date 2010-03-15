@@ -42,6 +42,16 @@ private:
 	bool InitializeCubeDL();
 	bool InitializeSphereDL();
 
+	static const int TUNNEL_TESSELATION;
+	static const float TUNNEL_WALL_SIZE;	// Have width and height?
+	static const float HALF_TUNNEL_WALL_SIZE;
+
+	enum TunnelOrientation { PosX, NegX, PosY, NegY, PosZ, NegZ };
+	Vector3D TunnelOrientToVector(GeometryMaker::TunnelOrientation orientation);
+	GeometryMaker::TunnelOrientation VectorToTunnelOrient(const Vector3D& vec);
+	void DrawTunnelWallSection(const Point3D& center, GeometryMaker::TunnelOrientation orientation);
+	void DrawFullTunnel(const Point3D& startCenterPt, int units, GeometryMaker::TunnelOrientation dir);
+
 public:
 
 	// Creation and deletion of the singleton
@@ -100,6 +110,7 @@ public:
 
 		debug_opengl_state();
 	};
+
 
 };
 #endif

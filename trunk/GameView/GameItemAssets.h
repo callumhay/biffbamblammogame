@@ -102,5 +102,7 @@ public:
 	void TimerStarted(const GameItemTimer* timer);
 	void TimerStopped(const GameItemTimer* timer);
 
+	void ClearTimers();
+
 };
 #endif

@@ -52,7 +52,7 @@ double MultiBallItem::Activate() {
 	if (ballDir == Vector2D(0, 0)) {
 		ballDir = Vector2D(0, 1);
 	}
-	GameBall::BallSpeed ballSpd = affectedBall->GetSpeed();
+	float ballSpd = affectedBall->GetSpeed();
 	if (ballSpd == GameBall::ZeroSpeed) {
 		assert(false);
 		ballSpd = GameBall::NormalSpeed;

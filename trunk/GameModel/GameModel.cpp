@@ -192,6 +192,12 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	GameEventManager::Instance()->ActionBallBlockCollision(ball, *pieceAfterCollision);
 
 
+	// Check to see if the ball is being teleported in ball-camera mode - in this case
+	// we move into a new game state to play the wormhole minigame
+	if (pieceAfterCollision->GetType() == LevelPiece::Portal && ball.GetIsBallCameraOn()) {
+		// TODO
+	}
+
 	// TODO: figure out this multiplier stuffs...
 	// If the piece was destroyed then increase the multiplier
 	//if (p->GetType() == LevelPiece::Empty) {
@@ -226,7 +232,7 @@ void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 
 		Vector2D ballVel    = ball.GetVelocity();
 		Vector2D ballVelHat = Vector2D::Normalize(ballVel);
-		GameBall::BallSpeed ballSpd = ball.GetSpeed(); 
+		float ballSpd			  = ball.GetSpeed(); 
 
 		// Rotate the ball's velocity vector to reflect the momentum of the paddle
 		ball.SetVelocity(ballSpd, Rotate(angleChange, ballVelHat));

@@ -182,3 +182,190 @@ GLuint GeometryMaker::CreateSphereDL(float horizRadius, float vertRadius, unsign
 	glEndList();
 	return sphereDrawList;
 }
+
+const int GeometryMaker::TUNNEL_TESSELATION					= 10;
+const float GeometryMaker::TUNNEL_WALL_SIZE					= 10.0f;
+const float GeometryMaker::HALF_TUNNEL_WALL_SIZE		= GeometryMaker::TUNNEL_WALL_SIZE / 2.0f;
+
+Vector3D GeometryMaker::TunnelOrientToVector(GeometryMaker::TunnelOrientation orientation) {
+	switch (orientation) {
+		case PosY:
+			return Vector3D(0, 1, 0);
+		case NegY:
+			return Vector3D(0, -1, 0);
+		case PosZ:
+			return Vector3D(0, 0, 1);
+		case NegZ:
+			return Vector3D(0, 0, -1);
+		case PosX:
+			return Vector3D(1, 0, 0);
+		case NegX:
+			return Vector3D(-1, 0, 0);
+		default:
+			assert(false);
+			break;
+	}
+	return Vector3D(0,0,0);
+}
+
+GeometryMaker::TunnelOrientation GeometryMaker::VectorToTunnelOrient(const Vector3D& vec) {
+	if (vec == Vector3D(0, 1, 0)) {
+		return PosY;
+	}
+	else if (vec == Vector3D(0, -1, 0)) {
+		return NegY;
+	}
+	else if (vec == Vector3D(0, 0, 1)) {
+		return PosZ;
+	}
+	else if (vec == Vector3D(0, 0, -1)) {
+		return NegZ;
+	}
+	else if (vec == Vector3D(1, 0, 0)) {
+		return PosX;
+	}
+	else if (vec == Vector3D(-1, 0, 0)) {
+		return NegX;
+	}
+	else {
+		assert(false);
+	}
+	return NegX;
+}
+
+/**
+ * Draw a tesselated quad representing a square section of tunnel wall.
+ */
+void GeometryMaker::DrawTunnelWallSection(const Point3D& center, GeometryMaker::TunnelOrientation orientation) {
+	assert(GeometryMaker::TUNNEL_TESSELATION > 0);
+	static const float QUAD_SIZE = GeometryMaker::TUNNEL_WALL_SIZE / static_cast<float>(GeometryMaker::TUNNEL_TESSELATION);
+
+	glPushMatrix();
+
+	// Move the grid to its proper, centered location
+	glTranslatef(center[0], center[1], center[2]);
+	
+	// Rotate into the proper orientation
+	switch (orientation) {
+		case PosY:
+			glRotatef(-90, 1, 0, 0);
+			break;
+		case NegY:
+			glRotatef(90, 1, 0, 0);
+			break;
+		case PosZ:
+			break;
+		case NegZ:
+			glRotatef(180, 1, 0, 0);
+			break;
+		case PosX:
+			glRotatef(90, 0, 1, 0);
+			break;
+		case NegX:
+			glRotatef(-90, 0, 1, 0);
+			break;
+		default:
+			assert(false);
+			break;
+	}	
+
+	// Move the grid so it gets centered at the origin
+	glTranslatef(GeometryMaker::HALF_TUNNEL_WALL_SIZE, GeometryMaker::HALF_TUNNEL_WALL_SIZE, 0.0f);
+	glBegin(GL_QUADS);
+
+	// Create the grid of quads from (0,0) to (GeometryMaker::TUNNEL_WALL_SIZE, GeometryMaker::TUNNEL_WALL_SIZE)
+	glNormal3i(0, 0, 1);
+	for (int row = 0; row < GeometryMaker::TUNNEL_TESSELATION; row++) {
+		for (int col = 0; col < GeometryMaker::TUNNEL_TESSELATION; col++) {
+			glVertex2f(row*QUAD_SIZE, col*QUAD_SIZE);
+			glVertex2f(row*QUAD_SIZE, (col+1)*QUAD_SIZE);
+			glVertex2f((row+1)*QUAD_SIZE, (col+1)*QUAD_SIZE);
+			glVertex2f((row+1)*QUAD_SIZE, col*QUAD_SIZE);
+		}
+	}
+
+	glEnd();
+	glPopMatrix();
+}
+
+void GeometryMaker::DrawFullTunnel(const Point3D& startCenterPt, int units, GeometryMaker::TunnelOrientation dir) {
+	assert(units > 0);
+
+	Vector3D dirUnitVec = TunnelOrientToVector(dir);
+	Vector3D upUnitVec(0,0,0);
+	Vector3D sideUnitVec(0,0,0);
+
+	switch (dir) {
+		case PosY:
+			dirUnitVec  = Vector3D(0, 1, 0);
+			upUnitVec   = Vector3D(1, 0, 0);
+			sideUnitVec = Vector3D(0, 0, 1);
+			break;
+		case NegY:
+			dirUnitVec  = Vector3D(0, -1, 0);
+			upUnitVec   = Vector3D(1, 0, 0);
+			sideUnitVec = Vector3D(0, 0, -1);
+			break;
+		case PosZ:
+			dirUnitVec  = Vector3D(0, 0, 1);
+			upUnitVec   = Vector3D(0, 1, 0);
+			sideUnitVec = Vector3D(1, 0, 0);
+			break;
+		case NegZ:
+			dirUnitVec  = Vector3D(0, 0, -1);
+			upUnitVec   = Vector3D(0, 1, 0);
+			sideUnitVec = Vector3D(-1, 0, 0);
+			break;
+		case PosX:
+			dirUnitVec  = Vector3D(1, 0, 0);
+			upUnitVec   = Vector3D(0, 0, 1);
+			sideUnitVec = Vector3D(0, 1, 0);
+			break;
+		case NegX:
+			dirUnitVec = Vector3D(-1, 0, 0);
+			upUnitVec   = Vector3D(0, 0, 1);
+			sideUnitVec = Vector3D(0, -1, 0);
+			break;
+		default:
+			assert(false);
+			break;
+	}
+
+	// Build a straight, full section of tunnel using the tunnel walls for each piece...
+	// Four sides...
+
+	const Vector3D HALF_INCREMENT_AMT = GeometryMaker::HALF_TUNNEL_WALL_SIZE * dirUnitVec;
+	const Vector3D INCREMENT_AMT			= GeometryMaker::TUNNEL_WALL_SIZE * dirUnitVec;
+
+	// Top
+	Point3D currentTopPt = startCenterPt + upUnitVec + HALF_INCREMENT_AMT;
+	TunnelOrientation inwardsFromTopOrient = this->VectorToTunnelOrient(-upUnitVec);
+	// Bottom
+	Point3D currentBottomPt = startCenterPt - upUnitVec + HALF_INCREMENT_AMT;
+	TunnelOrientation inwardsFromBottomOrient = this->VectorToTunnelOrient(upUnitVec);
+	// Side1
+	Point3D currentSide1Pt = startCenterPt + sideUnitVec + HALF_INCREMENT_AMT;
+	TunnelOrientation inwardsFromSide1Orient = this->VectorToTunnelOrient(-sideUnitVec);
+	// Side2
+	Point3D currentSide2Pt = startCenterPt - sideUnitVec + HALF_INCREMENT_AMT;
+	TunnelOrientation inwardsFromSide2Orient = this->VectorToTunnelOrient(sideUnitVec);
+
+	int count = 1;
+	while (true) {
+		this->DrawTunnelWallSection(currentTopPt,    inwardsFromTopOrient);
+		this->DrawTunnelWallSection(currentBottomPt, inwardsFromBottomOrient);
+		this->DrawTunnelWallSection(currentSide1Pt,  inwardsFromSide1Orient);
+		this->DrawTunnelWallSection(currentSide2Pt,  inwardsFromSide2Orient);
+
+		if (count >= units) {
+			break;
+		}
+
+		currentTopPt    = currentTopPt    + INCREMENT_AMT;
+		currentBottomPt = currentBottomPt + INCREMENT_AMT;
+		currentSide1Pt  = currentSide1Pt  + INCREMENT_AMT;
+		currentSide2Pt  = currentSide2Pt  + INCREMENT_AMT;
+		count++;
+	}
+
+}

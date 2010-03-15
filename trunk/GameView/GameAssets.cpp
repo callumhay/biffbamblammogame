@@ -228,7 +228,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				// We only take the average of visible balls.
 				avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], ballPos[2]);
 			
-				assert(numColoursApplied > 0);
+				numColoursApplied = std::max<int>(1, numColoursApplied);
 				avgBallColour = avgBallColour + (currBallColour / numColoursApplied);
 
 				visibleBallCount++;
@@ -888,6 +888,7 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 void GameAssets::DeactivateMiscEffects() {
 	this->fboAssets->DeactivateInkSplatterEffect();
 	this->espAssets->KillAllActiveEffects();
+	this->itemAssets->ClearTimers();
 }
 
 /**

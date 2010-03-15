@@ -15,17 +15,17 @@ class LevelPiece;
 class GameBall {
 
 public:
-	enum BallSpeed { ZeroSpeed = 0, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 24 };
+	enum BallSpeed { ZeroSpeed = 0, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 24, FastestSpeed = 30 };
 	enum BallSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
-	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100 };
+	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100, GraviBall = 0x00001000 };
 	
 private:
 	Collision::Circle2D bounds;	// The bounds of the ball, constantly updated to world space
 	float zCenterPos;						// VERY occasionally (some animations), the ball needs a z-coordinate
 
-	Vector2D currDir;						// The current direction of movement of the ball
-	BallSpeed currSpeed;				// The current speed of the ball
-	int currType;								// The current type of this ball
+	Vector2D currDir;				// The current direction of movement of the ball
+	float currSpeed;				// The current speed of the ball
+	int currType;						// The current type of this ball
 
 	BallSize currSize;					// The current size of this ball
 	float currScaleFactor;			// The scale difference between the ball's current size and its default size
@@ -42,6 +42,7 @@ private:
 	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
 	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink
 	static const float RADIUS_DIFF_PER_SIZE;		// The difference in radius per size change of the ball
+	static const float GRAVITY_ACCELERATION;		// Acceleration of gravity pulling the ball downwards
 
 	Vector3D rotationInDegs;	// Used for random rotation of the ball, gives the view the option to use it
 
@@ -157,12 +158,12 @@ public:
 		return static_cast<float>(this->currSpeed) * this->currDir;
 	}
 	// Obtain the current speed of the ball
-	BallSpeed GetSpeed() const {
+	float GetSpeed() const {
 		return this->currSpeed;
 	}
 	// Set the current speed of this ball
-	void SetSpeed(const BallSpeed speed) {
-		this->currSpeed = speed;
+	void SetSpeed(float speed) {
+		this->currSpeed    = speed;
 	}
 
 	int GetBallType() const {
@@ -215,34 +216,21 @@ public:
 	// Set the velocity of the ball; (0, 1) is up and (1, 0) is right
 	void SetVelocity(const BallSpeed &magnitude, const Vector2D& dir) {
 		this->currDir = Vector2D(dir);
-		this->currSpeed = magnitude;
+		this->SetSpeed(magnitude);
+	}
+	void SetVelocity(float magnitude, const Vector2D& dir) {
+		this->currDir = Vector2D(dir);
+		this->SetSpeed(magnitude);	
 	}
 
 	// Increases the Speed of the ball
 	void IncreaseSpeed() {
-		switch (this->currSpeed) {
-			case SlowSpeed :
-				this->currSpeed = NormalSpeed;
-				break;
-			case NormalSpeed :
-				this->currSpeed = FastSpeed;
-				break;
-			default:
-				break;
-		}
+		this->currSpeed += 5.0f;
 	}
+
 	// Decreases the speed of the ball
 	void DecreaseSpeed() {
-		switch (this->currSpeed) {
-			case FastSpeed :
-				this->currSpeed = NormalSpeed;
-				break;
-			case NormalSpeed :
-				this->currSpeed = SlowSpeed;
-				break;
-			default:
-				break;
-		}	
+		this->currSpeed -= 5.0f;
 	}
 
 	Onomatoplex::Extremeness GetOnomatoplexExtremeness() const;

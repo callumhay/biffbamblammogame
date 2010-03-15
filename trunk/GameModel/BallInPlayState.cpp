@@ -445,8 +445,8 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, double dT,
 	b.SetCenterPosition(b.GetBounds().Center() + (EPSILON + timeSinceCollision) * -b.GetVelocity());	
 
 	// Figure out the reflection vector and speed
-	Vector2D reflVecHat					= Vector2D::Normalize(Reflect(b.GetDirection(), n));
-	GameBall::BallSpeed reflSpd	= b.GetSpeed();
+	Vector2D reflVecHat	= Vector2D::Normalize(Reflect(b.GetDirection(), n));
+	float reflSpd				= b.GetSpeed();
 	
 	// This should NEVER happen
 	assert(reflSpd != GameBall::ZeroSpeed);

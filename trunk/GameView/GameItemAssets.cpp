@@ -22,12 +22,7 @@ GameItemAssets::~GameItemAssets() {
 	this->UnloadItemMeshes();
 
 	// Delete all active HUD timers...
-	for (std::list<ItemTimerHUDElement*>::iterator iter = this->activeItemTimers.begin(); iter != this->activeItemTimers.end(); ++iter) {
-		ItemTimerHUDElement* hudElement = *iter;
-		delete hudElement;
-		hudElement = NULL;
-	}
-	this->activeItemTimers.clear();
+	this->ClearTimers();
 }
 
 /**
@@ -334,6 +329,16 @@ void GameItemAssets::TimerStopped(const GameItemTimer* timer) {
 		}
 
 	}
+}
+
+void GameItemAssets::ClearTimers() {
+	// Delete all active HUD timers...
+	for (std::list<ItemTimerHUDElement*>::iterator iter = this->activeItemTimers.begin(); iter != this->activeItemTimers.end(); ++iter) {
+		ItemTimerHUDElement* hudElement = *iter;
+		delete hudElement;
+		hudElement = NULL;
+	}
+	this->activeItemTimers.clear();
 }
 
 

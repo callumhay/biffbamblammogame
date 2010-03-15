@@ -29,6 +29,9 @@ const float GameBall::MAX_ROATATION_SPEED	= 70;
 // Typical initial velocity for the ball when released from the player paddle
 const Vector2D GameBall::STD_INIT_VEL_DIR = Vector2D(0, GameBall::NormalSpeed);
 
+// Acceleration of the ball towards the ground when gravity ball is activated
+const float GameBall::GRAVITY_ACCELERATION = 9.8f;
+
 GameBall* GameBall::currBallCamBall = NULL;
 
 GameBall::GameBall() : bounds(Point2D(0.0f, 0.0f), DEFAULT_BALL_RADIUS), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
@@ -55,7 +58,7 @@ GameBall::~GameBall() {
  * then it should be reset).
  */
 void GameBall::ResetBallAttributes() {
-	this->currSpeed = NormalSpeed;
+	this->SetSpeed(NormalSpeed);
 	this->currType  = NormalBall;
 	this->SetBallSize(NormalSize);
 	this->SetDimensions(NormalSize);
@@ -119,37 +122,32 @@ Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
 	Onomatoplex::Extremeness result;
 
 	if ((this->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
-		switch (this->GetSpeed()) {
-			case GameBall::SlowSpeed :
-				result = Onomatoplex::AWESOME;
-				break;
-			case GameBall::NormalSpeed :
-				result =  Onomatoplex::SUPER_AWESOME;
-				break;
-			case GameBall::FastSpeed :
-				result =  Onomatoplex::UBER;
-				break;
-			default :
-				assert(false);
-				result = Onomatoplex::AWESOME;
-				break;
+		if (this->GetSpeed() <= GameBall::SlowSpeed) {
+			result = Onomatoplex::GOOD;
+		}
+		else if (this->GetSpeed() <= GameBall::NormalSpeed) {
+			result = Onomatoplex::AWESOME;
+		}
+		else if (this->GetSpeed() <= GameBall::FastSpeed) {
+			result =  Onomatoplex::SUPER_AWESOME;
+		}
+		else {
+			result =  Onomatoplex::UBER;
 		}	
 	}
 	else {
-		switch (this->GetSpeed()) {
-			case GameBall::SlowSpeed :
-				result = Onomatoplex::WEAK;
-				break;
-			case GameBall::NormalSpeed :
-				result = Onomatoplex::GOOD;
-				break;
-			case GameBall::FastSpeed :
-				result = Onomatoplex::AWESOME;
-				break;
-			default :
-				assert(false);
-				result = Onomatoplex::WEAK;
-				break;
+
+		if (this->GetSpeed() <= GameBall::SlowSpeed) {
+			result = Onomatoplex::WEAK;
+		}
+		else if (this->GetSpeed() <= GameBall::NormalSpeed) {
+			result = Onomatoplex::GOOD;
+		}
+		else if (this->GetSpeed() <= GameBall::FastSpeed) {
+			result =  Onomatoplex::AWESOME;
+		}
+		else {
+			result =  Onomatoplex::SUPER_AWESOME;
 		}
 	}
 
@@ -157,8 +155,27 @@ Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
 }
 
 void GameBall::Tick(double seconds) {
-	// Update the position of the ball based on its velocity
-	Vector2D dDist = (static_cast<float>(seconds) * static_cast<float>(this->currSpeed) *this->currDir);
+	// Update the position of the ball based on its velocity (and if applicable, acceleration)
+	Vector2D currVelocity = static_cast<float>(this->currSpeed) * this->currDir;
+
+	if ((this->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall) {
+		// Keep track of the last gravity speed calculated based on the gravity pulling the ball down
+		currVelocity = currVelocity + seconds * GameBall::GRAVITY_ACCELERATION * Vector2D(0, -1);
+		
+		// If the ball ever exceeds the maximum ball speed then slow it down to the maximum
+		float newVelocityMag    = Vector2D::Magnitude(currVelocity);
+		Vector2D newVelocityDir = (currVelocity / newVelocityMag);
+		if (newVelocityMag > static_cast<float>(GameBall::FastestSpeed)) {
+			currVelocity = GameBall::FastestSpeed * newVelocityDir;
+			this->SetVelocity(GameBall::FastestSpeed, newVelocityDir);
+		}
+		else {
+			this->SetVelocity(newVelocityMag, newVelocityDir);
+		}
+
+	}
+
+	Vector2D dDist = (static_cast<float>(seconds) * currVelocity);
 	this->bounds.SetCenter(this->bounds.Center() + dDist);
 
 	// Update the rotation of the ball
