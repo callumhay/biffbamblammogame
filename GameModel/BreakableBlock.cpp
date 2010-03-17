@@ -135,12 +135,12 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 
 	// Tell the ball what the last piece it collided with was (which will be the diminished
 	// piece if it hasn't become an empty/no bounds block yet...
-	if (!newPiece->IsNoBoundsPieceType()) {
-		ball.SetLastPieceCollidedWith(newPiece);
-	}
-	else {
-		ball.SetLastPieceCollidedWith(NULL);
-	}
+	//if (!newPiece->IsNoBoundsPieceType()) {
+	//	ball.SetLastPieceCollidedWith(newPiece);
+	//}
+	//else {
+	ball.SetLastPieceCollidedWith(NULL);
+	//}
 
 	return newPiece;
 }

@@ -48,6 +48,7 @@ private:
 	const std::string TEXTURE_ITEM_PADDLECAM;
 	const std::string TEXTURE_ITEM_BALLCAM;
 	const std::string TEXTURE_ITEM_PADDLEBEAM;
+	const std::string TEXTURE_ITEM_GRAVITYBALL;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -60,7 +61,8 @@ private:
 	const std::string TEXTURE_ITEM_TIMER_POISON;
 	const std::string TEXTURE_ITEM_TIMER_STICKYPADDLE;
 	const std::string TEXTURE_ITEM_TIMER_EYE;
-
+	const std::string TEXTURE_ITEM_TIMER_GRAVITYBALL;
+	
 	const std::string TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_INVISIBALL;
@@ -71,6 +73,7 @@ private:
 	const std::string TEXTURE_ITEM_TIMER_FILLER_POISON;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE;
 	const std::string TEXTURE_ITEM_TIMER_FILLER_EYE;
+	const std::string TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL;
 
 public:
 	

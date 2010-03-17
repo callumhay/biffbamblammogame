@@ -148,6 +148,7 @@ public:
 
 	// Level/World related queries *****************************************
 	void BeginOrRestartGame();
+	void ClearGameState();
 	
 	GameLevel* GetCurrentLevel() const {
 		return this->worlds[this->currWorldNum]->GetCurrentLevel();

@@ -6,11 +6,14 @@
 #include "GameState.h"
 
 class GameBall;
-class LineSeg2D;
 class Vector2D;
 class PlayerPaddle;
 class GameItem;
 class Point2D;
+
+namespace Collision {
+class LineSeg2D;
+}
 
 class BallInPlayState : public GameState {
 
@@ -19,7 +22,7 @@ private:
 
 	bool IsOutOfGameBounds(const Point2D& pos);
 
-	void DoBallCollision(GameBall& b, const Vector2D& n, double dT, double timeSinceCollision);
+	void DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision);
 	void DoBallCollision(GameBall& ball1, GameBall& ball2);
 	void DoItemCollision();
 	

@@ -28,6 +28,11 @@ InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(disp
 	this->scoreLabel.SetColour(textColourHUD);
 	this->scoreLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
 
+	// Clear up any stuff to an initial state in cases where things might still 
+	// be set unchanged from a previously loaded game
+	this->display->GetCamera().ClearCameraShake();
+	// ...
+
 	debug_opengl_state();
 }
 

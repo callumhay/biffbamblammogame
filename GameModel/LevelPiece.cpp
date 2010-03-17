@@ -44,7 +44,7 @@ void LevelPiece::SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc) {
  * Returns: true on collision as well as the normal of the line being collided with
  * and the distance from that line of the given circle; false otherwise.
  */
-bool LevelPiece::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, double& timeSinceCollision) const {
+bool LevelPiece::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
 	// If there are no bounds to collide with or this level piece was the
 	// last one collided with then we can't collide with this piece
 	if (this->IsNoBoundsPieceType()) {
@@ -54,7 +54,7 @@ bool LevelPiece::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, do
 		return false;
 	}
 
-	return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, timeSinceCollision);
+	return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
 }
 
 /**

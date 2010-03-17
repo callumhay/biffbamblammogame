@@ -15,7 +15,7 @@ PortalBlock::~PortalBlock() {
 // The portal block is a 'no-bounds' block, however it does still 'consider' collisions
 // since it needs to know if something hits it so that when it does it can move it to its sibling portal...
 
-bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, double& timeSinceCollision) const {
+bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
 	// No collision if the ball has just previously collided with this portal block
 	if (ball.IsLastPieceCollidedWith(this)) {
 		return false;
@@ -99,10 +99,7 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	GameEventManager::Instance()->ActionBallPortalBlockTeleport(ball, *this);
 
 	// Teleport the ball to the sibling portal block:
-	// Find position difference between the point and center and map it over to the sibling portal
-	Vector2D toHitVec = ball.GetBounds().Center() - this->GetCenter();
-	Point2D newBallPosition = this->sibling->GetCenter() + toHitVec;
-	ball.SetCenterPosition(newBallPosition);
+	ball.SetCenterPosition(this->sibling->GetCenter());
 
 	return this->Destroy(gameModel);
 }

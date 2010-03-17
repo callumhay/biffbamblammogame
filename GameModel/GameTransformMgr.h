@@ -118,6 +118,5 @@ public:
 	Matrix4x4 GetGameTransform() const;
 	Matrix4x4 GetCameraTransform() const;
 	float GetCameraFOVAngle() const;
-
 };
 #endif

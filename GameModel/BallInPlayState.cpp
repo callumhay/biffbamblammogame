@@ -75,6 +75,7 @@ void BallInPlayState::Tick(double seconds) {
 
 	// Variables that will be needed for collision detection
 	Vector2D n;
+	Collision::LineSeg2D collisionLine;
 	double timeSinceCollision;
 	bool didCollideWithPaddle = false;
 	bool didCollideWithBlock = false;
@@ -90,11 +91,14 @@ void BallInPlayState::Tick(double seconds) {
 	if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == NULL) {
 #endif
 
+	// Gravity vector in world space
+	const Vector3D worldGravityDir = this->gameModel->GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
+
 	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
 		GameBall *currBall = *iter;
 
 		// Update the current ball
-		currBall->Tick(seconds);
+		currBall->Tick(seconds, Vector2D(worldGravityDir[0], worldGravityDir[1]));
 
 		// Check for death (ball went out of bounds)
 		if (this->IsOutOfGameBounds(currBall->GetBounds().Center())) {
@@ -110,7 +114,7 @@ void BallInPlayState::Tick(double seconds) {
 		}
 
 		// Check for ball collision with the player's paddle
-		didCollideWithPaddle = paddle->CollisionCheck(*currBall, seconds, n, timeSinceCollision);
+		didCollideWithPaddle = paddle->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
 		if (didCollideWithPaddle) {
 			
 			// The ball no longer has a last piece that it collided with - it gets reset when it hits the paddle
@@ -134,7 +138,7 @@ void BallInPlayState::Tick(double seconds) {
 			}
 
 			// Do ball-paddle collision
-			this->DoBallCollision(*currBall, n, seconds, timeSinceCollision);
+			this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 			// Tell the model that a ball collision occurred with the paddle
 			this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
@@ -152,7 +156,7 @@ void BallInPlayState::Tick(double seconds) {
 			
 			LevelPiece *currPiece = *pieceIter;
 
-			didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds, n, timeSinceCollision);
+			didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
 			if (didCollideWithBlock) {
 				// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
 				// lose its ability to collide for 1 second, also check to see if we're already in ghost mode
@@ -185,7 +189,7 @@ void BallInPlayState::Tick(double seconds) {
 				}
 				else {
 					// Make the ball react to the collision
-					this->DoBallCollision(*currBall, n, seconds, timeSinceCollision);
+					this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 				}
 				
 				// Tell the model that a ball collision occurred with currPiece
@@ -195,9 +199,9 @@ void BallInPlayState::Tick(double seconds) {
 		}
 
 		// Ball Safety Net Collisions:
-		bool didCollideWithballSafetyNet = currLevel->BallSafetyNetCollisionCheck(*currBall, seconds, n, timeSinceCollision);
+		bool didCollideWithballSafetyNet = currLevel->BallSafetyNetCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
 		if (didCollideWithballSafetyNet) {
-			this->DoBallCollision(*currBall, n, seconds, timeSinceCollision);
+			this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 		}
 
 		// Ball-ball collisions - choose the next set of balls after this one
@@ -432,34 +436,49 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 // n must be normalized
 // d is the distance from the center of the ball to the line that was collided with
 // when d is negative the ball is inside the line, when positive it is outside
-void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, double dT, double timeSinceCollision) {
+void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision) {
 	
 	// Back the ball up to its position at collision, calculate the time of that and then the difference up to this point
 	// based on the velocity and then move it to that position...
-	double timeToMoveInReflectionDir = dT - timeSinceCollision;
-	if (timeToMoveInReflectionDir < EPSILON) {
-		timeToMoveInReflectionDir = EPSILON;
+	double timeToMoveInReflectionDir = std::max<double>(0.0, dT - timeSinceCollision);
+
+	// Position the ball so that it is at the location it was at when it collided...
+	const float BALL_RADIUS  = b.GetBounds().Radius();
+	const float BALL_EPSILON = 0.001f * BALL_RADIUS;
+	b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * -b.GetVelocity());
+
+	// Make sure the ball is on the correct side of the collision line (i.e., the side that the normal is pointing in)
+	Vector2D fromLineToBall = b.GetCenterPosition2D() - collisionLine.P1();
+	if (fromLineToBall == Vector2D(0, 0)) {
+		fromLineToBall = b.GetCenterPosition2D() - collisionLine.P2();
+		assert(fromLineToBall != Vector2D(0, 0));
 	}
 
-	// Position the ball so that it is against the collision line, approximately
-	b.SetCenterPosition(b.GetBounds().Center() + (EPSILON + timeSinceCollision) * -b.GetVelocity());	
+	// Make sure that the direction of the ball is against that of the normal, otherwise we adjust it to be so
+	Vector2D reflVecHat;
+	if (Vector2D::Dot(b.GetDirection(), n) >= 0) {
+		// Somehow the ball is travelling away from the normal but is hitting the line, keep its direction
+		reflVecHat = b.GetDirection();
+	}
+	else {
+		// Typical bounce off the normal: figure out the reflection vector
+		reflVecHat	= Vector2D::Normalize(Reflect(b.GetDirection(), n));
+	}
 
-	// Figure out the reflection vector and speed
-	Vector2D reflVecHat	= Vector2D::Normalize(Reflect(b.GetDirection(), n));
-	float reflSpd				= b.GetSpeed();
+	float reflSpd = b.GetSpeed();
 	
 	// This should NEVER happen
-	assert(reflSpd != GameBall::ZeroSpeed);
 	if (reflSpd == GameBall::ZeroSpeed) {
+		assert(false);
 		return;
 	}
 
 	// Figure out the angle between the normal and the reflection...
 	float angleOfReflInDegs = Trig::radiansToDegrees(acosf(Vector2D::Dot(n, reflVecHat)));
-	float diffAngleInDegs		= GameBall::MIN_BALL_ANGLE_IN_DEGS - angleOfReflInDegs;
+	float diffAngleInDegs		= GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(angleOfReflInDegs);
 
-	// Make sure the reflection is big enough to not cause 
-	// an annoying slow down in the game
+	// Make sure the reflection is big enough to not cause an annoying slow down in the game
+	// or to make a ridiculous gracing angle
 	if (diffAngleInDegs > EPSILON) {
 
 		// We need to figure out which way to rotate the velocity
@@ -474,11 +493,41 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, double dT,
 		
 		reflVecHat = newReflVelHat;
 	}
+	else {
+		// Do the same with 90 degrees to the normal
+		Vector2D tangentVec(n[1], -n[0]);
+		float gracingAngle = Trig::radiansToDegrees(acosf(Vector2D::Dot(tangentVec, reflVecHat)));
+		diffAngleInDegs = GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(gracingAngle);
+
+		if (diffAngleInDegs > EPSILON) {
+			// We need to figure out which way to rotate the velocity
+			// to ensure it's at least the MIN_BALL_ANGLE_IN_RADS
+			Vector2D newReflVelHat = Rotate(diffAngleInDegs, reflVecHat);
+
+			// Check to see if it's still the case, if it is then we rotated the wrong way
+			float newAngleInDegs =  Trig::radiansToDegrees(acosf(Vector2D::Dot(tangentVec, newReflVelHat)));
+			if (newAngleInDegs < GameBall::MIN_BALL_ANGLE_IN_DEGS) {
+				newReflVelHat = Rotate(-diffAngleInDegs, reflVecHat);
+			}
+
+			reflVecHat = newReflVelHat;
+		}
+	}
 
 	// Reflect the ball off the normal
 	b.SetVelocity(reflSpd, reflVecHat);
+
 	// Now move the ball in that direction over how ever much time was lost during the collision
-	b.SetCenterPosition(b.GetBounds().Center() + timeToMoveInReflectionDir * b.GetVelocity());
+	b.SetCenterPosition(b.GetCenterPosition2D() + timeToMoveInReflectionDir * b.GetVelocity());
+
+	// Now make absolutely sure that the ball is no longer colliding with the line
+	float distToLine = sqrt(Collision::SqDistFromPtToLineSeg(collisionLine, b.GetCenterPosition2D()));
+	if (distToLine <= BALL_RADIUS) {
+		// Move along the normal, which should be perfectly perpendicular the line a distance of the difference
+		float distanceDiff = (BALL_RADIUS - distToLine) + BALL_EPSILON;
+		b.SetCenterPosition(b.GetCenterPosition2D() + distanceDiff * n);
+	}
+
 }
 
 /**

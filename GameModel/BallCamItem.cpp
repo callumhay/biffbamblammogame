@@ -27,7 +27,7 @@ double BallCamItem::Activate() {
 			currTimer = NULL;
 		}
 		else {
-			 iter++;
+			 ++iter;
 		}
 	}
 

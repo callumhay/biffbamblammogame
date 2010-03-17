@@ -36,7 +36,7 @@ double PaddleCamItem::Activate() {
 			currTimer = NULL;
 		}
 		else {
-			 iter++;
+			 ++iter;
 		}
 	}
 

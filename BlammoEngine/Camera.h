@@ -128,6 +128,14 @@ public:
 		this->shakeMagnitude = Vector3D(shakeDirMag[0], shakeDirMag[1], shakeDirMag[2]);
 		this->shakeSpeed = speed;
 	}
+	// Clear the camera shake animation completely
+	void ClearCameraShake() {
+		this->shakeVar = 0.0;
+		this->shakeTimeElapsed = 0.0;
+		this->shakeTimeTotal = 0.0; 
+		this->shakeMagnitude = Vector3D(0,0,0);
+		this->shakeSpeed = 0;
+	}
 
 	void ApplyCameraTransform(double dT) {
 		glMultMatrixf(this->viewMatrix.begin());

@@ -394,7 +394,7 @@ bool GameTransformMgr::TickLevelFlipAnimation(double dT) {
 			iter = this->levelFlipAnimations.erase(iter);
 		}
 		else {
-			iter++;
+			++iter;
 		}
 	}
 

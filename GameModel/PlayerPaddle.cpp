@@ -432,10 +432,11 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 
 	// Make sure the position of the ball is sitting on-top of the paddle
 	Vector2D normal;
+	Collision::LineSeg2D collisionLine;
 	double timeSinceCollision;
-	bool onPaddle = this->CollisionCheck(*this->attachedBall, 0.0, normal, timeSinceCollision);
+	bool onPaddle = this->CollisionCheck(*this->attachedBall, 0.0, normal, collisionLine, timeSinceCollision);
 	if (onPaddle) {
-		// Position the ball so that it is against the collision line, exactly
+		// Position the ball so that it is against the collision line
 		Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
 		//this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() - distance - 5 * EPSILON) * - this->attachedBall->GetDirection());
 		this->attachedBall->SetCenterPosition(ballBounds.Center() + (EPSILON + timeSinceCollision) * -this->attachedBall->GetVelocity());
@@ -450,10 +451,17 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	return true;
 }
 
-bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, double& timeSinceCollision) {
+bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
 	// Move the circle into paddle space
-	Collision::Circle2D temp = Collision::Circle2D(ball.GetBounds().Center() - Vector2D(this->centerPos[0], this->centerPos[1]), ball.GetBounds().Radius());
-	return this->bounds.Collide(dT, temp, ball.GetVelocity(), n, timeSinceCollision);
+	Vector2D gameSpaceTranslation(this->centerPos[0], this->centerPos[1]);
+	Collision::Circle2D temp = Collision::Circle2D(ball.GetBounds().Center() - gameSpaceTranslation, ball.GetBounds().Radius());
+	bool result = this->bounds.Collide(dT, temp, ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+	
+	// Move the collision line into game space
+	collisionLine.SetP1(collisionLine.P1() + gameSpaceTranslation);
+	collisionLine.SetP2(collisionLine.P2() + gameSpaceTranslation);
+
+	return result;
 }
 
 /**

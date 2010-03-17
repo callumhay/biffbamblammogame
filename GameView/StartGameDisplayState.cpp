@@ -6,7 +6,6 @@
 #include "../GameModel/GameModel.h"
 
 StartGameDisplayState::StartGameDisplayState(GameDisplay* display) : DisplayState(display) {
-
 	// Load all the initial stuffs for the game
 	this->display->GetModel()->BeginOrRestartGame();
 }
