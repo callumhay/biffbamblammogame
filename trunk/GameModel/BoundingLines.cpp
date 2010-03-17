@@ -26,7 +26,8 @@ BoundingLines::~BoundingLines() {
  * inside the line, postivie means outside - the outward normal pointing direction).
  * The boolean return value will be true if one or more collisions occured, false otherwise.
  */
-bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, double& timeSinceCollision) const {
+bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
+														Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
 	n = Vector2D(0, 0);
 	timeSinceCollision = -1.0;
 
@@ -50,7 +51,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 
 	// Create lines for the center outer sides of the capsule and collide them with lines of this bounding line set
 	Collision::LineSeg2D centerRange(previousCenter, c.Center());
-	Collision::LineSeg2D extendedCenterRange(previousCenter - 5*c.Radius()*normalizedVel, c.Center());
+	Collision::LineSeg2D extendedCenterRange(previousCenter - c.Radius()*normalizedVel, c.Center() + c.Radius()*normalizedVel);
 
 	Collision::Ray2D capsuleSide1Ray(previousCenter + c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]), normalizedVel);
 	Collision::Ray2D capsuleSide2Ray(previousCenter - c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]), normalizedVel);
@@ -81,14 +82,11 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 				float timeToCollision = distance / velocityMagnitude;
 				assert(timeToCollision >= 0.0);
 
-				if (timeToCollision > dT) {
-					timeToCollision = dT;
-				}
-
 				if (timeToCollision > timeSinceCollision) {
 					timeSinceCollision = timeToCollision;
 					collisionOccurred = true;
-					n = currNormal;
+					n = n + currNormal;
+					collisionLine = currLine;
 				}
 			}			
 		}
@@ -99,14 +97,11 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 				float timeToCollision = distance / velocityMagnitude;
 				assert(timeToCollision >= 0.0);
 
-				if (timeToCollision > dT) {
-					timeToCollision = dT;
-				}
-
 				if (timeToCollision > timeSinceCollision) {
 					timeSinceCollision = timeToCollision;
 					collisionOccurred = true;
-					n = currNormal;
+					n = n + currNormal;
+					collisionLine = currLine;
 				}
 			}
 		}
@@ -116,26 +111,36 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 				float timeToCollision = distance / velocityMagnitude;
 				assert(timeToCollision >= 0.0);
 
-				if (timeToCollision > dT) {
-					timeToCollision = dT;
-				}
-
 				if (timeToCollision > timeSinceCollision) {
 					timeSinceCollision = timeToCollision;
 					collisionOccurred = true;
-					n = currNormal;
+					n = n + currNormal;
+					collisionLine = currLine;
 				}
 			}
 		}
 
 		if (!collisionOccurred) {
-			// Lastly check the current circle bounds
-			float sqDist = Collision::SqDistFromPtToLineSeg(currLine, c.Center());
+			// Lastly check the current and previous circle bounds
+			Point2D collidingCenter;
+			float sqDist = Collision::SqDistFromPtToLineSeg(currLine, previousCenter);
 			if (sqDist <= sqRadius) {
-				closestLinePt = Collision::ClosestPoint(c.Center(), currLine);
+				collidingCenter = previousCenter;
+				collisionOccurred = true;
+			}
+			else {
+				sqDist = Collision::SqDistFromPtToLineSeg(currLine, c.Center());
+				if (sqDist <= sqRadius) {
+					collidingCenter = c.Center();
+					collisionOccurred = true;
+				}
+			}
+
+			if (collisionOccurred) {
+				closestLinePt = Collision::ClosestPoint(collidingCenter, currLine);
 				float distance = sqrt(sqDist);
 
-				Vector2D toLine = closestLinePt - c.Center();
+				Vector2D toLine = closestLinePt - collidingCenter;
 				toLine.Normalize();
 				float theta = acos(Vector2D::Dot(toLine, -normalizedVel));
 				float sinTheta = sin(theta);
@@ -146,19 +151,21 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 				float timeToCollision = distance / velocityMagnitude;
 				assert(timeToCollision >= 0.0);
 
-				if (timeToCollision > dT) {
-					timeToCollision = dT;
-				}
-
 				if (timeToCollision > timeSinceCollision) {
 					timeSinceCollision = timeToCollision;
 					collisionOccurred = true;
-					n = currNormal;
+					n = n + currNormal;
+					collisionLine = currLine;
 				}
 			}
 		}
 
 		count++;
+	}
+
+	if (collisionOccurred) {
+		// Average of all the normals collided with
+		n.Normalize();
 	}
 
 	return collisionOccurred;

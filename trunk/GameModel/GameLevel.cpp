@@ -600,7 +600,7 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray, c
  * Do a collision check with the ball safety net if it's active.
  * Returns: true on collision (when active) and the normal and distance values, false otherwise.
  */
-bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, double& timeSinceCollision) {
+bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
 	if (!this->ballSafetyNetActive){ 
 		return false;
 	}
@@ -618,7 +618,7 @@ bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector
 	BoundingLines safetyNetBounds(lines, normals);
 
 	// Test for collision, if there was one then we kill the safety net
-	bool didCollide = safetyNetBounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, timeSinceCollision);
+	bool didCollide = safetyNetBounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, collisionLine, timeSinceCollision);
 	if (didCollide) {
 		this->ballSafetyNetActive = false;
 		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(b);

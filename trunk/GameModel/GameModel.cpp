@@ -36,18 +36,7 @@ GameModel::~GameModel() {
 	// Delete all items and timers - make sure we do this first since
 	// destroying some of these objects causes them to shutdown/use other objects
 	// in the game model
-	this->ClearLiveItems();
-	this->ClearActiveTimers();
-	this->ClearProjectiles();
-	this->ClearBeams();
-
-	// Delete the state
-	delete this->currState;
-	this->currState = NULL;	
-	if (this->nextState != NULL) {
-		delete this->nextState;
-		this->nextState = NULL;
-	}
+	this->ClearGameState();
 	
 	// Delete the transform manager
 	delete this->gameTransformInfo;
@@ -84,6 +73,22 @@ void GameModel::BeginOrRestartGame() {
 	this->numConsecutiveBlocksHit = GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT;	// Don't use set here, we don't want an event
 	this->gameTransformInfo->Reset();
 
+}
+
+// Called in order to make sure the game is no longer processing or generating anything
+void GameModel::ClearGameState() {
+	// Delete all world items, timers and thingys
+	this->ClearLiveItems();
+	this->ClearActiveTimers();
+	this->ClearProjectiles();
+	this->ClearBeams();
+
+	// Delete the state
+	delete this->currState;
+	this->currState = NULL;	
+	this->SetNextState(NULL);
+
+	this->gameTransformInfo->Reset();
 }
 
 void GameModel::SetCurrentWorld(unsigned int worldNum) {

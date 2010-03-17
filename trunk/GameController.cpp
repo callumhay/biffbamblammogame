@@ -53,7 +53,9 @@ void GameController::KeyDown(SDLKey key, SDLMod modifier) {
 	else if (key == SDLK_g) {
 		this->model->DropItem(GameItem::GhostBallItem);
 	}
-
+	else if (key == SDLK_h) {
+		this->model->DropItem(GameItem::GravityBallItem);
+	}
 	else if (key == SDLK_i) {
 		this->model->DropItem(GameItem::InvisiBallItem);
 	}

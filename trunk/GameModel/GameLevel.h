@@ -76,7 +76,7 @@ public:
 	void ToggleBallSafetyNet(bool isActive) {
 		this->ballSafetyNetActive = isActive;
 	}
-	bool BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, double& timeSinceCollision);
+	bool BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
 
 
 	/**

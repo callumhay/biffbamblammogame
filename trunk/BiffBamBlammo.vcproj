@@ -1066,6 +1066,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\GravityBallItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\InvisiBallItem.h"
 						>
 					</File>
@@ -1147,6 +1151,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\GhostBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\GravityBallItem.cpp"
 						>
 					</File>
 					<File

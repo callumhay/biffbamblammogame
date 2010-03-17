@@ -31,6 +31,7 @@
 #include "PaddleCamItem.h"
 #include "BallCamItem.h"
 #include "LaserBeamPaddleItem.h"
+#include "GravityBallItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -92,6 +93,8 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new BallCamItem(spawnOrigin, gameModel);																			// bad
 		case 20:
 			return new LaserBeamPaddleItem(spawnOrigin, gameModel);															// good
+		case 21:
+			return new GravityBallItem(spawnOrigin, gameModel);																	// neutral
 		default:
 			assert(false);
 	}
@@ -166,6 +169,9 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 
 		case GameItem::LaserBeamPaddleItem:
 			return new LaserBeamPaddleItem(spawnOrigin, gameModel);
+
+		case GameItem::GravityBallItem:
+			return new GravityBallItem(spawnOrigin, gameModel);
 
 		default:
 			assert(false);

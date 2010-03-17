@@ -15,9 +15,8 @@
 const float GameBall::DEFAULT_BALL_RADIUS = 0.5f;
 
 // Minimum angle a ball can be to the normal when it comes off something
-const float GameBall::MIN_BALL_ANGLE_IN_DEGS = 15.0f;
+const float GameBall::MIN_BALL_ANGLE_IN_DEGS = 8.0f;
 const float GameBall::MIN_BALL_ANGLE_IN_RADS = Trig::degreesToRadians(MIN_BALL_ANGLE_IN_DEGS);
-// TODO: have a max angle as well?? ... YES PROBABLY!
 
 // Ball size change related constants
 const float GameBall::SECONDS_TO_CHANGE_SIZE = 0.5f;	
@@ -30,7 +29,7 @@ const float GameBall::MAX_ROATATION_SPEED	= 70;
 const Vector2D GameBall::STD_INIT_VEL_DIR = Vector2D(0, GameBall::NormalSpeed);
 
 // Acceleration of the ball towards the ground when gravity ball is activated
-const float GameBall::GRAVITY_ACCELERATION = 9.8f;
+const float GameBall::GRAVITY_ACCELERATION = 8.0f;
 
 GameBall* GameBall::currBallCamBall = NULL;
 
@@ -154,25 +153,36 @@ Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
 	return result;
 }
 
-void GameBall::Tick(double seconds) {
+void GameBall::Tick(double seconds, const Vector2D& worldSpaceGravityDir) {
 	// Update the position of the ball based on its velocity (and if applicable, acceleration)
-	Vector2D currVelocity = static_cast<float>(this->currSpeed) * this->currDir;
+	Vector2D currVelocity;
 
 	if ((this->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall) {
 		// Keep track of the last gravity speed calculated based on the gravity pulling the ball down
-		currVelocity = currVelocity + seconds * GameBall::GRAVITY_ACCELERATION * Vector2D(0, -1);
+		// The gravitySpeed variable is basically a mirror of currSpeed but it tracks 
+		// the speed of the ball as it gets pulled down by gravity - currSpeed does not do this
+		Vector2D currGravityVelocity = (this->gravitySpeed * this->currDir);
 		
-		// If the ball ever exceeds the maximum ball speed then slow it down to the maximum
-		float newVelocityMag    = Vector2D::Magnitude(currVelocity);
-		Vector2D newVelocityDir = (currVelocity / newVelocityMag);
-		if (newVelocityMag > static_cast<float>(GameBall::FastestSpeed)) {
-			currVelocity = GameBall::FastestSpeed * newVelocityDir;
-			this->SetVelocity(GameBall::FastestSpeed, newVelocityDir);
+		// If the ball ever exceeds the current ball speed projected on the gravity vector then slow it down along that axis
+		// Figure out the projected gravity vector and speed
+		Vector2D nGravityDir = Vector2D::Normalize(worldSpaceGravityDir);
+		float projectedGravitySpeed  = Vector2D::Dot(currGravityVelocity, nGravityDir);
+		Vector2D projectedGravityVec = projectedGravitySpeed * nGravityDir;
+
+		if (projectedGravitySpeed > this->currSpeed) {
+			currVelocity = currGravityVelocity - projectedGravityVec + (this->currSpeed * nGravityDir);
 		}
 		else {
-			this->SetVelocity(newVelocityMag, newVelocityDir);
+			currVelocity = currGravityVelocity + (seconds * GameBall::GRAVITY_ACCELERATION * nGravityDir);
 		}
 
+		float newVelocityMag    = Vector2D::Magnitude(currVelocity);
+		Vector2D newVelocityDir = (currVelocity / newVelocityMag);
+		this->SetGravityVelocity(newVelocityMag, newVelocityDir);
+	}
+	else {
+		currVelocity = this->currSpeed * this->currDir;
+		this->gravitySpeed = this->currSpeed;
 	}
 
 	Vector2D dDist = (static_cast<float>(seconds) * currVelocity);

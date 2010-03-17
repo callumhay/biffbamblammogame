@@ -15,7 +15,7 @@ class LevelPiece;
 class GameBall {
 
 public:
-	enum BallSpeed { ZeroSpeed = 0, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 24, FastestSpeed = 30 };
+	enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 7, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 22, FastestSpeed = 27 };
 	enum BallSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100, GraviBall = 0x00001000 };
 	
@@ -25,6 +25,7 @@ private:
 
 	Vector2D currDir;				// The current direction of movement of the ball
 	float currSpeed;				// The current speed of the ball
+	float gravitySpeed;			// The current gravity speed of the ball
 	int currType;						// The current type of this ball
 
 	BallSize currSize;					// The current size of this ball
@@ -149,13 +150,16 @@ public:
 		Point2D center2D = this->bounds.Center();
 		return Point3D(center2D[0], center2D[1], this->zCenterPos);
 	}
+	Point2D GetCenterPosition2D() const {
+		return this->bounds.Center();
+	}
 
 	Vector2D GetDirection() const {
 		return this->currDir;
 	}
 	// Obtain the current velocity of ball
 	Vector2D GetVelocity() const {
-		return static_cast<float>(this->currSpeed) * this->currDir;
+		return this->currSpeed * this->currDir;
 	}
 	// Obtain the current speed of the ball
 	float GetSpeed() const {
@@ -164,6 +168,7 @@ public:
 	// Set the current speed of this ball
 	void SetSpeed(float speed) {
 		this->currSpeed    = speed;
+		this->gravitySpeed = speed;
 	}
 
 	int GetBallType() const {
@@ -219,23 +224,28 @@ public:
 		this->SetSpeed(magnitude);
 	}
 	void SetVelocity(float magnitude, const Vector2D& dir) {
-		this->currDir = Vector2D(dir);
+		this->currDir = dir;
 		this->SetSpeed(magnitude);	
+	}
+
+	void SetGravityVelocity(float magnitude, const Vector2D& dir) {
+		this->currDir = dir;
+		this->gravitySpeed = magnitude;
 	}
 
 	// Increases the Speed of the ball
 	void IncreaseSpeed() {
-		this->currSpeed += 5.0f;
+		this->SetSpeed(std::min<float>(GameBall::FastestSpeed, this->currSpeed + 5.0f));
 	}
 
 	// Decreases the speed of the ball
 	void DecreaseSpeed() {
-		this->currSpeed -= 5.0f;
+		this->SetSpeed(std::max<float>(GameBall::SlowestSpeed, this->currSpeed - 5.0f));
 	}
 
 	Onomatoplex::Extremeness GetOnomatoplexExtremeness() const;
 
-	void Tick(double seconds);
+	void Tick(double seconds, const Vector2D& worldSpaceGravityDir);
 	void Animate(double seconds);
 
 	// Set and get for the last level piece that this ball collided with

@@ -261,7 +261,7 @@ public:
 		return this->attachedBall;
 	}
 
-	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, double& timeSinceCollision);
+	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
 	void DebugDraw() const;
 
 };

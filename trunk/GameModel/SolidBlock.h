@@ -82,7 +82,7 @@ public:
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 		LevelPiece* resultingPiece = this->Destroy(gameModel);
 		// Tell the ball what the last piece it collided with was...
-		ball.SetLastPieceCollidedWith(/*resultingPiece*/NULL);
+		ball.SetLastPieceCollidedWith(/*resultingPiece*/ NULL);
 		return resultingPiece;
 	}
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {

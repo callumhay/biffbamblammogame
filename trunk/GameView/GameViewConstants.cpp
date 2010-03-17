@@ -97,6 +97,7 @@ TEXTURE_ITEM_STICKYPADDLE(TEXTURE_DIRECTORY "/stickypaddle_powerup256x128.jpg"),
 TEXTURE_ITEM_PADDLECAM(TEXTURE_DIRECTORY		"/paddlecam_powerdown_256x128.jpg"),
 TEXTURE_ITEM_BALLCAM(TEXTURE_DIRECTORY			"/ballcam_powerdown_256x128.jpg"),
 TEXTURE_ITEM_PADDLEBEAM(TEXTURE_DIRECTORY		"/laserbeampaddle_powerup_256x128.jpg"),
+TEXTURE_ITEM_GRAVITYBALL(TEXTURE_DIRECTORY  "/gravityball_powerneutral256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
 TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud256x128.png"),
@@ -110,6 +111,8 @@ TEXTURE_ITEM_TIMER_UPSIDEDOWN(TEXTURE_DIRECTORY		"/upsidedown_timer_hud256x128.p
 TEXTURE_ITEM_TIMER_POISON(TEXTURE_DIRECTORY				"/poison_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_STICKYPADDLE(TEXTURE_DIRECTORY "/stickypaddle_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_EYE(TEXTURE_DIRECTORY					"/cam_timer_hud256x128.png"),
+TEXTURE_ITEM_TIMER_GRAVITYBALL(TEXTURE_DIRECTORY	"/gravityball_timer_hud256x128.png"),
+
 
 // Item Timer (Fill) Texture Asset Paths
 TEXTURE_ITEM_TIMER_FILLER_SPDBALL(TEXTURE_DIRECTORY				"/ballspeed_timer_fill_hud256x128.png"),
@@ -122,6 +125,7 @@ TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN(TEXTURE_DIRECTORY		"/upsidedown_timer_fill2
 TEXTURE_ITEM_TIMER_FILLER_POISON(TEXTURE_DIRECTORY				"/poison_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE(TEXTURE_DIRECTORY	"/stickypaddle_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_EYE(TEXTURE_DIRECTORY						"/cam_timer_fill_hud256x128.png"),
+TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL(TEXTURE_DIRECTORY	  "/gravityball_timer_fill_hud256x128.png"),
 
 // Font Asset Paths
 FONT_SADBAD(FONT_DIRECTORY				"/sadbad.ttf"),
@@ -223,6 +227,7 @@ void GameViewConstants::InitItemTextures() {
 	this->itemTextures.insert(std::make_pair(GameItem::PaddleCamItem,						this->TEXTURE_ITEM_PADDLECAM));
 	this->itemTextures.insert(std::make_pair(GameItem::BallCamItem,							this->TEXTURE_ITEM_BALLCAM));
 	this->itemTextures.insert(std::make_pair(GameItem::LaserBeamPaddleItem,			this->TEXTURE_ITEM_PADDLEBEAM));
+	this->itemTextures.insert(std::make_pair(GameItem::GravityBallItem,					this->TEXTURE_ITEM_GRAVITYBALL));
 }
 
 void GameViewConstants::InitItemTimerTextures() {
@@ -238,6 +243,7 @@ void GameViewConstants::InitItemTimerTextures() {
 	this->itemTimerTextures.insert(std::make_pair(GameItem::StickyPaddleItem,				this->TEXTURE_ITEM_TIMER_STICKYPADDLE));
 	this->itemTimerTextures.insert(std::make_pair(GameItem::PaddleCamItem,					this->TEXTURE_ITEM_TIMER_EYE));
 	this->itemTimerTextures.insert(std::make_pair(GameItem::BallCamItem,						this->TEXTURE_ITEM_TIMER_EYE));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::GravityBallItem,				this->TEXTURE_ITEM_TIMER_GRAVITYBALL));
 }
 
 void GameViewConstants::InitItemTimerFillerTextures() {
@@ -253,6 +259,8 @@ void GameViewConstants::InitItemTimerFillerTextures() {
 	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::StickyPaddleItem,				this->TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE));
 	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::PaddleCamItem,					this->TEXTURE_ITEM_TIMER_FILLER_EYE));
 	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::BallCamItem,						this->TEXTURE_ITEM_TIMER_FILLER_EYE));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::GravityBallItem,				this->TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL));
+
 }
 
 GameViewConstants::~GameViewConstants() {

@@ -20,6 +20,8 @@
 
 #include "../BlammoEngine/FBObj.h"
 
+#include "../GameModel/GameModel.h"
+
 #include "../GameSound/GameSoundAssets.h"
 
 #include "../ESPEngine/ESPOnomataParticle.h"
@@ -52,6 +54,9 @@ mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NUL
 changeToPlayGameState(false), menuFBO(NULL), bloomEffect(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 {
+
+	// Make sure the game state is cleared
+	this->display->GetModel()->ClearGameState();
 
 	// Setup any textures for rendering the menu screen
 	this->bangTextures.reserve(3);
