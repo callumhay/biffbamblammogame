@@ -55,9 +55,9 @@ Point3D  ESPLineEmitter::CalculateRandomInitParticlePos() const {
 	Point3D randomPointOnLine = startPt + Randomizer::GetInstance()->RandomNumZeroToOne() * endToEndVec;
 	
 	// Now vary that point by the random offset of the emitter...
-	float randomPtX = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
-	float randomPtY = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
-	float randomPtZ = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
+	float randomPtX = this->radiusDeviationFromPtX.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
+	float randomPtY = this->radiusDeviationFromPtY.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
+	float randomPtZ = this->radiusDeviationFromPtZ.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
 	Vector3D randomDisplacement(randomPtX, randomPtY, randomPtZ);
 
 	return randomPointOnLine + randomDisplacement;

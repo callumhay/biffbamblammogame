@@ -61,7 +61,9 @@ protected:
 	// Inclusive intervals for the colour of particles
 	ESPInterval particleRed, particleGreen, particleBlue, particleAlpha;
 	// Inclusive interval for how far from the emitPt this particle may spawn at
-	ESPInterval radiusDeviationFromPt;	
+	ESPInterval radiusDeviationFromPtX;
+	ESPInterval radiusDeviationFromPtY;
+	ESPInterval radiusDeviationFromPtZ;
 
 	void Flush();
 
@@ -117,6 +119,7 @@ public:
 	void SetIsReversed(bool isReversed);
 	void SetAsPointSpriteEmitter(bool isPointSprite);
 	void SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter);
+	void SetRadiusDeviationFromCenter(const ESPInterval& xDistFromCenter, const ESPInterval& yDistFromCenter, const ESPInterval& zDistFromCenter);
 	void SetParticleDeathPlane(const Plane& plane);
 
 	void AddEffector(ESPParticleEffector* effector);
