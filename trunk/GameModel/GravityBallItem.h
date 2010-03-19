@@ -4,6 +4,7 @@
 #include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameItem.h"
+#include "GameModel.h"
 
 class Point2D;
 
@@ -21,5 +22,11 @@ public:
 	GameItem::ItemType GetItemType() const {
 		return GameItem::GravityBallItem;
 	}
+
+	const GameBall* GetBallAffected() const {
+		assert(this->gameModel->GetGameBalls().size() > 0);
+		return *this->gameModel->GetGameBalls().begin();
+	}
+
 };
 #endif

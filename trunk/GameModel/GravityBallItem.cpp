@@ -1,5 +1,4 @@
 #include "GravityBallItem.h"
-#include "GameModel.h"
 
 const char* GravityBallItem::GRAVITY_BALL_ITEM_NAME				= "GravityBall";
 const double GravityBallItem::GRAVITY_BALL_TIMER_IN_SECS	= 18.0;
