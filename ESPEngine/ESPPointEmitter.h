@@ -30,5 +30,8 @@ public:
 	void SetToggleEmitOnPlane(bool emitOnPlane, const Vector3D& planeNormal = Vector3D(0, 0, 1));
 	void SetEmitAngleInDegrees(int degs);
 	
+	Vector3D GetEmitDirection() const {
+		return this->emitDir;
+	}
 };
 #endif
