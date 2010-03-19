@@ -19,7 +19,8 @@
 ESPEmitter::ESPEmitter() : timeSinceLastSpawn(0.0f), particleTexture(NULL),
 particleAlignment(ESP::ViewPointAligned), particleRed(1), particleGreen(1), particleBlue(1), particleAlpha(1),
 particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES),
-isReversed(false), isPointSprite(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)) {
+isReversed(false), isPointSprite(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)),
+radiusDeviationFromPtX(0.0), radiusDeviationFromPtY(0.0), radiusDeviationFromPtZ(0.0) {
 	// NOTE: The death plane has been setup so that it's impossible to be in the 'death-zone' of it
 }
 
@@ -524,7 +525,15 @@ void ESPEmitter::SetAsPointSpriteEmitter(bool isPointSprite) {
  * Set the deviation from the center emit point where particles may spawn.
  */
 void ESPEmitter::SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter) {
-	this->radiusDeviationFromPt = distFromCenter;
+	this->radiusDeviationFromPtX = distFromCenter;
+	this->radiusDeviationFromPtY = distFromCenter;
+	this->radiusDeviationFromPtZ = distFromCenter;
+}
+void ESPEmitter::SetRadiusDeviationFromCenter(const ESPInterval& xDistFromCenter, const ESPInterval& yDistFromCenter, 
+																							const ESPInterval& zDistFromCenter) {
+	this->radiusDeviationFromPtX = xDistFromCenter;
+	this->radiusDeviationFromPtY = yDistFromCenter;
+	this->radiusDeviationFromPtZ = zDistFromCenter;
 }
 
 /**
