@@ -200,6 +200,7 @@ public:
 	const Colour POISON_LIGHT_LIGHT_COLOUR;
 	const Colour GHOST_BALL_COLOUR;
 	const Colour UBER_BALL_COLOUR;
+	const Colour GRAVITY_BALL_COLOUR;
 	const Colour INK_BLOCK_COLOUR;
 	const Colour STICKYPADDLE_GOO_COLOUR;
 	const Colour STICKYPADDLE_PLUS_BEAM_GOO_COLOUR;

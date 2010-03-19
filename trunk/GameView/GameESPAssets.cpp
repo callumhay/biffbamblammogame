@@ -23,7 +23,8 @@ GameESPAssets::GameESPAssets() :
 particleFader(1, 0), 
 particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(1.0f, 0.0f, 0.0f, 0.0f)),
 particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
-particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0), 
+particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0),
+particleGravityArrowColour(ColourRGBA(GameViewConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
 
 particleShrinkToNothing(1, 0),
 particlePulseUberballAura(0, 0),
@@ -2518,6 +2519,31 @@ void GameESPAssets::AddBallShrinkEffect(const GameBall* ball) {
 	}
 }
 
+void GameESPAssets::AddGravityBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList) {
+	assert(ball != NULL);
+	const float BALL_RADIUS = ball->GetBounds().Radius();
+
+	ESPPointEmitter* ballGravityEffect = new ESPPointEmitter();
+	ballGravityEffect->SetSpawnDelta(ESPInterval(0.1f, 0.15f));
+	ballGravityEffect->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+	ballGravityEffect->SetInitialSpd(ESPInterval(1.0f, 2.0f));
+	ballGravityEffect->SetParticleLife(ESPInterval(1.8f, 2.2f));
+	ballGravityEffect->SetParticleSize(ESPInterval(1.5f*BALL_RADIUS, 2.0f*BALL_RADIUS));
+	ballGravityEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.8f*BALL_RADIUS), ESPInterval(0), ESPInterval(0.0f, 0.8f*BALL_RADIUS));
+	ballGravityEffect->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+	ballGravityEffect->SetEmitPosition(Point3D(0,0,0));
+	ballGravityEffect->SetEmitDirection(Vector3D(0, -1, 0));	// Downwards gravity vector is always in -y direction
+	ballGravityEffect->SetEmitAngleInDegrees(0.0f);
+	ballGravityEffect->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+
+	ballGravityEffect->SetParticleColour(ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.5f) , ESPInterval(0.0f, 0.5f), ESPInterval(1.0f));
+	ballGravityEffect->SetParticles(10, this->upArrowTex);
+	ballGravityEffect->AddEffector(&this->particleGravityArrowColour);
+	ballGravityEffect->AddEffector(&this->particleSmallGrowth);
+
+	effectsList.push_back(ballGravityEffect);
+}
+
 /**
  * Add the effect for when the player acquires a 1UP power-up.
  */
@@ -2803,6 +2829,43 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 	ghostBallEffectList[0]->Draw(camera);
 	ghostBallEffectList[0]->Tick(dT);
 	
+	glPopMatrix();
+}
+
+void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir) {
+	// Check to see if the ball has any associated gravity ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	
+	if (foundBallEffects == this->ballEffects.end()) {
+		// Didn't even find a ball ... add one
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>())).first;
+	}
+
+	if (foundBallEffects->second.find(GameItem::GravityBallItem) == foundBallEffects->second.end()) {
+		// Didn't find an associated uber ball effect, so add one
+		this->AddGravityBallESPEffects(&ball, this->ballEffects[&ball][GameItem::GravityBallItem]);
+	}
+
+	std::vector<ESPPointEmitter*>& gravityBallEffectList = this->ballEffects[&ball][GameItem::GravityBallItem];
+
+	glPushMatrix();
+	Point2D loc = ball.GetBounds().Center();
+	glTranslatef(loc[0], loc[1], 0);
+
+	for (std::vector<ESPPointEmitter*>::iterator iter = gravityBallEffectList.begin(); iter != gravityBallEffectList.end(); ++iter) {
+		ESPPointEmitter* emitter = *iter;
+
+		// If the gravity direction is changing then reset it - we reset the emitter so the
+		// user doesn't see random particles flying around inbetween the transitions
+		if (emitter->GetEmitDirection() != gravityDir) {
+			emitter->SetEmitDirection(gravityDir);
+			emitter->Reset();
+		}
+		emitter->Tick(dT);
+		emitter->Draw(camera);
+	}
+
 	glPopMatrix();
 }
 

@@ -53,8 +53,9 @@ private:
 	ESPParticleColourEffector particleFader;
 	ESPParticleColourEffector particleFireColourFader;
 	ESPParticleColourEffector particleCloudColourFader;
-
 	ESPParticleColourEffector particleFaderUberballTrail;
+	ESPParticleColourEffector particleGravityArrowColour;
+
 	ESPParticleScaleEffector  particlePulseUberballAura;
 	ESPParticleScaleEffector  particlePulseItemDropAura;
 	ESPParticleScaleEffector  particlePulsePaddleLaser;
@@ -138,6 +139,7 @@ private:
 
 	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
+	void AddGravityBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 
@@ -213,6 +215,7 @@ public:
 
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball);
+	void DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir);
 	void DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	void DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	
