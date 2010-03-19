@@ -193,10 +193,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 					this->espAssets->DrawGhostBallEffects(dT, camera, *currBall);
 				}
 				
-				currBallColour = currBallColour +
-												 Colour(GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.R(),
-																GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.G(),
-																GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.B());
+				currBallColour = currBallColour + GameViewConstants::GetInstance()->GHOST_BALL_COLOUR;
 				numColoursApplied++;
 			}
 
@@ -210,10 +207,22 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 					this->espAssets->DrawUberBallEffects(dT, camera, *currBall);
 				}
 
-				currBallColour = currBallColour + 
-												 Colour(GameViewConstants::GetInstance()->UBER_BALL_COLOUR.R(),
-																GameViewConstants::GetInstance()->UBER_BALL_COLOUR.G(),
-																GameViewConstants::GetInstance()->UBER_BALL_COLOUR.B());
+				currBallColour = currBallColour + GameViewConstants::GetInstance()->UBER_BALL_COLOUR;
+				numColoursApplied++;
+			}
+
+			// GRAVITY BALL CHECK
+			if ((currBall->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall &&
+					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+
+				// Draw when gravity ball and not invisiball...
+				// We don't draw any of the effects if we're in ball camera mode
+				if (!GameBall::GetIsBallCameraOn()) {
+					Vector3D gravityDir = gameModel.GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
+					this->espAssets->DrawGravityBallEffects(dT, camera, *currBall, gravityDir);
+				}
+				
+				currBallColour = currBallColour + GameViewConstants::GetInstance()->GRAVITY_BALL_COLOUR;
 				numColoursApplied++;
 			}
 
