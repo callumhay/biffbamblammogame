@@ -64,9 +64,9 @@ Vector3D ESPPointEmitter::CalculateRandomInitParticleDir() const {
  * Returns: Initial position for particle spawn.
  */
 Point3D ESPPointEmitter::CalculateRandomInitParticlePos() const {
-	float randomPtX = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
-	float randomPtY = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
-	float randomPtZ = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
+	float randomPtX = this->radiusDeviationFromPtX.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
+	float randomPtY = this->radiusDeviationFromPtY.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
+	float randomPtZ = this->radiusDeviationFromPtZ.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
 	Point3D initialPt = this->emitPt + Vector3D(randomPtX, randomPtY, randomPtZ);
 
 	return initialPt;
