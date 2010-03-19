@@ -41,9 +41,9 @@ Vector3D ESPVolumeEmitter::CalculateRandomInitParticleDir() const {
 }
 
 Point3D ESPVolumeEmitter::CalculateRandomInitParticlePos() const {
-	float randomPtX = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
-	float randomPtY = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
-	float randomPtZ = this->radiusDeviationFromPt.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
+	float randomPtX = this->radiusDeviationFromPtX.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
+	float randomPtY = this->radiusDeviationFromPtY.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
+	float randomPtZ = this->radiusDeviationFromPtZ.RandomValueInInterval() * Randomizer::GetInstance()->RandomNegativeOrPositive();
 	Vector3D initialDisp(randomPtX, randomPtY, randomPtZ);
 
 	// If there is not emit volume then the emitter condenses into a point
