@@ -33,6 +33,7 @@ double GravityBallItem::Activate() {
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
 	GameBall* affectedBall = *gameBalls.begin();
 	assert(affectedBall != NULL);
+	
 	affectedBall->AddBallType(GameBall::GraviBall);
 
 	GameItem::Activate();
