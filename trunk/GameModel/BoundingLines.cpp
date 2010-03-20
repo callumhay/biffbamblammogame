@@ -121,33 +121,40 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 		}
 
 		if (!collisionOccurred) {
-			// Lastly check the current and previous circle bounds
-			Point2D collidingCenter;
-			float sqDist = Collision::SqDistFromPtToLineSeg(currLine, previousCenter);
+			float sqDist = Collision::SqDistFromPtToLineSeg(currLine, c.Center());
 			if (sqDist <= sqRadius) {
-				collidingCenter = previousCenter;
-				collisionOccurred = true;
-			}
-			else {
-				sqDist = Collision::SqDistFromPtToLineSeg(currLine, c.Center());
+
+				// Check to see if it's still colliding at the start of the time delta...
+				sqDist = Collision::SqDistFromPtToLineSeg(currLine, previousCenter);
 				if (sqDist <= sqRadius) {
-					collidingCenter = c.Center();
+					// Not so good... seems that it's still colliding at the start of the time segment,
+					// return that this is so
+					timeSinceCollision = dT;
 					collisionOccurred = true;
+					n = n + currNormal;
+					collisionLine = currLine;
+					break;
 				}
-			}
 
-			if (collisionOccurred) {
-				closestLinePt = Collision::ClosestPoint(collidingCenter, currLine);
-				float distance = sqrt(sqDist);
+				// Binary search for a point when the collision was close enough
+				Point2D currSearchCenter = previousCenter;
+				float searchFraction = 1.0f;
+				int count = 0;
+				while (fabs(sqDist - sqRadius) > 0.001 || count > 100) {
+					searchFraction *= 0.5f;
+					if (sqDist > sqRadius) {
+						currSearchCenter = currSearchCenter + searchFraction * movementDistOverDT * normalizedVel;
+					}
+					else {
+						currSearchCenter = currSearchCenter - searchFraction * movementDistOverDT * normalizedVel;
+					}
+					sqDist = Collision::SqDistFromPtToLineSeg(currLine, currSearchCenter);
+					count++;
+				}
 
-				Vector2D toLine = closestLinePt - collidingCenter;
-				toLine.Normalize();
-				float theta = acos(Vector2D::Dot(toLine, -normalizedVel));
-				float sinTheta = sin(theta);
-				float alpha = asin(sinTheta*distance / c.Radius());
-				float phi   = M_PI - theta - alpha;
-				distance = sin(phi)*c.Radius() / sinTheta;
-			
+				// Now figure out the distance between the current center circle position and the
+				// position of the center at collision
+				float distance = Point2D::Distance(c.Center(), currSearchCenter);
 				float timeToCollision = distance / velocityMagnitude;
 				assert(timeToCollision >= 0.0);
 

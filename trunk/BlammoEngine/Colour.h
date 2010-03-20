@@ -167,6 +167,9 @@ inline ColourRGBA operator /(const ColourRGBA& a, float b) {
 inline ColourRGBA operator *(const ColourRGBA& a, const ColourRGBA& b) {
 	return ColourRGBA(a.R()*b.R(), a.G()*b.G(), a.B()*b.B(), a.A()*b.A());
 }
+inline ColourRGBA operator *(const Colour& a, const ColourRGBA& b) {
+	return ColourRGBA(a.R()*b.R(), a.G()*b.G(), a.B()*b.B(), b.A());
+}
 
 // Additive colouring
 inline ColourRGBA operator +(const ColourRGBA& a, const ColourRGBA& b) {

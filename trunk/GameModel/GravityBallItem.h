@@ -27,6 +27,5 @@ public:
 		assert(this->gameModel->GetGameBalls().size() > 0);
 		return *this->gameModel->GetGameBalls().begin();
 	}
-
 };
 #endif

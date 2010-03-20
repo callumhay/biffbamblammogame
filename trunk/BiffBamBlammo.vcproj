@@ -1230,6 +1230,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\NetBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PortalBlock.h"
 						>
 					</File>
@@ -1263,6 +1267,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\LevelPiece.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\NetBlock.cpp"
 						>
 					</File>
 					<File

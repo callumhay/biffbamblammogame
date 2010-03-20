@@ -34,11 +34,14 @@ private:
 	double ballCollisionsDisabledTimer;	// If > 0 then collisions are disabled
 
 	ColourRGBA colour;													// The colour multiply of the paddle, including its visibility/alpha
+	Colour contributingGravityColour;
 	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
 
 	static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL
 
 	const LevelPiece* lastPieceCollidedWith;
+
+	bool wrappedUpInNet;	// Whether this ball is wrapped up in a net (from a net block or otherwise)
 
 	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
 	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink
@@ -78,7 +81,7 @@ public:
 
 	// Ball colour set/get functions
 	ColourRGBA GetColour() const {
-		return this->colour;
+		return this->contributingGravityColour * this->colour;
 	}
 	void SetColour(const ColourRGBA& c) {
 		this->colour = c;
@@ -171,17 +174,42 @@ public:
 		this->gravitySpeed = speed;
 	}
 
+	// Call this when the ball collides with a net block
+	void WrappedUpInNetBlock(const Vector3D& worldGravityDir) {
+		// Set velocity first and then wrap the ball up in a net
+		this->SetVelocity(this->GetSpeed(), Vector2D(worldGravityDir[0], worldGravityDir[1]));
+		this->wrappedUpInNet = true;
+	}
+	bool GetIsWrappedUpInNet() const {
+		return this->wrappedUpInNet;
+	}
+
 	int GetBallType() const {
 		return this->currType;
 	}
 	void RemoveAllBallTypes() {
 		this->currType = GameBall::NormalBall;
+		this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
 	}
 	void AddBallType(const BallType type) {
 		this->currType = this->currType | type;
+		switch (type) {
+			case GameBall::GraviBall:
+				this->contributingGravityColour = Colour(0.75f, 0.24f, 1.0f);
+				break;
+			default:
+				break;
+		}
 	}
 	void RemoveBallType(const BallType type) {
 		this->currType = this->currType & ~type;
+		switch (type) {
+			case GameBall::GraviBall:
+				this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
+				break;
+			default:
+				break;
+		}
 	}
 
 	// Ball size modifying / querying functions
@@ -222,10 +250,14 @@ public:
 	void SetVelocity(const BallSpeed &magnitude, const Vector2D& dir) {
 		this->currDir = Vector2D(dir);
 		this->SetSpeed(magnitude);
+		// Change of velocity direction results in removal of net
+		this->wrappedUpInNet = false;
 	}
 	void SetVelocity(float magnitude, const Vector2D& dir) {
 		this->currDir = dir;
-		this->SetSpeed(magnitude);	
+		this->SetSpeed(magnitude);
+		// Change of velocity direction results in removal of net
+		this->wrappedUpInNet = false;
 	}
 
 	void SetGravityVelocity(float magnitude, const Vector2D& dir) {

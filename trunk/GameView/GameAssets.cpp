@@ -246,7 +246,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 		// Draw the ball model...
 		
-		// Obtain the colour of the ball from the model, if it's invisible
+		// Obtain the colour of the ball from the model, if it's completely invisible
 		// then just skip the rest of the draw calls
 		ColourRGBA ballColour = currBall->GetColour();
 		if (ballColour.A() < EPSILON) {

@@ -92,7 +92,8 @@ void BallInPlayState::Tick(double seconds) {
 #endif
 
 	// Gravity vector in world space
-	const Vector3D worldGravityDir = this->gameModel->GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
+	Vector3D worldGravityDir = this->gameModel->GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
+	worldGravityDir.Normalize();
 
 	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
 		GameBall *currBall = *iter;
@@ -519,15 +520,6 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision:
 
 	// Now move the ball in that direction over how ever much time was lost during the collision
 	b.SetCenterPosition(b.GetCenterPosition2D() + timeToMoveInReflectionDir * b.GetVelocity());
-
-	// Now make absolutely sure that the ball is no longer colliding with the line
-	float distToLine = sqrt(Collision::SqDistFromPtToLineSeg(collisionLine, b.GetCenterPosition2D()));
-	if (distToLine <= BALL_RADIUS) {
-		// Move along the normal, which should be perfectly perpendicular the line a distance of the difference
-		float distanceDiff = (BALL_RADIUS - distToLine) + BALL_EPSILON;
-		b.SetCenterPosition(b.GetCenterPosition2D() + distanceDiff * n);
-	}
-
 }
 
 /**

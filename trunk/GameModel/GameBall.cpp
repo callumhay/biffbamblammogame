@@ -42,7 +42,8 @@ lastPieceCollidedWith(NULL), zCenterPos(0.0) {
 GameBall::GameBall(const GameBall& gameBall) : bounds(gameBall.bounds), currDir(gameBall.currDir), currSpeed(gameBall.currSpeed), 
 currType(gameBall.currType), currSize(gameBall.currSize), currScaleFactor(gameBall.currScaleFactor), 
 rotationInDegs(gameBall.rotationInDegs), ballCollisionsDisabledTimer(0.0), lastPieceCollidedWith(gameBall.lastPieceCollidedWith),
-colour(1, 1, 1, 1), zCenterPos(gameBall.zCenterPos) {
+colour(1, 1, 1, 1), zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributingGravityColour),
+wrappedUpInNet(gameBall.wrappedUpInNet) {
 
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
@@ -63,8 +64,10 @@ void GameBall::ResetBallAttributes() {
 	this->SetDimensions(NormalSize);
 	this->lastPieceCollidedWith = NULL;
 	this->colour = ColourRGBA(1, 1, 1, 1);
+	this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
+	this->wrappedUpInNet = false;
 }
 
 /**

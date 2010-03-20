@@ -13,12 +13,13 @@ public:
 		return LevelPiece::Bomb;
 	}
 
-	// Empty blocks have no bounds... they don't exist as physical entities
+	// Bomb blocks have bounds...
 	bool IsNoBoundsPieceType() const {
 		return false;
 	}
 
-	// Empty spaces don't exist and cannot really be destroyed...
+	// Bomb blocks don't need to be destroyed to end a level, they're just useful
+	// for making the level end faster... usually
 	bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}

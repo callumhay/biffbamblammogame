@@ -30,7 +30,7 @@ public:
 	static const float HALF_PIECE_HEIGHT;
 	static const float HALF_PIECE_DEPTH;
 
-	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, Portal, PrismTriangle };
+	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, Portal, PrismTriangle, Net };
 	virtual LevelPieceType GetType() const = 0;
 
 protected:
