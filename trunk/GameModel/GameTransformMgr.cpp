@@ -89,6 +89,9 @@ void GameTransformMgr::SetPaddleCamera(bool putCamInsidePaddle) {
 		animType = GameTransformMgr::ToPaddleCamAnimation;
 	}
 	else {
+		if (this->paddleWithCamera == NULL) {
+			return;
+		}
 		animType = GameTransformMgr::FromPaddleCamAnimation;
 	}
 
@@ -116,6 +119,9 @@ void GameTransformMgr::SetBallCamera(bool putCamInsideBall) {
 		animType = GameTransformMgr::ToBallCamAnimation;	
 	}
 	else {
+		if (this->ballWithCamera == NULL) {
+			return;
+		}
 		animType = GameTransformMgr::FromBallCamAnimation;
 	}
 
@@ -140,17 +146,18 @@ void GameTransformMgr::SetBallCamera(bool putCamInsideBall) {
 void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
 	GameTransformMgr::TransformAnimationType animType;
 	if (turnOnBallDeathCam) {
-		// Get rid of all other animations that may be in the queue - 
-		// ball death takes presedence over all other animations
-		animType = GameTransformMgr::ToBallDeathAnimation;	
+		animType = GameTransformMgr::ToBallDeathAnimation;
+		this->SetPaddleCamera(false);
+		this->SetBallCamera(false);
 	}
 	else {
 		animType = GameTransformMgr::FromBallDeathAnimation;
 	}
 
-	// Add the ball cam transform to the queue
+	// Ball death takes presedence over all other animations
+	// Add the ball cam transform to the front of the queue
 	TransformAnimation transformAnim(animType);
-	this->animationQueue.push_front(transformAnim);
+	this->animationQueue.push_back(transformAnim);
 }
 
 /**
@@ -226,7 +233,7 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 				}
 				else {
 					this->StartBallDeathAnimation(dT, gameModel);
-				}	
+				}
 				break;
 
 			default:
@@ -236,7 +243,25 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 	}
 
 	// We need to intelligently update where the camera is in relation to the paddle/ball/...,
-	if (this->paddleWithCamera != NULL) {
+	if (this->isBallDeathCamIsOn) {
+		// Ball death cam takes priority over all other camera effects...
+		// Follow the ball with the camera...
+		assert(gameModel.GetGameBalls().size() == 1);
+		const GameBall* deathBall = *(gameModel.GetGameBalls().begin());
+	
+		// Get the ball velocity and current camera worldspace position/translation
+		Vector2D ballVelocity2D = 0.8f * deathBall->GetVelocity();
+		Vector3D currCamTranslation = this->currCamOrientation.GetTranslation();
+		
+		// Calculate the distance the ball has moved so far (if it were travelling in a straight line), in worldspace
+		Point3D currCamPosition   = Point3D(currCamTranslation[0], currCamTranslation[1], currCamTranslation[2]);
+		Vector3D ballMoveDistance	= dT * Vector3D(ballVelocity2D[0], ballVelocity2D[1], 0.0f);
+		ballMoveDistance = this->GetGameTransform() * ballMoveDistance; 
+
+		currCamPosition  = currCamPosition + ballMoveDistance;
+		this->currCamOrientation.SetTranslation(Vector3D(currCamPosition[0], currCamPosition[1], currCamPosition[2]));
+	}
+	else if (this->paddleWithCamera != NULL) {
 		// Calculate the location of the paddle in world space and get the FOV angle as well
 		GameLevel* currLevel = gameModel.GetCurrentLevel();
 		assert(currLevel != NULL);
@@ -271,23 +296,6 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 		// Update the camera position and rotation based on the movement of the ball and the level transform
 		this->currCamOrientation.SetTranslation(worldSpaceTranslation);
 		this->currCamOrientation.SetRotation(worldRotation);
-	}
-	else if (this->isBallDeathCamIsOn) {
-		// Follow the ball with the camera...
-		assert(gameModel.GetGameBalls().size() == 1);
-		const GameBall* deathBall = *(gameModel.GetGameBalls().begin());
-	
-		// Get the ball velocity and current camera worldspace position/translation
-		Vector2D ballVelocity2D = 0.8f * deathBall->GetVelocity();
-		Vector3D currCamTranslation = this->currCamOrientation.GetTranslation();
-		
-		// Calculate the distance the ball has moved so far (if it were travelling in a straight line), in worldspace
-		Point3D currCamPosition   = Point3D(currCamTranslation[0], currCamTranslation[1], currCamTranslation[2]);
-		Vector3D ballMoveDistance	= dT * Vector3D(ballVelocity2D[0], ballVelocity2D[1], 0.0f);
-		ballMoveDistance = this->GetGameTransform() * ballMoveDistance; 
-
-		currCamPosition  = currCamPosition + ballMoveDistance;
-		this->currCamOrientation.SetTranslation(Vector3D(currCamPosition[0], currCamPosition[1], currCamPosition[2]));
 	}
 
 }
@@ -813,9 +821,9 @@ void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) 
 		Point2D ballLevelSpacePos = ballPos2D - halfLevelDim;
 
 		// This will store the actual world space position that we need to transform the camera to...
-		Vector3D finalCamPosition(ballLevelSpacePos[0], ballLevelSpacePos[1], 0.0f);
+		Vector3D finalCamPosition(ballLevelSpacePos[0], ballLevelSpacePos[1], GameTransformMgr::BALL_DEATH_CAM_DIST_TO_BALL);
 		finalCamPosition = this->GetGameTransform() * finalCamPosition;
-		finalCamPosition[2] = GameTransformMgr::BALL_DEATH_CAM_DIST_TO_BALL;
+		Orientation3D finalOrientation(finalCamPosition, Vector3D(0, 0, 0));
 
 		// Figure out the time to travel
 		Vector3D travelVec = this->currCamOrientation.GetTranslation() - finalCamPosition;
@@ -823,9 +831,18 @@ void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) 
 		double timeToAnimate = distToTravel * GameTransformMgr::SECONDS_PER_UNIT_DEATHCAM;
 			
 		// Center the ball on the screen
+		std::vector<Orientation3D> orients;
+		orients.reserve(2);
+		orients.push_back(this->currCamOrientation);
+		orients.push_back(finalOrientation);
+		std::vector<double> timeVals;
+		timeVals.reserve(2);
+		timeVals.push_back(0);
+		timeVals.push_back(timeToAnimate);
+
 		AnimationMultiLerp<Orientation3D> toBallDeathAnim(&this->currCamOrientation);
-		Orientation3D finalOrientation(finalCamPosition, Vector3D(0, 0, 0));
-		toBallDeathAnim.SetLerp(timeToAnimate, finalOrientation);
+		toBallDeathAnim.SetLerp(timeVals, orients);
+		toBallDeathAnim.SetRepeat(false);
 		this->ballDeathAnimations.push_back(toBallDeathAnim);
 	}
 	else {

@@ -9,52 +9,21 @@
 #include "../BlammoEngine/Animation.h"
 
 #include "Onomatoplex.h"
+#include "BallState.h"
 
 class LevelPiece;
+class CannonBlock;
 
 class GameBall {
+	// State Machine Design Pattern Friendships
+	friend class NormalBallState;
+	friend class InCannonBallState;
 
 public:
 	enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 7, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 22, FastestSpeed = 27 };
 	enum BallSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100, GraviBall = 0x00001000 };
 	
-private:
-	Collision::Circle2D bounds;	// The bounds of the ball, constantly updated to world space
-	float zCenterPos;						// VERY occasionally (some animations), the ball needs a z-coordinate
-
-	Vector2D currDir;				// The current direction of movement of the ball
-	float currSpeed;				// The current speed of the ball
-	float gravitySpeed;			// The current gravity speed of the ball
-	int currType;						// The current type of this ball
-
-	BallSize currSize;					// The current size of this ball
-	float currScaleFactor;			// The scale difference between the ball's current size and its default size
-
-	double ballCollisionsDisabledTimer;	// If > 0 then collisions are disabled
-
-	ColourRGBA colour;													// The colour multiply of the paddle, including its visibility/alpha
-	Colour contributingGravityColour;
-	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
-
-	static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL
-
-	const LevelPiece* lastPieceCollidedWith;
-
-	bool wrappedUpInNet;	// Whether this ball is wrapped up in a net (from a net block or otherwise)
-
-	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
-	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink
-	static const float RADIUS_DIFF_PER_SIZE;		// The difference in radius per size change of the ball
-	static const float GRAVITY_ACCELERATION;		// Acceleration of gravity pulling the ball downwards
-
-	Vector3D rotationInDegs;	// Used for random rotation of the ball, gives the view the option to use it
-
-	void SetDimensions(float newScaleFactor);
-	void SetDimensions(GameBall::BallSize size);
-	void SetBallSize(GameBall::BallSize size);
-
-public:
 	// Default radius of the ball
 	static const float DEFAULT_BALL_RADIUS;
 
@@ -81,7 +50,7 @@ public:
 
 	// Ball colour set/get functions
 	ColourRGBA GetColour() const {
-		return this->contributingGravityColour * this->colour;
+		return this->currState->GetBallColour();
 	}
 	void SetColour(const ColourRGBA& c) {
 		this->colour = c;
@@ -100,10 +69,10 @@ public:
 	}
 
 	/**
-	 * Whether or not this ball can collide with anything.
+	 * Whether or not this ball can collide with other balls.
 	 */
-	bool CanCollide() const {
-		return this->ballCollisionsDisabledTimer <= EPSILON;
+	bool CanCollideWithOtherBalls() const {
+		return this->ballballCollisionsDisabledTimer <= EPSILON;
 	}
 
 	/**
@@ -112,7 +81,7 @@ public:
 	 */
 	bool CollisionCheck(const GameBall& otherBall) {
 		// If the collisions are disabled then we only return false
-		if (this->ballCollisionsDisabledTimer > EPSILON || otherBall.ballCollisionsDisabledTimer > EPSILON) {
+		if (!this->CanCollideWithOtherBalls() || !otherBall.CanCollideWithOtherBalls()) {
 			return false;
 		}
 
@@ -126,17 +95,39 @@ public:
 	/** 
 	 * Set ball-ball collisions for this ball to be diabled for the given duration in seconds.
 	 */
-	void SetBallCollisionsDisabled(double durationInSecs) {
+	void SetBallBallCollisionsDisabled(double durationInSecs) {
 		assert(durationInSecs > EPSILON);
-		this->ballCollisionsDisabledTimer = durationInSecs;
+		this->ballballCollisionsDisabledTimer = durationInSecs;
 	}
-	void SetBallCollisionsDisabled() {
+	void SetBallBallCollisionsDisabled() {
 		// Set the ball collisions to be disabled forever (until they are re-enabled)
-		this->ballCollisionsDisabledTimer = DBL_MAX;
+		this->ballballCollisionsDisabledTimer = DBL_MAX;
 	}
-	void SetBallCollisionsEnabled() {
-		this->ballCollisionsDisabledTimer = 0.0;
+	void SetBallBallCollisionsEnabled() {
+		this->ballballCollisionsDisabledTimer = 0.0;
 	}
+
+	void SetBallPaddleCollisionsDisabled() {
+		this->paddleCollisionsDisabled = true;
+	}
+	void SetBallPaddleCollisionsEnabled() {
+		this->paddleCollisionsDisabled = false;
+	}
+	bool CanCollideWithPaddles() const {
+		return !this->paddleCollisionsDisabled;
+	}
+	
+	void SetBallBlockCollisionsDisabled() {
+		this->blockCollisionsDisabled = true;
+	}
+	void SetBallBlockCollisionsEnabled() {
+		this->blockCollisionsDisabled = false;
+	}
+	bool CanCollideWithBlocks() const {
+		return !this->blockCollisionsDisabled;
+	}
+
+
 
 	// Set the center position of the ball
 	void SetCenterPosition(const Point2D& p) {
@@ -172,16 +163,6 @@ public:
 	void SetSpeed(float speed) {
 		this->currSpeed    = speed;
 		this->gravitySpeed = speed;
-	}
-
-	// Call this when the ball collides with a net block
-	void WrappedUpInNetBlock(const Vector3D& worldGravityDir) {
-		// Set velocity first and then wrap the ball up in a net
-		this->SetVelocity(this->GetSpeed(), Vector2D(worldGravityDir[0], worldGravityDir[1]));
-		this->wrappedUpInNet = true;
-	}
-	bool GetIsWrappedUpInNet() const {
-		return this->wrappedUpInNet;
 	}
 
 	int GetBallType() const {
@@ -250,14 +231,10 @@ public:
 	void SetVelocity(const BallSpeed &magnitude, const Vector2D& dir) {
 		this->currDir = Vector2D(dir);
 		this->SetSpeed(magnitude);
-		// Change of velocity direction results in removal of net
-		this->wrappedUpInNet = false;
 	}
 	void SetVelocity(float magnitude, const Vector2D& dir) {
 		this->currDir = dir;
 		this->SetSpeed(magnitude);
-		// Change of velocity direction results in removal of net
-		this->wrappedUpInNet = false;
 	}
 
 	void SetGravityVelocity(float magnitude, const Vector2D& dir) {
@@ -283,6 +260,52 @@ public:
 	// Set and get for the last level piece that this ball collided with
 	void SetLastPieceCollidedWith(const LevelPiece* p) { this->lastPieceCollidedWith = p; }
 	bool IsLastPieceCollidedWith(const LevelPiece* p) const { return this->lastPieceCollidedWith == p; }
+
+	void LoadIntoCannonBlock(CannonBlock* cannonBlock);
+	bool IsLoadedInCannonBlock();
+
+private:
+	BallState* currState;
+
+	Collision::Circle2D bounds;	// The bounds of the ball, constantly updated to world space
+	float zCenterPos;						// VERY occasionally (some animations), the ball needs a z-coordinate
+
+	Vector2D currDir;				// The current direction of movement of the ball
+	float currSpeed;				// The current speed of the ball
+	float gravitySpeed;			// The current gravity speed of the ball
+	int currType;						// The current type of this ball
+
+	BallSize currSize;					// The current size of this ball
+	float currScaleFactor;			// The scale difference between the ball's current size and its default size
+
+	double ballballCollisionsDisabledTimer;	// If > 0 then collisions among this ball and other balls are disabled
+	bool blockCollisionsDisabled;
+	bool paddleCollisionsDisabled;
+
+	ColourRGBA colour;													// The colour multiply of the paddle, including its visibility/alpha
+	Colour contributingGravityColour;
+	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
+
+	static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL
+
+	const LevelPiece* lastPieceCollidedWith;
+
+	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
+	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink
+	static const float RADIUS_DIFF_PER_SIZE;		// The difference in radius per size change of the ball
+	static const float GRAVITY_ACCELERATION;		// Acceleration of gravity pulling the ball downwards
+
+	Vector3D rotationInDegs;	// Used for random rotation of the ball, gives the view the option to use it
+
+	void SetDimensions(float newScaleFactor);
+	void SetDimensions(GameBall::BallSize size);
+	void SetBallSize(GameBall::BallSize size);
+	void SetBallState(BallState* state, bool deletePrevState);
+
 };
+
+inline bool GameBall::IsLoadedInCannonBlock() {
+	return this->currState->GetBallStateType() == BallState::InCannonBallState;
+}
 
 #endif

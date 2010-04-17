@@ -322,6 +322,7 @@ void GameAssets::DrawGameBallsPostEffects(double dT, GameModel& gameModel, const
 			this->espAssets->DrawPaddleCamEffects(dT, camera, *currBall, *paddle);
 		}
 	}
+
 	debug_opengl_state();
 }
 

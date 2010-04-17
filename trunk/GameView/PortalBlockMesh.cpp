@@ -58,7 +58,7 @@ void PortalBlockMesh::LoadMesh() {
 	assert(this->portalEffect == NULL);	
 
 	this->portalBlockGeometry = ResourceManager::GetInstance()->GetPortalBlockMeshResource();
-	const std::map<std::string, MaterialGroup*> portalMaterialGrps = this->portalBlockGeometry->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& portalMaterialGrps = this->portalBlockGeometry->GetMaterialGroups();
 	assert(portalMaterialGrps.size() == 1);
 
 	MaterialGroup* portalMatGrp = portalMaterialGrps.begin()->second;

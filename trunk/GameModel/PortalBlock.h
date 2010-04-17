@@ -32,7 +32,10 @@ public:
 	bool IsNoBoundsPieceType() const {
 		return true;
 	}
-	
+	bool BallBouncesOffWhenHit() const {
+		return false;
+	}	
+
 	// Doesn't need to be destroyed to end the level - it's more just an
 	// obstruction to make it harder if it's hit
 	bool MustBeDestoryedToEndLevel() const {

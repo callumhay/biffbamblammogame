@@ -14,6 +14,7 @@ class BallSafetyNetMesh;
 class Mesh;
 class PrismBlockMesh;
 class PortalBlockMesh;
+class CannonBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 
@@ -30,6 +31,7 @@ private:
 	PortalBlockMesh* portalBlock;
 	PrismBlockMesh* prismBlockDiamond;		// Prism diamond block
 	PrismBlockMesh* prismBlockTriangleUR;	// Prism triangle block in upper-right corner position
+	CannonBlockMesh* cannonBlock;
 	Mesh* styleBlock;
 
 	// Misc. display lists and meshes for other geometry activated by items and such

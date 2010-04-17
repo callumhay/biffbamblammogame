@@ -5,6 +5,7 @@
 #include "BallSafetyNetMesh.h"
 #include "PrismBlockMesh.h"
 #include "PortalBlockMesh.h"
+#include "CannonBlockMesh.h"
 
 #include "../ESPEngine/ESPEmitter.h"
 
@@ -20,7 +21,7 @@
 
 LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
-prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
+prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
 	this->basicBlock						= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
@@ -30,6 +31,7 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
 	this->prismBlockTriangleUR	= new PrismBlockMesh(PrismBlockMesh::TrianglePrism);
 	this->inkBlock							= ResourceManager::GetInstance()->GetInkBlockMeshResource();
 	this->portalBlock						= new PortalBlockMesh();
+	this->cannonBlock						= new CannonBlockMesh();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
@@ -41,6 +43,7 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
 	const std::map<std::string, MaterialGroup*>& prismBlockMatGrps		= this->prismBlockDiamond->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& prismTriBlockMatGrps	= this->prismBlockTriangleUR->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& portalBlockMatGrps   = this->portalBlock->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& cannonBlockMatGrps		= this->cannonBlock->GetMaterialGroups();
 	
 	for (std::map<std::string, MaterialGroup*>::const_iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
@@ -63,6 +66,9 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL) {
 	for (std::map<std::string, MaterialGroup*>::const_iterator iter = portalBlockMatGrps.begin(); iter != portalBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}	
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = cannonBlockMatGrps.begin(); iter != cannonBlockMatGrps.end(); ++iter) {
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+	}	
 
 	this->LoadNewLevel(gameWorldAssets, level);
 }
@@ -77,6 +83,8 @@ LevelMesh::~LevelMesh() {
 	this->prismBlockTriangleUR = NULL;
 	delete this->portalBlock;
 	this->portalBlock = NULL;
+	delete this->cannonBlock;
+	this->cannonBlock = NULL;
 
 	// Clean up all assets pertaining to the currently loaded
 	// level, if applicable.
@@ -390,6 +398,9 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 			break;
 		case LevelPiece::Portal:
 			returnValue = this->portalBlock->GetMaterialGroups();
+			break;
+		case LevelPiece::Cannon:
+			returnValue = this->cannonBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Empty :
 			break;

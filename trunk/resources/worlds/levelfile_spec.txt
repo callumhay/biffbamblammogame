@@ -14,6 +14,7 @@ The following specifies the .lvl format.
 // B 	- Bomb
 // S 	- A solid unbreakable block
 // E 	- Empty spot
+// N    - Net Block 
 
 // T(x,p) - Triangle block: 
 // x: type of block from the above, can be any of the following: {R, O, Y, G, S}

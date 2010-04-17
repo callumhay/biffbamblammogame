@@ -269,6 +269,9 @@ public:
 	void SetLerp(double finalTime, T finalValue) {
 		this->ClearLerp();
 
+		this->x = 0.0;
+		this->tracker = 0;
+		
 		this->timePts.reserve(2);
 		this->timePts.push_back(x);
 		this->timePts.push_back(finalTime);

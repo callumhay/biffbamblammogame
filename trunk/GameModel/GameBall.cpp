@@ -10,6 +10,9 @@
  */
 
 #include "GameBall.h"
+#include "NormalBallState.h"
+#include "InCannonBallState.h"
+#include "CannonBlock.h"
 
 // Default radius of the ball - for defining its boundries
 const float GameBall::DEFAULT_BALL_RADIUS = 0.5f;
@@ -34,22 +37,42 @@ const float GameBall::GRAVITY_ACCELERATION = 8.0f;
 GameBall* GameBall::currBallCamBall = NULL;
 
 GameBall::GameBall() : bounds(Point2D(0.0f, 0.0f), DEFAULT_BALL_RADIUS), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
-currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballCollisionsDisabledTimer(0.0),
-lastPieceCollidedWith(NULL), zCenterPos(0.0) {
+currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballballCollisionsDisabledTimer(0.0),
+lastPieceCollidedWith(NULL), zCenterPos(0.0), currState(NULL) {
 	this->ResetBallAttributes();
 }
 
 GameBall::GameBall(const GameBall& gameBall) : bounds(gameBall.bounds), currDir(gameBall.currDir), currSpeed(gameBall.currSpeed), 
 currType(gameBall.currType), currSize(gameBall.currSize), currScaleFactor(gameBall.currScaleFactor), 
-rotationInDegs(gameBall.rotationInDegs), ballCollisionsDisabledTimer(0.0), lastPieceCollidedWith(gameBall.lastPieceCollidedWith),
-colour(1, 1, 1, 1), zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributingGravityColour),
-wrappedUpInNet(gameBall.wrappedUpInNet) {
+rotationInDegs(gameBall.rotationInDegs), ballballCollisionsDisabledTimer(0.0), lastPieceCollidedWith(gameBall.lastPieceCollidedWith),
+zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributingGravityColour), blockCollisionsDisabled(false),
+paddleCollisionsDisabled(false),
+currState(NULL) {
 
+	this->SetColour(ColourRGBA(1,1,1,1));
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
+	this->SetDimensions(gameBall.GetBallSize());
+
+	// Make sure we aren't copying special states across to the new ball...
+	if (gameBall.currState->GetBallStateType() == BallState::InCannonBallState) {
+		// In the case of the cannon state (i.e., the ball is inside a cannon block) we don't copy that
+		// (since only one ball can be inside the cannon block at once), and we just take the previous state
+		// and copy that instead...
+		InCannonBallState* cannonState = dynamic_cast<InCannonBallState*>(gameBall.currState);
+		assert(cannonState != NULL);
+		BallState* newState = cannonState->GetPreviousState();
+		assert(newState != NULL);
+		this->SetBallState(newState->Clone(this), true);
+	}
+	else {
+		this->SetBallState(gameBall.currState->Clone(this), true);
+	}
 }
 
 GameBall::~GameBall() {
+	// Delete the ball state...
+	this->SetBallState(NULL, true);
 }
 
 /**
@@ -63,11 +86,17 @@ void GameBall::ResetBallAttributes() {
 	this->SetBallSize(NormalSize);
 	this->SetDimensions(NormalSize);
 	this->lastPieceCollidedWith = NULL;
-	this->colour = ColourRGBA(1, 1, 1, 1);
+	this->SetColour(ColourRGBA(1, 1, 1, 1));
 	this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
-	this->wrappedUpInNet = false;
+
+	this->blockCollisionsDisabled = false;
+	this->paddleCollisionsDisabled = false;
+	this->ballballCollisionsDisabledTimer = 0.0;
+
+	// Set the ball state back to its typical state (how it normally interacts with the world)
+	this->SetBallState(new NormalBallState(this), true);
 }
 
 /**
@@ -120,6 +149,16 @@ void GameBall::SetBallSize(GameBall::BallSize size) {
 	this->currSize = size;
 }
 
+/**
+ * Set the ball's current state to the given state and remove any previous state.
+ */ 
+void GameBall::SetBallState(BallState* state, bool deletePrevState) {
+	if (this->currState != NULL && deletePrevState) {
+		delete this->currState;
+	}
+	this->currState = state;
+}
+
 Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
 	Onomatoplex::Extremeness result;
 
@@ -157,63 +196,25 @@ Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
 }
 
 void GameBall::Tick(double seconds, const Vector2D& worldSpaceGravityDir) {
-	// Update the position of the ball based on its velocity (and if applicable, acceleration)
-	Vector2D currVelocity;
-
-	if ((this->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall) {
-		// Keep track of the last gravity speed calculated based on the gravity pulling the ball down
-		// The gravitySpeed variable is basically a mirror of currSpeed but it tracks 
-		// the speed of the ball as it gets pulled down by gravity - currSpeed does not do this
-		Vector2D currGravityVelocity = (this->gravitySpeed * this->currDir);
-		
-		// If the ball ever exceeds the current ball speed projected on the gravity vector then slow it down along that axis
-		// Figure out the projected gravity vector and speed
-		Vector2D nGravityDir = Vector2D::Normalize(worldSpaceGravityDir);
-		float projectedGravitySpeed  = Vector2D::Dot(currGravityVelocity, nGravityDir);
-		Vector2D projectedGravityVec = projectedGravitySpeed * nGravityDir;
-
-		if (projectedGravitySpeed > this->currSpeed) {
-			currVelocity = currGravityVelocity - projectedGravityVec + (this->currSpeed * nGravityDir);
-		}
-		else {
-			currVelocity = currGravityVelocity + (seconds * GameBall::GRAVITY_ACCELERATION * nGravityDir);
-		}
-
-		float newVelocityMag    = Vector2D::Magnitude(currVelocity);
-		Vector2D newVelocityDir = (currVelocity / newVelocityMag);
-		this->SetGravityVelocity(newVelocityMag, newVelocityDir);
-	}
-	else {
-		currVelocity = this->currSpeed * this->currDir;
-		this->gravitySpeed = this->currSpeed;
-	}
-
-	Vector2D dDist = (static_cast<float>(seconds) * currVelocity);
-	this->bounds.SetCenter(this->bounds.Center() + dDist);
-
-	// Update the rotation of the ball
-	float dRotSpd = GameBall::MAX_ROATATION_SPEED * static_cast<float>(seconds);
-	this->rotationInDegs = this->rotationInDegs + Vector3D(dRotSpd, dRotSpd, dRotSpd);
-
-	// Change the size gradually (lerp based on some constant time) if need be...
-	int diffFromNormalSize = static_cast<int>(this->currSize) - static_cast<int>(GameBall::NormalSize);
-	float targetScaleFactor = (DEFAULT_BALL_RADIUS + diffFromNormalSize * RADIUS_DIFF_PER_SIZE) / DEFAULT_BALL_RADIUS;
-	float scaleFactorDiff = targetScaleFactor - this->currScaleFactor;
-	if (scaleFactorDiff != 0.0f) {
-		this->SetDimensions(this->currScaleFactor + ((scaleFactorDiff * seconds) / SECONDS_TO_CHANGE_SIZE));
-	}
-
-	// Decrement the collision disabled timer if necessary
-	if (this->ballCollisionsDisabledTimer >= EPSILON) {
-		this->ballCollisionsDisabledTimer -= seconds;
-	}
-	if (this->ballCollisionsDisabledTimer < EPSILON) {
-		this->ballCollisionsDisabledTimer = 0.0;
-	}
-
+	this->currState->Tick(seconds, worldSpaceGravityDir);
 }
 
 void GameBall::Animate(double seconds) {
 	// Tick any ball-related animations
 	this->colourAnimation.Tick(seconds);
+}
+
+/**
+ * Loads the ball into the given cannon block - this will cause the ball to enter
+ * the proper state for this, where it will spin around and eventually fire out
+ * of the cannon block and then reenter its previous state.
+ */
+void GameBall::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
+	assert(cannonBlock != NULL);
+	assert(this->currState->GetBallStateType() != BallState::InCannonBallState);
+
+	// Make sure that we don't delete the previous state since
+	// we cache it in the "InCannonBallState" and it will change back once
+	// that state is complete
+	this->SetBallState(new InCannonBallState(this, cannonBlock, this->currState), false);
 }

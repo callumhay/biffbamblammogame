@@ -68,6 +68,8 @@ public:
 		return temp;
 	}
 
+	static Vector2D Rotate(float angInDegs, const Vector2D& v);
+
 	void Normalize() {
 		float magnitude = Vector2D::Magnitude(*this);
 		assert(magnitude != 0);
@@ -115,7 +117,7 @@ inline Vector2D Reflect(const Vector2D& v, const Vector2D& n) {
 	return newVel;
 }
 
-inline Vector2D Rotate(float angInDegs, const Vector2D& v) {
+inline Vector2D Vector2D::Rotate(float angInDegs, const Vector2D& v) {
 	float angInRads = Trig::degreesToRadians(angInDegs);
 	return Vector2D(cosf(angInRads) * v[0] - sinf(angInRads) * v[1], sinf(angInRads) * v[0] + cosf(angInRads) * v[1]);
 }

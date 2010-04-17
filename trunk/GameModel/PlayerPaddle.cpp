@@ -185,7 +185,7 @@ void PlayerPaddle::FireAttachedBall() {
 	if (fabs(avgPaddleVel[0]) <= EPSILON) {
 		// Add some randomness to the velocity by deviating a straight-up shot by some random angle
 		float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::STILL_RAND_RELEASE_DEG;		
-		ballReleaseDir = Rotate(randomAngleInDegs, ballReleaseDir);
+		ballReleaseDir = Vector2D::Rotate(randomAngleInDegs, ballReleaseDir);
 	}
 	else {
 		// The paddle appears to be moving, modify the ball's release velocity
@@ -195,14 +195,15 @@ void PlayerPaddle::FireAttachedBall() {
 		
 		// and, of course, add some randomness...
 		float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::MOVING_RAND_RELEASE_DEG;		
-		ballReleaseDir = Rotate(randomAngleInDegs, newBallDir);
+		ballReleaseDir = Vector2D::Rotate(randomAngleInDegs, newBallDir);
 	}
 
 	ballReleaseDir.Normalize();
 
 	// Set the ball velocity (tragectory it will leave the paddle on) and re-enable its collisions
 	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), ballReleaseDir);
-	this->attachedBall->SetBallCollisionsEnabled();
+	this->attachedBall->SetBallBallCollisionsEnabled();
+	this->attachedBall->SetBallPaddleCollisionsEnabled();
 
 	// EVENT: Ball Shot
 	GameEventManager::Instance()->ActionBallShot(*this->attachedBall);
@@ -446,7 +447,8 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), Vector2D(0, 0));
 
 	// Disable collisions for the ball (reenable them when the ball is detached)
-	this->attachedBall->SetBallCollisionsDisabled();
+	this->attachedBall->SetBallBallCollisionsDisabled();
+	this->attachedBall->SetBallPaddleCollisionsDisabled();
 
 	return true;
 }

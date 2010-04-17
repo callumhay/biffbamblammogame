@@ -30,7 +30,7 @@ public:
 	static const float HALF_PIECE_HEIGHT;
 	static const float HALF_PIECE_DEPTH;
 
-	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, Portal, PrismTriangle, Net };
+	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, Portal, PrismTriangle, Cannon };
 	virtual LevelPieceType GetType() const = 0;
 
 protected:
@@ -84,6 +84,7 @@ public:
 	void DebugDraw() const;
 
 	virtual bool IsNoBoundsPieceType() const = 0;
+	virtual bool BallBouncesOffWhenHit() const = 0;
 	virtual bool MustBeDestoryedToEndLevel() const = 0;
 	virtual bool CanBeDestroyed() const = 0;
 	virtual bool UberballBlastsThrough() const = 0;

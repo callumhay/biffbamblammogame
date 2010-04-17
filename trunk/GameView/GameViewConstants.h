@@ -224,6 +224,8 @@ public:
 	const std::string BOMB_BLOCK_MESH;
 	const std::string PRISM_DIAMOND_BLOCK_MESH;
 	const std::string PRISM_TRIANGLE_BLOCK_MESH;
+	const std::string CANNON_BLOCK_BASE_MESH;
+	const std::string CANNON_BLOCK_BARREL_MESH;
 	const std::string SKYBOX_MESH;
 	const std::string ITEM_MESH;
 	const std::string PADDLE_LASER_ATTACHMENT_MESH;
