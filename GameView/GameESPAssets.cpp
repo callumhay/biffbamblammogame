@@ -714,7 +714,8 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
  */
 void GameESPAssets::AddBounceLevelPieceEffect(const Camera& camera, const GameBall& ball, const LevelPiece& block) {
 	// We don't do the effect for certain types of blocks...
-	if (block.GetType() == LevelPiece::Bomb || block.GetType() == LevelPiece::Ink) {
+	if (block.GetType() == LevelPiece::Bomb || block.GetType() == LevelPiece::Ink || block.GetType() == LevelPiece::Portal ||
+		block.GetType() == LevelPiece::Cannon) {
 		return;
 	}
 
@@ -811,6 +812,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::SolidTriangle:
 				case LevelPiece::Breakable:
 				case LevelPiece::BreakableTriangle: 
+				case LevelPiece::Cannon:
 					{
 						// A laser just hit a block and was disapated by it... show the particle disintegrate
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 

@@ -17,6 +17,9 @@ public:
 	bool IsNoBoundsPieceType() const {
 		return true;
 	}
+	bool BallBouncesOffWhenHit() const {
+		return false;
+	}
 
 	// Empty spaces don't exist and cannot really be destroyed...
 	bool MustBeDestoryedToEndLevel() const {

@@ -248,14 +248,15 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 			this->reInitStickyPaddle = false;
 		}
 
-		firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, Rotate(rotateBeamCenterBeamAmt, BEAM_UNIT_DIR)), centerBeamRadiusAmt * INITIAL_BEAM_RADIUS, 
+		firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, Vector2D::Rotate(rotateBeamCenterBeamAmt, BEAM_UNIT_DIR)), 
+																   centerBeamRadiusAmt * INITIAL_BEAM_RADIUS, 
 																	 centerBeamRadiusAmt * this->baseDamagePerSecond, NULL);
 
 		Vector2D adjustBeamOriginAmt(paddle->GetHalfFlatTopWidth()*0.5, 0.0f);
-		BeamSegment* refractSeg1 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN - adjustBeamOriginAmt, Rotate(rotateBeamRefract1Amt, BEAM_UNIT_DIR)), 
+		BeamSegment* refractSeg1 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN - adjustBeamOriginAmt, Vector2D::Rotate(rotateBeamRefract1Amt, BEAM_UNIT_DIR)), 
 																						   beamRefract1RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract1RadiusAmt * this->baseDamagePerSecond, NULL);
 		newBeamSegs.push_back(refractSeg1);
-		BeamSegment* refractSeg2 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN + adjustBeamOriginAmt, Rotate(rotateBeamRefract2Amt, BEAM_UNIT_DIR)), 
+		BeamSegment* refractSeg2 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN + adjustBeamOriginAmt, Vector2D::Rotate(rotateBeamRefract2Amt, BEAM_UNIT_DIR)), 
 																							 beamRefract2RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract2RadiusAmt * this->baseDamagePerSecond, NULL);
 		newBeamSegs.push_back(refractSeg2);
 	}

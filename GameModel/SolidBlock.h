@@ -30,6 +30,9 @@ public:
 	virtual bool IsNoBoundsPieceType() const {
 		return false;
 	}
+	bool BallBouncesOffWhenHit() const {
+		return true;
+	}
 
 	// Solid blocks can NEVER be destroyed...
 	virtual bool MustBeDestoryedToEndLevel() const {
@@ -82,7 +85,7 @@ public:
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 		LevelPiece* resultingPiece = this->Destroy(gameModel);
 		// Tell the ball what the last piece it collided with was...
-		ball.SetLastPieceCollidedWith(/*resultingPiece*/ NULL);
+		ball.SetLastPieceCollidedWith(resultingPiece);
 		return resultingPiece;
 	}
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {

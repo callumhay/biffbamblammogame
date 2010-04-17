@@ -60,7 +60,18 @@ namespace Collision {
 			return this->p2;
 		}
 
+		void Rotate(float angleInDegs, const Point2D& rotationCenter);
+
 	};
+
+	inline void LineSeg2D::Rotate(float angleInDegs, const Point2D& rotationCenter) {
+		Vector2D p1Vec = this->p1 - rotationCenter;
+		Vector2D p2Vec = this->p2 - rotationCenter;
+		p1Vec = Vector2D::Rotate(angleInDegs, p1Vec);
+		p2Vec = Vector2D::Rotate(angleInDegs, p2Vec);
+		this->SetP1(rotationCenter + p1Vec);
+		this->SetP2(rotationCenter + p2Vec);
+	}
 
 
 	class LineSeg3D {

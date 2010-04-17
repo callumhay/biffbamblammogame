@@ -114,88 +114,96 @@ void BallInPlayState::Tick(double seconds) {
 			}
 		}
 
-		// Check for ball collision with the player's paddle
-		didCollideWithPaddle = paddle->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
-		if (didCollideWithPaddle) {
-			
-			// The ball no longer has a last piece that it collided with - it gets reset when it hits the paddle
-			currBall->SetLastPieceCollidedWith(NULL);
+		// Check to see if the ball is allowed to collide with paddles, if so run the ball-paddle
+		// collision simulation
+		if (currBall->CanCollideWithPaddles()) {
 
-			// Don't do anything if this ball is the one attached to the paddle
-			if (paddle->GetAttachedBall() == currBall) {
-				continue;
-			}
+			// Check for ball collision with the player's paddle
+			didCollideWithPaddle = paddle->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
+			if (didCollideWithPaddle) {
+				
+				// The ball no longer has a last piece that it collided with - it gets reset when it hits the paddle
+				currBall->SetLastPieceCollidedWith(NULL);
 
-			// EVENT: Ball-paddle collision
-			GameEventManager::Instance()->ActionBallPaddleCollision(*currBall, *paddle);
-
-			// If the sticky paddle power-up is activated then the ball will simply be attached to
-			// the player paddle (if there are no balls already attached)
-			if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
-				bool couldAttach = this->gameModel->GetPlayerPaddle()->AttachBall(currBall);
-				if (couldAttach) {
+				// Don't do anything if this ball is the one attached to the paddle
+				if (paddle->GetAttachedBall() == currBall) {
 					continue;
 				}
-			}
 
-			// Do ball-paddle collision
-			this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
-			// Tell the model that a ball collision occurred with the paddle
-			this->gameModel->BallPaddleCollisionOccurred(*currBall);
+				// EVENT: Ball-paddle collision
+				GameEventManager::Instance()->ActionBallPaddleCollision(*currBall, *paddle);
 
-			// If there are multiple balls and the one that just hit the paddle is not
-			// the first one in the list, then we need to move this one to the front
-			if (gameBalls.size() > 1 && currBall != (*gameBalls.begin())) {
-				ballToMoveToFront = currBall;
+				// If the sticky paddle power-up is activated then the ball will simply be attached to
+				// the player paddle (if there are no balls already attached)
+				if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+					bool couldAttach = this->gameModel->GetPlayerPaddle()->AttachBall(currBall);
+					if (couldAttach) {
+						continue;
+					}
+				}
+
+				// Do ball-paddle collision
+				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+				// Tell the model that a ball collision occurred with the paddle
+				this->gameModel->BallPaddleCollisionOccurred(*currBall);
+
+				// If there are multiple balls and the one that just hit the paddle is not
+				// the first one in the list, then we need to move this one to the front
+				if (gameBalls.size() > 1 && currBall != (*gameBalls.begin())) {
+					ballToMoveToFront = currBall;
+				}
 			}
 		}
 
-		// Check for ball collision with level pieces
-		// Get the small set (maximum 4) of levelpieces based on the position of the ball...
-		std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(*currBall);
-		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
-			
-			LevelPiece *currPiece = *pieceIter;
-
-			didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
-			if (didCollideWithBlock) {
-				// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
-				// lose its ability to collide for 1 second, also check to see if we're already in ghost mode
-				// if so we won't collide with anything (except solid blocks)...
-				if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && currPiece->GhostballPassesThrough()) {
-					
-					if (this->timeSinceGhost < GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE) {
-						continue;
-					}
-
-					// If the ball is in ghost mode then it cannot hit anything other than the paddle and solid blocks...
-					// NOTE: we divide the probability of entering full ghost mode (i.e., not hitting blocks) by the number of balls
-					// because theoretically the rate of hitting blocks should increase multiplicatively with the number of balls
-					if (this->timeSinceGhost >= GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE &&
-						Randomizer::GetInstance()->RandomNumZeroToOne() <= 
-						(GameModelConstants::GetInstance()->PROB_OF_GHOSTBALL_BLOCK_MISS / static_cast<float>(gameBalls.size()))) {
-						
-						this->timeSinceGhost = 0.0;
-						continue;
-					}
-				}
-
-				if (currPiece->IsNoBoundsPieceType()) {
-					// If the piece doesnt have bounds to bounce off of then don't bounce the ball
-					// Ignore collision...
-				}
-				else if (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->UberballBlastsThrough()) {
-					// In the case that the ball is uber then we only reflect if the ball is not green
-					// Ignore collision...
-				}
-				else {
-					// Make the ball react to the collision
-					this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
-				}
+		// Make sure the ball can collide with level pieces (blocks) before running the block collision simulation
+		if (currBall->CanCollideWithBlocks()) {
+			// Check for ball collision with level pieces
+			// Get the small set (maximum 4) of levelpieces based on the position of the ball...
+			std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(*currBall);
+			for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
 				
-				// Tell the model that a ball collision occurred with currPiece
-				this->gameModel->CollisionOccurred(*currBall, currPiece);
-				break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
+				LevelPiece *currPiece = *pieceIter;
+
+				didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
+				if (didCollideWithBlock) {
+					// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
+					// lose its ability to collide for 1 second, also check to see if we're already in ghost mode
+					// if so we won't collide with anything (except solid blocks)...
+					if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && currPiece->GhostballPassesThrough()) {
+						
+						if (this->timeSinceGhost < GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE) {
+							continue;
+						}
+
+						// If the ball is in ghost mode then it cannot hit anything other than the paddle and solid blocks...
+						// NOTE: we divide the probability of entering full ghost mode (i.e., not hitting blocks) by the number of balls
+						// because theoretically the rate of hitting blocks should increase multiplicatively with the number of balls
+						if (this->timeSinceGhost >= GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE &&
+							Randomizer::GetInstance()->RandomNumZeroToOne() <= 
+							(GameModelConstants::GetInstance()->PROB_OF_GHOSTBALL_BLOCK_MISS / static_cast<float>(gameBalls.size()))) {
+							
+							this->timeSinceGhost = 0.0;
+							continue;
+						}
+					}
+
+					if (!currPiece->BallBouncesOffWhenHit()) {
+						// If the piece doesnt have bounds to bounce off of then don't bounce the ball
+						// Ignore collision...
+					}
+					else if (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->UberballBlastsThrough()) {
+						// In the case that the ball is uber then we only reflect if the ball is not green
+						// Ignore collision...
+					}
+					else {
+						// Make the ball react to the collision
+						this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+					}
+					
+					// Tell the model that a ball collision occurred with currPiece
+					this->gameModel->CollisionOccurred(*currBall, currPiece);
+					break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
+				}
 			}
 		}
 
@@ -438,15 +446,10 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 // d is the distance from the center of the ball to the line that was collided with
 // when d is negative the ball is inside the line, when positive it is outside
 void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision) {
-	
-	// Back the ball up to its position at collision, calculate the time of that and then the difference up to this point
+
+	// Calculate the time of that and then the difference up to this point
 	// based on the velocity and then move it to that position...
 	double timeToMoveInReflectionDir = std::max<double>(0.0, dT - timeSinceCollision);
-
-	// Position the ball so that it is at the location it was at when it collided...
-	const float BALL_RADIUS  = b.GetBounds().Radius();
-	const float BALL_EPSILON = 0.001f * BALL_RADIUS;
-	b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * -b.GetVelocity());
 
 	// Make sure the ball is on the correct side of the collision line (i.e., the side that the normal is pointing in)
 	Vector2D fromLineToBall = b.GetCenterPosition2D() - collisionLine.P1();
@@ -462,6 +465,11 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision:
 		reflVecHat = b.GetDirection();
 	}
 	else {
+		// Position the ball so that it is at the location it was at when it collided...
+		const float BALL_RADIUS  = b.GetBounds().Radius();
+		const float BALL_EPSILON = 0.001f * BALL_RADIUS;
+		b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * -b.GetVelocity());
+
 		// Typical bounce off the normal: figure out the reflection vector
 		reflVecHat	= Vector2D::Normalize(Reflect(b.GetDirection(), n));
 	}
@@ -484,12 +492,12 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision:
 
 		// We need to figure out which way to rotate the velocity
 		// to ensure it's at least the MIN_BALL_ANGLE_IN_RADS
-		Vector2D newReflVelHat = Rotate(diffAngleInDegs, reflVecHat);
+		Vector2D newReflVelHat = Vector2D::Rotate(diffAngleInDegs, reflVecHat);
 
 		// Check to see if it's still the case, if it is then we rotated the wrong way
 		float newAngleInDegs =  Trig::radiansToDegrees(acosf(Vector2D::Dot(n, newReflVelHat)));
 		if (newAngleInDegs < GameBall::MIN_BALL_ANGLE_IN_DEGS) {
-			newReflVelHat = Rotate(-diffAngleInDegs, reflVecHat);
+			newReflVelHat = Vector2D::Rotate(-diffAngleInDegs, reflVecHat);
 		}
 		
 		reflVecHat = newReflVelHat;
@@ -498,17 +506,22 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision:
 		// Do the same with 90 degrees to the normal
 		Vector2D tangentVec(n[1], -n[0]);
 		float gracingAngle = Trig::radiansToDegrees(acosf(Vector2D::Dot(tangentVec, reflVecHat)));
-		diffAngleInDegs = GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(gracingAngle);
+		if (gracingAngle > 90) {
+			diffAngleInDegs = GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(gracingAngle - 180);
+		}
+		else {
+			diffAngleInDegs = GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(gracingAngle);
+		}
 
 		if (diffAngleInDegs > EPSILON) {
 			// We need to figure out which way to rotate the velocity
 			// to ensure it's at least the MIN_BALL_ANGLE_IN_RADS
-			Vector2D newReflVelHat = Rotate(diffAngleInDegs, reflVecHat);
+			Vector2D newReflVelHat = Vector2D::Rotate(diffAngleInDegs, reflVecHat);
 
 			// Check to see if it's still the case, if it is then we rotated the wrong way
 			float newAngleInDegs =  Trig::radiansToDegrees(acosf(Vector2D::Dot(tangentVec, newReflVelHat)));
 			if (newAngleInDegs < GameBall::MIN_BALL_ANGLE_IN_DEGS) {
-				newReflVelHat = Rotate(-diffAngleInDegs, reflVecHat);
+				newReflVelHat = Vector2D::Rotate(-diffAngleInDegs, reflVecHat);
 			}
 
 			reflVecHat = newReflVelHat;

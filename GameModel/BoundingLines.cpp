@@ -85,7 +85,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 				if (timeToCollision > timeSinceCollision) {
 					timeSinceCollision = timeToCollision;
 					collisionOccurred = true;
-					n = n + currNormal;
+
+					Vector2D newNormal = n + currNormal;
+					if (newNormal != Vector2D(0, 0)) {
+						n = newNormal;
+					}
+
 					collisionLine = currLine;
 				}
 			}			
@@ -100,7 +105,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 				if (timeToCollision > timeSinceCollision) {
 					timeSinceCollision = timeToCollision;
 					collisionOccurred = true;
-					n = n + currNormal;
+
+					Vector2D newNormal = n + currNormal;
+					if (newNormal != Vector2D(0, 0)) {
+						n = newNormal;
+					}
+
 					collisionLine = currLine;
 				}
 			}
@@ -114,7 +124,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 				if (timeToCollision > timeSinceCollision) {
 					timeSinceCollision = timeToCollision;
 					collisionOccurred = true;
-					n = n + currNormal;
+
+					Vector2D newNormal = n + currNormal;
+					if (newNormal != Vector2D(0, 0)) {
+						n = newNormal;
+					}
+
 					collisionLine = currLine;
 				}
 			}
@@ -131,7 +146,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 					// return that this is so
 					timeSinceCollision = dT;
 					collisionOccurred = true;
-					n = n + currNormal;
+
+					Vector2D newNormal = n + currNormal;
+					if (newNormal != Vector2D(0, 0)) {
+						n = newNormal;
+					}
+
 					collisionLine = currLine;
 					break;
 				}
@@ -161,7 +181,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 				if (timeToCollision > timeSinceCollision) {
 					timeSinceCollision = timeToCollision;
 					collisionOccurred = true;
-					n = n + currNormal;
+
+					Vector2D newNormal = n + currNormal;
+					if (newNormal != Vector2D(0, 0)) {
+						n = newNormal;
+					}
+
 					collisionLine = currLine;
 				}
 			}
@@ -369,6 +394,25 @@ bool BoundingLines::CollisionCheck(const Collision::Ray2D& ray, float& rayT) con
 	}
 
 	return collisionFound;
+}
+
+/**
+ * Rotates the bounding lines of this by the given angle in degrees.
+ */
+void BoundingLines::RotateLinesAndNormals(float angleInDegs, const Point2D& rotationCenter) {
+	
+	// Rotate each line...
+	for (std::vector<Collision::LineSeg2D>::iterator iter = this->lines.begin(); iter != this->lines.end(); ++iter) {
+		Collision::LineSeg2D& currLineSeg = *iter;
+		currLineSeg.Rotate(angleInDegs, rotationCenter);
+	}
+
+	// Rotate each normal...
+	for (std::vector<Vector2D>::iterator iter = this->normals.begin(); iter != this->normals.end(); ++iter) {
+		Vector2D& currNormal = *iter;
+		currNormal = Vector2D::Rotate(angleInDegs, currNormal);
+	}
+
 }
 
 void BoundingLines::DebugDraw() const {

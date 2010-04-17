@@ -34,6 +34,9 @@ public:
 	virtual bool IsNoBoundsPieceType() const {
 		return false;
 	}
+	bool BallBouncesOffWhenHit() const {
+		return true;
+	}
 
 	// Prism blocks can NEVER be destroyed...
 	virtual bool MustBeDestoryedToEndLevel() const {

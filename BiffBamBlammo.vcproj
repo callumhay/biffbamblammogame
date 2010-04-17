@@ -535,6 +535,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\CannonBlockMesh.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CrosshairLaserHUD.h"
 					>
 				</File>
@@ -656,6 +660,10 @@
 				>
 				<File
 					RelativePath=".\GameView\BallSafetyNetMesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CannonBlockMesh.cpp"
 					>
 				</File>
 				<File
@@ -919,6 +927,10 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\GameModel\BallState.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\Beam.h"
 					>
 				</File>
@@ -956,6 +968,14 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\GameWorld.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\InCannonBallState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\NormalBallState.h"
 					>
 				</File>
 				<File
@@ -1008,6 +1028,14 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\GameWorld.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\InCannonBallState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\NormalBallState.cpp"
 					>
 				</File>
 				<File
@@ -1218,6 +1246,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\CannonBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\EmptySpaceBlock.h"
 						>
 					</File>
@@ -1227,10 +1259,6 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\LevelPiece.h"
-						>
-					</File>
-					<File
-						RelativePath=".\GameModel\NetBlock.h"
 						>
 					</File>
 					<File
@@ -1262,15 +1290,15 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\CannonBlock.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\InkBlock.cpp"
 						>
 					</File>
 					<File
 						RelativePath=".\GameModel\LevelPiece.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\GameModel\NetBlock.cpp"
 						>
 					</File>
 					<File
@@ -1292,7 +1320,7 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="States"
+				Name="Game States"
 				>
 				<Filter
 					Name="Source Files"
