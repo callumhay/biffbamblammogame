@@ -17,8 +17,8 @@ const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	= 1.0f;
 const double CannonBlock::MAX_ROTATION_TIME_IN_SECS = 2.5f;
 
 // Rotation will occur at some random speed in between these values
-const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC	= 100.0f;
-const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 300.0f;
+const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC	= 150.0f;
+const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 450.0f;
 
 CannonBlock::CannonBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc), 
 hasBall(false), currRotationFromXInDegs(0.0f), currRotationSpeed(0.0f), elapsedRotationTime(0.0), 

@@ -47,7 +47,7 @@ public:
 
 	void SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc);
 
-	Point2D GetCenter() const {	return this->center; }
+	const Point2D& GetCenter() const {	return this->center; }
 	unsigned int GetWidthIndex() const { return this->wIndex; }
 	unsigned int GetHeightIndex() const { return this->hIndex; }
 	Colour GetColour() const { return this->colour; }
