@@ -18,6 +18,7 @@
 #include "../ResourceManager.h"
 
 #include "../GameModel/GameBall.h"
+#include "../GameModel/CannonBlock.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
@@ -74,6 +75,10 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannon
 }
 
 LevelMesh::~LevelMesh() {
+	// Clean up all assets pertaining to the currently loaded
+	// level, if applicable.
+	this->Flush();
+
 	// Delete all meshes
 	delete this->ballSafetyNet;
 	this->ballSafetyNet = NULL;
@@ -85,10 +90,6 @@ LevelMesh::~LevelMesh() {
 	this->portalBlock = NULL;
 	delete this->cannonBlock;
 	this->cannonBlock = NULL;
-
-	// Clean up all assets pertaining to the currently loaded
-	// level, if applicable.
-	this->Flush();
 }
 
 /** 
@@ -137,6 +138,8 @@ void LevelMesh::Flush() {
 	}
 	this->pieceEmitterEffects.clear();
 
+	this->cannonBlock->Flush();
+
 	// Clear the current level pointer
 	this->currLevel = NULL;
 }
@@ -173,6 +176,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 	this->ballSafetyNet->Regenerate(levelDimensions);
 
 	Vector3D worldTransform(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
+	this->cannonBlock->SetWorldTranslation(worldTransform);
 
 	// Go through each piece and create an appropriate display list for it
 	for (size_t h = 0; h < levelPieces.size(); h++) {
@@ -185,6 +189,16 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 			this->CreateDisplayListsForPiece(currPiece, worldTransform);
 			// Create the emitters/effects for the piece...
 			this->CreateEmitterEffectsForPiece(currPiece, worldTransform);
+
+			// Special cases:
+			// 1) Case of a cannon block - we need to store all the cannon blocks we can
+			// properly draw their barrels oriented unique for each one
+			if (currPiece->GetType() == LevelPiece::Cannon) {
+				const CannonBlock* cannonLvlPiece = dynamic_cast<const CannonBlock*>(currPiece);
+				assert(cannonLvlPiece != NULL);
+				this->cannonBlock->AddCannonBlock(cannonLvlPiece);
+			}
+
 		}
 	}
 }
@@ -243,6 +257,8 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 	this->prismBlockTriangleUR->SetSceneTexture(sceneTexture);
 	this->portalBlock->SetSceneTexture(sceneTexture);
 	this->portalBlock->Tick(dT);
+
+	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight);
 
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
@@ -335,6 +351,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		this->pieceDisplayLists[piece].insert(std::make_pair<CgFxMaterialEffect*, GLuint>(currMaterial, newDisplayList));
 		this->displayListsPerMaterial[currMaterial].push_back(newDisplayList);
 	}
+
 }
 
 /**

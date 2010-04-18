@@ -9,6 +9,7 @@ Ks 0.330000 0.330000 0.330000
 Ns 110
 map_Kd resources/textures/bombmetal_512x256.jpg
 type phong
+outlinesize 0
 geomtype fg
 
 newmtl barrel_hole
@@ -16,5 +17,6 @@ Ka 0.000000 0.000000 0.000000
 Kd 0.000000 0.000000 0.000000
 Ks 0.330000 0.330000 0.330000
 type phong
+outlinesize 0
 geomtype fg
 

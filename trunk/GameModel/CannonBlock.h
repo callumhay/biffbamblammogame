@@ -87,7 +87,8 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) { return this->Destroy(gameModel); }
 
 	bool RotateAndEventuallyFire(double dT);
-	Vector2D GetCurrentCannonDirection();
+	Vector2D GetCurrentCannonDirection() const;
+	float GetCurrentCannonAngleInDegs() const;
 
 private:
 	static const double MIN_ROTATION_TIME_IN_SECS;
@@ -107,10 +108,14 @@ private:
  * Query the current pointing direction of the cannon.
  * Returns: The normalized direction the cannon is currently pointing in.
  */
-inline Vector2D CannonBlock::GetCurrentCannonDirection() {
+inline Vector2D CannonBlock::GetCurrentCannonDirection() const {
 	static const Vector2D X_DIR(1, 0);
 	Vector2D dir = Vector2D::Rotate(this->currRotationFromXInDegs, X_DIR);
 	return Vector2D::Normalize(dir);
+}
+
+inline float CannonBlock::GetCurrentCannonAngleInDegs() const {
+	return this->currRotationFromXInDegs;
 }
 
 #endif // __CANNONBLOCK_H__
