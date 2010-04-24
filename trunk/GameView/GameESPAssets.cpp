@@ -11,6 +11,7 @@
 #include "../GameModel/PlayerPaddle.h"
 #include "../GameModel/Beam.h"
 #include "../GameModel/PortalBlock.h"
+#include "../GameModel/CannonBlock.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
@@ -21,7 +22,7 @@
 
 GameESPAssets::GameESPAssets() : 
 particleFader(1, 0), 
-particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(1.0f, 0.0f, 0.0f, 0.0f)),
+particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
 particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0),
 particleGravityArrowColour(ColourRGBA(GameViewConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
@@ -842,7 +843,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 }
 
 ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling) {
-	Colour portalColour = block.GetColour();
+	const Colour& portalColour = block.GetColour();
 	// Create an emitter for the spirally teleportation texture
 	ESPPointEmitter* spiralEffect = new ESPPointEmitter();
 	spiralEffect->SetSpawnDelta(ESPInterval(-1, -1));
@@ -892,6 +893,66 @@ void GameESPAssets::AddPortalTeleportEffect(const GameBall& ball, const PortalBl
 
 	this->activeGeneralEmitters.push_back(enterEffect);
 	this->activeGeneralEmitters.push_back(exitEffect);
+}
+
+/**
+ * Add an effect to the end of the cannon barrel for when it fires a ball out.
+ */
+void GameESPAssets::AddCannonFireEffect(const GameBall& ball, const CannonBlock& block) {
+	// Don't bother if the ball camera is on...
+	if (GameBall::GetIsBallCameraOn()) {
+		return;
+	}
+
+	Point3D endOfBarrelPt(block.GetEndOfBarrelPoint());
+	Vector3D emitDir(block.GetCurrentCannonDirection());
+	bool result = true;
+
+	// Basic bang
+	// TODO
+
+	// Bits of stuff
+	ESPPointEmitter* debrisBits = new ESPPointEmitter();
+	debrisBits->SetNumParticleLives(1);
+	debrisBits->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	debrisBits->SetInitialSpd(ESPInterval(3.5f, 7.0f));
+	debrisBits->SetParticleLife(ESPInterval(1.0f, 1.75f));
+	debrisBits->SetParticleSize(ESPInterval(0.4f * CannonBlock::CANNON_BARREL_HEIGHT, CannonBlock::CANNON_BARREL_HEIGHT));
+	debrisBits->SetEmitAngleInDegrees(50);
+	debrisBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	debrisBits->SetAsPointSpriteEmitter(true);
+	debrisBits->SetEmitPosition(endOfBarrelPt);
+	debrisBits->SetEmitDirection(emitDir);
+	debrisBits->AddEffector(&this->particleFireColourFader);
+	result = debrisBits->SetParticles(15, this->starTex);
+	assert(result);	
+	
+	// Create an emitter for the sound of onomatopeia of the cannon firing
+	ESPPointEmitter* shotOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	shotOnoEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	shotOnoEffect->SetInitialSpd(ESPInterval(1.0f, 2.0f));
+	shotOnoEffect->SetParticleLife(ESPInterval(0.5f, 0.8f));
+	shotOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
+	shotOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	shotOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
+	shotOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	shotOnoEffect->SetEmitPosition(endOfBarrelPt + Vector3D(0, -LevelPiece::PIECE_HEIGHT, 0));
+	shotOnoEffect->SetEmitDirection(emitDir);
+	
+	// Add effectors...
+	shotOnoEffect->AddEffector(&this->particleFader);
+	shotOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single text particle to the emitter with the severity of the effect...
+	TextLabel2D fireTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small), "");
+	fireTextLabel.SetColour(Colour(1, 1, 1));
+	fireTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+	shotOnoEffect->SetParticles(1, fireTextLabel, Onomatoplex::SHOT, Onomatoplex::GOOD);
+
+	// Lastly, add the cannon emitters to the list of active emitters in order of back to front
+	this->activeGeneralEmitters.push_back(debrisBits);
+	this->activeGeneralEmitters.push_back(shotOnoEffect);
 }
 
 /**

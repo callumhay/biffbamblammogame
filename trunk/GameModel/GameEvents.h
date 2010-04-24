@@ -6,6 +6,7 @@ class GameBall;
 class PlayerPaddle;
 class LevelPiece;
 class PortalBlock;
+class CannonBlock;
 class GameLevel;
 class GameWorld;
 class GameItem;
@@ -152,6 +153,14 @@ public:
 	 *            enterPortal	- The portal entered by the ball.
 	 */
 	virtual void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) = 0;
+
+	/**
+	 * Event triggered when a ball is fired out of a cannon block. Only occurs once as the ball is JUST being
+	 * fired out of the barrel of the cannon.
+	 * Arguements: ball        - The ball being fired out of the cannon.
+	 *             cannonBlock - The cannon block firing the ball.
+	 */
+	virtual void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) = 0;
 
 	// Misc Events (Destruction, Combos, etc.) ************************************************
 

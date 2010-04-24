@@ -188,8 +188,8 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				// Draw when the ghost ball is not an invisiball...	
 				ballEffectTemp = this->ghostBallEffect;
 
-				// We don't draw any of the effects if we're in ball camera mode
-				if (!GameBall::GetIsBallCameraOn()) {
+				// We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
+				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
 					this->espAssets->DrawGhostBallEffects(dT, camera, *currBall);
 				}
 				
@@ -202,8 +202,8 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
 				
 				// Draw when uber ball and not invisiball...
-				// We don't draw any of the effects if we're in ball camera mode
-				if (!GameBall::GetIsBallCameraOn()) {
+				// We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
+				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
 					this->espAssets->DrawUberBallEffects(dT, camera, *currBall);
 				}
 
@@ -216,8 +216,8 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
 
 				// Draw when gravity ball and not invisiball...
-				// We don't draw any of the effects if we're in ball camera mode
-				if (!GameBall::GetIsBallCameraOn()) {
+				// We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
+				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
 					Vector3D gravityDir = gameModel.GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
 					this->espAssets->DrawGravityBallEffects(dT, camera, *currBall, gravityDir);
 				}

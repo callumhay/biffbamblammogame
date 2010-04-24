@@ -183,6 +183,7 @@ public:
 	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
 
 	void AddPortalTeleportEffect(const GameBall& ball, const PortalBlock& block);
+	void AddCannonFireEffect(const GameBall& ball, const CannonBlock& block);
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);

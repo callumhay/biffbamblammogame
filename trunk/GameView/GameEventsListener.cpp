@@ -123,6 +123,9 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
 	debug_output("EVENT: Last ball is about to die.");
 
 	this->display->GetAssets()->ActivateLastBallDeathEffects(lastBallToDie);
+
+	// Clear out the timers - they no longer matter since the ball is doomed
+	this->display->GetAssets()->GetItemAssets()->ClearTimers();
 }
 
 void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
@@ -207,6 +210,11 @@ void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const Gam
 void GameEventsListener::BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) {
 	this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball, enterPortal);
 	debug_output("EVENT: Ball teleported by portal block");
+}
+
+void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
+	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(ball, cannonBlock);
+	debug_output("EVENT: Ball fired out of cannon block");
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {

@@ -28,6 +28,10 @@ void CannonBlockMesh::Draw(const Camera& camera, const PointLight& keyLight,
 		const CannonBlock* currCannonBlock = *iter;
 		cannonRotationInDegs = currCannonBlock->GetCurrentCannonAngleInDegs();
 		const Point2D& blockCenter = currCannonBlock->GetCenter();
+		const Colour& cannonColour = currCannonBlock->GetColour();
+
+		// Make sure the proper colour is set for the barrel
+		glColor4f(cannonColour.R(), cannonColour.G(), cannonColour.B(), 1.0f);
 
 		glPushMatrix();
 		// Translate to the piece location in the game model...

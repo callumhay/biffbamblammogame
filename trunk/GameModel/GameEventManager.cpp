@@ -127,6 +127,14 @@ void GameEventManager::ActionBallPortalBlockTeleport(const GameBall& ball, const
 	}	
 }
 
+// Action for when the ball is fired from a cannon block
+void GameEventManager::ActionBallFiredFromCannon(const GameBall& ball, const CannonBlock& cannonBlock) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BallFiredFromCannonEvent(ball, cannonBlock);
+	}		
+}
+
 // Action for when the ball collides with the player paddle
 void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle) {
 	this->listenerIter = this->eventListeners.begin();

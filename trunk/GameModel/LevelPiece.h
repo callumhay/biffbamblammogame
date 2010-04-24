@@ -50,7 +50,7 @@ public:
 	const Point2D& GetCenter() const {	return this->center; }
 	unsigned int GetWidthIndex() const { return this->wIndex; }
 	unsigned int GetHeightIndex() const { return this->hIndex; }
-	Colour GetColour() const { return this->colour; }
+	const Colour& GetColour() const { return this->colour; }
 	void SetColour(const Colour& c) { this->colour = c; }
 
 	virtual Matrix4x4 GetPieceToLevelTransform() const {

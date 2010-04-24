@@ -89,6 +89,7 @@ public:
 	bool RotateAndEventuallyFire(double dT);
 	Vector2D GetCurrentCannonDirection() const;
 	float GetCurrentCannonAngleInDegs() const;
+	Point2D GetEndOfBarrelPoint() const;
 
 private:
 	static const double MIN_ROTATION_TIME_IN_SECS;
@@ -116,6 +117,11 @@ inline Vector2D CannonBlock::GetCurrentCannonDirection() const {
 
 inline float CannonBlock::GetCurrentCannonAngleInDegs() const {
 	return this->currRotationFromXInDegs;
+}
+
+// Obtain the point in game space at the end of the cannon barrel
+inline Point2D CannonBlock::GetEndOfBarrelPoint() const {
+	return this->GetCenter() + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->GetCurrentCannonDirection();
 }
 
 #endif // __CANNONBLOCK_H__

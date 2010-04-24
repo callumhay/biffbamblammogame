@@ -9,6 +9,7 @@ class Point2D;
 class PlayerPaddle;
 class LevelPiece;
 class PortalBlock;
+class CannonBlock;
 class GameItem;
 class GameItemTimer;
 class GameWorld;
@@ -43,6 +44,8 @@ public:
 	void ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block);
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal);
+	void ActionBallFiredFromCannon(const GameBall& ball, const CannonBlock& cannonBlock);
+
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
 	void ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2);
 	void ActionBlockDestroyed(const LevelPiece& block);
