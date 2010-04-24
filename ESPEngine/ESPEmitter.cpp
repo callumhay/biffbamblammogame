@@ -22,6 +22,8 @@ particleRotation(0), makeSizeConstraintsEqual(true), numParticleLives(ESPParticl
 isReversed(false), isPointSprite(false), particleDeathPlane(Vector3D(1, 0, 0), Point3D(-FLT_MAX, 0, 0)),
 radiusDeviationFromPtX(0.0), radiusDeviationFromPtY(0.0), radiusDeviationFromPtZ(0.0) {
 	// NOTE: The death plane has been setup so that it's impossible to be in the 'death-zone' of it
+	this->particleSize[0] = ESPInterval(1,1);
+	this->particleSize[1] = ESPInterval(1,1);
 }
 
 ESPEmitter::~ESPEmitter() {

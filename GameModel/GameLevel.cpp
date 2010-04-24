@@ -237,6 +237,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						newPiece = currentPortalBlock;
 					}
 					break;
+
 				case TRIANGLE_BLOCK_CHAR: {
 						// T(x,p) - Triangle block, 
 						// x: type of block from the above, can be any of the following: {R, O, Y, G, S}

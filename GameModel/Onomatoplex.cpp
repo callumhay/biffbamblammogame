@@ -432,22 +432,41 @@ namespace Onomatoplex {
 	 */
 	void Generator::LoadShotWords() {
 		std::vector<std::string> shotSingleWords;
-		shotSingleWords.push_back("Pew pew pew");
-		shotSingleWords.push_back("Blam Blam");
-		shotSingleWords.push_back("Bang Bang");
-		shotSingleWords.push_back("Pow pow");
-		shotSingleWords.push_back("Blasty");
-		shotSingleWords.push_back("Blasto");
-		shotSingleWords.push_back("Blammo");
-		shotSingleWords.push_back("Zap");
-		shotSingleWords.push_back("Shooty");
+		shotSingleWords.push_back("Blam");
+		shotSingleWords.push_back("Bang");
+		shotSingleWords.push_back("Pow");
+		shotSingleWords.push_back("Blast");
+		shotSingleWords.push_back("Shoot");
 		shotSingleWords.push_back("Pew");
-		shotSingleWords.push_back("Ploop");
+		shotSingleWords.push_back("Ploom");
+		shotSingleWords.push_back("Floom");
 		shotSingleWords.push_back("Spew");
+		shotSingleWords.push_back("Fire");
 		this->simpleSingleWords[SHOT]		= shotSingleWords;
-		this->goodSingleWords[SHOT]			= shotSingleWords;
-		this->awesomeSingleWords[SHOT]	= shotSingleWords;
-		this->uberSingleWords[SHOT]			= shotSingleWords;
+
+		std::vector<std::string> shotBetterWords;
+		shotBetterWords.push_back("Pew Pew");
+		shotBetterWords.push_back("Bang Bang");
+		shotBetterWords.push_back("Blam Blam");
+		shotBetterWords.push_back("Powy");
+		shotBetterWords.push_back("Blasto");
+		shotBetterWords.push_back("Blasty");
+		shotBetterWords.push_back("Blammo");
+		shotBetterWords.push_back("Ploomo");
+		shotBetterWords.push_back("Floomo");
+		shotBetterWords.push_back("Kablaam");
+		shotBetterWords.push_back("Kaboom");
+		this->goodSingleWords[SHOT] = shotBetterWords;
+		this->goodSingleWords[SHOT].insert(this->goodSingleWords[SHOT].end(), shotSingleWords.begin(), shotSingleWords.end());
+
+		std::vector<std::string> shotAwesomeWords;
+		shotAwesomeWords.push_back("Pew Pew Pew");
+		shotAwesomeWords.push_back("Blastotron");
+		shotAwesomeWords.push_back("Kabloomanator");
+		this->awesomeSingleWords[SHOT] = shotAwesomeWords;
+		this->awesomeSingleWords[SHOT].insert(this->awesomeSingleWords[SHOT].end(), shotSingleWords.begin(), shotSingleWords.end());
+		this->awesomeSingleWords[SHOT].insert(this->awesomeSingleWords[SHOT].end(), shotBetterWords.begin(), shotBetterWords.end());
+		this->uberSingleWords[SHOT] = this->awesomeSingleWords[SHOT];
 	}
 
 	

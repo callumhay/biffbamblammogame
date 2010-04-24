@@ -225,7 +225,7 @@ void PlayerPaddle::MoveAttachedBallToNewBounds(double dT) {
 	// Figure out if the ball is colliding with any of the boundries of the paddle
 	// if it is we can easily figure out where we have to move the ball to make 
 	// it accommodate those new boundries
-	Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
+	const Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
 	// Move the ball into paddle space and find the closest point to the center
 	Point2D ballCenterInPaddleSpace = ballBounds.Center() - Vector2D(this->centerPos[0], this->centerPos[1]);
 	Point2D closestPtInPaddleSpace = this->bounds.ClosestPoint(ballCenterInPaddleSpace);
@@ -438,7 +438,7 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	bool onPaddle = this->CollisionCheck(*this->attachedBall, 0.0, normal, collisionLine, timeSinceCollision);
 	if (onPaddle) {
 		// Position the ball so that it is against the collision line
-		Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
+		const Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
 		//this->attachedBall->SetCenterPosition(ballBounds.Center() + (ballBounds.Radius() - distance - 5 * EPSILON) * - this->attachedBall->GetDirection());
 		this->attachedBall->SetCenterPosition(ballBounds.Center() + (EPSILON + timeSinceCollision) * -this->attachedBall->GetVelocity());
 	}

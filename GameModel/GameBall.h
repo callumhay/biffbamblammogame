@@ -64,7 +64,7 @@ public:
 		return this->rotationInDegs;
 	}
 
-	Collision::Circle2D GetBounds() const {
+	const Collision::Circle2D& GetBounds() const {
 		return this->bounds;
 	}
 

@@ -258,8 +258,6 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 	this->portalBlock->SetSceneTexture(sceneTexture);
 	this->portalBlock->Tick(dT);
 
-	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight);
-
 	// Go through each material and draw all the display lists corresponding to it
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
 		iter != this->displayListsPerMaterial.end(); ++iter) {
@@ -270,6 +268,8 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 		currEffect->SetBallLight(ballLight);
 		currEffect->Draw(camera, iter->second);
 	}
+
+	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight);
 
 	// Draw the piece effects
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*>>::iterator pieceIter = this->pieceEmitterEffects.begin();
@@ -320,7 +320,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 
 		CgFxMaterialEffect* currMaterial	= currMaterialIter->second;
 		PolygonGroup* currPolyGrp					= iter->second->GetPolygonGroup();
-		Colour currColour									= piece->GetColour();
+		const Colour& currColour					= piece->GetColour();
 
 		assert(currMaterial != NULL);
 		assert(currPolyGrp != NULL);
