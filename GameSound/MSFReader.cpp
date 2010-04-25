@@ -3,9 +3,7 @@
 #include "GameSound.h"
 
 #include "../ResourceManager.h"
-
 #include "../GameView/GameViewConstants.h"
-
 #include "../BlammoEngine/StringHelper.h"
 
 const char* MSFReader::OPEN_SOUND_DEFINTION_BLOCK			= "{";
@@ -320,7 +318,9 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, GameSound*>& 
 	}	// while
 
 	// Clean up and return whether there was an error while reading
+#ifdef _DEBUG
 	inStream->close();
+#endif
 	delete inStream;
 	inStream = NULL;
 
