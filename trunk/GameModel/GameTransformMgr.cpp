@@ -349,6 +349,12 @@ Matrix4x4 GameTransformMgr::GetGameTransform() const {
  */
 Matrix4x4 GameTransformMgr::GetCameraTransform() const {
 
+	// If we're in ball camera mode and the ball is in a cannon block then we rotate
+	// the camera with the cannon block...
+	if (this->ballWithCamera != NULL) {
+		// TODO
+	}
+
 	// The inverse is returned because the camera transform is applied to the world matrix
 	return this->currCamOrientation.GetTransform().inverse();
 }

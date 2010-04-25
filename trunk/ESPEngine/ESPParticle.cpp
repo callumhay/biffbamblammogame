@@ -191,7 +191,7 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 
 		case ESP::ScreenAlignedFollowVelocity:
 			alignNormalVec = -cam.GetNormalizedViewVector();
-			alignUpVec     = Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], -this->velocity[2]));//-Vector3D::Normalize(this->GetVelocity());
+			alignUpVec     = Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], -this->velocity[2]));
 			alignRightVec	 = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
 			break;
 

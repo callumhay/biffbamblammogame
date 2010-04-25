@@ -84,7 +84,7 @@ public:
 };
 
 inline Matrix4x4 Orientation3D::GetTransform() const {
-	Matrix4x4 translationMat	= Matrix4x4::translationMatrix(this->translation);
+	Matrix4x4 translationMat	  = Matrix4x4::translationMatrix(this->translation);
 	Matrix4x4 rotationMatX			= Matrix4x4::rotationMatrix('x', this->rotation[0], true);
 	Matrix4x4 rotationMatY			= Matrix4x4::rotationMatrix('y', this->rotation[1], true);
 	Matrix4x4 rotationMatZ			= Matrix4x4::rotationMatrix('z', this->rotation[2], true);

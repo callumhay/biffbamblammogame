@@ -99,6 +99,7 @@ private:
 	Texture2D* lensFlareTex;
 	Texture2D* sparkleTex;
 	Texture2D* spiralTex;
+	Texture2D* sideBlastTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects; // stores each balls set of item-related (defined by unique ID) effects

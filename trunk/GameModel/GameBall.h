@@ -262,7 +262,7 @@ public:
 	bool IsLastPieceCollidedWith(const LevelPiece* p) const { return this->lastPieceCollidedWith == p; }
 
 	void LoadIntoCannonBlock(CannonBlock* cannonBlock);
-	bool IsLoadedInCannonBlock();
+	bool IsLoadedInCannonBlock() const;
 
 private:
 	BallState* currState;
@@ -304,7 +304,7 @@ private:
 
 };
 
-inline bool GameBall::IsLoadedInCannonBlock() {
+inline bool GameBall::IsLoadedInCannonBlock() const {
 	return this->currState->GetBallStateType() == BallState::InCannonBallState;
 }
 
