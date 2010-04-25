@@ -14,7 +14,6 @@ The following specifies the .lvl format.
 // B 	- Bomb
 // S 	- A solid unbreakable block
 // E 	- Empty spot
-// N    - Net Block 
 
 // T(x,p) - Triangle block: 
 // x: type of block from the above, can be any of the following: {R, O, Y, G, S}
@@ -29,5 +28,7 @@ The following specifies the .lvl format.
 // b: The single character name of the sibling portal block that this portal block is
 // the enterance and exit for.
 
+
+// C - Cannon block
 
 <block list in order of top-left to bottom-right>

@@ -31,6 +31,9 @@ drawItemsInLastPass(true) {
 	this->smokeyCamEffect				= new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
 	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->finalFSEffectFBO, this->tempFBO);
 
+
+	this->barrelOverlayTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BARREL_OVERLAY, Texture::Trilinear);
+	assert(this->barrelOverlayTex != NULL);
 }
 
 GameFBOAssets::~GameFBOAssets() {
@@ -63,6 +66,9 @@ GameFBOAssets::~GameFBOAssets() {
 	this->smokeyCamEffect = NULL;
 	delete this->uberIntenseCamEffect;
 	this->uberIntenseCamEffect = NULL;
+
+	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->barrelOverlayTex);
+	assert(success);
 }
 
 /**
@@ -231,12 +237,34 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 			inputFBO = outputFBO;
 			outputFBO = swapFBO;
 		}
+			
 	}
 
 	assert(inputFBO != NULL);
 	assert(outputFBO != NULL);
 	assert(outputFBO != inputFBO);
 	inputFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+
+	if (GameBall::GetIsBallCameraOn()) {
+		const GameBall* camBall = GameBall::GetBallCameraBall();
+		assert(camBall != NULL);
+		if (camBall->IsLoadedInCannonBlock()) {
+			float overlayAlpha = std::min<float>(0.7f, 1.0f - camBall->GetColour().A());
+			assert(overlayAlpha >= 0.0f);
+
+			// If the ball is inside a cannon and is in ball camera mode then we do the James-Bond-esque
+			// barrel overlay on the screen...
+			glPushAttrib(GL_ENABLE_BIT);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			this->barrelOverlayTex->BindTexture();
+			GeometryMaker::GetInstance()->DrawFullScreenQuad(width, height, 1.0f, ColourRGBA(1, 1, 1, overlayAlpha));
+			this->barrelOverlayTex->UnbindTexture();
+
+			glPopAttrib();
+		}
+	}
 
 	this->finalFSEffectFBO = inputFBO;
 	this->tempFBO = outputFBO;

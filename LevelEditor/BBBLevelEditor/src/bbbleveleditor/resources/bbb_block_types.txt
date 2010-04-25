@@ -114,6 +114,10 @@ Portal
 portal.png
 X
 
+Cannon
+cannon.png
+C
+
 Prism
 prism.png
 P

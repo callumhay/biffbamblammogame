@@ -68,7 +68,8 @@ targetTex(NULL),
 haloTex(NULL),
 lensFlareTex(NULL),
 sparkleTex(NULL),
-spiralTex(NULL) {
+spiralTex(NULL),
+sideBlastTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -131,6 +132,9 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->spiralTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sideBlastTex);
+	assert(removed);
 
 	// Delete any standalone effects
 	delete this->paddleLaserGlowAura;
@@ -412,6 +416,10 @@ void GameESPAssets::InitESPTextures() {
 	if (this->spiralTex == NULL) {
 		this->spiralTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_TWISTED_SPIRAL, Texture::Trilinear));
 		assert(this->spiralTex != NULL);
+	}
+	if (this->sideBlastTex == NULL) {
+		this->sideBlastTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST, Texture::Trilinear));
+		assert(this->sideBlastTex != NULL);
 	}
 
 	debug_opengl_state();
@@ -909,7 +917,21 @@ void GameESPAssets::AddCannonFireEffect(const GameBall& ball, const CannonBlock&
 	bool result = true;
 
 	// Basic bang
-	// TODO
+	ESPPointEmitter* cannonBlast = new ESPPointEmitter();
+	cannonBlast->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	cannonBlast->SetInitialSpd(ESPInterval(0.001f));
+	cannonBlast->SetParticleLife(ESPInterval(0.85f));
+	cannonBlast->SetParticleSize(ESPInterval(2 * CannonBlock::CANNON_BARREL_HEIGHT), ESPInterval(3 * CannonBlock::CANNON_BARREL_HEIGHT));
+	cannonBlast->SetEmitAngleInDegrees(0);
+	cannonBlast->SetAsPointSpriteEmitter(false);
+	cannonBlast->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+	cannonBlast->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	cannonBlast->SetEmitPosition(endOfBarrelPt + 1.5 * CannonBlock::CANNON_BARREL_HEIGHT * emitDir);
+	cannonBlast->SetEmitDirection(emitDir);
+	cannonBlast->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	cannonBlast->AddEffector(&this->particleFader);
+	result = cannonBlast->SetParticles(1, this->sideBlastTex);
+	assert(result);
 
 	// Bits of stuff
 	ESPPointEmitter* debrisBits = new ESPPointEmitter();
@@ -948,10 +970,12 @@ void GameESPAssets::AddCannonFireEffect(const GameBall& ball, const CannonBlock&
 	TextLabel2D fireTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small), "");
 	fireTextLabel.SetColour(Colour(1, 1, 1));
 	fireTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
-	shotOnoEffect->SetParticles(1, fireTextLabel, Onomatoplex::SHOT, Onomatoplex::GOOD);
+	result = shotOnoEffect->SetParticles(1, fireTextLabel, Onomatoplex::SHOT, Onomatoplex::GOOD);
+	assert(result);
 
 	// Lastly, add the cannon emitters to the list of active emitters in order of back to front
 	this->activeGeneralEmitters.push_back(debrisBits);
+	this->activeGeneralEmitters.push_back(cannonBlast);
 	this->activeGeneralEmitters.push_back(shotOnoEffect);
 }
 

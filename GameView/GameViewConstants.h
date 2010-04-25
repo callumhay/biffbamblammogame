@@ -152,6 +152,7 @@ public:
 	const std::string TEXTURE_HALO;
 	const std::string TEXTURE_LENSFLARE;
 	const std::string TEXTURE_TWISTED_SPIRAL;
+	const std::string TEXTURE_SIDEBLAST;
 
 	const std::string TEXTURE_STARFIELD;
 	
@@ -159,6 +160,7 @@ public:
 	const std::string TEXTURE_BALLTARGET;
 	const std::string TEXTURE_BULLET_CROSSHAIR;
 	const std::string TEXTURE_BEAM_CROSSHAIR;
+	const std::string TEXTURE_BARREL_OVERLAY;
 
 	const std::string TEXTURE_BALL_SAFETY_NET;
 
