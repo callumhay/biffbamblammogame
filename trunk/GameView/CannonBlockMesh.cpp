@@ -26,6 +26,14 @@ void CannonBlockMesh::Draw(const Camera& camera, const PointLight& keyLight,
 	float cannonRotationInDegs;
 	for (std::list<const CannonBlock*>::const_iterator iter = this->cannonBlocks.begin(); iter != this->cannonBlocks.end(); ++iter) {
 		const CannonBlock* currCannonBlock = *iter;
+		const GameBall* loadedBall = currCannonBlock->GetLoadedBall();
+
+		// If the current cannon block has a ball loaded in it with the ball camera 
+		// on then don't draw the barrel
+		if (loadedBall != NULL && loadedBall->GetIsBallCameraOn()) {
+			continue;
+		}
+
 		cannonRotationInDegs = currCannonBlock->GetCurrentCannonAngleInDegs();
 		const Point2D& blockCenter = currCannonBlock->GetCenter();
 		const Colour& cannonColour = currCannonBlock->GetColour();
