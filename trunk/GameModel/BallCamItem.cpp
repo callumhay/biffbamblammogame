@@ -31,7 +31,6 @@ double BallCamItem::Activate() {
 		}
 	}
 
-	// Deactivate the paddle camera effect
 	this->gameModel->GetTransformInfo()->SetBallCamera(true);
 	GameItem::Activate();
 
