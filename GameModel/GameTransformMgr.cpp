@@ -13,6 +13,7 @@
 #include "GameModel.h"
 #include "PlayerPaddle.h"
 #include "GameBall.h"
+#include "CannonBlock.h"
 
 #include "../BlammoEngine/Camera.h"
 
@@ -154,8 +155,6 @@ void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
 		animType = GameTransformMgr::FromBallDeathAnimation;
 	}
 
-	// Ball death takes presedence over all other animations
-	// Add the ball cam transform to the front of the queue
 	TransformAnimation transformAnim(animType);
 	this->animationQueue.push_back(transformAnim);
 }
@@ -352,7 +351,13 @@ Matrix4x4 GameTransformMgr::GetCameraTransform() const {
 	// If we're in ball camera mode and the ball is in a cannon block then we rotate
 	// the camera with the cannon block...
 	if (this->ballWithCamera != NULL) {
-		// TODO
+		const CannonBlock* cannon = this->ballWithCamera->GetCannonBlock();
+		if (cannon != NULL) {
+			const Vector3D& currCamRot = this->currCamOrientation.GetRotation();
+			return (Matrix4x4::translationMatrix(this->currCamOrientation.GetTranslation()) *
+							Matrix4x4::rotationMatrix('z', 90 + cannon->GetCurrentCannonAngleInDegs(), true) *
+							Matrix4x4::rotationMatrix('x', currCamRot[0], true)).inverse();
+		}
 	}
 
 	// The inverse is returned because the camera transform is applied to the world matrix

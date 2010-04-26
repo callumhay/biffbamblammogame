@@ -263,6 +263,7 @@ public:
 
 	void LoadIntoCannonBlock(CannonBlock* cannonBlock);
 	bool IsLoadedInCannonBlock() const;
+	const CannonBlock* GetCannonBlock() const;
 
 private:
 	BallState* currState;
@@ -303,6 +304,10 @@ private:
 	void SetBallState(BallState* state, bool deletePrevState);
 
 };
+
+inline const CannonBlock* GameBall::GetCannonBlock() const {
+	return this->currState->GetCannonBlock();
+}	
 
 inline bool GameBall::IsLoadedInCannonBlock() const {
 	return this->currState->GetBallStateType() == BallState::InCannonBallState;

@@ -21,7 +21,7 @@ const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC	= 150.0f;
 const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 450.0f;
 
 CannonBlock::CannonBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc), 
-hasBall(false), currRotationFromXInDegs(0.0f), currRotationSpeed(0.0f), elapsedRotationTime(0.0), 
+loadedBall(NULL), currRotationFromXInDegs(0.0f), currRotationSpeed(0.0f), elapsedRotationTime(0.0), 
 totalRotationTime(0.0) {
 }
 
@@ -92,7 +92,7 @@ void CannonBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	// If the cannon already has a ball inside it then just leave and have the ball bounce off of it
 	// Also if the ball already just collided with this piece, ignore the collision
-	if (this->hasBall || ball.IsLastPieceCollidedWith(this) || ball.IsLoadedInCannonBlock()) {
+	if (this->loadedBall != NULL || ball.IsLastPieceCollidedWith(this) || ball.IsLoadedInCannonBlock()) {
 		return this;
 	}
 
@@ -113,7 +113,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	// Place the ball in the cannon and make sure we don't continue colliding...
 	ball.LoadIntoCannonBlock(this);
 	ball.SetLastPieceCollidedWith(this);
-	this->hasBall = true;
+	this->loadedBall = &ball;
 
 	return this;
 }
@@ -128,7 +128,7 @@ bool CannonBlock::RotateAndEventuallyFire(double dT) {
 
 	if (this->elapsedRotationTime >= this->totalRotationTime) {
 		this->elapsedRotationTime = this->totalRotationTime;
-		this->hasBall = false;
+		this->loadedBall = NULL;
 		return true;
 	}
 

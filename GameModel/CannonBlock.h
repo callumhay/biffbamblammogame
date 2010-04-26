@@ -35,7 +35,7 @@ public:
 		return true;
 	}
 	bool BallBouncesOffWhenHit() const {
-		return this->hasBall;
+		return this->loadedBall != NULL;
 	}
 
 	// Cannon blocks don't need to be destroyed to end a level... in fact they cannot be destroyed
@@ -90,6 +90,7 @@ public:
 	Vector2D GetCurrentCannonDirection() const;
 	float GetCurrentCannonAngleInDegs() const;
 	Point2D GetEndOfBarrelPoint() const;
+	const GameBall* GetLoadedBall() const;
 
 private:
 	static const double MIN_ROTATION_TIME_IN_SECS;
@@ -98,7 +99,7 @@ private:
 	static const float MIN_ROTATION_SPD_IN_DEGS_PER_SEC;
 	static const float MAX_ROTATION_SPD_IN_DEGS_PER_SEC;
 
-	bool hasBall;
+	GameBall* loadedBall;
 	float currRotationFromXInDegs;	// The current rotation from the x-axis (default position) in degrees
 	float currRotationSpeed;				// The current rotation speed of the cannon
 	double elapsedRotationTime;			// The elapsed rotation time from the start of the ball coming into the cannon
@@ -122,6 +123,10 @@ inline float CannonBlock::GetCurrentCannonAngleInDegs() const {
 // Obtain the point in game space at the end of the cannon barrel
 inline Point2D CannonBlock::GetEndOfBarrelPoint() const {
 	return this->GetCenter() + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->GetCurrentCannonDirection();
+}
+
+inline const GameBall* CannonBlock::GetLoadedBall() const {
+	return this->loadedBall;
 }
 
 #endif // __CANNONBLOCK_H__

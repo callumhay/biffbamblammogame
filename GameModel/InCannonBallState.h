@@ -19,6 +19,7 @@ public:
 	BallState* Clone(GameBall* newBall) const;
 	void Tick(double seconds, const Vector2D& worldSpaceGravityDir);
 	ColourRGBA GetBallColour() const;
+	const CannonBlock* GetCannonBlock() const;
 
 	BallState::BallStateType GetBallStateType() const;
 
@@ -33,6 +34,10 @@ private:
 // The ball is invisible while in the cannon
 inline ColourRGBA InCannonBallState::GetBallColour() const {
 	return ColourRGBA(0, 0, 0, 0);
+}
+
+inline const CannonBlock* InCannonBallState::GetCannonBlock() const {
+	return this->cannonBlock;
 }
 
 inline BallState::BallStateType InCannonBallState::GetBallStateType() const {

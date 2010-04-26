@@ -35,10 +35,10 @@ public:
 		this->rotation = r;
 	}
 
-	Vector3D GetTranslation() const {
+	const Vector3D& GetTranslation() const {
 		return this->translation;
 	}
-	Vector3D GetRotation() const {
+	const Vector3D& GetRotation() const {
 		return this->rotation;
 	}
 
