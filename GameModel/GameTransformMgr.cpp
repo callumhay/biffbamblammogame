@@ -31,7 +31,7 @@ const double GameTransformMgr::SECONDS_PER_UNIT_DEATHCAM	= 0.015;
 // Distance between the camera and ball when in ball death camera mode
 const float GameTransformMgr::BALL_DEATH_CAM_DIST_TO_BALL = 20.0f;
 
-GameTransformMgr::GameTransformMgr() {
+GameTransformMgr::GameTransformMgr() : paddleWithCamera(NULL), ballWithCamera(NULL) {
 	this->Reset();
 }
 
@@ -47,8 +47,17 @@ void GameTransformMgr::Reset() {
 	this->currGameDegRotX = 0.0f;
 	this->currGameDegRotY = 0.0f;
 	this->isFlipped = false;
-	this->paddleWithCamera = NULL;
-	this->ballWithCamera = NULL;
+
+	if (this->ballWithCamera != NULL) {
+		this->ballWithCamera = NULL;
+		GameBall::SetBallCamera(NULL);
+	}
+
+	if (this->paddleWithCamera != NULL) {
+		this->paddleWithCamera->SetPaddleCamera(false, 0);
+		this->paddleWithCamera = NULL;
+	}
+	
 	this->cameraFOVAngle = Camera::FOV_ANGLE_IN_DEGS;
 	this->isBallDeathCamIsOn = false;
 
@@ -148,14 +157,17 @@ void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
 	GameTransformMgr::TransformAnimationType animType;
 	if (turnOnBallDeathCam) {
 		animType = GameTransformMgr::ToBallDeathAnimation;
-		this->SetPaddleCamera(false);
-		this->SetBallCamera(false);
+		this->Reset();
 	}
 	else {
 		animType = GameTransformMgr::FromBallDeathAnimation;
 	}
 
+	// PLEASE NOTE: A ball death animation clears all other animations off the queue, therefore
+	// the ball death animation MUST be able to handle animating all the changes made via those other
+	// animations back to their normal / expected values
 	TransformAnimation transformAnim(animType);
+	this->animationQueue.clear();
 	this->animationQueue.push_back(transformAnim);
 }
 
@@ -804,8 +816,19 @@ bool GameTransformMgr::TickBallDeathAnimation(double dT, GameModel& gameModel) {
 			++iter;
 		}
 	}
+
+	// Animate the field of view angle
+	for (std::list<AnimationMultiLerp<float>>::iterator iter = this->camFOVAnimations.begin(); iter != this->camFOVAnimations.end();) {
+		bool currAnimationFinished = iter->Tick(dT);
+		if (currAnimationFinished) {
+			iter = this->camFOVAnimations.erase(iter);
+		}
+		else {
+			++iter;
+		}
+	}
 	
-	return (this->ballDeathAnimations.size() == 0);
+	return (this->ballDeathAnimations.size() == 0 && this->camFOVAnimations.size() == 0);
 }
 
 void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) {
@@ -855,6 +878,12 @@ void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) 
 		toBallDeathAnim.SetLerp(timeVals, orients);
 		toBallDeathAnim.SetRepeat(false);
 		this->ballDeathAnimations.push_back(toBallDeathAnim);
+
+
+		// Make the camera's field of view angle normal again
+		AnimationMultiLerp<float> camFOVChangeAnim(&this->cameraFOVAngle);
+		camFOVChangeAnim.SetLerp(timeToAnimate, Camera::FOV_ANGLE_IN_DEGS);
+		this->camFOVAnimations.push_back(camFOVChangeAnim);
 	}
 	else {
 		// Leaving the death cam back to the default camera
