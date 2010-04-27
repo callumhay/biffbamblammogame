@@ -98,6 +98,8 @@ private:
 	void GetPaddleCamPositionAndFOV(const PlayerPaddle& paddle, float levelWidth, float levelHeight, Vector3D& paddleCamPos, float& fov);
 	void GetBallCamPositionAndFOV(const GameBall& ball, float levelWidth, float levelHeight, Vector3D& ballCamPos, float& fov); 
 
+	void ClearSpecialCamEffects();
+
 public:
 	GameTransformMgr();
 	~GameTransformMgr();
