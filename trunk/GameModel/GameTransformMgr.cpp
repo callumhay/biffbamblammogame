@@ -39,15 +39,7 @@ GameTransformMgr::~GameTransformMgr() {
 	this->Reset();
 }
 
-/** 
- * Reset the entire game transform manager - eliminate all animations on go back to defaults
- * for all relevant values.
- */
-void GameTransformMgr::Reset() {
-	this->currGameDegRotX = 0.0f;
-	this->currGameDegRotY = 0.0f;
-	this->isFlipped = false;
-
+void GameTransformMgr::ClearSpecialCamEffects() {
 	if (this->ballWithCamera != NULL) {
 		this->ballWithCamera = NULL;
 		GameBall::SetBallCamera(NULL);
@@ -57,15 +49,26 @@ void GameTransformMgr::Reset() {
 		this->paddleWithCamera->SetPaddleCamera(false, 0);
 		this->paddleWithCamera = NULL;
 	}
-	
-	this->cameraFOVAngle = Camera::FOV_ANGLE_IN_DEGS;
-	this->isBallDeathCamIsOn = false;
 
-	this->levelFlipAnimations.clear();
+	this->cameraFOVAngle = Camera::FOV_ANGLE_IN_DEGS;
 	this->paddleCamAnimations.clear();
 	this->ballCamAnimations.clear();
-	this->ballDeathAnimations.clear();
 	this->camFOVAnimations.clear();
+}
+
+/** 
+ * Reset the entire game transform manager - eliminate all animations on go back to defaults
+ * for all relevant values.
+ */
+void GameTransformMgr::Reset() {
+	this->currGameDegRotX = 0.0f;
+	this->currGameDegRotY = 0.0f;
+	this->isFlipped = false;
+	this->isBallDeathCamIsOn = false;
+
+	this->ClearSpecialCamEffects();
+	this->levelFlipAnimations.clear();
+	this->ballDeathAnimations.clear();
 	this->animationQueue.clear();
 }
 
@@ -157,18 +160,15 @@ void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
 	GameTransformMgr::TransformAnimationType animType;
 	if (turnOnBallDeathCam) {
 		animType = GameTransformMgr::ToBallDeathAnimation;
-		this->Reset();
+		// Clear up all other transforms that may manipulate the camera...
+		this->ClearSpecialCamEffects();
 	}
 	else {
 		animType = GameTransformMgr::FromBallDeathAnimation;
 	}
 
-	// PLEASE NOTE: A ball death animation clears all other animations off the queue, therefore
-	// the ball death animation MUST be able to handle animating all the changes made via those other
-	// animations back to their normal / expected values
 	TransformAnimation transformAnim(animType);
-	this->animationQueue.clear();
-	this->animationQueue.push_back(transformAnim);
+	this->animationQueue.push_front(transformAnim);
 }
 
 /**
