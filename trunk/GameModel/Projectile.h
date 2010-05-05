@@ -25,7 +25,7 @@ class LevelPiece;
  */
 class Projectile {
 public:
-	enum ProjectileType { PaddleLaserBulletProjectile };
+	enum ProjectileType { PaddleLaserBulletProjectile, CollateralBlockProjectile };
 protected:
 	Projectile(ProjectileType type, const Point2D& spawnLoc, float width, float height);
 	Projectile(const Projectile& copy);
@@ -53,10 +53,11 @@ public:
 	void SetHeight(float height) { this->currHeight = height; }
 
 	ProjectileType GetType() const { return this->type; }
-	Point2D GetPosition() const { return this->position; }
+	const Point2D& GetPosition() const { return this->position; }
 	void SetPosition(const Point2D& pos) { this->position = pos; } 
-	Vector2D GetVelocityDirection() const { return this->velocityDir; }
+	const Vector2D& GetVelocityDirection() const { return this->velocityDir; }
 	float GetVelocityMagnitude() const { return this->velocityMag; }
+
 	void SetVelocity(const Vector2D& velocityDir, float velocityMag) { 
 		this->velocityDir = velocityDir;
 		this->velocityMag = velocityMag;
@@ -75,26 +76,4 @@ public:
 	static Projectile* CreateProjectile(ProjectileType type, const Point2D& spawnLoc);
 };
 
-/**
- * Projectile representing laser shots/bullets fired by the player paddle.
- */
-class PaddleLaser : public Projectile {
-private:
-	static const Vector2D PADDLELASER_VELOCITYDIR;
-	static const Vector2D PADDLELASER_RIGHTDIR;
-	static const float PADDLELASER_VELOCITYMAG;
-
-public:
-	static const float PADDLELASER_HEIGHT_DEFAULT;
-	static const float PADDLELASER_WIDTH_DEFAULT;
-
-	PaddleLaser(const Point2D& spawnLoc);
-	PaddleLaser(const PaddleLaser& copy);
-	PaddleLaser(const Projectile& copy);
-	~PaddleLaser();
-
-	void Tick(double seconds);
-	BoundingLines BuildBoundingLines() const;
-
-};
 #endif

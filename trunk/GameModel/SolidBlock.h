@@ -18,8 +18,8 @@
 class SolidBlock : public LevelPiece {
 
 public:
-	SolidBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {}
-	virtual ~SolidBlock() {}
+	SolidBlock(unsigned int wLoc, unsigned int hLoc);
+	virtual ~SolidBlock();
 
 	virtual LevelPieceType GetType() const { 
 		return LevelPiece::Solid;
@@ -38,7 +38,7 @@ public:
 	virtual bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}
-	virtual bool CanBeDestroyed() const {
+	virtual bool CanBeDestroyedByBall() const {
 		return false;
 	}
 
@@ -59,21 +59,16 @@ public:
 		return 0;
 	}
 
-	// No projectiles pass through solid blocks
-	// Returns: false.
-	bool ProjectilePassesThrough(Projectile* projectile) {
-		return false;
-	}
-
 	// Solid blocks do not reflect or refract light.
 	// Returns: false
 	bool IsLightReflectorRefractor() const {
 		return false;
 	}
 
-	virtual LevelPiece* Destroy(GameModel* gameModel){
-		return this;
-	};
+	bool ProjectilePassesThrough(Projectile* projectile);
+
+	LevelPiece* Destroy(GameModel* gameModel);
+
 	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
@@ -82,14 +77,13 @@ public:
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 	
 	// Doesn't matter if a ball collides with solid block, it does nothing to the block.
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-		LevelPiece* resultingPiece = this->Destroy(gameModel);
+	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 		// Tell the ball what the last piece it collided with was...
-		ball.SetLastPieceCollidedWith(resultingPiece);
-		return resultingPiece;
+		ball.SetLastPieceCollidedWith(this);
+		return this;
 	}
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-		return this->Destroy(gameModel);
-	}
+
+	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
+
 };
 #endif

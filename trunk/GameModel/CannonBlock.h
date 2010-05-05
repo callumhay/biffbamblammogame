@@ -2,7 +2,7 @@
  * CannonBlock.h
  *
  * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2010
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -42,16 +42,16 @@ public:
 	bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}
-	bool CanBeDestroyed() const {
+	bool CanBeDestroyedByBall() const {
 		return false;
 	}
 	
-	// Even the uber ball gets captured by the nefarious net block!
+	// Even the uber ball just bounces off like a solid block
 	bool UberballBlastsThrough() const {
 		return false;
 	}
 
-	// Whether or not the ghost ball can just pass through this block.
+	// Ghost ball may pass through
 	bool GhostballPassesThrough() const {
 		return true;
 	}
@@ -61,30 +61,28 @@ public:
 		return 0;
 	}
 
-	// Particles just extinguish on contact with a cannon block
-	bool ProjectilePassesThrough(Projectile* projectile) {
-		return false;
-	}
-
 	// Light beams will extinguish on contact
 	bool IsLightReflectorRefractor() const {
 		return false;
 	}
 
+	bool ProjectilePassesThrough(Projectile* projectile);
+
+
 	// The cannon block cannot be destroyed
-	LevelPiece* Destroy(GameModel* gameModel) { return this; }
+	LevelPiece* Destroy(GameModel* gameModel);
 	
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
-	//bool CollisionCheck(const Collision::AABB2D& aabb) const;
-	//bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	//bool CollisionCheck(const BoundingLines& boundingLines) const;
+	bool CollisionCheck(const Collision::AABB2D& aabb) const;
+	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
+	bool CollisionCheck(const BoundingLines& boundingLines) const;
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
-	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) { return this->Destroy(gameModel); }
+	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
 	bool RotateAndEventuallyFire(double dT);
 	Vector2D GetCurrentCannonDirection() const;

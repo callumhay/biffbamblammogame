@@ -101,9 +101,13 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	// Teleport the ball to the sibling portal block:
 	ball.SetCenterPosition(this->sibling->GetCenter());
 
-	return this->Destroy(gameModel);
+	return this;
 }
 
+/**
+ * Call when a projectile hits the portal block. This tends to cause the projectile to
+ * be teleported to the sibling portal.
+ */
 LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 	// Ignore the collision if this was the last piece collided with
 	if (projectile->IsLastLevelPieceCollidedWith(this)) {

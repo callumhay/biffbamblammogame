@@ -13,7 +13,7 @@
 #include "GameModel.h"
 #include "GameEventManager.h"
 #include "GameModelConstants.h"
-#include "Projectile.h"
+#include "PaddleLaser.h"
 #include "GameBall.h"
 #include "Beam.h"
 

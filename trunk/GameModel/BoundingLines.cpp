@@ -19,6 +19,52 @@ BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines, con
 BoundingLines::~BoundingLines() {
 }
 
+Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
+	std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin();
+	const Collision::LineSeg2D& firstLine = *thisIter;
+
+	float minX = firstLine.P1()[0];
+	float maxX = firstLine.P1()[0];
+	float minY = firstLine.P1()[1];
+	float maxY = firstLine.P1()[1];
+
+	while (thisIter != this->lines.end()) {
+		const Collision::LineSeg2D& currThisLine = *thisIter;
+
+		// First point on the line...
+		if (currThisLine.P1()[0] < minX) {
+			minX = currThisLine.P1()[0];
+		}
+		if (currThisLine.P1()[0] > maxX) {
+			maxX = currThisLine.P1()[0];
+		}
+		if (currThisLine.P1()[1] < minY) {
+			minY = currThisLine.P1()[1];
+		}
+		if (currThisLine.P1()[1] > maxY) {
+			maxY = currThisLine.P1()[1];
+		}
+
+		// Second point on the line...
+		if (currThisLine.P2()[0] < minX) {
+			minX = currThisLine.P2()[0];
+		}
+		if (currThisLine.P2()[0] > maxX) {
+			maxX = currThisLine.P2()[0];
+		}
+		if (currThisLine.P2()[1] < minY) {
+			minY = currThisLine.P2()[1];
+		}
+		if (currThisLine.P2()[1] > maxY) {
+			maxY = currThisLine.P2()[1];
+		}
+
+		++thisIter;
+	}
+
+	return Collision::AABB2D(Point2D(minX, minY), Point2D(maxX, maxY));
+}
+
 /**
  * Test collision between the bounding lines of this and the given circle c.
  * Return: The average normal for the lines that the given circle collided with in the value n. 
@@ -413,6 +459,17 @@ void BoundingLines::RotateLinesAndNormals(float angleInDegs, const Point2D& rota
 		currNormal = Vector2D::Rotate(angleInDegs, currNormal);
 	}
 
+}
+
+/**
+ * Translates the bounding lines by the given vector.
+ */
+void BoundingLines::TranslateBounds(const Vector2D& translation) {
+	// Translate each line...
+	for (std::vector<Collision::LineSeg2D>::iterator iter = this->lines.begin(); iter != this->lines.end(); ++iter) {
+		Collision::LineSeg2D& currLineSeg = *iter;
+		currLineSeg.Translate(translation);
+	}
 }
 
 void BoundingLines::DebugDraw() const {

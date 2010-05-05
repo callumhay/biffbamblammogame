@@ -26,7 +26,7 @@ public:
 	bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}
-	bool CanBeDestroyed() const {
+	bool CanBeDestroyedByBall() const {
 		return true;
 	}
 
@@ -46,17 +46,13 @@ public:
 		return 0;
 	}
 
-	// No projectiles pass through bomb blocks
-	// Returns: false.
-	bool ProjectilePassesThrough(Projectile* projectile) {
-		return false;
-	}
-
 	// Bomb blocks do not reflect or refract light
 	// Returns: false
 	bool IsLightReflectorRefractor() const {
 		return false;
 	}
+
+	bool ProjectilePassesThrough(Projectile* projectile);
 
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel);
