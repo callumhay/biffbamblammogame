@@ -29,6 +29,14 @@ LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLi
 BreakableBlock::~BreakableBlock() {
 }
 
+// Determine whether the given projectile will pass through this block...
+bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) {
+	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
+		return true;
+	}
+	return false;
+}
+
 /**
  * Inherited private function for destroying this breakable block.
  */
@@ -154,9 +162,21 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 	assert(projectile != NULL);
 	LevelPiece* newPiece = this;
 
-	// For destructive projectile types...
-	if (projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
-		newPiece = this->DiminishPiece(gameModel);
+	switch (projectile->GetType()) {
+	
+		case Projectile::PaddleLaserBulletProjectile:
+			// Laser bullets just dimish the piece, but don't necessarily obliterated/destroy it
+			newPiece = this->DiminishPiece(gameModel);
+			break;
+
+		case Projectile::CollateralBlockProjectile:
+			// Completely destroy the block...
+			newPiece = this->Destroy(gameModel);
+			break;
+
+		default:
+			assert(false);
+			break;
 	}
 
 	return newPiece;
@@ -175,11 +195,6 @@ LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegment* beam
 		// The piece is dead... spawn the next one in sequence
 		this->currLifePoints = BreakableBlock::PIECE_STARTING_LIFE_POINTS;
 		newPiece = this->DiminishPiece(gameModel);
-	}
-	else {
-		// If the piece is not quite dead yet then show the current damage to it...
-		this->colour = std::max<float>(this->currLifePoints / static_cast<float>(BreakableBlock::PIECE_STARTING_LIFE_POINTS), 0.1f) * 
-			BreakableBlock::GetColourOfBreakableType(this->pieceType);
 	}
 
 	return newPiece;

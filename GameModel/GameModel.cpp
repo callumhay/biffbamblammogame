@@ -2,7 +2,7 @@
  * GameModel.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2010
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -16,6 +16,7 @@
 #include "GameOverState.h"
 #include "LevelCompleteState.h"
 #include "Beam.h"
+#include "CollateralBlock.h"
 
 GameModel::GameModel() : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), 
@@ -400,4 +401,19 @@ void GameModel::AddBeam(int beamType) {
 
 	// EVENT: Beam creation
 	GameEventManager::Instance()->ActionBeamSpawned(*addedBeam);
+}
+
+/**
+ * A collateral block enters here once it has been 'activated' by a ball hitting it (or
+ * some such thing) - it will count down on a timer (in warning mode) and then activate
+ * itself by going into a collateral damage mode where it will barrel down the level destroying
+ * everything in its path as a bad-ass projectile. This starts the whole process.
+ */
+void GameModel::AddActiveCollateralBlock(CollateralBlock* activeCollateralBlock) {
+	// TODO: Build a projectile to encapsulate the collateral block...
+
+
+	// TODO: MOVE THIS TO WHERE THE BLOCK WILL ACTUALLY BE DESTROYED!!
+	// EVENT: Block is being destroyed
+	//GameEventManager::Instance()->ActionBlockDestroyed(*this);
 }

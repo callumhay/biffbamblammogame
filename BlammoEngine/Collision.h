@@ -49,18 +49,19 @@ namespace Collision {
 		void SetP1(const Point2D& p) {
 			this->p1 = p;
 		}
-		Point2D P1() const {
+		const Point2D& P1() const {
 			return this->p1;
 		}
 
 		void SetP2(const Point2D& p) {
 			this->p2 = p;
 		}
-		Point2D P2() const {
+		const Point2D& P2() const {
 			return this->p2;
 		}
 
 		void Rotate(float angleInDegs, const Point2D& rotationCenter);
+		void Translate(const Vector2D& translation);
 
 	};
 
@@ -73,6 +74,10 @@ namespace Collision {
 		this->SetP2(rotationCenter + p2Vec);
 	}
 
+	inline void LineSeg2D::Translate(const Vector2D& translation) {
+		this->SetP1(this->p1 + translation);
+		this->SetP2(this->p2 + translation);
+	}
 
 	class LineSeg3D {
 

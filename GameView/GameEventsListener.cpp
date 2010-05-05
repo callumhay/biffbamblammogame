@@ -178,7 +178,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 
 	// We shake things up if the ball is uber and the block is indestructible...
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-		  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.CanBeDestroyed()) {
+		  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.CanBeDestroyedByBall()) {
 
 		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.1, 0.0), 100);
 	}

@@ -28,9 +28,47 @@ totalRotationTime(0.0) {
 CannonBlock::~CannonBlock() {
 }
 
+// Determine whether the given projectile will pass through this block...
+bool CannonBlock::ProjectilePassesThrough(Projectile* projectile) {
+	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
+		return true;
+	}
+	return false;
+}
+
+LevelPiece* CannonBlock::Destroy(GameModel* gameModel) {
+	// EVENT: Block is being destroyed
+	GameEventManager::Instance()->ActionBlockDestroyed(*this);
+
+	// Tell the level that this piece has changed to empty...
+	GameLevel* level = gameModel->GetCurrentLevel();
+	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
+	level->PieceChanged(this, emptyPiece);
+
+	// Obliterate all that is left of this block...
+	LevelPiece* tempThis = this;
+	delete tempThis;
+	tempThis = NULL;
+
+	return emptyPiece;
+}
+
 // We need to override this in order to make sure it actually checks for a collision
 bool CannonBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
 		return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+}
+
+bool CannonBlock::CollisionCheck(const Collision::AABB2D& aabb) const {
+	// See if there's a collision between this and the given AABB
+	return Collision::IsCollision(this->bounds.GenerateAABBFromLines(), aabb);	
+}
+
+bool CannonBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	return this->bounds.CollisionCheck(ray, rayT);
+}
+
+bool CannonBlock::CollisionCheck(const BoundingLines& boundingLines) const {
+	return this->bounds.CollisionCheck(boundingLines);
 }
 
 /**
@@ -116,6 +154,31 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	this->loadedBall = &ball;
 
 	return this;
+}
+
+/**
+ * Call this when a collision has actually occured with a projectile and this block.
+ * Returns: The resulting level piece that this has become.
+ */
+LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	LevelPiece* resultingPiece = this;
+
+	switch (projectile->GetType()) {
+		case Projectile::PaddleLaserBulletProjectile:
+			// Do nothing, typical laser bullets just extinguish on contact
+			break;
+
+		case Projectile::CollateralBlockProjectile:
+			// The collateral block projectile completely destroys a cannon block...
+			resultingPiece = this->Destroy(gameModel);
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
+
+	return resultingPiece;
 }
 
 /**

@@ -27,6 +27,15 @@ currLifePoints(BombBlock::PIECE_STARTING_LIFE_POINTS) {
 BombBlock::~BombBlock() {
 }
 
+// Whether or not the given projectile passes through this block...
+bool BombBlock::ProjectilePassesThrough(Projectile* projectile) {
+	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
+		return true;
+	}
+	
+	return false;
+}
+
 LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 	// Obtain the level from the model...
 	GameLevel* level = gameModel->GetCurrentLevel();
@@ -96,7 +105,12 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 		LevelPiece* currDestroyedPiece = *iter;
 		if (currDestroyedPiece != NULL) {
 			assert(currDestroyedPiece->GetType() != LevelPiece::Bomb);
-			currDestroyedPiece->Destroy(gameModel);
+
+			// Only allow the piece to be destroyed if the ball can destroy it as well...
+			if (currDestroyedPiece->CanBeDestroyedByBall()) {
+				currDestroyedPiece->Destroy(gameModel);
+			}
+
 		}
 	}
 
@@ -129,11 +143,26 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	return resultingPiece;
 }
 
+/**
+ * When the bomb block encounters a projectile it tends to go boom...
+ * Results in an empty level piece where the bomb block once was.
+ */
 LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-	if (projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
-		return this->Destroy(gameModel);
+	LevelPiece* result = this;
+
+	switch(projectile->GetType()) {
+		
+		case Projectile::PaddleLaserBulletProjectile:
+		case Projectile::CollateralBlockProjectile:
+			result = this->Destroy(gameModel);
+			break;
+
+		default:
+			assert(false);
+			break;
 	}
-	return this;
+
+	return result;
 }
 
 /**

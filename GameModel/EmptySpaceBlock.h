@@ -25,7 +25,7 @@ public:
 	bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}
-	bool CanBeDestroyed() const {
+	bool CanBeDestroyedByBall() const {
 		return false;
 	}
 
@@ -72,12 +72,13 @@ public:
 
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 		// Nothing happens when there's nothing to collide with...
-		return this->Destroy(gameModel);
+		return this;
 	}
 
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 		// Nothing happens when there's nothing to collide with...
-		return this->Destroy(gameModel);
+		return this;
 	}
 };
+
 #endif

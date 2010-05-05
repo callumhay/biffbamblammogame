@@ -22,6 +22,14 @@ LevelPiece(wLoc, hLoc), currLifePoints(InkBlock::PIECE_STARTING_LIFE_POINTS) {
 InkBlock::~InkBlock() {
 }
 
+// Determine whether the given projectile will pass through this block...
+bool InkBlock::ProjectilePassesThrough(Projectile* projectile) {
+	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
+		return true;
+	}
+	return false;
+}
+
 /**
  * The ink block is destroyed and replaced by an empty space.
  * Returns: A new empty space block.
@@ -48,10 +56,21 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 }
 
 LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-	if (projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
-		return this->Destroy(gameModel);
+	LevelPiece* resultingPiece = this;
+
+	switch (projectile->GetType()) {
+
+		case Projectile::PaddleLaserBulletProjectile:
+		case Projectile::CollateralBlockProjectile:
+			resultingPiece = this->Destroy(gameModel);
+			break;
+
+		default:
+			assert(false);
+			break;
 	}
-	return this;
+
+	return resultingPiece;
 }
 
 LevelPiece* InkBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {

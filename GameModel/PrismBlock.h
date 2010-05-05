@@ -22,8 +22,8 @@
 class PrismBlock : public LevelPiece {
 
 public:
-	PrismBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {}
-	virtual ~PrismBlock() {}
+	PrismBlock(unsigned int wLoc, unsigned int hLoc);
+	virtual ~PrismBlock();
 
 	virtual LevelPieceType GetType() const { 
 		return LevelPiece::Prism;
@@ -42,7 +42,7 @@ public:
 	virtual bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}
-	virtual bool CanBeDestroyed() const {
+	virtual bool CanBeDestroyedByBall() const {
 		return false;
 	}
 
@@ -63,9 +63,7 @@ public:
 		return 0;
 	}
 
-	// All projectiles pass through the prism block
-	// Returns: true.
-	virtual bool ProjectilePassesThrough(Projectile* projectile) {
+	bool ProjectilePassesThrough(Projectile* projectile) {
 		return true;
 	}
 
@@ -75,10 +73,7 @@ public:
 		return true;
 	}
 
-	LevelPiece* Destroy(GameModel* gameModel){
-		return this;
-	};
-
+	LevelPiece* Destroy(GameModel* gameModel);
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
@@ -86,10 +81,9 @@ public:
 	
 	// Doesn't matter if a ball collides with a prism block, it does nothing to the block.
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-		LevelPiece* resultingPiece = this->Destroy(gameModel);
 		// Tell the ball what the last piece it collided with was...
-		ball.SetLastPieceCollidedWith(resultingPiece);
-		return resultingPiece;
+		ball.SetLastPieceCollidedWith(this);
+		return this;
 	}
 
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);

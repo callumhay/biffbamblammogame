@@ -53,7 +53,7 @@ public:
 	virtual bool MustBeDestoryedToEndLevel() const {
 		return true;
 	}
-	virtual bool CanBeDestroyed() const {
+	virtual bool CanBeDestroyedByBall() const {
 		return true;
 	}
 
@@ -69,11 +69,7 @@ public:
 		return true;
 	}
 
-	// No projectiles pass through breakable blocks
-	// Returns: false.
-	virtual bool ProjectilePassesThrough(Projectile* projectile) {
-		return false;
-	}
+	bool ProjectilePassesThrough(Projectile* projectile);
 
 	// Breakable blocks do not reflect or refract light.
 	// Returns: false
@@ -98,9 +94,9 @@ public:
 	}
 
 	// Collision related stuffs
-	virtual LevelPiece* Destroy(GameModel* gameModel);	
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
-	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
+	LevelPiece* Destroy(GameModel* gameModel);	
+	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
+	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 };
 #endif

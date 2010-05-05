@@ -41,7 +41,7 @@ public:
 	bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}
-	bool CanBeDestroyed() const {
+	bool CanBeDestroyedByBall() const {
 		return false;
 	}
 

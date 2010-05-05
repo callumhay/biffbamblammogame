@@ -30,7 +30,8 @@ public:
 	static const float HALF_PIECE_HEIGHT;
 	static const float HALF_PIECE_DEPTH;
 
-	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, Ink, Prism, Portal, PrismTriangle, Cannon };
+	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
+												Ink, Prism, Portal, PrismTriangle, Cannon, Collateral };
 	virtual LevelPieceType GetType() const = 0;
 
 protected:
@@ -48,6 +49,7 @@ public:
 	void SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc);
 
 	const Point2D& GetCenter() const {	return this->center; }
+	const BoundingLines& GetBounds() const { return this->bounds; }
 	unsigned int GetWidthIndex() const { return this->wIndex; }
 	unsigned int GetHeightIndex() const { return this->hIndex; }
 	const Colour& GetColour() const { return this->colour; }
@@ -86,7 +88,7 @@ public:
 	virtual bool IsNoBoundsPieceType() const = 0;
 	virtual bool BallBouncesOffWhenHit() const = 0;
 	virtual bool MustBeDestoryedToEndLevel() const = 0;
-	virtual bool CanBeDestroyed() const = 0;
+	virtual bool CanBeDestroyedByBall() const = 0;
 	virtual bool UberballBlastsThrough() const = 0;
 	virtual bool GhostballPassesThrough() const = 0;
 	virtual bool ProjectilePassesThrough(Projectile* projectile) = 0;

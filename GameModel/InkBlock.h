@@ -26,7 +26,7 @@ public:
 	bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}
-	bool CanBeDestroyed() const {
+	bool CanBeDestroyedByBall() const {
 		return true;
 	}
 
@@ -48,17 +48,13 @@ public:
 		return POINTS_ON_BLOCK_DESTROYED;
 	}
 
-	// Particles do not pass through ink blocks.
-	// Return: false.
-	bool ProjectilePassesThrough(Projectile* projectile) {
-		return false;
-	}
-
 	// Ink blocks do not reflect or refract light.
 	// Returns: false
 	bool IsLightReflectorRefractor() const {
 		return false;
 	}
+
+	bool ProjectilePassesThrough(Projectile* projectile);
 
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel);	

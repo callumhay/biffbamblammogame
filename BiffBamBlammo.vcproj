@@ -939,6 +939,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\CollateralBlockProjectile.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\GameBall.h"
 					>
 				</File>
@@ -983,6 +987,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\PaddleLaser.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\PlayerPaddle.h"
 					>
 				</File>
@@ -1000,6 +1008,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\BoundingLines.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\CollateralBlockProjectile.cpp"
 					>
 				</File>
 				<File
@@ -1040,6 +1052,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\Onomatoplex.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\PaddleLaser.cpp"
 					>
 				</File>
 				<File
@@ -1250,6 +1266,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\CollateralBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\EmptySpaceBlock.h"
 						>
 					</File>
@@ -1291,6 +1311,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\CannonBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\CollateralBlock.cpp"
 						>
 					</File>
 					<File

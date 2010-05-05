@@ -286,6 +286,7 @@ void BallInPlayState::Tick(double seconds) {
 	for (std::vector<std::list<Projectile*>::iterator>::iterator iter = projectilesToDestroy.begin(); iter != projectilesToDestroy.end(); ++iter) {
 		Projectile* projectileToRemove = (**iter);
 		gameProjectiles.erase(*iter);
+		// EVENT: Particle was just destroyed/removed from the game
 		GameEventManager::Instance()->ActionProjectileRemoved(*projectileToRemove);
 		delete projectileToRemove;
 		projectileToRemove = NULL;

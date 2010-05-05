@@ -21,6 +21,8 @@ public:
 		return this->lines.size();
 	}
 
+	Collision::AABB2D GenerateAABBFromLines() const;
+
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
 							 Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 	Point2D ClosestPoint(const Point2D& pt) const;
@@ -36,6 +38,7 @@ public:
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	
 	void RotateLinesAndNormals(float angleInDegs, const Point2D& rotationCenter);
+	void TranslateBounds(const Vector2D& translation);
 
 	// Get the line at the given index within this set of bounding lines
 	// Precondition: The given index must be within bounds of the number of lines.

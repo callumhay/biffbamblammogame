@@ -10,6 +10,44 @@
  */
 
 #include "SolidBlock.h"
+#include "EmptySpaceBlock.h"
+#include "Projectile.h"
+#include "GameModel.h"
+#include "GameEventManager.h"
+
+SolidBlock::SolidBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {
+}
+
+SolidBlock::~SolidBlock() {
+}
+
+// Determine whether the given projectile will pass through this block...
+bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) {
+	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
+		return true;
+	}
+	return false;
+}
+
+LevelPiece* SolidBlock::Destroy(GameModel* gameModel) {
+	// EVENT: Block is being destroyed
+	GameEventManager::Instance()->ActionBlockDestroyed(*this);
+
+	// When destroying a breakable there is the possiblity of dropping an item...
+	this->AddPossibleItemDrop(gameModel);
+
+	// Tell the level that this piece has changed to empty...
+	GameLevel* level = gameModel->GetCurrentLevel();
+	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
+	level->PieceChanged(this, emptyPiece);
+
+	// Obliterate all that is left of this block...
+	LevelPiece* tempThis = this;
+	delete tempThis;
+	tempThis = NULL;
+
+	return emptyPiece;
+}
 
 /**
  * Update the collision boundries of this solid block, solid blocks are special in that they will
@@ -84,4 +122,28 @@ bool SolidBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const 
 
 	return Collision::IsCollision(ray, Collision::AABB2D(this->GetCenter() + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 																this->GetCenter() +  Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT)), rayT);
+}
+
+/**
+ * Called when the solid block is hit by a projectile. Tends to cause the projectile to
+ * extinguish, however for the collateral block projectile, it will completely destroy this.
+ */
+LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	LevelPiece* resultingPiece = this;
+
+	switch (projectile->GetType()) {
+		
+		case Projectile::PaddleLaserBulletProjectile:
+			break;
+		
+		case Projectile::CollateralBlockProjectile:
+			resultingPiece = this->Destroy(gameModel);
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
+
+	return resultingPiece;
 }

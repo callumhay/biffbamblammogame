@@ -10,8 +10,32 @@
  */
 
 #include "PrismBlock.h"
-#include "Projectile.h"
+#include "EmptySpaceBlock.h"
+#include "PaddleLaser.h"
 #include "GameModel.h"
+
+PrismBlock::PrismBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {
+}
+
+PrismBlock::~PrismBlock() {
+}
+
+LevelPiece* PrismBlock::Destroy(GameModel* gameModel) {
+	// EVENT: Block is being destroyed
+	GameEventManager::Instance()->ActionBlockDestroyed(*this);
+
+	// Tell the level that this piece has changed to empty...
+	GameLevel* level = gameModel->GetCurrentLevel();
+	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
+	level->PieceChanged(this, emptyPiece);
+
+	// Obliterate all that is left of this block...
+	LevelPiece* tempThis = this;
+	delete tempThis;
+	tempThis = NULL;
+
+	return emptyPiece;
+}
 
 /**
  * Update the boundry lines of the prism block. The prism block is shaped like a diamond, meaning
@@ -89,41 +113,58 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 }
 
 /**
- * The prism blocks reflects and refracts laser projectiles fired at it.
+ * Called when the prism block is hit by a projectile.
+ * The prism block tends to reflect and refract laser projectiles fired at it.
  */
 LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-	if (projectile->GetType() == Projectile::PaddleLaserBulletProjectile) {
-		// Based on where the laser bullet hits, we change its direction
-		
-		// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
-		if (!projectile->IsLastLevelPieceCollidedWith(this)) {
-			
-			const float PROJECTILE_VELOCITY_MAG			= projectile->GetVelocityMagnitude();
-			const Vector2D PROJECTILE_VELOCITY_DIR	= projectile->GetVelocityDirection();
-			const Point2D IMPACT_POINT = projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR;
+	LevelPiece* resultingPiece = this;
 
-			std::list<Collision::Ray2D> rays = this->GetReflectionRefractionRays(IMPACT_POINT, PROJECTILE_VELOCITY_DIR);
-			assert(rays.size() >= 1);
-			
-			std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
-			// The first ray is how the current projectile gets transmitted through this block...
-			projectile->SetPosition(rayIter->GetOrigin());
-			projectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
-			projectile->SetLastLevelPieceCollidedWith(this);
+	switch (projectile->GetType()) {
 
-			// All the other rays were created via refraction or some such thing, so spawn new particles for them
-			++rayIter;
-			for (; rayIter != rays.end(); ++rayIter) {
-				PaddleLaser* newProjectile = new PaddleLaser(*projectile);
-				newProjectile->SetPosition(rayIter->GetOrigin());
-				newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
-				newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
-				gameModel->AddProjectile(newProjectile);
+		case Projectile::PaddleLaserBulletProjectile: {
+				// Based on where the laser bullet hits, we change its direction
+				
+				// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
+				if (!projectile->IsLastLevelPieceCollidedWith(this)) {
+					
+					const float PROJECTILE_VELOCITY_MAG			= projectile->GetVelocityMagnitude();
+					const Vector2D PROJECTILE_VELOCITY_DIR	= projectile->GetVelocityDirection();
+					const Point2D IMPACT_POINT = projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR;
+
+					std::list<Collision::Ray2D> rays = this->GetReflectionRefractionRays(IMPACT_POINT, PROJECTILE_VELOCITY_DIR);
+					assert(rays.size() >= 1);
+					
+					std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
+					// The first ray is how the current projectile gets transmitted through this block...
+					projectile->SetPosition(rayIter->GetOrigin());
+					projectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
+					projectile->SetLastLevelPieceCollidedWith(this);
+
+					// All the other rays were created via refraction or some such thing, so spawn new particles for them
+					++rayIter;
+					for (; rayIter != rays.end(); ++rayIter) {
+						PaddleLaser* newProjectile = new PaddleLaser(*projectile);
+						newProjectile->SetPosition(rayIter->GetOrigin());
+						newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
+						newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
+						gameModel->AddProjectile(newProjectile);
+					}
+				}
 			}
-		}
+			break;
+
+		case Projectile::CollateralBlockProjectile:
+			// The collateral block projectile will actually completely destroy the prism block
+			resultingPiece = this->Destroy(gameModel);
+			break;
+
+		default:
+			assert(false);
+			break;
+
 	}
 
-	return this;
+	return resultingPiece;
 }
 
 /**
