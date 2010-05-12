@@ -54,10 +54,11 @@ public:
 
 	ProjectileType GetType() const { return this->type; }
 	const Point2D& GetPosition() const { return this->position; }
-	void SetPosition(const Point2D& pos) { this->position = pos; } 
+
 	const Vector2D& GetVelocityDirection() const { return this->velocityDir; }
 	float GetVelocityMagnitude() const { return this->velocityMag; }
 
+	virtual void SetPosition(const Point2D& pos) { this->position = pos; } 
 	void SetVelocity(const Vector2D& velocityDir, float velocityMag) { 
 		this->velocityDir = velocityDir;
 		this->velocityMag = velocityMag;

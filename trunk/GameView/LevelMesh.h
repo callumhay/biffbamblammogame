@@ -15,6 +15,7 @@ class Mesh;
 class PrismBlockMesh;
 class PortalBlockMesh;
 class CannonBlockMesh;
+class CollateralBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 
@@ -32,6 +33,9 @@ private:
 	PrismBlockMesh* prismBlockDiamond;		// Prism diamond block
 	PrismBlockMesh* prismBlockTriangleUR;	// Prism triangle block in upper-right corner position
 	CannonBlockMesh* cannonBlock;
+	CollateralBlockMesh* collateralBlock;
+
+	// Style-specific level pieces
 	Mesh* styleBlock;
 
 	// Misc. display lists and meshes for other geometry activated by items and such
@@ -58,6 +62,7 @@ public:
 	~LevelMesh();
 	
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
+	void RemovePiece(const LevelPiece& piece);
 	
 	void DrawPieces(double dT, const Camera& camera, const PointLight& keyLight, 
 									const PointLight& fillLight, const PointLight& ballLight, const Texture2D* sceneTexture);

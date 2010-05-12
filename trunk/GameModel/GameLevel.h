@@ -25,6 +25,7 @@ public:
 	static const char PRISM_BLOCK_CHAR;
 	static const char PORTAL_BLOCK_CHAR;
 	static const char CANNON_BLOCK_CHAR;
+	static const char COLLATERAL_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;

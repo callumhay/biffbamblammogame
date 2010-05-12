@@ -118,6 +118,10 @@ Cannon
 cannon.png
 C
 
+Collateral
+collateral.png
+L
+
 Prism
 prism.png
 P

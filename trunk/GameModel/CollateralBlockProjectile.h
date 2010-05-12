@@ -27,6 +27,7 @@ public:
 
 	void Tick(double seconds);
 	BoundingLines BuildBoundingLines() const;
+	void SetPosition(const Point2D& pos);
 
 private:
 	CollateralBlock* collateralBlock;

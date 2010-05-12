@@ -11,6 +11,7 @@
 
 #include "CollateralBlockProjectile.h"
 #include "CollateralBlock.h"
+#include "GameEventManager.h"
 
 CollateralBlockProjectile::CollateralBlockProjectile(CollateralBlock* collateralBlock) : 
 Projectile(Projectile::CollateralBlockProjectile, collateralBlock->GetCenter(), LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT),
@@ -19,6 +20,10 @@ collateralBlock(collateralBlock) {
 }
 
 CollateralBlockProjectile::~CollateralBlockProjectile() {
+
+	// EVENT: Collateral block is being destroyed
+	GameEventManager::Instance()->ActionBlockDestroyed(*this->collateralBlock);
+
 	// Clean up the collateral block
 	delete this->collateralBlock;
 	this->collateralBlock = NULL;
@@ -28,31 +33,28 @@ void CollateralBlockProjectile::Tick(double seconds) {
 	// The collateral block has several states that it goes through, in the case of this projectile
 	// it will start in its warning state then go into collateral damage mode and end via death,
 	// we tick the block to make this happen
-	this->collateralBlock->Tick(seconds);
-
-	switch (this->collateralBlock->GetState()) {
-
-		case CollateralBlock::WarningState:
-			break;
-
-		case CollateralBlock::CollateralDamageState: {
-				Vector2D moveAmt = static_cast<float>(seconds) * this->velocityMag * this->velocityDir;
-				this->SetPosition(this->GetPosition() + moveAmt);
-			}
-			break;
-
-		default:
-			assert(false);
-			break;
-	}
-
+	this->collateralBlock->Tick(seconds, *this);
 }
 
 BoundingLines CollateralBlockProjectile::BuildBoundingLines() const {
-	// Build the bounds based on the default position of the collateral block's bounds
-	// moved to the projectile's current position
-	BoundingLines bounds = this->collateralBlock->GetBounds();
-	Vector2D diffToPos = this->GetPosition() - this->collateralBlock->GetCenter();
-	bounds.TranslateBounds(diffToPos);
-	return bounds;
+		const Vector2D UP_DIR			= this->GetVelocityDirection();
+		const Vector2D RIGHT_DIR	= this->GetRightVectorDirection();
+
+		Point2D centerTop    = this->GetPosition() + this->GetHalfHeight() * UP_DIR;
+		Point2D centerBottom = this->GetPosition() - this->GetHalfHeight() * UP_DIR;
+
+		std::vector<Collision::LineSeg2D> sideBounds;
+		sideBounds.reserve(1);
+		sideBounds.push_back(Collision::LineSeg2D(centerTop, centerBottom));
+
+		std::vector<Vector2D> normBounds;
+		normBounds.resize(1);
+
+		return BoundingLines(sideBounds, normBounds);
 }
+
+// This allows things like the portal block to set the position...
+void CollateralBlockProjectile::SetPosition(const Point2D& pos) { 
+	this->collateralBlock->TeleportToNewPosition(pos);
+	this->position = pos; 
+} 

@@ -13,16 +13,18 @@
 #include "GameModel.h"
 #include "GameLevel.h"
 #include "EmptySpaceBlock.h"
-#include "Projectile.h"
+#include "CollateralBlockProjectile.h"
 #include "Beam.h"
 
 const float CollateralBlock::COLLATERAL_FALL_SPEED	= 2.0f;
 const double CollateralBlock::WARNING_TIME_MIN			= 2.0;
 const double CollateralBlock::WARNING_TIME_MAX			= 5.0;
+const float CollateralBlock::ROTATION_SPEED					= 240.0f;
 
 CollateralBlock::CollateralBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc),
 currState(CollateralBlock::InitialState), currTimeElapsedSinceHit(0.0), timeUntilCollateralDmg(0.0),
-currentRotation(0.0f), currLifePoints(CollateralBlock::PIECE_STARTING_LIFE_POINTS) {
+currentRotation(0.0f), currLifePoints(CollateralBlock::PIECE_STARTING_LIFE_POINTS), 
+rotationSgn(Randomizer::GetInstance()->RandomNegativeOrPositive()) {
 }
 
 CollateralBlock::~CollateralBlock() {
@@ -101,7 +103,7 @@ LevelPiece* CollateralBlock::TickBeamCollision(double dT, const BeamSegment* bea
 	return newPiece;
 }
 
-void CollateralBlock::Tick(double dT) {
+void CollateralBlock::Tick(double dT, CollateralBlockProjectile& collateralProjectile) {
 	switch(this->currState) {
 
 		case CollateralBlock::WarningState:
@@ -113,10 +115,23 @@ void CollateralBlock::Tick(double dT) {
 			}
 			break;
 
-		case CollateralBlock::CollateralDamageState:
-			// The collateral block moves down the level, rotating along the way 
-			// (for movement see the collateralblockprojectile)...
+		case CollateralBlock::CollateralDamageState: {
+				// The collateral block moves down the level, rotating along the way 
+				// (for movement see the collateralblockprojectile)...
+				
+				Vector2D moveAmt = static_cast<float>(dT) * collateralProjectile.GetVelocityMagnitude() * 
+																									  collateralProjectile.GetVelocityDirection();
+				this->center = this->center + moveAmt;
 
+				// Keep the projectile in the same position as the block (sync em up!)
+				collateralProjectile.SetPosition(this->center);
+
+				// Rotate...
+				this->currentRotation += rotationSgn * static_cast<float>(dT) * CollateralBlock::ROTATION_SPEED;
+
+				// We don't need to check to see if the collateral block is off the level yet - the game loop
+				// in BallInPlayState will do this for us with all projectiles.
+			}
 			break;
 
 		default:
@@ -148,7 +163,13 @@ LevelPiece* CollateralBlock::Detonate(GameModel* gameModel) {
 	level->PieceChanged(this, emptyPiece);
 
 	// Add the collateral block to the game model as a special type of soon-to-be-falling projectile...
-	gameModel->AddActiveCollateralBlock(this); 
+	/**
+	 * A collateral block enters here once it has been 'activated' by a ball hitting it (or
+	 * some such thing) - it will count down on a timer (in warning mode) and then activate
+	 * itself by going into a collateral damage mode where it will barrel down the level destroying
+	 * everything in its path as a bad-ass projectile. This starts the whole process.
+	 */
+	gameModel->AddProjectile(new CollateralBlockProjectile(this));
 
 	return emptyPiece;
 }

@@ -341,8 +341,6 @@ public:
 	void AddProjectile(Projectile* projectile);
 	void AddBeam(int beamType);
 
-	void AddActiveCollateralBlock(CollateralBlock* activeCollateralBlock);
-
 	// Debug functions
 #ifdef _DEBUG
 	void DropItem(GameItem::ItemType itemType) {

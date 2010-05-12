@@ -402,18 +402,3 @@ void GameModel::AddBeam(int beamType) {
 	// EVENT: Beam creation
 	GameEventManager::Instance()->ActionBeamSpawned(*addedBeam);
 }
-
-/**
- * A collateral block enters here once it has been 'activated' by a ball hitting it (or
- * some such thing) - it will count down on a timer (in warning mode) and then activate
- * itself by going into a collateral damage mode where it will barrel down the level destroying
- * everything in its path as a bad-ass projectile. This starts the whole process.
- */
-void GameModel::AddActiveCollateralBlock(CollateralBlock* activeCollateralBlock) {
-	// TODO: Build a projectile to encapsulate the collateral block...
-
-
-	// TODO: MOVE THIS TO WHERE THE BLOCK WILL ACTUALLY BE DESTROYED!!
-	// EVENT: Block is being destroyed
-	//GameEventManager::Instance()->ActionBlockDestroyed(*this);
-}
