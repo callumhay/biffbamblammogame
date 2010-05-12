@@ -247,6 +247,21 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 				}
 			}
 			break;
+
+		case LevelPiece::Cannon: {
+				// TODO: Put effect here for when the cannon block goes boom
+				const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
+				this->display->GetAssets()->GetLevelMesh(currLevel)->RemovePiece(block);
+			}
+			break;
+
+		case LevelPiece::Collateral: {
+				// TODO: Put effect here for when the collateral block goes boom
+				const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
+				this->display->GetAssets()->GetLevelMesh(currLevel)->RemovePiece(block);
+			}
+			break;
+
 		default:
 			break;
 	}

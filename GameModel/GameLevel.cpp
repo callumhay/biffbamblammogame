@@ -23,6 +23,7 @@
 #include "PrismBlock.h"
 #include "PortalBlock.h"
 #include "CannonBlock.h"
+#include "CollateralBlock.h"
 
 #include "../ResourceManager.h"
 
@@ -37,6 +38,7 @@ const char GameLevel::INKBLOCK_CHAR						= 'I';
 const char GameLevel::PRISM_BLOCK_CHAR				= 'P';
 const char GameLevel::PORTAL_BLOCK_CHAR				= 'X';
 const char GameLevel::CANNON_BLOCK_CHAR				= 'C';
+const char GameLevel::COLLATERAL_BLOCK_CHAR		= 'L';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -163,6 +165,9 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					break;
 				case CANNON_BLOCK_CHAR:
 					newPiece = new CannonBlock(pieceWLoc, pieceHLoc);
+					break;
+				case COLLATERAL_BLOCK_CHAR:
+					newPiece = new CollateralBlock(pieceWLoc, pieceHLoc);
 					break;
 				case PORTAL_BLOCK_CHAR: {
 						// X(a,b) - Portal block:

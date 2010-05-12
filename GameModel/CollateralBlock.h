@@ -14,6 +14,8 @@
 
 #include "LevelPiece.h"
 
+class CollateralBlockProjectile;
+
 class CollateralBlock : public LevelPiece {
 public:
 	static const float COLLATERAL_FALL_SPEED;	// Speed that the collateral block falls at in units / second
@@ -70,13 +72,16 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 
-	void Tick(double dT);
+	void Tick(double dT, CollateralBlockProjectile& collateralProjectile);
 	enum CollateralBlockState { InitialState, WarningState, CollateralDamageState };
 	CollateralBlock::CollateralBlockState GetState() const;
+	float GetCurrentRotation() const;
+	void TeleportToNewPosition(const Point2D& pos);
 
 private:
 	static const double WARNING_TIME_MIN;			// Minimum warning time before collateral damage mode
 	static const double WARNING_TIME_MAX;			// Maximum warning time before collateral damage mode
+	static const float ROTATION_SPEED;
 
 	static const int PIECE_STARTING_LIFE_POINTS = 100;	// Starting life points given to a breakable block
 	static const int POINTS_ON_BLOCK_DESTROYED	= 10;		// Points obtained when you destory a breakable block
@@ -88,6 +93,7 @@ private:
 	double currTimeElapsedSinceHit;	// Currently elapsed time since switching to the "WarningState"
 	double timeUntilCollateralDmg;	// Total time between the "InitialState" and the "CollateralDamageState"
 	float currentRotation;					// Rotation about the local x-axis as the block falls down in the collateral damage state
+	float rotationSgn;							// Specify if the rotation is CW/CCW
 
 	LevelPiece* Detonate(GameModel* gameModel);
 
@@ -95,6 +101,14 @@ private:
 
 inline CollateralBlock::CollateralBlockState CollateralBlock::GetState() const {
 	return this->currState;
+}
+
+inline float CollateralBlock::GetCurrentRotation() const {
+	return this->currentRotation;
+}
+
+inline void CollateralBlock::TeleportToNewPosition(const Point2D& pos) {
+	this->center = pos;
 }
 
 #endif // __COLLATERALBLOCK_H__

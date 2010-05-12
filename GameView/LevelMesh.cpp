@@ -6,6 +6,7 @@
 #include "PrismBlockMesh.h"
 #include "PortalBlockMesh.h"
 #include "CannonBlockMesh.h"
+#include "CollateralBlockMesh.h"
 
 #include "../ESPEngine/ESPEmitter.h"
 
@@ -19,10 +20,11 @@
 
 #include "../GameModel/GameBall.h"
 #include "../GameModel/CannonBlock.h"
+#include "../GameModel/CollateralBlock.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
-prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL) {
+prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
 	this->basicBlock						= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
@@ -33,6 +35,7 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannon
 	this->inkBlock							= ResourceManager::GetInstance()->GetInkBlockMeshResource();
 	this->portalBlock						= new PortalBlockMesh();
 	this->cannonBlock						= new CannonBlockMesh();
+	this->collateralBlock				= new CollateralBlockMesh();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
@@ -90,6 +93,8 @@ LevelMesh::~LevelMesh() {
 	this->portalBlock = NULL;
 	delete this->cannonBlock;
 	this->cannonBlock = NULL;
+	delete this->collateralBlock;
+	this->collateralBlock = NULL;
 }
 
 /** 
@@ -139,6 +144,7 @@ void LevelMesh::Flush() {
 	this->pieceEmitterEffects.clear();
 
 	this->cannonBlock->Flush();
+	this->collateralBlock->Flush();
 
 	// Clear the current level pointer
 	this->currLevel = NULL;
@@ -177,6 +183,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 
 	Vector3D worldTransform(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
 	this->cannonBlock->SetWorldTranslation(worldTransform);
+	this->collateralBlock->SetWorldTranslation(worldTransform);
 
 	// Go through each piece and create an appropriate display list for it
 	for (size_t h = 0; h < levelPieces.size(); h++) {
@@ -198,6 +205,13 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 				assert(cannonLvlPiece != NULL);
 				this->cannonBlock->AddCannonBlock(cannonLvlPiece);
 			}
+			// 2) Collateral block - we need to store all of them so that they can be drawn dynamically
+			// when the go into collateral mode
+			else if (currPiece->GetType() == LevelPiece::Collateral) {
+				const CollateralBlock* collateralLvlPiece = dynamic_cast<const CollateralBlock*>(currPiece);
+				assert(collateralLvlPiece != NULL);
+				this->collateralBlock->AddCollateralBlock(collateralLvlPiece);
+			}
 
 		}
 	}
@@ -212,38 +226,75 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 
 	// Find the changed piece and change its display list...
 	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint>>::iterator pieceInfoIter = this->pieceDisplayLists.find(&pieceBefore);
-	assert(pieceInfoIter != this->pieceDisplayLists.end());
 
-	// Go through each of the materials and clear up previous display lists and materials...
-	for (std::map<CgFxMaterialEffect*, GLuint>::iterator iter = pieceInfoIter->second.begin();
-		iter != pieceInfoIter->second.end(); ++iter) {
-		
-		// Delete any previous display list...
-		glDeleteLists(iter->second, 1);
+	if (pieceInfoIter != this->pieceDisplayLists.end()) {
+		// Go through each of the materials and clear up previous display lists and materials...
+		for (std::map<CgFxMaterialEffect*, GLuint>::iterator iter = pieceInfoIter->second.begin();
+			iter != pieceInfoIter->second.end(); ++iter) {
+			
+			// Delete any previous display list...
+			glDeleteLists(iter->second, 1);
 
-		// ... and remove it from other relevant maps/arrays/etc.
-		std::vector<GLuint>& displayLists = this->displayListsPerMaterial[iter->first];
-		for(std::vector<GLuint>::iterator iterDL = displayLists.begin(); iterDL != displayLists.end(); ++iterDL) {
-			if (*iterDL == iter->second)	{
-				displayLists.erase(iterDL);
-				break;
+			// ... and remove it from other relevant maps/arrays/etc.
+			std::vector<GLuint>& displayLists = this->displayListsPerMaterial[iter->first];
+			for(std::vector<GLuint>::iterator iterDL = displayLists.begin(); iterDL != displayLists.end(); ++iterDL) {
+				if (*iterDL == iter->second)	{
+					displayLists.erase(iterDL);
+					break;
+				}
 			}
+			if (displayLists.size() == 0) {
+				this->displayListsPerMaterial.erase(iter->first);
+			}
+
+			// Clean up
+			iter->second = 0;
 		}
-		if (displayLists.size() == 0) {
-			this->displayListsPerMaterial.erase(iter->first);
+		pieceInfoIter->second.clear();
+		this->pieceDisplayLists.erase(pieceInfoIter);
+	}
+	else {
+		// The piece is a special type that must be handled in a very specific way...
+		switch (pieceBefore.GetType()) {
+			case LevelPiece::Cannon:
+				break;
+			case LevelPiece::Collateral:
+				break;
+			default:
+				assert(false);
+				break;
 		}
 
-		// Clean up
-		iter->second = 0;
 	}
-	pieceInfoIter->second.clear();
-	this->pieceDisplayLists.erase(pieceInfoIter);
 
 	// Based on the new piece type we re-create a display list
 	Point2D changedPieceLoc = pieceAfter.GetCenter();
 	Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
 	Vector3D translation(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
 	this->CreateDisplayListsForPiece(&pieceAfter, translation);
+}
+
+void LevelMesh::RemovePiece(const LevelPiece& piece) {
+	switch (piece.GetType()) {
+		case LevelPiece::Cannon:
+			{
+				const CannonBlock* cannonLvlPiece = dynamic_cast<const CannonBlock*>(&piece);
+				assert(cannonLvlPiece != NULL);
+				this->cannonBlock->RemoveCannonBlock(cannonLvlPiece);
+			}
+			break;
+
+		case LevelPiece::Collateral:
+			{
+				const CollateralBlock* collateralLvlPiece = dynamic_cast<const CollateralBlock*>(&piece);
+				assert(collateralLvlPiece != NULL);
+				this->collateralBlock->RemoveCollateralBlock(collateralLvlPiece);
+			}
+			break;
+
+		default:
+			break;
+	}
 }
 
 /**
@@ -270,6 +321,7 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 	}
 
 	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight);
+	this->collateralBlock->Draw(camera, keyLight, fillLight, ballLight);
 
 	// Draw the piece effects
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*>>::iterator pieceIter = this->pieceEmitterEffects.begin();
@@ -419,7 +471,9 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 		case LevelPiece::Cannon:
 			returnValue = this->cannonBlock->GetMaterialGroups();
 			break;
-		case LevelPiece::Empty :
+		case LevelPiece::Collateral:
+			break;
+		case LevelPiece::Empty:
 			break;
 		default:
 			assert(false);

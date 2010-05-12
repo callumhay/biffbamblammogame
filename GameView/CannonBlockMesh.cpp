@@ -10,6 +10,8 @@ cannonBlockBarrelGeometry(NULL), currWorldTranslation(0, 0, 0) {
 }
 
 CannonBlockMesh::~CannonBlockMesh() {
+	ResourceManager::GetInstance()->ReleaseMeshResource(this->cannonBlockBarrelGeometry);
+	ResourceManager::GetInstance()->ReleaseMeshResource(this->cannonBlockBaseGeometry);
 }
 
 
@@ -24,7 +26,7 @@ void CannonBlockMesh::Draw(const Camera& camera, const PointLight& keyLight,
 	// Go through each of the cannon blocks and draw them, each with their proper,
 	// respective barrel orientation
 	float cannonRotationInDegs;
-	for (std::list<const CannonBlock*>::const_iterator iter = this->cannonBlocks.begin(); iter != this->cannonBlocks.end(); ++iter) {
+	for (std::set<const CannonBlock*>::const_iterator iter = this->cannonBlocks.begin(); iter != this->cannonBlocks.end(); ++iter) {
 		const CannonBlock* currCannonBlock = *iter;
 		const GameBall* loadedBall = currCannonBlock->GetLoadedBall();
 

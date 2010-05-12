@@ -843,6 +843,10 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 					break;
 			}
 			break;
+		
+		case Projectile::CollateralBlockProjectile:
+			// TODO?
+			break;
 
 		default:
 			assert(false);
@@ -1799,6 +1803,9 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 	switch (projectile.GetType()) {
 		case Projectile::PaddleLaserBulletProjectile:
 			this->AddLaserPaddleESPEffects(gameModel, projectile);
+			break;
+		case Projectile::CollateralBlockProjectile:
+			// TODO
 			break;
 		default:
 			assert(false);

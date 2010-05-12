@@ -539,6 +539,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\CollateralBlockMesh.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\CrosshairLaserHUD.h"
 					>
 				</File>
@@ -664,6 +668,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\CannonBlockMesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\CollateralBlockMesh.cpp"
 					>
 				</File>
 				<File
