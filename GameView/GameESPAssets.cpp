@@ -890,13 +890,13 @@ ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, cons
  * Add an effect to bring the user's attention to the fact that something just went though
  * a portal block and got teleported to its sibling.
  */
-void GameESPAssets::AddPortalTeleportEffect(const GameBall& ball, const PortalBlock& block) {
-	ESPPointEmitter* enterEffect = this->CreateTeleportEffect(ball.GetBounds().Center(), block, false);
+void GameESPAssets::AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block) {
+	ESPPointEmitter* enterEffect = this->CreateTeleportEffect(enterPt, block, false);
 	if (enterEffect == NULL) {
 		return;
 	}
 
-	Vector2D toBallFromBlock = ball.GetBounds().Center() - block.GetCenter();
+	Vector2D toBallFromBlock = enterPt - block.GetCenter();
 	ESPPointEmitter* exitEffect = this->CreateTeleportEffect(block.GetSiblingPortal()->GetCenter() + toBallFromBlock, *block.GetSiblingPortal(), true);
 	if (exitEffect == NULL) {
 		delete enterEffect;
@@ -1053,8 +1053,35 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
 	bangTextLabel.SetColour(Colour(1, 1, 1));
 	bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+
+	Onomatoplex::Extremeness severity = Onomatoplex::NORMAL;
+	Onomatoplex::SoundType type = Onomatoplex::EXPLOSION;
 	// TODO: make the severity more dynamic!!
-	bangOnoEffect->SetParticles(1, bangTextLabel, Onomatoplex::EXPLOSION, Onomatoplex::NORMAL);
+	switch (block.GetType()) {
+
+		case LevelPiece::Solid:
+		case LevelPiece::SolidTriangle:
+			severity = Onomatoplex::AWESOME;
+			break;
+
+		case LevelPiece::Prism:
+		case LevelPiece::PrismTriangle:
+			type = Onomatoplex::SHATTER;
+			severity = Onomatoplex::AWESOME;
+			break;
+
+		case LevelPiece::Collateral:
+			severity = Onomatoplex::SUPER_AWESOME;
+			break;
+
+		case LevelPiece::Cannon:
+			severity = Onomatoplex::AWESOME;
+			break;
+
+		default:
+			break;
+	}
+	bangOnoEffect->SetParticles(1, bangTextLabel, type, severity);
 
 	// Lastly, add the new emitters to the list of active emitters in order of back to front
 	this->activeGeneralEmitters.push_front(bangEffect);
@@ -1805,7 +1832,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 			this->AddLaserPaddleESPEffects(gameModel, projectile);
 			break;
 		case Projectile::CollateralBlockProjectile:
-			// TODO
+			this->AddCollateralProjectileEffects(projectile);
 			break;
 		default:
 			assert(false);
@@ -2182,15 +2209,45 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 }
 
 /**
+ * Add the projectile effects for the given collateral block projectile.
+ */
+void GameESPAssets::AddCollateralProjectileEffects(const Projectile& projectile) {
+	assert(projectile.GetType() == Projectile::CollateralBlockProjectile);
+
+	const Point2D& projectilePos2D = projectile.GetPosition();
+	Point3D projectilePos3D = Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f);
+	const Vector2D& projectileDir = projectile.GetVelocityDirection();
+	Vector3D projectileDir3D = Vector3D(projectileDir[0], projectileDir[1], 0.0f);
+	float projectileSpd = projectile.GetVelocityMagnitude();
+
+	// Create the trail of smoke and fire effects...
+	ESPPointEmitter* fireCloudTrail = new ESPPointEmitter();
+	fireCloudTrail->SetSpawnDelta(ESPInterval(0.008f, 0.015f));
+	fireCloudTrail->SetInitialSpd(ESPInterval(projectileSpd));
+	fireCloudTrail->SetParticleLife(ESPInterval(0.7f, 0.9f));
+	fireCloudTrail->SetParticleSize(ESPInterval(projectile.GetHalfWidth(), projectile.GetWidth()));
+	fireCloudTrail->SetEmitAngleInDegrees(5);
+	fireCloudTrail->SetEmitDirection(-projectileDir3D);
+	fireCloudTrail->SetRadiusDeviationFromCenter(ESPInterval(0.5f * projectile.GetHalfHeight()));
+	fireCloudTrail->SetAsPointSpriteEmitter(true);
+	fireCloudTrail->SetEmitPosition(projectilePos3D - 1.5f * projectile.GetHeight() * projectileDir3D);
+	fireCloudTrail->AddEffector(&this->particleLargeGrowth);
+	fireCloudTrail->AddEffector(&this->particleFireColourFader);
+	fireCloudTrail->SetParticles(10, this->explosionTex);
+
+	this->activeProjectileEmitters[&projectile].push_back(fireCloudTrail);
+}
+
+/**
  * Private helper function for making and adding a laser blast effect for the laser paddle item.
  */
 void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile) {
 	assert(projectile.GetType() == Projectile::PaddleLaserBulletProjectile);
 	
-	Point2D projectilePos2D = projectile.GetPosition();
+	const Point2D& projectilePos2D = projectile.GetPosition();
 	Point3D projectilePos3D = Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f);
 	float projectileSpd     = projectile.GetVelocityMagnitude();
-	Vector2D projectileDir		= projectile.GetVelocityDirection();
+	const Vector2D& projectileDir		= projectile.GetVelocityDirection();
 	Vector3D projectileDir3D	= Vector3D(projectileDir[0], projectileDir[1], 0.0f);
 
 	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
@@ -2749,10 +2806,6 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
  * shmancy type stuffs.
  */
 void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera, const Vector3D& worldTranslation) {
-	// Projectiles first...
-	this->DrawProjectileEffects(dT, camera);
-	this->DrawBeamEffects(dT, camera, worldTranslation);
-
 	// Go through all the other particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin(); iter != this->activeGeneralEmitters.end();) {
 		ESPEmitter* curr = *iter;

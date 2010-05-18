@@ -4,7 +4,7 @@
 
 newmtl CollateralBlockMetal
 Ka 0.000000 0.000000 0.000000
-Kd 0.9 0.9 0.9
+Kd 1.0 1.0 1.0
 Ks 0.70000 0.70000 0.70000
 Ns 100
 map_Kd resources/textures/collateral_block_256x128.jpg

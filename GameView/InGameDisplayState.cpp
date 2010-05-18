@@ -168,6 +168,9 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), camera);
 
+	// Projectiles...
+	this->display->GetAssets()->GetESPAssets()->DrawProjectileEffects(dT, camera);
+
 	glPopMatrix();
 
 	// Level pieces
@@ -234,11 +237,11 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
 
 	// Render all effects that do not go through all the post-processing filters...
-	Vector2D negHalfLevelDim = -0.5 * gameModel->GetLevelUnitDimensions();
+	Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel->GetLevelUnitDimensions(), 0.0);
 	glPushMatrix();
 	Matrix4x4 gameTransform = gameModel->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
-	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
+	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], negHalfLevelDim[2]);
 	
 	// Draw the dropping items if in the last pass
 	if (fboAssets->DrawItemsInLastPass()) {
@@ -249,7 +252,9 @@ void InGameDisplayState::RenderFinalGather(double dT) {
 	}
 
 	// Typical Particle effects...
-	this->display->GetAssets()->GetESPAssets()->DrawParticleEffects(dT, camera, Vector3D(negHalfLevelDim));
+	GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
+	espAssets->DrawBeamEffects(dT, camera, negHalfLevelDim);
+	espAssets->DrawParticleEffects(dT, camera, negHalfLevelDim);
 
 	// Absolute post effects call for various object effects
 	this->display->GetAssets()->DrawGameBallsPostEffects(dT, *gameModel, camera);

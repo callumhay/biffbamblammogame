@@ -208,8 +208,27 @@ void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const Gam
 }
 
 void GameEventsListener::BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) {
-	this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball, enterPortal);
+	this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball.GetBounds().Center(), enterPortal);
 	debug_output("EVENT: Ball teleported by portal block");
+}
+
+void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal) {
+	switch (projectile.GetType()) {
+		case Projectile::PaddleLaserBulletProjectile:
+			// TODO?
+			break;
+
+		case Projectile::CollateralBlockProjectile: {
+				Point2D projectileTeleportPos = projectile.GetPosition() + projectile.GetHalfHeight() * projectile.GetVelocityDirection();
+				this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(projectileTeleportPos, enterPortal);
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
+	debug_output("EVENT: Projectile teleported by portal block");
 }
 
 void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
@@ -222,6 +241,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 	// Add the effects based on the type of block that is being destroyed...
 	switch (block.GetType()) {
 		
+		case LevelPiece::Solid:
+		case LevelPiece::SolidTriangle:
 		case LevelPiece::Breakable:
 		case LevelPiece::BreakableTriangle:
 			// Typical break effect for basic breakable blocks
@@ -248,15 +269,20 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 			}
 			break;
 
+		case LevelPiece::Prism:
+		case LevelPiece::PrismTriangle:
+			this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
+			break;
+
 		case LevelPiece::Cannon: {
-				// TODO: Put effect here for when the cannon block goes boom
+				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
 				const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
 				this->display->GetAssets()->GetLevelMesh(currLevel)->RemovePiece(block);
 			}
 			break;
 
 		case LevelPiece::Collateral: {
-				// TODO: Put effect here for when the collateral block goes boom
+				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
 				const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
 				this->display->GetAssets()->GetLevelMesh(currLevel)->RemovePiece(block);
 			}

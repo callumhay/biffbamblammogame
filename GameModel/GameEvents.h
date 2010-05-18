@@ -155,6 +155,14 @@ public:
 	virtual void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) = 0;
 
 	/**
+	 * Event triggered when a projectile is teleported by a portal block. Only occurs once per projectile,
+	 * occurs one frame before the projectile is shown coming out of the sibling portal.
+	 * Arguements: projectile  - The projectile teleported.
+	 *             enterPortal - The portal entered by the projectile.
+	 */
+	virtual void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal) = 0;
+
+	/**
 	 * Event triggered when a ball is fired out of a cannon block. Only occurs once as the ball is JUST being
 	 * fired out of the barrel of the cannon.
 	 * Arguements: ball        - The ball being fired out of the cannon.

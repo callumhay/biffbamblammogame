@@ -119,6 +119,9 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 	std::list<Collision::Ray2D> newProjectileRay = this->GetReflectionRefractionRays(newPosition, projectile->GetVelocityDirection());
 	assert(newProjectileRay.size() == 1);
 	
+	// EVENT: The projectile is officially being teleported...
+	GameEventManager::Instance()->ActionProjectilePortalBlockTeleport(*projectile, *this);
+
 	// Change the projectile so that it comes out of the sibling portal
 	const Collision::Ray2D& ray = *newProjectileRay.begin();
 	projectile->SetPosition(ray.GetOrigin());

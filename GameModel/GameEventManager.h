@@ -44,6 +44,7 @@ public:
 	void ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block);
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal);
+	void ActionProjectilePortalBlockTeleport(const Projectile& projectile, const PortalBlock& enterPortal);
 	void ActionBallFiredFromCannon(const GameBall& ball, const CannonBlock& cannonBlock);
 
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);

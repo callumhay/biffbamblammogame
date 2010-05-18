@@ -127,6 +127,13 @@ void GameEventManager::ActionBallPortalBlockTeleport(const GameBall& ball, const
 	}	
 }
 
+void GameEventManager::ActionProjectilePortalBlockTeleport(const Projectile& projectile, const PortalBlock& enterPortal) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->ProjectilePortalBlockTeleportEvent(projectile, enterPortal);
+	}	
+}
+
 // Action for when the ball is fired from a cannon block
 void GameEventManager::ActionBallFiredFromCannon(const GameBall& ball, const CannonBlock& cannonBlock) {
 	this->listenerIter = this->eventListeners.begin();
