@@ -36,12 +36,18 @@ void CollateralBlockProjectile::Tick(double seconds) {
 	this->collateralBlock->Tick(seconds, *this);
 }
 
+/**
+ * Just vertical bounding line(s) - does the job by hitting everything below as it falls down.
+ */
 BoundingLines CollateralBlockProjectile::BuildBoundingLines() const {
 		const Vector2D UP_DIR			= this->GetVelocityDirection();
 		const Vector2D RIGHT_DIR	= this->GetRightVectorDirection();
 
 		Point2D centerTop    = this->GetPosition() + this->GetHalfHeight() * UP_DIR;
 		Point2D centerBottom = this->GetPosition() - this->GetHalfHeight() * UP_DIR;
+		
+		// other collision lines??
+		//Point2D 
 
 		std::vector<Collision::LineSeg2D> sideBounds;
 		sideBounds.reserve(1);

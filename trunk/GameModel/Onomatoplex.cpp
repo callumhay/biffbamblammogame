@@ -45,6 +45,7 @@ namespace Onomatoplex {
 		this->LoadShotWords();
 		this->LoadGoodHappyWords();
 		this->LoadGooWords();
+		this->LoadShatterWords();
 	}
 
 	// Destructor, deletes singleton, cleans up dictionaries
@@ -615,6 +616,33 @@ namespace Onomatoplex {
 		this->uberSingleWords[GOO] = gooUberSingleWords;
 
 	}
+	
+	
+	void Generator::LoadShatterWords() {
+		std::vector<std::string> shatterSimpleWords;
+		shatterSimpleWords.push_back("Crack");
+		shatterSimpleWords.push_back("Smash");
+		shatterSimpleWords.push_back("Shatter");
+		shatterSimpleWords.push_back("Crunch");
+		shatterSimpleWords.push_back("Splinter");
+		shatterSimpleWords.push_back("Break");
+		shatterSimpleWords.push_back("Krrzzk");
+		this->simpleSingleWords[SHATTER] = shatterSimpleWords;
+
+		std::vector<std::string> shatterGoodWords;
+		shatterGoodWords.push_back("Smashy");
+		shatterGoodWords.push_back("Crackkk");
+		shatterGoodWords.push_back("Krssszzk");
+		shatterGoodWords.push_back("Smaassh");
+		shatterGoodWords.push_back("Crrassh");
+		shatterGoodWords.push_back("Crunchy");
+		this->goodSingleWords[SHATTER] = shatterGoodWords;
+		this->goodSingleWords[SHATTER].insert(this->goodSingleWords[SHATTER].end(), shatterSimpleWords.begin(), shatterSimpleWords.end());
+
+		this->awesomeSingleWords[SHATTER] = this->goodSingleWords[SHATTER];
+		this->uberSingleWords[SHATTER] = this->goodSingleWords[SHATTER];
+	}
+
 	/*
 	 * Generates crazy onomatopoeia based on the sound type given and the extremeness of the context.
 	 * Precondition: true.

@@ -124,7 +124,7 @@ private:
 	ESPPointEmitter*  paddleLaserGlowSparks;
 	ESPVolumeEmitter* paddleBeamGlowSparks;
 	ESPVolumeEmitter* paddleBeamOriginUp;
-	ESPPointEmitter* paddleBeamBlastBits;
+	ESPPointEmitter*  paddleBeamBlastBits;
 	
 	std::vector<ESPPointEmitter*> beamEndEmitters;
 	std::vector<ESPPointEmitter*> beamBlockOnlyEndEmitters;
@@ -156,6 +156,8 @@ private:
 
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
 
+	void AddCollateralProjectileEffects(const Projectile& projectile);
+
 	void AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile);
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
@@ -165,9 +167,7 @@ private:
 	ESPPointEmitter* CreateBeamEndBlockEffect();
 	ESPPointEmitter* CreateBeamFallingBitEffect();
 	ESPPointEmitter* CreateBeamFlareEffect();
-	void DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
 
-	void DrawProjectileEffects(double dT, const Camera& camera);
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter);
 
 public:
@@ -183,7 +183,7 @@ public:
 	void AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2);
 	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
 
-	void AddPortalTeleportEffect(const GameBall& ball, const PortalBlock& block);
+	void AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block);
 	void AddCannonFireEffect(const GameBall& ball, const CannonBlock& block);
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
@@ -212,6 +212,9 @@ public:
 
 	// Draw functions for various particle effects in the game
 	void DrawParticleEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
+	void DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
+	void DrawProjectileEffects(double dT, const Camera& camera);
+
 
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
 

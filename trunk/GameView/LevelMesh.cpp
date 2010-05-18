@@ -321,7 +321,7 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 	}
 
 	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight);
-	this->collateralBlock->Draw(camera, keyLight, fillLight, ballLight);
+	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 
 	// Draw the piece effects
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*>>::iterator pieceIter = this->pieceEmitterEffects.begin();
