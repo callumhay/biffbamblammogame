@@ -282,6 +282,58 @@ public:
 	}
 
 	/**
+	 * Append the given lerp to any existing lerp in this animation.
+	 */
+	void AppendLerp(const std::vector<double>& times, const std::vector<T>& interpolations) {
+		assert(times.size() == interpolations.size());
+
+		if (this->timePts.size() == 0) {
+			this->SetLerp(times, interpolations);
+			return;
+		}
+
+		this->timePts.reserve(this->timePts.size() + times.size());
+		this->interpolationPts.reserve(this->interpolationPts.size() + interpolations.size());
+
+		std::vector<double>::const_iterator timeIter = times.begin();
+		std::vector<T>::const_iterator interpolateIter = interpolations.begin();
+		double originalEndTime = this->timePts.back();
+		for (; timeIter != times.end() && interpolateIter != interpolations.end(); ++timeIter, ++interpolateIter) {
+			// Add the times to the last time that was already in the lerp
+			this->timePts.push_back(originalEndTime + *timeIter);
+			// Just tack the interpolation points on as well
+			this->interpolationPts.push_back(*interpolateIter);
+		}
+	}
+
+	void AppendLerp(double finalTime, T finalValue) {
+		if (this->timePts.size() == 0) {
+			this->SetLerp(finalTime, finalValue);
+			return;
+		}
+
+		this->timePts.reserve(this->timePts.size() + 1);
+		this->interpolationPts.reserve(this->interpolationPts.size() + 1);
+		this->timePts.push_back(finalTime + this->timePts.back());
+		this->interpolationPts.push_back(finalValue);
+	}
+
+	/*
+	enum AnimationBlendType { ADDITIVE_BLEND };
+	// Blend the given lerp using the given blend type - this will blend with the current state of the
+	// animation using the current state as the basis for the given times (i.e., time 0 will be whatever 
+	// time into the current animation we're at now).
+	void BlendLerp(AnimationBlendType blendType, const std::vector<double>& times, const std::vector<T>& interpolations) {
+		assert(times.size() == interpolations.size());
+		if (this->timePts.size() == 0) {
+			this->SetLerp(times, interpolations);
+			return;
+		}
+
+	}
+	*/
+
+	/**
 	 * Completely clear the interpolation animation values (i.e., next time
 	 * tick is called nothing will happen).
 	 */
@@ -332,7 +384,7 @@ public:
 			x = timeEnd;
 			(*this->interpolant) = valueEnd;
 			this->tracker++;
-			return !this->repeat;
+			return !this->repeat && (this->tracker == this->timePts.size()-1);
 		}
 
 		// Linearly interpolate the given interpolate over the current value and time interval

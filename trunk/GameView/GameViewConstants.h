@@ -165,6 +165,7 @@ public:
 	const std::string TEXTURE_BALL_SAFETY_NET;
 
 	const std::string TEXTURE_CEL_GRADIENT;
+	const std::string TEXTURE_NOISE_OCTAVES;
 
 	// Font path constants **********************************
 	const std::string FONT_SADBAD;

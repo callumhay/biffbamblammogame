@@ -252,12 +252,28 @@ void BallInPlayState::Tick(double seconds) {
 	// Grab a list of all paddle-related projectiles and test each one for collisions...
 	std::list<Projectile*>& gameProjectiles = gameModel->GetActiveProjectiles();
 	std::vector<std::list<Projectile*>::iterator> projectilesToDestroy;
+	bool destroyProjectile = false;
 
 	for(std::list<Projectile*>::iterator iter = gameProjectiles.begin(); iter != gameProjectiles.end(); ++iter) {
 		Projectile* currProjectile = *iter;
 		
 		// Grab bounding lines from the projectile to test for collision
 		BoundingLines projectileBoundingLines = currProjectile->BuildBoundingLines();
+
+		// Check to see if the projectile collided with the player paddle
+		if (paddle->CollisionCheck(projectileBoundingLines)) {
+			
+			// Tell the paddle it got hit...
+			paddle->HitByProjectile(*currProjectile);
+
+			// Destroy the projectile if necessary
+			destroyProjectile = !paddle->ProjectilePassesThrough(*currProjectile);
+			if (destroyProjectile) {
+				projectilesToDestroy.push_back(iter);
+			}
+
+			continue;
+		}
 
 		// Find the any level pieces that the current projectile may have collided with and test for collision
 		std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(*currProjectile);
@@ -268,7 +284,7 @@ void BallInPlayState::Tick(double seconds) {
 			bool didCollide = currPiece->CollisionCheck(projectileBoundingLines);
 			if (didCollide) {
 				// This needs to be before the call to CollisionOccurred or else the currPiece may already be destroyed.
-				bool destroyProjectile = !currPiece->ProjectilePassesThrough(currProjectile);
+				destroyProjectile = !currPiece->ProjectilePassesThrough(currProjectile);
 				this->gameModel->CollisionOccurred(currProjectile, currPiece);	
 
 				// Check to see if the collision is supposed to destroy the projectile

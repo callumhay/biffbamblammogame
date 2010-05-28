@@ -144,11 +144,11 @@ public:
 		Point2D center2D = this->bounds.Center();
 		return Point3D(center2D[0], center2D[1], this->zCenterPos);
 	}
-	Point2D GetCenterPosition2D() const {
+	const Point2D& GetCenterPosition2D() const {
 		return this->bounds.Center();
 	}
 
-	Vector2D GetDirection() const {
+	const Vector2D& GetDirection() const {
 		return this->currDir;
 	}
 	// Obtain the current velocity of ball

@@ -19,9 +19,11 @@
 #include "../BlammoEngine/Animation.h"
 
 #include "BoundingLines.h"
+#include "GameBall.h"
 
 class GameModel;
 class GameBall;
+class Projectile;
 
 // Represents the player controlled paddle shaped as follows:
 //                -------------
@@ -36,66 +38,13 @@ public:
 	static const float PADDLE_HALF_HEIGHT;
 	static const float PADDLE_HALF_DEPTH;
 	static const float PADDLE_WIDTH_FLAT_TOP;
+	static const float DEFAULT_SPEED;
+	static const float POISON_SPEED_DIMINISH;
+	static const int RAND_DEG_ANG    = 20;
 
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000010, 
 										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000 };
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
-
-private:
-	// Default values for the dimensions of the paddle
-	static const float PADDLE_WIDTH_ANGLED_SIDE;
-	static const float WIDTH_DIFF_PER_SIZE;
-	static const float SECONDS_TO_CHANGE_SIZE;
-
-	static const int AVG_OVER_TICKS  = 60;
-
-	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
-
-	float distTemp;			// A temporary store for the change in movement
-	float avgVel;				// Keeps the average velocity (over the past AVG_OVER_TICKS ticks) of the paddle at a given time
-	int ticksSinceAvg;  // Keeps track of ticks since a sampling of the average velocity occurred
-	bool hitWall;				// True when the paddle hits a wall
-
-	int currType;					// An ORed together current type of this paddle (see PaddleType)
-	PaddleSize currSize;	// The current size (width) of this paddle
-
-	Point2D centerPos;						// Paddle position (at its center) in the game model
-	float currHalfHeight;					// Half the height of the paddle
-	float currHalfWidthFlat;			// Half of the flat portion of the paddle
-	float currHalfWidthTotal;			// Half of the total width of the paddle
-	float currHalfDepthTotal;			// Half of the total depth of the paddle
-	float minBound, maxBound;			// The current level's boundries along its width for the paddle
-	float speed;									// Speed of the paddle in units per second
-	float currScaleFactor;				// The scale difference between the paddle's current size and its default size
-	
-	Vector2D upVector;						// The unit vector pointing upwards for the paddle
-
-	ColourRGBA colour;																// The colour multiply of the paddle, including its visibility/alpha
-	AnimationLerp<ColourRGBA> colourAnimation;				// Animation associated with the colour
-	AnimationMultiLerp<float> beamForceDownAnimation;		// Animation for when the paddle is being pushed down by the laser beam (away from the level)
-	
-	BoundingLines bounds;						// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
-	
-	double timeSinceLastLaserBlast;	// Time since the last laser projectile/bullet was fired
-	double laserBeamTimer;					// Time left on the laser beam power-up
-
-	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
-
-	bool isPaddleCamActive;	// Whether or not the camera is inside the paddle
-	bool isFiringBeam;			// Whether this paddle is firing the laser beam
-
-	void SetupAnimations();
-
-	void SetDimensions(float newScaleFactor);
-	void SetDimensions(PlayerPaddle::PaddleSize size);
-	void SetPaddleSize(PlayerPaddle::PaddleSize size);
-	void FireAttachedBall();
-	void MoveAttachedBallToNewBounds(double dT);
-
-public:
-	static const float DEFAULT_SPEED;
-	static const float POISON_SPEED_DIMINISH;
-	static const int RAND_DEG_ANG    = 20;
 
 	PlayerPaddle(float minBound, float maxBound);
 	PlayerPaddle();
@@ -106,20 +55,25 @@ public:
 		this->timeSinceLastLaserBlast = 0.0;
 		this->laserBeamTimer = 0.0;
 		this->currSize = PlayerPaddle::NormalSize;
-		this->SetDimensions(PlayerPaddle::NormalSize);
 		this->centerPos = this->GetDefaultCenterPosition();
 		this->currType = PlayerPaddle::NormalPaddle;
 		this->colour = ColourRGBA(1, 1, 1, 1);
 		this->isFiringBeam = false;
 		this->SetupAnimations();
+		// This will set the dimensions the the default and regenerate the bounds of the paddle
+		this->SetDimensions(PlayerPaddle::NormalSize);
 	}
 
 	// Obtain the center position of this paddle.
-	Point2D GetCenterPosition() const {
+	const Point2D& GetCenterPosition() const {
 		return this->centerPos;
 	}
 	Point2D GetDefaultCenterPosition() const {
 		return Point2D((this->maxBound + this->minBound)/2.0f, this->currHalfHeight);
+	}
+
+	float GetZRotation() const {
+		return this->rotAngleZAnimation.GetInterpolantValue();
 	}
 
 	float GetHalfHeight() const {
@@ -136,7 +90,7 @@ public:
 	}
 
 	Vector2D GetUpVector() const {
-		return this->upVector;
+		return Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), Vector2D(0, 1));
 	}
 
 	void Tick(double seconds);
@@ -261,8 +215,92 @@ public:
 		return this->attachedBall;
 	}
 
+	void HitByProjectile(const Projectile& projectile);
+	bool ProjectilePassesThrough(const Projectile& projectile);
+
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
+	bool CollisionCheck(const BoundingLines& bounds);
 	void DebugDraw() const;
 
+private:
+	// Default values for the dimensions of the paddle
+	static const float PADDLE_WIDTH_ANGLED_SIDE;
+	static const float WIDTH_DIFF_PER_SIZE;
+	static const float SECONDS_TO_CHANGE_SIZE;
+
+	static const int AVG_OVER_TICKS  = 60;
+
+	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
+
+	float distTemp;			// A temporary store for the change in movement
+	float avgVel;				// Keeps the average velocity (over the past AVG_OVER_TICKS ticks) of the paddle at a given time
+	int ticksSinceAvg;  // Keeps track of ticks since a sampling of the average velocity occurred
+	bool hitWall;				// True when the paddle hits a wall
+
+	int currType;					// An ORed together current type of this paddle (see PaddleType)
+	PaddleSize currSize;	// The current size (width) of this paddle
+
+	Point2D centerPos;						// Paddle position (at its center) in the game model
+	float currHalfHeight;					// Half the height of the paddle
+	float currHalfWidthFlat;			// Half of the flat portion of the paddle
+	float currHalfWidthTotal;			// Half of the total width of the paddle
+	float currHalfDepthTotal;			// Half of the total depth of the paddle
+	float minBound, maxBound;			// The current level's boundries along its width for the paddle
+	float speed;									// Speed of the paddle in units per second
+	float currScaleFactor;				// The scale difference between the paddle's current size and its default size
+	
+
+	ColourRGBA colour;															// The colour multiply of the paddle, including its visibility/alpha
+	AnimationLerp<ColourRGBA> colourAnimation;			// Animation associated with the colour
+	AnimationMultiLerp<float> moveDownAnimation;		// Animation for when the paddle is being pushed down by the laser beam (away from the level)
+	AnimationMultiLerp<float> rotAngleZAnimation;		// Animation for rotating the paddle on the plane that the game is played, default angle is zero (pointing up)
+
+	BoundingLines bounds;						// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
+	
+	double timeSinceLastLaserBlast;	// Time since the last laser projectile/bullet was fired
+	double laserBeamTimer;					// Time left on the laser beam power-up
+
+	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
+
+	bool isPaddleCamActive;	// Whether or not the camera is inside the paddle
+	bool isFiringBeam;			// Whether this paddle is firing the laser beam
+
+	void SetupAnimations();
+
+	void RegenerateBounds();
+
+	void SetDimensions(float newScaleFactor);
+	void SetDimensions(PlayerPaddle::PaddleSize size);
+	void SetPaddleSize(PlayerPaddle::PaddleSize size);
+	void FireAttachedBall();
+	void MoveAttachedBallToNewBounds(double dT);
+
+
+	void CollateralBlockProjectileCollision(const Projectile& projectile);
+	void LaserBulletProjectileCollision(const Projectile& projectile);
 };
+
+inline void PlayerPaddle::Animate(double seconds) {
+	// Tick any paddle-related animations
+	this->colourAnimation.Tick(seconds);
+}
+
+// Check to see if the given ball collides, return the normal of the collision and the line of the collision as well
+// as the time since the collision occurred
+inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
+	return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+}
+
+/**
+ * Check to see if the given set of bounding lines collides with this paddle.
+ */
+inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds) {
+	return this->bounds.CollisionCheck(bounds);
+}
+
+// The paddle destroys all projectiles that collide with it, currently
+inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
+	return false;
+}
+
 #endif

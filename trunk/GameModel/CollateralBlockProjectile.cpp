@@ -40,21 +40,24 @@ void CollateralBlockProjectile::Tick(double seconds) {
  * Just vertical bounding line(s) - does the job by hitting everything below as it falls down.
  */
 BoundingLines CollateralBlockProjectile::BuildBoundingLines() const {
-		const Vector2D UP_DIR			= this->GetVelocityDirection();
-		const Vector2D RIGHT_DIR	= this->GetRightVectorDirection();
+		const Vector2D UP_DIR			= this->GetHalfHeight() * this->GetVelocityDirection();
+		const Vector2D RIGHT_DIR	= 0.5f * this->GetHalfWidth() * this->GetRightVectorDirection();
 
-		Point2D centerTop    = this->GetPosition() + this->GetHalfHeight() * UP_DIR;
-		Point2D centerBottom = this->GetPosition() - this->GetHalfHeight() * UP_DIR;
-		
-		// other collision lines??
-		//Point2D 
+		Point2D centerTop    = this->GetPosition() + UP_DIR;
+		Point2D centerBottom = this->GetPosition() - UP_DIR;
+		Point2D leftCenterTop    = this->GetPosition() - RIGHT_DIR + UP_DIR;
+		Point2D leftCenterBottom = this->GetPosition() - RIGHT_DIR - UP_DIR;
+		Point2D rightCenterTop   = 	this->GetPosition() + RIGHT_DIR + UP_DIR;
+		Point2D rightCenterBottom = this->GetPosition() + RIGHT_DIR - UP_DIR;
 
 		std::vector<Collision::LineSeg2D> sideBounds;
-		sideBounds.reserve(1);
+		sideBounds.reserve(3);
 		sideBounds.push_back(Collision::LineSeg2D(centerTop, centerBottom));
+		sideBounds.push_back(Collision::LineSeg2D(leftCenterTop, leftCenterBottom));
+		sideBounds.push_back(Collision::LineSeg2D(rightCenterTop, rightCenterBottom));
 
 		std::vector<Vector2D> normBounds;
-		normBounds.resize(1);
+		normBounds.resize(3);
 
 		return BoundingLines(sideBounds, normBounds);
 }

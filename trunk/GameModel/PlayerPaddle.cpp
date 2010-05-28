@@ -14,8 +14,9 @@
 #include "GameEventManager.h"
 #include "GameModelConstants.h"
 #include "PaddleLaser.h"
-#include "GameBall.h"
+
 #include "Beam.h"
+#include "Projectile.h"
 
 // Default values for the size of the paddle
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
@@ -45,7 +46,7 @@ PlayerPaddle::PlayerPaddle() :
 	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 
 	avgVel(0.0f), ticksSinceAvg(0), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
 	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
-	attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), upVector(0, 1), isFiringBeam(false) {
+	attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false) {
 
 	this->SetupAnimations();
 	this->SetDimensions(PlayerPaddle::NormalSize);
@@ -53,7 +54,8 @@ PlayerPaddle::PlayerPaddle() :
 
 PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : 
 speed(DEFAULT_SPEED), distTemp(0.0f), avgVel(0.0f), ticksSinceAvg(0), 
-hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), upVector(0, 1), isFiringBeam(false) {
+hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false) {
+
 	this->SetupAnimations();
 	this->SetMinMaxLevelBound(minBound, maxBound);
 }
@@ -73,8 +75,79 @@ void PlayerPaddle::SetupAnimations() {
 	// The beam force downwards animation forces the paddle to move off the level/downwards
 	// the amount of units equal to its current interpolated value when the paddle is firing its
 	// laser beam power-up
-	this->beamForceDownAnimation.SetInterpolantValue(0.0f);
-	this->beamForceDownAnimation.SetRepeat(false);
+	this->moveDownAnimation.ClearLerp();
+	this->moveDownAnimation.SetInterpolantValue(0.0f);
+	this->moveDownAnimation.SetRepeat(false);
+
+	// Set the rotation animation - this sets the paddle at a certain rotation about the z-axis
+	this->rotAngleZAnimation.ClearLerp();
+	this->rotAngleZAnimation.SetInterpolantValue(0.0f);
+	this->rotAngleZAnimation.SetRepeat(false);
+}
+
+// Regenerate the bounding lines of the player paddle so that they adhere to the size, position and rotation
+// of the paddle as it currently lies.
+void PlayerPaddle::RegenerateBounds() {
+	std::vector<Collision::LineSeg2D> lineBounds;
+	std::vector<Vector2D> lineNorms;
+
+	if (this->isPaddleCamActive) {
+		// When the paddle camera is active we compress the collision boundries down to the bottom of the paddle
+		// this help make for a better game experience since the collision seems more natural when it's on the camera's view plane
+
+		lineBounds.reserve(3);
+		lineNorms.reserve(3);
+
+		// 'Top' (flat) boundry
+		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthFlat, -this->currHalfHeight));
+		Vector2D n1(0, 1);
+		lineBounds.push_back(l1);
+		lineNorms.push_back(n1);
+
+		// 'Side' (oblique) boundries
+		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
+		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
+		lineBounds.push_back(sideLine1);
+		lineNorms.push_back(sideNormal1);
+		
+		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+		Vector2D sideNormal2 = Vector2D(-1, 1) / SQRT_2;
+		lineBounds.push_back(sideLine2);
+		lineNorms.push_back(sideNormal2);
+	}
+	else {
+		lineBounds.reserve(4);
+		lineNorms.reserve(4);
+
+		// Top boundry
+		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
+		Vector2D n1(0, 1);
+		lineBounds.push_back(l1);
+		lineNorms.push_back(n1);
+
+		// Side boundries
+		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
+		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
+		lineBounds.push_back(sideLine1);
+		lineNorms.push_back(sideNormal1);
+		
+		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+		Vector2D sideNormal2 = Vector2D(-1, 1) / SQRT_2;
+		lineBounds.push_back(sideLine2);
+		lineNorms.push_back(sideNormal2);
+
+		// Bottom boundry
+		Collision::LineSeg2D bottomLine(Point2D(this->currHalfWidthTotal, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
+		Vector2D bottomNormal(0, 1);
+		lineBounds.push_back(bottomLine);
+		lineNorms.push_back(bottomNormal);
+	}
+
+	this->bounds = BoundingLines(lineBounds, lineNorms);
+	// Rotate the bounds (in the case where the paddle rotation has changed)
+	this->bounds.RotateLinesAndNormals(this->rotAngleZAnimation.GetInterpolantValue(), Point2D(0,0));
+	// Translate the bounds into game space
+	this->bounds.TranslateBounds(Vector2D(this->GetCenterPosition()[0], this->GetCenterPosition()[1]));
 }
 
 /**
@@ -99,61 +172,7 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 	this->currHalfWidthFlat		= this->currScaleFactor * PADDLE_WIDTH_FLAT_TOP * 0.5f;
 	this->currHalfDepthTotal  = this->currScaleFactor * PADDLE_HALF_DEPTH;
 	
-	// Reset the bounds of the paddle (in paddle-space)
-	std::vector<Collision::LineSeg2D> lineBounds;
-	std::vector<Vector2D>  lineNorms;
-	lineBounds.reserve(3);
-	lineNorms.reserve(3);
-	
-	if (this->isPaddleCamActive) {
-		// When the paddle camera is active we compress the collision boundries down to the bottom of the paddle
-		// this help make for a better game experience since the collision seems more natural when it's on the camera's view plane
-
-		// 'Top' (flat) boundry
-		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthFlat, -this->currHalfHeight));
-		Vector2D n1(0, 1);
-		lineBounds.push_back(l1);
-		lineNorms.push_back(n1);
-
-		// 'Side' (oblique) boundries
-		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, -this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
-		lineBounds.push_back(sideLine1);
-		lineNorms.push_back(sideNormal1);
-		
-		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal2 = Vector2D(-1, 1) / SQRT_2;
-		lineBounds.push_back(sideLine2);
-		lineNorms.push_back(sideNormal2);
-	}
-	else {
-		// Top boundry
-		Collision::LineSeg2D l1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthFlat, this->currHalfHeight));
-		Vector2D n1(0, 1);
-		lineBounds.push_back(l1);
-		lineNorms.push_back(n1);
-
-		// Side boundries
-		Collision::LineSeg2D sideLine1(Point2D(this->currHalfWidthFlat, this->currHalfHeight), Point2D(this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal1 = Vector2D(1, 1) / SQRT_2;
-		lineBounds.push_back(sideLine1);
-		lineNorms.push_back(sideNormal1);
-		
-		Collision::LineSeg2D sideLine2(Point2D(-this->currHalfWidthFlat, this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D sideNormal2 = Vector2D(-1, 1) / SQRT_2;
-		lineBounds.push_back(sideLine2);
-		lineNorms.push_back(sideNormal2);
-	}
-
-	this->bounds = BoundingLines(lineBounds, lineNorms);
-
-	// We need to be careful when the collision boundries get changed the ball position could
-	// be compromised; we need to make sure the ball also moves to be on the 
-	// outside of the new paddle boundries
-	if (this->HasBallAttached()) {
-		assert(this->attachedBall != NULL);
-		// TODO
-	}
+	this->RegenerateBounds();
 }
 
 /**
@@ -222,31 +241,31 @@ void PlayerPaddle::MoveAttachedBallToNewBounds(double dT) {
 		return;
 	}
 
-	// Figure out if the ball is colliding with any of the boundries of the paddle
-	// if it is we can easily figure out where we have to move the ball to make 
-	// it accommodate those new boundries
-	const Collision::Circle2D& ballBounds = this->attachedBall->GetBounds();
-	// Move the ball into paddle space and find the closest point to the center
-	Point2D ballCenterInPaddleSpace = ballBounds.Center() - Vector2D(this->centerPos[0], this->centerPos[1]);
-	Point2D closestPtInPaddleSpace = this->bounds.ClosestPoint(ballCenterInPaddleSpace);
-	Vector2D closestPtDir   = Vector2D::Normalize(closestPtInPaddleSpace - ballCenterInPaddleSpace);
+	// We need to be careful when the collision boundries get changed the ball position could
+	// be compromised; we need to make sure the ball also moves to be on the 
+	// outside of the new paddle boundries
+	assert(this->attachedBall != NULL);
 
-	// Now we just attach the ball at the closest point on the paddle...
-	Point2D closestPtInWorldSpace = closestPtInPaddleSpace + Vector2D(this->centerPos[0], this->centerPos[1]);
-	this->attachedBall->SetCenterPosition(closestPtInWorldSpace + ballBounds.Radius() * closestPtDir);
-
-
+	// Make sure the attached ball is sitting on the bounding lines and not inside the paddle...
+	// Move the ball along the up vector until its no longer hitting...
+	Point2D closestPtOnBounds = Collision::ClosestPoint(this->attachedBall->GetCenterPosition2D(), this->bounds.GetLine(0));
+	this->attachedBall->SetCenterPosition(closestPtOnBounds + this->attachedBall->GetBounds().Radius() * this->GetUpVector());
 }
 
 void PlayerPaddle::Tick(double seconds) {
-	
+	Point2D startingCenterPos = this->centerPos;
 	Point2D defaultCenterPos = this->GetDefaultCenterPosition();
+
 	// If the beam is firing its laser then we want to animate it being pushed down
-	this->centerPos[1] = defaultCenterPos[1] - this->beamForceDownAnimation.GetInterpolantValue();
-	this->beamForceDownAnimation.Tick(seconds);
+	this->centerPos[1] = defaultCenterPos[1] - this->moveDownAnimation.GetInterpolantValue();
+	this->moveDownAnimation.Tick(seconds);
+
+	// If the paddle is rotating (might have been hit or knocked around) we want to animate that rotation
+	float startingZRotation = this->rotAngleZAnimation.GetInterpolantValue();
+	this->rotAngleZAnimation.Tick(seconds);
 
 	// Check to see if we need to increment seconds since the previous laser shot
-	// This makes sure the user can't consecutively fire lasers like some sort of mad person
+	// This makes sure the user can't consecutively fire lasers like crazy
 	if (this->timeSinceLastLaserBlast < PADDLE_LASER_BULLET_DELAY) {
 		this->timeSinceLastLaserBlast += seconds;
 	}
@@ -337,12 +356,14 @@ void PlayerPaddle::Tick(double seconds) {
 		// Maintain the vector obtained above in the new position of the paddle
 		this->attachedBall->SetCenterPosition(this->centerPos + Vector2D(0, this->GetHalfHeight()) + paddleTopCenterToBallCenter);
 	}
+
+	// Check to see if the center position changed or its rotation changed, if so then regenerate the bounds
+	if (startingCenterPos != this->centerPos || startingZRotation != this->rotAngleZAnimation.GetInterpolantValue()) {
+		this->RegenerateBounds();
+	}
 }
 
-void PlayerPaddle::Animate(double seconds) {
-	// Tick any paddle-related animations
-	this->colourAnimation.Tick(seconds);
-}
+
 
 void PlayerPaddle::SetIsLaserBeamFiring(bool isFiring) {
 	if (isFiring) {
@@ -356,13 +377,13 @@ void PlayerPaddle::SetIsLaserBeamFiring(bool isFiring) {
 
 		std::vector<float> values;
 		values.reserve(2);
-		values.push_back(0.0f);
+		values.push_back(this->moveDownAnimation.GetInterpolantValue());
 		values.push_back(PlayerPaddle::PADDLE_HEIGHT_TOTAL);
 
-		this->beamForceDownAnimation.SetLerp(times, values);
+		this->moveDownAnimation.SetLerp(times, values);	// Blended lerp??
 	}
 	else {
-		this->beamForceDownAnimation.SetLerp(0.1, 0.0f);
+		this->moveDownAnimation.AppendLerp(0.1, 0.0f);
 	}
 	this->isFiringBeam = isFiring;
 }
@@ -453,17 +474,21 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	return true;
 }
 
-bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
-	// Move the circle into paddle space
-	Vector2D gameSpaceTranslation(this->centerPos[0], this->centerPos[1]);
-	Collision::Circle2D temp = Collision::Circle2D(ball.GetBounds().Center() - gameSpaceTranslation, ball.GetBounds().Radius());
-	bool result = this->bounds.Collide(dT, temp, ball.GetVelocity(), n, collisionLine, timeSinceCollision);
-	
-	// Move the collision line into game space
-	collisionLine.SetP1(collisionLine.P1() + gameSpaceTranslation);
-	collisionLine.SetP2(collisionLine.P2() + gameSpaceTranslation);
-
-	return result;
+// Called when the paddle is hit by a projectile
+void PlayerPaddle::HitByProjectile(const Projectile& projectile) {
+	// Different projectiles have different effects on the paddle...
+	switch (projectile.GetType()) {
+		case Projectile::CollateralBlockProjectile:
+			// Causes the paddle to be violently thrown off course for a short period of time...
+			this->CollateralBlockProjectileCollision(projectile);
+			break;
+		case Projectile::PaddleLaserBulletProjectile:
+			this->LaserBulletProjectileCollision(projectile);
+			break;
+		default:
+			assert(false);
+			break;
+	}
 }
 
 /**
@@ -484,7 +509,70 @@ void PlayerPaddle::AnimateFade(bool fadeOut, double duration) {
 
 void PlayerPaddle::DebugDraw() const {
 	glPushMatrix();
-	glTranslatef(this->centerPos[0], this->centerPos[1], 0.0f);
 	this->bounds.DebugDraw();
 	glPopMatrix();
+}
+
+/**
+ * Do the paddle collision with the collateral block projectile - this will knock the
+ * the paddle off course and rotate it a bit.
+ */
+void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projectile) {
+	// Figure out what side of the paddle the projectile is hitting...
+	// Use a line test...
+	Vector2D vecToProjectile = projectile.GetPosition() - this->GetCenterPosition();
+	Vector2D positivePaddleAxis = Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), Vector2D(1, 0));
+
+	// Use a dot product to determine whether the projectile is on the positive side or not
+	float distFromCenter = Vector2D::Dot(vecToProjectile, positivePaddleAxis);
+	if (fabs(distFromCenter) < EPSILON) {
+		return;
+	}
+
+	// Find percent distance from edge to center of the paddle; closer to zero => further away from center of the paddle...
+	float percentNearCenter = std::max<float>(0.0f, this->currHalfWidthTotal - distFromCenter) / this->currHalfWidthTotal;
+	assert(percentNearCenter >= 0.0f && percentNearCenter <= 1.0);
+	float percentNearEdge = 1.0 - percentNearCenter;
+
+	static const float MAX_HIT_ROTATION = 70.0f;
+	
+	float rotationAmount = percentNearEdge * MAX_HIT_ROTATION;
+	if (distFromCenter > 0.0) {
+		// The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
+		rotationAmount *= -1.0f;
+	}
+	//else {
+		// The projectile hit the 'left' side of the paddle (typically along the negative x-axis)
+	//}
+
+	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
+	static const double HIT_EFFECT_TIME = 3.0;
+	std::vector<double> times;
+	times.reserve(3);
+	times.push_back(0.0f);
+	times.push_back(0.05f);
+	times.push_back(HIT_EFFECT_TIME);
+
+	static const float MIN_MOVE_DOWN_AMT = 2.0f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+	float totalMaxMoveDown = MIN_MOVE_DOWN_AMT + percentNearCenter * 2.5f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+
+	std::vector<float> moveDownValues;
+	moveDownValues.reserve(3);
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue());
+	moveDownValues.push_back(totalMaxMoveDown);
+	moveDownValues.push_back(0.0f);
+
+	this->moveDownAnimation.SetLerp(times, moveDownValues);
+
+	std::vector<float> rotationValues;
+	rotationValues.reserve(3);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue());
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + rotationAmount);
+	rotationValues.push_back(0.0f);
+
+	this->rotAngleZAnimation.AppendLerp(times, rotationValues);
+}
+
+void PlayerPaddle::LaserBulletProjectileCollision(const Projectile& projectile) {
+
 }

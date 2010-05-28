@@ -10,6 +10,7 @@
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Camera.h"
 
+
 #include "../ESPEngine/ESPParticleColourEffector.h"
 #include "../ESPEngine/ESPParticleScaleEffector.h"
 #include "../ESPEngine/ESPParticleAccelEffector.h"
@@ -32,6 +33,7 @@ class PlayerPaddle;
 class GameModel;
 class GameLevel;
 class Beam;
+struct ESPInterval;
 
 /**
  * Stores, draws and changes emitter/sprite/particle assets for the game.
@@ -167,6 +169,8 @@ private:
 	ESPPointEmitter* CreateBeamEndBlockEffect();
 	ESPPointEmitter* CreateBeamFallingBitEffect();
 	ESPPointEmitter* CreateBeamFlareEffect();
+
+	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b);
 
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter);
 

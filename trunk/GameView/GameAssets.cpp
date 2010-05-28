@@ -372,8 +372,8 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 
 	// In the case of a laser bullet paddle (and NOT paddle camera mode), we draw the laser attachment and its related effects
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		// Draw attachment (gun) mesh
 		this->paddleLaserAttachment->Draw(dT, p, camera, paddleKeyLight, paddleFillLight);
 	}

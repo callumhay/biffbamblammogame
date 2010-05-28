@@ -845,7 +845,6 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 		
 		case Projectile::CollateralBlockProjectile:
-			// TODO?
 			break;
 
 		default:
@@ -1056,6 +1055,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 
 	Onomatoplex::Extremeness severity = Onomatoplex::NORMAL;
 	Onomatoplex::SoundType type = Onomatoplex::EXPLOSION;
+
 	// TODO: make the severity more dynamic!!
 	switch (block.GetType()) {
 
@@ -1068,14 +1068,20 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 		case LevelPiece::PrismTriangle:
 			type = Onomatoplex::SHATTER;
 			severity = Onomatoplex::AWESOME;
+			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.0f), 
+				ESPInterval(0.1f, 1.0f), ESPInterval(0.5f, 1.0f)));
 			break;
 
 		case LevelPiece::Collateral:
 			severity = Onomatoplex::SUPER_AWESOME;
+			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 
+				ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f)));
 			break;
 
 		case LevelPiece::Cannon:
 			severity = Onomatoplex::AWESOME;
+			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.8f, 1.0f), 
+				ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.0f)));
 			break;
 
 		default:
@@ -1084,8 +1090,30 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	bangOnoEffect->SetParticles(1, bangTextLabel, type, severity);
 
 	// Lastly, add the new emitters to the list of active emitters in order of back to front
-	this->activeGeneralEmitters.push_front(bangEffect);
+	this->activeGeneralEmitters.push_back(bangEffect);
 	this->activeGeneralEmitters.push_back(bangOnoEffect);
+}
+
+ESPPointEmitter* GameESPAssets::CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, 
+																													 const ESPInterval& g, const ESPInterval& b) {
+		ESPPointEmitter* smashyBits = new ESPPointEmitter();
+		smashyBits->SetNumParticleLives(1);
+		smashyBits->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+		smashyBits->SetInitialSpd(ESPInterval(2.5f, 4.5f));
+		smashyBits->SetParticleLife(ESPInterval(1.5f, 2.5f));
+		smashyBits->SetParticleSize(ESPInterval(0.4f * LevelPiece::PIECE_HEIGHT, LevelPiece::PIECE_HEIGHT));
+		smashyBits->SetEmitAngleInDegrees(180);
+		smashyBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		smashyBits->SetAsPointSpriteEmitter(true);
+		smashyBits->SetEmitPosition(center);
+		smashyBits->SetEmitDirection(Vector3D(0,1,0));
+		smashyBits->SetToggleEmitOnPlane(true);
+		smashyBits->SetParticleColour(r, g, b, ESPInterval(1.0f));
+		smashyBits->AddEffector(&this->particleFader);
+		smashyBits->AddEffector(&this->gravity);
+		smashyBits->SetParticles(10, this->starTex);
+
+		return smashyBits;
 }
 
 /**
