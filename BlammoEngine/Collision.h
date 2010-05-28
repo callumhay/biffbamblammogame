@@ -147,7 +147,7 @@ namespace Collision {
 		void SetCenter(const Point2D& c) {
 			this->center = c;
 		}
-		Point2D Center() const {
+		const Point2D& Center() const {
 			return this->center;
 		}
 		void SetRadius(float r) {

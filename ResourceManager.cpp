@@ -466,6 +466,41 @@ Texture* ResourceManager::GetCelShadingTexture() {
 }
 
 /**
+ * Does a direct read of the raw noise octave texture data from the physfs file system
+ * and returns that data without taking ownership.
+ * The caller is responsible for the returned memory!
+ * Returns NULL if could not find data.
+ */
+GLubyte* ResourceManager::ReadNoiseOctave3DTextureData() {
+	const char* filepath = GameViewConstants::GetInstance()->TEXTURE_NOISE_OCTAVES.c_str();
+	int doesExist = PHYSFS_exists(filepath);
+	if (doesExist == NULL) {
+		return NULL;
+	}
+	
+	// Open the file for reading
+	PHYSFS_File* fileHandle = PHYSFS_openRead(filepath);
+	if (fileHandle == NULL) {
+		assert(false);
+		return NULL;
+	}
+	
+	// Grab all the data needed from the file handle
+	PHYSFS_sint64 fileLength = PHYSFS_fileLength(fileHandle);
+	GLubyte* fileBuffer = new GLubyte[fileLength];
+	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(GLubyte), fileLength);
+	if (readResult == NULL) {
+		delete[] fileBuffer;
+		fileBuffer = NULL;
+		debug_output("Error reading noise octave data to bytes.");
+		assert(false);
+		return NULL;
+	}
+
+	return fileBuffer;
+}
+
+/**
  * Obtain a font texture resource from the physfs file system.
  * Returns: The font set on successful load, false otherwise.
  */

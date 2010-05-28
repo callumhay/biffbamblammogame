@@ -70,12 +70,13 @@ public:
 
 		glPushMatrix();
 		
-		float paddleScaleFactor = p.GetPaddleScaleFactor();
+		float paddleScaleFactor  = p.GetPaddleScaleFactor();
+		float paddleZRotationAmt = p.GetZRotation();
 
+		glRotatef(paddleZRotationAmt, 0, 0, 1);
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
 		glColor4f(paddleColour.R(), paddleColour.G(), paddleColour.B(), paddleColour.A());
 		this->playerPaddle->Draw(camera, keyLight, fillLight, ballLight);
-
 		glPopMatrix();
 	}
 

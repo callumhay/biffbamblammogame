@@ -80,6 +80,7 @@ public:
 	Texture* GetImgTextureResource(const std::string &filepath, Texture::TextureFilterType filter, GLenum textureType = GL_TEXTURE_2D);
 	bool ReleaseTextureResource(Texture* texture);
 	Texture* GetCelShadingTexture();
+	GLubyte* ReadNoiseOctave3DTextureData();
 	
 	// Effects Resource Functions
 	void GetCgFxEffectResource(const std::string &filepath, CGeffect &effect, std::map<std::string, CGtechnique> &techniques);

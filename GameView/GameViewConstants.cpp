@@ -76,6 +76,7 @@ TEXTURE_BARREL_OVERLAY(TEXTURE_DIRECTORY "/barrel_overlay_1024x1024.png"),
 TEXTURE_BALL_SAFETY_NET(TEXTURE_DIRECTORY "/warning_platform_128x64.jpg"),
 
 TEXTURE_CEL_GRADIENT(TEXTURE_DIRECTORY "/celshading_texture1x256.jpg"),
+TEXTURE_NOISE_OCTAVES(TEXTURE_DIRECTORY "/noise_octaves.raw"),
 
 // Item Drop Texture Asset Paths
 TEXTURE_ITEM_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_powerup256x128.jpg"),

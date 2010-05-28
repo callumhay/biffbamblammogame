@@ -244,7 +244,7 @@ GLubyte* Noise::Make3DNoiseTexture(int size) {
 	GLubyte* ptr;
 	double amp = 0.5;
 
-	GLubyte* noise3DTexPtr = (GLubyte*) malloc(size * size * size * 4);
+	GLubyte* noise3DTexPtr = new GLubyte[size * size * size * 4];
 	for (f = 0, inc = 0; f < numOctaves; ++f, frequency *= 2, ++inc, amp *= 0.5)
 	{
 		SetNoiseFrequency(frequency);
