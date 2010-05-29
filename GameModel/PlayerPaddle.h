@@ -42,6 +42,9 @@ public:
 	static const float POISON_SPEED_DIMINISH;
 	static const int RAND_DEG_ANG    = 20;
 
+	static const Vector2D DEFAULT_PADDLE_UP_VECTOR;
+	static const Vector2D DEFAULT_PADDLE_RIGHT_VECTOR;
+
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000010, 
 										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000 };
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
@@ -90,7 +93,7 @@ public:
 	}
 
 	Vector2D GetUpVector() const {
-		return Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), Vector2D(0, 1));
+		return Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), PlayerPaddle::DEFAULT_PADDLE_UP_VECTOR);
 	}
 
 	void Tick(double seconds);
@@ -229,7 +232,7 @@ private:
 	static const float SECONDS_TO_CHANGE_SIZE;
 
 	static const int AVG_OVER_TICKS  = 60;
-
+	
 	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
 
 	float distTemp;			// A temporary store for the change in movement
@@ -278,6 +281,7 @@ private:
 
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
+	float GetPercentNearPaddleCenter(const Projectile& projectile, float& distFromCenter);
 };
 
 inline void PlayerPaddle::Animate(double seconds) {

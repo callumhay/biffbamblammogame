@@ -28,6 +28,9 @@ const float PlayerPaddle::PADDLE_HALF_WIDTH = PADDLE_WIDTH_TOTAL / 2.0f;
 const float PlayerPaddle::PADDLE_HALF_HEIGHT = PADDLE_HEIGHT_TOTAL / 2.0f;
 const float PlayerPaddle::PADDLE_HALF_DEPTH = PADDLE_DEPTH_TOTAL / 2.0f;
 
+const Vector2D PlayerPaddle::DEFAULT_PADDLE_UP_VECTOR(0, 1);
+const Vector2D PlayerPaddle::DEFAULT_PADDLE_RIGHT_VECTOR(1, 0);
+
 // The difference in width per size change of the paddle
 const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.8f;
 
@@ -138,7 +141,7 @@ void PlayerPaddle::RegenerateBounds() {
 
 		// Bottom boundry
 		Collision::LineSeg2D bottomLine(Point2D(this->currHalfWidthTotal, -this->currHalfHeight), Point2D(-this->currHalfWidthTotal, -this->currHalfHeight));
-		Vector2D bottomNormal(0, 1);
+		Vector2D bottomNormal(0, -1);
 		lineBounds.push_back(bottomLine);
 		lineNorms.push_back(bottomNormal);
 	}
@@ -489,6 +492,9 @@ void PlayerPaddle::HitByProjectile(const Projectile& projectile) {
 			assert(false);
 			break;
 	}
+
+	// EVENT: Paddle was just hit by a projectile
+	GameEventManager::Instance()->ActionPaddleHitByProjectile(*this, projectile);
 }
 
 /**
@@ -518,23 +524,12 @@ void PlayerPaddle::DebugDraw() const {
  * the paddle off course and rotate it a bit.
  */
 void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projectile) {
-	// Figure out what side of the paddle the projectile is hitting...
-	// Use a line test...
-	Vector2D vecToProjectile = projectile.GetPosition() - this->GetCenterPosition();
-	Vector2D positivePaddleAxis = Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), Vector2D(1, 0));
-
-	// Use a dot product to determine whether the projectile is on the positive side or not
-	float distFromCenter = Vector2D::Dot(vecToProjectile, positivePaddleAxis);
-	if (fabs(distFromCenter) < EPSILON) {
-		return;
-	}
-
-	// Find percent distance from edge to center of the paddle; closer to zero => further away from center of the paddle...
-	float percentNearCenter = std::max<float>(0.0f, this->currHalfWidthTotal - distFromCenter) / this->currHalfWidthTotal;
-	assert(percentNearCenter >= 0.0f && percentNearCenter <= 1.0);
+	float distFromCenter = 0.0f;
+	// Find percent distance from edge to center of the paddle
+	float percentNearCenter = this->GetPercentNearPaddleCenter(projectile, distFromCenter);
 	float percentNearEdge = 1.0 - percentNearCenter;
 
-	static const float MAX_HIT_ROTATION = 70.0f;
+	static const float MAX_HIT_ROTATION = 60.0f;
 	
 	float rotationAmount = percentNearEdge * MAX_HIT_ROTATION;
 	if (distFromCenter > 0.0) {
@@ -546,20 +541,20 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 	//}
 
 	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
-	static const double HIT_EFFECT_TIME = 3.0;
+	static const double HIT_EFFECT_TIME = 2.5;
 	std::vector<double> times;
 	times.reserve(3);
 	times.push_back(0.0f);
 	times.push_back(0.05f);
 	times.push_back(HIT_EFFECT_TIME);
 
-	static const float MIN_MOVE_DOWN_AMT = 2.0f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
-	float totalMaxMoveDown = MIN_MOVE_DOWN_AMT + percentNearCenter * 2.5f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+	static const float MIN_MOVE_DOWN_AMT = 3.0f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+	float totalMaxMoveDown = MIN_MOVE_DOWN_AMT + percentNearCenter * 2.25f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
 
 	std::vector<float> moveDownValues;
 	moveDownValues.reserve(3);
 	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue());
-	moveDownValues.push_back(totalMaxMoveDown);
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue() + totalMaxMoveDown);
 	moveDownValues.push_back(0.0f);
 
 	this->moveDownAnimation.SetLerp(times, moveDownValues);
@@ -570,9 +565,70 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + rotationAmount);
 	rotationValues.push_back(0.0f);
 
-	this->rotAngleZAnimation.AppendLerp(times, rotationValues);
+	this->rotAngleZAnimation.SetLerp(times, rotationValues);
 }
 
+// A laser bullet just collided with the paddle...
 void PlayerPaddle::LaserBulletProjectileCollision(const Projectile& projectile) {
+	float distFromCenter = 0.0;
+	// Find percent distance from edge to center of the paddle
+	float percentNearCenter = this->GetPercentNearPaddleCenter(projectile, distFromCenter);
+	float percentNearEdge = 1.0 - percentNearCenter;
 
+	static const float MAX_HIT_ROTATION = 15.0f;
+	
+	float rotationAmount = percentNearEdge * MAX_HIT_ROTATION;
+	if (distFromCenter > 0.0) {
+		// The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
+		rotationAmount *= -1.0f;
+	}
+	//else {
+		// The projectile hit the 'left' side of the paddle (typically along the negative x-axis)
+	//}
+	
+	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
+	static const double HIT_EFFECT_TIME = 1.5;
+	std::vector<double> times;
+	times.reserve(3);
+	times.push_back(0.0f);
+	times.push_back(0.05f);
+	times.push_back(HIT_EFFECT_TIME);
+
+	static const float MIN_MOVE_DOWN_AMT = PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+	float totalMaxMoveDown = MIN_MOVE_DOWN_AMT + percentNearCenter * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+
+	std::vector<float> moveDownValues;
+	moveDownValues.reserve(3);
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue());
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue() + totalMaxMoveDown);
+	moveDownValues.push_back(0.0f);
+
+	this->moveDownAnimation.SetLerp(times, moveDownValues);
+
+	std::vector<float> rotationValues;
+	rotationValues.reserve(3);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue());
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + rotationAmount);
+	rotationValues.push_back(0.0f);
+
+	this->rotAngleZAnimation.SetLerp(times, rotationValues);
+}
+
+// Get an idea of how close the given projectile is to the center of the paddle as a percentage
+// where 0 is a far away from the center as possible and 1 is at the center. Also returns the value
+// of distFromCenter which is assigned a negative/positive value based on the distance from the center
+// of the paddle on the left/right side respectively.
+float PlayerPaddle::GetPercentNearPaddleCenter(const Projectile& projectile, float& distFromCenter) {
+	// Figure out what side of the paddle the projectile is hitting...
+	// Use a line test...
+	Vector2D vecToProjectile = projectile.GetPosition() - this->GetCenterPosition();
+	Vector2D positivePaddleAxis = Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), PlayerPaddle::DEFAULT_PADDLE_RIGHT_VECTOR);
+
+	// Use a dot product to determine whether the projectile is on the positive side or not
+	distFromCenter = Vector2D::Dot(vecToProjectile, positivePaddleAxis);
+
+	// Find percent distance from edge to center of the paddle
+	float percentNearCenter = std::max<float>(0.0f, this->currHalfWidthTotal - fabs(distFromCenter)) / this->currHalfWidthTotal;
+	assert(percentNearCenter >= 0.0f && percentNearCenter <= 1.0);
+	return percentNearCenter;
 }

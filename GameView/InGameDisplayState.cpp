@@ -167,20 +167,22 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), camera);
-
-	// Projectiles...
-	this->display->GetAssets()->GetESPAssets()->DrawProjectileEffects(dT, camera);
-
 	glPopMatrix();
 
 	// Level pieces
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
 	this->display->GetAssets()->DrawLevelPieces(dT, currLevel, camera);
 
-	// Balls...
+	
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
+
+	// Balls...
 	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), camera, negHalfLevelDim);
+
+	// Projectiles...
+	this->display->GetAssets()->GetESPAssets()->DrawProjectileEffects(dT, camera);
+
 	glPopMatrix();
 
 	// Safety net (if active)

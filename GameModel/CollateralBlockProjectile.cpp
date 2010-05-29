@@ -41,23 +41,33 @@ void CollateralBlockProjectile::Tick(double seconds) {
  */
 BoundingLines CollateralBlockProjectile::BuildBoundingLines() const {
 		const Vector2D UP_DIR			= this->GetHalfHeight() * this->GetVelocityDirection();
-		const Vector2D RIGHT_DIR	= 0.5f * this->GetHalfWidth() * this->GetRightVectorDirection();
-
+		const Vector2D HALF_RIGHT_DIR	= 0.5f * this->GetHalfWidth() * this->GetRightVectorDirection();
+		
 		Point2D centerTop    = this->GetPosition() + UP_DIR;
 		Point2D centerBottom = this->GetPosition() - UP_DIR;
-		Point2D leftCenterTop    = this->GetPosition() - RIGHT_DIR + UP_DIR;
-		Point2D leftCenterBottom = this->GetPosition() - RIGHT_DIR - UP_DIR;
-		Point2D rightCenterTop   = 	this->GetPosition() + RIGHT_DIR + UP_DIR;
-		Point2D rightCenterBottom = this->GetPosition() + RIGHT_DIR - UP_DIR;
+
+		Point2D halfLeftCenterTop    = this->GetPosition() - HALF_RIGHT_DIR + UP_DIR;
+		Point2D halfLeftCenterBottom = this->GetPosition() - HALF_RIGHT_DIR - UP_DIR;
+
+		Point2D halfRightCenterTop   = 	this->GetPosition() + HALF_RIGHT_DIR + UP_DIR;
+		Point2D halfRightCenterBottom = this->GetPosition() + HALF_RIGHT_DIR - UP_DIR;
+
+		Point2D leftCenterTop    = halfLeftCenterTop - HALF_RIGHT_DIR;
+		Point2D leftCenterBottom = halfLeftCenterBottom - HALF_RIGHT_DIR;
+
+		Point2D rightCenterTop   = 	halfRightCenterTop + HALF_RIGHT_DIR;
+		Point2D rightCenterBottom = halfRightCenterBottom + HALF_RIGHT_DIR;
 
 		std::vector<Collision::LineSeg2D> sideBounds;
-		sideBounds.reserve(3);
+		sideBounds.reserve(5);
 		sideBounds.push_back(Collision::LineSeg2D(centerTop, centerBottom));
+		sideBounds.push_back(Collision::LineSeg2D(halfLeftCenterTop, halfLeftCenterBottom));
+		sideBounds.push_back(Collision::LineSeg2D(halfRightCenterTop, halfRightCenterBottom));
 		sideBounds.push_back(Collision::LineSeg2D(leftCenterTop, leftCenterBottom));
 		sideBounds.push_back(Collision::LineSeg2D(rightCenterTop, rightCenterBottom));
 
 		std::vector<Vector2D> normBounds;
-		normBounds.resize(3);
+		normBounds.resize(5);
 
 		return BoundingLines(sideBounds, normBounds);
 }

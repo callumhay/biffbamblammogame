@@ -170,7 +170,8 @@ private:
 	ESPPointEmitter* CreateBeamFallingBitEffect();
 	ESPPointEmitter* CreateBeamFlareEffect();
 
-	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b);
+	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
+		bool gravity = true, size_t numParticles = 10);
 
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter);
 
@@ -195,6 +196,7 @@ public:
 	void AddBallSafetyNetDestroyedEffect(const GameBall& ball);
 	void AddBallExplodedEffect(const GameBall* ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
+	void AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
 	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
 	void SetItemEffect(const GameItem& item, const GameModel& gameModel);
 	void AddItemDropEffect(const Camera& camera, const GameItem& item, bool showStars);
