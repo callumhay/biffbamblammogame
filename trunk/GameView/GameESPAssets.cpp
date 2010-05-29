@@ -1069,19 +1069,19 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 			type = Onomatoplex::SHATTER;
 			severity = Onomatoplex::AWESOME;
 			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.0f), 
-				ESPInterval(0.1f, 1.0f), ESPInterval(0.5f, 1.0f)));
+																						ESPInterval(0.1f, 1.0f), ESPInterval(0.5f, 1.0f)));
 			break;
 
 		case LevelPiece::Collateral:
 			severity = Onomatoplex::SUPER_AWESOME;
 			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 
-				ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f)));
+																						ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
 			break;
 
 		case LevelPiece::Cannon:
 			severity = Onomatoplex::AWESOME;
 			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.8f, 1.0f), 
-				ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.0f)));
+																						ESPInterval(0.8f, 1.0f), ESPInterval(0.0f, 0.0f)));
 			break;
 
 		default:
@@ -1095,12 +1095,13 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 }
 
 ESPPointEmitter* GameESPAssets::CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, 
-																													 const ESPInterval& g, const ESPInterval& b) {
+																													 const ESPInterval& g, const ESPInterval& b, bool gravity, 
+																													 size_t numParticles) {
 		ESPPointEmitter* smashyBits = new ESPPointEmitter();
 		smashyBits->SetNumParticleLives(1);
 		smashyBits->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-		smashyBits->SetInitialSpd(ESPInterval(2.5f, 4.5f));
-		smashyBits->SetParticleLife(ESPInterval(1.5f, 2.5f));
+		smashyBits->SetInitialSpd(ESPInterval(3.5f, 5.5f));
+		smashyBits->SetParticleLife(ESPInterval(1.7f, 2.8f));
 		smashyBits->SetParticleSize(ESPInterval(0.4f * LevelPiece::PIECE_HEIGHT, LevelPiece::PIECE_HEIGHT));
 		smashyBits->SetEmitAngleInDegrees(180);
 		smashyBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -1110,8 +1111,10 @@ ESPPointEmitter* GameESPAssets::CreateBlockBreakSmashyBits(const Point3D& center
 		smashyBits->SetToggleEmitOnPlane(true);
 		smashyBits->SetParticleColour(r, g, b, ESPInterval(1.0f));
 		smashyBits->AddEffector(&this->particleFader);
-		smashyBits->AddEffector(&this->gravity);
-		smashyBits->SetParticles(10, this->starTex);
+		if (gravity) {
+			smashyBits->AddEffector(&this->gravity);
+		}
+		smashyBits->SetParticles(numParticles, this->starTex);
 
 		return smashyBits;
 }
@@ -1673,6 +1676,94 @@ void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Poi
 		
 	this->activeGeneralEmitters.push_back(paddleWallStarEmitter);
 	this->activeGeneralEmitters.push_back(paddleWallOnoEffect);
+}
+
+/**
+ * Adds an effect for when the paddle is struck by a projectile.
+ */
+void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile) {
+	// No effect if the paddle camera is on
+	if (paddle.GetIsPaddleCameraOn()) {
+		return;
+	}
+
+	// Projectile type determines the severity and size
+	ESPInterval size(1.0f);
+	Onomatoplex::Extremeness severity = Onomatoplex::NORMAL;
+	switch (projectile.GetType()) {
+		case Projectile::CollateralBlockProjectile:
+			severity = Onomatoplex::AWESOME;
+			size.minValue = 1.0f;
+			size.maxValue = 1.5f;
+			break;
+		case Projectile::PaddleLaserBulletProjectile:
+			severity = Onomatoplex::GOOD;
+			size.minValue = 0.4f;
+			size.maxValue = 0.65f;
+			break;
+		default:
+			assert(false);
+			return;
+	}
+
+	Point3D hitPosition(paddle.GetCenterPosition());
+	Vector3D emitDirection(paddle.GetUpVector());
+
+	// Form the text for the sound particle...
+	DropShadow dpTemp;
+	dpTemp.colour = Colour(0,0,0);
+	dpTemp.amountPercentage = 0.125f;
+	ESPOnomataParticle* paddleOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::SadBadGoo, GameFontAssetsManager::Small));
+	paddleOnoParticle->SetDropShadow(dpTemp);
+	paddleOnoParticle->SetOnomatoplexSound(Onomatoplex::BADSAD, severity);
+
+	// Onomatopeia for the hit...
+	ESPPointEmitter* paddleOnoEffect = new ESPPointEmitter();
+	paddleOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	paddleOnoEffect->SetInitialSpd(ESPInterval(1.0f, 1.75f));
+	paddleOnoEffect->SetParticleLife(ESPInterval(2.5f));
+	paddleOnoEffect->SetParticleRotation(ESPInterval(-45.0f, 45.0f));
+	paddleOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	paddleOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	paddleOnoEffect->SetEmitPosition(hitPosition);
+	paddleOnoEffect->SetEmitDirection(emitDirection);
+	paddleOnoEffect->SetEmitAngleInDegrees(10);
+	paddleOnoEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.2f), ESPInterval(0.2f), ESPInterval(1));
+	paddleOnoEffect->SetParticleSize(size);
+	paddleOnoEffect->AddEffector(&this->particleFader);
+	paddleOnoEffect->AddEffector(&this->particleSmallGrowth);
+	paddleOnoEffect->AddParticle(paddleOnoParticle);
+
+
+	// Figure out the projectile's position projected onto the paddle's axis
+	Vector2D vecToProjectile = projectile.GetPosition() - paddle.GetCenterPosition();
+	Vector2D positivePaddleAxis = Vector2D::Rotate(paddle.GetZRotation(), PlayerPaddle::DEFAULT_PADDLE_RIGHT_VECTOR);
+	float minHeightOfImpact = 2.0f * projectile.GetHeight();
+
+	// Use a dot product to determine whether the projectile is on the positive side or not
+	Point3D hitPositionRelativeToPaddleCenter = Point3D(0,0,0) + 
+		Vector3D(Vector2D::Dot(vecToProjectile, positivePaddleAxis) * positivePaddleAxis + 
+		minHeightOfImpact * paddle.GetHalfHeight() * paddle.GetUpVector());
+
+	// Add firey impact at hit location...
+	ESPPointEmitter* fireyImpactOnPaddle = new ESPPointEmitter();
+	fireyImpactOnPaddle->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	fireyImpactOnPaddle->SetInitialSpd(ESPInterval(0.001f));
+	fireyImpactOnPaddle->SetParticleLife(ESPInterval(0.85f));
+	fireyImpactOnPaddle->SetParticleSize(ESPInterval(projectile.GetWidth(), 1.5f * projectile.GetWidth()), 
+																			 ESPInterval(minHeightOfImpact, 3.0f * projectile.GetHeight()));
+	fireyImpactOnPaddle->SetEmitAngleInDegrees(0);
+	fireyImpactOnPaddle->SetAsPointSpriteEmitter(false);
+	fireyImpactOnPaddle->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+	fireyImpactOnPaddle->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	fireyImpactOnPaddle->SetEmitPosition(hitPositionRelativeToPaddleCenter);
+	fireyImpactOnPaddle->SetEmitDirection(emitDirection);
+	fireyImpactOnPaddle->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
+	fireyImpactOnPaddle->AddEffector(&this->particleFader);
+	fireyImpactOnPaddle->SetParticles(1, this->sideBlastTex);
+
+	this->activeGeneralEmitters.push_back(paddleOnoEffect);
+	this->activePaddleEmitters.push_back(fireyImpactOnPaddle);
 }
 
 /**

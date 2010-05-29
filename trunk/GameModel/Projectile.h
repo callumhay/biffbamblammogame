@@ -44,6 +44,7 @@ public:
 	virtual ~Projectile();
 	virtual void Tick(double seconds) = 0;
 	virtual BoundingLines BuildBoundingLines() const = 0;
+	//virtual Collision::AABB2D BuildAABB2D() const;
 
 	float GetWidth() const { return this->currWidth; }
 	float GetHeight() const { return  this->currHeight; }
@@ -76,5 +77,6 @@ public:
 
 	static Projectile* CreateProjectile(ProjectileType type, const Point2D& spawnLoc);
 };
+
 
 #endif

@@ -319,17 +319,18 @@ public:
 	}
 
 	/*
-	enum AnimationBlendType { ADDITIVE_BLEND };
-	// Blend the given lerp using the given blend type - this will blend with the current state of the
+	// Blend the given lerp additively to the current one - this will blend with the current state of the
 	// animation using the current state as the basis for the given times (i.e., time 0 will be whatever 
 	// time into the current animation we're at now).
-	void BlendLerp(AnimationBlendType blendType, const std::vector<double>& times, const std::vector<T>& interpolations) {
+	void AdditiveBlendLerp(const std::vector<double>& times, const std::vector<T>& interpolations) {
 		assert(times.size() == interpolations.size());
 		if (this->timePts.size() == 0) {
 			this->SetLerp(times, interpolations);
 			return;
 		}
 
+		double lastTime;
+		
 	}
 	*/
 

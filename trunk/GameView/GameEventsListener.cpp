@@ -114,6 +114,15 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
 
+void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
+	// Add the sprite/particle effect
+	this->display->GetAssets()->GetESPAssets()->AddPaddleHitByProjectileEffect(paddle, projectile);
+	// Add a fullscreen effect to show pain/badness
+	//TODO: this->display->GetAssets()->GetFBOAssets()->ActivatePaddleHurtEffect();
+
+	debug_output("EVENT: Paddle hit by projectile");
+}
+
 void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 	debug_output("EVENT: Ball died");
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveBallEffects(deadBall);
@@ -286,6 +295,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 				const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
 				this->display->GetAssets()->GetLevelMesh(currLevel)->RemovePiece(block);
 			}
+
 			break;
 
 		default:
