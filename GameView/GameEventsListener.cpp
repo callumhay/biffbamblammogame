@@ -115,11 +115,8 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 }
 
 void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
-	// Add the sprite/particle effect
-	this->display->GetAssets()->GetESPAssets()->AddPaddleHitByProjectileEffect(paddle, projectile);
-	// Add a fullscreen effect to show pain/badness
-	//TODO: this->display->GetAssets()->GetFBOAssets()->ActivatePaddleHurtEffect();
-
+	// Add the hurting effects...
+	this->display->GetAssets()->PaddleHurtByProjectile(paddle, projectile);
 	debug_output("EVENT: Paddle hit by projectile");
 }
 

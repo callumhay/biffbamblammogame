@@ -39,7 +39,7 @@ private:
 	CgFxPostSmokey* smokeyCamEffect;
 	CgFxPostUberIntense* uberIntenseCamEffect;
 
-	// Misc. Textures
+	// Misc. Textures and overlays
 	Texture* barrelOverlayTex;	// Texture for overlay of the cannon barrel
 
 	bool drawItemsInLastPass;	// Whether or not items get drawn in the final pass
