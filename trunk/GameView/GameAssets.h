@@ -19,6 +19,7 @@ class CgFxVolumetricEffect;
 class ESPEmitter;
 class LivesLeftHUD;
 class CrosshairLaserHUD;
+class PlayerHurtHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
 
@@ -41,6 +42,7 @@ private:
 
 	LivesLeftHUD* lifeHUD;
 	CrosshairLaserHUD* crosshairHUD;
+	PlayerHurtHUD* painHUD;
 
 	// Level-related meshes
 	std::map<const GameLevel*, LevelMesh*> loadedLevelMeshes;
@@ -129,6 +131,7 @@ public:
 	}
 
 	void FirePaddleLaser(const PlayerPaddle& paddle);
+	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 };
 
 #endif

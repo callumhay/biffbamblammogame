@@ -259,7 +259,7 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			this->barrelOverlayTex->BindTexture();
-			GeometryMaker::GetInstance()->DrawFullScreenQuad(width, height, 1.0f, ColourRGBA(1, 1, 1, overlayAlpha));
+			GeometryMaker::GetInstance()->DrawFullScreenQuad(width, height, 0.9f, ColourRGBA(1, 1, 1, overlayAlpha));
 			this->barrelOverlayTex->UnbindTexture();
 
 			glPopAttrib();

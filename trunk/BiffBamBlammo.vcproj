@@ -643,6 +643,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\PlayerHurtHUD.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\PortalBlockMesh.h"
 					>
 				</File>
@@ -768,6 +772,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\MainMenuDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\PlayerHurtHUD.cpp"
 					>
 				</File>
 				<File

@@ -8,6 +8,7 @@
 #include "LoadingScreen.h"
 #include "LivesLeftHUD.h"
 #include "CrosshairLaserHUD.h"
+#include "PlayerHurtHUD.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
 
@@ -35,6 +36,7 @@ lightAssets(NULL),
 
 lifeHUD(NULL),
 crosshairHUD(NULL),
+painHUD(NULL),
 
 ball(NULL), 
 spikeyBall(NULL), 
@@ -74,6 +76,7 @@ ghostBallEffect(NULL)
 	// Initialize any HUD elements
 	this->crosshairHUD	= new CrosshairLaserHUD();
 	this->lifeHUD			  = new LivesLeftHUD();
+	this->painHUD				= new PlayerHurtHUD();
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();
@@ -113,6 +116,8 @@ GameAssets::~GameAssets() {
 	this->lifeHUD = NULL;
 	delete this->crosshairHUD;
 	this->crosshairHUD = NULL;
+	delete this->painHUD;
+	this->painHUD = NULL;
 }
 
 /*
@@ -662,6 +667,9 @@ void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel
 		this->crosshairHUD->Tick(dT);
 		this->crosshairHUD->Draw(paddle, displayWidth, displayHeight, (1.0 - paddle->GetColour().A()));
 	}
+
+	// Draw any pain overlay when active
+	this->painHUD->Draw(dT, displayWidth, displayHeight);
 }
 
 void GameAssets::LoadRegularMeshAssets() {
@@ -725,6 +733,31 @@ void GameAssets::DeleteRegularEffectAssets() {
  */
 void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
 	this->paddleLaserAttachment->FirePaddleLaserGun(paddle);
+}
+
+/**
+ * Notifies the assets that the paddle has been hurt so that the appropriate effects can
+ * occur to show the hurting.
+ */
+void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile) {
+	// Add the sprite/particle effect
+	this->espAssets->AddPaddleHitByProjectileEffect(paddle, projectile);
+
+	PlayerHurtHUD::PainIntensity intensity;
+	switch (projectile.GetType()) {
+		case Projectile::CollateralBlockProjectile:
+			intensity = PlayerHurtHUD::MajorPain;
+			break;
+		case Projectile::PaddleLaserBulletProjectile:
+			intensity = PlayerHurtHUD::MinorPain;
+			break;
+		default:
+			assert(false);
+			return;
+	}
+
+	// Add a fullscreen overlay effect to show pain/badness
+	this->painHUD->Activate(intensity);
 }
 
 /*
@@ -899,6 +932,8 @@ void GameAssets::DeactivateMiscEffects() {
 	this->fboAssets->DeactivateInkSplatterEffect();
 	this->espAssets->KillAllActiveEffects();
 	this->itemAssets->ClearTimers();
+	// Disable any overlay stuff
+	this->painHUD->Deactivate();
 }
 
 /**
