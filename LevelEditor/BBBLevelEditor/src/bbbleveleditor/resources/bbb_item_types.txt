@@ -13,6 +13,9 @@ The paddle gains the ability to shoot small laser bullets that can destroy block
 + LaserBeamPaddle
 The paddle gains the ability to shoot a giant laser beam that can destroy blocks and cause chain reactions with certain blocks (e.g., prism block).
 
++ RocketShotPaddle
+The paddle gains the ability to shoot a single rocket that can destroy a large group of blocks.
+
 + MultiBall3
 Split the most recently touched ball into 3 balls.
 

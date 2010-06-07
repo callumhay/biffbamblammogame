@@ -181,7 +181,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), camera, negHalfLevelDim);
 
 	// Projectiles...
-	this->display->GetAssets()->GetESPAssets()->DrawProjectileEffects(dT, camera);
+	this->display->GetAssets()->DrawProjectiles(dT, *this->display->GetModel(), camera);
 
 	glPopMatrix();
 

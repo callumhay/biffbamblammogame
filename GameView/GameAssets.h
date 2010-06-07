@@ -1,3 +1,14 @@
+/**
+ * GameAssets.h
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #ifndef __GAMEASSETS_H__
 #define __GAMEASSETS_H__
 
@@ -11,6 +22,13 @@
 #include "../GameModel/GameItem.h"
 #include "../GameModel/GameItemTimer.h"
 
+// Compositional classes for asssets
+#include "GameWorldAssets.h"
+#include "GameESPAssets.h"
+#include "GameItemAssets.h"
+#include "GameFBOAssets.h"
+#include "GameLightAssets.h"
+
 class GameModel;
 class Texture3D;
 class LevelMesh;
@@ -22,13 +40,7 @@ class CrosshairLaserHUD;
 class PlayerHurtHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
-
-// Compositional classes for asssets
-#include "GameWorldAssets.h"
-#include "GameESPAssets.h"
-#include "GameItemAssets.h"
-#include "GameFBOAssets.h"
-#include "GameLightAssets.h"
+class PaddleRocketMesh;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -50,6 +62,7 @@ private:
 	// Regular meshes - these persist throughout the entire game
 	Mesh* ball;																// Ball used to break blocks
 	Mesh* spikeyBall;													// What happens to the ball when it becomes uber
+	PaddleRocketMesh* rocketMesh;							// The rocket that can be fired from the paddle as a power-up
 
 	Mesh* paddleBeamAttachment;								// Laser beam attachment for paddle
 	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
@@ -65,6 +78,10 @@ private:
 	// Asset loading helper functions
 	void LoadRegularMeshAssets();
 	void LoadRegularEffectAssets();
+
+	// Projectile specific functionality
+	void FirePaddleLaser(const PlayerPaddle& paddle);
+	void FirePaddleRocket(const Projectile& rocketProjectile);
 
 public:
 	GameAssets(int screenWidth, int screenHeight);
@@ -90,6 +107,7 @@ public:
 	void DrawTimers(double dT, const Camera& camera);
 
 	void DrawBeams(double dT, const GameModel& gameModel, const Camera& camera);
+	void DrawProjectiles(double dT, const GameModel& gameModel, const Camera& camera);
 
 	void DrawActiveItemHUDElements(double dT, const GameModel& gameModel, int displayWidth, int displayHeight);
 
@@ -130,7 +148,9 @@ public:
 		return this->lifeHUD;
 	}
 
-	void FirePaddleLaser(const PlayerPaddle& paddle);
+	void AddProjectile(const GameModel& gameModel, const Projectile& projectile);
+	void RemoveProjectile(const GameModel& gameModel, const Projectile& projectile);
+
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 };
 

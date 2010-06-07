@@ -20,7 +20,7 @@ public:
 									InvisiBallItem, LaserBulletPaddleItem, LaserBeamPaddleItem, MultiBall3Item, MultiBall5Item, 
 									OneUpItem, PaddleCamItem, BallCamItem, PaddleGrowItem, PaddleShrinkItem, 
 									PoisonPaddleItem, StickyPaddleItem, UberBallItem, UpsideDownItem, BallSpeedUpItem, 
-									BallSlowDownItem, GravityBallItem };
+									BallSlowDownItem, GravityBallItem, RocketPaddleItem };
 
 protected:
 	std::string name;							// Name of this item

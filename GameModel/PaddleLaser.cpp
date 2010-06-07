@@ -37,7 +37,7 @@ PaddleLaser::~PaddleLaser() {
  * update the position and other relevant information for this paddle laser projectile.
  */
 void PaddleLaser::Tick(double seconds) {
-	// Update the laser's position and bounding box
+	// Update the laser's position
 	Vector2D dV = seconds * this->velocityMag * this->velocityDir;
 	this->position = this->position + dV;
 }

@@ -46,7 +46,7 @@ public:
 	static const Vector2D DEFAULT_PADDLE_RIGHT_VECTOR;
 
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000010, 
-										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000 };
+										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000, RocketPaddle = 0x00010000 };
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
 	PlayerPaddle(float minBound, float maxBound);

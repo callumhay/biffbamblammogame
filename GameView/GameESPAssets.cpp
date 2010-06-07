@@ -69,7 +69,8 @@ haloTex(NULL),
 lensFlareTex(NULL),
 sparkleTex(NULL),
 spiralTex(NULL),
-sideBlastTex(NULL) {
+sideBlastTex(NULL),
+hugeExplosionTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -134,6 +135,8 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->spiralTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sideBlastTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->hugeExplosionTex);
 	assert(removed);
 
 	// Delete any standalone effects
@@ -420,6 +423,10 @@ void GameESPAssets::InitESPTextures() {
 	if (this->sideBlastTex == NULL) {
 		this->sideBlastTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST, Texture::Trilinear));
 		assert(this->sideBlastTex != NULL);
+	}
+	if (this->hugeExplosionTex == NULL) {
+		this->hugeExplosionTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION, Texture::Trilinear));
+		assert(this->hugeExplosionTex != NULL);
 	}
 
 	debug_opengl_state();
@@ -844,6 +851,13 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			}
 			break;
 		
+		case Projectile::PaddleRocketBulletProjectile: {
+				// A rocket just hit a block - KABOOOOOOM!!!
+				Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+				this->AddRocketHitBlockEffect(midPoint);
+			}
+			break;
+
 		case Projectile::CollateralBlockProjectile:
 			break;
 
@@ -1950,9 +1964,15 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 		case Projectile::PaddleLaserBulletProjectile:
 			this->AddLaserPaddleESPEffects(gameModel, projectile);
 			break;
+
+		case Projectile::PaddleRocketBulletProjectile:
+			// TODO
+			break;
+
 		case Projectile::CollateralBlockProjectile:
 			this->AddCollateralProjectileEffects(projectile);
 			break;
+
 		default:
 			assert(false);
 			break;
@@ -1962,7 +1982,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 /**
  * Removes effects associated with the given projectile.
  */
-void GameESPAssets::RemoveProjectileEffect(const Camera& camera, const Projectile& projectile) {
+void GameESPAssets::RemoveProjectileEffect(const Projectile& projectile) {
 	
  	std::map<const Projectile*, std::list<ESPPointEmitter*>>::iterator projIter = this->activeProjectileEmitters.find(&projectile);
 	if (projIter != this->activeProjectileEmitters.end()) {
@@ -2543,6 +2563,108 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 
 	this->activeGeneralEmitters.push_back(lensFlareEmitter);
 	this->activeGeneralEmitters.push_back(particleSparks);
+}
+
+// Add the effect for when the rocket goes off after it hits a block
+void GameESPAssets::AddRocketHitBlockEffect(const Point2D& loc) {
+	ESPInterval bangLifeInterval		= ESPInterval(1.2f);
+	ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.maxValue + 0.4f);
+	Point3D emitCenter(loc);
+
+	// Create an emitter for the bang texture
+	ESPPointEmitter* explosionEffect = new ESPPointEmitter();
+	
+	// Set up the emitter...
+	explosionEffect->SetSpawnDelta(ESPInterval(-1));
+	explosionEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	explosionEffect->SetParticleLife(bangLifeInterval);
+	explosionEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	explosionEffect->SetParticleAlignment(ESP::ScreenAligned);
+	explosionEffect->SetEmitPosition(emitCenter);
+
+	// Figure out some random proper orientation...
+	explosionEffect->SetParticleRotation(ESPInterval(-25.0f, 25.0f));
+
+	ESPInterval sizeIntervalX(4 * LevelPiece::PIECE_WIDTH);
+	ESPInterval sizeIntervalY(5.5 * LevelPiece::PIECE_HEIGHT);
+	explosionEffect->SetParticleSize(sizeIntervalX, sizeIntervalY);
+
+	// Add effectors to the bang effect
+	explosionEffect->AddEffector(&this->particleFader);
+	explosionEffect->AddEffector(&this->particleMediumGrowth);
+	
+	// Add the explosion particle...
+	bool result = explosionEffect->SetParticles(1, this->hugeExplosionTex);
+	assert(result);
+
+	// Explosion rays...
+	ESPPointEmitter* explodeRayEffect = new ESPPointEmitter();
+	explodeRayEffect->SetSpawnDelta(ESPInterval(-1.0f));
+	explodeRayEffect->SetInitialSpd(ESPInterval(0.0f));
+	explodeRayEffect->SetParticleLife(ESPInterval(1.0f));
+	explodeRayEffect->SetParticleSize(sizeIntervalX);
+	explodeRayEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	explodeRayEffect->SetParticleAlignment(ESP::ScreenAligned);
+	explodeRayEffect->SetEmitPosition(emitCenter);
+	explodeRayEffect->SetParticles(1, this->explosionRayTex);
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		explodeRayEffect->AddEffector(&this->explosionRayRotatorCW);
+	}
+	else {
+		explodeRayEffect->AddEffector(&this->explosionRayRotatorCCW);
+	}
+	explodeRayEffect->AddEffector(&this->particleLargeGrowth);
+	explodeRayEffect->AddEffector(&this->particleFader);
+
+	// Add debris bits
+	ESPPointEmitter* debrisBits = new ESPPointEmitter();
+	debrisBits->SetSpawnDelta(ESPInterval(-1));
+	debrisBits->SetInitialSpd(ESPInterval(4.5f, 6.0f));
+	debrisBits->SetParticleLife(ESPInterval(2.5f, 3.5f));
+	debrisBits->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 6.0f, LevelPiece::PIECE_WIDTH / 5.0f));
+	debrisBits->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.2f), ESPInterval(1.0f));
+	debrisBits->SetEmitAngleInDegrees(180);
+	debrisBits->SetAsPointSpriteEmitter(true);
+	debrisBits->SetEmitPosition(emitCenter);
+	debrisBits->AddEffector(&this->particleFader);
+	debrisBits->AddEffector(&this->particleMediumGrowth);
+	debrisBits->AddEffector(&this->gravity);
+	debrisBits->SetParticles(15, this->circleGradientTex);
+
+	// Create an emitter for the sound of onomatopeia of the breaking block
+	ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
+	bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
+	bangOnoEffect->SetParticleSize(ESPInterval(1.0f));
+	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	bangOnoEffect->SetEmitPosition(emitCenter);
+	
+	// Add effectors...
+	bangOnoEffect->AddEffector(&this->particleFader);
+	bangOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single text particle to the emitter with the severity of the effect...
+	TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "");
+	bangTextLabel.SetColour(Colour(1, 1, 1));
+	bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+
+	Onomatoplex::Extremeness severity = Onomatoplex::UBER;
+	Onomatoplex::SoundType type = Onomatoplex::EXPLOSION;
+
+	bangOnoEffect->SetParticles(1, bangTextLabel, type, severity);
+
+	// Lastly, add the new emitters to the list of active emitters in order of back to front
+
+	this->activeGeneralEmitters.push_back(debrisBits);
+	this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 
+																				ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
+	this->activeGeneralEmitters.push_back(explosionEffect);
+	this->activeGeneralEmitters.push_back(explodeRayEffect);
+	this->activeGeneralEmitters.push_back(bangOnoEffect);
 }
 
 /**

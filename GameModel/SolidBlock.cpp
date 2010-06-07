@@ -140,6 +140,10 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			resultingPiece = this->Destroy(gameModel);
 			break;
 
+		case Projectile::PaddleRocketBulletProjectile:
+			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, this);
+			break;
+
 		default:
 			assert(false);
 			break;

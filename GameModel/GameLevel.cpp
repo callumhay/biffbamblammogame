@@ -456,6 +456,65 @@ void GameLevel::PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter) {
 }
 
 /**
+ * When a rocket explodes... a lot of stuff goes boom.
+ * If a rocket hits block 'x' then it plus all other blocks 'o' are destroyed 
+ * (if they can be destroyed by a ball).
+ *
+ *                        o o o
+ *                        o o o
+ *                        o x o 
+ *                        o o o
+ *                        o o o
+ */
+LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, LevelPiece* hitPiece) {
+	// Destroy the hit piece if we can...
+	LevelPiece* resultPiece = hitPiece;
+	if (hitPiece->CanBeDestroyedByBall()) {
+		resultPiece = hitPiece->Destroy(gameModel);
+	}
+
+	// Grab all the pieces that are going to be affected around the central given hit piece
+	// NOTE: If a piece doesn't exist (i.e., the bounds of the level are hit then the piece
+	// will be populated as NULL and accounted for while iterating through the affected pieces).
+	unsigned int hIndex = resultPiece->GetHeightIndex();
+	unsigned int wIndex = resultPiece->GetWidthIndex();
+
+	std::vector<LevelPiece*> affectedPieces;
+	affectedPieces.reserve(14);
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex-1));
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex));
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex+1));
+
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex-1));
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex));
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex+1));
+
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-1));
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+1));
+
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex-1));
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex));
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex+1));
+
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex-1));
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex));
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex+1));
+
+	// Go through each affected piece and destroy it if we can
+	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ++iter) {
+		LevelPiece* currAffectedPiece = *iter;
+		if (currAffectedPiece == NULL) {
+			continue;
+		}
+		if (currAffectedPiece->CanBeDestroyedByBall()) {
+			currAffectedPiece->Destroy(gameModel);
+		}
+	}
+
+	return resultPiece;
+}
+
+/**
  * Private helper function for finding a set of levelpieces within the given range of values
  * indexing along the x and y axis.
  * Return: Set of levelpieces included in the given bounds.

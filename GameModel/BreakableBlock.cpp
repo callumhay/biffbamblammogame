@@ -174,6 +174,10 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 			newPiece = this->Destroy(gameModel);
 			break;
 
+		case Projectile::PaddleRocketBulletProjectile:
+			newPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, this);
+			break;
+
 		default:
 			assert(false);
 			break;

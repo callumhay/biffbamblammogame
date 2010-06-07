@@ -13,6 +13,7 @@
 #include "LevelPiece.h"
 #include "GameEventManager.h"
 #include "PaddleLaser.h"
+#include "PaddleRocketProjectile.h"
 
 // Projectile ====================================================================================================================
 
@@ -35,6 +36,8 @@ Projectile* Projectile::CreateProjectile(ProjectileType type, const Point2D& spa
 	switch (type) {
 		case Projectile::PaddleLaserBulletProjectile:
 			return new PaddleLaser(spawnLoc);
+		case Projectile::PaddleRocketBulletProjectile:
+			return new PaddleRocketProjectile(spawnLoc);
 		default:
 			assert(false);
 			break;

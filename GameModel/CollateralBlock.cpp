@@ -79,6 +79,10 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			newLevelPiece = this->Destroy(gameModel);
 			break;
 
+		case Projectile::PaddleRocketBulletProjectile:
+			newLevelPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, this);
+			break;
+
 		default:
 			assert(false);
 			break;

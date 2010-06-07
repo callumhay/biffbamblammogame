@@ -13,6 +13,7 @@
 #define __PRISMBLOCK_H__
 
 #include "LevelPiece.h"
+#include "Projectile.h"
 
 /**
  * Represents a prism block in the game. Prism blocks are not destroyable,
@@ -64,6 +65,10 @@ public:
 	}
 
 	bool ProjectilePassesThrough(Projectile* projectile) {
+		if (projectile->GetType() == Projectile::PaddleRocketBulletProjectile) {
+			return false;
+		}
+
 		return true;
 	}
 

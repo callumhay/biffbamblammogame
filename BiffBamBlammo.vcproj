@@ -643,6 +643,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\PaddleRocketMesh.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\PlayerHurtHUD.h"
 					>
 				</File>
@@ -772,6 +776,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\MainMenuDisplayState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\PaddleRocketMesh.cpp"
 					>
 				</File>
 				<File
@@ -1007,6 +1015,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\PaddleRocketProjectile.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\PlayerPaddle.h"
 					>
 				</File>
@@ -1072,6 +1084,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\PaddleLaser.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\PaddleRocketProjectile.cpp"
 					>
 				</File>
 				<File
@@ -1162,6 +1178,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\RocketPaddleItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\StickyPaddleItem.h"
 						>
 					</File>
@@ -1247,6 +1267,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\PoisonPaddleItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\RocketPaddleItem.cpp"
 						>
 					</File>
 					<File
