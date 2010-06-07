@@ -1,0 +1,26 @@
+newmtl RedRocketMetal
+Ka 0.000000 0.000000 0.000000
+Kd 0.729412 0.164706 0.164706
+Ks 0.330000 0.330000 0.330000
+Ns 60
+map_Kd resources/textures/bombmetal_512x256.jpg
+type phong
+geomtype fg
+
+newmtl PlainRocketMetal
+Ka 0.000000 0.000000 0.000000
+Kd 0.874510 0.874510 0.874510
+Ks 0.660000 0.660000 0.660000
+Ns 80
+map_Kd resources/textures/bombmetal_512x256.jpg
+type phong
+geomtype fg
+
+newmtl ExclamationMarkMetal
+Ka 0.200000 0.200000 0.200000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ns 110
+map_Kd resources/textures/rocket_metal_256x128.jpg
+type phong
+geomtype fg

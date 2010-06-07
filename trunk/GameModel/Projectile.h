@@ -25,7 +25,7 @@ class LevelPiece;
  */
 class Projectile {
 public:
-	enum ProjectileType { PaddleLaserBulletProjectile, CollateralBlockProjectile };
+	enum ProjectileType { PaddleLaserBulletProjectile, CollateralBlockProjectile, PaddleRocketBulletProjectile };
 protected:
 	Projectile(ProjectileType type, const Point2D& spawnLoc, float width, float height);
 	Projectile(const Projectile& copy);

@@ -224,6 +224,7 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
 			// TODO?
 			break;
 
+		case Projectile::PaddleRocketBulletProjectile:
 		case Projectile::CollateralBlockProjectile: {
 				Point2D projectileTeleportPos = projectile.GetPosition() + projectile.GetHalfHeight() * projectile.GetVelocityDirection();
 				this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(projectileTeleportPos, enterPortal);
@@ -394,27 +395,14 @@ void GameEventsListener::ItemTimerStoppedEvent(const GameItemTimer& itemTimer) {
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
-	
-	// Add the projectile's effect
-	this->display->GetAssets()->GetESPAssets()->AddProjectileEffect(*this->display->GetModel(), projectile); 
-
-	// Add any other view-related effects for the given projectile
-	switch (projectile.GetType()) {
-		case Projectile::PaddleLaserBulletProjectile:
-			// Have the laser gun attachment move downwards in reaction to the laser being shot
-			this->display->GetAssets()->FirePaddleLaser(*this->display->GetModel()->GetPlayerPaddle());
-			break;
-		default:
-			break;
-	}
-
+	// Tell the assets - this will spawn the appropriate sprites/projectiles and effects
+	this->display->GetAssets()->AddProjectile(*this->display->GetModel(), projectile);
 	debug_output("EVENT: Projectile spawned");
 }
 
 void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	// Remove the projectile's effect
-	this->display->GetAssets()->GetESPAssets()->RemoveProjectileEffect(this->display->GetCamera(), projectile);
-
+	this->display->GetAssets()->RemoveProjectile(*this->display->GetModel(), projectile);
 	debug_output("EVENT: Projectile removed");
 }
 

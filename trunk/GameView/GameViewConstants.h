@@ -49,6 +49,7 @@ private:
 	const std::string TEXTURE_ITEM_BALLCAM;
 	const std::string TEXTURE_ITEM_PADDLEBEAM;
 	const std::string TEXTURE_ITEM_GRAVITYBALL;
+	const std::string TEXTURE_ITEM_PADDLEROCKET;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -153,6 +154,7 @@ public:
 	const std::string TEXTURE_LENSFLARE;
 	const std::string TEXTURE_TWISTED_SPIRAL;
 	const std::string TEXTURE_SIDEBLAST;
+	const std::string TEXTURE_HUGE_EXPLOSION;
 
 	const std::string TEXTURE_STARFIELD;
 	
@@ -235,6 +237,7 @@ public:
 	const std::string PADDLE_LASER_ATTACHMENT_MESH;
 	const std::string PADDLE_BEAM_ATTACHMENT_MESH;
 	const std::string PADDLE_STICKY_ATTACHMENT_MESH;
+	const std::string PADDLE_ROCKET_MESH;
 
 	// DECO WORLD
 	const std::string DECO_PADDLE_MESH;

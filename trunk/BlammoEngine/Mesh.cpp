@@ -25,7 +25,6 @@ PolygonGroup::PolygonGroup(const PolygonGroup& other) {
 PolygonGroup::PolygonGroup(const PolyGrpIndexer& faceIndexer, const std::vector<Point3D>& vertexStream, 
 													 const std::vector<Vector3D>& normalStream, const std::vector<Point2D>& texCoordStream) {
 	
-	assert(faceIndexer.normalIndices.size() == faceIndexer.texCoordIndices.size());
 	assert(faceIndexer.normalIndices.size() == faceIndexer.vertexIndices.size());
 	assert(faceIndexer.vertexIndices.size() == faceIndexer.texCoordIndices.size());
 
@@ -111,6 +110,12 @@ void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer,
 														 const std::vector<Point3D>& vertexStream, 
 														 const std::vector<Vector3D>& normalStream,
 														 const std::vector<Point2D>& texCoordStream) {
+	if (this->polyGrp != NULL) {
+		delete this->polyGrp;
+	}
+	if (this->displayListID != 0) {
+		this->DeleteDisplayList();
+	}
 
 	this->polyGrp = new PolygonGroup(indexer, vertexStream, normalStream, texCoordStream);
 

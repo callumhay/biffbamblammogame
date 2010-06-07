@@ -102,6 +102,7 @@ private:
 	Texture2D* sparkleTex;
 	Texture2D* spiralTex;
 	Texture2D* sideBlastTex;
+	Texture2D* hugeExplosionTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -164,6 +165,8 @@ private:
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
 
+	void AddRocketHitBlockEffect(const Point2D& loc);
+
 	void AddPaddleLaserBeamEffect(const Beam& beam);
 	ESPPointEmitter* CreateBeamEndEffect();
 	ESPPointEmitter* CreateBeamEndBlockEffect();
@@ -203,7 +206,7 @@ public:
 	void RemoveItemDropEffect(const Camera& camera, const GameItem& item);
 
 	void AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile);
-	void RemoveProjectileEffect(const Camera& camera, const Projectile& projectile);
+	void RemoveProjectileEffect(const Projectile& projectile);
 
 	void AddBeamEffect(const Beam& beam);
 	void UpdateBeamEffect(const Beam& beam);

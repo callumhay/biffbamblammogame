@@ -59,7 +59,7 @@ void GameController::KeyDown(SDLKey key, SDLMod modifier) {
 	else if (key == SDLK_i) {
 		this->model->DropItem(GameItem::InvisiBallItem);
 	}
-
+	// j
 	else if (key == SDLK_k) {
 		this->model->DropItem(GameItem::BallGrowItem);
 	}
@@ -72,22 +72,24 @@ void GameController::KeyDown(SDLKey key, SDLMod modifier) {
 	else if (key == SDLK_n) {
 		this->model->DropItem(GameItem::BallSafetyNetItem);
 	}
-
+	// o
 	else if (key == SDLK_p) {
 		this->model->TogglePause(GameModel::PauseGame);
 	}
 	else if (key == SDLK_q) {
 		this->model->DropItem(GameItem::BallSpeedUpItem);
 	}
-
+	else if (key == SDLK_r) {
+		this->model->DropItem(GameItem::RocketPaddleItem);
+	}
 	else if (key == SDLK_s) {
 		this->model->DropItem(GameItem::BallSlowDownItem);
 	}
-
+	// t
 	else if (key == SDLK_u) {
 		this->model->DropItem(GameItem::UberBallItem);
 	}
-
+	// v
 	else if (key == SDLK_w) {
 		GameDisplay::ToggleDrawDebugBounds();
 	}
@@ -106,12 +108,16 @@ void GameController::KeyDown(SDLKey key, SDLMod modifier) {
 	else if (key == SDLK_1) {
 		this->model->DropItem(GameItem::OneUpItem);
 	}
+	// 2
 	else if (key == SDLK_3) {
 		this->model->DropItem(GameItem::MultiBall3Item);
 	}
+	// 4
 	else if (key == SDLK_5) {
 		this->model->DropItem(GameItem::MultiBall5Item);
 	}
+	
+	// ...
 
 	else if (key == SDLK_SLASH) {
 		GameDisplay::ToggleDetachCamera();

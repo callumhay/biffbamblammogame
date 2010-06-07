@@ -14,9 +14,10 @@
 #include "GameEventManager.h"
 #include "GameModelConstants.h"
 #include "PaddleLaser.h"
+#include "PaddleRocketProjectile.h"
 
 #include "Beam.h"
-#include "Projectile.h"
+
 
 // Default values for the size of the paddle
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
@@ -309,7 +310,8 @@ void PlayerPaddle::Tick(double seconds) {
 		if (this->hitWall) {
 			this->distTemp = 0.0f;
 		}
-		else {
+		// Only do the event if the paddle is on the normal plane of movement
+		else if (this->moveDownAnimation.GetInterpolantValue() == 0.0) {
 			// EVENT: paddle hit left wall for first time
 			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-halfWidthTotalWithBallMin, 0));
 		}
@@ -323,7 +325,8 @@ void PlayerPaddle::Tick(double seconds) {
 		if (this->hitWall) {
 			this->distTemp = 0.0f;
 		}
-		else {
+		// Only do the event if the paddle is on the normal plane of movement
+		else if (this->moveDownAnimation.GetInterpolantValue() == 0.0) {
 			// EVENT: paddle hit right wall for first time
 			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(halfWidthTotalWithBallMax, 0));
 		}
@@ -404,8 +407,17 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		return;
 	}
 	
-	// Check for laser beam paddle (this has top priority)
-	if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !this->isFiringBeam) {
+	// Check for the rocket paddle (this has top priority)
+	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+		// The rocket immediately is fired from the paddle - create a projectile for it and add it to the model (i.e., fire it!)
+		Projectile* rocketProjectile = Projectile::CreateProjectile(Projectile::PaddleRocketBulletProjectile, 
+			this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT));
+		gameModel->AddProjectile(rocketProjectile);
+
+		this->RemovePaddleType(PlayerPaddle::RocketPaddle);
+	}
+	// Check for laser beam paddle 
+	else if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !this->isFiringBeam) {
 		// We add the beam to the game model, the rest will be taken care of by the beam and model
 		gameModel->AddBeam(Beam::PaddleLaserBeam);
 	}

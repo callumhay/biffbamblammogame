@@ -1,3 +1,14 @@
+/**
+ * GameAssets.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "GameAssets.h"
 #include "GameDisplay.h"
 #include "LevelMesh.h"
@@ -11,11 +22,13 @@
 #include "PlayerHurtHUD.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
+#include "PaddleRocketMesh.h"
 
 // Game Model includes
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
 #include "../GameModel/Beam.h"
+#include "../GameModel/PaddleRocketProjectile.h"
 
 // Blammo Engine includes
 #include "../BlammoEngine/Texture3D.h"
@@ -39,7 +52,8 @@ crosshairHUD(NULL),
 painHUD(NULL),
 
 ball(NULL), 
-spikeyBall(NULL), 
+spikeyBall(NULL),
+rocketMesh(NULL),
 paddleBeamAttachment(NULL),
 paddleLaserAttachment(NULL),
 paddleStickyAttachment(NULL),
@@ -97,6 +111,9 @@ GameAssets::~GameAssets() {
 
 	bool success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleBeamAttachment);
 	assert(success);
+
+	delete this->rocketMesh;
+	this->rocketMesh = NULL;
 
 	delete this->paddleLaserAttachment;
 	this->paddleLaserAttachment = NULL;
@@ -655,6 +672,18 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 }
 
 /**
+ * Draw the currently active projectiles in the game.
+ */
+void GameAssets::DrawProjectiles(double dT, const GameModel& gameModel, const Camera& camera) {
+	this->espAssets->DrawProjectileEffects(dT, camera);
+
+	// Get lights affecting the foreground meshes...
+	PointLight keyLight, fillLight, ballLight;
+	this->lightAssets->GetPaddleAffectingLights(keyLight, fillLight, ballLight);
+	this->rocketMesh->Draw(*gameModel.GetPlayerPaddle(), camera, keyLight, fillLight, ballLight);
+}
+
+/**
  * Draw HUD elements for any of the active items when applicable.
  */
 void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel, int displayWidth, int displayHeight) {
@@ -678,6 +707,9 @@ void GameAssets::LoadRegularMeshAssets() {
 	}
 	if (this->spikeyBall == NULL) {
 		this->spikeyBall = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->SPIKEY_BALL_MESH);
+	}
+	if (this->rocketMesh == NULL) {
+		this->rocketMesh = new PaddleRocketMesh();
 	}
 	if (this->paddleBeamAttachment == NULL) {
 		this->paddleBeamAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_BEAM_ATTACHMENT_MESH);
@@ -728,11 +760,56 @@ void GameAssets::DeleteRegularEffectAssets() {
 }
 
 /**
- * Cause the laser paddle attachment to animate - like it's reacting to shooting
+ * Add the given projectile and create associated assets for it in the game assets.
+ */
+void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& projectile) {
+	// Add the projectile's sprite/emitter effects
+	this->espAssets->AddProjectileEffect(gameModel, projectile); 
+
+	// Add any other view-related effects for the given projectile
+	switch (projectile.GetType()) {
+		case Projectile::PaddleLaserBulletProjectile:
+			// Have the laser gun attachment move downwards in reaction to the laser being shot
+			this->FirePaddleLaser(*gameModel.GetPlayerPaddle());
+			break;
+		case Projectile::PaddleRocketBulletProjectile:
+			// Notify assets of the rocket...
+			this->FirePaddleRocket(projectile);
+			break;
+		default:
+			break;
+	}
+}
+
+/** 
+ * Remove the given projectile and its effects from the assets.
+ */
+void GameAssets::RemoveProjectile(const GameModel& gameModel, const Projectile& projectile) {
+	this->espAssets->RemoveProjectileEffect(projectile);
+
+	switch (projectile.GetType()) {
+		case Projectile::PaddleRocketBulletProjectile:
+			this->rocketMesh->Deactivate();
+			break;
+		default:
+			break;
+	}
+}
+
+/**
+ * Private helper, cause the laser paddle attachment to animate - like it's reacting to shooting
  * a bullet or something.
  */
 void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
 	this->paddleLaserAttachment->FirePaddleLaserGun(paddle);
+}
+
+/**
+ * Private helper, causes the rocket to be fired and drawn.
+ */
+void GameAssets::FirePaddleRocket(const Projectile& rocketProjectile) {
+	assert(rocketProjectile.GetType() == Projectile::PaddleRocketBulletProjectile);
+	this->rocketMesh->Activate(dynamic_cast<const PaddleRocketProjectile*>(&rocketProjectile));
 }
 
 /**

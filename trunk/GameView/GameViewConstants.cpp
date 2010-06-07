@@ -64,6 +64,7 @@ TEXTURE_HALO(TEXTURE_DIRECTORY "/halo_64x64.png"),
 TEXTURE_LENSFLARE(TEXTURE_DIRECTORY "/lens_flare_64x64.png"),
 TEXTURE_TWISTED_SPIRAL(TEXTURE_DIRECTORY "/twisted_spiral_64x64.png"),
 TEXTURE_SIDEBLAST(TEXTURE_DIRECTORY "/sideblast_128x128.png"),
+TEXTURE_HUGE_EXPLOSION(TEXTURE_DIRECTORY "/huge_explosion_512x256.png"),
 
 TEXTURE_STARFIELD(TEXTURE_DIRECTORY "/starfield_1024x1024.jpg"),
 
@@ -101,6 +102,7 @@ TEXTURE_ITEM_PADDLECAM(TEXTURE_DIRECTORY		"/paddlecam_powerdown_256x128.jpg"),
 TEXTURE_ITEM_BALLCAM(TEXTURE_DIRECTORY			"/ballcam_powerdown_256x128.jpg"),
 TEXTURE_ITEM_PADDLEBEAM(TEXTURE_DIRECTORY		"/laserbeampaddle_powerup_256x128.jpg"),
 TEXTURE_ITEM_GRAVITYBALL(TEXTURE_DIRECTORY  "/gravityball_powerneutral256x128.jpg"),
+TEXTURE_ITEM_PADDLEROCKET(TEXTURE_DIRECTORY "/paddlerocket_powerup256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
 TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud256x128.png"),
@@ -199,6 +201,7 @@ ITEM_MESH(MESH_DIRECTORY "/item.obj"),
 PADDLE_LASER_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_laser_attachment.obj"),
 PADDLE_BEAM_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_beam_attachment.obj"),
 PADDLE_STICKY_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_sticky_attachment.obj"),
+PADDLE_ROCKET_MESH(MESH_DIRECTORY "/paddle_rocket.obj"),
 
 // Deco Asset Paths
 DECO_PADDLE_MESH(MESH_DIRECTORY "/deco_paddle.obj"),
@@ -235,6 +238,7 @@ void GameViewConstants::InitItemTextures() {
 	this->itemTextures.insert(std::make_pair(GameItem::BallCamItem,							this->TEXTURE_ITEM_BALLCAM));
 	this->itemTextures.insert(std::make_pair(GameItem::LaserBeamPaddleItem,			this->TEXTURE_ITEM_PADDLEBEAM));
 	this->itemTextures.insert(std::make_pair(GameItem::GravityBallItem,					this->TEXTURE_ITEM_GRAVITYBALL));
+	this->itemTextures.insert(std::make_pair(GameItem::RocketPaddleItem,				this->TEXTURE_ITEM_PADDLEROCKET));
 }
 
 void GameViewConstants::InitItemTimerTextures() {

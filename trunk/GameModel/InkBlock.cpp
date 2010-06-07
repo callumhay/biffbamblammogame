@@ -65,6 +65,10 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 			resultingPiece = this->Destroy(gameModel);
 			break;
 
+		case Projectile::PaddleRocketBulletProjectile:
+			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, this);
+			break;
+
 		default:
 			assert(false);
 			break;
