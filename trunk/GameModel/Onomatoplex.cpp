@@ -85,7 +85,7 @@ namespace Onomatoplex {
 		goodSingleWordExplosion.push_back("Zaam");
 		goodSingleWordExplosion.push_back("Kazaam");
 		goodSingleWordExplosion.push_back("Blammo");
-		goodSingleWordExplosion.push_back("Explodo");
+		goodSingleWordExplosion.push_back("Explodoo");
 		goodSingleWordExplosion.push_back("Ziff");
 		goodSingleWordExplosion.push_back("Biff");
 		goodSingleWordExplosion.push_back("Boomy");
@@ -112,7 +112,6 @@ namespace Onomatoplex {
 		awesomeSingleWordExplosion.push_back("BiffBammy");
 		awesomeSingleWordExplosion.push_back("Flamblam");
 		awesomeSingleWordExplosion.push_back("Explosiony");
-		awesomeSingleWordExplosion.push_back("Explodo");
 		awesomeSingleWordExplosion.push_back("Pphoommy");
 		awesomeSingleWordExplosion.push_back("Kablaamosion");
 		awesomeSingleWordExplosion.push_back("Kazaammo");
@@ -122,6 +121,7 @@ namespace Onomatoplex {
 		std::vector<std::string> uberSingleWordExplosion;
 		std::vector<std::string> uberEndFixExplosion;
 		uberEndFixExplosion.push_back("oplex");
+		uberEndFixExplosion.push_back("oplast");
 		uberEndFixExplosion.push_back("osity");
 		uberEndFixExplosion.push_back("etric");
 		uberEndFixExplosion.push_back("ation");

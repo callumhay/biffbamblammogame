@@ -20,6 +20,7 @@ struct ESPInterval {
 	ESPInterval(float singleVal) : minValue(singleVal), maxValue(singleVal) {}
 	ESPInterval(float min, float max) : minValue(min), maxValue(max) {
 		if (min > max) {
+			assert(false);
 			this->minValue = 0;
 			this->maxValue = 0;
 		}
