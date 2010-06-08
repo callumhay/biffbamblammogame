@@ -339,7 +339,7 @@ void GameESPAssets::InitESPTextures() {
 
 	// Initialize smoke textures (cartoony puffs of smoke)
 	if (this->smokeTextures.size() == 0) {
-		this->smokeTextures.reserve(6);
+		this->smokeTextures.reserve(NUM_SMOKE_TEXTURES);
 		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
@@ -468,7 +468,6 @@ void GameESPAssets::AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effects
 	result = uberBallEmitterTrail->SetParticles(GameESPAssets::NUM_UBER_BALL_TRAIL_PARTICLES, this->circleGradientTex);
 	assert(result);
 	
-	effectsList.reserve(effectsList.size() + 2);
 	effectsList.push_back(uberBallEmitterTrail);
 	effectsList.push_back(uberBallEmitterAura);
 }
@@ -496,7 +495,6 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 	bool result = ghostBallEmitterTrail->SetParticles(GameESPAssets::NUM_GHOST_SMOKE_PARTICLES, &this->ghostBallSmoke);
 	assert(result);
 
-	effectsList.reserve(effectsList.size() + 1);
 	effectsList.push_back(ghostBallEmitterTrail);
 }
 
@@ -659,12 +657,12 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->ghostBallSmoke.SetScale(0.5f);
 	this->ghostBallSmoke.SetFrequency(0.25f);
 	this->ghostBallSmoke.SetFlowDirection(Vector3D(0, 0, 1));
-	this->ghostBallSmoke.SetMaskTexture(dynamic_cast<Texture2D*>(this->circleGradientTex));
+	this->ghostBallSmoke.SetMaskTexture(this->circleGradientTex);
 
 	// Fire effect used in various things - like explosions and such.
 	this->fireEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
 	this->fireEffect.SetColour(Colour(1.00f, 1.00f, 1.00f));
-	this->fireEffect.SetScale(0.5f);
+	this->fireEffect.SetScale(0.25f);
 	this->fireEffect.SetFrequency(1.0f);
 	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
 	this->fireEffect.SetMaskTexture(this->circleGradientTex);
@@ -1966,7 +1964,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
-			// TODO
+			this->AddRocketProjectileEffects(projectile);
 			break;
 
 		case Projectile::CollateralBlockProjectile:
@@ -2375,6 +2373,65 @@ void GameESPAssets::AddCollateralProjectileEffects(const Projectile& projectile)
 	fireCloudTrail->SetParticles(10, this->explosionTex);
 
 	this->activeProjectileEmitters[&projectile].push_back(fireCloudTrail);
+}
+
+// Add effects for the rocket projectile (e.g., fire trail and smoke)
+void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
+
+	ESPPointEmitter* fireyTrailEmitter = new ESPPointEmitter();
+	fireyTrailEmitter->SetSpawnDelta(ESPInterval(0.01f));
+	fireyTrailEmitter->SetInitialSpd(ESPInterval(0.0f));
+	fireyTrailEmitter->SetParticleLife(ESPInterval(0.5f));
+	fireyTrailEmitter->SetParticleSize(ESPInterval(0.8f*projectile.GetWidth(), projectile.GetWidth()));
+	fireyTrailEmitter->SetEmitAngleInDegrees(15);
+	fireyTrailEmitter->SetEmitDirection(Vector3D(0, -1, 0));
+	fireyTrailEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	fireyTrailEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	fireyTrailEmitter->SetEmitPosition(Point3D(0, 0, 0));
+	fireyTrailEmitter->AddEffector(&this->particleFireColourFader);
+	fireyTrailEmitter->AddEffector(&this->particleLargeGrowth);
+	bool result = fireyTrailEmitter->SetParticles(25, &this->fireEffect);
+	assert(result);
+
+	size_t randomTexIndex1 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
+	size_t randomTexIndex2 = (randomTexIndex1 + 1) % this->smokeTextures.size();
+
+	ESPPointEmitter* smokeyTrailEmitter1 = new ESPPointEmitter();
+	smokeyTrailEmitter1->SetSpawnDelta(ESPInterval(0.1f));
+	smokeyTrailEmitter1->SetInitialSpd(ESPInterval(1.0f));
+	smokeyTrailEmitter1->SetParticleLife(ESPInterval(0.5f, 0.75f));
+	smokeyTrailEmitter1->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
+	smokeyTrailEmitter1->SetEmitAngleInDegrees(45);
+	smokeyTrailEmitter1->SetEmitDirection(Vector3D(0, -1, 0));
+	smokeyTrailEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAligned);
+	smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, 0));
+	smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
+	smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
+	smokeyTrailEmitter1->AddEffector(&this->smokeRotatorCW);
+	result = smokeyTrailEmitter1->SetParticles(10, this->smokeTextures[randomTexIndex1]);
+	assert(result);
+
+	ESPPointEmitter* smokeyTrailEmitter2 = new ESPPointEmitter();
+	smokeyTrailEmitter2->SetSpawnDelta(ESPInterval(0.1f));
+	smokeyTrailEmitter2->SetInitialSpd(ESPInterval(1.0f));
+	smokeyTrailEmitter2->SetParticleLife(ESPInterval(0.5f, 0.75f));
+	smokeyTrailEmitter2->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
+	smokeyTrailEmitter2->SetEmitAngleInDegrees(45);
+	smokeyTrailEmitter2->SetEmitDirection(Vector3D(0, -1, 0));
+	smokeyTrailEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAligned);
+	smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, 0));
+	smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
+	smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
+	smokeyTrailEmitter2->AddEffector(&this->smokeRotatorCCW);
+	result = smokeyTrailEmitter2->SetParticles(10, this->smokeTextures[randomTexIndex2]);
+	assert(result);
+
+	std::list<ESPPointEmitter*>& projectileEmitters = this->activeProjectileEmitters[&projectile];
+	projectileEmitters.push_back(fireyTrailEmitter);
+	projectileEmitters.push_back(smokeyTrailEmitter1);
+	projectileEmitters.push_back(smokeyTrailEmitter2);
 }
 
 /**
@@ -3083,7 +3140,7 @@ void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
 
 		// Update and draw the emitters, background then foreground...
 		for (std::list<ESPPointEmitter*>::iterator emitIter = projEmitters.begin(); emitIter != projEmitters.end(); ++emitIter) {
-			this->DrawProjectileEmitter(dT, camera, projectilePos2D, projectileDir, *emitIter);
+			this->DrawProjectileEmitter(dT, camera, *currProjectile, *emitIter);
 		}
 	}
 }
@@ -3091,18 +3148,17 @@ void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
 /**
  * Private helper function for drawing a single projectile at a given position.
  */
-void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, 
-																					const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter) {
+void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const Projectile& projectile, ESPPointEmitter* projectileEmitter) {
 
 	// In the case where the particle only spawns once, we have a stationary particle that needs to move
 	// to its current position and have an orientation to its current direction
 	bool movesWithProjectile = projectileEmitter->OnlySpawnsOnce();
 	if (movesWithProjectile) {
 		glPushMatrix();
-		glTranslatef(projectilePos2D[0], projectilePos2D[1], 0.0f);
+		glTranslatef(projectile.GetPosition()[0], projectile.GetPosition()[1], 0.0f);
 		// Calculate the angle to rotate it about the z-axis
-		float angleToRotate = Trig::radiansToDegrees(acos(Vector2D::Dot(projectileDir, Vector2D(0, 1))));
-		if (projectileDir[0] > 0) {
+		float angleToRotate = Trig::radiansToDegrees(acos(Vector2D::Dot(projectile.GetVelocityDirection(), Vector2D(0, 1))));
+		if (projectile.GetVelocityDirection()[0] > 0) {
 			angleToRotate *= -1.0;
 		}
 		glRotatef(angleToRotate, 0.0f, 0.0f, 1.0f);
@@ -3110,8 +3166,9 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const
 	else {
 		// We want all the emitting, moving particles attached to the projectile to move with the projectile and
 		// fire opposite its trajectory
-		projectileEmitter->SetEmitPosition(Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f));
-		projectileEmitter->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
+		Point3D emitPos = Point3D(projectile.GetPosition()) - projectile.GetHalfHeight() * Vector3D(projectile.GetVelocityDirection());
+		projectileEmitter->SetEmitPosition(emitPos);
+		projectileEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()[0], -projectile.GetVelocityDirection()[1], 0.0f));
 	}
 	
 	projectileEmitter->Draw(camera);

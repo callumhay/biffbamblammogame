@@ -122,6 +122,8 @@ private:
 	static const int NUM_INK_SPRAY_PARTICLES = 20;
 	static const int NUM_EXPLOSION_SMOKE_PART_PARTICLES = 6;
 
+	static const int NUM_SMOKE_TEXTURES = 6;
+
 	// Laser and beam effects
 	ESPPointEmitter*  paddleLaserGlowAura;
 	ESPPointEmitter*  paddleLaserGlowSparks;
@@ -160,6 +162,7 @@ private:
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
 
 	void AddCollateralProjectileEffects(const Projectile& projectile);
+	void AddRocketProjectileEffects(const Projectile& projectile);
 
 	void AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile);
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
@@ -176,7 +179,7 @@ private:
 	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
 		bool gravity = true, size_t numParticles = 10);
 
-	void DrawProjectileEmitter(double dT, const Camera& camera, const Point2D& projectilePos2D, const Vector2D& projectileDir, ESPPointEmitter* projectileEmitter);
+	void DrawProjectileEmitter(double dT, const Camera& camera, const Projectile& projectile, ESPPointEmitter* projectileEmitter);
 
 public:
 	GameESPAssets();
