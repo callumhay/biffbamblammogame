@@ -12,7 +12,7 @@ newmtl PlainRocketMetal
 Ka 0.000000 0.000000 0.000000
 Kd 1.004510 1.000000 1.000000
 Ks 0.660000 0.660000 0.660000
-Ns 80
+Ns 60
 map_Kd resources/textures/bombmetal_512x256.jpg
 type phong
 outlinesize 1.0

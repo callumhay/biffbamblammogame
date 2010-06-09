@@ -151,7 +151,7 @@ public:
 	}
 
 	void AddProjectile(const GameModel& gameModel, const Projectile& projectile);
-	void RemoveProjectile(const GameModel& gameModel, const Projectile& projectile);
+	void RemoveProjectile(Camera& camera, const GameModel& gameModel, const Projectile& projectile);
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 	void ExplosionFlash(double timeLength, float intensityPercent);

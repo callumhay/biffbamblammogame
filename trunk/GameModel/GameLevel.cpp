@@ -479,6 +479,24 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, LevelPiece* hitPiec
 	unsigned int hIndex = resultPiece->GetHeightIndex();
 	unsigned int wIndex = resultPiece->GetWidthIndex();
 
+	std::vector<LevelPiece*> affectedPieces = this->GetRocketExplosionAffectedLevelPieces(hIndex, wIndex);
+	// Go through each affected piece and destroy it if we can
+	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
+		LevelPiece* currAffectedPiece = *iter;
+		if (currAffectedPiece != NULL && currAffectedPiece->CanBeDestroyedByBall()) {
+			currAffectedPiece->Destroy(gameModel);
+			// Update all the affected pieces again...
+			affectedPieces = this->GetRocketExplosionAffectedLevelPieces(hIndex, wIndex);
+			iter = affectedPieces.begin();
+			continue;
+		}
+		++iter;
+	}
+
+	return resultPiece;
+}
+
+std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(size_t hIndex, size_t wIndex) {
 	std::vector<LevelPiece*> affectedPieces;
 	affectedPieces.reserve(14);
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex-1));
@@ -500,18 +518,7 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, LevelPiece* hitPiec
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex));
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex+1));
 
-	// Go through each affected piece and destroy it if we can
-	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ++iter) {
-		LevelPiece* currAffectedPiece = *iter;
-		if (currAffectedPiece == NULL) {
-			continue;
-		}
-		if (currAffectedPiece->CanBeDestroyedByBall()) {
-			currAffectedPiece->Destroy(gameModel);
-		}
-	}
-
-	return resultPiece;
+	return affectedPieces;
 }
 
 /**

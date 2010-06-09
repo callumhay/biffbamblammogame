@@ -684,12 +684,12 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
  * Draw the currently active projectiles in the game.
  */
 void GameAssets::DrawProjectiles(double dT, const GameModel& gameModel, const Camera& camera) {
-	this->espAssets->DrawProjectileEffects(dT, camera);
-
 	// Get lights affecting the foreground meshes...
 	PointLight keyLight, fillLight, ballLight;
-	this->lightAssets->GetPaddleAffectingLights(keyLight, fillLight, ballLight);
+	this->lightAssets->GetPieceAffectingLights(keyLight, fillLight, ballLight);
+
 	this->rocketMesh->Draw(*gameModel.GetPlayerPaddle(), camera, keyLight, fillLight, ballLight);
+	this->espAssets->DrawProjectileEffects(dT, camera);
 }
 
 /**
@@ -795,12 +795,15 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 /** 
  * Remove the given projectile and its effects from the assets.
  */
-void GameAssets::RemoveProjectile(const GameModel& gameModel, const Projectile& projectile) {
+void GameAssets::RemoveProjectile(Camera& camera, const GameModel& gameModel, const Projectile& projectile) {
 	this->espAssets->RemoveProjectileEffect(projectile);
 
 	switch (projectile.GetType()) {
 		case Projectile::PaddleRocketBulletProjectile:
 			this->rocketMesh->Deactivate();
+			// Add a camera shake and flash for when the rocket explodes...
+			camera.SetCameraShake(1.0, Vector3D(0.8, 0.7, 0.1), 120);
+			this->ExplosionFlash(0.5, 1.0f);			
 			break;
 		default:
 			break;
@@ -928,9 +931,10 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 				// Move the key light in the foreground so that it is behind the camera when it goes into
 				// paddle cam mode.
 				float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
+				float halfLevelWidth  = gameModel.GetCurrentLevel()->GetLevelUnitWidth() / 2.0f;
 
-				Point3D newFGKeyLightPos(0.0f, -(halfLevelHeight + 10.0f), 0.0f);
-				Point3D newFGFillLightPos(0.0f, (halfLevelHeight + 10.0f), 0.0f);
+				Point3D newFGKeyLightPos(halfLevelWidth, -(halfLevelHeight + 20.0f), 0.0f);
+				Point3D newFGFillLightPos(-halfLevelWidth, -(halfLevelHeight + 20.0f), 0.0f);
 				
 				this->lightAssets->ChangeLightPosition(GameLightAssets::FGKeyLight, newFGKeyLightPos, 2.0f);
 				this->lightAssets->ChangeLightPosition(GameLightAssets::FGFillLight, newFGFillLightPos, 2.0f);
