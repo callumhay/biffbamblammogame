@@ -38,6 +38,7 @@ class ESPEmitter;
 class LivesLeftHUD;
 class CrosshairLaserHUD;
 class PlayerHurtHUD;
+class FlashHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
 class PaddleRocketMesh;
@@ -55,6 +56,7 @@ private:
 	LivesLeftHUD* lifeHUD;
 	CrosshairLaserHUD* crosshairHUD;
 	PlayerHurtHUD* painHUD;
+	FlashHUD* flashHUD;
 
 	// Level-related meshes
 	std::map<const GameLevel*, LevelMesh*> loadedLevelMeshes;
@@ -152,6 +154,7 @@ public:
 	void RemoveProjectile(const GameModel& gameModel, const Projectile& projectile);
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
+	void ExplosionFlash(double timeLength, float intensityPercent);
 };
 
 #endif
