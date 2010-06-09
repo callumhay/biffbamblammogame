@@ -20,6 +20,7 @@
 #include "LivesLeftHUD.h"
 #include "CrosshairLaserHUD.h"
 #include "PlayerHurtHUD.h"
+#include "FlashHUD.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
 #include "PaddleRocketMesh.h"
@@ -50,6 +51,7 @@ lightAssets(NULL),
 lifeHUD(NULL),
 crosshairHUD(NULL),
 painHUD(NULL),
+flashHUD(NULL),
 
 ball(NULL), 
 spikeyBall(NULL),
@@ -91,6 +93,7 @@ ghostBallEffect(NULL)
 	this->crosshairHUD	= new CrosshairLaserHUD();
 	this->lifeHUD			  = new LivesLeftHUD();
 	this->painHUD				= new PlayerHurtHUD();
+	this->flashHUD			= new FlashHUD();
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();
@@ -135,6 +138,8 @@ GameAssets::~GameAssets() {
 	this->crosshairHUD = NULL;
 	delete this->painHUD;
 	this->painHUD = NULL;
+	delete this->flashHUD;
+	this->flashHUD = NULL;
 }
 
 /*
@@ -386,7 +391,9 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 				this->espAssets->DrawPaddleLaserBeamFiringEffects(dT, camera, p);
 			}
 		}
-		else {
+		// Beam isn't firing yet, if the rocket is on the paddle then don't draw any of the beam effects
+		// coming out of the paddle
+		else if ((p.GetPaddleType() & PlayerPaddle::RocketPaddle) != PlayerPaddle::RocketPaddle){
 			// Draw glowy beam origin when beam is able to fire but not actually firing yet
 			this->espAssets->DrawPaddleLaserBeamBeforeFiringEffects(dT, camera, p);
 		}
@@ -450,7 +457,9 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		this->paddleStickyAttachment->Draw(*paddle, camera, paddleKeyLight, paddleFillLight, ballLight);
 	}
 
-	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
+	// In order to draw the laser glow effect make sure there isn't a rocket sitting on the paddle
+	if ((paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle &&
+		  (paddle->GetPaddleType() & PlayerPaddle::RocketPaddle) != PlayerPaddle::RocketPaddle) {
 		// Draw glowy effects where the laser originates...
 		this->espAssets->DrawPaddleLaserBulletEffects(dT, camera, *paddle);
 	}
@@ -699,6 +708,8 @@ void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel
 
 	// Draw any pain overlay when active
 	this->painHUD->Draw(dT, displayWidth, displayHeight);
+	// Draw any flashes / fades
+	this->flashHUD->Draw(dT, displayWidth, displayHeight);
 }
 
 void GameAssets::LoadRegularMeshAssets() {
@@ -835,6 +846,11 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
 	// Add a fullscreen overlay effect to show pain/badness
 	this->painHUD->Activate(intensity);
+}
+
+// Notifies assets that there was an explosion and there should be a fullscreen flash
+void GameAssets::ExplosionFlash(double timeLength, float intensityPercent) {
+	this->flashHUD->Activate(timeLength, intensityPercent);
 }
 
 /*

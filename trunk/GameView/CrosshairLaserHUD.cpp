@@ -48,8 +48,9 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 	// Don't draw anything if there's significant paddle effect active
 	bool beamIsActive   = (paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle;
 	bool bulletIsActive = (paddle->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle;
+	//bool rocketIsActive = (paddle->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle;
 
-	if (!beamIsActive && !bulletIsActive) {
+	if (!beamIsActive && !bulletIsActive /*&& !rocketIsActive*/) {
 			return;
 	}
 
@@ -73,6 +74,7 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 	if (bulletIsActive) {
 		this->DrawBulletCrosshair(alpha);
 	}
+
 	if (beamIsActive) {
 		this->DrawBeamCrosshair(alpha);
 		if (paddle->GetIsLaserBeamFiring()) {
@@ -93,6 +95,9 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 			}
 		}
 	}
+	//if (rocketIsActive) {
+	//}
+
 
 	glPopMatrix();
 

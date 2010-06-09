@@ -559,6 +559,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\FlashHUD.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\GameAssets.h"
 					>
 				</File>
@@ -692,6 +696,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\DecoWorldAssets.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\FlashHUD.cpp"
 					>
 				</File>
 				<File
