@@ -104,6 +104,7 @@ public:
 
 	void PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter);
 	LevelPiece* RocketExplosion(GameModel* gameModel, LevelPiece* hitPiece);
+	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(size_t hIndex, size_t wIndex);
 
 private:	
 	std::vector<std::vector<LevelPiece*>> currentLevelPieces; // The current layout of the level, stored in row major format

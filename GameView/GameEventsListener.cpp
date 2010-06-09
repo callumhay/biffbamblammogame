@@ -171,17 +171,6 @@ void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& project
 	// Add any visual effects required for when a projectile hits the block
 	this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block);
 
-	// Add any other extraneous effects
-	switch (projectile.GetType()) {
-		case Projectile::PaddleRocketBulletProjectile:
-			// Add a camera shake for when the rocket explodes...
-			this->display->GetCamera().SetCameraShake(1.0, Vector3D(0.8, 0.7, 0.1), 120);
-			this->display->GetAssets()->ExplosionFlash(0.5, 1.0f);
-			break;
-		default:
-			break;
-	}
-
 	debug_output("EVENT: Projectile-block collision");
 }
 
@@ -413,7 +402,7 @@ void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
 
 void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	// Remove the projectile's effect
-	this->display->GetAssets()->RemoveProjectile(*this->display->GetModel(), projectile);
+	this->display->GetAssets()->RemoveProjectile(this->display->GetCamera(), *this->display->GetModel(), projectile);
 	debug_output("EVENT: Projectile removed");
 }
 

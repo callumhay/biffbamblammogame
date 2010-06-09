@@ -850,6 +850,11 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 		
 		case Projectile::PaddleRocketBulletProjectile: {
+				// No explosion when the rocket hits portals...
+				if (block.GetType() == LevelPiece::Portal) {
+					break;
+				}
+
 				// A rocket just hit a block - KABOOOOOOM!!!
 				Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
 				this->AddRocketHitBlockEffect(midPoint);
@@ -2408,8 +2413,8 @@ void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
 	smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, 0));
 	smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
 	smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
-	smokeyTrailEmitter1->AddEffector(&this->smokeRotatorCW);
-	result = smokeyTrailEmitter1->SetParticles(10, this->smokeTextures[randomTexIndex1]);
+	smokeyTrailEmitter1->AddEffector(&this->explosionRayRotatorCW);
+	result = smokeyTrailEmitter1->SetParticles(5, this->smokeTextures[randomTexIndex1]);
 	assert(result);
 
 	ESPPointEmitter* smokeyTrailEmitter2 = new ESPPointEmitter();
@@ -2424,14 +2429,16 @@ void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
 	smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, 0));
 	smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
 	smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
-	smokeyTrailEmitter2->AddEffector(&this->smokeRotatorCCW);
-	result = smokeyTrailEmitter2->SetParticles(10, this->smokeTextures[randomTexIndex2]);
+	smokeyTrailEmitter2->AddEffector(&this->explosionRayRotatorCCW);
+	result = smokeyTrailEmitter2->SetParticles(5, this->smokeTextures[randomTexIndex2]);
 	assert(result);
 
+
 	std::list<ESPPointEmitter*>& projectileEmitters = this->activeProjectileEmitters[&projectile];
-	projectileEmitters.push_back(fireyTrailEmitter);
 	projectileEmitters.push_back(smokeyTrailEmitter1);
 	projectileEmitters.push_back(smokeyTrailEmitter2);
+	projectileEmitters.push_back(fireyTrailEmitter);
+
 }
 
 /**
