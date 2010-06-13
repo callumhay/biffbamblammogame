@@ -52,7 +52,7 @@ public:
 	virtual ~CgFxBloom();
 
 	virtual void Draw(int screenWidth, int screenHeight, double dT);
-	std::list<AnimationMultiLerp<float>> GetPulseAnimation(float pulseLengthInSec, float pulseAmount);
+	std::list<AnimationMultiLerp<float> > GetPulseAnimation(float pulseLengthInSec, float pulseAmount);
 
 
 	inline void SetHighlightThreshold(float hlgtThreshold) {

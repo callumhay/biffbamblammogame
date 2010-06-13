@@ -235,7 +235,7 @@ Mesh* ResourceManager::GetObjMeshResource(const std::string &filepath) {
 	if (needToReadFromFile) {
 		// First make sure the file exists in the archive
 		int doesExist = PHYSFS_exists(filepath.c_str());
-		if (doesExist == NULL) {
+		if (doesExist == 0) {
 			debug_output("Mesh file not found: " << filepath);
 			debug_physfs_state(NULL);
 			return NULL;
@@ -278,7 +278,7 @@ std::map<std::string, CgFxMaterialEffect*> ResourceManager::GetMtlMeshResource(c
 
 	// First make sure the file exists in the archive
 	int doesExist = PHYSFS_exists(filepath.c_str());
-	if (doesExist == NULL) {
+	if (doesExist == 0) {
 		debug_output("Material file not found: " << filepath);
 		debug_physfs_state(NULL);
 		return materials;
@@ -346,7 +346,7 @@ Texture* ResourceManager::GetImgTextureResource(const std::string &filepath, Tex
 	if (needToReadFromFile) {
 		// First make sure the file exists in the archive
 		int doesExist = PHYSFS_exists(filepath.c_str());
-		if (doesExist == NULL) {
+		if (doesExist == 0) {
 			debug_output("Texture file not found: " << filepath);
 			debug_physfs_state(NULL);
 			return NULL;
@@ -447,7 +447,7 @@ Texture* ResourceManager::GetCelShadingTexture() {
 
 	const char* filepath = GameViewConstants::GetInstance()->TEXTURE_CEL_GRADIENT.c_str();
 	int doesExist = PHYSFS_exists(filepath);
-	if (doesExist == NULL) {
+	if (doesExist == 0) {
 		debug_output("Texture file not found: " << filepath);
 		debug_physfs_state(NULL);
 		return NULL;
@@ -474,7 +474,7 @@ Texture* ResourceManager::GetCelShadingTexture() {
 GLubyte* ResourceManager::ReadNoiseOctave3DTextureData() {
 	const char* filepath = GameViewConstants::GetInstance()->TEXTURE_NOISE_OCTAVES.c_str();
 	int doesExist = PHYSFS_exists(filepath);
-	if (doesExist == NULL) {
+	if (doesExist == 0) {
 		return NULL;
 	}
 	
@@ -489,7 +489,7 @@ GLubyte* ResourceManager::ReadNoiseOctave3DTextureData() {
 	PHYSFS_sint64 fileLength = PHYSFS_fileLength(fileHandle);
 	GLubyte* fileBuffer = new GLubyte[fileLength];
 	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(GLubyte), fileLength);
-	if (readResult == NULL) {
+	if (readResult == 0) {
 		delete[] fileBuffer;
 		fileBuffer = NULL;
 		debug_output("Error reading noise octave data to bytes.");
@@ -509,7 +509,7 @@ std::map<unsigned int, TextureFontSet*> ResourceManager::LoadFont(const std::str
 	
 	// First make sure the file exists in the archive
 	int doesExist = PHYSFS_exists(filepath.c_str());
-	if (doesExist == NULL) {
+	if (doesExist == 0) {
 		debug_output("Texture file not found: " << filepath);
 		debug_physfs_state(NULL);
 		return fontSets;
@@ -552,7 +552,7 @@ void ResourceManager::GetCgFxEffectResource(const std::string& filepath, CGeffec
 
 		// First make sure the file exists in the archive
 		int doesExist = PHYSFS_exists(filepath.c_str());
-		if (doesExist == NULL) {
+		if (doesExist == 0) {
 			debug_output("Effect file not found: " << filepath);
 			debug_physfs_state(NULL);
 			return;
@@ -570,7 +570,7 @@ void ResourceManager::GetCgFxEffectResource(const std::string& filepath, CGeffec
 		char* fileBuffer = new char[fileLength+1];
 	
 		int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(char), fileLength);
-		if (readResult == NULL) {
+		if (readResult == 0) {
 			delete[] fileBuffer;
 			fileBuffer = NULL;
 			debug_output("Error reading obj file to bytes: " << filepath);
@@ -605,7 +605,7 @@ void ResourceManager::GetCgFxEffectResource(const std::string& filepath, CGeffec
 		assert(effect != NULL);
 
 		// Make sure techniques exist for the effect as well
-		std::map<CGeffect, std::map<std::string, CGtechnique>>::iterator techniqueIter = this->loadedEffectTechniques.find(effect);
+		std::map<CGeffect, std::map<std::string, CGtechnique> >::iterator techniqueIter = this->loadedEffectTechniques.find(effect);
 		assert(techniqueIter != this->loadedEffectTechniques.end());
 		techniques = techniqueIter->second;
 		assert(techniques.size() > 0);
@@ -672,7 +672,7 @@ bool ResourceManager::ReleaseCgFxEffectResource(CGeffect &effect) {
 		CGeffect effectResource = effectResourceIter->second;
 		assert(effectResource != NULL);
 
-		std::map<CGeffect, std::map<std::string, CGtechnique>>::iterator techniquesIter = this->loadedEffectTechniques.find(effectResource);
+		std::map<CGeffect, std::map<std::string, CGtechnique> >::iterator techniquesIter = this->loadedEffectTechniques.find(effectResource);
 		assert(techniquesIter != this->loadedEffectTechniques.end());
 		std::map<std::string, CGtechnique>& techniques = techniquesIter->second;
 		assert(techniques.size() > 0);
@@ -842,7 +842,7 @@ std::istringstream* ResourceManager::FilepathToInStream(const std::string &filep
 char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, int &length) {
 // First make sure the file exists in the archive
 	int doesExist = PHYSFS_exists(filepath.c_str());
-	if (doesExist == NULL) {
+	if (doesExist == 0) {
 		debug_output("File not found: " << filepath);
 		debug_physfs_state(NULL);
 		return NULL;
@@ -861,7 +861,7 @@ char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, int &
 	char* fileBuffer = new char[fileLength+1];
 	
 	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(char), fileLength);
-	if (readResult == NULL) {
+	if (readResult == 0) {
 		delete[] fileBuffer;
 		fileBuffer = NULL;
 		debug_output("Error reading file to bytes: " << filepath);

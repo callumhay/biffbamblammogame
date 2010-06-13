@@ -45,11 +45,11 @@ private:
 	std::map<std::string, CgFxMaterialEffect*> levelMaterials;
 
 	// Which display lists correspond to a given material
-	std::map<CgFxMaterialEffect*, std::vector<GLuint>> displayListsPerMaterial;
+	std::map<CgFxMaterialEffect*, std::vector<GLuint> > displayListsPerMaterial;
 	// The display lists associated with each level piece
-	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint>> pieceDisplayLists;
+	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint> > pieceDisplayLists;
 	// Special effects always present for specific level pieces
-	std::map<const LevelPiece*, std::list<ESPEmitter*>> pieceEmitterEffects;
+	std::map<const LevelPiece*, std::list<ESPEmitter*> > pieceEmitterEffects;
 
 	std::map<std::string, MaterialGroup*> GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const;
 	void CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);

@@ -10,6 +10,7 @@
  */
 
 #include "Light.h"
+#include <vector>
 
 /**
  * Toggle the light on or off and fade it on or off over the given animation time frame.
@@ -73,7 +74,7 @@ void PointLight::SetLightStrobeOn(const Colour& strobeEndColour, float strobeTim
  * and the light will naturally return to its original colour.
  */
 void PointLight::SetLightStrobeOff() {
-	for (std::list<AnimationMultiLerp<Colour>>::iterator animIter = this->lightColourStrobeAnim.begin(); animIter != this->lightColourStrobeAnim.end(); ++animIter) {
+	for (std::list<AnimationMultiLerp<Colour> >::iterator animIter = this->lightColourStrobeAnim.begin(); animIter != this->lightColourStrobeAnim.end(); ++animIter) {
 		animIter->SetRepeat(false);
 	}
 }
@@ -118,7 +119,7 @@ void PointLight::Tick(double dT) {
 	bool isFinished = false;
 
 	// Tick position animaton
-	for (std::list<AnimationMultiLerp<Point3D>>::iterator animIter = this->lightPositionAnim.begin(); animIter != this->lightPositionAnim.end();) {
+	for (std::list<AnimationMultiLerp<Point3D> >::iterator animIter = this->lightPositionAnim.begin(); animIter != this->lightPositionAnim.end();) {
 			isFinished = animIter->Tick(dT);
 			if (isFinished) {
 				animIter = this->lightPositionAnim.erase(animIter);
@@ -129,7 +130,7 @@ void PointLight::Tick(double dT) {
 	}
 
 	// Tick the light animations that turn the light on or off (if any)
-	for (std::list<AnimationMultiLerp<float>>::iterator animIter = this->lightIntensityAnim.begin(); animIter != this->lightIntensityAnim.end();) {
+	for (std::list<AnimationMultiLerp<float> >::iterator animIter = this->lightIntensityAnim.begin(); animIter != this->lightIntensityAnim.end();) {
 			isFinished = animIter->Tick(dT);
 			if (isFinished) {
 				animIter = this->lightIntensityAnim.erase(animIter);
@@ -141,7 +142,7 @@ void PointLight::Tick(double dT) {
 
 	// Tick the light-on/light colour change animations (if any)
 	Colour newDiffuseColourChange = this->onDiffuseColour;
-	for (std::list<AnimationMultiLerp<Colour>>::iterator animIter = this->lightColourChangeAnim.begin(); animIter != this->lightColourChangeAnim.end();) {
+	for (std::list<AnimationMultiLerp<Colour> >::iterator animIter = this->lightColourChangeAnim.begin(); animIter != this->lightColourChangeAnim.end();) {
 			isFinished = animIter->Tick(dT);
 			newDiffuseColourChange = animIter->GetInterpolantValue();
 			if (isFinished) {
@@ -162,7 +163,7 @@ void PointLight::Tick(double dT) {
 		this->lightColourStrobeAnim.front().SetFinalInterpolationValue(newDiffuseColourChange);
 	}
 
-	for (std::list<AnimationMultiLerp<Colour>>::iterator animIter = this->lightColourStrobeAnim.begin(); animIter != this->lightColourStrobeAnim.end();) {
+	for (std::list<AnimationMultiLerp<Colour> >::iterator animIter = this->lightColourStrobeAnim.begin(); animIter != this->lightColourStrobeAnim.end();) {
 			isFinished = animIter->Tick(dT);
 			newDiffuseColourChange = animIter->GetInterpolantValue();
 			if (isFinished) {

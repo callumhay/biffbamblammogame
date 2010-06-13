@@ -12,7 +12,7 @@
 #ifndef __GAMEEVENTSLISTENER_H__
 #define __GAMEEVENTSLISTENER_H__
 
-#include "..\GameModel\GameEvents.h"
+#include "../GameModel/GameEvents.h"
 
 class GameDisplay;
 

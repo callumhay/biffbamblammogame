@@ -225,8 +225,8 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 		if (currAnimationType == LivesLeftHUD::CreationAnimation) {
 			// If the current ball element is performing its creation animation then its alpha will be
 			// affected - obtain its current alpha from the animation
-			std::map<int, AnimationLerp<float>>::iterator currAlphaAnimIter = this->creationAlphaAnimations.find(i);
-			std::map<int, AnimationLerp<float>>::iterator currShiftAnimIter = this->creationShiftAnimations.find(i);
+			std::map<int, AnimationLerp<float> >::iterator currAlphaAnimIter = this->creationAlphaAnimations.find(i);
+			std::map<int, AnimationLerp<float> >::iterator currShiftAnimIter = this->creationShiftAnimations.find(i);
 			
 			assert(currAlphaAnimIter != this->creationAlphaAnimations.end());
 			assert(currShiftAnimIter != this->creationShiftAnimations.end());
@@ -247,8 +247,8 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 		else if (currAnimationType == LivesLeftHUD::DestructionAnimation) {
 			// If the current ball is performing its destruction animation then its colour value
 			// and translation will be affected
-			std::map<int, AnimationLerp<float>>::iterator fallAnimIter				= this->destructionFallAnimations.find(i);
-			std::map<int, AnimationLerp<ColourRGBA>>::iterator colourAnimIter = this->destructionColourAnimations.find(i);
+			std::map<int, AnimationLerp<float> >::iterator fallAnimIter				= this->destructionFallAnimations.find(i);
+			std::map<int, AnimationLerp<ColourRGBA> >::iterator colourAnimIter = this->destructionColourAnimations.find(i);
 
 			assert(fallAnimIter != this->destructionFallAnimations.end());
 			assert(colourAnimIter != this->destructionColourAnimations.end());
@@ -307,7 +307,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 	glPopAttrib();
 
 	// Animate any animation values of the ball elements that require constant animation
-	for (std::vector<AnimationMultiLerp<Colour>>::iterator iter = this->idleColourAnimations.begin();
+	for (std::vector<AnimationMultiLerp<Colour> >::iterator iter = this->idleColourAnimations.begin();
 		iter != this->idleColourAnimations.end(); ++iter) {
 		iter->Tick(dT);
 	}

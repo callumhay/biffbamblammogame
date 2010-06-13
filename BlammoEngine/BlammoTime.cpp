@@ -31,6 +31,8 @@ void BlammoTime::SetVSync(bool vSyncOn) {
 		if( wglSwapIntervalEXT ) {
 			wglSwapIntervalEXT(vSyncOn ? 1 : 0);
 		}
+#else
+                SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, vSyncOn ? 1 : 0);
 #endif
 		// TODO: other ways of setting VSync...
 	}

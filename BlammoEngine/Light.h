@@ -32,10 +32,10 @@ private:
 	Point3D position;
 	float linearAttenuation;
 
-	std::list<AnimationMultiLerp<float>> lightIntensityAnim;
-	std::list<AnimationMultiLerp<Colour>> lightColourChangeAnim;
-	std::list<AnimationMultiLerp<Colour>> lightColourStrobeAnim;
-	std::list<AnimationMultiLerp<Point3D>> lightPositionAnim;
+	std::list<AnimationMultiLerp<float> > lightIntensityAnim;
+	std::list<AnimationMultiLerp<Colour> > lightColourChangeAnim;
+	std::list<AnimationMultiLerp<Colour> > lightColourStrobeAnim;
+	std::list<AnimationMultiLerp<Point3D> > lightPositionAnim;
 
 public:
 	PointLight() : position(0,0,0), currAmbientColour(0,0,0), currDiffuseColour(0,0,0), linearAttenuation(0), isOn(true), lightIntensity(1.0f) {}

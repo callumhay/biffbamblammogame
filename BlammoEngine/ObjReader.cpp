@@ -61,7 +61,7 @@ Mesh* ObjReader::ReadMesh(const std::string &filepath, PHYSFS_File* fileHandle) 
 	char* fileBuffer = new char[fileLength];
 	
 	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(char), fileLength);
-	if (readResult == NULL) {
+	if (readResult == 0) {
 		delete[] fileBuffer;
 		fileBuffer = NULL;
 		debug_output("Error reading obj file to bytes: " << filepath);

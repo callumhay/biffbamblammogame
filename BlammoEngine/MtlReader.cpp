@@ -78,7 +78,7 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFile(const std
 	char* fileBuffer = new char[fileLength];
 	
 	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(char), fileLength);
-	if (readResult == NULL) {
+	if (readResult == 0) {
 		delete[] fileBuffer;
 		fileBuffer = NULL;
 		debug_output("Error reading mtl file to bytes: " << filepath);

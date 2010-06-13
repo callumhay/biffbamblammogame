@@ -55,8 +55,8 @@ private:
 	static const Colour SUBMENU_ITEM_IDLE_COLOUR;
 	static const Colour SUBMENU_ITEM_ACTIVE_COLOUR;
 
-	static const int MENU_SEL_ON_INDEX	= 0;
-	static const int MENU_SEL_OFF_INDEX	= 1;
+	static const int MENU_SEL_ON_INDEX;
+	static const int MENU_SEL_OFF_INDEX;
 
 	// The configuration options for the game
 	ConfigOptions cfgOptions;

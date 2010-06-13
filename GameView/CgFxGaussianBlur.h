@@ -25,7 +25,7 @@ private:
 	CGparameter sceneHeightParam;
 
 	enum BlurAnimations { PoisonWidthBlurAnimation };
-	std::map<BlurAnimations, AnimationMultiLerp<float>> blurAnims;
+	std::map<BlurAnimations, AnimationMultiLerp<float> > blurAnims;
 
 public:
 	CgFxGaussianBlur(BlurType blurType, FBObj* sceneFBO);

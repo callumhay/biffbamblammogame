@@ -17,6 +17,7 @@
 #include "GameEventManager.h"
 
 const float Beam::MIN_BEAM_RADIUS = 0.1f;
+const int   Beam::MIN_DMG_PER_SEC = 1;
 
 Beam::Beam(BeamType type, int dmgPerSec, double lifeTimeInSec) : 
 type(type), baseDamagePerSecond(dmgPerSec), currTimeElapsed(0.0), totalLifeTime(lifeTimeInSec) {

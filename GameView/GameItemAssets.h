@@ -22,7 +22,7 @@ class PointLight;
  */
 class GameItemAssets {
 private:
-	typedef std::map<const GameItemTimer*, AnimationMultiLerp<float>> TimerScaleAnimationMap;
+	typedef std::map<const GameItemTimer*, AnimationMultiLerp<float> > TimerScaleAnimationMap;
 
 	Mesh* item;	// Item, picked up by the player paddle
 	GameESPAssets* espAssets;	// Effect assets

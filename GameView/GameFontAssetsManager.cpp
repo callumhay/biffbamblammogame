@@ -11,7 +11,7 @@ GameFontAssetsManager::GameFontAssetsManager() : minimalFontsLoaded(false) {
 
 GameFontAssetsManager::~GameFontAssetsManager() {
 	// Delete the regular fonts
-	std::map<FontStyle, std::map<unsigned int, TextureFontSet*>>::iterator fontSetIter;
+	std::map<FontStyle, std::map<unsigned int, TextureFontSet*> >::iterator fontSetIter;
 	std::map<unsigned int, TextureFontSet*>::iterator fontIter;
 	for (fontSetIter = this->fonts.begin(); fontSetIter != this->fonts.end(); ++fontSetIter) {
 		std::map<unsigned int, TextureFontSet*>& fontSet = fontSetIter->second;

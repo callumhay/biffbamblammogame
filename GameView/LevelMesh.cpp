@@ -118,7 +118,7 @@ void LevelMesh::Flush() {
 	
 	// Delete each of the display lists loaded for the previous level and clear up the
 	// relevant mappings to those display lists.
-	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::iterator iter = this->displayListsPerMaterial.begin(); 
+	for (std::map<CgFxMaterialEffect*, std::vector<GLuint> >::iterator iter = this->displayListsPerMaterial.begin();
 		iter != this->displayListsPerMaterial.end(); ++iter) {
 		
 		for (std::vector<GLuint>::iterator dispListIter = iter->second.begin(); dispListIter != iter->second.end(); ++dispListIter) {
@@ -130,7 +130,7 @@ void LevelMesh::Flush() {
 	this->pieceDisplayLists.clear();
 
 	// Delete all of the emitter effects for any of the level pieces
-	for (std::map<const LevelPiece*, std::list<ESPEmitter*>>::iterator pieceIter = this->pieceEmitterEffects.begin();
+	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
 		pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
 
 		std::list<ESPEmitter*>& emitterList = pieceIter->second;
@@ -173,7 +173,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 	}
 
 	// Load the actual level meshes as precomputed batches for speed...
-	const std::vector<std::vector<LevelPiece*>>& levelPieces = level->GetCurrentLevelLayout();
+	const std::vector<std::vector<LevelPiece*> >& levelPieces = level->GetCurrentLevelLayout();
 
 	// Get the proper vector to center the level
 	Vector2D levelDimensions = Vector2D(level->GetLevelUnitWidth(), level->GetLevelUnitHeight());
@@ -225,7 +225,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
 
 	// Find the changed piece and change its display list...
-	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint>>::iterator pieceInfoIter = this->pieceDisplayLists.find(&pieceBefore);
+	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint> >::iterator pieceInfoIter = this->pieceDisplayLists.find(&pieceBefore);
 
 	if (pieceInfoIter != this->pieceDisplayLists.end()) {
 		// Go through each of the materials and clear up previous display lists and materials...
@@ -310,7 +310,7 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 	this->portalBlock->Tick(dT);
 
 	// Go through each material and draw all the display lists corresponding to it
-	for (std::map<CgFxMaterialEffect*, std::vector<GLuint>>::const_iterator iter = this->displayListsPerMaterial.begin(); 
+	for (std::map<CgFxMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->displayListsPerMaterial.begin();
 		iter != this->displayListsPerMaterial.end(); ++iter) {
 		
 		CgFxMaterialEffect* currEffect = iter->first;
@@ -324,7 +324,7 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 
 	// Draw the piece effects
-	for (std::map<const LevelPiece*, std::list<ESPEmitter*>>::iterator pieceIter = this->pieceEmitterEffects.begin();
+	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
 		pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
 
 		std::list<ESPEmitter*>& emitterList = pieceIter->second;

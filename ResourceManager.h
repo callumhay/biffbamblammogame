@@ -37,7 +37,7 @@ private:
 	// Cg Runtime objects and helper functions
 	CGcontext cgContext;
 	std::map<std::string, CGeffect> loadedEffects;																	// Effects already loaded into the blammo engine
-	std::map<CGeffect, std::map<std::string, CGtechnique>> loadedEffectTechniques;	// Techniques associated with each effect
+	std::map<CGeffect, std::map<std::string, CGtechnique> > loadedEffectTechniques;	// Techniques associated with each effect
 	std::map<CGeffect, unsigned int> numRefPerEffect;																// Number of references per effect
 
 	// OpenAL loaded sound buffers from file

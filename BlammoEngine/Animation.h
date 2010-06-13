@@ -216,7 +216,7 @@ public:
 	void SetInterpolantValue(T value) {
 		(*this->interpolant) = value;
 	}
-	T GetInterpolantValue() const {
+	T& GetInterpolantValue() const {
 		return *this->interpolant;
 	}
 
@@ -296,13 +296,13 @@ public:
 		this->interpolationPts.reserve(this->interpolationPts.size() + interpolations.size());
 
 		std::vector<double>::const_iterator timeIter = times.begin();
-		std::vector<T>::const_iterator interpolateIter = interpolations.begin();
+		typename std::vector<T>::const_iterator interIter = interpolations.begin();
 		double originalEndTime = this->timePts.back();
-		for (; timeIter != times.end() && interpolateIter != interpolations.end(); ++timeIter, ++interpolateIter) {
+		for (; timeIter != times.end() && interIter != interpolations.end(); ++timeIter, ++interIter) {
 			// Add the times to the last time that was already in the lerp
 			this->timePts.push_back(originalEndTime + *timeIter);
 			// Just tack the interpolation points on as well
-			this->interpolationPts.push_back(*interpolateIter);
+			this->interpolationPts.push_back(*interIter);
 		}
 	}
 

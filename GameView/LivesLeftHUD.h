@@ -24,16 +24,16 @@ private:
 	std::vector<BallElementAnimations> elementCurrAnimationTypes;
 	
 	// Idle animation values
-	std::vector<AnimationMultiLerp<Colour>> idleColourAnimations;
-	std::vector<AnimationMultiLerp<float>>  idleSizeAnimations;
+	std::vector<AnimationMultiLerp<Colour> > idleColourAnimations;
+	std::vector<AnimationMultiLerp<float> >  idleSizeAnimations;
 
 	// Creation animation values
-	std::map<int, AnimationLerp<float>> creationAlphaAnimations;
-	std::map<int, AnimationLerp<float>> creationShiftAnimations;
+	std::map<int, AnimationLerp<float> > creationAlphaAnimations;
+	std::map<int, AnimationLerp<float> > creationShiftAnimations;
 
 	// Destruction animation values
-	std::map<int, AnimationLerp<ColourRGBA>> destructionColourAnimations;
-	std::map<int, AnimationLerp<float>> destructionFallAnimations; 
+	std::map<int, AnimationLerp<ColourRGBA> > destructionColourAnimations;
+	std::map<int, AnimationLerp<float> > destructionFallAnimations;
 
 	int currNumLivesLeft;
 	Texture *ballLifeHUDTex;

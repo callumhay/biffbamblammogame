@@ -32,10 +32,10 @@ namespace Onomatoplex {
 		~Generator();
 
 		// Dictionaries for word creation
-		std::map<SoundType, std::vector<std::string>> simpleSingleWords;
-		std::map<SoundType, std::vector<std::string>> goodSingleWords;
-		std::map<SoundType, std::vector<std::string>> awesomeSingleWords;
-		std::map<SoundType, std::vector<std::string>> uberSingleWords;
+		std::map<SoundType, std::vector<std::string> > simpleSingleWords;
+		std::map<SoundType, std::vector<std::string> > goodSingleWords;
+		std::map<SoundType, std::vector<std::string> > awesomeSingleWords;
+		std::map<SoundType, std::vector<std::string> > uberSingleWords;
 
 		void LoadExplosionWords();
 		void LoadBounceWords();

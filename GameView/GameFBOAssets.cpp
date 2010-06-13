@@ -86,19 +86,23 @@ GameFBOAssets::~GameFBOAssets() {
  * Used to animate and do any time-related activites with the FBOs.
  */
 void GameFBOAssets::Tick(double dT) {
-	for (std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float>>>::iterator iter1 = this->fboAnimations.begin();
+
+	for (std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float> > >::iterator iter1 = this->fboAnimations.begin();
 		iter1 != this->fboAnimations.end(); ++iter1) {
-		
-		std::map<FBOAnimationItem, AnimationMultiLerp<float>>& currAnimSet = iter1->second;
-		for (std::map<FBOAnimationItem, AnimationMultiLerp<float>>::iterator iter2 = currAnimSet.begin(); iter2 != currAnimSet.end();) {
+
+                std::list<std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator > toRemove;
+		std::map<FBOAnimationItem, AnimationMultiLerp<float> >& currAnimSet = iter1->second;
+		for (std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator iter2 = currAnimSet.begin(); iter2 != currAnimSet.end(); ++iter2) {
 			bool finished = iter2->second.Tick(dT);
 			if (finished) {
-				iter2 = currAnimSet.erase(iter2);
-			}
-			else {
-				++iter2;
+                            toRemove.push_back(iter2);
 			}
 		}
+
+                for (std::list<std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator >::iterator iterRemove = toRemove.begin();
+                        iterRemove != toRemove.end(); ++iterRemove) {
+                    currAnimSet.erase(*iterRemove);
+                }
 	}
 }
 

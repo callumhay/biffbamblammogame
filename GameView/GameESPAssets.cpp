@@ -173,7 +173,7 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->activePaddleEmitters.clear();
 
 	// Clear ball BG emiiters
-	for (std::map<const GameBall*, std::list<ESPEmitter*>>::iterator iter = this->activeBallBGEmitters.begin(); 
+	for (std::map<const GameBall*, std::list<ESPEmitter*> >::iterator iter = this->activeBallBGEmitters.begin();
 		iter != this->activeBallBGEmitters.end(); ++iter) {
 
 		std::list<ESPEmitter*>& currEmitterList = iter->second;
@@ -186,7 +186,7 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->activeBallBGEmitters.clear();
 
 	// Clear item drop emitters
-	for (std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.begin();	iter != this->activeItemDropEmitters.end(); ++iter) {
+	for (std::map<const GameItem*, std::list<ESPEmitter*> >::iterator iter = this->activeItemDropEmitters.begin();	iter != this->activeItemDropEmitters.end(); ++iter) {
 			for (std::list<ESPEmitter*>::iterator iter2 = iter->second.begin(); iter2 != iter->second.end(); ++iter2) {
 				ESPEmitter* currEmitter = *iter2;
 				delete currEmitter;
@@ -197,7 +197,7 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->activeItemDropEmitters.clear();
 
 	// Clear projectile emitters
-	for (std::map<const Projectile*, std::list<ESPPointEmitter*>>::iterator iter1 = this->activeProjectileEmitters.begin();
+	for (std::map<const Projectile*, std::list<ESPPointEmitter*> >::iterator iter1 = this->activeProjectileEmitters.begin();
 		iter1 != this->activeProjectileEmitters.end(); ++iter1) {
 	
 			std::list<ESPPointEmitter*>& projEmitters = iter1->second;
@@ -238,10 +238,10 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->beamFlareEmitters.clear();
 
 	// Clear all ball emitters
-	for (std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); ++iter1) {
-		std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>& currBallEffects = iter1->second;
+	for (std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator iter1 = this->ballEffects.begin(); iter1 != this->ballEffects.end(); ++iter1) {
+		std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >& currBallEffects = iter1->second;
 		
-		for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter2 = currBallEffects.begin(); iter2 != currBallEffects.end(); ++iter2) {
+		for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator iter2 = currBallEffects.begin(); iter2 != currBallEffects.end(); ++iter2) {
 			std::vector<ESPPointEmitter*>& effectList = iter2->second;
 
 			for (std::vector<ESPPointEmitter*>::iterator iter3 = effectList.begin(); iter3 != effectList.end(); ++iter3) {
@@ -256,7 +256,7 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->ballEffects.clear();
 
 	// Clear all the paddle emitters
-	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter1 = this->paddleEffects.begin(); iter1 != this->paddleEffects.end(); ++iter1) {
+	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator iter1 = this->paddleEffects.begin(); iter1 != this->paddleEffects.end(); ++iter1) {
 		std::vector<ESPPointEmitter*>& currPaddleEffects = iter1->second;
 
 		for (std::vector<ESPPointEmitter*>::iterator iter2 = currPaddleEffects.begin(); iter2 != currPaddleEffects.end(); ++iter2) {
@@ -269,7 +269,7 @@ void GameESPAssets::KillAllActiveEffects() {
 	this->paddleEffects.clear();
 
 	// Clear all the emitters for HUD Timers
-	for (std::map<GameItem::ItemType, std::list<ESPEmitter*>>::iterator iter1 = this->activeTimerHUDEmitters.begin(); iter1 != this->activeTimerHUDEmitters.end(); ++iter1) {
+	for (std::map<GameItem::ItemType, std::list<ESPEmitter*> >::iterator iter1 = this->activeTimerHUDEmitters.begin(); iter1 != this->activeTimerHUDEmitters.end(); ++iter1) {
 		std::list<ESPEmitter*>& emitterList = iter1->second;
 		for (std::list<ESPEmitter*>::iterator iter2 = emitterList.begin(); iter2 != emitterList.end(); ++iter2) {
 			ESPEmitter* currEmitter = *iter2;
@@ -289,13 +289,13 @@ void GameESPAssets::KillAllActiveEffects() {
 void GameESPAssets::KillAllActiveBallEffects(const GameBall& ball) {
 	// Check to see if there are any active effects for the ball, if not
 	// then just exit this function
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
 	if (foundBallEffects == this->ballEffects.end()) {
 		return;
 	}
 
 	// Iterate through all effects and delete them, then remove them from the list
-	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); ++iter) {
+	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); ++iter) {
 		std::vector<ESPPointEmitter*>& effectList = iter->second;
 		for (std::vector<ESPPointEmitter*>::iterator iter2 = effectList.begin(); iter2 != effectList.end(); ++iter2) {
 			ESPPointEmitter* currEmitter = *iter2;
@@ -1923,7 +1923,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 void GameESPAssets::RemoveItemDropEffect(const Camera& camera, const GameItem& item) {
 
 	// Try to find any effects associated with the given item
-	std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.find(&item);
+	std::map<const GameItem*, std::list<ESPEmitter*> >::iterator iter = this->activeItemDropEmitters.find(&item);
 	if (iter != this->activeItemDropEmitters.end()) {
 		
 		// Delete all emitters associated with the item drop effect
@@ -1944,7 +1944,7 @@ void GameESPAssets::RemoveItemDropEffect(const Camera& camera, const GameItem& i
 void GameESPAssets::TurnOffCurrentItemDropStars(const Camera& camera) {
 
 	// Start by removing the effect for each item and then replace them with non-star effects
-	for (std::map<const GameItem*, std::list<ESPEmitter*>>::iterator iter = this->activeItemDropEmitters.begin(); 
+	for (std::map<const GameItem*, std::list<ESPEmitter*> >::iterator iter = this->activeItemDropEmitters.begin();
 		iter != this->activeItemDropEmitters.end(); ++iter) {
 		
 		// Delete all emitters associated with the item drop effect
@@ -1987,7 +1987,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
  */
 void GameESPAssets::RemoveProjectileEffect(const Projectile& projectile) {
 	
- 	std::map<const Projectile*, std::list<ESPPointEmitter*>>::iterator projIter = this->activeProjectileEmitters.find(&projectile);
+ 	std::map<const Projectile*, std::list<ESPPointEmitter*> >::iterator projIter = this->activeProjectileEmitters.find(&projectile);
 	if (projIter != this->activeProjectileEmitters.end()) {
 			
 		std::list<ESPPointEmitter*>& projEffects = projIter->second;
@@ -2223,7 +2223,7 @@ void GameESPAssets::UpdateBeamEffect(const Beam& beam) {
  * Remove all effects associated with the given beam if any exist.
  */
 void GameESPAssets::RemoveBeamEffect(const Beam& beam) {
-	std::map<const Beam*, std::list<ESPEmitter*>>::iterator foundBeamIter = this->activeBeamEmitters.find(&beam);
+	std::map<const Beam*, std::list<ESPEmitter*> >::iterator foundBeamIter = this->activeBeamEmitters.find(&beam);
 	if (foundBeamIter != this->activeBeamEmitters.end()) {
 		this->activeBeamEmitters.erase(foundBeamIter);	
 	}
@@ -2237,7 +2237,7 @@ void GameESPAssets::RemoveBeamEffect(const Beam& beam) {
  */
 void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition) {
 	// Remove any previously active effects for the given item type
-	std::map<GameItem::ItemType, std::list<ESPEmitter*>>::iterator foundEffects = this->activeTimerHUDEmitters.find(type);
+	std::map<GameItem::ItemType, std::list<ESPEmitter*> >::iterator foundEffects = this->activeTimerHUDEmitters.find(type);
 	if (foundEffects != this->activeTimerHUDEmitters.end()) {
 		std::list<ESPEmitter*>& foundEmitters = foundEffects->second;
 		for (std::list<ESPEmitter*>::iterator iter = foundEmitters.begin(); iter != foundEmitters.end(); ++iter) {
@@ -3051,9 +3051,9 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 				assert(ballAffected != NULL);
 
 				// If there are any effects assigned for the uber ball then we need to reset the trail
-				std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(ballAffected);
+				std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(ballAffected);
 				if (foundBallEffects != this->ballEffects.end()) {
-					std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>::iterator foundUberBallFX = foundBallEffects->second.find(GameItem::UberBallItem);
+					std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator foundUberBallFX = foundBallEffects->second.find(GameItem::UberBallItem);
 					if (foundUberBallFX != foundBallEffects->second.end()) {
 						std::vector<ESPPointEmitter*>& uberBallEffectsList = foundUberBallFX->second;
 						assert(uberBallEffectsList.size() > 0);
@@ -3135,7 +3135,7 @@ void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera, const V
  * Update and draw all projectile effects that are currently active.
  */
 void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
-	for (std::map<const Projectile*, std::list<ESPPointEmitter*>>::iterator iter = this->activeProjectileEmitters.begin();
+	for (std::map<const Projectile*, std::list<ESPPointEmitter*> >::iterator iter = this->activeProjectileEmitters.begin();
 		iter != this->activeProjectileEmitters.end(); ++iter) {
 		
 		const Projectile* currProjectile = iter->first;
@@ -3192,7 +3192,7 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const
  */
 void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item) {
 	// Find the effects for the item we want to draw
-	std::map<const GameItem*, std::list<ESPEmitter*>>::iterator itemDropEffectIter = this->activeItemDropEmitters.find(&item);
+	std::map<const GameItem*, std::list<ESPEmitter*> >::iterator itemDropEffectIter = this->activeItemDropEmitters.find(&item);
 	
 	// If no effects were found then exit...
 	if (itemDropEffectIter == this->activeItemDropEmitters.end()) {
@@ -3214,11 +3214,11 @@ void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const G
 void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball) {
 	// Check to see if the ball has any associated uber ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
 	
 	if (foundBallEffects == this->ballEffects.end()) {
 		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>())).first;
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
 	}
 
 	if (foundBallEffects->second.find(GameItem::UberBallItem) == foundBallEffects->second.end()) {
@@ -3251,11 +3251,11 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball) {
 	// Check to see if the ball has any associated ghost ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
 	
 	if (foundBallEffects == this->ballEffects.end()) {
 		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>())).first;
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
 	}
 
 	if (foundBallEffects->second.find(GameItem::GhostBallItem) == foundBallEffects->second.end()) {
@@ -3287,11 +3287,11 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir) {
 	// Check to see if the ball has any associated gravity ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
 	
 	if (foundBallEffects == this->ballEffects.end()) {
 		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>())).first;
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
 	}
 
 	if (foundBallEffects->second.find(GameItem::GravityBallItem) == foundBallEffects->second.end()) {
@@ -3328,11 +3328,11 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 void GameESPAssets::DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
 	// Check to see if the ball has any associated camera paddle ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>>::iterator foundBallEffects = this->ballEffects.find(&ball);
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
 	
 	if (foundBallEffects == this->ballEffects.end()) {
 		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>())).first;
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
 	}
 
 	if (foundBallEffects->second.find(GameItem::PaddleCamItem) == foundBallEffects->second.end()) {
@@ -3408,7 +3408,7 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
 	std::list<std::list<ESPEmitter*>::iterator> removeElements;
 
 	// Find the emitters corresponding to the given ball
-	std::map<const GameBall*, std::list<ESPEmitter*>>::iterator tempIter = this->activeBallBGEmitters.find(&ball);
+	std::map<const GameBall*, std::list<ESPEmitter*> >::iterator tempIter = this->activeBallBGEmitters.find(&ball);
 	if (tempIter == this->activeBallBGEmitters.end()) {
 		return;
 	}
@@ -3518,7 +3518,7 @@ void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Camera& ca
  * Draw all the beams that are currently active in the game.
  */
 void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation) {
-	for (std::map<const Beam*, std::list<ESPEmitter*>>::iterator iter = this->activeBeamEmitters.begin(); 
+	for (std::map<const Beam*, std::list<ESPEmitter*> >::iterator iter = this->activeBeamEmitters.begin();
 		iter != this->activeBeamEmitters.end(); ++iter) {
 
 		const Beam* beam = iter->first;
@@ -3538,7 +3538,7 @@ void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera, const Vecto
 void GameESPAssets::DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type) {
 
 	// Try to find any emitters associated with the given item type
-	std::map<GameItem::ItemType, std::list<ESPEmitter*>>::iterator foundEmitters = this->activeTimerHUDEmitters.find(type);
+	std::map<GameItem::ItemType, std::list<ESPEmitter*> >::iterator foundEmitters = this->activeTimerHUDEmitters.find(type);
 	if (foundEmitters == this->activeTimerHUDEmitters.end()) {
 		return;
 	}

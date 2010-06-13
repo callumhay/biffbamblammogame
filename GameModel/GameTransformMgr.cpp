@@ -421,7 +421,7 @@ void GameTransformMgr::StartLevelFlipAnimation(double dT, GameModel& gameModel) 
  * Returns: true once the animation is complete, false otherwise.
  */
 bool GameTransformMgr::TickLevelFlipAnimation(double dT) {
-	for (std::list<AnimationLerp<float>>::iterator iter = this->levelFlipAnimations.begin(); iter != this->levelFlipAnimations.end();) {
+	for (std::list<AnimationLerp<float> >::iterator iter = this->levelFlipAnimations.begin(); iter != this->levelFlipAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->levelFlipAnimations.erase(iter);
@@ -576,7 +576,7 @@ bool GameTransformMgr::TickPaddleCamAnimation(double dT, GameModel& gameModel) {
 	paddle->Animate(dT);
 
 	// Animate any camera-related animations for the paddle cam
-	for (std::list<AnimationMultiLerp<Orientation3D>>::iterator iter = this->paddleCamAnimations.begin(); iter != this->paddleCamAnimations.end();) {
+	for (std::list<AnimationMultiLerp<Orientation3D> >::iterator iter = this->paddleCamAnimations.begin(); iter != this->paddleCamAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->paddleCamAnimations.erase(iter);
@@ -586,7 +586,7 @@ bool GameTransformMgr::TickPaddleCamAnimation(double dT, GameModel& gameModel) {
 		}
 	}
 
-	for (std::list<AnimationMultiLerp<float>>::iterator iter = this->camFOVAnimations.begin(); iter != this->camFOVAnimations.end();) {
+	for (std::list<AnimationMultiLerp<float> >::iterator iter = this->camFOVAnimations.begin(); iter != this->camFOVAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->camFOVAnimations.erase(iter);
@@ -756,7 +756,7 @@ bool GameTransformMgr::TickBallCamAnimation(double dT, GameModel& gameModel) {
 	ball->Animate(dT);
 
 	// Animate the camera
-	for (std::list<AnimationMultiLerp<Orientation3D>>::iterator iter = this->ballCamAnimations.begin(); iter != this->ballCamAnimations.end();) {
+	for (std::list<AnimationMultiLerp<Orientation3D> >::iterator iter = this->ballCamAnimations.begin(); iter != this->ballCamAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->ballCamAnimations.erase(iter);
@@ -767,7 +767,7 @@ bool GameTransformMgr::TickBallCamAnimation(double dT, GameModel& gameModel) {
 	}
 
 	// Animate the field of view angle
-	for (std::list<AnimationMultiLerp<float>>::iterator iter = this->camFOVAnimations.begin(); iter != this->camFOVAnimations.end();) {
+	for (std::list<AnimationMultiLerp<float> >::iterator iter = this->camFOVAnimations.begin(); iter != this->camFOVAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->camFOVAnimations.erase(iter);
@@ -809,7 +809,7 @@ bool GameTransformMgr::TickBallDeathAnimation(double dT, GameModel& gameModel) {
 	assert(this->ballDeathAnimations.size() > 0);
 
 	// Animate the camera
-	for (std::list<AnimationMultiLerp<Orientation3D>>::iterator iter = this->ballDeathAnimations.begin(); iter != this->ballDeathAnimations.end();) {
+	for (std::list<AnimationMultiLerp<Orientation3D> >::iterator iter = this->ballDeathAnimations.begin(); iter != this->ballDeathAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->ballDeathAnimations.erase(iter);
@@ -820,7 +820,7 @@ bool GameTransformMgr::TickBallDeathAnimation(double dT, GameModel& gameModel) {
 	}
 
 	// Animate the field of view angle
-	for (std::list<AnimationMultiLerp<float>>::iterator iter = this->camFOVAnimations.begin(); iter != this->camFOVAnimations.end();) {
+	for (std::list<AnimationMultiLerp<float> >::iterator iter = this->camFOVAnimations.begin(); iter != this->camFOVAnimations.end();) {
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->camFOVAnimations.erase(iter);

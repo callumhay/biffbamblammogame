@@ -57,19 +57,19 @@ private:
 
 	enum FBOAnimationType { PoisonAnimationType };
 	enum FBOAnimationItem { None };
-	std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float>>> fboAnimations;
+	std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float> > > fboAnimations;
 
 	/**
 	 * Trys to find a particular animation and return it.
 	 * Returns: A pointer to the found animation or NULL if not found.
 	 */
 	inline AnimationMultiLerp<float>* FindFBOAnimation(FBOAnimationType type, FBOAnimationItem item) {
-		std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float>>>::iterator iter1 = this->fboAnimations.find(type);
+		std::map<FBOAnimationType, std::map<FBOAnimationItem, AnimationMultiLerp<float> > >::iterator iter1 = this->fboAnimations.find(type);
 		if (iter1 == this->fboAnimations.end()) {
 			return NULL;
 		}
 
-		std::map<FBOAnimationItem, AnimationMultiLerp<float>>::iterator iter2 = iter1->second.find(item);
+		std::map<FBOAnimationItem, AnimationMultiLerp<float> >::iterator iter2 = iter1->second.find(item);
 		if (iter2 == iter1->second.end()) {
 			return NULL;
 		}
