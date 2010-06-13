@@ -90,7 +90,7 @@ public:
 
 protected:
 	static const float MIN_BEAM_RADIUS;
-	static const int   MIN_DMG_PER_SEC = 1;
+	static const int   MIN_DMG_PER_SEC;
 
 	BeamType type;														// Type of beam
 	std::list<BeamSegment*> beamParts;				// The beam's parts that make up this entire beam

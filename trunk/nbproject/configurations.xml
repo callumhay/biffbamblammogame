@@ -1,0 +1,775 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <logicalFolder name="BiffBamBlammo"
+                     displayName="BiffBamBlammo"
+                     projectFiles="true">
+        <logicalFolder name="BlammoEngine"
+                       displayName="BlammoEngine"
+                       projectFiles="true">
+          <itemPath>BlammoEngine/Algebra.cpp</itemPath>
+          <itemPath>BlammoEngine/Algebra.h</itemPath>
+          <itemPath>BlammoEngine/Animation.h</itemPath>
+          <itemPath>BlammoEngine/BasicIncludes.h</itemPath>
+          <itemPath>BlammoEngine/BlammoTime.cpp</itemPath>
+          <itemPath>BlammoEngine/BlammoTime.h</itemPath>
+          <itemPath>BlammoEngine/Camera.cpp</itemPath>
+          <itemPath>BlammoEngine/Camera.h</itemPath>
+          <itemPath>BlammoEngine/CgFxEffect.cpp</itemPath>
+          <itemPath>BlammoEngine/CgFxEffect.h</itemPath>
+          <itemPath>BlammoEngine/Collision.h</itemPath>
+          <itemPath>BlammoEngine/Colour.h</itemPath>
+          <itemPath>BlammoEngine/FBObj.cpp</itemPath>
+          <itemPath>BlammoEngine/FBObj.h</itemPath>
+          <itemPath>BlammoEngine/GeometryMaker.cpp</itemPath>
+          <itemPath>BlammoEngine/GeometryMaker.h</itemPath>
+          <itemPath>BlammoEngine/Light.cpp</itemPath>
+          <itemPath>BlammoEngine/Light.h</itemPath>
+          <itemPath>BlammoEngine/Matrix.h</itemPath>
+          <itemPath>BlammoEngine/Mesh.cpp</itemPath>
+          <itemPath>BlammoEngine/Mesh.h</itemPath>
+          <itemPath>BlammoEngine/MtlReader.cpp</itemPath>
+          <itemPath>BlammoEngine/MtlReader.h</itemPath>
+          <itemPath>BlammoEngine/Noise.cpp</itemPath>
+          <itemPath>BlammoEngine/Noise.h</itemPath>
+          <itemPath>BlammoEngine/ObjReader.cpp</itemPath>
+          <itemPath>BlammoEngine/ObjReader.h</itemPath>
+          <itemPath>BlammoEngine/Orientation.h</itemPath>
+          <itemPath>BlammoEngine/Plane.h</itemPath>
+          <itemPath>BlammoEngine/Point.cpp</itemPath>
+          <itemPath>BlammoEngine/Point.h</itemPath>
+          <itemPath>BlammoEngine/Skybox.cpp</itemPath>
+          <itemPath>BlammoEngine/Skybox.h</itemPath>
+          <itemPath>BlammoEngine/StringHelper.h</itemPath>
+          <itemPath>BlammoEngine/TextLabel.cpp</itemPath>
+          <itemPath>BlammoEngine/TextLabel.h</itemPath>
+          <itemPath>BlammoEngine/Texture.cpp</itemPath>
+          <itemPath>BlammoEngine/Texture.h</itemPath>
+          <itemPath>BlammoEngine/Texture1D.cpp</itemPath>
+          <itemPath>BlammoEngine/Texture1D.h</itemPath>
+          <itemPath>BlammoEngine/Texture2D.cpp</itemPath>
+          <itemPath>BlammoEngine/Texture2D.h</itemPath>
+          <itemPath>BlammoEngine/Texture3D.cpp</itemPath>
+          <itemPath>BlammoEngine/Texture3D.h</itemPath>
+          <itemPath>BlammoEngine/TextureCube.cpp</itemPath>
+          <itemPath>BlammoEngine/TextureCube.h</itemPath>
+          <itemPath>BlammoEngine/TextureFontSet.cpp</itemPath>
+          <itemPath>BlammoEngine/TextureFontSet.h</itemPath>
+          <itemPath>BlammoEngine/VBOBatch.cpp</itemPath>
+          <itemPath>BlammoEngine/VBOBatch.h</itemPath>
+          <itemPath>BlammoEngine/Vector.h</itemPath>
+          <itemPath>BlammoEngine/mtrand.cpp</itemPath>
+          <itemPath>BlammoEngine/mtrand.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="debug" displayName="debug" projectFiles="true">
+        </logicalFolder>
+        <logicalFolder name="ESPEngine" displayName="ESPEngine" projectFiles="true">
+          <itemPath>ESPEngine/ESP.h</itemPath>
+          <itemPath>ESPEngine/ESPEmitter.cpp</itemPath>
+          <itemPath>ESPEngine/ESPEmitter.h</itemPath>
+          <itemPath>ESPEngine/ESPEmitterEventHandler.h</itemPath>
+          <itemPath>ESPEngine/ESPGroup.h</itemPath>
+          <itemPath>ESPEngine/ESPLineEmitter.cpp</itemPath>
+          <itemPath>ESPEngine/ESPLineEmitter.h</itemPath>
+          <itemPath>ESPEngine/ESPMultiColourEffector.cpp</itemPath>
+          <itemPath>ESPEngine/ESPMultiColourEffector.h</itemPath>
+          <itemPath>ESPEngine/ESPOnomataParticle.cpp</itemPath>
+          <itemPath>ESPEngine/ESPOnomataParticle.h</itemPath>
+          <itemPath>ESPEngine/ESPParticle.cpp</itemPath>
+          <itemPath>ESPEngine/ESPParticle.h</itemPath>
+          <itemPath>ESPEngine/ESPParticleAccelEffector.cpp</itemPath>
+          <itemPath>ESPEngine/ESPParticleAccelEffector.h</itemPath>
+          <itemPath>ESPEngine/ESPParticleBatchMesh.cpp</itemPath>
+          <itemPath>ESPEngine/ESPParticleBatchMesh.h</itemPath>
+          <itemPath>ESPEngine/ESPParticleColourEffector.cpp</itemPath>
+          <itemPath>ESPEngine/ESPParticleColourEffector.h</itemPath>
+          <itemPath>ESPEngine/ESPParticleEffector.h</itemPath>
+          <itemPath>ESPEngine/ESPParticleRotateEffector.cpp</itemPath>
+          <itemPath>ESPEngine/ESPParticleRotateEffector.h</itemPath>
+          <itemPath>ESPEngine/ESPParticleScaleEffector.cpp</itemPath>
+          <itemPath>ESPEngine/ESPParticleScaleEffector.h</itemPath>
+          <itemPath>ESPEngine/ESPPointEmitter.cpp</itemPath>
+          <itemPath>ESPEngine/ESPPointEmitter.h</itemPath>
+          <itemPath>ESPEngine/ESPShaderParticle.cpp</itemPath>
+          <itemPath>ESPEngine/ESPShaderParticle.h</itemPath>
+          <itemPath>ESPEngine/ESPUtil.cpp</itemPath>
+          <itemPath>ESPEngine/ESPUtil.h</itemPath>
+          <itemPath>ESPEngine/ESPVolumeEmitter.cpp</itemPath>
+          <itemPath>ESPEngine/ESPVolumeEmitter.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="GameModel" displayName="GameModel" projectFiles="true">
+          <itemPath>GameModel/BallCamItem.cpp</itemPath>
+          <itemPath>GameModel/BallCamItem.h</itemPath>
+          <itemPath>GameModel/BallDeathState.cpp</itemPath>
+          <itemPath>GameModel/BallDeathState.h</itemPath>
+          <itemPath>GameModel/BallInPlayState.cpp</itemPath>
+          <itemPath>GameModel/BallInPlayState.h</itemPath>
+          <itemPath>GameModel/BallOnPaddleState.cpp</itemPath>
+          <itemPath>GameModel/BallOnPaddleState.h</itemPath>
+          <itemPath>GameModel/BallSafetyNetItem.cpp</itemPath>
+          <itemPath>GameModel/BallSafetyNetItem.h</itemPath>
+          <itemPath>GameModel/BallSizeItem.cpp</itemPath>
+          <itemPath>GameModel/BallSizeItem.h</itemPath>
+          <itemPath>GameModel/BallSpeedItem.cpp</itemPath>
+          <itemPath>GameModel/BallSpeedItem.h</itemPath>
+          <itemPath>GameModel/BallState.h</itemPath>
+          <itemPath>GameModel/BallWormholeState.cpp</itemPath>
+          <itemPath>GameModel/BallWormholeState.h</itemPath>
+          <itemPath>GameModel/Beam.cpp</itemPath>
+          <itemPath>GameModel/Beam.h</itemPath>
+          <itemPath>GameModel/BlackoutItem.cpp</itemPath>
+          <itemPath>GameModel/BlackoutItem.h</itemPath>
+          <itemPath>GameModel/BombBlock.cpp</itemPath>
+          <itemPath>GameModel/BombBlock.h</itemPath>
+          <itemPath>GameModel/BoundingLines.cpp</itemPath>
+          <itemPath>GameModel/BoundingLines.h</itemPath>
+          <itemPath>GameModel/BreakableBlock.cpp</itemPath>
+          <itemPath>GameModel/BreakableBlock.h</itemPath>
+          <itemPath>GameModel/CannonBlock.cpp</itemPath>
+          <itemPath>GameModel/CannonBlock.h</itemPath>
+          <itemPath>GameModel/CollateralBlock.cpp</itemPath>
+          <itemPath>GameModel/CollateralBlock.h</itemPath>
+          <itemPath>GameModel/CollateralBlockProjectile.cpp</itemPath>
+          <itemPath>GameModel/CollateralBlockProjectile.h</itemPath>
+          <itemPath>GameModel/EmptySpaceBlock.h</itemPath>
+          <itemPath>GameModel/GameBall.cpp</itemPath>
+          <itemPath>GameModel/GameBall.h</itemPath>
+          <itemPath>GameModel/GameCompleteState.cpp</itemPath>
+          <itemPath>GameModel/GameCompleteState.h</itemPath>
+          <itemPath>GameModel/GameEventManager.cpp</itemPath>
+          <itemPath>GameModel/GameEventManager.h</itemPath>
+          <itemPath>GameModel/GameEvents.h</itemPath>
+          <itemPath>GameModel/GameItem.cpp</itemPath>
+          <itemPath>GameModel/GameItem.h</itemPath>
+          <itemPath>GameModel/GameItemFactory.cpp</itemPath>
+          <itemPath>GameModel/GameItemFactory.h</itemPath>
+          <itemPath>GameModel/GameItemTimer.cpp</itemPath>
+          <itemPath>GameModel/GameItemTimer.h</itemPath>
+          <itemPath>GameModel/GameLevel.cpp</itemPath>
+          <itemPath>GameModel/GameLevel.h</itemPath>
+          <itemPath>GameModel/GameModel.cpp</itemPath>
+          <itemPath>GameModel/GameModel.h</itemPath>
+          <itemPath>GameModel/GameModelConstants.cpp</itemPath>
+          <itemPath>GameModel/GameModelConstants.h</itemPath>
+          <itemPath>GameModel/GameOverState.cpp</itemPath>
+          <itemPath>GameModel/GameOverState.h</itemPath>
+          <itemPath>GameModel/GameState.cpp</itemPath>
+          <itemPath>GameModel/GameState.h</itemPath>
+          <itemPath>GameModel/GameTransformMgr.cpp</itemPath>
+          <itemPath>GameModel/GameTransformMgr.h</itemPath>
+          <itemPath>GameModel/GameWorld.cpp</itemPath>
+          <itemPath>GameModel/GameWorld.h</itemPath>
+          <itemPath>GameModel/GhostBallItem.cpp</itemPath>
+          <itemPath>GameModel/GhostBallItem.h</itemPath>
+          <itemPath>GameModel/GravityBallItem.cpp</itemPath>
+          <itemPath>GameModel/GravityBallItem.h</itemPath>
+          <itemPath>GameModel/InCannonBallState.cpp</itemPath>
+          <itemPath>GameModel/InCannonBallState.h</itemPath>
+          <itemPath>GameModel/InkBlock.cpp</itemPath>
+          <itemPath>GameModel/InkBlock.h</itemPath>
+          <itemPath>GameModel/InvisiBallItem.cpp</itemPath>
+          <itemPath>GameModel/InvisiBallItem.h</itemPath>
+          <itemPath>GameModel/LaserBeamPaddleItem.cpp</itemPath>
+          <itemPath>GameModel/LaserBeamPaddleItem.h</itemPath>
+          <itemPath>GameModel/LaserPaddleItem.cpp</itemPath>
+          <itemPath>GameModel/LaserPaddleItem.h</itemPath>
+          <itemPath>GameModel/LevelCompleteState.cpp</itemPath>
+          <itemPath>GameModel/LevelCompleteState.h</itemPath>
+          <itemPath>GameModel/LevelPiece.cpp</itemPath>
+          <itemPath>GameModel/LevelPiece.h</itemPath>
+          <itemPath>GameModel/MultiBallItem.cpp</itemPath>
+          <itemPath>GameModel/MultiBallItem.h</itemPath>
+          <itemPath>GameModel/NormalBallState.cpp</itemPath>
+          <itemPath>GameModel/NormalBallState.h</itemPath>
+          <itemPath>GameModel/OneUpItem.cpp</itemPath>
+          <itemPath>GameModel/OneUpItem.h</itemPath>
+          <itemPath>GameModel/Onomatoplex.cpp</itemPath>
+          <itemPath>GameModel/Onomatoplex.h</itemPath>
+          <itemPath>GameModel/PaddleCamItem.cpp</itemPath>
+          <itemPath>GameModel/PaddleCamItem.h</itemPath>
+          <itemPath>GameModel/PaddleLaser.cpp</itemPath>
+          <itemPath>GameModel/PaddleLaser.h</itemPath>
+          <itemPath>GameModel/PaddleRocketProjectile.cpp</itemPath>
+          <itemPath>GameModel/PaddleRocketProjectile.h</itemPath>
+          <itemPath>GameModel/PaddleSizeItem.cpp</itemPath>
+          <itemPath>GameModel/PaddleSizeItem.h</itemPath>
+          <itemPath>GameModel/PlayerPaddle.cpp</itemPath>
+          <itemPath>GameModel/PlayerPaddle.h</itemPath>
+          <itemPath>GameModel/PoisonPaddleItem.cpp</itemPath>
+          <itemPath>GameModel/PoisonPaddleItem.h</itemPath>
+          <itemPath>GameModel/PortalBlock.cpp</itemPath>
+          <itemPath>GameModel/PortalBlock.h</itemPath>
+          <itemPath>GameModel/PrismBlock.cpp</itemPath>
+          <itemPath>GameModel/PrismBlock.h</itemPath>
+          <itemPath>GameModel/Projectile.cpp</itemPath>
+          <itemPath>GameModel/Projectile.h</itemPath>
+          <itemPath>GameModel/RocketPaddleItem.cpp</itemPath>
+          <itemPath>GameModel/RocketPaddleItem.h</itemPath>
+          <itemPath>GameModel/SolidBlock.cpp</itemPath>
+          <itemPath>GameModel/SolidBlock.h</itemPath>
+          <itemPath>GameModel/StickyPaddleItem.cpp</itemPath>
+          <itemPath>GameModel/StickyPaddleItem.h</itemPath>
+          <itemPath>GameModel/TriangleBlocks.cpp</itemPath>
+          <itemPath>GameModel/TriangleBlocks.h</itemPath>
+          <itemPath>GameModel/UberBallItem.cpp</itemPath>
+          <itemPath>GameModel/UberBallItem.h</itemPath>
+          <itemPath>GameModel/UpsideDownItem.cpp</itemPath>
+          <itemPath>GameModel/UpsideDownItem.h</itemPath>
+          <itemPath>GameModel/WorldCompleteState.cpp</itemPath>
+          <itemPath>GameModel/WorldCompleteState.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="GameSound" displayName="GameSound" projectFiles="true">
+          <itemPath>GameSound/GameSound.cpp</itemPath>
+          <itemPath>GameSound/GameSound.h</itemPath>
+          <itemPath>GameSound/GameSoundAssets.cpp</itemPath>
+          <itemPath>GameSound/GameSoundAssets.h</itemPath>
+          <itemPath>GameSound/MSFReader.cpp</itemPath>
+          <itemPath>GameSound/MSFReader.h</itemPath>
+          <itemPath>GameSound/Sound.cpp</itemPath>
+          <itemPath>GameSound/Sound.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="GameView" displayName="GameView" projectFiles="true">
+          <itemPath>GameView/BallSafetyNetMesh.cpp</itemPath>
+          <itemPath>GameView/BallSafetyNetMesh.h</itemPath>
+          <itemPath>GameView/CannonBlockMesh.cpp</itemPath>
+          <itemPath>GameView/CannonBlockMesh.h</itemPath>
+          <itemPath>GameView/CgFxAfterImage.cpp</itemPath>
+          <itemPath>GameView/CgFxAfterImage.h</itemPath>
+          <itemPath>GameView/CgFxBloom.cpp</itemPath>
+          <itemPath>GameView/CgFxBloom.h</itemPath>
+          <itemPath>GameView/CgFxCelShading.cpp</itemPath>
+          <itemPath>GameView/CgFxCelShading.h</itemPath>
+          <itemPath>GameView/CgFxDecoSkybox.cpp</itemPath>
+          <itemPath>GameView/CgFxDecoSkybox.h</itemPath>
+          <itemPath>GameView/CgFxFullscreenGoo.cpp</itemPath>
+          <itemPath>GameView/CgFxFullscreenGoo.h</itemPath>
+          <itemPath>GameView/CgFxGaussianBlur.cpp</itemPath>
+          <itemPath>GameView/CgFxGaussianBlur.h</itemPath>
+          <itemPath>GameView/CgFxInkBlock.cpp</itemPath>
+          <itemPath>GameView/CgFxInkBlock.h</itemPath>
+          <itemPath>GameView/CgFxInkSplatter.cpp</itemPath>
+          <itemPath>GameView/CgFxInkSplatter.h</itemPath>
+          <itemPath>GameView/CgFxPhong.cpp</itemPath>
+          <itemPath>GameView/CgFxPhong.h</itemPath>
+          <itemPath>GameView/CgFxPortalBlock.cpp</itemPath>
+          <itemPath>GameView/CgFxPortalBlock.h</itemPath>
+          <itemPath>GameView/CgFxPostRefract.cpp</itemPath>
+          <itemPath>GameView/CgFxPostRefract.h</itemPath>
+          <itemPath>GameView/CgFxPostSmokey.cpp</itemPath>
+          <itemPath>GameView/CgFxPostSmokey.h</itemPath>
+          <itemPath>GameView/CgFxPostUberIntense.cpp</itemPath>
+          <itemPath>GameView/CgFxPostUberIntense.h</itemPath>
+          <itemPath>GameView/CgFxPrism.cpp</itemPath>
+          <itemPath>GameView/CgFxPrism.h</itemPath>
+          <itemPath>GameView/CgFxStickyPaddle.cpp</itemPath>
+          <itemPath>GameView/CgFxStickyPaddle.h</itemPath>
+          <itemPath>GameView/CgFxVolumetricEffect.cpp</itemPath>
+          <itemPath>GameView/CgFxVolumetricEffect.h</itemPath>
+          <itemPath>GameView/CollateralBlockMesh.cpp</itemPath>
+          <itemPath>GameView/CollateralBlockMesh.h</itemPath>
+          <itemPath>GameView/CrosshairLaserHUD.cpp</itemPath>
+          <itemPath>GameView/CrosshairLaserHUD.h</itemPath>
+          <itemPath>GameView/DecoSkybox.cpp</itemPath>
+          <itemPath>GameView/DecoSkybox.h</itemPath>
+          <itemPath>GameView/DecoWorldAssets.cpp</itemPath>
+          <itemPath>GameView/DecoWorldAssets.h</itemPath>
+          <itemPath>GameView/DisplayState.h</itemPath>
+          <itemPath>GameView/FlashHUD.cpp</itemPath>
+          <itemPath>GameView/FlashHUD.h</itemPath>
+          <itemPath>GameView/GameAssets.cpp</itemPath>
+          <itemPath>GameView/GameAssets.h</itemPath>
+          <itemPath>GameView/GameCompleteDisplayState.cpp</itemPath>
+          <itemPath>GameView/GameCompleteDisplayState.h</itemPath>
+          <itemPath>GameView/GameDisplay.cpp</itemPath>
+          <itemPath>GameView/GameDisplay.h</itemPath>
+          <itemPath>GameView/GameESPAssets.cpp</itemPath>
+          <itemPath>GameView/GameESPAssets.h</itemPath>
+          <itemPath>GameView/GameEventsListener.cpp</itemPath>
+          <itemPath>GameView/GameEventsListener.h</itemPath>
+          <itemPath>GameView/GameFBOAssets.cpp</itemPath>
+          <itemPath>GameView/GameFBOAssets.h</itemPath>
+          <itemPath>GameView/GameFontAssetsManager.cpp</itemPath>
+          <itemPath>GameView/GameFontAssetsManager.h</itemPath>
+          <itemPath>GameView/GameItemAssets.cpp</itemPath>
+          <itemPath>GameView/GameItemAssets.h</itemPath>
+          <itemPath>GameView/GameLightAssets.cpp</itemPath>
+          <itemPath>GameView/GameLightAssets.h</itemPath>
+          <itemPath>GameView/GameMenu.cpp</itemPath>
+          <itemPath>GameView/GameMenu.h</itemPath>
+          <itemPath>GameView/GameMenuItem.cpp</itemPath>
+          <itemPath>GameView/GameMenuItem.h</itemPath>
+          <itemPath>GameView/GameOverDisplayState.cpp</itemPath>
+          <itemPath>GameView/GameOverDisplayState.h</itemPath>
+          <itemPath>GameView/GameViewConstants.cpp</itemPath>
+          <itemPath>GameView/GameViewConstants.h</itemPath>
+          <itemPath>GameView/GameWorldAssets.cpp</itemPath>
+          <itemPath>GameView/GameWorldAssets.h</itemPath>
+          <itemPath>GameView/InGameDisplayState.cpp</itemPath>
+          <itemPath>GameView/InGameDisplayState.h</itemPath>
+          <itemPath>GameView/InGameMenuState.cpp</itemPath>
+          <itemPath>GameView/InGameMenuState.h</itemPath>
+          <itemPath>GameView/LaserPaddleGun.cpp</itemPath>
+          <itemPath>GameView/LaserPaddleGun.h</itemPath>
+          <itemPath>GameView/LevelMesh.cpp</itemPath>
+          <itemPath>GameView/LevelMesh.h</itemPath>
+          <itemPath>GameView/LivesLeftHUD.cpp</itemPath>
+          <itemPath>GameView/LivesLeftHUD.h</itemPath>
+          <itemPath>GameView/LoadingScreen.cpp</itemPath>
+          <itemPath>GameView/LoadingScreen.h</itemPath>
+          <itemPath>GameView/MainMenuDisplayState.cpp</itemPath>
+          <itemPath>GameView/MainMenuDisplayState.h</itemPath>
+          <itemPath>GameView/PaddleRocketMesh.cpp</itemPath>
+          <itemPath>GameView/PaddleRocketMesh.h</itemPath>
+          <itemPath>GameView/PlayerHurtHUD.cpp</itemPath>
+          <itemPath>GameView/PlayerHurtHUD.h</itemPath>
+          <itemPath>GameView/PortalBlockMesh.cpp</itemPath>
+          <itemPath>GameView/PortalBlockMesh.h</itemPath>
+          <itemPath>GameView/PrismBlockMesh.cpp</itemPath>
+          <itemPath>GameView/PrismBlockMesh.h</itemPath>
+          <itemPath>GameView/StartGameDisplayState.cpp</itemPath>
+          <itemPath>GameView/StartGameDisplayState.h</itemPath>
+          <itemPath>GameView/StickyPaddleGoo.cpp</itemPath>
+          <itemPath>GameView/StickyPaddleGoo.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="include" displayName="include" projectFiles="true">
+          <logicalFolder name="AL" displayName="AL" projectFiles="true">
+            <itemPath>include/AL/EFX-Util.h</itemPath>
+            <itemPath>include/AL/al.h</itemPath>
+            <itemPath>include/AL/alc.h</itemPath>
+            <itemPath>include/AL/alut.h</itemPath>
+            <itemPath>include/AL/efx-creative.h</itemPath>
+            <itemPath>include/AL/efx.h</itemPath>
+            <itemPath>include/AL/xram.h</itemPath>
+          </logicalFolder>
+          <logicalFolder name="Cg" displayName="Cg" projectFiles="true">
+            <itemPath>include/Cg/cg.h</itemPath>
+            <itemPath>include/Cg/cgGL.h</itemPath>
+            <itemPath>include/Cg/cgGL_profiles.h</itemPath>
+            <itemPath>include/Cg/cg_bindlocations.h</itemPath>
+            <itemPath>include/Cg/cg_datatypes.h</itemPath>
+            <itemPath>include/Cg/cg_enums.h</itemPath>
+            <itemPath>include/Cg/cg_errors.h</itemPath>
+            <itemPath>include/Cg/cg_profiles.h</itemPath>
+          </logicalFolder>
+          <logicalFolder name="freetype" displayName="freetype" projectFiles="true">
+            <logicalFolder name="config" displayName="config" projectFiles="true">
+              <itemPath>include/freetype/config/ftconfig.h</itemPath>
+              <itemPath>include/freetype/config/ftheader.h</itemPath>
+              <itemPath>include/freetype/config/ftmodule.h</itemPath>
+              <itemPath>include/freetype/config/ftoption.h</itemPath>
+              <itemPath>include/freetype/config/ftstdlib.h</itemPath>
+            </logicalFolder>
+            <logicalFolder name="internal" displayName="internal" projectFiles="true">
+              <logicalFolder name="services" displayName="services" projectFiles="true">
+                <itemPath>include/freetype/internal/services/svbdf.h</itemPath>
+                <itemPath>include/freetype/internal/services/svgldict.h</itemPath>
+                <itemPath>include/freetype/internal/services/svgxval.h</itemPath>
+                <itemPath>include/freetype/internal/services/svkern.h</itemPath>
+                <itemPath>include/freetype/internal/services/svmm.h</itemPath>
+                <itemPath>include/freetype/internal/services/svotval.h</itemPath>
+                <itemPath>include/freetype/internal/services/svpfr.h</itemPath>
+                <itemPath>include/freetype/internal/services/svpostnm.h</itemPath>
+                <itemPath>include/freetype/internal/services/svpscmap.h</itemPath>
+                <itemPath>include/freetype/internal/services/svpsinfo.h</itemPath>
+                <itemPath>include/freetype/internal/services/svsfnt.h</itemPath>
+                <itemPath>include/freetype/internal/services/svttcmap.h</itemPath>
+                <itemPath>include/freetype/internal/services/svtteng.h</itemPath>
+                <itemPath>include/freetype/internal/services/svttglyf.h</itemPath>
+                <itemPath>include/freetype/internal/services/svwinfnt.h</itemPath>
+                <itemPath>include/freetype/internal/services/svxf86nm.h</itemPath>
+              </logicalFolder>
+              <itemPath>include/freetype/internal/autohint.h</itemPath>
+              <itemPath>include/freetype/internal/ftcalc.h</itemPath>
+              <itemPath>include/freetype/internal/ftdebug.h</itemPath>
+              <itemPath>include/freetype/internal/ftdriver.h</itemPath>
+              <itemPath>include/freetype/internal/ftgloadr.h</itemPath>
+              <itemPath>include/freetype/internal/ftmemory.h</itemPath>
+              <itemPath>include/freetype/internal/ftobjs.h</itemPath>
+              <itemPath>include/freetype/internal/ftrfork.h</itemPath>
+              <itemPath>include/freetype/internal/ftserv.h</itemPath>
+              <itemPath>include/freetype/internal/ftstream.h</itemPath>
+              <itemPath>include/freetype/internal/fttrace.h</itemPath>
+              <itemPath>include/freetype/internal/ftvalid.h</itemPath>
+              <itemPath>include/freetype/internal/internal.h</itemPath>
+              <itemPath>include/freetype/internal/pcftypes.h</itemPath>
+              <itemPath>include/freetype/internal/psaux.h</itemPath>
+              <itemPath>include/freetype/internal/pshints.h</itemPath>
+              <itemPath>include/freetype/internal/sfnt.h</itemPath>
+              <itemPath>include/freetype/internal/t1types.h</itemPath>
+              <itemPath>include/freetype/internal/tttypes.h</itemPath>
+            </logicalFolder>
+            <itemPath>include/freetype/freetype.h</itemPath>
+            <itemPath>include/freetype/ftbbox.h</itemPath>
+            <itemPath>include/freetype/ftbdf.h</itemPath>
+            <itemPath>include/freetype/ftbitmap.h</itemPath>
+            <itemPath>include/freetype/ftcache.h</itemPath>
+            <itemPath>include/freetype/ftchapters.h</itemPath>
+            <itemPath>include/freetype/fterrdef.h</itemPath>
+            <itemPath>include/freetype/fterrors.h</itemPath>
+            <itemPath>include/freetype/ftgasp.h</itemPath>
+            <itemPath>include/freetype/ftglyph.h</itemPath>
+            <itemPath>include/freetype/ftgxval.h</itemPath>
+            <itemPath>include/freetype/ftgzip.h</itemPath>
+            <itemPath>include/freetype/ftimage.h</itemPath>
+            <itemPath>include/freetype/ftincrem.h</itemPath>
+            <itemPath>include/freetype/ftlcdfil.h</itemPath>
+            <itemPath>include/freetype/ftlist.h</itemPath>
+            <itemPath>include/freetype/ftlzw.h</itemPath>
+            <itemPath>include/freetype/ftmac.h</itemPath>
+            <itemPath>include/freetype/ftmm.h</itemPath>
+            <itemPath>include/freetype/ftmodapi.h</itemPath>
+            <itemPath>include/freetype/ftmoderr.h</itemPath>
+            <itemPath>include/freetype/ftotval.h</itemPath>
+            <itemPath>include/freetype/ftoutln.h</itemPath>
+            <itemPath>include/freetype/ftpfr.h</itemPath>
+            <itemPath>include/freetype/ftrender.h</itemPath>
+            <itemPath>include/freetype/ftsizes.h</itemPath>
+            <itemPath>include/freetype/ftsnames.h</itemPath>
+            <itemPath>include/freetype/ftstroke.h</itemPath>
+            <itemPath>include/freetype/ftsynth.h</itemPath>
+            <itemPath>include/freetype/ftsystem.h</itemPath>
+            <itemPath>include/freetype/fttrigon.h</itemPath>
+            <itemPath>include/freetype/fttypes.h</itemPath>
+            <itemPath>include/freetype/ftwinfnt.h</itemPath>
+            <itemPath>include/freetype/ftxf86.h</itemPath>
+            <itemPath>include/freetype/t1tables.h</itemPath>
+            <itemPath>include/freetype/ttnameid.h</itemPath>
+            <itemPath>include/freetype/tttables.h</itemPath>
+            <itemPath>include/freetype/tttags.h</itemPath>
+            <itemPath>include/freetype/ttunpat.h</itemPath>
+          </logicalFolder>
+          <logicalFolder name="GL" displayName="GL" projectFiles="true">
+            <itemPath>include/GL/gl.h</itemPath>
+            <itemPath>include/GL/glew.h</itemPath>
+            <itemPath>include/GL/glext.h</itemPath>
+            <itemPath>include/GL/glu.h</itemPath>
+            <itemPath>include/GL/glut.h</itemPath>
+            <itemPath>include/GL/wglew.h</itemPath>
+          </logicalFolder>
+          <logicalFolder name="IL" displayName="IL" projectFiles="true">
+            <itemPath>include/IL/config.h</itemPath>
+            <itemPath>include/IL/devil_internal_exports.h</itemPath>
+            <itemPath>include/IL/il.h</itemPath>
+            <itemPath>include/IL/ilu.h</itemPath>
+            <itemPath>include/IL/ilu_region.h</itemPath>
+            <itemPath>include/IL/ilut.h</itemPath>
+          </logicalFolder>
+          <logicalFolder name="physfs" displayName="physfs" projectFiles="true">
+            <itemPath>include/physfs/beos.cpp</itemPath>
+            <itemPath>include/physfs/dir.c</itemPath>
+            <itemPath>include/physfs/macosx.c</itemPath>
+            <itemPath>include/physfs/os2.c</itemPath>
+            <itemPath>include/physfs/physfs.c</itemPath>
+            <itemPath>include/physfs/physfs.h</itemPath>
+            <itemPath>include/physfs/physfs_byteorder.c</itemPath>
+            <itemPath>include/physfs/physfs_casefolding.h</itemPath>
+            <itemPath>include/physfs/physfs_internal.h</itemPath>
+            <itemPath>include/physfs/physfs_platforms.h</itemPath>
+            <itemPath>include/physfs/physfs_unicode.c</itemPath>
+            <itemPath>include/physfs/pocketpc.c</itemPath>
+            <itemPath>include/physfs/posix.c</itemPath>
+            <itemPath>include/physfs/unix.c</itemPath>
+            <itemPath>include/physfs/windows.c</itemPath>
+            <itemPath>include/physfs/zip.c</itemPath>
+          </logicalFolder>
+          <logicalFolder name="zlib" displayName="zlib" projectFiles="true">
+            <itemPath>include/zlib/adler32.c</itemPath>
+            <itemPath>include/zlib/compress.c</itemPath>
+            <itemPath>include/zlib/crc32.c</itemPath>
+            <itemPath>include/zlib/crc32.h</itemPath>
+            <itemPath>include/zlib/deflate.c</itemPath>
+            <itemPath>include/zlib/deflate.h</itemPath>
+            <itemPath>include/zlib/gzio.c</itemPath>
+            <itemPath>include/zlib/infback.c</itemPath>
+            <itemPath>include/zlib/inffast.c</itemPath>
+            <itemPath>include/zlib/inffast.h</itemPath>
+            <itemPath>include/zlib/inffixed.h</itemPath>
+            <itemPath>include/zlib/inflate.c</itemPath>
+            <itemPath>include/zlib/inflate.h</itemPath>
+            <itemPath>include/zlib/inftrees.c</itemPath>
+            <itemPath>include/zlib/inftrees.h</itemPath>
+            <itemPath>include/zlib/trees.c</itemPath>
+            <itemPath>include/zlib/trees.h</itemPath>
+            <itemPath>include/zlib/uncompr.c</itemPath>
+            <itemPath>include/zlib/zconf.h</itemPath>
+            <itemPath>include/zlib/zlib.h</itemPath>
+            <itemPath>include/zlib/zutil.c</itemPath>
+            <itemPath>include/zlib/zutil.h</itemPath>
+          </logicalFolder>
+          <itemPath>include/SDL.h</itemPath>
+          <itemPath>include/SDL_active.h</itemPath>
+          <itemPath>include/SDL_audio.h</itemPath>
+          <itemPath>include/SDL_byteorder.h</itemPath>
+          <itemPath>include/SDL_cdrom.h</itemPath>
+          <itemPath>include/SDL_config.h</itemPath>
+          <itemPath>include/SDL_config_amiga.h</itemPath>
+          <itemPath>include/SDL_config_dreamcast.h</itemPath>
+          <itemPath>include/SDL_config_macos.h</itemPath>
+          <itemPath>include/SDL_config_macosx.h</itemPath>
+          <itemPath>include/SDL_config_minimal.h</itemPath>
+          <itemPath>include/SDL_config_nds.h</itemPath>
+          <itemPath>include/SDL_config_os2.h</itemPath>
+          <itemPath>include/SDL_config_symbian.h</itemPath>
+          <itemPath>include/SDL_config_win32.h</itemPath>
+          <itemPath>include/SDL_copying.h</itemPath>
+          <itemPath>include/SDL_cpuinfo.h</itemPath>
+          <itemPath>include/SDL_endian.h</itemPath>
+          <itemPath>include/SDL_error.h</itemPath>
+          <itemPath>include/SDL_events.h</itemPath>
+          <itemPath>include/SDL_getenv.h</itemPath>
+          <itemPath>include/SDL_joystick.h</itemPath>
+          <itemPath>include/SDL_keyboard.h</itemPath>
+          <itemPath>include/SDL_keysym.h</itemPath>
+          <itemPath>include/SDL_loadso.h</itemPath>
+          <itemPath>include/SDL_main.h</itemPath>
+          <itemPath>include/SDL_mouse.h</itemPath>
+          <itemPath>include/SDL_mutex.h</itemPath>
+          <itemPath>include/SDL_name.h</itemPath>
+          <itemPath>include/SDL_opengl.h</itemPath>
+          <itemPath>include/SDL_platform.h</itemPath>
+          <itemPath>include/SDL_quit.h</itemPath>
+          <itemPath>include/SDL_rwops.h</itemPath>
+          <itemPath>include/SDL_stdinc.h</itemPath>
+          <itemPath>include/SDL_syswm.h</itemPath>
+          <itemPath>include/SDL_thread.h</itemPath>
+          <itemPath>include/SDL_timer.h</itemPath>
+          <itemPath>include/SDL_types.h</itemPath>
+          <itemPath>include/SDL_version.h</itemPath>
+          <itemPath>include/SDL_video.h</itemPath>
+          <itemPath>include/begin_code.h</itemPath>
+          <itemPath>include/close_code.h</itemPath>
+          <itemPath>include/ft2build.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="LevelEditor" displayName="LevelEditor" projectFiles="true">
+          <logicalFolder name="BBBLevelEditor"
+                         displayName="BBBLevelEditor"
+                         projectFiles="true">
+            <logicalFolder name="src" displayName="src" projectFiles="true">
+              <logicalFolder name="bbbleveleditor"
+                             displayName="bbbleveleditor"
+                             projectFiles="true">
+                <logicalFolder name="resources" displayName="resources" projectFiles="true">
+                </logicalFolder>
+              </logicalFolder>
+            </logicalFolder>
+          </logicalFolder>
+        </logicalFolder>
+        <logicalFolder name="lib" displayName="lib" projectFiles="true">
+        </logicalFolder>
+        <logicalFolder name="resources" displayName="resources" projectFiles="true">
+          <logicalFolder name="fonts" displayName="fonts" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="icons" displayName="icons" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="models" displayName="models" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="shaders" displayName="shaders" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="sounds" displayName="sounds" projectFiles="true">
+            <logicalFolder name="deco" displayName="deco" projectFiles="true">
+            </logicalFolder>
+            <logicalFolder name="global" displayName="global" projectFiles="true">
+            </logicalFolder>
+            <logicalFolder name="main_menu" displayName="main_menu" projectFiles="true">
+            </logicalFolder>
+          </logicalFolder>
+          <logicalFolder name="textures" displayName="textures" projectFiles="true">
+            <logicalFolder name="test_textures"
+                           displayName="test_textures"
+                           projectFiles="true">
+            </logicalFolder>
+          </logicalFolder>
+          <logicalFolder name="worlds" displayName="worlds" projectFiles="true">
+            <logicalFolder name="0_deco" displayName="0_deco" projectFiles="true">
+            </logicalFolder>
+            <logicalFolder name="1_cyberpunk" displayName="1_cyberpunk" projectFiles="true">
+            </logicalFolder>
+          </logicalFolder>
+        </logicalFolder>
+        <itemPath>ConfigOptions.cpp</itemPath>
+        <itemPath>ConfigOptions.h</itemPath>
+        <itemPath>GameController.cpp</itemPath>
+        <itemPath>GameController.h</itemPath>
+        <itemPath>ResourceManager.cpp</itemPath>
+        <itemPath>ResourceManager.h</itemPath>
+        <itemPath>WindowManager.cpp</itemPath>
+        <itemPath>WindowManager.h</itemPath>
+        <itemPath>resource.h</itemPath>
+      </logicalFolder>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <logicalFolder name="BiffBamBlammo"
+                     displayName="BiffBamBlammo"
+                     projectFiles="true">
+        <logicalFolder name="BlammoEngine"
+                       displayName="BlammoEngine"
+                       projectFiles="true">
+        </logicalFolder>
+        <logicalFolder name="debug" displayName="debug" projectFiles="true">
+        </logicalFolder>
+        <logicalFolder name="ESPEngine" displayName="ESPEngine" projectFiles="true">
+        </logicalFolder>
+        <logicalFolder name="GameModel" displayName="GameModel" projectFiles="true">
+        </logicalFolder>
+        <logicalFolder name="GameSound" displayName="GameSound" projectFiles="true">
+        </logicalFolder>
+        <logicalFolder name="GameView" displayName="GameView" projectFiles="true">
+        </logicalFolder>
+        <logicalFolder name="include" displayName="include" projectFiles="true">
+          <logicalFolder name="AL" displayName="AL" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="Cg" displayName="Cg" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="freetype" displayName="freetype" projectFiles="true">
+            <logicalFolder name="config" displayName="config" projectFiles="true">
+            </logicalFolder>
+            <logicalFolder name="internal" displayName="internal" projectFiles="true">
+              <logicalFolder name="services" displayName="services" projectFiles="true">
+              </logicalFolder>
+            </logicalFolder>
+          </logicalFolder>
+          <logicalFolder name="GL" displayName="GL" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="IL" displayName="IL" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="physfs" displayName="physfs" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="zlib" displayName="zlib" projectFiles="true">
+          </logicalFolder>
+        </logicalFolder>
+        <logicalFolder name="LevelEditor" displayName="LevelEditor" projectFiles="true">
+          <logicalFolder name="BBBLevelEditor"
+                         displayName="BBBLevelEditor"
+                         projectFiles="true">
+            <logicalFolder name="src" displayName="src" projectFiles="true">
+              <logicalFolder name="bbbleveleditor"
+                             displayName="bbbleveleditor"
+                             projectFiles="true">
+                <logicalFolder name="resources" displayName="resources" projectFiles="true">
+                </logicalFolder>
+              </logicalFolder>
+            </logicalFolder>
+          </logicalFolder>
+        </logicalFolder>
+        <logicalFolder name="lib" displayName="lib" projectFiles="true">
+        </logicalFolder>
+        <logicalFolder name="resources" displayName="resources" projectFiles="true">
+          <logicalFolder name="fonts" displayName="fonts" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="icons" displayName="icons" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="models" displayName="models" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="shaders" displayName="shaders" projectFiles="true">
+          </logicalFolder>
+          <logicalFolder name="sounds" displayName="sounds" projectFiles="true">
+            <logicalFolder name="deco" displayName="deco" projectFiles="true">
+            </logicalFolder>
+            <logicalFolder name="global" displayName="global" projectFiles="true">
+            </logicalFolder>
+            <logicalFolder name="main_menu" displayName="main_menu" projectFiles="true">
+            </logicalFolder>
+          </logicalFolder>
+          <logicalFolder name="textures" displayName="textures" projectFiles="true">
+            <logicalFolder name="test_textures"
+                           displayName="test_textures"
+                           projectFiles="true">
+            </logicalFolder>
+          </logicalFolder>
+          <logicalFolder name="worlds" displayName="worlds" projectFiles="true">
+            <logicalFolder name="0_deco" displayName="0_deco" projectFiles="true">
+            </logicalFolder>
+            <logicalFolder name="1_cyberpunk" displayName="1_cyberpunk" projectFiles="true">
+            </logicalFolder>
+          </logicalFolder>
+        </logicalFolder>
+      </logicalFolder>
+      <itemPath>GameMain.cpp</itemPath>
+      <itemPath>include/SDLMain.m</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>GNU|GNU</compilerSet>
+        <platform>4</platform>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+            <pElem>include</pElem>
+            <pElem>GameModel</pElem>
+            <pElem>GameView</pElem>
+            <pElem>GameSound</pElem>
+            <pElem>BlammoEngine</pElem>
+            <pElem>ESPEngine</pElem>
+            <pElem>lib</pElem>
+            <pElem>include/physfs</pElem>
+            <pElem>include/AL</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>lib</pElem>
+            <pElem>/opt/local/lib</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerLibLibItem>physfs</linkerLibLibItem>
+            <linkerLibLibItem>freetype</linkerLibLibItem>
+            <linkerLibLibItem>IL</linkerLibLibItem>
+            <linkerLibLibItem>ILU</linkerLibLibItem>
+            <linkerLibLibItem>alut</linkerLibLibItem>
+            <linkerLibLibItem>ILUT</linkerLibLibItem>
+            <linkerLibLibItem>SDL</linkerLibLibItem>
+            <linkerLibLibItem>SDLmain</linkerLibLibItem>
+            <linkerLibLibItem>SDL_image</linkerLibLibItem>
+            <linkerLibLibItem>jpeg</linkerLibLibItem>
+          </linkerLibItems>
+          <commandLine>-framework GLUT -framework OpenGL -framework SDL -framework Cg -framework OpenAL -framework Carbon -framework IOKit -framework GLEW -framework Cocoa</commandLine>
+        </linkerTool>
+      </compileType>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>GNU|GNU</compilerSet>
+        <platform>4</platform>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+    </conf>
+  </confs>
+</configurationDescriptor>

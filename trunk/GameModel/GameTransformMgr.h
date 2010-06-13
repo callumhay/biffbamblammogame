@@ -73,11 +73,11 @@ private:
 	Orientation3D currCamOrientation;
 
 	// Active Animations
-	std::list<AnimationLerp<float>> levelFlipAnimations;
-	std::list<AnimationMultiLerp<Orientation3D>> paddleCamAnimations;
-	std::list<AnimationMultiLerp<Orientation3D>> ballCamAnimations;
-	std::list<AnimationMultiLerp<Orientation3D>> ballDeathAnimations;
-	std::list<AnimationMultiLerp<float>> camFOVAnimations;
+	std::list<AnimationLerp<float> > levelFlipAnimations;
+	std::list<AnimationMultiLerp<Orientation3D> > paddleCamAnimations;
+	std::list<AnimationMultiLerp<Orientation3D> > ballCamAnimations;
+	std::list<AnimationMultiLerp<Orientation3D> > ballDeathAnimations;
+	std::list<AnimationMultiLerp<float> > camFOVAnimations;
 
 	bool TickLevelFlipAnimation(double dT);
 	void StartLevelFlipAnimation(double dT, GameModel& gameModel);

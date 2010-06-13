@@ -47,7 +47,7 @@ const char GameLevel::TRI_LEFT_CORNER			= 'l';
 const char GameLevel::TRI_RIGHT_CORNER		= 'r';
 
 // Private constructor, requires all the pieces that make up the level
-GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces): currentLevelPieces(pieces),
+GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces): currentLevelPieces(pieces),
 piecesLeft(numBlocks), ballSafetyNetActive(false) {
 	assert(pieces.size() > 0);
 	
@@ -113,7 +113,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		return NULL;	
 	}
 
-	std::vector<std::vector<LevelPiece*>> levelPieces;
+	std::vector<std::vector<LevelPiece*> > levelPieces;
 	unsigned int numVitalPieces = 0;
 
 	// Keep track of named portal blocks...
@@ -215,7 +215,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 						if (siblingPortalBlock == NULL) {
 							// No sibling exists yet, create one
-							siblingPortalBlock = new PortalBlock(-1, -1, NULL);
+							siblingPortalBlock = new PortalBlock(0, 0, NULL);
 							insertResult = portalBlocks.insert(std::make_pair(siblingName, siblingPortalBlock));
 							assert(insertResult.second);
 						}
@@ -360,19 +360,19 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 /**
  * Updates the level piece at the given index.
  */
-void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces, size_t hIndex, size_t wIndex) {
+void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex) {
 	
 	// Make sure the provided indices are in the correct range
 	if (wIndex < 0 || wIndex >= pieces[0].size() || hIndex <0 || hIndex >= pieces.size()) {
 		return;
 	}
 	
-	LevelPiece* leftNeighbor				= NULL;
-	LevelPiece* bottomNeighbor			= NULL;
-	LevelPiece* rightNeighbor				= NULL;
-	LevelPiece* topNeighbor					= NULL;
-	LevelPiece* topLeftNeighbor			= NULL;
-	LevelPiece* topRightNeighbor		= NULL;
+	LevelPiece* leftNeighbor	= NULL;
+	LevelPiece* bottomNeighbor	= NULL;
+	LevelPiece* rightNeighbor	= NULL;
+	LevelPiece* topNeighbor		= NULL;
+	LevelPiece* topLeftNeighbor	= NULL;
+	LevelPiece* topRightNeighbor	= NULL;
 	LevelPiece* bottomLeftNeighbor	= NULL;
 	LevelPiece* bottomRightNeighbor	= NULL;
 

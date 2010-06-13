@@ -130,11 +130,11 @@ void GameModel::Tick(double seconds) {
 	}
 
 	if (currState != NULL) {
-		if ((this->pauseBitField & GameModel::PauseState) == NULL) {
+		if ((this->pauseBitField & GameModel::PauseState) == 0x0) {
 			this->currState->Tick(seconds);
 		}
 
-		if (this->playerPaddle != NULL && (this->pauseBitField & GameModel::PausePaddle) == NULL) {
+		if (this->playerPaddle != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0) {
 			this->playerPaddle->Tick(seconds);
 		}
 

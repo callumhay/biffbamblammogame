@@ -5,7 +5,7 @@
  * Callum Hay, 2009
  *
  * You may not use this work for commercial purposes.
- * If you alter, transform, or build upon this work, you may distribute the 
+ * If you alter, transform, or build upon this work, you may distribute the
  * resulting work only under the same or similar licence to this one.
  */
 
@@ -111,7 +111,7 @@ static void GameRenderLoop() {
 	// Main render loop...
 	while (!display->HasGameExited() && !display->ShouldGameReinitialize()) {
 		Uint32 startOfFrameTime = SDL_GetTicks();
-		
+
 		// Don't let the game run at less than 30 fps
 		if (frameTimeDelta > maxDelta) {
 			frameTimeDelta = maxDelta;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 	// One-Time Initialization stuff **************************************
-	
+
 	// Set the default config options - these will be read from and written to
 	// the .ini file as we need them
 	ConfigOptions initCfgOptions;
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
 		// Set whether the game has quit or not - if the game has not
 		// quit then we must be reinitializing it
 		quitGame = display->HasGameExited();
-		
+
 		// Kill everything graphics related
 		KillGraphicsAndWindow(quitGame);
 	}
@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
 	// One-Time Deletion Stuff (only on exit) *****************************
 
 	// Clean up all file and shader resources, ORDER MATTERS HERE!
-	
+
 	// Write whatever the current state of the configuration is back to the config (.ini) file
 	initCfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
 	bool iniWriteResult = ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(initCfgOptions);

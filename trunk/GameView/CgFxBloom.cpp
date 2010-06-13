@@ -166,7 +166,7 @@ void CgFxBloom::DoDownsampledBlur(int screenWidth, int screenHeight, const std::
  * a magnitude (strength of pulse) of the given amount.
  * Returns: Animation for the bloom that pulses it (gives a kind of sickly feeling).
  */
-std::list<AnimationMultiLerp<float>> CgFxBloom::GetPulseAnimation(float pulseLengthInSec, float pulseAmount) {
+std::list<AnimationMultiLerp<float> > CgFxBloom::GetPulseAnimation(float pulseLengthInSec, float pulseAmount) {
 	assert(pulseLengthInSec > 0);
 	assert(pulseAmount > 0);
 
@@ -215,7 +215,7 @@ std::list<AnimationMultiLerp<float>> CgFxBloom::GetPulseAnimation(float pulseLen
 	pulseGlowAnim.SetLerp(timeValues2, glowValues);
 	pulseGlowAnim.SetRepeat(true);	
 
-	std::list<AnimationMultiLerp<float>> retVal;
+	std::list<AnimationMultiLerp<float> > retVal;
 	retVal.push_back(pulseHighlightAnim);
 	retVal.push_back(pulseGlowAnim);
 

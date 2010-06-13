@@ -24,9 +24,11 @@
 #include <cmath>
 
 // Memory Leak Tracking Includes
+#if defined(_MSC_VER) || defined(_WIN32)
 #include <crtdbg.h>
 #define CRTDBG_MAP_ALLOC
 #define _CRTDBG_MAP_ALLOC 
+#endif
 
 // STL includes
 #include <algorithm>
@@ -46,19 +48,34 @@
 // OpenGL includes and defines
 #define GLEW_STATIC
 #include <gl/glew.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <gl/gl.h>
 #include <gl/glu.h>
+#endif//__APPLE__
 #include <gl/glut.h>
+
 
 #define BUFFER_OFFSET(bytes) ((GLubyte*)NULL + (bytes))
 
 // OpenAL includes
+#ifdef WIN32
 #include <al/al.h>
 #include <al/alc.h>
 #include <al/alut.h>
 #include <al/efx.h>
 #include <al/efx-creative.h>
 #include <al/xram.h>
+#elif __APPLE__
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#include <al/alut.h>
+//#include <OpenAL/efx.h>
+//#include <OpenAL/efx-creative.h>
+//#include <OpenAL/xram.h>
+#endif
 
 // SDL Includes
 #ifdef WIN32
@@ -75,6 +92,8 @@
 #include "Cg/cgGL.h"
 
 // DevIL includes ... uses a dll (cross-compatibility issue)
+#define ILUT_USE_OPENGL 1
+#undef  ILUT_USE_WIN32
 #include "IL/il.h"
 #include "IL/ilu.h"
 #include "IL/ilut.h"
@@ -181,7 +200,7 @@ inline void debug_openal_state() {
  * This will print off the error in debug mode and pose an assertion.
  */
 inline void debug_physfs_state(int physfsReturnVal) {
-	if (physfsReturnVal == NULL) {
+	if (physfsReturnVal == 0) {
 		const char* error = PHYSFS_getLastError();
 		if (error == NULL) {
 			error = "?";

@@ -178,7 +178,7 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF
 	unsigned char* fileBuffer = new unsigned char[fileLength];
 	
 	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(unsigned char), fileLength);
-	if (readResult == NULL) {
+	if (readResult == 0) {
 		delete[] fileBuffer;
 		fileBuffer = NULL;
 		debug_output("Error reading font file to bytes.");

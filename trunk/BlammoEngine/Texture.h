@@ -23,7 +23,7 @@ public:
 protected:
 	TextureFilterType texFilter;
 	int textureType;
-	unsigned int texID;
+	GLuint texID;
 	unsigned int width, height;
 
 	static void SetFilteringParams(TextureFilterType texFilter, int glTexType);

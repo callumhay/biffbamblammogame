@@ -19,7 +19,7 @@ private:
 	static GameFontAssetsManager* instance;
 	
 	// Set of fonts for use in the game, indexed by their style and height
-	std::map<FontStyle, std::map<unsigned int, TextureFontSet*>> fonts;
+	std::map<FontStyle, std::map<unsigned int, TextureFontSet*> > fonts;
 	bool minimalFontsLoaded;
 
 	GameFontAssetsManager();
@@ -45,7 +45,7 @@ public:
 
 	// Obtain a particular font
 	const TextureFontSet* GetFont(FontStyle style, FontSize height) const {
-		std::map<FontStyle, std::map<unsigned int, TextureFontSet*>>::const_iterator fontSetIter = this->fonts.find(style);
+		std::map<FontStyle, std::map<unsigned int, TextureFontSet*> >::const_iterator fontSetIter = this->fonts.find(style);
 		if (fontSetIter != this->fonts.end()) {
 			std::map<unsigned int, TextureFontSet*>::const_iterator fontIter = fontSetIter->second.find(height);
 			if (fontIter != fontSetIter->second.end()) {

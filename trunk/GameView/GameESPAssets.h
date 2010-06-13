@@ -44,12 +44,12 @@ private:
 	// Currently active particle systems
 	std::list<ESPEmitter*> activeGeneralEmitters;
 	std::list<ESPEmitter*> activePaddleEmitters;
-	std::map<const GameBall*, std::list<ESPEmitter*>>		activeBallBGEmitters;
-	std::map<const GameItem*, std::list<ESPEmitter*>>		activeItemDropEmitters; 
-	std::map<const Projectile*, std::list<ESPPointEmitter*>> activeProjectileEmitters;
-	std::map<const Beam*, std::list<ESPEmitter*>> activeBeamEmitters;
-	std::map<GameItem::ItemType, std::list<ESPEmitter*>> activeTimerHUDEmitters;
-	//std::map<const LevelPiece*, std::list<ESPEmitter*>> activeLevelPieceEmitters;
+	std::map<const GameBall*, std::list<ESPEmitter*> >		activeBallBGEmitters;
+	std::map<const GameItem*, std::list<ESPEmitter*> >		activeItemDropEmitters;
+	std::map<const Projectile*, std::list<ESPPointEmitter*> > activeProjectileEmitters;
+	std::map<const Beam*, std::list<ESPEmitter*> > activeBeamEmitters;
+	std::map<GameItem::ItemType, std::list<ESPEmitter*> > activeTimerHUDEmitters;
+	//std::map<const LevelPiece*, std::list<ESPEmitter*> > activeLevelPieceEmitters;
 	
 	// Standard effectors for the various ESP effects
 	ESPParticleColourEffector particleFader;
@@ -105,8 +105,8 @@ private:
 	Texture2D* hugeExplosionTex;
 
 	// Ball and paddle related ESP effects
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>>> ballEffects; // stores each balls set of item-related (defined by unique ID) effects
-	std::map<GameItem::ItemType, std::vector<ESPPointEmitter*>> paddleEffects;
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
+	std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > paddleEffects;
 
 	// Constants for the number of particles for particular effects
 	static const int NUM_PADDLE_LASER_SPARKS = 15;

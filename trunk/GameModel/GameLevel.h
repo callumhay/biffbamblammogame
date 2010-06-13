@@ -46,7 +46,7 @@ public:
 	 * Obtain the set of pieces making up the current state of the level.
 	 * Return: Reference to the row major, 2D array of level pieces as they currently stand.
 	 */
-	const std::vector<std::vector<LevelPiece*>>& GetCurrentLevelLayout() const {
+	const std::vector<std::vector<LevelPiece*> >& GetCurrentLevelLayout() const {
 		return this->currentLevelPieces;
 	}
 
@@ -107,16 +107,16 @@ public:
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(size_t hIndex, size_t wIndex);
 
 private:	
-	std::vector<std::vector<LevelPiece*>> currentLevelPieces; // The current layout of the level, stored in row major format
+	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
 	unsigned int piecesLeft;																	// Pieces left before the end of the level
 	unsigned int width, height;																// Size values for the level
 	bool ballSafetyNetActive;
 	
 	//QuadTree* levelTree;	// A quad tree representing the boundries of this entire level and all its pieces
 
-	GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*>> pieces);
+	GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces);
 	
-	static void UpdatePiece(const std::vector<std::vector<LevelPiece*>>& pieces, size_t hIndex, size_t wIndex);
+	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
 	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;
 
 };

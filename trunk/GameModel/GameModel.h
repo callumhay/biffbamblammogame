@@ -279,16 +279,16 @@ public:
 	// Move the paddle a distance in either positive or negative X direction.
 	void MovePaddle(float dist) {
 		// Can only move the paddle if the state exists and is not paused
-		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == NULL &&
-			 (this->pauseBitField & GameModel::PauseState) == NULL) {
+		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
+			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
 			this->currState->MovePaddleKeyPressed(dist);
 		}
 	}
 	// Release the ball from the paddle, shoot lasers and activate other power ups
 	void ReleaseBall() {
 		// Can only release the ball if the state exists and is not paused
-		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == NULL &&
-			 (this->pauseBitField & GameModel::PauseState) == NULL) {
+		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
+			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
 			this->currState->BallReleaseKeyPressed();
 		}
 	}

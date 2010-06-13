@@ -35,6 +35,9 @@ const std::string MainMenuDisplayState::TITLE_BIFF_TEXT			= "Biff!";
 const std::string MainMenuDisplayState::TITLE_BAM_TEXT			= "Bam!!";
 const std::string MainMenuDisplayState::TITLE_BLAMMO_TEXT		= "Blammo!?!";
 
+const int MainMenuDisplayState::MENU_SEL_ON_INDEX	= 0;
+const int MainMenuDisplayState::MENU_SEL_OFF_INDEX	= 1;
+
 // Menu items
 const std::string MainMenuDisplayState::NEW_GAME_MENUITEM		= "New Game";
 const std::string MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Play Level";

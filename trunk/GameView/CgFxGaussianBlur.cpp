@@ -73,7 +73,7 @@ void CgFxGaussianBlur::Draw(int screenWidth, int screenHeight, double dT) {
 	float revisedHeight = screenHeight;
 	
 	// Check for any animations
-	std::map<BlurAnimations, AnimationMultiLerp<float>>::iterator animWidthFind = this->blurAnims.find(PoisonWidthBlurAnimation);
+	std::map<BlurAnimations, AnimationMultiLerp<float> >::iterator animWidthFind = this->blurAnims.find(PoisonWidthBlurAnimation);
 	if (animWidthFind != this->blurAnims.end()) {
 		revisedWidth = animWidthFind->second.GetInterpolantValue();
 		bool isDone = animWidthFind->second.Tick(dT);
@@ -138,7 +138,7 @@ void CgFxGaussianBlur::SetPoisonBlurAnimation(bool on) {
 	}
 	else {
 		// Grab the already existing (previously active) poison animations
-		std::map<BlurAnimations, AnimationMultiLerp<float>>::iterator animWidthFind = this->blurAnims.find(PoisonWidthBlurAnimation);
+		std::map<BlurAnimations, AnimationMultiLerp<float> >::iterator animWidthFind = this->blurAnims.find(PoisonWidthBlurAnimation);
 		assert(animWidthFind  != this->blurAnims.end());
 	
 		// Fade back to normal and take off repeat/looping so that the animation dies when complete
