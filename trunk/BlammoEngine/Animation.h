@@ -219,7 +219,6 @@ public:
 	T& GetInterpolantValue() const {
 		return *this->interpolant;
 	}
-
 	std::vector<T> GetInterpolationValues() const {
 		return this->interpolationPts;
 	}

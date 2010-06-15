@@ -13,7 +13,7 @@ GravityBallItem::~GravityBallItem() {
 double GravityBallItem::Activate() {
 	this->isActive = true;
 
-	// Kill other ghost ball timers
+	// Kill other gravity ball timers
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end();) {
 		GameItemTimer* currTimer = *iter;

@@ -3,6 +3,7 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Animation.h"
+#include "../BlammoEngine/Vector.h"
 
 class Texture;
 class PlayerPaddle;
@@ -36,8 +37,11 @@ private:
 
 	AnimationMultiLerp<float> beamRadiusPulse;
 
+	AnimationMultiLerp<Vector3D> arrowFadeLerp;
+
 	void DrawBulletCrosshair(float alpha) const;
 	void DrawBeamCrosshair(float alpha) const;
+	void DrawRocketHUD(int screenWidth, int screenHeight, float alpha) const;
 	void DrawBeamBlast(float alpha) const;
 };
 

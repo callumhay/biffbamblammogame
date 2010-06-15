@@ -1,3 +1,15 @@
+/**
+ * GameBall.h
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
+
 #ifndef __GAMEBALL_H__
 #define __GAMEBALL_H__
 
@@ -22,7 +34,8 @@ class GameBall {
 public:
 	enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 7, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 22, FastestSpeed = 27 };
 	enum BallSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
-	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100, GraviBall = 0x00001000 };
+	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100, 
+		              GraviBall = 0x00001000, CrazyBall = 0x00010000 };
 	
 	// Default radius of the ball
 	static const float DEFAULT_BALL_RADIUS;

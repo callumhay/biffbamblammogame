@@ -18,9 +18,10 @@
 #include "GameView/GameViewConstants.h"
 
 ResourceManager* ResourceManager::instance = NULL;
+ConfigOptions* ResourceManager::configOptions = NULL;
 
 ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
-cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), configOptions(NULL), celShadingTexture(NULL) {
+cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NULL) {
 	// Initialize DevIL and make sure it loaded correctly
 	ilInit();
 	iluInit();
@@ -105,8 +106,10 @@ ResourceManager::~ResourceManager() {
 	}
 
 	// Clean up configuration options
-	delete this->configOptions;
-	this->configOptions = NULL;
+	if (ResourceManager::configOptions != NULL) {
+		delete ResourceManager::configOptions;
+		ResourceManager::configOptions = NULL;
+	}
 }
 
 /**
@@ -765,33 +768,33 @@ ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile) 
 	
 	// If we don't have to read from file and we already
 	// loaded the configuration options then return them immediately
-	if (!forceReadFromFile && this->configOptions != NULL) {
-		return *this->configOptions;
+	if (!forceReadFromFile && ResourceManager::configOptions != NULL) {
+		return *ResourceManager::configOptions;
 	}
 
 	// No matter what we need to read the configuration options from file
 	
 	// If any config options exist we must delete and overwrite them
-	if (this->configOptions != NULL) {
-		delete this->configOptions;
-		this->configOptions = NULL;
+	if (ResourceManager::configOptions != NULL) {
+		delete ResourceManager::configOptions;
+		ResourceManager::configOptions = NULL;
 	}
 	
-	this->configOptions = ConfigOptions::ReadConfigOptionsFromFile();
-	if (this->configOptions == NULL) {
+	ResourceManager::configOptions = ConfigOptions::ReadConfigOptionsFromFile();
+	if (ResourceManager::configOptions == NULL) {
 		// Couldn't find, open or properly read the file so try to make a 
 		// new one with the default settings and values in it
 		
-		this->configOptions = new ConfigOptions(); // By calling the default construtor 
-																							 // we populate the object with default settings
+		ResourceManager::configOptions = new ConfigOptions(); // By calling the default construtor 
+																													// we populate the object with default settings
 
-		bool writeResult = this->configOptions->WriteConfigOptionsToFile();
+		bool writeResult = ResourceManager::configOptions->WriteConfigOptionsToFile();
 		assert(writeResult);
 	}
 
 	// Try to return configuration options no matter what
-	assert(this->configOptions != NULL);
-	return *this->configOptions;
+	assert(ResourceManager::configOptions != NULL);
+	return *ResourceManager::configOptions;
 }
 
 /**
@@ -801,15 +804,15 @@ ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile) 
 bool ResourceManager::WriteConfigurationOptionsToFile(const ConfigOptions& cfgOptions) {
 	// First thing we do is update the configuration options
 	// that have already been loaded (or not)
-	if (this->configOptions == NULL) {
-		this->configOptions = new ConfigOptions(cfgOptions);
+	if (ResourceManager::configOptions == NULL) {
+		ResourceManager::configOptions = new ConfigOptions(cfgOptions);
 	}
 	else {
-		*this->configOptions = cfgOptions;
+		*ResourceManager::configOptions = cfgOptions;
 	}
 
 	// Now write to file
-	bool writeResult = this->configOptions->WriteConfigOptionsToFile();
+	bool writeResult = ResourceManager::configOptions->WriteConfigOptionsToFile();
 	return writeResult;
 }
 

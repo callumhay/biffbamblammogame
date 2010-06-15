@@ -1,5 +1,5 @@
 /**
- * GravityBallItem.h
+ * CrazyBallItem.h
  *
  * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
  * Callum Hay, 2009
@@ -9,29 +9,27 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#ifndef __GRAVITYBALLITEM_H__
-#define __GRAVITYBALLITEM_H__
+#ifndef __CRAZYBALLITEM_H__
+#define __CRAZYBALLITEM_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
 
 #include "GameItem.h"
 #include "GameModel.h"
 
-class Point2D;
-
-class GravityBallItem : public GameItem {
+class CrazyBallItem : public GameItem {
 public:
-	static const char* GRAVITY_BALL_ITEM_NAME;
-	static const double GRAVITY_BALL_TIMER_IN_SECS;
+	static const char* CRAZY_BALL_ITEM_NAME;
+	static const double CRAZY_BALL_TIMER_IN_SECS;
 
-	GravityBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	~GravityBallItem();
+	CrazyBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	~CrazyBallItem();
 
 	double Activate();
 	void Deactivate();
 
 	GameItem::ItemType GetItemType() const {
-		return GameItem::GravityBallItem;
+		return GameItem::CrazyBallItem;
 	}
 
 	const GameBall* GetBallAffected() const {
@@ -39,4 +37,6 @@ public:
 		return *this->gameModel->GetGameBalls().begin();
 	}
 };
-#endif
+
+
+#endif // __CRAZYBALLITEM_H__

@@ -183,17 +183,18 @@ int main(int argc, char *argv[]) {
 	// in this case we will break from the loop
 	bool quitGame = false;
 	while (!quitGame) {
-		// Establish the resource manager
-		ResourceManager::InitResourceManager(RESOURCE_ZIP, argv[0]);
 
 		// Read the .ini file options (used to initialize various settings in the game)
-		initCfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
+		initCfgOptions = ResourceManager::ReadConfigurationOptions(true);
 
 		// Setup the window
 		if (!WindowManager::GetInstance()->Init(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), initCfgOptions.GetIsFullscreenOn())) {
 			quitGame = true;
 			break;
 		}
+
+		// Establish the resource manager
+		ResourceManager::InitResourceManager(RESOURCE_ZIP, argv[0]);
 
 		// Load extensions
 		GLenum err = glewInit();
@@ -242,8 +243,8 @@ int main(int argc, char *argv[]) {
 	// Clean up all file and shader resources, ORDER MATTERS HERE!
 
 	// Write whatever the current state of the configuration is back to the config (.ini) file
-	initCfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
-	bool iniWriteResult = ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(initCfgOptions);
+	initCfgOptions = ResourceManager::ReadConfigurationOptions(true);
+	bool iniWriteResult = ResourceManager::WriteConfigurationOptionsToFile(initCfgOptions);
 	assert(iniWriteResult);
 
 	// Clean up the resource manager and finally the window
