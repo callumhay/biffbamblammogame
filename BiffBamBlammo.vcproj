@@ -1134,6 +1134,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\CrazyBallItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\GameItem.h"
 						>
 					</File>
@@ -1223,6 +1227,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\BlackoutItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\CrazyBallItem.cpp"
 						>
 					</File>
 					<File

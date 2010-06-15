@@ -43,7 +43,7 @@ private:
 	// OpenAL loaded sound buffers from file
 	std::map<std::string, ALuint> loadedSoundBuffers;
 
-	ConfigOptions* configOptions;	// The configuration options read from the game's ini file
+	static ConfigOptions* configOptions;	// The configuration options read from the game's ini file
 
 	void InitCgContext();
 	static void LoadEffectTechniques(const CGeffect effect, std::map<std::string, CGtechnique>& techniques);
@@ -91,8 +91,8 @@ public:
 	bool ReleaseSoundResource(ALuint soundBufferID);
 
 	// Initialization configuration loading
-	ConfigOptions ReadConfigurationOptions(bool forceReadFromFile);
-	bool WriteConfigurationOptionsToFile(const ConfigOptions& cfgOptions);
+	static ConfigOptions ReadConfigurationOptions(bool forceReadFromFile);
+	static bool WriteConfigurationOptionsToFile(const ConfigOptions& cfgOptions);
 
 	// Basic loading functions ****************************************************************************************************
 	static std::map<unsigned int, TextureFontSet*> LoadFont(const std::string &filepath, const std::vector<unsigned int> &heights);

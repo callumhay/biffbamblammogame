@@ -71,7 +71,7 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 	this->InitializeESPEffects();
 
 	// Read the configuration file to figure out how to initialize each of the options
-	this->cfgOptions = ResourceManager::GetInstance()->ReadConfigurationOptions(true);
+	this->cfgOptions = ResourceManager::ReadConfigurationOptions(true);
 
 	// Setup handlers for menus and initialize the menus
 	this->mainMenuEventHandler		= new MainMenuEventHandler(this);
