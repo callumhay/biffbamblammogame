@@ -33,8 +33,13 @@ cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NU
 	// Initialize OpenAL for audio, make sure everything loaded alright
 	alutInit(NULL, NULL);
 	debug_output("Supported OpenAL Sound MIME types:");
-	std::string mimeTypesStr(alutGetMIMETypes(ALUT_LOADER_BUFFER));
-	debug_output(mimeTypesStr);
+	
+#ifdef _DEBUG
+	const char* mimeTypes = alutGetMIMETypes(ALUT_LOADER_BUFFER);
+	if (mimeTypes != NULL) {
+		debug_output(mimeTypes);
+	}
+#endif
 	debug_openal_state();
 
 	// Initialize Physfs and make sure everything loaded alright
