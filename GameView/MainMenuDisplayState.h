@@ -58,6 +58,8 @@ private:
 	static const int MENU_SEL_ON_INDEX;
 	static const int MENU_SEL_OFF_INDEX;
 
+	static const float CAM_DIST_FROM_ORIGIN;
+
 	// The configuration options for the game
 	ConfigOptions cfgOptions;
 
@@ -116,8 +118,8 @@ private:
 
 	void SetupBloomEffect();
 
-	void RenderTitle();
-	void RenderBackgroundEffects(double dT);
+	void RenderTitle(Camera& menuCam);
+	void RenderBackgroundEffects(double dT, Camera& menuCam);
 
 	void InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
 	//void InsertZapEffectIntoBGEffects();
