@@ -51,6 +51,8 @@ const Colour MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 
 const Colour MainMenuDisplayState::SUBMENU_ITEM_IDLE_COLOUR		= Colour(0.75f, 0.75f, 0.75f);
 const Colour MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
 
+const float MainMenuDisplayState::CAM_DIST_FROM_ORIGIN = 20.0f;
+
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
 DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), 
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NULL), particleEventHandler(NULL),
@@ -416,10 +418,13 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	// Render background stuffs (behind the menu)
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	this->RenderBackgroundEffects(dT);
 
-	// Render the title
-	this->RenderTitle();
+	Camera menuCamera(camera.GetWindowWidth(), camera.GetWindowHeight());
+	menuCamera.SetPerspective();
+	menuCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
+
+	this->RenderBackgroundEffects(dT, menuCamera);
+	this->RenderTitle(menuCamera);
 
 	// Render the menu
 	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT);
@@ -427,12 +432,14 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->mainMenu->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 	// Fade-in/out overlay
+	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
+	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(DISPLAY_WIDTH, DISPLAY_HEIGHT, 1.0f, 
 																									 ColourRGBA(1, 1, 1, this->fadeAnimation.GetInterpolantValue()));
-	glDisable(GL_BLEND);
-	
+	glPopAttrib();
+
 	this->menuFBO->UnbindFBObj();
 
 	// Do bloom on the menu screen and draw it
@@ -440,29 +447,22 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->menuFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
 
 	debug_opengl_state();
-
-	
 }
 
 /**
  * Renders the title for the menu screen.
  */
-void MainMenuDisplayState::RenderTitle() {
+void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 	const Camera& displayCam = this->display->GetCamera();
 
-	const float CAM_DIST_FROM_ORIGIN = 20.0f;
 	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
 	const float MAX_X_COORD = static_cast<float>(displayCam.GetWindowWidth()) /  static_cast<float>(displayCam.GetWindowHeight()) * MAX_Y_COORD;
 	const float MIN_X_COORD = -MAX_X_COORD;
 
-	Camera tempCamera(displayCam.GetWindowWidth(), displayCam.GetWindowHeight());
-	tempCamera.SetPerspective();
-	tempCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
-
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	tempCamera.ApplyCameraTransform(0.0);
+	menuCam.ApplyCameraTransform(0.0);
 	
 	/*
 	// Draw debug grid for coordinates system
@@ -487,33 +487,33 @@ void MainMenuDisplayState::RenderTitle() {
 
 	this->biffEmitter.SetEmitPosition(BIFF_EMIT_COORD);
 	this->biffEmitter.Tick(0.1);
-	this->biffEmitter.Draw(tempCamera);
+	this->biffEmitter.Draw(menuCam);
 
 	this->biffTextEmitter.SetEmitPosition(BIFF_EMIT_COORD);
 	this->biffTextEmitter.Tick(0.1);
-	this->biffTextEmitter.Draw(tempCamera);
+	this->biffTextEmitter.Draw(menuCam);
 
 	// Draw the "Bam!!" Text
 	const Point3D BAM_EMIT_COORD = Point3D(MIN_X_COORD + 10.5f, MAX_Y_COORD - 4.0f, 0);
 
 	this->bamEmitter.SetEmitPosition(BAM_EMIT_COORD);
 	this->bamEmitter.Tick(0.1);
-	this->bamEmitter.Draw(tempCamera);
+	this->bamEmitter.Draw(menuCam);
 	
 	this->bamTextEmitter.SetEmitPosition(BAM_EMIT_COORD);
 	this->bamTextEmitter.Tick(0.1);
-	this->bamTextEmitter.Draw(tempCamera);
+	this->bamTextEmitter.Draw(menuCam);
 
 	// Draw the "Blammo!?!" Text
 	const Point3D BLAMMO_EMIT_COORD = Point3D(MIN_X_COORD + 16.0f, MAX_Y_COORD - 6.0f, 0);
 
 	this->blammoEmitter.SetEmitPosition(BLAMMO_EMIT_COORD);
 	this->blammoEmitter.Tick(0.1);
-	this->blammoEmitter.Draw(tempCamera);
+	this->blammoEmitter.Draw(menuCam);
 
 	this->blammoTextEmitter.SetEmitPosition(BLAMMO_EMIT_COORD);
 	this->blammoTextEmitter.Tick(0.1);
-	this->blammoTextEmitter.Draw(tempCamera);
+	this->blammoTextEmitter.Draw(menuCam);
 
 	glPopMatrix();
 }
@@ -522,10 +522,9 @@ void MainMenuDisplayState::RenderTitle() {
  * Renders the background effects for the menu screen. These include
  * random bangs and booms, etc. going off all over the place.
  */
-void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
+void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {
 	const Camera& camera = this->display->GetCamera();
 
-	const float CAM_DIST_FROM_ORIGIN = 20.0f;	
 	const float MAX_Z_COORD = CAM_DIST_FROM_ORIGIN / 4.0f;
 	const float MIN_Z_COORD = -MAX_Z_COORD;
 	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
@@ -539,20 +538,16 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT) {
 		this->InsertBangEffectIntoBGEffects(MIN_X_COORD, MAX_X_COORD, MIN_Y_COORD, MAX_Y_COORD_BG_EFFECTS, MIN_Z_COORD, MAX_Z_COORD);
 	}
 
-	Camera tempCamera(camera.GetWindowWidth(), camera.GetWindowHeight());
-	tempCamera.SetPerspective();
-	tempCamera.Move(Vector3D(0, 0, CAM_DIST_FROM_ORIGIN));
-
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	tempCamera.ApplyCameraTransform(0.0);
+	menuCam.ApplyCameraTransform(0.0);
 
 	// Go through all the active emitters and tick/draw them
 	for (std::list<ESPPointEmitter*>::iterator iter = this->randomBGParicles.begin(); iter != this->randomBGParicles.end();) {
 		ESPPointEmitter* currEmitter = *iter;
 		currEmitter->Tick(dT);
-		currEmitter->Draw(tempCamera);
+		currEmitter->Draw(menuCam);
 
 		if (currEmitter->IsDead()) {
 			iter = this->randomBGParicles.erase(iter);
