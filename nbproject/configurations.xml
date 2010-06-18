@@ -599,6 +599,7 @@
         <itemPath>WindowManager.h</itemPath>
         <itemPath>resource.h</itemPath>
       </logicalFolder>
+      <itemPath>include/macconfig.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -715,6 +716,7 @@
       </toolsSet>
       <compileType>
         <ccTool>
+          <architecture>1</architecture>
           <incDir>
             <pElem>.</pElem>
             <pElem>include</pElem>
@@ -732,18 +734,17 @@
           <linkerAddLib>
             <pElem>lib</pElem>
             <pElem>/opt/local/lib</pElem>
+            <pElem>/usr/local/lib</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerLibLibItem>physfs</linkerLibLibItem>
             <linkerLibLibItem>freetype</linkerLibLibItem>
-            <linkerLibLibItem>IL</linkerLibLibItem>
-            <linkerLibLibItem>ILU</linkerLibLibItem>
             <linkerLibLibItem>alut</linkerLibLibItem>
-            <linkerLibLibItem>ILUT</linkerLibLibItem>
-            <linkerLibLibItem>SDL</linkerLibLibItem>
-            <linkerLibLibItem>SDLmain</linkerLibLibItem>
-            <linkerLibLibItem>SDL_image</linkerLibLibItem>
-            <linkerLibLibItem>jpeg</linkerLibLibItem>
+            <linkerLibFileItem>lib/libjpeg.a</linkerLibFileItem>
+            <linkerLibFileItem>lib/libpng14.a</linkerLibFileItem>
+            <linkerLibFileItem>lib/libILU.a</linkerLibFileItem>
+            <linkerLibFileItem>lib/libILUT.a</linkerLibFileItem>
+            <linkerLibFileItem>lib/libIL.a</linkerLibFileItem>
           </linkerLibItems>
           <commandLine>-framework GLUT -framework OpenGL -framework SDL -framework Cg -framework OpenAL -framework Carbon -framework IOKit -framework GLEW -framework Cocoa</commandLine>
         </linkerTool>

@@ -214,8 +214,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-m32
+CXXFLAGS=-m32
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -224,11 +224,21 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-Llib -L/opt/local/lib -lphysfs -lfreetype -lIL -lILU -lalut -lILUT -lSDL -lSDLmain -lSDL_image -ljpeg
+LDLIBSOPTIONS=-Llib -L/opt/local/lib -L/usr/local/lib -lphysfs -lfreetype -lalut lib/libjpeg.a lib/libpng14.a lib/libILU.a lib/libILUT.a lib/libIL.a
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	${MAKE}  -f nbproject/Makefile-Debug.mk dist/Debug/GNU-MacOSX/biffbamblammo
+
+dist/Debug/GNU-MacOSX/biffbamblammo: lib/libjpeg.a
+
+dist/Debug/GNU-MacOSX/biffbamblammo: lib/libpng14.a
+
+dist/Debug/GNU-MacOSX/biffbamblammo: lib/libILU.a
+
+dist/Debug/GNU-MacOSX/biffbamblammo: lib/libILUT.a
+
+dist/Debug/GNU-MacOSX/biffbamblammo: lib/libIL.a
 
 dist/Debug/GNU-MacOSX/biffbamblammo: ${OBJECTFILES}
 	${MKDIR} -p dist/Debug/GNU-MacOSX
