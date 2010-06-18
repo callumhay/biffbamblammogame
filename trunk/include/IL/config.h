@@ -50,11 +50,11 @@
 //
 #undef ILUT_USE_ALLEGRO
 
-#define ILUT_USE_DIRECTX8 1
-#define ILUT_USE_DIRECTX9 1
+//#define ILUT_USE_DIRECTX8 1
+//#define ILUT_USE_DIRECTX9 1
 #define ILUT_USE_OPENGL 1
-#define ILUT_USE_SDL 1
-#define ILUT_USE_WIN32 1
+//#define ILUT_USE_SDL 1
+//#define ILUT_USE_WIN32 0
 
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
@@ -115,8 +115,10 @@
    first (like Motorola and SPARC, unlike Intel and VAX). */
 /* #undef WORDS_BIGENDIAN */
 
+#ifdef __APPLE__
 /* If using Mac OS X uncomment this line */
-/* #include "macconfig.h" */
+//#include "macconfig.h"
+#endif
 
 /* Define to 1 if the X Window System is missing or not being used. */
 /* #undef X_DISPLAY_MISSING */

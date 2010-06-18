@@ -382,9 +382,14 @@ Texture* ResourceManager::GetImgTextureResource(const std::string &filepath, Tex
 				assert(false);
 				return NULL;
 		}
-		
+
+                if (texture == NULL) {
+                    debug_output("Failed to load texture into memory: " << filepath);
+                    assert(false);
+                    return NULL;
+                }
+
 		// First reference to the texture...
-		assert(texture != NULL);
 		this->numRefPerTexture[texture] = 1;
 		this->loadedTextures[filepath] = texture;
 
