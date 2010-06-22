@@ -220,7 +220,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 					this->espAssets->DrawGhostBallEffects(dT, camera, *currBall);
 				}
 				
-				currBallColour = currBallColour + GameViewConstants::GetInstance()->GHOST_BALL_COLOUR;
+				currBallColour = currBallColour + GameModelConstants::GetInstance()->GHOST_BALL_COLOUR;
 				numColoursApplied++;
 			}
 
@@ -234,7 +234,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 					this->espAssets->DrawUberBallEffects(dT, camera, *currBall);
 				}
 
-				currBallColour = currBallColour + GameViewConstants::GetInstance()->UBER_BALL_COLOUR;
+				currBallColour = currBallColour + GameModelConstants::GetInstance()->UBER_BALL_COLOUR;
 				numColoursApplied++;
 			}
 
@@ -249,7 +249,21 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 					this->espAssets->DrawGravityBallEffects(dT, camera, *currBall, gravityDir);
 				}
 				
-				currBallColour = currBallColour + GameViewConstants::GetInstance()->GRAVITY_BALL_COLOUR;
+				currBallColour = currBallColour + GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR;
+				numColoursApplied++;
+			}
+
+			// CRAZY BALL CHECK
+			if ((currBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall &&
+					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+
+				// Draw when crazy ball and not invisiball...
+				// We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
+				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {				
+					this->espAssets->DrawCrazyBallEffects(dT, camera, *currBall);
+				}
+				
+				currBallColour = currBallColour + GameModelConstants::GetInstance()->CRAZY_BALL_COLOUR;
 				numColoursApplied++;
 			}
 
@@ -872,13 +886,13 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 	this->worldAssets = GameWorldAssets::CreateWorldAssets(world->GetStyle());
 	assert(this->worldAssets != NULL);
 
+	LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
+
 	// Load all of the level meshes for the world
 	const std::vector<GameLevel*>& levels = world->GetAllLevelsInWorld();
 	for (std::vector<GameLevel*>::const_iterator iter = levels.begin(); iter != levels.end(); ++iter) {
 		const GameLevel* level = *iter;
 		assert(level != NULL);
-
-		LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
 
 		// Create a mesh for the level
 		LevelMesh* levelMesh = new LevelMesh(this->worldAssets, level);

@@ -39,7 +39,9 @@ void InCannonBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDi
 	// it has 'fired' the ball
 	bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds);
 
-	if (cannonHasFired) {		
+	if (cannonHasFired) {
+		
+
 		// Set the velocity in the direction the cannon has fired in
 		Vector2D cannonFireDir = this->cannonBlock->GetCurrentCannonDirection();
 		this->gameBall->SetVelocity(this->gameBall->GetSpeed(), cannonFireDir);

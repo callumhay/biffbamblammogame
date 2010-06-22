@@ -124,6 +124,9 @@ private:
 
 	static const int NUM_SMOKE_TEXTURES = 6;
 
+	// Cached Ball effects
+	ESPPointEmitter* crazyBallAura;
+
 	// Laser and beam effects
 	ESPPointEmitter*  paddleLaserGlowAura;
 	ESPPointEmitter*  paddleLaserGlowSparks;
@@ -146,6 +149,7 @@ private:
 	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGravityBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
+	void AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 
@@ -233,6 +237,7 @@ public:
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir);
+	void DrawCrazyBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	void DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	

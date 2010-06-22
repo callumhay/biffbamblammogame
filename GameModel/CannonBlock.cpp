@@ -30,27 +30,12 @@ CannonBlock::~CannonBlock() {
 
 // Determine whether the given projectile will pass through this block...
 bool CannonBlock::ProjectilePassesThrough(Projectile* projectile) {
-	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
-		return true;
-	}
 	return false;
 }
 
 LevelPiece* CannonBlock::Destroy(GameModel* gameModel) {
-	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this);
-
-	// Tell the level that this piece has changed to empty...
-	GameLevel* level = gameModel->GetCurrentLevel();
-	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(this, emptyPiece);
-
-	// Obliterate all that is left of this block...
-	LevelPiece* tempThis = this;
-	delete tempThis;
-	tempThis = NULL;
-
-	return emptyPiece;
+	// You can't destroy the cannon block...
+	return this;
 }
 
 // We need to override this in order to make sure it actually checks for a collision
@@ -169,8 +154,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			break;
 
 		case Projectile::CollateralBlockProjectile:
-			// The collateral block projectile completely destroys a cannon block...
-			resultingPiece = this->Destroy(gameModel);
+			// Do nothing, collateral block will be destroyed..
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:

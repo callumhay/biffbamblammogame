@@ -35,7 +35,7 @@ private:
 
 // Return the typical ball colour
 inline ColourRGBA NormalBallState::GetBallColour() const {
-	return this->gameBall->contributingGravityColour * this->gameBall->colour;
+	return this->gameBall->contributingCrazyColour * this->gameBall->contributingGravityColour * this->gameBall->colour;
 }
 
 inline BallState::BallStateType NormalBallState::GetBallStateType() const {

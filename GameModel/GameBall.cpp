@@ -38,14 +38,16 @@ GameBall* GameBall::currBallCamBall = NULL;
 
 GameBall::GameBall() : bounds(Point2D(0.0f, 0.0f), DEFAULT_BALL_RADIUS), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
 currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballballCollisionsDisabledTimer(0.0),
-lastPieceCollidedWith(NULL), zCenterPos(0.0), currState(NULL) {
+lastPieceCollidedWith(NULL), zCenterPos(0.0), currState(NULL), timeSinceLastCollision(0.0f) {
 	this->ResetBallAttributes();
 }
 
 GameBall::GameBall(const GameBall& gameBall) : bounds(gameBall.bounds), currDir(gameBall.currDir), currSpeed(gameBall.currSpeed), 
 currType(gameBall.currType), currSize(gameBall.currSize), currScaleFactor(gameBall.currScaleFactor), 
 rotationInDegs(gameBall.rotationInDegs), ballballCollisionsDisabledTimer(0.0), lastPieceCollidedWith(gameBall.lastPieceCollidedWith),
-zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributingGravityColour), blockCollisionsDisabled(false),
+zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributingGravityColour), 
+contributingCrazyColour(gameBall.contributingCrazyColour), timeSinceLastCollision(gameBall.timeSinceLastCollision),
+blockCollisionsDisabled(false),
 paddleCollisionsDisabled(false),
 currState(NULL) {
 
@@ -88,12 +90,14 @@ void GameBall::ResetBallAttributes() {
 	this->lastPieceCollidedWith = NULL;
 	this->SetColour(ColourRGBA(1, 1, 1, 1));
 	this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
+	this->contributingCrazyColour   = Colour(1.0f, 1.0f, 1.0f);
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
 
 	this->blockCollisionsDisabled = false;
 	this->paddleCollisionsDisabled = false;
 	this->ballballCollisionsDisabledTimer = 0.0;
+	this->timeSinceLastCollision = 0.0;
 
 	// Set the ball state back to its typical state (how it normally interacts with the world)
 	this->SetBallState(new NormalBallState(this), true);
@@ -197,6 +201,7 @@ Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
 
 void GameBall::Tick(double seconds, const Vector2D& worldSpaceGravityDir) {
 	this->currState->Tick(seconds, worldSpaceGravityDir);
+	this->timeSinceLastCollision += seconds;
 }
 
 void GameBall::Animate(double seconds) {

@@ -103,6 +103,7 @@ TEXTURE_ITEM_BALLCAM(TEXTURE_DIRECTORY			"/ballcam_powerdown_256x128.jpg"),
 TEXTURE_ITEM_PADDLEBEAM(TEXTURE_DIRECTORY		"/laserbeampaddle_powerup_256x128.jpg"),
 TEXTURE_ITEM_GRAVITYBALL(TEXTURE_DIRECTORY  "/gravityball_powerneutral256x128.jpg"),
 TEXTURE_ITEM_PADDLEROCKET(TEXTURE_DIRECTORY "/paddlerocket_powerup256x128.jpg"),
+TEXTURE_ITEM_CRAZYBALL(TEXTURE_DIRECTORY    "/crazyball_powerneutral256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
 TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud256x128.png"),
@@ -167,9 +168,6 @@ BLACKOUT_PADDLE_KEY_LIGHT_COLOUR(0.3f, 0.3f, 0.32f),
 BLACKOUT_PADDLE_FILL_LIGHT_COLOUR(0.35f, 0.35f, 0.35f),
 POISON_LIGHT_DEEP_COLOUR(0.10f, 0.50f, 0.10f),
 POISON_LIGHT_LIGHT_COLOUR(0.75f, 1.0f, 0.0f),
-GHOST_BALL_COLOUR(0.643f, 0.725f, 0.843f),
-UBER_BALL_COLOUR(1.0f, 0.0f, 0.0f),
-GRAVITY_BALL_COLOUR(0.75f, 0.24f, 1.0f),
 INK_BLOCK_COLOUR(0.49f, 0.239f, 0.90f),
 STICKYPADDLE_GOO_COLOUR(1.0f, 0.81f, 0.333f),
 STICKYPADDLE_PLUS_BEAM_GOO_COLOUR(0.8f, 0.9f, 0.777f),
@@ -239,6 +237,7 @@ void GameViewConstants::InitItemTextures() {
 	this->itemTextures.insert(std::make_pair(GameItem::LaserBeamPaddleItem,			this->TEXTURE_ITEM_PADDLEBEAM));
 	this->itemTextures.insert(std::make_pair(GameItem::GravityBallItem,					this->TEXTURE_ITEM_GRAVITYBALL));
 	this->itemTextures.insert(std::make_pair(GameItem::RocketPaddleItem,				this->TEXTURE_ITEM_PADDLEROCKET));
+	this->itemTextures.insert(std::make_pair(GameItem::CrazyBallItem,						this->TEXTURE_ITEM_CRAZYBALL));
 }
 
 void GameViewConstants::InitItemTimerTextures() {

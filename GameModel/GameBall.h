@@ -22,6 +22,7 @@
 
 #include "Onomatoplex.h"
 #include "BallState.h"
+#include "GameModelConstants.h"
 
 class LevelPiece;
 class CannonBlock;
@@ -79,6 +80,13 @@ public:
 
 	const Collision::Circle2D& GetBounds() const {
 		return this->bounds;
+	}
+
+	void BallCollided() {
+		this->timeSinceLastCollision = 0.0;
+	}
+	double GetTimeSinceLastCollision() {
+		return this->timeSinceLastCollision;
 	}
 
 	/**
@@ -184,13 +192,16 @@ public:
 	void RemoveAllBallTypes() {
 		this->currType = GameBall::NormalBall;
 		this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
+		this->contributingCrazyColour = Colour(1.0f, 1.0f, 1.0f);
 	}
 	void AddBallType(const BallType type) {
 		this->currType = this->currType | type;
 		switch (type) {
 			case GameBall::GraviBall:
-				this->contributingGravityColour = Colour(0.75f, 0.24f, 1.0f);
+				this->contributingGravityColour = GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR;
 				break;
+			case GameBall::CrazyBall:
+				this->contributingCrazyColour = GameModelConstants::GetInstance()->CRAZY_BALL_COLOUR;
 			default:
 				break;
 		}
@@ -201,6 +212,8 @@ public:
 			case GameBall::GraviBall:
 				this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
 				break;
+			case GameBall::CrazyBall:
+				this->contributingCrazyColour = Colour(1.0f, 1.0f, 1.0f);
 			default:
 				break;
 		}
@@ -296,8 +309,11 @@ private:
 	bool blockCollisionsDisabled;
 	bool paddleCollisionsDisabled;
 
+	double timeSinceLastCollision;
+
 	ColourRGBA colour;													// The colour multiply of the paddle, including its visibility/alpha
 	Colour contributingGravityColour;
+	Colour contributingCrazyColour;
 	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
 
 	static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL

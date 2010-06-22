@@ -50,6 +50,7 @@ private:
 	const std::string TEXTURE_ITEM_PADDLEBEAM;
 	const std::string TEXTURE_ITEM_GRAVITYBALL;
 	const std::string TEXTURE_ITEM_PADDLEROCKET;
+	const std::string TEXTURE_ITEM_CRAZYBALL;
 
 	const std::string TEXTURE_ITEM_TIMER_SLOWBALL;
 	const std::string TEXTURE_ITEM_TIMER_FASTBALL;
@@ -203,9 +204,6 @@ public:
 	const Colour BLACKOUT_PADDLE_FILL_LIGHT_COLOUR;
 	const Colour POISON_LIGHT_DEEP_COLOUR;
 	const Colour POISON_LIGHT_LIGHT_COLOUR;
-	const Colour GHOST_BALL_COLOUR;
-	const Colour UBER_BALL_COLOUR;
-	const Colour GRAVITY_BALL_COLOUR;
 	const Colour INK_BLOCK_COLOUR;
 	const Colour STICKYPADDLE_GOO_COLOUR;
 	const Colour STICKYPADDLE_PLUS_BEAM_GOO_COLOUR;

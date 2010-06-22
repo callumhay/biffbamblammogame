@@ -463,6 +463,7 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 // d is the distance from the center of the ball to the line that was collided with
 // when d is negative the ball is inside the line, when positive it is outside
 void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision) {
+	b.BallCollided();
 
 	// Calculate the time of that and then the difference up to this point
 	// based on the velocity and then move it to that position...
@@ -557,6 +558,9 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision:
  * collided with each other.
  */
 void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
+	ball1.BallCollided();
+	ball2.BallCollided();
+
 	Collision::Circle2D ball1Bounds = ball1.GetBounds();
 	Collision::Circle2D ball2Bounds = ball2.GetBounds();
 	

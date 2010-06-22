@@ -25,7 +25,7 @@ particleFader(1, 0),
 particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
 particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0),
-particleGravityArrowColour(ColourRGBA(GameViewConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
+particleGravityArrowColour(ColourRGBA(GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
 
 particleShrinkToNothing(1, 0),
 particlePulseUberballAura(0, 0),
@@ -42,6 +42,7 @@ beamBlastColourEffector(ColourRGBA(0.75f, 1.0f, 1.0f, 1.0f), ColourRGBA(GameView
 ghostBallAccel1(Vector3D(1,1,1)),
 gravity(Vector3D(0, -9.8, 0)),
 
+crazyBallAura(NULL),
 paddleLaserGlowAura(NULL),
 paddleLaserGlowSparks(NULL),
 paddleBeamGlowSparks(NULL),
@@ -140,6 +141,8 @@ GameESPAssets::~GameESPAssets() {
 	assert(removed);
 
 	// Delete any standalone effects
+	delete this->crazyBallAura;
+	this->crazyBallAura = NULL;
 	delete this->paddleLaserGlowAura;
 	this->paddleLaserGlowAura = NULL;
 	delete this->paddleLaserGlowSparks;
@@ -446,9 +449,9 @@ void GameESPAssets::AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effects
 	uberBallEmitterAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	uberBallEmitterAura->SetParticleAlignment(ESP::ScreenAligned);
 	uberBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
-	uberBallEmitterAura->SetParticleColour(ESPInterval(GameViewConstants::GetInstance()->UBER_BALL_COLOUR.R()), 
-																				 ESPInterval(GameViewConstants::GetInstance()->UBER_BALL_COLOUR.G()), 
-																				 ESPInterval(GameViewConstants::GetInstance()->UBER_BALL_COLOUR.B()), 
+	uberBallEmitterAura->SetParticleColour(ESPInterval(GameModelConstants::GetInstance()->UBER_BALL_COLOUR.R()), 
+																				 ESPInterval(GameModelConstants::GetInstance()->UBER_BALL_COLOUR.G()), 
+																				 ESPInterval(GameModelConstants::GetInstance()->UBER_BALL_COLOUR.B()), 
 																			   ESPInterval(0.75f));
 	uberBallEmitterAura->AddEffector(&this->particlePulseUberballAura);
 	bool result = uberBallEmitterAura->SetParticles(1, this->circleGradientTex);
@@ -481,9 +484,9 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 	ghostBallEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
 	ghostBallEmitterTrail->SetParticleLife(ESPInterval(0.5f));
 	ghostBallEmitterTrail->SetParticleSize(ESPInterval(1.5f, 2.0f));
-	ghostBallEmitterTrail->SetParticleColour(ESPInterval(GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.R()), 
-																					 ESPInterval(GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.G()), 
-																					 ESPInterval(GameViewConstants::GetInstance()->GHOST_BALL_COLOUR.B()), 
+	ghostBallEmitterTrail->SetParticleColour(ESPInterval(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.R()), 
+																					 ESPInterval(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.G()), 
+																					 ESPInterval(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR.B()), 
 																					 ESPInterval(1.0f));
 
 	ghostBallEmitterTrail->SetEmitAngleInDegrees(20);
@@ -522,11 +525,27 @@ void GameESPAssets::AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& ef
  * Initialize the standalone effects for the paddle laser.
  */
 void GameESPAssets::InitLaserPaddleESPEffects() {
+	assert(this->crazyBallAura == NULL);
 	assert(this->paddleLaserGlowAura == NULL);
 	assert(this->paddleLaserGlowSparks == NULL);
 	assert(this->paddleBeamGlowSparks == NULL);
 	assert(this->paddleBeamOriginUp == NULL);
 	assert(this->paddleBeamBlastBits == NULL);
+
+	bool result = false;
+
+	this->crazyBallAura = new ESPPointEmitter();
+	this->crazyBallAura->SetSpawnDelta(ESPInterval(-1));
+	this->crazyBallAura->SetInitialSpd(ESPInterval(0));
+	this->crazyBallAura->SetParticleLife(ESPInterval(-1));
+	this->crazyBallAura->SetParticleSize(ESPInterval(1.5f));
+	this->crazyBallAura->SetEmitAngleInDegrees(0);
+	this->crazyBallAura->SetParticleAlignment(ESP::ScreenAligned);
+	this->crazyBallAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->crazyBallAura->SetEmitPosition(Point3D(0, 0, 0));
+	this->crazyBallAura->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
+	this->crazyBallAura->AddEffector(&this->particlePulsePaddleLaser);
+	result = this->crazyBallAura->SetParticles(1, this->circleGradientTex);
 
 	this->paddleLaserGlowAura = new ESPPointEmitter();
 	this->paddleLaserGlowAura->SetSpawnDelta(ESPInterval(-1));
@@ -539,7 +558,7 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, 0, 0));
 	this->paddleLaserGlowAura->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	this->paddleLaserGlowAura->AddEffector(&this->particlePulsePaddleLaser);
-	bool result = this->paddleLaserGlowAura->SetParticles(1, this->circleGradientTex);
+	result = this->paddleLaserGlowAura->SetParticles(1, this->circleGradientTex);
 	assert(result);
 
 	this->paddleLaserGlowSparks = new ESPPointEmitter();
@@ -3000,6 +3019,48 @@ void GameESPAssets::AddGravityBallESPEffects(const GameBall* ball, std::vector<E
 	effectsList.push_back(ballGravityEffect);
 }
 
+void GameESPAssets::AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList) {
+	// Create an emitter for insanity text...
+	ESPPointEmitter* crazyTextEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	crazyTextEffect->SetSpawnDelta(ESPInterval(0.10f, 0.20f));
+	crazyTextEffect->SetInitialSpd(ESPInterval(1.0f, 3.0f));
+	crazyTextEffect->SetParticleLife(ESPInterval(0.8f, 1.7f));
+	crazyTextEffect->SetParticleSize(ESPInterval(0.7f, 1.0f));
+	crazyTextEffect->SetParticleRotation(ESPInterval(-45.0f, 45.0f));
+	crazyTextEffect->SetRadiusDeviationFromCenter(ESPInterval(0.8f * ball->GetBounds().Radius(), ball->GetBounds().Radius()));
+	crazyTextEffect->SetParticleAlignment(ESP::ScreenAligned);
+	crazyTextEffect->SetEmitPosition(Point3D(0,0,0));
+	crazyTextEffect->SetEmitAngleInDegrees(180.0f);
+	crazyTextEffect->SetParticleColour(ESPInterval(0.15f, 1.0f), ESPInterval(0.15f, 1.0f), ESPInterval(0.15f, 1.0f), ESPInterval(1.0f));
+	crazyTextEffect->AddEffector(&this->particleFader);
+	crazyTextEffect->AddEffector(&this->particleMediumGrowth);
+
+	// Add the single text particle to the emitter...
+	TextLabel2D crazyTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small), "");
+	crazyTextLabel.SetColour(Colour(1, 1, 1));
+	crazyTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+	crazyTextEffect->SetParticles(12, crazyTextLabel, Onomatoplex::CRAZY, Onomatoplex::GOOD);
+
+	// Create an emitter for green particles emitting from the ball...
+	ESPPointEmitter* crazySparks = new ESPPointEmitter();
+	crazySparks->SetSpawnDelta(ESPInterval(0.01f, 0.03f));
+	crazySparks->SetInitialSpd(ESPInterval(0.0f, 2.0f));
+	crazySparks->SetParticleLife(ESPInterval(0.6f, 0.8f));
+	crazySparks->SetParticleSize(ESPInterval(0.33f * ball->GetBounds().Radius(), ball->GetBounds().Radius()));
+	crazySparks->SetParticleColour(ESPInterval(0.48f, 0.58f), ESPInterval(0.88f, 1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
+	crazySparks->SetEmitAngleInDegrees(20);
+	crazySparks->SetRadiusDeviationFromCenter(0.25f * ball->GetBounds().Radius());
+	crazySparks->SetAsPointSpriteEmitter(true);
+	crazySparks->SetEmitPosition(Point3D(0,0,0));
+	crazySparks->AddEffector(&this->particleFader);
+	crazySparks->SetParticles(15, this->circleGradientTex);
+
+	effectsList.push_back(crazyTextEffect);
+	effectsList.push_back(crazySparks);
+
+}
+
 /**
  * Add the effect for when the player acquires a 1UP power-up.
  */
@@ -3073,6 +3134,10 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 				this->paddleBeamOriginUp->Reset();
 				this->paddleBeamBlastBits->Reset();
 			}
+			break;
+
+		case GameItem::CrazyBallItem:
+			this->crazyBallAura->Reset();
 			break;
 
 		case GameItem::PaddleGrowItem: {
@@ -3295,7 +3360,7 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 	}
 
 	if (foundBallEffects->second.find(GameItem::GravityBallItem) == foundBallEffects->second.end()) {
-		// Didn't find an associated uber ball effect, so add one
+		// Didn't find an associated gravity ball effect, so add one
 		this->AddGravityBallESPEffects(&ball, this->ballEffects[&ball][GameItem::GravityBallItem]);
 	}
 
@@ -3319,6 +3384,39 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 	}
 
 	glPopMatrix();
+}
+
+void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	// Check to see if the ball has any associated crazy ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
+	
+	if (foundBallEffects == this->ballEffects.end()) {
+		// Didn't even find a ball ... add one
+		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
+	}
+
+	if (foundBallEffects->second.find(GameItem::CrazyBallItem) == foundBallEffects->second.end()) {
+		// Didn't find an associated gravity ball effect, so add one
+		this->AddCrazyBallESPEffects(&ball, this->ballEffects[&ball][GameItem::CrazyBallItem]);
+	}
+
+	std::vector<ESPPointEmitter*>& crazyBallEffectList = this->ballEffects[&ball][GameItem::CrazyBallItem];
+	glPushMatrix();
+	Point2D loc = ball.GetBounds().Center();
+	glTranslatef(loc[0], loc[1], 0);
+
+	this->crazyBallAura->Tick(dT);
+	this->crazyBallAura->Draw(camera);
+	glPopMatrix();
+
+	for (std::vector<ESPPointEmitter*>::iterator iter = crazyBallEffectList.begin(); iter != crazyBallEffectList.end(); ++iter) {
+		ESPPointEmitter* emitter = *iter;
+		emitter->SetEmitPosition(ball.GetCenterPosition());
+		emitter->SetEmitDirection(-Vector3D(ball.GetDirection()));
+		emitter->Tick(dT);
+		emitter->Draw(camera);
+	}
 }
 
 /**

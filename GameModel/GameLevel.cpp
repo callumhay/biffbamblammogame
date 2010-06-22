@@ -554,6 +554,12 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
 	assert(xIndexMin <= xIndexMax);
 	assert(yIndexMin <= yIndexMax);
 	
+	for (int x = xIndexMin; x <= xIndexMax; x++) {
+		for (int y = yIndexMin; y <= yIndexMax; y++) {
+			colliders.insert(this->currentLevelPieces[y][x]);
+		}
+	}
+	/*
 	if (xIndexMax == xIndexMin) {
 		if (yIndexMax == yIndexMin) {
 			// Only one collision point
@@ -567,19 +573,22 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
 		}
 	}
 	else {
-		// No matter what there are some number of collisions along the x-axis
-		for (int x = xIndexMin; x <= xIndexMax; x++) {
-			colliders.insert(this->currentLevelPieces[yIndexMin][x]);
-		}
-
-		if (yIndexMax != yIndexMin) {
-			// Add the left overs...
+		if (yIndexMax == yIndexMin) {
+			//Some number of collisions along the x-axis
 			for (int x = xIndexMin; x <= xIndexMax; x++) {
-				colliders.insert(this->currentLevelPieces[yIndexMax][x]);
+				colliders.insert(this->currentLevelPieces[yIndexMin][x]);
+			}
+		}
+		else {
+			// Both y and x have collisions along their axes...
+			for (int x = xIndexMin; x <= xIndexMax; x++) {
+				for (int y = yIndexMin; y < yIndexMax; y++) {
+					colliders.insert(this->currentLevelPieces[y][x]);
+				}
 			}
 		}
 	}
-
+	*/
 	return colliders;
 }
 
