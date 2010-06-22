@@ -233,7 +233,7 @@ void LoadingScreen::EndShowingLoadingScreen() {
  */
 void LoadingScreen::DrawLoadingBar() {
 	// Figure out what estimated percentage of loading is complete and fill the bar based on that percentage
-	float percentageDone			= NumberFuncs::MinF(1.0f, static_cast<float>(this->numCallsToUpdate) / static_cast<float>(this->numExpectedUpdates));
+	float percentageDone			= std::min<float>(1.0f, static_cast<float>(this->numCallsToUpdate) / static_cast<float>(this->numExpectedUpdates));
 	float lengthOfLoadingBar	= percentageDone * LOADING_BAR_WIDTH;
 
 	Point2D loadingBarUpperLeft = Point2D((this->width - LOADING_BAR_WIDTH) / 2.0f, (this->height + LOADING_BAR_HEIGHT) / 2.0f);

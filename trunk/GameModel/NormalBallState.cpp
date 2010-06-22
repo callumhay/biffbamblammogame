@@ -57,9 +57,9 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir)
 	}
 
 	// Crazy ball manipulates the direction and acceleration of the ball...
-	//if ((this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
+	if ((this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
 		this->ApplyCrazyBallVelocityChange(seconds, currVelocity);
-	//}
+	}
 
 	Vector2D dDist = (static_cast<float>(seconds) * currVelocity);
 	this->gameBall->bounds.SetCenter(this->gameBall->bounds.Center() + dDist);
@@ -88,32 +88,20 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir)
 // Apply the crazy ball item's effect to the velocity of the ball by changing it somewhat randomly
 // and strangely to make it difficult to track where the ball will go
 void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity) {
-	static const float MIN_CRAZY_INTENSITY = 8.0f;
-	static const float MAX_CRAZY_INTENSITY = 15.0f;
-	static const float DIFF_CRAZY_INTENSITY = MAX_CRAZY_INTENSITY - MIN_CRAZY_INTENSITY;
-
 	static double TIME_TRACKER = 0.0;
 	static double NEXT_TIME    = 0.0;
-	static Vector2D crazyAcceleration;
-	
+	static const double WAIT_TIME_BETWEEN_COLLISIONS = 0.5;
+
 	TIME_TRACKER += dT;
-	if (TIME_TRACKER >= NEXT_TIME) {
+
+	// After some accumlated interval of time, do a random velocity change
+	if (TIME_TRACKER >= NEXT_TIME && this->gameBall->GetTimeSinceLastCollision() > WAIT_TIME_BETWEEN_COLLISIONS) {
 		TIME_TRACKER = 0.0;
-		NEXT_TIME = 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 1.0;
+		NEXT_TIME = 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 2.0;
 
-		float accelerationAmt = MIN_CRAZY_INTENSITY + Randomizer::GetInstance()->RandomNumZeroToOne() * DIFF_CRAZY_INTENSITY;
-		float randomRotation  = Randomizer::GetInstance()->RandomNegativeOrPositive() * (90 + Randomizer::GetInstance()->RandomNumZeroToOne() * 15);
-		crazyAcceleration = accelerationAmt * Vector2D::Rotate(randomRotation, Vector2D::Normalize(this->gameBall->GetVelocity()));
-
-		if (Vector2D::Dot(Vector2D(0, -1), crazyAcceleration) <= 0 && Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) {
-			crazyAcceleration = accelerationAmt * Vector2D::Rotate(-randomRotation, Vector2D::Normalize(this->gameBall->GetVelocity()));
-		}
+		float randomRotation  = Randomizer::GetInstance()->RandomNegativeOrPositive() * (45 + Randomizer::GetInstance()->RandomNumZeroToOne() * 135);
+		float currVelMag = Vector2D::Magnitude(currVelocity);
+		Vector2D newVelocity = Vector2D::Normalize(Vector2D::Rotate(randomRotation, currVelocity));
+		this->gameBall->SetVelocity(currVelMag, newVelocity);
 	}
-
-	currVelocity = currVelocity + dT * crazyAcceleration;
-	float currVelMag = Vector2D::Magnitude(currVelocity);
-	Vector2D currVelNorm = Vector2D::Normalize(currVelocity);
-
-	// Needs to be fixed for speed ...
-	this->gameBall->SetVelocity(std::min<float>(currVelMag, GameBall::FastestSpeed), currVelNorm);
 }

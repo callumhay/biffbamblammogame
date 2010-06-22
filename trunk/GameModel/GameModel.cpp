@@ -193,6 +193,7 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	// tell the level about it
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, ball);	// WARNING: This can destroy p.
+	ball.BallCollided();
 
 	// EVENT: Ball-Block Collision
 	GameEventManager::Instance()->ActionBallBlockCollision(ball, *pieceAfterCollision);
@@ -218,6 +219,7 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 }
 
 void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
+	ball.BallCollided();
 
 	// Reset the multiplier
 	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);

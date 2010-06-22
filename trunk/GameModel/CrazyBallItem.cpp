@@ -15,7 +15,7 @@ const char* CrazyBallItem::CRAZY_BALL_ITEM_NAME				= "CrazyBall";
 const double CrazyBallItem::CRAZY_BALL_TIMER_IN_SECS	= 0.0;
 
 CrazyBallItem::CrazyBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(CRAZY_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
+GameItem(CRAZY_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
 }
 
 CrazyBallItem::~CrazyBallItem() {
@@ -29,7 +29,9 @@ double CrazyBallItem::Activate() {
 	GameBall* affectedBall = *gameBalls.begin();
 	assert(affectedBall != NULL);
 	
+	// Make the ball crazy, but slow it down a bit as well (in order to accomodate the craziness)
 	affectedBall->AddBallType(GameBall::CrazyBall);
+	affectedBall->DecreaseSpeed();
 
 	GameItem::Activate();
 	return CrazyBallItem::CRAZY_BALL_TIMER_IN_SECS;

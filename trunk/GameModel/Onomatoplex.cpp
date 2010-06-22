@@ -46,6 +46,7 @@ namespace Onomatoplex {
 		this->LoadGoodHappyWords();
 		this->LoadGooWords();
 		this->LoadShatterWords();
+		this->LoadCrazyWords();
 	}
 
 	// Destructor, deletes singleton, cleans up dictionaries
@@ -641,6 +642,30 @@ namespace Onomatoplex {
 
 		this->awesomeSingleWords[SHATTER] = this->goodSingleWords[SHATTER];
 		this->uberSingleWords[SHATTER] = this->goodSingleWords[SHATTER];
+	}
+
+	void Generator::LoadCrazyWords() {
+		std::vector<std::string> crazySimpleWords;
+		//crazySimpleWords.push_back("Waka");
+		//crazySimpleWords.push_back("Wee");
+		crazySimpleWords.push_back("?");
+		crazySimpleWords.push_back("!");
+		//crazySimpleWords.push_back("Mummble");
+		//crazySimpleWords.push_back("Gaah");
+		//crazySimpleWords.push_back("Moo");
+		//crazySimpleWords.push_back("Meow");
+		//crazySimpleWords.push_back("Woof");
+		//crazySimpleWords.push_back("Doo");
+		//crazySimpleWords.push_back("Daa");
+		//crazySimpleWords.push_back("Duurrr");
+		//crazySimpleWords.push_back("Blee");
+		//crazySimpleWords.push_back("Bloo");
+		crazySimpleWords.push_back("");
+
+		this->simpleSingleWords[CRAZY]  = crazySimpleWords;
+		this->goodSingleWords[CRAZY]		= crazySimpleWords;
+		this->awesomeSingleWords[CRAZY] = crazySimpleWords;
+		this->uberSingleWords[CRAZY]		= crazySimpleWords;
 	}
 
 	/*

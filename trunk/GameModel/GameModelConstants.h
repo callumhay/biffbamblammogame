@@ -1,6 +1,8 @@
 #ifndef __GAMECONSTANTS_H__
 #define __GAMECONSTANTS_H__
 
+#include "../BlammoEngine/Colour.h"
+
 #include <string>
 #include <vector>
 
@@ -57,6 +59,12 @@ public:
 	const int INIT_LIVES_LEFT;									// Initial player lives when starting a game
 	const int MAX_LIVES_LEFT;										// Maximum number of lives that a player may have at a given time
 	// -------------------------------------------------
+
+	// BALL COLOURS
+	const Colour GHOST_BALL_COLOUR;
+	const Colour UBER_BALL_COLOUR;
+	const Colour GRAVITY_BALL_COLOUR;
+	const Colour CRAZY_BALL_COLOUR;
 
 };
 

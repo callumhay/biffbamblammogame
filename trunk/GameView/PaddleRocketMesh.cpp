@@ -28,6 +28,7 @@ PaddleRocketMesh::~PaddleRocketMesh() {
 
 // Draw the rocket - if it's currently activated
 void PaddleRocketMesh::Draw(const PlayerPaddle& paddle, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) {
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	if ((paddle.GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
 		// Draw the rocket, mounted on the paddle
 		const Point2D& paddleCenter = paddle.GetCenterPosition();
