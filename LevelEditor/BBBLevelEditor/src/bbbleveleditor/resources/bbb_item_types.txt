@@ -23,7 +23,7 @@ Split the most recently touched ball into 3 balls.
 Split the most recently touched ball into 5 balls.
 
 + 1Up
-Gain an extra life.
+Player gains an extra life.
 
 + PaddleGrow
 The paddle increases in size.
@@ -37,6 +37,12 @@ The ball gains the ability to blast through level pieces that only require one h
 
 ~ GhostBall
 The ball will randomly phase through breakable blocks.
+
+~ GravityBall
+The ball becomes pulled towards the bottom of the screen for better or worse.
+
+~ CrazyBall
+The ball gains an insane mind of its own and starts moving in random directions on occasion.
 
 
 - BallShrink

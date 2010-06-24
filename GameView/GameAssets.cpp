@@ -104,7 +104,19 @@ GameAssets::~GameAssets() {
 	this->DeleteRegularEffectAssets();
 
 	// Delete the currently loaded world and level assets if there are any
-	this->DeleteWorldAssets();
+	// Delete all the levels for the world that are currently loaded - THIS MUST BE CALLED BEFORE DELETING
+	// THE WORLD ASSETS!!!
+	for(std::map<const GameLevel*, LevelMesh*>::iterator iter = this->loadedLevelMeshes.begin(); iter != this->loadedLevelMeshes.end(); ++iter) {
+		LevelMesh* currMesh = iter->second;
+		delete currMesh;
+		currMesh = NULL;
+	}
+	this->loadedLevelMeshes.clear();
+
+	if (this->worldAssets != NULL) {
+		delete this->worldAssets;
+		this->worldAssets = NULL;
+	}
 
 	// Delete item assets
 	if (this->itemAssets != NULL) {
@@ -140,25 +152,6 @@ GameAssets::~GameAssets() {
 	this->painHUD = NULL;
 	delete this->flashHUD;
 	this->flashHUD = NULL;
-}
-
-/*
- * Delete any previously loaded assets related to the world.
- */
-void GameAssets::DeleteWorldAssets() {
-	// Delete all the levels for the world that are currently loaded - THIS MUST BE CALLED BEFORE DELETING
-	// THE WORLD ASSETS!!!
-	for(std::map<const GameLevel*, LevelMesh*>::iterator iter = this->loadedLevelMeshes.begin(); iter != this->loadedLevelMeshes.end(); ++iter) {
-		LevelMesh* currMesh = iter->second;
-		delete currMesh;
-		currMesh = NULL;
-	}
-	this->loadedLevelMeshes.clear();	
-	
-	if (this->worldAssets != NULL) {
-		delete this->worldAssets;
-		this->worldAssets = NULL;
-	}
 }
 
 // Draw the foreground level pieces...
@@ -878,15 +871,27 @@ void GameAssets::ExplosionFlash(double timeLength, float intensityPercent) {
 void GameAssets::LoadWorldAssets(const GameWorld* world) {
 	assert(world != NULL);
 
-	// Delete all previously loaded style-related assets
-	this->DeleteWorldAssets();
-	
-	// Load up the new set of assets
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading world assets...");
-	this->worldAssets = GameWorldAssets::CreateWorldAssets(world->GetStyle());
-	assert(this->worldAssets != NULL);
+	// Delete the currently loaded world and level assets if there are any
+	// Delete all the levels for the world that are currently loaded - THIS MUST BE CALLED BEFORE DELETING
+	// THE WORLD ASSETS!!!
+	for(std::map<const GameLevel*, LevelMesh*>::iterator iter = this->loadedLevelMeshes.begin(); iter != this->loadedLevelMeshes.end(); ++iter) {
+		LevelMesh* currMesh = iter->second;
+		delete currMesh;
+		currMesh = NULL;
+	}
+	this->loadedLevelMeshes.clear();
 
-	LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
+	// Check to see if we've already loaded the world assets...
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading world assets...");
+	if (this->worldAssets == NULL || this->worldAssets->GetStyle() != world->GetStyle()) {
+		// Delete all previously loaded style-related assets
+		delete this->worldAssets;
+		this->worldAssets = NULL;
+
+		// Load up the new set of assets
+		this->worldAssets = GameWorldAssets::CreateWorldAssets(world->GetStyle());
+		assert(this->worldAssets != NULL);
+	}
 
 	// Load all of the level meshes for the world
 	const std::vector<GameLevel*>& levels = world->GetAllLevelsInWorld();
@@ -895,6 +900,7 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 		assert(level != NULL);
 
 		// Create a mesh for the level
+		LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
 		LevelMesh* levelMesh = new LevelMesh(this->worldAssets, level);
 		this->loadedLevelMeshes.insert(std::pair<const GameLevel*, LevelMesh*>(level, levelMesh));
 	}

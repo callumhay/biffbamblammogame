@@ -47,8 +47,9 @@ const char GameLevel::TRI_LEFT_CORNER			= 'l';
 const char GameLevel::TRI_RIGHT_CORNER		= 'r';
 
 // Private constructor, requires all the pieces that make up the level
-GameLevel::GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces): currentLevelPieces(pieces),
-piecesLeft(numBlocks), ballSafetyNetActive(false) {
+GameLevel::GameLevel(const std::string& filepath, unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces): currentLevelPieces(pieces),
+piecesLeft(numBlocks), ballSafetyNetActive(false), filepath(filepath) {
+	assert(!filepath.empty());
 	assert(pieces.size() > 0);
 	
 	// Set the dimensions of the level
@@ -340,9 +341,6 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		if (iter->second == NULL || iter->second->GetSiblingPortal() == NULL || iter->second->GetWidthIndex() < 0
 				|| iter->second->GetHeightIndex() < 0) {
 			debug_output("ERROR: Poorly formatted portal blocks.");
-			GameLevel* temp = new GameLevel(numVitalPieces, levelPieces);
-			delete temp;
-			temp = NULL;
 			return NULL;
 		}
 	}
@@ -354,7 +352,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		}
 	}
 
-	return new GameLevel(numVitalPieces, levelPieces);
+	return new GameLevel(filepath, numVitalPieces, levelPieces);
 }
 
 /**

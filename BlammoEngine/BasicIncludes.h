@@ -57,25 +57,7 @@
 #endif//__APPLE__
 #include <gl/glut.h>
 
-
 #define BUFFER_OFFSET(bytes) ((GLubyte*)NULL + (bytes))
-
-// OpenAL includes
-#ifdef WIN32
-#include <al/al.h>
-#include <al/alc.h>
-#include <al/alut.h>
-#include <al/efx.h>
-#include <al/efx-creative.h>
-#include <al/xram.h>
-#elif __APPLE__
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-#include <al/alut.h>
-//#include <OpenAL/efx.h>
-//#include <OpenAL/efx-creative.h>
-//#include <OpenAL/xram.h>
-#endif
 
 // SDL Includes
 #ifdef WIN32
@@ -86,6 +68,7 @@
 #include "SDL.h"
 #include "SDL_thread.h"
 #include "SDL_mutex.h"
+#include "SDL_mixer.h"
 
 // Cg includes
 #include "Cg/cg.h"
@@ -181,19 +164,19 @@ inline void debug_opengl_state() {
 	assert(false);
 }
 
-inline void debug_openal_state() {
-	ALenum alErr = alGetError();
-	if (alErr == AL_NO_ERROR) {
-		return;
-	}
-	debug_output("OpenAL Error: " << alErr);
-
-	alErr = alutGetError();
-	if (alErr == AL_NO_ERROR) {
-		return;
-	}
-	debug_output("OpenAL (ALUT) Error: " << alutGetErrorString(alErr) << " (" << alErr << ")");
-}
+//inline void debug_openal_state() {
+//	ALenum alErr = alGetError();
+//	if (alErr == AL_NO_ERROR) {
+//		return;
+//	}
+//	debug_output("OpenAL Error: " << alErr);
+//
+//	alErr = alutGetError();
+//	if (alErr == AL_NO_ERROR) {
+//		return;
+//	}
+//	debug_output("OpenAL (ALUT) Error: " << alutGetErrorString(alErr) << " (" << alErr << ")");
+//}
 
 /**
  * Used to check for errors in the physfs library.

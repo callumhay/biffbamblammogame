@@ -48,8 +48,9 @@ private:
 
 public:
 	DecoWorldAssets();
-	virtual ~DecoWorldAssets();
+	~DecoWorldAssets();
 
+	GameWorld::WorldStyle GetStyle() const;
 	void DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight);
 	void DrawBackgroundEffects(const Camera& camera);
 	void FadeBackground(bool fadeout, float fadeTime);
@@ -57,4 +58,9 @@ public:
 	virtual void Tick(double dT);
 
 };
+
+inline GameWorld::WorldStyle DecoWorldAssets::GetStyle() const {
+	return GameWorld::Deco;
+}
+
 #endif
