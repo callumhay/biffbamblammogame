@@ -5,16 +5,22 @@
 
 #include <cassert>
 
-// Position and velocity of the listener
-const ALfloat GameSoundAssets::DEFAULT_LISTENER_POS[3]	= {0.0, 0.0, 0.0};
-const ALfloat GameSoundAssets::DEFAULT_LISTENER_VEL[3]	= {0.0, 0.0, 0.0};
-// Orientation of the listener. (first 3 elements are "at", second 3 are "up")
-const ALfloat GameSoundAssets::DEFAULT_LISTENER_ORIENT[6]	= {0.0, 0.0, -1.0, 0.0, 1.0, 0.0};
-
+const int GameSoundAssets::MAX_MIX_GAME_SOUNDS = 64;
 
 GameSoundAssets::GameSoundAssets() {
-	// Setup OpenAL listener and load any sounds that will always be in memory
-	GameSoundAssets::SetupOpenALListener();
+	int sdlMixerFlags  = MIX_INIT_OGG;
+	int loadedSDLFlags = Mix_Init(sdlMixerFlags);
+	if ((sdlMixerFlags & loadedSDLFlags) != sdlMixerFlags) {
+		debug_output("Mix_Init: Failed to initialize certain sound type support:");
+		debug_output(Mix_GetError() << std::endl);
+	}
+
+	// Set up the number of mixing channels for sound effects - some fairly large number
+	// (should be large enough such that no more than that number of sounds are playing at
+	// any given time).
+	Mix_AllocateChannels(GameSoundAssets::MAX_MIX_GAME_SOUNDS);
+
+	// Setup and load any sounds that will always be in memory
 	this->LoadGlobalSounds();
 }
 
@@ -22,6 +28,8 @@ GameSoundAssets::~GameSoundAssets() {
 	this->UnloadMainMenuSounds(true);
 	this->UnloadWorldSounds();
 	this->UnloadGlobalSounds();
+
+	Mix_Quit();
 }
 
 /**
@@ -30,21 +38,12 @@ GameSoundAssets::~GameSoundAssets() {
  */
 void GameSoundAssets::SetGameVolume(int volumeLvl) {
 	float volumeFraction = static_cast<float>(std::max<int>(0, std::min<int>(100, volumeLvl))) / 100.0f;
-	alListenerf(AL_GAIN, volumeFraction);
-}
-
-/**
- * Called during the game event loop - this is passed the amount of
- * time passed since the previous frame of game play and is responsible
- * for updating sound effects over time.
- */
-void GameSoundAssets::Tick(double dT) {
-	// Go through each active sound and tick it
-	GameSound* currSound = NULL;
-	for (std::list<GameSound*>::iterator iter = this->activeSounds.begin(); iter != this->activeSounds.end(); ++iter) {
-		currSound = *iter;
-		currSound->Tick(dT);
-	}
+	
+	// Map the volume into the range of 0 to MIX_MAX_VOLUME
+	int mixVolumeLvl = static_cast<int>(MIX_MAX_VOLUME * volumeFraction);
+	// Set all channels (-1 means all channels) to the given volume level
+	Mix_Volume(-1, mixVolumeLvl);
+	Mix_VolumeMusic(mixVolumeLvl);
 }
 
 /**
@@ -61,15 +60,21 @@ void GameSoundAssets::LoadWorldSounds(int worldStyle) {
 void GameSoundAssets::UnloadWorldSounds() {
 }
 
+void GameSoundAssets::StopAllSounds() {
+	for (std::list<Sound*>::iterator iter = this->activeSounds.begin(); iter != this->activeSounds.end(); ++iter) {
+		Sound* sound = *iter;
+		sound->Stop(true);
+	}
+	this->activeSounds.clear();
+}
+
 /**
  * Load the sounds associated with the main menu in the game.
  */
 void GameSoundAssets::LoadMainMenuSounds() {
-	// This shouldn't happen, but if it's the case that there are still main menu sounds loaded
-	// that weren't previously cleaned up, clean them up first.
+	// If it's the case that there are still main menu sounds loaded then we don't need to load them again!
 	if (this->mainMenuSounds.size() != 0) {
-		assert(false);
-		this->UnloadMainMenuSounds(false);
+		return;
 	}
 
 	bool readSuccess = MSFReader::ReadMSF(GameViewConstants::GetInstance()->MAIN_MENU_SOUND_SCRIPT, this->mainMenuSounds);
@@ -83,16 +88,16 @@ void GameSoundAssets::LoadMainMenuSounds() {
  * Unload the sounds associated with the main menu in the game that may have been previously loaded.
  */
 void GameSoundAssets::UnloadMainMenuSounds(bool waitForFinish) {
-	for (std::map<int, GameSound*>::iterator iter = this->mainMenuSounds.begin(); iter != this->mainMenuSounds.end(); ++iter) {
-		GameSound* currSound = iter->second;
+	for (std::map<int, Sound*>::iterator iter = this->mainMenuSounds.begin(); iter != this->mainMenuSounds.end(); ++iter) {
+		Sound* currSound = iter->second;
 
 		// If wait for finish is set then we wait for each song to finish playing
-		if (waitForFinish && !GameSound::IsSoundMask(iter->first)) {
+		if (waitForFinish && !GameSoundAssets::IsSoundMask(iter->first)) {
 			while (currSound->IsPlaying()) {}
 		}
 
 		// Stop the sound from being active and delete it
-		this->StopMainMenuSound(static_cast<GameSound::MainMenuSound>(iter->first));
+		this->StopMainMenuSound(static_cast<GameSoundAssets::MainMenuSound>(iter->first));
 		delete currSound;
 		currSound = NULL;
 	}
@@ -102,24 +107,31 @@ void GameSoundAssets::UnloadMainMenuSounds(bool waitForFinish) {
 /**
  * Play a sound associated with the main menu of the game. The sound may be an event or mask.
  */
-void GameSoundAssets::PlayMainMenuSound(GameSound::MainMenuSound sound) {
-	GameSound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
+void GameSoundAssets::PlayMainMenuSound(GameSoundAssets::MainMenuSound sound) {
+	Sound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
 	if (foundSound == NULL) {
 		return;
 	}
 
-	foundSound->Play();
+	foundSound->Play(true);
 	this->activeSounds.push_back(foundSound);
 }
 
-void GameSoundAssets::StopMainMenuSound(GameSound::MainMenuSound sound) {
-	GameSound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
+void GameSoundAssets::StopMainMenuSound(GameSoundAssets::MainMenuSound sound) {
+	Sound* foundSound = GameSoundAssets::FindSound(this->mainMenuSounds, sound);
 	if (foundSound == NULL) {
 		return;
 	}
 
-	foundSound->Stop();
+	foundSound->Stop(true);
 	this->activeSounds.remove(foundSound);
+}
+
+/**
+ * Gets whether the given sound type is a sound mask or not.
+ */
+bool GameSoundAssets::IsSoundMask(int soundType) {
+	return soundType == GameSoundAssets::MainMenuBackgroundMask;
 }
 
 /**
@@ -139,21 +151,11 @@ void GameSoundAssets::UnloadGlobalSounds() {
 }
 
 /**
- * Private helper for setting up the OpenAL listener position, velocity and orientation,
- * this determines where the sound is going to be interpretted in the game.
- */
-void GameSoundAssets::SetupOpenALListener() {
-	alListenerfv(AL_POSITION,    GameSoundAssets::DEFAULT_LISTENER_POS);
-	alListenerfv(AL_VELOCITY,    GameSoundAssets::DEFAULT_LISTENER_VEL);
-	alListenerfv(AL_ORIENTATION, GameSoundAssets::DEFAULT_LISTENER_ORIENT);
-}
-
-/**
  * Tries to find the given sound ID in the given sound map.
  * Returns: The sound object found, if nothing was found then NULL is returned.
  */
-GameSound* GameSoundAssets::FindSound(std::map<int, GameSound*>& soundMap, int soundID) {
-	std::map<int, GameSound*>::iterator foundSoundIter = soundMap.find(soundID);
+Sound* GameSoundAssets::FindSound(std::map<int, Sound*>& soundMap, int soundID) {
+	std::map<int, Sound*>::iterator foundSoundIter = soundMap.find(soundID);
 	
 	// First make sure the sound exists, it should...
 	if (foundSoundIter == soundMap.end()) {

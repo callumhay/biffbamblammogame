@@ -48,7 +48,7 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	unsigned int numLevelsInWorld = world.GetAllLevelsInWorld().size();
 	const Camera& camera = this->display->GetCamera();
 
-	LoadingScreen::GetInstance()->StartShowLoadingScreen(camera.GetWindowWidth(), camera.GetWindowHeight(), 2);
+	LoadingScreen::GetInstance()->StartShowLoadingScreen(camera.GetWindowWidth(), camera.GetWindowHeight(), numLevelsInWorld + 1);
 	this->display->GetAssets()->LoadWorldAssets(&world);
 	this->display->GetSounds()->LoadWorldSounds(world.GetStyle());
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();

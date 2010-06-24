@@ -121,9 +121,6 @@ static void GameRenderLoop() {
 		display->Render(frameTimeDelta);
 		SDL_GL_SwapBuffers();
 
-		// Tick the sound assets...
-		sound->Tick(frameTimeDelta);
-
 		SDL_Delay(GameDisplay::FRAME_SLEEP_MS);
 
 		// Process SDL events...

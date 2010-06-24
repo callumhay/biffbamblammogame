@@ -74,7 +74,6 @@ private:
 	CgFxPostRefract* invisiBallEffect;
 	CgFxVolumetricEffect* ghostBallEffect;
 
-	void DeleteWorldAssets();
 	void DeleteRegularEffectAssets();
 
 	// Asset loading helper functions

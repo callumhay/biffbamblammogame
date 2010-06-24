@@ -102,6 +102,10 @@ public:
 		return this->piecesLeft == 0;
 	}
 
+	const std::string& GetFilepath() const {
+		return this->filepath;
+	}
+
 	void PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter);
 	LevelPiece* RocketExplosion(GameModel* gameModel, LevelPiece* hitPiece);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(size_t hIndex, size_t wIndex);
@@ -111,10 +115,11 @@ private:
 	unsigned int piecesLeft;																	// Pieces left before the end of the level
 	unsigned int width, height;																// Size values for the level
 	bool ballSafetyNetActive;
-	
+	std::string filepath;
+
 	//QuadTree* levelTree;	// A quad tree representing the boundries of this entire level and all its pieces
 
-	GameLevel(unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces);
+	GameLevel(const std::string& filepath, unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces);
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
 	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;

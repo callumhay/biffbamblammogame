@@ -31,16 +31,16 @@ cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NU
 	assert(ilResult);
 
 	// Initialize OpenAL for audio, make sure everything loaded alright
-	alutInit(NULL, NULL);
-	debug_output("Supported OpenAL Sound MIME types:");
-	
-#ifdef _DEBUG
-	const char* mimeTypes = alutGetMIMETypes(ALUT_LOADER_BUFFER);
-	if (mimeTypes != NULL) {
-		debug_output(mimeTypes);
-	}
-#endif
-	debug_openal_state();
+//	alutInit(NULL, NULL);
+//	debug_output("Supported OpenAL Sound MIME types:");
+//	
+//#ifdef _DEBUG
+//	const char* mimeTypes = alutGetMIMETypes(ALUT_LOADER_BUFFER);
+//	if (mimeTypes != NULL) {
+//		debug_output(mimeTypes);
+//	}
+//#endif
+//	debug_openal_state();
 
 	// Initialize Physfs and make sure everything loaded alright
 	int result = PHYSFS_init(argv0);
@@ -57,9 +57,9 @@ ResourceManager::~ResourceManager() {
 	PHYSFS_deinit();
 
 	// Check for errors and clean up OpenAL
-	ALboolean successfulOALExit = alutExit();
-	assert(successfulOALExit);
-	debug_openal_state();
+	//ALboolean successfulOALExit = alutExit();
+	//assert(successfulOALExit);
+	//debug_openal_state();
 
 	// Clean up all loaded meshes - these must be deleted first so that the
 	// effects go with them and make the assertions below correct
@@ -706,65 +706,65 @@ bool ResourceManager::ReleaseCgFxEffectResource(CGeffect &effect) {
  * Read the given filepath into an OpenAL sound buffer and set the given ID to be that buffer.
  * Returns: true on success, false otherwise.
  */
-bool ResourceManager::GetSoundResourceBuffer(const std::string &filepath, ALuint& soundBufferID) {
-	
-	// Try to find the sound in the loaded sounds first...
-	std::map<std::string, ALuint>::iterator loadedSoundIter = this->loadedSoundBuffers.find(filepath);
-	bool needToReadFromFile = loadedSoundIter == this->loadedSoundBuffers.end();
-
-	if (needToReadFromFile) {
-		// Create the sound buffer in OpenAL..
-		int dataLength = 0;
-		char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
-		if (soundMemData == NULL) {
-			return false;
-		}
-
-		soundBufferID = alutCreateBufferFromFileImage(soundMemData, dataLength);
-		delete[] soundMemData;
-		soundMemData = NULL;
-
-		if (soundBufferID == 0) {
-			return false;
-		}
-
-		// Insert into the list of sound buffer resources for future lookup
-		this->loadedSoundBuffers.insert(std::make_pair(filepath, soundBufferID));
-	}
-	else {
-		// Sound was already loaded, just grab and set the identifier for the sound buffer
-		soundBufferID = loadedSoundIter->second;
-	}
-
-	return true;
-}
+//bool ResourceManager::GetSoundResourceBuffer(const std::string &filepath, ALuint& soundBufferID) {
+//	
+//	// Try to find the sound in the loaded sounds first...
+//	std::map<std::string, ALuint>::iterator loadedSoundIter = this->loadedSoundBuffers.find(filepath);
+//	bool needToReadFromFile = loadedSoundIter == this->loadedSoundBuffers.end();
+//
+//	if (needToReadFromFile) {
+//		// Create the sound buffer in OpenAL..
+//		int dataLength = 0;
+//		char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
+//		if (soundMemData == NULL) {
+//			return false;
+//		}
+//
+//		soundBufferID = alutCreateBufferFromFileImage(soundMemData, dataLength);
+//		delete[] soundMemData;
+//		soundMemData = NULL;
+//
+//		if (soundBufferID == 0) {
+//			return false;
+//		}
+//
+//		// Insert into the list of sound buffer resources for future lookup
+//		this->loadedSoundBuffers.insert(std::make_pair(filepath, soundBufferID));
+//	}
+//	else {
+//		// Sound was already loaded, just grab and set the identifier for the sound buffer
+//		soundBufferID = loadedSoundIter->second;
+//	}
+//
+//	return true;
+//}
 
 /**
  * Release the given OpenAL sound buffer ID from the resources stored in the resource
  * manager.
  * Returns: true if the resource was found and removed, false otherwise.
  */
-bool ResourceManager::ReleaseSoundResource(ALuint soundBufferID) {
-
-	// Find the sound buffer resource
-	std::map<std::string, ALuint>::iterator soundResourceIter = this->loadedSoundBuffers.begin();
-	for (; soundResourceIter != this->loadedSoundBuffers.end(); ++soundResourceIter) {
-		if (soundResourceIter->second == soundBufferID) {
-			break;
-		}
-	}
-
-	if (soundResourceIter == this->loadedSoundBuffers.end()) {
-		return false;
-	}
-	else {
-		assert(soundResourceIter->second == soundBufferID);
-		alDeleteBuffers(1, &soundBufferID);
-		this->loadedSoundBuffers.erase(soundResourceIter);
-	}
-
-	return true;
-}
+//bool ResourceManager::ReleaseSoundResource(ALuint soundBufferID) {
+//
+//	// Find the sound buffer resource
+//	std::map<std::string, ALuint>::iterator soundResourceIter = this->loadedSoundBuffers.begin();
+//	for (; soundResourceIter != this->loadedSoundBuffers.end(); ++soundResourceIter) {
+//		if (soundResourceIter->second == soundBufferID) {
+//			break;
+//		}
+//	}
+//
+//	if (soundResourceIter == this->loadedSoundBuffers.end()) {
+//		return false;
+//	}
+//	else {
+//		assert(soundResourceIter->second == soundBufferID);
+//		alDeleteBuffers(1, &soundBufferID);
+//		this->loadedSoundBuffers.erase(soundResourceIter);
+//	}
+//
+//	return true;
+//}
 
 /**
  * Read the initialization configuration options in from the .ini file off disk

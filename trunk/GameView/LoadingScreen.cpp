@@ -85,6 +85,37 @@ void LoadingScreen::InitOpenGLForLoadingScreen() {
 	debug_opengl_state();
 }
 
+void LoadingScreen::RenderLoadingScreen() {
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	
+	// Initialize basic OpenGL state
+	LoadingScreen::InitOpenGLForLoadingScreen();
+	this->itemLoadingLabel.SetTopLeftCorner(Point2D((this->width - this->itemLoadingLabel.GetLastRasterWidth()) / 2.0f, (this->height + LOADING_BAR_HEIGHT) / 2 + this->itemLoadingLabel.GetHeight() + GAP_PIXELS/2));
+
+	// Bind the FBO so we draw the loading screen into it
+	this->loadingScreenFBO->BindFBObj();
+
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	// Draw the loading/progress bar
+	this->DrawLoadingBar();
+
+	// Draw labels for loading screen
+	this->loadingLabel.Draw();
+	this->itemLoadingLabel.Draw();
+
+	// Unbind the FBO, add bloom and draw it as a texture on a full screen quad
+	this->loadingScreenFBO->UnbindFBObj();
+	this->bloomEffect->Draw(width, height, 0.0f);
+	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
+
+	SDL_GL_SwapBuffers();
+
+	glPopAttrib();
+	debug_opengl_state();
+}
+
 void LoadingScreen::SetupFullscreenEffect(int width, int height) {
 	// Setup the FBO for the loading screen
 	if (this->loadingScreenFBO != NULL) {
@@ -170,44 +201,18 @@ void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
 		this->lastRandomAbsurdity = (this->lastRandomAbsurdity + 1) % this->absurdLoadingDescriptions.size();
 	}
 
-	// Increment the counter of updates and make sure we are under what is expected
-	this->numCallsToUpdate++;
-	assert(this->numCallsToUpdate <= this->numExpectedUpdates);
-
+	// Set the loading text label
 	ESPInterval randColourR(0.25f, 0.8f);
 	ESPInterval randColourG(0.25f, 0.8f);
 	ESPInterval randColourB(0.25f, 0.8f);
 	this->itemLoadingLabel.SetColour(Colour(randColourR.RandomValueInInterval(), randColourG.RandomValueInInterval(), randColourB.RandomValueInInterval()));
 	this->itemLoadingLabel.SetText(loadingStr);
 
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	
-	// Initialize basic OpenGL state
-	LoadingScreen::InitOpenGLForLoadingScreen();
-	this->itemLoadingLabel.SetTopLeftCorner(Point2D((this->width - this->itemLoadingLabel.GetLastRasterWidth()) / 2.0f, (this->height + LOADING_BAR_HEIGHT) / 2 + this->itemLoadingLabel.GetHeight() + GAP_PIXELS/2));
+	// Increment the counter of updates and make sure we are under what is expected
+	this->numCallsToUpdate++;
+	assert(this->numCallsToUpdate <= this->numExpectedUpdates);
 
-	// Bind the FBO so we draw the loading screen into it
-	this->loadingScreenFBO->BindFBObj();
-
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	// Draw the loading/progress bar
-	this->DrawLoadingBar();
-
-	// Draw labels for loading screen
-	this->loadingLabel.Draw();
-	this->itemLoadingLabel.Draw();
-
-	// Unbind the FBO, add bloom and draw it as a texture on a full screen quad
-	this->loadingScreenFBO->UnbindFBObj();
-	this->bloomEffect->Draw(width, height, 0.0f);
-	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
-
-	SDL_GL_SwapBuffers();
-
-	glPopAttrib();
-	debug_opengl_state();
+	this->RenderLoadingScreen();
 }
 
 /**
@@ -221,17 +226,21 @@ void LoadingScreen::EndShowingLoadingScreen() {
 		return; 
 	}
 
+	// Re-render the last update...
+	this->RenderLoadingScreen();
 
 	this->loadingScreenOn = false;
 	this->numCallsToUpdate = 0;
 	this->numExpectedUpdates = 0;
-
 }
 
 /**
  * Private helper function for drawing the loading bar for the loading screen.
  */
 void LoadingScreen::DrawLoadingBar() {
+	if (!this->loadingScreenOn) { 
+		return; 
+	}
 	// Figure out what estimated percentage of loading is complete and fill the bar based on that percentage
 	float percentageDone			= std::min<float>(1.0f, static_cast<float>(this->numCallsToUpdate) / static_cast<float>(this->numExpectedUpdates));
 	float lengthOfLoadingBar	= percentageDone * LOADING_BAR_WIDTH;

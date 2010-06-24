@@ -12,6 +12,30 @@ class CgFxBloom;
  * the game.
  */
 class LoadingScreen {
+public:
+	static const std::string ABSURD_LOADING_DESCRIPTION;
+
+	std::vector<std::string> absurdLoadingDescriptions;
+
+	// Obtain the singleton
+	static LoadingScreen* GetInstance() {
+		if (LoadingScreen::instance == NULL) {
+			LoadingScreen::instance = new LoadingScreen();
+		}
+		return LoadingScreen::instance;
+	}
+	
+	// Delete the singleton
+	static void DeleteInstance() {
+		if (LoadingScreen::instance != NULL) {
+			delete LoadingScreen::instance;
+			LoadingScreen::instance = NULL;
+		}
+	}
+
+	void StartShowLoadingScreen(int width, int height, unsigned int numExpectedUpdates);
+	void UpdateLoadingScreen(std::string loadingStr);
+	void EndShowingLoadingScreen();
 
 private:
 	static LoadingScreen* instance;
@@ -41,32 +65,8 @@ private:
 
 	inline static void InitOpenGLForLoadingScreen();
 	
+	void RenderLoadingScreen();
 	void SetupFullscreenEffect(int width, int height);
-	void DrawLoadingBar();
-
-public:
-	static const std::string ABSURD_LOADING_DESCRIPTION;
-
-	std::vector<std::string> absurdLoadingDescriptions;
-
-	// Obtain the singleton
-	static LoadingScreen* GetInstance() {
-		if (LoadingScreen::instance == NULL) {
-			LoadingScreen::instance = new LoadingScreen();
-		}
-		return LoadingScreen::instance;
-	}
-	
-	// Delete the singleton
-	static void DeleteInstance() {
-		if (LoadingScreen::instance != NULL) {
-			delete LoadingScreen::instance;
-			LoadingScreen::instance = NULL;
-		}
-	}
-
-	void StartShowLoadingScreen(int width, int height, unsigned int numExpectedUpdates);
-	void UpdateLoadingScreen(std::string loadingStr);
-	void EndShowingLoadingScreen();
+	void DrawLoadingBar();	
 };
 #endif

@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib EFX-Util.lib OpenAL32.lib alut.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib"
+				AdditionalDependencies="SDLmain.lib SDL_mixer.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrt.lib"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib cg.lib cgGL.lib DevIL.lib EFX-Util.lib OpenAL32.lib alut.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib"
+				AdditionalDependencies="SDLmain.lib SDL_mixer.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				IgnoreDefaultLibraryNames="libc.lib"
@@ -1699,7 +1699,7 @@
 				Name="Header Files"
 				>
 				<File
-					RelativePath=".\GameSound\GameSound.h"
+					RelativePath=".\GameSound\EventSound.h"
 					>
 				</File>
 				<File
@@ -1711,6 +1711,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameSound\MusicSound.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\Sound.h"
 					>
 				</File>
@@ -1719,7 +1723,7 @@
 				Name="Source Files"
 				>
 				<File
-					RelativePath=".\GameSound\GameSound.cpp"
+					RelativePath=".\GameSound\EventSound.cpp"
 					>
 				</File>
 				<File

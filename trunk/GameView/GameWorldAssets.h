@@ -58,6 +58,8 @@ public:
 		this->skybox->Draw(camera);
 	}
 
+	virtual GameWorld::WorldStyle GetStyle() const = 0;
+
 	virtual void DrawBackgroundEffects(const Camera& camera) = 0;
 	virtual void DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight) = 0;
 	virtual void FadeBackground(bool fadeout, float fadeTime) = 0;
