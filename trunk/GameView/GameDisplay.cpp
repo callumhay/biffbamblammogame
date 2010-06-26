@@ -20,13 +20,11 @@ bool GameDisplay::detachedCamera					= false;
 const int GameDisplay::MAX_FRAMERATE						= 500;
 const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMERATE;
 
-GameDisplay::GameDisplay(GameModel* model, GameSoundAssets* sounds, int initWidth, int initHeight): 
-gameListener(NULL), currState(NULL), sounds(sounds),
-model(model), assets(new GameAssets(initWidth, initHeight)), 
+GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): 
+gameListener(NULL), currState(NULL), model(model), assets(new GameAssets(initWidth, initHeight)), 
 gameExited(false), gameReinitialized(false), 
 gameCamera(initWidth, initHeight) {
 	assert(model != NULL);
-	assert(sounds != NULL);
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));

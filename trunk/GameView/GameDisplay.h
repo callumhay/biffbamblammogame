@@ -19,7 +19,6 @@ private:
 
 	DisplayState* currState;
 	GameModel* model;
-	GameSoundAssets* sounds;
 	GameAssets* assets;
 	GameEventsListener* gameListener;
 	
@@ -43,7 +42,7 @@ public:
 	static const int MAX_FRAMERATE;							// The maximum framerate possible for the game				
 	static const unsigned long FRAME_SLEEP_MS;	// Time to sleep between frames (determined by MAX_FRAMERATE)
 
-	GameDisplay(GameModel* model, GameSoundAssets* sounds, int initWidth, int initHeight);
+	GameDisplay(GameModel* model, int initWidth, int initHeight);
 	~GameDisplay();
 
 	bool HasGameExited() const { return this->gameExited; }
@@ -71,9 +70,7 @@ public:
 	GameAssets* GetAssets() {
 		return this->assets;
 	}
-	GameSoundAssets* GetSounds() {
-		return this->sounds;
-	}
+
 	GameModel* GetModel() {
 		return this->model;
 	}

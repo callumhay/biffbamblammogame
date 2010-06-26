@@ -30,7 +30,7 @@ private:
 	static const char* FADE_OUT_KEYWORD;
 
 	// Sound string identifiers
-	static const char* MAIN_MENU_BG_MASK;
+	static const char* MAIN_MENU_BG_MUSIC;
 	static const char* MAIN_MENU_BG_BANG_SMALL_EVENT;
 	static const char* MAIN_MENU_BG_BANG_MEDIUM_EVENT;
 	static const char* MAIN_MENU_BG_BANG_BIG_EVENT;

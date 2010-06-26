@@ -206,13 +206,11 @@ int main(int argc, char *argv[]) {
 
 		// Create the MVC while showing the loading screen...
 		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 6);
-
-		LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
-		sound = new GameSoundAssets();
-		sound->SetGameVolume(initCfgOptions.GetVolume());
+		// Set the volume from the initial configuration options...
+		GameSoundAssets::SetGameVolume(initCfgOptions.GetVolume());
 
 		model = new GameModel();
-		display = new GameDisplay(model, sound, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
+		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
 		controller = new GameController(model, display);
 
 		LoadingScreen::GetInstance()->EndShowingLoadingScreen();

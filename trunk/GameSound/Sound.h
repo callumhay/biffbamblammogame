@@ -18,7 +18,7 @@ public:
 		
 	// Whether or not this sound is valid
 	// Returns: true if valid, false otherwise.
-	virtual bool IsValid() const = 0;
+	virtual bool IsValid() const;
 	// Plays the sound
 	virtual void Play(bool doFadeIn) = 0;
 	// Pauses/Unpauses the sound
@@ -33,16 +33,23 @@ public:
 	// Whether this sound loops indefintely
 	virtual bool IsLooped() const = 0;
 
-	//void Tick(double dT) {};
-
 	std::string GetSoundName() const { return this->soundName; }
 
 protected:
-	Sound(const std::string& name);
+	Sound(const std::string& name, int msFadein, int msFadeout);
 
 	static const int INVALID_SDL_CHANNEL;	// Invalid value for a channel
 
 	std::string soundName;
+	int msFadein;		// Millisecond fade in when playing this sound
+	int msFadeout;	// Millisecond fade out when playing this sound
 };
+
+inline bool Sound::IsValid() const {
+	if (this->msFadein < 0 || this->msFadeout < 0) {
+		return false;
+	}
+	return true;
+}
 
 #endif

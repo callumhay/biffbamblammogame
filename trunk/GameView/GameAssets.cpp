@@ -47,6 +47,7 @@ espAssets(NULL),
 itemAssets(NULL),
 fboAssets(NULL),
 lightAssets(NULL),
+soundAssets(NULL),
 
 lifeHUD(NULL),
 crosshairHUD(NULL),
@@ -76,6 +77,11 @@ ghostBallEffect(NULL)
 	this->itemAssets = new GameItemAssets(this->espAssets);
 	bool didItemAssetsLoad = this->itemAssets->LoadItemAssets();
 	assert(didItemAssetsLoad);
+
+	// Load basic default in-memory sounds
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading melodic tunage...");
+	this->soundAssets = new GameSoundAssets();
+	this->soundAssets->LoadSoundPallet(GameSoundAssets::MainMenuSoundPallet);
 
 	// Load all fonts
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading fonts...");
@@ -142,6 +148,10 @@ GameAssets::~GameAssets() {
 	// Clear up the light assets
 	delete this->lightAssets;
 	this->lightAssets = NULL;
+
+	// Clean up sound assets
+	delete this->soundAssets;
+	this->soundAssets = NULL;
 
 	// Delete any HUD objects
 	delete this->lifeHUD;
@@ -888,9 +898,12 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 		delete this->worldAssets;
 		this->worldAssets = NULL;
 
-		// Load up the new set of assets
+		// Load up the new set of world geometry assets
 		this->worldAssets = GameWorldAssets::CreateWorldAssets(world->GetStyle());
 		assert(this->worldAssets != NULL);
+
+		// ... and sound assets
+		//this->soundAssets->LoadSoundPallet(GameSoundAssets::GetSoundPalletFromWorldStyle(world->GetStyle()));
 	}
 
 	// Load all of the level meshes for the world

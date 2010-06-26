@@ -1,4 +1,4 @@
-MainMenuBackgroundMask {
+MainMenuBackgroundMusic {
    file     = (5: main_menu/BGpiano.wav)
    fadein   = 1000;
    fadeout  = 1000;

@@ -28,6 +28,7 @@
 #include "GameItemAssets.h"
 #include "GameFBOAssets.h"
 #include "GameLightAssets.h"
+#include "../GameSound/GameSoundAssets.h"
 
 class GameModel;
 class Texture3D;
@@ -52,6 +53,7 @@ private:
 	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
 	GameFBOAssets* fboAssets;			// Framebuffer Object related assets
 	GameLightAssets* lightAssets; // Light assets in the foreground and background
+	GameSoundAssets* soundAssets; // Sound assets for everything
 
 	LivesLeftHUD* lifeHUD;
 	CrosshairLaserHUD* crosshairHUD;
@@ -143,6 +145,10 @@ public:
 
 	GameFBOAssets* GetFBOAssets() {
 		return this->fboAssets;
+	}
+
+	GameSoundAssets* GetSoundAssets() {
+		return this->soundAssets;
 	}
 
 	LivesLeftHUD* GetLifeHUD() const {

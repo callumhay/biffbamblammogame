@@ -50,7 +50,6 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 
 	LoadingScreen::GetInstance()->StartShowLoadingScreen(camera.GetWindowWidth(), camera.GetWindowHeight(), numLevelsInWorld + 1);
 	this->display->GetAssets()->LoadWorldAssets(&world);
-	this->display->GetSounds()->LoadWorldSounds(world.GetStyle());
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 }
 

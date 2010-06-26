@@ -2,6 +2,7 @@
 #include "GameSoundAssets.h"
 #include "Sound.h"
 #include "EventSound.h"
+#include "MusicSound.h"
 
 #include "../ResourceManager.h"
 #include "../GameView/GameViewConstants.h"
@@ -20,8 +21,7 @@ const char* MSFReader::LOOPS_KEYWORD			= "loops";
 const char* MSFReader::FADE_IN_KEYWORD		= "fadein";
 const char* MSFReader::FADE_OUT_KEYWORD		= "fadeout";
 
-const char* MSFReader::MAIN_MENU_BG_MASK										= "MainMenuBackgroundMask";
-
+const char* MSFReader::MAIN_MENU_BG_MUSIC										= "MainMenuBackgroundMusic";
 const char* MSFReader::MAIN_MENU_ITEM_HIGHLIGHTED_EVENT			= "MainMenuItemHighlightedEvent";
 const char* MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT				= "MainMenuBackgroundBangSmallEvent";
 const char* MSFReader::MAIN_MENU_BG_BANG_MEDIUM_EVENT				= "MainMenuBackgroundBangMediumEvent";
@@ -123,7 +123,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 					newGameSound = EventSound::BuildSoundEvent(lastSoundType, loops, fadein, fadeout, probabilities, soundFilePaths);
 					break;
 				case Sound::MusicSound:
-					assert(false);
+					newGameSound = MusicSound::BuildMusicSound(lastSoundType, soundFilePaths.front(), fadein, fadeout);
 					break;
 				default:
 					assert(false);
@@ -292,8 +292,16 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 				// Sound definition block has not been opened yet, look for an identifier...
 				soundAsset = MSFReader::ConvertKeywordToSoundType(currReadStr);
 				lastSoundType = currReadStr;
-				if (soundAsset != MSFReader::INVALID_SOUND_TYPE && GameSoundAssets::IsSoundMask(soundAsset)) {
+				if (soundAsset == MSFReader::INVALID_SOUND_TYPE){
+					error = true;
+					errorStr = "Invalid sound type.";
+					continue;
+				}
+				else if (GameSoundAssets::IsMaskSound(soundAsset)) {
 					soundType = Sound::MaskSound;
+				}
+				else if (GameSoundAssets::IsMusicSound(soundAsset)) {
+					soundType = Sound::MusicSound;
 				}
 				else {
 					soundType = Sound::EventSound;
@@ -322,8 +330,8 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
  * for the various game sounds.
  */
 int MSFReader::ConvertKeywordToSoundType(const std::string& soundName) {
-	if (soundName == MSFReader::MAIN_MENU_BG_MASK) {
-		return GameSoundAssets::MainMenuBackgroundMask;
+	if (soundName == MSFReader::MAIN_MENU_BG_MUSIC) {
+		return GameSoundAssets::MainMenuBackgroundMusic;
 	}
 	else if (soundName == MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT) {
 		return GameSoundAssets::MainMenuBackgroundBangSmallEvent;

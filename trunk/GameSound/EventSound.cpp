@@ -5,7 +5,7 @@ const int EventSound::DEFAULT_FADEIN = 0;
 const int EventSound::DEFAULT_FADEOUT = 0;
 
 EventSound::EventSound(const std::string& name, int loops, int msFadein, int msFadeout) :
-Sound(name), numLoops(loops), msFadein(msFadein), msFadeout(msFadeout), 
+Sound(name, msFadein, msFadeout), numLoops(loops),
 playingSoundChunk(NULL), channel(Sound::INVALID_SDL_CHANNEL) {
 }
 
@@ -61,7 +61,7 @@ EventSound* EventSound::BuildSoundEvent(const std::string& name, int loops, int 
 #ifdef _DEBUG
 		soundChunk = Mix_LoadWAV(currFilepath.c_str());
 #else
-		bool success = ResourceManager::GetInstance()->GetSoundResourceBuffer(filepath, this->playingSoundChunk);
+		bool success = ResourceManager::GetInstance()->GetSoundResourceBuffer(filepath, soundChunk);
 #endif
 		if (soundChunk == NULL) {
 			debug_output("Failed to load sound: " << currFilepath);
