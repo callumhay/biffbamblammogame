@@ -68,8 +68,6 @@ protected:
 																					// event then they will be in this list
 
 	int numLoops;		// The number of loops for this event/mask sound
-	int msFadein;		// Millisecond fade in when playing this sound
-	int msFadeout;	// Millisecond fade out when playing this sound
 	
 };
 
@@ -83,13 +81,13 @@ inline Sound::SoundType EventSound::GetType() const {
 }
 
 inline bool EventSound::IsValid() const {
+	if (!Sound::IsValid()) {
+		return false;
+	}
 	if (this->sounds.empty()) {
 		return false;
 	}
 	if (this->numLoops != -1 && this->numLoops <= 0) {
-		return false;
-	}
-	if (this->msFadein < 0 || this->msFadeout < 0) {
 		return false;
 	}
 
@@ -137,20 +135,10 @@ inline void EventSound::UnPause() {
 inline void EventSound::Stop(bool doFadeout) {
 	assert(this->IsValid());
 	
-	// If the sound is not playing then just exit
-	if (this->playingSoundChunk == NULL) {
-		return;
-	}
-
 	// Check to see if the sound is still playing on the channel
-	Mix_Chunk* playingSDLChunk = Mix_GetChunk(this->channel);
-	if (playingSDLChunk == this->playingSoundChunk && Mix_Playing(this->channel)) {
-		if (doFadeout) {
-			Mix_FadeOutChannel(this->channel, this->msFadeout);
-		}
-		else {
-			Mix_HaltChannel(this->channel);
-		}
+	if (this->IsPlaying()) {
+		int fadeoutAmt = doFadeout ? this->msFadeout : 0;
+		Mix_FadeOutChannel(this->channel, fadeoutAmt);
 	}
 
 	// Sound event has finished playing
@@ -159,7 +147,8 @@ inline void EventSound::Stop(bool doFadeout) {
 }
 
 inline bool EventSound::IsPlaying() const {
-	return (this->playingSoundChunk != NULL && Mix_Playing(this->channel));
+	Mix_Chunk* playingSDLChunk = Mix_GetChunk(this->channel);
+	return (this->playingSoundChunk != NULL && Mix_Playing(this->channel) && playingSDLChunk == this->playingSoundChunk);
 }
 
 inline bool EventSound::IsPaused() const {

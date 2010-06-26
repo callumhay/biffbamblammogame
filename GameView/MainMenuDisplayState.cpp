@@ -93,9 +93,9 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 	this->SetupBloomEffect();
 
 	// Load all the sound assets associated with the main menu
-	GameSoundAssets* soundAssets = this->display->GetSounds();
-	soundAssets->LoadMainMenuSounds();
-	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuBackgroundMask);
+	GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+	soundAssets->LoadSoundPallet(GameSoundAssets::MainMenuSoundPallet);
+	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuBackgroundMusic);
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
@@ -397,8 +397,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	if (this->changeToPlayGameState && finishFadeAnim) {
 		
 		// Turn off all the sounds first (waiting for any unfinished sounds), then switch states
-		GameSoundAssets* soundAssets = this->display->GetSounds();
-		//soundAssets->UnloadMainMenuSounds(true);
+		GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
 		soundAssets->StopAllSounds();
 
 		this->display->SetCurrentState(new StartGameDisplayState(this->display));
@@ -668,7 +667,7 @@ void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
 
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	// Play the sound effect assoicated with menu item highlighting
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemHighlightedEvent);
 }
 
@@ -677,7 +676,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(in
  */
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {
 	// Play the sound effect assoicated with menu item selection/activation
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	
 	// Do the actual selection of the item
 	if (itemIndex == this->mainMenuState->newGameMenuItemIndex) {
@@ -711,7 +710,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemVerifiedEvent(int i
 		
 		// Play the sound effect associated with menu item selection/activation
 		// NOT WORKING PROPERLY...
-		GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+		GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 		soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemVerifyAndSelectEvent);
 
 		// We exit the game if the exit game item has both been activated and verified...
@@ -733,7 +732,7 @@ void MainMenuDisplayState::MainMenuEventHandler::EscMenu() {
 
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	// Play the sound effect assoicated with menu item highlighting
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemHighlightedEvent);
 }
 
@@ -752,7 +751,7 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemActivatedEven
 				itemIndex == this->mainMenuState->optionsResolutionIndex ||
 				itemIndex == this->mainMenuState->optionsVSyncIndex) {
 			// Play the entered sound if it's an enterable item...
-			GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+			GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 			soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemEnteredEvent);
 		}
 	}
@@ -810,7 +809,7 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 		this->mainMenuState->cfgOptions.SetVolume(volumeLevel);
 		
 		// Set the actual volume...
-		GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+		GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 		soundAssets->SetGameVolume(volumeLevel);
 	}
 	else {
@@ -835,19 +834,19 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::EscMenu() {
 
 void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemScrolled() {
 	// Play the scroll sound...
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemScrolledEvent);
 }
 
 void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemEnteredAndSet() {
 	// Play the verification sound...
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemVerifyAndSelectEvent);
 }
 
 void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemCancelled() {
 	// Play the cancel/back sound..
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemBackAndCancelEvent);
 }
 
@@ -859,7 +858,7 @@ void MainMenuDisplayState::BangParticleEventHandler::ParticleSpawnedEvent(const 
 	assert(soundParticle != NULL);
 
 	// Based on the extremeness of the onomata particle just spawned, we signify a sound event
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetSounds();
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	switch (soundParticle->GetSoundExtremeness()) {
 
 		// Small bang event...

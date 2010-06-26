@@ -1735,6 +1735,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameSound\MusicSound.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\GameSound\Sound.cpp"
 					>
 				</File>

@@ -3,6 +3,11 @@
 
 #include "Sound.h"
 
+#include "../GameModel/GameWorld.h"
+
+class MusicSound;
+class EventSound;
+
 /**
  * Holder of all the sound assets for the Biff Bam Blammo game. This class is
  * responsible for managing, playing, stopping, ticking, etc. all the sounds
@@ -13,13 +18,12 @@ class GameSoundAssets {
 public:
 	static const int MAX_MIX_GAME_SOUNDS;
 
-	// Per-World Event and Mask Sounds
-	enum WorldSound { TODO };
-	
-	// Main Menu Event and Mask Sounds
+	enum SoundPallet { MainMenuSoundPallet, DecoWorldSoundPallet };
+
+	// Main Menu Event, Mask and Music Sounds
 	enum MainMenuSound { 
 		// Masks
-		MainMenuBackgroundMask = 0,
+		MainMenuBackgroundMusic = 0,
 		// Events
 		MainMenuBackgroundBangSmallEvent,
 		MainMenuBackgroundBangMediumEvent,
@@ -31,40 +35,36 @@ public:
 		MainMenuItemScrolledEvent 
 	};
 
-
 	GameSoundAssets();
 	~GameSoundAssets();
 
-	void SetGameVolume(int volumeLvl);
+	static void SetGameVolume(int volumeLvl);
 
-	// Sound loader and unloaders
-	void LoadWorldSounds(int worldStyle);
-	void UnloadWorldSounds();
-	
+
+	void LoadSoundPallet(GameSoundAssets::SoundPallet pallet);
+	void UnloadSoundPallet(GameSoundAssets::SoundPallet pallet);
 	void StopAllSounds();
 
-	void LoadMainMenuSounds();
-	void UnloadMainMenuSounds(bool waitForFinish);
 	void PlayMainMenuSound(GameSoundAssets::MainMenuSound sound);
 	void StopMainMenuSound(GameSoundAssets::MainMenuSound sound);
 
 
-	static bool IsSoundMask(int soundType);
+	static bool IsMaskSound(int soundType);
+	static bool IsMusicSound(int soundType);
+	static GameSoundAssets::SoundPallet GetSoundPalletFromWorldStyle(GameWorld::WorldStyle style);
 
 private:
-	// World sound effect variables - indexed using Sound::WorldSound enum
-	std::map<int, Sound*> worldSounds;
+	std::map<GameSoundAssets::SoundPallet, std::map<int, EventSound*>> loadedEventSounds;
+	std::map<GameSoundAssets::SoundPallet, MusicSound*> loadedMusicSounds;
 
-	// Main Menu sound effect variables - indexed using Sound::MaainMenuSound enum
-	std::map<int, Sound*> mainMenuSounds;
+	MusicSound* activeMusic;						// Currently playing music
+	std::list<EventSound*> activeMasks;	// Currently playing mask (looping) sounds
 
-	// Active sound variables - these hold sounds that are currently active (e.g., being played) in the game
-	std::list<Sound*> activeSounds;
+	void LoadMainMenuSounds();
+	void UnloadMainMenuSounds();
 
-	void LoadGlobalSounds();
-	void UnloadGlobalSounds();
-
-	static Sound* FindSound(std::map<int, Sound*>& soundMap, int soundID);
+	EventSound* FindEventSound(GameSoundAssets::SoundPallet pallet, int soundType) const;
+	MusicSound* FindMusicSound(GameSoundAssets::SoundPallet pallet) const;
 
 };
 #endif // _GAMESOUNDASSETS_H_
