@@ -1,0 +1,42 @@
+Purpose:
+The purpose of this document is to outline how music will be defined in a file outside of the BiffBamBlammo game so that it can be read in dynamically at run-time. This will offer more flexibility of playing around with sounds linked to various events and masks. 
+
+Definitions:
+Event: An instantaneous happening while the game is playing. Any sound linked to an event will not loop 'infinitely' - it will only play once or some finite number of times.
+Mask:  A on-going happening, it may be triggered by an event or it may simply be always on. Masks must have the ability to loop over and over again, since they will continue to loop as long as the mask is active. The distinction between an event and a mask is mostly out of respect to the difference that a mask's play length / number of loops is entirely determined by the game and is not specified by Music Definition Files.
+Music: A continuously looping sound for some level/menu-screen/place-in-the-game that never turns off (until the next screen/level/etc.). There can only be one piece of music playing at any given time.
+
+
+Sound definition blocks
+There are music definition blocks for both events and masks. These define the music that will be used for the event/mask and any variable values associated with the event/mask. Each variable will need to be within the scope (i.e., { ... }) of the event/mask and must be defined on its own, separate line. All extraneous whitespace is ignored.
+
+Event Definition Block:
+
+[ignore] <event_name> {
+    file     = (<prob_num_1> : <relative_filepath_1>) (<prob_num_2> : <relative_filepath_2>) ... (<prob_num_n> : <relative_filepath_n>)
+    loops    = <number_of_loops>
+    fadein   = <fade_in_time_in_milliseconds>
+    fadeout  = <fade_out_time_in_milliseconds>
+}
+
+Mask Definition Block:
+
+[ignore] <mask_name> {
+    file     = <relative_filepath>
+    fadein   = <fade_in_time_in_milliseconds>
+    fadeout  = <fade_out_time_in_milliseconds>
+
+}
+
+Music Definition Block:
+
+[ignore] <music_name> {
+    file     = <relative_filepath>
+    fadein   = <fade_in_time_in_milliseconds>
+    fadeout  = <fade_out_time_in_milliseconds
+
+}
+
+
+
+

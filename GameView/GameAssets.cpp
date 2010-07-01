@@ -902,8 +902,12 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 		this->worldAssets = GameWorldAssets::CreateWorldAssets(world->GetStyle());
 		assert(this->worldAssets != NULL);
 
-		// ... and sound assets
-		//this->soundAssets->LoadSoundPallet(GameSoundAssets::GetSoundPalletFromWorldStyle(world->GetStyle()));
+		// Unload any previous world's sound assets and load the new world sound assets
+		this->soundAssets->SetActiveWorldSounds(world->GetStyle(), true, true);
+	}
+	else {
+		// Make sure the sound and world assets are in sync
+		assert(this->soundAssets->GetActiveWorldSounds() == world->GetStyle());
 	}
 
 	// Load all of the level meshes for the world

@@ -97,10 +97,8 @@ inline bool EventSound::IsValid() const {
 inline void EventSound::Play(bool doFadeIn) {
 	assert(this->IsValid());
 
-	// Stop playing any previous sound if the sound is meant to be looped
-	if (this->IsLooped()) {
-		this->Stop(false);
-	}
+	// Stop playing any previous sound
+	this->Stop(false);
 
 	// We determine which sound to play based on their probabilities and a randomly generated number
 	double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();
@@ -111,12 +109,17 @@ inline void EventSound::Play(bool doFadeIn) {
 			
 			this->playingSoundChunk = currSoundProbPair.GetSoundChunk();
 			int fadeInAmt = doFadeIn ? this->msFadein : 0;
-			this->channel = Mix_FadeInChannel(-1, this->playingSoundChunk, this->numLoops, fadeInAmt);
+			int loops = -1;
+			if (this->numLoops > 0) {
+				loops = this->numLoops - 1;
+			}
+			int result = Mix_FadeInChannel(-1, this->playingSoundChunk, loops, fadeInAmt);
+			if (result != -1) {
+				this->channel = result;
+			}
 			break;
 		}
-
 	}
-
 }
 
 inline void EventSound::Pause() {
@@ -137,18 +140,18 @@ inline void EventSound::Stop(bool doFadeout) {
 	
 	// Check to see if the sound is still playing on the channel
 	if (this->IsPlaying()) {
+		assert(this->channel != -1);
 		int fadeoutAmt = doFadeout ? this->msFadeout : 0;
 		Mix_FadeOutChannel(this->channel, fadeoutAmt);
 	}
 
 	// Sound event has finished playing
-	this->channel = Sound::INVALID_SDL_CHANNEL;
 	this->playingSoundChunk = NULL;
 }
 
 inline bool EventSound::IsPlaying() const {
 	Mix_Chunk* playingSDLChunk = Mix_GetChunk(this->channel);
-	return (this->playingSoundChunk != NULL && Mix_Playing(this->channel) && playingSDLChunk == this->playingSoundChunk);
+	return Mix_Playing(this->channel) || (this->playingSoundChunk != NULL && playingSDLChunk == this->playingSoundChunk);
 }
 
 inline bool EventSound::IsPaused() const {

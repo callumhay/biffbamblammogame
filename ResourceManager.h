@@ -40,8 +40,13 @@ private:
 	std::map<CGeffect, std::map<std::string, CGtechnique> > loadedEffectTechniques;	// Techniques associated with each effect
 	std::map<CGeffect, unsigned int> numRefPerEffect;																// Number of references per effect
 
-	// OpenAL loaded sound buffers from file
-	//std::map<std::string, ALuint> loadedSoundBuffers;
+	// SDL Mixer loaded sounds
+	std::map<std::string, Mix_Chunk*> loadedEventSounds;
+	std::map<Mix_Chunk*, int> numReservedEventSounds;
+	std::map<std::string, Mix_Music*> loadedMusicSounds;
+	std::map<Mix_Music*, SDL_RWops*> musicSDLMemory;
+	std::map<Mix_Music*, char*> musicBuffers;
+	std::map<Mix_Music*, int> numReservedMusicSounds;
 
 	static ConfigOptions* configOptions;	// The configuration options read from the game's ini file
 
@@ -87,8 +92,10 @@ public:
 	bool ReleaseCgFxEffectResource(CGeffect &effect);
 
 	// Sound Resource Functions
-	//bool GetSoundResourceBuffer(const std::string &filepath, ALuint& soundBufferID);
-	//bool ReleaseSoundResource(ALuint soundBufferID);
+	Mix_Chunk* GetEventSoundResource(const std::string &filepath);
+	Mix_Music* GetMusicSoundResource(const std::string &filepath);
+	bool ReleaseEventSoundResource(Mix_Chunk* sound);
+	bool ReleaseMusicSoundResource(Mix_Music* music);
 
 	// Initialization configuration loading
 	static ConfigOptions ReadConfigurationOptions(bool forceReadFromFile);

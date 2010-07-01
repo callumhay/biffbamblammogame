@@ -1,4 +1,5 @@
 #include "EventSound.h"
+#include "../ResourceManager.h"
 
 const int EventSound::DEFAULT_LOOPS = 1;
 const int EventSound::DEFAULT_FADEIN = 0;
@@ -22,7 +23,10 @@ EventSound::~EventSound() {
 #ifdef _DEBUG
 		Mix_FreeChunk(soundChunk);
 #else
-		ResourceManager::GetInstance()->ReleaseSoundResource(soundChunk);
+		bool success = ResourceManager::GetInstance()->ReleaseEventSoundResource(soundChunk);
+		if (!success) {
+			std::cerr << "Error releasing event sound " << this->GetSoundName() << std::endl;
+		}
 #endif
 	}
 	this->sounds.clear();
@@ -61,7 +65,7 @@ EventSound* EventSound::BuildSoundEvent(const std::string& name, int loops, int 
 #ifdef _DEBUG
 		soundChunk = Mix_LoadWAV(currFilepath.c_str());
 #else
-		bool success = ResourceManager::GetInstance()->GetSoundResourceBuffer(filepath, soundChunk);
+		soundChunk = ResourceManager::GetInstance()->GetEventSoundResource(currFilepath);
 #endif
 		if (soundChunk == NULL) {
 			debug_output("Failed to load sound: " << currFilepath);
@@ -97,8 +101,9 @@ EventSound* EventSound::BuildSoundMask(const std::string& name, const std::strin
 #ifdef _DEBUG
 	soundChunk = Mix_LoadWAV(filepath.c_str());
 #else
-	bool success = ResourceManager::GetInstance()->GetSoundResourceBuffer(filepath, soundChunk);
+	soundChunk = ResourceManager::GetInstance()->GetEventSoundResource(filepath);
 #endif
+
 	if (soundChunk == NULL) {
 		debug_output("Failed to load sound: " << filepath);
 		assert(false);

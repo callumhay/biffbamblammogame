@@ -3,13 +3,12 @@
 #include "EventSound.h"
 #include "MSFReader.h"
 
-#include "../GameView/GameViewConstants.h"
 
 #include <cassert>
 
 const int GameSoundAssets::MAX_MIX_GAME_SOUNDS = 64;
 
-GameSoundAssets::GameSoundAssets() : activeMusic(NULL) {
+GameSoundAssets::GameSoundAssets() : activeMusic(NULL), activeWorld(GameWorld::None) {
 	int sdlMixerFlags  = MIX_INIT_OGG;
 	int loadedSDLFlags = Mix_Init(sdlMixerFlags);
 	if ((sdlMixerFlags & loadedSDLFlags) != sdlMixerFlags) {
@@ -42,6 +41,8 @@ GameSoundAssets::~GameSoundAssets() {
 		}
 		eventSounds.clear();
 	}
+	this->loadedEventSounds.clear();
+
 	for (std::map<GameSoundAssets::SoundPallet, MusicSound*>::iterator iter = this->loadedMusicSounds.begin();
 		iter != this->loadedMusicSounds.end(); ++iter) {
 		
@@ -73,6 +74,9 @@ void GameSoundAssets::LoadSoundPallet(GameSoundAssets::SoundPallet pallet) {
 		case GameSoundAssets::MainMenuSoundPallet:
 			this->LoadMainMenuSounds();
 			break;
+		case GameSoundAssets::DecoWorldSoundPallet:
+			this->LoadDecoWorldSounds();
+			break;
 		default:
 			assert(false);
 			break;
@@ -83,6 +87,9 @@ void GameSoundAssets::UnloadSoundPallet(GameSoundAssets::SoundPallet pallet) {
 	switch (pallet) {
 		case GameSoundAssets::MainMenuSoundPallet:
 			this->UnloadMainMenuSounds();
+			break;
+		case GameSoundAssets::DecoWorldSoundPallet:
+			this->UnloadDecoWorldSounds();
 			break;
 		default:
 			assert(false);
@@ -118,16 +125,19 @@ void GameSoundAssets::StopAllSounds() {
 	this->activeMasks.clear();
 }
 
-/**
- * Play a sound associated with the main menu of the game. The sound may be an event or mask.
- */
-void GameSoundAssets::PlayMainMenuSound(GameSoundAssets::MainMenuSound sound) {
 
+
+
+
+/**
+ * General version of the play sound * function.
+ */
+void GameSoundAssets::PlaySound(GameSoundAssets::SoundPallet pallet, int sound) {
 	MusicSound* musicFoundSound = NULL;
 	EventSound* eventFoundSound = NULL;
 
 	if (GameSoundAssets::IsMusicSound(sound)) {
-		musicFoundSound = this->FindMusicSound(GameSoundAssets::MainMenuSoundPallet);
+		musicFoundSound = this->FindMusicSound(pallet);
 		if (musicFoundSound == NULL) {
 			return;
 		}
@@ -140,7 +150,7 @@ void GameSoundAssets::PlayMainMenuSound(GameSoundAssets::MainMenuSound sound) {
 		this->activeMusic = musicFoundSound;
 	}
 	else {
-		eventFoundSound = this->FindEventSound(GameSoundAssets::MainMenuSoundPallet, sound);
+		eventFoundSound = this->FindEventSound(pallet, sound);
 		if (eventFoundSound == NULL) {
 			return;
 		}
@@ -151,9 +161,9 @@ void GameSoundAssets::PlayMainMenuSound(GameSoundAssets::MainMenuSound sound) {
 	}
 }
 
-void GameSoundAssets::StopMainMenuSound(GameSoundAssets::MainMenuSound sound) {
+void GameSoundAssets::StopSound(GameSoundAssets::SoundPallet pallet, int sound) {
 	if (GameSoundAssets::IsMusicSound(sound)) {
-		MusicSound* foundMusic = this->FindMusicSound(GameSoundAssets::MainMenuSoundPallet);
+		MusicSound* foundMusic = this->FindMusicSound(pallet);
 		if (foundMusic == NULL) {
 			return;
 		}
@@ -164,7 +174,7 @@ void GameSoundAssets::StopMainMenuSound(GameSoundAssets::MainMenuSound sound) {
 		}
 	}
 	else {
-		EventSound* foundSound = this->FindEventSound(GameSoundAssets::MainMenuSoundPallet, sound);
+		EventSound* foundSound = this->FindEventSound(pallet, sound);
 		if (foundSound == NULL) {
 			return;
 		}
@@ -175,24 +185,22 @@ void GameSoundAssets::StopMainMenuSound(GameSoundAssets::MainMenuSound sound) {
 	}
 }
 
-/**
- * Load the sounds associated with the main menu in the game.
- */
-void GameSoundAssets::LoadMainMenuSounds() {
+
+void GameSoundAssets::LoadSounds(const std::string& filepath, GameSoundAssets::SoundPallet pallet) {
 	// If it's the case that there are still main menu sounds loaded then we don't need to load them again!
 	std::map<GameSoundAssets::SoundPallet, std::map<int, EventSound*>>::iterator findSoundEventIter = 
-		this->loadedEventSounds.find(GameSoundAssets::MainMenuSoundPallet);
+		this->loadedEventSounds.find(pallet);
 	std::map<GameSoundAssets::SoundPallet, MusicSound*>::iterator findMusicEventIter =
-		this->loadedMusicSounds.find(GameSoundAssets::MainMenuSoundPallet);
+		this->loadedMusicSounds.find(pallet);
 	if (findSoundEventIter != this->loadedEventSounds.end()) {
 		//assert(findMusicEventIter != this->loadedMusicSounds.end());
 		return;
 	}
 
 	std::map<int, Sound*> loadedSounds;
-	bool readSuccess = MSFReader::ReadMSF(GameViewConstants::GetInstance()->MAIN_MENU_SOUND_SCRIPT, loadedSounds);
+	bool readSuccess = MSFReader::ReadMSF(filepath, loadedSounds);
 	if (!readSuccess) {
-		std::cerr << "Error reading main menu music script file: " << GameViewConstants::GetInstance()->MAIN_MENU_SOUND_SCRIPT << std::endl;
+		std::cerr << "Error reading main menu music script file: " << filepath << std::endl;
 		return;
 	}
 
@@ -200,7 +208,7 @@ void GameSoundAssets::LoadMainMenuSounds() {
 	assert(findMusicEventIter == this->loadedMusicSounds.end());
 
 	//MusicSound* emptyMusic = NULL;
-	this->loadedEventSounds.insert(std::make_pair(GameSoundAssets::MainMenuSoundPallet, std::map<int, EventSound*>()));
+	this->loadedEventSounds.insert(std::make_pair(pallet, std::map<int, EventSound*>()));
 	//this->loadedMusicSounds.insert(std::make_pair(GameSoundAssets::MainMenuSoundPallet, emptyMusic));
 
 	for (std::map<int, Sound*>::iterator iter = loadedSounds.begin(); iter != loadedSounds.end(); ++iter) {
@@ -215,14 +223,14 @@ void GameSoundAssets::LoadMainMenuSounds() {
 			case Sound::MaskSound: {
 					EventSound* eventSound = dynamic_cast<EventSound*>(currSound);
 					assert(eventSound != NULL);
-					this->loadedEventSounds[GameSoundAssets::MainMenuSoundPallet].insert(std::make_pair(iter->first, eventSound));	
+					this->loadedEventSounds[pallet].insert(std::make_pair(iter->first, eventSound));	
 				}
 				break;
 
 			case Sound::MusicSound: {
 					MusicSound* musicSound = dynamic_cast<MusicSound*>(currSound);
 					assert(musicSound != NULL);
-					this->loadedMusicSounds[GameSoundAssets::MainMenuSoundPallet] = musicSound;
+					this->loadedMusicSounds[pallet] = musicSound;
 				}
 				break;
 
@@ -233,16 +241,12 @@ void GameSoundAssets::LoadMainMenuSounds() {
 	}
 }
 
-/**
- * Unload the sounds associated with the main menu in the game that may have been previously loaded.
- */
-void GameSoundAssets::UnloadMainMenuSounds() {
-
+void GameSoundAssets::UnloadSounds(GameSoundAssets::SoundPallet pallet) {
 	// Check to see if the sounds are even loaded
 	std::map<GameSoundAssets::SoundPallet, std::map<int, EventSound*>>::iterator findSoundEventIter = 
-		this->loadedEventSounds.find(GameSoundAssets::MainMenuSoundPallet);
+		this->loadedEventSounds.find(pallet);
 	std::map<GameSoundAssets::SoundPallet, MusicSound*>::iterator findMusicEventIter =
-		this->loadedMusicSounds.find(GameSoundAssets::MainMenuSoundPallet);
+		this->loadedMusicSounds.find(pallet);
 	if (findSoundEventIter == this->loadedEventSounds.end()) {
 		assert(findMusicEventIter == this->loadedMusicSounds.end());
 		return;
@@ -254,7 +258,7 @@ void GameSoundAssets::UnloadMainMenuSounds() {
 
 	for (std::map<int, EventSound*>::iterator iter2 = eventSounds.begin(); iter2 != eventSounds.end(); ++iter2) {
 
-		this->StopMainMenuSound(static_cast<GameSoundAssets::MainMenuSound>(iter2->first));
+		this->StopSound(pallet, static_cast<GameSoundAssets::SoundPallet>(iter2->first));
 
 		EventSound* currSound = iter2->second;
 		delete currSound;
@@ -269,10 +273,9 @@ void GameSoundAssets::UnloadMainMenuSounds() {
 		musicSound = NULL;
 	}
 
-	this->loadedEventSounds.erase(GameSoundAssets::MainMenuSoundPallet);
-	this->loadedMusicSounds.erase(GameSoundAssets::MainMenuSoundPallet);
+	this->loadedEventSounds.erase(pallet);
+	this->loadedMusicSounds.erase(pallet);
 }
-
 
 /**
  * Gets whether the given sound type is a sound mask or not.

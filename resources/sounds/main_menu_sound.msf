@@ -16,8 +16,8 @@ ignore MainMenuBackgroundBangBigEvent {
    file     = (5 : test/event_test_sound.wav)
 }
 
-ignore MainMenuItemHighlightedEvent {
-   file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
+MainMenuItemHighlightedEvent {
+   file     = (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
    fadein   = 0
    fadeout  = 0
 }
