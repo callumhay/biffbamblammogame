@@ -1,0 +1,151 @@
+// Music
+ignore WorldBackgroundMusic {
+	file = 
+}
+
+// Events
+ignore WorldSoundPaddleHitWallEvent {
+	file = 
+}
+	
+ignore WorldSoundPlayerLostABallEvent {
+	file = 
+}
+
+ignore WorldSoundLastBallExplodedEvent {
+	file = 
+}
+
+ignore WorldSoundBallSpawnEvent {
+	file = 
+}
+
+ignore WorldSoundBallBlockCollisionEvent {
+	file = 
+}
+
+ignore WorldSoundBallPaddleCollisionEvent {
+	file = 
+}
+
+ignore WorldSoundStickyBallPaddleCollisionEvent {
+	file = 
+}
+
+ignore WorldSoundBallBallCollisionEvent {
+	file = 
+}
+
+ignore WorldSoundBombBlockDestroyedEvent {
+	file = 
+}
+
+ignore WorldSoundInkBlockDestroyedEvent {
+	file = 
+}
+
+ignore WorldSoundBasicBlockDestroyedEvent {
+	file = 
+}
+
+ignore WorldSoundCollateralBlockDestroyedEvent {
+	file = 
+}
+
+ignore WorldSoundCannonBlockLoadedEvent {
+	file = 
+}
+
+ignore WorldSoundPortalTeleportEvent {
+	file =
+}
+
+ignore WorldSoundBallSafetyNetCreatedEvent {
+	file = 
+}
+
+ignore WorldSoundBallSafetyNetDestroyedEvent {
+	file = 
+}
+
+ignore WorldSoundItemSpawnedEvent {
+	file = 
+}
+
+ignore WorldSoundPowerUpItemActivatedEvent {
+	file = 
+}
+
+ignore WorldSoundPowerNeutralItemActivatedEvent {
+	file = 
+}
+
+ignore WorldSoundPowerDownItemActivatedEvent {
+	file = 
+}
+
+ignore WorldSoundPowerUpItemTimerEndsEvent {
+	file = 
+}
+
+ignore WorldSoundPowerNeutralItemTimerEndsEvent {
+	file = 
+}
+
+ignore WorldSoundPowerDownItemTimerEndsEvent {
+	file = 
+}
+
+ignore WorldSoundBallOrPaddleGrowEvent {
+	file = 
+}
+
+ignore WorldSoundBallOrPaddleShrinkEvent {
+	file = 
+}
+
+ignore WorldSoundLaserBulletShotEvent {
+	file = 
+}
+
+ignore WorldSoundLevelCompletedEvent {
+	file = 
+}
+
+ignore WorldSoundWorldCompletedEvent {
+	file = 
+}
+
+// Masks
+ignore WorldSoundInkSplatterMask {
+	file = 
+}
+
+ignore WorldSoundPoisonSicknessMask {
+	file = 
+}
+
+ignore WorldSoundLaserBulletMovingMask {
+	file = 
+}
+
+ignore WorldSoundRocketMovingMask {
+	file =
+}
+
+ignore WorldSoundLaserBeamFiringMask {
+	file = 
+}
+
+ignore WorldSoundCollateralBlockFlashingMask {
+	file = 
+}
+
+ignore WorldSoundCollateralBlockFallingMask {
+	file = 
+}
+
+ignore WorldSoundCannonBlockRotatingMask {
+	file = 
+}
+

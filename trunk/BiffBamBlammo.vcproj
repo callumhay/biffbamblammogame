@@ -147,7 +147,7 @@
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				IgnoreDefaultLibraryNames="libc.lib"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

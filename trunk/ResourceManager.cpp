@@ -56,10 +56,34 @@ ResourceManager::~ResourceManager() {
 	// Clean up Physfs
 	PHYSFS_deinit();
 
-	// Check for errors and clean up OpenAL
-	//ALboolean successfulOALExit = alutExit();
-	//assert(successfulOALExit);
-	//debug_openal_state();
+	// Clean up sound memory
+	for (std::map<std::string, Mix_Chunk*>::iterator iter = this->loadedEventSounds.begin(); iter != this->loadedEventSounds.end(); ++iter) {
+		Mix_Chunk* chunk = iter->second;
+		Mix_FreeChunk(chunk);
+		chunk = NULL;
+	}
+	this->loadedEventSounds.clear();
+
+	for (std::map<std::string, Mix_Music*>::iterator iter = this->loadedMusicSounds.begin(); iter != this->loadedMusicSounds.end(); ++iter) {
+		Mix_Music* music = iter->second;
+		Mix_FreeMusic(music);
+		music = NULL;
+	}
+	this->loadedMusicSounds.clear();
+
+	for (std::map<Mix_Music*, SDL_RWops*>::iterator iter = this->musicSDLMemory.begin(); iter != this->musicSDLMemory.end(); ++iter) {
+		SDL_RWops* rw = iter->second;
+		SDL_FreeRW(rw);
+		rw = NULL;
+	}
+	this->musicSDLMemory.clear();
+
+	for (std::map<Mix_Music*, char*>::iterator iter = this->musicBuffers.begin(); iter != this->musicBuffers.end(); ++iter) {
+		char* buffer = iter->second;
+		delete[] buffer;
+		buffer = NULL;
+	}
+	this->musicBuffers.clear();
 
 	// Clean up all loaded meshes - these must be deleted first so that the
 	// effects go with them and make the assertions below correct
@@ -702,69 +726,160 @@ bool ResourceManager::ReleaseCgFxEffectResource(CGeffect &effect) {
 	return true;
 }
 
-/**
- * Read the given filepath into an OpenAL sound buffer and set the given ID to be that buffer.
- * Returns: true on success, false otherwise.
- */
-//bool ResourceManager::GetSoundResourceBuffer(const std::string &filepath, ALuint& soundBufferID) {
-//	
-//	// Try to find the sound in the loaded sounds first...
-//	std::map<std::string, ALuint>::iterator loadedSoundIter = this->loadedSoundBuffers.find(filepath);
-//	bool needToReadFromFile = loadedSoundIter == this->loadedSoundBuffers.end();
-//
-//	if (needToReadFromFile) {
-//		// Create the sound buffer in OpenAL..
-//		int dataLength = 0;
-//		char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
-//		if (soundMemData == NULL) {
-//			return false;
-//		}
-//
-//		soundBufferID = alutCreateBufferFromFileImage(soundMemData, dataLength);
-//		delete[] soundMemData;
-//		soundMemData = NULL;
-//
-//		if (soundBufferID == 0) {
-//			return false;
-//		}
-//
-//		// Insert into the list of sound buffer resources for future lookup
-//		this->loadedSoundBuffers.insert(std::make_pair(filepath, soundBufferID));
-//	}
-//	else {
-//		// Sound was already loaded, just grab and set the identifier for the sound buffer
-//		soundBufferID = loadedSoundIter->second;
-//	}
-//
-//	return true;
-//}
+// Get an event sound resource by instantiating its mix chunk in SDL - this will load the resource from
+// the game's resource zip file into memory.
+// Returns: true on success, false otherwise.
+Mix_Chunk* ResourceManager::GetEventSoundResource(const std::string &filepath) {
+	// Try to find the sound in loaded sounds
+	std::map<std::string, Mix_Chunk*>::iterator loadedSoundIter = this->loadedEventSounds.find(filepath);
+	bool needToReadFromFile = loadedSoundIter == this->loadedEventSounds.end();
 
-/**
- * Release the given OpenAL sound buffer ID from the resources stored in the resource
- * manager.
- * Returns: true if the resource was found and removed, false otherwise.
- */
-//bool ResourceManager::ReleaseSoundResource(ALuint soundBufferID) {
-//
-//	// Find the sound buffer resource
-//	std::map<std::string, ALuint>::iterator soundResourceIter = this->loadedSoundBuffers.begin();
-//	for (; soundResourceIter != this->loadedSoundBuffers.end(); ++soundResourceIter) {
-//		if (soundResourceIter->second == soundBufferID) {
-//			break;
-//		}
-//	}
-//
-//	if (soundResourceIter == this->loadedSoundBuffers.end()) {
-//		return false;
-//	}
-//	else {
-//		assert(soundResourceIter->second == soundBufferID);
-//		alDeleteBuffers(1, &soundBufferID);
-//		this->loadedSoundBuffers.erase(soundResourceIter);
-//	}
-//
-//	return true;
-//}
+	if (needToReadFromFile) {
+		int dataLength = 0;
+		char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
+		if (soundMemData == NULL) {
+			std::cerr << "Could not find file: " << filepath << std::endl;
+			return NULL;
+		}
+
+		SDL_RWops* sdlSoundMem = SDL_RWFromMem(soundMemData, dataLength);
+		Mix_Chunk* sound = Mix_LoadWAV_RW(sdlSoundMem, 1);	// Load the sound and free the SDL_RWops memory
+		
+		delete[] soundMemData;
+		soundMemData = NULL;
+
+		if (sound == NULL) {
+			std::cerr << "SDL Error loading sound: " << Mix_GetError() << std::endl;
+			return NULL;
+		}
+
+		this->loadedEventSounds.insert(std::make_pair(filepath, sound));
+		this->numReservedEventSounds[sound] += 1;
+		return sound;
+	}
+
+	// The sound had already been loaded, just return the pointer
+	return loadedSoundIter->second;
+}
+
+Mix_Music* ResourceManager::GetMusicSoundResource(const std::string &filepath) {
+	// Try to find the sound in loaded sounds
+	std::map<std::string, Mix_Music*>::iterator loadedSoundIter = this->loadedMusicSounds.find(filepath);
+	bool needToReadFromFile = loadedSoundIter == this->loadedMusicSounds.end();
+
+	if (needToReadFromFile) {
+		int dataLength = 0;
+		char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
+		if (soundMemData == NULL) {
+			std::cerr << "Could not find file: " << filepath << std::endl;
+			return NULL;
+		}
+
+		SDL_RWops* sdlSoundMem = SDL_RWFromMem(soundMemData, dataLength);
+		Mix_Music* music = Mix_LoadMUS_RW(sdlSoundMem);
+
+
+		if (music == NULL) {
+			std::cerr << "SDL Error loading music: " << Mix_GetError() << std::endl;
+			return NULL;
+		}
+
+		this->loadedMusicSounds.insert(std::make_pair(filepath, music));
+		this->musicSDLMemory.insert(std::make_pair(music, sdlSoundMem));
+		this->musicBuffers.insert(std::make_pair(music, soundMemData));
+		this->numReservedMusicSounds[music] += 1;
+		return music;
+	}
+
+	// The sound had already been loaded, just return the pointer
+	return loadedSoundIter->second;
+}
+
+bool ResourceManager::ReleaseEventSoundResource(Mix_Chunk* sound) {
+	// Make sure the sound resource was even allocated
+	std::map<Mix_Chunk*, int>::iterator reservedFindIter = this->numReservedEventSounds.find(sound);
+	if (reservedFindIter == this->numReservedEventSounds.end()) {
+		assert(false);
+		return false;
+	}
+
+	// If this is the last reserved sound then we delete it completely from memory
+	if (reservedFindIter->second - 1 == 0) {
+		std::map<std::string, Mix_Chunk*>::iterator nameToChunkIter = this->loadedEventSounds.begin();
+		for (; nameToChunkIter != this->loadedEventSounds.end(); ++nameToChunkIter) {
+			if (nameToChunkIter->second == sound) {
+				break;
+			}
+		}
+
+		if (nameToChunkIter == this->loadedEventSounds.end()) {
+			assert(false);
+			return false;
+		}
+
+		Mix_FreeChunk(sound);
+		sound = NULL;
+		this->loadedEventSounds.erase(nameToChunkIter);
+		this->numReservedEventSounds.erase(reservedFindIter);
+	}
+	else {
+		reservedFindIter->second -= 1;
+	}
+	
+	return true;
+}
+
+bool ResourceManager::ReleaseMusicSoundResource(Mix_Music* music) {
+	// Make sure the sound resource was even allocated
+	std::map<Mix_Music*, int>::iterator reservedFindIter = this->numReservedMusicSounds.find(music);
+	if (reservedFindIter == this->numReservedMusicSounds.end()) {
+		assert(false);
+		return false;
+	}
+
+	// If this is the last reserved sound then we delete it completely from memory
+	if (reservedFindIter->second - 1 == 0) {
+		std::map<std::string, Mix_Music*>::iterator nameToMusicIter = this->loadedMusicSounds.begin();
+		for (; nameToMusicIter != this->loadedMusicSounds.end(); ++nameToMusicIter) {
+			if (nameToMusicIter->second == music) {
+				break;
+			}
+		}
+
+		if (nameToMusicIter == this->loadedMusicSounds.end()) {
+			assert(false);
+			return false;
+		}
+
+		std::map<Mix_Music*, SDL_RWops*>::iterator sdlMemIter = this->musicSDLMemory.find(music);
+		if (sdlMemIter == this->musicSDLMemory.end()) {
+			assert(false);
+			return false;
+		}
+
+		std::map<Mix_Music*, char*>::iterator musicBufferIter = this->musicBuffers.find(music);
+		if (musicBufferIter == this->musicBuffers.end()) {
+			assert(false);
+			return false;
+		}
+
+		Mix_FreeMusic(music);
+		music = NULL;
+
+		SDL_FreeRW(sdlMemIter->second);
+		delete[] musicBufferIter->second;
+
+		this->loadedMusicSounds.erase(nameToMusicIter);
+		this->musicSDLMemory.erase(sdlMemIter);
+		this->musicBuffers.erase(musicBufferIter);
+		this->numReservedMusicSounds.erase(reservedFindIter);
+	}
+	else {
+		reservedFindIter->second -= 1;
+	}
+	
+	return true;
+}
 
 /**
  * Read the initialization configuration options in from the .ini file off disk
