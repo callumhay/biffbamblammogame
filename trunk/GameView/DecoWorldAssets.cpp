@@ -346,3 +346,18 @@ void DecoWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
 
 	this->bgFadeAnim.SetLerp(fadeTime, finalAlpha);
 }
+
+/**
+ * Reset the world to its initial state - makes sure that nothing is faded/invisible etc.
+ * and is ready to be see for the first time by the player.
+ */
+void DecoWorldAssets::ResetToInitialState() {
+	this->bgFadeAnim.ClearLerp();
+	this->bgFadeAnim.SetInterpolantValue(1.0f);
+	this->currBGMeshColourAnim.ResetToStart();
+
+	this->beamRotationfg1 = 0.0f;
+	this->beamRotationfg2 = 0.0f;
+	this->beamRotationbg1 = 0.0f;
+	this->beamRotationbg2 = 0.0f;
+}

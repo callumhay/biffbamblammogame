@@ -256,6 +256,9 @@ void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const Gam
 	// Add the effect for ball-ball collision
 	this->display->GetAssets()->GetESPAssets()->AddBounceBallBallEffect(this->display->GetCamera(), ball1, ball2);
 
+	// ... and the sound 
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBallBallCollisionEvent);
+
 	debug_output("EVENT: Ball-ball collision");
 }
 
@@ -287,8 +290,11 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
 void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
 	// Add the blast effect of the ball exiting the cannon
 	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(ball, cannonBlock);
+	// Stop the sound of the cannon rotating
+	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask);
 	// .. and the sound for it
 	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockFiredEvent, GameSoundAssets::LoudVolume);
+
 
 	debug_output("EVENT: Ball fired out of cannon block");
 }

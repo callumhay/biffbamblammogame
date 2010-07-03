@@ -9,7 +9,7 @@
 
 #include <cassert>
 
-const int GameSoundAssets::MAX_MIX_GAME_SOUNDS = 128;
+const int GameSoundAssets::MAX_MIX_GAME_SOUNDS = 256;
 int GameSoundAssets::BASE_MUSIC_SOUND_VOLUME = MIX_MAX_VOLUME;
 int GameSoundAssets::BASE_EVENT_AND_MASK_SOUND_VOLUME = MIX_MAX_VOLUME;
 
@@ -222,9 +222,10 @@ void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPie
 
 		case LevelPiece::Cannon: {
 				const CannonBlock* cannonBlock = static_cast<const CannonBlock*>(&block);
-				if (cannonBlock->GetLoadedBall() == NULL) {
+				if (cannonBlock->GetLoadedBall() == NULL && !ball.IsLastPieceCollidedWith(&block)) {
 					// The ball will be loaded into the cannon...
 					this->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockLoadedEvent);
+					this->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask, GameSoundAssets::QuietVolume);
 				}
 				else if (!ball.IsLastPieceCollidedWith(&block)) {
 					// Ball didn't go into the cannon... it must have already been loaded, play typical block hit sound
@@ -406,16 +407,16 @@ int GameSoundAssets::CalculateFinalVolume(Sound::SoundType soundType, GameSoundA
 	float loudnessModifier = 1.0f;
 	switch (loudness) {
 		case GameSoundAssets::VeryQuietVolume:
-			loudnessModifier = 0.6f;
+			loudnessModifier = 0.5f;
 			break;
 		case GameSoundAssets::QuietVolume:
-			loudnessModifier = 0.7f;
+			loudnessModifier = 0.65f;
 			break;
 		case GameSoundAssets::NormalVolume:
-			loudnessModifier = 0.8f;
+			loudnessModifier = 0.75f;
 			break;
 		case GameSoundAssets::LoudVolume:
-			loudnessModifier = 0.9f;
+			loudnessModifier = 0.85f;
 			break;
 		case GameSoundAssets::VeryLoudVolume:
 			loudnessModifier = 1.0f;
