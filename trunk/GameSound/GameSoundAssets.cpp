@@ -3,10 +3,15 @@
 #include "EventSound.h"
 #include "MSFReader.h"
 
+#include "../GameModel/LevelPiece.h"
+#include "../GameModel/CannonBlock.h"
+#include "../GameModel/GameBall.h"
 
 #include <cassert>
 
-const int GameSoundAssets::MAX_MIX_GAME_SOUNDS = 64;
+const int GameSoundAssets::MAX_MIX_GAME_SOUNDS = 128;
+int GameSoundAssets::BASE_MUSIC_SOUND_VOLUME = MIX_MAX_VOLUME;
+int GameSoundAssets::BASE_EVENT_AND_MASK_SOUND_VOLUME = MIX_MAX_VOLUME;
 
 GameSoundAssets::GameSoundAssets() : activeMusic(NULL), activeWorld(GameWorld::None) {
 	int sdlMixerFlags  = MIX_INIT_OGG;
@@ -64,9 +69,16 @@ void GameSoundAssets::SetGameVolume(int volumeLvl) {
 	
 	// Map the volume into the range of 0 to MIX_MAX_VOLUME
 	int mixVolumeLvl = static_cast<int>(MIX_MAX_VOLUME * volumeFraction);
+
+	// We set the base level of the max volume - this is because we want to be able to adjust relative levels 
+	// (e.g., more potent effect sounds might be louder than typical sounds) of volume 
+	// for various effects in the game.
+	GameSoundAssets::BASE_MUSIC_SOUND_VOLUME					= mixVolumeLvl;
+	GameSoundAssets::BASE_EVENT_AND_MASK_SOUND_VOLUME = mixVolumeLvl;
+
 	// Set all channels (-1 means all channels) to the given volume level
-	Mix_Volume(-1, mixVolumeLvl);
-	Mix_VolumeMusic(mixVolumeLvl);
+	Mix_Volume(-1, GameSoundAssets::BASE_EVENT_AND_MASK_SOUND_VOLUME);
+	Mix_VolumeMusic(GameSoundAssets::BASE_MUSIC_SOUND_VOLUME);
 }
 
 void GameSoundAssets::LoadSoundPallet(GameSoundAssets::SoundPallet pallet) {
@@ -125,14 +137,10 @@ void GameSoundAssets::StopAllSounds() {
 	this->activeMasks.clear();
 }
 
-
-
-
-
 /**
  * General version of the play sound * function.
  */
-void GameSoundAssets::PlaySound(GameSoundAssets::SoundPallet pallet, int sound) {
+void GameSoundAssets::PlaySoundGeneral(GameSoundAssets::SoundPallet pallet, int sound, GameSoundAssets::SoundVolumeLoudness volume) {
 	MusicSound* musicFoundSound = NULL;
 	EventSound* eventFoundSound = NULL;
 
@@ -146,7 +154,11 @@ void GameSoundAssets::PlaySound(GameSoundAssets::SoundPallet pallet, int sound) 
 		if (this->activeMusic != musicFoundSound && this->activeMusic != NULL) {
 			this->activeMusic->Stop(false);
 		}
+
+		int finalMusicVolume = GameSoundAssets::CalculateFinalVolume(Sound::MusicSound, volume);
+		musicFoundSound->SetVolume(finalMusicVolume);
 		musicFoundSound->Play(true);
+
 		this->activeMusic = musicFoundSound;
 	}
 	else {
@@ -154,14 +166,18 @@ void GameSoundAssets::PlaySound(GameSoundAssets::SoundPallet pallet, int sound) 
 		if (eventFoundSound == NULL) {
 			return;
 		}
+
+		int finalEventVolume = GameSoundAssets::CalculateFinalVolume(eventFoundSound->GetType(), volume);
+		eventFoundSound->SetVolume(finalEventVolume);
 		eventFoundSound->Play(true);
+
 		if (eventFoundSound->GetType() == Sound::MaskSound) {
 			this->activeMasks.push_back(eventFoundSound);
 		}
 	}
 }
 
-void GameSoundAssets::StopSound(GameSoundAssets::SoundPallet pallet, int sound) {
+void GameSoundAssets::StopSoundGeneral(GameSoundAssets::SoundPallet pallet, int sound) {
 	if (GameSoundAssets::IsMusicSound(sound)) {
 		MusicSound* foundMusic = this->FindMusicSound(pallet);
 		if (foundMusic == NULL) {
@@ -185,6 +201,44 @@ void GameSoundAssets::StopSound(GameSoundAssets::SoundPallet pallet, int sound) 
 	}
 }
 
+void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPiece& block) {
+	// Play a sound for the ball colliding with the block based on the block...
+	switch (block.GetType()) {
+		case LevelPiece::Solid:
+		case LevelPiece::SolidTriangle:
+		case LevelPiece::Breakable:
+		case LevelPiece::BreakableTriangle:
+		case LevelPiece::Collateral:
+		case LevelPiece::Bomb:
+		case LevelPiece::Prism:
+		case LevelPiece::PrismTriangle:
+			this->PlayWorldSound(GameSoundAssets::WorldSoundBallBlockCollisionEvent);
+			break;
+		
+		case LevelPiece::Ink:
+		case LevelPiece::Empty:
+		case LevelPiece::Portal:
+			break;
+
+		case LevelPiece::Cannon: {
+				const CannonBlock* cannonBlock = static_cast<const CannonBlock*>(&block);
+				if (cannonBlock->GetLoadedBall() == NULL) {
+					// The ball will be loaded into the cannon...
+					this->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockLoadedEvent);
+				}
+				else if (!ball.IsLastPieceCollidedWith(&block)) {
+					// Ball didn't go into the cannon... it must have already been loaded, play typical block hit sound
+					this->PlayWorldSound(GameSoundAssets::WorldSoundBallBlockCollisionEvent);
+				}
+			}
+			break;
+
+
+		default:
+			assert(false);
+			break;
+	}
+}
 
 void GameSoundAssets::LoadSounds(const std::string& filepath, GameSoundAssets::SoundPallet pallet) {
 	// If it's the case that there are still main menu sounds loaded then we don't need to load them again!
@@ -222,6 +276,7 @@ void GameSoundAssets::LoadSounds(const std::string& filepath, GameSoundAssets::S
 			case Sound::EventSound:
 			case Sound::MaskSound: {
 					EventSound* eventSound = dynamic_cast<EventSound*>(currSound);
+					eventSound->SetVolume(GameSoundAssets::CalculateFinalVolume(eventSound->GetType(), GameSoundAssets::NormalVolume));
 					assert(eventSound != NULL);
 					this->loadedEventSounds[pallet].insert(std::make_pair(iter->first, eventSound));	
 				}
@@ -229,6 +284,7 @@ void GameSoundAssets::LoadSounds(const std::string& filepath, GameSoundAssets::S
 
 			case Sound::MusicSound: {
 					MusicSound* musicSound = dynamic_cast<MusicSound*>(currSound);
+					musicSound->SetVolume(GameSoundAssets::CalculateFinalVolume(Sound::MusicSound, GameSoundAssets::NormalVolume));
 					assert(musicSound != NULL);
 					this->loadedMusicSounds[pallet] = musicSound;
 				}
@@ -258,7 +314,7 @@ void GameSoundAssets::UnloadSounds(GameSoundAssets::SoundPallet pallet) {
 
 	for (std::map<int, EventSound*>::iterator iter2 = eventSounds.begin(); iter2 != eventSounds.end(); ++iter2) {
 
-		this->StopSound(pallet, static_cast<GameSoundAssets::SoundPallet>(iter2->first));
+		this->StopSoundGeneral(pallet, static_cast<GameSoundAssets::SoundPallet>(iter2->first));
 
 		EventSound* currSound = iter2->second;
 		delete currSound;
@@ -281,11 +337,19 @@ void GameSoundAssets::UnloadSounds(GameSoundAssets::SoundPallet pallet) {
  * Gets whether the given sound type is a sound mask or not.
  */
 bool GameSoundAssets::IsMaskSound(int soundType) {
-	return false;
+	return soundType == WorldSoundInkSplatterMask ||
+				 soundType == WorldSoundPoisonSicknessMask ||
+				 soundType == WorldSoundLaserBulletMovingMask ||
+				 soundType == WorldSoundRocketMovingMask ||
+				 soundType == WorldSoundLaserBeamFiringMask ||
+			   soundType == WorldSoundCollateralBlockFlashingMask ||
+				 soundType == WorldSoundCollateralBlockFallingMask ||
+				 soundType == WorldSoundCannonBlockRotatingMask ||
+				 soundType == WorldSoundLastBallSpiralingToDeathMask;
 }
 
 bool GameSoundAssets::IsMusicSound(int soundType) {
-	return soundType == GameSoundAssets::MainMenuBackgroundMusic;
+	return soundType == GameSoundAssets::MainMenuBackgroundMusic || soundType == GameSoundAssets::WorldBackgroundMusic;
 }
 
 /**
@@ -331,4 +395,46 @@ MusicSound* GameSoundAssets::FindMusicSound(GameSoundAssets::SoundPallet pallet)
 	}
 
 	return findIter->second;
+}
+
+/**
+ * Calculates the final volume based on the given sound type and the loudness required
+ * for that sound. This will use the base, set volume for that sound type and modify it based on 
+ * the given loudness and then return a value in the range of [0, MIX_MAX_VOLUME].
+ */
+int GameSoundAssets::CalculateFinalVolume(Sound::SoundType soundType, GameSoundAssets::SoundVolumeLoudness loudness) {
+	float loudnessModifier = 1.0f;
+	switch (loudness) {
+		case GameSoundAssets::VeryQuietVolume:
+			loudnessModifier = 0.6f;
+			break;
+		case GameSoundAssets::QuietVolume:
+			loudnessModifier = 0.7f;
+			break;
+		case GameSoundAssets::NormalVolume:
+			loudnessModifier = 0.8f;
+			break;
+		case GameSoundAssets::LoudVolume:
+			loudnessModifier = 0.9f;
+			break;
+		case GameSoundAssets::VeryLoudVolume:
+			loudnessModifier = 1.0f;
+			break;
+		default:
+			assert(false);
+			break;
+	}
+
+	switch (soundType) {
+		case Sound::EventSound:
+		case Sound::MaskSound:
+			return static_cast<int>(GameSoundAssets::BASE_EVENT_AND_MASK_SOUND_VOLUME * loudnessModifier);
+		case Sound::MusicSound:
+			return static_cast<int>(GameSoundAssets::BASE_MUSIC_SOUND_VOLUME * loudnessModifier);
+		default:
+			assert(false);
+			break;
+	}
+
+	return 0;
 }

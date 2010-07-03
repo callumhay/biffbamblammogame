@@ -34,10 +34,14 @@ private:
 
 public:
 	BallInPlayState(GameModel* gm);
-	virtual ~BallInPlayState();
+	~BallInPlayState();
 
-	virtual void Tick(double seconds);
-	virtual void BallReleaseKeyPressed();
+	GameState::GameStateType GetType() const {
+		return GameState::BallInPlayStateType;
+	}
+
+	void Tick(double seconds);
+	void BallReleaseKeyPressed();
 	void DebugDropItem(GameItem* item);
 };
 #endif

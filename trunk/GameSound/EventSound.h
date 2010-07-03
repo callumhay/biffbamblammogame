@@ -34,6 +34,8 @@ public:
 	bool IsPaused() const;
 	bool IsLooped() const;
 	
+	void SetVolume(int volume);
+
 protected:
 	EventSound(const std::string& name, int loops, int msFadein, int msFadeout);
 
@@ -97,7 +99,13 @@ inline bool EventSound::IsValid() const {
 inline void EventSound::Play(bool doFadeIn) {
 	assert(this->IsValid());
 
-	// Stop playing any previous sound
+	// If the sound is looping and already playing then don't play it again,
+	// just get out of here
+	if (this->GetType() == Sound::MaskSound && this->IsPlaying()) {
+		return;
+	}
+
+	// TODO: Don't stop the sound if it's a Sound::EventSound, just play more of it
 	this->Stop(false);
 
 	// We determine which sound to play based on their probabilities and a randomly generated number
@@ -116,6 +124,7 @@ inline void EventSound::Play(bool doFadeIn) {
 			int result = Mix_FadeInChannel(-1, this->playingSoundChunk, loops, fadeInAmt);
 			if (result != -1) {
 				this->channel = result;
+				Mix_Volume(this->channel, this->volume);
 			}
 			break;
 		}
@@ -160,6 +169,16 @@ inline bool EventSound::IsPaused() const {
 
 inline bool EventSound::IsLooped() const {
 	return (this->numLoops == -1);
+}
+
+inline void EventSound::SetVolume(int volume) {
+	Sound::SetVolume(volume);
+	// Go through all sound chunks in this and set the volume
+	for (std::list<SoundProbabilityPair>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
+		SoundProbabilityPair& currPair = *iter;
+		Mix_Chunk* soundChunk = currPair.GetSoundChunk();
+		Mix_VolumeChunk(soundChunk, volume);
+	}
 }
 
 #endif // __EVENTSOUND_H__

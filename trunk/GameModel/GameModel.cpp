@@ -189,15 +189,14 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	assert(pointValue >= 0);
 	this->IncrementScore(pointValue);
 
+	// EVENT: Ball-Block Collision
+	GameEventManager::Instance()->ActionBallBlockCollision(ball, *p);
+
 	// Collide the ball with the level piece directly, then if there was a change
 	// tell the level about it
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, ball);	// WARNING: This can destroy p.
 	ball.BallCollided();
-
-	// EVENT: Ball-Block Collision
-	GameEventManager::Instance()->ActionBallBlockCollision(ball, *pieceAfterCollision);
-
 
 	// Check to see if the ball is being teleported in ball-camera mode - in this case
 	// we move into a new game state to play the wormhole minigame

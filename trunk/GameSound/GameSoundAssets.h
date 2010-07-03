@@ -56,7 +56,9 @@ public:
 		WorldSoundBasicBlockDestroyedEvent,
 		WorldSoundCollateralBlockDestroyedEvent,
 		WorldSoundCannonBlockLoadedEvent,
+		WorldSoundCannonBlockFiredEvent,
 		WorldSoundPortalTeleportEvent,
+		WorldSoundRocketExplodedEvent,
 
 		WorldSoundBallSafetyNetCreatedEvent,
 		WorldSoundBallSafetyNetDestroyedEvent,
@@ -81,8 +83,11 @@ public:
 		WorldSoundLaserBeamFiringMask,
 		WorldSoundCollateralBlockFlashingMask,
 		WorldSoundCollateralBlockFallingMask,
-		WorldSoundCannonBlockRotatingMask
+		WorldSoundCannonBlockRotatingMask,
+		WorldSoundLastBallSpiralingToDeathMask
 	};
+
+	enum SoundVolumeLoudness { VeryQuietVolume = 0, QuietVolume = 1, NormalVolume = 2, LoudVolume = 3, VeryLoudVolume = 4 };
 
 	GameSoundAssets();
 	~GameSoundAssets();
@@ -95,21 +100,28 @@ public:
 
 	void PlayMainMenuSound(GameSoundAssets::MainMenuSound sound);
 	void StopMainMenuSound(GameSoundAssets::MainMenuSound sound);
-	void PlayWorldSound(GameSoundAssets::WorldSound sound);
+	void PlayWorldSound(GameSoundAssets::WorldSound sound, GameSoundAssets::SoundVolumeLoudness volume = GameSoundAssets::NormalVolume);
 	void StopWorldSound(GameSoundAssets::WorldSound sound);
 
 	void SetActiveWorldSounds(GameWorld::WorldStyle style, bool unloadPreviousActiveWorldSounds, 
 														bool loadNewActiveWorldSounds);
 	GameWorld::WorldStyle GetActiveWorldSounds() const;
 
-	void PlaySound(GameSoundAssets::SoundPallet pallet, int sound);
-	void StopSound(GameSoundAssets::SoundPallet pallet, int sound);
+	void PlaySoundGeneral(GameSoundAssets::SoundPallet pallet, int sound, GameSoundAssets::SoundVolumeLoudness volume = GameSoundAssets::NormalVolume);
+	void StopSoundGeneral(GameSoundAssets::SoundPallet pallet, int sound);
+
+	// More specific functions for playing sounds related to particular things...
+	void PlayBallHitBlockEvent(const GameBall& ball, const LevelPiece& block);
+
 
 	static bool IsMaskSound(int soundType);
 	static bool IsMusicSound(int soundType);
 	static GameSoundAssets::SoundPallet GetSoundPalletFromWorldStyle(GameWorld::WorldStyle style);
 
 private:
+	static int BASE_MUSIC_SOUND_VOLUME;
+	static int BASE_EVENT_AND_MASK_SOUND_VOLUME;
+
 	std::map<GameSoundAssets::SoundPallet, std::map<int, EventSound*>> loadedEventSounds;
 	std::map<GameSoundAssets::SoundPallet, MusicSound*> loadedMusicSounds;
 
@@ -128,25 +140,27 @@ private:
 
 	EventSound* FindEventSound(GameSoundAssets::SoundPallet pallet, int soundType) const;
 	MusicSound* FindMusicSound(GameSoundAssets::SoundPallet pallet) const;
+
+	static int CalculateFinalVolume(Sound::SoundType soundType, GameSoundAssets::SoundVolumeLoudness loudness);
 };
 
 /**
  * Play a sound associated with the main menu of the game. The sound may be an event or mask.
  */
 inline void GameSoundAssets::PlayMainMenuSound(GameSoundAssets::MainMenuSound sound) {
-	this->PlaySound(GameSoundAssets::MainMenuSoundPallet, sound);
+	this->PlaySoundGeneral(GameSoundAssets::MainMenuSoundPallet, sound);
 }
 
 inline void GameSoundAssets::StopMainMenuSound(GameSoundAssets::MainMenuSound sound) {
-	this->StopSound(GameSoundAssets::MainMenuSoundPallet, sound);
+	this->StopSoundGeneral(GameSoundAssets::MainMenuSoundPallet, sound);
 }
 
-inline void GameSoundAssets::PlayWorldSound(GameSoundAssets::WorldSound sound) {
-	this->PlaySound(GameSoundAssets::GetSoundPalletFromWorldStyle(this->activeWorld), sound);
+inline void GameSoundAssets::PlayWorldSound(GameSoundAssets::WorldSound sound, GameSoundAssets::SoundVolumeLoudness volume) {
+	this->PlaySoundGeneral(GameSoundAssets::GetSoundPalletFromWorldStyle(this->activeWorld), sound, volume);
 }
 
 inline void GameSoundAssets::StopWorldSound(GameSoundAssets::WorldSound sound) {
-	this->StopSound(GameSoundAssets::GetSoundPalletFromWorldStyle(this->activeWorld), sound);
+	this->StopSoundGeneral(GameSoundAssets::GetSoundPalletFromWorldStyle(this->activeWorld), sound);
 }
 
 // Sets the currently active world - this is the style of the world so that whenever PlayWorldSound/StopWorldSound

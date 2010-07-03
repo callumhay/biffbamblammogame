@@ -9,6 +9,10 @@ public:
 	WorldCompleteState(GameModel* gm);
 	~WorldCompleteState();
 
+	GameState::GameStateType GetType() const {
+		return GameState::WorldCompleteStateType;
+	}
+
 	void Tick(double seconds);
 	void BallReleaseKeyPressed() { /* does nothing */ } 
 

@@ -108,7 +108,7 @@ void BallInPlayState::Tick(double seconds) {
 				return;
 			}
 			else {
-				// The ball is now dead an needs to be removed from the game
+				// The ball is now dead and needs to be removed from the game
 				ballsToRemove.push_back(iter);
 				continue;
 			}
@@ -233,6 +233,10 @@ void BallInPlayState::Tick(double seconds) {
 	// Get rid of all the balls that went out of bounds / are now dead
 	for (std::list<std::list<GameBall*>::iterator>::iterator iter = ballsToRemove.begin(); iter != ballsToRemove.end(); ++iter) {
 		GameBall* ballToDestroy = (**iter);
+
+		// EVENT: Ball died
+		GameEventManager::Instance()->ActionBallDied(*ballToDestroy);
+
 		gameBalls.erase(*iter);
 		delete ballToDestroy;
 		ballToDestroy = NULL;

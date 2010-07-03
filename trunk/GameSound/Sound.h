@@ -33,7 +33,10 @@ public:
 	// Whether this sound loops indefintely
 	virtual bool IsLooped() const = 0;
 
+	virtual void SetVolume(int volume);
+
 	std::string GetSoundName() const { return this->soundName; }
+
 
 protected:
 	Sound(const std::string& name, int msFadein, int msFadeout);
@@ -41,6 +44,7 @@ protected:
 	static const int INVALID_SDL_CHANNEL;	// Invalid value for a channel
 
 	std::string soundName;
+	int volume;			// The volume specified in the interval [0, MIX_MAX_VOLUME]
 	int msFadein;		// Millisecond fade in when playing this sound
 	int msFadeout;	// Millisecond fade out when playing this sound
 };
@@ -50,6 +54,11 @@ inline bool Sound::IsValid() const {
 		return false;
 	}
 	return true;
+}
+
+inline void Sound::SetVolume(int volume) {
+	assert(volume >= 0 && volume <= MIX_MAX_VOLUME);
+	this->volume = volume;
 }
 
 #endif

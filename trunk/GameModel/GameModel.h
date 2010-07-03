@@ -142,6 +142,13 @@ public:
 	GameModel();
 	~GameModel();
 
+	GameState::GameStateType GetCurrentStateType() const {
+		if (this->currState != NULL) {
+			return this->currState->GetType();
+		}
+		return GameState::NULLStateType;
+	}
+	
 	// The given next state will become the next state when update state is called
 	void SetNextState(GameState* nextState) {
 		if (this->nextState != NULL) {

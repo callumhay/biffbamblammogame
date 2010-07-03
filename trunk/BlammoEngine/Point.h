@@ -166,6 +166,8 @@ public:
 		return !(*this == other);
 	}
 
+
+	friend bool operator<=(const Point3D& a, const Point3D& b);
 };
 
 inline std::ostream& operator <<(std::ostream& os, const Point3D& p) {
@@ -179,6 +181,11 @@ inline Point3D operator *(const float f, const Point3D& p) {
 inline Point3D operator /(const Point3D& p, const float f) {
 	return Point3D(p[0]/f, p[1]/f, p[2]/f);
 }
+
+inline bool operator<=(const Point3D& a, const Point3D& b) {
+	return (a.v_[0] <= b.v_[0] && a.v_[1] <= b.v_[1] && a.v_[2] <= b.v_[2]);
+}
+
 
 Point3D operator *(const Matrix4x4& M, const Point3D& p);
 Point3D operator +(const Point3D& a, const Vector3D& b);

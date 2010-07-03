@@ -137,16 +137,17 @@ static void GameRenderLoop() {
  * Kills everything related to the graphics (opengl) and the window.
  */
 static void KillGraphicsAndWindow(bool gameIsQuiting) {
+	// ORDER OF CLEAN-UP MATTERS - Destroy the MVC before all else!
+
+	// Clear up MVC
+	CleanUpMVC();
 
 	// Clear up singletons
-	GameFontAssetsManager::DeleteInstance();
 	LoadingScreen::DeleteInstance();
 	Noise::DeleteInstance();
 	GeometryMaker::DeleteInstance();
 	LoadingScreen::DeleteInstance();
-
-	// Clear up MVC
-	CleanUpMVC();
+	GameFontAssetsManager::DeleteInstance();
 
 	// Only delete the resource manager if we aren't quitting (we need the
 	// resource manager to write out the config file otherwise - it needs to be
@@ -165,7 +166,7 @@ int main(int argc, char *argv[]) {
 	// Memory dump debug info for detecting and finding memory leaks
 #ifdef _DEBUG
 	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(24053);
+	//_CrtSetBreakAlloc(107767);
 #endif
 
 	// One-Time Initialization stuff **************************************

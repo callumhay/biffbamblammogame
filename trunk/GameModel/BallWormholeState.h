@@ -12,6 +12,10 @@ public:
 	BallWormholeState(GameModel* gm);
 	~BallWormholeState();
 
+	GameState::GameStateType GetType() const {
+		return GameState::BallWormholeStateType;
+	}
+
 	void Tick(double seconds);
 	void MovePaddleKeyPressed(float dist);
 	void BallReleaseKeyPressed() {}

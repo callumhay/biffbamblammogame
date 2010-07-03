@@ -31,7 +31,9 @@ private:
 	static const char* FADE_OUT_KEYWORD;
 
 	// Sound string identifiers
-	
+	static void InitSoundTypeMapping();
+	static std::map<std::string, int> soundTypeMapping;
+
 	// Main menu sound identifiers
 	static const char* MAIN_MENU_BG_MUSIC;
 	static const char* MAIN_MENU_BG_BANG_SMALL_EVENT;
@@ -58,7 +60,9 @@ private:
 	static const char* WORLD_BASIC_BLOCK_DESTROYED_EVENT;
 	static const char* WORLD_COLLATERAL_BLOCK_DESTROYED_EVENT;
 	static const char* WORLD_CANNON_BLOCK_LOADED_EVENT;
+	static const char* WORLD_CANNON_BLOCK_FIRED_EVENT;
 	static const char* WORLD_PORTAL_TELEPORT_EVENT;
+	static const char* WORLD_ROCKET_EXPLODED_EVENT;
 	static const char* WORLD_SAFETY_NET_CREATED_EVENT;
 	static const char* WORLD_SAFETY_NET_DESTROYED_EVENT;
 	static const char* WORLD_ITEM_SPAWNED_EVENT;
@@ -73,6 +77,8 @@ private:
 	static const char* WORLD_LASER_BULLET_SHOT_EVENT;
 	static const char* WORLD_LEVEL_COMPLETED_EVENT;
 	static const char* WORLD_WORLD_COMPLETED_EVENT;
+
+
 	static const char* WORLD_INK_SPLATTER_MASK;
 	static const char* WORLD_POISON_SICK_MASK;
 	static const char* WORLD_LASER_BULLET_MOVING_MASK;
@@ -81,6 +87,7 @@ private:
 	static const char* WORLD_COLLATERAL_BLOCK_FLASHING_MASK;
 	static const char* WORLD_COLLATERAL_BLOCK_FALLING_MASK;
 	static const char* WORLD_CANNON_BLOCK_ROTATING_MASK;
+	static const char* WORLD_LAST_BALL_SPIRAL_TO_DEATH_MASK;
 
 
 	// Initializer/Default values

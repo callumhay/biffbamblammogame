@@ -22,6 +22,8 @@ const char* MSFReader::LOOPS_KEYWORD			= "loops";
 const char* MSFReader::FADE_IN_KEYWORD		= "fadein";
 const char* MSFReader::FADE_OUT_KEYWORD		= "fadeout";
 
+std::map<std::string, int> MSFReader::soundTypeMapping;
+
 const char* MSFReader::MAIN_MENU_BG_MUSIC										= "MainMenuBackgroundMusic";
 const char* MSFReader::MAIN_MENU_ITEM_HIGHLIGHTED_EVENT			= "MainMenuItemHighlightedEvent";
 const char* MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT				= "MainMenuBackgroundBangSmallEvent";
@@ -35,7 +37,7 @@ const char* MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT				= "MainMenuItemScrolledE
 const char* MSFReader::WORLD_BG_MUSIC														= "WorldBackgroundMusic";
 const char* MSFReader::WORLD_PADDLE_HIT_WALL_EVENT							= "WorldSoundPaddleHitWallEvent";
 const char* MSFReader::WORLD_BALL_LOST_EVENT										= "WorldSoundPlayerLostABallEvent";
-const char* MSFReader::WORLD_LAST_BALL_EXPLODED_EVENT						= "WorldSoundPlayerLostABallEvent";
+const char* MSFReader::WORLD_LAST_BALL_EXPLODED_EVENT						= "WorldSoundLastBallExplodedEvent";
 const char* MSFReader::WORLD_BALL_SPAWN_EVENT										= "WorldSoundBallSpawnEvent";
 const char* MSFReader::WORLD_BALL_BLOCK_COLLISION_EVENT					= "WorldSoundBallBlockCollisionEvent";
 const char* MSFReader::WORLD_BALL_PADDLE_COLLISION_EVENT				= "WorldSoundBallPaddleCollisionEvent";
@@ -46,7 +48,9 @@ const char* MSFReader::WORLD_INK_BLOCK_DESTROYED_EVENT					= "WorldSoundInkBlock
 const char* MSFReader::WORLD_BASIC_BLOCK_DESTROYED_EVENT				= "WorldSoundBasicBlockDestroyedEvent";
 const char* MSFReader::WORLD_COLLATERAL_BLOCK_DESTROYED_EVENT		= "WorldSoundCollateralBlockDestroyedEvent";
 const char* MSFReader::WORLD_CANNON_BLOCK_LOADED_EVENT					= "WorldSoundCannonBlockLoadedEvent";
+const char* MSFReader::WORLD_CANNON_BLOCK_FIRED_EVENT						= "WorldSoundCannonBlockFiredEvent";
 const char* MSFReader::WORLD_PORTAL_TELEPORT_EVENT							= "WorldSoundPortalTeleportEvent";
+const char* MSFReader::WORLD_ROCKET_EXPLODED_EVENT							= "WorldSoundRocketExplodedEvent";
 const char* MSFReader::WORLD_SAFETY_NET_CREATED_EVENT						= "WorldSoundBallSafetyNetCreatedEvent";
 const char* MSFReader::WORLD_SAFETY_NET_DESTROYED_EVENT					= "WorldSoundBallSafetyNetDestroyedEvent";
 const char* MSFReader::WORLD_ITEM_SPAWNED_EVENT									= "WorldSoundItemSpawnedEvent";
@@ -69,9 +73,10 @@ const char* MSFReader::WORLD_LASER_BEAM_FIRING_MASK							= "WorldSoundLaserBeam
 const char* MSFReader::WORLD_COLLATERAL_BLOCK_FLASHING_MASK			= "WorldSoundCollateralBlockFlashingMask";
 const char* MSFReader::WORLD_COLLATERAL_BLOCK_FALLING_MASK			= "WorldSoundCollateralBlockFallingMask";
 const char* MSFReader::WORLD_CANNON_BLOCK_ROTATING_MASK					= "WorldSoundCannonBlockRotatingMask";
+const char* MSFReader::WORLD_LAST_BALL_SPIRAL_TO_DEATH_MASK			= "WorldSoundLastBallSpiralingToDeathMask";
 
 bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& sounds) {
-
+	MSFReader::InitSoundTypeMapping();
 	// Grab a file in stream from the main manu music script file:
 	// in debug mode we load right off disk, in release we load it from the zip file system
 #ifdef _DEBUG
@@ -205,71 +210,89 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 						continue;
 					}
 					
-					// The rest of the line should contain a set of probabilities and filepaths...
+					// The rest of the line should contain a set of probabilities and filepaths or just a single filepath
 					std::string soundFileLine;
 					std::getline(*inStream, soundFileLine);
 					// Clean up extra whitespace
 					soundFileLine = stringhelper::trim(soundFileLine);
 
-					// Read in the (probability : filepath) pairings:
-					// Split the line up into the probabilities and files
-					std::vector<std::string> tokens;
-					stringhelper::Tokenize(soundFileLine, tokens, std::string(MSFReader::OPEN_ENCLOSING_PROB_FILE_PAIR) +
-						std::string(MSFReader::CLOSE_ENCLOSING_PROB_FILE_PAIR) + std::string(MSFReader::PROB_DEFINITION_SYNTAX) + std::string("\n\r\t "));
-					// Should be pairs of probabilities and file paths...
-					if (tokens.size() % 2 != 0) {
-						error = true;
-						errorStr = "Invalid format of probabilities to filepaths provided on line: " + soundFileLine + ".";
-						continue;
-					}
-					
-					bool failed = false;
-					std::set<std::string> filesLoaded;
-					for (size_t i = 0; i < tokens.size(); i += 2) {
-						std::stringstream currProb(tokens[i]);
-						
-						int probability = 0;
-						currProb >> probability;
-
-						// Make sure the probabilities add up to something sensible
-						if (probability <= 0 || probability > 5) {
-							failed = true;
-							errorStr = "Invalid probability value(s) provided on line: " + soundFileLine + ". Probabilities must be in the range [1, 5].";
-							break;
-						}
-
-						std::string tempFilePath = stringhelper::trim(tokens[i+1]);
-						tempFilePath = GameViewConstants::GetInstance()->SOUND_DIR + "/" + tempFilePath;
-						
+					if (soundFileLine.find("(") == std::string::npos) {
+						// If we're here then there is just a single file provided...
+						soundFileLine = GameViewConstants::GetInstance()->SOUND_DIR + "/" + soundFileLine;
+							
 						// Check to see if the file exists...
-						std::ifstream test(tempFilePath.c_str(), std::ios::in | std::ios::binary);
+						std::ifstream test(soundFileLine.c_str(), std::ios::in | std::ios::binary);
 						if (!test.good()) {
-							errorStr = "Could not open file: " + tempFilePath;
-							failed = true;
-							break;
+							errorStr = "Could not open file: " + soundFileLine;
+							error = true;
+							continue;
 						}
 						test.close();
 
-						// Make sure there are no duplicate files
-						std::pair<std::set<std::string>::iterator, bool> found = filesLoaded.insert(tempFilePath);
-						if (!found.second) {
-							// The file was already part of the list...
-							errorStr = std::string("Duplicate file name found for game sound (") + lastSoundType + std::string(") : ") + tempFilePath;
-							failed = true;
-							break;
+						probabilities.push_back(1);
+						soundFilePaths.push_back(soundFileLine);
+					}
+					else {
+						// Read in the (probability : filepath) pairings:
+						// Split the line up into the probabilities and files
+						std::vector<std::string> tokens;
+						stringhelper::Tokenize(soundFileLine, tokens, std::string(MSFReader::OPEN_ENCLOSING_PROB_FILE_PAIR) +
+							std::string(MSFReader::CLOSE_ENCLOSING_PROB_FILE_PAIR) + std::string(MSFReader::PROB_DEFINITION_SYNTAX) + std::string("\n\r\t "));
+						// Should be pairs of probabilities and file paths...
+						if (tokens.size() % 2 != 0) {
+							error = true;
+							errorStr = "Invalid format of probabilities to filepaths provided on line: " + soundFileLine + ".";
+							continue;
+						}
+						
+						bool failed = false;
+						std::set<std::string> filesLoaded;
+						for (size_t i = 0; i < tokens.size(); i += 2) {
+							std::stringstream currProb(tokens[i]);
+							
+							int probability = 0;
+							currProb >> probability;
+
+							// Make sure the probabilities add up to something sensible
+							if (probability <= 0 || probability > 5) {
+								failed = true;
+								errorStr = "Invalid probability value(s) provided on line: " + soundFileLine + ". Probabilities must be in the range [1, 5].";
+								break;
+							}
+
+							std::string tempFilePath = stringhelper::trim(tokens[i+1]);
+							tempFilePath = GameViewConstants::GetInstance()->SOUND_DIR + "/" + tempFilePath;
+							
+							// Check to see if the file exists...
+							std::ifstream test(tempFilePath.c_str(), std::ios::in | std::ios::binary);
+							if (!test.good()) {
+								errorStr = "Could not open file: " + tempFilePath;
+								failed = true;
+								break;
+							}
+							test.close();
+
+							// Make sure there are no duplicate files
+							std::pair<std::set<std::string>::iterator, bool> found = filesLoaded.insert(tempFilePath);
+							if (!found.second) {
+								// The file was already part of the list...
+								errorStr = std::string("Duplicate file name found for game sound (") + lastSoundType + std::string(") : ") + tempFilePath;
+								failed = true;
+								break;
+							}
+
+							probabilities.push_back(probability);
+							soundFilePaths.push_back(tempFilePath);
 						}
 
-						probabilities.push_back(probability);
-						soundFilePaths.push_back(tempFilePath);
-					}
+						if (failed) {
+							probabilities.clear();
+							soundFilePaths.clear();
+							error = true;
+							continue;
+						}
 
-					if (failed) {
-						probabilities.clear();
-						soundFilePaths.clear();
-						error = true;
-						continue;
 					}
-
 				}
 				else if (currReadStr == MSFReader::FADE_IN_KEYWORD) {
 					if (!FoundEqualsSyntax(error, errorStr, inStream)) {
@@ -368,151 +391,76 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 	return !error;
 }
 
+void MSFReader::InitSoundTypeMapping() {
+	// Check to see if the mapping has already been initialized
+	if (!soundTypeMapping.empty()) {
+		return;
+	}
+
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_BG_MUSIC, GameSoundAssets::MainMenuBackgroundMusic));
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT, GameSoundAssets::MainMenuBackgroundBangSmallEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_BG_BANG_MEDIUM_EVENT, GameSoundAssets::MainMenuBackgroundBangMediumEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_BG_BANG_BIG_EVENT, GameSoundAssets::MainMenuBackgroundBangBigEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_HIGHLIGHTED_EVENT, GameSoundAssets::MainMenuItemHighlightedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT, GameSoundAssets::MainMenuItemEnteredEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT, GameSoundAssets::MainMenuItemBackAndCancelEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_VERIFY_AND_SEL_EVENT, GameSoundAssets::MainMenuItemVerifyAndSelectEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT, GameSoundAssets::MainMenuItemScrolledEvent));
+
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BG_MUSIC, GameSoundAssets::WorldBackgroundMusic));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_PADDLE_HIT_WALL_EVENT, GameSoundAssets::WorldSoundPaddleHitWallEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_LOST_EVENT, GameSoundAssets::WorldSoundPlayerLostABallEvent));
+	
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_LAST_BALL_EXPLODED_EVENT, GameSoundAssets::WorldSoundLastBallExplodedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_SPAWN_EVENT, GameSoundAssets::WorldSoundBallSpawnEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_BLOCK_COLLISION_EVENT, GameSoundAssets::WorldSoundBallBlockCollisionEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_PADDLE_COLLISION_EVENT, GameSoundAssets::WorldSoundBallPaddleCollisionEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_STICKY_BALL_PADDLE_COLLISION_EVENT, GameSoundAssets::WorldSoundStickyBallPaddleCollisionEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_BALL_COLLISION_EVENT, GameSoundAssets::WorldSoundBallBallCollisionEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BOMB_BLOCK_DESTROYED_EVENT, GameSoundAssets::WorldSoundBombBlockDestroyedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_INK_BLOCK_DESTROYED_EVENT, GameSoundAssets::WorldSoundInkBlockDestroyedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BASIC_BLOCK_DESTROYED_EVENT, GameSoundAssets::WorldSoundBasicBlockDestroyedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_COLLATERAL_BLOCK_DESTROYED_EVENT, GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_CANNON_BLOCK_LOADED_EVENT, GameSoundAssets::WorldSoundCannonBlockLoadedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_CANNON_BLOCK_FIRED_EVENT, GameSoundAssets::WorldSoundCannonBlockFiredEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_PORTAL_TELEPORT_EVENT, GameSoundAssets::WorldSoundPortalTeleportEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_ROCKET_EXPLODED_EVENT, GameSoundAssets::WorldSoundRocketExplodedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_SAFETY_NET_CREATED_EVENT, GameSoundAssets::WorldSoundBallSafetyNetCreatedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_SAFETY_NET_DESTROYED_EVENT, GameSoundAssets::WorldSoundBallSafetyNetDestroyedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_ITEM_SPAWNED_EVENT, GameSoundAssets::WorldSoundItemSpawnedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_POWER_UP_ACTIVATED_EVENT, GameSoundAssets::WorldSoundPowerUpItemActivatedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_POWER_NEUTRAL_ACTIVATED_EVENT, GameSoundAssets::WorldSoundPowerNeutralItemActivatedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_POWER_DOWN_ACTIVATED_EVENT, GameSoundAssets::WorldSoundPowerDownItemActivatedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_POWER_UP_TIMER_END_EVENT, GameSoundAssets::WorldSoundPowerUpItemTimerEndsEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_POWER_NEUTRAL_TIMER_END_EVENT, GameSoundAssets::WorldSoundPowerNeutralItemTimerEndsEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_POWER_DOWN_TIMER_END_EVENT, GameSoundAssets::WorldSoundPowerDownItemTimerEndsEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_OR_PADDLE_GROW_EVENT, GameSoundAssets::WorldSoundBallOrPaddleGrowEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_OR_PADDLE_SHRINK_EVENT, GameSoundAssets::WorldSoundBallOrPaddleShrinkEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_LASER_BULLET_SHOT_EVENT, GameSoundAssets::WorldSoundLaserBulletShotEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_LEVEL_COMPLETED_EVENT, GameSoundAssets::WorldSoundLevelCompletedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_WORLD_COMPLETED_EVENT, GameSoundAssets::WorldSoundWorldCompletedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_INK_SPLATTER_MASK, GameSoundAssets::WorldSoundInkSplatterMask));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_POISON_SICK_MASK, GameSoundAssets::WorldSoundPoisonSicknessMask));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_LASER_BULLET_MOVING_MASK, GameSoundAssets::WorldSoundLaserBulletMovingMask));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_ROCKET_MOVING_MASK, GameSoundAssets::WorldSoundRocketMovingMask));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_LASER_BEAM_FIRING_MASK, GameSoundAssets::WorldSoundLaserBeamFiringMask));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_COLLATERAL_BLOCK_FLASHING_MASK, GameSoundAssets::WorldSoundCollateralBlockFlashingMask));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_COLLATERAL_BLOCK_FALLING_MASK, GameSoundAssets::WorldSoundCollateralBlockFallingMask));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_CANNON_BLOCK_ROTATING_MASK, GameSoundAssets::WorldSoundCannonBlockRotatingMask));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_LAST_BALL_SPIRAL_TO_DEATH_MASK, GameSoundAssets::WorldSoundLastBallSpiralingToDeathMask));
+}
+
 /**
  * Converts the given music script file keyword sound name into an enumerated sound type
  * for the various game sounds.
  */
 int MSFReader::ConvertKeywordToSoundType(const std::string& soundName) {
-	if (soundName == MSFReader::MAIN_MENU_BG_MUSIC) {
-		return GameSoundAssets::MainMenuBackgroundMusic;
-	}
-	else if (soundName == MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT) {
-		return GameSoundAssets::MainMenuBackgroundBangSmallEvent;
-	}
-	else if (soundName == MSFReader::MAIN_MENU_BG_BANG_MEDIUM_EVENT) {
-		return GameSoundAssets::MainMenuBackgroundBangMediumEvent;
-	}
-	else if (soundName == MSFReader::MAIN_MENU_BG_BANG_BIG_EVENT) {
-		return GameSoundAssets::MainMenuBackgroundBangBigEvent;
-	}
-	else if (soundName == MSFReader::MAIN_MENU_ITEM_HIGHLIGHTED_EVENT) {
-		return GameSoundAssets::MainMenuItemHighlightedEvent;
-	}
-	else if (soundName == MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT) {
-		return GameSoundAssets::MainMenuItemEnteredEvent;
-	}
-	else if (soundName == MSFReader::MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT) {
-		return GameSoundAssets::MainMenuItemBackAndCancelEvent;
-	}
-	else if (soundName == MSFReader::MAIN_MENU_ITEM_VERIFY_AND_SEL_EVENT) {
-		return GameSoundAssets::MainMenuItemVerifyAndSelectEvent;
-	}
-	else if (soundName == MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT) {
-		return GameSoundAssets::MainMenuItemScrolledEvent;
-	}
-	else if (soundName == MSFReader::WORLD_BG_MUSIC) {
-		return GameSoundAssets::WorldBackgroundMusic;
-	}
-	else if (soundName == MSFReader::WORLD_PADDLE_HIT_WALL_EVENT) {
-		return GameSoundAssets::WorldSoundPaddleHitWallEvent;
-	}
-	else if (soundName == MSFReader::WORLD_BALL_LOST_EVENT) {
-		return GameSoundAssets::WorldSoundPlayerLostABallEvent;
-	}
-	else if (soundName == MSFReader::WORLD_LAST_BALL_EXPLODED_EVENT) {
-		return GameSoundAssets::WorldSoundLastBallExplodedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_BALL_SPAWN_EVENT) {
-		return GameSoundAssets::WorldSoundBallSpawnEvent;
-	}
-	else if (soundName == MSFReader::WORLD_BALL_BLOCK_COLLISION_EVENT) {
-		return GameSoundAssets::WorldSoundBallBlockCollisionEvent;
-	}
-	else if (soundName == MSFReader::WORLD_BALL_PADDLE_COLLISION_EVENT) {
-		return GameSoundAssets::WorldSoundBallPaddleCollisionEvent;
-	}
-	else if (soundName == MSFReader::WORLD_STICKY_BALL_PADDLE_COLLISION_EVENT) {
-		return GameSoundAssets::WorldSoundStickyBallPaddleCollisionEvent;
-	}
-	else if (soundName == MSFReader::WORLD_BALL_BALL_COLLISION_EVENT) {
-		return GameSoundAssets::WorldSoundBallBallCollisionEvent;
-	}
-	else if (soundName == MSFReader::WORLD_BOMB_BLOCK_DESTROYED_EVENT) {
-		return GameSoundAssets::WorldSoundBombBlockDestroyedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_INK_BLOCK_DESTROYED_EVENT) {
-		return GameSoundAssets::WorldSoundInkBlockDestroyedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_BASIC_BLOCK_DESTROYED_EVENT) {
-		return GameSoundAssets::WorldSoundBasicBlockDestroyedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_COLLATERAL_BLOCK_DESTROYED_EVENT) {
-		return GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_CANNON_BLOCK_LOADED_EVENT) {
-		return GameSoundAssets::WorldSoundCannonBlockLoadedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_PORTAL_TELEPORT_EVENT) {
-		return GameSoundAssets::WorldSoundPortalTeleportEvent;
-	}
-	else if (soundName == MSFReader::WORLD_SAFETY_NET_CREATED_EVENT) {
-		return GameSoundAssets::WorldSoundBallSafetyNetCreatedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_SAFETY_NET_DESTROYED_EVENT) {
-		return GameSoundAssets::WorldSoundBallSafetyNetDestroyedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_ITEM_SPAWNED_EVENT) {
-		return GameSoundAssets::WorldSoundItemSpawnedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_POWER_UP_ACTIVATED_EVENT) {
-		return GameSoundAssets::WorldSoundPowerUpItemActivatedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_POWER_NEUTRAL_ACTIVATED_EVENT) {
-		return GameSoundAssets::WorldSoundPowerNeutralItemActivatedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_POWER_DOWN_ACTIVATED_EVENT) {
-		return GameSoundAssets::WorldSoundPowerDownItemActivatedEvent;
-	}
-	else if (soundName == MSFReader::WORLD_POWER_UP_TIMER_END_EVENT) {
-		return GameSoundAssets::WorldSoundPowerUpItemTimerEndsEvent;
-	}
-	else if (soundName == MSFReader::WORLD_POWER_NEUTRAL_TIMER_END_EVENT) {
-		return GameSoundAssets::WorldSoundPowerNeutralItemTimerEndsEvent;
-	}
-	else if (soundName == MSFReader::WORLD_POWER_DOWN_TIMER_END_EVENT) {
-		return GameSoundAssets::WorldSoundPowerDownItemTimerEndsEvent;
-	}
-	else if (soundName ==MSFReader::WORLD_BALL_OR_PADDLE_GROW_EVENT) {
-		return GameSoundAssets::WorldSoundBallOrPaddleGrowEvent;
-	}
-	else if (soundName ==MSFReader::WORLD_BALL_OR_PADDLE_SHRINK_EVENT) {
-		return GameSoundAssets::WorldSoundBallOrPaddleShrinkEvent;
-	}
-	else if (soundName ==MSFReader::WORLD_LASER_BULLET_SHOT_EVENT) {
-		return GameSoundAssets::WorldSoundLaserBulletShotEvent;
-	}
-	else if (soundName ==MSFReader::WORLD_LEVEL_COMPLETED_EVENT) {
-		return GameSoundAssets::WorldSoundLevelCompletedEvent;
-	}
-	else if (soundName ==MSFReader::WORLD_WORLD_COMPLETED_EVENT) {
-		return GameSoundAssets::WorldSoundWorldCompletedEvent;
-	}
-	else if (soundName ==MSFReader::WORLD_INK_SPLATTER_MASK) {
-		return GameSoundAssets::WorldSoundInkSplatterMask;
-	}			
-	else if (soundName ==MSFReader::WORLD_POISON_SICK_MASK) {
-		return GameSoundAssets::WorldSoundPoisonSicknessMask;
-	}	
-	else if (soundName ==MSFReader::WORLD_LASER_BULLET_MOVING_MASK) {
-		return GameSoundAssets::WorldSoundLaserBulletMovingMask;
-	}
-	else if (soundName ==MSFReader::WORLD_ROCKET_MOVING_MASK) {
-		return GameSoundAssets::WorldSoundRocketMovingMask;
-	}
-	else if (soundName ==MSFReader::WORLD_LASER_BEAM_FIRING_MASK) {
-		return GameSoundAssets::WorldSoundLaserBeamFiringMask;
-	}
-	else if (soundName ==MSFReader::WORLD_COLLATERAL_BLOCK_FLASHING_MASK) {
-		return GameSoundAssets::WorldSoundCollateralBlockFlashingMask;
-	}
-	else if (soundName ==MSFReader::WORLD_COLLATERAL_BLOCK_FALLING_MASK) {
-		return GameSoundAssets::WorldSoundCollateralBlockFallingMask;
-	}
-	else if (soundName ==MSFReader::WORLD_CANNON_BLOCK_ROTATING_MASK) {
-		return GameSoundAssets::WorldSoundCannonBlockRotatingMask;
+	std::map<std::string, int>::iterator findIter = soundTypeMapping.find(soundName);
+	if (findIter == soundTypeMapping.end()) {
+		return MSFReader::INVALID_SOUND_TYPE;
 	}
 
-	return MSFReader::INVALID_SOUND_TYPE;
+	return findIter->second;
 }
 
 /**

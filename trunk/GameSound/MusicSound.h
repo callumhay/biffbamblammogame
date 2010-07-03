@@ -54,6 +54,7 @@ inline void MusicSound::Play(bool doFadeIn) {
 	
 	int fadeInAmt = doFadeIn ? this->msFadein : 0;
 	Mix_FadeInMusic(this->sdlMusic, -1, fadeInAmt);
+	Mix_VolumeMusic(this->volume);
 	this->isPlaying = true;
 }
 

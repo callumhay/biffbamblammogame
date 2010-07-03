@@ -98,6 +98,8 @@ void ESPVolumeEmitter::SetEmitVolume(const Point3D& min, const Point3D& max) {
 		delete this->emitVolume;
 	}
 
+	assert(min <= max);
+
 	// Setup a new emit area rectangle with the given parameters
 	ESPVolumeEmitter::EmitAABB* emitAABB = new ESPVolumeEmitter::EmitAABB();
 	emitAABB->min = min;

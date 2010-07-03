@@ -9,10 +9,14 @@ public:
 	GameOverState(GameModel* gm);
 	~GameOverState();
 
-	virtual void Tick(double seconds) {
+	GameState::GameStateType GetType() const {
+		return GameState::GameOverStateType;
+	}
+
+	void Tick(double seconds) {
 		// Do nothing, player is dead.
 	}
-	virtual void BallReleaseKeyPressed() {
+	void BallReleaseKeyPressed() {
 		// Do nothing, ball is dead as is player.
 	}
 
