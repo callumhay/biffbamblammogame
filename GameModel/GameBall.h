@@ -256,6 +256,13 @@ public:
 	// Set the velocity of the ball; (0, 1) is up and (1, 0) is right
 	void SetVelocity(const BallSpeed &magnitude, const Vector2D& dir) {
 		this->currDir = Vector2D(dir);
+		// If the ball is travelling directly sideways we should nudge it a bit up,
+		// just to make sure it doesn't go sideways forever
+		if (this->currDir == Vector2D(1, 0) || this->currDir == Vector2D(-1, 0)) {
+			this->currDir = Vector2D(this->currDir[0], 0.01);
+			this->currDir.Normalize();
+		}
+
 		this->SetSpeed(magnitude);
 	}
 	void SetVelocity(float magnitude, const Vector2D& dir) {

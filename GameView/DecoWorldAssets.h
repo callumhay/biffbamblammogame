@@ -54,8 +54,9 @@ public:
 	void DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight);
 	void DrawBackgroundEffects(const Camera& camera);
 	void FadeBackground(bool fadeout, float fadeTime);
+	void ResetToInitialState();
 
-	virtual void Tick(double dT);
+	void Tick(double dT);
 
 };
 

@@ -156,9 +156,13 @@ inline void EventSound::Stop(bool doFadeout) {
 
 	// Sound event has finished playing
 	this->playingSoundChunk = NULL;
+	this->channel					  = Sound::INVALID_SDL_CHANNEL;
 }
 
 inline bool EventSound::IsPlaying() const {
+	if (this->channel == Sound::INVALID_SDL_CHANNEL) {
+		return false;
+	}
 	Mix_Chunk* playingSDLChunk = Mix_GetChunk(this->channel);
 	return Mix_Playing(this->channel) || (this->playingSoundChunk != NULL && playingSDLChunk == this->playingSoundChunk);
 }

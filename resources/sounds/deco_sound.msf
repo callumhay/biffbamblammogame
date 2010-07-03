@@ -50,8 +50,8 @@ WorldSoundStickyBallPaddleCollisionEvent {
 	loops    = 1
 }
 
-ignore WorldSoundBallBallCollisionEvent {
-	file = 
+WorldSoundBallBallCollisionEvent {
+	file = deco/ball_ball_hit.ogg
    	fadein   = 0
 	loops    = 1
 }
@@ -231,8 +231,8 @@ ignore WorldSoundCollateralBlockFallingMask {
    	fadeout  = 0
 }
 
-ignore WorldSoundCannonBlockRotatingMask {
-	file = 
+WorldSoundCannonBlockRotatingMask {
+	file = deco/cannon_rotate.ogg
    	fadein   = 0
    	fadeout  = 0
 }

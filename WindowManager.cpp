@@ -36,7 +36,7 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
   static const int audio_rate = 44100;
   static const Uint16 audio_format = AUDIO_S16; // 16-bit stereo
   static const int audio_channels = 2;
-  static const int audio_buffers = 4096;
+  static const int audio_buffers = 2048;
 
 	if (Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers)) {
 		debug_output("Unable to open SDL audio: " << SDL_GetError());

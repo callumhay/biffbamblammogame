@@ -913,6 +913,7 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 		// Make sure the sound and world assets are in sync
 		assert(this->soundAssets->GetActiveWorldSounds() == world->GetStyle());
 	}
+	this->worldAssets->ResetToInitialState();
 
 	// Load all of the level meshes for the world
 	const std::vector<GameLevel*>& levels = world->GetAllLevelsInWorld();
