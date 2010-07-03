@@ -204,27 +204,41 @@ void PlayerPaddle::FireAttachedBall() {
 	// Get the paddle's avg. velocity
 	Vector2D avgPaddleVel = this->GetAvgVelocity();
 
-	// Check to see if the paddle is moving, if not just use a random angle
-	if (fabs(avgPaddleVel[0]) <= EPSILON) {
-		// Add some randomness to the velocity by deviating a straight-up shot by some random angle
-		float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::STILL_RAND_RELEASE_DEG;		
-		ballReleaseDir = Vector2D::Rotate(randomAngleInDegs, ballReleaseDir);
+	// Check for the sticky paddle - in the case of the sticky paddle we want the ball to not get stuck again..
+	if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+		std::vector<int> indices = this->bounds.ClosestCollisionIndices(this->attachedBall->GetCenterPosition2D(), 0.01f);
+		assert(indices.size() > 0);
+		const Vector2D& launchNormal = this->bounds.GetNormal(indices[0]);
+
+		// Move the ball so it's no longer colliding...
+		this->attachedBall->SetCenterPosition(this->attachedBall->GetCenterPosition2D() + this->attachedBall->GetBounds().Radius() * launchNormal);
+		this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), launchNormal);
 	}
 	else {
-		// The paddle appears to be moving, modify the ball's release velocity
-		// to reflect some of this movement
-		float multiplier = PlayerPaddle::DEFAULT_SPEED / static_cast<float>(GameBall::NormalSpeed);
-		Vector2D newBallDir = Vector2D::Normalize(ballReleaseDir + multiplier * avgPaddleVel);
-		
-		// and, of course, add some randomness...
-		float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::MOVING_RAND_RELEASE_DEG;		
-		ballReleaseDir = Vector2D::Rotate(randomAngleInDegs, newBallDir);
+		// Check to see if the paddle is moving, if not just use a random angle
+		if (fabs(avgPaddleVel[0]) <= EPSILON) {
+			// Add some randomness to the velocity by deviating a straight-up shot by some random angle
+			float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::STILL_RAND_RELEASE_DEG;		
+			ballReleaseDir = Vector2D::Rotate(randomAngleInDegs, ballReleaseDir);
+		}
+		else {
+			// The paddle appears to be moving, modify the ball's release velocity
+			// to reflect some of this movement
+			float multiplier = PlayerPaddle::DEFAULT_SPEED / static_cast<float>(GameBall::NormalSpeed);
+			Vector2D newBallDir = Vector2D::Normalize(ballReleaseDir + multiplier * avgPaddleVel);
+			
+			// and, of course, add some randomness...
+			float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::MOVING_RAND_RELEASE_DEG;		
+			ballReleaseDir = Vector2D::Rotate(randomAngleInDegs, newBallDir);
+		}
+
+		ballReleaseDir.Normalize();
+
+		// Set the ball velocity (tragectory it will leave the paddle on)
+		this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), ballReleaseDir);
 	}
 
-	ballReleaseDir.Normalize();
-
-	// Set the ball velocity (tragectory it will leave the paddle on) and re-enable its collisions
-	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), ballReleaseDir);
+	// Re-enable the ball's collisions
 	this->attachedBall->SetBallBallCollisionsEnabled();
 	this->attachedBall->SetBallPaddleCollisionsEnabled();
 

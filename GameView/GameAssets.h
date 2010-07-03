@@ -150,9 +150,6 @@ public:
 	GameSoundAssets* GetSoundAssets() {
 		return this->soundAssets;
 	}
-	//void PlaySound() {
-	//	this->soundAssets->
-	//}
 
 	LivesLeftHUD* GetLifeHUD() const {
 		return this->lifeHUD;

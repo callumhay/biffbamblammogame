@@ -24,6 +24,7 @@
 #include "../GameModel/PlayerPaddle.h"
 #include "../GameModel/Onomatoplex.h"
 #include "../GameModel/Projectile.h"
+#include "../GameModel/Beam.h"
 
 #include "../GameSound/GameSoundAssets.h"
 
@@ -52,7 +53,7 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	this->display->GetAssets()->LoadWorldAssets(&world);
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 
-	//this->display->GetAssets()->PlaySound(
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldBackgroundMusic);
 }
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
@@ -82,26 +83,32 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 	PlayerPaddle::PaddleSize paddleSize = paddle.GetPaddleSize();
 	float shakeMagnitude = 0.0f;
 	float shakeLength = 0.0f;
+	GameSoundAssets::SoundVolumeLoudness volume;
 	switch(paddleSize) {
 		case PlayerPaddle::SmallestSize:
 			shakeMagnitude = 0.0f;
 			shakeLength = 0.0f;
+			volume = GameSoundAssets::VeryQuietVolume;
 			break;
 		case PlayerPaddle::SmallerSize:
 			shakeMagnitude = 0.1f;
 			shakeLength = 0.1f;
+			volume = GameSoundAssets::QuietVolume;
 			break;
 		case PlayerPaddle::NormalSize:
 			shakeMagnitude = 0.2f;
 			shakeLength = 0.15f;
+			volume = GameSoundAssets::NormalVolume;
 			break;
 		case PlayerPaddle::BiggerSize:
 			shakeMagnitude = 0.33f;
 			shakeLength = 0.2f;
+			volume = GameSoundAssets::LoudVolume;
 			break;
 		case PlayerPaddle::BiggestSize:
 			shakeMagnitude = 0.5f;
 			shakeLength = 0.25f;
+			volume = GameSoundAssets::VeryLoudVolume;
 			break;
 		default:
 			assert(false);
@@ -111,6 +118,9 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 	
 	// Add a smacking type effect...
 	this->display->GetAssets()->GetESPAssets()->AddPaddleHitWallEffect(paddle, hitLoc);
+
+	// Add the sound for the smacking against the wall
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundPaddleHitWallEvent, volume);
 
 	debug_output("EVENT: Paddle hit wall - " << soundText);
 }
@@ -124,12 +134,21 @@ void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, 
 void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 	debug_output("EVENT: Ball died");
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveBallEffects(deadBall);
+
+	// If it's not the last ball then we play the lost ball effect...
+	if (this->display->GetModel()->GetGameBalls().size() >= 2) {
+		this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundPlayerLostABallEvent);
+	}
+
 }
 
 void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) {
 	debug_output("EVENT: Last ball is about to die.");
 
 	this->display->GetAssets()->ActivateLastBallDeathEffects(lastBallToDie);
+
+	// Play the sound of the ball spiralling to its most horrible death
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundLastBallSpiralingToDeathMask);
 
 	// Clear out the timers - they no longer matter since the ball is doomed
 	this->display->GetAssets()->GetItemAssets()->ClearTimers();
@@ -140,6 +159,11 @@ void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
 
 	// Add a cool effect for when the ball explodes
 	this->display->GetAssets()->GetESPAssets()->AddBallExplodedEffect(&explodedBall);
+
+	// Stop the spiraling sound mask
+	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundLastBallSpiralingToDeathMask);
+	// Add the sound for the last ball exploding
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundLastBallExplodedEvent, GameSoundAssets::LoudVolume);
 }
 
 void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
@@ -190,6 +214,8 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.1, 0.0), 100);
 	}
 
+	this->display->GetAssets()->GetSoundAssets()->PlayBallHitBlockEvent(ball, block);
+
 	debug_output("EVENT: Ball-block collision");
 }
 
@@ -198,10 +224,29 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 	// Add the visual effect for when the ball hits the paddle
 	this->display->GetAssets()->GetESPAssets()->AddBouncePaddleEffect(this->display->GetCamera(), ball, paddle);
 
+	bool ballIsUber = (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall;
+	// Loudness is determined by the current state of the ball...
+	GameSoundAssets::SoundVolumeLoudness loudness = GameSoundAssets::NormalVolume;
+
 	// We shake things up if the ball is uber...
-	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-		  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
+	if (ballIsUber) {
 		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.2, 0.0), 100);
+		loudness = GameSoundAssets::VeryLoudVolume;
+	}
+
+	if (ball.GetBallSize() > GameBall::NormalSize) {
+		loudness = GameSoundAssets::VeryLoudVolume;
+	}
+	else if (ball.GetBallSize() < GameBall::NormalSize) {
+		loudness = GameSoundAssets::QuietVolume;
+	}
+
+	// Play the sound for when the ball hits the paddle
+	if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+		this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundStickyBallPaddleCollisionEvent, loudness);
+	}
+	else {
+		this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBallPaddleCollisionEvent, loudness);
 	}
 
 	debug_output("EVENT: Ball-paddle collision");
@@ -240,7 +285,11 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
 }
 
 void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) {
+	// Add the blast effect of the ball exiting the cannon
 	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(ball, cannonBlock);
+	// .. and the sound for it
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockFiredEvent, GameSoundAssets::LoudVolume);
+
 	debug_output("EVENT: Ball fired out of cannon block");
 }
 
@@ -249,18 +298,23 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 	// Add the effects based on the type of block that is being destroyed...
 	switch (block.GetType()) {
 		
-		case LevelPiece::Solid:
-		case LevelPiece::SolidTriangle:
 		case LevelPiece::Breakable:
 		case LevelPiece::BreakableTriangle:
+		case LevelPiece::Solid:
+		case LevelPiece::SolidTriangle:
 			// Typical break effect for basic breakable blocks
 			this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
+			// Sound for basic breakable blocks
+			this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
 			break;
 
 		case LevelPiece::Bomb:
 			// Bomb effect - big explosion!
 			this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block);
 			this->display->GetCamera().SetCameraShake(1.2, Vector3D(1.0, 0.3, 0.1), 100);
+
+			// Sound for bomb explosion
+			this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBombBlockDestroyedEvent, GameSoundAssets::LoudVolume);
 			break;
 
 		case LevelPiece::Ink: {
@@ -274,6 +328,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 					// Cover camera in ink with a fullscreen splatter effect
 					this->display->GetAssets()->GetFBOAssets()->ActivateInkSplatterEffect();
 				}
+
+				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundInkBlockDestroyedEvent);
 			}
 			break;
 
@@ -290,11 +346,14 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 			break;
 
 		case LevelPiece::Collateral: {
-				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
+				// Don't show any effects / play any sounds if the ball is dead/dying
+				if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
+					this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
+					this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent);
+				}
 				const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
 				this->display->GetAssets()->GetLevelMesh(currLevel)->RemovePiece(block);
 			}
-
 			break;
 
 		default:
@@ -410,6 +469,17 @@ void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 void GameEventsListener::BeamSpawnedEvent(const Beam& beam) {
 	// Add an effect for the new beam...
 	this->display->GetAssets()->GetESPAssets()->AddBeamEffect(beam);
+
+	// Add the appropriate sounds for the beam
+	switch (beam.GetBeamType()) {
+		case Beam::PaddleLaserBeam:
+			this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundLaserBeamFiringMask);
+			break;
+		default:
+			assert(false);
+			break;
+	}
+
 	debug_output("EVENT: Beam spawned");
 }
 
@@ -422,6 +492,17 @@ void GameEventsListener::BeamChangedEvent(const Beam& beam) {
 void GameEventsListener::BeamRemovedEvent(const Beam& beam) {
 	// Remove the effect for the beam...
 	this->display->GetAssets()->GetESPAssets()->RemoveBeamEffect(beam);
+
+	// Removed the appropriate sounds for the beam
+	switch (beam.GetBeamType()) {
+		case Beam::PaddleLaserBeam:
+			this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundLaserBeamFiringMask);
+			break;
+		default:
+			assert(false);
+			break;
+	}
+
 	debug_output("EVENT: Beam removed");
 }
 

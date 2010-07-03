@@ -9,10 +9,14 @@ class GameCompleteState : public GameState {
 
 public:
 	GameCompleteState(GameModel* gm);
-	virtual ~GameCompleteState();
+	~GameCompleteState();
 
-	virtual void Tick(double seconds);
-	virtual void BallReleaseKeyPressed() {
+	GameState::GameStateType GetType() const {
+		return GameState::GameCompleteStateType;
+	}
+
+	void Tick(double seconds);
+	void BallReleaseKeyPressed() {
 		// Do nothing, the game is over!
 	}
 

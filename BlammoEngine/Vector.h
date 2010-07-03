@@ -193,6 +193,11 @@ public:
 		return static_cast<float>(sqrt(length2()));
   }
 
+	void Abs() {
+		this->v_[0] = fabs(this->v_[0]);
+		this->v_[1] = fabs(this->v_[1]);
+		this->v_[2] = fabs(this->v_[2]);
+	}
   
 	void Normalize() {
 		float magnitude = this->length();

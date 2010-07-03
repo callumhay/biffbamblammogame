@@ -2038,6 +2038,7 @@ void GameESPAssets::AddPaddleLaserBeamEffect(const Beam& beam) {
 
 	Vector3D beamRightVec(startSegment->GetBeamSegmentRay().GetUnitDirection());
 	Vector3D beamDiagonalVec = startSegment->GetRadius() * Vector3D(beamRightVec[1], -beamRightVec[0], PlayerPaddle::PADDLE_HALF_DEPTH);
+	beamDiagonalVec.Abs();
 
 	this->paddleBeamOriginUp->SetEmitDirection(Vector3D(startSegment->GetBeamSegmentRay().GetUnitDirection()));
 	ESPInterval xSize(0.5f * startSegment->GetRadius(), 1.5f * startSegment->GetRadius());
@@ -3594,7 +3595,9 @@ void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera
 void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
 	float tempXBound = 0.7f * paddle.GetHalfFlatTopWidth();
 	float tempZBound = 0.9f * paddle.GetHalfDepthTotal();
-	
+	assert(tempXBound > 0);
+	assert(tempZBound > 0);
+
 	this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, 0, -tempZBound), Point3D(tempXBound, 0, tempZBound));
 	this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
 

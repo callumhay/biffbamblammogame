@@ -9,6 +9,10 @@ public:
 	LevelCompleteState(GameModel* gm);
 	~LevelCompleteState();
 
+	GameState::GameStateType GetType() const {
+		return GameState::LevelCompleteStateType;
+	}
+
 	void Tick(double seconds);
 	void BallReleaseKeyPressed() { /* does nothing */ } 
 

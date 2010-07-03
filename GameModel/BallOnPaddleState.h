@@ -17,6 +17,10 @@ public:
 	BallOnPaddleState(GameModel* gm);
 	~BallOnPaddleState();
 
+	GameState::GameStateType GetType() const {
+		return GameState::BallOnPaddleStateType;
+	}
+
 	void Tick(double seconds);
 	void BallReleaseKeyPressed();
 

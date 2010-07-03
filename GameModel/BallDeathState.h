@@ -21,6 +21,10 @@ public:
 	BallDeathState(GameBall* lastBallToBeAlive, GameModel* gm);
 	~BallDeathState();
 
+	GameState::GameStateType GetType() const {
+		return GameState::BallDeathStateType;
+	}
+
 	void Tick(double seconds);
 	void BallReleaseKeyPressed() {}
 	void MovePaddleKeyPressed(float dist) {}

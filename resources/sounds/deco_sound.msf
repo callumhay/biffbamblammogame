@@ -1,151 +1,245 @@
 // Music
-ignore WorldBackgroundMusic {
-	file = 
+WorldBackgroundMusic {
+	file = deco/world_bg.ogg
+   	fadein   = 0
+   	fadeout  = 1000	
 }
 
 // Events
-ignore WorldSoundPaddleHitWallEvent {
-	file = 
+WorldSoundPaddleHitWallEvent {
+	file = deco/paddle_hit_wall.ogg
+   	fadein   = 0
+	loops    = 1
 }
 	
-ignore WorldSoundPlayerLostABallEvent {
-	file = 
+// This sound only plays if the player has more than 1 ball active
+// and loses one of the balls
+WorldSoundPlayerLostABallEvent {
+	file = deco/lost_ball.ogg
+   	fadein   = 0	
+	loops    = 1
 }
 
-ignore WorldSoundLastBallExplodedEvent {
-	file = 
+WorldSoundLastBallExplodedEvent {
+	file = deco/last_ball_death.ogg
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundBallSpawnEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
-ignore WorldSoundBallBlockCollisionEvent {
-	file = 
+WorldSoundBallBlockCollisionEvent {
+	file = deco/ball_block_hit.ogg
+   	fadein   = 0
+	loops    = 1
 }
 
-ignore WorldSoundBallPaddleCollisionEvent {
-	file = 
+WorldSoundBallPaddleCollisionEvent {
+	file = deco/ball_paddle_hit.ogg
+   	fadein   = 0
+	loops    = 1
 }
 
-ignore WorldSoundStickyBallPaddleCollisionEvent {
-	file = 
+WorldSoundStickyBallPaddleCollisionEvent {
+	file = deco/ball_sticky_paddle_hit.ogg
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundBallBallCollisionEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
-ignore WorldSoundBombBlockDestroyedEvent {
-	file = 
+WorldSoundBombBlockDestroyedEvent {
+	file = deco/bomb_explode.ogg
+   	fadein   = 0
+	loops    = 1
 }
 
-ignore WorldSoundInkBlockDestroyedEvent {
-	file = 
+WorldSoundInkBlockDestroyedEvent {
+	file = deco/ink_splat.ogg
+   	fadein   = 0
+	loops    = 1
 }
 
-ignore WorldSoundBasicBlockDestroyedEvent {
-	file = 
+WorldSoundBasicBlockDestroyedEvent {
+	file = deco/block_break_basic.ogg
+   	fadein   = 0
+	loops    = 1
 }
 
-ignore WorldSoundCollateralBlockDestroyedEvent {
-	file = 
+WorldSoundCollateralBlockDestroyedEvent {
+	file = deco/collateral_explode.ogg
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundCannonBlockLoadedEvent {
 	file = 
+   	fadein   = 0	
+	loops    = 1
+}
+
+WorldSoundCannonBlockFiredEvent {
+	file = deco/cannon_fired.ogg
+   	fadein   = 0	
+	loops    = 1
 }
 
 ignore WorldSoundPortalTeleportEvent {
 	file =
+   	fadein   = 0	
+	loops    = 1
+}
+
+WorldSoundRocketExplodedEvent {
+	file = deco/rocket_explode.ogg
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundBallSafetyNetCreatedEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundBallSafetyNetDestroyedEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundItemSpawnedEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundPowerUpItemActivatedEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundPowerNeutralItemActivatedEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundPowerDownItemActivatedEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundPowerUpItemTimerEndsEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundPowerNeutralItemTimerEndsEvent {
 	file = 
+   	fadein   = 0	
+	loops    = 1
 }
 
 ignore WorldSoundPowerDownItemTimerEndsEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundBallOrPaddleGrowEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundBallOrPaddleShrinkEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundLaserBulletShotEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundLevelCompletedEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 ignore WorldSoundWorldCompletedEvent {
 	file = 
+   	fadein   = 0
+	loops    = 1
 }
 
 // Masks
 ignore WorldSoundInkSplatterMask {
 	file = 
+   	fadein   = 0
+   	fadeout  = 0
 }
 
 ignore WorldSoundPoisonSicknessMask {
 	file = 
+   	fadein   = 0
+   	fadeout  = 0
 }
 
 ignore WorldSoundLaserBulletMovingMask {
 	file = 
+   	fadein   = 0
+   	fadeout  = 0
 }
 
-ignore WorldSoundRocketMovingMask {
-	file =
+WorldSoundRocketMovingMask {
+	file = deco/rocket.ogg
+   	fadein   = 1000
+   	fadeout  = 0
 }
 
-ignore WorldSoundLaserBeamFiringMask {
-	file = 
+WorldSoundLaserBeamFiringMask {
+	file = deco/laser_beam.ogg
+   	fadein   = 0
+   	fadeout  = 500
 }
 
 ignore WorldSoundCollateralBlockFlashingMask {
 	file = 
+   	fadein   = 0
+   	fadeout  = 0
 }
 
 ignore WorldSoundCollateralBlockFallingMask {
 	file = 
+   	fadein   = 0
+   	fadeout  = 0
 }
 
 ignore WorldSoundCannonBlockRotatingMask {
 	file = 
+   	fadein   = 0
+   	fadeout  = 0
 }
 
+
+WorldSoundLastBallSpiralingToDeathMask {
+	file = deco/ball_spiral_to_death.ogg
+   	fadein   = 0
+   	fadeout  = 300
+}

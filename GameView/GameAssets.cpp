@@ -820,7 +820,10 @@ void GameAssets::RemoveProjectile(Camera& camera, const GameModel& gameModel, co
 			this->rocketMesh->Deactivate();
 			// Add a camera shake and flash for when the rocket explodes...
 			camera.SetCameraShake(1.0, Vector3D(0.8, 0.7, 0.1), 120);
-			this->ExplosionFlash(0.5, 1.0f);			
+			this->ExplosionFlash(0.5, 1.0f);
+			// Turn off the sound for the rocket mask and play the explosion sound
+			this->soundAssets->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
+			this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketExplodedEvent, GameSoundAssets::VeryLoudVolume);
 			break;
 		default:
 			break;
@@ -841,6 +844,7 @@ void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
 void GameAssets::FirePaddleRocket(const Projectile& rocketProjectile) {
 	assert(rocketProjectile.GetType() == Projectile::PaddleRocketBulletProjectile);
 	this->rocketMesh->Activate(dynamic_cast<const PaddleRocketProjectile*>(&rocketProjectile));
+	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
 }
 
 /**
