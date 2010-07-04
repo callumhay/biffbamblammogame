@@ -14,11 +14,15 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 
+#include "../ESPEngine/ESPParticleScaleEffector.h"
+
 class Mesh;
 class PaddleRocketProjectile;
 class Camera;
 class PointLight;
 class PlayerPaddle;
+class ESPPointEmitter;
+class Texture2D;
 
 /**
  * Class that holds the paddle rocket bullet mesh - this will be drawn
@@ -32,9 +36,13 @@ public:
 	void Activate(const PaddleRocketProjectile* rocketProjectile);
 	void Deactivate();
 
-	void Draw(const PlayerPaddle& paddle, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight);
+	void Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight);
 
 private:
+	ESPParticleScaleEffector pulseEffector;
+	Texture2D* glowTex;
+	ESPPointEmitter* rocketGlowEmitter;
+
 	Mesh* rocketMesh;
 	const PaddleRocketProjectile* rocketProjectile;
 	
