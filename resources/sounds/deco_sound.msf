@@ -80,8 +80,8 @@ WorldSoundCollateralBlockDestroyedEvent {
 	loops    = 1
 }
 
-ignore WorldSoundCannonBlockLoadedEvent {
-	file = 
+WorldSoundCannonBlockLoadedEvent {
+	file = deco/cannon_loaded.ogg
    	fadein   = 0	
 	loops    = 1
 }
@@ -92,8 +92,8 @@ WorldSoundCannonBlockFiredEvent {
 	loops    = 1
 }
 
-ignore WorldSoundPortalTeleportEvent {
-	file =
+WorldSoundPortalTeleportEvent {
+	file = deco/portal_warp.ogg
    	fadein   = 0	
 	loops    = 1
 }

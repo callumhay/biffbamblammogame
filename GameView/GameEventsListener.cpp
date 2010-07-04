@@ -40,6 +40,9 @@ void GameEventsListener::GameCompletedEvent() {
 
 	// Set the state to the end of game display
 	this->display->SetCurrentState(new GameCompleteDisplayState(this->display));
+
+	// Stop world background music (if it's still going)
+	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldBackgroundMusic);
 }
 
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
@@ -58,6 +61,10 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
 	debug_output("EVENT: World completed");
+
+	// Stop world background music (if it's still going)
+	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldBackgroundMusic);
+
 }
 
 void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLevel& level) {
@@ -179,6 +186,9 @@ void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
 		// Kill absolutely all remaining visual effects...
 		this->display->GetAssets()->DeactivateMiscEffects();
 		
+		// Stop world background music (if it's still going)
+		this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldBackgroundMusic);
+
 		this->display->SetCurrentState(new GameOverDisplayState(this->display));
 	}
 }
@@ -263,6 +273,7 @@ void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const Gam
 }
 
 void GameEventsListener::BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal) {
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundPortalTeleportEvent);
 	this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(ball.GetBounds().Center(), enterPortal);
 	debug_output("EVENT: Ball teleported by portal block");
 }
