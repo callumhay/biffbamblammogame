@@ -423,6 +423,8 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newM
 }
 
 void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
+	// Play item spawn sound
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundItemSpawnedEvent);
 
 	// We don't show the stars coming off the dropping items if it gets in the way of playing
 	// the game - e.g., when in paddle camera mode
@@ -432,10 +434,16 @@ void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 	// Spawn an item drop effect for the item...
 	this->display->GetAssets()->GetESPAssets()->AddItemDropEffect(this->display->GetCamera(), item, showItemDropStars);
 
+	// Play the item 'moving' mask - plays as the item falls towards the paddle until it leaves play
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundItemMovingMask, GameSoundAssets::VeryQuietVolume);
+
 	debug_output("EVENT: Item Spawned: " << item);
 }
 
 void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
+	// Stop the item moving mask sound
+	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundItemMovingMask);
+
 	// Remove any previous item drop effect
 	this->display->GetAssets()->GetESPAssets()->RemoveItemDropEffect(this->display->GetCamera(), item);
 
@@ -443,13 +451,32 @@ void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
 }
 
 void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) {
-	
 	this->display->GetAssets()->GetESPAssets()->AddItemAcquiredEffect(this->display->GetCamera(), paddle, item);
 	debug_output("EVENT: Item Obtained by Player: " << item);
 }
 
 void GameEventsListener::ItemActivatedEvent(const GameItem& item) {
-	
+
+	// Play the appropriate sound based on the item acquired by the player
+	GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+	switch (item.GetItemDisposition()) {
+		case GameItem::Good:
+			soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundPowerUpItemActivatedEvent);
+			break;
+
+		case GameItem::Neutral:
+			soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundPowerNeutralItemActivatedEvent);
+			break;
+
+		case GameItem::Bad:
+			soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundPowerDownItemActivatedEvent);
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
+
 	// Activate the item's effects (if any)
 	this->display->GetAssets()->ActivateItemEffects(*this->display->GetModel(), item, this->display->GetCamera());
 
