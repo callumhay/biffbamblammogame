@@ -116,26 +116,26 @@ WorldSoundBallSafetyNetDestroyedEvent {
 	loops    = 1
 }
 
-ignore WorldSoundItemSpawnedEvent {
-	file = 
+WorldSoundItemSpawnedEvent {
+	file = deco/item_spawn.ogg
    	fadein   = 0
 	loops    = 1
 }
 
-ignore WorldSoundPowerUpItemActivatedEvent {
-	file = 
+WorldSoundPowerUpItemActivatedEvent {
+	file = deco/power_up_item.ogg
    	fadein   = 0
 	loops    = 1
 }
 
-ignore WorldSoundPowerNeutralItemActivatedEvent {
-	file = 
+WorldSoundPowerNeutralItemActivatedEvent {
+	file = deco/power_neutral_item.ogg
    	fadein   = 0
 	loops    = 1
 }
 
-ignore WorldSoundPowerDownItemActivatedEvent {
-	file = 
+WorldSoundPowerDownItemActivatedEvent {
+	file = deco/power_down_item.ogg
    	fadein   = 0
 	loops    = 1
 }
@@ -242,4 +242,10 @@ WorldSoundLastBallSpiralingToDeathMask {
 	file = deco/ball_spiral_to_death.ogg
    	fadein   = 0
    	fadeout  = 300
+}
+
+WorldSoundItemMovingMask {
+	file = deco/item_moving.ogg
+   	fadein   = 0
+   	fadeout  = 500
 }

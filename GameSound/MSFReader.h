@@ -88,6 +88,7 @@ private:
 	static const char* WORLD_COLLATERAL_BLOCK_FALLING_MASK;
 	static const char* WORLD_CANNON_BLOCK_ROTATING_MASK;
 	static const char* WORLD_LAST_BALL_SPIRAL_TO_DEATH_MASK;
+	static const char* WORLD_ITEM_MOVING_MASK;
 
 
 	// Initializer/Default values

@@ -84,7 +84,8 @@ public:
 		WorldSoundCollateralBlockFlashingMask,
 		WorldSoundCollateralBlockFallingMask,
 		WorldSoundCannonBlockRotatingMask,
-		WorldSoundLastBallSpiralingToDeathMask
+		WorldSoundLastBallSpiralingToDeathMask,
+		WorldSoundItemMovingMask
 	};
 
 	enum SoundVolumeLoudness { VeryQuietVolume = 0, QuietVolume = 1, NormalVolume = 2, LoudVolume = 3, VeryLoudVolume = 4 };

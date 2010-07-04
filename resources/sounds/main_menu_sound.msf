@@ -28,35 +28,35 @@ ignore MainMenuBackgroundBangBigEvent {
 MainMenuItemHighlightedEvent {
    file     = (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
    fadein   = 0
-   fadeout  = 0
+   fadeout  = 200
    loops    = 1
 }
 
 ignore MainMenuItemEnteredEvent {
    file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
    fadein   = 0
-   fadeout  = 0
+   fadeout  = 200
    loops    = 1
 }
 
 ignore MainMenuItemBackAndCancelEvent {
    file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
    fadein   = 0
-   fadeout  = 0
+   fadeout  = 200
    loops    = 1
 }
 
 ignore MainMenuItemVerifyAndSelectEvent {
    file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
    fadein   = 0
-   fadeout  = 0
+   fadeout  = 200
    loops    = 1
 }
 
 ignore MainMenuItemScrolledEvent {
    file     = (1 : main_menu/1kick1snare.wav) (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
    fadein   = 0
-   fadeout  = 0
+   fadeout  = 200
    loops    = 1
 }
 

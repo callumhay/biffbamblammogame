@@ -34,6 +34,10 @@ currAnimationState(BallDeathState::SpiralingToDeath) {
 	this->spiralAnimation = AnimationLerp<float>(&this->spiralRadius);
 	this->spiralAnimation.SetRepeat(false);
 	this->spiralAnimation.SetLerp(0.0, BallDeathState::SPIRAL_ANIMATION_TIME_TOTAL, 0.5, 3.0);
+
+	// Clear all the falling items out of the level - makes sure all their sounds/effects
+	// are eliminated so the player only sees and hears his/her death animation
+	this->gameModel->ClearLiveItems();
 }
 
 BallDeathState::~BallDeathState() {
@@ -43,7 +47,6 @@ BallDeathState::~BallDeathState() {
 	// If we are exiting being in play then clear all projectiles, items and timers
 	this->gameModel->ClearProjectiles();
 	this->gameModel->ClearBeams();
-	this->gameModel->ClearLiveItems();
 	this->gameModel->ClearActiveTimers();
 	
 	// Allow the player to control the paddle again

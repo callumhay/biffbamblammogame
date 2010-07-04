@@ -74,6 +74,8 @@ const char* MSFReader::WORLD_COLLATERAL_BLOCK_FLASHING_MASK			= "WorldSoundColla
 const char* MSFReader::WORLD_COLLATERAL_BLOCK_FALLING_MASK			= "WorldSoundCollateralBlockFallingMask";
 const char* MSFReader::WORLD_CANNON_BLOCK_ROTATING_MASK					= "WorldSoundCannonBlockRotatingMask";
 const char* MSFReader::WORLD_LAST_BALL_SPIRAL_TO_DEATH_MASK			= "WorldSoundLastBallSpiralingToDeathMask";
+const char* MSFReader::WORLD_ITEM_MOVING_MASK										= "WorldSoundItemMovingMask";
+
 
 bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& sounds) {
 	MSFReader::InitSoundTypeMapping();
@@ -448,6 +450,7 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_COLLATERAL_BLOCK_FALLING_MASK, GameSoundAssets::WorldSoundCollateralBlockFallingMask));
 	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_CANNON_BLOCK_ROTATING_MASK, GameSoundAssets::WorldSoundCannonBlockRotatingMask));
 	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_LAST_BALL_SPIRAL_TO_DEATH_MASK, GameSoundAssets::WorldSoundLastBallSpiralingToDeathMask));
+	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_ITEM_MOVING_MASK, GameSoundAssets::WorldSoundItemMovingMask));
 }
 
 /**
