@@ -112,6 +112,9 @@ static void GameRenderLoop() {
 	while (!display->HasGameExited() && !display->ShouldGameReinitialize()) {
 		Uint32 startOfFrameTime = SDL_GetTicks();
 
+		// Controller sync...
+		controller->Tick();
+
 		// Don't let the game run at less than 30 fps
 		if (frameTimeDelta > maxDelta) {
 			frameTimeDelta = maxDelta;
@@ -125,8 +128,6 @@ static void GameRenderLoop() {
 
 		// Process SDL events...
 		ProcessEvents();
-		// Controller sync...
-		controller->Tick();
 
 		// Calculate the frame delta...
 		frameTimeDelta = static_cast<double>(SDL_GetTicks() - startOfFrameTime) / 1000.0;

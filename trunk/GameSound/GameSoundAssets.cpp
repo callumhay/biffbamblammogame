@@ -137,6 +137,81 @@ void GameSoundAssets::StopAllSounds() {
 	this->activeMasks.clear();
 }
 
+void GameSoundAssets::PauseWorldSounds() {
+	// If no world is active then just exit
+	if (this->activeWorld == GameWorld::None) {
+		return;
+	}
+
+	debug_output("Pausing world sounds.");
+	GameSoundAssets::SoundPallet pallet = this->GetSoundPalletFromWorldStyle(this->activeWorld);
+	std::map<GameSoundAssets::SoundPallet, std::map<int, EventSound*>>::iterator findIter = this->loadedEventSounds.find(pallet);
+	
+	// Pause all sound events/masks for the given pallet
+	if (findIter != this->loadedEventSounds.end()) {
+		std::map<int, EventSound*>& eventSounds = findIter->second;
+		for (std::map<int, EventSound*>::iterator iter2 = eventSounds.begin(); iter2 != eventSounds.end(); ++iter2) {
+			EventSound* currSound = iter2->second;
+			assert(currSound != NULL);
+			currSound->Pause();
+		}
+	}
+
+	if (this->activeMusic != NULL) {
+		// Check to see if the music is in the provided pallet
+		for (std::map<GameSoundAssets::SoundPallet, MusicSound*>::iterator iter = this->loadedMusicSounds.begin();
+				 iter != this->loadedMusicSounds.end(); ++iter) {
+			
+			if (iter->second == this->activeMusic) {
+				if (iter->first == pallet) {
+					this->activeMusic->Pause();
+					this->activeMusic = NULL;
+				}
+				break;
+			}
+		}
+	}
+
+}
+
+void GameSoundAssets::UnpauseWorldSounds() {
+	// If no world is active then just exit
+	if (this->activeWorld == GameWorld::None) {
+		return;
+	}	
+	
+	debug_output("Unpausing world sounds.");
+	GameSoundAssets::SoundPallet pallet = this->GetSoundPalletFromWorldStyle(this->activeWorld);
+	std::map<GameSoundAssets::SoundPallet, std::map<int, EventSound*>>::iterator findEventIter = this->loadedEventSounds.find(pallet);
+	
+	// Unpause all sound events/masks for the given pallet
+	if (findEventIter != this->loadedEventSounds.end()) {
+		std::map<int, EventSound*>& eventSounds = findEventIter->second;
+		for (std::map<int, EventSound*>::iterator iter2 = eventSounds.begin(); iter2 != eventSounds.end(); ++iter2) {
+			EventSound* currSound = iter2->second;
+			assert(currSound != NULL);
+			currSound->UnPause();
+		}
+	}
+
+	std::map<GameSoundAssets::SoundPallet, MusicSound*>::iterator findMusicIter = this->loadedMusicSounds.find(pallet);
+
+	// Unpause the music for the given pallet
+	if (findMusicIter != this->loadedMusicSounds.end()) {
+		MusicSound* currMusic = findMusicIter->second;
+
+		// Check to see if the music is paused, if it is then we stop the currently
+		// active music (if there is any) and resume the paused music
+		if (currMusic->IsPaused()) {
+			if (this->activeMusic != NULL) {
+				this->activeMusic->Stop(false);
+			}
+			this->activeMusic = currMusic;
+			this->activeMusic->UnPause();
+		}
+	}
+}
+
 /**
  * General version of the play sound * function.
  */

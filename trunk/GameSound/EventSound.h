@@ -168,7 +168,7 @@ inline bool EventSound::IsPlaying() const {
 }
 
 inline bool EventSound::IsPaused() const {
-	return (this->playingSoundChunk != NULL && Mix_Paused(this->channel));
+	return (this->channel != Sound::INVALID_SDL_CHANNEL && this->playingSoundChunk != NULL && Mix_Paused(this->channel));
 }
 
 inline bool EventSound::IsLooped() const {
