@@ -4,6 +4,8 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
+#include "../GameModel/GameModel.h"
+
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../BlammoEngine/Camera.h"
@@ -15,6 +17,13 @@ const Colour InGameMenuState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f)
 
 InGameMenuState::InGameMenuState(GameDisplay* display) : DisplayState(display), nextAction(InGameMenuState::Nothing),
 topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL) {
+
+	// Pause all world sounds
+	this->display->GetAssets()->GetSoundAssets()->PauseWorldSounds();	
+	// Pause the game itself
+	this->display->GetModel()->SetPause(GameModel::PauseGame);
+
+
 	this->InitTopMenu();
 }
 
@@ -33,13 +42,26 @@ InGameMenuState::~InGameMenuState() {
  */
 void InGameMenuState::RenderFrame(double dT) {
 	switch (this->nextAction) {
+
 		case InGameMenuState::ResumeGame:
+			// Resume world sounds - these are initially paused when coming to this state (in the constructor)
+			this->display->GetAssets()->GetSoundAssets()->UnpauseWorldSounds();
+			// Unpause the game
+			this->display->GetModel()->UnsetPause(GameModel::PauseGame);
+
+			// Go back to the in-game display state
 			this->display->SetCurrentState(new InGameDisplayState(this->display));
 			return;
+
 		case InGameMenuState::ReturnToMainMenu:
+			// Clean up any misc. visual effects
 			this->display->GetAssets()->DeactivateMiscEffects();
+			// Kill all sounds
+			this->display->GetAssets()->GetSoundAssets()->StopAllSounds();
+			// Go back to the main menu state
 			this->display->SetCurrentState(new MainMenuDisplayState(this->display));
 			return;
+
 		case InGameMenuState::ExitToDesktop:
 			this->display->QuitGame();
 			return;

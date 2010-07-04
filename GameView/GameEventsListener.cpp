@@ -382,6 +382,9 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 }
 
 void GameEventsListener::BallSafetyNetCreatedEvent() {
+	// Play the sound
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBallSafetyNetCreatedEvent);
+
 	// Tell the level mesh about it so it can show any effects for the creation
 	// of the safety net mesh
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
@@ -391,7 +394,9 @@ void GameEventsListener::BallSafetyNetCreatedEvent() {
 }
 
 void GameEventsListener::BallSafetyNetDestroyedEvent(const GameBall& ball) {
-	
+	// Play the sound
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBallSafetyNetDestroyedEvent);
+
 	// Tell the level mesh about it so it can show any effects for the destruction
 	// of the safety net mesh
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();

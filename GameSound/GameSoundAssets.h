@@ -98,8 +98,12 @@ public:
 	void UnloadSoundPallet(GameSoundAssets::SoundPallet pallet);
 	void StopAllSounds();
 
+	void PauseWorldSounds();
+	void UnpauseWorldSounds();
+
 	void PlayMainMenuSound(GameSoundAssets::MainMenuSound sound);
 	void StopMainMenuSound(GameSoundAssets::MainMenuSound sound);
+	
 	void PlayWorldSound(GameSoundAssets::WorldSound sound, GameSoundAssets::SoundVolumeLoudness volume = GameSoundAssets::NormalVolume);
 	void StopWorldSound(GameSoundAssets::WorldSound sound);
 

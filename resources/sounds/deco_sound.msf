@@ -104,14 +104,14 @@ WorldSoundRocketExplodedEvent {
 	loops    = 1
 }
 
-ignore WorldSoundBallSafetyNetCreatedEvent {
-	file = 
+WorldSoundBallSafetyNetCreatedEvent {
+	file = deco/safety_net_created.ogg
    	fadein   = 0
 	loops    = 1
 }
 
-ignore WorldSoundBallSafetyNetDestroyedEvent {
-	file = 
+WorldSoundBallSafetyNetDestroyedEvent {
+	file = deco/safety_net_destroyed.ogg
    	fadein   = 0
 	loops    = 1
 }
