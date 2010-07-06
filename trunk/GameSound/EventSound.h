@@ -121,7 +121,13 @@ inline void EventSound::Play(bool doFadeIn) {
 			if (this->numLoops > 0) {
 				loops = this->numLoops - 1;
 			}
-			int result = Mix_FadeInChannel(-1, this->playingSoundChunk, loops, fadeInAmt);
+			int result = -1;
+			if (fadeInAmt == 0) {
+				result = Mix_PlayChannel(-1, this->playingSoundChunk, loops);
+			}
+			else {
+				result = Mix_FadeInChannel(-1, this->playingSoundChunk, loops, fadeInAmt);
+			}
 			if (result != -1) {
 				this->channel = result;
 				Mix_Volume(this->channel, this->volume);
@@ -151,7 +157,12 @@ inline void EventSound::Stop(bool doFadeout) {
 	if (this->IsPlaying()) {
 		assert(this->channel != -1);
 		int fadeoutAmt = doFadeout ? this->msFadeout : 0;
-		Mix_FadeOutChannel(this->channel, fadeoutAmt);
+		if (fadeoutAmt == 0) {
+			Mix_HaltChannel(this->channel);
+		}
+		else {
+			Mix_FadeOutChannel(this->channel, fadeoutAmt);
+		}
 	}
 
 	// Sound event has finished playing

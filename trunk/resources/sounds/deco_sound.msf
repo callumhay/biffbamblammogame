@@ -237,7 +237,6 @@ WorldSoundCannonBlockRotatingMask {
    	fadeout  = 0
 }
 
-
 WorldSoundLastBallSpiralingToDeathMask {
 	file = deco/ball_spiral_to_death.ogg
    	fadein   = 0
@@ -248,4 +247,13 @@ WorldSoundItemMovingMask {
 	file = deco/item_moving.ogg
    	fadein   = 0
    	fadeout  = 500
+}
+
+ignore WorldSoundPowerUpTimerMask {
+}
+
+ignore WorldSoundPowerNeutralTimerMask {
+}
+
+ignore WorldSoundPowerDownTimerMask {
 }
