@@ -80,7 +80,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
-			newLevelPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, this);
+			newLevelPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 			break;
 
 		default:

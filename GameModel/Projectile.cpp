@@ -36,8 +36,6 @@ Projectile* Projectile::CreateProjectile(ProjectileType type, const Point2D& spa
 	switch (type) {
 		case Projectile::PaddleLaserBulletProjectile:
 			return new PaddleLaser(spawnLoc);
-		case Projectile::PaddleRocketBulletProjectile:
-			return new PaddleRocketProjectile(spawnLoc);
 		default:
 			assert(false);
 			break;

@@ -25,6 +25,8 @@
 #include "CannonBlock.h"
 #include "CollateralBlock.h"
 
+#include "PaddleRocketProjectile.h"
+
 #include "../ResourceManager.h"
 
 const char GameLevel::EMPTY_SPACE_CHAR				= 'E';
@@ -457,14 +459,16 @@ void GameLevel::PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter) {
  * When a rocket explodes... a lot of stuff goes boom.
  * If a rocket hits block 'x' then it plus all other blocks 'o' are destroyed 
  * (if they can be destroyed by a ball).
- *
+ *                          b
+ *                        a o a
  *                        o o o
+ *                      b o x o b 
  *                        o o o
- *                        o x o 
- *                        o o o
- *                        o o o
+ *                        a o a
+ *                          b
+ * From the above ('o' is less than normal size, add 'a' for normal, add 'b' for bigger) is the normal scenario .
  */
-LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, LevelPiece* hitPiece) {
+LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece) {
 	// Destroy the hit piece if we can...
 	LevelPiece* resultPiece = hitPiece;
 	if (hitPiece->CanBeDestroyedByBall()) {
@@ -477,14 +481,16 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, LevelPiece* hitPiec
 	unsigned int hIndex = resultPiece->GetHeightIndex();
 	unsigned int wIndex = resultPiece->GetWidthIndex();
 
-	std::vector<LevelPiece*> affectedPieces = this->GetRocketExplosionAffectedLevelPieces(hIndex, wIndex);
+	float rocketSizeFactor = rocket->GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+
+	std::vector<LevelPiece*> affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, hIndex, wIndex);
 	// Go through each affected piece and destroy it if we can
 	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
 		LevelPiece* currAffectedPiece = *iter;
 		if (currAffectedPiece != NULL && currAffectedPiece->CanBeDestroyedByBall()) {
 			currAffectedPiece->Destroy(gameModel);
 			// Update all the affected pieces again...
-			affectedPieces = this->GetRocketExplosionAffectedLevelPieces(hIndex, wIndex);
+			affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, hIndex, wIndex);
 			iter = affectedPieces.begin();
 			continue;
 		}
@@ -494,27 +500,37 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, LevelPiece* hitPiec
 	return resultPiece;
 }
 
-std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(size_t hIndex, size_t wIndex) {
+std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex) {
 	std::vector<LevelPiece*> affectedPieces;
-	affectedPieces.reserve(14);
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex-1));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex+1));
+	affectedPieces.reserve(18);
 
+	// Start with the base pieces that will get destroyed
+	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex));
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex-1));
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex));
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+1, wIndex+1));
-
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-1));
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+1));
-
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex-1));
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex));
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-1, wIndex+1));
-
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex-1));
 	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex));
-	affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex+1));
+
+	// If the rocket's at least a normal size then the corner pieces are also destroyed
+	if (rocketSizeFactor >= 1.0f) {
+		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex-1));
+		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+2, wIndex+1));
+		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex-1));
+		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-2, wIndex+1));
+	}
+
+	// If the rocket's a bit bigger than usual then more pieces are destroyed as well...
+	if (rocketSizeFactor > 1.0f + EPSILON) {
+		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex-3, wIndex));
+		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex+3, wIndex));
+		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex+2));
+		affectedPieces.push_back(this->GetLevelPieceFromCurrentLayout(hIndex, wIndex-2));
+	}
 
 	return affectedPieces;
 }

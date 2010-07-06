@@ -158,7 +158,7 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* proje
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
-			result = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, this);
+			result = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 			break;
 
 		default:
