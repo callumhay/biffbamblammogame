@@ -66,7 +66,10 @@ void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera&
 		const Point2D& paddleCenter = paddle.GetCenterPosition();
 		
 		glPushMatrix();
-		glTranslatef(paddleCenter[0], paddleCenter[1] + paddle.GetHalfHeight() + PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT / 2.0f, 0.0f);
+		float rocketHeight = paddle.GetPaddleScaleFactor() * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+
+		glTranslatef(paddleCenter[0], paddleCenter[1] + paddle.GetHalfHeight() + 0.5f * rocketHeight, 0.0f);
+		glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
 		this->rocketGlowEmitter->Draw(camera);
 		this->rocketMesh->Draw(camera, keyLight, fillLight, ballLight);
 		glPopMatrix();
@@ -86,9 +89,14 @@ void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera&
 
 	glPushMatrix();
 	glTranslatef(rocketPos[0], rocketPos[1], 0.0f);
+
+	glPushMatrix();
+	glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
 	this->rocketGlowEmitter->Draw(camera);
-	
+	glPopMatrix();
+
 	glRotatef(currYRotation, 0.0f, 1.0f, 0.0f);
+	glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
 	this->rocketMesh->Draw(camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 }

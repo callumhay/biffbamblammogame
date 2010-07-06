@@ -1,5 +1,6 @@
 
 #include "PaddleRocketProjectile.h"
+#include "PlayerPaddle.h"
 
 const float PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT = 1.50f;
 const float PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT  = 0.8f;
@@ -13,10 +14,8 @@ const float PaddleRocketProjectile::ROTATION_ACCELERATION_MAG = 60.0f;
 const float PaddleRocketProjectile::MAX_VELOCITY_MAG					= 20.0f;
 const float PaddleRocketProjectile::MAX_ROTATION_VELOCITY_MAG	= 400.0f;
 
-PaddleRocketProjectile::PaddleRocketProjectile(const Point2D& spawnLoc) :
-Projectile(Projectile::PaddleRocketBulletProjectile, spawnLoc, 
-					 PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT,
-					 PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT) {
+PaddleRocketProjectile::PaddleRocketProjectile(const Point2D& spawnLoc, float width, float height) :
+Projectile(Projectile::PaddleRocketBulletProjectile, spawnLoc, width, height) {
 
 	// TODO: Add acceleration and start with 0 initial velocity...
   // do this for rotation as well...

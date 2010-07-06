@@ -192,6 +192,7 @@ inline void EventSound::SetVolume(int volume) {
 	for (std::list<SoundProbabilityPair>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
 		SoundProbabilityPair& currPair = *iter;
 		Mix_Chunk* soundChunk = currPair.GetSoundChunk();
+		assert(soundChunk != NULL);
 		Mix_VolumeChunk(soundChunk, volume);
 	}
 }

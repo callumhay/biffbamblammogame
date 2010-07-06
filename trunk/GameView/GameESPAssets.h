@@ -172,7 +172,7 @@ private:
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
 
-	void AddRocketHitBlockEffect(const Point2D& loc);
+	void AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
 	ESPPointEmitter* CreateBeamEndEffect();

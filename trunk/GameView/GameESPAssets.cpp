@@ -12,6 +12,7 @@
 #include "../GameModel/Beam.h"
 #include "../GameModel/PortalBlock.h"
 #include "../GameModel/CannonBlock.h"
+#include "../GameModel/PaddleRocketProjectile.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
@@ -875,8 +876,9 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				}
 
 				// A rocket just hit a block - KABOOOOOOM!!!
-				Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
-				this->AddRocketHitBlockEffect(midPoint);
+				Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter());
+				float rocketSizeFactor = projectile.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+				this->AddRocketHitBlockEffect(rocketSizeFactor, midPoint);
 			}
 			break;
 
@@ -2650,7 +2652,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 }
 
 // Add the effect for when the rocket goes off after it hits a block
-void GameESPAssets::AddRocketHitBlockEffect(const Point2D& loc) {
+void GameESPAssets::AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc) {
 	ESPInterval bangLifeInterval		= ESPInterval(1.2f);
 	ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.maxValue + 0.4f);
 	Point3D emitCenter(loc);
@@ -2669,8 +2671,8 @@ void GameESPAssets::AddRocketHitBlockEffect(const Point2D& loc) {
 	// Figure out some random proper orientation...
 	explosionEffect->SetParticleRotation(ESPInterval(-25.0f, 25.0f));
 
-	ESPInterval sizeIntervalX(4 * LevelPiece::PIECE_WIDTH);
-	ESPInterval sizeIntervalY(5.5 * LevelPiece::PIECE_HEIGHT);
+	ESPInterval sizeIntervalX(rocketSizeFactor * 4 * LevelPiece::PIECE_WIDTH);
+	ESPInterval sizeIntervalY(rocketSizeFactor * 5.5 * LevelPiece::PIECE_HEIGHT);
 	explosionEffect->SetParticleSize(sizeIntervalX, sizeIntervalY);
 
 	// Add effectors to the bang effect
@@ -2705,7 +2707,7 @@ void GameESPAssets::AddRocketHitBlockEffect(const Point2D& loc) {
 	debrisBits->SetSpawnDelta(ESPInterval(-1));
 	debrisBits->SetInitialSpd(ESPInterval(4.5f, 6.0f));
 	debrisBits->SetParticleLife(ESPInterval(2.5f, 3.5f));
-	debrisBits->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 6.0f, LevelPiece::PIECE_WIDTH / 5.0f));
+	debrisBits->SetParticleSize(ESPInterval(rocketSizeFactor * LevelPiece::PIECE_WIDTH / 6.0f, rocketSizeFactor * LevelPiece::PIECE_WIDTH / 5.0f));
 	debrisBits->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.2f), ESPInterval(1.0f));
 	debrisBits->SetEmitAngleInDegrees(180);
 	debrisBits->SetAsPointSpriteEmitter(true);
@@ -2721,7 +2723,7 @@ void GameESPAssets::AddRocketHitBlockEffect(const Point2D& loc) {
 	bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
 	bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
 	bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
-	bangOnoEffect->SetParticleSize(ESPInterval(1.0f));
+	bangOnoEffect->SetParticleSize(ESPInterval(rocketSizeFactor * 1.0f));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
 	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);

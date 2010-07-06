@@ -14,12 +14,14 @@
 
 #include "Projectile.h"
 
+class PlayerPaddle;
+
 class PaddleRocketProjectile : public Projectile {
 public:
 	static const float PADDLEROCKET_HEIGHT_DEFAULT;
 	static const float PADDLEROCKET_WIDTH_DEFAULT;
 
-	PaddleRocketProjectile(const Point2D& spawnLoc);
+	PaddleRocketProjectile(const Point2D& spawnLoc, float width, float height);
 	~PaddleRocketProjectile();
 
 	void Tick(double seconds);
@@ -28,6 +30,7 @@ public:
 	float GetYRotation() const;
 
 private:
+
 	static const Vector2D PADDLEROCKET_VELOCITYDIR;
 	static const Vector2D PADDLEROCKET_RIGHTDIR;
 
@@ -46,5 +49,9 @@ private:
 inline float PaddleRocketProjectile::GetYRotation() const {
 	return this->currYRotation;
 }
+
+// Obtain the size relative to the the normal size of the rocket (1.0) this rocket
+// is currently - used to determine how much it will destroy.
+
 
 #endif // __PADDLEROCKETPROJECTILE_H__

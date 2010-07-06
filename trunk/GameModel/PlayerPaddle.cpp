@@ -424,8 +424,10 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 	// Check for the rocket paddle (this has top priority)
 	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
 		// The rocket immediately is fired from the paddle - create a projectile for it and add it to the model (i.e., fire it!)
-		Projectile* rocketProjectile = Projectile::CreateProjectile(Projectile::PaddleRocketBulletProjectile, 
-			this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT));
+		float rocketHeight = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+		float rocketWidth  = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT;
+		Point2D rocketSpawnPos = this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * rocketHeight);
+		Projectile* rocketProjectile = new PaddleRocketProjectile(rocketSpawnPos, rocketWidth, rocketHeight);
 		gameModel->AddProjectile(rocketProjectile);
 
 		this->RemovePaddleType(PlayerPaddle::RocketPaddle);
