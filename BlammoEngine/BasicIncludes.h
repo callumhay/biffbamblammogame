@@ -160,7 +160,11 @@ inline void debug_opengl_state() {
 	if (glErr == GL_NO_ERROR) {
 		return;
 	}
+	const GLubyte* errStr = gluGetString(glErr);
 	debug_output("OpenGL Error: " << glErr);
+	if (errStr != NULL) {
+		debug_output(errStr);
+	}
 	assert(false);
 }
 
