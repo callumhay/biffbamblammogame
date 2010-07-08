@@ -132,6 +132,9 @@ inline void EventSound::Play(bool doFadeIn) {
 				this->channel = result;
 				Mix_Volume(this->channel, this->volume);
 			}
+			else {
+				debug_output("Could not play sound (" << this->GetSoundName() << "): " << Mix_GetError());
+			}
 			break;
 		}
 	}
@@ -175,7 +178,7 @@ inline bool EventSound::IsPlaying() const {
 		return false;
 	}
 	Mix_Chunk* playingSDLChunk = Mix_GetChunk(this->channel);
-	return Mix_Playing(this->channel) || (this->playingSoundChunk != NULL && playingSDLChunk == this->playingSoundChunk);
+	return (Mix_Playing(this->channel) == 1) || (this->playingSoundChunk != NULL && playingSDLChunk == this->playingSoundChunk);
 }
 
 inline bool EventSound::IsPaused() const {
