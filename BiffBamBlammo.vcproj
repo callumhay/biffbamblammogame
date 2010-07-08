@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib SDL_mixer.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib"
+				AdditionalDependencies="SDLmain.lib SDL_mixerd.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrt.lib"

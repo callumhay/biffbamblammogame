@@ -53,8 +53,13 @@ inline void MusicSound::Play(bool doFadeIn) {
 	}
 	
 	int fadeInAmt = doFadeIn ? this->msFadein : 0;
-	Mix_FadeInMusic(this->sdlMusic, -1, fadeInAmt);
-	Mix_VolumeMusic(this->volume);
+	int result = Mix_FadeInMusic(this->sdlMusic, -1, fadeInAmt);
+	if (result != -1) {
+		Mix_VolumeMusic(this->volume);
+	}
+	else {
+		debug_output("Could not play music (" << this->GetSoundName() << "): " << Mix_GetError());
+	}
 	this->isPlaying = true;
 }
 

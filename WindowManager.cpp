@@ -34,7 +34,7 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
 	
 	// Load the SDL Audio Mixer
   static const int audio_rate = 44100;
-  static const Uint16 audio_format = AUDIO_S16; // 16-bit stereo
+  static const Uint16 audio_format = AUDIO_S16SYS; // 16-bit stereo
   static const int audio_channels = 2;
   static const int audio_buffers = 2048;
 

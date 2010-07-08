@@ -425,6 +425,8 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	}
 	// Same goes for the laser beam paddle...
 	if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
+		float paddleScaleFactor = p.GetPaddleScaleFactor();
+		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
 		this->paddleBeamAttachment->Draw(camera, paddleKeyLight, paddleFillLight);
 	}
 
