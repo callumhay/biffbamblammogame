@@ -14,8 +14,8 @@ private:
 
 public:
 	ESPMultiColourEffector();
-	virtual ~ESPMultiColourEffector() {}
-	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
+	~ESPMultiColourEffector() {}
+	void AffectParticleOnTick(double dT, ESPParticle* particle);
 
 	void SetColours(const std::vector<ColourRGBA>& colours);
 };
