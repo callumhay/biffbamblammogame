@@ -117,7 +117,7 @@ void InGameDisplayState::RenderBackgroundToFBO(double dT) {
 
 	backgroundFBO->BindFBObj();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Draw the background of the current scene
@@ -154,7 +154,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 
 	fullSceneFBO->BindFBObj();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	backgroundFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
@@ -174,7 +174,6 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
 	this->display->GetAssets()->DrawLevelPieces(dT, currLevel, camera);
 
-	
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 

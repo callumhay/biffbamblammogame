@@ -96,7 +96,7 @@ void LoadingScreen::RenderLoadingScreen() {
 	this->loadingScreenFBO->BindFBObj();
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Draw the loading/progress bar
 	this->DrawLoadingBar();
@@ -108,7 +108,8 @@ void LoadingScreen::RenderLoadingScreen() {
 	// Unbind the FBO, add bloom and draw it as a texture on a full screen quad
 	this->loadingScreenFBO->UnbindFBObj();
 	this->bloomEffect->Draw(width, height, 0.0f);
-	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
+
+	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(1);
 
 	SDL_GL_SwapBuffers();
 
@@ -162,18 +163,19 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 
 	this->loadingScreenFBO->BindFBObj();
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	debug_opengl_state();
 	
-	//this->loadingLabel.Draw();
+	this->loadingLabel.Draw();
 	this->DrawLoadingBar();
 
 	this->loadingScreenFBO->UnbindFBObj();
 	debug_opengl_state();
 
-	//this->bloomEffect->Draw(width, height, 0.0f);
-	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
+	this->bloomEffect->Draw(width, height, 0.0f);
+
+	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(1);
 
 	SDL_GL_SwapBuffers();
 

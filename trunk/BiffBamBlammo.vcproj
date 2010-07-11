@@ -120,6 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
+				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(SolutionDir)include/physfs&quot;;&quot;$(SolutionDir)include/zlib&quot;;&quot;$(SolutionDir)include/al&quot;"

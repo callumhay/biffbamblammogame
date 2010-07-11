@@ -18,8 +18,8 @@ const float CgFxBloom::DEFAULT_HIGHLIGHT_INTENSITY	= 0.2f;
 
 CgFxBloom::CgFxBloom(FBObj* sceneFBO) : 
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_BLOOM_SHADER, sceneFBO),
-sceneSamplerParam(NULL), brightDownSampler2Param(NULL), brightDownSampler3Param(NULL), 
-brightDownSampler4Param(NULL), brightComposite2Param(NULL), brightComposite3Param(NULL), brightComposite4Param(NULL),
+sceneSamplerParam(NULL), brightDownSampler2Param(NULL),
+brightDownSampler4Param(NULL), brightComposite2Param(NULL), brightComposite4Param(NULL),
 highlightThresholdParam(NULL), sceneWidthParam(NULL), 
 sceneIntensity(CgFxBloom::DEFAULT_SCENE_INTENSITY), 
 glowIntensity(CgFxBloom::DEFAULT_GLOW_INTENSITY), 
@@ -27,7 +27,7 @@ highlightIntensity(CgFxBloom::DEFAULT_HIGHLIGHT_INTENSITY),
 highlightThreshold(CgFxBloom::DEFAULT_HIGHLIGHT_THRESHOLD),
 sceneHeightParam(NULL), sceneIntensityParam(NULL), glowIntensityParam(NULL), highlightIntensityParam(NULL),
 bloomFilterFBO(NULL), blurFBO(NULL), downsampleBlur2FBO(NULL),
-downsampleBlur3FBO(NULL), downsampleBlur4FBO(NULL) {
+downsampleBlur4FBO(NULL) {
 
 	// Setup the temporary FBOs, used to ping-pong rendering of seperable filters and store intermediate renderings
 	this->bloomFilterFBO = new FBObj(sceneFBO->GetFBOTexture()->GetWidth(), 
@@ -44,10 +44,6 @@ downsampleBlur3FBO(NULL), downsampleBlur4FBO(NULL) {
 														sceneFBO->GetFBOTexture()->GetHeight(), 
 														Texture::Nearest,
 														FBObj::NoAttachment);
-	this->downsampleBlur3FBO = new FBObj(sceneFBO->GetFBOTexture()->GetWidth(), 
-														sceneFBO->GetFBOTexture()->GetHeight(), 
-														Texture::Nearest,
-														FBObj::NoAttachment);
 	this->downsampleBlur4FBO = new FBObj(sceneFBO->GetFBOTexture()->GetWidth(), 
 														sceneFBO->GetFBOTexture()->GetHeight(), 
 														Texture::Nearest,
@@ -56,10 +52,8 @@ downsampleBlur3FBO(NULL), downsampleBlur4FBO(NULL) {
 	// Setup any CG parameters
 	this->sceneSamplerParam				= cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
 	this->brightDownSampler2Param	= cgGetNamedEffectParameter(this->cgEffect, "BrightDownsampleLvl2Sampler");
-	this->brightDownSampler3Param	= cgGetNamedEffectParameter(this->cgEffect, "BrightDownsampleLvl3Sampler");
 	this->brightDownSampler4Param	= cgGetNamedEffectParameter(this->cgEffect, "BrightDownsampleLvl4Sampler");
 	this->brightComposite2Param		= cgGetNamedEffectParameter(this->cgEffect, "BrightCompositeLvl2Sampler");
-	this->brightComposite3Param		= cgGetNamedEffectParameter(this->cgEffect, "BrightCompositeLvl3Sampler");
 	this->brightComposite4Param		= cgGetNamedEffectParameter(this->cgEffect, "BrightCompositeLvl4Sampler");
 	
 	this->sceneWidthParam					= cgGetNamedEffectParameter(this->cgEffect, "SceneWidth");
@@ -82,8 +76,6 @@ CgFxBloom::~CgFxBloom() {
 	this->blurFBO = NULL;
 	delete this->downsampleBlur2FBO;
 	this->downsampleBlur2FBO = NULL;
-	delete this->downsampleBlur3FBO;
-	this->downsampleBlur3FBO = NULL;
 	delete this->downsampleBlur4FBO;
 	this->downsampleBlur4FBO = NULL;
 }
@@ -116,18 +108,15 @@ void CgFxBloom::Draw(int screenWidth, int screenHeight, double dT) {
 	// Step 2: Using the bright parts of the screen do several downsampled blurs
 	// Setup the downsampled texture samplers
 	cgGLSetTextureParameter(this->brightDownSampler2Param, this->bloomFilterFBO->GetFBOTexture()->GetTextureID());
-	cgGLSetTextureParameter(this->brightDownSampler3Param, this->bloomFilterFBO->GetFBOTexture()->GetTextureID());
 	cgGLSetTextureParameter(this->brightDownSampler4Param, this->bloomFilterFBO->GetFBOTexture()->GetTextureID());
 
 	// Do each of the mipmap leveled (downsampled) bloom blurs
-	// Mipmap blur (levels 2, 3, 4)
+	// Mipmap blur (levels 2, and 4)
 	this->DoDownsampledBlur(screenWidth, screenHeight, CgFxBloom::BRIGHT_DOWNSAMPLE_LVL2_TECHNIQUE_NAME, this->brightDownSampler2Param, this->downsampleBlur2FBO);
-	this->DoDownsampledBlur(screenWidth, screenHeight, CgFxBloom::BRIGHT_DOWNSAMPLE_LVL3_TECHNIQUE_NAME, this->brightDownSampler3Param, this->downsampleBlur3FBO);
 	this->DoDownsampledBlur(screenWidth, screenHeight, CgFxBloom::BRIGHT_DOWNSAMPLE_LVL4_TECHNIQUE_NAME, this->brightDownSampler4Param, this->downsampleBlur4FBO);
 
 	// Step 3: Final bloom composition
 	cgGLSetTextureParameter(this->brightComposite2Param, this->downsampleBlur2FBO->GetFBOTexture()->GetTextureID());
-	cgGLSetTextureParameter(this->brightComposite3Param, this->downsampleBlur3FBO->GetFBOTexture()->GetTextureID());
 	cgGLSetTextureParameter(this->brightComposite4Param, this->downsampleBlur4FBO->GetFBOTexture()->GetTextureID());
 	
 	this->sceneFBO->BindFBObj();
