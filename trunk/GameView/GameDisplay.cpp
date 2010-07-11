@@ -28,6 +28,7 @@ gameCamera(initWidth, initHeight) {
 
 	this->SetupActionListeners();
 	this->SetCurrentState(new MainMenuDisplayState(this));
+	SetInitialRenderOptions();
 }
 
 GameDisplay::~GameDisplay() {
@@ -68,8 +69,8 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 }
 
 void GameDisplay::Render(double dT) {
-	SetInitialRenderOptions();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Render the current state
 	this->currState->RenderFrame(dT);

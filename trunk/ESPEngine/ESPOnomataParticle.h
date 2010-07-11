@@ -35,11 +35,11 @@ protected:
 public: 
 	ESPOnomataParticle(const TextureFontSet* font, const std::string& text);
 	ESPOnomataParticle(const TextureFontSet* font);
-	virtual ~ESPOnomataParticle();
+	~ESPOnomataParticle();
 
-	virtual void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
-	virtual void Tick(const double dT);
-	virtual void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
+	void Revive(const Point3D& pos, const Vector3D& vel, const Vector2D& size, float rot, float totalLifespan);
+	void Tick(const double dT);
+	void Draw(const Camera& camera, const ESP::ESPAlignment alignment);
 
 	void SetDropShadow(const DropShadow& ds) {
 		this->dropShadow = ds;

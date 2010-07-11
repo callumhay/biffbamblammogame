@@ -131,7 +131,7 @@ void DecoWorldAssets::InitializeEmitters() {
 	else {
 		this->spiralEmitterSm.AddEffector(&this->rotateEffectorCCW);
 	}
-	this->spiralEmitterSm.SetParticles(25, this->spiralTexSm);
+	this->spiralEmitterSm.SetParticles(23, this->spiralTexSm);
 	
 	this->spiralEmitterMed.SetSpawnDelta(spiralSpawn);
 	this->spiralEmitterMed.SetInitialSpd(spiralSpd);
@@ -148,7 +148,7 @@ void DecoWorldAssets::InitializeEmitters() {
 	else {
 		this->spiralEmitterMed.AddEffector(&this->rotateEffectorCCW);
 	}
-	this->spiralEmitterMed.SetParticles(25, this->spiralTexMed);
+	this->spiralEmitterMed.SetParticles(23, this->spiralTexMed);
 
 	this->spiralEmitterLg.SetSpawnDelta(spiralSpawn);
 	this->spiralEmitterLg.SetInitialSpd(spiralSpd);
@@ -165,7 +165,7 @@ void DecoWorldAssets::InitializeEmitters() {
 	else {
 		this->spiralEmitterLg.AddEffector(&this->rotateEffectorCCW);
 	}
-	this->spiralEmitterLg.SetParticles(25, this->spiralTexLg);
+	this->spiralEmitterLg.SetParticles(23, this->spiralTexLg);
 
 	// Tick all the emitters for a bit to get them to look like they've been spawning for awhile
 	for (unsigned int i = 0; i < 60; i++) {
