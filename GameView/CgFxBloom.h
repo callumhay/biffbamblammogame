@@ -23,10 +23,8 @@ private:
 	// CG parameters
 	CGparameter sceneSamplerParam;
 	CGparameter brightDownSampler2Param;
-	CGparameter brightDownSampler3Param;
 	CGparameter brightDownSampler4Param;
 	CGparameter brightComposite2Param;
-	CGparameter brightComposite3Param;
 	CGparameter brightComposite4Param;
 
 	CGparameter sceneWidthParam;
@@ -40,7 +38,6 @@ private:
 	FBObj* bloomFilterFBO;
 	FBObj* blurFBO;
 	FBObj* downsampleBlur2FBO;
-	FBObj* downsampleBlur3FBO;
 	FBObj* downsampleBlur4FBO;
 
 	float highlightThreshold, sceneIntensity, glowIntensity, highlightIntensity;

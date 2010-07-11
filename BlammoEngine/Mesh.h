@@ -22,21 +22,12 @@
 
 class Camera;
 
-/*
-struct Vertex32 {
-	float x, y, z;		// Vertex
-	float nx, ny, nz;	// Normal
-	float s, t;				// Texture coordinate
-	float r, g, b, a;	// Colour
-};
-*/
-
 // Represents the set of indices 
 struct PolyGrpIndexer {
 	GLenum polyType;
-	std::vector<unsigned int> vertexIndices;
-	std::vector<unsigned int> normalIndices;
-	std::vector<unsigned int> texCoordIndices;
+	std::vector<unsigned short> vertexIndices;
+	std::vector<unsigned short> normalIndices;
+	std::vector<unsigned short> texCoordIndices;
 
 	PolyGrpIndexer() : polyType(GL_TRIANGLES) {};
 };
@@ -44,14 +35,14 @@ struct PolyGrpIndexer {
 // Holds all of the indexed vertices, normals, etc. for a polygon group
 class PolygonGroup {
 private:
-	static const int INTERLEAVED_MULTIPLIER = 8;
-	static const GLint GL_INTERLEAVED_FORMAT = GL_T2F_N3F_V3F;
-	static const GLint INTERLEAVED_STRIDE = INTERLEAVED_MULTIPLIER * sizeof(float);
 
 	GLenum polyType;
-	unsigned int polygroupArrayLength;
-	unsigned int numIndices;
-	float* polygroupArray;
+	//size_t numIndices;
+	std::vector<Point3D>  vertexStream;
+	std::vector<Vector3D> normalStream;
+	std::vector<Point2D>  texCoordStream;
+
+	std::vector<GLushort> indices;
 
 public:
 	PolygonGroup(const PolygonGroup& other);
@@ -60,14 +51,9 @@ public:
 							 const std::vector<Vector3D>& normalStream,
 							 const std::vector<Point2D>& texCoordStream);
 
-	~PolygonGroup() {
-		delete[] this->polygroupArray;	
-	}
+	~PolygonGroup() {};
 
-	void Draw() const {
-		glInterleavedArrays(GL_INTERLEAVED_FORMAT, INTERLEAVED_STRIDE, this->polygroupArray);
-		glDrawArrays(this->polyType, 0, this->numIndices);
-	};
+	void Draw() const;
 
 	GLuint GenerateDisplayList() const {
 		GLuint displayListID = glGenLists(1);
@@ -79,8 +65,6 @@ public:
 
 	void Translate(const Vector3D& t);
 	void Transform(const Matrix4x4& m);
-
-	unsigned int GetDataArrays(std::vector<float>& vertexArray, std::vector<float>& normalArray, std::vector<float>& texCoordArray) const;
 };
 
 class Mesh;
@@ -134,8 +118,10 @@ public:
 	}
 
 	void DeleteDisplayList() {
-		glDeleteLists(this->displayListID, 1);
-		this->displayListID = 0;	
+		if (this->displayListID != 0) {
+			glDeleteLists(this->displayListID, 1);
+			this->displayListID = 0;
+		}
 	}
 
 	inline void Draw(const Camera& camera) const {

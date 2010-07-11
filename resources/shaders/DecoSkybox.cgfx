@@ -35,7 +35,7 @@ texture SkyTex : Environment <
 >;
 
 sampler2D SkySampler = sampler_state {
-	Texture = <SkyTex>;
+    Texture = <SkyTex>;
 };
 
 texture NoiseTexture  <
@@ -56,15 +56,15 @@ sampler3D NoiseSampler = sampler_state {
 
 // application to vertex shader ------------------------------------------
 struct appdata {
-    float3 Position	: POSITION;
-	float2 UV       : TEXCOORD0;
+    float3 Position : POSITION;
+    float2 UV       : TEXCOORD0;
 };
 
 // vertex shader to pixel shader -----------------------------------------
 struct vertexOutput {
     float4 HPosition    : POSITION;
-	float3 WorldPos	    : TEXCOORD0;
-	float2 UV           : TEXCOORD1;
+    float3 WorldPos     : TEXCOORD0;
+    float2 UV           : TEXCOORD1;
 };
 
 
@@ -74,41 +74,40 @@ vertexOutput deco_skybox_VS(appdata IN) {
     
     float4 Pos = float4(IN.Position.xyz,1);
     float3 Pw = mul(WorldXf,Pos).xyz;
-	
+    
     OUT.HPosition = mul(ModelViewProjXf,Pos);
     OUT.WorldPos = Pw;
-	OUT.UV = IN.UV;
-	
-	return OUT;
+    OUT.UV = IN.UV;
+    
+    return OUT;
 }
 
 
 // Fragement Shader (Floating Point) --------------------------------------
 float4 deco_skybox_PS(vertexOutput IN) : COLOR {
-	const float SCALE = 10;
-	
-	// Make the stars in the sky twinkle using a noise texture
-	// lookup and multiplying it with the starry sky lookup
-	float3 noiseLookup = IN.WorldPos + Freq*Timer*ViewDir/SCALE;
-	
-	float4 noiseColour = tex3D(NoiseSampler, SCALE * noiseLookup).rgba;
-	//float noiseVal = (noiseColour.x + noiseColour.y + noiseColour.z + noiseColour.w + 0.03125) * 1.5f;
-	float noiseVal = (noiseColour.z - 0.045f) * 25.0f;
-	noiseVal = clamp(noiseVal, 0, 1);
-	float3 skyColour   = tex2D(SkySampler, IN.UV.xy).rgb;
-	float3 finalColour = noiseVal * skyColour;
-	
-	return float4(finalColour, 1);
-    //return float4(noiseVal.rrr,1.0f);
+    const float SCALE = 10;
+    
+    // Make the stars in the sky twinkle using a noise texture
+    // lookup and multiplying it with the starry sky lookup
+    float3 noiseLookup = IN.WorldPos + Freq*Timer*ViewDir/SCALE;
+    
+    float4 noiseColour = tex3D(NoiseSampler, SCALE * noiseLookup).rgba;
+    //float noiseVal = (noiseColour.x + noiseColour.y + noiseColour.z + noiseColour.w + 0.03125) * 1.5f;
+    float noiseVal = (noiseColour.z - 0.045f) * 25.0f;
+    noiseVal = clamp(noiseVal, 0, 1);
+    float3 skyColour   = tex2D(SkySampler, IN.UV.xy).rgb;
+    float3 finalColour = noiseVal * skyColour;
+    
+    return float4(finalColour, 1);
 }
 
 technique DecoSkybox {
     pass pass0 {
-    	PolygonMode = int2(Front, Fill);
+        PolygonMode = int2(Front, Fill);
         CullFaceEnable = true;
         CullFace = Back;
         DepthTestEnable = true;
-		
+        
         VertexProgram = compile arbvp1 deco_skybox_VS();
         FragmentProgram = compile arbfp1 deco_skybox_PS();
     }

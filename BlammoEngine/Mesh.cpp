@@ -12,98 +12,65 @@
 #include "Mesh.h"
 
 // Copy constructor
-PolygonGroup::PolygonGroup(const PolygonGroup& other) {
-	this->polygroupArray = new float[other.polygroupArrayLength];
-	for (unsigned int i = 0; i < other.polygroupArrayLength; i++) {
-		this->polygroupArray[i] = other.polygroupArray[i];
-	}
-	this->polygroupArrayLength = other.polygroupArrayLength;
-	this->numIndices = other.numIndices;
-	this->polyType   = other.polyType;
+PolygonGroup::PolygonGroup(const PolygonGroup& other) : polyType(other.polyType), vertexStream(other.vertexStream),
+normalStream(other.normalStream), texCoordStream(other.texCoordStream), indices(other.indices) {
 }
 
 PolygonGroup::PolygonGroup(const PolyGrpIndexer& faceIndexer, const std::vector<Point3D>& vertexStream, 
 													 const std::vector<Vector3D>& normalStream, const std::vector<Point2D>& texCoordStream) {
-	
+	assert(faceIndexer.vertexIndices.size () >= 3);
 	assert(faceIndexer.normalIndices.size() == faceIndexer.vertexIndices.size());
 	assert(faceIndexer.vertexIndices.size() == faceIndexer.texCoordIndices.size());
 
-	this->polyType	 = faceIndexer.polyType;
-	this->numIndices = faceIndexer.vertexIndices.size();
-	this->polygroupArrayLength = numIndices * INTERLEAVED_MULTIPLIER;
-	this->polygroupArray = new float[this->polygroupArrayLength];
-	
-	// Go through each possible vertex and add it to the polygon group array
-	for (unsigned int i = 0, j = 0; i < this->polygroupArrayLength; i += INTERLEAVED_MULTIPLIER, j++) {
-		const Point3D& vertex		= vertexStream[faceIndexer.vertexIndices[j]];
-		const Vector3D& normal	= normalStream[faceIndexer.normalIndices[j]];
-		const Point2D& texCoord = texCoordStream[faceIndexer.texCoordIndices[j]];
-
-		this->polygroupArray[i]			= texCoord[0];
-		this->polygroupArray[i + 1]	= texCoord[1];
-		this->polygroupArray[i + 2]	= normal[0];
-		this->polygroupArray[i + 3]	= normal[1];
-		this->polygroupArray[i + 4]	= normal[2];
-		this->polygroupArray[i + 5]	= vertex[0];
-		this->polygroupArray[i + 6]	= vertex[1];
-		this->polygroupArray[i + 7]	= vertex[2];
+	this->polyType   = faceIndexer.polyType;
+	assert(faceIndexer.vertexIndices.size() <= USHRT_MAX);
+	for (size_t i = 0; i < faceIndexer.vertexIndices.size(); i++) {
+		this->vertexStream.push_back(vertexStream[faceIndexer.vertexIndices[i]]);
+		this->normalStream.push_back(normalStream[faceIndexer.normalIndices[i]]);
+		this->texCoordStream.push_back(texCoordStream[faceIndexer.texCoordIndices[i]]);
+		this->indices.push_back(static_cast<GLushort>(i));
 	}
+
+}
+
+void PolygonGroup::Draw() const {
+	glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT); 
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, &this->vertexStream[0]);
+
+	if (this->normalStream.size() > 0) {
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glNormalPointer(GL_FLOAT, 0, &this->normalStream[0]);
+	}
+	if (this->texCoordStream.size() > 0) {
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, &this->texCoordStream[0]);
+	}
+
+	glDrawRangeElements(this->polyType, 0, this->indices.size(), this->indices.size(), GL_UNSIGNED_SHORT, &this->indices[0]);
+
+	glPopClientAttrib();
 }
 
 /**
  * Translate this polygon group by the given vector.
  */
 void PolygonGroup::Translate(const Vector3D& t) {
-	// Only need to transform the vertices
-	for (unsigned int i = 0; i < this->polygroupArrayLength; i += INTERLEAVED_MULTIPLIER) {
-		this->polygroupArray[i + 5] += t[0];
-		this->polygroupArray[i + 6] += t[1];
-		this->polygroupArray[i + 7] += t[2];
+	for (std::vector<Point3D>::iterator iter = this->vertexStream.begin(); iter != this->vertexStream.end(); ++iter) {
+		Point3D& currPt = *iter;
+		currPt = currPt + t;
 	}
 }
 
 void PolygonGroup::Transform(const Matrix4x4& m) {
-	// Only need to transform the vertices
-	for (unsigned int i = 0; i < this->polygroupArrayLength; i += INTERLEAVED_MULTIPLIER) {
-		Point3D tempVert(this->polygroupArray[i + 5], this->polygroupArray[i + 6], this->polygroupArray[i + 7]);
-		Point3D resultVert = m * tempVert;
-		Vector3D tempNorm(this->polygroupArray[i + 2], this->polygroupArray[i + 3], this->polygroupArray[i + 4]);
-		Vector3D resultNorm = m * tempNorm;
-		this->polygroupArray[i + 2] = resultNorm[0];
-		this->polygroupArray[i + 3] = resultNorm[1];
-		this->polygroupArray[i + 4] = resultNorm[2];
-		this->polygroupArray[i + 5] = resultVert[0];
-		this->polygroupArray[i + 6] = resultVert[1];
-		this->polygroupArray[i + 7] = resultVert[2];
+	for (std::vector<Point3D>::iterator iter = this->vertexStream.begin(); iter != this->vertexStream.end(); ++iter) {
+		Point3D& currPt = *iter;
+		currPt = m * currPt;
 	}
-}
-
-/**
- * Obtain arrays of the vertex, normal and texture coordinate data for this polygon group.
- * Returns: The number of vertices in the data.
- */
-unsigned int PolygonGroup::GetDataArrays(std::vector<float>& vertexArray, std::vector<float>& normalArray, std::vector<float>& texCoordArray) const {
-	const float numVerts = static_cast<float>(this->polygroupArrayLength) / static_cast<float>(INTERLEAVED_MULTIPLIER);
-
-	vertexArray.reserve(3 * numVerts);
-	normalArray.reserve(3 * numVerts);
-	texCoordArray.reserve(2 * numVerts);
-
-	for (unsigned int i = 0; i < this->polygroupArrayLength; i += INTERLEAVED_MULTIPLIER) {
-		
-		texCoordArray.push_back(this->polygroupArray[i]);
-		texCoordArray.push_back(this->polygroupArray[i + 1]);
-
-		normalArray.push_back(this->polygroupArray[i + 2]);
-		normalArray.push_back(this->polygroupArray[i + 3]);
-		normalArray.push_back(this->polygroupArray[i + 4]);
-
-		vertexArray.push_back(this->polygroupArray[i + 5]);
-		vertexArray.push_back(this->polygroupArray[i + 6]);
-		vertexArray.push_back(this->polygroupArray[i + 7]);
+	for (std::vector<Vector3D>::iterator iter = this->normalStream.begin(); iter != this->normalStream.end(); ++iter) {
+		Vector3D& currNormal = *iter;
+		currNormal = m * currNormal;
 	}
-
-	return numVerts;
 }
 
 void MaterialGroup::AddFaces(const PolyGrpIndexer& indexer, 

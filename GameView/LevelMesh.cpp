@@ -212,7 +212,6 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 				assert(collateralLvlPiece != NULL);
 				this->collateralBlock->AddCollateralBlock(collateralLvlPiece);
 			}
-
 		}
 	}
 }
