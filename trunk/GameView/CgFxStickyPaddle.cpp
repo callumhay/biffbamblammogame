@@ -42,7 +42,7 @@ CgFxStickyPaddle::~CgFxStickyPaddle() {
 void CgFxStickyPaddle::SetupBeforePasses(const Camera& camera) {
 	CgFxMaterialEffect::SetupBeforePasses(camera);
 
-	this->timer += 0.017;	// Approx 60 fps
+	this->timer = static_cast<float>(BlammoTime::GetSystemTimeInMillisecs()) / 1000.0f;
 
 	cgGLSetParameter1f(this->timerParam, this->timer);
 	cgGLSetParameter1f(this->displacementParam, this->displacement);

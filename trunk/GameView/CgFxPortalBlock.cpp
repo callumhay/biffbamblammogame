@@ -54,7 +54,7 @@ void CgFxPortalBlock::SetupBeforePasses(const Camera& camera) {
 	cgGLSetParameter1f(this->timerParam, this->timer);
 	cgGLSetParameter1f(this->noiseScaleParam, this->scale);
 	cgGLSetParameter1f(this->noiseFreqParam, this->freq);
-	cgGLSetParameter3f(this->noiseFlowDirParam, this->flowDir[0], this->flowDir[1], this->flowDir[2]);
+	cgGLSetParameter3fv(this->noiseFlowDirParam, this->flowDir.begin());
 	cgGLSetTextureParameter(this->noiseSamplerParam, this->noiseTexID);
 
 	CgFxMaterialEffect::SetupBeforePasses(camera);

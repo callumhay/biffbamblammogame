@@ -50,33 +50,19 @@ CgFxVolumetricEffect::~CgFxVolumetricEffect() {
 
 void CgFxVolumetricEffect::SetupBeforePasses(const Camera& camera) {
 	// Transform setup
-	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-
-	// Obtain the current model view and inverse view transforms
-	float tempMVXfVals[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
-	Matrix4x4 tempMVXf(tempMVXfVals);
-	Matrix4x4 invViewXf = camera.GetInvViewTransform();
-
-	// Make sure that JUST the world transform is set
-	glPushMatrix();
-	glLoadIdentity();
-	glMultMatrixf(invViewXf.begin());
-	// Set the inverse view transform parameter
-	cgGLSetStateMatrixParameter(this->viewInvMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	glMultMatrixf(tempMVXf.begin());
-	// Set the world transform parameters
+	cgGLSetStateMatrixParameter(this->wvpMatrixParam,     CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
-	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	glPopMatrix();
+	cgGLSetStateMatrixParameter(this->worldMatrixParam,   CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
+	const Matrix4x4& invViewXf = camera.GetInvViewTransform();
+	cgGLSetMatrixParameterfc(this->viewInvMatrixParam, invViewXf.begin());
 
 	// Set tweakables...
 	cgGLSetParameter1f(this->scaleParam, this->scale);
 	cgGLSetParameter1f(this->freqParam, this->freq);
 	cgGLSetParameter1f(this->fadeExpParam, this->fadeExponent);
 	cgGLSetParameter1f(this->alphaMultParam, this->alphaMultiplier);
-	cgGLSetParameter3f(this->flowDirectionParam, this->flowDir[0], this->flowDir[1], this->flowDir[2]);
-	cgGLSetParameter3f(this->colourParam, this->colour[0], this->colour[1], this->colour[2]);
+	cgGLSetParameter3fv(this->flowDirectionParam, this->flowDir.begin());
+	cgGLSetParameter3fv(this->colourParam, this->colour.begin());
 
 	// Set the timer and noise parameters...
 	double timeInSecs = static_cast<double>(BlammoTime::GetSystemTimeInMillisecs()) / 1000.0;

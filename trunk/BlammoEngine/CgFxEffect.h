@@ -167,18 +167,6 @@ public:
 			currPass = cgGetNextPass(currPass);
 		}
 	}
-	/*
-	void Draw(const Camera& camera, const VBOBatch* batch) {
-		this->SetupBeforePasses(camera);
-		
-		// Draw each pass of this effect
-		CGpass currPass = cgGetFirstPass(this->currTechnique);
-		while (currPass) {
-			CgFxEffectBase::DrawPass(currPass, batch);
-			currPass = cgGetNextPass(currPass);
-		}		
-	}
-	*/
 
 	/**
 	 * Obtain the current technique for this effect.

@@ -43,29 +43,15 @@ CgFxDecoSkybox::~CgFxDecoSkybox() {
 
 void CgFxDecoSkybox::SetupBeforePasses(const Camera& camera) {
 	// Transform setup
-	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-	
-	// Obtain the current model view and inverse view transforms
-	float tempMVXfVals[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
-	Matrix4x4 tempMVXf(tempMVXfVals);
-	Matrix4x4 invViewXf = camera.GetInvViewTransform();
-
-	// Make sure that JUST the world transform is set
-	glPushMatrix();
-	glLoadIdentity();
-	glMultMatrixf(invViewXf.begin());
-	glMultMatrixf(tempMVXf.begin());
-	// Set the world transform parameter
-	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	glPopMatrix();
+	cgGLSetStateMatrixParameter(this->wvpMatrixParam,   CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX,            CG_GL_MATRIX_IDENTITY);
 
 	cgGLSetParameter1f(this->freqParam, this->freq);
 	double timeInSecs = static_cast<double>(BlammoTime::GetSystemTimeInMillisecs()) / 1000.0;
 	cgGLSetParameter1f(this->timerParam, timeInSecs);
 
 	Vector3D camDir = camera.GetNormalizedViewVector();
-	cgGLSetParameter3f(this->viewDirParam, camDir[0], camDir[1], camDir[2]);
+	cgGLSetParameter3fv(this->viewDirParam, camDir.begin());
 
 	// Set noise sampler
 	cgGLSetTextureParameter(this->noiseSamplerParam, this->noiseTexID);

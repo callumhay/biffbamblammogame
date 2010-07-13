@@ -77,7 +77,7 @@ void CgFxCelShading::SetupBeforePasses(const Camera& camera) {
 
 	cgGLSetTextureParameter(this->celSamplerParam, CgFxCelShading::CelDiffuseTexture->GetTextureID());
 	cgGLSetParameter1f(this->outlineWidthParam, this->properties->outlineSize);
-	cgGLSetParameter3f(this->outlineColourParam, this->properties->outlineColour.R(),this->properties->outlineColour.G(), this->properties->outlineColour.B());
+	cgGLSetParameter3fv(this->outlineColourParam, this->properties->outlineColour.begin());
 
 	CgFxMaterialEffect::SetupBeforePasses(camera);
 }

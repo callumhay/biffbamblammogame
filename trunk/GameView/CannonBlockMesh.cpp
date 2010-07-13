@@ -18,11 +18,6 @@ CannonBlockMesh::~CannonBlockMesh() {
 void CannonBlockMesh::Draw(const Camera& camera, const PointLight& keyLight, 
 													 const PointLight& fillLight, const PointLight& ballLight) const {
 
-	glPushMatrix();
-
-	// Translate to world space of the current game level...
-	glTranslatef(this->currWorldTranslation[0], this->currWorldTranslation[1], this->currWorldTranslation[2]);
-
 	// Go through each of the cannon blocks and draw them, each with their proper,
 	// respective barrel orientation
 	float cannonRotationInDegs;
@@ -45,14 +40,12 @@ void CannonBlockMesh::Draw(const Camera& camera, const PointLight& keyLight,
 
 		glPushMatrix();
 		// Translate to the piece location in the game model...
-		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+		glTranslatef(this->currWorldTranslation[0] + blockCenter[0], this->currWorldTranslation[1] + blockCenter[1], this->currWorldTranslation[2]);
 		// Rotate the barrel to its current direction
 		glRotatef(cannonRotationInDegs, 0, 0, 1);
 		this->cannonBlockBarrelGeometry->Draw(camera, keyLight, fillLight, ballLight);
 		glPopMatrix();
 	}
-
-	glPopMatrix();
 }
 
 void CannonBlockMesh::LoadMesh() {

@@ -51,10 +51,10 @@ public:
 	~PointLight() {}
 
 	//inline Colour GetAmbientColour() const { return this->currAmbientColour; }
-	inline Colour GetDiffuseColour() const { return this->currDiffuseColour; }
+	inline const Colour& GetDiffuseColour() const { return this->currDiffuseColour; }
 
 	//inline Colour* GetDiffuseColourPtr() { return &this->currDiffuseColour; }  
-	inline Point3D GetPosition() const { return this->position; }
+	inline const Point3D& GetPosition() const { return this->position; }
 	inline float GetLinearAttenuation() const { return this->linearAttenuation; }
 	inline bool GetIsTurnedOn() const { return this->isOn; }
 	

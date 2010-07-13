@@ -70,7 +70,7 @@ void CgFxFullscreenGoo::Draw(int screenWidth, int screenHeight, double dT) {
 	cgGLSetParameter1f(this->frequencyParam, this->frequency);
 	cgGLSetParameter1f(this->displacementParam, this->displacement);
 	cgGLSetParameter1f(this->fadeParam, this->fade);
-	cgGLSetParameter3f(this->colourParam, this->colour.R(), this->colour.G(), this->colour.B());
+	cgGLSetParameter3fv(this->colourParam, this->colour.begin());
 
 	if (this->currTechnique == this->techniques[CgFxFullscreenGoo::MASK_SPLATTER_TECHNIQUE_NAME]) {
 		cgGLSetTextureParameter(this->maskSamplerParam, this->maskTex->GetTextureID());
@@ -85,6 +85,4 @@ void CgFxFullscreenGoo::Draw(int screenWidth, int screenHeight, double dT) {
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);
 	this->resultFBO->UnbindFBObj();
-
-
 }

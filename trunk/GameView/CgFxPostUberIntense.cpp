@@ -38,7 +38,7 @@ void CgFxPostUberIntense::Draw(int screenWidth, int screenHeight, double dT) {
 	cgGLSetParameter1f(this->timerParam, this->timer);
 	cgGLSetParameter1f(this->frequencyParam, this->frequency);
 	cgGLSetParameter1f(this->fadeParam, this->fade);
-	cgGLSetParameter3f(this->colourParam, this->colour.R(), this->colour.G(), this->colour.B());
+	cgGLSetParameter3fv(this->colourParam, this->colour.begin());
 
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
 
