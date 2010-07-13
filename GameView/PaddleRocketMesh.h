@@ -39,6 +39,9 @@ public:
 	void Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight);
 
 private:
+	static const float GLOW_X_SIZE;
+	static const float GLOW_Y_SIZE;
+
 	ESPParticleScaleEffector pulseEffector;
 	Texture2D* glowTex;
 	ESPPointEmitter* rocketGlowEmitter;

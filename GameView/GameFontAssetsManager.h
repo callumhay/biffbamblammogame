@@ -52,6 +52,8 @@ public:
 				return fontIter->second;
 			}
 		}
+		
+		assert(false);
 		return NULL;
 	}
 

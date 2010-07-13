@@ -85,7 +85,7 @@ void ESPParticle::DrawAsPointSprite(const Camera& camera, const Vector3D& transl
 
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
 	glBegin(GL_POINTS);
-	glVertex3f(this->position[0], this->position[1], this->position[2]);
+	glVertex3fv(this->position.begin());
 	glEnd();
 }
 
@@ -149,7 +149,7 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 				}
 			}
 			alignRightVec = Vector3D::Normalize(alignRightVec);
-			alignUpVec			= Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
+			alignUpVec		= Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
 			break;
 
 		case ESP::AxisAligned:

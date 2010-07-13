@@ -103,7 +103,6 @@ void CgFxBloom::Draw(int screenWidth, int screenHeight, double dT) {
 	cgSetPassState(currPass);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);
-	this->bloomFilterFBO->UnbindFBObj();
 
 	// Step 2: Using the bright parts of the screen do several downsampled blurs
 	// Setup the downsampled texture samplers
@@ -124,7 +123,8 @@ void CgFxBloom::Draw(int screenWidth, int screenHeight, double dT) {
 	cgSetPassState(currPass);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight, -1.0f);
 	cgResetPassState(currPass);
-	this->sceneFBO->UnbindFBObj();
+
+	FBObj::UnbindFBObj();
 }
 
 /**
@@ -137,7 +137,6 @@ void CgFxBloom::DoDownsampledBlur(int screenWidth, int screenHeight, const std::
 	cgSetPassState(currPass);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);
-	this->blurFBO->UnbindFBObj();
 
 	cgGLSetTextureParameter(downsampleParam, this->blurFBO->GetFBOTexture()->GetTextureID());
 	
@@ -146,7 +145,6 @@ void CgFxBloom::DoDownsampledBlur(int screenWidth, int screenHeight, const std::
 	cgSetPassState(currPass);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);	
-	downsampleFBO->UnbindFBObj();
 }
 
 /**

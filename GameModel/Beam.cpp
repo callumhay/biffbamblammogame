@@ -64,6 +64,7 @@ bool Beam::BeamHasChanged(const std::list<BeamSegment*>& oldBeamSegs, const std:
  * for debug purposes.
  */
 void Beam::DebugDraw() const {
+	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 	glDisable(GL_DEPTH_TEST);
 
 	glBegin(GL_LINES);
@@ -79,7 +80,7 @@ void Beam::DebugDraw() const {
 	}
 	glEnd();
 
-	glEnable(GL_DEPTH_TEST);
+	glPopAttrib();
 }
 
 /**

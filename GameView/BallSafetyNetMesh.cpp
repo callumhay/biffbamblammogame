@@ -233,12 +233,15 @@ void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const PointLight& 
 		case BallSafetyNetMesh::Idle:
 			assert(this->displayListID != 0);
 			// Draw the typical ball safety net
+			glPushAttrib(GL_CURRENT_BIT);
 			glColor4f(1.0f, 1.0f, 1.0f, this->idleAlpha);
 			this->shadingMaterial->Draw(camera, this->displayListID);
+			glPopAttrib();
 			break;
 
 		case BallSafetyNetMesh::CreationAnimation:
 			assert(this->displayListID != 0);
+			glPushAttrib(GL_CURRENT_BIT);
 			glColor4f(1.0f, 1.0f, 1.0f, this->pieceAlpha);
 			this->shadingMaterial->Draw(camera, this->displayListID);	
 			{
@@ -247,9 +250,11 @@ void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const PointLight& 
 					this->currAnimation = BallSafetyNetMesh::Idle;
 				}
 			}
+			glPopAttrib();
 			break;
 
 		case BallSafetyNetMesh::DestructionAnimation:
+			glPushAttrib(GL_CURRENT_BIT);
 			// Play the destruction animation for the safety net
 			glColor4f(1, 1, 1, this->pieceAlpha);
 
@@ -278,6 +283,8 @@ void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const PointLight& 
 					this->currAnimation = BallSafetyNetMesh::Dead;
 				}
 			}
+
+			glPopAttrib();
 			break;
 
 		case BallSafetyNetMesh::Dead:

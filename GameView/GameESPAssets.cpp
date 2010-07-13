@@ -3443,8 +3443,8 @@ void GameESPAssets::DrawPaddleCamEffects(double dT, const Camera& camera, const 
 	std::vector<ESPPointEmitter*>& paddleCamBallEffectList = this->ballEffects[&ball][GameItem::PaddleCamItem];
 
 	glPushMatrix();
-	Point2D ballLoc		= ball.GetBounds().Center();
-	Point2D paddleLoc	= paddle.GetCenterPosition();
+	const Point2D& ballLoc		= ball.GetBounds().Center();
+	const Point2D& paddleLoc	= paddle.GetCenterPosition();
 	
 	// The only effect so far is a spinning target on the ball...
 	glTranslatef(ballLoc[0], ballLoc[1], 0);
@@ -3479,8 +3479,8 @@ void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const Ga
 	std::vector<ESPPointEmitter*>& ballCamPaddleEffectList = this->paddleEffects[GameItem::BallCamItem];
 
 	glPushMatrix();
-	Point2D ballLoc		= ball.GetBounds().Center();
-	Point2D paddleLoc	= paddle.GetCenterPosition();
+	const Point2D& ballLoc		= ball.GetBounds().Center();
+	const Point2D& paddleLoc	= paddle.GetCenterPosition();
 	
 	// The only effect so far is a spinning target on the paddle...
 	glTranslatef(paddleLoc[0], paddleLoc[1], 0);
@@ -3506,8 +3506,6 @@ void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const Ga
  * Draw particle effects associated with the ball, which get drawn behind the ball.
  */
 void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball) {
-	std::list<std::list<ESPEmitter*>::iterator> removeElements;
-
 	// Find the emitters corresponding to the given ball
 	std::map<const GameBall*, std::list<ESPEmitter*> >::iterator tempIter = this->activeBallBGEmitters.find(&ball);
 	if (tempIter == this->activeBallBGEmitters.end()) {
@@ -3517,28 +3515,26 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
 	std::list<ESPEmitter*>& ballEmitters = tempIter->second;
 
 	// Go through all the particles and do book keeping and drawing
-	for (std::list<ESPEmitter*>::iterator iter = ballEmitters.begin(); iter != ballEmitters.end(); ++iter) {
+	for (std::list<ESPEmitter*>::iterator iter = ballEmitters.begin(); iter != ballEmitters.end(); ) {
 	
 		ESPEmitter* curr = *iter;
 
 		// Check to see if dead, if so erase it...
 		if (curr->IsDead()) {
-			removeElements.push_back(iter);
+			delete curr;
+			curr = NULL;
+			iter = ballEmitters.erase(iter);
 		}
 		else {
 			// Not dead yet so we draw and tick
 			curr->Draw(camera);
 			curr->Tick(dT);
+			++iter;
 		}
 	}
 
-	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin(); iter != removeElements.end(); ++iter) {
-			ESPEmitter* currEmitter = (**iter);
-			tempIter->second.erase(*iter);
-			delete currEmitter;
-			currEmitter = NULL;
-	}
-
+	// If there are no background emitters left for the ball then remove that ball from
+	// the ball background emitter mapping
 	if (tempIter->second.size() == 0) {
 		this->activeBallBGEmitters.erase(tempIter);
 	}

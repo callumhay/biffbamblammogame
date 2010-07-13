@@ -120,30 +120,30 @@ sampler2D ColourSampler = sampler_state {
 
 /* data from application vertex buffer */
 struct appdata {
-    float3 Position	: POSITION;
-    float4 UV		: TEXCOORD0;
-    float4 Normal	: NORMAL;
-    float4 Colour	: COLOR0;
+    float3 Position : POSITION;
+    float4 UV       : TEXCOORD0;
+    float4 Normal   : NORMAL;
+    float4 Colour   : COLOR;
 };
 
 struct appdata_outlines {
-    float3 Position	  : POSITION;
-    float4 Colour	  : COLOR0;
+    float3 Position   : POSITION;
+    float4 Colour     : COLOR;
 };
 
 /* data passed from vertex shader to pixel shader */
 struct vertexOutput {
-    float4 HPosition	: POSITION;
-    float2 UV		: TEXCOORD0;
+    float4 HPosition    : POSITION;
+    float2 UV       : TEXCOORD0;
     float3 WorldPos     : TEXCOORD1;
-    float3 WorldNormal	: TEXCOORD2;
-    float3 WorldView	: TEXCOORD3;
-    float4 Colour	: TEXCOORD4;
+    float3 WorldNormal  : TEXCOORD2;
+    float3 WorldView    : TEXCOORD3;
+    float4 Colour   : TEXCOORD4;
 };
  
 struct vertexOutput_outlines {
-    float4 HPosition	: POSITION;
-    float Alpha		: TEXCOORD0;
+    float4 HPosition    : POSITION;
+    float Alpha     : TEXCOORD0;
 };
 
 ///////// VERTEX SHADING /////////////////////
@@ -157,7 +157,7 @@ vertexOutput phongshading_VS(appdata IN) {
     float4 Po = float4(IN.Position.xyz,1);
     float3 Pw = mul(WorldXf,Po).xyz;
     OUT.WorldPos = Pw;
-	OUT.UV = IN.UV.xy;
+    OUT.UV = IN.UV.xy;
     
     float3 VertToViewVec = float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w) - Pw;
     OUT.WorldView = normalize(VertToViewVec);
@@ -170,47 +170,47 @@ vertexOutput phongshading_VS(appdata IN) {
 
 // Utility function for phong shading
 void PhongShadingBG(float3 Nn,
-			float3 WorldPos,
-		    float3 Vn,
-		    out float3 DiffuseContrib,
-		    out float3 SpecularContrib)
+            float3 WorldPos,
+            float3 Vn,
+            out float3 DiffuseContrib,
+            out float3 SpecularContrib)
 {
-	float3 KeyLightVec  = KeyPointLightPos - WorldPos;
-	float3 FillLightVec = FillPointLightPos - WorldPos;
-	
-	float3 KeyLn  = normalize(KeyLightVec);
-	float3 FillLn = normalize(FillLightVec);
-	
+    float3 KeyLightVec  = KeyPointLightPos - WorldPos;
+    float3 FillLightVec = FillPointLightPos - WorldPos;
+    
+    float3 KeyLn  = normalize(KeyLightVec);
+    float3 FillLn = normalize(FillLightVec);
+    
     float3 KeyHn = normalize(Vn + KeyLn);
     float3 KeyLitV = lit(dot(KeyLn,Nn),dot(KeyHn,Nn),Shininess).xyz;
     
-	float3 FillHn = normalize(Vn + FillLn);
+    float3 FillHn = normalize(Vn + FillLn);
     float3 FillLitV = lit(dot(FillLn,Nn),dot(FillHn,Nn),Shininess).xyz;
-	
-	float FillLinearAtten = clamp(1.0f / (FillPointLightLinearAtten * distance(FillPointLightPos, WorldPos)), 0, 1);
-	FillLinearAtten = clamp(FillLinearAtten, 0, 1);
-	
+    
+    float FillLinearAtten = clamp(1.0f / (FillPointLightLinearAtten * distance(FillPointLightPos, WorldPos)), 0, 1);
+    FillLinearAtten = clamp(FillLinearAtten, 0, 1);
+    
     DiffuseContrib  = (KeyLitV.y * KeyPointLightColour) + FillLinearAtten * (FillLitV.y * FillPointLightColour);
     SpecularContrib = (KeyLitV.z * KeyPointLightColour) + FillLinearAtten * (FillLitV.z * FillPointLightColour);
 }
 
 // Same as Background shading but with one more light source (ball)
 void PhongShadingFG(float3 Nn,
-			float3 WorldPos,
-		    float3 Vn,
-		    out float3 DiffuseContrib,
-		    out float3 SpecularContrib)
+            float3 WorldPos,
+            float3 Vn,
+            out float3 DiffuseContrib,
+            out float3 SpecularContrib)
 {
-	PhongShadingBG(Nn, WorldPos, Vn, DiffuseContrib, SpecularContrib);
-	
-	float3 BallLn = normalize(BallPointLightPos - WorldPos);
-	float3 BallHn = normalize(Vn + BallLn);
-	float3 BallLitV = lit(dot(BallLn,Nn), dot(BallHn,Nn), Shininess).xyz;
-	
-	float BallLinearAtten =  clamp(1.0f / (BallPointLightLinearAtten * distance(BallPointLightPos, WorldPos)), 0, 1);
-	
-	DiffuseContrib  += BallLinearAtten * (BallLitV.y * BallPointLightDiffuse);
-	SpecularContrib += BallLinearAtten * (BallLitV.z * BallPointLightDiffuse);	
+    PhongShadingBG(Nn, WorldPos, Vn, DiffuseContrib, SpecularContrib);
+    
+    float3 BallLn = normalize(BallPointLightPos - WorldPos);
+    float3 BallHn = normalize(Vn + BallLn);
+    float3 BallLitV = lit(dot(BallLn,Nn), dot(BallHn,Nn), Shininess).xyz;
+    
+    float BallLinearAtten =  clamp(1.0f / (BallPointLightLinearAtten * distance(BallPointLightPos, WorldPos)), 0, 1);
+    
+    DiffuseContrib  += BallLinearAtten * (BallLitV.y * BallPointLightDiffuse);
+    SpecularContrib += BallLinearAtten * (BallLitV.z * BallPointLightDiffuse);  
 }
 
 float4 phongshading_fg_PS(vertexOutput IN) : COLOR {
@@ -219,7 +219,7 @@ float4 phongshading_fg_PS(vertexOutput IN) : COLOR {
     float3 Vn     = normalize(IN.WorldView);
     float3 Nn     = normalize(IN.WorldNormal);
     
-	PhongShadingFG(Nn,IN.WorldPos,Vn,diffContrib,specContrib);
+    PhongShadingFG(Nn,IN.WorldPos,Vn,diffContrib,specContrib);
     
     float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*diffContrib;
     return float4(result,IN.Colour.a);
@@ -231,7 +231,7 @@ float4 phongshading_bg_PS(vertexOutput IN) : COLOR {
     float3 Vn     = normalize(IN.WorldView);
     float3 Nn     = normalize(IN.WorldNormal);
     
-	PhongShadingBG(Nn,IN.WorldPos,Vn,diffContrib,specContrib);
+    PhongShadingBG(Nn,IN.WorldPos,Vn,diffContrib,specContrib);
     
     float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*diffContrib;
     return float4(result, IN.Colour.a);
@@ -242,7 +242,7 @@ float4 phongshading_textured_fg_PS(vertexOutput IN) : COLOR {
     float3 specContrib;
     float3 Vn = normalize(IN.WorldView);
     float3 Nn = normalize(IN.WorldNormal);
-	  
+      
     PhongShadingFG(Nn,IN.WorldPos,Vn,diffContrib,specContrib);
     
     float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
@@ -255,7 +255,7 @@ float4 phongshading_textured_bg_PS(vertexOutput IN) : COLOR {
     float3 specContrib;
     float3 Vn = normalize(IN.WorldView);
     float3 Nn = normalize(IN.WorldNormal);
-	  
+      
     PhongShadingBG(Nn,IN.WorldPos,Vn,diffContrib,specContrib);
     
     float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
@@ -288,16 +288,16 @@ technique BasicBG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-		PolygonSmoothEnable = true;
+        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
-		
+        
         VertexProgram = compile arbvp1 phongshading_VS();        
         FragmentProgram = compile arbfp1 phongshading_bg_PS();
-	}
-	
+    }
+    
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-		BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
@@ -308,7 +308,7 @@ technique BasicBG {
         
         VertexProgram = compile arbvp1 outline_VS();
         FragmentProgram = compile arbfp1 outline_PS();
-    } 	
+    }   
 }
 
 technique BasicFG {
@@ -319,16 +319,16 @@ technique BasicFG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-		PolygonSmoothEnable = true;
+        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
 
         VertexProgram = compile arbvp1 phongshading_VS();        
         FragmentProgram = compile arbfp1 phongshading_fg_PS();
     }
-	
+    
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-		BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
@@ -339,8 +339,8 @@ technique BasicFG {
         
         VertexProgram = compile arbvp1 outline_VS();
         FragmentProgram = compile arbfp1 outline_PS();
-    } 		
-	
+    }       
+    
 }
 
 technique BasicFGNoOutline {
@@ -351,7 +351,7 @@ technique BasicFGNoOutline {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-		PolygonSmoothEnable = true;
+        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
 
         VertexProgram = compile arbvp1 phongshading_VS();        
@@ -368,16 +368,16 @@ technique TexturedBG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-		PolygonSmoothEnable = true;
+        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile arbvp1 phongshading_VS();        
         FragmentProgram = compile arbfp1 phongshading_textured_bg_PS();
     }
-	
+    
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-		BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
@@ -388,8 +388,8 @@ technique TexturedBG {
         
         VertexProgram = compile arbvp1 outline_VS();
         FragmentProgram = compile arbfp1 outline_PS();
-    } 		
-	
+    }       
+    
 }
 
 technique TexturedFG {
@@ -401,16 +401,15 @@ technique TexturedFG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-		PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile arbvp1 phongshading_VS();        
         FragmentProgram = compile arbfp1 phongshading_textured_fg_PS();
     } 
-	
+
     pass p1 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
-		BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
@@ -421,7 +420,8 @@ technique TexturedFG {
         
         VertexProgram = compile arbvp1 outline_VS();
         FragmentProgram = compile arbfp1 outline_PS();
-    } 		
+    }
+
 }
 
 technique TexturedFGNoOutline {
@@ -433,10 +433,10 @@ technique TexturedFGNoOutline {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-		PolygonSmoothEnable = true;
+        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
-        
+
         VertexProgram = compile arbvp1 phongshading_VS();        
         FragmentProgram = compile arbfp1 phongshading_textured_fg_PS();
-    } 	
+    }   
 }

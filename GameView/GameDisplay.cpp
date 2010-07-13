@@ -55,11 +55,16 @@ GameDisplay::~GameDisplay() {
 void GameDisplay::SetInitialRenderOptions() {
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT, GL_FILL);
 	glDisable(GL_LIGHTING);
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 }
 
 void GameDisplay::ChangeDisplaySize(int w, int h) {

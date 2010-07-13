@@ -41,6 +41,10 @@ public:
     return *this;
   }
 	
+	const float* begin() const {
+		return colours;
+	}
+
 	float& operator[](size_t idx) {
 		assert(idx < 3);
     return this->colours[ idx ];
@@ -114,8 +118,8 @@ public:
 		return this->alpha;
 	}
 
-	Colour GetColour() const {
-		return Colour(this->colours[0], this->colours[1], this->colours[2]);
+	const Colour& GetColour() const {
+		return (*this);
 	}
 };
 

@@ -72,8 +72,7 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 			return;
 	}
 
-	glPushAttrib(GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 	
-	glDisable(GL_LIGHTING);
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT); 	
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);	
 	glEnable(GL_BLEND);
@@ -83,7 +82,6 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 	Camera::PushWindowCoords();
 	
 	glMatrixMode(GL_MODELVIEW);
-	
 	glPushMatrix();
 	glLoadIdentity();
 
@@ -105,10 +103,7 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 				glPushMatrix();
 				glTranslatef(quarterScreenWidth, 0.0f, 0.0f);
 				this->DrawBeamBlast(alpha);
-				glPopMatrix();
-
-				glPushMatrix();
-				glTranslatef(-quarterScreenWidth, 0.0f, 0.0f);
+				glTranslatef(-2.0f*quarterScreenWidth, 0.0f, 0.0f);
 				this->DrawBeamBlast(alpha);
 				glPopMatrix();
 			}

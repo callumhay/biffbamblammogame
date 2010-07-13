@@ -44,6 +44,10 @@ public:
     return *this;
   }
 
+	const float* begin() const {
+		return v_;
+	}
+
   float& operator[](size_t idx) {
 		assert(idx < 2);
     return v_[ idx ];
@@ -164,6 +168,10 @@ public:
     v_[2] = other.v_[2];
     return *this;
   }
+
+	const float* begin() const {
+		return v_;
+	}
 
   float& operator[](size_t idx) {
 		assert(idx < 3);

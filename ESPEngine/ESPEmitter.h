@@ -110,8 +110,10 @@ public:
 	void SetSpawnDelta(const ESPInterval& spawnDelta);
 	void SetInitialSpd(const ESPInterval& initialSpd);
 	void SetParticleLife(const ESPInterval& particleLife);
+
 	void SetParticleSize(const ESPInterval& particleSizeX, const ESPInterval& particleSizeY);
 	void SetParticleSize(const ESPInterval& particleSize);
+
 	void SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha);
 	void SetParticleAlpha(const ESPInterval& alpha);
 	void SetParticleRotation(const ESPInterval& particleRot);

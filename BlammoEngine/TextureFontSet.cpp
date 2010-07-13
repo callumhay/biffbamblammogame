@@ -59,11 +59,11 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 	Camera::PushWindowCoords();
 
 	// Prepare OGL for drawing the text
-	glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT ); 
+	glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT | GL_COLOR_BUFFER_BIT); 
+
 	glMatrixMode(GL_MODELVIEW);
-	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
-	
+
 	if (depthTestOn) {
 		glEnable(GL_DEPTH_TEST);
 	}
@@ -73,16 +73,17 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
 
-	// Draw the text
-	glListBase(this->charDispLists[0]);
 	glPushMatrix();
 	glLoadIdentity();
 	glTranslatef(topLeftCorner[0], topLeftCorner[1]-this->heightInPixels, topLeftCorner[2]);
-	glRasterPos2f(0,0);
+	glRasterPos2i(0, 0);
+
+	// Draw the text
+	glListBase(this->charDispLists[0]);
 	glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
-	
+
 	float rpos[4];
-	glGetFloatv(GL_CURRENT_RASTER_POSITION ,rpos);
+	glGetFloatv(GL_CURRENT_RASTER_POSITION, rpos);
 	float textLength = rpos[0] - topLeftCorner[0];
 	
 	glPopMatrix();
@@ -91,6 +92,8 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 	// Pop the projection matrix
 	Camera::PopWindowCoords();
 	
+	debug_opengl_state();
+
 	return textLength;
 }
 

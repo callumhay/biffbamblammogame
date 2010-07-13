@@ -154,25 +154,16 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilt
 	}
 
 	// Bind the texture and create it in all its glory
-	glBindTexture(GL_TEXTURE_2D, newTex->texID);
-
+	newTex->BindTexture();
 	// Fonts are 2 channel data, hence the use of GL_LUMINANCE_ALPHA
-	if (!Texture::IsMipmappedFilter(texFilter)) {
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-									GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expandedData );
-	}
-	else {
-		GLint result = gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, width, height, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expandedData);
-		
-		if (result != 0) {
-			debug_output("Failed to load mipmaps for empty texture.");
-			delete newTex;
-			newTex = NULL;
-		}	
-	}
-
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expandedData );
 	Texture::SetFilteringParams(texFilter, newTex->textureType);
-	glBindTexture(GL_TEXTURE_2D, 0);
+
+	if (Texture::IsMipmappedFilter(texFilter)) {
+		glGenerateMipmapEXT(newTex->textureType);
+	}
+	
+	newTex->UnbindTexture();
 	glPopAttrib();
 
 	delete[] expandedData;

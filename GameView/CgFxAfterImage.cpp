@@ -42,7 +42,6 @@ void CgFxAfterImage::Draw(int screenWidth, int screenHeight, double dT) {
 	cgGLSetParameter1f(this->blurStrengthParam, this->blurStrength);
 
 	this->prevFrameFBO->BindFBObj();
-
 	// Step 1: Draw a fullscreen quad with the previous frame rendered onto it
 	this->prevFrameFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
 
@@ -52,11 +51,11 @@ void CgFxAfterImage::Draw(int screenWidth, int screenHeight, double dT) {
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);
 
-	this->prevFrameFBO->UnbindFBObj();
-
 	// Render the result into the output FBO
 	this->outputFBO->BindFBObj();
 	this->prevFrameFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
-	this->outputFBO->UnbindFBObj();
+	
+	FBObj::UnbindFBObj();
 	debug_cg_state();
+	debug_opengl_state();
 }

@@ -91,11 +91,11 @@ public:
 		return Vector3D::Normalize(this->viewMatrix * DEFAULT_LEFT_VEC);
 	}
 
-	Matrix4x4 GetViewTransform() const {
+	const Matrix4x4& GetViewTransform() const {
 		return this->viewMatrix;
 	}
 
-	Matrix4x4 GetInvViewTransform() const {
+	const Matrix4x4& GetInvViewTransform() const {
 		return this->invViewMatrix;
 	}
 

@@ -139,7 +139,11 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 
 	// Textures
 	if (this->properties->diffuseTexture != NULL) {
+
+		//cgGLSetupSampler(this->texSamplerParam, this->properties->diffuseTexture->GetTextureID());
+		
 		cgGLSetTextureParameter(this->texSamplerParam, this->properties->diffuseTexture->GetTextureID());
+		cgSetSamplerState(this->texSamplerParam);
 	}
 
 	// Material properties

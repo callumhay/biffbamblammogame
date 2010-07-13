@@ -93,7 +93,6 @@ void CgFxGaussianBlur::Draw(int screenWidth, int screenHeight, double dT) {
 	cgSetPassState(currPass);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);
-	this->tempFBO->UnbindFBObj();
 
 	// Step 2: We have the first blur stored into the temporary FBO, now feed that
 	// into the next pass and render it into the scene FBO.
@@ -103,6 +102,7 @@ void CgFxGaussianBlur::Draw(int screenWidth, int screenHeight, double dT) {
 	cgSetPassState(currPass);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(screenWidth, screenHeight);
 	cgResetPassState(currPass);	
+
 	this->sceneFBO->UnbindFBObj();
 }
 

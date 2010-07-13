@@ -61,9 +61,6 @@ void InGameDisplayState::RenderFrame(double dT) {
 	
 	debug_opengl_state();
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-
 	// Draw the game scene
 	this->DrawGameScene(dT);
 	
@@ -201,8 +198,6 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	// Render the beam effects
 	this->display->GetAssets()->DrawBeams(dT, *this->display->GetModel(), camera);
 
-	fullSceneFBO->UnbindFBObj();
-	
 	// Draw Post-Fullscene effects
 	postFullSceneFBO->BindFBObj();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -212,7 +207,7 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	// Render any post-processing effects for various items/objects in the game
 	this->display->GetAssets()->DrawPaddlePostEffects(dT, *this->display->GetModel(), camera);
 
-	postFullSceneFBO->UnbindFBObj();
+	FBObj::UnbindFBObj();
 
 	glPopMatrix();
 
