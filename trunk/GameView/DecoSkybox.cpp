@@ -37,7 +37,6 @@ void DecoSkybox::Draw(const Camera& camera) {
 	glMultMatrixf(camTransform.begin());
 
 	glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT);
-  glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
 	
 	this->skyboxTex->BindTexture();

@@ -32,21 +32,17 @@ Skybox::~Skybox() {
  */
 void Skybox::Draw(const Camera& camera) {
 	// Draw the skybox:  The skybox consists of a cube with inward facing quads, textured with the skybox texture
-	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-  glLoadIdentity();
 
+	// Load just the rotation/orientation of the view matrix
 	Vector3D camView = camera.GetNormalizedViewVector();
 	Matrix4x4 camTransform = camera.GetViewTransform();
 	camTransform.setTranslation(Point3D(0,0,0));
-	glMultMatrixf(camTransform.begin());
+	glLoadMatrixf(camTransform.begin());
 
   glPushAttrib(GL_ENABLE_BIT);
   glEnable(GL_TEXTURE_2D);
-  glDisable(GL_LIGHTING);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   this->skyboxTex->BindTexture();
 	Skybox::DrawSkyboxGeometry(1, (Camera::FAR_PLANE_DIST - 1.0f) / SQRT_2);
 	this->skyboxTex->UnbindTexture();

@@ -128,8 +128,8 @@ public:
 
 	Matrix4x4 inverse() const;
 
-  const float *begin() const {
-    return (float*)v_;
+  const float* begin() const {
+    return v_;
   }
 
   const float *end() const {

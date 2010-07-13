@@ -269,11 +269,8 @@ void ESPEmitter::Tick(const double dT) {
  */
 void ESPEmitter::Draw(const Camera& camera, const Vector3D& worldTranslation, bool enableDepth) {
 	// Setup OpenGL for drawing the particles in this emitter...
-	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | 
-		GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_POINT_BIT); 	
+	glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 	
 
-	glMatrixMode(GL_MODELVIEW);
-	glDisable(GL_LIGHTING);
 	enableDepth ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
@@ -451,13 +448,14 @@ void ESPEmitter::SetParticleSize(const ESPInterval& particleSizeX, const ESPInte
 	this->particleSize[0] = particleSizeX;
 	this->particleSize[1] = particleSizeY;
 	this->makeSizeConstraintsEqual = false;
+
 }
 void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
 	this->particleSize[0] = particleSize;
 	this->particleSize[1] = particleSize;
 	this->makeSizeConstraintsEqual = true;
-}
 
+}
 /**
  * Sets the inclusive interval of random possible values that represent the initial
  * rotation (in degrees) of particles in this emitter.

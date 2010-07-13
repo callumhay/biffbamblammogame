@@ -42,6 +42,10 @@ public:
     v_[1] = other.v_[1];
   }
 
+	const float* begin() const {
+		return v_;
+	}
+
   Point2D& operator =(const Point2D& other) {
     v_[0] = other.v_[0];
     v_[1] = other.v_[1];
@@ -143,6 +147,10 @@ public:
     v_[2] = other.v_[2];
     return *this;
   }
+
+	const float* begin() const {
+		return v_;
+	}
 
   float& operator[](size_t idx) {
 		assert(idx < 3);

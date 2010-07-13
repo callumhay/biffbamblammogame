@@ -155,7 +155,7 @@ void ResourceManager::InitCgContext() {
 
 	// Register OGL states for the context and allow texture mgmt
 	cgGLRegisterStates(this->cgContext);
-	cgGLSetManageTextureParameters(this->cgContext, true);
+	cgGLSetManageTextureParameters(this->cgContext, CG_TRUE);
 	debug_cg_state();
 }
 

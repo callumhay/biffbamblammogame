@@ -42,7 +42,7 @@ public:
 	inline void BindFBObj() const {
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, this->fboID);
 	}
-	inline void UnbindFBObj() const {
+	static void UnbindFBObj() {
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 

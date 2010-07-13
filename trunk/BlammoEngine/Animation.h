@@ -375,10 +375,10 @@ public:
 		}
 
 		// Grab the current interpolation values
-		T &valueStart = this->interpolationPts[this->tracker];
-		T &valueEnd   = this->interpolationPts[this->tracker+1];
-		double timeStart  = this->timePts[this->tracker];
-		double timeEnd		= this->timePts[this->tracker+1];
+		const T& valueStart = this->interpolationPts[this->tracker];
+		const T& valueEnd   = this->interpolationPts[this->tracker+1];
+		const double& timeStart  = this->timePts[this->tracker];
+		const double& timeEnd		= this->timePts[this->tracker+1];
 
 		if (fabs(timeEnd - timeStart) < EPSILON) {
 			x = timeEnd;

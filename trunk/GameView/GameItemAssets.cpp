@@ -162,44 +162,45 @@ bool GameItemAssets::LoadItemAssets() {
 void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
 															const PointLight& fgKeyLight, const PointLight& fgFillLight, 
 															const PointLight& ballLight) const  {
-	Point2D center = gameItem.GetCenter();
-	glPushMatrix();
-	glTranslatef(center[0], center[1], 0.0f);
 
 	// Set material for the image based on the item name/type
 	GameItem::ItemType itemName	= gameItem.GetItemType();
 	std::map<GameItem::ItemType, Texture*>::const_iterator lookupIter = this->itemTextures.find(itemName);
 	assert(lookupIter != this->itemTextures.end());
 
-	Texture2D* itemTexture = dynamic_cast<Texture2D*>(lookupIter->second);
+	Texture* itemTexture = lookupIter->second;
 	assert(itemTexture != NULL);
 	
 	this->item->SetTextureForMaterial(GameViewConstants::GetInstance()->ITEM_LABEL_MATGRP, itemTexture);
 	
-	Colour itemEndColour;
+	const Colour* itemEndColour = NULL;
 	switch (gameItem.GetItemDisposition()) {
 		case GameItem::Good:
-			itemEndColour = GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR;
+			itemEndColour = &GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR;
 			break;
 		case GameItem::Bad:
-			itemEndColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR;
+			itemEndColour = &GameViewConstants::GetInstance()->ITEM_BAD_COLOUR;
 			break;		
 		case GameItem::Neutral:
-			itemEndColour = GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR;
+			itemEndColour = &GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR;
 			break;
 		default:
 			assert(false);
-			break;
+			return;
 	}
 
-	this->item->SetColourForMaterial(GameViewConstants::GetInstance()->ITEM_END_MATGRP, itemEndColour);
+	this->item->SetColourForMaterial(GameViewConstants::GetInstance()->ITEM_END_MATGRP, *itemEndColour);
 	
+	glPushMatrix();
+	const Point2D& center = gameItem.GetCenter();
+	glTranslatef(center[0], center[1], 0.0f);
+
 	// Draw the item's effect and the item itself
 	this->espAssets->DrawItemDropEffects(dT, camera, gameItem);
 	
 	// Set the colour multiply for the item - this allows the model to control the colour
 	// and transparency of the model based on the state of the game
-	ColourRGBA itemColourMultiply = gameItem.GetItemColour();
+	const ColourRGBA& itemColourMultiply = gameItem.GetItemColour();
 	glColor4f(itemColourMultiply.R(), itemColourMultiply.G(), itemColourMultiply.B(), itemColourMultiply.A());	
 	this->item->Draw(camera, fgKeyLight, fgFillLight, ballLight);
 	glPopMatrix();
@@ -232,14 +233,12 @@ void GameItemAssets::DrawTimers(double dT, const Camera& camera) {
 	int currYPos	= displayHeight - ((displayHeight - (static_cast<int>(this->activeItemTimers.size()) * TIMER_HEIGHT_SPACED)) / 2);
 
 	// Prepare OGL for drawing the timer
-	glPushAttrib(GL_VIEWPORT_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+	glPushAttrib(GL_TEXTURE_BIT | GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	
 	// Make world coordinates equal window coordinates
 	Camera::PushWindowCoords();
 	
 	// Set the OGL state to properly draw the timers
-	glMatrixMode(GL_MODELVIEW);
-	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 	
@@ -248,6 +247,10 @@ void GameItemAssets::DrawTimers(double dT, const Camera& camera) {
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 	glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
 
 	for (std::list<ItemTimerHUDElement*>::iterator iter = this->activeItemTimers.begin(); iter != this->activeItemTimers.end(); ++iter) {
 		ItemTimerHUDElement* currHUDElement = *iter;
@@ -266,11 +269,13 @@ void GameItemAssets::DrawTimers(double dT, const Camera& camera) {
 		currYPos -= (halfHeight + ItemTimerHUDElement::TIMER_VERTICAL_SPACING);
 	}
 
-	// Restore the OGL state
-	glPopAttrib();
+	glPopMatrix();
+
 	// Pop the projection matrix
 	Camera::PopWindowCoords();
-
+	// Restore the OGL state
+	glPopAttrib();
+	
 	// Remove any dead HUD elements...
 	for (std::list<ItemTimerHUDElement*>::iterator iter = this->activeItemTimers.begin(); iter != this->activeItemTimers.end();) {
 		ItemTimerHUDElement* timerHUDElement = *iter;
@@ -460,16 +465,12 @@ void GameItemAssets::ItemTimerHUDElement::Tick(double dT) {
 void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, int x, int y, int width, int height) {
 	this->Tick(dT);
 
-	const float ITEM_SCALE = this->scaleAnimation.GetInterpolantValue();
-	const ColourRGBA ITEM_ADDITIVE_COLOUR = this->additiveColourAnimation.GetInterpolantValue();
+	const float& ITEM_SCALE = this->scaleAnimation.GetInterpolantValue();
+	const ColourRGBA& ITEM_ADDITIVE_COLOUR = this->additiveColourAnimation.GetInterpolantValue();
 	const int HALF_WIDTH	 = width / 2;
 	const int HALF_HEIGHT	 = height / 2;
 	const int TRANSLATE_X	 = x + HALF_WIDTH;
 	
-	// Draw the timer...
-	glPushMatrix();
-	glLoadIdentity();
-
 	// Draw the filler for the timer (how much has elapsed)
 	double percentElapsed = 1.0;
 	if (this->itemTimer != NULL) {
@@ -529,8 +530,6 @@ void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, 
 	glTexCoord2i(0, 1); glVertex2f(-HALF_WIDTH, HALF_HEIGHT);
 	glEnd();
 	this->timerTexture->UnbindTexture();
-	glPopMatrix();
-
 	glPopMatrix();
 }
 

@@ -1,6 +1,7 @@
 #include "LoadingScreen.h"
 #include "GameFontAssetsManager.h"
 #include "CgFxBloom.h"
+#include "GameDisplay.h"
 
 #include "../ESPEngine/ESPUtil.h"
 
@@ -78,7 +79,6 @@ void LoadingScreen::InitOpenGLForLoadingScreen() {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glDepthFunc(GL_LESS);
 	glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -168,6 +168,7 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 	debug_opengl_state();
 	
 	this->loadingLabel.Draw();
+	debug_opengl_state();
 	this->DrawLoadingBar();
 
 	this->loadingScreenFBO->UnbindFBObj();
@@ -238,6 +239,8 @@ void LoadingScreen::EndShowingLoadingScreen() {
 	this->loadingScreenOn = false;
 	this->numCallsToUpdate = 0;
 	this->numExpectedUpdates = 0;
+
+	//GameDisplay::SetInitialRenderOptions();
 }
 
 /**

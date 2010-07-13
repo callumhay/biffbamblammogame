@@ -71,6 +71,7 @@ public:
 	void Tick(double dT);
 
 	inline void DebugDraw() const {
+		glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBlendEquation(GL_FUNC_ADD);
@@ -81,6 +82,8 @@ public:
 		glTranslatef(this->position[0], this->position[1], this->position[2]);
 		GeometryMaker::GetInstance()->DrawCube();
 		glPopMatrix();
+
+		glPopAttrib();
 	}
 
 };

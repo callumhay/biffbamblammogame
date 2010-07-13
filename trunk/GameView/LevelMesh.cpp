@@ -362,6 +362,8 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 	assert(piece != NULL);
 	std::map<std::string, MaterialGroup*> pieceMatGrps = this->GetMaterialGrpsForPieceType(piece->GetType());
 
+	glPushAttrib(GL_CURRENT_BIT);
+
 	// Go through each of the material groups ensuring that the material is associated with an appropriate display list
 	for (std::map<std::string, MaterialGroup*>::iterator iter = pieceMatGrps.begin(); iter != pieceMatGrps.end(); ++iter) {
 		
@@ -388,7 +390,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		
 		// TODO: other local transform operations to the mesh e.g., reflect, rotate, etc.
 		glNewList(newDisplayList, GL_COMPILE);
-		glColor3f(currColour.R(), currColour.G(), currColour.B());
+		glColor3fv(currColour.begin());
 		currPolyGrp->Draw();
 		glEndList();
 	
@@ -403,6 +405,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		this->displayListsPerMaterial[currMaterial].push_back(newDisplayList);
 	}
 
+	glPopAttrib();
 }
 
 /**

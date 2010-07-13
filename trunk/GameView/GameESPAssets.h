@@ -44,8 +44,8 @@ private:
 	// Currently active particle systems
 	std::list<ESPEmitter*> activeGeneralEmitters;
 	std::list<ESPEmitter*> activePaddleEmitters;
-	std::map<const GameBall*, std::list<ESPEmitter*> >		activeBallBGEmitters;
-	std::map<const GameItem*, std::list<ESPEmitter*> >		activeItemDropEmitters;
+	std::map<const GameBall*, std::list<ESPEmitter*> > activeBallBGEmitters;
+	std::map<const GameItem*, std::list<ESPEmitter*> > activeItemDropEmitters;
 	std::map<const Projectile*, std::list<ESPPointEmitter*> > activeProjectileEmitters;
 	std::map<const Beam*, std::list<ESPEmitter*> > activeBeamEmitters;
 	std::map<GameItem::ItemType, std::list<ESPEmitter*> > activeTimerHUDEmitters;
@@ -110,10 +110,10 @@ private:
 
 	// Constants for the number of particles for particular effects
 	static const int NUM_PADDLE_LASER_SPARKS = 15;
-	static const int NUM_PADDLE_BEAM_ORIGIN_PARTICLES = 35;
+	static const int NUM_PADDLE_BEAM_ORIGIN_PARTICLES = 30;
 	static const int NUM_GHOST_SMOKE_PARTICLES = 23;
 	static const int NUM_UBER_BALL_TRAIL_PARTICLES = 35;
-	static const int NUM_EXPLOSION_FIRE_CLOUD_PARTICLES  = 25;
+	static const int NUM_EXPLOSION_FIRE_CLOUD_PARTICLES  = 23;
 	static const int NUM_LASER_VAPOUR_TRAIL_PARTICLES = 15;
 	static const int NUM_PADDLE_SIZE_CHANGE_PARTICLES = 24;
 	static const int NUM_BALL_SIZE_CHANGE_PARTICLES = 20;

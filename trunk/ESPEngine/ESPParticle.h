@@ -80,7 +80,9 @@ public:
 		this->size[0] = mult[0] * this->initSize[0];
 		this->size[1] = mult[1] * this->initSize[1];
 	}
-
+	void SetNewInitSizeScale(const Vector2D& size) {
+		this->initSize = size;
+	}
 
 	Vector3D GetVelocity() const {
 		return this->velocity;

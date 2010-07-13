@@ -34,7 +34,22 @@ PolygonGroup::PolygonGroup(const PolyGrpIndexer& faceIndexer, const std::vector<
 }
 
 void PolygonGroup::Draw() const {
-	glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT); 
+	glBegin(this->polyType);
+	std::vector<Point3D>::const_iterator vertexIter = this->vertexStream.begin();
+	std::vector<Vector3D>::const_iterator normalIter = this->normalStream.begin();
+	std::vector<Point2D>::const_iterator texIter = this->texCoordStream.begin();
+	for (; vertexIter != this->vertexStream.end(); ++vertexIter, ++normalIter, ++texIter) {
+		const Point3D& currVertex = *vertexIter;
+		const Vector3D& currNormal = *normalIter;
+		const Point2D& currTexCoord = *texIter;
+		glNormal3f(currNormal[0], currNormal[1], currNormal[2]);
+		glTexCoord2f(currTexCoord[0], currTexCoord[1]);
+		glVertex3f(currVertex[0], currVertex[1], currVertex[2]);
+
+	}
+	glEnd();
+
+/*
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, &this->vertexStream[0]);
 
@@ -48,8 +63,11 @@ void PolygonGroup::Draw() const {
 	}
 
 	glDrawRangeElements(this->polyType, 0, this->indices.size(), this->indices.size(), GL_UNSIGNED_SHORT, &this->indices[0]);
-
-	glPopClientAttrib();
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+*/
 }
 
 /**
@@ -132,7 +150,7 @@ void Mesh::SetColour(const Colour& c) {
 /**
  * Set the texture for the material group of the given name.
  */
-void Mesh::SetTextureForMaterial(const std::string& matGrpName, Texture2D* texToSet) {
+void Mesh::SetTextureForMaterial(const std::string& matGrpName, Texture* texToSet) {
 
 	// Make sure the material group exists
 	std::map<std::string, MaterialGroup*>::iterator foundMatGrpIter = this->matGrps.find(matGrpName);

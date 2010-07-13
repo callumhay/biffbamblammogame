@@ -82,7 +82,7 @@ public:
 	static GLuint CreateSphereDL(float horizRadius, float vertRadius, unsigned int stacks, unsigned int slices);
 
 	inline void DrawFullScreenQuad(int width, int height, float depth = 0.0f, const ColourRGBA& colour = ColourRGBA(1,1,1,1)) {
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT);
 		Camera::PushWindowCoords();
 
 		glEnable(GL_CULL_FACE);

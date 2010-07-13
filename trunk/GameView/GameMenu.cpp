@@ -221,7 +221,6 @@ void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const G
 	glPopMatrix();
 	Camera::PopWindowCoords();
 
-	glDisable(GL_BLEND);
 	glPopAttrib();
 
 	this->selArrowScaleAnim.Tick(dT);
@@ -456,7 +455,6 @@ void GameMenu::DebugDraw() {
 	
 	glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | GL_TRANSFORM_BIT); 
 	glMatrixMode(GL_MODELVIEW);
-	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 
@@ -605,9 +603,6 @@ void GameSubMenu::DrawMenuBackground(double dT) {
 	glPushMatrix();
 	glLoadIdentity();
 	glTranslatef(bgTopLeftCorner[0], bgTopLeftCorner[1], -0.5f);
-
-	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glPolygonMode(GL_FRONT, GL_LINE);
 	glLineWidth(4.0f);
 

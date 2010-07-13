@@ -191,9 +191,8 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 	int currXPos  = LivesLeftHUD::BORDER_SPACING;
 
 	// Prepare OGL for drawing the timer
-	glPushAttrib(GL_TEXTURE_BIT | GL_LIGHTING_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	
-	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -215,7 +214,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 		const BallElementAnimations currAnimationType = this->elementCurrAnimationTypes[i];
 
 		Colour& currColour = this->idleColourAnimations[i].GetInterpolantValue();
-		float currSize = this->idleSizeAnimations[i].GetInterpolantValue();
+		const float& currSize = this->idleSizeAnimations[i].GetInterpolantValue();
 		const int outlineHalfSize = LivesLeftHUD::OUTLINE_SIZE + LivesLeftHUD::ELEMENT_HALF_SIZE;
 
 		float currAlpha = 1.0f;
@@ -276,29 +275,28 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 		this->ballLifeHUDTex->BindTexture();
 		
 		glBegin(GL_QUADS);
-			// Black outline behind the coloured graphic of the ball life HUD element
-			glColor4f(0.0f, 0.0f, 0.0f, currAlpha);
-			glTexCoord2i(0, 0); glVertex2i(-outlineHalfSize, -outlineHalfSize);
-			glTexCoord2i(1, 0); glVertex2i(outlineHalfSize, -outlineHalfSize);
-			glTexCoord2i(1, 1); glVertex2i(outlineHalfSize, outlineHalfSize);
-			glTexCoord2i(0, 1); glVertex2i(-outlineHalfSize, outlineHalfSize);
+		// Black outline behind the coloured graphic of the ball life HUD element
+		glColor4f(0.0f, 0.0f, 0.0f, currAlpha);
+		glTexCoord2i(0, 0); glVertex2i(-outlineHalfSize, -outlineHalfSize);
+		glTexCoord2i(1, 0); glVertex2i(outlineHalfSize, -outlineHalfSize);
+		glTexCoord2i(1, 1); glVertex2i(outlineHalfSize, outlineHalfSize);
+		glTexCoord2i(0, 1); glVertex2i(-outlineHalfSize, outlineHalfSize);
 
-			// Coloured ball life HUD element
-			glColor4f(currColour.R(), currColour.G(), currColour.B(), currAlpha);
-			glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
-			glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
-			glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
-			glTexCoord2i(0, 1); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+		// Coloured ball life HUD element
+		glColor4f(currColour.R(), currColour.G(), currColour.B(), currAlpha);
+		glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+		glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+		glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+		glTexCoord2i(0, 1); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
 		glEnd();
-		
-		this->ballLifeHUDTex->UnbindTexture();
-
 		glPopMatrix();
 
 		currXPos += LivesLeftHUD::ELEMENT_OVERLAP;
 
 		this->idleSizeAnimations[i].Tick(dT);
 	}
+
+	this->ballLifeHUDTex->UnbindTexture();
 
 	// Pop modelview matrix
 	glPopMatrix();
@@ -311,5 +309,4 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 		iter != this->idleColourAnimations.end(); ++iter) {
 		iter->Tick(dT);
 	}
-
 }

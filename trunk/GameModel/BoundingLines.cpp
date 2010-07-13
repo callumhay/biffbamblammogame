@@ -473,6 +473,7 @@ void BoundingLines::TranslateBounds(const Vector2D& translation) {
 }
 
 void BoundingLines::DebugDraw() const {
+	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT);
 	glDisable(GL_DEPTH_TEST);
 
 	// Draw bounding lines
@@ -501,5 +502,5 @@ void BoundingLines::DebugDraw() const {
 	}
 	glEnd();
 
-	glEnable(GL_DEPTH_TEST);
+	glPopAttrib();
 }

@@ -65,12 +65,12 @@ public:
 	}
 
 	// For obtaining the name of this item
-	std::string GetName() const {
+	const std::string& GetName() const {
 		return this->name;
 	}
 
 	// For obtaining the center of this item
-	Point2D GetCenter() const {
+	const Point2D& GetCenter() const {
 		return this->center;
 	}
 
@@ -82,7 +82,7 @@ public:
 	virtual GameItem::ItemType GetItemType() const = 0;
 
 	// Item colour set/get functions
-	ColourRGBA GetItemColour() const {
+	const ColourRGBA& GetItemColour() const {
 		return this->colour;
 	}
 	void SetItemColour(const Colour& c) {
