@@ -42,7 +42,7 @@ void CgFxPostSmokey::Draw(int screenWidth, int screenHeight, double dT) {
 	cgGLSetParameter1f(this->scaleParam, this->scale);
 	cgGLSetParameter1f(this->frequencyParam, this->frequency);
 	cgGLSetParameter1f(this->fadeParam, this->fade);
-	cgGLSetParameter3f(this->colourParam, this->colour.R(), this->colour.G(), this->colour.B());
+	cgGLSetParameter3fv(this->colourParam, this->colour.begin());
 
 	cgGLSetTextureParameter(this->noiseSamplerParam, Noise::GetInstance()->GetNoise3DTexture()->GetTextureID());
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());

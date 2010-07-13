@@ -40,25 +40,13 @@ CgFxPostRefract::~CgFxPostRefract() {
 
 void CgFxPostRefract::SetupBeforePasses(const Camera& camera) {
 	// Transform setup
-	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+	cgGLSetStateMatrixParameter(this->wvpMatrixParam,     CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 
-	// Obtain the current model view and inverse view transforms
-	float tempMVXfVals[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
-	Matrix4x4 tempMVXf(tempMVXfVals);
-	Matrix4x4 invViewXf = camera.GetInvViewTransform();
-
-	// Make sure that JUST the world transform is set
-	glPushMatrix();
-	glLoadIdentity();
-	glMultMatrixf(invViewXf.begin());
-	// Set the inverse view transform parameter
-	cgGLSetStateMatrixParameter(this->viewInvMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	glMultMatrixf(tempMVXf.begin());
-	// Set the world transform parameters
 	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
-	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	glPopMatrix();
+	cgGLSetStateMatrixParameter(this->worldMatrixParam,   CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
+
+	const Matrix4x4& invViewXf = camera.GetInvViewTransform();
+	cgGLSetMatrixParameterfc(this->viewInvMatrixParam, invViewXf.begin());
 
 	// Refraction property setup
 	cgGLSetParameter1f(this->indexOfRefactionParam, this->indexOfRefraction);

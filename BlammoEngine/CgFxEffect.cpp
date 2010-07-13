@@ -118,66 +118,50 @@ void CgFxMaterialEffect::LoadParameters() {
 void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	// Transforms
 	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-
-	// Obtain the current model view and inverse view transforms
-	float tempMVXfVals[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
-	Matrix4x4 tempMVXf(tempMVXfVals);
-	Matrix4x4 invViewXf = camera.GetInvViewTransform();
-
-	// Make sure that JUST the world transform is set
-	glPushMatrix();
-	glLoadIdentity();
-	glMultMatrixf(invViewXf.begin());
-	// Set the inverse view transform parameter
-	cgGLSetStateMatrixParameter(this->viewInvMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	glMultMatrixf(tempMVXf.begin());
-	// Set the world transform parameters
+	cgGLSetStateMatrixParameter(this->worldMatrixParam,   CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
 	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
-	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	glPopMatrix();
-
+	
+	const Matrix4x4& invViewXf = camera.GetInvViewTransform();
+	cgGLSetMatrixParameterfc(this->viewInvMatrixParam, invViewXf.begin());
+	
 	// Textures
 	if (this->properties->diffuseTexture != NULL) {
-
-		//cgGLSetupSampler(this->texSamplerParam, this->properties->diffuseTexture->GetTextureID());
-		
 		cgGLSetTextureParameter(this->texSamplerParam, this->properties->diffuseTexture->GetTextureID());
 		cgSetSamplerState(this->texSamplerParam);
 	}
 
 	// Material properties
-	cgGLSetParameter3f(this->diffuseColourParam, this->properties->diffuse.R(), this->properties->diffuse.G(), this->properties->diffuse.B());
-	cgGLSetParameter3f(this->specularColourParam, this->properties->specular.R(), this->properties->specular.G(), this->properties->specular.B());
+	cgGLSetParameter3fv(this->diffuseColourParam, this->properties->diffuse.begin());
+	cgGLSetParameter3fv(this->specularColourParam, this->properties->specular.begin());
 	cgGLSetParameter1f(this->shininessParam, this->properties->shininess);
 	
 	// Lights - depending on whether this is a foreground or background effect - no matter what there
 	// is always a key and a fill light
-	Point3D keyLightPos			= this->keyLight.GetPosition();
-	Colour  keyLightCol			= this->keyLight.GetDiffuseColour();
-	Point3D fillLightPos		= this->fillLight.GetPosition();
-	Colour  fillLightCol		= this->fillLight.GetDiffuseColour();
-	float fillLightLinearAtten	= this->fillLight.GetLinearAttenuation();
+	const Point3D& keyLightPos		= this->keyLight.GetPosition();
+	const Colour&  keyLightCol		= this->keyLight.GetDiffuseColour();
+	const Point3D& fillLightPos		= this->fillLight.GetPosition();
+	const Colour&  fillLightCol		= this->fillLight.GetDiffuseColour();
+	float fillLightLinearAtten		= this->fillLight.GetLinearAttenuation();
 
 	// Key
-	cgGLSetParameter3f(this->keyPointLightPosParam,    keyLightPos[0], keyLightPos[1], keyLightPos[2]);
-	cgGLSetParameter3f(this->keyPointLightColourParam, keyLightCol[0], keyLightCol[1], keyLightCol[2]);
+	cgGLSetParameter3fv(this->keyPointLightPosParam, keyLightPos.begin());
+	cgGLSetParameter3fv(this->keyPointLightColourParam, keyLightCol.begin());
 
 	// Fill
-	cgGLSetParameter3f(this->fillPointLightPosParam,    fillLightPos[0], fillLightPos[1], fillLightPos[2]);
-	cgGLSetParameter3f(this->fillPointLightColourParam, fillLightCol[0], fillLightCol[1], fillLightCol[2]);
-	cgGLSetParameter1f(this->fillPointLightAttenParam,  fillLightLinearAtten);
+	cgGLSetParameter3fv(this->fillPointLightPosParam,    fillLightPos.begin());
+	cgGLSetParameter3fv(this->fillPointLightColourParam, fillLightCol.begin());
+	cgGLSetParameter1f(this->fillPointLightAttenParam,   fillLightLinearAtten);
 
 	if (this->properties->geomType == MaterialProperties::MATERIAL_GEOM_FG_TYPE) {
 		// Foreground: also has a Ball light
 		
-		Point3D ballLightPos				= this->ballLight.GetPosition();
-		Colour ballLightDiffuse			= this->ballLight.GetDiffuseColour();
-		float ballLightLinearAtten	= this->ballLight.GetLinearAttenuation();
+		const Point3D& ballLightPos				= this->ballLight.GetPosition();
+		const Colour& ballLightDiffuse		= this->ballLight.GetDiffuseColour();
+		float ballLightLinearAtten				= this->ballLight.GetLinearAttenuation();
 
 		// Ball
-		cgGLSetParameter3f(this->ballPointLightPosParam,     ballLightPos[0], ballLightPos[1], ballLightPos[2]);
-		cgGLSetParameter3f(this->ballPointLightDiffuseParam, ballLightDiffuse[0], ballLightDiffuse[1], ballLightDiffuse[2]);
+		cgGLSetParameter3fv(this->ballPointLightPosParam,     ballLightPos.begin());
+		cgGLSetParameter3fv(this->ballPointLightDiffuseParam, ballLightDiffuse.begin());
 		cgGLSetParameter1f(this->ballPointLightAttenParam,   ballLightLinearAtten);	
 	}
 
