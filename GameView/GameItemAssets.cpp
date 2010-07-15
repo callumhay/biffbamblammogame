@@ -160,8 +160,8 @@ bool GameItemAssets::LoadItemAssets() {
  * Draw the given item as a item drop in-game.
  */
 void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
-															const PointLight& fgKeyLight, const PointLight& fgFillLight, 
-															const PointLight& ballLight) const  {
+															const BasicPointLight& fgKeyLight, const BasicPointLight& fgFillLight, 
+															const BasicPointLight& ballLight) const  {
 
 	// Set material for the image based on the item name/type
 	GameItem::ItemType itemName	= gameItem.GetItemType();

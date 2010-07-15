@@ -19,7 +19,7 @@
 class Mesh;
 class PaddleRocketProjectile;
 class Camera;
-class PointLight;
+class BasicPointLight;
 class PlayerPaddle;
 class ESPPointEmitter;
 class Texture2D;
@@ -36,7 +36,8 @@ public:
 	void Activate(const PaddleRocketProjectile* rocketProjectile);
 	void Deactivate();
 
-	void Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight);
+	void Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, const BasicPointLight& keyLight, 
+						const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
 private:
 	static const float GLOW_X_SIZE;

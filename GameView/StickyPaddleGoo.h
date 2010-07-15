@@ -30,7 +30,8 @@ public:
   /**
 	 * Draw the sticky goo - basically just wraps the draw method for the goo mesh.
 	 */
-	inline void StickyPaddleGoo::Draw(const PlayerPaddle& p, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) {
+	inline void StickyPaddleGoo::Draw(const PlayerPaddle& p, const Camera& camera, const BasicPointLight& keyLight, 
+																		const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 		float paddleScaleFactor = p.GetPaddleScaleFactor();
 		glPushMatrix();
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);

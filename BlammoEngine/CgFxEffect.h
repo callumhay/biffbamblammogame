@@ -221,9 +221,9 @@ protected:
 	CGparameter ballPointLightDiffuseParam;
 	CGparameter ballPointLightAttenParam;
 
-	PointLight keyLight;
-	PointLight fillLight;
-	PointLight ballLight;
+	BasicPointLight keyLight;
+	BasicPointLight fillLight;
+	BasicPointLight ballLight;
 
 	// Properties of this material
 	MaterialProperties* properties;
@@ -236,14 +236,14 @@ public:
 		return this->properties;
 	}
 
-	void SetKeyLight(const PointLight& keyLight) {
-		this->keyLight = keyLight;
+	void SetKeyLight(const BasicPointLight& keyLight) {
+		keyLight.Copy(this->keyLight);
 	}
-	void SetFillLight(const PointLight& fillLight) {
-		this->fillLight = fillLight;
+	void SetFillLight(const BasicPointLight& fillLight) {
+		fillLight.Copy(this->fillLight);
 	}
-	void SetBallLight(const PointLight& ballLight) {
-		this->ballLight = ballLight;
+	void SetBallLight(const BasicPointLight& ballLight) {
+		ballLight.Copy(this->ballLight);
 	}
 
 };

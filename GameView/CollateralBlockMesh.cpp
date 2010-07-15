@@ -12,7 +12,8 @@ CollateralBlockMesh::~CollateralBlockMesh() {
 	ResourceManager::GetInstance()->ReleaseMeshResource(this->collateralBlockGeometry);
 }
 
-void CollateralBlockMesh::Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
+void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+															 const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
 	static double SHAKE_TIME_COUNT = 0.0;
 	SHAKE_TIME_COUNT += dT;
 

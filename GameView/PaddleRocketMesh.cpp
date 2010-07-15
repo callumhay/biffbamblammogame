@@ -60,10 +60,11 @@ PaddleRocketMesh::~PaddleRocketMesh() {
 }
 
 // Draw the rocket - if it's currently activated
-void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) {
+void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, 
+														const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+														const BasicPointLight& ballLight) {
+
 	this->rocketGlowEmitter->Tick(dT);
-
-
 
 	if ((paddle.GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
 		glPushAttrib(GL_CURRENT_BIT);

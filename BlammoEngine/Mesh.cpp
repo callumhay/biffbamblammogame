@@ -74,19 +74,19 @@ void PolygonGroup::Draw() const {
  * Translate this polygon group by the given vector.
  */
 void PolygonGroup::Translate(const Vector3D& t) {
-	for (std::vector<Point3D>::iterator iter = this->vertexStream.begin(); iter != this->vertexStream.end(); ++iter) {
-		Point3D& currPt = *iter;
+	for (size_t i = 0; i < this->vertexStream.size(); ++i) {
+		Point3D& currPt = this->vertexStream[i];
 		currPt = currPt + t;
 	}
 }
 
 void PolygonGroup::Transform(const Matrix4x4& m) {
-	for (std::vector<Point3D>::iterator iter = this->vertexStream.begin(); iter != this->vertexStream.end(); ++iter) {
-		Point3D& currPt = *iter;
+	for (size_t i = 0; i < this->vertexStream.size(); ++i) {
+		Point3D& currPt = this->vertexStream[i];
 		currPt = m * currPt;
 	}
-	for (std::vector<Vector3D>::iterator iter = this->normalStream.begin(); iter != this->normalStream.end(); ++iter) {
-		Vector3D& currNormal = *iter;
+	for (size_t i = 0; i < this->normalStream.size(); ++i) {
+		Vector3D& currNormal = this->normalStream[i];
 		currNormal = m * currNormal;
 	}
 }

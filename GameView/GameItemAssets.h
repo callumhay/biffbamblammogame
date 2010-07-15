@@ -12,7 +12,7 @@ class Mesh;
 class GameESPAssets;
 class Camera;
 class GameItemTimer;
-class PointLight;
+class BasicPointLight;
 
 
 
@@ -94,7 +94,7 @@ public:
 	
 	bool LoadItemAssets();
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
-		const PointLight& fgKeyLight, const PointLight& fgFillLight, const PointLight& ballLight) const;
+		const BasicPointLight& fgKeyLight, const BasicPointLight& fgFillLight, const BasicPointLight& ballLight) const;
 
 	void DrawTimers(double dT, const Camera& camera);
 

@@ -103,8 +103,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 	Collision::Ray2D capsuleSide2Ray(previousCenter - c.Radius() * Vector2D(normalizedVel[1], -normalizedVel[0]), normalizedVel);
 
 	int count = 0;
-	for (std::vector<Collision::LineSeg2D>::const_iterator lineIter = this->lines.begin(); lineIter != this->lines.end(); ++lineIter) {
-		const Collision::LineSeg2D& currLine = *lineIter;
+	for (size_t lineIdx = 0; lineIdx < this->lines.size(); ++lineIdx) {
+		const Collision::LineSeg2D& currLine = this->lines[lineIdx];
 		const Vector2D& currNormal = this->normals[count];
 
 		// Cast a ray from the previous extent of circle towards the colliding line
@@ -317,11 +317,11 @@ int BoundingLines::CollisionCheckIndex(const BoundingLines& other) const {
 	int count = 0;
 
 	// Do a line-line collision with every line in this verses every line in the given set of BoundingLines
-	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
-		const Collision::LineSeg2D& currThisLine = *thisIter;
+	for (size_t i = 0; i < this->lines.size(); ++i) {
+		const Collision::LineSeg2D& currThisLine = this->lines[i];
 
-		for (std::vector<Collision::LineSeg2D>::const_iterator otherIter = other.lines.begin(); otherIter != other.lines.end(); ++otherIter) {
-			const Collision::LineSeg2D& currOtherLine = *otherIter;
+		for (size_t j = 0; j < other.lines.size(); ++j) {
+			const Collision::LineSeg2D& currOtherLine = other.lines[j];
 
 			if (Collision::IsCollision(currThisLine, currOtherLine)) {
 				return count;
@@ -343,11 +343,11 @@ std::vector<int> BoundingLines::CollisionCheckIndices(const BoundingLines& other
 	int count = 0;
 
 	// Do a line-line collision with every line in this verses every line in the given set of BoundingLines
-	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
-		const Collision::LineSeg2D& currThisLine = *thisIter;
+	for (size_t i = 0; i < this->lines.size(); ++i) {
+		const Collision::LineSeg2D& currThisLine = this->lines[i];
 
-		for (std::vector<Collision::LineSeg2D>::const_iterator otherIter = other.lines.begin(); otherIter != other.lines.end(); ++otherIter) {
-			const Collision::LineSeg2D& currOtherLine = *otherIter;
+		for (size_t j = 0; j < other.lines.size(); ++j) {
+			const Collision::LineSeg2D& currOtherLine = other.lines[j];
 
 			if (Collision::IsCollision(currThisLine, currOtherLine)) {
 				indicesCollidedWith.insert(count);
@@ -356,7 +356,6 @@ std::vector<int> BoundingLines::CollisionCheckIndices(const BoundingLines& other
 
 		count++;
 	}
-
 
 	std::vector<int> tempVecOfIndices;
 	tempVecOfIndices.reserve(indicesCollidedWith.size());
@@ -375,8 +374,8 @@ std::vector<int> BoundingLines::CollisionCheckIndices(const Collision::LineSeg2D
 	std::vector<int> indicesCollidedWith;
 	int count = 0;
 
-	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
-		const Collision::LineSeg2D& currThisLine = *thisIter;
+	for (size_t i = 0; i < this->lines.size(); ++i) {
+		const Collision::LineSeg2D& currThisLine = this->lines[i];
 		
 		if (Collision::IsCollision(currThisLine, lineSeg)) {
 			indicesCollidedWith.push_back(count);
@@ -399,9 +398,9 @@ std::vector<int> BoundingLines::ClosestCollisionIndices(const Point2D& pt, float
 	float closestSqDist = FLT_MAX;
 	std::vector<int> closestIndices;
 
-	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
+	for (size_t i = 0; i < this->lines.size(); ++i) {
 		// Check the square distance between the point and the current line segment...
-		float currSqDist = Collision::SqDistFromPtToLineSeg(*thisIter, pt);
+		float currSqDist = Collision::SqDistFromPtToLineSeg(this->lines[i], pt);
 
 		// Update the smallest distance line index - if there are multiple then add them to the array...
 		if (currSqDist < closestSqDist) {
@@ -429,9 +428,9 @@ bool BoundingLines::CollisionCheck(const Collision::Ray2D& ray, float& rayT) con
 	rayT = FLT_MAX;
 	bool collisionFound = false;
 
-	for (std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin(); thisIter != this->lines.end(); ++thisIter) {
+	for (size_t i = 0; i < this->lines.size(); ++i) {
 		float currentT;
-		if (Collision::IsCollision(ray, *thisIter, currentT)) {
+		if (Collision::IsCollision(ray, this->lines[i], currentT)) {
 			collisionFound = true;
 			if (currentT < rayT) {
 				rayT = currentT;
@@ -458,7 +457,6 @@ void BoundingLines::RotateLinesAndNormals(float angleInDegs, const Point2D& rota
 		Vector2D& currNormal = *iter;
 		currNormal = Vector2D::Rotate(angleInDegs, currNormal);
 	}
-
 }
 
 /**

@@ -15,7 +15,7 @@ public:
 	void RemoveCollateralBlock(const CollateralBlock* collateralBlock);
 
 	void SetWorldTranslation(const Vector3D& t);
-	void Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
+	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
 
 private:
 	Mesh* collateralBlockGeometry;

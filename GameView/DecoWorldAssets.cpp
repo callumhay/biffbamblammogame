@@ -281,7 +281,7 @@ void DecoWorldAssets::RotateSkybeams(double dT) {
 	}
 }
 
-void DecoWorldAssets::DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight) {
+void DecoWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight, const BasicPointLight& bgFillLight) {
 	float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
 	if (currBGAlpha == 0) {
 		return;

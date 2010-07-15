@@ -36,10 +36,10 @@ public:
 
 	void Tick(double dT);
 
-	void GetPieceAffectingLights(PointLight& fgKeyLight, PointLight& fgFillLight, PointLight& ballLight) const;
-	void GetBallAffectingLights(PointLight& ballKeyLight, PointLight& ballFillLight) const;
-	void GetPaddleAffectingLights(PointLight& paddleKeyLight, PointLight& paddleFillLight, PointLight& ballLight) const;
-	void GetBackgroundAffectingLights(PointLight& bgKeyLight, PointLight& bgFillLight) const;
+	void GetPieceAffectingLights(BasicPointLight& fgKeyLight, BasicPointLight& fgFillLight, BasicPointLight& ballLight) const;
+	void GetBallAffectingLights(BasicPointLight& ballKeyLight, BasicPointLight& ballFillLight) const;
+	void GetPaddleAffectingLights(BasicPointLight& paddleKeyLight, BasicPointLight& paddleFillLight, BasicPointLight& ballLight) const;
+	void GetBackgroundAffectingLights(BasicPointLight& bgKeyLight, BasicPointLight& bgFillLight) const;
 	PointLight& GetBallLight() { return this->ballLight; };
 
 #ifdef _DEBUG

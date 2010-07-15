@@ -51,7 +51,7 @@ public:
 	~DecoWorldAssets();
 
 	GameWorld::WorldStyle GetStyle() const;
-	void DrawBackgroundModel(const Camera& camera, const PointLight& bgKeyLight, const PointLight& bgFillLight);
+	void DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight, const BasicPointLight& bgFillLight);
 	void DrawBackgroundEffects(const Camera& camera);
 	void FadeBackground(bool fadeout, float fadeTime);
 	void ResetToInitialState();

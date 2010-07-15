@@ -299,8 +299,8 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 /**
  * Draw the current level mesh pieces (i.e., blocks that make up the level).
  */
-void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& keyLight, 
-													 const PointLight& fillLight, const PointLight& ballLight, const Texture2D* sceneTexture) {
+void LevelMesh::DrawPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+													 const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture) {
 
 	// Set any appropriate parameters on the various meshes materials, etc.
 	this->prismBlockDiamond->SetSceneTexture(sceneTexture);
@@ -341,7 +341,7 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const PointLight& ke
  * Draw the ball safety net if it is currently active in the game (this
  * appears at the bottom of the level).
  */
-void LevelMesh::DrawSafetyNet(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const {
+void LevelMesh::DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
 	// If the ball safety net is active then we draw it
 	assert(this->currLevel != NULL);
 	if (this->currLevel->IsBallSafetyNetActive() || this->ballSafetyNet->IsPlayingAnimation()) {

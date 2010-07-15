@@ -168,7 +168,7 @@ GameAssets::~GameAssets() {
 void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
 	LevelMesh* currLevelMesh = this->GetLevelMesh(currLevel);
 
-	PointLight fgKeyLight, fgFillLight, ballLight;
+	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
 	currLevelMesh->DrawPieces(dT, camera, fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
 }
@@ -176,7 +176,7 @@ void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Ca
 void GameAssets::DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera) {
 	LevelMesh* currLevelMesh = this->GetLevelMesh(currLevel);
 
-	PointLight fgKeyLight, fgFillLight, ballLight;
+	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
 	currLevelMesh->DrawSafetyNet(dT, camera, fgKeyLight, fgFillLight, ballLight);
 }
@@ -311,7 +311,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		glScalef(ballScaleFactor, ballScaleFactor, ballScaleFactor);
 		glColor4f(ballColour.R(), ballColour.G(), ballColour.B(), ballColour.A());
 
-		PointLight ballKeyLight, ballFillLight;
+		BasicPointLight ballKeyLight, ballFillLight;
 		this->lightAssets->GetBallAffectingLights(ballKeyLight, ballFillLight);
 
 		if ((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) {
@@ -389,7 +389,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	float scaleHeightAdjustment = PlayerPaddle::PADDLE_HALF_HEIGHT * (paddleScaleFactor - 1);
 	
 	// Obtain the lights that affect the paddle
-	PointLight paddleKeyLight, paddleFillLight, ballLight;
+	BasicPointLight paddleKeyLight, paddleFillLight, ballLight;
 	this->lightAssets->GetPaddleAffectingLights(paddleKeyLight, paddleFillLight, ballLight);
 
 	glPushMatrix();
@@ -469,7 +469,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 		}
 
 		// Obtain the lights that affect the paddle
-		PointLight paddleKeyLight, paddleFillLight, ballLight;
+		BasicPointLight paddleKeyLight, paddleFillLight, ballLight;
 		this->lightAssets->GetPaddleAffectingLights(paddleKeyLight, paddleFillLight, ballLight);
 
 		// Draw the sticky goo
@@ -507,7 +507,7 @@ void GameAssets::DrawSkybox(const Camera& camera) {
  * Draw the background model for the current world type.
  */
 void GameAssets::DrawBackgroundModel(const Camera& camera) {
-	PointLight bgKeyLight, bgFillLight;
+	BasicPointLight bgKeyLight, bgFillLight;
 	this->lightAssets->GetBackgroundAffectingLights(bgKeyLight, bgFillLight);
 	this->worldAssets->DrawBackgroundModel(camera, bgKeyLight, bgFillLight);
 }
@@ -523,7 +523,7 @@ void GameAssets::DrawBackgroundEffects(const Camera& camera) {
  * Draw a given item in the world.
  */
 void GameAssets::DrawItem(double dT, const Camera& camera, const GameItem& gameItem) {
-	PointLight fgKeyLight, fgFillLight, ballLight;
+	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
 	this->itemAssets->DrawItem(dT, camera, gameItem, fgKeyLight, fgFillLight, ballLight);
 }
@@ -705,7 +705,7 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
  */
 void GameAssets::DrawProjectiles(double dT, const GameModel& gameModel, const Camera& camera) {
 	// Get lights affecting the foreground meshes...
-	PointLight keyLight, fillLight, ballLight;
+	BasicPointLight keyLight, fillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(keyLight, fillLight, ballLight);
 
 	this->rocketMesh->Draw(dT, *gameModel.GetPlayerPaddle(), camera, keyLight, fillLight, ballLight);
