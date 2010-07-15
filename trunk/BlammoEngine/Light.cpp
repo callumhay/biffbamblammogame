@@ -174,6 +174,5 @@ void PointLight::Tick(double dT) {
 			}
 	}		
 
-	this->currAmbientColour = this->lightIntensity * this->onAmbientColour;
 	this->currDiffuseColour = this->lightIntensity * newDiffuseColourChange;
 }

@@ -219,7 +219,8 @@ void BallSafetyNetMesh::DestroyBallSafetyNet(const Vector2D& levelDimensions, fl
 /**
  * Draw the active display lists for this mesh.
  */
-void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) {
+void BallSafetyNetMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+														 const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 	// TODO: Creation animation?
 
 	// Set the appropriate light values for the shading material

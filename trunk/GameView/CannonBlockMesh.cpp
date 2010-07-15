@@ -15,8 +15,8 @@ CannonBlockMesh::~CannonBlockMesh() {
 }
 
 
-void CannonBlockMesh::Draw(const Camera& camera, const PointLight& keyLight, 
-													 const PointLight& fillLight, const PointLight& ballLight) const {
+void CannonBlockMesh::Draw(const Camera& camera, const BasicPointLight& keyLight, 
+													 const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
 
 	// Go through each of the cannon blocks and draw them, each with their proper,
 	// respective barrel orientation

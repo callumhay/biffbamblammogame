@@ -31,6 +31,9 @@
 #endif
 
 // STL includes
+//#ifdef _SECURE_SCL
+//#undef _SECURE_SCL
+//#endif
 #include <algorithm>
 #include <limits>
 #include <vector>

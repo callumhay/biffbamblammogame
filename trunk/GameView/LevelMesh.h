@@ -64,9 +64,9 @@ public:
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void RemovePiece(const LevelPiece& piece);
 	
-	void DrawPieces(double dT, const Camera& camera, const PointLight& keyLight, 
-									const PointLight& fillLight, const PointLight& ballLight, const Texture2D* sceneTexture);
-	void DrawSafetyNet(double dT, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight, const PointLight& ballLight) const;
+	void DrawPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+									const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
+	void DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
 
 	void LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
 

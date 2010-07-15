@@ -24,7 +24,7 @@ public:
 	 * Draws the paddle laser gun attachment - also is responsible for
 	 * animating the attachment and setting the appropriate transformations.
 	 */
-	inline void Draw(double dT, const PlayerPaddle& p, const Camera& camera, const PointLight& keyLight, const PointLight& fillLight) {
+	inline void Draw(double dT, const PlayerPaddle& p, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight) {
 		float paddleScaleFactor = p.GetPaddleScaleFactor();
 		this->laserGunRecoilAnim.Tick(dT);
 

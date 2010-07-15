@@ -2,34 +2,27 @@
 #include "GameViewConstants.h"
 #include "GameDisplay.h"
 
-GameLightAssets::GameLightAssets() {
-
-	// Initialize default light values
-	// Foreground lights:
-	this->fgKeyLight  = PointLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, 
-		GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0f);
-	this->fgFillLight = PointLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, 
-		GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,  0.037f);
-
-	this->ballLight		= PointLight(Point3D(0,0,0), 
-		GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, 
-		GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN);
-	
-	// Background lights:
-	this->bgKeyLight	= PointLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, 
-		GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.0f);
-
-	this->bgFillLight = PointLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, 
-		GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f);
+GameLightAssets::GameLightAssets() : 
+// Foreground lights
+fgKeyLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0f),
+fgFillLight(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_COLOUR,  0.037f),
+ballLight(Point3D(0,0,0), GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR, GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_ATTEN),
+// Background lights
+bgKeyLight(GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_KEY_LIGHT_COLOUR, 0.0f),
+bgFillLight(GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_BG_FILL_LIGHT_COLOUR,  0.025f)
+{
 
 	// Ball and paddle specific foreground lights
-	this->ballKeyLight	= this->fgKeyLight;
+	this->fgKeyLight.CopyBasicAttributes(this->ballKeyLight);
 	this->ballKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_BALL_KEY_LIGHT_COLOUR);
-	this->ballFillLight	= this->fgFillLight;
+
+	this->fgFillLight.CopyBasicAttributes(this->ballFillLight);
 	this->ballFillLight.SetDiffuseColour(Colour(0,0,0));
-	this->paddleKeyLight = this->fgKeyLight;
+
+	this->fgKeyLight.CopyBasicAttributes(this->paddleKeyLight);
 	this->paddleKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_PADDLE_KEY_LIGHT_COLOUR);
-	this->paddleFillLight = this->fgFillLight;
+
+	this->fgFillLight.CopyBasicAttributes(this->paddleFillLight);
 	this->paddleFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->DEFAULT_PADDLE_FILL_LIGHT_COLOUR);
 }
 
@@ -194,35 +187,35 @@ void GameLightAssets::Tick(double dT) {
 /**
  * Get the lights only affecting the game/level pieces.
  */
-void GameLightAssets::GetPieceAffectingLights(PointLight& fgKeyLight, PointLight& fgFillLight, PointLight& ballLight) const {
-	fgKeyLight = this->fgKeyLight;
-	fgFillLight = this->fgFillLight;
-	ballLight = this->ballLight;
+void GameLightAssets::GetPieceAffectingLights(BasicPointLight& fgKeyLight, BasicPointLight& fgFillLight, BasicPointLight& ballLight) const {
+	this->fgKeyLight.ConvertToBasicPointLight(fgKeyLight);
+	this->fgFillLight.ConvertToBasicPointLight(fgFillLight);
+	this->ballLight.ConvertToBasicPointLight(ballLight);
 }
 
 /**
  * Get the lights only affecting the game ball(s).
  */
-void GameLightAssets::GetBallAffectingLights(PointLight& ballKeyLight, PointLight& ballFillLight) const {
-	ballKeyLight = this->ballKeyLight;
-	ballFillLight = this->ballFillLight;
+void GameLightAssets::GetBallAffectingLights(BasicPointLight& ballKeyLight, BasicPointLight& ballFillLight) const {
+	this->ballKeyLight.ConvertToBasicPointLight(ballKeyLight);
+	this->ballFillLight.ConvertToBasicPointLight(ballFillLight);
 }
 
 /**
  * Get the lights only affecting the player paddle.
  */
-void GameLightAssets::GetPaddleAffectingLights(PointLight& paddleKeyLight, PointLight& paddleFillLight, PointLight& ballLight) const {
-	paddleKeyLight = this->paddleKeyLight;
-	paddleFillLight = this->paddleFillLight;
-	ballLight = this->ballLight;
+void GameLightAssets::GetPaddleAffectingLights(BasicPointLight& paddleKeyLight, BasicPointLight& paddleFillLight, BasicPointLight& ballLight) const {
+	this->paddleKeyLight.ConvertToBasicPointLight(paddleKeyLight);
+	this->paddleFillLight.ConvertToBasicPointLight(paddleFillLight);
+	this->ballLight.ConvertToBasicPointLight(ballLight);
 }
 
 /**
  * Get the lights only affecting the background.
  */
-void GameLightAssets::GetBackgroundAffectingLights(PointLight& bgKeyLight, PointLight& bgFillLight) const {
-	bgKeyLight = this->bgKeyLight;
-	bgFillLight = this->bgFillLight;
+void GameLightAssets::GetBackgroundAffectingLights(BasicPointLight& bgKeyLight, BasicPointLight& bgFillLight) const {
+	this->bgKeyLight.ConvertToBasicPointLight(bgKeyLight);
+	this->bgFillLight.ConvertToBasicPointLight(bgFillLight);
 }
 
 /**
