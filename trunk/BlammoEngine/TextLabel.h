@@ -85,10 +85,10 @@ public:
 	const TextureFontSet* GetFont() const {
 		return this->font;
 	}
-	DropShadow GetDropShadow() const {
+	const DropShadow& GetDropShadow() const {
 		return this->dropShadow;
 	}
-	ColourRGBA GetColour() const {
+	const ColourRGBA& GetColour() const {
 		return this->colour;
 	}
 	std::string GetText() const {

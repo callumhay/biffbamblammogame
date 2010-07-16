@@ -83,7 +83,11 @@ public:
 
 	inline void DrawFullScreenQuad(int width, int height, float depth = 0.0f, const ColourRGBA& colour = ColourRGBA(1,1,1,1)) {
 		glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT);
-		Camera::PushWindowCoords();
+		
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluOrtho2D(0, width, 0, height);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -105,7 +109,8 @@ public:
 
 		glPopMatrix();
 
-		Camera::PopWindowCoords();
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
 		glPopAttrib();
 
 		debug_opengl_state();

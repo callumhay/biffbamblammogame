@@ -87,6 +87,7 @@ void InGameMenuState::RenderFrame(double dT) {
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), -1.0f, ColourRGBA(0.0f, 0.0f, 0.0f, 0.5f));
 	
 	// Draw the menus...
+	glEnable(GL_DEPTH_TEST);
 	this->topMenu->SetCenteredOnScreen(camera.GetWindowWidth(), camera.GetWindowHeight());
 	this->topMenu->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
 	glPopAttrib();

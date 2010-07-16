@@ -134,7 +134,7 @@ public:
 	}
 
 	// Paddle colour set/get functions
-	ColourRGBA GetColour() const {
+	const ColourRGBA& GetColour() const {
 		return this->colour;
 	}
 	void SetColour(const Colour& c) {

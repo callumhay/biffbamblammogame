@@ -26,6 +26,11 @@ struct ESPInterval {
 		}
 	}
 
+	void CopyFromInterval(const ESPInterval& other) {
+		this->minValue = other.minValue;
+		this->maxValue = other.maxValue;
+	}
+
 	float RandomValueInInterval() const {
 		return static_cast<float>(minValue + Randomizer::GetInstance()->RandomNumZeroToOne()*(maxValue - minValue));
 	}

@@ -16,22 +16,6 @@
 class TextureFontSet;
 
 class ESPOnomataParticle : public ESPParticle {
-protected:
-	bool useGivenString;
-
-	const TextureFontSet*		 font;
-	Onomatoplex::SoundType	 soundType;
-	Onomatoplex::Extremeness extremeness;
-	DropShadow dropShadow;
-
-	std::string currStr;
-	float currHalfStrWidth;
-	float currHalfStrHeight;
-
-	void SetRandomSoundType();
-	void SetRandomExtremeness();
-	void GenerateNewString();
-
 public: 
 	ESPOnomataParticle(const TextureFontSet* font, const std::string& text);
 	ESPOnomataParticle(const TextureFontSet* font);
@@ -53,6 +37,27 @@ public:
 
 	Onomatoplex::SoundType GetSoundType() const { return this->soundType; }
 	Onomatoplex::Extremeness GetSoundExtremeness() const { return this->extremeness; }
+
+protected:
+	bool useGivenString;
+
+	const TextureFontSet*		 font;
+	Onomatoplex::SoundType	 soundType;
+	Onomatoplex::Extremeness extremeness;
+	DropShadow dropShadow;
+
+	std::string currStr;
+	float currHalfStrWidth;
+	float currHalfStrHeight;
+
+	void SetRandomSoundType();
+	void SetRandomExtremeness();
+	void GenerateNewString();
+
+private:
+	// Disallow copy and assign
+	ESPOnomataParticle(const ESPOnomataParticle& p);
+	ESPOnomataParticle& operator=(const ESPOnomataParticle& p);
 
 };
 #endif

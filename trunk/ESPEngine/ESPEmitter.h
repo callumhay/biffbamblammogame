@@ -24,55 +24,6 @@ class ESPEmitterEventHandler;
  * Abstract base class representing an Emitter of particles.
  */
 class ESPEmitter {
-private:
-	void TickParticles(double dT);
-
-protected:			
-	Texture2D* particleTexture;		// Texture of particles in this emitter
-
-	std::map<const ESPParticle*, int> particleLivesLeft;		// Number of lives left for each particle
-	std::list<ESPParticle*> aliveParticles;									// All the alive particles in this emitter
-	std::list<ESPParticle*> deadParticles;									// All the dead particles in this emitter
-	
-	float timeSinceLastSpawn;																// Time since the last particle was spawned	
-	int numParticleLives;
-	
-	bool isReversed;		// Whether this emitter is reversed (i.e., particles start where they die and die where they start)
-	bool isPointSprite;	// Whether this emitter emits point sprites
-
-	std::list<ESPParticleEffector*> effectors;					// All the particle effectors of this emitter
-	std::list<ESPEmitterEventHandler*> eventHandlers;		// The event handlers attached to this emitter
-	
-	Plane particleDeathPlane;
-
-	// The alignment of particles in this emitter w.r.t. the viewer
-	ESP::ESPAlignment particleAlignment;
-	// Inclusive interval of time between firing/spawning of particles in seconds
-	ESPInterval particleSpawnDelta;
-	// Inclusive interval for initial Speed of particles
-	ESPInterval particleInitialSpd;
-	// Inclusive interval for lifetime (in seconds) of particles
-	ESPInterval particleLifetime;
-	// Inclusive interval for size of particles (in units)
-	ESPInterval particleSize[2];
-	bool makeSizeConstraintsEqual;
-	// Inclusive interval for the rotation of particles (in degrees)
-	ESPInterval particleRotation;
-	// Inclusive intervals for the colour of particles
-	ESPInterval particleRed, particleGreen, particleBlue, particleAlpha;
-	// Inclusive interval for how far from the emitPt this particle may spawn at
-	ESPInterval radiusDeviationFromPtX;
-	ESPInterval radiusDeviationFromPtY;
-	ESPInterval radiusDeviationFromPtZ;
-
-	void Flush();
-
-	virtual Vector3D CalculateRandomInitParticleDir() const = 0;
-	virtual Point3D  CalculateRandomInitParticlePos() const = 0;
-	void ReviveParticle();
-
-	bool IsParticlePastDeathPlane(const ESPParticle& p);
-
 public:
 	ESPEmitter();
 	virtual ~ESPEmitter();
@@ -138,6 +89,59 @@ public:
 	void Tick(double dT);
 	void Draw(const Camera& camera, const Vector3D& worldTranslation = Vector3D(0,0,0), bool enableDepth = false);
 	void Reset();
+
+protected:			
+	Texture2D* particleTexture;		// Texture of particles in this emitter
+
+	std::map<const ESPParticle*, int> particleLivesLeft;		// Number of lives left for each particle
+	std::list<ESPParticle*> aliveParticles;									// All the alive particles in this emitter
+	std::list<ESPParticle*> deadParticles;									// All the dead particles in this emitter
+	
+	float timeSinceLastSpawn;																// Time since the last particle was spawned	
+	int numParticleLives;
+	
+	bool isReversed;		// Whether this emitter is reversed (i.e., particles start where they die and die where they start)
+	bool isPointSprite;	// Whether this emitter emits point sprites
+
+	std::list<ESPParticleEffector*> effectors;					// All the particle effectors of this emitter
+	std::list<ESPEmitterEventHandler*> eventHandlers;		// The event handlers attached to this emitter
+	
+	Plane particleDeathPlane;
+
+	// The alignment of particles in this emitter w.r.t. the viewer
+	ESP::ESPAlignment particleAlignment;
+	// Inclusive interval of time between firing/spawning of particles in seconds
+	ESPInterval particleSpawnDelta;
+	// Inclusive interval for initial Speed of particles
+	ESPInterval particleInitialSpd;
+	// Inclusive interval for lifetime (in seconds) of particles
+	ESPInterval particleLifetime;
+	// Inclusive interval for size of particles (in units)
+	ESPInterval particleSize[2];
+	bool makeSizeConstraintsEqual;
+	// Inclusive interval for the rotation of particles (in degrees)
+	ESPInterval particleRotation;
+	// Inclusive intervals for the colour of particles
+	ESPInterval particleRed, particleGreen, particleBlue, particleAlpha;
+	// Inclusive interval for how far from the emitPt this particle may spawn at
+	ESPInterval radiusDeviationFromPtX;
+	ESPInterval radiusDeviationFromPtY;
+	ESPInterval radiusDeviationFromPtZ;
+
+	void Flush();
+
+	virtual Vector3D CalculateRandomInitParticleDir() const = 0;
+	virtual Point3D  CalculateRandomInitParticlePos() const = 0;
+	void ReviveParticle();
+
+	bool IsParticlePastDeathPlane(const ESPParticle& p);
+
+private:
+	void TickParticles(double dT);
+
+	// Disallow copy and assign
+	ESPEmitter(const ESPEmitter& e);
+	ESPEmitter& operator=(const ESPEmitter& e);
 
 };
 #endif
