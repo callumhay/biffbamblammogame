@@ -56,7 +56,7 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	this->display->GetAssets()->LoadWorldAssets(&world);
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 
-	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldBackgroundMusic);
+	//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldBackgroundMusic);
 }
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
