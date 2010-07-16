@@ -89,7 +89,7 @@ public:
 	std::list<Collision::Ray2D> GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const;
 
 	static void ResetPortalColourGenerator();
-	static Colour GeneratePortalColour();
+	static const Colour& GeneratePortalColour();
 
 protected:
 	PortalBlock* sibling;

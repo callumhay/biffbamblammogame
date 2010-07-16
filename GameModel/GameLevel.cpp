@@ -237,7 +237,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							currentPortalBlock->SetSiblingPortal(siblingPortalBlock);
 
 							// Set the same colour for both the current and sibling portal blocks
-							Colour portalBlockColour = PortalBlock::GeneratePortalColour();
+							const Colour& portalBlockColour = PortalBlock::GeneratePortalColour();
 							currentPortalBlock->SetColour(portalBlockColour);
 							siblingPortalBlock->SetColour(portalBlockColour);
 						}

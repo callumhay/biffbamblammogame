@@ -87,7 +87,7 @@ public:
 	inline void SetTextColour(const ColourRGBA& c) {
 		this->currLabel->SetColour(c);
 	}
-	inline ColourRGBA GetTextColour() const {
+	inline const ColourRGBA& GetTextColour() const {
 		return this->currLabel->GetColour();
 	}
 };

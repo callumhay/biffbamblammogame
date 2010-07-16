@@ -7,8 +7,20 @@
  * An area emitter - emits sprites from a defined area.
  */
 class ESPVolumeEmitter : public ESPEmitter {
-private:
+public:
+	ESPVolumeEmitter();
+	~ESPVolumeEmitter();
 
+	// Rectangle-prism volume setters
+	//void SetEmitArea(const Point3D& center, const Vector3D& rectHalfVert, const Vector3D& rectHalfHoriz);
+	void SetEmitVolume(const Point3D& min, const Point3D& max);
+	void SetEmitDirection(const Vector3D& dir);
+
+protected:
+	Vector3D CalculateRandomInitParticleDir() const;
+	Point3D  CalculateRandomInitParticlePos() const;
+
+private:
 	// Super class for area shapes to emit from
 	struct EmitVolume {
 		virtual ~EmitVolume() {}
@@ -27,17 +39,8 @@ private:
 	Vector3D emitDir;													// The direction (in emitter coords) that the emitter fires towards
 	ESPVolumeEmitter::EmitVolume* emitVolume;	// The area to emit particles from
 
-protected:
-	Vector3D CalculateRandomInitParticleDir() const;
-	Point3D  CalculateRandomInitParticlePos() const;
+	ESPVolumeEmitter(const ESPVolumeEmitter& e);
+	ESPVolumeEmitter& operator=(const ESPVolumeEmitter& e);
 
-public:
-	ESPVolumeEmitter();
-	~ESPVolumeEmitter();
-
-	// Rectangle-prism volume setters
-	//void SetEmitArea(const Point3D& center, const Vector3D& rectHalfVert, const Vector3D& rectHalfHoriz);
-	void SetEmitVolume(const Point3D& min, const Point3D& max);
-	void SetEmitDirection(const Vector3D& dir);
 };
 #endif

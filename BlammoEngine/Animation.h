@@ -73,7 +73,7 @@ public:
 	void SetInterpolantValue(T value) {
 		(*this->interpolant) = value;
 	}
-	T GetInterpolantValue() const {
+	const T& GetInterpolantValue() const {
 		return *this->interpolant;
 	}
 

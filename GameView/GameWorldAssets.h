@@ -67,7 +67,7 @@ public:
 
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, const BasicPointLight& keyLight, 
 								  const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
-		ColourRGBA paddleColour = p.GetColour();
+		const ColourRGBA& paddleColour = p.GetColour();
 		if (paddleColour.A() < EPSILON) {
 			return;
 		}

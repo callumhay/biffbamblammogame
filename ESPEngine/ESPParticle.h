@@ -12,25 +12,6 @@
 class Camera;
 
 class ESPParticle {
-
-protected:
-	// Total lifespan in seconds of this particle
-	double totalLifespan;
-	// Amount of time in seconds that have elapsed since this particle was created
-	double currLifeElapsed;
-	// x,y,z Size of particle in units
-	Vector2D initSize, size;
-	// Rotation of particle in degrees
-	float rotation;
-	// The colour of the particle
-	Colour colour;
-	// The alpha of the particle (0 is completely transparent, 1 is completely opaque)
-	float alpha;
-
-	// Kinematics variables for this particle
-	Point3D  position;	// Position of the particle in world space
-	Vector3D velocity;
-
 public: 
 	static const int INFINITE_PARTICLE_LIFETIME = -1;
 	static const int INFINITE_PARTICLE_LIVES		= -1;
@@ -63,14 +44,14 @@ public:
 	}
 
 	// Getter and setter functions (mostly used by Effector objects)
-	Point3D GetPosition() const {
+	const Point3D& GetPosition() const {
 		return this->position;
 	}
 	void SetPosition(const Point3D& p) {
 		this->position = p;
 	}
 
-	Vector2D GetScale() const {
+	const Vector2D& GetScale() const {
 		return this->size;
 	}
 	void SetScale(const Vector2D& scale) {
@@ -84,7 +65,7 @@ public:
 		this->initSize = size;
 	}
 
-	Vector3D GetVelocity() const {
+	const Vector3D& GetVelocity() const {
 		return this->velocity;
 	}
 	void SetVelocity(const Vector3D& v) {
@@ -110,6 +91,11 @@ public:
 		this->alpha = rgba.A();
 	}
 
+	void SetColour(float r, float g, float b, float alpha) {
+		this->colour = Colour(r, g, b);
+		this->alpha = alpha;
+	}
+
 	void SetColour(const Colour& rgb, float alpha) {
 		this->colour = rgb;
 		this->alpha = alpha;
@@ -132,6 +118,29 @@ public:
 	void SetRotation(float r) {
 		this->rotation = r;
 	}
+
+protected:
+	// Total lifespan in seconds of this particle
+	double totalLifespan;
+	// Amount of time in seconds that have elapsed since this particle was created
+	double currLifeElapsed;
+	// x,y,z Size of particle in units
+	Vector2D initSize, size;
+	// Rotation of particle in degrees
+	float rotation;
+	// The colour of the particle
+	Colour colour;
+	// The alpha of the particle (0 is completely transparent, 1 is completely opaque)
+	float alpha;
+
+	// Kinematics variables for this particle
+	Point3D  position;	// Position of the particle in world space
+	Vector3D velocity;
+
+private:
+	// Disallow copy and assign
+	ESPParticle(const ESPParticle& p);
+	ESPParticle& operator=(const ESPParticle& p);
 
 };
 #endif

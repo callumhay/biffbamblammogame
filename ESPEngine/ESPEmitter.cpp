@@ -421,7 +421,7 @@ void  ESPEmitter::SetParticleAlignment(const ESP::ESPAlignment alignment) {
  * delay (in seconds) between the spawning of new particles for this emitter.
  */
 void ESPEmitter::SetSpawnDelta(const ESPInterval& spawnDelta) {
-	this->particleSpawnDelta = spawnDelta;
+	this->particleSpawnDelta.CopyFromInterval(spawnDelta);
 }
 
 /**
@@ -429,7 +429,7 @@ void ESPEmitter::SetSpawnDelta(const ESPInterval& spawnDelta) {
  * initial speed of particles as they are launched out of this emitter.
  */
 void ESPEmitter::SetInitialSpd(const ESPInterval& initialSpd) {
-	this->particleInitialSpd = initialSpd;
+	this->particleInitialSpd.CopyFromInterval(initialSpd);
 }
 
 /**
@@ -437,7 +437,7 @@ void ESPEmitter::SetInitialSpd(const ESPInterval& initialSpd) {
  * lifetime (in seconds) of particles in this emitter.
  */
 void ESPEmitter::SetParticleLife(const ESPInterval& particleLife) {
-	this->particleLifetime = particleLife;
+	this->particleLifetime.CopyFromInterval(particleLife);
 }
 
 /**
@@ -461,27 +461,27 @@ void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
  * rotation (in degrees) of particles in this emitter.
  */
 void ESPEmitter::SetParticleRotation(const ESPInterval& particleRot) {
-	this->particleRotation = particleRot;
+	this->particleRotation.CopyFromInterval(particleRot);
 }
 
 /**
  * Sets the inclusive intervals of random possible values for the colour and alpha of particles.
  */
 void ESPEmitter::SetParticleColour(const ESPInterval& red, const ESPInterval& green, const ESPInterval& blue, const ESPInterval& alpha) {
-	this->particleRed = red;
-	this->particleGreen = green;
-	this->particleBlue = blue;
-	this->particleAlpha = alpha;
+	this->particleRed.CopyFromInterval(red);
+	this->particleGreen.CopyFromInterval(green);
+	this->particleBlue.CopyFromInterval(blue);
+	this->particleAlpha.CopyFromInterval(alpha);
 
 	// Go through any already assigned particles and set the colour...
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
-		currParticle->SetColour(ColourRGBA(red.RandomValueInInterval(), green.RandomValueInInterval(), blue.RandomValueInInterval(), alpha.RandomValueInInterval()));
+		currParticle->SetColour(red.RandomValueInInterval(), green.RandomValueInInterval(), blue.RandomValueInInterval(), alpha.RandomValueInInterval());
 	}
 }
 
 void ESPEmitter::SetParticleAlpha(const ESPInterval& alpha) {
-	this->particleAlpha = alpha;
+	this->particleAlpha.CopyFromInterval(alpha);
 	// Go through any already assigned particles and set the alpha...
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 		ESPParticle* currParticle = *iter;
@@ -524,15 +524,15 @@ void ESPEmitter::SetAsPointSpriteEmitter(bool isPointSprite) {
  * Set the deviation from the center emit point where particles may spawn.
  */
 void ESPEmitter::SetRadiusDeviationFromCenter(const ESPInterval& distFromCenter) {
-	this->radiusDeviationFromPtX = distFromCenter;
-	this->radiusDeviationFromPtY = distFromCenter;
-	this->radiusDeviationFromPtZ = distFromCenter;
+	this->radiusDeviationFromPtX.CopyFromInterval(distFromCenter);
+	this->radiusDeviationFromPtY.CopyFromInterval(distFromCenter);
+	this->radiusDeviationFromPtZ.CopyFromInterval(distFromCenter);
 }
 void ESPEmitter::SetRadiusDeviationFromCenter(const ESPInterval& xDistFromCenter, const ESPInterval& yDistFromCenter, 
 																							const ESPInterval& zDistFromCenter) {
-	this->radiusDeviationFromPtX = xDistFromCenter;
-	this->radiusDeviationFromPtY = yDistFromCenter;
-	this->radiusDeviationFromPtZ = zDistFromCenter;
+	this->radiusDeviationFromPtX.CopyFromInterval(xDistFromCenter);
+	this->radiusDeviationFromPtY.CopyFromInterval(yDistFromCenter);
+	this->radiusDeviationFromPtZ.CopyFromInterval(zDistFromCenter);
 }
 
 /**

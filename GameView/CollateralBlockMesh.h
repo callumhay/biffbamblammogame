@@ -34,8 +34,7 @@ inline void CollateralBlockMesh::AddCollateralBlock(const CollateralBlock* colla
 }
 
 inline void CollateralBlockMesh::RemoveCollateralBlock(const CollateralBlock* collateralBlock) {
-	size_t numRemoved = this->collateralBlocks.erase(collateralBlock);
-	assert(numRemoved == 1);
+	this->collateralBlocks.erase(collateralBlock);
 }
 
 inline void CollateralBlockMesh::SetWorldTranslation(const Vector3D& t) {

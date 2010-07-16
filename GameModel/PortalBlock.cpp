@@ -161,7 +161,7 @@ void PortalBlock::ResetPortalColourGenerator() {
  * Static function that assigns portal colours to a portal and its sibling
  * this helps distinguish, to the user, what portals match up.... and it looks prettier.
  */
-Colour PortalBlock::GeneratePortalColour() {
+const Colour& PortalBlock::GeneratePortalColour() {
 	static const int MAX_PORTAL_COLOURS = 8;
 	
 	static std::vector<Colour> nonUsedPortalColours;
@@ -196,7 +196,7 @@ Colour PortalBlock::GeneratePortalColour() {
 
 	// Choose a random colour from the set of portal colours not used yet...
 	unsigned int randomIndex = Randomizer::GetInstance()->RandomUnsignedInt() % nonUsedPortalColours.size();
-	Colour colourToUse = nonUsedPortalColours[randomIndex];
+	const Colour& colourToUse = nonUsedPortalColours[randomIndex];
 	nonUsedPortalColours.erase(nonUsedPortalColours.begin() + randomIndex);
 	usedPortalColours.push_back(colourToUse);
 

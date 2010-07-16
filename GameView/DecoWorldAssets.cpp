@@ -292,9 +292,11 @@ void DecoWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPoint
 	this->spiralEmitterMed.Draw(camera);
 	this->spiralEmitterLg.Draw(camera);
 
-	Colour currBGModelColour = this->currBGMeshColourAnim.GetInterpolantValue();
+	const Colour& currBGModelColour = this->currBGMeshColourAnim.GetInterpolantValue();
+	glPushAttrib(GL_CURRENT_BIT);
 	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), currBGAlpha);
 	this->background->Draw(camera, bgKeyLight, bgFillLight);
+	glPopAttrib();
 }
 
 void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
@@ -303,6 +305,8 @@ void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 		return;
 	}
 	
+	glPushAttrib(GL_CURRENT_BIT);
+
 	// Draw deco background beams:
 	glColor4f(1, 1, 1, currBGAlpha);
 
@@ -331,6 +335,8 @@ void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 	glRotated(this->beamRotationfg2, 0, 0, 1);
 	this->skybeam->Draw(camera, this->beamEffect);
 	glPopMatrix();
+
+	glPopAttrib();
 }
 
 /**

@@ -776,8 +776,8 @@ void GameESPAssets::AddBouncePaddleEffect(const Camera& camera, const GameBall& 
  */
 void GameESPAssets::AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2) {
 	// Obtain a reasonably centered position to show the effect
-	const Point2D ball1Center = ball1.GetBounds().Center();
-	const Point2D ball2Center = ball2.GetBounds().Center();
+	const Point2D& ball1Center = ball1.GetBounds().Center();
+	const Point2D& ball2Center = ball2.GetBounds().Center();
 	const Point2D emitPoint2D = Point2D::GetMidPoint(ball1Center, ball2Center);
 	const Point3D emitPoint3D(emitPoint2D[0], emitPoint2D[1], 0.0f);
 	
@@ -1032,7 +1032,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPi
 	
 	ESPInterval bangLifeInterval		= ESPInterval(0.8f, 1.1f);
 	ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.minValue + 0.3f, bangLifeInterval.maxValue + 0.3f);
-	Point2D blockCenter = block.GetCenter();
+	const Point2D& blockCenter = block.GetCenter();
 	Point3D emitCenter  = Point3D(blockCenter[0], blockCenter[1], 0.0f);
 
 	// Create an emitter for the bang texture
@@ -1442,7 +1442,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	Point2D inkBlockCenter  = inkBlock.GetCenter();
 	Point3D emitCenter  = Point3D(inkBlockCenter[0], inkBlockCenter[1], 0.0f);
 	
-	Colour inkBlockColour					= GameViewConstants::GetInstance()->INK_BLOCK_COLOUR;
+	const Colour& inkBlockColour	= GameViewConstants::GetInstance()->INK_BLOCK_COLOUR;
 	Colour lightInkBlockColour		= inkBlockColour + Colour(0.15f, 0.15f, 0.15f);
 	Colour lighterInkBlockColour	= lightInkBlockColour + Colour(0.2f, 0.2f, 0.2f);
 

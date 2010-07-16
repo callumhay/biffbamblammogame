@@ -7,20 +7,6 @@
  * A point emitter - emits sprites from a defined point in space.
  */
 class ESPPointEmitter : public ESPEmitter {
-
-private:
-	Point3D emitPt;					// The point from which all particles will be emitted from
-	Vector3D emitDir;			// The direction (in emitter coords) that the emitter fires towards on average
-	
-	float emitAngleInRads;	// The angle of possible deviation from the emit dir
-	
-	bool emitOnPlane;				// Whether or not the emitter emits particles on a plane defined by planeNormal
-	Vector3D planeNormal;		// The normal vector defining the plane to emit on in the case of emitOnPlane == true
-
-protected:
-	virtual Vector3D CalculateRandomInitParticleDir() const;
-	virtual Point3D  CalculateRandomInitParticlePos() const;
-
 public:
 	ESPPointEmitter();
 	virtual ~ESPPointEmitter();
@@ -33,5 +19,23 @@ public:
 	Vector3D GetEmitDirection() const {
 		return this->emitDir;
 	}
+
+protected:
+	virtual Vector3D CalculateRandomInitParticleDir() const;
+	virtual Point3D  CalculateRandomInitParticlePos() const;
+
+private:
+	Point3D emitPt;					// The point from which all particles will be emitted from
+	Vector3D emitDir;			// The direction (in emitter coords) that the emitter fires towards on average
+	
+	float emitAngleInRads;	// The angle of possible deviation from the emit dir
+	
+	bool emitOnPlane;				// Whether or not the emitter emits particles on a plane defined by planeNormal
+	Vector3D planeNormal;		// The normal vector defining the plane to emit on in the case of emitOnPlane == true
+
+	// Disallow copy and assign
+	ESPPointEmitter(const ESPPointEmitter& e);
+	ESPPointEmitter& operator=(const ESPPointEmitter& e);
+
 };
 #endif

@@ -184,16 +184,15 @@ void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, flo
 	const Point2D BOTTOM_POINT	= (isLeftPointing ? Point2D(HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT) : Point2D(-HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT));
 
 	// We set the alpha of the arrows based on the text
-	const ColourRGBA currTextColour = this->currLabel->GetColour();
+	const ColourRGBA& currTextColour = this->currLabel->GetColour();
 
+	glPushAttrib(GL_ENABLE_BIT);
 	Camera::PushWindowCoords();
-	
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Draw the outlines of the arrows
-	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glPolygonMode(GL_FRONT, GL_LINE);
 	glLineWidth(2.0f);
 	glColor4f(0.0f, 0.0f, 0.0f, currTextColour.A());
@@ -236,8 +235,8 @@ void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, flo
 	}
 	
 	glPopMatrix();
-	glDisable(GL_BLEND);
 	Camera::PopWindowCoords();
+	glPopAttrib();
 }
 
 /**
@@ -559,7 +558,7 @@ void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, flo
 	const Point2D BOTTOM_POINT	= (isLeftPointing ? Point2D(HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT) : Point2D(-HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT));
 
 	// We set the alpha of the arrows based on the text
-	const ColourRGBA currTextColour = this->currLabel->GetColour();
+	const ColourRGBA& currTextColour = this->currLabel->GetColour();
 	
 	// Draw the outlines of the arrows
 	glPolygonMode(GL_FRONT, GL_LINE);

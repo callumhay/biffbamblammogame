@@ -10,8 +10,8 @@ class Plane {
 public:
 	Plane(const Vector3D& unitNormal, const Point3D& ptOnPlane) : normal(unitNormal), point(ptOnPlane) {}
 
-	Vector3D GetUnitNormal() const { return this->normal; }
-	Point3D  GetPointOnPlane() const { return this->point; }
+	const Vector3D& GetUnitNormal() const { return this->normal; }
+	const Point3D& GetPointOnPlane() const { return this->point; }
 
 private:
 	Vector3D normal;	// Normal the is perpendicular to the plane on the positive side

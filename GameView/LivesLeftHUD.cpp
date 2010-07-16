@@ -213,7 +213,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 
 		const BallElementAnimations currAnimationType = this->elementCurrAnimationTypes[i];
 
-		Colour& currColour = this->idleColourAnimations[i].GetInterpolantValue();
+		const Colour* currColour = &this->idleColourAnimations[i].GetInterpolantValue();
 		const float& currSize = this->idleSizeAnimations[i].GetInterpolantValue();
 		const int outlineHalfSize = LivesLeftHUD::OUTLINE_SIZE + LivesLeftHUD::ELEMENT_HALF_SIZE;
 
@@ -253,8 +253,8 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 			assert(colourAnimIter != this->destructionColourAnimations.end());
 
 			fallTranslation = fallAnimIter->second.GetInterpolantValue();
-			ColourRGBA currRGBAColour = colourAnimIter->second.GetInterpolantValue();
-			currColour = currRGBAColour.GetColour();
+			const ColourRGBA& currRGBAColour = colourAnimIter->second.GetInterpolantValue();
+			currColour = &currRGBAColour.GetColour();
 			currAlpha = currRGBAColour.A();
 
 			bool isFallAnimFinished   = fallAnimIter->second.Tick(dT);
@@ -283,7 +283,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 		glTexCoord2i(0, 1); glVertex2i(-outlineHalfSize, outlineHalfSize);
 
 		// Coloured ball life HUD element
-		glColor4f(currColour.R(), currColour.G(), currColour.B(), currAlpha);
+		glColor4f(currColour->R(), currColour->G(), currColour->B(), currAlpha);
 		glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
 		glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
 		glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
