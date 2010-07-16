@@ -393,7 +393,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		glColor3fv(currColour.begin());
 		currPolyGrp->Draw();
 		glEndList();
-	
+		
 		Matrix4x4 localInvTransform = piece->GetPieceToLevelInvTransform();
 		Matrix4x4 worldInvTransform = Matrix4x4::translationMatrix(-worldTranslation);
 		Matrix4x4 fullInvTransform = localInvTransform * worldInvTransform;

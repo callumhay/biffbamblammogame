@@ -17,7 +17,6 @@ void StartGameDisplayState::RenderFrame(double dT) {
 	
 	// TODO: Add an actual animation here...
 	this->display->SetCurrentState(new InGameDisplayState(this->display));
-
 }
 
 void StartGameDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
