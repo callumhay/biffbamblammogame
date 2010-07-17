@@ -40,7 +40,7 @@ private:
 
 public:
 	~TextureFontSet();
-	float OrthoPrint(const Point3D& topLeftCorner, const std::string& s, bool depthTestOn = false) const;
+	float OrthoPrint(const Point3D& topLeftCorner, const std::string& s, bool depthTestOn = false, float scale = 1.0f) const;
 	void Print(const std::string& s) const;
 
 	float GetWidth(const std::string& s) const;

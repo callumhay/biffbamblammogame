@@ -14,12 +14,12 @@
 
 TextLabel2D::TextLabel2D() : 
 colour(ColourRGBA(0, 0, 0, 1)), topLeftCorner(Point2D(0, 0)), font(NULL), text(""),
-lastRasterWidth(0.0f) {
+lastRasterWidth(0.0f), scale(1.0f) {
 }
 
 TextLabel2D::TextLabel2D(const TextureFontSet* font, const std::string& text) : 
 colour(ColourRGBA(0, 0, 0, 1)), topLeftCorner(Point2D(0, 0)), font(font), text(text),
-lastRasterWidth(font->GetWidth(text)) {
+lastRasterWidth(font->GetWidth(text)), scale(1.0f) {
 	assert(font != NULL);
 }
 
@@ -37,11 +37,12 @@ void TextLabel2D::Draw(bool depthTestOn, float depth) {
 	if (this->dropShadow.isSet) {
 		float dropAmt = static_cast<float>(this->GetHeight()) * this->dropShadow.amountPercentage;
 		glColor4f(this->dropShadow.colour.R(), this->dropShadow.colour.G(), this->dropShadow.colour.B(), this->colour.A());
-		this->font->OrthoPrint(Point3D(this->topLeftCorner, depth - 0.01f) + Vector3D(dropAmt, -dropAmt, 0), this->text, depthTestOn);
+		this->font->OrthoPrint(Point3D(this->topLeftCorner, depth - 0.01f) + Vector3D(dropAmt, -dropAmt, 0), 
+													 this->text, depthTestOn, this->scale);
 	}
 
 	// Draw coloured text part
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->colour.A());
-	this->font->OrthoPrint(Point3D(this->topLeftCorner, depth), this->text, depthTestOn);
+	this->font->OrthoPrint(Point3D(this->topLeftCorner, depth), this->text, depthTestOn, this->scale);
 	this->lastRasterWidth = this->font->GetWidth(this->text);
 }

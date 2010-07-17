@@ -172,6 +172,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 	
 	TextLabel2D biffTitleText(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), MainMenuDisplayState::TITLE_BIFF_TEXT);
 	biffTitleText.SetDropShadow(Colour(0,0,0), 0.1f);
+	this->biffTitleWidth = biffTitleText.GetLastRasterWidth();
 	this->biffTextEmitter.SetParticles(1, biffTitleText);
 
 	// "Bam!!" Bang title text
@@ -194,6 +195,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 
 	TextLabel2D bamTitleText(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), MainMenuDisplayState::TITLE_BAM_TEXT);
 	bamTitleText.SetDropShadow(Colour(0,0,0), 0.1f);
+	this->bamTitleWidth = bamTitleText.GetLastRasterWidth();
 	this->bamTextEmitter.SetParticles(1, bamTitleText);
 
 	// "Blammo!?!" Bang title text
@@ -217,6 +219,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 	TextLabel2D blammoTitleText(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), 
 		MainMenuDisplayState::TITLE_BLAMMO_TEXT);
 	blammoTitleText.SetDropShadow(Colour(0,0,0), 0.1f);
+	this->blammoTitleWidth = blammoTitleText.GetLastRasterWidth();
 	this->blammoTextEmitter.SetParticles(1, blammoTitleText);
 }
 
@@ -241,12 +244,17 @@ void MainMenuDisplayState::InitializeMainMenu() {
 	// Setup submenues
 	this->InitializeOptionsSubMenu();
 
+	// Scale the labels based on the height/width of the window
+	float textScaleFactor = this->display->GetTextScalingFactor();
+
 	// Add items to the menu in their order (first to last)
 	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  NEW_GAME_MENUITEM);
 	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
 
 	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
+	tempLabelSm.SetScale(textScaleFactor);
 	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
+	tempLabelLg.SetScale(textScaleFactor);
 
 	this->newGameMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 
@@ -285,11 +293,16 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	const float dropShadowAmtLg = 0.15f;
 	const Colour dropShadowColour = Colour(0, 0, 0);
 
+	// Scale the labels based on the height/width of the window
+	float textScaleFactor = this->display->GetTextScalingFactor();
+
 	TextLabel2D subMenuLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),  "Fullscreen");
 	TextLabel2D subMenuLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "Fullscreen");
 	subMenuLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
+	subMenuLabelSm.SetScale(textScaleFactor);
 	subMenuLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
-
+	subMenuLabelLg.SetScale(textScaleFactor);
+	
 	// Options Menu
 	this->optionsSubMenu = new GameSubMenu();
 	this->optionsSubMenu->AddEventHandler(this->optionsMenuEventHandler);
@@ -452,8 +465,9 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 	const Camera& displayCam = this->display->GetCamera();
 
 	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
-	const float MAX_X_COORD = static_cast<float>(displayCam.GetWindowWidth()) /  static_cast<float>(displayCam.GetWindowHeight()) * MAX_Y_COORD;
-	const float MIN_X_COORD = -MAX_X_COORD;
+	const float MAX_X_COORD = static_cast<float>(displayCam.GetWindowWidth()) / static_cast<float>(displayCam.GetWindowHeight()) * MAX_Y_COORD;
+	const float MENU_WIDTH = 5.0f + (2*0.82f*this->blammoTitleWidth*MAX_X_COORD / static_cast<float>(displayCam.GetWindowWidth()));
+	const float X_INDENT = -MAX_X_COORD + (2.0f * MAX_X_COORD - MENU_WIDTH) / 2.0f;
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -479,7 +493,7 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 	*/
 
 	// Draw the "Biff!" Text
-	const Point3D BIFF_EMIT_COORD = Point3D(MIN_X_COORD + 5.0f, MAX_Y_COORD - 2.5f, 0);
+	const Point3D BIFF_EMIT_COORD = Point3D(X_INDENT, MAX_Y_COORD - 3.0f, 0);
 
 	this->biffEmitter.SetEmitPosition(BIFF_EMIT_COORD);
 	this->biffEmitter.Tick(0.1);
@@ -490,7 +504,7 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 	this->biffTextEmitter.Draw(menuCam);
 
 	// Draw the "Bam!!" Text
-	const Point3D BAM_EMIT_COORD = Point3D(MIN_X_COORD + 10.5f, MAX_Y_COORD - 4.0f, 0);
+	const Point3D BAM_EMIT_COORD = Point3D(X_INDENT + 5.5f, MAX_Y_COORD - 4.5f, 0);
 
 	this->bamEmitter.SetEmitPosition(BAM_EMIT_COORD);
 	this->bamEmitter.Tick(0.1);
@@ -501,7 +515,7 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 	this->bamTextEmitter.Draw(menuCam);
 
 	// Draw the "Blammo!?!" Text
-	const Point3D BLAMMO_EMIT_COORD = Point3D(MIN_X_COORD + 16.0f, MAX_Y_COORD - 6.0f, 0);
+	const Point3D BLAMMO_EMIT_COORD = Point3D(X_INDENT + 11.0f, MAX_Y_COORD - 6.5f, 0);
 
 	this->blammoEmitter.SetEmitPosition(BLAMMO_EMIT_COORD);
 	this->blammoEmitter.Tick(0.1);
@@ -530,7 +544,7 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {
 	
 	// Insert a bunch of bang-onomatopiea effects for drawing if we're running low on them
 	const float MAX_Y_COORD_BG_EFFECTS = (MAX_Y_COORD - 6.0f);
-	while (this->randomBGParicles.size() < 20) {
+	while (this->randomBGParicles.size() < 15) {
 		this->InsertBangEffectIntoBGEffects(MIN_X_COORD, MAX_X_COORD, MIN_Y_COORD, MAX_Y_COORD_BG_EFFECTS, MIN_Z_COORD, MAX_Z_COORD);
 	}
 

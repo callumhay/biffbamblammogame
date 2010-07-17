@@ -78,6 +78,8 @@ public:
 		return this->gameCamera;
 	}
 
+	float GetTextScalingFactor() const;
+
 	// Tells the display that a certain key was pressed/released
 	void KeyPressed(SDLKey key, SDLMod modifier) {
 		this->currState->KeyPressed(key, modifier);
