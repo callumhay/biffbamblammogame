@@ -17,7 +17,7 @@ public:
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
 	void SetWorldTranslation(const Vector3D& t);
-	void Draw(const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
+	void Draw(const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight, bool lightsAreOff) const;
 	
 private:
 	Vector3D currWorldTranslation;

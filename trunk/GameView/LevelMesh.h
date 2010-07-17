@@ -64,7 +64,7 @@ public:
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void RemovePiece(const LevelPiece& piece);
 	
-	void DrawPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+	void DrawPieces(double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
 									const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
 	void DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
 
