@@ -16,7 +16,7 @@ CannonBlockMesh::~CannonBlockMesh() {
 
 
 void CannonBlockMesh::Draw(const Camera& camera, const BasicPointLight& keyLight, 
-													 const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
+													 const BasicPointLight& fillLight, const BasicPointLight& ballLight, bool lightsAreOff) const {
 
 	// Go through each of the cannon blocks and draw them, each with their proper,
 	// respective barrel orientation
@@ -30,6 +30,9 @@ void CannonBlockMesh::Draw(const Camera& camera, const BasicPointLight& keyLight
 		if (loadedBall != NULL && loadedBall->GetIsBallCameraOn()) {
 			continue;
 		}
+	
+
+
 
 		cannonRotationInDegs = currCannonBlock->GetCurrentCannonAngleInDegs();
 		const Point2D& blockCenter = currCannonBlock->GetCenter();
@@ -43,7 +46,16 @@ void CannonBlockMesh::Draw(const Camera& camera, const BasicPointLight& keyLight
 		glTranslatef(this->currWorldTranslation[0] + blockCenter[0], this->currWorldTranslation[1] + blockCenter[1], this->currWorldTranslation[2]);
 		// Rotate the barrel to its current direction
 		glRotatef(cannonRotationInDegs, 0, 0, 1);
-		this->cannonBlockBarrelGeometry->Draw(camera, keyLight, fillLight, ballLight);
+
+		// If the lights are out and a ball is inside the current cannon block 
+		// then we illuminate the cannon block
+		if (lightsAreOff && currCannonBlock->GetLoadedBall() != NULL) {
+			BasicPointLight newKeyLight(Point3D(0, 0, -10), Colour(1, 1, 1), 0.01f);
+			this->cannonBlockBarrelGeometry->Draw(camera, newKeyLight, fillLight, ballLight);
+		}
+		else {
+			this->cannonBlockBarrelGeometry->Draw(camera, keyLight, fillLight, ballLight);
+		}
 		glPopMatrix();
 	}
 }

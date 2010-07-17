@@ -170,7 +170,7 @@ void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Ca
 
 	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	currLevelMesh->DrawPieces(dT, camera, fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
+	currLevelMesh->DrawPieces(dT, camera, this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
 }
 
 void GameAssets::DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera) {

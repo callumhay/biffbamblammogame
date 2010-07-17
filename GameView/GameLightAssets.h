@@ -42,6 +42,10 @@ public:
 	void GetBackgroundAffectingLights(BasicPointLight& bgKeyLight, BasicPointLight& bgFillLight) const;
 	PointLight& GetBallLight() { return this->ballLight; };
 
+	bool GetIsBlackOutActive() const {
+		return this->isBlackOutActive;
+	}
+
 #ifdef _DEBUG
 	void DebugDrawLights() const;
 #endif

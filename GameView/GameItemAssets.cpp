@@ -75,6 +75,8 @@ bool GameItemAssets::LoadItemTextures() {
 	const std::map<GameItem::ItemType, std::string>& itemTimerTextureNames				= GameViewConstants::GetInstance()->GetItemTimerTextures();
 	const std::map<GameItem::ItemType, std::string>& itemTimerFillerTextureNames	= GameViewConstants::GetInstance()->GetItemTimerFillerTextures();
 
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
+
 	// Initialize/load all the item drop textures
 	for (std::map<GameItem::ItemType, std::string>::const_iterator iter = itemTextureNames.begin(); iter != itemTextureNames.end(); ++iter) {
 		// Grab the item ID and its corresponding texture filepath
@@ -100,6 +102,10 @@ bool GameItemAssets::LoadItemTextures() {
 
 		// Load a texture for the item, make sure it isn't null
 		Texture* currItemTimerTex = ResourceManager::GetInstance()->GetImgTextureResource(currTexFilepath,	Texture::Trilinear);
+		glBindTexture(GL_TEXTURE_2D, currItemTimerTex->GetTextureID());
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 		if (currItemTimerTex == NULL) {
 			assert(false);
 			return false;
@@ -116,7 +122,11 @@ bool GameItemAssets::LoadItemTextures() {
 		std::string currTexFilepath		= iter->second;
 
 		// Load a texture for the item, make sure it isn't null
-		Texture* currItemTimerFillerTex = ResourceManager::GetInstance()->GetImgTextureResource(currTexFilepath,	Texture::Bilinear);
+		Texture* currItemTimerFillerTex = ResourceManager::GetInstance()->GetImgTextureResource(currTexFilepath,	Texture::Trilinear);
+		glBindTexture(GL_TEXTURE_2D, currItemTimerFillerTex->GetTextureID());
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 		if (currItemTimerFillerTex == NULL) {
 			assert(false);
 			return false;
@@ -477,12 +487,12 @@ void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, 
 		percentElapsed = this->itemTimer->GetPercentTimeElapsed();
 	}
 
-	double fillerHalfHeight = (height - (height * percentElapsed)) / 2.0;
-	double fillerTexHeight  = 1.0 - percentElapsed;
+	double fillerHalfHeight = (HALF_HEIGHT - (HALF_HEIGHT * percentElapsed)) ;
+	double fillerTexHeight  = (1.0 - percentElapsed);
 	
 	// Back fill - so that the filler that has expired so far stands out from the background
 	glPushMatrix();
-	glTranslatef(TRANSLATE_X, y + HALF_HEIGHT, 0.0f);
+	glTranslatef(TRANSLATE_X, y + ITEM_SCALE*HALF_HEIGHT, 0.0f);
 	
 	// Draw any effects currently active for this HUD element
 	this->itemAssets->espAssets->DrawTimerHUDEffect(dT, camera, this->itemType);
@@ -501,7 +511,7 @@ void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, 
 
 	// The actual filler, which is constantly decreasing to zero
 	glPushMatrix();
-	glTranslatef(TRANSLATE_X, y + fillerHalfHeight, 0.0f);
+	glTranslatef(TRANSLATE_X, y + ITEM_SCALE*fillerHalfHeight, 0.0f);
 	glScalef(ITEM_SCALE, ITEM_SCALE, 0.0f);
 
 	glColor4f(std::min<float>(1.0f, this->timerColour.R() + ITEM_ADDITIVE_COLOUR.R()), 
@@ -514,11 +524,10 @@ void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, 
 	glTexCoord2d(1, fillerTexHeight); glVertex2d(HALF_WIDTH, fillerHalfHeight);
 	glTexCoord2d(0, fillerTexHeight); glVertex2d(-HALF_WIDTH, fillerHalfHeight);
 	glEnd();
-	this->fillerTexture->UnbindTexture();
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(TRANSLATE_X, y + HALF_HEIGHT, 0.0f);
+	glTranslatef(TRANSLATE_X, y + ITEM_SCALE*HALF_HEIGHT, 0.0f);
 	glScalef(ITEM_SCALE, ITEM_SCALE, 0.0f);
 
 	this->timerTexture->BindTexture();
@@ -531,6 +540,7 @@ void GameItemAssets::ItemTimerHUDElement::Draw(double dT, const Camera& camera, 
 	glEnd();
 	this->timerTexture->UnbindTexture();
 	glPopMatrix();
+
 }
 
 /**
@@ -614,7 +624,7 @@ void GameItemAssets::ItemTimerHUDElement::SetState(const TimerState& state) {
 				std::vector<float> scaleValues;
 				scaleValues.reserve(3);
 				scaleValues.push_back(1.0f);
-				scaleValues.push_back(1.015f);
+				scaleValues.push_back(1.03f);
 				scaleValues.push_back(1.0f);
 
 				this->scaleAnimation.SetLerp(timeValues, scaleValues);

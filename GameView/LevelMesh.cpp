@@ -299,7 +299,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 /**
  * Draw the current level mesh pieces (i.e., blocks that make up the level).
  */
-void LevelMesh::DrawPieces(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+void LevelMesh::DrawPieces(double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
 													 const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture) {
 
 	// Set any appropriate parameters on the various meshes materials, etc.
@@ -319,7 +319,7 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, const BasicPointLigh
 		currEffect->Draw(camera, iter->second);
 	}
 
-	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight);
+	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight, lightsAreOut);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 
 	// Draw the piece effects
