@@ -120,6 +120,7 @@ void InGameMenuState::InitTopMenu() {
 	assert(this->topMenuEventHandler == NULL);
 
 	const Camera& camera = this->display->GetCamera();
+	const float textScaleFactor = this->display->GetTextScalingFactor();
 
 	// Set up the handlers
 	this->topMenuEventHandler			= new TopMenuEventHandler(this);
@@ -135,12 +136,14 @@ void InGameMenuState::InitTopMenu() {
 	// Prepare some of the properties of the text labels in the top level menu...
 	const float dropShadowAmtSm = 0.10f;
 	const float dropShadowAmtLg = 0.10f;
-	const Colour dropShadowColour = Colour(0.62f, 0.72f, 0.80f);
+	const Colour dropShadowColour = Colour(0.0f, 0.0f, 0.0f);
 
 	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  "Resume");
 	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),     "Resume");
 	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
-	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);	
+	tempLabelSm.SetScale(textScaleFactor);
+	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
+	tempLabelLg.SetScale(textScaleFactor);
 
 	// Add items to the menu in their order (first to last)
 	this->resumeItem = this->topMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);

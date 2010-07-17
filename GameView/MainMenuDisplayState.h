@@ -81,6 +81,8 @@ private:
 	static const unsigned int MENU_Y_INDENT = 320;
 	static const unsigned int MENU_ITEM_PADDING = 15;
 
+	float biffTitleWidth, bamTitleWidth, blammoTitleWidth;
+
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
 

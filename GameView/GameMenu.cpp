@@ -22,7 +22,7 @@
 const float GameMenu::UP_DOWN_ARROW_HEIGHT					= 12.0f;	
 const float GameMenu::UP_DOWN_ARROW_TOP_PADDING			= 8.0f;
 const float GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING	= 12.0f;
-const float GameMenu::BACKGROUND_PADDING						= 15.0f;
+const float GameMenu::BACKGROUND_PADDING						= 12.0f;
 
 const Colour GameMenu::RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS] = {
 	Colour(0.89f, 0.149f, 0.2118f),								// 0: Alizarin Red
@@ -124,68 +124,27 @@ void GameMenu::DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight) {
  * Draw an outline around the menu with a colourful plain background.
  */
 void GameMenu::DrawMenuBackground(double dT) {
-/*
-	const float APPLY_PADDING_WIDTH				= 2 * BACKGROUND_PADDING + 2 * GameMenuItem::MENU_ITEM_WOBBLE_AMT_LARGE;
-	const float APPLY_PADDING_WIDTH_DIV2  = APPLY_PADDING_WIDTH / 2.0f;
-	const float APPLY_PADDING_HEIGHT			= 2 * BACKGROUND_PADDING + GameMenu::UP_DOWN_ARROW_HEIGHT;
-	const float APPLY_PADDING_HEIGHT_DIV2	= APPLY_PADDING_HEIGHT / 2.0f;
-
-	const float MENU_WIDTH = (this->menuWidth + APPLY_PADDING_WIDTH);
-	const float MENU_HEIGHT = (this->menuHeight + APPLY_PADDING_HEIGHT);
-	
-	const float MENU_WIDTH_DIV2		= MENU_WIDTH / 2.0f;
-	const float MENU_HEIGHT_DIV2	= MENU_HEIGHT / 2.0f;
-
-	// Make world coordinates equal window coordinates
-	Camera::PushWindowCoords();
-
-	glPushMatrix();
-	glLoadIdentity();
-	glTranslatef(this->topLeftCorner[0] + MENU_WIDTH_DIV2 - APPLY_PADDING_WIDTH_DIV2, this->topLeftCorner[1] - MENU_HEIGHT_DIV2 + APPLY_PADDING_HEIGHT_DIV2 + GameMenu::UP_DOWN_ARROW_HEIGHT, -0.5f);
-	
-	// Draw the outline of the background
-	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glPolygonMode(GL_FRONT, GL_LINE);
-	glLineWidth(6.0f);
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
-
-	glEnable(GL_POINT_SMOOTH);
-	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-	glPolygonMode(GL_FRONT, GL_POINT);
-	glPointSize(6.0f);
-	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
-
-	// Fill in the background
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glColor4f(this->bgColour.R(), this->bgColour.G(), this->bgColour.B(), 1.0f);
-	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
-	
-	glPopMatrix();
-	Camera::PopWindowCoords();
-	*/
 }
 
 /**
  * Draw up and down arrows around a menu item at the given position.
  */
 void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem) {
-	const float ARROW_WIDTH				= 40;
+	const float ARROW_WIDTH				= 40 * menuItem.GetCurrLabel()->GetScale();
 	const float HALF_ARROW_WIDTH	= ARROW_WIDTH / 2.0f;
-	const float HALF_ARROW_HEIGHT	= GameMenu::UP_DOWN_ARROW_HEIGHT / 2.0f;
+	const float HALF_ARROW_HEIGHT	= GameMenu::UP_DOWN_ARROW_HEIGHT * menuItem.GetCurrLabel()->GetScale() / 2.0f;
 
+	const float SCALED_PADDING = GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING * menuItem.GetCurrLabel()->GetScale();
 	const float ARROW_X = (menuItem.GetWidth() - ARROW_WIDTH) / 2.0f;
-	const float TOP_ARROW_BOTTOM_Y	= GameMenu::UP_DOWN_ARROW_TOP_PADDING;
+	const float TOP_ARROW_BOTTOM_Y	= SCALED_PADDING;
 	
-	const float BOTTOM_ARROW_TOP_Y		=  -1.0f * (static_cast<float>(menuItem.GetHeight()) + GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING);
-	const float BOTTOM_ARROW_BOTTOM_Y	= BOTTOM_ARROW_TOP_Y - GameMenu::UP_DOWN_ARROW_HEIGHT;
+	const float BOTTOM_ARROW_TOP_Y		=  -1.0f * (static_cast<float>(menuItem.GetHeight()) + SCALED_PADDING);
+	const float BOTTOM_ARROW_BOTTOM_Y	= BOTTOM_ARROW_TOP_Y - GameMenu::UP_DOWN_ARROW_HEIGHT * menuItem.GetCurrLabel()->GetScale();
 
 	float selArrowPulseScale = this->selArrowScaleAnim.GetInterpolantValue();
 	float selArrowPulseFade	 = this->selArrowFadeAnim.GetInterpolantValue();
 
 	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

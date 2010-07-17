@@ -51,7 +51,7 @@ float TextureFontSet::GetWidth(const std::string& s) const {
  * Precondition: s cannot have any new lines in it!!
  * Returns: The length of the printed text.
  */
-float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string& s, bool depthTestOn) const {
+float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string& s, bool depthTestOn, float scale) const {
 	assert(s.find('\n') == std::string::npos);
 	assert(s.find('\r') == std::string::npos);
 
@@ -75,7 +75,8 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 
 	glPushMatrix();
 	glLoadIdentity();
-	glTranslatef(topLeftCorner[0], topLeftCorner[1]-this->heightInPixels, topLeftCorner[2]);
+	glTranslatef(topLeftCorner[0], topLeftCorner[1] - this->heightInPixels*scale, topLeftCorner[2]);
+	glScalef(scale, scale, 1.0f);
 	glRasterPos2i(0, 0);
 
 	// Draw the text

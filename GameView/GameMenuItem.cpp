@@ -399,15 +399,16 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	const float BASE_LABEL_WIDTH  = this->currLabel->GetLastRasterWidth();
 	const float SCROLLER_HEIGHT = this->currLabel->GetHeight();
 
-	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(BASE_LABEL_WIDTH + AmountScrollerMenuItem::INTERIOR_PADDING_TEXT_ARROWS, 0.0);
+	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(BASE_LABEL_WIDTH + AmountScrollerMenuItem::INTERIOR_PADDING_TEXT_ARROWS, 0);
 	this->DrawScrollerArrow(wiggleTopLeftCorner, SCROLLER_HEIGHT, true);
 
 	// Draw the scroller widget
-	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(AmountScrollerMenuItem::SCROLLER_ARROW_WIDTH + 
-																											 AmountScrollerMenuItem::INTERIOR_PADDING_ARROWS_SCROLLER, 0.0f);
+	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(AmountScrollerMenuItem::SCROLLER_ARROW_WIDTH + AmountScrollerMenuItem::INTERIOR_PADDING_ARROWS_SCROLLER, 0);
 	
+	const float NEW_Y_POS = wiggleTopLeftCorner[1];
+
 	const float SCROLLER_X_WIDTH		  = wiggleTopLeftCorner[0] + SCROLLER_WIDTH;
-	const float SCROLLER_Y_HEIGHT		  = wiggleTopLeftCorner[1] - SCROLLER_HEIGHT;
+	const float SCROLLER_Y_HEIGHT		  = NEW_Y_POS - SCROLLER_HEIGHT;
 	const float SCROLLER_FILL_X_WIDTH = wiggleTopLeftCorner[0] + SCROLLER_WIDTH * ((this->currentValue - this->minValue) / (this->maxValue - this->minValue));
 	glPolygonMode(GL_FRONT, GL_FILL);
 	
@@ -415,17 +416,17 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	
 	// Shadowy background
 	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-	glVertex2f(wiggleTopLeftCorner[0], wiggleTopLeftCorner[1]);
+	glVertex2f(wiggleTopLeftCorner[0], NEW_Y_POS);
 	glVertex2f(wiggleTopLeftCorner[0], SCROLLER_Y_HEIGHT);
 	glVertex2f(SCROLLER_X_WIDTH, SCROLLER_Y_HEIGHT);
-	glVertex2f(SCROLLER_X_WIDTH, wiggleTopLeftCorner[1]);
+	glVertex2f(SCROLLER_X_WIDTH, NEW_Y_POS);
 
 	// Scroller fill
 	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-	glVertex2f(wiggleTopLeftCorner[0], wiggleTopLeftCorner[1]);
+	glVertex2f(wiggleTopLeftCorner[0], NEW_Y_POS);
 	glVertex2f(wiggleTopLeftCorner[0], SCROLLER_Y_HEIGHT);
 	glVertex2f(SCROLLER_FILL_X_WIDTH, SCROLLER_Y_HEIGHT);
-	glVertex2f(SCROLLER_FILL_X_WIDTH, wiggleTopLeftCorner[1]);
+	glVertex2f(SCROLLER_FILL_X_WIDTH, NEW_Y_POS);
 
 	glEnd();
 
@@ -433,15 +434,14 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	glPolygonMode(GL_FRONT, GL_LINE);
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 	glBegin(GL_QUADS);
-	glVertex2f(wiggleTopLeftCorner[0], wiggleTopLeftCorner[1]);
+	glVertex2f(wiggleTopLeftCorner[0], NEW_Y_POS);
 	glVertex2f(wiggleTopLeftCorner[0], SCROLLER_Y_HEIGHT);
 	glVertex2f(SCROLLER_X_WIDTH, SCROLLER_Y_HEIGHT);
-	glVertex2f(SCROLLER_X_WIDTH, wiggleTopLeftCorner[1]);
+	glVertex2f(SCROLLER_X_WIDTH, NEW_Y_POS);
 	glEnd();
 
 	// Draw the right pointing scroller arrow
-	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(AmountScrollerMenuItem::SCROLLER_WIDTH + 
-																											AmountScrollerMenuItem::INTERIOR_PADDING_ARROWS_SCROLLER, 0.0f);
+	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(AmountScrollerMenuItem::SCROLLER_WIDTH + AmountScrollerMenuItem::INTERIOR_PADDING_ARROWS_SCROLLER, 0.0f);
 	this->DrawScrollerArrow(wiggleTopLeftCorner, SCROLLER_HEIGHT, false);
 
 	glPopAttrib();
@@ -543,7 +543,6 @@ void AmountScrollerMenuItem::ChangeScrollerValue(float changeAmt) {
 }
 
 void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing) {
-
 	// Increase the size of the approriate arrow if that button is pressed
 	float multiplier = 1.0f;
 	if ((this->decreaseValueButtonPressed && isLeftPointing) || (this->increaseValueButtonPressed && !isLeftPointing)) {

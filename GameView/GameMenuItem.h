@@ -62,6 +62,10 @@ public:
 	unsigned int GetHeight() const;
 	virtual float GetWidth() const;
 	
+	const TextLabel2D* GetCurrLabel() const {
+		return this->currLabel;
+	}
+
 	void ToggleWiggleAnimationOn(float amplitude, float frequency);
 	void ToggleWiggleAnimationOff();
 

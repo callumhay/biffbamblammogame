@@ -29,6 +29,7 @@ struct DropShadow {
 class TextLabel2D {
 
 private:
+	float scale;
 	float lastRasterWidth;
 	ColourRGBA colour;
 	DropShadow dropShadow;
@@ -40,6 +41,14 @@ public:
 	TextLabel2D();
 	TextLabel2D(const TextureFontSet* font, const std::string& text);
 	~TextLabel2D();
+
+	void SetScale(float scale) {
+		assert(scale != 0.0f);
+		this->scale = scale;
+	}
+	float GetScale() const {
+		return this->scale;
+	}
 
 	// Set the font of this label
 	void SetFont(const TextureFontSet* font) {
@@ -76,10 +85,10 @@ public:
 
 	// Obtain the height of this label
 	unsigned int GetHeight() const {
-		return this->font->GetHeight();
+		return this->scale * this->font->GetHeight();
 	}
 	float GetLastRasterWidth() const {
-		return this->lastRasterWidth;
+		return this->scale * this->lastRasterWidth;
 	}
 
 	const TextureFontSet* GetFont() const {

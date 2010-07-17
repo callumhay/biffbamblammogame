@@ -86,6 +86,16 @@ void GameDisplay::Render(double dT) {
 	this->model->UpdateState();
 }
 
+float GameDisplay::GetTextScalingFactor() const {
+	// We choose a base resolution to scale from...
+	static const float BASE_X_RESOLUTION = 1152;
+	static const float BASE_Y_RESOLUTION = 864;
+	
+	float currXRes = this->gameCamera.GetWindowWidth();
+	float currYRes = this->gameCamera.GetWindowHeight();
+
+	return std::min<float>(currXRes / BASE_X_RESOLUTION, currYRes / BASE_Y_RESOLUTION);
+}
 
 // LISTENER FUNCTIONS ***************************************************
 void GameDisplay::SetupActionListeners() {
