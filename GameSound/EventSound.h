@@ -63,14 +63,15 @@ protected:
 	};
 
 
-	Mix_Chunk* playingSoundChunk;	// Pointer to the sound chunk that's currently playing, NULL if nothing is playing
-	int channel;									// SDL Mixer channel that the sound plays on
-
+	std::map<int, Mix_Chunk*> channels;			// Mapping of all channels that this sound is playing 
+																					// on to their respective mix chunks
 	std::list<SoundProbabilityPair> sounds;	// If there are multiple possible sounds that can be played by this
 																					// event then they will be in this list
 
 	int numLoops;		// The number of loops for this event/mask sound
 	
+
+	void DoChannelCleanUp();
 };
 
 inline Sound::SoundType EventSound::GetType() const {
@@ -99,14 +100,15 @@ inline bool EventSound::IsValid() const {
 inline void EventSound::Play(bool doFadeIn) {
 	assert(this->IsValid());
 
+	// Go through all the sounds currently mapped and check to see which ones are still playing,
+	// clean up the map if any aren't
+	this->DoChannelCleanUp();
+
 	// If the sound is looping and already playing then don't play it again,
 	// just get out of here
 	if (this->GetType() == Sound::MaskSound && this->IsPlaying()) {
 		return;
 	}
-
-	// TODO: Don't stop the sound if it's a Sound::EventSound, just play more of it
-	this->Stop(false);
 
 	// We determine which sound to play based on their probabilities and a randomly generated number
 	double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();
@@ -115,7 +117,7 @@ inline void EventSound::Play(bool doFadeIn) {
 		const SoundProbabilityPair& currSoundProbPair = *iter;
 		if (currSoundProbPair.IsInInterval(randomNum)) {
 			
-			this->playingSoundChunk = currSoundProbPair.GetSoundChunk();
+			Mix_Chunk* chunkToPlay = currSoundProbPair.GetSoundChunk();
 			int fadeInAmt = doFadeIn ? this->msFadein : 0;
 			int loops = -1;
 			if (this->numLoops > 0) {
@@ -123,14 +125,14 @@ inline void EventSound::Play(bool doFadeIn) {
 			}
 			int result = -1;
 			if (fadeInAmt == 0) {
-				result = Mix_PlayChannel(-1, this->playingSoundChunk, loops);
+				result = Mix_PlayChannel(-1, chunkToPlay, loops);
 			}
 			else {
-				result = Mix_FadeInChannel(-1, this->playingSoundChunk, loops, fadeInAmt);
+				result = Mix_FadeInChannel(-1, chunkToPlay, loops, fadeInAmt);
 			}
 			if (result != -1) {
-				this->channel = result;
-				Mix_Volume(this->channel, this->volume);
+				this->channels.insert(std::make_pair(result, chunkToPlay));
+				Mix_Volume(result, this->volume);
 			}
 			else {
 				debug_output("Could not play sound (" << this->GetSoundName() << "): " << Mix_GetError());
@@ -142,47 +144,62 @@ inline void EventSound::Play(bool doFadeIn) {
 
 inline void EventSound::Pause() {
 	if (this->IsPlaying()) {
-		Mix_Pause(this->channel);
+		for (std::map<int, Mix_Chunk*>::iterator iter = this->channels.begin(); iter != this->channels.end(); ++iter) {
+			Mix_Pause(iter->first);
+		}
 	}
 }
 
 inline void EventSound::UnPause() {
 	if (this->IsPaused()) {
-		Mix_Resume(this->channel);
+		for (std::map<int, Mix_Chunk*>::iterator iter = this->channels.begin(); iter != this->channels.end(); ++iter) {
+			Mix_Resume(iter->first);
+		}
 	}
 }
 
 // Stop the sound from playing
 inline void EventSound::Stop(bool doFadeout) {
 	assert(this->IsValid());
+	this->DoChannelCleanUp();
 	
 	// Check to see if the sound is still playing on the channel
 	if (this->IsPlaying()) {
-		assert(this->channel != -1);
+		assert(!this->channels.empty());
+		int currChannel = this->channels.begin()->first;
+		assert(currChannel != -1);
+
 		int fadeoutAmt = doFadeout ? this->msFadeout : 0;
 		if (fadeoutAmt == 0) {
-			Mix_HaltChannel(this->channel);
+			Mix_HaltChannel(currChannel);
 		}
 		else {
-			Mix_FadeOutChannel(this->channel, fadeoutAmt);
+			Mix_FadeOutChannel(currChannel, fadeoutAmt);
 		}
+		
+		this->channels.erase(this->channels.begin());
 	}
-
-	// Sound event has finished playing
-	this->playingSoundChunk = NULL;
-	this->channel					  = Sound::INVALID_SDL_CHANNEL;
 }
 
 inline bool EventSound::IsPlaying() const {
-	if (this->channel == Sound::INVALID_SDL_CHANNEL) {
-		return false;
+	// Go through all the channels and check to see if any are playing
+	for (std::map<int, Mix_Chunk*>::const_iterator iter = this->channels.begin(); iter != this->channels.end(); ++iter) {
+		if (Mix_Playing(iter->first) == 1) {
+			assert(Mix_GetChunk(iter->first) == iter->second);
+			return true;
+		}
 	}
-	Mix_Chunk* playingSDLChunk = Mix_GetChunk(this->channel);
-	return (Mix_Playing(this->channel) == 1) || (this->playingSoundChunk != NULL && playingSDLChunk == this->playingSoundChunk);
+	
+	return false;
 }
 
 inline bool EventSound::IsPaused() const {
-	return (this->channel != Sound::INVALID_SDL_CHANNEL && this->playingSoundChunk != NULL && Mix_Paused(this->channel));
+	for (std::map<int, Mix_Chunk*>::const_iterator iter = this->channels.begin(); iter != this->channels.end(); ++iter) {
+		if (Mix_Paused(iter->first)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 inline bool EventSound::IsLooped() const {

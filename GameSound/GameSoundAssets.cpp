@@ -9,7 +9,7 @@
 
 #include <cassert>
 
-const int GameSoundAssets::MAX_MIX_GAME_SOUNDS = 256;
+const int GameSoundAssets::MAX_MIX_GAME_SOUNDS = 1024;
 int GameSoundAssets::BASE_MUSIC_SOUND_VOLUME = MIX_MAX_VOLUME;
 int GameSoundAssets::BASE_EVENT_AND_MASK_SOUND_VOLUME = MIX_MAX_VOLUME;
 

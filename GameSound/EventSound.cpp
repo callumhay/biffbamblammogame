@@ -6,15 +6,18 @@ const int EventSound::DEFAULT_FADEIN = 0;
 const int EventSound::DEFAULT_FADEOUT = 0;
 
 EventSound::EventSound(const std::string& name, int loops, int msFadein, int msFadeout) :
-Sound(name, msFadein, msFadeout), numLoops(loops),
-playingSoundChunk(NULL), channel(Sound::INVALID_SDL_CHANNEL) {
+Sound(name, msFadein, msFadeout), numLoops(loops) {
 }
 
 EventSound::~EventSound() {
 	if (this->IsValid()) {
 		// Make sure the sound is stopped first
-		this->Stop(false);
+		size_t numChannels = this->channels.size();
+		for (size_t i = 0; i < numChannels; i++) {
+			this->Stop(false);
+		}
 	}
+	assert(this->channels.empty());
 
 	// Delete all the probability-sound pairings
 	for (std::list<SoundProbabilityPair>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
@@ -30,7 +33,6 @@ EventSound::~EventSound() {
 #endif
 	}
 	this->sounds.clear();
-	this->playingSoundChunk = NULL;
 }
 
 // Static factory method for building a sound event (finite looping sound)
@@ -124,3 +126,15 @@ EventSound* EventSound::BuildSoundMask(const std::string& name, const std::strin
 }
 
 
+void EventSound::DoChannelCleanUp() {
+	std::list<std::map<int, Mix_Chunk*>::iterator> toRemove;
+	for (std::map<int, Mix_Chunk*>::iterator iter = this->channels.begin(); iter != this->channels.end(); ++iter) {
+		if (Mix_Playing(iter->first) != 1) {
+			toRemove.push_back(iter);
+		}
+	}
+
+	for (std::list<std::map<int, Mix_Chunk*>::iterator>::iterator iter = toRemove.begin(); iter != toRemove.end(); ++iter) {
+		this->channels.erase(*iter);
+	}
+}
