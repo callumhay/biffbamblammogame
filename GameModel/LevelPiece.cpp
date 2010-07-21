@@ -145,7 +145,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		std::vector<Collision::LineSeg2D> boundingLines;
 		std::vector<Vector2D>  boundingNorms;
 
-		// We only create boundries for breakables in cases where neighbours exist AND they are empty 
+		// We only create boundries in cases where neighbours exist AND they are empty 
 		// (i.e., the ball can actually get to them).
 
 		// Left boundry of the piece
@@ -192,10 +192,9 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
  * the beam segment then this will return any new beam segments created by that reflection/
  * refraction.
  */
-std::list<Collision::Ray2D> LevelPiece::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const {
+void LevelPiece::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {
 	// The default behaviour is to just not do any reflection/refraction and return an empty list
-	std::list<Collision::Ray2D> result;
-	return result;
+	rays.clear();
 }
 
 LevelPiece* LevelPiece::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {

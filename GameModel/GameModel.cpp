@@ -15,7 +15,7 @@
 #include "GameCompleteState.h"
 #include "GameOverState.h"
 #include "LevelCompleteState.h"
-#include "Beam.h"
+#include "PaddleLaserBeam.h"
 #include "CollateralBlock.h"
 
 GameModel::GameModel() : 

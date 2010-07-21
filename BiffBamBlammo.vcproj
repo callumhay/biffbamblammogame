@@ -1024,6 +1024,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\PaddleLaserBeam.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\PaddleRocketProjectile.h"
 					>
 				</File>
@@ -1093,6 +1097,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\PaddleLaser.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\PaddleLaserBeam.cpp"
 					>
 				</File>
 				<File
@@ -1351,6 +1359,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\TeslaBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\TriangleBlocks.h"
 						>
 					</File>
@@ -1392,6 +1404,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\SolidBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\TeslaBlock.cpp"
 						>
 					</File>
 					<File

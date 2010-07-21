@@ -116,7 +116,8 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 
 	// Send the projectile to the sibling portal...
 	Point2D newPosition = projectile->GetPosition() + projectile->GetHeight() * projectile->GetVelocityDirection();
-	std::list<Collision::Ray2D> newProjectileRay = this->GetReflectionRefractionRays(newPosition, projectile->GetVelocityDirection());
+	std::list<Collision::Ray2D> newProjectileRay;
+	this->GetReflectionRefractionRays(newPosition, projectile->GetVelocityDirection(), newProjectileRay);
 	assert(newProjectileRay.size() == 1);
 	
 	// EVENT: The projectile is officially being teleported...
@@ -137,15 +138,12 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 /**
  * Calculates what happens when a ray goes through the portal and comes out of its sibling portal.
  */
-std::list<Collision::Ray2D> PortalBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const {
+void PortalBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {
 	// Find position difference between the point and center...
 	Vector2D toHitVec = hitPoint - this->GetCenter();
 	// The new ray is simply the old one coming out of the sibling portal
 	Point2D newPosition = this->sibling->GetCenter() + toHitVec;
-	
-	std::list<Collision::Ray2D> result;
-	result.push_back(Collision::Ray2D(newPosition, impactDir));
-	return result;
+	rays.push_back(Collision::Ray2D(newPosition, impactDir));
 }
 
 // Whether or not the portal colour generator will reset

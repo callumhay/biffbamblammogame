@@ -30,25 +30,25 @@ public:
 	~BeamSegment();
 
 	LevelPiece* FireBeamSegmentIntoLevel(const GameLevel* level);
-	Collision::Ray2D GetBeamSegmentRay() const { return this->ray; }
+	const Collision::Ray2D& GetBeamSegmentRay() const { return this->ray; }
 	
 	LevelPiece* GetCollidingPiece() const { return this->collidingPiece; }
 	void SetCollidingPiece(LevelPiece* piece) { this->collidingPiece = piece; }
 	
-	Point2D GetStartPoint() const { return this->ray.GetOrigin(); }
+	const Point2D& GetStartPoint() const { return this->ray.GetOrigin(); }
 	Point2D GetEndPoint() const { return this->ray.GetPointAlongRayFromOrigin(this->endT); }
 	
-	float GetRadius() const { return this->radius; }
+	const float& GetRadius() const { return this->radius; }
 	void SetRadius(float radius);
 
-	float GetLength() const { 
+	const float& GetLength() const { 
 		assert(this->endT >= 0);
 		return this->endT;
 	}
 
 	void Tick(double dT);
 
-	int GetDamagePerSecond() const { return this->damagePerSecond; }
+	const int& GetDamagePerSecond() const { return this->damagePerSecond; }
 	void SetDamagePerSecond(int dmgPerSec) { this->damagePerSecond = dmgPerSec; }
 
 	static bool Equals(const BeamSegment& beamSeg1, const BeamSegment& beamSeg2);
@@ -105,24 +105,5 @@ protected:
 
 	Beam(BeamType type, int dmgPerSec, double lifeTimeInSec);
 };
-
-class PaddleLaserBeam : public Beam {
-public:
-	static const double BEAM_EXPIRE_TIME_IN_SECONDS;
-
-	PaddleLaserBeam(PlayerPaddle* paddle, const GameLevel* level);
-	~PaddleLaserBeam();
-	
-	void UpdateCollisions(const GameLevel* level);
-	int GetNumBaseBeamSegments() const;
-
-private:
-	static const int BASE_DAMAGE_PER_SECOND;
-
-	bool reInitStickyPaddle;	// Indicates whether the beam should reinitialize its sticky paddle beams
-
-	PlayerPaddle* paddle;
-};
-
 
 #endif

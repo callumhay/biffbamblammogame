@@ -82,6 +82,8 @@ public:
 	static float SqDistance(const Point2D& p1, const Point2D& p2) {
 		return (p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1]);
 	}
+
+	friend bool operator!=(const Point2D& a, const Point2D& b);
 };
 
 // 2D Point output function for debugging purposes
@@ -102,6 +104,10 @@ inline Point2D operator -(const Point2D& a, const Vector2D& b) {
 }
 inline Point2D operator *(float f, const Point2D& p) {
 	return Point2D(f*p[0], f*p[1]);
+}
+
+inline bool operator!=(const Point2D& a, const Point2D& b) {
+	return a[0] != b[0] && a[1] != b[1];
 }
 
 // Simple 3D Point --------------------------------

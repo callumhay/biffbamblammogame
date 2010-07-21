@@ -216,8 +216,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
  * Get the resulting reflection/refraction rays for the given hit point
  * on this prism triangle block with the given impact velocity direction.
  */
-std::list<Collision::Ray2D> PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const {
-	std::list<Collision::Ray2D> resultRays;
+void PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {
 	Collision::Ray2D defaultRay(hitPoint, impactDir);	// This is what happens to the original ray
 	Vector2D negImpactDir = -impactDir;
 
@@ -271,7 +270,7 @@ std::list<Collision::Ray2D> PrismTriangleBlock::GetReflectionRefractionRays(cons
 			Vector2D longSideNormal  = TriangleBlock::GetSideNormal(TriangleBlock::LongSide, this->orient);
 
 			defaultRay.SetUnitDirection(longSideNormal);
-			resultRays.push_back(Collision::Ray2D(hitPoint, shortSideNormal));
+			rays.push_back(Collision::Ray2D(hitPoint, shortSideNormal));
 		}
 	}
 	else {
@@ -280,8 +279,7 @@ std::list<Collision::Ray2D> PrismTriangleBlock::GetReflectionRefractionRays(cons
 		newVelDir.Normalize();
 		defaultRay.SetUnitDirection(newVelDir);
 	}
-	resultRays.push_front(defaultRay);
-	return resultRays;
+	rays.push_front(defaultRay);
 }
 
 // Triangle Block Namespace Functions ----------------------------------------------------------------

@@ -1,5 +1,5 @@
 /**
- * SolidBlock.cpp
+ * TeslaBlock.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
  * Callum Hay, 2009
@@ -9,51 +9,26 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#include "SolidBlock.h"
-#include "EmptySpaceBlock.h"
+#include "TeslaBlock.h"
 #include "Projectile.h"
 #include "GameModel.h"
-#include "GameEventManager.h"
 
-SolidBlock::SolidBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {
+TeslaBlock::TeslaBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc), electricityIsActive(false) {
 }
 
-SolidBlock::~SolidBlock() {
+TeslaBlock::~TeslaBlock() {
 }
 
 // Determine whether the given projectile will pass through this block...
-bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) {
-	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
-		return true;
-	}
+bool TeslaBlock::ProjectilePassesThrough(Projectile* projectile) {
 	return false;
 }
 
-LevelPiece* SolidBlock::Destroy(GameModel* gameModel) {
-	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this);
-
-	// When destroying a breakable there is the possiblity of dropping an item...
-	this->AddPossibleItemDrop(gameModel);
-
-	// Tell the level that this piece has changed to empty...
-	GameLevel* level = gameModel->GetCurrentLevel();
-	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(this, emptyPiece);
-
-	// Obliterate all that is left of this block...
-	LevelPiece* tempThis = this;
-	delete tempThis;
-	tempThis = NULL;
-
-	return emptyPiece;
-}
-
 /**
- * Update the collision boundries of this solid block, solid blocks are special in that they will
+ * Update the collision boundries of this tesla block, tesla blocks are special in that they will
  * ALWAYS have all possible collision boundries enabled and created.
  */
-void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 															const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
@@ -62,7 +37,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		this->bounds.Clear();
 
 		// We ALWAYS create boundries unless the neighbour does not exist (NULL) 
-		// or is another solid block.
+		// or is a solid/tesla block.
 
 		// Set the bounding lines for a rectangular block
 		std::vector<Collision::LineSeg2D> boundingLines;
@@ -115,33 +90,35 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		this->bounds = BoundingLines(boundingLines, boundingNorms);
 }
 
-bool SolidBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-	if (this->IsNoBoundsPieceType()) {
-		return false;
-	}
-
+bool TeslaBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
 	return Collision::IsCollision(ray, Collision::AABB2D(this->GetCenter() + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 																this->GetCenter() +  Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT)), rayT);
 }
 
 /**
- * Called when the solid block is hit by a projectile. Tends to cause the projectile to
- * extinguish, however for the collateral block projectile, it will completely destroy this.
+ * Called when the tesla block is hit by a projectile. Tends to cause the projectile to
+ * extinguish - all projectiles also tend to activate/deactivate the tesla block.
  */
-LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-	LevelPiece* resultingPiece = this;
+LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	// TODO: Tell the game model to recalculate it's tesla lightning arcs...
 
 	switch (projectile->GetType()) {
 		
 		case Projectile::PaddleLaserBulletProjectile:
+			this->electricityIsActive = !this->electricityIsActive;
 			break;
 		
 		case Projectile::CollateralBlockProjectile:
-			resultingPiece = this->Destroy(gameModel);
+			this->electricityIsActive = !this->electricityIsActive;
 			break;
 
-		case Projectile::PaddleRocketBulletProjectile:
-			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+		case Projectile::PaddleRocketBulletProjectile: {
+				// The rocket should not destroy this block, however it certainly
+				// is allowed to destroy blocks around it!
+				LevelPiece* resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+				assert(resultingPiece == this);
+				this->electricityIsActive = !this->electricityIsActive;
+			}
 			break;
 
 		default:
@@ -149,5 +126,6 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			break;
 	}
 
-	return resultingPiece;
+	return this;
 }
+
