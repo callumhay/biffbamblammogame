@@ -384,7 +384,7 @@ void PlayerPaddle::Tick(double seconds) {
 }
 
 
-
+// Tells the paddle that it has started to fire the laser beam (or has stopped firing the laser beam)
 void PlayerPaddle::SetIsLaserBeamFiring(bool isFiring) {
 	if (isFiring) {
 

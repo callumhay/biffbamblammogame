@@ -131,7 +131,8 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 					const Vector2D PROJECTILE_VELOCITY_DIR	= projectile->GetVelocityDirection();
 					const Point2D IMPACT_POINT = projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR;
 
-					std::list<Collision::Ray2D> rays = this->GetReflectionRefractionRays(IMPACT_POINT, PROJECTILE_VELOCITY_DIR);
+					std::list<Collision::Ray2D> rays;
+					this->GetReflectionRefractionRays(IMPACT_POINT, PROJECTILE_VELOCITY_DIR, rays);
 					assert(rays.size() >= 1);
 					
 					std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
@@ -175,8 +176,7 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
  * Obtains all reflected/refracted rays that can result from an impacting object at a given point on this
  * prism block with the given impact velocity unit direction.
  */
-std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const {
-	std::list<Collision::Ray2D> resultRays;						// All resulting rays go in here
+void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {
 	Collision::Ray2D defaultRay(hitPoint, impactDir);	// This is what happens to the original ray
 
 	// Determine how the ray will move through the prism based on where it hit...
@@ -198,8 +198,8 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 				// We spawn two other rays to go out of the top right and left
 				const Vector2D TOP_RIGHT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
 				const Vector2D TOP_LEFT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
-				resultRays.push_back(Collision::Ray2D(hitPoint, TOP_RIGHT_NORMAL));
-				resultRays.push_back(Collision::Ray2D(hitPoint, TOP_LEFT_NORMAL));
+				rays.push_back(Collision::Ray2D(hitPoint, TOP_RIGHT_NORMAL));
+				rays.push_back(Collision::Ray2D(hitPoint, TOP_LEFT_NORMAL));
 			}
 		}
 		else {
@@ -211,8 +211,8 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 				// We spawn two other rays to go out of the bottom right and left
 				const Vector2D BOTTOM_RIGHT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
 				const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
-				resultRays.push_back(Collision::Ray2D(hitPoint, BOTTOM_RIGHT_NORMAL));
-				resultRays.push_back(Collision::Ray2D(hitPoint, BOTTOM_LEFT_NORMAL));
+				rays.push_back(Collision::Ray2D(hitPoint, BOTTOM_RIGHT_NORMAL));
+				rays.push_back(Collision::Ray2D(hitPoint, BOTTOM_LEFT_NORMAL));
 			}
 		}
 	}
@@ -228,8 +228,8 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 				// We spawn two other projectiles to go out the top-right and bottom-right
 				const Vector2D BOTTOM_RIGHT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
 				const Vector2D TOP_RIGHT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
-				resultRays.push_back(Collision::Ray2D(this->GetCenter(), BOTTOM_RIGHT_NORMAL));
-				resultRays.push_back(Collision::Ray2D(this->GetCenter(), TOP_RIGHT_NORMAL));
+				rays.push_back(Collision::Ray2D(this->GetCenter(), BOTTOM_RIGHT_NORMAL));
+				rays.push_back(Collision::Ray2D(this->GetCenter(), TOP_RIGHT_NORMAL));
 				defaultRay.SetOrigin(this->GetCenter());
 			}
 		}
@@ -272,8 +272,8 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 				// We spawn two other rays to go out the top-right and bottom-right
 				const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
 				const Vector2D TOP_LEFT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
-				resultRays.push_back(Collision::Ray2D(this->GetCenter(), BOTTOM_LEFT_NORMAL));
-				resultRays.push_back(Collision::Ray2D(this->GetCenter(), TOP_LEFT_NORMAL));
+				rays.push_back(Collision::Ray2D(this->GetCenter(), BOTTOM_LEFT_NORMAL));
+				rays.push_back(Collision::Ray2D(this->GetCenter(), TOP_LEFT_NORMAL));
 				defaultRay.SetOrigin(this->GetCenter());
 			}
 		}
@@ -305,6 +305,5 @@ std::list<Collision::Ray2D> PrismBlock::GetReflectionRefractionRays(const Point2
 		}
 	}
 
-	resultRays.push_front(defaultRay);
-	return resultRays;
+	rays.push_front(defaultRay);
 }

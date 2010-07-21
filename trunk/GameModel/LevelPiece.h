@@ -31,7 +31,7 @@ public:
 	static const float HALF_PIECE_DEPTH;
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
-												Ink, Prism, Portal, PrismTriangle, Cannon, Collateral };
+												Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla };
 	virtual LevelPieceType GetType() const = 0;
 
 protected:
@@ -79,7 +79,7 @@ public:
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) = 0;
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) = 0;
 
-	virtual std::list<Collision::Ray2D> GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir) const;
+	virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 	virtual LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 
 	// Debug Stuffs

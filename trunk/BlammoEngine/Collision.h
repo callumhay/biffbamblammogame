@@ -119,8 +119,8 @@ namespace Collision {
 		}
 		~Ray2D() {};
 
-		Point2D GetOrigin() const { return this->origin; }
-		Vector2D GetUnitDirection() const { return this->unitDirection; }
+		const Point2D& GetOrigin() const { return this->origin; }
+		const Vector2D& GetUnitDirection() const { return this->unitDirection; }
 
 		void SetOrigin(const Point2D& origin) { this->origin = origin; }
 		void SetUnitDirection(const Vector2D& unitDir) { this->unitDirection = unitDir; }
