@@ -209,7 +209,7 @@ public:
   
 	void Normalize() {
 		float magnitude = this->length();
-		if (magnitude < EPSILON) {
+		if (magnitude < 0.000000001f) {
 			assert(false);
 			this->v_[0] = this->v_[1] = this->v_[2] = 0;			
 		}

@@ -10,6 +10,7 @@
 
 class GameBall;
 class QuadTree;
+class TeslaBlock;
 
 // Represents a game level, also deals with game level 'lvl' file reading.
 class GameLevel {
@@ -26,6 +27,7 @@ public:
 	static const char PORTAL_BLOCK_CHAR;
 	static const char CANNON_BLOCK_CHAR;
 	static const char COLLATERAL_BLOCK_CHAR;
+	static const char TESLA_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
@@ -67,6 +69,11 @@ public:
 	}
 	bool BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
 
+
+	// Ability to add/remove tesla lightning barriers
+	void AddTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
+	void RemoveTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
+	bool TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 
 	/**
 	 * Obtain the LevelPiece at the given height and width indices.
@@ -112,10 +119,14 @@ public:
 
 private:	
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
-	unsigned int piecesLeft;																	// Pieces left before the end of the level
-	unsigned int width, height;																// Size values for the level
+	unsigned int piecesLeft;																	 // Pieces left before the end of the level
+	unsigned int width, height;																 // Size values for the level
 	bool ballSafetyNetActive;
 	std::string filepath;
+
+	// Map of the pairings of tesla blocks and their active lightning arc that enforces bounds
+	// on the level as long as it's active
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D> teslaLightning;
 
 	//QuadTree* levelTree;	// A quad tree representing the boundries of this entire level and all its pieces
 

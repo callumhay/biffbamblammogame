@@ -24,6 +24,7 @@
 #include "PortalBlock.h"
 #include "CannonBlock.h"
 #include "CollateralBlock.h"
+#include "TeslaBlock.h"
 
 #include "PaddleRocketProjectile.h"
 
@@ -41,6 +42,7 @@ const char GameLevel::PRISM_BLOCK_CHAR				= 'P';
 const char GameLevel::PORTAL_BLOCK_CHAR				= 'X';
 const char GameLevel::CANNON_BLOCK_CHAR				= 'C';
 const char GameLevel::COLLATERAL_BLOCK_CHAR		= 'L';
+const char GameLevel::TESLA_BLOCK_CHAR        = 'A';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -124,6 +126,9 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 	// Reset the colours for the portal blocks
 	PortalBlock::ResetPortalColourGenerator();
 
+	// Keep track of named tesla blocks...
+	std::map<char, TeslaBlock*> teslaBlocks;
+
 	// Read in the values that make up the level
 	for (int h = 0; h < height; h++) {
 		std::vector<LevelPiece*> currentRowPieces;
@@ -172,6 +177,80 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 				case COLLATERAL_BLOCK_CHAR:
 					newPiece = new CollateralBlock(pieceWLoc, pieceHLoc);
 					break;
+
+				case TESLA_BLOCK_CHAR: {
+						// A(a, (B)) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
+						// a : The single character name of this tesla block.
+						// B : One or more other named tesla blocks seperated by commas.
+
+						char tempChar;
+
+						// Beginning bracket
+						*inFile >> tempChar;
+						if (tempChar != '(') {
+							debug_output("ERROR: poorly formed tesla block syntax, missing the beginning '('");
+							break;
+						}
+
+						// Read the single character name of the tesla block
+						char portalName;
+						*inFile >> portalName;
+
+						// Should be a comma after the name...
+						*inFile >> tempChar;
+						if (tempChar != ',') {
+							debug_output("ERROR: poorly formed tesla block syntax, missing ',' after the name.");
+							break;
+						}
+
+						// Read in all the names of the brother tesla blocks that this one can fire lightning to
+						std::string errorStr;
+						std::list<char> connectedNameList;
+						while (true) {
+							if (*inFile >> tempChar) {
+								if (tempChar >= 'A' && tempChar <= 'z') {
+									connectedNameList.push_back(tempChar);
+
+									*inFile >> tempChar;
+									if (tempChar == ')') {
+										break;
+									}
+									if (tempChar == ',') {
+										continue;
+									}
+
+									errorStr = "invalid connecting tesla block list formatting.";
+									break;
+								}
+								else {
+									errorStr = "invalid tesla block name in connecting tesla block list.";
+									break;						
+								}
+							}
+							else {
+								errorStr = "failed to read connecting tesla block list.";
+								break;
+							}
+						}
+
+						if (!errorStr.empty()) {
+							debug_output("ERROR: poorly formed tesla block syntax, " << errorStr);
+							break;							
+						}
+
+						// End bracket
+						*inFile >> tempChar;
+						if (tempChar != ')') {
+							debug_output("ERROR: poorly formed tesla block syntax, missing the last ')'");
+							break;
+						}
+
+						// Now we need to connect the tesla blocks...
+
+						assert(false); // TODO
+					}
+					break;
+
 				case PORTAL_BLOCK_CHAR: {
 						// X(a,b) - Portal block:
 						// a: A single character name for this portal block
@@ -725,4 +804,75 @@ bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector
 	}
 
 	return didCollide;
+}
+
+// Add a newly activated lightning barrier for the tesla block
+void GameLevel::AddTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2) {
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::iterator findIter =
+		this->teslaLightning.find(std::make_pair(block1, block2));
+	assert(findIter == this->teslaLightning.end());
+
+#ifdef _DEBUG
+	// Extra checking
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::iterator findIter2 =
+		this->teslaLightning.find(std::make_pair(block2, block1));
+	assert(findIter2 == this->teslaLightning.end());
+#endif
+
+	// Build a bounding line for the tesla block lightning arc
+	Collision::LineSeg2D teslaBoundry(block1->GetLightningOrigin(), block2->GetLightningOrigin());
+	this->teslaLightning.insert(std::make_pair(std::make_pair(block1, block2), teslaBoundry));
+}
+
+// Remove any currently active tesla lightning arcs
+void GameLevel::RemoveTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2) {
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::iterator findIter =
+		this->teslaLightning.find(std::make_pair(block1, block2));
+	if (findIter == this->teslaLightning.end()) {
+		findIter = this->teslaLightning.find(std::make_pair(block2, block1));
+
+		// The arc have better existed... we shouldn't be calling this otherwise
+		assert(findIter != this->teslaLightning.end());
+	}
+
+	this->teslaLightning.erase(findIter);
+}
+
+
+bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, 
+																						 Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+
+	const Point2D& currentBallPos					= b.GetCenterPosition2D();
+	const Collision::Circle2D& ballBounds = b.GetBounds();
+	float sqBallRadius = ballBounds.Radius() * ballBounds.Radius();
+	
+	// Find the first collision between the ball and a tesla lightning arc
+	float lineToBallCenterSqDist = FLT_MAX;
+	bool isCollision = false;
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::const_iterator iter = this->teslaLightning.begin();
+	for (; iter != this->teslaLightning.end(); ++iter) {
+
+		const Collision::LineSeg2D& currLineSeg = iter->second;
+		lineToBallCenterSqDist = Collision::SqDistFromPtToLineSeg(currLineSeg, currentBallPos);
+
+		// Collision if the square radius is greater or equal to the sq distance between the line
+		// segment and the ball's center
+		if (lineToBallCenterSqDist <= sqBallRadius) {
+			collisionLine = iter->second;
+			isCollision = true;
+			break;
+		}
+	}
+
+	// If there was no collision then just exit
+	if (!isCollision) {
+		return false;
+	}
+
+	// inline: There was a collision, figure out what the normal of the collision was
+	// and set all the other relevant parameter values
+
+	// TODO
+
+	return true;
 }

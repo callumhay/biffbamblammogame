@@ -121,6 +121,12 @@ void BallSpeedItem::Deactivate() {
 		GameBall* currBall = *ballIter;
 		assert(currBall != NULL);
 		currBall->SetSpeed(GameBall::NormalSpeed);
+
+		// Special check for crazyball - in this case we decrease the speed to make it
+		// a bit easier for the player
+		if ((currBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
+			currBall->DecreaseSpeed();
+		}
 	}
 
 	this->isActive = false;
