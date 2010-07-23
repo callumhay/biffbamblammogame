@@ -17,6 +17,7 @@ The following specifies the .lvl format.
 // I - Ink block   (When hit it splats all over the player's vision)
 // P - Prism block (Unbreakable, but if hit by any sort of laser it reflects/refracts the laser)
 // C - Cannon block
+// L - Collateral block (when hit it falls downwards destroying almost everything in its path)
 
 // T(x,p) - Triangle block: 
 // x: type of block from the above, can be any of the following: {R, O, Y, G, S, P}
@@ -28,7 +29,7 @@ The following specifies the .lvl format.
 // b: The single character name of the sibling portal block that this portal block is
 // the enterence and exit for.
 
-// L(a, (B)) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
+// A(a, (B)) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
 // a : The single character name of this tesla block.
 // B : One or more other named tesla blocks seperated by commas.
 

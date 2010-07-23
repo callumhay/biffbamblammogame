@@ -84,8 +84,6 @@ void BallInPlayState::Tick(double seconds) {
 	std::list<std::list<GameBall*>::iterator> ballsToRemove;						// The balls that are no longer in play and will be removed
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();	// The current set of balls in play
 
-	// TODO: BEFORE DOING BEAMS ITS TIME TO REFACTOR THIS CRAP!!!!!
-
 #ifdef _DEBUG
 	// Pause the ball from moving
 	if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == NULL) {
@@ -94,12 +92,13 @@ void BallInPlayState::Tick(double seconds) {
 	// Gravity vector in world space
 	Vector3D worldGravityDir = this->gameModel->GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
 	worldGravityDir.Normalize();
+	Vector2D worldGravity2D(worldGravityDir[0], worldGravityDir[1]);
 
 	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
 		GameBall *currBall = *iter;
 
 		// Update the current ball
-		currBall->Tick(seconds, Vector2D(worldGravityDir[0], worldGravityDir[1]));
+		//currBall->Tick(seconds, worldGravity2D);
 
 		// Check for death (ball went out of bounds)
 		if (this->IsOutOfGameBounds(currBall->GetBounds().Center())) {
@@ -246,6 +245,13 @@ void BallInPlayState::Tick(double seconds) {
 	if (ballToMoveToFront != NULL) {
 		gameBalls.remove(ballToMoveToFront);
 		gameBalls.push_front(ballToMoveToFront);
+	}
+
+	// Tick the balls
+	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+		GameBall *currBall = *iter;
+		// Update the current ball
+		currBall->Tick(seconds, worldGravity2D);
 	}
 
 #ifdef _DEBUG

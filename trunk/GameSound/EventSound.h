@@ -185,7 +185,6 @@ inline bool EventSound::IsPlaying() const {
 	// Go through all the channels and check to see if any are playing
 	for (std::map<int, Mix_Chunk*>::const_iterator iter = this->channels.begin(); iter != this->channels.end(); ++iter) {
 		if (Mix_Playing(iter->first) == 1) {
-			assert(Mix_GetChunk(iter->first) == iter->second);
 			return true;
 		}
 	}

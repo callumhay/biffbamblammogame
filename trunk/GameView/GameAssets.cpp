@@ -541,8 +541,10 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 		return;
 	}
 
+	const float TYPICAL_BEAM_ALPHA = 0.4f;
+	const Colour& beamColour = GameViewConstants::GetInstance()->LASER_BEAM_COLOUR;
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-	const float QUARTER_PADDLE_DEPTH = paddle->GetHalfDepthTotal() / 2.0f;
+	float quarterPaddleDepth = paddle->GetHalfDepthTotal() / 2.0f;
 
 	glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
 	glEnable(GL_BLEND);
@@ -550,11 +552,14 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	// If in paddle cam mode draw a fullscreen quad with the laser colour
+	if (paddle->GetIsPaddleCameraOn()) {
+		GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 0.0, ColourRGBA(beamColour, 0.2f));
+	}
+
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
 	glBegin(GL_QUADS);
-			
-	const float TYPICAL_BEAM_ALPHA = 0.4f;
 	Point3D temp;
 	Point3D beamSegStart, beamSegEnd;
 	Vector3D beamRightVec;
@@ -572,31 +577,25 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 		int segCounter = 0;
 		const int NUM_BASE_SEGMENTS = currentBeam->GetNumBaseBeamSegments();
 
-		for (; segmentIter != beamSegments.end(); ++segmentIter) {
+		for (; segmentIter != beamSegments.end(); ++segmentIter, ++segCounter) {
+
+			if (paddle->GetIsPaddleCameraOn() && segCounter < NUM_BASE_SEGMENTS) {
+				continue;
+			}
+
 			const BeamSegment* currentSeg = *segmentIter;
 
 			beamSegStart = Point3D(currentSeg->GetStartPoint());
 			beamSegEnd   = Point3D(currentSeg->GetEndPoint());
 			beamUpVec    = Vector3D(currentSeg->GetBeamSegmentRay().GetUnitDirection());
 
+			// Center of the beam (brighter in the center) 
 			currRadius   = 0.5f * currentSeg->GetRadius();
 			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
-			beamDepthVec = Vector3D(0, 0, 0.5f * QUARTER_PADDLE_DEPTH);
+			beamDepthVec = Vector3D(0, 0, 0.5f * quarterPaddleDepth);
 
-			// In the case of a paddle laser beam and we're in paddle camera mode, don't
-			// draw the first beam segment... We use a HUD element to do this instead
-			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segCounter < NUM_BASE_SEGMENTS) {
-				float beamAlpha = paddle->GetColour().A();
-				if (beamAlpha < EPSILON) {
-					continue;
-				}
-				glColor4f(0.75f, 1.0f, 1.0f, std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
-			}
-			else {
-				glColor4f(0.75f, 1.0f, 1.0f, TYPICAL_BEAM_ALPHA);
-			}
-
-			// Center of the beam (brighter in the center)
+			glColor4f(0.75f, 1.0f, 1.0f, TYPICAL_BEAM_ALPHA);
+			
 			// Front face
 			temp = beamSegStart - beamRightVec - beamDepthVec;
 			glVertex3fv(temp.begin());
@@ -637,18 +636,12 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 			temp = beamSegEnd - beamRightVec + beamDepthVec;
 			glVertex3fv(temp.begin());
 
+			// We want the first beams to fill up the entire screen in paddle cam mode
 			currRadius   = currentSeg->GetRadius();
 			beamRightVec = currRadius * Vector3D(beamUpVec[1], -beamUpVec[0], 0);
-			beamDepthVec = Vector3D(0, 0, QUARTER_PADDLE_DEPTH);
+			beamDepthVec = Vector3D(0, 0, quarterPaddleDepth);
 
-			Colour beamColour = GameViewConstants::GetInstance()->LASER_BEAM_COLOUR;
-			if (currentBeam->GetBeamType() == Beam::PaddleLaserBeam && paddle->GetIsPaddleCameraOn() && segCounter < NUM_BASE_SEGMENTS) {
-				float beamAlpha = paddle->GetColour().A();
-				glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), std::min<float>(beamAlpha, TYPICAL_BEAM_ALPHA));
-			}
-			else {
-				glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), TYPICAL_BEAM_ALPHA);
-			}
+			glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), TYPICAL_BEAM_ALPHA);
 
 			// Front face
 			temp = beamSegStart - beamRightVec - beamDepthVec;
@@ -689,8 +682,6 @@ void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& 
 			glVertex3fv(temp.begin());
 			temp = beamSegEnd - beamRightVec + beamDepthVec;
 			glVertex3fv(temp.begin());
-
-			segCounter++;
 		}
 	}
 	glEnd();

@@ -233,9 +233,8 @@ void CrosshairLaserHUD::DrawRocketHUD(int screenWidth, int screenHeight, float a
 }
 
 void CrosshairLaserHUD::DrawBeamBlast(float alpha) const {
-	// Draw the beam
-	Colour beamColour = GameViewConstants::GetInstance()->LASER_BEAM_COLOUR;
-	glColor4f(beamColour.R(), beamColour.G(), beamColour.B(), 0.4f * alpha);
+	// Draw the beam center glowy thingy
+	glColor4f(0.75f, 1.0f, 1.0f, 0.4f * alpha);
 	this->beamCenterGlowTex->BindTexture();
 
 	glPushMatrix();

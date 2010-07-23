@@ -90,6 +90,8 @@ public:
 	bool GetIsElectricityActive() const;
 	std::list<TeslaBlock*> GetActiveConnectedTeslaBlocks() const;
 
+	const Point2D& GetLightningOrigin() const;
+
 private:
 	bool electricityIsActive;											// Whether the lightning/electric current is active on this tesla block
 	std::list<TeslaBlock*> connectedTeslaBlocks;	// All tesla blocks that this one can connect to when active (and when they're active)
@@ -126,6 +128,11 @@ inline std::list<TeslaBlock*> TeslaBlock::GetActiveConnectedTeslaBlocks() const 
 	}
 
 	return activeConnections;
+}
+
+// Get the point where the lighting shoots into/out of for this tesla block
+inline const Point2D& TeslaBlock::GetLightningOrigin() const {
+	return this->GetCenter();
 }
 
 #endif // __TESLABLOCK_H__
