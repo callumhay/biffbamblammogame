@@ -10,6 +10,7 @@ class PlayerPaddle;
 class LevelPiece;
 class PortalBlock;
 class CannonBlock;
+class TeslaBlock;
 class GameItem;
 class GameItemTimer;
 class GameWorld;
@@ -47,12 +48,14 @@ public:
 	void ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal);
 	void ActionProjectilePortalBlockTeleport(const Projectile& projectile, const PortalBlock& enterPortal);
 	void ActionBallFiredFromCannon(const GameBall& ball, const CannonBlock& cannonBlock);
+	void ActionBallHitTeslaLightningArc(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
 
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
 	void ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2);
 	void ActionBlockDestroyed(const LevelPiece& block);
 	void ActionBallSafetyNetCreated();
 	void ActionBallSafetyNetDestroyed(const GameBall& ball);
+	void ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle);
 	void ActionLevelPieceChanged(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void ActionScoreChanged(int amt);
 	void ActionScoreMultiplierChanged(int oldScoreMultiplier, int newScoreMultiplier);

@@ -11,7 +11,7 @@
 
 #include "GameLevel.h"
 #include "GameBall.h"
-
+#include "PlayerPaddle.h"
 #include "GameEventManager.h"
 #include "LevelPiece.h"
 #include "EmptySpaceBlock.h"
@@ -59,6 +59,18 @@ piecesLeft(numBlocks), ballSafetyNetActive(false), filepath(filepath) {
 	// Set the dimensions of the level
 	this->width = pieces[0].size();
 	this->height = pieces.size();
+
+	// Create the safety net bounding line for this level
+	std::vector<Collision::LineSeg2D> lines;
+	lines.reserve(1);
+	Collision::LineSeg2D safetyNetLine(Point2D(0.0f, -LevelPiece::HALF_PIECE_HEIGHT), Point2D(this->GetLevelUnitWidth(), -LevelPiece::HALF_PIECE_HEIGHT));
+	lines.push_back(safetyNetLine);
+
+	std::vector<Vector2D> normals;
+	normals.reserve(1);
+	normals.push_back(Vector2D(0, 1));
+	
+	this->safetyNetBounds = BoundingLines(lines, normals);
 
 	// Set the quad tree for the level
 	//Point2D levelMax(this->GetLevelUnitWidth(), this->GetLevelUnitHeight());
@@ -780,27 +792,32 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray, c
  * Returns: true on collision (when active) and the normal and distance values, false otherwise.
  */
 bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
+	// Fast exit if there's no safety net active
 	if (!this->ballSafetyNetActive){ 
 		return false;
 	}
 
-	// Create the safety net bounding line and check the ball against it
-	std::vector<Collision::LineSeg2D> lines;
-	lines.reserve(1);
-	Collision::LineSeg2D safetyNetLine(Point2D(0.0f, -LevelPiece::HALF_PIECE_HEIGHT), Point2D(this->GetLevelUnitWidth(), -LevelPiece::HALF_PIECE_HEIGHT));
-	lines.push_back(safetyNetLine);
-
-	std::vector<Vector2D> normals;
-	normals.reserve(1);
-	normals.push_back(Vector2D(0, 1));
-	
-	BoundingLines safetyNetBounds(lines, normals);
-
 	// Test for collision, if there was one then we kill the safety net
-	bool didCollide = safetyNetBounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, collisionLine, timeSinceCollision);
+	bool didCollide = this->safetyNetBounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, collisionLine, timeSinceCollision);
 	if (didCollide) {
 		this->ballSafetyNetActive = false;
 		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(b);
+	}
+
+	return didCollide;
+}
+
+bool GameLevel::PaddleSafetyNetCollisionCheck(const PlayerPaddle& p) {
+	// Fast exit if there's no safety net active
+	if (!this->ballSafetyNetActive){ 
+		return false;
+	}
+	
+	// Test for collision, if there was one then we kill the safety net
+	bool didCollide = p.CollisionCheck(this->safetyNetBounds);
+	if (didCollide) {
+		this->ballSafetyNetActive = false;
+		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(p);
 	}
 
 	return didCollide;
@@ -841,6 +858,10 @@ void GameLevel::RemoveTeslaLightningBarrier(const TeslaBlock* block1, const Tesl
 
 bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, 
 																						 Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+	// Fast exit if there's no tesla stuffs
+	if (this->teslaLightning.empty()) {
+		return false;
+	}
 
 	const Point2D& currentBallPos					= b.GetCenterPosition2D();
 	const Collision::Circle2D& ballBounds = b.GetBounds();
@@ -871,8 +892,31 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 
 	// inline: There was a collision, figure out what the normal of the collision was
 	// and set all the other relevant parameter values
+	
+	// Get the vector from the line to the ball's center
+	const Point2D& linePt1 = collisionLine.P1();
+	const Point2D& linePt2 = collisionLine.P2();
+	Vector2D fromLineToBall = currentBallPos - linePt1;
+	if (Vector2D::Dot(fromLineToBall, fromLineToBall) < EPSILON) {
+		fromLineToBall = currentBallPos - linePt2;
+	}
+	assert(Vector2D::Dot(fromLineToBall, fromLineToBall) >= EPSILON);
 
-	// TODO
+	// Use the vector from the line to the ball to determine what side of the line
+	// the ball is on and what the normal should be for the collision
+	n[0] = -fromLineToBall[1];
+	n[1] =  fromLineToBall[0];
+	if (Vector2D::Dot(n, fromLineToBall) < 0) {
+		n[0] =  fromLineToBall[1];
+		n[1] = -fromLineToBall[0];
+	}
+
+	// Now we need to calculate the time since the collision
+	double collisionOverlapDist = ballBounds.Radius() - sqrt(lineToBallCenterSqDist);
+	timeSinceCollision = collisionOverlapDist / b.GetSpeed();
+
+	// EVENT: Ball hit a tesla lightning arc!
+	GameEventManager::Instance()->ActionBallHitTeslaLightningArc(b, *iter->first.first, *iter->first.second);
 
 	return true;
 }

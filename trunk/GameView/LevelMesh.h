@@ -71,7 +71,7 @@ public:
 	void LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
 
 	void BallSafetyNetCreated();
-	void BallSafetyNetDestroyed(const GameBall& ball);
+	void BallSafetyNetDestroyed(const Point2D& pos);
 
 	void PaddleCameraActiveToggle(bool isActive);
 };

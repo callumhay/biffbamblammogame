@@ -17,6 +17,7 @@
 #include "GameOverDisplayState.h"
 #include "GameCompleteDisplayState.h"
 #include "LivesLeftHUD.h"
+#include "BallSafetyNetMesh.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameBall.h"
@@ -310,6 +311,13 @@ void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const Ca
 	debug_output("EVENT: Ball fired out of cannon block");
 }
 
+void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
+
+	// TODO
+
+	debug_output("EVENT: Ball hit tesla lightning arc");
+}
+
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 	
 	// Add the effects based on the type of block that is being destroyed...
@@ -394,18 +402,28 @@ void GameEventsListener::BallSafetyNetCreatedEvent() {
 }
 
 void GameEventsListener::BallSafetyNetDestroyedEvent(const GameBall& ball) {
+	Point2D collisionCenter = ball.GetCenterPosition2D() - Vector2D(0, ball.GetBounds().Radius() + BallSafetyNetMesh::SAFETY_NET_HEIGHT/2.0f);
+	this->DestroyBallSafetyNet(collisionCenter);
+	debug_output("EVENT: Ball safety net destroyed by ball");
+}
+
+void GameEventsListener::BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle) {
+	this->DestroyBallSafetyNet(paddle.GetCenterPosition());
+	debug_output("EVENT: Ball safety net destroyed by paddle");
+}
+
+// Private helper for when the safety net is destroyed
+void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
 	// Play the sound
 	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBallSafetyNetDestroyedEvent);
 
 	// Tell the level mesh about it so it can show any effects for the destruction
 	// of the safety net mesh
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
-	this->display->GetAssets()->GetLevelMesh(currLevel)->BallSafetyNetDestroyed(ball);
+	this->display->GetAssets()->GetLevelMesh(currLevel)->BallSafetyNetDestroyed(pt);
 
 	// Particle effects for when the safety net is destroyed
-	this->display->GetAssets()->GetESPAssets()->AddBallSafetyNetDestroyedEffect(ball);
-
-	debug_output("EVENT: Ball safety net destroyed");
+	this->display->GetAssets()->GetESPAssets()->AddBallSafetyNetDestroyedEffect(pt);
 }
 
 void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {

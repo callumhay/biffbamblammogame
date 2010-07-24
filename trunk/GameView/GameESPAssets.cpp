@@ -1161,18 +1161,17 @@ ESPPointEmitter* GameESPAssets::CreateBlockBreakSmashyBits(const Point3D& center
  * Add the effect for when something hits the active ball safety barrier/net and causes
  * it to be destroyed.
  */
-void GameESPAssets::AddBallSafetyNetDestroyedEffect(const GameBall& ball) {
+void GameESPAssets::AddBallSafetyNetDestroyedEffect(const Point2D& pos) {
 	assert(this->bangTextures.size() != 0);
 
 	// Choose a random bang texture
 	unsigned int randomBangTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->bangTextures.size();
 	Texture2D* randomBangTex = this->bangTextures[randomBangTexIndex];
 	
-	ESPInterval bangLifeInterval		= ESPInterval(0.8f, 1.1f);
+	ESPInterval bangLifeInterval		= ESPInterval(1.0f, 1.25f);
 	ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.minValue + 0.3f, bangLifeInterval.maxValue + 0.3f);
 	
-	Point2D ballLoc = ball.GetBounds().Center();
-	Point3D emitCenter  = Point3D(ballLoc[0], ballLoc[1] - ball.GetBounds().Radius() - BallSafetyNetMesh::SAFETY_NET_HEIGHT/2.0f, 0.0f);
+	Point3D emitCenter(pos);
 
 	// Create an emitter for the bang texture
 	ESPPointEmitter* bangEffect = new ESPPointEmitter();
