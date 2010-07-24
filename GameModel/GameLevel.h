@@ -11,6 +11,7 @@
 class GameBall;
 class QuadTree;
 class TeslaBlock;
+class PlayerPaddle;
 
 // Represents a game level, also deals with game level 'lvl' file reading.
 class GameLevel {
@@ -68,6 +69,7 @@ public:
 		this->ballSafetyNetActive = isActive;
 	}
 	bool BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
+	bool PaddleSafetyNetCollisionCheck(const PlayerPaddle& p);
 
 
 	// Ability to add/remove tesla lightning barriers
@@ -122,6 +124,7 @@ private:
 	unsigned int piecesLeft;																	 // Pieces left before the end of the level
 	unsigned int width, height;																 // Size values for the level
 	bool ballSafetyNetActive;
+	BoundingLines safetyNetBounds;
 	std::string filepath;
 
 	// Map of the pairings of tesla blocks and their active lightning arc that enforces bounds

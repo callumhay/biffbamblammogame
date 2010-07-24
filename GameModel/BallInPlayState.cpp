@@ -79,6 +79,8 @@ void BallInPlayState::Tick(double seconds) {
 	double timeSinceCollision;
 	bool didCollideWithPaddle = false;
 	bool didCollideWithBlock = false;
+	bool didCollideWithTeslaLightning = false;
+	bool didCollideWithballSafetyNet  = false;
 	
 	GameBall* ballToMoveToFront = NULL;																	// The last ball to hit the paddle is the one with priority for item effects
 	std::list<std::list<GameBall*>::iterator> ballsToRemove;						// The balls that are no longer in play and will be removed
@@ -207,8 +209,14 @@ void BallInPlayState::Tick(double seconds) {
 		}
 
 		// Ball Safety Net Collisions:
-		bool didCollideWithballSafetyNet = currLevel->BallSafetyNetCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
+		didCollideWithballSafetyNet = currLevel->BallSafetyNetCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
 		if (didCollideWithballSafetyNet) {
+			this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+		}
+
+		// Ball - tesla lightning arc collisions:
+		didCollideWithTeslaLightning = currLevel->TeslaLightningCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
+		if (didCollideWithTeslaLightning) {
 			this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 		}
 
@@ -257,6 +265,10 @@ void BallInPlayState::Tick(double seconds) {
 #ifdef _DEBUG
 	} // Pause ball
 #endif
+
+	// Quick check to see if the paddle collided with the safety net - this will just register necessary
+	// events and destroy the net if it exists and there is a collision
+	currLevel->PaddleSafetyNetCollisionCheck(*paddle);
 
 	// Projectile Collisions:
 	// Grab a list of all paddle-related projectiles and test each one for collisions...
@@ -466,8 +478,6 @@ void BallInPlayState::UpdateActiveBeams(double seconds) {
 	}
 
 }
-
-
 
 // n must be normalized
 // d is the distance from the center of the ball to the line that was collided with

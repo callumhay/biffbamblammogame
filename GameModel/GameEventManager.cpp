@@ -150,6 +150,14 @@ void GameEventManager::ActionBallFiredFromCannon(const GameBall& ball, const Can
 	}		
 }
 
+// Action for when the ball hits a lightning arc between two tesla blocks
+void GameEventManager::ActionBallHitTeslaLightningArc(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BallHitTeslaLightningArcEvent(ball, teslaBlock1, teslaBlock2);
+	}		
+}
+
 // Action for when the ball collides with the player paddle
 void GameEventManager::ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle) {
 	this->listenerIter = this->eventListeners.begin();
@@ -186,6 +194,13 @@ void GameEventManager::ActionBallSafetyNetDestroyed(const GameBall& ball) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallSafetyNetDestroyedEvent(ball);
+	}	
+}
+
+void GameEventManager::ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BallSafetyNetDestroyedEvent(paddle);
 	}	
 }
 

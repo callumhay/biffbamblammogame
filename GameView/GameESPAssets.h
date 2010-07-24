@@ -203,7 +203,7 @@ public:
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
 	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
-	void AddBallSafetyNetDestroyedEffect(const GameBall& ball);
+	void AddBallSafetyNetDestroyedEffect(const Point2D& pos);
 	void AddBallExplodedEffect(const GameBall* ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);

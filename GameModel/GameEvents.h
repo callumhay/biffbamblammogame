@@ -7,6 +7,7 @@ class PlayerPaddle;
 class LevelPiece;
 class PortalBlock;
 class CannonBlock;
+class TeslaBlock;
 class GameLevel;
 class GameWorld;
 class GameItem;
@@ -177,6 +178,15 @@ public:
 	 */
 	virtual void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) = 0;
 
+	/**
+	 * Event triggered when the ball hits a tesla block to tesla block lightning arc.
+	 * Occurs right before the the repel of the ball from the arc takes place.
+	 * Arguements: ball         - The ball that hit the lightning arc.
+	 *             teslaBlock1  - One of the tesla blocks responsible for the lightning arc.
+	 *             teslaBlock2  - The other tesla block responsible for the lightning arc.    
+	 */
+	virtual void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) = 0;
+
 	// Misc Events (Destruction, Combos, etc.) ************************************************
 
 	/**
@@ -198,6 +208,8 @@ public:
 	 * Arguements: ball - The ball that collided and destroyed the safety net.
 	 */
 	virtual void BallSafetyNetDestroyedEvent(const GameBall& ball) = 0;
+	// Same as above, only the paddle did it.
+	virtual void BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle) = 0;
 
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same

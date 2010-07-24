@@ -496,9 +496,9 @@ void LevelMesh::BallSafetyNetCreated() {
  * Call when the ball safety net has been destroyed this will prompt any
  * animations / effects associated with the mesh representing the safety net.
  */
-void LevelMesh::BallSafetyNetDestroyed(const GameBall& ball) {
+void LevelMesh::BallSafetyNetDestroyed(const Point2D& pos) {
 	Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
-	this->ballSafetyNet->DestroyBallSafetyNet(levelDimensions, ball.GetBounds().Center()[0]);
+	this->ballSafetyNet->DestroyBallSafetyNet(levelDimensions, pos[0]);
 }
 
 /**

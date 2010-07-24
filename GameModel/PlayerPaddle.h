@@ -221,8 +221,8 @@ public:
 	void HitByProjectile(const Projectile& projectile);
 	bool ProjectilePassesThrough(const Projectile& projectile);
 
-	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
-	bool CollisionCheck(const BoundingLines& bounds);
+	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+	bool CollisionCheck(const BoundingLines& bounds) const;
 	void DebugDraw() const;
 
 private:
@@ -291,14 +291,14 @@ inline void PlayerPaddle::Animate(double seconds) {
 
 // Check to see if the given ball collides, return the normal of the collision and the line of the collision as well
 // as the time since the collision occurred
-inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
+inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
 	return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
 }
 
 /**
  * Check to see if the given set of bounding lines collides with this paddle.
  */
-inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds) {
+inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds) const {
 	return this->bounds.CollisionCheck(bounds);
 }
 

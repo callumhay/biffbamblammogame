@@ -49,11 +49,13 @@ public:
 	void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal);
 	void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal);
 	void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock);
+	void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
 
 	// Misc game events
 	void BlockDestroyedEvent(const LevelPiece& block);
 	void BallSafetyNetCreatedEvent();
 	void BallSafetyNetDestroyedEvent(const GameBall& ball);
+	void BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle);
 	void LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void ScoreChangedEvent(int amt);
 	void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier);
@@ -70,6 +72,9 @@ public:
 	void BeamChangedEvent(const Beam& beam);
 	void BeamRemovedEvent(const Beam& beam);
 	void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
+
+private:
+	void DestroyBallSafetyNet(const Point2D& pt);
 };
 
 #endif
