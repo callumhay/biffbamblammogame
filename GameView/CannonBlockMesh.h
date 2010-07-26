@@ -16,12 +16,9 @@ public:
 	void RemoveCannonBlock(const CannonBlock* cannonBlock);
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-	void SetWorldTranslation(const Vector3D& t);
 	void Draw(const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight, bool lightsAreOff) const;
 	
 private:
-	Vector3D currWorldTranslation;
-
 	Mesh* cannonBlockBaseGeometry;
 	Mesh* cannonBlockBarrelGeometry;
 	std::map<std::string, MaterialGroup*> materialGroups;
@@ -36,6 +33,7 @@ inline void CannonBlockMesh::Flush() {
 }
 
 inline void CannonBlockMesh::AddCannonBlock(const CannonBlock* cannonBlock) {
+	assert(cannonBlock != NULL);
 	this->cannonBlocks.insert(cannonBlock);
 }
 
@@ -46,10 +44,6 @@ inline void CannonBlockMesh::RemoveCannonBlock(const CannonBlock* cannonBlock) {
 
 inline const std::map<std::string, MaterialGroup*>& CannonBlockMesh::GetMaterialGroups() const {
 	return this->materialGroups;
-}
-
-inline void CannonBlockMesh::SetWorldTranslation(const Vector3D& t) {
-	this->currWorldTranslation = t;
 }
 
 #endif // __CANNONBLOCKMESH_H__

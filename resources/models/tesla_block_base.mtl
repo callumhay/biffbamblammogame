@@ -1,0 +1,8 @@
+newmtl tesla_block_metal
+Ka 0.000000 0.000000 0.000000
+Kd 0.7 0.7 0.7
+Ks 0.800000 0.800000 0.800000
+Ns 100
+outlinesize 2.0
+type phong
+geomtype fg

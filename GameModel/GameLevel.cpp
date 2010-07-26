@@ -205,8 +205,12 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						}
 
 						// Read the single character name of the tesla block
-						char portalName;
-						*inFile >> portalName;
+						char teslaBlockName;
+						*inFile >> teslaBlockName;
+						if (teslaBlockName < 'A' && teslaBlockName > 'z') {
+							debug_output("ERROR: tesla block name must be a character A-Z or a-z");
+							break;
+						}
 
 						// Should be a comma after the name...
 						*inFile >> tempChar;
@@ -245,7 +249,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							}
 						}
 
-						if (!errorStr.empty()) {
+						if (!errorStr.empty() || connectedNameList.empty()) {
 							debug_output("ERROR: poorly formed tesla block syntax, " << errorStr);
 							break;							
 						}
@@ -258,8 +262,72 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						}
 
 						// Now we need to connect the tesla blocks...
+						TeslaBlock* currentTeslaBlock = NULL;
+						std::list<TeslaBlock*> siblingTeslaBlocks;
 
-						assert(false); // TODO
+						std::map<char, TeslaBlock*>::iterator findIter = teslaBlocks.find(teslaBlockName);
+						std::pair<std::map<char, TeslaBlock*>::iterator, bool> insertResult;
+
+						if (findIter != teslaBlocks.end()) {
+							currentTeslaBlock = findIter->second;
+							assert(currentTeslaBlock != NULL);
+						}
+
+						// Go through each sibling and try to find it in the list of tesla blocks already created,
+						// if it does not exist then build a place holder for it
+						for (std::list<char>::const_iterator iter = connectedNameList.begin(); iter != connectedNameList.end(); ++iter) {
+							
+							const char& siblingName = *iter;
+							findIter = teslaBlocks.find(siblingName);
+							TeslaBlock* siblingTeslaBlock = NULL;
+
+							if (findIter != teslaBlocks.end()) {
+								siblingTeslaBlock = findIter->second;
+								assert(siblingTeslaBlock != NULL);
+								assert(siblingTeslaBlock != currentTeslaBlock);
+								siblingTeslaBlocks.push_back(siblingTeslaBlock);
+							}
+							else {
+								assert(siblingTeslaBlock == NULL);
+								// No sibling tesla block with the current name exists yet, create one and add it to the list
+								siblingTeslaBlock = new TeslaBlock(0, 0);
+								insertResult = teslaBlocks.insert(std::make_pair(siblingName, siblingTeslaBlock));
+								if (!insertResult.second) {
+									// Tesla block with that name already existed... fail!
+									delete siblingTeslaBlock;
+									siblingTeslaBlock = NULL;
+									errorStr = std::string("Duplicate tesla block name: '") + siblingName + std::string("'");
+									break;
+								}
+							}
+						}
+
+						if (!errorStr.empty()) {
+							debug_output("ERROR: Poorly formed tesla block syntax, " << errorStr);
+							break;
+						}
+
+						if (currentTeslaBlock == NULL) {
+							// No tesla block has been created for the current name yet, create one.
+							currentTeslaBlock = new TeslaBlock(pieceWLoc, pieceHLoc);
+							currentTeslaBlock->SetConnectedTeslaBlockList(siblingTeslaBlocks);
+							insertResult = teslaBlocks.insert(std::make_pair(teslaBlockName, currentTeslaBlock));
+							if (!insertResult.second) {
+								delete currentTeslaBlock;
+								currentTeslaBlock = NULL;
+								debug_output("ERROR: Poorly formed tesla block syntax, " << "Duplicate tesla block name: '" << teslaBlockName << "'");
+								break;
+							}
+						}
+						else {
+							// The tesla block has previously been created and inserted into the map...
+							// Use that tesla block, make sure it has the proper location and sibling
+							currentTeslaBlock->SetWidthAndHeightIndex(pieceWLoc, pieceHLoc);
+							assert(currentTeslaBlock->GetConnectedTeslaBlockList().empty());
+							currentTeslaBlock->SetConnectedTeslaBlockList(siblingTeslaBlocks);
+						}
+
+						newPiece = currentTeslaBlock;
 					}
 					break;
 
@@ -277,6 +345,10 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						
 						char portalName;
 						*inFile >> portalName;
+						if (portalName < 'A' && portalName > 'z') {
+							debug_output("ERROR: Portal block name must be a character A-Z or a-z");
+							break;
+						}
 
 						*inFile >> tempChar;
 						if (tempChar != ',') {
@@ -286,6 +358,10 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 						char siblingName;
 						*inFile >> siblingName;
+						if (siblingName < 'A' && siblingName > 'z') {
+							debug_output("ERROR: Portal block name must be a character A-Z or a-z");
+							break;
+						}
 
 						*inFile >> tempChar;
 						if (tempChar != ')') {
@@ -301,6 +377,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 						if (findIter != portalBlocks.end()) {
 							currentPortalBlock = findIter->second;
+							assert(currentPortalBlock != NULL);
 						}
 						findIter = portalBlocks.find(siblingName);
 						if (findIter != portalBlocks.end()) {

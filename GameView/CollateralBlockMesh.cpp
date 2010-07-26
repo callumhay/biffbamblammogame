@@ -17,11 +17,6 @@ void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 	static double SHAKE_TIME_COUNT = 0.0;
 	SHAKE_TIME_COUNT += dT;
 
-	glPushMatrix();
-
-	// Translate to world space of the current game level...
-	glTranslatef(this->currWorldTranslation[0], this->currWorldTranslation[1], this->currWorldTranslation[2]);
-
 	float currRotation;
 	Vector3D shake;
 	Colour colour;
@@ -66,8 +61,6 @@ void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 		this->collateralBlockGeometry->Draw(camera, keyLight, fillLight, ballLight);
 		glPopMatrix();
 	}
-
-	glPopMatrix();
 }
 
 void CollateralBlockMesh::LoadMesh() {
