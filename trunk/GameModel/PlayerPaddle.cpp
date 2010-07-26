@@ -587,10 +587,20 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 
 	this->moveDownAnimation.SetLerp(times, moveDownValues);
 
+	times.clear();
+	times.reserve(5);
+	times.push_back(0.0f);
+	times.push_back(0.05f);
+	times.push_back(0.3f);
+	times.push_back(0.6f);
+	times.push_back(HIT_EFFECT_TIME);
+
 	std::vector<float> rotationValues;
-	rotationValues.reserve(3);
+	rotationValues.reserve(5);
 	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue());
 	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + rotationAmount);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() - 0.25f * rotationAmount);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + 0.75f * rotationAmount);
 	rotationValues.push_back(0.0f);
 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);

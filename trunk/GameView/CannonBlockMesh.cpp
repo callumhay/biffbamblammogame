@@ -5,7 +5,7 @@
 #include "../GameModel/CannonBlock.h"
 
 CannonBlockMesh::CannonBlockMesh() : cannonBlockBaseGeometry(NULL),
-cannonBlockBarrelGeometry(NULL), currWorldTranslation(0, 0, 0) {
+cannonBlockBarrelGeometry(NULL) {
 	this->LoadMesh();
 }
 
@@ -30,9 +30,6 @@ void CannonBlockMesh::Draw(const Camera& camera, const BasicPointLight& keyLight
 		if (loadedBall != NULL && loadedBall->GetIsBallCameraOn()) {
 			continue;
 		}
-	
-
-
 
 		cannonRotationInDegs = currCannonBlock->GetCurrentCannonAngleInDegs();
 		const Point2D& blockCenter = currCannonBlock->GetCenter();
@@ -43,7 +40,7 @@ void CannonBlockMesh::Draw(const Camera& camera, const BasicPointLight& keyLight
 
 		glPushMatrix();
 		// Translate to the piece location in the game model...
-		glTranslatef(this->currWorldTranslation[0] + blockCenter[0], this->currWorldTranslation[1] + blockCenter[1], this->currWorldTranslation[2]);
+		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
 		// Rotate the barrel to its current direction
 		glRotatef(cannonRotationInDegs, 0, 0, 1);
 

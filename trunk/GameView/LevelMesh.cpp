@@ -7,6 +7,7 @@
 #include "PortalBlockMesh.h"
 #include "CannonBlockMesh.h"
 #include "CollateralBlockMesh.h"
+#include "TeslaBlockMesh.h"
 
 #include "../ESPEngine/ESPEmitter.h"
 
@@ -21,10 +22,12 @@
 #include "../GameModel/GameBall.h"
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/CollateralBlock.h"
+#include "../GameModel/TeslaBlock.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
-prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL) {
+prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL),
+teslaBlock(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
 	this->basicBlock						= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
@@ -36,6 +39,7 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannon
 	this->portalBlock						= new PortalBlockMesh();
 	this->cannonBlock						= new CannonBlockMesh();
 	this->collateralBlock				= new CollateralBlockMesh();
+	this->teslaBlock						= new TeslaBlockMesh();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
@@ -48,6 +52,7 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannon
 	const std::map<std::string, MaterialGroup*>& prismTriBlockMatGrps	= this->prismBlockTriangleUR->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& portalBlockMatGrps   = this->portalBlock->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& cannonBlockMatGrps		= this->cannonBlock->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& teslaBlockMatGrps		= this->teslaBlock->GetMaterialGroups();
 	
 	for (std::map<std::string, MaterialGroup*>::const_iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
@@ -73,6 +78,9 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannon
 	for (std::map<std::string, MaterialGroup*>::const_iterator iter = cannonBlockMatGrps.begin(); iter != cannonBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}	
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = teslaBlockMatGrps.begin(); iter != teslaBlockMatGrps.end(); ++iter) {
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+	}	
 
 	this->LoadNewLevel(gameWorldAssets, level);
 }
@@ -95,6 +103,8 @@ LevelMesh::~LevelMesh() {
 	this->cannonBlock = NULL;
 	delete this->collateralBlock;
 	this->collateralBlock = NULL;
+	delete this->teslaBlock;
+	this->teslaBlock = NULL;
 }
 
 /** 
@@ -145,6 +155,7 @@ void LevelMesh::Flush() {
 
 	this->cannonBlock->Flush();
 	this->collateralBlock->Flush();
+	this->teslaBlock->Flush();
 
 	// Clear the current level pointer
 	this->currLevel = NULL;
@@ -182,8 +193,6 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 	this->ballSafetyNet->Regenerate(levelDimensions);
 
 	Vector3D worldTransform(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
-	this->cannonBlock->SetWorldTranslation(worldTransform);
-	this->collateralBlock->SetWorldTranslation(worldTransform);
 
 	// Go through each piece and create an appropriate display list for it
 	for (size_t h = 0; h < levelPieces.size(); h++) {
@@ -211,6 +220,13 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 				const CollateralBlock* collateralLvlPiece = dynamic_cast<const CollateralBlock*>(currPiece);
 				assert(collateralLvlPiece != NULL);
 				this->collateralBlock->AddCollateralBlock(collateralLvlPiece);
+			}
+			// 3) Tesla block - similar to the cannon block, we store all of them to draw certain
+			// parts of the block oriented differently / animating
+			else if (currPiece->GetType() == LevelPiece::Tesla) {
+				const TeslaBlock* telsaLvlPiece = dynamic_cast<const TeslaBlock*>(currPiece);
+				assert(telsaLvlPiece != NULL);
+				this->teslaBlock->AddTeslaBlock(telsaLvlPiece);
 			}
 		}
 	}
@@ -291,6 +307,14 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 			}
 			break;
 
+		case LevelPiece::Tesla:
+			{
+				const TeslaBlock* teslaLvlPiece = dynamic_cast<const TeslaBlock*>(&piece);
+				assert(teslaLvlPiece != NULL);
+				this->teslaBlock->RemoveTeslaBlock(teslaLvlPiece);
+			}
+			break;
+
 		default:
 			break;
 	}
@@ -299,7 +323,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 /**
  * Draw the current level mesh pieces (i.e., blocks that make up the level).
  */
-void LevelMesh::DrawPieces(double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
+void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
 													 const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture) {
 
 	// Set any appropriate parameters on the various meshes materials, etc.
@@ -319,9 +343,13 @@ void LevelMesh::DrawPieces(double dT, const Camera& camera, bool lightsAreOut, c
 		currEffect->Draw(camera, iter->second);
 	}
 
+	glPushMatrix();
+	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
 	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight, lightsAreOut);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-
+	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+	glPopMatrix();
+		
 	// Draw the piece effects
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
 		pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
@@ -472,6 +500,9 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 			break;
 		case LevelPiece::Cannon:
 			returnValue = this->cannonBlock->GetMaterialGroups();
+			break;
+		case LevelPiece::Tesla:
+			returnValue = this->teslaBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Collateral:
 			break;

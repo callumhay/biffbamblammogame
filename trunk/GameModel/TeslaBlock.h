@@ -87,12 +87,15 @@ public:
 
 	// Tesla Block Specific Functionality
 	void SetConnectedTeslaBlockList(const std::list<TeslaBlock*>& teslaBlocks);
+	const std::list<TeslaBlock*>& GetConnectedTeslaBlockList() const;
+
 	bool GetIsElectricityActive() const;
 	std::list<TeslaBlock*> GetActiveConnectedTeslaBlocks() const;
 
 	const Point2D& GetLightningOrigin() const;
 
 private:
+
 	bool electricityIsActive;											// Whether the lightning/electric current is active on this tesla block
 	std::list<TeslaBlock*> connectedTeslaBlocks;	// All tesla blocks that this one can connect to when active (and when they're active)
 
@@ -102,6 +105,9 @@ private:
 // to when it's active and they're active.
 inline void TeslaBlock::SetConnectedTeslaBlockList(const std::list<TeslaBlock*>& teslaBlocks) {
 	this->connectedTeslaBlocks = teslaBlocks;
+}
+inline const std::list<TeslaBlock*>& TeslaBlock::GetConnectedTeslaBlockList() const {
+	return this->connectedTeslaBlocks;
 }
 
 // Query whether this tesla block is active - i.e., will connect to any connected tesla blocks

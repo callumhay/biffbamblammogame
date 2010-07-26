@@ -1,0 +1,8 @@
+newmtl teslaCoil_mat
+Ka 0.000000 0.000000 0.000000
+Kd 0.8 0.8 0.8
+Ks 0.600000 0.600000 0.600000
+Ns 80
+outlinesize 1.0
+type phong
+geomtype fg

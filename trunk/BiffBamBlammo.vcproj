@@ -408,6 +408,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPBeam.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPBeamSegment.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPEmitter.h"
 					>
 				</File>
@@ -453,6 +461,10 @@
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPPointEmitter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPPointToPointBeam.h"
 					>
 				</File>
 				<File
@@ -509,6 +521,10 @@
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPPointEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPPointToPointBeam.cpp"
 					>
 				</File>
 				<File
@@ -671,6 +687,10 @@
 					RelativePath=".\GameView\StickyPaddleGoo.h"
 					>
 				</File>
+				<File
+					RelativePath=".\GameView\TeslaBlockMesh.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
@@ -809,6 +829,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\StickyPaddleGoo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\TeslaBlockMesh.cpp"
 					>
 				</File>
 			</Filter>

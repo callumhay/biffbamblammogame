@@ -13,13 +13,10 @@ public:
 	void Flush();
 	void AddCollateralBlock(const CollateralBlock* collateralBlock);
 	void RemoveCollateralBlock(const CollateralBlock* collateralBlock);
-
-	void SetWorldTranslation(const Vector3D& t);
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
 
 private:
 	Mesh* collateralBlockGeometry;
-	Vector3D currWorldTranslation;
 	std::set<const CollateralBlock*> collateralBlocks;	// A list of all the collateral blocks that are currently present in the game
 
 	void LoadMesh();
@@ -35,10 +32,6 @@ inline void CollateralBlockMesh::AddCollateralBlock(const CollateralBlock* colla
 
 inline void CollateralBlockMesh::RemoveCollateralBlock(const CollateralBlock* collateralBlock) {
 	this->collateralBlocks.erase(collateralBlock);
-}
-
-inline void CollateralBlockMesh::SetWorldTranslation(const Vector3D& t) {
-	this->currWorldTranslation = t;
 }
 
 #endif // __COLLATERALBLOCKMESH_H__
