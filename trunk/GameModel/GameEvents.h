@@ -315,6 +315,23 @@ public:
 	 */
 	virtual void BeamRemovedEvent(const Beam& beam) = 0;
 
+
+	/**
+	 * Event triggered when a tesla block is activated and one of its neighbour/connecting tesla blocks is
+	 * already active - thus spawning a lightning arc between the two.
+	 * Arguements: newlyOnTeslaBlock      - The tesla block that just got turned on and now has lightning arc shooting out of it
+	 *             previouslyOnTeslaBlock - The previously active connecting tesla block that now has a lightning arc between itself and 'newlyOnTeslaBlock'
+	 */
+	virtual void TeslaLightningBarrierSpawnedEvent(const TeslaBlock& newlyOnTeslaBlock, const TeslaBlock& previouslyOnTeslaBlock) = 0;
+
+	/**
+	 * Event triggered when a tesla block is deactivated and an arc of lightning drops between it and one of its still
+	 * active neighbours.
+	 * Arguements: newlyOffTeslaBlock - The tesla block that was previously turned on but is now off.
+	 *             stillOnTeslaBlock  - The neighbour tesla block that previously had an arc between itself and 'newlyOffTeslaBlock'
+	 */
+	virtual void TeslaLightningBarrierRemovedEvent(const TeslaBlock& newlyOffTeslaBlock, const TeslaBlock& stillOnTeslaBlock) = 0;
+	
 	/**
 	 * Event triggered whenever the number of player lives changes. Only occurs once per life or
 	 * set of lives are added or removed.

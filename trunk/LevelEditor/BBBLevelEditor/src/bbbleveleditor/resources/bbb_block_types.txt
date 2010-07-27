@@ -122,6 +122,10 @@ Collateral
 collateral.png
 L
 
+Tesla
+tesla.png
+A
+
 Prism
 prism.png
 P

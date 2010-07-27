@@ -71,6 +71,8 @@ public:
 	void BeamSpawnedEvent(const Beam& beam);
 	void BeamChangedEvent(const Beam& beam);
 	void BeamRemovedEvent(const Beam& beam);
+	void TeslaLightningBarrierSpawnedEvent(const TeslaBlock& newlyOnTeslaBlock, const TeslaBlock& previouslyOnTeslaBlock);
+	void TeslaLightningBarrierRemovedEvent(const TeslaBlock& newlyOffTeslaBlock, const TeslaBlock& stillOnTeslaBlock);
 	void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
 
 private:

@@ -74,6 +74,9 @@ public:
 	void ActionBeamChanged(const Beam& beam);
 	void ActionBeamRemoved(const Beam& beam);
 
+	void ActionTeslaLightningBarrierSpawned(const TeslaBlock& newlyOnTeslaBlock, const TeslaBlock& previouslyOnTeslaBlock);
+	void ActionTeslaLightningBarrierRemoved(const TeslaBlock& newlyOffTeslaBlock, const TeslaBlock& stillOnTeslaBlock);
+
 	void ActionGameCompleted();
 	void ActionWorldStarted(const GameWorld& world);
 	void ActionWorldCompleted(const GameWorld& world);

@@ -19,8 +19,8 @@ public class NewLevelEditDialog extends JDialog implements PropertyChangeListene
 	
 	private boolean exitWithOK;
 	
-	public static int DEFAULT_LEVEL_WIDTH 	= 20;
-	public static int DEFAULT_LEVEL_HEIGHT 	= 40;
+	public static int DEFAULT_LEVEL_WIDTH 	= 15;
+	public static int DEFAULT_LEVEL_HEIGHT 	= 30;
 	
 	public NewLevelEditDialog(JFrame window) {
 		super(window, "New Level", true);

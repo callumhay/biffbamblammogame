@@ -573,6 +573,16 @@ void GameEventsListener::BeamRemovedEvent(const Beam& beam) {
 	debug_output("EVENT: Beam removed");
 }
 
+void GameEventsListener::TeslaLightningBarrierSpawnedEvent(const TeslaBlock& newlyOnTeslaBlock, const TeslaBlock& previouslyOnTeslaBlock) {
+	// TODO
+	debug_output("EVENT: Tesla lightning barrier spawned");
+}
+
+void GameEventsListener::TeslaLightningBarrierRemovedEvent(const TeslaBlock& newlyOffTeslaBlock, const TeslaBlock& stillOnTeslaBlock) {
+	// TODO
+	debug_output("EVENT: Tesla lightning barrier removed");
+}
+
 void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAfter) {
 	
 	// Tell the life HUD about the change in lives

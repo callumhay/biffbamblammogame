@@ -484,6 +484,14 @@
 				Name="Source Files"
 				>
 				<File
+					RelativePath=".\ESPEngine\ESPBeam.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPBeamSegment.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPEmitter.cpp"
 					>
 				</File>
