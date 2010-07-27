@@ -75,14 +75,8 @@ public:
 													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
-	
-	// Doesn't matter if a ball collides with solid block, it does nothing to the block.
-	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-		// Tell the ball what the last piece it collided with was...
-		ball.SetLastPieceCollidedWith(this);
-		return this;
-	}
 
+	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
 	// Tesla Block Specific Functionality
@@ -95,10 +89,10 @@ public:
 	const Point2D& GetLightningOrigin() const;
 
 private:
-
 	bool electricityIsActive;											// Whether the lightning/electric current is active on this tesla block
 	std::list<TeslaBlock*> connectedTeslaBlocks;	// All tesla blocks that this one can connect to when active (and when they're active)
 
+	void ToggleElectricity(GameLevel& level);
 };
 
 // Sets the list of Tesla blocks (not including this one) that this tesla block will connect

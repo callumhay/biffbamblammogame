@@ -323,6 +323,22 @@ void GameEventManager::ActionBeamRemoved(const Beam& beam) {
 	}	
 }
 
+// Action for when a tesla lightning barrier is newly spawned between two tesla blocks
+void GameEventManager::ActionTeslaLightningBarrierSpawned(const TeslaBlock& newlyOnTeslaBlock, const TeslaBlock& previouslyOnTeslaBlock) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->TeslaLightningBarrierSpawnedEvent(newlyOnTeslaBlock, previouslyOnTeslaBlock);
+	}	
+}
+
+// Action for when an existing tesla lightning barrier is removed from between two tesla blocks
+void GameEventManager::ActionTeslaLightningBarrierRemoved(const TeslaBlock& newlyOffTeslaBlock, const TeslaBlock& stillOnTeslaBlock) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->TeslaLightningBarrierRemovedEvent(newlyOffTeslaBlock, stillOnTeslaBlock);
+	}	
+}
+
 // Action for when the game is completed
 void GameEventManager::ActionGameCompleted() {
 	this->listenerIter = this->eventListeners.begin();

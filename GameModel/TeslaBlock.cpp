@@ -95,6 +95,17 @@ bool TeslaBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const 
 																this->GetCenter() +  Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT)), rayT);
 }
 
+LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+	// Tell the ball what the last piece it collided with was...
+	ball.SetLastPieceCollidedWith(this);
+
+	// Toggle the electricity to the tesla block
+	GameLevel* currLevel = gameModel->GetCurrentLevel();
+	this->ToggleElectricity(*currLevel);
+	
+	return this;
+}
+
 /**
  * Called when the tesla block is hit by a projectile. Tends to cause the projectile to
  * extinguish - all projectiles also tend to activate/deactivate the tesla block.
@@ -102,14 +113,15 @@ bool TeslaBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const 
 LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 	// TODO: Tell the game model to recalculate it's tesla lightning arcs...
 
+	GameLevel* currLevel = gameModel->GetCurrentLevel();
 	switch (projectile->GetType()) {
 		
 		case Projectile::PaddleLaserBulletProjectile:
-			this->electricityIsActive = !this->electricityIsActive;
+			this->ToggleElectricity(*currLevel);
 			break;
 		
 		case Projectile::CollateralBlockProjectile:
-			this->electricityIsActive = !this->electricityIsActive;
+			this->ToggleElectricity(*currLevel);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile: {
@@ -117,7 +129,7 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 				// is allowed to destroy blocks around it!
 				LevelPiece* resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 				assert(resultingPiece == this);
-				this->electricityIsActive = !this->electricityIsActive;
+				this->ToggleElectricity(*currLevel);
 			}
 			break;
 
@@ -129,3 +141,36 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 	return this;
 }
 
+void TeslaBlock::ToggleElectricity(GameLevel& level) {
+
+	// TODO: event...
+
+	// Get the list of active connected tesla blocks
+	std::list<TeslaBlock*> activeNeighbourTeslaBlocks = this->GetActiveConnectedTeslaBlocks();
+
+	// Toggle the electricity...
+	this->electricityIsActive = !this->electricityIsActive;
+
+	// Based on whether the electricity is now active or not, signal the proper events and add/remove
+	// lightning arcs from the current game level
+	if (this->electricityIsActive) {
+		for (std::list<TeslaBlock*>::const_iterator iter = activeNeighbourTeslaBlocks.begin(); iter != activeNeighbourTeslaBlocks.end(); ++iter) {
+			const TeslaBlock* activeNeighbour = *iter;
+			assert(activeNeighbour != NULL);
+			level.AddTeslaLightningBarrier(this, activeNeighbour);
+	
+			// EVENT: Lightning arc/barrier was just added to the level
+			GameEventManager::Instance()->ActionTeslaLightningBarrierSpawned(*this, *activeNeighbour);
+		}
+	}
+	else {
+		for (std::list<TeslaBlock*>::const_iterator iter = activeNeighbourTeslaBlocks.begin(); iter != activeNeighbourTeslaBlocks.end(); ++iter) {
+			const TeslaBlock* activeNeighbour = *iter;
+			assert(activeNeighbour != NULL);
+			level.RemoveTeslaLightningBarrier(this, activeNeighbour);
+
+			// EVENT: Lightning arc/barrier was just removed from the level
+			GameEventManager::Instance()->ActionTeslaLightningBarrierRemoved(*this, *activeNeighbour);
+		}
+	}
+}

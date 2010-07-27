@@ -7,25 +7,44 @@
 
 class ESPBeam {
 public:
-	ESPBeam() : startSegment(new ESPBeamSegment()), lifeTimeInSecs(0.0), currLifeTickCount(0.0) {}
-	
-	~ESPBeam() {
-		delete startSegment;
-		startSegment = NULL;
-	}
+	static const int INFINITE_BEAM_LIFETIME				 = -1;
 
-	ESPBeamSegment* GetStartSegment() const {
-		return this->startSegment;
-	}
-	void SetLifeTime(double lifeInSeconds) {
-		this->lifeTimeInSecs = lifeInSeconds;
-	}
+	ESPBeam();
+	~ESPBeam();
+
+	ESPBeamSegment* GetStartSegment() const;
+	void SetLifeTime(double lifeInSeconds);
+
+	void Tick(double dT);
+	void Draw() const;
+	bool IsDead() const;
 
 private:
 	double currLifeTickCount;
 	double lifeTimeInSecs;
+
+
 	ESPBeamSegment* startSegment;	// The root/starting beam segment
+
+	// Disallow copy and assign
+	ESPBeam(const ESPBeam& b);
+	ESPBeam& operator=(const ESPBeam& b);
 };
 
+inline ESPBeamSegment* ESPBeam::GetStartSegment() const {
+	return this->startSegment;
+}
+
+inline void ESPBeam::SetLifeTime(double lifeInSeconds) {
+	this->lifeTimeInSecs = lifeInSeconds;
+}
+
+inline void ESPBeam::Tick(double dT) {
+	this->currLifeTickCount += dT;
+}
+
+inline bool ESPBeam::IsDead() const {
+	return (this->lifeTimeInSecs != ESPBeam::INFINITE_BEAM_LIFETIME) && (this->lifeTimeInSecs <= this->currLifeTickCount);
+}
 
 #endif // __ESPBEAM_H__

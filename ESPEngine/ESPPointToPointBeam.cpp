@@ -18,7 +18,7 @@ mainBeamAmplitude(ESPInterval(0.0f)) {
 	// By default there is a single beam shot that lasts forever
 	this->SetNumBeamShots(1);
 	this->SetTimeBetweenBeamShots(ESPInterval(0));
-	this->SetBeamLifetime(ESPInterval(INFINITE_BEAM_LIFETIME));
+	this->SetBeamLifetime(ESPInterval(ESPBeam::INFINITE_BEAM_LIFETIME));
 }
 
 ESPPointToPointBeam::~ESPPointToPointBeam() {
@@ -40,13 +40,45 @@ void ESPPointToPointBeam::Tick(double dT) {
 	}
 
 	// Go through each beam to check if it's life has expired yet
-
+	for (std::list<ESPBeam*>::iterator iter = this->aliveBeams.begin(); iter != this->aliveBeams.end();) {
+		ESPBeam* currBeam = *iter;
+		currBeam->Tick(dT);
+		if (currBeam->IsDead()) {
+			delete currBeam;
+			currBeam = NULL;
+			iter = this->aliveBeams.erase(iter);
+		}
+		else {
+			++iter;
+		}
+	}
 
 	timeSinceLastBeamSpawn += dT;
 }
 
 void ESPPointToPointBeam::Draw(const Camera& camera) {
+	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glPolygonMode(GL_FRONT, GL_FILL);
 
+	glPushMatrix();
+	glTranslatef(this->startPt[0], this->startPt[1], this->startPt[2]);
+	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->colour.A());
+
+	// Draw all of the alive beams
+	for (std::list<ESPBeam*>::iterator iter = this->aliveBeams.begin(); iter != this->aliveBeams.end(); ++iter) {
+		ESPBeam* currBeam = *iter;
+		currBeam->Draw();
+	}
+
+	glPopMatrix();
+
+	glPopAttrib();
 }
 
 void ESPPointToPointBeam::SpawnBeam() {
@@ -71,6 +103,8 @@ void ESPPointToPointBeam::SpawnBeam() {
 	float currSegLength, currSegDistFromStart;
 	float minSegmentLength, maxSegmentLength, minMaxSegLengthDiff;
 
+	const Point3D ORIGIN_PT(0,0,0);
+
 	for (int i = 0; i < numPts; i++) {
 		maxSegmentLength = lengthLeftOver / (numPts - i);
 		minSegmentLength = MIN_FRACTION * maxSegmentLength;
@@ -80,7 +114,9 @@ void ESPPointToPointBeam::SpawnBeam() {
 		currSegDistFromStart = lengthLeftOver + currSegLength;
 		assert(maxPtDist >= currSegDistFromStart);
 
-		beamMidPts.push_back(startPt + currSegDistFromStart * beamVec);
+		// Place the beam starting point at the origin instead - so that everything is in a more reasonable local
+		// space position for transforming the beam to face the viewer
+		beamMidPts.push_back(ORIGIN_PT + currSegDistFromStart * beamVec);
 		lengthLeftOver -= currSegLength;
 	}
 
@@ -112,7 +148,7 @@ void ESPPointToPointBeam::SpawnBeam() {
 		currESPBeamSegment = currESPBeamSegment->AddESPBeamSegment();
 		assert(currESPBeamSegment != NULL);
 	}
-	currESPBeamSegment->SetEndPoint(this->endPt);
+	currESPBeamSegment->SetEndPoint(this->endPt - Vector3D(this->startPt[0], this->startPt[1], this->startPt[2]));
 
 	// Set the lifetime on the beam...
 	newBeam->SetLifeTime(this->lifeTimeInSecs.MeanValueInInterval());

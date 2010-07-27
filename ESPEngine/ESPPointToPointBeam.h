@@ -18,9 +18,9 @@
 #include "../BlammoEngine/Colour.h"
 
 #include "ESPUtil.h"
+#include "ESPBeam.h"
 
 class Texture2D;
-class ESPBeam;
 
 class ESPPointToPointBeam {
 public:
@@ -36,7 +36,7 @@ public:
 	void SetNumMainESPBeamSegments(size_t numSegments);
 	void SetMainBeamAmplitude(const ESPInterval& a);
 
-	static const int INFINITE_BEAM_LIFETIME				 = -1;
+	
 	static const int INFINITE_NUMBER_OF_BEAM_SHOTS = -1;
 	void SetNumBeamShots(int numBeamShots);
 	void SetTimeBetweenBeamShots(const ESPInterval& timeBetweenShotsInSeconds);
@@ -115,7 +115,7 @@ inline void ESPPointToPointBeam::SetTimeBetweenBeamShots(const ESPInterval& time
 // Sets the time in seconds of the lifetime of each beam
 inline void ESPPointToPointBeam::SetBeamLifetime(const ESPInterval& beamLifetimeInSeconds) {
 	assert((beamLifetimeInSeconds.minValue > 0 && beamLifetimeInSeconds.maxValue > 0) ||
-				 (beamLifetimeInSeconds.minValue == INFINITE_BEAM_LIFETIME && beamLifetimeInSeconds.maxValue == INFINITE_BEAM_LIFETIME));
+		(beamLifetimeInSeconds.minValue == ESPBeam::INFINITE_BEAM_LIFETIME && beamLifetimeInSeconds.maxValue == ESPBeam::INFINITE_BEAM_LIFETIME));
 	this->timeBetweenShotsInSecs = beamLifetimeInSeconds;
 }
 
