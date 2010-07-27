@@ -77,6 +77,8 @@ private:
 		return &(iter2->second);
 	}
 
+	void DrawCannonBarrelOverlay(int width, int height, float alpha);
+
 public:
 	GameFBOAssets(int displayWidth, int displayHeight);
 	~GameFBOAssets();
