@@ -269,18 +269,107 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 
 			// If the ball is inside a cannon and is in ball camera mode then we do the James-Bond-esque
 			// barrel overlay on the screen...
-			glPushAttrib(GL_ENABLE_BIT);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			this->barrelOverlayTex->BindTexture();
-			GeometryMaker::GetInstance()->DrawFullScreenQuad(width, height, 0.9f, ColourRGBA(1, 1, 1, overlayAlpha));
-			this->barrelOverlayTex->UnbindTexture();
-
-			glPopAttrib();
+			this->DrawCannonBarrelOverlay(width, height, overlayAlpha);
 		}
 	}
 
 	this->finalFSEffectFBO = inputFBO;
 	this->tempFBO = outputFBO;
+}
+
+void GameFBOAssets::DrawCannonBarrelOverlay(int width, int height, float alpha) {
+	static const float depth = 0.9f;
+	glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0, width, 0, height);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);		
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_ALWAYS);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glColor4f(0, 0, 0, alpha);
+	glBegin(GL_QUADS);
+
+	if (width > height) {
+		float widthBufferSize = static_cast<float>(width - height) / 2.0f;
+		// Draw the two width buffers as black...
+		glVertex3f(0, 0, depth);
+		glVertex3f(widthBufferSize, 0, depth);
+		glVertex3f(widthBufferSize, height, depth);
+		glVertex3f(0, height, depth);
+		
+		float afterOverlayX = widthBufferSize + height;
+		glVertex3f(afterOverlayX, 0, depth);
+		glVertex3f(width, 0, depth);
+		glVertex3f(width, height, depth);
+		glVertex3f(afterOverlayX, height, depth);
+
+		// Now draw the overlay right in the center
+		glColor4f(1, 1, 1, alpha);
+		glEnd();
+
+		this->barrelOverlayTex->BindTexture();
+
+		glBegin(GL_QUADS);
+		glTexCoord2i(0, 0);
+		glVertex3f(widthBufferSize, 0, depth);
+		glTexCoord2i(1, 0);
+		glVertex3f(afterOverlayX, 0, depth);
+		glTexCoord2i(1, 1);
+		glVertex3f(afterOverlayX, height, depth);
+		glTexCoord2i(0, 1);
+		glVertex3f(widthBufferSize, height, depth);
+		glEnd();
+
+		this->barrelOverlayTex->UnbindTexture();
+	}
+	else {
+		float heightBufferSize = static_cast<float>(height - width) / 2.0f;
+		// Draw the two height buffers as black...
+		glVertex3f(0, 0, depth);
+		glVertex3f(width, 0, depth);
+		glVertex3f(width, heightBufferSize, depth);
+		glVertex3f(0, heightBufferSize, depth);
+		
+		float afterOverlayY = heightBufferSize + width;
+		glVertex3f(0, afterOverlayY, depth);
+		glVertex3f(width, afterOverlayY, depth);
+		glVertex3f(width, height, depth);
+		glVertex3f(0, height, depth);
+
+		// Now draw the overlay right in the center
+		glColor4f(1, 1, 1, alpha);
+		glEnd();
+
+		this->barrelOverlayTex->BindTexture();
+
+		glBegin(GL_QUADS);
+		glVertex3f(0, heightBufferSize, depth);
+		glVertex3f(width, heightBufferSize, depth);
+		glVertex3f(width, afterOverlayY, depth);
+		glVertex3f(0, afterOverlayY, depth);
+		glEnd();
+
+		this->barrelOverlayTex->UnbindTexture();	
+	}
+	
+
+	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glPopAttrib();
+
+	debug_opengl_state();
 }

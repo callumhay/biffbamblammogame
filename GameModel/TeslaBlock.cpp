@@ -142,9 +142,6 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 }
 
 void TeslaBlock::ToggleElectricity(GameLevel& level) {
-
-	// TODO: event...
-
 	// Get the list of active connected tesla blocks
 	std::list<TeslaBlock*> activeNeighbourTeslaBlocks = this->GetActiveConnectedTeslaBlocks();
 
