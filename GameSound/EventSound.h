@@ -187,8 +187,7 @@ inline bool EventSound::IsPlaying() const {
 		if (Mix_Playing(iter->first) == 1) {
 			return true;
 		}
-	}
-	
+    }
 	return false;
 }
 
