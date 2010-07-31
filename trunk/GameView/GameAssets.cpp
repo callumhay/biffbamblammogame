@@ -311,7 +311,14 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
 		glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
 		glScalef(ballScaleFactor, ballScaleFactor, ballScaleFactor);
-		glColor4f(ballColour.R(), ballColour.G(), ballColour.B(), ballColour.A());
+		// Always make the colour of the invisiball to be plain white - we don't want to affect
+		// the cloaking effect
+		if ((currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall) {
+			glColor4f(1.0f, 1.0f, 1.0f, ballColour.A());
+		}
+		else {
+			glColor4f(ballColour.R(), ballColour.G(), ballColour.B(), ballColour.A());
+		}
 
 		BasicPointLight ballKeyLight, ballFillLight;
 		this->lightAssets->GetBallAffectingLights(ballKeyLight, ballFillLight);

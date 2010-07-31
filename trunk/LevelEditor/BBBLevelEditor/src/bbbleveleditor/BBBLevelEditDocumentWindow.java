@@ -21,6 +21,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
@@ -38,13 +39,14 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private File savedFileOnDisk = null;
 	private boolean hasBeenModified = false;
 	
-	private JPanel levelDisplayPanel; // panel where the level is displayed
-	
+	private JPanel levelDisplayPanel;           // panel where the level is displayed
+
 	// access to the level piece names in this document [row (starting at the top)][col]
 	private ArrayList<ArrayList<LevelPieceImageLabel>> pieces;	
 	
 	// A listing of all portal IDs present 
 	private Set<Character> portalIDs = new TreeSet<Character>();
+	private Set<Character> teslaIDs  = new TreeSet<Character>();
 	
 	// Settings for all the drop items in the level
 	private HashMap<String, Integer> itemDropSettings;
@@ -309,8 +311,11 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 						LevelPieceImageLabel tempLabel = new LevelPieceImageLabel(currLevelPieceSymbol);
 						
 						if (tempLabel.getIsPortal()) {
-							this.portalIDs.add(tempLabel.GetPortalID());
-							this.portalIDs.add(tempLabel.getSiblingID());
+							this.portalIDs.add(tempLabel.getBlockID());
+							this.portalIDs.add(tempLabel.getPortalSiblingID());
+						}
+						else if (tempLabel.getIsTesla()) {
+							
 						}
 						
 						currRow.add(tempLabel);
@@ -438,15 +443,31 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					
 					// If we're dealing with a portal block make sure its name and sibling are valid
 					if (currPieceLbl.getIsPortal()) {
-						if (currPieceLbl.GetPortalID() == LevelPieceImageLabel.INVALID_PORTAL_ID ||
-							currPieceLbl.getSiblingID() == LevelPieceImageLabel.INVALID_PORTAL_ID) {
+						if (!currPieceLbl.getIsValid() || !currPieceLbl.getHasIDsInGivenSet(this.portalIDs)) {
 							JOptionPane.showMessageDialog(this, "Failed to write level file due to invalid portal ids.", 
 									"Level Format Error", JOptionPane.ERROR_MESSAGE);
 							throw new Exception();
 						}
 						
-						levelFileWriter.write(currLvlPiece.getSymbol() + "(" + currPieceLbl.GetPortalID() + 
-								"," + currPieceLbl.getSiblingID() + ")");
+						levelFileWriter.write(currLvlPiece.getSymbol() + "(" + currPieceLbl.getBlockID() + 
+								"," + currPieceLbl.getPortalSiblingID() + ")");
+					}
+					else if (currPieceLbl.getIsTesla()) {
+						if (!currPieceLbl.getIsValid() || !currPieceLbl.getHasIDsInGivenSet(this.teslaIDs)) {
+							JOptionPane.showMessageDialog(this, "Failed to write level file due to invalid tesla block ids.", 
+									"Level Format Error", JOptionPane.ERROR_MESSAGE);
+							throw new Exception();
+						}
+						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getBlockID() + ",";
+						Iterator<Character> iter = currPieceLbl.getSiblingIDs().iterator();
+						while (iter.hasNext()) {
+							outputStr = outputStr + iter.next();
+							if (iter.hasNext()) {
+								outputStr = outputStr + ",";
+							}
+						}
+						outputStr = outputStr + ")";
+						levelFileWriter.write(outputStr);
 					}
 					else {
 						levelFileWriter.write(currLvlPiece.getSymbol());
@@ -553,7 +574,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		
 		// If we're getting rid of a portal block then remove its ID from the list...
 		if (editPiece.getIsPortal()) {
-			this.portalIDs.remove(editPiece.GetPortalID());
+			this.portalIDs.remove(editPiece.getBlockID());
 		}
 		
 		LevelPiece oldPiece = editPiece.getLevelPiece();
@@ -562,52 +583,138 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		
 		// In the case of a portal block we ask the user for a valid, unique character ID
 		if (editPiece.getIsPortal()) {
-			String portalID = "";
-			String siblingID = "";
-			boolean enteredData = true;
-			while(true) {
-				portalID = (String)JOptionPane.showInputDialog(
-                    this.levelEditWindow,
-                    "Enter a single, unique character name\r\nfor the portal:",
-                    "Portal Name Entry",
-                    JOptionPane.PLAIN_MESSAGE,
-                    null, null, null);
-				if (portalID == null) {
-					enteredData = false;
-					break;
-				}
-				else if (portalID.length() == 1 && !this.portalIDs.contains(portalID.charAt(0))) {
-					
-					siblingID = (String)JOptionPane.showInputDialog(
-		                    this.levelEditWindow,
-		                    "Enter a single, unique character name\r\nfor the portal's sibling:",
-		                    "Portal Name Entry",
-		                    JOptionPane.PLAIN_MESSAGE,
-		                    null, null, null);
-					if (siblingID == null) {
-						enteredData = false;
-						break;
-					}
-					else if (siblingID.length() == 1 && !siblingID.equals(portalID)) {
-						enteredData = true;
-						break;
-					}	
-				}
-				JOptionPane.showMessageDialog(this.levelEditWindow, "Invalid value, must be a single, unique character!");
-			}
-			
-			if (enteredData) {
-				editPiece.setPortalID(portalID.charAt(0));
-				editPiece.setSiblingID(siblingID.charAt(0));
-				this.portalIDs.add(portalID.charAt(0));
-			}
-			else {
-				editPiece.setLevelPiece(oldPiece);
-			}
+			this.readIDAndSiblings(editPiece, oldPiece, false);
+		}
+		else if (editPiece.getIsTesla()) {
+			this.readIDAndSiblings(editPiece, oldPiece, true);
 		}
 		
 	}
 
+	private void readIDAndSiblings(LevelPieceImageLabel editPiece, LevelPiece oldPiece, boolean allowMultipleSiblings) {
+		// Start with getting just the block ID
+		char blockID = ' ';
+		String blockIDStr = "";
+		while (blockIDStr.length() != 1) {
+			blockIDStr = (String)JOptionPane.showInputDialog(
+	                this.levelEditWindow,
+	                "Enter a single, unique character name\r\nfor the block:",
+	                "Block Name Entry",
+	                JOptionPane.PLAIN_MESSAGE,
+	                null, null, null);
+			
+			// The user cancelled the operation...
+			if (blockIDStr == null) {
+				editPiece.setLevelPiece(oldPiece);
+				return;
+			}
+			
+			if (blockIDStr.length() != 1 || !LevelPieceImageLabel.IsValidBlockID(blockIDStr.charAt(0))) {
+				JOptionPane.showMessageDialog(this.levelEditWindow, "Invalid value, must be a single, unique alpha numeric character!");
+				blockIDStr = "";
+			}
+			else {
+				blockID = blockIDStr.charAt(0);
+				if (allowMultipleSiblings && this.teslaIDs.contains(blockID)) {
+					JOptionPane.showMessageDialog(this.levelEditWindow, "Invalid value, must be a single, unique alpha numeric character!");
+					blockIDStr = "";
+				}
+				else if (!allowMultipleSiblings && this.portalIDs.contains(blockID)) {
+					JOptionPane.showMessageDialog(this.levelEditWindow, "Invalid value, must be a single, unique alpha numeric character!");
+					blockIDStr = "";	
+				}
+			}
+		}
+		
+		
+		
+		// Now get the sibling(s) of the block
+		Set<Character> siblingIDs = null;
+		while (siblingIDs == null) {
+			if (allowMultipleSiblings) {
+				String enteredSiblings = "";
+				enteredSiblings = (String)JOptionPane.showInputDialog(
+	                    this.levelEditWindow,
+	                    "Enter one or more, unique character names\r\nfor the block's siblings, seperated by commas:",
+	                    "Sibling Names Entry",
+	                    JOptionPane.PLAIN_MESSAGE,
+	                    null, null, null);
+				
+				String[] splitStr = enteredSiblings.split("\\,");
+				siblingIDs = new TreeSet<Character>();
+				for (int i = 0; i < splitStr.length; i++) {
+					String currSibling = splitStr[i];
+					currSibling.trim();
+					if (currSibling.length() != 1 || !LevelPieceImageLabel.IsValidBlockID(currSibling.charAt(0))) {
+						siblingIDs = null;
+						JOptionPane.showMessageDialog(this.levelEditWindow, "Invalid value, each sibling must be a single, unique alpha numeric character!");
+						continue;
+					}
+
+					boolean wasUnique = siblingIDs.add(currSibling.charAt(0));
+					if (!wasUnique) {
+						siblingIDs = null;
+						JOptionPane.showMessageDialog(this.levelEditWindow, "Invalid value, each sibling must be a single, unique alpha numeric character!");
+						continue;
+					}
+				}
+			}
+			else {
+				// Check for the id among the other blocks already existing with siblings...
+				for (int row = 0; row < this.currHeight; row++) {
+					for (int col = 0; col < this.currWidth; col++) {
+						
+						LevelPieceImageLabel currPieceLbl = this.pieces.get(row).get(col);
+						if (currPieceLbl.getIsPortal()) {
+							if (currPieceLbl.getPortalSiblingID() == blockID) {
+								siblingIDs = new TreeSet<Character>();
+								siblingIDs.add(currPieceLbl.getBlockID());
+								break;
+							}
+						}
+					}
+				}
+				if (siblingIDs != null) {
+					break;
+				}
+				
+				String inputSiblingID = (String)JOptionPane.showInputDialog(
+	                    this.levelEditWindow,
+	                    "Enter a single, unique character name\r\nfor the block's sibling:",
+	                    "Sibling Name Entry",
+	                    JOptionPane.PLAIN_MESSAGE,
+	                    null, null, null);
+				
+				// The user cancelled the operation...
+				if (inputSiblingID == null) {
+					editPiece.setLevelPiece(oldPiece);
+					return;
+				}
+				
+				if (inputSiblingID.length() == 1 && !inputSiblingID.equals(blockID) && LevelPieceImageLabel.IsValidBlockID(inputSiblingID.charAt(0))) {
+					siblingIDs = new TreeSet<Character>();
+					siblingIDs.add(inputSiblingID.charAt(0));
+				}
+				else {
+					JOptionPane.showMessageDialog(this.levelEditWindow, "Invalid value, must be a single, unique alpha numeric character!");
+				}
+			}
+		}
+		
+		if (allowMultipleSiblings) {
+			assert(siblingIDs.size() >= 1);
+			editPiece.setBlockID(blockID);
+			editPiece.setSiblingIDs(siblingIDs);
+			this.teslaIDs.add(blockID);
+		}
+		else {
+			assert(siblingIDs.size() == 1);
+			editPiece.setBlockID(blockID);
+			editPiece.setPortalSiblingID(siblingIDs.iterator().next());
+			this.portalIDs.add(blockID);
+		}
+	}
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
@@ -637,14 +744,23 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	public void mouseExited(MouseEvent arg0) {	
 	}
 
+	private void maybeShowContextMenu(MouseEvent e) {
+		if (e.isPopupTrigger()) {
+			// Context menu for the level display panel
+			//JPopupMenu levelEditContextMenu = new JPopupMenu();	
+			//levelEditContextMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
+	}
+	
 	@Override
 	public void mousePressed(MouseEvent e) {
 		this.paintPieces(e.getPoint());
-		
+		this.maybeShowContextMenu(e);
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent arg0) {
+	public void mouseReleased(MouseEvent e) {
+		this.maybeShowContextMenu(e);
 	}
 
 	@Override
