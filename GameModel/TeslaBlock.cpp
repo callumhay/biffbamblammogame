@@ -13,7 +13,8 @@
 #include "Projectile.h"
 #include "GameModel.h"
 
-TeslaBlock::TeslaBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc), electricityIsActive(false) {
+TeslaBlock::TeslaBlock(bool isActive, unsigned int wLoc, unsigned int hLoc) : 
+LevelPiece(wLoc, hLoc), electricityIsActive(isActive) {
 }
 
 TeslaBlock::~TeslaBlock() {

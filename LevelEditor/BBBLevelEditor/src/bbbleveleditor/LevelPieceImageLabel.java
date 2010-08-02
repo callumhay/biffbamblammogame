@@ -26,6 +26,7 @@ public class LevelPieceImageLabel extends JLabel {
 
 	private char blockID;
 	private Set<Character> siblingIDs = new TreeSet<Character>();
+	private boolean teslaBlockStartsOn;
 	
 	static boolean IsValidBlockID(char id) {
 		if ((id >= 'A' && id <= 'z') || (id >= '0' && id <= '9')) {
@@ -36,6 +37,7 @@ public class LevelPieceImageLabel extends JLabel {
 	
 	public LevelPieceImageLabel(LevelPiece piece) {
 		this.blockID = INVALID_PORTAL_ID;
+		this.teslaBlockStartsOn = false;
 		this.setLevelPiece(piece);
 	}
 	
@@ -49,9 +51,8 @@ public class LevelPieceImageLabel extends JLabel {
 			pieceSymbol = LevelPiece.PORTAL_PIECE_SYMBOL;
 		}
 		else if (pieceSymbol.length() >= 6 && pieceSymbol.substring(0, 2).equals(LevelPiece.TESLA_PIECE_SYMBOL + "(")) {
-			this.blockID = pieceSymbol.charAt(2);
-			String siblingStr = pieceSymbol.substring(3);
-			String[] splitSiblingStr = siblingStr.split("[\\,)]");
+			String siblingStr = pieceSymbol.substring(2);
+			String[] splitSiblingStr = siblingStr.split("[\\,)(]");
 			for (int i = 0; i < splitSiblingStr.length; i++) {
 				String currSiblingID = splitSiblingStr[i];
 				currSiblingID.trim();
@@ -59,7 +60,15 @@ public class LevelPieceImageLabel extends JLabel {
 					throw new Exception("Badly formed level file document.");
 				}
 				else if (currSiblingID.length() == 1){
-					this.siblingIDs.add(currSiblingID.charAt(0));
+					if (i == 0) {
+						teslaBlockStartsOn = (currSiblingID.charAt(0) == '1') ? true : false;
+					}
+					else if (i == 1) {
+						this.blockID = currSiblingID.charAt(0);
+					}
+					else {
+						this.siblingIDs.add(currSiblingID.charAt(0));
+					}
 				}
 			}
 			pieceSymbol = LevelPiece.TESLA_PIECE_SYMBOL;
@@ -81,6 +90,10 @@ public class LevelPieceImageLabel extends JLabel {
 	
 	public LevelPiece getLevelPiece() {
 		return this.piece;
+	}
+	
+	public char getIsTeslaOn() {
+		return this.teslaBlockStartsOn ? '1' : '0';
 	}
 	
 	public boolean getIsValid() {
@@ -185,7 +198,9 @@ public class LevelPieceImageLabel extends JLabel {
 			g.setColor(Color.BLACK);
 			g.drawString(teslaString, 4, this.getHeight()/2 + 2);
 			g.setColor(Color.CYAN);
-			g.drawString(teslaString, 2, this.getHeight()/2);			
+			g.drawString(teslaString, 2, this.getHeight()/2);
+			
+			g.drawString(this.teslaBlockStartsOn ? "On" : "Off", 2, 2);
 		}
 	}
 }

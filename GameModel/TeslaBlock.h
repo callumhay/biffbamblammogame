@@ -16,7 +16,7 @@
 
 class TeslaBlock : public LevelPiece {
 public:
-	TeslaBlock(unsigned int wLoc, unsigned int hLoc);
+	TeslaBlock(bool isActive, unsigned int wLoc, unsigned int hLoc);
 	~TeslaBlock();
 
 	LevelPieceType GetType() const { 
@@ -83,6 +83,7 @@ public:
 	void SetConnectedTeslaBlockList(const std::list<TeslaBlock*>& teslaBlocks);
 	const std::list<TeslaBlock*>& GetConnectedTeslaBlockList() const;
 
+	void SetElectricityIsActive(bool isActive);
 	bool GetIsElectricityActive() const;
 	std::list<TeslaBlock*> GetActiveConnectedTeslaBlocks() const;
 
@@ -102,6 +103,10 @@ inline void TeslaBlock::SetConnectedTeslaBlockList(const std::list<TeslaBlock*>&
 }
 inline const std::list<TeslaBlock*>& TeslaBlock::GetConnectedTeslaBlockList() const {
 	return this->connectedTeslaBlocks;
+}
+
+inline void TeslaBlock::SetElectricityIsActive(bool isActive) {
+	this->electricityIsActive = isActive;
 }
 
 // Query whether this tesla block is active - i.e., will connect to any connected tesla blocks

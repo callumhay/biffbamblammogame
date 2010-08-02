@@ -191,7 +191,8 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					break;
 
 				case TESLA_BLOCK_CHAR: {
-						// A(a, (B)) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
+						// A([1|0], a, B) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
+					  // [1|0]: A '1' or a '0' to indicated whether it starts on (1) or off (0).
 						// a : The single character name of this tesla block.
 						// B : One or more other named tesla blocks seperated by commas.
 
@@ -204,11 +205,26 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							break;
 						}
 
+						// Read whether the block is on or off
+						*inFile >> tempChar;
+						if (tempChar != '1' && tempChar != '0') {
+							debug_output("ERROR: poorly formed tesla block syntax, missing the [1|0] to indicate whether the block starts on or off");
+							break;
+						}
+						bool startsOn = (tempChar == '1') ? true : false;
+
+						// Should be a comma after the on/off...
+						*inFile >> tempChar;
+						if (tempChar != ',') {
+							debug_output("ERROR: poorly formed tesla block syntax, missing ',' after the name.");
+							break;
+						}
+
 						// Read the single character name of the tesla block
 						char teslaBlockName;
 						*inFile >> teslaBlockName;
-						if (teslaBlockName < 'A' && teslaBlockName > 'z') {
-							debug_output("ERROR: tesla block name must be a character A-Z or a-z");
+						if ((teslaBlockName < 'A' && teslaBlockName > 'z') || (teslaBlockName < '0' && teslaBlockName > '9')) {
+							debug_output("ERROR: tesla block name must be a character A-Z, a-z or 0-9");
 							break;
 						}
 
@@ -224,10 +240,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						std::list<char> connectedNameList;
 						while (true) {
 							if (*inFile >> tempChar) {
-								if (tempChar >= 'A' && tempChar <= 'z') {
+								if ((tempChar >= 'A' && tempChar <= 'z') || (teslaBlockName < '0' && teslaBlockName > '9')) {
 									connectedNameList.push_back(tempChar);
 
 									*inFile >> tempChar;
+									// Check for the end bracket
 									if (tempChar == ')') {
 										break;
 									}
@@ -252,13 +269,6 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						if (!errorStr.empty() || connectedNameList.empty()) {
 							debug_output("ERROR: poorly formed tesla block syntax, " << errorStr);
 							break;							
-						}
-
-						// End bracket
-						*inFile >> tempChar;
-						if (tempChar != ')') {
-							debug_output("ERROR: poorly formed tesla block syntax, missing the last ')'");
-							break;
 						}
 
 						// Now we need to connect the tesla blocks...
@@ -290,7 +300,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							else {
 								assert(siblingTeslaBlock == NULL);
 								// No sibling tesla block with the current name exists yet, create one and add it to the list
-								siblingTeslaBlock = new TeslaBlock(0, 0);
+								siblingTeslaBlock = new TeslaBlock(false, 0, 0);
 								insertResult = teslaBlocks.insert(std::make_pair(siblingName, siblingTeslaBlock));
 								if (!insertResult.second) {
 									// Tesla block with that name already existed... fail!
@@ -309,7 +319,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 						if (currentTeslaBlock == NULL) {
 							// No tesla block has been created for the current name yet, create one.
-							currentTeslaBlock = new TeslaBlock(pieceWLoc, pieceHLoc);
+							currentTeslaBlock = new TeslaBlock(startsOn, pieceWLoc, pieceHLoc);
 							currentTeslaBlock->SetConnectedTeslaBlockList(siblingTeslaBlocks);
 							insertResult = teslaBlocks.insert(std::make_pair(teslaBlockName, currentTeslaBlock));
 							if (!insertResult.second) {
@@ -325,6 +335,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							currentTeslaBlock->SetWidthAndHeightIndex(pieceWLoc, pieceHLoc);
 							assert(currentTeslaBlock->GetConnectedTeslaBlockList().empty());
 							currentTeslaBlock->SetConnectedTeslaBlockList(siblingTeslaBlocks);
+							currentTeslaBlock->SetElectricityIsActive(startsOn);
 						}
 
 						newPiece = currentTeslaBlock;
@@ -345,7 +356,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						
 						char portalName;
 						*inFile >> portalName;
-						if (portalName < 'A' && portalName > 'z') {
+						if ((portalName < 'A' && portalName > 'z') || (portalName < '0' && portalName > '9')) {
 							debug_output("ERROR: Portal block name must be a character A-Z or a-z");
 							break;
 						}
@@ -358,7 +369,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 						char siblingName;
 						*inFile >> siblingName;
-						if (siblingName < 'A' && siblingName > 'z') {
+						if ((portalName < 'A' && portalName > 'z') || (portalName < '0' && portalName > '9')) {
 							debug_output("ERROR: Portal block name must be a character A-Z or a-z");
 							break;
 						}
