@@ -5,13 +5,15 @@
 
 #include "../GameModel/TeslaBlock.h"
 
-const float TeslaBlockMesh::COIL_ROTATION_SPEED_DEGSPERSEC = 180;
+const float TeslaBlockMesh::COIL_ROTATION_SPEED_DEGSPERSEC = 270;
 
 TeslaBlockMesh::TeslaBlockMesh() : teslaBaseMesh(NULL), teslaCoilMesh(NULL) {
 	this->LoadMesh();
 }
 
 TeslaBlockMesh::~TeslaBlockMesh() {
+	ResourceManager::GetInstance()->ReleaseMeshResource(this->teslaBaseMesh);
+	ResourceManager::GetInstance()->ReleaseMeshResource(this->teslaCoilMesh);
 }
 
 void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
@@ -24,18 +26,23 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 		const TeslaBlock* currTeslaBlock = *iter;
 		assert(currTeslaBlock != NULL);
 		
-		Vector3D& currRotation = this->rotations[currTeslaBlock];
+		std::map<const TeslaBlock*, std::pair<Vector3D, float>>::iterator findIter = this->rotations.find(currTeslaBlock);
+
+		const Vector3D& currRotationAxis = findIter->second.first;
+		float& currRotatationAmt = findIter->second.second;
+		const Point2D& blockCenter = currTeslaBlock->GetCenter();
 
 		glPushMatrix();
-		glRotatef(currRotation[0], 1, 0, 0);
-		glRotatef(currRotation[1], 0, 1, 0);
-		glRotatef(currRotation[2], 0, 0, 1);
+		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+		//glRotatef(currRotation[0], 1, 0, 0);
+		glRotatef(currRotatationAmt, currRotationAxis[0], currRotationAxis[1], currRotationAxis[2]);
+		//glRotatef(currRotation[2], 0, 0, 1);
 
 		this->teslaCoilMesh->Draw(camera, keyLight, fillLight, ballLight);
 
 		glPopMatrix();
 
-		currRotation = currRotation + Vector3D(rotationAmt, rotationAmt, rotationAmt);
+		currRotatationAmt += rotationAmt;
 	}
 }
 

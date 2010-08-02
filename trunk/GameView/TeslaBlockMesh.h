@@ -17,6 +17,9 @@ public:
 	void RemoveTeslaBlock(const TeslaBlock* cannonBlock);
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
+
+	//void AddLightningBarrier
+
 	//void SetWorldTranslation(const Vector3D& t);
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	
@@ -26,8 +29,8 @@ private:
 
 	std::map<std::string, MaterialGroup*> materialGroups;	// Material groups for the static parts of the tesla block mesh
 	
-	std::set<const TeslaBlock*> teslaBlocks;							// A list of all the tesla blocks that are currently present in the game
-	std::map<const TeslaBlock*, Vector3D> rotations;			// Rotations of the various tesla coils
+	std::set<const TeslaBlock*> teslaBlocks;														// A list of all the tesla blocks that are currently present in the game
+	std::map<const TeslaBlock*, std::pair<Vector3D, float>> rotations;	// Rotations of the various tesla coils
 
 	Mesh* teslaBaseMesh;
 	Mesh* teslaCoilMesh;
@@ -47,9 +50,11 @@ inline void TeslaBlockMesh::AddTeslaBlock(const TeslaBlock* teslaBlock) {
 	assert(teslaBlock != NULL);
 	std::pair<std::set<const TeslaBlock*>::iterator, bool> insertResult = this->teslaBlocks.insert(teslaBlock);
 	assert(insertResult.second);
-	this->rotations.insert(std::make_pair(teslaBlock, Vector3D(Randomizer::GetInstance()->RandomNumNegOneToOne() * 360,
-																														 Randomizer::GetInstance()->RandomNumNegOneToOne() * 360,
-																														 Randomizer::GetInstance()->RandomNumNegOneToOne() * 360)));
+	Vector3D randomRotVec(Randomizer::GetInstance()->RandomNumNegOneToOne(),
+												Randomizer::GetInstance()->RandomNumNegOneToOne(),
+												Randomizer::GetInstance()->RandomNumNegOneToOne());
+	randomRotVec.Normalize();
+	this->rotations.insert(std::make_pair(teslaBlock, std::make_pair(randomRotVec, static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne() * 360.0f))));
 }	
 
 inline void TeslaBlockMesh::RemoveTeslaBlock(const TeslaBlock* teslaBlock) {

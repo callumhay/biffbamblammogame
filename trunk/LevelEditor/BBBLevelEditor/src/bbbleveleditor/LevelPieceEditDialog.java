@@ -11,17 +11,18 @@
 
 package bbbleveleditor;
 
+import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.text.JTextComponent;
 
-/**
- *
- * @author Beowulf
- */
 public class LevelPieceEditDialog extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -36,13 +37,20 @@ public class LevelPieceEditDialog extends javax.swing.JFrame {
     private javax.swing.JTextField pieceTypeTxtField;
     private javax.swing.JButton removeSiblingBtn;
     private javax.swing.JList siblingList;
+    private DefaultListModel siblingListModel;
     // End of variables declaration//GEN-END:variables
 	
 	private Set<Character> allPieceIDs;
+	private LevelPieceImageLabel levelPieceLbl;
+	private JFrame parentWindow;
 	
     /** Creates new form LevelPieceEditDialog */
-    public LevelPieceEditDialog(Set<Character> allPieceIDs) {
+    public LevelPieceEditDialog(JFrame parentWindow, LevelPieceImageLabel levelPieceLbl, Set<Character> allPieceIDs) {
+    	assert(levelPieceLbl != null);
+    	this.parentWindow = parentWindow;
     	this.allPieceIDs = allPieceIDs;
+    	this.levelPieceLbl = levelPieceLbl;
+    	
         initComponents();
     }
 
@@ -94,11 +102,8 @@ public class LevelPieceEditDialog extends javax.swing.JFrame {
 
         jLabel3.setText("Level Piece Siblings:");
 
-        siblingList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
+        this.siblingListModel = new DefaultListModel();
+        siblingList.setModel(this.siblingListModel);
         jScrollPane1.setViewportView(siblingList);
 
         removeSiblingBtn.setToolTipText("Remove Sibling");
@@ -196,19 +201,70 @@ public class LevelPieceEditDialog extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void removeSiblingBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeSiblingBtnActionPerformed
-        // TODO add your handling code here:
+    	
+    	int[] selectedIndices = this.siblingList.getSelectedIndices();
+    	if (selectedIndices.length == this.siblingListModel.getSize()) {
+    		JOptionPane.showMessageDialog(this, "Cannot remove all siblings from the list!", "Illegal operation", JOptionPane.ERROR_MESSAGE);
+    		return;
+    	}
+    	for (int i = 0; i < selectedIndices.length; i++) {
+    		this.siblingListModel.remove(selectedIndices[i]);
+    	}
+    	
     }//GEN-LAST:event_removeSiblingBtnActionPerformed
 
     private void addSiblingBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addSiblingBtnActionPerformed
-        // TODO add your handling code here:
+        // Open up a dialog with a combo box filled with possible siblings
+    	assert(this.allPieceIDs.size() > 1);
+    	Set<Character> allowableSiblings = new TreeSet<Character>();
+    	Iterator<Character> iter = this.allPieceIDs.iterator();
+    	while (iter.hasNext()) {
+    		Character currIterChar = iter.next();
+    		if (currIterChar != this.levelPieceLbl.getBlockID() &&
+    			!this.siblingListModel.contains(currIterChar)) {
+    			allowableSiblings.add(currIterChar);
+    		}
+    	}
+    	
+    	if (allowableSiblings.size() == 0) {
+    		return;
+    	}
+    	
+    	Character c = (Character)JOptionPane.showInputDialog(
+                this.parentWindow,
+                "Select a sibling ID to add:",
+                "Add a Sibling",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                allowableSiblings.toArray(),
+                allowableSiblings.iterator().next());
+    	
+    	if (c == null) {
+    		return;
+    	}
+    	
+    	this.siblingListModel.addElement(c);
     }//GEN-LAST:event_addSiblingBtnActionPerformed
 
     private void okBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtnActionPerformed
-        // TODO add your handling code here:
+    	// Update the ID siblings and other attributes...
+    	this.updateSiblingsFromList();
+    	// TODO
+    	
+    	this.setVisible(false);
     }//GEN-LAST:event_okBtnActionPerformed
 
     private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
-        // TODO add your handling code here:
+        // Don't update anything, just exit...
+    	this.setVisible(false);
     }//GEN-LAST:event_cancelBtnActionPerformed
 
+    private void updateSiblingsFromList() {
+    	Set<Character> siblings = new TreeSet<Character>();
+    	for (int i = 0; i < this.siblingListModel.getSize(); i++) {
+    		siblings.add((Character)this.siblingListModel.get(i));
+    	}
+    	this.levelPieceLbl.setSiblingIDs(siblings);
+    }
+    
 }
