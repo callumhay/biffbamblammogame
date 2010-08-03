@@ -110,6 +110,7 @@ public:
 	void DrawTimers(double dT, const Camera& camera);
 
 	void DrawBeams(double dT, const GameModel& gameModel, const Camera& camera);
+	void DrawTeslaLightning(double dT, const Camera& camera);
 	void DrawProjectiles(double dT, const GameModel& gameModel, const Camera& camera);
 
 	void DrawActiveItemHUDElements(double dT, const GameModel& gameModel, int displayWidth, int displayHeight);
@@ -161,5 +162,10 @@ public:
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 	void ExplosionFlash(double timeLength, float intensityPercent);
 };
+
+// Draw any currently active tesla lightning bolts in the game.
+inline void GameAssets::DrawTeslaLightning(double dT, const Camera& camera) {
+	this->espAssets->DrawTeslaLightningArcs(dT, camera);
+}
 
 #endif

@@ -97,9 +97,13 @@ bool TeslaBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const 
 }
 
 LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+	if (ball.IsLastPieceCollidedWith(this)) {
+		return this;
+	}
+
 	// Tell the ball what the last piece it collided with was...
 	ball.SetLastPieceCollidedWith(this);
-
+	
 	// Toggle the electricity to the tesla block
 	GameLevel* currLevel = gameModel->GetCurrentLevel();
 	this->ToggleElectricity(*currLevel);
@@ -156,9 +160,6 @@ void TeslaBlock::ToggleElectricity(GameLevel& level) {
 			const TeslaBlock* activeNeighbour = *iter;
 			assert(activeNeighbour != NULL);
 			level.AddTeslaLightningBarrier(this, activeNeighbour);
-	
-			// EVENT: Lightning arc/barrier was just added to the level
-			GameEventManager::Instance()->ActionTeslaLightningBarrierSpawned(*this, *activeNeighbour);
 		}
 	}
 	else {
@@ -166,9 +167,6 @@ void TeslaBlock::ToggleElectricity(GameLevel& level) {
 			const TeslaBlock* activeNeighbour = *iter;
 			assert(activeNeighbour != NULL);
 			level.RemoveTeslaLightningBarrier(this, activeNeighbour);
-
-			// EVENT: Lightning arc/barrier was just removed from the level
-			GameEventManager::Instance()->ActionTeslaLightningBarrierRemoved(*this, *activeNeighbour);
 		}
 	}
 }

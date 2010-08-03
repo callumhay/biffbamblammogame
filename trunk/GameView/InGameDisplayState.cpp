@@ -185,6 +185,9 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	// Balls...
 	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), camera, negHalfLevelDim);
 
+	// Tesla lightning arcs
+	this->display->GetAssets()->DrawTeslaLightning(dT, camera);
+
 	// Projectiles...
 	this->display->GetAssets()->DrawProjectiles(dT, *this->display->GetModel(), camera);
 

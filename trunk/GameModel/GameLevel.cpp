@@ -72,6 +72,21 @@ piecesLeft(numBlocks), ballSafetyNetActive(false), filepath(filepath) {
 	
 	this->safetyNetBounds = BoundingLines(lines, normals);
 
+	// Initialize the tesla lightning barriers already in existance...
+	for (size_t h = 0; h < this->currentLevelPieces.size(); h++) {
+		for (size_t w = 0; w < this->currentLevelPieces[h].size(); w++) {
+			LevelPiece* currPiece = this->currentLevelPieces[h][w];
+			if (currPiece->GetType() == LevelPiece::Tesla) {
+				TeslaBlock* currTeslaBlk = dynamic_cast<TeslaBlock*>(currPiece);
+				assert(currTeslaBlk != NULL);
+				std::list<TeslaBlock*> activeConnectedBlks = currTeslaBlk->GetLightningArcTeslaBlocks();
+				for (std::list<TeslaBlock*>::const_iterator iter = activeConnectedBlks.begin(); iter != activeConnectedBlks.end(); ++iter) {
+					this->AddTeslaLightningBarrier(currTeslaBlk, *iter);
+				}
+			}
+		}
+	}
+
 	// Set the quad tree for the level
 	//Point2D levelMax(this->GetLevelUnitWidth(), this->GetLevelUnitHeight());
 	//this->levelTree = new QuadTree(Collision::AABB2D(Point2D(0, 0), levelMax), Vector2D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT));
@@ -301,6 +316,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 								assert(siblingTeslaBlock == NULL);
 								// No sibling tesla block with the current name exists yet, create one and add it to the list
 								siblingTeslaBlock = new TeslaBlock(false, 0, 0);
+								siblingTeslaBlocks.push_back(siblingTeslaBlock);
 								insertResult = teslaBlocks.insert(std::make_pair(siblingName, siblingTeslaBlock));
 								if (!insertResult.second) {
 									// Tesla block with that name already existed... fail!
@@ -337,6 +353,9 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							currentTeslaBlock->SetConnectedTeslaBlockList(siblingTeslaBlocks);
 							currentTeslaBlock->SetElectricityIsActive(startsOn);
 						}
+						
+						// We need to inform the level about any initially 'on' tesla blocks!!!
+						// TODO
 
 						newPiece = currentTeslaBlock;
 					}
@@ -913,20 +932,23 @@ bool GameLevel::PaddleSafetyNetCollisionCheck(const PlayerPaddle& p) {
 
 // Add a newly activated lightning barrier for the tesla block
 void GameLevel::AddTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2) {
+	// Check to see if the barrier already exists, if it does then just exit with no change
 	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::iterator findIter =
 		this->teslaLightning.find(std::make_pair(block1, block2));
-	assert(findIter == this->teslaLightning.end());
-
-#ifdef _DEBUG
-	// Extra checking
-	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::iterator findIter2 =
-		this->teslaLightning.find(std::make_pair(block2, block1));
-	assert(findIter2 == this->teslaLightning.end());
-#endif
+	if (findIter != this->teslaLightning.end()) {
+		return;
+	}
+	findIter = this->teslaLightning.find(std::make_pair(block2, block1));
+	if (findIter != this->teslaLightning.end()) {
+		return;
+	}
 
 	// Build a bounding line for the tesla block lightning arc
 	Collision::LineSeg2D teslaBoundry(block1->GetLightningOrigin(), block2->GetLightningOrigin());
 	this->teslaLightning.insert(std::make_pair(std::make_pair(block1, block2), teslaBoundry));
+
+	// EVENT: Lightning arc/barrier was just added to the level
+	GameEventManager::Instance()->ActionTeslaLightningBarrierSpawned(*block1, *block2);
 }
 
 // Remove any currently active tesla lightning arcs
@@ -941,6 +963,9 @@ void GameLevel::RemoveTeslaLightningBarrier(const TeslaBlock* block1, const Tesl
 	}
 
 	this->teslaLightning.erase(findIter);
+
+	// EVENT: Lightning arc/barrier was just removed from the level
+	GameEventManager::Instance()->ActionTeslaLightningBarrierRemoved(*block1, *block2);
 }
 
 

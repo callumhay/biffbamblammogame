@@ -13,6 +13,8 @@
 #include "ESPEmitter.h"
 #include "ESPPointEmitter.h"
 #include "ESPVolumeEmitter.h"
+#include "ESPPointToPointBeam.h"
+#include "ESPBeam.h"
 #include "ESPParticle.h"
 #include "ESPOnomataParticle.h"
 #include "ESPShaderParticle.h"

@@ -327,6 +327,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::BreakableTriangle:
 		case LevelPiece::Solid:
 		case LevelPiece::SolidTriangle:
+		case LevelPiece::Tesla:
 			// Typical break effect for basic breakable blocks
 			this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
 			// Sound for basic breakable blocks
@@ -574,12 +575,12 @@ void GameEventsListener::BeamRemovedEvent(const Beam& beam) {
 }
 
 void GameEventsListener::TeslaLightningBarrierSpawnedEvent(const TeslaBlock& newlyOnTeslaBlock, const TeslaBlock& previouslyOnTeslaBlock) {
-	// TODO
+	this->display->GetAssets()->GetESPAssets()->AddTeslaLightningBarrierEffect(newlyOnTeslaBlock, previouslyOnTeslaBlock);
 	debug_output("EVENT: Tesla lightning barrier spawned");
 }
 
 void GameEventsListener::TeslaLightningBarrierRemovedEvent(const TeslaBlock& newlyOffTeslaBlock, const TeslaBlock& stillOnTeslaBlock) {
-	// TODO
+	this->display->GetAssets()->GetESPAssets()->RemoveTeslaLightningBarrierEffect(newlyOffTeslaBlock, stillOnTeslaBlock);
 	debug_output("EVENT: Tesla lightning barrier removed");
 }
 

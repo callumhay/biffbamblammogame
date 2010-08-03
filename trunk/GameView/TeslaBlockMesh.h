@@ -17,13 +17,8 @@ public:
 	void RemoveTeslaBlock(const TeslaBlock* cannonBlock);
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-
-	//void AddLightningBarrier
-
-	//void SetWorldTranslation(const Vector3D& t);
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	
-
 private:
 	static const float COIL_ROTATION_SPEED_DEGSPERSEC;
 
