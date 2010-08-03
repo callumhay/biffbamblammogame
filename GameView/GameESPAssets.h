@@ -26,6 +26,7 @@ class GameItem;
 class ESPEmitter;
 class ESPPointEmitter;
 class ESPVolumeEmitter;
+class ESPPointToPointBeam;
 class Texture;
 class ESPShaderParticle;
 class Projectile;
@@ -50,6 +51,7 @@ private:
 	std::map<const Beam*, std::list<ESPEmitter*> > activeBeamEmitters;
 	std::map<GameItem::ItemType, std::list<ESPEmitter*> > activeTimerHUDEmitters;
 	//std::map<const LevelPiece*, std::list<ESPEmitter*> > activeLevelPieceEmitters;
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> > teslaLightningArcs;
 	
 	// Standard effectors for the various ESP effects
 	ESPParticleColourEffector particleFader;
@@ -219,6 +221,9 @@ public:
 	void UpdateBeamEffect(const Beam& beam);
 	void RemoveBeamEffect(const Beam& beam);
 
+	void AddTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2);
+	void RemoveTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2);
+
 	void AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition);
 
 	void TurnOffCurrentItemDropStars(const Camera& camera);
@@ -247,6 +252,8 @@ public:
 	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 	void DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 	void DrawPaddleLaserBeamFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+
+	void DrawTeslaLightningArcs(double dT, const Camera& camera);
 
 	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };

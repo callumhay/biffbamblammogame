@@ -4,20 +4,28 @@
 
 #include "../BlammoEngine/Point.h"
 
+class ESPBeam;
+
 class ESPBeamSegment {
 public:
-	ESPBeamSegment();
+	ESPBeamSegment(ESPBeamSegment* parent);
 	~ESPBeamSegment();
 
-	void SetEndPoint(const Point3D& endPt);
+	void SetDefaultPointOnLine(const Point3D& pt);
 	const Point3D& GetEndPoint() const;
 	ESPBeamSegment* AddESPBeamSegment();
 
 	const std::list<ESPBeamSegment*>& GetChildSegments() const;
 
+	void Tick(double dT, const ESPBeam& parentBeam);
+
 private:
+	Point3D defaultPtOnLine;
 	Point3D endPt;
+	double timeCounter;
+
 	// 4 points to represent the quad...
+	ESPBeamSegment* parentSegment;
 	std::list<ESPBeamSegment*> childSegments;
 
 	// Disallow copy and assign
@@ -25,8 +33,9 @@ private:
 	ESPBeamSegment& operator=(const ESPBeamSegment& b);
 };
 
-inline void ESPBeamSegment::SetEndPoint(const Point3D& endPt) {
-	this->endPt = endPt;
+inline void ESPBeamSegment::SetDefaultPointOnLine(const Point3D& pt) {
+	this->defaultPtOnLine = pt;
+	this->endPt = pt;
 }
 
 inline const Point3D& ESPBeamSegment::GetEndPoint() const {
@@ -34,7 +43,7 @@ inline const Point3D& ESPBeamSegment::GetEndPoint() const {
 }
 
 inline ESPBeamSegment* ESPBeamSegment::AddESPBeamSegment() {
-	ESPBeamSegment* newBeamSeg = new ESPBeamSegment();
+	ESPBeamSegment* newBeamSeg = new ESPBeamSegment(this);
 	this->childSegments.push_back(newBeamSeg);
 	return newBeamSeg;
 }

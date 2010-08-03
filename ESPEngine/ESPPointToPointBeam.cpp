@@ -12,7 +12,7 @@
 #include "ESPPointToPointBeam.h"
 #include "ESPBeam.h"
 
-ESPPointToPointBeam::ESPPointToPointBeam() : startPt(0,0,0), endPt(0,0,0), colour(1,1,1,1), texture(NULL), 
+ESPPointToPointBeam::ESPPointToPointBeam() : startPt(0,0,0), endPt(0,0,0), colour(1,1,1,1), /*texture(NULL),*/
 numMainESPBeamSegments(10), numBeamsShot(0), timeSinceLastBeamSpawn(0.0), timeUntilNextBeamSpawn(0.0), 
 mainBeamAmplitude(ESPInterval(0.0f)) {
 	// By default there is a single beam shot that lasts forever
@@ -37,6 +37,7 @@ void ESPPointToPointBeam::Tick(double dT) {
 	if (this->ThereAreStillMoreBeamsToFire() && this->timeSinceLastBeamSpawn >= this->timeUntilNextBeamSpawn) {
 		// Spawn a new beam
 		this->SpawnBeam();
+		this->numBeamsShot++;
 	}
 
 	// Go through each beam to check if it's life has expired yet
@@ -59,9 +60,9 @@ void ESPPointToPointBeam::Tick(double dT) {
 void ESPPointToPointBeam::Draw(const Camera& camera) {
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	
-	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT, GL_FILL);
@@ -82,43 +83,9 @@ void ESPPointToPointBeam::Draw(const Camera& camera) {
 }
 
 void ESPPointToPointBeam::SpawnBeam() {
-	ESPBeam* newBeam = new ESPBeam();
-
-	std::list<Point3D> beamMidPts;
 	Vector3D beamVec = endPt - startPt;
 	float beamLength = beamVec.length();
 	beamVec.Normalize();
-
-	// Space out the points along the line from start to end point based on the 
-	// number of segments that make up the main beam
-	int numPts = this->numMainESPBeamSegments - 1;
-	
-	const float MIN_FRACTION = 0.25f;
-	
-	// Maximum distance from the start point along the line to the end point that
-	// a point can be placed in the main beam
-	const float maxPtDist = beamLength - MIN_FRACTION * (beamLength / this->numMainESPBeamSegments);
-
-	float lengthLeftOver = maxPtDist;
-	float currSegLength, currSegDistFromStart;
-	float minSegmentLength, maxSegmentLength, minMaxSegLengthDiff;
-
-	const Point3D ORIGIN_PT(0,0,0);
-
-	for (int i = 0; i < numPts; i++) {
-		maxSegmentLength = lengthLeftOver / (numPts - i);
-		minSegmentLength = MIN_FRACTION * maxSegmentLength;
-		minMaxSegLengthDiff = maxSegmentLength - minSegmentLength;
-
-		currSegLength = minSegmentLength + Randomizer::GetInstance()->RandomNumZeroToOne() * minMaxSegLengthDiff;
-		currSegDistFromStart = lengthLeftOver + currSegLength;
-		assert(maxPtDist >= currSegDistFromStart);
-
-		// Place the beam starting point at the origin instead - so that everything is in a more reasonable local
-		// space position for transforming the beam to face the viewer
-		beamMidPts.push_back(ORIGIN_PT + currSegDistFromStart * beamVec);
-		lengthLeftOver -= currSegLength;
-	}
 
 	// Calculate an orthogonal vector for the beam line/vector
 	Vector3D orthToBeamVec = Vector3D::cross(beamVec, Vector3D(1, 0, 0));
@@ -132,23 +99,22 @@ void ESPPointToPointBeam::SpawnBeam() {
 	orthToBeamVec = Vector3D::cross(beamVec, orthToBeamVec);
 	orthToBeamVec.Normalize();
 
-	// Apply amplitude to the beam points and add them to the beam
+	const Point3D ORIGIN_PT(0,0,0);
+
+	const float BEAM_LINE_DIST_VARIATION_FRACTION = 0.6f;
+	float avgSegLength = beamLength / this->numMainESPBeamSegments;
+	float fractionAvgSegLength = BEAM_LINE_DIST_VARIATION_FRACTION * avgSegLength;
+
+	ESPBeam* newBeam = new ESPBeam(beamVec, orthToBeamVec, this->mainBeamAmplitude, ESPInterval(-fractionAvgSegLength, fractionAvgSegLength));
 	ESPBeamSegment* currESPBeamSegment = newBeam->GetStartSegment();
 	assert(currESPBeamSegment != NULL);
-
-	for (std::list<Point3D>::iterator iter = beamMidPts.begin(); iter != beamMidPts.end(); ++iter) {
-		
-		Matrix4x4 randomRotation = Matrix4x4::rotationMatrix(static_cast<float>(2*M_PI*Randomizer::GetInstance()->RandomNumNegOneToOne()), beamVec);
-		Vector3D rotatedVec = randomRotation * orthToBeamVec;
-		
-		Point3D& currPt = *iter;
-		currPt = currPt + this->mainBeamAmplitude.MeanValueInInterval() * rotatedVec;
-		currESPBeamSegment->SetEndPoint(currPt);
-
+	
+	for (int i = 0; i < static_cast<int>(this->numMainESPBeamSegments); i++) {
+		currESPBeamSegment->SetDefaultPointOnLine(ORIGIN_PT + (i * avgSegLength) * beamVec);
 		currESPBeamSegment = currESPBeamSegment->AddESPBeamSegment();
 		assert(currESPBeamSegment != NULL);
 	}
-	currESPBeamSegment->SetEndPoint(this->endPt - Vector3D(this->startPt[0], this->startPt[1], this->startPt[2]));
+	currESPBeamSegment->SetDefaultPointOnLine(ORIGIN_PT + (this->numMainESPBeamSegments * avgSegLength) * beamVec);
 
 	// Set the lifetime on the beam...
 	newBeam->SetLifeTime(this->lifeTimeInSecs.MeanValueInInterval());

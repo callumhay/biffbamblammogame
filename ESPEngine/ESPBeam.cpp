@@ -1,7 +1,11 @@
 #include "ESPBeam.h"
 
-ESPBeam::ESPBeam() : startSegment(new ESPBeamSegment()), 
-lifeTimeInSecs(0.0), currLifeTickCount(0.0) {
+ESPBeam::ESPBeam(const Vector3D& beamLineVec, const Vector3D& rotationalVec, 
+								 const ESPInterval& amplitudeVariationAmt, const ESPInterval& lineDistVariationAmt) : 
+startSegment(new ESPBeamSegment(NULL)), 
+lifeTimeInSecs(0.0), currLifeTickCount(0.0),
+rotationalVec(rotationalVec), beamLineVec(beamLineVec), 
+amplitudeVariationAmt(amplitudeVariationAmt), lineDistVariationAmt(lineDistVariationAmt) {
 }
 
 ESPBeam::~ESPBeam() {
@@ -12,12 +16,9 @@ ESPBeam::~ESPBeam() {
 void ESPBeam::Draw() const {
 	std::list<const ESPBeamSegment*> beamSegs;
 	beamSegs.push_back(this->startSegment);
-	static const Point3D STARTING_PT(0,0,0);
 
 	// For now just draw the main beam...
 	glBegin(GL_LINE_STRIP);
-	glVertex3fv(STARTING_PT.begin());
-
 	while (!beamSegs.empty()) {
 		const ESPBeamSegment* currSeg = beamSegs.front();
 		beamSegs.pop_front();

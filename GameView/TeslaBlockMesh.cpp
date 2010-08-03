@@ -19,6 +19,8 @@ TeslaBlockMesh::~TeslaBlockMesh() {
 void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
 													const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 	
+	glPushAttrib(GL_CURRENT_BIT);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	float rotationAmt = dT * COIL_ROTATION_SPEED_DEGSPERSEC;
 
 	// Go through each tesla block and transform their center's appropriately
@@ -37,13 +39,14 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 		//glRotatef(currRotation[0], 1, 0, 0);
 		glRotatef(currRotatationAmt, currRotationAxis[0], currRotationAxis[1], currRotationAxis[2]);
 		//glRotatef(currRotation[2], 0, 0, 1);
-
+	
 		this->teslaCoilMesh->Draw(camera, keyLight, fillLight, ballLight);
 
 		glPopMatrix();
 
 		currRotatationAmt += rotationAmt;
 	}
+	glPopAttrib();
 }
 
 void TeslaBlockMesh::LoadMesh() {

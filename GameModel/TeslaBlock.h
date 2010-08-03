@@ -85,6 +85,7 @@ public:
 
 	void SetElectricityIsActive(bool isActive);
 	bool GetIsElectricityActive() const;
+	std::list<TeslaBlock*> GetLightningArcTeslaBlocks() const;
 	std::list<TeslaBlock*> GetActiveConnectedTeslaBlocks() const;
 
 	const Point2D& GetLightningOrigin() const;
@@ -117,13 +118,28 @@ inline bool TeslaBlock::GetIsElectricityActive() const {
 
 // Query the set of tesla blocks connected to this block that are active along with this one
 // which are currently forming an arc of lightning/electricity between themselves and this block.
-inline std::list<TeslaBlock*> TeslaBlock::GetActiveConnectedTeslaBlocks() const {
+inline std::list<TeslaBlock*> TeslaBlock::GetLightningArcTeslaBlocks() const {
 	std::list<TeslaBlock*> activeConnections;
 	// First check to see if any electricity is active for this block, 
 	// if not then there are no active connections at all
 	if (!this->GetIsElectricityActive()) {
 		return activeConnections;
 	}
+
+	for (std::list<TeslaBlock*>::const_iterator iter = this->connectedTeslaBlocks.begin(); iter != this->connectedTeslaBlocks.end(); ++iter) {
+		TeslaBlock* currBlock = *iter;
+		if (currBlock->GetIsElectricityActive()) {
+			activeConnections.push_back(currBlock);
+		}
+	}
+
+	return activeConnections;
+}
+
+// Query the set of tesla blocks that are connected to this block and that are active (whether this
+// block is active or not).
+inline std::list<TeslaBlock*> TeslaBlock::GetActiveConnectedTeslaBlocks() const {
+	std::list<TeslaBlock*> activeConnections;
 
 	for (std::list<TeslaBlock*>::const_iterator iter = this->connectedTeslaBlocks.begin(); iter != this->connectedTeslaBlocks.end(); ++iter) {
 		TeslaBlock* currBlock = *iter;

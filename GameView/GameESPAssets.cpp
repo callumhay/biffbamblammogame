@@ -12,6 +12,7 @@
 #include "../GameModel/Beam.h"
 #include "../GameModel/PortalBlock.h"
 #include "../GameModel/CannonBlock.h"
+#include "../GameModel/TeslaBlock.h"
 #include "../GameModel/PaddleRocketProjectile.h"
 
 #include "../BlammoEngine/Texture.h"
@@ -283,6 +284,20 @@ void GameESPAssets::KillAllActiveEffects() {
 		emitterList.clear();
 	}
 	this->activeTimerHUDEmitters.clear();
+
+	// Clear all of the tesla lightning arcs
+	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator iter1 = this->teslaLightningArcs.begin();
+		iter1 != this->teslaLightningArcs.end(); ++iter1) {
+		
+			std::list<ESPPointToPointBeam*>& lightningArcs = iter1->second;
+			for (std::list<ESPPointToPointBeam*>::iterator iter2 = lightningArcs.begin(); iter2 != lightningArcs.end(); ++iter2) {
+				ESPPointToPointBeam* currArc = *iter2;
+				delete currArc;
+				currArc = NULL;
+			}
+			lightningArcs.clear();
+	}
+	this->teslaLightningArcs.clear();
 
 }
 
@@ -846,6 +861,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::SolidTriangle:
 				case LevelPiece::Breakable:
 				case LevelPiece::BreakableTriangle: 
+				case LevelPiece::Tesla:
 				case LevelPiece::Cannon:
 					{
 						// A laser just hit a block and was disapated by it... show the particle disintegrate
@@ -2253,6 +2269,52 @@ void GameESPAssets::RemoveBeamEffect(const Beam& beam) {
 	}
 }
 
+// Adds a tesla lightning arc effect
+void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2) {
+
+	Point3D startPt(block1.GetCenter());
+	Point3D endPt(block2.GetCenter());
+	ESPPointToPointBeam* bigLightningArc = new ESPPointToPointBeam();
+	bigLightningArc->SetStartAndEndPoints(startPt, endPt);
+	bigLightningArc->SetColour(ColourRGBA(1,1,1,1));
+	bigLightningArc->SetBeamLifetime(ESPInterval(ESPBeam::INFINITE_BEAM_LIFETIME));
+	bigLightningArc->SetNumBeamShots(1);
+	bigLightningArc->SetMainBeamAmplitude(ESPInterval(0.0f, 0.75f * LevelPiece::PIECE_HEIGHT));
+
+	// Base the number of segments on the distance between the tesla blocks!!
+	float distance = Point2D::Distance(block1.GetCenter(), block2.GetCenter());
+	static const float NUM_SEGMENTS_PER_UNIT_DIST = 2;
+	int totalSegments = NUM_SEGMENTS_PER_UNIT_DIST * distance;
+	bigLightningArc->SetNumMainESPBeamSegments(totalSegments);
+	
+	std::list<ESPPointToPointBeam*> lightningArcs;
+	lightningArcs.push_back(bigLightningArc);
+
+	std::pair<std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::const_iterator, bool> insertResult =
+		this->teslaLightningArcs.insert(std::make_pair(std::make_pair(&block1, &block2), lightningArcs));
+	assert(insertResult.second);
+}
+
+// Removes a tesla lightning arc barrier from the effects list
+void GameESPAssets::RemoveTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2) {
+	// Find the effect for the lightning arc among the existing effects
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator findIter = this->teslaLightningArcs.find(std::make_pair(&block1, &block2));
+	if (findIter == this->teslaLightningArcs.end()) {
+		findIter = this->teslaLightningArcs.find(std::make_pair(&block2, &block1));
+		assert(findIter != this->teslaLightningArcs.end());
+	}
+
+	// Clean up all of the effects
+	std::list<ESPPointToPointBeam*>& lightningArcs = findIter->second;
+	for (std::list<ESPPointToPointBeam*>::iterator iter = lightningArcs.begin(); iter != lightningArcs.end(); ++iter) {
+		ESPPointToPointBeam* currArc = *iter;
+		delete currArc;
+		currArc = NULL;
+	}
+	lightningArcs.clear();
+	this->teslaLightningArcs.erase(findIter);
+}
+
 /**
  * Adds a Timer HUD effect for the given item type.
  */
@@ -3610,6 +3672,19 @@ void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Camera& ca
 
 	this->paddleBeamBlastBits->Draw(camera);
 	this->paddleBeamBlastBits->Tick(dT);
+}
+
+void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {
+	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator iter = this->teslaLightningArcs.begin();
+		iter != this->teslaLightningArcs.end(); ++iter) {
+
+		std::list<ESPPointToPointBeam*>& arcs = iter->second;
+		for (std::list<ESPPointToPointBeam*>::iterator arcIter = arcs.begin(); arcIter != arcs.end(); ++arcIter) {
+			ESPPointToPointBeam* currArc = *arcIter;
+			currArc->Tick(dT);
+			currArc->Draw(camera);
+		}
+	}
 }
 
 /**
