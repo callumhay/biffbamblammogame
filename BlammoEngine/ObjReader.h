@@ -34,10 +34,8 @@ private:
 
 	ObjReader();
 
-	static Mesh* ReadMeshFromStream(const std::string &filepath, std::istream &inFile);
-
 public:
-
+	static Mesh* ReadMeshFromStream(const std::string &filepath, std::istream &inFile);
 	static Mesh* ReadMesh(const std::string &filepath);
 	static Mesh* ReadMesh(const std::string &filepath, PHYSFS_File* fileHandle);
 

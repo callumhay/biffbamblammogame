@@ -24,6 +24,7 @@ public:
 	virtual ~Texture1D();
 
 	// Creator methods
+	static Texture1D* CreateTexture1DFromBuffer(unsigned char* fileBuffer, long fileBufferLength, TextureFilterType texFilter);
 	static Texture1D* CreateTexture1DFromImgFile(PHYSFS_File* fileHandle, TextureFilterType texFilter);
 	static Texture1D* CreateTexture1DFromImgFile(const std::string& filepath, TextureFilterType texFilter);
 	

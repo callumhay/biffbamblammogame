@@ -7,15 +7,10 @@ Sound(name, msFadein, msFadeout), sdlMusic(NULL), isPlaying(false), isPaused(fal
 
 MusicSound::~MusicSound() {
 	// Clean up the music pointer in SDL
-#ifdef _DEBUG
-	Mix_FreeMusic(this->sdlMusic);
-	this->sdlMusic = NULL;
-#else
 	bool success = ResourceManager::GetInstance()->ReleaseMusicSoundResource(this->sdlMusic);
 	if (!success) {
 		std::cerr << "Error releasing music " << this->GetSoundName() << std::endl;
 	}
-#endif
 }
 
 // Static factory method for building a Music sound.
@@ -23,14 +18,10 @@ MusicSound* MusicSound::BuildMusicSound(const std::string& name, const std::stri
 
 	MusicSound* newMusic = new MusicSound(name, msFadein, msFadeout);
 	
-#ifdef _DEBUG
-	newMusic->sdlMusic = Mix_LoadMUS(filepath.c_str());
-#else
 	newMusic->sdlMusic = ResourceManager::GetInstance()->GetMusicSoundResource(filepath);
 	if (newMusic->sdlMusic == NULL) {
 		std::cerr << "Error loading music file " << filepath << std::endl;
 	}
-#endif
 
 	if (!newMusic->IsValid()) {
 		std::cerr << "Invalid music found: " << newMusic->GetSoundName() << std::endl;

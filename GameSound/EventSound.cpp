@@ -23,14 +23,11 @@ EventSound::~EventSound() {
 	for (std::list<SoundProbabilityPair>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
 		SoundProbabilityPair& currPair = *iter;
 		Mix_Chunk* soundChunk = currPair.GetSoundChunk();
-#ifdef _DEBUG
-		Mix_FreeChunk(soundChunk);
-#else
+
 		bool success = ResourceManager::GetInstance()->ReleaseEventSoundResource(soundChunk);
 		if (!success) {
 			std::cerr << "Error releasing event sound " << this->GetSoundName() << std::endl;
 		}
-#endif
 	}
 	this->sounds.clear();
 }
@@ -64,11 +61,7 @@ EventSound* EventSound::BuildSoundEvent(const std::string& name, int loops, int 
 		currIntervalVal += (currProbability / totalProbability);
 		float probabilityIntervalMax = currIntervalVal;
 
-#ifdef _DEBUG
-		soundChunk = Mix_LoadWAV(currFilepath.c_str());
-#else
 		soundChunk = ResourceManager::GetInstance()->GetEventSoundResource(currFilepath);
-#endif
 		if (soundChunk == NULL) {
 			debug_output("Failed to load sound: " << currFilepath);
 			assert(false);
@@ -99,13 +92,7 @@ EventSound* EventSound::BuildSoundEvent(const std::string& name, int loops, int 
 // Static factory method for building a sound event mask (infinite looping sound)
 EventSound* EventSound::BuildSoundMask(const std::string& name, const std::string& filepath, int msFadein, int msFadeout) {
 	// Create the SDL objects required to play the sound
-	Mix_Chunk* soundChunk = NULL;
-#ifdef _DEBUG
-	soundChunk = Mix_LoadWAV(filepath.c_str());
-#else
-	soundChunk = ResourceManager::GetInstance()->GetEventSoundResource(filepath);
-#endif
-
+	Mix_Chunk* soundChunk = ResourceManager::GetInstance()->GetEventSoundResource(filepath);
 	if (soundChunk == NULL) {
 		debug_output("Failed to load sound: " << filepath);
 		assert(false);

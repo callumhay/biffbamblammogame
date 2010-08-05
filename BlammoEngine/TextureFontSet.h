@@ -50,7 +50,9 @@ public:
 	}
 
 	// Creator Functions
+	
 	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromTTF(PHYSFS_File* fileHandle, const std::vector<unsigned int>& heightsInPixels);
 	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromTTF(const std::string& ttfFilepath, const std::vector<unsigned int>& heightsInPixels);
+	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromBuffer(unsigned char* buffer, long length, const std::vector<unsigned int>& heightsInPixels);
 };
 #endif

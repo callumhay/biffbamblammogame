@@ -31,6 +31,7 @@ protected:
 		return !(texFilter == Nearest || texFilter == Linear);
 	}
 
+	bool Load2DOr1DTextureFromBuffer(unsigned char* fileBuffer, long fileBufferLength, TextureFilterType texFilter = Nearest);
 	bool Load2DOr1DTextureFromImg(const std::string& filepath, TextureFilterType texFilter = Nearest);
 	bool Load2DOr1DTextureFromImg(PHYSFS_File* fileHandle, TextureFilterType texFilter = Nearest);
 

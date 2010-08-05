@@ -17,6 +17,19 @@ Texture1D::Texture1D(TextureFilterType texFilter) : Texture(texFilter, GL_TEXTUR
 Texture1D::~Texture1D() {
 }
 
+Texture1D* Texture1D::CreateTexture1DFromBuffer(unsigned char* fileBuffer, long fileBufferLength, TextureFilterType texFilter) {
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
+
+	Texture1D* newTex = new Texture1D(texFilter);
+	if (!newTex->Load2DOr1DTextureFromBuffer(fileBuffer, fileBufferLength, texFilter)) {
+		delete newTex;
+		newTex = NULL;
+	}
+
+	glPopAttrib();
+	return newTex;
+}
+
 /**
  * Static creator method for the creation of 1D textures.
  */

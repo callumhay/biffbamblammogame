@@ -80,6 +80,21 @@ Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height, Texture
 	return newTex;
 }
 
+Texture2D* Texture2D::CreateTexture2DFromBuffer(unsigned char* fileBuffer, long fileBufferLength, TextureFilterType texFilter) {
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
+	
+	Texture2D* newTex = new Texture2D(texFilter);
+	if (!newTex->Load2DOr1DTextureFromBuffer(fileBuffer, fileBufferLength, texFilter)) {
+		delete newTex;
+		newTex = NULL;
+	}
+
+	glPopAttrib();
+	debug_opengl_state();
+
+	return newTex;
+}
+
 /**
  * Static creator for making a 2D texture from a given file path to an image file.
  * Returns: 2D Texture with given image, NULL otherwise.
