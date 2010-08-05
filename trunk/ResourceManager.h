@@ -18,41 +18,6 @@ class TextureFontSet;
  * all memory creation and destruction for these.
  */
 class ResourceManager {
-private:
-	static ResourceManager* instance;
-
-	ResourceManager(const std::string& resourceZip, const char* argv0);
-	~ResourceManager();
-
-	std::map<std::string, Mesh*> loadedMeshes;					// Meshes already loaded into the blammo engine from file
-	
-	// Independant meshes for specific special-material things in the game
-	Mesh* inkBlockMesh;
-	Mesh* portalBlockMesh;
-
-	std::map<std::string, Texture*> loadedTextures;			// Textures already loaded into the blammo engine
-	Texture* celShadingTexture;													// Cel-shading 1D texture
-	std::map<Texture*, unsigned int> numRefPerTexture;	// Number of references per texture handed out
-
-	// Cg Runtime objects and helper functions
-	CGcontext cgContext;
-	std::map<std::string, CGeffect> loadedEffects;																	// Effects already loaded into the blammo engine
-	std::map<CGeffect, std::map<std::string, CGtechnique> > loadedEffectTechniques;	// Techniques associated with each effect
-	std::map<CGeffect, unsigned int> numRefPerEffect;																// Number of references per effect
-
-	// SDL Mixer loaded sounds
-	std::map<std::string, Mix_Chunk*> loadedEventSounds;
-	std::map<Mix_Chunk*, int> numReservedEventSounds;
-	std::map<std::string, Mix_Music*> loadedMusicSounds;
-	std::map<Mix_Music*, SDL_RWops*> musicSDLMemory;
-	std::map<Mix_Music*, char*> musicBuffers;
-	std::map<Mix_Music*, int> numReservedMusicSounds;
-
-	static ConfigOptions* configOptions;	// The configuration options read from the game's ini file
-
-	void InitCgContext();
-	static void LoadEffectTechniques(const CGeffect effect, std::map<std::string, CGtechnique>& techniques);
-
 public:
 	static ResourceManager* GetInstance() {
 		if (ResourceManager::instance == NULL) {
@@ -104,7 +69,50 @@ public:
 	// Basic loading functions ****************************************************************************************************
 	static std::map<unsigned int, TextureFontSet*> LoadFont(const std::string &filepath, const std::vector<unsigned int> &heights);
 	static std::istringstream* FilepathToInStream(const std::string &filepath);
-	static char* FilepathToMemoryBuffer(const std::string &filepath, int &length);
+	static char* FilepathToMemoryBuffer(const std::string &filepath, long &length);
+
+private:
+	static ResourceManager* instance;
+
+	ResourceManager(const std::string& resourceZip, const char* argv0);
+	~ResourceManager();
+
+	static const char* RESOURCE_DIRECTORY;
+	static const char* MOD_DIRECTORY;
+
+	std::map<std::string, Mesh*> loadedMeshes;	// Meshes already loaded into the blammo engine from file
+	
+	// Independant meshes for specific special-material things in the game
+	Mesh* inkBlockMesh;
+	Mesh* portalBlockMesh;
+
+	std::map<std::string, Texture*> loadedTextures;			// Textures already loaded into the blammo engine
+	Texture* celShadingTexture;													// Cel-shading 1D texture
+	std::map<Texture*, unsigned int> numRefPerTexture;	// Number of references per texture handed out
+
+	// Cg Runtime objects and helper functions
+	CGcontext cgContext;
+	std::map<std::string, CGeffect> loadedEffects;																	// Effects already loaded into the blammo engine
+	std::map<CGeffect, std::map<std::string, CGtechnique> > loadedEffectTechniques;	// Techniques associated with each effect
+	std::map<CGeffect, unsigned int> numRefPerEffect;																// Number of references per effect
+
+	// SDL Mixer loaded sounds
+	std::map<std::string, Mix_Chunk*> loadedEventSounds;
+	std::map<Mix_Chunk*, int> numReservedEventSounds;
+	std::map<std::string, Mix_Music*> loadedMusicSounds;
+	std::map<Mix_Music*, SDL_RWops*> musicSDLMemory;
+	std::map<Mix_Music*, char*> musicBuffers;
+	std::map<Mix_Music*, int> numReservedMusicSounds;
+
+	static ConfigOptions* configOptions;	// The configuration options read from the game's ini file
+
+	void InitCgContext();
+	static void LoadEffectTechniques(const CGeffect effect, std::map<std::string, CGtechnique>& techniques);
+
+	static std::string ConvertResourceFilepathToModFilepath(const std::string& resourceFilepath);
+
+	//static std::string GetAsModDirectoryPath(const std::string& resourceFilepath);
+	//static std::string GetAsResourceDirectoryPath(const std::string& resourceFilepath);
 };
 
 #endif

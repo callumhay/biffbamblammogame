@@ -20,6 +20,11 @@
 ResourceManager* ResourceManager::instance = NULL;
 ConfigOptions* ResourceManager::configOptions = NULL;
 
+const char* ResourceManager::RESOURCE_DIRECTORY = "resources";
+// The modifications resource directory - this takes loading presedant over the 
+// resource zip file when in debug mode, otherwise it is ignored.
+const char* ResourceManager::MOD_DIRECTORY = "mod";
+
 ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
 cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NULL) {
 	// Initialize DevIL and make sure it loaded correctly
@@ -265,30 +270,19 @@ Mesh* ResourceManager::GetObjMeshResource(const std::string &filepath) {
 	Mesh* mesh = NULL;
 
 	if (needToReadFromFile) {
-		// First make sure the file exists in the archive
-		int doesExist = PHYSFS_exists(filepath.c_str());
-		if (doesExist == 0) {
+		std::istringstream* iStrStream = this->FilepathToInStream(filepath);
+		if (iStrStream == NULL) {
 			debug_output("Mesh file not found: " << filepath);
-			debug_physfs_state(NULL);
 			return NULL;
 		}
-
-		// Open the file for reading
-		PHYSFS_File* fileHandle = PHYSFS_openRead(filepath.c_str());
-		if (fileHandle == NULL) {
-			assert(false);
-			return NULL;
-		}
-
-		// Read the file as an obj
-		mesh = ObjReader::ReadMesh(filepath, fileHandle);
+		mesh = ObjReader::ReadMeshFromStream(filepath, *iStrStream);
 		assert(mesh != NULL);
+
 		this->loadedMeshes[filepath] = mesh;
 
-		// Clean-up
-		int closeWentWell = PHYSFS_close(fileHandle);
-		debug_physfs_state(closeWentWell);
-		fileHandle = NULL;
+		// Clean-up the stream
+		delete iStrStream;
+		iStrStream = NULL;
 	}
 	else {
 		// The mesh has already been loaded from file - all we have to do is either return it
@@ -308,29 +302,19 @@ Mesh* ResourceManager::GetObjMeshResource(const std::string &filepath) {
 std::map<std::string, CgFxMaterialEffect*> ResourceManager::GetMtlMeshResource(const std::string &filepath) {
 	std::map<std::string, CgFxMaterialEffect*> materials;
 
-	// First make sure the file exists in the archive
-	int doesExist = PHYSFS_exists(filepath.c_str());
-	if (doesExist == 0) {
+	std::istringstream* iStrStream = this->FilepathToInStream(filepath);
+	if (iStrStream == NULL) {
 		debug_output("Material file not found: " << filepath);
-		debug_physfs_state(NULL);
-		return materials;
-	}
-
-	// Open the file for reading
-	PHYSFS_File* fileHandle = PHYSFS_openRead(filepath.c_str());
-	if (fileHandle == NULL) {
-		assert(false);
 		return materials;
 	}
 
 	// Read in the MTL file
-	materials = MtlReader::ReadMaterialFile(filepath, fileHandle);
+	materials = MtlReader::ReadMaterialFileFromStream(filepath, *iStrStream);
 	assert(materials.size() > 0);
 
-	// Clean-up
-	int closeWentWell = PHYSFS_close(fileHandle);
-	debug_physfs_state(closeWentWell);
-	fileHandle = NULL;
+	// Clean-up the stream
+	delete iStrStream;
+	iStrStream = NULL;
 
 	return materials;
 }
@@ -376,18 +360,10 @@ Texture* ResourceManager::GetImgTextureResource(const std::string &filepath, Tex
 	Texture* texture = NULL;
 
 	if (needToReadFromFile) {
-		// First make sure the file exists in the archive
-		int doesExist = PHYSFS_exists(filepath.c_str());
-		if (doesExist == 0) {
+		long texBufferLength;
+		unsigned char* texBuffer = (unsigned char*)this->FilepathToMemoryBuffer(filepath, texBufferLength);
+		if (texBuffer == NULL) {
 			debug_output("Texture file not found: " << filepath);
-			debug_physfs_state(NULL);
-			return NULL;
-		}
-
-		// Open the file for reading
-		PHYSFS_File* fileHandle = PHYSFS_openRead(filepath.c_str());
-		if (fileHandle == NULL) {
-			assert(false);
 			return NULL;
 		}
 
@@ -395,32 +371,30 @@ Texture* ResourceManager::GetImgTextureResource(const std::string &filepath, Tex
 		switch (textureType) {
 
 			case GL_TEXTURE_1D:
-				texture = Texture1D::CreateTexture1DFromImgFile(fileHandle, filter);
+				texture = Texture1D::CreateTexture1DFromBuffer(texBuffer, texBufferLength, filter);
 				break;
 
 			case GL_TEXTURE_2D:
-				texture = Texture2D::CreateTexture2DFromImgFile(fileHandle, filter);
+				texture = Texture2D::CreateTexture2DFromBuffer(texBuffer, texBufferLength, filter);
 				break;
 
 			default:
 				assert(false);
 				return NULL;
 		}
+		
+		// Clean up the texture buffer...
+		delete[] texBuffer;
+		texBuffer = NULL;
 
     if (texture == NULL) {
         debug_output("Failed to load texture into memory: " << filepath);
-        assert(false);
         return NULL;
     }
 
 		// First reference to the texture...
 		this->numRefPerTexture[texture] = 1;
 		this->loadedTextures[filepath] = texture;
-
-		// Clean-up the file handle
-		int closeWentWell = PHYSFS_close(fileHandle);
-		debug_physfs_state(closeWentWell);
-		fileHandle = NULL;
 	}
 	else {
 		// Read the texture out of memory and increment the number of references past out
@@ -482,59 +456,39 @@ Texture* ResourceManager::GetCelShadingTexture() {
 		return this->celShadingTexture;
 	}
 
-	const char* filepath = GameViewConstants::GetInstance()->TEXTURE_CEL_GRADIENT.c_str();
-	int doesExist = PHYSFS_exists(filepath);
-	if (doesExist == 0) {
+	const std::string& filepath = GameViewConstants::GetInstance()->TEXTURE_CEL_GRADIENT;
+	long texBufferLength;
+	unsigned char* textureBuffer = (unsigned char*)this->FilepathToMemoryBuffer(filepath, texBufferLength);
+	if (textureBuffer == NULL) {
 		debug_output("Texture file not found: " << filepath);
-		debug_physfs_state(NULL);
-		return NULL;
-	}
-	// Open the file for reading
-	PHYSFS_File* fileHandle = PHYSFS_openRead(filepath);
-	if (fileHandle == NULL) {
-		assert(false);
 		return NULL;
 	}
 
-	this->celShadingTexture = Texture1D::CreateTexture1DFromImgFile(fileHandle, Texture::Nearest);
+	this->celShadingTexture = Texture1D::CreateTexture1DFromBuffer(textureBuffer, texBufferLength, Texture::Nearest);
 	assert(this->celShadingTexture != NULL);
+
+	delete[] textureBuffer;
+	textureBuffer = NULL;
 
 	return this->celShadingTexture;
 }
 
 /**
- * Does a direct read of the raw noise octave texture data from the physfs file system
+ * Does a direct read of the raw noise octave texture data from the relevant file system
  * and returns that data without taking ownership.
  * The caller is responsible for the returned memory!
- * Returns NULL if could not find data.
+ * Returns: NULL if could not find data.
  */
 GLubyte* ResourceManager::ReadNoiseOctave3DTextureData() {
-	const char* filepath = GameViewConstants::GetInstance()->TEXTURE_NOISE_OCTAVES.c_str();
-	int doesExist = PHYSFS_exists(filepath);
-	if (doesExist == 0) {
-		return NULL;
-	}
-	
-	// Open the file for reading
-	PHYSFS_File* fileHandle = PHYSFS_openRead(filepath);
-	if (fileHandle == NULL) {
-		assert(false);
-		return NULL;
-	}
-	
-	// Grab all the data needed from the file handle
-	PHYSFS_sint64 fileLength = PHYSFS_fileLength(fileHandle);
-	GLubyte* fileBuffer = new GLubyte[fileLength];
-	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(GLubyte), fileLength);
-	if (readResult == 0) {
-		delete[] fileBuffer;
-		fileBuffer = NULL;
+	long length;
+	GLubyte* noiseBuffer = (GLubyte*)this->FilepathToMemoryBuffer(GameViewConstants::GetInstance()->TEXTURE_NOISE_OCTAVES, length);
+	if (noiseBuffer == NULL) {
 		debug_output("Error reading noise octave data to bytes.");
 		assert(false);
 		return NULL;
 	}
 
-	return fileBuffer;
+	return noiseBuffer;
 }
 
 /**
@@ -544,28 +498,19 @@ GLubyte* ResourceManager::ReadNoiseOctave3DTextureData() {
 std::map<unsigned int, TextureFontSet*> ResourceManager::LoadFont(const std::string &filepath, const std::vector<unsigned int>& heights) {
 	std::map<unsigned int, TextureFontSet*> fontSets;
 	
-	// First make sure the file exists in the archive
-	int doesExist = PHYSFS_exists(filepath.c_str());
-	if (doesExist == 0) {
-		debug_output("Texture file not found: " << filepath);
-		debug_physfs_state(NULL);
+	long bufferLength = 0;
+	unsigned char* fileBuffer = (unsigned char*)ResourceManager::FilepathToMemoryBuffer(filepath, bufferLength);
+	if (fileBuffer == NULL) {
+		debug_output("Font file not found: " << filepath);
 		return fontSets;
 	}
 
-	// Open the file for reading
-	PHYSFS_File* fileHandle = PHYSFS_openRead(filepath.c_str());
-	if (fileHandle == NULL) {
-		assert(false);
-		return fontSets;
-	}
-
-	// Load the font sets using physfs file handle
-	fontSets = TextureFontSet::CreateTextureFontFromTTF(fileHandle, heights);
-
-	// Clean-up the file handle
-	int closeWentWell = PHYSFS_close(fileHandle);
-	debug_physfs_state(closeWentWell);
-	fileHandle = NULL;
+	// Load the font sets using the file buffer
+	fontSets = TextureFontSet::CreateTextureFontFromBuffer(fileBuffer, bufferLength, heights);
+	
+	// Clean up the file buffer
+	delete[] fileBuffer;
+	fileBuffer = NULL;
 
 	return fontSets;
 }
@@ -587,34 +532,12 @@ void ResourceManager::GetCgFxEffectResource(const std::string& filepath, CGeffec
 
 	if (needToReadFromFile) {
 
-		// First make sure the file exists in the archive
-		int doesExist = PHYSFS_exists(filepath.c_str());
-		if (doesExist == 0) {
+		long fileBufferLength;
+		char* fileBuffer = this->FilepathToMemoryBuffer(filepath, fileBufferLength);
+		if (fileBuffer == NULL) {
 			debug_output("Effect file not found: " << filepath);
-			debug_physfs_state(NULL);
 			return;
 		}
-
-		// Open the file for reading
-		PHYSFS_File* fileHandle = PHYSFS_openRead(filepath.c_str());
-		if (fileHandle == NULL) {
-			assert(false);
-			return;
-		}
-
-		// Grab all the data out of the file so it can be used to compile the cgfx effect:
-		PHYSFS_sint64 fileLength = PHYSFS_fileLength(fileHandle);
-		char* fileBuffer = new char[fileLength+1];
-	
-		int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(char), fileLength);
-		if (readResult == 0) {
-			delete[] fileBuffer;
-			fileBuffer = NULL;
-			debug_output("Error reading obj file to bytes: " << filepath);
-			assert(false);
-			return;
-		}
-		fileBuffer[fileLength] = '\0';
 
 		// Load the effect file using physfs and create the effect using the Cg runtime
 		effect = cgCreateEffect(this->cgContext, fileBuffer, NULL);
@@ -623,9 +546,6 @@ void ResourceManager::GetCgFxEffectResource(const std::string& filepath, CGeffec
 		// Clean-up the buffer and file handle
 		delete[] fileBuffer;
 		fileBuffer = NULL;
-		int closeWentWell = PHYSFS_close(fileHandle);
-		debug_physfs_state(closeWentWell);
-		fileHandle = NULL;
 
 		// Add the effect as a resource
 		assert(effect != NULL);
@@ -735,14 +655,14 @@ Mix_Chunk* ResourceManager::GetEventSoundResource(const std::string &filepath) {
 	bool needToReadFromFile = loadedSoundIter == this->loadedEventSounds.end();
 
 	if (needToReadFromFile) {
-		int dataLength = 0;
+		long dataLength = 0;
 		char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
 		if (soundMemData == NULL) {
 			std::cerr << "Could not find file: " << filepath << std::endl;
 			return NULL;
 		}
 
-		SDL_RWops* sdlSoundMem = SDL_RWFromMem(soundMemData, dataLength);
+		SDL_RWops* sdlSoundMem = SDL_RWFromMem(soundMemData, static_cast<int>(dataLength));
 		Mix_Chunk* sound = Mix_LoadWAV_RW(sdlSoundMem, 1);	// Load the sound and free the SDL_RWops memory
 		
 		delete[] soundMemData;
@@ -768,16 +688,15 @@ Mix_Music* ResourceManager::GetMusicSoundResource(const std::string &filepath) {
 	bool needToReadFromFile = loadedSoundIter == this->loadedMusicSounds.end();
 
 	if (needToReadFromFile) {
-		int dataLength = 0;
+		long dataLength = 0;
 		char* soundMemData = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, dataLength);
 		if (soundMemData == NULL) {
 			std::cerr << "Could not find file: " << filepath << std::endl;
 			return NULL;
 		}
 
-		SDL_RWops* sdlSoundMem = SDL_RWFromMem(soundMemData, dataLength);
+		SDL_RWops* sdlSoundMem = SDL_RWFromMem(soundMemData, static_cast<int>(dataLength));
 		Mix_Music* music = Mix_LoadMUS_RW(sdlSoundMem);
-
 
 		if (music == NULL) {
 			std::cerr << "SDL Error loading music: " << Mix_GetError() << std::endl;
@@ -796,6 +715,10 @@ Mix_Music* ResourceManager::GetMusicSoundResource(const std::string &filepath) {
 }
 
 bool ResourceManager::ReleaseEventSoundResource(Mix_Chunk* sound) {
+	if (sound == NULL) {
+		return true;
+	}
+
 	// Make sure the sound resource was even allocated
 	std::map<Mix_Chunk*, int>::iterator reservedFindIter = this->numReservedEventSounds.find(sound);
 	if (reservedFindIter == this->numReservedEventSounds.end()) {
@@ -830,6 +753,10 @@ bool ResourceManager::ReleaseEventSoundResource(Mix_Chunk* sound) {
 }
 
 bool ResourceManager::ReleaseMusicSoundResource(Mix_Music* music) {
+	if (music == NULL) {
+		return true;
+	}
+
 	// Make sure the sound resource was even allocated
 	std::map<Mix_Music*, int>::iterator reservedFindIter = this->numReservedMusicSounds.find(music);
 	if (reservedFindIter == this->numReservedMusicSounds.end()) {
@@ -865,9 +792,8 @@ bool ResourceManager::ReleaseMusicSoundResource(Mix_Music* music) {
 
 		Mix_FreeMusic(music);
 		music = NULL;
-
-		SDL_FreeRW(sdlMemIter->second);
 		delete[] musicBufferIter->second;
+		musicBufferIter->second = NULL;
 
 		this->loadedMusicSounds.erase(nameToMusicIter);
 		this->musicSDLMemory.erase(sdlMemIter);
@@ -946,7 +872,7 @@ bool ResourceManager::WriteConfigurationOptionsToFile(const ConfigOptions& cfgOp
  */ 
 std::istringstream* ResourceManager::FilepathToInStream(const std::string &filepath) {
 	std::istringstream* inFile = NULL;
-	int fileBufferlength = 0;
+	long fileBufferlength = 0;
 
 	char* fileBuffer = ResourceManager::FilepathToMemoryBuffer(filepath, fileBufferlength);
 	if (fileBuffer == NULL) {
@@ -964,11 +890,50 @@ std::istringstream* ResourceManager::FilepathToInStream(const std::string &filep
 	return inFile;
 }
 
+// Convert a filepath with the resource directory in it into one with the mod directory instead
+std::string ResourceManager::ConvertResourceFilepathToModFilepath(const std::string& resourceFilepath) {
+	// On failure then we return an empty string...
+	size_t resourceDirIdx = resourceFilepath.find_first_of(ResourceManager::RESOURCE_DIRECTORY);
+	if (resourceDirIdx == std::string::npos) {
+		return std::string("");
+	}
+
+	// Replace the resource directory name with the modifications directory name...
+	std::string resourceDirName(ResourceManager::RESOURCE_DIRECTORY);
+	std::string result = resourceFilepath;
+	result.replace(resourceDirIdx, resourceDirName.size(), ResourceManager::MOD_DIRECTORY);
+
+	return result;
+}
+
 /**
- * Convert a file stored in the resource zip filesystem into a memory stream of bytes.
+ * Convert a file stored in the resource zip filesystem into a memory stream of type T.
  */
-char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, int &length) {
-// First make sure the file exists in the archive
+char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, long &length) {
+
+#ifdef _DEBUG
+	// Get the corresponding file path in the modifications directory...
+	std::string modDirFilepath = ConvertResourceFilepathToModFilepath(filepath);
+	std::ifstream iStream(modDirFilepath.c_str(), std::ios::binary);
+	
+	// If the file was not found then the stream will simply be closed and 
+	// the file system will fall back to loading from the zip file
+	if (iStream.is_open()) {
+		iStream.seekg(0, std::ios::end);
+		length = static_cast<long>(iStream.tellg());
+		iStream.seekg(0, std::ios::beg);
+
+		char* fileBuffer = new char[length+1];
+		fileBuffer[length] = '\0';
+
+		iStream.read(fileBuffer, length);
+		iStream.close();
+
+		return fileBuffer;
+	}
+#endif
+
+	// First make sure the file exists in the archive
 	int doesExist = PHYSFS_exists(filepath.c_str());
 	if (doesExist == 0) {
 		debug_output("File not found: " << filepath);
@@ -979,7 +944,6 @@ char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, int &
 	// Open the file for reading
 	PHYSFS_File* fileHandle = PHYSFS_openRead(filepath.c_str());
 	if (fileHandle == NULL) {
-		assert(false);
 		return NULL;
 	}
 
@@ -993,7 +957,6 @@ char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, int &
 		delete[] fileBuffer;
 		fileBuffer = NULL;
 		debug_output("Error reading file to bytes: " << filepath);
-		assert(false);
 		return NULL;
 	}
 	fileBuffer[fileLength] = '\0';
@@ -1002,6 +965,6 @@ char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, int &
 	debug_physfs_state(closeWentWell);
 	fileHandle = NULL;
 
-	length = fileLength;
+	length = static_cast<long>(fileLength);
 	return fileBuffer;
 }

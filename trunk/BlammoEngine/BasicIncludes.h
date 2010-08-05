@@ -196,7 +196,6 @@ inline void debug_physfs_state(int physfsReturnVal) {
 			error = "?";
 		}
 		debug_output("PHYSFS ERROR: " << error);
-		assert(false);
 	}
 }
 

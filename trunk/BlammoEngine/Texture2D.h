@@ -26,6 +26,7 @@ public:
 	void RenderTextureToFullscreenQuad(float depth = 0.0f) const;
 
 	// Creator methods
+	static Texture2D* CreateTexture2DFromBuffer(unsigned char* fileBuffer, long fileBufferLength, TextureFilterType texFilter);
 	static Texture2D* CreateTexture2DFromImgFile(PHYSFS_File* fileHandle, TextureFilterType texFilter);
 	static Texture2D* CreateTexture2DFromImgFile(const std::string& filepath, TextureFilterType texFilter);
 	static Texture2D* CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilterType texFilter);
