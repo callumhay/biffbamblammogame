@@ -81,6 +81,7 @@ hugeExplosionTex(NULL) {
 
 GameESPAssets::~GameESPAssets() {
 	this->KillAllActiveEffects();
+	this->KillAllActiveTeslaLightningArcs();
 
 	// Delete any effect textures
 	for (std::vector<Texture2D*>::iterator iter = this->bangTextures.begin();
@@ -284,7 +285,9 @@ void GameESPAssets::KillAllActiveEffects() {
 		emitterList.clear();
 	}
 	this->activeTimerHUDEmitters.clear();
+}
 
+void GameESPAssets::KillAllActiveTeslaLightningArcs() {
 	// Clear all of the tesla lightning arcs
 	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator iter1 = this->teslaLightningArcs.begin();
 		iter1 != this->teslaLightningArcs.end(); ++iter1) {
@@ -298,7 +301,6 @@ void GameESPAssets::KillAllActiveEffects() {
 			lightningArcs.clear();
 	}
 	this->teslaLightningArcs.clear();
-
 }
 
 /**
@@ -2274,21 +2276,35 @@ void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, con
 
 	Point3D startPt(block1.GetCenter());
 	Point3D endPt(block2.GetCenter());
+
+	// Base the number of segments on the distance between the tesla blocks!!
+	float distance = Point2D::Distance(block1.GetCenter(), block2.GetCenter());
+	static const float NUM_SEGMENTS_PER_UNIT_DIST = 1.5f;
+	int totalSegments = NUM_SEGMENTS_PER_UNIT_DIST * distance;
+
+	// Create the large central lightining arc
 	ESPPointToPointBeam* bigLightningArc = new ESPPointToPointBeam();
 	bigLightningArc->SetStartAndEndPoints(startPt, endPt);
 	bigLightningArc->SetColour(ColourRGBA(1,1,1,1));
 	bigLightningArc->SetBeamLifetime(ESPInterval(ESPBeam::INFINITE_BEAM_LIFETIME));
 	bigLightningArc->SetNumBeamShots(1);
-	bigLightningArc->SetMainBeamAmplitude(ESPInterval(0.0f, 0.75f * LevelPiece::PIECE_HEIGHT));
-
-	// Base the number of segments on the distance between the tesla blocks!!
-	float distance = Point2D::Distance(block1.GetCenter(), block2.GetCenter());
-	static const float NUM_SEGMENTS_PER_UNIT_DIST = 2;
-	int totalSegments = NUM_SEGMENTS_PER_UNIT_DIST * distance;
+	bigLightningArc->SetMainBeamAmplitude(ESPInterval(0.0f, 0.7f * LevelPiece::PIECE_HEIGHT));
+	bigLightningArc->SetMainBeamThickness(ESPInterval(LevelPiece::PIECE_WIDTH / 9.0f, LevelPiece::PIECE_WIDTH / 8.0f));
 	bigLightningArc->SetNumMainESPBeamSegments(totalSegments);
 	
+	// Create some purpleish smaller arcs
+	ESPPointToPointBeam* smallerLightningArcs = new ESPPointToPointBeam();
+	smallerLightningArcs->SetStartAndEndPoints(startPt, endPt);
+	smallerLightningArcs->SetColour(ColourRGBA(0.9f, 0.75f, 1.0f, 1.0f));
+	smallerLightningArcs->SetBeamLifetime(ESPInterval(ESPBeam::INFINITE_BEAM_LIFETIME));
+	smallerLightningArcs->SetNumBeamShots(2);
+	smallerLightningArcs->SetMainBeamAmplitude(ESPInterval(0.1f * LevelPiece::PIECE_HEIGHT, 0.9f * LevelPiece::PIECE_HEIGHT));
+	smallerLightningArcs->SetMainBeamThickness(ESPInterval(LevelPiece::PIECE_WIDTH / 20.0f, LevelPiece::PIECE_WIDTH / 18.0f));
+	smallerLightningArcs->SetNumMainESPBeamSegments(totalSegments);
+
 	std::list<ESPPointToPointBeam*> lightningArcs;
 	lightningArcs.push_back(bigLightningArc);
+	lightningArcs.push_back(smallerLightningArcs);
 
 	std::pair<std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::const_iterator, bool> insertResult =
 		this->teslaLightningArcs.insert(std::make_pair(std::make_pair(&block1, &block2), lightningArcs));

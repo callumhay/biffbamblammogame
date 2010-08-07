@@ -230,6 +230,7 @@ public:
 
 	void KillAllActiveEffects();
 	void KillAllActiveBallEffects(const GameBall& ball);
+	void KillAllActiveTeslaLightningArcs();
 
 	// Draw functions for various particle effects in the game
 	void DrawParticleEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);

@@ -171,6 +171,9 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
+	// Tesla lightning arcs
+	this->display->GetAssets()->DrawTeslaLightning(dT, camera);
+
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), camera);
 	glPopMatrix();
@@ -184,9 +187,6 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 
 	// Balls...
 	this->display->GetAssets()->DrawGameBalls(dT, *this->display->GetModel(), camera, negHalfLevelDim);
-
-	// Tesla lightning arcs
-	this->display->GetAssets()->DrawTeslaLightning(dT, camera);
 
 	// Projectiles...
 	this->display->GetAssets()->DrawProjectiles(dT, *this->display->GetModel(), camera);

@@ -5,7 +5,11 @@
 #include "../BlammoEngine/Algebra.h"
 #include "../BlammoEngine/Mesh.h"
 
+#include "../ESPEngine/ESPParticleScaleEffector.h"
+
 class TeslaBlock;
+class ESPPointEmitter;
+class Texture2D;
 
 class TeslaBlockMesh {
 public:
@@ -30,6 +34,13 @@ private:
 	Mesh* teslaBaseMesh;
 	Mesh* teslaCoilMesh;
 
+	ESPParticleScaleEffector flarePulse;
+	//ESPParticleAccelEffector sparkGravity;
+	ESPPointEmitter* teslaCenterFlare;
+	//ESPPointEmitter* teslaSparks;
+	Texture2D* flareTex;
+	//Texture2D* sparkTex;
+
 	void LoadMesh();
 
 	// Disallow copy and assign
@@ -46,8 +57,11 @@ inline void TeslaBlockMesh::AddTeslaBlock(const TeslaBlock* teslaBlock) {
 	std::pair<std::set<const TeslaBlock*>::iterator, bool> insertResult = this->teslaBlocks.insert(teslaBlock);
 	assert(insertResult.second);
 	Vector3D randomRotVec(Randomizer::GetInstance()->RandomNumNegOneToOne(),
-												Randomizer::GetInstance()->RandomNumNegOneToOne(),
-												Randomizer::GetInstance()->RandomNumNegOneToOne());
+												Randomizer::GetInstance()->RandomNumNegOneToOne(), 0.0f);
+	if (randomRotVec == Vector3D(0,0,0)) {
+		randomRotVec[0] = 1.0f;
+		randomRotVec[1] = 1.0f;
+	}
 	randomRotVec.Normalize();
 	this->rotations.insert(std::make_pair(teslaBlock, std::make_pair(randomRotVec, static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne() * 360.0f))));
 }	

@@ -265,6 +265,7 @@ namespace Onomatoplex {
 		goodSingleWordElectric.push_back("Zappy");
 		goodSingleWordElectric.push_back("BzZsstt");
 		goodSingleWordElectric.push_back("Fzzstt");
+		goodSingleWordElectric.push_back("Ksszzk");
 		this->goodSingleWords[ELECTRIC] = goodSingleWordElectric;
 
 		std::vector<std::string> awesomeSingleWordElectric;

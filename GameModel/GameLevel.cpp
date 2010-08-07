@@ -1023,10 +1023,31 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 		n[0] =  fromLineToBall[1];
 		n[1] = -fromLineToBall[0];
 	}
+	n.Normalize();
 
 	// Now we need to calculate the time since the collision
 	double collisionOverlapDist = ballBounds.Radius() - sqrt(lineToBallCenterSqDist);
 	timeSinceCollision = collisionOverlapDist / b.GetSpeed();
+
+	// Change the normal slightly to make the ball reflection a bit random - make it harder on the player...
+	// Tend towards changing the normal to make a bigger reflection not a smaller one...
+	static const float MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS = static_cast<float>(M_PI / 4.0);	// Angle from the normal that's allowable
+	static const float MAX_ANGLE_LESS_REFLECTION_DEGS = 15.0f;
+	static const float MAX_ANGLE_MORE_REFLECTION_DEGS = 30.0f;
+	const Vector2D& ballVelocityDir = b.GetDirection();
+	// First make sure the ball velocity direction is reasonably off from the line/ reasonably close to the normal
+	// or modification could cause the ball to collide multiple times or worse
+	if (acos(Vector2D::Dot(-ballVelocityDir, n)) <= MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS) {
+		float rotateDir = NumberFuncs::SignOf(Vector3D::cross(Vector3D(n), Vector3D(ballVelocityDir))[2]);
+		if (Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
+			// Rotate in the opposite direction (make the ball not reflect as much)
+			rotateDir *= -1;
+			n.Rotate(rotateDir * Randomizer::GetInstance()->RandomNumZeroToOne() * MAX_ANGLE_LESS_REFLECTION_DEGS);
+		}
+		else {
+			n.Rotate(rotateDir * Randomizer::GetInstance()->RandomNumZeroToOne() * MAX_ANGLE_MORE_REFLECTION_DEGS);
+		}
+	}
 
 	// EVENT: Ball hit a tesla lightning arc!
 	GameEventManager::Instance()->ActionBallHitTeslaLightningArc(b, *iter->first.first, *iter->first.second);
