@@ -14,9 +14,10 @@ public:
 
 	ESPBeamSegment* GetStartSegment() const;
 	void SetLifeTime(double lifeInSeconds);
+	void SetThickness(float thickness);
 
 	void Tick(double dT);
-	void Draw() const;
+	void Draw(const Point3D& startPt, const Camera& camera) const;
 	bool IsDead() const;
 
 	const Vector3D& GetBeamLineVec() const;
@@ -33,6 +34,7 @@ private:
 	Vector3D beamLineVec;								// Vector from start to end of the beam (without any variations)
 	ESPInterval amplitudeVariationAmt;	// Interval of allowed variation from the beam line
 	ESPInterval lineDistVariationAmt;		// Interval of allowed variation along the beam line of any segment point
+	float thickness;
 
 	//double variationSpd
 
@@ -49,6 +51,11 @@ inline ESPBeamSegment* ESPBeam::GetStartSegment() const {
 
 inline void ESPBeam::SetLifeTime(double lifeInSeconds) {
 	this->lifeTimeInSecs = lifeInSeconds;
+}
+
+inline void ESPBeam::SetThickness(float thickness) {
+	assert(thickness > 0.0f);
+	this->thickness = thickness;
 }
 
 inline void ESPBeam::Tick(double dT) {

@@ -73,6 +73,7 @@ public:
 	}
 
 	static Vector2D Rotate(float angInDegs, const Vector2D& v);
+	void Rotate(float angInDegs);
 
 	void Normalize() {
 		float magnitude = Vector2D::Magnitude(*this);
@@ -124,6 +125,12 @@ inline Vector2D Reflect(const Vector2D& v, const Vector2D& n) {
 inline Vector2D Vector2D::Rotate(float angInDegs, const Vector2D& v) {
 	float angInRads = Trig::degreesToRadians(angInDegs);
 	return Vector2D(cosf(angInRads) * v[0] - sinf(angInRads) * v[1], sinf(angInRads) * v[0] + cosf(angInRads) * v[1]);
+}
+
+inline void Vector2D::Rotate(float angInDegs) {
+	float angInRads = Trig::degreesToRadians(angInDegs);
+	v_[0] = cosf(angInRads) * v_[0] - sinf(angInRads) * v_[1];
+	v_[1] = sinf(angInRads) * v_[0] + cosf(angInRads) * v_[1];
 }
 
 // 3D Vector -----------------------------------------------------

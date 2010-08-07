@@ -156,6 +156,7 @@ public:
 	const std::string TEXTURE_TWISTED_SPIRAL;
 	const std::string TEXTURE_SIDEBLAST;
 	const std::string TEXTURE_HUGE_EXPLOSION;
+	const std::string TEXTURE_BRIGHT_FLARE;
 
 	const std::string TEXTURE_STARFIELD;
 	

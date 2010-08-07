@@ -14,7 +14,7 @@
 
 ESPPointToPointBeam::ESPPointToPointBeam() : startPt(0,0,0), endPt(0,0,0), colour(1,1,1,1), /*texture(NULL),*/
 numMainESPBeamSegments(10), numBeamsShot(0), timeSinceLastBeamSpawn(0.0), timeUntilNextBeamSpawn(0.0), 
-mainBeamAmplitude(ESPInterval(0.0f)) {
+mainBeamAmplitude(ESPInterval(0.0f)), mainBeamThickness(ESPInterval(1.0f)) {
 	// By default there is a single beam shot that lasts forever
 	this->SetNumBeamShots(1);
 	this->SetTimeBetweenBeamShots(ESPInterval(0));
@@ -58,11 +58,12 @@ void ESPPointToPointBeam::Tick(double dT) {
 }
 
 void ESPPointToPointBeam::Draw(const Camera& camera) {
-	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
 	
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
+	//glBlendFunc(GL_ONE, GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glPolygonMode(GL_FRONT, GL_FILL);
@@ -74,12 +75,13 @@ void ESPPointToPointBeam::Draw(const Camera& camera) {
 	// Draw all of the alive beams
 	for (std::list<ESPBeam*>::iterator iter = this->aliveBeams.begin(); iter != this->aliveBeams.end(); ++iter) {
 		ESPBeam* currBeam = *iter;
-		currBeam->Draw();
+		currBeam->Draw(startPt, camera);
 	}
 
 	glPopMatrix();
-
 	glPopAttrib();
+
+	debug_opengl_state();
 }
 
 void ESPPointToPointBeam::SpawnBeam() {
@@ -117,7 +119,8 @@ void ESPPointToPointBeam::SpawnBeam() {
 	currESPBeamSegment->SetDefaultPointOnLine(ORIGIN_PT + (this->numMainESPBeamSegments * avgSegLength) * beamVec);
 
 	// Set the lifetime on the beam...
-	newBeam->SetLifeTime(this->lifeTimeInSecs.MeanValueInInterval());
+	newBeam->SetLifeTime(this->lifeTimeInSecs.RandomValueInInterval());
+	newBeam->SetThickness(this->mainBeamThickness.RandomValueInInterval());
 	
 	// Add the new beam as an alive beam in this beam emitter
 	this->aliveBeams.push_back(newBeam);

@@ -35,6 +35,7 @@ public:
 	//void SetTexture(const Texture2D* texture);
 	void SetNumMainESPBeamSegments(size_t numSegments);
 	void SetMainBeamAmplitude(const ESPInterval& a);
+	void SetMainBeamThickness(const ESPInterval& thickness);
 
 	
 	static const int INFINITE_NUMBER_OF_BEAM_SHOTS = -1;
@@ -50,9 +51,10 @@ protected:
 	Point3D endPt;		// End of the beam
 
 	ColourRGBA colour;							// General colour of the beam (multiplies the texture colour if there is a texture)
-	//const Texture2D* texture;				// The texture applied to the beam
-	size_t numMainESPBeamSegments;			// Number of segments that make up the main beam that goes from startPt to endPt
+	//const Texture2D* texture;			// The texture applied to the beam
+	size_t numMainESPBeamSegments;	// Number of segments that make up the main beam that goes from startPt to endPt
 	ESPInterval mainBeamAmplitude;	// Amplitude of the main beam measured perpendicular from the striaght line between startPt and endPt
+	ESPInterval mainBeamThickness;	// The thickness of the main beam, measured in world units
 
 	// Timing
 	int totalNumBeamShots;								// Number of times the beam will shoot (INFINITE_NUMBER_OF_BEAM_SHOTS means it will keep shooting forever) 
@@ -98,6 +100,12 @@ inline void ESPPointToPointBeam::SetNumMainESPBeamSegments(size_t numSegments) {
 // can move to (to create lightning-like effects)
 inline void ESPPointToPointBeam::SetMainBeamAmplitude(const ESPInterval& a) {
 	this->mainBeamAmplitude = a;
+}
+
+// Set the thickness in world units of the main beam
+inline void ESPPointToPointBeam::SetMainBeamThickness(const ESPInterval& thickness) {
+	assert(thickness.minValue > 0);
+	this->mainBeamThickness = thickness;
 }
 
 // Sets the total number of shots the beam will take
