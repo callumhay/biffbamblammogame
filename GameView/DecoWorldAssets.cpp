@@ -12,7 +12,7 @@ const Colour DecoWorldAssets::COLOUR_CHANGE_LIST[DecoWorldAssets::NUM_COLOUR_CHA
 	Colour(0.28235f, 0.2392f, 0.545098f),				// slate purple-blue
 	Colour(0.51372549f, 0.4352941f, 1.0f),			// slate purple
 	Colour(0.8588235f, 0.439215686f, 0.57647f),	// pale violet
-	Colour(1.0f, 0.75686f, 0.75686f),						// rosy brown 
+	Colour(0.8f, 0.55686f, 0.55686f),						// rosy brown 
 	Colour(0.7215686f, 0.52549f, 0.043f),				// goldenrod
 	Colour(0.4196f, 0.5568627f, 0.1372549f),		// olive
 	Colour(0.4f, 0.8039215f, 0.666667f),				// deep aquamarine
