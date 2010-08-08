@@ -73,7 +73,8 @@ lensFlareTex(NULL),
 sparkleTex(NULL),
 spiralTex(NULL),
 sideBlastTex(NULL),
-hugeExplosionTex(NULL) {
+hugeExplosionTex(NULL),
+lightningBoltTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -141,6 +142,8 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sideBlastTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->hugeExplosionTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningBoltTex);
 	assert(removed);
 
 	// Delete any standalone effects
@@ -448,6 +451,10 @@ void GameESPAssets::InitESPTextures() {
 	if (this->hugeExplosionTex == NULL) {
 		this->hugeExplosionTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION, Texture::Trilinear));
 		assert(this->hugeExplosionTex != NULL);
+	}
+	if (this->lightningBoltTex == NULL) {
+		this->lightningBoltTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT, Texture::Trilinear));
+		assert(this->lightningBoltTex != NULL);
 	}
 
 	debug_opengl_state();
@@ -907,6 +914,67 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			assert(false);
 			break;
 	}
+}
+
+void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
+
+	// Add the lightning bolt graphic and onomatopeia effect
+	ESPInterval boltLifeInterval		= ESPInterval(0.8f, 1.1f);
+	ESPInterval boltOnoLifeInterval	= ESPInterval(boltLifeInterval.minValue + 0.3f, boltLifeInterval.maxValue + 0.3f);
+	ESPInterval sizeIntervalX(0.8f, 1.0f);
+	ESPInterval sizeIntervalY(1.65f, 1.8f);
+
+	Point3D emitPosition = ball.GetCenterPosition();
+
+	// Create an emitter for the lightning bolt texture
+	ESPPointEmitter* lightningBoltEffect = new ESPPointEmitter();
+	
+	// Set up the emitter...
+	lightningBoltEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	lightningBoltEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	lightningBoltEffect->SetParticleLife(boltLifeInterval);
+	lightningBoltEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	lightningBoltEffect->SetParticleAlignment(ESP::ScreenAligned);
+	lightningBoltEffect->SetEmitPosition(emitPosition);
+	lightningBoltEffect->SetParticleRotation(ESPInterval(-15.0f, 15.0f));
+	lightningBoltEffect->SetParticleSize(sizeIntervalX, sizeIntervalY);
+	lightningBoltEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.9f, 1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
+	lightningBoltEffect->AddEffector(&this->particleFader);
+	lightningBoltEffect->AddEffector(&this->particleMediumGrowth);
+	bool result = lightningBoltEffect->SetParticles(1, this->lightningBoltTex);
+	assert(result);
+
+	// Create an emitter for the sound of onomatopeia of the breaking block
+	ESPPointEmitter* boltOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	boltOnoEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	boltOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	boltOnoEffect->SetParticleLife(boltOnoLifeInterval);
+	boltOnoEffect->SetParticleSize(ESPInterval(0.7f, 1.0f), ESPInterval(1.0f, 1.0f));
+	boltOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	boltOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+	boltOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	boltOnoEffect->SetEmitPosition(emitPosition);
+	boltOnoEffect->AddEffector(&this->particleFader);
+	boltOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single text particle to the emitter with the severity of the effect...
+	TextLabel2D boltTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ElectricZap, GameFontAssetsManager::Small), "");
+	boltTextLabel.SetColour(Colour(1, 1, 1));
+	boltTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+
+	// TODO: Make this more dynamic...
+	Onomatoplex::Extremeness severity = Onomatoplex::GOOD;
+	Onomatoplex::SoundType type = Onomatoplex::ELECTRIC;
+	boltOnoEffect->SetParticles(1, boltTextLabel, type, severity);	
+	
+	// Add the bolt graphic and its sound graphic to the active general emitters
+	this->activeGeneralEmitters.push_back(lightningBoltEffect);
+	this->activeGeneralEmitters.push_back(boltOnoEffect);
+
+	// Add the smoke on the ball
+	// TODO
+
 }
 
 ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling) {

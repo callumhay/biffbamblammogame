@@ -976,7 +976,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 		return false;
 	}
 
-	const Point2D& currentBallPos					= b.GetCenterPosition2D();
+	const Point2D& currentBallPos	= b.GetCenterPosition2D();
 	const Collision::Circle2D& ballBounds = b.GetBounds();
 	float sqBallRadius = ballBounds.Radius() * ballBounds.Radius();
 	
@@ -1006,12 +1006,13 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	// inline: There was a collision, figure out what the normal of the collision was
 	// and set all the other relevant parameter values
 	
-	// Get the vector from the line to the ball's center
-	const Point2D& linePt1 = collisionLine.P1();
-	const Point2D& linePt2 = collisionLine.P2();
-	Vector2D fromLineToBall = currentBallPos - linePt1;
+	// Get the vector from the line to the ball's center (the center of the ball dT time ago)
+	const Point2D previousBallPos = currentBallPos + dT * b.GetVelocity();
+	const Point2D& linePt1			  = collisionLine.P1();
+	const Point2D& linePt2				= collisionLine.P2();
+	Vector2D fromLineToBall = previousBallPos - linePt1;
 	if (Vector2D::Dot(fromLineToBall, fromLineToBall) < EPSILON) {
-		fromLineToBall = currentBallPos - linePt2;
+		fromLineToBall = previousBallPos - linePt2;
 	}
 	assert(Vector2D::Dot(fromLineToBall, fromLineToBall) >= EPSILON);
 
@@ -1026,8 +1027,9 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	n.Normalize();
 
 	// Now we need to calculate the time since the collision
-	double collisionOverlapDist = ballBounds.Radius() - sqrt(lineToBallCenterSqDist);
+	double collisionOverlapDist = fabs(ballBounds.Radius() - sqrt(lineToBallCenterSqDist));
 	timeSinceCollision = collisionOverlapDist / b.GetSpeed();
+	assert(timeSinceCollision >= 0.0);
 
 	// Change the normal slightly to make the ball reflection a bit random - make it harder on the player...
 	// Tend towards changing the normal to make a bigger reflection not a smaller one...

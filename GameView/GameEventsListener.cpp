@@ -312,8 +312,8 @@ void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const Ca
 }
 
 void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
-
-	// TODO
+	// Add the effect(s) for when the ball hits the lightning
+	this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball);
 
 	debug_output("EVENT: Ball hit tesla lightning arc");
 }
