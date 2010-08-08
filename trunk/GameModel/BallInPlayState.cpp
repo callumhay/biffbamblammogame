@@ -217,7 +217,19 @@ void BallInPlayState::Tick(double seconds) {
 		// Ball - tesla lightning arc collisions:
 		didCollideWithTeslaLightning = currLevel->TeslaLightningCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
 		if (didCollideWithTeslaLightning) {
+			// Clear the last piece collided with since the ball is now colliding with a tesla lightning arc
+			currBall->SetLastPieceCollidedWith(NULL);
+			
+			// Calculate the ball position/velocity after collision
 			this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+			
+			// Make for damn sure that the ball is no longer colliding!
+			Vector2D tempN;
+			Collision::LineSeg2D tempLine;
+			double tempTime;
+			while (currLevel->TeslaLightningCollisionCheck(*currBall, 0.0, tempN, tempLine, tempTime)) {
+				currBall->SetCenterPosition(currBall->GetCenterPosition2D() + currBall->GetBounds().Radius() * n);
+			}
 		}
 
 		// Ball-ball collisions - choose the next set of balls after this one
