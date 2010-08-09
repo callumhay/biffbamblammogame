@@ -12,33 +12,18 @@ class Camera;
 class CgFxPostRefract : public CgFxEffectBase {
 public:
 	static const char* BASIC_TECHNIQUE_NAME;
+	static const char* NORMAL_TEXTURE_TECHNIQUE_NAME;
 
 	CgFxPostRefract();
-	virtual ~CgFxPostRefract();
+	~CgFxPostRefract();
 
-	/**
-	 * Set the FBO texture (the texture where the scene thus far
-	 * has been rendered to).
-	 */
-	void SetFBOTexture(const Texture2D* tex) {
-		this->sceneTex = tex;
-	}
-	/**
-	 * Set the average (doesn't have to be perfect) amount to warp
-   * the lookup into the scene texture.
-	 */
-	void SetWarpAmountParam(float amt) {
-		this->warpAmount = amt;
-	}
-	/**
-	 * Set the index of refraction for the background.
-	 */
-	void SetIndexOfRefraction(float eta) {
-		this->indexOfRefraction = eta;
-	}
+	void SetFBOTexture(const Texture2D* tex);
+	void SetNormalTexture(const Texture2D* tex);
+	void SetWarpAmountParam(float amt);
+	void SetIndexOfRefraction(float eta);
 
 protected:
-	virtual void SetupBeforePasses(const Camera& camera);
+	void SetupBeforePasses(const Camera& camera);
 
 private:
 	// CG Transform params
@@ -49,6 +34,7 @@ private:
 
 	// CG Refract params
 	CGparameter sceneSamplerParam;
+	CGparameter normalSamplerParam;
 	CGparameter indexOfRefactionParam;
 	CGparameter warpAmountParam;
 	CGparameter sceneWidthParam;
@@ -57,6 +43,37 @@ private:
 	// Actual values for parameters
 	float indexOfRefraction, warpAmount;
 	const Texture2D* sceneTex;
+	const Texture2D* normalTex;
 };
+
+/**
+ * Set the FBO texture (the texture where the scene thus far
+ * has been rendered to).
+ */
+inline void CgFxPostRefract::SetFBOTexture(const Texture2D* tex) {
+	this->sceneTex = tex;
+}
+
+/**
+ * Set the normal texture to the one given - this only applies to the normal texture
+ * post-refraction effect technique.
+ */
+inline void CgFxPostRefract::SetNormalTexture(const Texture2D* tex) {
+	this->normalTex = tex;
+}
+
+/**
+ * Set the average (doesn't have to be perfect) amount to warp
+ * the lookup into the scene texture.
+ */
+inline void CgFxPostRefract::SetWarpAmountParam(float amt) {
+	this->warpAmount = amt;
+}
+/**
+ * Set the index of refraction for the background.
+ */
+inline void CgFxPostRefract::SetIndexOfRefraction(float eta) {
+	this->indexOfRefraction = eta;
+}
 
 #endif
