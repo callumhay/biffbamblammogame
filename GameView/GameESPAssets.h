@@ -72,6 +72,7 @@ private:
 	ESPParticleScaleEffector particleSmallGrowth;
 	ESPParticleScaleEffector particleMediumGrowth;
 	ESPParticleScaleEffector particleLargeGrowth;
+	ESPParticleScaleEffector particleSuperGrowth;
 	ESPParticleScaleEffector particleMediumShrink;
 	ESPParticleScaleEffector particleLargeVStretch;
 
@@ -106,6 +107,7 @@ private:
 	Texture2D* sideBlastTex;
 	Texture2D* hugeExplosionTex;
 	Texture2D* lightningBoltTex;
+	Texture2D* sphereNormalsTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -144,6 +146,7 @@ private:
 
 	CgFxVolumetricEffect ghostBallSmoke;
 	CgFxVolumetricEffect fireEffect;
+	CgFxPostRefract normalTexRefractEffect;
 
 	// Initialization functions for effect stuffs
 	void InitESPTextures();
@@ -196,11 +199,11 @@ public:
 	//void AddBallBounceEffect(const Camera& camera, const GameBall& ball);	
 
 	ESPPointEmitter* CreateBallBounceEffect(const GameBall& ball, Onomatoplex::SoundType soundType); 
-	void AddBounceLevelPieceEffect(const Camera& camera, const GameBall& ball, const LevelPiece& block);
-	void AddBouncePaddleEffect(const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
-	void AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2);
+	void AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block);
+	void AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle);
+	void AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2);
 	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
-	void AddBallHitLightningArcEffect(const GameBall& ball);
+	void AddBallHitLightningArcEffect(const GameBall& ball, const Texture2D& bgTexture);
 
 	void AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block);
 	void AddCannonFireEffect(const GameBall& ball, const CannonBlock& block);

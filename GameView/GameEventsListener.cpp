@@ -215,7 +215,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 	// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
 	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
 		((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.UberballBlastsThrough())) {
-			this->display->GetAssets()->GetESPAssets()->AddBounceLevelPieceEffect(this->display->GetCamera(), ball, block);
+			this->display->GetAssets()->GetESPAssets()->AddBounceLevelPieceEffect(ball, block);
 	}
 
 	// We shake things up if the ball is uber and the block is indestructible...
@@ -233,7 +233,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
 
 	// Add the visual effect for when the ball hits the paddle
-	this->display->GetAssets()->GetESPAssets()->AddBouncePaddleEffect(this->display->GetCamera(), ball, paddle);
+	this->display->GetAssets()->GetESPAssets()->AddBouncePaddleEffect(ball, paddle);
 
 	bool ballIsUber = (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall;
 	// Loudness is determined by the current state of the ball...
@@ -265,7 +265,7 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 
 void GameEventsListener::BallBallCollisionEvent(const GameBall& ball1, const GameBall& ball2) {
 	// Add the effect for ball-ball collision
-	this->display->GetAssets()->GetESPAssets()->AddBounceBallBallEffect(this->display->GetCamera(), ball1, ball2);
+	this->display->GetAssets()->GetESPAssets()->AddBounceBallBallEffect(ball1, ball2);
 
 	// ... and the sound 
 	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBallBallCollisionEvent);
@@ -313,7 +313,9 @@ void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const Ca
 
 void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
 	// Add the effect(s) for when the ball hits the lightning
-	this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball);
+	this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball, *this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture());
+	// Add a tiny camera shake
+	this->display->GetCamera().SetCameraShake(1.2, Vector3D(0.75, 0.1, 0.1), 40);
 
 	debug_output("EVENT: Ball hit tesla lightning arc");
 }

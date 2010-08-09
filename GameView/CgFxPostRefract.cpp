@@ -7,12 +7,13 @@
 #include "../BlammoEngine/Texture3D.h"
 #include "../BlammoEngine/Texture2D.h"
 
-const char* CgFxPostRefract::BASIC_TECHNIQUE_NAME = "PostRefractGeom";
+const char* CgFxPostRefract::BASIC_TECHNIQUE_NAME						= "PostRefractGeom";
+const char* CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME	= "PostRefractNormalTex";
 
 // Default constructor
 CgFxPostRefract::CgFxPostRefract() : 
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_POSTREFRACT_SHADER), 
-indexOfRefraction(1.00f), warpAmount(1.0f), sceneTex(NULL) {
+indexOfRefraction(1.00f), warpAmount(1.0f), sceneTex(NULL), normalTex(NULL) {
 	
 	// Set the technique
 	this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
@@ -30,7 +31,8 @@ indexOfRefraction(1.00f), warpAmount(1.0f), sceneTex(NULL) {
 	this->sceneHeightParam			= cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
 
 	// The rendered scene background texture
-	this->sceneSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
+	this->sceneSamplerParam  = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
+	this->normalSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "NormalSampler");
 	
 	debug_cg_state();
 }
@@ -41,7 +43,6 @@ CgFxPostRefract::~CgFxPostRefract() {
 void CgFxPostRefract::SetupBeforePasses(const Camera& camera) {
 	// Transform setup
 	cgGLSetStateMatrixParameter(this->wvpMatrixParam,     CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-
 	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
 	cgGLSetStateMatrixParameter(this->worldMatrixParam,   CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
 
@@ -57,5 +58,9 @@ void CgFxPostRefract::SetupBeforePasses(const Camera& camera) {
 		cgGLSetParameter1f(this->sceneWidthParam,  this->sceneTex->GetWidth());
 		cgGLSetParameter1f(this->sceneHeightParam, this->sceneTex->GetHeight());	
 		cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneTex->GetTextureID());
+	}
+	// If there's a normal texture, set it
+	if (this->normalTex != NULL) {
+		cgGLSetTextureParameter(this->normalSamplerParam, this->normalTex->GetTextureID());
 	}
 }

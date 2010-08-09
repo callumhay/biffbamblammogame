@@ -158,6 +158,7 @@ public:
 	const std::string TEXTURE_HUGE_EXPLOSION;
 	const std::string TEXTURE_BRIGHT_FLARE;
 	const std::string TEXTURE_LIGHTNING_BOLT;
+	const std::string TEXTURE_SPHERE_NORMALS;
 
 	const std::string TEXTURE_STARFIELD;
 	

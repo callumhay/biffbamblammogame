@@ -37,6 +37,7 @@ beamEndPulse(0, 0),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f),
 particleLargeGrowth(1.0f, 2.2f),
+particleSuperGrowth(1.0f, 5.0f),
 particleMediumShrink(1.0f, 0.25f),
 particleLargeVStretch(Vector2D(1.0f, 1.0f), Vector2D(1.0f, 4.0f)),
 beamBlastColourEffector(ColourRGBA(0.75f, 1.0f, 1.0f, 1.0f), ColourRGBA(GameViewConstants::GetInstance()->LASER_BEAM_COLOUR, 0.8f)),
@@ -74,7 +75,8 @@ sparkleTex(NULL),
 spiralTex(NULL),
 sideBlastTex(NULL),
 hugeExplosionTex(NULL),
-lightningBoltTex(NULL) {
+lightningBoltTex(NULL),
+sphereNormalsTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -144,6 +146,8 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->hugeExplosionTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningBoltTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sphereNormalsTex);
 	assert(removed);
 
 	// Delete any standalone effects
@@ -456,6 +460,10 @@ void GameESPAssets::InitESPTextures() {
 		this->lightningBoltTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT, Texture::Trilinear));
 		assert(this->lightningBoltTex != NULL);
 	}
+	if (this->sphereNormalsTex == NULL) {
+		this->sphereNormalsTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
+		assert(this->sphereNormalsTex != NULL);
+	}
 
 	debug_opengl_state();
 }
@@ -710,6 +718,13 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->fireEffect.SetFrequency(1.0f);
 	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
 	this->fireEffect.SetMaskTexture(this->circleGradientTex);
+
+	// Setup the post refraction normal effect with the sphere normal - this is for forcefield
+	// and shockwave effects
+	this->normalTexRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
+	this->normalTexRefractEffect.SetIndexOfRefraction(0.7f);
+	this->normalTexRefractEffect.SetWarpAmountParam(30.0f);
+	this->normalTexRefractEffect.SetNormalTexture(this->sphereNormalsTex);
 }
 
 /**
@@ -770,7 +785,7 @@ ESPPointEmitter* GameESPAssets::CreateBallBounceEffect(const GameBall& ball, Ono
  * Adds a ball bouncing ESP - the effect that occurs when a ball typically
  * bounces off a level piece (e.g., a block).
  */
-void GameESPAssets::AddBounceLevelPieceEffect(const Camera& camera, const GameBall& ball, const LevelPiece& block) {
+void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block) {
 	// We don't do the effect for certain types of blocks...
 	if (block.GetType() == LevelPiece::Bomb || block.GetType() == LevelPiece::Ink || block.GetType() == LevelPiece::Portal ||
 		block.GetType() == LevelPiece::Cannon) {
@@ -784,7 +799,7 @@ void GameESPAssets::AddBounceLevelPieceEffect(const Camera& camera, const GameBa
 /**
  * Adds ball bouncing effect when the ball bounces off the player paddle.
  */
-void GameESPAssets::AddBouncePaddleEffect(const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
+void GameESPAssets::AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle) {
 	if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
 		// The sticky paddle should make a spongy gooey sound when hit by the ball...
 		this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::GOO));
@@ -798,7 +813,7 @@ void GameESPAssets::AddBouncePaddleEffect(const Camera& camera, const GameBall& 
 /**
  * Adds the effect that occurs when two balls bounce off of each other.
  */
-void GameESPAssets::AddBounceBallBallEffect(const Camera& camera, const GameBall& ball1, const GameBall& ball2) {
+void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2) {
 	// Obtain a reasonably centered position to show the effect
 	const Point2D& ball1Center = ball1.GetBounds().Center();
 	const Point2D& ball2Center = ball2.GetBounds().Center();
@@ -916,7 +931,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 	}
 }
 
-void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
+void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball, const Texture2D& bgTexture) {
 
 	// Add the lightning bolt graphic and onomatopeia effect
 	ESPInterval boltLifeInterval		= ESPInterval(0.8f, 1.1f);
@@ -968,7 +983,26 @@ void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
 	Onomatoplex::SoundType type = Onomatoplex::ELECTRIC;
 	boltOnoEffect->SetParticles(1, boltTextLabel, type, severity);	
 	
-	// Add the bolt graphic and its sound graphic to the active general emitters
+	// Add the shockwave for the ball hitting the lightning...
+	this->normalTexRefractEffect.SetFBOTexture(&bgTexture);
+	this->normalTexRefractEffect.SetWarpAmountParam(27.0f);
+	this->normalTexRefractEffect.SetIndexOfRefraction(1.2f);
+	ESPPointEmitter* shockwaveEffect = new ESPPointEmitter();
+	shockwaveEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	shockwaveEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	shockwaveEffect->SetParticleLife(ESPInterval(0.45f));
+	shockwaveEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	shockwaveEffect->SetParticleAlignment(ESP::ScreenAligned);
+	shockwaveEffect->SetEmitPosition(emitPosition);
+	shockwaveEffect->SetParticleSize(ESPInterval(2.0f * GameBall::DEFAULT_BALL_RADIUS));
+	shockwaveEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	shockwaveEffect->AddEffector(&this->particleFader);
+	shockwaveEffect->AddEffector(&this->particleSuperGrowth);
+	result = shockwaveEffect->SetParticles(1, &this->normalTexRefractEffect);
+	assert(result);
+
+	// Add the bolt graphic, its sound graphic and the shockwave to the active general emitters
+	this->activeGeneralEmitters.push_back(shockwaveEffect);
 	this->activeGeneralEmitters.push_back(lightningBoltEffect);
 	this->activeGeneralEmitters.push_back(boltOnoEffect);
 

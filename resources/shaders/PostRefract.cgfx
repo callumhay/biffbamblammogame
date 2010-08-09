@@ -71,6 +71,20 @@ sampler2D SceneSampler = sampler_state {
     MagFilter = Linear;
 };   
 
+texture NormalTexture <
+    string ResourceName = "SphereNormals_128x128.jpg";
+    string UIName =  "Normal Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D NormalSampler = sampler_state {
+    Texture = <NormalTexture>;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+};  
+
 //////// CONNECTOR DATA STRUCTURES ///////////
 
 /* data from application vertex buffer */
@@ -80,6 +94,12 @@ struct appdata {
 	float4 Colour	: COLOR0;
 };
 
+struct appdataUV {
+    float3 Position	: POSITION;
+	float4 Colour	: COLOR0;
+    float2 UV		: TEXCOORD0;
+};
+
 /* data passed from vertex shader to pixel shader */
 struct vertexOutputPostRefract {
     float4 HPosition    : POSITION;
@@ -87,6 +107,14 @@ struct vertexOutputPostRefract {
     float3 ProjPos      : TEXCOORD1;
     float3 WorldView    : TEXCOORD2;
 	float4 Colour       : TEXCOORD5;
+};
+
+struct vertexOutputPostRefractNormalTex {
+    float4 HPosition    : POSITION;
+    float3 ProjPos      : TEXCOORD1;
+    float3 WorldView    : TEXCOORD2;
+	float2 UV           : TEXCOORD3;
+	float4 Colour       : TEXCOORD4;
 };
 
 ///////// VERTEX SHADING /////////////////////
@@ -105,7 +133,24 @@ vertexOutputPostRefract PostRefract_VS(appdata IN) {
     
     float4 outPos  = mul(WvpXf,Po);
     OUT.HPosition  = outPos;
-    OUT.ProjPos    = outPos.xyz / outPos.w;   
+    OUT.ProjPos    = outPos.xyz / outPos.w;
+	OUT.Colour     = IN.Colour;
+    return OUT;
+}
+
+vertexOutputPostRefractNormalTex PostRefractNormalTex_VS(appdataUV IN) {
+    vertexOutputPostRefractNormalTex OUT = (vertexOutputPostRefractNormalTex)0;
+    
+    float4 Po = float4(IN.Position.xyz,1);
+    float3 Pw = mul(WorldXf,Po).xyz;
+    float3 viewToVert  = Pw - float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w);
+    
+    OUT.WorldView   = normalize(viewToVert);
+    
+    float4 outPos  = mul(WvpXf,Po);
+    OUT.HPosition  = outPos;
+    OUT.ProjPos    = outPos.xyz / outPos.w;
+	OUT.UV         = IN.UV;
 	OUT.Colour     = IN.Colour;
     return OUT;
 }
@@ -148,6 +193,21 @@ float4 PostRefract_PS(vertexOutputPostRefract IN) : COLOR {
     return IN.Colour * float4(textureColour, 1.0f);
 }
 
+float4 PostRefractNormalTex_PS(vertexOutputPostRefractNormalTex IN) : COLOR {
+    float3 nWorldView     = normalize(IN.WorldView.xyz);
+    float3 nProjPos      = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
+	
+	// Get the normal from the texture of the object
+	float4 normalSample = tex2D(NormalSampler, IN.UV).rgba;
+	// Convert the RGB colour into a normal with components in [-1,1]
+    float3 normalFromTex = normalize(2 * normalSample.rbg - float3(1,1,1));
+	
+    float2 lookupOffset = GetRefractBGOffset(nWorldView, normalFromTex);
+    float3 textureColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
+ 
+    return IN.Colour * float4(textureColour, normalSample.a);
+}
+
 ///// TECHNIQUES /////////////////////////////
 
 technique PostRefractGeom {
@@ -166,4 +226,22 @@ technique PostRefractGeom {
         FragmentProgram = compile arbfp1 PostRefract_PS();
     }  
 }
+
+technique PostRefractNormalTex {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
+        
+        DepthTestEnable = true;
+        DepthFunc = LEqual;
+        CullFaceEnable = true;
+        CullFace = Back;
+        PolygonMode = int2(Front, Fill);
+        
+        VertexProgram = compile arbvp1 PostRefractNormalTex_VS();        
+        FragmentProgram = compile arbfp1 PostRefractNormalTex_PS();
+    }  
+}
+
 /////////////////////////////////////// eof //
