@@ -299,6 +299,21 @@ bool BoundingLines::IsInside(const Point2D& pt) const {
 }
 
 /**
+ * Check to see if the given circle collides with any of the bounding lines of this.
+ */
+bool BoundingLines::CollisionCheck(const Collision::Circle2D& c) const {
+	const float sqrRadius = c.Radius() * c.Radius();
+	for (size_t i = 0; i < this->lines.size(); i++) {
+		Point2D closestPt = Collision::ClosestPoint(c.Center(), this->lines[i]);
+		if (Point2D::SqDistance(closestPt, c.Center()) <= sqrRadius) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Check to see whether this collided with another set of bounding lines.
  * Returns: true if any lines in this collided with any lines in the given BoundingLines object,
  * false otherwise.

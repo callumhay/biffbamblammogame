@@ -5,6 +5,7 @@
 
 #include "GameEventManager.h"
 
+class GameModel;
 class GameLevel;
 class GameTransformMgr;
 

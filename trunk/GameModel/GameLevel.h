@@ -53,10 +53,10 @@ public:
 		return this->currentLevelPieces;
 	}
 
-	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const GameBall& b) const;
+	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Point2D& center, float radius) const;
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Projectile& p) const;
 
-	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, const LevelPiece* ignorePiece, float& rayT) const;
+	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, std::set<const LevelPiece*> ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
 	
 	// Get whether or not the ball safety net is currently active
 	bool IsBallSafetyNetActive() const {
@@ -73,7 +73,7 @@ public:
 
 
 	// Ability to add/remove tesla lightning barriers
-	void AddTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
+	void AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
 	void RemoveTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
 	bool TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 

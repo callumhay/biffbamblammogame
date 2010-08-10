@@ -12,8 +12,8 @@ S S E E E E E E G S
 S G E E E E E E G S 
 S P T(P,ul) E E T(P,ur) P E G S 
 S G E E E E E E G S 
-S G A(1,a,b) E E E E B G S 
-S C E E E E E A(1,b,a) B S 
+S G A(0,a,b) O R S E B G S 
+S C E        E G Y E A(1,b,a) B S 
 S E I E E E E E E S 
 S E E E E E E E E S 
 S X(a,b) E E E E E X(b,a) E S 

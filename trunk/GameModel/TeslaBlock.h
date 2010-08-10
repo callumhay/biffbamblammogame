@@ -16,6 +16,8 @@
 
 class TeslaBlock : public LevelPiece {
 public:
+	static const float LIGHTNING_ARC_RADIUS;
+
 	TeslaBlock(bool isActive, unsigned int wLoc, unsigned int hLoc);
 	~TeslaBlock();
 
@@ -94,7 +96,7 @@ private:
 	bool electricityIsActive;											// Whether the lightning/electric current is active on this tesla block
 	std::list<TeslaBlock*> connectedTeslaBlocks;	// All tesla blocks that this one can connect to when active (and when they're active)
 
-	void ToggleElectricity(GameLevel& level);
+	void ToggleElectricity(GameModel& gameModel, GameLevel& level);
 };
 
 // Sets the list of Tesla blocks (not including this one) that this tesla block will connect
