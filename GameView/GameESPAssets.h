@@ -170,6 +170,7 @@ private:
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
 
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
+	ESPPointEmitter* CreateShockwaveEffect(const Texture2D& bgTex, const Point3D& center, float startSize, size_t numRipples, float lifeTime);
 
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const Projectile& projectile);
@@ -178,7 +179,7 @@ private:
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
 
-	void AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc);
+	void AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc, const Texture2D& bgTexture);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
 	ESPPointEmitter* CreateBeamEndEffect();
@@ -202,13 +203,13 @@ public:
 	void AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block);
 	void AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle);
 	void AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2);
-	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
+	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block, const Texture2D& bgTexture);
 	void AddBallHitLightningArcEffect(const GameBall& ball, const Texture2D& bgTexture);
 
 	void AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block);
 	void AddCannonFireEffect(const GameBall& ball, const CannonBlock& block);
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
-	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
+	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb, const Texture2D& bgTexture);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
 	void AddBallSafetyNetDestroyedEffect(const Point2D& pos);
 	void AddBallExplodedEffect(const GameBall* ball);

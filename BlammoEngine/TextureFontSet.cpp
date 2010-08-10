@@ -16,10 +16,10 @@
 #include "BasicIncludes.h"
 #include "Algebra.h"
 
-const unsigned char TextureFontSet::MAX_NUM_CHARS = 128;
+//const unsigned char TextureFontSet::MAX_NUM_CHARS = 128;
 const float TextureFontSet::TEXT_3D_SCALE	= 0.04;
 
-TextureFontSet::TextureFontSet() {
+TextureFontSet::TextureFontSet() : numGlyphs(0), heightInPixels(0) {
 }
 
 TextureFontSet::~TextureFontSet() {
@@ -80,7 +80,7 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 	glRasterPos2i(0, 0);
 
 	// Draw the text
-	glListBase(this->charDispLists[0]);
+	glListBase(this->baseDisplayList);
 	glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
 
 	float rpos[4];
@@ -111,7 +111,7 @@ void TextureFontSet::Print(const std::string& s) const {
 	// Draw the text
 	glPushMatrix();
 	glScalef(TextureFontSet::TEXT_3D_SCALE, TextureFontSet::TEXT_3D_SCALE, TextureFontSet::TEXT_3D_SCALE);
-	glListBase(this->charDispLists[0]);
+	glListBase(this->baseDisplayList);
 	glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
 	glPopMatrix();
 }
@@ -293,8 +293,6 @@ void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Lib
 	assert(library != NULL);
 	assert(face != NULL);
 
-	newFontSet->heightInPixels = heightInPixels;
-
 	// FreeType Measures Font Size In Terms Of 1/64ths Of Pixels.  
 	// Thus, To Make A Font h Pixels High, We Need To Request A Size Of h*64.
 	if (FT_Set_Char_Size(face, heightInPixels << 6, heightInPixels << 6, 96, 96)) {
@@ -302,14 +300,19 @@ void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Lib
 		return;	
 	}
 
+	newFontSet->heightInPixels = heightInPixels;
+	long numGlyphs = std::max<long>(128, face->num_glyphs);
+	newFontSet->numGlyphs = numGlyphs;
+	newFontSet->charTextures.reserve(numGlyphs);
+
 	// Create the font set by making the texture and display list for
 	// each character in the font
+	newFontSet->baseDisplayList = glGenLists(numGlyphs);
 	glPushMatrix();
-	for (unsigned char i=0; i < MAX_NUM_CHARS; i++) {
-		
+	for (int i = 0; i < numGlyphs; i++) {	
 		// Render the current character into a bitmap
 		// Load the glyph for the character
-		if(FT_Load_Glyph(face, FT_Get_Char_Index(face, i), FT_LOAD_DEFAULT )) {
+		if (FT_Load_Glyph(face, FT_Get_Char_Index(face, i), FT_LOAD_DEFAULT)) {
 			debug_output("Could not load the glyph for character: " << i << " in font set file.");
 			return;
 		}
@@ -323,72 +326,73 @@ void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Lib
 		}
 
 		// Convert The Glyph To A Bitmap.
-		FT_Glyph_To_Bitmap(&glyph, ft_render_mode_normal, 0, 1);
+		FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1);
 		FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
 
 		// This Reference Will Make Accessing The Bitmap Easier.
 		FT_Bitmap& bitmap = bitmap_glyph->bitmap;
+		Texture2D* newCharTexture = NULL;
+		
+		// Create a texture for the current character only if there's data in the buffer...
+		if (bitmap.width > 0 && bitmap.rows > 0 && bitmap.buffer != NULL) {
+			newCharTexture = Texture2D::CreateTexture2DFromFTBMP(bitmap, Texture::Trilinear);
 
-		// Create a texture for the current character
-		Texture2D* newCharTexture = Texture2D::CreateTexture2DFromFTBMP(bitmap, Texture::Trilinear);
-
-		if (newCharTexture == NULL) {
-			debug_output("Could not create texture from bitmap for character: " << i << " in font set file.");
-			FT_Done_Glyph(glyph);
-			return;
+			if (newCharTexture == NULL) {
+				debug_output("Could not create texture from bitmap for character: " << i << " in font set file.");
+				FT_Done_Glyph(glyph);
+				return;
+			}
+			newFontSet->charTextures.push_back(newCharTexture);
 		}
-		newFontSet->charTextures.push_back(newCharTexture);
 
-		// Create the display list for the character as well
-		GLuint dList = glGenLists(1);
-		glNewList(dList, GL_COMPILE);
+		// Create the display list for the character as well - in the case where there's no texture
+		// all we're interested in is advancing, via translation, the current display list
+		glNewList(newFontSet->baseDisplayList + i, GL_COMPILE);
+		if (newCharTexture != NULL) {
+			newCharTexture->BindTexture();
+			glPushMatrix();
 
-		newCharTexture->BindTexture();
-		glPushMatrix();
+			// Move the character over so that it has the right
+			// amount of space between it and the one before
+			glTranslatef(bitmap_glyph->left, 0, 0);
 
-		// Move the character over so that it has the right
-		// amount of space between it and the one before
-		glTranslatef(bitmap_glyph->left,0,0);
+			// Now We Move Down A Little In The Case That The Bitmap Extends Past The Bottom Of The Line 
+			// This Is Only True For Characters Like 'g' Or 'y'.
+			glTranslatef(0, bitmap_glyph->top - bitmap.rows, 0);
 
-		// Now We Move Down A Little In The Case That The Bitmap Extends Past The Bottom Of The Line 
-		// This Is Only True For Characters Like 'g' Or 'y'.
-		glTranslatef(0,bitmap_glyph->top-bitmap.rows,0);
+			// Textures Are Filled With Empty Padding Space. We Figure What Portion Of The Texture Is Used By 
+			// The Actual Character And Store That Information In The x And y Variables, Then When We Draw The
+			// Quad, We Will Only Reference The Parts Of The Texture That Contains The Character Itself.
+			int width		= std::max<float>(2, NumberFuncs::NextPowerOfTwo(bitmap.width));
+			int height	= std::max<float>(2, NumberFuncs::NextPowerOfTwo(bitmap.rows));
+			float x = static_cast<float>(bitmap.width) / static_cast<float>(width);
+			float y = static_cast<float>(bitmap.rows)  / static_cast<float>(height);
 
-		// Textures Are Filled With Empty Padding Space. We Figure What Portion Of The Texture Is Used By 
-		// The Actual Character And Store That Information In The x And y Variables, Then When We Draw The
-		// Quad, We Will Only Reference The Parts Of The Texture That Contains The Character Itself.
-		int width		= NumberFuncs::NextPowerOfTwo(bitmap.width);
-		int height	= NumberFuncs::NextPowerOfTwo(bitmap.rows);
-		float x = static_cast<float>(bitmap.width) / static_cast<float>(width);
-		float y = static_cast<float>(bitmap.rows)  / static_cast<float>(height);
+			// Draw The Texturemapped Quads. The Bitmap That We Got From FreeType Was Not 
+			// Oriented Quite Like We Would Like It To Be, But We Link The Texture To The Quad
+			// In Such A Way That The Result Will Be Properly Aligned.
+			glBegin(GL_QUADS);
+			glTexCoord2d(0, 0); glVertex2f(0, bitmap.rows);
+			glTexCoord2d(0, y); glVertex2f(0, 0);
+			glTexCoord2d(x, y); glVertex2f(bitmap.width, 0);
+			glTexCoord2d(x, 0); glVertex2f(bitmap.width, bitmap.rows);
+			glEnd();
+			glPopMatrix();
+		}
 
-		newFontSet->widthOfChars.push_back(face->glyph->advance.x >> 6);
-
-		// Draw The Texturemapped Quads. The Bitmap That We Got From FreeType Was Not 
-		// Oriented Quite Like We Would Like It To Be, But We Link The Texture To The Quad
-		// In Such A Way That The Result Will Be Properly Aligned.
-		glBegin(GL_QUADS);
-		glTexCoord2d(0, 0); glVertex2f(0, bitmap.rows);
-		glTexCoord2d(0, y); glVertex2f(0, 0);
-		glTexCoord2d(x, y); glVertex2f(bitmap.width, 0);
-		glTexCoord2d(x, 0); glVertex2f(bitmap.width, bitmap.rows);
-		glEnd();
-		glPopMatrix();
-
-		glTranslatef(face->glyph->advance.x >> 6, 0, 0);
-
+		float charWidth = face->glyph->advance.x >> 6;
+		newFontSet->widthOfChars.push_back(charWidth);
+		glTranslatef(charWidth, 0, 0);
 		// Increment The Raster Position As If We Were A Bitmap Font.
 		// (Only Needed If You Want To Calculate Text Length)
 		glBitmap(0,0,0,0,face->glyph->advance.x >> 6, 0, NULL);
 
 		// Finish The Display List
 		glEndList();
-		newCharTexture->UnbindTexture();
-		newFontSet->charDispLists.push_back(dList);
 
 		FT_Done_Glyph(glyph);
 	}
 	glPopMatrix();
 
-	assert(newFontSet->charDispLists.size() == newFontSet->charTextures.size());
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

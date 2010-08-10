@@ -205,7 +205,8 @@ void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) {
 
 	// Add any visual effects required for when a projectile hits the block
-	this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block);
+	this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block, 
+		*this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture());
 
 	debug_output("EVENT: Projectile-block collision");
 }
@@ -338,7 +339,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 
 		case LevelPiece::Bomb:
 			// Bomb effect - big explosion!
-			this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block);
+			this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block, 
+				*this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture());
 			this->display->GetCamera().SetCameraShake(1.2, Vector3D(1.0, 0.3, 0.1), 100);
 
 			// Sound for bomb explosion
