@@ -13,6 +13,8 @@
 #include "Projectile.h"
 #include "GameModel.h"
 
+const float TeslaBlock::LIGHTNING_ARC_RADIUS = LevelPiece::PIECE_HEIGHT * 0.25f;
+
 TeslaBlock::TeslaBlock(bool isActive, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), electricityIsActive(isActive) {
 }
@@ -94,8 +96,7 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 }
 
 bool TeslaBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-	return Collision::IsCollision(ray, Collision::AABB2D(this->GetCenter() + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-																this->GetCenter() +  Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT)), rayT);
+	return Collision::IsCollision(ray, this->GetAABB(), rayT);
 }
 
 LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
@@ -108,7 +109,7 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) 
 	
 	// Toggle the electricity to the tesla block
 	GameLevel* currLevel = gameModel->GetCurrentLevel();
-	this->ToggleElectricity(*currLevel);
+	this->ToggleElectricity(*gameModel, *currLevel);
 	
 	return this;
 }
@@ -124,11 +125,11 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 	switch (projectile->GetType()) {
 		
 		case Projectile::PaddleLaserBulletProjectile:
-			this->ToggleElectricity(*currLevel);
+			this->ToggleElectricity(*gameModel, *currLevel);
 			break;
 		
 		case Projectile::CollateralBlockProjectile:
-			this->ToggleElectricity(*currLevel);
+			this->ToggleElectricity(*gameModel, *currLevel);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile: {
@@ -136,7 +137,7 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 				// is allowed to destroy blocks around it!
 				LevelPiece* resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 				assert(resultingPiece == this);
-				this->ToggleElectricity(*currLevel);
+				this->ToggleElectricity(*gameModel, *currLevel);
 			}
 			break;
 
@@ -148,7 +149,7 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 	return this;
 }
 
-void TeslaBlock::ToggleElectricity(GameLevel& level) {
+void TeslaBlock::ToggleElectricity(GameModel& gameModel, GameLevel& level) {
 	// Get the list of active connected tesla blocks
 	std::list<TeslaBlock*> activeNeighbourTeslaBlocks = this->GetActiveConnectedTeslaBlocks();
 
@@ -161,7 +162,7 @@ void TeslaBlock::ToggleElectricity(GameLevel& level) {
 		for (std::list<TeslaBlock*>::const_iterator iter = activeNeighbourTeslaBlocks.begin(); iter != activeNeighbourTeslaBlocks.end(); ++iter) {
 			const TeslaBlock* activeNeighbour = *iter;
 			assert(activeNeighbour != NULL);
-			level.AddTeslaLightningBarrier(this, activeNeighbour);
+			level.AddTeslaLightningBarrier(&gameModel, this, activeNeighbour);
 		}
 	}
 	else {

@@ -222,6 +222,16 @@ namespace Collision {
 	}
 
 	/**
+	 * Test whether a circle and 2D aabb collide.
+	 * Returns: true on collision, false otherwise.
+	 */
+	inline bool IsCollision(const AABB2D& aabb, const Circle2D& circle) {
+		float sqrDist = Collision::SqDistFromPtToAABB(aabb, circle.Center());
+		return sqrDist <= (circle.Radius() * circle.Radius());
+	}
+
+
+	/**
 	 * Figures out if two 2D line segments collide or not.
 	 * Returns: true on collision, false otherwise.
 	 */
@@ -245,11 +255,11 @@ namespace Collision {
 	 * multiplier from its origin.
 	 */
 	inline bool IsCollision(const Ray2D& ray, const AABB2D& aabb, float& tMin) {
-		const Point2D RAY_ORIGIN = ray.GetOrigin();
-		const Vector2D RAY_DIR   = ray.GetUnitDirection();
+		const Point2D& RAY_ORIGIN = ray.GetOrigin();
+		const Vector2D& RAY_DIR   = ray.GetUnitDirection();
 		
-		const Point2D AABB_MIN   = aabb.GetMin();
-		const Point2D AABB_MAX	 = aabb.GetMax();
+		const Point2D& AABB_MIN   = aabb.GetMin();
+		const Point2D& AABB_MAX	 = aabb.GetMax();
 
 		tMin = 0.0f;
 		float tMax = FLT_MAX;

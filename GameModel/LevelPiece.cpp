@@ -39,6 +39,11 @@ void LevelPiece::SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc) {
 	this->center = Point2D(wLoc * PIECE_WIDTH + HALF_PIECE_WIDTH, hLoc * PIECE_HEIGHT + HALF_PIECE_HEIGHT);
 }
 
+Collision::AABB2D LevelPiece::GetAABB() const {
+	return Collision::AABB2D(this->center - Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+													 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+}
+
 /**
  * Check for a collision of a given circle with this block.
  * Returns: true on collision as well as the normal of the line being collided with
@@ -66,12 +71,8 @@ bool LevelPiece::CollisionCheck(const Collision::AABB2D& aabb) const {
 		return false;
 	}
 
-	// Make a 2D AABB for this piece
-	Collision::AABB2D pieceBounds(this->center - Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-																this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-
 	// See if there's a collision between this and the piece using AABBs
-	return Collision::IsCollision(pieceBounds, aabb);	
+	return Collision::IsCollision(aabb, this->GetAABB());	
 }
 
 /**
@@ -83,8 +84,7 @@ bool LevelPiece::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const 
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}
-
-	return this->bounds.CollisionCheck(ray, rayT);
+	return Collision::IsCollision(ray, this->GetAABB(), rayT);
 }
 
 /**
@@ -99,6 +99,12 @@ bool LevelPiece::CollisionCheck(const BoundingLines& boundingLines) const {
 	return this->bounds.CollisionCheck(boundingLines);
 }
 
+bool LevelPiece::CollisionCheck(const Collision::Circle2D& c) const {
+	if (this->IsNoBoundsPieceType()) {
+		return false;
+	}
+	return Collision::IsCollision(this->GetAABB(), c);
+}
 
 /**
  * Function for adding a possible item drop for the given level piece.

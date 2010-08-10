@@ -11,8 +11,6 @@ const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND				  = 150;	// Damage per seco
 PaddleLaserBeam::PaddleLaserBeam(PlayerPaddle* paddle, const GameLevel* level) : 
 Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), 
 paddle(paddle), reInitStickyPaddle(true) {
-	assert((paddle->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle);
-	
 	this->UpdateCollisions(level);
 	paddle->SetIsLaserBeamFiring(true);
 }

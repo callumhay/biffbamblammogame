@@ -81,7 +81,7 @@ piecesLeft(numBlocks), ballSafetyNetActive(false), filepath(filepath) {
 				assert(currTeslaBlk != NULL);
 				std::list<TeslaBlock*> activeConnectedBlks = currTeslaBlk->GetLightningArcTeslaBlocks();
 				for (std::list<TeslaBlock*>::const_iterator iter = activeConnectedBlks.begin(); iter != activeConnectedBlks.end(); ++iter) {
-					this->AddTeslaLightningBarrier(currTeslaBlk, *iter);
+					this->AddTeslaLightningBarrier(NULL, currTeslaBlk, *iter);
 				}
 			}
 		}
@@ -771,36 +771,7 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
 			colliders.insert(this->currentLevelPieces[y][x]);
 		}
 	}
-	/*
-	if (xIndexMax == xIndexMin) {
-		if (yIndexMax == yIndexMin) {
-			// Only one collision point
-			colliders.insert(this->currentLevelPieces[yIndexMin][xIndexMin]);
-		}
-		else {
-			// Some number of collisions along the y-axis
-			for (int y = yIndexMin; y <= yIndexMax; y++) {
-				colliders.insert(this->currentLevelPieces[y][xIndexMin]);
-			}
-		}
-	}
-	else {
-		if (yIndexMax == yIndexMin) {
-			//Some number of collisions along the x-axis
-			for (int x = xIndexMin; x <= xIndexMax; x++) {
-				colliders.insert(this->currentLevelPieces[yIndexMin][x]);
-			}
-		}
-		else {
-			// Both y and x have collisions along their axes...
-			for (int x = xIndexMin; x <= xIndexMax; x++) {
-				for (int y = yIndexMin; y < yIndexMax; y++) {
-					colliders.insert(this->currentLevelPieces[y][x]);
-				}
-			}
-		}
-	}
-	*/
+
 	return colliders;
 }
 
@@ -809,20 +780,17 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
  * in collision with the given gameball.
  * Returns: array of unique LevelPieces that are possibly colliding with b.
  */
-std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const GameBall& b) const {
+std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Point2D& center, float radius) const {
 
 	// Get the ball boundry and use it to figure out what levelpieces are relevant
-	Collision::Circle2D ballBounds = b.GetBounds();
-	Point2D ballCenter = ballBounds.Center();
-
 	// Find the non-rounded max and min indices to look at along the x and y axis
-	float xNonAdjustedIndex = ballCenter[0] / LevelPiece::PIECE_WIDTH;
-	int xIndexMax = static_cast<int>(floorf(xNonAdjustedIndex + ballBounds.Radius())); 
-	int xIndexMin = static_cast<int>(floorf(xNonAdjustedIndex - ballBounds.Radius()));
+	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
+	int xIndexMax = static_cast<int>(floorf(xNonAdjustedIndex + radius)); 
+	int xIndexMin = static_cast<int>(floorf(xNonAdjustedIndex - radius));
 	
-	float yNonAdjustedIndex = ballCenter[1] / LevelPiece::PIECE_HEIGHT;
-	int yIndexMax = static_cast<int>(floorf(yNonAdjustedIndex + ballBounds.Radius()));
-	int yIndexMin = static_cast<int>(floorf(yNonAdjustedIndex - ballBounds.Radius()));
+	float yNonAdjustedIndex = center[1] / LevelPiece::PIECE_HEIGHT;
+	int yIndexMax = static_cast<int>(floorf(yNonAdjustedIndex + radius));
+	int yIndexMin = static_cast<int>(floorf(yNonAdjustedIndex - radius));
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
 }
@@ -851,10 +819,11 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Projecti
  * Get the first piece in the level to collide with the given ray, if the ray does not collide
  * with any piece in the level then NULL is returned.
  * The given ray is in game world space.
+ * A tolerance radius may be given, this will allow for checking around the ray.
  * Returns: The first piece closest to the origin of the given ray that collides with it, NULL
  * if no collision found.
  */
-LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray, const LevelPiece* ignorePiece, float& rayT) const {
+LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray, std::set<const LevelPiece*> ignorePieces, float& rayT, float toleranceRadius) const {
 	// Step along the ray - not a perfect algorithm but will result in something very reasonable
 	const float LEVEL_WIDTH					 = this->GetLevelUnitWidth();
 	const float LEVEL_HEIGHT				 = this->GetLevelUnitHeight();
@@ -862,33 +831,49 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray, c
 
 	// NOTE: if the step size is too large then the ray might skip over entire sections of blocks - BECAREFUL!
 	const float STEP_SIZE = 0.5f * std::min<float>(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
-
 	int NUM_STEPS = static_cast<int>(LONGEST_POSSIBLE_RAY / STEP_SIZE);
+
+	LevelPiece* returnPiece = NULL;
+	Collision::Circle2D toleranceCircle(Point2D(0,0), toleranceRadius);
+
 	for (int i = 0; i < NUM_STEPS; i++) {
 		Point2D currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
+		
 
 		// Indices of the sampled level piece can be found using the point...
-		int wSampleIndex = static_cast<int>(currSamplePoint[0] / LevelPiece::PIECE_WIDTH);
-		int hSampleIndex = static_cast<int>(currSamplePoint[1] / LevelPiece::PIECE_HEIGHT);
-		
-		// Make sure the ray hasn't gone out of bounds
-		if (wSampleIndex < 0 || hSampleIndex < 0) {
-			continue;
-		}
-		else if (static_cast<size_t>(wSampleIndex) >= this->width || static_cast<size_t>(hSampleIndex) >= this->height) {
-			continue;
+		std::set<LevelPiece*> collisionCandidates = this->GetLevelPieceCollisionCandidates(currSamplePoint, toleranceRadius);
+		float minRayT = FLT_MAX;
+		for (std::set<LevelPiece*>::iterator iter = collisionCandidates.begin(); iter != collisionCandidates.end(); ++iter) {
+			
+			LevelPiece* currSamplePiece = *iter;
+			assert(currSamplePiece != NULL);
+
+			// Check to see if the piece can be collided with, if so try to collide the ray with
+			// the actual block bounds, if there's a collision we get out of here and just return the piece
+			if (ignorePieces.find(currSamplePiece) == ignorePieces.end()) {
+				if (currSamplePiece->CollisionCheck(ray, rayT)) {
+					// Make sure the piece is along the direction of the ray and not behind it
+					if (rayT < minRayT) {
+						returnPiece = currSamplePiece;
+						minRayT = rayT;
+					}
+				}
+				else if (toleranceRadius != 0.0f) {
+					toleranceCircle.SetCenter(currSamplePoint);
+					if (currSamplePiece->CollisionCheck(toleranceCircle)) {
+						// TODO: Project the center onto the ray...
+						minRayT = i * STEP_SIZE;
+						returnPiece = currSamplePiece;
+					}
+				}
+			}
 		}
 
-		// Grab the piece at that index
-		LevelPiece* currSamplePiece = this->currentLevelPieces[hSampleIndex][wSampleIndex];
-		assert(currSamplePiece != NULL);
-
-		// Check to see if the piece can be collided with, if so try to collide the ray with
-		// the actual block bounds, if there's a collision we get out of here and just return the piece
-		if (currSamplePiece != ignorePiece && currSamplePiece->CollisionCheck(ray, rayT)) {
-			return currSamplePiece;
+		// If we managed to find a suitable piece (with the lowest ray t), then return it
+		if (returnPiece != NULL) {
+			rayT = minRayT;
+			return returnPiece;
 		}
-
 	}
 
 	return NULL;
@@ -931,7 +916,9 @@ bool GameLevel::PaddleSafetyNetCollisionCheck(const PlayerPaddle& p) {
 }
 
 // Add a newly activated lightning barrier for the tesla block
-void GameLevel::AddTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2) {
+void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2) {
+	assert(gameModel != NULL);
+
 	// Check to see if the barrier already exists, if it does then just exit with no change
 	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::iterator findIter =
 		this->teslaLightning.find(std::make_pair(block1, block2));
@@ -949,6 +936,32 @@ void GameLevel::AddTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBl
 
 	// EVENT: Lightning arc/barrier was just added to the level
 	GameEventManager::Instance()->ActionTeslaLightningBarrierSpawned(*block1, *block2);
+
+	// Destroy any destroyable blocks in the arc path...
+	if (gameModel != NULL) {
+		Collision::Ray2D rayFromBlock(block1->GetCenter(), Vector2D::Normalize(block2->GetCenter() - block1->GetCenter()));
+		float rayT;
+		LevelPiece* pieceInArc;
+		std::set<const LevelPiece*> ignorePieces;
+		ignorePieces.insert(block1);
+
+		while (true) {
+			pieceInArc = this->GetLevelPieceFirstCollider(rayFromBlock, ignorePieces, rayT, TeslaBlock::LIGHTNING_ARC_RADIUS);
+			// We get out once we've reached the 2nd tesla block (which MUST happen!)
+			if (pieceInArc == block2) {
+				break;
+			}
+			assert(pieceInArc != NULL);
+			assert(pieceInArc != block1);
+			assert(rayT >= 0.0f);
+
+			// Destroy the piece in the lightning arc...
+			ignorePieces.insert(pieceInArc->Destroy(gameModel));
+			// Reevaluate the next collider using a new ray from the new ignore piece
+			rayFromBlock.SetOrigin(rayFromBlock.GetPointAlongRayFromOrigin(rayT));
+		}
+	}
+
 }
 
 // Remove any currently active tesla lightning arcs

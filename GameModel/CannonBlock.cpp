@@ -49,8 +49,7 @@ bool CannonBlock::CollisionCheck(const Collision::AABB2D& aabb) const {
 }
 
 bool CannonBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-	return Collision::IsCollision(ray, Collision::AABB2D(this->GetCenter() + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-																this->GetCenter() +  Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT)), rayT);
+	return Collision::IsCollision(ray, this->GetAABB(), rayT);
 }
 
 bool CannonBlock::CollisionCheck(const BoundingLines& boundingLines) const {

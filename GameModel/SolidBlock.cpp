@@ -120,8 +120,7 @@ bool SolidBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const 
 		return false;
 	}
 
-	return Collision::IsCollision(ray, Collision::AABB2D(this->GetCenter() + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-																this->GetCenter() +  Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT)), rayT);
+	return Collision::IsCollision(ray, this->GetAABB(), rayT);
 }
 
 /**

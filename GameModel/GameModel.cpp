@@ -375,20 +375,24 @@ void GameModel::AddBeam(int beamType) {
 	// Create the beam based on type...
 	Beam* addedBeam = NULL;
 	switch (beamType) {
-		case Beam::PaddleLaserBeam:
-			// Remove any previous paddle laser beams and add the new one...
-			for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); ++iter) {
-				Beam* currBeam = *iter;
-				if (currBeam->GetBeamType() == Beam::PaddleLaserBeam) {
-					this->beams.erase(iter);
-					// EVENT: Beam was removed (being replaced)
-					GameEventManager::Instance()->ActionBeamRemoved(*currBeam);
-					delete currBeam;
-					currBeam = NULL;
-					break;
+		case Beam::PaddleLaserBeam: {
+				
+				bool foundOtherLaserBeam = false;
+				// Reset the time on the previous beam if there is one, otherwise spawn a new beam
+				for (std::list<Beam*>::iterator iter = this->beams.begin(); iter != this->beams.end(); ++iter) {
+					Beam* currBeam = *iter;
+					if (currBeam->GetBeamType() == Beam::PaddleLaserBeam) {
+						assert(foundOtherLaserBeam == false);
+						foundOtherLaserBeam = true;
+						currBeam->ResetTimeElapsed();
+					}
 				}
+				if (foundOtherLaserBeam) {
+					return;
+				}
+
+				addedBeam = new PaddleLaserBeam(this->GetPlayerPaddle(), this->GetCurrentLevel());
 			}
-			addedBeam = new PaddleLaserBeam(this->GetPlayerPaddle(), this->GetCurrentLevel());
 			break;
 
 		default:

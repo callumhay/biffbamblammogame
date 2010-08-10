@@ -81,6 +81,8 @@ public:
 	virtual void UpdateCollisions(const GameLevel* level) = 0;
 	bool Tick(double dT);
 
+	void ResetTimeElapsed();
+
 	std::list<BeamSegment*>& GetBeamParts() { return this->beamParts; }
 	const std::list<BeamSegment*>& GetBeamParts() const { return this->beamParts; }
 
@@ -105,5 +107,9 @@ protected:
 
 	Beam(BeamType type, int dmgPerSec, double lifeTimeInSec);
 };
+
+inline void Beam::ResetTimeElapsed() {
+	this->currTimeElapsed = 0.0f;
+}
 
 #endif

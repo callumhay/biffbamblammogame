@@ -140,10 +140,13 @@ void BeamSegment::Tick(double dT) {
  */
 LevelPiece* BeamSegment::FireBeamSegmentIntoLevel(const GameLevel* level) {
 	assert(level != NULL);
+	
+	std::set<const LevelPiece*> ignorePieces;
+	ignorePieces.insert(this->ignorePiece);
 
 	// Collide the ray of this beam with the level - find out where the collision occurs
 	// and what piece is being collided with - set those values for the members of this beam segment.
-	this->collidingPiece = level->GetLevelPieceFirstCollider(this->ray, this->ignorePiece, this->endT);
+	this->collidingPiece = level->GetLevelPieceFirstCollider(this->ray, ignorePieces, this->endT);
 
 	// Make sure that the endT isn't set if there was no collision - it flies out of the level...
 	if (this->collidingPiece == NULL) {

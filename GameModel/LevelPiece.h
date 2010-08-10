@@ -62,10 +62,12 @@ public:
 		return Matrix4x4::translationMatrix(Vector3D(-this->center[0], -this->center[1], 0.0f));
 	}
 
+	virtual Collision::AABB2D GetAABB() const;
 	virtual bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 	virtual bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	virtual bool CollisionCheck(const BoundingLines& boundingLines) const;
+	virtual bool CollisionCheck(const Collision::Circle2D& c) const;
 
 	virtual int GetPointValueForCollision() = 0;
 
