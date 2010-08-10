@@ -29,12 +29,13 @@ public:
 private:
 	TextureFontSet();
 
-	static const unsigned char MAX_NUM_CHARS;
+	//static const unsigned char MAX_NUM_CHARS;
 
+	unsigned int numGlyphs;
 	unsigned int heightInPixels;								// Height of the font set in pixels
 	std::vector<float> widthOfChars;						// Width of each character in the font set
 	std::vector<Texture2D*> charTextures;				// Holds each character as a texture
-	std::vector<unsigned int> charDispLists;		// Holds display list IDs for each character
+	GLuint baseDisplayList;
 
 	static void CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library, FT_Face face, unsigned int heightInPixels);
 
