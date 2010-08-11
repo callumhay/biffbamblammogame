@@ -23,6 +23,7 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 	private JMenu editMenu				= null;
 	private JMenuItem lvlDimMenuItem	= null;
 	private JMenuItem lvlItemsMenuItem	= null;
+	//private JMenuItem editBlock			= null;
 	//private JMenuItem portalsMenuItem   = null;
 	
 	// Tools menu
@@ -143,6 +144,11 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		this.lvlItemsMenuItem.addActionListener(editMenuActionListener);
 		this.lvlItemsMenuItem.setEnabled(false);
 		
+		//this.editBlock = new JMenuItem("Block Properties...");
+		//this.editBlock.setActionCommand("block_properties");
+		//this.editBlock.addActionListener(editMenuActionListener);
+		//this.editBlock.setEnabled(false);
+		
 		//this.portalsMenuItem  = new JMenuItem("Portals...");
 		//this.portalsMenuItem.setActionCommand("portals");
 		//this.portalsMenuItem.addActionListener(editMenuActionListener);
@@ -222,6 +228,9 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 					activeDoc.setItemDropSettings(dlg.getItemDropSettings());
 				}
 			}
+			//else if (e.getActionCommand().equals("block_properties")) {
+				
+			//}
 			/*
 			else if (e.getActionCommand().equals("portals")) {
 				BBBLevelEditDocumentWindow activeDoc = levelEditWindow.getActiveLevelDoc();

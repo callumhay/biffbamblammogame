@@ -1,6 +1,8 @@
 package bbbleveleditor;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -19,6 +21,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -545,14 +548,16 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		this.paintPieces(e.getPoint());
+		if (e.getButton() == MouseEvent.BUTTON1 && !e.isPopupTrigger()) {
+			this.paintPieces(e.getPoint());
+		}
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
 	}
 	
-	public void changeLevelPieceAtLocation(Point loc, LevelPiece newPiece) {
+	private LevelPieceImageLabel getPieceAtLocation(Point loc) {
 		// First of all make sure the location is within the bounds of the
 		// level currently being edited
 		int x = Math.min(loc.x, this.currWidth*(LevelPiece.LEVEL_PIECE_WIDTH));
@@ -571,7 +576,11 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		colIndex = Math.min(this.currWidth-1, Math.max(0, colIndex));
 		
 		ArrayList<LevelPieceImageLabel> levelPieceRow = this.pieces.get(rowIndex);
-		LevelPieceImageLabel editPiece = levelPieceRow.get(colIndex);
+		return levelPieceRow.get(colIndex);
+	}
+	
+	public void changeLevelPieceAtLocation(Point loc, LevelPiece newPiece) {
+		LevelPieceImageLabel editPiece = this.getPieceAtLocation(loc);
 		
 		// If we're getting rid of a portal block then remove its ID from the list...
 		if (editPiece.getIsPortal()) {
@@ -745,18 +754,49 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	public void mouseExited(MouseEvent arg0) {	
 	}
 
+	private class ContextMenuListener implements ActionListener {
+		private LevelPieceEditDialog editDlg;
+		
+		ContextMenuListener(LevelPieceEditDialog editDlg) {
+			this.editDlg = editDlg;
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			this.editDlg.setVisible(true);
+		}
+		
+	}
+	
 	private void maybeShowContextMenu(MouseEvent e) {
 		if (e.isPopupTrigger()) {
+			LevelPieceImageLabel levelPiece = this.getPieceAtLocation(e.getPoint());
+			Set<Character> allowableIDs = null;
+			if (levelPiece.getIsPortal()) {
+				allowableIDs = this.portalIDs;
+			}
+			else if (levelPiece.getIsTesla()) {
+				allowableIDs = this.teslaIDs;
+			}
+			
+			LevelPieceEditDialog blockEditDlg = new LevelPieceEditDialog(this.levelEditWindow, levelPiece, allowableIDs);
+			JMenuItem blockPropertiesItem = new JMenuItem("Block properties");
+			blockPropertiesItem.addActionListener(new ContextMenuListener(blockEditDlg));
+			
 			// Context menu for the level display panel
-			//JPopupMenu levelEditContextMenu = new JPopupMenu();	
-			//levelEditContextMenu.show(e.getComponent(), e.getX(), e.getY());
+			JPopupMenu levelEditContextMenu = new JPopupMenu();	
+			levelEditContextMenu.add(blockPropertiesItem);
+			levelEditContextMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		this.paintPieces(e.getPoint());
 		this.maybeShowContextMenu(e);
+		
+		if (e.getButton() == MouseEvent.BUTTON1 && !e.isPopupTrigger()) {
+			this.paintPieces(e.getPoint());
+		}
 	}
 
 	@Override

@@ -18,7 +18,7 @@ public class LevelPieceImageLabel extends JLabel {
 	private static final Font portalFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
 	private static final Font teslaFont  = new Font(Font.SANS_SERIF, Font.BOLD, 14);
 	
-	public static final char INVALID_PORTAL_ID = '\0';
+	public static final char INVALID_ID = '\0';
 	
 	private Image image;
 	private ImageObserver imageObserver; 
@@ -36,7 +36,7 @@ public class LevelPieceImageLabel extends JLabel {
 	}
 	
 	public LevelPieceImageLabel(LevelPiece piece) {
-		this.blockID = INVALID_PORTAL_ID;
+		this.blockID = INVALID_ID;
 		this.teslaBlockStartsOn = false;
 		this.setLevelPiece(piece);
 	}
@@ -163,7 +163,7 @@ public class LevelPieceImageLabel extends JLabel {
 		if (this.siblingIDs.size() == 1) {
 			return this.siblingIDs.iterator().next();
 		}
-		return INVALID_PORTAL_ID;
+		return INVALID_ID;
 			
 	}
 	// overload setIcon method
