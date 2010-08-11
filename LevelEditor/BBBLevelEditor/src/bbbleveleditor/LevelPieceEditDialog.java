@@ -11,19 +11,12 @@
 
 package bbbleveleditor;
 
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.InputVerifier;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import java.awt.Point;
+import java.util.*;
+import javax.swing.*;
 import javax.swing.text.JTextComponent;
 
-public class LevelPieceEditDialog extends javax.swing.JFrame {
+public class LevelPieceEditDialog extends JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addSiblingBtn;
@@ -46,12 +39,41 @@ public class LevelPieceEditDialog extends javax.swing.JFrame {
 	
     /** Creates new form LevelPieceEditDialog */
     public LevelPieceEditDialog(JFrame parentWindow, LevelPieceImageLabel levelPieceLbl, Set<Character> allPieceIDs) {
+    	super(parentWindow, "Block Properties", true);
     	assert(levelPieceLbl != null);
     	this.parentWindow = parentWindow;
     	this.allPieceIDs = allPieceIDs;
     	this.levelPieceLbl = levelPieceLbl;
     	
         initComponents();
+        
+        String pieceIDStr = "";
+        if (levelPieceLbl.getBlockID() == LevelPieceImageLabel.INVALID_ID) {
+        	pieceIDStr = "N/A";
+        }
+        else {
+        	pieceIDStr = "" +  levelPieceLbl.getBlockID();
+        }
+        
+        this.pieceIDTxtField.setText(pieceIDStr);
+        this.pieceTypeTxtField.setText("" + levelPieceLbl.getLevelPiece().getName());
+        
+        // Populate the sibling list with all of the sibling IDs
+        Set<Character> siblingIDs = this.levelPieceLbl.getSiblingIDs();
+        for (Iterator<Character> iter = siblingIDs.iterator(); iter.hasNext();) {
+        	this.siblingListModel.addElement(iter.next());
+        }
+        
+        if (allPieceIDs == null) {
+        	this.siblingList.setEnabled(false);
+        	this.addSiblingBtn.setEnabled(false);
+        	this.removeSiblingBtn.setEnabled(false);
+        }
+        
+		this.setLocationRelativeTo(parentWindow);
+		int parentWidth = parentWindow.getWidth();
+		int parentHeight = parentWindow.getHeight();
+		this.setLocation(new Point((parentWidth - this.getWidth()) / 2, (parentHeight - this.getHeight()) / 2));		
     }
 
     /** This method is called from within the constructor to
@@ -75,7 +97,7 @@ public class LevelPieceEditDialog extends javax.swing.JFrame {
         cancelBtn = new javax.swing.JButton();
         okBtn = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("Level Piece Type:");
 
@@ -214,8 +236,12 @@ public class LevelPieceEditDialog extends javax.swing.JFrame {
     }//GEN-LAST:event_removeSiblingBtnActionPerformed
 
     private void addSiblingBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addSiblingBtnActionPerformed
+    	if (this.allPieceIDs == null) {
+    		return;
+    	}
+    	
         // Open up a dialog with a combo box filled with possible siblings
-    	assert(this.allPieceIDs.size() > 1);
+    	assert(this.allPieceIDs.size() >= 1);
     	Set<Character> allowableSiblings = new TreeSet<Character>();
     	Iterator<Character> iter = this.allPieceIDs.iterator();
     	while (iter.hasNext()) {
@@ -227,6 +253,7 @@ public class LevelPieceEditDialog extends javax.swing.JFrame {
     	}
     	
     	if (allowableSiblings.size() == 0) {
+    		JOptionPane.showMessageDialog(this.parentWindow, "No other siblings are available!", "Error", JOptionPane.WARNING_MESSAGE);
     		return;
     	}
     	
