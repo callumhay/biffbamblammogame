@@ -1,6 +1,7 @@
 
 #include "ESPBeam.h"
 #include "../BlammoEngine/Camera.h"
+#include "../BlammoEngine/Collision.h"
 
 ESPBeam::ESPBeam(const Vector3D& beamLineVec, const Vector3D& rotationalVec, 
 								 const ESPInterval& amplitudeVariationAmt, const ESPInterval& lineDistVariationAmt) : 
@@ -15,7 +16,7 @@ ESPBeam::~ESPBeam() {
 	startSegment = NULL;
 }
 
-void ESPBeam::Draw(const Point3D& startPt, const Camera& camera) const {
+void ESPBeam::Draw(const Point3D& startPt, const Point3D& endPt, const Camera& camera) const {
 	std::list<const ESPBeamSegment*> beamSegs;
 	beamSegs.push_back(this->startSegment);
 
@@ -23,8 +24,9 @@ void ESPBeam::Draw(const Point3D& startPt, const Camera& camera) const {
 	// thickness of the beam in world units...
 
 	// Calculate the distance from the camera along the look vector that the beam is...
-	Vector3D cameraViewVec   = camera.GetNormalizedViewVector();
-	float distanceFromCamera = fabs(Vector3D::Dot(cameraViewVec, startPt - camera.GetCurrentCameraPosition()));
+	//Vector3D cameraViewVec   = camera.GetNormalizedViewVector();
+	Vector3D distVec = Point3D::GetMidPoint(startPt, endPt) - camera.GetCurrentCameraPosition();
+	float distanceFromCamera = distVec.length();
 
 	// Calculate the height of the screen in world space
 	float screenHeightInWorldUnits = 2.0f * tan(Trig::degreesToRadians(camera.GetFOVAngleInDegrees() / 2.0f)) * distanceFromCamera;

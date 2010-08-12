@@ -17,7 +17,7 @@ public:
 	void SetThickness(float thickness);
 
 	void Tick(double dT);
-	void Draw(const Point3D& startPt, const Camera& camera) const;
+	void Draw(const Point3D& startPt, const Point3D& endPt, const Camera& camera) const;
 	bool IsDead() const;
 
 	const Vector3D& GetBeamLineVec() const;

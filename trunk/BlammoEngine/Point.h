@@ -180,6 +180,9 @@ public:
 		return !(*this == other);
 	}
 
+	static Point3D GetMidPoint(const Point3D& p1, const Point3D& p2) {
+		return Point3D((p1[0] + p2[0]) / 2.0f, (p1[1] + p2[1]) / 2.0f, (p1[2] + p2[2]) / 2.0f);
+	}
 
 	friend bool operator<=(const Point3D& a, const Point3D& b);
 };

@@ -2393,10 +2393,10 @@ void GameESPAssets::RemoveBeamEffect(const Beam& beam) {
 }
 
 // Adds a tesla lightning arc effect
-void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2) {
+void GameESPAssets::AddTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2, const Vector3D& levelTranslation) {
 
-	Point3D startPt(block1.GetCenter());
-	Point3D endPt(block2.GetCenter());
+	Point3D startPt = Point3D(block1.GetCenter()) + levelTranslation;
+	Point3D endPt   = Point3D(block2.GetCenter()) + levelTranslation;
 
 	// Base the number of segments on the distance between the tesla blocks!!
 	float distance = Point2D::Distance(block1.GetCenter(), block2.GetCenter());

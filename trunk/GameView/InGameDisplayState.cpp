@@ -168,11 +168,11 @@ void InGameDisplayState::RenderForegroundWithBackgroundToFBO(double dT) {
 	Matrix4x4 gameTransform = this->display->GetModel()->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 
-	glPushMatrix();
-	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
-
 	// Tesla lightning arcs
 	this->display->GetAssets()->DrawTeslaLightning(dT, camera);
+
+	glPushMatrix();
+	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
 	// Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *this->display->GetModel()->GetPlayerPaddle(), camera);
