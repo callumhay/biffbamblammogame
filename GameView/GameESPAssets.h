@@ -227,7 +227,7 @@ public:
 	void UpdateBeamEffect(const Beam& beam);
 	void RemoveBeamEffect(const Beam& beam);
 
-	void AddTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2);
+	void AddTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2, const Vector3D& levelTranslation);
 	void RemoveTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2);
 
 	void AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition);

@@ -75,7 +75,7 @@ void ESPPointToPointBeam::Draw(const Camera& camera) {
 	// Draw all of the alive beams
 	for (std::list<ESPBeam*>::iterator iter = this->aliveBeams.begin(); iter != this->aliveBeams.end(); ++iter) {
 		ESPBeam* currBeam = *iter;
-		currBeam->Draw(startPt, camera);
+		currBeam->Draw(this->startPt, this->endPt, camera);
 	}
 
 	glPopMatrix();
