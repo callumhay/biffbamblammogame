@@ -122,13 +122,7 @@ private:
 		glCallLists(displayListIDs.size(), GL_UNSIGNED_INT, &displayListIDs[0]);
 		cgResetPassState(pass);
 	}
-	/*
-	static void DrawPass(CGpass pass, const VBOBatch* batch) {
-		cgSetPassState(pass);
-		batch->Draw();
-		cgResetPassState(pass);
-	}
-	*/
+
 protected:
 	// The Cg Effect pointer
 	CGeffect cgEffect;

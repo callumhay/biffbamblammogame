@@ -1005,9 +1005,10 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	// and set all the other relevant parameter values
 	
 	// Get the vector from the line to the ball's center (the center of the ball dT time ago)
-	const Point2D previousBallPos = currentBallPos + dT * b.GetVelocity();
+	const Point2D previousBallPos = currentBallPos - dT * b.GetVelocity();
 	const Point2D& linePt1			  = collisionLine.P1();
 	const Point2D& linePt2				= collisionLine.P2();
+
 	Vector2D fromLineToBall = previousBallPos - linePt1;
 	if (Vector2D::Dot(fromLineToBall, fromLineToBall) < EPSILON) {
 		fromLineToBall = previousBallPos - linePt2;
@@ -1016,11 +1017,12 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 
 	// Use the vector from the line to the ball to determine what side of the line
 	// the ball is on and what the normal should be for the collision
-	n[0] = -fromLineToBall[1];
-	n[1] =  fromLineToBall[0];
+	Vector2D lineVec = linePt2 - linePt1;
+	n[0] = -lineVec[1];
+	n[1] =  lineVec[0];
 	if (Vector2D::Dot(n, fromLineToBall) < 0) {
-		n[0] =  fromLineToBall[1];
-		n[1] = -fromLineToBall[0];
+		n[0] =  lineVec[1];
+		n[1] = -lineVec[0];
 	}
 	n.Normalize();
 

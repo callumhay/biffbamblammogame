@@ -170,7 +170,7 @@ private:
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
 
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
-	ESPPointEmitter* CreateShockwaveEffect(const Texture2D& bgTex, const Point3D& center, float startSize, size_t numRipples, float lifeTime);
+	ESPPointEmitter* CreateShockwaveEffect(const Texture2D& bgTex, const Point3D& center, float startSize, float lifeTime);
 
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const Projectile& projectile);

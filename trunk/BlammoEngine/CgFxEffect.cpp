@@ -117,7 +117,7 @@ void CgFxMaterialEffect::LoadParameters() {
  */
 void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	// Transforms
-	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+	cgGLSetStateMatrixParameter(this->wvpMatrixParam,     CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
 	cgGLSetStateMatrixParameter(this->worldMatrixParam,   CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
 	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
 	
@@ -162,7 +162,7 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 		// Ball
 		cgGLSetParameter3fv(this->ballPointLightPosParam,     ballLightPos.begin());
 		cgGLSetParameter3fv(this->ballPointLightDiffuseParam, ballLightDiffuse.begin());
-		cgGLSetParameter1f(this->ballPointLightAttenParam,   ballLightLinearAtten);	
+		cgGLSetParameter1f(this->ballPointLightAttenParam,    ballLightLinearAtten);	
 	}
 
 	debug_cg_state();
