@@ -76,12 +76,12 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 		std::map<const TeslaBlock*, std::pair<Vector3D, float>>::iterator findIter = this->rotations.find(currTeslaBlock);
 
 		const Vector3D& currRotationAxis = findIter->second.first;
-		float& currRotatationAmt = findIter->second.second;
+		float& currRotationAmt = findIter->second.second;
 		const Point2D& blockCenter = currTeslaBlock->GetCenter();
 
 		glPushMatrix();
 		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
-		glRotatef(currRotatationAmt, currRotationAxis[0], currRotationAxis[1], currRotationAxis[2]);	
+		glRotatef(currRotationAmt, currRotationAxis[0], currRotationAxis[1], currRotationAxis[2]);	
 		this->teslaCoilMesh->Draw(camera, keyLight, fillLight, ballLight);
 		glPopMatrix();
 
@@ -92,7 +92,7 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 			this->teslaCenterFlare->Draw(camera, Vector3D(0,0,0), true);
 			glPopMatrix();
 
-			currRotatationAmt += rotationAmt;
+			currRotationAmt += rotationAmt;
 		}
 
 	}

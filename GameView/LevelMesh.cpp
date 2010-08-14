@@ -279,13 +279,11 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 				assert(false);
 				break;
 		}
-
 	}
 
 	// Based on the new piece type we re-create a display list
-	Point2D changedPieceLoc = pieceAfter.GetCenter();
-	Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
-	Vector3D translation(-levelDimensions[0]/2.0f, -levelDimensions[1]/2.0f, 0.0f);
+	const Point2D& changedPieceLoc = pieceAfter.GetCenter();
+	Vector3D translation(-this->currLevel->GetLevelUnitWidth()/2.0f, -this->currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
 	this->CreateDisplayListsForPiece(&pieceAfter, translation);
 }
 
@@ -333,10 +331,11 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->portalBlock->Tick(dT);
 
 	// Go through each material and draw all the display lists corresponding to it
+	CgFxMaterialEffect* currEffect = NULL;
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->displayListsPerMaterial.begin();
 		iter != this->displayListsPerMaterial.end(); ++iter) {
 		
-		CgFxMaterialEffect* currEffect = iter->first;
+		currEffect = iter->first;
 		currEffect->SetKeyLight(keyLight);
 		currEffect->SetFillLight(fillLight);
 		currEffect->SetBallLight(ballLight);
@@ -349,16 +348,15 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
-		
+	
 	// Draw the piece effects
+	ESPEmitter* emitter = NULL;
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
 		pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
 
 		std::list<ESPEmitter*>& emitterList = pieceIter->second;
-		ESPEmitter* emitter = NULL;
 		for (std::list<ESPEmitter*>::iterator emitterIter = emitterList.begin(); emitterIter != emitterList.end(); ++emitterIter) {
 			emitter = *emitterIter;
-			assert(emitter != NULL);
 			emitter->Tick(dT);
 			emitter->Draw(camera);
 		}
@@ -373,10 +371,8 @@ void LevelMesh::DrawSafetyNet(double dT, const Camera& camera, const BasicPointL
 	// If the ball safety net is active then we draw it
 	assert(this->currLevel != NULL);
 	if (this->currLevel->IsBallSafetyNetActive() || this->ballSafetyNet->IsPlayingAnimation()) {
-		Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
-
 		glPushMatrix();
-		glTranslatef(-levelDimensions[0] / 2.0f, -(levelDimensions[1] / 2.0f + LevelPiece::HALF_PIECE_HEIGHT), 0.0f);
+		glTranslatef(-this->currLevel->GetLevelUnitWidth() / 2.0f, -(this->currLevel->GetLevelUnitHeight() / 2.0f + LevelPiece::HALF_PIECE_HEIGHT), 0.0f);
 		this->ballSafetyNet->Draw(dT, camera, keyLight, fillLight, ballLight);
 		glPopMatrix();
 	}
@@ -388,12 +384,15 @@ void LevelMesh::DrawSafetyNet(double dT, const Camera& camera, const BasicPointL
  */
 void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation) {
 	assert(piece != NULL);
-	std::map<std::string, MaterialGroup*> pieceMatGrps = this->GetMaterialGrpsForPieceType(piece->GetType());
+	const std::map<std::string, MaterialGroup*>* pieceMatGrps = this->GetMaterialGrpsForPieceType(piece->GetType());
+	if (pieceMatGrps == NULL) {
+		return;
+	}
 
 	glPushAttrib(GL_CURRENT_BIT);
 
 	// Go through each of the material groups ensuring that the material is associated with an appropriate display list
-	for (std::map<std::string, MaterialGroup*>::iterator iter = pieceMatGrps.begin(); iter != pieceMatGrps.end(); ++iter) {
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = pieceMatGrps->begin(); iter != pieceMatGrps->end(); ++iter) {
 		
 		// Make sure that the material exists in our set of available level materials
 		std::map<std::string, CgFxMaterialEffect*>::iterator currMaterialIter = this->levelMaterials.find(iter->first);
@@ -467,42 +466,40 @@ void LevelMesh::CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vect
  * Returns: A map of the identifiers to corresponding material groups for a particular mesh representation
  * of the given level piece type.
  */
-std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const {
-	
-	std::map<std::string, MaterialGroup*> returnValue;
+const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const {
 	switch (type) {
 		case LevelPiece::Solid :
-			returnValue = this->styleBlock->GetMaterialGroups();
+			return &this->styleBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::SolidTriangle:
-			returnValue = this->triangleBlockUR->GetMaterialGroups();
+			return &this->triangleBlockUR->GetMaterialGroups();
 			break;
 		case LevelPiece::Breakable:
-			returnValue = this->basicBlock->GetMaterialGroups();
+			return &this->basicBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::BreakableTriangle:
-			returnValue = this->triangleBlockUR->GetMaterialGroups();
+			return &this->triangleBlockUR->GetMaterialGroups();
 			break;
 		case LevelPiece::Bomb:
-			returnValue = this->bombBlock->GetMaterialGroups();
+			return &this->bombBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Ink:
-			returnValue = this->inkBlock->GetMaterialGroups();
+			return &this->inkBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Prism:
-			returnValue = this->prismBlockDiamond->GetMaterialGroups();
+			return &this->prismBlockDiamond->GetMaterialGroups();
 			break;
 		case LevelPiece::PrismTriangle:
-			returnValue = this->prismBlockTriangleUR->GetMaterialGroups();
+			return &this->prismBlockTriangleUR->GetMaterialGroups();
 			break;
 		case LevelPiece::Portal:
-			returnValue = this->portalBlock->GetMaterialGroups();
+			return &this->portalBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Cannon:
-			returnValue = this->cannonBlock->GetMaterialGroups();
+			return &this->cannonBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Tesla:
-			returnValue = this->teslaBlock->GetMaterialGroups();
+			return &this->teslaBlock->GetMaterialGroups();
 			break;
 		case LevelPiece::Collateral:
 			break;
@@ -512,7 +509,7 @@ std::map<std::string, MaterialGroup*> LevelMesh::GetMaterialGrpsForPieceType(Lev
 			assert(false);
 			break;
 	}
-	return returnValue;
+	return NULL;
 }
 
 /**

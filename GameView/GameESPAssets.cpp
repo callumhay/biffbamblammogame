@@ -984,17 +984,13 @@ void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball, const Tex
 	boltOnoEffect->SetParticles(1, boltTextLabel, type, severity);	
 	
 	// Add the shockwave for the ball hitting the lightning...
-	ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(bgTexture, emitPosition, 2.0f * GameBall::DEFAULT_BALL_RADIUS, 1, 0.45f);
+	ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(bgTexture, emitPosition, 3.0f * GameBall::DEFAULT_BALL_RADIUS, 0.5f);
 	assert(shockwaveEffect != NULL);
 
 	// Add the bolt graphic, its sound graphic and the shockwave to the active general emitters
 	this->activeGeneralEmitters.push_back(shockwaveEffect);
 	this->activeGeneralEmitters.push_back(lightningBoltEffect);
 	this->activeGeneralEmitters.push_back(boltOnoEffect);
-
-	// Add the smoke on the ball
-	// TODO
-
 }
 
 ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling) {
@@ -1033,16 +1029,14 @@ ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, cons
  * Builds a shockwave that distorts the background.
  *
  */
-ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Texture2D& bgTex, const Point3D& center, float startSize, size_t numRipples, float lifeTime) {
+ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Texture2D& bgTex, const Point3D& center, float startSize, float lifeTime) {
 	// Add the shockwave for the ball hitting the lightning...
 	this->normalTexRefractEffect.SetFBOTexture(&bgTex);
 
-	assert(numRipples > 0);
 	assert(lifeTime > 0);
-	const float spawnDelta = lifeTime / static_cast<float>(numRipples);
 
 	ESPPointEmitter* shockwaveEffect = new ESPPointEmitter();
-	shockwaveEffect->SetSpawnDelta(ESPInterval(spawnDelta));
+	shockwaveEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	shockwaveEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
 	shockwaveEffect->SetParticleLife(ESPInterval(lifeTime));
 	shockwaveEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
@@ -1563,7 +1557,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPie
 	bombOnoEffect->AddParticle(bombOnoParticle);
 
 	// Shockwave...
-	ESPPointEmitter* shockwave = this->CreateShockwaveEffect(bgTexture, emitCenter, LevelPiece::PIECE_WIDTH, 3, 0.8f);
+	ESPPointEmitter* shockwave = this->CreateShockwaveEffect(bgTexture, emitCenter, LevelPiece::PIECE_WIDTH, 0.8f);
 	assert(shockwave != NULL);
 
 	// Lastly, add the new emitters to the list of active emitters
@@ -2942,7 +2936,7 @@ void GameESPAssets::AddRocketHitBlockEffect(float rocketSizeFactor, const Point2
 	bangOnoEffect->SetParticles(1, bangTextLabel, type, severity);
 
 	// Add shockwave
-	ESPPointEmitter* shockwave = this->CreateShockwaveEffect(bgTexture, emitCenter, sizeIntervalX.maxValue, 3, 1.0f);
+	ESPPointEmitter* shockwave = this->CreateShockwaveEffect(bgTexture, emitCenter, sizeIntervalX.maxValue, 1.0f);
 	assert(shockwave != NULL);
 
 	// Lastly, add the new emitters to the list of active emitters in order of back to front

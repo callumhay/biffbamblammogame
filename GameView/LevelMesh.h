@@ -53,7 +53,7 @@ private:
 	// Special effects always present for specific level pieces
 	std::map<const LevelPiece*, std::list<ESPEmitter*> > pieceEmitterEffects;
 
-	std::map<std::string, MaterialGroup*> GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const;
+	const std::map<std::string, MaterialGroup*>* GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const;
 	void CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateDisplayListForBallSafetyNet(float levelWidth);
