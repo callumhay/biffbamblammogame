@@ -580,19 +580,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\DisplayState.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\FlashHUD.h"
 					>
 				</File>
 				<File
 					RelativePath=".\GameView\GameAssets.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameCompleteDisplayState.h"
 					>
 				</File>
 				<File
@@ -632,23 +624,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\GameOverDisplayState.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\GameViewConstants.h"
 					>
 				</File>
 				<File
 					RelativePath=".\GameView\GameWorldAssets.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\InGameDisplayState.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\InGameMenuState.h"
 					>
 				</File>
 				<File
@@ -668,10 +648,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\MainMenuDisplayState.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\PaddleRocketMesh.h"
 					>
 				</File>
@@ -685,10 +661,6 @@
 				</File>
 				<File
 					RelativePath=".\GameView\PrismBlockMesh.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\StartGameDisplayState.h"
 					>
 				</File>
 				<File
@@ -736,10 +708,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\GameCompleteDisplayState.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\GameDisplay.cpp"
 					>
 				</File>
@@ -776,23 +744,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\GameOverDisplayState.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\GameViewConstants.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\GameView\GameWorldAssets.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\InGameDisplayState.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\InGameMenuState.cpp"
 					>
 				</File>
 				<File
@@ -812,10 +768,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\MainMenuDisplayState.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\PaddleRocketMesh.cpp"
 					>
 				</File>
@@ -829,10 +781,6 @@
 				</File>
 				<File
 					RelativePath=".\GameView\PrismBlockMesh.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\StartGameDisplayState.cpp"
 					>
 				</File>
 				<File
@@ -980,6 +928,74 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxVolumetricEffect.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="States"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameView\DisplayState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameCompleteDisplayState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameOverDisplayState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\InGameDisplayState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\InGameMenuState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\MainMenuDisplayState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\WorldStartDisplayState.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\GameView\DisplayState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameCompleteDisplayState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameOverDisplayState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\InGameDisplayState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\InGameMenuState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\MainMenuDisplayState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\WorldStartDisplayState.cpp"
 						>
 					</File>
 				</Filter>

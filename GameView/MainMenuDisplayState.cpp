@@ -10,7 +10,7 @@
  */
 
 #include "MainMenuDisplayState.h"
-#include "StartGameDisplayState.h"
+#include "InGameDisplayState.h"
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "GameMenu.h"
@@ -413,7 +413,13 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 		GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
 		soundAssets->StopAllSounds();
 
-		this->display->SetCurrentState(new StartGameDisplayState(this->display));
+		// Load all the initial stuffs for the game - this will queue up the next states that we need to go to
+		this->display->GetModel()->BeginOrRestartGame();
+
+		// Place the view into the proper state to play the game
+		this->display->AddStateToQueue(DisplayState::InGame);
+		this->display->SetCurrentStateAsNextQueuedState();
+		//this->display->SetCurrentState(new InGameDisplayState(this->display));
 		
 		return;
 	}

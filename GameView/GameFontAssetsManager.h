@@ -51,6 +51,10 @@ public:
 			if (fontIter != fontSetIter->second.end()) {
 				return fontIter->second;
 			}
+			else if (!fontSetIter->second.empty()) {
+				// Just return whatever we can
+				return fontSetIter->second.begin()->second;
+			}	
 		}
 		
 		assert(false);

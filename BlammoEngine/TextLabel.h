@@ -62,6 +62,9 @@ public:
 	void SetColour(const ColourRGBA& c) {
 		this->colour = c;
 	}
+	void SetAlpha(float alpha) {
+		this->colour[3] = alpha;
+	}
 
 	// Set drop shadow for the label - the colour and amount it drops
 	// from the text as a percentage of the text height

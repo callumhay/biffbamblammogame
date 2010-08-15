@@ -11,6 +11,10 @@ protected:
 	GameDisplay* display;
 
 public:
+	enum DisplayStateType { MainMenu, WorldStart, InGame, InGameMenu, GameComplete, GameOver };
+
+	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, GameDisplay* display);
+
 	DisplayState(GameDisplay* display) : display(display) {}
 	virtual ~DisplayState() {};
 

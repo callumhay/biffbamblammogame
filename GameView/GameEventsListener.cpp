@@ -58,6 +58,7 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 
 	//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldBackgroundMusic);
+	this->display->AddStateToQueue(DisplayState::WorldStart);
 }
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
@@ -74,6 +75,9 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 	// Set up the initial game camera for the level
 	//this->display->GetCamera().Reset();
 	//this->display->GetCamera().SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
+
+	
+	//this->display->AddStateToQueue(DisplayState::LevelStart);
 }
 
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
@@ -371,7 +375,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::Cannon: {
 				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
 				const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
-				this->display->GetAssets()->GetLevelMesh(currLevel)->RemovePiece(block);
+				this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
 			}
 			break;
 
@@ -382,7 +386,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 					this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCollateralBlockDestroyedEvent);
 				}
 				const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
-				this->display->GetAssets()->GetLevelMesh(currLevel)->RemovePiece(block);
+				this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
 			}
 			break;
 
@@ -400,8 +404,7 @@ void GameEventsListener::BallSafetyNetCreatedEvent() {
 
 	// Tell the level mesh about it so it can show any effects for the creation
 	// of the safety net mesh
-	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
-	this->display->GetAssets()->GetLevelMesh(currLevel)->BallSafetyNetCreated();
+	this->display->GetAssets()->GetCurrentLevelMesh()->BallSafetyNetCreated();
 
 	debug_output("EVENT: Ball safety net created");
 }
@@ -425,7 +428,7 @@ void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
 	// Tell the level mesh about it so it can show any effects for the destruction
 	// of the safety net mesh
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
-	this->display->GetAssets()->GetLevelMesh(currLevel)->BallSafetyNetDestroyed(pt);
+	this->display->GetAssets()->GetCurrentLevelMesh()->BallSafetyNetDestroyed(pt);
 
 	// Particle effects for when the safety net is destroyed
 	this->display->GetAssets()->GetESPAssets()->AddBallSafetyNetDestroyedEffect(pt);
@@ -433,7 +436,7 @@ void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
 
 void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
 	const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
-	this->display->GetAssets()->GetLevelMesh(currLevel)->ChangePiece(pieceBefore, pieceAfter);
+	this->display->GetAssets()->GetCurrentLevelMesh()->ChangePiece(pieceBefore, pieceAfter);
 	debug_output("EVENT: LevelPiece changed");
 }
 

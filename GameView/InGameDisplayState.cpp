@@ -18,6 +18,7 @@ const unsigned int InGameDisplayState::HUD_X_INDENT = 10;
 const unsigned int InGameDisplayState::HUD_Y_INDENT = 10;
 
 InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display) {
+	this->display->GetModel()->SetPauseState(GameModel::NoPause);
 
 	// Set HUD display elements
 	float dropShadowAmt = 0.05f;
