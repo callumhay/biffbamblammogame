@@ -12,7 +12,9 @@
 #ifndef __TEXTUREFONTSET_H__
 #define __TEXTUREFONTSET_H__
 
+
 #include "BasicIncludes.h"
+#include "Texture.h"
 #include "Point.h"
 
 class Texture2D;
@@ -37,7 +39,7 @@ private:
 	std::vector<Texture2D*> charTextures;				// Holds each character as a texture
 	GLuint baseDisplayList;
 
-	static void CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library, FT_Face face, unsigned int heightInPixels);
+	static void CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library, FT_Face face, unsigned int heightInPixels, Texture::TextureFilterType filterType);
 
 public:
 	~TextureFontSet();
@@ -52,8 +54,11 @@ public:
 
 	// Creator Functions
 	
-	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromTTF(PHYSFS_File* fileHandle, const std::vector<unsigned int>& heightsInPixels);
-	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromTTF(const std::string& ttfFilepath, const std::vector<unsigned int>& heightsInPixels);
-	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromBuffer(unsigned char* buffer, long length, const std::vector<unsigned int>& heightsInPixels);
+	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromTTF(PHYSFS_File* fileHandle, 
+		const std::vector<unsigned int>& heightsInPixels, Texture::TextureFilterType filterType);
+	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromTTF(const std::string& ttfFilepath, 
+		const std::vector<unsigned int>& heightsInPixels, Texture::TextureFilterType filterType);
+	static std::map<unsigned int, TextureFontSet*> CreateTextureFontFromBuffer(unsigned char* buffer, long length, 
+		const std::vector<unsigned int>& heightsInPixels, Texture::TextureFilterType filterType);
 };
 #endif

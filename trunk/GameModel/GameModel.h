@@ -178,6 +178,9 @@ public:
 	GameWorld::WorldStyle GetCurrentWorldStyle() const {
 		return this->GetCurrentWorld()->GetStyle();
 	}
+	const std::string& GetCurrentWorldName() const {
+		return this->GetCurrentWorld()->GetName();
+	}
 	
 	Vector2D GetLevelUnitDimensions() const {
 		GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();

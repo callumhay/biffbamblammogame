@@ -61,7 +61,7 @@ private:
 	FlashHUD* flashHUD;
 
 	// Level-related meshes
-	std::map<const GameLevel*, LevelMesh*> loadedLevelMeshes;
+	LevelMesh* currentLevelMesh;
 
 	// Regular meshes - these persist throughout the entire game
 	Mesh* ball;																// Ball used to break blocks
@@ -120,14 +120,10 @@ public:
 #endif
 
 	// Public Getter Functions **********************************************************************
-	LevelMesh* GetLevelMesh(const GameLevel* currLevel) const {
-		std::map<const GameLevel*, LevelMesh*>::const_iterator iter = this->loadedLevelMeshes.find(currLevel);
-		if (iter == this->loadedLevelMeshes.end()) {
-			assert(false);
-			return NULL;
-		}
-		return iter->second;
+	LevelMesh* GetCurrentLevelMesh() const {
+		return this->currentLevelMesh;
 	}
+	void LoadNewLevelMesh(const GameLevel* currLevel);
 
 	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item, const Camera& camera);
 	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item);

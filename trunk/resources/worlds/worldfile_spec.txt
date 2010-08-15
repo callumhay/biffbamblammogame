@@ -6,6 +6,9 @@
 // levels loaded in this world
 <theme_name> 
 
+// The world name - as it appears to people in the splash screen before playing
+<world_name>
+
 
 // The level list comes next, this is a list of all the level files, in order,
 // for this world - no extensions are included

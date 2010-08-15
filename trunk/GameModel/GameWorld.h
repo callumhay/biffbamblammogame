@@ -27,6 +27,7 @@ private:
 	std::vector<GameLevel*> loadedLevels;	// Levels loaded into memory
 	unsigned int currentLevelNum;					// Current level expressed as an index into loaded levels vector
 
+	std::string name;											// Human-readable name of the world
 	WorldStyle style;											// Style of the world loaded (None if no world is loaded)
 
 	GameTransformMgr& transformMgr;
@@ -43,30 +44,40 @@ public:
 	}
 
 	GameLevel* GetCurrentLevel() {
-		assert(isLoaded);
+		assert(this->isLoaded);
+		return this->loadedLevels[this->currentLevelNum];
+	}
+	const GameLevel* GetCurrentLevel() const {
+		assert(this->isLoaded);
 		return this->loadedLevels[this->currentLevelNum];
 	}
 
 	unsigned int GetCurrentLevelNum() const {
-		assert(isLoaded);
+		assert(this->isLoaded);
 		return this->currentLevelNum;
 	}
 
 	WorldStyle GetStyle() const {
-		assert(isLoaded);
+		assert(this->isLoaded);
 		return this->style;
+	}
+	const std::string& GetName() const {
+		assert(this->isLoaded);
+		return this->name;
 	}
 
 	void IncrementLevel() {
-		assert(isLoaded);
+		assert(this->isLoaded);
 		this->SetCurrentLevel(this->currentLevelNum + 1);
+		// EVENT: New Level Started
+		GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
 	}
 
 	void SetCurrentLevel(unsigned int levelNum);
 
 	// Returns whether the current level is the last level in this world.
 	bool IsLastLevel() const {
-		assert(isLoaded);
+		assert(this->isLoaded);
 		return this->currentLevelNum == (this->loadedLevels.size()-1);
 	}
 

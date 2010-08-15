@@ -122,7 +122,9 @@ void TextureFontSet::Print(const std::string& s) const {
  * the height of the font in pixels - this will restrict the size of the font.
  * Returns: A mapping of the given heights to texture sets - returns empty map on error.
  */
-std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfFilepath, const std::vector<unsigned int>& heightsInPixels) {
+std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfFilepath, 
+																																								 const std::vector<unsigned int>& heightsInPixels, 
+																																								 Texture::TextureFilterType filterType) {
 	
 	std::map<unsigned int, TextureFontSet*> newFontSets;
 
@@ -151,7 +153,7 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF
 	for (unsigned int i = 0; i < heightsInPixels.size(); i++) {
 		TextureFontSet* newFontSet = new TextureFontSet();
 		unsigned int currHeight = heightsInPixels[i];
-		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight);
+		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight, filterType);
 		
 		assert(newFontSet != NULL);
 		assert(newFontSets.find(currHeight) == newFontSets.end());
@@ -174,7 +176,9 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF
  * Returns: A new TextureFontSet of the particular font if all goes well, otherwise it will
  * return NULL.
  */
-std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF(PHYSFS_File* fileHandle, const std::vector<unsigned int>& heightsInPixels) {
+std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF(PHYSFS_File* fileHandle, 
+																																								 const std::vector<unsigned int>& heightsInPixels, 
+																																								 Texture::TextureFilterType filterType) {
 	std::map<unsigned int, TextureFontSet*> newFontSets;
 
 	// Grab the in-memory buffer for the file from the physfs filehandle
@@ -219,7 +223,7 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF
 	for (unsigned int i = 0; i < heightsInPixels.size(); i++) {
 		TextureFontSet* newFontSet = new TextureFontSet();
 		unsigned int currHeight = heightsInPixels[i];
-		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight);
+		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight, filterType);
 		
 		assert(newFontSet != NULL);
 		assert(newFontSets.find(currHeight) == newFontSets.end());
@@ -239,7 +243,9 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF
 	return newFontSets;
 }
 
-std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromBuffer(unsigned char* buffer, long length, const std::vector<unsigned int>& heightsInPixels) {
+std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromBuffer(unsigned char* buffer, long length, 
+																																										const std::vector<unsigned int>& heightsInPixels,
+																																										Texture::TextureFilterType filterType) {
 	std::map<unsigned int, TextureFontSet*> newFontSets;
 
 	// Create And Initilize A FreeType Font Library.
@@ -267,7 +273,7 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromBuf
 	for (unsigned int i = 0; i < heightsInPixels.size(); i++) {
 		TextureFontSet* newFontSet = new TextureFontSet();
 		unsigned int currHeight = heightsInPixels[i];
-		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight);
+		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight, filterType);
 		
 		assert(newFontSet != NULL);
 		assert(newFontSets.find(currHeight) == newFontSets.end());
@@ -289,7 +295,8 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromBuf
  * Returns: A new TextureFontSet of the particular font if all goes well, otherwise it will
  * return NULL.
  */
-void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library, FT_Face face, unsigned int heightInPixels) {
+void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library, FT_Face face, unsigned int heightInPixels,
+																							Texture::TextureFilterType filterType) {
 	assert(library != NULL);
 	assert(face != NULL);
 
@@ -335,7 +342,7 @@ void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Lib
 		
 		// Create a texture for the current character only if there's data in the buffer...
 		if (bitmap.width > 0 && bitmap.rows > 0 && bitmap.buffer != NULL) {
-			newCharTexture = Texture2D::CreateTexture2DFromFTBMP(bitmap, Texture::Trilinear);
+			newCharTexture = Texture2D::CreateTexture2DFromFTBMP(bitmap, filterType);
 
 			if (newCharTexture == NULL) {
 				debug_output("Could not create texture from bitmap for character: " << i << " in font set file.");

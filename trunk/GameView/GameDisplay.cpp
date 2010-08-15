@@ -67,6 +67,17 @@ void GameDisplay::SetInitialRenderOptions() {
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 }
 
+// Sets the current state to be the next state lined up on the
+// state queue - these get pushed on as the game model sends events to the view
+// and as the game view states progress
+void GameDisplay::SetCurrentStateAsNextQueuedState() {
+	assert(!this->stateQueue.empty());
+
+	DisplayState::DisplayStateType nextStateType = this->stateQueue.front();
+	this->stateQueue.pop_front();
+	this->SetCurrentState(DisplayState::BuildDisplayStateFromType(nextStateType, this));
+}
+
 void GameDisplay::ChangeDisplaySize(int w, int h) {
 	this->gameCamera.SetWindowDimensions(w, h);
 	this->gameCamera.SetPerspective();

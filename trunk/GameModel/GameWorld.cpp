@@ -63,6 +63,14 @@ bool GameWorld::Load() {
 		return false;	
 	}
 
+	// Read the name of the world
+	if (!(*inFile >> this->name)) {
+		debug_output("ERROR: Could not find world name in world file: " << this->worldFilepath);
+		delete inFile;
+		inFile = NULL;
+		return false;		
+	}
+
 	// Read all the level file names
 	std::vector<std::string> levelFileList;
 	std::string currLvlFile;
@@ -93,11 +101,12 @@ bool GameWorld::Load() {
 	}
 
 	this->isLoaded = true;
+	this->SetCurrentLevel(0);
 
 	// EVENT: World started...
 	GameEventManager::Instance()->ActionWorldStarted(*this);
-
-	this->SetCurrentLevel(0);
+	// EVENT: New Level Started
+	GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
 
 	return true;
 }
@@ -168,7 +177,4 @@ void GameWorld::SetCurrentLevel(unsigned int levelNum) {
 
 	// Setup the default transforms for the new level
 	this->transformMgr.SetupLevelCameraDefaultPosition(*this->GetCurrentLevel());
-
-	// EVENT: New Level Started
-	GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
 }

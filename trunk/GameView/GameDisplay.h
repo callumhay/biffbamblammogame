@@ -13,31 +13,6 @@ class GameEventsListener;
 // The main display class, used to execute the main rendering loop
 // and adjust size, etc.
 class GameDisplay {
-
-private:
-	Camera gameCamera;
-
-	DisplayState* currState;
-	GameModel* model;
-	GameAssets* assets;
-	GameEventsListener* gameListener;
-	
-	bool gameReinitialized;		// Whether or not we should reinitialize the whole game (recreate the window, etc.)
-	bool gameExited;  				// Whether or not the game has been exited
-
-	// Functions for Action Listeners
-	void SetupActionListeners();
-	void RemoveActionListeners();
-
-#ifdef _DEBUG
-	static bool drawDebugBounds;
-	static bool drawDebugLightGeometry;
-	static bool detachedCamera;
-	// Debug draw stuff
-	void DrawDebugAxes();
-	void DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks);
-#endif
-
 public:
 	static const int MAX_FRAMERATE;							// The maximum framerate possible for the game				
 	static const unsigned long FRAME_SLEEP_MS;	// Time to sleep between frames (determined by MAX_FRAMERATE)
@@ -59,6 +34,9 @@ public:
 		}
 		this->currState = state;
 	}
+
+	void AddStateToQueue(const DisplayState::DisplayStateType& type);
+	void SetCurrentStateAsNextQueuedState();
 
 	void ChangeDisplaySize(int w, int h);
 	void Render(double dT);
@@ -110,8 +88,37 @@ public:
 	}
 #endif
 
-	// Be friends with the state classes
-	//friend class InGameDisplayState;
+private:
+	Camera gameCamera;
+
+	std::list<DisplayState::DisplayStateType> stateQueue;
+	DisplayState* currState;
+
+
+	GameModel* model;
+	GameAssets* assets;
+	GameEventsListener* gameListener;
+	
+	bool gameReinitialized;		// Whether or not we should reinitialize the whole game (recreate the window, etc.)
+	bool gameExited;  				// Whether or not the game has been exited
+
+	// Functions for Action Listeners
+	void SetupActionListeners();
+	void RemoveActionListeners();
+
+#ifdef _DEBUG
+	static bool drawDebugBounds;
+	static bool drawDebugLightGeometry;
+	static bool detachedCamera;
+	// Debug draw stuff
+	void DrawDebugAxes();
+	void DrawDebugUnitGrid(bool xy, bool xz, bool zy, int numGridTicks);
+#endif
 
 };
+
+inline void GameDisplay::AddStateToQueue(const DisplayState::DisplayStateType& type) {
+	stateQueue.push_back(type);
+}
+
 #endif

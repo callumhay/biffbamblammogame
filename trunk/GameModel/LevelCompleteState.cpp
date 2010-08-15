@@ -9,7 +9,11 @@
  * all the craziness of the previous level's state...
  */
 LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
- }
+	GameWorld* currWorld = this->gameModel->GetCurrentWorld();
+	GameLevel* currLevel = currWorld->GetCurrentLevel();
+	// EVENT: Level is complete
+	GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
+}
 
 LevelCompleteState::~LevelCompleteState() {
 	// Clear up the model since the level is officially completed
@@ -50,10 +54,6 @@ void LevelCompleteState::Tick(double seconds) {
 	}
 
 	GameWorld* currWorld = this->gameModel->GetCurrentWorld();
-	GameLevel* currLevel = currWorld->GetCurrentLevel();
-
-	// EVENT: Level is complete
-	GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
 
   // Determine the next level to increment to and then load the appropriate
   // level, world or end of game depending on what comes next.

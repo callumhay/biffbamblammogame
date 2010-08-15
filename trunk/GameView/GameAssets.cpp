@@ -42,6 +42,7 @@
 
 GameAssets::GameAssets(int screenWidth, int screenHeight): 
 
+currentLevelMesh(NULL),
 worldAssets(NULL),
 espAssets(NULL),
 itemAssets(NULL),
@@ -112,12 +113,10 @@ GameAssets::~GameAssets() {
 	// Delete the currently loaded world and level assets if there are any
 	// Delete all the levels for the world that are currently loaded - THIS MUST BE CALLED BEFORE DELETING
 	// THE WORLD ASSETS!!!
-	for(std::map<const GameLevel*, LevelMesh*>::iterator iter = this->loadedLevelMeshes.begin(); iter != this->loadedLevelMeshes.end(); ++iter) {
-		LevelMesh* currMesh = iter->second;
-		delete currMesh;
-		currMesh = NULL;
+	if (this->currentLevelMesh != NULL) {
+		delete this->currentLevelMesh;
+		this->currentLevelMesh = NULL;
 	}
-	this->loadedLevelMeshes.clear();
 
 	if (this->worldAssets != NULL) {
 		delete this->worldAssets;
@@ -166,21 +165,17 @@ GameAssets::~GameAssets() {
 
 // Draw the foreground level pieces...
 void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
-	LevelMesh* currLevelMesh = this->GetLevelMesh(currLevel);
-
 	Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
 
 	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	currLevelMesh->DrawPieces(worldTransform, dT, camera, this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
+	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
 }
 
 void GameAssets::DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera) {
-	LevelMesh* currLevelMesh = this->GetLevelMesh(currLevel);
-
 	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	currLevelMesh->DrawSafetyNet(dT, camera, fgKeyLight, fgFillLight, ballLight);
+	this->GetCurrentLevelMesh()->DrawSafetyNet(dT, camera, fgKeyLight, fgFillLight, ballLight);
 }
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
@@ -732,6 +727,13 @@ void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel
 	this->flashHUD->Draw(dT, displayWidth, displayHeight);
 }
 
+void GameAssets::LoadNewLevelMesh(const GameLevel* currLevel) {
+	if (this->currentLevelMesh != NULL) {
+		delete this->currentLevelMesh;
+	}
+	this->currentLevelMesh = new LevelMesh(this->worldAssets, currLevel);
+}
+
 void GameAssets::LoadRegularMeshAssets() {
 	if (this->ball == NULL) {
 		this->ball = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BALL_MESH);
@@ -891,12 +893,10 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 	// Delete the currently loaded world and level assets if there are any
 	// Delete all the levels for the world that are currently loaded - THIS MUST BE CALLED BEFORE DELETING
 	// THE WORLD ASSETS!!!
-	for(std::map<const GameLevel*, LevelMesh*>::iterator iter = this->loadedLevelMeshes.begin(); iter != this->loadedLevelMeshes.end(); ++iter) {
-		LevelMesh* currMesh = iter->second;
-		delete currMesh;
-		currMesh = NULL;
+	if (this->currentLevelMesh != NULL) {
+		delete this->currentLevelMesh;
+		this->currentLevelMesh = NULL;
 	}
-	this->loadedLevelMeshes.clear();
 
 	// Check to see if we've already loaded the world assets...
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading world assets...");
@@ -918,17 +918,14 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 	}
 	this->worldAssets->ResetToInitialState();
 
-	// Load all of the level meshes for the world
-	const std::vector<GameLevel*>& levels = world->GetAllLevelsInWorld();
-	for (std::vector<GameLevel*>::const_iterator iter = levels.begin(); iter != levels.end(); ++iter) {
-		const GameLevel* level = *iter;
-		assert(level != NULL);
+	LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
 
-		// Create a mesh for the level
-		LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
-		LevelMesh* levelMesh = new LevelMesh(this->worldAssets, level);
-		this->loadedLevelMeshes.insert(std::pair<const GameLevel*, LevelMesh*>(level, levelMesh));
-	}
+	// Load the first/current level mesh for the world - the current level should be the first level in the world
+	const GameLevel* currentLevel = world->GetCurrentLevel();
+	assert(currentLevel == world->GetAllLevelsInWorld().front());
+	this->LoadNewLevelMesh(currentLevel);
+	assert(this->currentLevelMesh != NULL);
+	
 
 	// Reinitialize the life HUD elements
 	this->lifeHUD->Reinitialize();
@@ -969,9 +966,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 				this->espAssets->TurnOffCurrentItemDropStars(camera);
 				
 				// We make the safety net transparent so that it doesn't obstruct the paddle cam... too much
-				LevelMesh* currLevelMesh = this->GetLevelMesh(gameModel.GetCurrentLevel());
-				assert(currLevelMesh != NULL);
-				currLevelMesh->PaddleCameraActiveToggle(true);
+				assert(this->GetCurrentLevelMesh() != NULL);
+				this->GetCurrentLevelMesh()->PaddleCameraActiveToggle(true);
 
 				// Move the key light in the foreground so that it is behind the camera when it goes into
 				// paddle cam mode.
@@ -1040,9 +1036,8 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 
 		case GameItem::PaddleCamItem: {
 				// We make the safety net visible (if activated) again
-				LevelMesh* currLevelMesh = this->GetLevelMesh(gameModel.GetCurrentLevel());
-				assert(currLevelMesh != NULL);
-				currLevelMesh->PaddleCameraActiveToggle(false);
+				assert(this->GetCurrentLevelMesh() != NULL);
+				this->GetCurrentLevelMesh()->PaddleCameraActiveToggle(false);
 
 				// Move the foreground key and fill lights back to their default positions...
 				this->lightAssets->RestoreLightPosition(GameLightAssets::FGKeyLight, 2.0f);
