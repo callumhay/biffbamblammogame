@@ -85,9 +85,6 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 }
 
 void GameDisplay::Render(double dT) {
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	// Render the current state
 	this->currState->RenderFrame(dT);
 	debug_opengl_state();

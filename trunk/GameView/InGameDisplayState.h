@@ -2,10 +2,8 @@
 #define __INGAMEDISPLAYSTATE_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
-#include "../BlammoEngine/TextLabel.h"
-#include "../BlammoEngine/FBObj.h"
-
 #include "DisplayState.h"
+#include "InGameRenderPipeline.h"
 
 class Texture2D;
 
@@ -14,24 +12,6 @@ class Texture2D;
  * being played by the user.
  */
 class InGameDisplayState : public DisplayState {
-
-private:
-	// HUD related members
-	static const std::string LIVES_LABEL_TEXT;
-	static const unsigned int HUD_X_INDENT;
-	static const unsigned int HUD_Y_INDENT;
-	TextLabel2D scoreLabel;
-
-	void DrawGameHUD(double dT);
-	void DrawGameScene(double dT);
-
-	void RenderBackgroundToFBO(double dT);
-	void RenderForegroundWithBackgroundToFBO(double dT);
-	void RenderFinalGather(double dT);
-
-#ifdef _DEBUG
-	void DebugDrawBounds();
-#endif
 
 public:
 	InGameDisplayState(GameDisplay* display);
@@ -42,6 +22,15 @@ public:
 	void KeyReleased(SDLKey key, SDLMod modifier);
 	void DisplaySizeChanged(int width, int height);
 
+private:
+	InGameRenderPipeline renderPipeline;
+
+#ifdef _DEBUG
+	void DebugDrawBounds();
+#endif
 };
+
+inline void InGameDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
+}
 
 #endif

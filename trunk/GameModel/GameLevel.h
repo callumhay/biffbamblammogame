@@ -36,7 +36,6 @@ public:
 	static const char TRI_LEFT_CORNER;
 	static const char TRI_RIGHT_CORNER;
 
-public:
 	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 5;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;
 
@@ -126,6 +125,7 @@ private:
 	bool ballSafetyNetActive;
 	BoundingLines safetyNetBounds;
 	std::string filepath;
+	std::string levelName;
 
 	// Map of the pairings of tesla blocks and their active lightning arc that enforces bounds
 	// on the level as long as it's active
@@ -133,7 +133,7 @@ private:
 
 	//QuadTree* levelTree;	// A quad tree representing the boundries of this entire level and all its pieces
 
-	GameLevel(const std::string& filepath, unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces);
+	GameLevel(const std::string& filepath, const std::string& levelName, unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces);
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
 	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;

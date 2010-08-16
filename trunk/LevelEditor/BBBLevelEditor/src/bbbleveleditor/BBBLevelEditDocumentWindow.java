@@ -36,6 +36,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private static final long serialVersionUID = 1L;
 	
 	private BBBLevelEditMainWindow levelEditWindow = null;
+	private String levelName = "";
 	private String fileName = "";
 	private int currWidth = -1;
 	private int currHeight = -1;
@@ -58,7 +59,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		super("", true, true, true, true);
 		
 		this.levelEditWindow = window;
-		this.fileName = "";
+		this.fileName = this.levelName = "";
 		this.currWidth = 0;
 		this.currHeight = 0;
 		this.pieces = null;
@@ -68,9 +69,9 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	public BBBLevelEditDocumentWindow(BBBLevelEditMainWindow window, String fileName, int width, int height) {
 		super(fileName + " (" + width + "x" + height + ")", true, true, true, true);
-
+			
 		this.levelEditWindow = window;
-		this.fileName = fileName;
+		this.fileName = this.levelName = fileName;
 		this.currWidth = width;
 		this.currHeight = height;
 		this.itemDropSettings = ItemDrop.populateDefaultItemDropSettings();
@@ -277,9 +278,16 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			Scanner levelFileScanner = null;
 			try {
 				levelFileScanner = new Scanner(this.savedFileOnDisk);
+				boolean goodFormat = true;
+				// Start by reading the name...
+				goodFormat = levelFileScanner.hasNextLine();
+				if (!goodFormat) {
+					throw new Exception();
+				}
+				this.levelName = levelFileScanner.nextLine();
 				
-				// Start by reading the width and height of the level
-				boolean goodFormat = levelFileScanner.hasNextInt();
+				// ...width and height of the level
+				goodFormat = levelFileScanner.hasNextInt();
 				if (!goodFormat) {
 					throw new Exception();
 				}
@@ -385,7 +393,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	}
 	
 	public boolean saveAs() {
-		this.fileName = BBBLevelFileFilter.changeExtensionToBBBLvlExt(this.fileName);
+		String renameToProperExt = BBBLevelFileFilter.changeExtensionToBBBLvlExt(this.fileName);
 		
 		// Use preferences to store and retrieve the last save location
 		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());	
@@ -399,14 +407,14 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			saveAsDlg.setCurrentDirectory(new File(saveAsDir));
 		}
 		
-		String temp = saveAsDlg.getCurrentDirectory().getPath() + File.separatorChar + this.fileName;
+		String temp = saveAsDlg.getCurrentDirectory().getPath() + File.separatorChar + renameToProperExt;
 		saveAsDlg.setSelectedFile(new File(temp));
 
 		int result = saveAsDlg.showSaveDialog(this.levelEditWindow);
 		
 		if (result == JFileChooser.APPROVE_OPTION) {
 			this.savedFileOnDisk = saveAsDlg.getSelectedFile();
-			String renameToProperExt = BBBLevelFileFilter.changeExtensionToBBBLvlExt(this.savedFileOnDisk.getPath());
+			renameToProperExt = BBBLevelFileFilter.changeExtensionToBBBLvlExt(this.savedFileOnDisk.getPath());
 			this.savedFileOnDisk.renameTo(new File(renameToProperExt));
 			
 			if (this.savedFileOnDisk.exists()) {
@@ -433,7 +441,8 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		try {
 			levelFileWriter = new FileWriter(this.savedFileOnDisk);
 			
-			// File starts with the width and height of the level...
+			// File starts with the name of the level and the width and height of the level...
+			levelFileWriter.write(this.levelName + "\r\n");
 			levelFileWriter.write(this.currWidth + " " + this.currHeight + "\r\n");
 			
 			// Followed by the level pieces...
@@ -548,9 +557,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		if (e.getButton() == MouseEvent.BUTTON1 && !e.isPopupTrigger()) {
-			this.paintPieces(e.getPoint());
-		}
+		this.paintPieces(e.getPoint());
 	}
 
 	@Override
@@ -727,6 +734,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		this.maybeShowContextMenu(e);
 	}
 
 	@Override
@@ -792,9 +800,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		this.maybeShowContextMenu(e);
-		
-		if (e.getButton() == MouseEvent.BUTTON1 && !e.isPopupTrigger()) {
+		if (e.getButton() == MouseEvent.BUTTON1) {
 			this.paintPieces(e.getPoint());
 		}
 	}

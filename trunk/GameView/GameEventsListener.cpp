@@ -53,7 +53,7 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	unsigned int numLevelsInWorld = world.GetAllLevelsInWorld().size();
 	const Camera& camera = this->display->GetCamera();
 
-	LoadingScreen::GetInstance()->StartShowLoadingScreen(camera.GetWindowWidth(), camera.GetWindowHeight(), numLevelsInWorld + 1);
+	LoadingScreen::GetInstance()->StartShowLoadingScreen(camera.GetWindowWidth(), camera.GetWindowHeight(), 2);
 	this->display->GetAssets()->LoadWorldAssets(&world);
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 
@@ -76,8 +76,7 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 	//this->display->GetCamera().Reset();
 	//this->display->GetCamera().SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
 
-	
-	//this->display->AddStateToQueue(DisplayState::LevelStart);
+	this->display->AddStateToQueue(DisplayState::LevelStart);
 }
 
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {

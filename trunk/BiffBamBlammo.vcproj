@@ -632,6 +632,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\InGameRenderPipeline.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\LaserPaddleGun.h"
 					>
 				</File>
@@ -749,6 +753,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\GameWorldAssets.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\InGameRenderPipeline.cpp"
 					>
 				</File>
 				<File
@@ -959,6 +967,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\LevelStartDisplayState.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\MainMenuDisplayState.h"
 						>
 					</File>
@@ -988,6 +1000,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\InGameMenuState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\LevelStartDisplayState.cpp"
 						>
 					</File>
 					<File
