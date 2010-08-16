@@ -13,6 +13,8 @@
 #include "GameLevel.h"
 #include "GameTransformMgr.h"
 
+#include "../BlammoEngine/StringHelper.h"
+
 #include "../ResourceManager.h"
 
 /* 
@@ -47,12 +49,15 @@ bool GameWorld::Load() {
 	}
 
 	// Figure out the world style
-	std::string worldStyleStr;
-	if (!(*inFile >> worldStyleStr)) {
-		debug_output("ERROR: Could not find world style in world file: " << this->worldFilepath);
-		delete inFile;
-		inFile = NULL;
-		return false;		
+	std::string worldStyleStr("");
+	while (worldStyleStr.empty()) {
+		if (!std::getline(*inFile, worldStyleStr)) {
+			debug_output("ERROR: Could not find world style in world file: " << this->worldFilepath);
+			delete inFile;
+			inFile = NULL;
+			return false;		
+		}
+		worldStyleStr = stringhelper::trim(worldStyleStr);
 	}
 
 	this->style = GameWorld::GetWorldStyleFromString(worldStyleStr);
@@ -64,11 +69,15 @@ bool GameWorld::Load() {
 	}
 
 	// Read the name of the world
-	if (!(*inFile >> this->name)) {
-		debug_output("ERROR: Could not find world name in world file: " << this->worldFilepath);
-		delete inFile;
-		inFile = NULL;
-		return false;		
+	this->name.clear();
+	while (this->name.empty()) {
+		if (!std::getline(*inFile, this->name)) {
+			debug_output("ERROR: Could not find world name in world file: " << this->worldFilepath);
+			delete inFile;
+			inFile = NULL;
+			return false;		
+		}
+		this->name = stringhelper::trim(this->name);
 	}
 
 	// Read all the level file names

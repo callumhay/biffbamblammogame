@@ -1,6 +1,9 @@
 The following specifies the .lvl format.
 
-// the start of the file begins with the width and height
+// The start of the file begins with the level name
+<level_name>
+
+// The next element is the width and height
 // in 'block' units, these are the building blocks of a level.
 <w> <h>
 

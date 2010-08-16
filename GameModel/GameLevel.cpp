@@ -28,6 +28,8 @@
 
 #include "PaddleRocketProjectile.h"
 
+#include "../BlammoEngine/StringHelper.h"
+
 #include "../ResourceManager.h"
 
 const char GameLevel::EMPTY_SPACE_CHAR				= 'E';
@@ -51,8 +53,8 @@ const char GameLevel::TRI_LEFT_CORNER			= 'l';
 const char GameLevel::TRI_RIGHT_CORNER		= 'r';
 
 // Private constructor, requires all the pieces that make up the level
-GameLevel::GameLevel(const std::string& filepath, unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces): currentLevelPieces(pieces),
-piecesLeft(numBlocks), ballSafetyNetActive(false), filepath(filepath) {
+GameLevel::GameLevel(const std::string& filepath, const std::string& levelName, unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces): currentLevelPieces(pieces),
+piecesLeft(numBlocks), ballSafetyNetActive(false), filepath(filepath), levelName(levelName) {
 	assert(!filepath.empty());
 	assert(pieces.size() > 0);
 	
@@ -110,6 +112,18 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 	if (inFile == NULL) {
 		assert(false);
 		return NULL;
+	}
+
+	// Read in the level name
+	std::string levelName("");
+	while (levelName.empty()) {
+		if (!std::getline(*inFile, levelName)) {
+			debug_output("ERROR: Error reading in level name for file: " << filepath);
+			delete inFile;
+			inFile = NULL;
+			return NULL;
+		}
+		levelName = stringhelper::trim(levelName);
 	}
 
 	// Read in the file width and height
@@ -537,7 +551,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		}
 	}
 
-	return new GameLevel(filepath, numVitalPieces, levelPieces);
+	return new GameLevel(filepath, levelName, numVitalPieces, levelPieces);
 }
 
 /**

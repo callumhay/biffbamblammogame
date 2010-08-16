@@ -19,6 +19,8 @@ GameCompleteDisplayState::~GameCompleteDisplayState() {
 void GameCompleteDisplayState::RenderFrame(double dT) {
 	
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 	const Camera& camera = this->display->GetCamera();
 	this->gameCompleteLabel.SetTopLeftCorner(
 		Point2D((static_cast<float>(camera.GetWindowWidth()) - this->gameCompleteLabel.GetLastRasterWidth()) * 0.5f, 

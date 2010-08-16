@@ -46,7 +46,7 @@ void GameFontAssetsManager::LoadMinimalFonts() {
 	sizeSet.push_back(Medium);
 	sizeSet.push_back(Big);
 	sizeSet.push_back(Huge);
-	this->fonts[ExplosionBoom]	= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, sizeSet, Texture::Trilinear);
+	this->fonts[ExplosionBoom]	= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, sizeSet, Texture::Linear);
 	this->fonts[AllPurpose]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, sizeSet, Texture::Linear);
 
 	sizeSet.clear();
