@@ -73,6 +73,10 @@ public:
 		this->dropShadow.colour = c;
 		this->dropShadow.amountPercentage = percentAmt;
 	}
+	void SetDropShadowAmount(float percentAmt) {
+		this->dropShadow.amountPercentage = percentAmt;
+	}
+
 	// Set the text for this label
 	void SetText(const std::string& text) {
 		this->text = text;
@@ -82,7 +86,7 @@ public:
 	void SetTopLeftCorner(const Point2D& p) {
 		this->topLeftCorner = p;
 	}
-	Point2D GetTopLeftCorner() const {
+	const Point2D& GetTopLeftCorner() const {
 		return this->topLeftCorner;
 	}
 

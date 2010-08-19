@@ -113,6 +113,9 @@ public:
 	const std::string& GetFilepath() const {
 		return this->filepath;
 	}
+	const std::string& GetName() const {
+		return this->levelName;
+	}
 
 	void PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter);
 	LevelPiece* RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece);
