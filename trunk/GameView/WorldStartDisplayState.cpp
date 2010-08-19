@@ -9,7 +9,7 @@
 const double WorldStartDisplayState::FADE_OUT_TIME							= 1.0;		// Time it takes to fade to white when this state is being exited
 const double WorldStartDisplayState::HEADER_WIPE_TIME						= 1.5;		// Time it takes for the header to wipe fade-in
 const double WorldStartDisplayState::FOOTER_FLASH_TIME					= 0.5;		// Time to switch the footer colour when it's flashing
-const float  WorldStartDisplayState::HEADER_WIPE_FADE_QUAD_SIZE = 100.0f;	// Size of the gradient quad used to wipe in the header
+const float  WorldStartDisplayState::HEADER_WIPE_FADE_QUAD_SIZE = 110.0f;	// Size of the gradient quad used to wipe in the header
 
 WorldStartDisplayState::WorldStartDisplayState(GameDisplay* display) : DisplayState(display),
 waitingForKeyPress(false), 
@@ -54,13 +54,16 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 	this->worldNameLabel.SetText(worldName);
 	this->worldNameLabel.SetDropShadow(Colour(0, 0, 0), 0.12f);
 	this->worldNameLabel.SetColour(Colour(1.0f, 0.5f, 0.0f));			// Orange
+	this->worldNameLabel.SetScale(this->display->GetTextScalingFactor());
 
 	// Setup the label for the Now entering text...
 	this->nowEnteringLabel.SetDropShadow(Colour(0, 0, 0), 0.12f);
 	this->nowEnteringLabel.SetColour(Colour(0.39f, 0.72f, 1.0f));	// Steel blue colour
+	this->nowEnteringLabel.SetScale(1.25 * this->display->GetTextScalingFactor());
 
 	// Setup the label for the press any key text...
 	this->pressAnyKeyLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+	this->pressAnyKeyLabel.SetScale(this->display->GetTextScalingFactor());
 
 	// Make sure we dont' exceed the limits of OpenGL line widths
 	glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, this->minMaxLineWidth);

@@ -370,8 +370,8 @@ void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Lib
 			// Textures Are Filled With Empty Padding Space. We Figure What Portion Of The Texture Is Used By 
 			// The Actual Character And Store That Information In The x And y Variables, Then When We Draw The
 			// Quad, We Will Only Reference The Parts Of The Texture That Contains The Character Itself.
-			int width		= std::max<float>(2, NumberFuncs::NextPowerOfTwo(bitmap.width));
-			int height	= std::max<float>(2, NumberFuncs::NextPowerOfTwo(bitmap.rows));
+			int width		= NumberFuncs::NextPowerOfTwo(bitmap.width);
+			int height	= NumberFuncs::NextPowerOfTwo(bitmap.rows);
 			float x = static_cast<float>(bitmap.width) / static_cast<float>(width);
 			float y = static_cast<float>(bitmap.rows)  / static_cast<float>(height);
 

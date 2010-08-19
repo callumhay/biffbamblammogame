@@ -21,15 +21,6 @@ InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(disp
 	// Clear up any stuff to an initial state in cases where things might still 
 	// be set unchanged from a previously loaded game
 	this->display->GetCamera().ClearCameraShake();
-	// ...
-
-	// Render the first frame - just to make sure everything is loaded
-	glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	glDepthMask(GL_FALSE);
-	this->RenderFrame(0.0);
-	glPopAttrib();
-	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldBackgroundMusic);
 
 	debug_opengl_state();
 }
