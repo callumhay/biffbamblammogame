@@ -76,6 +76,7 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 	//this->display->GetCamera().Reset();
 	//this->display->GetCamera().SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
 
+	// Queue up the state for starting a level - this will display the level name and do proper animations, fade-ins, etc.
 	this->display->AddStateToQueue(DisplayState::LevelStart);
 }
 
@@ -84,6 +85,9 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 
 	// Kill all effects that may have previously been occuring...
 	this->display->GetAssets()->DeactivateMiscEffects();
+	
+	// Queue up the state for ending a level - this will display the level name and do proper animations, fade-outs, etc.
+	//this->display->AddStateToQueue(DisplayState::LevelEnd);
 }
 
 

@@ -193,7 +193,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			// Colliding with the lower-center - we only do special refraction stuff if the angle is
 			// almost perfectly perpendicular to the bottom
 			const Vector2D CURRENT_NORMAL = Vector2D(0.0f, -1.0f);
-			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
 			if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
 				// We spawn two other rays to go out of the top right and left
 				const Vector2D TOP_RIGHT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
@@ -206,7 +206,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			// Colliding with the upper-center - we only do special refraction stuff if the angle is
 			// almost perfectly perpendicular to the top
 			const Vector2D CURRENT_NORMAL = Vector2D(0.0f, 1.0f);
-			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
 			if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
 				// We spawn two other rays to go out of the bottom right and left
 				const Vector2D BOTTOM_RIGHT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
@@ -223,7 +223,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			// Colliding with the center-left - we only do special refraction stuff if the angle is
 			// almost perfectly perpendicular to the left
 			const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, 0.0f);
-			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
 			if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
 				// We spawn two other projectiles to go out the top-right and bottom-right
 				const Vector2D BOTTOM_RIGHT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
@@ -238,7 +238,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
-			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
 			if (angleBetweenNormalAndLaser >= REFLECTION_REFRACTION_ANGLE) {
 				// Reflect the laser in the normal
 				Vector2D newVelDir = Reflect(impactDir, CURRENT_NORMAL);
@@ -251,7 +251,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
-			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
 			if (angleBetweenNormalAndLaser >= REFLECTION_REFRACTION_ANGLE) {
 				// Reflect the ray in the normal
 				Vector2D newVelDir = Reflect(impactDir, CURRENT_NORMAL);
@@ -267,7 +267,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 			// Colliding with the center-right - we only do special refraction stuff if the angle is
 			// almost perfectly perpendicular to the left
 			const Vector2D CURRENT_NORMAL = Vector2D(1.0f, 0.0f);
-			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
 			if (angleBetweenNormalAndLaser < REFLECTION_REFRACTION_ANGLE) {
 				// We spawn two other rays to go out the top-right and bottom-right
 				const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
@@ -282,7 +282,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
-			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
 			if (angleBetweenNormalAndLaser >= REFLECTION_REFRACTION_ANGLE) {
 				// Reflect the ray in the normal
 				Vector2D newVelDir = Reflect(impactDir, CURRENT_NORMAL);
@@ -295,7 +295,7 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 
 			// Based on the angle of the ray it will either pass through or reflect
 			const Vector2D CURRENT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
-			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(Vector2D::Dot(-impactDir, CURRENT_NORMAL)));
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-impactDir, CURRENT_NORMAL)))));
 			if (angleBetweenNormalAndLaser >= REFLECTION_REFRACTION_ANGLE) {
 				// Reflect the ray in the normal
 				Vector2D newVelDir = Reflect(impactDir, CURRENT_NORMAL);

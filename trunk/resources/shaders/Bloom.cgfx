@@ -53,8 +53,8 @@ texture SceneTex <
 >;
 sampler2D SceneSampler = sampler_state {
     Texture = <SceneTex>;   
-    WrapS = Clamp;
-    WrapT = Clamp;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
 };
 
 // Downsample blur images
@@ -65,22 +65,22 @@ texture BrightDownsampleTex <
 >;
 sampler2D BrightDownsampleLvl2Sampler = sampler_state {
     Texture = <BrightDownsampleTex>;    
-    WrapS = Clamp;
-    WrapT = Clamp;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
     MinMipLevel = 2;
     MaxMipLevel = 2;
 };
 sampler2D BrightDownsampleLvl3Sampler = sampler_state {
     Texture = <BrightDownsampleTex>;    
-    WrapS = Clamp;
-    WrapT = Clamp;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
     MinMipLevel = 3;
     MaxMipLevel = 3;
 };
 sampler2D BrightDownsampleLvl4Sampler = sampler_state {
     Texture = <BrightDownsampleTex>;    
-    WrapS = Clamp;
-    WrapT = Clamp;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
     MinMipLevel = 4;
     MaxMipLevel = 4;
 };
@@ -88,18 +88,18 @@ sampler2D BrightDownsampleLvl4Sampler = sampler_state {
 // Composite blur images for the final composition of the bloom
 sampler2D BrightCompositeLvl2Sampler = sampler_state {
     Texture = <BrightDownsampleTex>;    
-    WrapS = Clamp;
-    WrapT = Clamp;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
 };
 sampler2D BrightCompositeLvl3Sampler = sampler_state {
     Texture = <BrightDownsampleTex>;    
-    WrapS = Clamp;
-    WrapT = Clamp;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
 };
 sampler2D BrightCompositeLvl4Sampler = sampler_state {
     Texture = <BrightDownsampleTex>;    
-    WrapS = Clamp;
-    WrapT = Clamp;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
 };
 
 const half Blur7x7Weights[7] = {

@@ -25,6 +25,8 @@ private:
 	static const double FADE_IN_TIME;
 	static const double WIPE_TIME;
 	static const double LEVEL_TEXT_FADE_OUT_TIME;
+	static const double LEVEL_BLOCK_FADE_IN_TIME;
+
 	static const float LEVEL_NAME_WIPE_FADE_QUAD_SIZE;
 	static const float LEVEL_TEXT_X_PADDING;
 	static const float LEVEL_TEXT_Y_PADDING;
@@ -34,7 +36,7 @@ private:
 	AnimationLerp<float> showLevelNameWipeAnimation;	// Animation for wipe-fadein of the level name label
 	AnimationLerp<float> levelNameFadeOutAnimation;		// Animation to fade out the level text
 	AnimationLerp<float> dropShadowAnimation;					// Animation for level text drop shadow
-	//AnimationLerp<float> blockFadeInAnimation;
+	AnimationLerp<float> blockFadeInAnimation;				// Animation for fading in the level's blockss
 
 
 };

@@ -101,6 +101,16 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 	this->teslaCenterFlare->Tick(dT);
 }
 
+void TeslaBlockMesh::SetAlphaMultiplier(float alpha) {
+	const std::map<std::string, MaterialGroup*>&  matGrps = this->teslaCoilMesh->GetMaterialGroups();
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = matGrps.begin(); iter != matGrps.end(); ++iter) {
+		MaterialGroup* matGrp = iter->second;
+		matGrp->GetMaterial()->GetProperties()->alphaMultiplier = alpha;
+	}
+
+	this->teslaCenterFlare->SetParticleAlpha(ESPInterval(alpha));
+}
+
 void TeslaBlockMesh::LoadMesh() {
 	assert(this->teslaBaseMesh == NULL);
 	assert(this->teslaCoilMesh == NULL);

@@ -3428,7 +3428,7 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const
 		glPushMatrix();
 		glTranslatef(projectile.GetPosition()[0], projectile.GetPosition()[1], 0.0f);
 		// Calculate the angle to rotate it about the z-axis
-		float angleToRotate = Trig::radiansToDegrees(acos(Vector2D::Dot(projectile.GetVelocityDirection(), Vector2D(0, 1))));
+		float angleToRotate = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(projectile.GetVelocityDirection(), Vector2D(0, 1))))));
 		if (projectile.GetVelocityDirection()[0] > 0) {
 			angleToRotate *= -1.0;
 		}

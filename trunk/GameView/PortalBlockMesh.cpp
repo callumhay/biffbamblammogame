@@ -50,6 +50,11 @@ std::list<ESPEmitter*> PortalBlockMesh::CreatePortalBlockEmitters(const Colour& 
 	return portalEmitters;
 }
 
+void PortalBlockMesh::SetAlphaMultiplier(float alpha) {
+	this->haloFader.SetStartAlpha(this->haloFader.GetStartAlpha() * alpha);
+	this->haloFader.SetEndAlpha(this->haloFader.GetEndAlpha() * alpha);
+}
+
 /**
  * Private helper for loading the mesh and material for the prism block.
  */

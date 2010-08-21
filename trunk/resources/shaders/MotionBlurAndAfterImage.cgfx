@@ -13,23 +13,23 @@ texture CurrFrameTex <
 >;
 
 sampler2D CurrFrameSampler = sampler_state {
-	Texture = <CurrFrameTex>;	
-	WrapS = Clamp;
-	WrapT = Clamp;
+    Texture = <CurrFrameTex>;   
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
 };
 
 float4 afterimage_PS(float2 UV : TEXCOORD0) : COLOR {
-	float4 finalColour;
-	
-	finalColour.rgb = tex2D(CurrFrameSampler, UV).rgb;
-	finalColour.a = BlurStrength;
-	return finalColour;
+    float4 finalColour;
+    
+    finalColour.rgb = tex2D(CurrFrameSampler, UV).rgb;
+    finalColour.a = BlurStrength;
+    return finalColour;
 }
 
 technique AfterImage {
     pass p0 {
-		BlendEnable = true;
-		BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
-    	FragmentProgram = compile arbfp1 afterimage_PS();
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha); 
+        FragmentProgram = compile arbfp1 afterimage_PS();
     }
 }

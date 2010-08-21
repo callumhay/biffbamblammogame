@@ -533,7 +533,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision:
 	}
 
 	// Figure out the angle between the normal and the reflection...
-	float angleOfReflInDegs = Trig::radiansToDegrees(acosf(Vector2D::Dot(n, reflVecHat)));
+	float angleOfReflInDegs = Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, reflVecHat)))));
 	float diffAngleInDegs		= GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(angleOfReflInDegs);
 
 	// Make sure the reflection is big enough to not cause an annoying slow down in the game
@@ -545,7 +545,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision:
 		Vector2D newReflVelHat = Vector2D::Rotate(diffAngleInDegs, reflVecHat);
 
 		// Check to see if it's still the case, if it is then we rotated the wrong way
-		float newAngleInDegs =  Trig::radiansToDegrees(acosf(Vector2D::Dot(n, newReflVelHat)));
+		float newAngleInDegs =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, newReflVelHat)))));
 		if (newAngleInDegs < GameBall::MIN_BALL_ANGLE_IN_DEGS) {
 			newReflVelHat = Vector2D::Rotate(-diffAngleInDegs, reflVecHat);
 		}
@@ -555,7 +555,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision:
 	else {
 		// Do the same with 90 degrees to the normal
 		Vector2D tangentVec(n[1], -n[0]);
-		float gracingAngle = Trig::radiansToDegrees(acosf(Vector2D::Dot(tangentVec, reflVecHat)));
+		float gracingAngle = Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(tangentVec, reflVecHat)))));
 		if (gracingAngle > 90) {
 			diffAngleInDegs = GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(gracingAngle - 180);
 		}
@@ -569,7 +569,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision:
 			Vector2D newReflVelHat = Vector2D::Rotate(diffAngleInDegs, reflVecHat);
 
 			// Check to see if it's still the case, if it is then we rotated the wrong way
-			float newAngleInDegs =  Trig::radiansToDegrees(acosf(Vector2D::Dot(tangentVec, newReflVelHat)));
+			float newAngleInDegs =  Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(tangentVec, newReflVelHat)))));
 			if (newAngleInDegs < GameBall::MIN_BALL_ANGLE_IN_DEGS) {
 				newReflVelHat = Vector2D::Rotate(-diffAngleInDegs, reflVecHat);
 			}
@@ -635,7 +635,7 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
 	// Check to see how close the two velocities are to one another, if they're within
 	// some small threshold then make them dramatically different...
 	static const float CLOSE_TRAGECTORY_ANGLE = Trig::degreesToRadians(5.0f);
-	if (fabs(acos(Vector2D::Dot(reflectBall1Vec, reflectBall2Vec))) < CLOSE_TRAGECTORY_ANGLE) {
+	if (fabs(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(reflectBall1Vec, reflectBall2Vec))))) < CLOSE_TRAGECTORY_ANGLE) {
 		// Rotate them both 90 degrees away from each other
 		reflectBall1Vec = Vector2D(reflectBall1Vec[1], -reflectBall1Vec[0]);
 		reflectBall2Vec = Vector2D(-reflectBall2Vec[1], reflectBall2Vec[0]);

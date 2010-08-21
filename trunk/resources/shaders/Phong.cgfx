@@ -106,6 +106,14 @@ float Shininess <
     string UIName =  "Shininess";
 > = 128.0;
 
+float AlphaMultiplier <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "AlphaMultiplier";
+> = 1.0;
+
 texture ColourTexture  <
     string ResourceName = "default_color.dds";
     string UIName =  "Diffuse Texture";
@@ -148,8 +156,6 @@ struct vertexOutput_outlines {
 
 ///////// VERTEX SHADING /////////////////////
 
-/*********** Generic Vertex Shader ******/
-
 vertexOutput phongshading_VS(appdata IN) {
     vertexOutput OUT = (vertexOutput)0;
     OUT.WorldNormal = mul(WorldITXf,IN.Normal).xyz;
@@ -163,6 +169,14 @@ vertexOutput phongshading_VS(appdata IN) {
     OUT.WorldView = normalize(VertToViewVec);
     OUT.HPosition = mul(WvpXf,Po);
     OUT.Colour = IN.Colour;
+    OUT.Colour.a *= AlphaMultiplier;
+    return OUT;
+}
+
+vertexOutput_outlines outline_VS(appdata_outlines IN) {
+    vertexOutput_outlines OUT = (vertexOutput_outlines)0;
+    OUT.HPosition = mul(WvpXf, float4(IN.Position, 1.0f));
+    OUT.Alpha = IN.Colour.a * AlphaMultiplier;
     return OUT;
 }
 
@@ -222,7 +236,7 @@ float4 phongshading_fg_PS(vertexOutput IN) : COLOR {
     PhongShadingFG(Nn,IN.WorldPos,Vn,diffContrib,specContrib);
     
     float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*diffContrib;
-    return float4(result,IN.Colour.a);
+    return float4(result, IN.Colour.a);
 }
 
 float4 phongshading_bg_PS(vertexOutput IN) : COLOR {
@@ -261,14 +275,6 @@ float4 phongshading_textured_bg_PS(vertexOutput IN) : COLOR {
     float3 textureColour = tex2D(ColourSampler,IN.UV).rgb;
     float3 result = SpecularColour*specContrib + IN.Colour.rgb*DiffuseColour*textureColour*diffContrib;
     return float4(result, IN.Colour.a);
-}
-
-
-vertexOutput_outlines outline_VS(appdata_outlines IN) {
-    vertexOutput_outlines OUT = (vertexOutput_outlines)0;
-    OUT.HPosition = mul(WvpXf, float4(IN.Position, 1.0f));
-    OUT.Alpha = IN.Colour.a;
-    return OUT;
 }
 
 float4 outline_PS(vertexOutput_outlines IN) : COLOR {

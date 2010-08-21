@@ -530,11 +530,29 @@ void LevelMesh::BallSafetyNetDestroyed(const Point2D& pos) {
 }
 
 /**
-
+ * Call when the camera mode changes from/to paddle camera.
  */
 void LevelMesh::PaddleCameraActiveToggle(bool isActive) {
 	// Call to make the safety net visible or not when its activated. This is
   // useful to avoid obstruction of the player's viewpoint e.g., when in paddle camera mode.
 	float safetyNetTransparency = isActive ? 0.5f : 1.0f;
 	this->ballSafetyNet->SetTransparency(safetyNetTransparency);
+}
+
+void LevelMesh::SetLevelAlpha(float alpha) {
+	assert(alpha >= 0.0f && alpha <= 1.0f);
+
+	// First go through each stored material effect and change its alpha multiplier
+	std::map<CgFxMaterialEffect*, std::vector<GLuint> >::iterator iter = this->displayListsPerMaterial.begin();
+	for (; iter != this->displayListsPerMaterial.end(); ++iter) {
+		CgFxMaterialEffect* currMatEffect = iter->first;
+		MaterialProperties* matProperties = currMatEffect->GetProperties();
+		matProperties->alphaMultiplier = alpha;
+	}
+
+	// Make sure all other materials (inside certain special meshes) also get their alpha multiplier set
+	this->portalBlock->SetAlphaMultiplier(alpha);
+	this->cannonBlock->SetAlphaMultiplier(alpha);
+	this->collateralBlock->SetAlphaMultiplier(alpha);
+	this->teslaBlock->SetAlphaMultiplier(alpha);
 }

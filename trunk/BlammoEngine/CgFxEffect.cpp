@@ -69,6 +69,7 @@ void CgFxMaterialEffect::LoadParameters() {
 	this->diffuseColourParam		= NULL;
 	this->shininessParam				= NULL;
 	this->specularColourParam		= NULL;
+	this->alphaMultiplierParam	= NULL;
 	
 	this->keyPointLightPosParam				= NULL;
 	this->keyPointLightColourParam		= NULL;
@@ -92,6 +93,7 @@ void CgFxMaterialEffect::LoadParameters() {
 	this->diffuseColourParam		= cgGetNamedEffectParameter(this->cgEffect, "DiffuseColour");
 	this->specularColourParam		= cgGetNamedEffectParameter(this->cgEffect, "SpecularColour");
 	this->shininessParam				= cgGetNamedEffectParameter(this->cgEffect, "Shininess");
+	this->alphaMultiplierParam  = cgGetNamedEffectParameter(this->cgEffect, "AlphaMultiplier");
 
 	// Lights: Key light, Fill light and Ball light
 	this->keyPointLightPosParam			= cgGetNamedEffectParameter(this->cgEffect, "KeyPointLightPos");
@@ -109,7 +111,7 @@ void CgFxMaterialEffect::LoadParameters() {
 				 this->shininessParam	&& this->specularColourParam && this->keyPointLightPosParam && 
 				 this->keyPointLightColourParam && this->fillPointLightPosParam && this->fillPointLightColourParam &&
 				 this->fillPointLightAttenParam && this->ballPointLightPosParam && this->ballPointLightDiffuseParam &&
-				 this->ballPointLightAttenParam);
+				 this->ballPointLightAttenParam && this->alphaMultiplierParam);
 }
 
 /**
@@ -134,6 +136,7 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	cgGLSetParameter3fv(this->diffuseColourParam, this->properties->diffuse.begin());
 	cgGLSetParameter3fv(this->specularColourParam, this->properties->specular.begin());
 	cgGLSetParameter1f(this->shininessParam, this->properties->shininess);
+	cgGLSetParameter1f(this->alphaMultiplierParam, this->properties->alphaMultiplier);
 	
 	// Lights - depending on whether this is a foreground or background effect - no matter what there
 	// is always a key and a fill light

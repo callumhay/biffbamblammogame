@@ -63,6 +63,14 @@ void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 	}
 }
 
+void CollateralBlockMesh::SetAlphaMultiplier(float alpha) {
+	const std::map<std::string, MaterialGroup*>&  matGrps = this->collateralBlockGeometry->GetMaterialGroups();
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = matGrps.begin(); iter != matGrps.end(); ++iter) {
+		MaterialGroup* matGrp = iter->second;
+		matGrp->GetMaterial()->GetProperties()->alphaMultiplier = alpha;
+	}
+}
+
 void CollateralBlockMesh::LoadMesh() {
 	assert(this->collateralBlockGeometry == NULL);
 	this->collateralBlockGeometry = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->COLLATERAL_BLOCK_MESH);

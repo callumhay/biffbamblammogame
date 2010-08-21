@@ -57,6 +57,14 @@ void CannonBlockMesh::Draw(const Camera& camera, const BasicPointLight& keyLight
 	}
 }
 
+void CannonBlockMesh::SetAlphaMultiplier(float alpha) {
+	const std::map<std::string, MaterialGroup*>&  barrelMatGrps = this->cannonBlockBarrelGeometry->GetMaterialGroups();
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = barrelMatGrps.begin(); iter != barrelMatGrps.end(); ++iter) {
+		MaterialGroup* matGrp = iter->second;
+		matGrp->GetMaterial()->GetProperties()->alphaMultiplier = alpha;
+	}
+}
+
 void CannonBlockMesh::LoadMesh() {
 	assert(this->cannonBlockBaseGeometry == NULL);
 	assert(this->cannonBlockBarrelGeometry == NULL);
