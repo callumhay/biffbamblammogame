@@ -245,7 +245,7 @@ void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 		ball.SetVelocity(ballSpd, Vector2D::Rotate(angleChange, ballVelHat));
 		
 		// Make sure the ball goes upwards (it can't reflect downwards off the paddle or the game would suck)
-		if (acosf(Vector2D::Dot(ballVelHat, Vector2D(0, 1))) > ((M_PI / 2.0f) - GameBall::MIN_BALL_ANGLE_IN_RADS)) {
+		if (acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(ballVelHat, Vector2D(0, 1))))) > ((M_PI / 2.0f) - GameBall::MIN_BALL_ANGLE_IN_RADS)) {
 			// Inline: The ball either at a very sharp angle w.r.t. the paddle or it is aimed downwards
 			// even though the paddle has deflected it, adjust the angle to be suitable for the game
 			if (ballVel[0] < 0) {

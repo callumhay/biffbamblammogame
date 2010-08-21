@@ -97,6 +97,14 @@ float Shininess <
     string UIName =  "Shininess";
 > = 128.0;
 
+float AlphaMultiplier <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "AlphaMultiplier";
+> = 1.0;
+
 float OutlineWidth <
     string UIWidget = "slider";
     float UIMin = 0.0f;
@@ -182,13 +190,14 @@ vertexOutput celshading_VS(appdata IN) {
     OUT.WorldView = normalize(VertToViewVec);
     OUT.HPosition = mul(WvpXf,Po);
     OUT.Colour = IN.Colour;
+    OUT.Colour.a *= AlphaMultiplier;
     return OUT;
 }
 
 vertexOutput_outlines outline_VS(appdata_outlines IN) {
     vertexOutput_outlines OUT = (vertexOutput_outlines)0;
     OUT.HPosition = mul(WvpXf, float4(IN.Position, 1.0f));
-    OUT.Alpha = IN.Colour.a;
+    OUT.Alpha = IN.Colour.a * AlphaMultiplier;
     return OUT;
 }
 

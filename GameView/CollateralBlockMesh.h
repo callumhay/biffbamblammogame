@@ -15,6 +15,8 @@ public:
 	void RemoveCollateralBlock(const CollateralBlock* collateralBlock);
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
 
+	void SetAlphaMultiplier(float alpha);
+
 private:
 	Mesh* collateralBlockGeometry;
 	std::set<const CollateralBlock*> collateralBlocks;	// A list of all the collateral blocks that are currently present in the game

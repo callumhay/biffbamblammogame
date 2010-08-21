@@ -31,8 +31,8 @@ texture SceneTex <
 
 sampler2D SceneSampler = sampler_state {
     Texture = <SceneTex>;   
-    WrapS = Clamp;
-    WrapT = Clamp;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
 };
 
 float4 gauss3x3_rows_PS(float2 UV : TEXCOORD0) : COLOR {

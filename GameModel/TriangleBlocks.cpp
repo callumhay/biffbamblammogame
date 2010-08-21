@@ -126,8 +126,8 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 						Vector2D normal0 = this->bounds.GetNormal(collidingIndices[0]);
 						Vector2D normal1 = this->bounds.GetNormal(collidingIndices[1]);
 
-						float angleBetween0 = Trig::radiansToDegrees(acos(Vector2D::Dot(-projectile->GetVelocityDirection(), normal0)));
-						float angleBetween1 = Trig::radiansToDegrees(acos(Vector2D::Dot(-projectile->GetVelocityDirection(), normal1)));
+						float angleBetween0 = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), normal0)))));
+						float angleBetween1 = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), normal1)))));
 
 						if (angleBetween0 < angleBetween1) {
 							collisionNormal = this->bounds.GetNormal(collidingIndices[0]);
@@ -147,7 +147,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 					}
 
 					// Send the laser flying out the hypotenuse side if it hit within a certain angle
-					const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(Vector2D::Dot(-projectile->GetVelocityDirection(), collisionNormal)));
+					const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), collisionNormal)))));
 					const float CUTOFF_ANGLE			 = 15.0f;
 
 					// Check to see if the collision was within the cut-off angle, if the laser
@@ -230,7 +230,7 @@ void PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint, co
 		float smallestAngle = FLT_MAX;
 		for (std::vector<int>::iterator iter = collidingIndices.begin(); iter != collidingIndices.end(); ++iter) {
 			Vector2D currentNormal = this->bounds.GetNormal(*iter);
-			float currentAngle     = Trig::radiansToDegrees(acos(Vector2D::Dot(negImpactDir, currentNormal)));
+			float currentAngle     = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(negImpactDir, currentNormal)))));
 			if (currentAngle < smallestAngle) {
 				smallestAngle   = currentAngle;
 				collisionNormal = currentNormal; 
@@ -248,7 +248,7 @@ void PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint, co
 	}
 
 	// Send the laser flying out the hypotenuse side if it hit within a certain angle
-	const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(Vector2D::Dot(negImpactDir, collisionNormal)));
+	const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(negImpactDir, collisionNormal)))));
 	const float CUTOFF_ANGLE			 = 15.0f;
 
 	// Check to see if the collision was within the cut-off angle, if the laser

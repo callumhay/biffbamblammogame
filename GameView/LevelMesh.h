@@ -21,6 +21,25 @@ class MaterialGroup;
 class ESPEmitter;
 
 class LevelMesh {
+public:
+	LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
+	~LevelMesh();
+	
+	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
+	void RemovePiece(const LevelPiece& piece);
+	
+	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
+									const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
+	void DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
+
+	void LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
+
+	void BallSafetyNetCreated();
+	void BallSafetyNetDestroyed(const Point2D& pos);
+
+	void PaddleCameraActiveToggle(bool isActive);
+
+	void SetLevelAlpha(float alpha);
 
 private:
 	const GameLevel* currLevel;
@@ -58,23 +77,5 @@ private:
 	void CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateDisplayListForBallSafetyNet(float levelWidth);
 	void Flush();	
-
-public:
-	LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
-	~LevelMesh();
-	
-	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
-	void RemovePiece(const LevelPiece& piece);
-	
-	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
-									const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
-	void DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
-
-	void LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
-
-	void BallSafetyNetCreated();
-	void BallSafetyNetDestroyed(const Point2D& pos);
-
-	void PaddleCameraActiveToggle(bool isActive);
 };
 #endif

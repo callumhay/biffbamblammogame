@@ -3,12 +3,15 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 #include "GameFontAssetsManager.h"
+#include "LevelMesh.h"
 
 #include "../GameModel/GameModel.h"
 
 const double LevelStartDisplayState::FADE_IN_TIME										= 1.5;
 const double LevelStartDisplayState::WIPE_TIME											= 1.0;
 const double LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME				= 3.0;
+const double LevelStartDisplayState::LEVEL_BLOCK_FADE_IN_TIME				= 2.0;
+
 const float LevelStartDisplayState::LEVEL_NAME_WIPE_FADE_QUAD_SIZE	= 100.0f;
 const float LevelStartDisplayState::LEVEL_TEXT_X_PADDING						= 50;			// Padding from the right-hand side of the screen to the level name text
 const float LevelStartDisplayState::LEVEL_TEXT_Y_PADDING						= 80;			// Padding from the bottom of the screen to the bottom of the level name text
@@ -46,13 +49,20 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	this->showLevelNameWipeAnimation.SetInterpolantValue(0.0f);
 
 	double startOfNameFadeOut = LevelStartDisplayState::WIPE_TIME + 0.5;
-	this->levelNameFadeOutAnimation.SetLerp(startOfNameFadeOut, startOfNameFadeOut + LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME, 1.0f, 0.0f);
+	double endOfNameFadeOut   = startOfNameFadeOut + LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME;
+	this->levelNameFadeOutAnimation.SetLerp(startOfNameFadeOut, endOfNameFadeOut, 1.0f, 0.0f);
 	this->levelNameFadeOutAnimation.SetRepeat(false);
 	this->levelNameFadeOutAnimation.SetInterpolantValue(1.0f);
 
-	this->dropShadowAnimation.SetLerp(startOfNameFadeOut, startOfNameFadeOut + LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME, startDropShadowAmt, 0.2f);
+	this->dropShadowAnimation.SetLerp(startOfNameFadeOut, endOfNameFadeOut, startDropShadowAmt, 0.5f);
 	this->dropShadowAnimation.SetRepeat(false);
 	this->dropShadowAnimation.SetInterpolantValue(startDropShadowAmt);
+
+	double startTimeOfBlockFadeIn = LevelStartDisplayState::WIPE_TIME + 1.0 + LevelStartDisplayState::FADE_IN_TIME;
+	double endOfBlockFadeIn       = startTimeOfBlockFadeIn + LevelStartDisplayState::LEVEL_BLOCK_FADE_IN_TIME;
+	this->blockFadeInAnimation.SetLerp(startTimeOfBlockFadeIn, endOfBlockFadeIn, 0.0f, 1.0f);
+	this->blockFadeInAnimation.SetRepeat(false);
+	this->blockFadeInAnimation.SetInterpolantValue(0.0f);
 }
 
 LevelStartDisplayState::~LevelStartDisplayState() {
@@ -61,12 +71,19 @@ LevelStartDisplayState::~LevelStartDisplayState() {
 void LevelStartDisplayState::RenderFrame(double dT) {
 	const Camera& camera = this->display->GetCamera();
 
-	renderPipeline.RenderFrameWithoutHUD(dT);
-
 	bool fadeInDone           = this->fadeInAnimation.Tick(dT);
 	bool wipeInDone           = this->showLevelNameWipeAnimation.Tick(dT);
 	bool levelTextFadeOutDone = this->levelNameFadeOutAnimation.Tick(dT);
 	bool dropShadowAnimDone   = this->dropShadowAnimation.Tick(dT);
+	bool levelPieceFadeInDone = this->blockFadeInAnimation.Tick(dT);
+
+	// Fade in the level pieces...
+	if (!levelPieceFadeInDone) {
+		this->display->GetAssets()->GetCurrentLevelMesh()->SetLevelAlpha(this->blockFadeInAnimation.GetInterpolantValue());
+
+	}
+
+	renderPipeline.RenderFrameWithoutHUD(dT);
 
 	// Render the fade-in if we haven't already
 	if (!fadeInDone) {
@@ -81,13 +98,6 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	}
 
 	if (!levelTextFadeOutDone) {
-		// Grab the fbo and its texture for the rendering of the screen - we use this to obscure the
-		// text for the wipe-in
-		//const FBObj* finalFBO = this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO();
-		//assert(finalFBO != NULL);
-		//const Texture2D* finalFBOTex = finalFBO->GetFBOTexture();
-		//assert(finalFBOTex != NULL);
-
 		// If we're done the fade in then we need to do the level text display...
 		this->levelNameLabel.SetAlpha(this->levelNameFadeOutAnimation.GetInterpolantValue());
 		this->levelNameLabel.SetDropShadowAmount(this->dropShadowAnimation.GetInterpolantValue());
@@ -154,11 +164,9 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 			glPopAttrib();
 		}
 	}
-		
-
 	
 	// All done animating the start of the level - go to the official in-game state
-	if (fadeInDone && wipeInDone && levelTextFadeOutDone && dropShadowAnimDone) {
+	if (fadeInDone && wipeInDone && levelTextFadeOutDone && dropShadowAnimDone && levelPieceFadeInDone) {
 		this->display->SetCurrentStateAsNextQueuedState();
 		return;
 	}

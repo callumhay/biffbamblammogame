@@ -1053,7 +1053,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	const Vector2D& ballVelocityDir = b.GetDirection();
 	// First make sure the ball velocity direction is reasonably off from the line/ reasonably close to the normal
 	// or modification could cause the ball to collide multiple times or worse
-	if (acos(Vector2D::Dot(-ballVelocityDir, n)) <= MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS) {
+	if (acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-ballVelocityDir, n)))) <= MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS) {
 		float rotateDir = NumberFuncs::SignOf(Vector3D::cross(Vector3D(n), Vector3D(ballVelocityDir))[2]);
 		if (Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
 			// Rotate in the opposite direction (make the ball not reflect as much)

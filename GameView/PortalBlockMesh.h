@@ -39,6 +39,8 @@ public:
 
 	std::list<ESPEmitter*> CreatePortalBlockEmitters(const Colour& colour, const Point3D &worldTranslation);
 
+	void SetAlphaMultiplier(float alpha);
+
 private:
 	// Mesh variables
 	Mesh* portalBlockGeometry;

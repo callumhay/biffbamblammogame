@@ -23,19 +23,19 @@ float Freq <
 > = 1;
 
 float Displacement <
-	string UIWidget = "slider";
-	string UIName =  "Displacement";
-	float UIMin = 0.0;
-	float UIMax = 1.0;
-	float UIStep = 0.001;
+    string UIWidget = "slider";
+    string UIName =  "Displacement";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
 > = 0.15f;
 
 float Fade <
-	string UIWidget = "slider";
-	string UIName =  "Fade";
-	float UIMin = 0.0;
-	float UIMax = 1.0;
-	float UIStep = 0.001;
+    string UIWidget = "slider";
+    string UIName =  "Fade";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.001;
 > = 0.0f;
 
 float3 Colour <
@@ -65,11 +65,11 @@ texture MaskTex <
 >;
 
 sampler2D MaskSampler = sampler_state {
-	Texture = <MaskTex>;
+    Texture = <MaskTex>;
     MinFilter = LinearMipMapLinear;
     MagFilter = Linear;
-	WrapS = Clamp;
-	WrapT = Clamp;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
 };
 
 texture SceneTex <
@@ -79,58 +79,58 @@ texture SceneTex <
 >;
 
 sampler2D SceneSampler = sampler_state {
-	Texture = <SceneTex>;	
-	WrapS = Clamp;
-	WrapT = Clamp;
+    Texture = <SceneTex>;   
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
     MinFilter = Nearest;
-    MagFilter = Nearest;	
+    MagFilter = Nearest;    
 };
 
 float4 mask_splatter_PS(float2 UV : TEXCOORD0) : COLOR {
-	float4 splatterColour = tex2D(MaskSampler, UV);
-	float3 sceneColour    = tex2D(SceneSampler, UV).rgb;
-	float4 noise          = tex3D(NoiseSampler, Scale * float3(UV.xy, Freq * Timer));
-	
-	float fadeDisplacement = Displacement * Fade;
-	float lerpAmt = splatterColour.a * Fade;
-	
-	// Make sure the noise value is in the range [-1,1]
-	float noiseVal = clamp((noise.z + noise.w) * 7.0f, 0, 1);
-	noiseVal = (clamp(noiseVal, 0, 1) * 2.0f) - 1.0f;
-	
-	// Calculate the distortion of the ink
-	float3 distortedSceneColour = Colour * tex2D(SceneSampler, UV + fadeDisplacement*float2(noiseVal)).rgb;
-	
-	// Interpolate between the scene and the ink based on the splatter mask texture
-	return float4(lerp(sceneColour, distortedSceneColour, lerpAmt), 1);
+    float4 splatterColour = tex2D(MaskSampler, UV);
+    float3 sceneColour    = tex2D(SceneSampler, UV).rgb;
+    float4 noise          = tex3D(NoiseSampler, Scale * float3(UV.xy, Freq * Timer));
+    
+    float fadeDisplacement = Displacement * Fade;
+    float lerpAmt = splatterColour.a * Fade;
+    
+    // Make sure the noise value is in the range [-1,1]
+    float noiseVal = clamp((noise.z + noise.w) * 7.0f, 0, 1);
+    noiseVal = (clamp(noiseVal, 0, 1) * 2.0f) - 1.0f;
+    
+    // Calculate the distortion of the ink
+    float3 distortedSceneColour = Colour * tex2D(SceneSampler, UV + fadeDisplacement*float2(noiseVal)).rgb;
+    
+    // Interpolate between the scene and the ink based on the splatter mask texture
+    return float4(lerp(sceneColour, distortedSceneColour, lerpAmt), 1);
 }
 
 float4 nomask_splatter_PS(float2 UV : TEXCOORD0) : COLOR {
-	float3 sceneColour    = tex2D(SceneSampler, UV).rgb;
-	float4 noise          = tex3D(NoiseSampler, Scale * float3(UV.xy, Freq * Timer));
-	
-	float fadeDisplacement = Displacement * Fade;
-	float lerpAmt = Fade;
-	
-	// Make sure the noise value is in the range [-1,1]
-	float noiseVal = clamp((noise.z + noise.w) * 7.0f, 0, 1);
-	noiseVal = (clamp(noiseVal, 0, 1) * 2.0f) - 1.0f;
-	
-	// Calculate the distortion of the ink
-	float3 distortedSceneColour = Colour * tex2D(SceneSampler, UV + fadeDisplacement*float2(noiseVal)).rgb;
-	
-	// Interpolate between the scene and the ink based on the splatter mask texture
-	return float4(lerp(sceneColour, distortedSceneColour, lerpAmt), 1);
+    float3 sceneColour    = tex2D(SceneSampler, UV).rgb;
+    float4 noise          = tex3D(NoiseSampler, Scale * float3(UV.xy, Freq * Timer));
+    
+    float fadeDisplacement = Displacement * Fade;
+    float lerpAmt = Fade;
+    
+    // Make sure the noise value is in the range [-1,1]
+    float noiseVal = clamp((noise.z + noise.w) * 7.0f, 0, 1);
+    noiseVal = (clamp(noiseVal, 0, 1) * 2.0f) - 1.0f;
+    
+    // Calculate the distortion of the ink
+    float3 distortedSceneColour = Colour * tex2D(SceneSampler, UV + fadeDisplacement*float2(noiseVal)).rgb;
+    
+    // Interpolate between the scene and the ink based on the splatter mask texture
+    return float4(lerp(sceneColour, distortedSceneColour, lerpAmt), 1);
 }
 
 technique MaskSplatter <string Script = "Pass=p0;";> {
     pass p0 <string Script = "Draw=geometry;";> {
-    	FragmentProgram = compile arbfp1 mask_splatter_PS();
+        FragmentProgram = compile arbfp1 mask_splatter_PS();
     }
 }
 
 technique NoMaskSplatter <string Script = "Pass=p0;";> {
     pass p0 <string Script = "Draw=geometry;";> {
-    	FragmentProgram = compile arbfp1 nomask_splatter_PS();
+        FragmentProgram = compile arbfp1 nomask_splatter_PS();
     }
 }

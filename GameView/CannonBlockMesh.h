@@ -18,6 +18,8 @@ public:
 
 	void Draw(const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight, bool lightsAreOff) const;
 	
+	void SetAlphaMultiplier(float alpha);
+
 private:
 	Mesh* cannonBlockBaseGeometry;
 	Mesh* cannonBlockBarrelGeometry;

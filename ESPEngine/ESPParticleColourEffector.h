@@ -20,5 +20,30 @@ public:
 	virtual ~ESPParticleColourEffector();
 
 	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
+
+	float GetStartAlpha() const;
+	float GetEndAlpha() const;
+
+	void SetStartAlpha(float alpha);
+	void SetEndAlpha(float alpha);
+
 };
+
+inline float ESPParticleColourEffector::GetStartAlpha() const {
+	return this->startAlpha;
+}
+
+inline float ESPParticleColourEffector::GetEndAlpha() const {
+	return this->endAlpha;
+}
+
+inline void ESPParticleColourEffector::SetStartAlpha(float alpha) {
+	this->startAlpha = alpha;
+}
+
+inline void ESPParticleColourEffector::SetEndAlpha(float alpha) {
+	this->endAlpha = alpha;
+}
+
+
 #endif

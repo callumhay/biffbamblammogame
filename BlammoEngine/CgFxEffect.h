@@ -45,13 +45,14 @@ struct MaterialProperties {
 
 	Colour diffuse, specular, outlineColour;
 	float shininess, outlineSize;
+	float alphaMultiplier;
 	Texture* diffuseTexture;
 	
 	std::string materialType;
 	std::string geomType;
 
 	MaterialProperties(): diffuseTexture(NULL), materialType(MATERIAL_CELBASIC_TYPE), geomType(MATERIAL_GEOM_BG_TYPE),
-		diffuse(Colour(1,1,1)), specular(Colour(1,1,1)), outlineColour(Colour(0,0,0)), shininess(128.0f), outlineSize(1.0f) {}
+		diffuse(Colour(1,1,1)), specular(Colour(1,1,1)), outlineColour(Colour(0,0,0)), shininess(128.0f), outlineSize(1.0f), alphaMultiplier(1.0f) {}
 
 	~MaterialProperties() {
 		if (this->diffuseTexture != NULL) {
@@ -205,7 +206,8 @@ protected:
 	CGparameter diffuseColourParam;
 	CGparameter shininessParam;
 	CGparameter specularColourParam;
-	
+	CGparameter alphaMultiplierParam;
+
 	// Lights
 	CGparameter keyPointLightPosParam;
 	CGparameter keyPointLightColourParam;
