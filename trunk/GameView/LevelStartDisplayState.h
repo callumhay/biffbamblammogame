@@ -8,6 +8,7 @@
 #include "../BlammoEngine/TextLabel.h"
 
 class GameDisplay;
+class ESPPointEmitter;
 
 class LevelStartDisplayState : public DisplayState {
 public:
@@ -36,8 +37,14 @@ private:
 	AnimationLerp<float> showLevelNameWipeAnimation;	// Animation for wipe-fadein of the level name label
 	AnimationLerp<float> levelNameFadeOutAnimation;		// Animation to fade out the level text
 	AnimationLerp<float> dropShadowAnimation;					// Animation for level text drop shadow
-	AnimationLerp<float> blockFadeInAnimation;				// Animation for fading in the level's blockss
+	AnimationLerp<float> blockFadeInAnimation;				// Animation for fading in the level's blocks
 
+	AnimationLerp<float> paddleMoveUpAnimation;				// Movement from the bottom of the screen into position
+	AnimationLerp<float> ballFadeInAnimation;					// Animation for ball fade in
+
+	// Emitters for when the ball appears
+	ESPPointEmitter* shockwaveEmitter;
+	ESPPointEmitter* starEmitter;
 
 };
 

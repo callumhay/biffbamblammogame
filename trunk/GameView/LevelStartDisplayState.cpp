@@ -5,6 +5,7 @@
 #include "GameFontAssetsManager.h"
 #include "LevelMesh.h"
 
+#include "../ESPEngine/ESPPointEmitter.h"
 #include "../GameModel/GameModel.h"
 
 const double LevelStartDisplayState::FADE_IN_TIME										= 1.5;
@@ -17,7 +18,7 @@ const float LevelStartDisplayState::LEVEL_TEXT_X_PADDING						= 50;			// Padding
 const float LevelStartDisplayState::LEVEL_TEXT_Y_PADDING						= 80;			// Padding from the bottom of the screen to the bottom of the level name text
 
 LevelStartDisplayState::LevelStartDisplayState(GameDisplay* display) : 
-DisplayState(display), renderPipeline(display),
+DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL),
 levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "") {
 
 	Camera& camera = this->display->GetCamera();
@@ -63,9 +64,37 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	this->blockFadeInAnimation.SetLerp(startTimeOfBlockFadeIn, endOfBlockFadeIn, 0.0f, 1.0f);
 	this->blockFadeInAnimation.SetRepeat(false);
 	this->blockFadeInAnimation.SetInterpolantValue(0.0f);
+
+	const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
+	float paddleAnimMoveDist   = 0.33f * std::max<float>(level->GetLevelUnitWidth(), level->GetLevelUnitHeight());
+	float paddleStartPos       = paddle->GetCenterPosition()[1] - paddleAnimMoveDist;
+	double endOfPaddleMove     = endOfBlockFadeIn + 0.25;
+
+	this->paddleMoveUpAnimation.SetLerp(startTimeOfBlockFadeIn, endOfPaddleMove, paddleStartPos, paddle->GetCenterPosition()[1]);
+	this->paddleMoveUpAnimation.SetRepeat(false);
+	this->paddleMoveUpAnimation.SetInterpolantValue(paddleStartPos);
+
+	this->ballFadeInAnimation.SetLerp(endOfPaddleMove, endOfPaddleMove + 0.5, 0.0f, 1.0f);
+	this->ballFadeInAnimation.SetRepeat(false);
+	this->ballFadeInAnimation.SetInterpolantValue(0.0f);
+
+	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
+	const GameBall* ball = this->display->GetModel()->GetGameBalls().front();
+	assert(ball != NULL);
+	Point3D emitCenter(ball->GetCenterPosition2D() + negHalfLevelDim, 0.0f);
+
+	const Texture2D* fullscreenTex = this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture();
+	this->shockwaveEmitter = this->display->GetAssets()->GetESPAssets()->CreateShockwaveEffect(*fullscreenTex, emitCenter, 
+		4 * ball->GetBounds().Radius(), 1.0);
+	this->starEmitter = this->display->GetAssets()->GetESPAssets()->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.8f, 1.0f), 
+		ESPInterval(0.5f, 1.0f), ESPInterval(0.0f), false, 20);
 }
 
 LevelStartDisplayState::~LevelStartDisplayState() {
+	delete this->shockwaveEmitter;
+	this->shockwaveEmitter = NULL;
+	delete this->starEmitter;
+	this->starEmitter = NULL;
 }
 
 void LevelStartDisplayState::RenderFrame(double dT) {
@@ -76,14 +105,33 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	bool levelTextFadeOutDone = this->levelNameFadeOutAnimation.Tick(dT);
 	bool dropShadowAnimDone   = this->dropShadowAnimation.Tick(dT);
 	bool levelPieceFadeInDone = this->blockFadeInAnimation.Tick(dT);
+	bool paddleMoveDone       = this->paddleMoveUpAnimation.Tick(dT);
+	bool ballFadeInDone       = this->ballFadeInAnimation.Tick(dT);
 
 	// Fade in the level pieces...
-	if (!levelPieceFadeInDone) {
-		this->display->GetAssets()->GetCurrentLevelMesh()->SetLevelAlpha(this->blockFadeInAnimation.GetInterpolantValue());
+	this->display->GetAssets()->GetCurrentLevelMesh()->SetLevelAlpha(this->blockFadeInAnimation.GetInterpolantValue());
 
-	}
+	PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
+	GameBall* ball       = this->display->GetModel()->GetGameBalls().front();
+	assert(paddle != NULL);
+	assert(ball != NULL);
+
+	// Animate the ball and paddle...
+	const Point2D& paddleCenter = paddle->GetCenterPosition();
+	paddle->SetCenterPosition(Point2D(paddleCenter[0], this->paddleMoveUpAnimation.GetInterpolantValue()));
+
+	float ballAlpha = this->ballFadeInAnimation.GetInterpolantValue();
+	ball->SetAlpha(ballAlpha);
 
 	renderPipeline.RenderFrameWithoutHUD(dT);
+
+	// If the ball is appearing, draw the emitters around the ball for a cool, flashy enterance
+	if (ballAlpha > 0.0f) {
+		this->shockwaveEmitter->Tick(dT);
+		this->starEmitter->Tick(dT);
+		this->shockwaveEmitter->Draw(camera);
+		this->starEmitter->Draw(camera);
+	}
 
 	// Render the fade-in if we haven't already
 	if (!fadeInDone) {
@@ -166,7 +214,10 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	}
 	
 	// All done animating the start of the level - go to the official in-game state
-	if (fadeInDone && wipeInDone && levelTextFadeOutDone && dropShadowAnimDone && levelPieceFadeInDone) {
+	if (fadeInDone && wipeInDone && levelTextFadeOutDone && dropShadowAnimDone && 
+		levelPieceFadeInDone && paddleMoveDone && ballFadeInDone && this->shockwaveEmitter->IsDead() && 
+		this->starEmitter->IsDead()) {
+
 		this->display->SetCurrentStateAsNextQueuedState();
 		return;
 	}
