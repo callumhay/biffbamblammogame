@@ -74,6 +74,9 @@ public:
 	Point2D GetDefaultCenterPosition() const {
 		return Point2D((this->maxBound + this->minBound)/2.0f, this->currHalfHeight);
 	}
+	void SetCenterPosition(const Point2D& center) {
+		this->centerPos = center;
+	}
 
 	float GetZRotation() const {
 		return this->rotAngleZAnimation.GetInterpolantValue();

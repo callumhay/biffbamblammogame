@@ -350,7 +350,7 @@ vn -0.843999 0.000000 0.536345
 vn -0.278758 0.000000 0.960361
 vn -0.278758 0.000000 0.960361
 g teslaBlock_coil
-usemtl teslaBlock_3_0:teslaBlock_coilMatSG
+usemtl teslaBlock_coilMatSG
 f 2/2/1 14/16/2 1/1/3
 f 1/1/3 14/16/2 13/15/4
 f 15/17/5 14/16/2 3/3/6

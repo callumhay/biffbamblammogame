@@ -170,7 +170,7 @@ private:
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
 
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
-	ESPPointEmitter* CreateShockwaveEffect(const Texture2D& bgTex, const Point3D& center, float startSize, float lifeTime);
+	
 
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const Projectile& projectile);
@@ -187,14 +187,15 @@ private:
 	ESPPointEmitter* CreateBeamFallingBitEffect();
 	ESPPointEmitter* CreateBeamFlareEffect();
 
-	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
-		bool gravity = true, size_t numParticles = 10);
-
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Projectile& projectile, ESPPointEmitter* projectileEmitter);
 
 public:
 	GameESPAssets();
 	~GameESPAssets();
+
+	ESPPointEmitter* CreateShockwaveEffect(const Texture2D& bgTex, const Point3D& center, float startSize, float lifeTime);
+	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
+		bool gravity = true, size_t numParticles = 10);
 
 	// Specific effects that can be made to occur in the game
 	//void AddBallBounceEffect(const Camera& camera, const GameBall& ball);	
