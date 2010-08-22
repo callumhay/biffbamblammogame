@@ -416,11 +416,9 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 		// Load all the initial stuffs for the game - this will queue up the next states that we need to go to
 		this->display->GetModel()->BeginOrRestartGame();
 
-		// Place the view into the proper state to play the game
-		this->display->AddStateToQueue(DisplayState::InGame);
+		// Place the view into the proper state to play the game	
 		this->display->SetCurrentStateAsNextQueuedState();
-		//this->display->SetCurrentState(new InGameDisplayState(this->display));
-		
+
 		return;
 	}
 	

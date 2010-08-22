@@ -65,7 +65,6 @@ GameModel::~GameModel() {
  * the first world, level, etc.
  */
 void GameModel::BeginOrRestartGame() {
-	this->SetNextState(new BallOnPaddleState(this));
 	this->SetCurrentWorld(GameModelConstants::GetInstance()->INITIAL_WORLD_NUM);
 
 	// Reset the score, lives, etc.
@@ -74,6 +73,7 @@ void GameModel::BeginOrRestartGame() {
 	this->numConsecutiveBlocksHit = GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT;	// Don't use set here, we don't want an event
 	this->gameTransformInfo->Reset();
 
+	this->SetNextState(new BallOnPaddleState(this));
 }
 
 // Called in order to make sure the game is no longer processing or generating anything

@@ -5,6 +5,7 @@
 #include "WorldStartDisplayState.h"
 #include "InGameDisplayState.h"
 #include "InGameMenuState.h"
+#include "LevelEndDisplayState.h"
 #include "GameCompleteDisplayState.h"
 #include "GameOverDisplayState.h"
 
@@ -22,6 +23,8 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
 			return new InGameDisplayState(display);
 		case DisplayState::InGameMenu:
 			return new InGameMenuState(display);
+		case DisplayState::LevelEnd:
+			return new LevelEndDisplayState(display);
 		case DisplayState::GameComplete:
 			return new GameCompleteDisplayState(display);
 		case DisplayState::GameOver:

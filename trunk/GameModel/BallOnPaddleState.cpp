@@ -22,7 +22,11 @@ BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(t
 	assert(paddle != NULL);
 	GameBall* ball = this->GetGameBall();
 	assert(ball != NULL);
+	GameLevel* currLevel = this->gameModel->GetCurrentLevel();
+	assert(currLevel != NULL);
 
+	// Make sure the paddle and ball are in a nice default state and position
+	paddle->SetMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
 	paddle->ResetPaddle();
 	ball->ResetBallAttributes();
 

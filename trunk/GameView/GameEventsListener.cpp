@@ -54,7 +54,7 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	const Camera& camera = this->display->GetCamera();
 
 	LoadingScreen::GetInstance()->StartShowLoadingScreen(camera.GetWindowWidth(), camera.GetWindowHeight(), 2);
-	this->display->GetAssets()->LoadWorldAssets(&world);
+	this->display->GetAssets()->LoadWorldAssets(world);
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 
 	//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldBackgroundMusic);
@@ -76,8 +76,12 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 	//this->display->GetCamera().Reset();
 	//this->display->GetCamera().SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
 
+	// Load the level geometry/mesh data for display...
+	this->display->GetAssets()->LoadNewLevelMesh(level);
+
 	// Queue up the state for starting a level - this will display the level name and do proper animations, fade-ins, etc.
 	this->display->AddStateToQueue(DisplayState::LevelStart);
+	this->display->AddStateToQueue(DisplayState::InGame);
 }
 
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {
@@ -87,7 +91,8 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 	this->display->GetAssets()->DeactivateMiscEffects();
 	
 	// Queue up the state for ending a level - this will display the level name and do proper animations, fade-outs, etc.
-	//this->display->AddStateToQueue(DisplayState::LevelEnd);
+	this->display->AddStateToQueue(DisplayState::LevelEnd);
+	this->display->SetCurrentStateAsNextQueuedState();
 }
 
 

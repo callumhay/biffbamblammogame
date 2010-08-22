@@ -90,7 +90,7 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir)
 void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity) {
 	static double TIME_TRACKER = 0.0;
 	static double NEXT_TIME    = 0.0;
-	static const double WAIT_TIME_BETWEEN_COLLISIONS = 0.5;
+	static const double WAIT_TIME_BETWEEN_COLLISIONS = 0.75;
 
 	TIME_TRACKER += dT;
 
