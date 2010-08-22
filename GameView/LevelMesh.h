@@ -22,7 +22,7 @@ class ESPEmitter;
 
 class LevelMesh {
 public:
-	LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
+	LevelMesh(const GameWorldAssets& gameWorldAssets, const GameLevel& level);
 	~LevelMesh();
 	
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
@@ -32,7 +32,7 @@ public:
 									const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
 	void DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
 
-	void LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level);
+	void LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameLevel& level);
 
 	void BallSafetyNetCreated();
 	void BallSafetyNetDestroyed(const Point2D& pos);

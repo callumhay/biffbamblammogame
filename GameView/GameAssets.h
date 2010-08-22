@@ -90,7 +90,7 @@ public:
 	GameAssets(int screenWidth, int screenHeight);
 	~GameAssets();
 
-	void LoadWorldAssets(const GameWorld* world);
+	void LoadWorldAssets(const GameWorld& world);
 	void Tick(double dT);
 
 	// Draw functions ******************************************************************************
@@ -123,7 +123,7 @@ public:
 	LevelMesh* GetCurrentLevelMesh() const {
 		return this->currentLevelMesh;
 	}
-	void LoadNewLevelMesh(const GameLevel* currLevel);
+	void LoadNewLevelMesh(const GameLevel& currLevel);
 
 	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item, const Camera& camera);
 	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item);

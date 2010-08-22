@@ -727,11 +727,11 @@ void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel
 	this->flashHUD->Draw(dT, displayWidth, displayHeight);
 }
 
-void GameAssets::LoadNewLevelMesh(const GameLevel* currLevel) {
+void GameAssets::LoadNewLevelMesh(const GameLevel& currLevel) {
 	if (this->currentLevelMesh != NULL) {
 		delete this->currentLevelMesh;
 	}
-	this->currentLevelMesh = new LevelMesh(this->worldAssets, currLevel);
+	this->currentLevelMesh = new LevelMesh(*this->worldAssets, currLevel);
 }
 
 void GameAssets::LoadRegularMeshAssets() {
@@ -887,9 +887,7 @@ void GameAssets::ExplosionFlash(double timeLength, float intensityPercent) {
  * given world-style, after loading all assets will be available for use in-game.
  * Precondition: world != NULL.
  */
-void GameAssets::LoadWorldAssets(const GameWorld* world) {
-	assert(world != NULL);
-
+void GameAssets::LoadWorldAssets(const GameWorld& world) {
 	// Delete the currently loaded world and level assets if there are any
 	// Delete all the levels for the world that are currently loaded - THIS MUST BE CALLED BEFORE DELETING
 	// THE WORLD ASSETS!!!
@@ -900,32 +898,25 @@ void GameAssets::LoadWorldAssets(const GameWorld* world) {
 
 	// Check to see if we've already loaded the world assets...
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading world assets...");
-	if (this->worldAssets == NULL || this->worldAssets->GetStyle() != world->GetStyle()) {
+	if (this->worldAssets == NULL || this->worldAssets->GetStyle() != world.GetStyle()) {
 		// Delete all previously loaded style-related assets
 		delete this->worldAssets;
 		this->worldAssets = NULL;
 
 		// Load up the new set of world geometry assets
-		this->worldAssets = GameWorldAssets::CreateWorldAssets(world->GetStyle());
+		this->worldAssets = GameWorldAssets::CreateWorldAssets(world.GetStyle());
 		assert(this->worldAssets != NULL);
 
 		// Unload any previous world's sound assets and load the new world sound assets
-		this->soundAssets->SetActiveWorldSounds(world->GetStyle(), true, true);
+		this->soundAssets->SetActiveWorldSounds(world.GetStyle(), true, true);
 	}
 	else {
 		// Make sure the sound and world assets are in sync
-		assert(this->soundAssets->GetActiveWorldSounds() == world->GetStyle());
+		assert(this->soundAssets->GetActiveWorldSounds() == world.GetStyle());
 	}
 	this->worldAssets->ResetToInitialState();
 
 	LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
-
-	// Load the first/current level mesh for the world - the current level should be the first level in the world
-	const GameLevel* currentLevel = world->GetCurrentLevel();
-	assert(currentLevel == world->GetAllLevelsInWorld().front());
-	this->LoadNewLevelMesh(currentLevel);
-	assert(this->currentLevelMesh != NULL);
-	
 
 	// Reinitialize the life HUD elements
 	this->lifeHUD->Reinitialize();

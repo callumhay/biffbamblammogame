@@ -24,7 +24,7 @@
 #include "../GameModel/CollateralBlock.h"
 #include "../GameModel/TeslaBlock.h"
 
-LevelMesh::LevelMesh(const GameWorldAssets* gameWorldAssets, const GameLevel* level) : currLevel(NULL),
+LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL) {
@@ -164,18 +164,15 @@ void LevelMesh::Flush() {
 /**
  * Load a new level mesh into this object. This will clear out any old loaded level.
  */
-void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameLevel* level) {
-	assert(gameWorldAssets != NULL);
-	assert(level != NULL);
-
+void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameLevel& level) {
 	// Make sure any previous levels are cleared...
 	this->Flush();
 	
 	// Set the current level pointer
-	this->currLevel = level;
+	this->currLevel = &level;
 
 	// Based on the world style read-in the appropriate block
-	this->styleBlock = gameWorldAssets->GetWorldStyleBlock();
+	this->styleBlock = gameWorldAssets.GetWorldStyleBlock();
 
 	// Load the materials for the style block...
 	std::map<std::string, MaterialGroup*> styleBlockMatGrps  = this->styleBlock->GetMaterialGroups();
@@ -184,10 +181,10 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets* gameWorldAssets, const GameL
 	}
 
 	// Load the actual level meshes as precomputed batches for speed...
-	const std::vector<std::vector<LevelPiece*> >& levelPieces = level->GetCurrentLevelLayout();
+	const std::vector<std::vector<LevelPiece*> >& levelPieces = level.GetCurrentLevelLayout();
 
 	// Get the proper vector to center the level
-	Vector2D levelDimensions = Vector2D(level->GetLevelUnitWidth(), level->GetLevelUnitHeight());
+	Vector2D levelDimensions = Vector2D(level.GetLevelUnitWidth(), level.GetLevelUnitHeight());
 	
 	// Create the ball safety net for the level
 	this->ballSafetyNet->Regenerate(levelDimensions);

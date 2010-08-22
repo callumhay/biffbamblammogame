@@ -21,6 +21,9 @@ LevelStartDisplayState::LevelStartDisplayState(GameDisplay* display) :
 DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL),
 levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "") {
 
+	// Pause all game play elements in the game model
+	this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
+
 	Camera& camera = this->display->GetCamera();
 
 	// Clear up any stuff to an initial state in cases where things might still 
