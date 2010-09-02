@@ -151,6 +151,12 @@ void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, 
 	debug_output("EVENT: Paddle hit by projectile");
 }
 
+void GameEventsListener::PaddleShieldHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
+	// TODO!!
+	assert(false);
+	debug_output("EVENT: Paddle shield hit by projectile");
+}
+
 void GameEventsListener::BallDiedEvent(const GameBall& deadBall) {
 	debug_output("EVENT: Ball died");
 	this->display->GetAssets()->GetESPAssets()->KillAllActiveBallEffects(deadBall);

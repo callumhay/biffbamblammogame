@@ -77,6 +77,14 @@ public:
 	 */
 	virtual void PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) = 0;
 
+	/**
+	 * This event occurs when the player paddle's shield gets hit by a projectile - it only happens once
+	 * per projectile and happens just before the effects of the hit take place.
+	 * Arguments: paddle     - The paddle whose shield just got hit by the projectile.
+	 *            projectile - The projectile that just hit the paddle.
+	 */
+	virtual void PaddleShieldHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) = 0;
+
 	// Ball related events ***************************************************************
 
 	/**

@@ -83,7 +83,7 @@ TEXTURE_CEL_GRADIENT(TEXTURE_DIRECTORY "/celshading_texture1x256.jpg"),
 TEXTURE_NOISE_OCTAVES(TEXTURE_DIRECTORY "/noise_octaves.raw"),
 
 // Item Drop Texture Asset Paths
-TEXTURE_ITEM_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_powerup256x128.jpg"),
+TEXTURE_ITEM_SLOWBALL(TEXTURE_DIRECTORY     "/slowball_powerup256x128.jpg"),
 TEXTURE_ITEM_FASTBALL(TEXTURE_DIRECTORY			"/fastball_powerdown256x128.jpg"),
 TEXTURE_ITEM_UBERBALL(TEXTURE_DIRECTORY			"/uberball_powerup256x128.jpg"),
 TEXTURE_ITEM_INVISIBALL(TEXTURE_DIRECTORY		"/invisiball_powerdown256x128.jpg"),
@@ -107,6 +107,7 @@ TEXTURE_ITEM_PADDLEBEAM(TEXTURE_DIRECTORY		"/laserbeampaddle_powerup_256x128.jpg
 TEXTURE_ITEM_GRAVITYBALL(TEXTURE_DIRECTORY  "/gravityball_powerneutral256x128.jpg"),
 TEXTURE_ITEM_PADDLEROCKET(TEXTURE_DIRECTORY "/paddlerocket_powerup256x128.jpg"),
 TEXTURE_ITEM_CRAZYBALL(TEXTURE_DIRECTORY    "/crazyball_powerneutral256x128.jpg"),
+TEXTURE_ITEM_SHIELDPADDLE(TEXTURE_DIRECTORY "/shieldpaddle_powerneutral_256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
 TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud256x128.png"),
@@ -121,7 +122,7 @@ TEXTURE_ITEM_TIMER_POISON(TEXTURE_DIRECTORY				"/poison_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_STICKYPADDLE(TEXTURE_DIRECTORY "/stickypaddle_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_EYE(TEXTURE_DIRECTORY					"/cam_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_GRAVITYBALL(TEXTURE_DIRECTORY	"/gravityball_timer_hud256x128.png"),
-
+TEXTURE_ITEM_TIMER_SHIELDPADDLE(TEXTURE_DIRECTORY "/shieldpaddle_timer_hud256x128.png"),
 
 // Item Timer (Fill) Texture Asset Paths
 TEXTURE_ITEM_TIMER_FILLER_SPDBALL(TEXTURE_DIRECTORY				"/ballspeed_timer_fill_hud256x128.png"),
@@ -135,6 +136,7 @@ TEXTURE_ITEM_TIMER_FILLER_POISON(TEXTURE_DIRECTORY				"/poison_timer_fill_hud256
 TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE(TEXTURE_DIRECTORY	"/stickypaddle_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_EYE(TEXTURE_DIRECTORY						"/cam_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL(TEXTURE_DIRECTORY	  "/gravityball_timer_fill_hud256x128.png"),
+TEXTURE_ITEM_TIMER_FILLER_SHIELDPADDLE(TEXTURE_DIRECTORY  "/shieldpaddle_timer_fill_hud256x128.png"),
 
 // Font Asset Paths
 FONT_SADBAD(FONT_DIRECTORY				"/sadbad.ttf"),
@@ -243,6 +245,7 @@ void GameViewConstants::InitItemTextures() {
 	this->itemTextures.insert(std::make_pair(GameItem::GravityBallItem,					this->TEXTURE_ITEM_GRAVITYBALL));
 	this->itemTextures.insert(std::make_pair(GameItem::RocketPaddleItem,				this->TEXTURE_ITEM_PADDLEROCKET));
 	this->itemTextures.insert(std::make_pair(GameItem::CrazyBallItem,						this->TEXTURE_ITEM_CRAZYBALL));
+	this->itemTextures.insert(std::make_pair(GameItem::ShieldPaddleItem,				this->TEXTURE_ITEM_SHIELDPADDLE));
 }
 
 void GameViewConstants::InitItemTimerTextures() {
@@ -259,6 +262,7 @@ void GameViewConstants::InitItemTimerTextures() {
 	this->itemTimerTextures.insert(std::make_pair(GameItem::PaddleCamItem,					this->TEXTURE_ITEM_TIMER_EYE));
 	this->itemTimerTextures.insert(std::make_pair(GameItem::BallCamItem,						this->TEXTURE_ITEM_TIMER_EYE));
 	this->itemTimerTextures.insert(std::make_pair(GameItem::GravityBallItem,				this->TEXTURE_ITEM_TIMER_GRAVITYBALL));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::ShieldPaddleItem,				this->TEXTURE_ITEM_TIMER_SHIELDPADDLE));
 }
 
 void GameViewConstants::InitItemTimerFillerTextures() {
@@ -275,7 +279,7 @@ void GameViewConstants::InitItemTimerFillerTextures() {
 	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::PaddleCamItem,					this->TEXTURE_ITEM_TIMER_FILLER_EYE));
 	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::BallCamItem,						this->TEXTURE_ITEM_TIMER_FILLER_EYE));
 	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::GravityBallItem,				this->TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL));
-
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::ShieldPaddleItem,				this->TEXTURE_ITEM_TIMER_FILLER_SHIELDPADDLE));
 }
 
 GameViewConstants::~GameViewConstants() {

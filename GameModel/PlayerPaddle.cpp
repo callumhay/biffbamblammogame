@@ -507,6 +507,13 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 
 // Called when the paddle is hit by a projectile
 void PlayerPaddle::HitByProjectile(const Projectile& projectile) {
+	// The paddle is unaffected if it has a shield active...
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		// EVENT: Paddle shield was just hit by a projectile
+		GameEventManager::Instance()->ActionPaddleShieldHitByProjectile(*this, projectile);
+		return;
+	}
+
 	// Different projectiles have different effects on the paddle...
 	switch (projectile.GetType()) {
 		case Projectile::CollateralBlockProjectile:

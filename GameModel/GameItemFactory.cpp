@@ -34,6 +34,7 @@
 #include "GravityBallItem.h"
 #include "RocketPaddleItem.h"
 #include "CrazyBallItem.h"
+#include "ShieldPaddleItem.h"
 
 /**
  * Creates a random item, could be either a power-up or down and
@@ -84,7 +85,7 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 		case 14:
 			return new BallSafetyNetItem(spawnOrigin, gameModel);																// good
 		case 15:
-			return new OneUpItem(spawnOrigin, gameModel);																				// good
+			return new ShieldPaddleItem(spawnOrigin, gameModel);																// neutral
 		case 16:
 			return new PoisonPaddleItem(spawnOrigin, gameModel);																// bad
 		case 17:
@@ -101,6 +102,8 @@ GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameMode
 			return new RocketPaddleItem(spawnOrigin, gameModel);																// good
 		case 23:
 			return new CrazyBallItem(spawnOrigin, gameModel);																		// neutral
+		case 24:
+			return new OneUpItem(spawnOrigin, gameModel);																				// good
 		default:
 			assert(false);
 	}
@@ -184,6 +187,9 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 
 		case GameItem::CrazyBallItem:
 			return new CrazyBallItem(spawnOrigin, gameModel);
+
+		case GameItem::ShieldPaddleItem:
+			return new ShieldPaddleItem(spawnOrigin, gameModel);
 
 		default:
 			assert(false);

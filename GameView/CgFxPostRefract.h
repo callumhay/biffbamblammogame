@@ -13,6 +13,7 @@ class CgFxPostRefract : public CgFxEffectBase {
 public:
 	static const char* BASIC_TECHNIQUE_NAME;
 	static const char* NORMAL_TEXTURE_TECHNIQUE_NAME;
+	static const char* NORMAL_TEXTURE_WITH_NOISE_TECHNIQUE_NAME;
 
 	CgFxPostRefract();
 	~CgFxPostRefract();
@@ -21,6 +22,16 @@ public:
 	void SetNormalTexture(const Texture2D* tex);
 	void SetWarpAmountParam(float amt);
 	void SetIndexOfRefraction(float eta);
+
+	void SetScale(float s) {
+		this->scale = s;
+	}
+	void SetFrequency(float f) {
+		this->freq = f;
+	}
+	void AddToTimer(double dT) {
+		this->timer += dT;
+	}
 
 protected:
 	void SetupBeforePasses(const Camera& camera);
@@ -35,13 +46,20 @@ private:
 	// CG Refract params
 	CGparameter sceneSamplerParam;
 	CGparameter normalSamplerParam;
+	CGparameter noiseSamplerParam;
 	CGparameter indexOfRefactionParam;
 	CGparameter warpAmountParam;
 	CGparameter sceneWidthParam;
 	CGparameter sceneHeightParam;
 
+	CGparameter timerParam;
+	CGparameter noiseScaleParam;
+	CGparameter noiseFreqParam;
+
 	// Actual values for parameters
 	float indexOfRefraction, warpAmount;
+	double timer;
+	float scale, freq;	
 	const Texture2D* sceneTex;
 	const Texture2D* normalTex;
 };

@@ -74,7 +74,9 @@ void GameController::KeyDown(SDLKey key, SDLMod modifier) {
 	else if (key == SDLK_n) {
 		this->model->DropItem(GameItem::BallSafetyNetItem);
 	}
-	// o
+	else if (key == SDLK_o) {
+		this->model->DropItem(GameItem::ShieldPaddleItem);
+	}
 	else if (key == SDLK_p) {
 		this->model->TogglePause(GameModel::PauseGame);
 	}

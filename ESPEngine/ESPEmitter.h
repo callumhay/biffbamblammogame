@@ -99,6 +99,7 @@ public:
 
 	void Tick(double dT);
 	void Draw(const Camera& camera, const Vector3D& worldTranslation = Vector3D(0,0,0), bool enableDepth = false);
+
 	void Reset();
 
 protected:			

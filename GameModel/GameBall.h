@@ -100,15 +100,19 @@ public:
 	 * Check to see if this ball collided with another.
 	 * Returns: true if there was a collision between this ball and otherball, false otherwise.
 	 */
-	bool CollisionCheck(const GameBall& otherBall) {
+	bool CollisionCheck(const GameBall& otherBall) const {
 		// If the collisions are disabled then we only return false
 		if (!this->CanCollideWithOtherBalls() || !otherBall.CanCollideWithOtherBalls()) {
 			return false;
 		}
 
-		Vector2D lengthVec = this->bounds.Center() - otherBall.bounds.Center();
+		return this->CollisionCheck(otherBall.GetBounds());
+	}
+
+	bool CollisionCheck(const Collision::Circle2D& circle) const {
+		Vector2D lengthVec = this->bounds.Center() - circle.Center();
 		float sqLength = Vector2D::Dot(lengthVec, lengthVec);
-		float radiiSum = this->bounds.Radius() + otherBall.bounds.Radius();
+		float radiiSum = this->bounds.Radius() + circle.Radius();
 		float sqRadii = radiiSum * radiiSum;
 		return sqLength < sqRadii;
 	}
