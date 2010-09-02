@@ -30,7 +30,7 @@ private:
 	GameItemFactory() {};
 
 public:
-	static const unsigned int TOTAL_NUM_OF_ITEMS = 24;
+	static const unsigned int TOTAL_NUM_OF_ITEMS = 25;
 	~GameItemFactory() {};
 
 	// Static factory functions for the creation of game items

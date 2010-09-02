@@ -44,6 +44,8 @@ The ball becomes pulled towards the bottom of the screen for better or worse.
 ~ CrazyBall
 The ball gains an insane mind of its own and starts moving in random directions on occasion.
 
+~ ShieldPaddle
+The paddle gains a shield that protects it from falling objects, however it causes a lot of distraction in paddle camera mode and the ball bounces off of it.
 
 - BallShrink
 The ball decreases in size.

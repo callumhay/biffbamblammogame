@@ -262,7 +262,6 @@ public:
 	void DrawPaddleLaserBeamFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 
 	void DrawTeslaLightningArcs(double dT, const Camera& camera);
-
 	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };
 #endif

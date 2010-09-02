@@ -660,6 +660,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\PaddleShield.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\PlayerHurtHUD.h"
 					>
 				</File>
@@ -785,6 +789,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\PaddleRocketMesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\PaddleShield.cpp"
 					>
 				</File>
 				<File
@@ -1275,6 +1283,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\ShieldPaddleItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\StickyPaddleItem.h"
 						>
 					</File>
@@ -1368,6 +1380,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\RocketPaddleItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\ShieldPaddleItem.cpp"
 						>
 					</File>
 					<File

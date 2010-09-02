@@ -37,6 +37,7 @@ public:
 	// Action functions (when events happen, call these)
 	void ActionPaddleHitWall(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void ActionPaddleHitByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
+	void ActionPaddleShieldHitByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 	void ActionBallDied(const GameBall& deadBall);
 	void ActionLastBallAboutToDie(const GameBall& ballAboutToDie);
 	void ActionLastBallExploded(const GameBall& explodedBall);

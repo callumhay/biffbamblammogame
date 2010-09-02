@@ -24,6 +24,7 @@
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
 #include "PaddleRocketMesh.h"
+#include "PaddleShield.h"
 
 // Game Model includes
 #include "../GameModel/GameModel.h"
@@ -61,6 +62,7 @@ rocketMesh(NULL),
 paddleBeamAttachment(NULL),
 paddleLaserAttachment(NULL),
 paddleStickyAttachment(NULL),
+paddleShield(NULL),
 
 invisiBallEffect(NULL), 
 ghostBallEffect(NULL)
@@ -139,6 +141,8 @@ GameAssets::~GameAssets() {
 	this->paddleLaserAttachment = NULL;
 	delete this->paddleStickyAttachment;
 	this->paddleStickyAttachment = NULL;
+	delete this->paddleShield;
+	this->paddleShield = NULL;
 
 	// Clear up the FrameBuffer Object assets
 	delete this->fboAssets;
@@ -398,6 +402,11 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
+
+	if (!p.GetIsPaddleCameraOn()) {
+		// Draw the shield around the paddle (if it's currently activated)
+		this->paddleShield->DrawAndTick(p, camera, dT);
+	}
 
 	// Draw any effects on the paddle (e.g., item acquiring effects)
 	this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
@@ -753,6 +762,7 @@ void GameAssets::LoadRegularMeshAssets() {
 	if (this->paddleStickyAttachment == NULL) {
 		this->paddleStickyAttachment = new StickyPaddleGoo();
 	}
+	
 }
 
 void GameAssets::LoadRegularEffectAssets() {
@@ -770,6 +780,9 @@ void GameAssets::LoadRegularEffectAssets() {
 		this->ghostBallEffect->SetFrequency(0.8f);
 		this->ghostBallEffect->SetAlphaMultiplier(1.0f);
 		this->ghostBallEffect->SetFlowDirection(Vector3D(0, 0, 1));
+	}
+	if (this->paddleShield == NULL) {
+		this->paddleShield = new PaddleShield();
 	}
 }
 
@@ -857,6 +870,8 @@ void GameAssets::FirePaddleRocket(const Projectile& rocketProjectile) {
  * occur to show the hurting.
  */
 void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile) {
+	
+	
 	// Add the sprite/particle effect
 	this->espAssets->AddPaddleHitByProjectileEffect(paddle, projectile);
 
@@ -875,6 +890,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
 	// Add a fullscreen overlay effect to show pain/badness
 	this->painHUD->Activate(intensity);
+
 }
 
 // Notifies assets that there was an explosion and there should be a fullscreen flash
@@ -995,6 +1011,13 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			}
 			break;
 
+		case GameItem::ShieldPaddleItem: {
+				const Texture2D* fullscreenFBOTex = this->GetFBOAssets()->GetFinalFullScreenFBO()->GetFBOTexture();
+				assert(fullscreenFBOTex != NULL);
+				this->paddleShield->ActivateShield(*gameModel.GetPlayerPaddle(), *fullscreenFBOTex);
+			}
+			break;
+
 		default:
 			break;
 	}
@@ -1046,6 +1069,11 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 
 			// Show the background once again...
 			this->worldAssets->FadeBackground(false, 2.0f);
+			break;
+
+		case GameItem::ShieldPaddleItem: {
+				this->paddleShield->DeactivateShield();
+			}
 			break;
 
 		default:

@@ -46,7 +46,8 @@ public:
 	static const Vector2D DEFAULT_PADDLE_RIGHT_VECTOR;
 
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000010, 
-										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000, RocketPaddle = 0x00010000 };
+										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000, RocketPaddle = 0x00010000, 
+										ShieldPaddle = 0x00100000 };
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
 	PlayerPaddle(float minBound, float maxBound);
@@ -285,6 +286,7 @@ private:
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
 	float GetPercentNearPaddleCenter(const Projectile& projectile, float& distFromCenter);
+	Collision::Circle2D CreatePaddleShieldBounds() const;
 };
 
 inline void PlayerPaddle::Animate(double seconds) {
@@ -295,19 +297,61 @@ inline void PlayerPaddle::Animate(double seconds) {
 // Check to see if the given ball collides, return the normal of the collision and the line of the collision as well
 // as the time since the collision occurred
 inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
-	return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+	// If the paddle has a shield around it do the collision with the shield
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+
+		Collision::Circle2D shield = this->CreatePaddleShieldBounds();
+		Vector2D lengthVec = ball.GetBounds().Center() - shield.Center();
+		float sqLength = Vector2D::Dot(lengthVec, lengthVec);
+		float radiiSum = ball.GetBounds().Radius() + shield.Radius();
+		float sqRadii = radiiSum * radiiSum;
+
+		if (sqLength < sqRadii) {
+			n = lengthVec;
+			n.Normalize();
+			
+			Point2D  approxCircleCollisionPt = shield.Center() + shield.Radius() * n;
+			Vector2D perpendicularVec(-n[1], n[0]);
+
+			// Make the collision line the tangent at the surface of the shield
+			collisionLine = Collision::LineSeg2D(approxCircleCollisionPt - perpendicularVec, approxCircleCollisionPt + perpendicularVec);
+			// A rough approximate of the the time since collision is the distance between the 
+			// ball's center and the shield barrier divided by the ball's velocity
+			timeSinceCollision = Vector2D::Magnitude(approxCircleCollisionPt - ball.GetBounds().Center()) / ball.GetSpeed();
+
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else {
+		return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+	}
 }
 
 /**
  * Check to see if the given set of bounding lines collides with this paddle.
  */
 inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds) const {
-	return this->bounds.CollisionCheck(bounds);
+	// If the paddle has a shield around it do the collision with the shield
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		return this->bounds.CollisionCheck(this->CreatePaddleShieldBounds());
+	}
+	else {
+		return this->bounds.CollisionCheck(bounds);
+	}
 }
 
 // The paddle destroys all projectiles that collide with it, currently
 inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
 	return false;
+}
+
+// Build a temporary circle representing the bounds of any shield that might exist around
+// the paddle.
+inline Collision::Circle2D PlayerPaddle::CreatePaddleShieldBounds() const {
+	return Collision::Circle2D(this->GetCenterPosition(), this->GetHalfWidthTotal());
 }
 
 #endif

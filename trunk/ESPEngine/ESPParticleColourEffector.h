@@ -17,9 +17,9 @@ public:
 	ESPParticleColourEffector(const Colour& colour, float startAlpha, float endAlpha);
 	ESPParticleColourEffector(const Colour& colour, float alpha);
 	ESPParticleColourEffector(const ColourRGBA& start, const ColourRGBA& end);
-	virtual ~ESPParticleColourEffector();
+	~ESPParticleColourEffector();
 
-	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
+	void AffectParticleOnTick(double dT, ESPParticle* particle);
 
 	float GetStartAlpha() const;
 	float GetEndAlpha() const;

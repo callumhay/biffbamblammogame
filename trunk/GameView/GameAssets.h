@@ -43,6 +43,7 @@ class FlashHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
 class PaddleRocketMesh;
+class PaddleShield;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -71,6 +72,7 @@ private:
 	Mesh* paddleBeamAttachment;								// Laser beam attachment for paddle
 	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
 	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
+	PaddleShield* paddleShield;								// Refractive glowy shield for the paddle
 
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;

@@ -4,6 +4,7 @@
 #include "GameAssets.h"
 #include "GameFontAssetsManager.h"
 #include "LevelMesh.h"
+#include "LivesLeftHUD.h"
 
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../GameModel/GameModel.h"
@@ -71,13 +72,13 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
 	float paddleAnimMoveDist   = 0.33f * std::max<float>(level->GetLevelUnitWidth(), level->GetLevelUnitHeight());
 	float paddleStartPos       = paddle->GetCenterPosition()[1] - paddleAnimMoveDist;
-	double endOfPaddleMove     = endOfBlockFadeIn + 0.25;
+	double endOfPaddleMove     = endOfBlockFadeIn + 0.15;
 
 	this->paddleMoveUpAnimation.SetLerp(startTimeOfBlockFadeIn, endOfPaddleMove, paddleStartPos, paddle->GetCenterPosition()[1]);
 	this->paddleMoveUpAnimation.SetRepeat(false);
 	this->paddleMoveUpAnimation.SetInterpolantValue(paddleStartPos);
 
-	this->ballFadeInAnimation.SetLerp(endOfPaddleMove, endOfPaddleMove + 0.5, 0.0f, 1.0f);
+	this->ballFadeInAnimation.SetLerp(endOfPaddleMove, endOfPaddleMove + 0.25, 0.0f, 1.0f);
 	this->ballFadeInAnimation.SetRepeat(false);
 	this->ballFadeInAnimation.SetInterpolantValue(0.0f);
 
@@ -91,6 +92,11 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 		4 * ball->GetBounds().Radius(), 1.0);
 	this->starEmitter = this->display->GetAssets()->GetESPAssets()->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.8f, 1.0f), 
 		ESPInterval(0.5f, 1.0f), ESPInterval(0.0f), false, 20);
+
+	// Reset any HUD animations - this makes sure the animations are always displayed (e.g., the life balls fly in)
+	// at the beginning of each level
+	this->display->GetAssets()->GetLifeHUD()->Reinitialize();
+	this->display->GetAssets()->GetLifeHUD()->LivesGained(this->display->GetModel()->GetLivesLeft());
 }
 
 LevelStartDisplayState::~LevelStartDisplayState() {

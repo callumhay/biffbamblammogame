@@ -311,6 +311,27 @@ namespace Collision {
 		return (rayT >= 0 && lineT >= 0 && lineT <= 1);
 	}
 
+	inline bool IsCollision(const Ray2D& ray, const Circle2D& circle, float& rayT) {
+		Vector2D m = ray.GetOrigin() - circle.Center();
+		float b    = Vector2D::Dot(m, ray.GetUnitDirection());
+		float c    = Vector2D::Dot(m, m) - (circle.Radius() * circle.Radius());
+
+		if (c > 0.0f && b > 0.0f) {
+			return false;
+		}
+
+		float discr = b*b - c;
+		if (discr < 0.0f) {
+			return false;
+		}
+
+		rayT = -b - sqrt(discr);
+		if (rayT < 0.0f) {
+			rayT = 0.0f;
+		}
+		return true;
+	}
+
 	// Closest Point Computations ******************************************************
 	
 	/**
