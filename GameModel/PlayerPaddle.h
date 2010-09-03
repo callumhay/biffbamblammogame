@@ -20,10 +20,10 @@
 
 #include "BoundingLines.h"
 #include "GameBall.h"
+#include "Projectile.h"
 
 class GameModel;
 class GameBall;
-class Projectile;
 
 // Represents the player controlled paddle shaped as follows:
 //                -------------
@@ -224,6 +224,7 @@ public:
 
 	void HitByProjectile(const Projectile& projectile);
 	bool ProjectilePassesThrough(const Projectile& projectile);
+	void ModifyProjectileTrajectory(Projectile& projectile);
 
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 	bool CollisionCheck(const BoundingLines& bounds) const;
@@ -281,7 +282,6 @@ private:
 	void SetPaddleSize(PlayerPaddle::PaddleSize size);
 	void FireAttachedBall();
 	void MoveAttachedBallToNewBounds(double dT);
-
 
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
@@ -345,6 +345,12 @@ inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds) const {
 
 // The paddle destroys all projectiles that collide with it, currently
 inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
+	// Projectiles can pass through when reflected by the paddle shield
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		if (projectile.GetType() == Projectile::PaddleLaserBulletProjectile) {
+			return true;
+		}
+	}
 	return false;
 }
 

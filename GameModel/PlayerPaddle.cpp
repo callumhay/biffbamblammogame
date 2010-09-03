@@ -505,6 +505,23 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	return true;
 }
 
+// Modify the projectile trajectory in certain special cases when the projectile is colliding with the paddle
+// (or the paddle shield or some component of the paddle)
+void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
+
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		if (projectile.GetType() == Projectile::PaddleLaserBulletProjectile) {
+			Vector2D fromShieldCenterToProjectile = projectile.GetPosition() - this->GetCenterPosition();
+			fromShieldCenterToProjectile.Normalize();
+			projectile.SetVelocity(fromShieldCenterToProjectile, projectile.GetVelocityMagnitude());
+			projectile.SetPosition(projectile.GetPosition() + projectile.GetHeight() * fromShieldCenterToProjectile);
+
+			// EVENT: Projectile deflected by shield
+			GameEventManager::Instance()->ActionProjectileDeflectedByPaddleShield(projectile, *this);
+		}
+	}
+}
+
 // Called when the paddle is hit by a projectile
 void PlayerPaddle::HitByProjectile(const Projectile& projectile) {
 	// The paddle is unaffected if it has a shield active...

@@ -314,7 +314,9 @@ void BallInPlayState::Tick(double seconds) {
 			if (destroyProjectile) {
 				projectilesToDestroy.push_back(iter);
 			}
-
+			else {
+				paddle->ModifyProjectileTrajectory(*currProjectile);
+			}
 			continue;
 		}
 
