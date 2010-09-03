@@ -804,6 +804,10 @@ void GameESPAssets::AddBouncePaddleEffect(const GameBall& ball, const PlayerPadd
 		// The sticky paddle should make a spongy gooey sound when hit by the ball...
 		this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::GOO));
 	}
+	else if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		// The ball hits a energy shield bbzzzap!
+		this->AddEnergyShieldHitEffect(paddle.GetCenterPosition(), ball);
+	}
 	else {
 		// Typical paddle bounce, similar to a regular block bounce effect
 		this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::BOUNCE));
@@ -867,7 +871,7 @@ void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBal
 /**
  * Add effects based on what happens when a given projectile hits a given level piece.
  */
-void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block, const Texture2D& bgTexture) {
+void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block) {
 	switch (projectile.GetType()) {
 		case Projectile::PaddleLaserBulletProjectile:
 			switch(block.GetType()) {
@@ -918,7 +922,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				// A rocket just hit a block - KABOOOOOOM!!!
 				Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter());
 				float rocketSizeFactor = projectile.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
-				this->AddRocketHitBlockEffect(rocketSizeFactor, midPoint, bgTexture);
+				this->AddRocketHitBlockEffect(rocketSizeFactor, midPoint);
 			}
 			break;
 
@@ -931,7 +935,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 	}
 }
 
-void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball, const Texture2D& bgTexture) {
+void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
 
 	// Add the lightning bolt graphic and onomatopeia effect
 	ESPInterval boltLifeInterval		= ESPInterval(0.8f, 1.1f);
@@ -984,7 +988,7 @@ void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball, const Tex
 	boltOnoEffect->SetParticles(1, boltTextLabel, type, severity);	
 	
 	// Add the shockwave for the ball hitting the lightning...
-	ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(bgTexture, emitPosition, 3.0f * GameBall::DEFAULT_BALL_RADIUS, 0.5f);
+	ESPPointEmitter* shockwaveEffect = this->CreateShockwaveEffect(emitPosition, 3.0f * GameBall::DEFAULT_BALL_RADIUS, 0.5f);
 	assert(shockwaveEffect != NULL);
 
 	// Add the bolt graphic, its sound graphic and the shockwave to the active general emitters
@@ -1025,14 +1029,17 @@ ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, cons
 	return spiralEffect;
 }
 
+// Updates any required values that need to be refreshed every frame
+void GameESPAssets::UpdateBGTexture(const Texture2D& bgTexture) {
+	this->normalTexRefractEffect.SetFBOTexture(&bgTexture);
+}
+
 /**
  * Builds a shockwave that distorts the background.
  *
  */
-ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Texture2D& bgTex, const Point3D& center, float startSize, float lifeTime) {
+ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Point3D& center, float startSize, float lifeTime) {
 	// Add the shockwave for the ball hitting the lightning...
-	this->normalTexRefractEffect.SetFBOTexture(&bgTex);
-
 	assert(lifeTime > 0);
 
 	ESPPointEmitter* shockwaveEffect = new ESPPointEmitter();
@@ -1268,7 +1275,7 @@ ESPPointEmitter* GameESPAssets::CreateBlockBreakSmashyBits(const Point3D& center
 		smashyBits->SetNumParticleLives(1);
 		smashyBits->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 		smashyBits->SetInitialSpd(ESPInterval(3.5f, 5.5f));
-		smashyBits->SetParticleLife(ESPInterval(1.7f, 2.8f));
+		smashyBits->SetParticleLife(ESPInterval(1.25f, 2.0f));
 		smashyBits->SetParticleSize(ESPInterval(0.4f * LevelPiece::PIECE_HEIGHT, LevelPiece::PIECE_HEIGHT));
 		smashyBits->SetEmitAngleInDegrees(180);
 		smashyBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -1469,7 +1476,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 /**
  * Add the effect for when a bomb block is hit - explodey!
  */
-void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb, const Texture2D& bgTexture) {
+void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb) {
 	Point2D bombCenter  = bomb.GetCenter();
 	Point3D emitCenter  = Point3D(bombCenter[0], bombCenter[1], 0.0f);
 
@@ -1557,7 +1564,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPie
 	bombOnoEffect->AddParticle(bombOnoParticle);
 
 	// Shockwave...
-	ESPPointEmitter* shockwave = this->CreateShockwaveEffect(bgTexture, emitCenter, LevelPiece::PIECE_WIDTH, 0.8f);
+	ESPPointEmitter* shockwave = this->CreateShockwaveEffect(emitCenter, LevelPiece::PIECE_WIDTH, 0.8f);
 	assert(shockwave != NULL);
 
 	// Lastly, add the new emitters to the list of active emitters
@@ -2844,7 +2851,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 }
 
 // Add the effect for when the rocket goes off after it hits a block
-void GameESPAssets::AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc, const Texture2D& bgTexture) {
+void GameESPAssets::AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc) {
 	ESPInterval bangLifeInterval		= ESPInterval(1.2f);
 	ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.maxValue + 0.4f);
 	Point3D emitCenter(loc);
@@ -2936,7 +2943,7 @@ void GameESPAssets::AddRocketHitBlockEffect(float rocketSizeFactor, const Point2
 	bangOnoEffect->SetParticles(1, bangTextLabel, type, severity);
 
 	// Add shockwave
-	ESPPointEmitter* shockwave = this->CreateShockwaveEffect(bgTexture, emitCenter, sizeIntervalX.maxValue, 1.0f);
+	ESPPointEmitter* shockwave = this->CreateShockwaveEffect(emitCenter, sizeIntervalX.maxValue, 1.0f);
 	assert(shockwave != NULL);
 
 	// Lastly, add the new emitters to the list of active emitters in order of back to front
@@ -2947,6 +2954,56 @@ void GameESPAssets::AddRocketHitBlockEffect(float rocketSizeFactor, const Point2
 	this->activeGeneralEmitters.push_back(explosionEffect);
 	this->activeGeneralEmitters.push_back(explodeRayEffect);
 	this->activeGeneralEmitters.push_back(bangOnoEffect);
+}
+
+void GameESPAssets::AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball) {
+	Vector2D emitDirection = ball.GetCenterPosition2D() - shieldCenter;
+	Point3D emitPosition3D(ball.GetCenterPosition());
+
+	// Add energy bits
+	ESPPointEmitter* sparkleEnergyBits = new ESPPointEmitter();
+	sparkleEnergyBits->SetNumParticleLives(1);
+	sparkleEnergyBits->SetSpawnDelta(ESPInterval(0.005f, 0.02f));
+	sparkleEnergyBits->SetInitialSpd(ESPInterval(2.0f, 4.0f));
+	sparkleEnergyBits->SetParticleLife(ESPInterval(1.0f, 2.0f));
+	sparkleEnergyBits->SetParticleSize(ESPInterval(2.0f, 3.0f));
+	sparkleEnergyBits->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	sparkleEnergyBits->SetEmitAngleInDegrees(20);
+	sparkleEnergyBits->SetEmitDirection(Vector3D(emitDirection));
+	sparkleEnergyBits->SetAsPointSpriteEmitter(true);
+	sparkleEnergyBits->SetEmitPosition(emitPosition3D);
+	sparkleEnergyBits->AddEffector(&this->particleFader);
+	sparkleEnergyBits->AddEffector(&this->particleMediumShrink);
+	bool result = sparkleEnergyBits->SetParticles(7, this->sparkleTex);
+	assert(result);
+	
+	ESPPointEmitter* solidEnergyBits = new ESPPointEmitter();
+	solidEnergyBits->SetNumParticleLives(1);
+	solidEnergyBits->SetSpawnDelta(ESPInterval(0.005f, 0.02f));
+	solidEnergyBits->SetInitialSpd(ESPInterval(2.5f, 4.0f));
+	solidEnergyBits->SetParticleLife(ESPInterval(0.5f, 1.0f));
+	solidEnergyBits->SetParticleSize(ESPInterval(0.25f, 0.75f));
+	solidEnergyBits->SetParticleColour(ESPInterval(0.5f, 0.7f), ESPInterval(0.7f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	solidEnergyBits->SetEmitAngleInDegrees(25);
+	solidEnergyBits->SetEmitDirection(Vector3D(emitDirection));
+	solidEnergyBits->SetAsPointSpriteEmitter(true);
+	solidEnergyBits->SetEmitPosition(emitPosition3D);
+	solidEnergyBits->AddEffector(&this->particleFader);
+	solidEnergyBits->AddEffector(&this->particleMediumShrink);
+	result = solidEnergyBits->SetParticles(10, this->circleGradientTex);
+	assert(result);
+
+	// Add a small shockwave
+	ESPPointEmitter* shockwave = this->CreateShockwaveEffect(emitPosition3D, 2.0f * GameBall::DEFAULT_BALL_RADIUS, 0.75f);
+	assert(shockwave != NULL);
+
+	// Add sound for the ball hitting the shield
+	ESPPointEmitter* onomataEffect = this->CreateBallBounceEffect(ball, Onomatoplex::ELECTRIC);
+		
+	this->activeGeneralEmitters.push_back(shockwave);
+	this->activeGeneralEmitters.push_back(solidEnergyBits);
+	this->activeGeneralEmitters.push_back(sparkleEnergyBits);
+	this->activeGeneralEmitters.push_back(onomataEffect);
 }
 
 /**

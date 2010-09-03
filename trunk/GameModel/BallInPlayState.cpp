@@ -153,6 +153,15 @@ void BallInPlayState::Tick(double seconds) {
 				if (gameBalls.size() > 1 && currBall != (*gameBalls.begin())) {
 					ballToMoveToFront = currBall;
 				}
+
+				// Make for damn sure that the ball is no longer colliding!
+				Vector2D tempN;
+				Collision::LineSeg2D tempLine;
+				double tempTime;
+				while (paddle->CollisionCheck(*currBall, 0.0, tempN, tempLine, tempTime)) {
+					currBall->SetCenterPosition(currBall->GetCenterPosition2D() + currBall->GetBounds().Radius() * n);
+				}
+
 			}
 		}
 

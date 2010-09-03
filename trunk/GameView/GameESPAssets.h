@@ -168,7 +168,6 @@ private:
 	void InitLaserPaddleESPEffects();
 
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
-
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
 	
 
@@ -179,7 +178,9 @@ private:
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
 
-	void AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc, const Texture2D& bgTexture);
+	void AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc);
+
+	void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
 	ESPPointEmitter* CreateBeamEndEffect();
@@ -193,7 +194,9 @@ public:
 	GameESPAssets();
 	~GameESPAssets();
 
-	ESPPointEmitter* CreateShockwaveEffect(const Texture2D& bgTex, const Point3D& center, float startSize, float lifeTime);
+	void UpdateBGTexture(const Texture2D& bgTexture);
+
+	ESPPointEmitter* CreateShockwaveEffect(const Point3D& center, float startSize, float lifeTime);
 	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
 		bool gravity = true, size_t numParticles = 10);
 
@@ -204,13 +207,13 @@ public:
 	void AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block);
 	void AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle);
 	void AddBounceBallBallEffect(const GameBall& ball1, const GameBall& ball2);
-	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block, const Texture2D& bgTexture);
-	void AddBallHitLightningArcEffect(const GameBall& ball, const Texture2D& bgTexture);
+	void AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block);
+	void AddBallHitLightningArcEffect(const GameBall& ball);
 
 	void AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block);
 	void AddCannonFireEffect(const GameBall& ball, const CannonBlock& block);
 	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
-	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb, const Texture2D& bgTexture);
+	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
 	void AddBallSafetyNetDestroyedEffect(const Point2D& pos);
 	void AddBallExplodedEffect(const GameBall* ball);

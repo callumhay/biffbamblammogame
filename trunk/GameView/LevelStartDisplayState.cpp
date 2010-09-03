@@ -9,10 +9,10 @@
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../GameModel/GameModel.h"
 
-const double LevelStartDisplayState::FADE_IN_TIME										= 1.5;
-const double LevelStartDisplayState::WIPE_TIME											= 1.0;
-const double LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME				= 3.0;
-const double LevelStartDisplayState::LEVEL_BLOCK_FADE_IN_TIME				= 2.0;
+const double LevelStartDisplayState::FADE_IN_TIME										= 1.25;
+const double LevelStartDisplayState::WIPE_TIME											= 0.8f;
+const double LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME				= 2.5;
+const double LevelStartDisplayState::LEVEL_BLOCK_FADE_IN_TIME				= 1.25;
 
 const float LevelStartDisplayState::LEVEL_NAME_WIPE_FADE_QUAD_SIZE	= 100.0f;
 const float LevelStartDisplayState::LEVEL_TEXT_X_PADDING						= 50;			// Padding from the right-hand side of the screen to the level name text
@@ -53,7 +53,7 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	this->showLevelNameWipeAnimation.SetRepeat(false);
 	this->showLevelNameWipeAnimation.SetInterpolantValue(0.0f);
 
-	double startOfNameFadeOut = LevelStartDisplayState::WIPE_TIME + 0.5;
+	double startOfNameFadeOut = LevelStartDisplayState::WIPE_TIME + 0.3;
 	double endOfNameFadeOut   = startOfNameFadeOut + LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME;
 	this->levelNameFadeOutAnimation.SetLerp(startOfNameFadeOut, endOfNameFadeOut, 1.0f, 0.0f);
 	this->levelNameFadeOutAnimation.SetRepeat(false);
@@ -63,7 +63,7 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	this->dropShadowAnimation.SetRepeat(false);
 	this->dropShadowAnimation.SetInterpolantValue(startDropShadowAmt);
 
-	double startTimeOfBlockFadeIn = LevelStartDisplayState::WIPE_TIME + 1.0 + LevelStartDisplayState::FADE_IN_TIME;
+	double startTimeOfBlockFadeIn = LevelStartDisplayState::WIPE_TIME + 0.5 + LevelStartDisplayState::FADE_IN_TIME;
 	double endOfBlockFadeIn       = startTimeOfBlockFadeIn + LevelStartDisplayState::LEVEL_BLOCK_FADE_IN_TIME;
 	this->blockFadeInAnimation.SetLerp(startTimeOfBlockFadeIn, endOfBlockFadeIn, 0.0f, 1.0f);
 	this->blockFadeInAnimation.SetRepeat(false);
@@ -78,7 +78,7 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	this->paddleMoveUpAnimation.SetRepeat(false);
 	this->paddleMoveUpAnimation.SetInterpolantValue(paddleStartPos);
 
-	this->ballFadeInAnimation.SetLerp(endOfPaddleMove, endOfPaddleMove + 0.25, 0.0f, 1.0f);
+	this->ballFadeInAnimation.SetLerp(endOfPaddleMove, endOfPaddleMove + 0.15, 0.0f, 1.0f);
 	this->ballFadeInAnimation.SetRepeat(false);
 	this->ballFadeInAnimation.SetInterpolantValue(0.0f);
 
@@ -88,8 +88,7 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	Point3D emitCenter(ball->GetCenterPosition2D() + negHalfLevelDim, 0.0f);
 
 	const Texture2D* fullscreenTex = this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture();
-	this->shockwaveEmitter = this->display->GetAssets()->GetESPAssets()->CreateShockwaveEffect(*fullscreenTex, emitCenter, 
-		4 * ball->GetBounds().Radius(), 1.0);
+	this->shockwaveEmitter = this->display->GetAssets()->GetESPAssets()->CreateShockwaveEffect(emitCenter, 4 * ball->GetBounds().Radius(), 1.2f);
 	this->starEmitter = this->display->GetAssets()->GetESPAssets()->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.8f, 1.0f), 
 		ESPInterval(0.5f, 1.0f), ESPInterval(0.0f), false, 20);
 

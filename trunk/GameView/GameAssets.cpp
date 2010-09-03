@@ -386,6 +386,9 @@ void GameAssets::Tick(double dT) {
 
 	// Tick the light assets (light animations for strobing, changing colours, etc.)
 	this->lightAssets->Tick(dT);
+
+	// Update the esp assets with any changes over the last tick
+	this->espAssets->UpdateBGTexture(*this->fboAssets->GetFinalFullScreenFBO()->GetFBOTexture());
 }
 
 /**

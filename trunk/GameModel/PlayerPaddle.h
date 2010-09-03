@@ -336,7 +336,7 @@ inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector
 inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds) const {
 	// If the paddle has a shield around it do the collision with the shield
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		return this->bounds.CollisionCheck(this->CreatePaddleShieldBounds());
+		return bounds.CollisionCheck(this->CreatePaddleShieldBounds());
 	}
 	else {
 		return this->bounds.CollisionCheck(bounds);
