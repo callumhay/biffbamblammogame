@@ -640,10 +640,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\LevelEndDisplayState.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\LevelMesh.h"
 					>
 				</File>
@@ -769,10 +765,6 @@
 				</File>
 				<File
 					RelativePath=".\GameView\LaserPaddleGun.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\LevelEndDisplayState.cpp"
 					>
 				</File>
 				<File
@@ -983,6 +975,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\LevelEndDisplayState.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\LevelStartDisplayState.h"
 						>
 					</File>
@@ -1016,6 +1012,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\InGameMenuState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\LevelEndDisplayState.cpp"
 						>
 					</File>
 					<File

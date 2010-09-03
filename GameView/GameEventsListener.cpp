@@ -152,8 +152,7 @@ void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, 
 }
 
 void GameEventsListener::PaddleShieldHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
-	// TODO!!
-	assert(false);
+	// TODO ?
 	debug_output("EVENT: Paddle shield hit by projectile");
 }
 
@@ -223,8 +222,7 @@ void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) {
 
 	// Add any visual effects required for when a projectile hits the block
-	this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block, 
-		*this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture());
+	this->display->GetAssets()->GetESPAssets()->AddBlockHitByProjectileEffect(projectile, block);
 
 	debug_output("EVENT: Projectile-block collision");
 }
@@ -332,7 +330,7 @@ void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const Ca
 
 void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
 	// Add the effect(s) for when the ball hits the lightning
-	this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball, *this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture());
+	this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball);
 	// Add a tiny camera shake
 	this->display->GetCamera().SetCameraShake(1.2, Vector3D(0.75, 0.1, 0.1), 40);
 
@@ -357,8 +355,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 
 		case LevelPiece::Bomb:
 			// Bomb effect - big explosion!
-			this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block, 
-				*this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture());
+			this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(this->display->GetCamera(), block);
 			this->display->GetCamera().SetCameraShake(1.2, Vector3D(1.0, 0.3, 0.1), 100);
 
 			// Sound for bomb explosion
