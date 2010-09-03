@@ -147,6 +147,14 @@ public:
 	virtual void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) = 0;
 
 	/**
+	 * Event triggered when a projectile hits the paddle shield and is deflected by it. Occurs once right after
+	 * the deflection.
+	 * Arguments: projectile - The projectile that was just deflected.
+	 *            paddle     - The paddle whose shield deflected the projectile.
+	 */
+	virtual void ProjectileDeflectedByPaddleShieldEvent(const Projectile& projectile, const PlayerPaddle& paddle) = 0;
+		
+	/**
 	 * Event triggered when the ball collides with the player paddle. Only occurs once as the ball
 	 * collides with the paddle.
 	 * Arguements: ball   - The ball as it is colliding with the player paddle.

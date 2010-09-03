@@ -35,6 +35,7 @@ public:
 	void PaddleHitWallEvent(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile);
 	void PaddleShieldHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile);
+	void ProjectileDeflectedByPaddleShieldEvent(const Projectile& projectile, const PlayerPaddle& paddle);
 
 	// Ball/Block related events
 	void BallDiedEvent(const GameBall& deadBall);

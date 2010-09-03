@@ -71,6 +71,14 @@ void GameEventManager::ActionPaddleShieldHitByProjectile(const PlayerPaddle& pad
 	}	
 }
 
+// Action for when the player paddle shield deflects a projectile
+void GameEventManager::ActionProjectileDeflectedByPaddleShield(const Projectile& projectile, const PlayerPaddle& paddle) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->ProjectileDeflectedByPaddleShieldEvent(projectile, paddle);
+	}	
+}
+
 // Action for when a ball has died (gone out of bounds)
 void GameEventManager::ActionBallDied(const GameBall& deadBall) {
 	this->listenerIter = this->eventListeners.begin();
