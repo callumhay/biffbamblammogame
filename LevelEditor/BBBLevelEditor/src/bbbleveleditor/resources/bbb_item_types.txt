@@ -47,6 +47,7 @@ The ball gains an insane mind of its own and starts moving in random directions 
 ~ ShieldPaddle
 The paddle gains a shield that protects it from falling objects, however it causes a lot of distraction in paddle camera mode and the ball bounces off of it.
 
+
 - BallShrink
 The ball decreases in size.
 

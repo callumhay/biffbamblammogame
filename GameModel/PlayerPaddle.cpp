@@ -694,3 +694,17 @@ float PlayerPaddle::GetPercentNearPaddleCenter(const Projectile& projectile, flo
 	assert(percentNearCenter >= 0.0f && percentNearCenter <= 1.0);
 	return percentNearCenter;
 }
+
+// Check for a collision with the given projectile
+bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType, const BoundingLines& bounds) const {
+	bool result = false;
+	switch (projectileType) {
+		case Projectile::PaddleRocketBulletProjectile:
+			break;
+		default:
+			result = this->CollisionCheck(bounds);
+			break;
+	}
+
+	return result;
+}

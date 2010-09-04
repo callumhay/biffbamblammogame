@@ -49,6 +49,7 @@ private:
 	CgFxFullscreenGoo* stickyPaddleCamEffect;
 	CgFxPostSmokey* smokeyCamEffect;
 	CgFxPostUberIntense* uberIntenseCamEffect;
+	CgFxFullscreenGoo* shieldPaddleCamEffect;
 
 	// Misc. Textures and overlays
 	Texture* barrelOverlayTex;	// Texture for overlay of the cannon barrel
@@ -134,6 +135,8 @@ public:
 	void DeactivateInkSplatterEffect() {
 		this->inkSplatterEffect->DeactivateInkSplat();
 	}
+
+	void SetupPaddleShieldEffect();
 
 };
 #endif

@@ -32,7 +32,9 @@ MAX_LIVES_LEFT(10),
 GHOST_BALL_COLOUR(0.643f, 0.725f, 0.843f),
 UBER_BALL_COLOUR(1.0f, 0.0f, 0.0f),
 GRAVITY_BALL_COLOUR(0.75f, 0.24f, 1.0f),
-CRAZY_BALL_COLOUR(0.93f, 0.0f, 0.93f)
+CRAZY_BALL_COLOUR(0.93f, 0.0f, 0.93f),
+
+SHIELD_PADDLE_COLOUR(0.53f, 0.81f, 1.0f)
 {
 	this->WORLD0_PATH = this->RESOURCE_DIR + "/" + this->WORLD_DIR	+ "/0_deco/0_deco.wld";
 	this->WORLD1_PATH = this->RESOURCE_DIR + "/" + this->WORLD_DIR	+ "/1_cyberpunk/1_cyberpunk.wld";

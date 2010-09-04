@@ -168,13 +168,21 @@ void PaddleShield::DrawAndTick(const PlayerPaddle& paddle, const Camera& camera,
 	}
 }
 
+// Draw the shield effect in all of its refracty-aura-glowing awesomeness.
 void PaddleShield::DrawRefractionWithAura(const PlayerPaddle& paddle, const Camera& camera, double dT) {
 	glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
 
 	float scaleAmt = 2.25f * paddle.GetHalfWidthTotal() * this->shieldSizeAnimation.GetInterpolantValue();
 	this->auraEnergyOut->SetParticleSize(ESPInterval(scaleAmt));
 
+
+	Vector3D alignNormalVec = -camera.GetNormalizedViewVector();
+	Vector3D alignUpVec		  = camera.GetNormalizedUpVector();
+	Vector3D alignRightVec	= Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+	Matrix4x4 screenAlignMatrix(alignRightVec, alignUpVec, alignNormalVec);
+
 	glPushMatrix();
+	glMultMatrixf(screenAlignMatrix.begin());
 	glScalef(scaleAmt, scaleAmt, scaleAmt);
 
 	glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
