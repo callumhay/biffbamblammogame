@@ -29,7 +29,15 @@
 
 #include "../GameSound/GameSoundAssets.h"
 
-GameEventsListener::GameEventsListener(GameDisplay* d) : display(d) {
+// Wait times before showing the same effect - these prevent the game view from displaying a whole ton
+// of the same effect over and over when the ball hits a bunch of blocks/the paddle in a very small time frame
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 100;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS	= 75;
+
+GameEventsListener::GameEventsListener(GameDisplay* d) : 
+display(d), 
+timeSinceLastBallBlockCollisionEventInMS(0),
+timeSinceLastBallPaddleCollisionEventInMS(0) {
 	assert(d != NULL);
 }
 
@@ -233,59 +241,71 @@ void GameEventsListener::ProjectileBlockCollisionEvent(const Projectile& project
 }
 
 void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const LevelPiece& block) {
-	// Add the visual effect for when the ball hits a block
-	// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
-	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-		((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.UberballBlastsThrough())) {
-			this->display->GetAssets()->GetESPAssets()->AddBounceLevelPieceEffect(ball, block);
+	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+	bool doEffects = (currSystemTime - this->timeSinceLastBallBlockCollisionEventInMS) > GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
+
+	if (doEffects) {
+		// Add the visual effect for when the ball hits a block
+		// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
+		if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
+			((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.UberballBlastsThrough())) {
+				this->display->GetAssets()->GetESPAssets()->AddBounceLevelPieceEffect(ball, block);
+		}
+
+		// We shake things up if the ball is uber and the block is indestructible...
+		if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
+				(ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.CanBeDestroyedByBall()) {
+
+			this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.1, 0.0), 100);
+		}
+
+		this->display->GetAssets()->GetSoundAssets()->PlayBallHitBlockEvent(ball, block);
 	}
 
-	// We shake things up if the ball is uber and the block is indestructible...
-	if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-		  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.CanBeDestroyedByBall()) {
-
-		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.1, 0.0), 100);
-	}
-
-	this->display->GetAssets()->GetSoundAssets()->PlayBallHitBlockEvent(ball, block);
-
+	this->timeSinceLastBallBlockCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball-block collision");
 }
 
 void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const PlayerPaddle& paddle) {
+	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+	bool doEffect = (currSystemTime - this->timeSinceLastBallPaddleCollisionEventInMS) > 
+									EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
 
-	// Add the visual effect for when the ball hits the paddle
-	this->display->GetAssets()->GetESPAssets()->AddBouncePaddleEffect(ball, paddle);
+	if (doEffect) {
+		// Add the visual effect for when the ball hits the paddle
+		this->display->GetAssets()->GetESPAssets()->AddBouncePaddleEffect(ball, paddle);
 
-	bool ballIsUber = (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall;
-	// Loudness is determined by the current state of the ball...
-	GameSoundAssets::SoundVolumeLoudness loudness = GameSoundAssets::NormalVolume;
+		bool ballIsUber = (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall;
+		// Loudness is determined by the current state of the ball...
+		GameSoundAssets::SoundVolumeLoudness loudness = GameSoundAssets::NormalVolume;
 
-	// We shake things up if the ball is uber...
-	if (ballIsUber) {
-		this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.2, 0.0), 100);
-		loudness = GameSoundAssets::VeryLoudVolume;
+		// We shake things up if the ball is uber...
+		if (ballIsUber) {
+			this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.2, 0.0), 100);
+			loudness = GameSoundAssets::VeryLoudVolume;
+		}
+
+		if (ball.GetBallSize() > GameBall::NormalSize) {
+			loudness = GameSoundAssets::VeryLoudVolume;
+		}
+		else if (ball.GetBallSize() < GameBall::NormalSize) {
+			loudness = GameSoundAssets::QuietVolume;
+		}
+
+		// Play the sound for when the ball hits the paddle
+		if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle && 
+				(paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == NULL) {
+			this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundStickyBallPaddleCollisionEvent, loudness);
+		}
+		else if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+			// sound for paddle shield hit...
+		}
+		else {
+			this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBallPaddleCollisionEvent, loudness);
+		}
 	}
 
-	if (ball.GetBallSize() > GameBall::NormalSize) {
-		loudness = GameSoundAssets::VeryLoudVolume;
-	}
-	else if (ball.GetBallSize() < GameBall::NormalSize) {
-		loudness = GameSoundAssets::QuietVolume;
-	}
-
-	// Play the sound for when the ball hits the paddle
-	if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle && 
-		  (paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == NULL) {
-		this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundStickyBallPaddleCollisionEvent, loudness);
-	}
-	else if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		// sound for paddle shield hit...
-	}
-	else {
-		this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBallPaddleCollisionEvent, loudness);
-	}
-
+	this->timeSinceLastBallPaddleCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball-paddle collision");
 }
 

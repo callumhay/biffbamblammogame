@@ -1,8 +1,8 @@
-newmtl teslaBlock_baseMatSG
+newmtl teslaBlock_coilMatSG
+Kd 1.00 1.00 1.00
 Ka 0.00 0.00 0.00
-Kd 0.50 0.50 0.50
-Ks 0.50 0.50 0.50
-Ns 80.00
-outlinesize 2.0
+Ks 0.6 0.6 0.6
+Ns 80
+map_Kd resources/textures/tesla_block_256x256.jpg
 type phong
 geomtype fg
