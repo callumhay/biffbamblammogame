@@ -43,17 +43,28 @@ public:
 
 	virtual void Draw(int screenWidth, int screenHeight, double dT);
 
-	inline void SetColour(const Colour& c) {
-		this->colour = c;
-	}
+	void SetColour(const Colour& c);
 	void SetMask(const std::string& texMaskFilepath);
-
-	inline void SetOutputFBO(FBObj* renderOut) {
-		this->resultFBO = renderOut;
-	}
-	inline void SetFadeAlpha(float alpha) {
-		this->fade = alpha;
-	}
-
+	void SetOutputFBO(FBObj* renderOut);
+	void SetFadeAlpha(float alpha);
+	void SetDisplacement(float d);
+	void SetScale(float s);
 };
+
+inline void CgFxFullscreenGoo::SetColour(const Colour& c) {
+	this->colour = c;
+}
+inline void CgFxFullscreenGoo::SetOutputFBO(FBObj* renderOut) {
+	this->resultFBO = renderOut;
+}
+inline void CgFxFullscreenGoo::SetFadeAlpha(float alpha) {
+	this->fade = alpha;
+}
+inline void CgFxFullscreenGoo::SetDisplacement(float d) {
+	this->displacement = d;
+}
+inline void CgFxFullscreenGoo::SetScale(float s) {
+	this->scale = s;
+}
+
 #endif

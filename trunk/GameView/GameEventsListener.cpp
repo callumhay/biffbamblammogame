@@ -275,8 +275,12 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 	}
 
 	// Play the sound for when the ball hits the paddle
-	if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+	if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle && 
+		  (paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == NULL) {
 		this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundStickyBallPaddleCollisionEvent, loudness);
+	}
+	else if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		// sound for paddle shield hit...
 	}
 	else {
 		this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBallPaddleCollisionEvent, loudness);

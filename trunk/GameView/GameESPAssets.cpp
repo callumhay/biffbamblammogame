@@ -800,13 +800,15 @@ void GameESPAssets::AddBounceLevelPieceEffect(const GameBall& ball, const LevelP
  * Adds ball bouncing effect when the ball bounces off the player paddle.
  */
 void GameESPAssets::AddBouncePaddleEffect(const GameBall& ball, const PlayerPaddle& paddle) {
-	if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
-		// The sticky paddle should make a spongy gooey sound when hit by the ball...
-		this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::GOO));
-	}
-	else if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+	// Shield takes priority over the sticky paddle
+	if ((paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
 		// The ball hits a energy shield bbzzzap!
 		this->AddEnergyShieldHitEffect(paddle.GetCenterPosition(), ball);
+	}
+	else if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle && 
+		       (paddle.GetPaddleType() & PlayerPaddle::ShieldPaddle) == NULL) {
+		// The sticky paddle should make a spongy gooey sound when hit by the ball...
+		this->activeGeneralEmitters.push_front(this->CreateBallBounceEffect(ball, Onomatoplex::GOO));
 	}
 	else {
 		// Typical paddle bounce, similar to a regular block bounce effect

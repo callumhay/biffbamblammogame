@@ -20,7 +20,7 @@
 GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), 
 postFgAndBgFBO(NULL), initialFSEffectFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NULL),
 fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), 
-stickyPaddleCamEffect(NULL), smokeyCamEffect(NULL), uberIntenseCamEffect(NULL),
+stickyPaddleCamEffect(NULL), shieldPaddleCamEffect(NULL), smokeyCamEffect(NULL), uberIntenseCamEffect(NULL),
 drawItemsInLastPass(true) {
 	
 	// Framebuffer object setup
@@ -41,6 +41,7 @@ drawItemsInLastPass(true) {
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
 	this->smokeyCamEffect				= new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
 	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->finalFSEffectFBO, this->tempFBO);
+	this->SetupPaddleShieldEffect();
 
 
 	this->barrelOverlayTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BARREL_OVERLAY, Texture::Trilinear);
@@ -77,6 +78,8 @@ GameFBOAssets::~GameFBOAssets() {
 	this->smokeyCamEffect = NULL;
 	delete this->uberIntenseCamEffect;
 	this->uberIntenseCamEffect = NULL;
+	delete this->shieldPaddleCamEffect;
+	this->shieldPaddleCamEffect = NULL;
 
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->barrelOverlayTex);
 	assert(success);
@@ -132,6 +135,7 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	delete this->stickyPaddleCamEffect;
 	delete this->smokeyCamEffect;
 	delete this->uberIntenseCamEffect;
+	delete this->shieldPaddleCamEffect;
 
 	this->fgAndBgBlurEffect			= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
 	this->bloomEffect						= new CgFxBloom(this->postFgAndBgFBO);
@@ -141,6 +145,9 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
 	this->smokeyCamEffect				= new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
 	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->finalFSEffectFBO, this->tempFBO);
+	
+	this->SetupPaddleShieldEffect();
+
 
 	debug_opengl_state();
 }
@@ -209,17 +216,43 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 	}
 
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
-	if (paddle->GetIsPaddleCameraOn() && (paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
-		// We take inverse of the alpha of the paddle to fade the sticky goo effect properly while in paddle cam mode
-		float stickyGooAlpha = 1.0f - paddle->GetColour().A();
-		this->stickyPaddleCamEffect->SetFadeAlpha(stickyGooAlpha);
-		this->stickyPaddleCamEffect->SetInputFBO(inputFBO);
-		this->stickyPaddleCamEffect->SetOutputFBO(outputFBO);
-		this->stickyPaddleCamEffect->Draw(width, height, dT);
+	if (paddle->GetIsPaddleCameraOn()) {
+		
+		if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+			// We take inverse of the alpha of the paddle to fade the sticky goo effect properly while in paddle cam mode
+			float stickyGooAlpha = 1.0f - paddle->GetColour().A();
+			this->stickyPaddleCamEffect->SetFadeAlpha(stickyGooAlpha);
+			this->stickyPaddleCamEffect->SetInputFBO(inputFBO);
+			this->stickyPaddleCamEffect->SetOutputFBO(outputFBO);
+			this->stickyPaddleCamEffect->Draw(width, height, dT);
 
-		swapFBO = inputFBO;
-		inputFBO = outputFBO;
-		outputFBO = swapFBO;
+			swapFBO = inputFBO;
+			inputFBO = outputFBO;
+			outputFBO = swapFBO;
+		}
+		
+		if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+			float shieldAlpha = 1.0f - paddle->GetColour().A();
+			this->shieldPaddleCamEffect->SetFadeAlpha(shieldAlpha);
+			this->shieldPaddleCamEffect->SetInputFBO(inputFBO);
+			this->shieldPaddleCamEffect->SetOutputFBO(outputFBO);
+			this->shieldPaddleCamEffect->Draw(width, height, dT);
+
+			swapFBO = inputFBO;
+			inputFBO = outputFBO;
+			outputFBO = swapFBO;
+
+			this->uberIntenseCamEffect->SetFadeAlpha(shieldAlpha);
+			this->uberIntenseCamEffect->SetColour(GameModelConstants::GetInstance()->SHIELD_PADDLE_COLOUR);
+			this->uberIntenseCamEffect->SetInputFBO(inputFBO);
+			this->uberIntenseCamEffect->SetOutputFBO(outputFBO);
+			this->uberIntenseCamEffect->Draw(width, height, dT);
+			
+			swapFBO = inputFBO;
+			inputFBO = outputFBO;
+			outputFBO = swapFBO;
+		}
+
 	}
 	else if (GameBall::GetIsBallCameraOn()) {
 		const GameBall* camBall = GameBall::GetBallCameraBall();
@@ -244,6 +277,7 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 			// We take inverse of the alpha of the ball to fade the smokey effect properly while in ball cam mode
 			float uberAlpha = 1.0f - camBall->GetColour().A();
 			this->uberIntenseCamEffect->SetFadeAlpha(uberAlpha);
+			this->uberIntenseCamEffect->SetColour(GameModelConstants::GetInstance()->UBER_BALL_COLOUR);
 			this->uberIntenseCamEffect->SetInputFBO(inputFBO);
 			this->uberIntenseCamEffect->SetOutputFBO(outputFBO);
 			this->uberIntenseCamEffect->Draw(width, height, dT);
@@ -372,4 +406,11 @@ void GameFBOAssets::DrawCannonBarrelOverlay(int width, int height, float alpha) 
 	glPopAttrib();
 
 	debug_opengl_state();
+}
+
+void GameFBOAssets::SetupPaddleShieldEffect() {
+	this->shieldPaddleCamEffect	= new CgFxFullscreenGoo(this->finalFSEffectFBO, this->tempFBO);
+	this->shieldPaddleCamEffect->SetColour(Colour(1, 1, 1));
+	this->shieldPaddleCamEffect->SetDisplacement(0.02f);
+	this->shieldPaddleCamEffect->SetScale(1.5f);
 }

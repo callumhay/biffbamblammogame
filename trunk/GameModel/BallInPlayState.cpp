@@ -135,8 +135,9 @@ void BallInPlayState::Tick(double seconds) {
 				GameEventManager::Instance()->ActionBallPaddleCollision(*currBall, *paddle);
 
 				// If the sticky paddle power-up is activated then the ball will simply be attached to
-				// the player paddle (if there are no balls already attached)
-				if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+				// the player paddle (if there are no balls already attached) ... unless the paddle has a shield active as well
+				if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
+					  (paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == NULL) {
 					bool couldAttach = this->gameModel->GetPlayerPaddle()->AttachBall(currBall);
 					if (couldAttach) {
 						continue;
@@ -304,7 +305,7 @@ void BallInPlayState::Tick(double seconds) {
 		BoundingLines projectileBoundingLines = currProjectile->BuildBoundingLines();
 
 		// Check to see if the projectile collided with the player paddle
-		if (paddle->CollisionCheck(projectileBoundingLines)) {
+		if (paddle->CollisionCheckWithProjectile(currProjectile->GetType(), projectileBoundingLines)) {
 			
 			// Tell the paddle it got hit...
 			paddle->HitByProjectile(*currProjectile);
