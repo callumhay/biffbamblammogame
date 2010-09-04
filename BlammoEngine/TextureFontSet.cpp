@@ -349,6 +349,7 @@ void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Lib
 				FT_Done_Glyph(glyph);
 				return;
 			}
+			
 			newFontSet->charTextures.push_back(newCharTexture);
 		}
 

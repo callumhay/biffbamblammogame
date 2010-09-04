@@ -168,7 +168,7 @@ void PaddleShield::DrawAndTick(const PlayerPaddle& paddle, const Camera& camera,
 	}
 }
 
-// Draw the shield effect in all of its refracty-aura-glowing awesomeness.
+// Draw the shield effect in all of its refracty-aura-glowing awesomeness
 void PaddleShield::DrawRefractionWithAura(const PlayerPaddle& paddle, const Camera& camera, double dT) {
 	glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
 

@@ -172,6 +172,10 @@ Texture2D* Texture2D::CreateTexture2DFromFTBMP(const FT_Bitmap& bmp, TextureFilt
 	newTex->BindTexture();
 	// Fonts are 2 channel data, hence the use of GL_LUMINANCE_ALPHA
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expandedData);
+	// Clamp the texture so we don't get any accidental spillage of texture, text doesn't repeat within itself, duh.
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 	Texture::SetFilteringParams(texFilter, newTex->textureType);
 
 	if (Texture::IsMipmappedFilter(texFilter)) {
