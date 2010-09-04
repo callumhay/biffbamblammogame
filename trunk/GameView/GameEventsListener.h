@@ -17,9 +17,6 @@
 class GameDisplay;
 
 class GameEventsListener : public GameEvents {
-private:
-	GameDisplay* display;
-
 public:
 	GameEventsListener(GameDisplay* d);
 	virtual ~GameEventsListener();
@@ -78,6 +75,13 @@ public:
 	void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
 
 private:
+	GameDisplay* display;
+	long timeSinceLastBallBlockCollisionEventInMS;
+	long timeSinceLastBallPaddleCollisionEventInMS;
+
+	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
+	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
+
 	void DestroyBallSafetyNet(const Point2D& pt);
 };
 
