@@ -354,6 +354,36 @@ void GameModel::ClearActiveTimers() {
 }
 
 /**
+ * Function for adding a possible item drop for the given level piece.
+ */
+void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
+	// Make sure we don't drop more items than the max allowable...
+	if (this->currLiveItems.size() >= GameModelConstants::GetInstance()->MAX_LIVE_ITEMS) {
+		return;
+	}
+
+	// We will drop an item based on probablility
+	// TODO: Add probability based off multiplier and score stuff...
+	double itemDropProb = GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP;
+	double randomNum    = Randomizer::GetInstance()->RandomNumZeroToOne();
+	
+	debug_output("Probability of drop: " << itemDropProb << " Number for deciding: " << randomNum);
+
+	if (randomNum <= itemDropProb) {
+		GameItem::ItemType itemType = GameItemFactory::CreateRandomItemType(this);
+		this->AddItemDrop(p, itemType);
+	}
+}
+
+void GameModel::AddItemDrop(const LevelPiece& p, const GameItem::ItemType& itemType) {
+	// We always drop items in this manor, even if we've exceeded the max!
+	GameItem* newGameItem = GameItemFactory::CreateItem(itemType, p.GetCenter(), this);
+	this->currLiveItems.push_back(newGameItem);
+	// EVENT: Item has been created and added to the game
+	GameEventManager::Instance()->ActionItemSpawned(*newGameItem);
+}
+
+/**
  * Add a projectile to the game.
  */
 void GameModel::AddProjectile(Projectile* projectile) {

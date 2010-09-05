@@ -43,75 +43,29 @@
  */
 GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel) {
 	assert(gameModel != NULL);
-	
+	GameItem::ItemType randomItemType = GameItemFactory::CreateRandomItemType(gameModel);
+	return GameItemFactory::CreateItem(randomItemType, spawnOrigin, gameModel);
+}
+
+/**
+ * Creates a random item type.
+ */
+GameItem::ItemType GameItemFactory::CreateRandomItemType(GameModel *gameModel) {
+	assert(gameModel != NULL);
 	unsigned int randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % TOTAL_NUM_OF_ITEMS;
 	
 	// Avoid insane numbers of balls, if we're going to spawn more balls and there's already a lot
 	// of them try to pick another item...
-	if (gameModel->GetGameBalls().size() > 3 && randomValue == 7) {
+	if (gameModel->GetGameBalls().size() > 3 && (randomValue == GameItem::MultiBall5Item || randomValue == GameItem::MultiBall3Item)) {
 		randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % TOTAL_NUM_OF_ITEMS;
 	}
-	
-	// TODO: more items go here...
-	switch (randomValue) {	// switch is faster than a for loop... trade-off dynamic for speed
-		case 0:
-			return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);					// bad
-		case 1:
-			return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);					// good
-		case 2:
-			return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::ThreeMultiBalls);		// good
-		case 3:
-			return new InvisiBallItem(spawnOrigin, gameModel);																	// bad
-		case 4:
-			return new GhostBallItem(spawnOrigin, gameModel);																		// neutral
-		case 5:
-			return new LaserPaddleItem(spawnOrigin, gameModel);																	// good
-		case 6:
-			return new UberBallItem(spawnOrigin, gameModel);																		// good
-		case 7:
-			return new MultiBallItem(spawnOrigin, gameModel, MultiBallItem::FiveMultiBalls);		// good
-		case 8:
-			return new PaddleSizeItem(PaddleSizeItem::ShrinkPaddle, spawnOrigin, gameModel);		// bad
-		case 9:
-			return new PaddleSizeItem(PaddleSizeItem::GrowPaddle, spawnOrigin, gameModel);			// good
-		case 10:
-			return new BallSizeItem(BallSizeItem::ShrinkBall, spawnOrigin, gameModel);					// bad
-		case 11:
-			return new BallSizeItem(BallSizeItem::GrowBall, spawnOrigin, gameModel);						// good
-		case 12:
-			return new BlackoutItem(spawnOrigin, gameModel);																		// bad
-		case 13:
-			return new UpsideDownItem(spawnOrigin, gameModel);																	// bad
-		case 14:
-			return new BallSafetyNetItem(spawnOrigin, gameModel);																// good
-		case 15:
-			return new ShieldPaddleItem(spawnOrigin, gameModel);																// neutral
-		case 16:
-			return new PoisonPaddleItem(spawnOrigin, gameModel);																// bad
-		case 17:
-			return new StickyPaddleItem(spawnOrigin, gameModel);																// good
-		case 18:
-			return new PaddleCamItem(spawnOrigin, gameModel);																		// bad
-		case 19:
-			return new BallCamItem(spawnOrigin, gameModel);																			// bad
-		case 20:
-			return new LaserBeamPaddleItem(spawnOrigin, gameModel);															// good
-		case 21:
-			return new GravityBallItem(spawnOrigin, gameModel);																	// neutral
-		case 22:
-			return new RocketPaddleItem(spawnOrigin, gameModel);																// good
-		case 23:
-			return new CrazyBallItem(spawnOrigin, gameModel);																		// neutral
-		case 24:
-			return new OneUpItem(spawnOrigin, gameModel);																				// good
-		default:
-			assert(false);
-	}
-
-	return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);
+	return static_cast<GameItem::ItemType>(randomValue);
 }
 
-#ifdef _DEBUG
+/**
+ * Creates a item based on the given item type; hands the new object to the caller.
+ * NOTE: The caller will be responsible for its destruction!
+ */
 GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel) {
 	
 	switch (type) {
@@ -198,4 +152,3 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 
 	return NULL;
 }
-#endif

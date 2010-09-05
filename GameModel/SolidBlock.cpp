@@ -34,7 +34,7 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel) {
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
 	// When destroying a breakable there is the possiblity of dropping an item...
-	this->AddPossibleItemDrop(gameModel);
+	gameModel->AddPossibleItemDrop(*this);
 
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();

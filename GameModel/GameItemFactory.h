@@ -35,10 +35,8 @@ public:
 
 	// Static factory functions for the creation of game items
 	static GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel);			// Could be either power-up or down
-	
-#ifdef _DEBUG
-	// Item specific creation methods for debugging
+	static GameItem::ItemType CreateRandomItemType(GameModel *gameModel);
 	static GameItem* CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel);
-#endif
+
 };
 #endif
