@@ -31,7 +31,7 @@ public:
 	static const float HALF_PIECE_DEPTH;
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
-												Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla };
+												Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop };
 	virtual LevelPieceType GetType() const = 0;
 
 protected:
@@ -39,8 +39,6 @@ protected:
 	Point2D center;								// The exact center of this piece in the game model
 	unsigned int wIndex, hIndex;	// The width and height index to where this block is in its level
 	BoundingLines bounds;			 		// The bounding box, rep. as lines forming the boundry of this, kept in world space
-
-	void AddPossibleItemDrop(GameModel *gameModel);
 
 public:
 	LevelPiece(unsigned int wLoc, unsigned int hLoc);

@@ -347,7 +347,8 @@ public:
 
 	// *******************************************************************
 
-	void AddPossibleItemDrop(LevelPiece* p);
+	void AddPossibleItemDrop(const LevelPiece& p);
+	void AddItemDrop(const LevelPiece& p, const GameItem::ItemType& itemType);
 	void AddProjectile(Projectile* projectile);
 	void AddBeam(int beamType);
 

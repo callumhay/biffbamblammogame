@@ -22,11 +22,6 @@ LevelPiece(wLoc, hLoc), electricityIsActive(isActive) {
 TeslaBlock::~TeslaBlock() {
 }
 
-// Determine whether the given projectile will pass through this block...
-bool TeslaBlock::ProjectilePassesThrough(Projectile* projectile) {
-	return false;
-}
-
 /**
  * Update the collision boundries of this tesla block, tesla blocks are special in that they will
  * ALWAYS have all possible collision boundries enabled and created.

@@ -65,18 +65,21 @@ public:
 		return false;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile);
+	// Determine whether the given projectile will pass through this block...
+	bool ProjectilePassesThrough(Projectile* projectile) {
+		return false;
+	}
 
 	LevelPiece* Destroy(GameModel* gameModel) {
 		return this;
 	}
 
-	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
+	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 
-	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
