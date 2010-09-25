@@ -636,6 +636,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\ItemDropBlockMesh.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\LaserPaddleGun.h"
 					>
 				</File>
@@ -761,6 +765,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\InGameRenderPipeline.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\ItemDropBlockMesh.cpp"
 					>
 				</File>
 				<File

@@ -37,6 +37,10 @@ The following specifies the .lvl format.
 // a : The single character name of this tesla block.
 // B : One or more other named tesla blocks seperated by commas.
 
-
+// D(i0, i1, i2, ...) - Item drop block:
+// i0, i1, i2, ... : The names of all the item types that the block is allowed to drop, names can be 
+//                   repeated in order to make higher probabilities of drops. Also, there are several special key
+//                   words that can be used: (all, powerups, powerdowns, powerneutrals), which cause the block to drop 
+//                   all items of those respective designations.
 
 <block list in order of top-left to bottom-right>

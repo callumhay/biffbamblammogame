@@ -15,8 +15,8 @@
 
 const double PaddleSizeItem::PADDLE_SIZE_TIMER_IN_SECS	= 0.0;
 
-const std::string PaddleSizeItem::PADDLE_GROW_ITEM_NAME		= "PaddleGrow";
-const std::string PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME = "PaddleShrink";
+const char* PaddleSizeItem::PADDLE_GROW_ITEM_NAME		= "PaddleGrow";
+const char* PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME = "PaddleShrink";
 
 PaddleSizeItem::PaddleSizeItem(const PaddleSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(((type == ShrinkPaddle) ? PADDLE_SHRINK_ITEM_NAME : PADDLE_GROW_ITEM_NAME), spawnOrigin, gameModel, 

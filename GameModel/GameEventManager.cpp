@@ -299,6 +299,14 @@ void GameEventManager::ActionItemTimerStopped(const GameItemTimer& itemTimer) {
 	}		
 }
 
+// Action for when the item drop block's drop item type changes
+void GameEventManager::ActionItemDropBlockItemChange(const ItemDropBlock& dropBlock) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->ItemDropBlockItemChangeEvent(dropBlock);
+	}	
+}
+
 // Action for when a projectile is fired/spawned
 void GameEventManager::ActionProjectileSpawned(const Projectile& projectile) {
 	this->listenerIter = this->eventListeners.begin();

@@ -88,7 +88,7 @@ private:
 	float hitPointsBeforeNextDrop;							// Hit points left that must be deminished (by a laser beam) before the next item drop
 	GameItem::ItemType nextDropItemType;				// The next item type that will drop from this block
 
-	void ChangeToNextItemDropType();
+	void ChangeToNextItemDropType(bool doEvent);
 };
 
 // Get what the next item drop will be
@@ -96,10 +96,6 @@ inline const GameItem::ItemType& ItemDropBlock::GetNextDropItemType() const {
 	return this->nextDropItemType;
 }
 
-// Update the nextDropItemType of this to be some random item type from the list of allowable item drops
-inline void ItemDropBlock::ChangeToNextItemDropType() {
-	size_t randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->allowedItemDropTypes.size();
-	this->nextDropItemType = this->allowedItemDropTypes[randomIdx];
-}
+
 
 #endif // __ITEMDROPBLOCK_H__

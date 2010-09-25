@@ -20,7 +20,7 @@
 
 class UberBallItem : public GameItem {
 public:
-	static const std::string UBER_BALL_ITEM_NAME;
+	static const char*  UBER_BALL_ITEM_NAME;
 	static const double UBER_BALL_TIMER_IN_SECS;
 
 	UberBallItem(const Point2D &spawnOrigin, GameModel *gameModel);

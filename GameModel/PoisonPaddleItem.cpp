@@ -11,7 +11,7 @@
 
 #include "PoisonPaddleItem.h"
 
-const std::string PoisonPaddleItem::POISON_PADDLE_ITEM_NAME	= "PoisonPaddle";
+const char* PoisonPaddleItem::POISON_PADDLE_ITEM_NAME			  = "PoisonPaddle";
 const double PoisonPaddleItem::POISON_PADDLE_TIMER_IN_SECS	= 18.0f;
 
 PoisonPaddleItem::PoisonPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :

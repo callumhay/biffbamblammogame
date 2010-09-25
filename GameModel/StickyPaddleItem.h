@@ -21,7 +21,7 @@
  */
 class StickyPaddleItem : public GameItem {
 public:
-	static const std::string STICKY_PADDLE_ITEM_NAME;
+	static const char*  STICKY_PADDLE_ITEM_NAME;
 	static const double STICKY_PADDLE_TIMER_IN_SECS;
 
 	StickyPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);

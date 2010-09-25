@@ -893,6 +893,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::BreakableTriangle: 
 				case LevelPiece::Tesla:
 				case LevelPiece::Cannon:
+				case LevelPiece::ItemDrop:
 					{
 						// A laser just hit a block and was disapated by it... show the particle disintegrate
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 

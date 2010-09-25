@@ -22,7 +22,7 @@
  */
 class PaddleCamItem : public GameItem {
 public:
-	static const std::string PADDLE_CAM_ITEM_NAME;
+	static const char* PADDLE_CAM_ITEM_NAME;
 	static const double PADDLE_CAM_TIMER_IN_SECS;
 
 	PaddleCamItem(const Point2D &spawnOrigin, GameModel *gameModel);

@@ -10,12 +10,11 @@
  */
 
 #include "InvisiBallItem.h"
-
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
 const double InvisiBallItem::INVISI_BALL_TIMER_IN_SECS	= 12.0;
-const std::string InvisiBallItem::INVISI_BALL_ITEM_NAME = "InvisiBall";
+const char* InvisiBallItem::INVISI_BALL_ITEM_NAME				= "InvisiBall";
 
 InvisiBallItem::InvisiBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(INVISI_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {

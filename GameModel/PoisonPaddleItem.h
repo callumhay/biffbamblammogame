@@ -23,7 +23,7 @@
  */
 class PoisonPaddleItem : public GameItem {
 public:
-	static const std::string POISON_PADDLE_ITEM_NAME;
+	static const char* POISON_PADDLE_ITEM_NAME;
 	static const double POISON_PADDLE_TIMER_IN_SECS;
 
 	PoisonPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);

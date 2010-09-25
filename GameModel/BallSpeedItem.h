@@ -31,8 +31,8 @@ private:
 
 public:
 	static const double BALL_SPEED_TIMER_IN_SECS;
-	static const std::string SLOW_BALL_ITEM_NAME;
-	static const std::string FAST_BALL_ITEM_NAME;
+	static const char* SLOW_BALL_ITEM_NAME;
+	static const char* FAST_BALL_ITEM_NAME;
 
 	const GameBall* GetBallAffected() const {
 		assert(this->gameModel->GetGameBalls().size() > 0);

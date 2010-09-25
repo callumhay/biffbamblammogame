@@ -25,8 +25,8 @@ private:
 	PaddleSizeChangeType sizeChangeType;
 
 public:
-	static const std::string PADDLE_GROW_ITEM_NAME;
-	static const std::string PADDLE_SHRINK_ITEM_NAME;
+	static const char* PADDLE_GROW_ITEM_NAME;
+	static const char* PADDLE_SHRINK_ITEM_NAME;
 	static const double PADDLE_SIZE_TIMER_IN_SECS;
 
 	PaddleSizeItem(const PaddleSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel);

@@ -15,7 +15,7 @@
 #include "GameItemTimer.h"
 
 const double GhostBallItem::GHOST_BALL_TIMER_IN_SECS	= 15.0;
-const std::string GhostBallItem::GHOST_BALL_ITEM_NAME = "GhostBall";
+const char* GhostBallItem::GHOST_BALL_ITEM_NAME			  = "GhostBall";
 
 GhostBallItem::GhostBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(GHOST_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {

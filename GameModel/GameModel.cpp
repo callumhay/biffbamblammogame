@@ -370,14 +370,14 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 	debug_output("Probability of drop: " << itemDropProb << " Number for deciding: " << randomNum);
 
 	if (randomNum <= itemDropProb) {
-		GameItem::ItemType itemType = GameItemFactory::CreateRandomItemType(this);
+		GameItem::ItemType itemType = GameItemFactory::GetInstance()->CreateRandomItemType(this);
 		this->AddItemDrop(p, itemType);
 	}
 }
 
 void GameModel::AddItemDrop(const LevelPiece& p, const GameItem::ItemType& itemType) {
 	// We always drop items in this manor, even if we've exceeded the max!
-	GameItem* newGameItem = GameItemFactory::CreateItem(itemType, p.GetCenter(), this);
+	GameItem* newGameItem = GameItemFactory::GetInstance()->CreateItem(itemType, p.GetCenter(), this);
 	this->currLiveItems.push_back(newGameItem);
 	// EVENT: Item has been created and added to the game
 	GameEventManager::Instance()->ActionItemSpawned(*newGameItem);

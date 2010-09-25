@@ -104,5 +104,12 @@ public:
 
 	void ClearTimers();
 
+	const std::map<GameItem::ItemType, Texture*>& GetItemTextureMap() const;
+
 };
+
+inline const std::map<GameItem::ItemType, Texture*>& GameItemAssets::GetItemTextureMap() const {
+	return this->itemTextures;
+}
+
 #endif

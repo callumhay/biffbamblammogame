@@ -12,8 +12,8 @@
 #include "MultiBallItem.h"
 #include "GameModel.h"
 
-const std::string MultiBallItem::MULTI3_BALL_ITEM_NAME	= "MultiBall3";
-const std::string MultiBallItem::MULTI5_BALL_ITEM_NAME	= "MultiBall5";
+const char* MultiBallItem::MULTI3_BALL_ITEM_NAME	= "MultiBall3";
+const char* MultiBallItem::MULTI5_BALL_ITEM_NAME	= "MultiBall5";
 
 const double MultiBallItem::MULTI_BALL_TIMER_IN_SECS	= 0.0;
 const double MultiBallItem::BALL_COLLISIONS_DISABLED_DURATION = 0.5;

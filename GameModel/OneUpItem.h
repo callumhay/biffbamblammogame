@@ -20,7 +20,7 @@
  */
 class OneUpItem : public GameItem {
 public:
-	static const std::string ONE_UP_ITEM_NAME;
+	static const char*  ONE_UP_ITEM_NAME;
 	static const double ONE_UP_TIMER_IN_SECS;
 
 	OneUpItem(const Point2D &spawnOrigin, GameModel *gameModel);

@@ -150,8 +150,9 @@ MAIN_MENU_SOUND_SCRIPT(SOUND_DIRECTORY "/main_menu_sound.msf"),
 DECO_SOUND_SCRIPT(SOUND_DIRECTORY "/deco_sound.msf"),
 
 // Item-related constants
-ITEM_LABEL_MATGRP("ItemLabel"),	// Material group name for changing the label on the item mesh
-ITEM_END_MATGRP("ColourEnd"),		// Material group name for changing the colour on the item mesh
+ITEM_LABEL_MATGRP("ItemLabel"),																// Material group name for changing the label on the item mesh
+ITEM_END_MATGRP("ColourEnd"),																	// Material group name for changing the colour on the item mesh
+ITEM_DROP_BLOCK_ITEMTYPE_MATGRP("item_drop_item_material"),		// Material group name for the item picture on the item drop block mesh
 
 ITEM_GOOD_COLOUR(0.0f, 0.8f, 0.0f),
 ITEM_BAD_COLOUR(0.8f, 0.0f, 0.0f),
@@ -198,9 +199,10 @@ PRISM_DIAMOND_BLOCK_MESH(MESH_DIRECTORY "/prism_block.obj"),
 PRISM_TRIANGLE_BLOCK_MESH(MESH_DIRECTORY "/triangle_prism_block.obj"),
 CANNON_BLOCK_BASE_MESH(MESH_DIRECTORY "/cannon_block_base.obj"),
 CANNON_BLOCK_BARREL_MESH(MESH_DIRECTORY "/cannon_block_barrel.obj"),
+COLLATERAL_BLOCK_MESH(MESH_DIRECTORY "/collateral_block.obj"),
 TESLA_BLOCK_BASE_MESH(MESH_DIRECTORY "/tesla_block_base.obj"),
 TESLA_BLOCK_COIL_MESH(MESH_DIRECTORY "/tesla_block_coil.obj"),
-COLLATERAL_BLOCK_MESH(MESH_DIRECTORY "/collateral_block.obj"),
+ITEM_DROP_BLOCK_MESH(MESH_DIRECTORY  "/item_drop_block.obj"),
 SKYBOX_MESH(MESH_DIRECTORY "/skybox.obj"),
 ITEM_MESH(MESH_DIRECTORY "/item.obj"),
 PADDLE_LASER_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_laser_attachment.obj"),

@@ -26,7 +26,7 @@ class Point2D;
  */
 class RocketPaddleItem : public GameItem {
 public:
-	static const std::string ROCKET_PADDLE_ITEM_NAME;
+	static const char* ROCKET_PADDLE_ITEM_NAME;
 	static const double ROCKET_PADDLE_TIMER_IN_SECS;
 
 	RocketPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);

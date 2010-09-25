@@ -741,9 +741,13 @@ void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel
 
 void GameAssets::LoadNewLevelMesh(const GameLevel& currLevel) {
 	if (this->currentLevelMesh != NULL) {
-		delete this->currentLevelMesh;
+		// If the level mesh object is already loaded then use it's proper method - this
+		// avoids reloading a whole bunch of common assets
+		this->currentLevelMesh->LoadNewLevel(*this->worldAssets, *this->itemAssets, currLevel);
 	}
-	this->currentLevelMesh = new LevelMesh(*this->worldAssets, currLevel);
+	else {
+		this->currentLevelMesh = new LevelMesh(*this->worldAssets, *this->itemAssets, currLevel);
+	}
 }
 
 void GameAssets::LoadRegularMeshAssets() {
