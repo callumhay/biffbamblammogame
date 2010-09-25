@@ -65,6 +65,7 @@ public:
 	void ItemDeactivatedEvent(const GameItem& item);
 	void ItemTimerStartedEvent(const GameItemTimer& itemTimer);
 	void ItemTimerStoppedEvent(const GameItemTimer& itemTimer);
+	void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock);
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
 	void BeamSpawnedEvent(const Beam& beam);

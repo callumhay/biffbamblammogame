@@ -18,7 +18,7 @@
 
 class LaserBeamPaddleItem : public GameItem {
 public:
-	static const std::string LASER_BEAM_PADDLE_ITEM_NAME;
+	static const char* LASER_BEAM_PADDLE_ITEM_NAME;
 	static const double LASER_BEAM_PADDLE_TIMER_IN_SECS;
 
 	LaserBeamPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);

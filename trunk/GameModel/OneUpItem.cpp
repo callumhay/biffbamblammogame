@@ -11,7 +11,7 @@
 
 #include "OneUpItem.h"
 
-const std::string OneUpItem::ONE_UP_ITEM_NAME	= "1Up";
+const char* OneUpItem::ONE_UP_ITEM_NAME	      = "1Up";
 const double OneUpItem::ONE_UP_TIMER_IN_SECS	= 0.0;
 
 OneUpItem::OneUpItem(const Point2D &spawnOrigin, GameModel *gameModel) :

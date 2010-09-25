@@ -29,12 +29,18 @@ public:
 	static const char CANNON_BLOCK_CHAR;
 	static const char COLLATERAL_BLOCK_CHAR;
 	static const char TESLA_BLOCK_CHAR;
+	static const char ITEM_DROP_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
 	static const char TRI_LOWER_CORNER;
 	static const char TRI_LEFT_CORNER;
 	static const char TRI_RIGHT_CORNER;
+
+	static const char* ALL_ITEM_TYPES_KEYWORD;
+	static const char* POWERUP_ITEM_TYPES_KEYWORD;
+	static const char* POWERNEUTRAL_ITEM_TYPES_KEYWORD;
+	static const char* POWERDOWN_ITEM_TYPES_KEYWORD;
 
 	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 5;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;

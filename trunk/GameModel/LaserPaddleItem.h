@@ -25,7 +25,7 @@ class Point2D;
  */
 class LaserPaddleItem : public GameItem {
 public:
-	static const std::string LASER_PADDLE_ITEM_NAME;
+	static const char* LASER_PADDLE_ITEM_NAME;
 	static const double LASER_PADDLE_TIMER_IN_SECS;
 
 	LaserPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);

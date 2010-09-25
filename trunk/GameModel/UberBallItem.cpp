@@ -15,7 +15,7 @@
 #include "GameItemTimer.h"
 
 const double UberBallItem::UBER_BALL_TIMER_IN_SECS	= 10.0;
-const std::string UberBallItem::UBER_BALL_ITEM_NAME = "UberBall";
+const char* UberBallItem::UBER_BALL_ITEM_NAME       = "UberBall";
 
 UberBallItem::UberBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(UBER_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Good) {

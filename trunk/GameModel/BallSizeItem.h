@@ -27,8 +27,8 @@ private:
 	BallSizeChangeType sizeChangeType;
 
 public:
-	static const std::string BALL_GROW_ITEM_NAME;
-	static const std::string BALL_SHRINK_ITEM_NAME;
+	static const char* BALL_GROW_ITEM_NAME;
+	static const char* BALL_SHRINK_ITEM_NAME;
 	static const double BALL_SIZE_TIMER_IN_SECS;
 
 	BallSizeItem(const BallSizeChangeType type, const Point2D &spawnOrigin, GameModel *gameModel);

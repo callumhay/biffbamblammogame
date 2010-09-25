@@ -12,7 +12,7 @@
 #include "PaddleCamItem.h"
 #include "GameModel.h"
 
-const std::string PaddleCamItem::PADDLE_CAM_ITEM_NAME	= "PaddleCam";
+const char* PaddleCamItem::PADDLE_CAM_ITEM_NAME			  = "PaddleCam";
 const double PaddleCamItem::PADDLE_CAM_TIMER_IN_SECS	= 20.0;
 
 PaddleCamItem::PaddleCamItem(const Point2D &spawnOrigin, GameModel *gameModel) : 

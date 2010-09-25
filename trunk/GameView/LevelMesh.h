@@ -10,6 +10,7 @@
 #include "../GameModel/LevelPiece.h"
 
 class GameWorldAssets;
+class GameItemAssets;
 class BallSafetyNetMesh;
 class Mesh;
 class PrismBlockMesh;
@@ -17,12 +18,14 @@ class PortalBlockMesh;
 class CannonBlockMesh;
 class CollateralBlockMesh;
 class TeslaBlockMesh;
+class ItemDropBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
+class ItemDropBlock;
 
 class LevelMesh {
 public:
-	LevelMesh(const GameWorldAssets& gameWorldAssets, const GameLevel& level);
+	LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 	~LevelMesh();
 	
 	void ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
@@ -32,7 +35,7 @@ public:
 									const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
 	void DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
 
-	void LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameLevel& level);
+	void LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 
 	void BallSafetyNetCreated();
 	void BallSafetyNetDestroyed(const Point2D& pos);
@@ -40,6 +43,8 @@ public:
 	void PaddleCameraActiveToggle(bool isActive);
 
 	void SetLevelAlpha(float alpha);
+
+	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);
 
 private:
 	const GameLevel* currLevel;
@@ -55,6 +60,7 @@ private:
 	CannonBlockMesh* cannonBlock;
 	CollateralBlockMesh* collateralBlock;
 	TeslaBlockMesh* teslaBlock;
+	ItemDropBlockMesh* itemDropBlock;
 
 	// Style-specific level pieces
 	Mesh* styleBlock;

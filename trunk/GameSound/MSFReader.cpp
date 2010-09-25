@@ -220,7 +220,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 
 					if (soundFileLine.find("(") == std::string::npos) {
 						// If we're here then there is just a single file provided...
-						soundFileLine = GameViewConstants::GetInstance()->SOUND_DIR + "/" + soundFileLine;
+						soundFileLine = std::string(GameViewConstants::GetInstance()->SOUND_DIR) + "/" + soundFileLine;
 							
 						// Check to see if the file exists...
 						std::ifstream test(soundFileLine.c_str(), std::ios::in | std::ios::binary);
@@ -263,7 +263,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 							}
 
 							std::string tempFilePath = stringhelper::trim(tokens[i+1]);
-							tempFilePath = GameViewConstants::GetInstance()->SOUND_DIR + "/" + tempFilePath;
+							tempFilePath = std::string(GameViewConstants::GetInstance()->SOUND_DIR) + "/" + tempFilePath;
 							
 							// Check to see if the file exists...
 							std::ifstream test(tempFilePath.c_str(), std::ios::in | std::ios::binary);

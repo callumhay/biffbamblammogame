@@ -11,6 +11,7 @@ class LevelPiece;
 class PortalBlock;
 class CannonBlock;
 class TeslaBlock;
+class ItemDropBlock;
 class GameItem;
 class GameItemTimer;
 class GameWorld;
@@ -68,6 +69,7 @@ public:
 	void ActionItemDeactivated(const GameItem& item);
 	void ActionItemTimerStarted(const GameItemTimer& itemTimer);
 	void ActionItemTimerStopped(const GameItemTimer& itemTimer);
+	void ActionItemDropBlockItemChange(const ItemDropBlock& dropBlock);
 
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);

@@ -8,6 +8,7 @@ class LevelPiece;
 class PortalBlock;
 class CannonBlock;
 class TeslaBlock;
+class ItemDropBlock;
 class GameLevel;
 class GameWorld;
 class GameItem;
@@ -299,6 +300,13 @@ public:
 	 * Arguements: itemTimer - The item timer that just stopped/expired.
 	 */
 	virtual void ItemTimerStoppedEvent(const GameItemTimer& itemTimer) = 0;
+
+	/**
+	 * Event triggered when an item drop block changes the item type that it will drop next. Occurs
+	 * once right after the item drop block changes the type of item it will drop.
+	 * Arguements: dropBlock - the drop block that changed.
+	 */
+	virtual void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock) = 0;
 
 	/**
 	 * Event triggered when a projectile is spawned. Only occurs once per spawned projectile.

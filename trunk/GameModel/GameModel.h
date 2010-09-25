@@ -358,7 +358,7 @@ public:
 		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
 		if (state != NULL) {
 			Vector2D levelDim = this->GetLevelUnitDimensions();
-			state->DebugDropItem(GameItemFactory::CreateItem(itemType, Point2D(0,0) + 0.5f*levelDim, this));
+			state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType, Point2D(0,0) + 0.5f*levelDim, this));
 		}
 	}
 #endif

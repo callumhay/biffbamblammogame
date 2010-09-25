@@ -3,7 +3,7 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 
-const std::string BallCamItem::BALL_CAM_ITEM_NAME	= "EyeBall";
+const char*  BallCamItem::BALL_CAM_ITEM_NAME	    = "BallCam";
 const double BallCamItem::BALL_CAM_TIMER_IN_SECS	= 20.0;
 
 BallCamItem::BallCamItem(const Point2D &spawnOrigin, GameModel *gameModel) :

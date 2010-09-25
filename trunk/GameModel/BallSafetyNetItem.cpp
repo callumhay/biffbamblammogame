@@ -13,7 +13,7 @@
 #include "GameLevel.h"
 #include "GameEventManager.h"
 
-const std::string BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME	= "BallSafetyNet";
+const char* BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME	      = "BallSafetyNet";
 const double BallSafetyNetItem::BALL_SAFETY_NET_TIMER_IN_SECS		= 0.0;
 
 BallSafetyNetItem::BallSafetyNetItem(const Point2D &spawnOrigin, GameModel *gameModel) :

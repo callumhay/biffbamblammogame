@@ -376,6 +376,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::Solid:
 		case LevelPiece::SolidTriangle:
 		case LevelPiece::Tesla:
+		case LevelPiece::ItemDrop:
 			// Typical break effect for basic breakable blocks
 			this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(this->display->GetCamera(), block);
 			// Sound for basic breakable blocks
@@ -567,6 +568,14 @@ void GameEventsListener::ItemTimerStoppedEvent(const GameItemTimer& itemTimer) {
 	this->display->GetAssets()->GetItemAssets()->TimerStopped(&itemTimer);
 
 	debug_output("EVENT: Item timer stopped/expired: " << itemTimer);
+}
+
+void GameEventsListener::ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock) {
+	const GameItemAssets* itemAssets = this->display->GetAssets()->GetItemAssets();
+	assert(itemAssets != NULL);
+	this->display->GetAssets()->GetCurrentLevelMesh()->UpdateItemDropBlock(*itemAssets, dropBlock);
+
+	debug_output("EVENT: Item drop block item type changed");
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {

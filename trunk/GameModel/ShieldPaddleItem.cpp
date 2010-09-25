@@ -12,7 +12,7 @@
 #include "ShieldPaddleItem.h"
 #include "GameModel.h"
 
-const std::string ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME	= "ShieldPaddle";
+const char* ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME	      = "ShieldPaddle";
 const double ShieldPaddleItem::SHIELD_PADDLE_TIMER_IN_SECS  = 45.0;
 
 ShieldPaddleItem::ShieldPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :

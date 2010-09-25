@@ -26,17 +26,73 @@ class Point2D;
  */
 class GameItemFactory {
 
-private:
-	GameItemFactory() {};
-
 public:
 	static const unsigned int TOTAL_NUM_OF_ITEMS = 25;
-	~GameItemFactory() {};
+	
+	static GameItemFactory* GetInstance();
+	static void DeleteInstance();
 
-	// Static factory functions for the creation of game items
-	static GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel);			// Could be either power-up or down
-	static GameItem::ItemType CreateRandomItemType(GameModel *gameModel);
-	static GameItem* CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel);
+	// Factory functions for the creation of game items
+	GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel) const;			// Could be either power-up or down
+	GameItem::ItemType CreateRandomItemType(GameModel *gameModel) const;
+	GameItem::ItemType GetItemTypeFromName(const std::string& itemName) const;
+	GameItem* CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel) const;
+
+	bool IsValidItemTypeName(const std::string& itemName) const;
+
+	const std::set<GameItem::ItemType>& GetAllItemTypes() const;
+	const std::set<GameItem::ItemType>& GetPowerUpItemTypes() const;
+	const std::set<GameItem::ItemType>& GetPowerNeutralItemTypes() const;
+	const std::set<GameItem::ItemType>& GetPowerDownItemTypes() const;
+
+private:
+	GameItemFactory();
+	~GameItemFactory();
+
+	static GameItemFactory* instance;
+
+	std::map<std::string, GameItem::ItemType> itemNameToTypeMap;
+	
+	std::set<GameItem::ItemType> allItemTypes;
+	std::set<GameItem::ItemType> allPowerUpItemTypes;
+	std::set<GameItem::ItemType> allPowerNeutralItemTypes;
+	std::set<GameItem::ItemType> allPowerDownItemTypes;
 
 };
+
+inline GameItemFactory* GameItemFactory::GetInstance() {
+	if (GameItemFactory::instance == NULL) {
+		GameItemFactory::instance = new GameItemFactory();
+	}
+	return GameItemFactory::instance;
+}
+
+inline void GameItemFactory::DeleteInstance() {
+	if (GameItemFactory::instance != NULL) {
+		delete GameItemFactory::instance;
+		GameItemFactory::instance = NULL;
+	}
+}
+
+inline bool GameItemFactory::IsValidItemTypeName(const std::string& itemName) const {
+	std::map<std::string, GameItem::ItemType>::const_iterator findIter = this->itemNameToTypeMap.find(itemName.c_str());
+	return (findIter != this->itemNameToTypeMap.end());
+}
+
+inline const std::set<GameItem::ItemType>& GameItemFactory::GetAllItemTypes() const {
+	return this->allItemTypes;
+}
+
+inline const std::set<GameItem::ItemType>& GameItemFactory::GetPowerUpItemTypes() const {
+	return this->allPowerUpItemTypes;
+}
+
+inline const std::set<GameItem::ItemType>& GameItemFactory::GetPowerNeutralItemTypes() const {
+	return this->allPowerNeutralItemTypes;
+}
+
+inline const std::set<GameItem::ItemType>& GameItemFactory::GetPowerDownItemTypes() const {
+	return this->allPowerDownItemTypes;
+}
+
 #endif

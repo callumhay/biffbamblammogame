@@ -105,91 +105,92 @@ public:
 	// Constant listing...
 
 	// Asset file path constants ***************************
-	const std::string RESOURCE_DIR;
-	const std::string FONT_DIR;
-	const std::string MESH_DIR;
-	const std::string SHADER_DIR;
-	const std::string TEXTURE_DIR;
-	const std::string SOUND_DIR;
+	const char* RESOURCE_DIR;
+	const char* FONT_DIR;
+	const char* MESH_DIR;
+	const char* SHADER_DIR;
+	const char* TEXTURE_DIR;
+	const char* SOUND_DIR;
 
 	// Shader path constants ********************************
-	const std::string CGFX_CEL_SHADER;
-	const std::string CGFX_PHONG_SHADER;
-	const std::string CGFX_INKBLOCK_SHADER;
-	const std::string CGFX_POSTREFRACT_SHADER;
-	const std::string CGFX_VOLUMEMETRIC_SHADER;
-	const std::string CGFX_DECOSKYBOX_SHADER;
-	const std::string CGFX_GAUSSIAN_SHADER;
-	const std::string CGFX_AFTERIMAGE_SHADER;
-	const std::string CGFX_BLOOM_SHADER;
-	const std::string CGFX_FULLSCREENGOO_SHADER;
-	const std::string CGFX_STICKYPADDLE_SHADER;
-	const std::string CGFX_FULLSCREENSMOKEY_SHADER;
-	const std::string CGFX_FULLSCREEN_UBERINTENSE_SHADER;
-	const std::string CGFX_PRISM_SHADER;
-	const std::string CGFX_PORTALBLOCK_SHADER;
+	const char* CGFX_CEL_SHADER;
+	const char* CGFX_PHONG_SHADER;
+	const char* CGFX_INKBLOCK_SHADER;
+	const char* CGFX_POSTREFRACT_SHADER;
+	const char* CGFX_VOLUMEMETRIC_SHADER;
+	const char* CGFX_DECOSKYBOX_SHADER;
+	const char* CGFX_GAUSSIAN_SHADER;
+	const char* CGFX_AFTERIMAGE_SHADER;
+	const char* CGFX_BLOOM_SHADER;
+	const char* CGFX_FULLSCREENGOO_SHADER;
+	const char* CGFX_STICKYPADDLE_SHADER;
+	const char* CGFX_FULLSCREENSMOKEY_SHADER;
+	const char* CGFX_FULLSCREEN_UBERINTENSE_SHADER;
+	const char* CGFX_PRISM_SHADER;
+	const char* CGFX_PORTALBLOCK_SHADER;
 
 	// Texture path constants *******************************
-	const std::string TEXTURE_BANG1;
-	const std::string TEXTURE_BANG2;
-	const std::string TEXTURE_BANG3;
-	const std::string TEXTURE_SPLAT1;
-	const std::string TEXTURE_SMOKE1;
-	const std::string TEXTURE_SMOKE2;
-	const std::string TEXTURE_SMOKE3;
-	const std::string TEXTURE_SMOKE4;
-	const std::string TEXTURE_SMOKE5;
-	const std::string TEXTURE_SMOKE6;
-	const std::string TEXTURE_CIRCLE_GRADIENT;
-	const std::string TEXTURE_STAR;
-	const std::string TEXTURE_STAR_OUTLINE;
-	const std::string TEXTURE_EVIL_STAR;
-	const std::string TEXTURE_EVIL_STAR_OUTLINE;
-	const std::string TEXTURE_EXPLOSION_CLOUD;
-	const std::string TEXTURE_EXPLOSION_RAYS;
-	const std::string TEXTURE_LASER_BEAM;
-	const std::string TEXTURE_UP_ARROW;
-	const std::string TEXTURE_BALL_LIFE_HUD;
-	const std::string TEXTURE_SPARKLE;
-	const std::string TEXTURE_SPIRAL_SMALL;
-	const std::string TEXTURE_SPIRAL_MEDIUM;
-	const std::string TEXTURE_SPIRAL_LARGE;
-	const std::string TEXTURE_HALO;
-	const std::string TEXTURE_LENSFLARE;
-	const std::string TEXTURE_TWISTED_SPIRAL;
-	const std::string TEXTURE_SIDEBLAST;
-	const std::string TEXTURE_HUGE_EXPLOSION;
-	const std::string TEXTURE_BRIGHT_FLARE;
-	const std::string TEXTURE_LIGHTNING_BOLT;
-	const std::string TEXTURE_SPHERE_NORMALS;
+	const char* TEXTURE_BANG1;
+	const char* TEXTURE_BANG2;
+	const char* TEXTURE_BANG3;
+	const char* TEXTURE_SPLAT1;
+	const char* TEXTURE_SMOKE1;
+	const char* TEXTURE_SMOKE2;
+	const char* TEXTURE_SMOKE3;
+	const char* TEXTURE_SMOKE4;
+	const char* TEXTURE_SMOKE5;
+	const char* TEXTURE_SMOKE6;
+	const char* TEXTURE_CIRCLE_GRADIENT;
+	const char* TEXTURE_STAR;
+	const char* TEXTURE_STAR_OUTLINE;
+	const char* TEXTURE_EVIL_STAR;
+	const char* TEXTURE_EVIL_STAR_OUTLINE;
+	const char* TEXTURE_EXPLOSION_CLOUD;
+	const char* TEXTURE_EXPLOSION_RAYS;
+	const char* TEXTURE_LASER_BEAM;
+	const char* TEXTURE_UP_ARROW;
+	const char* TEXTURE_BALL_LIFE_HUD;
+	const char* TEXTURE_SPARKLE;
+	const char* TEXTURE_SPIRAL_SMALL;
+	const char* TEXTURE_SPIRAL_MEDIUM;
+	const char* TEXTURE_SPIRAL_LARGE;
+	const char* TEXTURE_HALO;
+	const char* TEXTURE_LENSFLARE;
+	const char* TEXTURE_TWISTED_SPIRAL;
+	const char* TEXTURE_SIDEBLAST;
+	const char* TEXTURE_HUGE_EXPLOSION;
+	const char* TEXTURE_BRIGHT_FLARE;
+	const char* TEXTURE_LIGHTNING_BOLT;
+	const char* TEXTURE_SPHERE_NORMALS;
 
-	const std::string TEXTURE_STARFIELD;
+	const char* TEXTURE_STARFIELD;
 	
-	const std::string TEXTURE_INKSPLATTER;
-	const std::string TEXTURE_BALLTARGET;
-	const std::string TEXTURE_BULLET_CROSSHAIR;
-	const std::string TEXTURE_BEAM_CROSSHAIR;
-	const std::string TEXTURE_BARREL_OVERLAY;
+	const char* TEXTURE_INKSPLATTER;
+	const char* TEXTURE_BALLTARGET;
+	const char* TEXTURE_BULLET_CROSSHAIR;
+	const char* TEXTURE_BEAM_CROSSHAIR;
+	const char* TEXTURE_BARREL_OVERLAY;
 
-	const std::string TEXTURE_BALL_SAFETY_NET;
+	const char* TEXTURE_BALL_SAFETY_NET;
 
-	const std::string TEXTURE_CEL_GRADIENT;
-	const std::string TEXTURE_NOISE_OCTAVES;
+	const char* TEXTURE_CEL_GRADIENT;
+	const char* TEXTURE_NOISE_OCTAVES;
 
 	// Font path constants **********************************
-	const std::string FONT_SADBAD;
-	const std::string FONT_HAPPYGOOD;
-	const std::string FONT_EXPLOSIONBOOM;
-	const std::string FONT_ELECTRICZAP;
-	const std::string FONT_ALLPURPOSE;
+	const char* FONT_SADBAD;
+	const char* FONT_HAPPYGOOD;
+	const char* FONT_EXPLOSIONBOOM;
+	const char* FONT_ELECTRICZAP;
+	const char* FONT_ALLPURPOSE;
 
 	// Sound Script File (.msf) path constants *********************************
-	const std::string MAIN_MENU_SOUND_SCRIPT;
-	const std::string DECO_SOUND_SCRIPT;
+	const char* MAIN_MENU_SOUND_SCRIPT;
+	const char* DECO_SOUND_SCRIPT;
 
 	// Item-related constants *******************************
-	const std::string ITEM_LABEL_MATGRP;
-	const std::string ITEM_END_MATGRP;
+	const char* ITEM_LABEL_MATGRP;
+	const char* ITEM_END_MATGRP;
+	const char* ITEM_DROP_BLOCK_ITEMTYPE_MATGRP;
 
 	const Colour ITEM_GOOD_COLOUR;
 	const Colour ITEM_BAD_COLOUR;
@@ -226,30 +227,31 @@ public:
 	const Point3D DEFAULT_PADDLE_FILL_LIGHT_POSITION;
 
 	// World specific path constants ************************
-	const std::string BALL_MESH;
-	const std::string SPIKEY_BALL_MESH;
-	const std::string BASIC_BLOCK_MESH_PATH;
-	const std::string TRIANGLE_BLOCK_MESH_PATH;
-	const std::string BOMB_BLOCK_MESH;
-	const std::string PRISM_DIAMOND_BLOCK_MESH;
-	const std::string PRISM_TRIANGLE_BLOCK_MESH;
-	const std::string CANNON_BLOCK_BASE_MESH;
-	const std::string CANNON_BLOCK_BARREL_MESH;
-	const std::string COLLATERAL_BLOCK_MESH;
-	const std::string TESLA_BLOCK_BASE_MESH;
-	const std::string TESLA_BLOCK_COIL_MESH;
-	const std::string SKYBOX_MESH;
-	const std::string ITEM_MESH;
-	const std::string PADDLE_LASER_ATTACHMENT_MESH;
-	const std::string PADDLE_BEAM_ATTACHMENT_MESH;
-	const std::string PADDLE_STICKY_ATTACHMENT_MESH;
-	const std::string PADDLE_ROCKET_MESH;
+	const char* BALL_MESH;
+	const char* SPIKEY_BALL_MESH;
+	const char* BASIC_BLOCK_MESH_PATH;
+	const char* TRIANGLE_BLOCK_MESH_PATH;
+	const char* BOMB_BLOCK_MESH;
+	const char* PRISM_DIAMOND_BLOCK_MESH;
+	const char* PRISM_TRIANGLE_BLOCK_MESH;
+	const char* CANNON_BLOCK_BASE_MESH;
+	const char* CANNON_BLOCK_BARREL_MESH;
+	const char* COLLATERAL_BLOCK_MESH;
+	const char* TESLA_BLOCK_BASE_MESH;
+	const char* TESLA_BLOCK_COIL_MESH;
+	const char* ITEM_DROP_BLOCK_MESH;
+	const char* SKYBOX_MESH;
+	const char* ITEM_MESH;
+	const char* PADDLE_LASER_ATTACHMENT_MESH;
+	const char* PADDLE_BEAM_ATTACHMENT_MESH;
+	const char* PADDLE_STICKY_ATTACHMENT_MESH;
+	const char* PADDLE_ROCKET_MESH;
 
 	// DECO WORLD
-	const std::string DECO_PADDLE_MESH;
-	const std::string DECO_BACKGROUND_MESH;
-	const std::string DECO_SKYBEAM_MESH;
-	const std::string DECO_BLOCK_MESH_PATH;
+	const char* DECO_PADDLE_MESH;
+	const char* DECO_BACKGROUND_MESH;
+	const char* DECO_SKYBEAM_MESH;
+	const char* DECO_BLOCK_MESH_PATH;
 
 
 };

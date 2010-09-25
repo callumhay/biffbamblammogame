@@ -22,7 +22,7 @@
 class BlackoutItem : public GameItem {
 
 public:
-	static const std::string BLACKOUT_ITEM_NAME;
+	static const char* BLACKOUT_ITEM_NAME;
 	static const double BLACKOUT_TIMER_IN_SECS;
 
 	BlackoutItem(const Point2D &spawnOrigin, GameModel *gameModel);

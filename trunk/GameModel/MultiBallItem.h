@@ -22,8 +22,8 @@ class MultiBallItem : public GameItem {
 public:
 	enum NumMultiBalls { ThreeMultiBalls = 3, FiveMultiBalls = 5 };
 	
-	static const std::string MULTI3_BALL_ITEM_NAME;
-	static const std::string MULTI5_BALL_ITEM_NAME;
+	static const char* MULTI3_BALL_ITEM_NAME;
+	static const char* MULTI5_BALL_ITEM_NAME;
 	
 	static const double MULTI_BALL_TIMER_IN_SECS;
 	static const double BALL_COLLISIONS_DISABLED_DURATION;

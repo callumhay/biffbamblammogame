@@ -2,12 +2,14 @@
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
 #include "GameWorldAssets.h"
+#include "GameItemAssets.h"
 #include "BallSafetyNetMesh.h"
 #include "PrismBlockMesh.h"
 #include "PortalBlockMesh.h"
 #include "CannonBlockMesh.h"
 #include "CollateralBlockMesh.h"
 #include "TeslaBlockMesh.h"
+#include "ItemDropBlockMesh.h"
 
 #include "../ESPEngine/ESPEmitter.h"
 
@@ -23,8 +25,9 @@
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/CollateralBlock.h"
 #include "../GameModel/TeslaBlock.h"
+#include "../GameModel/ItemDropBlock.h"
 
-LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameLevel& level) : currLevel(NULL),
+LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL) {
@@ -40,6 +43,7 @@ teslaBlock(NULL) {
 	this->cannonBlock						= new CannonBlockMesh();
 	this->collateralBlock				= new CollateralBlockMesh();
 	this->teslaBlock						= new TeslaBlockMesh();
+	this->itemDropBlock					= new ItemDropBlockMesh();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
@@ -53,6 +57,7 @@ teslaBlock(NULL) {
 	const std::map<std::string, MaterialGroup*>& portalBlockMatGrps   = this->portalBlock->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& cannonBlockMatGrps		= this->cannonBlock->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& teslaBlockMatGrps		= this->teslaBlock->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& itemDropBlockMatGrps = this->itemDropBlock->GetMaterialGroups(); 
 	
 	for (std::map<std::string, MaterialGroup*>::const_iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
@@ -81,8 +86,11 @@ teslaBlock(NULL) {
 	for (std::map<std::string, MaterialGroup*>::const_iterator iter = teslaBlockMatGrps.begin(); iter != teslaBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}	
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = itemDropBlockMatGrps.begin(); iter != itemDropBlockMatGrps.end(); ++iter) {
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+	}	
 
-	this->LoadNewLevel(gameWorldAssets, level);
+	this->LoadNewLevel(gameWorldAssets, gameItemAssets, level);
 }
 
 LevelMesh::~LevelMesh() {
@@ -105,6 +113,8 @@ LevelMesh::~LevelMesh() {
 	this->collateralBlock = NULL;
 	delete this->teslaBlock;
 	this->teslaBlock = NULL;
+	delete this->itemDropBlock;
+	this->itemDropBlock = NULL;
 }
 
 /** 
@@ -156,6 +166,7 @@ void LevelMesh::Flush() {
 	this->cannonBlock->Flush();
 	this->collateralBlock->Flush();
 	this->teslaBlock->Flush();
+	this->itemDropBlock->Flush();
 
 	// Clear the current level pointer
 	this->currLevel = NULL;
@@ -164,7 +175,7 @@ void LevelMesh::Flush() {
 /**
  * Load a new level mesh into this object. This will clear out any old loaded level.
  */
-void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameLevel& level) {
+void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) {
 	// Make sure any previous levels are cleared...
 	this->Flush();
 	
@@ -225,6 +236,20 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameL
 				assert(telsaLvlPiece != NULL);
 				this->teslaBlock->AddTeslaBlock(telsaLvlPiece);
 			}
+			// 4) Item drop block - like the above - since we need to set the texture for the item
+			// each block will drop next, we need to store them in a seperate container object
+			else if (currPiece->GetType() == LevelPiece::ItemDrop) {
+				const ItemDropBlock* itemDrpPiece = dynamic_cast<const ItemDropBlock*>(currPiece);
+				assert(itemDrpPiece != NULL);
+
+				// Figure out what texture is associated with the next item to be dropped from the block
+				const std::map<GameItem::ItemType, Texture*>& itemTextures = gameItemAssets.GetItemTextureMap();
+				std::map<GameItem::ItemType, Texture*>::const_iterator findIter = itemTextures.find(itemDrpPiece->GetNextDropItemType());
+				assert(findIter != itemTextures.end());
+
+				this->itemDropBlock->AddItemDropBlock(itemDrpPiece, findIter->second);
+			}
+
 		}
 	}
 }
@@ -310,6 +335,13 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 			}
 			break;
 
+		case LevelPiece::ItemDrop:
+			{
+				const ItemDropBlock* itemDrpPiece = dynamic_cast<const ItemDropBlock*>(&piece);
+				assert(itemDrpPiece != NULL);
+				this->itemDropBlock->RemoveItemDropBlock(itemDrpPiece);
+			}
+
 		default:
 			break;
 	}
@@ -344,6 +376,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight, lightsAreOut);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 	
 	// Draw the piece effects
@@ -498,6 +531,9 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
 		case LevelPiece::Tesla:
 			return &this->teslaBlock->GetMaterialGroups();
 			break;
+		case LevelPiece::ItemDrop:
+			return &this->itemDropBlock->GetMaterialGroups();
+			break;
 		case LevelPiece::Collateral:
 			break;
 		case LevelPiece::Empty:
@@ -552,4 +588,18 @@ void LevelMesh::SetLevelAlpha(float alpha) {
 	this->cannonBlock->SetAlphaMultiplier(alpha);
 	this->collateralBlock->SetAlphaMultiplier(alpha);
 	this->teslaBlock->SetAlphaMultiplier(alpha);
+	this->itemDropBlock->SetAlphaMultiplier(alpha);
+}
+
+/**
+ * Call when the item type that the item drop block will drop, changes and the model needs to be
+ * updated to display this to the player.
+ */
+void LevelMesh::UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block) {
+	// Figure out what texture is associated with the next item to be dropped from the block
+	const std::map<GameItem::ItemType, Texture*>& itemTextures = gameItemAssets.GetItemTextureMap();
+	std::map<GameItem::ItemType, Texture*>::const_iterator findIter = itemTextures.find(block.GetNextDropItemType());
+	assert(findIter != itemTextures.end());
+
+	this->itemDropBlock->UpdateItemDropBlockTexture(&block, findIter->second);
 }

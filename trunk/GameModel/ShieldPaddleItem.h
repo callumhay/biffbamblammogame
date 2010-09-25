@@ -16,7 +16,7 @@
 
 class ShieldPaddleItem : public GameItem {
 public:
-	static const std::string SHIELD_PADDLE_ITEM_NAME;
+	static const char* SHIELD_PADDLE_ITEM_NAME;
 	static const double SHIELD_PADDLE_TIMER_IN_SECS;
 
 	ShieldPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel);

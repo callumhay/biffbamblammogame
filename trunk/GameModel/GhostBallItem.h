@@ -20,7 +20,7 @@ class Point2D;
 
 class GhostBallItem : public GameItem {
 public:
-	static const std::string GHOST_BALL_ITEM_NAME;
+	static const char* GHOST_BALL_ITEM_NAME;
 	static const double GHOST_BALL_TIMER_IN_SECS;
 
 	GhostBallItem(const Point2D &spawnOrigin, GameModel *gameModel);

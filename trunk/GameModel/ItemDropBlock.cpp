@@ -21,7 +21,7 @@ LevelPiece(wLoc, hLoc), allowedItemDropTypes(droppableItemTypes), hitPointsBefor
 	assert(!droppableItemTypes.empty());
 
 	// Prepare for the next random item...
-	this->ChangeToNextItemDropType();
+	this->ChangeToNextItemDropType(false);
 }
 
 ItemDropBlock::~ItemDropBlock() {
@@ -31,7 +31,7 @@ ItemDropBlock::~ItemDropBlock() {
 LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	// Drop an item...
 	gameModel->AddItemDrop(*this, this->nextDropItemType);
-	this->ChangeToNextItemDropType();
+	this->ChangeToNextItemDropType(true);
 
 	return this;
 }
@@ -40,7 +40,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 	// Drop an item...
 	gameModel->AddItemDrop(*this, this->nextDropItemType);
-	this->ChangeToNextItemDropType();
+	this->ChangeToNextItemDropType(true);
 
 	return this;
 }
@@ -57,9 +57,19 @@ LevelPiece* ItemDropBlock::TickBeamCollision(double dT, const BeamSegment* beamS
 
 		// We now need to drop an item...
 		gameModel->AddItemDrop(*this, this->nextDropItemType);
-		this->ChangeToNextItemDropType();
-	
+		this->ChangeToNextItemDropType(true);
 	}
 
 	return this;
+}
+
+// Update the nextDropItemType of this to be some random item type from the list of allowable item drops
+void ItemDropBlock::ChangeToNextItemDropType(bool doEvent) {
+	size_t randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->allowedItemDropTypes.size();
+	this->nextDropItemType = this->allowedItemDropTypes[randomIdx];
+
+	if (doEvent) {
+		// EVENT: Item drop type changed
+		GameEventManager::Instance()->ActionItemDropBlockItemChange(*this);
+	}
 }

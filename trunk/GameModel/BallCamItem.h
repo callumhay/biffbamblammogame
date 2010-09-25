@@ -20,7 +20,7 @@
  */
 class BallCamItem : public GameItem {
 public:
-	static const std::string BALL_CAM_ITEM_NAME;
+	static const char* BALL_CAM_ITEM_NAME;
 	static const double BALL_CAM_TIMER_IN_SECS;
 
 	BallCamItem(const Point2D &spawnOrigin, GameModel *gameModel);

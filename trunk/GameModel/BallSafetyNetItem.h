@@ -22,7 +22,7 @@
 class BallSafetyNetItem : public GameItem {
 
 public:
-	static const std::string BALL_SAFETY_NET_ITEM_NAME;
+	static const char* BALL_SAFETY_NET_ITEM_NAME;
 	static const double BALL_SAFETY_NET_TIMER_IN_SECS;
 
 	BallSafetyNetItem(const Point2D &spawnOrigin, GameModel *gameModel);
