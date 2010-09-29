@@ -27,14 +27,12 @@ class Point2D;
 class GameItemFactory {
 
 public:
-	static const unsigned int TOTAL_NUM_OF_ITEMS = 25;
-	
 	static GameItemFactory* GetInstance();
 	static void DeleteInstance();
 
 	// Factory functions for the creation of game items
-	GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel) const;			// Could be either power-up or down
-	GameItem::ItemType CreateRandomItemType(GameModel *gameModel) const;
+	GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const;			// Could be either power-up or down
+	GameItem::ItemType CreateRandomItemType(GameModel *gameModel, bool allowRandomItemType) const;
 	GameItem::ItemType GetItemTypeFromName(const std::string& itemName) const;
 	GameItem* CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel) const;
 

@@ -21,7 +21,7 @@ S E E T(P,ul) E E E E E E T(P,ur) S
 S E E E E E E E E E E S
 S E E E E E E E E E E S
 S E E E E E E E E E E S
-S E E E E D(GhostBall,BallSafetyNet) E E E E E S
+S E E E E D(GhostBall,BallSafetyNet,Random) E E E E E S
 S E E E E E E E E E E S
 S E E E E E E E E E E S
 S E E E E E E E E E E S

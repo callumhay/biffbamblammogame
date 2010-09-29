@@ -108,6 +108,7 @@ TEXTURE_ITEM_GRAVITYBALL(TEXTURE_DIRECTORY  "/gravityball_powerneutral256x128.jp
 TEXTURE_ITEM_PADDLEROCKET(TEXTURE_DIRECTORY "/paddlerocket_powerup256x128.jpg"),
 TEXTURE_ITEM_CRAZYBALL(TEXTURE_DIRECTORY    "/crazyball_powerneutral256x128.jpg"),
 TEXTURE_ITEM_SHIELDPADDLE(TEXTURE_DIRECTORY "/shieldpaddle_powerneutral_256x128.jpg"),
+TEXTURE_ITEM_RANDOM(TEXTURE_DIRECTORY       "/random_powerneutral_256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
 TEXTURE_ITEM_TIMER_SLOWBALL(TEXTURE_DIRECTORY			"/slowball_timer_hud256x128.png"),
@@ -248,6 +249,7 @@ void GameViewConstants::InitItemTextures() {
 	this->itemTextures.insert(std::make_pair(GameItem::RocketPaddleItem,				this->TEXTURE_ITEM_PADDLEROCKET));
 	this->itemTextures.insert(std::make_pair(GameItem::CrazyBallItem,						this->TEXTURE_ITEM_CRAZYBALL));
 	this->itemTextures.insert(std::make_pair(GameItem::ShieldPaddleItem,				this->TEXTURE_ITEM_SHIELDPADDLE));
+	this->itemTextures.insert(std::make_pair(GameItem::RandomItem,							this->TEXTURE_ITEM_RANDOM));
 }
 
 void GameViewConstants::InitItemTimerTextures() {

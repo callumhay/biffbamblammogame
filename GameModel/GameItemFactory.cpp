@@ -36,6 +36,8 @@
 #include "CrazyBallItem.h"
 #include "ShieldPaddleItem.h"
 
+#include "RandomItem.h"
+
 GameItemFactory* GameItemFactory::instance = NULL;
 
 GameItemFactory::GameItemFactory() {
@@ -65,7 +67,8 @@ GameItemFactory::GameItemFactory() {
 	itemNameToTypeMap.insert(std::make_pair(RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME,				GameItem::RocketPaddleItem));
 	itemNameToTypeMap.insert(std::make_pair(CrazyBallItem::CRAZY_BALL_ITEM_NAME,					    GameItem::CrazyBallItem));
 	itemNameToTypeMap.insert(std::make_pair(ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME,			  GameItem::ShieldPaddleItem));
-
+	itemNameToTypeMap.insert(std::make_pair(RandomItem::RANDOM_ITEM_NAME,											GameItem::RandomItem));
+	
 	// Establish the set of ALL items
 	allItemTypes.insert(GameItem::BallSpeedUpItem);
 	allItemTypes.insert(GameItem::BallSlowDownItem);
@@ -133,24 +136,30 @@ GameItemFactory::~GameItemFactory() {
  * hands the new object to the caller.
  * NOTE: The caller will be responsible for its destruction!
  */
-GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel) const {
+GameItem* GameItemFactory::CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const {
 	assert(gameModel != NULL);
-	GameItem::ItemType randomItemType = GameItemFactory::CreateRandomItemType(gameModel);
+	GameItem::ItemType randomItemType = GameItemFactory::CreateRandomItemType(gameModel, allowRandomItemType);
 	return GameItemFactory::CreateItem(randomItemType, spawnOrigin, gameModel);
 }
 
 /**
  * Creates a random item type.
  */
-GameItem::ItemType GameItemFactory::CreateRandomItemType(GameModel *gameModel) const {
+GameItem::ItemType GameItemFactory::CreateRandomItemType(GameModel *gameModel, bool allowRandomItemType) const {
 	assert(gameModel != NULL);
-	unsigned int randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % TOTAL_NUM_OF_ITEMS;
-	
+	unsigned int numItems = this->allItemTypes.size();
+	if (allowRandomItemType) {
+		numItems++;
+	}
+	unsigned int randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % numItems;
+
 	// Avoid insane numbers of balls, if we're going to spawn more balls and there's already a lot
 	// of them try to pick another item...
 	if (gameModel->GetGameBalls().size() > 3 && (randomValue == GameItem::MultiBall5Item || randomValue == GameItem::MultiBall3Item)) {
-		randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % TOTAL_NUM_OF_ITEMS;
+		randomValue = Randomizer::GetInstance()->RandomUnsignedInt() % numItems;
 	}
+	assert((!allowRandomItemType && randomValue != GameItem::RandomItem) || allowRandomItemType);
+
 	return static_cast<GameItem::ItemType>(randomValue);
 }
 
@@ -168,9 +177,7 @@ GameItem::ItemType GameItemFactory::GetItemTypeFromName(const std::string& itemN
  * NOTE: The caller will be responsible for its destruction!
  */
 GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel) const {
-	
 	switch (type) {
-
 		case GameItem::BallSpeedUpItem:
 			return new BallSpeedItem(BallSpeedItem::FastBall, spawnOrigin, gameModel);
 		
@@ -245,6 +252,11 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 
 		case GameItem::ShieldPaddleItem:
 			return new ShieldPaddleItem(spawnOrigin, gameModel);
+
+		
+		// Random item is a very special kind of item that can't be generated anywhere else but here
+		case GameItem::RandomItem:
+			return new RandomItem(spawnOrigin, gameModel);
 
 		default:
 			assert(false);

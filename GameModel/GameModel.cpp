@@ -370,7 +370,7 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 	debug_output("Probability of drop: " << itemDropProb << " Number for deciding: " << randomNum);
 
 	if (randomNum <= itemDropProb) {
-		GameItem::ItemType itemType = GameItemFactory::GetInstance()->CreateRandomItemType(this);
+		GameItem::ItemType itemType = GameItemFactory::GetInstance()->CreateRandomItemType(this, true);
 		this->AddItemDrop(p, itemType);
 	}
 }

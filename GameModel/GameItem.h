@@ -27,27 +27,35 @@ class GameBall;
 class GameItem {
 public:
 	enum ItemDisposition { Good, Bad, Neutral };
-	enum ItemType { BallSafetyNetItem, BallGrowItem, BallShrinkItem, BlackoutItem, GhostBallItem, 
-									InvisiBallItem, LaserBulletPaddleItem, LaserBeamPaddleItem, MultiBall3Item, MultiBall5Item, 
-									OneUpItem, PaddleCamItem, BallCamItem, PaddleGrowItem, PaddleShrinkItem, 
-									PoisonPaddleItem, StickyPaddleItem, UberBallItem, UpsideDownItem, BallSpeedUpItem, 
-									BallSlowDownItem, GravityBallItem, RocketPaddleItem, CrazyBallItem, ShieldPaddleItem };
+	enum ItemType { BallSafetyNetItem = 0, 
+									BallGrowItem, 
+									BallShrinkItem, 
+									BlackoutItem, 
+									GhostBallItem, 
+									InvisiBallItem, 
+									LaserBulletPaddleItem, 
+									LaserBeamPaddleItem, 
+									MultiBall3Item, 
+									MultiBall5Item, 
+									OneUpItem, 
+									PaddleCamItem, 
+									BallCamItem, 
+									PaddleGrowItem, 
+									PaddleShrinkItem, 
+									PoisonPaddleItem, 
+									StickyPaddleItem, 
+									UberBallItem, 
+									UpsideDownItem, 
+									BallSpeedUpItem, 
+									BallSlowDownItem, 
+									GravityBallItem, 
+									RocketPaddleItem, 
+									CrazyBallItem, 
+									ShieldPaddleItem, 
+									
+									RandomItem // MAKE SURE RANDOM ITEM IS ALWAYS THE LAST ONE!!
+	};
 
-protected:
-	std::string name;							// Name of this item
-	GameModel* gameModel;					// Items have to be able to manipulate what happens in the game...
-	Point2D center;								// The center x,y coord that this item is located at
-	ItemDisposition disposition;	// The disposition of the item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
-	bool isActive;								// Whether or not this item is currently active (i.e., has been accquired and is effecting the game play)
-	
-	ColourRGBA colour;													// Colour multiply of the item
-	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
-	
-
-	// Speed of descent for items
-	static const float SPEED_OF_DESCENT;
-
-public:
 	// Height and Width for items
 	static const float ITEM_WIDTH;
 	static const float ITEM_HEIGHT;
@@ -56,8 +64,7 @@ public:
 
 	static const float ALPHA_ON_PADDLE_CAM;
 	static const float ALPHA_ON_BALL_CAM;
-
-	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const GameItem::ItemDisposition disp);
+	
 	virtual ~GameItem();
 
 	virtual const GameBall* GetBallAffected() const {
@@ -102,12 +109,35 @@ public:
 		GameEventManager::Instance()->ActionItemActivated(*this);
 		return -1;
 	}	
+
 	virtual void Deactivate() {
 		// Raise an event for this item being deactivated
 		GameEventManager::Instance()->ActionItemDeactivated(*this);
 	}
 
 	friend std::ostream& operator <<(std::ostream& os, const GameItem& item);
+
+protected:
+	std::string name;							// Name of this item
+	GameModel* gameModel;					// Items have to be able to manipulate what happens in the game...
+	Point2D center;								// The center x,y coord that this item is located at
+	ItemDisposition disposition;	// The disposition of the item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
+	bool isActive;								// Whether or not this item is currently active (i.e., has been accquired and is effecting the game play)
+	
+	ColourRGBA colour;													// Colour multiply of the item
+	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
+	
+	// Speed of descent for items
+	static const float SPEED_OF_DESCENT;
+
+	GameItem(const std::string& name, const Point2D &spawnOrigin, GameModel *gameModel, const GameItem::ItemDisposition disp);
+
+	void SetItemDisposition(const ItemDisposition& d) {
+		this->disposition = d;
+	}
+	void SetItemName(const std::string& n) {
+		this->name = n;
+	}
 };
 
 inline std::ostream& operator <<(std::ostream& os, const GameItem& item) {

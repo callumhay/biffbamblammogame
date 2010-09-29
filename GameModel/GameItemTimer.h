@@ -47,10 +47,6 @@ public:
 		return (this->timeElapsedInSecs >= this->timeLengthInSecs);
 	}
 
-	inline std::string GetTimerItemName() const {
-		return this->assocGameItem->GetName();
-	}
-
 	inline GameItem::ItemType GetTimerItemType() const {
 		return this->assocGameItem->GetItemType();
 	}
