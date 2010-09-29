@@ -47,6 +47,8 @@ The ball gains an insane mind of its own and starts moving in random directions 
 ~ ShieldPaddle
 The paddle gains a shield that protects it from falling objects, however it causes a lot of distraction in paddle camera mode and the ball bounces off of it.
 
+~ Random
+The completely random item type - the only item this may not be is random, since that would be infinitely recursive, now wouldn't it?
 
 - BallShrink
 The ball decreases in size.

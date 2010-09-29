@@ -1287,6 +1287,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\RandomItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\RocketPaddleItem.h"
 						>
 					</File>
@@ -1384,6 +1388,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\PoisonPaddleItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\RandomItem.cpp"
 						>
 					</File>
 					<File

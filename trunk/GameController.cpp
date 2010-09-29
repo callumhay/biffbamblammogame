@@ -120,7 +120,13 @@ void GameController::KeyDown(SDLKey key, SDLMod modifier) {
 	else if (key == SDLK_5) {
 		this->model->DropItem(GameItem::MultiBall5Item);
 	}
-	
+	// 6
+	// 7
+	// 8
+	// 9
+	else if (key == SDLK_BACKSLASH) {
+		this->model->DropItem(GameItem::RandomItem);
+	}
 	// ...
 
 	else if (key == SDLK_SLASH) {
