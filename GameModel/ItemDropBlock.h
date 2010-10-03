@@ -79,14 +79,19 @@ public:
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 
 	const GameItem::ItemType& GetNextDropItemType() const;
+	const GameItem::ItemDisposition& GetNextDropItemDisposition() const;
 
 private:
 	static const float DAMAGE_UNTIL_ITEM_DROP;
-	
+	static const unsigned long DISABLE_DROP_TIME;
+
 	std::vector<GameItem::ItemType> allowedItemDropTypes;
 
-	float hitPointsBeforeNextDrop;							// Hit points left that must be deminished (by a laser beam) before the next item drop
-	GameItem::ItemType nextDropItemType;				// The next item type that will drop from this block
+	float hitPointsBeforeNextDrop;									// Hit points left that must be deminished (by a laser beam) before the next item drop
+	GameItem::ItemType nextDropItemType;						// The next item type that will drop from this block
+	GameItem::ItemDisposition nextDropDisposition;	// The disposition (good/neutral/bad) of the next item type that will drop from this block
+
+	unsigned long timeOfLastDrop;	// Amount of time since the last item drop
 
 	void ChangeToNextItemDropType(bool doEvent);
 };
@@ -96,6 +101,8 @@ inline const GameItem::ItemType& ItemDropBlock::GetNextDropItemType() const {
 	return this->nextDropItemType;
 }
 
-
+inline const GameItem::ItemDisposition& ItemDropBlock::GetNextDropItemDisposition() const {
+	return this->nextDropDisposition;
+}
 
 #endif // __ITEMDROPBLOCK_H__

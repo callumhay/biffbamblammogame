@@ -3,6 +3,7 @@
 
 #include "LevelPiece.h"
 #include "Projectile.h"
+#include "GameItem.h"
 
 #include <string>
 #include <vector>
@@ -56,6 +57,13 @@ public:
 	 */
 	const std::vector<std::vector<LevelPiece*> >& GetCurrentLevelLayout() const {
 		return this->currentLevelPieces;
+	}
+
+	const std::vector<GameItem::ItemType>& GetAllowableItemDropTypes() const {
+		return this->allowedDropTypes;
+	}
+	size_t GetRandomItemDropProbabilityNum() const {
+		return this->randomItemProbabilityNum;
 	}
 
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Point2D& center, float radius) const;
@@ -136,16 +144,23 @@ private:
 	std::string filepath;
 	std::string levelName;
 
+	std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
+	size_t randomItemProbabilityNum;									// A number >= 0 for random item probability in the level
+
 	// Map of the pairings of tesla blocks and their active lightning arc that enforces bounds
 	// on the level as long as it's active
 	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D> teslaLightning;
 
 	//QuadTree* levelTree;	// A quad tree representing the boundries of this entire level and all its pieces
 
-	GameLevel(const std::string& filepath, const std::string& levelName, unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces);
+	GameLevel(const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
+		const std::vector<std::vector<LevelPiece*> >& pieces, const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum);
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
 	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;
+
+
+	static void CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& levelPieces);
 
 };
 #endif

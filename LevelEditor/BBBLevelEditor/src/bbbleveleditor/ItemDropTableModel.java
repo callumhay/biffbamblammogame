@@ -47,16 +47,28 @@ public class ItemDropTableModel extends AbstractTableModel {
 		}
 	}
 	
+	public String[] GetItemNames() {
+		return this.itemNames;
+	}
+	public Integer[] GetDropLikelihoods() {
+		return this.dropLikelihoods;
+	}
+	
 	public String getItemNameAtRow(int row) {
 		return this.itemNames[row];
 	}
 	public int getItemLikelihoodAtRow(int row) {
 		return this.dropLikelihoods[row];
 	}
+	public void setItemLikelihoodAtRow(int row, Integer likelihood) {
+		this.dropLikelihoods[row] = likelihood;
+		this.fireTableCellUpdated(row, 2);
+	}
 	public void setItemLikelihood(String itemName, Integer likelihood) {
 		for (int i = 0; i < itemNames.length; i++) {
 			if (this.itemNames[i].equals(itemName)) {
 				this.dropLikelihoods[i] = likelihood;
+				this.fireTableCellUpdated(i, 2);
 				break;
 			}
 		}

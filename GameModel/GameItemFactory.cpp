@@ -266,3 +266,36 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 	return NULL;
 }
 
+GameItem* GameItemFactory::CreateRandomItemForCurrentLevel(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const {
+	assert(gameModel != NULL);
+	GameItem::ItemType randomItemType = GameItemFactory::CreateRandomItemTypeForCurrentLevel(gameModel, allowRandomItemType);
+	return GameItemFactory::CreateItem(randomItemType, spawnOrigin, gameModel);
+}
+
+/**
+ * Generate a item type that is within the types allowed for the current level of the game.
+ * If allowRandomItemType is set to true then a random item type may be generated as well.
+ */
+GameItem::ItemType GameItemFactory::CreateRandomItemTypeForCurrentLevel(GameModel *gameModel, bool allowRandomItemType) const {
+	assert(gameModel != NULL);
+
+	// Grab the current game level and get the allowable item drops for it
+	const GameLevel* currGameLevel = gameModel->GetCurrentLevel();
+	assert(currGameLevel != NULL);
+	const std::vector<GameItem::ItemType>& allowableItemDrops = currGameLevel->GetAllowableItemDropTypes();
+	assert(!allowableItemDrops.empty());
+
+	// If we've enabled generation of random items then we allow the possible generatation of one...
+	size_t randomNum = 0;
+	if (allowRandomItemType) {
+		randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % (allowableItemDrops.size() + currGameLevel->GetRandomItemDropProbabilityNum());
+		if (randomNum >= allowableItemDrops.size()) {
+			return GameItem::RandomItem;
+		}
+	}
+	else {
+		randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size();
+	}
+
+	return allowableItemDrops.at(randomNum);
+}

@@ -36,6 +36,11 @@ public:
 	GameItem::ItemType GetItemTypeFromName(const std::string& itemName) const;
 	GameItem* CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel) const;
 
+	GameItem* CreateRandomItemForCurrentLevel(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const;
+	GameItem::ItemType CreateRandomItemTypeForCurrentLevel(GameModel *gameModel, bool allowRandomItemType) const;
+
+	GameItem::ItemDisposition GetItemTypeDisposition(const GameItem::ItemType& itemType) const;
+
 	bool IsValidItemTypeName(const std::string& itemName) const;
 
 	const std::set<GameItem::ItemType>& GetAllItemTypes() const;
@@ -70,6 +75,17 @@ inline void GameItemFactory::DeleteInstance() {
 		delete GameItemFactory::instance;
 		GameItemFactory::instance = NULL;
 	}
+}
+
+inline GameItem::ItemDisposition GameItemFactory::GetItemTypeDisposition(const GameItem::ItemType& itemType) const {
+	if (this->allPowerUpItemTypes.find(itemType) != this->allPowerUpItemTypes.end()) {
+		return GameItem::Good;
+	}
+	else if (this->allPowerNeutralItemTypes.find(itemType) != this->allPowerNeutralItemTypes.end()) {
+		return GameItem::Neutral;
+	}
+	
+	return GameItem::Bad;
 }
 
 inline bool GameItemFactory::IsValidItemTypeName(const std::string& itemName) const {

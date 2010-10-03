@@ -18,7 +18,7 @@ RandomItem::RandomItem(const Point2D &spawnOrigin, GameModel *gameModel) :
 GameItem(RandomItem::RANDOM_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral), randomItem(NULL) {
 
 	// Build the random item...
-	this->randomItem = GameItemFactory::GetInstance()->CreateRandomItem(spawnOrigin, gameModel, false);
+	this->randomItem = GameItemFactory::GetInstance()->CreateRandomItemForCurrentLevel(spawnOrigin, gameModel, false);
 	assert(this->randomItem != NULL);
 }
 

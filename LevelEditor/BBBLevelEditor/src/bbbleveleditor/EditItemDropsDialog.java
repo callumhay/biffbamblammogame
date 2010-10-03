@@ -5,6 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -12,6 +15,8 @@ import javax.swing.table.TableColumn;
 
 public class EditItemDropsDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 3548973828806465681L;
+	
+	private LevelPieceImageLabel itemDropPiece;
 	
 	private BBBLevelEditMainWindow levelEditWindow;
 	private JButton applyButton;
@@ -27,7 +32,98 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 		super(window, "Level Drop Items", true);
 		
 		this.levelEditWindow = window;
+		this.setupGUI();
+	}
+	
+	public EditItemDropsDialog(BBBLevelEditMainWindow window, LevelPieceImageLabel itemDropPiece) {
+		super(window, "Item Drop Block Item Types", true);
 		
+		this.levelEditWindow = window;
+		this.itemDropPiece = itemDropPiece;
+		this.setupGUI();
+		
+		// Read the current state of the item drop piece and use it to establish what item types
+		// are currently being dropped by it...
+		Iterator<String> iter = itemDropPiece.getItemDropTypes().iterator();
+		
+		ItemDropTableModel powerUpsData      = (ItemDropTableModel)this.powerUpsTable.getModel();
+		ItemDropTableModel powerNeutralsData = (ItemDropTableModel)this.powerNeutralsTable.getModel();
+		ItemDropTableModel powerDownsData    = (ItemDropTableModel)this.powerDownsTable.getModel();
+		
+		HashMap<String, Integer> itemCounts = new HashMap<String, Integer>();
+		while (iter.hasNext()) {
+			String currItemTypeName = iter.next();
+			if (itemCounts.containsKey(currItemTypeName)) {
+				itemCounts.put(currItemTypeName, new Integer(itemCounts.get(currItemTypeName).intValue() + 1));
+			}
+			else {
+				itemCounts.put(currItemTypeName, new Integer(1));
+			}
+		}
+		
+		// Find the maximum value in the hash
+		float maxValue = 0.0f;
+		Iterator<Integer> countValueIter = itemCounts.values().iterator();
+		while (countValueIter.hasNext()) {
+			maxValue = Math.max(maxValue, countValueIter.next());
+		}
+		
+		Iterator<Entry<String, Integer>> hashEntryIter = itemCounts.entrySet().iterator();
+		while (hashEntryIter.hasNext()) {
+			Entry<String, Integer> currEntry = hashEntryIter.next();
+
+			// Handle some special cases first...
+			if (currEntry.getKey().equals("all")) {
+				for (int i = 0; i < powerUpsData.getRowCount(); i++) {
+					powerUpsData.setItemLikelihoodAtRow(i, ItemDrop.MEDIUM_LIKELIHOOD);
+				}
+				for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
+					powerNeutralsData.setItemLikelihoodAtRow(i, ItemDrop.MEDIUM_LIKELIHOOD);
+				}
+				for (int i = 0; i < powerDownsData.getRowCount(); i++) {
+					powerDownsData.setItemLikelihoodAtRow(i, ItemDrop.MEDIUM_LIKELIHOOD);
+				}
+			}
+			else if (currEntry.getKey().equals("powerups")) {
+				for (int i = 0; i < powerUpsData.getRowCount(); i++) {
+					powerUpsData.setItemLikelihoodAtRow(i, ItemDrop.MEDIUM_LIKELIHOOD);
+				}
+			}
+			else if (currEntry.getKey().equals("powerneutrals")) {
+				for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
+					powerNeutralsData.setItemLikelihoodAtRow(i, ItemDrop.MEDIUM_LIKELIHOOD);
+				}
+			}
+			else if (currEntry.getKey().equals("powerdowns")) {
+				for (int i = 0; i < powerDownsData.getRowCount(); i++) {
+					powerDownsData.setItemLikelihoodAtRow(i, ItemDrop.MEDIUM_LIKELIHOOD);
+				}
+			}
+			else {
+				float percentValue = ((float)currEntry.getValue()) / maxValue;
+				int likelihood = ItemDrop.NO_LIKELIHOOD;
+				if (percentValue == 0.0f) {
+					likelihood = ItemDrop.NO_LIKELIHOOD;
+				}
+				else if (percentValue <= 0.333333334f) {
+					likelihood = ItemDrop.LOW_LIKELIHOOD;
+				}
+				else if (percentValue <= 0.666666667f) {
+					likelihood = ItemDrop.MEDIUM_LIKELIHOOD;
+				}
+				else if (percentValue <= 1.0f) {
+					likelihood = ItemDrop.HIGH_LIKELIHOOD;
+				}
+								
+				
+				powerUpsData.setItemLikelihood(currEntry.getKey(),      likelihood);
+				powerNeutralsData.setItemLikelihood(currEntry.getKey(), likelihood);
+				powerDownsData.setItemLikelihood(currEntry.getKey(),    likelihood);
+			}
+		}
+	}
+	
+	private void setupGUI() {
 		// Setup the apply, ok and cancel buttons
 		this.applyButton = new JButton("Apply");
 		this.applyButton.setActionCommand("Apply");
@@ -111,9 +207,9 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 		
 		this.pack();
 		
-		this.setLocationRelativeTo(window);
-		int parentWidth = window.getWidth();
-		int parentHeight = window.getHeight();
+		this.setLocationRelativeTo(this.levelEditWindow);
+		int parentWidth = this.levelEditWindow.getWidth();
+		int parentHeight = this.levelEditWindow.getHeight();
 		this.setLocation(new Point((parentWidth - this.getWidth()) / 2, (parentHeight - this.getHeight()) / 2));
 	}
 	
@@ -143,7 +239,93 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 			this.setVisible(false);
 		}
 		else if (e.getActionCommand().equals("Apply")) {
-			this.levelEditWindow.setItemDropsForLevelEditDocument(this.getItemDropSettings());
+			if (this.itemDropPiece != null) {
+				ItemDropTableModel powerUpsData      = (ItemDropTableModel)this.powerUpsTable.getModel();
+				ItemDropTableModel powerNeutralsData = (ItemDropTableModel)this.powerNeutralsTable.getModel();
+				ItemDropTableModel powerDownsData    = (ItemDropTableModel)this.powerDownsTable.getModel();
+				
+				ArrayList<String> itemDropTypeStrs = new ArrayList<String>();
+				
+				// Start with power-ups check to see if every power up is included with the same likelihood...
+				boolean allSame = true;
+				boolean allAreAllSame = true;
+				int commonLikelihood = powerUpsData.getItemLikelihoodAtRow(0);
+				for (int i = 0; i < powerUpsData.getRowCount(); i++) {
+					if (powerUpsData.getItemLikelihoodAtRow(i) != commonLikelihood) {
+						allSame = false;
+						break;
+					}
+				}
+				
+				if (allSame) {
+					itemDropTypeStrs.add("powerups");
+				}
+				else {
+					allAreAllSame = false;
+					// Add each power-up individually...
+					for (int i = 0; i < powerUpsData.getRowCount(); i++) {
+						for (int j = 0; j < powerUpsData.getItemLikelihoodAtRow(i); j++) {
+							itemDropTypeStrs.add(powerUpsData.getItemNameAtRow(i));
+						}
+					}
+				}
+				
+				// Now do the same for power-neutrals
+				allSame = true;
+				commonLikelihood = powerNeutralsData.getItemLikelihoodAtRow(0);
+				for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
+					if (powerNeutralsData.getItemLikelihoodAtRow(i) != commonLikelihood) {
+						allSame = false;
+						break;
+					}
+				}
+				if (allSame) {
+					itemDropTypeStrs.add("powerneutrals");
+				}
+				else {
+					allAreAllSame = false;
+					// Add each power-neutral individually...
+					for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
+						for (int j = 0; j < powerNeutralsData.getItemLikelihoodAtRow(i); j++) {
+							itemDropTypeStrs.add(powerNeutralsData.getItemNameAtRow(i));
+						}
+					}
+				}
+				
+				// And finally, power-downs...
+				allSame = true;
+				commonLikelihood = powerDownsData.getItemLikelihoodAtRow(0);
+				for (int i = 0; i < powerDownsData.getRowCount(); i++) {
+					if (powerDownsData.getItemLikelihoodAtRow(i) != commonLikelihood) {
+						allSame = false;
+						break;
+					}
+				}
+				if (allSame) {
+					itemDropTypeStrs.add("powerdowns");
+				}
+				else {
+					allAreAllSame = false;
+					// Add each power-down individually...
+					for (int i = 0; i < powerDownsData.getRowCount(); i++) {
+						for (int j = 0; j < powerDownsData.getItemLikelihoodAtRow(i); j++) {
+							itemDropTypeStrs.add(powerDownsData.getItemNameAtRow(i));
+						}
+					}
+				}
+				
+				if (allAreAllSame) {
+					itemDropTypeStrs.clear();
+					itemDropTypeStrs.add("all");
+				}
+				
+				this.itemDropPiece.setItemDropTypes(itemDropTypeStrs);
+				
+			}
+			else if (this.levelEditWindow != null) {
+				this.levelEditWindow.setItemDropsForLevelEditDocument(this.getItemDropSettings());
+			}
+
 		}
 	}
 	
