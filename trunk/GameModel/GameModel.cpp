@@ -370,7 +370,11 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 	debug_output("Probability of drop: " << itemDropProb << " Number for deciding: " << randomNum);
 
 	if (randomNum <= itemDropProb) {
-		GameItem::ItemType itemType = GameItemFactory::GetInstance()->CreateRandomItemType(this, true);
+		// If there are no allowable item drops for the current level then we drop nothing anyway
+		if (this->GetCurrentLevel()->GetAllowableItemDropTypes().empty()) {
+			return;
+		}
+		GameItem::ItemType itemType = GameItemFactory::GetInstance()->CreateRandomItemTypeForCurrentLevel(this, true);
 		this->AddItemDrop(p, itemType);
 	}
 }

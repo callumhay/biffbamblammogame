@@ -5,7 +5,9 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.ImageObserver;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -28,6 +30,8 @@ public class LevelPieceImageLabel extends JLabel {
 	private Set<Character> siblingIDs = new TreeSet<Character>();
 	private boolean teslaBlockStartsOn;
 	
+	private ArrayList<String> itemDropTypes = new ArrayList<String>();
+	
 	static boolean IsValidBlockID(char id) {
 		if ((id >= 'A' && id <= 'z') || (id >= '0' && id <= '9')) {
 			return true;
@@ -39,6 +43,7 @@ public class LevelPieceImageLabel extends JLabel {
 		this.blockID = INVALID_ID;
 		this.teslaBlockStartsOn = false;
 		this.setLevelPiece(piece);
+		this.itemDropTypes.add("all");
 	}
 	
 	// constructor with icon
@@ -72,6 +77,16 @@ public class LevelPieceImageLabel extends JLabel {
 				}
 			}
 			pieceSymbol = LevelPiece.TESLA_PIECE_SYMBOL;
+		}
+		else if (pieceSymbol.length() >= 3 &&  pieceSymbol.substring(0, 2).equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL + "(")) {
+			String[] itemDropTypeNames = pieceSymbol.substring(2, pieceSymbol.length()).split("[\\(,\\)]");
+			for (int i = 0; i < itemDropTypeNames.length; i++) {
+				if (itemDropTypeNames[i].length() > 1) {
+					this.itemDropTypes.add(itemDropTypeNames[i]);
+				}
+			}
+			
+			pieceSymbol = LevelPiece.ITEM_DROP_PIECE_SYMBOL;
 		}
 		
 		this.setLevelPiece(LevelPiece.LevelPieceCache.get(pieceSymbol));
@@ -133,6 +148,9 @@ public class LevelPieceImageLabel extends JLabel {
 	public boolean getIsTesla() {
 		return piece.getSymbol().equals(LevelPiece.TESLA_PIECE_SYMBOL);
 	}
+	public boolean getIsItemDrop() {
+		return piece.getSymbol().equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL);
+	}
 	
 	public void setBlockID(char blockID) {
 		this.blockID = blockID;
@@ -159,6 +177,18 @@ public class LevelPieceImageLabel extends JLabel {
 	public Set<Character> getSiblingIDs() {
 		return this.siblingIDs;
 	}
+	
+	public ArrayList<String> getItemDropTypes() {
+		return this.itemDropTypes;
+	}
+	public void setItemDropTypes(ArrayList<String> dropTypes) {
+		this.itemDropTypes = dropTypes;
+	}
+	public void addItemDropType(String itemName) {
+		this.itemDropTypes.add(itemName);
+	}
+	
+	
 	public char getPortalSiblingID() {
 		if (this.siblingIDs.size() == 1) {
 			return this.siblingIDs.iterator().next();

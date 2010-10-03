@@ -8,6 +8,8 @@ public class LevelPiece {
 	public static final String PORTAL_PIECE_SYMBOL = "X";
 	public static final String TESLA_PIECE_NAME    = "Tesla";
 	public static final String TESLA_PIECE_SYMBOL  = "A";
+	public static final String ITEM_DROP_PIECE_SYMBOL = "D";
+	public static final String ITEM_DROP_PIECE_NAME   = "Item Drop";
 	
 	public static LevelPiece DefaultPiece;
 	

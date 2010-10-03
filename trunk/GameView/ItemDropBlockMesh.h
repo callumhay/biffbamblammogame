@@ -5,7 +5,11 @@
 #include "../BlammoEngine/Algebra.h"
 #include "../BlammoEngine/Mesh.h"
 
+#include "../ESPEngine/ESPParticleColourEffector.h"
+
 class ItemDropBlock;
+class ESPVolumeEmitter;
+class Texture2D;
 
 class ItemDropBlockMesh {
 public:
@@ -28,9 +32,18 @@ private:
 	Mesh* blockMesh;
 	std::map<std::string, MaterialGroup*> baseMaterialGrp;
 
+	ESPVolumeEmitter* flareParticleEmitter;
+	ESPVolumeEmitter* powerUpSparkEmitter;
+	ESPVolumeEmitter* powerNeutralSparkEmitter;
+	ESPVolumeEmitter* powerDownSparkEmitter;
+	Texture2D* flareTex;
+	Texture2D* sparkTex;
+	ESPParticleColourEffector particleFader;
+
 	std::map<const ItemDropBlock*, Texture*> itemDropBlockToItemTexMap;
 	MaterialGroup* itemDropTypeMatGrp;
 	
+	ESPVolumeEmitter* InitSparkEmitter(const Colour& colour);
 	void LoadMesh();
 };
 

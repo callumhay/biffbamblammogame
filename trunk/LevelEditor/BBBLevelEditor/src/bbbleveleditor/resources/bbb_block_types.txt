@@ -126,6 +126,10 @@ Tesla
 tesla.png
 A
 
+Item Drop
+item_drop.png
+D
+
 Prism
 prism.png
 P

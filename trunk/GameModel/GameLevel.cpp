@@ -61,7 +61,10 @@ const char* GameLevel::POWERNEUTRAL_ITEM_TYPES_KEYWORD	= "powerneutrals";
 const char* GameLevel::POWERDOWN_ITEM_TYPES_KEYWORD			= "powerdowns";
 
 // Private constructor, requires all the pieces that make up the level
-GameLevel::GameLevel(const std::string& filepath, const std::string& levelName, unsigned int numBlocks, std::vector<std::vector<LevelPiece*> > pieces): currentLevelPieces(pieces),
+GameLevel::GameLevel(const std::string& filepath, const std::string& levelName, 
+										 unsigned int numBlocks, const std::vector<std::vector<LevelPiece*> >& pieces,
+										 const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum): 
+currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), randomItemProbabilityNum(randomItemProbabilityNum),
 piecesLeft(numBlocks), ballSafetyNetActive(false), filepath(filepath), levelName(levelName) {
 	assert(!filepath.empty());
 	assert(pieces.size() > 0);
@@ -607,19 +610,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc);
 					delete inFile;
 					inFile = NULL;
-
-					// Clean up any already loaded pieces...
-					for (std::vector<std::vector<LevelPiece*> >::iterator iter1 = levelPieces.begin(); iter1 != levelPieces.end(); ++iter1) {
-						std::vector<LevelPiece*>& currPieceRow = *iter1;
-						for (std::vector<LevelPiece*>::iterator iter2 = currPieceRow.begin(); iter2 != currPieceRow.end(); ++iter2) {
-							LevelPiece* currPiece = *iter2;
-							delete currPiece;
-							currPiece = NULL;
-						}
-						currPieceRow.clear();
-					}
-					levelPieces.clear();
-
+					GameLevel::CleanUpFileReadData(levelPieces);
 					return NULL;
 			}
 			assert(newPiece != NULL);
@@ -633,6 +624,55 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		levelPieces.insert(levelPieces.begin(), currentRowPieces);
 	}
 
+	// Finished reading in all the blocks for the level, now read in the allowed item drops and their probabilities...
+	std::string itemTypeName;
+	int probabilityNum = 0;
+	size_t randomItemProbabilityNum = 0;
+	std::vector<GameItem::ItemType> allowedDropTypes;
+	while (*inFile >> itemTypeName) {
+		if (!GameItemFactory::GetInstance()->IsValidItemTypeName(itemTypeName)) {
+				debug_output("ERROR: Invalid item type name found in allowable item drop probability list.");
+				GameLevel::CleanUpFileReadData(levelPieces);
+				delete inFile;
+				inFile = NULL;
+				return NULL;
+		}
+
+
+		if (*inFile >> probabilityNum) {
+			if (probabilityNum < 0) {
+				debug_output("ERROR: Poorly formated item drop probability number - must be >= 0.");
+				GameLevel::CleanUpFileReadData(levelPieces);
+				delete inFile;
+				inFile = NULL;
+				return NULL;
+			}
+			else {
+				GameItem::ItemType currItemType = GameItemFactory::GetInstance()->GetItemTypeFromName(itemTypeName);
+				// Ignore random item types...
+				if (currItemType == GameItem::RandomItem) {
+					randomItemProbabilityNum = probabilityNum;
+					continue;
+				}
+				for (int i = 0; i < probabilityNum; i++) {
+					allowedDropTypes.push_back(currItemType);
+				}
+			}
+		}
+		else {
+			debug_output("ERROR: Poorly formated item drop probability list - missing probability number.");
+			GameLevel::CleanUpFileReadData(levelPieces);
+			delete inFile;
+			inFile = NULL;
+			return NULL;
+		}	
+	}
+
+	// If there are no allowed drop types then there should be a zero random item drop probability
+	if (allowedDropTypes.empty()) {
+		randomItemProbabilityNum = 0;
+	}
+
 	delete inFile;
 	inFile = NULL;
 
@@ -641,6 +681,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		if (iter->second == NULL || iter->second->GetSiblingPortal() == NULL || iter->second->GetWidthIndex() < 0
 				|| iter->second->GetHeightIndex() < 0) {
 			debug_output("ERROR: Poorly formatted portal blocks.");
+			GameLevel::CleanUpFileReadData(levelPieces);
 			return NULL;
 		}
 	}
@@ -652,7 +693,21 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		}
 	}
 
-	return new GameLevel(filepath, levelName, numVitalPieces, levelPieces);
+	return new GameLevel(filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum);
+}
+
+void GameLevel::CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& levelPieces) {
+	// Clean up any already loaded pieces...
+	for (std::vector<std::vector<LevelPiece*> >::iterator iter1 = levelPieces.begin(); iter1 != levelPieces.end(); ++iter1) {
+		std::vector<LevelPiece*>& currPieceRow = *iter1;
+		for (std::vector<LevelPiece*>::iterator iter2 = currPieceRow.begin(); iter2 != currPieceRow.end(); ++iter2) {
+			LevelPiece* currPiece = *iter2;
+			delete currPiece;
+			currPiece = NULL;
+		}
+		currPieceRow.clear();
+	}
+	levelPieces.clear();
 }
 
 /**

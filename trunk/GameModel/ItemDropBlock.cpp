@@ -12,12 +12,16 @@
 #include "ItemDropBlock.h"
 #include "GameModel.h"
 #include "PaddleLaserBeam.h"
+#include "GameItemFactory.h"
 
 // Amount of damage the block will take before dropping an item while being hit by a beam
 const float ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP = 150.0f;
+// Amount of time (in milliseconds) that must be waited until another item drop is allowed (for things other than beam damage)
+const unsigned long ItemDropBlock::DISABLE_DROP_TIME = 750;
 
 ItemDropBlock::ItemDropBlock(const std::vector<GameItem::ItemType>& droppableItemTypes, unsigned int wLoc, unsigned int hLoc) : 
-LevelPiece(wLoc, hLoc), allowedItemDropTypes(droppableItemTypes), hitPointsBeforeNextDrop(ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP) {
+LevelPiece(wLoc, hLoc), allowedItemDropTypes(droppableItemTypes), hitPointsBeforeNextDrop(ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP),
+timeOfLastDrop(0) {
 	assert(!droppableItemTypes.empty());
 
 	// Prepare for the next random item...
@@ -29,18 +33,25 @@ ItemDropBlock::~ItemDropBlock() {
 
 // When balls collide with the item drop block it causes an item to fall from the block
 LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-	// Drop an item...
-	gameModel->AddItemDrop(*this, this->nextDropItemType);
-	this->ChangeToNextItemDropType(true);
+	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
+		// Drop an item...
+		gameModel->AddItemDrop(*this, this->nextDropItemType);
+		this->ChangeToNextItemDropType(true);
+	}
+
+	// Tell the ball that it collided with this block
+	ball.SetLastPieceCollidedWith(this);
 
 	return this;
 }
 
 // When projectiles collide with the item drop block it causes an item to fall from the block
 LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-	// Drop an item...
-	gameModel->AddItemDrop(*this, this->nextDropItemType);
-	this->ChangeToNextItemDropType(true);
+	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
+		// Drop an item...
+		gameModel->AddItemDrop(*this, this->nextDropItemType);
+		this->ChangeToNextItemDropType(true);
+	}
 
 	return this;
 }
@@ -67,6 +78,8 @@ LevelPiece* ItemDropBlock::TickBeamCollision(double dT, const BeamSegment* beamS
 void ItemDropBlock::ChangeToNextItemDropType(bool doEvent) {
 	size_t randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->allowedItemDropTypes.size();
 	this->nextDropItemType = this->allowedItemDropTypes[randomIdx];
+	this->nextDropDisposition = GameItemFactory::GetInstance()->GetItemTypeDisposition(this->nextDropItemType);
+	this->timeOfLastDrop = BlammoTime::GetSystemTimeInMillisecs();
 
 	if (doEvent) {
 		// EVENT: Item drop type changed

@@ -326,7 +326,8 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 							this.portalIDs.add(tempLabel.getPortalSiblingID());
 						}
 						else if (tempLabel.getIsTesla()) {
-							
+							this.teslaIDs.add(tempLabel.getBlockID());
+							this.teslaIDs.addAll(tempLabel.getSiblingIDs());
 						}
 						
 						currRow.add(tempLabel);
@@ -453,9 +454,15 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					LevelPiece currLvlPiece = currPieceLbl.getLevelPiece();
 					assert(currLvlPiece != null);
 					
+					if (!currPieceLbl.getIsValid()) {
+						JOptionPane.showMessageDialog(this, "Failed to write level file due to invalid block.", 
+								"Level Format Error", JOptionPane.ERROR_MESSAGE);
+						throw new Exception();
+					}
+					
 					// If we're dealing with a portal block make sure its name and sibling are valid
 					if (currPieceLbl.getIsPortal()) {
-						if (!currPieceLbl.getIsValid() || !currPieceLbl.getHasIDsInGivenSet(this.portalIDs)) {
+						if (!currPieceLbl.getHasIDsInGivenSet(this.portalIDs)) {
 							JOptionPane.showMessageDialog(this, "Failed to write level file due to invalid portal ids.", 
 									"Level Format Error", JOptionPane.ERROR_MESSAGE);
 							throw new Exception();
@@ -465,7 +472,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 								"," + currPieceLbl.getPortalSiblingID() + ")");
 					}
 					else if (currPieceLbl.getIsTesla()) {
-						if (!currPieceLbl.getIsValid() || !currPieceLbl.getHasIDsInGivenSet(this.teslaIDs)) {
+						if (!currPieceLbl.getHasIDsInGivenSet(this.teslaIDs)) {
 							JOptionPane.showMessageDialog(this, "Failed to write level file due to invalid tesla block ids.", 
 									"Level Format Error", JOptionPane.ERROR_MESSAGE);
 							throw new Exception();
@@ -473,6 +480,18 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getIsTeslaOn() + "," +
 						currPieceLbl.getBlockID() + ",";
 						Iterator<Character> iter = currPieceLbl.getSiblingIDs().iterator();
+						while (iter.hasNext()) {
+							outputStr = outputStr + iter.next();
+							if (iter.hasNext()) {
+								outputStr = outputStr + ",";
+							}
+						}
+						outputStr = outputStr + ")";
+						levelFileWriter.write(outputStr);
+					}
+					else if (currPieceLbl.getIsItemDrop()) {
+						String outputStr = currLvlPiece.getSymbol() + "(";
+						Iterator<String> iter = currPieceLbl.getItemDropTypes().iterator();
 						while (iter.hasNext()) {
 							outputStr = outputStr + iter.next();
 							if (iter.hasNext()) {
@@ -763,15 +782,24 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	}
 
 	private class ContextMenuListener implements ActionListener {
-		private LevelPieceEditDialog editDlg;
+		private LevelPieceEditDialog editDlg = null;
+		private EditItemDropsDialog editDlgForItemDropBlks = null;
 		
 		ContextMenuListener(LevelPieceEditDialog editDlg) {
 			this.editDlg = editDlg;
 		}
+		ContextMenuListener(EditItemDropsDialog editDlg) {
+			this.editDlgForItemDropBlks = editDlg;
+		}
+		
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			this.editDlg.setVisible(true);
+			if (this.editDlg != null) {
+				this.editDlg.setVisible(true);
+			}
+			else if (this.editDlgForItemDropBlks != null) {
+				this.editDlgForItemDropBlks.setVisible(true);
+			}
 		}
 		
 	}
@@ -779,22 +807,36 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private void maybeShowContextMenu(MouseEvent e) {
 		if (e.isPopupTrigger()) {
 			LevelPieceImageLabel levelPiece = this.getPieceAtLocation(e.getPoint());
-			Set<Character> allowableIDs = null;
-			if (levelPiece.getIsPortal()) {
-				allowableIDs = this.portalIDs;
-			}
-			else if (levelPiece.getIsTesla()) {
-				allowableIDs = this.teslaIDs;
-			}
 			
-			LevelPieceEditDialog blockEditDlg = new LevelPieceEditDialog(this.levelEditWindow, levelPiece, allowableIDs);
-			JMenuItem blockPropertiesItem = new JMenuItem("Block properties");
-			blockPropertiesItem.addActionListener(new ContextMenuListener(blockEditDlg));
-			
-			// Context menu for the level display panel
-			JPopupMenu levelEditContextMenu = new JPopupMenu();	
-			levelEditContextMenu.add(blockPropertiesItem);
-			levelEditContextMenu.show(e.getComponent(), e.getX(), e.getY());
+			if (levelPiece.getIsItemDrop()) {
+				EditItemDropsDialog blockEditDlg = new EditItemDropsDialog(this.levelEditWindow, levelPiece);
+				JMenuItem blockPropertiesItem = new JMenuItem("Block properties");
+				blockPropertiesItem.addActionListener(new ContextMenuListener(blockEditDlg));
+				
+				// Context menu for the level display panel
+				JPopupMenu levelEditContextMenu = new JPopupMenu();	
+				levelEditContextMenu.add(blockPropertiesItem);
+				levelEditContextMenu.show(e.getComponent(), e.getX(), e.getY());
+				
+			}
+			else {
+				Set<Character> allowableIDs = null;
+				if (levelPiece.getIsPortal()) {
+					allowableIDs = this.portalIDs;
+				}
+				else if (levelPiece.getIsTesla()) {
+					allowableIDs = this.teslaIDs;
+				}
+				
+				LevelPieceEditDialog blockEditDlg = new LevelPieceEditDialog(this.levelEditWindow, levelPiece, allowableIDs);
+				JMenuItem blockPropertiesItem = new JMenuItem("Block properties");
+				blockPropertiesItem.addActionListener(new ContextMenuListener(blockEditDlg));
+				
+				// Context menu for the level display panel
+				JPopupMenu levelEditContextMenu = new JPopupMenu();	
+				levelEditContextMenu.add(blockPropertiesItem);
+				levelEditContextMenu.show(e.getComponent(), e.getX(), e.getY());
+			}
 		}
 	}
 	
