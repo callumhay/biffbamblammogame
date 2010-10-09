@@ -290,8 +290,8 @@ void ESPEmitter::Draw(const Camera& camera, const Vector3D& worldTranslation, bo
 		glEnable(GL_POINT_SPRITE);
 		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 		glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
-		glPointParameterf(GL_POINT_SIZE_MAX, 9999.0f);
-		glPointParameterf(GL_POINT_SIZE_MIN, 0.0f);
+		//glPointParameterf(GL_POINT_SIZE_MAX, 9999.0f);
+		//glPointParameterf(GL_POINT_SIZE_MIN, 0.0f);
 
 		for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
 			ESPParticle* currParticle = *iter;

@@ -153,12 +153,13 @@ void GameController::KeyUp(SDLKey key, SDLMod modifier) {
 void GameController::Tick() {
 
 	// Paddle controls (NOTE: the else is to make the feedback slicker)
-	int paddleDir = this->model->AreControlsFlipped() ? 1 : -1;
 	if (this->keyPressed[SDLK_LEFT]) {
-		this->model->MovePaddle(PlayerPaddle::LeftPaddleMovement);
+		PlayerPaddle::PaddleMovement leftDir = this->model->AreControlsFlipped() ? PlayerPaddle::RightPaddleMovement : PlayerPaddle::LeftPaddleMovement;
+		this->model->MovePaddle(leftDir);
 	}
 	else if (this->keyPressed[SDLK_RIGHT]) {
-		this->model->MovePaddle(PlayerPaddle::RightPaddleMovement);
+		PlayerPaddle::PaddleMovement rightDir = this->model->AreControlsFlipped() ? PlayerPaddle::LeftPaddleMovement : PlayerPaddle::RightPaddleMovement;
+		this->model->MovePaddle(rightDir);
 	}
 	else {
 		this->model->MovePaddle(PlayerPaddle::NoPaddleMovement);

@@ -198,13 +198,41 @@ void BallInPlayState::Tick(double seconds) {
 						}
 					}
 
-					if (!currPiece->BallBouncesOffWhenHit()) {
-						// If the piece doesnt have bounds to bounce off of then don't bounce the ball
+					// If the piece doesnt have bounds to bounce off of then don't bounce the ball OR
+					// In the case that the ball is uber then we only reflect if the ball is not green OR
+					// The ball is attached to the paddle (special case)
+					if (!currPiece->BallBouncesOffWhenHit() ||
+						  (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->UberballBlastsThrough())) {
 						// Ignore collision...
 					}
-					else if (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->UberballBlastsThrough()) {
-						// In the case that the ball is uber then we only reflect if the ball is not green
-						// Ignore collision...
+					else if (paddle->GetAttachedBall() == currBall) {
+						// Ignore the collison FOR THE BALL ONLY - the paddle should recoil since the ball attached to it just
+						// hit a block and balls tend to be bouncy in the bbb universe
+						
+						float xRecoilDir = n[0];
+						// Figure out the recoil direction by projecting the normal of the collision onto the x-axis
+						if (fabs(xRecoilDir) < EPSILON) {
+							// Annoying case: seems, somehow, that the ball collided with a side that is completely parallel to the x-axis
+
+							// First see what the vector from the center of the collided block to the ball is and use it's x-component...
+							xRecoilDir = (currBall->GetCenterPosition2D() - currPiece->GetCenter())[0];
+							if (fabs(xRecoilDir) < EPSILON) {
+								// Really annoying case: somehow the ball is almost at the center line of the block, wtf??, anyway, just pick the opposite
+								// of the paddle moving direction
+								xRecoilDir = paddle->GetLastMovingDirection();
+
+								if (fabs(xRecoilDir) < EPSILON) {
+									// This should just never happen, but in case it somehow does, pick a freaking random number (-1 or 1), geez
+									xRecoilDir = Randomizer::GetInstance()->RandomNegativeOrPositive();
+								}
+							}
+						}
+						
+						// Make sure it's normalized (just use signof function to get either -1 or 1)
+						xRecoilDir = NumberFuncs::SignOf(xRecoilDir);
+						
+						// Now we need to apply an impulse to the paddle in the direction of the recoil...
+						paddle->ApplyImpulseForce(fabs(paddle->GetSpeed()) * xRecoilDir);
 					}
 					else {
 						// Make the ball react to the collision

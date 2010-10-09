@@ -145,6 +145,8 @@ private:
 	std::string filepath;
 	std::string levelName;
 
+	
+
 	std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
 	size_t randomItemProbabilityNum;									// A number >= 0 for random item probability in the level
 
