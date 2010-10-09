@@ -31,7 +31,7 @@ double CrazyBallItem::Activate() {
 	
 	// Make the ball crazy, but slow it down a bit as well (in order to accomodate the craziness)
 	affectedBall->AddBallType(GameBall::CrazyBall);
-	affectedBall->DecreaseSpeed();
+	//affectedBall->DecreaseSpeed();
 
 	GameItem::Activate();
 	return CrazyBallItem::CRAZY_BALL_TIMER_IN_SECS;

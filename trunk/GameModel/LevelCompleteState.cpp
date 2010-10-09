@@ -65,7 +65,7 @@ void LevelCompleteState::Tick(double seconds) {
 	}
 	else {
 		// We are infact going to the next level...
-		currWorld->IncrementLevel();
+		currWorld->IncrementLevel(this->gameModel);
 		// Place the ball back on the paddle, and let the next level begin!
 		this->gameModel->SetNextState(new BallOnPaddleState(this->gameModel));
 	}

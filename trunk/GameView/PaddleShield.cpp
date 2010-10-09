@@ -191,7 +191,7 @@ void PaddleShield::DrawRefractionWithAura(const PlayerPaddle& paddle, const Came
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4f(SHIELD_COLOUR.R(), SHIELD_COLOUR.G(), SHIELD_COLOUR.B(), 1.0f);
-	glEnable(GL_TEXTURE_2D);
+
 	this->haloTex->BindTexture();
 	GeometryMaker::GetInstance()->DrawQuad();
 

@@ -85,21 +85,6 @@ piecesLeft(numBlocks), ballSafetyNetActive(false), filepath(filepath), levelName
 	
 	this->safetyNetBounds = BoundingLines(lines, normals);
 
-	// Initialize the tesla lightning barriers already in existance...
-	for (size_t h = 0; h < this->currentLevelPieces.size(); h++) {
-		for (size_t w = 0; w < this->currentLevelPieces[h].size(); w++) {
-			LevelPiece* currPiece = this->currentLevelPieces[h][w];
-			if (currPiece->GetType() == LevelPiece::Tesla) {
-				TeslaBlock* currTeslaBlk = dynamic_cast<TeslaBlock*>(currPiece);
-				assert(currTeslaBlk != NULL);
-				std::list<TeslaBlock*> activeConnectedBlks = currTeslaBlk->GetLightningArcTeslaBlocks();
-				for (std::list<TeslaBlock*>::const_iterator iter = activeConnectedBlks.begin(); iter != activeConnectedBlks.end(); ++iter) {
-					this->AddTeslaLightningBarrier(NULL, currTeslaBlk, *iter);
-				}
-			}
-		}
-	}
-
 	// Set the quad tree for the level
 	//Point2D levelMax(this->GetLevelUnitWidth(), this->GetLevelUnitHeight());
 	//this->levelTree = new QuadTree(Collision::AABB2D(Point2D(0, 0), levelMax), Vector2D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT));
@@ -238,10 +223,26 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						}
 						bool startsOn = (tempChar == '1') ? true : false;
 
+
 						// Should be a comma after the on/off...
 						*inFile >> tempChar;
 						if (tempChar != ',') {
-							debug_output("ERROR: poorly formed tesla block syntax, missing ',' after the name.");
+							debug_output("ERROR: poorly formed tesla block syntax, missing ',' after the on/off option.");
+							break;
+						}
+
+						// Read whether the block is changable or not
+						*inFile >> tempChar;
+						if (tempChar != '1' && tempChar != '0') {
+							debug_output("ERROR: poorly formed tesla block syntax, missing the [1|0] to indicate whether the block is changable or not");
+							break;
+						}
+						bool isChangable = (tempChar == '1') ? true : false;
+
+						// Should be a comma after the changable...
+						*inFile >> tempChar;
+						if (tempChar != ',') {
+							debug_output("ERROR: poorly formed tesla block syntax, missing ',' after the changable option.");
 							break;
 						}
 
@@ -325,7 +326,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							else {
 								assert(siblingTeslaBlock == NULL);
 								// No sibling tesla block with the current name exists yet, create one and add it to the list
-								siblingTeslaBlock = new TeslaBlock(false, 0, 0);
+								siblingTeslaBlock = new TeslaBlock(false, false, 0, 0);
 								siblingTeslaBlocks.push_back(siblingTeslaBlock);
 								insertResult = teslaBlocks.insert(std::make_pair(siblingName, siblingTeslaBlock));
 								if (!insertResult.second) {
@@ -345,7 +346,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 
 						if (currentTeslaBlock == NULL) {
 							// No tesla block has been created for the current name yet, create one.
-							currentTeslaBlock = new TeslaBlock(startsOn, pieceWLoc, pieceHLoc);
+							currentTeslaBlock = new TeslaBlock(startsOn, isChangable, pieceWLoc, pieceHLoc);
 							currentTeslaBlock->SetConnectedTeslaBlockList(siblingTeslaBlocks);
 							insertResult = teslaBlocks.insert(std::make_pair(teslaBlockName, currentTeslaBlock));
 							if (!insertResult.second) {
@@ -362,6 +363,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							assert(currentTeslaBlock->GetConnectedTeslaBlockList().empty());
 							currentTeslaBlock->SetConnectedTeslaBlockList(siblingTeslaBlocks);
 							currentTeslaBlock->SetElectricityIsActive(startsOn);
+							currentTeslaBlock->SetIsChangable(isChangable);
 						}
 						
 						// We need to inform the level about any initially 'on' tesla blocks!!!
@@ -630,42 +632,68 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 	size_t randomItemProbabilityNum = 0;
 	std::vector<GameItem::ItemType> allowedDropTypes;
 	while (*inFile >> itemTypeName) {
-		if (!GameItemFactory::GetInstance()->IsValidItemTypeName(itemTypeName)) {
-				debug_output("ERROR: Invalid item type name found in allowable item drop probability list.");
-				GameLevel::CleanUpFileReadData(levelPieces);
-				delete inFile;
-				inFile = NULL;
-				return NULL;
+		// There are some special keywords that we need to check for first...
+		if (itemTypeName.compare(ALL_ITEM_TYPES_KEYWORD) == 0) {
+			// Add all item types...
+			std::set<GameItem::ItemType> allItemTypes = GameItemFactory::GetInstance()->GetAllItemTypes();
+			allItemTypes.erase(GameItem::RandomItem);
+			randomItemProbabilityNum++;
+			allowedDropTypes.insert(allowedDropTypes.end(), allItemTypes.begin(), allItemTypes.end());
 		}
-
-
-		if (*inFile >> probabilityNum) {
-			if (probabilityNum < 0) {
-				debug_output("ERROR: Poorly formated item drop probability number - must be >= 0.");
-				GameLevel::CleanUpFileReadData(levelPieces);
-				delete inFile;
-				inFile = NULL;
-				return NULL;
-			}
-			else {
-				GameItem::ItemType currItemType = GameItemFactory::GetInstance()->GetItemTypeFromName(itemTypeName);
-				// Ignore random item types...
-				if (currItemType == GameItem::RandomItem) {
-					randomItemProbabilityNum = probabilityNum;
-					continue;
-				}
-				for (int i = 0; i < probabilityNum; i++) {
-					allowedDropTypes.push_back(currItemType);
-				}
-			}
+		else if (itemTypeName.compare(POWERUP_ITEM_TYPES_KEYWORD) == 0) {
+			// Add all power-up item types
+			const std::set<GameItem::ItemType>& powerUpItemTypes = GameItemFactory::GetInstance()->GetPowerUpItemTypes();
+			allowedDropTypes.insert(allowedDropTypes.end(), powerUpItemTypes.begin(), powerUpItemTypes.end());
+		}
+		else if (itemTypeName.compare(POWERNEUTRAL_ITEM_TYPES_KEYWORD) == 0) {
+			// Add all power-neutral item types
+			std::set<GameItem::ItemType> powerNeutralItemTypes = GameItemFactory::GetInstance()->GetPowerNeutralItemTypes();
+			powerNeutralItemTypes.erase(GameItem::RandomItem);
+			randomItemProbabilityNum++;
+			allowedDropTypes.insert(allowedDropTypes.end(), powerNeutralItemTypes.begin(), powerNeutralItemTypes.end());
+		}
+		else if (itemTypeName.compare(POWERDOWN_ITEM_TYPES_KEYWORD) == 0) {
+			// Add all power-up item types
+			const std::set<GameItem::ItemType>& powerDownItemTypes = GameItemFactory::GetInstance()->GetPowerDownItemTypes();
+			allowedDropTypes.insert(allowedDropTypes.end(), powerDownItemTypes.begin(), powerDownItemTypes.end());
 		}
 		else {
-			debug_output("ERROR: Poorly formated item drop probability list - missing probability number.");
-			GameLevel::CleanUpFileReadData(levelPieces);
-			delete inFile;
-			inFile = NULL;
-			return NULL;
-		}	
+			if (!GameItemFactory::GetInstance()->IsValidItemTypeName(itemTypeName)) {
+					debug_output("ERROR: Invalid item type name found in allowable item drop probability list.");
+					GameLevel::CleanUpFileReadData(levelPieces);
+					delete inFile;
+					inFile = NULL;
+					return NULL;
+			}
+
+			if (*inFile >> probabilityNum) {
+				if (probabilityNum < 0) {
+					debug_output("ERROR: Poorly formated item drop probability number - must be >= 0.");
+					GameLevel::CleanUpFileReadData(levelPieces);
+					delete inFile;
+					inFile = NULL;
+					return NULL;
+				}
+				else {
+					GameItem::ItemType currItemType = GameItemFactory::GetInstance()->GetItemTypeFromName(itemTypeName);
+					// Ignore random item types...
+					if (currItemType == GameItem::RandomItem) {
+						randomItemProbabilityNum = probabilityNum;
+						continue;
+					}
+					for (int i = 0; i < probabilityNum; i++) {
+						allowedDropTypes.push_back(currItemType);
+					}
+				}
+			}
+			else {
+				debug_output("ERROR: Poorly formated item drop probability list - missing probability number.");
+				GameLevel::CleanUpFileReadData(levelPieces);
+				delete inFile;
+				inFile = NULL;
+				return NULL;
+			}	
+		}
 	}
 
 	// If there are no allowed drop types then there should be a zero random item drop probability
@@ -1072,8 +1100,6 @@ bool GameLevel::PaddleSafetyNetCollisionCheck(const PlayerPaddle& p) {
 
 // Add a newly activated lightning barrier for the tesla block
 void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2) {
-	assert(gameModel != NULL);
-
 	// Check to see if the barrier already exists, if it does then just exit with no change
 	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::iterator findIter =
 		this->teslaLightning.find(std::make_pair(block1, block2));
@@ -1197,6 +1223,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	n.Normalize();
 
 	// Now we need to calculate the time since the collision
+	assert(lineToBallCenterSqDist >= 0);
 	double collisionOverlapDist = fabs(ballBounds.Radius() - sqrt(lineToBallCenterSqDist));
 	timeSinceCollision = collisionOverlapDist / b.GetSpeed();
 	assert(timeSinceCollision >= 0.0);
@@ -1225,4 +1252,21 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	GameEventManager::Instance()->ActionBallHitTeslaLightningArc(b, *iter->first.first, *iter->first.second);
 
 	return true;
+}
+
+void GameLevel::InitAfterLevelLoad(GameModel* model) {
+	// Initialize the tesla lightning barriers already in existance...
+	for (size_t h = 0; h < this->currentLevelPieces.size(); h++) {
+		for (size_t w = 0; w < this->currentLevelPieces[h].size(); w++) {
+			LevelPiece* currPiece = this->currentLevelPieces[h][w];
+			if (currPiece->GetType() == LevelPiece::Tesla) {
+				TeslaBlock* currTeslaBlk = dynamic_cast<TeslaBlock*>(currPiece);
+				assert(currTeslaBlk != NULL);
+				std::list<TeslaBlock*> activeConnectedBlks = currTeslaBlk->GetLightningArcTeslaBlocks();
+				for (std::list<TeslaBlock*>::const_iterator iter = activeConnectedBlks.begin(); iter != activeConnectedBlks.end(); ++iter) {
+					this->AddTeslaLightningBarrier(model, currTeslaBlk, *iter);
+				}
+			}
+		}
+	}
 }

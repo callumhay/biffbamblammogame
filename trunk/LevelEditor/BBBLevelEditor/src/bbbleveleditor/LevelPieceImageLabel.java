@@ -17,8 +17,8 @@ import javax.swing.JLabel;
 public class LevelPieceImageLabel extends JLabel {
 	private static final long serialVersionUID = 1L;
 	
-	private static final Font portalFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-	private static final Font teslaFont  = new Font(Font.SANS_SERIF, Font.BOLD, 14);
+	private static final Font portalFont = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
+	private static final Font teslaFont  = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
 	
 	public static final char INVALID_ID = '\0';
 	
@@ -29,6 +29,7 @@ public class LevelPieceImageLabel extends JLabel {
 	private char blockID;
 	private Set<Character> siblingIDs = new TreeSet<Character>();
 	private boolean teslaBlockStartsOn;
+	private boolean teslaIsChangable;
 	
 	private ArrayList<String> itemDropTypes = new ArrayList<String>();
 	
@@ -42,6 +43,7 @@ public class LevelPieceImageLabel extends JLabel {
 	public LevelPieceImageLabel(LevelPiece piece) {
 		this.blockID = INVALID_ID;
 		this.teslaBlockStartsOn = false;
+		this.teslaIsChangable   = true;
 		this.setLevelPiece(piece);
 		this.itemDropTypes.add("all");
 	}
@@ -66,9 +68,12 @@ public class LevelPieceImageLabel extends JLabel {
 				}
 				else if (currSiblingID.length() == 1){
 					if (i == 0) {
-						teslaBlockStartsOn = (currSiblingID.charAt(0) == '1') ? true : false;
+						this.teslaBlockStartsOn = (currSiblingID.charAt(0) == '1') ? true : false;
 					}
-					else if (i == 1) {
+					if (i == 1) {
+						this.teslaIsChangable = (currSiblingID.charAt(0) == '1') ? true : false;
+					}
+					else if (i == 2) {
 						this.blockID = currSiblingID.charAt(0);
 					}
 					else {
@@ -109,6 +114,22 @@ public class LevelPieceImageLabel extends JLabel {
 	
 	public char getIsTeslaOn() {
 		return this.teslaBlockStartsOn ? '1' : '0';
+	}
+	public boolean getIsTeslaOnBool() {
+		return this.teslaBlockStartsOn;
+	}
+	void setTeslaStartsOn(boolean startsOn) {
+		this.teslaBlockStartsOn = startsOn;
+	}
+	
+	public char getIsTeslaChangable() {
+		return this.teslaIsChangable ? '1' : '0';
+	}
+	public boolean getIsTeslaChangableBool() {
+		return this.teslaIsChangable;
+	}
+	void setTeslaChangable(boolean changable) {
+		this.teslaIsChangable = changable;
 	}
 	
 	public boolean getIsValid() {
@@ -213,6 +234,8 @@ public class LevelPieceImageLabel extends JLabel {
 			g.drawString(portalString, 4, this.getHeight()/2 + 2);
 			g.setColor(Color.CYAN);
 			g.drawString(portalString, 2, this.getHeight()/2);
+			
+			this.setToolTipText("Portal block: " + portalString);
 		}
 		else if (this.getIsTesla()) {
 			String teslaString = this.getTeslaID() + " : (";
@@ -229,8 +252,11 @@ public class LevelPieceImageLabel extends JLabel {
 			g.drawString(teslaString, 4, this.getHeight()/2 + 2);
 			g.setColor(Color.CYAN);
 			g.drawString(teslaString, 2, this.getHeight()/2);
+			String onOffString = this.teslaBlockStartsOn ? "On" : "Off";
+			g.drawString(onOffString, 2, 2);
 			
-			g.drawString(this.teslaBlockStartsOn ? "On" : "Off", 2, 2);
+			this.setToolTipText("Tesla block: " + onOffString + ", " + teslaString);
 		}
+		
 	}
 }

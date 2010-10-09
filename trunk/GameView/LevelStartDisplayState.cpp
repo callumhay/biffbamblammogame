@@ -118,6 +118,8 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 
 	// Fade in the level pieces...
 	this->display->GetAssets()->GetCurrentLevelMesh()->SetLevelAlpha(this->blockFadeInAnimation.GetInterpolantValue());
+	// Fade in tesla lightning...
+	this->display->GetAssets()->GetESPAssets()->SetTeslaLightiningAlpha(this->blockFadeInAnimation.GetInterpolantValue());
 
 	PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
 	GameBall* ball       = this->display->GetModel()->GetGameBalls().front();

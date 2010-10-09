@@ -39,25 +39,35 @@ const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.8f;
 // (bigger is slower, smaller is faster)
 const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 
-// Default speed of the paddle
-const float PlayerPaddle::DEFAULT_SPEED = 24.0f;
-// Speed amount taken off the paddle when poisoned
-const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_SPEED / 2.75f;
+// Default speed of the paddle (units/sec)
+const float PlayerPaddle::DEFAULT_MAX_SPEED = 24.0f;
+// Default acceleration/decceleration of the paddle (units/sec^2)
+const float PlayerPaddle::DEFAULT_ACCELERATION  = 120.0f;
+const float PlayerPaddle::DEFAULT_DECCELERATION = -115.0f;
+
+// Speed amount to diminish from the max speed when the paddle is poisoned
+const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 2.9f;
+
+// The coefficent angle change of the ball when deflected by a moving paddle
+const int PlayerPaddle::DEFLECTION_DEGREE_ANGLE = 20; // TODO: Fix this...
+
 // Delay between shots of the laser
-const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.25;
+const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.3;
 
 PlayerPaddle::PlayerPaddle() : 
-	centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), speed(DEFAULT_SPEED), distTemp(0.0f), 
-	avgVel(0.0f), ticksSinceAvg(0), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
-	hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
-	attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false) {
+centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDirection(0.0f), 
+maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_ACCELERATION), 
+decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
+moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
+attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false) {
 
-	this->SetupAnimations();
-	this->SetDimensions(PlayerPaddle::NormalSize);
+	this->ResetPaddle();
 }
 
 PlayerPaddle::PlayerPaddle(float minBound, float maxBound) : 
-speed(DEFAULT_SPEED), distTemp(0.0f), avgVel(0.0f), ticksSinceAvg(0), 
+centerPos(0.0f, 0.0f), currSpeed(0.0f), lastDirection(0.0f), moveButtonDown(false), 
+acceleration(PlayerPaddle::DEFAULT_ACCELERATION), decceleration(PlayerPaddle::DEFAULT_DECCELERATION),
+currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), attachedBall(NULL),
 hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false) {
 
 	this->SetupAnimations();
@@ -201,8 +211,8 @@ void PlayerPaddle::FireAttachedBall() {
 	// Set the ball's new trajectory in order for it to leave the paddle
 	Vector2D ballReleaseDir = GameBall::STD_INIT_VEL_DIR;
 
-	// Get the paddle's avg. velocity
-	Vector2D avgPaddleVel = this->GetAvgVelocity();
+	// Get the paddle's velocity
+	Vector2D avgPaddleVel = this->GetVelocity();
 
 	// Check for the sticky paddle - in the case of the sticky paddle we want the ball to not get stuck again..
 	if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
@@ -224,7 +234,7 @@ void PlayerPaddle::FireAttachedBall() {
 		else {
 			// The paddle appears to be moving, modify the ball's release velocity
 			// to reflect some of this movement
-			float multiplier = PlayerPaddle::DEFAULT_SPEED / static_cast<float>(GameBall::NormalSpeed);
+			float multiplier = PlayerPaddle::DEFAULT_MAX_SPEED / static_cast<float>(GameBall::NormalSpeed);
 			Vector2D newBallDir = Vector2D::Normalize(ballReleaseDir + multiplier * avgPaddleVel);
 			
 			// and, of course, add some randomness...
@@ -270,7 +280,7 @@ void PlayerPaddle::MoveAttachedBallToNewBounds(double dT) {
 	this->attachedBall->SetCenterPosition(closestPtOnBounds + this->attachedBall->GetBounds().Radius() * this->GetUpVector());
 }
 
-void PlayerPaddle::Tick(double seconds) {
+void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement) {
 	Point2D startingCenterPos = this->centerPos;
 	Point2D defaultCenterPos = this->GetDefaultCenterPosition();
 
@@ -288,8 +298,25 @@ void PlayerPaddle::Tick(double seconds) {
 		this->timeSinceLastLaserBlast += seconds;
 	}
 
-	float distanceTravelled = this->distTemp * seconds;
-	float newCenterX = this->centerPos[0] + (this->distTemp * seconds);
+	// Figure out what the current acceleration is based on whether the player
+	// is currently telling the paddle to move or not
+	float distanceTravelled;
+	if (pausePaddleMovement) {
+		distanceTravelled = 0.0f;
+	}
+	else {
+		float currAcceleration;
+		if (this->moveButtonDown) {
+			currAcceleration = this->acceleration;
+		}
+		else {
+			currAcceleration = this->decceleration;
+		}
+		this->currSpeed = std::max<float>(0.0f, std::min<float>(this->maxSpeed, this->currSpeed + currAcceleration * seconds));
+		distanceTravelled = this->GetSpeed() * seconds;
+	}
+
+	float newCenterX = this->centerPos[0] + distanceTravelled;
 	float minNewXPos = newCenterX - this->currHalfWidthTotal;
 	float maxNewXPos = newCenterX + this->currHalfWidthTotal;
 	Point2D oldPaddleCenter = this->centerPos;
@@ -321,11 +348,8 @@ void PlayerPaddle::Tick(double seconds) {
 		// The paddle bumped into the left wall
 		this->centerPos[0] = this->minBound + halfWidthTotalWithBallMin;
 		
-		if (this->hitWall) {
-			this->distTemp = 0.0f;
-		}
-		// Only do the event if the paddle is on the normal plane of movement
-		else if (this->moveDownAnimation.GetInterpolantValue() == 0.0) {
+		// Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
+		if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
 			// EVENT: paddle hit left wall for first time
 			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-halfWidthTotalWithBallMin, 0));
 		}
@@ -336,11 +360,8 @@ void PlayerPaddle::Tick(double seconds) {
 		// The paddle bumped into the right wall
 		this->centerPos[0] = this->maxBound - halfWidthTotalWithBallMax;
 		
-		if (this->hitWall) {
-			this->distTemp = 0.0f;
-		}
-		// Only do the event if the paddle is on the normal plane of movement
-		else if (this->moveDownAnimation.GetInterpolantValue() == 0.0) {
+		// Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
+		if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
 			// EVENT: paddle hit right wall for first time
 			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(halfWidthTotalWithBallMax, 0));
 		}
@@ -351,15 +372,16 @@ void PlayerPaddle::Tick(double seconds) {
 		this->hitWall = false;
 	}
 
-	// TODO: Fix this to work nicer
+	/*
+	// Figure out the average speed over some number of ticks ... don't know if I actually need this...
 	if (this->ticksSinceAvg == 0) {
-		this->avgVel = this->distTemp;
+		this->avgVel = this->currSpeed;
 	}
 	else {
-		this->avgVel = (this->avgVel + this->distTemp) * 0.5f;
+		this->avgVel = (this->avgVel + this->currSpeed) * 0.5f;
 	}
 	this->ticksSinceAvg = (this->ticksSinceAvg + 1) % AVG_OVER_TICKS;
-	this->distTemp = 0.0f;
+	*/
 
 	// Change the size gradually (lerp based on some constant time) if need be...
 	int diffFromNormalSize = static_cast<int>(this->currSize) - static_cast<int>(PlayerPaddle::NormalSize);
@@ -383,6 +405,27 @@ void PlayerPaddle::Tick(double seconds) {
 	}
 }
 
+ void PlayerPaddle::AddPaddleType(const PaddleType& type) {
+		this->currType = this->currType | type;
+		switch (type) {
+			case PlayerPaddle::PoisonPaddle:
+				this->maxSpeed -= PlayerPaddle::POISON_SPEED_DIMINISH;
+				break;
+			default:
+				break;
+		}
+	}
+
+void PlayerPaddle::RemovePaddleType(const PaddleType& type) {
+	this->currType = this->currType & ~type;
+	switch (type) {
+			case PlayerPaddle::PoisonPaddle:
+				this->maxSpeed += PlayerPaddle::POISON_SPEED_DIMINISH;
+				break;
+			default:
+				break;
+	}
+}
 
 // Tells the paddle that it has started to fire the laser beam (or has stopped firing the laser beam)
 void PlayerPaddle::SetIsLaserBeamFiring(bool isFiring) {

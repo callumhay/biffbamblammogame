@@ -477,8 +477,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 									"Level Format Error", JOptionPane.ERROR_MESSAGE);
 							throw new Exception();
 						}
-						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getIsTeslaOn() + "," +
-						currPieceLbl.getBlockID() + ",";
+						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getIsTeslaOn() + "," + currPieceLbl.getIsTeslaChangable() + "," + currPieceLbl.getBlockID() + ",";
 						Iterator<Character> iter = currPieceLbl.getSiblingIDs().iterator();
 						while (iter.hasNext()) {
 							outputStr = outputStr + iter.next();

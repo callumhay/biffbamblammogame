@@ -287,11 +287,11 @@ public:
 	// Paddle and ball related manipulators *********************************
 
 	// Move the paddle a distance in either positive or negative X direction.
-	void MovePaddle(float dist) {
+	void MovePaddle(const PlayerPaddle::PaddleMovement& paddleMovement) {
 		// Can only move the paddle if the state exists and is not paused
 		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
 			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
-			this->currState->MovePaddleKeyPressed(dist);
+				 this->currState->MovePaddleKeyPressed(paddleMovement);
 		}
 	}
 	// Release the ball from the paddle, shoot lasers and activate other power ups

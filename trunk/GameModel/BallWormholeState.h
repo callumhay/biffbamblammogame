@@ -17,7 +17,7 @@ public:
 	}
 
 	void Tick(double seconds);
-	void MovePaddleKeyPressed(float dist);
+	void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement);
 	void BallReleaseKeyPressed() {}
 
 private:

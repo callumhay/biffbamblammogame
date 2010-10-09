@@ -233,6 +233,7 @@ public:
 
 	void AddTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2, const Vector3D& levelTranslation);
 	void RemoveTeslaLightningBarrierEffect(const TeslaBlock& block1, const TeslaBlock& block2);
+	void SetTeslaLightiningAlpha(float alpha);
 
 	void AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition);
 

@@ -1,6 +1,8 @@
 #ifndef __GAMESTATE_H__
 #define __GAMESTATE_H__
 
+#include "PlayerPaddle.h"
+
 class GameModel;
 
 class GameState {
@@ -19,9 +21,7 @@ public:
 
 	virtual void Tick(double seconds) = 0;
 	virtual void BallReleaseKeyPressed() = 0;
-	virtual void MovePaddleKeyPressed(float dist);
-	
-	 
-
+	virtual void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement);
 };
+
 #endif

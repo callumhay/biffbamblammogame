@@ -3,7 +3,7 @@ Pretty much an empty level for testing
 S S S S S S S S S S S S
 S E E E E E E E E E E S
 S E E E E E E E E E E S
-S E E E E E E E E E E S
+S A(1,0,a,b) E E E E E E E E A(1,0,b,a) S
 S E E E E E E E E E E S
 S E E E E E E E E E E S
 S E E E E E E E E E E S

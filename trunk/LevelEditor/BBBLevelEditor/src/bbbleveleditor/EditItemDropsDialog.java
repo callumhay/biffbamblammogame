@@ -28,6 +28,10 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 	private ItemDropTable powerNeutralsTable;
 	private ItemDropTable powerDownsTable;
 	
+	private JComboBox powerUpsLikelyhoodComboBox;
+	private JComboBox powerNeutralsLikelyhoodComboBox;
+	private JComboBox powerDownsLikelyhoodComboBox;
+	
 	public EditItemDropsDialog(BBBLevelEditMainWindow window) {
 		super(window, "Level Drop Items", true);
 		
@@ -134,6 +138,22 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 		this.cancelButton = new JButton("Cancel");
 		this.cancelButton.setActionCommand("Cancel");
 		this.cancelButton.addActionListener(this);
+	
+		this.powerUpsLikelyhoodComboBox = new JComboBox(ItemDrop.LIKEYIHOOD_STRINGS);
+		this.powerUpsLikelyhoodComboBox.setEditable(false);
+		this.powerUpsLikelyhoodComboBox.setActionCommand("AllPowerUpsComboBox");
+		this.powerUpsLikelyhoodComboBox.addActionListener(this);
+		
+		this.powerNeutralsLikelyhoodComboBox = new JComboBox(ItemDrop.LIKEYIHOOD_STRINGS);
+		this.powerNeutralsLikelyhoodComboBox.setEditable(false);
+		this.powerNeutralsLikelyhoodComboBox.setActionCommand("AllPowerNeutralsComboBox");
+		this.powerNeutralsLikelyhoodComboBox.addActionListener(this);
+		
+		this.powerDownsLikelyhoodComboBox = new JComboBox(ItemDrop.LIKEYIHOOD_STRINGS);
+		this.powerDownsLikelyhoodComboBox.setEditable(false);		
+		this.powerDownsLikelyhoodComboBox.setActionCommand("AllPowerDownsComboBox");
+		this.powerDownsLikelyhoodComboBox.addActionListener(this);
+		
 		
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		buttonPanel.add(this.okButton);
@@ -186,6 +206,7 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 		JScrollPane powerUpTableScroll 		= new JScrollPane(this.powerUpsTable);
 		JScrollPane powerNeutralTableScroll	= new JScrollPane(this.powerNeutralsTable);
 		JScrollPane powerDownTableScroll	= new JScrollPane(this.powerDownsTable);
+		
 		this.powerUpsTable.setFillsViewportHeight(true);
 		this.powerNeutralsTable.setFillsViewportHeight(true);
 		this.powerDownsTable.setFillsViewportHeight(true);
@@ -195,11 +216,29 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 		powerNeutralTableScroll.setBorder(BorderFactory.createTitledBorder(blackLine, "Power-Neutral Items"));
 		powerDownTableScroll.setBorder(BorderFactory.createTitledBorder(blackLine, "Power-Down Items"));
 		
+		JPanel powerUpComboBoxPanel = new JPanel();
+		powerUpComboBoxPanel.setLayout(new FlowLayout());
+		powerUpComboBoxPanel.add(new JLabel("Set all power-up likelihoods:"));
+		powerUpComboBoxPanel.add(this.powerUpsLikelyhoodComboBox);
+		
+		JPanel powerNeutralComboBoxPanel = new JPanel();
+		powerNeutralComboBoxPanel.setLayout(new FlowLayout());
+		powerNeutralComboBoxPanel.add(new JLabel("Set all power-neutral likelihoods:"));
+		powerNeutralComboBoxPanel.add(this.powerNeutralsLikelyhoodComboBox);
+		
+		JPanel powerDownComboBoxPanel = new JPanel();
+		powerDownComboBoxPanel.setLayout(new FlowLayout());
+		powerDownComboBoxPanel.add(new JLabel("Set all power-down likelihoods:"));
+		powerDownComboBoxPanel.add(this.powerDownsLikelyhoodComboBox);	
+		
 		JPanel tablePanel = new JPanel();
 		tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.Y_AXIS));
 		tablePanel.add(powerUpTableScroll);
+		tablePanel.add(powerUpComboBoxPanel);
 		tablePanel.add(powerNeutralTableScroll);
+		tablePanel.add(powerNeutralComboBoxPanel);
 		tablePanel.add(powerDownTableScroll);
+		tablePanel.add(powerDownComboBoxPanel);
 		
 		this.setLayout(new BorderLayout());
 		this.add(tablePanel, BorderLayout.CENTER);
@@ -327,6 +366,24 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 			}
 
 		}
+		else if (e.getActionCommand().equals("AllPowerUpsComboBox")) {
+			ItemDropTableModel powerUpsData      = (ItemDropTableModel)this.powerUpsTable.getModel();
+			for (int i = 0; i < powerUpsData.getRowCount(); i++) {
+				powerUpsData.setItemLikelihoodAtRow(i, this.powerUpsLikelyhoodComboBox.getSelectedIndex());
+			}
+		}
+		else if (e.getActionCommand().equals("AllPowerNeutralsComboBox")) {
+			ItemDropTableModel powerNeutralsData = (ItemDropTableModel)this.powerNeutralsTable.getModel();
+			for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
+				powerNeutralsData.setItemLikelihoodAtRow(i, this.powerNeutralsLikelyhoodComboBox.getSelectedIndex());
+			}
+		}
+		else if (e.getActionCommand().equals("AllPowerDownsComboBox")) {
+			ItemDropTableModel powerDownsData    = (ItemDropTableModel)this.powerDownsTable.getModel();
+			for (int i = 0; i < powerDownsData.getRowCount(); i++) {
+				powerDownsData.setItemLikelihoodAtRow(i, this.powerDownsLikelyhoodComboBox.getSelectedIndex());
+			}
+		}		
 	}
 	
 	public boolean getExitedWithOK() {

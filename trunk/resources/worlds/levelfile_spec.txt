@@ -32,8 +32,9 @@ The following specifies the .lvl format.
 // b: The single character name of the sibling portal block that this portal block is
 // the enterence and exit for.
 
-// A([1|0], a, B) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
+// A([1|0], [1|0], a, B) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
 // [1|0]: A '1' or a '0' to indicated whether it starts on (1) or off (0).
+// [1|0]: A '1' or a '0' to indicated whether it can be turned on/off (1) or is unchangable (0).
 // a : The single character name of this tesla block.
 // B : One or more other named tesla blocks seperated by commas.
 
