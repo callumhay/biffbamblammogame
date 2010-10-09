@@ -2456,6 +2456,18 @@ void GameESPAssets::RemoveTeslaLightningBarrierEffect(const TeslaBlock& block1, 
 	this->teslaLightningArcs.erase(findIter);
 }
 
+void GameESPAssets::SetTeslaLightiningAlpha(float alpha) {
+	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator iter1 = this->teslaLightningArcs.begin();
+		iter1 != this->teslaLightningArcs.end(); ++iter1) {
+		
+		std::list<ESPPointToPointBeam*>& lightningArcs = iter1->second;
+		for (std::list<ESPPointToPointBeam*>::iterator iter2 = lightningArcs.begin(); iter2 != lightningArcs.end(); ++iter2) {
+			ESPPointToPointBeam* arc = *iter2;
+			arc->SetAlpha(alpha);
+		}
+	}
+}
+
 /**
  * Adds a Timer HUD effect for the given item type.
  */

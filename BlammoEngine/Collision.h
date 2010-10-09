@@ -188,7 +188,7 @@ namespace Collision {
 		}
 		
 		// Case where c projects onto ab
-		return Vector2D::Dot(ac, ac) - (e * e / f);
+		return fabs(Vector2D::Dot(ac, ac) - (e * e / f));
 	}
 
 	/**

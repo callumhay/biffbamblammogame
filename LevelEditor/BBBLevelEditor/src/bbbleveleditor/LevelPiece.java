@@ -16,8 +16,8 @@ public class LevelPiece {
 	// Hash mapping of the symbols to level pieces
 	public static HashMap<String, LevelPiece> LevelPieceCache = new HashMap<String, LevelPiece>();
 	
-	public static final int LEVEL_PIECE_WIDTH  = 64;
-	public static final int LEVEL_PIECE_HEIGHT = 32;
+	public static final int LEVEL_PIECE_WIDTH  = 32;
+	public static final int LEVEL_PIECE_HEIGHT = 16;
 	
 	private String name;
 	private String fileSymbol;

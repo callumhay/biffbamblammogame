@@ -10,6 +10,7 @@
 class TeslaBlock;
 class ESPPointEmitter;
 class Texture2D;
+class CgFxPostRefract;
 
 class TeslaBlockMesh {
 public:
@@ -41,6 +42,10 @@ private:
 	//ESPPointEmitter* teslaSparks;
 	Texture2D* flareTex;
 	//Texture2D* sparkTex;
+	Texture2D* shieldTex;
+	float shieldAlpha;
+
+	void DrawTeslaShield(const Camera& camera, const Matrix4x4& screenAlignMatrix);
 
 	void LoadMesh();
 

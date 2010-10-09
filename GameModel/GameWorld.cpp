@@ -36,7 +36,7 @@ GameWorld::~GameWorld() {
  * Precondition: true.
  * Return: true on a successful load, false otherwise.
  */
-bool GameWorld::Load() {
+bool GameWorld::Load(GameModel* model) {
 	if (this->isLoaded) {
 		this->Unload();
 	}
@@ -110,12 +110,6 @@ bool GameWorld::Load() {
 	}
 
 	this->isLoaded = true;
-	this->SetCurrentLevel(0);
-
-	// EVENT: World started...
-	GameEventManager::Instance()->ActionWorldStarted(*this);
-	// EVENT: New Level Started
-	GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
 
 	return true;
 }
@@ -178,11 +172,14 @@ GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
  * camera is properly transformed to view it and raising an event that the level has
  * been started.
  */
-void GameWorld::SetCurrentLevel(unsigned int levelNum) {
+void GameWorld::SetCurrentLevel(GameModel* model, unsigned int levelNum) {
 	assert(isLoaded);
 	assert(levelNum < this->loadedLevels.size());
 	assert(levelNum >= 0);
 	this->currentLevelNum = levelNum;
+
+	GameLevel* currentLevel = this->GetCurrentLevel();
+	currentLevel->InitAfterLevelLoad(model);
 
 	// Setup the default transforms for the new level
 	this->transformMgr.SetupLevelCameraDefaultPosition(*this->GetCurrentLevel());

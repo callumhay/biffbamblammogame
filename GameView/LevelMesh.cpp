@@ -359,6 +359,14 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->portalBlock->SetSceneTexture(sceneTexture);
 	this->portalBlock->Tick(dT);
 
+	glPushMatrix();
+	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
+	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight, lightsAreOut);
+	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+	glPopMatrix();
+
 	// Go through each material and draw all the display lists corresponding to it
 	CgFxMaterialEffect* currEffect = NULL;
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->displayListsPerMaterial.begin();
@@ -371,14 +379,6 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 		currEffect->Draw(camera, iter->second);
 	}
 
-	glPushMatrix();
-	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
-	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight, lightsAreOut);
-	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-	glPopMatrix();
-	
 	// Draw the piece effects
 	ESPEmitter* emitter = NULL;
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();

@@ -15,8 +15,8 @@
 
 const float TeslaBlock::LIGHTNING_ARC_RADIUS = LevelPiece::PIECE_HEIGHT * 0.25f;
 
-TeslaBlock::TeslaBlock(bool isActive, unsigned int wLoc, unsigned int hLoc) : 
-LevelPiece(wLoc, hLoc), electricityIsActive(isActive) {
+TeslaBlock::TeslaBlock(bool isActive, bool isChangable, unsigned int wLoc, unsigned int hLoc) : 
+LevelPiece(wLoc, hLoc), electricityIsActive(isActive), isChangable(isChangable) {
 }
 
 TeslaBlock::~TeslaBlock() {
@@ -105,7 +105,7 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) 
 	// Toggle the electricity to the tesla block
 	GameLevel* currLevel = gameModel->GetCurrentLevel();
 	this->ToggleElectricity(*gameModel, *currLevel);
-	
+
 	return this;
 }
 
@@ -145,6 +145,10 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 }
 
 void TeslaBlock::ToggleElectricity(GameModel& gameModel, GameLevel& level) {
+	if (!this->GetIsChangable()) {
+		return;
+	}
+
 	// Get the list of active connected tesla blocks
 	std::list<TeslaBlock*> activeNeighbourTeslaBlocks = this->GetActiveConnectedTeslaBlocks();
 

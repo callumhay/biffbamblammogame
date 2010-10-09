@@ -11,6 +11,7 @@
 
 package bbbleveleditor;
 
+import java.awt.BorderLayout;
 import java.awt.Point;
 import java.util.*;
 import javax.swing.*;
@@ -31,6 +32,9 @@ public class LevelPieceEditDialog extends JDialog {
     private javax.swing.JButton removeSiblingBtn;
     private javax.swing.JList siblingList;
     private DefaultListModel siblingListModel;
+    
+    private JCheckBox teslaStartsOn;
+    private JCheckBox teslaChangable;
     // End of variables declaration//GEN-END:variables
 	
 	private Set<Character> allPieceIDs;
@@ -96,7 +100,7 @@ public class LevelPieceEditDialog extends JDialog {
         addSiblingBtn = new javax.swing.JButton();
         cancelBtn = new javax.swing.JButton();
         okBtn = new javax.swing.JButton();
-
+        
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("Level Piece Type:");
@@ -165,9 +169,16 @@ public class LevelPieceEditDialog extends JDialog {
                 okBtnActionPerformed(evt);
             }
         });
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
+        
+        
+        this.getContentPane().setLayout(new BorderLayout());
+        
+        //javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        //getContentPane().setLayout(layout);
+        
+        JPanel otherPanel = new JPanel();
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(otherPanel);
+        otherPanel.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -209,9 +220,11 @@ public class LevelPieceEditDialog extends JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(addSiblingBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(removeSiblingBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cancelBtn)
@@ -219,6 +232,35 @@ public class LevelPieceEditDialog extends JDialog {
                 .addContainerGap())
         );
 
+        this.getContentPane().add(otherPanel, BorderLayout.CENTER);
+        
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
+        
+        if (this.levelPieceLbl.getIsTesla()) {
+	        this.teslaStartsOn = new JCheckBox("Tesla starts on");
+	        this.teslaStartsOn.setSelected(this.levelPieceLbl.getIsTeslaOnBool());
+	        this.teslaStartsOn.setEnabled(true);
+	        this.teslaStartsOn.addActionListener(new java.awt.event.ActionListener() {
+	        	public void actionPerformed(java.awt.event.ActionEvent evt) {
+	            	teslaOnCheckBoxClicked(evt);
+	            }
+	        });
+        
+	        this.teslaChangable = new JCheckBox("Tesla is changable");
+	        this.teslaChangable.setSelected(this.levelPieceLbl.getIsTeslaChangableBool());
+	        this.teslaChangable.setEnabled(true);
+	        this.teslaChangable.addActionListener(new java.awt.event.ActionListener() {
+	        	public void actionPerformed(java.awt.event.ActionEvent evt) {
+	            	teslaChangableCheckBoxClicked(evt);
+	            }
+	        });
+       
+	        buttonPanel.add(this.teslaStartsOn);
+	        buttonPanel.add(this.teslaChangable);
+	        this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+        }
+        
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -286,6 +328,14 @@ public class LevelPieceEditDialog extends JDialog {
     	this.setVisible(false);
     }//GEN-LAST:event_cancelBtnActionPerformed
 
+    private void teslaOnCheckBoxClicked(java.awt.event.ActionEvent evt) {
+    	this.levelPieceLbl.setTeslaStartsOn(this.teslaStartsOn.isSelected());
+    }
+    
+    private void teslaChangableCheckBoxClicked(java.awt.event.ActionEvent evt) {
+    	this.levelPieceLbl.setTeslaChangable(this.teslaChangable.isSelected());
+    }
+    
     private void updateSiblingsFromList() {
     	Set<Character> siblings = new TreeSet<Character>();
     	for (int i = 0; i < this.siblingListModel.getSize(); i++) {

@@ -104,16 +104,22 @@ void GameModel::SetCurrentWorld(unsigned int worldNum) {
 	assert(world != NULL);
 	
 	// Make sure the world loaded properly.
-	if (!world->Load()) {
+	if (!world->Load(this)) {
 		debug_output("ERROR: Could not load world " << worldNum);
 		assert(false);
 		return;
 	}
 
+	// Setup the world for this object and make sure the world has its zeroth (i.e., first) level set for play
 	this->currWorldNum = worldNum;
-
+	world->SetCurrentLevel(this, 0);
 	GameLevel* currLevel = world->GetCurrentLevel();
 	assert(currLevel != NULL);
+
+	// EVENT: World started...
+	GameEventManager::Instance()->ActionWorldStarted(*world);
+	// EVENT: New Level Started
+	GameEventManager::Instance()->ActionLevelStarted(*world, *currLevel);
 
 	// Tell the paddle what the boundries of the level are and reset the paddle
 	this->playerPaddle->SetMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
@@ -130,12 +136,13 @@ void GameModel::Tick(double seconds) {
 	}
 
 	if (currState != NULL) {
-		if ((this->pauseBitField & GameModel::PauseState) == 0x0) {
+		bool pauseState = (this->pauseBitField & GameModel::PauseState) != 0x0;
+		if ((this->pauseBitField & GameModel::PauseState) == 0x00000000) {
 			this->currState->Tick(seconds);
 		}
 
 		if (this->playerPaddle != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0) {
-			this->playerPaddle->Tick(seconds);
+			this->playerPaddle->Tick(seconds, (this->pauseBitField & GameModel::PauseState) == GameModel::PauseState);
 		}
 
 	}
@@ -223,15 +230,15 @@ void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 	// Reset the multiplier
 	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
 
-	// Modify the ball velocity using the current paddle velocity
-	Vector2D paddleVel = this->playerPaddle->GetAvgVelocity();
+	// Modify the ball velocity using the current paddle speed
+	Vector2D paddleVel = this->playerPaddle->GetVelocity();
 	
 	if (fabs(paddleVel[0]) > EPSILON) {
 		// The paddle has a considerable velocity, we should augment the ball's
 		// tragectory based on this (transfer of momentum)
 		int angleDecSgn = -NumberFuncs::SignOf(paddleVel[0]);
-		float fractionOfSpeed = fabs(paddleVel[0]) / PlayerPaddle::DEFAULT_SPEED;
-		float angleChange = angleDecSgn * fractionOfSpeed * PlayerPaddle::RAND_DEG_ANG;
+		float fractionOfSpeed = fabs(paddleVel[0]) / PlayerPaddle::DEFAULT_MAX_SPEED;
+		float angleChange = angleDecSgn * fractionOfSpeed * PlayerPaddle::DEFLECTION_DEGREE_ANGLE;
 
 		// Set the ball to be just off the paddle
 		ball.SetCenterPosition(Point2D(ball.GetBounds().Center()[0], 

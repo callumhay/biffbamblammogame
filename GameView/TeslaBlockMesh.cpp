@@ -2,6 +2,7 @@
 
 #include "TeslaBlockMesh.h"
 #include "GameViewConstants.h"
+#include "CgFxPostRefract.h"
 
 #include "../BlammoEngine/Texture2D.h"
 #include "../ESPEngine/ESPPointEmitter.h"
@@ -10,7 +11,7 @@
 const float TeslaBlockMesh::COIL_ROTATION_SPEED_DEGSPERSEC = 270;
 
 TeslaBlockMesh::TeslaBlockMesh() : teslaBaseMesh(NULL), teslaCoilMesh(NULL), flarePulse(0,0), /*sparkGravity(Vector3D(0, -9.8f, 0)), sparkTex(NULL), teslaSparks(NULL),*/
-teslaCenterFlare(NULL), flareTex(NULL){
+teslaCenterFlare(NULL), flareTex(NULL), shieldTex(NULL), shieldAlpha(1.0f) {
 	this->LoadMesh();
 	
 	// Grab the flare texture
@@ -51,12 +52,16 @@ teslaCenterFlare(NULL), flareTex(NULL){
 	this->teslaSparks = new ESPPointEmitter();
 	// ...
 	*/
+
+	this->shieldTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+	assert(this->shieldTex != NULL);
 }
 
 TeslaBlockMesh::~TeslaBlockMesh() {
 	ResourceManager::GetInstance()->ReleaseMeshResource(this->teslaBaseMesh);
 	ResourceManager::GetInstance()->ReleaseMeshResource(this->teslaCoilMesh);
 	ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTex);
+	ResourceManager::GetInstance()->ReleaseTextureResource(this->shieldTex);
 	delete this->teslaCenterFlare;
 	this->teslaCenterFlare = NULL;
 }
@@ -67,6 +72,11 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 	glPushAttrib(GL_CURRENT_BIT);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	float rotationAmt = dT * COIL_ROTATION_SPEED_DEGSPERSEC;
+
+	Vector3D alignNormalVec = -camera.GetNormalizedViewVector();
+	Vector3D alignUpVec		  = camera.GetNormalizedUpVector();
+	Vector3D alignRightVec	= Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+	Matrix4x4 screenAlignMatrix(alignRightVec, alignUpVec, alignNormalVec);
 
 	// Go through each tesla block and transform their center's appropriately
 	for (std::set<const TeslaBlock*>::const_iterator iter = this->teslaBlocks.begin(); iter != this->teslaBlocks.end(); ++iter) {
@@ -81,6 +91,12 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 
 		glPushMatrix();
 		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
+
+		// Draw a shield around the tesla block if it cannot be changed
+		if (!currTeslaBlock->GetIsChangable()) {
+			this->DrawTeslaShield(camera, screenAlignMatrix);
+		}
+
 		glRotatef(currRotationAmt, currRotationAxis[0], currRotationAxis[1], currRotationAxis[2]);	
 		this->teslaCoilMesh->Draw(camera, keyLight, fillLight, ballLight);
 		glPopMatrix();
@@ -109,6 +125,25 @@ void TeslaBlockMesh::SetAlphaMultiplier(float alpha) {
 	}
 
 	this->teslaCenterFlare->SetParticleAlpha(ESPInterval(alpha));
+	this->shieldAlpha = std::min<float>(alpha, 0.75f);
+}
+
+void TeslaBlockMesh::DrawTeslaShield(const Camera& camera, const Matrix4x4& screenAlignMatrix) {
+	glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glPushMatrix();
+	glMultMatrixf(screenAlignMatrix.begin());
+	glColor4f(0.9f, 0.7f, 1.0f, this->shieldAlpha);
+	glScalef(LevelPiece::PIECE_WIDTH * 1.2f, LevelPiece::PIECE_HEIGHT * 1.2f, 1.0f);
+	
+	this->shieldTex->BindTexture();
+	GeometryMaker::GetInstance()->DrawQuad();
+
+	glPopMatrix();
+	glPopAttrib();
 }
 
 void TeslaBlockMesh::LoadMesh() {

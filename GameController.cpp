@@ -155,10 +155,13 @@ void GameController::Tick() {
 	// Paddle controls (NOTE: the else is to make the feedback slicker)
 	int paddleDir = this->model->AreControlsFlipped() ? 1 : -1;
 	if (this->keyPressed[SDLK_LEFT]) {
-		this->model->MovePaddle(paddleDir * this->model->GetPlayerPaddle()->GetSpeed());
+		this->model->MovePaddle(PlayerPaddle::LeftPaddleMovement);
 	}
 	else if (this->keyPressed[SDLK_RIGHT]) {
-		this->model->MovePaddle(-paddleDir * this->model->GetPlayerPaddle()->GetSpeed());
+		this->model->MovePaddle(PlayerPaddle::RightPaddleMovement);
+	}
+	else {
+		this->model->MovePaddle(PlayerPaddle::NoPaddleMovement);
 	}
 
 	// Debug movement controls

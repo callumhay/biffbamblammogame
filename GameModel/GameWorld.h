@@ -36,7 +36,7 @@ public:
 	GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr);
 	~GameWorld();
 
-	bool Load();
+	bool Load(GameModel* model);
 	bool Unload();
 	
 	const std::vector<GameLevel*>& GetAllLevelsInWorld() const {
@@ -66,21 +66,20 @@ public:
 		return this->name;
 	}
 
-	void IncrementLevel() {
+	void IncrementLevel(GameModel* model) {
 		assert(this->isLoaded);
-		this->SetCurrentLevel(this->currentLevelNum + 1);
+		this->SetCurrentLevel(model, this->currentLevelNum + 1);
 		// EVENT: New Level Started
 		GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
 	}
 
-	void SetCurrentLevel(unsigned int levelNum);
+	void SetCurrentLevel(GameModel* model, unsigned int levelNum);
 
 	// Returns whether the current level is the last level in this world.
 	bool IsLastLevel() const {
 		assert(this->isLoaded);
 		return this->currentLevelNum == (this->loadedLevels.size()-1);
 	}
-
 
 };
 #endif

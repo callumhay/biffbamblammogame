@@ -32,6 +32,7 @@ public:
 
 	void SetStartAndEndPoints(const Point3D& startPt, const Point3D& endPt);
 	void SetColour(const ColourRGBA& colour);
+	void SetAlpha(float alpha);
 	//void SetTexture(const Texture2D* texture);
 	void SetNumMainESPBeamSegments(size_t numSegments);
 	void SetMainBeamAmplitude(const ESPInterval& a);
@@ -83,6 +84,10 @@ inline void ESPPointToPointBeam::SetStartAndEndPoints(const Point3D& startPt, co
 // Sets the general colour of the beam
 inline void ESPPointToPointBeam::SetColour(const ColourRGBA& colour) {
 	this->colour = colour;
+}
+
+inline void ESPPointToPointBeam::SetAlpha(float alpha) {
+	this->colour[3] = alpha;
 }
 
 // Sets the texture (if any) applied to the beam

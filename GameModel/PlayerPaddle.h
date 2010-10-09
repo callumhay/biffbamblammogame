@@ -38,9 +38,11 @@ public:
 	static const float PADDLE_HALF_HEIGHT;
 	static const float PADDLE_HALF_DEPTH;
 	static const float PADDLE_WIDTH_FLAT_TOP;
-	static const float DEFAULT_SPEED;
+	static const float DEFAULT_MAX_SPEED;
+	static const float DEFAULT_ACCELERATION;
+	static const float DEFAULT_DECCELERATION;
 	static const float POISON_SPEED_DIMINISH;
-	static const int RAND_DEG_ANG    = 20;
+	static const int DEFLECTION_DEGREE_ANGLE;
 
 	static const Vector2D DEFAULT_PADDLE_UP_VECTOR;
 	static const Vector2D DEFAULT_PADDLE_RIGHT_VECTOR;
@@ -63,6 +65,13 @@ public:
 		this->currType = PlayerPaddle::NormalPaddle;
 		this->colour = ColourRGBA(1, 1, 1, 1);
 		this->isFiringBeam = false;
+		this->hitWall = false;
+		this->lastDirection = 0.0f;
+		this->currSpeed = 0.0f;
+		this->maxSpeed = PlayerPaddle::DEFAULT_MAX_SPEED;
+		this->acceleration  = PlayerPaddle::DEFAULT_ACCELERATION; 
+		this->decceleration = PlayerPaddle::DEFAULT_DECCELERATION;
+
 		this->SetupAnimations();
 		// This will set the dimensions the the default and regenerate the bounds of the paddle
 		this->SetDimensions(PlayerPaddle::NormalSize);
@@ -100,11 +109,15 @@ public:
 		return Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), PlayerPaddle::DEFAULT_PADDLE_UP_VECTOR);
 	}
 
-	void Tick(double seconds);
+	void Tick(double seconds, bool pausePaddleMovement);
 	void Animate(double seconds);
 
-	void Move(float dist) {
-		this->distTemp += dist;
+	enum PaddleMovement { LeftPaddleMovement = -1, NoPaddleMovement = 0, RightPaddleMovement = 1 };
+	void ControlPaddleMovement(const PaddleMovement& movement) {
+		this->moveButtonDown = (movement != NoPaddleMovement);
+		if (this->moveButtonDown) {
+			this->lastDirection = static_cast<float>(movement);
+		}
 	}
 
 	void SetMinMaxLevelBound(float min, float max) {
@@ -118,19 +131,22 @@ public:
 	}
 
 	float GetSpeed() const {
-		float currSpeed = this->speed;
-		if ((this->currType & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle) {
-			currSpeed -= PlayerPaddle::POISON_SPEED_DIMINISH;
-		}
-		return currSpeed;
+		return this->lastDirection * this->currSpeed;
 	}
 
-	Vector2D GetAvgVelocity() const {
-		return Vector2D(this->avgVel, 0);
+	Vector2D GetVelocity() const {
+		return Vector2D(this->GetSpeed(), 0);
 	}
+
+	//float GetAverageSpeed() const {
+		//return this->avgSpeed;
+	//}
+	//Vector2D GetAverageVelocity() const {
+	//	return Vector2D(this->avgSpeed, 0);
+	//}
 
 	// Paddle size set/get functions
-	PaddleSize GetPaddleSize() const {
+	const PaddleSize& GetPaddleSize() const {
 		return this->currSize;
 	}
 	float GetPaddleScaleFactor() const {
@@ -177,15 +193,10 @@ public:
 	}
 
 	// Paddle type modifying / querying functions
-	int GetPaddleType() const {
-		return this->currType;
-	}
-	void AddPaddleType(const PaddleType type) {
-		this->currType = this->currType | type;
-	}
-	void RemovePaddleType(const PaddleType type) {
-		this->currType = this->currType & ~type;
-	}
+	int GetPaddleType() const { return this->currType; }
+
+	void AddPaddleType(const PaddleType& type);
+	void RemovePaddleType(const PaddleType& type);
 
 	// Paddle camera set/get functions
 	void SetPaddleCamera(bool isPaddleCamOn, double dT) {
@@ -241,10 +252,7 @@ private:
 	
 	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
 
-	float distTemp;			// A temporary store for the change in movement
-	float avgVel;				// Keeps the average velocity (over the past AVG_OVER_TICKS ticks) of the paddle at a given time
-	int ticksSinceAvg;  // Keeps track of ticks since a sampling of the average velocity occurred
-	bool hitWall;				// True when the paddle hits a wall
+	bool hitWall;					// True when the paddle hits a wall
 
 	int currType;					// An ORed together current type of this paddle (see PaddleType)
 	PaddleSize currSize;	// The current size (width) of this paddle
@@ -255,10 +263,17 @@ private:
 	float currHalfWidthTotal;			// Half of the total width of the paddle
 	float currHalfDepthTotal;			// Half of the total depth of the paddle
 	float minBound, maxBound;			// The current level's boundries along its width for the paddle
-	float speed;									// Speed of the paddle in units per second
 	float currScaleFactor;				// The scale difference between the paddle's current size and its default size
 	
+	// Movement 
+	float acceleration;	  // The paddle's acceleration in units / second^2 (always positive)
+	float decceleration;  // The paddle's deceleration in units / second^2 (always negative)
+	float maxSpeed;	  		// The maximum absolute value speed of the paddle in units per second (note that the minimum Speed is always 0)
+	float currSpeed;			// The current absolute value speed of the paddle in units per second
+	float lastDirection;	// Used to store the last direction the user told the paddle to move in (-1 for left, 1 for right, 0 for no movement)
+	bool moveButtonDown;	// Whether the move button is being held down currently
 
+	// Colour and animation
 	ColourRGBA colour;															// The colour multiply of the paddle, including its visibility/alpha
 	AnimationLerp<ColourRGBA> colourAnimation;			// Animation associated with the colour
 	AnimationMultiLerp<float> moveDownAnimation;		// Animation for when the paddle is being pushed down by the laser beam (away from the level)

@@ -89,6 +89,7 @@ public:
 	void AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
 	void RemoveTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
 	bool TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+	void InitAfterLevelLoad(GameModel* model);
 
 	/**
 	 * Obtain the LevelPiece at the given height and width indices.

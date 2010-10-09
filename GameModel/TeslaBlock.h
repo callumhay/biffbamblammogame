@@ -18,7 +18,7 @@ class TeslaBlock : public LevelPiece {
 public:
 	static const float LIGHTNING_ARC_RADIUS;
 
-	TeslaBlock(bool isActive, unsigned int wLoc, unsigned int hLoc);
+	TeslaBlock(bool isActive, bool isChangable, unsigned int wLoc, unsigned int hLoc);
 	~TeslaBlock();
 
 	LevelPieceType GetType() const { 
@@ -90,6 +90,8 @@ public:
 
 	void SetElectricityIsActive(bool isActive);
 	bool GetIsElectricityActive() const;
+	void SetIsChangable(bool isChangable);
+	bool GetIsChangable() const;
 	std::list<TeslaBlock*> GetLightningArcTeslaBlocks() const;
 	std::list<TeslaBlock*> GetActiveConnectedTeslaBlocks() const;
 
@@ -97,6 +99,7 @@ public:
 
 private:
 	bool electricityIsActive;											// Whether the lightning/electric current is active on this tesla block
+	bool isChangable;															// Whether the state (on/off) of the tesla block can be changed via game play
 	std::list<TeslaBlock*> connectedTeslaBlocks;	// All tesla blocks that this one can connect to when active (and when they're active)
 
 	void ToggleElectricity(GameModel& gameModel, GameLevel& level);
@@ -119,6 +122,15 @@ inline void TeslaBlock::SetElectricityIsActive(bool isActive) {
 // that are also active with an arc of lightning
 inline bool TeslaBlock::GetIsElectricityActive() const {
 	return this->electricityIsActive;
+}
+
+inline void TeslaBlock::SetIsChangable(bool isChangable) {
+	this->isChangable = isChangable;
+}
+
+// Query whether this tesla block can be turned on/off by the player
+inline bool TeslaBlock::GetIsChangable() const {
+	return this->isChangable;
 }
 
 // Query the set of tesla blocks connected to this block that are active along with this one
