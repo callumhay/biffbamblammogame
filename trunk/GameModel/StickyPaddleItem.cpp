@@ -43,6 +43,8 @@ double StickyPaddleItem::Activate() {
 	// Remove the sticky paddle timers from the list of active timers
 	for (unsigned int i = 0; i < removeTimers.size(); i++) {
 			GameItemTimer* currTimer = removeTimers[i];
+			currTimer->SetDeactivateItemOnStop(false);	// Make sure we don't call deactivate on teh sticky paddle item that's active
+																									// or else the ball will fly off the paddle
 			activeTimers.remove(currTimer);
 			delete currTimer;
 			currTimer = NULL;

@@ -122,8 +122,8 @@ void GameModel::SetCurrentWorld(unsigned int worldNum) {
 	GameEventManager::Instance()->ActionLevelStarted(*world, *currLevel);
 
 	// Tell the paddle what the boundries of the level are and reset the paddle
-	this->playerPaddle->SetMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
-	this->playerPaddle->ResetPaddle();
+	this->playerPaddle->SetNewMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound()); // resets the paddle
+	//this->playerPaddle->ResetPaddle();
 }
 
 /**
@@ -204,6 +204,12 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, ball);	// WARNING: This can destroy p.
 	ball.BallCollided();
+
+	// If the ball is attached to the paddle then we always set the last piece it collided with to NULL
+	// This ensures that the ball ALWAYS collides with everything in its way while on the paddle
+	if (this->playerPaddle->GetAttachedBall() == &ball) {
+		ball.SetLastPieceCollidedWith(NULL);
+	}
 
 	// Check to see if the ball is being teleported in ball-camera mode - in this case
 	// we move into a new game state to play the wormhole minigame

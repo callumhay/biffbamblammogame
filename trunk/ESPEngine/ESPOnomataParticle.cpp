@@ -92,8 +92,7 @@ void ESPOnomataParticle::Draw(const Camera& camera, const ESP::ESPAlignment alig
 	glRotatef(this->rotation, 0, 0, -1);
 	glScalef(this->size[0], this->size[1], 1.0f);
 	glTranslatef(-this->currHalfStrWidth, -this->currHalfStrHeight, 0.0f);
-	glColor4d(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
+	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);
 	this->font->Print(this->currStr);
-
 	glPopMatrix();
 }

@@ -59,8 +59,7 @@ centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDire
 maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_ACCELERATION), 
 decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
-attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false) {
-
+attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f) {
 	this->ResetPaddle();
 }
 
@@ -68,13 +67,35 @@ PlayerPaddle::PlayerPaddle(float minBound, float maxBound) :
 centerPos(0.0f, 0.0f), currSpeed(0.0f), lastDirection(0.0f), moveButtonDown(false), 
 acceleration(PlayerPaddle::DEFAULT_ACCELERATION), decceleration(PlayerPaddle::DEFAULT_DECCELERATION),
 currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), attachedBall(NULL),
-hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false) {
+hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f) {
 
 	this->SetupAnimations();
-	this->SetMinMaxLevelBound(minBound, maxBound);
+	this->SetNewMinMaxLevelBound(minBound, maxBound); // resets the paddle
 }
 
 PlayerPaddle::~PlayerPaddle() {
+}
+
+// Reset the dimensions and position of this paddle (e.g., after death, start of a level).
+void PlayerPaddle::ResetPaddle() {
+	this->timeSinceLastLaserBlast = 0.0;
+	this->laserBeamTimer = 0.0;
+	this->currSize = PlayerPaddle::NormalSize;
+	this->centerPos = this->GetDefaultCenterPosition();
+	this->currType = PlayerPaddle::NormalPaddle;
+	this->colour = ColourRGBA(1, 1, 1, 1);
+	this->isFiringBeam = false;
+	this->hitWall = false;
+	this->lastDirection = 0.0f;
+	this->currSpeed = 0.0f;
+	this->maxSpeed = PlayerPaddle::DEFAULT_MAX_SPEED;
+	this->acceleration  = PlayerPaddle::DEFAULT_ACCELERATION; 
+	this->decceleration = PlayerPaddle::DEFAULT_DECCELERATION;
+	this->impulse = 0.0f;
+
+	this->SetupAnimations();
+	// This will set the dimensions the the default and regenerate the bounds of the paddle
+	this->SetDimensions(PlayerPaddle::NormalSize);
 }
 
 /**
@@ -181,11 +202,22 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 	this->currScaleFactor = newScaleFactor;
 	assert(this->currScaleFactor > 0.0f);
 
-	this->currHalfHeight			= this->currScaleFactor * PADDLE_HALF_HEIGHT;
-	this->currHalfWidthTotal	= this->currScaleFactor * PADDLE_HALF_WIDTH;
-	this->currHalfWidthFlat		= this->currScaleFactor * PADDLE_WIDTH_FLAT_TOP * 0.5f;
-	this->currHalfDepthTotal  = this->currScaleFactor * PADDLE_HALF_DEPTH;
+	// Update all of the dimension values for the new scale factor
+	this->currHalfHeight			= this->currScaleFactor * PlayerPaddle::PADDLE_HALF_HEIGHT;
+	this->currHalfWidthTotal	= this->currScaleFactor * PlayerPaddle::PADDLE_HALF_WIDTH;
+	this->currHalfWidthFlat		= this->currScaleFactor * PlayerPaddle::PADDLE_WIDTH_FLAT_TOP * 0.5f;
+	this->currHalfDepthTotal  = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_DEPTH;
 	
+	// The momentum of the paddle will change as well - we do a physics hack here where the acceleration/decceleration
+	// are effected directly by the inverse scale factor of the paddle
+	float intensifier = 1.0f;
+	if (this->currScaleFactor != 1.0f) {
+		intensifier = 1.25f;
+	}
+	float invCurrScaleFactor = 1.0f / (intensifier * this->currScaleFactor);
+	this->acceleration  = invCurrScaleFactor * PlayerPaddle::DEFAULT_ACCELERATION;
+	this->decceleration = invCurrScaleFactor * PlayerPaddle::DEFAULT_DECCELERATION;
+
 	this->RegenerateBounds();
 }
 
@@ -316,7 +348,9 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement) {
 		distanceTravelled = this->GetSpeed() * seconds;
 	}
 
-	float newCenterX = this->centerPos[0] + distanceTravelled;
+	float newCenterX = this->centerPos[0] + distanceTravelled + this->impulse;
+	this->impulse = 0.0f;
+
 	float minNewXPos = newCenterX - this->currHalfWidthTotal;
 	float maxNewXPos = newCenterX + this->currHalfWidthTotal;
 	Point2D oldPaddleCenter = this->centerPos;
@@ -329,8 +363,9 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement) {
 	bool ballIsAttached = this->attachedBall != NULL;
 	if (ballIsAttached) {	
 		float ballX = this->attachedBall->GetBounds().Center()[0] + distanceTravelled;
-		float ballMinX = ballX - this->attachedBall->GetBounds().Radius();
-		float ballMaxX = ballX + this->attachedBall->GetBounds().Radius();
+		float slightlyBiggerRadius = 1.05f * this->attachedBall->GetBounds().Radius();
+		float ballMinX = ballX - slightlyBiggerRadius;
+		float ballMaxX = ballX + slightlyBiggerRadius;
 		
 		// If it's the case that the ball increases the size of the paddle on the -x dir
 		// then accomodate this, same goes for +x direction
@@ -403,6 +438,32 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement) {
 	if (startingCenterPos != this->centerPos || startingZRotation != this->rotAngleZAnimation.GetInterpolantValue()) {
 		this->RegenerateBounds();
 	}
+}
+
+/**
+ * Increases the paddle size if it can.
+ * Returns: true if there was an increase in size, false otherwise.
+ */
+bool PlayerPaddle::IncreasePaddleSize() {
+	if (this->currSize == BiggestSize) { 
+		return false; 
+	}
+	
+	this->SetPaddleSize(static_cast<PaddleSize>(this->currSize + 1));
+	return true;
+}
+
+/**
+ * Decreases the paddle size if it can.
+ * Returns: true if there was an decrease in size, false otherwise.
+ */
+bool PlayerPaddle::DecreasePaddleSize() {
+	if (this->currSize == SmallestSize) { 
+		return false; 
+	}
+
+	this->SetPaddleSize(static_cast<PaddleSize>(this->currSize - 1));
+	return true;
 }
 
  void PlayerPaddle::AddPaddleType(const PaddleType& type) {
@@ -590,6 +651,13 @@ void PlayerPaddle::HitByProjectile(const Projectile& projectile) {
 
 	// EVENT: Paddle was just hit by a projectile
 	GameEventManager::Instance()->ActionPaddleHitByProjectile(*this, projectile);
+}
+
+// Applies an immediate impulse force along the x-axis (movement axis of the paddle)
+void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce) {
+	assert(xDirectionalForce != 0.0f);
+	this->lastDirection = NumberFuncs::SignOf(xDirectionalForce);
+	this->impulse += 0.05f * xDirectionalForce;
 }
 
 /**

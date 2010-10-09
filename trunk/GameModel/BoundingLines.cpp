@@ -77,13 +77,12 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 	n = Vector2D(0, 0);
 	timeSinceCollision = -1.0;
 
-	// If there's no velocity then just exit with no collision (how can a non-moving object collide?)
-	if (velocity == Vector2D(0.0f, 0.0f)) {
-		return false;
+	float velocityMagnitude = 0.0f;
+	Vector2D normalizedVel(0.0f, 0.0f);
+	if (velocity != Vector2D(0.0f, 0.0f)) {
+		velocityMagnitude = Vector2D::Magnitude(velocity);
+		normalizedVel = velocity / velocityMagnitude;
 	}
-
-	float velocityMagnitude = Vector2D::Magnitude(velocity);
-	Vector2D normalizedVel = velocity / velocityMagnitude;
 
 	// Use a square radius instead of using square root operations (it's faster.)
 	float sqRadius = c.Radius()*c.Radius();

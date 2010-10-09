@@ -31,6 +31,8 @@ private:
 	double timeElapsedInSecs;	// Amount of time elapsed on the timer so far
 	bool wasStopped;
 
+	bool deactivateItemOnStop;
+
 public:
 	static const float ZERO_TIME_TIMER_IN_SECS;
 
@@ -56,13 +58,23 @@ public:
 	}
 
 	/**
+	 * Allows control over whether the "deactivate" method will be called
+	 * on the game item in this when the timer stops.
+	 */
+	inline void SetDeactivateItemOnStop(bool deactivate) {
+		this->deactivateItemOnStop = deactivate;
+	}
+
+	/**
 	 * Stops the timer and the item effect associated with it.
 	 */
 	inline void StopTimer() {
 		// In the case of items that have no time associated with their effect, we
 		// don't affect the item or set off any events
 		if ((this->timeLengthInSecs - GameItemTimer::ZERO_TIME_TIMER_IN_SECS) > EPSILON) {
-			this->assocGameItem->Deactivate();
+			if (this->deactivateItemOnStop) {
+				this->assocGameItem->Deactivate();
+			}
 			GameEventManager::Instance()->ActionItemTimerStopped(*this);
 		}
 

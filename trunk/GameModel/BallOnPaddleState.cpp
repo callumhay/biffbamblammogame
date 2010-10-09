@@ -26,7 +26,7 @@ BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(t
 	assert(currLevel != NULL);
 
 	// Make sure the paddle and ball are in a nice default state and position
-	paddle->SetMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
+	paddle->SetNewMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
 	paddle->ResetPaddle();
 	ball->ResetBallAttributes();
 

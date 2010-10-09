@@ -56,26 +56,14 @@ public:
 	PlayerPaddle();
 	~PlayerPaddle();
 
-	// Reset the dimensions and position of this paddle (e.g., after death, start of a level).
-	void ResetPaddle() {
-		this->timeSinceLastLaserBlast = 0.0;
-		this->laserBeamTimer = 0.0;
-		this->currSize = PlayerPaddle::NormalSize;
-		this->centerPos = this->GetDefaultCenterPosition();
-		this->currType = PlayerPaddle::NormalPaddle;
-		this->colour = ColourRGBA(1, 1, 1, 1);
-		this->isFiringBeam = false;
-		this->hitWall = false;
-		this->lastDirection = 0.0f;
-		this->currSpeed = 0.0f;
-		this->maxSpeed = PlayerPaddle::DEFAULT_MAX_SPEED;
-		this->acceleration  = PlayerPaddle::DEFAULT_ACCELERATION; 
-		this->decceleration = PlayerPaddle::DEFAULT_DECCELERATION;
-
-		this->SetupAnimations();
-		// This will set the dimensions the the default and regenerate the bounds of the paddle
-		this->SetDimensions(PlayerPaddle::NormalSize);
+	void UpdatePaddleBounds(float min, float max) {
+		assert(min < max);
+		assert((max - min) > PADDLE_WIDTH_TOTAL);
+		this->minBound = min;
+		this->maxBound = max;
 	}
+
+	void ResetPaddle();
 
 	// Obtain the center position of this paddle.
 	const Point2D& GetCenterPosition() const {
@@ -119,13 +107,12 @@ public:
 			this->lastDirection = static_cast<float>(movement);
 		}
 	}
+	float GetLastMovingDirection() const {
+		return this->lastDirection;
+	}
 
-	void SetMinMaxLevelBound(float min, float max) {
-		assert(min < max);
-		assert((max - min) > PADDLE_WIDTH_TOTAL);
-		this->minBound = min;
-		this->maxBound = max;
-
+	void SetNewMinMaxLevelBound(float min, float max) {
+		this->UpdatePaddleBounds(min, max);
 		// Reset the paddle to the center of the new bounds
 		this->ResetPaddle();
 	}
@@ -153,6 +140,8 @@ public:
 		return this->currScaleFactor;
 	}
 
+	void ApplyImpulseForce(float xDirectionalForce);
+
 	// Paddle colour set/get functions
 	const ColourRGBA& GetColour() const {
 		return this->colour;
@@ -165,32 +154,8 @@ public:
 	}
 	void AnimateFade(bool fadeOut, double duration);
 
-
-	/**
-	 * Increases the paddle size if it can.
-	 * Returns: true if there was an increase in size, false otherwise.
-	 */
-	bool IncreasePaddleSize() {
-		if (this->currSize == BiggestSize) { 
-			return false; 
-		}
-		
-		this->SetPaddleSize(static_cast<PaddleSize>(this->currSize + 1));
-		return true;
-	}
-
-	/**
-	 * Decreases the paddle size if it can.
-	 * Returns: true if there was an decrease in size, false otherwise.
-	 */
-	bool DecreasePaddleSize() {
-		if (this->currSize == SmallestSize) { 
-			return false; 
-		}
-
-		this->SetPaddleSize(static_cast<PaddleSize>(this->currSize - 1));
-		return true;
-	}
+	bool IncreasePaddleSize();
+	bool DecreasePaddleSize();
 
 	// Paddle type modifying / querying functions
 	int GetPaddleType() const { return this->currType; }
@@ -272,6 +237,8 @@ private:
 	float currSpeed;			// The current absolute value speed of the paddle in units per second
 	float lastDirection;	// Used to store the last direction the user told the paddle to move in (-1 for left, 1 for right, 0 for no movement)
 	bool moveButtonDown;	// Whether the move button is being held down currently
+	float impulse;				// When there's an immediate impulse applied to the paddle we need to use this and add it directly to the position
+												// of the paddle (and then immediately reset it to zero)
 
 	// Colour and animation
 	ColourRGBA colour;															// The colour multiply of the paddle, including its visibility/alpha

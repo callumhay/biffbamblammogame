@@ -13,7 +13,8 @@
 
 const float GameItemTimer::ZERO_TIME_TIMER_IN_SECS = 0.0f;
 
-GameItemTimer::GameItemTimer(GameItem* gameItem) : assocGameItem(gameItem), timeElapsedInSecs(0.0) , wasStopped(false) {
+GameItemTimer::GameItemTimer(GameItem* gameItem) : 
+assocGameItem(gameItem), timeElapsedInSecs(0.0) , wasStopped(false), deactivateItemOnStop(true) {
 	assert(gameItem != NULL);
 	this->timeLengthInSecs = gameItem->Activate();
 	if ((this->timeLengthInSecs - GameItemTimer::ZERO_TIME_TIMER_IN_SECS) > EPSILON) {
