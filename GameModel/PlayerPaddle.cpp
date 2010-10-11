@@ -609,23 +609,6 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	return true;
 }
 
-// Modify the projectile trajectory in certain special cases when the projectile is colliding with the paddle
-// (or the paddle shield or some component of the paddle)
-void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
-
-	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		if (projectile.GetType() == Projectile::PaddleLaserBulletProjectile) {
-			Vector2D fromShieldCenterToProjectile = projectile.GetPosition() - this->GetCenterPosition();
-			fromShieldCenterToProjectile.Normalize();
-			projectile.SetVelocity(fromShieldCenterToProjectile, projectile.GetVelocityMagnitude());
-			projectile.SetPosition(projectile.GetPosition() + projectile.GetHeight() * fromShieldCenterToProjectile);
-
-			// EVENT: Projectile deflected by shield
-			GameEventManager::Instance()->ActionProjectileDeflectedByPaddleShield(projectile, *this);
-		}
-	}
-}
-
 // Called when the paddle is hit by a projectile
 void PlayerPaddle::HitByProjectile(const Projectile& projectile) {
 	// The paddle is unaffected if it has a shield active...
@@ -653,11 +636,86 @@ void PlayerPaddle::HitByProjectile(const Projectile& projectile) {
 	GameEventManager::Instance()->ActionPaddleHitByProjectile(*this, projectile);
 }
 
-// Applies an immediate impulse force along the x-axis (movement axis of the paddle)
-void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce) {
-	assert(xDirectionalForce != 0.0f);
-	this->lastDirection = NumberFuncs::SignOf(xDirectionalForce);
-	this->impulse += 0.05f * xDirectionalForce;
+// Modify the projectile trajectory in certain special cases when the projectile is colliding with the paddle
+// (or the paddle shield or some component of the paddle)
+void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
+
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		if (projectile.GetType() == Projectile::PaddleLaserBulletProjectile) {
+			Vector2D fromShieldCenterToProjectile = projectile.GetPosition() - this->GetCenterPosition();
+			fromShieldCenterToProjectile.Normalize();
+			projectile.SetVelocity(fromShieldCenterToProjectile, projectile.GetVelocityMagnitude());
+			projectile.SetPosition(projectile.GetPosition() + projectile.GetHeight() * fromShieldCenterToProjectile);
+
+			// EVENT: Projectile deflected by shield
+			GameEventManager::Instance()->ActionProjectileDeflectedByPaddleShield(projectile, *this);
+		}
+	}
+}
+
+/**
+ * It is assumed that at this point, the paddle collides with the given level piece.
+ * Based on this collision, we need to update how far to the left/right the paddle can move.
+ * If doAttachedBallCollision is true then a collision check will also take place for the attached ball -
+ * this is fine if we don't want the ball to break blocks but if the game state is BallInPlayState then just
+ * set this to false.
+ */
+void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAttachedBallCollision) {
+	bool didCollide = false;
+	std::list<Point2D> collisionPts;
+
+	// We need to find the location of the collision so we can make the paddle stop (by updating its bounds):
+	// Grab all of the collision points between the paddle and the level piece
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		didCollide = p.GetBounds().GetCollisionPoints(this->CreatePaddleShieldBounds(), collisionPts);
+	}
+	else {
+		didCollide = p.GetBounds().GetCollisionPoints(this->bounds, collisionPts);
+	}
+	
+	if (doAttachedBallCollision && this->HasBallAttached()) {
+		didCollide |= p.GetBounds().GetCollisionPoints(this->GetAttachedBall()->GetBounds(), collisionPts);
+	}
+
+	if (!didCollide) {
+		return;
+	}
+	
+	// The trick with the points we've obtained is to make sure we properly update the min/max bounds
+	// along the x-axis of the paddle...
+	
+	// Seperate points into those to the left and right of the paddle center, closest to the paddle center...
+	bool collisionOnLeft  = false;
+	bool collisionOnRight = false;
+
+	for (std::list<Point2D>::iterator iter = collisionPts.begin(); iter != collisionPts.end(); ++iter) {
+		const Point2D& currPt = *iter;
+		// Check to see where the point is relative to the center of the paddle...
+		if (currPt[0] < this->GetCenterPosition()[0]) {
+			// Point is on the left of the paddle...
+			collisionOnLeft = true;
+		}
+		else {
+			// Point is on the right of the paddle (or centerish)...
+			collisionOnRight = true;
+		}
+	}
+
+	if (collisionOnLeft) {
+		// If both the closest right and left coordinates were changed then the paddle is somehow
+		// centered on a block, just ignore any changes and exit if this is the case (we don't want the
+		// player to get stuck).
+		if (collisionOnRight) {
+			return;
+		}
+
+		this->minBound = std::max<float>(this->minBound, this->GetCenterPosition()[0] - this->GetHalfWidthTotal());
+	}
+	else {
+		// There must bee a collision on the right then...
+		assert(collisionOnRight);
+		this->maxBound = std::min<float>(this->maxBound, this->GetCenterPosition()[0] + this->GetHalfWidthTotal());
+	}	
 }
 
 /**
@@ -813,7 +871,7 @@ bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile::ProjectileType
 		case Projectile::PaddleRocketBulletProjectile:
 			break;
 		default:
-			result = this->CollisionCheck(bounds);
+			result = this->CollisionCheck(bounds, true);
 			break;
 	}
 

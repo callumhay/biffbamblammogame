@@ -7,9 +7,12 @@ const Vector3D ESPParticle::PARTICLE_UP_VEC				= Vector3D(0, 1, 0);
 const Vector3D ESPParticle::PARTICLE_NORMAL_VEC		= Vector3D(0, 0, 1);
 const Vector3D ESPParticle::PARTICLE_RIGHT_VEC		= Vector3D::cross(PARTICLE_UP_VEC, PARTICLE_NORMAL_VEC);
 
+float ESPParticle::minMaxPtSize[2];
+
 // NOTE: All particles are created as if they were already dead
 ESPParticle::ESPParticle() : 
 totalLifespan(0.0), currLifeElapsed(0.0), size(1.0f, 1.0f), initSize(1.0f, 1.0f), colour(1,1,1), alpha(1.0f), rotation(0.0f) {
+	glGetFloatv(GL_ALIASED_POINT_SIZE_RANGE, minMaxPtSize);
 }
 
 ESPParticle::~ESPParticle() {
@@ -81,6 +84,7 @@ void ESPParticle::DrawAsPointSprite(const Camera& camera, const Vector3D& transl
 	
 	float dist = vecToCam.length();
 	float pointSize = (this->size[0] / 2.0) * static_cast<float>(camera.GetWindowHeight()) / (tan(Trig::degreesToRadians(camera.GetFOVAngleInDegrees() / 2.0)) * dist);
+	pointSize = std::max<float>(minMaxPtSize[0], std::min<float>(minMaxPtSize[1], pointSize));
 	glPointSize(pointSize);
 
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->alpha);

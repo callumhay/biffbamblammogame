@@ -65,10 +65,13 @@ void BallOnPaddleState::UpdateBallPosition() {
  * Time tick in-game as dealt with when the ball is on the paddle only.
  */
 void BallOnPaddleState::Tick(double seconds) {
+	// Make sure the paddle isn't moving into any blocks along the sides of the level
+	this->DoUpdateToPaddleBoundries(true);
+
 	// In this state the paddle can move around freely and the ball stays at
 	// its center without moving.
 	this->UpdateBallPosition();
-
+	
 	//GameBall* ball = this->GetGameBall();
 	//ball->Tick(seconds);
 

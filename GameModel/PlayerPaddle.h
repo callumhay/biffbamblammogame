@@ -202,9 +202,15 @@ public:
 	bool ProjectilePassesThrough(const Projectile& projectile);
 	void ModifyProjectileTrajectory(Projectile& projectile);
 
+	void UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAttachedBallCollision);
+
+	// TODO: Add the parameter: "bool includeAttachedBallCheck" to all paddle collision checks...
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
-	bool CollisionCheck(const BoundingLines& bounds) const;
+	bool CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const;
 	bool CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType, const BoundingLines& bounds) const;
+	
+	Collision::AABB2D GetPaddleAABB(bool includeAttachedBall) const;
+	
 	void DebugDraw() const;
 
 private:
@@ -316,14 +322,21 @@ inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector
 /**
  * Check to see if the given set of bounding lines collides with this paddle.
  */
-inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds) const {
+inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const {
+	bool didCollide = false;
 	// If the paddle has a shield around it do the collision with the shield
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		return bounds.CollisionCheck(this->CreatePaddleShieldBounds());
+		didCollide = bounds.CollisionCheck(this->CreatePaddleShieldBounds());
 	}
 	else {
-		return this->bounds.CollisionCheck(bounds);
+		didCollide = this->bounds.CollisionCheck(bounds);
 	}
+
+	if (includeAttachedBallCheck && !didCollide && this->HasBallAttached()) {
+		didCollide = bounds.CollisionCheck(this->GetAttachedBall()->GetBounds());
+	}
+	
+	return didCollide;
 }
 
 // The paddle destroys all projectiles that collide with it, currently
@@ -342,5 +355,41 @@ inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) 
 inline Collision::Circle2D PlayerPaddle::CreatePaddleShieldBounds() const {
 	return Collision::Circle2D(this->GetCenterPosition(), this->GetHalfWidthTotal());
 }
+
+// Obtain an AABB encompassing the entire paddle's current collision area
+inline Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) const {
+	Point2D minPt, maxPt;
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		Vector2D sphereRadiusVec(this->GetHalfWidthTotal(), this->GetHalfWidthTotal());
+		sphereRadiusVec = 1.2f * sphereRadiusVec;
+		minPt = this->GetCenterPosition() - sphereRadiusVec;
+		maxPt = this->GetCenterPosition() + sphereRadiusVec;
+	}
+	else {
+		Vector2D halfWidthHeight(this->GetHalfWidthTotal(), this->GetHalfHeight());
+		halfWidthHeight = 1.2f * halfWidthHeight;
+		minPt = this->GetCenterPosition() - halfWidthHeight;
+		maxPt = this->GetCenterPosition() + halfWidthHeight;
+	}
+
+	Collision::AABB2D paddleAABB(minPt, maxPt);
+	if (includeAttachedBall && this->HasBallAttached()) {
+		const Collision::Circle2D& ballBounds = this->GetAttachedBall()->GetBounds();
+		Vector2D ballRadiusVec(ballBounds.Radius(), ballBounds.Radius());
+		ballRadiusVec = 1.2f * ballRadiusVec;
+		paddleAABB.AddPoint(ballBounds.Center() + ballRadiusVec);
+		paddleAABB.AddPoint(ballBounds.Center() - ballRadiusVec);
+	}
+
+	return paddleAABB;
+}
+
+// Applies an immediate impulse force along the x-axis (movement axis of the paddle)
+inline void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce) {
+	assert(xDirectionalForce != 0.0f);
+	this->lastDirection = NumberFuncs::SignOf(xDirectionalForce);
+	this->impulse += 0.05f * xDirectionalForce;
+}
+
 
 #endif

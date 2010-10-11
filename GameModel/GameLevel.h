@@ -68,6 +68,7 @@ public:
 
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Point2D& center, float radius) const;
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Projectile& p) const;
+	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const PlayerPaddle& p, bool includeAttachedBall) const;
 
 	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, std::set<const LevelPiece*> ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
 	
@@ -83,7 +84,6 @@ public:
 	}
 	bool BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
 	bool PaddleSafetyNetCollisionCheck(const PlayerPaddle& p);
-
 
 	// Ability to add/remove tesla lightning barriers
 	void AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
