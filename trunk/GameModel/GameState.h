@@ -22,6 +22,9 @@ public:
 	virtual void Tick(double seconds) = 0;
 	virtual void BallReleaseKeyPressed() = 0;
 	virtual void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement);
+
+	void DoUpdateToPaddleBoundries(bool doAttachedBallCollision);
+
 };
 
 #endif

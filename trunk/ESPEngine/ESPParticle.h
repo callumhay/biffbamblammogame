@@ -137,6 +137,9 @@ protected:
 	Point3D  position;	// Position of the particle in world space
 	Vector3D velocity;
 
+	static float minMaxPtSize[2];
+	
+
 private:
 	// Disallow copy and assign
 	ESPParticle(const ESPParticle& p);

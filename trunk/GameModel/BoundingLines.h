@@ -31,10 +31,13 @@ public:
 	bool CollisionCheck(const Collision::Circle2D& c) const;
 	bool CollisionCheck(const BoundingLines& other) const;
 	int CollisionCheckIndex(const BoundingLines& other) const;
+
 	std::vector<int> CollisionCheckIndices(const BoundingLines& other) const;
 	std::vector<int> CollisionCheckIndices(const Collision::LineSeg2D& lineSeg) const;
-
 	std::vector<int> ClosestCollisionIndices(const Point2D& pt, float tolerance) const;
+
+	bool GetCollisionPoints(const BoundingLines& other, std::list<Point2D>& collisionPts) const;
+	bool GetCollisionPoints(const Collision::Circle2D& circle, std::list<Point2D>& collisionPts) const;
 
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	
@@ -43,7 +46,7 @@ public:
 
 	// Get the line at the given index within this set of bounding lines
 	// Precondition: The given index must be within bounds of the number of lines.
-	inline const Collision::LineSeg2D& GetLine(int index) {
+	inline const Collision::LineSeg2D& GetLine(int index) const {
 		assert(index < static_cast<int>(lines.size()) && index >= 0);
 		return this->lines[index];
 	}

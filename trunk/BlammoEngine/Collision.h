@@ -27,12 +27,39 @@ namespace Collision {
 		AABB2D(const Point2D &min, const Point2D &max): minCoord(min), maxCoord(max) {}
 		~AABB2D() {}
 
-		Point2D GetMin() const {
+		const Point2D& GetMin() const {
 			return this->minCoord;
 		}
-		Point2D GetMax() const {
+		const Point2D& GetMax() const {
 			return this->maxCoord;
 		}
+
+		Point2D GetCenter() const {
+			return Point2D::GetMidPoint(this->maxCoord, this->minCoord);
+		}
+		float GetWidth() const {
+			return this->maxCoord[0] - this->minCoord[0];
+		}
+		float GetHeight() const {
+			return this->maxCoord[1] - this->minCoord[1];
+		}
+
+		// Potentially Increase the bounds of this AABB by adding a point to include within it
+		void AddPoint(const Point2D& pt) {
+			if (pt[0] < minCoord[0]) {
+				minCoord[0] = pt[0];
+			}
+			if (pt[0] > maxCoord[0]) {
+				maxCoord[0] = pt[0];
+			}
+			if (pt[1] < minCoord[1]) {
+				minCoord[1] = pt[1];
+			}
+			if (pt[1] > maxCoord[1]) {
+				maxCoord[1] = pt[1];
+			}
+		}
+
 	};
 
 	class LineSeg2D {
@@ -248,6 +275,58 @@ namespace Collision {
 		}
 		
 		return false;
+	}
+
+	inline bool GetCollisionPoint(const LineSeg2D& l1, const LineSeg2D& l2, Point2D& collisionPt) {
+		float a1 = Signed2DTriArea(l1.P1(), l1.P2(), l2.P2());
+		float a2 = Signed2DTriArea(l1.P1(), l1.P2(), l2.P1());
+
+		if (a1 * a2 < 0.0f) {
+			float a3 = Signed2DTriArea(l2.P1(), l2.P2(), l1.P1());
+			float a4 = a3 + a2 - a1;
+			if (a3 * a4 < 0.0f) {
+
+				// The segments intersect - find the intersection point
+				float t = a3 / (a3 - a4);
+				collisionPt = l1.P1() + t * (l1.P2() - l1.P1());
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	// Get the FIRST collision point found for the given line segment intersecting the given circle.
+	// Returns: true if there was a collision, false otherwise.
+	inline bool GetCollisionPoint(const Collision::Circle2D& circle, const Collision::LineSeg2D& l, Point2D& collisionPt) {
+		Vector2D d = l.P2() - l.P1();
+		float lengthOfLine = Vector2D::Magnitude(d);
+		assert(lengthOfLine > 0.0f);
+		d = d / lengthOfLine;
+
+		Vector2D m = l.P1() - circle.Center();
+		float b = Vector2D::Dot(m, d);
+		float c = Vector2D::Dot(m, m) - (circle.Radius() * circle.Radius());
+		
+		if (c > 0.0f && b > 0.0f) {
+			return false;
+		}
+
+		float discr = b * b - c;
+		if (discr < 0.0f) {
+			return false;
+		}
+
+		float t = -b - sqrt(discr); // NOTE: Make this -b + sqrt(discr) to get another intersection point (if there is one)
+		if (t < 0.0f) {
+			t = 0.0f;
+		}
+		else if (t > lengthOfLine) {
+			return false;
+		}
+
+		collisionPt = l.P1() + t * d;
+		return true;
 	}
 
 	/**

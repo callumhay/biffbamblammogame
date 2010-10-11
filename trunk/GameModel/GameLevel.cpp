@@ -924,9 +924,22 @@ std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(float 
 std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const {
 	std::set<LevelPiece*> colliders;
 
+	// Check to see if we're completely out of bounds first...
+	if (xIndexMin >= static_cast<float>(this->width) || yIndexMin >= static_cast<float>(this->height) ||
+		  xIndexMax < 0.0f || yIndexMax < 0.0f) {
+		return colliders;
+	}
+
+	xIndexMin = std::max<float>(0.0f, xIndexMin);
+	yIndexMin = std::max<float>(0.0f, yIndexMin);
+	xIndexMax = std::min<float>(static_cast<float>(this->width-1), xIndexMax);
+	yIndexMax = std::min<float>(static_cast<float>(this->height-1), yIndexMax);
+
+	/*
 	// Do some correction of x-axis index values if the ball goes out of bounds...
 	if (xIndexMin < 0 || xIndexMin >= static_cast<float>(this->width)) {
 		if (xIndexMax >= static_cast<float>(this->width) || xIndexMax < 0) {
+			// We're completely out of bounds of the level
 			return colliders;
 		}
 		xIndexMin = xIndexMax;
@@ -938,6 +951,7 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
 	// Do some correction of y-axis index values if the ball goes out of bounds...
 	if (yIndexMin < 0 || yIndexMin >= static_cast<float>(this->height)) {
 		if (yIndexMax >= static_cast<float>(this->height) || yIndexMax < 0) {
+			// We're completely out of bounds of the level
 			return colliders;
 		}
 		yIndexMin = yIndexMax;
@@ -945,7 +959,7 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
 	else if (yIndexMax >= static_cast<float>(this->height) || yIndexMax < 0) {
 		yIndexMax = yIndexMin;
 	}
-	
+	*/
 	assert(xIndexMin <= xIndexMax);
 	assert(yIndexMin <= yIndexMax);
 	
@@ -968,12 +982,12 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Point2D&
 	// Get the ball boundry and use it to figure out what levelpieces are relevant
 	// Find the non-rounded max and min indices to look at along the x and y axis
 	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
-	int xIndexMax = static_cast<int>(floorf(xNonAdjustedIndex + radius)); 
-	int xIndexMin = static_cast<int>(floorf(xNonAdjustedIndex - radius));
+	float xIndexMax = ceilf(xNonAdjustedIndex + radius); 
+	float xIndexMin = floorf(xNonAdjustedIndex - radius);
 	
 	float yNonAdjustedIndex = center[1] / LevelPiece::PIECE_HEIGHT;
-	int yIndexMax = static_cast<int>(floorf(yNonAdjustedIndex + radius));
-	int yIndexMin = static_cast<int>(floorf(yNonAdjustedIndex - radius));
+	float yIndexMax = ceilf(yNonAdjustedIndex + radius);
+	float yIndexMin = floorf(yNonAdjustedIndex - radius);
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
 }
@@ -984,18 +998,35 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Point2D&
  * Returns: array of unique LevelPieces that are possibly colliding with p.
  */
 std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Projectile& p) const {
-	Point2D projectileCenter = p.GetPosition();
+	const Point2D& projectileCenter = p.GetPosition();
 
 	// Find the non-rounded max and min indices to look at along the x and y axis
 	float xDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[0]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[0]);
-	int xIndexMax = static_cast<int>(floorf((projectileCenter[0] + xDelta) / LevelPiece::PIECE_WIDTH)); 
-	int xIndexMin = static_cast<int>(floorf((projectileCenter[0] - xDelta) / LevelPiece::PIECE_WIDTH));
+	float xIndexMax = ceilf((projectileCenter[0] + xDelta) / LevelPiece::PIECE_WIDTH); 
+	float xIndexMin = floorf((projectileCenter[0] - xDelta) / LevelPiece::PIECE_WIDTH);
 	
 	float yDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[1]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[1]);
-	int yIndexMax = static_cast<int>(floorf((projectileCenter[1] + yDelta) / LevelPiece::PIECE_HEIGHT));
-	int yIndexMin = static_cast<int>(floorf((projectileCenter[1] - yDelta) / LevelPiece::PIECE_HEIGHT));
+	float yIndexMax = ceilf((projectileCenter[1] + yDelta) / LevelPiece::PIECE_HEIGHT);
+	float yIndexMin = floorf((projectileCenter[1] - yDelta) / LevelPiece::PIECE_HEIGHT);
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
+}
+
+/**
+ * Obtain the level pieces that may currently be colliding with the given paddle.
+ * Returns: array of unique LevelPieces that are possibly colliding with p.
+ */
+std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const PlayerPaddle& p, bool includeAttachedBall) const {
+	Collision::AABB2D paddleAABB = p.GetPaddleAABB(includeAttachedBall);
+	const Point2D& maxPt = paddleAABB.GetMax();
+	const Point2D& minPt = paddleAABB.GetMin();
+	
+	float minIndexX = floorf(minPt[0] / LevelPiece::PIECE_WIDTH);
+	float maxIndexX = ceilf(maxPt[0] / LevelPiece::PIECE_WIDTH);
+	float minIndexY = floorf(minPt[1] / LevelPiece::PIECE_HEIGHT);
+	float maxIndexY = ceilf(maxPt[1] / LevelPiece::PIECE_HEIGHT);
+	
+	return this->IndexCollisionCandidates(minIndexX, maxIndexX, minIndexY, maxIndexY);
 }
 
 /**
@@ -1089,7 +1120,7 @@ bool GameLevel::PaddleSafetyNetCollisionCheck(const PlayerPaddle& p) {
 	}
 	
 	// Test for collision, if there was one then we kill the safety net
-	bool didCollide = p.CollisionCheck(this->safetyNetBounds);
+	bool didCollide = p.CollisionCheck(this->safetyNetBounds, false);
 	if (didCollide) {
 		this->ballSafetyNetActive = false;
 		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(p);

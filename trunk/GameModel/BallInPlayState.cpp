@@ -320,6 +320,9 @@ void BallInPlayState::Tick(double seconds) {
 	// events and destroy the net if it exists and there is a collision
 	currLevel->PaddleSafetyNetCollisionCheck(*paddle);
 
+	// Paddle-block collisions / boundry update (so that the paddle crashes into potential blocks at its sides):
+	this->DoUpdateToPaddleBoundries(false);
+
 	// Projectile Collisions:
 	// Grab a list of all paddle-related projectiles and test each one for collisions...
 	std::list<Projectile*>& gameProjectiles = gameModel->GetActiveProjectiles();

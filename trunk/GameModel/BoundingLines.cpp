@@ -433,6 +433,44 @@ std::vector<int> BoundingLines::ClosestCollisionIndices(const Point2D& pt, float
 }
 
 /**
+ * Get a list of all collision points where lines in this are colliding with 
+ * the lines in other.
+ * Returns: true if there were collisions, false otherwise.
+ */
+bool BoundingLines::GetCollisionPoints(const BoundingLines& other, std::list<Point2D>& collisionPts) const {
+	bool isCollision;
+	Point2D collisionPt;
+	for (size_t i = 0; i < this->lines.size(); ++i) {
+		for (size_t j = 0; j < other.lines.size(); ++j) {
+			isCollision = Collision::GetCollisionPoint(this->GetLine(i), other.GetLine(j), collisionPt);
+			if (isCollision) {
+				collisionPts.push_back(collisionPt);
+			}
+		}
+	}
+	
+	return !(collisionPts.empty());
+}
+
+/**
+ * Get a list of all the collision points where lines in this are colliding with the
+ * given circle.
+ * Returns: true if there were collisions, false otherwise.
+ */
+bool BoundingLines::GetCollisionPoints(const Collision::Circle2D& circle, std::list<Point2D>& collisionPts) const {
+	bool isCollision;
+	Point2D collisionPt;
+	for (size_t i = 0; i < this->lines.size(); ++i) {
+		isCollision = Collision::GetCollisionPoint(circle, this->GetLine(i), collisionPt);
+		if (isCollision) {
+			collisionPts.push_back(collisionPt);
+		}
+	}
+	
+	return !(collisionPts.empty());
+}
+
+/**
  * Check to see whether this collided with a ray. Finds the closest collision among
  * all the lines in these bounding lines and returns the parameter required to get the point
  * of the collision by plugging it into the ray equation.

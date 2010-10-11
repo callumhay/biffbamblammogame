@@ -56,7 +56,7 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir)
 		this->gameBall->gravitySpeed = this->gameBall->currSpeed;
 	}
 
-	// Crazy ball manipulates the direction and acceleration of the ball...
+	// Crazy ball manipulates the direction and acceleration of the ball... *unless it's attached to a paddle
 	if ((this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
 		this->ApplyCrazyBallVelocityChange(seconds, currVelocity);
 	}
@@ -88,6 +88,11 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir)
 // Apply the crazy ball item's effect to the velocity of the ball by changing it somewhat randomly
 // and strangely to make it difficult to track where the ball will go
 void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity) {
+	// If the ball has no velocity then just exit, we're not going to be able to change it...
+	if (currVelocity == Vector2D(0.0f, 0.0f)) {
+		return;
+	}
+
 	static double TIME_TRACKER = 0.0;
 	static double NEXT_TIME    = 0.0;
 	static const double WAIT_TIME_BETWEEN_COLLISIONS = 0.75;
