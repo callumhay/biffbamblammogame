@@ -26,14 +26,14 @@ namespace TriangleBlock {
 	enum SideType { ShortSide, LongSide, HypotenuseSide };
 	enum Orientation { UpperLeft, UpperRight, LowerLeft, LowerRight };
 		
-	BoundingLines CreateTriangleBounds(Orientation triOrient, const Point2D& center,
+	BoundingLines CreateTriangleBounds(bool generateReflectRefractNormals, Orientation triOrient, const Point2D& center,
 		const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 		const LevelPiece* rightNeightbor, const LevelPiece* topNeighbor);
 
 	Matrix4x4 GetOrientationMatrix(Orientation orient);
 	Matrix4x4 GetInvOrientationMatrix(Orientation orient);
 
-	Vector2D GetSideNormal(SideType side, Orientation orient);
+	Vector2D GetSideNormal(bool generateReflectRefractNormals, SideType side, Orientation orient);
 };
 
 /**
@@ -97,7 +97,7 @@ public:
 class PrismTriangleBlock : public PrismBlock {
 protected:
 	TriangleBlock::Orientation orient;	// Orientation of the triangle - i.e., where the apex corner is located
-
+	BoundingLines reflectRefractBounds;	// Bounds used for reflection/refraction of beams
 public:
 	PrismTriangleBlock(TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc);
 	~PrismTriangleBlock();
@@ -105,6 +105,9 @@ public:
 	LevelPieceType GetType() const {
 		return LevelPiece::PrismTriangle;
 	}
+
+	const BoundingLines& GetReflectRefractBounds() const;
+
 
 	Matrix4x4 GetPieceToLevelTransform() const;
 	Matrix4x4 GetPieceToLevelInvTransform() const;

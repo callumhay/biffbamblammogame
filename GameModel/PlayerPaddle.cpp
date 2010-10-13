@@ -490,6 +490,9 @@ void PlayerPaddle::RemovePaddleType(const PaddleType& type) {
 
 // Tells the paddle that it has started to fire the laser beam (or has stopped firing the laser beam)
 void PlayerPaddle::SetIsLaserBeamFiring(bool isFiring) {
+	/*
+	// We don't push the paddle down while firing the laser any more cause it's annoying and
+	// it breaks the safety net, which is annoying and not fun.
 	if (isFiring) {
 
 		// Start up the animation that pushes the paddle down (as if reacting to the sheer
@@ -509,6 +512,7 @@ void PlayerPaddle::SetIsLaserBeamFiring(bool isFiring) {
 	else {
 		this->moveDownAnimation.AppendLerp(0.1, 0.0f);
 	}
+	*/
 	this->isFiringBeam = isFiring;
 }
 

@@ -91,8 +91,14 @@ public:
 		return this;
 	}
 
+	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
+
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
+
+//protected:
+//	BoundingLines reflectRefractBounds;	// Bounds used for reflection/refraction of beams
+
 
 };
 #endif // __PRISMBLOCK_H__

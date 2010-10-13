@@ -54,6 +54,9 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		std::vector<Collision::LineSeg2D> boundingLines;
 		std::vector<Vector2D>  boundingNorms;
 
+		//std::vector<Collision::LineSeg2D> reflectRefractBoundingLines;
+		//std::vector<Vector2D>  reflectRefractBoundingNorms;
+
 		// Bottom-left diagonal boundry
 		if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
 			  (bottomLeftNeighbor != NULL && bottomLeftNeighbor->IsNoBoundsPieceType()) ||
@@ -66,6 +69,10 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 			boundingLines.push_back(boundry);
 			boundingNorms.push_back(n1);
+
+			//reflectRefractBoundingLines.push_back(boundry);
+			//Vector2D rrNormal(
+			//reflectRefractBoundingNorms
 		}
 
 		// Bottom-right diagonal boundry
@@ -110,6 +117,11 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		}
 
 		this->bounds = BoundingLines(boundingLines, boundingNorms);
+		//this->reflectRefractBounds = BoundingLines(reflectRefractBoundingLines, reflectRefractBoundingNorms);
+}
+
+bool PrismBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	return this->bounds.CollisionCheck(ray, rayT);
 }
 
 /**
