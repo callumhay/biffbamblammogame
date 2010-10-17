@@ -34,7 +34,7 @@ public:
 	~PaddleRocketMesh();
 
 	void Activate(const PaddleRocketProjectile* rocketProjectile);
-	void Deactivate();
+	void Deactivate(const PaddleRocketProjectile* rocketProjectile);
 
 	void Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, const BasicPointLight& keyLight, 
 						const BasicPointLight& fillLight, const BasicPointLight& ballLight);
@@ -48,19 +48,21 @@ private:
 	ESPPointEmitter* rocketGlowEmitter;
 
 	Mesh* rocketMesh;
-	const PaddleRocketProjectile* rocketProjectile;
+	std::set<const PaddleRocketProjectile*> rocketProjectiles;
 	
 	void LoadMesh();
 };
 
 // Activates the paddle rocket mesh so that it gets drawn based on the given projectile
 inline void PaddleRocketMesh::Activate(const PaddleRocketProjectile* rocketProjectile) {
-	this->rocketProjectile = rocketProjectile;
+	std::pair<std::set<const PaddleRocketProjectile*>::iterator, bool> insertResult = this->rocketProjectiles.insert(rocketProjectile);
+	assert(insertResult.second);
 }
 
 // Deactivates the rocket projectile - stops it from being drawn until next time it is activated
-inline void PaddleRocketMesh::Deactivate() {
-	this->rocketProjectile = NULL;
+inline void PaddleRocketMesh::Deactivate(const PaddleRocketProjectile* rocketProjectile) {
+	size_t numErased = this->rocketProjectiles.erase(rocketProjectile);
+	assert(numErased == 1);
 }
 
 #endif // __PADDLEROCKETMESH_H__

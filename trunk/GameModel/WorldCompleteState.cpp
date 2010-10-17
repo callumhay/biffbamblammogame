@@ -13,6 +13,8 @@ WorldCompleteState::~WorldCompleteState() {
  * Executes only once before changing the state based on what happens after the world ends...
  */
 void WorldCompleteState::Tick(double seconds) {
+	UNUSED_PARAMETER(seconds);
+
 	GameWorld* currWorld = this->gameModel->GetCurrentWorld();
 
 	// EVENT: World is complete

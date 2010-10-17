@@ -95,7 +95,7 @@ void WorldStartDisplayState::RenderFrame(double dT) {
 	// If we're waiting for the user's key press then flash on and off the text telling them to press any key
 	if (this->waitingForKeyPress) {
 		this->footerColourAnimation.Tick(dT);
-		this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth(), camera.GetWindowHeight());
+		this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
 	}
 
 	Camera::PopWindowCoords();
@@ -122,6 +122,9 @@ void WorldStartDisplayState::RenderFrame(double dT) {
 }
 
 void WorldStartDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
+
 	if (this->waitingForKeyPress) {
 		// Start the fade out animation - the user wants to start playing!
 		this->fadeAnimation.SetLerp(WorldStartDisplayState::FADE_OUT_TIME, 1.0f);
@@ -129,6 +132,8 @@ void WorldStartDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
 }
 
 void WorldStartDisplayState::DisplaySizeChanged(int width, int height) {
+	UNUSED_PARAMETER(width);
+	UNUSED_PARAMETER(height);
 }
 
 void WorldStartDisplayState::DrawNowEnteringTextHeader(float screenWidth, float screenHeight) {
@@ -210,7 +215,7 @@ void WorldStartDisplayState::DrawNowEnteringTextHeader(float screenWidth, float 
 	glPopAttrib();
 }
 
-void WorldStartDisplayState::DrawPressAnyKeyTextFooter(float screenWidth, float screenHeight) {
+void WorldStartDisplayState::DrawPressAnyKeyTextFooter(float screenWidth) {
 	static const float VERTICAL_PADDING = 20.0f;
 	const float horizontalLabelSize = this->pressAnyKeyLabel.GetLastRasterWidth();
 

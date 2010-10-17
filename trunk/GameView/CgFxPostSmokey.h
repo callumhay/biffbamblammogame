@@ -11,7 +11,7 @@
 class CgFxPostSmokey : public CgFxPostProcessingEffect {
 
 public:
-	CgFxPostSmokey(FBObj* inputFBO, FBObj* outputFBO);
+	CgFxPostSmokey(FBObj* outputFBO);
 	~CgFxPostSmokey();
 
 	void Draw(int screenWidth, int screenHeight, double dT);

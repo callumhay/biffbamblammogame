@@ -87,7 +87,7 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	assert(ball != NULL);
 	Point3D emitCenter(ball->GetCenterPosition2D() + negHalfLevelDim, 0.0f);
 
-	const Texture2D* fullscreenTex = this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture();
+	//const Texture2D* fullscreenTex = this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture();
 	this->shockwaveEmitter = this->display->GetAssets()->GetESPAssets()->CreateShockwaveEffect(emitCenter, 4 * ball->GetBounds().Radius(), 1.2f);
 	this->starEmitter = this->display->GetAssets()->GetESPAssets()->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.8f, 1.0f), 
 		ESPInterval(0.5f, 1.0f), ESPInterval(0.0f), false, 20);

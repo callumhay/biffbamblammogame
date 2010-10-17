@@ -139,6 +139,8 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 }
 
 LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+	UNUSED_PARAMETER(ball);
+
 	LevelPiece* resultingPiece = this->Destroy(gameModel);
 	return resultingPiece;
 }

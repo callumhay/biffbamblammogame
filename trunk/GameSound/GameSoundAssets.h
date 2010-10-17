@@ -2,13 +2,13 @@
 #define _GAMESOUNDASSETS_H_
 
 #include "Sound.h"
+#include "EventSound.h"
 
 #include "../GameModel/GameWorld.h"
 
 #include "../GameView/GameViewConstants.h"
 
 class MusicSound;
-class EventSound;
 
 /**
  * Holder of all the sound assets for the Biff Bam Blammo game. This class is
@@ -107,6 +107,7 @@ public:
 	
 	void PlayWorldSound(GameSoundAssets::WorldSound sound, GameSoundAssets::SoundVolumeLoudness volume = GameSoundAssets::NormalVolume);
 	void StopWorldSound(GameSoundAssets::WorldSound sound);
+	bool IsWorldSoundPlaying(GameSoundAssets::WorldSound sound);
 
 	void SetActiveWorldSounds(GameWorld::WorldStyle style, bool unloadPreviousActiveWorldSounds, 
 														bool loadNewActiveWorldSounds);
@@ -166,6 +167,12 @@ inline void GameSoundAssets::PlayWorldSound(GameSoundAssets::WorldSound sound, G
 
 inline void GameSoundAssets::StopWorldSound(GameSoundAssets::WorldSound sound) {
 	this->StopSoundGeneral(GameSoundAssets::GetSoundPalletFromWorldStyle(this->activeWorld), sound);
+}
+
+inline bool GameSoundAssets::IsWorldSoundPlaying(GameSoundAssets::WorldSound sound) {
+	EventSound* eventSound =  this->FindEventSound(GameSoundAssets::GetSoundPalletFromWorldStyle(this->activeWorld), sound);
+	assert(eventSound != NULL);
+	return eventSound->IsPlaying();
 }
 
 // Sets the currently active world - this is the style of the world so that whenever PlayWorldSound/StopWorldSound

@@ -28,6 +28,8 @@
 #include "../GameModel/Beam.h"
 #include "../GameModel/RandomItem.h"
 #include "../GameModel/TeslaBlock.h"
+#include "../GameModel/CannonBlock.h"
+#include "../GameModel/PaddleRocketProjectile.h"
 
 #include "../GameSound/GameSoundAssets.h"
 
@@ -367,11 +369,36 @@ void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const Ca
 	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(cannonBlock);
 	// Stop the sound of the cannon rotating
 	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask);
-	// .. and the sound for it
+	// .. and the sound for the blast
 	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockFiredEvent, GameSoundAssets::LoudVolume);
 
-
 	debug_output("EVENT: Ball fired out of cannon block");
+}
+
+
+void GameEventsListener::RocketEnteredCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+	UNUSED_PARAMETER(rocket);
+	UNUSED_PARAMETER(cannonBlock);
+
+	// Suspend certain elements of the rocket projectile until it's fired back out of the cannon...
+	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
+	
+	debug_output("EVENT: Rocket entered cannon block");
+}
+
+void GameEventsListener::RocketFiredFromCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+	UNUSED_PARAMETER(rocket);
+
+	// Add the blast effect of the rocket exiting the cannon
+	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(cannonBlock);
+	// Stop the sound of the cannon rotating
+	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask);
+	// .. and the sound for the blast
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockFiredEvent, GameSoundAssets::LoudVolume);
+	// ... and for the rocket moving mask again
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
+
+	debug_output("EVENT: Rocket fired out of cannon block");
 }
 
 void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {

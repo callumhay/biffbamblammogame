@@ -14,6 +14,7 @@ public:
 	}
 
 	void Tick(double seconds) {
+		UNUSED_PARAMETER(seconds);
 		// Do nothing, player is dead.
 	}
 	void BallReleaseKeyPressed() {

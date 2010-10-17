@@ -22,7 +22,7 @@
  * which will be loaded when they are required.
  */
 GameWorld::GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr) : 
-worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(-1),
+worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(0),
 transformMgr(transformMgr) {
 }
 
@@ -36,7 +36,7 @@ GameWorld::~GameWorld() {
  * Precondition: true.
  * Return: true on a successful load, false otherwise.
  */
-bool GameWorld::Load(GameModel* model) {
+bool GameWorld::Load() {
 	if (this->isLoaded) {
 		this->Unload();
 	}
@@ -128,7 +128,7 @@ bool GameWorld::Unload() {
 	this->loadedLevels.clear();
 	this->isLoaded = false;
 	this->style = None;
-	this->currentLevelNum = -1;
+	this->currentLevelNum = 0;
 
 	return true;
 }

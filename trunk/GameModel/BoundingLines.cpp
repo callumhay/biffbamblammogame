@@ -87,7 +87,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 	// Use a square radius instead of using square root operations (it's faster.)
 	float sqRadius = c.Radius()*c.Radius();
 	bool collisionOccurred = false;
-	float smallestCollisionDistSq = FLT_MAX;
+	//float smallestCollisionDistSq = FLT_MAX;
 	float movementDistOverDT = dT * velocityMagnitude;
 	Vector2D movementOverDT = dT * velocity;
 	Point2D previousCenter = c.Center() - movementOverDT;

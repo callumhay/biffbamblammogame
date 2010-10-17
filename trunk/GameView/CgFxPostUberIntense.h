@@ -11,7 +11,7 @@
 class CgFxPostUberIntense : public CgFxPostProcessingEffect {
 
 public:
-	CgFxPostUberIntense(FBObj* inputFBO, FBObj* outputFBO);
+	CgFxPostUberIntense(FBObj* outputFBO);
 	~CgFxPostUberIntense();
 
 	void Draw(int screenWidth, int screenHeight, double dT);

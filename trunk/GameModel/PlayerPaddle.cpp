@@ -300,6 +300,8 @@ void PlayerPaddle::FireAttachedBall() {
  * e.g., when in paddle cam mode and then changing back while the sticky paddle is active.
  */
 void PlayerPaddle::MoveAttachedBallToNewBounds(double dT) {
+	UNUSED_PARAMETER(dT);
+
 	if (!this->HasBallAttached()) {
 		return;
 	}

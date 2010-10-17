@@ -15,6 +15,7 @@
 #include "Projectile.h"
 
 class PlayerPaddle;
+class CannonBlock;
 
 class PaddleRocketProjectile : public Projectile {
 public:
@@ -29,8 +30,12 @@ public:
 
 	float GetYRotation() const;
 
-private:
+	void LoadIntoCannonBlock(CannonBlock* cannonBlock);
+	bool IsLoadedInCannonBlock() const;
 
+	bool GetIsActive() const;
+
+private:
 	static const Vector2D PADDLEROCKET_VELOCITYDIR;
 	static const Vector2D PADDLEROCKET_RIGHTDIR;
 
@@ -44,10 +49,20 @@ private:
 	float currYRotationSpd;
 	float currYRotation;
 
+	// When the rocket is loaded into a cannon block this will not be NULL
+	CannonBlock* cannonBlock;
 };
 
 inline float PaddleRocketProjectile::GetYRotation() const {
 	return this->currYRotation;
+}
+
+inline bool PaddleRocketProjectile::IsLoadedInCannonBlock() const {
+	return (this->cannonBlock != NULL);
+}
+
+inline bool PaddleRocketProjectile::GetIsActive() const {
+	return !this->IsLoadedInCannonBlock();
 }
 
 // Obtain the size relative to the the normal size of the rocket (1.0) this rocket

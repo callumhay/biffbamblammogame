@@ -30,6 +30,11 @@ void BreakableTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const 
 																					const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 																					const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
+	UNUSED_PARAMETER(topRightNeighbor);
+	UNUSED_PARAMETER(topLeftNeighbor);
+	UNUSED_PARAMETER(bottomRightNeighbor);
+	UNUSED_PARAMETER(bottomLeftNeighbor);
+
 	this->bounds = TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
 }
 
@@ -61,6 +66,11 @@ void SolidTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Leve
 																			const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 																			const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 																			const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+	UNUSED_PARAMETER(topRightNeighbor);
+	UNUSED_PARAMETER(topLeftNeighbor);
+	UNUSED_PARAMETER(bottomRightNeighbor);
+	UNUSED_PARAMETER(bottomLeftNeighbor);
 
 	this->bounds = TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
 }
@@ -100,6 +110,12 @@ void PrismTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Leve
 																			const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 																			const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 																			const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+	UNUSED_PARAMETER(topRightNeighbor);
+	UNUSED_PARAMETER(topLeftNeighbor);
+	UNUSED_PARAMETER(bottomRightNeighbor);
+	UNUSED_PARAMETER(bottomLeftNeighbor);
+
 	this->bounds = TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
 	this->reflectRefractBounds = TriangleBlock::CreateTriangleBounds(true, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
 }

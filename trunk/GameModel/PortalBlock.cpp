@@ -16,6 +16,10 @@ PortalBlock::~PortalBlock() {
 // since it needs to know if something hits it so that when it does it can move it to its sibling portal...
 
 bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+	UNUSED_PARAMETER(n);
+	UNUSED_PARAMETER(collisionLine);
+	UNUSED_PARAMETER(timeSinceCollision);
+
 	// No collision if the ball has just previously collided with this portal block
 	if (ball.IsLastPieceCollidedWith(this)) {
 		return false;
@@ -47,6 +51,16 @@ void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 															 const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 															 const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 															 const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+	UNUSED_PARAMETER(leftNeighbor);
+	UNUSED_PARAMETER(bottomNeighbor);
+	UNUSED_PARAMETER(rightNeighbor);
+	UNUSED_PARAMETER(topNeighbor);
+	UNUSED_PARAMETER(topRightNeighbor);
+	UNUSED_PARAMETER(topLeftNeighbor);
+	UNUSED_PARAMETER(bottomRightNeighbor);
+	UNUSED_PARAMETER(bottomLeftNeighbor);
+
 	// Make the bounds a bit smaller than a typical level piece and always make all of them
 
 	// Clear all the currently existing boundry lines first
@@ -91,6 +105,8 @@ void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 }
 
 LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+	UNUSED_PARAMETER(gameModel);
+
 	// Tell the ball what the last piece it collided with was the sibling so it doesn't
 	// keep teleporting back and forth between this and its sibling...
 	ball.SetLastPieceCollidedWith(this->sibling);
@@ -109,6 +125,8 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
  * be teleported to the sibling portal.
  */
 LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	UNUSED_PARAMETER(gameModel);
+
 	// Ignore the collision if this was the last piece collided with
 	if (projectile->IsLastLevelPieceCollidedWith(this)) {
 		return this;

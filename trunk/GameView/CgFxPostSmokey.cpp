@@ -9,7 +9,7 @@
 
 const std::string CgFxPostSmokey::POSTSMOKEY_TECHNIQUE_NAME = "PostSmokey";
 
-CgFxPostSmokey::CgFxPostSmokey(FBObj* inputFBO, FBObj* outputFBO) :
+CgFxPostSmokey::CgFxPostSmokey(FBObj* outputFBO) :
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_FULLSCREENSMOKEY_SHADER, sceneFBO), resultFBO(outputFBO),
 timerParam(NULL), scaleParam(NULL), frequencyParam(NULL), fadeParam(NULL), colourParam(NULL), noiseSamplerParam(NULL), sceneSamplerParam(NULL),
 scale(0.5f), frequency(0.5f), colour(GameModelConstants::GetInstance()->GHOST_BALL_COLOUR), timer(0.0f), fade(1.0f) {
