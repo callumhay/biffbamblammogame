@@ -18,6 +18,8 @@ ESPParticleScaleEffector::~ESPParticleScaleEffector() {
 }
 
 void ESPParticleScaleEffector::AffectParticleOnTick(double dT, ESPParticle* particle) {
+	UNUSED_PARAMETER(dT);
+
 	double particleLifeElapsed = particle->GetCurrentLifeElapsed();
 
 	// TODO: move to function...

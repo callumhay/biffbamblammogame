@@ -11,6 +11,7 @@
 
 #include "GameState.h"
 #include "GameModel.h"
+#include "LevelCompleteState.h"
 
 /**
  * Default action here is to just move the paddle around.
@@ -23,18 +24,18 @@ void GameState::MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleM
  * This should only be called when the state allows the player to control the paddle...
  * This function updates the paddle boundries so that it hits blocks around it.
  */
-void GameState::DoUpdateToPaddleBoundries(bool doAttachedBallCollision) {
+bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttachedBallCollision) {
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
-	GameLevel* currLevel = this->gameModel->GetCurrentLevel();
+	GameLevel* currentLevel = this->gameModel->GetCurrentLevel();
 	assert(paddle != NULL);
-	assert(currLevel != NULL);
+	assert(currentLevel != NULL);
 
 	// Start by setting the paddle boundries to be the innermost solid blocks on the paddle level of blocks
-	paddle->UpdatePaddleBounds(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound());
+	paddle->UpdatePaddleBounds(currentLevel->GetPaddleMinBound(), currentLevel->GetPaddleMaxBound());
 
 	// Check to see if the paddle collided with any blocks...
 	bool didCollideWithPiece = false;
-	std::set<LevelPiece*> collisionCandidatePieces = currLevel->GetLevelPieceCollisionCandidates(*paddle, doAttachedBallCollision);
+	std::set<LevelPiece*> collisionCandidatePieces = currentLevel->GetLevelPieceCollisionCandidates(*paddle, doAttachedBallCollision);
 	for (std::set<LevelPiece*>::iterator iter = collisionCandidatePieces.begin(); iter != collisionCandidatePieces.end(); ++iter) {
 		LevelPiece* currPiece = *iter;
 		if (currPiece->IsNoBoundsPieceType()) {
@@ -45,7 +46,22 @@ void GameState::DoUpdateToPaddleBoundries(bool doAttachedBallCollision) {
 		didCollideWithPiece = paddle->CollisionCheck(currPiece->GetBounds(), doAttachedBallCollision);
 		if (didCollideWithPiece) {
 			paddle->UpdateBoundsByPieceCollision(*currPiece, doAttachedBallCollision);
-			//this->gameModel->CollisionOccurred(currProjectile, currPiece);
+
+			/*
+			if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+				LevelPiece* resultingPiece = currPiece->TickPaddleShieldCollision(dT, *paddle, this->gameModel);
+				// Check to see if the level is done
+				if (currentLevel->IsLevelComplete()) {
+					// The level was completed, move to the level completed state
+					this->gameModel->SetNextState(new LevelCompleteState(this->gameModel));
+					// We signify to the caller that the state has changed...
+					return true;
+				}
+			}
+			*/
+
 		}
 	}
+
+	return false;
 }

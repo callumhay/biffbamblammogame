@@ -26,7 +26,8 @@ ESPParticleColourEffector::~ESPParticleColourEffector() {
 }
 
 void ESPParticleColourEffector::AffectParticleOnTick(double dT, ESPParticle* particle) {
-	
+	UNUSED_PARAMETER(dT);
+
 	// Only do interpolation when we're dealing with discrete lifetimes
 	double particleLifespan = particle->GetLifespanLength();
 	

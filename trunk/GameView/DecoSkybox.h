@@ -16,7 +16,7 @@ public:
 	DecoSkybox();
 	virtual ~DecoSkybox();
 
-	virtual void Tick(double dT){};
+	virtual void Tick(double){};
 	virtual void Draw(const Camera& camera);
 };
 

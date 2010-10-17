@@ -10,7 +10,7 @@
 const std::string CgFxFullscreenGoo::MASK_SPLATTER_TECHNIQUE_NAME		= "MaskSplatter";
 const std::string CgFxFullscreenGoo::NOMASK_SPLATTER_TECHNIQUE_NAME	= "NoMaskSplatter";
 
-CgFxFullscreenGoo::CgFxFullscreenGoo(FBObj* inputFBO, FBObj* outputFBO) :
+CgFxFullscreenGoo::CgFxFullscreenGoo(FBObj* outputFBO) :
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_FULLSCREENGOO_SHADER, sceneFBO), resultFBO(outputFBO),
 timerParam(NULL), scaleParam(NULL), frequencyParam(NULL), displacementParam(NULL), fadeParam(NULL),
 colourParam(NULL), noiseSamplerParam(NULL), maskSamplerParam(NULL), sceneSamplerParam(NULL),

@@ -67,10 +67,12 @@ public:
 
 	// Determine whether the given projectile will pass through this block...
 	bool ProjectilePassesThrough(Projectile* projectile) {
+		UNUSED_PARAMETER(projectile);
 		return false;
 	}
 
 	LevelPiece* Destroy(GameModel* gameModel) {
+		UNUSED_PARAMETER(gameModel);
 		return this;
 	}
 

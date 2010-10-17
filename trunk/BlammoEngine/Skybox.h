@@ -34,7 +34,7 @@ protected:
 public:
 	virtual ~Skybox();
 
-	virtual void Tick(double dT){};
+	virtual void Tick(double dT){ UNUSED_PARAMETER(dT); };
 	virtual void Draw(const Camera& camera);
 
 	// Static creators

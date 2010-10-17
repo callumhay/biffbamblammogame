@@ -38,7 +38,7 @@ protected:
 	FBObj* resultFBO;
 
 public:
-	CgFxFullscreenGoo(FBObj* inputFBO, FBObj* outputFBO);
+	CgFxFullscreenGoo(FBObj* outputFBO);
 	virtual ~CgFxFullscreenGoo();
 
 	virtual void Draw(int screenWidth, int screenHeight, double dT);

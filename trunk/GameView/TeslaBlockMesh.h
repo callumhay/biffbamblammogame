@@ -45,7 +45,7 @@ private:
 	Texture2D* shieldTex;
 	float shieldAlpha;
 
-	void DrawTeslaShield(const Camera& camera, const Matrix4x4& screenAlignMatrix);
+	void DrawTeslaShield(const Matrix4x4& screenAlignMatrix);
 
 	void LoadMesh();
 

@@ -7,21 +7,7 @@
 #include <vector>
 
 class GameModelConstants {
-
-private:
-	static GameModelConstants* Instance;
-
-	void InitConstArrays();
-
-	// World paths
-	std::string WORLD0_PATH;
-	std::string WORLD1_PATH;
-
-	GameModelConstants();
-	~GameModelConstants(){};
-
 public:
-	
 	static GameModelConstants* GetInstance() {
 		if (GameModelConstants::Instance == NULL) {
 			GameModelConstants::Instance = new GameModelConstants();
@@ -67,6 +53,22 @@ public:
 	const Colour CRAZY_BALL_COLOUR;
 
 	const Colour SHIELD_PADDLE_COLOUR;
+
+private:
+	static GameModelConstants* Instance;
+
+	void InitConstArrays();
+
+	// World paths
+	std::string WORLD0_PATH;
+	std::string WORLD1_PATH;
+
+	GameModelConstants();
+	~GameModelConstants(){};
+
+	// Disallow copy and assignment
+	GameModelConstants(const GameModelConstants& g);
+	GameModelConstants& operator=(const GameModelConstants& g);
 };
 
 #endif

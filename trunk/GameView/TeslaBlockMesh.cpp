@@ -73,10 +73,11 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	float rotationAmt = dT * COIL_ROTATION_SPEED_DEGSPERSEC;
 
-	Vector3D alignNormalVec = -camera.GetNormalizedViewVector();
-	Vector3D alignUpVec		  = camera.GetNormalizedUpVector();
-	Vector3D alignRightVec	= Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
-	Matrix4x4 screenAlignMatrix(alignRightVec, alignUpVec, alignNormalVec);
+	//Vector3D alignNormalVec = -camera.GetNormalizedViewVector();
+	//Vector3D alignUpVec		  = camera.GetNormalizedUpVector();
+	//Vector3D alignRightVec	= Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+	//Matrix4x4 screenAlignMatrix(alignRightVec, alignUpVec, alignNormalVec);
+	Matrix4x4 screenAlignMatrix = camera.GenerateScreenAlignMatrix();
 
 	// Go through each tesla block and transform their center's appropriately
 	for (std::set<const TeslaBlock*>::const_iterator iter = this->teslaBlocks.begin(); iter != this->teslaBlocks.end(); ++iter) {
@@ -94,7 +95,7 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 
 		// Draw a shield around the tesla block if it cannot be changed
 		if (!currTeslaBlock->GetIsChangable()) {
-			this->DrawTeslaShield(camera, screenAlignMatrix);
+			this->DrawTeslaShield(screenAlignMatrix);
 		}
 
 		glRotatef(currRotationAmt, currRotationAxis[0], currRotationAxis[1], currRotationAxis[2]);	
@@ -128,7 +129,7 @@ void TeslaBlockMesh::SetAlphaMultiplier(float alpha) {
 	this->shieldAlpha = std::min<float>(alpha, 0.75f);
 }
 
-void TeslaBlockMesh::DrawTeslaShield(const Camera& camera, const Matrix4x4& screenAlignMatrix) {
+void TeslaBlockMesh::DrawTeslaShield(const Matrix4x4& screenAlignMatrix) {
 	glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
 
 	glEnable(GL_BLEND);

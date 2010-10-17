@@ -81,6 +81,8 @@ CgFxBloom::~CgFxBloom() {
 }
 
 void CgFxBloom::Draw(int screenWidth, int screenHeight, double dT) {
+	UNUSED_PARAMETER(dT);
+
 	// Step 0: Setup necessary cg parameters
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
 

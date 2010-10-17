@@ -47,6 +47,8 @@ public:
 	static const Vector2D DEFAULT_PADDLE_UP_VECTOR;
 	static const Vector2D DEFAULT_PADDLE_RIGHT_VECTOR;
 
+	static const int DEFAULT_SHIELD_DMG_PER_SECOND;
+
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000010, 
 										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000, RocketPaddle = 0x00010000, 
 										ShieldPaddle = 0x00100000 };
@@ -91,6 +93,10 @@ public:
 	}
 	float GetHalfDepthTotal() const {
 		return this->currHalfDepthTotal;
+	}
+
+	int GetShieldDamagePerSecond() const {
+		return PlayerPaddle::DEFAULT_SHIELD_DMG_PER_SECOND;
 	}
 
 	Vector2D GetUpVector() const {

@@ -264,7 +264,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						// Read in all the names of the brother tesla blocks that this one can fire lightning to
 						std::string errorStr;
 						std::list<char> connectedNameList;
-						while (true) {
+						for (;;) {
 							if (*inFile >> tempChar) {
 								if ((tempChar >= 'A' && tempChar <= 'z') || (teslaBlockName < '0' && teslaBlockName > '9')) {
 									connectedNameList.push_back(tempChar);
@@ -487,7 +487,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						*inFile >> orient1;
 						*inFile >> orient2;
 
-						TriangleBlock::Orientation orientation;
+						TriangleBlock::Orientation orientation = TriangleBlock::UpperRight;
 						if (orient1 == TRI_UPPER_CORNER) {
 							if (orient2 == TRI_RIGHT_CORNER) {
 								// Upper-right
@@ -1157,7 +1157,7 @@ void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock*
 		std::set<const LevelPiece*> ignorePieces;
 		ignorePieces.insert(block1);
 
-		while (true) {
+		for (;;) {
 			pieceInArc = this->GetLevelPieceFirstCollider(rayFromBlock, ignorePieces, rayT, TeslaBlock::LIGHTNING_ARC_RADIUS);
 			// We get out once we've reached the 2nd tesla block (which MUST happen!)
 			if (pieceInArc == block2) {

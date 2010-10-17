@@ -5,8 +5,8 @@
 #include "../BlammoEngine/Texture3D.h"
 #include "../BlammoEngine/FBObj.h"
 
-CgFxInkSplatter::CgFxInkSplatter(FBObj* inputFBO, FBObj* outputFBO, const std::string& maskTexFilepath) : 
-CgFxFullscreenGoo(inputFBO, outputFBO), isInkSplatActivated(false) {
+CgFxInkSplatter::CgFxInkSplatter(FBObj* outputFBO, const std::string& maskTexFilepath) : 
+CgFxFullscreenGoo(outputFBO), isInkSplatActivated(false) {
 	this->SetMask(maskTexFilepath);
 	this->SetColour(GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
 }

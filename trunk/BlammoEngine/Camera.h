@@ -81,6 +81,13 @@ public:
 		return this->fovAngleInDegrees;
 	}
 
+	Matrix4x4 GenerateScreenAlignMatrix() const {
+		Vector3D alignNormalVec = -this->GetNormalizedViewVector();
+		Vector3D alignUpVec		  = this->GetNormalizedUpVector();
+		Vector3D alignRightVec	= Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+		return Matrix4x4(alignRightVec, alignUpVec, alignNormalVec);
+	}
+
 	Vector3D GetNormalizedUpVector() const {
 		return Vector3D::Normalize(this->viewMatrix * DEFAULT_UP_VEC); 
 	}

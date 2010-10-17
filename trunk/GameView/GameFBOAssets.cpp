@@ -36,8 +36,8 @@ drawItemsInLastPass(true) {
 	this->fgAndBgBlurEffect			= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
 	this->bloomEffect						= new CgFxBloom(this->postFgAndBgFBO);
 	this->afterImageEffect			= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
-	this->inkSplatterEffect			= new CgFxInkSplatter(this->finalFSEffectFBO, this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
-	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->finalFSEffectFBO, this->tempFBO);
+	this->inkSplatterEffect			= new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
+	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
 	this->smokeyCamEffect				= new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
 	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->finalFSEffectFBO, this->tempFBO);
@@ -140,8 +140,8 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	this->fgAndBgBlurEffect			= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
 	this->bloomEffect						= new CgFxBloom(this->postFgAndBgFBO);
 	this->afterImageEffect			= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
-	this->inkSplatterEffect			= new CgFxInkSplatter(this->finalFSEffectFBO, this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
-	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->finalFSEffectFBO, this->tempFBO);
+	this->inkSplatterEffect			= new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
+	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
 	this->smokeyCamEffect				= new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
 	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->finalFSEffectFBO, this->tempFBO);
@@ -409,7 +409,7 @@ void GameFBOAssets::DrawCannonBarrelOverlay(int width, int height, float alpha) 
 }
 
 void GameFBOAssets::SetupPaddleShieldEffect() {
-	this->shieldPaddleCamEffect	= new CgFxFullscreenGoo(this->finalFSEffectFBO, this->tempFBO);
+	this->shieldPaddleCamEffect	= new CgFxFullscreenGoo(this->tempFBO);
 	this->shieldPaddleCamEffect->SetColour(Colour(1, 1, 1));
 	this->shieldPaddleCamEffect->SetDisplacement(0.02f);
 	this->shieldPaddleCamEffect->SetScale(1.5f);

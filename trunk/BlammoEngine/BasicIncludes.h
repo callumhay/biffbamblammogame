@@ -30,6 +30,8 @@
 #define _CRTDBG_MAP_ALLOC 
 #endif
 
+#define UNUSED_PARAMETER(p) (p)
+
 // STL includes
 //#ifdef _SECURE_SCL
 //#undef _SECURE_SCL
@@ -47,6 +49,8 @@
 #include <fstream>
 #include <sstream>
 #include <ostream>
+
+#define GLUT_DISABLE_ATEXIT_HACK 1
 
 // OpenGL includes and defines
 #define GLEW_STATIC

@@ -50,7 +50,7 @@ private:
 		~TopMenuEventHandler() {}
 		void GameMenuItemHighlightedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
-		void GameMenuItemChangedEvent(int itemIndex) {};
+		void GameMenuItemChangedEvent(int itemIndex) { UNUSED_PARAMETER(itemIndex); };
 		void GameMenuItemVerifiedEvent(int itemIndex);
 		void EscMenu();
 	};

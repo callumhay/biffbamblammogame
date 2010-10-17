@@ -7,7 +7,7 @@ class EmptySpaceBlock : public LevelPiece {
 
 public:
 	EmptySpaceBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {}
-	virtual ~EmptySpaceBlock() {}
+	~EmptySpaceBlock() {}
 
 	LevelPieceType GetType() const { 
 		return LevelPiece::Empty;
@@ -47,18 +47,20 @@ public:
 
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel){
+		UNUSED_PARAMETER(gameModel);
 		return this;
 	};	
 	
 	// All projectiles pass through empty space
 	// Returns: true.
 	bool ProjectilePassesThrough(Projectile* projectile) {
+		UNUSED_PARAMETER(projectile);
 		return true;
 	}
 
 	// Empty blocks do not reflect or refract light.
 	// Returns: false
-	virtual bool IsLightReflectorRefractor() const {
+	bool IsLightReflectorRefractor() const {
 		return false;
 	}
 
@@ -66,16 +68,29 @@ public:
 													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+			UNUSED_PARAMETER(leftNeighbor);
+			UNUSED_PARAMETER(bottomNeighbor);
+			UNUSED_PARAMETER(rightNeighbor);
+			UNUSED_PARAMETER(topNeighbor);
+			UNUSED_PARAMETER(topRightNeighbor);
+			UNUSED_PARAMETER(topLeftNeighbor);
+			UNUSED_PARAMETER(bottomRightNeighbor);
+			UNUSED_PARAMETER(bottomLeftNeighbor);
+
 			// Empty spaces don't have bounds...
 			this->bounds.Clear();
 	};
 
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+		UNUSED_PARAMETER(gameModel);
+		UNUSED_PARAMETER(ball);
 		// Nothing happens when there's nothing to collide with...
 		return this;
 	}
 
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+		UNUSED_PARAMETER(gameModel);
+		UNUSED_PARAMETER(projectile);
 		// Nothing happens when there's nothing to collide with...
 		return this;
 	}

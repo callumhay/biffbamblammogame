@@ -23,7 +23,7 @@ public:
 	virtual void BallReleaseKeyPressed() = 0;
 	virtual void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement);
 
-	void DoUpdateToPaddleBoundries(bool doAttachedBallCollision);
+	bool DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttachedBallCollision);
 
 };
 

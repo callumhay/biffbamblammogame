@@ -61,6 +61,7 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
+	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
 protected:
 	static const int POINTS_ON_BLOCK_DESTROYED = 15;	// Points obtained when you destory an ink block

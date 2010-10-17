@@ -22,13 +22,15 @@
 #include "../GameModel/GameItem.h"
 #include "../GameModel/GameItemTimer.h"
 
+#include "../GameSound/GameSoundAssets.h"
+
 // Compositional classes for asssets
 #include "GameWorldAssets.h"
 #include "GameESPAssets.h"
 #include "GameItemAssets.h"
 #include "GameFBOAssets.h"
 #include "GameLightAssets.h"
-#include "../GameSound/GameSoundAssets.h"
+#include "RandomToItemAnimation.h"
 
 class GameModel;
 class Texture3D;
@@ -44,6 +46,7 @@ class StickyPaddleGoo;
 class LaserPaddleGun;
 class PaddleRocketMesh;
 class PaddleShield;
+class RandomItem;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -73,6 +76,8 @@ private:
 	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
 	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
 	PaddleShield* paddleShield;								// Refractive glowy shield for the paddle
+
+	RandomToItemAnimation randomToItemAnimation;
 
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
@@ -107,13 +112,15 @@ public:
 	void DrawBackgroundEffects(const Camera& camera);
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
-	void DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera);
+	void DrawSafetyNetIfActive(double dT, const Camera& camera);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
 	void DrawTimers(double dT, const Camera& camera);
 
-	void DrawBeams(double dT, const GameModel& gameModel, const Camera& camera);
+	void DrawBeams(const GameModel& gameModel, const Camera& camera);
 	void DrawTeslaLightning(double dT, const Camera& camera);
 	void DrawProjectiles(double dT, const GameModel& gameModel, const Camera& camera);
+
+	void DrawInformativeGameElements(const Camera& camera, double dT, const GameModel& gameModel);
 
 	void DrawActiveItemHUDElements(double dT, const GameModel& gameModel, int displayWidth, int displayHeight);
 
@@ -127,7 +134,8 @@ public:
 	}
 	void LoadNewLevelMesh(const GameLevel& currLevel);
 
-	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item, const Camera& camera);
+	void ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem);
+	void ActivateItemEffects(const GameModel& gameModel, const GameItem& item);
 	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item);
 	void DeactivateMiscEffects();
 
@@ -155,7 +163,7 @@ public:
 	}
 
 	void AddProjectile(const GameModel& gameModel, const Projectile& projectile);
-	void RemoveProjectile(Camera& camera, const GameModel& gameModel, const Projectile& projectile);
+	void RemoveProjectile(Camera& camera, const Projectile& projectile);
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 	void ExplosionFlash(double timeLength, float intensityPercent);

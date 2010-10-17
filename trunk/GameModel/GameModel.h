@@ -130,6 +130,8 @@ private:
 	void ClearLiveItems();
 	void ClearActiveTimers();
 
+	bool RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type);
+
 public:
 	// Pause functionality for the game:
 	// NoPause: no pauses at all in the game model execution.

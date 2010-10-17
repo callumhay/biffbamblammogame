@@ -676,6 +676,8 @@ void MainMenuDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
 }
 
 void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
+	UNUSED_PARAMETER(width);
+	UNUSED_PARAMETER(height);
 	const Camera& camera = this->display->GetCamera();
 
 	delete this->menuFBO;
@@ -684,6 +686,8 @@ void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
 }
 
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
+	UNUSED_PARAMETER(itemIndex);
+
 	// Play the sound effect assoicated with menu item highlighting
 	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemHighlightedEvent);
@@ -749,6 +753,8 @@ void MainMenuDisplayState::MainMenuEventHandler::EscMenu() {
 }
 
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
+	UNUSED_PARAMETER(itemIndex);
+
 	// Play the sound effect assoicated with menu item highlighting
 	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemHighlightedEvent);
@@ -827,8 +833,8 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 		this->mainMenuState->cfgOptions.SetVolume(volumeLevel);
 		
 		// Set the actual volume...
-		GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-		soundAssets->SetGameVolume(volumeLevel);
+		//GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+		GameSoundAssets::SetGameVolume(volumeLevel);
 	}
 	else {
 		assert(false);

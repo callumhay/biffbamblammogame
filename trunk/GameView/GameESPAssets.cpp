@@ -1086,7 +1086,7 @@ void GameESPAssets::AddPortalTeleportEffect(const Point2D& enterPt, const Portal
 /**
  * Add an effect to the end of the cannon barrel for when it fires a ball out.
  */
-void GameESPAssets::AddCannonFireEffect(const GameBall& ball, const CannonBlock& block) {
+void GameESPAssets::AddCannonFireEffect(const CannonBlock& block) {
 	// Don't bother if the ball camera is on...
 	if (GameBall::GetIsBallCameraOn()) {
 		return;
@@ -1162,7 +1162,7 @@ void GameESPAssets::AddCannonFireEffect(const GameBall& ball, const CannonBlock&
 /**
  * Add the typical block break effect - visible when you destroy a typical block.
  */
-void GameESPAssets::AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block) {
+void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
 	assert(this->bangTextures.size() != 0);
 
 	// Choose a random bang texture
@@ -1479,7 +1479,7 @@ void GameESPAssets::AddBallExplodedEffect(const GameBall* ball) {
 /**
  * Add the effect for when a bomb block is hit - explodey!
  */
-void GameESPAssets::AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb) {
+void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 	Point2D bombCenter  = bomb.GetCenter();
 	Point3D emitCenter  = Point3D(bombCenter[0], bombCenter[1], 0.0f);
 
@@ -1825,6 +1825,9 @@ void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Poi
 			break;
 		default:
 			assert(false);
+			severity = Onomatoplex::GOOD;
+			size.maxValue = 1.0f;
+			size.minValue = 0.75f;
 			break;
 	}
 	paddleWallOnoEffect->SetParticleSize(size);
@@ -1949,7 +1952,7 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 /**
  * Adds an effect for when an item is dropping and not yet acquired by the player.
  */
-void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item, bool showStars) {
+void GameESPAssets::AddItemDropEffect(const GameItem& item, bool showStars) {
 	ESPInterval redRandomColour(0.1f, 1.0f);
 	ESPInterval greenRandomColour(0.1f, 1.0f);
 	ESPInterval blueRandomColour(0.1f, 1.0f);
@@ -2083,7 +2086,7 @@ void GameESPAssets::AddItemDropEffect(const Camera& camera, const GameItem& item
 /**
  * Removes an effect associated with a dropping item.
  */
-void GameESPAssets::RemoveItemDropEffect(const Camera& camera, const GameItem& item) {
+void GameESPAssets::RemoveItemDropEffect(const GameItem& item) {
 
 	// Try to find any effects associated with the given item
 	std::map<const GameItem*, std::list<ESPEmitter*> >::iterator iter = this->activeItemDropEmitters.find(&item);
@@ -2104,7 +2107,7 @@ void GameESPAssets::RemoveItemDropEffect(const Camera& camera, const GameItem& i
 /**
  * Completely turn off the stars on the item drop emitters.
  */
-void GameESPAssets::TurnOffCurrentItemDropStars(const Camera& camera) {
+void GameESPAssets::TurnOffCurrentItemDropStars() {
 
 	// Start by removing the effect for each item and then replace them with non-star effects
 	for (std::map<const GameItem*, std::list<ESPEmitter*> >::iterator iter = this->activeItemDropEmitters.begin();
@@ -2118,7 +2121,7 @@ void GameESPAssets::TurnOffCurrentItemDropStars(const Camera& camera) {
 		}
 		iter->second.clear();
 	
-		this->AddItemDropEffect(camera, *iter->first, false);
+		this->AddItemDropEffect(*iter->first, false);
 	}
 }
 
@@ -3446,7 +3449,7 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
  * for the game. These are particle effects that require no render to texture or other fancy
  * shmancy type stuffs.
  */
-void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera, const Vector3D& worldTranslation) {
+void GameESPAssets::DrawParticleEffects(double dT, const Camera& camera) {
 	// Go through all the other particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin(); iter != this->activeGeneralEmitters.end();) {
 		ESPEmitter* curr = *iter;
@@ -3811,7 +3814,7 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
 /**
  * Draw particle effects associated with the paddle, which get drawn behind the paddle.
  */
-void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera) {
 	std::list<std::list<ESPEmitter*>::iterator> removeElements;
 
 	// Go through all the particles and do book keeping and drawing

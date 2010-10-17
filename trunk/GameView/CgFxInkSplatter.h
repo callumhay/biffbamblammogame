@@ -14,7 +14,7 @@ private:
 	AnimationMultiLerp<float> inkSplatFadeAnim;
 
 public:
-	CgFxInkSplatter(FBObj* inputFBO, FBObj* outputFBO, const std::string& maskTexFilepath);
+	CgFxInkSplatter(FBObj* outputFBO, const std::string& maskTexFilepath);
 	virtual ~CgFxInkSplatter();
 
 	void ActivateInkSplat();

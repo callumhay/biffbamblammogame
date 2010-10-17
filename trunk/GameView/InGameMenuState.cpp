@@ -115,6 +115,8 @@ void InGameMenuState::KeyReleased(SDLKey key, SDLMod modifier) {
 }
 
 void InGameMenuState::DisplaySizeChanged(int width, int height) {
+	UNUSED_PARAMETER(width);
+	UNUSED_PARAMETER(height);
 }
 
 
@@ -122,7 +124,7 @@ void InGameMenuState::InitTopMenu() {
 	assert(this->topMenu == NULL);
 	assert(this->topMenuEventHandler == NULL);
 
-	const Camera& camera = this->display->GetCamera();
+	//const Camera& camera = this->display->GetCamera();
 	const float textScaleFactor = this->display->GetTextScalingFactor();
 
 	// Set up the handlers
@@ -187,6 +189,7 @@ void InGameMenuState::InitTopMenu() {
 // Top Menu Handler Functions ***********************************************************
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
+	UNUSED_PARAMETER(itemIndex);
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIndex) {

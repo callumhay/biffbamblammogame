@@ -181,6 +181,11 @@ LevelPiece* LevelPiece::TickBeamCollision(double dT, const BeamSegment* beamSegm
 	return this;
 }
 
+LevelPiece* LevelPiece::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel) {
+	assert(gameModel != NULL);
+	return this;
+}
+
 // Draws the boundry lines and normals for this level piece.
 void LevelPiece::DebugDraw() const {
 	this->bounds.DebugDraw();

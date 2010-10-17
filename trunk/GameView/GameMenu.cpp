@@ -124,6 +124,7 @@ void GameMenu::DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight) {
  * Draw an outline around the menu with a colourful plain background.
  */
 void GameMenu::DrawMenuBackground(double dT) {
+	UNUSED_PARAMETER(dT);
 }
 
 /**
@@ -139,7 +140,7 @@ void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const G
 	const float TOP_ARROW_BOTTOM_Y	= SCALED_PADDING;
 	
 	const float BOTTOM_ARROW_TOP_Y		=  -1.0f * (static_cast<float>(menuItem.GetHeight()) + SCALED_PADDING);
-	const float BOTTOM_ARROW_BOTTOM_Y	= BOTTOM_ARROW_TOP_Y - GameMenu::UP_DOWN_ARROW_HEIGHT * menuItem.GetCurrLabel()->GetScale();
+	//const float BOTTOM_ARROW_BOTTOM_Y	= BOTTOM_ARROW_TOP_Y - GameMenu::UP_DOWN_ARROW_HEIGHT * menuItem.GetCurrLabel()->GetScale();
 
 	float selArrowPulseScale = this->selArrowScaleAnim.GetInterpolantValue();
 	float selArrowPulseFade	 = this->selArrowFadeAnim.GetInterpolantValue();
@@ -245,7 +246,7 @@ void GameMenu::Draw(double dT, int windowWidth, int windowHeight) {
 		}
 		
 		// Check to see if we are iterating on the selected/highlighted menu item
-		if (i == this->selectedMenuItemIndex) {
+		if (i == static_cast<size_t>(this->selectedMenuItemIndex)) {
 
 			// Check to see if the highlighted item is activated
 			if (this->isSelectedItemActivated) {
@@ -311,7 +312,7 @@ void GameMenu::ActivateSelectedMenuItem() {
 	
 	// Go through all the menu items except the selected one and grey them out
 	for (size_t i = 0; i < this->menuItems.size(); i++) {	
-		if (i == this->selectedMenuItemIndex) { continue; }
+		if (i == static_cast<size_t>(this->selectedMenuItemIndex)) { continue; }
 		this->menuItems[i]->SetTextColour(this->greyedOutColour);
 	}
 
@@ -328,7 +329,7 @@ void GameMenu::DeactivateSelectedMenuItem() {
 
 	// Go through all the menu items except the selected one and set their idle colours
 	for (size_t i = 0; i < this->menuItems.size(); i++) {	
-		if (i == this->selectedMenuItemIndex) { continue; }
+		if (i == static_cast<size_t>(this->selectedMenuItemIndex)) { continue; }
 		this->menuItems[i]->SetTextColour(this->idleColour);
 	}
 }

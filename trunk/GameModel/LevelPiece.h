@@ -17,6 +17,7 @@ class GameLevel;
 class GameModel;
 class Projectile;
 class BeamSegment;
+class PlayerPaddle;
 
 class LevelPiece {
 
@@ -81,6 +82,7 @@ public:
 
 	virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 	virtual LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
+	virtual LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
 	// Debug Stuffs
 	void DebugDraw() const;

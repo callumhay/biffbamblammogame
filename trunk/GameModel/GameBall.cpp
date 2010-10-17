@@ -75,6 +75,11 @@ currState(NULL) {
 GameBall::~GameBall() {
 	// Delete the ball state...
 	this->SetBallState(NULL, true);
+
+	// If the ball camera ball dies then we better set it to NULL since it will no longer exist after this
+	if (this == GameBall::currBallCamBall) {
+		GameBall::currBallCamBall = NULL;
+	}
 }
 
 /**

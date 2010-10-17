@@ -16,6 +16,7 @@
 
 #include "GameItem.h"
 #include "GameModel.h"
+#include "GameEventManager.h"
 
 // A random item can be any sort of other item in the game - It wraps up the random item in itself so
 // that it drops as an entirely separate type of item.
@@ -44,6 +45,7 @@ inline double RandomItem::Activate() {
 	this->isActive = true;
 	this->SetItemDisposition(this->randomItem->GetItemDisposition());
 	this->SetItemName(this->randomItem->GetName());
+	GameEventManager::Instance()->ActionRandomItemActivated(*this, *this->randomItem);
 	return this->randomItem->Activate();
 }
 

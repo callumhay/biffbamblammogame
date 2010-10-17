@@ -41,7 +41,7 @@ private:
 
 	void DrawBulletCrosshair(float alpha) const;
 	void DrawBeamCrosshair(float alpha) const;
-	void DrawRocketHUD(int screenWidth, int screenHeight, float alpha) const;
+	void DrawRocketHUD(float alpha) const;
 	void DrawBeamBlast(float alpha) const;
 };
 

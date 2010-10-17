@@ -294,6 +294,15 @@ void BallInPlayState::Tick(double seconds) {
 		// EVENT: Ball died
 		GameEventManager::Instance()->ActionBallDied(*ballToDestroy);
 
+		// SPECIAL CASE:
+		// We need to be very careful - if the player is in ball camera mode but there are multiple balls and the one
+		// that the camera is in just died then we need to deactivate ball camera mode but keep the player alive!
+		if (ballToDestroy == GameBall::GetBallCameraBall()) {
+			// Deactivate the ball camera item!!!
+			bool wasRemoved = this->gameModel->RemoveActiveGameItemsOfGivenType(GameItem::BallCamItem);
+			assert(wasRemoved);
+		}
+
 		gameBalls.erase(*iter);
 		delete ballToDestroy;
 		ballToDestroy = NULL;
@@ -321,7 +330,13 @@ void BallInPlayState::Tick(double seconds) {
 	currLevel->PaddleSafetyNetCollisionCheck(*paddle);
 
 	// Paddle-block collisions / boundry update (so that the paddle crashes into potential blocks at its sides):
-	this->DoUpdateToPaddleBoundries(false);
+	// This may cause the level to end since the paddle shield can destroy blocks, in such a case we exit immediately
+	// since this state is now destroyed.
+	//bool stateChanged = 
+  this->DoUpdateToPaddleBoundriesAndCollisions(seconds, false);
+	//if (stateChanged) {
+	//	return;
+	//}
 
 	// Projectile Collisions:
 	// Grab a list of all paddle-related projectiles and test each one for collisions...

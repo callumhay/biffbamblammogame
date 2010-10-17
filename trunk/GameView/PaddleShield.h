@@ -48,6 +48,10 @@ private:
 	ShieldState state;
 
 	void DrawRefractionWithAura(const PlayerPaddle& paddle, const Camera& camera, double dT);
+
+	// Disallow copy and assign
+	PaddleShield& operator=(const PaddleShield& p);
+	PaddleShield(const PaddleShield& p);
 };
 
 #endif // __PADDLESHIELD_H__

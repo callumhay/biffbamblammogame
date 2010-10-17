@@ -63,6 +63,7 @@ public:
 	void ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle);
 	void ItemActivatedEvent(const GameItem& item);
 	void ItemDeactivatedEvent(const GameItem& item);
+	void RandomItemActivatedEvent(const RandomItem& randomItem, const GameItem& actualItem);
 	void ItemTimerStartedEvent(const GameItemTimer& itemTimer);
 	void ItemTimerStoppedEvent(const GameItemTimer& itemTimer);
 	void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock);
