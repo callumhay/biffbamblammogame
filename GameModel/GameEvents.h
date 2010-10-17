@@ -16,6 +16,7 @@ class RandomItem;
 class GameItemTimer;
 class Projectile;
 class Beam;
+class PaddleRocketProjectile;
 
 class GameEvents {
 public:
@@ -195,6 +196,23 @@ public:
 	 *             cannonBlock - The cannon block firing the ball.
 	 */
 	virtual void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock) = 0;
+
+
+	/**
+	 * Event triggered when a rocket enters a cannon block. Only occurs once as the rocket is JUST being
+	 * loaded into the barrel of the cannon.
+	 * Arguements: rocket      - The rocket being loaded by the cannon.
+	 *             cannonBlock - The cannon block loading the rocket. 
+	 */
+	virtual void RocketEnteredCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) = 0;
+
+	/**
+	 * Event triggered when a rocket is fired out of a cannon block. Only occurs once as the rocket is JUST being
+	 * fired out of the barrel of the cannon.
+	 * Arguements: rocket      - The rocket being fired out of the cannon.
+	 *             cannonBlock - The cannon block firing the rocket. 
+	 */
+	virtual void RocketFiredFromCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) = 0;
 
 	/**
 	 * Event triggered when the ball hits a tesla block to tesla block lightning arc.

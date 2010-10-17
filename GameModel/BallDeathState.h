@@ -27,7 +27,9 @@ public:
 
 	void Tick(double seconds);
 	void BallReleaseKeyPressed() {}
-	void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement) {}
+	void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement) {
+		UNUSED_PARAMETER(paddleMovement);
+	}
 
 private:
 	// Constant Ball spiraling death values

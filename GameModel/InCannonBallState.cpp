@@ -35,6 +35,8 @@ BallState* InCannonBallState::Clone(GameBall* newBall) const {
 }
 
 void InCannonBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir) {
+	UNUSED_PARAMETER(worldSpaceGravityDir);
+
 	// 'Tick' the cannon to spin the ball around inside it... eventually the function will say
 	// it has 'fired' the ball
 	bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds);

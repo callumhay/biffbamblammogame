@@ -8,7 +8,7 @@
 
 const std::string CgFxPostUberIntense::POSTUBERINTENSE_TECHNIQUE_NAME = "PostUberIntense";
 
-CgFxPostUberIntense::CgFxPostUberIntense(FBObj* inputFBO, FBObj* outputFBO) :
+CgFxPostUberIntense::CgFxPostUberIntense(FBObj* outputFBO) :
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_FULLSCREEN_UBERINTENSE_SHADER, sceneFBO), resultFBO(outputFBO),
 timerParam(NULL), frequencyParam(NULL), fadeParam(NULL), colourParam(NULL), sceneSamplerParam(NULL),
 frequency(1.5f), colour(GameModelConstants::GetInstance()->UBER_BALL_COLOUR), timer(0.0f), fade(1.0f) {

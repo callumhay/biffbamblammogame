@@ -45,7 +45,6 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 
 	// Now begin the possible recursion of adding more and more beams based on whether the first
 	// beam hits a prism block (and if its children also do)
-	LevelPiece* lastCollisionPiece = NULL;
 	std::list<BeamSegment*> newBeamSegs;
 
 	// In the case where there's a sticky paddle the beam refracts through the sticky paddle a bit

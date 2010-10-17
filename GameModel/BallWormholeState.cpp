@@ -37,6 +37,8 @@ BallWormholeState::~BallWormholeState() {
 }
 
 void BallWormholeState::Tick(double seconds) {
+	UNUSED_PARAMETER(seconds);
+
 	// We can be in several 'sub' states:
 	// a) entering the wormhole
 	// b) travelling through the wormhole tunnels
@@ -50,7 +52,7 @@ void BallWormholeState::Tick(double seconds) {
 // the wormhole by pushing it up, down, left or right in order to accomplish
 // tasks and solve puzzles...
 void BallWormholeState::MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement) {
-
+	UNUSED_PARAMETER(paddleMovement);
 
 	// TODO
 }

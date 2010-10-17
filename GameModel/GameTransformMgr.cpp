@@ -386,6 +386,9 @@ float GameTransformMgr::GetCameraFOVAngle() const {
 }
 
 void GameTransformMgr::StartLevelFlipAnimation(double dT, GameModel& gameModel) {
+	UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(gameModel);
+
 	// Grab the current transform animation information from the front of the queue
 	TransformAnimation& levelFlipAnim = this->animationQueue.front();
 	assert(levelFlipAnim.type == GameTransformMgr::LevelFlipAnimation);
@@ -439,6 +442,9 @@ bool GameTransformMgr::TickLevelFlipAnimation(double dT) {
  * the current level flip animation from the animation queue as well.
  */
 void GameTransformMgr::FinishLevelFlipAnimaiton(double dT, GameModel& gameModel) {
+	UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(gameModel);
+
 	// Pop the animation off the queue
 	this->animationQueue.pop_front();
 }
@@ -448,6 +454,8 @@ void GameTransformMgr::FinishLevelFlipAnimaiton(double dT, GameModel& gameModel)
  * get into or come out of paddle camera mode.
  */
 void GameTransformMgr::StartPaddleCamAnimation(double dT, GameModel& gameModel) {
+	UNUSED_PARAMETER(dT);
+
 	// Grab the current transform animation information from the front of the queue
 	TransformAnimation& paddleCamAnim = this->animationQueue.front();
 	assert(paddleCamAnim.type == GameTransformMgr::ToPaddleCamAnimation || paddleCamAnim.type == GameTransformMgr::FromPaddleCamAnimation);
@@ -626,6 +634,8 @@ void GameTransformMgr::FinishPaddleCamAnimation(double dT, GameModel& gameModel)
 }
 
 void GameTransformMgr::StartBallCamAnimation(double dT, GameModel& gameModel) {
+	UNUSED_PARAMETER(dT);
+
 	// Grab the current transform animation information from the front of the queue
 	TransformAnimation& ballCamAnim = this->animationQueue.front();
 	assert(ballCamAnim.type == GameTransformMgr::ToBallCamAnimation || ballCamAnim.type == GameTransformMgr::FromBallCamAnimation);
@@ -785,6 +795,8 @@ bool GameTransformMgr::TickBallCamAnimation(double dT, GameModel& gameModel) {
  * ball camera mode.
  */
 void GameTransformMgr::FinishBallCamAnimation(double dT, GameModel& gameModel) {
+	UNUSED_PARAMETER(dT);
+
 	// Grab the current transform animation information from the front of the queue
 	TransformAnimation& ballCamAnim = this->animationQueue.front();
 	assert(ballCamAnim.type == GameTransformMgr::ToBallCamAnimation || ballCamAnim.type == GameTransformMgr::FromBallCamAnimation);
@@ -806,6 +818,8 @@ void GameTransformMgr::FinishBallCamAnimation(double dT, GameModel& gameModel) {
 }
 
 bool GameTransformMgr::TickBallDeathAnimation(double dT, GameModel& gameModel) {
+	UNUSED_PARAMETER(gameModel);
+
 	assert(this->ballDeathAnimations.size() > 0);
 
 	// Animate the camera
@@ -834,6 +848,8 @@ bool GameTransformMgr::TickBallDeathAnimation(double dT, GameModel& gameModel) {
 }
 
 void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) {
+	UNUSED_PARAMETER(dT);
+
 	// Grab the current transform animation information from the front of the queue
 	TransformAnimation& ballDeathAnim = this->animationQueue.front();
 	assert(ballDeathAnim.type == GameTransformMgr::ToBallDeathAnimation || ballDeathAnim.type == GameTransformMgr::FromBallDeathAnimation);
@@ -904,6 +920,8 @@ void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) 
 }
 
 void GameTransformMgr::FinishBallDeathAnimation(double dT, GameModel& gameModel) {
+	UNUSED_PARAMETER(dT);
+
 	// Grab the current transform animation information from the front of the queue
 	TransformAnimation& ballDeathAnim = this->animationQueue.front();
 	assert(ballDeathAnim.type == GameTransformMgr::ToBallDeathAnimation || ballDeathAnim.type == GameTransformMgr::FromBallDeathAnimation);

@@ -104,7 +104,7 @@ void GameModel::SetCurrentWorld(unsigned int worldNum) {
 	assert(world != NULL);
 	
 	// Make sure the world loaded properly.
-	if (!world->Load(this)) {
+	if (!world->Load()) {
 		debug_output("ERROR: Could not load world " << worldNum);
 		assert(false);
 		return;
@@ -136,7 +136,6 @@ void GameModel::Tick(double seconds) {
 	}
 
 	if (currState != NULL) {
-		bool pauseState = (this->pauseBitField & GameModel::PauseState) != 0x0;
 		if ((this->pauseBitField & GameModel::PauseState) == 0x00000000) {
 			this->currState->Tick(seconds);
 		}
@@ -188,8 +187,6 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
  */
 void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	assert(p != NULL);
-	
-	LevelPiece* pieceBefore = p;
 
 	// Set the score appropriately
 	int pointValue = p->GetPointValueForCollision();

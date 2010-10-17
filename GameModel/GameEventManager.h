@@ -19,6 +19,7 @@ class GameWorld;
 class GameLevel;
 class Projectile;
 class Beam;
+class PaddleRocketProjectile;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
@@ -52,6 +53,8 @@ public:
 	void ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal);
 	void ActionProjectilePortalBlockTeleport(const Projectile& projectile, const PortalBlock& enterPortal);
 	void ActionBallFiredFromCannon(const GameBall& ball, const CannonBlock& cannonBlock);
+	void ActionRocketEnteredCannon(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock);
+	void ActionRocketFiredFromCannon(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock);
 	void ActionBallHitTeslaLightningArc(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
 
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);

@@ -29,6 +29,8 @@ LevelCompleteState::~LevelCompleteState() {
  * based on what happens to the game after the level ends.
  */
 void LevelCompleteState::Tick(double seconds) {
+	UNUSED_PARAMETER(seconds);
+
 	// Clean up all the level-related state stuff in preparation for the next level/world/?
 	
 	// Reset the multiplier

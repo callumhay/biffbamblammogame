@@ -44,7 +44,7 @@ private:
 	AnimationMultiLerp<Colour> footerColourAnimation;
 
 	void DrawNowEnteringTextHeader(float screenWidth, float screenHeight);
-	void DrawPressAnyKeyTextFooter(float screenWidth, float screenHeight);
+	void DrawPressAnyKeyTextFooter(float screenWidth);
 
 };
 

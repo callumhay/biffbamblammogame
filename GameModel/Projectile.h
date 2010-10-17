@@ -76,6 +76,11 @@ public:
 	bool IsLastLevelPieceCollidedWith(LevelPiece* p) { return this->lastPieceCollidedWith == p; }
 
 	static Projectile* CreateProjectile(ProjectileType type, const Point2D& spawnLoc);
+
+	virtual bool GetIsActive() const {
+		return true;
+	}
+
 };
 
 

@@ -39,8 +39,8 @@ drawItemsInLastPass(true) {
 	this->inkSplatterEffect			= new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
-	this->smokeyCamEffect				= new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
-	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->finalFSEffectFBO, this->tempFBO);
+	this->smokeyCamEffect				= new CgFxPostSmokey(this->tempFBO);
+	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->tempFBO);
 	this->SetupPaddleShieldEffect();
 
 
@@ -143,8 +143,8 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	this->inkSplatterEffect			= new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
-	this->smokeyCamEffect				= new CgFxPostSmokey(this->finalFSEffectFBO, this->tempFBO);
-	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->finalFSEffectFBO, this->tempFBO);
+	this->smokeyCamEffect				= new CgFxPostSmokey(this->tempFBO);
+	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->tempFBO);
 	
 	this->SetupPaddleShieldEffect();
 

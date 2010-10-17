@@ -52,6 +52,8 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel) {
 }
 
 LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+	UNUSED_PARAMETER(ball);
+
 	return this->Destroy(gameModel);
 }
 

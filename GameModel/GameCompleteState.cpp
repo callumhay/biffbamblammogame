@@ -18,5 +18,5 @@ GameCompleteState::~GameCompleteState() {
 }
 
 void GameCompleteState::Tick(double seconds) {
-
+	UNUSED_PARAMETER(seconds);
 }

@@ -24,7 +24,7 @@ public:
 	GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr);
 	~GameWorld();
 
-	bool Load(GameModel* model);
+	bool Load();
 	bool Unload();
 	
 	const std::vector<GameLevel*>& GetAllLevelsInWorld() const {

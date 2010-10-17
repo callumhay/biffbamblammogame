@@ -163,6 +163,7 @@ static void KillGraphicsAndWindow(bool gameIsQuiting) {
 
 // Driver function for the game.
 int main(int argc, char *argv[]) {
+	UNUSED_PARAMETER(argc);
 
 	// Memory dump debug info for detecting and finding memory leaks
 #ifdef _DEBUG

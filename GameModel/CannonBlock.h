@@ -14,6 +14,8 @@
 
 #include "LevelPiece.h"
 
+class PaddleRocketProjectile;
+
 class CannonBlock : public LevelPiece {
 
 public:
@@ -89,6 +91,8 @@ public:
 	float GetCurrentCannonAngleInDegs() const;
 	Point2D GetEndOfBarrelPoint() const;
 	const GameBall* GetLoadedBall() const;
+	const PaddleRocketProjectile* GetLoadedRocket() const;
+	bool GetIsLoaded() const;
 
 private:
 	static const double MIN_ROTATION_TIME_IN_SECS;
@@ -98,10 +102,14 @@ private:
 	static const float MAX_ROTATION_SPD_IN_DEGS_PER_SEC;
 
 	GameBall* loadedBall;
+	PaddleRocketProjectile* loadedRocket;
+
 	float currRotationFromXInDegs;	// The current rotation from the x-axis (default position) in degrees
 	float currRotationSpeed;				// The current rotation speed of the cannon
 	double elapsedRotationTime;			// The elapsed rotation time from the start of the ball coming into the cannon
 	double totalRotationTime;				// The total time before the ball is fired from the cannon
+
+	void SetupRandomCannonFireTimeAndDirection();
 };
 
 /**
@@ -125,6 +133,14 @@ inline Point2D CannonBlock::GetEndOfBarrelPoint() const {
 
 inline const GameBall* CannonBlock::GetLoadedBall() const {
 	return this->loadedBall;
+}
+
+inline const PaddleRocketProjectile* CannonBlock::GetLoadedRocket() const {
+	return this->loadedRocket;
+}
+
+inline bool CannonBlock::GetIsLoaded() const {
+	return (this->loadedBall != NULL) || (this->loadedRocket != NULL);
 }
 
 #endif // __CANNONBLOCK_H__

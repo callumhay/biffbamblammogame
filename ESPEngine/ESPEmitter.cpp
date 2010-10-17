@@ -462,6 +462,12 @@ void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
  */
 void ESPEmitter::SetParticleRotation(const ESPInterval& particleRot) {
 	this->particleRotation.CopyFromInterval(particleRot);
+
+	// Go through any already assigned particles and set the rotation...
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+		ESPParticle* currParticle = *iter;
+		currParticle->SetRotation(particleRot.RandomValueInInterval());
+	}
 }
 
 /**

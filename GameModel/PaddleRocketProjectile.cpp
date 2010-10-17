@@ -1,6 +1,8 @@
 
 #include "PaddleRocketProjectile.h"
 #include "PlayerPaddle.h"
+#include "CannonBlock.h"
+#include "GameEventManager.h"
 
 const float PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT = 1.50f;
 const float PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT  = 0.8f;
@@ -15,7 +17,7 @@ const float PaddleRocketProjectile::MAX_VELOCITY_MAG					= 20.0f;
 const float PaddleRocketProjectile::MAX_ROTATION_VELOCITY_MAG	= 400.0f;
 
 PaddleRocketProjectile::PaddleRocketProjectile(const Point2D& spawnLoc, float width, float height) :
-Projectile(Projectile::PaddleRocketBulletProjectile, spawnLoc, width, height) {
+Projectile(Projectile::PaddleRocketBulletProjectile, spawnLoc, width, height), cannonBlock(NULL) {
 
 	// TODO: Add acceleration and start with 0 initial velocity...
   // do this for rotation as well...
@@ -34,17 +36,36 @@ PaddleRocketProjectile::~PaddleRocketProjectile() {
  * position and rotation of the rocket projectile.
  */
 void PaddleRocketProjectile::Tick(double seconds) {
-	// Update the rocket's velocity and position
-	float dA = seconds * PaddleRocketProjectile::ACCELERATION_MAG;
-	this->velocityMag = std::min<float>(PaddleRocketProjectile::MAX_VELOCITY_MAG ,this->velocityMag + dA);
-	float dV = seconds * this->velocityMag;
-	this->SetPosition(this->GetPosition() + dV * this->velocityDir);
 
-	// Update the rocket's rotation
-	dA = seconds * PaddleRocketProjectile::ROTATION_ACCELERATION_MAG;
-	this->currYRotationSpd = std::min<float>(PaddleRocketProjectile::MAX_ROTATION_VELOCITY_MAG, this->currYRotationSpd + dA);
-	dV = static_cast<float>(seconds * this->currYRotationSpd);
-	this->currYRotation += dV;
+	if (this->cannonBlock != NULL) {
+		// 'Tick' the cannon to spin the ball around inside it... eventually the function will say
+		// it has 'fired' the ball
+		bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds);
+		if (cannonHasFired) {
+			// Set the velocity in the direction the cannon has fired in
+			this->velocityMag = 0.25f * PaddleRocketProjectile::MAX_VELOCITY_MAG;
+			this->velocityDir = this->cannonBlock->GetCurrentCannonDirection();
+			this->position = this->position + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
+
+			// EVENT: Rocket has officially been fired from the cannon
+			GameEventManager::Instance()->ActionRocketFiredFromCannon(*this, *this->cannonBlock);
+
+			this->cannonBlock = NULL;
+		}
+	}
+	else {
+		// Update the rocket's velocity and position
+		float dA = seconds * PaddleRocketProjectile::ACCELERATION_MAG;
+		this->velocityMag = std::min<float>(PaddleRocketProjectile::MAX_VELOCITY_MAG ,this->velocityMag + dA);
+		float dV = seconds * this->velocityMag;
+		this->SetPosition(this->GetPosition() + dV * this->velocityDir);
+
+		// Update the rocket's rotation
+		dA = seconds * PaddleRocketProjectile::ROTATION_ACCELERATION_MAG;
+		this->currYRotationSpd = std::min<float>(PaddleRocketProjectile::MAX_ROTATION_VELOCITY_MAG, this->currYRotationSpd + dA);
+		dV = static_cast<float>(seconds * this->currYRotationSpd);
+		this->currYRotation += dV;
+	}
 }
 
 BoundingLines PaddleRocketProjectile::BuildBoundingLines() const {
@@ -64,4 +85,16 @@ BoundingLines PaddleRocketProjectile::BuildBoundingLines() const {
 	normBounds.resize(2);
 
 	return BoundingLines(sideBounds, normBounds);
+}
+
+void PaddleRocketProjectile::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
+	assert(cannonBlock != NULL);
+
+	// When loaded into a cannon block the rocket stops moving and centers on the block...
+	this->velocityMag = 0.0f;
+	this->position = cannonBlock->GetCenter();
+	this->cannonBlock = cannonBlock;
+
+	// EVENT: The rocket is officially loaded into the cannon block
+	GameEventManager::Instance()->ActionRocketEnteredCannon(*this, *cannonBlock);
 }

@@ -25,6 +25,8 @@ void GameState::MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleM
  * This function updates the paddle boundries so that it hits blocks around it.
  */
 bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttachedBallCollision) {
+	UNUSED_PARAMETER(dT);
+
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	GameLevel* currentLevel = this->gameModel->GetCurrentLevel();
 	assert(paddle != NULL);

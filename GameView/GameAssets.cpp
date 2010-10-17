@@ -869,7 +869,8 @@ void GameAssets::RemoveProjectile(Camera& camera, const Projectile& projectile) 
 
 	switch (projectile.GetType()) {
 		case Projectile::PaddleRocketBulletProjectile:
-			this->rocketMesh->Deactivate();
+
+			this->rocketMesh->Deactivate(dynamic_cast<const PaddleRocketProjectile*>(&projectile));
 			// Add a camera shake and flash for when the rocket explodes...
 			camera.SetCameraShake(1.0, Vector3D(0.8, 0.7, 0.1), 120);
 			this->ExplosionFlash(0.5, 1.0f);

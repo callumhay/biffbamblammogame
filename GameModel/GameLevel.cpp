@@ -850,6 +850,7 @@ void GameLevel::PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter) {
  * From the above ('o' is less than normal size, add 'a' for normal, add 'b' for bigger) is the normal scenario .
  */
 LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece) {
+	
 	// Destroy the hit piece if we can...
 	LevelPiece* resultPiece = hitPiece;
 	if (hitPiece->CanBeDestroyedByBall()) {

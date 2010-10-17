@@ -166,6 +166,22 @@ void GameEventManager::ActionBallFiredFromCannon(const GameBall& ball, const Can
 	}		
 }
 
+// Action for when a rocket enters/is loaded into a cannon block
+void GameEventManager::ActionRocketEnteredCannon(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->RocketEnteredCannonEvent(rocket, cannonBlock);
+	}	
+}
+
+// Action for when the rocket is fired from a cannon block
+void GameEventManager::ActionRocketFiredFromCannon(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->RocketFiredFromCannonEvent(rocket, cannonBlock);
+	}		
+}
+
 // Action for when the ball hits a lightning arc between two tesla blocks
 void GameEventManager::ActionBallHitTeslaLightningArc(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {
 	this->listenerIter = this->eventListeners.begin();

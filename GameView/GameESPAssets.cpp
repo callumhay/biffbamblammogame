@@ -917,15 +917,20 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 		
 		case Projectile::PaddleRocketBulletProjectile: {
-				// No explosion when the rocket hits portals...
-				if (block.GetType() == LevelPiece::Portal) {
+				// No explosion when the rocket hits portals or cannons...
+			switch (block.GetType()) {
+				case LevelPiece::Portal:
+				case LevelPiece::Cannon:
+					break;
+
+				default: {
+						// A rocket just hit a block - KABOOOOOOM!!!
+						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter());
+						float rocketSizeFactor = projectile.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+						this->AddRocketHitBlockEffect(rocketSizeFactor, midPoint);
+					}
 					break;
 				}
-
-				// A rocket just hit a block - KABOOOOOOM!!!
-				Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter());
-				float rocketSizeFactor = projectile.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
-				this->AddRocketHitBlockEffect(rocketSizeFactor, midPoint);
 			}
 			break;
 
@@ -3478,6 +3483,10 @@ void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
 		iter != this->activeProjectileEmitters.end(); ++iter) {
 		
 		const Projectile* currProjectile = iter->first;
+		if (!currProjectile->GetIsActive()) {
+			continue;
+		}
+
 		std::list<ESPPointEmitter*>& projEmitters = iter->second;
 
 		assert(currProjectile != NULL);

@@ -299,7 +299,7 @@ void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPie
 
 		case LevelPiece::Cannon: {
 				const CannonBlock* cannonBlock = static_cast<const CannonBlock*>(&block);
-				if (cannonBlock->GetLoadedBall() == NULL && !ball.IsLastPieceCollidedWith(&block)) {
+				if (!cannonBlock->GetIsLoaded() && !ball.IsLastPieceCollidedWith(&block)) {
 					// The ball will be loaded into the cannon...
 					this->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockLoadedEvent);
 					this->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask, GameSoundAssets::QuietVolume);

@@ -31,6 +31,11 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
+	UNUSED_PARAMETER(topRightNeighbor);
+	UNUSED_PARAMETER(topLeftNeighbor);
+	UNUSED_PARAMETER(bottomRightNeighbor);
+	UNUSED_PARAMETER(bottomLeftNeighbor);
+
 		// Clear all the currently existing boundry lines first
 		this->bounds.Clear();
 
