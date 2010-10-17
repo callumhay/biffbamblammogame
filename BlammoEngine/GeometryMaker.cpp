@@ -351,7 +351,7 @@ void GeometryMaker::DrawFullTunnel(const Point3D& startCenterPt, int units, Geom
 	TunnelOrientation inwardsFromSide2Orient = this->VectorToTunnelOrient(sideUnitVec);
 
 	int count = 1;
-	while (true) {
+	for (;;) {
 		this->DrawTunnelWallSection(currentTopPt,    inwardsFromTopOrient);
 		this->DrawTunnelWallSection(currentBottomPt, inwardsFromBottomOrient);
 		this->DrawTunnelWallSection(currentSide1Pt,  inwardsFromSide1Orient);

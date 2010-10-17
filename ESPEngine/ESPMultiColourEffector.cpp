@@ -7,6 +7,8 @@ ESPMultiColourEffector::ESPMultiColourEffector() {
 }
 
 void ESPMultiColourEffector::AffectParticleOnTick(double dT, ESPParticle* particle) {
+	UNUSED_PARAMETER(dT);
+
 	// If there are colours to interpolate across then we setup an animation for them and
 	// tick them to the current point in the particle's life
 	if (this->colours.size() == 0) {

@@ -31,6 +31,8 @@ private:
 };
 
 inline void InGameDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
 }
 
 #endif

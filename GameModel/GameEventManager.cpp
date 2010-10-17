@@ -283,6 +283,14 @@ void GameEventManager::ActionItemDeactivated(const GameItem& item) {
 	}		
 }
 
+// Action for when a random item is activated
+void GameEventManager::ActionRandomItemActivated(const RandomItem& randomItem, const GameItem& actualItem) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->RandomItemActivatedEvent(randomItem, actualItem);
+	}	
+}
+
 // Action for when an item timer starts
 void GameEventManager::ActionItemTimerStarted(const GameItemTimer& itemTimer) {
 	this->listenerIter = this->eventListeners.begin();

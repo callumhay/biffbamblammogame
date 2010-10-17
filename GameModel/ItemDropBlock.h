@@ -67,16 +67,19 @@ public:
 	}
 
 	bool ProjectilePassesThrough(Projectile* projectile) {
+		UNUSED_PARAMETER(projectile);
 		return false;
 	}
 
 	LevelPiece* Destroy(GameModel* gameModel) {
+		UNUSED_PARAMETER(gameModel);
 		return this;
 	}
 
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
+	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
 	const GameItem::ItemType& GetNextDropItemType() const;
 	const GameItem::ItemDisposition& GetNextDropItemDisposition() const;

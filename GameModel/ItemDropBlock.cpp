@@ -47,6 +47,8 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 
 // When projectiles collide with the item drop block it causes an item to fall from the block
 LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	UNUSED_PARAMETER(projectile);
+
 	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
 		// Drop an item...
 		gameModel->AddItemDrop(*this, this->nextDropItemType);
@@ -60,7 +62,28 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
  * Called as this piece is being hit by the given beam over the given amount of time in seconds.
  */
 LevelPiece* ItemDropBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
+	assert(gameModel != NULL);
 	this->hitPointsBeforeNextDrop -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
+	
+	if (this->hitPointsBeforeNextDrop <= 0) {
+		// Reset the hit points for the next drop
+		this->hitPointsBeforeNextDrop = ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP;
+
+		// We now need to drop an item...
+		gameModel->AddItemDrop(*this, this->nextDropItemType);
+		this->ChangeToNextItemDropType(true);
+	}
+
+	return this;
+}
+
+/**
+ * Tick the collision with the paddle shield - the shield will eat away at the block until it's destroyed.
+ * Returns: The block that this block is/has become.
+ */
+LevelPiece* ItemDropBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel) {
+	assert(gameModel != NULL);
+	this->hitPointsBeforeNextDrop -= static_cast<float>(dT * static_cast<double>(paddle.GetShieldDamagePerSecond()));
 	
 	if (this->hitPointsBeforeNextDrop <= 0) {
 		// Reset the hit points for the next drop

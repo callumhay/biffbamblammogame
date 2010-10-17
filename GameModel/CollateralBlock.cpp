@@ -107,6 +107,24 @@ LevelPiece* CollateralBlock::TickBeamCollision(double dT, const BeamSegment* bea
 	return newPiece;
 }
 
+/**
+ * Tick the collision with the paddle shield - the shield will eat away at the block until it's destroyed.
+ * Returns: The block that this block is/has become.
+ */
+LevelPiece* CollateralBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel) {
+	assert(gameModel != NULL);
+	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(paddle.GetShieldDamagePerSecond()));
+	
+	LevelPiece* newPiece = this;
+	if (currLifePoints <= 0) {
+		// This piece will now go into warning and collateral damage mode...
+		this->currLifePoints = 0.0f;
+		newPiece = this->Detonate(gameModel);
+	}
+
+	return newPiece;
+}
+
 void CollateralBlock::Tick(double dT, CollateralBlockProjectile& collateralProjectile) {
 	switch(this->currState) {
 

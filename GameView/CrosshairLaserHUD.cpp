@@ -111,7 +111,7 @@ void CrosshairLaserHUD::Draw(const PlayerPaddle* paddle, int screenWidth, int sc
 	}
 
 	if (rocketIsActive) {
-		this->DrawRocketHUD(screenWidth, screenHeight, alpha);
+		this->DrawRocketHUD(alpha);
 	}
 	glPopMatrix();
 
@@ -160,7 +160,7 @@ void CrosshairLaserHUD::DrawBeamCrosshair(float alpha) const {
 /**
  * Draw the HUD for when a rocket is sitting on top of the paddle.
  */
-void CrosshairLaserHUD::DrawRocketHUD(int screenWidth, int screenHeight, float alpha) const {
+void CrosshairLaserHUD::DrawRocketHUD(float alpha) const {
 	static const int ARROW_BASE_TO_APEX   = 32;
 	static const int ARROW_BASE_SIZE      = 64;
 	static const int ARROW_HALF_BASE_SIZE = ARROW_BASE_SIZE / 2;

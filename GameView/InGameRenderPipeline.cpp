@@ -70,6 +70,8 @@ void InGameRenderPipeline::ApplyInGameCamera(double dT) {
 // will be done to the background FBO in the FBO assets and a pointer to it will be returned
 // NOTE: The caller does NOT assume ownership of the returned memory
 FBObj* InGameRenderPipeline::RenderBackgroundToFBO(double dT) {
+	UNUSED_PARAMETER(dT);
+
 	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
 	
 	// Attach the background FBO
@@ -146,7 +148,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	glPopMatrix();
 
 	// Safety net (if active)
-	this->display->GetAssets()->DrawSafetyNetIfActive(dT, currLevel, camera);
+	this->display->GetAssets()->DrawSafetyNetIfActive(dT, camera);
 
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
@@ -159,7 +161,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	}
 
 	// Render the beam effects
-	this->display->GetAssets()->DrawBeams(dT, *this->display->GetModel(), camera);
+	this->display->GetAssets()->DrawBeams(*this->display->GetModel(), camera);
 
 	// Draw Post-Fullscene effects
 	postFullSceneFBO->BindFBObj();
@@ -216,7 +218,7 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
 	// Typical Particle effects...
 	GameESPAssets* espAssets = this->display->GetAssets()->GetESPAssets();
 	espAssets->DrawBeamEffects(dT, camera, negHalfLevelDim);
-	espAssets->DrawParticleEffects(dT, camera, negHalfLevelDim);
+	espAssets->DrawParticleEffects(dT, camera);
 
 	// Absolute post effects call for various object effects
 	this->display->GetAssets()->DrawGameBallsPostEffects(dT, *gameModel, camera);
@@ -252,6 +254,10 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 
 	// Draw any HUD special elements based on currently active items, etc.
 	this->display->GetAssets()->DrawActiveItemHUDElements(dT, *gameModel, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
+	// The very last thing we do is draw the 'informative' game elements (e.g., tutorial stuff, or important information for the player)
+	// this stuff should always be on the top
+	this->display->GetAssets()->DrawInformativeGameElements(camera, dT, *gameModel);
 
 	debug_opengl_state();
 }

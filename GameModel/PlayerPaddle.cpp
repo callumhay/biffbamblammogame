@@ -43,7 +43,7 @@ const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 const float PlayerPaddle::DEFAULT_MAX_SPEED = 24.0f;
 // Default acceleration/decceleration of the paddle (units/sec^2)
 const float PlayerPaddle::DEFAULT_ACCELERATION  = 120.0f;
-const float PlayerPaddle::DEFAULT_DECCELERATION = -115.0f;
+const float PlayerPaddle::DEFAULT_DECCELERATION = -130.0f;
 
 // Speed amount to diminish from the max speed when the paddle is poisoned
 const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 2.9f;
@@ -53,6 +53,9 @@ const int PlayerPaddle::DEFLECTION_DEGREE_ANGLE = 20; // TODO: Fix this...
 
 // Delay between shots of the laser
 const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.3;
+
+// The default amount of damage the the paddle shield does to a block, when colliding with the block, per second
+const int PlayerPaddle::DEFAULT_SHIELD_DMG_PER_SECOND = 90;
 
 PlayerPaddle::PlayerPaddle() : 
 centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDirection(0.0f), 

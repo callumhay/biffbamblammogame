@@ -367,6 +367,27 @@ void GameModel::ClearActiveTimers() {
 }
 
 /**
+ * Remove all active items of the given type from the game - their effects will be turned off after this function call.
+ * Returns: true if any items of the given type were fournd and removed, false otherwise.
+ */
+bool GameModel::RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type) {
+	bool foundItemType = false;
+	for (std::list<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end();) {
+		GameItemTimer* currTimer = *iter;
+		if (currTimer->GetTimerItemType() == type) {
+			iter = this->activeTimers.erase(iter);
+			delete currTimer;
+			currTimer = NULL;
+			foundItemType = true;
+		}
+		else {
+			 ++iter;
+		}
+	}
+	return foundItemType;
+}
+
+/**
  * Function for adding a possible item drop for the given level piece.
  */
 void GameModel::AddPossibleItemDrop(const LevelPiece& p) {

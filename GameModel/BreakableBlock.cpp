@@ -203,3 +203,21 @@ LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegment* beam
 
 	return newPiece;
 }
+
+/**
+ * Tick the collision with the paddle shield - the shield will eat away at the block until it's destroyed.
+ * Returns: The block that this block is/has become.
+ */
+LevelPiece* BreakableBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel) {
+	assert(gameModel != NULL);
+	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(paddle.GetShieldDamagePerSecond()));
+	
+	LevelPiece* newPiece = this;
+	if (currLifePoints <= 0) {
+		// The piece is dead... spawn the next one in sequence
+		this->currLifePoints = BreakableBlock::PIECE_STARTING_LIFE_POINTS;
+		newPiece = this->DiminishPiece(gameModel);
+	}
+
+	return newPiece;
+}

@@ -304,7 +304,6 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 	}
 
 	// Based on the new piece type we re-create a display list
-	const Point2D& changedPieceLoc = pieceAfter.GetCenter();
 	Vector3D translation(-this->currLevel->GetLevelUnitWidth()/2.0f, -this->currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
 	this->CreateDisplayListsForPiece(&pieceAfter, translation);
 }

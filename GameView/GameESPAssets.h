@@ -211,9 +211,9 @@ public:
 	void AddBallHitLightningArcEffect(const GameBall& ball);
 
 	void AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block);
-	void AddCannonFireEffect(const GameBall& ball, const CannonBlock& block);
-	void AddBasicBlockBreakEffect(const Camera& camera, const LevelPiece& block);
-	void AddBombBlockBreakEffect(const Camera& camera, const LevelPiece& bomb);
+	void AddCannonFireEffect(const CannonBlock& block);
+	void AddBasicBlockBreakEffect(const LevelPiece& block);
+	void AddBombBlockBreakEffect(const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
 	void AddBallSafetyNetDestroyedEffect(const Point2D& pos);
 	void AddBallExplodedEffect(const GameBall* ball);
@@ -221,8 +221,8 @@ public:
 	void AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
 	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
 	void SetItemEffect(const GameItem& item, const GameModel& gameModel);
-	void AddItemDropEffect(const Camera& camera, const GameItem& item, bool showStars);
-	void RemoveItemDropEffect(const Camera& camera, const GameItem& item);
+	void AddItemDropEffect(const GameItem& item, bool showStars);
+	void RemoveItemDropEffect(const GameItem& item);
 
 	void AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile);
 	void RemoveProjectileEffect(const Projectile& projectile);
@@ -237,14 +237,14 @@ public:
 
 	void AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDisposition disposition);
 
-	void TurnOffCurrentItemDropStars(const Camera& camera);
+	void TurnOffCurrentItemDropStars();
 
 	void KillAllActiveEffects();
 	void KillAllActiveBallEffects(const GameBall& ball);
 	void KillAllActiveTeslaLightningArcs();
 
 	// Draw functions for various particle effects in the game
-	void DrawParticleEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
+	void DrawParticleEffects(double dT, const Camera& camera);
 	void DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
 	void DrawProjectileEffects(double dT, const Camera& camera);
 
@@ -259,7 +259,7 @@ public:
 	void DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
-	void DrawBackgroundPaddleEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
+	void DrawBackgroundPaddleEffects(double dT, const Camera& camera);
 
 	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 	void DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);

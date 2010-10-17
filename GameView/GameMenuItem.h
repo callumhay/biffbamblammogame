@@ -56,8 +56,14 @@ public:
 	}
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	virtual void KeyPressed(SDLKey key, SDLMod modifier) {};
-	virtual void KeyReleased(SDLKey key, SDLMod modifier) {};
+	virtual void KeyPressed(SDLKey key, SDLMod modifier) {
+		UNUSED_PARAMETER(key);
+		UNUSED_PARAMETER(modifier);
+	};
+	virtual void KeyReleased(SDLKey key, SDLMod modifier) {
+		UNUSED_PARAMETER(key);
+		UNUSED_PARAMETER(modifier);
+	};
 
 	unsigned int GetHeight() const;
 	virtual float GetWidth() const;

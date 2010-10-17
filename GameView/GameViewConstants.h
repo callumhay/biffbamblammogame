@@ -8,79 +8,6 @@
 #include "../GameModel/GameItem.h"
 
 class GameViewConstants {
-
-private:
-	static GameViewConstants* Instance;
-
-	GameViewConstants();
-	~GameViewConstants();
-
-	// Maps of the item identifiers and their corresponding textures for
-	// the items that drop in the game and timers and their fillers
-	std::map<GameItem::ItemType, std::string> itemTextures;
-	std::map<GameItem::ItemType, std::string> itemTimerTextures;
-	std::map<GameItem::ItemType, std::string> itemTimerFillerTextures;
-
-	// Initializer methods for filling the item texture arrays
-	void InitItemTextures();
-	void InitItemTimerTextures();
-	void InitItemTimerFillerTextures();
-	
-	// Item drop, timer and filler textures ************************
-	const char* TEXTURE_ITEM_SLOWBALL;
-	const char* TEXTURE_ITEM_FASTBALL;
-	const char* TEXTURE_ITEM_UBERBALL;
-	const char* TEXTURE_ITEM_INVISIBALL;
-	const char* TEXTURE_ITEM_GHOSTBALL;
-	const char* TEXTURE_ITEM_PADDLELASER;
-	const char* TEXTURE_ITEM_MULTIBALL3;
-	const char* TEXTURE_ITEM_MULTIBALL5;
-	const char* TEXTURE_ITEM_PADDLEGROW;
-	const char* TEXTURE_ITEM_PADDLESHRINK;
-	const char* TEXTURE_ITEM_BALLGROW;
-	const char* TEXTURE_ITEM_BALLSHRINK;
-	const char* TEXTURE_ITEM_BLACKOUT;
-	const char* TEXTURE_ITEM_UPSIDEDOWN;
-	const char* TEXTURE_ITEM_BALLSAFETYNET;
-	const char* TEXTURE_ITEM_1UP;
-	const char* TEXTURE_ITEM_POISON;
-	const char* TEXTURE_ITEM_STICKYPADDLE;
-	const char* TEXTURE_ITEM_PADDLECAM;
-	const char* TEXTURE_ITEM_BALLCAM;
-	const char* TEXTURE_ITEM_PADDLEBEAM;
-	const char* TEXTURE_ITEM_GRAVITYBALL;
-	const char* TEXTURE_ITEM_PADDLEROCKET;
-	const char* TEXTURE_ITEM_CRAZYBALL;
-	const char* TEXTURE_ITEM_SHIELDPADDLE;
-	const char* TEXTURE_ITEM_RANDOM;
-
-	const char* TEXTURE_ITEM_TIMER_SLOWBALL;
-	const char* TEXTURE_ITEM_TIMER_FASTBALL;
-	const char* TEXTURE_ITEM_TIMER_UBERBALL;
-	const char* TEXTURE_ITEM_TIMER_INVISIBALL;
-	const char* TEXTURE_ITEM_TIMER_GHOSTBALL;
-	const char* TEXTURE_ITEM_TIMER_PADDLELASER;
-	const char* TEXTURE_ITEM_TIMER_BLACKOUT;
-	const char* TEXTURE_ITEM_TIMER_UPSIDEDOWN;
-	const char* TEXTURE_ITEM_TIMER_POISON;
-	const char* TEXTURE_ITEM_TIMER_STICKYPADDLE;
-	const char* TEXTURE_ITEM_TIMER_EYE;
-	const char* TEXTURE_ITEM_TIMER_GRAVITYBALL;
-	const char* TEXTURE_ITEM_TIMER_SHIELDPADDLE;
-	
-	const char* TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
-	const char* TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
-	const char* TEXTURE_ITEM_TIMER_FILLER_INVISIBALL;
-	const char* TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL;
-	const char* TEXTURE_ITEM_TIMER_FILLER_PADDLELASER;
-	const char* TEXTURE_ITEM_TIMER_FILLER_BLACKOUT;
-	const char* TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN;
-	const char* TEXTURE_ITEM_TIMER_FILLER_POISON;
-	const char* TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE;
-	const char* TEXTURE_ITEM_TIMER_FILLER_EYE;
-	const char* TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL;
-	const char* TEXTURE_ITEM_TIMER_FILLER_SHIELDPADDLE;
-
 public:
 	
 	// Obtain the singleton
@@ -254,6 +181,80 @@ public:
 	const char* DECO_SKYBEAM_MESH;
 	const char* DECO_BLOCK_MESH_PATH;
 
+private:
+	static GameViewConstants* Instance;
 
+	GameViewConstants();
+	~GameViewConstants();
+
+	// Maps of the item identifiers and their corresponding textures for
+	// the items that drop in the game and timers and their fillers
+	std::map<GameItem::ItemType, std::string> itemTextures;
+	std::map<GameItem::ItemType, std::string> itemTimerTextures;
+	std::map<GameItem::ItemType, std::string> itemTimerFillerTextures;
+
+	// Initializer methods for filling the item texture arrays
+	void InitItemTextures();
+	void InitItemTimerTextures();
+	void InitItemTimerFillerTextures();
+	
+	// Item drop, timer and filler textures ************************
+	const char* TEXTURE_ITEM_SLOWBALL;
+	const char* TEXTURE_ITEM_FASTBALL;
+	const char* TEXTURE_ITEM_UBERBALL;
+	const char* TEXTURE_ITEM_INVISIBALL;
+	const char* TEXTURE_ITEM_GHOSTBALL;
+	const char* TEXTURE_ITEM_PADDLELASER;
+	const char* TEXTURE_ITEM_MULTIBALL3;
+	const char* TEXTURE_ITEM_MULTIBALL5;
+	const char* TEXTURE_ITEM_PADDLEGROW;
+	const char* TEXTURE_ITEM_PADDLESHRINK;
+	const char* TEXTURE_ITEM_BALLGROW;
+	const char* TEXTURE_ITEM_BALLSHRINK;
+	const char* TEXTURE_ITEM_BLACKOUT;
+	const char* TEXTURE_ITEM_UPSIDEDOWN;
+	const char* TEXTURE_ITEM_BALLSAFETYNET;
+	const char* TEXTURE_ITEM_1UP;
+	const char* TEXTURE_ITEM_POISON;
+	const char* TEXTURE_ITEM_STICKYPADDLE;
+	const char* TEXTURE_ITEM_PADDLECAM;
+	const char* TEXTURE_ITEM_BALLCAM;
+	const char* TEXTURE_ITEM_PADDLEBEAM;
+	const char* TEXTURE_ITEM_GRAVITYBALL;
+	const char* TEXTURE_ITEM_PADDLEROCKET;
+	const char* TEXTURE_ITEM_CRAZYBALL;
+	const char* TEXTURE_ITEM_SHIELDPADDLE;
+	const char* TEXTURE_ITEM_RANDOM;
+
+	const char* TEXTURE_ITEM_TIMER_SLOWBALL;
+	const char* TEXTURE_ITEM_TIMER_FASTBALL;
+	const char* TEXTURE_ITEM_TIMER_UBERBALL;
+	const char* TEXTURE_ITEM_TIMER_INVISIBALL;
+	const char* TEXTURE_ITEM_TIMER_GHOSTBALL;
+	const char* TEXTURE_ITEM_TIMER_PADDLELASER;
+	const char* TEXTURE_ITEM_TIMER_BLACKOUT;
+	const char* TEXTURE_ITEM_TIMER_UPSIDEDOWN;
+	const char* TEXTURE_ITEM_TIMER_POISON;
+	const char* TEXTURE_ITEM_TIMER_STICKYPADDLE;
+	const char* TEXTURE_ITEM_TIMER_EYE;
+	const char* TEXTURE_ITEM_TIMER_GRAVITYBALL;
+	const char* TEXTURE_ITEM_TIMER_SHIELDPADDLE;
+	
+	const char* TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
+	const char* TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
+	const char* TEXTURE_ITEM_TIMER_FILLER_INVISIBALL;
+	const char* TEXTURE_ITEM_TIMER_FILLER_GHOSTBALL;
+	const char* TEXTURE_ITEM_TIMER_FILLER_PADDLELASER;
+	const char* TEXTURE_ITEM_TIMER_FILLER_BLACKOUT;
+	const char* TEXTURE_ITEM_TIMER_FILLER_UPSIDEDOWN;
+	const char* TEXTURE_ITEM_TIMER_FILLER_POISON;
+	const char* TEXTURE_ITEM_TIMER_FILLER_STICKYPADDLE;
+	const char* TEXTURE_ITEM_TIMER_FILLER_EYE;
+	const char* TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL;
+	const char* TEXTURE_ITEM_TIMER_FILLER_SHIELDPADDLE;
+
+	// Disallow copy and assign
+	GameViewConstants(const GameViewConstants& g);
+	GameViewConstants& operator=(const GameViewConstants& g);
 };
 #endif

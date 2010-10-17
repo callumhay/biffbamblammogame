@@ -17,6 +17,7 @@ GameCompleteDisplayState::~GameCompleteDisplayState() {
 }
 
 void GameCompleteDisplayState::RenderFrame(double dT) {
+	UNUSED_PARAMETER(dT);
 	
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -30,11 +31,17 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
 }
 
 void GameCompleteDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
 	this->display->SetCurrentState(new MainMenuDisplayState(this->display));
 }
 
 void GameCompleteDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
 }
 
 void GameCompleteDisplayState::DisplaySizeChanged(int width, int height) {
+	UNUSED_PARAMETER(width);
+	UNUSED_PARAMETER(height);
 }

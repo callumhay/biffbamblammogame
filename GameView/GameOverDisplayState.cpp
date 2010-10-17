@@ -16,6 +16,7 @@ GameOverDisplayState::~GameOverDisplayState() {
 }
 
 void GameOverDisplayState::RenderFrame(double dT) {
+	UNUSED_PARAMETER(dT);
 	const Camera& camera = this->display->GetCamera();
 	
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -27,12 +28,18 @@ void GameOverDisplayState::RenderFrame(double dT) {
 }
 
 void GameOverDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
 	// Allow the player to exit the game over screen...
 	this->display->SetCurrentState(new MainMenuDisplayState(this->display));
 }
 
 void GameOverDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
 }
 
 void GameOverDisplayState::DisplaySizeChanged(int width, int height) {
+	UNUSED_PARAMETER(width);
+	UNUSED_PARAMETER(height);
 }

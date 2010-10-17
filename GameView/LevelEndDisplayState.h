@@ -27,12 +27,18 @@ private:
 };
 
 inline void LevelEndDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
 }
 
 inline void LevelEndDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
 }
 
 inline void LevelEndDisplayState::DisplaySizeChanged(int width, int height) {
+	UNUSED_PARAMETER(width);
+	UNUSED_PARAMETER(height);
 	assert(false);
 }
 

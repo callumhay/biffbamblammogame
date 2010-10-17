@@ -21,18 +21,6 @@ public:
 	static bool IsValidWorldStyle(const std::string &s);
 	static WorldStyle GetWorldStyleFromString(const std::string &s);
 
-private:
-	bool isLoaded;												// Has this world been loaded into memory or not?
-	std::string worldFilepath;						// Path to the world defintion file
-	std::vector<GameLevel*> loadedLevels;	// Levels loaded into memory
-	unsigned int currentLevelNum;					// Current level expressed as an index into loaded levels vector
-
-	std::string name;											// Human-readable name of the world
-	WorldStyle style;											// Style of the world loaded (None if no world is loaded)
-
-	GameTransformMgr& transformMgr;
-
-public:
 	GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr);
 	~GameWorld();
 
@@ -80,6 +68,21 @@ public:
 		assert(this->isLoaded);
 		return this->currentLevelNum == (this->loadedLevels.size()-1);
 	}
+
+private:
+	bool isLoaded;												// Has this world been loaded into memory or not?
+	std::string worldFilepath;						// Path to the world defintion file
+	std::vector<GameLevel*> loadedLevels;	// Levels loaded into memory
+	unsigned int currentLevelNum;					// Current level expressed as an index into loaded levels vector
+
+	std::string name;											// Human-readable name of the world
+	WorldStyle style;											// Style of the world loaded (None if no world is loaded)
+
+	GameTransformMgr& transformMgr;
+
+	// Disallow copy and assign
+	GameWorld(const GameWorld& w);
+	GameWorld& operator=(const GameWorld& w);
 
 };
 #endif

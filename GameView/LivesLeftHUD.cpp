@@ -180,6 +180,7 @@ void LivesLeftHUD::LivesGained(int numLives) {
  * for the HUD elements.
  */
 void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
+	UNUSED_PARAMETER(displayWidth);
 	assert(this->currNumLivesLeft >= 0);
 
 	// If there are no lives left then there is nothing to draw

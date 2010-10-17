@@ -48,7 +48,7 @@
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="false"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="4"
 				DisableSpecificWarnings="4996"
 			/>
@@ -676,6 +676,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\RandomToItemAnimation.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\StickyPaddleGoo.h"
 					>
 				</File>
@@ -805,6 +809,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\PrismBlockMesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\RandomToItemAnimation.cpp"
 					>
 				</File>
 				<File

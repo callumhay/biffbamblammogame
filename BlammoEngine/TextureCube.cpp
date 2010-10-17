@@ -54,8 +54,8 @@ bool TextureCube::LoadCubeTextureFromImgs(const std::string filepaths[NUM_CUBE_F
 			this->height = height;
 		}
 		else {
-			assert(this->width == width);
-			assert(this->height == height);
+			assert(this->width == static_cast<unsigned int>(width));
+			assert(this->height == static_cast<unsigned int>(height));
 		}
 
 		ILint internalFormat = ilGetInteger(IL_IMAGE_BPP);

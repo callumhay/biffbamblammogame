@@ -176,7 +176,7 @@ void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Ca
 	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
 }
 
-void GameAssets::DrawSafetyNetIfActive(double dT, const GameLevel* currLevel, const Camera& camera) {
+void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera) {
 	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
 	this->GetCurrentLevelMesh()->DrawSafetyNet(dT, camera, fgKeyLight, fgFillLight, ballLight);
@@ -412,7 +412,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	}
 
 	// Draw any effects on the paddle (e.g., item acquiring effects)
-	this->espAssets->DrawBackgroundPaddleEffects(dT, camera, p);
+	this->espAssets->DrawBackgroundPaddleEffects(dT, camera);
 	// Draw the paddle
 	this->worldAssets->DrawPaddle(p, camera, paddleKeyLight, paddleFillLight, ballLight);
 
@@ -551,7 +551,7 @@ void GameAssets::DrawTimers(double dT, const Camera& camera) {
 	this->itemAssets->DrawTimers(dT, camera);
 }
 
-void GameAssets::DrawBeams(double dT, const GameModel& gameModel, const Camera& camera) {
+void GameAssets::DrawBeams(const GameModel& gameModel, const Camera& camera) {
 	const std::list<Beam*>& beams = gameModel.GetActiveBeams();
 	if (beams.empty()) {
 		return;
@@ -720,6 +720,32 @@ void GameAssets::DrawProjectiles(double dT, const GameModel& gameModel, const Ca
 }
 
 /**
+ * Draw informational game elements (e.g., tutorial bubbles, information about items acquired, etc.).
+ */
+void GameAssets::DrawInformativeGameElements(const Camera& camera, double dT, const GameModel& gameModel) {
+	if (!this->randomToItemAnimation.GetIsActive()) {
+		return;
+	}
+
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
+
+	Vector3D negHalfLevelDim = Vector3D(-0.5 * gameModel.GetLevelUnitDimensions(), 0.0);
+	glPushMatrix();
+	Matrix4x4 gameTransform = gameModel.GetTransformInfo()->GetGameTransform();
+	glMultMatrixf(gameTransform.begin());
+	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], negHalfLevelDim[2]);
+
+	// Draw the random item to actual item animation when required...
+	this->randomToItemAnimation.Draw(camera, dT);
+
+	glPopMatrix();
+
+	glPopAttrib();
+
+}
+
+/**
  * Draw HUD elements for any of the active items when applicable.
  */
 void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel, int displayWidth, int displayHeight) {
@@ -732,6 +758,7 @@ void GameAssets::DrawActiveItemHUDElements(double dT, const GameModel& gameModel
 		this->crosshairHUD->Tick(dT);
 		this->crosshairHUD->Draw(paddle, displayWidth, displayHeight, (1.0 - paddle->GetColour().A()));
 	}
+
 
 	// Draw any pain overlay when active
 	this->painHUD->Draw(dT, displayWidth, displayHeight);
@@ -837,7 +864,7 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 /** 
  * Remove the given projectile and its effects from the assets.
  */
-void GameAssets::RemoveProjectile(Camera& camera, const GameModel& gameModel, const Projectile& projectile) {
+void GameAssets::RemoveProjectile(Camera& camera, const Projectile& projectile) {
 	this->espAssets->RemoveProjectileEffect(projectile);
 
 	switch (projectile.GetType()) {
@@ -945,11 +972,22 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 	this->lifeHUD->Reinitialize();
 }
 
+void GameAssets::ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem) {
+	// Figure out the item texture associated with the actual item...
+	const std::map<GameItem::ItemType, Texture*>& itemTextureMap = this->itemAssets->GetItemTextureMap();
+	std::map<GameItem::ItemType, Texture*>::const_iterator findIter = itemTextureMap.find(actualItem.GetItemType());
+	assert(findIter != itemTextureMap.end());
+	Texture* actualItemTexture = findIter->second;
+
+	// This will start and animation that shows to the player what the random item has become
+	this->randomToItemAnimation.Start(actualItemTexture, gameModel);
+}
+
 /**
  * Activate the effect for a particular item - this can be anything from changing lighting to
  * making pretty eye-candy-particles.
  */
-void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem& item, const Camera& camera) {
+void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem& item) {
 	// First deal with any particle related effects
 	this->espAssets->SetItemEffect(item, gameModel);
 	// Also make the FBO assets aware of a newly active effect
@@ -977,7 +1015,7 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 		case GameItem::PaddleCamItem: {
 				// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
 				// NOTE that this is not permanent and just does so for any currently falling items
-				this->espAssets->TurnOffCurrentItemDropStars(camera);
+				this->espAssets->TurnOffCurrentItemDropStars();
 				
 				// We make the safety net transparent so that it doesn't obstruct the paddle cam... too much
 				assert(this->GetCurrentLevelMesh() != NULL);
@@ -1002,7 +1040,7 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 		case GameItem::BallCamItem: {
 				// For the paddle camera we remove the stars from all currently falling items (block the view of the player)
 				// NOTE that this is not permanent and just does so for any currently falling items
-				this->espAssets->TurnOffCurrentItemDropStars(camera);
+				this->espAssets->TurnOffCurrentItemDropStars();
 
 				// Change the position of the key light so that it is facing down with the ball
 				float halfLevelHeight = gameModel.GetCurrentLevel()->GetLevelUnitHeight() / 2.0f;
@@ -1098,6 +1136,7 @@ void GameAssets::DeactivateMiscEffects() {
 	this->itemAssets->ClearTimers();
 	// Disable any overlay stuff
 	this->painHUD->Deactivate();
+	this->randomToItemAnimation.Stop();
 }
 
 /**
@@ -1105,6 +1144,8 @@ void GameAssets::DeactivateMiscEffects() {
  * be called just as the last ball is spiralling towards its death.
  */
 void GameAssets::ActivateLastBallDeathEffects(const GameBall& lastBall) {
+	UNUSED_PARAMETER(lastBall);
+
 	// Fade out the world background since the camera is going to be moving places we don't
 	// want the player to see
 	this->worldAssets->FadeBackground(true, 0.2f);

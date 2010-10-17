@@ -62,6 +62,7 @@ public:
 
 	// Particles pass through portal blocks.
 	bool ProjectilePassesThrough(Projectile* projectile) {
+		UNUSED_PARAMETER(projectile);
 		return true;
 	}
 
@@ -72,6 +73,7 @@ public:
 
 	// Portal blocks are never destroyed.
 	LevelPiece* Destroy(GameModel* gameModel) {
+		UNUSED_PARAMETER(gameModel);
 		return this;
 	}
 

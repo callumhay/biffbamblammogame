@@ -12,6 +12,7 @@ class ItemDropBlock;
 class GameLevel;
 class GameWorld;
 class GameItem;
+class RandomItem;
 class GameItemTimer;
 class Projectile;
 class Beam;
@@ -287,6 +288,16 @@ public:
 	 */
 	virtual void ItemDeactivatedEvent(const GameItem& item)	= 0;
 	
+
+	/** 
+	 * Event triggered when a random item is activated - this is distinct from a typical item since a
+	 * random item alone has no effect (what it becomes does). This event is triggered just before the random
+   * item's actual item is activated.
+	 * Arguements: randomItem - The random item.
+   *             actualItem - The actual item that the random item turns into.
+	 */
+	virtual void RandomItemActivatedEvent(const RandomItem& randomItem, const GameItem& actualItem) = 0;
+
 	/**
 	 * Event triggered when an item's timer is started for the first time. Only occurs
 	 * once at item activation, when that item has an associated time period of activity.

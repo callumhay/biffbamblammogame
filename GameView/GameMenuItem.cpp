@@ -48,6 +48,9 @@ float GameMenuItem::GetWidth() const {
  * be drawn, in window coordinates.
  */
 void GameMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight) {
+	UNUSED_PARAMETER(windowWidth);
+	UNUSED_PARAMETER(windowHeight);
+
 	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
 
 	this->currLabel->SetTopLeftCorner(topLeftCorner + Vector2D(wiggleAmount, 0.0f));
@@ -133,6 +136,9 @@ void SelectionListMenuItem::SetSelectionList(const std::vector<std::string>& ite
 }
 
 void SelectionListMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight) {
+	UNUSED_PARAMETER(windowWidth);
+	UNUSED_PARAMETER(windowHeight);
+
 	// Obtain the latest interpolated wiggle value
 	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
 	
@@ -244,6 +250,7 @@ void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, flo
  * is the one currently selected and relevant.
  */
 void SelectionListMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(modifier);
 	assert(parent != NULL);
 
 	// Key pressing does nothing if there's nothing to select from
@@ -358,6 +365,9 @@ AmountScrollerMenuItem::~AmountScrollerMenuItem() {
 }
 
 void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight) {
+	UNUSED_PARAMETER(windowWidth);
+	UNUSED_PARAMETER(windowHeight);
+
 	// Obtain the latest interpolated wiggle value
 	float wiggleAmount = this->wiggleAnimation.GetInterpolantValue();
 	
@@ -509,6 +519,8 @@ void AmountScrollerMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 }
 
 void AmountScrollerMenuItem::KeyReleased(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(modifier);
+
 	switch (key) {
 		case SDLK_LEFT:
 		case SDLK_LEFTBRACKET:
@@ -809,6 +821,8 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 }
 
 void VerifyMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(modifier);
+
 	// If the verify menu is not active then we just exit... this shouldn't happen though
 	if (!this->verifyMenuActive) {
 		assert(false);

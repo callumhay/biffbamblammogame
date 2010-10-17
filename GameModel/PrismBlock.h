@@ -86,6 +86,8 @@ public:
 	
 	// Doesn't matter if a ball collides with a prism block, it does nothing to the block.
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+		UNUSED_PARAMETER(gameModel);
+
 		// Tell the ball what the last piece it collided with was...
 		ball.SetLastPieceCollidedWith(this);
 		return this;

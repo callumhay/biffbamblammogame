@@ -42,6 +42,8 @@ void InGameDisplayState::RenderFrame(double dT) {
 }
 
 void InGameDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(modifier);
+
 	// We only interpret one key press - when the user wants to access the in-game menu...
 	if (key == SDLK_ESCAPE) {
 		// Go to the next state

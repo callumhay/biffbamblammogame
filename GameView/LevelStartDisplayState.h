@@ -49,9 +49,13 @@ private:
 };
 
 inline void LevelStartDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
 }
 
 inline void LevelStartDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
+	UNUSED_PARAMETER(key);
+	UNUSED_PARAMETER(modifier);
 }
 
 #endif // __LEVELSTARTDISPLAYSTATE_H__

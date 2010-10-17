@@ -13,6 +13,7 @@ class CannonBlock;
 class TeslaBlock;
 class ItemDropBlock;
 class GameItem;
+class RandomItem;
 class GameItemTimer;
 class GameWorld;
 class GameLevel;
@@ -67,6 +68,7 @@ public:
 	void ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle);
 	void ActionItemActivated(const GameItem& item);
 	void ActionItemDeactivated(const GameItem& item);
+	void ActionRandomItemActivated(const RandomItem& randomItem, const GameItem& actualItem);
 	void ActionItemTimerStarted(const GameItemTimer& itemTimer);
 	void ActionItemTimerStopped(const GameItemTimer& itemTimer);
 	void ActionItemDropBlockItemChange(const ItemDropBlock& dropBlock);
