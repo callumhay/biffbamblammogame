@@ -21,6 +21,7 @@
 #include "BoundingLines.h"
 #include "GameBall.h"
 #include "Projectile.h"
+#include "PaddleRocketProjectile.h"
 
 class GameModel;
 class GameBall;
@@ -282,6 +283,9 @@ private:
 	void LaserBulletProjectileCollision(const Projectile& projectile);
 	float GetPercentNearPaddleCenter(const Projectile& projectile, float& distFromCenter);
 	Collision::Circle2D CreatePaddleShieldBounds() const;
+
+
+	void GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const;
 };
 
 inline void PlayerPaddle::Animate(double seconds) {
@@ -341,6 +345,17 @@ inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool inclu
 	if (includeAttachedBallCheck && !didCollide && this->HasBallAttached()) {
 		didCollide = bounds.CollisionCheck(this->GetAttachedBall()->GetBounds());
 	}
+
+	// If there's a rocket attached we need to check for collisions with it!
+	if (!didCollide && (this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+		Point2D rocketSpawnPos;
+		float rocketHeight, rocketWidth;
+		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
+		Vector2D widthHeightVec(rocketWidth/1.5f, rocketHeight/1.5f);
+
+		Collision::AABB2D rocketAABB(rocketSpawnPos - widthHeightVec, rocketSpawnPos + widthHeightVec);
+		didCollide = bounds.CollisionCheck(rocketAABB);
+	}
 	
 	return didCollide;
 }
@@ -387,6 +402,16 @@ inline Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) c
 		paddleAABB.AddPoint(ballBounds.Center() - ballRadiusVec);
 	}
 
+	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+		Point2D rocketSpawnPos;
+		float rocketHeight, rocketWidth;
+		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
+		Vector2D widthHeightVec(rocketWidth/1.5f, rocketHeight/1.5f);
+
+		paddleAABB.AddPoint(rocketSpawnPos - widthHeightVec);
+		paddleAABB.AddPoint(rocketSpawnPos + widthHeightVec);
+	}
+
 	return paddleAABB;
 }
 
@@ -397,5 +422,10 @@ inline void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce) {
 	this->impulse += 0.05f * xDirectionalForce;
 }
 
+inline void PlayerPaddle::GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const {
+		height = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+		width  = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT;
+		spawnPos = this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * height);
+}
 
 #endif

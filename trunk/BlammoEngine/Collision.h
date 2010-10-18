@@ -369,6 +369,37 @@ namespace Collision {
 		return true;
 	}
 
+	inline bool GetCollisionPoint(const Collision::AABB2D& aabb, const Collision::LineSeg2D& l, Point2D& collisionPt) {
+		Vector2D lineVec = l.P2() - l.P1();
+		float lineLength = Vector2D::Magnitude(lineVec);
+		assert(lineLength > 0.0f);
+		lineVec = lineVec / lineLength;
+
+		Ray2D lineRay(l.P1(), lineVec);
+		float rayMin;
+		bool isCollision = IsCollision(lineRay, aabb, rayMin);
+		if (!isCollision) {
+			return false;
+		}
+		
+		if (rayMin >= 0.0f && rayMin <= lineLength) {
+			collisionPt = lineRay.GetPointAlongRayFromOrigin(rayMin);
+			return true;
+		}
+
+		return false;
+	}
+
+	inline bool IsCollision(const Collision::LineSeg2D& l, const AABB2D& aabb) {
+		Vector2D lineVec = l.P2() - l.P1();
+		float lineLength = Vector2D::Magnitude(lineVec);
+		assert(lineLength > 0.0f);
+		lineVec = lineVec / lineLength;
+		Ray2D lineRay(l.P1(), lineVec);
+		float rayMin;
+		return IsCollision(lineRay, aabb, rayMin) && rayMin >= 0.0f && rayMin <= lineLength;
+	}
+
 	inline bool IsCollision(const Ray2D& ray, const LineSeg2D& lineSeg, float& rayT) {
 		// Create a parameteric equation for the line segment
 		Vector2D D1 = lineSeg.P2() - lineSeg.P1();

@@ -29,7 +29,7 @@ E E E E E E E E E E E E E E E
 E E E E E E E E E E E E E E E 
 E E E E E E E E E E E E E E E 
 E T(S,ll) E E E E E E E E E E E T(S,lr) E 
-A(1,0,a,b) S T(S,ll) E E E E E E E E E T(S,lr) S A(1,0,d,c) 
+A(1,0,a,b) E E E E E E E E E E E E E A(1,0,d,c) 
 
 PaddleGrow 2
 PoisonPaddle 2

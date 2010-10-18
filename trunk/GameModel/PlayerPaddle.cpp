@@ -14,10 +14,7 @@
 #include "GameEventManager.h"
 #include "GameModelConstants.h"
 #include "PaddleLaser.h"
-#include "PaddleRocketProjectile.h"
-
 #include "Beam.h"
-
 
 // Default values for the size of the paddle
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
@@ -537,9 +534,9 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 	// Check for the rocket paddle (this has top priority)
 	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
 		// The rocket immediately is fired from the paddle - create a projectile for it and add it to the model (i.e., fire it!)
-		float rocketHeight = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
-		float rocketWidth  = this->currScaleFactor * PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT;
-		Point2D rocketSpawnPos = this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * rocketHeight);
+		Point2D rocketSpawnPos;
+		float rocketHeight, rocketWidth;
+		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
 		Projectile* rocketProjectile = new PaddleRocketProjectile(rocketSpawnPos, rocketWidth, rocketHeight);
 		gameModel->AddProjectile(rocketProjectile);
 
@@ -682,8 +679,20 @@ void PlayerPaddle::UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAtta
 		didCollide = p.GetBounds().GetCollisionPoints(this->bounds, collisionPts);
 	}
 	
+	// If there's a ball attached we need to check its bounds as well...
 	if (doAttachedBallCollision && this->HasBallAttached()) {
 		didCollide |= p.GetBounds().GetCollisionPoints(this->GetAttachedBall()->GetBounds(), collisionPts);
+	}
+
+	// If there's a rocket attached we need to check its bounds too...
+	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+		Point2D rocketSpawnPos;
+		float rocketHeight, rocketWidth;
+		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
+		Vector2D widthHeightVec(rocketWidth/1.5f, rocketHeight/1.5f);
+
+		//didCollide |= Collision::GetCollisionPoint(p.GetAABB(), Collision::AABB2D(rocketSpawnPos - widthHeightVec, rocketSpawnPos + widthHeightVec), collisionPts);
+		didCollide |= p.GetBounds().GetCollisionPoints(Collision::AABB2D(rocketSpawnPos - widthHeightVec, rocketSpawnPos + widthHeightVec), collisionPts);
 	}
 
 	if (!didCollide) {

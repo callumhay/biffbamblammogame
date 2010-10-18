@@ -28,6 +28,7 @@ public:
 	Point2D ClosestPoint(const Point2D& pt) const;
 	bool IsInside(const Point2D& pt) const;
 
+	bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	bool CollisionCheck(const Collision::Circle2D& c) const;
 	bool CollisionCheck(const BoundingLines& other) const;
 	int CollisionCheckIndex(const BoundingLines& other) const;
@@ -38,6 +39,7 @@ public:
 
 	bool GetCollisionPoints(const BoundingLines& other, std::list<Point2D>& collisionPts) const;
 	bool GetCollisionPoints(const Collision::Circle2D& circle, std::list<Point2D>& collisionPts) const;
+	bool GetCollisionPoints(const Collision::AABB2D& aabb, std::list<Point2D>& collisionPts) const;
 
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	

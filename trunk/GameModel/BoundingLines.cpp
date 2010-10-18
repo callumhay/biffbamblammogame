@@ -312,6 +312,16 @@ bool BoundingLines::CollisionCheck(const Collision::Circle2D& c) const {
 	return false;
 }
 
+bool BoundingLines::CollisionCheck(const Collision::AABB2D& aabb) const {
+	for (size_t i = 0; i < this->lines.size(); ++i) {
+		if (Collision::IsCollision(this->lines[i], aabb)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /**
  * Check to see whether this collided with another set of bounding lines.
  * Returns: true if any lines in this collided with any lines in the given BoundingLines object,
@@ -462,6 +472,19 @@ bool BoundingLines::GetCollisionPoints(const Collision::Circle2D& circle, std::l
 	Point2D collisionPt;
 	for (size_t i = 0; i < this->lines.size(); ++i) {
 		isCollision = Collision::GetCollisionPoint(circle, this->GetLine(i), collisionPt);
+		if (isCollision) {
+			collisionPts.push_back(collisionPt);
+		}
+	}
+	
+	return !(collisionPts.empty());
+}
+
+bool BoundingLines::GetCollisionPoints(const Collision::AABB2D& aabb, std::list<Point2D>& collisionPts) const {
+	bool isCollision;
+	Point2D collisionPt;
+	for (size_t i = 0; i < this->lines.size(); ++i) {
+		isCollision = Collision::GetCollisionPoint(aabb, this->GetLine(i), collisionPt);
 		if (isCollision) {
 			collisionPts.push_back(collisionPt);
 		}
