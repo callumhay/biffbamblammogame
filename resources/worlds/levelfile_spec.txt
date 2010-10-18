@@ -19,8 +19,10 @@ The following specifies the .lvl format.
 // E - Empty spot
 // I - Ink block   (When hit it splats all over the player's vision)
 // P - Prism block (Unbreakable, but if hit by any sort of laser it reflects/refracts the laser)
-// C - Cannon block
 // L - Collateral block (when hit it falls downwards destroying almost everything in its path)
+
+// C - Cannon block
+// TODO: Directions
 
 // T(x,p) - Triangle block: 
 // x: type of block from the above, can be any of the following: {R, O, Y, G, S, P}
