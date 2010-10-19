@@ -129,8 +129,14 @@ inline Vector2D Vector2D::Rotate(float angInDegs, const Vector2D& v) {
 
 inline void Vector2D::Rotate(float angInDegs) {
 	float angInRads = Trig::degreesToRadians(angInDegs);
-	v_[0] = cosf(angInRads) * v_[0] - sinf(angInRads) * v_[1];
-	v_[1] = sinf(angInRads) * v_[0] + cosf(angInRads) * v_[1];
+
+	float c = cosf(angInRads);
+	float s = sinf(angInRads);
+	float x = c * v_[0] - s * v_[1];
+	float y = s * v_[0] + c * v_[1];
+
+	v_[0] = x;
+	v_[1] = y;
 }
 
 // 3D Vector -----------------------------------------------------

@@ -12,9 +12,14 @@
 package bbbleveleditor;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
 
 public class LevelPieceEditDialog extends JDialog {
@@ -40,6 +45,10 @@ public class LevelPieceEditDialog extends JDialog {
 	private Set<Character> allPieceIDs;
 	private LevelPieceImageLabel levelPieceLbl;
 	private JFrame parentWindow;
+	
+	private JRadioButton randomCannonAngleRadio;
+	private JRadioButton specifyCannonAngleRadio;
+	private JSpinner cannonAngleValue;
 	
     /** Creates new form LevelPieceEditDialog */
     public LevelPieceEditDialog(JFrame parentWindow, LevelPieceImageLabel levelPieceLbl, Set<Character> allPieceIDs) {
@@ -258,9 +267,62 @@ public class LevelPieceEditDialog extends JDialog {
        
 	        buttonPanel.add(this.teslaStartsOn);
 	        buttonPanel.add(this.teslaChangable);
-	        this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+	        
+        }
+        else if (this.levelPieceLbl.getIsCannonBlock()) {
+        	this.randomCannonAngleRadio  = new JRadioButton("Random Angle");
+        	this.randomCannonAngleRadio.setEnabled(true);
+        	this.randomCannonAngleRadio.addActionListener( new ActionListener() {
+        		public void actionPerformed(ActionEvent evt) {
+        			cannonAngleRadioClicked(true);
+        		}
+        	});
+        	
+        	
+        	this.specifyCannonAngleRadio = new JRadioButton("Specify Angle");
+        	this.specifyCannonAngleRadio.setEnabled(true);
+        	this.specifyCannonAngleRadio.addActionListener( new ActionListener() {
+        		public void actionPerformed(ActionEvent evt) {
+        			cannonAngleRadioClicked(false);
+        		}
+        	});
+        	this.specifyCannonAngleRadio.setSelected(false);
+        	
+        	ButtonGroup group = new ButtonGroup();
+        	group.add(this.randomCannonAngleRadio);
+        	group.add(this.specifyCannonAngleRadio);
+        	
+        	SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0, 0, 356, 1);
+        	this.cannonAngleValue = new JSpinner(spinnerModel);
+        	this.cannonAngleValue.setEnabled(false);
+        	this.cannonAngleValue.addChangeListener(new ChangeListener() {
+
+				public void stateChanged(ChangeEvent arg0) {
+					cannonAngleValueChanged((Integer)cannonAngleValue.getValue());
+				}
+        	});
+        	
+        	if (this.levelPieceLbl.getCannonBlockDegAngle() == -1) {
+        		this.randomCannonAngleRadio.setSelected(true);
+        		this.specifyCannonAngleRadio.setSelected(false);
+        		this.cannonAngleValue.setEnabled(false);
+        	}
+        	else {
+        		this.cannonAngleValue.setValue(new Integer(this.levelPieceLbl.getCannonBlockDegAngle()));
+        		this.randomCannonAngleRadio.setSelected(false);
+        		this.specifyCannonAngleRadio.setSelected(true);
+        		this.cannonAngleValue.setEnabled(true);
+        	}
+        		
+        	JPanel tempPanel = new JPanel(new FlowLayout());
+        	tempPanel.add(this.randomCannonAngleRadio);
+        	tempPanel.add(this.specifyCannonAngleRadio);
+        	tempPanel.add(this.cannonAngleValue);
+
+	        buttonPanel.add(tempPanel);
         }
         
+        this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -336,6 +398,23 @@ public class LevelPieceEditDialog extends JDialog {
     	this.levelPieceLbl.setTeslaChangable(this.teslaChangable.isSelected());
     }
     
+    private void cannonAngleRadioClicked(boolean random) {
+    	if (random) {
+    		this.levelPieceLbl.setCannonBlockDegAngle(-1);
+    		this.cannonAngleValue.setEnabled(false);
+    	}
+    	else {
+    		this.cannonAngleValue.setEnabled(true);
+    		this.cannonAngleValueChanged((Integer)this.cannonAngleValue.getValue());
+    	}
+    	
+    }
+    
+	private void cannonAngleValueChanged(int value) {
+		// TODO Auto-generated method stub
+		this.levelPieceLbl.setCannonBlockDegAngle(value);
+	}
+    
     private void updateSiblingsFromList() {
     	Set<Character> siblings = new TreeSet<Character>();
     	for (int i = 0; i < this.siblingListModel.getSize(); i++) {
@@ -343,5 +422,8 @@ public class LevelPieceEditDialog extends JDialog {
     	}
     	this.levelPieceLbl.setSiblingIDs(siblings);
     }
+    
+    
+    
     
 }

@@ -9,6 +9,7 @@ public class LevelPiece {
 	public static final String TESLA_PIECE_NAME    = "Tesla";
 	public static final String TESLA_PIECE_SYMBOL  = "A";
 	public static final String ITEM_DROP_PIECE_SYMBOL = "D";
+	public static final String CANNON_PIECE_SYMBOL    = "C";
 	public static final String ITEM_DROP_PIECE_NAME   = "Item Drop";
 	
 	public static LevelPiece DefaultPiece;
@@ -16,8 +17,8 @@ public class LevelPiece {
 	// Hash mapping of the symbols to level pieces
 	public static HashMap<String, LevelPiece> LevelPieceCache = new HashMap<String, LevelPiece>();
 	
-	public static final int LEVEL_PIECE_WIDTH  = 32;
-	public static final int LEVEL_PIECE_HEIGHT = 16;
+	public static final int LEVEL_PIECE_WIDTH  = 40;
+	public static final int LEVEL_PIECE_HEIGHT = 20;
 	
 	private String name;
 	private String fileSymbol;
