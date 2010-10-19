@@ -500,6 +500,10 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 						outputStr = outputStr + ")";
 						levelFileWriter.write(outputStr);
 					}
+					else if (currPieceLbl.getIsCannonBlock()) {
+						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getCannonBlockDegAngle() + ")";
+						levelFileWriter.write(outputStr);
+					}
 					else {
 						levelFileWriter.write(currLvlPiece.getSymbol());
 					}

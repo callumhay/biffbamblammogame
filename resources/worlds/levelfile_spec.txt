@@ -21,8 +21,12 @@ The following specifies the .lvl format.
 // P - Prism block (Unbreakable, but if hit by any sort of laser it reflects/refracts the laser)
 // L - Collateral block (when hit it falls downwards destroying almost everything in its path)
 
-// C - Cannon block
-// TODO: Directions
+// C(d) - Cannon block
+// d: The direction to always fire the cannon block in (or specify random firing direction)
+//    the value can be any degree angle starting at 0 going to 359, the special value of -1 can be used
+//    to specify a random direction. The angle starts by firing directly upwards and moves around the circle
+// of angles clockwise (e.g., 90 will always fire the ball perfectly to the right of the cannon, 180 will always
+// fire the ball downwards from the cannon, ...).
 
 // T(x,p) - Triangle block: 
 // x: type of block from the above, can be any of the following: {R, O, Y, G, S, P}

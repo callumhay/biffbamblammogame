@@ -24,7 +24,9 @@ public:
 	static const float CANNON_BARREL_HEIGHT;
 	static const float HALF_CANNON_BARREL_HEIGHT;
 
-	CannonBlock(unsigned int wLoc, unsigned int hLoc);
+	static const int RANDOM_SET_ROTATION;
+
+	CannonBlock(unsigned int wLoc, unsigned int hLoc, int setRotation);
 	~CannonBlock();
 
 	LevelPieceType GetType() const { 
@@ -94,12 +96,18 @@ public:
 	const PaddleRocketProjectile* GetLoadedRocket() const;
 	bool GetIsLoaded() const;
 
+	bool GetHasRandomRotation() const;
+	float GetFixedRotationDegsFromX() const;
+
 private:
 	static const double MIN_ROTATION_TIME_IN_SECS;
 	static const double MAX_ROTATION_TIME_IN_SECS;
 
 	static const float MIN_ROTATION_SPD_IN_DEGS_PER_SEC;
 	static const float MAX_ROTATION_SPD_IN_DEGS_PER_SEC;
+
+	static const int MIN_FIXED_ROTATION_NUM_SPINS;
+	static const int MAX_FIXED_ROTATION_NUM_SPINS;
 
 	GameBall* loadedBall;
 	PaddleRocketProjectile* loadedRocket;
@@ -108,8 +116,9 @@ private:
 	float currRotationSpeed;				// The current rotation speed of the cannon
 	double elapsedRotationTime;			// The elapsed rotation time from the start of the ball coming into the cannon
 	double totalRotationTime;				// The total time before the ball is fired from the cannon
+	int fixedRotation;							// The fixed rotation (i.e., the degree angle where the cannon block always fires, measured from 12 o'clock), -1 for random
 
-	void SetupRandomCannonFireTimeAndDirection();
+	void SetupCannonFireTimeAndDirection();
 };
 
 /**
@@ -141,6 +150,17 @@ inline const PaddleRocketProjectile* CannonBlock::GetLoadedRocket() const {
 
 inline bool CannonBlock::GetIsLoaded() const {
 	return (this->loadedBall != NULL) || (this->loadedRocket != NULL);
+}
+
+// Gets whether this cannon block fires in random directions or not
+inline bool CannonBlock::GetHasRandomRotation() const {
+	return (this->fixedRotation == -1);
+}
+
+// Gets the degrees from the x-axis the rotation direction is...
+inline float CannonBlock::GetFixedRotationDegsFromX() const {
+	assert(!this->GetHasRandomRotation());
+	return 90 - this->fixedRotation;
 }
 
 #endif // __CANNONBLOCK_H__

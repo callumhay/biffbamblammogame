@@ -31,6 +31,8 @@ public class LevelPieceImageLabel extends JLabel {
 	private boolean teslaBlockStartsOn;
 	private boolean teslaIsChangable;
 	
+	private int cannonDegAngle;
+	
 	private ArrayList<String> itemDropTypes = new ArrayList<String>();
 	
 	static boolean IsValidBlockID(char id) {
@@ -45,6 +47,7 @@ public class LevelPieceImageLabel extends JLabel {
 		this.teslaBlockStartsOn = false;
 		this.teslaIsChangable   = true;
 		this.setLevelPiece(piece);
+		this.cannonDegAngle = -1;
 		this.itemDropTypes.add("all");
 	}
 	
@@ -92,6 +95,12 @@ public class LevelPieceImageLabel extends JLabel {
 			}
 			
 			pieceSymbol = LevelPiece.ITEM_DROP_PIECE_SYMBOL;
+		}
+		else if (pieceSymbol.length() >= 3 &&  pieceSymbol.substring(0, 2).equals(LevelPiece.CANNON_PIECE_SYMBOL + "(")) {
+
+			String angleValue = pieceSymbol.substring(2, pieceSymbol.length()-1);
+			this.cannonDegAngle = Integer.parseInt(angleValue);
+			pieceSymbol = LevelPiece.CANNON_PIECE_SYMBOL;
 		}
 		
 		this.setLevelPiece(LevelPiece.LevelPieceCache.get(pieceSymbol));
@@ -172,6 +181,9 @@ public class LevelPieceImageLabel extends JLabel {
 	public boolean getIsItemDrop() {
 		return piece.getSymbol().equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL);
 	}
+	public boolean getIsCannonBlock() {
+		return piece.getSymbol().equals(LevelPiece.CANNON_PIECE_SYMBOL);
+	}
 	
 	public void setBlockID(char blockID) {
 		this.blockID = blockID;
@@ -209,6 +221,13 @@ public class LevelPieceImageLabel extends JLabel {
 		this.itemDropTypes.add(itemName);
 	}
 	
+	
+	public int getCannonBlockDegAngle() {
+		return this.cannonDegAngle;
+	}
+	public void setCannonBlockDegAngle(int angle) {
+		this.cannonDegAngle = angle;
+	}
 	
 	public char getPortalSiblingID() {
 		if (this.siblingIDs.size() == 1) {

@@ -12,6 +12,7 @@ const float CannonBlock::CANNON_BARREL_LENGTH				= 1.20f;
 const float CannonBlock::HALF_CANNON_BARREL_LENGTH	= CannonBlock::CANNON_BARREL_LENGTH	/ 2.0f;
 const float CannonBlock::CANNON_BARREL_HEIGHT				= 0.8f;
 const float CannonBlock::HALF_CANNON_BARREL_HEIGHT	= CannonBlock::CANNON_BARREL_HEIGHT / 2.0f;
+const int CannonBlock::RANDOM_SET_ROTATION					= -1;
 
 // Rotation will happen for some random period of time in between these values
 const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	= 1.0f;
@@ -21,9 +22,14 @@ const double CannonBlock::MAX_ROTATION_TIME_IN_SECS = 2.5f;
 const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC	= 150.0f;
 const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 450.0f;
 
-CannonBlock::CannonBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc), 
-loadedBall(NULL), loadedRocket(NULL), currRotationFromXInDegs(0.0f), currRotationSpeed(0.0f), elapsedRotationTime(0.0), 
+// When the rotation angle is fixed, we can still spin the cannon a whole bunch of times...
+const int CannonBlock::MIN_FIXED_ROTATION_NUM_SPINS = 0;
+const int CannonBlock::MAX_FIXED_ROTATION_NUM_SPINS = 3;
+
+CannonBlock::CannonBlock(unsigned int wLoc, unsigned int hLoc, int setRotation) : LevelPiece(wLoc, hLoc), 
+fixedRotation(setRotation), loadedBall(NULL), loadedRocket(NULL), currRotationFromXInDegs(0.0f), currRotationSpeed(0.0f), elapsedRotationTime(0.0), 
 totalRotationTime(0.0) {
+	assert(setRotation == -1 || (setRotation >= 0 && setRotation <= 359));
 }
 
 CannonBlock::~CannonBlock() {
@@ -136,7 +142,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 		return this;
 	}
 
-	this->SetupRandomCannonFireTimeAndDirection();
+	this->SetupCannonFireTimeAndDirection();
 
 	// Place the ball in the cannon and make sure we don't continue colliding...
 	ball.LoadIntoCannonBlock(this);
@@ -170,12 +176,11 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			if (!projectile->IsLastLevelPieceCollidedWith(this) && !this->GetIsLoaded()) {
 				PaddleRocketProjectile* rocketProjectile = dynamic_cast<PaddleRocketProjectile*>(projectile);
 				assert(rocketProjectile != NULL);
-				this->SetupRandomCannonFireTimeAndDirection();
+				this->SetupCannonFireTimeAndDirection();
 				rocketProjectile->LoadIntoCannonBlock(this);
 				rocketProjectile->SetLastLevelPieceCollidedWith(this);
 				this->loadedRocket = rocketProjectile;
 			}
-			//resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 			break;
 
 		default:
@@ -195,6 +200,9 @@ bool CannonBlock::RotateAndEventuallyFire(double dT) {
 	assert(this->totalRotationTime > 0.0);
 
 	if (this->elapsedRotationTime >= this->totalRotationTime) {
+		if (!this->GetHasRandomRotation()) {
+			this->currRotationFromXInDegs = this->GetFixedRotationDegsFromX();
+		}
 		this->elapsedRotationTime = this->totalRotationTime;
 		this->loadedBall = NULL;
 		this->loadedRocket = NULL;
@@ -210,6 +218,8 @@ bool CannonBlock::RotateAndEventuallyFire(double dT) {
 	else if (this->currRotationFromXInDegs <= -360.0f) {
 		this->currRotationFromXInDegs += 360.0f;
 	}
+	assert(this->currRotationFromXInDegs < 360);
+	assert(this->currRotationFromXInDegs > -360);
 
 	// Also rotate the the bounding lines appropriately...
 	this->bounds.RotateLinesAndNormals(rotationIncrement, this->center);
@@ -219,18 +229,66 @@ bool CannonBlock::RotateAndEventuallyFire(double dT) {
 	return false;
 }
 
-void CannonBlock::SetupRandomCannonFireTimeAndDirection() {
+void CannonBlock::SetupCannonFireTimeAndDirection() {
 	// Reset the elapsed rotation time
 	this->elapsedRotationTime = 0.0;
 
-	// Pick a random rotation speed
-	this->currRotationSpeed = CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC	+ 
-		Randomizer::GetInstance()->RandomNumZeroToOne() * (CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC - CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC);
-	// Rotation direction is random as well...
-	this->currRotationSpeed *= Randomizer::GetInstance()->RandomNegativeOrPositive();
+	// Based on whether the cannon fires randomly or not, set up the time until the cannon will fire
+	// and the speed with which it rotate until that time...
+	if (this->GetHasRandomRotation()) {
+		// Pick a random rotation speed
+		this->currRotationSpeed = CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC	+ 
+			Randomizer::GetInstance()->RandomNumZeroToOne() * (CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC - CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC);
+		// Rotation direction is random as well...
+		this->currRotationSpeed *= Randomizer::GetInstance()->RandomNegativeOrPositive();
 
-	// Pick a random rotation time
-	this->totalRotationTime = CannonBlock::MIN_ROTATION_TIME_IN_SECS +
-		Randomizer::GetInstance()->RandomNumZeroToOne() * (CannonBlock::MAX_ROTATION_TIME_IN_SECS - CannonBlock::MIN_ROTATION_TIME_IN_SECS);
-	assert(this->totalRotationTime > 0.0);
+		// Pick a random rotation time
+		this->totalRotationTime = CannonBlock::MIN_ROTATION_TIME_IN_SECS +
+			Randomizer::GetInstance()->RandomNumZeroToOne() * (CannonBlock::MAX_ROTATION_TIME_IN_SECS - CannonBlock::MIN_ROTATION_TIME_IN_SECS);
+		assert(this->totalRotationTime > 0.0);
+	}
+	else {
+		// We need to actually fire in a proper direction dictated by the degree angle in 'fixedRotation',
+		// which measures from the y-axis from 0 to 359 degrees
+
+		// Pick a random rotation time (this will dictate all other values)
+		this->totalRotationTime = CannonBlock::MIN_ROTATION_TIME_IN_SECS +
+			Randomizer::GetInstance()->RandomNumZeroToOne() * (CannonBlock::MAX_ROTATION_TIME_IN_SECS - CannonBlock::MIN_ROTATION_TIME_IN_SECS);
+		assert(this->totalRotationTime > 0.0);
+
+		// And we still rotate at some speed that allows us to get to the proper firing direction at the end of
+		// the totalRotationTime, after some randomNumberOfRotations
+		
+		float noSpinNumDegrees = this->GetFixedRotationDegsFromX() - this->currRotationFromXInDegs;
+		if (noSpinNumDegrees >= 360.0f) {
+			noSpinNumDegrees -= 360.0f;
+		}
+		else if (noSpinNumDegrees <= -360.0f) {
+			noSpinNumDegrees += 360.0f;
+		}
+		assert(noSpinNumDegrees < 360);
+		assert(noSpinNumDegrees > -360);
+
+		if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+			if (noSpinNumDegrees < 0) {
+				noSpinNumDegrees = 360 + noSpinNumDegrees;
+			}
+			else {
+				noSpinNumDegrees = noSpinNumDegrees - 360;
+			}
+		}
+
+		int minRotations = CannonBlock::MIN_FIXED_ROTATION_NUM_SPINS;
+		if (noSpinNumDegrees < 1) {
+			minRotations = 1;
+		}
+
+		// We still rotate a random number of times...
+		int randomNumberOfRotations = minRotations + 
+			Randomizer::GetInstance()->RandomUnsignedInt() % ((CannonBlock::MAX_FIXED_ROTATION_NUM_SPINS - minRotations) + 1);
+
+
+		float totalDegAngleDist = noSpinNumDegrees + (Randomizer::GetInstance()->RandomNegativeOrPositive() * 360.0f * randomNumberOfRotations);
+		this->currRotationSpeed = totalDegAngleDist / this->totalRotationTime;
+	}
 }

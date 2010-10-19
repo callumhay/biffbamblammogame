@@ -77,6 +77,7 @@ void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera&
 
 			glTranslatef(paddleCenter[0], paddleCenter[1] + paddle.GetHalfHeight() + 0.5f * rocketHeight, 0.0f);
 			glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
+			this->rocketGlowEmitter->SetParticleRotation(ESPInterval(0.0));
 			this->rocketGlowEmitter->Draw(camera);
 			this->rocketMesh->Draw(camera, keyLight, fillLight, ballLight);
 			glPopMatrix();

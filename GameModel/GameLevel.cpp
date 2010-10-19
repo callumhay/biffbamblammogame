@@ -193,11 +193,43 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 				case PRISM_BLOCK_CHAR:
 					newPiece = new PrismBlock(pieceWLoc, pieceHLoc);
 					break;
-				case CANNON_BLOCK_CHAR:
-					newPiece = new CannonBlock(pieceWLoc, pieceHLoc);
-					break;
 				case COLLATERAL_BLOCK_CHAR:
 					newPiece = new CollateralBlock(pieceWLoc, pieceHLoc);
+					break;
+
+				case CANNON_BLOCK_CHAR: {
+						// C(d) - Cannon block
+						// d: The direction to always fire the cannon block in (or specify random firing direction)
+						//    the value can be any degree angle starting at 0 going to 359, the special value of -1 can be used
+						// to specify a random direction. The angle starts by firing directly upwards and moves around the circle
+						// of angles clockwise (e.g., 90 will always fire the ball perfectly to the right of the cannon, 180 will always
+						// fire the ball downwards from the cannon, ...).
+						char tempChar;
+
+						// Beginning bracket
+						*inFile >> tempChar;
+						if (tempChar != '(') {
+							debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
+							break;
+						}
+
+						// Degree angle value (or random -1)
+						int rotationValue;
+						*inFile >> rotationValue;
+						if (rotationValue != -1 && (rotationValue < 0 || rotationValue > 359)) {
+							debug_output("ERROR: poorly formed cannon block syntax, degree angle must either be -1 or in [0,359]");
+							break;
+						}
+
+						// Closing bracket
+						*inFile >> tempChar;
+						if (tempChar != ')') {
+							debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
+							break;
+						}
+
+						newPiece = new CannonBlock(pieceWLoc, pieceHLoc, rotationValue);
+					}
 					break;
 
 				case TESLA_BLOCK_CHAR: {
