@@ -106,9 +106,9 @@ inline void EventSound::Play(bool doFadeIn) {
 
 	// If the sound is looping and already playing then don't play it again,
 	// just get out of here
-	if (this->GetType() == Sound::MaskSound && this->IsPlaying()) {
-		return;
-	}
+	//if (this->GetType() == Sound::MaskSound && this->IsPlaying()) {
+	//	return;
+	//}
 
 	// We determine which sound to play based on their probabilities and a randomly generated number
 	double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();

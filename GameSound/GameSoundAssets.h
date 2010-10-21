@@ -108,6 +108,8 @@ public:
 	void PlayWorldSound(GameSoundAssets::WorldSound sound, GameSoundAssets::SoundVolumeLoudness volume = GameSoundAssets::NormalVolume);
 	void StopWorldSound(GameSoundAssets::WorldSound sound);
 	bool IsWorldSoundPlaying(GameSoundAssets::WorldSound sound);
+	
+	void StopAllActiveMasks(bool fadeOut);
 
 	void SetActiveWorldSounds(GameWorld::WorldStyle style, bool unloadPreviousActiveWorldSounds, 
 														bool loadNewActiveWorldSounds);
@@ -173,6 +175,16 @@ inline bool GameSoundAssets::IsWorldSoundPlaying(GameSoundAssets::WorldSound sou
 	EventSound* eventSound =  this->FindEventSound(GameSoundAssets::GetSoundPalletFromWorldStyle(this->activeWorld), sound);
 	assert(eventSound != NULL);
 	return eventSound->IsPlaying();
+}
+
+// Stop all active mask sounds
+inline void GameSoundAssets::StopAllActiveMasks(bool fadeOut) {
+	for (std::list<EventSound*>::iterator iter = this->activeMasks.begin(); iter != this->activeMasks.end(); ++iter) {
+		EventSound* currMask = *iter;
+		while (currMask->IsPlaying()) {
+			currMask->Stop(fadeOut);
+		}
+	}
 }
 
 // Sets the currently active world - this is the style of the world so that whenever PlayWorldSound/StopWorldSound

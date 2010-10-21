@@ -37,11 +37,13 @@
 // of the same effect over and over when the ball hits a bunch of blocks/the paddle in a very small time frame
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 100;
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS	= 75;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS   = 60;
 
 GameEventsListener::GameEventsListener(GameDisplay* d) : 
 display(d), 
 timeSinceLastBallBlockCollisionEventInMS(0),
-timeSinceLastBallPaddleCollisionEventInMS(0) {
+timeSinceLastBallPaddleCollisionEventInMS(0),
+timeSinceLastBallTeslaCollisionEventInMS(0) {
 	assert(d != NULL);
 }
 
@@ -199,6 +201,9 @@ void GameEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToDie) 
 	debug_output("EVENT: Last ball is about to die.");
 
 	this->display->GetAssets()->ActivateLastBallDeathEffects(lastBallToDie);
+
+	// Stop any persistant masks that might currently be activated...
+	this->display->GetAssets()->GetSoundAssets()->StopAllActiveMasks(true);
 
 	// Play the sound of the ball spiralling to its most horrible death
 	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundLastBallSpiralingToDeathMask);
@@ -382,6 +387,8 @@ void GameEventsListener::RocketEnteredCannonEvent(const PaddleRocketProjectile& 
 
 	// Suspend certain elements of the rocket projectile until it's fired back out of the cannon...
 	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
+	// Start the sound of the cannon rotating
+	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask);
 	
 	debug_output("EVENT: Rocket entered cannon block");
 }
@@ -405,11 +412,18 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 	UNUSED_PARAMETER(teslaBlock1);
 	UNUSED_PARAMETER(teslaBlock2);
 
-	// Add the effect(s) for when the ball hits the lightning
-	this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball);
-	// Add a tiny camera shake
-	this->display->GetCamera().SetCameraShake(1.2, Vector3D(0.75, 0.1, 0.1), 40);
+	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+	bool doEffect = (currSystemTime - this->timeSinceLastBallTeslaCollisionEventInMS) > 
+									EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;
 
+	if (doEffect) {
+		// Add the effect(s) for when the ball hits the lightning
+		this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball);
+		// Add a tiny camera shake
+		this->display->GetCamera().SetCameraShake(1.2, Vector3D(0.75, 0.1, 0.1), 40);
+	}
+
+	this->timeSinceLastBallTeslaCollisionEventInMS = currSystemTime;
 	debug_output("EVENT: Ball hit tesla lightning arc");
 }
 
@@ -637,8 +651,14 @@ void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
 
 void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	// Remove the projectile's effect
-	this->display->GetAssets()->RemoveProjectile(this->display->GetCamera(), projectile);
+	this->display->GetAssets()->RemoveProjectile(projectile);
 	debug_output("EVENT: Projectile removed");
+}
+
+void GameEventsListener::RocketExplodedEvent(const PaddleRocketProjectile& rocket) {
+	UNUSED_PARAMETER(rocket);
+	this->display->GetAssets()->RocketExplosion(this->display->GetCamera());
+	debug_output("EVENT: Rocket exploded");
 }
 
 void GameEventsListener::BeamSpawnedEvent(const Beam& beam) {

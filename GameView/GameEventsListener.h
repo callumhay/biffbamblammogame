@@ -71,6 +71,7 @@ public:
 	void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock);
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
+	void RocketExplodedEvent(const PaddleRocketProjectile& rocket);
 	void BeamSpawnedEvent(const Beam& beam);
 	void BeamChangedEvent(const Beam& beam);
 	void BeamRemovedEvent(const Beam& beam);
@@ -82,9 +83,11 @@ private:
 	GameDisplay* display;
 	long timeSinceLastBallBlockCollisionEventInMS;
 	long timeSinceLastBallPaddleCollisionEventInMS;
+	long timeSinceLastBallTeslaCollisionEventInMS;
 
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS;
+	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;
 
 	void DestroyBallSafetyNet(const Point2D& pt);
 };

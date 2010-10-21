@@ -691,7 +691,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		}
 		else {
 			if (!GameItemFactory::GetInstance()->IsValidItemTypeName(itemTypeName)) {
-					debug_output("ERROR: Invalid item type name found in allowable item drop probability list.");
+				debug_output("ERROR: Invalid item type name found in allowable item drop probability list: '" << itemTypeName << "'");
 					GameLevel::CleanUpFileReadData(levelPieces);
 					delete inFile;
 					inFile = NULL;
@@ -910,6 +910,11 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const Projectile* r
 		}
 		++iter;
 	}
+
+	// EVENT: Rocket exploded!!
+	const PaddleRocketProjectile* rocketProjectile = dynamic_cast<const PaddleRocketProjectile*>(rocket);
+	assert(rocketProjectile != NULL);
+	GameEventManager::Instance()->ActionRocketExploded(*rocketProjectile);
 
 	return resultPiece;
 }
@@ -1236,7 +1241,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 
 	const Point2D& currentBallPos	= b.GetCenterPosition2D();
 	const Collision::Circle2D& ballBounds = b.GetBounds();
-	float sqBallRadius = ballBounds.Radius() * ballBounds.Radius();
+	float sqBallRadius = 1.15f * ballBounds.Radius() * ballBounds.Radius();
 	
 	// Find the first collision between the ball and a tesla lightning arc
 	float lineToBallCenterSqDist = FLT_MAX;
