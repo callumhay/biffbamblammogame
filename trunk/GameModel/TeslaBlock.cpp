@@ -40,8 +40,8 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		this->bounds.Clear();
 
 		// We ALWAYS create boundries unless the neighbour does not exist at all...
-		static const float HALF_TESLA_HEIGHT_BOUND = 0.8f * LevelPiece::HALF_PIECE_HEIGHT;
-		static const float HALF_TESLA_WIDTH_BOUND  = 0.6f * LevelPiece::HALF_PIECE_WIDTH;
+		static const float HALF_TESLA_HEIGHT_BOUND = 0.9f * LevelPiece::HALF_PIECE_HEIGHT;
+		static const float HALF_TESLA_WIDTH_BOUND  = 1.0f * LevelPiece::HALF_PIECE_WIDTH;
 
 		// Set the bounding lines for a rectangular block
 		std::vector<Collision::LineSeg2D> boundingLines;

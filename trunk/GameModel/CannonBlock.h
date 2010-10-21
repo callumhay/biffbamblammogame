@@ -106,8 +106,8 @@ private:
 	static const float MIN_ROTATION_SPD_IN_DEGS_PER_SEC;
 	static const float MAX_ROTATION_SPD_IN_DEGS_PER_SEC;
 
-	static const int MIN_FIXED_ROTATION_NUM_SPINS;
-	static const int MAX_FIXED_ROTATION_NUM_SPINS;
+	static const float MIN_DEGREES_PER_FIXED_ROTATION;
+	static const float MAX_DEGREES_PER_FIXED_ROTATION;
 
 	GameBall* loadedBall;
 	PaddleRocketProjectile* loadedRocket;
@@ -119,6 +119,8 @@ private:
 	int fixedRotation;							// The fixed rotation (i.e., the degree angle where the cannon block always fires, measured from 12 o'clock), -1 for random
 
 	void SetupCannonFireTimeAndDirection();
+
+	BoundingLines BuildBounds() const;
 };
 
 /**

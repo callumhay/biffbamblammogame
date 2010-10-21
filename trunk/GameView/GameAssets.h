@@ -163,10 +163,10 @@ public:
 	}
 
 	void AddProjectile(const GameModel& gameModel, const Projectile& projectile);
-	void RemoveProjectile(Camera& camera, const Projectile& projectile);
+	void RemoveProjectile(const Projectile& projectile);
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
-	void ExplosionFlash(double timeLength, float intensityPercent);
+	void RocketExplosion(Camera& camera);
 };
 
 // Draw any currently active tesla lightning bolts in the game.

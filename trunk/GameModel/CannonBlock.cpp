@@ -16,15 +16,15 @@ const int CannonBlock::RANDOM_SET_ROTATION					= -1;
 
 // Rotation will happen for some random period of time in between these values
 const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	= 1.0f;
-const double CannonBlock::MAX_ROTATION_TIME_IN_SECS = 2.5f;
+const double CannonBlock::MAX_ROTATION_TIME_IN_SECS = 2.8f;
 
 // Rotation will occur at some random speed in between these values
 const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC	= 150.0f;
 const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 450.0f;
 
 // When the rotation angle is fixed, we can still spin the cannon a whole bunch of times...
-const int CannonBlock::MIN_FIXED_ROTATION_NUM_SPINS = 0;
-const int CannonBlock::MAX_FIXED_ROTATION_NUM_SPINS = 3;
+const float CannonBlock::MIN_DEGREES_PER_FIXED_ROTATION = 0.65f;
+const float CannonBlock::MAX_DEGREES_PER_FIXED_ROTATION = 1.2f;
 
 CannonBlock::CannonBlock(unsigned int wLoc, unsigned int hLoc, int setRotation) : LevelPiece(wLoc, hLoc), 
 fixedRotation(setRotation), loadedBall(NULL), loadedRocket(NULL), currRotationFromXInDegs(0.0f), currRotationSpeed(0.0f), elapsedRotationTime(0.0), 
@@ -91,12 +91,14 @@ void CannonBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 		return;
 	}
 
-	// Make the bounds a bit smaller than a typical level piece and always make all of them
-	// despite the neighboring blocks...
-
 	// Clear all the currently existing boundry lines first
-	this->bounds.Clear();
+	this->bounds = this->BuildBounds();
+}
 
+/**
+ * Build default position (facing in x axis direction) bounding lines for this cannon block.
+ */
+BoundingLines CannonBlock::BuildBounds() const {
 	// Set the bounding lines for a rectangular block
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D> boundingNorms;
@@ -129,7 +131,7 @@ void CannonBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	boundingLines.push_back(l4);
 	boundingNorms.push_back(n4);
 
-	this->bounds = BoundingLines(boundingLines, boundingNorms);
+	return BoundingLines(boundingLines, boundingNorms);
 }
 
 // The cannon block will capture the colliding ball and spin around a bit before shooting it in some random direction
@@ -200,8 +202,12 @@ bool CannonBlock::RotateAndEventuallyFire(double dT) {
 	assert(this->totalRotationTime > 0.0);
 
 	if (this->elapsedRotationTime >= this->totalRotationTime) {
+		// In the case of fixed direction firing, we need to make sure the degree angle
+		// is set to exactly the firing angle when we fire...
 		if (!this->GetHasRandomRotation()) {
 			this->currRotationFromXInDegs = this->GetFixedRotationDegsFromX();
+			this->bounds = this->BuildBounds();
+			this->bounds.RotateLinesAndNormals(this->currRotationFromXInDegs, this->center);
 		}
 		this->elapsedRotationTime = this->totalRotationTime;
 		this->loadedBall = NULL;
@@ -277,18 +283,17 @@ void CannonBlock::SetupCannonFireTimeAndDirection() {
 				noSpinNumDegrees = noSpinNumDegrees - 360;
 			}
 		}
-
-		int minRotations = CannonBlock::MIN_FIXED_ROTATION_NUM_SPINS;
-		if (noSpinNumDegrees < 1) {
-			minRotations = 1;
+		
+		float approxTimePerRotation = MIN_DEGREES_PER_FIXED_ROTATION + Randomizer::GetInstance()->RandomNumZeroToOne() * 
+			                           (MAX_DEGREES_PER_FIXED_ROTATION - MIN_DEGREES_PER_FIXED_ROTATION);
+		int randomNumberOfRotations = std::max<int>(1, static_cast<int>(ceil(this->totalRotationTime / approxTimePerRotation)));
+		
+		float totalDegAngleDist = noSpinNumDegrees + (Randomizer::GetInstance()->RandomNegativeOrPositive() * 360.0f * randomNumberOfRotations);
+		if (fabs(totalDegAngleDist) < 0.1f) {
+			totalDegAngleDist = Randomizer::GetInstance()->RandomNegativeOrPositive() * 360.0f; 
 		}
 
-		// We still rotate a random number of times...
-		int randomNumberOfRotations = minRotations + 
-			Randomizer::GetInstance()->RandomUnsignedInt() % ((CannonBlock::MAX_FIXED_ROTATION_NUM_SPINS - minRotations) + 1);
-
-
-		float totalDegAngleDist = noSpinNumDegrees + (Randomizer::GetInstance()->RandomNegativeOrPositive() * 360.0f * randomNumberOfRotations);
+		assert(fabs(totalDegAngleDist) > 0.0f);
 		this->currRotationSpeed = totalDegAngleDist / this->totalRotationTime;
 	}
 }

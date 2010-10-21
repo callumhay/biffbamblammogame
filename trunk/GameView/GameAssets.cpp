@@ -263,7 +263,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 				// Draw when crazy ball and not invisiball...
 				// We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
-				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {				
+				if (!GameBall::GetIsBallCameraOn()) {				
 					this->espAssets->DrawCrazyBallEffects(dT, camera, *currBall);
 				}
 				
@@ -864,19 +864,14 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 /** 
  * Remove the given projectile and its effects from the assets.
  */
-void GameAssets::RemoveProjectile(Camera& camera, const Projectile& projectile) {
+void GameAssets::RemoveProjectile(const Projectile& projectile) {
 	this->espAssets->RemoveProjectileEffect(projectile);
 
 	switch (projectile.GetType()) {
 		case Projectile::PaddleRocketBulletProjectile:
-
 			this->rocketMesh->Deactivate(dynamic_cast<const PaddleRocketProjectile*>(&projectile));
-			// Add a camera shake and flash for when the rocket explodes...
-			camera.SetCameraShake(1.0, Vector3D(0.8, 0.7, 0.1), 120);
-			this->ExplosionFlash(0.5, 1.0f);
 			// Turn off the sound for the rocket mask and play the explosion sound
 			this->soundAssets->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
-			this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketExplodedEvent, GameSoundAssets::VeryLoudVolume);
 			break;
 		default:
 			break;
@@ -929,8 +924,12 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 }
 
 // Notifies assets that there was an explosion and there should be a fullscreen flash
-void GameAssets::ExplosionFlash(double timeLength, float intensityPercent) {
-	this->flashHUD->Activate(timeLength, intensityPercent);
+void GameAssets::RocketExplosion(Camera& camera) {
+	// Add a camera shake and flash for when the rocket explodes...
+	camera.SetCameraShake(1.0, Vector3D(0.8, 0.7, 0.1), 120);
+	this->flashHUD->Activate(0.5, 1.0f);
+	// Play the explosion sound
+	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketExplodedEvent, GameSoundAssets::VeryLoudVolume);
 }
 
 /*

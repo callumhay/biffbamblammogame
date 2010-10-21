@@ -350,6 +350,12 @@ public:
 	virtual void ProjectileRemovedEvent(const Projectile& projectile) = 0;
 
 	/**
+	 * Event triggered when the rocket explodes. Only occurs once just as it explodes.
+	 * Arguements: rocket - The rocket do'n the explod'n.
+	 */
+	virtual void RocketExplodedEvent(const PaddleRocketProjectile& rocket) = 0;
+
+	/**
 	 * Event triggered when a new beam is spawned. Only occurs once per spawned beam.
 	 * Arguements: beam - the beam that was just spawned.
 	 */

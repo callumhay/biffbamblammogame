@@ -3680,11 +3680,21 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 	}
 
 	if (foundBallEffects->second.find(GameItem::CrazyBallItem) == foundBallEffects->second.end()) {
-		// Didn't find an associated gravity ball effect, so add one
+		// Didn't find an associated crazy ball effect, so add one
 		this->AddCrazyBallESPEffects(&ball, this->ballEffects[&ball][GameItem::CrazyBallItem]);
 	}
 
 	std::vector<ESPPointEmitter*>& crazyBallEffectList = this->ballEffects[&ball][GameItem::CrazyBallItem];
+
+	// Reset all of the effects for the ball if it's inside a cannon block
+	if (ball.IsLoadedInCannonBlock()) {
+		for (std::vector<ESPPointEmitter*>::iterator iter = crazyBallEffectList.begin(); iter != crazyBallEffectList.end(); ++iter) {
+			ESPPointEmitter* emitter = *iter;
+			emitter->Reset();
+		}
+		return;
+	}
+
 	glPushMatrix();
 	Point2D loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);

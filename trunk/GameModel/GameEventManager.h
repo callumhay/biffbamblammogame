@@ -78,6 +78,7 @@ public:
 
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);
+	void ActionRocketExploded(const PaddleRocketProjectile& rocket);
 
 	void ActionBeamSpawned(const Beam& beam);
 	void ActionBeamChanged(const Beam& beam);

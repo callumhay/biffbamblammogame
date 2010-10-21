@@ -95,7 +95,7 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
 
 	static double TIME_TRACKER = 0.0;
 	static double NEXT_TIME    = 0.0;
-	static const double WAIT_TIME_BETWEEN_COLLISIONS = 0.75;
+	static const double WAIT_TIME_BETWEEN_COLLISIONS = 1.00;
 
 	TIME_TRACKER += dT;
 
@@ -104,7 +104,7 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
 		TIME_TRACKER = 0.0;
 		NEXT_TIME = 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 2.0;
 
-		float randomRotation  = Randomizer::GetInstance()->RandomNegativeOrPositive() * (45 + Randomizer::GetInstance()->RandomNumZeroToOne() * 135);
+		float randomRotation  = Randomizer::GetInstance()->RandomNegativeOrPositive() * (45 + Randomizer::GetInstance()->RandomNumZeroToOne() * 115);
 		float currVelMag = Vector2D::Magnitude(currVelocity);
 		Vector2D newVelocity = Vector2D::Normalize(Vector2D::Rotate(randomRotation, currVelocity));
 		this->gameBall->SetVelocity(currVelMag, newVelocity);

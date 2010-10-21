@@ -268,6 +268,7 @@ void GameEventManager::ActionItemSpawned(const GameItem& item) {
 	}	
 }
 
+// Action for when an item is removed from dropping
 void GameEventManager::ActionItemRemoved(const GameItem& item) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
@@ -344,6 +345,14 @@ void GameEventManager::ActionProjectileRemoved(const Projectile& projectile) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->ProjectileRemovedEvent(projectile);
+	}	
+}
+
+// Action for when a rocket explodes
+void GameEventManager::ActionRocketExploded(const PaddleRocketProjectile& rocket) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->RocketExplodedEvent(rocket);
 	}	
 }
 
