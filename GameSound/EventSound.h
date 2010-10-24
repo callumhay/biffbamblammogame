@@ -2,6 +2,9 @@
 #define __EVENTSOUND_H__
 
 #include "Sound.h"
+#include "SoundProbabilityPair.h"
+#include "SoundTimedSequence.h"
+
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Algebra.h"
 
@@ -19,8 +22,10 @@ public:
 
 	~EventSound();
 
-	static EventSound* BuildSoundEvent(const std::string& name, int loops, int msFadein, int msFadeout,
-																		 const std::vector<int>& probabilities, const std::vector<std::string>& filepaths);
+   static EventSound* BuildProbabilitySoundEvent(const std::string& name, int loops, int msFadein, int msFadeout,
+                                                 const std::vector<int>& probabilities, const std::vector<std::string>& filepaths);
+   static EventSound* BuildSequenceSoundEvent(const std::string& name, int loops, int msFadein, int msFadeout, 
+                                              double resetSequenceTime, const std::vector<std::string>& filepaths);
 	static EventSound* BuildSoundMask(const std::string& name, const std::string& filepath, int msFadein, int msFadeout);
 
 	// Inherited from Sound
@@ -39,34 +44,13 @@ public:
 protected:
 	EventSound(const std::string& name, int loops, int msFadein, int msFadeout);
 
-	// Inner class used for pairing sound with a probability interval - used when an event has multiple
-	// possible sounds that it can play
-	class SoundProbabilityPair {
-	private:
-		float probabilityIntervalMin;
-		float probabilityIntervalMax;
-		Mix_Chunk* soundChunk;
-
-	public:
-		SoundProbabilityPair(float intervalMin, float intervalMax, Mix_Chunk* sound) :
-				probabilityIntervalMin(intervalMin), probabilityIntervalMax(intervalMax), soundChunk(sound) {}
-
-		Mix_Chunk* GetSoundChunk() const { return this->soundChunk; }
-		float GetMinProb() const { return this->probabilityIntervalMin; }
-		float GetMaxProb() const { return this->probabilityIntervalMax; }
-
-		void SetMaxProb(float amt) { this->probabilityIntervalMax = amt; }
-		
-		bool IsInInterval(float val) const { return val >= this->GetMinProb() && val < this->GetMaxProb(); }
-		
-		~SoundProbabilityPair() {};
-	};
-
-
 	std::map<int, Mix_Chunk*> channels;			// Mapping of all channels that this sound is playing 
-																					// on to their respective mix chunks
-	std::list<SoundProbabilityPair> sounds;	// If there are multiple possible sounds that can be played by this
-																					// event then they will be in this list
+                                             // on to their respective mix chunks
+	std::list<SoundProbabilityPair*> sounds;	// If there are multiple possible sounds that can be played by this
+                                             // event then they will be in this list
+
+   SoundTimedSequence* soundSequence;  // If there's a sound sequence then this will not be NULL and
+                                       // will be used instead of the probability pairs
 
 	int numLoops;		// The number of loops for this event/mask sound
 	
@@ -112,12 +96,12 @@ inline void EventSound::Play(bool doFadeIn) {
 
 	// We determine which sound to play based on their probabilities and a randomly generated number
 	double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();
-	for (std::list<SoundProbabilityPair>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
+	for (std::list<SoundProbabilityPair*>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
 
-		const SoundProbabilityPair& currSoundProbPair = *iter;
-		if (currSoundProbPair.IsInInterval(randomNum)) {
+		const SoundProbabilityPair* currSoundProbPair = *iter;
+		if (currSoundProbPair->IsInInterval(randomNum)) {
 			
-			Mix_Chunk* chunkToPlay = currSoundProbPair.GetSoundChunk();
+			Mix_Chunk* chunkToPlay = currSoundProbPair->GetSoundChunk();
 			int fadeInAmt = doFadeIn ? this->msFadein : 0;
 			int loops = -1;
 			if (this->numLoops > 0) {
@@ -207,9 +191,9 @@ inline bool EventSound::IsLooped() const {
 inline void EventSound::SetVolume(int volume) {
 	Sound::SetVolume(volume);
 	// Go through all sound chunks in this and set the volume
-	for (std::list<SoundProbabilityPair>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
-		SoundProbabilityPair& currPair = *iter;
-		Mix_Chunk* soundChunk = currPair.GetSoundChunk();
+	for (std::list<SoundProbabilityPair*>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
+		SoundProbabilityPair* currPair = *iter;
+		Mix_Chunk* soundChunk = currPair->GetSoundChunk();
 		assert(soundChunk != NULL);
 		Mix_VolumeChunk(soundChunk, volume);
 	}

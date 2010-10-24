@@ -6,7 +6,7 @@ const int EventSound::DEFAULT_FADEIN = 0;
 const int EventSound::DEFAULT_FADEOUT = 0;
 
 EventSound::EventSound(const std::string& name, int loops, int msFadein, int msFadeout) :
-Sound(name, msFadein, msFadeout), numLoops(loops) {
+Sound(name, msFadein, msFadeout), numLoops(loops), soundSequence(NULL) {
 }
 
 EventSound::~EventSound() {
@@ -20,21 +20,30 @@ EventSound::~EventSound() {
 	assert(this->channels.empty());
 
 	// Delete all the probability-sound pairings
-	for (std::list<SoundProbabilityPair>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
-		SoundProbabilityPair& currPair = *iter;
-		Mix_Chunk* soundChunk = currPair.GetSoundChunk();
+	for (std::list<SoundProbabilityPair*>::iterator iter = this->sounds.begin(); iter != this->sounds.end(); ++iter) {
+		SoundProbabilityPair* currPair = *iter;
+		Mix_Chunk* soundChunk = currPair->GetSoundChunk();
 
 		bool success = ResourceManager::GetInstance()->ReleaseEventSoundResource(soundChunk);
 		if (!success) {
 			std::cerr << "Error releasing event sound " << this->GetSoundName() << std::endl;
 		}
+      
+      delete currPair;
+      currPair = NULL;
+
 	}
 	this->sounds.clear();
+
+   if (this->soundSequence != NULL) {
+      delete this->soundSequence;
+      this->soundSequence = NULL;
+   }
 }
 
 // Static factory method for building a sound event (finite looping sound)
-EventSound* EventSound::BuildSoundEvent(const std::string& name, int loops, int msFadein, int msFadeout,
-																				const std::vector<int>& probabilities, const std::vector<std::string>& filepaths) {
+EventSound* EventSound::BuildProbabilitySoundEvent(const std::string& name, int loops, int msFadein, int msFadeout,
+                                                   const std::vector<int>& probabilities, const std::vector<std::string>& filepaths) {
 	
 	// Build the new sound event...
 	EventSound* newSoundEvent = new EventSound(name, loops, msFadein, msFadeout);
@@ -53,8 +62,8 @@ EventSound* EventSound::BuildSoundEvent(const std::string& name, int loops, int 
 
 	for (size_t i = 0; i < NUM_SOUNDS; i++) {
 		const std::string& currFilepath = filepaths[i];
-		const float currProbability		  = probabilities[i];
-		Mix_Chunk* soundChunk						= NULL;
+		const float currProbability	  = probabilities[i];
+		Mix_Chunk* soundChunk			  = NULL;
 
 		// Set the interval [x1, x2) where the sound will either execute or not
 		float probabilityIntervalMin = currIntervalVal;
@@ -70,14 +79,14 @@ EventSound* EventSound::BuildSoundEvent(const std::string& name, int loops, int 
 			return NULL;
 		}
 
-		SoundProbabilityPair newSoundProb(probabilityIntervalMin, probabilityIntervalMax, soundChunk);
+		SoundProbabilityPair* newSoundProb = new SoundProbabilityPair(probabilityIntervalMin, probabilityIntervalMax, soundChunk);
 		newSoundEvent->sounds.push_back(newSoundProb);
 	}
 	assert(fabs(currIntervalVal - 1.0f) < EPSILON);
 
 	// Since the interval uses a strict less than, we add a bit to the final interval to be correct
 	if (!newSoundEvent->sounds.empty()) {
-		newSoundEvent->sounds.back().SetMaxProb(1.1);
+		newSoundEvent->sounds.back()->SetMaxProb(1.1);
 	}
 
 	if (!newSoundEvent->IsValid()) {
@@ -87,6 +96,48 @@ EventSound* EventSound::BuildSoundEvent(const std::string& name, int loops, int 
 	}
 
 	return newSoundEvent;
+}
+
+// Static factory method from building a sequence sound event - one where a sequence of sounds plays if
+// played within a certain amount of time
+EventSound* EventSound::BuildSequenceSoundEvent(const std::string& name, int loops, int msFadein, int msFadeout, 
+                                                double resetSequenceTime, const std::vector<std::string>& filepaths) {
+   assert(!filepaths.empty());
+
+   // Build the new sound event...
+	EventSound* newSoundEvent = new EventSound(name, loops, msFadein, msFadeout);
+
+   // Build the vector of SDL sounds in the sequence
+   bool failed = false;
+   std::vector<Mix_Chunk*> sequence;
+   for (std::vector<std::string>::const_iterator iter = filepaths.begin(); iter != filepaths.end(); ++iter) {
+      const std::string& currFilepath = *iter;
+		Mix_Chunk* soundChunk = ResourceManager::GetInstance()->GetEventSoundResource(currFilepath);
+		if (soundChunk == NULL) {
+			debug_output("Failed to load sound: " << currFilepath);
+			failed = true;
+		}
+      sequence.push_back(soundChunk);
+   }
+
+   // Check to see if we failed to load any particular sound chunk into memory
+   if (failed) {
+      for (std::vector<Mix_Chunk*>::iterator iter = sequence.begin(); iter != sequence.end(); ++iter) {
+         Mix_Chunk* chunk = *iter;
+         ResourceManager::GetInstance()->ReleaseEventSoundResource(chunk);
+      }
+
+      assert(false);
+		delete newSoundEvent;
+		newSoundEvent = NULL;
+      return NULL;
+   }
+
+
+   SoundTimedSequence* soundSeq = new SoundTimedSequence(sequence, resetSequenceTime);
+   newSoundEvent->soundSequence = soundSeq;
+
+   return newSoundEvent;
 }
 
 // Static factory method for building a sound event mask (infinite looping sound)
@@ -100,7 +151,7 @@ EventSound* EventSound::BuildSoundMask(const std::string& name, const std::strin
 
 	// Build the new sound
 	EventSound* eventMaskSound = new EventSound(name, -1, msFadein, msFadeout);
-	SoundProbabilityPair probSoundPair(0.0, 1.1, soundChunk);
+	SoundProbabilityPair* probSoundPair = new SoundProbabilityPair(0.0, 1.1, soundChunk);
 	eventMaskSound->sounds.push_back(probSoundPair);
 
 	if (!eventMaskSound->IsValid()) {

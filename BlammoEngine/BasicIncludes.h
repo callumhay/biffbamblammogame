@@ -32,6 +32,10 @@
 
 #define UNUSED_PARAMETER(p) (p)
 
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
+  TypeName(const TypeName&);               \
+  void operator=(const TypeName&)
+
 // STL includes
 //#ifdef _SECURE_SCL
 //#undef _SECURE_SCL

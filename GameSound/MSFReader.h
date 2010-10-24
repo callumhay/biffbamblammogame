@@ -19,6 +19,8 @@ private:
 	static const char* OPEN_ENCLOSING_PROB_FILE_PAIR;
 	static const char* CLOSE_ENCLOSING_PROB_FILE_PAIR;
 	static const char* PROB_DEFINITION_SYNTAX;
+   static const char* OPEN_TIME_SEQUENCE_DEFINITION;
+   static const char* CLOSE_TIME_SEQUENCE_DEFINITION;
 
 	// Other keywords for the MSF
 	static const char* IGNORE_KEYWORD;
@@ -39,7 +41,7 @@ private:
 	static const char* MAIN_MENU_BG_BANG_SMALL_EVENT;
 	static const char* MAIN_MENU_BG_BANG_MEDIUM_EVENT;
 	static const char* MAIN_MENU_BG_BANG_BIG_EVENT;
-	static const char* MAIN_MENU_ITEM_HIGHLIGHTED_EVENT;
+	static const char* MAIN_MENU_ITEM_CHANGED_EVENT;
 	static const char* MAIN_MENU_ITEM_ENTERED_EVENT;
 	static const char* MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT;
 	static const char* MAIN_MENU_ITEM_VERIFY_AND_SEL_EVENT;

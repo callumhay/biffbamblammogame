@@ -30,7 +30,7 @@ public:
 		MainMenuBackgroundBangSmallEvent,
 		MainMenuBackgroundBangMediumEvent,
 		MainMenuBackgroundBangBigEvent,
-		MainMenuItemHighlightedEvent, 
+		MainMenuItemChangedEvent, 
 		MainMenuItemEnteredEvent,
 		MainMenuItemBackAndCancelEvent,
 		MainMenuItemVerifyAndSelectEvent, 

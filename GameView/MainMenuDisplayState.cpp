@@ -687,10 +687,6 @@ void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
 
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	UNUSED_PARAMETER(itemIndex);
-
-	// Play the sound effect assoicated with menu item highlighting
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemHighlightedEvent);
 }
 
 /**
@@ -727,6 +723,13 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 	}
 }
 
+void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
+	UNUSED_PARAMETER(itemIndex);
+	// Play the sound effect assoicated with menu item changing
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemChangedEvent);
+};
+
 void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
 	if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
 		
@@ -754,10 +757,6 @@ void MainMenuDisplayState::MainMenuEventHandler::EscMenu() {
 
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
 	UNUSED_PARAMETER(itemIndex);
-
-	// Play the sound effect assoicated with menu item highlighting
-	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
-	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemHighlightedEvent);
 }
 
 /**
@@ -785,6 +784,10 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemActivatedEven
  * Handle changes in the options for the game.
  */
 void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
+	// Play the sound effect assoicated with menu item changing
+	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemChangedEvent);
+
 	if (itemIndex == this->mainMenuState->optionsFullscreenIndex) {
 		int currSelectionIdx = this->mainMenuState->fullscreenMenuItem->GetSelectedItemIndex();
 

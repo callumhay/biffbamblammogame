@@ -25,7 +25,7 @@ ignore MainMenuBackgroundBangBigEvent {
    loops    = 1
 }
 
-MainMenuItemHighlightedEvent {
+MainMenuItemChangedEvent {
    file     = (1 : main_menu/bass5chirp.wav) (1: main_menu/pingdescrobo.wav) (1 :main_menu/shakex4s.wav)
    fadein   = 0
    fadeout  = 200
