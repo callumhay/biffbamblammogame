@@ -36,6 +36,8 @@ private:
 	void DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision);
 	void DoBallCollision(GameBall& ball1, GameBall& ball2);
 	void DoItemCollision();
+
+	void AugmentBallDirectionToBeNotDownwards(GameBall& b);
 	
 	//void UpdateActiveBalls(double seconds);
 	void UpdateActiveTimers(double seconds);
@@ -55,4 +57,16 @@ public:
 	void BallReleaseKeyPressed();
 	void DebugDropItem(GameItem* item);
 };
+
+// Makes sure that the ball's direction is upwards and changes it to be upwards - when it gets
+// hit by the paddle this is called.
+inline void BallInPlayState::AugmentBallDirectionToBeNotDownwards(GameBall& b) {
+	Vector2D ballDirection = b.GetDirection();
+
+	if (ballDirection[1] < 0) {
+		ballDirection[1] = fabs(ballDirection[0] * tanf(GameBall::MIN_BALL_ANGLE_IN_RADS));
+		b.SetDirection(ballDirection);
+	}
+}
+
 #endif

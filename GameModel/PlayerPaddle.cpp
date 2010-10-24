@@ -611,6 +611,8 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	// Disable collisions for the ball (reenable them when the ball is detached)
 	this->attachedBall->SetBallBallCollisionsDisabled();
 	this->attachedBall->SetBallPaddleCollisionsDisabled();
+	// Tell the ball not to collide with this paddle again when it's released until it hits something else...
+	this->attachedBall->SetLastThingCollidedWith(this);
 
 	return true;
 }

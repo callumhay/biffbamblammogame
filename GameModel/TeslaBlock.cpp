@@ -12,11 +12,17 @@
 #include "TeslaBlock.h"
 #include "Projectile.h"
 #include "GameModel.h"
+#include "PaddleLaserBeam.h"
 
 const float TeslaBlock::LIGHTNING_ARC_RADIUS = LevelPiece::PIECE_HEIGHT * 0.25f;
 
+// Life points that must be diminished in order to toggle the state of the tesla block (on/off
+// (if it's changable)
+const int TeslaBlock::TOGGLE_ON_OFF_LIFE_POINTS = 150;	
+
 TeslaBlock::TeslaBlock(bool isActive, bool isChangable, unsigned int wLoc, unsigned int hLoc) : 
-LevelPiece(wLoc, hLoc), electricityIsActive(isActive), isChangable(isChangable) {
+LevelPiece(wLoc, hLoc), electricityIsActive(isActive), isChangable(isChangable), 
+lifePointsUntilNextToggle(TOGGLE_ON_OFF_LIFE_POINTS) {
 }
 
 TeslaBlock::~TeslaBlock() {
@@ -135,6 +141,27 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 		default:
 			assert(false);
 			break;
+	}
+
+	return this;
+}
+
+LevelPiece* TeslaBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
+	assert(gameModel != NULL);
+
+	// If this is not changable then we don't care
+	if (!this->GetIsChangable()) {
+		return this;
+	}
+
+	this->lifePointsUntilNextToggle -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
+	if (this->lifePointsUntilNextToggle <= 0) {
+		// Reset the hit points for the next toggle
+		this->lifePointsUntilNextToggle = TeslaBlock::TOGGLE_ON_OFF_LIFE_POINTS;
+
+		// We now need to toggle the tesla block
+		GameLevel* currLevel = gameModel->GetCurrentLevel();
+		this->ToggleElectricity(*gameModel, *currLevel);
 	}
 
 	return this;

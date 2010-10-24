@@ -2,8 +2,13 @@
 #define __CANNONBLOCKMESH_H__
 
 #include "../BlammoEngine/Mesh.h"
+#include "../BlammoEngine/Texture2D.h"
+
+#include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESPParticleColourEffector.h"
 
 class CannonBlock;
+class ESPPointEmitter;
 
 class CannonBlockMesh {
 public:
@@ -16,7 +21,7 @@ public:
 	void RemoveCannonBlock(const CannonBlock* cannonBlock);
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
-	void Draw(const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight, bool lightsAreOff) const;
+	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight, bool lightsAreOff) const;
 	
 	void SetAlphaMultiplier(float alpha);
 
@@ -26,6 +31,12 @@ private:
 	std::map<std::string, MaterialGroup*> materialGroups;
 
 	std::set<const CannonBlock*> cannonBlocks;	// A list of all the cannon blocks that are currently present in the game
+
+	// Effects for drawing attention to active cannon blocks
+	ESPParticleScaleEffector haloExpandPulse;
+	ESPParticleColourEffector haloFader;
+	Texture2D* haloTexture;
+	ESPPointEmitter* activeCannonEffectEmitter;
 
 	void LoadMesh();
 };

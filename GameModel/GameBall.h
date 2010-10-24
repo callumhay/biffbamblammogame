@@ -176,6 +176,11 @@ public:
 	const Vector2D& GetDirection() const {
 		return this->currDir;
 	}
+	void SetDirection(const Vector2D& dir) {
+		assert(fabs(dir.Magnitude() - 1.0f) < EPSILON);
+		this->currDir = dir;
+	}
+
 	// Obtain the current velocity of ball
 	Vector2D GetVelocity() const {
 		return this->currSpeed * this->currDir;
@@ -259,7 +264,7 @@ public:
 
 	// Set the velocity of the ball; (0, 1) is up and (1, 0) is right
 	void SetVelocity(const BallSpeed &magnitude, const Vector2D& dir) {
-		this->currDir = Vector2D(dir);
+		this->currDir = dir;
 		// If the ball is travelling directly sideways we should nudge it a bit up,
 		// just to make sure it doesn't go sideways forever
 		if (this->currDir == Vector2D(1, 0) || this->currDir == Vector2D(-1, 0)) {
@@ -295,8 +300,18 @@ public:
 	void Animate(double seconds);
 
 	// Set and get for the last level piece that this ball collided with
-	void SetLastPieceCollidedWith(const LevelPiece* p) { this->lastPieceCollidedWith = p; }
-	bool IsLastPieceCollidedWith(const LevelPiece* p) const { return this->lastPieceCollidedWith == p; }
+	void SetLastPieceCollidedWith(const LevelPiece* p) { 
+		this->lastThingCollidedWith = p; 
+	}
+	void SetLastThingCollidedWith(const void* p) {
+		this->lastThingCollidedWith = p;
+	}
+	bool IsLastPieceCollidedWith(const LevelPiece* p) const { 
+		return this->lastThingCollidedWith == p; 
+	}
+	bool IsLastThingCollidedWith(const void* p) const {
+		return (this->lastThingCollidedWith == p);
+	}
 
 	void LoadIntoCannonBlock(CannonBlock* cannonBlock);
 	bool IsLoadedInCannonBlock() const;
@@ -329,7 +344,7 @@ private:
 
 	static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL
 
-	const LevelPiece* lastPieceCollidedWith;
+	const void* lastThingCollidedWith;	// This is just used to check equality with POINTERS DO NOT CAST THIS!!!
 
 	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
 	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink

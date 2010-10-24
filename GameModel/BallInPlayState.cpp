@@ -149,6 +149,12 @@ void BallInPlayState::Tick(double seconds) {
 				// Tell the model that a ball collision occurred with the paddle
 				this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
+				// Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
+				// still see it fly into the void - of course, if the shield is active then no help is provided
+				if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
+					this->AugmentBallDirectionToBeNotDownwards(*currBall);
+				}
+
 				// If there are multiple balls and the one that just hit the paddle is not
 				// the first one in the list, then we need to move this one to the front
 				if (gameBalls.size() > 1 && currBall != (*gameBalls.begin())) {
