@@ -54,6 +54,10 @@ Vector3D ESPPointEmitter::CalculateRandomInitParticleDir() const {
 
 		// Convert back to cartesian Coordinates
 		Vector3D resultVec = Vector3D::ToCartesianFromSpherical(sphCoordEmitDir);
+		if (resultVec == Vector3D(0,0,0)) {
+			resultVec = this->emitDir;
+		}
+
 		return Vector3D::Normalize(resultVec);
 	}
 }

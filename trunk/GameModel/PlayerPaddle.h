@@ -296,6 +296,10 @@ inline void PlayerPaddle::Animate(double seconds) {
 // Check to see if the given ball collides, return the normal of the collision and the line of the collision as well
 // as the time since the collision occurred
 inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+	if (ball.IsLastThingCollidedWith(this)) {
+		return false;
+	}
+
 	// If the paddle has a shield around it do the collision with the shield
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
 

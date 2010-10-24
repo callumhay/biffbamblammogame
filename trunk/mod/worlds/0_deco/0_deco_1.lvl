@@ -1,62 +1,34 @@
-Tesla block testing
-12 33
-S S S S S S S S S S S S
-S E E E E E E E E E E S
-S A(1,0,e,f) E E E E E E E E A(1,0,f,e) S
-S E E E A(1,0,a,b) E E E A(1,0,c,d) E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S A(1,0,z,y) E E E E E E E E A(1,0,y,z) S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E E E E E E E S
-S E E E E A(1,0,b,a) C(0) C(0) A(1,0,d,c) E E S
-S E E E E E E E E E E S
-S G E E E E E E E E G S
-S E E E E E E E E E E S
-S G G E E E E E E G G S
-S G E E E E E E E E E S
+A crazy level name goes here
+10 30
+S S S S S S S S S S 
+S E E E E E E C(180) E S 
+S E E E E E E E E S 
+S L E T(P,ur) E E E E E S 
+S G G E G G G G G S 
+S L R E B R Y G G S 
+S O G E E E E B O S 
+S G G E E E E G G S 
+S P G E E E T(Y,lr) G G S 
+S S E E E E E E G S 
+S G E E E E E E G S 
+S P T(P,ul) E E T(P,ur) P E G S 
+S G E E E E E E G S 
+S G A(0,1,a,b) O R S E B G S 
+S C(90) E        E G Y E A(1,1,b,a) B S 
+S E I E E E E E E S 
+S E E E E E E E E S 
+S X(a,b) E E E E E X(b,a) E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E L E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S
 
-PaddleGrow 2
-PoisonPaddle 2
-BallSafetyNet 2
-Blackout 2
-BallGrow 2
-UberBall 2
-StickyPaddle 2
-ShieldPaddle 2
-LaserBulletPaddle 2
-1Up 2
-PaddleShrink 2
-InvisiBall 2
-LaserBeamPaddle 2
-RocketPaddle 2
-GhostBall 2
-BallShrink 2
-UpsideDown 2
-MultiBall5 2
-BallCam 2
-MultiBall3 2
-SlowBall 2
-GravityBall 2
-CrazyBall 2
-Random 2
-FastBall 2
-PaddleCam 2
+all

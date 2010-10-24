@@ -62,6 +62,10 @@ public:
 		return sqrtf(v1[0]*v1[0] + v1[1]*v1[1]);
 	}
 
+	float Magnitude() const {
+		return sqrtf(Vector2D::Dot(*this, *this));
+	}
+
 	static float Dot(const Vector2D& v1, const Vector2D& v2) {
 		return v1[0]*v2[0] + v1[1]*v2[1];
 	}

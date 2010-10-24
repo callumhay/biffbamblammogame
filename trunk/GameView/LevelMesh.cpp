@@ -372,7 +372,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 
 	glPushMatrix();
 	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
-	this->cannonBlock->Draw(camera, keyLight, fillLight, ballLight, lightsAreOut);
+	this->cannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);

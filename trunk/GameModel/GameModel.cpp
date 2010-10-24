@@ -229,6 +229,7 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 
 void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 	ball.BallCollided();
+	//ball.SetLastThingCollidedWith(this->playerPaddle);
 
 	// Reset the multiplier
 	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
@@ -238,7 +239,7 @@ void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 	
 	if (fabs(paddleVel[0]) > EPSILON) {
 		// The paddle has a considerable velocity, we should augment the ball's
-		// tragectory based on this (transfer of momentum)
+		// tragectory based on this...
 		int angleDecSgn = -NumberFuncs::SignOf(paddleVel[0]);
 		float fractionOfSpeed = fabs(paddleVel[0]) / PlayerPaddle::DEFAULT_MAX_SPEED;
 		float angleChange = angleDecSgn * fractionOfSpeed * PlayerPaddle::DEFLECTION_DEGREE_ANGLE;
@@ -391,6 +392,16 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 	// Make sure we don't drop more items than the max allowable...
 	if (this->currLiveItems.size() >= GameModelConstants::GetInstance()->MAX_LIVE_ITEMS) {
 		return;
+	}
+
+	// Make sure we don't drop an item close to another dropping item in the same column of the level...
+	for (std::list<GameItem*>::const_iterator iter = this->currLiveItems.begin(); iter != this->currLiveItems.end(); ++iter) {
+		const GameItem* currItem = *iter;
+		if (fabs(currItem->GetCenter()[0] - p.GetCenter()[0]) < EPSILON) {
+			if (fabs(currItem->GetCenter()[1] - p.GetCenter()[1]) < 3 * GameItem::HALF_ITEM_HEIGHT) {
+				return;
+			}
+		}
 	}
 
 	// We will drop an item based on probablility

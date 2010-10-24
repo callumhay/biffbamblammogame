@@ -83,7 +83,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 	MSFReader::InitSoundTypeMapping();
 	// Grab a file in stream from the main manu music script file:
 	// in debug mode we load right off disk, in release we load it from the zip file system
-   std::istringstream* inStream = ResourceManager::GetInstance()->FilepathToInStream(filepath);
+	std::istringstream* inStream = ResourceManager::GetInstance()->FilepathToInStream(filepath);
 	if (inStream == NULL) {
 		return false;
 	}
@@ -94,7 +94,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 
 	// The current string being read from the file
 	std::string currReadStr = "";
-	
+
 	// Data storage while we read the file - save the state of the file read so far
 	bool soundDefBlockOpen = false;
 	Sound::SoundType soundType = Sound::EventSound;
@@ -106,7 +106,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 	int loops		= EventSound::DEFAULT_LOOPS;
 	int fadein		= EventSound::DEFAULT_FADEIN;
 	int fadeout		= EventSound::DEFAULT_FADEOUT;
-   double resetSequenceTime = -1;
+	double resetSequenceTime = -1;
 
 	// Read through the music script file
 	while (*inStream >> currReadStr && !error) {
@@ -159,7 +159,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 			assert(soundAsset != MSFReader::INVALID_SOUND_TYPE);
 			assert(lastSoundType != "");
 			assert(soundFilePaths.size() > 0);
-			
+
 			// TODO 
 			// GameSound* newGameSound = new GameSound(soundIsMask, lastSoundType, probabilities, soundFilePaths);
 			Sound* newGameSound = NULL;
@@ -167,15 +167,15 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 				case Sound::MaskSound:
 					newGameSound = EventSound::BuildSoundMask(lastSoundType, soundFilePaths.front(), fadein, fadeout);
 					break;
-            case Sound::EventSound: {
-                  if (resetSequenceTime == -1) {
-					      newGameSound = EventSound::BuildProbabilitySoundEvent(lastSoundType, loops, fadein, fadeout, probabilities, soundFilePaths);
-                  }
-                  else {
-                     newGameSound = EventSound::BuildSequenceSoundEvent(lastSoundType, loops, fadein, fadeout, resetSequenceTime, soundFilePaths);
-                  }
-               }
-					break;
+				case Sound::EventSound: {
+					if (resetSequenceTime == -1) {
+						newGameSound = EventSound::BuildProbabilitySoundEvent(lastSoundType, loops, fadein, fadeout, probabilities, soundFilePaths);
+					}
+					else {
+						newGameSound = EventSound::BuildSequenceSoundEvent(lastSoundType, loops, fadein, fadeout, resetSequenceTime, soundFilePaths);
+					}
+																}
+																break;
 				case Sound::MusicSound:
 					newGameSound = MusicSound::BuildMusicSound(lastSoundType, soundFilePaths.front(), fadein, fadeout);
 					break;
@@ -197,7 +197,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 			soundAsset = MSFReader::INVALID_SOUND_TYPE;
 			soundDefBlockOpen = false;
 			lastSoundType = "";
-         resetSequenceTime = -1;
+			resetSequenceTime = -1;
 		}
 		else {
 			// Check to see if the sound definition block has been opened, if it has we will search for
@@ -216,18 +216,18 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 					if (!FoundEqualsSyntax(error, errorStr, inStream)) {
 						continue;
 					}
-					
+
 					// The rest of the line should contain a set of probabilities and filepaths or just a single filepath
-               //... or it should contain a sequence definition...
+					//... or it should contain a sequence definition...
 					std::string soundFileLine;
 					std::getline(*inStream, soundFileLine);
 					// Clean up extra whitespace
 					soundFileLine = stringhelper::trim(soundFileLine);
 
-               if (soundFileLine.find("(") == std::string::npos && soundFileLine.find("[") == std::string::npos) {
+					if (soundFileLine.find("(") == std::string::npos && soundFileLine.find("[") == std::string::npos) {
 						// If we're here then there is just a single file provided...
 						soundFileLine = std::string(GameViewConstants::GetInstance()->SOUND_DIR) + "/" + soundFileLine;
-							
+
 						// Check to see if the file exists...
 						std::ifstream test(soundFileLine.c_str(), std::ios::in | std::ios::binary);
 						if (!test.good()) {
@@ -240,38 +240,38 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 						probabilities.push_back(1);
 						soundFilePaths.push_back(soundFileLine);
 					}
-               else if (soundFileLine.find("[") != std::string::npos) {
-                  // If we're here then a time sequence was provided, it takes the form of:
-                  // [<time_before_sequence_reset> <relative_filepath_1>  <relative_filepath_2> ...  <relative_filepath_n>]
-                  
-                  std::vector<std::string> tokens;
-                  stringhelper::Tokenize(soundFileLine, tokens, std::string(MSFReader::OPEN_TIME_SEQUENCE_DEFINITION) +
+					else if (soundFileLine.find("[") != std::string::npos) {
+						// If we're here then a time sequence was provided, it takes the form of:
+						// [<time_before_sequence_reset> <relative_filepath_1>  <relative_filepath_2> ...  <relative_filepath_n>]
+
+						std::vector<std::string> tokens;
+						stringhelper::Tokenize(soundFileLine, tokens, std::string(MSFReader::OPEN_TIME_SEQUENCE_DEFINITION) +
 							std::string(MSFReader::CLOSE_TIME_SEQUENCE_DEFINITION) + std::string("\n\r\t "));
 
-                  
-                  bool failed = false;
-                  for (std::vector<std::string>::iterator iter = tokens.begin(); iter != tokens.end(); ++iter) {
-                     std::stringstream currTokenStream(*iter);
-                     if (!(currTokenStream >> resetSequenceTime)) {
-                        failed = true;
-                        errorStr = "Invalid format of time sequence, first parameter must be a time value in seconds. " +
-                           "Error found on line: " + soundFileLine + ".";
-                        break;
-                     }
 
-                     std::string currFilepath;
-                     while (currTokenStream >> currFilepath) {
-                        soundFilePaths.push_back(currFilepath);
-                     }
-                  }
-                  
-                  if (failed) {
-                     resetSequenceTime = -1;
+						bool failed = false;
+						for (std::vector<std::string>::iterator iter = tokens.begin(); iter != tokens.end(); ++iter) {
+							std::stringstream currTokenStream(*iter);
+							if (!(currTokenStream >> resetSequenceTime)) {
+								failed = true;
+								errorStr = std::string("Invalid format of time sequence, first parameter must be a time value in seconds. ") +
+									std::string("Error found on line: ") + soundFileLine + std::string(".");
+								break;
+							}
+
+							std::string currFilepath;
+							while (currTokenStream >> currFilepath) {
+								soundFilePaths.push_back(currFilepath);
+							}
+						}
+
+						if (failed) {
+							resetSequenceTime = -1;
 							soundFilePaths.clear();
 							error = true;
 							continue;
-                  }
-               }
+					 }
+					}
 					else {
 						// Read in the (probability : filepath) pairings:
 						// Split the line up into the probabilities and files
@@ -284,12 +284,12 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 							errorStr = "Invalid format of probabilities to filepaths provided on line: " + soundFileLine + ".";
 							continue;
 						}
-						
+
 						bool failed = false;
 						std::set<std::string> filesLoaded;
 						for (size_t i = 0; i < tokens.size(); i += 2) {
 							std::stringstream currProb(tokens[i]);
-							
+
 							int probability = 0;
 							currProb >> probability;
 
@@ -302,7 +302,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 
 							std::string tempFilePath = stringhelper::trim(tokens[i+1]);
 							tempFilePath = std::string(GameViewConstants::GetInstance()->SOUND_DIR) + "/" + tempFilePath;
-							
+
 							// Check to see if the file exists...
 							std::ifstream test(tempFilePath.c_str(), std::ios::in | std::ios::binary);
 							if (!test.good()) {
@@ -370,7 +370,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 						continue;
 					}
 				}
-				
+
 				// There are different parameters that are accepted based on the sound type...
 				if (soundType == Sound::EventSound) {
 					// We are dealing with an event sound...
@@ -447,7 +447,7 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BG_MUSIC, GameSoundAssets::WorldBackgroundMusic));
 	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_PADDLE_HIT_WALL_EVENT, GameSoundAssets::WorldSoundPaddleHitWallEvent));
 	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_LOST_EVENT, GameSoundAssets::WorldSoundPlayerLostABallEvent));
-	
+
 	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_LAST_BALL_EXPLODED_EVENT, GameSoundAssets::WorldSoundLastBallExplodedEvent));
 	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_SPAWN_EVENT, GameSoundAssets::WorldSoundBallSpawnEvent));
 	soundTypeMapping.insert(std::make_pair(MSFReader::WORLD_BALL_BLOCK_COLLISION_EVENT, GameSoundAssets::WorldSoundBallBlockCollisionEvent));
@@ -489,9 +489,9 @@ void MSFReader::InitSoundTypeMapping() {
 }
 
 /**
- * Converts the given music script file keyword sound name into an enumerated sound type
- * for the various game sounds.
- */
+* Converts the given music script file keyword sound name into an enumerated sound type
+* for the various game sounds.
+*/
 int MSFReader::ConvertKeywordToSoundType(const std::string& soundName) {
 	std::map<std::string, int>::iterator findIter = soundTypeMapping.find(soundName);
 	if (findIter == soundTypeMapping.end()) {
@@ -502,9 +502,9 @@ int MSFReader::ConvertKeywordToSoundType(const std::string& soundName) {
 }
 
 /**
- * Private helper function for finding whether an equals sign was present in the file
- * at the current read position.
- */
+* Private helper function for finding whether an equals sign was present in the file
+* at the current read position.
+*/
 bool MSFReader::FoundEqualsSyntax(bool& noEquals, std::string& errorStr, std::istream* inStream) {
 	char equals = '\0';
 	*inStream >> equals;

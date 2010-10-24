@@ -86,6 +86,8 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
+	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
+
 	// Tesla Block Specific Functionality
 	void SetConnectedTeslaBlockList(const std::list<TeslaBlock*>& teslaBlocks);
 	const std::list<TeslaBlock*>& GetConnectedTeslaBlockList() const;
@@ -103,6 +105,9 @@ private:
 	bool electricityIsActive;											// Whether the lightning/electric current is active on this tesla block
 	bool isChangable;															// Whether the state (on/off) of the tesla block can be changed via game play
 	std::list<TeslaBlock*> connectedTeslaBlocks;	// All tesla blocks that this one can connect to when active (and when they're active)
+
+	static const int TOGGLE_ON_OFF_LIFE_POINTS;	
+	float lifePointsUntilNextToggle;							// Current life points left of this block before it toggles between on/off
 
 	void ToggleElectricity(GameModel& gameModel, GameLevel& level);
 };
