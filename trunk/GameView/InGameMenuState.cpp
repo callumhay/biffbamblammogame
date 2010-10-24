@@ -196,8 +196,10 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIn
 	if (itemIndex == this->inGameMenuState->resumeItem) {
 		this->inGameMenuState->nextAction = InGameMenuState::ResumeGame;
 	}
+}
 
-
+void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
+	UNUSED_PARAMETER(itemIndex);
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {

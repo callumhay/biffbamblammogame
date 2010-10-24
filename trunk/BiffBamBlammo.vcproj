@@ -64,7 +64,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="SDLmain.lib SDL_mixerd.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib"
-				LinkIncremental="2"
+				LinkIncremental="0"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrt.lib"
 				GenerateDebugInformation="true"
@@ -1855,6 +1855,14 @@
 					RelativePath=".\GameSound\Sound.h"
 					>
 				</File>
+				<File
+					RelativePath=".\GameSound\SoundProbabilityPair.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\SoundTimedSequence.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
@@ -1877,6 +1885,10 @@
 				</File>
 				<File
 					RelativePath=".\GameSound\Sound.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameSound\SoundTimedSequence.cpp"
 					>
 				</File>
 			</Filter>

@@ -333,6 +333,12 @@ void GameSoundAssets::LoadSounds(const std::string& filepath, GameSoundAssets::S
 	bool readSuccess = MSFReader::ReadMSF(filepath, loadedSounds);
 	if (!readSuccess) {
 		std::cerr << "Error reading main menu music script file: " << filepath << std::endl;
+      // Clean up...
+      for (std::map<int, Sound*>::iterator iter = loadedSounds.begin(); iter != loadedSounds.end(); ++iter) {
+         Sound* sound = iter->second;
+         delete sound;
+         sound = NULL;
+      }
 		return;
 	}
 

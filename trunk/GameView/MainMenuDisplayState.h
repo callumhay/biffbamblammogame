@@ -143,9 +143,7 @@ public:
 		~MainMenuEventHandler() {}
 		void GameMenuItemHighlightedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
-		void GameMenuItemChangedEvent(int itemIndex) {
-			UNUSED_PARAMETER(itemIndex);
-		};
+		void GameMenuItemChangedEvent(int itemIndex);
 		void GameMenuItemVerifiedEvent(int itemIndex);
 		void EscMenu();
 	};

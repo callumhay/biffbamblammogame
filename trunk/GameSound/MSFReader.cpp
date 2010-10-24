@@ -8,11 +8,13 @@
 #include "../GameView/GameViewConstants.h"
 #include "../BlammoEngine/StringHelper.h"
 
-const char* MSFReader::OPEN_SOUND_DEFINTION_BLOCK			= "{";
-const char* MSFReader::CLOSE_SOUND_DEFINITION_BLOCK		= "}";
+const char* MSFReader::OPEN_SOUND_DEFINTION_BLOCK     = "{";
+const char* MSFReader::CLOSE_SOUND_DEFINITION_BLOCK   = "}";
 const char* MSFReader::OPEN_ENCLOSING_PROB_FILE_PAIR	= "(";
 const char* MSFReader::CLOSE_ENCLOSING_PROB_FILE_PAIR	= ")";
-const char* MSFReader::PROB_DEFINITION_SYNTAX					= ":";
+const char* MSFReader::PROB_DEFINITION_SYNTAX         = ":";
+const char* MSFReader::OPEN_TIME_SEQUENCE_DEFINITION  = "[";
+const char* MSFReader::CLOSE_TIME_SEQUENCE_DEFINITION = "]";
 
 const char* MSFReader::IGNORE_KEYWORD			= "ignore";
 const char* MSFReader::IGNORE_LINE				= "//";
@@ -24,15 +26,15 @@ const char* MSFReader::FADE_OUT_KEYWORD		= "fadeout";
 
 std::map<std::string, int> MSFReader::soundTypeMapping;
 
-const char* MSFReader::MAIN_MENU_BG_MUSIC										= "MainMenuBackgroundMusic";
-const char* MSFReader::MAIN_MENU_ITEM_HIGHLIGHTED_EVENT			= "MainMenuItemHighlightedEvent";
-const char* MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT				= "MainMenuBackgroundBangSmallEvent";
-const char* MSFReader::MAIN_MENU_BG_BANG_MEDIUM_EVENT				= "MainMenuBackgroundBangMediumEvent";
-const char* MSFReader::MAIN_MENU_BG_BANG_BIG_EVENT					= "MainMenuBackgroundBangBigEvent";
-const char* MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT					= "MainMenuItemEnteredEvent";
-const char* MSFReader::MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT	= "MainMenuItemBackAndCancelEvent";
-const char* MSFReader::MAIN_MENU_ITEM_VERIFY_AND_SEL_EVENT	= "MainMenuItemVerifyAndSelectEvent";
-const char* MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT				= "MainMenuItemScrolledEvent";
+const char* MSFReader::MAIN_MENU_BG_MUSIC                   = "MainMenuBackgroundMusic";
+const char* MSFReader::MAIN_MENU_ITEM_CHANGED_EVENT         = "MainMenuItemChangedEvent";
+const char* MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT        = "MainMenuBackgroundBangSmallEvent";
+const char* MSFReader::MAIN_MENU_BG_BANG_MEDIUM_EVENT       = "MainMenuBackgroundBangMediumEvent";
+const char* MSFReader::MAIN_MENU_BG_BANG_BIG_EVENT          = "MainMenuBackgroundBangBigEvent";
+const char* MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT         = "MainMenuItemEnteredEvent";
+const char* MSFReader::MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT = "MainMenuItemBackAndCancelEvent";
+const char* MSFReader::MAIN_MENU_ITEM_VERIFY_AND_SEL_EVENT  = "MainMenuItemVerifyAndSelectEvent";
+const char* MSFReader::MAIN_MENU_ITEM_SCROLLED_EVENT        = "MainMenuItemScrolledEvent";
 
 const char* MSFReader::WORLD_BG_MUSIC														= "WorldBackgroundMusic";
 const char* MSFReader::WORLD_PADDLE_HIT_WALL_EVENT							= "WorldSoundPaddleHitWallEvent";
@@ -69,24 +71,19 @@ const char* MSFReader::WORLD_INK_SPLATTER_MASK									= "WorldSoundInkSplatterM
 const char* MSFReader::WORLD_POISON_SICK_MASK										= "WorldSoundPoisonSicknessMask";
 const char* MSFReader::WORLD_LASER_BULLET_MOVING_MASK						= "WorldSoundLaserBulletMovingMask";
 const char* MSFReader::WORLD_ROCKET_MOVING_MASK									= "WorldSoundRocketMovingMask";
-const char* MSFReader::WORLD_LASER_BEAM_FIRING_MASK							= "WorldSoundLaserBeamFiringMask";
+const char* MSFReader::WORLD_LASER_BEAM_FIRING_MASK               = "WorldSoundLaserBeamFiringMask";
 const char* MSFReader::WORLD_COLLATERAL_BLOCK_FLASHING_MASK			= "WorldSoundCollateralBlockFlashingMask";
 const char* MSFReader::WORLD_COLLATERAL_BLOCK_FALLING_MASK			= "WorldSoundCollateralBlockFallingMask";
-const char* MSFReader::WORLD_CANNON_BLOCK_ROTATING_MASK					= "WorldSoundCannonBlockRotatingMask";
+const char* MSFReader::WORLD_CANNON_BLOCK_ROTATING_MASK	         = "WorldSoundCannonBlockRotatingMask";
 const char* MSFReader::WORLD_LAST_BALL_SPIRAL_TO_DEATH_MASK			= "WorldSoundLastBallSpiralingToDeathMask";
-const char* MSFReader::WORLD_ITEM_MOVING_MASK										= "WorldSoundItemMovingMask";
+const char* MSFReader::WORLD_ITEM_MOVING_MASK                     = "WorldSoundItemMovingMask";
 
 
 bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& sounds) {
 	MSFReader::InitSoundTypeMapping();
 	// Grab a file in stream from the main manu music script file:
 	// in debug mode we load right off disk, in release we load it from the zip file system
-#ifdef _DEBUG
-	std::ifstream* inStream = new std::ifstream(filepath.c_str());
-#else 
-	std::istringstream* inStream = ResourceManager::GetInstance()->FilepathToInStream(filepath);
-#endif
-
+   std::istringstream* inStream = ResourceManager::GetInstance()->FilepathToInStream(filepath);
 	if (inStream == NULL) {
 		return false;
 	}
@@ -106,9 +103,10 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 	int soundAsset = MSFReader::INVALID_SOUND_TYPE;
 	std::vector<std::string> soundFilePaths;
 	std::vector<int> probabilities;
-	int loops			= EventSound::DEFAULT_LOOPS;
+	int loops		= EventSound::DEFAULT_LOOPS;
 	int fadein		= EventSound::DEFAULT_FADEIN;
 	int fadeout		= EventSound::DEFAULT_FADEOUT;
+   double resetSequenceTime = -1;
 
 	// Read through the music script file
 	while (*inStream >> currReadStr && !error) {
@@ -169,8 +167,14 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 				case Sound::MaskSound:
 					newGameSound = EventSound::BuildSoundMask(lastSoundType, soundFilePaths.front(), fadein, fadeout);
 					break;
-				case Sound::EventSound:
-					newGameSound = EventSound::BuildSoundEvent(lastSoundType, loops, fadein, fadeout, probabilities, soundFilePaths);
+            case Sound::EventSound: {
+                  if (resetSequenceTime == -1) {
+					      newGameSound = EventSound::BuildProbabilitySoundEvent(lastSoundType, loops, fadein, fadeout, probabilities, soundFilePaths);
+                  }
+                  else {
+                     newGameSound = EventSound::BuildSequenceSoundEvent(lastSoundType, loops, fadein, fadeout, resetSequenceTime, soundFilePaths);
+                  }
+               }
 					break;
 				case Sound::MusicSound:
 					newGameSound = MusicSound::BuildMusicSound(lastSoundType, soundFilePaths.front(), fadein, fadeout);
@@ -193,6 +197,7 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 			soundAsset = MSFReader::INVALID_SOUND_TYPE;
 			soundDefBlockOpen = false;
 			lastSoundType = "";
+         resetSequenceTime = -1;
 		}
 		else {
 			// Check to see if the sound definition block has been opened, if it has we will search for
@@ -213,12 +218,13 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 					}
 					
 					// The rest of the line should contain a set of probabilities and filepaths or just a single filepath
+               //... or it should contain a sequence definition...
 					std::string soundFileLine;
 					std::getline(*inStream, soundFileLine);
 					// Clean up extra whitespace
 					soundFileLine = stringhelper::trim(soundFileLine);
 
-					if (soundFileLine.find("(") == std::string::npos) {
+               if (soundFileLine.find("(") == std::string::npos && soundFileLine.find("[") == std::string::npos) {
 						// If we're here then there is just a single file provided...
 						soundFileLine = std::string(GameViewConstants::GetInstance()->SOUND_DIR) + "/" + soundFileLine;
 							
@@ -234,6 +240,38 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 						probabilities.push_back(1);
 						soundFilePaths.push_back(soundFileLine);
 					}
+               else if (soundFileLine.find("[") != std::string::npos) {
+                  // If we're here then a time sequence was provided, it takes the form of:
+                  // [<time_before_sequence_reset> <relative_filepath_1>  <relative_filepath_2> ...  <relative_filepath_n>]
+                  
+                  std::vector<std::string> tokens;
+                  stringhelper::Tokenize(soundFileLine, tokens, std::string(MSFReader::OPEN_TIME_SEQUENCE_DEFINITION) +
+							std::string(MSFReader::CLOSE_TIME_SEQUENCE_DEFINITION) + std::string("\n\r\t "));
+
+                  
+                  bool failed = false;
+                  for (std::vector<std::string>::iterator iter = tokens.begin(); iter != tokens.end(); ++iter) {
+                     std::stringstream currTokenStream(*iter);
+                     if (!(currTokenStream >> resetSequenceTime)) {
+                        failed = true;
+                        errorStr = "Invalid format of time sequence, first parameter must be a time value in seconds. " +
+                           "Error found on line: " + soundFileLine + ".";
+                        break;
+                     }
+
+                     std::string currFilepath;
+                     while (currTokenStream >> currFilepath) {
+                        soundFilePaths.push_back(currFilepath);
+                     }
+                  }
+                  
+                  if (failed) {
+                     resetSequenceTime = -1;
+							soundFilePaths.clear();
+							error = true;
+							continue;
+                  }
+               }
 					else {
 						// Read in the (probability : filepath) pairings:
 						// Split the line up into the probabilities and files
@@ -379,9 +417,6 @@ bool MSFReader::ReadMSF(const std::string& filepath, std::map<int, Sound*>& soun
 	}	// while
 
 	// Clean up and return whether there was an error while reading
-#ifdef _DEBUG
-	inStream->close();
-#endif
 	delete inStream;
 	inStream = NULL;
 
@@ -403,7 +438,7 @@ void MSFReader::InitSoundTypeMapping() {
 	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_BG_BANG_SMALL_EVENT, GameSoundAssets::MainMenuBackgroundBangSmallEvent));
 	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_BG_BANG_MEDIUM_EVENT, GameSoundAssets::MainMenuBackgroundBangMediumEvent));
 	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_BG_BANG_BIG_EVENT, GameSoundAssets::MainMenuBackgroundBangBigEvent));
-	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_HIGHLIGHTED_EVENT, GameSoundAssets::MainMenuItemHighlightedEvent));
+	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_CHANGED_EVENT, GameSoundAssets::MainMenuItemChangedEvent));
 	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_ENTERED_EVENT, GameSoundAssets::MainMenuItemEnteredEvent));
 	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_BACK_AND_CANCEL_EVENT, GameSoundAssets::MainMenuItemBackAndCancelEvent));
 	soundTypeMapping.insert(std::make_pair(MSFReader::MAIN_MENU_ITEM_VERIFY_AND_SEL_EVENT, GameSoundAssets::MainMenuItemVerifyAndSelectEvent));
