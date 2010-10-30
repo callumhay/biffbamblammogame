@@ -70,7 +70,7 @@ public:
 		return false;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile);
+	bool ProjectilePassesThrough(Projectile* projectile) const;
 
 
 	// The cannon block cannot be destroyed

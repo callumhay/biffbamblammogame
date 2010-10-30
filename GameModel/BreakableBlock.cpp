@@ -30,7 +30,7 @@ BreakableBlock::~BreakableBlock() {
 }
 
 // Determine whether the given projectile will pass through this block...
-bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) {
+bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
 		return true;
 	}

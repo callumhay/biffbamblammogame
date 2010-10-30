@@ -61,7 +61,7 @@ public:
 	}
 
 	// Particles pass through portal blocks.
-	bool ProjectilePassesThrough(Projectile* projectile) {
+	bool ProjectilePassesThrough(Projectile* projectile) const {
 		UNUSED_PARAMETER(projectile);
 		return true;
 	}

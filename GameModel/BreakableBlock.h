@@ -69,7 +69,7 @@ public:
 		return true;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile);
+	bool ProjectilePassesThrough(Projectile* projectile) const;
 
 	// Breakable blocks do not reflect or refract light.
 	// Returns: false

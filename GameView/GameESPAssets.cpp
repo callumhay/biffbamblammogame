@@ -1866,14 +1866,7 @@ void GameESPAssets::AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Poi
 	this->activeGeneralEmitters.push_back(paddleWallOnoEffect);
 }
 
-/**
- * Adds an effect for when the paddle is struck by a projectile.
- */
-void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile) {
-	// No effect if the paddle camera is on
-	if (paddle.GetIsPaddleCameraOn()) {
-		return;
-	}
+void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile) {
 
 	// Projectile type determines the severity and size
 	ESPInterval size(1.0f);
@@ -1922,7 +1915,8 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 	paddleOnoEffect->AddEffector(&this->particleSmallGrowth);
 	paddleOnoEffect->AddParticle(paddleOnoParticle);
 
-
+	this->activeGeneralEmitters.push_back(paddleOnoEffect);
+	
 	// Figure out the projectile's position projected onto the paddle's axis
 	Vector2D vecToProjectile = projectile.GetPosition() - paddle.GetCenterPosition();
 	Vector2D positivePaddleAxis = Vector2D::Rotate(paddle.GetZRotation(), PlayerPaddle::DEFAULT_PADDLE_RIGHT_VECTOR);
@@ -1950,8 +1944,36 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 	fireyImpactOnPaddle->AddEffector(&this->particleFader);
 	fireyImpactOnPaddle->SetParticles(1, this->sideBlastTex);
 
-	this->activeGeneralEmitters.push_back(paddleOnoEffect);
 	this->activePaddleEmitters.push_back(fireyImpactOnPaddle);
+}
+
+/**
+ * Adds an effect for when the paddle is struck by a projectile.
+ */
+void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile) {
+	// No effect if the paddle camera is on
+	if (paddle.GetIsPaddleCameraOn()) {
+		return;
+	}
+
+	switch (projectile.GetType()) {
+
+		case Projectile::CollateralBlockProjectile:
+		case Projectile::PaddleLaserBulletProjectile:
+			this->AddBasicPaddleHitByProjectileEffect(paddle, projectile);
+			break;
+
+		case Projectile::PaddleRocketBulletProjectile: 
+			{
+				float rocketSizeFactor = projectile.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+				this->AddRocketHitBlockEffect(rocketSizeFactor, projectile.GetPosition());
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
 }
 
 /**

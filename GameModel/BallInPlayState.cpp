@@ -359,8 +359,7 @@ void BallInPlayState::Tick(double seconds) {
 		// Check to see if the projectile collided with the player paddle
 		if (paddle->CollisionCheckWithProjectile(currProjectile->GetType(), projectileBoundingLines)) {
 			
-			// Tell the paddle it got hit...
-			paddle->HitByProjectile(*currProjectile);
+			this->gameModel->CollisionOccurred(currProjectile, paddle);
 
 			// Destroy the projectile if necessary
 			destroyProjectile = !paddle->ProjectilePassesThrough(*currProjectile);

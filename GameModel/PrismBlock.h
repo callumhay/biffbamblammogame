@@ -64,7 +64,7 @@ public:
 		return 0;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile) {
+	bool ProjectilePassesThrough(Projectile* projectile) const {
 		if (projectile->GetType() == Projectile::PaddleRocketBulletProjectile) {
 			return false;
 		}

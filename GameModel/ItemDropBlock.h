@@ -66,7 +66,7 @@ public:
 		return false;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile) {
+	bool ProjectilePassesThrough(Projectile* projectile) const {
 		UNUSED_PARAMETER(projectile);
 		return false;
 	}

@@ -28,7 +28,7 @@ BombBlock::~BombBlock() {
 }
 
 // Whether or not the given projectile passes through this block...
-bool BombBlock::ProjectilePassesThrough(Projectile* projectile) {
+bool BombBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
 		return true;
 	}

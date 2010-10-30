@@ -913,6 +913,9 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 		case Projectile::PaddleLaserBulletProjectile:
 			intensity = PlayerHurtHUD::MinorPain;
 			break;
+		case Projectile::PaddleRocketBulletProjectile:
+			intensity = PlayerHurtHUD::MajorPain;
+			break;
 		default:
 			assert(false);
 			return;

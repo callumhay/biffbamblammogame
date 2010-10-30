@@ -30,7 +30,7 @@ rotationSgn(Randomizer::GetInstance()->RandomNegativeOrPositive()) {
 CollateralBlock::~CollateralBlock() {
 }
 
-bool CollateralBlock::ProjectilePassesThrough(Projectile* projectile) {
+bool CollateralBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
 		// Much like all other blocks, when collateral blocks are hit by other collateral
 		// blocks they just get destroyed and the other collateral block passes through

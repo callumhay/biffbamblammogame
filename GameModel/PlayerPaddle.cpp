@@ -538,8 +538,19 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		float rocketHeight, rocketWidth;
 		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
 		Projectile* rocketProjectile = new PaddleRocketProjectile(rocketSpawnPos, rocketWidth, rocketHeight);
-		gameModel->AddProjectile(rocketProjectile);
 
+		// Make sure the rocket doesn't explode if it's lying up against a block when launched...
+		const GameLevel* currLevel = gameModel->GetCurrentLevel();
+		std::set<LevelPiece*> levelPieces = currLevel->GetLevelPieceCollisionCandidates(*rocketProjectile);
+		for (std::set<LevelPiece*>::const_iterator iter = levelPieces.begin(); iter != levelPieces.end(); ++iter) {
+			const LevelPiece* currPiece = *iter;
+			if (!currPiece->ProjectilePassesThrough(rocketProjectile)) {
+				rocketProjectile->SetLastLevelPieceCollidedWith(currPiece);
+				break;
+			}
+		}
+
+		gameModel->AddProjectile(rocketProjectile);
 		this->RemovePaddleType(PlayerPaddle::RocketPaddle);
 	}
 	// Check for laser beam paddle 
@@ -618,7 +629,7 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 }
 
 // Called when the paddle is hit by a projectile
-void PlayerPaddle::HitByProjectile(const Projectile& projectile) {
+void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& projectile) {
 	// The paddle is unaffected if it has a shield active...
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
 		// EVENT: Paddle shield was just hit by a projectile
@@ -628,13 +639,20 @@ void PlayerPaddle::HitByProjectile(const Projectile& projectile) {
 
 	// Different projectiles have different effects on the paddle...
 	switch (projectile.GetType()) {
+
 		case Projectile::CollateralBlockProjectile:
 			// Causes the paddle to be violently thrown off course for a short period of time...
 			this->CollateralBlockProjectileCollision(projectile);
 			break;
+
 		case Projectile::PaddleLaserBulletProjectile:
 			this->LaserBulletProjectileCollision(projectile);
 			break;
+
+		case Projectile::PaddleRocketBulletProjectile:
+			this->RocketProjectileCollision(gameModel, projectile);
+			break;
+
 		default:
 			assert(false);
 			break;
@@ -865,6 +883,75 @@ void PlayerPaddle::LaserBulletProjectileCollision(const Projectile& projectile) 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
 }
 
+// Rocket projectile just collided with the paddle - causes the paddle to fly wildly off course
+void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const Projectile& projectile) {
+	float distFromCenter = 0.0f;
+	// Find percent distance from edge to center of the paddle
+	float percentNearCenter = this->GetPercentNearPaddleCenter(projectile, distFromCenter);
+	float percentNearEdge = 1.0 - percentNearCenter;
+
+	static const float MAX_HIT_ROTATION = 170.0f;
+	
+	float rotationAmount = percentNearEdge * MAX_HIT_ROTATION;
+	if (distFromCenter > 0.0) {
+		// The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
+		rotationAmount *= -1.0f;
+	}
+	//else {
+		// The projectile hit the 'left' side of the paddle (typically along the negative x-axis)
+	//}
+
+	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
+	static const double HIT_EFFECT_TIME = 5.0;
+	std::vector<double> times;
+	times.reserve(3);
+	times.push_back(0.0f);
+	times.push_back(0.05f);
+	times.push_back(HIT_EFFECT_TIME);
+
+	static const float MIN_MOVE_DOWN_AMT = 4.0f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+	float totalMaxMoveDown = MIN_MOVE_DOWN_AMT + percentNearCenter * 2.5f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+
+	std::vector<float> moveDownValues;
+	moveDownValues.reserve(3);
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue());
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue() + totalMaxMoveDown);
+	moveDownValues.push_back(0.0f);
+
+	this->moveDownAnimation.SetLerp(times, moveDownValues);
+
+	times.clear();
+	times.reserve(5);
+	times.push_back(0.0f);
+	times.push_back(0.05f);
+	times.push_back(0.3f);
+	times.push_back(0.6f);
+	times.push_back(HIT_EFFECT_TIME);
+
+	std::vector<float> rotationValues;
+	rotationValues.reserve(5);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue());
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + rotationAmount);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() - 0.25f * rotationAmount);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + 0.75f * rotationAmount);
+	rotationValues.push_back(0.0f);
+
+	this->rotAngleZAnimation.SetLerp(times, rotationValues);
+
+	// Rocket explosion!!
+	GameLevel* currentLevel = gameModel->GetCurrentLevel();
+	assert(currentLevel != NULL);
+
+	// Figure out the position in space where the rocket hit and find what block is at that position...
+	std::set<LevelPiece*> levelPieces = currentLevel->GetLevelPieceCollisionCandidates(projectile.GetPosition(), EPSILON);
+	if (!levelPieces.empty()) {
+		currentLevel->RocketExplosion(gameModel, &projectile, *levelPieces.begin());
+	}
+	else {
+		assert(false);
+	}
+}
+
 // Get an idea of how close the given projectile is to the center of the paddle as a percentage
 // where 0 is a far away from the center as possible and 1 is at the center. Also returns the value
 // of distFromCenter which is assigned a negative/positive value based on the distance from the center
@@ -882,18 +969,4 @@ float PlayerPaddle::GetPercentNearPaddleCenter(const Projectile& projectile, flo
 	float percentNearCenter = std::max<float>(0.0f, this->currHalfWidthTotal - fabs(distFromCenter)) / this->currHalfWidthTotal;
 	assert(percentNearCenter >= 0.0f && percentNearCenter <= 1.0);
 	return percentNearCenter;
-}
-
-// Check for a collision with the given projectile
-bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType, const BoundingLines& bounds) const {
-	bool result = false;
-	switch (projectileType) {
-		case Projectile::PaddleRocketBulletProjectile:
-			break;
-		default:
-			result = this->CollisionCheck(bounds, true);
-			break;
-	}
-
-	return result;
 }

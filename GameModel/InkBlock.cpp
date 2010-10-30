@@ -23,7 +23,7 @@ InkBlock::~InkBlock() {
 }
 
 // Determine whether the given projectile will pass through this block...
-bool InkBlock::ProjectilePassesThrough(Projectile* projectile) {
+bool InkBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
 		return true;
 	}

@@ -180,6 +180,22 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
 	}
 }
 
+void GameModel::CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle) {
+	assert(projectile != NULL);
+	assert(paddle != NULL);
+
+	// Tell the paddle it got hit by a projectile
+	paddle->HitByProjectile(this, *projectile);
+
+	// Check to see if the level is done
+	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
+	if (currLevel->IsLevelComplete()) {
+
+		// The level was completed, move to the level completed state
+		this->SetNextState(new LevelCompleteState(this));
+	}
+}
+
 /**
  * Called when a collision occurs between the ball and a level piece.
  * Deals with all the important effects a collision could have on the game model.

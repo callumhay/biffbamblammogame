@@ -53,7 +53,7 @@ public:
 	
 	// All projectiles pass through empty space
 	// Returns: true.
-	bool ProjectilePassesThrough(Projectile* projectile) {
+	bool ProjectilePassesThrough(Projectile* projectile) const {
 		UNUSED_PARAMETER(projectile);
 		return true;
 	}
