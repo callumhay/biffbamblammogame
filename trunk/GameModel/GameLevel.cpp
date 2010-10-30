@@ -973,31 +973,6 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
 	xIndexMax = std::min<float>(static_cast<float>(this->width-1), xIndexMax);
 	yIndexMax = std::min<float>(static_cast<float>(this->height-1), yIndexMax);
 
-	/*
-	// Do some correction of x-axis index values if the ball goes out of bounds...
-	if (xIndexMin < 0 || xIndexMin >= static_cast<float>(this->width)) {
-		if (xIndexMax >= static_cast<float>(this->width) || xIndexMax < 0) {
-			// We're completely out of bounds of the level
-			return colliders;
-		}
-		xIndexMin = xIndexMax;
-	}
-	else if (xIndexMax >= static_cast<float>(this->width) || xIndexMax < 0) {
-		xIndexMax = xIndexMin;
-	}
-
-	// Do some correction of y-axis index values if the ball goes out of bounds...
-	if (yIndexMin < 0 || yIndexMin >= static_cast<float>(this->height)) {
-		if (yIndexMax >= static_cast<float>(this->height) || yIndexMax < 0) {
-			// We're completely out of bounds of the level
-			return colliders;
-		}
-		yIndexMin = yIndexMax;
-	}
-	else if (yIndexMax >= static_cast<float>(this->height) || yIndexMax < 0) {
-		yIndexMax = yIndexMin;
-	}
-	*/
 	assert(xIndexMin <= xIndexMax);
 	assert(yIndexMin <= yIndexMax);
 	
@@ -1020,11 +995,11 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Point2D&
 	// Get the ball boundry and use it to figure out what levelpieces are relevant
 	// Find the non-rounded max and min indices to look at along the x and y axis
 	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
-	float xIndexMax = ceilf(xNonAdjustedIndex + radius); 
+	float xIndexMax = floorf(xNonAdjustedIndex + radius);//ceilf(xNonAdjustedIndex + radius); 
 	float xIndexMin = floorf(xNonAdjustedIndex - radius);
 	
 	float yNonAdjustedIndex = center[1] / LevelPiece::PIECE_HEIGHT;
-	float yIndexMax = ceilf(yNonAdjustedIndex + radius);
+	float yIndexMax = floorf(yNonAdjustedIndex + radius);//ceilf(yNonAdjustedIndex + radius);
 	float yIndexMin = floorf(yNonAdjustedIndex - radius);
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);

@@ -38,7 +38,7 @@ protected:
 	Vector2D velocityDir;	// Velocity direction of the projectile
 	Vector2D rightVec;		// Unit vector pointing outwards to the right of the particle, perpendicular to the velocity direction
 	float velocityMag;		// Velocity magnitude of the projectile in game units / second
-	LevelPiece* lastPieceCollidedWith;
+	const LevelPiece* lastPieceCollidedWith;
 
 public:
 	virtual ~Projectile();
@@ -72,8 +72,8 @@ public:
 
 	// Functionality for storing the last level piece that the particle collided with
 	// and for querying it
-	void SetLastLevelPieceCollidedWith(LevelPiece* p) { this->lastPieceCollidedWith = p; }
-	bool IsLastLevelPieceCollidedWith(LevelPiece* p) { return this->lastPieceCollidedWith == p; }
+	void SetLastLevelPieceCollidedWith(const LevelPiece* p) { this->lastPieceCollidedWith = p; }
+	bool IsLastLevelPieceCollidedWith(const LevelPiece* p) const { return this->lastPieceCollidedWith == p; }
 
 	static Projectile* CreateProjectile(ProjectileType type, const Point2D& spawnLoc);
 

@@ -52,7 +52,7 @@ public:
 		return false;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile);
+	bool ProjectilePassesThrough(Projectile* projectile) const;
 
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel);

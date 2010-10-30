@@ -205,7 +205,7 @@ public:
 		return this->attachedBall;
 	}
 
-	void HitByProjectile(const Projectile& projectile);
+	void HitByProjectile(GameModel* gameModel, const Projectile& projectile);
 	bool ProjectilePassesThrough(const Projectile& projectile);
 	void ModifyProjectileTrajectory(Projectile& projectile);
 
@@ -281,6 +281,7 @@ private:
 
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
+	void RocketProjectileCollision(GameModel* gameModel, const Projectile& projectile);
 	float GetPercentNearPaddleCenter(const Projectile& projectile, float& distFromCenter);
 	Collision::Circle2D CreatePaddleShieldBounds() const;
 
@@ -362,6 +363,12 @@ inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool inclu
 	}
 	
 	return didCollide;
+}
+
+// Check for a collision with the given projectile
+inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType, const BoundingLines& bounds) const {
+	UNUSED_PARAMETER(projectileType);
+	return this->CollisionCheck(bounds, true);
 }
 
 // The paddle destroys all projectiles that collide with it, currently

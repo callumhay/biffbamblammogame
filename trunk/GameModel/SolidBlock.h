@@ -65,7 +65,7 @@ public:
 		return false;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile);
+	bool ProjectilePassesThrough(Projectile* projectile) const;
 
 	LevelPiece* Destroy(GameModel* gameModel);
 

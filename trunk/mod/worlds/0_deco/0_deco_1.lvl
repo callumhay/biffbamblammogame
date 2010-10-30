@@ -21,7 +21,7 @@ S X(a,b) E E E E E X(b,a) E S
 S E E E E E E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
-S E E E L E E E E S 
+S E E E L C(180) E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 

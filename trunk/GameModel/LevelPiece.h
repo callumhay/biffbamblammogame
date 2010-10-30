@@ -93,7 +93,7 @@ public:
 	virtual bool CanBeDestroyedByBall() const = 0;
 	virtual bool UberballBlastsThrough() const = 0;
 	virtual bool GhostballPassesThrough() const = 0;
-	virtual bool ProjectilePassesThrough(Projectile* projectile) = 0;
+	virtual bool ProjectilePassesThrough(Projectile* projectile) const = 0;
 	virtual bool IsLightReflectorRefractor() const = 0;
 };
 #endif

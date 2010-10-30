@@ -22,7 +22,7 @@ SolidBlock::~SolidBlock() {
 }
 
 // Determine whether the given projectile will pass through this block...
-bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) {
+bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
 		return true;
 	}

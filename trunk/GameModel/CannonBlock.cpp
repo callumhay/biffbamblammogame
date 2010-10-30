@@ -36,7 +36,7 @@ CannonBlock::~CannonBlock() {
 }
 
 // Determine whether the given projectile will pass through this block...
-bool CannonBlock::ProjectilePassesThrough(Projectile* projectile) {
+bool CannonBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	if (projectile->GetType() == Projectile::PaddleRocketBulletProjectile) {
 		return true;
 	}
