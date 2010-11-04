@@ -51,7 +51,8 @@ public:
 									GravityBallItem, 
 									RocketPaddleItem, 
 									CrazyBallItem, 
-									ShieldPaddleItem, 
+									ShieldPaddleItem,
+									FireBallItem,
 									
 									RandomItem // MAKE SURE RANDOM ITEM IS ALWAYS THE LAST ONE!!
 	};

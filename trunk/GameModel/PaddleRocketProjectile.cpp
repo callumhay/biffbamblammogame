@@ -69,10 +69,10 @@ void PaddleRocketProjectile::Tick(double seconds) {
 }
 
 BoundingLines PaddleRocketProjectile::BuildBoundingLines() const {
-	const Vector2D UP_DIR			= this->GetVelocityDirection();
-	const Vector2D RIGHT_DIR	= this->GetRightVectorDirection();
+	const Vector2D& UP_DIR			= this->GetVelocityDirection();
+	const Vector2D& RIGHT_DIR	= this->GetRightVectorDirection();
 
-	Point2D topRight = this->GetPosition() + this->GetHalfHeight()*UP_DIR + 0.5f*this->GetHalfWidth()*RIGHT_DIR;
+	Point2D topRight = this->GetPosition() + this->GetHalfHeight()*UP_DIR + 0.75f*this->GetHalfWidth()*RIGHT_DIR;
 	Point2D bottomRight = topRight - this->GetHeight()*UP_DIR;
 	Point2D topLeft = topRight - this->GetWidth()*RIGHT_DIR;
 	Point2D bottomLeft = topLeft - this->GetHeight()*UP_DIR;

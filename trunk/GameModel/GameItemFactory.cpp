@@ -35,6 +35,7 @@
 #include "RocketPaddleItem.h"
 #include "CrazyBallItem.h"
 #include "ShieldPaddleItem.h"
+#include "FireBallItem.h"
 
 #include "RandomItem.h"
 
@@ -67,6 +68,7 @@ GameItemFactory::GameItemFactory() {
 	itemNameToTypeMap.insert(std::make_pair(RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME,				GameItem::RocketPaddleItem));
 	itemNameToTypeMap.insert(std::make_pair(CrazyBallItem::CRAZY_BALL_ITEM_NAME,					    GameItem::CrazyBallItem));
 	itemNameToTypeMap.insert(std::make_pair(ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME,			  GameItem::ShieldPaddleItem));
+	itemNameToTypeMap.insert(std::make_pair(FireBallItem::FIRE_BALL_ITEM_NAME,								GameItem::FireBallItem));
 	itemNameToTypeMap.insert(std::make_pair(RandomItem::RANDOM_ITEM_NAME,											GameItem::RandomItem));
 	
 	// Establish the set of ALL items
@@ -95,6 +97,7 @@ GameItemFactory::GameItemFactory() {
 	allItemTypes.insert(GameItem::RocketPaddleItem);
 	allItemTypes.insert(GameItem::CrazyBallItem);
 	allItemTypes.insert(GameItem::ShieldPaddleItem);
+	allItemTypes.insert(GameItem::FireBallItem);
 	
 	// Establish the Power-up item set
 	allPowerUpItemTypes.insert(GameItem::BallSlowDownItem);
@@ -115,6 +118,7 @@ GameItemFactory::GameItemFactory() {
 	allPowerNeutralItemTypes.insert(GameItem::GravityBallItem);
 	allPowerNeutralItemTypes.insert(GameItem::CrazyBallItem);
 	allPowerNeutralItemTypes.insert(GameItem::ShieldPaddleItem);
+	allPowerNeutralItemTypes.insert(GameItem::FireBallItem);
 
 	// Establish the Power-down item set
 	allPowerDownItemTypes.insert(GameItem::BallShrinkItem);
@@ -253,7 +257,9 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 		case GameItem::ShieldPaddleItem:
 			return new ShieldPaddleItem(spawnOrigin, gameModel);
 
-		
+		case GameItem::FireBallItem:
+			return new FireBallItem(spawnOrigin, gameModel);
+
 		// Random item is a very special kind of item that can't be generated anywhere else but here
 		case GameItem::RandomItem:
 			return new RandomItem(spawnOrigin, gameModel);

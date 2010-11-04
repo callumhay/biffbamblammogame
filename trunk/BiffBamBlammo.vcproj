@@ -1072,6 +1072,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\FireGlobProjectile.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\GameBall.h"
 					>
 				</File>
@@ -1149,6 +1153,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\CollateralBlockProjectile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\FireGlobProjectile.cpp"
 					>
 				</File>
 				<File
@@ -1439,6 +1447,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\FireBallItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\GameItem.h"
 						>
 					</File>
@@ -1540,6 +1552,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\CrazyBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\FireBallItem.cpp"
 						>
 					</File>
 					<File
