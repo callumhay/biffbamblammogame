@@ -405,6 +405,8 @@ void BallInPlayState::Tick(double seconds) {
 		projectileToRemove = NULL;
 	}
 		
+	// Tick/update any level pieces that require it...
+	this->gameModel->DoPieceUpdates(seconds);
 }
 
 /**

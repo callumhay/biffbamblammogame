@@ -14,7 +14,7 @@
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
-const double GhostBallItem::GHOST_BALL_TIMER_IN_SECS	= 15.0;
+const double GhostBallItem::GHOST_BALL_TIMER_IN_SECS	= 25.0;
 const char* GhostBallItem::GHOST_BALL_ITEM_NAME			  = "GhostBall";
 
 GhostBallItem::GhostBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 

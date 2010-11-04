@@ -1,5 +1,5 @@
 /**
- * GhostBallItem.h
+ * FireBallItem.h
  *
  * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
  * Callum Hay, 2009
@@ -9,29 +9,29 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#ifndef __GHOSTBALLITEM_H__
-#define __GHOSTBALLITEM_H__
+#ifndef __FIREBALLITEM_H__
+#define __FIREBALLITEM_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
 
-#include "GameItem.h"
 #include "GameModel.h"
+#include "GameItem.h"
 
 class Point2D;
 
-class GhostBallItem : public GameItem {
+class FireBallItem : public GameItem {
 public:
-	static const char* GHOST_BALL_ITEM_NAME;
-	static const double GHOST_BALL_TIMER_IN_SECS;
+	static const char* FIRE_BALL_ITEM_NAME;
+	static const double FIRE_BALL_TIMER_IN_SECS;
 
-	GhostBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	~GhostBallItem();
+	FireBallItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	~FireBallItem();
 
 	double Activate();
 	void Deactivate();
 
 	GameItem::ItemType GetItemType() const {
-		return GameItem::GhostBallItem;
+		return GameItem::FireBallItem;
 	}
 
 	const GameBall* GetBallAffected() const {
@@ -39,4 +39,6 @@ public:
 		return *this->gameModel->GetGameBalls().begin();
 	}
 };
-#endif
+
+
+#endif // __FIREBALLITEM_H__

@@ -50,9 +50,9 @@ public:
 
 	static const int DEFAULT_SHIELD_DMG_PER_SECOND;
 
-	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000010, 
-										StickyPaddle = 0x00000100, LaserBeamPaddle = 0x00001000, RocketPaddle = 0x00010000, 
-										ShieldPaddle = 0x00100000 };
+	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000002, 
+										StickyPaddle = 0x00000004, LaserBeamPaddle = 0x00000008, RocketPaddle = 0x00000010, 
+										ShieldPaddle = 0x00000020 };
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
 	PlayerPaddle(float minBound, float maxBound);
@@ -165,7 +165,7 @@ public:
 	bool DecreasePaddleSize();
 
 	// Paddle type modifying / querying functions
-	int GetPaddleType() const { return this->currType; }
+	uint32_t GetPaddleType() const { return this->currType; }
 
 	void AddPaddleType(const PaddleType& type);
 	void RemovePaddleType(const PaddleType& type);
@@ -232,7 +232,7 @@ private:
 
 	bool hitWall;					// True when the paddle hits a wall
 
-	int currType;					// An ORed together current type of this paddle (see PaddleType)
+	uint32_t currType;		// An ORed together current type of this paddle (see PaddleType)
 	PaddleSize currSize;	// The current size (width) of this paddle
 
 	Point2D centerPos;						// Paddle position (at its center) in the game model

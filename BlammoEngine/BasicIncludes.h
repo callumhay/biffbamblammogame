@@ -30,7 +30,7 @@
 #define _CRTDBG_MAP_ALLOC 
 #endif
 
-#define UNUSED_PARAMETER(p) (p)
+#define UNUSED_PARAMETER(p) ((void)p)
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
   TypeName(const TypeName&);               \

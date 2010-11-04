@@ -32,6 +32,7 @@ public:
 private:
 	CollateralBlock* collateralBlock;
 
+	DISALLOW_COPY_AND_ASSIGN(CollateralBlockProjectile);
 };
 
 #endif // __COLLATERALBLOCKPROJECTILE_H__

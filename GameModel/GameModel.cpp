@@ -79,6 +79,7 @@ void GameModel::BeginOrRestartGame() {
 // Called in order to make sure the game is no longer processing or generating anything
 void GameModel::ClearGameState() {
 	// Delete all world items, timers and thingys
+	this->ClearUpdatePieces();
 	this->ClearLiveItems();
 	this->ClearActiveTimers();
 	this->ClearProjectiles();
@@ -326,6 +327,35 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 }
 
 /**
+ * Called to update each piece that requires per-frame updates in the current level.
+ */
+void GameModel::DoPieceUpdates(double dT) {
+	LevelPiece* currLevelPiece;
+	bool keepTicking;
+
+	// Go through each piece that we need to update and do the updates
+	for (std::set<LevelPiece*>::iterator iter = this->updatePieces.begin(); iter != this->updatePieces.end();) {
+		currLevelPiece = *iter;
+		keepTicking = currLevelPiece->Tick(dT, this);
+		if (keepTicking) {
+			++iter;
+		}
+		else {
+			iter = this->updatePieces.erase(iter);
+		}
+	}
+
+	if (!this->updatePieces.empty()) {
+		// Check to see if the level is done
+		GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
+		if (currLevel->IsLevelComplete()) {
+			// The level was completed, move to the level completed state
+			this->SetNextState(new LevelCompleteState(this));
+		}
+	}
+}
+
+/**
  * Clears the list of all projectiles that are currently in existance in the game.
  */
 void GameModel::ClearProjectiles() {
@@ -446,7 +476,7 @@ void GameModel::AddItemDrop(const LevelPiece& p, const GameItem::ItemType& itemT
 }
 
 /**
- * Add a projectile to the game.
+ * Add a projectile to the game. The gamemodel object takes ownership of the provided projectile.
  */
 void GameModel::AddProjectile(Projectile* projectile) {
 	assert(projectile != NULL);
@@ -498,4 +528,17 @@ void GameModel::AddBeam(int beamType) {
 
 	// EVENT: Beam creation
 	GameEventManager::Instance()->ActionBeamSpawned(*addedBeam);
+}
+
+/**
+ * Add a level piece that requires 'ticking' (updates) every frame when in the "BallInPlay" state.
+ * This allows us to selectively apply long term effects to level pieces.
+ */
+void GameModel::AddTickLevelPiece(LevelPiece* p) {
+	assert(p != NULL);
+	// TODO...
+	//this->updatePieces.insert(p);
+	
+	// Don't forget to clean these out when you clean everything else out...
+
 }

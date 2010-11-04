@@ -34,9 +34,9 @@ class GameBall {
 
 public:
 	enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 7, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 22, FastestSpeed = 27 };
-	enum BallSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
-	enum BallType { NormalBall = 0x00000000, UberBall = 0x00000001, InvisiBall = 0x00000010, GhostBall = 0x00000100, 
-		              GraviBall = 0x00001000, CrazyBall = 0x00010000 };
+	enum BallSize  { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
+	enum BallType  { NormalBall = 0x00000000, UberBall = 0x00000001,  InvisiBall = 0x00000002, GhostBall = 0x00000004, 
+		               GraviBall = 0x00000008,  CrazyBall = 0x00000010, FireBall = 0x00000020 };
 	
 	// Default radius of the ball
 	static const float DEFAULT_BALL_RADIUS;
@@ -195,7 +195,7 @@ public:
 		this->gravitySpeed = speed;
 	}
 
-	int GetBallType() const {
+	uint32_t GetBallType() const {
 		return this->currType;
 	}
 	void RemoveAllBallTypes() {
@@ -326,7 +326,7 @@ private:
 	Vector2D currDir;				// The current direction of movement of the ball
 	float currSpeed;				// The current speed of the ball
 	float gravitySpeed;			// The current gravity speed of the ball
-	int currType;						// The current type of this ball
+	uint32_t currType;			// The current type of this ball
 
 	BallSize currSize;					// The current size of this ball
 	float currScaleFactor;			// The scale difference between the ball's current size and its default size

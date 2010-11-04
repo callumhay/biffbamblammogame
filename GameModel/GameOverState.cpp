@@ -9,5 +9,6 @@ GameOverState::~GameOverState(){
 	this->gameModel->ClearProjectiles();
 	this->gameModel->ClearBeams();
 	this->gameModel->ClearLiveItems();
-	this->gameModel->ClearActiveTimers();	
+	this->gameModel->ClearActiveTimers();
+	this->gameModel->ClearUpdatePieces();
 }

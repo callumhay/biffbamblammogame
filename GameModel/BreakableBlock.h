@@ -2,29 +2,9 @@
 #define __BREAKABLEBLOCK_H__
 
 #include "LevelPiece.h"
+#include "Beam.h"
 
 class BreakableBlock : public LevelPiece {
-protected:
-	static const int PIECE_STARTING_LIFE_POINTS = 100;	// Starting life points given to a breakable block
-	static const int POINTS_ON_BLOCK_HIT				= 5;		// Points obtained when you just hit a breakable block
-	static const int POINTS_ON_BLOCK_DESTROYED	= 10;		// Points obtained when you destory a breakable block
-
-	float currLifePoints;	// Current life points of this block
-
-	enum BreakablePieceType { GreenBreakable = 'G', YellowBreakable = 'Y', OrangeBreakable = 'O', RedBreakable = 'R' }; 
-	BreakablePieceType pieceType;
-
-	static BreakablePieceType GetDecrementedPieceType(BreakablePieceType breakableType);
-	static Colour GetColourOfBreakableType(BreakablePieceType breakableType);
-
-	// Decrements this piecetype to the next lesser breakable piece type.
-	void DecrementPieceType() {
-		this->pieceType = BreakableBlock::GetDecrementedPieceType(this->pieceType);
-		this->colour    = BreakableBlock::GetColourOfBreakableType(this->pieceType);
-	}
-
-	LevelPiece* DiminishPiece(GameModel* gameModel);
-
 public:
 	BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc);
 	virtual ~BreakableBlock();
@@ -99,5 +79,62 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
+
+	bool Tick(double dT, GameModel* gameModel);
+
+protected:
+	static const int PIECE_STARTING_LIFE_POINTS = 100;	// Starting life points given to a breakable block
+	static const int POINTS_ON_BLOCK_HIT				= 5;		// Points obtained when you just hit a breakable block
+	static const int POINTS_ON_BLOCK_DESTROYED	= 10;		// Points obtained when you destory a breakable block
+
+	float currLifePoints;	// Current life points of this block
+
+	enum BreakablePieceType { GreenBreakable = 'G', YellowBreakable = 'Y', OrangeBreakable = 'O', RedBreakable = 'R' }; 
+	BreakablePieceType pieceType;
+
+	static BreakablePieceType GetDecrementedPieceType(BreakablePieceType breakableType);
+	static Colour GetColourOfBreakableType(BreakablePieceType breakableType);
+
+	// Decrements this piecetype to the next lesser breakable piece type.
+	void DecrementPieceType() {
+		this->pieceType = BreakableBlock::GetDecrementedPieceType(this->pieceType);
+		this->colour    = BreakableBlock::GetColourOfBreakableType(this->pieceType);
+	}
+
+	LevelPiece* DiminishPiece(GameModel* gameModel);
+	LevelPiece* EatAwayAtPiece(double dT, int dmgPerSec, GameModel* gameModel);
+
+private:
+	double fireGlobTimeCounter;	// Used to keep track of the amount of time this block has been on fire and
+															// when it stands the chance of dropping a fire glob
+	DISALLOW_COPY_AND_ASSIGN(BreakableBlock);
 };
+
+// Determine whether the given projectile will pass through this block...
+inline bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) const {
+	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Called as this piece is being hit by the given beam over the given amount of time in seconds.
+ */
+inline LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
+	assert(beamSegment != NULL);
+	assert(gameModel != NULL);
+	return this->EatAwayAtPiece(dT, beamSegment->GetDamagePerSecond(), gameModel);
+}
+
+/**
+ * Tick the collision with the paddle shield - the shield will eat away at the block until it's destroyed.
+ * Returns: The block that this block is/has become.
+ */
+inline LevelPiece* BreakableBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel) {
+	assert(gameModel != NULL);
+	return this->EatAwayAtPiece(dT, paddle.GetShieldDamagePerSecond(), gameModel);
+}
+
+
 #endif

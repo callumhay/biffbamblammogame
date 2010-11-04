@@ -89,7 +89,9 @@ void GameController::KeyDown(SDLKey key, SDLMod modifier) {
 	else if (key == SDLK_s) {
 		this->model->DropItem(GameItem::BallSlowDownItem);
 	}
-	// t
+	else if (key == SDLK_t) {
+		this->model->DropItem(GameItem::FireBallItem);
+	}
 	else if (key == SDLK_u) {
 		this->model->DropItem(GameItem::UberBallItem);
 	}

@@ -224,7 +224,9 @@ private:
 	const char* TEXTURE_ITEM_PADDLEROCKET;
 	const char* TEXTURE_ITEM_CRAZYBALL;
 	const char* TEXTURE_ITEM_SHIELDPADDLE;
+	const char* TEXTURE_ITEM_FIREBALL;
 	const char* TEXTURE_ITEM_RANDOM;
+	
 
 	const char* TEXTURE_ITEM_TIMER_SLOWBALL;
 	const char* TEXTURE_ITEM_TIMER_FASTBALL;
@@ -239,6 +241,7 @@ private:
 	const char* TEXTURE_ITEM_TIMER_EYE;
 	const char* TEXTURE_ITEM_TIMER_GRAVITYBALL;
 	const char* TEXTURE_ITEM_TIMER_SHIELDPADDLE;
+	const char* TEXTURE_ITEM_TIMER_FIREBALL;
 	
 	const char* TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
 	const char* TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
@@ -252,6 +255,7 @@ private:
 	const char* TEXTURE_ITEM_TIMER_FILLER_EYE;
 	const char* TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL;
 	const char* TEXTURE_ITEM_TIMER_FILLER_SHIELDPADDLE;
+	const char* TEXTURE_ITEM_TIMER_FILLER_FIREBALL;
 
 	// Disallow copy and assign
 	GameViewConstants(const GameViewConstants& g);

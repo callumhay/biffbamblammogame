@@ -45,6 +45,7 @@ private:
 	std::list<GameBall*> balls;						// Current set of balls active in the game
 	std::list<Projectile*> projectiles;		// Projectiles spawned as the game is played
 	std::list<Beam*> beams;								// Beams spawned as the game is played
+	std::set<LevelPiece*> updatePieces;		// Pieces that require updating every frame
 
 	// Current world and level information
 	unsigned int currWorldNum;
@@ -93,6 +94,7 @@ private:
 	void CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle);
 	void BallPaddleCollisionOccurred(GameBall& ball);
 	void BallDied(GameBall* deadBall, bool& stateChanged);
+	void DoPieceUpdates(double dT);
 	
 	// Increment the player's score in the game
 	void IncrementScore(int amt) {
@@ -130,6 +132,7 @@ private:
 	void ClearBeams();
 	void ClearLiveItems();
 	void ClearActiveTimers();
+	void ClearUpdatePieces();
 
 	bool RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type);
 
@@ -255,7 +258,7 @@ public:
 	bool IsBallEffectActive(GameBall::BallType effectType) const {
 		for (std::list<GameBall*>::const_iterator ballIter = this->balls.begin(); ballIter != this->balls.end(); ++ballIter) {
 			const GameBall* currBall = *ballIter;
-			if ((currBall->GetBallType() & effectType) == effectType) {
+			if ((currBall->GetBallType() & effectType) == static_cast<uint32_t>(effectType)) {
 				return true;
 			}
 		}
@@ -354,6 +357,7 @@ public:
 	void AddItemDrop(const LevelPiece& p, const GameItem::ItemType& itemType);
 	void AddProjectile(Projectile* projectile);
 	void AddBeam(int beamType);
+	void AddTickLevelPiece(LevelPiece* p);
 
 	// Debug functions
 #ifdef _DEBUG
@@ -377,5 +381,9 @@ public:
 	friend class BallDeathState;
 	friend class GameOverState;
 };
+
+inline void GameModel::ClearUpdatePieces() {
+	this->updatePieces.clear();
+}
 
 #endif

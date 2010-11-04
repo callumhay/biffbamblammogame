@@ -11,15 +11,15 @@
 
 #include "BreakableBlock.h"
 #include "EmptySpaceBlock.h"
-
 #include "GameModel.h"
 #include "GameLevel.h"
 #include "GameBall.h"
 #include "GameEventManager.h"
-#include "Beam.h"
+#include "FireGlobProjectile.h"
 
 BreakableBlock::BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc) : 
-LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLifePoints(PIECE_STARTING_LIFE_POINTS) {
+LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLifePoints(PIECE_STARTING_LIFE_POINTS),
+fireGlobTimeCounter(0.0) {
 	assert(IsValidBreakablePieceType(type));
 
 	this->colour = BreakableBlock::GetColourOfBreakableType(this->pieceType);
@@ -27,14 +27,6 @@ LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLi
 
 
 BreakableBlock::~BreakableBlock() {
-}
-
-// Determine whether the given projectile will pass through this block...
-bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) const {
-	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
-		return true;
-	}
-	return false;
 }
 
 /**
@@ -126,6 +118,21 @@ LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel) {
 	return newPiece;
 }
 
+// Eat away at this block over the given dT time at the given damage per second...
+// Returns: The resulting level piece that this becomes after exposed to the damage
+LevelPiece* BreakableBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel* gameModel) {
+	this->currLifePoints -= static_cast<float>(dT * dmgPerSec);
+	
+	LevelPiece* newPiece = this;
+	if (currLifePoints <= 0) {
+		// The piece is dead... spawn the next one in sequence
+		this->currLifePoints = BreakableBlock::PIECE_STARTING_LIFE_POINTS;
+		newPiece = this->DiminishPiece(gameModel);
+	}
+
+	return newPiece;
+}
+
 /**
  * Call this when a collision has actually occured with the ball and this block.
  * Returns: The resulting level piece that this has become.
@@ -135,21 +142,28 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 
 	// If the ball is an 'uber' ball then we decrement the piece type twice when it is
 	// not the lowest kind of breakable block (i.e., green)
-	if (((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall) && this->pieceType != GreenBreakable) {
+	bool isUberBall = ((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall);
+	if (isUberBall && this->pieceType != GreenBreakable) {
 		this->DecrementPieceType();
 	}
 	
-	LevelPiece* newPiece = this->DiminishPiece(gameModel);
+	LevelPiece* newPiece = this;
+	
+	// If the ball is an uber ball with fire or a ball without fire, then we dimish the piece,
+	// otherwise we apply the "on fire" status to the piece and leave it at that
+	bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+	if (isUberBall || !isFireBall) {
+		newPiece = this->DiminishPiece(gameModel);
+	}
+	else {
+		// The ball is on fire, and so we'll make this piece catch fire too...
+		// The fire will eat away at the block over time
+		assert(isFireBall);
+		gameModel->AddTickLevelPiece(this);
+		this->AddStatus(LevelPiece::OnFireStatus);
+	}
 
-	// Tell the ball what the last piece it collided with was (which will be the diminished
-	// piece if it hasn't become an empty/no bounds block yet...
-	//if (!newPiece->IsNoBoundsPieceType()) {
-	//	ball.SetLastPieceCollidedWith(newPiece);
-	//}
-	//else {
 	ball.SetLastPieceCollidedWith(NULL);
-	//}
-
 	return newPiece;
 }
 
@@ -186,38 +200,38 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 	return newPiece;
 }
 
-/**
- * Called as this piece is being hit by the given beam over the given amount of time in seconds.
- */
-LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
-	assert(beamSegment != NULL);
-	assert(gameModel != NULL);
-	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
-	
-	LevelPiece* newPiece = this;
-	if (currLifePoints <= 0) {
-		// The piece is dead... spawn the next one in sequence
-		this->currLifePoints = BreakableBlock::PIECE_STARTING_LIFE_POINTS;
-		newPiece = this->DiminishPiece(gameModel);
-	}
-
-	return newPiece;
-}
 
 /**
- * Tick the collision with the paddle shield - the shield will eat away at the block until it's destroyed.
- * Returns: The block that this block is/has become.
+ * When the piece has a per-frame effect on it (e.g., it's on fire) then this will be called
+ * by the game model.
+ * Returns: true if we need to keep ticking, false otherwise.
  */
-LevelPiece* BreakableBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel) {
+bool BreakableBlock::Tick(double dT, GameModel* gameModel) {
 	assert(gameModel != NULL);
-	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(paddle.GetShieldDamagePerSecond()));
-	
-	LevelPiece* newPiece = this;
-	if (currLifePoints <= 0) {
-		// The piece is dead... spawn the next one in sequence
-		this->currLifePoints = BreakableBlock::PIECE_STARTING_LIFE_POINTS;
-		newPiece = this->DiminishPiece(gameModel);
-	}
 
-	return newPiece;
+	// If this piece is on fire then we slowly eat away at it with fire...
+	if ((this->pieceStatus & LevelPiece::OnFireStatus) == LevelPiece::OnFireStatus) {
+		// Blocks on fire have a (very small) chance of dropping a glob of flame over some time...
+		this->fireGlobTimeCounter += dT;
+		if (this->fireGlobTimeCounter >= GameModelConstants::GetInstance()->FIRE_GLOB_DROP_CHANCE_INTERVAL) {
+			this->fireGlobTimeCounter = 0.0;
+			int fireGlobDropRandomNum = Randomizer::GetInstance()->RandomUnsignedInt() % GameModelConstants::GetInstance()->FIRE_GLOB_CHANCE_MOD;
+			if (fireGlobDropRandomNum == 0) {
+				// Calculate a somewhat random place on the block to drop the glob from...
+				Point2D dropPos = this->center + Vector2D(Randomizer::GetInstance()->RandomNumNegOneToOne() * LevelPiece::HALF_PIECE_WIDTH * 0.8f, 
+																									Randomizer::GetInstance()->RandomNumNegOneToOne() * LevelPiece::HALF_PIECE_HEIGHT * 0.75f);
+				// Do the same for the width and height...
+				float globWidth  = 0.25f * LevelPiece::HALF_PIECE_WIDTH + Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_WIDTH;
+				float globHeight = 1.2f * globWidth + 0.25f * Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_HEIGHT;
+				
+				// Drop a glob of fire downwards from the block...
+				gameModel->AddProjectile(new FireGlobProjectile(dropPos, globWidth, globHeight));
+			}
+		}
+
+		// Fire will continue to diminish the piece...
+		this->EatAwayAtPiece(dT, GameModelConstants::GetInstance()->FIRE_DAMAGE_PER_SECOND, gameModel);
+	}
+	
+	return true;
 }
