@@ -534,6 +534,62 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 	effectsList.push_back(ghostBallEmitterTrail);
 }
 
+void GameESPAssets::AddFireBallESPEffects(std::vector<ESPPointEmitter*>& effectsList) {
+	assert(effectsList.size() == 0);
+
+	ESPPointEmitter* fireBallEmitterTrail = new ESPPointEmitter();
+	fireBallEmitterTrail->SetSpawnDelta(ESPInterval(0.01f));
+	fireBallEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
+	fireBallEmitterTrail->SetParticleLife(ESPInterval(0.5f));
+	fireBallEmitterTrail->SetParticleSize(ESPInterval(1.5f, 2.0f));
+	fireBallEmitterTrail->SetEmitAngleInDegrees(15);
+	fireBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	fireBallEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
+	fireBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+	fireBallEmitterTrail->AddEffector(&this->particleFireColourFader);
+	bool result = fireBallEmitterTrail->SetParticles(GameESPAssets::NUM_FIRE_BALL_PARTICLES, &this->fireEffect);
+	assert(result);
+
+	/*
+	size_t randomTexIndex1 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
+	size_t randomTexIndex2 = (randomTexIndex1 + 1) % this->smokeTextures.size();
+
+	ESPPointEmitter* smokeyTrailEmitter1 = new ESPPointEmitter();
+	smokeyTrailEmitter1->SetSpawnDelta(ESPInterval(0.1f));
+	smokeyTrailEmitter1->SetInitialSpd(ESPInterval(1.0f));
+	smokeyTrailEmitter1->SetParticleLife(ESPInterval(0.5f, 0.75f));
+	smokeyTrailEmitter1->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
+	smokeyTrailEmitter1->SetEmitAngleInDegrees(45);
+	smokeyTrailEmitter1->SetEmitDirection(Vector3D(0, -1, 0));
+	smokeyTrailEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAligned);
+	smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, 0));
+	smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
+	smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
+	smokeyTrailEmitter1->AddEffector(&this->explosionRayRotatorCW);
+	result = smokeyTrailEmitter1->SetParticles(5, this->smokeTextures[randomTexIndex1]);
+	assert(result);
+
+	ESPPointEmitter* smokeyTrailEmitter2 = new ESPPointEmitter();
+	smokeyTrailEmitter2->SetSpawnDelta(ESPInterval(0.1f));
+	smokeyTrailEmitter2->SetInitialSpd(ESPInterval(1.0f));
+	smokeyTrailEmitter2->SetParticleLife(ESPInterval(0.5f, 0.75f));
+	smokeyTrailEmitter2->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
+	smokeyTrailEmitter2->SetEmitAngleInDegrees(45);
+	smokeyTrailEmitter2->SetEmitDirection(Vector3D(0, -1, 0));
+	smokeyTrailEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAligned);
+	smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, 0));
+	smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
+	smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
+	smokeyTrailEmitter2->AddEffector(&this->explosionRayRotatorCCW);
+	result = smokeyTrailEmitter2->SetParticles(5, this->smokeTextures[randomTexIndex2]);
+	assert(result);
+	*/
+
+	effectsList.push_back(fireBallEmitterTrail);
+}
+
 /**
  * Private helper function - sets up any ball effects that are associated with the paddle
  * camera mode.
@@ -2653,7 +2709,7 @@ void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
 	fireyTrailEmitter->SetSpawnDelta(ESPInterval(0.01f));
 	fireyTrailEmitter->SetInitialSpd(ESPInterval(0.0f));
 	fireyTrailEmitter->SetParticleLife(ESPInterval(0.5f));
-	fireyTrailEmitter->SetParticleSize(ESPInterval(0.8f*projectile.GetWidth(), projectile.GetWidth()));
+	fireyTrailEmitter->SetParticleSize(ESPInterval(0.9f*projectile.GetWidth(), projectile.GetWidth()));
 	fireyTrailEmitter->SetEmitAngleInDegrees(15);
 	fireyTrailEmitter->SetEmitDirection(Vector3D(0, -1, 0));
 	fireyTrailEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
@@ -2704,7 +2760,6 @@ void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
 	projectileEmitters.push_back(smokeyTrailEmitter1);
 	projectileEmitters.push_back(smokeyTrailEmitter2);
 	projectileEmitters.push_back(fireyTrailEmitter);
-
 }
 
 /**
@@ -3601,7 +3656,7 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 	Point2D ballPos  = ball.GetBounds().Center();
 
 	glPushMatrix();
-	Point2D loc = ball.GetBounds().Center();
+	const Point2D& loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);
 
 	uberBallEffectList[1]->Draw(camera);
@@ -3629,29 +3684,33 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 	}
 
 	if (foundBallEffects->second.find(GameItem::GhostBallItem) == foundBallEffects->second.end()) {
-		// Didn't find an associated uber ball effect, so add one
+		// Didn't find an associated ghost ball effect, so add one
 		this->AddGhostBallESPEffects(this->ballEffects[&ball][GameItem::GhostBallItem]);
 	}
 	std::vector<ESPPointEmitter*>& ghostBallEffectList = this->ballEffects[&ball][GameItem::GhostBallItem];
 
 	glPushMatrix();
-	Point2D loc = ball.GetBounds().Center();
+	const Point2D& loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);
 
-	// Rotate the negative ball -vel direction by some random amount and then affect the particle's velocities
+	// Rotate the negative ball velocity direction by some random amount and then affect the particle's velocities
 	// by it, this gives the impression that the particles are waving around mysteriously (ghostlike... one might say)
 	double randomDegrees = Randomizer::GetInstance()->RandomNumNegOneToOne() * 90;
-	Vector2D ballDir    = ball.GetDirection();
-	Vector3D negBallDir = Vector3D(-ballDir[0], -ballDir[1], 0.0f);
-	Vector3D accel = Matrix4x4::rotationMatrix('z', static_cast<float>(randomDegrees), true) * negBallDir;
-	accel = ball.GetSpeed() * 4.0 * accel;
-	this->ghostBallAccel1.SetAcceleration(accel);
+	const Vector2D& ballDir = ball.GetDirection();
 
-	// Create a kind of trail for the ball...
+	Vector2D accelVec = Vector2D::Rotate(static_cast<float>(randomDegrees), -ballDir);
+	accelVec = ball.GetSpeed() * 4.0 * accelVec;
+	this->ghostBallAccel1.SetAcceleration(Vector3D(accelVec, 0.0f));
+
+	// Draw the ghostly trail for the ball...
 	ghostBallEffectList[0]->Draw(camera);
 	ghostBallEffectList[0]->Tick(dT);
 	
 	glPopMatrix();
+}
+
+void GameESPAssets::DrawFireBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	// TODO
 }
 
 void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir) {
@@ -3672,7 +3731,7 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 	std::vector<ESPPointEmitter*>& gravityBallEffectList = this->ballEffects[&ball][GameItem::GravityBallItem];
 
 	glPushMatrix();
-	Point2D loc = ball.GetBounds().Center();
+	const Point2D& loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);
 
 	for (std::vector<ESPPointEmitter*>::iterator iter = gravityBallEffectList.begin(); iter != gravityBallEffectList.end(); ++iter) {
@@ -3718,7 +3777,7 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 	}
 
 	glPushMatrix();
-	Point2D loc = ball.GetBounds().Center();
+	const Point2D& loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);
 
 	this->crazyBallAura->Tick(dT);

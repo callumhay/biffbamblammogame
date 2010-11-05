@@ -65,6 +65,7 @@ inline void BallInPlayState::AugmentBallDirectionToBeNotDownwards(GameBall& b) {
 
 	if (ballDirection[1] < 0) {
 		ballDirection[1] = fabs(ballDirection[0] * tanf(GameBall::MIN_BALL_ANGLE_IN_RADS));
+		ballDirection.Normalize();
 		b.SetDirection(ballDirection);
 	}
 }

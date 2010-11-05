@@ -208,13 +208,13 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			visibleBallCount++;
 		}
 		else {
-			// The ball has an item in effect on it... figure out what effect and render it appropriately
+			// The ball has an item in effect on it... figure out what effect(s) and render it/them appropriately
 
 			unsigned int numColoursApplied = 0;
+			bool ballIsInvisible = (currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall;
 
 			// GHOST BALL CHECK
-			if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall &&
-					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+			if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && !ballIsInvisible) {
 				
 				// Draw when the ghost ball is not an invisiball...	
 				ballEffectTemp = this->ghostBallEffect;
@@ -229,8 +229,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			}
 
 			// UBER BALL CHECK
-			if ((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall &&
-					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+			if ((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall && !ballIsInvisible) {
 				
 				// Draw when uber ball and not invisiball...
 				// We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
@@ -243,8 +242,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			}
 
 			// GRAVITY BALL CHECK
-			if ((currBall->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall &&
-					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+			if ((currBall->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall && !ballIsInvisible) {
 
 				// Draw when gravity ball and not invisiball...
 				// We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
@@ -258,11 +256,10 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			}
 
 			// CRAZY BALL CHECK
-			if ((currBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall &&
-					(currBall->GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall) {
+			if ((currBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall && !ballIsInvisible) {
 
-				// Draw when crazy ball and not invisiball...
-				// We don't draw any of the effects if we're in ball camera mode or the ball is inside a cannon
+				// Draw when crazy ball when not invisible...
+				// We don't draw any of the effects if we're in ball camera mode
 				if (!GameBall::GetIsBallCameraOn()) {				
 					this->espAssets->DrawCrazyBallEffects(dT, camera, *currBall);
 				}
@@ -271,8 +268,19 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				numColoursApplied++;
 			}
 
+			// FIRE BALL CHECK
+			if ((currBall->GetBallType() & GameBall::FireBall) == GameBall::FireBall && !ballIsInvisible) {
+				// Draw the fire ball when not invisible
+				// We don't draw any of the effects if we're in a ball camera mode or inside a cannon
+				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {				
+					this->espAssets->DrawFireBallEffects(dT, camera, *currBall);
+				}
+				currBallColour = currBallColour + GameModelConstants::GetInstance()->FIRE_BALL_COLOUR;
+				numColoursApplied++;
+			}
+
 			// INVISIBALL CHECK
-			if ((currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall) {
+			if (ballIsInvisible) {
 				// Obtain the POST full screen rendering from the previous frame - this is
 				// a bit of a hack but it saves us from reading/writing to the same FBO simultaneously
 				this->invisiBallEffect->SetFBOTexture(this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
