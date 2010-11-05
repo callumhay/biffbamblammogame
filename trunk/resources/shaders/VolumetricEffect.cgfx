@@ -170,10 +170,6 @@ float4 smokey_PS(vertexOutput IN) : COLOR {
 }
 
 float4 smokey_sprite_PS(vertexOutput IN) : COLOR {
-    
-    float3 nN = normalize(IN.WorldNormal);
-    float3 nV = normalize(IN.WorldView);
-
     float3 sampleCoord = IN.WorldPos.xyz + Freq*Timer*FlowDir;
     
     float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);
@@ -187,10 +183,6 @@ float4 smokey_sprite_PS(vertexOutput IN) : COLOR {
 }
 
 float4 firey_sprite_PS(vertexOutput IN) : COLOR {
-    
-    float3 nN = normalize(IN.WorldNormal);
-    float3 nV = normalize(IN.WorldView);
-
     float3 sampleCoord = IN.WorldPos.xyz + Freq*Timer*FlowDir;
     
     float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);

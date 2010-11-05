@@ -117,6 +117,7 @@ private:
 	static const int NUM_PADDLE_LASER_SPARKS = 15;
 	static const int NUM_PADDLE_BEAM_ORIGIN_PARTICLES = 30;
 	static const int NUM_GHOST_SMOKE_PARTICLES = 23;
+	static const int NUM_FIRE_BALL_PARTICLES = 25;
 	static const int NUM_UBER_BALL_TRAIL_PARTICLES = 35;
 	static const int NUM_EXPLOSION_FIRE_CLOUD_PARTICLES  = 23;
 	static const int NUM_LASER_VAPOUR_TRAIL_PARTICLES = 15;
@@ -154,6 +155,7 @@ private:
 
 	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
+	void AddFireBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGravityBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
@@ -255,6 +257,7 @@ public:
 
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball);
+	void DrawFireBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir);
 	void DrawCrazyBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);

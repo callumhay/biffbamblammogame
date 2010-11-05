@@ -56,6 +56,7 @@ public:
 	const Colour UBER_BALL_COLOUR;
 	const Colour GRAVITY_BALL_COLOUR;
 	const Colour CRAZY_BALL_COLOUR;
+	const Colour FIRE_BALL_COLOUR;
 
 	const Colour SHIELD_PADDLE_COLOUR;
 
