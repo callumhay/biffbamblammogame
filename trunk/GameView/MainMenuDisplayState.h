@@ -38,15 +38,15 @@ class MainMenuDisplayState : public DisplayState {
 
 private:
 	// Title and menu text
-	static const std::string TITLE_TEXT;
-	static const std::string TITLE_BIFF_TEXT;
-	static const std::string TITLE_BAM_TEXT;
-	static const std::string TITLE_BLAMMO_TEXT;
+	static const char* TITLE_TEXT;
+	static const char* TITLE_BIFF_TEXT;
+	static const char* TITLE_BAM_TEXT;
+	static const char* TITLE_BLAMMO_TEXT;
 
-	static const std::string NEW_GAME_MENUITEM;
-	static const std::string PLAY_LEVEL_MENUITEM;
-	static const std::string OPTIONS_MENUITEM;
-	static const std::string EXIT_MENUITEM;
+	static const char* NEW_GAME_MENUITEM;
+	static const char* PLAY_LEVEL_MENUITEM;
+	static const char* OPTIONS_MENUITEM;
+	static const char* EXIT_MENUITEM;
 
 	static const Colour MENU_ITEM_IDLE_COLOUR;
 	static const Colour MENU_ITEM_SEL_COLOUR;

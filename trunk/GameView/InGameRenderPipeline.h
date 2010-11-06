@@ -27,7 +27,6 @@ private:
 	GameDisplay* display;	// Not owned by this object
 
 	// HUD related members
-	static const std::string LIVES_LABEL_TEXT;
 	static const unsigned int HUD_X_INDENT;
 	static const unsigned int HUD_Y_INDENT;
 	TextLabel2D scoreLabel;

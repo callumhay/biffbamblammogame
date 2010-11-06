@@ -847,6 +847,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxFireBallEffect.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxFullscreenGoo.h"
 						>
 					</File>
@@ -912,6 +916,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxDecoSkybox.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxFireBallEffect.cpp"
 						>
 					</File>
 					<File

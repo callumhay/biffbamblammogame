@@ -15,17 +15,17 @@
 
 #include "../ResourceManager.h"
 
-const std::string ObjReader::OBJ_EXTENSION = "obj";
-const std::string ObjReader::MTL_EXTENSION = "mtl";
+const char* ObjReader::OBJ_EXTENSION = "obj";
+const char* ObjReader::MTL_EXTENSION = "mtl";
 
-const std::string ObjReader::OBJ_MTLFILE = "mtllib";
-const std::string ObjReader::OBJ_USE_MATERIAL = "usemtl";
+const char* ObjReader::OBJ_MTLFILE = "mtllib";
+const char* ObjReader::OBJ_USE_MATERIAL = "usemtl";
 
-const std::string ObjReader::OBJ_GROUP = "g";
-const std::string ObjReader::OBJ_VERTEX_COORD = "v";
-const std::string ObjReader::OBJ_VERTEX_NORMAL = "vn";
-const std::string ObjReader::OBJ_VERTEX_TEXCOORD = "vt";
-const std::string ObjReader::OBJ_FACE = "f";
+const char* ObjReader::OBJ_GROUP = "g";
+const char* ObjReader::OBJ_VERTEX_COORD = "v";
+const char* ObjReader::OBJ_VERTEX_NORMAL = "vn";
+const char* ObjReader::OBJ_VERTEX_TEXCOORD = "vt";
+const char* ObjReader::OBJ_FACE = "f";
 
 /*
  * Read in a mesh from an Obj file.

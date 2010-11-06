@@ -21,16 +21,16 @@ class ObjReader {
 
 private:
 
-	static const std::string OBJ_EXTENSION;
-	static const std::string MTL_EXTENSION;
+	static const char* OBJ_EXTENSION;
+	static const char* MTL_EXTENSION;
 
-	static const std::string OBJ_MTLFILE;
-	static const std::string OBJ_USE_MATERIAL;
-	static const std::string OBJ_GROUP;
-	static const std::string OBJ_VERTEX_COORD;
-	static const std::string OBJ_VERTEX_NORMAL;
-	static const std::string OBJ_VERTEX_TEXCOORD;
-	static const std::string OBJ_FACE;
+	static const char* OBJ_MTLFILE;
+	static const char* OBJ_USE_MATERIAL;
+	static const char* OBJ_GROUP;
+	static const char* OBJ_VERTEX_COORD;
+	static const char* OBJ_VERTEX_NORMAL;
+	static const char* OBJ_VERTEX_TEXCOORD;
+	static const char* OBJ_FACE;
 
 	ObjReader();
 

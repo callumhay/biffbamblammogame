@@ -10,12 +10,12 @@
 
 LoadingScreen* LoadingScreen::instance = NULL;
 
-const std::string LoadingScreen::LOADING_TEXT = "Loading ...";
+const char* LoadingScreen::LOADING_TEXT = "Loading ...";
 const float LoadingScreen::GAP_PIXELS	= 20.0f;
 
 const int LoadingScreen::LOADING_BAR_WIDTH	= 550;
 const int LoadingScreen::LOADING_BAR_HEIGHT = 50;
-const std::string LoadingScreen::ABSURD_LOADING_DESCRIPTION = "ABSURD";
+const char* LoadingScreen::ABSURD_LOADING_DESCRIPTION = "ABSURD";
 
 LoadingScreen::LoadingScreen() : loadingScreenOn(false), width(0), height(0), 
 numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(NULL) {

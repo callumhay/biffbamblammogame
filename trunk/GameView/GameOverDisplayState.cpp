@@ -4,7 +4,7 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
-const std::string GameOverDisplayState::GAME_OVER_TEXT = "Game Over";
+const char* GameOverDisplayState::GAME_OVER_TEXT = "Game Over";
 
 GameOverDisplayState::GameOverDisplayState(GameDisplay* display) : DisplayState(display) {
 	this->gameOverLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), GAME_OVER_TEXT);

@@ -13,7 +13,7 @@ class CgFxBloom;
  */
 class LoadingScreen {
 public:
-	static const std::string ABSURD_LOADING_DESCRIPTION;
+	static const char* ABSURD_LOADING_DESCRIPTION;
 
 	std::vector<std::string> absurdLoadingDescriptions;
 
@@ -48,7 +48,7 @@ private:
 	unsigned int lastRandomAbsurdity;
 
 	// Display-related members
-	static const std::string LOADING_TEXT;
+	static const char* LOADING_TEXT;
 	static const float GAP_PIXELS;						// Gap between text and items on the load screen
 	
 	static const int LOADING_BAR_WIDTH;				// Width of the loading bar in pixels

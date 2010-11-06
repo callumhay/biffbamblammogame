@@ -5,7 +5,7 @@
 #include "../BlammoEngine/Noise.h"
 #include "../BlammoEngine/Texture3D.h"
 
-const std::string CgFxInkBlock::INKBLOCK_TECHNIQUE_NAME = "InkBlock";
+const char* CgFxInkBlock::INKBLOCK_TECHNIQUE_NAME = "InkBlock";
 
 CgFxInkBlock::CgFxInkBlock(MaterialProperties* properties) : 
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_INKBLOCK_SHADER, properties),

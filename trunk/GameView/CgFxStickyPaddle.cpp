@@ -5,7 +5,7 @@
 #include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/Texture3D.h"
 
-const std::string CgFxStickyPaddle::STICKYPADDLE_TECHNIQUE_NAME = "StickyPaddle";
+const char* CgFxStickyPaddle::STICKYPADDLE_TECHNIQUE_NAME = "StickyPaddle";
 
 CgFxStickyPaddle::CgFxStickyPaddle(MaterialProperties* properties) :
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_STICKYPADDLE_SHADER, properties),

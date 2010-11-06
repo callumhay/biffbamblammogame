@@ -196,6 +196,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		
+		bool ballIsInvisible = (currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall;
 		CgFxEffectBase* ballEffectTemp = NULL;
 		Colour currBallColour(0,0,0);
 
@@ -211,8 +212,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			// The ball has an item in effect on it... figure out what effect(s) and render it/them appropriately
 
 			unsigned int numColoursApplied = 0;
-			bool ballIsInvisible = (currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall;
-
+			
 			// GHOST BALL CHECK
 			if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && !ballIsInvisible) {
 				
@@ -320,7 +320,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		glScalef(ballScaleFactor, ballScaleFactor, ballScaleFactor);
 		// Always make the colour of the invisiball to be plain white - we don't want to affect
 		// the cloaking effect
-		if ((currBall->GetBallType() & GameBall::InvisiBall) == GameBall::InvisiBall) {
+		if (ballIsInvisible) {
 			glColor4f(1.0f, 1.0f, 1.0f, ballColour.A());
 		}
 		else {

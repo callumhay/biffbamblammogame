@@ -6,7 +6,7 @@
 
 #include "../GameModel/GameModelConstants.h"
 
-const std::string CgFxPostUberIntense::POSTUBERINTENSE_TECHNIQUE_NAME = "PostUberIntense";
+const char* CgFxPostUberIntense::POSTUBERINTENSE_TECHNIQUE_NAME = "PostUberIntense";
 
 CgFxPostUberIntense::CgFxPostUberIntense(FBObj* outputFBO) :
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_FULLSCREEN_UBERINTENSE_SHADER, sceneFBO), resultFBO(outputFBO),

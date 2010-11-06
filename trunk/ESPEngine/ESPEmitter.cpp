@@ -304,10 +304,6 @@ void ESPEmitter::Draw(const Camera& camera, const Vector3D& worldTranslation, bo
 			currParticle->Draw(camera, this->particleAlignment);
 		}
 	}
-
-	if (this->particleTexture != NULL) {
-		this->particleTexture->UnbindTexture();
-	}
 	
 	glPopAttrib();
 	debug_opengl_state();

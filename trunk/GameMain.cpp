@@ -31,7 +31,7 @@
 #include "ConfigOptions.h"
 
 // Initialization Constants for the application
-static const std::string RESOURCE_ZIP = "BBBResources.zip";
+static const char* RESOURCE_ZIP = "BBBResources.zip";
 
 static GameModel *model = NULL;
 static GameController *controller = NULL;

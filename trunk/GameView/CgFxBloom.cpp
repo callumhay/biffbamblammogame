@@ -5,11 +5,11 @@
 
 #include "../BlammoEngine/FBObj.h"
 
-const std::string CgFxBloom::BLOOM_FILTER_TECHNIQUE_NAME						= "BloomFilter";
-const std::string CgFxBloom::BRIGHT_DOWNSAMPLE_LVL2_TECHNIQUE_NAME	= "BrightDownsampleBlur2";
-const std::string CgFxBloom::BRIGHT_DOWNSAMPLE_LVL3_TECHNIQUE_NAME	= "BrightDownsampleBlur3";
-const std::string CgFxBloom::BRIGHT_DOWNSAMPLE_LVL4_TECHNIQUE_NAME	= "BrightDownsampleBlur4";
-const std::string CgFxBloom::BLOOM_COMPOSITION_TECHNIQUE_NAME				= "CompositeBloom";
+const char* CgFxBloom::BLOOM_FILTER_TECHNIQUE_NAME						= "BloomFilter";
+const char* CgFxBloom::BRIGHT_DOWNSAMPLE_LVL2_TECHNIQUE_NAME	= "BrightDownsampleBlur2";
+const char* CgFxBloom::BRIGHT_DOWNSAMPLE_LVL3_TECHNIQUE_NAME	= "BrightDownsampleBlur3";
+const char* CgFxBloom::BRIGHT_DOWNSAMPLE_LVL4_TECHNIQUE_NAME	= "BrightDownsampleBlur4";
+const char* CgFxBloom::BLOOM_COMPOSITION_TECHNIQUE_NAME				= "CompositeBloom";
 
 const float CgFxBloom::DEFAULT_HIGHLIGHT_THRESHOLD	= 0.55f;
 const float CgFxBloom::DEFAULT_SCENE_INTENSITY			= 0.85f;

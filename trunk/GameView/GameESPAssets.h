@@ -1,3 +1,14 @@
+/**
+ * GameESPAssets.h
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #ifndef __GAMESPASSETS_H__
 #define __GAMESPASSETS_H__
 
@@ -56,6 +67,7 @@ private:
 	// Standard effectors for the various ESP effects
 	ESPParticleColourEffector particleFader;
 	ESPParticleColourEffector particleFireColourFader;
+	ESPParticleColourEffector fireBallColourFader;
 	ESPParticleColourEffector particleCloudColourFader;
 	ESPParticleColourEffector particleFaderUberballTrail;
 	ESPParticleColourEffector particleGravityArrowColour;
@@ -68,6 +80,7 @@ private:
 
 	ESPParticleAccelEffector ghostBallAccel1;
 	ESPParticleAccelEffector gravity;
+	ESPParticleAccelEffector fireBallAccel1;
 
 	ESPParticleScaleEffector particleSmallGrowth;
 	ESPParticleScaleEffector particleMediumGrowth;
@@ -155,7 +168,7 @@ private:
 
 	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
-	void AddFireBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
+	void AddFireBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddGravityBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
@@ -193,6 +206,8 @@ private:
 	ESPPointEmitter* CreateBeamFlareEffect();
 
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Projectile& projectile, ESPPointEmitter* projectileEmitter);
+
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator EnsureBallEffectsList(const GameBall& ball);
 
 public:
 	GameESPAssets();

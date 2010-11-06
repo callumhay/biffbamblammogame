@@ -1,3 +1,14 @@
+/**
+ * CgFxBloom.h
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009-2010
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #ifndef __CGFXBLOOM_H__
 #define __CGFXBLOOM_H__
 
@@ -9,11 +20,11 @@ class FBObj;
 
 class CgFxBloom : public CgFxPostProcessingEffect {
 private:
-	static const std::string BLOOM_FILTER_TECHNIQUE_NAME;
-	static const std::string BRIGHT_DOWNSAMPLE_LVL2_TECHNIQUE_NAME;
-	static const std::string BRIGHT_DOWNSAMPLE_LVL3_TECHNIQUE_NAME;
-	static const std::string BRIGHT_DOWNSAMPLE_LVL4_TECHNIQUE_NAME;
-	static const std::string BLOOM_COMPOSITION_TECHNIQUE_NAME;
+	static const char* BLOOM_FILTER_TECHNIQUE_NAME;
+	static const char* BRIGHT_DOWNSAMPLE_LVL2_TECHNIQUE_NAME;
+	static const char* BRIGHT_DOWNSAMPLE_LVL3_TECHNIQUE_NAME;
+	static const char* BRIGHT_DOWNSAMPLE_LVL4_TECHNIQUE_NAME;
+	static const char* BLOOM_COMPOSITION_TECHNIQUE_NAME;
 
 	static const float DEFAULT_HIGHLIGHT_THRESHOLD;
 	static const float DEFAULT_SCENE_INTENSITY;

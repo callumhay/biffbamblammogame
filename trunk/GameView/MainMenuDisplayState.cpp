@@ -31,18 +31,18 @@
 
 
 // 3 sprites for "Biff" "Bam" and "Blammo" respectively
-const std::string MainMenuDisplayState::TITLE_BIFF_TEXT			= "Biff!";
-const std::string MainMenuDisplayState::TITLE_BAM_TEXT			= "Bam!!";
-const std::string MainMenuDisplayState::TITLE_BLAMMO_TEXT		= "Blammo!?!";
+const char* MainMenuDisplayState::TITLE_BIFF_TEXT			= "Biff!";
+const char* MainMenuDisplayState::TITLE_BAM_TEXT			= "Bam!!";
+const char* MainMenuDisplayState::TITLE_BLAMMO_TEXT		= "Blammo!?!";
 
 const int MainMenuDisplayState::MENU_SEL_ON_INDEX	= 0;
 const int MainMenuDisplayState::MENU_SEL_OFF_INDEX	= 1;
 
 // Menu items
-const std::string MainMenuDisplayState::NEW_GAME_MENUITEM		= "New Game";
-const std::string MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Play Level";
-const std::string MainMenuDisplayState::OPTIONS_MENUITEM		= "Options";
-const std::string MainMenuDisplayState::EXIT_MENUITEM				= "Exit Game";
+const char* MainMenuDisplayState::NEW_GAME_MENUITEM		= "New Game";
+const char* MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Play Level";
+const char* MainMenuDisplayState::OPTIONS_MENUITEM		= "Options";
+const char* MainMenuDisplayState::EXIT_MENUITEM				= "Exit Game";
 
 const Colour MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR		= Colour(1, 0.65f, 0);
 const Colour MainMenuDisplayState::MENU_ITEM_SEL_COLOUR			= Colour(1, 1, 0);

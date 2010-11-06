@@ -11,7 +11,7 @@ class GameDisplay;
 class GameOverDisplayState : public DisplayState {
 
 private:
-	static const std::string GAME_OVER_TEXT;
+	static const char* GAME_OVER_TEXT;
 	TextLabel2D gameOverLabel;
 
 public:

@@ -1,6 +1,6 @@
 #include "ConfigOptions.h"
 
-const std::string ConfigOptions::INI_FILEPATH				= "BiffBamBlammo.ini";
+const char* ConfigOptions::INI_FILEPATH				= "BiffBamBlammo.ini";
 
 const char* ConfigOptions::WINDOW_HEIGHT_VAR			= "window_height";
 const char* ConfigOptions::WINDOW_WIDTH_VAR				= "window_width";
@@ -53,7 +53,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 
 	// Open the .ini file off disk
 	std::ifstream inFile;
-	inFile.open(ConfigOptions::INI_FILEPATH.c_str());
+	inFile.open(ConfigOptions::INI_FILEPATH);
 	if (!inFile.is_open()) {
 		// Couldn't find or open the file
 		inFile.close();
@@ -145,7 +145,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 bool ConfigOptions::WriteConfigOptionsToFile() const {
 	// Open or create the .ini file for writing
 	std::ofstream outFile;
-	outFile.open(ConfigOptions::INI_FILEPATH.c_str());
+	outFile.open(ConfigOptions::INI_FILEPATH);
 	if (!outFile.is_open()) {
 		// Couldn't open for writing...
 		outFile.close();

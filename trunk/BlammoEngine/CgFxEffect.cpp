@@ -35,8 +35,8 @@ const char* MaterialProperties::MATERIAL_STICKYGOO_TYPE	= "stickygoo";
 const char* MaterialProperties::MATERIAL_PRISM_TYPE			= "prism";
 const char* MaterialProperties::MATERIAL_PORTAL_TYPE		= "portal";
 
-const std::string MaterialProperties::MATERIAL_GEOM_FG_TYPE = "fg";
-const std::string MaterialProperties::MATERIAL_GEOM_BG_TYPE = "bg";
+const char* MaterialProperties::MATERIAL_GEOM_FG_TYPE = "fg";
+const char* MaterialProperties::MATERIAL_GEOM_BG_TYPE = "bg";
 
 CgFxMaterialEffect::CgFxMaterialEffect(const std::string& effectPath, MaterialProperties* props) : 
 CgFxEffectBase(effectPath), properties(props),

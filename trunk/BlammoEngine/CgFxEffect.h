@@ -40,8 +40,8 @@ struct MaterialProperties {
 	static const char* MATERIAL_PORTAL_TYPE;
 
 	// Geometry types
-	static const std::string MATERIAL_GEOM_FG_TYPE;
-	static const std::string MATERIAL_GEOM_BG_TYPE;
+	static const char* MATERIAL_GEOM_FG_TYPE;
+	static const char* MATERIAL_GEOM_BG_TYPE;
 
 	Colour diffuse, specular, outlineColour;
 	float shininess, outlineSize;
