@@ -9,7 +9,7 @@
 
 #include "../ResourceManager.h"
 
-const std::string CgFxDecoSkybox::DECOSKYBOX_TECHNIQUE_NAME = "DecoSkybox";
+const char* CgFxDecoSkybox::DECOSKYBOX_TECHNIQUE_NAME = "DecoSkybox";
 
 CgFxDecoSkybox::CgFxDecoSkybox(Texture *skyTex) :
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_DECOSKYBOX_SHADER), skyTex(skyTex),

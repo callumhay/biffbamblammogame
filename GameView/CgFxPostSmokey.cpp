@@ -7,7 +7,7 @@
 
 #include "../GameModel/GameModelConstants.h"
 
-const std::string CgFxPostSmokey::POSTSMOKEY_TECHNIQUE_NAME = "PostSmokey";
+const char* CgFxPostSmokey::POSTSMOKEY_TECHNIQUE_NAME = "PostSmokey";
 
 CgFxPostSmokey::CgFxPostSmokey(FBObj* outputFBO) :
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_FULLSCREENSMOKEY_SHADER, sceneFBO), resultFBO(outputFBO),

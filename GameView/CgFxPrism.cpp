@@ -3,7 +3,7 @@
 
 #include "../BlammoEngine/Texture2D.h"
 
-const std::string CgFxPrism::DEFAULT_PRISM_TECHNIQUE_NAME = "Prism";
+const char* CgFxPrism::DEFAULT_PRISM_TECHNIQUE_NAME = "Prism";
 
 CgFxPrism::CgFxPrism(MaterialProperties* properties) : 
 CgFxMaterialEffect(GameViewConstants::GetInstance()->CGFX_PRISM_SHADER, properties),

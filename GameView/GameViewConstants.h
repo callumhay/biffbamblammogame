@@ -56,6 +56,7 @@ public:
 	const char* CGFX_FULLSCREEN_UBERINTENSE_SHADER;
 	const char* CGFX_PRISM_SHADER;
 	const char* CGFX_PORTALBLOCK_SHADER;
+	const char* CGFX_FIREBALL_SHADER;
 
 	// Texture path constants *******************************
 	const char* TEXTURE_BANG1;

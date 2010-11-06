@@ -25,6 +25,7 @@
 GameESPAssets::GameESPAssets() : 
 particleFader(1, 0), 
 particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
+fireBallColourFader(ColourRGBA(1.0f, 1.0f, 0.0f, 1.0f), ColourRGBA(0.4f, 0.15f, 0.0f, 0.2f)),
 particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
 particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0),
 particleGravityArrowColour(ColourRGBA(GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
@@ -43,6 +44,7 @@ particleLargeVStretch(Vector2D(1.0f, 1.0f), Vector2D(1.0f, 4.0f)),
 beamBlastColourEffector(ColourRGBA(0.75f, 1.0f, 1.0f, 1.0f), ColourRGBA(GameViewConstants::GetInstance()->LASER_BEAM_COLOUR, 0.8f)),
 
 ghostBallAccel1(Vector3D(1,1,1)),
+fireBallAccel1(Vector3D(1,1,1)),
 gravity(Vector3D(0, -9.8, 0)),
 
 crazyBallAura(NULL),
@@ -534,19 +536,21 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 	effectsList.push_back(ghostBallEmitterTrail);
 }
 
-void GameESPAssets::AddFireBallESPEffects(std::vector<ESPPointEmitter*>& effectsList) {
+void GameESPAssets::AddFireBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList) {
 	assert(effectsList.size() == 0);
 
 	ESPPointEmitter* fireBallEmitterTrail = new ESPPointEmitter();
 	fireBallEmitterTrail->SetSpawnDelta(ESPInterval(0.01f));
 	fireBallEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
-	fireBallEmitterTrail->SetParticleLife(ESPInterval(0.5f));
-	fireBallEmitterTrail->SetParticleSize(ESPInterval(1.5f, 2.0f));
-	fireBallEmitterTrail->SetEmitAngleInDegrees(15);
+	fireBallEmitterTrail->SetParticleLife(ESPInterval(0.3f, 0.45f));
+	fireBallEmitterTrail->SetParticleSize(ESPInterval(2.25f*ball->GetBounds().Radius(), 3.25f*ball->GetBounds().Radius()));
+	fireBallEmitterTrail->SetEmitAngleInDegrees(10);
 	fireBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	fireBallEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
 	fireBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
-	fireBallEmitterTrail->AddEffector(&this->particleFireColourFader);
+	fireBallEmitterTrail->AddEffector(&this->fireBallColourFader);
+	fireBallEmitterTrail->AddEffector(&this->particleMediumGrowth);
+	fireBallEmitterTrail->AddEffector(&this->fireBallAccel1);
 	bool result = fireBallEmitterTrail->SetParticles(GameESPAssets::NUM_FIRE_BALL_PARTICLES, &this->fireEffect);
 	assert(result);
 
@@ -3633,18 +3637,28 @@ void GameESPAssets::DrawItemDropEffects(double dT, const Camera& camera, const G
 	}
 }
 
-/**
- * Draw particle effects associated with the uberball.
- */
-void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball) {
-	// Check to see if the ball has any associated uber ball effects, if not, then
-	// create the effect and add it to the ball first
+// Private helper function to ensure a ball has an associated effects list
+std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator
+GameESPAssets::EnsureBallEffectsList(const GameBall& ball) {
+	// Check to see if the ball has any associated effects, if not, then we add one for the ball
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
 	
 	if (foundBallEffects == this->ballEffects.end()) {
 		// Didn't even find a ball ... add one
 		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
 	}
+
+	return foundBallEffects;
+}
+
+/**
+ * Draw particle effects associated with the uberball.
+ */
+void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	// Check to see if the ball has any associated uber ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+		this->EnsureBallEffectsList(ball);
 
 	if (foundBallEffects->second.find(GameItem::UberBallItem) == foundBallEffects->second.end()) {
 		// Didn't find an associated uber ball effect, so add one
@@ -3659,12 +3673,14 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 	const Point2D& loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);
 
+	uberBallEffectList[1]->SetParticleSize(ESPInterval(3.0f*ball.GetBounds().Radius()));
 	uberBallEffectList[1]->Draw(camera);
 	uberBallEffectList[1]->Tick(dT);
 
 	glPopMatrix();
 
 	// Draw the trail...
+	uberBallEffectList[0]->SetParticleSize(ESPInterval(2.5f*ball.GetBounds().Radius(), 3.5f*ball.GetBounds().Radius()));
 	uberBallEffectList[0]->SetEmitPosition(Point3D(ballPos[0], ballPos[1], 0.0f));
 	uberBallEffectList[0]->Draw(camera);
 	uberBallEffectList[0]->Tick(dT);
@@ -3676,12 +3692,8 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball) {
 	// Check to see if the ball has any associated ghost ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
-	
-	if (foundBallEffects == this->ballEffects.end()) {
-		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
-	}
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+		this->EnsureBallEffectsList(ball);
 
 	if (foundBallEffects->second.find(GameItem::GhostBallItem) == foundBallEffects->second.end()) {
 		// Didn't find an associated ghost ball effect, so add one
@@ -3699,10 +3711,11 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 	const Vector2D& ballDir = ball.GetDirection();
 
 	Vector2D accelVec = Vector2D::Rotate(static_cast<float>(randomDegrees), -ballDir);
-	accelVec = ball.GetSpeed() * 4.0 * accelVec;
+	accelVec = ball.GetSpeed() * 4.0f * accelVec;
 	this->ghostBallAccel1.SetAcceleration(Vector3D(accelVec, 0.0f));
 
 	// Draw the ghostly trail for the ball...
+	ghostBallEffectList[0]->SetParticleSize(ESPInterval(2.5f*ball.GetBounds().Radius(), 3.5f*ball.GetBounds().Radius()));
 	ghostBallEffectList[0]->Draw(camera);
 	ghostBallEffectList[0]->Tick(dT);
 	
@@ -3710,18 +3723,47 @@ void GameESPAssets::DrawGhostBallEffects(double dT, const Camera& camera, const 
 }
 
 void GameESPAssets::DrawFireBallEffects(double dT, const Camera& camera, const GameBall& ball) {
-	// TODO
+	// Check to see if the ball has any associated fire ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+		this->EnsureBallEffectsList(ball);
+
+	if (foundBallEffects->second.find(GameItem::FireBallItem) == foundBallEffects->second.end()) {
+		// Didn't find an associated fire ball effect, so add one
+		this->AddFireBallESPEffects(&ball, this->ballEffects[&ball][GameItem::FireBallItem]);
+	}
+
+	std::vector<ESPPointEmitter*>& fireBallEffectList = this->ballEffects[&ball][GameItem::FireBallItem];
+
+	glPushMatrix();
+	const Point2D& loc = ball.GetBounds().Center();
+	glTranslatef(loc[0], loc[1], 0);
+
+	// Rotate the negative ball velocity direction by some random amount and then affect the particle's velocities
+	// by it, this gives the impression that the particles are flickering like fire
+	double randomDegrees = Randomizer::GetInstance()->RandomNumNegOneToOne() * 30;
+	const Vector2D& ballDir = ball.GetDirection();
+
+	Vector2D accelVec = Vector2D::Rotate(static_cast<float>(randomDegrees), -ballDir);
+	accelVec = ball.GetSpeed() * 3.25f * accelVec;
+	this->fireBallAccel1.SetAcceleration(Vector3D(accelVec, 0.0f));
+
+	for (std::vector<ESPPointEmitter*>::iterator iter = fireBallEffectList.begin(); iter != fireBallEffectList.end(); ++iter) {
+		ESPPointEmitter* emitter = *iter;
+
+		emitter->SetParticleSize(ESPInterval(2.33f*ball.GetBounds().Radius(), 3.33f*ball.GetBounds().Radius()));
+		emitter->Draw(camera);
+		emitter->Tick(dT);
+	}
+
+	glPopMatrix();
 }
 
 void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir) {
 	// Check to see if the ball has any associated gravity ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
-	
-	if (foundBallEffects == this->ballEffects.end()) {
-		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
-	}
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+		this->EnsureBallEffectsList(ball);
 
 	if (foundBallEffects->second.find(GameItem::GravityBallItem) == foundBallEffects->second.end()) {
 		// Didn't find an associated gravity ball effect, so add one
@@ -3753,12 +3795,8 @@ void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, cons
 void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const GameBall& ball) {
 	// Check to see if the ball has any associated crazy ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
-	
-	if (foundBallEffects == this->ballEffects.end()) {
-		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
-	}
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+		this->EnsureBallEffectsList(ball);
 
 	if (foundBallEffects->second.find(GameItem::CrazyBallItem) == foundBallEffects->second.end()) {
 		// Didn't find an associated crazy ball effect, so add one
@@ -3780,6 +3818,7 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 	const Point2D& loc = ball.GetBounds().Center();
 	glTranslatef(loc[0], loc[1], 0);
 
+	this->crazyBallAura->SetParticleSize(ESPInterval(2.75f*ball.GetBounds().Radius()));
 	this->crazyBallAura->Tick(dT);
 	this->crazyBallAura->Draw(camera);
 	glPopMatrix();
@@ -3800,12 +3839,8 @@ void GameESPAssets::DrawCrazyBallEffects(double dT, const Camera& camera, const 
 void GameESPAssets::DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle) {
 	// Check to see if the ball has any associated camera paddle ball effects, if not, then
 	// create the effect and add it to the ball first
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
-	
-	if (foundBallEffects == this->ballEffects.end()) {
-		// Didn't even find a ball ... add one
-		foundBallEffects = this->ballEffects.insert(std::make_pair(&ball, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >())).first;
-	}
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+		this->EnsureBallEffectsList(ball);
 
 	if (foundBallEffects->second.find(GameItem::PaddleCamItem) == foundBallEffects->second.end()) {
 		// Didn't find an associated paddle camera ball effect, so add one

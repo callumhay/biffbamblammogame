@@ -7,8 +7,8 @@
 
 #include "../ResourceManager.h"
 
-const std::string CgFxFullscreenGoo::MASK_SPLATTER_TECHNIQUE_NAME		= "MaskSplatter";
-const std::string CgFxFullscreenGoo::NOMASK_SPLATTER_TECHNIQUE_NAME	= "NoMaskSplatter";
+const char* CgFxFullscreenGoo::MASK_SPLATTER_TECHNIQUE_NAME		= "MaskSplatter";
+const char* CgFxFullscreenGoo::NOMASK_SPLATTER_TECHNIQUE_NAME	= "NoMaskSplatter";
 
 CgFxFullscreenGoo::CgFxFullscreenGoo(FBObj* outputFBO) :
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_FULLSCREENGOO_SHADER, sceneFBO), resultFBO(outputFBO),

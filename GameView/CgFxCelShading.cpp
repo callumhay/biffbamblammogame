@@ -4,10 +4,10 @@
 #include "../BlammoEngine/Matrix.h"
 #include "../ResourceManager.h"
 
-const std::string CgFxCelShading::BASIC_FG_TECHNIQUE_NAME			= "BasicFG";
-const std::string CgFxCelShading::TEXTURED_FG_TECHNIQUE_NAME	= "TexturedFG";
-const std::string CgFxCelShading::BASIC_BG_TECHNIQUE_NAME			= "BasicBG";
-const std::string CgFxCelShading::TEXTURED_BG_TECHNIQUE_NAME	= "TexturedBG";
+const char* CgFxCelShading::BASIC_FG_TECHNIQUE_NAME			= "BasicFG";
+const char* CgFxCelShading::TEXTURED_FG_TECHNIQUE_NAME	= "TexturedFG";
+const char* CgFxCelShading::BASIC_BG_TECHNIQUE_NAME			= "BasicBG";
+const char* CgFxCelShading::TEXTURED_BG_TECHNIQUE_NAME	= "TexturedBG";
 Texture* CgFxCelShading::CelDiffuseTexture = NULL;
 
 // Default constructor, builds default, white material

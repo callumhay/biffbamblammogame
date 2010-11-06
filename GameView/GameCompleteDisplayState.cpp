@@ -4,7 +4,7 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
-const std::string GameCompleteDisplayState::GAME_COMPLETE_TEXT = "YOU WIN!";
+const char* GameCompleteDisplayState::GAME_COMPLETE_TEXT = "YOU WIN!";
 
 GameCompleteDisplayState::GameCompleteDisplayState(GameDisplay* display) : DisplayState(display) {
 

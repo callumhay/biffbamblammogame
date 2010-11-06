@@ -8,7 +8,6 @@
 #include "../BlammoEngine/Camera.h"
 #include "../GameModel/GameModel.h"
 
-const std::string InGameRenderPipeline::LIVES_LABEL_TEXT = "Lives: ";
 const unsigned int InGameRenderPipeline::HUD_X_INDENT = 10;	
 const unsigned int InGameRenderPipeline::HUD_Y_INDENT = 10;
 

@@ -13,7 +13,7 @@
 class GameCompleteDisplayState : public DisplayState {
 
 private:
-	static const std::string GAME_COMPLETE_TEXT;
+	static const char* GAME_COMPLETE_TEXT;
 	TextLabel2D gameCompleteLabel;
 	float gameCompleteLabelRasterWidth;
 

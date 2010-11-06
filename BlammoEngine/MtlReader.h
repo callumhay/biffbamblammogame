@@ -25,17 +25,17 @@ class MtlReader {
 private:
 
 	// Typical MTL statements
-	static const std::string MTL_NEWMATERIAL;
-	static const std::string MTL_AMBIENT;
-	static const std::string MTL_DIFFUSE;
-	static const std::string MTL_SPECULAR;
-	static const std::string MTL_SHININESS;
-	static const std::string MTL_DIFF_TEXTURE;
+	static const char* MTL_NEWMATERIAL;
+	static const char* MTL_AMBIENT;
+	static const char* MTL_DIFFUSE;
+	static const char* MTL_SPECULAR;
+	static const char* MTL_SHININESS;
+	static const char* MTL_DIFF_TEXTURE;
 
 	// Custom MTL statements
-	static const std::string CUSTOM_MTL_MATTYPE;
-	static const std::string CUSTOM_MTL_OUTLINESIZE;
-	static const std::string CUSTOM_MTL_GEOMETRYTYPE;
+	static const char* CUSTOM_MTL_MATTYPE;
+	static const char* CUSTOM_MTL_OUTLINESIZE;
+	static const char* CUSTOM_MTL_GEOMETRYTYPE;
 
 	MtlReader();
 

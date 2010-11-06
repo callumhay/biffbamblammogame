@@ -22,17 +22,17 @@
 #include <iostream>
 #include <fstream>
 
-const std::string MtlReader::MTL_NEWMATERIAL	= "newmtl";
-const std::string MtlReader::MTL_AMBIENT			= "Ka";
-const std::string MtlReader::MTL_DIFFUSE			= "Kd";
-const std::string MtlReader::MTL_SPECULAR			= "Ks";
-const std::string MtlReader::MTL_SHININESS		= "Ns";
-const std::string MtlReader::MTL_DIFF_TEXTURE	= "map_Kd";
+const char* MtlReader::MTL_NEWMATERIAL	= "newmtl";
+const char* MtlReader::MTL_AMBIENT			= "Ka";
+const char* MtlReader::MTL_DIFFUSE			= "Kd";
+const char* MtlReader::MTL_SPECULAR			= "Ks";
+const char* MtlReader::MTL_SHININESS		= "Ns";
+const char* MtlReader::MTL_DIFF_TEXTURE	= "map_Kd";
 
 // Custom tags
-const std::string MtlReader::CUSTOM_MTL_MATTYPE				= "type";
-const std::string MtlReader::CUSTOM_MTL_OUTLINESIZE		= "outlinesize";
-const std::string MtlReader::CUSTOM_MTL_GEOMETRYTYPE	= "geomtype";
+const char* MtlReader::CUSTOM_MTL_MATTYPE				= "type";
+const char* MtlReader::CUSTOM_MTL_OUTLINESIZE		= "outlinesize";
+const char* MtlReader::CUSTOM_MTL_GEOMETRYTYPE	= "geomtype";
 
 MtlReader::MtlReader() {
 }

@@ -11,7 +11,7 @@
 class ConfigOptions {
 private:
 	// Filepath to the game's .ini file
-	static const std::string INI_FILEPATH;
+	static const char* INI_FILEPATH;
 
 	// The variable (initialization string) names for the various values in the .ini file
 	static const char* WINDOW_HEIGHT_VAR;

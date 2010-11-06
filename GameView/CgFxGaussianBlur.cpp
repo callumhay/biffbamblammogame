@@ -6,9 +6,9 @@
 
 #include "../GameController.h"
 
-const std::string CgFxGaussianBlur::GAUSSIANBLUR_3x3_TECHNIQUE_NAME = "GaussianBlur3x3";
-const std::string CgFxGaussianBlur::GAUSSIANBLUR_5x5_TECHNIQUE_NAME = "GaussianBlur5x5";
-const std::string CgFxGaussianBlur::GAUSSIANBLUR_7x7_TECHNIQUE_NAME = "GaussianBlur7x7";
+const char* CgFxGaussianBlur::GAUSSIANBLUR_3x3_TECHNIQUE_NAME = "GaussianBlur3x3";
+const char* CgFxGaussianBlur::GAUSSIANBLUR_5x5_TECHNIQUE_NAME = "GaussianBlur5x5";
+const char* CgFxGaussianBlur::GAUSSIANBLUR_7x7_TECHNIQUE_NAME = "GaussianBlur7x7";
 
 CgFxGaussianBlur::CgFxGaussianBlur(BlurType blurType, FBObj* sceneFBO) : 
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_GAUSSIAN_SHADER, sceneFBO),
