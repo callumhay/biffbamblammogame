@@ -47,13 +47,7 @@ void InGameMenuState::RenderFrame(double dT) {
 	switch (this->nextAction) {
 
 		case InGameMenuState::ResumeGame:
-			// Resume world sounds - these are initially paused when coming to this state (in the constructor)
-			this->display->GetAssets()->GetSoundAssets()->UnpauseWorldSounds();
-			// Unpause the game
-			this->display->GetModel()->UnsetPause(GameModel::PauseGame);
-
-			// Go back to the in-game display state
-			this->display->SetCurrentState(new InGameDisplayState(this->display));
+			this->ResumeTheGame();
 			return;
 
 		case InGameMenuState::ReturnToMainMenu:
@@ -96,29 +90,40 @@ void InGameMenuState::RenderFrame(double dT) {
 	glPopAttrib();
 }
 
+void InGameMenuState::ResumeTheGame() {
+	// Resume world sounds - these are initially paused when coming to this state (in the constructor)
+	this->display->GetAssets()->GetSoundAssets()->UnpauseWorldSounds();
+	// Unpause the game
+	this->display->GetModel()->UnsetPause(GameModel::PauseGame);
+
+	// Go back to the in-game display state
+	this->display->SetCurrentState(new InGameDisplayState(this->display));
+}
+
 /**
  * Called whenever a key is pressed while in this state.
  */
-void InGameMenuState::KeyPressed(SDLKey key, SDLMod modifier) {
+void InGameMenuState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	assert(this->topMenu != NULL);
-	// Tell the top-most menu about the key pressed event
-	this->topMenu->KeyPressed(key, modifier);
+
+	// If the pause button is hit again then just exit this menu back to the game...
+	if (pressedButton == GameControl::PauseButtonAction) {
+		this->ResumeTheGame();
+	}
+	else {
+		// Tell the top-most menu about the key pressed event
+		this->topMenu->ButtonPressed(pressedButton);
+	}
 }
 
 /**
  * Called whenever a key is released while in this state.
  */
-void InGameMenuState::KeyReleased(SDLKey key, SDLMod modifier) {
+void InGameMenuState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	assert(this->topMenu != NULL);
 	// Tell the top-most menu about the key released event
-	this->topMenu->KeyReleased(key, modifier);
+	this->topMenu->ButtonReleased(releasedButton);
 }
-
-void InGameMenuState::DisplaySizeChanged(int width, int height) {
-	UNUSED_PARAMETER(width);
-	UNUSED_PARAMETER(height);
-}
-
 
 void InGameMenuState::InitTopMenu() {
 	assert(this->topMenu == NULL);

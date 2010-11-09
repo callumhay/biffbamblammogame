@@ -1,8 +1,6 @@
 #include "CgFxBloom.h"
 #include "GameViewConstants.h"
 
-#include "../GameController.h"
-
 #include "../BlammoEngine/FBObj.h"
 
 const char* CgFxBloom::BLOOM_FILTER_TECHNIQUE_NAME						= "BloomFilter";

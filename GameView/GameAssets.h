@@ -37,6 +37,7 @@ class Texture3D;
 class LevelMesh;
 class CgFxPostRefract;
 class CgFxVolumetricEffect;
+class CgFxFireBallEffect;
 class ESPEmitter;
 class LivesLeftHUD;
 class CrosshairLaserHUD;
@@ -82,6 +83,7 @@ private:
 	// Special effects - persistant special effects in the game
 	CgFxPostRefract* invisiBallEffect;
 	CgFxVolumetricEffect* ghostBallEffect;
+	CgFxFireBallEffect* fireBallEffect;
 
 	void DeleteRegularEffectAssets();
 

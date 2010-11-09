@@ -406,7 +406,7 @@ void BallInPlayState::Tick(double seconds) {
 	}
 		
 	// Tick/update any level pieces that require it...
-	this->gameModel->DoPieceUpdates(seconds);
+	this->gameModel->DoPieceStatusUpdates(seconds);
 }
 
 /**

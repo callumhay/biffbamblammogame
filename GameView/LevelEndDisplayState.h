@@ -14,9 +14,10 @@ public:
 	~LevelEndDisplayState();
 
 	void RenderFrame(double dT);
-	void KeyPressed(SDLKey key, SDLMod modifier);
-	void KeyReleased(SDLKey key, SDLMod modifier);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 	void DisplaySizeChanged(int width, int height);
+	DisplayState::DisplayStateType GetType() const;
 
 private:
 	static const double FADE_TIME;
@@ -26,20 +27,22 @@ private:
 
 };
 
-inline void LevelEndDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(key);
-	UNUSED_PARAMETER(modifier);
+inline void LevelEndDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+	UNUSED_PARAMETER(pressedButton);
 }
 
-inline void LevelEndDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(key);
-	UNUSED_PARAMETER(modifier);
+inline void LevelEndDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
+	UNUSED_PARAMETER(releasedButton);
 }
 
 inline void LevelEndDisplayState::DisplaySizeChanged(int width, int height) {
 	UNUSED_PARAMETER(width);
 	UNUSED_PARAMETER(height);
 	assert(false);
+}
+
+inline DisplayState::DisplayStateType LevelEndDisplayState::GetType() const {
+	return DisplayState::LevelEnd;
 }
 
 #endif // __LEVELENDDISPLAYSTATE_H__

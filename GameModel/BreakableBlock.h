@@ -1,3 +1,14 @@
+/**
+ * BreakableBlock.h
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2009-2010
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #ifndef __BREAKABLEBLOCK_H__
 #define __BREAKABLEBLOCK_H__
 
@@ -80,7 +91,7 @@ public:
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
-	bool Tick(double dT, GameModel* gameModel);
+	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
 protected:
 	static const int PIECE_STARTING_LIFE_POINTS = 100;	// Starting life points given to a breakable block

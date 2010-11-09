@@ -19,16 +19,10 @@
 #include "CgFxBloom.h"
 
 #include "../BlammoEngine/FBObj.h"
-
 #include "../GameModel/GameModel.h"
-
 #include "../GameSound/GameSoundAssets.h"
-
 #include "../ESPEngine/ESPOnomataParticle.h"
-
-#include "../GameController.h"
 #include "../WindowManager.h"
-
 
 // 3 sprites for "Biff" "Bam" and "Blammo" respectively
 const char* MainMenuDisplayState::TITLE_BIFF_TEXT			= "Biff!";
@@ -372,7 +366,7 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 
 	int currentVolume = cfgOptions.GetVolume(); // Determine the volume of the sound...
 	this->soundVolumeMenuItem = new AmountScrollerMenuItem(subMenuLabelSm, subMenuLabelLg,
-		ConfigOptions::MIN_VOLUME, ConfigOptions::MAX_VOLUME, currentVolume, 1.0f);
+		ConfigOptions::MIN_VOLUME, ConfigOptions::MAX_VOLUME, currentVolume, 5.0f);
 	this->soundVolumeMenuItem->SetConstantChangeFeedback(true);
 	this->soundVolumeMenuItem->SetEventHandler(this->itemsEventHandler);
 	this->optionsSoundVolumeIndex = this->optionsSubMenu->AddMenuItem(this->soundVolumeMenuItem);
@@ -663,16 +657,16 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
  * Directly read key presses to manipulate the selections
  * in the main menu.
  */
-void MainMenuDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
+void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	assert(this->mainMenu != NULL);
 	// Tell the main menu about the key pressed event
-	this->mainMenu->KeyPressed(key, modifier);
+	this->mainMenu->ButtonPressed(pressedButton);
 }
 
-void MainMenuDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
+void MainMenuDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	assert(this->mainMenu != NULL);
 	// Tell the main menu about the key pressed event
-	this->mainMenu->KeyReleased(key, modifier);
+	this->mainMenu->ButtonReleased(releasedButton);
 }
 
 void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {

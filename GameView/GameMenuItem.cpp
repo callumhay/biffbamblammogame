@@ -249,17 +249,16 @@ void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, flo
  * Called from the parent menu of this item when a key is pressed and this item
  * is the one currently selected and relevant.
  */
-void SelectionListMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(modifier);
-	assert(parent != NULL);
+void SelectionListMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+	assert(this->parent != NULL);
 
 	// Key pressing does nothing if there's nothing to select from
 	if (this->selectionList.size() == 0) {
 		return;
 	}
 
-	switch (key) {
-		case SDLK_LEFT:
+	switch (pressedButton) {
+		case GameControl::LeftButtonAction:
 			// Move the selection down one item
 			this->selectedIndex--;
 			if (this->selectedIndex < 0) {
@@ -271,7 +270,7 @@ void SelectionListMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 			}
 			break;
 
-		case SDLK_RIGHT:
+		case GameControl::RightButtonAction:
 			// Move the selection up one item
 			this->selectedIndex = (this->selectedIndex + 1) % this->selectionList.size();
 			
@@ -280,7 +279,7 @@ void SelectionListMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 			}
 			break;
 
-		case SDLK_RETURN:
+		case GameControl::EnterButtonAction:
 			// When return is hit, the selection is locked and results in a change in the menu item
 			// tell the parent about this in order to send out a change event
 			if (this->parent != NULL) {
@@ -295,7 +294,7 @@ void SelectionListMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 			}
 			break;
 
-		case SDLK_ESCAPE:
+		case GameControl::EscapeButtonAction:
 			// If the user hits ESC then we deselect the currently selected item (i.e., this one)
 			// and we make sure the selection inside the item doesn't change
 			this->selectedIndex = this->previouslySelectedIndex;
@@ -458,35 +457,31 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	Camera::PopWindowCoords();
 }
 
-void AmountScrollerMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
+void AmountScrollerMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	this->incrementAmt = this->baseIncrementAmt;
 
+	/*
 	// If the user is holding down the shift key then we make the scroller scroll faster
 	if ((modifier & KMOD_LSHIFT) == KMOD_LSHIFT || (modifier & KMOD_RSHIFT) == KMOD_RSHIFT) {
 		this->incrementAmt = std::max<float>(0.05f * (this->maxValue - this->minValue), 2.0f * this->baseIncrementAmt);
 		assert(this->incrementAmt > 0);
 	}
+	*/
 
-	switch (key) {
-		case SDLK_LEFT:
-		case SDLK_LEFTBRACKET:
-		case SDLK_LEFTPAREN:
-		case SDLK_KP4:
+	switch (pressedButton) {
+		case GameControl::LeftButtonAction:
 			// Decrease the scroller value...
 			this->decreaseValueButtonPressed = true;
 			this->ChangeScrollerValue(-this->incrementAmt);
 			break;
 
-		case SDLK_RIGHT:
-		case SDLK_RIGHTBRACKET:
-		case SDLK_RIGHTPAREN:
-		case SDLK_KP6:
+		case GameControl::RightButtonAction:
 			// Increase the scroller value...
 			this->increaseValueButtonPressed = true;
 			this->ChangeScrollerValue(this->incrementAmt);
 			break;
 
-		case SDLK_RETURN:
+		case GameControl::EnterButtonAction:
 			// When return is hit, the value is locked and results in a change in the menu item
 			// tell the parent about this in order to send out a change event
 			if (this->parent != NULL) {
@@ -500,7 +495,7 @@ void AmountScrollerMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 			}
 			break;
 
-		case SDLK_ESCAPE:
+		case GameControl::EscapeButtonAction:
 			// If the user hits ESC then we sure the selection inside the item doesn't change
 			this->ChangeScrollerValue(this->previouslySelectedValue - this->currentValue);
 			if (this->parent != NULL) {
@@ -518,21 +513,13 @@ void AmountScrollerMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 	}
 }
 
-void AmountScrollerMenuItem::KeyReleased(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(modifier);
-
-	switch (key) {
-		case SDLK_LEFT:
-		case SDLK_LEFTBRACKET:
-		case SDLK_LEFTPAREN:
-		case SDLK_KP4:
+void AmountScrollerMenuItem::ButtonReleased(const GameControl::ActionButton& releasedButton) {
+	switch (releasedButton) {
+		case GameControl::LeftButtonAction:
 			this->decreaseValueButtonPressed = false;
 			break;
 
-		case SDLK_RIGHT:
-		case SDLK_RIGHTBRACKET:
-		case SDLK_RIGHTPAREN:
-		case SDLK_KP6:
+		case GameControl::RightButtonAction:
 			this->increaseValueButtonPressed = false;
 			break;
 
@@ -820,18 +807,16 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	this->verifyMenuBGFadeAnim.Tick(dT);
 }
 
-void VerifyMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(modifier);
-
+void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	// If the verify menu is not active then we just exit... this shouldn't happen though
 	if (!this->verifyMenuActive) {
 		assert(false);
 		return;
 	}
 
-	switch (key) {
-		case SDLK_LEFT:
-		case SDLK_RIGHT:
+	switch (pressedButton) {
+		case GameControl::LeftButtonAction:
+		case GameControl::RightButtonAction:
 			// Change the selected item in the verify menu
 			if (this->selectedOption == VerifyMenuItem::Cancel) {
 				this->SetSelectedVerifyMenuOption(VerifyMenuItem::Confirm);
@@ -844,7 +829,7 @@ void VerifyMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 			}
 			break;
 
-		case SDLK_RETURN:
+		case GameControl::EnterButtonAction:
 			// Item currently highlighted in the verify menu has just been activated...
 			if (this->selectedOption == VerifyMenuItem::Cancel) {
 				if (this->parent != NULL) {
@@ -865,7 +850,7 @@ void VerifyMenuItem::KeyPressed(SDLKey key, SDLMod modifier) {
 			}
 			break;
 
-		case SDLK_ESCAPE:
+		case GameControl::EscapeButtonAction:
 			// User has indicated that they aren't sure... Set the selected item to cancel,
 			// if the item is already set to cancel then just cancel the verify menu
 			if (this->selectedOption == VerifyMenuItem::Cancel) {

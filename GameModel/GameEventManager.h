@@ -2,12 +2,12 @@
 #define __GAMEEVENTMANAGER_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "LevelPiece.h"
 
 class GameEvents;
 class GameBall;
 class Point2D;
 class PlayerPaddle;
-class LevelPiece;
 class PortalBlock;
 class CannonBlock;
 class TeslaBlock;
@@ -64,6 +64,9 @@ public:
 	void ActionBallSafetyNetDestroyed(const GameBall& ball);
 	void ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle);
 	void ActionLevelPieceChanged(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
+	void ActionLevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus);
+	void ActionLevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus);
+	void ActionLevelPieceAllStatusRemoved(const LevelPiece& piece);
 	void ActionScoreChanged(int amt);
 	void ActionScoreMultiplierChanged(int oldScoreMultiplier, int newScoreMultiplier);
 	void ActionItemSpawned(const GameItem& item);

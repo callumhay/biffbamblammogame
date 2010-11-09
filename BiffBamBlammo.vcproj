@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib SDL_mixerd.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib"
+				AdditionalDependencies="SDLmain.lib SDL_mixerd.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrt.lib"
@@ -144,7 +144,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib SDL_mixer.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib"
+				AdditionalDependencies="SDLmain.lib SDL_mixer.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				IgnoreDefaultLibraryNames="libc.lib"
@@ -560,11 +560,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CannonBlockMesh.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CollateralBlockMesh.h"
+					RelativePath=".\GameView\BlockStatusEffectRenderer.h"
 					>
 				</File>
 				<File
@@ -636,10 +632,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\ItemDropBlockMesh.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\LaserPaddleGun.h"
 					>
 				</File>
@@ -668,23 +660,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\PortalBlockMesh.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\PrismBlockMesh.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\RandomToItemAnimation.h"
 					>
 				</File>
 				<File
 					RelativePath=".\GameView\StickyPaddleGoo.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\TeslaBlockMesh.h"
 					>
 				</File>
 			</Filter>
@@ -696,11 +676,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CannonBlockMesh.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\CollateralBlockMesh.cpp"
+					RelativePath=".\GameView\BlockStatusEffectRenderer.cpp"
 					>
 				</File>
 				<File
@@ -772,10 +748,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\ItemDropBlockMesh.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\LaserPaddleGun.cpp"
 					>
 				</File>
@@ -804,23 +776,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\PortalBlockMesh.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\PrismBlockMesh.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\RandomToItemAnimation.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\GameView\StickyPaddleGoo.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\TeslaBlockMesh.cpp"
 					>
 				</File>
 			</Filter>
@@ -1052,6 +1012,66 @@
 					</File>
 					<File
 						RelativePath=".\GameView\WorldStartDisplayState.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Block Meshes"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameView\CannonBlockMesh.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CollateralBlockMesh.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\ItemDropBlockMesh.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PortalBlockMesh.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PrismBlockMesh.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\TeslaBlockMesh.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\GameView\CannonBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CollateralBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\ItemDropBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PortalBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PrismBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\TeslaBlockMesh.cpp"
 						>
 					</File>
 				</Filter>
@@ -1810,10 +1830,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameController.h"
-					>
-				</File>
-				<File
 					RelativePath=".\resource.h"
 					>
 				</File>
@@ -1833,10 +1849,6 @@
 				>
 				<File
 					RelativePath=".\ConfigOptions.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameController.cpp"
 					>
 				</File>
 				<File
@@ -1913,6 +1925,50 @@
 				</File>
 				<File
 					RelativePath=".\GameSound\SoundTimedSequence.cpp"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="GameControl"
+			>
+			<Filter
+				Name="Header Files"
+				>
+				<File
+					RelativePath=".\GameControl\BBBGameController.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\GameControl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\GameControllerManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\KeyboardSDLController.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\XBox360Controller.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				>
+				<File
+					RelativePath=".\GameControl\GameControllerManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\KeyboardSDLController.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameControl\XBox360Controller.cpp"
 					>
 				</File>
 			</Filter>

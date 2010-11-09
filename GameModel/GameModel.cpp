@@ -79,7 +79,7 @@ void GameModel::BeginOrRestartGame() {
 // Called in order to make sure the game is no longer processing or generating anything
 void GameModel::ClearGameState() {
 	// Delete all world items, timers and thingys
-	this->ClearUpdatePieces();
+	this->ClearStatusUpdatePieces();
 	this->ClearLiveItems();
 	this->ClearActiveTimers();
 	this->ClearProjectiles();
@@ -329,29 +329,50 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 /**
  * Called to update each piece that requires per-frame updates in the current level.
  */
-void GameModel::DoPieceUpdates(double dT) {
+void GameModel::DoPieceStatusUpdates(double dT) {
 	LevelPiece* currLevelPiece;
-	bool keepTicking;
+	int32_t statusesToRemove = static_cast<int32_t>(LevelPiece::NormalStatus);
+	bool pieceMustBeRemoved = false;
 
-	// Go through each piece that we need to update and do the updates
-	for (std::set<LevelPiece*>::iterator iter = this->updatePieces.begin(); iter != this->updatePieces.end();) {
-		currLevelPiece = *iter;
-		keepTicking = currLevelPiece->Tick(dT, this);
-		if (keepTicking) {
+	for (std::map<LevelPiece*, int32_t>::iterator iter = this->statusUpdatePieces.begin(); iter != this->statusUpdatePieces.end();) {
+		currLevelPiece = iter->first;
+
+		// When we tick the statuses on a piece we get a result that tells us whether the piece is completely
+		// removed of all its status effects in which case we remove it from the map and move on - this tends to mean
+		// that the piece has been destroyed by its own status effects
+		pieceMustBeRemoved = currLevelPiece->StatusTick(dT, this, statusesToRemove);
+		if (pieceMustBeRemoved) {
+			iter = this->statusUpdatePieces.erase(iter);
+			continue;
+		}
+
+		// In this case the piece still exists and we need to check if any status effects must be removed from it
+		if (statusesToRemove == static_cast<int32_t>(LevelPiece::NormalStatus)) {
 			++iter;
 		}
 		else {
-			iter = this->updatePieces.erase(iter);
+			// Remove the status from the updates... if the resulting status is NormalStatus then remove entirely
+			// Sanity: The status to remove better already be applied!!! - 
+			// NOTE: We don't have to remove it from the piece
+			// since the piece should have already done that for itself when we called statusTick - do it anyway though, just to be safe
+			assert((iter->second & statusesToRemove) == statusesToRemove);
+			iter->second = (iter->second & ~statusesToRemove);
+			currLevelPiece->RemoveStatuses(statusesToRemove);
+
+			if (iter->second == static_cast<int32_t>(LevelPiece::NormalStatus)) {
+				iter = this->statusUpdatePieces.erase(iter);
+			}
+			else {
+				++iter;
+			}
 		}
 	}
 
-	if (!this->updatePieces.empty()) {
-		// Check to see if the level is done
-		GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
-		if (currLevel->IsLevelComplete()) {
-			// The level was completed, move to the level completed state
-			this->SetNextState(new LevelCompleteState(this));
-		}
+	// Check to see if the level is done
+	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
+	if (currLevel->IsLevelComplete()) {
+		// The level was completed, move to the level completed state
+		this->SetNextState(new LevelCompleteState(this));
 	}
 }
 
@@ -531,14 +552,28 @@ void GameModel::AddBeam(int beamType) {
 }
 
 /**
- * Add a level piece that requires 'ticking' (updates) every frame when in the "BallInPlay" state.
+ * Add a level piece that requires 'ticking' (updates) every frame due to status effects applied to it, when in the "BallInPlay" state.
  * This allows us to selectively apply long term effects to level pieces.
+ * Returns: true if the piece is freshly added as a update piece, false if it has already been added previously.
  */
-void GameModel::AddTickLevelPiece(LevelPiece* p) {
+bool GameModel::AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status) {
 	assert(p != NULL);
-	// TODO...
-	//this->updatePieces.insert(p);
-	
-	// Don't forget to clean these out when you clean everything else out...
 
+	// First try to find the level piece among existing level pieces with status updates
+	std::map<LevelPiece*, int32_t>::iterator findIter = this->statusUpdatePieces.find(p);
+	if (findIter == this->statusUpdatePieces.end()) {
+		// Nothing was found, add a new entry for the piece with the given status...
+		this->statusUpdatePieces.insert(std::make_pair(p, static_cast<int32_t>(status)));
+		assert(p->HasStatus(status));
+		return true;
+	}
+
+	// We found an existing piece, check to see if it already is in the update list for the given status if it is then
+	// we just ignore it otherwise we append the new status as well
+	if ((findIter->second & status) == status) {
+		return false;
+	}
+
+	findIter->second = (findIter->second | status);
+	return true;
 }

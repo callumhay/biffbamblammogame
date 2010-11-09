@@ -18,9 +18,10 @@ public:
 	~InGameDisplayState();
 
 	void RenderFrame(double dT);
-	void KeyPressed(SDLKey key, SDLMod modifier);
-	void KeyReleased(SDLKey key, SDLMod modifier);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 	void DisplaySizeChanged(int width, int height);
+	DisplayState::DisplayStateType GetType() const;
 
 private:
 	InGameRenderPipeline renderPipeline;
@@ -28,11 +29,16 @@ private:
 #ifdef _DEBUG
 	void DebugDrawBounds();
 #endif
+
+	DISALLOW_COPY_AND_ASSIGN(InGameDisplayState);
 };
 
-inline void InGameDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(key);
-	UNUSED_PARAMETER(modifier);
+inline void InGameDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
+	UNUSED_PARAMETER(releasedButton);
+}
+
+inline DisplayState::DisplayStateType InGameDisplayState::GetType() const {
+	return DisplayState::InGame;
 }
 
 #endif

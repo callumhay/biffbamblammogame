@@ -19,8 +19,23 @@ public:
 	~GameOverDisplayState();
 
 	void RenderFrame(double dT);
-	void KeyPressed(SDLKey key, SDLMod modifier);
-	void KeyReleased(SDLKey key, SDLMod modifier);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 	void DisplaySizeChanged(int width, int height);
+	DisplayState::DisplayStateType GetType() const;
 };
+
+inline void GameOverDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
+	UNUSED_PARAMETER(releasedButton);
+}
+
+inline void GameOverDisplayState::DisplaySizeChanged(int width, int height) {
+	UNUSED_PARAMETER(width);
+	UNUSED_PARAMETER(height);
+}
+
+inline DisplayState::DisplayStateType GameOverDisplayState::GetType() const {
+	return DisplayState::GameOver;
+}
+
 #endif

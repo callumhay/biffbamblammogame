@@ -244,6 +244,30 @@ void GameEventManager::ActionLevelPieceChanged(const LevelPiece& pieceBefore, co
 	}	
 }
 
+// Action for when a level piece has a status added to it
+void GameEventManager::ActionLevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->LevelPieceStatusAddedEvent(piece, addedStatus);
+	}	
+}
+
+// Action for when a level piece has a status removed from it
+void GameEventManager::ActionLevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->LevelPieceStatusRemovedEvent(piece, removedStatus);
+	}	
+}
+
+// Action for when a level piece has all its status removed from it
+void GameEventManager::ActionLevelPieceAllStatusRemoved(const LevelPiece& piece) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->LevelPieceAllStatusRemovedEvent(piece);
+	}	
+}
+
 // Action for when the player's score changes
 void GameEventManager::ActionScoreChanged(int amt) {
 	this->listenerIter = this->eventListeners.begin();

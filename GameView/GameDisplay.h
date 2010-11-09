@@ -37,6 +37,9 @@ public:
 
 	void AddStateToQueue(const DisplayState::DisplayStateType& type);
 	void SetCurrentStateAsNextQueuedState();
+	DisplayState::DisplayStateType GetCurrentDisplayState() const {
+		return this->currState->GetType();
+	}
 
 	void ChangeDisplaySize(int w, int h);
 	void Render(double dT);
@@ -58,13 +61,10 @@ public:
 
 	float GetTextScalingFactor() const;
 
-	// Tells the display that a certain key was pressed/released
-	void KeyPressed(SDLKey key, SDLMod modifier) {
-		this->currState->KeyPressed(key, modifier);
-	}
-	void KeyReleased(SDLKey key, SDLMod modifier) {
-		this->currState->KeyReleased(key, modifier);
-	}	
+	// Enumeration of the various actions that can be sent to the GameDisplay
+	// to inform it of inputs from the user in a general way
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 
 #ifdef _DEBUG
 
@@ -116,6 +116,14 @@ private:
 #endif
 
 };
+
+inline void GameDisplay::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+	this->currState->ButtonPressed(pressedButton);
+}
+
+inline void GameDisplay::ButtonReleased(const GameControl::ActionButton& releasedButton) {
+	this->currState->ButtonReleased(releasedButton);
+}
 
 inline void GameDisplay::AddStateToQueue(const DisplayState::DisplayStateType& type) {
 	stateQueue.push_back(type);

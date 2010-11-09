@@ -338,7 +338,7 @@ void GameMenu::DeactivateSelectedMenuItem() {
  * Capture input from the keyboard for a key pressed event
  * and navigate or change the menu based on the given key input.
  */
-void GameMenu::KeyPressed(SDLKey key, SDLMod modifier) {
+void GameMenu::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	// We check to see if we're in a sub menu - so that we know where
 	// to pass the key pressed event
 	GameMenu* currentMenu = this;
@@ -349,32 +349,32 @@ void GameMenu::KeyPressed(SDLKey key, SDLMod modifier) {
 		if (currentMenu == NULL) {
 			// In this case we are dealing with a menu item that takes input,
 			// give that menu item the input
-			activatedMenuItem->KeyPressed(key, modifier);
+			activatedMenuItem->ButtonPressed(pressedButton);
 		}
 		else {
 			// Recursively tell the menu about the key press
-			currentMenu->KeyPressed(key, modifier);
+			currentMenu->ButtonPressed(pressedButton);
 		}
 		return;
 	}
 	
 	// If we managed to get here then the key press is specific to this menu,
 	// handle the input by changing the menu according to the key pressed.
-	switch(key) {
+	switch(pressedButton) {
 		
-		case SDLK_DOWN:
+		case GameControl::DownButtonAction:
 			currentMenu->DownAction();
 			break;
 
-		case SDLK_UP:
+		case GameControl::UpButtonAction:
 			currentMenu->UpAction();
 			break;
 	
-		case SDLK_RETURN:
+		case GameControl::EnterButtonAction:
 			currentMenu->ActivateSelectedMenuItem();
 			break;
 
-		case SDLK_ESCAPE:
+		case GameControl::EscapeButtonAction:
 			for (std::list<GameMenuEventHandler*>::iterator iter = currentMenu->eventHandlers.begin(); iter != currentMenu->eventHandlers.end(); ++iter) {
 				(*iter)->EscMenu();
 			}
@@ -385,7 +385,7 @@ void GameMenu::KeyPressed(SDLKey key, SDLMod modifier) {
 	}
 }
 
-void GameMenu::KeyReleased(SDLKey key, SDLMod modifier) {
+void GameMenu::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	// We check to see if we're in a sub menu - so that we know where
 	// to pass the key released event
 	GameMenu* currentMenu = this;
@@ -396,11 +396,11 @@ void GameMenu::KeyReleased(SDLKey key, SDLMod modifier) {
 		if (currentMenu == NULL) {
 			// In this case we are dealing with a menu item that takes input,
 			// give that menu item the input
-			activatedMenuItem->KeyReleased(key, modifier);
+			activatedMenuItem->ButtonReleased(releasedButton);
 		}
 		else {
 			// Recursively tell the menu about the key press
-			currentMenu->KeyReleased(key, modifier);
+			currentMenu->ButtonReleased(releasedButton);
 		}
 		return;
 	}

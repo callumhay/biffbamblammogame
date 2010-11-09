@@ -165,7 +165,7 @@ public:
 	bool DecreasePaddleSize();
 
 	// Paddle type modifying / querying functions
-	uint32_t GetPaddleType() const { return this->currType; }
+	int32_t GetPaddleType() const { return this->currType; }
 
 	void AddPaddleType(const PaddleType& type);
 	void RemovePaddleType(const PaddleType& type);
@@ -232,7 +232,7 @@ private:
 
 	bool hitWall;					// True when the paddle hits a wall
 
-	uint32_t currType;		// An ORed together current type of this paddle (see PaddleType)
+	int32_t currType;	    // An ORed together current type of this paddle (see PaddleType)
 	PaddleSize currSize;	// The current size (width) of this paddle
 
 	Point2D centerPos;						// Paddle position (at its center) in the game model

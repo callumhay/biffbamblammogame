@@ -131,9 +131,10 @@ public:
 	~MainMenuDisplayState();
 
 	void RenderFrame(double dT);
-	void KeyPressed(SDLKey key, SDLMod modifier);
-	void KeyReleased(SDLKey key, SDLMod modifier);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 	void DisplaySizeChanged(int width, int height);
+	DisplayState::DisplayStateType GetType() const;
 
 	class MainMenuEventHandler : public GameMenuEventHandler {
 	private:
@@ -190,6 +191,12 @@ private:
 	OptionsSubMenuEventHandler* optionsMenuEventHandler;	// Event handler for the options sub-menu
 	AllMenuItemsEventHandler* itemsEventHandler;					// Event handler for more complicated items (e.g., scrollers, verify menus)
 	BangParticleEventHandler* particleEventHandler;				// Event handler for the sound particles
+
+	DISALLOW_COPY_AND_ASSIGN(MainMenuDisplayState);
 };
+
+inline DisplayState::DisplayStateType MainMenuDisplayState::GetType() const {
+	return DisplayState::MainMenu;
+}
 
 #endif

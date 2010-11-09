@@ -15,6 +15,7 @@
 #include "GameViewConstants.h"
 #include "CgFxPostRefract.h"
 #include "CgFxVolumetricEffect.h"
+#include "CgFxFireBallEffect.h"
 #include "GameFontAssetsManager.h"
 #include "LoadingScreen.h"
 #include "LivesLeftHUD.h"
@@ -65,7 +66,8 @@ paddleStickyAttachment(NULL),
 paddleShield(NULL),
 
 invisiBallEffect(NULL), 
-ghostBallEffect(NULL)
+ghostBallEffect(NULL),
+fireBallEffect(NULL)
 {
 
 	// Load ESP assets
@@ -270,6 +272,8 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 			// FIRE BALL CHECK
 			if ((currBall->GetBallType() & GameBall::FireBall) == GameBall::FireBall && !ballIsInvisible) {
+				ballEffectTemp = this->fireBallEffect;
+
 				// Draw the fire ball when not invisible
 				// We don't draw any of the effects if we're in a ball camera mode or inside a cannon
 				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {				
@@ -823,6 +827,9 @@ void GameAssets::LoadRegularEffectAssets() {
 		this->ghostBallEffect->SetAlphaMultiplier(1.0f);
 		this->ghostBallEffect->SetFlowDirection(Vector3D(0, 0, 1));
 	}
+	if (this->fireBallEffect == NULL) {
+		this->fireBallEffect = new CgFxFireBallEffect();
+	}
 	if (this->paddleShield == NULL) {
 		this->paddleShield = new PaddleShield();
 	}
@@ -838,6 +845,11 @@ void GameAssets::DeleteRegularEffectAssets() {
 	if (this->ghostBallEffect != NULL) {
 		delete this->ghostBallEffect;
 		this->ghostBallEffect = NULL;
+	}
+
+	if (this->fireBallEffect != NULL) {
+		delete this->fireBallEffect;
+		this->fireBallEffect = NULL;
 	}
 
 	// Delete any left behind particles
@@ -938,6 +950,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 void GameAssets::RocketExplosion(Camera& camera) {
 	// Add a camera shake and flash for when the rocket explodes...
 	camera.SetCameraShake(1.0, Vector3D(0.8, 0.7, 0.1), 120);
+	//GameControllerManager::GetInstance()->Vibrate(
 	this->flashHUD->Activate(0.5, 1.0f);
 	// Play the explosion sound
 	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketExplodedEvent, GameSoundAssets::VeryLoudVolume);

@@ -16,9 +16,10 @@ public:
 	~LevelStartDisplayState();
 
 	void RenderFrame(double dT);
-	void KeyPressed(SDLKey key, SDLMod modifier);
-	void KeyReleased(SDLKey key, SDLMod modifier);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 	void DisplaySizeChanged(int width, int height);
+	DisplayState::DisplayStateType GetType() const;
 
 private:
 	InGameRenderPipeline renderPipeline;
@@ -48,14 +49,16 @@ private:
 
 };
 
-inline void LevelStartDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(key);
-	UNUSED_PARAMETER(modifier);
+inline void LevelStartDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+	UNUSED_PARAMETER(pressedButton);
 }
 
-inline void LevelStartDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(key);
-	UNUSED_PARAMETER(modifier);
+inline void LevelStartDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
+	UNUSED_PARAMETER(releasedButton);
+}
+
+inline DisplayState::DisplayStateType LevelStartDisplayState::GetType() const {
+	return DisplayState::LevelStart;
 }
 
 #endif // __LEVELSTARTDISPLAYSTATE_H__

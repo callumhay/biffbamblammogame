@@ -30,6 +30,9 @@ LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc) : colour(1,1,1), pi
 }
 
 LevelPiece::~LevelPiece() {
+	// We need to be sure to obliterate any status effects that might be linguring on the level piece -
+	// this emits an important event to any model listeners to remove those effects as well!
+	this->RemoveAllStatus();
 }
 
 void LevelPiece::SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc) {
@@ -101,4 +104,54 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	this->bounds = BoundingLines(boundingLines, boundingNorms);
+}
+
+void LevelPiece::AddStatus(const PieceStatus& status) {
+	// If the piece already has the status then just exit, this saves us the trouble
+	// of emitting an event that could potentially be a more expensive operation
+	if ((this->pieceStatus & status) == status) {
+		return;
+	}
+
+	this->pieceStatus = (this->pieceStatus | status);
+
+	// EVENT: A status has been added to this piece...
+	GameEventManager::Instance()->ActionLevelPieceStatusAdded(*this, status);
+}
+
+void LevelPiece::RemoveStatus(const PieceStatus& status) {
+	// If the piece doesn't have the status then just exit, this saves us the trouble
+	// of emitting an event that could potentially be a more expensive operation
+	if ((this->pieceStatus & status) != status) {
+		return;
+	}
+
+	this->pieceStatus = (this->pieceStatus & ~status);
+	
+	// EVENT: A status has been removed from this piece...
+	GameEventManager::Instance()->ActionLevelPieceStatusRemoved(*this, status);
+}
+
+void LevelPiece::RemoveStatuses(int32_t statusMask) {
+	// Go through each status and remove it...
+	if ((statusMask & LevelPiece::OnFireStatus) == LevelPiece::OnFireStatus) {
+		this->RemoveStatus(LevelPiece::OnFireStatus);
+	}
+	//... TODO for each other status
+	else {
+		assert(false);
+	}
+}
+
+void LevelPiece::RemoveAllStatus() {
+	// If the piece has no status effects then just exit, this saves us the trouble
+	// of emitting an event that could potentially be a more expensive operation
+	if (this->pieceStatus == LevelPiece::NormalStatus) {
+		return;
+	}
+
+	this->pieceStatus = LevelPiece::NormalStatus;
+
+	// EVENT: All status effects removed from this piece...
+	GameEventManager::Instance()->ActionLevelPieceAllStatusRemoved(*this);
 }

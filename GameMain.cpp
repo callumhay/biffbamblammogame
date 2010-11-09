@@ -25,7 +25,8 @@
 
 #include "GameSound/GameSoundAssets.h"
 
-#include "GameController.h"
+#include "GameControl/GameControllerManager.h"
+
 #include "ResourceManager.h"
 #include "WindowManager.h"
 #include "ConfigOptions.h"
@@ -34,51 +35,15 @@
 static const char* RESOURCE_ZIP = "BBBResources.zip";
 
 static GameModel *model = NULL;
-static GameController *controller = NULL;
 static GameDisplay *display = NULL;
 static GameSoundAssets* sound = NULL;
-
-//static void ResizeWindow(int w, int h) {
-//	display->ChangeDisplaySize(w, h);
-//}
-
-static void KeyDownEventHandler(SDL_keysym* keysym) {
-	controller->KeyDown(keysym->sym, keysym->mod);
-}
-
-static void KeyUpEventHandler(SDL_keysym* keysym) {
-	controller->KeyUp(keysym->sym, keysym->mod);
-}
-
-static void ProcessEvents() {
-	//Our SDL event placeholder.
-	SDL_Event event;
-
-	// Grab all the events off the queue
-	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
-			case SDL_KEYDOWN:
-				// Handle key presses
-				KeyDownEventHandler(&event.key.keysym);
-				break;
-			case SDL_KEYUP:
-				KeyUpEventHandler(&event.key.keysym);
-				break;
-			case SDL_VIDEORESIZE:
-				assert(false);
-				break;
-			case SDL_QUIT:
-				// Handle quit requests (like Ctrl-c)
-				display->QuitGame();
-				break;
-		}
-	}
-}
 
 /**
  * Clean up the ModelViewController classes that run the game.
  */
 static void CleanUpMVC() {
+	GameControllerManager::DeleteInstance();
+
 	if (model != NULL) {
 		delete model;
 		model = NULL;
@@ -93,11 +58,6 @@ static void CleanUpMVC() {
 		delete sound;
 		sound = NULL;
 	}
-
-	if (controller != NULL) {
-		delete controller;
-		controller = NULL;
-	}
 }
 
 /**
@@ -107,13 +67,14 @@ static void CleanUpMVC() {
 static void GameRenderLoop() {
 	double frameTimeDelta = 0.0;
 	const double maxDelta = 1.0 / 30.0;
+	bool quitGame = false;
 
 	// Main render loop...
 	while (!display->HasGameExited() && !display->ShouldGameReinitialize()) {
 		Uint32 startOfFrameTime = SDL_GetTicks();
 
-		// Controller sync...
-		controller->Tick();
+		// Synchronize the controller state with the current game loop
+		GameControllerManager::GetInstance()->SyncControllers(frameTimeDelta);
 
 		// Don't let the game run at less than 30 fps
 		if (frameTimeDelta > maxDelta) {
@@ -126,8 +87,12 @@ static void GameRenderLoop() {
 
 		SDL_Delay(GameDisplay::FRAME_SLEEP_MS);
 
-		// Process SDL events...
-		ProcessEvents();
+		// Process events (like input from controllers/windows)...
+		// TODO: Signal a quit here via a boolean
+		quitGame = GameControllerManager::GetInstance()->ProcessControllers();
+		if (quitGame) {
+			display->QuitGame();
+		}
 
 		// Calculate the frame delta...
 		frameTimeDelta = static_cast<double>(SDL_GetTicks() - startOfFrameTime) / 1000.0;
@@ -214,7 +179,9 @@ int main(int argc, char *argv[]) {
 
 		model = new GameModel();
 		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
-		controller = new GameController(model, display);
+
+		// Initialize all controllers that we can...
+		GameControllerManager::GetInstance()->InitAllControllers(model, display);
 
 		LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 		debug_opengl_state();
