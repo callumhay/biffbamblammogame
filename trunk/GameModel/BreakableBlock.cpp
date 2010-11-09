@@ -2,7 +2,7 @@
  * BreakableBlock.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2009-2010
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -159,8 +159,8 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 		// The ball is on fire, and so we'll make this piece catch fire too...
 		// The fire will eat away at the block over time
 		assert(isFireBall);
-		gameModel->AddTickLevelPiece(this);
 		this->AddStatus(LevelPiece::OnFireStatus);
+		gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::OnFireStatus);
 	}
 
 	ball.SetLastPieceCollidedWith(NULL);
@@ -203,11 +203,13 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 
 /**
  * When the piece has a per-frame effect on it (e.g., it's on fire) then this will be called
- * by the game model.
- * Returns: true if we need to keep ticking, false otherwise.
+ * by the game model. See LevelPiece for more information.
  */
-bool BreakableBlock::Tick(double dT, GameModel* gameModel) {
+bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
 	assert(gameModel != NULL);
+	
+	LevelPiece* resultingPiece = this;
+	int32_t currPieceStatus = this->pieceStatus;
 
 	// If this piece is on fire then we slowly eat away at it with fire...
 	if ((this->pieceStatus & LevelPiece::OnFireStatus) == LevelPiece::OnFireStatus) {
@@ -229,9 +231,20 @@ bool BreakableBlock::Tick(double dT, GameModel* gameModel) {
 			}
 		}
 
-		// Fire will continue to diminish the piece...
-		this->EatAwayAtPiece(dT, GameModelConstants::GetInstance()->FIRE_DAMAGE_PER_SECOND, gameModel);
+		// Fire will continue to diminish the piece... 
+		// NOTE: This can destroy this piece resulting in a new level piece to replace it (i.e., an empty piece)
+		resultingPiece = this->EatAwayAtPiece(dT, GameModelConstants::GetInstance()->FIRE_DAMAGE_PER_SECOND, gameModel);
+		// Technically if the above destroys the block then the block automatically loses all of its status
+		// this is done in the destructor of LevelPiece
 	}
 	
-	return true;
+	// If this piece has been destroyed during this tick then we need to return all the
+	// status effects that were previously making it tick
+	if (resultingPiece != this) {
+		removedStatuses = currPieceStatus;
+		return true;
+	}
+
+	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
+	return false;
 }

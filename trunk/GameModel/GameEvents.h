@@ -1,10 +1,11 @@
 #ifndef __GAMEEVENTS_H__
 #define __GAMEEVENTS_H__
 
+#include "LevelPiece.h"
+
 class Point2D;
 class GameBall;
 class PlayerPaddle;
-class LevelPiece;
 class PortalBlock;
 class CannonBlock;
 class TeslaBlock;
@@ -252,9 +253,33 @@ public:
 	 * object or to a different object. Only occurs once as the piece changes - this may be triggered along side
 	 * other similar events e.g., BlockDestroyedEvent, BallBlockCollisionEvent.
 	 * Arguements: pieceBefore - The LevelPiece object before the change.
-	 *						 pieceAfter  = The LevelPiece object after the change.
+	 *						 pieceAfter  - The LevelPiece object after the change.
 	 */
 	virtual void LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) = 0;
+
+
+	/**
+	 * Event triggered when a level piece has a status effect added to it. Only occurs once, just after the status is applied, 
+	 * for a particular status effect. All status effects are eventually removed either via the 
+	 * LevelPieceStatusRemoved or LevelPieceAllStatusRemoved events.
+	 * Arguements: piece       - The level piece that had the status added to it.
+	 *             addedStatus - The status added to the piece. 
+	 */
+	virtual void LevelPieceStatusAddedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus) = 0;
+
+	/**
+	 * Event triggered when a level piece has a status effect removed from it. Only occurs once, just after the status is removed,
+	 * for a particular status effect. A LevelPieceStatusAdded event for that same status is gaurenteed to have been made before this event.
+	 * Arguements: piece         - The level piece that had the status removed from it.
+	 *             removedStatus - The status removed from the piece. 
+	 */
+	virtual void LevelPieceStatusRemovedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus) = 0;
+
+	/**
+	 * Event triggered when a level piece has all status effects removed from it. Only occurs once just after all status is removed.
+	 * Arguements: piece - The level piece that had all the status removed from it.
+	 */
+	virtual void LevelPieceAllStatusRemovedEvent(const LevelPiece& piece) = 0;
 
 	/**
 	 * Event triggered when there is a change to the player's score. Only occurs once per change.

@@ -195,7 +195,7 @@ public:
 		this->gravitySpeed = speed;
 	}
 
-	uint32_t GetBallType() const {
+	int32_t GetBallType() const {
 		return this->currType;
 	}
 	void RemoveAllBallTypes() {
@@ -326,7 +326,7 @@ private:
 	Vector2D currDir;				// The current direction of movement of the ball
 	float currSpeed;				// The current speed of the ball
 	float gravitySpeed;			// The current gravity speed of the ball
-	uint32_t currType;			// The current type of this ball
+	int32_t currType;			  // The current type of this ball
 
 	BallSize currSize;					// The current size of this ball
 	float currScaleFactor;			// The scale difference between the ball's current size and its default size

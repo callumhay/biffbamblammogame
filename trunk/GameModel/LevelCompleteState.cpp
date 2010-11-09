@@ -17,7 +17,7 @@ LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
 
 LevelCompleteState::~LevelCompleteState() {
 	// Clear up the model since the level is officially completed
-	this->gameModel->ClearUpdatePieces();
+	this->gameModel->ClearStatusUpdatePieces();
 	this->gameModel->ClearProjectiles();
 	this->gameModel->ClearBeams();
 	this->gameModel->ClearLiveItems();

@@ -121,6 +121,7 @@ private:
 	Texture2D* hugeExplosionTex;
 	Texture2D* lightningBoltTex;
 	Texture2D* sphereNormalsTex;
+	Texture2D* cloudTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -160,6 +161,7 @@ private:
 
 	CgFxVolumetricEffect ghostBallSmoke;
 	CgFxVolumetricEffect fireEffect;
+	CgFxVolumetricEffect fireBallTrailEffect;
 	CgFxPostRefract normalTexRefractEffect;
 
 	// Initialization functions for effect stuffs

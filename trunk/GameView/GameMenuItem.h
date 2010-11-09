@@ -17,6 +17,8 @@
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/Animation.h"
 
+#include "../GameControl/GameControl.h"
+
 class GameMenu;
 class GameSubMenu;
 
@@ -56,14 +58,13 @@ public:
 	}
 
 	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	virtual void KeyPressed(SDLKey key, SDLMod modifier) {
-		UNUSED_PARAMETER(key);
-		UNUSED_PARAMETER(modifier);
-	};
-	virtual void KeyReleased(SDLKey key, SDLMod modifier) {
-		UNUSED_PARAMETER(key);
-		UNUSED_PARAMETER(modifier);
-	};
+
+	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton) {
+		UNUSED_PARAMETER(pressedButton);
+	}
+	virtual void ButtonReleased(const GameControl::ActionButton& releasedButton) {
+		UNUSED_PARAMETER(releasedButton);
+	}
 
 	unsigned int GetHeight() const;
 	virtual float GetWidth() const;
@@ -124,7 +125,7 @@ private:
 
 public:
 	SelectionListMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, const std::vector<std::string>& items);
-	virtual ~SelectionListMenuItem();
+	~SelectionListMenuItem();
 
 	void SetSelectionList(const std::vector<std::string>& items);
 	
@@ -140,12 +141,10 @@ public:
 		return this->selectionList[this->selectedIndex];
 	}
 
-	virtual void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	virtual void KeyPressed(SDLKey key, SDLMod modifier);
-
-	virtual float GetWidth() const { return this->maxWidth; }
-
-	virtual void Activate();
+	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	float GetWidth() const { return this->maxWidth; }
+	void Activate();
 };
 
 /**
@@ -170,8 +169,8 @@ public:
 
 	// Inherited from GameMenuItem
 	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	void KeyPressed(SDLKey key, SDLMod modifier);
-	void KeyReleased(SDLKey key, SDLMod modifier);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 	float GetWidth() const { return this->maxWidth; }
 
 private:
@@ -233,7 +232,7 @@ public:
 	void SetVerifyMenuColours(const Colour& descTxtColour, const Colour& idleColour, const Colour& selColour);
 
 	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
-	void KeyPressed(SDLKey key, SDLMod modifier);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 
 private:
 	static const float VERIFY_MENU_HPADDING;

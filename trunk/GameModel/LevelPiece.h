@@ -75,7 +75,7 @@ public:
 	virtual LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 	virtual LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
-	virtual bool Tick(double dT, GameModel* gameModel);
+	virtual bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
 	// Debug Stuffs
 	void DebugDraw() const;
@@ -89,18 +89,23 @@ public:
 	virtual bool ProjectilePassesThrough(Projectile* projectile) const = 0;
 	virtual bool IsLightReflectorRefractor() const = 0;
 
+	// Track the status of the piece, effects properties of the piece and how it works/acts in a level
+	// NOTE: IF YOU ADD TO THIS DON'T FORGET TO UPDATE LevelPiece::RemoveStatuses !!!!!
+	enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001 };
+	bool HasStatus(const PieceStatus& status) const;
+	void AddStatus(const PieceStatus& status);
+	void RemoveStatus(const PieceStatus& status);
+	void RemoveStatuses(int32_t statusMask);
+
 protected:
 	Colour colour;								// The colour of this level piece
 	Point2D center;								// The exact center of this piece in the game model
 	unsigned int wIndex, hIndex;	// The width and height index to where this block is in its level
 	BoundingLines bounds;			 		// The bounding box, rep. as lines forming the boundry of this, kept in world space
 
-	// Track the status of the piece, effects properties of the piece and how it works/acts in a level
-	enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001 };
-	uint32_t pieceStatus;
+	int32_t pieceStatus;
 
-	void AddStatus(const PieceStatus& status);
-	void RemoveStatus(const PieceStatus& status);
+	void RemoveAllStatus();
 
 private:
 	DISALLOW_COPY_AND_ASSIGN(LevelPiece);
@@ -202,13 +207,18 @@ inline LevelPiece* LevelPiece::TickPaddleShieldCollision(double dT, const Player
 	return this;
 }
 
-// Returns: false (meaning do not keep ticking i.e., stop ticking!)
-inline bool LevelPiece::Tick(double dT, GameModel* gameModel) {
+// Used to tick the status effects on a particular level piece.
+// removedStatuses [out]: Any status effects that have been removed during this tick, 0x00000000 (i.e., NormalStatus)
+// if no effects were removed.
+// Returns: true to say that this piece no longer needs to tick, false if it does.
+inline bool LevelPiece::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
 	// By default this does nothing
 	UNUSED_PARAMETER(dT);
 	UNUSED_PARAMETER(gameModel);
 	assert(gameModel != NULL);
-	return false;
+
+	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
+	return true;
 }
 
 // Draws the boundry lines and normals for this level piece.
@@ -216,12 +226,8 @@ inline void LevelPiece::DebugDraw() const {
 	this->bounds.DebugDraw();
 }
 
-inline void LevelPiece::AddStatus(const PieceStatus& status) {
-	this->pieceStatus = (this->pieceStatus | status);
-}
-
-inline void LevelPiece::RemoveStatus(const PieceStatus& status) {
-	this->pieceStatus = (this->pieceStatus & ~status);
+inline bool LevelPiece::HasStatus(const PieceStatus& status) const {
+	return (this->pieceStatus & status) == static_cast<int32_t>(status);
 }
 
 #endif

@@ -41,11 +41,11 @@ private:
 	GameState* nextState;
 
 	// Player-controllable game assets
-	PlayerPaddle* playerPaddle;						// The one and only player paddle
-	std::list<GameBall*> balls;						// Current set of balls active in the game
-	std::list<Projectile*> projectiles;		// Projectiles spawned as the game is played
-	std::list<Beam*> beams;								// Beams spawned as the game is played
-	std::set<LevelPiece*> updatePieces;		// Pieces that require updating every frame
+	PlayerPaddle* playerPaddle;														// The one and only player paddle
+	std::list<GameBall*> balls;														// Current set of balls active in the game
+	std::list<Projectile*> projectiles;										// Projectiles spawned as the game is played
+	std::list<Beam*> beams;																// Beams spawned as the game is played
+	std::map<LevelPiece*, int32_t> statusUpdatePieces;		// Pieces that require updating every frame due to status effects
 
 	// Current world and level information
 	unsigned int currWorldNum;
@@ -94,7 +94,7 @@ private:
 	void CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle);
 	void BallPaddleCollisionOccurred(GameBall& ball);
 	void BallDied(GameBall* deadBall, bool& stateChanged);
-	void DoPieceUpdates(double dT);
+	void DoPieceStatusUpdates(double dT);
 	
 	// Increment the player's score in the game
 	void IncrementScore(int amt) {
@@ -132,7 +132,7 @@ private:
 	void ClearBeams();
 	void ClearLiveItems();
 	void ClearActiveTimers();
-	void ClearUpdatePieces();
+	void ClearStatusUpdatePieces();
 
 	bool RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type);
 
@@ -252,13 +252,24 @@ public:
 	}
 
 	/**
+	 * Get the level pieces that are constantly being updated each frame.
+	 * These pieces have status effects applied to them that require updating
+	 * each frame (e.g., blocks that are on fire).
+	 * Returns: A map of status update pieces along with their status mask (i.e., what status combination
+	 * is causing them to be updated).
+	 */
+	const std::map<LevelPiece*, int32_t>& GetStatusUpdateLevelPieces() const {
+		return this->statusUpdatePieces;
+	}
+
+	/**
 	 * Determines whether the given ball effect is active in the current state of the game or not.
 	 * Returns: true if the ball effect is active on any one of the balls in play, false otherwise.
 	 */
 	bool IsBallEffectActive(GameBall::BallType effectType) const {
 		for (std::list<GameBall*>::const_iterator ballIter = this->balls.begin(); ballIter != this->balls.end(); ++ballIter) {
 			const GameBall* currBall = *ballIter;
-			if ((currBall->GetBallType() & effectType) == static_cast<uint32_t>(effectType)) {
+			if ((currBall->GetBallType() & effectType) == static_cast<int32_t>(effectType)) {
 				return true;
 			}
 		}
@@ -300,8 +311,9 @@ public:
 				 this->currState->MovePaddleKeyPressed(paddleMovement);
 		}
 	}
+
 	// Release the ball from the paddle, shoot lasers and activate other power ups
-	void ReleaseBall() {
+	void ShootActionReleaseUse() {
 		// Can only release the ball if the state exists and is not paused
 		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
 			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
@@ -357,7 +369,7 @@ public:
 	void AddItemDrop(const LevelPiece& p, const GameItem::ItemType& itemType);
 	void AddProjectile(Projectile* projectile);
 	void AddBeam(int beamType);
-	void AddTickLevelPiece(LevelPiece* p);
+	bool AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status);
 
 	// Debug functions
 #ifdef _DEBUG
@@ -382,8 +394,13 @@ public:
 	friend class GameOverState;
 };
 
-inline void GameModel::ClearUpdatePieces() {
-	this->updatePieces.clear();
+inline void GameModel::ClearStatusUpdatePieces() {
+	// When we clear all the update pieces we also clear all the relevant status effects for those pieces...
+	for (std::map<LevelPiece*, int32_t>::iterator iter = this->statusUpdatePieces.begin(); iter != this->statusUpdatePieces.end(); ++iter) {
+		LevelPiece* currLevelPiece = iter->first;
+		currLevelPiece->RemoveStatuses(iter->second);
+	}
+	this->statusUpdatePieces.clear();
 }
 
 #endif

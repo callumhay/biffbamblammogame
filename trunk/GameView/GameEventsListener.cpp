@@ -33,6 +33,9 @@
 
 #include "../GameSound/GameSoundAssets.h"
 
+#include "../GameControl/BBBGameController.h"
+#include "../GameControl/GameControllerManager.h"
+
 // Wait times before showing the same effect - these prevent the game view from displaying a whole ton
 // of the same effect over and over when the ball hits a bunch of blocks/the paddle in a very small time frame
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 100;
@@ -120,6 +123,7 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 	std::string soundText = Onomatoplex::Generator::GetInstance()->Generate(Onomatoplex::BOUNCE, Onomatoplex::NORMAL);
 
 	// Do a camera shake based on the size of the paddle...
+	BBBGameController::VibrateAmount controllerVibeAmt = BBBGameController::NoVibration;
 	PlayerPaddle::PaddleSize paddleSize = paddle.GetPaddleSize();
 	float shakeMagnitude = 0.0f;
 	float shakeLength = 0.0f;
@@ -129,34 +133,54 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 			shakeMagnitude = 0.0f;
 			shakeLength = 0.0f;
 			volume = GameSoundAssets::VeryQuietVolume;
+			controllerVibeAmt = BBBGameController::VerySoftVibration;
 			break;
 		case PlayerPaddle::SmallerSize:
 			shakeMagnitude = 0.1f;
 			shakeLength = 0.1f;
 			volume = GameSoundAssets::QuietVolume;
+			controllerVibeAmt = BBBGameController::SoftVibration;
 			break;
 		case PlayerPaddle::NormalSize:
 			shakeMagnitude = 0.2f;
 			shakeLength = 0.15f;
 			volume = GameSoundAssets::NormalVolume;
+			controllerVibeAmt = BBBGameController::MediumVibration;
 			break;
 		case PlayerPaddle::BiggerSize:
 			shakeMagnitude = 0.33f;
 			shakeLength = 0.2f;
 			volume = GameSoundAssets::LoudVolume;
+			controllerVibeAmt = BBBGameController::HeavyVibration;
 			break;
 		case PlayerPaddle::BiggestSize:
 			shakeMagnitude = 0.5f;
 			shakeLength = 0.25f;
 			volume = GameSoundAssets::VeryLoudVolume;
+			controllerVibeAmt = BBBGameController::VeryHeavyVibration;
 			break;
 		default:
 			assert(false);
 			volume = GameSoundAssets::NormalVolume;
 			break;
 	}
+	
+	// Make the camera shake...
 	this->display->GetCamera().SetCameraShake(shakeLength, Vector3D(shakeMagnitude, 0.0, 0.0), 20);
 	
+	// Make the controller shake (if it can)...
+	BBBGameController::VibrateAmount leftVibeAmt = BBBGameController::VerySoftVibration;
+	BBBGameController::VibrateAmount rightVibeAmt = BBBGameController::VerySoftVibration;
+	if (hitLoc[0] > 0) {
+		// On the right side...
+		rightVibeAmt = controllerVibeAmt;
+	}
+	else {
+		// On the left side...
+		leftVibeAmt = controllerVibeAmt;
+	}
+	GameControllerManager::GetInstance()->VibrateControllers(shakeLength, leftVibeAmt, rightVibeAmt);
+
 	// Add a smacking type effect...
 	this->display->GetAssets()->GetESPAssets()->AddPaddleHitWallEffect(paddle, hitLoc);
 
@@ -536,6 +560,23 @@ void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
 void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
 	this->display->GetAssets()->GetCurrentLevelMesh()->ChangePiece(pieceBefore, pieceAfter);
 	debug_output("EVENT: LevelPiece changed");
+}
+
+void GameEventsListener::LevelPieceStatusAddedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus) {
+	UNUSED_PARAMETER(piece);
+	UNUSED_PARAMETER(addedStatus);
+	debug_output("EVENT: LevelPiece status added");
+}
+
+void GameEventsListener::LevelPieceStatusRemovedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus) {
+	UNUSED_PARAMETER(piece);
+	UNUSED_PARAMETER(removedStatus);
+	debug_output("EVENT: LevelPiece status removed");
+}
+
+void GameEventsListener::LevelPieceAllStatusRemovedEvent(const LevelPiece& piece) {
+	UNUSED_PARAMETER(piece);
+	debug_output("EVENT: LevelPiece all status removed");
 }
 
 void GameEventsListener::ScoreChangedEvent(int amt) {

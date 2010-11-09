@@ -151,8 +151,8 @@ public:
 	void Draw(double dT, int windowWidth, int windowHeight);
 	void DebugDraw();
 
-	void KeyPressed(SDLKey key, SDLMod modifier);
-	void KeyReleased(SDLKey key, SDLMod modifier);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 
 	inline void MenuItemHighlighted() {
 		for (std::list<GameMenuEventHandler*>::iterator iter = this->eventHandlers.begin(); iter != this->eventHandlers.end(); ++iter) {
@@ -254,18 +254,18 @@ private:
 	AnimationMultiLerp<float> menuBGOpenGhostFade;
 
 protected:
-	virtual float GetMenuItemPadding() const;
-	virtual void DrawMenuBackground(double dT);
-	virtual void DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem);
-	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem, int windowWidth, int windowHeight);
+	float GetMenuItemPadding() const;
+	void DrawMenuBackground(double dT);
+	void DrawSelectionIndicator(double dT, const Point2D& itemPos, const GameMenuItem& menuItem);
+	void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem, int windowWidth, int windowHeight);
 
 public:
 	static const float HALF_ARROW_WIDTH;
 	
 	GameSubMenu();
-	virtual ~GameSubMenu();
+	~GameSubMenu();
 
-	virtual void SetSelectedMenuItem(int index);
+	void SetSelectedMenuItem(int index);
 
 	void AnimateMenuOpen();
 

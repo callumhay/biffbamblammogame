@@ -106,7 +106,7 @@ float4 firey_sprite_PS(vertexOutput IN) : COLOR {
     float totalTexVal = 8.0 * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
                                abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
 	totalTexVal = clamp(totalTexVal, 0, 1);
-	float alpha = lerp(0.2f, 0.9f, totalTexVal) * AlphaMultiplier;
+	float alpha = lerp(0.2f, 1.0f, totalTexVal) * AlphaMultiplier;
 	float3 fireColour = lerp(float3(1.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f), totalTexVal.x);             
 
     // return as float4

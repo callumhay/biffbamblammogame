@@ -121,9 +121,8 @@ void WorldStartDisplayState::RenderFrame(double dT) {
 	}
 }
 
-void WorldStartDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(key);
-	UNUSED_PARAMETER(modifier);
+void WorldStartDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+	UNUSED_PARAMETER(pressedButton);
 
 	if (this->waitingForKeyPress) {
 		// Start the fade out animation - the user wants to start playing!

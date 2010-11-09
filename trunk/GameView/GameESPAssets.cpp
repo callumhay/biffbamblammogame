@@ -78,7 +78,8 @@ spiralTex(NULL),
 sideBlastTex(NULL),
 hugeExplosionTex(NULL),
 lightningBoltTex(NULL),
-sphereNormalsTex(NULL) {
+sphereNormalsTex(NULL),
+cloudTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -150,6 +151,8 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->lightningBoltTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sphereNormalsTex);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTex);
 	assert(removed);
 
 	// Delete any standalone effects
@@ -466,6 +469,10 @@ void GameESPAssets::InitESPTextures() {
 		this->sphereNormalsTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
 		assert(this->sphereNormalsTex != NULL);
 	}
+	if (this->cloudTex == NULL) {
+		this->cloudTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
+		assert(this->cloudTex != NULL);
+	}
 
 	debug_opengl_state();
 }
@@ -545,13 +552,14 @@ void GameESPAssets::AddFireBallESPEffects(const GameBall* ball, std::vector<ESPP
 	fireBallEmitterTrail->SetParticleLife(ESPInterval(0.3f, 0.45f));
 	fireBallEmitterTrail->SetParticleSize(ESPInterval(2.25f*ball->GetBounds().Radius(), 3.25f*ball->GetBounds().Radius()));
 	fireBallEmitterTrail->SetEmitAngleInDegrees(10);
+	fireBallEmitterTrail->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
 	fireBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	fireBallEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
 	fireBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
 	fireBallEmitterTrail->AddEffector(&this->fireBallColourFader);
 	fireBallEmitterTrail->AddEffector(&this->particleMediumGrowth);
 	fireBallEmitterTrail->AddEffector(&this->fireBallAccel1);
-	bool result = fireBallEmitterTrail->SetParticles(GameESPAssets::NUM_FIRE_BALL_PARTICLES, &this->fireEffect);
+	bool result = fireBallEmitterTrail->SetParticles(GameESPAssets::NUM_FIRE_BALL_PARTICLES, &this->fireBallTrailEffect);
 	assert(result);
 
 	/*
@@ -778,6 +786,13 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->fireEffect.SetFrequency(1.0f);
 	this->fireEffect.SetFlowDirection(Vector3D(0, 0, 1));
 	this->fireEffect.SetMaskTexture(this->circleGradientTex);
+
+	this->fireBallTrailEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
+	this->fireBallTrailEffect.SetColour(Colour(1.00f, 1.00f, 1.00f));
+	this->fireBallTrailEffect.SetScale(0.8f);
+	this->fireBallTrailEffect.SetFrequency(1.2f);
+	this->fireBallTrailEffect.SetFlowDirection(Vector3D(0, 0, 1));
+	this->fireBallTrailEffect.SetMaskTexture(this->cloudTex);
 
 	// Setup the post refraction normal effect with the sphere normal - this is for forcefield
 	// and shockwave effects

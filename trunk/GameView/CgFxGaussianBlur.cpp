@@ -4,8 +4,6 @@
 #include "../BlammoEngine/FBObj.h"
 #include "../BlammoEngine/GeometryMaker.h"
 
-#include "../GameController.h"
-
 const char* CgFxGaussianBlur::GAUSSIANBLUR_3x3_TECHNIQUE_NAME = "GaussianBlur3x3";
 const char* CgFxGaussianBlur::GAUSSIANBLUR_5x5_TECHNIQUE_NAME = "GaussianBlur5x5";
 const char* CgFxGaussianBlur::GAUSSIANBLUR_7x7_TECHNIQUE_NAME = "GaussianBlur7x7";

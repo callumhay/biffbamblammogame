@@ -20,7 +20,7 @@ const char* CgFxFireBallEffect::BASIC_TECHNIQUE_NAME = "FireBall";
 
 CgFxFireBallEffect::CgFxFireBallEffect() : 
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_FIREBALL_SHADER), 
-scale(1.0f), freq(1.0f), flowDir(0, 0, 1), 
+scale(1.0f), freq(0.6f), flowDir(0, 0, 1), alphaMultiplier(1.0f),
 noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
 
 	// Set the technique
@@ -52,8 +52,8 @@ void CgFxFireBallEffect::SetupBeforePasses(const Camera& camera) {
 	UNUSED_PARAMETER(camera);
 
 	// Transform setup
-	cgGLSetStateMatrixParameter(this->wvpMatrixParam,     CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-	cgGLSetStateMatrixParameter(this->worldMatrixParam,   CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
+	cgGLSetStateMatrixParameter(this->wvpMatrixParam,   CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
 
 	// Set tweakables...
 	cgGLSetParameter1f(this->scaleParam, this->scale);

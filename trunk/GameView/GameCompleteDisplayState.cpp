@@ -30,18 +30,7 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
 
 }
 
-void GameCompleteDisplayState::KeyPressed(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(key);
-	UNUSED_PARAMETER(modifier);
+void GameCompleteDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+	UNUSED_PARAMETER(pressedButton);
 	this->display->SetCurrentState(new MainMenuDisplayState(this->display));
-}
-
-void GameCompleteDisplayState::KeyReleased(SDLKey key, SDLMod modifier) {
-	UNUSED_PARAMETER(key);
-	UNUSED_PARAMETER(modifier);
-}
-
-void GameCompleteDisplayState::DisplaySizeChanged(int width, int height) {
-	UNUSED_PARAMETER(width);
-	UNUSED_PARAMETER(height);
 }

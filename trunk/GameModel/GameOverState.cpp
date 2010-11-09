@@ -10,5 +10,5 @@ GameOverState::~GameOverState(){
 	this->gameModel->ClearBeams();
 	this->gameModel->ClearLiveItems();
 	this->gameModel->ClearActiveTimers();
-	this->gameModel->ClearUpdatePieces();
+	this->gameModel->ClearStatusUpdatePieces();
 }

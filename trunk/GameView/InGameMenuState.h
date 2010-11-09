@@ -18,9 +18,10 @@ public:
 	~InGameMenuState();
 
 	void RenderFrame(double dT);
-	void KeyPressed(SDLKey key, SDLMod modifier);
-	void KeyReleased(SDLKey key, SDLMod modifier);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 	void DisplaySizeChanged(int width, int height);
+	DisplayState::DisplayStateType GetType() const;
 
 private:
 
@@ -40,6 +41,8 @@ private:
 	int exitToDesktopItem;
 
 	void InitTopMenu();
+
+	void ResumeTheGame();
 
 	// Top Level Menu Handler class
 	class TopMenuEventHandler : public GameMenuEventHandler {
@@ -71,6 +74,16 @@ private:
 	TopMenuEventHandler* topMenuEventHandler;
 	VerifyMenuEventHandler* verifyMenuEventHandler;
 
+	DISALLOW_COPY_AND_ASSIGN(InGameMenuState);
 };
+
+inline void InGameMenuState::DisplaySizeChanged(int width, int height) {
+	UNUSED_PARAMETER(width);
+	UNUSED_PARAMETER(height);
+}
+
+inline DisplayState::DisplayStateType InGameMenuState::GetType() const {
+	return DisplayState::InGameMenu;
+}
 
 #endif // __INGAMEMENUSTATE_H__
