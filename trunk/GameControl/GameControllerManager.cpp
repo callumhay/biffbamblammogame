@@ -8,7 +8,7 @@ GameControllerManager* GameControllerManager::instance = NULL;
 const size_t GameControllerManager::KEYBOARD_SDL_INDEX = 0;
 const size_t GameControllerManager::XBOX_360_INDEX		 = 1;
 
-GameControllerManager::GameControllerManager() {
+GameControllerManager::GameControllerManager() : model(NULL), display(NULL) {
 	this->gameControllers.resize(2, NULL);
 }
 
@@ -24,16 +24,23 @@ GameControllerManager::~GameControllerManager() {
 }
 
 void GameControllerManager::InitAllControllers(GameModel* model, GameDisplay* display) {
-	this->GetSDLKeyboardGameController(model, display);
-	this->GetXBox360Controller(model, display, 0);
+	assert(model != NULL);
+	assert(display != NULL);
+	this->model   = model;
+	this->display = display;
+	this->GetSDLKeyboardGameController();
+	this->GetXBox360Controller(0);
 }
 
 /**
  * Builds a keyboard controller when using the SDL library.
  */
-BBBGameController* GameControllerManager::GetSDLKeyboardGameController(GameModel* model, GameDisplay* display) {
+BBBGameController* GameControllerManager::GetSDLKeyboardGameController() {
+	assert(this->model != NULL);
+	assert(this->display != NULL);
+
 	if (this->gameControllers[KEYBOARD_SDL_INDEX] == NULL) {
-		BBBGameController* sdlKeyboard = new KeyboardSDLController(model, display);
+		BBBGameController* sdlKeyboard = new KeyboardSDLController(this->model, this->display);
 		this->gameControllers[KEYBOARD_SDL_INDEX] = sdlKeyboard;
 		this->loadedGameControllers.push_back(sdlKeyboard);
 	}
@@ -43,12 +50,15 @@ BBBGameController* GameControllerManager::GetSDLKeyboardGameController(GameModel
 /**
  * Builds a XBox 360 Game controller when in windows using the XInput library.
  */
-BBBGameController* GameControllerManager::GetXBox360Controller(GameModel* model, GameDisplay* display, int controllerNum) {
+BBBGameController* GameControllerManager::GetXBox360Controller(int controllerNum) {
+	assert(this->model != NULL);
+	assert(this->display != NULL);
+
 #ifdef _WIN32
 	if (this->gameControllers[XBOX_360_INDEX] == NULL) {
 		// Check for a connected XBox 360 controller of the given controller number
 		if (XBox360Controller::IsConnected(controllerNum)) {
-			BBBGameController* xBox360Controller = new XBox360Controller(model, display, controllerNum);
+			BBBGameController* xBox360Controller = new XBox360Controller(this->model, this->display, controllerNum);
 		this->gameControllers[XBOX_360_INDEX] = xBox360Controller;
 		this->loadedGameControllers.push_back(xBox360Controller);
 		}
@@ -61,10 +71,13 @@ BBBGameController* GameControllerManager::GetXBox360Controller(GameModel* model,
 /**
  * Trys to load any newly introduced plug-and-play controllers.
  */
-void GameControllerManager::TryToLoadPlugAndPlayControllers(GameModel* model, GameDisplay* display) {
+void GameControllerManager::TryToLoadPlugAndPlayControllers() {
+	assert(this->model != NULL);
+	assert(this->display != NULL);
+
 	if (this->ControllersCanStillPlugAndPlay()) {
 		// Currently the only plug-and-play controller we care about is the XBox360 controller
-		GameControllerManager::GetXBox360Controller(model, display, 0);
+		GameControllerManager::GetXBox360Controller(0);
 	}
 }
 
