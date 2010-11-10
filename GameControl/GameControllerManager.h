@@ -28,12 +28,8 @@ public:
 	}
 
 	void InitAllControllers(GameModel* model, GameDisplay* display);
-	BBBGameController* GetSDLKeyboardGameController(GameModel* model, GameDisplay* display);
-	//BBBGameController* GetSDLJoystickGameController();
-	BBBGameController* GetXBox360Controller(GameModel* model, GameDisplay* display, int controllerNum);
-
 	bool ControllersCanStillPlugAndPlay() const;
-	void TryToLoadPlugAndPlayControllers(GameModel* model, GameDisplay* display);
+	void TryToLoadPlugAndPlayControllers();
 
 	//const std::list<BBBGameController*>& GetLoadedGameControllers() const;
 
@@ -45,8 +41,15 @@ public:
 private:
 	static GameControllerManager* instance;
 
+	GameModel* model;
+	GameDisplay* display;
+
 	GameControllerManager();
 	~GameControllerManager();
+
+	BBBGameController* GetSDLKeyboardGameController();
+	//BBBGameController* GetSDLJoystickGameController();
+	BBBGameController* GetXBox360Controller(int controllerNum);
 
 	static const size_t KEYBOARD_SDL_INDEX;
 	static const size_t XBOX_360_INDEX;
@@ -67,12 +70,30 @@ inline bool GameControllerManager::ControllersCanStillPlugAndPlay() const {
 inline bool GameControllerManager::ProcessControllers() {
 	bool quit = false;
 	BBBGameController* currController;
-	for (std::list<BBBGameController*>::iterator iter = this->loadedGameControllers.begin(); iter != this->loadedGameControllers.end(); ++iter) {
+	for (std::list<BBBGameController*>::iterator iter = this->loadedGameControllers.begin(); iter != this->loadedGameControllers.end();) {
 		currController = *iter;
-		quit |= currController->ProcessState();
+		// Make sure the controller is still connected...
+		if (currController->IsConnected()) {
+			quit |= currController->ProcessState();
+			++iter;
+		}
+		else {
+			// Remove the controller from all lists/maps of game controllers and delete it
+			for (std::vector<BBBGameController*>::iterator iter2 = this->gameControllers.begin(); iter2 != this->gameControllers.end(); ++iter2) {
+				if (*iter2 == currController) {
+					(*iter2) = NULL;
+					break;
+				}
+			}
+			delete currController;
+			currController = NULL;
+			
+			iter = this->loadedGameControllers.erase(iter); 
+		}
 	}
 
-	// TODO: Check for other controllers here...
+	// Check for other controllers that may have been plugged in since last time we processed them
+	this->TryToLoadPlugAndPlayControllers();
 
 	return quit;
 }
