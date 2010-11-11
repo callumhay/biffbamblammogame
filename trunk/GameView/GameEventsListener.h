@@ -13,6 +13,8 @@
 #define __GAMEEVENTSLISTENER_H__
 
 #include "../GameModel/GameEvents.h"
+#include "../GameControl/BBBGameController.h"
+#include "../GameSound/GameSoundAssets.h"
 
 class GameDisplay;
 
@@ -93,6 +95,10 @@ private:
 	static const long EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS;
 
 	void DestroyBallSafetyNet(const Point2D& pt);
+
+	static void GetVolAndShakeForBallSize(const GameBall::BallSize& ballSize, float& shakeMagnitude,
+																				float& shakeLength, GameSoundAssets::SoundVolumeLoudness& volume,
+																				BBBGameController::VibrateAmount& controllerVibeAmt);
 };
 
 #endif

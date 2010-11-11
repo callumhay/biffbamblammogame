@@ -42,20 +42,20 @@ bool KeyboardSDLController::ProcessState() {
 	return false;
 }
 
-void KeyboardSDLController::Sync(double dT) {
+void KeyboardSDLController::Sync(size_t frameID, double dT) {
 	UNUSED_PARAMETER(dT);
 
 	// Paddle controls (NOTE: the else is to make the feedback more exacting)
 	if (this->keyPressed[SDLK_LEFT]) {
 		PlayerPaddle::PaddleMovement leftDir = this->model->AreControlsFlipped() ? PlayerPaddle::RightPaddleMovement : PlayerPaddle::LeftPaddleMovement;
-		this->model->MovePaddle(leftDir);
+		this->model->MovePaddle(frameID, leftDir);
 	}
 	else if (this->keyPressed[SDLK_RIGHT]) {
 		PlayerPaddle::PaddleMovement rightDir = this->model->AreControlsFlipped() ? PlayerPaddle::LeftPaddleMovement : PlayerPaddle::RightPaddleMovement;
-		this->model->MovePaddle(rightDir);
+		this->model->MovePaddle(frameID, rightDir);
 	}
 	else {
-		this->model->MovePaddle(PlayerPaddle::NoPaddleMovement);
+		this->model->MovePaddle(frameID, PlayerPaddle::NoPaddleMovement);
 	}
 
 	// Execute any debug functionality for when a button is held down...

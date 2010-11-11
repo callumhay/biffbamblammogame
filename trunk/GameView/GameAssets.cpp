@@ -33,11 +33,16 @@
 #include "../GameModel/Beam.h"
 #include "../GameModel/PaddleRocketProjectile.h"
 
+// Game Control Includes
+#include "../GameControl/GameControllerManager.h"
+
 // Blammo Engine includes
 #include "../BlammoEngine/Texture3D.h"
+
 // ESP Engine includes
 #include "../ESPEngine/ESPEmitter.h"
 
+// Basic Top Level Includes
 #include "../ResourceManager.h"
 
 // *****************************************************
@@ -948,9 +953,10 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
 // Notifies assets that there was an explosion and there should be a fullscreen flash
 void GameAssets::RocketExplosion(Camera& camera) {
-	// Add a camera shake and flash for when the rocket explodes...
-	camera.SetCameraShake(1.0, Vector3D(0.8, 0.7, 0.1), 120);
-	//GameControllerManager::GetInstance()->Vibrate(
+	// Add a camera/controller shake and flash for when the rocket explodes...
+	camera.SetCameraShake(1.2f, Vector3D(0.9f, 0.8f, 0.1f), 130);
+	GameControllerManager::GetInstance()->VibrateControllers(1.2f, BBBGameController::VeryHeavyVibration, BBBGameController::VeryHeavyVibration);
+
 	this->flashHUD->Activate(0.5, 1.0f);
 	// Play the explosion sound
 	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketExplodedEvent, GameSoundAssets::VeryLoudVolume);

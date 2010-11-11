@@ -22,7 +22,7 @@ public:
 
 	void Vibrate(double lengthInSeconds, const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt);
 	bool ProcessState();
-	void Sync(double dT);
+	void Sync(size_t frameID, double dT);
 	bool IsConnected() const;
 
 private:
