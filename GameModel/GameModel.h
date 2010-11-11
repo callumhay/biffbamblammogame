@@ -304,7 +304,20 @@ public:
 	// Paddle and ball related manipulators *********************************
 
 	// Move the paddle a distance in either positive or negative X direction.
-	void MovePaddle(const PlayerPaddle::PaddleMovement& paddleMovement) {
+	void MovePaddle(size_t frameID, const PlayerPaddle::PaddleMovement& paddleMovement) {
+		static PlayerPaddle::PaddleMovement lastPaddleMoveThisFrame = PlayerPaddle::NoPaddleMovement;
+		static size_t lastFrameID = 0;
+		if (frameID == lastFrameID) {
+			// We ignore 'no movement' in cases where the paddle has been told to move this frame
+			if (lastPaddleMoveThisFrame != PlayerPaddle::NoPaddleMovement && paddleMovement == PlayerPaddle::NoPaddleMovement) {
+				return;
+			}
+		}
+		else {
+			lastFrameID = frameID;
+		}
+		lastPaddleMoveThisFrame = paddleMovement;
+
 		// Can only move the paddle if the state exists and is not paused
 		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
 			 (this->pauseBitField & GameModel::PauseState) == 0x0) {

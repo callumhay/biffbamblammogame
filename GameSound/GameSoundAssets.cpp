@@ -276,7 +276,7 @@ void GameSoundAssets::StopSoundGeneral(GameSoundAssets::SoundPallet pallet, int 
 	}
 }
 
-void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPiece& block) {
+void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPiece& block, GameSoundAssets::SoundVolumeLoudness volume) {
 	// Play a sound for the ball colliding with the block based on the block...
 	switch (block.GetType()) {
 		case LevelPiece::Solid:
@@ -289,7 +289,7 @@ void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPie
 		case LevelPiece::PrismTriangle:
 		case LevelPiece::Tesla:
 		case LevelPiece::ItemDrop:
-			this->PlayWorldSound(GameSoundAssets::WorldSoundBallBlockCollisionEvent);
+			this->PlayWorldSound(GameSoundAssets::WorldSoundBallBlockCollisionEvent, volume);
 			break;
 		
 		case LevelPiece::Ink:
@@ -301,12 +301,12 @@ void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPie
 				const CannonBlock* cannonBlock = static_cast<const CannonBlock*>(&block);
 				if (!cannonBlock->GetIsLoaded() && !ball.IsLastPieceCollidedWith(&block)) {
 					// The ball will be loaded into the cannon...
-					this->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockLoadedEvent);
+					this->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockLoadedEvent,  GameSoundAssets::NormalVolume);
 					this->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask, GameSoundAssets::QuietVolume);
 				}
 				else if (!ball.IsLastPieceCollidedWith(&block)) {
 					// Ball didn't go into the cannon... it must have already been loaded, play typical block hit sound
-					this->PlayWorldSound(GameSoundAssets::WorldSoundBallBlockCollisionEvent);
+					this->PlayWorldSound(GameSoundAssets::WorldSoundBallBlockCollisionEvent, volume);
 				}
 			}
 			break;

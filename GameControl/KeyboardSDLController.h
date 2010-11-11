@@ -15,7 +15,7 @@ public:
 	bool IsConnected() const;
 
 	bool ProcessState();
-	void Sync(double dT);
+	void Sync(size_t frameID, double dT);
 
 private:
 	bool keyPressed[SDLK_LAST];

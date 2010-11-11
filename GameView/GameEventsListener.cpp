@@ -31,9 +31,6 @@
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/PaddleRocketProjectile.h"
 
-#include "../GameSound/GameSoundAssets.h"
-
-#include "../GameControl/BBBGameController.h"
 #include "../GameControl/GameControllerManager.h"
 
 // Wait times before showing the same effect - these prevent the game view from displaying a whole ton
@@ -291,6 +288,8 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 	bool doEffects = (currSystemTime - this->timeSinceLastBallBlockCollisionEventInMS) > GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS;
 
 	if (doEffects) {
+		GameSoundAssets::SoundVolumeLoudness volume = GameSoundAssets::NormalVolume;
+
 		// Add the visual effect for when the ball hits a block
 		// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
 		if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
@@ -300,12 +299,30 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 
 		// We shake things up if the ball is uber and the block is indestructible...
 		if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-				(ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.CanBeDestroyedByBall()) {
+			  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.UberballBlastsThrough()) {
 
-			this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.1, 0.0), 100);
+			float shakeMagnitude, shakeLength;
+			BBBGameController::VibrateAmount controllerVibeAmt;
+			GameEventsListener::GetVolAndShakeForBallSize(ball.GetBallSize(), shakeMagnitude, shakeLength, volume, controllerVibeAmt);
+			
+			this->display->GetCamera().SetCameraShake(shakeLength, Vector3D(8 * shakeMagnitude, shakeMagnitude, 0.0), 100);
+			
+			// Make the controller shake by side (based on where the ball is)
+			BBBGameController::VibrateAmount leftVibeAmt = BBBGameController::VerySoftVibration;
+			BBBGameController::VibrateAmount rightVibeAmt = BBBGameController::VerySoftVibration;
+			if (ball.GetCenterPosition2D()[0] > 0) {
+				// On the right side...
+				rightVibeAmt = controllerVibeAmt;
+			}
+			else {
+				// On the left side...
+				leftVibeAmt = controllerVibeAmt;
+			}
+
+			GameControllerManager::GetInstance()->VibrateControllers(shakeLength, leftVibeAmt, rightVibeAmt);
 		}
 
-		this->display->GetAssets()->GetSoundAssets()->PlayBallHitBlockEvent(ball, block);
+		this->display->GetAssets()->GetSoundAssets()->PlayBallHitBlockEvent(ball, block, volume);
 	}
 
 	this->timeSinceLastBallBlockCollisionEventInMS = currSystemTime;
@@ -324,19 +341,25 @@ void GameEventsListener::BallPaddleCollisionEvent(const GameBall& ball, const Pl
 		bool ballIsUber = (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall;
 		// Loudness is determined by the current state of the ball...
 		GameSoundAssets::SoundVolumeLoudness loudness = GameSoundAssets::NormalVolume;
+		BBBGameController::VibrateAmount vibration = BBBGameController::SoftVibration;
 
 		// We shake things up if the ball is uber...
 		if (ballIsUber) {
-			this->display->GetCamera().SetCameraShake(0.2, Vector3D(0.8, 0.2, 0.0), 100);
+			this->display->GetCamera().SetCameraShake(0.2f, Vector3D(0.8f, 0.2f, 0.0f), 100);
 			loudness = GameSoundAssets::VeryLoudVolume;
+			vibration = BBBGameController::HeavyVibration;
 		}
 
 		if (ball.GetBallSize() > GameBall::NormalSize) {
 			loudness = GameSoundAssets::VeryLoudVolume;
+			vibration = BBBGameController::MediumVibration;
 		}
 		else if (ball.GetBallSize() < GameBall::NormalSize) {
 			loudness = GameSoundAssets::QuietVolume;
+			vibration = BBBGameController::VerySoftVibration;
 		}
+
+		GameControllerManager::GetInstance()->VibrateControllers(0.2f, vibration, vibration);
 
 		// Play the sound for when the ball hits the paddle
 		if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle && 
@@ -443,8 +466,10 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 	if (doEffect) {
 		// Add the effect(s) for when the ball hits the lightning
 		this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball);
-		// Add a tiny camera shake
+
+		// Add a tiny camera and controller shake
 		this->display->GetCamera().SetCameraShake(1.2, Vector3D(0.75, 0.1, 0.1), 40);
+		GameControllerManager::GetInstance()->VibrateControllers(0.8f, BBBGameController::SoftVibration, BBBGameController::SoftVibration);
 	}
 
 	this->timeSinceLastBallTeslaCollisionEventInMS = currSystemTime;
@@ -471,7 +496,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::Bomb:
 			// Bomb effect - big explosion!
 			this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(block);
-			this->display->GetCamera().SetCameraShake(1.2, Vector3D(1.0, 0.3, 0.1), 100);
+			this->display->GetCamera().SetCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
+			GameControllerManager::GetInstance()->VibrateControllers(1.0f, BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
 
 			// Sound for bomb explosion
 			this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBombBlockDestroyedEvent, GameSoundAssets::LoudVolume);
@@ -768,4 +794,58 @@ void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAft
 	}
 
 	debug_output("EVENT: Lives changed - Before: " << livesLeftBefore << " After: " << livesLeftAfter);
+}
+
+/**
+ * Calculate the volume and shake for a ball of a given size (if we want the size to have an effect on such things).
+ */
+void GameEventsListener::GetVolAndShakeForBallSize(const GameBall::BallSize& ballSize, float& shakeMagnitude,
+																								   float& shakeLength, GameSoundAssets::SoundVolumeLoudness& volume,
+																								   BBBGameController::VibrateAmount& controllerVibeAmt) {
+	switch(ballSize) {
+
+		case GameBall::SmallestSize:
+			shakeMagnitude = 0.1f;
+			shakeLength = 0.05f;
+			volume = GameSoundAssets::VeryQuietVolume;
+			controllerVibeAmt = BBBGameController::VerySoftVibration;
+			break;
+
+		case GameBall::SmallerSize:
+			shakeMagnitude = 0.15f;
+			shakeLength = 0.1f;
+			volume = GameSoundAssets::QuietVolume;
+			controllerVibeAmt = BBBGameController::SoftVibration;
+			break;
+
+		case GameBall::NormalSize:
+			shakeMagnitude = 0.2f;
+			shakeLength = 0.15f;
+			volume = GameSoundAssets::NormalVolume;
+			controllerVibeAmt = BBBGameController::MediumVibration;
+			break;
+
+		case GameBall::BiggerSize:
+			shakeMagnitude = 0.33f;
+			shakeLength = 0.2f;
+			volume = GameSoundAssets::LoudVolume;
+			controllerVibeAmt = BBBGameController::HeavyVibration;
+			break;
+
+		case GameBall::BiggestSize:
+			shakeMagnitude = 0.5f;
+			shakeLength = 0.25f;
+			volume = GameSoundAssets::VeryLoudVolume;
+			controllerVibeAmt = BBBGameController::VeryHeavyVibration;
+			break;
+
+		default:
+			assert(false);
+			shakeMagnitude = 0.0f;
+			shakeLength = 0.0f;
+			volume = GameSoundAssets::NormalVolume;
+			controllerVibeAmt = BBBGameController::NoVibration;
+			break;
+
+	}
 }

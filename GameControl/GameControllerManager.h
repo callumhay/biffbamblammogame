@@ -99,11 +99,13 @@ inline bool GameControllerManager::ProcessControllers() {
 }
 
 inline void GameControllerManager::SyncControllers(double dT) {
+	static size_t currFrameID = 0;
 	BBBGameController* currController;
 	for (std::list<BBBGameController*>::iterator iter = this->loadedGameControllers.begin(); iter != this->loadedGameControllers.end(); ++iter) {
 		currController = *iter;
-		currController->Sync(dT);
+		currController->Sync(currFrameID, dT);
 	}
+	currFrameID++;
 }
 
 inline void GameControllerManager::VibrateControllers(double lengthInSeconds, 

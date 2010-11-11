@@ -114,19 +114,6 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
 		}
 	}
 
-	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_START) {
-		if (!this->pauseActionOn) {
-			this->display->ButtonPressed(GameControl::PauseButtonAction);
-			this->pauseActionOn = true;
-		}
-	}
-	else {
-		if (this->pauseActionOn) {
-			this->display->ButtonReleased(GameControl::PauseButtonAction);
-			this->pauseActionOn = false;
-		}
-	}
-
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) {
 		if (!this->escapeActionOn) {
 			this->display->ButtonPressed(GameControl::EscapeButtonAction);
@@ -165,6 +152,20 @@ bool XBox360Controller::ProcessState() {
 	else {
 		this->NotInGameOnProcessStateSpecificActions(controllerState);
 	}
+
+	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_START) {
+		if (!this->pauseActionOn) {
+			this->display->ButtonPressed(GameControl::PauseButtonAction);
+			this->pauseActionOn = true;
+		}
+	}
+	else {
+		if (this->pauseActionOn) {
+			this->display->ButtonReleased(GameControl::PauseButtonAction);
+			this->pauseActionOn = false;
+		}
+	}
+
 
 	// Movement controls:
 	// D-Pad
@@ -230,20 +231,20 @@ bool XBox360Controller::ProcessState() {
 	return false;
 }
 
-void XBox360Controller::Sync(double dT) {
+void XBox360Controller::Sync(size_t frameID, double dT) {
 	UNUSED_PARAMETER(dT);
 
 	// Paddle controls (NOTE: the else is to make the feedback more exacting)
 	if (this->leftActionOn) {
 		PlayerPaddle::PaddleMovement leftDir = this->model->AreControlsFlipped() ? PlayerPaddle::RightPaddleMovement : PlayerPaddle::LeftPaddleMovement;
-		this->model->MovePaddle(leftDir);
+		this->model->MovePaddle(frameID, leftDir);
 	}
 	else if (this->rightActionOn) {
 		PlayerPaddle::PaddleMovement rightDir = this->model->AreControlsFlipped() ? PlayerPaddle::LeftPaddleMovement : PlayerPaddle::RightPaddleMovement;
-		this->model->MovePaddle(rightDir);
+		this->model->MovePaddle(frameID, rightDir);
 	}
 	else {
-		this->model->MovePaddle(PlayerPaddle::NoPaddleMovement);
+		this->model->MovePaddle(frameID, PlayerPaddle::NoPaddleMovement);
 	}
 
 	// Check for vibration time expiration...

@@ -119,7 +119,7 @@ public:
 	void StopSoundGeneral(GameSoundAssets::SoundPallet pallet, int sound);
 
 	// More specific functions for playing sounds related to particular things...
-	void PlayBallHitBlockEvent(const GameBall& ball, const LevelPiece& block);
+	void PlayBallHitBlockEvent(const GameBall& ball, const LevelPiece& block, GameSoundAssets::SoundVolumeLoudness volume = GameSoundAssets::NormalVolume);
 
 
 	static bool IsMaskSound(int soundType);
