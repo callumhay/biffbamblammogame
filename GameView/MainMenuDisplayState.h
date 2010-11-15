@@ -90,7 +90,6 @@ private:
 	ESPPointEmitter biffEmitter, bamEmitter, blammoEmitter;
 	ESPPointEmitter biffTextEmitter, bamTextEmitter, blammoTextEmitter;
 	
-	std::list<ESPPointEmitter*> randomBGParicles;
 	//ESPParticleColourEffector particleFader;
 	ESPMultiColourEffector particleFadeInAndOut;
 	ESPParticleScaleEffector particleSmallGrowth;
@@ -125,6 +124,12 @@ private:
 
 	void InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
 	//void InsertZapEffectIntoBGEffects();
+
+	static const size_t TOTAL_NUM_BANG_EFFECTS;
+	std::list<ESPPointEmitter*> aliveBangEffects;
+	std::list<ESPPointEmitter*> aliveOnoEffects;
+	std::list<ESPPointEmitter*> deadBangEffects;
+	std::list<ESPPointEmitter*> deadOnoEffects;
 
 public:
 	MainMenuDisplayState(GameDisplay* display);

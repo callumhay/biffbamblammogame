@@ -32,6 +32,8 @@ const char* MainMenuDisplayState::TITLE_BLAMMO_TEXT		= "Blammo!?!";
 const int MainMenuDisplayState::MENU_SEL_ON_INDEX	= 0;
 const int MainMenuDisplayState::MENU_SEL_OFF_INDEX	= 1;
 
+const size_t MainMenuDisplayState::TOTAL_NUM_BANG_EFFECTS = 10;
+
 // Menu items
 const char* MainMenuDisplayState::NEW_GAME_MENUITEM		= "New Game";
 const char* MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Play Level";
@@ -90,6 +92,13 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 	GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
 	soundAssets->LoadSoundPallet(GameSoundAssets::MainMenuSoundPallet);
 	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuBackgroundMusic);
+
+
+	// Allocate memory...
+	for (size_t i = 0; i < TOTAL_NUM_BANG_EFFECTS; i++) {
+		this->deadBangEffects.push_back(new ESPPointEmitter());
+		this->deadOnoEffects.push_back(new ESPPointEmitter());
+	}
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
@@ -125,10 +134,22 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	}
 
 	// Clean up any left over emitters
-	for (std::list<ESPPointEmitter*>::iterator iter = this->randomBGParicles.begin(); iter != this->randomBGParicles.end(); ++iter) {
+	for (std::list<ESPPointEmitter*>::iterator iter = this->aliveBangEffects.begin(); iter != this->aliveBangEffects.end(); ++iter) {
 		delete *iter;
 	}
-	this->randomBGParicles.clear();
+	this->aliveBangEffects.clear();
+	for (std::list<ESPPointEmitter*>::iterator iter = this->aliveOnoEffects.begin(); iter != this->aliveOnoEffects.end(); ++iter) {
+		delete *iter;
+	}
+	this->aliveOnoEffects.clear();
+	for(std::list<ESPPointEmitter*>::iterator iter = this->deadBangEffects.begin(); iter != this->deadBangEffects.end(); ++iter) {
+		delete *iter;
+	}
+	this->deadBangEffects.clear();
+	for(std::list<ESPPointEmitter*>::iterator iter = this->deadOnoEffects.begin(); iter != this->deadOnoEffects.end(); ++iter) {
+		delete *iter;
+	}
+	this->deadOnoEffects.clear();
 }
 
 /**
@@ -533,16 +554,18 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {
 	const Camera& camera = this->display->GetCamera();
 
-	const float MAX_Z_COORD = CAM_DIST_FROM_ORIGIN / 4.0f;
-	const float MIN_Z_COORD = -MAX_Z_COORD;
-	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
-	const float MIN_Y_COORD = -MAX_Y_COORD;
+	static const float MAX_Z_COORD = CAM_DIST_FROM_ORIGIN / 4.0f;
+	static const float MIN_Z_COORD = -MAX_Z_COORD;
+	static const float MAX_Y_COORD = 0.95f * CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
+	static const float MIN_Y_COORD = -MAX_Y_COORD;
 	const float MAX_X_COORD = static_cast<float>(camera.GetWindowWidth()) /  static_cast<float>(camera.GetWindowHeight()) * MAX_Y_COORD;
 	const float MIN_X_COORD = -MAX_X_COORD;	
 	
 	// Insert a bunch of bang-onomatopiea effects for drawing if we're running low on them
-	const float MAX_Y_COORD_BG_EFFECTS = (MAX_Y_COORD - 6.0f);
-	while (this->randomBGParicles.size() < 15) {
+	static const float MAX_Y_COORD_BG_EFFECTS = (MAX_Y_COORD - 6.0f);
+	while (this->aliveOnoEffects.size() < TOTAL_NUM_BANG_EFFECTS) {
+		assert(this->aliveBangEffects.size() == this->aliveOnoEffects.size());
+		assert(this->deadBangEffects.size() == this->deadOnoEffects.size());
 		this->InsertBangEffectIntoBGEffects(MIN_X_COORD, MAX_X_COORD, MIN_Y_COORD, MAX_Y_COORD_BG_EFFECTS, MIN_Z_COORD, MAX_Z_COORD);
 	}
 
@@ -552,15 +575,27 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {
 	menuCam.ApplyCameraTransform(0.0);
 
 	// Go through all the active emitters and tick/draw them
-	for (std::list<ESPPointEmitter*>::iterator iter = this->randomBGParicles.begin(); iter != this->randomBGParicles.end();) {
+	for (std::list<ESPPointEmitter*>::iterator iter = this->aliveBangEffects.begin(); iter != this->aliveBangEffects.end();) {
 		ESPPointEmitter* currEmitter = *iter;
 		currEmitter->Tick(dT);
 		currEmitter->Draw(menuCam);
 
 		if (currEmitter->IsDead()) {
-			iter = this->randomBGParicles.erase(iter);
-			delete currEmitter;
-			currEmitter = NULL;
+			iter = this->aliveBangEffects.erase(iter);
+			this->deadBangEffects.push_back(currEmitter);
+		}
+		else {
+			++iter;
+		}
+	}
+	for (std::list<ESPPointEmitter*>::iterator iter = this->aliveOnoEffects.begin(); iter != this->aliveOnoEffects.end();) {
+		ESPPointEmitter* currEmitter = *iter;
+		currEmitter->Tick(dT);
+		currEmitter->Draw(menuCam);
+
+		if (currEmitter->IsDead()) {
+			iter = this->aliveOnoEffects.erase(iter);
+			this->deadOnoEffects.push_back(currEmitter);
 		}
 		else {
 			++iter;
@@ -579,8 +614,8 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	Texture2D* randomBangTex = dynamic_cast<Texture2D*>(this->bangTextures[randomBangTexIndex]);
 	
 	// Establish some of the values we will use to create the emitter for a 'BANG!" effect
-	ESPInterval bangLifeInterval(1.5f, 3.0f);
-	ESPInterval randomSpawnInterval(0.0f, 2.5f);
+	static const ESPInterval bangLifeInterval(2.0f, 3.5f);
+	static const ESPInterval randomSpawnInterval(0.1f, 3.25f);
 	ESPInterval xCoordInterval(minX, maxX);
 	ESPInterval yCoordInterval(minY, maxY);
 	ESPInterval zCoordInterval(minZ, maxZ);
@@ -590,7 +625,9 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	float randomLife  = bangLifeInterval.RandomValueInInterval();
 
 	// Create an emitter for the bang texture
-	ESPPointEmitter* bangEffect = new ESPPointEmitter();
+	ESPPointEmitter* bangEffect = this->deadBangEffects.front();
+	this->deadBangEffects.pop_front();
+	//new ESPPointEmitter();
 	
 	// Set up the emitter...
 	bangEffect->SetSpawnDelta(ESPInterval(randomSpawn));
@@ -613,15 +650,19 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	ESPInterval sizeIntervalY(1.9f, 2.2f);
 	bangEffect->SetParticleSize(sizeIntervalX, sizeIntervalY);
 
-	// Add effectors to the bang effect
-	bangEffect->AddEffector(&this->particleFadeInAndOut);
-	bangEffect->AddEffector(&this->particleMediumGrowth);
-	
 	// Add the bang particle...
-	bangEffect->SetParticles(1, randomBangTex);
+	if (!bangEffect->GetHasParticles()) {
+		// Add effectors to the bang effect
+		bangEffect->AddEffector(&this->particleFadeInAndOut);
+		bangEffect->AddEffector(&this->particleMediumGrowth);
+		bangEffect->SetParticles(1, randomBangTex);
+	}
 
 	// Create an emitter for the sound of onomatopeia of the breaking block
-	ESPPointEmitter* bangOnoEffect = new ESPPointEmitter();
+	ESPPointEmitter* bangOnoEffect = this->deadOnoEffects.front();
+	this->deadOnoEffects.pop_front();
+	//new ESPPointEmitter();
+
 	// Set up the emitter...
 	bangOnoEffect->SetSpawnDelta(ESPInterval(randomSpawn));
 	bangOnoEffect->SetNumParticleLives(1);
@@ -634,23 +675,25 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 	bangOnoEffect->SetEmitPosition(emitCenter);
 	
 	// Add effectors...
-	bangOnoEffect->AddEffector(&this->particleFadeInAndOut);
-	bangOnoEffect->AddEffector(&this->particleSmallGrowth);
+	if (!bangOnoEffect->GetHasParticles()) {
+		bangOnoEffect->AddEffector(&this->particleFadeInAndOut);
+		bangOnoEffect->AddEffector(&this->particleSmallGrowth);
 
-	// Add event handler
-	bangOnoEffect->AddEventHandler(this->particleEventHandler);
+		// Add event handler
+		bangOnoEffect->AddEventHandler(this->particleEventHandler);
 
-	// Add the single text particle to the emitter with the severity of the effect...
-	TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
-	bangTextLabel.SetColour(Colour(1, 1, 1));
-	bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
-	
-	Onomatoplex::Extremeness randomExtremeness = Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::WEAK, Onomatoplex::UBER);
-	bangOnoEffect->SetParticles(1, bangTextLabel, Onomatoplex::EXPLOSION, randomExtremeness);
+		// Add the single text particle to the emitter with the severity of the effect...
+		TextLabel2D bangTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+		bangTextLabel.SetColour(Colour(1, 1, 1));
+		bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+		
+		Onomatoplex::Extremeness randomExtremeness = Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::WEAK, Onomatoplex::UBER);
+		bangOnoEffect->SetParticles(1, bangTextLabel, Onomatoplex::EXPLOSION, randomExtremeness);
+	}
 
 	// Add the particles to the list of background effects
-	this->randomBGParicles.push_back(bangEffect);
-	this->randomBGParicles.push_back(bangOnoEffect);
+	this->aliveBangEffects.push_back(bangEffect);
+	this->aliveOnoEffects.push_back(bangOnoEffect);
 }
 
 /**
