@@ -41,7 +41,7 @@
 LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL),
-teslaBlock(NULL) {
+teslaBlock(NULL), statusEffectRenderer(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
 	this->basicBlock						= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
@@ -101,6 +101,9 @@ teslaBlock(NULL) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}	
 
+	// Initialize the status renderer
+	this->statusEffectRenderer = new BlockStatusEffectRenderer();
+
 	this->LoadNewLevel(gameWorldAssets, gameItemAssets, level);
 }
 
@@ -126,6 +129,10 @@ LevelMesh::~LevelMesh() {
 	this->teslaBlock = NULL;
 	delete this->itemDropBlock;
 	this->itemDropBlock = NULL;
+
+	// Delete the status effect renderer
+	delete this->statusEffectRenderer;
+	this->statusEffectRenderer = NULL;
 }
 
 /** 
@@ -387,9 +394,11 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+
+	// Draw the piece effects and statuses
+	this->statusEffectRenderer->Draw(dT, camera);
 	glPopMatrix();
 
-	// Draw the piece effects
 	ESPEmitter* emitter = NULL;
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
 		pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
@@ -401,6 +410,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 			emitter->Draw(camera);
 		}
 	}
+
 }
 
 /**

@@ -16,12 +16,13 @@
 #include "../BlammoEngine/Noise.h"
 #include "../BlammoEngine/Texture3D.h"
 
-const char* CgFxFireBallEffect::BASIC_TECHNIQUE_NAME = "FireBall";
+const char* CgFxFireBallEffect::BASIC_TECHNIQUE_NAME					= "FireBall";
+const char* CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME	= "FireBallNoDepthWithMask";
 
 CgFxFireBallEffect::CgFxFireBallEffect() : 
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_FIREBALL_SHADER), 
 scale(1.0f), freq(0.6f), flowDir(0, 0, 1), alphaMultiplier(1.0f),
-noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
+noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL) {
 
 	// Set the technique
 	this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
@@ -32,6 +33,8 @@ noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()) {
 
 	// Noise texture sampler param
 	this->noiseSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
+	// Mask texture sampler parameter
+	this->maskSamplerParam  = cgGetNamedEffectParameter(this->cgEffect, "MaskSampler");
 
 	// Timer paramter
 	this->timerParam = cgGetNamedEffectParameter(this->cgEffect, "Timer");
@@ -67,4 +70,9 @@ void CgFxFireBallEffect::SetupBeforePasses(const Camera& camera) {
 
 	// Set noise texture sampler...
 	cgGLSetTextureParameter(this->noiseSamplerParam, this->noiseTexID);
+
+	// Set the mask texture sampler if it exists
+	if (this->maskTex != NULL) {
+		cgGLSetTextureParameter(this->maskSamplerParam, this->maskTex->GetTextureID());
+	}
 }

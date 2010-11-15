@@ -21,12 +21,17 @@ class CgFxFireBallEffect : public CgFxEffectBase {
 public:
 	// Constants used for loading the CelShading effect
 	static const char* BASIC_TECHNIQUE_NAME;
+	static const char* NO_DEPTH_WITH_MASK_TECHNIQUE_NAME;
 
 	CgFxFireBallEffect();
 	~CgFxFireBallEffect();
 
 	void SetAlphaMultiplier(float a) {
 		this->alphaMultiplier = a;
+	}
+
+	void SetMaskTexture(Texture2D* tex) {
+		this->maskTex = tex;
 	}
 
 protected:
@@ -37,8 +42,9 @@ private:
 	CGparameter wvpMatrixParam;
 	CGparameter worldMatrixParam;
 
-	// Noise texture sampler param
+	// Texture sampler params
 	CGparameter noiseSamplerParam;
+	CGparameter maskSamplerParam;
 
 	// Timer paramter
 	CGparameter timerParam;
@@ -53,6 +59,7 @@ private:
 	float scale, freq, alphaMultiplier;
 	Vector3D flowDir;
 	GLuint noiseTexID; 
+	Texture2D* maskTex;
 
 	DISALLOW_COPY_AND_ASSIGN(CgFxFireBallEffect);
 };

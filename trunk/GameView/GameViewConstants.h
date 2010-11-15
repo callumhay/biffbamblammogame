@@ -95,6 +95,7 @@ public:
 	const char* TEXTURE_LIGHTNING_BOLT;
 	const char* TEXTURE_SPHERE_NORMALS;
 	const char* TEXTURE_CLOUD;
+	const char* TEXTURE_GRIT;
 
 	const char* TEXTURE_STARFIELD;
 	
