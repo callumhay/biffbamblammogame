@@ -92,6 +92,8 @@ public:
 
 	void AddParticle(ESPParticle* particle);
 
+	bool GetHasParticles() const;
+		
 	ESPInterval GetParticleSizeX() const { return this->particleSize[0]; }
 	ESPInterval GetParticleSizeY() const { return this->particleSize[1]; }
 
@@ -156,4 +158,8 @@ private:
 	ESPEmitter& operator=(const ESPEmitter& e);
 
 };
+
+inline bool ESPEmitter::GetHasParticles() const {
+	return !(this->aliveParticles.empty() && this->deadParticles.empty());
+}
 #endif
