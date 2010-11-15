@@ -20,6 +20,8 @@
 #include "../GameModel/GameLevel.h"
 #include "../GameModel/LevelPiece.h"
 
+#include "BlockStatusEffectRenderer.h"
+
 class GameWorldAssets;
 class GameItemAssets;
 class BallSafetyNetMesh;
@@ -51,9 +53,9 @@ public:
 	void BallSafetyNetCreated();
 	void BallSafetyNetDestroyed(const Point2D& pos);
 
-	//void LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status);
-	//void LevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& status);
-	//void LevelPieceAllStatusRemoved(const LevelPiece& piece);
+	void LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status);
+	void LevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& status);
+	void LevelPieceAllStatusRemoved(const LevelPiece& piece);
 
 	void PaddleCameraActiveToggle(bool isActive);
 	void SetLevelAlpha(float alpha);
@@ -91,10 +93,27 @@ private:
 	// Special effects always present for specific level pieces
 	std::map<const LevelPiece*, std::list<ESPEmitter*> > pieceEmitterEffects;
 
+	// Block status rendering object
+	BlockStatusEffectRenderer* statusEffectRenderer;
+
 	const std::map<std::string, MaterialGroup*>* GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const;
 	void CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateDisplayListForBallSafetyNet(float levelWidth);
 	void Flush();	
 };
+
+inline void LevelMesh::LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status) {
+	this->statusEffectRenderer->AddLevelPieceStatus(piece, status);
+}
+
+inline void LevelMesh::LevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& status) {
+	this->statusEffectRenderer->RemoveLevelPieceStatus(piece, status);
+}
+
+inline void LevelMesh::LevelPieceAllStatusRemoved(const LevelPiece& piece) {
+	this->statusEffectRenderer->RemoveAllLevelPieceStatus(piece);
+}
+
+
 #endif

@@ -16,11 +16,15 @@
 #include "../BlammoEngine/Camera.h"
 
 #include "../ESPEngine/ESPParticleColourEffector.h"
+#include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESPParticleRotateEffector.h"
 
 #include "../GameModel/LevelPiece.h"
 
+#include "CgFxFireBallEffect.h"
+
 class ESPEmitter;
-class ESPVolumeEmitter;
+class ESPPointEmitter;
 class Texture2D;
 
 /**
@@ -39,22 +43,35 @@ public:
 	void Draw(double dT, const Camera& camera);
 
 private:
-	typedef std::map<LevelPiece::PieceStatus, ESPEmitter*> StatusEffectMap;
+	typedef std::list<ESPEmitter*> EmitterList;
+	typedef std::map<LevelPiece::PieceStatus, EmitterList> StatusEffectMap;
 	typedef std::map<const LevelPiece*, StatusEffectMap> PieceStatusEffectMap;
 	PieceStatusEffectMap pieceStatusEffects;
 
 	// Persistant Textures
 	std::vector<Texture2D*> smokePuffTextures;
-	std::vector<Texture2D*> fireGlobTextures;
+	Texture2D* fireMiasma;
+	Texture2D* gritTexture;
+	CgFxFireBallEffect fireEffect;
+	
 	void SetupTextures();
 	
+	
+
 
 	// Persistant Effects structures
 	ESPParticleColourEffector fireColourEffector;
+	ESPParticleColourEffector semiFaderEffector;
+	ESPParticleColourEffector fullFaderEffector;
+	ESPParticleScaleEffector  particleLargeGrowth;
+	ESPParticleScaleEffector  particleMediumGrowth;
+	ESPParticleRotateEffector smokeRotatorCW;
+	ESPParticleRotateEffector smokeRotatorCCW;
 
 	// Effects Factory methods for each of the status effects
-	ESPVolumeEmitter* BuildBlockOnFireStatusEffect(const LevelPiece& piece);
-
+	ESPPointEmitter* BuildBlockOnFireFlameEffect(const LevelPiece& piece, bool spinCW);
+	ESPPointEmitter* BuildBlockOnFireSmokeEffect(const LevelPiece& piece);
+	ESPPointEmitter* BuildBlockOnFireScortchEffect(const LevelPiece& piece);
 
 	DISALLOW_COPY_AND_ASSIGN(BlockStatusEffectRenderer);
 

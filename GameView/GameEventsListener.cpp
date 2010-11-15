@@ -589,19 +589,18 @@ void GameEventsListener::LevelPieceChangedEvent(const LevelPiece& pieceBefore, c
 }
 
 void GameEventsListener::LevelPieceStatusAddedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus) {
-	UNUSED_PARAMETER(piece);
-	UNUSED_PARAMETER(addedStatus);
+	this->display->GetAssets()->GetCurrentLevelMesh()->LevelPieceStatusAdded(piece, addedStatus);
 	debug_output("EVENT: LevelPiece status added");
 }
 
 void GameEventsListener::LevelPieceStatusRemovedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus) {
-	UNUSED_PARAMETER(piece);
 	UNUSED_PARAMETER(removedStatus);
+	this->display->GetAssets()->GetCurrentLevelMesh()->LevelPieceAllStatusRemoved(piece);
 	debug_output("EVENT: LevelPiece status removed");
 }
 
 void GameEventsListener::LevelPieceAllStatusRemovedEvent(const LevelPiece& piece) {
-	UNUSED_PARAMETER(piece);
+	this->display->GetAssets()->GetCurrentLevelMesh()->LevelPieceAllStatusRemoved(piece);
 	debug_output("EVENT: LevelPiece all status removed");
 }
 

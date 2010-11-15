@@ -69,17 +69,44 @@ sampler3D NoiseSampler = sampler_state {
 };  
 
 
+texture MaskTexture <
+    string ResourceName = "Circle_Gradient_64x64.png";
+    string UIName = "Mask Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D MaskSampler = sampler_state {
+    Texture = <MaskTexture>;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+    WrapS = Repeat;
+    WrapT = Repeat;
+};
+
 //////// CONNECTOR DATA STRUCTURES ///////////
 
 /* data from application vertex buffer */
 struct appdata {
-    float3 Position	: POSITION;
+    float3 Position : POSITION;
+};
+
+struct appdatawithuv {
+    float3 Position : POSITION;
+    float4 UV       : TEXCOORD0;
+	float4 Colour   : COLOR0;
 };
 
 /* data passed from vertex shader to pixel shader */
 struct vertexOutput {
-    float4 HPosition	: POSITION;
-    float3 WorldPos	    : TEXCOORD0;
+    float4 HPosition    : POSITION;
+    float3 WorldPos     : TEXCOORD0;
+};
+
+struct vertexOutputWithUV {
+    float4 HPosition    : POSITION;
+    float3 WorldPos     : TEXCOORD0;
+    float2 UV           : TEXCOORD1;    
+	float4 Colour       : TEXCOORD2;
 };
  
 ///////// VERTEX SHADING /////////////////////
@@ -97,6 +124,19 @@ vertexOutput localpos_VS(appdata IN) {
     return OUT;
 }
 
+vertexOutputWithUV mask_VS(appdatawithuv IN) {
+    vertexOutputWithUV OUT = (vertexOutputWithUV)0;
+    
+    float4 Po = float4(IN.Position.xyz,1);
+    float3 Pw = mul(WorldXf,Po).xyz;
+
+    OUT.WorldPos  = Po.xyz;
+    OUT.HPosition = mul(WvpXf,Po);
+    OUT.UV = IN.UV.xy;
+	OUT.Colour = IN.Colour;
+    return OUT;
+}
+
 ///////// PIXEL SHADING //////////////////////
 
 float4 firey_sprite_PS(vertexOutput IN) : COLOR {
@@ -105,12 +145,26 @@ float4 firey_sprite_PS(vertexOutput IN) : COLOR {
     float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);
     float totalTexVal = 8.0 * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
                                abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
-	totalTexVal = clamp(totalTexVal, 0, 1);
-	float alpha = lerp(0.2f, 1.0f, totalTexVal) * AlphaMultiplier;
-	float3 fireColour = lerp(float3(1.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f), totalTexVal.x);             
+    totalTexVal = clamp(totalTexVal, 0, 1);
+    float alpha = lerp(0.2f, 1.0f, totalTexVal) * AlphaMultiplier;
+    float3 fireColour = lerp(float3(1.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f), totalTexVal.x);             
 
     // return as float4
     return float4(fireColour.xyz, alpha);
+}
+
+float4 firey_sprite_with_mask_PS(vertexOutputWithUV IN) : COLOR {
+    float3 sampleCoord = IN.WorldPos.xyz + Freq*Timer*FlowDir;
+    
+    float4 texVal = tex3D(NoiseSampler, Scale * sampleCoord);
+    float totalTexVal = 8.0 * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
+                               abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
+    totalTexVal = clamp(totalTexVal, 0, 1);
+    float alpha = lerp(0.2f, 1.0f, totalTexVal) * AlphaMultiplier;
+    float3 fireColour = lerp(float3(1.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f), totalTexVal.x);             
+
+    // return as float4
+    return IN.Colour * float4(fireColour.xyz, alpha) * tex2D(MaskSampler, IN.UV).rgba;
 }
 
 ///// TECHNIQUES /////////////////////////////
@@ -120,16 +174,34 @@ technique FireBall < string Script = "Pass=p0;"; > {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
-		BlendEquation = FuncAdd;
+        BlendEquation = FuncAdd;
             
         PolygonMode = int2(Front, Fill);
         DepthTestEnable = true;
         DepthFunc = LEqual;
-		DepthMask = false;
-		CullFaceEnable = true;
+        DepthMask = false;
+        CullFace = Back;
+        CullFaceEnable = true;
 
         VertexProgram = compile arbvp1 localpos_VS();            
         FragmentProgram = compile arbfp1 firey_sprite_PS();
+    }
+}
+
+technique FireBallNoDepthWithMask < string Script = "Pass=p0;"; > {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
+        BlendEquation = FuncAdd;
+            
+        PolygonMode = int2(Front, Fill);
+        
+        CullFace = Back;
+        CullFaceEnable = true;
+
+        VertexProgram   = compile arbvp1 mask_VS();            
+        FragmentProgram = compile arbfp1 firey_sprite_with_mask_PS();
     }
 }
 

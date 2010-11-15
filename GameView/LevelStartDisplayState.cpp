@@ -59,9 +59,9 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	this->levelNameFadeOutAnimation.SetRepeat(false);
 	this->levelNameFadeOutAnimation.SetInterpolantValue(1.0f);
 
-	this->dropShadowAnimation.SetLerp(startOfNameFadeOut, endOfNameFadeOut, startDropShadowAmt, 0.5f);
-	this->dropShadowAnimation.SetRepeat(false);
-	this->dropShadowAnimation.SetInterpolantValue(startDropShadowAmt);
+	//this->dropShadowAnimation.SetLerp(startOfNameFadeOut, endOfNameFadeOut, startDropShadowAmt, 0.5f);
+	//this->dropShadowAnimation.SetRepeat(false);
+	//this->dropShadowAnimation.SetInterpolantValue(startDropShadowAmt);
 
 	double startTimeOfBlockFadeIn = LevelStartDisplayState::WIPE_TIME + 0.5 + LevelStartDisplayState::FADE_IN_TIME;
 	double endOfBlockFadeIn       = startTimeOfBlockFadeIn + LevelStartDisplayState::LEVEL_BLOCK_FADE_IN_TIME;
@@ -111,7 +111,7 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	bool fadeInDone           = this->fadeInAnimation.Tick(dT);
 	bool wipeInDone           = this->showLevelNameWipeAnimation.Tick(dT);
 	bool levelTextFadeOutDone = this->levelNameFadeOutAnimation.Tick(dT);
-	bool dropShadowAnimDone   = this->dropShadowAnimation.Tick(dT);
+	//bool dropShadowAnimDone   = this->dropShadowAnimation.Tick(dT);
 	bool levelPieceFadeInDone = this->blockFadeInAnimation.Tick(dT);
 	bool paddleMoveDone       = this->paddleMoveUpAnimation.Tick(dT);
 	bool ballFadeInDone       = this->ballFadeInAnimation.Tick(dT);
@@ -158,7 +158,7 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	if (!levelTextFadeOutDone) {
 		// If we're done the fade in then we need to do the level text display...
 		this->levelNameLabel.SetAlpha(this->levelNameFadeOutAnimation.GetInterpolantValue());
-		this->levelNameLabel.SetDropShadowAmount(this->dropShadowAnimation.GetInterpolantValue());
+		//this->levelNameLabel.SetDropShadowAmount(this->dropShadowAnimation.GetInterpolantValue());
 		this->levelNameLabel.Draw();
 
 		if (!wipeInDone) {
@@ -224,7 +224,7 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	}
 	
 	// All done animating the start of the level - go to the official in-game state
-	if (fadeInDone && wipeInDone && levelTextFadeOutDone && dropShadowAnimDone && 
+	if (fadeInDone && wipeInDone && levelTextFadeOutDone /*&& dropShadowAnimDone */ && 
 		levelPieceFadeInDone && paddleMoveDone && ballFadeInDone && this->shockwaveEmitter->IsDead() && 
 		this->starEmitter->IsDead()) {
 
