@@ -69,9 +69,14 @@ public:
 	const char* TEXTURE_SMOKE4;
 	const char* TEXTURE_SMOKE5;
 	const char* TEXTURE_SMOKE6;
-	const char* TEXTURE_FIRE_GLOB1;
-	const char* TEXTURE_FIRE_GLOB2;
-	const char* TEXTURE_FIRE_GLOB3;
+	//const char* TEXTURE_FIRE_GLOB1;
+	//const char* TEXTURE_FIRE_GLOB2;
+	//const char* TEXTURE_FIRE_GLOB3;
+	const char* TEXTURE_ROCK1;
+	const char* TEXTURE_ROCK2;
+	const char* TEXTURE_ROCK3;
+	const char* TEXTURE_ROCK4;
+	const char* TEXTURE_ROCK5;
 	const char* TEXTURE_CIRCLE_GRADIENT;
 	const char* TEXTURE_STAR;
 	const char* TEXTURE_STAR_OUTLINE;

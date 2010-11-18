@@ -282,7 +282,11 @@ private:
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
 	void RocketProjectileCollision(GameModel* gameModel, const Projectile& projectile);
-	float GetPercentNearPaddleCenter(const Projectile& projectile, float& distFromCenter);
+	void FireGlobProjectileCollision(const Projectile& projectile);
+	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter);
+	void SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, double totalHitEffectTime, 
+																				 float minMoveDown, float closeToCenterCoeff, float maxRotationInDegs);
+
 	Collision::Circle2D CreatePaddleShieldBounds() const;
 
 

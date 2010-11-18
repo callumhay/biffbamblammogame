@@ -83,6 +83,10 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			newLevelPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 			break;
 
+		case Projectile::FireGlobProjectile:
+			// Fire glob just extinguishes
+			break;
+				
 		default:
 			assert(false);
 			break;

@@ -60,17 +60,9 @@ BlockStatusEffectRenderer::~BlockStatusEffectRenderer() {
 	}
 	this->smokePuffTextures.clear();
 
-	/*
-	for (std::vector<Texture2D*>::iterator iter = this->fireGlobTextures.begin();
-		iter != this->fireGlobTextures.end(); ++iter) {
-		
-		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(removed);	
-	}
-	this->fireGlobTextures.clear();
-	*/
-
 	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->fireMiasma);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->gritTexture);
 	assert(removed);
 }
 
@@ -214,21 +206,6 @@ void BlockStatusEffectRenderer::SetupTextures() {
 	temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
 	assert(temp != NULL);
 	this->smokePuffTextures.push_back(temp);	
-
-	/*
-	// Initialize all the fire glob textures
-	assert(this->fireGlobTextures.empty());
-	this->fireGlobTextures.reserve(3);
-	temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB1, Texture::Trilinear));
-	assert(temp != NULL);
-	this->fireGlobTextures.push_back(temp);
-	temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB2, Texture::Trilinear));
-	assert(temp != NULL);
-	this->fireGlobTextures.push_back(temp);
-	temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB3, Texture::Trilinear));
-	assert(temp != NULL);
-	this->fireGlobTextures.push_back(temp);
-	*/
 
 	this->fireMiasma = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
 	assert(this->fireMiasma != NULL);

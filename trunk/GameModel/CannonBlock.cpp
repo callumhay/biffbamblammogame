@@ -185,6 +185,10 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			}
 			break;
 
+		case Projectile::FireGlobProjectile:
+			// Fire glob just extinguishes...
+			break;
+
 		default:
 			assert(false);
 			break;

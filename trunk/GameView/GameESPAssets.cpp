@@ -2,6 +2,7 @@
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
 #include "BallSafetyNetMesh.h"
+#include "CgFXFireBallEffect.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameLevel.h"
@@ -14,6 +15,7 @@
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/TeslaBlock.h"
 #include "../GameModel/PaddleRocketProjectile.h"
+#include "../GameModel/FireGlobProjectile.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
@@ -34,6 +36,7 @@ particleShrinkToNothing(1, 0),
 particlePulseUberballAura(0, 0),
 particlePulseItemDropAura(0, 0),
 particlePulsePaddleLaser(0, 0),
+particlePulseFireGlobAura(0, 0),
 beamEndPulse(0, 0),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f),
@@ -59,6 +62,7 @@ explosionRayRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.5
 smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
 smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 loopRotateEffectorCW(90.0f, ESPParticleRotateEffector::CLOCKWISE),
+loopRotateEffectorCCW(90.0f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 
 circleGradientTex(NULL), 
 starTex(NULL), 
@@ -113,6 +117,26 @@ GameESPAssets::~GameESPAssets() {
 		assert(removed);	
 	}
 	this->smokeTextures.clear();
+
+	//for (std::vector<Texture2D*>::iterator iter = this->fireGlobTextures.begin();
+	//	iter != this->fireGlobTextures.end(); ++iter) {
+	//	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+	//	assert(removed);	
+	//}
+	//this->fireGlobTextures.clear();
+
+	for (std::vector<Texture2D*>::iterator iter = this->rockTextures.begin(); iter != this->rockTextures.end(); ++iter) {
+		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		assert(removed);
+	}
+	this->rockTextures.clear();
+
+	for (std::vector<CgFxFireBallEffect*>::iterator iter = this->moltenRockEffects.begin(); iter != this->moltenRockEffects.end(); ++iter) {
+		CgFxFireBallEffect* effect = *iter;
+		delete effect;
+		effect = NULL;
+	}
+	this->moltenRockEffects.clear();
 
 	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleGradientTex);
 	assert(removed);
@@ -349,7 +373,7 @@ void GameESPAssets::InitESPTextures() {
 	debug_output("Loading ESP Textures...");
 	
 	// Initialize bang textures (big boom thingys when there are explosions)
-	if (this->bangTextures.size() == 0) {
+	if (this->bangTextures.empty()) {
 		this->bangTextures.reserve(3);
 		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear));
 		assert(temp != NULL);
@@ -363,7 +387,7 @@ void GameESPAssets::InitESPTextures() {
 	}
 	
 	// Initialize splat textures (splatty thingys when ink blocks and other messy, gooey things explode)
-	if (this->splatTextures.size() == 0) {
+	if (this->splatTextures.empty()) {
 		this->splatTextures.reserve(1);
 		Texture2D* temp =  dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPLAT1, Texture::Trilinear));
 		assert(temp != NULL);
@@ -371,7 +395,7 @@ void GameESPAssets::InitESPTextures() {
 	}
 
 	// Initialize smoke textures (cartoony puffs of smoke)
-	if (this->smokeTextures.size() == 0) {
+	if (this->smokeTextures.empty()) {
 		this->smokeTextures.reserve(NUM_SMOKE_TEXTURES);
 		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
 		assert(temp != NULL);
@@ -391,6 +415,54 @@ void GameESPAssets::InitESPTextures() {
 		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);	
+	}
+
+	// Initialize all the fire glob textures
+	//if (this->fireGlobTextures.empty()) {
+	//	this->fireGlobTextures.reserve(3);
+	//	Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB1, Texture::Trilinear));
+	//	assert(temp != NULL);
+	//	this->fireGlobTextures.push_back(temp);
+	//	temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB2, Texture::Trilinear));
+	//	assert(temp != NULL);
+	//	this->fireGlobTextures.push_back(temp);
+	//	temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB3, Texture::Trilinear));
+	//	assert(temp != NULL);
+	//	this->fireGlobTextures.push_back(temp);
+	//}
+
+	// Initialize all rock textures
+	if (this->rockTextures.empty()) {
+		this->rockTextures.reserve(5);
+		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK1, Texture::Trilinear));
+		assert(temp != NULL);
+		this->rockTextures.push_back(temp);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK2, Texture::Trilinear));
+		assert(temp != NULL);
+		this->rockTextures.push_back(temp);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK3, Texture::Trilinear));
+		assert(temp != NULL);
+		this->rockTextures.push_back(temp);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK4, Texture::Trilinear));
+		assert(temp != NULL);
+		this->rockTextures.push_back(temp);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK5, Texture::Trilinear));
+		assert(temp != NULL);
+		this->rockTextures.push_back(temp);
+	}
+	// Initialize all of the molten rock effects with the rock textures as masks
+	if (this->moltenRockEffects.empty()) {
+		assert(!this->rockTextures.empty());
+		this->moltenRockEffects.reserve(this->rockTextures.size());
+		for (std::vector<Texture2D*>::iterator iter = this->rockTextures.begin(); iter != this->rockTextures.end(); ++iter) {
+			CgFxFireBallEffect* newFireEffect = new CgFxFireBallEffect();
+			newFireEffect->SetTechnique(CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME);
+			newFireEffect->SetMaskTexture(*iter);
+			newFireEffect->SetDarkFireColour(Colour(1.0f, 0.9f, 0.15f));
+			newFireEffect->SetBrightFireColour(Colour(0.75f, 0.15f, 0.10f));
+			newFireEffect->SetScale(0.6f);
+			this->moltenRockEffects.push_back(newFireEffect);
+		}
 	}
 
 	if (this->circleGradientTex == NULL) {
@@ -766,6 +838,11 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	beamPulseSettings.pulseRate        = 0.5f;
 	this->beamEndPulse = ESPParticleScaleEffector(beamPulseSettings);
 
+	ScaleEffect fireGlobPulseSettings;
+	fireGlobPulseSettings.pulseGrowthScale = 1.6f;
+	fireGlobPulseSettings.pulseRate = 0.75f;
+	this->particlePulseFireGlobAura = ESPParticleScaleEffector(fireGlobPulseSettings);
+
 	// Initialize uberball effectors
 	ScaleEffect uberBallPulseSettings;
 	uberBallPulseSettings.pulseGrowthScale = 2.0f;
@@ -1010,6 +1087,9 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 
 		case Projectile::CollateralBlockProjectile:
+			break;
+
+		case Projectile::FireGlobProjectile:
 			break;
 
 		default:
@@ -1948,7 +2028,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	Onomatoplex::Extremeness severity = Onomatoplex::NORMAL;
 	switch (projectile.GetType()) {
 		case Projectile::CollateralBlockProjectile:
-			severity = Onomatoplex::AWESOME;
+			severity = Onomatoplex::SUPER_AWESOME;
 			size.minValue = 1.0f;
 			size.maxValue = 1.5f;
 			break;
@@ -1956,6 +2036,30 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 			severity = Onomatoplex::GOOD;
 			size.minValue = 0.4f;
 			size.maxValue = 0.65f;
+			break;
+		case Projectile::FireGlobProjectile: {
+				const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
+				switch (fireGlobProjectile->GetRelativeSize()) {
+					case FireGlobProjectile::Small:
+						severity = Onomatoplex::GOOD;
+						size.minValue = 0.5f;
+						size.maxValue = 0.7f;
+						break;
+					case FireGlobProjectile::Medium:
+						severity = Onomatoplex::GOOD;
+						size.minValue = 0.6f;
+						size.maxValue = 1.0f;
+						break;
+					case FireGlobProjectile::Large:
+						severity = Onomatoplex::AWESOME;
+						size.minValue = 0.8f;
+						size.maxValue = 1.25f;
+						break;
+					default:
+						assert(false);
+						break;
+				}
+			}
 			break;
 		default:
 			assert(false);
@@ -2035,6 +2139,7 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 
 		case Projectile::CollateralBlockProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
+		case Projectile::FireGlobProjectile:
 			this->AddBasicPaddleHitByProjectileEffect(paddle, projectile);
 			break;
 
@@ -2242,6 +2347,10 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 
 		case Projectile::CollateralBlockProjectile:
 			this->AddCollateralProjectileEffects(projectile);
+			break;
+
+		case Projectile::FireGlobProjectile:
+			this->AddFireGlobProjectileEffects(projectile);
 			break;
 
 		default:
@@ -2779,6 +2888,112 @@ void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
 	projectileEmitters.push_back(smokeyTrailEmitter1);
 	projectileEmitters.push_back(smokeyTrailEmitter2);
 	projectileEmitters.push_back(fireyTrailEmitter);
+}
+
+// Add effects for a fire glob projectile (from blocks on fire)
+void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
+
+	static const ESPInterval SMOKE_LIFE = ESPInterval(0.5f, 1.0f);
+	static const ESPInterval FIRE_TRAIL_LIFE = ESPInterval(SMOKE_LIFE.minValue - 0.05f, SMOKE_LIFE.maxValue - 0.1f);
+	static const ESPInterval SMOKE_SPAWN_DELTA = ESPInterval(0.2f, 0.35f);
+	static const ESPInterval SMOKE_SPD = ESPInterval(0.8f, 1.5f);
+	static const ESPInterval FIRE_TRAIL_SPD = ESPInterval(SMOKE_SPD.minValue - 0.1f, SMOKE_SPD.maxValue - 0.25f);
+	static const int NUM_SMOKE_PARTICLES_PER_EMITTER = 4;
+
+	size_t randomTexIndex1 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
+	size_t randomTexIndex2 = (randomTexIndex1 + 1) % this->smokeTextures.size();
+
+	ESPPointEmitter* smokeyTrailEmitter1 = new ESPPointEmitter();
+	smokeyTrailEmitter1->SetSpawnDelta(SMOKE_SPAWN_DELTA);
+	smokeyTrailEmitter1->SetInitialSpd(SMOKE_SPD);
+	smokeyTrailEmitter1->SetParticleLife(SMOKE_LIFE);
+	smokeyTrailEmitter1->SetParticleSize(ESPInterval(0.5f*projectile.GetWidth(), 1.0f*projectile.GetWidth()));
+	smokeyTrailEmitter1->SetEmitAngleInDegrees(30);
+	smokeyTrailEmitter1->SetEmitDirection(Vector3D(0, 1, 0));
+	smokeyTrailEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAligned);
+	smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, 0));
+	smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
+	smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
+	smokeyTrailEmitter1->AddEffector(&this->explosionRayRotatorCW);
+	bool result = smokeyTrailEmitter1->SetParticles(NUM_SMOKE_PARTICLES_PER_EMITTER, this->smokeTextures[randomTexIndex1]);
+	assert(result);
+
+	ESPPointEmitter* smokeyTrailEmitter2 = new ESPPointEmitter();
+	smokeyTrailEmitter2->SetSpawnDelta(SMOKE_SPAWN_DELTA);
+	smokeyTrailEmitter2->SetInitialSpd(SMOKE_SPD);
+	smokeyTrailEmitter2->SetParticleLife(SMOKE_LIFE);
+	smokeyTrailEmitter2->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
+	smokeyTrailEmitter2->SetEmitAngleInDegrees(30);
+	smokeyTrailEmitter2->SetEmitDirection(Vector3D(0, 1, 0));
+	smokeyTrailEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAligned);
+	smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, 0));
+	smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
+	smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
+	smokeyTrailEmitter2->AddEffector(&this->explosionRayRotatorCCW);
+	result = smokeyTrailEmitter2->SetParticles(NUM_SMOKE_PARTICLES_PER_EMITTER, this->smokeTextures[randomTexIndex2]);
+	smokeyTrailEmitter2->SimulateTicking(0.5f);
+	assert(result);
+
+	size_t randomRockIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->moltenRockEffects.size();
+	ESPPointEmitter* fireRock = new ESPPointEmitter();
+	fireRock->SetSpawnDelta(ESPInterval(-1));
+	fireRock->SetInitialSpd(ESPInterval(0));
+	fireRock->SetParticleLife(ESPInterval(-1));
+	fireRock->SetParticleSize(ESPInterval(projectile.GetWidth()), ESPInterval(projectile.GetHeight()));
+	fireRock->SetEmitAngleInDegrees(0);
+	fireRock->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	fireRock->SetParticleAlignment(ESP::ScreenAligned);
+	fireRock->SetParticleRotation(ESPInterval(0.0f, 359.9999f));
+	fireRock->SetEmitPosition(Point3D(0, 0, 0));
+	result = fireRock->SetParticles(1, this->moltenRockEffects[randomRockIdx]);
+	assert(result);
+
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		fireRock->AddEffector(&this->loopRotateEffectorCW);
+	}
+	else {
+		fireRock->AddEffector(&loopRotateEffectorCCW);
+	}
+
+	// Add a fire aura around the rock...
+	ESPPointEmitter* fireRockAura = new ESPPointEmitter();
+	fireRockAura->SetSpawnDelta(ESPInterval(-1));
+	fireRockAura->SetInitialSpd(ESPInterval(0));
+	fireRockAura->SetParticleLife(ESPInterval(-1));
+	fireRockAura->SetParticleSize(ESPInterval(1.3f * projectile.GetWidth()), ESPInterval(1.3f * projectile.GetHeight()));
+	fireRockAura->SetEmitAngleInDegrees(0);
+	fireRockAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	fireRockAura->SetParticleAlignment(ESP::ScreenAligned);
+	fireRockAura->SetEmitPosition(Point3D(0, 0, 0));
+	fireRockAura->SetParticleColour(ESPInterval(0.9f), ESPInterval(0.8f), ESPInterval(0.0f), ESPInterval(1.0f));
+	fireRockAura->AddEffector(&this->particlePulseFireGlobAura);
+	result = fireRockAura->SetParticles(1, this->circleGradientTex);
+	assert(result);
+
+	ESPPointEmitter* fireBallEmitterTrail = new ESPPointEmitter();
+	fireBallEmitterTrail->SetSpawnDelta(ESPInterval(0.1f, 0.15f));
+	fireBallEmitterTrail->SetInitialSpd(FIRE_TRAIL_SPD);
+	fireBallEmitterTrail->SetParticleLife(FIRE_TRAIL_LIFE);
+	fireBallEmitterTrail->SetParticleSize(ESPInterval(1.15f * projectile.GetWidth(), 1.3f * projectile.GetWidth()));
+	fireBallEmitterTrail->SetEmitAngleInDegrees(15);
+	fireBallEmitterTrail->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+	fireBallEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	fireBallEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
+	fireBallEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+	fireBallEmitterTrail->SetEmitDirection(Vector3D(0, 1, 0));
+	fireBallEmitterTrail->AddEffector(&this->fireBallColourFader);
+	fireBallEmitterTrail->AddEffector(&this->particleMediumGrowth);
+	result = fireBallEmitterTrail->SetParticles(9, &this->fireBallTrailEffect);
+	assert(result);
+
+	std::list<ESPPointEmitter*>& projectileEmitters = this->activeProjectileEmitters[&projectile];
+	projectileEmitters.push_back(smokeyTrailEmitter1);
+	projectileEmitters.push_back(smokeyTrailEmitter2);
+	projectileEmitters.push_back(fireBallEmitterTrail);
+	projectileEmitters.push_back(fireRockAura);
+	projectileEmitters.push_back(fireRock);
 }
 
 /**

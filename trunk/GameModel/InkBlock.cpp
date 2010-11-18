@@ -71,6 +71,10 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 			break;
 
+		case Projectile::FireGlobProjectile:
+			// Fire glob just extinguishes
+			break;
+
 		default:
 			assert(false);
 			break;

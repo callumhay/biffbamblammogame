@@ -32,6 +32,7 @@
 #include "../GameModel/GameItem.h"
 #include "../GameModel/Beam.h"
 #include "../GameModel/PaddleRocketProjectile.h"
+#include "../GameModel/FireGlobProjectile.h"
 
 // Game Control Includes
 #include "../GameControl/GameControllerManager.h"
@@ -940,6 +941,24 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 			break;
 		case Projectile::PaddleRocketBulletProjectile:
 			intensity = PlayerHurtHUD::MajorPain;
+			break;
+		case Projectile::FireGlobProjectile: {
+				const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
+				switch (fireGlobProjectile->GetRelativeSize()) {
+					case FireGlobProjectile::Small:
+						intensity = PlayerHurtHUD::MinorPain;
+						break;
+					case FireGlobProjectile::Medium:
+						intensity = PlayerHurtHUD::ModeratePain;
+						break;
+					case FireGlobProjectile::Large:
+						intensity = PlayerHurtHUD::MajorPain;
+						break;
+					default:
+						assert(false);
+						break;
+				}
+			}
 			break;
 		default:
 			assert(false);

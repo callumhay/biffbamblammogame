@@ -15,6 +15,7 @@
 #include "GameModelConstants.h"
 #include "PaddleLaser.h"
 #include "Beam.h"
+#include "FireGlobProjectile.h"
 
 // Default values for the size of the paddle
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
@@ -653,6 +654,10 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 			this->RocketProjectileCollision(gameModel, projectile);
 			break;
 
+		case Projectile::FireGlobProjectile:
+			this->FireGlobProjectileCollision(projectile);
+			break;
+
 		default:
 			assert(false);
 			break;
@@ -785,10 +790,10 @@ void PlayerPaddle::DebugDraw() const {
 void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projectile) {
 	float distFromCenter = 0.0f;
 	// Find percent distance from edge to center of the paddle
-	float percentNearCenter = this->GetPercentNearPaddleCenter(projectile, distFromCenter);
+	float percentNearCenter = this->GetPercentNearPaddleCenter(projectile.GetPosition(), distFromCenter);
 	float percentNearEdge = 1.0 - percentNearCenter;
 
-	static const float MAX_HIT_ROTATION = 60.0f;
+	static const float MAX_HIT_ROTATION = 80.0f;
 	
 	float rotationAmount = percentNearEdge * MAX_HIT_ROTATION;
 	if (distFromCenter > 0.0) {
@@ -822,8 +827,8 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 	times.reserve(5);
 	times.push_back(0.0f);
 	times.push_back(0.05f);
-	times.push_back(0.3f);
-	times.push_back(0.6f);
+	times.push_back(0.5f);
+	times.push_back(1.0f);
 	times.push_back(HIT_EFFECT_TIME);
 
 	std::vector<float> rotationValues;
@@ -839,55 +844,15 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 
 // A laser bullet just collided with the paddle...
 void PlayerPaddle::LaserBulletProjectileCollision(const Projectile& projectile) {
-	float distFromCenter = 0.0;
-	// Find percent distance from edge to center of the paddle
-	float percentNearCenter = this->GetPercentNearPaddleCenter(projectile, distFromCenter);
-	float percentNearEdge = 1.0 - percentNearCenter;
-
-	static const float MAX_HIT_ROTATION = 15.0f;
-	
-	float rotationAmount = percentNearEdge * MAX_HIT_ROTATION;
-	if (distFromCenter > 0.0) {
-		// The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
-		rotationAmount *= -1.0f;
-	}
-	//else {
-		// The projectile hit the 'left' side of the paddle (typically along the negative x-axis)
-	//}
-	
-	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
-	static const double HIT_EFFECT_TIME = 1.5;
-	std::vector<double> times;
-	times.reserve(3);
-	times.push_back(0.0f);
-	times.push_back(0.05f);
-	times.push_back(HIT_EFFECT_TIME);
-
-	static const float MIN_MOVE_DOWN_AMT = PlayerPaddle::PADDLE_HEIGHT_TOTAL;
-	float totalMaxMoveDown = MIN_MOVE_DOWN_AMT + percentNearCenter * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
-
-	std::vector<float> moveDownValues;
-	moveDownValues.reserve(3);
-	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue());
-	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue() + totalMaxMoveDown);
-	moveDownValues.push_back(0.0f);
-
-	this->moveDownAnimation.SetLerp(times, moveDownValues);
-
-	std::vector<float> rotationValues;
-	rotationValues.reserve(3);
-	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue());
-	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + rotationAmount);
-	rotationValues.push_back(0.0f);
-
-	this->rotAngleZAnimation.SetLerp(times, rotationValues);
+	float currHeight = 2.0f * this->GetHalfHeight();
+	this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 1.5f, currHeight, currHeight, 15.0f);
 }
 
 // Rocket projectile just collided with the paddle - causes the paddle to fly wildly off course
 void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const Projectile& projectile) {
 	float distFromCenter = 0.0f;
 	// Find percent distance from edge to center of the paddle
-	float percentNearCenter = this->GetPercentNearPaddleCenter(projectile, distFromCenter);
+	float percentNearCenter = this->GetPercentNearPaddleCenter(projectile.GetPosition(), distFromCenter);
 	float percentNearEdge = 1.0 - percentNearCenter;
 
 	static const float MAX_HIT_ROTATION = 170.0f;
@@ -924,16 +889,16 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const Project
 	times.reserve(5);
 	times.push_back(0.0f);
 	times.push_back(0.05f);
-	times.push_back(0.3f);
-	times.push_back(0.6f);
+	times.push_back(1.0f);
+	times.push_back(2.5f);
 	times.push_back(HIT_EFFECT_TIME);
 
 	std::vector<float> rotationValues;
 	rotationValues.reserve(5);
 	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue());
 	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + rotationAmount);
-	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() - 0.25f * rotationAmount);
-	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + 0.75f * rotationAmount);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() - 0.75f * rotationAmount);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + 0.50f * rotationAmount);
 	rotationValues.push_back(0.0f);
 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
@@ -952,14 +917,38 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const Project
 	}
 }
 
+void PlayerPaddle::FireGlobProjectileCollision(const Projectile& projectile) {
+	assert(projectile.GetType() == Projectile::FireGlobProjectile);
+	const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
+
+	float currHeight = 2.0f * this->GetHalfHeight();
+	switch (fireGlobProjectile->GetRelativeSize()) {
+		case FireGlobProjectile::Small:
+			this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 2.0f, currHeight, currHeight, 20.0f);
+			break;
+
+		case FireGlobProjectile::Medium:
+			this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 2.75f, 2.0f * currHeight, 1.5f * currHeight, 35.0f);
+			break;
+
+		case FireGlobProjectile::Large:
+			this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 3.25f, 2.5f * currHeight, 2.0f * currHeight, 70.0f);
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
+}
+
 // Get an idea of how close the given projectile is to the center of the paddle as a percentage
 // where 0 is a far away from the center as possible and 1 is at the center. Also returns the value
 // of distFromCenter which is assigned a negative/positive value based on the distance from the center
 // of the paddle on the left/right side respectively.
-float PlayerPaddle::GetPercentNearPaddleCenter(const Projectile& projectile, float& distFromCenter) {
+float PlayerPaddle::GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter) {
 	// Figure out what side of the paddle the projectile is hitting...
 	// Use a line test...
-	Vector2D vecToProjectile = projectile.GetPosition() - this->GetCenterPosition();
+	Vector2D vecToProjectile = projectileCenter - this->GetCenterPosition();
 	Vector2D positivePaddleAxis = Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), PlayerPaddle::DEFAULT_PADDLE_RIGHT_VECTOR);
 
 	// Use a dot product to determine whether the projectile is on the positive side or not
@@ -969,4 +958,49 @@ float PlayerPaddle::GetPercentNearPaddleCenter(const Projectile& projectile, flo
 	float percentNearCenter = std::max<float>(0.0f, this->currHalfWidthTotal - fabs(distFromCenter)) / this->currHalfWidthTotal;
 	assert(percentNearCenter >= 0.0f && percentNearCenter <= 1.0);
 	return percentNearCenter;
+}
+
+// Helper function for setting the animation for when a projectile hits the paddle
+// projectileCenter    - position where the projectile is
+// totalHitEffectTime  - total time of the animation
+// minMoveDown         - minimum distance the paddle will be pushed down
+// closeToCenterCoeff  - added maximum effect of the paddle being hit right in the center
+// maxRotationInDegs   - maximum rotation amount (when the paddle is hit on its outer edges)
+void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, double totalHitEffectTime, 
+																										 float minMoveDown, float closeToCenterCoeff, float maxRotationInDegs) {
+	
+	// Find percent distance from edge to center of the paddle
+	float distFromCenter = 0.0;
+	float percentNearCenter = this->GetPercentNearPaddleCenter(projectileCenter, distFromCenter);
+	float percentNearEdge = 1.0 - percentNearCenter;
+	float rotationAmount = percentNearEdge * maxRotationInDegs;
+	if (distFromCenter > 0.0) {
+		// The projectile hit the 'right' side of the paddle (typically along the positive x-axis)
+		rotationAmount *= -1.0f;
+	}
+
+	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
+	std::vector<double> times;
+	times.reserve(3);
+	times.push_back(0.0f);
+	times.push_back(0.05f);
+	times.push_back(totalHitEffectTime);
+
+	float totalMaxMoveDown = minMoveDown + percentNearCenter * closeToCenterCoeff;
+
+	std::vector<float> moveDownValues;
+	moveDownValues.reserve(3);
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue());
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue() + totalMaxMoveDown);
+	moveDownValues.push_back(0.0f);
+
+	this->moveDownAnimation.SetLerp(times, moveDownValues);
+
+	std::vector<float> rotationValues;
+	rotationValues.reserve(3);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue());
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + rotationAmount);
+	rotationValues.push_back(0.0f);
+
+	this->rotAngleZAnimation.SetLerp(times, rotationValues);
 }

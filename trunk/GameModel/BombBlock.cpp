@@ -163,6 +163,10 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* proje
 			result = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 			break;
 
+		case Projectile::FireGlobProjectile:
+			// Fire glob just extinguishes on a bomb block
+			break;
+
 		default:
 			assert(false);
 			break;

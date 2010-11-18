@@ -34,6 +34,17 @@ public:
 		this->maskTex = tex;
 	}
 
+	void SetBrightFireColour(const Colour& c) {
+		this->brightFireColour = c;
+	}
+	void SetDarkFireColour(const Colour& c) {
+		this->darkFireColour = c;
+	}
+
+	void SetScale(float scale) {
+		this->scale = scale;
+	}
+
 protected:
 	void SetupBeforePasses(const Camera& camera);
 
@@ -54,12 +65,17 @@ private:
 	CGparameter freqParam;
 	CGparameter flowDirectionParam;
 	CGparameter alphaMultParam;
+	CGparameter brightFireColourParam;
+	CGparameter darkFireColourParam;
 
 	// Actual values to be used for parameters in the shader
 	float scale, freq, alphaMultiplier;
 	Vector3D flowDir;
 	GLuint noiseTexID; 
 	Texture2D* maskTex;
+
+	Colour brightFireColour;
+	Colour darkFireColour;
 
 	DISALLOW_COPY_AND_ASSIGN(CgFxFireBallEffect);
 };

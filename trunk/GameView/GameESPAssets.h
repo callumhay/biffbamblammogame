@@ -45,6 +45,7 @@ class PlayerPaddle;
 class GameModel;
 class GameLevel;
 class Beam;
+class CgFxFireBallEffect;
 struct ESPInterval;
 
 /**
@@ -75,6 +76,7 @@ private:
 	ESPParticleScaleEffector  particlePulseUberballAura;
 	ESPParticleScaleEffector  particlePulseItemDropAura;
 	ESPParticleScaleEffector  particlePulsePaddleLaser;
+	ESPParticleScaleEffector	particlePulseFireGlobAura;
 	ESPParticleScaleEffector  beamEndPulse;
 	ESPParticleScaleEffector  particleShrinkToNothing;
 
@@ -94,6 +96,7 @@ private:
 	ESPParticleRotateEffector smokeRotatorCW;
 	ESPParticleRotateEffector smokeRotatorCCW;
 	ESPParticleRotateEffector loopRotateEffectorCW;
+	ESPParticleRotateEffector loopRotateEffectorCCW;
 
 	ESPParticleColourEffector beamBlastColourEffector;
 
@@ -101,6 +104,10 @@ private:
 	std::vector<Texture2D*> bangTextures;
 	std::vector<Texture2D*> splatTextures;
 	std::vector<Texture2D*> smokeTextures;
+	//std::vector<Texture2D*> fireGlobTextures;
+
+	std::vector<Texture2D*> rockTextures;
+	std::vector<CgFxFireBallEffect*> moltenRockEffects;
 	
 	Texture2D* circleGradientTex;
 	Texture2D* starTex;
@@ -190,6 +197,7 @@ private:
 
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const Projectile& projectile);
+	void AddFireGlobProjectileEffects(const Projectile& projectile);
 
 	void AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
 
