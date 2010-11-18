@@ -138,6 +138,10 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			}
 			break;
 
+		case Projectile::FireGlobProjectile:
+			// Fire glob will just extinguish
+			break;
+
 		default:
 			assert(false);
 			break;

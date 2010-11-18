@@ -35,6 +35,9 @@ cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NU
 	ilResult = ilutEnable(ILUT_OPENGL_CONV);
 	assert(ilResult);
 
+	//ilEnable(IL_ORIGIN_SET);
+	//ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+
 	// Initialize OpenAL for audio, make sure everything loaded alright
 //	alutInit(NULL, NULL);
 //	debug_output("Supported OpenAL Sound MIME types:");

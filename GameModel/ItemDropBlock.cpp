@@ -49,10 +49,25 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 	UNUSED_PARAMETER(projectile);
 
-	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
-		// Drop an item...
-		gameModel->AddItemDrop(*this, this->nextDropItemType);
-		this->ChangeToNextItemDropType(true);
+	// Do nothing for a fire glob, it will just extinguish
+	switch (projectile->GetType()) {
+		case Projectile::FireGlobProjectile:
+			break;
+
+		case Projectile::PaddleLaserBulletProjectile: 
+		case Projectile::CollateralBlockProjectile:
+		case Projectile::PaddleRocketBulletProjectile:
+			// Drop an item if we can...
+			if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
+				// Drop an item...
+				gameModel->AddItemDrop(*this, this->nextDropItemType);
+				this->ChangeToNextItemDropType(true);
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
 	}
 
 	return this;

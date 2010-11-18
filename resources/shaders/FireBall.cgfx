@@ -49,6 +49,13 @@ float3 FlowDir <
     string UIName = "Flow Direction";
 > = {0, 1, 1};
 
+float3 BrightFireColour <
+    string UIName = "Bright Fire Colour";
+> = {1, 1, 0};
+
+float3 DarkFireColour <
+    string UIName = "Dark Fire Colour";
+> = {1, 0, 0};
 
 //////// COLOR & TEXTURE /////////////////////
 
@@ -93,7 +100,7 @@ struct appdata {
 struct appdatawithuv {
     float3 Position : POSITION;
     float4 UV       : TEXCOORD0;
-	float4 Colour   : COLOR0;
+    float4 Colour   : COLOR0;
 };
 
 /* data passed from vertex shader to pixel shader */
@@ -106,7 +113,7 @@ struct vertexOutputWithUV {
     float4 HPosition    : POSITION;
     float3 WorldPos     : TEXCOORD0;
     float2 UV           : TEXCOORD1;    
-	float4 Colour       : TEXCOORD2;
+    float4 Colour       : TEXCOORD2;
 };
  
 ///////// VERTEX SHADING /////////////////////
@@ -133,7 +140,7 @@ vertexOutputWithUV mask_VS(appdatawithuv IN) {
     OUT.WorldPos  = Po.xyz;
     OUT.HPosition = mul(WvpXf,Po);
     OUT.UV = IN.UV.xy;
-	OUT.Colour = IN.Colour;
+    OUT.Colour = IN.Colour;
     return OUT;
 }
 
@@ -147,7 +154,7 @@ float4 firey_sprite_PS(vertexOutput IN) : COLOR {
                                abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
     totalTexVal = clamp(totalTexVal, 0, 1);
     float alpha = lerp(0.2f, 1.0f, totalTexVal) * AlphaMultiplier;
-    float3 fireColour = lerp(float3(1.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f), totalTexVal.x);             
+    float3 fireColour = lerp(DarkFireColour, BrightFireColour, totalTexVal.x);             
 
     // return as float4
     return float4(fireColour.xyz, alpha);
@@ -160,11 +167,11 @@ float4 firey_sprite_with_mask_PS(vertexOutputWithUV IN) : COLOR {
     float totalTexVal = 8.0 * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
                                abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
     totalTexVal = clamp(totalTexVal, 0, 1);
-    float alpha = lerp(0.2f, 1.0f, totalTexVal) * AlphaMultiplier;
-    float3 fireColour = lerp(float3(1.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f), totalTexVal.x);             
+    //float alpha = lerp(0.2f, 1.0f, totalTexVal) * AlphaMultiplier;
+    float3 fireColour = lerp(DarkFireColour, BrightFireColour, totalTexVal.x);             
 
     // return as float4
-    return IN.Colour * float4(fireColour.xyz, alpha) * tex2D(MaskSampler, IN.UV).rgba;
+    return IN.Colour * float4(fireColour.xyz, 1) * tex2D(MaskSampler, IN.UV).rgba;
 }
 
 ///// TECHNIQUES /////////////////////////////

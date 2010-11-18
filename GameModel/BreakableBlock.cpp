@@ -192,6 +192,14 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 			newPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 			break;
 
+		case Projectile::FireGlobProjectile:
+			if (!projectile->IsLastLevelPieceCollidedWith(this)) {
+				// This piece catches on fire...
+				this->AddStatus(LevelPiece::OnFireStatus);
+				gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::OnFireStatus);
+			}
+			break;
+
 		default:
 			assert(false);
 			break;
@@ -217,18 +225,20 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 		this->fireGlobTimeCounter += dT;
 		if (this->fireGlobTimeCounter >= GameModelConstants::GetInstance()->FIRE_GLOB_DROP_CHANCE_INTERVAL) {
 			this->fireGlobTimeCounter = 0.0;
-			int fireGlobDropRandomNum = Randomizer::GetInstance()->RandomUnsignedInt() % GameModelConstants::GetInstance()->FIRE_GLOB_CHANCE_MOD;
-			if (fireGlobDropRandomNum == 0) {
-				// Calculate a somewhat random place on the block to drop the glob from...
-				Point2D dropPos = this->center + Vector2D(Randomizer::GetInstance()->RandomNumNegOneToOne() * LevelPiece::HALF_PIECE_WIDTH * 0.8f, 
-																									Randomizer::GetInstance()->RandomNumNegOneToOne() * LevelPiece::HALF_PIECE_HEIGHT * 0.75f);
+
+			//int fireGlobDropRandomNum = Randomizer::GetInstance()->RandomUnsignedInt() % GameModelConstants::GetInstance()->FIRE_GLOB_CHANCE_MOD;
+			//if (fireGlobDropRandomNum == 0) {
+
 				// Do the same for the width and height...
-				float globWidth  = 0.25f * LevelPiece::HALF_PIECE_WIDTH + Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_WIDTH;
-				float globHeight = 1.2f * globWidth + 0.25f * Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_HEIGHT;
-				
+				float globSize  = 0.4f * LevelPiece::HALF_PIECE_WIDTH + Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_WIDTH;
+				// Calculate a place on the block to drop the glob from...
+				Point2D dropPos = this->center - Vector2D(0.0f, globSize);
+
 				// Drop a glob of fire downwards from the block...
-				gameModel->AddProjectile(new FireGlobProjectile(dropPos, globWidth, globHeight));
-			}
+				Projectile* fireGlobProjectile = new FireGlobProjectile(dropPos, globSize);
+				fireGlobProjectile->SetLastLevelPieceCollidedWith(this);
+				gameModel->AddProjectile(fireGlobProjectile);
+			//}
 		}
 
 		// Fire will continue to diminish the piece... 
@@ -246,5 +256,25 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 	}
 
 	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
+	return false;
+}
+
+// Determine whether the given projectile will pass through this block...
+bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) const {
+	switch (projectile->GetType()) {
+		
+		case Projectile::CollateralBlockProjectile:
+			return true;
+
+		case Projectile::FireGlobProjectile:
+			// Let fire globs pass through if they spawned on this block
+			if (projectile->IsLastLevelPieceCollidedWith(this)) {
+				return true;
+			}
+			break;
+
+		default:
+			break;
+	}
 	return false;
 }

@@ -121,14 +121,6 @@ private:
 	DISALLOW_COPY_AND_ASSIGN(BreakableBlock);
 };
 
-// Determine whether the given projectile will pass through this block...
-inline bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) const {
-	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
-		return true;
-	}
-	return false;
-}
-
 /**
  * Called as this piece is being hit by the given beam over the given amount of time in seconds.
  */

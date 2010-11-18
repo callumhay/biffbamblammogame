@@ -16,11 +16,14 @@
 
 class FireGlobProjectile : public Projectile {
 public:
-	FireGlobProjectile(const Point2D& spawnLoc, float width, float height);
+	FireGlobProjectile(const Point2D& spawnLoc, float size);
 	~FireGlobProjectile();
 
 	void Tick(double seconds);
 	BoundingLines BuildBoundingLines() const;
+
+	enum RelativeSize { Small, Medium, Large };
+	const FireGlobProjectile::RelativeSize& GetRelativeSize() const;
 
 private:
 	static const float FIRE_GLOB_MIN_VELOCITY;
@@ -28,8 +31,13 @@ private:
 
 	float xMovementVariation;		// The variation of the x-axis movement as the fire glob falls
 	double totalTickTime;				// The total time ticked on this projectile so far
+	RelativeSize relativeSize;  // The relative size of this fire glob
 
 	DISALLOW_COPY_AND_ASSIGN(FireGlobProjectile);
 };
+
+inline const FireGlobProjectile::RelativeSize& FireGlobProjectile::GetRelativeSize() const {
+	return this->relativeSize;
+}
 
 #endif // __FIREGLOBPROJECTILE_H__

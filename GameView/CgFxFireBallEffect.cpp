@@ -22,7 +22,8 @@ const char* CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME	= "FireBallNoD
 CgFxFireBallEffect::CgFxFireBallEffect() : 
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_FIREBALL_SHADER), 
 scale(1.0f), freq(0.6f), flowDir(0, 0, 1), alphaMultiplier(1.0f),
-noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL) {
+noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(NULL),
+brightFireColour(1.0f, 1.0f, 0.0f), darkFireColour(1.0f, 0.0f, 0.0f) {
 
 	// Set the technique
 	this->currTechnique = this->techniques[BASIC_TECHNIQUE_NAME];
@@ -40,10 +41,12 @@ noiseTexID(Noise::GetInstance()->GetNoise3DTexture()->GetTextureID()), maskTex(N
 	this->timerParam = cgGetNamedEffectParameter(this->cgEffect, "Timer");
 
 	// Tweakable params
-	this->scaleParam					= cgGetNamedEffectParameter(this->cgEffect, "Scale");
-	this->freqParam						= cgGetNamedEffectParameter(this->cgEffect, "Freq");
-	this->flowDirectionParam	= cgGetNamedEffectParameter(this->cgEffect, "FlowDir");
-	this->alphaMultParam			= cgGetNamedEffectParameter(this->cgEffect, "AlphaMultiplier");
+	this->scaleParam						= cgGetNamedEffectParameter(this->cgEffect, "Scale");
+	this->freqParam							= cgGetNamedEffectParameter(this->cgEffect, "Freq");
+	this->flowDirectionParam		= cgGetNamedEffectParameter(this->cgEffect, "FlowDir");
+	this->alphaMultParam				= cgGetNamedEffectParameter(this->cgEffect, "AlphaMultiplier");
+	this->brightFireColourParam	= cgGetNamedEffectParameter(this->cgEffect, "BrightFireColour");
+	this->darkFireColourParam		= cgGetNamedEffectParameter(this->cgEffect, "DarkFireColour");
 
 	debug_cg_state();
 }
@@ -63,6 +66,8 @@ void CgFxFireBallEffect::SetupBeforePasses(const Camera& camera) {
 	cgGLSetParameter1f(this->freqParam, this->freq);
 	cgGLSetParameter1f(this->alphaMultParam, this->alphaMultiplier);
 	cgGLSetParameter3fv(this->flowDirectionParam, this->flowDir.begin());
+	cgGLSetParameter3fv(this->brightFireColourParam, this->brightFireColour.begin());
+	cgGLSetParameter3fv(this->darkFireColourParam, this->darkFireColour.begin());
 
 	// Set the timer and noise parameters...
 	double timeInSecs = static_cast<double>(BlammoTime::GetSystemTimeInMillisecs()) / 1000.0;

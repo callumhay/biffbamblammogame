@@ -148,6 +148,10 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 			break;
 
+		case Projectile::FireGlobProjectile:
+			// Fire glob will just extinguish
+			break;
+
 		default:
 			assert(false);
 			break;

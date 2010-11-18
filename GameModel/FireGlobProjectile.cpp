@@ -10,15 +10,26 @@
  */
 
 #include "FireGlobProjectile.h"
+#include "LevelPiece.h"
 
 const float FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY			= 2.5f;
 const float FireGlobProjectile::FIRE_GLOB_MAX_ADD_VELOCITY	= 1.25f;
 
-FireGlobProjectile::FireGlobProjectile(const Point2D& spawnLoc, float width, float height) : 
-Projectile(Projectile::FireGlobProjectile, spawnLoc, width, height), totalTickTime(0.0) {
+FireGlobProjectile::FireGlobProjectile(const Point2D& spawnLoc, float size) : 
+Projectile(Projectile::FireGlobProjectile, spawnLoc, size, size), totalTickTime(0.0) {
 
 	this->SetVelocity(Vector2D(0, -1), FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY);
-	this->xMovementVariation = 0.8f * width;
+	this->xMovementVariation = 0.8f * size;
+
+	if (size >= LevelPiece::HALF_PIECE_WIDTH) {
+		this->relativeSize = Large;
+	}
+	else if (size >= 0.66f * LevelPiece::HALF_PIECE_WIDTH) {
+		this->relativeSize = Medium;
+	}
+	else {
+		this->relativeSize = Small;
+	}
 }
 
 FireGlobProjectile::~FireGlobProjectile() {
@@ -29,12 +40,12 @@ void FireGlobProjectile::Tick(double seconds) {
 	Vector2D dDist = seconds * this->velocityMag * this->velocityDir;
 	this->SetPosition(this->GetPosition() + dDist);
 
-	float randomXDir = sin(this->totalTickTime + Randomizer::GetInstance()->RandomNumZeroToOne()) * this->xMovementVariation;
-	float randomYDir = FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY + FireGlobProjectile::FIRE_GLOB_MAX_ADD_VELOCITY * Randomizer::GetInstance()->RandomNumZeroToOne();
-	Vector2D newVelocity(randomXDir, randomYDir);
-	float velocityMagnitude = newVelocity.Magnitude();
-	assert(velocityMagnitude > EPSILON);
-	this->SetVelocity(newVelocity / velocityMagnitude, velocityMagnitude);
+	//float randomXDir = sin(this->totalTickTime + Randomizer::GetInstance()->RandomNumZeroToOne()) * this->xMovementVariation;
+	//float randomYDir = FireGlobProjectile::FIRE_GLOB_MIN_VELOCITY + FireGlobProjectile::FIRE_GLOB_MAX_ADD_VELOCITY * Randomizer::GetInstance()->RandomNumZeroToOne();
+	//Vector2D newVelocity(randomXDir, randomYDir);
+	//float velocityMagnitude = newVelocity.Magnitude();
+	//assert(velocityMagnitude > EPSILON);
+	//this->SetVelocity(newVelocity / velocityMagnitude, velocityMagnitude);
 
 	this->totalTickTime += seconds;
 }
