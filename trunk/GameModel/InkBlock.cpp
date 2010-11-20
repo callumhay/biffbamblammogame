@@ -41,7 +41,7 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel) {
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece);
 
 	// Obliterate all that is left of this block...
 	LevelPiece* tempThis = this;

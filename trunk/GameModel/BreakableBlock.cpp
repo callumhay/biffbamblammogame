@@ -42,7 +42,7 @@ LevelPiece* BreakableBlock::Destroy(GameModel* gameModel) {
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece);
 
 	// Obliterate all that is left of this block...
 	LevelPiece* tempThis = this;
@@ -109,7 +109,7 @@ LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel) {
 			this->DecrementPieceType();
 			{
 				GameLevel* level = gameModel->GetCurrentLevel();
-				level->PieceChanged(this, this);
+				level->PieceChanged(gameModel, this, this);
 			}
 			newPiece = this;
 			break;
@@ -226,19 +226,22 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 		if (this->fireGlobTimeCounter >= GameModelConstants::GetInstance()->FIRE_GLOB_DROP_CHANCE_INTERVAL) {
 			this->fireGlobTimeCounter = 0.0;
 
-			//int fireGlobDropRandomNum = Randomizer::GetInstance()->RandomUnsignedInt() % GameModelConstants::GetInstance()->FIRE_GLOB_CHANCE_MOD;
-			//if (fireGlobDropRandomNum == 0) {
+			int fireGlobDropRandomNum = Randomizer::GetInstance()->RandomUnsignedInt() % GameModelConstants::GetInstance()->FIRE_GLOB_CHANCE_MOD;
+			if (fireGlobDropRandomNum == 0) {
 
 				// Do the same for the width and height...
 				float globSize  = 0.4f * LevelPiece::HALF_PIECE_WIDTH + Randomizer::GetInstance()->RandomNumZeroToOne() * LevelPiece::HALF_PIECE_WIDTH;
+				float edgeDist  = ((LevelPiece::PIECE_WIDTH - globSize) / 2.0f) - 0.01f;
+				assert(edgeDist >= 0.0f);
+
 				// Calculate a place on the block to drop the glob from...
-				Point2D dropPos = this->center - Vector2D(0.0f, globSize);
+				Point2D dropPos = this->center - Vector2D(Randomizer::GetInstance()->RandomNumNegOneToOne() * edgeDist, globSize / 2.0f);
 
 				// Drop a glob of fire downwards from the block...
 				Projectile* fireGlobProjectile = new FireGlobProjectile(dropPos, globSize);
 				fireGlobProjectile->SetLastLevelPieceCollidedWith(this);
 				gameModel->AddProjectile(fireGlobProjectile);
-			//}
+			}
 		}
 
 		// Fire will continue to diminish the piece... 
