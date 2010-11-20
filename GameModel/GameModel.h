@@ -74,6 +74,8 @@ private:
 	
 	// ***************************************************
 
+	bool doingPieceStatusListIteration;
+
 	// Private getters and setters ****************************************
 	void SetCurrentWorld(unsigned int worldNum);
 
@@ -95,7 +97,16 @@ private:
 	void BallPaddleCollisionOccurred(GameBall& ball);
 	void BallDied(GameBall* deadBall, bool& stateChanged);
 	void DoPieceStatusUpdates(double dT);
+	void DoProjectileCollisions();
 	
+	bool IsOutOfGameBounds(const Point2D& pos);
+
+	void UpdateActiveTimers(double seconds);
+	void UpdateActiveItemDrops(double seconds);
+	void UpdateActiveProjectiles(double seconds);
+	void UpdateActiveBeams(double seconds);
+
+
 	// Increment the player's score in the game
 	void IncrementScore(int amt) {
 		bool wasGreaterThanZero = this->currPlayerScore > 0;
@@ -232,6 +243,8 @@ public:
 		GameEventManager::Instance()->ActionLivesChanged(0, this->currLivesLeft);
 	}
 
+	void WipePieceFromAuxLists(LevelPiece* piece);
+
 	std::list<GameItem*>& GetLiveItems() {
 		return this->currLiveItems;
 	}
@@ -249,17 +262,6 @@ public:
 	}
 	const std::list<Beam*>& GetActiveBeams() const {
 		return this->beams;
-	}
-
-	/**
-	 * Get the level pieces that are constantly being updated each frame.
-	 * These pieces have status effects applied to them that require updating
-	 * each frame (e.g., blocks that are on fire).
-	 * Returns: A map of status update pieces along with their status mask (i.e., what status combination
-	 * is causing them to be updated).
-	 */
-	const std::map<LevelPiece*, int32_t>& GetStatusUpdateLevelPieces() const {
-		return this->statusUpdatePieces;
 	}
 
 	/**
@@ -408,12 +410,15 @@ public:
 };
 
 inline void GameModel::ClearStatusUpdatePieces() {
+	assert(!this->doingPieceStatusListIteration);
 	// When we clear all the update pieces we also clear all the relevant status effects for those pieces...
+	this->doingPieceStatusListIteration = true;
 	for (std::map<LevelPiece*, int32_t>::iterator iter = this->statusUpdatePieces.begin(); iter != this->statusUpdatePieces.end(); ++iter) {
 		LevelPiece* currLevelPiece = iter->first;
 		currLevelPiece->RemoveStatuses(iter->second);
 	}
 	this->statusUpdatePieces.clear();
+	this->doingPieceStatusListIteration = false;
 }
 
 #endif

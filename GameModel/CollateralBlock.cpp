@@ -46,7 +46,7 @@ LevelPiece* CollateralBlock::Destroy(GameModel* gameModel) {
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece);
 
 	// Obliterate all that is left of this block...
 	LevelPiece* tempThis = this;
@@ -186,7 +186,7 @@ LevelPiece* CollateralBlock::Detonate(GameModel* gameModel) {
 	// memory of the piece, we're just changing it to avoid collision detection issues in the level)
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece);
 
 	// Add the collateral block to the game model as a special type of soon-to-be-falling projectile...
 	/**

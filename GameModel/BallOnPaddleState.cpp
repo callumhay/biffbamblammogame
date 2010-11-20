@@ -65,8 +65,17 @@ void BallOnPaddleState::UpdateBallPosition() {
  * Time tick in-game as dealt with when the ball is on the paddle only.
  */
 void BallOnPaddleState::Tick(double seconds) {
+	// Since some piece may have status effects which cause projectiles to spawn and move around (e.g., fire globs)
+	// we still need to tick projectiles in this state... 
+	this->gameModel->UpdateActiveProjectiles(seconds);
+
 	// Make sure the paddle isn't moving into any blocks along the sides of the level
 	this->DoUpdateToPaddleBoundriesAndCollisions(seconds, true);
+
+	// Projectile Collisions:
+	this->gameModel->DoProjectileCollisions();
+	// Tick/update any level pieces that require it...
+	this->gameModel->DoPieceStatusUpdates(seconds);
 
 	// In this state the paddle can move around freely and the ball stays at
 	// its center without moving.

@@ -27,6 +27,7 @@
 #include "CollateralBlock.h"
 #include "TeslaBlock.h"
 #include "ItemDropBlock.h"
+#include "GameModel.h"
 
 #include "PaddleRocketProjectile.h"
 
@@ -830,7 +831,8 @@ void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces
  * Call this when a level piece changes in this level. This function is meant to 
  * change the piece and manage the other level pieces accordingly.
  */
-void GameLevel::PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter) {
+void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter) {
+	assert(gameModel != NULL);
 	assert(pieceBefore != NULL);
 	assert(pieceAfter != NULL);
 
@@ -861,6 +863,9 @@ void GameLevel::PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter) {
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex); // bottom
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1); // right
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex); // top
+
+		// If the piece is in any auxillary lists within the game model then we need to remove it
+		gameModel->WipePieceFromAuxLists(pieceBefore);
 	}
 	else {
 		// Inline: in this case there was a change within the piece object itself

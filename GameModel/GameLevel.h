@@ -132,7 +132,7 @@ public:
 		return this->levelName;
 	}
 
-	void PieceChanged(LevelPiece* pieceBefore, LevelPiece* pieceAfter);
+	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter);
 	LevelPiece* RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
 

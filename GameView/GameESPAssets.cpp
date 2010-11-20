@@ -2124,6 +2124,32 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	fireyImpactOnPaddle->SetParticles(1, this->sideBlastTex);
 
 	this->activePaddleEmitters.push_back(fireyImpactOnPaddle);
+
+	// Smashy star texture particle
+	ESPPointEmitter* starEmitter = new ESPPointEmitter();
+	starEmitter->SetSpawnDelta(ESPInterval(-1));
+	starEmitter->SetInitialSpd(ESPInterval(3.0f, 5.5f));
+	starEmitter->SetParticleLife(ESPInterval(1.2f, 2.0f));
+	starEmitter->SetParticleSize(ESPInterval(paddle.GetHalfWidthTotal() * 0.2f, paddle.GetHalfWidthTotal() * 0.5f));
+	starEmitter->SetParticleColour(ESPInterval(1.0f), ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), ESPInterval(1.0f));
+	starEmitter->SetEmitAngleInDegrees(35);
+	starEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, paddle.GetHalfWidthTotal() * 0.25f));
+	starEmitter->SetParticleAlignment(ESP::ViewPlaneAligned);
+	starEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()));
+	starEmitter->SetEmitPosition(Point3D(paddle.GetCenterPosition()[0] + hitPositionRelativeToPaddleCenter[0],
+																			 paddle.GetCenterPosition()[1] + hitPositionRelativeToPaddleCenter[1], 0.0f));
+
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		starEmitter->AddEffector(&this->explosionRayRotatorCCW);
+	}
+	else {
+		starEmitter->AddEffector(&this->explosionRayRotatorCW);
+	}
+
+	starEmitter->AddEffector(&this->particleFader);
+	starEmitter->SetParticles(3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 3), this->starTex);
+
+	this->activeGeneralEmitters.push_back(starEmitter);
 }
 
 /**

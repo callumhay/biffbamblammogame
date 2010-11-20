@@ -31,7 +31,7 @@ class BallInPlayState : public GameState {
 private:
 	double timeSinceGhost;		// The time since the ball stopped colliding with blocks
 
-	bool IsOutOfGameBounds(const Point2D& pos);
+	
 
 	void DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision);
 	void DoBallCollision(GameBall& ball1, GameBall& ball2);
@@ -40,10 +40,7 @@ private:
 	void AugmentBallDirectionToBeNotDownwards(GameBall& b);
 	
 	//void UpdateActiveBalls(double seconds);
-	void UpdateActiveTimers(double seconds);
-	void UpdateActiveItemDrops(double seconds);
-	void UpdateActiveProjectiles(double seconds);
-	void UpdateActiveBeams(double seconds);
+
 
 public:
 	BallInPlayState(GameModel* gm);
