@@ -37,7 +37,14 @@ struct ESPInterval {
 
 	float MeanValueInInterval() const {
 		return (minValue + maxValue) / 2.0f;
-	}	
+	}
+
+	bool operator==(const ESPInterval& other) const {
+		return (this->minValue == other.minValue) && (this->maxValue == other.maxValue);
+	}
+	bool operator!=(const ESPInterval& other) const {
+		return !(*this == other);
+	}
 };
 
 // A function with a single variable

@@ -432,7 +432,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement) {
 	// If there is a ball attached then we need to move it around with the paddle
 	if (ballIsAttached) {
 		// We need to figure out what the distance is from the paddle center-top to the ball center
-		Vector2D paddleTopCenterToBallCenter = this->attachedBall->GetBounds().Center() - (oldPaddleCenter + Vector2D(0, this->GetHalfHeight()));
+		Vector2D paddleTopCenterToBallCenter = this->attachedBall->GetBounds().Center() - (startingCenterPos + Vector2D(0, this->GetHalfHeight()));
 		// Maintain the vector obtained above in the new position of the paddle
 		this->attachedBall->SetCenterPosition(this->centerPos + Vector2D(0, this->GetHalfHeight()) + paddleTopCenterToBallCenter);
 	}

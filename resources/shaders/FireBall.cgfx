@@ -167,10 +167,7 @@ float4 firey_sprite_with_mask_PS(vertexOutputWithUV IN) : COLOR {
     float totalTexVal = 8.0 * (abs(texVal.x - 0.25)  + abs(texVal.y - 0.125) + 
                                abs(texVal.z - 0.0625) + abs(texVal.w - 0.03125));
     totalTexVal = clamp(totalTexVal, 0, 1);
-    //float alpha = lerp(0.2f, 1.0f, totalTexVal) * AlphaMultiplier;
     float3 fireColour = lerp(DarkFireColour, BrightFireColour, totalTexVal.x);             
-
-    // return as float4
     return IN.Colour * float4(fireColour.xyz, 1) * tex2D(MaskSampler, IN.UV).rgba;
 }
 

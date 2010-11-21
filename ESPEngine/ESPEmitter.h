@@ -94,8 +94,8 @@ public:
 
 	bool GetHasParticles() const;
 		
-	ESPInterval GetParticleSizeX() const { return this->particleSize[0]; }
-	ESPInterval GetParticleSizeY() const { return this->particleSize[1]; }
+	const ESPInterval& GetParticleSizeX() const { return this->particleSize[0]; }
+	const ESPInterval& GetParticleSizeY() const { return this->particleSize[1]; }
 
 	void SimulateTicking(double time);
 
