@@ -34,6 +34,7 @@ public:
 																		const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 		float paddleScaleFactor = p.GetPaddleScaleFactor();
 		glPushMatrix();
+		glRotatef(p.GetZRotation(), 0.0f, 0.0f, 1.0f);
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
 		this->paddleGooMesh->Draw(camera, keyLight, fillLight, ballLight);
 		glPopMatrix();

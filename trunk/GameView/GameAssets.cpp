@@ -931,7 +931,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 	// Add the sprite/particle effect
 	this->espAssets->AddPaddleHitByProjectileEffect(paddle, projectile);
 
-	PlayerHurtHUD::PainIntensity intensity;
+	PlayerHurtHUD::PainIntensity intensity = PlayerHurtHUD::MinorPain;
 	switch (projectile.GetType()) {
 		case Projectile::CollateralBlockProjectile:
 			intensity = PlayerHurtHUD::MajorPain;
