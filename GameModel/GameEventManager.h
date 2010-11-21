@@ -63,6 +63,7 @@ public:
 	void ActionBallSafetyNetCreated();
 	void ActionBallSafetyNetDestroyed(const GameBall& ball);
 	void ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle);
+	void ActionBallSafetyNetDestroyed(const Projectile& projectile);
 	void ActionLevelPieceChanged(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter);
 	void ActionLevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus);
 	void ActionLevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus);

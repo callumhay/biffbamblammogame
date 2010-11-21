@@ -228,11 +228,16 @@ void GameEventManager::ActionBallSafetyNetDestroyed(const GameBall& ball) {
 		(*this->listenerIter)->BallSafetyNetDestroyedEvent(ball);
 	}	
 }
-
 void GameEventManager::ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallSafetyNetDestroyedEvent(paddle);
+	}	
+}
+void GameEventManager::ActionBallSafetyNetDestroyed(const Projectile& projectile) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BallSafetyNetDestroyedEvent(projectile);
 	}	
 }
 

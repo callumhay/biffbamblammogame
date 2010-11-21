@@ -247,6 +247,9 @@ public:
 	virtual void BallSafetyNetDestroyedEvent(const GameBall& ball) = 0;
 	// Same as above, only the paddle did it.
 	virtual void BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle) = 0;
+	// Same as above, only a projectile did it.
+	virtual void BallSafetyNetDestroyedEvent(const Projectile& projectile) = 0;
+
 
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same
