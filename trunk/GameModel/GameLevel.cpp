@@ -28,6 +28,7 @@
 #include "TeslaBlock.h"
 #include "ItemDropBlock.h"
 #include "GameModel.h"
+#include "Projectile.h"
 
 #include "PaddleRocketProjectile.h"
 
@@ -1139,6 +1140,29 @@ bool GameLevel::PaddleSafetyNetCollisionCheck(const PlayerPaddle& p) {
 	
 	// Test for collision, if there was one then we kill the safety net
 	bool didCollide = p.CollisionCheck(this->safetyNetBounds, false);
+	if (didCollide) {
+		this->ballSafetyNetActive = false;
+		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(p);
+	}
+
+	return didCollide;
+}
+
+bool GameLevel::ProjectileSafetyNetCollisionCheck(const Projectile& p, const BoundingLines& projectileBoundingLines) {
+	// Fast exit if there's no safety net active
+	if (!this->ballSafetyNetActive){ 
+		return false;
+	}
+
+	// Make sure the projectile is a type that we want being able to destroy a safety net
+	bool isProjectileThatBreaksSafetyNet = (p.GetType() == Projectile::FireGlobProjectile) ||
+																				 (p.GetType() == Projectile::CollateralBlockProjectile);
+	if (!isProjectileThatBreaksSafetyNet){ 
+		return false;
+	}
+	
+	// Test for collision, if there was one then we kill the safety net
+	bool didCollide = projectileBoundingLines.CollisionCheck(this->safetyNetBounds);
 	if (didCollide) {
 		this->ballSafetyNetActive = false;
 		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(p);

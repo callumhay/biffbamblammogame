@@ -418,6 +418,13 @@ void GameModel::DoProjectileCollisions() {
 			continue;
 		}
 
+		// Check to see if the projectile collided with a safety net (if one is active)
+		if (this->GetCurrentLevel()->ProjectileSafetyNetCollisionCheck(*currProjectile, projectileBoundingLines)) {
+			// This doesn't destroy projectiles currently
+			++iter;
+			continue;
+		}
+
 		// Find the any level pieces that the current projectile may have collided with and test for collision
 		incIter = true;	// Keep track of whether we need to increment the iterator or not
 		std::set<LevelPiece*> collisionPieces = this->GetCurrentLevel()->GetLevelPieceCollisionCandidates(*currProjectile);

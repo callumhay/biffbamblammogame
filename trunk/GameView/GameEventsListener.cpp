@@ -570,6 +570,12 @@ void GameEventsListener::BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle)
 	debug_output("EVENT: Ball safety net destroyed by paddle");
 }
 
+void GameEventsListener::BallSafetyNetDestroyedEvent(const Projectile& projectile) {
+	this->DestroyBallSafetyNet(projectile.GetPosition());
+	debug_output("EVENT: Ball safety net destroyed by projectile");
+}
+
+
 // Private helper for when the safety net is destroyed
 void GameEventsListener::DestroyBallSafetyNet(const Point2D& pt) {
 	// Play the sound

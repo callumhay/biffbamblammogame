@@ -835,6 +835,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxPostFirey.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxPostRefract.h"
 						>
 					</File>
@@ -904,6 +908,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxPortalBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPostFirey.cpp"
 						>
 					</File>
 					<File

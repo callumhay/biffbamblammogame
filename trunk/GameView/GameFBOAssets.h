@@ -25,6 +25,7 @@ class GameModel;
 class GameItem;
 class CgFxPostSmokey;
 class CgFxPostUberIntense;
+class CgFxPostFirey;
 
 /**
  * Storage class for framebuffer object assets used in the game graphics
@@ -50,6 +51,7 @@ private:
 	CgFxPostSmokey* smokeyCamEffect;
 	CgFxPostUberIntense* uberIntenseCamEffect;
 	CgFxFullscreenGoo* shieldPaddleCamEffect;
+	CgFxPostFirey* fireBallCamEffect;
 
 	// Misc. Textures and overlays
 	Texture* barrelOverlayTex;	// Texture for overlay of the cannon barrel

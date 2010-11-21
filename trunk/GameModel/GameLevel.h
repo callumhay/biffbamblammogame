@@ -84,6 +84,7 @@ public:
 	}
 	bool BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
 	bool PaddleSafetyNetCollisionCheck(const PlayerPaddle& p);
+	bool ProjectileSafetyNetCollisionCheck(const Projectile& p, const BoundingLines& projectileBoundingLines);
 
 	// Ability to add/remove tesla lightning barriers
 	void AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
