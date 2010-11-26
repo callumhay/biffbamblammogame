@@ -1,0 +1,11 @@
+#Fri Nov 26 00:36:49 EST 2010
+net.sf.eclipsensis.installoptions.fix_problems=net.sf.eclipsensis.installoptions.fix_all
+net.sf.eclipsensis.installoptions.arrange=net.sf.eclipsensis.installoptions.align.bring.forward
+PreviewLang=English
+eclipse.preferences.version=1
+net.sf.eclipsensis.installoptions.distribute=net.sf.eclipsensis.installoptions.distribute.horizontal.between
+net.sf.eclipsensis.installoptions.matchsize=org.eclipse.gef.match.width
+net.sf.eclipsensis.installoptions.preview=net.sf.eclipsensis.installoptions.preview_mui
+net.sf.eclipsensis.installoptions.align=org.eclipse.gef.align_left
+PaletteViewerPrefsInit=true
+SyntaxStyles=CommentStyle\#127,159,191||false|true|false|false\u00FFSectionStyle\#0,80,80||true|false|false|false\u00FFKeyStyle\#0,0,255||false|false|false|false\u00FFKeyValueDelimStyle\#255,0,0||false|false|false|false\u00FFNumberStyle\#97,49,30||true|false|false|false
