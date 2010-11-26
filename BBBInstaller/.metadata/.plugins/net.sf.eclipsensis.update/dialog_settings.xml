@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="net.sf.eclipsensis.update.wizard.NSISUpdateWizard">
+		<item value="0" key="updateAction"/>
+		<item value="false" key="ignorePreview"/>
+	</section>
+</section>
