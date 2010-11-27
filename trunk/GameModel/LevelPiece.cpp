@@ -133,14 +133,19 @@ void LevelPiece::RemoveStatus(const PieceStatus& status) {
 }
 
 void LevelPiece::RemoveStatuses(int32_t statusMask) {
+	bool statusFound = false;
 	// Go through each status and remove it...
 	if ((statusMask & LevelPiece::OnFireStatus) == LevelPiece::OnFireStatus) {
 		this->RemoveStatus(LevelPiece::OnFireStatus);
+		statusFound = true;
+	}
+	if ((statusMask & LevelPiece::IceCubeStatus) == LevelPiece::IceCubeStatus) {
+		this->RemoveStatus(LevelPiece::IceCubeStatus);
+		statusFound = true;
 	}
 	//... TODO for each other status
-	else {
-		assert(false);
-	}
+
+	assert(statusFound);
 }
 
 void LevelPiece::RemoveAllStatus() {
@@ -154,4 +159,38 @@ void LevelPiece::RemoveAllStatus() {
 
 	// EVENT: All status effects removed from this piece...
 	GameEventManager::Instance()->ActionLevelPieceAllStatusRemoved(*this);
+}
+
+// Helper function used to light this piece on fire - ONLY CALL THIS IF YOU CAN ACTUALLY
+// PLACE AN ONFIRE STATUS ON THIS BLOCK!!!
+void LevelPiece::LightPieceOnFire(GameModel* gameModel) {
+		// If this piece is currently in an ice cube then just melt the ice cube but don't
+		// make the block catch on fire...
+		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+			assert(success);
+		}
+		else {
+			// The ball is on fire, and so we'll make this piece catch fire too...
+			// The fire will eat away at the block over time
+			this->AddStatus(LevelPiece::OnFireStatus);
+			gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::OnFireStatus);
+		}
+}
+
+// Helper function used to freeze this piece in an ice block - ONLY CALL THIS IF YOU CAN ACTUALLY
+// PLACE AN ICECUBE STATUS ON THIS BLOCK!!!
+void LevelPiece::FreezePieceInIce(GameModel* gameModel) {
+		// If this piece is currently on fire then the ice will cancel with the fire and
+		// the piece will no longer be on fire
+		if (this->HasStatus(LevelPiece::OnFireStatus)) {
+			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::OnFireStatus);
+			assert(success);
+		}
+		else {
+			// The ball is icy, encapsulate this piece in an ice cube, this will make the ball take
+			// have to hit this piece once more in order to destroy it...
+			this->AddStatus(LevelPiece::IceCubeStatus);
+			gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::IceCubeStatus);
+		}
 }

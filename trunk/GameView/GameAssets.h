@@ -16,6 +16,7 @@
 #include "../BlammoEngine/Animation.h"
 
 #include "../GameModel/GameWorld.h"
+#include "../GameModel/GameLevel.h"
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/GameBall.h"
 #include "../GameModel/PlayerPaddle.h"
@@ -31,6 +32,7 @@
 #include "GameFBOAssets.h"
 #include "GameLightAssets.h"
 #include "RandomToItemAnimation.h"
+#include "LevelMesh.h"
 
 class GameModel;
 class Texture3D;
@@ -115,6 +117,7 @@ public:
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const Camera& camera);
+	void DrawStatusEffects(double dT, const Camera& camera);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
 	void DrawTimers(double dT, const Camera& camera);
 
@@ -174,6 +177,26 @@ public:
 // Draw any currently active tesla lightning bolts in the game.
 inline void GameAssets::DrawTeslaLightning(double dT, const Camera& camera) {
 	this->espAssets->DrawTeslaLightningArcs(dT, camera);
+}
+
+// Draw the foreground level pieces...
+inline void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
+	Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
+
+	BasicPointLight fgKeyLight, fgFillLight, ballLight;
+	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
+}
+
+inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera) {
+	BasicPointLight fgKeyLight, fgFillLight, ballLight;
+	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+	this->GetCurrentLevelMesh()->DrawSafetyNet(dT, camera, fgKeyLight, fgFillLight, ballLight);
+}
+
+// Draw the block status effects
+inline void GameAssets::DrawStatusEffects(double dT, const Camera& camera) {
+	this->GetCurrentLevelMesh()->DrawStatusEffects(dT, camera, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
 }
 
 #endif

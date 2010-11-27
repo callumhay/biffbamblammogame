@@ -78,8 +78,10 @@ TEXTURE_HUGE_EXPLOSION(TEXTURE_DIRECTORY "/huge_explosion_512x256.png"),
 TEXTURE_BRIGHT_FLARE(TEXTURE_DIRECTORY "/flare_64x64.png"),
 TEXTURE_LIGHTNING_BOLT(TEXTURE_DIRECTORY "/LightningBolt_32x64.png"),
 TEXTURE_SPHERE_NORMALS(TEXTURE_DIRECTORY "/SphereNormals_128x128.png"),
+TEXTURE_RECT_PRISM_NORMALS(TEXTURE_DIRECTORY "/rect_prism_normals_64x32.jpg"),
 TEXTURE_CLOUD(TEXTURE_DIRECTORY "/Cloud_64x64.png"),
 TEXTURE_GRIT(TEXTURE_DIRECTORY "/Grit_64x64.png"),
+TEXTURE_FROST(TEXTURE_DIRECTORY "/frost_128x64.png"),
 
 TEXTURE_STARFIELD(TEXTURE_DIRECTORY "/starfield_1024x1024.jpg"),
 
@@ -121,6 +123,7 @@ TEXTURE_ITEM_PADDLEROCKET(TEXTURE_DIRECTORY "/paddlerocket_powerup256x128.jpg"),
 TEXTURE_ITEM_CRAZYBALL(TEXTURE_DIRECTORY    "/crazyball_powerneutral256x128.jpg"),
 TEXTURE_ITEM_SHIELDPADDLE(TEXTURE_DIRECTORY "/shieldpaddle_powerneutral_256x128.jpg"),
 TEXTURE_ITEM_FIREBALL(TEXTURE_DIRECTORY			"/fireball_powerneutral256x128.jpg"),
+TEXTURE_ITEM_ICEBALL(TEXTURE_DIRECTORY			"/iceball_powerneutral_256x128.jpg"),
 TEXTURE_ITEM_RANDOM(TEXTURE_DIRECTORY       "/random_powerneutral_256x128.jpg"),
 
 // Item Timer (Outline) Texture Asset Paths
@@ -138,6 +141,7 @@ TEXTURE_ITEM_TIMER_EYE(TEXTURE_DIRECTORY					"/cam_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_GRAVITYBALL(TEXTURE_DIRECTORY	"/gravityball_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_SHIELDPADDLE(TEXTURE_DIRECTORY "/shieldpaddle_timer_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FIREBALL(TEXTURE_DIRECTORY			"/fireball_timer_hud256x128.png"),
+TEXTURE_ITEM_TIMER_ICEBALL(TEXTURE_DIRECTORY			"/iceball_timer_hud256x128.png"),
 
 // Item Timer (Fill) Texture Asset Paths
 TEXTURE_ITEM_TIMER_FILLER_SPDBALL(TEXTURE_DIRECTORY				"/ballspeed_timer_fill_hud256x128.png"),
@@ -153,6 +157,7 @@ TEXTURE_ITEM_TIMER_FILLER_EYE(TEXTURE_DIRECTORY						"/cam_timer_fill_hud256x128
 TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL(TEXTURE_DIRECTORY	  "/gravityball_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_SHIELDPADDLE(TEXTURE_DIRECTORY  "/shieldpaddle_timer_fill_hud256x128.png"),
 TEXTURE_ITEM_TIMER_FILLER_FIREBALL(TEXTURE_DIRECTORY      "/fireball_timer_fill_hud256x128.png"),
+TEXTURE_ITEM_TIMER_FILLER_ICEBALL(TEXTURE_DIRECTORY       "/iceball_timer_fill_hud256x128.png"),
 
 // Font Asset Paths
 FONT_SADBAD(FONT_DIRECTORY				"/sadbad.ttf"),
@@ -265,6 +270,7 @@ void GameViewConstants::InitItemTextures() {
 	this->itemTextures.insert(std::make_pair(GameItem::CrazyBallItem,						this->TEXTURE_ITEM_CRAZYBALL));
 	this->itemTextures.insert(std::make_pair(GameItem::ShieldPaddleItem,				this->TEXTURE_ITEM_SHIELDPADDLE));
 	this->itemTextures.insert(std::make_pair(GameItem::FireBallItem,						this->TEXTURE_ITEM_FIREBALL));
+	this->itemTextures.insert(std::make_pair(GameItem::IceBallItem,							this->TEXTURE_ITEM_ICEBALL));
 	this->itemTextures.insert(std::make_pair(GameItem::RandomItem,							this->TEXTURE_ITEM_RANDOM));
 }
 
@@ -284,6 +290,7 @@ void GameViewConstants::InitItemTimerTextures() {
 	this->itemTimerTextures.insert(std::make_pair(GameItem::GravityBallItem,				this->TEXTURE_ITEM_TIMER_GRAVITYBALL));
 	this->itemTimerTextures.insert(std::make_pair(GameItem::ShieldPaddleItem,				this->TEXTURE_ITEM_TIMER_SHIELDPADDLE));
 	this->itemTimerTextures.insert(std::make_pair(GameItem::FireBallItem,						this->TEXTURE_ITEM_TIMER_FIREBALL));
+	this->itemTimerTextures.insert(std::make_pair(GameItem::IceBallItem,						this->TEXTURE_ITEM_TIMER_ICEBALL));
 }
 
 void GameViewConstants::InitItemTimerFillerTextures() {
@@ -302,6 +309,7 @@ void GameViewConstants::InitItemTimerFillerTextures() {
 	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::GravityBallItem,				this->TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL));
 	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::ShieldPaddleItem,				this->TEXTURE_ITEM_TIMER_FILLER_SHIELDPADDLE));
 	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::FireBallItem,						this->TEXTURE_ITEM_TIMER_FILLER_FIREBALL));
+	this->itemTimerFillerTextures.insert(std::make_pair(GameItem::IceBallItem,						this->TEXTURE_ITEM_TIMER_FILLER_ICEBALL));
 }
 
 GameViewConstants::~GameViewConstants() {

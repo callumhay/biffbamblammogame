@@ -11,7 +11,6 @@
 
 #include "GameAssets.h"
 #include "GameDisplay.h"
-#include "LevelMesh.h"
 #include "GameViewConstants.h"
 #include "CgFxPostRefract.h"
 #include "CgFxVolumetricEffect.h"
@@ -175,20 +174,6 @@ GameAssets::~GameAssets() {
 	this->flashHUD = NULL;
 }
 
-// Draw the foreground level pieces...
-void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera) {
-	Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
-
-	BasicPointLight fgKeyLight, fgFillLight, ballLight;
-	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
-}
-
-void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera) {
-	BasicPointLight fgKeyLight, fgFillLight, ballLight;
-	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	this->GetCurrentLevelMesh()->DrawSafetyNet(dT, camera, fgKeyLight, fgFillLight, ballLight);
-}
 
 // Draw the game's ball (the thing that bounces and blows stuff up), position it, 
 // draw the materials and draw the mesh.

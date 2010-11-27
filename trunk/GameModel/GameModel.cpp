@@ -815,8 +815,8 @@ bool GameModel::AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::Piece
 	std::map<LevelPiece*, int32_t>::iterator findIter = this->statusUpdatePieces.find(p);
 	if (findIter == this->statusUpdatePieces.end()) {
 		// Nothing was found, add a new entry for the piece with the given status...
+		p->AddStatus(status);
 		this->statusUpdatePieces.insert(std::make_pair(p, static_cast<int32_t>(status)));
-		assert(p->HasStatus(status));
 		return true;
 	}
 
@@ -827,6 +827,30 @@ bool GameModel::AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::Piece
 	}
 
 	findIter->second = (findIter->second | status);
+	return true;
+}
+
+bool GameModel::RemoveStatusForLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status) {
+	assert(p != NULL);
+
+	// First try to find the level piece among existing level pieces with status updates
+	std::map<LevelPiece*, int32_t>::iterator findIter = this->statusUpdatePieces.find(p);
+	if (findIter == this->statusUpdatePieces.end()) {
+		return false;
+	}
+	// Make sure the status is currently being applied to the piece
+	if ((findIter->second & status) != status) {
+		return false;
+	}
+
+	// Remove the status, if all statuses are removed by doing this then remove the piece
+	// from the status update map
+	findIter->second = (findIter->second & ~status);
+	findIter->first->RemoveStatus(status);
+	if (findIter->second == static_cast<int32_t>(LevelPiece::NormalStatus)) {
+		this->statusUpdatePieces.erase(findIter);
+	}
+
 	return true;
 }
 

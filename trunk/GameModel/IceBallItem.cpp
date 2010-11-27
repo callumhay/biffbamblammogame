@@ -1,5 +1,5 @@
 /**
- * FireBallItem.cpp
+ * IceBallItem.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
  * Callum Hay, 2009
@@ -9,22 +9,22 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#include "FireBallItem.h"
+#include "IceBallItem.h"
 
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
-const double FireBallItem::FIRE_BALL_TIMER_IN_SECS	= 22.0;
-const char* FireBallItem::FIRE_BALL_ITEM_NAME			  = "FireBall";
+const double IceBallItem::ICE_BALL_TIMER_IN_SECS	= 22.0;
+const char* IceBallItem::ICE_BALL_ITEM_NAME			  = "IceBall";
 
-FireBallItem::FireBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
-GameItem(FIRE_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
+IceBallItem::IceBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
+GameItem(ICE_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
 }
 
-FireBallItem::~FireBallItem() {
+IceBallItem::~IceBallItem() {
 }
 
-double FireBallItem::Activate() {
+double IceBallItem::Activate() {
 	this->isActive = true;
 
 	// Kill other fire ball timers
@@ -32,14 +32,14 @@ double FireBallItem::Activate() {
 	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end();) {
 		GameItemTimer* currTimer = *iter;
 
-		// Remove the fire ball timers from the list of active timers
-		if (currTimer->GetTimerItemType() == GameItem::FireBallItem) {
+		// Remove the gravity ball timers from the list of active timers
+		if (currTimer->GetTimerItemType() == GameItem::IceBallItem) {
 			iter = activeTimers.erase(iter);
 			delete currTimer;
 			currTimer = NULL;
 		}
-		else if (currTimer->GetTimerItemType() == GameItem::IceBallItem) {
-			// If there's an ice ball item going right now then the effects just cancel each other out
+		else if (currTimer->GetTimerItemType() == GameItem::FireBallItem) {
+			// If there's a fire ball item going right now then the effects just cancel each other out
 			iter = activeTimers.erase(iter);
 			delete currTimer;
 			currTimer = NULL;
@@ -54,13 +54,13 @@ double FireBallItem::Activate() {
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
 	GameBall* affectedBall = *gameBalls.begin();
 	assert(affectedBall != NULL);
-	affectedBall->AddBallType(GameBall::FireBall);
+	affectedBall->AddBallType(GameBall::IceBall);
 
 	GameItem::Activate();
-	return FireBallItem::FIRE_BALL_TIMER_IN_SECS;
+	return IceBallItem::ICE_BALL_TIMER_IN_SECS;
 }
 
-void FireBallItem::Deactivate() {
+void IceBallItem::Deactivate() {
 	if (!this->isActive) {
 		return;
 	}
@@ -70,7 +70,7 @@ void FireBallItem::Deactivate() {
 	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		assert(currBall != NULL);	
-		currBall->RemoveBallType(GameBall::FireBall);
+		currBall->RemoveBallType(GameBall::IceBall);
 	}
 
 	this->isActive = false;

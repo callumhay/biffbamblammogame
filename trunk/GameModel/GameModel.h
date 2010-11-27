@@ -384,7 +384,9 @@ public:
 	void AddItemDrop(const LevelPiece& p, const GameItem::ItemType& itemType);
 	void AddProjectile(Projectile* projectile);
 	void AddBeam(int beamType);
+
 	bool AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status);
+	bool RemoveStatusForLevelPiece(LevelPiece* p, const LevelPiece::PieceStatus& status);
 
 	// Debug functions
 #ifdef _DEBUG

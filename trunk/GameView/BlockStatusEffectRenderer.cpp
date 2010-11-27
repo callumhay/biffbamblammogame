@@ -20,17 +20,27 @@
 #include "../ResourceManager.h"
 
 BlockStatusEffectRenderer::BlockStatusEffectRenderer() :
-fireMiasma(NULL),
 fireColourEffector(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 semiFaderEffector(1.0f, 0.1f), 
 fullFaderEffector(1.0f, 0.0f),
 particleLargeGrowth(1.0f, 2.3f),
 particleMediumGrowth(1.0f, 1.85f),
 smokeRotatorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
-smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE) {
+smokeRotatorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
+gritTexture(NULL),
+cloudTexture(NULL),
+rectPrismTexture(NULL),
+frostTexture(NULL) {
+
 	this->SetupTextures();
+
 	this->fireEffect.SetTechnique(CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME);
-	this->fireEffect.SetMaskTexture(this->fireMiasma);
+	this->fireEffect.SetMaskTexture(this->cloudTexture);
+
+	this->iceBlockEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
+	this->iceBlockEffect.SetWarpAmountParam(50.0f);
+	this->iceBlockEffect.SetIndexOfRefraction(1.33f);
+	this->iceBlockEffect.SetNormalTexture(this->rectPrismTexture);
 }
 
 BlockStatusEffectRenderer::~BlockStatusEffectRenderer() {
@@ -60,9 +70,13 @@ BlockStatusEffectRenderer::~BlockStatusEffectRenderer() {
 	}
 	this->smokePuffTextures.clear();
 
-	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->fireMiasma);
+	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTexture);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->gritTexture);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->rectPrismTexture);
+	assert(removed);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->frostTexture);
 	assert(removed);
 }
 
@@ -96,6 +110,12 @@ void BlockStatusEffectRenderer::AddLevelPieceStatus(const LevelPiece& piece, con
 			emitterList.push_back(this->BuildBlockOnFireFlameEffect(piece, false));
 			emitterList.push_back(this->BuildBlockOnFireFlameEffect(piece, true));
 			break;
+
+		case LevelPiece::IceCubeStatus:
+			emitterList.push_back(this->BuildIceBlockEffect(piece));
+			emitterList.push_back(this->BuildIceBlockFrost(piece));
+			break;
+
 		default:
 			assert(false);
 			return;
@@ -168,7 +188,8 @@ void BlockStatusEffectRenderer::RemoveAllLevelPieceStatus(const LevelPiece& piec
 	this->pieceStatusEffects.erase(findPieceIter);
 }
 
-void BlockStatusEffectRenderer::Draw(double dT, const Camera& camera) {
+void BlockStatusEffectRenderer::Draw(double dT, const Camera& camera, const Texture2D* sceneTexture) {
+	this->iceBlockEffect.SetFBOTexture(sceneTexture);
 
 	for (PieceStatusEffectMap::iterator iter = this->pieceStatusEffects.begin(); iter != this->pieceStatusEffects.end(); ++iter) {
 		StatusEffectMap& effectMap = iter->second;
@@ -207,11 +228,21 @@ void BlockStatusEffectRenderer::SetupTextures() {
 	assert(temp != NULL);
 	this->smokePuffTextures.push_back(temp);	
 
-	this->fireMiasma = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
-	assert(this->fireMiasma != NULL);
+	assert(this->cloudTexture == NULL);
+	this->cloudTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
+	assert(this->cloudTexture != NULL);
 
+	assert(this->gritTexture == NULL);
 	this->gritTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_GRIT, Texture::Trilinear));
 	assert(this->gritTexture != NULL);
+
+	assert(this->rectPrismTexture == NULL);
+	this->rectPrismTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_RECT_PRISM_NORMALS, Texture::Trilinear));
+	assert(this->rectPrismTexture != NULL);
+
+	assert(this->frostTexture == NULL);
+	this->frostTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FROST, Texture::Trilinear));
+	assert(this->frostTexture != NULL);
 }
 
 ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireFlameEffect(const LevelPiece& piece, bool spinCW) {
@@ -286,4 +317,32 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireScortchEffect(const 
 	scortchEffect->SetEmitPosition(Point3D(piece.GetCenter()));
 	scortchEffect->SetParticles(1, this->gritTexture);
 	return scortchEffect;
+}
+
+ESPPointEmitter* BlockStatusEffectRenderer::BuildIceBlockEffect(const LevelPiece& piece) {
+	ESPPointEmitter* iceCubeEffect = new ESPPointEmitter();
+	iceCubeEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+	iceCubeEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(0.85f), ESPInterval(1.0f), ESPInterval(1.0f));
+	iceCubeEffect->SetInitialSpd(ESPInterval(0.0f));
+	iceCubeEffect->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+	iceCubeEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH), ESPInterval(LevelPiece::PIECE_HEIGHT));
+	iceCubeEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	iceCubeEffect->SetParticleAlignment(ESP::ScreenAligned);
+	iceCubeEffect->SetEmitPosition(Point3D(piece.GetCenter()));
+	iceCubeEffect->SetParticles(1, &this->iceBlockEffect);
+	return iceCubeEffect;
+}
+
+ESPPointEmitter* BlockStatusEffectRenderer::BuildIceBlockFrost(const LevelPiece& piece) {
+	ESPPointEmitter* frostEffect = new ESPPointEmitter();
+	frostEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+	frostEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(0.85f), ESPInterval(1.0f), ESPInterval(1.0f));
+	frostEffect->SetInitialSpd(ESPInterval(0.0f));
+	frostEffect->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
+	frostEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH), ESPInterval(LevelPiece::PIECE_HEIGHT));
+	frostEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	frostEffect->SetParticleAlignment(ESP::ScreenAligned);
+	frostEffect->SetEmitPosition(Point3D(piece.GetCenter()));
+	frostEffect->SetParticles(1, this->frostTexture);
+	return frostEffect;
 }

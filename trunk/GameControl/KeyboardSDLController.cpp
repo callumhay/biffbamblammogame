@@ -18,17 +18,17 @@ KeyboardSDLController::~KeyboardSDLController() {
 }
 
 bool KeyboardSDLController::ProcessState() {
-	SDL_Event event;
+	SDL_Event keyEvent;
 	// Grab all the events off the queue
-	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
+	while (SDL_PollEvent(&keyEvent)) {
+		switch (keyEvent.type) {
 
 			case SDL_KEYDOWN:
-				this->KeyDown(event.key.keysym.sym);
+				this->KeyDown(keyEvent.key.keysym.sym);
 				break;
 
 			case SDL_KEYUP:
-				this->KeyUp(event.key.keysym.sym);
+				this->KeyUp(keyEvent.key.keysym.sym);
 				break;
 
 			case SDL_QUIT:
@@ -112,6 +112,7 @@ void KeyboardSDLController::ExecuteDisplayKeyPressedNotifications(SDLKey key) {
 		case SDLK_RETURN:
 			this->display->ButtonPressed(GameControl::EnterButtonAction);
 			break;
+
 		case SDLK_ESCAPE:
 			this->display->ButtonPressed(GameControl::EscapeButtonAction);
 			break;
@@ -264,7 +265,9 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
 	else if (key == SDLK_u) {
 		this->model->DropItem(GameItem::UberBallItem);
 	}
-	// v
+	else if (key == SDLK_v) {
+		this->model->DropItem(GameItem::IceBallItem);
+	}
 	else if (key == SDLK_w) {
 		GameDisplay::ToggleDrawDebugBounds();
 	}
