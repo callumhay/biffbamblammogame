@@ -100,8 +100,10 @@ public:
 	const char* TEXTURE_BRIGHT_FLARE;
 	const char* TEXTURE_LIGHTNING_BOLT;
 	const char* TEXTURE_SPHERE_NORMALS;
+	const char* TEXTURE_RECT_PRISM_NORMALS;
 	const char* TEXTURE_CLOUD;
 	const char* TEXTURE_GRIT;
+	const char* TEXTURE_FROST;
 
 	const char* TEXTURE_STARFIELD;
 	
@@ -237,9 +239,9 @@ private:
 	const char* TEXTURE_ITEM_CRAZYBALL;
 	const char* TEXTURE_ITEM_SHIELDPADDLE;
 	const char* TEXTURE_ITEM_FIREBALL;
+	const char* TEXTURE_ITEM_ICEBALL;
 	const char* TEXTURE_ITEM_RANDOM;
 	
-
 	const char* TEXTURE_ITEM_TIMER_SLOWBALL;
 	const char* TEXTURE_ITEM_TIMER_FASTBALL;
 	const char* TEXTURE_ITEM_TIMER_UBERBALL;
@@ -254,6 +256,7 @@ private:
 	const char* TEXTURE_ITEM_TIMER_GRAVITYBALL;
 	const char* TEXTURE_ITEM_TIMER_SHIELDPADDLE;
 	const char* TEXTURE_ITEM_TIMER_FIREBALL;
+	const char* TEXTURE_ITEM_TIMER_ICEBALL;
 	
 	const char* TEXTURE_ITEM_TIMER_FILLER_SPDBALL;
 	const char* TEXTURE_ITEM_TIMER_FILLER_UBERBALL;
@@ -268,6 +271,7 @@ private:
 	const char* TEXTURE_ITEM_TIMER_FILLER_GRAVITYBALL;
 	const char* TEXTURE_ITEM_TIMER_FILLER_SHIELDPADDLE;
 	const char* TEXTURE_ITEM_TIMER_FILLER_FIREBALL;
+	const char* TEXTURE_ITEM_TIMER_FILLER_ICEBALL;
 
 	// Disallow copy and assign
 	GameViewConstants(const GameViewConstants& g);

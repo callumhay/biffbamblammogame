@@ -21,6 +21,7 @@
 #include "../GameModel/LevelPiece.h"
 
 #include "BlockStatusEffectRenderer.h"
+#include "BallSafetyNetMesh.h"
 
 class GameWorldAssets;
 class GameItemAssets;
@@ -47,6 +48,7 @@ public:
 	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
 									const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
 	void DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const;
+	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
 
 	void LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 
@@ -115,5 +117,24 @@ inline void LevelMesh::LevelPieceAllStatusRemoved(const LevelPiece& piece) {
 	this->statusEffectRenderer->RemoveAllLevelPieceStatus(piece);
 }
 
+/**
+ * Draw the ball safety net if it is currently active in the game (this
+ * appears at the bottom of the level).
+ */
+inline void LevelMesh::DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, 
+																		 const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
+	// If the ball safety net is active then we draw it
+	assert(this->currLevel != NULL);
+	if (this->currLevel->IsBallSafetyNetActive() || this->ballSafetyNet->IsPlayingAnimation()) {
+		glPushMatrix();
+		glTranslatef(-this->currLevel->GetLevelUnitWidth() / 2.0f, -(this->currLevel->GetLevelUnitHeight() / 2.0f + LevelPiece::HALF_PIECE_HEIGHT), 0.0f);
+		this->ballSafetyNet->Draw(dT, camera, keyLight, fillLight, ballLight);
+		glPopMatrix();
+	}
+}
+
+inline void LevelMesh::DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture) {
+	this->statusEffectRenderer->Draw(dT, camera, sceneTexture);
+}
 
 #endif

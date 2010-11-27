@@ -34,21 +34,28 @@ numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(
 	this->itemLoadingLabel.SetDropShadow(Colour(0,0,0), 0.05);
 
 	// Load the absurd descriptions...
-	this->absurdLoadingDescriptions.reserve(6);
+	this->absurdLoadingDescriptions.reserve(30);
 	this->absurdLoadingDescriptions.push_back("Generating mind-numbing onamotapoeia ...");
 	this->absurdLoadingDescriptions.push_back("Initializing blocky stuffs ...");
 	this->absurdLoadingDescriptions.push_back("Loading balls of doom ...");
 	this->absurdLoadingDescriptions.push_back("Loading extraneous punctuation ...");
 	this->absurdLoadingDescriptions.push_back("Pulling Levers ...");
 	this->absurdLoadingDescriptions.push_back("Pushing buttons ...");
+	this->absurdLoadingDescriptions.push_back("Twisting knobs ...");
+	this->absurdLoadingDescriptions.push_back("Making breakfast ...");
+	this->absurdLoadingDescriptions.push_back("Composing Musak ...");
 	this->absurdLoadingDescriptions.push_back("Generating distracting colours ...");
 	this->absurdLoadingDescriptions.push_back("Baking cake ...");
 	this->absurdLoadingDescriptions.push_back("Eating cake ... Om nom nom");
 	this->absurdLoadingDescriptions.push_back("Compiling sounds to words ...");
 	this->absurdLoadingDescriptions.push_back("Contacting Skynet ...");
+	this->absurdLoadingDescriptions.push_back("Doing... stuff ...");
 	this->absurdLoadingDescriptions.push_back("Communicating with the MCP ...");
-	this->absurdLoadingDescriptions.push_back("Nomming your cpu ...");
-	this->absurdLoadingDescriptions.push_back("Affixing suffixes and prefixes...");
+	this->absurdLoadingDescriptions.push_back("Reconciling Quantum Mechanics and Relativity ...");
+	this->absurdLoadingDescriptions.push_back("Deploying Nanotubes ...");
+	this->absurdLoadingDescriptions.push_back("Loading moderately relevant things ...");
+	this->absurdLoadingDescriptions.push_back("Nomming your CPU ...");
+	this->absurdLoadingDescriptions.push_back("Affixing suffixes and prefixes ...");
 
 	this->lastRandomAbsurdity = Randomizer::GetInstance()->RandomUnsignedInt() % this->absurdLoadingDescriptions.size();
 

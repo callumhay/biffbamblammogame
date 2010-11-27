@@ -36,7 +36,7 @@ public:
 	enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 7, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 22, FastestSpeed = 27 };
 	enum BallSize  { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 	enum BallType  { NormalBall = 0x00000000, UberBall = 0x00000001,  InvisiBall = 0x00000002, GhostBall = 0x00000004, 
-		               GraviBall = 0x00000008,  CrazyBall = 0x00000010, FireBall = 0x00000020 };
+		               GraviBall = 0x00000008,  CrazyBall = 0x00000010, FireBall = 0x00000020, IceBall = 0x00000040 };
 	
 	// Default radius of the ball
 	static const float DEFAULT_BALL_RADIUS;

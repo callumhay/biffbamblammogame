@@ -132,7 +132,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 				if (!projectile->IsLastLevelPieceCollidedWith(this)) {
 
 					// Obtain all the normals of the lines that the projectile is colliding with...
-					std::vector<int> collidingIndices = this->bounds.CollisionCheckIndices(projectile->BuildBoundingLines());
+					std::vector<int> collidingIndices = this->reflectRefractBounds.CollisionCheckIndices(projectile->BuildBoundingLines());
 					Vector2D collisionNormal;
 
 					if (collidingIndices.size() == 2) {
@@ -140,17 +140,17 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 						// colliding with the projectile, we need to reconcile this...
 
 						// Just figure out which normal is closest to the negative velocity of the projectile and use it
-						Vector2D normal0 = this->bounds.GetNormal(collidingIndices[0]);
-						Vector2D normal1 = this->bounds.GetNormal(collidingIndices[1]);
+						Vector2D normal0 = this->reflectRefractBounds.GetNormal(collidingIndices[0]);
+						Vector2D normal1 = this->reflectRefractBounds.GetNormal(collidingIndices[1]);
 
 						float angleBetween0 = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), normal0)))));
 						float angleBetween1 = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), normal1)))));
 
 						if (angleBetween0 < angleBetween1) {
-							collisionNormal = this->bounds.GetNormal(collidingIndices[0]);
+							collisionNormal = this->reflectRefractBounds.GetNormal(collidingIndices[0]);
 						}
 						else {
-							collisionNormal = this->bounds.GetNormal(collidingIndices[1]);
+							collisionNormal = this->reflectRefractBounds.GetNormal(collidingIndices[1]);
 						}
 
 					}
@@ -160,11 +160,12 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 					}
 					else {
 						// Just one collision line, use it
-						collisionNormal = this->bounds.GetNormal(collidingIndices[0]);
+						collisionNormal = this->reflectRefractBounds.GetNormal(collidingIndices[0]);
 					}
 
 					// Send the laser flying out the hypotenuse side if it hit within a certain angle
-					const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), collisionNormal)))));
+					const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(std::min<float>(1.0f, 
+																					 std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), collisionNormal)))));
 					const float CUTOFF_ANGLE			 = 15.0f;
 
 					// Check to see if the collision was within the cut-off angle, if the laser

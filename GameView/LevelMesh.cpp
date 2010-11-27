@@ -14,7 +14,6 @@
 #include "GameViewConstants.h"
 #include "GameWorldAssets.h"
 #include "GameItemAssets.h"
-#include "BallSafetyNetMesh.h"
 #include "PrismBlockMesh.h"
 #include "PortalBlockMesh.h"
 #include "CannonBlockMesh.h"
@@ -395,8 +394,6 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 
-	// Draw the piece effects and statuses
-	this->statusEffectRenderer->Draw(dT, camera);
 	glPopMatrix();
 
 	ESPEmitter* emitter = NULL;
@@ -411,21 +408,6 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 		}
 	}
 
-}
-
-/**
- * Draw the ball safety net if it is currently active in the game (this
- * appears at the bottom of the level).
- */
-void LevelMesh::DrawSafetyNet(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
-	// If the ball safety net is active then we draw it
-	assert(this->currLevel != NULL);
-	if (this->currLevel->IsBallSafetyNetActive() || this->ballSafetyNet->IsPlayingAnimation()) {
-		glPushMatrix();
-		glTranslatef(-this->currLevel->GetLevelUnitWidth() / 2.0f, -(this->currLevel->GetLevelUnitHeight() / 2.0f + LevelPiece::HALF_PIECE_HEIGHT), 0.0f);
-		this->ballSafetyNet->Draw(dT, camera, keyLight, fillLight, ballLight);
-		glPopMatrix();
-	}
 }
 
 /**

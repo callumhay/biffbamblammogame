@@ -140,27 +140,34 @@ LevelPiece* BreakableBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel* 
 LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	assert(gameModel != NULL);
 
-	// If the ball is an 'uber' ball then we decrement the piece type twice when it is
-	// not the lowest kind of breakable block (i.e., green)
-	bool isUberBall = ((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall);
-	if (isUberBall && this->pieceType != GreenBreakable) {
-		this->DecrementPieceType();
-	}
-	
 	LevelPiece* newPiece = this;
 	
 	// If the ball is an uber ball with fire or a ball without fire, then we dimish the piece,
 	// otherwise we apply the "on fire" status to the piece and leave it at that
 	bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
-	if (isUberBall || !isFireBall) {
-		newPiece = this->DiminishPiece(gameModel);
+	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
+	if (!isFireBall && !isIceBall) {
+		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			// If the piece is frozen it shatters and is immediately destroyed on ball impact
+			newPiece = this->Destroy(gameModel);
+		}
+		else {
+			bool isUberBall = ((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall);
+
+			// If the ball is an 'uber' ball then we decrement the piece type twice when it is
+			// not the lowest kind of breakable block (i.e., green)
+			if (isUberBall && this->pieceType != GreenBreakable) {
+				this->DecrementPieceType();
+			}
+
+			newPiece = this->DiminishPiece(gameModel);
+		}
 	}
-	else {
-		// The ball is on fire, and so we'll make this piece catch fire too...
-		// The fire will eat away at the block over time
-		assert(isFireBall);
-		this->AddStatus(LevelPiece::OnFireStatus);
-		gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::OnFireStatus);
+	else if (isFireBall) {
+		this->LightPieceOnFire(gameModel);
+	}
+	else if (isIceBall) {
+		this->FreezePieceInIce(gameModel);
 	}
 
 	ball.SetLastPieceCollidedWith(NULL);
@@ -179,6 +186,8 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 	switch (projectile->GetType()) {
 	
 		case Projectile::PaddleLaserBulletProjectile:
+			// TODO: Deal with case where the piece is frozen in an ice cube...
+				
 			// Laser bullets just dimish the piece, but don't necessarily obliterated/destroy it
 			newPiece = this->DiminishPiece(gameModel);
 			break;
@@ -194,9 +203,8 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 
 		case Projectile::FireGlobProjectile:
 			if (!projectile->IsLastLevelPieceCollidedWith(this)) {
-				// This piece catches on fire...
-				this->AddStatus(LevelPiece::OnFireStatus);
-				gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::OnFireStatus);
+				// This piece may catch on fire...
+				this->LightPieceOnFire(gameModel);
 			}
 			break;
 
@@ -220,7 +228,8 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 	int32_t currPieceStatus = this->pieceStatus;
 
 	// If this piece is on fire then we slowly eat away at it with fire...
-	if ((this->pieceStatus & LevelPiece::OnFireStatus) == LevelPiece::OnFireStatus) {
+	if (this->HasStatus(LevelPiece::OnFireStatus)) {
+		assert(!this->HasStatus(LevelPiece::IceCubeStatus));
 		// Blocks on fire have a (very small) chance of dropping a glob of flame over some time...
 		this->fireGlobTimeCounter += dT;
 		if (this->fireGlobTimeCounter >= GameModelConstants::GetInstance()->FIRE_GLOB_DROP_CHANCE_INTERVAL) {
@@ -250,7 +259,11 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 		// Technically if the above destroys the block then the block automatically loses all of its status
 		// this is done in the destructor of LevelPiece
 	}
-	
+	//else if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+	//	assert(!this->HasStatus(LevelPiece::OnFireStatus));
+	//  // ... There's no tick activity for ice cubes
+	//}
+
 	// If this piece has been destroyed during this tick then we need to return all the
 	// status effects that were previously making it tick
 	if (resultingPiece != this) {

@@ -53,6 +53,7 @@ public:
 									CrazyBallItem, 
 									ShieldPaddleItem,
 									FireBallItem,
+									IceBallItem,
 									
 									RandomItem // MAKE SURE RANDOM ITEM IS ALWAYS THE LAST ONE!!
 	};

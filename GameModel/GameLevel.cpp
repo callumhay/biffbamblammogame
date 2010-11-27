@@ -649,9 +649,16 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					GameLevel::CleanUpFileReadData(levelPieces);
 					return NULL;
 			}
-			assert(newPiece != NULL);
+			if (newPiece == NULL) {
+				assert(false);
+				debug_output("ERROR: Invalid level piece found.");
+				delete inFile;
+				inFile = NULL;
+				GameLevel::CleanUpFileReadData(levelPieces);
+				return NULL;
+			}
+
 			currentRowPieces.push_back(newPiece);
-	
 			if (newPiece->MustBeDestoryedToEndLevel()) {
 				numVitalPieces++;
 			}

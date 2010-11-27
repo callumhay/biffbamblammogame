@@ -4,7 +4,7 @@
 	Version="9.00"
 	Name="BiffBamBlammo"
 	ProjectGUID="{8678CEF2-B783-4BC0-90DD-DB71854CF646}"
-	RootNamespace="SDLTest"
+	RootNamespace="BiffBamBlammo"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(SolutionDir)include/physfs&quot;;&quot;$(SolutionDir)include/zlib&quot;;&quot;$(SolutionDir)include/al&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/al&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -64,8 +64,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="SDLmain.lib SDL_mixerd.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
+				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="0"
-				AdditionalLibraryDirectories="$(SolutionDir)lib"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
 				IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -91,7 +92,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BBBResources.zip $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BiffBamBlammoIcon.bmp $(OutDir)&#x0D;&#x0A;"
+				CommandLine="xcopy /Y /R $(ProjectDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BBBResources.zip $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BiffBamBlammoIcon.bmp $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -123,7 +124,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(SolutionDir)include/physfs&quot;;&quot;$(SolutionDir)include/zlib&quot;;&quot;$(SolutionDir)include/al&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/al&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -145,8 +146,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="SDLmain.lib SDL_mixer.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
+				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(SolutionDir)lib"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
 				IgnoreDefaultLibraryNames="libc.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -174,7 +176,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /Y /R $(SolutionDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BBBResources.zip $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(SolutionDir)BiffBamBlammoIcon.bmp $(OutDir)&#x0D;&#x0A;"
+				CommandLine="xcopy /Y /R $(ProjectDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BBBResources.zip $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BiffBamBlammoIcon.bmp $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BiffBamBlammo.ico $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -572,15 +574,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\DecoWorldAssets.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\FlashHUD.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameAssets.h"
 					>
 				</File>
 				<File
@@ -588,27 +582,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\GameESPAssets.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\GameEventsListener.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameFBOAssets.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameFontAssetsManager.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameItemAssets.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameLightAssets.h"
 					>
 				</File>
 				<File
@@ -621,10 +595,6 @@
 				</File>
 				<File
 					RelativePath=".\GameView\GameViewConstants.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameWorldAssets.h"
 					>
 				</File>
 				<File
@@ -688,15 +658,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\DecoWorldAssets.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\FlashHUD.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameAssets.cpp"
 					>
 				</File>
 				<File
@@ -704,27 +666,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\GameESPAssets.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\GameEventsListener.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameFBOAssets.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameFontAssetsManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameItemAssets.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameLightAssets.cpp"
 					>
 				</File>
 				<File
@@ -737,10 +679,6 @@
 				</File>
 				<File
 					RelativePath=".\GameView\GameViewConstants.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\GameWorldAssets.cpp"
 					>
 				</File>
 				<File
@@ -1080,6 +1018,82 @@
 					</File>
 					<File
 						RelativePath=".\GameView\TeslaBlockMesh.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Asset Classes"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameView\DecoWorldAssets.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameAssets.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameESPAssets.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameFBOAssets.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameFontAssetsManager.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameItemAssets.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameLightAssets.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameWorldAssets.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\GameView\DecoWorldAssets.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameAssets.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameESPAssets.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameFBOAssets.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameFontAssetsManager.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameItemAssets.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameLightAssets.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\GameWorldAssets.cpp"
 						>
 					</File>
 				</Filter>
@@ -1507,6 +1521,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\IceBallItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\InvisiBallItem.h"
 						>
 					</File>
@@ -1612,6 +1630,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\GravityBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\IceBallItem.cpp"
 						>
 					</File>
 					<File

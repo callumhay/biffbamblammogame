@@ -91,7 +91,7 @@ public:
 
 	// Track the status of the piece, effects properties of the piece and how it works/acts in a level
 	// NOTE: IF YOU ADD TO THIS DON'T FORGET TO UPDATE LevelPiece::RemoveStatuses !!!!!
-	enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001 };
+	enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, IceCubeStatus = 0x00000002 };
 	bool HasStatus(const PieceStatus& status) const;
 	void AddStatus(const PieceStatus& status);
 	void RemoveStatus(const PieceStatus& status);
@@ -106,6 +106,9 @@ protected:
 	int32_t pieceStatus;
 
 	void RemoveAllStatus();
+
+	void LightPieceOnFire(GameModel* gameModel);
+	void FreezePieceInIce(GameModel* gameModel);
 
 private:
 	DISALLOW_COPY_AND_ASSIGN(LevelPiece);

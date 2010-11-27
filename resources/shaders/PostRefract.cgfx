@@ -160,7 +160,7 @@ struct vertexOutputPostRefractNormalTex {
 struct vertexOutputPostRefractNormalTexWithNoise {
     float4 HPosition    : POSITION;
     float3 WorldPos     : TEXCOORD0;
-	float3 ProjPos      : TEXCOORD1;
+    float3 ProjPos      : TEXCOORD1;
     float3 WorldView    : TEXCOORD2;
     float2 UV           : TEXCOORD3;
     float4 Colour       : TEXCOORD4;
@@ -217,7 +217,7 @@ vertexOutputPostRefractNormalTexWithNoise PostRefractNormalTexWithNoise_VS(appda
     
     float4 outPos  = mul(WvpXf,Po);
     OUT.HPosition  = outPos;
-	OUT.WorldPos   = outPos.xyz;
+    OUT.WorldPos   = outPos.xyz;
     OUT.ProjPos    = outPos.xyz / outPos.w;
     OUT.UV         = IN.UV;
     OUT.Colour     = IN.Colour;
@@ -335,13 +335,22 @@ technique PostRefractNormalTex {
     pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
+        BlendEquation = FuncAdd;
+            
+        PolygonMode = int2(Front, Fill);
+        
+        CullFace = Back;
+        CullFaceEnable = true;
+    /*
+        BlendEnable = true;
+        BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
         
         DepthTestEnable = true;
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
-        
+    */    
         VertexProgram = compile arbvp1 PostRefractNormalTex_VS();        
         FragmentProgram = compile arbfp1 PostRefractNormalTex_PS();
     }  
@@ -350,6 +359,7 @@ technique PostRefractNormalTex {
 technique PostRefractNormalTexWithNoise {
 
     pass p0 < string Script = "Draw=geometry;"; > {
+
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
         
