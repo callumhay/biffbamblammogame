@@ -16,10 +16,10 @@ S G Y Y O O O O G S
 S O G O R R G G G S 
 S E E E E E E E B S 
 S E I E E E E E E S 
+S E E E T(R,ur) E E E E S 
 S E E E E E E E E S 
-S E E E E E E E E S 
-S E E E E E E E E S 
-S E E E E E E E E S 
+S E E E E E E T(Y,ll) E S 
+S T(O,ul) E E E E E T(O,lr) E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 

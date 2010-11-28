@@ -274,6 +274,19 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 				numColoursApplied++;
 			}
 
+			// ICE BALL CHECK
+			if ((currBall->GetBallType() & GameBall::IceBall) == GameBall::IceBall && !ballIsInvisible) {
+				//ballEffectTemp = this->iceBallEffect;
+
+				// Draw the ice ball when not invisible
+				// We don't draw any of the effects if we're in a ball camera mode or inside a cannon
+				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {				
+					this->espAssets->DrawIceBallEffects(dT, camera, *currBall);
+				}
+				currBallColour = currBallColour + GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
+				numColoursApplied++;
+			}
+
 			// INVISIBALL CHECK
 			if (ballIsInvisible) {
 				// Obtain the POST full screen rendering from the previous frame - this is

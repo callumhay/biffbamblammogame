@@ -52,9 +52,26 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel) {
 }
 
 LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-	UNUSED_PARAMETER(ball);
+	LevelPiece* resultingPiece = this;
+	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
+	if (isIceBall) {
+		this->FreezePieceInIce(gameModel);
+	}
+	else {
+		bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+		if (isFireBall) {
+			// Unfreeze a frozen ink block if it gets hit by a fireball
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+				assert(success);
+			}
+		}
+		else {
+			resultingPiece = this->Destroy(gameModel);
+		}
+	}
 
-	return this->Destroy(gameModel);
+	return resultingPiece;
 }
 
 LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
@@ -72,7 +89,12 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 			break;
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob just extinguishes
+			// Fire glob just extinguishes on an ink block, unless it's frozen in an ice cube;
+			// in that case, unfreeze a frozen ink block
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+				assert(success);
+			}
 			break;
 
 		default:

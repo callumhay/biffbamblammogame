@@ -25,9 +25,10 @@
 #include "../ResourceManager.h"
 
 GameESPAssets::GameESPAssets() : 
-particleFader(1, 0), 
+particleFader(1, 0),
 particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 fireBallColourFader(ColourRGBA(1.0f, 1.0f, 0.0f, 1.0f), ColourRGBA(0.4f, 0.15f, 0.0f, 0.2f)),
+iceBallColourFader(ColourRGBA(GameModelConstants::GetInstance()->ICE_BALL_COLOUR, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.1f)),
 particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
 particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0),
 particleGravityArrowColour(ColourRGBA(GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
@@ -37,6 +38,7 @@ particlePulseUberballAura(0, 0),
 particlePulseItemDropAura(0, 0),
 particlePulsePaddleLaser(0, 0),
 particlePulseFireGlobAura(0, 0),
+particlePulseIceBallAura(0, 0),
 beamEndPulse(0, 0),
 particleSmallGrowth(1.0f, 1.3f), 
 particleMediumGrowth(1.0f, 1.6f),
@@ -48,6 +50,7 @@ beamBlastColourEffector(ColourRGBA(0.75f, 1.0f, 1.0f, 1.0f), ColourRGBA(GameView
 
 ghostBallAccel1(Vector3D(1,1,1)),
 fireBallAccel1(Vector3D(1,1,1)),
+iceBallAccel(Vector3D(1,1,1)),
 gravity(Vector3D(0, -9.8, 0)),
 
 crazyBallAura(NULL),
@@ -83,6 +86,7 @@ sideBlastTex(NULL),
 hugeExplosionTex(NULL),
 lightningBoltTex(NULL),
 sphereNormalsTex(NULL),
+//rectPrismTexture(NULL),
 cloudTex(NULL) {
 
 	this->InitESPTextures();
@@ -118,6 +122,14 @@ GameESPAssets::~GameESPAssets() {
 	}
 	this->smokeTextures.clear();
 
+	for (std::vector<Texture2D*>::iterator iter = this->snowflakeTextures.begin();
+		iter != this->snowflakeTextures.end(); ++iter) {
+		
+		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		assert(removed);	
+	}
+	this->snowflakeTextures.clear();
+	
 	//for (std::vector<Texture2D*>::iterator iter = this->fireGlobTextures.begin();
 	//	iter != this->fireGlobTextures.end(); ++iter) {
 	//	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
@@ -176,6 +188,8 @@ GameESPAssets::~GameESPAssets() {
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->sphereNormalsTex);
 	assert(removed);
+	//removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->rectPrismTexture);
+	//assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTex);
 	assert(removed);
 
@@ -431,6 +445,20 @@ void GameESPAssets::InitESPTextures() {
 	//	this->fireGlobTextures.push_back(temp);
 	//}
 
+	// Initialize all the snowflake textures
+	if (this->snowflakeTextures.empty()) {
+		this->snowflakeTextures.reserve(3);
+		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE1, Texture::Trilinear));
+		assert(temp != NULL);
+		this->snowflakeTextures.push_back(temp);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE2, Texture::Trilinear));
+		assert(temp != NULL);
+		this->snowflakeTextures.push_back(temp);
+		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE3, Texture::Trilinear));
+		assert(temp != NULL);
+		this->snowflakeTextures.push_back(temp);
+	}
+
 	// Initialize all rock textures
 	if (this->rockTextures.empty()) {
 		this->rockTextures.reserve(5);
@@ -541,6 +569,10 @@ void GameESPAssets::InitESPTextures() {
 		this->sphereNormalsTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
 		assert(this->sphereNormalsTex != NULL);
 	}
+	//if (this->rectPrismTexture != NULL) {
+	//	this->rectPrismTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_RECT_PRISM_NORMALS, Texture::Trilinear));
+	//	assert(this->rectPrismTexture != NULL);
+	//}	
 	if (this->cloudTex == NULL) {
 		this->cloudTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
 		assert(this->cloudTex != NULL);
@@ -616,6 +648,7 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 }
 
 void GameESPAssets::AddFireBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList) {
+	assert(ball != NULL);
 	assert(effectsList.size() == 0);
 
 	ESPPointEmitter* fireBallEmitterTrail = new ESPPointEmitter();
@@ -634,44 +667,95 @@ void GameESPAssets::AddFireBallESPEffects(const GameBall* ball, std::vector<ESPP
 	bool result = fireBallEmitterTrail->SetParticles(GameESPAssets::NUM_FIRE_BALL_PARTICLES, &this->fireBallTrailEffect);
 	assert(result);
 
-	/*
-	size_t randomTexIndex1 = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
-	size_t randomTexIndex2 = (randomTexIndex1 + 1) % this->smokeTextures.size();
-
-	ESPPointEmitter* smokeyTrailEmitter1 = new ESPPointEmitter();
-	smokeyTrailEmitter1->SetSpawnDelta(ESPInterval(0.1f));
-	smokeyTrailEmitter1->SetInitialSpd(ESPInterval(1.0f));
-	smokeyTrailEmitter1->SetParticleLife(ESPInterval(0.5f, 0.75f));
-	smokeyTrailEmitter1->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
-	smokeyTrailEmitter1->SetEmitAngleInDegrees(45);
-	smokeyTrailEmitter1->SetEmitDirection(Vector3D(0, -1, 0));
-	smokeyTrailEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAligned);
-	smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, 0));
-	smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
-	smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
-	smokeyTrailEmitter1->AddEffector(&this->explosionRayRotatorCW);
-	result = smokeyTrailEmitter1->SetParticles(5, this->smokeTextures[randomTexIndex1]);
-	assert(result);
-
-	ESPPointEmitter* smokeyTrailEmitter2 = new ESPPointEmitter();
-	smokeyTrailEmitter2->SetSpawnDelta(ESPInterval(0.1f));
-	smokeyTrailEmitter2->SetInitialSpd(ESPInterval(1.0f));
-	smokeyTrailEmitter2->SetParticleLife(ESPInterval(0.5f, 0.75f));
-	smokeyTrailEmitter2->SetParticleSize(ESPInterval(0.75f*projectile.GetWidth(), 0.85f*projectile.GetWidth()));
-	smokeyTrailEmitter2->SetEmitAngleInDegrees(45);
-	smokeyTrailEmitter2->SetEmitDirection(Vector3D(0, -1, 0));
-	smokeyTrailEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAligned);
-	smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, 0));
-	smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
-	smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
-	smokeyTrailEmitter2->AddEffector(&this->explosionRayRotatorCCW);
-	result = smokeyTrailEmitter2->SetParticles(5, this->smokeTextures[randomTexIndex2]);
-	assert(result);
-	*/
-
 	effectsList.push_back(fireBallEmitterTrail);
+}
+
+void GameESPAssets::AddIceBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList) {
+	assert(ball != NULL);
+	assert(effectsList.size() == 0);
+
+	static const unsigned int NUM_SNOWFLAKES_PER_EMITTER = 5;
+	bool result = false;
+	
+	ESPPointEmitter* iceBallEmitterAura = new ESPPointEmitter();
+	iceBallEmitterAura->SetSpawnDelta(ESPInterval(-1));
+	iceBallEmitterAura->SetInitialSpd(ESPInterval(0));
+	iceBallEmitterAura->SetParticleLife(ESPInterval(-1));
+	iceBallEmitterAura->SetParticleSize(ESPInterval(1.5f));
+	iceBallEmitterAura->SetEmitAngleInDegrees(0);
+	iceBallEmitterAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	iceBallEmitterAura->SetParticleAlignment(ESP::ScreenAligned);
+	iceBallEmitterAura->SetEmitPosition(Point3D(0, 0, 0));
+	iceBallEmitterAura->SetParticleColour(ESPInterval(GameModelConstants::GetInstance()->ICE_BALL_COLOUR.R()), 
+																				ESPInterval(GameModelConstants::GetInstance()->ICE_BALL_COLOUR.G()), 
+																				ESPInterval(GameModelConstants::GetInstance()->ICE_BALL_COLOUR.B()), 
+																			  ESPInterval(1.0f));
+	iceBallEmitterAura->AddEffector(&this->particlePulseIceBallAura);
+	iceBallEmitterAura->AddEffector(&this->loopRotateEffectorCW);
+	result = iceBallEmitterAura->SetParticles(1, this->circleGradientTex);
+	assert(result);
+	effectsList.push_back(iceBallEmitterAura);
+
+	ESPPointEmitter* sparklesEmitterTrail = new ESPPointEmitter();
+	sparklesEmitterTrail->SetSpawnDelta(ESPInterval(0.05f, 0.15f));
+	sparklesEmitterTrail->SetInitialSpd(ESPInterval(2.0f, 6.0f));
+	sparklesEmitterTrail->SetParticleLife(ESPInterval(0.4f, 0.8f));
+	sparklesEmitterTrail->SetParticleSize(ESPInterval(0.33f * ball->GetBounds().Radius(), ball->GetBounds().Radius()));
+	sparklesEmitterTrail->SetParticleColour(ESPInterval(0.9f, 1.0f), ESPInterval(0.95f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	sparklesEmitterTrail->SetEmitAngleInDegrees(15);
+	sparklesEmitterTrail->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+	sparklesEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.75f * ball->GetBounds().Radius()));
+	sparklesEmitterTrail->SetAsPointSpriteEmitter(true);
+	sparklesEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+	sparklesEmitterTrail->AddEffector(&this->gravity);
+	result = sparklesEmitterTrail->SetParticles(11, this->sparkleTex);
+	assert(result);
+	effectsList.push_back(sparklesEmitterTrail);	
+	
+	float numSnowflakeFraction = 1.0f / static_cast<float>(NUM_SNOWFLAKES_PER_EMITTER);
+	const Colour& iceColour = GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
+	for (size_t i = 0; i < this->snowflakeTextures.size(); i++) {
+		ESPPointEmitter* snowFlakeEmitterTrail = new ESPPointEmitter();
+		snowFlakeEmitterTrail->SetSpawnDelta(ESPInterval(0.5f * numSnowflakeFraction, numSnowflakeFraction));
+		snowFlakeEmitterTrail->SetInitialSpd(ESPInterval(3.0f, 8.0f));
+		snowFlakeEmitterTrail->SetParticleLife(ESPInterval(0.33f, 0.9f));
+		snowFlakeEmitterTrail->SetParticleSize(ESPInterval(0.5f * ball->GetBounds().Radius(), 2.0f*ball->GetBounds().Radius()));
+		snowFlakeEmitterTrail->SetParticleColour(ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f), ESPInterval(iceColour.B()), ESPInterval(1.0f));
+		snowFlakeEmitterTrail->SetEmitAngleInDegrees(25);
+		snowFlakeEmitterTrail->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+		snowFlakeEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.75f * ball->GetBounds().Radius()));
+		snowFlakeEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
+		snowFlakeEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+		snowFlakeEmitterTrail->AddEffector(&this->particleFader);
+		snowFlakeEmitterTrail->AddEffector(&this->particleMediumGrowth);
+		if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+			snowFlakeEmitterTrail->AddEffector(&this->smokeRotatorCW);
+		}
+		else {
+			snowFlakeEmitterTrail->AddEffector(&this->smokeRotatorCCW);
+		}
+		result = snowFlakeEmitterTrail->SetParticles(NUM_SNOWFLAKES_PER_EMITTER, this->snowflakeTextures[i]);
+		assert(result);
+
+		effectsList.push_back(snowFlakeEmitterTrail);
+	}
+
+	ESPPointEmitter* iceBallCloudEmitterTrail = new ESPPointEmitter();
+	iceBallCloudEmitterTrail->SetSpawnDelta(ESPInterval(0.01f, 0.05f));
+	iceBallCloudEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
+	iceBallCloudEmitterTrail->SetParticleLife(ESPInterval(0.35f, 0.55f));
+	iceBallCloudEmitterTrail->SetParticleSize(ESPInterval(2.25f*ball->GetBounds().Radius(), 3.25f*ball->GetBounds().Radius()));
+	iceBallCloudEmitterTrail->SetEmitAngleInDegrees(10);
+	iceBallCloudEmitterTrail->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+	iceBallCloudEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	iceBallCloudEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
+	iceBallCloudEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+	iceBallCloudEmitterTrail->AddEffector(&this->iceBallColourFader);
+	iceBallCloudEmitterTrail->AddEffector(&this->particleMediumGrowth);
+	iceBallCloudEmitterTrail->AddEffector(&this->iceBallAccel);
+	result = iceBallCloudEmitterTrail->SetParticles(15, &this->iceBallTrailEffect);
+	assert(result);
+	effectsList.push_back(iceBallCloudEmitterTrail);
 }
 
 /**
@@ -849,6 +933,11 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	uberBallPulseSettings.pulseRate = 1.5f;
 	this->particlePulseUberballAura = ESPParticleScaleEffector(uberBallPulseSettings);
 
+	ScaleEffect iceBallPulseSettings;
+	iceBallPulseSettings.pulseGrowthScale = 1.65f;
+	iceBallPulseSettings.pulseRate = 1.25f;
+	this->particlePulseIceBallAura = ESPParticleScaleEffector(iceBallPulseSettings);
+
 	// Ghost smoke effect used for ghostball
 	this->ghostBallSmoke.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
 	this->ghostBallSmoke.SetScale(0.5f);
@@ -865,11 +954,18 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->fireEffect.SetMaskTexture(this->circleGradientTex);
 
 	this->fireBallTrailEffect.SetTechnique(CgFxVolumetricEffect::FIRESPRITE_TECHNIQUE_NAME);
-	this->fireBallTrailEffect.SetColour(Colour(1.00f, 1.00f, 1.00f));
+	this->fireBallTrailEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
 	this->fireBallTrailEffect.SetScale(0.8f);
 	this->fireBallTrailEffect.SetFrequency(1.2f);
 	this->fireBallTrailEffect.SetFlowDirection(Vector3D(0, 0, 1));
 	this->fireBallTrailEffect.SetMaskTexture(this->cloudTex);
+
+	this->iceBallTrailEffect.SetTechnique(CgFxVolumetricEffect::SMOKESPRITE_TECHNIQUE_NAME);
+	this->iceBallTrailEffect.SetColour(Colour(1.0f, 1.0f, 1.0f));
+	this->iceBallTrailEffect.SetScale(0.5f);
+	this->iceBallTrailEffect.SetFrequency(0.5f);
+	this->iceBallTrailEffect.SetFlowDirection(Vector3D(0, 0, 1));
+	this->iceBallTrailEffect.SetMaskTexture(this->cloudTex);
 
 	// Setup the post refraction normal effect with the sphere normal - this is for forcefield
 	// and shockwave effects
@@ -877,6 +973,11 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->normalTexRefractEffect.SetWarpAmountParam(27.0f);
 	this->normalTexRefractEffect.SetIndexOfRefraction(1.2f);
 	this->normalTexRefractEffect.SetNormalTexture(this->sphereNormalsTex);
+
+	//this->iceRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
+	//this->iceRefractEffect.SetWarpAmountParam(50.0f);
+	//this->iceRefractEffect.SetIndexOfRefraction(1.33f);
+	//this->iceRefractEffect.SetNormalTexture(this->rectPrismTexture);
 }
 
 /**
@@ -1912,6 +2013,108 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	}
 	this->activeGeneralEmitters.push_back(splatEffect);
 	this->activeGeneralEmitters.push_back(inkOnoEffect);
+}
+
+// When a block frozen in an ice cube gets smashed we use this effect instead of the typical block break effect
+// for that particular block type
+void GameESPAssets::AddIceCubeBreakEffect(const LevelPiece& block, const Colour& colour) {
+	const Colour& iceColour = GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
+	const Point2D& blockCenter = block.GetCenter();
+	Point3D emitCenter(blockCenter, 0.0f);
+
+	bool result = false;
+
+	// Create the smashy ice block bits
+	size_t randomIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->rockTextures.size();
+	for (int i = 0; i < 3; i++) {
+		ESPPointEmitter* smashBitsEffect = new ESPPointEmitter();
+		smashBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+		smashBitsEffect->SetInitialSpd(ESPInterval(2.0f, 5.0f));
+		smashBitsEffect->SetParticleLife(ESPInterval(1.0f, 2.5f));
+		smashBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
+		smashBitsEffect->SetEmitAngleInDegrees(180);
+		smashBitsEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 14.0f, LevelPiece::PIECE_WIDTH / 3.0f));
+		smashBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+		smashBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH / 3.0f));
+		smashBitsEffect->SetEmitPosition(emitCenter);
+		smashBitsEffect->SetParticleAlignment(ESP::ScreenAligned);
+		smashBitsEffect->SetParticleColour(ESPInterval(iceColour.R() * colour.R()), ESPInterval(iceColour.G() * colour.G()),
+																			 ESPInterval(iceColour.B() * colour.B()), ESPInterval(0.8f, 1.0f));
+		smashBitsEffect->AddEffector(&this->gravity);
+		smashBitsEffect->AddEffector(&this->particleFader);
+		result = smashBitsEffect->SetParticles(2, this->rockTextures[(randomIdx + i) % this->rockTextures.size()]);
+		assert(result);
+		this->activeGeneralEmitters.push_back(smashBitsEffect);
+	}
+
+	ESPPointEmitter* snowflakeBitsEffect = new ESPPointEmitter();
+	snowflakeBitsEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+	snowflakeBitsEffect->SetInitialSpd(ESPInterval(3.0f, 7.0f));
+	snowflakeBitsEffect->SetParticleLife(ESPInterval(1.0f, 2.5f));
+	snowflakeBitsEffect->SetEmitDirection(Vector3D(0, 1, 0));
+	snowflakeBitsEffect->SetEmitAngleInDegrees(180);
+	snowflakeBitsEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH / 5.0f, LevelPiece::PIECE_WIDTH / 1.5f));
+	snowflakeBitsEffect->SetParticleRotation(ESPInterval(-180.0f, 180.0f));
+	snowflakeBitsEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, LevelPiece::PIECE_WIDTH / 2.5f));
+	snowflakeBitsEffect->SetEmitPosition(emitCenter);
+	snowflakeBitsEffect->SetParticleAlignment(ESP::ScreenAligned);
+	snowflakeBitsEffect->SetParticleColour(ESPInterval(iceColour.R(), 1.0f), ESPInterval(iceColour.G(), 1.0f),
+																		     ESPInterval(iceColour.B(), 1.0f), ESPInterval(1.0f));
+	snowflakeBitsEffect->AddEffector(&this->particleFader);
+	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+		snowflakeBitsEffect->AddEffector(&this->smokeRotatorCCW);
+	}
+	else {
+		snowflakeBitsEffect->AddEffector(&this->smokeRotatorCW);
+	}
+	result = snowflakeBitsEffect->SetParticles(10, this->snowflakeTextures[Randomizer::GetInstance()->RandomUnsignedInt() % this->snowflakeTextures.size()]);
+	assert(result);
+	this->activeGeneralEmitters.push_back(snowflakeBitsEffect);
+	
+	// Create an emitter for a single large snowflake
+	ESPPointEmitter* snowflakeBackingEffect = new ESPPointEmitter();
+	snowflakeBackingEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+	snowflakeBackingEffect->SetInitialSpd(ESPInterval(0.0f));
+	snowflakeBackingEffect->SetParticleLife(ESPInterval(1.75f));
+	snowflakeBackingEffect->SetRadiusDeviationFromCenter(ESPInterval(0));
+	snowflakeBackingEffect->SetParticleAlignment(ESP::ScreenAligned);
+	snowflakeBackingEffect->SetEmitPosition(emitCenter);
+	snowflakeBackingEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	snowflakeBackingEffect->SetParticleRotation(ESPInterval(-180, 180));
+	snowflakeBackingEffect->SetParticleSize(ESPInterval(1.5f * LevelPiece::PIECE_WIDTH));
+	snowflakeBackingEffect->AddEffector(&this->particleFader);
+	snowflakeBackingEffect->AddEffector(&this->particleMediumGrowth);
+	result = snowflakeBackingEffect->SetParticles(1, this->snowflakeTextures[1]);
+	assert(result);
+	this->activeGeneralEmitters.push_back(snowflakeBackingEffect);
+
+	// Create an emitter for the sound of onomatopeia of shattering block
+	ESPPointEmitter* iceSmashOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	iceSmashOnoEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
+	iceSmashOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	iceSmashOnoEffect->SetParticleLife(ESPInterval(2.25f));
+	iceSmashOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
+	iceSmashOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	iceSmashOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
+	iceSmashOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	iceSmashOnoEffect->SetEmitPosition(emitCenter);
+	iceSmashOnoEffect->SetParticleColour(ESPInterval(iceColour.R()), ESPInterval(iceColour.G()), 
+																			 ESPInterval(iceColour.B()), ESPInterval(1));
+	
+	// Add effectors...
+	iceSmashOnoEffect->AddEffector(&this->particleFader);
+	iceSmashOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Set the onomata particle
+	TextLabel2D smashTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "");
+	smashTextLabel.SetColour(iceColour);
+	smashTextLabel.SetDropShadow(Colour(0, 0, 0), 0.15f);
+	Onomatoplex::Extremeness severity = Onomatoplex::Generator::GetInstance()->GetRandomExtremeness(Onomatoplex::GOOD, Onomatoplex::UBER);
+	result = iceSmashOnoEffect->SetParticles(1, smashTextLabel, Onomatoplex::SHATTER, severity);
+	assert(result);
+
+	this->activeGeneralEmitters.push_back(iceSmashOnoEffect);
 }
 
 /**
@@ -3740,6 +3943,26 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 			}
 			break;
 
+		case GameItem::IceBallItem:
+			{
+				// If there are any effects assigned for the ice ball then we need to reset the trail
+				const GameBall* ballAffected = item.GetBallAffected();
+				assert(ballAffected != NULL);
+				std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(ballAffected);
+				if (foundBallEffects != this->ballEffects.end()) {
+					std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator foundIceBallFX = foundBallEffects->second.find(GameItem::IceBallItem);
+					if (foundIceBallFX != foundBallEffects->second.end()) {
+						std::vector<ESPPointEmitter*>& emitters = foundIceBallFX->second;
+						for (std::vector<ESPPointEmitter*>::iterator iter = emitters.begin(); iter != emitters.end(); ++iter) {
+							ESPPointEmitter* currEmitter = *iter;
+							currEmitter->Reset();
+						}	
+					}
+				}
+			}
+			break;
+
+
 		case GameItem::LaserBulletPaddleItem: {
 				this->paddleLaserGlowAura->Reset();
 				this->paddleLaserGlowSparks->Reset();
@@ -4017,6 +4240,56 @@ void GameESPAssets::DrawFireBallEffects(double dT, const Camera& camera, const G
 	}
 
 	glPopMatrix();
+}
+
+void GameESPAssets::DrawIceBallEffects(double dT, const Camera& camera, const GameBall& ball) {
+	// Check to see if the ball has any associated ice ball effects, if not, then
+	// create the effect and add it to the ball first
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = 
+		this->EnsureBallEffectsList(ball);
+
+	if (foundBallEffects->second.find(GameItem::IceBallItem) == foundBallEffects->second.end()) {
+		// Didn't find an associated ice ball effect, so add one
+		this->AddIceBallESPEffects(&ball, this->ballEffects[&ball][GameItem::IceBallItem]);
+	}
+
+	std::vector<ESPPointEmitter*>& iceBallEffectList = this->ballEffects[&ball][GameItem::IceBallItem];
+	assert(iceBallEffectList.size() >= (3 + this->snowflakeTextures.size()));
+	size_t lastIdx = iceBallEffectList.size()-1;
+	const Point2D& loc  = ball.GetBounds().Center();
+	const Vector2D& dir = ball.GetDirection();
+
+	iceBallEffectList[0]->SetParticleSize(ESPInterval(3.0f * ball.GetBounds().Radius()));
+	iceBallEffectList[1]->SetParticleSize(ESPInterval(1.25f * ball.GetBounds().Radius(), 2.0f * ball.GetBounds().Radius()));
+	for (size_t i = 0; i < this->snowflakeTextures.size(); i++) {
+		iceBallEffectList[i+2]->SetParticleSize(ESPInterval(ball.GetBounds().Radius(), 2.5f * ball.GetBounds().Radius()));
+	}
+	iceBallEffectList[lastIdx]->SetParticleSize(ESPInterval(2.25f*ball.GetBounds().Radius(), 3.25f*ball.GetBounds().Radius()));
+
+	// Rotate the negative ball velocity direction by some random amount and then affect the particle's velocities
+	// by it, this gives the impression that the particles are flickering like fire
+	double randomDegrees = Randomizer::GetInstance()->RandomNumNegOneToOne() * 20;
+	Vector2D accelVec = Vector2D::Rotate(static_cast<float>(randomDegrees), -dir);
+	accelVec = ball.GetSpeed() * 2.75f * accelVec;
+	this->iceBallAccel.SetAcceleration(Vector3D(accelVec, 0.0f));
+
+	// The aura always needs to be drawn centered on the ball
+	glPushMatrix();
+	glTranslatef(loc[0], loc[1], 0);
+	iceBallEffectList[0]->Draw(camera);
+	iceBallEffectList[0]->Tick(dT);
+	iceBallEffectList[lastIdx]->Draw(camera);
+	iceBallEffectList[lastIdx]->Tick(dT);
+	glPopMatrix();
+
+	for (size_t i = 1; i < lastIdx; i++) {
+		ESPPointEmitter* emitter = iceBallEffectList[i];
+
+		emitter->SetEmitDirection(-Vector3D(dir));
+		emitter->SetEmitPosition(Point3D(loc));
+		emitter->Draw(camera);
+		emitter->Tick(dT);
+	}
 }
 
 void GameESPAssets::DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir) {

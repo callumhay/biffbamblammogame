@@ -46,7 +46,8 @@ GameBall::GameBall(const GameBall& gameBall) : bounds(gameBall.bounds), currDir(
 currType(gameBall.currType), currSize(gameBall.currSize), currScaleFactor(gameBall.currScaleFactor), 
 rotationInDegs(gameBall.rotationInDegs), ballballCollisionsDisabledTimer(0.0), lastThingCollidedWith(gameBall.lastThingCollidedWith),
 zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributingGravityColour), 
-contributingCrazyColour(gameBall.contributingCrazyColour), timeSinceLastCollision(gameBall.timeSinceLastCollision),
+contributingCrazyColour(gameBall.contributingCrazyColour), contributingIceColour(gameBall.contributingIceColour),
+timeSinceLastCollision(gameBall.timeSinceLastCollision),
 blockCollisionsDisabled(false),
 paddleCollisionsDisabled(false),
 currState(NULL) {
@@ -96,6 +97,7 @@ void GameBall::ResetBallAttributes() {
 	this->SetColour(ColourRGBA(1, 1, 1, 1));
 	this->contributingGravityColour = Colour(1.0f, 1.0f, 1.0f);
 	this->contributingCrazyColour   = Colour(1.0f, 1.0f, 1.0f);
+	this->contributingIceColour     = Colour(1.0f, 1.0f, 1.0f);
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
 

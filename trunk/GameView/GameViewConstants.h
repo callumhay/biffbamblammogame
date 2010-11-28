@@ -73,6 +73,9 @@ public:
 	//const char* TEXTURE_FIRE_GLOB1;
 	//const char* TEXTURE_FIRE_GLOB2;
 	//const char* TEXTURE_FIRE_GLOB3;
+	const char* TEXTURE_SNOWFLAKE1;
+	const char* TEXTURE_SNOWFLAKE2;
+	const char* TEXTURE_SNOWFLAKE3;
 	const char* TEXTURE_ROCK1;
 	const char* TEXTURE_ROCK2;
 	const char* TEXTURE_ROCK3;

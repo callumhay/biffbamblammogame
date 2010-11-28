@@ -325,7 +325,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildIceBlockEffect(const LevelPiece
 	iceCubeEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(0.85f), ESPInterval(1.0f), ESPInterval(1.0f));
 	iceCubeEffect->SetInitialSpd(ESPInterval(0.0f));
 	iceCubeEffect->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
-	iceCubeEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH), ESPInterval(LevelPiece::PIECE_HEIGHT));
+	iceCubeEffect->SetParticleSize(ESPInterval(1.1f * LevelPiece::PIECE_WIDTH), ESPInterval(1.1f * LevelPiece::PIECE_HEIGHT));
 	iceCubeEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	iceCubeEffect->SetParticleAlignment(ESP::ScreenAligned);
 	iceCubeEffect->SetEmitPosition(Point3D(piece.GetCenter()));
