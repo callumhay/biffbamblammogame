@@ -477,7 +477,8 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 }
 
 void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
-	
+	bool wasFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
+
 	// Add the effects based on the type of block that is being destroyed...
 	switch (block.GetType()) {
 		
@@ -487,35 +488,58 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::SolidTriangle:
 		case LevelPiece::Tesla:
 		case LevelPiece::ItemDrop:
-			// Typical break effect for basic breakable blocks
-			this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
-			// Sound for basic breakable blocks
-			this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			if (wasFrozen) {
+				// Add ice break effect
+				this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block, block.GetColour());
+				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			}
+			else {
+				// Typical break effect for basic breakable blocks
+				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				// Sound for basic breakable blocks
+				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			}
 			break;
 
 		case LevelPiece::Bomb:
-			// Bomb effect - big explosion!
-			this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(block);
-			this->display->GetCamera().SetCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
-			GameControllerManager::GetInstance()->VibrateControllers(1.0f, BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
+			if (wasFrozen) {
+				// Add ice break effect
+				this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
+				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			}
+			else {
+				// Bomb effect - big explosion!
+				this->display->GetAssets()->GetESPAssets()->AddBombBlockBreakEffect(block);
+				this->display->GetCamera().SetCameraShake(1.2f, Vector3D(1.0f, 0.3f, 0.1f), 110);
+				GameControllerManager::GetInstance()->VibrateControllers(1.0f, BBBGameController::HeavyVibration, BBBGameController::HeavyVibration);
 
-			// Sound for bomb explosion
-			this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBombBlockDestroyedEvent, GameSoundAssets::LoudVolume);
+				// Sound for bomb explosion
+				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBombBlockDestroyedEvent, GameSoundAssets::LoudVolume);
+			}
 			break;
 
 		case LevelPiece::Ink: {
 				const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
 
-				// We do not do any ink blotches while in ball or paddle camera modes
-				bool specialCamModeOn = paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn();
-				// Emit goo from ink block and make onomata effects
-				this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), !specialCamModeOn);
-				if (!specialCamModeOn) {
-					// Cover camera in ink with a fullscreen splatter effect
-					this->display->GetAssets()->GetFBOAssets()->ActivateInkSplatterEffect();
-				}
+				// We do not do any ink blotches while in ball or paddle camera modes, also, if the ink block is frozen
+				// then it just shatters...
+				bool inkSplatter = !(paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) && !wasFrozen;
 
-				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundInkBlockDestroyedEvent);
+				if (wasFrozen) {
+					// Add ice break effect
+					this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
+					//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+				}
+				else {
+					// Emit goo from ink block and make onomata effects
+					this->display->GetAssets()->GetESPAssets()->AddInkBlockBreakEffect(this->display->GetCamera(), block, *this->display->GetModel()->GetCurrentLevel(), inkSplatter);
+					this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundInkBlockDestroyedEvent);
+
+					if (inkSplatter) {
+						// Cover camera in ink with a fullscreen splatter effect
+						this->display->GetAssets()->GetFBOAssets()->ActivateInkSplatterEffect();
+					}
+				}
 			}
 			break;
 

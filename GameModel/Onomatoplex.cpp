@@ -634,6 +634,7 @@ void Generator::LoadShatterWords() {
 	std::vector<std::string> shatterGoodWords;
 	shatterGoodWords.push_back("Smashy");
 	shatterGoodWords.push_back("Crackkk");
+	shatterGoodWords.push_back("Cracky");
 	shatterGoodWords.push_back("Krssszzk");
 	shatterGoodWords.push_back("Smaassh");
 	shatterGoodWords.push_back("Crrassh");

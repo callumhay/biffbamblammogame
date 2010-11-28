@@ -29,11 +29,11 @@ protected:
 	// Values for the cg parameters
 	float timer, displacement, sharpness, speed, turbulanceDensity;
 
-	virtual void SetupBeforePasses(const Camera& camera);
+	void SetupBeforePasses(const Camera& camera);
 
 public:
 	CgFxInkBlock(MaterialProperties* properties);
-	virtual ~CgFxInkBlock();
+	~CgFxInkBlock();
 
 };
 #endif

@@ -69,6 +69,7 @@ private:
 	ESPParticleColourEffector particleFader;
 	ESPParticleColourEffector particleFireColourFader;
 	ESPParticleColourEffector fireBallColourFader;
+	ESPParticleColourEffector iceBallColourFader;
 	ESPParticleColourEffector particleCloudColourFader;
 	ESPParticleColourEffector particleFaderUberballTrail;
 	ESPParticleColourEffector particleGravityArrowColour;
@@ -77,12 +78,14 @@ private:
 	ESPParticleScaleEffector  particlePulseItemDropAura;
 	ESPParticleScaleEffector  particlePulsePaddleLaser;
 	ESPParticleScaleEffector	particlePulseFireGlobAura;
+	ESPParticleScaleEffector  particlePulseIceBallAura;
 	ESPParticleScaleEffector  beamEndPulse;
 	ESPParticleScaleEffector  particleShrinkToNothing;
 
 	ESPParticleAccelEffector ghostBallAccel1;
 	ESPParticleAccelEffector gravity;
 	ESPParticleAccelEffector fireBallAccel1;
+	ESPParticleAccelEffector iceBallAccel;
 
 	ESPParticleScaleEffector particleSmallGrowth;
 	ESPParticleScaleEffector particleMediumGrowth;
@@ -105,6 +108,7 @@ private:
 	std::vector<Texture2D*> splatTextures;
 	std::vector<Texture2D*> smokeTextures;
 	//std::vector<Texture2D*> fireGlobTextures;
+	std::vector<Texture2D*> snowflakeTextures;
 
 	std::vector<Texture2D*> rockTextures;
 	std::vector<CgFxFireBallEffect*> moltenRockEffects;
@@ -128,6 +132,7 @@ private:
 	Texture2D* hugeExplosionTex;
 	Texture2D* lightningBoltTex;
 	Texture2D* sphereNormalsTex;
+	//Texture2D* rectPrismTexture;
 	Texture2D* cloudTex;
 
 	// Ball and paddle related ESP effects
@@ -169,6 +174,8 @@ private:
 	CgFxVolumetricEffect ghostBallSmoke;
 	CgFxVolumetricEffect fireEffect;
 	CgFxVolumetricEffect fireBallTrailEffect;
+	CgFxVolumetricEffect iceBallTrailEffect;
+	//CgFxPostRefract iceRefractEffect;
 	CgFxPostRefract normalTexRefractEffect;
 
 	// Initialization functions for effect stuffs
@@ -178,6 +185,7 @@ private:
 	void AddUberBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
 	void AddFireBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
+	void AddIceBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddGravityBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESPPointEmitter*>& effectsList);
 	void AddPaddleCamBallESPEffects(std::vector<ESPPointEmitter*>& effectsList);
@@ -194,7 +202,6 @@ private:
 	ESPPointEmitter* CreateSpinningTargetESPEffect();
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
 	
-
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const Projectile& projectile);
 	void AddFireGlobProjectileEffects(const Projectile& projectile);
@@ -204,9 +211,7 @@ private:
 	void AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile);
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
-
 	void AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc);
-
 	void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
@@ -244,6 +249,7 @@ public:
 	void AddBasicBlockBreakEffect(const LevelPiece& block);
 	void AddBombBlockBreakEffect(const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);
+	void AddIceCubeBreakEffect(const LevelPiece& block, const Colour& colour);
 	void AddBallSafetyNetDestroyedEffect(const Point2D& pos);
 	void AddBallExplodedEffect(const GameBall* ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
@@ -283,6 +289,7 @@ public:
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGhostBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawFireBallEffects(double dT, const Camera& camera, const GameBall& ball);
+	void DrawIceBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawGravityBallEffects(double dT, const Camera& camera, const GameBall& ball, const Vector3D& gravityDir);
 	void DrawCrazyBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
