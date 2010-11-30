@@ -490,7 +490,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::ItemDrop:
 			if (wasFrozen) {
 				// Add ice break effect
-				this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block, block.GetColour());
+				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
 				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
 			}
 			else {
@@ -504,7 +504,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::Bomb:
 			if (wasFrozen) {
 				// Add ice break effect
-				this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
+				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
 				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
 			}
 			else {
@@ -527,7 +527,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 
 				if (wasFrozen) {
 					// Add ice break effect
-					this->display->GetAssets()->GetESPAssets()->AddIceCubeBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
+					this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, GameViewConstants::GetInstance()->INK_BLOCK_COLOUR);
 					//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
 				}
 				else {
@@ -823,6 +823,11 @@ void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAft
 	}
 
 	debug_output("EVENT: Lives changed - Before: " << livesLeftBefore << " After: " << livesLeftAfter);
+}
+
+void GameEventsListener::BlockIceShatteredEvent(const LevelPiece& block) {
+	this->display->GetAssets()->GetESPAssets()->AddIceBitsBreakEffect(block);
+	debug_output("EVENT: Ice shattered");
 }
 
 /**

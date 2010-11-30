@@ -61,9 +61,21 @@ public:
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
+	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses); 
+
 protected:
 	static const int PIECE_STARTING_LIFE_POINTS = 120;	// Starting life points given to a bomb block
 	float currLifePoints;	// Current life points of this block
 
 };
+
+inline bool BombBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
+	UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(gameModel);
+	assert(gameModel != NULL);
+
+	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
+	return false;
+}
+
 #endif

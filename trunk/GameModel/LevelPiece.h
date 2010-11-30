@@ -219,7 +219,7 @@ inline bool LevelPiece::StatusTick(double dT, GameModel* gameModel, int32_t& rem
 	UNUSED_PARAMETER(dT);
 	UNUSED_PARAMETER(gameModel);
 	assert(gameModel != NULL);
-
+	assert(false);
 	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
 	return true;
 }

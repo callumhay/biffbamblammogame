@@ -46,5 +46,10 @@ public:
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
+	inline void BindDepthRenderBuffer() {
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->depthBuffID);
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,  GL_RENDERBUFFER_EXT, this->depthBuffID);
+	}
+
 };
 #endif

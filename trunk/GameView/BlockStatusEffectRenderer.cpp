@@ -37,10 +37,11 @@ frostTexture(NULL) {
 	this->fireEffect.SetTechnique(CgFxFireBallEffect::NO_DEPTH_WITH_MASK_TECHNIQUE_NAME);
 	this->fireEffect.SetMaskTexture(this->cloudTexture);
 
-	this->iceBlockEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
+	this->iceBlockEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_WITH_OVERLAY_TECHNIQUE_NAME);
 	this->iceBlockEffect.SetWarpAmountParam(50.0f);
 	this->iceBlockEffect.SetIndexOfRefraction(1.33f);
 	this->iceBlockEffect.SetNormalTexture(this->rectPrismTexture);
+	this->iceBlockEffect.SetOverlayTexture(this->frostTexture);
 }
 
 BlockStatusEffectRenderer::~BlockStatusEffectRenderer() {
@@ -112,8 +113,6 @@ void BlockStatusEffectRenderer::AddLevelPieceStatus(const LevelPiece& piece, con
 			break;
 
 		case LevelPiece::IceCubeStatus:
-			emitterList.push_back(this->BuildIceBlockEffect(piece));
-			emitterList.push_back(this->BuildIceBlockFrost(piece));
 			break;
 
 		default:
@@ -121,7 +120,6 @@ void BlockStatusEffectRenderer::AddLevelPieceStatus(const LevelPiece& piece, con
 			return;
 	}
 
-	assert(!emitterList.empty());
 	std::pair<StatusEffectMap::iterator, bool> insertResult = statusEffectMap.insert(std::make_pair(status, emitterList));
 }
 
@@ -193,16 +191,40 @@ void BlockStatusEffectRenderer::Draw(double dT, const Camera& camera, const Text
 
 	for (PieceStatusEffectMap::iterator iter = this->pieceStatusEffects.begin(); iter != this->pieceStatusEffects.end(); ++iter) {
 		StatusEffectMap& effectMap = iter->second;
+		const LevelPiece* currPiece = iter->first;
+
+		glPushAttrib(GL_CURRENT_BIT);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		for (StatusEffectMap::iterator iter2 = effectMap.begin(); iter2 != effectMap.end(); ++iter2) {
+
+			if (iter2->first == LevelPiece::IceCubeStatus) {
+				glPushMatrix();
+				glTranslatef(currPiece->GetCenter()[0], currPiece->GetCenter()[1], 0.0f);
+				glScalef(1.1f * LevelPiece::PIECE_WIDTH, 1.1f * LevelPiece::PIECE_HEIGHT, 1.5f * LevelPiece::PIECE_DEPTH);
+				this->iceBlockEffect.Draw(camera, GeometryMaker::GetInstance()->GetCubeDL());
+				glPopMatrix();
+			}
+
 			EmitterList& emitterList = iter2->second;
-			for (EmitterList::iterator iter3 = emitterList.begin(); iter3 != emitterList.end(); ++iter3) {
+			for (EmitterList::iterator iter3 = emitterList.begin(); iter3 != emitterList.end();) {
 				ESPEmitter* currEmitter = *iter3;
 				currEmitter->Tick(dT);
 				currEmitter->Draw(camera);
+
+				if (currEmitter->IsDead()) {
+					delete currEmitter;
+					currEmitter = NULL;
+					iter3 = emitterList.erase(iter3);
+				}
+				else {
+					++iter3;
+				}
+
 			}
 		}
-	}
+		glPopAttrib();
 
+	}
 }
 
 void BlockStatusEffectRenderer::SetupTextures() {
@@ -331,18 +353,4 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildIceBlockEffect(const LevelPiece
 	iceCubeEffect->SetEmitPosition(Point3D(piece.GetCenter()));
 	iceCubeEffect->SetParticles(1, &this->iceBlockEffect);
 	return iceCubeEffect;
-}
-
-ESPPointEmitter* BlockStatusEffectRenderer::BuildIceBlockFrost(const LevelPiece& piece) {
-	ESPPointEmitter* frostEffect = new ESPPointEmitter();
-	frostEffect->SetSpawnDelta(ESPInterval(ESPPointEmitter::ONLY_SPAWN_ONCE));
-	frostEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(0.85f), ESPInterval(1.0f), ESPInterval(1.0f));
-	frostEffect->SetInitialSpd(ESPInterval(0.0f));
-	frostEffect->SetParticleLife(ESPInterval(ESPParticle::INFINITE_PARTICLE_LIFETIME));
-	frostEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH), ESPInterval(LevelPiece::PIECE_HEIGHT));
-	frostEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	frostEffect->SetParticleAlignment(ESP::ScreenAligned);
-	frostEffect->SetEmitPosition(Point3D(piece.GetCenter()));
-	frostEffect->SetParticles(1, this->frostTexture);
-	return frostEffect;
 }

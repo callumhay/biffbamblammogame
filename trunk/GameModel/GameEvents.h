@@ -427,6 +427,11 @@ public:
 	 */
 	virtual void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter) = 0;
 
+	/**
+	 * Event triggered when the ice on a block is shattered. Only occurs once just before the ice shatters.
+	 * Arguements: block - The block whose ice shattered.
+	 */
+	virtual void BlockIceShatteredEvent(const LevelPiece& block) = 0;
 };
 
 

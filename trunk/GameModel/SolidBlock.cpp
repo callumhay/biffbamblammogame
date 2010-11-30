@@ -33,6 +33,11 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			// EVENT: Ice was shattered
+			GameEventManager::Instance()->ActionBlockIceShattered(*this);
+	}
+
 	// When destroying a breakable there is the possiblity of dropping an item...
 	gameModel->AddPossibleItemDrop(*this);
 
@@ -128,6 +133,35 @@ bool SolidBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const 
 	return Collision::IsCollision(ray, this->GetAABB(), rayT);
 }
 
+// Doesn't matter if a ball collides with solid block, it does nothing to the block.
+LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+	// Tell the ball what the last piece it collided with was...
+	ball.SetLastPieceCollidedWith(this);
+
+	// Solid blocks can be frozen, but they still can't be destroyed (in most cases)
+	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
+	if (isIceBall) {
+		this->FreezePieceInIce(gameModel);
+	}
+	else {
+		bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+		if (!isFireBall) {
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				// EVENT: Ice was shattered
+				GameEventManager::Instance()->ActionBlockIceShattered(*this);
+			}
+		}
+
+		// Unfreeze a frozen solid block
+		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+			assert(success);
+		}
+	}
+
+	return this;
+}
+
 /**
  * Called when the solid block is hit by a projectile. Tends to cause the projectile to
  * extinguish, however for the collateral block projectile, it will completely destroy this.
@@ -149,7 +183,12 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			break;
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob will just extinguish
+			// Fire glob just extinguishes on a solid block, unless it's frozen in an ice cube;
+			// in that case, unfreeze a frozen solid block
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+				assert(success);
+			}
 			break;
 
 		default:

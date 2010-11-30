@@ -85,6 +85,8 @@ public:
 	void TeslaLightningBarrierRemovedEvent(const TeslaBlock& newlyOffTeslaBlock, const TeslaBlock& stillOnTeslaBlock);
 	void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
 
+	void BlockIceShatteredEvent(const LevelPiece& block);
+
 private:
 	GameDisplay* display;
 	long timeSinceLastBallBlockCollisionEventInMS;

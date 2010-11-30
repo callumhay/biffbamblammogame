@@ -56,6 +56,73 @@ bool GeometryMaker::InitializeQuadDL() {
 	return this->quadDL != 0;
 }
 
+void GeometryMaker::DrawRawCube(const Point3D& center, const Vector3D& size) const {
+	Vector3D halfSize = 0.5f * size;
+
+	glBegin(GL_QUADS);
+		glNormal3i(0, 1, 0);
+		glTexCoord2i(1, 1);
+    glVertex3fv((center + Vector3D(halfSize[0], halfSize[1], -halfSize[2])).begin());	// Top Right Of The Quad (Top)
+		glTexCoord2i(0, 1);
+    glVertex3fv((center + Vector3D(-halfSize[0], halfSize[1], -halfSize[2])).begin());	// Top Left Of The Quad (Top)
+		glTexCoord2i(0, 0);
+    glVertex3fv((center + Vector3D(-halfSize[0], halfSize[1], halfSize[2])).begin());	// Bottom Left Of The Quad (Top)
+		glTexCoord2i(1, 0);
+    glVertex3fv((center + Vector3D(halfSize[0], halfSize[1], halfSize[2])).begin());	// Bottom Right Of The Quad (Top)
+
+		glNormal3i(0, -1, 0);
+		glTexCoord2i(1, 1);
+    glVertex3fv((center + Vector3D(halfSize[0], -halfSize[1], halfSize[2])).begin());	// Top Right Of The Quad (Bottom)
+		glTexCoord2i(0, 1);
+    glVertex3fv((center + Vector3D(-halfSize[0], -halfSize[1], halfSize[2])).begin());	// Top Left Of The Quad (Bottom)
+		glTexCoord2i(0, 0);
+    glVertex3fv((center + Vector3D(-halfSize[0], -halfSize[1], -halfSize[2])).begin());	// Bottom Left Of The Quad (Bottom)
+		glTexCoord2i(1, 0);
+    glVertex3fv((center + Vector3D(halfSize[0], -halfSize[1], -halfSize[2])).begin());	// Bottom Right Of The Quad (Bottom)
+
+		glNormal3i(0, 0, 1);
+		glTexCoord2i(1, 1);
+    glVertex3fv((center + Vector3D(halfSize[0], halfSize[1], halfSize[2])).begin());	// Top Right Of The Quad (Front)
+		glTexCoord2i(0, 1);
+    glVertex3fv((center + Vector3D(-halfSize[0], halfSize[1], halfSize[2])).begin());	// Top Left Of The Quad (Front)
+		glTexCoord2i(0, 0);
+    glVertex3fv((center + Vector3D(-halfSize[0], -halfSize[1], halfSize[2])).begin());	// Bottom Left Of The Quad (Front)
+		glTexCoord2i(1, 0);
+    glVertex3fv((center + Vector3D(halfSize[0], -halfSize[1], halfSize[2])).begin());	// Bottom Right Of The Quad (Front)
+
+		glNormal3i(0, 0, -1);
+		glTexCoord2i(1, 1);
+    glVertex3fv((center + Vector3D(halfSize[0], -halfSize[1], -halfSize[2])).begin());	// Top Right Of The Quad (Back)
+		glTexCoord2i(0, 1);
+    glVertex3fv((center + Vector3D(-halfSize[0], -halfSize[1], -halfSize[2])).begin());	// Top Left Of The Quad (Back)
+		glTexCoord2i(0, 0);
+    glVertex3fv((center + Vector3D(-halfSize[0], halfSize[1], -halfSize[2])).begin());	// Bottom Left Of The Quad (Back)
+		glTexCoord2i(1, 0);
+    glVertex3fv((center + Vector3D(halfSize[0], halfSize[1], -halfSize[2])).begin());	// Bottom Right Of The Quad (Back)
+
+		glNormal3i(-1, 0, 0);
+		glTexCoord2i(1, 1);
+    glVertex3fv((center + Vector3D(-halfSize[0], halfSize[1], halfSize[2])).begin());	// Top Right Of The Quad (Left)
+		glTexCoord2i(0, 1);
+    glVertex3fv((center + Vector3D(-halfSize[0], halfSize[1], -halfSize[2])).begin());	// Top Left Of The Quad (Left)
+		glTexCoord2i(0, 0);
+    glVertex3fv((center + Vector3D(-halfSize[0], -halfSize[1], -halfSize[2])).begin());	// Bottom Left Of The Quad (Left)
+		glTexCoord2i(1, 0);
+    glVertex3fv((center + Vector3D(-halfSize[0], -halfSize[1], halfSize[2])).begin());	// Bottom Right Of The Quad (Left)
+
+		glNormal3i(1, 0, 0);
+		glTexCoord2i(1, 1);
+    glVertex3fv((center + Vector3D(halfSize[0], halfSize[1], -halfSize[2])).begin());	// Top Right Of The Quad (Right)
+		glTexCoord2i(0, 1);
+    glVertex3fv((center + Vector3D(halfSize[0], halfSize[1], halfSize[2])).begin());	// Top Left Of The Quad (Right)
+		glTexCoord2i(0, 0);
+    glVertex3fv((center + Vector3D(halfSize[0], -halfSize[1], halfSize[2])).begin());	// Bottom Left Of The Quad (Right)
+		glTexCoord2i(1, 0);
+    glVertex3fv((center + Vector3D(halfSize[0], -halfSize[1], -halfSize[2])).begin());	// Bottom Right Of The Quad (Right)
+		
+	glEnd();
+}
+
 /**
  * Initializes the display list for a simple, unit cube -
  * has no texture coordinates, but has normals set.
@@ -65,45 +132,7 @@ bool GeometryMaker::InitializeCubeDL() {
 	
 	this->cubeDL = glGenLists(1);
 	glNewList(this->cubeDL, GL_COMPILE);
-	
-	glBegin(GL_QUADS);
-		glNormal3i(0, 1, 0);
-    glVertex3f( 0.5f, 0.5f,-0.5f);	// Top Right Of The Quad (Top)
-    glVertex3f(-0.5f, 0.5f,-0.5f);	// Top Left Of The Quad (Top)
-    glVertex3f(-0.5f, 0.5f, 0.5f);	// Bottom Left Of The Quad (Top)
-    glVertex3f( 0.5f, 0.5f, 0.5f);	// Bottom Right Of The Quad (Top)
-
-		glNormal3i(0, -1, 0);
-    glVertex3f( 0.5f,-0.5f, 0.5f);	// Top Right Of The Quad (Bottom)
-    glVertex3f(-0.5f,-0.5f, 0.5f);	// Top Left Of The Quad (Bottom)
-    glVertex3f(-0.5f,-0.5f,-0.5f);	// Bottom Left Of The Quad (Bottom)
-    glVertex3f( 0.5f,-0.5f,-0.5f);	// Bottom Right Of The Quad (Bottom)
-
-		glNormal3i(0, 0, 1);
-    glVertex3f( 0.5f, 0.5f, 0.5f);	// Top Right Of The Quad (Front)
-    glVertex3f(-0.5f, 0.5f, 0.5f);	// Top Left Of The Quad (Front)
-    glVertex3f(-0.5f,-0.5f, 0.5f);	// Bottom Left Of The Quad (Front)
-    glVertex3f( 0.5f,-0.5f, 0.5f);	// Bottom Right Of The Quad (Front)
-
-		glNormal3i(0, 0, -1);
-    glVertex3f( 0.5f,-0.5f,-0.5f);	// Top Right Of The Quad (Back)
-    glVertex3f(-0.5f,-0.5f,-0.5f);	// Top Left Of The Quad (Back)
-    glVertex3f(-0.5f, 0.5f,-0.5f);	// Bottom Left Of The Quad (Back)
-    glVertex3f( 0.5f, 0.5f,-0.5f);	// Bottom Right Of The Quad (Back)
-
-		glNormal3i(-1, 0, 0);
-    glVertex3f(-0.5f, 0.5f, 0.5f);	// Top Right Of The Quad (Left)
-    glVertex3f(-0.5f, 0.5f,-0.5f);	// Top Left Of The Quad (Left)
-    glVertex3f(-0.5f,-0.5f,-0.5f);	// Bottom Left Of The Quad (Left)
-    glVertex3f(-0.5f,-0.5f, 0.5f);	// Bottom Right Of The Quad (Left)
-
-		glNormal3i(1, 0, 0);
-    glVertex3f( 0.5f, 0.5f,-0.5f);	// Top Right Of The Quad (Right)
-    glVertex3f( 0.5f, 0.5f, 0.5f);	// Top Left Of The Quad (Right)
-    glVertex3f( 0.5f,-0.5f, 0.5f);	// Bottom Left Of The Quad (Right)
-    glVertex3f( 0.5f,-0.5f,-0.5f);	// Bottom Right Of The Quad (Right)
-		
-	glEnd();
+	this->DrawRawCube(Point3D(0,0,0), Vector3D(1,1,1));
 	glEndList();
 	return this->cubeDL != 0;
 }

@@ -309,7 +309,8 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 	assert(inputFBO != NULL);
 	assert(outputFBO != NULL);
 	assert(outputFBO != inputFBO);
-	inputFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+
+	inputFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(1.0f);
 
 	if (GameBall::GetIsBallCameraOn()) {
 		const GameBall* camBall = GameBall::GetBallCameraBall();

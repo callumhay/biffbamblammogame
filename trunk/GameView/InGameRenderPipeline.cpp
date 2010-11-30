@@ -164,13 +164,18 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 
 	// Draw Post-Fullscene effects
 	postFullSceneFBO->BindFBObj();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	fullSceneFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1);
 	
 	// Render any post-processing effects for various items/objects in the game
 	this->display->GetAssets()->DrawPaddlePostEffects(dT, *this->display->GetModel(), camera);
+	
+	// We bind the full scene FBO's depth buffer temporarily so that we can render our ice cubes
+	// (and other status effects) with proper depth data available
+	fullSceneFBO->BindDepthRenderBuffer();
 	this->display->GetAssets()->DrawStatusEffects(dT, camera);
+	postFullSceneFBO->BindDepthRenderBuffer();
 
 	FBObj::UnbindFBObj();
 
@@ -198,6 +203,7 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
 
 	// Final non-fullscreen draw pass - draw the falling items and particles
 	finalFBO->BindFBObj();
+	glClear(GL_DEPTH_BUFFER_BIT);
 	initialFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
 
 	// Render all effects that do not go through all the post-processing filters...

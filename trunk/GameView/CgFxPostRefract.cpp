@@ -7,14 +7,15 @@
 #include "../BlammoEngine/Texture3D.h"
 #include "../BlammoEngine/Texture2D.h"
 
-const char* CgFxPostRefract::BASIC_TECHNIQUE_NAME											= "PostRefractGeom";
-const char* CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME						= "PostRefractNormalTex";
-const char* CgFxPostRefract::NORMAL_TEXTURE_WITH_NOISE_TECHNIQUE_NAME	= "PostRefractNormalTexWithNoise";
+const char* CgFxPostRefract::BASIC_TECHNIQUE_NAME												= "PostRefractGeom";
+const char* CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME							= "PostRefractNormalTex";
+const char* CgFxPostRefract::NORMAL_TEXTURE_WITH_OVERLAY_TECHNIQUE_NAME	= "PostRefractNormalTexWithOverlay";
+const char* CgFxPostRefract::NORMAL_TEXTURE_WITH_NOISE_TECHNIQUE_NAME		= "PostRefractNormalTexWithNoise";
 
 // Default constructor
 CgFxPostRefract::CgFxPostRefract() : 
 CgFxEffectBase(GameViewConstants::GetInstance()->CGFX_POSTREFRACT_SHADER), 
-indexOfRefraction(1.00f), warpAmount(1.0f), sceneTex(NULL), normalTex(NULL), 
+indexOfRefraction(1.00f), warpAmount(1.0f), sceneTex(NULL), normalTex(NULL), overlayTex(NULL),
 timer(0.0), scale(0.05f), freq(1.0f) {
 	
 	// Set the technique
@@ -33,9 +34,10 @@ timer(0.0), scale(0.05f), freq(1.0f) {
 	this->sceneHeightParam			= cgGetNamedEffectParameter(this->cgEffect, "SceneHeight");
 
 	// The rendered scene background texture
-	this->sceneSamplerParam  = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
-	this->normalSamplerParam = cgGetNamedEffectParameter(this->cgEffect, "NormalSampler");
-	this->noiseSamplerParam  = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
+	this->sceneSamplerParam   = cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
+	this->normalSamplerParam  = cgGetNamedEffectParameter(this->cgEffect, "NormalSampler");
+	this->overlaySamplerParam = cgGetNamedEffectParameter(this->cgEffect, "OverlaySampler");
+	this->noiseSamplerParam   = cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
 
 	this->noiseScaleParam				= cgGetNamedEffectParameter(this->cgEffect, "Scale");
 	this->noiseFreqParam				= cgGetNamedEffectParameter(this->cgEffect, "Freq");
@@ -74,6 +76,9 @@ void CgFxPostRefract::SetupBeforePasses(const Camera& camera) {
 	// If there's a normal texture, set it
 	if (this->normalTex != NULL) {
 		cgGLSetTextureParameter(this->normalSamplerParam, this->normalTex->GetTextureID());
+	}
+	if (this->overlayTex != NULL) {
+		cgGLSetTextureParameter(this->overlaySamplerParam, this->overlayTex->GetTextureID());
 	}
 	// Set the noise texture sampler
 	cgGLSetTextureParameter(this->noiseSamplerParam, Noise::GetInstance()->GetNoise3DTexture()->GetTextureID());
