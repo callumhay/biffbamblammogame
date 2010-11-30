@@ -148,6 +148,8 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
 	if (!isFireBall && !isIceBall) {
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			// EVENT: Ice was shattered
+			GameEventManager::Instance()->ActionBlockIceShattered(*this);
 			// If the piece is frozen it shatters and is immediately destroyed on ball impact
 			newPiece = this->Destroy(gameModel);
 		}

@@ -24,6 +24,7 @@ class CgFxPostRefract : public CgFxEffectBase {
 public:
 	static const char* BASIC_TECHNIQUE_NAME;
 	static const char* NORMAL_TEXTURE_TECHNIQUE_NAME;
+	static const char* NORMAL_TEXTURE_WITH_OVERLAY_TECHNIQUE_NAME;
 	static const char* NORMAL_TEXTURE_WITH_NOISE_TECHNIQUE_NAME;
 
 	CgFxPostRefract();
@@ -31,6 +32,7 @@ public:
 
 	void SetFBOTexture(const Texture2D* tex);
 	void SetNormalTexture(const Texture2D* tex);
+	void SetOverlayTexture(const Texture2D* tex);
 	void SetWarpAmountParam(float amt);
 	void SetIndexOfRefraction(float eta);
 
@@ -58,6 +60,7 @@ private:
 	CGparameter sceneSamplerParam;
 	CGparameter normalSamplerParam;
 	CGparameter noiseSamplerParam;
+	CGparameter overlaySamplerParam;
 	CGparameter indexOfRefactionParam;
 	CGparameter warpAmountParam;
 	CGparameter sceneWidthParam;
@@ -73,6 +76,7 @@ private:
 	float scale, freq;	
 	const Texture2D* sceneTex;
 	const Texture2D* normalTex;
+	const Texture2D* overlayTex;
 };
 
 /**
@@ -89,6 +93,13 @@ inline void CgFxPostRefract::SetFBOTexture(const Texture2D* tex) {
  */
 inline void CgFxPostRefract::SetNormalTexture(const Texture2D* tex) {
 	this->normalTex = tex;
+}
+
+/**
+ * Sets the overlay texture to the given one - only applies to the normal with overlay technique.
+ */
+inline void CgFxPostRefract::SetOverlayTexture(const Texture2D* tex) {
+	this->overlayTex = tex;
 }
 
 /**

@@ -77,10 +77,10 @@ private:
 	ESPPointEmitter* BuildBlockOnFireFlameEffect(const LevelPiece& piece, bool spinCW);
 	ESPPointEmitter* BuildBlockOnFireSmokeEffect(const LevelPiece& piece);
 	ESPPointEmitter* BuildBlockOnFireScortchEffect(const LevelPiece& piece);
+
 	// ... Ice Cube (Frozen) status effect builders
 	ESPPointEmitter* BuildIceBlockEffect(const LevelPiece& piece);
-	ESPPointEmitter* BuildIceBlockFrost(const LevelPiece& piece);
-
+	GLuint BuildIceBlockDL(const LevelPiece& piece);
 
 	DISALLOW_COPY_AND_ASSIGN(BlockStatusEffectRenderer);
 

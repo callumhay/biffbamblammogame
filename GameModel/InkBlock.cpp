@@ -38,6 +38,12 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
+	// Check to see if the ink block is frozen...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			// EVENT: Ice was shattered
+			GameEventManager::Instance()->ActionBlockIceShattered(*this);
+	}
+
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);

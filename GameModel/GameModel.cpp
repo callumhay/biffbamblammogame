@@ -816,7 +816,9 @@ bool GameModel::AddStatusUpdateLevelPiece(LevelPiece* p, const LevelPiece::Piece
 	if (findIter == this->statusUpdatePieces.end()) {
 		// Nothing was found, add a new entry for the piece with the given status...
 		p->AddStatus(status);
-		this->statusUpdatePieces.insert(std::make_pair(p, static_cast<int32_t>(status)));
+		std::pair<std::map<LevelPiece*, int32_t>::iterator, bool> insertResult = 
+			this->statusUpdatePieces.insert(std::make_pair(p, static_cast<int32_t>(status)));
+		assert(insertResult.second);
 		return true;
 	}
 

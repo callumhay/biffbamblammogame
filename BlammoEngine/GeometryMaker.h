@@ -74,6 +74,7 @@ public:
 	inline GLuint GetQuadDL() const { return this->quadDL; }
 	
 	// Draw a basic unit cube
+	void DrawRawCube(const Point3D& center, const Vector3D& size) const;
 	inline void DrawCube() const { glCallList(this->cubeDL); }
 	inline GLuint GetCubeDL() const { return this->cubeDL; }
 

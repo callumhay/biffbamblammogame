@@ -196,7 +196,7 @@ inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera) {
 
 // Draw the block status effects
 inline void GameAssets::DrawStatusEffects(double dT, const Camera& camera) {
-	this->GetCurrentLevelMesh()->DrawStatusEffects(dT, camera, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
+	this->GetCurrentLevelMesh()->DrawStatusEffects(dT, camera, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
 }
 
 #endif

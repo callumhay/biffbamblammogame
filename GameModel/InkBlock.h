@@ -63,6 +63,8 @@ public:
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
+	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses); 
+
 protected:
 	static const int POINTS_ON_BLOCK_DESTROYED = 15;	// Points obtained when you destory an ink block
 	static const int PIECE_STARTING_LIFE_POINTS = 80;	// Starting life points given to a ink block
@@ -70,4 +72,14 @@ protected:
 	float currLifePoints;	// Current life points of this block
 
 };
+
+inline bool InkBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
+	UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(gameModel);
+	assert(gameModel != NULL);
+
+	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
+	return false;
+}
+
 #endif

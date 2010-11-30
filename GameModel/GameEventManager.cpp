@@ -473,3 +473,11 @@ void GameEventManager::ActionLivesChanged(int livesLeftBefore, int livesLeftAfte
 		(*this->listenerIter)->LivesChangedEvent(livesLeftBefore, livesLeftAfter);
 	}	
 }
+
+// Action for when ice shatters on a block
+void GameEventManager::ActionBlockIceShattered(const LevelPiece& block) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BlockIceShatteredEvent(block);
+	}	
+}

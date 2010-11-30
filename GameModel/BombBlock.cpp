@@ -128,6 +128,11 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 			}
 		}
 	}
+	else {
+		// EVENT: Ice was shattered
+		GameEventManager::Instance()->ActionBlockIceShattered(*this);
+	}
+
 
 	// Obliterate this bomb
 	// EVENT: Bomb Block is being destroyed

@@ -15,6 +15,7 @@
 #include "LevelPiece.h"
 #include "GameBall.h"
 
+
 class SolidBlock : public LevelPiece {
 
 public:
@@ -76,16 +77,19 @@ public:
 														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 	
-	// Doesn't matter if a ball collides with solid block, it does nothing to the block.
-	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-		UNUSED_PARAMETER(gameModel);
-
-		// Tell the ball what the last piece it collided with was...
-		ball.SetLastPieceCollidedWith(this);
-		return this;
-	}
-
+	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
+	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 };
+
+inline bool SolidBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
+	UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(gameModel);
+	assert(gameModel != NULL);
+
+	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
+	return false;
+}
+
 #endif

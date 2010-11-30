@@ -99,6 +99,8 @@ public:
 	
 	void ActionLivesChanged(int livesLeftBefore, int livesLeftAfter);
 
+	void ActionBlockIceShattered(const LevelPiece& block);
+
 protected:
 	GameEventManager();
 	

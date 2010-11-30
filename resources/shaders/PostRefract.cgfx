@@ -109,6 +109,21 @@ sampler2D NormalSampler = sampler_state {
     MagFilter = Linear;
 };
 
+texture OverlayTexture <
+    string ResourceName = "ink_splatter_1024x512.png";
+    string UIName =  "Overlay Texture";
+    string ResourceType = "2D";
+>;
+
+sampler2D OverlaySampler = sampler_state {
+    Texture = <OverlayTexture>;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Linear;
+};
+
+
 texture NoiseTexture  <
     string ResourceName = "noiseL8_32x32x32.dds";
     string UIName =  "Noise Texture";
@@ -273,8 +288,26 @@ float4 PostRefractNormalTex_PS(vertexOutputPostRefractNormalTex IN) : COLOR {
     
     float2 lookupOffset = GetRefractBGOffset(nWorldView, normalFromTex);
     float3 textureColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
- 
+    
     return IN.Colour * float4(textureColour, normalSample.a);
+}
+
+float4 PostRefractNormalTexWithOverlay_PS(vertexOutputPostRefractNormalTex IN) : COLOR {
+    float3 nWorldView     = normalize(IN.WorldView.xyz);
+    float3 nProjPos      = (IN.ProjPos.xyz + float3(1,1,1)) * 0.5;
+    
+    // Get the normal from the texture of the object
+    float4 normalSample = tex2D(NormalSampler, IN.UV).rgba;
+    // Convert the RGB colour into a normal with components in [-1,1]
+    float3 normalFromTex = normalize(2 * normalSample.rbg - float3(1,1,1));
+    
+    // Get the overlay texture (adds detail to the refraction...)
+    float4 overlayColour = tex2D(OverlaySampler, IN.UV).rgba;
+    
+    float2 lookupOffset = GetRefractBGOffset(nWorldView, normalFromTex);
+    float3 textureColour = tex2D(SceneSampler, nProjPos.xy + lookupOffset).rgb;
+    
+    return clamp(IN.Colour * ((1.0f - overlayColour.a) * float4(textureColour, normalSample.a) + overlayColour.a * float4(1.1f * overlayColour.rgb, 1.0f)), 0, 1);
 }
 
 float Turbulance(float4 noiseSample) {
@@ -341,18 +374,28 @@ technique PostRefractNormalTex {
         
         CullFace = Back;
         CullFaceEnable = true;
-    /*
+  
+        VertexProgram = compile arbvp1 PostRefractNormalTex_VS();        
+        FragmentProgram = compile arbfp1 PostRefractNormalTex_PS();
+    }  
+}
+
+technique PostRefractNormalTexWithOverlay {
+
+    pass p0 < string Script = "Draw=geometry;"; > {
         BlendEnable = true;
         BlendFunc = int2(SrcAlpha, OneMinusSrcAlpha);
+        BlendEquation = FuncAdd;
         
         DepthTestEnable = true;
         DepthFunc = LEqual;
+        DepthMask = true;
         CullFaceEnable = true;
         CullFace = Back;
         PolygonMode = int2(Front, Fill);
-    */    
+        
         VertexProgram = compile arbvp1 PostRefractNormalTex_VS();        
-        FragmentProgram = compile arbfp1 PostRefractNormalTex_PS();
+        FragmentProgram = compile arbfp1 PostRefractNormalTexWithOverlay_PS();
     }  
 }
 
