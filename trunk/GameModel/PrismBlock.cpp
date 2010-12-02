@@ -47,77 +47,75 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
-		// Clear all the currently existing boundry lines first
-		this->bounds.Clear();
+	// Set the bounding lines for a diamond-shaped block
+	std::vector<Collision::LineSeg2D> boundingLines;
+	std::vector<Vector2D>  boundingNorms;
 
-		// Set the bounding lines for a diamond-shaped block
-		std::vector<Collision::LineSeg2D> boundingLines;
-		std::vector<Vector2D>  boundingNorms;
+	//std::vector<Collision::LineSeg2D> reflectRefractBoundingLines;
+	//std::vector<Vector2D>  reflectRefractBoundingNorms;
 
-		//std::vector<Collision::LineSeg2D> reflectRefractBoundingLines;
-		//std::vector<Vector2D>  reflectRefractBoundingNorms;
+	// Bottom-left diagonal boundry
+	if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
+		  (bottomLeftNeighbor != NULL && bottomLeftNeighbor->IsNoBoundsPieceType()) ||
+			(bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
+		
+		Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
+														this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
+		Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
+		n1.Normalize();
 
-		// Bottom-left diagonal boundry
-		if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
-			  (bottomLeftNeighbor != NULL && bottomLeftNeighbor->IsNoBoundsPieceType()) ||
-				(bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
-			
-			Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
-															this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
-			n1.Normalize();
+		boundingLines.push_back(boundry);
+		boundingNorms.push_back(n1);
 
-			boundingLines.push_back(boundry);
-			boundingNorms.push_back(n1);
+		//reflectRefractBoundingLines.push_back(boundry);
+		//Vector2D rrNormal(
+		//reflectRefractBoundingNorms
+	}
 
-			//reflectRefractBoundingLines.push_back(boundry);
-			//Vector2D rrNormal(
-			//reflectRefractBoundingNorms
-		}
+	// Bottom-right diagonal boundry
+	if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
+		  (bottomRightNeighbor != NULL && bottomRightNeighbor->IsNoBoundsPieceType()) ||
+			(bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
+		Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
+																 this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
+		Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
+		n1.Normalize();
 
-		// Bottom-right diagonal boundry
-		if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
-			  (bottomRightNeighbor != NULL && bottomRightNeighbor->IsNoBoundsPieceType()) ||
-				(bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
-			Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
-																	 this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
-			n1.Normalize();
+		boundingLines.push_back(boundry);
+		boundingNorms.push_back(n1);
+	}
 
-			boundingLines.push_back(boundry);
-			boundingNorms.push_back(n1);
-		}
+	// Top-left diagonal boundry
+	if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
+		  (topLeftNeighbor != NULL && topLeftNeighbor->IsNoBoundsPieceType()) ||
+			(topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
 
-		// Top-left diagonal boundry
-		if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
-			  (topLeftNeighbor != NULL && topLeftNeighbor->IsNoBoundsPieceType()) ||
-				(topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
+		Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
+														this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
+		Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
+		n1.Normalize();
 
-			Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
-															this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
-			n1.Normalize();
+		boundingLines.push_back(boundry);
+		boundingNorms.push_back(n1);
+	}
 
-			boundingLines.push_back(boundry);
-			boundingNorms.push_back(n1);
-		}
+	// Top-right diagonal boundry
+	if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
+		  (topRightNeighbor != NULL && topRightNeighbor->IsNoBoundsPieceType()) ||
+			(topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
 
-		// Top-right diagonal boundry
-		if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
-			  (topRightNeighbor != NULL && topRightNeighbor->IsNoBoundsPieceType()) ||
-				(topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
+		Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
+																 this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
+		Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
+		n1.Normalize();
 
-			Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
-																	 this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
-			n1.Normalize();
-
-			boundingLines.push_back(boundry);
-			boundingNorms.push_back(n1);
-		}
-
-		this->bounds = BoundingLines(boundingLines, boundingNorms);
-		//this->reflectRefractBounds = BoundingLines(reflectRefractBoundingLines, reflectRefractBoundingNorms);
+		boundingLines.push_back(boundry);
+		boundingNorms.push_back(n1);
+	}
+	
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+		 							topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+	//this->reflectRefractBounds = BoundingLines(reflectRefractBoundingLines, reflectRefractBoundingNorms);
 }
 
 bool PrismBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {

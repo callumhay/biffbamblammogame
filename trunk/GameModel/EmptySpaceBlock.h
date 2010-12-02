@@ -65,9 +65,9 @@ public:
 	}
 
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-														const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+										const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 			UNUSED_PARAMETER(leftNeighbor);
 			UNUSED_PARAMETER(bottomNeighbor);
 			UNUSED_PARAMETER(rightNeighbor);

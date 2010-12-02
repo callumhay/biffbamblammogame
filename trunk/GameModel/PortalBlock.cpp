@@ -101,7 +101,8 @@ void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	boundingLines.push_back(l4);
 	boundingNorms.push_back(n4);
 
-	this->bounds = BoundingLines(boundingLines, boundingNorms);
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+		 							topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {

@@ -2979,7 +2979,7 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	const ESPInterval starSpawnDelta(0.02f, 0.06f);
 	const ESPInterval starInitialSpd(60.0f, 80.0f);
 	const ESPInterval starLife(2.0f, 2.5f);
-	const ESPInterval starSize(1.0f, 1.5f);
+	const ESPInterval starSize(15.0f, 40.0f); // In pixels on the screen...
 
 	ESPPointEmitter* solidStarEmitter = new ESPPointEmitter();
 	solidStarEmitter->SetSpawnDelta(starSpawnDelta);
@@ -2990,7 +2990,8 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	solidStarEmitter->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, ESPInterval(1.0f));
 	solidStarEmitter->SetEmitAngleInDegrees(180);
 	solidStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	solidStarEmitter->SetAsPointSpriteEmitter(true);
+	//solidStarEmitter->SetAsPointSpriteEmitter(true);
+	solidStarEmitter->SetParticleAlignment(ESP::NoAlignment);
 	solidStarEmitter->SetEmitDirection(Vector3D(0, 1, 0));
 	solidStarEmitter->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	solidStarEmitter->SetEmitPosition(Point3D(0, 0, 0));
@@ -3007,7 +3008,8 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	outlineStarEmitter->SetParticleColour(redRandomColour, greenRandomColour, blueRandomColour, ESPInterval(1.0f));
 	outlineStarEmitter->SetEmitAngleInDegrees(180);
 	outlineStarEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	outlineStarEmitter->SetAsPointSpriteEmitter(true);
+	//outlineStarEmitter->SetAsPointSpriteEmitter(true);
+	outlineStarEmitter->SetParticleAlignment(ESP::NoAlignment);
 	outlineStarEmitter->SetEmitDirection(Vector3D(0, 1, 0));
 	outlineStarEmitter->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	outlineStarEmitter->SetEmitPosition(Point3D(0, 0, 0));
@@ -3019,10 +3021,10 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	haloExpandingAura->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	haloExpandingAura->SetInitialSpd(ESPInterval(0));
 	haloExpandingAura->SetParticleLife(ESPInterval(2.5f));
-	haloExpandingAura->SetParticleSize(ESPInterval(100), ESPInterval(75));
+	haloExpandingAura->SetParticleSize(ESPInterval(100), ESPInterval(75)); // In pixels on the screen...
 	haloExpandingAura->SetEmitAngleInDegrees(0);
 	haloExpandingAura->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	haloExpandingAura->SetParticleAlignment(ESP::ScreenAligned);
+	haloExpandingAura->SetParticleAlignment(ESP::NoAlignment);
 	haloExpandingAura->SetEmitPosition(Point3D(0, 0, 0));
 	haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
 	haloExpandingAura->AddEffector(&this->particleLargeGrowth);

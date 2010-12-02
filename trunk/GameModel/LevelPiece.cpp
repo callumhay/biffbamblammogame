@@ -25,7 +25,10 @@ const float LevelPiece::HALF_PIECE_WIDTH = PIECE_WIDTH / 2.0f;
 const float LevelPiece::HALF_PIECE_HEIGHT = PIECE_HEIGHT / 2.0f;
 const float LevelPiece::HALF_PIECE_DEPTH  = PIECE_DEPTH / 2.0f;
 
-LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc) : colour(1,1,1), pieceStatus(LevelPiece::NormalStatus) {
+LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc) : 
+colour(1,1,1), pieceStatus(LevelPiece::NormalStatus), leftNeighbor(NULL),
+bottomNeighbor(NULL), rightNeighbor(NULL), topNeighbor(NULL), topRightNeighbor(NULL),
+topLeftNeighbor(NULL), bottomRightNeighbor(NULL), bottomLeftNeighbor(NULL) {
 	this->SetWidthAndHeightIndex(wLoc, hLoc);
 }
 
@@ -57,10 +60,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	UNUSED_PARAMETER(topRightNeighbor);
 	UNUSED_PARAMETER(topLeftNeighbor);
 
-	// Clear all the currently existing boundry lines first
-	this->bounds.Clear();
-
-	// Set the bounding lines for a rectangular block
+	// Set the bounding lines for a rectangular block - these are also used when any block is frozen in an ice cube
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
 
@@ -103,7 +103,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		boundingNorms.push_back(n4);
 	}
 
-	this->bounds = BoundingLines(boundingLines, boundingNorms);
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor,
+									rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 void LevelPiece::AddStatus(const PieceStatus& status) {
@@ -114,6 +115,12 @@ void LevelPiece::AddStatus(const PieceStatus& status) {
 	}
 
 	this->pieceStatus = (this->pieceStatus | status);
+	if (status == LevelPiece::IceCubeStatus) {
+		// We update the bounds since ice cubes change the bounds of a block - this must be done
+		// AFTER the change to the status 
+		this->UpdateBounds(this->leftNeighbor, this->bottomNeighbor, this->rightNeighbor, this->topNeighbor,
+											 this->topRightNeighbor, this->topLeftNeighbor, this->bottomRightNeighbor, this->bottomLeftNeighbor);
+	}
 
 	// EVENT: A status has been added to this piece...
 	GameEventManager::Instance()->ActionLevelPieceStatusAdded(*this, status);
@@ -128,6 +135,13 @@ void LevelPiece::RemoveStatus(const PieceStatus& status) {
 
 	this->pieceStatus = (this->pieceStatus & ~status);
 	
+	if (status == LevelPiece::IceCubeStatus) {
+		// We update the bounds since ice cubes change the bounds of a block - this must be done
+		// AFTER the change to the status 
+		this->UpdateBounds(this->leftNeighbor, this->bottomNeighbor, this->rightNeighbor, this->topNeighbor,
+											 this->topRightNeighbor, this->topLeftNeighbor, this->bottomRightNeighbor, this->bottomLeftNeighbor);
+	}
+
 	// EVENT: A status has been removed from this piece...
 	GameEventManager::Instance()->ActionLevelPieceStatusRemoved(*this, status);
 }
@@ -155,7 +169,14 @@ void LevelPiece::RemoveAllStatus() {
 		return;
 	}
 
+	bool hadIceCubeStatus = this->HasStatus(LevelPiece::IceCubeStatus);
 	this->pieceStatus = LevelPiece::NormalStatus;
+	if (hadIceCubeStatus) {
+		// We update the bounds since ice cubes change the bounds of a block - this must be done
+		// AFTER the change to the status 
+		this->UpdateBounds(this->leftNeighbor, this->bottomNeighbor, this->rightNeighbor, this->topNeighbor,
+											 this->topRightNeighbor, this->topLeftNeighbor, this->bottomRightNeighbor, this->bottomLeftNeighbor);
+	}
 
 	// EVENT: All status effects removed from this piece...
 	GameEventManager::Instance()->ActionLevelPieceAllStatusRemoved(*this);
