@@ -220,6 +220,9 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			alignUpVec			= Vector3D::Normalize(Vector3D::cross(alignNormalVec, alignRightVec));
 			break;
 
+		case ESP::NoAlignment:
+			break;
+
 		default:
 			break;
 	}

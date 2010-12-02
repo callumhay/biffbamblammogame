@@ -379,7 +379,8 @@ inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile::Project
 inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
 	// Projectiles can pass through when reflected by the paddle shield
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		if (projectile.GetType() == Projectile::PaddleLaserBulletProjectile) {
+		if (projectile.GetType() == Projectile::PaddleLaserBulletProjectile ||
+			  projectile.GetType() == Projectile::PaddleRocketBulletProjectile) {
 			return true;
 		}
 	}

@@ -63,13 +63,11 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
-	UNUSED_PARAMETER(topRightNeighbor);
-	UNUSED_PARAMETER(topLeftNeighbor);
-	UNUSED_PARAMETER(bottomRightNeighbor);
-	UNUSED_PARAMETER(bottomLeftNeighbor);
-
-	// Clear all the currently existing boundry lines first
-	this->bounds.Clear();
+	// If the triangle block is in ice then its bounds are a basic rectangle...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+		return;
+	}
 
 	// We ALWAYS create boundries unless the neighbour does not exist (NULL) 
 	// or is another solid block.
@@ -122,7 +120,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		}
 	}
 
-	this->bounds = BoundingLines(boundingLines, boundingNorms);
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+		 							topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 bool SolidBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {

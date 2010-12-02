@@ -30,12 +30,15 @@ void BreakableTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const 
 																					const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 																					const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
-	UNUSED_PARAMETER(topRightNeighbor);
-	UNUSED_PARAMETER(topLeftNeighbor);
-	UNUSED_PARAMETER(bottomRightNeighbor);
-	UNUSED_PARAMETER(bottomLeftNeighbor);
-
-	this->bounds = TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
+	// If the triangle block is in ice then its bounds are a basic rectangle...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+	}
+	else {
+		this->SetBounds(TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor), 
+										leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+		 							  topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+	}
 }
 
 Matrix4x4 BreakableTriangleBlock::GetPieceToLevelTransform() const {
@@ -67,12 +70,15 @@ void SolidTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Leve
 																			const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 																			const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
-	UNUSED_PARAMETER(topRightNeighbor);
-	UNUSED_PARAMETER(topLeftNeighbor);
-	UNUSED_PARAMETER(bottomRightNeighbor);
-	UNUSED_PARAMETER(bottomLeftNeighbor);
-
-	this->bounds = TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
+	// If the triangle block is in ice then its bounds are a basic rectangle...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+	}
+	else {
+		this->SetBounds(TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor), 
+										leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+		 								topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+	}
 }
 
 Matrix4x4 SolidTriangleBlock::GetPieceToLevelTransform() const {
@@ -116,7 +122,16 @@ void PrismTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const Leve
 	UNUSED_PARAMETER(bottomRightNeighbor);
 	UNUSED_PARAMETER(bottomLeftNeighbor);
 
-	this->bounds = TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
+	// TODO: If we want to support ice cube prisms...
+	// If the triangle block is in ice then its bounds are a basic rectangle...
+	//if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+	//	LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+	//}
+	//else {
+
+	this->SetBounds(TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor), 
+									leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+	 								topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 	this->reflectRefractBounds = TriangleBlock::CreateTriangleBounds(true, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor);
 }
 

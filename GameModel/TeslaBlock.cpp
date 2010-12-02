@@ -37,59 +37,58 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
-	UNUSED_PARAMETER(topRightNeighbor);
-	UNUSED_PARAMETER(topLeftNeighbor);
-	UNUSED_PARAMETER(bottomRightNeighbor);
-	UNUSED_PARAMETER(bottomLeftNeighbor);
+	// If the triangle block is in ice then its bounds are a basic rectangle...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+		return;
+	}
 
-		// Clear all the currently existing boundry lines first
-		this->bounds.Clear();
+	// We ALWAYS create boundries unless the neighbour does not exist at all...
+	static const float HALF_TESLA_HEIGHT_BOUND = 0.9f * LevelPiece::HALF_PIECE_HEIGHT;
+	static const float HALF_TESLA_WIDTH_BOUND  = 1.0f * LevelPiece::HALF_PIECE_WIDTH;
 
-		// We ALWAYS create boundries unless the neighbour does not exist at all...
-		static const float HALF_TESLA_HEIGHT_BOUND = 0.9f * LevelPiece::HALF_PIECE_HEIGHT;
-		static const float HALF_TESLA_WIDTH_BOUND  = 1.0f * LevelPiece::HALF_PIECE_WIDTH;
+	// Set the bounding lines for a rectangular block
+	std::vector<Collision::LineSeg2D> boundingLines;
+	std::vector<Vector2D>  boundingNorms;
 
-		// Set the bounding lines for a rectangular block
-		std::vector<Collision::LineSeg2D> boundingLines;
-		std::vector<Vector2D>  boundingNorms;
+	// Left boundry of the piece
+	if (leftNeighbor != NULL) {
+		Collision::LineSeg2D l1(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND), 
+								 this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
+		Vector2D n1(-1, 0);
+		boundingLines.push_back(l1);
+		boundingNorms.push_back(n1);
+	}
 
-		// Left boundry of the piece
-		if (leftNeighbor != NULL) {
-			Collision::LineSeg2D l1(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND), 
-									 this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
-			Vector2D n1(-1, 0);
-			boundingLines.push_back(l1);
-			boundingNorms.push_back(n1);
-		}
+	// Bottom boundry of the piece
+	if (bottomNeighbor != NULL) {
+		Collision::LineSeg2D l2(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
+								 this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
+		Vector2D n2(0, -1);
+		boundingLines.push_back(l2);
+		boundingNorms.push_back(n2);
+	}
 
-		// Bottom boundry of the piece
-		if (bottomNeighbor != NULL) {
-			Collision::LineSeg2D l2(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
-									 this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
-			Vector2D n2(0, -1);
-			boundingLines.push_back(l2);
-			boundingNorms.push_back(n2);
-		}
+	// Right boundry of the piece
+	if (rightNeighbor != NULL) {
+		Collision::LineSeg2D l3(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
+								 this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
+		Vector2D n3(1, 0);
+		boundingLines.push_back(l3);
+		boundingNorms.push_back(n3);
+	}
 
-		// Right boundry of the piece
-		if (rightNeighbor != NULL) {
-			Collision::LineSeg2D l3(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
-									 this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
-			Vector2D n3(1, 0);
-			boundingLines.push_back(l3);
-			boundingNorms.push_back(n3);
-		}
+	// Top boundry of the piece
+	if (topNeighbor != NULL) {
+		Collision::LineSeg2D l4(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND),
+								 this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
+		Vector2D n4(0, 1);
+		boundingLines.push_back(l4);
+		boundingNorms.push_back(n4);
+	}
 
-		// Top boundry of the piece
-		if (topNeighbor != NULL) {
-			Collision::LineSeg2D l4(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND),
-									 this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
-			Vector2D n4(0, 1);
-			boundingLines.push_back(l4);
-			boundingNorms.push_back(n4);
-		}
-
-		this->bounds = BoundingLines(boundingLines, boundingNorms);
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+		 							topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 bool TeslaBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {

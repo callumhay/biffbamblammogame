@@ -672,14 +672,26 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
 
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		if (projectile.GetType() == Projectile::PaddleLaserBulletProjectile) {
-			Vector2D fromShieldCenterToProjectile = projectile.GetPosition() - this->GetCenterPosition();
-			fromShieldCenterToProjectile.Normalize();
-			projectile.SetVelocity(fromShieldCenterToProjectile, projectile.GetVelocityMagnitude());
-			projectile.SetPosition(projectile.GetPosition() + projectile.GetHeight() * fromShieldCenterToProjectile);
+		if (projectile.GetType() == Projectile::PaddleLaserBulletProjectile ||
+			  projectile.GetType() == Projectile::PaddleRocketBulletProjectile) {
 
-			// EVENT: Projectile deflected by shield
-			GameEventManager::Instance()->ActionProjectileDeflectedByPaddleShield(projectile, *this);
+			// If the projectile is moving generally upwards and away from the paddle then we ignore this entirely...
+			if (acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
+				  Vector2D::Dot(projectile.GetVelocityDirection(), 
+					Vector2D::Normalize(this->GetUpVector()))))) > static_cast<float>(M_PI / 3.0f)) {
+				
+				Vector2D fromShieldCenterToProjectile = projectile.GetPosition() - this->GetCenterPosition();
+				fromShieldCenterToProjectile.Normalize();
+				projectile.SetVelocity(fromShieldCenterToProjectile, projectile.GetVelocityMagnitude());
+				projectile.SetPosition(projectile.GetPosition() + projectile.GetHeight() * fromShieldCenterToProjectile);
+
+				// Be sure to reset the last piece the projectile collided with since it technically just collided
+				// off of the paddle's shield
+				projectile.SetLastLevelPieceCollidedWith(NULL);
+
+				// EVENT: Projectile deflected by shield
+				GameEventManager::Instance()->ActionProjectileDeflectedByPaddleShield(projectile, *this);
+			}
 		}
 	}
 }

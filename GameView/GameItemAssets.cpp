@@ -243,7 +243,8 @@ void GameItemAssets::DrawTimers(double dT, const Camera& camera) {
 	int currYPos	= displayHeight - ((displayHeight - (static_cast<int>(this->activeItemTimers.size()) * TIMER_HEIGHT_SPACED)) / 2);
 
 	// Prepare OGL for drawing the timer
-	glPushAttrib(GL_TEXTURE_BIT | GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+	glPushAttrib(GL_TEXTURE_BIT | GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | 
+							 GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	
 	// Make world coordinates equal window coordinates
 	Camera::PushWindowCoords();
@@ -342,7 +343,6 @@ void GameItemAssets::TimerStopped(const GameItemTimer* timer) {
 		if (itemType == timer->GetTimerItemType()) {
 			timerHUDElement->StopTimer();
 		}
-
 	}
 }
 

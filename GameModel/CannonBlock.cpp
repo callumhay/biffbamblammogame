@@ -51,7 +51,10 @@ LevelPiece* CannonBlock::Destroy(GameModel* gameModel) {
 }
 
 // We need to override this in order to make sure it actually checks for a collision
-bool CannonBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+bool CannonBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
+																 Collision::LineSeg2D& collisionLine, 
+																 double& timeSinceCollision) const {
+
 		return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
 }
 
@@ -92,7 +95,8 @@ void CannonBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	}
 
 	// Clear all the currently existing boundry lines first
-	this->bounds = this->BuildBounds();
+	this->SetBounds(this->BuildBounds(), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+		 							topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 /**

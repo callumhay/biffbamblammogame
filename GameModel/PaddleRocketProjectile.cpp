@@ -69,6 +69,11 @@ void PaddleRocketProjectile::Tick(double seconds) {
 }
 
 BoundingLines PaddleRocketProjectile::BuildBoundingLines() const {
+	// If the rocket is inside a cannon block it has no bounding lines...
+	if (this->cannonBlock != NULL) {
+		return BoundingLines();
+	}
+
 	const Vector2D& UP_DIR			= this->GetVelocityDirection();
 	const Vector2D& RIGHT_DIR	= this->GetRightVectorDirection();
 

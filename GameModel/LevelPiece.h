@@ -103,6 +103,22 @@ protected:
 	unsigned int wIndex, hIndex;	// The width and height index to where this block is in its level
 	BoundingLines bounds;			 		// The bounding box, rep. as lines forming the boundry of this, kept in world space
 
+	// Pointers to any neighboring level pieces to this one - if a neighbor does not
+	// exist it will be NULL - these get initialized/set with any call to UpdateBounds.
+	const LevelPiece* leftNeighbor;
+	const LevelPiece* bottomNeighbor;
+	const LevelPiece* rightNeighbor;
+	const LevelPiece* topNeighbor;
+	const LevelPiece* topRightNeighbor;
+	const LevelPiece* topLeftNeighbor;
+	const LevelPiece* bottomRightNeighbor;
+	const LevelPiece* bottomLeftNeighbor;
+
+	void SetBounds(const BoundingLines& bounds, const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+								 const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+								 const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+								 const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+
 	int32_t pieceStatus;
 
 	void RemoveAllStatus();
@@ -231,6 +247,21 @@ inline void LevelPiece::DebugDraw() const {
 
 inline bool LevelPiece::HasStatus(const PieceStatus& status) const {
 	return (this->pieceStatus & status) == static_cast<int32_t>(status);
+}
+
+inline void LevelPiece::SetBounds(const BoundingLines& bounds, const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+																  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+																	const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+																	const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+	this->bounds = bounds;
+	this->leftNeighbor        = leftNeighbor;
+	this->bottomNeighbor      = bottomNeighbor;
+	this->rightNeighbor       = rightNeighbor;
+	this->topNeighbor         = topNeighbor;
+	this->topRightNeighbor    = topRightNeighbor;
+	this->topLeftNeighbor     = topLeftNeighbor;
+	this->bottomRightNeighbor = bottomRightNeighbor;
+	this->bottomLeftNeighbor  = bottomLeftNeighbor;
 }
 
 #endif
