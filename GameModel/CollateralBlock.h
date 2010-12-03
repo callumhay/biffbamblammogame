@@ -73,6 +73,8 @@ public:
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
+	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
+
 	void Tick(double dT, CollateralBlockProjectile& collateralProjectile);
 	enum CollateralBlockState { InitialState, WarningState, CollateralDamageState };
 	CollateralBlock::CollateralBlockState GetState() const;
@@ -99,6 +101,15 @@ private:
 	LevelPiece* Detonate(GameModel* gameModel);
 
 };
+
+inline bool CollateralBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
+	UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(gameModel);
+	assert(gameModel != NULL);
+
+	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
+	return false;
+}
 
 inline CollateralBlock::CollateralBlockState CollateralBlock::GetState() const {
 	return this->currState;

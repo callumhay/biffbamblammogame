@@ -42,6 +42,8 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel) {
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 			// EVENT: Ice was shattered
 			GameEventManager::Instance()->ActionBlockIceShattered(*this);
+			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+			assert(success);
 	}
 
 	// Tell the level that this piece has changed to empty...
@@ -86,6 +88,14 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 	switch (projectile->GetType()) {
 
 		case Projectile::PaddleLaserBulletProjectile:
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				// TODO: Deal with case where the piece is frozen in an ice cube...
+			}
+			else {
+				resultingPiece = this->Destroy(gameModel);
+			}
+			break;
+
 		case Projectile::CollateralBlockProjectile:
 			resultingPiece = this->Destroy(gameModel);
 			break;

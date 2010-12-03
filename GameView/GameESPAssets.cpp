@@ -1147,6 +1147,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::Tesla:
 				case LevelPiece::Cannon:
 				case LevelPiece::ItemDrop:
+				case LevelPiece::Collateral:
 					{
 						// A laser just hit a block and was disapated by it... show the particle disintegrate
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
@@ -1164,6 +1165,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				default:
 					// If you get an assert fail here then you'll need to add a particle
 					// destruction effect for the new block type!
+					debug_output("GameESPAssets: There's no implementation for the effects when a laser bullet projectile hits this block type!");
 					assert(false);
 					break;
 			}
@@ -1194,6 +1196,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 
 		default:
+			debug_output("GameESPAssets: There's no implementation for the effects for this type of projectile when it hits any block!");
 			assert(false);
 			break;
 	}
@@ -1510,6 +1513,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
 																						ESPInterval(0.1f, 1.0f), ESPInterval(0.5f, 1.0f)));
 			break;
 
+		case LevelPiece::ItemDrop:
 		case LevelPiece::Collateral:
 			severity = Onomatoplex::SUPER_AWESOME;
 			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 

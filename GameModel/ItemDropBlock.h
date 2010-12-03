@@ -14,7 +14,7 @@
 
 #include "LevelPiece.h"
 #include "GameItem.h"
-
+#include "GameModel.h"
 
 class ItemDropBlock : public LevelPiece {
 
@@ -71,16 +71,15 @@ public:
 		return false;
 	}
 
-	LevelPiece* Destroy(GameModel* gameModel) {
-		UNUSED_PARAMETER(gameModel);
-		return this;
-	}
-
+	LevelPiece* Destroy(GameModel* gameModel);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
+	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
+
+	void AttemptToDropAnItem(GameModel* gameModel);
 	const GameItem::ItemType& GetNextDropItemType() const;
 	const GameItem::ItemDisposition& GetNextDropItemDisposition() const;
 
@@ -98,6 +97,23 @@ private:
 
 	void ChangeToNextItemDropType(bool doEvent);
 };
+
+inline bool ItemDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
+	UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(gameModel);
+	assert(gameModel != NULL);
+
+	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
+	return false;
+}
+
+inline void ItemDropBlock::AttemptToDropAnItem(GameModel* gameModel) {
+	// Drop an item if the item drop timer allows it...
+	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
+		gameModel->AddItemDrop(*this, this->nextDropItemType);
+		this->ChangeToNextItemDropType(true);
+	}
+}
 
 // Get what the next item drop will be
 inline const GameItem::ItemType& ItemDropBlock::GetNextDropItemType() const {

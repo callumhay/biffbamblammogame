@@ -487,7 +487,6 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::Solid:
 		case LevelPiece::SolidTriangle:
 		case LevelPiece::Tesla:
-		case LevelPiece::ItemDrop:
 			if (wasFrozen) {
 				// Add ice break effect
 				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
@@ -499,6 +498,21 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 				// Sound for basic breakable blocks
 				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
 			}
+			break;
+
+		case LevelPiece::ItemDrop:
+			if (wasFrozen) {
+				// Add ice break effect
+				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.9f, 0.45f, 0.0f));
+				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			}
+			else {
+				// Typical break effect
+				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				// Sound for basic breakable blocks
+				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			}
+			this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
 			break;
 
 		case LevelPiece::Bomb:
@@ -827,6 +841,7 @@ void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAft
 
 void GameEventsListener::BlockIceShatteredEvent(const LevelPiece& block) {
 	this->display->GetAssets()->GetESPAssets()->AddIceBitsBreakEffect(block);
+	this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
 	debug_output("EVENT: Ice shattered");
 }
 

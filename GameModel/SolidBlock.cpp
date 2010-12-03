@@ -36,6 +36,8 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel) {
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 			// EVENT: Ice was shattered
 			GameEventManager::Instance()->ActionBlockIceShattered(*this);
+			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+			assert(success);
 	}
 
 	// When destroying a breakable there is the possiblity of dropping an item...
@@ -171,6 +173,9 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 	switch (projectile->GetType()) {
 		
 		case Projectile::PaddleLaserBulletProjectile:
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				// TODO
+			}
 			break;
 		
 		case Projectile::CollateralBlockProjectile:

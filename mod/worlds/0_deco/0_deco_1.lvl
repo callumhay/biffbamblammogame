@@ -19,10 +19,10 @@ S E I E E E E E E S
 S E E E T(R,ur) E E E E S 
 S E E E E E E E E S 
 S E E E E E E T(Y,ll) E S 
-S T(O,ul) E E E E E T(O,lr) E S 
+S T(O,ul) L E E E E T(O,lr) E S 
+S E E E E L E E E S 
 S E E E E E E E E S 
-S E E E E E E E E S 
-S E E E E E E E E S 
+S E E E E D(all) E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
