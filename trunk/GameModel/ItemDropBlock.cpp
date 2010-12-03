@@ -10,9 +10,9 @@
  */
 
 #include "ItemDropBlock.h"
-#include "GameModel.h"
 #include "PaddleLaserBeam.h"
 #include "GameItemFactory.h"
+#include "EmptySpaceBlock.h"
 
 // Amount of damage the block will take before dropping an item while being hit by a beam
 const float ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP = 150.0f;
@@ -31,12 +31,65 @@ timeOfLastDrop(0) {
 ItemDropBlock::~ItemDropBlock() {
 }
 
+/**
+ * An item drop block may actually be destroyed (specifically it can only
+ * be destroyed by a collateral block falling on top of it)... hopefully the level designer doesn't depend
+ * on it existing if they setup a level where it can be destroyed..
+ */
+LevelPiece* ItemDropBlock::Destroy(GameModel* gameModel) {
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		// EVENT: Ice was shattered
+		GameEventManager::Instance()->ActionBlockIceShattered(*this);
+		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+		assert(success);
+	}
+
+	// Drop one last item before death...
+	this->timeOfLastDrop = 0;
+	this->AttemptToDropAnItem(gameModel);
+
+	// EVENT: Block is being destroyed
+	GameEventManager::Instance()->ActionBlockDestroyed(*this);
+
+	// Tell the level that this piece has changed to empty...
+	GameLevel* level = gameModel->GetCurrentLevel();
+	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
+	level->PieceChanged(gameModel, this, emptyPiece);
+
+	// Obliterate all that is left of this block...
+	LevelPiece* tempThis = this;
+	delete tempThis;
+	tempThis = NULL;
+
+	return emptyPiece;
+}
+
 // When balls collide with the item drop block it causes an item to fall from the block
 LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
-		// Drop an item...
-		gameModel->AddItemDrop(*this, this->nextDropItemType);
-		this->ChangeToNextItemDropType(true);
+	if (ball.IsLastPieceCollidedWith(this)) {
+		return this;
+	}
+
+	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
+	if (isIceBall) {
+		this->FreezePieceInIce(gameModel);
+	}
+	else {
+		bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+		bool isInIceCube = this->HasStatus(LevelPiece::IceCubeStatus);
+		if (!isFireBall && isInIceCube) {
+			// EVENT: Ice was shattered
+			GameEventManager::Instance()->ActionBlockIceShattered(*this);
+		}
+
+		// Unfreeze a frozen solid block
+		if (isInIceCube) {
+			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+			assert(success);
+		}
+		else {
+			this->AttemptToDropAnItem(gameModel);
+		}
 	}
 
 	// Tell the ball that it collided with this block
@@ -47,22 +100,41 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, GameBall& bal
 
 // When projectiles collide with the item drop block it causes an item to fall from the block
 LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-	UNUSED_PARAMETER(projectile);
+	LevelPiece* resultingPiece = this;
 
-	// Do nothing for a fire glob, it will just extinguish
 	switch (projectile->GetType()) {
 		case Projectile::FireGlobProjectile:
+			// Fire glob just extinguishes on a item drop block, unless it's frozen in an ice cube;
+			// in that case, unfreeze a frozen item drop block
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+				assert(success);
+			}
 			break;
 
 		case Projectile::PaddleLaserBulletProjectile: 
-		case Projectile::CollateralBlockProjectile:
-		case Projectile::PaddleRocketBulletProjectile:
-			// Drop an item if we can...
-			if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
-				// Drop an item...
-				gameModel->AddItemDrop(*this, this->nextDropItemType);
-				this->ChangeToNextItemDropType(true);
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				// TODO...
 			}
+			else {
+				this->AttemptToDropAnItem(gameModel);
+			}
+			break;
+
+		case Projectile::CollateralBlockProjectile:
+			// Both the collateral block and the item drop block will be destroyed in horrible, 
+			// horrible gory glory
+			resultingPiece = this->Destroy(gameModel);
+			break;
+
+		case Projectile::PaddleRocketBulletProjectile:
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				// EVENT: Ice was shattered
+				GameEventManager::Instance()->ActionBlockIceShattered(*this);
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+				assert(success);
+			}
+			this->AttemptToDropAnItem(gameModel);
 			break;
 
 		default:
@@ -70,7 +142,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 			break;
 	}
 
-	return this;
+	return resultingPiece;
 }
 
 /**

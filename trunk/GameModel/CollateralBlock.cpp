@@ -43,6 +43,13 @@ LevelPiece* CollateralBlock::Destroy(GameModel* gameModel) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		// EVENT: Ice was shattered
+		GameEventManager::Instance()->ActionBlockIceShattered(*this);
+		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+		assert(success);
+	}
+
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
@@ -57,10 +64,37 @@ LevelPiece* CollateralBlock::Destroy(GameModel* gameModel) {
 }
 
 LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-	ball.SetLastPieceCollidedWith(NULL);
-	// Being hit by the ball causes the collateral block to detonate and
-	// go into warning/collateral mode
-	return this->Detonate(gameModel);
+	if (ball.IsLastPieceCollidedWith(this)) {
+		return this;
+	}
+	
+	LevelPiece* resultingPiece = this;
+	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
+	if (isIceBall) {
+		this->FreezePieceInIce(gameModel);
+	}
+	else {
+		bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+		bool isInIceCube = this->HasStatus(LevelPiece::IceCubeStatus);
+		if (!isFireBall && isInIceCube) {
+			// EVENT: Ice was shattered
+			GameEventManager::Instance()->ActionBlockIceShattered(*this);
+		}
+
+		// Unfreeze a frozen solid block
+		if (isInIceCube) {
+			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+			assert(success);
+		}
+		else {
+			// Being hit by the ball, when not frozen, causes the collateral block to detonate and
+			// go into warning/collateral mode
+			resultingPiece = this->Detonate(gameModel);
+		}
+	}
+
+	ball.SetLastPieceCollidedWith(this);
+	return resultingPiece;
 }
 
 /**
@@ -71,8 +105,13 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 	LevelPiece* newLevelPiece = this;
 
 	switch (projectile->GetType()) {
-		case Projectile::PaddleLaserBulletProjectile: 
-			newLevelPiece = this->Detonate(gameModel);
+		case Projectile::PaddleLaserBulletProjectile:
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				// TODO...
+			}
+			else {
+				newLevelPiece = this->Detonate(gameModel);
+			}
 			break;
 
 		case Projectile::CollateralBlockProjectile:
@@ -85,7 +124,12 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			break;
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob just extinguishes
+			// Fire glob just extinguishes on a collateral block, unless it's frozen in an ice cube;
+			// in that case, unfreeze a frozen collateral block
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+				assert(success);
+			}
 			break;
 				
 		default:
@@ -174,6 +218,14 @@ void CollateralBlock::Tick(double dT, CollateralBlockProjectile& collateralProje
  */
 LevelPiece* CollateralBlock::Detonate(GameModel* gameModel) {
 	assert(this->currState == CollateralBlock::InitialState);
+
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		// EVENT: Ice was shattered
+		GameEventManager::Instance()->ActionBlockIceShattered(*this);
+		// Remove the ice status immediately...
+		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+		assert(success);
+	}
 
 	// The block is destroyed in the game level, however it lives on as a projectile
 	// within the game model!

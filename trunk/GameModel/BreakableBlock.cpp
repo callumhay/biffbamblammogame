@@ -188,10 +188,13 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 	switch (projectile->GetType()) {
 	
 		case Projectile::PaddleLaserBulletProjectile:
-			// TODO: Deal with case where the piece is frozen in an ice cube...
-				
-			// Laser bullets just dimish the piece, but don't necessarily obliterated/destroy it
-			newPiece = this->DiminishPiece(gameModel);
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				// TODO: Deal with case where the piece is frozen in an ice cube...
+			}
+			else {	
+				// Laser bullets dimish the piece, but don't necessarily obliterated/destroy it
+				newPiece = this->DiminishPiece(gameModel);
+			}
 			break;
 
 		case Projectile::CollateralBlockProjectile:
