@@ -3,11 +3,13 @@
 
 #include "../BlammoEngine/Noise.h"
 #include "../BlammoEngine/Texture3D.h"
+#include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/FBObj.h"
 
 #include "../GameModel/GameModelConstants.h"
 
 const char* CgFxPostSmokey::POSTSMOKEY_TECHNIQUE_NAME = "PostSmokey";
+const char* CgFxPostSmokey::POST_ICY_TECHNIQUE_NAME		= "PostIcy";
 
 CgFxPostSmokey::CgFxPostSmokey(FBObj* outputFBO) :
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_FULLSCREENSMOKEY_SHADER, sceneFBO), resultFBO(outputFBO),
@@ -27,11 +29,18 @@ scale(0.5f), frequency(0.5f), colour(GameModelConstants::GetInstance()->GHOST_BA
 	// Initialize CG sampler parameters
 	this->noiseSamplerParam		= cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
 	this->sceneSamplerParam		= cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
+	this->overlaySamplerParam = cgGetNamedEffectParameter(this->cgEffect, "OverlaySampler");
+
+	// The overlay texture is for the post-icy effect... get a semi-transparent frost texture
+	this->overlayTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FULLSCREEN_FROST, Texture::Trilinear));
+	assert(this->overlayTex != NULL);
 
 	debug_cg_state();
 }
 
 CgFxPostSmokey::~CgFxPostSmokey() {
+	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->overlayTex);
+	assert(success);
 }
 
 void CgFxPostSmokey::Draw(int screenWidth, int screenHeight, double dT) {
@@ -46,6 +55,10 @@ void CgFxPostSmokey::Draw(int screenWidth, int screenHeight, double dT) {
 
 	cgGLSetTextureParameter(this->noiseSamplerParam, Noise::GetInstance()->GetNoise3DTexture()->GetTextureID());
 	cgGLSetTextureParameter(this->sceneSamplerParam, this->sceneFBO->GetFBOTexture()->GetTextureID());
+
+	if (this->overlayTex != NULL) {
+		cgGLSetTextureParameter(this->overlaySamplerParam, this->overlayTex->GetTextureID());
+	}
 
 	// Draw a fullscreen quad with the effect applied and draw it all into the result FBO
 	this->resultFBO->BindFBObj();

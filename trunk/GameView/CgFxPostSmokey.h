@@ -20,8 +20,10 @@
  * when the player is in ball camera mode and also has the ghost ball active.
  */
 class CgFxPostSmokey : public CgFxPostProcessingEffect {
-
 public:
+	static const char* POSTSMOKEY_TECHNIQUE_NAME;
+	static const char* POST_ICY_TECHNIQUE_NAME;
+
 	CgFxPostSmokey(FBObj* outputFBO);
 	~CgFxPostSmokey();
 
@@ -36,10 +38,14 @@ public:
 	inline void SetFadeAlpha(float alpha) {
 		this->fade = alpha;
 	}
+	inline void SetScale(float scale) {
+		this->scale = scale;
+	}
+	inline void SetFrequency(float freq) {
+		this->frequency = freq;
+	}
 
 private:
-	static const char* POSTSMOKEY_TECHNIQUE_NAME;
-
 	// Cg parameters
 	CGparameter timerParam;
 	CGparameter scaleParam;
@@ -49,6 +55,7 @@ private:
 	
 	CGparameter noiseSamplerParam;
 	CGparameter sceneSamplerParam;
+	CGparameter overlaySamplerParam;
 
 	float timer;
 	float scale;
@@ -56,6 +63,7 @@ private:
 	float fade;
 	Colour colour;
 	FBObj* resultFBO;
+	Texture2D* overlayTex; 
 
 };
 #endif

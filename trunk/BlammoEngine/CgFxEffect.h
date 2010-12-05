@@ -99,6 +99,24 @@ public:
 	inline void SetInputFBO(FBObj* sceneFBO) {
 		this->sceneFBO = sceneFBO;
 	}
+
+	/**
+	 * Obtain the current technique for this effect.
+	 */
+	CGtechnique GetCurrentTechnique() const {
+		return this->currTechnique;
+	}
+
+	void SetTechnique(const std::string& techniqueName) {
+		CGtechnique temp = this->techniques[techniqueName];
+		if (temp != NULL) {
+			if (cgValidateTechnique(currTechnique) == CG_FALSE) {
+				debug_output("Invalid Cg Technique found: " << techniqueName);
+			}
+			this->currTechnique = temp;
+		}
+	}
+
 };
 
 /**
