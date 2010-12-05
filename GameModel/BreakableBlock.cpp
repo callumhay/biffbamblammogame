@@ -189,7 +189,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 	
 		case Projectile::PaddleLaserBulletProjectile:
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				// TODO: Deal with case where the piece is frozen in an ice cube...
+				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			else {	
 				// Laser bullets dimish the piece, but don't necessarily obliterated/destroy it
@@ -284,6 +284,13 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	switch (projectile->GetType()) {
 		
+		case Projectile::PaddleLaserBulletProjectile:
+			// When frozen, projectiles can pass through
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				return true;
+			}
+			break;
+
 		case Projectile::CollateralBlockProjectile:
 			return true;
 

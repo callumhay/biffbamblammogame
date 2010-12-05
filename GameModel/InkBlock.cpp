@@ -24,9 +24,22 @@ InkBlock::~InkBlock() {
 
 // Determine whether the given projectile will pass through this block...
 bool InkBlock::ProjectilePassesThrough(Projectile* projectile) const {
-	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
-		return true;
+	switch (projectile->GetType()) {
+
+		case Projectile::PaddleLaserBulletProjectile:
+			// When frozen, projectiles can pass through
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				return true;
+			}
+			break;
+
+		case Projectile::CollateralBlockProjectile:
+			return true;
+
+		default:
+			break;
 	}
+
 	return false;
 }
 
@@ -89,7 +102,7 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 
 		case Projectile::PaddleLaserBulletProjectile:
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				// TODO: Deal with case where the piece is frozen in an ice cube...
+				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			else {
 				resultingPiece = this->Destroy(gameModel);
@@ -125,6 +138,11 @@ LevelPiece* InkBlock::TickBeamCollision(double dT, const BeamSegment* beamSegmen
 	assert(beamSegment != NULL);
 	assert(gameModel != NULL);
 	
+	// If the piece is frozen in ice we don't hurt it, instead it will refract the laser beams...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		return this;
+	}
+
 	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
 
 	LevelPiece* newPiece = this;

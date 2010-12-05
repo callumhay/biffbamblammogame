@@ -61,6 +61,10 @@ public:
 
 	// Light beams will extinguish on contact
 	bool IsLightReflectorRefractor() const {
+		// When frozen in ice a block can reflect/refract lasers and the like
+		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			return true;
+		}
 		return false;
 	}
 

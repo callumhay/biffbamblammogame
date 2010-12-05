@@ -63,14 +63,14 @@ public:
 	// Tesla blocks do not reflect or refract light.
 	// Returns: false
 	bool IsLightReflectorRefractor() const {
+		// When frozen in ice a block can reflect/refract lasers and the like
+		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			return true;
+		}
 		return false;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile) const {
-		UNUSED_PARAMETER(projectile);
-		return false;
-	}
-
+	bool ProjectilePassesThrough(Projectile* projectile) const;
 	LevelPiece* Destroy(GameModel* gameModel);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);

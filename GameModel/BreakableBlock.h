@@ -65,6 +65,10 @@ public:
 	// Breakable blocks do not reflect or refract light.
 	// Returns: false
 	bool IsLightReflectorRefractor() const {
+		// When frozen in ice a block can reflect/refract lasers and the like
+		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			return true;
+		}
 		return false;
 	}
 
@@ -127,6 +131,11 @@ private:
 inline LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
 	assert(beamSegment != NULL);
 	assert(gameModel != NULL);
+
+	// If the piece is frozen in ice we don't hurt it, instead it will refract the laser beams...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		return this;
+	}
 	return this->EatAwayAtPiece(dT, beamSegment->GetDamagePerSecond(), gameModel);
 }
 

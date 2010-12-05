@@ -31,10 +31,22 @@ CollateralBlock::~CollateralBlock() {
 }
 
 bool CollateralBlock::ProjectilePassesThrough(Projectile* projectile) const {
-	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
-		// Much like all other blocks, when collateral blocks are hit by other collateral
-		// blocks they just get destroyed and the other collateral block passes through
-		return true;
+	switch (projectile->GetType()) {
+
+		case Projectile::PaddleLaserBulletProjectile:
+			// When frozen, projectiles can pass through
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				return true;
+			}
+			break;
+
+		case Projectile::CollateralBlockProjectile:
+			// Much like all other blocks, when collateral blocks are hit by other collateral
+			// blocks they just get destroyed and the other collateral block passes through
+			return true;
+
+		default:
+			break;
 	}
 	return false;
 }
@@ -107,7 +119,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 	switch (projectile->GetType()) {
 		case Projectile::PaddleLaserBulletProjectile:
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				// TODO...
+				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			else {
 				newLevelPiece = this->Detonate(gameModel);
@@ -144,6 +156,12 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 LevelPiece* CollateralBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
 	assert(beamSegment != NULL);
 	assert(gameModel != NULL);
+
+	// If the piece is frozen in ice we don't hurt it, instead it will refract the laser beams...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		return this;
+	}
+
 	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
 	
 	LevelPiece* newPiece = this;

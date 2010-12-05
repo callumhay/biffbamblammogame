@@ -60,9 +60,11 @@ public:
 		return 0;
 	}
 
-	// Solid blocks do not reflect or refract light.
-	// Returns: false
 	bool IsLightReflectorRefractor() const {
+		// When frozen in ice a block can reflect/refract lasers and the like
+		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			return true;
+		}
 		return false;
 	}
 

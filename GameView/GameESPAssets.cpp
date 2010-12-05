@@ -1149,14 +1149,31 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::ItemDrop:
 				case LevelPiece::Collateral:
 					{
-						// A laser just hit a block and was disapated by it... show the particle disintegrate
+						bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
-						this->AddLaserHitWallEffect(midPoint);
+						if (blockIsFrozen) {
+							// Frozen blocks reflect/refract laser beams...
+							this->AddLaserHitPrismBlockEffect(midPoint);
+						}
+						else {
+							// A laser just hit a block and was disapated by it... show the particle disintegrate
+							this->AddLaserHitWallEffect(midPoint);
+						}
 					}
 					break;
 
 				case LevelPiece::Ink:
 				case LevelPiece::Bomb:
+					{
+						bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
+						if (blockIsFrozen) {
+							// Frozen blocks reflect/refract laser beams...
+							Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
+							this->AddLaserHitPrismBlockEffect(midPoint);
+						}
+					}
+					break;
+
 				case LevelPiece::Empty:
 				case LevelPiece::Portal:
 					// Certain level pieces require no effects...
