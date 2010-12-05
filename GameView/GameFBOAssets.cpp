@@ -21,8 +21,8 @@
 GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL), fgAndBgFBO(NULL), 
 postFgAndBgFBO(NULL), initialFSEffectFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NULL),
 fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), 
-stickyPaddleCamEffect(NULL), shieldPaddleCamEffect(NULL), smokeyCamEffect(NULL), uberIntenseCamEffect(NULL),
-fireBallCamEffect(NULL), drawItemsInLastPass(true) {
+stickyPaddleCamEffect(NULL), shieldPaddleCamEffect(NULL), smokeyCamEffect(NULL), icyCamEffect(NULL), 
+uberIntenseCamEffect(NULL), fireBallCamEffect(NULL), drawItemsInLastPass(true) {
 	
 	// Framebuffer object setup
 	this->fgAndBgFBO					= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
@@ -41,6 +41,12 @@ fireBallCamEffect(NULL), drawItemsInLastPass(true) {
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
 	this->smokeyCamEffect				= new CgFxPostSmokey(this->tempFBO);
+
+	this->icyCamEffect					= new CgFxPostSmokey(this->tempFBO);
+	this->icyCamEffect->SetTechnique(CgFxPostSmokey::POST_ICY_TECHNIQUE_NAME);
+	this->icyCamEffect->SetScale(0.4f);
+	this->icyCamEffect->SetFrequency(0.4f);
+
 	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->tempFBO);
 	this->fireBallCamEffect     = new CgFxPostFirey(this->tempFBO);
 	this->SetupPaddleShieldEffect();
@@ -78,6 +84,8 @@ GameFBOAssets::~GameFBOAssets() {
 	this->stickyPaddleCamEffect = NULL;
 	delete this->smokeyCamEffect;
 	this->smokeyCamEffect = NULL;
+	delete this->icyCamEffect;
+	this->icyCamEffect = NULL;
 	delete this->uberIntenseCamEffect;
 	this->uberIntenseCamEffect = NULL;
 	delete this->shieldPaddleCamEffect;
@@ -138,6 +146,7 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	delete this->inkSplatterEffect;
 	delete this->stickyPaddleCamEffect;
 	delete this->smokeyCamEffect;
+	delete this->icyCamEffect;
 	delete this->uberIntenseCamEffect;
 	delete this->shieldPaddleCamEffect;
 	delete this->fireBallCamEffect;
@@ -149,10 +158,15 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
 	this->smokeyCamEffect				= new CgFxPostSmokey(this->tempFBO);
+	
+	this->icyCamEffect					= new CgFxPostSmokey(this->tempFBO);
+	this->icyCamEffect->SetTechnique(CgFxPostSmokey::POST_ICY_TECHNIQUE_NAME);
+	this->icyCamEffect->SetScale(0.4f);
+	this->icyCamEffect->SetFrequency(0.4f);
+
 	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->tempFBO);
 	this->fireBallCamEffect     = new CgFxPostFirey(this->tempFBO);
 	this->SetupPaddleShieldEffect();
-
 
 	debug_opengl_state();
 }
@@ -272,6 +286,20 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 			this->smokeyCamEffect->SetOutputFBO(outputFBO);
 			this->smokeyCamEffect->Draw(width, height, dT);
 			
+			swapFBO = inputFBO;
+			inputFBO = outputFBO;
+			outputFBO = swapFBO;
+		}
+
+		if (gameModel.IsBallEffectActive(GameBall::IceBall)) {
+			// The ball camera is on and we're in ice ball mode, make everything frozen/frosty for the player...
+			// We take inverse of the alpha of the ball to fade the effect properly while in ball cam mode
+			float icyAlpha = 1.0f - camBall->GetColour().A();
+			this->icyCamEffect->SetFadeAlpha(icyAlpha);
+			this->icyCamEffect->SetInputFBO(inputFBO);
+			this->icyCamEffect->SetOutputFBO(outputFBO);
+			this->icyCamEffect->Draw(width, height, dT);
+
 			swapFBO = inputFBO;
 			inputFBO = outputFBO;
 			outputFBO = swapFBO;

@@ -49,6 +49,7 @@ private:
 	CgFxInkSplatter* inkSplatterEffect;
 	CgFxFullscreenGoo* stickyPaddleCamEffect;
 	CgFxPostSmokey* smokeyCamEffect;
+	CgFxPostSmokey* icyCamEffect;
 	CgFxPostUberIntense* uberIntenseCamEffect;
 	CgFxFullscreenGoo* shieldPaddleCamEffect;
 	CgFxPostFirey* fireBallCamEffect;

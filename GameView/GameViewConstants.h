@@ -107,6 +107,7 @@ public:
 	const char* TEXTURE_CLOUD;
 	const char* TEXTURE_GRIT;
 	const char* TEXTURE_FROST;
+	const char* TEXTURE_FULLSCREEN_FROST;
 
 	const char* TEXTURE_STARFIELD;
 	

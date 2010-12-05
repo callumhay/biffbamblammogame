@@ -841,7 +841,6 @@ void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAft
 
 void GameEventsListener::BlockIceShatteredEvent(const LevelPiece& block) {
 	this->display->GetAssets()->GetESPAssets()->AddIceBitsBreakEffect(block);
-	this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, Colour(0.66f, 0.66f, 0.66f));
 	debug_output("EVENT: Ice shattered");
 }
 
