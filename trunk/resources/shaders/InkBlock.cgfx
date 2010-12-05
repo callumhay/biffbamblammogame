@@ -292,7 +292,7 @@ vertexData ink_block_VS(appData IN) {
     // Displacement along normal
     float ni = pow(abs(i),Sharpness);
     float3 Nn = normalize(IN.Normal.xyz);
-    float3 NewPos = Pos.xyz - (Nn * (ni-0.5) * Displacement);
+    float3 NewPos = (Pos.xyz - (Nn * (ni-0.5) * Displacement));
     
     float3 Pw = mul(WorldXf, Pos).xyz;
     float3 viewToVert  = float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w) - Pw;

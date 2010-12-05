@@ -31,6 +31,23 @@ timeOfLastDrop(0) {
 ItemDropBlock::~ItemDropBlock() {
 }
 
+bool ItemDropBlock::ProjectilePassesThrough(Projectile* projectile) const {
+	switch (projectile->GetType()) {
+		
+		case Projectile::PaddleLaserBulletProjectile:
+			// When frozen, projectiles can pass through
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				return true;
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	return false;
+}
+
 /**
  * An item drop block may actually be destroyed (specifically it can only
  * be destroyed by a collateral block falling on top of it)... hopefully the level designer doesn't depend
@@ -103,18 +120,10 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 	LevelPiece* resultingPiece = this;
 
 	switch (projectile->GetType()) {
-		case Projectile::FireGlobProjectile:
-			// Fire glob just extinguishes on a item drop block, unless it's frozen in an ice cube;
-			// in that case, unfreeze a frozen item drop block
-			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-				assert(success);
-			}
-			break;
 
 		case Projectile::PaddleLaserBulletProjectile: 
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				// TODO...
+				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			else {
 				this->AttemptToDropAnItem(gameModel);
@@ -137,6 +146,15 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 			this->AttemptToDropAnItem(gameModel);
 			break;
 
+		case Projectile::FireGlobProjectile:
+			// Fire glob just extinguishes on a item drop block, unless it's frozen in an ice cube;
+			// in that case, unfreeze a frozen item drop block
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+				assert(success);
+			}
+			break;
+
 		default:
 			assert(false);
 			break;
@@ -150,6 +168,12 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
  */
 LevelPiece* ItemDropBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
 	assert(gameModel != NULL);
+
+	// If the piece is frozen in ice we don't hurt it, instead it will refract the laser beams...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		return this;
+	}
+
 	this->hitPointsBeforeNextDrop -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
 	
 	if (this->hitPointsBeforeNextDrop <= 0) {

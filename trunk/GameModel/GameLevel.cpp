@@ -785,7 +785,7 @@ void GameLevel::CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& leve
 void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex) {
 	
 	// Make sure the provided indices are in the correct range
-	if (wIndex < 0 || wIndex >= pieces[0].size() || hIndex <0 || hIndex >= pieces.size()) {
+	if (wIndex < 0 || wIndex >= pieces[0].size() || hIndex < 0 || hIndex >= pieces.size()) {
 		return;
 	}
 	

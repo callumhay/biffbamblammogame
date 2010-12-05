@@ -23,9 +23,22 @@ SolidBlock::~SolidBlock() {
 
 // Determine whether the given projectile will pass through this block...
 bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) const {
-	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
-		return true;
+	switch (projectile->GetType()) {
+
+		case Projectile::PaddleLaserBulletProjectile:
+			// When frozen, projectiles can pass through
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				return true;
+			}
+			break;		
+
+		case Projectile::CollateralBlockProjectile:
+			return true;
+
+		default:
+			break;
 	}
+
 	return false;
 }
 
@@ -64,12 +77,6 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 															const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
 															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
-
-	// If the triangle block is in ice then its bounds are a basic rectangle...
-	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-		return;
-	}
 
 	// We ALWAYS create boundries unless the neighbour does not exist (NULL) 
 	// or is another solid block.
@@ -174,7 +181,7 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 		
 		case Projectile::PaddleLaserBulletProjectile:
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				// TODO
+				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			break;
 		

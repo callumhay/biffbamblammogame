@@ -17,6 +17,7 @@
 #include "GameItemFactory.h"
 #include "GameModelConstants.h"
 #include "Beam.h"
+#include "PaddleLaser.h"
 
 const float LevelPiece::PIECE_WIDTH = 2.5f;
 const float LevelPiece::PIECE_HEIGHT = 1.0f;
@@ -68,7 +69,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	// (i.e., the ball can actually get to them).
 
 	// Left boundry of the piece
-	if (leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) {
+	if (leftNeighbor != NULL /*&& leftNeighbor->IsNoBoundsPieceType()*/) {
 		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n1(-1, 0);
@@ -77,7 +78,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Bottom boundry of the piece
-	if (bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType()) {
+	if (bottomNeighbor != NULL /*&& bottomNeighbor->IsNoBoundsPieceType()*/) {
 		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n2(0, -1);
@@ -86,7 +87,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Right boundry of the piece
-	if (rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) {
+	if (rightNeighbor != NULL /*&& rightNeighbor->IsNoBoundsPieceType()*/) {
 		Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n3(1, 0);
@@ -95,7 +96,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Top boundry of the piece
-	if (topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType()) {
+	if (topNeighbor != NULL /*&& topNeighbor->IsNoBoundsPieceType()*/) {
 		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n4(0, 1);
@@ -214,4 +215,159 @@ void LevelPiece::FreezePieceInIce(GameModel* gameModel) {
 			this->AddStatus(LevelPiece::IceCubeStatus);
 			gameModel->AddStatusUpdateLevelPiece(this, LevelPiece::IceCubeStatus);
 		}
+}
+
+/**
+ * Call this in order to properly set the projectile (and possibly spawn any extra projectiles) when
+ * this piece is frozen in ice.
+ */
+void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, 
+																										 GameModel* gameModel) const {
+
+	assert(this->HasStatus(LevelPiece::IceCubeStatus));
+	assert(projectile != NULL);
+	assert(gameModel != NULL);
+
+	// Need to figure out if this laser bullet already collided with this block... 
+	// If it has then we just ignore it
+	if (projectile->IsLastLevelPieceCollidedWith(this)) {
+		return;
+	}
+	
+	std::list<Collision::Ray2D> rays;
+	this->GetIceCubeReflectionRefractionRays(projectile->GetPosition(), /*projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection(),*/
+																					 projectile->GetVelocityDirection(), rays);
+	assert(rays.size() >= 1);
+					
+	std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
+	// The first ray is how the current projectile gets transmitted through this block...
+	projectile->SetPosition(rayIter->GetOrigin());
+	projectile->SetVelocity(rayIter->GetUnitDirection(), projectile->GetVelocityMagnitude());
+	projectile->SetLastLevelPieceCollidedWith(this);
+
+	// All the other rays were created via refraction or some such thing, so spawn new particles for them
+	++rayIter;
+	for (; rayIter != rays.end(); ++rayIter) {
+		PaddleLaser* newProjectile = new PaddleLaser(*projectile);
+		newProjectile->SetPosition(rayIter->GetOrigin());
+		newProjectile->SetVelocity(rayIter->GetUnitDirection(), projectile->GetVelocityMagnitude());
+		newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
+		gameModel->AddProjectile(newProjectile);
+	}
+}
+
+/**
+ * Gets the expected reflection/refraction rays for a levelpiece that's been frozen in an ice cube status.
+ * The resulting rays are based on the position of the projectile at impact relative to this piece.
+ */
+void LevelPiece::GetIceCubeReflectionRefractionRays(const Point2D& currCenter,
+																										const Vector2D& currDir, 
+																										std::list<Collision::Ray2D>& rays) const {
+
+	Collision::Ray2D defaultRay(currCenter, currDir);	// This is what happens to the original ray
+	
+	// Determine how the ray will move through the ice cube based on where it hit...
+	const Vector2D delta										= currCenter - this->GetCenter();
+	static const float HEIGHT_FUZZINESS     = LevelPiece::PIECE_HEIGHT / 15.0f;
+	static const float WIDTH_FUZZINESS      = LevelPiece::PIECE_WIDTH  / 15.0f;
+	static const float HALF_PIECE_WIDTH     = LevelPiece::PIECE_WIDTH  / 2.0f;
+	static const float HALF_PIECE_HEIGHT    = LevelPiece::PIECE_HEIGHT / 2.0f;
+
+	static const float LEFT_FUZZ_LINE_X   =  -HALF_PIECE_WIDTH  + WIDTH_FUZZINESS;
+	static const float RIGHT_FUZZ_LINE_X  =   HALF_PIECE_WIDTH  - WIDTH_FUZZINESS;
+	static const float TOP_FUZZ_LINE_Y    =   HALF_PIECE_HEIGHT - HEIGHT_FUZZINESS;
+	static const float BOTTOM_FUZZ_LINE_Y =  -HALF_PIECE_HEIGHT + HEIGHT_FUZZINESS;
+
+	// Figure out what face of the ice cube it hit...
+	if (delta[0] <= LEFT_FUZZ_LINE_X) {
+
+		if (delta[1] < BOTTOM_FUZZ_LINE_Y) {
+			// Collision was in the bottom left corner
+			static const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(-1.0f, -1.0f) / SQRT_2;
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-currDir, BOTTOM_LEFT_NORMAL)))));
+			if (angleBetweenNormalAndLaser <= 20) {
+				// The ray will split...
+				rays.push_back(Collision::Ray2D(this->GetCenter(), Vector2D(0.0f, 1.0f)));
+				rays.push_back(Collision::Ray2D(this->GetCenter(), Vector2D(1.0f, 0.0f)));
+				defaultRay.SetOrigin(this->GetCenter());
+			}
+		}
+		else if (delta[1] > TOP_FUZZ_LINE_Y) {
+			// Collision was in the top left corner
+			static const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(-1.0f, 1.0f) / SQRT_2;
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-currDir, BOTTOM_LEFT_NORMAL)))));
+			if (angleBetweenNormalAndLaser <= 20) {
+				// The ray will split...
+				rays.push_back(Collision::Ray2D(this->GetCenter(), Vector2D(0.0f, -1.0f)));
+				rays.push_back(Collision::Ray2D(this->GetCenter(), Vector2D(1.0f, 0.0f)));
+				defaultRay.SetOrigin(this->GetCenter());
+			}
+		}
+		else {
+			// Collision was on the left side
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-currDir, Vector2D(-1.0f, 0.0f))))));
+			if (angleBetweenNormalAndLaser <= 60) {
+				// The ray will just go striaght right 
+				defaultRay.SetUnitDirection(Vector2D(1.0f, 0.0f));
+				defaultRay.SetOrigin(this->GetCenter());
+			}
+		}
+	}
+	else if (delta[0] >= RIGHT_FUZZ_LINE_X) {
+		
+		if (delta[1] < BOTTOM_FUZZ_LINE_Y) {
+			// Collision was in the bottom right corner
+			static const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(1.0f, -1.0f) / SQRT_2;
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-currDir, BOTTOM_LEFT_NORMAL)))));
+			if (angleBetweenNormalAndLaser <= 20) {
+				// The ray will split...
+				rays.push_back(Collision::Ray2D(this->GetCenter(), Vector2D(0.0f, 1.0f)));
+				rays.push_back(Collision::Ray2D(this->GetCenter(), Vector2D(-1.0f, 0.0f)));
+				defaultRay.SetOrigin(this->GetCenter());
+			}
+		}
+		else if (delta[1] > TOP_FUZZ_LINE_Y) {
+			// Collision was in the top right corner
+			static const Vector2D BOTTOM_LEFT_NORMAL = Vector2D(1.0f, 1.0f) / SQRT_2;
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-currDir, BOTTOM_LEFT_NORMAL)))));
+			if (angleBetweenNormalAndLaser <= 20) {
+				// The ray will split...
+				rays.push_back(Collision::Ray2D(this->GetCenter(), Vector2D(0.0f, -1.0f)));
+				rays.push_back(Collision::Ray2D(this->GetCenter(), Vector2D(-1.0f, 0.0f)));
+				defaultRay.SetOrigin(this->GetCenter());
+			}
+		}
+		else {
+			// Collision was on the right side
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-currDir, Vector2D(-1.0f, 0.0f))))));
+			if (angleBetweenNormalAndLaser <= 60) {
+				// The ray will just go striaght right 
+				defaultRay.SetUnitDirection(Vector2D(-1.0f, 0.0f));
+				defaultRay.SetOrigin(this->GetCenter());
+			}
+		}
+	}
+	else {
+		// Collision was on either the bottom or top sides
+		if (delta[1] >= 0) {
+			// Top
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-currDir, Vector2D(0.0f, 1.0f))))));
+			if (angleBetweenNormalAndLaser <= 60) {
+				// The ray will just go striaght down 
+				defaultRay.SetUnitDirection(Vector2D(0.0f, -1.0f));
+				defaultRay.SetOrigin(this->GetCenter());
+			}
+		}
+		else {
+			// Bottom
+			float angleBetweenNormalAndLaser = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-currDir, Vector2D(0.0f, -1.0f))))));
+			if (angleBetweenNormalAndLaser <= 60) {
+				// The ray will just go striaght up 
+				defaultRay.SetUnitDirection(Vector2D(0.0f, 1.0f));
+				defaultRay.SetOrigin(this->GetCenter());
+			}
+		}
+	}
+
+	rays.push_front(defaultRay);
 }

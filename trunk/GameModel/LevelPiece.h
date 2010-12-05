@@ -126,6 +126,10 @@ protected:
 	void LightPieceOnFire(GameModel* gameModel);
 	void FreezePieceInIce(GameModel* gameModel);
 
+	void DoIceCubeReflectRefractLaserBullets(Projectile* projectile, GameModel* gameModel) const;
+	void GetIceCubeReflectionRefractionRays(const Point2D& currCenter, const Vector2D& currDir, 
+																					std::list<Collision::Ray2D>& rays) const;
+
 private:
 	DISALLOW_COPY_AND_ASSIGN(LevelPiece);
 };
@@ -203,11 +207,14 @@ inline bool LevelPiece::CollisionCheck(const Collision::Circle2D& c) const {
  * refraction.
  */
 inline void LevelPiece::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {
-	UNUSED_PARAMETER(hitPoint);
-	UNUSED_PARAMETER(impactDir);
-
-	// The default behaviour is to just not do any reflection/refraction and return an empty list
-	rays.clear();
+	// If this piece is frozen then there are reflection/refraction rays...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		this->GetIceCubeReflectionRefractionRays(hitPoint, impactDir, rays);
+	}
+	else {
+		// The default behaviour is to just not do any reflection/refraction and return an empty list
+		rays.clear();
+	}
 }
 
 inline LevelPiece* LevelPiece::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {

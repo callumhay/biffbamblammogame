@@ -98,11 +98,11 @@ fireBallEffect(NULL)
 	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
 
 	// Load regular meshes
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading regular geometry...");
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading geometry...");
 	this->LoadRegularMeshAssets();
 
 	// Load regular effects
-	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading groovy effects...");
+	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading effects...");
 	this->LoadRegularEffectAssets();
 
 	// Initialize any HUD elements

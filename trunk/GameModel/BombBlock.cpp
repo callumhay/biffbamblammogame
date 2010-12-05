@@ -29,8 +29,20 @@ BombBlock::~BombBlock() {
 
 // Whether or not the given projectile passes through this block...
 bool BombBlock::ProjectilePassesThrough(Projectile* projectile) const {
-	if (projectile->GetType() == Projectile::CollateralBlockProjectile) {
-		return true;
+	switch (projectile->GetType()) {
+
+		case Projectile::PaddleLaserBulletProjectile:
+			// When frozen, projectiles can pass through
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				return true;
+			}
+			break;
+
+		case Projectile::CollateralBlockProjectile:
+			return true;
+
+		default:
+			break;
 	}
 	
 	return false;
@@ -176,17 +188,25 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
  * Results in an empty level piece where the bomb block once was.
  */
 LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-	LevelPiece* result = this;
+	LevelPiece* resultingPiece = this;
 
 	switch(projectile->GetType()) {
 		
 		case Projectile::PaddleLaserBulletProjectile:
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
+			}
+			else {
+				resultingPiece = this->Destroy(gameModel);
+			}
+			break;
+
 		case Projectile::CollateralBlockProjectile:
-			result = this->Destroy(gameModel);
+			resultingPiece = this->Destroy(gameModel);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
-			result = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
 			break;
 
 		case Projectile::FireGlobProjectile:
@@ -203,7 +223,7 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* proje
 			break;
 	}
 
-	return result;
+	return resultingPiece;
 }
 
 /**
@@ -215,6 +235,11 @@ LevelPiece* BombBlock::TickBeamCollision(double dT, const BeamSegment* beamSegme
 	assert(beamSegment != NULL);
 	assert(gameModel != NULL);
 	
+	// If the piece is frozen in ice we don't hurt it, instead it will refract the laser beams...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		return this;
+	}
+
 	this->currLifePoints -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
 
 	LevelPiece* newPiece = this;
