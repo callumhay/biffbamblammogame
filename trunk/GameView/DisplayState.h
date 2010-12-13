@@ -8,11 +8,8 @@ class GameDisplay;
 
 class DisplayState {
 
-protected:
-	GameDisplay* display;
-
 public:
-	enum DisplayStateType { MainMenu, LevelStart, WorldStart, InGame, InGameMenu, LevelEnd, GameComplete, GameOver };
+	enum DisplayStateType { MainMenu, Blammopedia, LevelStart, WorldStart, InGame, InGameMenu, LevelEnd, GameComplete, GameOver };
 	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, GameDisplay* display);
 
 	DisplayState(GameDisplay* display) : display(display) {}
@@ -26,6 +23,12 @@ public:
 	virtual void DisplaySizeChanged(int width, int height) = 0;
 
 	virtual DisplayState::DisplayStateType GetType() const = 0;
+
+protected:
+	GameDisplay* display;
+
+private:
+	DISALLOW_COPY_AND_ASSIGN(DisplayState);
 
 };
 
