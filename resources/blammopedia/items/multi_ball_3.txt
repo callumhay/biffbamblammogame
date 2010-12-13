@@ -1,0 +1,1 @@
+Your ball will instantly triplicate, and in a fit of confusion, the resulting spawn will fire off in random directions from the original ball.

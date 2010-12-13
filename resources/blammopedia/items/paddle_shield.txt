@@ -1,0 +1,1 @@
+The paddle gains a shield that does two seemingly not-so neutral things: it protects the paddle from falling objects; and creates a larger area for the ball to hit. Why neutral you ask? Collisions become less predictable and the shield can seriously alter other items.

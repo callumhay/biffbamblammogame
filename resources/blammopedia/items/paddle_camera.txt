@@ -1,0 +1,1 @@
+This puts you right inside the paddle, staring up at the level from the paddle’s point of view. Now, hit the ball with your face.
