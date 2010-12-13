@@ -1,0 +1,1 @@
+This power-up makes your paddle grow. It can stack up to three times, resulting in a paddle of unusual size.
