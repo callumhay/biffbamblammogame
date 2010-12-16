@@ -294,7 +294,6 @@ technique BasicBG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile arbvp1 phongshading_VS();        
@@ -325,7 +324,6 @@ technique BasicFG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
 
         VertexProgram = compile arbvp1 phongshading_VS();        
@@ -357,7 +355,6 @@ technique BasicFGNoOutline {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
 
         VertexProgram = compile arbvp1 phongshading_VS();        
@@ -374,7 +371,6 @@ technique TexturedBG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile arbvp1 phongshading_VS();        
@@ -439,7 +435,6 @@ technique TexturedFGNoOutline {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
 
         VertexProgram = compile arbvp1 phongshading_VS();        

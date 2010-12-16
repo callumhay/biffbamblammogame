@@ -378,7 +378,6 @@ technique InkBlock {
 
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
         BlendEnable = true;
