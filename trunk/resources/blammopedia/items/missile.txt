@@ -1,1 +1,3 @@
-This power-up turns your paddle into a private launchpad for your very own weapon of mass destruction, capable of annihilating a large troop of blocks. It’ll always travel in a straight line, unless of course certain blocks intervene... Fire ze missiles!
+Name: Missile
+ItemTexture: paddlerocket_powerup256x128.jpg
+Desc: This power-up turns your paddle into a private launchpad for your very own weapon of mass destruction, capable of annihilating a large troop of blocks. It’ll always travel in a straight line, unless of course certain blocks intervene... Fire ze missiles!

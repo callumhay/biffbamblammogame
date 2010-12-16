@@ -1,1 +1,5 @@
-This makes the paddle queasy and feverish, causing blurry double-vision and sluggishness, not unlike the time you ate bad sushi. When you were wasted. In Moscow.
+Name: Poison
+ItemTexture: poison_powerdown256x128.jpg
+HUDOutlineTexture: poison_timer_hud256x128.png
+HUDFillTexture: poison_timer_fill_hud256x128.png
+Desc: This makes the paddle queasy and feverish, causing blurry double-vision and sluggishness, not unlike the time you ate bad sushi. When you were wasted. In Moscow.

@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
 		// Read the .ini file options (used to initialize various settings in the game)
 		initCfgOptions = ResourceManager::ReadConfigurationOptions(true);
 
-		// Setup the window
+		// Setup the window - this initializes OpenGL so that OGL calls may be made after this
 		if (!WindowManager::GetInstance()->Init(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), initCfgOptions.GetIsFullscreenOn())) {
 			quitGame = true;
 			break;
@@ -176,6 +176,12 @@ int main(int argc, char *argv[]) {
 		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 6);
 		// Set the volume from the initial configuration options...
 		GameSoundAssets::SetGameVolume(initCfgOptions.GetVolume());
+
+		// Load the blammopedia...
+		if (!ResourceManager::GetInstance()->LoadBlammopedia(ResourceManager::GetBlammopediaResourceDir() + std::string("blammopedia"))) {
+			quitGame = true;
+			break;
+		}
 
 		model = new GameModel();
 		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());

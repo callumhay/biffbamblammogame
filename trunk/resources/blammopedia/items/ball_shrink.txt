@@ -1,1 +1,3 @@
-Once activated, the ball decreases in size making it harder to hit and see. (Insert cold water joke here.) This item can stack up to three times making for an incredibly puny speck of a ball, worthy of ridicule.
+Name: Ball Shrink
+ItemTexture: ballshrink_powerdown256x128.jpg
+Desc: Once activated, the ball decreases in size making it harder to hit and see. (Insert cold water joke here.) This item can stack up to three times making for an incredibly puny speck of a ball, worthy of ridicule.

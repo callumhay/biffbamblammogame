@@ -1,0 +1,5 @@
+Name: Flip
+ItemTexture: upsidedown_powerdown256x128.jpg
+HUDOutlineTexture: upsidedown_timer_hud256x128.png
+HUDFillTexture: upsidedown_timer_fill256x128.png
+Desc: When activated, the entire level flips upside-down like one of those nauseating fair rides, minus the carnies.

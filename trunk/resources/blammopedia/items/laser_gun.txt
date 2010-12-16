@@ -1,1 +1,5 @@
-Remember as a child always asking mom and dad for a laser gun? Well, this game is better than your parents. Indulge your trigger finger and shoot laser blasts at your leisure to quickly demolish a level and relieve stress.
+Name: Laser Gun
+ItemTexture: paddlelaser_powerup256x128.jpg
+HUDOutlineTexture: paddlelaser_timer_hud256x128.png
+HUDFillTexture: paddlelaser_timer_fill_hud256x128.png
+Desc: Remember as a child always asking mom and dad for a laser gun? Well, this game is better than your parents. Indulge your trigger finger and shoot laser blasts at your leisure to quickly demolish a level and relieve stress.

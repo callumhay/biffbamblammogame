@@ -1,5 +1,6 @@
 #include "ResourceManager.h"
 #include "ConfigOptions.h"
+#include "Blammopedia.h"
 
 #include "BlammoEngine/ObjReader.h"
 #include "BlammoEngine/MtlReader.h"
@@ -20,13 +21,16 @@
 ResourceManager* ResourceManager::instance = NULL;
 ConfigOptions* ResourceManager::configOptions = NULL;
 
-const char* ResourceManager::RESOURCE_DIRECTORY = "resources";
+const char* ResourceManager::RESOURCE_DIRECTORY			= "resources";
+const char* ResourceManager::TEXTURE_DIRECTORY			= "textures";
+const char* ResourceManager::BLAMMOPEDIA_DIRECTORY	= "blammopedia";
+
 // The modifications resource directory - this takes loading presedant over the 
 // resource zip file when in debug mode, otherwise it is ignored.
 const char* ResourceManager::MOD_DIRECTORY = "mod";
 
 ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
-cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NULL) {
+cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NULL), blammopedia(NULL) {
 	// Initialize DevIL and make sure it loaded correctly
 	ilInit();
 	iluInit();
@@ -61,6 +65,13 @@ cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NU
 }
 
 ResourceManager::~ResourceManager() {
+	// Clean up blammopedia - this should always be done first since it depends
+	// on physfs and various textures / resources
+	if (this->blammopedia != NULL) {
+		delete this->blammopedia;
+		this->blammopedia = NULL;
+	}
+
 	// Clean up Physfs
 	PHYSFS_deinit();
 
@@ -176,7 +187,23 @@ void ResourceManager::InitResourceManager(const std::string& resourceZip, const 
 	assert(ResourceManager::instance == NULL);
 	if (ResourceManager::instance == NULL) {
 		ResourceManager::instance = new ResourceManager(resourceZip, argv0);
+
 	}
+}
+
+bool ResourceManager::LoadBlammopedia(const std::string& blammopediaFile) {
+	if (this->blammopedia != NULL) {
+		delete this->blammopedia;
+	}
+
+	// Initialize blammopedia
+	this->blammopedia = Blammopedia::BuildFromBlammopediaFile(blammopediaFile);
+	if (this->blammopedia == NULL) {
+		assert(false);
+		debug_output("Could not load blammopedia!!!");
+		return false;
+	}
+	return true;
 }
 
 /**
@@ -956,7 +983,7 @@ char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, long 
 	char* fileBuffer = new char[fileLength+1];
 	
 	int readResult = PHYSFS_read(fileHandle, fileBuffer, sizeof(char), fileLength);
-	if (readResult == 0) {
+	if (readResult != fileLength) {
 		delete[] fileBuffer;
 		fileBuffer = NULL;
 		debug_output("Error reading file to bytes: " << filepath);
@@ -970,4 +997,35 @@ char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, long 
 
 	length = static_cast<long>(fileLength);
 	return fileBuffer;
+}
+
+bool ResourceManager::OverwriteResourceFile(const std::string& filepath, const std::string& data) {
+	// First make sure the file exists in the archive
+	int doesExist = PHYSFS_exists(filepath.c_str());
+	if (doesExist == 0) {
+		debug_output("File not found: " << filepath);
+		debug_physfs_state(NULL);
+		return false;
+	}
+
+	// Open the file for writing
+	PHYSFS_File* fileHandle = PHYSFS_openWrite(filepath.c_str());
+	if (fileHandle == NULL) {
+		return false;
+	}
+
+	// Write the file...
+	PHYSFS_sint64 writeResult = PHYSFS_write(fileHandle, data.c_str(), data.size(), 1);
+	if (writeResult != 1) {
+		assert(false);
+		debug_output("Failed to write to file: " << filepath);
+		debug_physfs_state(NULL);
+		return false;
+	}
+
+	int closeWentWell = PHYSFS_close(fileHandle);
+	debug_physfs_state(closeWentWell);
+	fileHandle = NULL;
+
+	return true;
 }

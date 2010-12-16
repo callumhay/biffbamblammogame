@@ -1,1 +1,5 @@
-The ball becomes spooky and mysterious, and randomly passes through certain types of blocks. This is because this game is actually haunted by the ghosts of all the balls lost during the creation of this game.
+Name: Ghost Ball
+ItemTexture: ghostball_powerneutral256x128.jpg
+HUDOutlineTexture: ghostball_timer_hud256x128.png
+HUDFillTexture: ghostball_timer_fill_hud256x128.png
+Desc: The ball becomes spooky and mysterious, and randomly passes through certain types of blocks. This is because this game is actually haunted by the ghosts of all the balls lost during the creation of this game.

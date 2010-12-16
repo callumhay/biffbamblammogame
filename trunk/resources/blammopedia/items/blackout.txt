@@ -1,1 +1,5 @@
-Remember that massive blackout in 2003? It’s just like that, only you actually have something to do that doesn’t involve holding hands and singing coombayah. And if it does, well, that’s your business.
+Name: Blackout
+ItemTexture: blackout_powerdown256x128.jpg
+HUDOutlineTexture: blackout_timer_hud256x128.png
+HUDFillTexture: blackout_timer_fill_hud256x128.png
+Desc: Remember that massive blackout in 2003? It’s just like that, only you actually have something to do that doesn’t involve holding hands and singing coombayah. And if it does, well, that’s your business.
