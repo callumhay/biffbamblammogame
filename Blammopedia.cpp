@@ -5,6 +5,7 @@
 #include "BlammoEngine/StringHelper.h"
 #include "BlammoEngine/Texture2D.h"
 #include "GameModel/GameItemFactory.h"
+#include "GameView/GameViewConstants.h"
 
 // Blammopedia entry lock file keywords/syntax constants
 const char* Blammopedia::ITEM_ENTRIES						= "ITEM_ENTRIES:";
@@ -18,7 +19,7 @@ const char* Blammopedia::Entry::HUD_OUTLINE_TEXTURE_KEYWORD	= "HUDOutlineTexture
 const char* Blammopedia::Entry::HUD_FILL_TEXTURE_KEYWORD		= "HUDFillTexture:";
 const char* Blammopedia::Entry::DESCRIPTION_KEYWORD					= "Desc:";
 
-Blammopedia::Blammopedia() {
+Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
 	static const std::string BLAMMOPEDIA_ITEMS_DIR  = ResourceManager::GetBlammopediaResourceDir()  + std::string("items/");
 	static const std::string BLAMMOPEDIA_BLOCKS_DIR = ResourceManager::GetBlammopediaResourceDir()  + std::string("blocks/");
 	static const std::string BLAMMOPEDIA_STATUS_DIR = ResourceManager::GetBlammopediaResourceDir()  + std::string("status/");
@@ -55,14 +56,24 @@ Blammopedia::Blammopedia() {
 	this->itemEntries.insert(std::make_pair(GameItem::IceBallItem,						new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ice_ball.txt"))));
 	this->itemEntries.insert(std::make_pair(GameItem::RandomItem,							new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("random.txt"))));
 
+	
+
 	// Block Entry Types...
 
 
 	// Status Effect Entry Types...
 
+
+
 }
 
 Blammopedia::~Blammopedia() {
+	// Clean up the locked item texture
+	if (this->lockedItemTexture != NULL) {
+		bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lockedItemTexture);
+		assert(success);
+	}
+
 	// Clear all of the entries in the blammopedia
 	for (std::map<GameItem::ItemType, ItemEntry*>::iterator iter = this->itemEntries.begin(); iter != this->itemEntries.end(); ++iter) {
 		ItemEntry* itemEntry = iter->second;
@@ -196,10 +207,19 @@ bool Blammopedia::InitializeEntries() {
 	bool success = true;
 	bool allSuccess = true;
 
+	// Load the item entries
 	for (std::map<GameItem::ItemType, ItemEntry*>::iterator iter = this->itemEntries.begin(); iter != this->itemEntries.end(); ++iter) {
 		ItemEntry* itemEntry = iter->second;
 		success = itemEntry->PopulateFromFile();
 		if (!success) { allSuccess = false; }
+	}
+
+	// Load the locked item texture...
+	assert(this->lockedItemTexture == NULL);
+	this->lockedItemTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+		GameViewConstants::GetInstance()->TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY, Texture::Trilinear, GL_TEXTURE_2D));
+	if (this->lockedItemTexture == NULL) {
+		allSuccess = false;
 	}
 
 	for (std::map<LevelPiece::LevelPieceType,
