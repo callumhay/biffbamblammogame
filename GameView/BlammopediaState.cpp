@@ -61,22 +61,7 @@ ItemListView* BlammopediaState::BuildGameItemsListView() const {
 	
 	// Add each item in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
-	const std::set<GameItem::ItemType>& itemTypes = GameItemFactory::GetInstance()->GetAllItemTypes();
-	const std::map<GameItem::ItemType, std::string>& itemTextures = GameViewConstants::GetInstance()->GetItemTextures();
-
-	for (std::set<GameItem::ItemType>::const_iterator iter = itemTypes.begin(); iter != itemTypes.end(); ++iter) {
-		const GameItem::ItemType& currItemType = *iter;
-		std::map<GameItem::ItemType, std::string>::const_iterator findIter = itemTextures.find(currItemType);
-		assert(findIter != itemTextures.end());
-
-		// Grab the item texture, name and description
-		const Texture* itemTexture = ResourceManager::GetInstance()->GetImgTextureResource(findIter->second, Texture::Trilinear, GL_TEXTURE_2D);
-		assert(itemTexture != NULL);
-		// Name and description come from the item resource text file...
-		//ItemBlammopediaEntry* itemData = ResourceManager::GetBlammopediaEntryForItem(currItemType);
-
-
-	}
+	// TODO
 
 	return itemsListView;
 }

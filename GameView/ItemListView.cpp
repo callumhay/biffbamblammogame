@@ -108,6 +108,9 @@ ItemListView::ListItem::~ListItem() {
 
 // Draws this item with its local origin in its bottom left corner with the given width and height
 void ItemListView::ListItem::Draw(double dT, const Camera& camera, size_t width, size_t height) {
+	UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(camera);
+
 	this->texture->BindTexture();
 	
 	glColor4f(1,1,1,1);

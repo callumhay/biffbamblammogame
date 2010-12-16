@@ -13,13 +13,11 @@
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
 #include "GameWorldAssets.h"
-#include "GameItemAssets.h"
 #include "PrismBlockMesh.h"
 #include "PortalBlockMesh.h"
 #include "CannonBlockMesh.h"
 #include "CollateralBlockMesh.h"
 #include "TeslaBlockMesh.h"
-#include "ItemDropBlockMesh.h"
 
 #include "../ESPEngine/ESPEmitter.h"
 
@@ -35,7 +33,6 @@
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/CollateralBlock.h"
 #include "../GameModel/TeslaBlock.h"
-#include "../GameModel/ItemDropBlock.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
@@ -260,11 +257,8 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 				assert(itemDrpPiece != NULL);
 
 				// Figure out what texture is associated with the next item to be dropped from the block
-				const std::map<GameItem::ItemType, Texture*>& itemTextures = gameItemAssets.GetItemTextureMap();
-				std::map<GameItem::ItemType, Texture*>::const_iterator findIter = itemTextures.find(itemDrpPiece->GetNextDropItemType());
-				assert(findIter != itemTextures.end());
-
-				this->itemDropBlock->AddItemDropBlock(itemDrpPiece, findIter->second);
+				Texture2D* itemTexture = gameItemAssets.GetItemTexture(itemDrpPiece->GetNextDropItemType());
+				this->itemDropBlock->AddItemDropBlock(itemDrpPiece, itemTexture);
 			}
 
 		}
@@ -591,17 +585,4 @@ void LevelMesh::SetLevelAlpha(float alpha) {
 	this->collateralBlock->SetAlphaMultiplier(alpha);
 	this->teslaBlock->SetAlphaMultiplier(alpha);
 	this->itemDropBlock->SetAlphaMultiplier(alpha);
-}
-
-/**
- * Call when the item type that the item drop block will drop, changes and the model needs to be
- * updated to display this to the player.
- */
-void LevelMesh::UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block) {
-	// Figure out what texture is associated with the next item to be dropped from the block
-	const std::map<GameItem::ItemType, Texture*>& itemTextures = gameItemAssets.GetItemTextureMap();
-	std::map<GameItem::ItemType, Texture*>::const_iterator findIter = itemTextures.find(block.GetNextDropItemType());
-	assert(findIter != itemTextures.end());
-
-	this->itemDropBlock->UpdateItemDropBlockTexture(&block, findIter->second);
 }

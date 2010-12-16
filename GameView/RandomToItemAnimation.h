@@ -27,7 +27,7 @@ public:
 	bool GetIsActive() const { return this->isAnimating; }
 
 private:
-	Texture2D* randomItemTexture;
+	const Texture2D* randomItemTexture;
 	const Texture* currItemFromRandomTexture;
 
 	bool isAnimating;

@@ -173,11 +173,12 @@ int main(int argc, char *argv[]) {
 		BlammoTime::SetVSync(initCfgOptions.GetIsVSyncOn());
 
 		// Create the MVC while showing the loading screen...
-		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 6);
+		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 7);
 		// Set the volume from the initial configuration options...
 		GameSoundAssets::SetGameVolume(initCfgOptions.GetVolume());
 
 		// Load the blammopedia...
+		LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading blammopedia...");
 		if (!ResourceManager::GetInstance()->LoadBlammopedia(ResourceManager::GetBlammopediaResourceDir() + std::string("blammopedia"))) {
 			quitGame = true;
 			break;
