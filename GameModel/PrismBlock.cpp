@@ -43,79 +43,79 @@ LevelPiece* PrismBlock::Destroy(GameModel* gameModel) {
  * its two sides are eliminated, we need to form a boundry.
  */
 void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-															const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                              const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                              const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                              const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	// Set the bounding lines for a diamond-shaped block
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
 
 	//std::vector<Collision::LineSeg2D> reflectRefractBoundingLines;
-	//std::vector<Vector2D>  reflectRefractBoundingNorms;
+    //std::vector<Vector2D>  reflectRefractBoundingNorms;
 
-	// Bottom-left diagonal boundry
-	if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
-		  (bottomLeftNeighbor != NULL && bottomLeftNeighbor->IsNoBoundsPieceType()) ||
-			(bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
-		
-		Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
-														this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
-		n1.Normalize();
+    // Bottom-left diagonal boundry
+    if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
+        (bottomLeftNeighbor != NULL && bottomLeftNeighbor->IsNoBoundsPieceType()) ||
+        (bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
 
-		boundingLines.push_back(boundry);
-		boundingNorms.push_back(n1);
+            Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
+                this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
+            Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
+            n1.Normalize();
 
-		//reflectRefractBoundingLines.push_back(boundry);
-		//Vector2D rrNormal(
-		//reflectRefractBoundingNorms
-	}
+            boundingLines.push_back(boundry);
+            boundingNorms.push_back(n1);
 
-	// Bottom-right diagonal boundry
-	if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
-		  (bottomRightNeighbor != NULL && bottomRightNeighbor->IsNoBoundsPieceType()) ||
-			(bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
-		Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
-																 this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
-		n1.Normalize();
+            //reflectRefractBoundingLines.push_back(boundry);
+            //Vector2D rrNormal(
+            //reflectRefractBoundingNorms
+    }
 
-		boundingLines.push_back(boundry);
-		boundingNorms.push_back(n1);
-	}
+    // Bottom-right diagonal boundry
+    if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
+        (bottomRightNeighbor != NULL && bottomRightNeighbor->IsNoBoundsPieceType()) ||
+        (bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType())) {
+            Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
+                this->center + Vector2D(0, -LevelPiece::HALF_PIECE_HEIGHT));
+            Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, -LevelPiece::HALF_PIECE_WIDTH);
+            n1.Normalize();
 
-	// Top-left diagonal boundry
-	if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
-		  (topLeftNeighbor != NULL && topLeftNeighbor->IsNoBoundsPieceType()) ||
-			(topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
+            boundingLines.push_back(boundry);
+            boundingNorms.push_back(n1);
+    }
 
-		Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
-														this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
-		n1.Normalize();
+    // Top-left diagonal boundry
+    if ((leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType()) ||
+        (topLeftNeighbor != NULL && topLeftNeighbor->IsNoBoundsPieceType()) ||
+        (topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
 
-		boundingLines.push_back(boundry);
-		boundingNorms.push_back(n1);
-	}
+            Collision::LineSeg2D boundry(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, 0), 
+                this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
+            Vector2D n1(-LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
+            n1.Normalize();
 
-	// Top-right diagonal boundry
-	if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
-		  (topRightNeighbor != NULL && topRightNeighbor->IsNoBoundsPieceType()) ||
-			(topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
+            boundingLines.push_back(boundry);
+            boundingNorms.push_back(n1);
+    }
 
-		Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
-																 this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
-		Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
-		n1.Normalize();
+    // Top-right diagonal boundry
+    if ((rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType()) ||
+        (topRightNeighbor != NULL && topRightNeighbor->IsNoBoundsPieceType()) ||
+        (topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType())) {
 
-		boundingLines.push_back(boundry);
-		boundingNorms.push_back(n1);
-	}
-	
-	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-		 							topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-	//this->reflectRefractBounds = BoundingLines(reflectRefractBoundingLines, reflectRefractBoundingNorms);
+            Collision::LineSeg2D boundry(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, 0), 
+                this->center + Vector2D(0, LevelPiece::HALF_PIECE_HEIGHT));
+            Vector2D n1(LevelPiece::HALF_PIECE_HEIGHT, LevelPiece::HALF_PIECE_WIDTH);
+            n1.Normalize();
+
+            boundingLines.push_back(boundry);
+            boundingNorms.push_back(n1);
+    }
+
+    this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+    //this->reflectRefractBounds = BoundingLines(reflectRefractBoundingLines, reflectRefractBoundingNorms);
 }
 
 bool PrismBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
@@ -132,37 +132,36 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 	switch (projectile->GetType()) {
 
 		case Projectile::PaddleLaserBulletProjectile: {
-				// Based on where the laser bullet hits, we change its direction
+		    // Based on where the laser bullet hits, we change its direction	
+			// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
+			if (!projectile->IsLastLevelPieceCollidedWith(this)) {
 				
-				// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
-				if (!projectile->IsLastLevelPieceCollidedWith(this)) {
-					
-					const float PROJECTILE_VELOCITY_MAG			= projectile->GetVelocityMagnitude();
-					const Vector2D PROJECTILE_VELOCITY_DIR	= projectile->GetVelocityDirection();
-					const Point2D IMPACT_POINT = projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR;
+				const float PROJECTILE_VELOCITY_MAG			= projectile->GetVelocityMagnitude();
+				const Vector2D PROJECTILE_VELOCITY_DIR	= projectile->GetVelocityDirection();
+				const Point2D IMPACT_POINT = projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR;
 
-					std::list<Collision::Ray2D> rays;
-					this->GetReflectionRefractionRays(IMPACT_POINT, PROJECTILE_VELOCITY_DIR, rays);
-					assert(rays.size() >= 1);
-					
-					std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
-					// The first ray is how the current projectile gets transmitted through this block...
-					projectile->SetPosition(rayIter->GetOrigin());
-					projectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
-					projectile->SetLastLevelPieceCollidedWith(this);
+				std::list<Collision::Ray2D> rays;
+				this->GetReflectionRefractionRays(IMPACT_POINT, PROJECTILE_VELOCITY_DIR, rays);
+				assert(rays.size() >= 1);
+				
+				std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
+				// The first ray is how the current projectile gets transmitted through this block...
+				projectile->SetPosition(rayIter->GetOrigin());
+				projectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
+				projectile->SetLastLevelPieceCollidedWith(this);
 
-					// All the other rays were created via refraction or some such thing, so spawn new particles for them
-					++rayIter;
-					for (; rayIter != rays.end(); ++rayIter) {
-						PaddleLaser* newProjectile = new PaddleLaser(*projectile);
-						newProjectile->SetPosition(rayIter->GetOrigin());
-						newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
-						newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
-						gameModel->AddProjectile(newProjectile);
-					}
+				// All the other rays were created via refraction or some such thing, so spawn new particles for them
+				++rayIter;
+				for (; rayIter != rays.end(); ++rayIter) {
+					PaddleLaser* newProjectile = new PaddleLaser(*projectile);
+					newProjectile->SetPosition(rayIter->GetOrigin());
+					newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
+					newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
+					gameModel->AddProjectile(newProjectile);
 				}
 			}
-			break;
+		}
+		break;
 
 		case Projectile::CollateralBlockProjectile:
 			// The collateral block projectile will actually completely destroy the prism block

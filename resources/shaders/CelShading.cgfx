@@ -308,7 +308,6 @@ technique BasicBG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile arbvp1 celshading_VS();        
@@ -339,7 +338,6 @@ technique BasicFG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile arbvp1 celshading_VS();        
@@ -370,7 +368,6 @@ technique TexturedBG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
         
         VertexProgram = compile arbvp1 celshading_VS();        
@@ -401,7 +398,6 @@ technique TexturedFG {
         DepthFunc = LEqual;
         CullFaceEnable = true;
         CullFace = Back;
-        PolygonSmoothEnable = true;
         PolygonMode = int2(Front, Fill);
     
         VertexProgram = compile arbvp1 celshading_VS();        
