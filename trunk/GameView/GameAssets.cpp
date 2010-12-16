@@ -1021,11 +1021,7 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 
 void GameAssets::ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem) {
 	// Figure out the item texture associated with the actual item...
-	const std::map<GameItem::ItemType, Texture*>& itemTextureMap = this->itemAssets->GetItemTextureMap();
-	std::map<GameItem::ItemType, Texture*>::const_iterator findIter = itemTextureMap.find(actualItem.GetItemType());
-	assert(findIter != itemTextureMap.end());
-	Texture* actualItemTexture = findIter->second;
-
+	Texture2D* actualItemTexture = this->itemAssets->GetItemTexture(actualItem.GetItemType());
 	// This will start and animation that shows to the player what the random item has become
 	this->randomToItemAnimation.Start(actualItemTexture, gameModel);
 }

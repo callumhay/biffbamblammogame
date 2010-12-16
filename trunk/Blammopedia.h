@@ -80,6 +80,18 @@ public:
 		~StatusEffectEntry() {};
 	};
 
+	typedef std::map<GameItem::ItemType, Blammopedia::ItemEntry*> ItemEntryMap;
+	typedef std::map<LevelPiece::LevelPieceType, Blammopedia::BlockEntry*> BlockEntryMap;
+	typedef std::map<LevelPiece::PieceStatus, Blammopedia::StatusEffectEntry*> StatusEffectEntryMap;
+
+	typedef ItemEntryMap::iterator				 ItemEntryMapIter;
+	typedef BlockEntryMap::iterator				 BlockEntryMapIter;
+	typedef StatusEffectEntryMap::iterator StatusEffectEntryMapIter;
+
+	typedef ItemEntryMap::const_iterator          ItemEntryMapConstIter;
+	typedef BlockEntryMap::const_iterator				  BlockEntryMapConstIter;
+	typedef StatusEffectEntryMap::const_iterator  StatusEffectEntryMapConstIter;
+
 	~Blammopedia();
 	static Blammopedia* BuildFromBlammopediaFile(const std::string &filepath);
 
@@ -87,8 +99,11 @@ public:
 	Blammopedia::BlockEntry* GetBlockEntry(const LevelPiece::LevelPieceType& blockType) const;
 	Blammopedia::StatusEffectEntry* GetStatusEffectEntry(const LevelPiece::PieceStatus& statusType) const;
 
-	bool WriteAsEntryStatusFile(const std::string &filepath) const;
+	const Blammopedia::ItemEntryMap& GetItemEntries() const;
+	const Blammopedia::BlockEntryMap& GetBlockEntries() const;
+	const Blammopedia::StatusEffectEntryMap& GetStatusEffectEntries() const;
 
+	bool WriteAsEntryStatusFile(const std::string &filepath) const;
 
 private:
 	// Blammopedia entry lock file keywords/syntax constants
@@ -96,9 +111,9 @@ private:
 	static const char* BLOCK_ENTRIES;
 	static const char* STATUS_EFFECT_ENTRIES;
 
-	std::map<GameItem::ItemType, Blammopedia::ItemEntry*> itemEntries;
-	std::map<LevelPiece::LevelPieceType, Blammopedia::BlockEntry*> blockEntries;
-	std::map<LevelPiece::PieceStatus, Blammopedia::StatusEffectEntry*> statusEffectEntries;
+	ItemEntryMap itemEntries;
+	BlockEntryMap blockEntries;
+	StatusEffectEntryMap statusEffectEntries;
 
 	Blammopedia();
 	bool InitializeEntries();
@@ -138,6 +153,19 @@ inline Blammopedia::StatusEffectEntry* Blammopedia::GetStatusEffectEntry(const L
 	}
 		
 	return findIter->second;
+}
+
+
+inline const Blammopedia::ItemEntryMap& Blammopedia::GetItemEntries() const {
+	return this->itemEntries;
+}
+
+inline const Blammopedia::BlockEntryMap& Blammopedia::GetBlockEntries() const {
+	return this->blockEntries;
+}
+
+inline const Blammopedia::StatusEffectEntryMap& Blammopedia::GetStatusEffectEntries() const {
+	return this->statusEffectEntries;
 }
 
 #endif // __BLAMMOPEDIAENTRY_H__

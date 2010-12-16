@@ -38,8 +38,9 @@ public:
 
 	static void InitResourceManager(const std::string& resourceZip, const char* argv0);
 
-	// Resource Managerment and loading functions *******************************************************************************
+	// Resource Management and loading functions *******************************************************************************
 	bool LoadBlammopedia(const std::string& blammopediaFile);	
+	Blammopedia* GetBlammopedia() const;
 
 	// Mesh Resource Functions
 	Mesh* GetObjMeshResource(const std::string &filepath);
@@ -128,6 +129,10 @@ private:
 	//static std::string GetAsModDirectoryPath(const std::string& resourceFilepath);
 	//static std::string GetAsResourceDirectoryPath(const std::string& resourceFilepath);
 };
+
+inline Blammopedia* ResourceManager::GetBlammopedia() const {
+	return this->blammopedia;
+}
 
 inline std::string ResourceManager::GetTextureResourceDir() {
 	return std::string(ResourceManager::RESOURCE_DIRECTORY) + std::string("/") + std::string(ResourceManager::TEXTURE_DIRECTORY) + std::string("/");

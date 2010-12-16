@@ -12,6 +12,11 @@
 #ifndef __LEVELMESH_H__
 #define __LEVELMESH_H__
 
+#include "BlockStatusEffectRenderer.h"
+#include "BallSafetyNetMesh.h"
+#include "GameItemAssets.h"
+#include "ItemDropBlockMesh.h"
+
 #include "../BlammoEngine/CgFxEffect.h"
 #include "../BlammoEngine/ObjReader.h"
 #include "../BlammoEngine/Light.h"
@@ -19,12 +24,9 @@
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameLevel.h"
 #include "../GameModel/LevelPiece.h"
-
-#include "BlockStatusEffectRenderer.h"
-#include "BallSafetyNetMesh.h"
+#include "../GameModel/ItemDropBlock.h"
 
 class GameWorldAssets;
-class GameItemAssets;
 class BallSafetyNetMesh;
 class Mesh;
 class PrismBlockMesh;
@@ -32,10 +34,8 @@ class PortalBlockMesh;
 class CannonBlockMesh;
 class CollateralBlockMesh;
 class TeslaBlockMesh;
-class ItemDropBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
-class ItemDropBlock;
 
 class LevelMesh {
 public:
@@ -135,6 +135,16 @@ inline void LevelMesh::DrawSafetyNet(double dT, const Camera& camera, const Basi
 
 inline void LevelMesh::DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture) {
 	this->statusEffectRenderer->Draw(dT, camera, sceneTexture);
+}
+
+/**
+ * Call when the item type that the item drop block will drop, changes and the model needs to be
+ * updated to display this to the player.
+ */
+inline void LevelMesh::UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block) {
+	// Figure out what texture is associated with the next item to be dropped from the block
+	Texture2D* itemTexture = gameItemAssets.GetItemTexture(block.GetNextDropItemType());
+	this->itemDropBlock->UpdateItemDropBlockTexture(&block, itemTexture);
 }
 
 #endif

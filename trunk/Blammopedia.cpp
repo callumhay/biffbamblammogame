@@ -192,20 +192,23 @@ bool Blammopedia::WriteAsEntryStatusFile(const std::string &filepath) const {
 // Goes through every entry in the blammopedia and initializes it from file - this includes loading
 // the textures of various entries, etc.
 bool Blammopedia::InitializeEntries() {
+
 	bool success = true;
 	bool allSuccess = true;
+
 	for (std::map<GameItem::ItemType, ItemEntry*>::iterator iter = this->itemEntries.begin(); iter != this->itemEntries.end(); ++iter) {
 		ItemEntry* itemEntry = iter->second;
 		success = itemEntry->PopulateFromFile();
 		if (!success) { allSuccess = false; }
 	}
-	this->itemEntries.clear();
-	for (std::map<LevelPiece::LevelPieceType, BlockEntry*>::iterator iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
+
+	for (std::map<LevelPiece::LevelPieceType,
+		BlockEntry*>::iterator iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
 		BlockEntry* blockEntry = iter->second;
 		success = blockEntry->PopulateFromFile();
 		if (!success) { allSuccess = false; }
 	}
-	this->blockEntries.clear();
+
 	for (std::map<LevelPiece::PieceStatus, StatusEffectEntry*>::iterator iter = this->statusEffectEntries.begin();
 			 iter != this->statusEffectEntries.end(); ++iter) {
 
@@ -329,6 +332,8 @@ bool Blammopedia::ItemEntry::PopulateFromFile() {
 		return false;
 	}
 
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
+
 	strStream.clear();
 	strStream.seekg(0, std::ios::beg);
 
@@ -369,6 +374,11 @@ bool Blammopedia::ItemEntry::PopulateFromFile() {
 					debug_output("Failed to load the item HUD outline texture for blammopedia item entry: " << this->filename);
 					break;
 				}
+				else {
+					glBindTexture(GL_TEXTURE_2D, this->hudOutlineTexture->GetTextureID());
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				}
 
 			}
 			else {
@@ -391,7 +401,11 @@ bool Blammopedia::ItemEntry::PopulateFromFile() {
 					debug_output("Failed to load the item HUD fill texture for blammopedia item entry: " << this->filename);
 					break;
 				}
-
+				else {
+					glBindTexture(GL_TEXTURE_2D, this->hudFillTexture->GetTextureID());
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				}
 			}
 			else {
 				success = false;
@@ -400,6 +414,8 @@ bool Blammopedia::ItemEntry::PopulateFromFile() {
 			}
 		}
 	}
+
+	glPopAttrib();
 
 	return success;
 }

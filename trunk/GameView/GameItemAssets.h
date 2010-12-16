@@ -1,6 +1,9 @@
 #ifndef __GAMEITEMASSETS_H__
 #define __GAMEITEMASSETS_H__
 
+#include "../ResourceManager.h"
+#include "../Blammopedia.h"
+
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Colour.h"
 #include "../BlammoEngine/Animation.h"
@@ -14,28 +17,37 @@ class Camera;
 class GameItemTimer;
 class BasicPointLight;
 
-
-
 /**
  * Manages assets related to items - including dropping items and items that are already
  * activated in the game.
  */
 class GameItemAssets {
+public:
+	GameItemAssets(GameESPAssets* espAssets);
+	~GameItemAssets();
+	
+	bool LoadItemAssets();
+	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
+		const BasicPointLight& fgKeyLight, const BasicPointLight& fgFillLight, const BasicPointLight& ballLight) const;
+
+	void DrawTimers(double dT, const Camera& camera);
+
+	// On Event functions for signalling the start/stop of timers
+	void TimerStarted(const GameItemTimer* timer);
+	void TimerStopped(const GameItemTimer* timer);
+
+	void ClearTimers();
+
+	Texture2D* GetItemTexture(const GameItem::ItemType& itemType) const;
+
 private:
 	typedef std::map<const GameItemTimer*, AnimationMultiLerp<float> > TimerScaleAnimationMap;
 
 	Mesh* item;	// Item, picked up by the player paddle
 	GameESPAssets* espAssets;	// Effect assets
 
-	// Mapping of item names to their respective texture assets
-	std::map<GameItem::ItemType, Texture*> itemTextures;
-	std::map<GameItem::ItemType, Texture*> itemTimerTextures;
-	std::map<GameItem::ItemType, Texture*> itemTimerFillerTextures;
-
 	// Private helper load and unload functions for item assets
-	bool LoadItemTextures();
 	bool LoadItemMeshes();
-	void UnloadItemTextures();
 	void UnloadItemMeshes();
 
 	/**
@@ -82,34 +94,19 @@ private:
 
 		void SetState(const TimerState& state);
 		void Tick(double dT);
-
 	};
 
 	// Mapping of currently active timers to their respective HUD elements
 	std::list<ItemTimerHUDElement*> activeItemTimers;
 
-public:
-	GameItemAssets(GameESPAssets* espAssets);
-	~GameItemAssets();
-	
-	bool LoadItemAssets();
-	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem, 
-		const BasicPointLight& fgKeyLight, const BasicPointLight& fgFillLight, const BasicPointLight& ballLight) const;
-
-	void DrawTimers(double dT, const Camera& camera);
-
-	// On Event functions for signalling the start/stop of timers
-	void TimerStarted(const GameItemTimer* timer);
-	void TimerStopped(const GameItemTimer* timer);
-
-	void ClearTimers();
-
-	const std::map<GameItem::ItemType, Texture*>& GetItemTextureMap() const;
-
+	DISALLOW_COPY_AND_ASSIGN(GameItemAssets);
 };
 
-inline const std::map<GameItem::ItemType, Texture*>& GameItemAssets::GetItemTextureMap() const {
-	return this->itemTextures;
+inline Texture2D* GameItemAssets::GetItemTexture(const GameItem::ItemType& itemType) const {
+	Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
+	assert(blammopedia != NULL);
+	Blammopedia::ItemEntry* entry = blammopedia->GetItemEntry(itemType);
+	return entry->GetItemTexture();
 }
 
 #endif

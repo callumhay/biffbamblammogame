@@ -1,6 +1,7 @@
 
 #include "RandomToItemAnimation.h"
 #include "GameViewConstants.h"
+#include "../Blammopedia.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/PlayerPaddle.h"
@@ -14,13 +15,11 @@
 
 RandomToItemAnimation::RandomToItemAnimation() :
 randomItemTexture(NULL), currItemFromRandomTexture(NULL), isAnimating(false) {
-	const std::map<GameItem::ItemType, std::string>& itemTexFileNames = GameViewConstants::GetInstance()->GetItemTextures();
-	std::map<GameItem::ItemType, std::string>::const_iterator findIter = itemTexFileNames.find(GameItem::RandomItem);
-	assert(findIter != itemTexFileNames.end());
-	std::string randomItemFilename = findIter->second;
-	assert(!randomItemFilename.empty());
-
-	this->randomItemTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(randomItemFilename, Texture::Trilinear, GL_TEXTURE_2D));
+	Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
+	assert(blammopedia != NULL);
+	const Blammopedia::ItemEntry* randomItemEntry = blammopedia->GetItemEntry(GameItem::RandomItem);
+	assert(randomItemEntry != NULL);
+	this->randomItemTexture = randomItemEntry->GetItemTexture();
 	assert(randomItemTexture != NULL);
 
 	this->initialFadeInAnim.SetInterpolantValue(0.0f);
@@ -34,8 +33,8 @@ randomItemTexture(NULL), currItemFromRandomTexture(NULL), isAnimating(false) {
 }
 
 RandomToItemAnimation::~RandomToItemAnimation() {
-	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->randomItemTexture);
-	assert(success);
+	//bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->randomItemTexture);
+	//assert(success);
 }
 
 void RandomToItemAnimation::Start(const Texture* gameItemTexture, const GameModel& gameModel) {
