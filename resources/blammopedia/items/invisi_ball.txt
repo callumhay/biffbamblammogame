@@ -1,1 +1,5 @@
-Okay, I lied. This power-down doesn’t make your ball completely invisible, it just makes it a hell of a lot harder to find. Sucker.
+Name: Invisiball
+ItemTexture: invisiball_powerdown256x128.jpg
+HUDOutlineTexture: invisiball_timer_hud256x128.png
+HUDFillTexture: invisiball_timer_fill_hud256x128.png
+Desc: Okay, I lied. This power-down doesn’t make your ball completely invisible, it just makes it a hell of a lot harder to find. Sucker.

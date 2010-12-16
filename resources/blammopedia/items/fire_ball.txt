@@ -1,0 +1,5 @@
+Name: Fire Ball
+ItemTexture: fireball_powerneutral256x128.jpg
+HUDOutlineTexture: fireball_timer_hud256x128.png
+HUDFillTexture: fireball_timer_fill_hud256x128.png
+Desc: TODO

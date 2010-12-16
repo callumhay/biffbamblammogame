@@ -1,1 +1,5 @@
-This puts you right inside the paddle, staring up at the level from the paddle’s point of view. Now, hit the ball with your face.
+Name: Paddle Camera
+ItemTexture: paddlecam_powerdown_256x128.jpg
+HUDOutlineTexture: cam_timer_hud256x128.png
+HUDFillTexture: cam_timer_fill_hud256x128.png
+Desc: This puts you right inside the paddle, staring up at the level from the paddle’s point of view. Now, hit the ball with your face.

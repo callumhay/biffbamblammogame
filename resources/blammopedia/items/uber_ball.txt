@@ -1,1 +1,5 @@
-The ball gains the temporary ability to blast through those pesky green blocks in one hit, and make a dent in some of the other tougher-to-break blocks, all without any rigorous martial arts training. Hi-yah!
+Name: Das Uber Ball
+ItemTexture: uberball_powerup256x128.jpg
+HUDOutlineTexture: uberball_timer_hud256x128.png
+HUDFillTexture: uberball_timer_fill_hud256x128.png
+Desc: The ball gains the temporary ability to blast through those pesky green blocks in one hit, and make a dent in some of the other tougher-to-break blocks, all without any rigorous martial arts training. Hi-yah!

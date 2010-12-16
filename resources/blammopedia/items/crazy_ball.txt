@@ -1,1 +1,3 @@
-The ball becomes clinically insane and starts moving in random directions. Sometimes this can be a good thing, other times not so much. Just beware, no amount of prescription drugs can calm it’s tick.
+Name: Crazy Ball
+ItemTexture: crazyball_powerneutral256x128.jpg
+Desc: The ball becomes clinically insane and starts moving in random directions. Sometimes this can be a good thing, other times not so much. Just beware, no amount of prescription drugs can calm it’s tick.

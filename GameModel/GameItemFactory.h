@@ -47,6 +47,8 @@ public:
 	const std::set<GameItem::ItemType>& GetPowerUpItemTypes() const;
 	const std::set<GameItem::ItemType>& GetPowerNeutralItemTypes() const;
 	const std::set<GameItem::ItemType>& GetPowerDownItemTypes() const;
+	
+	const std::map<std::string, GameItem::ItemType>& GetItemNameToTypeMap() const;
 
 private:
 	GameItemFactory();
@@ -107,6 +109,10 @@ inline const std::set<GameItem::ItemType>& GameItemFactory::GetPowerNeutralItemT
 
 inline const std::set<GameItem::ItemType>& GameItemFactory::GetPowerDownItemTypes() const {
 	return this->allPowerDownItemTypes;
+}
+
+inline const std::map<std::string, GameItem::ItemType>& GameItemFactory::GetItemNameToTypeMap() const {
+	return this->itemNameToTypeMap;
 }
 
 #endif

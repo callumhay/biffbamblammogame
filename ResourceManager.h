@@ -8,6 +8,7 @@ class ConfigOptions;
 class Mesh;
 class CgFxMaterialEffect;
 class TextureFontSet;
+class Blammopedia;
 
 /**
  * This class is important for the quick loading of all resources relevant to BiffBlamBlammo
@@ -36,9 +37,10 @@ public:
 	}
 
 	static void InitResourceManager(const std::string& resourceZip, const char* argv0);
-	
+
 	// Resource Managerment and loading functions *******************************************************************************
-		
+	bool LoadBlammopedia(const std::string& blammopediaFile);	
+
 	// Mesh Resource Functions
 	Mesh* GetObjMeshResource(const std::string &filepath);
 	Mesh* GetInkBlockMeshResource();
@@ -71,6 +73,13 @@ public:
 	static std::istringstream* FilepathToInStream(const std::string &filepath);
 	static char* FilepathToMemoryBuffer(const std::string &filepath, long &length);
 
+	// Basic writing functions *****************************************************************************************************
+	bool OverwriteResourceFile(const std::string& filepath, const std::string& data);
+
+	// Public Resource Directories
+	static std::string GetTextureResourceDir();
+	static std::string GetBlammopediaResourceDir();
+
 private:
 	static ResourceManager* instance;
 
@@ -78,6 +87,8 @@ private:
 	~ResourceManager();
 
 	static const char* RESOURCE_DIRECTORY;
+	static const char* TEXTURE_DIRECTORY;
+	static const char* BLAMMOPEDIA_DIRECTORY;
 	static const char* MOD_DIRECTORY;
 
 	std::map<std::string, Mesh*> loadedMeshes;	// Meshes already loaded into the blammo engine from file
@@ -104,6 +115,9 @@ private:
 	std::map<Mix_Music*, char*> musicBuffers;
 	std::map<Mix_Music*, int> numReservedMusicSounds;
 
+	// Blammopedia - where all information and textures for items, blocks, etc. are archived for easy lookup
+	Blammopedia* blammopedia;
+
 	static ConfigOptions* configOptions;	// The configuration options read from the game's ini file
 
 	void InitCgContext();
@@ -114,5 +128,13 @@ private:
 	//static std::string GetAsModDirectoryPath(const std::string& resourceFilepath);
 	//static std::string GetAsResourceDirectoryPath(const std::string& resourceFilepath);
 };
+
+inline std::string ResourceManager::GetTextureResourceDir() {
+	return std::string(ResourceManager::RESOURCE_DIRECTORY) + std::string("/") + std::string(ResourceManager::TEXTURE_DIRECTORY) + std::string("/");
+}
+
+inline std::string ResourceManager::GetBlammopediaResourceDir() {
+	return std::string(ResourceManager::RESOURCE_DIRECTORY) + std::string("/") + std::string(ResourceManager::BLAMMOPEDIA_DIRECTORY) + std::string("/");
+}
 
 #endif

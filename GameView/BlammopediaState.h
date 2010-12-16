@@ -15,6 +15,7 @@
 #include "DisplayState.h"
 
 class ItemListView;
+class Texture;
 
 class BlammopediaState : public DisplayState {
 public:
@@ -37,6 +38,8 @@ private:
 
 	size_t currListViewIndex;
 	std::vector<ItemListView*> listViews;
+
+	Texture* lockedEntryTexture;
 
 	ItemListView* BuildGameItemsListView() const;
 	ItemListView* BuildGameBlockListView() const;

@@ -14,12 +14,16 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 
+class Texture;
+class Camera;
+
 class ItemListView {
 public:
 	static const int NO_ITEM_SELECTED_INDEX;
 
 	class ListItem {
-		ListItem(const std::string& name, const Texture2D* itemTexture, bool isLocked);
+	public:
+		ListItem(const std::string& name, const Texture* itemTexture, bool isLocked);
 		~ListItem();
 
 		void Draw(double dT, const Camera& camera, size_t width, size_t height);
@@ -29,23 +33,23 @@ public:
 		const std::string& GetName() { return this->name; }
 
 	private:
-		size_t bottomLeftX, bottomLeftY;	// Relative to parent container
+		int bottomLeftX, bottomLeftY;	// Relative to parent container
 		
 		bool isLocked;
 		std::string name;
-		const Texture2D* texture;
+		const Texture* texture;
 		//int intData;
 
 		DISALLOW_COPY_AND_ASSIGN(ListItem);
 	};
 
 
-	ItemListView(size_t topRightX, size_t topRightY, size_t width);
+	ItemListView(size_t width);
 	~ItemListView();
 
 	void Draw(double dT, const Camera& camera);
 
-	ItemListView::ListItem* AddItem(const std::string& name, const Texture2D* itemTexture, bool isLocked);
+	ItemListView::ListItem* AddItem(const std::string& name, const Texture* itemTexture, bool isLocked);
 	ItemListView::ListItem* GetSelectedItem() const;
 
 private:
@@ -67,7 +71,7 @@ private:
 
 // Gets the currently selected item in this list view
 inline ItemListView::ListItem* ItemListView::GetSelectedItem() const {
-	if (this->selectedItemIndex >= this->items.size() || this->selectedItemIndex < 0) {
+	if (this->selectedItemIndex >= static_cast<int>(this->items.size()) || this->selectedItemIndex < 0) {
 		return NULL;
 	}
 	return this->items[this->selectedItemIndex];

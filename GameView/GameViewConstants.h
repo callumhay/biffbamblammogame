@@ -122,6 +122,8 @@ public:
 	const char* TEXTURE_CEL_GRADIENT;
 	const char* TEXTURE_NOISE_OCTAVES;
 
+	const char* TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY;
+
 	// Font path constants **********************************
 	const char* FONT_SADBAD;
 	const char* FONT_HAPPYGOOD;
