@@ -39,8 +39,6 @@ private:
 	size_t currListViewIndex;
 	std::vector<ItemListView*> listViews;
 
-	Texture* lockedEntryTexture;
-
 	ItemListView* BuildGameItemsListView() const;
 	ItemListView* BuildGameBlockListView() const;
 	ItemListView* BuildStatusEffectListView() const;

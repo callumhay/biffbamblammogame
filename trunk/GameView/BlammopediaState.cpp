@@ -18,10 +18,7 @@
 #include "../GameModel/GameItemFactory.h"
 
 BlammopediaState::BlammopediaState(GameDisplay* display) : 
-DisplayState(display), lockedEntryTexture(NULL) {
-
-	this->lockedEntryTexture = ResourceManager::GetInstance()->GetImgTextureResource(
-		GameViewConstants::GetInstance()->TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY, Texture::Trilinear, GL_TEXTURE_2D);
+DisplayState(display) {
 
 	this->listViews.reserve(3);
 	this->listViews.push_back(this->BuildGameItemsListView());
@@ -30,9 +27,6 @@ DisplayState(display), lockedEntryTexture(NULL) {
 }
 
 BlammopediaState::~BlammopediaState() {
-	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lockedEntryTexture);
-	assert(success);
-
 	for (std::vector<ItemListView*>::iterator iter = this->listViews.begin(); iter != this->listViews.end(); ++iter) {
 		ItemListView* currListView = *iter;
 		delete currListView;
@@ -54,8 +48,6 @@ void BlammopediaState::ButtonReleased(const GameControl::ActionButton& releasedB
 }
 
 ItemListView* BlammopediaState::BuildGameItemsListView() const {
-	assert(this->lockedEntryTexture != NULL);
-
 	const Camera& camera = this->display->GetCamera();
 	ItemListView* itemsListView = new ItemListView(camera.GetWindowWidth());
 	
@@ -67,8 +59,6 @@ ItemListView* BlammopediaState::BuildGameItemsListView() const {
 }
 
 ItemListView* BlammopediaState::BuildGameBlockListView() const {
-	assert(this->lockedEntryTexture != NULL);
-
 	const Camera& camera = this->display->GetCamera();
 	ItemListView* blockListView = new ItemListView(camera.GetWindowWidth());
 
@@ -78,8 +68,6 @@ ItemListView* BlammopediaState::BuildGameBlockListView() const {
 }
 
 ItemListView* BlammopediaState::BuildStatusEffectListView() const {
-	assert(this->lockedEntryTexture != NULL);
-
 	const Camera& camera = this->display->GetCamera();
 	ItemListView* statusListView = new ItemListView(camera.GetWindowWidth());
 

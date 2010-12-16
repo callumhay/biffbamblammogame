@@ -105,6 +105,8 @@ public:
 
 	bool WriteAsEntryStatusFile(const std::string &filepath) const;
 
+	const Texture2D* GetLockedItemTexture() const;
+
 private:
 	// Blammopedia entry lock file keywords/syntax constants
 	static const char* ITEM_ENTRIES;
@@ -114,6 +116,8 @@ private:
 	ItemEntryMap itemEntries;
 	BlockEntryMap blockEntries;
 	StatusEffectEntryMap statusEffectEntries;
+
+	Texture2D* lockedItemTexture;
 
 	Blammopedia();
 	bool InitializeEntries();
@@ -166,6 +170,10 @@ inline const Blammopedia::BlockEntryMap& Blammopedia::GetBlockEntries() const {
 
 inline const Blammopedia::StatusEffectEntryMap& Blammopedia::GetStatusEffectEntries() const {
 	return this->statusEffectEntries;
+}
+
+inline const Texture2D* Blammopedia::GetLockedItemTexture() const {
+	return this->lockedItemTexture;
 }
 
 #endif // __BLAMMOPEDIAENTRY_H__
