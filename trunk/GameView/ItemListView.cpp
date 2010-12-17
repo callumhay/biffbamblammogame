@@ -16,19 +16,22 @@
 
 // ItemListView Methods --------------------------------------------------------------------------
 
-const int ItemListView::NO_ITEM_SELECTED_INDEX = -1;
+const int ItemListView::NO_ITEM_SELECTED_INDEX      = -1;
+const int ItemListView::DEFAULT_NUM_ITEMS_PER_ROW   = 4;
+const int ItemListView::MAX_ITEM_WIDTH              = 200;
 
 ItemListView::ItemListView(size_t width) : 
 selectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX) {
 	assert(width > 0);
 	
-	this->horizontalBorder	= 10;
-	this->verticalBorder		= 10;
-	this->horizontalGap			= 26;
-	this->verticalGap				= this->horizontalGap / 2;
+	this->horizontalBorder	= 15;
+	this->verticalBorder	= 15;
+	this->horizontalGap		= 30;
+	this->verticalGap		= 20;
+    this->numItemsPerRow    = ItemListView::DEFAULT_NUM_ITEMS_PER_ROW;
 
 	// Figure out an optimal width and height for items and gaps for the given list width and height...
-	this->itemPixelWidth		= this->GetItemWidthForListWidth(width);
+	this->itemPixelWidth		= this->AdjustItemWidthAndListLayout(width);
 	this->itemPixelHeight		= this->itemPixelWidth / 2;
 }
 
@@ -45,38 +48,32 @@ void ItemListView::Draw(double dT, const Camera& camera) {
 	
 	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
-	
-	glPushMatrix();
-	glTranslatef(this->horizontalBorder, this->verticalBorder, 0);
+	glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+	glPolygonMode(GL_FRONT, GL_FILL);
 	
 	bool isSelected = false;
-	int xTranslation = 0;
-	int yTranslation = 0;
+	float xTranslation = 0;
+	float yTranslation = 0;
 	for (int i = 0; i < static_cast<int>(this->items.size()); i++) {
 		ListItem* currItem = this->items[i];
 
 		// If the current item is selected then draw an appropriate selection border around it
 		isSelected = (i == this->selectedItemIndex);
 		if (isSelected) {
-			// TODO
+			// Draw the selection indicator around the item...
+
 		}		
 		
+        this->GetTranslationToItemAtIndex(i, xTranslation, yTranslation);
+
+        glPushMatrix();
+        glTranslatef(xTranslation, yTranslation, 0);
 		currItem->Draw(dT, camera, this->itemPixelWidth, this->itemPixelHeight);
-
-		// Figure out the translation required to get to the next item in the list
-		if (i % 4 == 0) {
-			xTranslation = -static_cast<int>(4*this->itemPixelWidth + 3*this->horizontalGap);
-			yTranslation = -static_cast<int>(this->itemPixelHeight + this->verticalGap);
-		}
-		else {
-			xTranslation = this->itemPixelWidth + this->horizontalGap;
-			yTranslation = 0;
-		}
-		glTranslatef(xTranslation, yTranslation, 0);
-
+		glPopMatrix();
 	}
 
-	glPopMatrix();
+    glPopAttrib();
 }
 
 // Adds a new list item to the end of the current list 
@@ -87,13 +84,31 @@ ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const Tex
 }
 
 // Calculate the correct item width for a given list widget width
-size_t ItemListView::GetItemWidthForListWidth(size_t width) const {
-	int itemWidth = (width - 2 * this->horizontalBorder - 3 * this->horizontalGap) / 4;
+size_t ItemListView::AdjustItemWidthAndListLayout(size_t width) {
+	int itemWidth = (width - 2 * this->horizontalBorder - (this->numItemsPerRow -1) * this->horizontalGap) / this->numItemsPerRow;
 	if (itemWidth < 0) {
 		assert(false);
 		return 0;
 	}
+    
+    // Make sure the item width does not exceed the maximum - if it does then we need to scale the item width down...
+    while (itemWidth > MAX_ITEM_WIDTH) {
+        this->numItemsPerRow++;
+        itemWidth = (width - 2 * this->horizontalBorder - (this->numItemsPerRow -1) * this->horizontalGap) / this->numItemsPerRow;
+    }
+
 	return static_cast<size_t>(itemWidth);
+}
+
+void ItemListView::GetTranslationToItemAtIndex(int index, float& xTranslation, float& yTranslation) {
+    assert(index >= 0 && index < static_cast<int>(this->items.size()));
+    int numItemsIntoRow = index % this->numItemsPerRow;
+    xTranslation  = (this->horizontalBorder + (numItemsIntoRow * this->itemPixelWidth) + 
+                     numItemsIntoRow * static_cast<float>(this->horizontalGap));
+    
+    int numRowsDown    = (index / this->numItemsPerRow) + 1;
+    yTranslation = -(this->verticalBorder + (numRowsDown * this->itemPixelHeight) +
+                     std::max<float>(0.0f, (numRowsDown-1) * static_cast<float>(this->verticalGap)));
 }
 
 // ListItem Methods --------------------------------------------------------------------------
@@ -112,29 +127,25 @@ void ItemListView::ListItem::Draw(double dT, const Camera& camera, size_t width,
 	UNUSED_PARAMETER(camera);
 
 	this->texture->BindTexture();
-	
+
 	glColor4f(1,1,1,1);
 	glBegin(GL_QUADS);
-	glTexCoord2i(0, 0);
-	glVertex2i(0, 0);
-	glTexCoord2i(0, 1);
-	glVertex2i(0, height);
-	glTexCoord2i(1, 1);
-	glVertex2i(width, height);
 	glTexCoord2i(1, 0);
 	glVertex2i(width, 0);
+	glTexCoord2i(1, 1);
+	glVertex2i(width, height);
+	glTexCoord2i(0, 1);
+	glVertex2i(0, height);
+    glTexCoord2i(0, 0);
+	glVertex2i(0, 0);
 	glEnd();
 
 	glLineWidth(2.0f);
 	glColor4f(0,0,0,1);
 	glBegin(GL_LINE_LOOP);
-	glTexCoord2i(0, 0);
-	glVertex2i(0, 0);
-	glTexCoord2i(0, 1);
-	glVertex2i(0, height);
-	glTexCoord2i(1, 1);
-	glVertex2i(width, height);
-	glTexCoord2i(1, 0);
 	glVertex2i(width, 0);
+	glVertex2i(width, height);
+	glVertex2i(0, height);
+	glVertex2i(0, 0);
 	glEnd();
 }

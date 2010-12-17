@@ -20,6 +20,8 @@ class Camera;
 class ItemListView {
 public:
 	static const int NO_ITEM_SELECTED_INDEX;
+    static const int DEFAULT_NUM_ITEMS_PER_ROW;
+    static const int MAX_ITEM_WIDTH;
 
 	class ListItem {
 	public:
@@ -33,7 +35,7 @@ public:
 		const std::string& GetName() { return this->name; }
 
 	private:
-		int bottomLeftX, bottomLeftY;	// Relative to parent container
+		//int bottomLeftX, bottomLeftY;	// Relative to parent container
 		
 		bool isLocked;
 		std::string name;
@@ -50,24 +52,35 @@ public:
 	void Draw(double dT, const Camera& camera);
 
 	ItemListView::ListItem* AddItem(const std::string& name, const Texture* itemTexture, bool isLocked);
+    void SetSelectedItemIndex(int index);
 	ItemListView::ListItem* GetSelectedItem() const;
 
 private:
-
 	// Location and dimension information
 	size_t horizontalBorder, verticalBorder;
 	size_t horizontalGap, verticalGap;
 	size_t itemPixelWidth, itemPixelHeight;
+    int numItemsPerRow;
 
 	// Item information
 	int selectedItemIndex;
 	std::vector<ListItem*> items;	// List items in order of rendering from
 																// the top left corner of the list to the bottom right
-
-	size_t GetItemWidthForListWidth(size_t width) const;
+    
+    void GetTranslationToItemAtIndex(int index, float& xTranslation, float& yTranslation);
+	size_t AdjustItemWidthAndListLayout(size_t width);
 
 	DISALLOW_COPY_AND_ASSIGN(ItemListView);
 };
+
+inline void ItemListView::SetSelectedItemIndex(int index) {
+    if (index == -1 || (index >= 0 && index < static_cast<int>(this->items.size()))) {
+        this->selectedItemIndex = index;
+    }
+    else {
+        assert(false);
+    }
+}
 
 // Gets the currently selected item in this list view
 inline ItemListView::ListItem* ItemListView::GetSelectedItem() const {
