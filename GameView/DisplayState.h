@@ -9,7 +9,7 @@ class GameDisplay;
 class DisplayState {
 
 public:
-	enum DisplayStateType { MainMenu, Blammopedia, LevelStart, WorldStart, InGame, InGameMenu, LevelEnd, GameComplete, GameOver };
+	enum DisplayStateType { MainMenu, BlammopediaMenu, LevelStart, WorldStart, InGame, InGameMenu, LevelEnd, GameComplete, GameOver };
 	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, GameDisplay* display);
 
 	DisplayState(GameDisplay* display) : display(display) {}

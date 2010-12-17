@@ -86,10 +86,10 @@ public:
 
 	typedef ItemEntryMap::iterator				 ItemEntryMapIter;
 	typedef BlockEntryMap::iterator				 BlockEntryMapIter;
-	typedef StatusEffectEntryMap::iterator StatusEffectEntryMapIter;
+	typedef StatusEffectEntryMap::iterator       StatusEffectEntryMapIter;
 
 	typedef ItemEntryMap::const_iterator          ItemEntryMapConstIter;
-	typedef BlockEntryMap::const_iterator				  BlockEntryMapConstIter;
+	typedef BlockEntryMap::const_iterator         BlockEntryMapConstIter;
 	typedef StatusEffectEntryMap::const_iterator  StatusEffectEntryMapConstIter;
 
 	~Blammopedia();

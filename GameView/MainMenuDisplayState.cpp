@@ -38,7 +38,8 @@ const size_t MainMenuDisplayState::TOTAL_NUM_BANG_EFFECTS = 10;
 const char* MainMenuDisplayState::NEW_GAME_MENUITEM		= "New Game";
 const char* MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Play Level";
 const char* MainMenuDisplayState::OPTIONS_MENUITEM		= "Options";
-const char* MainMenuDisplayState::EXIT_MENUITEM				= "Exit Game";
+const char* MainMenuDisplayState::BLAMMOPEDIA_MENUITEM  = "Blammopedia";
+const char* MainMenuDisplayState::EXIT_MENUITEM			= "Exit Game";
 
 const Colour MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR		= Colour(1, 0.65f, 0);
 const Colour MainMenuDisplayState::MENU_ITEM_SEL_COLOUR			= Colour(1, 1, 0);
@@ -52,7 +53,7 @@ const float MainMenuDisplayState::CAM_DIST_FROM_ORIGIN = 20.0f;
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
 DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), 
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NULL), particleEventHandler(NULL),
-changeToPlayGameState(false), menuFBO(NULL), bloomEffect(NULL),
+changeToPlayGameState(false), changeToBlammopediaState(false), menuFBO(NULL), bloomEffect(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 {
 
@@ -277,11 +278,16 @@ void MainMenuDisplayState::InitializeMainMenu() {
 	tempLabelLg.SetText(PLAY_LEVEL_MENUITEM);
 	this->playLevelMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 
+    // Place an item for the blammopedia
+    tempLabelSm.SetText(BLAMMOPEDIA_MENUITEM);
+    tempLabelLg.SetText(BLAMMOPEDIA_MENUITEM);
+	this->blammopediaItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+
 	// Setup the options item in the main menu and its submenu
 	tempLabelSm.SetText(OPTIONS_MENUITEM);
 	tempLabelLg.SetText(OPTIONS_MENUITEM);
 	this->optionsMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, this->optionsSubMenu);
-	
+
 	tempLabelSm.SetText(EXIT_MENUITEM);
 	tempLabelLg.SetText(EXIT_MENUITEM);
 
@@ -436,6 +442,14 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 
 		return;
 	}
+    else if (this->changeToBlammopediaState && finishFadeAnim) {
+		// Turn off all the sounds first (waiting for any unfinished sounds), then switch states
+		GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+		soundAssets->StopAllSounds();
+        // Change to the blammopedia state
+        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::BlammopediaMenu, this->display));
+        return;
+    }
 	
 	const Camera& camera			= this->display->GetCamera();
 	const int DISPLAY_WIDTH		= camera.GetWindowWidth();
@@ -749,6 +763,12 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 		debug_output("Selected " << OPTIONS_MENUITEM << " from menu");
 		soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemVerifyAndSelectEvent);
 	}
+    else if (itemIndex == this->mainMenuState->blammopediaItemIndex) {
+        debug_output("Selected " << BLAMMOPEDIA_MENUITEM << " from menu");
+        this->mainMenuState->changeToBlammopediaState = true;
+		this->mainMenuState->fadeAnimation.SetLerp(0.0, 2.0, 0.0f, 1.0f);
+		this->mainMenuState->fadeAnimation.SetRepeat(false);
+    }
 	else if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
 		// We don't do anything since the user is currently being asked
 		// for verification to quit the game

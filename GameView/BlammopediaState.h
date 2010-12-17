@@ -14,8 +14,11 @@
 
 #include "DisplayState.h"
 
+#include "../BlammoEngine/Animation.h"
+
 class ItemListView;
 class Texture;
+class Blammopedia;
 
 class BlammopediaState : public DisplayState {
 public:
@@ -39,9 +42,11 @@ private:
 	size_t currListViewIndex;
 	std::vector<ItemListView*> listViews;
 
-	ItemListView* BuildGameItemsListView() const;
-	ItemListView* BuildGameBlockListView() const;
-	ItemListView* BuildStatusEffectListView() const;
+    AnimationLerp<float> fadeAnimation;
+
+	ItemListView* BuildGameItemsListView(Blammopedia* blammopedia) const;
+	ItemListView* BuildGameBlockListView(Blammopedia* blammopedia) const;
+	ItemListView* BuildStatusEffectListView(Blammopedia* blammopedia) const;
 
 	DISALLOW_COPY_AND_ASSIGN(BlammopediaState);
 };
@@ -52,7 +57,7 @@ inline void BlammopediaState::DisplaySizeChanged(int width, int height) {
 }
 
 inline DisplayState::DisplayStateType BlammopediaState::GetType() const {
-	return DisplayState::Blammopedia;
+	return DisplayState::BlammopediaMenu;
 }
 
 #endif // __BLAMMOPEDIASTATE_H__

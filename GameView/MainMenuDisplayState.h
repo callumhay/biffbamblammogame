@@ -45,6 +45,7 @@ private:
 
 	static const char* NEW_GAME_MENUITEM;
 	static const char* PLAY_LEVEL_MENUITEM;
+    static const char* BLAMMOPEDIA_MENUITEM;
 	static const char* OPTIONS_MENUITEM;
 	static const char* EXIT_MENUITEM;
 
@@ -67,6 +68,7 @@ private:
 	int newGameMenuItemIndex;
 	int playLevelMenuItemIndex;
 	int optionsMenuItemIndex;
+    int blammopediaItemIndex;
 	int exitGameMenuItemIndex;
 
 	// Indices for the options submenu
@@ -112,6 +114,7 @@ private:
 	AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value
 
 	bool changeToPlayGameState;
+    bool changeToBlammopediaState;
 
 	void InitializeESPEffects();
 	void InitializeMainMenu();

@@ -1,6 +1,7 @@
 
 #include "DisplayState.h"
 #include "MainMenuDisplayState.h"
+#include "BlammopediaState.h"
 #include "LevelStartDisplayState.h"
 #include "WorldStartDisplayState.h"
 #include "InGameDisplayState.h"
@@ -15,6 +16,8 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
 	switch (type) {
 		case DisplayState::MainMenu:
 			return new MainMenuDisplayState(display);
+        case DisplayState::BlammopediaMenu:
+            return new BlammopediaState(display);
 		case DisplayState::LevelStart:
 			return new LevelStartDisplayState(display);
 		case DisplayState::WorldStart:
