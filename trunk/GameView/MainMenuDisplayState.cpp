@@ -43,8 +43,8 @@ const char* MainMenuDisplayState::EXIT_MENUITEM			= "Exit Game";
 
 const Colour MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR		= Colour(1, 0.65f, 0);
 const Colour MainMenuDisplayState::MENU_ITEM_SEL_COLOUR			= Colour(1, 1, 0);
-const Colour MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR	= Colour(0.49f, 0.98f, 1.0f);
-const Colour MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
+const Colour MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR	    = Colour(0.49f, 0.98f, 1.0f);
+const Colour MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR	    = Colour(0.5f, 0.5f, 0.5f);
 const Colour MainMenuDisplayState::SUBMENU_ITEM_IDLE_COLOUR		= Colour(0.75f, 0.75f, 0.75f);
 const Colour MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
 
