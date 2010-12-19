@@ -26,18 +26,19 @@ BreakableTriangleBlock::~BreakableTriangleBlock() {
 }
 
 void BreakableTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-																					const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-																					const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-																					const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                                          const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                          const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                          const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
-	// If the triangle block is in ice then its bounds are a basic rectangle...
+    // If the triangle block is in ice then its bounds are a basic rectangle...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+                                 topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 	}
 	else {
-		this->SetBounds(TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor), 
-										leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-		 							  topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+        this->SetBounds(TriangleBlock::CreateTriangleBounds(false, this->orient, this->center, leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor), 
+            leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+            topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 	}
 }
 
@@ -113,9 +114,9 @@ Matrix4x4 PrismTriangleBlock::GetPieceToLevelInvTransform() const {
 }
 
 void PrismTriangleBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-																			const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-																			const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-																			const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                                      const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                      const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                      const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	UNUSED_PARAMETER(topRightNeighbor);
 	UNUSED_PARAMETER(topLeftNeighbor);
@@ -326,117 +327,117 @@ void PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint, co
  * Returns: bounding lines for the given triangle.
  */
 BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNormals, Orientation triOrient, const Point2D& center, 
-																									const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-																									const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor) {
-	// Set the bounding lines for a rectangular block
-	std::vector<Collision::LineSeg2D> boundingLines;
-	std::vector<Vector2D>  boundingNorms;
+                                                  const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                                                  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor) {
+    // Set the bounding lines for a rectangular block
+    std::vector<Collision::LineSeg2D> boundingLines;
+    std::vector<Vector2D>  boundingNorms;
 
-	Vector2D longSideNorm, shortSideNorm, hypSideNorm;
-	Collision::LineSeg2D shortSide, longSide, hypSide;
+    Vector2D longSideNorm, shortSideNorm, hypSideNorm;
+    Collision::LineSeg2D shortSide, longSide, hypSide;
 
-	bool topNeighborEmpty			= topNeighbor != NULL && topNeighbor->IsNoBoundsPieceType();
-	bool bottomNeighborEmpty	= bottomNeighbor != NULL && bottomNeighbor->IsNoBoundsPieceType();
-	bool leftNeighborEmpty		= leftNeighbor != NULL && leftNeighbor->IsNoBoundsPieceType();
-	bool rightNeighborEmpty		= rightNeighbor != NULL && rightNeighbor->IsNoBoundsPieceType();
+    bool topNeighborNotSolid	= topNeighbor != NULL     && (topNeighbor->GetType()    != LevelPiece::Solid);
+    bool bottomNeighborNotSolid	= bottomNeighbor != NULL  && (bottomNeighbor->GetType() != LevelPiece::Solid);
+    bool leftNeighborNotSolid   = leftNeighbor != NULL    && (leftNeighbor->GetType()   != LevelPiece::Solid);
+    bool rightNeighborNotSolid  = rightNeighbor != NULL   && (rightNeighbor->GetType()  != LevelPiece::Solid);
 
-	switch (triOrient) {
-		case TriangleBlock::UpperLeft:
-			// Long side is the top, short side is left and hypotenuse goes from lower left to upper right
-			longSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::LongSide, TriangleBlock::UpperLeft);
-			shortSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::ShortSide, TriangleBlock::UpperLeft);
-			
-			longSide	= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-									 center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-			shortSide = Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
-									 center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-			
-			if (bottomNeighborEmpty || rightNeighborEmpty) {
-				hypSideNorm		= GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::UpperLeft);
-				hypSide				= Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-											center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-				boundingLines.push_back(hypSide);
-				boundingNorms.push_back(hypSideNorm);
-			}
-			break;
+    switch (triOrient) {
+        case TriangleBlock::UpperLeft:
+            // Long side is the top, short side is left and hypotenuse goes from lower left to upper right
+            longSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::LongSide, TriangleBlock::UpperLeft);
+            shortSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::ShortSide, TriangleBlock::UpperLeft);
 
-		case TriangleBlock::UpperRight:
-			// Long side is the top, short side is the right and hypotenuse goes from lower right to upper left
-			longSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::LongSide, TriangleBlock::UpperRight);
-			shortSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::ShortSide, TriangleBlock::UpperRight);
+            longSide	= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+                center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+            shortSide = Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+                center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 
-			longSide	= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-										center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));		
-			shortSide = Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
-										center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));			
-			
-			if (bottomNeighborEmpty || leftNeighborEmpty) {
-				hypSideNorm		= GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::UpperRight);
-				hypSide				= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-											center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-				boundingLines.push_back(hypSide);
-				boundingNorms.push_back(hypSideNorm);				
-			}
-			break;
+            if (bottomNeighborNotSolid || rightNeighborNotSolid) {
+                hypSideNorm		= GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::UpperLeft);
+                hypSide				= Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+                    center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+                boundingLines.push_back(hypSide);
+                boundingNorms.push_back(hypSideNorm);
+            }
+            break;
 
-		case TriangleBlock::LowerLeft:
-			// Long side is at the bottom, short side is on the left and hypotenuse goes from lower-right to upper-left
-			longSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::LongSide, TriangleBlock::LowerLeft);
-			shortSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::ShortSide, TriangleBlock::LowerLeft);
-			
-			longSide	= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-										center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));		
-			shortSide = Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
-									 center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-			
-			if (topNeighborEmpty || rightNeighborEmpty) {
-				hypSideNorm		= GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::LowerLeft);
-				hypSide				= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-											center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-				boundingLines.push_back(hypSide);
-				boundingNorms.push_back(hypSideNorm);
-			}
-			break;
-		case TriangleBlock::LowerRight:
-			// Long side is at the bottom, short side is on the right and hypotenuse goes from lower-left to upper-right
-			longSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::LongSide, TriangleBlock::LowerRight);
-			shortSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::ShortSide, TriangleBlock::LowerRight);
-			
-			longSide	= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-										center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));		
-			shortSide = Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
-									 center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-			
-			if (topNeighborEmpty || leftNeighborEmpty) {
-				hypSideNorm		= GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::LowerRight);
-				hypSide				= Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-											center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-				boundingLines.push_back(hypSide);
-				boundingNorms.push_back(hypSideNorm);			
-			}
-			break;
+        case TriangleBlock::UpperRight:
+            // Long side is the top, short side is the right and hypotenuse goes from lower right to upper left
+            longSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::LongSide, TriangleBlock::UpperRight);
+            shortSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::ShortSide, TriangleBlock::UpperRight);
 
-		default:
-			assert(false);
-			break;
-	}
+            longSide	= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+                center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));		
+            shortSide = Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+                center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));			
+
+            if (bottomNeighborNotSolid || leftNeighborNotSolid) {
+                hypSideNorm		= GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::UpperRight);
+                hypSide				= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+                    center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+                boundingLines.push_back(hypSide);
+                boundingNorms.push_back(hypSideNorm);				
+            }
+            break;
+
+        case TriangleBlock::LowerLeft:
+            // Long side is at the bottom, short side is on the left and hypotenuse goes from lower-right to upper-left
+            longSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::LongSide, TriangleBlock::LowerLeft);
+            shortSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::ShortSide, TriangleBlock::LowerLeft);
+
+            longSide	= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+                center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));		
+            shortSide = Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+                center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+
+            if (topNeighborNotSolid || rightNeighborNotSolid) {
+                hypSideNorm		= GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::LowerLeft);
+                hypSide				= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+                    center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+                boundingLines.push_back(hypSide);
+                boundingNorms.push_back(hypSideNorm);
+            }
+            break;
+        case TriangleBlock::LowerRight:
+            // Long side is at the bottom, short side is on the right and hypotenuse goes from lower-left to upper-right
+            longSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::LongSide, TriangleBlock::LowerRight);
+            shortSideNorm	= GetSideNormal(generateReflectRefractNormals, TriangleBlock::ShortSide, TriangleBlock::LowerRight);
+
+            longSide	= Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+                center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));		
+            shortSide = Collision::LineSeg2D(center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+                center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+
+            if (topNeighborNotSolid || leftNeighborNotSolid) {
+                hypSideNorm		= GetSideNormal(generateReflectRefractNormals, TriangleBlock::HypotenuseSide, TriangleBlock::LowerRight);
+                hypSide				= Collision::LineSeg2D(center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+                    center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+                boundingLines.push_back(hypSide);
+                boundingNorms.push_back(hypSideNorm);			
+            }
+            break;
+
+        default:
+            assert(false);
+            break;
+                                                      }
 
 	// We only create boundries for breakables in cases where neighbours exist AND they are empty 
 	// (i.e., the ball can actually get to them).
-	if (topNeighborEmpty && (triOrient == TriangleBlock::UpperRight || triOrient == TriangleBlock::UpperLeft)) {
+    if (topNeighborNotSolid && (triOrient == TriangleBlock::UpperRight || triOrient == TriangleBlock::UpperLeft)) {
 		boundingLines.push_back(longSide);
 		boundingNorms.push_back(longSideNorm);
 	}
-	else if (bottomNeighborEmpty && (triOrient == TriangleBlock::LowerRight || triOrient == TriangleBlock::LowerLeft)) {
+	else if (bottomNeighborNotSolid && (triOrient == TriangleBlock::LowerRight || triOrient == TriangleBlock::LowerLeft)) {
 		boundingLines.push_back(longSide);
 		boundingNorms.push_back(longSideNorm);
 	}
 
-	if (leftNeighborEmpty && (triOrient == TriangleBlock::LowerLeft || triOrient == TriangleBlock::UpperLeft)) {
+    if (leftNeighborNotSolid && (triOrient == TriangleBlock::LowerLeft || triOrient == TriangleBlock::UpperLeft)) {
 		boundingLines.push_back(shortSide);
 		boundingNorms.push_back(shortSideNorm);		
 	}
-	else if (rightNeighborEmpty && (triOrient == TriangleBlock::LowerRight || triOrient == TriangleBlock::UpperRight)) {
+    else if (rightNeighborNotSolid && (triOrient == TriangleBlock::LowerRight || triOrient == TriangleBlock::UpperRight)) {
 		boundingLines.push_back(shortSide);
 		boundingNorms.push_back(shortSideNorm);		
 	}

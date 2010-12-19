@@ -73,7 +73,87 @@ Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
  * The boolean return value will be true if one or more collisions occured, false otherwise.
  */
 bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
-														Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+							Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+
+
+    static const int NUM_COLLISON_SAMPLES = 12;
+
+    bool zeroVelocity = (velocity == Vector2D(0.0f, 0.0f));
+    int numCollisionSamples;
+    if (zeroVelocity) {
+        numCollisionSamples = 1;
+    }
+    else {
+        numCollisionSamples = NUM_COLLISON_SAMPLES;
+    }
+    
+    // Figure out the distance along the vector travelled since the last collision
+    // to take each sample at...
+    Vector2D sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples+1);
+    double   sampleIncTime = dT / static_cast<double>(numCollisionSamples+1);
+
+    Point2D  currSamplePt = c.Center() - (dT * velocity) + sampleIncDist;
+    double   currTimeSinceCollision = dT - sampleIncTime;
+
+    // Keep track of all the indices collided with and the collision point collided at
+    std::list<size_t> collisionList;
+    Point2D collisionPt;
+    bool isCollision = false;
+
+    // Go through all of the samples starting with the first (which is just a bit off from the previous
+    // tick location) and moving towards the circle's current location, when a collision is found we exit
+    for (int i = 0; i < numCollisionSamples; i++) {
+        for (size_t lineIdx = 0; lineIdx < this->lines.size(); ++lineIdx) {
+            bool tempIsCollision = Collision::GetCollisionPoint(Collision::Circle2D(currSamplePt, c.Radius()), 
+                                                                this->lines[lineIdx], collisionPt);
+            if (tempIsCollision) {
+                collisionList.push_back(lineIdx);
+                isCollision = true;
+            }
+        }
+        if (isCollision) { break; }
+        currSamplePt = currSamplePt + sampleIncDist;
+        currTimeSinceCollision -= sampleIncTime;
+    }
+
+    if (!isCollision) {
+        return false;
+    }
+    assert(!collisionList.empty());
+    timeSinceCollision = currTimeSinceCollision;
+
+    if (zeroVelocity) {
+        n = this->normals[collisionList.front()];
+        collisionLine = this->lines[collisionList.front()];
+    }
+
+    // Calculate the normal of the collision along with the line segment where the collision occurred...
+    // Find a line with a normal that is pointing the most opposite to the velocity...
+    Vector2D nVelocity = Vector2D::Normalize(velocity);
+    float dotProductVal;
+    for (std::list<size_t>::const_iterator iter = collisionList.begin(); 
+         iter != collisionList.end(); ++iter) {
+
+        const Vector2D& currNormal = this->normals[*iter];
+        dotProductVal = Vector2D::Dot(currNormal, nVelocity);
+        if (dotProductVal < 0.0) {
+           n = n + currNormal;
+        }
+        else {
+           n = n + (0.25f) * currNormal;
+        }
+    }
+
+    if (n == Vector2D(0,0)) { return false; }
+    n.Normalize();
+
+    // Build a collision line from the given normal...
+    Vector2D lineDir(-n[1], n[0]);
+    collisionLine = Collision::LineSeg2D(collisionPt + lineDir, collisionPt - lineDir);
+
+    return true;
+
+    /*
 	n = Vector2D(0, 0);
 	timeSinceCollision = -1.0;
 
@@ -246,6 +326,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 	}
 
 	return collisionOccurred;
+    */
 }
 
 /**

@@ -186,7 +186,8 @@ void BallInPlayState::Tick(double seconds) {
 					// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
 					// lose its ability to collide for 1 second, also check to see if we're already in ghost mode
 					// if so we won't collide with anything (except solid blocks)...
-					if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && currPiece->GhostballPassesThrough()) {
+					if ((currBall->GetBallType() & GameBall::GhostBall) == GameBall::GhostBall && 
+                         currPiece->GhostballPassesThrough()) {
 						
 						if (this->timeSinceGhost < GameModelConstants::GetInstance()->LENGTH_OF_GHOSTMODE) {
 							continue;
@@ -247,7 +248,7 @@ void BallInPlayState::Tick(double seconds) {
 					
 					// Tell the model that a ball collision occurred with currPiece
 					this->gameModel->CollisionOccurred(*currBall, currPiece);
-					break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
+					//break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
 				}
 			}
 		}
@@ -355,10 +356,12 @@ void BallInPlayState::Tick(double seconds) {
 // n must be normalized
 // d is the distance from the center of the ball to the line that was collided with
 // when d is negative the ball is inside the line, when positive it is outside
-void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision) {
+void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n, 
+                                      Collision::LineSeg2D& collisionLine, 
+                                      double dT, double timeSinceCollision) {
 	b.BallCollided();
 
-	// Calculate the time of that and then the difference up to this point
+	// Calculate the time of collision and then the difference up to this point
 	// based on the velocity and then move it to that position...
 	double timeToMoveInReflectionDir = std::max<double>(0.0, dT - timeSinceCollision);
 
