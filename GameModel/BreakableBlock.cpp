@@ -139,6 +139,9 @@ LevelPiece* BreakableBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel* 
  */
 LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	assert(gameModel != NULL);
+    if (ball.IsLastPieceCollidedWith(this)) {
+        return this;
+    }
 
 	LevelPiece* newPiece = this;
 	
@@ -172,7 +175,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 		this->FreezePieceInIce(gameModel);
 	}
 
-	ball.SetLastPieceCollidedWith(NULL);
+	ball.SetLastPieceCollidedWith(this);
 	return newPiece;
 }
 

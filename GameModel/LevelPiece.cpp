@@ -52,9 +52,9 @@ void LevelPiece::SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc) {
  * the boundry will be placed there.
  */
 void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-															const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                              const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                              const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                              const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	UNUSED_PARAMETER(bottomLeftNeighbor);
 	UNUSED_PARAMETER(bottomRightNeighbor);
@@ -69,7 +69,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	// (i.e., the ball can actually get to them).
 
 	// Left boundry of the piece
-	if (leftNeighbor != NULL /*&& leftNeighbor->IsNoBoundsPieceType()*/) {
+    if (leftNeighbor != NULL && leftNeighbor->GetType() != LevelPiece::Solid) {
 		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n1(-1, 0);
@@ -78,7 +78,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Bottom boundry of the piece
-	if (bottomNeighbor != NULL /*&& bottomNeighbor->IsNoBoundsPieceType()*/) {
+	if (bottomNeighbor != NULL && bottomNeighbor->GetType() != LevelPiece::Solid) {
 		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n2(0, -1);
@@ -87,7 +87,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Right boundry of the piece
-	if (rightNeighbor != NULL /*&& rightNeighbor->IsNoBoundsPieceType()*/) {
+	if (rightNeighbor != NULL && rightNeighbor->GetType() != LevelPiece::Solid) {
 		Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n3(1, 0);
@@ -96,7 +96,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Top boundry of the piece
-	if (topNeighbor != NULL /*&& topNeighbor->IsNoBoundsPieceType()*/) {
+	if (topNeighbor != NULL && topNeighbor->GetType() != LevelPiece::Solid) {
 		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n4(0, 1);
@@ -105,7 +105,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor,
-									rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+                                  rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, 
+                                  bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 void LevelPiece::AddStatus(const PieceStatus& status) {

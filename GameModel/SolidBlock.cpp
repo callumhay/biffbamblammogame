@@ -74,9 +74,9 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel) {
  * ALWAYS have all possible collision boundries enabled and created.
  */
 void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-															const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                              const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                              const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                              const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	// We ALWAYS create boundries unless the neighbour does not exist (NULL) 
 	// or is another solid block.
@@ -143,8 +143,7 @@ bool SolidBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const 
 
 // Doesn't matter if a ball collides with solid block, it does nothing to the block.
 LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-	// Tell the ball what the last piece it collided with was...
-	ball.SetLastPieceCollidedWith(this);
+	ball.SetLastPieceCollidedWith(NULL);
 
 	// Solid blocks can be frozen, but they still can't be destroyed (in most cases)
 	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);

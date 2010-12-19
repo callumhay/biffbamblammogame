@@ -76,9 +76,9 @@ bool CannonBlock::CollisionCheck(const BoundingLines& boundingLines) const {
  * into the cannon block if it actually hits the cannon.
  */
 void CannonBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-															 const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-															 const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-															 const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                               const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                               const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                               const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	UNUSED_PARAMETER(leftNeighbor);
 	UNUSED_PARAMETER(bottomNeighbor);
@@ -95,8 +95,9 @@ void CannonBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	}
 
 	// Clear all the currently existing boundry lines first
-	this->SetBounds(this->BuildBounds(), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-		 							topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+    this->SetBounds(this->BuildBounds(), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, 
+        bottomLeftNeighbor);
 }
 
 /**
@@ -109,7 +110,7 @@ BoundingLines CannonBlock::BuildBounds() const {
 
 	// Left boundry of the piece
 	Collision::LineSeg2D l1(this->center + Vector2D(-CannonBlock::HALF_CANNON_BARREL_LENGTH, CannonBlock::HALF_CANNON_BARREL_HEIGHT), 
-							 this->center + Vector2D(-CannonBlock::HALF_CANNON_BARREL_LENGTH, -CannonBlock::HALF_CANNON_BARREL_HEIGHT));
+							this->center + Vector2D(-CannonBlock::HALF_CANNON_BARREL_LENGTH, -CannonBlock::HALF_CANNON_BARREL_HEIGHT));
 	Vector2D n1(-1, 0);
 	boundingLines.push_back(l1);
 	boundingNorms.push_back(n1);
