@@ -65,6 +65,32 @@ InstallDirRegKey HKLM "${REGKEY}" Path
 ShowUninstDetails show
 
 # Installer sections
+
+# Prerequisite installations:
+# - C++ Redistributable
+Section -Prerequisites
+    SetOutPath $INSTDIR
+  
+    IfErrors continue
+    continue:
+    File vcredist_x86.exe
+    restart_installing_cpp_redist:
+    ExecWait '"$INSTDIR\vcredist_x86.exe"'
+    IfErrors error_installing_cpp_redist
+    goto success_installing_cpp_redist
+    
+    error_installing_cpp_redist:
+       MessageBox MB_OKCANCEL "You must install the C++ 2010 Redistributable in order to continue installation." IDOK restart_installing_cpp_redist IDCANCEL exit_now
+       exit_now:
+       Delete "$INSTDIR\vcredist_x86.exe"
+       Quit
+
+    success_installing_cpp_redist:
+    Delete "$INSTDIR\vcredist_x86.exe"
+SectionEnd
+
+
+# Installation of BBB section
 Section "Biff! Bam!! Blammo!?!" SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
@@ -77,8 +103,10 @@ Section "Biff! Bam!! Blammo!?!" SEC0000
     File ..\lib\SDL_mixer.dll
     File ..\lib\XInput9_1_0.dll
     File ..\BBBResources.zip
+    File ..\BiffBamBlammoIcon.bmp
     File ..\Release\BiffBamBlammo.exe
     File ..\Release\BiffBamBlammo.ico
+    #File vcredist_x86.exe
     WriteRegStr HKLM "${REGKEY}\Components" "Biff! Bam!! Blammo!?! Install" 1
 SectionEnd
 
