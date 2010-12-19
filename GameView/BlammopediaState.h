@@ -15,6 +15,7 @@
 #include "DisplayState.h"
 
 #include "../BlammoEngine/Animation.h"
+#include "../BlammoEngine/TextLabel.h"
 
 class ItemListView;
 class Texture;
@@ -35,6 +36,7 @@ public:
 	DisplayState::DisplayStateType GetType() const;
 
 private:
+    static const int ITEM_NAME_BORDER_SIZE;
 	static const size_t ITEMS_LIST_VIEW_INDEX;
 	static const size_t BLOCKS_LIST_VIEW_INDEX;
 	static const size_t STATUS_LIST_VIEW_INDEX;
@@ -42,12 +44,15 @@ private:
 	size_t currListViewIndex;
 	std::vector<ItemListView*> listViews;
 
+    TextLabel2D selectedItemNameLbl;
     AnimationLerp<float> fadeAnimation;
 
 	ItemListView* BuildGameItemsListView(Blammopedia* blammopedia) const;
 	ItemListView* BuildGameBlockListView(Blammopedia* blammopedia) const;
 	ItemListView* BuildStatusEffectListView(Blammopedia* blammopedia) const;
 
+    ItemListView* GetCurrentListView() const;
+        
 	DISALLOW_COPY_AND_ASSIGN(BlammopediaState);
 };
 
@@ -58,6 +63,13 @@ inline void BlammopediaState::DisplaySizeChanged(int width, int height) {
 
 inline DisplayState::DisplayStateType BlammopediaState::GetType() const {
 	return DisplayState::BlammopediaMenu;
+}
+
+inline ItemListView* BlammopediaState::GetCurrentListView() const {
+    if (this->currListViewIndex >= this->listViews.size()) {
+        return NULL;
+    }
+    return this->listViews[this->currListViewIndex];
 }
 
 #endif // __BLAMMOPEDIASTATE_H__
