@@ -12,14 +12,14 @@ RequestExecutionLevel user
 !define URL ""
 
 # MUI Symbol Definitions
-!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
+!define MUI_ICON "..\BiffBamBlammo_Install.ico"  #"${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_LICENSEPAGE_CHECKBOX
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT HKLM
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${REGKEY}
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME StartMenuGroup
 !define MUI_STARTMENUPAGE_DEFAULTFOLDER "Biff Bam Blammo"
-!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
+!define MUI_UNICON "..\BiffBamBlammo_Uninstall.ico" #"${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
 !define MUI_UNFINISHPAGE_NOAUTOCLOSE
 
 # Included files
@@ -153,6 +153,7 @@ Section /o "-un.Biff! Bam!! Blammo!?! Install" UNSEC0000
     Delete /REBOOTOK $INSTDIR\cg.dll
     Delete /REBOOTOK $INSTDIR\XInput9_1_0.dll
     Delete /REBOOTOK $INSTDIR\BiffBamBlammo.ini
+    Delete /REBOOTOK $INSTDIR\BiffBamBlammoIcon.bmp
     DeleteRegValue HKLM "${REGKEY}\Components" "Biff! Bam!! Blammo!?! Install"
 SectionEnd
 
