@@ -1,0 +1,3 @@
+Name: Collateral Block
+DisplayTexture: collateral_block_256x128.png
+Desc: Some Description for the Collateral block goes here.

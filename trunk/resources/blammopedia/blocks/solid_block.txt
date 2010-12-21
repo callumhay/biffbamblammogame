@@ -1,0 +1,3 @@
+Name: Solid Block
+DisplayTexture: solid_block_256x128.png
+Desc: Some Description for the Solid block goes here.

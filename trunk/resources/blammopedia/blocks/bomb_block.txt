@@ -1,0 +1,3 @@
+Name: Bomb Block
+DisplayTexture: bomb_block_256x128.png
+Desc: Some Description for the Bomb block goes here.

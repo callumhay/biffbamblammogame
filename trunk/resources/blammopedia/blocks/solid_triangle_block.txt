@@ -1,0 +1,3 @@
+Name: Solid Triangle Block
+DisplayTexture: solid_triangle_block_256x128.png
+Desc: Some Description for the Solid triangle block goes here.

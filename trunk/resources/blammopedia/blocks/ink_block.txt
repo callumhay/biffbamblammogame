@@ -1,0 +1,3 @@
+Name: Ink Block
+DisplayTexture: ink_block_256x128.png
+Desc: Some Description for the Ink block goes here.
