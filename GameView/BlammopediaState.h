@@ -37,6 +37,7 @@ public:
 
 private:
     static const int ITEM_NAME_BORDER_SIZE;
+    static const int TOTAL_MENU_HEIGHT;
 	static const size_t ITEMS_LIST_VIEW_INDEX;
 	static const size_t BLOCKS_LIST_VIEW_INDEX;
 	static const size_t STATUS_LIST_VIEW_INDEX;
@@ -44,8 +45,24 @@ private:
 	size_t currListViewIndex;
 	std::vector<ItemListView*> listViews;
 
-    TextLabel2D selectedItemNameLbl;
     AnimationLerp<float> fadeAnimation;
+
+    TextLabel2D selectedItemNameLbl;
+
+    // Menu items and states
+    static const int NO_MENU_ITEM_INDEX     = -1;
+    static const int ITEMS_MENU_ITEM_INDEX  = 0; 
+    static const int BLOCK_MENU_ITEM_INDEX  = 1;
+    static const int STATUS_MENU_ITEM_INDEX = 2;
+    static const int BACK_MENU_ITEM_INDEX   = 3;
+    
+    int currMenuItemIndex;
+    TextLabel2D backMenuItem;
+    TextLabel2D itemListMenuItem;
+    //TextLabel2D blockListMenuItem;
+    //TextLabel2D statusListMenuItem;
+
+    bool goBackToMainMenu;
 
 	ItemListView* BuildGameItemsListView(Blammopedia* blammopedia) const;
 	ItemListView* BuildGameBlockListView(Blammopedia* blammopedia) const;
@@ -53,6 +70,8 @@ private:
 
     ItemListView* GetCurrentListView() const;
         
+    void GoBackToMainMenu();
+
 	DISALLOW_COPY_AND_ASSIGN(BlammopediaState);
 };
 
