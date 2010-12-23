@@ -1,0 +1,3 @@
+Name: Item Drop Block
+DisplayTexture: item_drop_block_256x128.png
+Desc: Some Description for the Item Drop block goes here.

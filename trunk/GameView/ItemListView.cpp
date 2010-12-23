@@ -183,7 +183,7 @@ void ItemListView::MoveSelectionX(bool right) {
     int currRowIndex  = this->selectedItemIndex / this->numItemsPerRow;
     int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
     int wrapAroundX   = (numItemsOnRow + this->selectedItemIndex + x) % numItemsOnRow;
-    this->selectedItemIndex = this->numItemsPerRow * currRowIndex + wrapAroundX;
+    this->SetSelection(this->numItemsPerRow * currRowIndex + wrapAroundX);
 }
 
 void ItemListView::MoveSelectionY(bool up) {
@@ -192,15 +192,16 @@ void ItemListView::MoveSelectionY(bool up) {
 
     int numRows = (this->items.size() / this->numItemsPerRow) + 1;
     int rowsAllFilledNumItems = (numRows * this->numItemsPerRow);
-    this->selectedItemIndex = (rowsAllFilledNumItems + this->selectedItemIndex - y * this->numItemsPerRow) % rowsAllFilledNumItems;
+    int newSelectedIndex = (rowsAllFilledNumItems + this->selectedItemIndex - y * this->numItemsPerRow) % rowsAllFilledNumItems;
     if (this->selectedItemIndex >= static_cast<int>(this->items.size())) {
         if (up) {
-            this->selectedItemIndex -= this->numItemsPerRow;
+            newSelectedIndex -= this->numItemsPerRow;
         }
         else {
-            this->selectedItemIndex %= this->numItemsPerRow;
+            newSelectedIndex %= this->numItemsPerRow;
         }
     }
+    this->SetSelection(newSelectedIndex);
 }
 
 int ItemListView::GetNumItemsOnRow(int rowIdx) {
@@ -253,6 +254,19 @@ void ItemListView::GetTranslationToItemAtIndex(int index, float& xTranslation, f
                      std::max<float>(0.0f, (numRowsDown-1) * static_cast<float>(this->verticalGap)));
 }
 
+void ItemListView::SetSelection(int index) {
+    ListItem* prevSelection  = this->GetSelectedItem();
+    if (prevSelection != NULL) {
+        prevSelection->SetSelected(false);
+    }
+    
+    this->selectedItemIndex = index;
+    ListItem* newSelection = this->GetSelectedItem();
+    if (newSelection != NULL) {
+        newSelection->SetSelected(true);
+    }
+}
+
 // ListItem Methods --------------------------------------------------------------------------
 
 ItemListView::ListItem::ListItem(const ItemListView* parent, const std::string& name, 
@@ -262,6 +276,11 @@ name(name), texture(itemTexture), isLocked(isLocked) {
     assert(itemTexture != NULL);
 
     this->halfSelectionBorderSize = static_cast<float>(parent->GetSmallestBorderSize()) / 2.0f;
+
+    this->sizeAnimation = AnimationLerp<float>(1.0f);
+    this->sizeAnimation.SetInterpolantValue(1.0f);
+    this->sizeAnimation.SetRepeat(false);
+
 }
 
 ItemListView::ListItem::~ListItem() {
@@ -271,13 +290,16 @@ void ItemListView::ListItem::DrawSelection(double dT, const Camera& camera,
                                            size_t width, size_t height, 
                                            float alphaOrange, float alphaYellow, 
                                            float scale) {
-	UNUSED_PARAMETER(dT);
 	UNUSED_PARAMETER(camera);
+    UNUSED_PARAMETER(dT);
+    
+    float sizeAnimationScaling = this->sizeAnimation.GetInterpolantValue();
 
     glBindTexture(GL_TEXTURE_2D, 0);
  
     glPushMatrix();
     glTranslatef(static_cast<float>(width) / 2.0f, static_cast<float>(height) / 2.0f, 0.0f);
+    glScalef(sizeAnimationScaling, sizeAnimationScaling, 1);
 
     glColor4f(1, 1, 0, alphaYellow);
     this->DrawItemQuadCenter(width + scale, height + scale);
@@ -290,22 +312,43 @@ void ItemListView::ListItem::DrawSelection(double dT, const Camera& camera,
 
 // Draws this item with its local origin in its bottom left corner with the given width and height
 void ItemListView::ListItem::DrawItem(double dT, const Camera& camera, size_t width, size_t height) {
-	UNUSED_PARAMETER(dT);
 	UNUSED_PARAMETER(camera);
+    
+    this->sizeAnimation.Tick(dT);
+    float scale = this->sizeAnimation.GetInterpolantValue();
 
 	this->texture->BindTexture();
 
+    glPushMatrix();
+    
+    float halfWidth  = width / 2.0f;
+    float halfHeight = height / 2.0f;
+    glTranslatef(halfWidth, halfHeight, 0);
+    glScalef(scale, scale, 1);
+
 	glColor4f(1,1,1,1);
-	this->DrawItemQuadBottomLeft(width, height);
+    this->DrawItemQuadCenter(width, height);
 
 	glLineWidth(2.0f);
 	glColor4f(0,0,0,1);
 	glBegin(GL_LINE_LOOP);
-	glVertex2i(width, 0);
-	glVertex2i(width, height);
-	glVertex2i(0, height);
-	glVertex2i(0, 0);
+	glVertex2f(halfWidth, -halfHeight);
+	glVertex2f(halfWidth, halfHeight);
+	glVertex2f(-halfWidth, halfHeight);
+	glVertex2f(-halfWidth, -halfHeight);
 	glEnd();
+    glPopMatrix();
+}
+
+void ItemListView::ListItem::SetSelected(bool isSelected) {
+    if (isSelected) {
+        this->sizeAnimation.SetLerp(0.2, 1.1f);
+        this->sizeAnimation.SetRepeat(false);
+    }
+    else {
+        this->sizeAnimation.SetLerp(0.2, 1.0f);
+        this->sizeAnimation.SetRepeat(false);
+    }
 }
 
 void ItemListView::ListItem::DrawItemQuadBottomLeft(size_t width, size_t height) {

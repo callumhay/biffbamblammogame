@@ -35,6 +35,8 @@ public:
             size_t height, float alphaOrange, float alphaYellow, float scale);
 		void DrawItem(double dT, const Camera& camera, size_t width, size_t height);
 
+        void SetSelected(bool isSelected);
+
 		//void SetIntData(int data) { this->intData = data; }
 		//int GetIntData() const { return this->intData; }
 		const std::string& GetName() const { return this->name; }
@@ -46,6 +48,8 @@ public:
 		const Texture* texture;
         float halfSelectionBorderSize;
 		//int intData;
+
+        AnimationLerp<float> sizeAnimation;
 
         void DrawItemQuadBottomLeft(size_t width, size_t height);
         void DrawItemQuadCenter(float width, float height);
@@ -97,12 +101,14 @@ private:
     void ItemActivated();
     void StartLockedAnimation();
 
+    void SetSelection(int index);
+
 	DISALLOW_COPY_AND_ASSIGN(ItemListView);
 };
 
 inline void ItemListView::SetSelectedItemIndex(int index) {
     if (index == -1 || (index >= 0 && index < static_cast<int>(this->items.size()))) {
-        this->selectedItemIndex = index;
+        this->SetSelection(index);
     }
     else {
         assert(false);

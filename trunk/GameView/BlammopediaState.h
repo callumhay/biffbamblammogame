@@ -55,10 +55,15 @@ private:
     static const int BLOCK_MENU_ITEM_INDEX  = 1;
     static const int STATUS_MENU_ITEM_INDEX = 2;
     static const int BACK_MENU_ITEM_INDEX   = 3;
+    static const int TOTAL_NUM_MENU_ITEMS   = 4;
     
+    static const Colour SELECTION_COLOUR;
+    static const Colour IDLE_COLOUR;
+
     int currMenuItemIndex;
-    TextLabel2D backMenuItem;
-    TextLabel2D itemListMenuItem;
+    std::vector<TextLabel2D*> blammoMenuLabels;
+    //TextLabel2D backMenuItem;
+    //TextLabel2D itemListMenuItem;
     //TextLabel2D blockListMenuItem;
     //TextLabel2D statusListMenuItem;
 
@@ -71,7 +76,11 @@ private:
     ItemListView* GetCurrentListView() const;
         
     void GoBackToMainMenu();
+    void SetBlammoMenuItemHighlighted(int menuItemIndex);
+    void SetBlammoMenuItemSelection();
+    void SetBlammoMenuItemDeselection();
 
+    void DrawFadeOverlay(int width, int height, float alpha);
 	DISALLOW_COPY_AND_ASSIGN(BlammopediaState);
 };
 
