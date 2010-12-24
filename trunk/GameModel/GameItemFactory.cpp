@@ -123,6 +123,7 @@ GameItemFactory::GameItemFactory() {
 	allPowerNeutralItemTypes.insert(GameItem::ShieldPaddleItem);
 	allPowerNeutralItemTypes.insert(GameItem::FireBallItem);
 	allPowerNeutralItemTypes.insert(GameItem::IceBallItem);
+    allPowerNeutralItemTypes.insert(GameItem::RandomItem);
 
 	// Establish the Power-down item set
 	allPowerDownItemTypes.insert(GameItem::BallShrinkItem);

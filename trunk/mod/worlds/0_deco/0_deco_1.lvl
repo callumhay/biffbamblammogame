@@ -16,7 +16,7 @@ S G X(c,d) Y O O O X(d,c) G S
 S A(1,1,a,b) G O R R G G G S 
 S E E E E E E E B S 
 S E I E E E E E E S 
-S E E E T(R,ur) E E E E S 
+S E D(Random) E T(R,ur) E E E E S 
 S E E E E E E E E S 
 S E E E E E E T(Y,ll) E S 
 S T(O,ul) L E E E E T(O,lr) E S 
