@@ -38,16 +38,24 @@ The following specifies the .lvl format.
 // b: The single character name of the sibling portal block that this portal block is
 // the enterence and exit for.
 
-// A([1|0], [1|0], a, B) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
+// A([1|0], [1|0], a, b) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
 // [1|0]: A '1' or a '0' to indicated whether it starts on (1) or off (0).
 // [1|0]: A '1' or a '0' to indicated whether it can be turned on/off (1) or is unchangable (0).
 // a : The single character name of this tesla block.
-// B : One or more other named tesla blocks seperated by commas.
+// b : One or more other named tesla blocks seperated by commas.
 
 // D(i0, i1, i2, ...) - Item drop block:
 // i0, i1, i2, ... : The names of all the item types that the block is allowed to drop, names can be 
 //                   repeated in order to make higher probabilities of drops. Also, there are several special key
 //                   words that can be used: (all, powerups, powerdowns, powerneutrals), which cause the block to drop 
 //                   all items of those respective designations.
+
+// W(a) - Switch block:
+// a : The trigger ID of the block that gets triggered by the switch 
+//     (switch is turned on when a ball/projectile hits it).
+
+// NOTE: All blocks may have an optional trigger ID, which must be a 0 or positive integer 
+// contained within curly brackets at the end of the block signature.
+// e.g., R{12}, X(z,j){1}, ...
 
 <block list in order of top-left to bottom-right>

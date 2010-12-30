@@ -18,9 +18,15 @@ class GameLevel;
 class GameModel;
 class Projectile;
 class BeamSegment;
+class SwitchBlock;
 
 class LevelPiece {
 public:
+    // Typedef and constants for trigger IDs - used to indicate a unique id for a level piece
+    // so it can be triggered by switches
+    typedef int TriggerID;
+    static const TriggerID NO_TRIGGER_ID;
+
 	// All level pieces must conform to these measurements...
 	static const float PIECE_WIDTH;
 	static const float PIECE_HEIGHT;
@@ -30,7 +36,8 @@ public:
 	static const float HALF_PIECE_DEPTH;
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
-                          Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop };
+                          Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop,
+                          Switch };
 	virtual LevelPieceType GetType() const = 0;
     static bool IsValidLevelPieceType(int pieceType);
 
@@ -71,15 +78,13 @@ public:
 
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball) = 0;
 	virtual LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile) = 0;
+    virtual LevelPiece* CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
 
 	virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 	virtual LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 	virtual LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
 
 	virtual bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
-
-	// Debug Stuffs
-	void DebugDraw() const;
 
 	virtual bool IsNoBoundsPieceType() const = 0;
 	virtual bool BallBouncesOffWhenHit() const = 0;
@@ -90,6 +95,10 @@ public:
 	virtual bool ProjectilePassesThrough(Projectile* projectile) const = 0;
 	virtual bool IsLightReflectorRefractor() const = 0;
 
+    //virtual bool TriggeredBySwitch(const SwitchBlock& switchBlock); // TODO: When a switch triggers a block it calls this method
+    void SetTriggerID(const LevelPiece::TriggerID& id) { this->triggerID = id; }
+    const LevelPiece::TriggerID& GetTriggerID() const { return this->triggerID; }
+
 	// Track the status of the piece, effects properties of the piece and how it works/acts in a level
 	// NOTE: IF YOU ADD TO THIS DON'T FORGET TO UPDATE LevelPiece::RemoveStatuses !!!!!
 	enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, IceCubeStatus = 0x00000002 };
@@ -98,11 +107,16 @@ public:
 	void RemoveStatus(const PieceStatus& status);
 	void RemoveStatuses(int32_t statusMask);
 
+	// Debug Stuffs
+	void DebugDraw() const;
+
 protected:
-	Colour colour;								// The colour of this level piece
-	Point2D center;								// The exact center of this piece in the game model
-	unsigned int wIndex, hIndex;	// The width and height index to where this block is in its level
-	BoundingLines bounds;			 		// The bounding box, rep. as lines forming the boundry of this, kept in world space
+	Colour colour;                  // The colour of this level piece
+	Point2D center;                 // The exact center of this piece in the game model
+	unsigned int wIndex, hIndex;    // The width and height index to where this block is in its level
+	BoundingLines bounds;           // The bounding box, rep. as lines forming the boundry of this, kept in world space
+    
+    TriggerID triggerID;
 
 	// Pointers to any neighboring level pieces to this one - if a neighbor does not
 	// exist it will be NULL - these get initialized/set with any call to UpdateBounds.
@@ -137,7 +151,7 @@ private:
 
 inline Collision::AABB2D LevelPiece::GetAABB() const {
 	return Collision::AABB2D(this->center - Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-													 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+                             this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 }
 
 /**
@@ -200,6 +214,12 @@ inline bool LevelPiece::CollisionCheck(const Collision::Circle2D& c) const {
 		return false;
 	}
 	return Collision::IsCollision(this->GetAABB(), c);
+}
+
+inline LevelPiece* LevelPiece::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
+    UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(paddle);
+    return this;
 }
 
 /**

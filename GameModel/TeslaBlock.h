@@ -112,6 +112,10 @@ private:
 	void ToggleElectricity(GameModel& gameModel, GameLevel& level);
 };
 
+inline bool TeslaBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	return Collision::IsCollision(ray, this->GetAABB(), rayT);
+}
+
 // Sets the list of Tesla blocks (not including this one) that this tesla block will connect
 // to when it's active and they're active.
 inline void TeslaBlock::SetConnectedTeslaBlockList(const std::list<TeslaBlock*>& teslaBlocks) {

@@ -1349,6 +1349,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\SwitchBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\TeslaBlock.h"
 						>
 					</File>
@@ -1398,6 +1402,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\SolidBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\SwitchBlock.cpp"
 						>
 					</File>
 					<File

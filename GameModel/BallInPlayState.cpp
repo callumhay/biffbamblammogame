@@ -161,7 +161,7 @@ void BallInPlayState::Tick(double seconds) {
 					ballToMoveToFront = currBall;
 				}
 
-				// Make for damn sure that the ball is no longer colliding!
+				// Make sure that the ball is no longer colliding!
 				Vector2D tempN;
 				Collision::LineSeg2D tempLine;
 				double tempTime;
@@ -340,7 +340,7 @@ void BallInPlayState::Tick(double seconds) {
 	// This may cause the level to end since the paddle shield can destroy blocks, in such a case we exit immediately
 	// since this state is now destroyed.
 	//bool stateChanged = 
-  this->DoUpdateToPaddleBoundriesAndCollisions(seconds, false);
+    this->DoUpdateToPaddleBoundriesAndCollisions(seconds, false);
 	//if (stateChanged) {
 	//	return;
 	//}
