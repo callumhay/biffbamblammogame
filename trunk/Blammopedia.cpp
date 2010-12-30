@@ -7,17 +7,13 @@
 #include "GameModel/GameItemFactory.h"
 #include "GameView/GameViewConstants.h"
 
-// Blammopedia entry lock file keywords/syntax constants
-const char* Blammopedia::ITEM_ENTRIES						= "ITEM_ENTRIES:";
-const char* Blammopedia::BLOCK_ENTRIES					= "BLOCK_ENTRIES:";
-const char* Blammopedia::STATUS_EFFECT_ENTRIES	= "STATUS_EFFECT_ENTRIES:";
-
 // Item, block and status effect file keywords/syntax constants
-const char* Blammopedia::Entry::NAME_KEYWORD								= "Name:";
-const char* Blammopedia::Entry::ITEM_TEXTURE_KEYWORD				= "ItemTexture:";
+const char* Blammopedia::Entry::NAME_KEYWORD				= "Name:";
+const char* Blammopedia::Entry::ITEM_TEXTURE_KEYWORD		= "ItemTexture:";
 const char* Blammopedia::Entry::HUD_OUTLINE_TEXTURE_KEYWORD	= "HUDOutlineTexture:";
-const char* Blammopedia::Entry::HUD_FILL_TEXTURE_KEYWORD		= "HUDFillTexture:";
-const char* Blammopedia::Entry::DESCRIPTION_KEYWORD					= "Desc:";
+const char* Blammopedia::Entry::HUD_FILL_TEXTURE_KEYWORD	= "HUDFillTexture:";
+const char* Blammopedia::Entry::DESCRIPTION_KEYWORD			= "Desc:";
+const char* Blammopedia::Entry::DISPLAY_TEXTURE_KEYWORD     = "DisplayTexture:";
 
 Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
 	static const std::string BLAMMOPEDIA_ITEMS_DIR  = ResourceManager::GetBlammopediaResourceDir()  + std::string("items/");
@@ -27,43 +23,49 @@ Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
 	// Initialize all of the various types of entries in the blammopedia...
 
 	// Item Entry Types...
-	this->itemEntries.insert(std::make_pair(GameItem::BallSpeedUpItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("fast_ball.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::BallSlowDownItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("slow_ball.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::UberBallItem,						new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("uber_ball.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::InvisiBallItem,					new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("invisi_ball.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::GhostBallItem,					new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ghost_ball.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::LaserBulletPaddleItem,	new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("laser_gun.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::MultiBall3Item,					new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("multi_ball_3.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::MultiBall5Item,					new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("multi_ball_5.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::PaddleGrowItem,					new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("paddle_grow.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::PaddleShrinkItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("paddle_shrink.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::BallShrinkItem,					new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ball_shrink.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::BallGrowItem,						new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ball_grow.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::BlackoutItem,						new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("blackout.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::UpsideDownItem,					new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("flip.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::BallSafetyNetItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("safety_net.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::OneUpItem,							new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("one_up.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::PoisonPaddleItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("poison.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::StickyPaddleItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("sticky_paddle.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::PaddleCamItem,					new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("paddle_camera.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::BallCamItem,						new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ball_camera.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::LaserBeamPaddleItem,		new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("laser_beam.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::GravityBallItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("gravity_ball.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::RocketPaddleItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("missile.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::CrazyBallItem,					new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("crazy_ball.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::ShieldPaddleItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("shield.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::FireBallItem,						new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("fire_ball.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::IceBallItem,						new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ice_ball.txt"))));
-	this->itemEntries.insert(std::make_pair(GameItem::RandomItem,							new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("random.txt"))));
-
-	
-
+    this->itemEntries.insert(std::make_pair(GameItem::BallSpeedUpItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("fast_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::BallSlowDownItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("slow_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::UberBallItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("uber_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::InvisiBallItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("invisi_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::GhostBallItem,            new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ghost_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::LaserBulletPaddleItem,	new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("laser_gun.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::MultiBall3Item,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("multi_ball_3.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::MultiBall5Item,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("multi_ball_5.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::PaddleGrowItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("paddle_grow.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::PaddleShrinkItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("paddle_shrink.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::BallShrinkItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ball_shrink.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::BallGrowItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ball_grow.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::BlackoutItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("blackout.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::UpsideDownItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("flip.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::BallSafetyNetItem,		new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("safety_net.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::OneUpItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("one_up.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::PoisonPaddleItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("poison.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::StickyPaddleItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("sticky_paddle.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::PaddleCamItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("paddle_camera.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::BallCamItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ball_camera.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::LaserBeamPaddleItem,		new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("laser_beam.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::GravityBallItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("gravity_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::RocketPaddleItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("missile.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::CrazyBallItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("crazy_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::ShieldPaddleItem,         new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("shield.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::FireBallItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("fire_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::IceBallItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ice_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::RandomItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("random.txt"))));
+    
 	// Block Entry Types...
-
+    this->blockEntries.insert(std::make_pair(LevelPiece::Solid,        new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("solid_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Breakable,    new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("breakable_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Bomb,         new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("bomb_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Ink,          new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("ink_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Prism,        new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("prism_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Portal,       new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("portal_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Cannon,       new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("cannon_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Collateral,   new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("collateral_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::Tesla,        new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("tesla_block.txt"))));
+    this->blockEntries.insert(std::make_pair(LevelPiece::ItemDrop,     new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("item_drop_block.txt"))));
+    
 
 	// Status Effect Entry Types...
-
-
 
 }
 
@@ -81,13 +83,15 @@ Blammopedia::~Blammopedia() {
 		itemEntry = NULL;
 	}
 	this->itemEntries.clear();
-	for (std::map<LevelPiece::LevelPieceType, BlockEntry*>::iterator iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
+	
+    for (std::map<LevelPiece::LevelPieceType, BlockEntry*>::iterator iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
 		BlockEntry* blockEntry = iter->second;
 		delete blockEntry;
 		blockEntry = NULL;
 	}
 	this->blockEntries.clear();
-	for (std::map<LevelPiece::PieceStatus, StatusEffectEntry*>::iterator iter = this->statusEffectEntries.begin();
+	
+    for (std::map<LevelPiece::PieceStatus, StatusEffectEntry*>::iterator iter = this->statusEffectEntries.begin();
 			 iter != this->statusEffectEntries.end(); ++iter) {
 
 		StatusEffectEntry* statusEntry = iter->second;
@@ -98,43 +102,32 @@ Blammopedia::~Blammopedia() {
 }
 
 Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) {
-	long fileLength;
-	char* fileBuffer = ResourceManager::GetInstance()->FilepathToMemoryBuffer(filepath, fileLength);
-	if (fileBuffer == NULL) {
-		assert(false);
-		return NULL;
-	}
-
-	// Start by reading in the unlock file which tells us which blammopedia entries are locked/unlocked...
-	std::istringstream strStream(std::string(fileBuffer), std::ios_base::in | std::ios_base::binary);
-	delete[] fileBuffer;
-	fileBuffer = NULL;
-
-	std::string tempReadStr;
-	bool success = true;
-
+    bool success = true;
 	std::map<GameItem::ItemType, bool> itemStatusMap;
-	std::map<LevelPiece::LevelPieceType, bool> blockStatusMap;
+    std::map<LevelPiece::LevelPieceType, bool> blockStatusMap;
 	std::map<LevelPiece::PieceStatus, bool> statusEffectStatusMap;
 
-	while (success && strStream >> tempReadStr) {
-		if (tempReadStr.compare(Blammopedia::ITEM_ENTRIES) == 0) {
-			success = Blammopedia::ReadItemEntires(strStream, itemStatusMap);
-		}
-		else if (tempReadStr.compare(Blammopedia::BLOCK_ENTRIES) == 0) {
-			success = Blammopedia::ReadBlockEntries(strStream, blockStatusMap);
-		}
-		else if (tempReadStr.compare(Blammopedia::STATUS_EFFECT_ENTRIES) == 0) {
-			success = Blammopedia::ReadStatusEffectEntries(strStream, statusEffectStatusMap);
-		}
-	}
+	// Start by reading in the unlock file which tells us which blammopedia entries are locked/unlocked...
+    std::ifstream inFile(filepath.c_str(), std::ifstream::in | std::ifstream::binary);
+	if (inFile.is_open()) {
+
+        success &= Blammopedia::ReadItemEntires(inFile, itemStatusMap);
+		success &= Blammopedia::ReadBlockEntries(inFile, blockStatusMap);
+        //success &= Blammopedia::ReadStatusEffectEntries(inFile, statusEffectStatusMap);
+
+        inFile.close();
+    }
+    else {
+        success = false;
+    }
 
 	Blammopedia* blammopedia = new Blammopedia();
+    blammopedia->blammopediaFile = filepath;
 
 	// If we're unsuccessful in reading the blammopedia file then we just write an 'empty' 
 	// (i.e., all entries are locked) blammopedia file from scratch
 	if (!success) {
-		success = blammopedia->WriteAsEntryStatusFile(filepath);
+		success = blammopedia->WriteAsEntryStatusFile();
 		if (!success) {
 			assert(false);
 			debug_output("Critical error: could not write blammopedia file.");
@@ -142,7 +135,6 @@ Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) 
 			blammopedia = NULL;
 			return NULL;
 		}
-		return blammopedia;
 	}
 	
 	// Set the lock/unlocked status for all entries and read each entry from its respective file...
@@ -175,29 +167,56 @@ Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) 
 
 // Writes the current state of this blammopedia object to a entry status file (the file that stores whether
 // entries are locked/unlocked).
-bool Blammopedia::WriteAsEntryStatusFile(const std::string &filepath) const {
-	std::ostringstream strStream(std::string(""), std::ios_base::out | std::ios_base::binary);
-	
-	// Write all of the item entry's lock statuses first...
-	strStream << Blammopedia::ITEM_ENTRIES << std::endl;
-	const std::map<std::string, GameItem::ItemType>& itemNameToTypeMap = GameItemFactory::GetInstance()->GetItemNameToTypeMap();
-	for (std::map<std::string, GameItem::ItemType>::const_iterator iter = itemNameToTypeMap.begin();
-			 iter != itemNameToTypeMap.end(); ++iter) {
-
-		ItemEntry* itemEntry = this->GetItemEntry(iter->second);
-		assert(itemEntry != NULL);
-		strStream << iter->first << " " << itemEntry->GetIsLocked() << std::endl;
+bool Blammopedia::WriteAsEntryStatusFile() const {
+	// Open or create the blammopedia file for writing
+    std::ofstream outFile(this->blammopediaFile.c_str(), std::ios::out | std::ios::binary);
+	if (!outFile.is_open()) {
+		// Couldn't open for writing...
+		outFile.close();
+		return false;
 	}
 
+	// Write all of the item entry's lock statuses first...
+    size_t itemOutDataSize = 2*this->itemEntries.size() + 1;
+    char* itemOutData = new char[itemOutDataSize];
+    
+    assert(this->itemEntries.size() <= CHAR_MAX);
+    itemOutData[0] = this->itemEntries.size();
+    int count = 1;
+    for (ItemEntryMapConstIter iter = this->itemEntries.begin(); iter != this->itemEntries.end(); ++iter) {
+        int itemType = iter->first;
+        ItemEntry* itemEntry = iter->second;
+        assert(itemEntry != NULL);
+        itemOutData[count++] = itemType;
+        itemOutData[count++] = itemEntry->GetIsLocked() ? 1 : 0;
+    }
+    outFile.write(itemOutData, itemOutDataSize);
+    delete[] itemOutData;
+    itemOutData = NULL;
+
 	// Same for blocks...
-	//strStream << Blammopedia::BLOCK_ENTRIES << std::endl;
-	//TODO
+    size_t blockOutDataSize = 2*this->blockEntries.size() + 1;
+    char* blockOutData = new char[blockOutDataSize];
+    assert(this->blockEntries.size() <= CHAR_MAX);
+    blockOutData[0] = this->blockEntries.size();
+    count = 1;
+    for (BlockEntryMapConstIter iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
+        const BlockEntry* blockEntry = iter->second;
+        const LevelPiece::LevelPieceType& pieceType = iter->first;
+		assert(blockEntry != NULL);
+        blockOutData[count++] = pieceType;
+        blockOutData[count++] = blockEntry->GetIsLocked() ? 1 : 0;
+    }
+    outFile.write(blockOutData, blockOutDataSize);
+    delete[] blockOutData;
+    blockOutData = NULL;
 
 	// ... and status effects...
 	//strStream << Blammopedia::STATUS_EFFECT_ENTRIES << std::endl;
 	//TODO
-
-	return ResourceManager::GetInstance()->OverwriteResourceFile(filepath, strStream.str());
+    
+    outFile.close();
+	return true;
 }
 
 // Goes through every entry in the blammopedia and initializes it from file - this includes loading
@@ -222,6 +241,7 @@ bool Blammopedia::InitializeEntries() {
 		allSuccess = false;
 	}
 
+    // Load level piece (block) entries
 	for (std::map<LevelPiece::LevelPieceType,
 		BlockEntry*>::iterator iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
 		BlockEntry* blockEntry = iter->second;
@@ -241,46 +261,85 @@ bool Blammopedia::InitializeEntries() {
 }
 
 bool Blammopedia::ReadItemEntires(std::istream& inStream, std::map<GameItem::ItemType, bool>& itemStatusMap) {
+    char tempReadChar;
+    if (!inStream.read(&tempReadChar, 1)) {
+	    debug_output("Error while reading item entries from blammopedia file.");
+	    return false; 
+    }
 
-	std::string tempReadStr;
-	bool success  = true;
-	bool isLocked = true;
+    int numItems = static_cast<int>(tempReadChar);
+    for (int i = 0; i < numItems; i++) {
 
-	while (inStream >> tempReadStr) {
-		if (GameItemFactory::GetInstance()->IsValidItemTypeName(tempReadStr)) {
+        // Read the item type enumeration
+        if (!inStream.read(&tempReadChar, 1)) {
+	        debug_output("Error while reading item type for item entry from blammopedia file.");
+	        return false;
+        }
+        int itemReadType = static_cast<int>(tempReadChar);
+        if (!GameItemFactory::GetInstance()->IsValidItemType(itemReadType)) {
+		    debug_output("Error while reading blammopedia file invalid item enumeration type found while trying to read item type.");
+		    return false;
+        }
+        GameItem::ItemType itemType = static_cast<GameItem::ItemType>(itemReadType);
 
-			GameItem::ItemType itemType = GameItemFactory::GetInstance()->GetItemTypeFromName(tempReadStr);
-			// Read whether it's locked or unlocked
-			if (inStream >> isLocked) {
-				std::pair<std::map<GameItem::ItemType, bool>::iterator, bool> insertResult = 
-					itemStatusMap.insert(std::make_pair(itemType, isLocked));
-				if (!insertResult.second) {
-					success = false;
-					debug_output("Error while reading blammopedia file duplicate item type found: " << tempReadStr);
-					break;
-				}
-			}
-			else {
-				success = false;
-				debug_output("Error while reading blammopedia file could not read whether item status: " << tempReadStr);
-				break;
-			}
-		}
-		else {
-			success = false;
-			debug_output("Error while reading blammopedia file - item type not found: " << tempReadStr);
-			break;
-		}
-	}
-
-	return success;
+        // Read whether the item is locked or not
+        if (!inStream.read(&tempReadChar, 1)) {
+	        debug_output("Error while reading blammopedia file could not read locked status for item.");
+	        return false;
+        }
+        int isLockedInt = static_cast<int>(tempReadChar);
+        bool isLockedBool = (isLockedInt == 1) ? true : false;
+        
+	    std::pair<std::map<GameItem::ItemType, bool>::iterator, bool> insertResult = 
+		    itemStatusMap.insert(std::make_pair(itemType, isLockedBool));
+	    if (!insertResult.second) {
+		    debug_output("Error while reading blammopedia file duplicate item type found: " << itemReadType);
+		    return false;
+	    }
+    }
+    
+    return true;
 }
 
 bool Blammopedia::ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::LevelPieceType, bool>& blockStatusMap) {
-	UNUSED_PARAMETER(inStream);
-	UNUSED_PARAMETER(blockStatusMap);
-	assert(false);
-	return false;
+    char tempReadChar;
+    if (!inStream.read(&tempReadChar, 1)) {
+	    debug_output("Error while reading block entries from blammopedia file.");
+	    return false; 
+    }
+
+    int numBlocks = static_cast<int>(tempReadChar);
+    for (int i = 0; i < numBlocks; i++) {
+
+        // Read the item type enumeration
+        if (!inStream.read(&tempReadChar, 1)) {
+	        debug_output("Error while reading item type for item entry from blammopedia file.");
+	        return false;
+        }
+        int levelPieceReadType = static_cast<int>(tempReadChar);
+        if (!LevelPiece::IsValidLevelPieceType(levelPieceReadType)) {
+		    debug_output("Error while reading blammopedia file invalid level piece enumeration type found while trying to read block type.");
+		    return false;
+        }
+        LevelPiece::LevelPieceType levelPieceType = static_cast<LevelPiece::LevelPieceType>(levelPieceReadType);
+
+        // Read whether the item is locked or not
+        if (!inStream.read(&tempReadChar, 1)) {
+	        debug_output("Error while reading blammopedia file could not read locked status for block.");
+	        return false;
+        }
+        int isLockedInt = static_cast<int>(tempReadChar);
+        bool isLockedBool = (isLockedInt == 1) ? true : false;
+        
+	    std::pair<std::map<LevelPiece::LevelPieceType, bool>::iterator, bool> insertResult = 
+		    blockStatusMap.insert(std::make_pair(levelPieceType, isLockedBool));
+	    if (!insertResult.second) {
+		    debug_output("Error while reading blammopedia file duplicate level piece type found: " << levelPieceReadType);
+		    return false;
+	    }
+    }
+    
+    return true;
 }
 
 bool Blammopedia::ReadStatusEffectEntries(std::istream& inStream, std::map<LevelPiece::PieceStatus, bool>& statusEffectStatusMap) {
@@ -435,6 +494,60 @@ bool Blammopedia::ItemEntry::PopulateFromFile() {
 		}
 	}
 
+	glPopAttrib();
+
+	return success;
+}
+
+Blammopedia::BlockEntry::~BlockEntry() {
+    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->blockTexture);
+	assert(success);
+}
+
+bool Blammopedia::BlockEntry::PopulateFromFile() {
+	long fileLength;
+	char* fileBuffer = ResourceManager::GetInstance()->FilepathToMemoryBuffer(this->filename, fileLength);
+	if (fileBuffer == NULL || fileLength <= 0) {
+		assert(false);
+		return NULL;
+	}
+	std::istringstream strStream(std::string(fileBuffer), std::ios_base::in | std::ios_base::binary);
+	delete[] fileBuffer;
+	fileBuffer = NULL;
+
+	bool success = Entry::PopulateBaseValuesFromStream(strStream);
+	if (!success) {
+		return false;
+	}
+
+	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT);
+
+	strStream.clear();
+	strStream.seekg(0, std::ios::beg);
+
+    std::string tempReadStr;
+	while (success && strStream >> tempReadStr) {
+		if (tempReadStr.compare(DISPLAY_TEXTURE_KEYWORD) == 0) {
+			if (std::getline(strStream, tempReadStr)) {
+				tempReadStr = stringhelper::trim(tempReadStr);
+                this->blockTextureFilename = ResourceManager::GetTextureResourceDir() + tempReadStr;
+
+				// Read the texture from the resource manager...
+				this->blockTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(this->blockTextureFilename, Texture::Trilinear, GL_TEXTURE_2D));
+				if (this->blockTexture == NULL) {
+					assert(false);
+					success = false;
+					debug_output("Failed to load the block display texture for blammopedia item entry: " << this->filename);
+					break;
+				}
+			}
+			else {
+				success = false;
+				debug_output("Failed to read the item texture for blammopedia item entry: " << this->filename);
+				break;
+			}
+		}
+	}
 	glPopAttrib();
 
 	return success;

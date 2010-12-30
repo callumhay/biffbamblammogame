@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
 	// Memory dump debug info for detecting and finding memory leaks
 #ifdef _DEBUG
 	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(28481);
+    //_CrtSetBreakAlloc(26466);
 #endif
 
 	// One-Time Initialization stuff **************************************
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
 
 		// Load the blammopedia...
 		LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading blammopedia...");
-		if (!ResourceManager::GetInstance()->LoadBlammopedia(ResourceManager::GetBlammopediaResourceDir() + std::string("blammopedia"))) {
+		if (!ResourceManager::GetInstance()->LoadBlammopedia(std::string("blammopedia.dat"))) {
 			quitGame = true;
 			break;
 		}
@@ -207,7 +207,6 @@ int main(int argc, char *argv[]) {
 	GameModelConstants::DeleteInstance();
 	GameViewConstants::DeleteInstance();
 	GameEventManager::DeleteInstance();
-	GameItemFactory::DeleteInstance();
 	Onomatoplex::Generator::DeleteInstance();
 	Randomizer::DeleteInstance();
 
@@ -220,9 +219,9 @@ int main(int argc, char *argv[]) {
 	bool iniWriteResult = ResourceManager::WriteConfigurationOptionsToFile(initCfgOptions);
 	assert(iniWriteResult);
 
-	// Clean up the resource manager and finally the window
 	ResourceManager::DeleteInstance();
 	WindowManager::DeleteInstance();
+    GameItemFactory::DeleteInstance();
 	// ********************************************************************
 
 	return 0;

@@ -182,8 +182,10 @@ void ItemListView::MoveSelectionX(bool right) {
     int x = right ? 1 : -1;
     int currRowIndex  = this->selectedItemIndex / this->numItemsPerRow;
     int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
-    int wrapAroundX   = (numItemsOnRow + this->selectedItemIndex + x) % numItemsOnRow;
+    int wrapAroundX   = (numItemsOnRow + (this->selectedItemIndex - currRowIndex * this->numItemsPerRow) + x) % numItemsOnRow;
     this->SetSelection(this->numItemsPerRow * currRowIndex + wrapAroundX);
+
+    assert(this->GetSelectedItem() != NULL);
 }
 
 void ItemListView::MoveSelectionY(bool up) {
@@ -193,7 +195,7 @@ void ItemListView::MoveSelectionY(bool up) {
     int numRows = (this->items.size() / this->numItemsPerRow) + 1;
     int rowsAllFilledNumItems = (numRows * this->numItemsPerRow);
     int newSelectedIndex = (rowsAllFilledNumItems + this->selectedItemIndex - y * this->numItemsPerRow) % rowsAllFilledNumItems;
-    if (this->selectedItemIndex >= static_cast<int>(this->items.size())) {
+    if (newSelectedIndex >= static_cast<int>(this->items.size())) {
         if (up) {
             newSelectedIndex -= this->numItemsPerRow;
         }
@@ -202,6 +204,8 @@ void ItemListView::MoveSelectionY(bool up) {
         }
     }
     this->SetSelection(newSelectedIndex);
+
+    assert(this->GetSelectedItem() != NULL);
 }
 
 int ItemListView::GetNumItemsOnRow(int rowIdx) {

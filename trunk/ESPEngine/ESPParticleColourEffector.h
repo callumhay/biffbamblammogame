@@ -6,11 +6,6 @@
 #include "ESPParticleEffector.h"
 
 class ESPParticleColourEffector : public ESPParticleEffector {
-private:
-	bool useStartColour;
-	float startAlpha, endAlpha;
-	Colour startColour, endColour;
-
 public:
 	ESPParticleColourEffector();
 	ESPParticleColourEffector(float startAlpha, float endAlpha);
@@ -27,6 +22,12 @@ public:
 	void SetStartAlpha(float alpha);
 	void SetEndAlpha(float alpha);
 
+private:
+	bool useStartColour;
+	float startAlpha, endAlpha;
+	Colour startColour, endColour;
+
+    DISALLOW_COPY_AND_ASSIGN(ESPParticleColourEffector);
 };
 
 inline float ESPParticleColourEffector::GetStartAlpha() const {

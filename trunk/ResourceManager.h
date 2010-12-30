@@ -74,9 +74,6 @@ public:
 	static std::istringstream* FilepathToInStream(const std::string &filepath);
 	static char* FilepathToMemoryBuffer(const std::string &filepath, long &length);
 
-	// Basic writing functions *****************************************************************************************************
-	bool OverwriteResourceFile(const std::string& filepath, const std::string& data);
-
 	// Public Resource Directories
 	static std::string GetTextureResourceDir();
 	static std::string GetBlammopediaResourceDir();

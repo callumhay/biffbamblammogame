@@ -26,12 +26,24 @@
 const int BlammopediaState::ITEM_NAME_BORDER_SIZE = 10;
 const int BlammopediaState::TOTAL_MENU_HEIGHT     = 60;
 
-const Colour BlammopediaState::SELECTION_COLOUR(0.49f, 0.98f, 1.0f);
+const Colour BlammopediaState::SELECTION_COLOUR(1.0f, 1.0f, 0.0f);
 const Colour BlammopediaState::IDLE_COLOUR(0.75f, 0.75f, 0.75f);
+const float BlammopediaState::SELECTION_SCALE = 1.1f;
+
+const float BlammopediaState::NO_SELECTION_DROP_SHADOW_AMT = 0.1f;
+const float BlammopediaState::SELECTION_DROP_SHADOW_AMT    = 0.15f;
+
+const char* BlammopediaState::LOCKED_NAME = "Locked !";
+
+const float BlammopediaState::LABEL_ITEM_GAP = 50;
 
 BlammopediaState::BlammopediaState(GameDisplay* display) : 
 DisplayState(display), currMenuItemIndex(NO_MENU_ITEM_INDEX), currListViewIndex(0), 
 goBackToMainMenu(false) {
+
+    this->itemSelTabAnim.SetInterpolantValue(0.0f);
+    this->itemSelTabAnim.SetRepeat(false);
+
     const Camera& camera = this->display->GetCamera();
 
     this->fadeAnimation.SetLerp(0.0, 0.5f, 1.0f, 0.0f);
@@ -48,54 +60,76 @@ goBackToMainMenu(false) {
     this->selectedItemNameLbl.SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
         GameFontAssetsManager::Medium));
     this->selectedItemNameLbl.SetColour(Colour(1, 0.65f, 0));
-    this->selectedItemNameLbl.SetDropShadow(Colour(0,0,0), 0.1f);
-
-    static const float ITEM_GAP = 20;
+    this->selectedItemNameLbl.SetDropShadow(Colour(0,0,0), 0.125f);
 
     TextLabel2D* itemListMenuItem = new TextLabel2D();
     itemListMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
         GameFontAssetsManager::Small));
     itemListMenuItem->SetText("Items");
     itemListMenuItem->SetColour(IDLE_COLOUR);
-    itemListMenuItem->SetDropShadow(Colour(0,0,0), 0.07f);
+    itemListMenuItem->SetDropShadow(Colour(0,0,0), NO_SELECTION_DROP_SHADOW_AMT);
+
+    float itemListMenuItemScaledWidth  = BlammopediaState::SELECTION_SCALE * itemListMenuItem->GetLastRasterWidth();
 
     TextLabel2D* blockMenuItem = new TextLabel2D();
     blockMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
         GameFontAssetsManager::Small));
     blockMenuItem->SetText("Blocks");
     blockMenuItem->SetColour(IDLE_COLOUR);
-    blockMenuItem->SetDropShadow(Colour(0,0,0), 0.07f);
+    blockMenuItem->SetDropShadow(Colour(0,0,0), NO_SELECTION_DROP_SHADOW_AMT);
+
+    float blockMenuItemScaledWidth = BlammopediaState::SELECTION_SCALE *  blockMenuItem->GetLastRasterWidth();
 
     TextLabel2D* statusMenuItem = new TextLabel2D();
     statusMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
         GameFontAssetsManager::Small));
     statusMenuItem->SetText("Status Effects");
     statusMenuItem->SetColour(IDLE_COLOUR);
-    statusMenuItem->SetDropShadow(Colour(0,0,0), 0.07f);
+    statusMenuItem->SetDropShadow(Colour(0,0,0), NO_SELECTION_DROP_SHADOW_AMT);
 
-    float startMenuItemsX = (camera.GetWindowWidth() - itemListMenuItem->GetLastRasterWidth() - blockMenuItem->GetLastRasterWidth() -
-        statusMenuItem->GetLastRasterWidth() - 2 * ITEM_GAP)/2;
+    float statusMenuItemScaledWidth = BlammopediaState::SELECTION_SCALE *  statusMenuItem->GetLastRasterWidth(); 
+
+    float startMenuItemsX = (camera.GetWindowWidth() - itemListMenuItemScaledWidth - blockMenuItemScaledWidth -
+        statusMenuItemScaledWidth - 2 * LABEL_ITEM_GAP)/2;
     float topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - itemListMenuItem->GetHeight()) / 2.0f + itemListMenuItem->GetHeight();
     itemListMenuItem->SetTopLeftCorner(Point2D(startMenuItemsX, topLeftY));
-    startMenuItemsX += itemListMenuItem->GetLastRasterWidth() + ITEM_GAP;
+    startMenuItemsX += itemListMenuItem->GetLastRasterWidth() + LABEL_ITEM_GAP;
 
     topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - blockMenuItem->GetHeight()) / 2.0f + blockMenuItem->GetHeight();
     blockMenuItem->SetTopLeftCorner(Point2D(startMenuItemsX, topLeftY));
-    startMenuItemsX += blockMenuItem->GetLastRasterWidth() + ITEM_GAP;
+    startMenuItemsX += blockMenuItem->GetLastRasterWidth() + LABEL_ITEM_GAP;
 
     topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - statusMenuItem->GetHeight()) / 2.0f + statusMenuItem->GetHeight();
     statusMenuItem->SetTopLeftCorner(Point2D(startMenuItemsX, topLeftY));
-    startMenuItemsX += statusMenuItem->GetLastRasterWidth() + ITEM_GAP;
-
+    startMenuItemsX += statusMenuItem->GetLastRasterWidth() + LABEL_ITEM_GAP;
 
     TextLabel2D* backMenuItem = new TextLabel2D();
     backMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
         GameFontAssetsManager::Small));
     backMenuItem->SetText("Back");
     backMenuItem->SetColour(IDLE_COLOUR);
-    backMenuItem->SetDropShadow(Colour(0,0,0), 0.07f);
+    backMenuItem->SetDropShadow(Colour(0,0,0), NO_SELECTION_DROP_SHADOW_AMT);
     topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - backMenuItem->GetHeight()) / 2.0f + backMenuItem->GetHeight();
     backMenuItem->SetTopLeftCorner(Point2D(BlammopediaState::ITEM_NAME_BORDER_SIZE, topLeftY));
+
+
+    static const double TIME_INTERVAL_AMT = 0.15;
+    static const float  WIGGLE_INTERVAL_AMT = 4.0f;
+    std::vector<double> timeVals;
+    timeVals.push_back(0.0);
+    timeVals.push_back(TIME_INTERVAL_AMT);
+    timeVals.push_back(2*TIME_INTERVAL_AMT);
+    timeVals.push_back(3*TIME_INTERVAL_AMT);
+    timeVals.push_back(4*TIME_INTERVAL_AMT);
+    std::vector<float> wiggleVals;
+    wiggleVals.push_back(0.0f);
+    wiggleVals.push_back(WIGGLE_INTERVAL_AMT);
+    wiggleVals.push_back(0.0f);
+    wiggleVals.push_back(-WIGGLE_INTERVAL_AMT);
+    wiggleVals.push_back(0.0f);
+    this->itemHighlightWiggle.SetLerp(timeVals, wiggleVals);
+    this->itemHighlightWiggle.SetRepeat(true);
+    this->itemHighlightWiggle.SetInterpolantValue(0.0f);
 
     this->blammoMenuLabels.resize(TOTAL_NUM_MENU_ITEMS);
     this->blammoMenuLabels[ITEMS_MENU_ITEM_INDEX]  = itemListMenuItem;
@@ -136,9 +170,12 @@ void BlammopediaState::RenderFrame(double dT) {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
     glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    static const float LINE_WIDTH = 2.0f;
+    glLineWidth(LINE_WIDTH);
 
 	// Draw the splash screen for the current world...
 	Camera::PushWindowCoords();
@@ -154,8 +191,8 @@ void BlammopediaState::RenderFrame(double dT) {
     currListView->Draw(dT, camera);
     glPopMatrix();
 
-
     // If the user is currently selecting stuff from the menu then we grey out the list view
+    /*
     if (this->currMenuItemIndex != NO_MENU_ITEM_INDEX) {
         glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
         glBegin(GL_QUADS);
@@ -165,20 +202,53 @@ void BlammopediaState::RenderFrame(double dT) {
         glVertex2i(0, camera.GetWindowHeight());
         glEnd();
     }
+    */
 
     // Draw the bottom menu background
-    glColor4f(1.0f, 0.65f, 1.0f, 0.75f);
+    glColor4f(1, 0.65f, 0, 1.0f);
     glBegin(GL_QUADS);
     glVertex2i(0, 0);
     glVertex2i(camera.GetWindowWidth(), 0);
     glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
     glVertex2i(0, TOTAL_MENU_HEIGHT);
     glEnd();
-    glColor4f(0, 0, 0, 0.8f);
+    glColor4f(0, 0, 0, 1.0f);
     glBegin(GL_LINES);
     glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
     glVertex2i(0, TOTAL_MENU_HEIGHT);
     glEnd();
+
+    this->itemSelTabAnim.Tick(dT);
+    if (this->currMenuItemIndex < static_cast<int>(this->blammoMenuLabels.size())) {
+        float tabHeightScale = this->itemSelTabAnim.GetInterpolantValue();
+
+        TextLabel2D* selectedLabel = this->blammoMenuLabels[this->currListViewIndex];
+        float quadLeftX  = selectedLabel->GetTopLeftCorner()[0] - LABEL_ITEM_GAP/2.0f;
+        float quadRightX = selectedLabel->GetTopLeftCorner()[0] + selectedLabel->GetLastRasterWidth() + LABEL_ITEM_GAP/2.0f;
+        float bottomY = selectedLabel->GetTopLeftCorner()[1] - selectedLabel->GetHeight() - 10;
+        float animatedBottomY = (1.0f - tabHeightScale) * (TOTAL_MENU_HEIGHT + LINE_WIDTH) + tabHeightScale * bottomY;
+
+        glColor4f(1,1,1,1);
+        glBegin(GL_QUADS);
+        glVertex2i(quadLeftX,  animatedBottomY);
+        glVertex2i(quadRightX, animatedBottomY);
+        glVertex2i(quadRightX, (TOTAL_MENU_HEIGHT + LINE_WIDTH));
+        glVertex2i(quadLeftX,  (TOTAL_MENU_HEIGHT + LINE_WIDTH));
+        glEnd();
+
+        animatedBottomY = (1.0f - tabHeightScale) * TOTAL_MENU_HEIGHT + tabHeightScale * bottomY;
+        glColor4f(0, 0, 0, 1.0f);
+        glBegin(GL_LINES);
+        glVertex2i(quadLeftX,  animatedBottomY);
+        glVertex2i(quadRightX, animatedBottomY);
+
+        glVertex2i(quadRightX, animatedBottomY);
+        glVertex2i(quadRightX, TOTAL_MENU_HEIGHT);
+
+        glVertex2i(quadLeftX, TOTAL_MENU_HEIGHT);
+        glVertex2i(quadLeftX,  animatedBottomY);
+        glEnd();
+    }
 
     if (currItem != NULL) {
         // Draw the name of the currently selected item in the active blammopedia list...
@@ -196,13 +266,22 @@ void BlammopediaState::RenderFrame(double dT) {
         this->selectedItemNameLbl.Draw();
     }
 
+    // Animate any highlighted labels...
+    if (this->currMenuItemIndex != NO_MENU_ITEM_INDEX) {
+        this->itemHighlightWiggle.Tick(dT);
+        float wiggleAmt = this->itemHighlightWiggle.GetInterpolantValue();
+        TextLabel2D* highlightedItem = this->blammoMenuLabels[this->currMenuItemIndex];
+        Point2D defaultTopLeftCorner(highlightedItem->GetTopLeftCorner()[0], 
+            (BlammopediaState::TOTAL_MENU_HEIGHT - highlightedItem->GetHeight()) / 2.0f + highlightedItem->GetHeight());
+        highlightedItem->SetTopLeftCorner(defaultTopLeftCorner + Vector2D(0, wiggleAmt));
+    }
+    
     // Draw the labels
     for (std::vector<TextLabel2D*>::iterator iter = this->blammoMenuLabels.begin(); iter != this->blammoMenuLabels.end(); ++iter) {
         TextLabel2D* label = *iter;
         label->Draw();
     }
     
-
     glPopMatrix();
 
     Camera::PopWindowCoords();
@@ -303,12 +382,12 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
             currName = itemEntry->GetName();
         }
         else {
-            currName = "Locked!";
+            currName = LOCKED_NAME;
         }
         itemsListView->AddItem(currName, texture, itemEntry->GetIsLocked());
     }
 
-    itemsListView->SetSelectedItemIndex(0);
+    itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
 	return itemsListView;
 }
 
@@ -316,8 +395,23 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
 	const Camera& camera = this->display->GetCamera();
 	ItemListView* blockListView = new ItemListView(camera.GetWindowWidth());
 
+    std::string currName;
+    const Blammopedia::BlockEntryMap& blockEntries = blammopedia->GetBlockEntries();
+    for (Blammopedia::BlockEntryMapConstIter iter = blockEntries.begin(); iter != blockEntries.end(); ++iter) {
+        Blammopedia::BlockEntry* blockEntry = iter->second;
+        const Texture2D* texture = blammopedia->GetLockedItemTexture();
+        if (!blockEntry->GetIsLocked()) {
+            texture = blockEntry->GetBlockTexture();
+            currName = blockEntry->GetName();
+        }
+        else {
+            currName = LOCKED_NAME;
+        }
+        blockListView->AddItem(currName, texture, blockEntry->GetIsLocked());
+    }
 
-	//assert(false);
+	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
+
 	return blockListView;
 }
 
@@ -343,14 +437,20 @@ void BlammopediaState::SetBlammoMenuItemHighlighted(int menuItemIndex) {
     // Unhighlight the previously selected item (if there was one)...
     if (this->currMenuItemIndex != NO_MENU_ITEM_INDEX) {
         TextLabel2D* prevSelection = this->blammoMenuLabels[this->currMenuItemIndex];
-        prevSelection->SetScale(1);
+        prevSelection->SetScale(1.0f);
+        prevSelection->SetDropShadowAmount(NO_SELECTION_DROP_SHADOW_AMT);
+        float newTopLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - prevSelection->GetHeight()) / 2.0f + prevSelection->GetHeight();
+        prevSelection->SetTopLeftCorner(Point2D(prevSelection->GetTopLeftCorner()[0], newTopLeftY));
         prevSelection->SetColour(IDLE_COLOUR);
     }
 
     // Highlight the newly selected item...
     if (menuItemIndex != NO_MENU_ITEM_INDEX) {
         TextLabel2D* newSelection = this->blammoMenuLabels[menuItemIndex];
-        newSelection->SetScale(1.0f);
+        newSelection->SetScale(SELECTION_SCALE);
+        newSelection->SetDropShadowAmount(SELECTION_DROP_SHADOW_AMT);
+        float newTopLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - newSelection->GetHeight()) / 2.0f + newSelection->GetHeight();
+        newSelection->SetTopLeftCorner(Point2D(newSelection->GetTopLeftCorner()[0], newTopLeftY));
         newSelection->SetColour(SELECTION_COLOUR);
     }
 
@@ -370,6 +470,16 @@ void BlammopediaState::SetBlammoMenuItemSelection() {
         assert(prevListSelected != NULL);
         prevListSelected->SetSelectedItemIndex(0);
         this->currMenuItemIndex = NO_MENU_ITEM_INDEX;
+
+        // Reset the proper y coordinate for the label (since it was animating)
+        TextLabel2D* newSelection = this->blammoMenuLabels[this->currListViewIndex];
+        float newTopLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - newSelection->GetHeight()) / 2.0f + newSelection->GetHeight();
+        newSelection->SetTopLeftCorner(Point2D(newSelection->GetTopLeftCorner()[0], newTopLeftY));
+
+        // Setup the animation for the tab...
+        this->itemSelTabAnim.SetLerp(0.33f, 1.0f);
+        this->itemSelTabAnim.SetInterpolantValue(0.0f);
+        this->itemSelTabAnim.SetRepeat(false);
     }
 }
 
@@ -378,6 +488,11 @@ void BlammopediaState::SetBlammoMenuItemDeselection() {
     assert(prevListSelected != NULL);
     prevListSelected->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
     this->currMenuItemIndex = this->currListViewIndex;
+
+    // Setup the animation for the tab...
+    this->itemSelTabAnim.SetLerp(0.33f, 0.0f);
+    this->itemSelTabAnim.SetInterpolantValue(1.0f);
+    this->itemSelTabAnim.SetRepeat(false);
 }
 
 void BlammopediaState::DrawFadeOverlay(int width, int height, float alpha) {

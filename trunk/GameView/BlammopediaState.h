@@ -57,8 +57,14 @@ private:
     static const int BACK_MENU_ITEM_INDEX   = 3;
     static const int TOTAL_NUM_MENU_ITEMS   = 4;
     
+    static const char* LOCKED_NAME;
+
     static const Colour SELECTION_COLOUR;
     static const Colour IDLE_COLOUR;
+    static const float SELECTION_SCALE;
+    static const float NO_SELECTION_DROP_SHADOW_AMT;
+    static const float SELECTION_DROP_SHADOW_AMT;
+    static const float LABEL_ITEM_GAP;
 
     int currMenuItemIndex;
     std::vector<TextLabel2D*> blammoMenuLabels;
@@ -66,6 +72,9 @@ private:
     //TextLabel2D itemListMenuItem;
     //TextLabel2D blockListMenuItem;
     //TextLabel2D statusListMenuItem;
+
+    AnimationLerp<float> itemSelTabAnim;     // Animation for when an item is selected in the menu and the tab to highlight it moves
+    AnimationMultiLerp<float> itemHighlightWiggle; // Animation to wiggle the highlighted item
 
     bool goBackToMainMenu;
 
