@@ -40,6 +40,7 @@ public class LevelPieceEditDialog extends JDialog {
     
     private JCheckBox teslaStartsOn;
     private JCheckBox teslaChangable;
+    //private JComboBox triggerIDComboBox;
     // End of variables declaration//GEN-END:variables
 	
 	private Set<Character> allPieceIDs;
@@ -51,7 +52,7 @@ public class LevelPieceEditDialog extends JDialog {
 	private JSpinner cannonAngleValue;
 	
     /** Creates new form LevelPieceEditDialog */
-    public LevelPieceEditDialog(JFrame parentWindow, LevelPieceImageLabel levelPieceLbl, Set<Character> allPieceIDs) {
+	public LevelPieceEditDialog(JFrame parentWindow, LevelPieceImageLabel levelPieceLbl, Set<Character> allPieceIDs) {
     	super(parentWindow, "Block Properties", true);
     	assert(levelPieceLbl != null);
     	this.parentWindow = parentWindow;

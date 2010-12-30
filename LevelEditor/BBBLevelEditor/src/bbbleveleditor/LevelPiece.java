@@ -12,6 +12,8 @@ public class LevelPiece {
 	public static final String CANNON_PIECE_SYMBOL    = "C";
 	public static final String ITEM_DROP_PIECE_NAME   = "Item Drop";
 	
+	public static final int NO_TRIGGER_ID = -1;
+	
 	public static LevelPiece DefaultPiece;
 	
 	// Hash mapping of the symbols to level pieces

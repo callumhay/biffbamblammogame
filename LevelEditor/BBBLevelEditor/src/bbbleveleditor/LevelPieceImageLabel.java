@@ -32,7 +32,7 @@ public class LevelPieceImageLabel extends JLabel {
 	private boolean teslaIsChangable;
 	
 	private int cannonDegAngle;
-	
+	private int triggerID;
 	private ArrayList<String> itemDropTypes = new ArrayList<String>();
 	
 	static boolean IsValidBlockID(char id) {
@@ -49,10 +49,12 @@ public class LevelPieceImageLabel extends JLabel {
 		this.setLevelPiece(piece);
 		this.cannonDegAngle = -1;
 		this.itemDropTypes.add("all");
+		this.triggerID = LevelPiece.NO_TRIGGER_ID;
 	}
 	
 	// constructor with icon
 	public LevelPieceImageLabel(String pieceSymbol) throws Exception {
+		
 		// Clean up in the case of a portal block - since it has variables in it
 		if (pieceSymbol.length() == 6 && pieceSymbol.substring(0, 2).equals(LevelPiece.PORTAL_PIECE_SYMBOL + "(")) {
 			this.blockID  = pieceSymbol.charAt(2);
@@ -104,6 +106,16 @@ public class LevelPieceImageLabel extends JLabel {
 		}
 		
 		this.setLevelPiece(LevelPiece.LevelPieceCache.get(pieceSymbol));
+		
+		// Check for a trigger ID...
+		int triggerIDStart = pieceSymbol.indexOf('{');
+		if (triggerIDStart != -1) {
+			String triggerIDStr = pieceSymbol.substring(triggerIDStart, pieceSymbol.length()-1);
+			this.triggerID = Integer.parseInt(triggerIDStr);
+		}
+		else {
+			this.triggerID = LevelPiece.NO_TRIGGER_ID;
+		}
 	}
 
 	public void setLevelPiece(LevelPiece piece) {
@@ -127,9 +139,17 @@ public class LevelPieceImageLabel extends JLabel {
 	public boolean getIsTeslaOnBool() {
 		return this.teslaBlockStartsOn;
 	}
-	void setTeslaStartsOn(boolean startsOn) {
+	public void setTeslaStartsOn(boolean startsOn) {
 		this.teslaBlockStartsOn = startsOn;
 	}
+	
+	public int getTriggerID() {
+		return this.triggerID;
+	}
+	public void setTriggerID(int triggerID) {
+		this.triggerID = triggerID;
+	}
+	
 	
 	public char getIsTeslaChangable() {
 		return this.teslaIsChangable ? '1' : '0';
