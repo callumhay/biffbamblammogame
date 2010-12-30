@@ -30,8 +30,9 @@ public:
 	static const float HALF_PIECE_DEPTH;
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
-												Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop };
+                          Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop };
 	virtual LevelPieceType GetType() const = 0;
+    static bool IsValidLevelPieceType(int pieceType);
 
 	LevelPiece(unsigned int wLoc, unsigned int hLoc);
 	virtual ~LevelPiece();

@@ -33,13 +33,13 @@ public:
 		static const char* HUD_OUTLINE_TEXTURE_KEYWORD;
 		static const char* HUD_FILL_TEXTURE_KEYWORD;
 		static const char* DESCRIPTION_KEYWORD;
+        static const char* DISPLAY_TEXTURE_KEYWORD;
 
 		std::string filename;
 
 		bool isLocked;
 		std::string name;
 		std::string description;
-
 
 		virtual bool PopulateFromFile() = 0;
 		bool PopulateBaseValuesFromStream(std::istream& inStream);
@@ -71,9 +71,23 @@ public:
 	class BlockEntry : public Entry {
 		friend class Blammopedia;
 	public:
-		BlockEntry(const std::string& filename) : Entry(filename) {}
-		~BlockEntry() {};
+		BlockEntry(const std::string& filename) : Entry(filename), blockTexture(NULL) {}
+		~BlockEntry();
+
+        Texture2D* GetBlockTexture() const { return this->blockTexture; }
+
+	protected:
+		bool PopulateFromFile();
+
+    private:
+        std::string blockTextureFilename;
+        Texture2D* blockTexture;
+        //Texture2D* altBlockTexture;
+
 	};
+
+
+
 	class StatusEffectEntry : public Entry {
 	public:
 		StatusEffectEntry(const std::string& filename) : Entry(filename) {}
@@ -99,19 +113,18 @@ public:
 	Blammopedia::BlockEntry* GetBlockEntry(const LevelPiece::LevelPieceType& blockType) const;
 	Blammopedia::StatusEffectEntry* GetStatusEffectEntry(const LevelPiece::PieceStatus& statusType) const;
 
+    void UnlockItem(const GameItem::ItemType& itemType);
+
 	const Blammopedia::ItemEntryMap& GetItemEntries() const;
 	const Blammopedia::BlockEntryMap& GetBlockEntries() const;
 	const Blammopedia::StatusEffectEntryMap& GetStatusEffectEntries() const;
 
-	bool WriteAsEntryStatusFile(const std::string &filepath) const;
+	bool WriteAsEntryStatusFile() const;
 
 	const Texture2D* GetLockedItemTexture() const;
 
 private:
-	// Blammopedia entry lock file keywords/syntax constants
-	static const char* ITEM_ENTRIES;
-	static const char* BLOCK_ENTRIES;
-	static const char* STATUS_EFFECT_ENTRIES;
+    std::string blammopediaFile;
 
 	ItemEntryMap itemEntries;
 	BlockEntryMap blockEntries;
@@ -159,6 +172,10 @@ inline Blammopedia::StatusEffectEntry* Blammopedia::GetStatusEffectEntry(const L
 	return findIter->second;
 }
 
+inline void Blammopedia::UnlockItem(const GameItem::ItemType& itemType) {
+    Blammopedia::ItemEntry* itemEntry = this->GetItemEntry(itemType);
+    itemEntry->SetIsLocked(false);
+}
 
 inline const Blammopedia::ItemEntryMap& Blammopedia::GetItemEntries() const {
 	return this->itemEntries;

@@ -506,24 +506,6 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 	glPushMatrix();
 	glLoadIdentity();
 	menuCam.ApplyCameraTransform(0.0);
-	
-	/*
-	// Draw debug grid for coordinates system
-	const int TEST_WIDTH = 15;
-	const int TEST_HEIGHT = 15;
-	glLineWidth(1.0f);
-	glColor3f(1, 0, 0);
-	glBegin(GL_LINES);
-	for (int x = -TEST_WIDTH; x < TEST_WIDTH; x++) {
-			glVertex2f(x, TEST_HEIGHT);
-			glVertex2f(x, -TEST_HEIGHT);
-	}
-	for (int y = -TEST_HEIGHT; y < TEST_HEIGHT; y++) {
-			glVertex2f(-TEST_WIDTH, y);
-			glVertex2f(TEST_WIDTH, y);
-	}
-	glEnd();
-	*/
 
 	// Draw the "Biff!" Text
 	const Point3D BIFF_EMIT_COORD = Point3D(X_INDENT, MAX_Y_COORD - 3.0f, 0);

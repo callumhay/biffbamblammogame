@@ -39,6 +39,31 @@ LevelPiece::~LevelPiece() {
 	this->RemoveAllStatus();
 }
 
+// Static function to determine if the piece type given is valid
+bool LevelPiece::IsValidLevelPieceType(int pieceType) {
+    switch (pieceType) {
+        case Breakable:
+        case Solid:
+        case Empty:
+        case Bomb:
+        case SolidTriangle:
+        case BreakableTriangle:
+        case Ink:
+        case Prism:
+        case Portal:
+        case PrismTriangle:
+        case Cannon:
+        case Collateral:
+        case Tesla:
+        case ItemDrop:
+            return true;
+        default:
+            assert(false);
+            break;
+    }
+    return false;
+}
+
 void LevelPiece::SetWidthAndHeightIndex(unsigned int wLoc, unsigned int hLoc) {
 	this->wIndex = wLoc;
 	this->hIndex = hLoc;

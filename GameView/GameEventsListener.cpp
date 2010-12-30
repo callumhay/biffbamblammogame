@@ -19,6 +19,8 @@
 #include "LivesLeftHUD.h"
 #include "BallSafetyNetMesh.h"
 
+#include "../Blammopedia.h"
+
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameBall.h"
 #include "../GameModel/LevelPiece.h"
@@ -685,6 +687,11 @@ void GameEventsListener::ItemRemovedEvent(const GameItem& item) {
 }
 
 void GameEventsListener::ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle) {
+    // Tell blammopedia to unlock the item (if it hasn't already)
+    Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
+    blammopedia->UnlockItem(item.GetItemType());
+    
+    // Add the visual effect for acquiring an item
 	this->display->GetAssets()->GetESPAssets()->AddItemAcquiredEffect(this->display->GetCamera(), paddle, item);
 	debug_output("EVENT: Item Obtained by Player: " << item);
 }

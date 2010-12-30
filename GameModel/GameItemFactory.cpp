@@ -135,6 +135,8 @@ GameItemFactory::GameItemFactory() {
 	allPowerDownItemTypes.insert(GameItem::PaddleShrinkItem);
 	allPowerDownItemTypes.insert(GameItem::PoisonPaddleItem);
 	allPowerDownItemTypes.insert(GameItem::UpsideDownItem);
+
+    atexit(GameItemFactory::DeleteInstance);
 }
 
 GameItemFactory::~GameItemFactory() {

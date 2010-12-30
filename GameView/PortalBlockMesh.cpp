@@ -5,8 +5,11 @@
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../ResourceManager.h"
 
+static const float HALO_FADER_START = 1.0f;
+static const float HALO_FADER_END   = 0.15f;
+
 PortalBlockMesh::PortalBlockMesh() : portalBlockGeometry(NULL), portalEffect(NULL), haloTexture(NULL),
-haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f) {
+haloExpandPulse(1.0f, 3.0f), haloFader(HALO_FADER_START, HALO_FADER_END) {
 	this->LoadMesh();
 	assert(this->portalBlockGeometry != NULL);
 	assert(this->portalEffect != NULL);
@@ -51,8 +54,8 @@ std::list<ESPEmitter*> PortalBlockMesh::CreatePortalBlockEmitters(const Colour& 
 }
 
 void PortalBlockMesh::SetAlphaMultiplier(float alpha) {
-	this->haloFader.SetStartAlpha(this->haloFader.GetStartAlpha() * alpha);
-	this->haloFader.SetEndAlpha(this->haloFader.GetEndAlpha() * alpha);
+	this->haloFader.SetStartAlpha(HALO_FADER_START * alpha);
+	this->haloFader.SetEndAlpha(HALO_FADER_END * alpha);
 }
 
 /**

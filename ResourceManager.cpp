@@ -57,7 +57,7 @@ cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NU
 	// Initialize Physfs and make sure everything loaded alright
 	int result = PHYSFS_init(argv0);
 	debug_physfs_state(result);
-
+    //result = PHYSFS_mount(resourceZip.c_str(), NULL, 0);
 	result = PHYSFS_addToSearchPath(resourceZip.c_str(), 0);
 	debug_physfs_state(result);
 
@@ -68,6 +68,8 @@ ResourceManager::~ResourceManager() {
 	// Clean up blammopedia - this should always be done first since it depends
 	// on physfs and various textures / resources
 	if (this->blammopedia != NULL) {
+        bool success = this->blammopedia->WriteAsEntryStatusFile();
+        assert(success);
 		delete this->blammopedia;
 		this->blammopedia = NULL;
 	}
@@ -187,7 +189,6 @@ void ResourceManager::InitResourceManager(const std::string& resourceZip, const 
 	assert(ResourceManager::instance == NULL);
 	if (ResourceManager::instance == NULL) {
 		ResourceManager::instance = new ResourceManager(resourceZip, argv0);
-
 	}
 }
 
@@ -997,35 +998,4 @@ char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, long 
 
 	length = static_cast<long>(fileLength);
 	return fileBuffer;
-}
-
-bool ResourceManager::OverwriteResourceFile(const std::string& filepath, const std::string& data) {
-	// First make sure the file exists in the archive
-	int doesExist = PHYSFS_exists(filepath.c_str());
-	if (doesExist == 0) {
-		debug_output("File not found: " << filepath);
-		debug_physfs_state(NULL);
-		return false;
-	}
-
-	// Open the file for writing
-	PHYSFS_File* fileHandle = PHYSFS_openWrite(filepath.c_str());
-	if (fileHandle == NULL) {
-		return false;
-	}
-
-	// Write the file...
-	PHYSFS_sint64 writeResult = PHYSFS_write(fileHandle, data.c_str(), data.size(), 1);
-	if (writeResult != 1) {
-		assert(false);
-		debug_output("Failed to write to file: " << filepath);
-		debug_physfs_state(NULL);
-		return false;
-	}
-
-	int closeWentWell = PHYSFS_close(fileHandle);
-	debug_physfs_state(closeWentWell);
-	fileHandle = NULL;
-
-	return true;
 }

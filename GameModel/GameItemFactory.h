@@ -42,6 +42,7 @@ public:
 	GameItem::ItemDisposition GetItemTypeDisposition(const GameItem::ItemType& itemType) const;
 
 	bool IsValidItemTypeName(const std::string& itemName) const;
+    bool IsValidItemType(int itemType) const;
 
 	const std::set<GameItem::ItemType>& GetAllItemTypes() const;
 	const std::set<GameItem::ItemType>& GetPowerUpItemTypes() const;
@@ -93,6 +94,10 @@ inline GameItem::ItemDisposition GameItemFactory::GetItemTypeDisposition(const G
 inline bool GameItemFactory::IsValidItemTypeName(const std::string& itemName) const {
 	std::map<std::string, GameItem::ItemType>::const_iterator findIter = this->itemNameToTypeMap.find(itemName.c_str());
 	return (findIter != this->itemNameToTypeMap.end());
+}
+
+inline bool GameItemFactory::IsValidItemType(int itemType) const {
+    return (itemType >= 0 && itemType <= static_cast<int>(GameItem::RandomItem));
 }
 
 inline const std::set<GameItem::ItemType>& GameItemFactory::GetAllItemTypes() const {

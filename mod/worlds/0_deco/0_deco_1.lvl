@@ -25,7 +25,7 @@ S T(P,ul) E E E S E E T(P,ur) S
 S R E E E T(P,lr) E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
-S E E E E E E E E S 
+S E X(f,g) E E X(g,f) E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
