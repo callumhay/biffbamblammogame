@@ -19,6 +19,8 @@
 #include "Beam.h"
 #include "PaddleLaser.h"
 
+const LevelPiece::TriggerID LevelPiece::NO_TRIGGER_ID = -1;
+
 const float LevelPiece::PIECE_WIDTH = 2.5f;
 const float LevelPiece::PIECE_HEIGHT = 1.0f;
 const float LevelPiece::PIECE_DEPTH  = 1.30f;
@@ -29,7 +31,8 @@ const float LevelPiece::HALF_PIECE_DEPTH  = PIECE_DEPTH / 2.0f;
 LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc) : 
 colour(1,1,1), pieceStatus(LevelPiece::NormalStatus), leftNeighbor(NULL),
 bottomNeighbor(NULL), rightNeighbor(NULL), topNeighbor(NULL), topRightNeighbor(NULL),
-topLeftNeighbor(NULL), bottomRightNeighbor(NULL), bottomLeftNeighbor(NULL) {
+topLeftNeighbor(NULL), bottomRightNeighbor(NULL), bottomLeftNeighbor(NULL), 
+triggerID(LevelPiece::NO_TRIGGER_ID) {
 	this->SetWidthAndHeightIndex(wLoc, hLoc);
 }
 

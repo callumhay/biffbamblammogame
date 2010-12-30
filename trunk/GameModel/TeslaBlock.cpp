@@ -33,11 +33,11 @@ TeslaBlock::~TeslaBlock() {
  * ALWAYS have all possible collision boundries enabled and created.
  */
 void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-															const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-															const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-															const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                              const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                              const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                              const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
-	// If the triangle block is in ice then its bounds are a basic rectangle...
+	// If the tesla block is in ice then its bounds are a basic rectangle...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 		LevelPiece::UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 		return;
@@ -88,11 +88,7 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-		 							topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-}
-
-bool TeslaBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-	return Collision::IsCollision(ray, this->GetAABB(), rayT);
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {

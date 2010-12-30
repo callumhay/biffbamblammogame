@@ -31,6 +31,7 @@ public:
 	static const char COLLATERAL_BLOCK_CHAR;
 	static const char TESLA_BLOCK_CHAR;
 	static const char ITEM_DROP_BLOCK_CHAR;
+    static const char SWITCH_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
@@ -139,14 +140,14 @@ public:
 
 private:	
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
-	unsigned int piecesLeft;																	 // Pieces left before the end of the level
-	unsigned int width, height;																 // Size values for the level
+    //std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
+
+	unsigned int piecesLeft;            // Pieces left before the end of the level
+	unsigned int width, height;         // Size values for the level
 	bool ballSafetyNetActive;
 	BoundingLines safetyNetBounds;
 	std::string filepath;
 	std::string levelName;
-
-	
 
 	std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
 	size_t randomItemProbabilityNum;									// A number >= 0 for random item probability in the level

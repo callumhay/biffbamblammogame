@@ -95,6 +95,9 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 	// Load the level geometry/mesh data for display...
 	this->display->GetAssets()->LoadNewLevelMesh(level);
 
+    // Any new blocks that are being revealed in this level should affect the blammopedia...
+    //const std::vector<std::vector<LevelPiece*> >& levelPieces = level.GetCurrentLevelLayout();
+
 	// Queue up the state for starting a level - this will display the level name and do proper animations, fade-ins, etc.
 	this->display->AddStateToQueue(DisplayState::LevelStart);
 	this->display->AddStateToQueue(DisplayState::InGame);

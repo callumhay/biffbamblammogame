@@ -36,38 +36,44 @@
 
 #include "../ResourceManager.h"
 
-const char GameLevel::EMPTY_SPACE_CHAR				= 'E';
-const char GameLevel::SOLID_BLOCK_CHAR				= 'S';
+const char GameLevel::EMPTY_SPACE_CHAR          = 'E';
+const char GameLevel::SOLID_BLOCK_CHAR          = 'S';
 const char GameLevel::GREEN_BREAKABLE_CHAR		= 'G';
 const char GameLevel::YELLOW_BREAKABLE_CHAR		= 'Y';
 const char GameLevel::ORANGE_BREAKABLE_CHAR		= 'O';
-const char GameLevel::RED_BREAKABLE_CHAR			= 'R';
-const char GameLevel::BOMB_CHAR								= 'B';
-const char GameLevel::INKBLOCK_CHAR						= 'I';
-const char GameLevel::PRISM_BLOCK_CHAR				= 'P';
-const char GameLevel::PORTAL_BLOCK_CHAR				= 'X';
-const char GameLevel::CANNON_BLOCK_CHAR				= 'C';
-const char GameLevel::COLLATERAL_BLOCK_CHAR		= 'L';
-const char GameLevel::TESLA_BLOCK_CHAR        = 'A';
-const char GameLevel::ITEM_DROP_BLOCK_CHAR		= 'D';
+const char GameLevel::RED_BREAKABLE_CHAR        = 'R';
+const char GameLevel::BOMB_CHAR	                = 'B';
+const char GameLevel::INKBLOCK_CHAR             = 'I';
+const char GameLevel::PRISM_BLOCK_CHAR          = 'P';
+const char GameLevel::PORTAL_BLOCK_CHAR         = 'X';
+const char GameLevel::CANNON_BLOCK_CHAR         = 'C';
+const char GameLevel::COLLATERAL_BLOCK_CHAR	    = 'L';
+const char GameLevel::TESLA_BLOCK_CHAR          = 'A';
+const char GameLevel::ITEM_DROP_BLOCK_CHAR      = 'D';
+const char GameLevel::SWITCH_BLOCK_CHAR         = 'W';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
 const char GameLevel::TRI_LOWER_CORNER		= 'l';
-const char GameLevel::TRI_LEFT_CORNER			= 'l';
+const char GameLevel::TRI_LEFT_CORNER       = 'l';
 const char GameLevel::TRI_RIGHT_CORNER		= 'r';
 
-const char* GameLevel::ALL_ITEM_TYPES_KEYWORD						= "all";
-const char* GameLevel::POWERUP_ITEM_TYPES_KEYWORD				= "powerups";
-const char* GameLevel::POWERNEUTRAL_ITEM_TYPES_KEYWORD	= "powerneutrals";
-const char* GameLevel::POWERDOWN_ITEM_TYPES_KEYWORD			= "powerdowns";
+const char* GameLevel::ALL_ITEM_TYPES_KEYWORD               = "all";
+const char* GameLevel::POWERUP_ITEM_TYPES_KEYWORD           = "powerups";
+const char* GameLevel::POWERNEUTRAL_ITEM_TYPES_KEYWORD      = "powerneutrals";
+const char* GameLevel::POWERDOWN_ITEM_TYPES_KEYWORD         = "powerdowns";
 
 // Private constructor, requires all the pieces that make up the level
 GameLevel::GameLevel(const std::string& filepath, const std::string& levelName, 
-										 unsigned int numBlocks, const std::vector<std::vector<LevelPiece*> >& pieces,
-										 const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum): 
-currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), randomItemProbabilityNum(randomItemProbabilityNum),
-piecesLeft(numBlocks), ballSafetyNetActive(false), filepath(filepath), levelName(levelName) {
+                     unsigned int numBlocks, 
+                     const std::vector<std::vector<LevelPiece*> >& pieces,
+                     const std::vector<GameItem::ItemType>& allowedDropTypes, 
+                     size_t randomItemProbabilityNum): 
+currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
+randomItemProbabilityNum(randomItemProbabilityNum),
+piecesLeft(numBlocks), ballSafetyNetActive(false), 
+filepath(filepath), levelName(levelName) {
+
 	assert(!filepath.empty());
 	assert(pieces.size() > 0);
 	
@@ -642,6 +648,15 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					}
 					break;
 
+                case GameLevel::SWITCH_BLOCK_CHAR:
+                    // W(a) - Switch block:
+                    // a : The trigger ID of the block that gets triggered by the switch 
+                    //     (switch is turned on when a ball/projectile hits it).
+
+                    // TODO...
+
+                    break;
+
 				default:
 					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc);
 					delete inFile;
@@ -649,6 +664,39 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					GameLevel::CleanUpFileReadData(levelPieces);
 					return NULL;
 			}
+            // Check to see if there's a trigger ID for the block...
+            if (newPiece != NULL) {
+                char nextChar = inFile->peek();
+                if (nextChar == '{') {
+                    // There's a trigger ID available, read it!
+                    std::string triggerIDWithBraces;
+                    if (!(*inFile >> triggerIDWithBraces)) {
+                        debug_output("ERROR: Trigger ID could not be properly read from file.");
+                        delete newPiece;
+                        newPiece = NULL;
+                    }
+                    else {
+                        std::string triggerIDStr = triggerIDWithBraces.substr(1, triggerIDWithBraces.size()-1);
+                        if (triggerIDStr.empty()) {
+                            debug_output("ERROR: Invalid (empty) trigger ID found in level file.");
+                            delete newPiece;
+                            newPiece = NULL;
+                        }
+                        else {
+                            LevelPiece::TriggerID triggerID = atoi(triggerIDStr.c_str());
+                            if (triggerID < 0) {
+                                debug_output("ERROR: Invalid (< 0) trigger ID found in level file.");
+                                delete newPiece;
+                                newPiece = NULL;
+                            }
+                            else {
+                                newPiece->SetTriggerID(triggerID);
+                            }
+                        }
+                    }
+                }
+            }
+
 			if (newPiece == NULL) {
 				assert(false);
 				debug_output("ERROR: Invalid level piece found.");
