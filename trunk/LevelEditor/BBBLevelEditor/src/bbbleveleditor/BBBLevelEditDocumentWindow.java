@@ -19,6 +19,7 @@ import java.util.prefs.Preferences;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuItem;
@@ -785,42 +786,29 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	}
 
 	private class ContextMenuListener implements ActionListener {
-		private LevelPieceEditDialog editDlg = null;
-		private EditItemDropsDialog editDlgForItemDropBlks = null;
-		
-		ContextMenuListener(LevelPieceEditDialog editDlg) {
-			this.editDlg = editDlg;
+		private JDialog dlg = null;
+
+		ContextMenuListener(JDialog dlg) {
+			this.dlg = dlg;
 		}
-		ContextMenuListener(EditItemDropsDialog editDlg) {
-			this.editDlgForItemDropBlks = editDlg;
-		}
-		
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (this.editDlg != null) {
-				this.editDlg.setVisible(true);
-			}
-			else if (this.editDlgForItemDropBlks != null) {
-				this.editDlgForItemDropBlks.setVisible(true);
-			}
+			this.dlg.setVisible(true);
 		}
-		
 	}
 	
 	private void maybeShowContextMenu(MouseEvent e) {
 		if (e.isPopupTrigger()) {
 			LevelPieceImageLabel levelPiece = this.getPieceAtLocation(e.getPoint());
-			
+			JPopupMenu levelEditContextMenu = new JPopupMenu();
 			if (levelPiece.getIsItemDrop()) {
 				EditItemDropsDialog blockEditDlg = new EditItemDropsDialog(this.levelEditWindow, levelPiece);
-				JMenuItem blockPropertiesItem = new JMenuItem("Block properties");
+				JMenuItem blockPropertiesItem = new JMenuItem("Block properties...");
 				blockPropertiesItem.addActionListener(new ContextMenuListener(blockEditDlg));
 				
-				// Context menu for the level display panel
-				JPopupMenu levelEditContextMenu = new JPopupMenu();	
-				levelEditContextMenu.add(blockPropertiesItem);
-				levelEditContextMenu.show(e.getComponent(), e.getX(), e.getY());
-				
+				// Add to the context menu for the level display panel
+				levelEditContextMenu.add(blockPropertiesItem);	
 			}
 			else {
 				Set<Character> allowableIDs = null;
@@ -832,14 +820,19 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				}
 				
 				LevelPieceEditDialog blockEditDlg = new LevelPieceEditDialog(this.levelEditWindow, levelPiece, allowableIDs);
-				JMenuItem blockPropertiesItem = new JMenuItem("Block properties");
+				JMenuItem blockPropertiesItem = new JMenuItem("Block properties...");
 				blockPropertiesItem.addActionListener(new ContextMenuListener(blockEditDlg));
 				
-				// Context menu for the level display panel
-				JPopupMenu levelEditContextMenu = new JPopupMenu();	
+				// Add to the context menu for the level display panel
 				levelEditContextMenu.add(blockPropertiesItem);
-				levelEditContextMenu.show(e.getComponent(), e.getX(), e.getY());
 			}
+			
+			// Blocks all can have trigger IDs...
+			JMenuItem triggerIDItem = new JMenuItem("Trigger ID...");
+			triggerIDItem.addActionListener(new ContextMenuListener(new LevelPieceTriggerIDDialog(this.levelEditWindow, levelPiece)));
+			levelEditContextMenu.add(triggerIDItem);
+			
+			levelEditContextMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 	

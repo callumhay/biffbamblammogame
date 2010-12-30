@@ -130,6 +130,10 @@ Item Drop
 item_drop.png
 D
 
+Switch
+switch.png
+W
+
 Prism
 prism.png
 P

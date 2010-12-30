@@ -50,7 +50,7 @@ The paddle gains a shield that protects it from falling objects, however it caus
 ~ FireBall
 The ball lights on fire causing certain blocks that it hits to catch on fire (which eventually destroys them), however they also drop globs of flaming doom.
 
-~IceBall
+~ IceBall
 The ball becomes icy causing blocks that it hits to freeze instantly - making them easier (or harder depending on the block) to destroy.
 
 ~ Random
