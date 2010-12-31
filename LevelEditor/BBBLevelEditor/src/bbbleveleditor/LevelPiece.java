@@ -10,7 +10,7 @@ public class LevelPiece {
 	public static final String TESLA_PIECE_SYMBOL  = "A";
 	public static final String ITEM_DROP_PIECE_SYMBOL = "D";
 	public static final String CANNON_PIECE_SYMBOL    = "C";
-	public static final String SWITCH_PIECE_NAME      = "W";
+	public static final String SWITCH_PIECE_SYMBOL     = "W";
 	public static final String ITEM_DROP_PIECE_NAME   = "Item Drop";
 	
 	public static final int NO_TRIGGER_ID = -1;

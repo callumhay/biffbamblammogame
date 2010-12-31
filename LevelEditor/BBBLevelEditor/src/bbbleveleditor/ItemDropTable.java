@@ -4,9 +4,7 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 
 import java.util.*;
 

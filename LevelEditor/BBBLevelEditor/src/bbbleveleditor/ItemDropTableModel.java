@@ -106,9 +106,8 @@ public class ItemDropTableModel extends AbstractTableModel {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Class getColumnClass(int c) {
+	public Class<? extends Object> getColumnClass(int c) {
 		return getValueAt(0, c).getClass();
 	}
 	

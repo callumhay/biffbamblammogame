@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Point;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -16,6 +15,8 @@ import javax.swing.SpinnerNumberModel;
 
 public class LevelPieceTriggerIDDialog extends JDialog {
 
+	private static final long serialVersionUID = 57605608260878100L;
+	
 	private JButton okButton;
 	private JButton cancelButton;
 	private JSpinner triggerIDSpinner;
