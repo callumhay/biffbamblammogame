@@ -23,6 +23,7 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 	private JMenu editMenu				= null;
 	private JMenuItem lvlDimMenuItem	= null;
 	private JMenuItem lvlItemsMenuItem	= null;
+	private JMenuItem lvlProperties     = null;
 	//private JMenuItem editBlock			= null;
 	//private JMenuItem portalsMenuItem   = null;
 	
@@ -144,6 +145,11 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		this.lvlItemsMenuItem.addActionListener(editMenuActionListener);
 		this.lvlItemsMenuItem.setEnabled(false);
 		
+		this.lvlProperties = new JMenuItem("Level Properties...");
+		this.lvlProperties.setActionCommand("lvl_properties");
+		this.lvlProperties.addActionListener(editMenuActionListener);
+		this.lvlProperties.setEnabled(false);
+		
 		//this.editBlock = new JMenuItem("Block Properties...");
 		//this.editBlock.setActionCommand("block_properties");
 		//this.editBlock.addActionListener(editMenuActionListener);
@@ -156,6 +162,7 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		
 		this.editMenu.add(this.lvlDimMenuItem);
 		this.editMenu.add(this.lvlItemsMenuItem);
+		this.editMenu.add(this.lvlProperties);
 		//this.editMenu.add(this.portalsMenuItem);
 		this.editMenu.setEnabled(false);
 		
@@ -198,13 +205,13 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			BBBLevelEditDocumentWindow activeDoc = levelEditWindow.getActiveLevelDoc();
+			if (activeDoc == null) {
+				assert(false);
+				return;
+			}
+			
 			if (e.getActionCommand().equals("dimensions")) {
-				BBBLevelEditDocumentWindow activeDoc = levelEditWindow.getActiveLevelDoc();
-				if (activeDoc == null) {
-					assert(false);
-					return;
-				}
-				
 				EditDimensionsDialog dlg = new EditDimensionsDialog(levelEditWindow, 
 						activeDoc.GetLevelWidth(), activeDoc.GetLevelHeight());
 				dlg.setVisible(true);
@@ -214,12 +221,6 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 				}
 			}
 			else if (e.getActionCommand().equals("item_drops")) {
-				BBBLevelEditDocumentWindow activeDoc = levelEditWindow.getActiveLevelDoc();
-				if (activeDoc == null) {
-					assert(false);
-					return;
-				}
-				
 				EditItemDropsDialog dlg = new EditItemDropsDialog(levelEditWindow);
 				dlg.setItemDropSettings(activeDoc.getItemDropSettings());
 				dlg.setVisible(true);
@@ -228,6 +229,11 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 					activeDoc.setItemDropSettings(dlg.getItemDropSettings());
 				}
 			}
+			else if (e.getActionCommand().equals("lvl_properties")) {
+				EditLevelPropertiesDialog dlg = new EditLevelPropertiesDialog(levelEditWindow, activeDoc);
+				dlg.setVisible(true);
+			}
+			
 			//else if (e.getActionCommand().equals("block_properties")) {
 				
 			//}
@@ -270,6 +276,7 @@ public class BBBLevelEditorMenuBar extends JMenuBar {
 		this.saveAsMenuItem.setEnabled(activeDocExists);
 		this.lvlDimMenuItem.setEnabled(activeDocExists);
 		this.lvlItemsMenuItem.setEnabled(activeDocExists);
+		this.lvlProperties.setEnabled(activeDocExists);
 		
 		boolean editMenuEnabled = this.lvlDimMenuItem.isEnabled() || this.lvlItemsMenuItem.isEnabled();
 		this.editMenu.setEnabled(editMenuEnabled);

@@ -7,7 +7,6 @@ import java.awt.Image;
 import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -108,10 +107,10 @@ public class LevelPieceImageLabel extends JLabel {
 			this.cannonDegAngle = Integer.parseInt(angleValue);
 			pieceSymbol = LevelPiece.CANNON_PIECE_SYMBOL;
 		}
-		else if (pieceSymbol.length() >= 3 && pieceSymbol.substring(0, 2).equals(LevelPiece.SWITCH_PIECE_NAME + "(")) {
+		else if (pieceSymbol.length() >= 3 && pieceSymbol.substring(0, 2).equals(LevelPiece.SWITCH_PIECE_SYMBOL + "(")) {
 			String switchTriggerIDStr = pieceSymbol.substring(2, pieceSymbol.length()-1);
 			this.switchTriggerID = Integer.parseInt(switchTriggerIDStr);
-			pieceSymbol = LevelPiece.SWITCH_PIECE_NAME;
+			pieceSymbol = LevelPiece.SWITCH_PIECE_SYMBOL;
 		}
 
 		// Check for a trigger ID...
@@ -160,6 +159,12 @@ public class LevelPieceImageLabel extends JLabel {
 	}
 	public void setTriggerID(int triggerID) {
 		this.triggerID = triggerID;
+	}
+	public int getSwitchTriggerID() {
+		return this.switchTriggerID;
+	}
+	public void setSwitchTriggerID(int id) {
+		this.switchTriggerID = id;
 	}
 	
 	
@@ -215,6 +220,9 @@ public class LevelPieceImageLabel extends JLabel {
 	}
 	public boolean getIsCannonBlock() {
 		return piece.getSymbol().equals(LevelPiece.CANNON_PIECE_SYMBOL);
+	}
+	public boolean getIsSwitchBlock() {
+		return piece.getSymbol().equals(LevelPiece.SWITCH_PIECE_SYMBOL);
 	}
 	
 	public void setBlockID(char blockID) {

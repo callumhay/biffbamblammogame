@@ -17,7 +17,6 @@ import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
 import javax.swing.Box;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -80,6 +79,13 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		
 		this.setupUI();
 		this.initDefaultPieces();
+	}
+	
+	public String getLevelName() {
+		return this.levelName;
+	}
+	public void setLevelName(String name) {
+		this.levelName = name;
 	}
 	
 	private void setupUI() {
@@ -503,6 +509,10 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					}
 					else if (currPieceLbl.getIsCannonBlock()) {
 						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getCannonBlockDegAngle() + ")";
+						levelFileWriter.write(outputStr);
+					}
+					else if (currPieceLbl.getIsSwitchBlock()) {
+						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getSwitchTriggerID() + ")";
 						levelFileWriter.write(outputStr);
 					}
 					else {

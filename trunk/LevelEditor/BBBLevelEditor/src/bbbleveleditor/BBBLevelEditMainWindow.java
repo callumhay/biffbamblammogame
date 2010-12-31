@@ -7,7 +7,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.PropertyVetoException;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.*;
