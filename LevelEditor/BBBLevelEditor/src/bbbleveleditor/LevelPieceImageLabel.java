@@ -33,7 +33,10 @@ public class LevelPieceImageLabel extends JLabel {
 	
 	private int cannonDegAngle;
 	private int triggerID;
+	
 	private ArrayList<String> itemDropTypes = new ArrayList<String>();
+	
+	private int switchTriggerID;	// When this level piece is a switch, this ID is the ID of what gets triggered by the switch
 	
 	static boolean IsValidBlockID(char id) {
 		if ((id >= 'A' && id <= 'z') || (id >= '0' && id <= '9')) {
@@ -50,6 +53,7 @@ public class LevelPieceImageLabel extends JLabel {
 		this.cannonDegAngle = -1;
 		this.itemDropTypes.add("all");
 		this.triggerID = LevelPiece.NO_TRIGGER_ID;
+		this.switchTriggerID = LevelPiece.NO_TRIGGER_ID;
 	}
 	
 	// constructor with icon
@@ -104,18 +108,26 @@ public class LevelPieceImageLabel extends JLabel {
 			this.cannonDegAngle = Integer.parseInt(angleValue);
 			pieceSymbol = LevelPiece.CANNON_PIECE_SYMBOL;
 		}
-		
-		this.setLevelPiece(LevelPiece.LevelPieceCache.get(pieceSymbol));
-		
+		else if (pieceSymbol.length() >= 3 && pieceSymbol.substring(0, 2).equals(LevelPiece.SWITCH_PIECE_NAME + "(")) {
+			String switchTriggerIDStr = pieceSymbol.substring(2, pieceSymbol.length()-1);
+			this.switchTriggerID = Integer.parseInt(switchTriggerIDStr);
+			pieceSymbol = LevelPiece.SWITCH_PIECE_NAME;
+		}
+
 		// Check for a trigger ID...
+		String justTheSymbol = pieceSymbol;
 		int triggerIDStart = pieceSymbol.indexOf('{');
 		if (triggerIDStart != -1) {
-			String triggerIDStr = pieceSymbol.substring(triggerIDStart, pieceSymbol.length()-1);
+			String triggerIDStr = pieceSymbol.substring(triggerIDStart+1, pieceSymbol.length()-1);
 			this.triggerID = Integer.parseInt(triggerIDStr);
+			justTheSymbol = pieceSymbol.substring(0, triggerIDStart);
 		}
 		else {
 			this.triggerID = LevelPiece.NO_TRIGGER_ID;
 		}
+		
+		LevelPiece piece = LevelPiece.LevelPieceCache.get(justTheSymbol);
+		this.setLevelPiece(piece);
 	}
 
 	public void setLevelPiece(LevelPiece piece) {

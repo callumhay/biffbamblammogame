@@ -509,6 +509,11 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 						levelFileWriter.write(currLvlPiece.getSymbol());
 					}
 					
+					// Write the trigger ID if there is one...
+					if (currPieceLbl.getTriggerID() != LevelPiece.NO_TRIGGER_ID) {
+						levelFileWriter.write("{" + currPieceLbl.getTriggerID() + "}");
+					}
+					
 					levelFileWriter.write(" ");
 				}
 				levelFileWriter.write("\r\n");
