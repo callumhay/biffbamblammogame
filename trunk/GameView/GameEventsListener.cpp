@@ -38,8 +38,8 @@
 // Wait times before showing the same effect - these prevent the game view from displaying a whole ton
 // of the same effect over and over when the ball hits a bunch of blocks/the paddle in a very small time frame
 const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_BLOCK_COLLISIONS_IN_MS		= 100;
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS	= 75;
-const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS   = 60;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_PADDLE_COLLISIONS_IN_MS    = 75;
+const long GameEventsListener::EFFECT_WAIT_TIME_BETWEEN_BALL_TESLA_COLLISIONS_IN_MS     = 60;
 
 GameEventsListener::GameEventsListener(GameDisplay* d) : 
 display(d), 
@@ -761,6 +761,11 @@ void GameEventsListener::ItemDropBlockItemChangeEvent(const ItemDropBlock& dropB
 	this->display->GetAssets()->GetCurrentLevelMesh()->UpdateItemDropBlock(*itemAssets, dropBlock);
 
 	debug_output("EVENT: Item drop block item type changed");
+}
+
+void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBlock) {
+    // TODO
+    debug_output("EVENT: Switch block activated");
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {

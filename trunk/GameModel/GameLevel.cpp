@@ -27,6 +27,7 @@
 #include "CollateralBlock.h"
 #include "TeslaBlock.h"
 #include "ItemDropBlock.h"
+#include "SwitchBlock.h"
 #include "GameModel.h"
 #include "Projectile.h"
 
@@ -93,6 +94,16 @@ filepath(filepath), levelName(levelName) {
 	
 	this->safetyNetBounds = BoundingLines(lines, normals);
 
+    // Initialize triggerable pieces...
+    for (size_t row = 0; row < this->height; row++) {
+        for (size_t col = 0; col < this->width; col++) {
+            LevelPiece* currPiece = this->currentLevelPieces[row][col];
+            if (currPiece->GetHasTriggerID()) {
+                this->triggerablePieces.insert(std::make_pair(currPiece->GetTriggerID(), currPiece));
+            }
+        }
+    }
+
 	// Set the quad tree for the level
 	//Point2D levelMax(this->GetLevelUnitWidth(), this->GetLevelUnitHeight());
 	//this->levelTree = new QuadTree(Collision::AABB2D(Point2D(0, 0), levelMax), Vector2D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT));
@@ -112,7 +123,7 @@ GameLevel::~GameLevel() {
 }
 
 GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
-	std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(filepath);
+	std::stringstream* inFile = ResourceManager::GetInstance()->FilepathToInOutStream(filepath);
 	if (inFile == NULL) {
 		assert(false);
 		return NULL;
@@ -549,6 +560,13 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							}
 						}
 
+						// Read in the closing bracket
+						*inFile >> tempChar;
+						if (tempChar != ')') {
+							debug_output("ERROR: poorly formed triangle block syntax, missing ')'");
+							break;
+						}
+
 						// Create a new class for the triangle block based on its type...
 						if (typeOfBlock == SOLID_BLOCK_CHAR) {
 							newPiece = new SolidTriangleBlock(orientation, pieceWLoc, pieceHLoc);
@@ -560,12 +578,6 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 							newPiece = new BreakableTriangleBlock(typeOfBlock, orientation, pieceWLoc, pieceHLoc);
 						}
 
-						// Read in the closing bracket
-						*inFile >> tempChar;
-						if (tempChar != ')') {
-							debug_output("ERROR: poorly formed triangle block syntax, missing ')'");
-							break;
-						}
 					}
 					break;
 
@@ -586,12 +598,17 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 						// Read each of the item type names and set the proper possible item drops for the item drop block...
 						std::string tempStr;
 						*inFile >> tempStr;
-						if (tempStr.at(tempStr.size()-1) != ')') {
-							debug_output("ERROR: poorly formed item drop block syntax, missing ')'");
-							break;
-						}
 
 						std::vector<std::string> itemNames;
+                        // Careful of the case where there's a curly bracket - we want to get rid of the curly bracket in that case
+                        size_t curlyBracketPos = tempStr.find_first_of("{");
+                        if (curlyBracketPos != std::string::npos) {
+                            stringhelper::Tokenize(tempStr, itemNames, "{");
+                            std::string putBackIntoStream = tempStr.substr(curlyBracketPos);
+                            inFile->seekg(-static_cast<int>(putBackIntoStream.size()), std::ios_base::cur);
+                            tempStr = itemNames.front();
+                            itemNames.clear();
+                        }
 						stringhelper::Tokenize(tempStr, itemNames, ",) \t\r\n"); 
 						
 						// Make sure there's at least one item defined
@@ -648,13 +665,35 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 					}
 					break;
 
-                case GameLevel::SWITCH_BLOCK_CHAR:
-                    // W(a) - Switch block:
-                    // a : The trigger ID of the block that gets triggered by the switch 
-                    //     (switch is turned on when a ball/projectile hits it).
+                case GameLevel::SWITCH_BLOCK_CHAR: {
+                        // W(a) - Switch block:
+                        // a : The trigger ID of the block that gets triggered by the switch 
+                        //     (switch is turned on when a ball/projectile hits it).
 
-                    // TODO...
+                        char tempChar;
+                        *inFile >> tempChar;
+					    if (tempChar != '(') {
+					        debug_output("ERROR: poorly formed switch block syntax, missing '('");
+						    break;
+					    }
+                        
+                        // The next value will be a triggerID
+                        LevelPiece::TriggerID switchTriggerID = LevelPiece::NO_TRIGGER_ID;
+                        *inFile >> switchTriggerID;
+                        if (switchTriggerID < 0) {
+					        debug_output("ERROR: poorly formed switch block syntax, switch trigger ID was invalid.");
+						    break;
+                        }
 
+					    // Read in the closing bracket
+					    *inFile >> tempChar;
+					    if (tempChar != ')') {
+						    debug_output("ERROR: poorly formed switch block syntax, missing ')'");
+						    break;
+					    }
+                        
+                        newPiece = new SwitchBlock(switchTriggerID, pieceWLoc, pieceHLoc);
+                    }
                     break;
 
 				default:
@@ -676,7 +715,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
                         newPiece = NULL;
                     }
                     else {
-                        std::string triggerIDStr = triggerIDWithBraces.substr(1, triggerIDWithBraces.size()-1);
+                        std::string triggerIDStr = triggerIDWithBraces.substr(1, triggerIDWithBraces.size()-2);
                         if (triggerIDStr.empty()) {
                             debug_output("ERROR: Invalid (empty) trigger ID found in level file.");
                             delete newPiece;
@@ -920,6 +959,15 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, Leve
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1); // right
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex); // top
 
+        // Check to see if the piece is inside the list of triggerables...
+        if (pieceBefore->GetHasTriggerID()) {
+            // Remove it from the trigger list
+            std::map<LevelPiece::TriggerID, LevelPiece*>::iterator findIter =
+                this->triggerablePieces.find(pieceBefore->GetTriggerID());
+            assert(findIter != this->triggerablePieces.end());
+            this->triggerablePieces.erase(findIter);
+        }
+
 		// If the piece is in any auxillary lists within the game model then we need to remove it
 		gameModel->WipePieceFromAuxLists(pieceBefore);
 	}
@@ -1016,11 +1064,26 @@ std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(float 
 }
 
 /**
+ * Activates the triggerable level piece with the given trigger ID (if it exists).
+ */
+void GameLevel::ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel) {
+    std::map<LevelPiece::TriggerID, LevelPiece*>::iterator findIter = this->triggerablePieces.find(triggerID);
+    if (findIter == this->triggerablePieces.end()) {
+        return;
+    }
+
+    LevelPiece* triggerPiece = findIter->second;
+    assert(triggerPiece != NULL);
+    triggerPiece->Triggered(gameModel);
+}
+
+/**
  * Private helper function for finding a set of levelpieces within the given range of values
  * indexing along the x and y axis.
  * Return: Set of levelpieces included in the given bounds.
  */
-std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const {
+std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float xIndexMax, 
+                                                          float yIndexMin, float yIndexMax) const {
 	std::set<LevelPiece*> colliders;
 
 	// Check to see if we're completely out of bounds first...
@@ -1330,8 +1393,8 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	
 	// Get the vector from the line to the ball's center (the center of the ball dT time ago)
 	const Point2D previousBallPos = currentBallPos - dT * b.GetVelocity();
-	const Point2D& linePt1			  = collisionLine.P1();
-	const Point2D& linePt2				= collisionLine.P2();
+	const Point2D& linePt1        = collisionLine.P1();
+	const Point2D& linePt2        = collisionLine.P2();
 
 	Vector2D fromLineToBall = previousBallPos - linePt1;
 	if (Vector2D::Dot(fromLineToBall, fromLineToBall) < EPSILON) {

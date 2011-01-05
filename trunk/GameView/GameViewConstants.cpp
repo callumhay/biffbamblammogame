@@ -19,23 +19,23 @@ TEXTURE_DIR(TEXTURE_DIRECTORY),
 SOUND_DIR(SOUND_DIRECTORY),
 
 // Shader Asset Paths
-CGFX_CEL_SHADER(SHADER_DIRECTORY										"/CelShading.cgfx"),
-CGFX_PHONG_SHADER(SHADER_DIRECTORY									"/Phong.cgfx"),
-CGFX_INKBLOCK_SHADER(SHADER_DIRECTORY								"/InkBlock.cgfx"),
-CGFX_POSTREFRACT_SHADER(SHADER_DIRECTORY						"/PostRefract.cgfx"),
-CGFX_VOLUMEMETRIC_SHADER(SHADER_DIRECTORY						"/VolumetricEffect.cgfx"),
-CGFX_DECOSKYBOX_SHADER(SHADER_DIRECTORY							"/DecoSkybox.cgfx"),
-CGFX_GAUSSIAN_SHADER(SHADER_DIRECTORY								"/GaussianBlur.cgfx"),
-CGFX_AFTERIMAGE_SHADER(SHADER_DIRECTORY							"/MotionBlurAndAfterImage.cgfx"),
-CGFX_BLOOM_SHADER(SHADER_DIRECTORY									"/Bloom.cgfx"),
-CGFX_FULLSCREENGOO_SHADER(SHADER_DIRECTORY					"/FullscreenGoo.cgfx"),
-CGFX_STICKYPADDLE_SHADER(SHADER_DIRECTORY						"/StickyPaddle.cgfx"),
-CGFX_FULLSCREENSMOKEY_SHADER(SHADER_DIRECTORY				"/PostSmokey.cgfx"),
+CGFX_CEL_SHADER(SHADER_DIRECTORY                    "/CelShading.cgfx"),
+CGFX_PHONG_SHADER(SHADER_DIRECTORY                  "/Phong.cgfx"),
+CGFX_INKBLOCK_SHADER(SHADER_DIRECTORY               "/InkBlock.cgfx"),
+CGFX_POSTREFRACT_SHADER(SHADER_DIRECTORY            "/PostRefract.cgfx"),
+CGFX_VOLUMEMETRIC_SHADER(SHADER_DIRECTORY           "/VolumetricEffect.cgfx"),
+CGFX_DECOSKYBOX_SHADER(SHADER_DIRECTORY             "/DecoSkybox.cgfx"),
+CGFX_GAUSSIAN_SHADER(SHADER_DIRECTORY               "/GaussianBlur.cgfx"),
+CGFX_AFTERIMAGE_SHADER(SHADER_DIRECTORY             "/MotionBlurAndAfterImage.cgfx"),
+CGFX_BLOOM_SHADER(SHADER_DIRECTORY                  "/Bloom.cgfx"),
+CGFX_FULLSCREENGOO_SHADER(SHADER_DIRECTORY          "/FullscreenGoo.cgfx"),
+CGFX_STICKYPADDLE_SHADER(SHADER_DIRECTORY           "/StickyPaddle.cgfx"),
+CGFX_FULLSCREENSMOKEY_SHADER(SHADER_DIRECTORY       "/PostSmokey.cgfx"),
 CGFX_FULLSCREEN_UBERINTENSE_SHADER(SHADER_DIRECTORY "/PostUberIntense.cgfx"),
-CGFX_PRISM_SHADER(SHADER_DIRECTORY									"/Prism.cgfx"),
-CGFX_PORTALBLOCK_SHADER(SHADER_DIRECTORY						"/PortalBlock.cgfx"),
-CGFX_FIREBALL_SHADER(SHADER_DIRECTORY								"/FireBall.cgfx"),
-CGFX_FULLSCREEN_POSTFIREY_SHADER(SHADER_DIRECTORY		"/PostFirey.cgfx"),
+CGFX_PRISM_SHADER(SHADER_DIRECTORY                  "/Prism.cgfx"),
+CGFX_PORTALBLOCK_SHADER(SHADER_DIRECTORY            "/PortalBlock.cgfx"),
+CGFX_FIREBALL_SHADER(SHADER_DIRECTORY               "/FireBall.cgfx"),
+CGFX_FULLSCREEN_POSTFIREY_SHADER(SHADER_DIRECTORY   "/PostFirey.cgfx"),
 
 // Texture Asset Paths
 TEXTURE_BANG1(TEXTURE_DIRECTORY  "/Bang1_256x128.png"),
@@ -96,6 +96,9 @@ TEXTURE_BEAM_CROSSHAIR(TEXTURE_DIRECTORY "/beam_crosshairs_256x256.png"),
 TEXTURE_BARREL_OVERLAY(TEXTURE_DIRECTORY "/barrel_overlay_1024x1024.png"),
 
 TEXTURE_BALL_SAFETY_NET(TEXTURE_DIRECTORY "/warning_platform_128x64.jpg"),
+TEXTURE_OFF_SWITCH(TEXTURE_DIRECTORY      "/switch_off_128x64.jpg"),
+TEXTURE_GREEN_ON_SWITCH(TEXTURE_DIRECTORY "/switch_green_128x64.jpg"),
+TEXTURE_RED_ON_SWITCH(TEXTURE_DIRECTORY   "/switch_red_128x64.jpg"),
 
 TEXTURE_CEL_GRADIENT(TEXTURE_DIRECTORY "/celshading_texture1x256.jpg"),
 TEXTURE_NOISE_OCTAVES(TEXTURE_DIRECTORY "/noise_octaves.raw"),
@@ -114,13 +117,17 @@ MAIN_MENU_SOUND_SCRIPT(SOUND_DIRECTORY "/main_menu_sound.msf"),
 DECO_SOUND_SCRIPT(SOUND_DIRECTORY "/deco_sound.msf"),
 
 // Item-related constants
-ITEM_LABEL_MATGRP("ItemLabel"),																// Material group name for changing the label on the item mesh
-ITEM_END_MATGRP("ColourEnd"),																	// Material group name for changing the colour on the item mesh
-ITEM_DROP_BLOCK_ITEMTYPE_MATGRP("item_drop_item_material"),		// Material group name for the item picture on the item drop block mesh
+ITEM_LABEL_MATGRP("ItemLabel"),                             // Material group name for changing the label on the item mesh
+ITEM_END_MATGRP("ColourEnd"),                               // Material group name for changing the colour on the item mesh
+ITEM_DROP_BLOCK_ITEMTYPE_MATGRP("item_drop_item_material"), // Material group name for the item picture on the item drop block mesh
 
 ITEM_GOOD_COLOUR(0.0f, 0.8f, 0.0f),
 ITEM_BAD_COLOUR(0.8f, 0.0f, 0.0f),
 ITEM_NEUTRAL_COLOUR(0.0f, 0.6f, 1.0f),
+
+SWITCH_BASE_METAL_MATGRP("switch_metal"),   // Material group name for the base texture of the switch block, which doesn't change
+SWITCH_ON_MATGRP("switch_on"),              // Material group name for the 'on' texture of the switch block
+SWITCH_OFF_MATGRP("switch_off"),            // Material group name for the 'off' texture of the switch block
 
 DEFAULT_BALL_LIGHT_ATTEN(0.5f),
 BLACKOUT_BALL_LIGHT_ATTEN(0.85f),
@@ -167,6 +174,7 @@ COLLATERAL_BLOCK_MESH(MESH_DIRECTORY "/collateral_block.obj"),
 TESLA_BLOCK_BASE_MESH(MESH_DIRECTORY "/tesla_block_base.obj"),
 TESLA_BLOCK_COIL_MESH(MESH_DIRECTORY "/tesla_block_coil.obj"),
 ITEM_DROP_BLOCK_MESH(MESH_DIRECTORY  "/item_drop_block.obj"),
+SWITCH_BLOCK_MESH(MESH_DIRECTORY "/switch_block.obj"),
 SKYBOX_MESH(MESH_DIRECTORY "/skybox.obj"),
 ITEM_MESH(MESH_DIRECTORY "/item.obj"),
 PADDLE_LASER_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_laser_attachment.obj"),

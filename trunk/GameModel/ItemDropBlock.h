@@ -22,55 +22,19 @@ public:
 	ItemDropBlock(const std::vector<GameItem::ItemType>& droppableItemTypes, unsigned int wLoc, unsigned int hLoc);
 	~ItemDropBlock();
 
-	LevelPieceType GetType() const { 
-		return LevelPiece::ItemDrop;
-	}
-
-	// Is this piece one without any boundries (i.e., no collision surface/line)?
-	// Return: true if non-collider, false otherwise.
-	bool IsNoBoundsPieceType() const {
-		return false;
-	}
-	bool BallBouncesOffWhenHit() const {
-		return true;
-	}
-
-	// Tesla blocks can NEVER be destroyed...
-	bool MustBeDestoryedToEndLevel() const {
-		return false;
-	}
-	bool CanBeDestroyedByBall() const {
-		return false;
-	}
-
-	// Whether or not the uber ball can just blast right through this block.
-	// Returns: true if it can, false otherwise.
-	bool UberballBlastsThrough() const {
-		return false;	// Cannot pass through tesla blocks...
-	}
-
-	// Whether or not the ghost ball can just pass through this block.
-	// Returns: true if it can, false otherwise.
-	bool GhostballPassesThrough() const {
-		return true;
-	}
-
-	// You get no points for collisions with tesla blocks...
-	int GetPointValueForCollision() {
-		return 0;
-	}
-
-	// Tesla blocks do not reflect or refract light.
-	// Returns: false
-	bool IsLightReflectorRefractor() const {
-		// When frozen in ice a block can reflect/refract lasers and the like
-		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-			return true;
-		}
-		return false;
-	}
-
+	LevelPieceType GetType() const;
+	bool IsNoBoundsPieceType() const;
+	bool BallBouncesOffWhenHit() const;
+	bool MustBeDestoryedToEndLevel() const;
+	bool CanBeDestroyedByBall() const;
+	bool UberballBlastsThrough() const;
+	bool GhostballPassesThrough() const;
+	int GetPointValueForCollision();
+	bool IsLightReflectorRefractor() const;
 	bool ProjectilePassesThrough(Projectile* projectile) const;
+
+    void Triggered(GameModel* gameModel);
+
 	LevelPiece* Destroy(GameModel* gameModel);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
@@ -89,14 +53,69 @@ private:
 
 	std::vector<GameItem::ItemType> allowedItemDropTypes;
 
-	float hitPointsBeforeNextDrop;									// Hit points left that must be deminished (by a laser beam) before the next item drop
-	GameItem::ItemType nextDropItemType;						// The next item type that will drop from this block
+	float hitPointsBeforeNextDrop;                  // Hit points left that must be deminished (by a laser beam) before the next item drop
+	GameItem::ItemType nextDropItemType;            // The next item type that will drop from this block
 	GameItem::ItemDisposition nextDropDisposition;	// The disposition (good/neutral/bad) of the next item type that will drop from this block
 
 	unsigned long timeOfLastDrop;	// Amount of time since the last item drop
 
 	void ChangeToNextItemDropType(bool doEvent);
+
+    DISALLOW_COPY_AND_ASSIGN(ItemDropBlock);
 };
+
+inline LevelPiece::LevelPieceType ItemDropBlock::GetType() const { 
+	return LevelPiece::ItemDrop;
+}
+
+// Is this piece one without any boundries (i.e., no collision surface/line)?
+// Return: true if non-collider, false otherwise.
+inline bool ItemDropBlock::IsNoBoundsPieceType() const {
+	return false;
+}
+inline bool ItemDropBlock::BallBouncesOffWhenHit() const {
+	return true;
+}
+
+// Item drop blocks can NEVER be destroyed...
+inline bool ItemDropBlock::MustBeDestoryedToEndLevel() const {
+	return false;
+}
+inline bool ItemDropBlock::CanBeDestroyedByBall() const {
+	return false;
+}
+
+// Whether or not the uber ball can just blast right through this block.
+// Returns: true if it can, false otherwise.
+inline bool ItemDropBlock::UberballBlastsThrough() const {
+	return false;	// Cannot pass through tesla blocks...
+}
+
+// Whether or not the ghost ball can just pass through this block.
+// Returns: true if it can, false otherwise.
+inline bool ItemDropBlock::GhostballPassesThrough() const {
+	return true;
+}
+
+// You get no points for collisions with item drop blocks...
+inline int ItemDropBlock::GetPointValueForCollision() {
+	return 0;
+}
+
+// Item drop blocks do not reflect or refract light.
+// Returns: false
+inline bool ItemDropBlock::IsLightReflectorRefractor() const {
+	// When frozen in ice a block can reflect/refract lasers and the like
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		return true;
+	}
+	return false;
+}
+
+inline void ItemDropBlock::Triggered(GameModel* gameModel) {
+    // When triggered, an item drop block will try to drop an item
+    this->AttemptToDropAnItem(gameModel);
+}
 
 inline bool ItemDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
 	UNUSED_PARAMETER(dT);

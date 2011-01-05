@@ -72,6 +72,7 @@ public:
 	// Basic loading functions ****************************************************************************************************
 	static std::map<unsigned int, TextureFontSet*> LoadFont(const std::string &filepath, const std::vector<unsigned int> &heights, Texture::TextureFilterType filterType);
 	static std::istringstream* FilepathToInStream(const std::string &filepath);
+    static std::stringstream* FilepathToInOutStream(const std::string &filepath);
 	static char* FilepathToMemoryBuffer(const std::string &filepath, long &length);
 
 	// Public Resource Directories

@@ -921,6 +921,29 @@ std::istringstream* ResourceManager::FilepathToInStream(const std::string &filep
 	return inFile;
 }
 
+/**
+ * Convert a file stored in the resource zip filesystem into an input stream using physfs.
+ */ 
+std::stringstream* ResourceManager::FilepathToInOutStream(const std::string &filepath) {
+	std::stringstream* inFile = NULL;
+	long fileBufferlength = 0;
+
+	char* fileBuffer = ResourceManager::FilepathToMemoryBuffer(filepath, fileBufferlength);
+	if (fileBuffer == NULL) {
+		assert(false);
+		return NULL;
+	}
+	
+	// Convert the bytes to a string stream 
+    inFile = new std::stringstream(std::string(fileBuffer), std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+	
+	// Clean up
+	delete[] fileBuffer;
+	fileBuffer = NULL;
+
+	return inFile;
+}
+
 // Convert a filepath with the resource directory in it into one with the mod directory instead
 std::string ResourceManager::ConvertResourceFilepathToModFilepath(const std::string& resourceFilepath) {
 	// On failure then we return an empty string...

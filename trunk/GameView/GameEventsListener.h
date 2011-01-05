@@ -75,6 +75,8 @@ public:
 	void ItemTimerStartedEvent(const GameItemTimer& itemTimer);
 	void ItemTimerStoppedEvent(const GameItemTimer& itemTimer);
 	void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock);
+    void SwitchBlockActivatedEvent(const SwitchBlock& switchBlock);
+
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
 	void RocketExplodedEvent(const PaddleRocketProjectile& rocket);

@@ -95,9 +95,10 @@ public:
 	virtual bool ProjectilePassesThrough(Projectile* projectile) const = 0;
 	virtual bool IsLightReflectorRefractor() const = 0;
 
-    //virtual bool TriggeredBySwitch(const SwitchBlock& switchBlock); // TODO: When a switch triggers a block it calls this method
+    virtual void Triggered(GameModel* gameModel);
     void SetTriggerID(const LevelPiece::TriggerID& id) { this->triggerID = id; }
     const LevelPiece::TriggerID& GetTriggerID() const { return this->triggerID; }
+    bool GetHasTriggerID() const { return (this->GetTriggerID() != LevelPiece::NO_TRIGGER_ID); };
 
 	// Track the status of the piece, effects properties of the piece and how it works/acts in a level
 	// NOTE: IF YOU ADD TO THIS DON'T FORGET TO UPDATE LevelPiece::RemoveStatuses !!!!!
@@ -266,6 +267,13 @@ inline bool LevelPiece::StatusTick(double dT, GameModel* gameModel, int32_t& rem
 	assert(false);
 	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
 	return true;
+}
+
+// When a switch (or some other triggering mechanism) triggers a block it calls this method
+inline void LevelPiece::Triggered(GameModel* gameModel) {
+    UNUSED_PARAMETER(gameModel);
+    // Must be overridden for functionality.
+    //return false;
 }
 
 // Draws the boundry lines and normals for this level piece.

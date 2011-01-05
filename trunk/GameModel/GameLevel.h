@@ -138,12 +138,15 @@ public:
 	LevelPiece* RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
 
+    void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);
+    const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;
+
 private:	
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
-    //std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
+    std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
 
-	unsigned int piecesLeft;            // Pieces left before the end of the level
-	unsigned int width, height;         // Size values for the level
+	size_t piecesLeft;            // Pieces left before the end of the level
+	size_t width, height;         // Size values for the level
 	bool ballSafetyNetActive;
 	BoundingLines safetyNetBounds;
 	std::string filepath;
@@ -163,10 +166,18 @@ private:
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
 	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;
-
-
 	static void CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& levelPieces);
 
+    DISALLOW_COPY_AND_ASSIGN(GameLevel);
 };
+
+inline const LevelPiece* GameLevel::GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const {
+    std::map<LevelPiece::TriggerID, LevelPiece*>::const_iterator findIter = this->triggerablePieces.find(triggerID);
+    if (findIter == this->triggerablePieces.end()) {
+        return NULL;
+    }
+    return findIter->second;
+}
+
 #endif
 
