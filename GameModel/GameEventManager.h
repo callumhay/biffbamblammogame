@@ -12,6 +12,7 @@ class PortalBlock;
 class CannonBlock;
 class TeslaBlock;
 class ItemDropBlock;
+class SwitchBlock;
 class GameItem;
 class RandomItem;
 class GameItemTimer;
@@ -79,6 +80,7 @@ public:
 	void ActionItemTimerStarted(const GameItemTimer& itemTimer);
 	void ActionItemTimerStopped(const GameItemTimer& itemTimer);
 	void ActionItemDropBlockItemChange(const ItemDropBlock& dropBlock);
+    void ActionSwitchBlockActivated(const SwitchBlock& switchBlock);
 
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);

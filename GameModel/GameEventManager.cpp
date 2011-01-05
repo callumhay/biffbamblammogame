@@ -361,6 +361,14 @@ void GameEventManager::ActionItemDropBlockItemChange(const ItemDropBlock& dropBl
 	}	
 }
 
+// Action for when a switch block is initially turned on
+void GameEventManager::ActionSwitchBlockActivated(const SwitchBlock& switchBlock) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->SwitchBlockActivatedEvent(switchBlock);
+	}	
+}
+
 // Action for when a projectile is fired/spawned
 void GameEventManager::ActionProjectileSpawned(const Projectile& projectile) {
 	this->listenerIter = this->eventListeners.begin();

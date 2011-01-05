@@ -18,6 +18,7 @@
 #include "CannonBlockMesh.h"
 #include "CollateralBlockMesh.h"
 #include "TeslaBlockMesh.h"
+#include "SwitchBlockMesh.h"
 
 #include "../ESPEngine/ESPEmitter.h"
 
@@ -33,6 +34,7 @@
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/CollateralBlock.h"
 #include "../GameModel/TeslaBlock.h"
+#include "../GameModel/SwitchBlock.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
@@ -40,31 +42,33 @@ prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannon
 teslaBlock(NULL), statusEffectRenderer(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
-	this->basicBlock						= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
-	this->bombBlock							= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
+	this->basicBlock					= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
+	this->bombBlock						= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
 	this->triangleBlockUR				= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TRIANGLE_BLOCK_MESH_PATH);
-	this->prismBlockDiamond			= new PrismBlockMesh(PrismBlockMesh::DiamondPrism);
-	this->prismBlockTriangleUR	= new PrismBlockMesh(PrismBlockMesh::TrianglePrism);
-	this->inkBlock							= ResourceManager::GetInstance()->GetInkBlockMeshResource();
-	this->portalBlock						= new PortalBlockMesh();
-	this->cannonBlock						= new CannonBlockMesh();
+	this->prismBlockDiamond			    = new PrismBlockMesh(PrismBlockMesh::DiamondPrism);
+	this->prismBlockTriangleUR	        = new PrismBlockMesh(PrismBlockMesh::TrianglePrism);
+	this->inkBlock						= ResourceManager::GetInstance()->GetInkBlockMeshResource();
+	this->portalBlock					= new PortalBlockMesh();
+	this->cannonBlock					= new CannonBlockMesh();
 	this->collateralBlock				= new CollateralBlockMesh();
-	this->teslaBlock						= new TeslaBlockMesh();
+	this->teslaBlock                    = new TeslaBlockMesh();
 	this->itemDropBlock					= new ItemDropBlockMesh();
+    this->switchBlock                   = new SwitchBlockMesh();
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
 	// Add the typical level meshes to the list of materials...
 	const std::map<std::string, MaterialGroup*>& basicBlockMatGrps		= this->basicBlock->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& triangleBlockMatGrps	= this->triangleBlockUR->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& bombBlockMatGrps			= this->bombBlock->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& inkBlockMatGrps			= this->inkBlock->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& bombBlockMatGrps		= this->bombBlock->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& inkBlockMatGrps		= this->inkBlock->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& prismBlockMatGrps		= this->prismBlockDiamond->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& prismTriBlockMatGrps	= this->prismBlockTriangleUR->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& portalBlockMatGrps   = this->portalBlock->GetMaterialGroups();
+	const std::map<std::string, MaterialGroup*>& portalBlockMatGrps     = this->portalBlock->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& cannonBlockMatGrps		= this->cannonBlock->GetMaterialGroups();
 	const std::map<std::string, MaterialGroup*>& teslaBlockMatGrps		= this->teslaBlock->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& itemDropBlockMatGrps = this->itemDropBlock->GetMaterialGroups(); 
+	const std::map<std::string, MaterialGroup*>& itemDropBlockMatGrps   = this->itemDropBlock->GetMaterialGroups();
+    const std::map<std::string, MaterialGroup*>& switchBlockMatGrps     = this->switchBlock->GetMaterialGroups();
 	
 	for (std::map<std::string, MaterialGroup*>::const_iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
@@ -96,6 +100,9 @@ teslaBlock(NULL), statusEffectRenderer(NULL) {
 	for (std::map<std::string, MaterialGroup*>::const_iterator iter = itemDropBlockMatGrps.begin(); iter != itemDropBlockMatGrps.end(); ++iter) {
 		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
 	}	
+	for (std::map<std::string, MaterialGroup*>::const_iterator iter = switchBlockMatGrps.begin(); iter != switchBlockMatGrps.end(); ++iter) {
+		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
+	}
 
 	// Initialize the status renderer
 	this->statusEffectRenderer = new BlockStatusEffectRenderer();
@@ -125,6 +132,8 @@ LevelMesh::~LevelMesh() {
 	this->teslaBlock = NULL;
 	delete this->itemDropBlock;
 	this->itemDropBlock = NULL;
+    delete this->switchBlock;
+    this->switchBlock = NULL;
 
 	// Delete the status effect renderer
 	delete this->statusEffectRenderer;
@@ -181,6 +190,7 @@ void LevelMesh::Flush() {
 	this->collateralBlock->Flush();
 	this->teslaBlock->Flush();
 	this->itemDropBlock->Flush();
+    this->switchBlock->Flush();
 
 	// Clear the current level pointer
 	this->currLevel = NULL;
@@ -260,7 +270,12 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 				Texture2D* itemTexture = gameItemAssets.GetItemTexture(itemDrpPiece->GetNextDropItemType());
 				this->itemDropBlock->AddItemDropBlock(itemDrpPiece, itemTexture);
 			}
-
+            // 5) Switch block
+            else if (currPiece->GetType() == LevelPiece::Switch) {
+                const SwitchBlock* switchPiece = dynamic_cast<const SwitchBlock*>(currPiece);
+                assert(switchPiece != NULL);
+                this->switchBlock->AddSwitchBlock(switchPiece);
+            }
 		}
 	}
 }
@@ -351,6 +366,15 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 				assert(itemDrpPiece != NULL);
 				this->itemDropBlock->RemoveItemDropBlock(itemDrpPiece);
 			}
+            break;
+
+        case LevelPiece::Switch:
+            {
+				const SwitchBlock* switchPiece = dynamic_cast<const SwitchBlock*>(&piece);
+				assert(switchPiece != NULL);
+				this->switchBlock->RemoveSwitchBlock(switchPiece);
+            }
+            break;
 
 		default:
 			break;
@@ -386,6 +410,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->cannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 
 	glPopMatrix();
@@ -530,6 +555,9 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
 		case LevelPiece::ItemDrop:
 			return &this->itemDropBlock->GetMaterialGroups();
 			break;
+        case LevelPiece::Switch:
+            return &this->switchBlock->GetMaterialGroups();
+            break;
 		case LevelPiece::Collateral:
 			break;
 		case LevelPiece::Empty:
@@ -585,4 +613,5 @@ void LevelMesh::SetLevelAlpha(float alpha) {
 	this->collateralBlock->SetAlphaMultiplier(alpha);
 	this->teslaBlock->SetAlphaMultiplier(alpha);
 	this->itemDropBlock->SetAlphaMultiplier(alpha);
+    this->switchBlock->SetAlphaMultiplier(alpha);
 }

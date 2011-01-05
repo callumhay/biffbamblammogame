@@ -39,6 +39,8 @@ private:
 	ESPPointEmitter* activeCannonEffectEmitter;
 
 	void LoadMesh();
+
+    DISALLOW_COPY_AND_ASSIGN(CannonBlockMesh);
 };
 
 inline void CannonBlockMesh::Flush() {

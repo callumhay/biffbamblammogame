@@ -10,6 +10,7 @@ class PortalBlock;
 class CannonBlock;
 class TeslaBlock;
 class ItemDropBlock;
+class SwitchBlock;
 class GameLevel;
 class GameWorld;
 class GameItem;
@@ -365,6 +366,13 @@ public:
 	 */
 	virtual void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock) = 0;
 
+    /**
+     * Event triggered when a switch block is initially activated. Occurs once just after the switch
+     * activates its triggers.
+     * Arguements: switchBlock - the switch block that was activated.
+     */
+    virtual void SwitchBlockActivatedEvent(const SwitchBlock& switchBlock) = 0;
+        
 	/**
 	 * Event triggered when a projectile is spawned. Only occurs once per spawned projectile.
 	 * Arguements: projectile - The projectile that was just spawned.

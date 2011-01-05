@@ -13,6 +13,7 @@
 #include "GameModel.h"
 #include "GameLevel.h"
 #include "Beam.h"
+#include "GameEventManager.h"
 
 // Constant for the amount of time it takes for the switch to become activatable again, after
 // being turned on
@@ -23,8 +24,12 @@ const float SwitchBlock::SWITCH_HEIGHT  = 0.3f;
 
 const int SwitchBlock::TOGGLE_ON_OFF_LIFE_POINTS = 150;
 
-SwitchBlock::SwitchBlock(unsigned int wLoc, unsigned int hLoc) : 
-LevelPiece(wLoc, hLoc), timeOfLastSwitchPress(0), lifePointsUntilNextToggle(SwitchBlock::TOGGLE_ON_OFF_LIFE_POINTS) {
+SwitchBlock::SwitchBlock(const LevelPiece::TriggerID& idToTriggerOnSwitch, 
+                         unsigned int wLoc, unsigned int hLoc) :
+idToTriggerOnSwitch(idToTriggerOnSwitch),
+LevelPiece(wLoc, hLoc), timeOfLastSwitchPress(0), 
+lifePointsUntilNextToggle(SwitchBlock::TOGGLE_ON_OFF_LIFE_POINTS) {
+    assert(idToTriggerOnSwitch != LevelPiece::NO_TRIGGER_ID);
 }
 
 SwitchBlock::~SwitchBlock() {
@@ -176,7 +181,12 @@ LevelPiece* SwitchBlock::TickBeamCollision(double dT, const BeamSegment* beamSeg
 	return this;
 }
 
+/**
+ * Private helper function called whenever the switch block is 'pressed'.
+ */
 void SwitchBlock::SwitchPressed(GameModel* gameModel) {
+    // The timer makes sure that the player can't repeatedly trigger this block, it also prevents
+    // infinite recursion when two switches are hooked up in a loop
     unsigned long currSysTime = BlammoTime::GetSystemTimeInMillisecs();
     if (currSysTime - this->timeOfLastSwitchPress < SwitchBlock::RESET_TIME) {
         // Do nothing, need to wait for the switch to reset
@@ -184,7 +194,12 @@ void SwitchBlock::SwitchPressed(GameModel* gameModel) {
     }
     
     // Activate the switch - which in turn will activate some other block/event in the level...
-    // TODO
+    GameLevel* currLevel = gameModel->GetCurrentLevel();
+    currLevel->ActivateTriggerableLevelPiece(this->idToTriggerOnSwitch, gameModel);
 
+    // EVENT: This switch block has been activated
+    GameEventManager::Instance()->ActionSwitchBlockActivated(*this);
+
+    // Switch has now officially been activated, reset the timer.
     this->timeOfLastSwitchPress = currSysTime;
 }

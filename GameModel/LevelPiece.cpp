@@ -59,6 +59,7 @@ bool LevelPiece::IsValidLevelPieceType(int pieceType) {
         case Collateral:
         case Tesla:
         case ItemDrop:
+        case Switch:
             return true;
         default:
             assert(false);

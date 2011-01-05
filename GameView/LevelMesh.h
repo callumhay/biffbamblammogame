@@ -34,6 +34,7 @@ class PortalBlockMesh;
 class CannonBlockMesh;
 class CollateralBlockMesh;
 class TeslaBlockMesh;
+class SwitchBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 
@@ -78,6 +79,7 @@ private:
 	CollateralBlockMesh* collateralBlock;
 	TeslaBlockMesh* teslaBlock;
 	ItemDropBlockMesh* itemDropBlock;
+    SwitchBlockMesh* switchBlock;
 
 	// Style-specific level pieces
 	Mesh* styleBlock;

@@ -20,7 +20,7 @@ public:
     static const float SWITCH_WIDTH;
     static const float SWITCH_HEIGHT;
 
-    SwitchBlock(unsigned int wLoc, unsigned int hLoc);
+    SwitchBlock(const LevelPiece::TriggerID& idToTriggerOnSwitch, unsigned int wLoc, unsigned int hLoc);
 	~SwitchBlock();
 
 	LevelPieceType GetType() const;
@@ -33,6 +33,9 @@ public:
 	int GetPointValueForCollision();
 	bool IsLightReflectorRefractor() const;
 	bool ProjectilePassesThrough(Projectile* projectile) const;
+
+    void Triggered(GameModel* gameModel);
+
 	LevelPiece* Destroy(GameModel* gameModel);
 
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
@@ -47,10 +50,15 @@ public:
 
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 
+    bool GetIsSwitchOn() const;
+
 private:
     static const int TOGGLE_ON_OFF_LIFE_POINTS;
+    
     float lifePointsUntilNextToggle;
     unsigned long timeOfLastSwitchPress;
+    LevelPiece::TriggerID idToTriggerOnSwitch;
+    
     void SwitchPressed(GameModel* gameModel);
 
     DISALLOW_COPY_AND_ASSIGN(SwitchBlock);
@@ -87,9 +95,24 @@ inline bool SwitchBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	UNUSED_PARAMETER(projectile);
 	return false;
 }
+
+inline void SwitchBlock::Triggered(GameModel* gameModel) {
+    // When a switch block is triggered it gets its switch activated
+    this->SwitchPressed(gameModel);
+}
+
 inline LevelPiece* SwitchBlock::Destroy(GameModel* gameModel) {
 	UNUSED_PARAMETER(gameModel);
 	return this;
+}
+
+inline bool SwitchBlock::GetIsSwitchOn() const {
+    unsigned long currSysTime = BlammoTime::GetSystemTimeInMillisecs();
+    if (currSysTime - this->timeOfLastSwitchPress < SwitchBlock::RESET_TIME) {
+        // Do nothing, need to wait for the switch to reset
+        return true;
+    }
+    return false;
 }
 
 #endif // __SWITCHBLOCK_H__

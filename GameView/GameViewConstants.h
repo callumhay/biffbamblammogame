@@ -113,6 +113,9 @@ public:
 	const char* TEXTURE_BARREL_OVERLAY;
 
 	const char* TEXTURE_BALL_SAFETY_NET;
+    const char* TEXTURE_OFF_SWITCH;
+    const char* TEXTURE_GREEN_ON_SWITCH;
+    const char* TEXTURE_RED_ON_SWITCH;
 
 	const char* TEXTURE_CEL_GRADIENT;
 	const char* TEXTURE_NOISE_OCTAVES;
@@ -138,7 +141,11 @@ public:
 	const Colour ITEM_GOOD_COLOUR;
 	const Colour ITEM_BAD_COLOUR;
 	const Colour ITEM_NEUTRAL_COLOUR;
-	
+
+    const char* SWITCH_BASE_METAL_MATGRP;
+    const char* SWITCH_ON_MATGRP;
+    const char* SWITCH_OFF_MATGRP;
+
 	const float DEFAULT_BALL_LIGHT_ATTEN;
 	const float BLACKOUT_BALL_LIGHT_ATTEN;
 	const Colour DEFAULT_PADDLE_KEY_LIGHT_COLOUR;
@@ -183,6 +190,7 @@ public:
 	const char* TESLA_BLOCK_BASE_MESH;
 	const char* TESLA_BLOCK_COIL_MESH;
 	const char* ITEM_DROP_BLOCK_MESH;
+    const char* SWITCH_BLOCK_MESH;
 	const char* SKYBOX_MESH;
 	const char* ITEM_MESH;
 	const char* PADDLE_LASER_ATTACHMENT_MESH;

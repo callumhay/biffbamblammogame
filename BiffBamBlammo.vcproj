@@ -973,6 +973,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\SwitchBlockMesh.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\TeslaBlockMesh.h"
 						>
 					</File>
@@ -998,6 +1002,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\PrismBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\SwitchBlockMesh.cpp"
 						>
 					</File>
 					<File
