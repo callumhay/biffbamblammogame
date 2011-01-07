@@ -4,7 +4,7 @@ Kd 1.0 1.0 1.0
 Ks 0.10000 0.10000 0.10000
 Ns 100
 map_Kd resources/textures/switch_red_128x64.jpg
-type outlinedcel
+type phong
 outlinesize 1.0
 geomtype fg
 
@@ -30,11 +30,11 @@ geomtype fg
 
 newmtl switch_metal
 Ka 0.000000 0.000000 0.000000
-Kd 0.66 0.66 0.66
-Ks 0.330000 0.330000 0.330000
+Kd 0.8 0.8 0.8
+Ks 0.50000 0.50000 0.50000
 Ns 80
-map_Kd resources/textures/switch_metal_256x128.jpg
-type outlinedcel
+map_Kd resources/textures/switch_metal_128x64.jpg
+type phong
 outlinesize 1.0
 geomtype fg
 
