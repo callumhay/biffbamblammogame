@@ -16,7 +16,7 @@
 #include "../ResourceManager.h"
 
 SwitchBlockMesh::SwitchBlockMesh() : switchBlockGeometry(NULL), 
-switchOnMaterialGrp(NULL), switchOffMaterialGrp(NULL),
+switchOnMaterialGrp(NULL), switchOffMaterialGrp(NULL), switchCurrentMaterialGrp(NULL),
 greenOnSwitchTexture(NULL), redOnSwitchTexture(NULL), offSwitchTexture(NULL) {
     this->LoadMesh();
 
@@ -26,6 +26,7 @@ greenOnSwitchTexture(NULL), redOnSwitchTexture(NULL), offSwitchTexture(NULL) {
     assert(this->greenOnSwitchTexture != NULL);
     assert(this->redOnSwitchTexture != NULL);
     assert(this->offSwitchTexture != NULL);
+
 }
 
 SwitchBlockMesh::~SwitchBlockMesh() {
@@ -44,8 +45,10 @@ void SwitchBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLigh
                            const BasicPointLight& fillLight, const BasicPointLight& ballLight, 
                            bool lightsAreOff) const {
     
-    MaterialProperties* switchOnMatProperties  = this->switchOnMaterialGrp->GetMaterial()->GetProperties();
-    MaterialProperties* switchOffMatProperties  = this->switchOffMaterialGrp->GetMaterial()->GetProperties();
+
+    MaterialProperties* switchOnMatProperties       = this->switchOnMaterialGrp->GetMaterial()->GetProperties();
+    MaterialProperties* switchOffMatProperties      = this->switchOffMaterialGrp->GetMaterial()->GetProperties();
+    MaterialProperties* switchCurrentMatProperties  = this->switchCurrentMaterialGrp->GetMaterial()->GetProperties();
     
 	glPushAttrib(GL_TEXTURE_BIT | GL_CURRENT_BIT);
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -61,16 +64,19 @@ void SwitchBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLigh
 
         // Set the texture based on whether the block is currently switched on or not
         if (switchBlock->GetIsSwitchOn()) {
-            switchOnMatProperties->diffuseTexture  = this->greenOnSwitchTexture;
-            switchOffMatProperties->diffuseTexture = this->offSwitchTexture;
+            switchOnMatProperties->diffuseTexture      = this->greenOnSwitchTexture;
+            switchOffMatProperties->diffuseTexture     = this->offSwitchTexture;
+            switchCurrentMatProperties->diffuseTexture = this->greenOnSwitchTexture;
         }
         else {
-            switchOffMatProperties->diffuseTexture = this->redOnSwitchTexture;
-            switchOnMatProperties->diffuseTexture  = this->offSwitchTexture;
+            switchOffMatProperties->diffuseTexture     = this->redOnSwitchTexture;
+            switchOnMatProperties->diffuseTexture      = this->offSwitchTexture;
+            switchCurrentMatProperties->diffuseTexture = this->redOnSwitchTexture;
         }
         
         this->switchOnMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
         this->switchOffMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
+        this->switchCurrentMaterialGrp->Draw(camera, keyLight, fillLight, ballLight);
 
         glPopMatrix();
     }
@@ -89,6 +95,7 @@ void SwitchBlockMesh::LoadMesh() {
     assert(this->switchBlockGeometry == NULL);
     assert(this->switchOnMaterialGrp == NULL);
     assert(this->switchOffMaterialGrp == NULL);
+    assert(this->switchCurrentMaterialGrp == NULL);
     assert(this->baseMaterialGrp.empty());
 
     this->switchBlockGeometry = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->SWITCH_BLOCK_MESH);
@@ -110,6 +117,13 @@ void SwitchBlockMesh::LoadMesh() {
     assert(findIter != this->baseMaterialGrp.end());
     this->switchOffMaterialGrp = findIter->second;
     assert(this->switchOffMaterialGrp != NULL);
+	this->baseMaterialGrp.erase(findIter);
+
+    // Current switch mode material group...
+    findIter = this->baseMaterialGrp.find(GameViewConstants::GetInstance()->SWITCH_CURRENT_MATGRP);
+    assert(findIter != this->baseMaterialGrp.end());
+    this->switchCurrentMaterialGrp = findIter->second;
+    assert(this->switchCurrentMaterialGrp != NULL);
 	this->baseMaterialGrp.erase(findIter);
 
     assert(this->baseMaterialGrp.size() == 1);

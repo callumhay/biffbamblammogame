@@ -16,7 +16,7 @@
 
 class SwitchBlock : public LevelPiece {
 public:
-    static const float RESET_TIME;
+    static const float RESET_TIME_IN_MS;
     static const float SWITCH_WIDTH;
     static const float SWITCH_HEIGHT;
 
@@ -108,7 +108,7 @@ inline LevelPiece* SwitchBlock::Destroy(GameModel* gameModel) {
 
 inline bool SwitchBlock::GetIsSwitchOn() const {
     unsigned long currSysTime = BlammoTime::GetSystemTimeInMillisecs();
-    if (currSysTime - this->timeOfLastSwitchPress < SwitchBlock::RESET_TIME) {
+    if (currSysTime - this->timeOfLastSwitchPress < SwitchBlock::RESET_TIME_IN_MS) {
         // Do nothing, need to wait for the switch to reset
         return true;
     }

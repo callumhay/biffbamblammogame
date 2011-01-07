@@ -1,11 +1,11 @@
-newmtl switch_metal
+newmtl switch_current
 Ka 0.000000 0.000000 0.000000
-Kd 0.66 0.66 0.66
-Ks 0.330000 0.330000 0.330000
-Ns 80
-map_Kd resources/textures/switch_metal_256x128.jpg
+Kd 1.0 1.0 1.0
+Ks 0.10000 0.10000 0.10000
+Ns 100
+map_Kd resources/textures/switch_red_128x64.jpg
 type outlinedcel
-outlinesize 2.0
+outlinesize 1.0
 geomtype fg
 
 newmtl switch_off
@@ -26,5 +26,15 @@ Ns 100
 map_Kd resources/textures/switch_off_128x64.jpg
 type outlinedcel
 outlinesize 0.0
+geomtype fg
+
+newmtl switch_metal
+Ka 0.000000 0.000000 0.000000
+Kd 0.66 0.66 0.66
+Ks 0.330000 0.330000 0.330000
+Ns 80
+map_Kd resources/textures/switch_metal_256x128.jpg
+type outlinedcel
+outlinesize 1.0
 geomtype fg
 

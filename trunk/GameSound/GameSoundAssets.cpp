@@ -292,6 +292,9 @@ void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPie
 			this->PlayWorldSound(GameSoundAssets::WorldSoundBallBlockCollisionEvent, volume);
 			break;
 		
+        case LevelPiece::Switch:
+            break;
+
 		case LevelPiece::Ink:
 		case LevelPiece::Empty:
 		case LevelPiece::Portal:

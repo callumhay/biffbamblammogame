@@ -765,6 +765,10 @@ void GameEventsListener::ItemDropBlockItemChangeEvent(const ItemDropBlock& dropB
 
 void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBlock) {
     // TODO
+
+    //GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+    //this->PlayWorldSound(GameSoundAssets::WorldSoundActionSwitchBlockActivated,  GameSoundAssets::NormalVolume);
+
     debug_output("EVENT: Switch block activated");
 }
 
