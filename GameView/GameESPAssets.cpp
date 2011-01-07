@@ -1148,6 +1148,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::Cannon:
 				case LevelPiece::ItemDrop:
 				case LevelPiece::Collateral:
+                case LevelPiece::Switch:
 					{
 						bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 

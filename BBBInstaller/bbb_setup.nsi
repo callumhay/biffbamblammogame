@@ -8,7 +8,7 @@ RequestExecutionLevel user
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
 !define VERSION 1.0
-!define COMPANY "Great Googoly Woogoly Games"
+!define COMPANY "Callum Hay"
 !define URL ""
 
 # MUI Symbol Definitions

@@ -145,6 +145,7 @@ public:
     const char* SWITCH_BASE_METAL_MATGRP;
     const char* SWITCH_ON_MATGRP;
     const char* SWITCH_OFF_MATGRP;
+    const char* SWITCH_CURRENT_MATGRP;
 
 	const float DEFAULT_BALL_LIGHT_ATTEN;
 	const float BLACKOUT_BALL_LIGHT_ATTEN;

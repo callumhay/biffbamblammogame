@@ -38,6 +38,7 @@ private:
     std::map<std::string, MaterialGroup*> baseMaterialGrp;
     std::set<const SwitchBlock*> switchBlocks;
 
+    MaterialGroup* switchCurrentMaterialGrp;
     MaterialGroup* switchOnMaterialGrp;
     MaterialGroup* switchOffMaterialGrp;
 

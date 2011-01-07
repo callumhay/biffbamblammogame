@@ -128,6 +128,7 @@ ITEM_NEUTRAL_COLOUR(0.0f, 0.6f, 1.0f),
 SWITCH_BASE_METAL_MATGRP("switch_metal"),   // Material group name for the base texture of the switch block, which doesn't change
 SWITCH_ON_MATGRP("switch_on"),              // Material group name for the 'on' texture of the switch block
 SWITCH_OFF_MATGRP("switch_off"),            // Material group name for the 'off' texture of the switch block
+SWITCH_CURRENT_MATGRP("switch_current"),    // Material group name for currently active mode (on or off) of the switch block
 
 DEFAULT_BALL_LIGHT_ATTEN(0.5f),
 BLACKOUT_BALL_LIGHT_ATTEN(0.85f),

@@ -17,7 +17,7 @@
 
 // Constant for the amount of time it takes for the switch to become activatable again, after
 // being turned on
-const float SwitchBlock::RESET_TIME = 1.0f;
+const float SwitchBlock::RESET_TIME_IN_MS = 5000;
 
 const float SwitchBlock::SWITCH_WIDTH   = 1.5f;
 const float SwitchBlock::SWITCH_HEIGHT  = 0.3f;
@@ -188,7 +188,7 @@ void SwitchBlock::SwitchPressed(GameModel* gameModel) {
     // The timer makes sure that the player can't repeatedly trigger this block, it also prevents
     // infinite recursion when two switches are hooked up in a loop
     unsigned long currSysTime = BlammoTime::GetSystemTimeInMillisecs();
-    if (currSysTime - this->timeOfLastSwitchPress < SwitchBlock::RESET_TIME) {
+    if (currSysTime - this->timeOfLastSwitchPress < SwitchBlock::RESET_TIME_IN_MS) {
         // Do nothing, need to wait for the switch to reset
         return;
     }
