@@ -897,6 +897,11 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
 			// Turn off the sound for the rocket mask and play the explosion sound
 			this->soundAssets->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
 			break;
+        
+        case Projectile::FireGlobProjectile:
+            this->espAssets->AddFireGlobDestroyedEffect(projectile);
+            break;
+
 		default:
 			break;
 	}

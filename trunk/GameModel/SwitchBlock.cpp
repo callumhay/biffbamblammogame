@@ -17,7 +17,7 @@
 
 // Constant for the amount of time it takes for the switch to become activatable again, after
 // being turned on
-const float SwitchBlock::RESET_TIME_IN_MS = 5000;
+const float SwitchBlock::RESET_TIME_IN_MS = 4000;
 
 const float SwitchBlock::SWITCH_WIDTH   = 1.5f;
 const float SwitchBlock::SWITCH_HEIGHT  = 0.3f;
@@ -123,9 +123,48 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 		 			topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
+bool SwitchBlock::ProjectilePassesThrough(Projectile* projectile) const {
+    switch (projectile->GetType()) {	
+		case Projectile::PaddleLaserBulletProjectile:
+			// When frozen, projectiles can pass through
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				return true;
+			}
+			break;
+
+		case Projectile::CollateralBlockProjectile:
+			return false;
+		case Projectile::FireGlobProjectile:
+            return false;
+
+		default:
+			break;
+	}
+	return false;
+}
 
 LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-    this->SwitchPressed(gameModel);
+
+	bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
+	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
+	if (isIceBall) {
+		this->FreezePieceInIce(gameModel);
+	}
+	else {
+        if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+            if (!isFireBall) {
+				// EVENT: Ice was shattered
+				GameEventManager::Instance()->ActionBlockIceShattered(*this);
+            }
+            // Unfreeze a frozen block
+			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+			assert(success);
+        }
+        else {
+            this->SwitchPressed(gameModel);
+        }
+	}
+
     ball.SetLastPieceCollidedWith(NULL);
     return this;
 }
@@ -135,11 +174,20 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
     LevelPiece* resultingPiece = this;
 	switch (projectile->GetType()) {
 		case Projectile::PaddleLaserBulletProjectile:
-			this->SwitchPressed(gameModel);
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
+			}
+            else {
+			    this->SwitchPressed(gameModel);
+            }
 			break;
 		
 		case Projectile::CollateralBlockProjectile:
-			this->SwitchPressed(gameModel);
+            if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+                GameEventManager::Instance()->ActionBlockIceShattered(*this);
+                gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+            }
+	        this->SwitchPressed(gameModel);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile: 
@@ -147,11 +195,26 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			// is allowed to destroy blocks around it!
 			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
             assert(resultingPiece == this);
+
+            if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+                GameEventManager::Instance()->ActionBlockIceShattered(*this);
+                bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                assert(success);
+            }
+
             this->SwitchPressed(gameModel);
 			break;
 
 		case Projectile::FireGlobProjectile:
-			// Fire glob will just extinguish
+			// Fire glob just extinguishes on a switch block, unless it's frozen in an ice cube;
+			// in that case, unfreeze a frozen switch block
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+				assert(success);
+			}
+            else {
+                this->SwitchPressed(gameModel);
+            }
 			break;
 
 		default:
@@ -164,12 +227,26 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 
 LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
     UNUSED_PARAMETER(paddle);
-    this->SwitchPressed(gameModel);
+
+    if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+	    GameEventManager::Instance()->ActionBlockIceShattered(*this);
+        // Unfreeze a frozen block
+		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+		assert(success);
+    }
+    else {
+        this->SwitchPressed(gameModel);
+    }
     return this;
 }
 
 LevelPiece* SwitchBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
 	assert(gameModel != NULL);
+
+	// If the piece is frozen in ice it will just refract the laser beams...
+	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+		return this;
+	}
 
 	this->lifePointsUntilNextToggle -= static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond()));
 	if (this->lifePointsUntilNextToggle <= 0) {

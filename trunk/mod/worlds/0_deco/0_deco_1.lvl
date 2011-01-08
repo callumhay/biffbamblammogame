@@ -18,10 +18,10 @@ S E E E E E E E B S
 S E I E E E E E E S 
 S E D(Random){1} E T(R,ur) E E E E S 
 S E E E E E E E E S 
-S E E E E E E T(Y,ll) E S 
-S T(O,ul) L E E E E T(O,lr) E S 
+S R E E E E E E E S 
+S E E E E E E R E S 
 S E E E E E E E E S 
-S W(1) E E E E E E E S 
+S W(1) E E E E E W(1) E S 
 S E E E E E E E E S 
 S E E E E E E E E S 
 S E E E E E E E E S 

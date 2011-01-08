@@ -60,6 +60,7 @@ public:
 	void LevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& status);
 	void LevelPieceAllStatusRemoved(const LevelPiece& piece);
 
+    void SwitchActivated(const SwitchBlock* block, const GameLevel* currLevel);
 	void PaddleCameraActiveToggle(bool isActive);
 	void SetLevelAlpha(float alpha);
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);

@@ -48,8 +48,8 @@ public:
 
 	const Point2D& GetCenter() const {	return this->center; }
 	const BoundingLines& GetBounds() const { return this->bounds; }
-	unsigned int GetWidthIndex() const { return this->wIndex; }
-	unsigned int GetHeightIndex() const { return this->hIndex; }
+	size_t GetWidthIndex() const { return this->wIndex; }
+	size_t GetHeightIndex() const { return this->hIndex; }
 	const Colour& GetColour() const { return this->colour; }
 	void SetColour(const Colour& c) { this->colour = c; }
 
@@ -112,10 +112,10 @@ public:
 	void DebugDraw() const;
 
 protected:
-	Colour colour;                  // The colour of this level piece
-	Point2D center;                 // The exact center of this piece in the game model
-	unsigned int wIndex, hIndex;    // The width and height index to where this block is in its level
-	BoundingLines bounds;           // The bounding box, rep. as lines forming the boundry of this, kept in world space
+	Colour colour;            // The colour of this level piece
+	Point2D center;           // The exact center of this piece in the game model
+	size_t wIndex, hIndex;    // The width and height index to where this block is in its level
+	BoundingLines bounds;     // The bounding box, rep. as lines forming the boundry of this, kept in world space
     
     TriggerID triggerID;
 
@@ -131,9 +131,9 @@ protected:
 	const LevelPiece* bottomLeftNeighbor;
 
 	void SetBounds(const BoundingLines& bounds, const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-								 const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-								 const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-								 const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+                   const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                   const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                   const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
 
 	int32_t pieceStatus;
 

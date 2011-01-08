@@ -492,6 +492,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::Solid:
 		case LevelPiece::SolidTriangle:
 		case LevelPiece::Tesla:
+        case LevelPiece::Switch:
 			if (wasFrozen) {
 				// Add ice break effect
 				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
@@ -764,7 +765,7 @@ void GameEventsListener::ItemDropBlockItemChangeEvent(const ItemDropBlock& dropB
 }
 
 void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBlock) {
-    // TODO
+    this->display->GetAssets()->GetCurrentLevelMesh()->SwitchActivated(&switchBlock, this->display->GetModel()->GetCurrentLevel());
 
     //GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
     //this->PlayWorldSound(GameSoundAssets::WorldSoundActionSwitchBlockActivated,  GameSoundAssets::NormalVolume);

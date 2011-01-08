@@ -410,9 +410,8 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->cannonBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
 	this->collateralBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-    this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
-
+    this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
 	glPopMatrix();
 
 	ESPEmitter* emitter = NULL;
@@ -584,6 +583,10 @@ void LevelMesh::BallSafetyNetCreated() {
 void LevelMesh::BallSafetyNetDestroyed(const Point2D& pos) {
 	Vector2D levelDimensions = Vector2D(this->currLevel->GetLevelUnitWidth(), this->currLevel->GetLevelUnitHeight());
 	this->ballSafetyNet->DestroyBallSafetyNet(levelDimensions, pos[0]);
+}
+
+void LevelMesh::SwitchActivated(const SwitchBlock* block, const GameLevel* currLevel) {
+    this->switchBlock->SwitchBlockActivated(block, currLevel->GetTriggerableLevelPiece(block->GetIDTriggeredBySwitch()));
 }
 
 /**

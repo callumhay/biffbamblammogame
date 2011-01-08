@@ -251,8 +251,7 @@ void LevelPiece::FreezePieceInIce(GameModel* gameModel) {
  * Call this in order to properly set the projectile (and possibly spawn any extra projectiles) when
  * this piece is frozen in ice.
  */
-void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, 
-																										 GameModel* gameModel) const {
+void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, GameModel* gameModel) const {
 
 	assert(this->HasStatus(LevelPiece::IceCubeStatus));
 	assert(projectile != NULL);

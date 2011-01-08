@@ -47,7 +47,8 @@ CannonBlockMesh::~CannonBlockMesh() {
 
 
 void CannonBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-													 const BasicPointLight& fillLight, const BasicPointLight& ballLight, bool lightsAreOff) const {
+                           const BasicPointLight& fillLight, const BasicPointLight& ballLight, 
+                           bool lightsAreOff) const {
 
 	bool doCannonActiveEffectTick = false;
 

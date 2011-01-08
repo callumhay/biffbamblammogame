@@ -77,7 +77,7 @@ private:
 	ESPParticleScaleEffector  particlePulseUberballAura;
 	ESPParticleScaleEffector  particlePulseItemDropAura;
 	ESPParticleScaleEffector  particlePulsePaddleLaser;
-	ESPParticleScaleEffector	particlePulseFireGlobAura;
+	ESPParticleScaleEffector  particlePulseFireGlobAura;
 	ESPParticleScaleEffector  particlePulseIceBallAura;
 	ESPParticleScaleEffector  beamEndPulse;
 	ESPParticleScaleEffector  particleShrinkToNothing;
@@ -252,6 +252,8 @@ public:
 	
 	void AddIceBitsBreakEffect(const LevelPiece& block);
 	void AddIceCubeBlockBreakEffect(const LevelPiece& block, const Colour& colour);
+
+    void AddFireGlobDestroyedEffect(const Projectile& projectile);
 
 	void AddBallSafetyNetDestroyedEffect(const Point2D& pos);
 	void AddBallExplodedEffect(const GameBall* ball);
