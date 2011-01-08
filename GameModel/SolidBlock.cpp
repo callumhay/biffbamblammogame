@@ -34,6 +34,8 @@ bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) const {
 
 		case Projectile::CollateralBlockProjectile:
 			return true;
+		case Projectile::FireGlobProjectile:
+            return false;
 
 		default:
 			break;
@@ -190,6 +192,13 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 
 		case Projectile::PaddleRocketBulletProjectile:
 			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+
+            if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+                GameEventManager::Instance()->ActionBlockIceShattered(*this);
+                bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                assert(success);
+            }
+
 			break;
 
 		case Projectile::FireGlobProjectile:

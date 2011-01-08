@@ -2148,6 +2148,28 @@ void GameESPAssets::AddIceCubeBlockBreakEffect(const LevelPiece& block, const Co
 	this->activeGeneralEmitters.push_back(iceSmashOnoEffect);
 }
 
+// When a fire glob extinguishes this effect is invoked
+void GameESPAssets::AddFireGlobDestroyedEffect(const Projectile& projectile) {
+
+	ESPPointEmitter* fireDisperseEffect = new ESPPointEmitter();
+    fireDisperseEffect->SetNumParticleLives(1);
+	fireDisperseEffect->SetSpawnDelta(ESPInterval(0.01f, 0.015f));
+	fireDisperseEffect->SetInitialSpd(ESPInterval(1.5f, 4.0f));
+	fireDisperseEffect->SetParticleLife(ESPInterval(0.8f, 1.5f));
+	fireDisperseEffect->SetParticleSize(ESPInterval(0.2f*projectile.GetWidth(), 0.5f*projectile.GetWidth()));
+	fireDisperseEffect->SetEmitAngleInDegrees(180);
+	fireDisperseEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    fireDisperseEffect->SetEmitPosition(Point3D(projectile.GetPosition(), 0));
+    fireDisperseEffect->SetAsPointSpriteEmitter(true);
+	fireDisperseEffect->AddEffector(&this->particleFireColourFader);
+    fireDisperseEffect->AddEffector(&this->particleMediumGrowth);
+    size_t randomTexIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
+    bool result = fireDisperseEffect->SetParticles(8, this->smokeTextures[randomTexIdx]);
+	assert(result);
+
+    this->activeGeneralEmitters.push_back(fireDisperseEffect);
+}
+
 /**
  * Adds the effect for a paddle hitting a wall.
  */

@@ -51,6 +51,9 @@ public:
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
 
     bool GetIsSwitchOn() const;
+    const LevelPiece::TriggerID& GetIDTriggeredBySwitch() const { return this->idToTriggerOnSwitch; }
+
+    bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
 private:
     static const int TOGGLE_ON_OFF_LIFE_POINTS;
@@ -91,10 +94,6 @@ inline int SwitchBlock::GetPointValueForCollision() {
 inline bool SwitchBlock::IsLightReflectorRefractor() const {
 	return false;
 }
-inline bool SwitchBlock::ProjectilePassesThrough(Projectile* projectile) const {
-	UNUSED_PARAMETER(projectile);
-	return false;
-}
 
 inline void SwitchBlock::Triggered(GameModel* gameModel) {
     // When a switch block is triggered it gets its switch activated
@@ -113,6 +112,15 @@ inline bool SwitchBlock::GetIsSwitchOn() const {
         return true;
     }
     return false;
+}
+
+inline bool SwitchBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
+	UNUSED_PARAMETER(dT);
+	UNUSED_PARAMETER(gameModel);
+	assert(gameModel != NULL);
+
+	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
+	return false;
 }
 
 #endif // __SWITCHBLOCK_H__
