@@ -52,7 +52,7 @@ public class LevelPieceImageLabel extends JLabel {
 		this.cannonDegAngle = -1;
 		this.itemDropTypes.add("all");
 		this.triggerID = LevelPiece.NO_TRIGGER_ID;
-		this.switchTriggerID = LevelPiece.NO_TRIGGER_ID;
+		this.switchTriggerID = 0;
 	}
 	
 	// constructor with icon

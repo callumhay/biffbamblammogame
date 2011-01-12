@@ -9,11 +9,16 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-
 #include "NormalBallState.h"
+#include "Projectile.h"
+#include "GameModel.h"
+
 #include "../BlammoEngine/Algebra.h"
 
-NormalBallState::NormalBallState(GameBall* ball) : BallState(ball) {
+const double NormalBallState::OMNI_BULLET_WAIT_TIME_IN_SECS = 0.1;
+const int NormalBallState::MAX_BULLETS_AT_A_TIME            = 3;
+
+NormalBallState::NormalBallState(GameBall* ball) : BallState(ball), timeSinceLastOmniBullets(0.0) {
 }
 
 NormalBallState::~NormalBallState() {
@@ -24,7 +29,7 @@ BallState* NormalBallState::Clone(GameBall* newBall) const {
 	return new NormalBallState(newBall);
 }
 
-void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir) {
+void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) {
 	// Update the position of the ball based on its velocity (and if applicable, acceleration)
 	Vector2D currVelocity;
 
@@ -83,6 +88,11 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir)
 	else {
 		this->gameBall->ballballCollisionsDisabledTimer = 0.0;
 	}
+
+    // Omni Laser ball has a chance of shooting laser bullets in some random direction...
+    if ((this->gameBall->GetBallType() & GameBall::OmniLaserBulletBall) == GameBall::OmniLaserBulletBall) {
+        this->AttemptFireOfOmniBullets(seconds, gameModel);
+    }
 }
 
 // Apply the crazy ball item's effect to the velocity of the ball by changing it somewhat randomly
@@ -109,4 +119,38 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
 		Vector2D newVelocity = Vector2D::Normalize(Vector2D::Rotate(randomRotation, currVelocity));
 		this->gameBall->SetVelocity(currVelMag, newVelocity);
 	}
+}
+
+// When the ball has the omni laser effect we try to fire lasers whenever possible outwards
+// in all directions from the ball - this method does that.
+void NormalBallState::AttemptFireOfOmniBullets(double dT, GameModel* gameModel) {
+    // If we're still waiting to fire the bullets then don't try to fire any
+    if (this->timeSinceLastOmniBullets < OMNI_BULLET_WAIT_TIME_IN_SECS) {
+        this->timeSinceLastOmniBullets += dT;
+        return;
+    }
+
+    // Attempt to fire some bullet(s)...
+    int numBullets = Randomizer::GetInstance()->RandomUnsignedInt() % (MAX_BULLETS_AT_A_TIME+1);
+    for (int i = 0; i < numBullets; i++) {
+        // Determine a random angle to fire the bullet at and fire it into the level from the ball
+        float randomAngle = (Randomizer::GetInstance()->RandomUnsignedInt() % 360);
+        Vector2D randomVector(0, 1);
+        randomVector.Rotate(randomAngle);
+        randomVector.Normalize();
+        
+        // Calculate the size of the bullet based on the size of the ball...
+        float projectileWidth  = Randomizer::GetInstance()->RandomNumZeroToOne() * 1.5f * this->gameBall->GetBounds().Radius();
+        float projectileHeight = 2.0f * projectileWidth; 
+
+		Projectile* newProjectile = Projectile::CreateProjectile(Projectile::PaddleLaserBulletProjectile, 
+            this->gameBall->GetCenterPosition2D() + (this->gameBall->GetBounds().Radius() + projectileHeight * 0.5f) * randomVector);
+		newProjectile->SetWidth(projectileWidth);
+		newProjectile->SetHeight(projectileHeight);
+        newProjectile->SetVelocity(randomVector, newProjectile->GetVelocityMagnitude());
+
+		gameModel->AddProjectile(newProjectile);
+    }
+
+    this->timeSinceLastOmniBullets = 0.0;
 }

@@ -54,6 +54,7 @@ public:
                     ShieldPaddleItem,
                     FireBallItem,
                     IceBallItem,
+                    OmniLaserBallItem,
 
                     RandomItem // MAKE SURE RANDOM ITEM IS ALWAYS THE LAST ONE!!
 	};

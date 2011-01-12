@@ -26,6 +26,7 @@
 
 class LevelPiece;
 class CannonBlock;
+class GameModel;
 
 class GameBall {
 	// State Machine Design Pattern Friendships
@@ -36,7 +37,8 @@ public:
 	enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 7, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 22, FastestSpeed = 27 };
 	enum BallSize  { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 	enum BallType  { NormalBall = 0x00000000, UberBall = 0x00000001,  InvisiBall = 0x00000002, GhostBall = 0x00000004, 
-		               GraviBall = 0x00000008,  CrazyBall = 0x00000010, FireBall = 0x00000020, IceBall = 0x00000040 };
+		             GraviBall = 0x00000008,  CrazyBall = 0x00000010, FireBall = 0x00000020, IceBall = 0x00000040,
+                     OmniLaserBulletBall = 0x00000080 };
 	
 	// Default radius of the ball
 	static const float DEFAULT_BALL_RADIUS;
@@ -306,7 +308,7 @@ public:
 
 	Onomatoplex::Extremeness GetOnomatoplexExtremeness() const;
 
-	void Tick(double seconds, const Vector2D& worldSpaceGravityDir);
+	void Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel);
 	void Animate(double seconds);
 
 	// Set and get for the last level piece that this ball collided with
@@ -347,7 +349,7 @@ private:
 
 	double timeSinceLastCollision;
 
-	ColourRGBA colour;													// The colour multiply of the paddle, including its visibility/alpha
+	ColourRGBA colour;                  // The colour multiply of the paddle, including its visibility/alpha
 	Colour contributingGravityColour;
 	Colour contributingCrazyColour;
 	Colour contributingIceColour;

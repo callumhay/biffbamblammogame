@@ -53,6 +53,8 @@ public class LevelPieceEditDialog extends JDialog {
 	private JRadioButton specifyCannonAngleRadio;
 	private JSpinner cannonAngleValue;
 	
+	private JSpinner switchTriggerIDSpinner;
+	
     /** Creates new form LevelPieceEditDialog */
 	public LevelPieceEditDialog(JFrame parentWindow, LevelPieceImageLabel levelPieceLbl, Set<Character> allPieceIDs) {
     	super(parentWindow, "Block Properties", true);
@@ -323,6 +325,21 @@ public class LevelPieceEditDialog extends JDialog {
 
 	        buttonPanel.add(tempPanel);
         }
+        else if (this.levelPieceLbl.getIsSwitchBlock()) {
+        	this.switchTriggerIDSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 10000, 1));
+        	this.switchTriggerIDSpinner.setValue(new Integer(this.levelPieceLbl.getSwitchTriggerID()));
+        	this.switchTriggerIDSpinner.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent arg0) {
+					switchTriggerableIDChanged((Integer)switchTriggerIDSpinner.getValue());
+				}
+        	});
+        	
+        	JPanel tempPanel = new JPanel(new FlowLayout());
+        	tempPanel.add(new JLabel("ID to Trigger on Switch:"));
+        	tempPanel.add(this.switchTriggerIDSpinner);
+        	
+        	buttonPanel.add(tempPanel);
+        }
         
         this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
         pack();
@@ -413,10 +430,13 @@ public class LevelPieceEditDialog extends JDialog {
     }
     
 	private void cannonAngleValueChanged(int value) {
-		// TODO Auto-generated method stub
 		this.levelPieceLbl.setCannonBlockDegAngle(value);
 	}
     
+	private void switchTriggerableIDChanged(int value) {
+		this.levelPieceLbl.setSwitchTriggerID(value);
+	}
+	
     private void updateSiblingsFromList() {
     	Set<Character> siblings = new TreeSet<Character>();
     	for (int i = 0; i < this.siblingListModel.getSize(); i++) {
