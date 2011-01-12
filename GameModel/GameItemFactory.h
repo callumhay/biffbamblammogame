@@ -31,7 +31,7 @@ public:
 	static void DeleteInstance();
 
 	// Factory functions for the creation of game items
-	GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const;			// Could be either power-up or down
+	GameItem* CreateRandomItem(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const;   // Could be either power-up or down
 	GameItem::ItemType CreateRandomItemType(GameModel *gameModel, bool allowRandomItemType) const;
 	GameItem::ItemType GetItemTypeFromName(const std::string& itemName) const;
 	GameItem* CreateItem(GameItem::ItemType type, const Point2D &spawnOrigin, GameModel *gameModel) const;
@@ -64,6 +64,17 @@ private:
 	std::set<GameItem::ItemType> allPowerNeutralItemTypes;
 	std::set<GameItem::ItemType> allPowerDownItemTypes;
 
+    /*
+    // Good-luck / Bad-luck information for combinations of items based
+    // on the current amount of luck the player has
+    struct ComboItemGroups {
+        std::vector<GameItem::ItemType> goodLuckItems;  // In order from least good to most good
+        std::vector<GameItem::ItemType> badLuckItems;   // In order from least bad to most bad
+    };
+    std::map<GameItem::ItemType, ComboItemGroups*> itemCombos;
+    */
+
+    DISALLOW_COPY_AND_ASSIGN(GameItemFactory);
 };
 
 inline GameItemFactory* GameItemFactory::GetInstance() {

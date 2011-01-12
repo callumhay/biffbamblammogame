@@ -18,7 +18,7 @@ const char* Blammopedia::Entry::DISPLAY_TEXTURE_KEYWORD     = "DisplayTexture:";
 Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
 	static const std::string BLAMMOPEDIA_ITEMS_DIR  = ResourceManager::GetBlammopediaResourceDir()  + std::string("items/");
 	static const std::string BLAMMOPEDIA_BLOCKS_DIR = ResourceManager::GetBlammopediaResourceDir()  + std::string("blocks/");
-	static const std::string BLAMMOPEDIA_STATUS_DIR = ResourceManager::GetBlammopediaResourceDir()  + std::string("status/");
+	static const std::string BLAMMOPEDIA_MISC_DIR   = ResourceManager::GetBlammopediaResourceDir()  + std::string("misc/");
 
 	// Initialize all of the various types of entries in the blammopedia...
 
@@ -91,14 +91,14 @@ Blammopedia::~Blammopedia() {
 	}
 	this->blockEntries.clear();
 	
-    for (std::map<LevelPiece::PieceStatus, StatusEffectEntry*>::iterator iter = this->statusEffectEntries.begin();
-			 iter != this->statusEffectEntries.end(); ++iter) {
+    for (std::map<LevelPiece::PieceStatus, MiscEntry*>::iterator iter = this->miscEntries.begin();
+			 iter != this->miscEntries.end(); ++iter) {
 
-		StatusEffectEntry* statusEntry = iter->second;
+		MiscEntry* statusEntry = iter->second;
 		delete statusEntry;
 		statusEntry = NULL;
 	}
-	this->statusEffectEntries.clear();
+	this->miscEntries.clear();
 }
 
 Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) {
@@ -113,7 +113,7 @@ Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) 
 
         success &= Blammopedia::ReadItemEntires(inFile, itemStatusMap);
 		success &= Blammopedia::ReadBlockEntries(inFile, blockStatusMap);
-        //success &= Blammopedia::ReadStatusEffectEntries(inFile, statusEffectStatusMap);
+        //success &= Blammopedia::ReadMiscEntries(inFile, miscEntries);
 
         inFile.close();
     }
@@ -149,7 +149,7 @@ Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) 
 		blockEntry->SetIsLocked(iter->second);
 	}
 	for (std::map<LevelPiece::PieceStatus, bool>::const_iterator iter = statusEffectStatusMap.begin(); iter != statusEffectStatusMap.end(); ++iter) {
-		StatusEffectEntry* statusEntry = blammopedia->GetStatusEffectEntry(iter->first);
+		MiscEntry* statusEntry = blammopedia->GetMiscEntry(iter->first);
 		assert(statusEntry != NULL);
 		statusEntry->SetIsLocked(iter->second);
 	}
@@ -249,11 +249,11 @@ bool Blammopedia::InitializeEntries() {
 		if (!success) { allSuccess = false; }
 	}
 
-	for (std::map<LevelPiece::PieceStatus, StatusEffectEntry*>::iterator iter = this->statusEffectEntries.begin();
-			 iter != this->statusEffectEntries.end(); ++iter) {
+	for (std::map<LevelPiece::PieceStatus, MiscEntry*>::iterator iter = this->miscEntries.begin();
+			 iter != this->miscEntries.end(); ++iter) {
 
-		StatusEffectEntry* statusEntry = iter->second;
-		success = statusEntry->PopulateFromFile();
+		MiscEntry* miscEntry = iter->second;
+		success = miscEntry->PopulateFromFile();
 		if (!success) { allSuccess = false; }
 	}
 
@@ -342,9 +342,9 @@ bool Blammopedia::ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::
     return true;
 }
 
-bool Blammopedia::ReadStatusEffectEntries(std::istream& inStream, std::map<LevelPiece::PieceStatus, bool>& statusEffectStatusMap) {
+bool Blammopedia::ReadMiscEntries(std::istream& inStream, std::map<LevelPiece::PieceStatus, bool>& miscStatusMap) {
 	UNUSED_PARAMETER(inStream);
-	UNUSED_PARAMETER(statusEffectStatusMap);
+	UNUSED_PARAMETER(miscStatusMap);
 	assert(false);
 	return false;
 }

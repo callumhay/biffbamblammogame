@@ -4,6 +4,7 @@
 #include "BallState.h"
 
 class CannonBlock;
+class GameModel;
 
 /**
  * Ball state that occurs when the ball has been lodged inside a cannon block and
@@ -17,7 +18,7 @@ public:
 	~InCannonBallState();
 
 	BallState* Clone(GameBall* newBall) const;
-	void Tick(double seconds, const Vector2D& worldSpaceGravityDir);
+	void Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel);
 	ColourRGBA GetBallColour() const;
 	const CannonBlock* GetCannonBlock() const;
 

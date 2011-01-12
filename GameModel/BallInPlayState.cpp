@@ -325,7 +325,7 @@ void BallInPlayState::Tick(double seconds) {
 	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
 		GameBall *currBall = *iter;
 		// Update the current ball
-		currBall->Tick(seconds, worldGravity2D);
+        currBall->Tick(seconds, worldGravity2D, this->gameModel);
 	}
 
 #ifdef _DEBUG

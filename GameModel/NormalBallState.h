@@ -15,6 +15,8 @@
 #include "BallState.h"
 #include "GameBall.h"
 
+class GameModel;
+
 // The state that the game ball is usually in - does its normal tick where the ball
 // travels around the level based on its velocity
 class NormalBallState : public BallState {
@@ -23,14 +25,20 @@ public:
 	~NormalBallState();
 
 	BallState* Clone(GameBall* newBall) const;
-	void Tick(double seconds, const Vector2D& worldSpaceGravityDir);
+	void Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel);
 	ColourRGBA GetBallColour() const;
 
 	BallState::BallStateType GetBallStateType() const;
 
 private:
-	void ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity);
+    static const double OMNI_BULLET_WAIT_TIME_IN_SECS;
+    static const int MAX_BULLETS_AT_A_TIME;
 
+    double timeSinceLastOmniBullets;
+	void ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity);
+    void AttemptFireOfOmniBullets(double dT, GameModel* gameModel);
+
+    DISALLOW_COPY_AND_ASSIGN(NormalBallState);
 };
 
 // Return the typical ball colour

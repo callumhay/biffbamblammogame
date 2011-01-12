@@ -34,7 +34,8 @@ BallState* InCannonBallState::Clone(GameBall* newBall) const {
 	return new InCannonBallState(newBall, this->cannonBlock, this->previousState->Clone(newBall));
 }
 
-void InCannonBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir) {
+void InCannonBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) {
+    UNUSED_PARAMETER(gameModel);
 	UNUSED_PARAMETER(worldSpaceGravityDir);
 
 	// 'Tick' the cannon to spin the ball around inside it... eventually the function will say

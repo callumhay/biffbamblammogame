@@ -88,36 +88,36 @@ public:
 
 
 
-	class StatusEffectEntry : public Entry {
+	class MiscEntry : public Entry {
 	public:
-		StatusEffectEntry(const std::string& filename) : Entry(filename) {}
-		~StatusEffectEntry() {};
+		MiscEntry(const std::string& filename) : Entry(filename) {}
+		~MiscEntry() {};
 	};
 
 	typedef std::map<GameItem::ItemType, Blammopedia::ItemEntry*> ItemEntryMap;
 	typedef std::map<LevelPiece::LevelPieceType, Blammopedia::BlockEntry*> BlockEntryMap;
-	typedef std::map<LevelPiece::PieceStatus, Blammopedia::StatusEffectEntry*> StatusEffectEntryMap;
+	typedef std::map<LevelPiece::PieceStatus, Blammopedia::MiscEntry*> MiscEntryMap;
 
-	typedef ItemEntryMap::iterator				 ItemEntryMapIter;
-	typedef BlockEntryMap::iterator				 BlockEntryMapIter;
-	typedef StatusEffectEntryMap::iterator       StatusEffectEntryMapIter;
+	typedef ItemEntryMap::iterator	ItemEntryMapIter;
+	typedef BlockEntryMap::iterator	BlockEntryMapIter;
+	typedef MiscEntryMap::iterator  MiscEntryMapIter;
 
-	typedef ItemEntryMap::const_iterator          ItemEntryMapConstIter;
-	typedef BlockEntryMap::const_iterator         BlockEntryMapConstIter;
-	typedef StatusEffectEntryMap::const_iterator  StatusEffectEntryMapConstIter;
+	typedef ItemEntryMap::const_iterator   ItemEntryMapConstIter;
+	typedef BlockEntryMap::const_iterator  BlockEntryMapConstIter;
+	typedef MiscEntryMap::const_iterator   MiscEntryMapConstIter;
 
 	~Blammopedia();
 	static Blammopedia* BuildFromBlammopediaFile(const std::string &filepath);
 
 	Blammopedia::ItemEntry*  GetItemEntry(const GameItem::ItemType& itemType) const;
 	Blammopedia::BlockEntry* GetBlockEntry(const LevelPiece::LevelPieceType& blockType) const;
-	Blammopedia::StatusEffectEntry* GetStatusEffectEntry(const LevelPiece::PieceStatus& statusType) const;
+	Blammopedia::MiscEntry*  GetMiscEntry(const LevelPiece::PieceStatus& statusType) const;
 
     void UnlockItem(const GameItem::ItemType& itemType);
 
 	const Blammopedia::ItemEntryMap& GetItemEntries() const;
 	const Blammopedia::BlockEntryMap& GetBlockEntries() const;
-	const Blammopedia::StatusEffectEntryMap& GetStatusEffectEntries() const;
+	const Blammopedia::MiscEntryMap& GetMiscEntries() const;
 
 	bool WriteAsEntryStatusFile() const;
 
@@ -128,7 +128,7 @@ private:
 
 	ItemEntryMap itemEntries;
 	BlockEntryMap blockEntries;
-	StatusEffectEntryMap statusEffectEntries;
+	MiscEntryMap miscEntries;
 
 	Texture2D* lockedItemTexture;
 
@@ -137,7 +137,7 @@ private:
 
 	static bool ReadItemEntires(std::istream& inStream, std::map<GameItem::ItemType, bool>& itemStatusMap);
 	static bool ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::LevelPieceType, bool>& blockStatusMap);
-	static bool ReadStatusEffectEntries(std::istream& inStream, std::map<LevelPiece::PieceStatus, bool>& statusEffectStatusMap);
+	static bool ReadMiscEntries(std::istream& inStream, std::map<LevelPiece::PieceStatus, bool>& miscStatusMap);
 		
 	DISALLOW_COPY_AND_ASSIGN(Blammopedia);
 };
@@ -162,9 +162,9 @@ inline Blammopedia::BlockEntry* Blammopedia::GetBlockEntry(const LevelPiece::Lev
 	return findIter->second;
 }
 
-inline Blammopedia::StatusEffectEntry* Blammopedia::GetStatusEffectEntry(const LevelPiece::PieceStatus& statusType) const {
-	std::map<LevelPiece::PieceStatus, Blammopedia::StatusEffectEntry*>::const_iterator findIter = this->statusEffectEntries.find(statusType);
-	if (findIter == this->statusEffectEntries.end()) {
+inline Blammopedia::MiscEntry* Blammopedia::GetMiscEntry(const LevelPiece::PieceStatus& statusType) const {
+	std::map<LevelPiece::PieceStatus, Blammopedia::MiscEntry*>::const_iterator findIter = this->miscEntries.find(statusType);
+	if (findIter == this->miscEntries.end()) {
 		assert(false);
 		return NULL;
 	}
@@ -185,8 +185,8 @@ inline const Blammopedia::BlockEntryMap& Blammopedia::GetBlockEntries() const {
 	return this->blockEntries;
 }
 
-inline const Blammopedia::StatusEffectEntryMap& Blammopedia::GetStatusEffectEntries() const {
-	return this->statusEffectEntries;
+inline const Blammopedia::MiscEntryMap& Blammopedia::GetMiscEntries() const {
+	return this->miscEntries;
 }
 
 inline const Texture2D* Blammopedia::GetLockedItemTexture() const {

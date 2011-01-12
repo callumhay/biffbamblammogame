@@ -40,6 +40,14 @@ SwitchBlockMesh::~SwitchBlockMesh() {
     delete this->onEmitter;
     this->onEmitter = NULL;
 
+    // Restore the mesh to its initial state (off) before cleaning up
+    MaterialProperties* switchOnMatProperties       = this->switchOnMaterialGrp->GetMaterial()->GetProperties();
+    MaterialProperties* switchOffMatProperties      = this->switchOffMaterialGrp->GetMaterial()->GetProperties();
+    MaterialProperties* switchCurrentMatProperties  = this->switchCurrentMaterialGrp->GetMaterial()->GetProperties();
+    switchOffMatProperties->diffuseTexture     = this->redOnSwitchTexture;
+    switchOnMatProperties->diffuseTexture      = this->offSwitchTexture;
+    switchCurrentMatProperties->diffuseTexture = this->redOnSwitchTexture;
+
     bool success = ResourceManager::GetInstance()->ReleaseMeshResource(this->switchBlockGeometry);
 	assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->greenOnSwitchTexture);

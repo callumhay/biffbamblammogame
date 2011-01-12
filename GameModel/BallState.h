@@ -7,6 +7,7 @@
 class GameBall;
 class Vector2D;
 class CannonBlock;
+class GameModel;
 
 // Abstract Superclass for the game ball's various states
 class BallState {
@@ -18,7 +19,7 @@ public:
 
 
 	virtual BallState* Clone(GameBall* newBall) const = 0;
-	virtual void Tick(double seconds, const Vector2D& worldSpaceGravityDir) = 0;
+	virtual void Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) = 0;
 	virtual ColourRGBA GetBallColour() const = 0;
 	virtual const CannonBlock* GetCannonBlock() const;
 
