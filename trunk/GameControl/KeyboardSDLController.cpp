@@ -297,7 +297,9 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
 	// 6
 	// 7
 	// 8
-	// 9
+    else if (key == SDLK_9) {
+        this->model->DropItem(GameItem::OmniLaserBallItem);
+    }
 	else if (key == SDLK_BACKSLASH) {
 		this->model->DropItem(GameItem::RandomItem);
 	}

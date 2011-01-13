@@ -15,8 +15,8 @@
 
 #include "../BlammoEngine/Algebra.h"
 
-const double NormalBallState::OMNI_BULLET_WAIT_TIME_IN_SECS = 0.1;
-const int NormalBallState::MAX_BULLETS_AT_A_TIME            = 3;
+const double NormalBallState::OMNI_BULLET_WAIT_TIME_IN_SECS = 0.5;
+const int NormalBallState::MAX_BULLETS_AT_A_TIME            = 5;
 
 NormalBallState::NormalBallState(GameBall* ball) : BallState(ball), timeSinceLastOmniBullets(0.0) {
 }
@@ -140,8 +140,9 @@ void NormalBallState::AttemptFireOfOmniBullets(double dT, GameModel* gameModel) 
         randomVector.Normalize();
         
         // Calculate the size of the bullet based on the size of the ball...
-        float projectileWidth  = Randomizer::GetInstance()->RandomNumZeroToOne() * 1.5f * this->gameBall->GetBounds().Radius();
-        float projectileHeight = 2.0f * projectileWidth; 
+        float projectileWidth  = (this->gameBall->GetBounds().Radius() * 0.25f) + 
+            (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.75f * this->gameBall->GetBounds().Radius());
+        float projectileHeight = 1.75f * projectileWidth; 
 
 		Projectile* newProjectile = Projectile::CreateProjectile(Projectile::PaddleLaserBulletProjectile, 
             this->gameBall->GetCenterPosition2D() + (this->gameBall->GetBounds().Radius() + projectileHeight * 0.5f) * randomVector);

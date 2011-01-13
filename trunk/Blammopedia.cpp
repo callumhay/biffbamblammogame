@@ -50,6 +50,7 @@ Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
     this->itemEntries.insert(std::make_pair(GameItem::ShieldPaddleItem,         new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("shield.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::FireBallItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("fire_ball.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::IceBallItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("ice_ball.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::OmniLaserBallItem,        new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("omni_laser_ball.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::RandomItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("random.txt"))));
     
 	// Block Entry Types...
