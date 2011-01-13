@@ -55,7 +55,7 @@ bool CannonBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
 																 Collision::LineSeg2D& collisionLine, 
 																 double& timeSinceCollision) const {
 
-		return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+    return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
 }
 
 bool CannonBlock::CollisionCheck(const Collision::AABB2D& aabb) const {

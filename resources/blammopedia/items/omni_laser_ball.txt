@@ -1,0 +1,5 @@
+Name: Omni-laser Ball
+ItemTexture: omni_laser_ball_256x128.jpg
+HUDOutlineTexture: omnilaserball_timer_hud256x128.png
+HUDFillTexture: omnilaserball_timer_fill_hud256x128.png
+Desc: TODO.

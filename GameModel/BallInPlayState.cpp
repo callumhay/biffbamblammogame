@@ -175,9 +175,13 @@ void BallInPlayState::Tick(double seconds) {
 		// Make sure the ball can collide with level pieces (blocks) before running the block collision simulation
 		if (currBall->CanCollideWithBlocks()) {
 			// Check for ball collision with level pieces
-			// Get the small set (maximum 4) of levelpieces based on the position of the ball...
-			std::set<LevelPiece*> collisionPieces = currLevel->GetLevelPieceCollisionCandidates(currBall->GetBounds().Center(), currBall->GetBounds().Radius());
-			for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
+			// Get the small set of levelpieces based on the position of the ball...
+			std::set<LevelPiece*> collisionPieces = 
+                currLevel->GetLevelPieceCollisionCandidates(currBall->GetBounds().Center(), 
+                                                            currBall->GetBounds().Radius());
+
+			for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); 
+                pieceIter != collisionPieces.end(); ++pieceIter) {
 				
 				LevelPiece *currPiece = *pieceIter;
 
@@ -247,9 +251,14 @@ void BallInPlayState::Tick(double seconds) {
 					}
 					
 					// Tell the model that a ball collision occurred with currPiece
-					this->gameModel->CollisionOccurred(*currBall, currPiece);
-					//break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
-				}
+                    this->gameModel->CollisionOccurred(*currBall, currPiece);
+                    
+                    // Recalculate the blocks we're dealing with in this loop since 
+                    // some blocks may no longer exist after a collision
+				    collisionPieces = currLevel->GetLevelPieceCollisionCandidates(currBall->GetBounds().Center(), 
+                                                                                  currBall->GetBounds().Radius());
+                    pieceIter = collisionPieces.begin();
+                }
 			}
 		}
 
