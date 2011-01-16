@@ -14,7 +14,7 @@
 #include "GameEventManager.h"
 
 CollateralBlockProjectile::CollateralBlockProjectile(CollateralBlock* collateralBlock) : 
-Projectile(Projectile::CollateralBlockProjectile, collateralBlock->GetCenter(), LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT),
+Projectile(collateralBlock->GetCenter(), LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT),
 collateralBlock(collateralBlock) {
 	this->SetVelocity(Vector2D(0, -1), CollateralBlock::COLLATERAL_FALL_SPEED);
 }

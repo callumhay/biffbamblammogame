@@ -117,6 +117,7 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 	switch (projectile->GetType()) {
 		
 		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::BallLaserBulletProjectile:
 			this->ToggleElectricity(*gameModel, *currLevel);
 			break;
 		

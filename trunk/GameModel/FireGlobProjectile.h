@@ -21,6 +21,9 @@ public:
 
 	void Tick(double seconds);
 	BoundingLines BuildBoundingLines() const;
+    ProjectileType GetType() const {
+        return Projectile::FireGlobProjectile;
+    }
 
 	enum RelativeSize { Small, Medium, Large };
 	const FireGlobProjectile::RelativeSize& GetRelativeSize() const;

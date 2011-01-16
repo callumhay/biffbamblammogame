@@ -50,17 +50,18 @@ class LaserPaddleGun;
 class PaddleRocketMesh;
 class PaddleShield;
 class RandomItem;
+class OmniLaserBallEffect;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
 
 private:
 	GameWorldAssets* worldAssets;	// World-related assets
-	GameESPAssets* espAssets;			// Emitter/Sprite/Particle assets
+	GameESPAssets* espAssets;       // Emitter/Sprite/Particle assets
 	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
-	GameFBOAssets* fboAssets;			// Framebuffer Object related assets
-	GameLightAssets* lightAssets; // Light assets in the foreground and background
-	GameSoundAssets* soundAssets; // Sound assets for everything
+	GameFBOAssets* fboAssets;       // Framebuffer Object related assets
+	GameLightAssets* lightAssets;   // Light assets in the foreground and background
+	GameSoundAssets* soundAssets;   // Sound assets for everything
 
 	LivesLeftHUD* lifeHUD;
 	CrosshairLaserHUD* crosshairHUD;
@@ -75,10 +76,10 @@ private:
 	Mesh* spikeyBall;													// What happens to the ball when it becomes uber
 	PaddleRocketMesh* rocketMesh;							// The rocket that can be fired from the paddle as a power-up
 
-	Mesh* paddleBeamAttachment;								// Laser beam attachment for paddle
+	Mesh* paddleBeamAttachment;                 // Laser beam attachment for paddle
 	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
 	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
-	PaddleShield* paddleShield;								// Refractive glowy shield for the paddle
+	PaddleShield* paddleShield;                 // Refractive glowy shield for the paddle
 
 	RandomToItemAnimation randomToItemAnimation;
 
@@ -86,6 +87,8 @@ private:
 	CgFxPostRefract* invisiBallEffect;
 	CgFxVolumetricEffect* ghostBallEffect;
 	CgFxFireBallEffect* fireBallEffect;
+
+    OmniLaserBallEffect* omniLaserBallEffect;
 
 	void DeleteRegularEffectAssets();
 

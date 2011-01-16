@@ -13,7 +13,7 @@
 #include "GameModel.h"
 #include "GameEventManager.h"
 #include "GameModelConstants.h"
-#include "PaddleLaser.h"
+#include "PaddleLaserProjectile.h"
 #include "Beam.h"
 #include "FireGlobProjectile.h"
 
@@ -565,11 +565,11 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		if (this->timeSinceLastLaserBlast >= PADDLE_LASER_BULLET_DELAY) {
 
 			// Calculate the width and height of the laser bullet based on the size of the paddle...
-			float projectileWidth  = this->GetPaddleScaleFactor() * PaddleLaser::PADDLELASER_WIDTH_DEFAULT;
-			float projectileHeight = this->GetPaddleScaleFactor() * PaddleLaser::PADDLELASER_HEIGHT_DEFAULT;
+			float projectileWidth  = this->GetPaddleScaleFactor() * PaddleLaserProjectile::WIDTH_DEFAULT;
+			float projectileHeight = this->GetPaddleScaleFactor() * PaddleLaserProjectile::HEIGHT_DEFAULT;
 
 			// Create the right type of projectile in the right place
-			Projectile* newProjectile = Projectile::CreateProjectile(Projectile::PaddleLaserBulletProjectile, 
+			Projectile* newProjectile = Projectile::CreateProjectileFromType(Projectile::PaddleLaserBulletProjectile, 
 				this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight));
 
 			// Modify the fired bullet based on the current paddle's properties...
@@ -646,6 +646,7 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 			this->CollateralBlockProjectileCollision(projectile);
 			break;
 
+        case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
 			this->LaserBulletProjectileCollision(projectile);
 			break;
@@ -672,26 +673,32 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
 
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		if (projectile.GetType() == Projectile::PaddleLaserBulletProjectile ||
-			  projectile.GetType() == Projectile::PaddleRocketBulletProjectile) {
+        switch (projectile.GetType()) {
+            case Projectile::BallLaserBulletProjectile:
+            case Projectile::PaddleLaserBulletProjectile:
+            case Projectile::PaddleRocketBulletProjectile:
+                {
+			        // If the projectile is moving generally upwards and away from the paddle then we ignore this entirely...
+			        if (acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
+				          Vector2D::Dot(projectile.GetVelocityDirection(), 
+					        Vector2D::Normalize(this->GetUpVector()))))) > static_cast<float>(M_PI / 3.0f)) {
+        				
+				        Vector2D fromShieldCenterToProjectile = projectile.GetPosition() - this->GetCenterPosition();
+				        fromShieldCenterToProjectile.Normalize();
+				        projectile.SetVelocity(fromShieldCenterToProjectile, projectile.GetVelocityMagnitude());
+				        projectile.SetPosition(projectile.GetPosition() + projectile.GetHeight() * fromShieldCenterToProjectile);
 
-			// If the projectile is moving generally upwards and away from the paddle then we ignore this entirely...
-			if (acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
-				  Vector2D::Dot(projectile.GetVelocityDirection(), 
-					Vector2D::Normalize(this->GetUpVector()))))) > static_cast<float>(M_PI / 3.0f)) {
-				
-				Vector2D fromShieldCenterToProjectile = projectile.GetPosition() - this->GetCenterPosition();
-				fromShieldCenterToProjectile.Normalize();
-				projectile.SetVelocity(fromShieldCenterToProjectile, projectile.GetVelocityMagnitude());
-				projectile.SetPosition(projectile.GetPosition() + projectile.GetHeight() * fromShieldCenterToProjectile);
+				        // Be sure to reset the last piece the projectile collided with since it technically just collided
+				        // off of the paddle's shield
+				        projectile.SetLastLevelPieceCollidedWith(NULL);
 
-				// Be sure to reset the last piece the projectile collided with since it technically just collided
-				// off of the paddle's shield
-				projectile.SetLastLevelPieceCollidedWith(NULL);
-
-				// EVENT: Projectile deflected by shield
-				GameEventManager::Instance()->ActionProjectileDeflectedByPaddleShield(projectile, *this);
-			}
+				        // EVENT: Projectile deflected by shield
+				        GameEventManager::Instance()->ActionProjectileDeflectedByPaddleShield(projectile, *this);
+			        }
+                }
+                break;
+            default:
+                break;
 		}
 	}
 }

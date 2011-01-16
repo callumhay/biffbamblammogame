@@ -27,6 +27,9 @@ public:
 
 	void Tick(double seconds);
 	BoundingLines BuildBoundingLines() const;
+    ProjectileType GetType() const {
+        return Projectile::PaddleRocketBulletProjectile;
+    }
 
 	float GetYRotation() const;
 

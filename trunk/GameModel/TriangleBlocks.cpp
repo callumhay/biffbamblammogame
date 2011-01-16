@@ -13,7 +13,7 @@
 #include "GameModel.h"
 #include "GameLevel.h"
 #include "GameEventManager.h"
-#include "PaddleLaser.h"
+#include "PaddleLaserProjectile.h"
 #include "EmptySpaceBlock.h"
 
 // Breakable Triangle Block Class Functions ---------------------------------------------------------
@@ -141,6 +141,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 
 	switch (projectile->GetType()) {
 
+        case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile: {
 				// Based on where the laser bullet hits, we change its direction
 				
@@ -181,8 +182,8 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 
 					// Send the laser flying out the hypotenuse side if it hit within a certain angle
 					const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(std::min<float>(1.0f, 
-																					 std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), collisionNormal)))));
-					const float CUTOFF_ANGLE			 = 15.0f;
+                        std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), collisionNormal)))));
+					const float CUTOFF_ANGLE = 15.0f;
 
 					// Check to see if the collision was within the cut-off angle, if the laser
 					// almost hits the prism on the normal it will be refracted and/or split
@@ -204,7 +205,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 							Point2D splitPosition    = projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection();
 
 							// Send the current projectile out the long side, spawn a new one for the short side
-							PaddleLaser* newProjectile  = new PaddleLaser(*projectile); 
+                            Projectile* newProjectile  = Projectile::CreateProjectileFromCopy(projectile); 
 							newProjectile->SetPosition(splitPosition);
 							newProjectile->SetVelocity(shortSideNormal, projectile->GetVelocityMagnitude());
 							newProjectile->SetLastLevelPieceCollidedWith(this);

@@ -38,12 +38,16 @@ GRAVITY_BALL_COLOUR(0.75f, 0.24f, 1.0f),
 CRAZY_BALL_COLOUR(0.93f, 0.0f, 0.93f),
 FIRE_BALL_COLOUR(1.0f, 0.7f, 0.0f),
 ICE_BALL_COLOUR(0.40f, 0.72f, 1.0f),
+OMNI_LASER_BALL_COLOUR(0.5f, 0.85f, 0.9f),
 
 SHIELD_PADDLE_COLOUR(0.53f, 0.81f, 1.0f)
 {
 	this->WORLD0_PATH = this->RESOURCE_DIR + "/" + this->WORLD_DIR	+ "/0_deco/0_deco.wld";
 	this->WORLD1_PATH = this->RESOURCE_DIR + "/" + this->WORLD_DIR	+ "/1_cyberpunk/1_cyberpunk.wld";
 	this->InitConstArrays();
+}
+
+GameModelConstants::~GameModelConstants() {
 }
 
 void GameModelConstants::InitConstArrays() {

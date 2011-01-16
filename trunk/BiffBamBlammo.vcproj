@@ -606,6 +606,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameView\OmniLaserBallEffect.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameView\PaddleRocketMesh.h"
 					>
 				</File>
@@ -675,6 +679,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\LivesLeftHUD.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\OmniLaserBallEffect.cpp"
 					>
 				</File>
 				<File
@@ -1154,14 +1162,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\CollateralBlockProjectile.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\FireGlobProjectile.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\GameBall.h"
 					>
 				</File>
@@ -1206,23 +1206,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\PaddleLaser.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\PaddleLaserBeam.h"
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\PaddleRocketProjectile.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\PlayerPaddle.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\Projectile.h"
 					>
 				</File>
 			</Filter>
@@ -1235,14 +1223,6 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\BoundingLines.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\CollateralBlockProjectile.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\FireGlobProjectile.cpp"
 					>
 				</File>
 				<File
@@ -1286,23 +1266,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\PaddleLaser.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\PaddleLaserBeam.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\GameModel\PaddleRocketProjectile.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameModel\PlayerPaddle.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameModel\Projectile.cpp"
 					>
 				</File>
 			</Filter>
@@ -1742,6 +1710,74 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\UpsideDownItem.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Projectiles"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameModel\BallLaserProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\CollateralBlockProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\FireGlobProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LaserBulletProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleLaserProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleRocketProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\Projectile.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\GameModel\BallLaserProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\CollateralBlockProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\FireGlobProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LaserBulletProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleLaserProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleRocketProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\Projectile.cpp"
 						>
 					</File>
 				</Filter>
