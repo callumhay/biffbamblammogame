@@ -1128,6 +1128,7 @@ void GameESPAssets::AddBounceBallBallEffect(const GameBall& ball1, const GameBal
  */
 void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, const LevelPiece& block) {
 	switch (projectile.GetType()) {
+        case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
 			switch(block.GetType()) {
 
@@ -2293,6 +2294,11 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 			size.minValue = 0.4f;
 			size.maxValue = 0.65f;
 			break;
+        case Projectile::BallLaserBulletProjectile:
+            severity = Onomatoplex::NORMAL;
+            size.minValue = 0.35f;
+			size.maxValue = 0.55f;
+            break;
 		case Projectile::FireGlobProjectile: {
 				const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
 				switch (fireGlobProjectile->GetRelativeSize()) {
@@ -2421,6 +2427,7 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 
 		case Projectile::CollateralBlockProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::BallLaserBulletProjectile:
 		case Projectile::FireGlobProjectile:
 			this->AddBasicPaddleHitByProjectileEffect(paddle, projectile);
 			break;
@@ -2619,6 +2626,10 @@ void GameESPAssets::TurnOffCurrentItemDropStars() {
  */
 void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile) {
 	switch (projectile.GetType()) {
+        case Projectile::BallLaserBulletProjectile:
+            this->AddLaserBallESPEffects(gameModel, projectile);
+            break;
+
 		case Projectile::PaddleLaserBulletProjectile:
 			this->AddLaserPaddleESPEffects(gameModel, projectile);
 			break;
@@ -3286,12 +3297,10 @@ void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
 void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile) {
 	assert(projectile.GetType() == Projectile::PaddleLaserBulletProjectile);
 	
-	const Point2D& projectilePos2D = projectile.GetPosition();
-	Point3D projectilePos3D = Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f);
-	float projectileSpd     = projectile.GetVelocityMagnitude();
-	const Vector2D& projectileDir		= projectile.GetVelocityDirection();
-	Vector3D projectileDir3D	= Vector3D(projectileDir[0], projectileDir[1], 0.0f);
-
+	const Point2D& projectilePos2D  = projectile.GetPosition();
+	Point3D projectilePos3D         = Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f);
+	const Vector2D& projectileDir   = projectile.GetVelocityDirection();
+	Vector3D projectileDir3D        = Vector3D(projectileDir[0], projectileDir[1], 0.0f);
 	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 
 	// We only do the laser onomatopiea if we aren't in a special camera mode...
@@ -3319,13 +3328,31 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 		DropShadow dpTemp;
 		dpTemp.colour = Colour(0,0,0);
 		dpTemp.amountPercentage = 0.10f;
-		ESPOnomataParticle* laserOnoParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ElectricZap, GameFontAssetsManager::Small));
+		ESPOnomataParticle* laserOnoParticle = 
+            new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ElectricZap, 
+                                                                                 GameFontAssetsManager::Small));
 		laserOnoParticle->SetDropShadow(dpTemp);
 		laserOnoParticle->SetOnomatoplexSound(Onomatoplex::SHOT, Onomatoplex::GOOD);
 		laserOnoEffect->AddParticle(laserOnoParticle);
 		
 		this->activeGeneralEmitters.push_back(laserOnoEffect);
 	}
+
+    this->AddLaserESPEffects(gameModel, projectile);
+}
+
+void GameESPAssets::AddLaserBallESPEffects(const GameModel& gameModel, const Projectile& projectile) {
+    this->AddLaserESPEffects(gameModel, projectile);
+}
+
+void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Projectile& projectile) {
+	const Point2D& projectilePos2D  = projectile.GetPosition();
+	Point3D projectilePos3D         = Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f);
+	float projectileSpd             = projectile.GetVelocityMagnitude();
+	const Vector2D& projectileDir   = projectile.GetVelocityDirection();
+	Vector3D projectileDir3D        = Vector3D(projectileDir[0], projectileDir[1], 0.0f);
+
+	PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 
 	// Create the basic laser beam
 	ESPPointEmitter* laserBeamEmitter = new ESPPointEmitter();

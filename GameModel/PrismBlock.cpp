@@ -11,7 +11,7 @@
 
 #include "PrismBlock.h"
 #include "EmptySpaceBlock.h"
-#include "PaddleLaser.h"
+#include "PaddleLaserProjectile.h"
 #include "GameModel.h"
 
 PrismBlock::PrismBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {
@@ -131,6 +131,7 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 
 	switch (projectile->GetType()) {
 
+        case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile: {
 		    // Based on where the laser bullet hits, we change its direction	
 			// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
@@ -153,7 +154,7 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 				// All the other rays were created via refraction or some such thing, so spawn new particles for them
 				++rayIter;
 				for (; rayIter != rays.end(); ++rayIter) {
-					PaddleLaser* newProjectile = new PaddleLaser(*projectile);
+                    Projectile* newProjectile = Projectile::CreateProjectileFromCopy(projectile);
 					newProjectile->SetPosition(rayIter->GetOrigin());
 					newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
 					newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom

@@ -25,6 +25,7 @@
 #include "LaserPaddleGun.h"
 #include "PaddleRocketMesh.h"
 #include "PaddleShield.h"
+#include "OmniLaserBallEffect.h"
 
 // Game Model includes
 #include "../GameModel/GameModel.h"
@@ -72,7 +73,9 @@ paddleShield(NULL),
 
 invisiBallEffect(NULL), 
 ghostBallEffect(NULL),
-fireBallEffect(NULL)
+fireBallEffect(NULL),
+
+omniLaserBallEffect(NULL)
 {
 
 	// Load ESP assets
@@ -280,12 +283,21 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 				// Draw the ice ball when not invisible
 				// We don't draw any of the effects if we're in a ball camera mode or inside a cannon
-				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {				
+				if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
 					this->espAssets->DrawIceBallEffects(dT, camera, *currBall);
 				}
 				currBallColour = currBallColour + GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
 				numColoursApplied++;
 			}
+
+            // OMNI LASER BALL CHECK
+            if ((currBall->GetBallType() & GameBall::OmniLaserBulletBall) == GameBall::OmniLaserBulletBall && !ballIsInvisible) {
+                if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
+					this->omniLaserBallEffect->Draw(dT, camera, *currBall);
+				}
+                currBallColour = currBallColour + GameModelConstants::GetInstance()->OMNI_LASER_BALL_COLOUR;
+                numColoursApplied++;
+            }
 
 			// INVISIBALL CHECK
 			if (ballIsInvisible) {
@@ -834,6 +846,9 @@ void GameAssets::LoadRegularEffectAssets() {
 	if (this->fireBallEffect == NULL) {
 		this->fireBallEffect = new CgFxFireBallEffect();
 	}
+    if (this->omniLaserBallEffect == NULL) {
+        this->omniLaserBallEffect = new OmniLaserBallEffect();
+    }
 	if (this->paddleShield == NULL) {
 		this->paddleShield = new PaddleShield();
 	}
@@ -855,6 +870,11 @@ void GameAssets::DeleteRegularEffectAssets() {
 		delete this->fireBallEffect;
 		this->fireBallEffect = NULL;
 	}
+    
+    if (this->omniLaserBallEffect != NULL) {
+        delete this->omniLaserBallEffect;
+        this->omniLaserBallEffect = NULL;
+    }
 
 	// Delete any left behind particles
 	if (this->espAssets != NULL) {
@@ -936,15 +956,20 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
 	PlayerHurtHUD::PainIntensity intensity = PlayerHurtHUD::MinorPain;
 	switch (projectile.GetType()) {
+
 		case Projectile::CollateralBlockProjectile:
 			intensity = PlayerHurtHUD::MajorPain;
 			break;
+
+        case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
 			intensity = PlayerHurtHUD::MinorPain;
 			break;
+
 		case Projectile::PaddleRocketBulletProjectile:
 			intensity = PlayerHurtHUD::MajorPain;
 			break;
+
 		case Projectile::FireGlobProjectile: {
 				const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
 				switch (fireGlobProjectile->GetRelativeSize()) {

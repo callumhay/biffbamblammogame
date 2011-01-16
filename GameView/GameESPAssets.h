@@ -209,6 +209,9 @@ private:
 	void AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
 
 	void AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile);
+    void AddLaserBallESPEffects(const GameModel& gameModel, const Projectile& projectile);
+    void AddLaserESPEffects(const GameModel& gameModel, const Projectile& projectile);
+
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
 	void AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc);

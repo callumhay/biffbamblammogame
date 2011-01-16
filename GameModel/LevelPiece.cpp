@@ -17,7 +17,7 @@
 #include "GameItemFactory.h"
 #include "GameModelConstants.h"
 #include "Beam.h"
-#include "PaddleLaser.h"
+#include "PaddleLaserProjectile.h"
 
 const LevelPiece::TriggerID LevelPiece::NO_TRIGGER_ID = -1;
 
@@ -264,8 +264,7 @@ void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, Gam
 	}
 	
 	std::list<Collision::Ray2D> rays;
-	this->GetIceCubeReflectionRefractionRays(projectile->GetPosition(), /*projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection(),*/
-																					 projectile->GetVelocityDirection(), rays);
+	this->GetIceCubeReflectionRefractionRays(projectile->GetPosition(), projectile->GetVelocityDirection(), rays);
 	assert(rays.size() >= 1);
 					
 	std::list<Collision::Ray2D>::iterator rayIter = rays.begin();
@@ -277,7 +276,7 @@ void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, Gam
 	// All the other rays were created via refraction or some such thing, so spawn new particles for them
 	++rayIter;
 	for (; rayIter != rays.end(); ++rayIter) {
-		PaddleLaser* newProjectile = new PaddleLaser(*projectile);
+        Projectile* newProjectile = Projectile::CreateProjectileFromCopy(projectile);
 		newProjectile->SetPosition(rayIter->GetOrigin());
 		newProjectile->SetVelocity(rayIter->GetUnitDirection(), projectile->GetVelocityMagnitude());
 		newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom

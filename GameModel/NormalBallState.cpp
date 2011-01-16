@@ -144,11 +144,14 @@ void NormalBallState::AttemptFireOfOmniBullets(double dT, GameModel* gameModel) 
             (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.75f * this->gameBall->GetBounds().Radius());
         float projectileHeight = 1.75f * projectileWidth; 
 
-		Projectile* newProjectile = Projectile::CreateProjectile(Projectile::PaddleLaserBulletProjectile, 
+		Projectile* newProjectile = Projectile::CreateProjectileFromType(Projectile::BallLaserBulletProjectile, 
             this->gameBall->GetCenterPosition2D() + (this->gameBall->GetBounds().Radius() + projectileHeight * 0.5f) * randomVector);
 		newProjectile->SetWidth(projectileWidth);
 		newProjectile->SetHeight(projectileHeight);
-        newProjectile->SetVelocity(randomVector, newProjectile->GetVelocityMagnitude());
+
+        Vector2D newVelocity = newProjectile->GetVelocityMagnitude() * randomVector +
+                               this->gameBall->GetVelocity();
+        newProjectile->SetVelocity(newVelocity);
 
 		gameModel->AddProjectile(newProjectile);
     }

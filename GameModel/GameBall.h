@@ -218,7 +218,6 @@ public:
 			case GameBall::IceBall:
 				this->contributingIceColour = GameModelConstants::GetInstance()->ICE_BALL_COLOUR;
 				break;
-
 			default:
 				break;
 		}

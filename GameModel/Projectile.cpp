@@ -12,16 +12,17 @@
 #include "Projectile.h"
 #include "LevelPiece.h"
 #include "GameEventManager.h"
-#include "PaddleLaser.h"
+#include "PaddleLaserProjectile.h"
 #include "PaddleRocketProjectile.h"
+#include "BallLaserProjectile.h"
 
 // Projectile ====================================================================================================================
 
-Projectile::Projectile(ProjectileType type, const Point2D& spawnLoc, float width, float height) : 
-type(type), position(spawnLoc), lastPieceCollidedWith(NULL), currWidth(width), currHeight(height) {
+Projectile::Projectile(const Point2D& spawnLoc, float width, float height) : 
+position(spawnLoc), lastPieceCollidedWith(NULL), currWidth(width), currHeight(height) {
 }
 
-Projectile::Projectile(const Projectile& copy) : type(copy.type), position(copy.position),
+Projectile::Projectile(const Projectile& copy) : position(copy.position),
 lastPieceCollidedWith(copy.lastPieceCollidedWith), currWidth(copy.currWidth), currHeight(copy.currHeight),
 velocityDir(copy.velocityDir), velocityMag(copy.velocityMag), rightVec(copy.rightVec) {
 }
@@ -32,10 +33,12 @@ Projectile::~Projectile() {
 /**
  * Static factory creator pattern method for making projectiles based on the given type.
  */
-Projectile* Projectile::CreateProjectile(ProjectileType type, const Point2D& spawnLoc) {
+Projectile* Projectile::CreateProjectileFromType(ProjectileType type, const Point2D& spawnLoc) {
 	switch (type) {
 		case Projectile::PaddleLaserBulletProjectile:
-			return new PaddleLaser(spawnLoc);
+			return new PaddleLaserProjectile(spawnLoc);
+        case Projectile::BallLaserBulletProjectile:
+            return new BallLaserProjectile(spawnLoc);
 		default:
 			assert(false);
 			break;
@@ -44,28 +47,17 @@ Projectile* Projectile::CreateProjectile(ProjectileType type, const Point2D& spa
 	return NULL;
 }
 
-/**
- * Build an 2D Axis-Aligned Bounding Box for this projectile.
- */
-/*
-Collision::AABB2D Projectile::BuildAABB2D() const {
-	static const Vector2D unitX(1, 0);
-	static const Vector2D unitY(0, 1);
-	
-	// Create the set of points representing the 4 outer points of this projectile
-	const Vector2D UP_DIR			    = this->GetHalfHeight() * this->GetVelocityDirection();
-	const Vector2D FULL_RIGHT_DIR = this->GetHalfWidth() * this->GetRightVectorDirection();
+Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
+    assert(p != NULL);
+	switch (p->GetType()) {
+		case Projectile::PaddleLaserBulletProjectile:
+			return new PaddleLaserProjectile(*static_cast<const PaddleLaserProjectile*>(p));
+        case Projectile::BallLaserBulletProjectile:
+            return new BallLaserProjectile(*static_cast<const BallLaserProjectile*>(p));
+		default:
+			assert(false);
+			break;
+	}
 
-	Point2D projectilePts[4];
-	projectilePts[0] = this->GetPosition() + UP_DIR + RIGHT_DIR;
-	projectilePts[1] = this->GetPosition() + UP_DIR - RIGHT_DIR;
-	projectilePts[2] = this->GetPosition() - UP_DIR + RIGHT_DIR;
-	projectilePts[3] = this->GetPosition() - UP_DIR - RIGHT_DIR;
-
-	// Now figure out what the min and max boundries of the AABB will be by projecting
-	// those points onto the x and y axes...
-	
-
-	return Collision::AABB2D(
+	return NULL;
 }
-*/

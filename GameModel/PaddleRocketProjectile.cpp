@@ -17,7 +17,7 @@ const float PaddleRocketProjectile::MAX_VELOCITY_MAG					= 20.0f;
 const float PaddleRocketProjectile::MAX_ROTATION_VELOCITY_MAG	= 400.0f;
 
 PaddleRocketProjectile::PaddleRocketProjectile(const Point2D& spawnLoc, float width, float height) :
-Projectile(Projectile::PaddleRocketBulletProjectile, spawnLoc, width, height), cannonBlock(NULL) {
+Projectile(spawnLoc, width, height), cannonBlock(NULL) {
 
 	// TODO: Add acceleration and start with 0 initial velocity...
   // do this for rotation as well...

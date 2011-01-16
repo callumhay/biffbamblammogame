@@ -58,6 +58,7 @@ public:
 	const Colour CRAZY_BALL_COLOUR;
 	const Colour FIRE_BALL_COLOUR;
 	const Colour ICE_BALL_COLOUR;
+    const Colour OMNI_LASER_BALL_COLOUR;
 
 	const Colour SHIELD_PADDLE_COLOUR;
 
@@ -71,11 +72,10 @@ private:
 	std::string WORLD1_PATH;
 
 	GameModelConstants();
-	~GameModelConstants(){};
+	~GameModelConstants();
 
 	// Disallow copy and assignment
-	GameModelConstants(const GameModelConstants& g);
-	GameModelConstants& operator=(const GameModelConstants& g);
+    DISALLOW_COPY_AND_ASSIGN(GameModelConstants);
 };
 
 #endif
