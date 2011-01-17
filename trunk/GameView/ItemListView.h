@@ -32,8 +32,8 @@ public:
 		~ListItem();
 
         void DrawSelection(double dT, const Camera& camera, size_t width, 
-            size_t height, float alphaOrange, float alphaYellow, float scale);
-		void DrawItem(double dT, const Camera& camera, size_t width, size_t height);
+            size_t height, float alphaOrange, float alphaYellow, float scale, float otherScale);
+		void DrawItem(double dT, const Camera& camera, size_t width, size_t height, float alpha, float scale);
 
         void SetSelected(bool isSelected);
 
@@ -66,6 +66,7 @@ public:
 	ItemListView::ListItem* AddItem(const std::string& name, const Texture* itemTexture, bool isLocked);
     void SetSelectedItemIndex(int index);
 	ItemListView::ListItem* GetSelectedItem() const;
+    bool GetIsItemActivated() const;
 
     size_t GetSmallestBorderSize() const;
 
@@ -79,6 +80,7 @@ private:
     int numItemsPerRow;
 
 	// Item information
+    bool itemIsActivated;
 	int selectedItemIndex;
 	std::vector<ListItem*> items;	// List items in order of rendering from
 									// the top left corner of the list to the bottom right
@@ -92,6 +94,14 @@ private:
     // Animations for selection
     AnimationMultiLerp<float> lockedSelectionAnim;
 
+    // Animations for activation
+    AnimationLerp<float> activatedItemGrowAnim;
+    AnimationLerp<float> activatedItemFadeAnim;
+    AnimationLerp<float> nonActivatedItemsFadeAnim;
+
+    //AnimationLerp<float> blackBorderAnim;
+    //AnimationLerp<float> revealAnim;
+
     void GetTranslationToItemAtIndex(int index, float& xTranslation, float& yTranslation);
 	size_t AdjustItemWidthAndListLayout(size_t width);
     void MoveSelectionX(bool right);
@@ -99,6 +109,7 @@ private:
     int GetNumItemsOnRow(int rowIdx);
 
     void ItemActivated();
+    void ItemDeactivated();
     void StartLockedAnimation();
 
     void SetSelection(int index);
@@ -121,6 +132,10 @@ inline ItemListView::ListItem* ItemListView::GetSelectedItem() const {
 		return NULL;
 	}
 	return this->items[this->selectedItemIndex];
+}
+
+inline bool ItemListView::GetIsItemActivated() const {
+    return this->itemIsActivated;
 }
 
 inline size_t ItemListView::GetSmallestBorderSize() const {

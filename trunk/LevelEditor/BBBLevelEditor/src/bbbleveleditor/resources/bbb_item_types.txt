@@ -53,6 +53,9 @@ The ball lights on fire causing certain blocks that it hits to catch on fire (wh
 ~ IceBall
 The ball becomes icy causing blocks that it hits to freeze instantly - making them easier (or harder depending on the block) to destroy.
 
+~ OmniLaserBall
+The ball gains the ability to shoot lasers randomly in all directions destroying blocks and knocking the paddle around.
+
 ~ Random
 The completely random item type - the only item this may not be is random, since that would be infinitely recursive, now wouldn't it?
 
