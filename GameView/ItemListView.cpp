@@ -21,7 +21,8 @@ const int ItemListView::DEFAULT_NUM_ITEMS_PER_ROW   = 4;
 const int ItemListView::MAX_ITEM_WIDTH              = 200;
 
 ItemListView::ItemListView(size_t width) : 
-selectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX) {
+selectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX), 
+itemIsActivated(false), nonActivatedItemsFadeAnim(1), activatedItemFadeAnim(1), activatedItemGrowAnim(1) {
 	assert(width > 0);
 	
 	this->horizontalBorder	= 30;
@@ -63,6 +64,10 @@ selectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX) {
 
     this->lockedSelectionAnim.ClearLerp();
     this->lockedSelectionAnim.SetInterpolantValue(0);
+
+    this->nonActivatedItemsFadeAnim.SetInterpolantValue(1.0f);
+    this->activatedItemFadeAnim.SetInterpolantValue(1.0f);
+    this->activatedItemGrowAnim.SetInterpolantValue(1.0f);
 }
 
 ItemListView::~ItemListView() {
@@ -78,6 +83,9 @@ void ItemListView::Draw(double dT, const Camera& camera) {
     this->selectionBorderAddYellowAnim.Tick(dT);
     this->selectionAlphaYellowAnim.Tick(dT);
     this->lockedSelectionAnim.Tick(dT);
+    this->nonActivatedItemsFadeAnim.Tick(dT);
+    this->activatedItemFadeAnim.Tick(dT);
+    this->activatedItemGrowAnim.Tick(dT);
 
 	glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_COLOR_BUFFER_BIT);
 	
@@ -90,20 +98,24 @@ void ItemListView::Draw(double dT, const Camera& camera) {
 	float xTranslation = 0;
 	float yTranslation = 0;
 
-	for (int i = 0; i < static_cast<int>(this->items.size()); i++) {
-        if (i == this->selectedItemIndex) { continue; }
-        ListItem* currItem = this->items[i];
-            
-        // Translate the OpenGL matrix to the item's bottom-left
-        this->GetTranslationToItemAtIndex(i, xTranslation, yTranslation);
-        glPushMatrix();
-        glTranslatef(xTranslation, yTranslation, 0);
-		currItem->DrawItem(dT, camera, this->itemPixelWidth, this->itemPixelHeight);
-		glPopMatrix();
-	}
+    if (this->nonActivatedItemsFadeAnim.GetInterpolantValue() > 0.0f) {
+	    for (int i = 0; i < static_cast<int>(this->items.size()); i++) {
+            if (i == this->selectedItemIndex) { continue; }
+            ListItem* currItem = this->items[i];
+                
+            // Translate the OpenGL matrix to the item's bottom-left
+            this->GetTranslationToItemAtIndex(i, xTranslation, yTranslation);
+            glPushMatrix();
+            glTranslatef(xTranslation, yTranslation, 0);
+		    currItem->DrawItem(dT, camera, this->itemPixelWidth, this->itemPixelHeight, 
+                               this->nonActivatedItemsFadeAnim.GetInterpolantValue(), 1);
+		    glPopMatrix();
+	    }
+    }
 
-    // Draw the selected item last - that way the selection indicator is ontop of all other items!
-    if (this->selectedItemIndex >= 0) {
+    // Draw the selected item last - that way the selection indicator is on top of all other items!
+    float selectedItemAlpha = this->activatedItemFadeAnim.GetInterpolantValue();
+    if (this->selectedItemIndex >= 0 && selectedItemAlpha > 0.0f) {
         glEnable(GL_BLEND);
 	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -115,16 +127,24 @@ void ItemListView::Draw(double dT, const Camera& camera) {
         glPushMatrix();
         glTranslatef(xTranslation, yTranslation, 0);
 
+        float scalingFactor = this->activatedItemGrowAnim.GetInterpolantValue();
+
 	    // Draw the selection indicator around the item...
         currItem->DrawSelection(dT, camera, this->itemPixelWidth, this->itemPixelHeight, 
-            this->selectionAlphaOrangeAnim.GetInterpolantValue(), 
-            this->selectionAlphaYellowAnim.GetInterpolantValue(),
-            this->selectionBorderAddYellowAnim.GetInterpolantValue());
+            this->selectionAlphaOrangeAnim.GetInterpolantValue() * selectedItemAlpha, 
+            this->selectionAlphaYellowAnim.GetInterpolantValue() * selectedItemAlpha,
+            this->selectionBorderAddYellowAnim.GetInterpolantValue(), scalingFactor);
 
         // Draw the item first
         glTranslatef(this->lockedSelectionAnim.GetInterpolantValue(), 0, 0);
-        currItem->DrawItem(dT, camera, this->itemPixelWidth, this->itemPixelHeight);
+        currItem->DrawItem(dT, camera, this->itemPixelWidth, this->itemPixelHeight, 
+                           selectedItemAlpha, scalingFactor);
         glPopMatrix();
+    }
+
+    if (this->GetIsItemActivated()) {
+        // Draw the description, picture, title of the currently activated blammopedia item entry...
+        // TODO
     }
 
     glPopAttrib();
@@ -138,6 +158,7 @@ ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const Tex
 }
 
 void ItemListView::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+
     // Movement buttons move the selection around the array of items - this wraps
     switch (pressedButton) {
         case GameControl::UpButtonAction:
@@ -154,6 +175,9 @@ void ItemListView::ButtonPressed(const GameControl::ActionButton& pressedButton)
             break;
         case GameControl::EnterButtonAction:
             this->ItemActivated();
+            break;
+        case GameControl::EscapeButtonAction:
+            this->ItemDeactivated();
             break;
         default:
             break;
@@ -178,7 +202,7 @@ size_t ItemListView::AdjustItemWidthAndListLayout(size_t width) {
 }
 
 void ItemListView::MoveSelectionX(bool right) {
-    if (this->GetSelectedItem() == NULL) { return; }
+    if (this->GetSelectedItem() == NULL || this->itemIsActivated) { return; }
     int x = right ? 1 : -1;
     int currRowIndex  = this->selectedItemIndex / this->numItemsPerRow;
     int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
@@ -189,7 +213,7 @@ void ItemListView::MoveSelectionX(bool right) {
 }
 
 void ItemListView::MoveSelectionY(bool up) {
-    if (this->GetSelectedItem() == NULL) { return; }
+    if (this->GetSelectedItem() == NULL || this->itemIsActivated) { return; }
     int y = up ? 1 : -1;
 
     int numRows = (this->items.size() / this->numItemsPerRow) + 1;
@@ -219,6 +243,37 @@ void ItemListView::ItemActivated() {
 
     if (selectedItem->GetIsLocked()) {
         this->StartLockedAnimation();
+    }
+    else {
+        this->itemIsActivated = true;
+
+        this->nonActivatedItemsFadeAnim.SetLerp(0.0, 0.5, 1.0f, 0.0f);
+        this->nonActivatedItemsFadeAnim.SetRepeat(false);
+        this->nonActivatedItemsFadeAnim.SetInterpolantValue(1.0f);
+
+        this->activatedItemFadeAnim.SetLerp(0.0, 1.0, 1.0f, 0.0f);
+        this->activatedItemFadeAnim.SetRepeat(false);
+        this->activatedItemFadeAnim.SetInterpolantValue(1.0f);
+
+        this->activatedItemGrowAnim.SetLerp(0.0, 1.0, 1.0f, 2.0f);
+        this->activatedItemGrowAnim.SetRepeat(false);
+        this->activatedItemGrowAnim.SetInterpolantValue(1.0f);
+    }   
+}
+
+void ItemListView::ItemDeactivated() {
+    if (this->itemIsActivated) {
+        this->itemIsActivated = false;
+
+        // Make all previously non-activated items visible again
+        this->nonActivatedItemsFadeAnim.SetLerp(0.5, 1.0f);
+        this->nonActivatedItemsFadeAnim.SetRepeat(false);
+
+        this->activatedItemFadeAnim.SetLerp(0.5, 1.0f);
+        this->activatedItemFadeAnim.SetRepeat(false);
+
+        this->activatedItemGrowAnim.SetLerp(0.5, 1.0f);
+        this->activatedItemGrowAnim.SetRepeat(false);
     }
 }
 
@@ -293,11 +348,11 @@ ItemListView::ListItem::~ListItem() {
 void ItemListView::ListItem::DrawSelection(double dT, const Camera& camera, 
                                            size_t width, size_t height, 
                                            float alphaOrange, float alphaYellow, 
-                                           float scale) {
+                                           float scale, float otherScale) {
 	UNUSED_PARAMETER(camera);
     UNUSED_PARAMETER(dT);
     
-    float sizeAnimationScaling = this->sizeAnimation.GetInterpolantValue();
+    float sizeAnimationScaling = this->sizeAnimation.GetInterpolantValue() * otherScale;
 
     glBindTexture(GL_TEXTURE_2D, 0);
  
@@ -315,11 +370,11 @@ void ItemListView::ListItem::DrawSelection(double dT, const Camera& camera,
 }
 
 // Draws this item with its local origin in its bottom left corner with the given width and height
-void ItemListView::ListItem::DrawItem(double dT, const Camera& camera, size_t width, size_t height) {
+void ItemListView::ListItem::DrawItem(double dT, const Camera& camera, size_t width, size_t height, float alpha, float scale) {
 	UNUSED_PARAMETER(camera);
     
     this->sizeAnimation.Tick(dT);
-    float scale = this->sizeAnimation.GetInterpolantValue();
+    float totalScale = this->sizeAnimation.GetInterpolantValue() * scale;
 
 	this->texture->BindTexture();
 
@@ -328,13 +383,13 @@ void ItemListView::ListItem::DrawItem(double dT, const Camera& camera, size_t wi
     float halfWidth  = width / 2.0f;
     float halfHeight = height / 2.0f;
     glTranslatef(halfWidth, halfHeight, 0);
-    glScalef(scale, scale, 1);
+    glScalef(totalScale, totalScale, 1);
 
-	glColor4f(1,1,1,1);
+	glColor4f(1, 1, 1, alpha);
     this->DrawItemQuadCenter(width, height);
 
 	glLineWidth(2.0f);
-	glColor4f(0,0,0,1);
+	glColor4f(0, 0, 0, alpha);
 	glBegin(GL_LINE_LOOP);
 	glVertex2f(halfWidth, -halfHeight);
 	glVertex2f(halfWidth, halfHeight);

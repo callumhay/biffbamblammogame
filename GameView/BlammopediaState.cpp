@@ -2,7 +2,7 @@
  * BlammopediaState.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
- * Callum Hay, 2010
+ * Callum Hay, 2010-2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -204,86 +204,90 @@ void BlammopediaState::RenderFrame(double dT) {
     }
     */
 
-    // Draw the bottom menu background
-    glColor4f(1, 0.65f, 0, 1.0f);
-    glBegin(GL_QUADS);
-    glVertex2i(0, 0);
-    glVertex2i(camera.GetWindowWidth(), 0);
-    glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
-    glVertex2i(0, TOTAL_MENU_HEIGHT);
-    glEnd();
-    glColor4f(0, 0, 0, 1.0f);
-    glBegin(GL_LINES);
-    glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
-    glVertex2i(0, TOTAL_MENU_HEIGHT);
-    glEnd();
-
     this->itemSelTabAnim.Tick(dT);
-    if (this->currMenuItemIndex < static_cast<int>(this->blammoMenuLabels.size())) {
-        float tabHeightScale = this->itemSelTabAnim.GetInterpolantValue();
 
-        TextLabel2D* selectedLabel = this->blammoMenuLabels[this->currListViewIndex];
-        float quadLeftX  = selectedLabel->GetTopLeftCorner()[0] - LABEL_ITEM_GAP/2.0f;
-        float quadRightX = selectedLabel->GetTopLeftCorner()[0] + selectedLabel->GetLastRasterWidth() + LABEL_ITEM_GAP/2.0f;
-        float bottomY = selectedLabel->GetTopLeftCorner()[1] - selectedLabel->GetHeight() - 10;
-        float animatedBottomY = (1.0f - tabHeightScale) * (TOTAL_MENU_HEIGHT + LINE_WIDTH) + tabHeightScale * bottomY;
-
-        glColor4f(1,1,1,1);
+    // Check to see if an item is activated from the current blammopedia list, if it is then it will
+    // draw over the entire screen and we don't need to draw all the other stuff
+    if (!currListView->GetIsItemActivated()) {
+        // Draw the bottom menu background
+        glColor4f(1, 0.65f, 0, 1.0f);
         glBegin(GL_QUADS);
-        glVertex2i(quadLeftX,  animatedBottomY);
-        glVertex2i(quadRightX, animatedBottomY);
-        glVertex2i(quadRightX, (TOTAL_MENU_HEIGHT + LINE_WIDTH));
-        glVertex2i(quadLeftX,  (TOTAL_MENU_HEIGHT + LINE_WIDTH));
+        glVertex2i(0, 0);
+        glVertex2i(camera.GetWindowWidth(), 0);
+        glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
+        glVertex2i(0, TOTAL_MENU_HEIGHT);
         glEnd();
-
-        animatedBottomY = (1.0f - tabHeightScale) * TOTAL_MENU_HEIGHT + tabHeightScale * bottomY;
         glColor4f(0, 0, 0, 1.0f);
         glBegin(GL_LINES);
-        glVertex2i(quadLeftX,  animatedBottomY);
-        glVertex2i(quadRightX, animatedBottomY);
-
-        glVertex2i(quadRightX, animatedBottomY);
-        glVertex2i(quadRightX, TOTAL_MENU_HEIGHT);
-
-        glVertex2i(quadLeftX, TOTAL_MENU_HEIGHT);
-        glVertex2i(quadLeftX,  animatedBottomY);
+        glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
+        glVertex2i(0, TOTAL_MENU_HEIGHT);
         glEnd();
+
+        if (this->currMenuItemIndex < static_cast<int>(this->blammoMenuLabels.size())) {
+            float tabHeightScale = this->itemSelTabAnim.GetInterpolantValue();
+
+            TextLabel2D* selectedLabel = this->blammoMenuLabels[this->currListViewIndex];
+            float quadLeftX  = selectedLabel->GetTopLeftCorner()[0] - LABEL_ITEM_GAP/2.0f;
+            float quadRightX = selectedLabel->GetTopLeftCorner()[0] + selectedLabel->GetLastRasterWidth() + LABEL_ITEM_GAP/2.0f;
+            float bottomY = selectedLabel->GetTopLeftCorner()[1] - selectedLabel->GetHeight() - 10;
+            float animatedBottomY = (1.0f - tabHeightScale) * (TOTAL_MENU_HEIGHT + LINE_WIDTH) + tabHeightScale * bottomY;
+
+            glColor4f(1,1,1,1);
+            glBegin(GL_QUADS);
+            glVertex2i(quadLeftX,  animatedBottomY);
+            glVertex2i(quadRightX, animatedBottomY);
+            glVertex2i(quadRightX, (TOTAL_MENU_HEIGHT + LINE_WIDTH));
+            glVertex2i(quadLeftX,  (TOTAL_MENU_HEIGHT + LINE_WIDTH));
+            glEnd();
+
+            animatedBottomY = (1.0f - tabHeightScale) * TOTAL_MENU_HEIGHT + tabHeightScale * bottomY;
+            glColor4f(0, 0, 0, 1.0f);
+            glBegin(GL_LINES);
+            glVertex2i(quadLeftX,  animatedBottomY);
+            glVertex2i(quadRightX, animatedBottomY);
+
+            glVertex2i(quadRightX, animatedBottomY);
+            glVertex2i(quadRightX, TOTAL_MENU_HEIGHT);
+
+            glVertex2i(quadLeftX, TOTAL_MENU_HEIGHT);
+            glVertex2i(quadLeftX,  animatedBottomY);
+            glEnd();
+        }
+
+        if (currItem != NULL) {
+            // Draw the name of the currently selected item in the active blammopedia list...
+            // If the item is locked we change the colour value to something that looks neutral
+            if (currItem->GetIsLocked()) {
+                this->selectedItemNameLbl.SetColour(Colour(0.66f, 0.66f, 0.66f));
+            }
+            else {
+                this->selectedItemNameLbl.SetColour(Colour(0.49f, 0.98f, 1.0f));
+            }
+            this->selectedItemNameLbl.SetText(currItem->GetName());
+            this->selectedItemNameLbl.SetTopLeftCorner(Point2D(camera.GetWindowWidth() - 
+                this->selectedItemNameLbl.GetLastRasterWidth() - BlammopediaState::ITEM_NAME_BORDER_SIZE,
+                this->selectedItemNameLbl.GetHeight() + BlammopediaState::ITEM_NAME_BORDER_SIZE));
+            this->selectedItemNameLbl.Draw();
+        }
+
+        // Animate any highlighted labels...
+        if (this->currMenuItemIndex != NO_MENU_ITEM_INDEX) {
+            this->itemHighlightWiggle.Tick(dT);
+            float wiggleAmt = this->itemHighlightWiggle.GetInterpolantValue();
+            TextLabel2D* highlightedItem = this->blammoMenuLabels[this->currMenuItemIndex];
+            Point2D defaultTopLeftCorner(highlightedItem->GetTopLeftCorner()[0], 
+                (BlammopediaState::TOTAL_MENU_HEIGHT - highlightedItem->GetHeight()) / 2.0f + highlightedItem->GetHeight());
+            highlightedItem->SetTopLeftCorner(defaultTopLeftCorner + Vector2D(0, wiggleAmt));
+        }
+        
+        // Draw the labels
+        for (std::vector<TextLabel2D*>::iterator iter = this->blammoMenuLabels.begin(); iter != this->blammoMenuLabels.end(); ++iter) {
+            TextLabel2D* label = *iter;
+            label->Draw();
+        }
     }
 
-    if (currItem != NULL) {
-        // Draw the name of the currently selected item in the active blammopedia list...
-        // If the item is locked we change the colour value to something that looks neutral
-        if (currItem->GetIsLocked()) {
-            this->selectedItemNameLbl.SetColour(Colour(0.66f, 0.66f, 0.66f));
-        }
-        else {
-            this->selectedItemNameLbl.SetColour(Colour(0.49f, 0.98f, 1.0f));
-        }
-        this->selectedItemNameLbl.SetText(currItem->GetName());
-        this->selectedItemNameLbl.SetTopLeftCorner(Point2D(camera.GetWindowWidth() - 
-            this->selectedItemNameLbl.GetLastRasterWidth() - BlammopediaState::ITEM_NAME_BORDER_SIZE,
-            this->selectedItemNameLbl.GetHeight() + BlammopediaState::ITEM_NAME_BORDER_SIZE));
-        this->selectedItemNameLbl.Draw();
-    }
-
-    // Animate any highlighted labels...
-    if (this->currMenuItemIndex != NO_MENU_ITEM_INDEX) {
-        this->itemHighlightWiggle.Tick(dT);
-        float wiggleAmt = this->itemHighlightWiggle.GetInterpolantValue();
-        TextLabel2D* highlightedItem = this->blammoMenuLabels[this->currMenuItemIndex];
-        Point2D defaultTopLeftCorner(highlightedItem->GetTopLeftCorner()[0], 
-            (BlammopediaState::TOTAL_MENU_HEIGHT - highlightedItem->GetHeight()) / 2.0f + highlightedItem->GetHeight());
-        highlightedItem->SetTopLeftCorner(defaultTopLeftCorner + Vector2D(0, wiggleAmt));
-    }
-    
-    // Draw the labels
-    for (std::vector<TextLabel2D*>::iterator iter = this->blammoMenuLabels.begin(); iter != this->blammoMenuLabels.end(); ++iter) {
-        TextLabel2D* label = *iter;
-        label->Draw();
-    }
-    
     glPopMatrix();
-
     Camera::PopWindowCoords();
     glPopAttrib();
 
@@ -311,9 +315,11 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
     if (currList == NULL) {
         return;
     }
+    bool itemWasActivated = false;
 
     // Only give the list a button event when the list has focus and not the blammopedia menu
     if (this->currMenuItemIndex == NO_MENU_ITEM_INDEX) {
+        itemWasActivated = currList->GetIsItemActivated();
         currList->ButtonPressed(pressedButton);
     }
     else {
@@ -346,7 +352,7 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
 
     // If we escape from a list then we go into the blammopedia menu, if we're already in the menu
     // then we go to the 'back' option, if we're already on the back option then we go back to the main menu
-    if (pressedButton == GameControl::EscapeButtonAction) {
+    if (!itemWasActivated && (pressedButton == GameControl::EscapeButtonAction)) {
         if (this->currMenuItemIndex == NO_MENU_ITEM_INDEX) {
             this->SetBlammoMenuItemDeselection();
         }
