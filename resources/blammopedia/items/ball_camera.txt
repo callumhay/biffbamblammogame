@@ -2,4 +2,4 @@ Name: Ball Camera
 ItemTexture: ballcam_powerdown_256x128.jpg
 HUDOutlineTexture: cam_timer_hud256x128.png
 HUDFillTexture: cam_timer_fill_hud256x128.png
-Desc: This bad-ass power-down will eff you up like an over-eager masseuse. It’ll put you inside an active ball, staring downwards at the paddle. You will never feel this helpless, guaranteed.
+Desc: This bad-ass power-down will eff you up like an over-eager masseuse. It'll put you inside an active ball, staring downwards at the paddle. You will never feel this helpless, guaranteed.

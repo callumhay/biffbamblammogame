@@ -19,35 +19,43 @@
 
 class Texture;
 class Camera;
+class TextLabel2D;
+class TextLabel2DFixedWidth;
 
 class ItemListView {
 public:
 	static const int NO_ITEM_SELECTED_INDEX;
     static const int DEFAULT_NUM_ITEMS_PER_ROW;
     static const int MAX_ITEM_WIDTH;
+    static const int HORIZ_ITEM_ACTIVATED_BORDER;
 
 	class ListItem {
 	public:
-		ListItem(const ItemListView* parent, const std::string& name, const Texture* itemTexture, bool isLocked);
+		ListItem(const ItemListView* parent, const std::string& name, const std::string& description, 
+                 const Texture* itemTexture, bool isLocked);
 		~ListItem();
 
-        void DrawSelection(double dT, const Camera& camera, size_t width, 
-            size_t height, float alphaOrange, float alphaYellow, float scale, float otherScale);
-		void DrawItem(double dT, const Camera& camera, size_t width, size_t height, float alpha, float scale);
+        void Tick(double dT);
+        void DrawSelection(const Camera& camera, size_t width, size_t height, 
+                           float alphaOrange, float alphaYellow, float scale, float otherScale);
+
+		void DrawItem(const Camera& camera, size_t width, size_t height, float alpha, float scale);
+        void DrawItem(const Camera& camera, size_t width, size_t height, float alpha);
 
         void SetSelected(bool isSelected);
 
-		//void SetIntData(int data) { this->intData = data; }
-		//int GetIntData() const { return this->intData; }
-		const std::string& GetName() const { return this->name; }
+		TextLabel2D* GetNameLbl() const { return this->nameLbl; }
+        TextLabel2DFixedWidth* GetDescriptionLbl() const { return this->descriptionLbl; }
+
         bool GetIsLocked() const { return this->isLocked; }
 
 	private:
 		bool isLocked;
-		std::string name;
+        TextLabel2D* nameLbl;
+        TextLabel2DFixedWidth* descriptionLbl;
 		const Texture* texture;
+
         float halfSelectionBorderSize;
-		//int intData;
 
         AnimationLerp<float> sizeAnimation;
 
@@ -61,13 +69,17 @@ public:
 	ItemListView(size_t width);
 	~ItemListView();
 
-	void Draw(double dT, const Camera& camera);
+    void Tick(double dT);
+	void Draw(const Camera& camera);
+    void DrawPost(const Camera& camera);
 
-	ItemListView::ListItem* AddItem(const std::string& name, const Texture* itemTexture, bool isLocked);
+	ItemListView::ListItem* AddItem(const std::string& name, const std::string& description, 
+                                    const Texture* itemTexture, bool isLocked);
     void SetSelectedItemIndex(int index);
 	ItemListView::ListItem* GetSelectedItem() const;
     bool GetIsItemActivated() const;
 
+    size_t GetListWidth() const;
     size_t GetSmallestBorderSize() const;
 
     void ButtonPressed(const GameControl::ActionButton& pressedButton);
@@ -77,6 +89,7 @@ private:
 	size_t horizontalBorder, verticalBorder;
 	size_t horizontalGap, verticalGap;
 	size_t itemPixelWidth, itemPixelHeight;
+    size_t listWidth;
     int numItemsPerRow;
 
 	// Item information
@@ -98,9 +111,10 @@ private:
     AnimationLerp<float> activatedItemGrowAnim;
     AnimationLerp<float> activatedItemFadeAnim;
     AnimationLerp<float> nonActivatedItemsFadeAnim;
-
-    //AnimationLerp<float> blackBorderAnim;
+    AnimationLerp<float> blackBorderAnim;
     //AnimationLerp<float> revealAnim;
+    AnimationLerp<float> activatedItemXPicAnim;
+    AnimationLerp<float> activatedItemAlphaAnim;
 
     void GetTranslationToItemAtIndex(int index, float& xTranslation, float& yTranslation);
 	size_t AdjustItemWidthAndListLayout(size_t width);
@@ -140,6 +154,10 @@ inline bool ItemListView::GetIsItemActivated() const {
 
 inline size_t ItemListView::GetSmallestBorderSize() const {
     return std::min<size_t>(this->horizontalGap, std::min<size_t>(this->verticalGap, std::min<size_t>(this->horizontalBorder, this->verticalBorder)));
+}
+
+inline size_t ItemListView::GetListWidth() const {
+    return this->listWidth;
 }
 
 #endif // __ITEMLISTVIEW_H__

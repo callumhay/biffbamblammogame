@@ -47,6 +47,8 @@ public:
 	void Print(const std::string& s) const;
 
 	float GetWidth(const std::string& s) const;
+    std::vector<std::string> ParseTextToWidth(const std::string& s, float width, float scale) const;
+
 	// Obtain the height of this font set, measured in pixels
 	unsigned int GetHeight() const {
 		return this->heightInPixels;

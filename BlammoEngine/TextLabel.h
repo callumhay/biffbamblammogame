@@ -26,21 +26,11 @@ struct DropShadow {
 	DropShadow(): amountPercentage(0.0f), colour(Colour(0,0,0)), isSet(false), scale(1.0f) {}
 };
 
-class TextLabel2D {
-
-private:
-	float scale;
-	float lastRasterWidth;
-	ColourRGBA colour;
-	DropShadow dropShadow;
-	Point2D topLeftCorner;
-	const TextureFontSet* font;
-	std::string text;
-
+class TextLabel {
 public:
-	TextLabel2D();
-	TextLabel2D(const TextureFontSet* font, const std::string& text);
-	~TextLabel2D();
+    TextLabel();
+    TextLabel(const TextureFontSet* font);
+    virtual ~TextLabel();
 
 	void SetScale(float scale) {
 		assert(scale != 0.0f);
@@ -48,22 +38,6 @@ public:
 	}
 	float GetScale() const {
 		return this->scale;
-	}
-
-	// Set the font of this label
-	void SetFont(const TextureFontSet* font) {
-		this->font = font;
-		this->lastRasterWidth = this->font->GetWidth(this->text);
-	}
-	// Set the text colour for this label
-	void SetColour(const Colour& c) {
-		this->colour = ColourRGBA(c, 1.0f);
-	}
-	void SetColour(const ColourRGBA& c) {
-		this->colour = c;
-	}
-	void SetAlpha(float alpha) {
-		this->colour[3] = alpha;
 	}
 
 	// Set drop shadow for the label - the colour and amount it drops
@@ -77,25 +51,27 @@ public:
 		this->dropShadow.amountPercentage = percentAmt;
 	}
 
-	// Set the text for this label
-	void SetText(const std::string& text) {
-		this->text = text;
-		this->lastRasterWidth = this->font->GetWidth(this->text);
+	// Set the font of this label
+	virtual void SetFont(const TextureFontSet* font) {
+		this->font = font;
 	}
+	// Set the text colour for this label
+	void SetColour(const Colour& c) {
+		this->colour = ColourRGBA(c, 1.0f);
+	}
+	void SetColour(const ColourRGBA& c) {
+		this->colour = c;
+	}
+	void SetAlpha(float alpha) {
+		this->colour[3] = alpha;
+	}
+
 	// Set the top left corner location where this label will be drawn
 	void SetTopLeftCorner(const Point2D& p) {
 		this->topLeftCorner = p;
 	}
 	const Point2D& GetTopLeftCorner() const {
 		return this->topLeftCorner;
-	}
-
-	// Obtain the height of this label
-	unsigned int GetHeight() const {
-		return this->scale * this->font->GetHeight();
-	}
-	float GetLastRasterWidth() const {
-		return this->scale * this->lastRasterWidth;
 	}
 
 	const TextureFontSet* GetFont() const {
@@ -107,11 +83,74 @@ public:
 	const ColourRGBA& GetColour() const {
 		return this->colour;
 	}
+
+protected:
+    float scale;
+	ColourRGBA colour;
+	DropShadow dropShadow;
+	Point2D topLeftCorner;
+	const TextureFontSet* font;
+};
+
+
+class TextLabel2D : public TextLabel {
+
+public:
+	TextLabel2D();
+	TextLabel2D(const TextureFontSet* font, const std::string& text);
+	~TextLabel2D();
+
+	// Set the text for this label
+	void SetText(const std::string& text) {
+		this->text = text;
+		this->lastRasterWidth = this->font->GetWidth(this->text);
+	}
+
+	void SetFont(const TextureFontSet* font) {
+		this->font = font;
+		this->lastRasterWidth = this->font->GetWidth(this->text);
+	}
+
+	// Obtain the height of this label
+	unsigned int GetHeight() const {
+		return this->scale * this->font->GetHeight();
+	}
+	float GetLastRasterWidth() const {
+		return this->scale * this->lastRasterWidth;
+	}
+
 	std::string GetText() const {
 		return this->text;
 	}
 
 	void Draw(bool depthTestOn = false, float depth = 0.0);
+
+private:
+	float lastRasterWidth;
+	std::string text;
+};
+
+
+class TextLabel2DFixedWidth : public TextLabel {
+
+public:
+    TextLabel2DFixedWidth(const TextureFontSet* font, float width, const std::string& text); 
+    ~TextLabel2DFixedWidth();
+
+	const std::vector<std::string>& GetTextLines() const {
+		return this->textLines;
+	}
+    void SetText(const std::string& text);
+
+    void Draw();
+
+private:
+    float fixedWidth;
+    std::vector<std::string> textLines;
+
+    void DrawTextLines(float xOffset, float yOffset);
+
+    DISALLOW_COPY_AND_ASSIGN(TextLabel2DFixedWidth);
 };
 
 #endif
