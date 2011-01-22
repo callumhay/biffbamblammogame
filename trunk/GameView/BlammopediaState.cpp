@@ -162,8 +162,11 @@ BlammopediaState::~BlammopediaState() {
 
 void BlammopediaState::RenderFrame(double dT) {
     const Camera& camera = this->display->GetCamera();
+    
     ItemListView* currListView = this->GetCurrentListView();
     assert(currListView != NULL);
+    currListView->Tick(dT);
+
     ItemListView::ListItem* currItem = currListView->GetSelectedItem();
 
 	// Clear the screen to a white background
@@ -188,7 +191,8 @@ void BlammopediaState::RenderFrame(double dT) {
     // Now draw the currently selected list of the blammopedia...
     glPushMatrix();
     glTranslatef(0, camera.GetWindowHeight(), 0);
-    currListView->Draw(dT, camera);
+    
+    currListView->Draw(camera);
     glPopMatrix();
 
     // If the user is currently selecting stuff from the menu then we grey out the list view
@@ -263,7 +267,7 @@ void BlammopediaState::RenderFrame(double dT) {
             else {
                 this->selectedItemNameLbl.SetColour(Colour(0.49f, 0.98f, 1.0f));
             }
-            this->selectedItemNameLbl.SetText(currItem->GetName());
+            this->selectedItemNameLbl.SetText(currItem->GetNameLbl()->GetText());
             this->selectedItemNameLbl.SetTopLeftCorner(Point2D(camera.GetWindowWidth() - 
                 this->selectedItemNameLbl.GetLastRasterWidth() - BlammopediaState::ITEM_NAME_BORDER_SIZE,
                 this->selectedItemNameLbl.GetHeight() + BlammopediaState::ITEM_NAME_BORDER_SIZE));
@@ -286,6 +290,8 @@ void BlammopediaState::RenderFrame(double dT) {
             label->Draw();
         }
     }
+
+    currListView->DrawPost(camera);
 
     glPopMatrix();
     Camera::PopWindowCoords();
@@ -379,6 +385,7 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
 	// Add each item in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
     std::string currName;
+    std::string currDesc;
     const Blammopedia::ItemEntryMap& itemEntries = blammopedia->GetItemEntries();
     for (Blammopedia::ItemEntryMapConstIter iter = itemEntries.begin(); iter != itemEntries.end(); ++iter) {
         Blammopedia::ItemEntry* itemEntry = iter->second;
@@ -386,11 +393,13 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
         if (!itemEntry->GetIsLocked()) {
             texture  = itemEntry->GetItemTexture();
             currName = itemEntry->GetName();
+            currDesc = itemEntry->GetDescription();
         }
         else {
             currName = LOCKED_NAME;
+            currDesc = "";
         }
-        itemsListView->AddItem(currName, texture, itemEntry->GetIsLocked());
+        itemsListView->AddItem(currName, currDesc, texture, itemEntry->GetIsLocked());
     }
 
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
@@ -413,7 +422,7 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
         else {
             currName = LOCKED_NAME;
         }
-        blockListView->AddItem(currName, texture, blockEntry->GetIsLocked());
+        blockListView->AddItem(currName, "", texture, blockEntry->GetIsLocked());
     }
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);

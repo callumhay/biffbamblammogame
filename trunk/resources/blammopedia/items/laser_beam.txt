@@ -1,3 +1,3 @@
 Name: Laser Beam
 ItemTexture: laserbeampaddle_powerup_256x128.jpg
-Desc: Laser effing beams. It’ll melt blocks like lego in a microwave. Imagine the carnage! Need I say more? (Sharks sold separately.)
+Desc: Laser effing beams. It'll melt blocks like lego in a microwave. Imagine the carnage! Need I say more? (Sharks sold separately.)

@@ -45,6 +45,44 @@ float TextureFontSet::GetWidth(const std::string& s) const {
 }
 
 /**
+ * Parses the given text into lines that are at most the given width and scale for printing using this font.
+ */
+std::vector<std::string> TextureFontSet::ParseTextToWidth(const std::string& s, float width, float scale) const {
+    assert(width > 0);
+    std::vector<std::string> lines;
+    if (s.empty()) {
+        return lines;
+    }
+
+    float currCount = 0;
+    size_t lastLineBeginIdx = 0;
+    size_t lastSpaceIdx = 0;
+    float countAtSpace = 0;
+
+    for (size_t i = 0; i < s.size(); i++) {
+        char currChar = s.at(i);
+		currCount += scale * this->widthOfChars[currChar];
+        
+
+        if (currCount <= width && (currChar == ' ' || currChar == '\n' || currChar == '-')) {
+            lastSpaceIdx = i;
+            countAtSpace = currCount;
+        }
+
+        if (currCount >= width && lastSpaceIdx != 0) {
+            lines.push_back(s.substr(lastLineBeginIdx, lastSpaceIdx - lastLineBeginIdx));
+            currCount -= countAtSpace;
+            lastLineBeginIdx = lastSpaceIdx+1;
+        }
+        if (i == s.size()-1 && lastLineBeginIdx != i) {
+            lines.push_back(s.substr(lastLineBeginIdx, s.size() - lastLineBeginIdx));
+        }
+    }
+
+    return lines;
+}
+
+/**
  * Prints a given string using this font, while printing such that
  * the string starts with its top-left corner at the point specified.
  * This prints in 2D, window coordinates.
