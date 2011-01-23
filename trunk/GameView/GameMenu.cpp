@@ -19,32 +19,30 @@
 
 // GameMenu Functions **********************************************
 
-const float GameMenu::UP_DOWN_ARROW_HEIGHT					= 12.0f;	
-const float GameMenu::UP_DOWN_ARROW_TOP_PADDING			= 8.0f;
-const float GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING	= 12.0f;
-const float GameMenu::BACKGROUND_PADDING						= 12.0f;
+const float GameMenu::UP_DOWN_ARROW_HEIGHT          = 12.0f;	
+const float GameMenu::UP_DOWN_ARROW_TOP_PADDING     = 8.0f;
+const float GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING  = 12.0f;
+const float GameMenu::BACKGROUND_PADDING            = 12.0f;
 
 const Colour GameMenu::RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS] = {
-	Colour(0.89f, 0.149f, 0.2118f),								// 0: Alizarin Red
-	Colour(0.6f, 0.4f, 0.8f),											// 1: Amethyst Purple
-	Colour(0.5f, 1.0f, 0.83f),										// 2: Aquamarine
-	Colour(0.0f, 0.5f, 1.0f),											// 3: Azure Blue
-	Colour(0.5f, 1.0f, 0.0f),											// 4: Chartreuse
-	Colour(0.8588235f, 0.439215686f, 0.57647f),		// 5: Pale Violet
-	Colour(1.0f, 0.3333f, 0.639f),								// 6: Rose
-	Colour(1.0f, 0.7176f, 0.77f),									// 7: Light Pink
-	Colour(0.39f, 0.5843f, 0.9294f),							// 8: Cornflower Blue
-	Colour(0.4f, 0.69f, 0.196f),									// 9: Puke Green
-	Colour(0.988f, 0.76078f, 0.0f),								// 10: Gold
-	Colour(0.596f, 1.0f, 0.596f),									// 11: Mint Green
-	Colour(1.0f, 0.8f, 0.0f),											// 12: Tangerine Yellow
-	Colour(0.0f, 1.0f, 0.5f),											// 13: Spring Green
-	Colour(0.8745f, 0.451f, 1.0f),								// 14: Pinkish-Purple (Heliotrope)
-	Colour(0.251f, 0.8784f, 0.815686f),						// 15: Turquoise
-	Colour(0.3137f, 0.7843f, 0.47f),							// 16: Emerald Green
-	Colour(1.0f, 0.6f, 0.4f),											// 17: Grapefruit pink
-	Colour(0.57647f, 0.4392f, 0.8588f),						// 18: Medium Purple
-	Colour(0.45098f, 0.76078f, 0.98431f)					// 19: Maya Blue
+	Colour(0.89f, 0.149f, 0.2118f),                 // Alizarin Red
+	Colour(0.6f, 0.4f, 0.8f),                       // Amethyst Purple
+	Colour(0.5f, 1.0f, 0.83f),                      // Aquamarine
+	Colour(0.0f, 0.5f, 1.0f),                       // Azure Blue
+	Colour(0.5f, 1.0f, 0.0f),                       // Chartreuse
+	Colour(0.8588235f, 0.439215686f, 0.57647f),     // Pale Violet
+	Colour(1.0f, 0.3333f, 0.639f),                  // Rose
+	Colour(1.0f, 0.7176f, 0.77f),                   // Light Pink
+	Colour(0.39f, 0.5843f, 0.9294f),                // Cornflower Blue
+	Colour(0.4f, 0.69f, 0.196f),                    // Puke Green
+	Colour(0.596f, 1.0f, 0.596f),                   // Mint Green
+	Colour(0.0f, 1.0f, 0.5f),                       // Spring Green
+	Colour(0.8745f, 0.451f, 1.0f),                  // Pinkish-Purple (Heliotrope)
+	Colour(0.251f, 0.8784f, 0.815686f),             // Turquoise
+	Colour(0.3137f, 0.7843f, 0.47f),                // Emerald Green
+	Colour(1.0f, 0.6f, 0.4f),                       // Grapefruit pink
+	Colour(0.57647f, 0.4392f, 0.8588f),             // Medium Purple
+	Colour(0.45098f, 0.76078f, 0.98431f)            // Maya Blue
 };
 
 GameMenu::GameMenu() : topLeftCorner(Point2D(0,0)), menuItemPadding(0.0f),

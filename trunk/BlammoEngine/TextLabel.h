@@ -32,7 +32,7 @@ public:
     TextLabel(const TextureFontSet* font);
     virtual ~TextLabel();
 
-	void SetScale(float scale) {
+	virtual void SetScale(float scale) {
 		assert(scale != 0.0f);
 		this->scale = scale;
 	}
@@ -142,9 +142,20 @@ public:
         return this->textLines.size() * (this->scale * this->font->GetHeight()) + 
             (this->textLines.size() - 1) * this->lineSpacing;
 	}
-
 	const std::vector<std::string>& GetTextLines() const {
 		return this->textLines;
+	}
+    std::string GetText() const;
+
+    void SetScale(float scale) {
+	    assert(scale != 0.0f);
+	    this->scale = scale;
+        this->SetText(this->GetText());
+	}
+
+	void SetFont(const TextureFontSet* font) {
+		this->font = font;
+        this->SetText(this->GetText());
 	}
 
     void SetText(const std::string& text);

@@ -72,6 +72,15 @@ void TextLabel2DFixedWidth::SetText(const std::string& text) {
     this->textLines = this->font->ParseTextToWidth(text, this->fixedWidth, this->scale);
 }
 
+std::string TextLabel2DFixedWidth::GetText() const {
+    if (this->textLines.empty()) { return std::string(""); }
+
+    std::string text = this->textLines[0];
+    for (size_t i = 1; i < this->textLines.size(); i++) {
+        text = text + std::string(" ") + this->textLines[i];
+    }
+}
+
 void TextLabel2DFixedWidth::Draw() {
 	// Draw drop shadow part
 	if (this->dropShadow.isSet) {

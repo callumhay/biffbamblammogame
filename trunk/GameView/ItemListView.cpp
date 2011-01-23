@@ -11,10 +11,13 @@
 
 #include "ItemListView.h"
 #include "GameFontAssetsManager.h"
+#include "GameViewConstants.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/TextLabel.h"
+
+#include "../ResourceManager.h"
 
 // ItemListView Methods --------------------------------------------------------------------------
 
@@ -28,10 +31,21 @@ const int ItemListView::HORIZ_ITEM_ACTIVATED_BORDER = 50;
 ItemListView::ItemListView(size_t width) : listWidth(width),
 selectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX), 
 itemIsActivated(false), nonActivatedItemsFadeAnim(1), activatedItemFadeAnim(1), 
-activatedItemGrowAnim(1), blackBorderAnim(0.0f), activatedItemXPicAnim(width + 1),
-activatedItemAlphaAnim(0.0f) {
+activatedItemGrowAnim(1), blackBorderAnim(0.0f), activatedItemXPicAnim(width + 1), keyboardButtonTex(NULL),
+escKeyTextLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small), "Esc")),
+pressTextLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "Press")),
+toReturnTextLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "to Return")),
+activatedItemAlphaAnim(0.0f), pressEscAlphaAnim(0.0f) {
 	assert(width > 0);
 	
+    this->keyboardButtonTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_KEYBOARD_KEY, 
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->keyboardButtonTex != NULL);
+    
+    this->escKeyTextLbl->SetColour(Colour(0, 0, 0));
+    this->pressTextLbl->SetColour(Colour(1,1,1));
+    this->toReturnTextLbl->SetColour(Colour(1,1,1));
+
 	this->horizontalBorder	= 30;
 	this->verticalBorder	= 30;
 	this->horizontalGap		= 30;
@@ -78,6 +92,7 @@ activatedItemAlphaAnim(0.0f) {
     this->blackBorderAnim.SetInterpolantValue(0.0f);
     this->activatedItemXPicAnim.SetInterpolantValue(width + this->itemPixelWidth);
     this->activatedItemAlphaAnim.SetInterpolantValue(0.0f);
+    this->pressEscAlphaAnim.SetInterpolantValue(0.0f);
 }
 
 ItemListView::~ItemListView() {
@@ -86,6 +101,15 @@ ItemListView::~ItemListView() {
 		delete currItem;
 		currItem = NULL;
 	}
+
+    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->keyboardButtonTex);
+    assert(success);
+    delete this->escKeyTextLbl;
+    this->escKeyTextLbl = NULL;
+    delete this->pressTextLbl;
+    this->pressTextLbl = NULL;
+    delete this->toReturnTextLbl;
+    this->toReturnTextLbl = NULL;
 }
 
 void ItemListView::Tick(double dT) {
@@ -99,6 +123,7 @@ void ItemListView::Tick(double dT) {
     this->blackBorderAnim.Tick(dT);
     this->activatedItemXPicAnim.Tick(dT);
     this->activatedItemAlphaAnim.Tick(dT);
+    this->pressEscAlphaAnim.Tick(dT);
 
     for (int i = 0; i < static_cast<int>(this->items.size()); i++) {
         ListItem* currItem = this->items[i];
@@ -164,7 +189,7 @@ void ItemListView::Draw(const Camera& camera) {
 
     
     float activatedItemAlpha = this->activatedItemAlphaAnim.GetInterpolantValue();
-    if (activatedItemAlpha > 0) {
+    if (activatedItemAlpha > 0 && this->GetSelectedItem() != NULL) {
 
         const Colour& itemColour = this->GetSelectedItem()->GetColour();
         TextLabel2D* nameLbl = this->GetSelectedItem()->GetNameLbl();
@@ -230,10 +255,18 @@ void ItemListView::DrawPost(const Camera& camera) {
         float screenHeight = camera.GetWindowHeight();
         float topBorderBottomY = screenHeight - blackBorderAmt;
 
-        glPushAttrib(GL_CURRENT_BIT);
+        glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_COLOR_BUFFER_BIT);
+
+	    glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+	    glPolygonMode(GL_FRONT, GL_FILL);
+
+        glEnable(GL_BLEND);
+	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glPushMatrix();
         glLoadIdentity();
+
         glColor4f(0, 0, 0, 1);
         glBegin(GL_QUADS);
 
@@ -250,10 +283,47 @@ void ItemListView::DrawPost(const Camera& camera) {
         glVertex2i(screenWidth, 0);
 
         glEnd();
-        glPopMatrix();
 
+        // Draw the keyboard key for escaping the entry pop-up
+        float activatedItemAlpha = this->activatedItemAlphaAnim.GetInterpolantValue() * this->pressEscAlphaAnim.GetInterpolantValue();
+
+        static const float TEXT_KEY_PIC_GAP = 10;
+        static const float X_TEXT_LOC = 40;
+        const float Y_TEXT_LOC = 30 + this->pressTextLbl->GetHeight();
+        const float KEY_HEIGHT = 2 * this->pressTextLbl->GetHeight();
+        const float X_LEFT_KEY_PIC  = X_TEXT_LOC + this->pressTextLbl->GetLastRasterWidth() + TEXT_KEY_PIC_GAP;
+        const float X_RIGHT_KEY_PIC = X_LEFT_KEY_PIC + KEY_HEIGHT;
+
+        this->pressTextLbl->SetAlpha(activatedItemAlpha);
+        this->pressTextLbl->SetTopLeftCorner(Point2D(X_TEXT_LOC, Y_TEXT_LOC));
+        this->pressTextLbl->Draw();
+
+        this->toReturnTextLbl->SetAlpha(activatedItemAlpha);
+        this->toReturnTextLbl->SetTopLeftCorner(Point2D(X_RIGHT_KEY_PIC + TEXT_KEY_PIC_GAP, Y_TEXT_LOC));
+        this->toReturnTextLbl->Draw();
+
+        this->keyboardButtonTex->BindTexture();
+        glColor4f(1, 1, 1, activatedItemAlpha);
+        glBegin(GL_QUADS);
+	    glTexCoord2i(1, 0);
+	    glVertex2f(X_RIGHT_KEY_PIC, Y_TEXT_LOC - 1.5f * this->pressTextLbl->GetHeight());
+	    glTexCoord2i(1, 1);
+	    glVertex2f(X_RIGHT_KEY_PIC, Y_TEXT_LOC + this->pressTextLbl->GetHeight()/2);
+	    glTexCoord2i(0, 1);
+	    glVertex2f(X_LEFT_KEY_PIC, Y_TEXT_LOC + this->pressTextLbl->GetHeight()/2);
+        glTexCoord2i(0, 0);
+	    glVertex2f(X_LEFT_KEY_PIC, Y_TEXT_LOC - 1.5f * this->pressTextLbl->GetHeight());
+        glEnd();
+
+        this->escKeyTextLbl->SetAlpha(activatedItemAlpha);
+        this->escKeyTextLbl->SetTopLeftCorner(Point2D(X_LEFT_KEY_PIC + this->pressTextLbl->GetHeight()/2, Y_TEXT_LOC));
+        this->escKeyTextLbl->Draw();
+
+        glPopMatrix();
         glPopAttrib();
     }
+
+
 }
 
 // Adds a new list item to the end of the current list 
@@ -371,6 +441,17 @@ void ItemListView::ItemActivated() {
 
         this->activatedItemAlphaAnim.SetLerp(1.0, 1.75, this->activatedItemAlphaAnim.GetInterpolantValue(), 1.0f);
         this->activatedItemAlphaAnim.SetRepeat(false);
+
+        std::vector<float> alphaVals;
+        alphaVals.push_back(0.15f);
+        alphaVals.push_back(1.0f);
+        alphaVals.push_back(0.15f);
+        std::vector<double> timeVals;
+        timeVals.push_back(0.0);
+        timeVals.push_back(2.0);
+        timeVals.push_back(4.0);
+        this->pressEscAlphaAnim.SetLerp(timeVals, alphaVals);
+        this->pressEscAlphaAnim.SetRepeat(true);
     }   
 }
 
@@ -396,6 +477,10 @@ void ItemListView::ItemDeactivated() {
 
         this->activatedItemAlphaAnim.SetLerp(0.5, 0.0f);
         this->activatedItemAlphaAnim.SetRepeat(false);
+
+        this->pressEscAlphaAnim.ClearLerp();
+        this->pressEscAlphaAnim.SetRepeat(false);
+        this->pressEscAlphaAnim.SetInterpolantValue(0.0f);
     }
 }
 

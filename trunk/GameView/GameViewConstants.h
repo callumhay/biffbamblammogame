@@ -122,6 +122,8 @@ public:
 
 	const char* TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY;
 
+    const char* TEXTURE_KEYBOARD_KEY;
+
 	// Font path constants **********************************
 	const char* FONT_SADBAD;
 	const char* FONT_HAPPYGOOD;
