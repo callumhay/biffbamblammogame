@@ -96,6 +96,11 @@ private:
     size_t listWidth;
     int numItemsPerRow;
 
+    Texture* keyboardButtonTex;
+    TextLabel2D* escKeyTextLbl;
+    TextLabel2D* pressTextLbl;
+    TextLabel2D* toReturnTextLbl;
+
 	// Item information
     bool itemIsActivated;
 	int selectedItemIndex;
@@ -119,6 +124,7 @@ private:
     //AnimationLerp<float> revealAnim;
     AnimationLerp<float> activatedItemXPicAnim;
     AnimationLerp<float> activatedItemAlphaAnim;
+    AnimationMultiLerp<float> pressEscAlphaAnim;
 
     void GetTranslationToItemAtIndex(int index, float& xTranslation, float& yTranslation);
 	size_t AdjustItemWidthAndListLayout(size_t width);

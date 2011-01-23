@@ -105,16 +105,18 @@ TEXTURE_NOISE_OCTAVES(TEXTURE_DIRECTORY "/noise_octaves.raw"),
 
 TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY(TEXTURE_DIRECTORY "/locked_item_256x128.jpg"),
 
+TEXTURE_KEYBOARD_KEY(TEXTURE_DIRECTORY "/keyboard_button_64x64.png"),
+
 // Font Asset Paths
-FONT_SADBAD(FONT_DIRECTORY				"/sadbad.ttf"),
-FONT_HAPPYGOOD(FONT_DIRECTORY			"/happygood.ttf"),
-FONT_EXPLOSIONBOOM(FONT_DIRECTORY "/explosionboom.ttf"),
-FONT_ELECTRICZAP(FONT_DIRECTORY		"/electriczap.ttf"),
-FONT_ALLPURPOSE(FONT_DIRECTORY		"/allpurpose.ttf"),
+FONT_SADBAD(FONT_DIRECTORY          "/sadbad.ttf"),
+FONT_HAPPYGOOD(FONT_DIRECTORY       "/happygood.ttf"),
+FONT_EXPLOSIONBOOM(FONT_DIRECTORY   "/explosionboom.ttf"),
+FONT_ELECTRICZAP(FONT_DIRECTORY     "/electriczap.ttf"),
+FONT_ALLPURPOSE(FONT_DIRECTORY      "/allpurpose.ttf"),
 
 // Sound script paths
-MAIN_MENU_SOUND_SCRIPT(SOUND_DIRECTORY "/main_menu_sound.msf"),
-DECO_SOUND_SCRIPT(SOUND_DIRECTORY "/deco_sound.msf"),
+MAIN_MENU_SOUND_SCRIPT(SOUND_DIRECTORY  "/main_menu_sound.msf"),
+DECO_SOUND_SCRIPT(SOUND_DIRECTORY       "/deco_sound.msf"),
 
 // Item-related constants
 ITEM_LABEL_MATGRP("ItemLabel"),                             // Material group name for changing the label on the item mesh
