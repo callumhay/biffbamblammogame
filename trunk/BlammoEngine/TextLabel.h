@@ -112,7 +112,7 @@ public:
 	}
 
 	// Obtain the height of this label
-	unsigned int GetHeight() const {
+	size_t GetHeight() const {
 		return this->scale * this->font->GetHeight();
 	}
 	float GetLastRasterWidth() const {
@@ -137,14 +137,25 @@ public:
     TextLabel2DFixedWidth(const TextureFontSet* font, float width, const std::string& text); 
     ~TextLabel2DFixedWidth();
 
+	size_t GetHeight() const {
+        if (this->textLines.empty()) { return 0; }
+        return this->textLines.size() * (this->scale * this->font->GetHeight()) + 
+            (this->textLines.size() - 1) * this->lineSpacing;
+	}
+
 	const std::vector<std::string>& GetTextLines() const {
 		return this->textLines;
 	}
+
     void SetText(const std::string& text);
+    void SetLineSpacing(float spacing) {
+        this->lineSpacing = spacing;
+    }
 
     void Draw();
 
 private:
+    float lineSpacing;
     float fixedWidth;
     std::vector<std::string> textLines;
 

@@ -58,7 +58,7 @@ void TextLabel2D::Draw(bool depthTestOn, float depth) {
 
 TextLabel2DFixedWidth::TextLabel2DFixedWidth(const TextureFontSet* font, 
                                              float width, const std::string& text) : 
-TextLabel(font), fixedWidth(width) {
+TextLabel(font), fixedWidth(width), lineSpacing(8.0f) {
     assert(font != NULL);
     this->SetText(text);
 }
@@ -92,6 +92,6 @@ void TextLabel2DFixedWidth::DrawTextLines(float xOffset, float yOffset) {
 
         const std::string& currLineTxt = *iter;
         this->font->OrthoPrint(currTextTopLeftPos, currLineTxt, false, this->scale);
-        currTextTopLeftPos[1] -= this->font->GetHeight() * 1.5f;
+        currTextTopLeftPos[1] -= (this->scale * this->font->GetHeight() + this->lineSpacing);
     }
 }

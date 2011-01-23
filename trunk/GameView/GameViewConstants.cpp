@@ -193,3 +193,21 @@ DECO_BLOCK_MESH_PATH(MESH_DIRECTORY "/deco_block.obj")
 
 GameViewConstants::~GameViewConstants() {
 }
+
+/**
+ * Gets the colour associated with the given item disposition.
+ */
+const Colour& GameViewConstants::GetItemColourFromDisposition(const GameItem::ItemDisposition& itemDisposition) const {
+    switch (itemDisposition) {
+        case GameItem::Good:
+            return this->ITEM_GOOD_COLOUR;
+        case GameItem::Neutral:
+            return this->ITEM_NEUTRAL_COLOUR;
+        case GameItem::Bad:
+            return this->ITEM_BAD_COLOUR;
+        default:
+            assert(false);
+            break;
+    }
+    return this->ITEM_NEUTRAL_COLOUR;
+}
