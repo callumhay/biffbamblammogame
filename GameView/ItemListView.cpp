@@ -21,6 +21,8 @@
 const int ItemListView::NO_ITEM_SELECTED_INDEX      = -1;
 const int ItemListView::DEFAULT_NUM_ITEMS_PER_ROW   = 4;
 const int ItemListView::MAX_ITEM_WIDTH              = 200;
+
+const int ItemListView::BLACK_BORDER_HEIGHT         = 100;
 const int ItemListView::HORIZ_ITEM_ACTIVATED_BORDER = 50;
 
 ItemListView::ItemListView(size_t width) : listWidth(width),
@@ -163,24 +165,54 @@ void ItemListView::Draw(const Camera& camera) {
     
     float activatedItemAlpha = this->activatedItemAlphaAnim.GetInterpolantValue();
     if (activatedItemAlpha > 0) {
+
+        const Colour& itemColour = this->GetSelectedItem()->GetColour();
+        TextLabel2D* nameLbl = this->GetSelectedItem()->GetNameLbl();
+        TextLabel2DFixedWidth* descLbl = this->GetSelectedItem()->GetDescriptionLbl();
+        assert(nameLbl != NULL);
+        assert(descLbl != NULL);
+
+        static const float PIC_TITLE_GAP = 40;
+        static const float STRIPE_BORDER = 20;
+        
+        float totalItemDisplayHeight = (this->itemPixelHeight + PIC_TITLE_GAP + descLbl->GetHeight());
         float itemPicX = this->activatedItemXPicAnim.GetInterpolantValue();
-        float itemAndTitleY = camera.GetWindowHeight() - 200;
 
-        static const float PIC_TITLE_GAP = 30;
-
+        float interiorHeight = (camera.GetWindowHeight() - (2 * ItemListView::BLACK_BORDER_HEIGHT) - totalItemDisplayHeight) / 2.0f;
+        float itemAndTitleYTopLeftCorner = camera.GetWindowHeight() - ItemListView::BLACK_BORDER_HEIGHT - interiorHeight;
+        float itemAndTitleYUnderPic = itemAndTitleYTopLeftCorner - this->itemPixelHeight;
+            
         glPushMatrix();
         glLoadIdentity();
         
-        glTranslatef(itemPicX, itemAndTitleY, 0);
+        // Draw the stripe background of for the title
+        glColor4f(itemColour.R(), itemColour.G(), itemColour.B(), activatedItemAlpha);
+        glBegin(GL_QUADS);
+        glVertex2f(0, itemAndTitleYTopLeftCorner + STRIPE_BORDER);
+        glVertex2f(0, itemAndTitleYUnderPic - STRIPE_BORDER);
+        glVertex2f(camera.GetWindowWidth(), itemAndTitleYUnderPic - STRIPE_BORDER);
+        glVertex2f(camera.GetWindowWidth(), itemAndTitleYTopLeftCorner + STRIPE_BORDER);
+        glEnd();
+
+        glLineWidth(3.0f);
+        glColor4f(0, 0, 0, activatedItemAlpha);
+        glBegin(GL_LINES);
+        glVertex2f(0, itemAndTitleYTopLeftCorner + STRIPE_BORDER);
+        glVertex2f(camera.GetWindowWidth(), itemAndTitleYTopLeftCorner + STRIPE_BORDER);
+        glVertex2f(0, itemAndTitleYUnderPic - STRIPE_BORDER);
+        glVertex2f(camera.GetWindowWidth(), itemAndTitleYUnderPic - STRIPE_BORDER);
+        glEnd();
+
+        glPushMatrix();
+        glTranslatef(itemPicX, itemAndTitleYUnderPic, 0);
         this->GetSelectedItem()->DrawItem(camera, this->itemPixelWidth, this->itemPixelHeight, activatedItemAlpha);
-        
-        TextLabel2D* nameLbl = this->GetSelectedItem()->GetNameLbl();
-        nameLbl->SetTopLeftCorner(Point2D(itemPicX + this->itemPixelWidth + PIC_TITLE_GAP, itemAndTitleY + 1.2f * nameLbl->GetHeight()));
+        glPopMatrix();
+
+        nameLbl->SetTopLeftCorner(Point2D(itemPicX + this->itemPixelWidth + PIC_TITLE_GAP, itemAndTitleYUnderPic + 1.2f * nameLbl->GetHeight()));
         nameLbl->SetAlpha(activatedItemAlpha);
         nameLbl->Draw();
 
-        TextLabel2DFixedWidth* descLbl = this->GetSelectedItem()->GetDescriptionLbl();
-        descLbl->SetTopLeftCorner(Point2D(itemPicX, itemAndTitleY - PIC_TITLE_GAP));
+        descLbl->SetTopLeftCorner(Point2D(itemPicX, itemAndTitleYUnderPic - PIC_TITLE_GAP));
         descLbl->SetAlpha(activatedItemAlpha);
         descLbl->Draw();
 
@@ -225,8 +257,9 @@ void ItemListView::DrawPost(const Camera& camera) {
 }
 
 // Adds a new list item to the end of the current list 
-ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const std::string& description, const Texture* itemTexture, bool isLocked) {
-	ItemListView::ListItem* newItem = new ItemListView::ListItem(this, name, description, itemTexture, isLocked);
+ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const std::string& description, const Colour& colour,
+                                              const Texture* itemTexture, bool isLocked) {
+	ItemListView::ListItem* newItem = new ItemListView::ListItem(this, name, description, colour, itemTexture, isLocked);
 	this->items.push_back(newItem);
 	return newItem;
 }
@@ -330,8 +363,7 @@ void ItemListView::ItemActivated() {
         this->activatedItemGrowAnim.SetLerp(0.0, 1.0, this->activatedItemGrowAnim.GetInterpolantValue(), 2.0f);
         this->activatedItemGrowAnim.SetRepeat(false);
 
-        static const float BLACK_BORDER_HEIGHT = 100;
-        this->blackBorderAnim.SetLerp(0.8, 1.2, this->blackBorderAnim.GetInterpolantValue(), BLACK_BORDER_HEIGHT);
+        this->blackBorderAnim.SetLerp(0.8, 1.2, this->blackBorderAnim.GetInterpolantValue(), ItemListView::BLACK_BORDER_HEIGHT);
         this->blackBorderAnim.SetRepeat(false);
 
         this->activatedItemXPicAnim.SetLerp(1.0, 1.75, this->activatedItemXPicAnim.GetInterpolantValue(), ItemListView::HORIZ_ITEM_ACTIVATED_BORDER);
@@ -418,9 +450,10 @@ void ItemListView::SetSelection(int index) {
 
 // ListItem Methods --------------------------------------------------------------------------
 
-ItemListView::ListItem::ListItem(const ItemListView* parent, const std::string& name, const std::string& description,
+ItemListView::ListItem::ListItem(const ItemListView* parent, const std::string& name, 
+                                 const std::string& description, const Colour& colour,
                                  const Texture* itemTexture, bool isLocked) : 
-texture(itemTexture), isLocked(isLocked), 
+texture(itemTexture), isLocked(isLocked), colour(colour),
 nameLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), name)), 
 descriptionLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
                GameFontAssetsManager::Big), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, description))
@@ -430,8 +463,8 @@ descriptionLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->G
 
     this->nameLbl->SetColour(Colour(1,1,1));
     this->nameLbl->SetDropShadow(Colour(0,0,0), 0.1f);
-    this->descriptionLbl->SetColour(Colour(1,1,1));
-    this->descriptionLbl->SetDropShadow(Colour(0,0,0), 0.1f);
+    this->descriptionLbl->SetColour(Colour(0,0,0));
+    this->descriptionLbl->SetLineSpacing(10.0f);
 
     this->halfSelectionBorderSize = static_cast<float>(parent->GetSmallestBorderSize()) / 2.0f;
 

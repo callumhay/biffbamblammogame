@@ -72,23 +72,8 @@ void GameItemAssets::DrawItem(double dT, const Camera& camera, const GameItem& g
 	
 	this->item->SetTextureForMaterial(GameViewConstants::GetInstance()->ITEM_LABEL_MATGRP, itemTexture);
 	
-	const Colour* itemEndColour = NULL;
-	switch (gameItem.GetItemDisposition()) {
-		case GameItem::Good:
-			itemEndColour = &GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR;
-			break;
-		case GameItem::Bad:
-			itemEndColour = &GameViewConstants::GetInstance()->ITEM_BAD_COLOUR;
-			break;		
-		case GameItem::Neutral:
-			itemEndColour = &GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR;
-			break;
-		default:
-			assert(false);
-			return;
-	}
-
-	this->item->SetColourForMaterial(GameViewConstants::GetInstance()->ITEM_END_MATGRP, *itemEndColour);
+    const Colour& itemEndColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(gameItem.GetItemDisposition());
+	this->item->SetColourForMaterial(GameViewConstants::GetInstance()->ITEM_END_MATGRP, itemEndColour);
 	
 	glPushMatrix();
 	const Point2D& center = gameItem.GetCenter();
@@ -262,28 +247,9 @@ itemTimer(itemTimer), timerTexture(NULL), fillerTexture(NULL), itemAssets(itemAs
 
 	// Figure out what colour to make the fill based on how it
 	// affects the player (red is bad, green is good, etc.)
-	GameItem::ItemDisposition itemDisposition = itemTimer->GetTimerDisposition();
-	switch (itemDisposition) {
-		
-		case GameItem::Good:
-			this->timerColour = GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR;
-			break;
-
-		case GameItem::Bad:
-			this->timerColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR;
-			break;
-
-		case GameItem::Neutral:
-			this->timerColour = GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR;
-			break;
-
-		default:
-			assert(false);
-			break;
-	}
+    this->timerColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(itemTimer->GetTimerDisposition());
 
 	// Check to see if a timer textures exist... if they don't we have a serious problem
-
 	Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
 	assert(blammopedia != NULL);
 

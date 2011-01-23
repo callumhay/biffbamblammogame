@@ -384,6 +384,7 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
 	
 	// Add each item in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
+    Colour itemColour;
     std::string currName;
     std::string currDesc;
     const Blammopedia::ItemEntryMap& itemEntries = blammopedia->GetItemEntries();
@@ -391,15 +392,20 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
         Blammopedia::ItemEntry* itemEntry = iter->second;
         const Texture2D* texture = blammopedia->GetLockedItemTexture();
         if (!itemEntry->GetIsLocked()) {
+
             texture  = itemEntry->GetItemTexture();
             currName = itemEntry->GetName();
             currDesc = itemEntry->GetDescription();
+            
+            GameItem::ItemDisposition itemDisposition = GameItemFactory::GetInstance()->GetItemTypeDisposition(iter->first);
+            itemColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(itemDisposition);
         }
         else {
+            itemColour = Colour(0.5, 0.5, 0.5);
             currName = LOCKED_NAME;
             currDesc = "";
         }
-        itemsListView->AddItem(currName, currDesc, texture, itemEntry->GetIsLocked());
+        itemsListView->AddItem(currName, currDesc, itemColour, texture, itemEntry->GetIsLocked());
     }
 
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
@@ -422,7 +428,7 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
         else {
             currName = LOCKED_NAME;
         }
-        blockListView->AddItem(currName, "", texture, blockEntry->GetIsLocked());
+        blockListView->AddItem(currName, "", Colour(1, 0.65f, 0), texture, blockEntry->GetIsLocked());
     }
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);

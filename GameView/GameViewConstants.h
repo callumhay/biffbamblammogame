@@ -205,6 +205,8 @@ public:
 	const char* DECO_SKYBEAM_MESH;
 	const char* DECO_BLOCK_MESH_PATH;
 
+    const Colour& GetItemColourFromDisposition(const GameItem::ItemDisposition& itemDisposition) const;
+
 private:
 	static GameViewConstants* Instance;
 

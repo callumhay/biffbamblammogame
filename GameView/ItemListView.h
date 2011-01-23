@@ -14,7 +14,7 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Animation.h"
-
+#include "../BlammoEngine/Colour.h"
 #include "../GameControl/GameControl.h"
 
 class Texture;
@@ -28,10 +28,12 @@ public:
     static const int DEFAULT_NUM_ITEMS_PER_ROW;
     static const int MAX_ITEM_WIDTH;
     static const int HORIZ_ITEM_ACTIVATED_BORDER;
+    static const int BLACK_BORDER_HEIGHT;
 
 	class ListItem {
 	public:
-		ListItem(const ItemListView* parent, const std::string& name, const std::string& description, 
+		ListItem(const ItemListView* parent, const std::string& name, 
+                 const std::string& description, const Colour& colour,
                  const Texture* itemTexture, bool isLocked);
 		~ListItem();
 
@@ -44,6 +46,7 @@ public:
 
         void SetSelected(bool isSelected);
 
+        const Colour& GetColour() const { return this->colour; }
 		TextLabel2D* GetNameLbl() const { return this->nameLbl; }
         TextLabel2DFixedWidth* GetDescriptionLbl() const { return this->descriptionLbl; }
 
@@ -51,6 +54,7 @@ public:
 
 	private:
 		bool isLocked;
+        Colour colour;
         TextLabel2D* nameLbl;
         TextLabel2DFixedWidth* descriptionLbl;
 		const Texture* texture;
@@ -74,7 +78,7 @@ public:
     void DrawPost(const Camera& camera);
 
 	ItemListView::ListItem* AddItem(const std::string& name, const std::string& description, 
-                                    const Texture* itemTexture, bool isLocked);
+                                    const Colour& colour, const Texture* itemTexture, bool isLocked);
     void SetSelectedItemIndex(int index);
 	ItemListView::ListItem* GetSelectedItem() const;
     bool GetIsItemActivated() const;

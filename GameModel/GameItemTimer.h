@@ -53,7 +53,7 @@ public:
 		return this->assocGameItem->GetItemType();
 	}
 
-	inline GameItem::ItemDisposition GetTimerDisposition() const {
+	inline const GameItem::ItemDisposition& GetTimerDisposition() const {
 		return this->assocGameItem->GetItemDisposition();
 	}
 

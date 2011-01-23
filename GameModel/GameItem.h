@@ -85,7 +85,7 @@ public:
 	}
 
 	// For obtaining the type of item (e.g., power-up, power-down, ...)
-	GameItem::ItemDisposition GetItemDisposition() const {
+	const GameItem::ItemDisposition& GetItemDisposition() const {
 		return this->disposition;
 	}
 
