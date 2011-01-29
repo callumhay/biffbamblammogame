@@ -1,6 +1,17 @@
+/**
+ * DisplayState.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2010
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
 
 #include "DisplayState.h"
 #include "MainMenuDisplayState.h"
+#include "SelectWorldMenuState.h"
 #include "BlammopediaState.h"
 #include "LevelStartDisplayState.h"
 #include "WorldStartDisplayState.h"
@@ -16,6 +27,8 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
 	switch (type) {
 		case DisplayState::MainMenu:
 			return new MainMenuDisplayState(display);
+        case DisplayState::SelectWorldMenu:
+            return new SelectWorldMenuState(display);
         case DisplayState::BlammopediaMenu:
             return new BlammopediaState(display);
 		case DisplayState::LevelStart:

@@ -97,7 +97,8 @@ void LoadingScreen::RenderLoadingScreen() {
 	
 	// Initialize basic OpenGL state
 	LoadingScreen::InitOpenGLForLoadingScreen();
-	this->itemLoadingLabel.SetTopLeftCorner(Point2D((this->width - this->itemLoadingLabel.GetLastRasterWidth()) / 2.0f, (this->height + LOADING_BAR_HEIGHT) / 2 + this->itemLoadingLabel.GetHeight() + GAP_PIXELS/2));
+	this->itemLoadingLabel.SetTopLeftCorner((this->width - this->itemLoadingLabel.GetLastRasterWidth()) / 2.0f, 
+                                            (this->height + LOADING_BAR_HEIGHT) / 2 + this->itemLoadingLabel.GetHeight() + GAP_PIXELS/2);
 
 	// Bind the FBO so we draw the loading screen into it
 	this->loadingScreenFBO->BindFBObj();
@@ -161,7 +162,7 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 	this->numExpectedUpdates = numExpectedUpdates;
 	this->width = width;
 	this->height = height;
-	this->loadingLabel.SetTopLeftCorner(Point2D(0 + GAP_PIXELS, this->loadingLabel.GetHeight() + GAP_PIXELS));
+	this->loadingLabel.SetTopLeftCorner(0 + GAP_PIXELS, this->loadingLabel.GetHeight() + GAP_PIXELS);
 	
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	

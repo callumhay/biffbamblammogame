@@ -249,7 +249,7 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 	std::stringstream ptStrStream;
 	ptStrStream << gameModel->GetScore();
 	this->scoreLabel.SetText(ptStrStream.str());
-	this->scoreLabel.SetTopLeftCorner(Point2D(DISPLAY_WIDTH - HUD_X_INDENT - this->scoreLabel.GetLastRasterWidth(), DISPLAY_HEIGHT - HUD_Y_INDENT));
+	this->scoreLabel.SetTopLeftCorner(DISPLAY_WIDTH - HUD_X_INDENT - this->scoreLabel.GetLastRasterWidth(), DISPLAY_HEIGHT - HUD_Y_INDENT);
 	this->scoreLabel.Draw();
 
 	// Draw the number of lives left in the top-left corner of the display

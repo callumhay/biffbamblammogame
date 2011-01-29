@@ -15,18 +15,6 @@ public:
 	enum FontSize  { Small = 16, Medium = 24, Big = 32, Huge = 60 };
 	enum FontStyle { SadBadGoo, HappyGood, ExplosionBoom, ElectricZap, AllPurpose }; //Decoish, Cyberpunkish };
 
-private:
-	static GameFontAssetsManager* instance;
-	
-	// Set of fonts for use in the game, indexed by their style and height
-	std::map<FontStyle, std::map<unsigned int, TextureFontSet*> > fonts;
-	bool minimalFontsLoaded;
-
-	GameFontAssetsManager();
-	~GameFontAssetsManager();
-
-public:
-	
 	// Obtain the singleton
 	static GameFontAssetsManager* GetInstance() {
 		if (GameFontAssetsManager::instance == NULL) {
@@ -62,5 +50,17 @@ public:
 	}
 
 	void LoadMinimalFonts();
+
+private:
+	static GameFontAssetsManager* instance;
+	
+	// Set of fonts for use in the game, indexed by their style and height
+	std::map<FontStyle, std::map<unsigned int, TextureFontSet*> > fonts;
+	bool minimalFontsLoaded;
+
+	GameFontAssetsManager();
+	~GameFontAssetsManager();
+
+    DISALLOW_COPY_AND_ASSIGN(GameFontAssetsManager);
 };
 #endif
