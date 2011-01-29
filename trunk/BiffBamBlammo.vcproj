@@ -905,6 +905,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\SelectLevelMenuState.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\SelectWorldMenuState.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\WorldStartDisplayState.h"
 						>
 					</File>
@@ -946,6 +954,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\MainMenuDisplayState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\SelectWorldMenuState.cpp"
 						>
 					</File>
 					<File
@@ -1117,6 +1129,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\KeyboardHelperLabel.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\LoadingScreen.h"
 						>
 					</File>
@@ -1134,6 +1150,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\ItemListView.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\KeyboardHelperLabel.cpp"
 						>
 					</File>
 					<File

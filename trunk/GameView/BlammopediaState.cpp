@@ -110,7 +110,7 @@ goBackToMainMenu(false) {
     backMenuItem->SetColour(IDLE_COLOUR);
     backMenuItem->SetDropShadow(Colour(0,0,0), NO_SELECTION_DROP_SHADOW_AMT);
     topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - backMenuItem->GetHeight()) / 2.0f + backMenuItem->GetHeight();
-    backMenuItem->SetTopLeftCorner(Point2D(BlammopediaState::ITEM_NAME_BORDER_SIZE, topLeftY));
+    backMenuItem->SetTopLeftCorner(BlammopediaState::ITEM_NAME_BORDER_SIZE, topLeftY);
 
 
     static const double TIME_INTERVAL_AMT = 0.15;
@@ -180,11 +180,9 @@ void BlammopediaState::RenderFrame(double dT) {
     static const float LINE_WIDTH = 2.0f;
     glLineWidth(LINE_WIDTH);
 
-	// Draw the splash screen for the current world...
+	// Draw in window coordinates
 	Camera::PushWindowCoords();
-
 	glMatrixMode(GL_MODELVIEW);
-
     glPushMatrix();
 	glLoadIdentity();
 
@@ -268,9 +266,9 @@ void BlammopediaState::RenderFrame(double dT) {
                 this->selectedItemNameLbl.SetColour(Colour(0.49f, 0.98f, 1.0f));
             }
             this->selectedItemNameLbl.SetText(currItem->GetNameLbl()->GetText());
-            this->selectedItemNameLbl.SetTopLeftCorner(Point2D(camera.GetWindowWidth() - 
+            this->selectedItemNameLbl.SetTopLeftCorner(camera.GetWindowWidth() - 
                 this->selectedItemNameLbl.GetLastRasterWidth() - BlammopediaState::ITEM_NAME_BORDER_SIZE,
-                this->selectedItemNameLbl.GetHeight() + BlammopediaState::ITEM_NAME_BORDER_SIZE));
+                this->selectedItemNameLbl.GetHeight() + BlammopediaState::ITEM_NAME_BORDER_SIZE);
             this->selectedItemNameLbl.Draw();
         }
 
@@ -461,7 +459,7 @@ void BlammopediaState::SetBlammoMenuItemHighlighted(int menuItemIndex) {
         prevSelection->SetScale(1.0f);
         prevSelection->SetDropShadowAmount(NO_SELECTION_DROP_SHADOW_AMT);
         float newTopLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - prevSelection->GetHeight()) / 2.0f + prevSelection->GetHeight();
-        prevSelection->SetTopLeftCorner(Point2D(prevSelection->GetTopLeftCorner()[0], newTopLeftY));
+        prevSelection->SetTopLeftCorner(prevSelection->GetTopLeftCorner()[0], newTopLeftY);
         prevSelection->SetColour(IDLE_COLOUR);
     }
 
@@ -471,7 +469,7 @@ void BlammopediaState::SetBlammoMenuItemHighlighted(int menuItemIndex) {
         newSelection->SetScale(SELECTION_SCALE);
         newSelection->SetDropShadowAmount(SELECTION_DROP_SHADOW_AMT);
         float newTopLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - newSelection->GetHeight()) / 2.0f + newSelection->GetHeight();
-        newSelection->SetTopLeftCorner(Point2D(newSelection->GetTopLeftCorner()[0], newTopLeftY));
+        newSelection->SetTopLeftCorner(newSelection->GetTopLeftCorner()[0], newTopLeftY);
         newSelection->SetColour(SELECTION_COLOUR);
     }
 
@@ -495,7 +493,7 @@ void BlammopediaState::SetBlammoMenuItemSelection() {
         // Reset the proper y coordinate for the label (since it was animating)
         TextLabel2D* newSelection = this->blammoMenuLabels[this->currListViewIndex];
         float newTopLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - newSelection->GetHeight()) / 2.0f + newSelection->GetHeight();
-        newSelection->SetTopLeftCorner(Point2D(newSelection->GetTopLeftCorner()[0], newTopLeftY));
+        newSelection->SetTopLeftCorner(newSelection->GetTopLeftCorner()[0], newTopLeftY);
 
         // Setup the animation for the tab...
         this->itemSelTabAnim.SetLerp(0.33f, 1.0f);
@@ -516,13 +514,3 @@ void BlammopediaState::SetBlammoMenuItemDeselection() {
     this->itemSelTabAnim.SetRepeat(false);
 }
 
-void BlammopediaState::DrawFadeOverlay(int width, int height, float alpha) {
-    // Draw the fade quad overlay
-    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    GeometryMaker::GetInstance()->DrawFullScreenQuad(width, height, 1.0f, 
-                                                     ColourRGBA(1, 1, 1, alpha));
-    glPopAttrib();
-}

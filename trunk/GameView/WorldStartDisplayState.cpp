@@ -143,7 +143,7 @@ void WorldStartDisplayState::DrawNowEnteringTextHeader(float screenWidth, float 
 	const float nowEnteringTextHeight = this->nowEnteringLabel.GetHeight(); 
 
 	// Draw the "Now Entering..." label in the top left part of the screen
-	this->nowEnteringLabel.SetTopLeftCorner(Point2D(HORIZONTAL_PADDING, screenHeight - VERTICAL_PADDING));
+	this->nowEnteringLabel.SetTopLeftCorner(HORIZONTAL_PADDING, screenHeight - VERTICAL_PADDING);
 	this->nowEnteringLabel.Draw();
 	const float nowEnteringTextWidth = this->nowEnteringLabel.GetLastRasterWidth();
 
@@ -207,7 +207,8 @@ void WorldStartDisplayState::DrawNowEnteringTextHeader(float screenWidth, float 
 
 	// Draw the world name text label...
 	const float nameLabelXPos = this->titleMoveIn.GetInterpolantValue();
-	this->worldNameLabel.SetTopLeftCorner(Point2D(nameLabelXPos - this->worldNameLabel.GetLastRasterWidth(), screenHeight - (nowEnteringTextHeight + 3 * VERTICAL_PADDING)));
+	this->worldNameLabel.SetTopLeftCorner(nameLabelXPos - this->worldNameLabel.GetLastRasterWidth(), 
+                                          screenHeight - (nowEnteringTextHeight + 3 * VERTICAL_PADDING));
 	this->worldNameLabel.SetAlpha(this->titleFadeIn.GetInterpolantValue());
 	this->worldNameLabel.Draw();
 
@@ -219,7 +220,7 @@ void WorldStartDisplayState::DrawPressAnyKeyTextFooter(float screenWidth) {
 	const float horizontalLabelSize = this->pressAnyKeyLabel.GetLastRasterWidth();
 
 	this->pressAnyKeyLabel.SetColour(this->footerColourAnimation.GetInterpolantValue());
-	this->pressAnyKeyLabel.SetTopLeftCorner(Point2D((screenWidth - horizontalLabelSize) / 2.0f, VERTICAL_PADDING + this->pressAnyKeyLabel.GetHeight()));
+	this->pressAnyKeyLabel.SetTopLeftCorner((screenWidth - horizontalLabelSize) / 2.0f, VERTICAL_PADDING + this->pressAnyKeyLabel.GetHeight());
 
 	this->pressAnyKeyLabel.Draw();
 }

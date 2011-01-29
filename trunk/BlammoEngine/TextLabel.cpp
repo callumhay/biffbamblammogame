@@ -79,6 +79,8 @@ std::string TextLabel2DFixedWidth::GetText() const {
     for (size_t i = 1; i < this->textLines.size(); i++) {
         text = text + std::string(" ") + this->textLines[i];
     }
+
+    return text;
 }
 
 void TextLabel2DFixedWidth::Draw() {

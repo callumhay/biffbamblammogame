@@ -115,6 +115,7 @@ private:
 
 	bool changeToPlayGameState;
     bool changeToBlammopediaState;
+    bool changeToLevelSelectState;
 
 	void InitializeESPEffects();
 	void InitializeMainMenu();

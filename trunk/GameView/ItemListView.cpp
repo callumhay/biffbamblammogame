@@ -12,6 +12,7 @@
 #include "ItemListView.h"
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
+#include "KeyboardHelperLabel.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Camera.h"
@@ -31,20 +32,12 @@ const int ItemListView::HORIZ_ITEM_ACTIVATED_BORDER = 50;
 ItemListView::ItemListView(size_t width) : listWidth(width),
 selectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX), 
 itemIsActivated(false), nonActivatedItemsFadeAnim(1), activatedItemFadeAnim(1), 
-activatedItemGrowAnim(1), blackBorderAnim(0.0f), activatedItemXPicAnim(width + 1), keyboardButtonTex(NULL),
-escKeyTextLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small), "Esc")),
-pressTextLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "Press")),
-toReturnTextLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "to Return")),
+activatedItemGrowAnim(1), blackBorderAnim(0.0f), activatedItemXPicAnim(width + 1), keyLabel(NULL),
 activatedItemAlphaAnim(0.0f), pressEscAlphaAnim(0.0f) {
 	assert(width > 0);
 	
-    this->keyboardButtonTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_KEYBOARD_KEY, 
-        Texture::Trilinear, GL_TEXTURE_2D);
-    assert(this->keyboardButtonTex != NULL);
-    
-    this->escKeyTextLbl->SetColour(Colour(0, 0, 0));
-    this->pressTextLbl->SetColour(Colour(1,1,1));
-    this->toReturnTextLbl->SetColour(Colour(1,1,1));
+    this->keyLabel = new KeyboardHelperLabel(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium, "Press", "Esc", "to Return");
+    this->keyLabel->SetBeforeAndAfterTextColour(Colour(1,1,1));
 
 	this->horizontalBorder	= 30;
 	this->verticalBorder	= 30;
@@ -102,14 +95,8 @@ ItemListView::~ItemListView() {
 		currItem = NULL;
 	}
 
-    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->keyboardButtonTex);
-    assert(success);
-    delete this->escKeyTextLbl;
-    this->escKeyTextLbl = NULL;
-    delete this->pressTextLbl;
-    this->pressTextLbl = NULL;
-    delete this->toReturnTextLbl;
-    this->toReturnTextLbl = NULL;
+    delete this->keyLabel;
+    this->keyLabel = NULL;
 }
 
 void ItemListView::Tick(double dT) {
@@ -233,11 +220,11 @@ void ItemListView::Draw(const Camera& camera) {
         this->GetSelectedItem()->DrawItem(camera, this->itemPixelWidth, this->itemPixelHeight, activatedItemAlpha);
         glPopMatrix();
 
-        nameLbl->SetTopLeftCorner(Point2D(itemPicX + this->itemPixelWidth + PIC_TITLE_GAP, itemAndTitleYUnderPic + 1.2f * nameLbl->GetHeight()));
+        nameLbl->SetTopLeftCorner(itemPicX + this->itemPixelWidth + PIC_TITLE_GAP, itemAndTitleYUnderPic + 1.2f * nameLbl->GetHeight());
         nameLbl->SetAlpha(activatedItemAlpha);
         nameLbl->Draw();
 
-        descLbl->SetTopLeftCorner(Point2D(itemPicX, itemAndTitleYUnderPic - PIC_TITLE_GAP));
+        descLbl->SetTopLeftCorner(itemPicX, itemAndTitleYUnderPic - PIC_TITLE_GAP);
         descLbl->SetAlpha(activatedItemAlpha);
         descLbl->Draw();
 
@@ -285,45 +272,16 @@ void ItemListView::DrawPost(const Camera& camera) {
         glEnd();
 
         // Draw the keyboard key for escaping the entry pop-up
+        static const float X_TEXT_LOC = 20;
+        const float Y_TEXT_LOC = this->keyLabel->GetHeight();
         float activatedItemAlpha = this->activatedItemAlphaAnim.GetInterpolantValue() * this->pressEscAlphaAnim.GetInterpolantValue();
-
-        static const float TEXT_KEY_PIC_GAP = 10;
-        static const float X_TEXT_LOC = 40;
-        const float Y_TEXT_LOC = 30 + this->pressTextLbl->GetHeight();
-        const float KEY_HEIGHT = 2 * this->pressTextLbl->GetHeight();
-        const float X_LEFT_KEY_PIC  = X_TEXT_LOC + this->pressTextLbl->GetLastRasterWidth() + TEXT_KEY_PIC_GAP;
-        const float X_RIGHT_KEY_PIC = X_LEFT_KEY_PIC + KEY_HEIGHT;
-
-        this->pressTextLbl->SetAlpha(activatedItemAlpha);
-        this->pressTextLbl->SetTopLeftCorner(Point2D(X_TEXT_LOC, Y_TEXT_LOC));
-        this->pressTextLbl->Draw();
-
-        this->toReturnTextLbl->SetAlpha(activatedItemAlpha);
-        this->toReturnTextLbl->SetTopLeftCorner(Point2D(X_RIGHT_KEY_PIC + TEXT_KEY_PIC_GAP, Y_TEXT_LOC));
-        this->toReturnTextLbl->Draw();
-
-        this->keyboardButtonTex->BindTexture();
-        glColor4f(1, 1, 1, activatedItemAlpha);
-        glBegin(GL_QUADS);
-	    glTexCoord2i(1, 0);
-	    glVertex2f(X_RIGHT_KEY_PIC, Y_TEXT_LOC - 1.5f * this->pressTextLbl->GetHeight());
-	    glTexCoord2i(1, 1);
-	    glVertex2f(X_RIGHT_KEY_PIC, Y_TEXT_LOC + this->pressTextLbl->GetHeight()/2);
-	    glTexCoord2i(0, 1);
-	    glVertex2f(X_LEFT_KEY_PIC, Y_TEXT_LOC + this->pressTextLbl->GetHeight()/2);
-        glTexCoord2i(0, 0);
-	    glVertex2f(X_LEFT_KEY_PIC, Y_TEXT_LOC - 1.5f * this->pressTextLbl->GetHeight());
-        glEnd();
-
-        this->escKeyTextLbl->SetAlpha(activatedItemAlpha);
-        this->escKeyTextLbl->SetTopLeftCorner(Point2D(X_LEFT_KEY_PIC + this->pressTextLbl->GetHeight()/2, Y_TEXT_LOC));
-        this->escKeyTextLbl->Draw();
+        this->keyLabel->SetAlpha(activatedItemAlpha);
+        this->keyLabel->SetTopLeftCorner(X_TEXT_LOC, Y_TEXT_LOC);
+        this->keyLabel->Draw();
 
         glPopMatrix();
         glPopAttrib();
     }
-
-
 }
 
 // Adds a new list item to the end of the current list 

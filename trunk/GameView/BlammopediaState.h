@@ -89,7 +89,6 @@ private:
     void SetBlammoMenuItemSelection();
     void SetBlammoMenuItemDeselection();
 
-    void DrawFadeOverlay(int width, int height, float alpha);
 	DISALLOW_COPY_AND_ASSIGN(BlammopediaState);
 };
 

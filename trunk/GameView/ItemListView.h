@@ -21,6 +21,7 @@ class Texture;
 class Camera;
 class TextLabel2D;
 class TextLabel2DFixedWidth;
+class KeyboardHelperLabel;
 
 class ItemListView {
 public:
@@ -96,10 +97,7 @@ private:
     size_t listWidth;
     int numItemsPerRow;
 
-    Texture* keyboardButtonTex;
-    TextLabel2D* escKeyTextLbl;
-    TextLabel2D* pressTextLbl;
-    TextLabel2D* toReturnTextLbl;
+    KeyboardHelperLabel* keyLabel;
 
 	// Item information
     bool itemIsActivated;

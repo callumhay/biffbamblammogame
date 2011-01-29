@@ -70,6 +70,10 @@ public:
 	void SetTopLeftCorner(const Point2D& p) {
 		this->topLeftCorner = p;
 	}
+    void SetTopLeftCorner(float x, float y) {
+        this->topLeftCorner[0] = x;
+        this->topLeftCorner[1] = y;
+    }
 	const Point2D& GetTopLeftCorner() const {
 		return this->topLeftCorner;
 	}
@@ -101,9 +105,12 @@ public:
 	~TextLabel2D();
 
 	// Set the text for this label
+    void SetText(const char* text) {
+        this->text = std::string(text);
+        this->lastRasterWidth = this->font->GetWidth(this->text);
+    }
 	void SetText(const std::string& text) {
-		this->text = text;
-		this->lastRasterWidth = this->font->GetWidth(this->text);
+        this->SetText(text.c_str());
 	}
 
 	void SetFont(const TextureFontSet* font) {

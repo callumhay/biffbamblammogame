@@ -27,7 +27,7 @@
 // 3 sprites for "Biff" "Bam" and "Blammo" respectively
 const char* MainMenuDisplayState::TITLE_BIFF_TEXT			= "Biff!";
 const char* MainMenuDisplayState::TITLE_BAM_TEXT			= "Bam!!";
-const char* MainMenuDisplayState::TITLE_BLAMMO_TEXT		= "Blammo!?!";
+const char* MainMenuDisplayState::TITLE_BLAMMO_TEXT         = "Blammo!?!";
 
 const int MainMenuDisplayState::MENU_SEL_ON_INDEX	= 0;
 const int MainMenuDisplayState::MENU_SEL_OFF_INDEX	= 1;
@@ -36,7 +36,7 @@ const size_t MainMenuDisplayState::TOTAL_NUM_BANG_EFFECTS = 10;
 
 // Menu items
 const char* MainMenuDisplayState::NEW_GAME_MENUITEM		= "New Game";
-const char* MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Play Level";
+const char* MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Level Select";
 const char* MainMenuDisplayState::OPTIONS_MENUITEM		= "Options";
 const char* MainMenuDisplayState::BLAMMOPEDIA_MENUITEM  = "Blammopedia";
 const char* MainMenuDisplayState::EXIT_MENUITEM			= "Exit Game";
@@ -53,7 +53,8 @@ const float MainMenuDisplayState::CAM_DIST_FROM_ORIGIN = 20.0f;
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
 DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), 
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NULL), particleEventHandler(NULL),
-changeToPlayGameState(false), changeToBlammopediaState(false), menuFBO(NULL), bloomEffect(NULL),
+changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false),
+menuFBO(NULL), bloomEffect(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 {
 
@@ -93,7 +94,6 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 	GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
 	soundAssets->LoadSoundPallet(GameSoundAssets::MainMenuSoundPallet);
 	soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuBackgroundMusic);
-
 
 	// Allocate memory...
 	for (size_t i = 0; i < TOTAL_NUM_BANG_EFFECTS; i++) {
@@ -428,27 +428,37 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	bool finishFadeAnim = this->fadeAnimation.Tick(dT);
 
 	// Check to see if we're switching game states...
-	if (this->changeToPlayGameState && finishFadeAnim) {
-		
-		// Turn off all the sounds first (waiting for any unfinished sounds), then switch states
-		GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
-		soundAssets->StopAllSounds();
+    if (finishFadeAnim) {
+	    if (this->changeToPlayGameState) {
+    		
+		    // Turn off all the sounds first (waiting for any unfinished sounds), then switch states
+		    GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+		    soundAssets->StopAllSounds();
 
-		// Load all the initial stuffs for the game - this will queue up the next states that we need to go to
-		this->display->GetModel()->BeginOrRestartGame();
+		    // Load all the initial stuffs for the game - this will queue up the next states that we need to go to
+		    this->display->GetModel()->BeginOrRestartGame();
 
-		// Place the view into the proper state to play the game	
-		this->display->SetCurrentStateAsNextQueuedState();
+		    // Place the view into the proper state to play the game	
+		    this->display->SetCurrentStateAsNextQueuedState();
 
-		return;
-	}
-    else if (this->changeToBlammopediaState && finishFadeAnim) {
-		// Turn off all the sounds first (waiting for any unfinished sounds), then switch states
-		GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
-		soundAssets->StopAllSounds();
-        // Change to the blammopedia state
-        this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::BlammopediaMenu, this->display));
-        return;
+		    return;
+	    }
+        else if (this->changeToBlammopediaState) {
+		    // Turn off all the sounds first, then switch states
+		    GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+		    soundAssets->StopAllSounds();
+            // Change to the blammopedia state
+            this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::BlammopediaMenu, this->display));
+            return;
+        }
+        else if (this->changeToLevelSelectState) {
+		    // Turn off all the sounds first, then switch states
+		    GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+		    soundAssets->StopAllSounds();
+            // Change to the blammopedia state
+            this->display->SetCurrentState(DisplayState::BuildDisplayStateFromType(DisplayState::SelectWorldMenu, this->display));
+            return;
+        }
     }
 	
 	const Camera& camera			= this->display->GetCamera();
@@ -474,14 +484,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->mainMenu->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 	// Fade-in/out overlay
-	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	GeometryMaker::GetInstance()->DrawFullScreenQuad(DISPLAY_WIDTH, DISPLAY_HEIGHT, 1.0f, 
-																									 ColourRGBA(1, 1, 1, this->fadeAnimation.GetInterpolantValue()));
-	glPopAttrib();
-
+    this->DrawFadeOverlay(DISPLAY_WIDTH, DISPLAY_HEIGHT, this->fadeAnimation.GetInterpolantValue());
 	this->menuFBO->UnbindFBObj();
 
 	// Do bloom on the menu screen and draw it
@@ -740,6 +743,9 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 	else if (itemIndex == this->mainMenuState->playLevelMenuItemIndex) {
 		debug_output("Selected " << PLAY_LEVEL_MENUITEM << " from menu");
 		soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemVerifyAndSelectEvent);
+        this->mainMenuState->changeToLevelSelectState = true;
+		this->mainMenuState->fadeAnimation.SetLerp(0.0, 1.0, 0.0f, 1.0f);
+		this->mainMenuState->fadeAnimation.SetRepeat(false);
 	}
 	else if (itemIndex == this->mainMenuState->optionsMenuItemIndex) {
 		debug_output("Selected " << OPTIONS_MENUITEM << " from menu");
@@ -748,7 +754,7 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
     else if (itemIndex == this->mainMenuState->blammopediaItemIndex) {
         debug_output("Selected " << BLAMMOPEDIA_MENUITEM << " from menu");
         this->mainMenuState->changeToBlammopediaState = true;
-		this->mainMenuState->fadeAnimation.SetLerp(0.0, 2.0, 0.0f, 1.0f);
+		this->mainMenuState->fadeAnimation.SetLerp(0.0, 1.0, 0.0f, 1.0f);
 		this->mainMenuState->fadeAnimation.SetRepeat(false);
     }
 	else if (itemIndex == this->mainMenuState->exitGameMenuItemIndex) {
