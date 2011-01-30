@@ -70,6 +70,10 @@ void TextLabel2DFixedWidth::SetText(const std::string& text) {
     // Parse the text based on the current width...
     assert(this->font != NULL);
     this->textLines = this->font->ParseTextToWidth(text, this->fixedWidth, this->scale);
+    this->currTextWidth = 0;
+    for (size_t i = 1; i < this->textLines.size(); i++) {
+        this->currTextWidth = std::max<float>(this->currTextWidth, this->font->GetWidth(this->textLines[i]));
+    }
 }
 
 std::string TextLabel2DFixedWidth::GetText() const {

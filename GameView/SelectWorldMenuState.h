@@ -19,6 +19,9 @@ class TextLabel2D;
 class FBObj;
 class CgFxBloom;
 class KeyboardHelperLabel;
+class GameWorld;
+class Texture;
+class TextLabel2DFixedWidth;
 
 class SelectWorldMenuState : public DisplayState {
 public:
@@ -41,6 +44,32 @@ private:
 
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
+
+    // Inner class for representing a selectable world item in the world select menu
+    class WorldSelectItem {
+    public:
+        WorldSelectItem(const GameWorld* world, size_t worldNumber, float size);
+        ~WorldSelectItem();
+
+        void SetTopLeftCorner(float x, float y) {
+            this->topLeftCorner[0] = x;
+            this->topLeftCorner[1] = y;
+        }
+        void Draw(const Camera& camera, double dT);
+
+    private:
+        size_t worldNumber;
+        const GameWorld* gameWorld;
+        Texture* image;
+        TextLabel2DFixedWidth* label;
+        TextLabel2DFixedWidth* selectedLabel;
+        Point2D topLeftCorner;
+        float size;
+
+        DISALLOW_COPY_AND_ASSIGN(WorldSelectItem);  
+    };
+
+    std::vector<WorldSelectItem*> worldItems;
 
     bool goBackToMainMenu;
     void GoBackToMainMenu();

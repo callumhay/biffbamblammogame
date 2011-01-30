@@ -18,15 +18,29 @@
 #include "PaddleLaserBeam.h"
 #include "CollateralBlock.h"
 
+#include "../BlammoEngine/StringHelper.h"
+#include "../ResourceManager.h"
+
 GameModel::GameModel() : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), 
 currLivesLeft(0), pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false),
 gameTransformInfo(new GameTransformMgr()), nextState(NULL), doingPieceStatusListIteration(false) {
 	
-	// Initialize the worlds for the game
-	for (size_t i = 0; i < GameModelConstants::GetInstance()->WORLD_PATHS.size(); i++) {
-		this->worlds.push_back(new GameWorld(GameModelConstants::GetInstance()->WORLD_PATHS[i], *this->gameTransformInfo));
-	}
+	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
+    std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
+    std::string currWorldPath;
+    while (std::getline(*inFile, currWorldPath)) {
+        currWorldPath = stringhelper::trim(currWorldPath);
+        if (!currWorldPath.empty()) {
+            GameWorld* newGameWorld = new GameWorld(GameModelConstants::GetInstance()->GetResourceWorldDir() + 
+                                                    std::string("/") + currWorldPath, *this->gameTransformInfo);
+            assert(newGameWorld != NULL);
+            this->worlds.push_back(newGameWorld);
+            currWorldPath.clear();
+        }
+    }
+    delete inFile;
+    inFile = NULL;
 
 	// Initialize paddle and the first ball
 	this->playerPaddle = new PlayerPaddle();

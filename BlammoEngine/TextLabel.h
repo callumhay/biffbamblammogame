@@ -154,6 +154,10 @@ public:
 	}
     std::string GetText() const;
 
+    float GetWidth() const {
+        return this->currTextWidth;
+    }
+
     void SetScale(float scale) {
 	    assert(scale != 0.0f);
 	    this->scale = scale;
@@ -175,6 +179,7 @@ public:
 private:
     float lineSpacing;
     float fixedWidth;
+    float currTextWidth;
     std::vector<std::string> textLines;
 
     void DrawTextLines(float xOffset, float yOffset);
