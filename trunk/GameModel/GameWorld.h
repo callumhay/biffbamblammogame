@@ -14,7 +14,6 @@ class GameTransformMgr;
 // a proxy to itself thus it has a state where the world is not
 // actually loaded - it can be loaded and unloaded from memory on demand.
 class GameWorld {
-
 public:
 	enum WorldStyle { None = -1, Deco = 0, Cyberpunk = 1 };
 
@@ -53,6 +52,10 @@ public:
 		assert(this->isLoaded);
 		return this->name;
 	}
+    const std::string& GetImageFilepath() const {
+        assert(this->isLoaded);
+        return this->imageFilepath;
+    }
 
 	void IncrementLevel(GameModel* model) {
 		assert(this->isLoaded);
@@ -70,13 +73,14 @@ public:
 	}
 
 private:
-	bool isLoaded;												// Has this world been loaded into memory or not?
-	std::string worldFilepath;						// Path to the world defintion file
+	bool isLoaded;                          // Has this world been loaded into memory or not?
+	std::string worldFilepath;              // Path to the world defintion file
 	std::vector<GameLevel*> loadedLevels;	// Levels loaded into memory
-	unsigned int currentLevelNum;					// Current level expressed as an index into loaded levels vector
+	unsigned int currentLevelNum;           // Current level expressed as an index into loaded levels vector
 
-	std::string name;											// Human-readable name of the world
-	WorldStyle style;											// Style of the world loaded (None if no world is loaded)
+	std::string name;						// Human-readable name of the world
+	WorldStyle style;						// Style of the world loaded (None if no world is loaded)
+    std::string imageFilepath;              // The image file path - for the image used to show this world in menus
 
 	GameTransformMgr& transformMgr;
 

@@ -18,6 +18,9 @@
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/FBObj.h"
 
+#include "../GameModel/GameModel.h"
+#include "../GameModel/GameWorld.h"
+
 const char* SelectWorldMenuState::WORLD_SELECT_TITLE = "Select a World...";
 
 SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display) : DisplayState(display), pressEscAlphaAnim(0.0f),
@@ -57,6 +60,32 @@ worldSelectTitleLbl(NULL), keyEscLabel(NULL), goBackToMainMenu(false), menuFBO(N
 	this->bloomEffect->SetSceneIntensity(0.70f);
 	this->bloomEffect->SetGlowIntensity(0.3f);
 	this->bloomEffect->SetHighlightIntensity(0.1f);
+
+    // Setup the world items for the GUI menu
+    const GameModel* gameModel = this->display->GetModel();
+    const std::vector<GameWorld*>& gameWorlds = gameModel->GetGameWorlds();
+    assert(!gameWorlds.empty());
+
+    static const float MAX_ITEM_SIZE = 512;
+    static const float MENU_ITEM_HORIZ_GAP = 30;
+    static const float MENU_VERT_GAP = 50;
+    float menuItemSize = std::min<float>((camera.GetWindowWidth() / gameWorlds.size()) - MENU_ITEM_HORIZ_GAP * (1 + gameWorlds.size()), 
+        (camera.GetWindowHeight() - this->worldSelectTitleLbl->GetHeight() - this->keyEscLabel->GetHeight() - 2*MENU_VERT_GAP));
+    menuItemSize = std::min<float>(menuItemSize, MAX_ITEM_SIZE);
+
+
+    float yCoord = (camera.GetWindowHeight() - menuItemSize / 2) + menuItemSize;
+    float xCoord = (camera.GetWindowWidth() - gameWorlds.size()*menuItemSize - MENU_ITEM_HORIZ_GAP * (gameWorlds.size()));
+
+    this->worldItems.reserve(gameWorlds.size());
+    for (size_t i = 0; i < gameWorlds.size(); i++) {
+        const GameWorld* currGameWorld = gameWorlds[i];
+        WorldSelectItem* menuItem = new WorldSelectItem(currGameWorld, i+1, menuItemSize);
+        menuItem->SetTopLeftCorner(xCoord, yCoord);
+        this->worldItems.push_back(menuItem);
+
+        xCoord += menuItemSize + MENU_ITEM_HORIZ_GAP;
+    }
 }
 
 SelectWorldMenuState::~SelectWorldMenuState() {
@@ -70,6 +99,13 @@ SelectWorldMenuState::~SelectWorldMenuState() {
     this->menuFBO = NULL;
     delete this->bloomEffect;
     this->bloomEffect = NULL;
+
+    for (std::vector<WorldSelectItem*>::iterator iter = this->worldItems.begin(); iter != this->worldItems.end(); ++iter) {
+        WorldSelectItem* item = *iter;
+        delete item;
+        item = NULL;
+    }
+    this->worldItems.clear();
 }
 
 void SelectWorldMenuState::RenderFrame(double dT) {
@@ -97,6 +133,14 @@ void SelectWorldMenuState::RenderFrame(double dT) {
     this->keyEscLabel->SetAlpha(this->pressEscAlphaAnim.GetInterpolantValue());
     this->keyEscLabel->SetTopLeftCorner(20, this->keyEscLabel->GetHeight()); 
     this->keyEscLabel->Draw();
+
+    // Draw the menu
+    for (std::vector<WorldSelectItem*>::iterator iter = this->worldItems.begin(); 
+         iter != this->worldItems.end(); ++iter) {
+
+        WorldSelectItem* worldItem = *iter;
+        worldItem->Draw(camera, dT);
+    }
 
 	// Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
@@ -141,4 +185,83 @@ void SelectWorldMenuState::GoBackToMainMenu() {
 	this->fadeAnimation.SetRepeat(false);
 	this->fadeAnimation.SetInterpolantValue(0.0f);
     this->goBackToMainMenu = true;
+}
+
+
+
+SelectWorldMenuState::WorldSelectItem::WorldSelectItem(const GameWorld* world, size_t worldNumber, float size) : 
+worldNumber(worldNumber), gameWorld(world), image(NULL), label(NULL), selectedLabel(NULL), size(size) {
+    assert(world != NULL);
+
+    this->image = ResourceManager::GetInstance()->GetImgTextureResource(world->GetImageFilepath(), Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->image != NULL);
+    
+    std::stringstream labelTextStream;
+    labelTextStream << "World " << worldNumber << ": " << world->GetName();
+    
+    this->label = new TextLabel2DFixedWidth(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
+        size, labelTextStream.str());
+    this->label->SetColour(Colour(0, 0, 0));
+    
+    this->selectedLabel = new TextLabel2DFixedWidth(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),
+        size, labelTextStream.str());
+    this->selectedLabel->SetDropShadow(Colour(0,0,0), 0.08f);
+    this->selectedLabel->SetColour(Colour(1.0f, 0.4f, 0.0f));
+
+}
+
+SelectWorldMenuState::WorldSelectItem::~WorldSelectItem() {
+    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->image);
+    assert(success);
+    
+    delete this->label;
+    this->label = NULL;
+    delete this->selectedLabel;
+    this->selectedLabel = NULL;
+}
+
+void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT) {
+    UNUSED_PARAMETER(camera);
+    UNUSED_PARAMETER(dT);
+
+    glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glPushMatrix();
+    glTranslatef(this->topLeftCorner[0], this->topLeftCorner[1], 0);
+
+    float negHalfSize = -this->size/2;
+    glTranslatef(negHalfSize, negHalfSize, 0);
+    glScalef(this->size, this->size, 1);
+
+    // Draw the image for the world
+    this->image->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+    this->image->UnbindTexture();
+
+    // Draw the outlines
+    glLineWidth(2.0f);
+	glColor4f(0, 0, 0, 1);
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(0.5, -0.5);
+	glVertex2f(0.5, 0.5);
+	glVertex2f(-0.5, 0.5);
+	glVertex2f(-0.5, -0.5);
+	glEnd();
+    glPopMatrix();
+
+    static const float VERTICAL_GAP = 10;
+    float labelX = this->topLeftCorner[0] + (size - this->label->GetWidth()) / 2.0f;
+    float labelY = this->topLeftCorner[1] - size - VERTICAL_GAP;
+    this->label->SetTopLeftCorner(labelX, labelY);
+    this->label->Draw();
+
+    glPopAttrib();
 }

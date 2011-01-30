@@ -27,27 +27,29 @@ public:
 	const std::string RESOURCE_DIR;
 	const std::string WORLD_DIR;
 
+    std::string GetResourceWorldDir() const;
+    std::string GetWorldDefinitonFilePath() const;
+
 	// World path/file related constants
-	std::vector<std::string> WORLD_PATHS;
 	const int INITIAL_WORLD_NUM;
 	// -------------------------------------------------
 
 	// IN-GAME CONSTANTS -------------------------------
-	const double PROB_OF_ITEM_DROP;							// Probability multiplier used for an item that drops from a destroyed block
+	const double PROB_OF_ITEM_DROP;             // Probability multiplier used for an item that drops from a destroyed block
 	const double PROB_OF_CONSECTUIVE_ITEM_DROP;	// Probability multiplier used for consecutive item drops
-	const unsigned int MAX_LIVE_ITEMS;					// Maximum number of items dropping simulataneously
+	const unsigned int MAX_LIVE_ITEMS;          // Maximum number of items dropping simulataneously
 	
 	const double PROB_OF_GHOSTBALL_BLOCK_MISS;	// Probablity the ball will go into ghost mode when it hits a block
-	const double LENGTH_OF_GHOSTMODE;						// Length of time in seconds of ghost mode
+	const double LENGTH_OF_GHOSTMODE;           // Length of time in seconds of ghost mode
 
-	const int DEFAULT_BLOCKS_HIT;								// Initial number of blocks hit by a ball as it leaves the paddle
-	const int INIT_SCORE;												// Initial player score when starting a game
-	const int INIT_LIVES_LEFT;									// Initial player lives when starting a game
-	const int MAX_LIVES_LEFT;										// Maximum number of lives that a player may have at a given time
+	const int DEFAULT_BLOCKS_HIT;               // Initial number of blocks hit by a ball as it leaves the paddle
+	const int INIT_SCORE;                       // Initial player score when starting a game
+	const int INIT_LIVES_LEFT;                  // Initial player lives when starting a game
+	const int MAX_LIVES_LEFT;                   // Maximum number of lives that a player may have at a given time
 	
-	const int FIRE_DAMAGE_PER_SECOND;							// The damage that fire does per second
-	const double FIRE_GLOB_DROP_CHANCE_INTERVAL;	// The interval of time in seconds over which a fire glob might be dropped from a block
-	const int FIRE_GLOB_CHANCE_MOD;								// The 1/x where x is the value of this, of a fire glob dropping after FIRE_GLOB_DROP_CHANCE_INTERVAL seconds
+	const int FIRE_DAMAGE_PER_SECOND;               // The damage that fire does per second
+	const double FIRE_GLOB_DROP_CHANCE_INTERVAL;    // The interval of time in seconds over which a fire glob might be dropped from a block
+	const int FIRE_GLOB_CHANCE_MOD;                 // The 1/x where x is the value of this, of a fire glob dropping after FIRE_GLOB_DROP_CHANCE_INTERVAL seconds
 
 	// -------------------------------------------------
 
@@ -65,17 +67,18 @@ public:
 private:
 	static GameModelConstants* Instance;
 
-	void InitConstArrays();
-
-	// World paths
-	std::string WORLD0_PATH;
-	std::string WORLD1_PATH;
-
 	GameModelConstants();
 	~GameModelConstants();
 
 	// Disallow copy and assignment
     DISALLOW_COPY_AND_ASSIGN(GameModelConstants);
 };
+
+inline std::string GameModelConstants::GetResourceWorldDir() const {
+    return this->RESOURCE_DIR + std::string("/") + this->WORLD_DIR;
+}
+inline std::string GameModelConstants::GetWorldDefinitonFilePath() const {
+    return this->RESOURCE_DIR + std::string("/") + this->WORLD_DIR + std::string("/worlds");
+}
 
 #endif

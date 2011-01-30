@@ -188,6 +188,10 @@ public:
 	void BeginOrRestartGame();
 	void ClearGameState();
 	
+    const std::vector<GameWorld*>& GetGameWorlds() const {
+        return this->worlds;
+    }
+
 	GameLevel* GetCurrentLevel() const {
 		return this->worlds[this->currWorldNum]->GetCurrentLevel();
 	}

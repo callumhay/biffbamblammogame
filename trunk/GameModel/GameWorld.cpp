@@ -80,6 +80,18 @@ bool GameWorld::Load() {
 		this->name = stringhelper::trim(this->name);
 	}
 
+    // Read the image file path for the world
+    this->imageFilepath.clear();
+	while (this->imageFilepath.empty()) {
+		if (!std::getline(*inFile, this->imageFilepath)) {
+			debug_output("ERROR: Could not find world image filepath in world file: " << this->worldFilepath);
+			delete inFile;
+			inFile = NULL;
+			return false;		
+		}
+		this->imageFilepath = stringhelper::trim(this->imageFilepath);
+	}
+
 	// Read all the level file names
 	std::vector<std::string> levelFileList;
 	std::string currLvlFile;
