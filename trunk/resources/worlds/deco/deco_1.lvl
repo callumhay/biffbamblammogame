@@ -1,0 +1,34 @@
+A crazy level name goes here
+10 30
+S S S S S S S S S S 
+S E E E E E E C(180) E S 
+S E E E E E E E E S 
+S L E T(P,ur) E E E E E S 
+S G G E G G G G G S 
+S L R E B R Y G G S 
+S O G E E E E B O S 
+S A(0,1,b,a) G E E E E G G S 
+S P G E E E T(Y,lr) G G S 
+S S E E E E E E G S 
+S G E E E E E E G S 
+S P T(P,ul) E E T(P,ur) P E G S 
+S G X(c,d) Y O O O X(d,c) G S 
+S A(1,1,a,b) G O R R G G G S 
+S E E E E E E E B S 
+S E I E E E E E E S 
+S E D(Random){1} E T(R,ur) E E E E S 
+S E E E E E E E E S 
+S R E E E E E E E S 
+S E E E E E E R E S 
+S E E E E E E E P S 
+S W(1) E E E E E W(1) E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S
+
+all
