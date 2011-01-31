@@ -66,7 +66,7 @@ worldSelectTitleLbl(NULL), keyEscLabel(NULL), goBackToMainMenu(false), menuFBO(N
     const std::vector<GameWorld*>& gameWorlds = gameModel->GetGameWorlds();
     assert(!gameWorlds.empty());
 
-    static const float MAX_ITEM_SIZE = 512;
+    static const float MAX_ITEM_SIZE = 300;
     static const float MENU_ITEM_HORIZ_GAP = 30;
     static const float MENU_VERT_GAP = 50;
     float menuItemSize = std::min<float>((camera.GetWindowWidth() / gameWorlds.size()) - MENU_ITEM_HORIZ_GAP * (1 + gameWorlds.size()), 
@@ -74,8 +74,8 @@ worldSelectTitleLbl(NULL), keyEscLabel(NULL), goBackToMainMenu(false), menuFBO(N
     menuItemSize = std::min<float>(menuItemSize, MAX_ITEM_SIZE);
 
 
-    float yCoord = (camera.GetWindowHeight() - menuItemSize / 2) + menuItemSize;
-    float xCoord = (camera.GetWindowWidth() - gameWorlds.size()*menuItemSize - MENU_ITEM_HORIZ_GAP * (gameWorlds.size()));
+    float yCoord = camera.GetWindowHeight() - ((camera.GetWindowHeight() - menuItemSize) / 2.0f);
+    float xCoord = (camera.GetWindowWidth() - gameWorlds.size()*menuItemSize - MENU_ITEM_HORIZ_GAP * (gameWorlds.size()-1)) / 2.0f;
 
     this->worldItems.reserve(gameWorlds.size());
     for (size_t i = 0; i < gameWorlds.size(); i++) {
@@ -237,12 +237,13 @@ void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT
     glPushMatrix();
     glTranslatef(this->topLeftCorner[0], this->topLeftCorner[1], 0);
 
-    float negHalfSize = -this->size/2;
-    glTranslatef(negHalfSize, negHalfSize, 0);
+    float halfSize = this->size  / 2;
+    glTranslatef(halfSize, -halfSize, 0);
     glScalef(this->size, this->size, 1);
 
     // Draw the image for the world
     this->image->BindTexture();
+    glColor4f(1,1,1,1);
     GeometryMaker::GetInstance()->DrawQuad();
     this->image->UnbindTexture();
 
