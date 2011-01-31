@@ -29,12 +29,16 @@ gameTransformInfo(new GameTransformMgr()), nextState(NULL), doingPieceStatusList
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
     std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
     std::string currWorldPath;
+    bool success = true;
     while (std::getline(*inFile, currWorldPath)) {
         currWorldPath = stringhelper::trim(currWorldPath);
         if (!currWorldPath.empty()) {
             GameWorld* newGameWorld = new GameWorld(GameModelConstants::GetInstance()->GetResourceWorldDir() + 
                                                     std::string("/") + currWorldPath, *this->gameTransformInfo);
-            assert(newGameWorld != NULL);
+
+            success = newGameWorld->Load();
+            assert(success);
+
             this->worlds.push_back(newGameWorld);
             currWorldPath.clear();
         }
