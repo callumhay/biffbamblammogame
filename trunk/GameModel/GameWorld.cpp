@@ -17,13 +17,15 @@
 
 #include "../ResourceManager.h"
 
+const int GameWorld::NO_LEVEL_PASSED = -1;
+
 /* 
  * Constructor for GameWorld class, requires a list of level text/filenames
  * which will be loaded when they are required.
  */
 GameWorld::GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr) : 
 worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(0),
-transformMgr(transformMgr) {
+lastLevelPassed(GameWorld::NO_LEVEL_PASSED), transformMgr(transformMgr) {
 }
 
 GameWorld::~GameWorld() {
@@ -154,7 +156,7 @@ bool GameWorld::IsValidWorldStyle(const std::string &s) {
 	if (s == "Deco") {
 		return true;
 	}
-	else if (s == "Cyberpunk") {
+	else if (s == "Futurism") {
 		return true;
 	}
 	else {
@@ -172,10 +174,34 @@ GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
 	if (s == "Deco") {
 		ret = Deco;
 	}
-	else if (s == "Cyberpunk") {
-		ret = Cyberpunk;
+	else if (s == "Futurism") {
+		ret = Futurism;
 	}
 	return ret;
+}
+
+/** 
+ * Increments the current level in this world - this should be called whenever the
+ * player progresses to the next level of the game.
+ */
+void GameWorld::IncrementLevel(GameModel* model) {
+	assert(this->isLoaded);
+	this->SetCurrentLevel(model, this->currentLevelNum + 1);
+
+    // Make sure we keep track of the greatest level number that was
+    // passed by the player (so we can save their progress later)
+    if (this->currentLevelNum > 0) {
+        this->lastLevelPassed = std::max<int>(this->lastLevelPassed, this->currentLevelNum-1);
+    }
+    else if (this->currentLevelNum == 0) {
+        this->lastLevelPassed = GameWorld::NO_LEVEL_PASSED;
+    }
+    else {
+        assert(false);
+    }
+
+	// EVENT: New Level Started
+	GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
 }
 
 /**
@@ -184,12 +210,13 @@ GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
  * camera is properly transformed to view it and raising an event that the level has
  * been started.
  */
-void GameWorld::SetCurrentLevel(GameModel* model, unsigned int levelNum) {
+void GameWorld::SetCurrentLevel(GameModel* model, int levelNum) {
 	assert(isLoaded);
-	assert(levelNum < this->loadedLevels.size());
+	assert(levelNum < static_cast<int>(this->loadedLevels.size()));
 	assert(levelNum >= 0);
-	this->currentLevelNum = levelNum;
 
+	this->currentLevelNum = levelNum;
+    
 	GameLevel* currentLevel = this->GetCurrentLevel();
 	currentLevel->InitAfterLevelLoad(model);
 

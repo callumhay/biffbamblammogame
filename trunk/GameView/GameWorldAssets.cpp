@@ -8,6 +8,10 @@ GameWorldAssets* GameWorldAssets::CreateWorldAssets(GameWorld::WorldStyle world)
 	switch (world) {
 		case GameWorld::Deco:
 			return new DecoWorldAssets();
+        case GameWorld::Futurism:
+            assert(false);
+            // TODO: return new FuturismWorldAssets();
+            break;
 		default:
 			break;
 	}

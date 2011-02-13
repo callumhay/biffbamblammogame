@@ -76,6 +76,7 @@ void TextLabel2DFixedWidth::SetText(const std::string& text) {
     for (size_t i = 1; i < this->textLines.size(); i++) {
         this->currTextWidth = std::max<float>(this->currTextWidth, this->font->GetWidth(this->textLines[i]));
     }
+    this->currTextWidth *= this->scale;
 }
 
 std::string TextLabel2DFixedWidth::GetText() const {

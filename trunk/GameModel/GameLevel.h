@@ -151,9 +151,16 @@ private:
 	BoundingLines safetyNetBounds;
 	std::string filepath;
 	std::string levelName;
+    
+    //bool isLocked;    // Whether this level has been unlocked or not
+
+
+    // Persistant scoring variables - used to mark previously saved scores and calculate high scores
+    //size_t starAwardScores[5];    // Scores where stars are awarded
+    //size_t highScore;             // Current high score for this level
 
 	std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
-	size_t randomItemProbabilityNum;									// A number >= 0 for random item probability in the level
+	size_t randomItemProbabilityNum;                    // A number >= 0 for random item probability in the level
 
 	// Map of the pairings of tesla blocks and their active lightning arc that enforces bounds
 	// on the level as long as it's active

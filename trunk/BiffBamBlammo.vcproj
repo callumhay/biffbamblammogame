@@ -957,6 +957,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\SelectLevelMenuState.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\SelectWorldMenuState.cpp"
 						>
 					</File>
@@ -1206,6 +1210,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GameModel\GameProgressIO.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\GameTransformMgr.h"
 					>
 				</File>
@@ -1263,6 +1271,10 @@
 				</File>
 				<File
 					RelativePath=".\GameModel\GameModelConstants.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\GameProgressIO.cpp"
 					>
 				</File>
 				<File

@@ -15,7 +15,7 @@ class GameTransformMgr;
 // actually loaded - it can be loaded and unloaded from memory on demand.
 class GameWorld {
 public:
-	enum WorldStyle { None = -1, Deco = 0, Cyberpunk = 1 };
+	enum WorldStyle { None = -1, Deco = 0, Futurism = 1 };
 
 	static bool IsValidWorldStyle(const std::string &s);
 	static WorldStyle GetWorldStyleFromString(const std::string &s);
@@ -39,11 +39,15 @@ public:
 		return this->loadedLevels[this->currentLevelNum];
 	}
 
-	unsigned int GetCurrentLevelNum() const {
+	int GetCurrentLevelNum() const {
 		assert(this->isLoaded);
 		return this->currentLevelNum;
 	}
 
+    int GetWorldNumber() const {
+        assert(this->style != None);
+        return static_cast<int>(this->style) + 1;
+    }
 	WorldStyle GetStyle() const {
 		assert(this->isLoaded);
 		return this->style;
@@ -57,26 +61,29 @@ public:
         return this->imageFilepath;
     }
 
-	void IncrementLevel(GameModel* model) {
-		assert(this->isLoaded);
-		this->SetCurrentLevel(model, this->currentLevelNum + 1);
-		// EVENT: New Level Started
-		GameEventManager::Instance()->ActionLevelStarted(*this, *this->GetCurrentLevel());
-	}
-
-	void SetCurrentLevel(GameModel* model, unsigned int levelNum);
+	void IncrementLevel(GameModel* model);
+	void SetCurrentLevel(GameModel* model, int levelNum);
 
 	// Returns whether the current level is the last level in this world.
 	bool IsLastLevel() const {
 		assert(this->isLoaded);
-		return this->currentLevelNum == (this->loadedLevels.size()-1);
+		return this->currentLevelNum == (static_cast<int>(this->loadedLevels.size()) - 1);
 	}
+
+    // TODO
+    //void SetLastLevelPassedIndex(int levelIdx);
+    int GetLastLevelIndexPassed() const;
 
 private:
 	bool isLoaded;                          // Has this world been loaded into memory or not?
 	std::string worldFilepath;              // Path to the world defintion file
 	std::vector<GameLevel*> loadedLevels;	// Levels loaded into memory
-	unsigned int currentLevelNum;           // Current level expressed as an index into loaded levels vector
+	int currentLevelNum;                    // Current level expressed as an index into loaded levels vector
+
+    static const int NO_LEVEL_PASSED;
+    int lastLevelPassed;                    // Progress indicator - has the number of the last level that was passed by the player,
+                                            // Similar to currentLevelNum, this is an index into the loadedLevels vector, if no progress
+                                            // has been made in this world yet then it will be equal to NO_LEVEL_PASSED
 
 	std::string name;						// Human-readable name of the world
 	WorldStyle style;						// Style of the world loaded (None if no world is loaded)
@@ -89,4 +96,10 @@ private:
 	GameWorld& operator=(const GameWorld& w);
 
 };
+
+// Gets the index of the last level that was passed (i.e., progress) of the player in this world
+inline int GameWorld::GetLastLevelIndexPassed() const {
+    return this->lastLevelPassed;
+}
+
 #endif

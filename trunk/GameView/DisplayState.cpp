@@ -12,6 +12,7 @@
 #include "DisplayState.h"
 #include "MainMenuDisplayState.h"
 #include "SelectWorldMenuState.h"
+#include "SelectLevelMenuState.h"
 #include "BlammopediaState.h"
 #include "LevelStartDisplayState.h"
 #include "WorldStartDisplayState.h"
@@ -29,6 +30,11 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
 			return new MainMenuDisplayState(display);
         case DisplayState::SelectWorldMenu:
             return new SelectWorldMenuState(display);
+
+        case DisplayState::SelectLevelMenu:
+            assert(false);
+            return NULL;
+
         case DisplayState::BlammopediaMenu:
             return new BlammopediaState(display);
 		case DisplayState::LevelStart:
