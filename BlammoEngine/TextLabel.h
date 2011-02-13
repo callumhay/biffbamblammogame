@@ -157,6 +157,9 @@ public:
     float GetWidth() const {
         return this->currTextWidth;
     }
+    float GetFixedWidth() const {
+        return this->fixedWidth;
+    }
 
     void SetScale(float scale) {
 	    assert(scale != 0.0f);

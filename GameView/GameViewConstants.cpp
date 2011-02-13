@@ -117,6 +117,7 @@ FONT_ALLPURPOSE(FONT_DIRECTORY      "/allpurpose.ttf"),
 // Sound script paths
 MAIN_MENU_SOUND_SCRIPT(SOUND_DIRECTORY  "/main_menu_sound.msf"),
 DECO_SOUND_SCRIPT(SOUND_DIRECTORY       "/deco_sound.msf"),
+FUTURISM_SOUND_SCRIPT(SOUND_DIRECTORY   "/futurism_sound.msf"),
 
 // Item-related constants
 ITEM_LABEL_MATGRP("ItemLabel"),                             // Material group name for changing the label on the item mesh

@@ -89,6 +89,9 @@ void GameSoundAssets::LoadSoundPallet(GameSoundAssets::SoundPallet pallet) {
 		case GameSoundAssets::DecoWorldSoundPallet:
 			this->LoadDecoWorldSounds();
 			break;
+        case GameSoundAssets::FuturismWorldSoundPallet:
+            this->LoadFuturismWorldSounds();
+            break;
 		default:
 			assert(false);
 			break;
@@ -103,6 +106,9 @@ void GameSoundAssets::UnloadSoundPallet(GameSoundAssets::SoundPallet pallet) {
 		case GameSoundAssets::DecoWorldSoundPallet:
 			this->UnloadDecoWorldSounds();
 			break;
+        case GameSoundAssets::FuturismWorldSoundPallet:
+            this->UnloadFuturismWorldSounds();
+            break;
 		default:
 			assert(false);
 			break;
@@ -436,7 +442,8 @@ bool GameSoundAssets::IsMaskSound(int soundType) {
 }
 
 bool GameSoundAssets::IsMusicSound(int soundType) {
-	return soundType == GameSoundAssets::MainMenuBackgroundMusic || soundType == GameSoundAssets::WorldBackgroundMusic;
+	return soundType == GameSoundAssets::MainMenuBackgroundMusic || 
+           soundType == GameSoundAssets::WorldBackgroundMusic;
 }
 
 /**
@@ -446,6 +453,8 @@ GameSoundAssets::SoundPallet GameSoundAssets::GetSoundPalletFromWorldStyle(GameW
 	switch (style) {
 		case GameWorld::Deco:
 			return GameSoundAssets::DecoWorldSoundPallet;
+        case GameWorld::Futurism:
+            return GameSoundAssets::FuturismWorldSoundPallet;
 		default:
 			assert(false);
 			break;

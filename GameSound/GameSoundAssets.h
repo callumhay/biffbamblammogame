@@ -20,7 +20,7 @@ class GameSoundAssets {
 public:
 	static const int MAX_MIX_GAME_SOUNDS;
 
-	enum SoundPallet { MainMenuSoundPallet, DecoWorldSoundPallet };
+	enum SoundPallet { MainMenuSoundPallet, DecoWorldSoundPallet, FuturismWorldSoundPallet };
 
 	// Main Menu Event, Mask and Music Sounds
 	enum MainMenuSound { 
@@ -142,6 +142,8 @@ private:
 	void UnloadMainMenuSounds();
 	void LoadDecoWorldSounds();
 	void UnloadDecoWorldSounds();
+    void LoadFuturismWorldSounds();
+    void UnloadFuturismWorldSounds();
 
 	void LoadSounds(const std::string& filepath, GameSoundAssets::SoundPallet pallet);
 	void UnloadSounds(GameSoundAssets::SoundPallet pallet);
@@ -191,8 +193,9 @@ inline void GameSoundAssets::StopAllActiveMasks(bool fadeOut) {
 // are called they will play the currently active world style music.
 // unloadPreviousActiveWorldSounds : set this to true to unload the previous world sound pallet
 // loadNewActiveWorldSounds        : set this to true to load the given 'style' world sound assets
-inline void GameSoundAssets::SetActiveWorldSounds(GameWorld::WorldStyle style, bool unloadPreviousActiveWorldSounds, 
-																									bool loadNewActiveWorldSounds) {
+inline void GameSoundAssets::SetActiveWorldSounds(GameWorld::WorldStyle style,
+                                                  bool unloadPreviousActiveWorldSounds, 
+												  bool loadNewActiveWorldSounds) {
 	if (unloadPreviousActiveWorldSounds) {
 		if (this->activeWorld != GameWorld::None) {
 			this->UnloadSoundPallet(GameSoundAssets::GetSoundPalletFromWorldStyle(this->activeWorld));
@@ -228,6 +231,14 @@ inline void GameSoundAssets::LoadDecoWorldSounds() {
 
 inline void GameSoundAssets::UnloadDecoWorldSounds() {
 	this->UnloadSounds(GameSoundAssets::DecoWorldSoundPallet);
+}
+
+inline void GameSoundAssets::LoadFuturismWorldSounds() {
+	this->LoadSounds(GameViewConstants::GetInstance()->FUTURISM_SOUND_SCRIPT, GameSoundAssets::FuturismWorldSoundPallet);
+}
+
+inline void GameSoundAssets::UnloadFuturismWorldSounds() {
+    this->UnloadSounds(GameSoundAssets::FuturismWorldSoundPallet);
 }
 
 #endif // _GAMESOUNDASSETS_H_

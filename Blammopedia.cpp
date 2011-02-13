@@ -188,6 +188,7 @@ bool Blammopedia::WriteAsEntryStatusFile() const {
         int itemType = iter->first;
         ItemEntry* itemEntry = iter->second;
         assert(itemEntry != NULL);
+        assert(itemType <= CHAR_MAX);
         itemOutData[count++] = itemType;
         itemOutData[count++] = itemEntry->GetIsLocked() ? 1 : 0;
     }
@@ -205,6 +206,7 @@ bool Blammopedia::WriteAsEntryStatusFile() const {
         const BlockEntry* blockEntry = iter->second;
         const LevelPiece::LevelPieceType& pieceType = iter->first;
 		assert(blockEntry != NULL);
+        assert(pieceType <= CHAR_MAX);
         blockOutData[count++] = pieceType;
         blockOutData[count++] = blockEntry->GetIsLocked() ? 1 : 0;
     }
