@@ -56,5 +56,30 @@ inline void Tokenize(const std::string& str, std::vector<std::string>& tokens, c
     }
 }
 
+/**
+ * Adds commas to a basic number stored in the given string.
+ * e.g., given 243556 will return 243,556
+ */
+inline std::string AddNumberCommas(const std::string& number) {
+    if (number.size() <= 3) {
+        return number;
+    }
+
+    std::string result;
+    int numCommas = (number.size()-1) / 3;
+    int count = 0;
+    for (int i = static_cast<int>(number.size()); i >= 0 && numCommas > 0; i--) {
+        result = number[i] + result;
+        count++;
+        if (count == 3) {
+            result = std::string(",") + result;
+            count = 0;
+            numCommas--;
+        }
+    }
+
+    return result;
+}
+
 };
 #endif

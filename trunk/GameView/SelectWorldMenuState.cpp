@@ -81,7 +81,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 
     // Draw the title...
     static const int HORIZONTAL_TITLE_GAP = 20;
-    static const int VERTICAL_TITLE_GAP   = 20;
+    static const int VERTICAL_TITLE_GAP   = 30;
     this->worldSelectTitleLbl->SetTopLeftCorner(HORIZONTAL_TITLE_GAP, camera.GetWindowHeight() - VERTICAL_TITLE_GAP);
     this->worldSelectTitleLbl->Draw();
 
@@ -332,7 +332,7 @@ selectedLabel(NULL), baseSize(size), isSelected(false), sizeAnim(size) {
     std::stringstream labelTextStream;
     labelTextStream << "World " << worldNumber << ": " << world->GetName();
     
-    float slightlyBiggerSize = size + SelectWorldMenuState::MENU_ITEM_HORIZ_GAP;
+    float slightlyBiggerSize = size + 0.75f * SelectWorldMenuState::MENU_ITEM_HORIZ_GAP;
     this->label = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
         slightlyBiggerSize, labelTextStream.str());

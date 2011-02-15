@@ -37,6 +37,8 @@
 
 #include "../ResourceManager.h"
 
+const int GameLevel::MAX_STARS_PER_LEVEL = 5;
+
 const char GameLevel::EMPTY_SPACE_CHAR          = 'E';
 const char GameLevel::SOLID_BLOCK_CHAR          = 'S';
 const char GameLevel::GREEN_BREAKABLE_CHAR		= 'G';
@@ -73,7 +75,7 @@ GameLevel::GameLevel(const std::string& filepath, const std::string& levelName,
 currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum),
 piecesLeft(numBlocks), ballSafetyNetActive(false), 
-filepath(filepath), levelName(levelName) {
+filepath(filepath), levelName(levelName), highScore(0) {
 
 	assert(!filepath.empty());
 	assert(pieces.size() > 0);

@@ -17,6 +17,8 @@ class PlayerPaddle;
 // Represents a game level, also deals with game level 'lvl' file reading.
 class GameLevel {
 public:
+    static const int MAX_STARS_PER_LEVEL;
+
 	static const char EMPTY_SPACE_CHAR;
 	static const char SOLID_BLOCK_CHAR;
 	static const char GREEN_BREAKABLE_CHAR;
@@ -141,6 +143,9 @@ public:
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);
     const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;
 
+    size_t GetHighScore() const;
+    void SetHighScore(size_t highScore);
+
 private:	
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
     std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
@@ -157,7 +162,7 @@ private:
 
     // Persistant scoring variables - used to mark previously saved scores and calculate high scores
     //size_t starAwardScores[5];    // Scores where stars are awarded
-    //size_t highScore;             // Current high score for this level
+    size_t highScore;             // Current high score for this level
 
 	std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
 	size_t randomItemProbabilityNum;                    // A number >= 0 for random item probability in the level
@@ -184,6 +189,14 @@ inline const LevelPiece* GameLevel::GetTriggerableLevelPiece(const LevelPiece::T
         return NULL;
     }
     return findIter->second;
+}
+
+inline size_t GameLevel::GetHighScore() const {
+    return this->highScore;
+}
+
+inline void GameLevel::SetHighScore(size_t highScore) {
+    this->highScore = highScore;
 }
 
 #endif

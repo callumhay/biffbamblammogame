@@ -36,6 +36,9 @@ public:
 	DisplayState::DisplayStateType GetType() const;
 
 private:
+    static const int HORIZONTAL_TITLE_GAP = 20;
+    static const int VERTICAL_TITLE_GAP   = 30;
+
     const GameWorld* world;
     TextLabel2D* worldLabel;
     KeyboardHelperLabel* keyEscLabel;
@@ -43,6 +46,7 @@ private:
 
     AnimationLerp<float> fadeAnimation;
 
+    Texture* starTexture;
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
 
@@ -51,30 +55,45 @@ private:
     AnimationLerp<float> goBackMenuAlphaAnim;
 
     void DrawTitleStrip(const Camera& camera) const;
+    void DrawLevelSelectMenu(const Camera& camera, double dT);
     void GoBackToWorldSelectMenu();
     void SetupLevelItems();
 
     class LevelMenuItem {
     public:
-        LevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner);
+        LevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner, const Texture* starTexture);
         ~LevelMenuItem();
+        
+        const Point2D& GetTopLeftCorner() const { return this->topLeftCorner; }
+        const float GetWidth() const { return this->width; }
+        float GetHeight() const;
 
         void Draw(const Camera& camera, double dT);
 
     private:
         static const float NUM_TO_NAME_GAP;
+        static const float NUM_TO_HIGH_SCORE_Y_GAP;
+        static const float HIGH_SCORE_TO_STAR_Y_GAP;
         Point2D topLeftCorner;
+        float width;
 
         const GameLevel* level;
         bool isEnabled;
         bool isSelected;
+
+        GLuint starDisplayList;
+        float starSize;
+
         TextLabel2D* numLabel;
         TextLabel2DFixedWidth* nameLabel;
-        //TextLabel2D* highScoreLabel; 
+        TextLabel2D* highScoreLabel; 
+
+        const Texture* starTexture;
         
         DISALLOW_COPY_AND_ASSIGN(LevelMenuItem);
     };
 
+    size_t selectedItem;
     std::vector<LevelMenuItem*> levelItems;
 
     DISALLOW_COPY_AND_ASSIGN(SelectLevelMenuState);
