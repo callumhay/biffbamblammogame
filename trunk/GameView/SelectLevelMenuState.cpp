@@ -26,7 +26,8 @@
 
 SelectLevelMenuState::SelectLevelMenuState(GameDisplay* display, const GameWorld* world) : 
 DisplayState(display), worldLabel(NULL), world(world), pressEscAlphaAnim(0.0f), 
-goBackToWorldSelectMenu(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL) {
+goBackToWorldSelectMenu(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
+selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderAddAnim(0.0f), totalNumStarsLabel(NULL) {
 
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear, GL_TEXTURE_2D);
@@ -81,6 +82,9 @@ SelectLevelMenuState::~SelectLevelMenuState() {
     delete this->worldLabel;
     this->worldLabel = NULL;
 
+    delete this->totalNumStarsLabel;
+    this->totalNumStarsLabel = NULL;
+
     delete this->keyEscLabel;
     this->keyEscLabel = NULL;
 
@@ -128,8 +132,12 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     // want the bloom applied to...
 	this->bloomEffect->Draw(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
     this->menuFBO->BindFBObj();
+    
     // Draw the menu
     this->DrawLevelSelectMenu(camera, dT);
+
+    // Draw the label showing how many stars have been acquired for the world...
+    this->DrawStarTotalLabel(camera);
 
 	// Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
@@ -211,6 +219,42 @@ void SelectLevelMenuState::ButtonReleased(const GameControl::ActionButton& relea
     UNUSED_PARAMETER(releasedButton);
 }
 
+void SelectLevelMenuState::DrawStarTotalLabel(const Camera& camera) {
+    float labelTopCornerX = camera.GetWindowWidth() - this->totalNumStarsLabel->GetLastRasterWidth() - HORIZONTAL_TITLE_GAP;
+    float labelTopCornerY = this->totalNumStarsLabel->GetHeight() + VERTICAL_TITLE_GAP/2;
+
+    this->totalNumStarsLabel->SetTopLeftCorner(labelTopCornerX, labelTopCornerY);
+    this->totalNumStarsLabel->Draw();
+
+    float diff      = 0.25f * this->totalNumStarsLabel->GetHeight();
+    float starSize  = this->totalNumStarsLabel->GetHeight() + 2*diff;
+    float starRightX  = labelTopCornerX - diff;
+    float starLeftX   = starRightX - starSize;
+    float starTopY    = labelTopCornerY + 1.5f * diff;
+    float starBottomY = starTopY - starSize;
+
+    glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT);
+    
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    const Colour& starColour = GameViewConstants::GetInstance()->POINT_STAR_COLOUR;
+    this->starTexture->BindTexture();
+    glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
+    glBegin(GL_QUADS);
+    glTexCoord2i(0, 1);
+    glVertex2f(starLeftX,  starTopY);
+    glTexCoord2i(0, 0);
+    glVertex2f(starLeftX,  starBottomY);
+    glTexCoord2i(1, 0);
+    glVertex2f(starRightX, starBottomY);
+    glTexCoord2i(1, 1);
+    glVertex2f(starRightX, starTopY);
+    glEnd();
+
+    glPopAttrib();
+}
+
 void SelectLevelMenuState::DrawTitleStrip(const Camera& camera) const {
 
     static const float STRIP_HEIGHT      = 20;
@@ -263,8 +307,47 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
     float topY = selectedItem->GetTopLeftCorner()[1] + BORDER_GAP;
     float bottomY = selectedItem->GetTopLeftCorner()[1] - selectedItem->GetHeight() - BORDER_GAP;
 
-    // TODO... animation...
+    float centerX = (leftX + rightX) / 2.0f;
+    float centerY = (topY + bottomY) / 2.0f;
+    float selectionWidth  = selectedItem->GetWidth() + 2*BORDER_GAP;
+    float selectionHeight = selectedItem->GetHeight() + 2*BORDER_GAP;
 
+    // TODO... animation...
+    this->selectionAlphaOrangeAnim.Tick(dT);
+    this->selectionAlphaYellowAnim.Tick(dT);
+    this->selectionBorderAddAnim.Tick(dT);
+
+    float yellowAlpha  = this->selectionAlphaYellowAnim.GetInterpolantValue();
+    float orangeAlpha  = this->selectionAlphaOrangeAnim.GetInterpolantValue();
+    float selectionAdd = this->selectionBorderAddAnim.GetInterpolantValue();
+
+    glPushMatrix();
+    glTranslatef(centerX, centerY, 0.0f);
+    
+    glPushMatrix();
+    // Draw the yellow border
+    glColor4f(1, 1, 0, yellowAlpha);
+    glScalef(selectionWidth + selectionAdd, selectionHeight + selectionAdd, 1.0f);
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+
+    glPushMatrix();
+    // Draw the orange border
+    glColor4f(1, 0.65f, 0, orangeAlpha);
+    glScalef(selectionWidth + selectionAdd/2, selectionHeight + selectionAdd/2, 1.0f);
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+
+    glPopMatrix();
+
+    // Draw slightly highlighted yellow for the background of the item
+    glColor4f(0.98f, 1.0f, 0.66f, 1.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(leftX, topY);
+    glVertex2f(leftX, bottomY);
+    glVertex2f(rightX, bottomY);
+    glVertex2f(rightX, topY);
+    glEnd();
 
     glColor4f(0, 0, 0, 1);
     glLineWidth(3.0f);
@@ -321,10 +404,13 @@ void SelectLevelMenuState::SetupLevelItems() {
 
     // Build the menu items for level selection
     int tempCount = 0;
+    int totalNumStarsCollected = 0;
     const std::vector<GameLevel*>& levels = this->world->GetAllLevelsInWorld();
     for (size_t levelIdx = 0; levelIdx < levels.size(); levelIdx++) {
         const GameLevel* currLevel = levels.at(levelIdx);
         assert(currLevel != NULL);
+        
+        //totalNumStarsCollected += currLevel->GetNumStars();
 
         LevelMenuItem* levelItem = new LevelMenuItem(levelIdx+1, currLevel, itemWidth, 
             Point2D(itemX, itemY), this->starTexture);
@@ -340,11 +426,44 @@ void SelectLevelMenuState::SetupLevelItems() {
     
     assert(!this->levelItems.empty());
     this->selectedItem = 0;
+
+    // Setup the selection animation
+    std::vector<double> timeVals;
+    timeVals.push_back(0.0);
+    timeVals.push_back(0.5);
+    timeVals.push_back(1.0);
+    std::vector<float> alphaVals;
+    alphaVals.push_back(0.0f);
+    alphaVals.push_back(1.0f);
+    alphaVals.push_back(0.0f);
+    this->selectionAlphaOrangeAnim.SetLerp(timeVals, alphaVals);
+    this->selectionAlphaOrangeAnim.SetRepeat(true);
+
+    timeVals.clear();
+    timeVals.push_back(0.0);
+    timeVals.push_back(1.0);
+    alphaVals.clear();
+    alphaVals.push_back(1.0f);
+    alphaVals.push_back(0.0f);
+    this->selectionAlphaYellowAnim.SetLerp(timeVals, alphaVals);
+    this->selectionAlphaYellowAnim.SetRepeat(true);
+
+    std::vector<float> scaleVals;
+    scaleVals.push_back(0.0f);
+    scaleVals.push_back(2*ITEM_X_GAP_SIZE);
+    this->selectionBorderAddAnim.SetLerp(timeVals, scaleVals);
+    this->selectionBorderAddAnim.SetRepeat(true);
+
+    std::stringstream totalNumStarsTxt;
+    totalNumStarsTxt << totalNumStarsCollected << "/" << (this->levelItems.size() * GameLevel::MAX_STARS_PER_LEVEL);
+    this->totalNumStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+        GameFontAssetsManager::Medium), totalNumStarsTxt.str());
+    this->totalNumStarsLabel->SetColour(Colour(0,0,0));
 }
 
 const float SelectLevelMenuState::LevelMenuItem::NUM_TO_NAME_GAP = 8;
 const float SelectLevelMenuState::LevelMenuItem::NUM_TO_HIGH_SCORE_Y_GAP = 5;
-const float SelectLevelMenuState::LevelMenuItem::HIGH_SCORE_TO_STAR_Y_GAP = 3;
+const float SelectLevelMenuState::LevelMenuItem::HIGH_SCORE_TO_STAR_Y_GAP = 4;
 
 SelectLevelMenuState::LevelMenuItem::LevelMenuItem(int levelNum, const GameLevel* level, 
                                                    float width, const Point2D& topLeftCorner, 
@@ -406,7 +525,6 @@ level(level), topLeftCorner(topLeftCorner), starTexture(starTexture), width(widt
         glTranslatef(STAR_GAP + starSize, 0, 0);
 
 	    glBegin(GL_QUADS);
-		    glNormal3i(0, 0, 1);
 		    glTexCoord2i(0, 0); glVertex2f(-halfStarSize, -halfStarSize);
 		    glTexCoord2i(1, 0); glVertex2f( halfStarSize, -halfStarSize);
 		    glTexCoord2i(1, 1); glVertex2f( halfStarSize,  halfStarSize);
