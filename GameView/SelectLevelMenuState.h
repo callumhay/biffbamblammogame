@@ -41,10 +41,16 @@ private:
 
     const GameWorld* world;
     TextLabel2D* worldLabel;
+    TextLabel2D* totalNumStarsLabel;
     KeyboardHelperLabel* keyEscLabel;
     AnimationMultiLerp<float> pressEscAlphaAnim;
 
     AnimationLerp<float> fadeAnimation;
+
+    // Animation of the selection indicator
+    AnimationMultiLerp<float> selectionAlphaOrangeAnim;   
+    AnimationMultiLerp<float> selectionAlphaYellowAnim;   
+    AnimationMultiLerp<float> selectionBorderAddAnim; 
 
     Texture* starTexture;
 	CgFxBloom* bloomEffect;
@@ -54,6 +60,7 @@ private:
     AnimationLerp<float> goBackMenuMoveAnim;
     AnimationLerp<float> goBackMenuAlphaAnim;
 
+    void DrawStarTotalLabel(const Camera& camera);
     void DrawTitleStrip(const Camera& camera) const;
     void DrawLevelSelectMenu(const Camera& camera, double dT);
     void GoBackToWorldSelectMenu();
