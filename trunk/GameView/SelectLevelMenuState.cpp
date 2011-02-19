@@ -279,7 +279,7 @@ void SelectLevelMenuState::DrawStarTotalLabel(const Camera& camera) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    const Colour& starColour = GameViewConstants::GetInstance()->POINT_STAR_COLOUR;
+    const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
     this->starTexture->BindTexture();
     glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
     glBegin(GL_QUADS);

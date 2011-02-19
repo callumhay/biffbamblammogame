@@ -15,19 +15,27 @@
 
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/TextLabel.h"
+#include "../BlammoEngine/GeometryMaker.h"
+#include "../BlammoEngine/Texture.h"
 
-const int PointsHUD::STAR_SIZE                  = 30;
+#include "../GameModel/GameLevel.h"
+
+#include "../ResourceManager.h"
+
+const int PointsHUD::STAR_SIZE                  = 40;
+const int PointsHUD::STAR_GAP                   = 3;
 const int PointsHUD::SCREEN_EDGE_VERTICAL_GAP   = 10;
 const int PointsHUD::SCREEN_EDGE_HORIZONTAL_GAP = 15;
 const int PointsHUD::STAR_TO_SCORE_VERTICAL_GAP = 5;
 
-PointsHUD::PointsHUD() : currPtScore(0), currPtMultiplier(1), 
-ptScoreLabel(NULL), ptMultiplierLabel(NULL) {
+PointsHUD::PointsHUD() : numStars(0), currPtScore(0), currPtMultiplier(1), 
+ptScoreLabel(NULL), ptMultiplierLabel(NULL), starTex(NULL) {
 
     this->ptScoreLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "0");
     this->ptScoreLabel->SetColour(Colour(1.0f, 0.4f, 0.0f));
     this->ptScoreLabel->SetDropShadow(Colour(1,1,1), 0.09f);
+    this->ptScoreLabel->SetScale(0.85f);
 
     this->ptMultiplierLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "");
@@ -36,6 +44,10 @@ ptScoreLabel(NULL), ptMultiplierLabel(NULL) {
     
     this->scoreAnimator = AnimationLerp<long>(&this->currPtScore);
     this->scoreAnimator.SetRepeat(false);
+
+    this->starTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->starTex != NULL);
 }
 
 PointsHUD::~PointsHUD() {
@@ -46,6 +58,9 @@ PointsHUD::~PointsHUD() {
 
     // Clean up any leftover notifications
     this->ClearNotifications();
+
+    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTex);
+    assert(success);
 }
 
 void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
@@ -54,9 +69,23 @@ void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
     float currentX = displayWidth  - SCREEN_EDGE_HORIZONTAL_GAP;
     float currentY = displayHeight - SCREEN_EDGE_VERTICAL_GAP;
     
+    Camera::PushWindowCoords();
+	glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+	glLoadIdentity();
+
     // Draw the current star score
-    // TODO
+    this->DrawIdleStars(currentX, currentY, dT);
     currentY -= (STAR_SIZE + STAR_TO_SCORE_VERTICAL_GAP);
+
+    Camera::PopWindowCoords();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    // Draw the multiplier if it's something greater than 1
+    if (this->currPtMultiplier > 1) {
+        // TODO
+    }
 
     // Draw the current total point score
     std::stringstream ptScoreString;
@@ -66,11 +95,6 @@ void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
     currentX = displayWidth - SCREEN_EDGE_HORIZONTAL_GAP - this->ptScoreLabel->GetLastRasterWidth();
     this->ptScoreLabel->SetTopLeftCorner(currentX, currentY);
     this->ptScoreLabel->Draw();
-
-    // Draw the multiplier if it's something greater than 1
-    if (this->currPtMultiplier > 1) {
-        // TODO
-    }
 
     // Draw any point notifications
     for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
@@ -86,6 +110,45 @@ void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
     }
 }
 
+void PointsHUD::DrawIdleStars(float rightMostX, float topMostY, double dT) {
+    static const float STAR_HALF_SIZE  = STAR_SIZE / 2.0f;
+    static const float ALL_STARS_WIDTH = (STAR_GAP * (GameLevel::MAX_STARS_PER_LEVEL-1) + STAR_SIZE * GameLevel::MAX_STARS_PER_LEVEL);
+
+    const Colour& activeStarColour   = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+    const Colour& inactiveStarColour = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
+
+    float currentCenterX = rightMostX - ALL_STARS_WIDTH + STAR_HALF_SIZE;
+    float centerY = topMostY - STAR_HALF_SIZE;
+
+	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    this->starTex->BindTexture();
+
+    int currStarIdx = 0;
+    glColor4f(activeStarColour.R(), activeStarColour.G(), activeStarColour.B(), 1.0f);
+    for (; currStarIdx < this->numStars; currStarIdx++) {
+        this->DrawQuad(currentCenterX , centerY, STAR_SIZE);
+        currentCenterX += STAR_SIZE + STAR_GAP;
+    }
+    glColor4f(inactiveStarColour.R(), inactiveStarColour.G(), inactiveStarColour.B(), 1.0f);
+    for (; currStarIdx < GameLevel::MAX_STARS_PER_LEVEL; currStarIdx++) {
+        this->DrawQuad(currentCenterX , centerY, STAR_SIZE);
+        currentCenterX += STAR_SIZE + STAR_GAP;
+    }
+
+    glPopAttrib();
+}
+
+void PointsHUD::DrawQuad(float centerX, float centerY, float size) {
+    glPushMatrix();
+    glTranslatef(centerX, centerY, 0.0f);
+    glScalef(size, size, 1.0f);
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+}
+
 /**
  * Call this to reinitialize the points HUD to what you would expect it
  * to look like at the very start of a level.
@@ -95,8 +158,16 @@ void PointsHUD::Reinitialize() {
     this->scoreAnimator.SetInterpolantValue(0);
     this->ClearNotifications();
 
+    this->numStars         = 0;
     this->currPtScore      = 0;
     this->currPtMultiplier = 1;
+}
+
+void PointsHUD::SetNumStars(int numStars) {
+    assert(numStars >= 0);
+
+    // TODO...
+    this->numStars = numStars;
 }
 
 void PointsHUD::SetScore(long pointScore) {

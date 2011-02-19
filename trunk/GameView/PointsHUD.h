@@ -15,6 +15,7 @@
 #include "../BlammoEngine/Animation.h"
 
 class Camera;
+class Texture;
 class TextLabel2D;
 
 /**
@@ -33,12 +34,14 @@ public:
 
     void Reinitialize();
 
+    void SetNumStars(int numStars);
     void SetScore(long pointScore);
     void SetMultiplier(int multiplierAmt);
     void PostPointNotification(const std::string& name, int pointAmount);
 
 private:
     static const int STAR_SIZE;
+    static const int STAR_GAP;
     static const int SCREEN_EDGE_VERTICAL_GAP;
     static const int SCREEN_EDGE_HORIZONTAL_GAP;
     static const int STAR_TO_SCORE_VERTICAL_GAP;
@@ -57,12 +60,15 @@ private:
         TextLabel2D* notificationName;  // The name of the bonus/notification, may be NULL
         TextLabel2D* pointLabel;        // The points earned/removed, always not NULL
 
+
+
         DISALLOW_COPY_AND_ASSIGN(PointNotification);
     };
 
     typedef std::list<PointNotification*> PointNotifyList;
     typedef PointNotifyList::iterator PointNotifyListIter;
 
+    int numStars;                                   // The current number of stars awarded to the player
     long currPtScore;                               // The current score
     int currPtMultiplier;                           // The current score multiplier
     std::list<PointNotification*> ptNotifications;  // FIFO Queue of current point notifications
@@ -74,6 +80,12 @@ private:
     // Animations
     AnimationLerp<long> scoreAnimator;   // Animates the current score (so that it looks like it's tallying points over time)
     
+    // Textures
+    Texture* starTex;
+
+    void DrawIdleStars(float rightMostX, float topMostY, double dT);
+    void DrawQuad(float centerX, float centerY, float size);
+
     void SetAlpha(float alpha);
     void ClearNotifications();
 
