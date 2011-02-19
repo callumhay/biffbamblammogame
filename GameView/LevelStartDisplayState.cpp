@@ -5,18 +5,19 @@
 #include "GameFontAssetsManager.h"
 #include "LevelMesh.h"
 #include "LivesLeftHUD.h"
+#include "PointsHUD.h"
 
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../GameModel/GameModel.h"
 
-const double LevelStartDisplayState::FADE_IN_TIME										= 1.25;
-const double LevelStartDisplayState::WIPE_TIME											= 0.8f;
-const double LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME				= 2.5;
-const double LevelStartDisplayState::LEVEL_BLOCK_FADE_IN_TIME				= 1.25;
+const double LevelStartDisplayState::FADE_IN_TIME               = 1.25;
+const double LevelStartDisplayState::WIPE_TIME                  = 0.8f;
+const double LevelStartDisplayState::LEVEL_TEXT_FADE_OUT_TIME   = 2.5;
+const double LevelStartDisplayState::LEVEL_BLOCK_FADE_IN_TIME   = 1.25;
 
 const float LevelStartDisplayState::LEVEL_NAME_WIPE_FADE_QUAD_SIZE	= 100.0f;
-const float LevelStartDisplayState::LEVEL_TEXT_X_PADDING						= 50;			// Padding from the right-hand side of the screen to the level name text
-const float LevelStartDisplayState::LEVEL_TEXT_Y_PADDING						= 80;			// Padding from the bottom of the screen to the bottom of the level name text
+const float LevelStartDisplayState::LEVEL_TEXT_X_PADDING            = 50;			// Padding from the right-hand side of the screen to the level name text
+const float LevelStartDisplayState::LEVEL_TEXT_Y_PADDING            = 80;			// Padding from the bottom of the screen to the bottom of the level name text
 
 LevelStartDisplayState::LevelStartDisplayState(GameDisplay* display) : 
 DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL),
@@ -106,7 +107,8 @@ LevelStartDisplayState::~LevelStartDisplayState() {
 }
 
 void LevelStartDisplayState::RenderFrame(double dT) {
-	const Camera& camera = this->display->GetCamera();
+	const Camera& camera   = this->display->GetCamera();
+    GameAssets* gameAssets = this->display->GetAssets();
 
 	bool fadeInDone           = this->fadeInAnimation.Tick(dT);
 	bool wipeInDone           = this->showLevelNameWipeAnimation.Tick(dT);
@@ -117,9 +119,9 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	bool ballFadeInDone       = this->ballFadeInAnimation.Tick(dT);
 
 	// Fade in the level pieces...
-	this->display->GetAssets()->GetCurrentLevelMesh()->SetLevelAlpha(this->blockFadeInAnimation.GetInterpolantValue());
+	gameAssets->GetCurrentLevelMesh()->SetLevelAlpha(this->blockFadeInAnimation.GetInterpolantValue());
 	// Fade in tesla lightning...
-	this->display->GetAssets()->GetESPAssets()->SetTeslaLightiningAlpha(this->blockFadeInAnimation.GetInterpolantValue());
+	gameAssets->GetESPAssets()->SetTeslaLightiningAlpha(this->blockFadeInAnimation.GetInterpolantValue());
 
 	PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
 	GameBall* ball       = this->display->GetModel()->GetGameBalls().front();
@@ -151,7 +153,7 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 1.0f, 
-																										 ColourRGBA(1, 1, 1, this->fadeInAnimation.GetInterpolantValue()));
+            ColourRGBA(1, 1, 1, this->fadeInAnimation.GetInterpolantValue()));
 		glPopAttrib();
 	}
 
@@ -169,8 +171,10 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 
 			const float hPadding              = 20;
 			const float quadHeight						= this->levelNameLabel.GetHeight() + 2 * LevelStartDisplayState::LEVEL_TEXT_Y_PADDING;
-			const float currOpaqueQuadWidth	  = hPadding + this->levelNameLabel.GetLastRasterWidth() + LevelStartDisplayState::LEVEL_TEXT_X_PADDING + LevelStartDisplayState::LEVEL_NAME_WIPE_FADE_QUAD_SIZE - 
-																					this->showLevelNameWipeAnimation.GetInterpolantValue();
+			const float currOpaqueQuadWidth	  = hPadding + this->levelNameLabel.GetLastRasterWidth() + 
+                                                LevelStartDisplayState::LEVEL_TEXT_X_PADDING + 
+                                                LevelStartDisplayState::LEVEL_NAME_WIPE_FADE_QUAD_SIZE - 
+                                                this->showLevelNameWipeAnimation.GetInterpolantValue();
 			Camera::PushWindowCoords();
 
 			//const float originUTexCoord = (this->levelNameLabel.GetTopLeftCorner()[0]) / static_cast<float>(camera.GetWindowWidth());

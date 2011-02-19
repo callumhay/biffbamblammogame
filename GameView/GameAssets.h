@@ -45,6 +45,7 @@ class LivesLeftHUD;
 class CrosshairLaserHUD;
 class PlayerHurtHUD;
 class FlashHUD;
+class PointsHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
 class PaddleRocketMesh;
@@ -67,6 +68,7 @@ private:
 	CrosshairLaserHUD* crosshairHUD;
 	PlayerHurtHUD* painHUD;
 	FlashHUD* flashHUD;
+    PointsHUD* pointsHUD;
 
 	// Level-related meshes
 	LevelMesh* currentLevelMesh;
@@ -169,6 +171,9 @@ public:
 	LivesLeftHUD* GetLifeHUD() const {
 		return this->lifeHUD;
 	}
+    PointsHUD* GetPointsHUD() const {
+        return this->pointsHUD;
+    }
 
 	void AddProjectile(const GameModel& gameModel, const Projectile& projectile);
 	void RemoveProjectile(const Projectile& projectile);

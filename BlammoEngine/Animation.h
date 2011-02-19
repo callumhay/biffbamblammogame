@@ -76,6 +76,9 @@ public:
 	const T& GetInterpolantValue() const {
 		return *this->interpolant;
 	}
+    const T& GetTargetValue() const {
+        return this->y1;
+    }
 
 	/**
 	 * Set whether the animation is on repeat or not.
@@ -109,6 +112,14 @@ public:
 		this->y0 = *interpolant;
 		this->y1 = finalValue;
 	}
+
+    void ClearLerp() {
+        this->x = 0.0;
+        this->x0 = 0;
+        this->x1 = 0;
+        this->y0 = *interpolant;
+        this->y1 = *interpolant;
+    }
 
 	/**
 	 * Tick the animation (i.e., animate it using linear interpolation).

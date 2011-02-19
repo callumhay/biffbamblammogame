@@ -40,7 +40,6 @@ private:
 	// HUD related members
 	static const unsigned int HUD_X_INDENT;
 	static const unsigned int HUD_Y_INDENT;
-	TextLabel2D scoreLabel;
 
 };
 

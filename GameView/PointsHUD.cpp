@@ -1,0 +1,192 @@
+/**
+ * PointsHUD.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2011
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
+#include "PointsHUD.h"
+#include "GameFontAssetsManager.h"
+#include "GameViewConstants.h"
+
+#include "../BlammoEngine/Camera.h"
+#include "../BlammoEngine/TextLabel.h"
+
+const int PointsHUD::STAR_SIZE                  = 30;
+const int PointsHUD::SCREEN_EDGE_VERTICAL_GAP   = 10;
+const int PointsHUD::SCREEN_EDGE_HORIZONTAL_GAP = 15;
+const int PointsHUD::STAR_TO_SCORE_VERTICAL_GAP = 5;
+
+PointsHUD::PointsHUD() : currPtScore(0), currPtMultiplier(1), 
+ptScoreLabel(NULL), ptMultiplierLabel(NULL) {
+
+    this->ptScoreLabel = new TextLabel2D(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "0");
+    this->ptScoreLabel->SetColour(Colour(1.0f, 0.4f, 0.0f));
+    this->ptScoreLabel->SetDropShadow(Colour(1,1,1), 0.09f);
+
+    this->ptMultiplierLabel = new TextLabel2D(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "");
+    this->ptMultiplierLabel->SetColour(Colour(1.0f, 0.4f, 0.0f));
+    this->ptMultiplierLabel->SetDropShadow(Colour(0,0,0), 0.09f);
+    
+    this->scoreAnimator = AnimationLerp<long>(&this->currPtScore);
+    this->scoreAnimator.SetRepeat(false);
+}
+
+PointsHUD::~PointsHUD() {
+    delete this->ptScoreLabel;
+    this->ptScoreLabel = NULL;
+    delete this->ptMultiplierLabel;
+    this->ptMultiplierLabel = NULL;
+
+    // Clean up any leftover notifications
+    this->ClearNotifications();
+}
+
+void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
+    this->scoreAnimator.Tick(dT);
+
+    float currentX = displayWidth  - SCREEN_EDGE_HORIZONTAL_GAP;
+    float currentY = displayHeight - SCREEN_EDGE_VERTICAL_GAP;
+    
+    // Draw the current star score
+    // TODO
+    currentY -= (STAR_SIZE + STAR_TO_SCORE_VERTICAL_GAP);
+
+    // Draw the current total point score
+    std::stringstream ptScoreString;
+    ptScoreString << this->currPtScore;
+    this->ptScoreLabel->SetText(ptScoreString.str());
+    
+    currentX = displayWidth - SCREEN_EDGE_HORIZONTAL_GAP - this->ptScoreLabel->GetLastRasterWidth();
+    this->ptScoreLabel->SetTopLeftCorner(currentX, currentY);
+    this->ptScoreLabel->Draw();
+
+    // Draw the multiplier if it's something greater than 1
+    if (this->currPtMultiplier > 1) {
+        // TODO
+    }
+
+    // Draw any point notifications
+    for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
+        PointNotification* ptNotification = *iter;
+        if (ptNotification->Draw(dT)) {
+            delete ptNotification;
+            ptNotification = NULL;
+            iter = this->ptNotifications.erase(iter);
+        }
+        else {
+            ++iter;
+        }
+    }
+}
+
+/**
+ * Call this to reinitialize the points HUD to what you would expect it
+ * to look like at the very start of a level.
+ */
+void PointsHUD::Reinitialize() {
+    this->scoreAnimator.ClearLerp();
+    this->scoreAnimator.SetInterpolantValue(0);
+    this->ClearNotifications();
+
+    this->currPtScore      = 0;
+    this->currPtMultiplier = 1;
+}
+
+void PointsHUD::SetScore(long pointScore) {
+
+    // This will animated and update the score as calls to Draw are made
+    if (this->scoreAnimator.GetTargetValue() != pointScore) {
+        this->scoreAnimator.SetLerp(0.25, pointScore);
+    }
+}
+
+void PointsHUD::PostPointNotification(const std::string& name, int pointAmount) {
+    PointNotification* ptNotify = new PointNotification(name, pointAmount);
+    this->ptNotifications.push_back(ptNotify);
+}
+
+void PointsHUD::ClearNotifications() {
+    for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end(); ++iter) {
+        PointNotification* ptNotify = *iter;
+        delete ptNotify;
+        ptNotify = NULL;
+    }
+    this->ptNotifications.clear();
+}
+
+/**
+ * Sets the current alpha (1 for completely visible, 0 for completely invisible) for the entire
+ * points HUD.
+ */
+void PointsHUD::SetAlpha(float alpha) {
+    this->ptScoreLabel->SetAlpha(alpha);
+    this->ptMultiplierLabel->SetAlpha(alpha);
+    for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
+        PointNotification* ptNotification = *iter;
+        ptNotification->SetAlpha(alpha);
+    }
+}
+
+PointsHUD::PointNotification::PointNotification(const std::string& name, int pointAmount) :
+pointLabel(NULL), notificationName(NULL), pointAmount(pointAmount) {
+    assert(pointAmount != 0);
+
+    bool isPositive = (pointAmount > 0);
+    std::string positiveSign("");
+    Colour labelColour;
+    if (isPositive) {
+        labelColour = GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR;
+        positiveSign = "+";
+    }
+    else {
+        labelColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR;
+    }
+
+    std::stringstream pointStr;
+    pointStr << positiveSign << pointAmount;
+    this->pointLabel = new TextLabel2D(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
+        pointStr.str());
+    this->pointLabel->SetDropShadow(Colour(0,0,0), 0.05f);
+    this->pointLabel->SetColour(labelColour);
+
+    if (!name.empty()) {
+        this->notificationName = new TextLabel2D(
+            GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), name);
+        this->notificationName->SetDropShadow(Colour(0,0,0), 0.08f);
+        this->notificationName->SetColour(labelColour);
+    }
+}
+
+PointsHUD::PointNotification::~PointNotification() {
+    delete this->pointLabel;
+    this->pointLabel = NULL;
+
+    if (this->notificationName != NULL) {
+        delete this->notificationName;
+        this->notificationName = NULL;
+    }
+}
+
+bool PointsHUD::PointNotification::Draw(double dT) {
+    
+    if (this->notificationName != NULL) {
+    }
+
+    
+    return false;
+}
+
+void PointsHUD::PointNotification::SetAlpha(float alpha) {
+    this->pointLabel->SetAlpha(alpha);
+    if (this->notificationName != NULL) {
+        this->notificationName->SetAlpha(alpha);
+    }
+}
