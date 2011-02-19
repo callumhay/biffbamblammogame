@@ -47,7 +47,7 @@ void LevelEndDisplayState::RenderFrame(double dT) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 1.0f, 
-																									 ColourRGBA(1, 1, 1, this->fadeToWhiteAnimation.GetInterpolantValue()));
+        ColourRGBA(1, 1, 1, this->fadeToWhiteAnimation.GetInterpolantValue()));
 
 	glPopAttrib();
 

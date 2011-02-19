@@ -566,15 +566,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CrosshairLaserHUD.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\DecoSkybox.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\FlashHUD.h"
 					>
 				</File>
 				<File
@@ -602,10 +594,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\LivesLeftHUD.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\OmniLaserBallEffect.h"
 					>
 				</File>
@@ -615,10 +603,6 @@
 				</File>
 				<File
 					RelativePath=".\GameView\PaddleShield.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\PlayerHurtHUD.h"
 					>
 				</File>
 				<File
@@ -642,15 +626,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\CrosshairLaserHUD.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\DecoSkybox.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\FlashHUD.cpp"
 					>
 				</File>
 				<File
@@ -678,10 +654,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\LivesLeftHUD.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\OmniLaserBallEffect.cpp"
 					>
 				</File>
@@ -691,10 +663,6 @@
 				</File>
 				<File
 					RelativePath=".\GameView\PaddleShield.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\PlayerHurtHUD.cpp"
 					>
 				</File>
 				<File
@@ -1162,6 +1130,58 @@
 					</File>
 					<File
 						RelativePath=".\GameView\LoadingScreen.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Heads Up Display (HUD)"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameView\CrosshairLaserHUD.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\FlashHUD.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\LivesLeftHUD.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PlayerHurtHUD.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PointsHUD.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\GameView\CrosshairLaserHUD.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\FlashHUD.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\LivesLeftHUD.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PlayerHurtHUD.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PointsHUD.cpp"
 						>
 					</File>
 				</Filter>

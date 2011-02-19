@@ -4,6 +4,7 @@
 #include "GameAssets.h"
 #include "GameFontAssetsManager.h"
 #include "LivesLeftHUD.h"
+#include "PointsHUD.h"
 
 #include "../BlammoEngine/Camera.h"
 #include "../GameModel/GameModel.h"
@@ -13,15 +14,6 @@ const unsigned int InGameRenderPipeline::HUD_Y_INDENT = 10;
 
 InGameRenderPipeline::InGameRenderPipeline(GameDisplay* display) : display(display) {
 	assert(display != NULL);
-
-	// Set HUD display elements
-	float dropShadowAmt = 0.05f;
-	Colour shadowColourHUD(0, 0, 0);
-	Colour textColourHUD(1, 1, 1);
-	// Score display
-	this->scoreLabel = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), "0");
-	this->scoreLabel.SetColour(textColourHUD);
-	this->scoreLabel.SetDropShadow(shadowColourHUD, dropShadowAmt);
 }
 
 InGameRenderPipeline::~InGameRenderPipeline() {
@@ -239,31 +231,31 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
 }
 
 void InGameRenderPipeline::RenderHUD(double dT) {
-	GameModel* gameModel = this->display->GetModel();
-	const Camera& camera = this->display->GetCamera();
+    GameAssets* gameAssets = this->display->GetAssets();
+    GameModel* gameModel   = this->display->GetModel();
+	const Camera& camera   = this->display->GetCamera();
 
 	const int DISPLAY_WIDTH  = camera.GetWindowWidth();
 	const int DISPLAY_HEIGHT = camera.GetWindowHeight();
 
 	// Draw the points in the top-right corner of the display
-	std::stringstream ptStrStream;
-	ptStrStream << gameModel->GetScore();
-	this->scoreLabel.SetText(ptStrStream.str());
-	this->scoreLabel.SetTopLeftCorner(DISPLAY_WIDTH - HUD_X_INDENT - this->scoreLabel.GetLastRasterWidth(), DISPLAY_HEIGHT - HUD_Y_INDENT);
-	this->scoreLabel.Draw();
+    PointsHUD* pointsHUD = gameAssets->GetPointsHUD();
+    pointsHUD->SetScore(gameModel->GetScore());
+    //pointsHUD->SetMultiplier(gameModel->GetMultiplier());
+    pointsHUD->Draw(DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
 
 	// Draw the number of lives left in the top-left corner of the display
-	this->display->GetAssets()->GetLifeHUD()->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	gameAssets->GetLifeHUD()->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	
 	// Draw the timers that are currently in existance
-	this->display->GetAssets()->DrawTimers(dT, camera);
+	gameAssets->DrawTimers(dT, camera);
 
 	// Draw any HUD special elements based on currently active items, etc.
-	this->display->GetAssets()->DrawActiveItemHUDElements(dT, *gameModel, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	gameAssets->DrawActiveItemHUDElements(dT, *gameModel, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 	// The very last thing we do is draw the 'informative' game elements (e.g., tutorial stuff, or important information for the player)
 	// this stuff should always be on the top
-	this->display->GetAssets()->DrawInformativeGameElements(camera, dT, *gameModel);
+	gameAssets->DrawInformativeGameElements(camera, dT, *gameModel);
 
 	debug_opengl_state();
 }

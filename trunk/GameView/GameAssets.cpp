@@ -21,6 +21,7 @@
 #include "CrosshairLaserHUD.h"
 #include "PlayerHurtHUD.h"
 #include "FlashHUD.h"
+#include "PointsHUD.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
 #include "PaddleRocketMesh.h"
@@ -62,6 +63,7 @@ lifeHUD(NULL),
 crosshairHUD(NULL),
 painHUD(NULL),
 flashHUD(NULL),
+pointsHUD(NULL),
 
 ball(NULL), 
 spikeyBall(NULL),
@@ -110,9 +112,10 @@ omniLaserBallEffect(NULL)
 
 	// Initialize any HUD elements
 	this->crosshairHUD	= new CrosshairLaserHUD();
-	this->lifeHUD			  = new LivesLeftHUD();
-	this->painHUD				= new PlayerHurtHUD();
-	this->flashHUD			= new FlashHUD();
+	this->lifeHUD       = new LivesLeftHUD();
+	this->painHUD       = new PlayerHurtHUD();
+	this->flashHUD      = new FlashHUD();
+    this->pointsHUD     = new PointsHUD();
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();
@@ -175,6 +178,8 @@ GameAssets::~GameAssets() {
 	this->painHUD = NULL;
 	delete this->flashHUD;
 	this->flashHUD = NULL;
+    delete this->pointsHUD;
+    this->pointsHUD = NULL;
 }
 
 
@@ -1050,6 +1055,7 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 
 	// Reinitialize the life HUD elements
 	this->lifeHUD->Reinitialize();
+    this->pointsHUD->Reinitialize();
 }
 
 void GameAssets::ActivateRandomItemEffects(const GameModel& gameModel, const GameItem& actualItem) {
