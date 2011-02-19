@@ -78,13 +78,11 @@ GameModel::~GameModel() {
 }
 
 /**
- * Called when we want to begin/restart the model from the
- * beginning of the game, this will reinitialize the model to
- * the first world, level, etc.
+ * Called in order to completely reset the game state and load the
+ * given zero-based index world and level number.
  */
-void GameModel::BeginOrRestartGame() {
-	this->SetCurrentWorld(GameModelConstants::GetInstance()->INITIAL_WORLD_NUM);
-
+void GameModel::StartGameAtWorldAndLevel(int worldNum, int levelNum) {
+	this->SetCurrentWorldAndLevel(worldNum, levelNum);
 	// Reset the score, lives, etc.
 	this->currPlayerScore	= GameModelConstants::GetInstance()->INIT_SCORE;
 	this->SetInitialNumberOfLives(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
@@ -92,6 +90,15 @@ void GameModel::BeginOrRestartGame() {
 	this->gameTransformInfo->Reset();
 
 	this->SetNextState(new BallOnPaddleState(this));
+}
+
+/**
+ * Called when we want to begin/restart the model from the
+ * beginning of the game, this will reinitialize the model to
+ * the first world, level, etc.
+ */
+void GameModel::BeginOrRestartGame() {
+    this->StartGameAtWorldAndLevel(GameModelConstants::GetInstance()->INITIAL_WORLD_NUM, 0);
 }
 
 // Called in order to make sure the game is no longer processing or generating anything
@@ -111,8 +118,8 @@ void GameModel::ClearGameState() {
 	this->gameTransformInfo->Reset();
 }
 
-void GameModel::SetCurrentWorld(unsigned int worldNum) {
-	assert(worldNum < this->worlds.size());
+void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum) {
+	assert(worldNum >= 0 && worldNum < static_cast<int>(this->worlds.size()));
 	
 	// Clean up the previous world
 	GameWorld* prevWorld = this->GetCurrentWorld();
@@ -131,7 +138,8 @@ void GameModel::SetCurrentWorld(unsigned int worldNum) {
 
 	// Setup the world for this object and make sure the world has its zeroth (i.e., first) level set for play
 	this->currWorldNum = worldNum;
-	world->SetCurrentLevel(this, 0);
+    assert(levelNum >= 0 && levelNum < static_cast<int>(world->GetNumLevels()));
+	world->SetCurrentLevel(this, levelNum);
 	GameLevel* currLevel = world->GetCurrentLevel();
 	assert(currLevel != NULL);
 
@@ -403,14 +411,16 @@ void GameModel::DoPieceStatusUpdates(double dT) {
 void GameModel::DoProjectileCollisions() {
 
 #define PROJECTILE_CLEANUP(p) GameEventManager::Instance()->ActionProjectileRemoved(*p); \
-													    delete p; \
-													    p = NULL
+                              delete p; \
+                              p = NULL
 													 
 	// Grab a list of all paddle-related projectiles and test each one for collisions...
 	std::list<Projectile*>& gameProjectiles = this->GetActiveProjectiles();
 	bool destroyProjectile = false;
 	bool didCollide = false;
 	bool incIter = true;
+
+    GameLevel* currLevel = this->GetCurrentLevel();
 
 	for (std::list<Projectile*>::iterator iter = gameProjectiles.begin(); iter != gameProjectiles.end();) {
 		Projectile* currProjectile = *iter;
@@ -437,15 +447,36 @@ void GameModel::DoProjectileCollisions() {
 		}
 
 		// Check to see if the projectile collided with a safety net (if one is active)
-		if (this->GetCurrentLevel()->ProjectileSafetyNetCollisionCheck(*currProjectile, projectileBoundingLines)) {
+		if (currLevel->ProjectileSafetyNetCollisionCheck(*currProjectile, projectileBoundingLines)) {
 			// This doesn't destroy projectiles currently
 			++iter;
 			continue;
 		}
 
+        // Check if the projectile collided with any tesla lightning arcs...
+        if (currLevel->IsDestroyedByTelsaLightning(*currProjectile)) {
+            if (currLevel->TeslaLightningCollisionCheck(projectileBoundingLines)) {
+                // In the special case of a rocket projectile we cause an explosion...
+                if (currProjectile->GetType() == Projectile::PaddleRocketBulletProjectile) {
+                    std::set<LevelPiece*> collisionPieces = this->GetCurrentLevel()->GetLevelPieceCollisionCandidates(currProjectile->GetPosition(), EPSILON);
+                    if (collisionPieces.empty()) {
+                        assert(false);
+                    }
+                    else {
+                        currLevel->RocketExplosion(this, currProjectile, *collisionPieces.begin());
+                    }
+                }
+
+			    // Despose of the projectile...
+                iter = gameProjectiles.erase(iter);
+                PROJECTILE_CLEANUP(currProjectile);
+                continue;    
+            }
+        }
+
 		// Find the any level pieces that the current projectile may have collided with and test for collision
-		incIter = true;	// Keep track of whether we need to increment the iterator or not
 		std::set<LevelPiece*> collisionPieces = this->GetCurrentLevel()->GetLevelPieceCollisionCandidates(*currProjectile);
+        incIter = true;	// Keep track of whether we need to increment the iterator or not
 		for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); pieceIter != collisionPieces.end(); ++pieceIter) {
 			LevelPiece *currPiece = *pieceIter;
 			
@@ -465,7 +496,7 @@ void GameModel::DoProjectileCollisions() {
 				}
 
 				break;	// Important that we break out of the loop since some blocks may no longer exist after a collision
-								// (and we may have destroyed the projectile anyway).
+						// (and we may have destroyed the projectile anyway).
 			}
 		}
 
@@ -475,6 +506,12 @@ void GameModel::DoProjectileCollisions() {
 	}
 
 #undef PROJECTILE_CLEANUP
+
+	// Check to see if the level is done
+    if (currLevel->IsLevelComplete()) {
+		// The level was completed, move to the level completed state
+		this->SetNextState(new LevelCompleteState(this));
+	}
 
 }
 

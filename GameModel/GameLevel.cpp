@@ -67,11 +67,12 @@ const char* GameLevel::POWERNEUTRAL_ITEM_TYPES_KEYWORD      = "powerneutrals";
 const char* GameLevel::POWERDOWN_ITEM_TYPES_KEYWORD         = "powerdowns";
 
 // Private constructor, requires all the pieces that make up the level
-GameLevel::GameLevel(const std::string& filepath, const std::string& levelName, 
+GameLevel::GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, 
                      unsigned int numBlocks, 
                      const std::vector<std::vector<LevelPiece*> >& pieces,
                      const std::vector<GameItem::ItemType>& allowedDropTypes, 
                      size_t randomItemProbabilityNum): 
+levelNum(levelNumber),
 currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum),
 piecesLeft(numBlocks), ballSafetyNetActive(false), 
@@ -124,7 +125,7 @@ GameLevel::~GameLevel() {
 	this->currentLevelPieces.clear();
 }
 
-GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
+GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string filepath) {
 	std::stringstream* inFile = ResourceManager::GetInstance()->FilepathToInOutStream(filepath);
 	if (inFile == NULL) {
 		assert(false);
@@ -851,7 +852,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(std::string filepath) {
 		}
 	}
 
-	return new GameLevel(filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum);
+	return new GameLevel(levelNumber, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum);
 }
 
 void GameLevel::CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& levelPieces) {
@@ -1276,7 +1277,7 @@ bool GameLevel::ProjectileSafetyNetCollisionCheck(const Projectile& p, const Bou
 
 	// Make sure the projectile is a type that we want being able to destroy a safety net
 	bool isProjectileThatBreaksSafetyNet = (p.GetType() == Projectile::FireGlobProjectile) ||
-																				 (p.GetType() == Projectile::CollateralBlockProjectile);
+                                           (p.GetType() == Projectile::CollateralBlockProjectile);
 	if (!isProjectileThatBreaksSafetyNet){ 
 		return false;
 	}
@@ -1357,7 +1358,8 @@ void GameLevel::RemoveTeslaLightningBarrier(const TeslaBlock* block1, const Tesl
 
 
 bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, 
-																						 Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+											 Collision::LineSeg2D& collisionLine, 
+                                             double& timeSinceCollision) const {
 	// Fast exit if there's no tesla stuffs
 	if (this->teslaLightning.empty()) {
 		return false;
@@ -1445,6 +1447,40 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	GameEventManager::Instance()->ActionBallHitTeslaLightningArc(b, *iter->first.first, *iter->first.second);
 
 	return true;
+}
+
+/**
+ * Checks if the given bounding lines collide with any tesla lightning arcs currently active in this level.
+ */
+bool GameLevel::TeslaLightningCollisionCheck(const BoundingLines& bounds) const {
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::const_iterator iter = this->teslaLightning.begin();
+	for (; iter != this->teslaLightning.end(); ++iter) {
+		const Collision::LineSeg2D& currLineSeg = iter->second;
+        if (bounds.CollisionCheck(currLineSeg)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Whether or not the given projectile is destroyed by collision with a tesla lightning arc
+bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
+    switch (p.GetType()) {
+        case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::BallLaserBulletProjectile:
+        case Projectile::FireGlobProjectile:
+            return false;
+        
+        case Projectile::CollateralBlockProjectile:
+        case Projectile::PaddleRocketBulletProjectile: 
+            return true;
+
+        default:
+            assert(false);
+            break;
+    }
+
+    return false;
 }
 
 void GameLevel::InitAfterLevelLoad(GameModel* model) {

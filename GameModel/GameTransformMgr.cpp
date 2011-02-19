@@ -299,8 +299,8 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 
 		Vector3D worldSpaceTranslation;
 		this->GetBallCamPositionAndFOV(*this->ballWithCamera, currLevel->GetLevelUnitWidth(), 
-																	 currLevel->GetLevelUnitHeight(), worldSpaceTranslation,
-																	 this->cameraFOVAngle);
+                                       currLevel->GetLevelUnitHeight(), worldSpaceTranslation,
+                                       this->cameraFOVAngle);
 
 		// TODO: make the rotation a little more creative...
 		Vector3D worldRotation(-90, 0, 0);

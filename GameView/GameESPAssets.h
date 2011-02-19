@@ -214,7 +214,6 @@ private:
 
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);
-	void AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc);
 	void AddEnergyShieldHitEffect(const Point2D& shieldCenter, const GameBall& ball);
 
 	void AddPaddleLaserBeamEffect(const Beam& beam);
@@ -239,6 +238,8 @@ public:
 
 	// Specific effects that can be made to occur in the game
 	//void AddBallBounceEffect(const Camera& camera, const GameBall& ball);	
+
+    void AddRocketBlastEffect(float rocketSizeFactor, const Point2D& loc);
 
 	ESPPointEmitter* CreateBallBounceEffect(const GameBall& ball, Onomatoplex::SoundType soundType); 
 	void AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block);

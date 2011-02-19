@@ -298,13 +298,13 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 		// Add the visual effect for when the ball hits a block
 		// We don't do bounce effects for the invisiball... cause then the player would know where it is easier
 		if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-			((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.UberballBlastsThrough())) {
+			((ball.GetBallType() & GameBall::UberBall) != GameBall::UberBall || !block.BallBlastsThrough(ball))) {
 				this->display->GetAssets()->GetESPAssets()->AddBounceLevelPieceEffect(ball, block);
 		}
 
 		// We shake things up if the ball is uber and the block is indestructible...
 		if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-			  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.UberballBlastsThrough()) {
+			  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.BallBlastsThrough(ball)) {
 
 			float shakeMagnitude, shakeLength;
 			BBBGameController::VibrateAmount controllerVibeAmt;
@@ -788,7 +788,7 @@ void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 
 void GameEventsListener::RocketExplodedEvent(const PaddleRocketProjectile& rocket) {
 	UNUSED_PARAMETER(rocket);
-	this->display->GetAssets()->RocketExplosion(this->display->GetCamera());
+	this->display->GetAssets()->RocketExplosion(rocket, this->display->GetCamera());
 	debug_output("EVENT: Rocket exploded");
 }
 

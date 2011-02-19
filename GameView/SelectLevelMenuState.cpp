@@ -26,7 +26,7 @@
 
 SelectLevelMenuState::SelectLevelMenuState(GameDisplay* display, const GameWorld* world) : 
 DisplayState(display), worldLabel(NULL), world(world), pressEscAlphaAnim(0.0f), 
-goBackToWorldSelectMenu(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
+goBackToWorldSelectMenu(false), goToStartLevel(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
 selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderAddAnim(0.0f), totalNumStarsLabel(NULL) {
 
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(
@@ -201,13 +201,54 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 	    this->menuFBO->GetFBOTexture()->RenderTextureToFullscreenQuad();
     }
 
+    // Handle the case where the player selected a level
+    if (this->goToStartLevel && fadeDone) {
+        // Start the currently selected level
+        LevelMenuItem* selectedLevelItem = this->levelItems[this->selectedItem];
+        const GameLevel* selectedLevel = selectedLevelItem->GetLevel();
+
+		// Turn off all the sounds first (waiting for any unfinished sounds), then switch states
+		//GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
+		//soundAssets->StopAllSounds();
+
+		// Load all the initial stuffs for the game - this will queue up the next states that we need to go to
+        this->display->GetModel()->StartGameAtWorldAndLevel(this->world->GetWorldIndex(), selectedLevel->GetLevelNumIndex());
+		// Place the view into the proper state to play the game	
+		this->display->SetCurrentStateAsNextQueuedState();
+    }
+
     debug_opengl_state();
 }
 
 void SelectLevelMenuState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+    if (goBackToWorldSelectMenu || goToStartLevel) {
+        return;
+    }
+
     switch (pressedButton) {
         case GameControl::EscapeButtonAction:
             this->GoBackToWorldSelectMenu();
+            break;
+
+        case GameControl::EnterButtonAction:
+            // Start up the currently selected world (if it's enabled)
+            this->GoToStartLevel();
+            break;
+
+        case GameControl::LeftButtonAction:
+            this->selectedItem--;
+            if (this->selectedItem < 0) {
+                this->selectedItem = (this->levelItems.size()-1);
+            }
+            break;
+
+        case GameControl::RightButtonAction:
+            this->selectedItem = (this->selectedItem + 1) % this->levelItems.size();
+            break;
+
+        case GameControl::UpButtonAction:
+        case GameControl::DownButtonAction:
+            // TODO...
             break;
 
         default:
@@ -312,7 +353,6 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
     float selectionWidth  = selectedItem->GetWidth() + 2*BORDER_GAP;
     float selectionHeight = selectedItem->GetHeight() + 2*BORDER_GAP;
 
-    // TODO... animation...
     this->selectionAlphaOrangeAnim.Tick(dT);
     this->selectionAlphaYellowAnim.Tick(dT);
     this->selectionBorderAddAnim.Tick(dT);
@@ -377,6 +417,20 @@ void SelectLevelMenuState::GoBackToWorldSelectMenu() {
     this->goBackMenuAlphaAnim.SetRepeat(false);
 
     this->goBackToWorldSelectMenu = true;
+}
+
+void SelectLevelMenuState::GoToStartLevel() {
+    if (this->levelItems[this->selectedItem]->GetIsEnabled()) {
+        // Finishing animation for starting the level
+        this->fadeAnimation.SetLerp(0.5f, 1.0f);
+	    this->fadeAnimation.SetRepeat(false);
+
+        this->goToStartLevel = true;
+    }
+    else {
+        // Play animation to indicate/show that the level is disabled
+        // TODO
+    }
 }
 
 void SelectLevelMenuState::SetupLevelItems() {
@@ -477,7 +531,7 @@ level(level), topLeftCorner(topLeftCorner), starTexture(starTexture), width(widt
 
     this->numLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Huge), levelNumStr.str());
-    this->numLabel->SetDropShadow(Colour(0.4f, 0.4f, 0.4f), 0.04f);
+    this->numLabel->SetDropShadow(Colour(0.0f, 0.0f, 0.0f), 0.04f);
     this->numLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
     this->numLabel->SetTopLeftCorner(this->topLeftCorner);
 

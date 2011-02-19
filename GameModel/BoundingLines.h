@@ -31,6 +31,7 @@ public:
 	bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	bool CollisionCheck(const Collision::Circle2D& c) const;
 	bool CollisionCheck(const BoundingLines& other) const;
+    bool CollisionCheck(const Collision::LineSeg2D& lineSeg) const;
 	int CollisionCheckIndex(const BoundingLines& other) const;
 
 	std::vector<int> CollisionCheckIndices(const BoundingLines& other) const;

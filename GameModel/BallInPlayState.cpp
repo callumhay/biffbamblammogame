@@ -213,7 +213,8 @@ void BallInPlayState::Tick(double seconds) {
 					// In the case that the ball is uber then we only reflect if the ball is not green OR
 					// The ball is attached to the paddle (special case)
 					if (!currPiece->BallBouncesOffWhenHit() ||
-						  (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && currPiece->UberballBlastsThrough())) {
+                       (((currBall->GetBallType() & GameBall::UberBall) == GameBall::UberBall) && 
+                       currPiece->BallBlastsThrough(*currBall))) {
 						// Ignore collision...
 					}
 					else if (paddle->GetAttachedBall() == currBall) {

@@ -44,8 +44,8 @@ public:
 		return true;
 	}
 
-	// Uberball doesn't blast through
-	bool UberballBlastsThrough() const {
+	bool BallBlastsThrough(const GameBall& b) const {
+        UNUSED_PARAMETER(b);
 		return false;
 	}
 

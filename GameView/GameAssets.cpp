@@ -999,7 +999,10 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 }
 
 // Notifies assets that there was an explosion and there should be a fullscreen flash
-void GameAssets::RocketExplosion(Camera& camera) {
+void GameAssets::RocketExplosion(const PaddleRocketProjectile& rocket, Camera& camera) {
+    float rocketSizeFactor = rocket.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+	this->espAssets->AddRocketBlastEffect(rocketSizeFactor, rocket.GetPosition());
+
 	// Add a camera/controller shake and flash for when the rocket explodes...
 	camera.SetCameraShake(1.2f, Vector3D(0.9f, 0.8f, 0.1f), 130);
 	GameControllerManager::GetInstance()->VibrateControllers(1.2f, BBBGameController::VeryHeavyVibration, BBBGameController::VeryHeavyVibration);

@@ -49,7 +49,8 @@ public:
 
     // Whether or not the uber ball can just blast right through this block.
     // Returns: true if it can, false otherwise.
-    virtual bool UberballBlastsThrough() const {
+    virtual bool BallBlastsThrough(const GameBall& b) const {
+        UNUSED_PARAMETER(b);
         return false;	// Cannot pass through prism blocks...
     }
 

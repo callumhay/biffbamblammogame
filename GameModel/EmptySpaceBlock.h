@@ -30,7 +30,8 @@ public:
 	}
 
 	// Any type of ball can blast through an empty space...
-	bool UberballBlastsThrough() const {
+	bool BallBlastsThrough(const GameBall& b) const {
+        UNUSED_PARAMETER(b);
 		return true;
 	}
 

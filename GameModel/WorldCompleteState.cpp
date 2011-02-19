@@ -30,7 +30,7 @@ void WorldCompleteState::Tick(double seconds) {
 	}
 	else {
 		// Increment the world...
-		this->gameModel->SetCurrentWorld(this->gameModel->currWorldNum + 1);
+		this->gameModel->SetCurrentWorldAndLevel(this->gameModel->currWorldNum + 1, 0);
 		// Place the ball back on the paddle, and let the next level/world begin!
 		this->gameModel->SetNextState(new BallOnPaddleState(this->gameModel));
 	}

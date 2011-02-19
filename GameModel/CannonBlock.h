@@ -51,7 +51,8 @@ public:
 	}
 	
 	// Even the uber ball just bounces off like a solid block
-	bool UberballBlastsThrough() const {
+	bool BallBlastsThrough(const GameBall& b) const {
+        UNUSED_PARAMETER(b);
 		return false;
 	}
 

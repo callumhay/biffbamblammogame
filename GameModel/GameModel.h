@@ -77,7 +77,7 @@ private:
 	bool doingPieceStatusListIteration;
 
 	// Private getters and setters ****************************************
-	void SetCurrentWorld(unsigned int worldNum);
+	void SetCurrentWorldAndLevel(int worldNum, int levelNum);
 
 	GameWorld* GetCurrentWorld() const {
 		return this->worlds[this->currWorldNum];
@@ -185,6 +185,7 @@ public:
 	void Tick(double seconds);
 
 	// Level/World related queries *****************************************
+    void StartGameAtWorldAndLevel(int worldNum, int levelNum);
 	void BeginOrRestartGame();
 	void ClearGameState();
 	

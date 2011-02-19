@@ -27,7 +27,7 @@ public:
 	bool BallBouncesOffWhenHit() const;
 	bool MustBeDestoryedToEndLevel() const;
 	bool CanBeDestroyedByBall() const;
-	bool UberballBlastsThrough() const;
+	bool BallBlastsThrough(const GameBall& b) const;
 	bool GhostballPassesThrough() const;
 	int GetPointValueForCollision();
 	bool IsLightReflectorRefractor() const;
@@ -85,9 +85,10 @@ inline bool ItemDropBlock::CanBeDestroyedByBall() const {
 	return false;
 }
 
-// Whether or not the uber ball can just blast right through this block.
+// Whether or not the ball can just blast right through this block.
 // Returns: true if it can, false otherwise.
-inline bool ItemDropBlock::UberballBlastsThrough() const {
+inline bool ItemDropBlock::BallBlastsThrough(const GameBall& b) const {
+    UNUSED_PARAMETER(b);
 	return false;	// Cannot pass through tesla blocks...
 }
 

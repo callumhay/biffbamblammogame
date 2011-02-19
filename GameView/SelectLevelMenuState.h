@@ -60,10 +60,13 @@ private:
     AnimationLerp<float> goBackMenuMoveAnim;
     AnimationLerp<float> goBackMenuAlphaAnim;
 
+    bool goToStartLevel;    // true when the user has selected a level to play
+    
     void DrawStarTotalLabel(const Camera& camera);
     void DrawTitleStrip(const Camera& camera) const;
     void DrawLevelSelectMenu(const Camera& camera, double dT);
     void GoBackToWorldSelectMenu();
+    void GoToStartLevel();
     void SetupLevelItems();
 
     class LevelMenuItem {
@@ -74,6 +77,8 @@ private:
         const Point2D& GetTopLeftCorner() const { return this->topLeftCorner; }
         const float GetWidth() const { return this->width; }
         float GetHeight() const;
+        const GameLevel* GetLevel() const { return this->level; }
+        bool GetIsEnabled() const { return this->isEnabled; }
 
         void Draw(const Camera& camera, double dT);
 
@@ -100,7 +105,7 @@ private:
         DISALLOW_COPY_AND_ASSIGN(LevelMenuItem);
     };
 
-    size_t selectedItem;
+    int selectedItem;
     std::vector<LevelMenuItem*> levelItems;
 
     DISALLOW_COPY_AND_ASSIGN(SelectLevelMenuState);
