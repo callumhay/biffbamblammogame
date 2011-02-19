@@ -1190,8 +1190,11 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			}
 			break;
 		
-		case Projectile::PaddleRocketBulletProjectile: {
-				// No explosion when the rocket hits portals or cannons...
+		case Projectile::PaddleRocketBulletProjectile:
+            /*
+            {
+            // NOTE: THIS IS NOW TAKEN CARE OF BY THE RocketExploded event
+			// No explosion when the rocket hits portals or cannons...
 			switch (block.GetType()) {
 				case LevelPiece::Portal:
 				case LevelPiece::Cannon:
@@ -1201,11 +1204,12 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 						// A rocket just hit a block - KABOOOOOOM!!!
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter());
 						float rocketSizeFactor = projectile.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
-						this->AddRocketHitBlockEffect(rocketSizeFactor, midPoint);
+						this->AddRocketBlastEffect(rocketSizeFactor, midPoint);
 					}
 					break;
 				}
 			}
+            */
 			break;
 
 		case Projectile::CollateralBlockProjectile:
@@ -2433,10 +2437,13 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile: 
+            /*
+            // NOTE: THIS IS NOW TAKEN CARE OF BY THE RocketExploded EVENT
 			{
 				float rocketSizeFactor = projectile.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
-				this->AddRocketHitBlockEffect(rocketSizeFactor, projectile.GetPosition());
+				this->AddRocketBlastEffect(rocketSizeFactor, projectile.GetPosition());
 			}
+            */
 			break;
 
 		default:
@@ -3496,7 +3503,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 }
 
 // Add the effect for when the rocket goes off after it hits a block
-void GameESPAssets::AddRocketHitBlockEffect(float rocketSizeFactor, const Point2D& loc) {
+void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& loc) {
 	ESPInterval bangLifeInterval		= ESPInterval(1.2f);
 	ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.maxValue + 0.4f);
 	Point3D emitCenter(loc);

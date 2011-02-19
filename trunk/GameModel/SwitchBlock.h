@@ -28,7 +28,7 @@ public:
 	bool BallBouncesOffWhenHit() const;
 	bool MustBeDestoryedToEndLevel() const;
 	bool CanBeDestroyedByBall() const;
-	bool UberballBlastsThrough() const;
+	bool BallBlastsThrough(const GameBall& b) const;
 	bool GhostballPassesThrough() const;
 	int GetPointValueForCollision();
 	bool IsLightReflectorRefractor() const;
@@ -82,7 +82,8 @@ inline bool SwitchBlock::MustBeDestoryedToEndLevel() const {
 inline bool SwitchBlock::CanBeDestroyedByBall() const {
 	return false;
 }
-inline bool SwitchBlock::UberballBlastsThrough() const {
+inline bool SwitchBlock::BallBlastsThrough(const GameBall& b) const {
+    UNUSED_PARAMETER(b);
 	return false;
 }
 inline bool SwitchBlock::GhostballPassesThrough() const {

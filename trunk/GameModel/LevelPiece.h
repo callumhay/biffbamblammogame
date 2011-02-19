@@ -90,7 +90,7 @@ public:
 	virtual bool BallBouncesOffWhenHit() const = 0;
 	virtual bool MustBeDestoryedToEndLevel() const = 0;
 	virtual bool CanBeDestroyedByBall() const = 0;
-	virtual bool UberballBlastsThrough() const = 0;
+	virtual bool BallBlastsThrough(const GameBall& b) const = 0;
 	virtual bool GhostballPassesThrough() const = 0;
 	virtual bool ProjectilePassesThrough(Projectile* projectile) const = 0;
 	virtual bool IsLightReflectorRefractor() const = 0;

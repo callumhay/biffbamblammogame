@@ -43,10 +43,18 @@ public:
 		assert(this->isLoaded);
 		return this->currentLevelNum;
 	}
+    size_t GetNumLevels() const {
+        return this->loadedLevels.size();
+    }
 
-    int GetWorldNumber() const {
+    // Zero based index of the world
+    int GetWorldIndex() const {
         assert(this->style != None);
-        return static_cast<int>(this->style) + 1;
+        return static_cast<int>(this->style);
+    }
+    // One based index of the world
+    int GetWorldNumber() const {
+        return this->GetWorldIndex() + 1;
     }
 	WorldStyle GetStyle() const {
 		assert(this->isLoaded);

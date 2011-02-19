@@ -113,7 +113,7 @@ bool GameWorld::Load() {
 
 	// Load each of the levels
 	for (size_t i = 0; i < levelFileList.size(); i++) {
-		GameLevel* lvl = GameLevel::CreateGameLevelFromFile(levelFileList[i]);
+		GameLevel* lvl = GameLevel::CreateGameLevelFromFile(i, levelFileList[i]);
 		if (lvl == NULL) {
 			// Clean up and exit on erroroneous level read
 			this->Unload();

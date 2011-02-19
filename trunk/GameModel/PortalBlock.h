@@ -45,9 +45,11 @@ public:
 		return false;
 	}
 
-	// Whether or not the uber ball can just blast right through this block.
-	bool UberballBlastsThrough() const {
-		return true;
+	// Whether or not the ball can just blast right through this block.
+	bool BallBlastsThrough(const GameBall& b) const {
+        UNUSED_PARAMETER(b);
+		// All balls pass through the portal
+        return true;
 	}
 
 	// Whether or not the ghost ball can just pass through this block.

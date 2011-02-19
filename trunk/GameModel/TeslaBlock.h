@@ -44,7 +44,8 @@ public:
 
 	// Whether or not the uber ball can just blast right through this block.
 	// Returns: true if it can, false otherwise.
-	bool UberballBlastsThrough() const {
+	bool BallBlastsThrough(const GameBall& b) const {
+        UNUSED_PARAMETER(b);
 		return false;	// Cannot pass through tesla blocks...
 	}
 

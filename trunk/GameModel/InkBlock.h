@@ -30,10 +30,13 @@ public:
 		return true;
 	}
 
-	// Whether or not the uber ball can just blast right through this block.
+	// Whether or not the ball can just blast right through this block.
 	// Returns: true if it can, false otherwise.
-	bool UberballBlastsThrough() const {
-		return true;
+	bool BallBlastsThrough(const GameBall& b) const {
+        // The may blast through this if it's uber and not firey/icy
+		return ((b.GetBallType() & GameBall::UberBall) == GameBall::UberBall) &&
+               ((b.GetBallType() & GameBall::IceBall) != GameBall::IceBall) && 
+               ((b.GetBallType() & GameBall::FireBall) != GameBall::FireBall);
 	}
 
 	// Whether or not the ghost ball can just pass through this block.

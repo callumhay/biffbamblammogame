@@ -412,6 +412,17 @@ bool BoundingLines::CollisionCheck(const BoundingLines& other) const {
 	return this->CollisionCheckIndex(other) != -1;
 }
 
+bool BoundingLines::CollisionCheck(const Collision::LineSeg2D& lineSeg) const {
+	for (size_t i = 0; i < this->lines.size(); ++i) {
+		const Collision::LineSeg2D& currThisLine = this->lines[i];
+		if (Collision::IsCollision(currThisLine, lineSeg)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /**
  * Test for a collision between this and the given set of lines and get the index of the first
  * line in this that collided.

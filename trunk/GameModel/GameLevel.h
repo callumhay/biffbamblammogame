@@ -52,7 +52,7 @@ public:
 	~GameLevel();
 
 	// Used to create a level from file
-	static GameLevel* CreateGameLevelFromFile(std::string filepath);
+	static GameLevel* CreateGameLevelFromFile(size_t levelNumber, std::string filepath);
 
 	/**
 	 * Obtain the set of pieces making up the current state of the level.
@@ -73,7 +73,8 @@ public:
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Projectile& p) const;
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const PlayerPaddle& p, bool includeAttachedBall) const;
 
-	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, std::set<const LevelPiece*> ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
+	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, 
+        std::set<const LevelPiece*> ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
 	
 	// Get whether or not the ball safety net is currently active
 	bool IsBallSafetyNetActive() const {
@@ -93,7 +94,9 @@ public:
 	void AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
 	void RemoveTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
 	bool TeslaLightningCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
-	void InitAfterLevelLoad(GameModel* model);
+	bool TeslaLightningCollisionCheck(const BoundingLines& bounds) const;
+    bool IsDestroyedByTelsaLightning(const Projectile& p) const;
+    void InitAfterLevelLoad(GameModel* model);
 
 	/**
 	 * Obtain the LevelPiece at the given height and width indices.
@@ -136,6 +139,9 @@ public:
 		return this->levelName;
 	}
 
+    // Get the zero-based level number/index in its world
+    size_t GetLevelNumIndex() const { return this->levelNum; }
+
 	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter);
 	LevelPiece* RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
@@ -150,8 +156,9 @@ private:
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
     std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
 
-	size_t piecesLeft;            // Pieces left before the end of the level
-	size_t width, height;         // Size values for the level
+    size_t levelNum;                // The zero-based index of this level in its world
+	size_t piecesLeft;              // Pieces left before the end of the level
+	size_t width, height;           // Size values for the level
 	bool ballSafetyNetActive;
 	BoundingLines safetyNetBounds;
 	std::string filepath;
@@ -173,7 +180,7 @@ private:
 
 	//QuadTree* levelTree;	// A quad tree representing the boundries of this entire level and all its pieces
 
-	GameLevel(const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
+	GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
 		const std::vector<std::vector<LevelPiece*> >& pieces, const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum);
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
