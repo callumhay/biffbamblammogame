@@ -57,7 +57,7 @@ private:
 	std::list<GameItemTimer*> activeTimers;
 
 	// Player score and life information
-	int currPlayerScore;
+	long currPlayerScore;
 	int numConsecutiveBlocksHit;
 	int currLivesLeft;
 
@@ -106,22 +106,8 @@ private:
 	void UpdateActiveProjectiles(double seconds);
 	void UpdateActiveBeams(double seconds);
 
-
 	// Increment the player's score in the game
-	void IncrementScore(int amt) {
-		bool wasGreaterThanZero = this->currPlayerScore > 0;
-		int amtChanged = amt;
-			
-		this->currPlayerScore +=  amtChanged;
-		if (this->currPlayerScore < 0) {
-				this->currPlayerScore = 0;
-		}
-
-		if (amt != 0 && wasGreaterThanZero){
-			// EVENT: Score was changed
-			GameEventManager::Instance()->ActionScoreChanged(amtChanged);
-		}
-	}
+	void IncrementScore(int amt);
 
 	// Set the number of consecutive blocks hit by the ball in the interrum between
 	// when it leaves and returns to the player paddle
@@ -215,7 +201,7 @@ public:
 		return this->currWorldNum == this->worlds.size()-1;
 	}
 
-	int GetScore() const {
+	long GetScore() const {
 		return this->currPlayerScore;
 	}
 
