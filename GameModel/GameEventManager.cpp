@@ -489,3 +489,11 @@ void GameEventManager::ActionBlockIceShattered(const LevelPiece& block) {
 		(*this->listenerIter)->BlockIceShatteredEvent(block);
 	}	
 }
+
+// Action for when points are awarded and the GUI needs to be notified
+void GameEventManager::ActionPointNotification(const std::string& name, int pointAmount) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->PointNotificationEvent(name, pointAmount);
+	}
+}

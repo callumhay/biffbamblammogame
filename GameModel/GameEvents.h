@@ -286,20 +286,6 @@ public:
 	virtual void LevelPieceAllStatusRemovedEvent(const LevelPiece& piece) = 0;
 
 	/**
-	 * Event triggered when there is a change to the player's score. Only occurs once per change.
-	 * Arguements: amt - The amount the score changed by.
-	 */
-	virtual void ScoreChangedEvent(int amt) = 0;
-
-	/**
-	 * Event triggered when there is a change to the player's score multiplier. 
-	 * Only occurs once per change.
-	 * Arguements: oldMultiplier - The multiplier before the change.
-	 *             newMultiplier - The multiplier after the change.
-	 */
-	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) = 0;
-
-	/**
 	 * Event triggered when an item is spawned and becomes part of the game.
 	 * Only occurs once per spawn.
 	 * Arguements: item - The newly spawned item.
@@ -440,6 +426,31 @@ public:
 	 * Arguements: block - The block whose ice shattered.
 	 */
 	virtual void BlockIceShatteredEvent(const LevelPiece& block) = 0;
+
+
+    // Point related events ****************************************************************
+
+    /**
+     * Event tiggered whenever the player earns a fixed point amount, occurs right after the point
+     * amount is added to the score.
+     * Arguements: name        - Name of the notification (e.g., "Masochist Bonus"), is allowed to be blank
+     *             pointAmount - The number of points awarded
+     */
+    virtual void PointNotificationEvent(const std::string& name, int pointAmount) = 0;
+
+	/**
+	 * Event triggered when there is a change to the player's score. Only occurs once per change.
+	 * Arguements: amt - The amount the score changed by.
+	 */
+	virtual void ScoreChangedEvent(int amt) = 0;
+
+	/**
+	 * Event triggered when there is a change to the player's score multiplier. 
+	 * Only occurs once per change.
+	 * Arguements: oldMultiplier - The multiplier before the change.
+	 *             newMultiplier - The multiplier after the change.
+	 */
+	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) = 0;
 };
 
 

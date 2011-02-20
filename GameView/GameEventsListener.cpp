@@ -17,6 +17,7 @@
 #include "GameOverDisplayState.h"
 #include "GameCompleteDisplayState.h"
 #include "LivesLeftHUD.h"
+#include "PointsHUD.h"
 #include "BallSafetyNetMesh.h"
 
 #include "../Blammopedia.h"
@@ -655,14 +656,6 @@ void GameEventsListener::LevelPieceAllStatusRemovedEvent(const LevelPiece& piece
 	debug_output("EVENT: LevelPiece all status removed");
 }
 
-void GameEventsListener::ScoreChangedEvent(int amt) {
-	debug_output("EVENT: Score Change: " << amt);
-}
-
-void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) {
-	debug_output("EVENT: Score Multiplier Change - Old Value: " << oldMultiplier << " New Value: " << newMultiplier); 
-}
-
 void GameEventsListener::ItemSpawnedEvent(const GameItem& item) {
 	// Play item spawn sound
 	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundItemSpawnedEvent);
@@ -865,12 +858,34 @@ void GameEventsListener::BlockIceShatteredEvent(const LevelPiece& block) {
 	debug_output("EVENT: Ice shattered");
 }
 
+void GameEventsListener::PointNotificationEvent(const std::string& name, int pointAmount) {
+    PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
+    pointsHUD->PostPointNotification(name, pointAmount);
+
+    debug_output("EVENT: Point notification: " << name << " : " << pointAmount);
+}
+
+void GameEventsListener::ScoreChangedEvent(int amt) {
+    PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
+    pointsHUD->SetScore(this->display->GetModel()->GetScore());
+
+	debug_output("EVENT: Score Change: " << amt);
+}
+
+void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) {
+    PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
+    pointsHUD->SetMultiplier(newMultiplier);
+
+	debug_output("EVENT: Score Multiplier Change - Old Value: " << oldMultiplier << " New Value: " << newMultiplier); 
+}
+
 /**
  * Calculate the volume and shake for a ball of a given size (if we want the size to have an effect on such things).
  */
 void GameEventsListener::GetVolAndShakeForBallSize(const GameBall::BallSize& ballSize, float& shakeMagnitude,
-																								   float& shakeLength, GameSoundAssets::SoundVolumeLoudness& volume,
-																								   BBBGameController::VibrateAmount& controllerVibeAmt) {
+                                                   float& shakeLength, GameSoundAssets::SoundVolumeLoudness& volume,
+                                                   BBBGameController::VibrateAmount& controllerVibeAmt) {
+
 	switch(ballSize) {
 
 		case GameBall::SmallestSize:

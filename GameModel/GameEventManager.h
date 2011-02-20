@@ -103,6 +103,8 @@ public:
 
 	void ActionBlockIceShattered(const LevelPiece& block);
 
+    void ActionPointNotification(const std::string& name, int pointAmount);
+
 protected:
 	GameEventManager();
 	

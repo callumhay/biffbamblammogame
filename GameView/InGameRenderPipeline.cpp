@@ -240,7 +240,7 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 
 	// Draw the points in the top-right corner of the display
     PointsHUD* pointsHUD = gameAssets->GetPointsHUD();
-    pointsHUD->SetScore(gameModel->GetScore());
+    //pointsHUD->SetScore(gameModel->GetScore());
     //pointsHUD->SetMultiplier(gameModel->GetMultiplier());
     pointsHUD->Draw(DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
 

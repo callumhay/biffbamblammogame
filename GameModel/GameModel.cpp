@@ -678,6 +678,18 @@ void GameModel::UpdateActiveBeams(double seconds) {
 
 }
 
+// Increment the player's score in the game
+void GameModel::IncrementScore(int amt) {
+    this->currPlayerScore += amt;
+	if (amt != 0){
+		// EVENT: Score was changed
+		GameEventManager::Instance()->ActionScoreChanged(amt);
+	
+        // TODO: GET RID OF THIS
+        GameEventManager::Instance()->ActionPointNotification("Random Bonus", 100);
+    }
+}
+
 /**
  * Clears the list of all projectiles that are currently in existance in the game.
  */

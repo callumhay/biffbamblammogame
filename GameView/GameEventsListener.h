@@ -64,8 +64,6 @@ public:
 	void LevelPieceStatusAddedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus);
 	void LevelPieceStatusRemovedEvent(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus);
 	void LevelPieceAllStatusRemovedEvent(const LevelPiece& piece);
-	void ScoreChangedEvent(int amt);
-	void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier);
 	void ItemSpawnedEvent(const GameItem& item);
 	void ItemRemovedEvent(const GameItem& item);
 	void ItemPaddleCollsionEvent(const GameItem& item, const PlayerPaddle& paddle);
@@ -88,6 +86,10 @@ public:
 	void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
 
 	void BlockIceShatteredEvent(const LevelPiece& block);
+
+	void ScoreChangedEvent(int amt);
+	void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier);
+    void PointNotificationEvent(const std::string& name, int pointAmount);
 
 private:
 	GameDisplay* display;
