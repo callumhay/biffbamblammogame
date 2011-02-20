@@ -86,6 +86,7 @@ public:
 	const char* TEXTURE_LASER_BEAM;
 	const char* TEXTURE_UP_ARROW;
 	const char* TEXTURE_BALL_LIFE_HUD;
+    const char* TEXTURE_MULTIPLIER_BANG;
 	const char* TEXTURE_SPARKLE;
 	const char* TEXTURE_SPIRAL_SMALL;
 	const char* TEXTURE_SPIRAL_MEDIUM;

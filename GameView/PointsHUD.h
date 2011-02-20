@@ -45,6 +45,8 @@ private:
     static const int SCREEN_EDGE_VERTICAL_GAP;
     static const int SCREEN_EDGE_HORIZONTAL_GAP;
     static const int STAR_TO_SCORE_VERTICAL_GAP;
+    static const int SCORE_TO_MULTIPLER_HORIZONTAL_GAP;
+    static const int ALL_STARS_WIDTH;
 
     class PointNotification {
     public:
@@ -82,7 +84,9 @@ private:
     
     // Textures
     Texture* starTex;
+    Texture* multiplierBangTex;
 
+    void DrawMultiplier(float rightMostX, float topMostY);
     void DrawIdleStars(float rightMostX, float topMostY, double dT);
     void DrawQuad(float centerX, float centerY, float size);
 
