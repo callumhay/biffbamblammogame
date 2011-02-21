@@ -311,3 +311,75 @@ bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	}
 	return false;
 }
+
+/**
+ * Get the number of points when this piece changes to the given piece.
+ */
+int BreakableBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
+    int totalPts = 0;
+    if (changeToPiece.GetType() == LevelPiece::Empty) {
+        totalPts += BreakableBlock::POINTS_ON_BLOCK_DESTROYED;
+        switch (this->pieceType) {
+            case RedBreakable:
+                totalPts += BreakableBlock::POINTS_ON_RED_TO_ORANGE_HIT;
+            case OrangeBreakable:
+                totalPts += BreakableBlock::POINTS_ON_ORANGE_TO_YELLOW_HIT;
+            case YellowBreakable:
+                totalPts += BreakableBlock::POINTS_ON_YELLOW_TO_GREEN_HIT;
+            case GreenBreakable:
+                break;
+            default:
+                assert(false);
+                break;
+        }
+    }
+    
+    if (changeToPiece.GetType() == LevelPiece::Breakable || 
+        changeToPiece.GetType() == LevelPiece::BreakableTriangle) {
+        
+        const BreakableBlock* breakableChangeToPiece = static_cast<const BreakableBlock*>(&changeToPiece);
+        assert(breakableChangeToPiece != NULL);
+        switch (breakableChangeToPiece->pieceType) {
+            case RedBreakable:
+                break;
+
+            case OrangeBreakable:
+                if (this->pieceType == RedBreakable) {
+                    totalPts += BreakableBlock::POINTS_ON_RED_TO_ORANGE_HIT;
+                }
+                break;
+
+            case YellowBreakable:
+                switch (this->pieceType) {
+                    case RedBreakable:
+                        totalPts += BreakableBlock::POINTS_ON_RED_TO_ORANGE_HIT;
+                    case OrangeBreakable:
+                        totalPts += BreakableBlock::POINTS_ON_ORANGE_TO_YELLOW_HIT;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            case GreenBreakable:
+                switch (this->pieceType) {
+                    case RedBreakable:
+                        totalPts += BreakableBlock::POINTS_ON_RED_TO_ORANGE_HIT;
+                    case OrangeBreakable:
+                        totalPts += BreakableBlock::POINTS_ON_ORANGE_TO_YELLOW_HIT;
+                    case YellowBreakable:
+                        totalPts += BreakableBlock::POINTS_ON_YELLOW_TO_GREEN_HIT;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            default:
+                assert(false);
+                break;
+        }
+    }
+
+    return totalPts;
+}

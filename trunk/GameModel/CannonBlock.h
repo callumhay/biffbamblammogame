@@ -61,18 +61,16 @@ public:
 		return true;
 	}
 
-	// Obtain the point value for a collision with this block.
-	int GetPointValueForCollision() {
-		return 0;
-	}
-
 	// Light beams will extinguish on contact
 	bool IsLightReflectorRefractor() const {
 		return false;
 	}
 
 	bool ProjectilePassesThrough(Projectile* projectile) const;
-
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const {
+        UNUSED_PARAMETER(changeToPiece);
+        return 0; 
+    }
 
 	// The cannon block cannot be destroyed
 	LevelPiece* Destroy(GameModel* gameModel);

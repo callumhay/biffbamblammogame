@@ -440,17 +440,16 @@ public:
 
 	/**
 	 * Event triggered when there is a change to the player's score. Only occurs once per change.
-	 * Arguements: amt - The amount the score changed by.
+	 * Arguements: newScore - The new score after the change.
 	 */
-	virtual void ScoreChangedEvent(int amt) = 0;
+	virtual void ScoreChangedEvent(int newScore) = 0;
 
 	/**
 	 * Event triggered when there is a change to the player's score multiplier. 
 	 * Only occurs once per change.
-	 * Arguements: oldMultiplier - The multiplier before the change.
-	 *             newMultiplier - The multiplier after the change.
+	 * Arguements: newMultiplier - The multiplier after the change.
 	 */
-	virtual void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) = 0;
+	virtual void ScoreMultiplierChangedEvent(int newMultiplier) = 0;
 };
 
 

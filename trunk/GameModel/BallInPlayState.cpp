@@ -122,7 +122,6 @@ void BallInPlayState::Tick(double seconds) {
 			// Check for ball collision with the player's paddle
 			didCollideWithPaddle = paddle->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
 			if (didCollideWithPaddle) {
-				
 				// The ball no longer has a last piece that it collided with - it gets reset when it hits the paddle
 				currBall->SetLastPieceCollidedWith(NULL);
 
@@ -143,6 +142,11 @@ void BallInPlayState::Tick(double seconds) {
 						continue;
 					}
 				}
+
+                // Grab a point amount based on the collision - if the ball is closer to the edge of the paddle
+                // and the paddle is moving, etc., more points are awarded for being risky
+                //int paddleHitPoints = paddle->GetPointsForHittingBall(*currBall);
+                // TODO
 
 				// Do ball-paddle collision
 				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);

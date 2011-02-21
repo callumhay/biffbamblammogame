@@ -211,7 +211,7 @@ void CollateralBlock::Tick(double dT, CollateralBlockProjectile& collateralProje
 				// (for movement see the collateralblockprojectile)...
 				
 				Vector2D moveAmt = static_cast<float>(dT) * collateralProjectile.GetVelocityMagnitude() * 
-																									  collateralProjectile.GetVelocityDirection();
+                                   collateralProjectile.GetVelocityDirection();
 				this->center = this->center + moveAmt;
 
 				// Keep the projectile in the same position as the block (sync em up!)

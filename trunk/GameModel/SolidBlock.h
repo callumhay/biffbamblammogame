@@ -56,11 +56,6 @@ public:
 		return false; // Cannot pass through solid blocks... 
 	}
 
-	// You get no points for collisions with solid blocks...
-	int GetPointValueForCollision() {
-		return 0;
-	}
-
 	bool IsLightReflectorRefractor() const {
 		// When frozen in ice a block can reflect/refract lasers and the like
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
@@ -70,6 +65,7 @@ public:
 	}
 
 	bool ProjectilePassesThrough(Projectile* projectile) const;
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
 	LevelPiece* Destroy(GameModel* gameModel);
 
@@ -84,6 +80,10 @@ public:
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
+
+private:
+    static const int POINTS_ON_BLOCK_DESTROYED = 700;
+    DISALLOW_COPY_AND_ASSIGN(SolidBlock);
 };
 
 inline bool SolidBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {

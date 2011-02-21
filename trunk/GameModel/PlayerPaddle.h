@@ -217,7 +217,8 @@ public:
 	bool CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType, const BoundingLines& bounds) const;
 	
 	Collision::AABB2D GetPaddleAABB(bool includeAttachedBall) const;
-	
+	int GetPointsForHittingBall(const GameBall& ball) const;
+
 	void DebugDraw() const;
 
 private:
@@ -285,7 +286,7 @@ private:
 	void FireGlobProjectileCollision(const Projectile& projectile);
 	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter);
 	void SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, double totalHitEffectTime, 
-																				 float minMoveDown, float closeToCenterCoeff, float maxRotationInDegs);
+                                           float minMoveDown, float closeToCenterCoeff, float maxRotationInDegs);
 
 	Collision::Circle2D CreatePaddleShieldBounds() const;
 
@@ -300,7 +301,10 @@ inline void PlayerPaddle::Animate(double seconds) {
 
 // Check to see if the given ball collides, return the normal of the collision and the line of the collision as well
 // as the time since the collision occurred
-inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
+                                         Collision::LineSeg2D& collisionLine, 
+                                         double& timeSinceCollision) const {
+
 	if (ball.IsLastThingCollidedWith(this)) {
 		return false;
 	}
@@ -341,7 +345,8 @@ inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector
 /**
  * Check to see if the given set of bounding lines collides with this paddle.
  */
-inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const {
+inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds,
+                                         bool includeAttachedBallCheck) const {
 	bool didCollide = false;
 	// If the paddle has a shield around it do the collision with the shield
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
@@ -370,7 +375,8 @@ inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds, bool inclu
 }
 
 // Check for a collision with the given projectile
-inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType, const BoundingLines& bounds) const {
+inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType,
+                                                       const BoundingLines& bounds) const {
 	UNUSED_PARAMETER(projectileType);
 	return this->CollisionCheck(bounds, true);
 }

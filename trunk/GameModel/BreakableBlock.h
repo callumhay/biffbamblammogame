@@ -65,6 +65,7 @@ public:
 	}
 
 	bool ProjectilePassesThrough(Projectile* projectile) const;
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
 	// Breakable blocks do not reflect or refract light.
 	// Returns: false
@@ -74,22 +75,6 @@ public:
 			return true;
 		}
 		return false;
-	}
-
-	// Obtain the point value for a collision with this breakable block.
-	// Returns: point value.
-	virtual int GetPointValueForCollision() {
-		switch (this->pieceType) {
-			case GreenBreakable:
-				return POINTS_ON_BLOCK_DESTROYED;
-			case YellowBreakable:
-			case OrangeBreakable:
-			case RedBreakable:
-				return POINTS_ON_BLOCK_HIT;
-			default:
-				break;
-		}
-		return 0;
 	}
 
 	// Collision related stuffs
@@ -102,9 +87,11 @@ public:
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
 protected:
-	static const int PIECE_STARTING_LIFE_POINTS = 100;	// Starting life points given to a breakable block
-	static const int POINTS_ON_BLOCK_HIT				= 5;		// Points obtained when you just hit a breakable block
-	static const int POINTS_ON_BLOCK_DESTROYED	= 10;		// Points obtained when you destory a breakable block
+	static const int PIECE_STARTING_LIFE_POINTS     = 100;	// Starting life points given to a breakable block
+	static const int POINTS_ON_RED_TO_ORANGE_HIT    = 300;
+    static const int POINTS_ON_ORANGE_TO_YELLOW_HIT = 200;
+    static const int POINTS_ON_YELLOW_TO_GREEN_HIT  = 150;
+	static const int POINTS_ON_BLOCK_DESTROYED	    = 100;   // Points obtained when you destory a breakable block
 
 	float currLifePoints;	// Current life points of this block
 

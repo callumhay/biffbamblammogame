@@ -29,9 +29,13 @@ public:
 	bool CanBeDestroyedByBall() const;
 	bool BallBlastsThrough(const GameBall& b) const;
 	bool GhostballPassesThrough() const;
-	int GetPointValueForCollision();
 	bool IsLightReflectorRefractor() const;
 	bool ProjectilePassesThrough(Projectile* projectile) const;
+
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const {
+        UNUSED_PARAMETER(changeToPiece);
+        return 0;
+    };
 
     void Triggered(GameModel* gameModel);
 
@@ -96,11 +100,6 @@ inline bool ItemDropBlock::BallBlastsThrough(const GameBall& b) const {
 // Returns: true if it can, false otherwise.
 inline bool ItemDropBlock::GhostballPassesThrough() const {
 	return true;
-}
-
-// You get no points for collisions with item drop blocks...
-inline int ItemDropBlock::GetPointValueForCollision() {
-	return 0;
 }
 
 // Item drop blocks do not reflect or refract light.

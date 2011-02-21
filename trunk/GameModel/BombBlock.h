@@ -42,11 +42,6 @@ public:
 		return true;
 	}
 
-	// You get no points for empty spaces...
-	int GetPointValueForCollision() {
-		return 0;
-	}
-
 	bool IsLightReflectorRefractor() const {
 		// When frozen in ice a block can reflect/refract lasers and the like
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
@@ -54,6 +49,8 @@ public:
 		}
 		return false;
 	}
+
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
 	bool ProjectilePassesThrough(Projectile* projectile) const;
 
@@ -67,6 +64,7 @@ public:
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses); 
 
 protected:
+    static const int BOMB_DESTRUCTION_POINTS    = 50;
 	static const int PIECE_STARTING_LIFE_POINTS = 120;	// Starting life points given to a bomb block
 	float currLifePoints;	// Current life points of this block
 

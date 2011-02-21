@@ -49,6 +49,16 @@ bool BombBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	return false;
 }
 
+/**
+ * Get the number of points when this piece changes to the given piece.
+ */
+int BombBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
+    if (changeToPiece.GetType() == LevelPiece::Empty) {
+        return BombBlock::BOMB_DESTRUCTION_POINTS;
+    }
+    return 0;
+}
+
 LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 	// Obtain the level from the model...
 	GameLevel* level = gameModel->GetCurrentLevel();

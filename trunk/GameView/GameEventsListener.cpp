@@ -865,18 +865,18 @@ void GameEventsListener::PointNotificationEvent(const std::string& name, int poi
     debug_output("EVENT: Point notification: " << name << " : " << pointAmount);
 }
 
-void GameEventsListener::ScoreChangedEvent(int amt) {
+void GameEventsListener::ScoreChangedEvent(int newScore) {
     PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
-    pointsHUD->SetScore(this->display->GetModel()->GetScore());
+    pointsHUD->SetScore(newScore);
 
-	debug_output("EVENT: Score Change: " << amt);
+	debug_output("EVENT: Score Change: " << newScore);
 }
 
-void GameEventsListener::ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier) {
+void GameEventsListener::ScoreMultiplierChangedEvent(int newMultiplier) {
     PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
     pointsHUD->SetMultiplier(newMultiplier);
 
-	debug_output("EVENT: Score Multiplier Change - Old Value: " << oldMultiplier << " New Value: " << newMultiplier); 
+	debug_output("EVENT: Score Multiplier Change: " << newMultiplier); 
 }
 
 /**

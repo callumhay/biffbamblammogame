@@ -86,7 +86,7 @@ void GameModel::StartGameAtWorldAndLevel(int worldNum, int levelNum) {
 	// Reset the score, lives, etc.
 	this->currPlayerScore	= GameModelConstants::GetInstance()->INIT_SCORE;
 	this->SetInitialNumberOfLives(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
-	this->numConsecutiveBlocksHit = GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT;	// Don't use set here, we don't want an event
+	this->numInterimBlocksDestroyed = 0;	// Don't use set here, we don't want an event
 	this->gameTransformInfo->Reset();
 
 	this->SetNextState(new BallOnPaddleState(this));
@@ -183,10 +183,7 @@ void GameModel::Tick(double seconds) {
  */
 void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
 	assert(p != NULL);
-	
-	int pointValue = p->GetPointValueForCollision();
-	assert(pointValue >= 0);
-	this->IncrementScore(pointValue);
+	assert(p->GetType() != LevelPiece::Empty);
 
 	bool alreadyCollided = projectile->IsLastLevelPieceCollidedWith(p);
 
@@ -230,11 +227,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle) 
  */
 void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	assert(p != NULL);
-
-	// Set the score appropriately
-	int pointValue = p->GetPointValueForCollision();
-	assert(pointValue >= 0);
-	this->IncrementScore(pointValue);
+    assert(p->GetType() != LevelPiece::Empty);
 
 	// EVENT: Ball-Block Collision
 	GameEventManager::Instance()->ActionBallBlockCollision(ball, *p);
@@ -257,12 +250,6 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 		// TODO
 	}
 
-	// TODO: figure out this multiplier stuffs...
-	// If the piece was destroyed then increase the multiplier
-	//if (p->GetType() == LevelPiece::Empty) {
-	//	this->SetNumConsecutiveBlocksHit(this->numConsecutiveBlocksHit+1);
-	//}
-
 	// Check to see if the level is done
 	if (currLevel->IsLevelComplete()) {
 		// The level was completed, move to the level completed state
@@ -273,9 +260,6 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 	ball.BallCollided();
 	//ball.SetLastThingCollidedWith(this->playerPaddle);
-
-	// Reset the multiplier
-	this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
 
 	// Modify the ball velocity using the current paddle speed
 	Vector2D paddleVel = this->playerPaddle->GetVelocity();
@@ -310,6 +294,10 @@ void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 			}
 		}
 	}
+
+	// Reset the number of blocks that have been destroyed since the last paddle hit - this will
+    // also get rid of any score multiplier
+	this->SetNumInterimBlocksDestroyed(0);
 }
 
 /**
@@ -325,7 +313,7 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 	// Do nasty stuff to player only if that was the last ball left
 	if (this->balls.size() == 1) {
 		// Reset the multiplier
-		this->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
+		this->SetNumInterimBlocksDestroyed(0);
 		
 		// Decrement the number of lives left
 		this->SetLivesLeft(this->currLivesLeft-1);
@@ -680,14 +668,54 @@ void GameModel::UpdateActiveBeams(double seconds) {
 
 // Increment the player's score in the game
 void GameModel::IncrementScore(int amt) {
-    this->currPlayerScore += amt;
-	if (amt != 0){
+	if (amt != 0) {
+        int currMultiplier = this->GetCurrentMultiplier();
+        int incrementAmt   = currMultiplier * amt;
+        this->currPlayerScore += incrementAmt;
+
 		// EVENT: Score was changed
-		GameEventManager::Instance()->ActionScoreChanged(amt);
+        GameEventManager::Instance()->ActionScoreChanged(this->currPlayerScore);
 	
         // TODO: GET RID OF THIS
         GameEventManager::Instance()->ActionPointNotification("Random Bonus", 100);
+
+        // TODO: Check to see if a star was obtained...
+
     }
+}
+
+// Set the number of consecutive blocks hit by the ball in the interrum between
+// when it leaves and returns to the player paddle
+void GameModel::SetNumInterimBlocksDestroyed(int value) {
+	assert(value >= 0);
+	if (value != this->numInterimBlocksDestroyed) {
+		this->numInterimBlocksDestroyed = value;
+        int newMultiplier = this->GetCurrentMultiplier();
+		
+		// EVENT: The score multiplier has changed
+		GameEventManager::Instance()->ActionScoreMultiplierChanged(newMultiplier);
+	}
+}
+
+/**
+ * Gets the current score multiplier based on the number of blocks that have been
+ * currently destroyed between paddle hits.
+ */
+int GameModel::GetCurrentMultiplier() const {
+    if (this->numInterimBlocksDestroyed >=
+        GameModelConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_NUM_BLOCKS) {
+        return 4;
+    }
+    else if (this->numInterimBlocksDestroyed >= 
+        GameModelConstants::GetInstance()->THREE_TIMES_MULTIPLIER_NUM_BLOCKS) {
+        return 3;
+    }
+    else if (this->numInterimBlocksDestroyed >= 
+        GameModelConstants::GetInstance()->TWO_TIMES_MULTIPLIER_NUM_BLOCKS) {
+        return 2;
+    }
+
+    return 1;
 }
 
 /**

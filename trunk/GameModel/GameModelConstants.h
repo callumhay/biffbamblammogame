@@ -42,7 +42,6 @@ public:
 	const double PROB_OF_GHOSTBALL_BLOCK_MISS;	// Probablity the ball will go into ghost mode when it hits a block
 	const double LENGTH_OF_GHOSTMODE;           // Length of time in seconds of ghost mode
 
-	const int DEFAULT_BLOCKS_HIT;               // Initial number of blocks hit by a ball as it leaves the paddle
 	const int INIT_SCORE;                       // Initial player score when starting a game
 	const int INIT_LIVES_LEFT;                  // Initial player lives when starting a game
 	const int MAX_LIVES_LEFT;                   // Maximum number of lives that a player may have at a given time
@@ -50,6 +49,10 @@ public:
 	const int FIRE_DAMAGE_PER_SECOND;               // The damage that fire does per second
 	const double FIRE_GLOB_DROP_CHANCE_INTERVAL;    // The interval of time in seconds over which a fire glob might be dropped from a block
 	const int FIRE_GLOB_CHANCE_MOD;                 // The 1/x where x is the value of this, of a fire glob dropping after FIRE_GLOB_DROP_CHANCE_INTERVAL seconds
+
+    const int TWO_TIMES_MULTIPLIER_NUM_BLOCKS;      // The number of blocks that must be destroyed between paddle hits to get a 2x multiplier
+    const int THREE_TIMES_MULTIPLIER_NUM_BLOCKS;    // ... 3x multiplier
+    const int FOUR_TIMES_MULTIPLIER_NUM_BLOCKS;     // ... 4x multiplier
 
 	// -------------------------------------------------
 

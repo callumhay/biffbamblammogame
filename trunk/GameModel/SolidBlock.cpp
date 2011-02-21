@@ -45,6 +45,16 @@ bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	return false;
 }
 
+/**
+ * Get the number of points when this piece changes to the given piece.
+ */
+int SolidBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
+    if (changeToPiece.GetType() == LevelPiece::Empty) {
+        return SolidBlock::POINTS_ON_BLOCK_DESTROYED;
+    }
+    return 0;
+}
+
 LevelPiece* SolidBlock::Destroy(GameModel* gameModel) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
