@@ -54,11 +54,6 @@ public:
 		return true;
 	}
 
-	// Obtain the point value for a collision with this block.
-	int GetPointValueForCollision() {
-		return CollateralBlock::POINTS_ON_BLOCK_DESTROYED;
-	}
-
 	// Light beams will extinguish on contact
 	bool IsLightReflectorRefractor() const {
 		// When frozen in ice a block can reflect/refract lasers and the like
@@ -69,6 +64,10 @@ public:
 	}
 
 	bool ProjectilePassesThrough(Projectile* projectile) const;
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const {
+        UNUSED_PARAMETER(changeToPiece);
+        return 0;
+    }
 
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel);	
@@ -91,7 +90,6 @@ private:
 	static const float ROTATION_SPEED;
 
 	static const int PIECE_STARTING_LIFE_POINTS = 100;	// Starting life points given to a breakable block
-	static const int POINTS_ON_BLOCK_DESTROYED	= 10;		// Points obtained when you destory a breakable block
 
 	float currLifePoints;	// Current life points of this block
 

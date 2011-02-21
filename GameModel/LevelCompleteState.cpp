@@ -35,7 +35,7 @@ void LevelCompleteState::Tick(double seconds) {
 	// Clean up all the level-related state stuff in preparation for the next level/world/?
 	
 	// Reset the multiplier
-	this->gameModel->SetNumConsecutiveBlocksHit(GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT);
+	this->gameModel->SetNumInterimBlocksDestroyed(0);
 	// Reset the game transform manager
 	this->gameModel->GetTransformInfo()->Reset();
 

@@ -1,0 +1,56 @@
+Bombs are your friend
+11 25
+S S S S S S S S S S S 
+S R R E E E E E R R S 
+S B R E E E E E R B S 
+S R R R R R R R R R S 
+S R O O O O O O O R S 
+S B Y Y Y Y Y Y Y B S 
+S G B G G B G G B G S 
+S E G E G G G E G E S 
+S R E G E G E G E R S 
+S B O E G E G E O B S 
+S G E Y B O B Y E G S 
+S E O E G E G E O E S 
+S R E G E G E G E G S 
+S B G E G B G E G B S 
+S G G G G G G G G G S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+BallGrow 2
+UberBall 2
+StickyPaddle 2
+ShieldPaddle 0
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiBall 2
+LaserBeamPaddle 2
+FireBall 0
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 0
+BallCam 0
+MultiBall3 2
+IceBall 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 0
+FastBall 2
+PaddleCam 0

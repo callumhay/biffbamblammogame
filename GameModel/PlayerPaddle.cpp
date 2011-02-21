@@ -985,8 +985,10 @@ float PlayerPaddle::GetPercentNearPaddleCenter(const Point2D& projectileCenter, 
 // minMoveDown         - minimum distance the paddle will be pushed down
 // closeToCenterCoeff  - added maximum effect of the paddle being hit right in the center
 // maxRotationInDegs   - maximum rotation amount (when the paddle is hit on its outer edges)
-void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, double totalHitEffectTime, 
-																										 float minMoveDown, float closeToCenterCoeff, float maxRotationInDegs) {
+void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, 
+                                                     double totalHitEffectTime, 
+                                                     float minMoveDown, 
+                                                     float closeToCenterCoeff, float maxRotationInDegs) {
 	
 	// Find percent distance from edge to center of the paddle
 	float distFromCenter = 0.0;
@@ -1022,4 +1024,18 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
 	rotationValues.push_back(0.0f);
 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
+}
+
+int PlayerPaddle::GetPointsForHittingBall(const GameBall& ball) const {
+    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+        // No points are awarded if there's a shield on the paddle
+        return 0;
+    }
+
+    // Two major things factor into this: 
+    // 1. How far the ball is from the paddle center (further = more points)
+    // 2. How fast the paddle is moving when it hits the ball (faster = more points)
+    
+
+
 }

@@ -87,8 +87,8 @@ public:
 
 	void BlockIceShatteredEvent(const LevelPiece& block);
 
-	void ScoreChangedEvent(int amt);
-	void ScoreMultiplierChangedEvent(int oldMultiplier, int newMultiplier);
+	void ScoreChangedEvent(int newScore);
+	void ScoreMultiplierChangedEvent(int newMultiplier);
     void PointNotificationEvent(const std::string& name, int pointAmount);
 
 private:

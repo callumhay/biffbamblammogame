@@ -33,7 +33,7 @@ public:
     PointsHUD();
     ~PointsHUD();
 
-    //enum AnimationType { CreationAnimation, IdleAnimation, DestructionAnimation };
+    //enum AnimationType { CreationAnimation, IdleAnimation };
 
     void Draw(int displayWidth, int displayHeight, double dT);
 
@@ -50,7 +50,6 @@ private:
     static const int STAR_TO_SCORE_VERTICAL_GAP;
     static const int SCORE_TO_MULTIPLER_HORIZONTAL_GAP;
     static const int ALL_STARS_WIDTH;
-    
 
     class PointNotification {
     public:
@@ -78,25 +77,58 @@ private:
         DISALLOW_COPY_AND_ASSIGN(PointNotification);
     };
 
+    class MultiplierHUD {
+    public:
+        MultiplierHUD();
+        ~MultiplierHUD();
+
+        void Reinitialize();
+        
+        void SetAlpha(float alpha);
+        void SetMultiplier(int multiplierAmt);
+        void Draw(float rightMostX, float topMostY, double dT);
+
+    private:
+        static const float BANG_TEXT_BORDER;
+
+        enum AnimationState { None, CreationAnimation, IncreaseAnimation, IdleAnimation, LeaveAnimation };
+        AnimationState currState;
+
+        float size;                     // The total size (width/height) of the multiplier
+        int currPtMultiplier;           // The current score multiplier
+        TextLabel2D* ptMultiplierLabel; // The display label for the multiplier
+        Texture* multiplierBangTex;     // The 'bang' texture behind the multiplier label
+
+        // Animations
+        AnimationMultiLerp<float> scaleAnim;
+        AnimationMultiLerp<ColourRGBA> rgbaLabelAnim;
+        
+        void DrawHUD(float rightMostX, float topMostY);
+        void SetCurrentAnimationState(const AnimationState& state);
+
+        static Colour GetMultiplierColour(int multiplier);
+        static float  GetMultiplierScale(int multiplier);
+
+        DISALLOW_COPY_AND_ASSIGN(MultiplierHUD);
+    };
+
     typedef std::list<PointNotification*> PointNotifyList;
     typedef PointNotifyList::iterator PointNotifyListIter;
     typedef PointNotifyList::const_iterator PointNotifyListConstIter;
 
+    //AnimationType currAnimState;
+
     int numStars;                                   // The current number of stars awarded to the player
     long currPtScore;                               // The current score
-    int currPtMultiplier;                           // The current score multiplier
     std::list<PointNotification*> ptNotifications;  // FIFO Queue of current point notifications
-
+    MultiplierHUD* multiplier;                      // HUD for the multiplier
+    
     // Labels
     TextLabel2D* ptScoreLabel;
-    TextLabel2D* ptMultiplierLabel;
-
     // Animations
     AnimationLerp<long> scoreAnimator;   // Animates the current score (so that it looks like it's tallying points over time)
-    
     // Textures
     Texture* starTex;
-    Texture* multiplierBangTex;
 
     void DrawMultiplier(float rightMostX, float topMostY);
     void DrawIdleStars(float rightMostX, float topMostY, double dT);
@@ -110,7 +142,7 @@ private:
 
 inline void PointsHUD::SetMultiplier(int multiplierAmt) {
     assert(multiplierAmt >= 1);
-    this->currPtMultiplier = multiplierAmt;
+    this->multiplier->SetMultiplier(multiplierAmt);
 }
 
 #endif // __POINTSHUD_H__

@@ -55,11 +55,6 @@ public:
 		return true;
 	}
 
-	// You get no points for collisions with tesla blocks...
-	int GetPointValueForCollision() {
-		return 0;
-	}
-
 	// Tesla blocks do not reflect or refract light.
 	// Returns: false
 	bool IsLightReflectorRefractor() const {
@@ -71,6 +66,11 @@ public:
 		UNUSED_PARAMETER(projectile);
 		return false;
 	}
+
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const {
+        UNUSED_PARAMETER(changeToPiece);
+        return 0;
+    }
 
 	LevelPiece* Destroy(GameModel* gameModel) {
 		UNUSED_PARAMETER(gameModel);

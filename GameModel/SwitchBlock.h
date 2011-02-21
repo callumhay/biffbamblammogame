@@ -30,9 +30,13 @@ public:
 	bool CanBeDestroyedByBall() const;
 	bool BallBlastsThrough(const GameBall& b) const;
 	bool GhostballPassesThrough() const;
-	int GetPointValueForCollision();
 	bool IsLightReflectorRefractor() const;
 	bool ProjectilePassesThrough(Projectile* projectile) const;
+    
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const {
+        UNUSED_PARAMETER(changeToPiece);
+        return 0;
+    }
 
     void Triggered(GameModel* gameModel);
 
@@ -88,9 +92,6 @@ inline bool SwitchBlock::BallBlastsThrough(const GameBall& b) const {
 }
 inline bool SwitchBlock::GhostballPassesThrough() const {
 	return true;
-}
-inline int SwitchBlock::GetPointValueForCollision() {
-	return 0;
 }
 inline bool SwitchBlock::IsLightReflectorRefractor() const {
 	return false;

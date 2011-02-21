@@ -274,18 +274,18 @@ void GameEventManager::ActionLevelPieceAllStatusRemoved(const LevelPiece& piece)
 }
 
 // Action for when the player's score changes
-void GameEventManager::ActionScoreChanged(int amt) {
+void GameEventManager::ActionScoreChanged(int newScore) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->ScoreChangedEvent(amt);
+		(*this->listenerIter)->ScoreChangedEvent(newScore);
 	}	
 }
 
 // Action for when the score multiplier changes
-void GameEventManager::ActionScoreMultiplierChanged(int oldScoreMultiplier, int newScoreMultiplier) {
+void GameEventManager::ActionScoreMultiplierChanged(int newScoreMultiplier) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->ScoreMultiplierChangedEvent(oldScoreMultiplier, newScoreMultiplier);
+		(*this->listenerIter)->ScoreMultiplierChangedEvent(newScoreMultiplier);
 	}	
 }
 

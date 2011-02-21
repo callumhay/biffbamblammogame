@@ -41,11 +41,6 @@ public:
 		return true;
 	}
 
-	// You get no points for empty spaces...
-	int GetPointValueForCollision() {
-		return 0;
-	}
-
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel){
 		UNUSED_PARAMETER(gameModel);
@@ -58,6 +53,10 @@ public:
 		UNUSED_PARAMETER(projectile);
 		return true;
 	}
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const {
+        UNUSED_PARAMETER(changeToPiece);
+        return 0;
+    }
 
 	// Empty blocks do not reflect or refract light.
 	// Returns: false

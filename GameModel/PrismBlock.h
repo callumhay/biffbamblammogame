@@ -60,11 +60,6 @@ public:
         return true; // Ghost ball can float through them, why not?
     }
 
-    // You get no points for collisions with prism blocks...
-    virtual int GetPointValueForCollision() {
-        return 0;
-    }
-
     bool ProjectilePassesThrough(Projectile* projectile) const {
         if (projectile->GetType() == Projectile::PaddleRocketBulletProjectile) {
             return false;
@@ -72,6 +67,11 @@ public:
 
         return true;
     }
+
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const {
+        UNUSED_PARAMETER(changeToPiece);
+        return 0;
+    };
 
     // Prism blocks reflect and refract light.
     // Returns: true

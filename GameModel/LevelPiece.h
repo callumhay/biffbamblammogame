@@ -67,8 +67,6 @@ public:
 	virtual bool CollisionCheck(const BoundingLines& boundingLines) const;
 	virtual bool CollisionCheck(const Collision::Circle2D& c) const;
 
-	virtual int GetPointValueForCollision() = 0;
-
 	// Collision related stuffs
 	virtual LevelPiece* Destroy(GameModel* gameModel) = 0;
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
@@ -94,6 +92,9 @@ public:
 	virtual bool GhostballPassesThrough() const = 0;
 	virtual bool ProjectilePassesThrough(Projectile* projectile) const = 0;
 	virtual bool IsLightReflectorRefractor() const = 0;
+
+    virtual int GetPointsOnChange(const LevelPiece& changeToPiece) const = 0;
+
 
     virtual void Triggered(GameModel* gameModel);
     void SetTriggerID(const LevelPiece::TriggerID& id) { this->triggerID = id; }

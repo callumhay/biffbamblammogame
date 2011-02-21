@@ -45,12 +45,6 @@ public:
 		return true;
 	}
 
-	// Obtain the point value for a collision with this block.
-	// Returns: point value.
-	int GetPointValueForCollision() {
-		return POINTS_ON_BLOCK_DESTROYED;
-	}
-
 	// Ink blocks do not reflect or refract light.
 	// Returns: false
 	bool IsLightReflectorRefractor() const {
@@ -62,6 +56,7 @@ public:
 	}
 
 	bool ProjectilePassesThrough(Projectile* projectile) const;
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel);	
@@ -73,7 +68,7 @@ public:
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses); 
 
 protected:
-	static const int POINTS_ON_BLOCK_DESTROYED = 15;	// Points obtained when you destory an ink block
+	static const int POINTS_ON_BLOCK_DESTROYED  = 500;	// Points obtained when you destory an ink block
 	static const int PIECE_STARTING_LIFE_POINTS = 80;	// Starting life points given to a ink block
 
 	float currLifePoints;	// Current life points of this block

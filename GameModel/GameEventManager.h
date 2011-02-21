@@ -69,8 +69,8 @@ public:
 	void ActionLevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& addedStatus);
 	void ActionLevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus);
 	void ActionLevelPieceAllStatusRemoved(const LevelPiece& piece);
-	void ActionScoreChanged(int amt);
-	void ActionScoreMultiplierChanged(int oldScoreMultiplier, int newScoreMultiplier);
+	void ActionScoreChanged(int newScore);
+	void ActionScoreMultiplierChanged(int newScoreMultiplier);
 	void ActionItemSpawned(const GameItem& item);
 	void ActionItemRemoved(const GameItem& item);
 	void ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle);

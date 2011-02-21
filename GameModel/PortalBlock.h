@@ -57,16 +57,16 @@ public:
 		return false;
 	}
 
-	// Obtain the point value for a collision with this block.
-	int GetPointValueForCollision() {
-		return 0;
-	}
-
 	// Particles pass through portal blocks.
 	bool ProjectilePassesThrough(Projectile* projectile) const {
 		UNUSED_PARAMETER(projectile);
 		return true;
 	}
+
+    int GetPointsOnChange(const LevelPiece& changeToPiece) const {
+        UNUSED_PARAMETER(changeToPiece);
+        return 0;
+    }
 
 	// Portal blocks change light...
 	bool IsLightReflectorRefractor() const {

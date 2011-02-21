@@ -58,7 +58,7 @@ private:
 
 	// Player score and life information
 	long currPlayerScore;
-	int numConsecutiveBlocksHit;
+	int numInterimBlocksDestroyed;
 	int currLivesLeft;
 
 	// Holds the type of pausing that is currently being used on the game model (see PauseType enum)
@@ -106,24 +106,9 @@ private:
 	void UpdateActiveProjectiles(double seconds);
 	void UpdateActiveBeams(double seconds);
 
-	// Increment the player's score in the game
-	void IncrementScore(int amt);
-
-	// Set the number of consecutive blocks hit by the ball in the interrum between
-	// when it leaves and returns to the player paddle
-	void SetNumConsecutiveBlocksHit(int value) {
-		if (value < GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT) {
-			value = GameModelConstants::GetInstance()->DEFAULT_BLOCKS_HIT;
-		}
-
-		if (value != this->numConsecutiveBlocksHit) {
-			int oldMultiplier = this->numConsecutiveBlocksHit;
-			this->numConsecutiveBlocksHit = value;
-			
-			// EVENT: The score multiplier has changed
-			GameEventManager::Instance()->ActionScoreMultiplierChanged(oldMultiplier, this->numConsecutiveBlocksHit);
-		}
-	}
+	void SetNumInterimBlocksDestroyed(int value);
+    int GetNumInterimBlocksDestroyed() const { return this->numInterimBlocksDestroyed; }
+    int GetCurrentMultiplier() const;
 
 	void ClearProjectiles();
 	void ClearBeams();
@@ -144,6 +129,9 @@ public:
 
 	GameModel();
 	~GameModel();
+
+    void IncrementScore(int amt);
+    void IncrementNumInterimBlocksDestroyed() { this->SetNumInterimBlocksDestroyed(this->GetNumInterimBlocksDestroyed()+1); }
 
 	GameState::GameStateType GetCurrentStateType() const {
 		if (this->currState != NULL) {
@@ -206,7 +194,7 @@ public:
 	}
 
 	int GetNumConsecutiveBlocksHit() const {
-		return this->numConsecutiveBlocksHit;
+		return this->numInterimBlocksDestroyed;
 	}
 
 	int GetLivesLeft() const {

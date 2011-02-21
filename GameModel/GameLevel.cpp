@@ -922,7 +922,8 @@ void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces
 	}
 
 	pieces[hIndex][wIndex]->UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-																			 topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+                                         topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, 
+                                         bottomLeftNeighbor);
 }
 
 /**
@@ -933,6 +934,11 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, Leve
 	assert(gameModel != NULL);
 	assert(pieceBefore != NULL);
 	assert(pieceAfter != NULL);
+
+    // Add whatever number of points are acquired for the piece change to the player's score
+    // NOTE: Make sure this is done before incrementing the number of interim
+    // blocks destroyed - otherwise the multiplier will be applied before the incremented score!
+    gameModel->IncrementScore(pieceBefore->GetPointsOnChange(*pieceAfter));
 
 	// EVENT: Level piece has changed...
 	GameEventManager::Instance()->ActionLevelPieceChanged(*pieceBefore, *pieceAfter);
@@ -973,6 +979,11 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, Leve
 
 		// If the piece is in any auxillary lists within the game model then we need to remove it
 		gameModel->WipePieceFromAuxLists(pieceBefore);
+
+	    // The replaced piece has officially been destroyed, increase the number of destroyed blocks in the model
+        if (pieceBefore->GetType() != LevelPiece::Empty && pieceAfter->GetType() == LevelPiece::Empty) {
+		    gameModel->IncrementNumInterimBlocksDestroyed();
+        }
 	}
 	else {
 		// Inline: in this case there was a change within the piece object itself

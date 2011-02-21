@@ -45,6 +45,16 @@ bool InkBlock::ProjectilePassesThrough(Projectile* projectile) const {
 }
 
 /**
+ * Get the number of points when this piece changes to the given piece.
+ */
+int InkBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
+    if (changeToPiece.GetType() == LevelPiece::Empty) {
+        return InkBlock::POINTS_ON_BLOCK_DESTROYED;
+    }
+    return 0;
+}
+
+/**
  * The ink block is destroyed and replaced by an empty space.
  * Returns: A new empty space block.
  */
