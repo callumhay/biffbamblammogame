@@ -288,9 +288,9 @@ void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, Gam
  * Gets the expected reflection/refraction rays for a levelpiece that's been frozen in an ice cube status.
  * The resulting rays are based on the position of the projectile at impact relative to this piece.
  */
-void LevelPiece::GetIceCubeReflectionRefractionRays(const Point2D& currCenter,
-																										const Vector2D& currDir, 
-																										std::list<Collision::Ray2D>& rays) const {
+void LevelPiece::GetIceCubeReflectionRefractionRays(const Point2D& currCenter, 
+                                                    const Vector2D& currDir, 
+                                                    std::list<Collision::Ray2D>& rays) const {
 
 	Collision::Ray2D defaultRay(currCenter, currDir);	// This is what happens to the original ray
 	

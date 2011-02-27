@@ -22,6 +22,7 @@
 #include "GameBall.h"
 #include "Projectile.h"
 #include "PaddleRocketProjectile.h"
+#include "PointAward.h"
 
 class GameModel;
 class GameBall;
@@ -217,7 +218,7 @@ public:
 	bool CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType, const BoundingLines& bounds) const;
 	
 	Collision::AABB2D GetPaddleAABB(bool includeAttachedBall) const;
-	int GetPointsForHittingBall(const GameBall& ball) const;
+    std::list<PointAward> GetPointsForHittingBall(const GameBall& ball) const;
 
 	void DebugDraw() const;
 
@@ -247,12 +248,12 @@ private:
 	// Movement 
 	float acceleration;	  // The paddle's acceleration in units / second^2 (always positive)
 	float decceleration;  // The paddle's deceleration in units / second^2 (always negative)
-	float maxSpeed;	  		// The maximum absolute value speed of the paddle in units per second (note that the minimum Speed is always 0)
-	float currSpeed;			// The current absolute value speed of the paddle in units per second
-	float lastDirection;	// Used to store the last direction the user told the paddle to move in (-1 for left, 1 for right, 0 for no movement)
-	bool moveButtonDown;	// Whether the move button is being held down currently
-	float impulse;				// When there's an immediate impulse applied to the paddle we need to use this and add it directly to the position
-												// of the paddle (and then immediately reset it to zero)
+	float maxSpeed;	  	  // The maximum absolute value speed of the paddle in units per second (note that the minimum Speed is always 0)
+	float currSpeed;      // The current absolute value speed of the paddle in units per second
+	float lastDirection;  // Used to store the last direction the user told the paddle to move in (-1 for left, 1 for right, 0 for no movement)
+	bool moveButtonDown;  // Whether the move button is being held down currently
+	float impulse;        // When there's an immediate impulse applied to the paddle we need to use this and add it directly to the position
+                          // of the paddle (and then immediately reset it to zero)
 
 	// Colour and animation
 	ColourRGBA colour;															// The colour multiply of the paddle, including its visibility/alpha
@@ -289,9 +290,9 @@ private:
                                            float minMoveDown, float closeToCenterCoeff, float maxRotationInDegs);
 
 	Collision::Circle2D CreatePaddleShieldBounds() const;
-
-
 	void GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const;
+    
+    DISALLOW_COPY_AND_ASSIGN(PlayerPaddle);
 };
 
 inline void PlayerPaddle::Animate(double seconds) {

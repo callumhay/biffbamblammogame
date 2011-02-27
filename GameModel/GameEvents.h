@@ -19,6 +19,7 @@ class GameItemTimer;
 class Projectile;
 class Beam;
 class PaddleRocketProjectile;
+class PointAward;
 
 class GameEvents {
 public:
@@ -433,10 +434,9 @@ public:
     /**
      * Event tiggered whenever the player earns a fixed point amount, occurs right after the point
      * amount is added to the score.
-     * Arguements: name        - Name of the notification (e.g., "Masochist Bonus"), is allowed to be blank
-     *             pointAmount - The number of points awarded
+     * Arguements: pointAward - information about the point notification.
      */
-    virtual void PointNotificationEvent(const std::string& name, int pointAmount) = 0;
+    virtual void PointNotificationEvent(const PointAward& pointAward) = 0;
 
 	/**
 	 * Event triggered when there is a change to the player's score. Only occurs once per change.
@@ -448,8 +448,9 @@ public:
 	 * Event triggered when there is a change to the player's score multiplier. 
 	 * Only occurs once per change.
 	 * Arguements: newMultiplier - The multiplier after the change.
+     *             position      - The position in the game where the event occurred that changed the multiplier.
 	 */
-	virtual void ScoreMultiplierChangedEvent(int newMultiplier) = 0;
+	virtual void ScoreMultiplierChangedEvent(int newMultiplier, const Point2D& position) = 0;
 };
 
 

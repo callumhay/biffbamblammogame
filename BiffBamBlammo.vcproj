@@ -1261,6 +1261,14 @@
 					RelativePath=".\GameModel\PlayerPaddle.h"
 					>
 				</File>
+				<File
+					RelativePath=".\GameModel\PointAward.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameModel\ScoreTypes.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"

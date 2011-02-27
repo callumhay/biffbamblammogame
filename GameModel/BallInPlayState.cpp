@@ -136,27 +136,31 @@ void BallInPlayState::Tick(double seconds) {
 				// If the sticky paddle power-up is activated then the ball will simply be attached to
 				// the player paddle (if there are no balls already attached) ... unless the paddle has a shield active as well
 				if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
-					  (paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == NULL) {
+					(paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == 0x0) {
 					bool couldAttach = this->gameModel->GetPlayerPaddle()->AttachBall(currBall);
 					if (couldAttach) {
+                        // Reset the multiplier
+                        this->gameModel->SetNumInterimBlocksDestroyed(0);
 						continue;
 					}
 				}
 
-                // Grab a point amount based on the collision - if the ball is closer to the edge of the paddle
-                // and the paddle is moving, etc., more points are awarded for being risky
-                //int paddleHitPoints = paddle->GetPointsForHittingBall(*currBall);
-                // TODO
+                // Grab a point amount based on the collision of the ball with the paddle - 
+                // only occurs if the paddle is not shielded or sticky
+                // NOTE: Be sure to call this before telling the model about the collision occuring, we
+                // want the score to be multiplied by any multiplier that exists before being reset by the collision!
+                std::list<PointAward> pointPairsList = paddle->GetPointsForHittingBall(*currBall);
+                this->gameModel->IncrementScore(pointPairsList);
 
 				// Do ball-paddle collision
 				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 				// Tell the model that a ball collision occurred with the paddle
 				this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
-				// Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
-				// still see it fly into the void - of course, if the shield is active then no help is provided
 				if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
-					this->AugmentBallDirectionToBeNotDownwards(*currBall);
+				    // Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
+				    // still see it fly into the void - of course, if the shield is active then no help is provided
+                    this->AugmentBallDirectionToBeNotDownwards(*currBall);
 				}
 
 				// If there are multiple balls and the one that just hit the paddle is not

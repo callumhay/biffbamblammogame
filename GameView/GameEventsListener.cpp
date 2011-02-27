@@ -858,11 +858,19 @@ void GameEventsListener::BlockIceShatteredEvent(const LevelPiece& block) {
 	debug_output("EVENT: Ice shattered");
 }
 
-void GameEventsListener::PointNotificationEvent(const std::string& name, int pointAmount) {
-    PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
-    pointsHUD->PostPointNotification(name, pointAmount);
+void GameEventsListener::PointNotificationEvent(const PointAward& pointAward) {
 
-    debug_output("EVENT: Point notification: " << name << " : " << pointAmount);
+    PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
+    pointsHUD->PostPointNotification(pointAward);
+
+    // When large point amounts are awarded, display them in the game
+    // **MEH - this is pretty unimpressive
+    //if (pointAward.GetTotalPointAmount() >= 1000) {
+    //    this->display->GetAssets()->GetESPAssets()->AddPointAwardEffect(pointAward, 
+    //        *this->display->GetModel()->GetPlayerPaddle());
+    //}
+
+    debug_output("EVENT: Point notification");
 }
 
 void GameEventsListener::ScoreChangedEvent(int newScore) {
@@ -872,9 +880,14 @@ void GameEventsListener::ScoreChangedEvent(int newScore) {
 	debug_output("EVENT: Score Change: " << newScore);
 }
 
-void GameEventsListener::ScoreMultiplierChangedEvent(int newMultiplier) {
+void GameEventsListener::ScoreMultiplierChangedEvent(int newMultiplier, const Point2D& position) {
     PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
     pointsHUD->SetMultiplier(newMultiplier);
+
+    // Indicate the change in multiplier where it happens in the level...
+    if (newMultiplier > 1) {
+        this->display->GetAssets()->GetESPAssets()->AddMultiplierComboEffect(newMultiplier, position);
+    }
 
 	debug_output("EVENT: Score Multiplier Change: " << newMultiplier); 
 }

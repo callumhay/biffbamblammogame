@@ -19,6 +19,7 @@
 class Camera;
 class Texture;
 class TextLabel2D;
+class PointAward;
 
 /**
  * Class for encapsulating all animations and display for the Points Heads-up-display
@@ -42,7 +43,9 @@ public:
     void SetNumStars(int numStars);
     void SetScore(long pointScore);
     void SetMultiplier(int multiplierAmt);
-    void PostPointNotification(const std::string& name, int pointAmount);
+    void PostPointNotification(const PointAward& pointAward);
+
+    static const char* GetPointNotificationName(const PointAward& pointAward);
 
 private:
     static const int STAR_SIZE;
@@ -56,7 +59,7 @@ private:
         static const int NOTIFIER_TO_NOTIFIER_VERTICAL_GAP;
         static const int INITIAL_NOTIFY_VERTICAL_GAP;
 
-        PointNotification(const std::string& name, int pointAmount, float initialTopY, float finalTopY);
+        PointNotification(const PointAward& pointAward, float initialTopY, float finalTopY);
         ~PointNotification();
 
         bool Draw(int displayWidth, double dT);
@@ -106,7 +109,7 @@ private:
         void DrawHUD(float rightMostX, float topMostY);
         void SetCurrentAnimationState(const AnimationState& state);
 
-        static Colour GetMultiplierColour(int multiplier);
+        
         static float  GetMultiplierScale(int multiplier);
 
         DISALLOW_COPY_AND_ASSIGN(MultiplierHUD);

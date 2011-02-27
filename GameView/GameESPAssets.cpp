@@ -3,6 +3,7 @@
 #include "GameViewConstants.h"
 #include "BallSafetyNetMesh.h"
 #include "CgFXFireBallEffect.h"
+#include "PointsHUD.h"
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameLevel.h"
@@ -32,6 +33,7 @@ iceBallColourFader(ColourRGBA(GameModelConstants::GetInstance()->ICE_BALL_COLOUR
 particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
 particleFaderUberballTrail(Colour(1,0,0), 0.6f, 0),
 particleGravityArrowColour(ColourRGBA(GameModelConstants::GetInstance()->GRAVITY_BALL_COLOUR, 1.0f), ColourRGBA(0.58, 0.0, 0.83, 0.1)),
+flashColourFader(ColourRGBA(1,1,1,1), ColourRGBA(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR, 0.0f)),
 
 particleShrinkToNothing(1, 0),
 particlePulseUberballAura(0, 0),
@@ -1269,6 +1271,7 @@ void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
 
 	// Add the single text particle to the emitter with the severity of the effect...
 	TextLabel2D boltTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ElectricZap, GameFontAssetsManager::Small), "");
+    boltTextLabel.SetScale(0.8f);
 	boltTextLabel.SetColour(Colour(1, 1, 1));
 	boltTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
 
@@ -3318,7 +3321,7 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 		laserOnoEffect->SetSpawnDelta(ESPInterval(-1));
 		laserOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
 		laserOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
-		laserOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.9f));
+		laserOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.7f));
 		laserOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 		laserOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 		laserOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
@@ -3501,6 +3504,77 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	this->activeGeneralEmitters.push_back(lensFlareEmitter);
 	this->activeGeneralEmitters.push_back(particleSparks);
 }
+
+void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& position) {
+    
+	// The effect is a basic onomatopeia multiplier word e.g., "Combo (2x)!"
+    std::stringstream comboStrStream;
+    comboStrStream << "Combo (" << multiplier << "x)!";
+
+	ESPPointEmitter* comboEffect = new ESPPointEmitter();
+	comboEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	comboEffect->SetParticleLife(ESPInterval(1.8f));
+	comboEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));
+	comboEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
+	comboEffect->SetParticleAlignment(ESP::ScreenAligned);
+	comboEffect->SetEmitPosition(Point3D(position));
+
+    comboEffect->AddEffector(&this->particleLargeGrowth);
+    this->flashColourFader.SetEndColour(GameViewConstants::GetInstance()->GetMultiplierColour(multiplier));
+    comboEffect->AddEffector(&this->flashColourFader);
+
+	// Add the single particle to the emitter
+	DropShadow dpTemp;
+	dpTemp.amountPercentage = 0.10f;
+    dpTemp.colour = Colour(0, 0, 0);
+
+	ESPOnomataParticle* textParticle = new ESPOnomataParticle(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::HappyGood, GameFontAssetsManager::Small),
+        comboStrStream.str());
+	textParticle->SetDropShadow(dpTemp);
+    comboEffect->AddParticle(textParticle);
+
+    this->activeGeneralEmitters.push_back(comboEffect);
+}
+
+// This is currently not in use...
+//void GameESPAssets::AddPointAwardEffect(const PointAward& pointAward, const PlayerPaddle& paddle) {
+//    std::string awardName(PointsHUD::GetPointNotificationName(pointAward));
+//
+//	// The effect is a basic onomatopeia point score with optional name (e.g., "Paddle Daredevil +1000pts!")
+//    std::stringstream ptStrStream;
+//    if (!awardName.empty()) {
+//        ptStrStream << awardName << " ";
+//    }
+//    if (pointAward.GetTotalPointAmount() > 0) {
+//        ptStrStream << "+";
+//    }
+//    ptStrStream << pointAward.GetTotalPointAmount() << "pts!";
+//
+//	DropShadow dpTemp;
+//	dpTemp.amountPercentage = 0.05f;
+//    dpTemp.colour = Colour(0, 0, 0);
+//
+//	ESPOnomataParticle* textParticle = new ESPOnomataParticle(
+//        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
+//        ptStrStream.str());
+//	textParticle->SetDropShadow(dpTemp);
+//
+//	ESPPointEmitter* ptTextEffect = new ESPPointEmitter();
+//	ptTextEffect->SetSpawnDelta(ESPInterval(-1, -1));
+//	ptTextEffect->SetParticleLife(ESPInterval(1.5f));
+//	ptTextEffect->SetParticleSize(ESPInterval(0.75f));
+//	ptTextEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
+//	ptTextEffect->SetParticleAlignment(ESP::ScreenAligned);
+//    ptTextEffect->SetEmitPosition(Point3D(paddle.GetCenterPosition() - Vector2D(0, 2.0f * paddle.GetHalfHeight())));
+//
+//    this->flashColourFader.SetEndColour(GameViewConstants::GetInstance()->GetMultiplierColour(pointAward.GetMultiplierAmount()));
+//    ptTextEffect->AddEffector(&this->flashColourFader);
+//    ptTextEffect->AddEffector(&this->particleLargeGrowth);
+//    ptTextEffect->AddParticle(textParticle);
+//
+//    this->activeGeneralEmitters.push_back(ptTextEffect);
+//}
 
 // Add the effect for when the rocket goes off after it hits a block
 void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& loc) {

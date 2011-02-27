@@ -21,6 +21,7 @@ class GameLevel;
 class Projectile;
 class Beam;
 class PaddleRocketProjectile;
+class PointAward;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
@@ -70,7 +71,7 @@ public:
 	void ActionLevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& removedStatus);
 	void ActionLevelPieceAllStatusRemoved(const LevelPiece& piece);
 	void ActionScoreChanged(int newScore);
-	void ActionScoreMultiplierChanged(int newScoreMultiplier);
+	void ActionScoreMultiplierChanged(int newMultiplier, const Point2D& position);
 	void ActionItemSpawned(const GameItem& item);
 	void ActionItemRemoved(const GameItem& item);
 	void ActionItemPaddleCollision(const GameItem& item, const PlayerPaddle& paddle);
@@ -103,7 +104,7 @@ public:
 
 	void ActionBlockIceShattered(const LevelPiece& block);
 
-    void ActionPointNotification(const std::string& name, int pointAmount);
+    void ActionPointNotification(const PointAward& pointAward);
 
 protected:
 	GameEventManager();
