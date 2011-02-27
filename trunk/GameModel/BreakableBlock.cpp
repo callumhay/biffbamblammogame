@@ -175,7 +175,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 		this->FreezePieceInIce(gameModel);
 	}
 
-	ball.SetLastPieceCollidedWith(this);
+	ball.SetLastPieceCollidedWith(newPiece);
 	return newPiece;
 }
 

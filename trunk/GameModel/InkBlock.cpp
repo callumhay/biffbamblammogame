@@ -22,6 +22,64 @@ LevelPiece(wLoc, hLoc), currLifePoints(InkBlock::PIECE_STARTING_LIFE_POINTS) {
 InkBlock::~InkBlock() {
 }
 
+void InkBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                            const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                            const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                            const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+	UNUSED_PARAMETER(leftNeighbor);
+	UNUSED_PARAMETER(bottomNeighbor);
+	UNUSED_PARAMETER(rightNeighbor);
+	UNUSED_PARAMETER(topNeighbor);
+	UNUSED_PARAMETER(topRightNeighbor);
+	UNUSED_PARAMETER(topLeftNeighbor);
+	UNUSED_PARAMETER(bottomRightNeighbor);
+	UNUSED_PARAMETER(bottomLeftNeighbor);
+
+	// Make the bounds a bit smaller than a typical level piece and always make all of them
+
+	// Clear all the currently existing boundry lines first
+	this->bounds.Clear();
+
+	// Set the bounding lines for a rectangular block
+	std::vector<Collision::LineSeg2D> boundingLines;
+	std::vector<Vector2D>  boundingNorms;
+
+	static const float FRACTION_HALF_PIECE_WIDTH  = 0.7f * LevelPiece::HALF_PIECE_WIDTH;
+	static const float FRACTION_HALF_PIECE_HEIGHT = 0.7f * LevelPiece::HALF_PIECE_HEIGHT;
+
+	// Left boundry of the piece
+	Collision::LineSeg2D l1(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT), 
+							 this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT));
+	Vector2D n1(-1, 0);
+	boundingLines.push_back(l1);
+	boundingNorms.push_back(n1);
+
+	// Bottom boundry of the piece
+	Collision::LineSeg2D l2(this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT),
+							 this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT));
+	Vector2D n2(0, -1);
+	boundingLines.push_back(l2);
+	boundingNorms.push_back(n2);
+
+	// Right boundry of the piece
+	Collision::LineSeg2D l3(this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, -FRACTION_HALF_PIECE_HEIGHT),
+							 this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT));
+	Vector2D n3(1, 0);
+	boundingLines.push_back(l3);
+	boundingNorms.push_back(n3);
+
+	// Top boundry of the piece
+	Collision::LineSeg2D l4(this->center + Vector2D(FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT),
+							 this->center + Vector2D(-FRACTION_HALF_PIECE_WIDTH, FRACTION_HALF_PIECE_HEIGHT));
+	Vector2D n4(0, 1);
+	boundingLines.push_back(l4);
+	boundingNorms.push_back(n4);
+
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+                                  topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+}
+
 // Determine whether the given projectile will pass through this block...
 bool InkBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	switch (projectile->GetType()) {
@@ -97,12 +155,16 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
 				assert(success);
 			}
+            else {
+                resultingPiece = this->Destroy(gameModel);
+            }
 		}
-		else {
-			resultingPiece = this->Destroy(gameModel);
-		}
+        else {
+            resultingPiece = this->Destroy(gameModel);
+        }
 	}
 
+    ball.SetLastPieceCollidedWith(resultingPiece);
 	return resultingPiece;
 }
 

@@ -30,6 +30,7 @@
 #include "SwitchBlock.h"
 #include "GameModel.h"
 #include "Projectile.h"
+#include "PointAward.h"
 
 #include "PaddleRocketProjectile.h"
 
@@ -938,7 +939,8 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, Leve
     // Add whatever number of points are acquired for the piece change to the player's score
     // NOTE: Make sure this is done before incrementing the number of interim
     // blocks destroyed - otherwise the multiplier will be applied before the incremented score!
-    gameModel->IncrementScore(pieceBefore->GetPointsOnChange(*pieceAfter));
+    PointAward ptAward(pieceBefore->GetPointsOnChange(*pieceAfter), ScoreTypes::UndefinedBonus, pieceBefore->GetCenter());
+    gameModel->IncrementScore(ptAward);
 
 	// EVENT: Level piece has changed...
 	GameEventManager::Instance()->ActionLevelPieceChanged(*pieceBefore, *pieceAfter);
@@ -982,7 +984,7 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, Leve
 
 	    // The replaced piece has officially been destroyed, increase the number of destroyed blocks in the model
         if (pieceBefore->GetType() != LevelPiece::Empty && pieceAfter->GetType() == LevelPiece::Empty) {
-		    gameModel->IncrementNumInterimBlocksDestroyed();
+            gameModel->IncrementNumInterimBlocksDestroyed(pieceBefore->GetCenter());
         }
 	}
 	else {

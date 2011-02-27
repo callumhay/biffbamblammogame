@@ -222,3 +222,20 @@ const Colour& GameViewConstants::GetItemColourFromDisposition(const GameItem::It
     }
     return this->ITEM_NEUTRAL_COLOUR;
 }
+
+const Colour& GameViewConstants::GetMultiplierColour(int multiplier) {
+    switch (multiplier) {
+        case 1:
+            break;
+        case 2:
+            return GameViewConstants::GetInstance()->TWO_TIMES_MULTIPLIER_COLOUR;
+        case 3:
+            return GameViewConstants::GetInstance()->THREE_TIMES_MULTIPLIER_COLOUR;
+        case 4:
+            return GameViewConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_COLOUR;
+        default:
+            assert(false);
+            break;
+    }
+    return GameViewConstants::GetInstance()->TWO_TIMES_MULTIPLIER_COLOUR;
+}

@@ -73,6 +73,7 @@ private:
 	ESPParticleColourEffector particleCloudColourFader;
 	ESPParticleColourEffector particleFaderUberballTrail;
 	ESPParticleColourEffector particleGravityArrowColour;
+    ESPParticleColourEffector flashColourFader;
 
 	ESPParticleScaleEffector  particlePulseUberballAura;
 	ESPParticleScaleEffector  particlePulseItemDropAura;
@@ -235,6 +236,10 @@ public:
 	ESPPointEmitter* CreateShockwaveEffect(const Point3D& center, float startSize, float lifeTime);
 	ESPPointEmitter* CreateBlockBreakSmashyBits(const Point3D& center, const ESPInterval& r, const ESPInterval& g, const ESPInterval& b, 
 		bool gravity = true, size_t numParticles = 10);
+
+
+    void AddMultiplierComboEffect(int multiplier, const Point2D& position);
+    //void AddPointAwardEffect(const PointAward& pointAward, const PlayerPaddle& paddle);
 
 	// Specific effects that can be made to occur in the game
 	//void AddBallBounceEffect(const Camera& camera, const GameBall& ball);	

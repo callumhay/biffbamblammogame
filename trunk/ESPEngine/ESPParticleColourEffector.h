@@ -21,6 +21,9 @@ public:
 
 	void SetStartAlpha(float alpha);
 	void SetEndAlpha(float alpha);
+    void SetEndColour(const Colour& c) {
+        this->endColour = c;
+    }
 
 private:
 	bool useStartColour;

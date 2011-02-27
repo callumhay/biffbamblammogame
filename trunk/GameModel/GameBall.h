@@ -34,7 +34,15 @@ class GameBall {
 	friend class InCannonBallState;
 
 public:
-	enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 7, SlowSpeed = 12, NormalSpeed = 17, FastSpeed = 22, FastestSpeed = 27 };
+    //static const float ZeroSpeed;
+    //static const float SlowestSpeed;
+    //static const float SlowSpeed;
+    //static const float NormalSpeed;
+    //static const float FastSpeed;
+    //static const float FastestSpeed;
+
+	enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 10, SlowSpeed = 13, NormalSpeed = 16, 
+                     FastSpeed = 21, FastestSpeed = 26, FastestSpeedWithBoost = 30 };
 	enum BallSize  { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 	enum BallType  { NormalBall = 0x00000000, UberBall = 0x00000001,  InvisiBall = 0x00000002, GhostBall = 0x00000004, 
 		             GraviBall = 0x00000008,  CrazyBall = 0x00000010, FireBall = 0x00000020, IceBall = 0x00000040,
@@ -153,7 +161,6 @@ public:
 	bool CanCollideWithBlocks() const {
 		return !this->blockCollisionsDisabled;
 	}
-
 
 
 	// Set the center position of the ball
@@ -297,12 +304,12 @@ public:
 
 	// Increases the Speed of the ball
 	void IncreaseSpeed() {
-		this->SetSpeed(std::min<float>(GameBall::FastestSpeed, this->currSpeed + 5.0f));
+		this->SetSpeed(this->currSpeed + 4.25f);
 	}
 
 	// Decreases the speed of the ball
 	void DecreaseSpeed() {
-		this->SetSpeed(std::max<float>(GameBall::SlowestSpeed, this->currSpeed - 5.0f));
+		this->SetSpeed(std::max<float>(GameBall::SlowestSpeed, this->currSpeed - 4.25f));
 	}
 
 	Onomatoplex::Extremeness GetOnomatoplexExtremeness() const;
@@ -328,25 +335,33 @@ public:
 	bool IsLoadedInCannonBlock() const;
 	const CannonBlock* GetCannonBlock() const;
 
+    void ExecuteBallBoost(float angleInDegs);
+    bool IsBallBoosting() const {
+        return (this->boostSpdDecreaseCounter < BOOST_TEMP_SPD_INCREASE_AMT);
+    }
+
 private:
 	BallState* currState;
 
 	Collision::Circle2D bounds;	// The bounds of the ball, constantly updated to world space
-	float zCenterPos;						// VERY occasionally (some animations), the ball needs a z-coordinate
+	float zCenterPos;           // VERY occasionally (some animations), the ball needs a z-coordinate
 
-	Vector2D currDir;				// The current direction of movement of the ball
-	float currSpeed;				// The current speed of the ball
+	Vector2D currDir;           // The current direction of movement of the ball
+	float currSpeed;            // The current speed of the ball
 	float gravitySpeed;			// The current gravity speed of the ball
-	int32_t currType;			  // The current type of this ball
+	int32_t currType;           // The current type of this ball
 
-	BallSize currSize;					// The current size of this ball
-	float currScaleFactor;			// The scale difference between the ball's current size and its default size
+	BallSize currSize;          // The current size of this ball
+	float currScaleFactor;      // The scale difference between the ball's current size and its default size
 
 	double ballballCollisionsDisabledTimer;	// If > 0 then collisions among this ball and other balls are disabled
 	bool blockCollisionsDisabled;
 	bool paddleCollisionsDisabled;
 
 	double timeSinceLastCollision;
+
+    float boostSpdDecreaseCounter;      // Counts the boost deceleration so far, when this reaches BOOST_TEMP_SPD_INCREASE_AMT
+                                        // the ball will no longer decelerate from a boost
 
 	ColourRGBA colour;                  // The colour multiply of the paddle, including its visibility/alpha
 	Colour contributingGravityColour;
@@ -358,10 +373,13 @@ private:
 
 	const void* lastThingCollidedWith;	// This is just used to check equality with POINTERS DO NOT CAST THIS!!!
 
-	static const float MAX_ROATATION_SPEED;			// Speed of rotation in degrees/sec
-	static const float SECONDS_TO_CHANGE_SIZE;	// Number of seconds for the ball to grow/shrink
-	static const float RADIUS_DIFF_PER_SIZE;		// The difference in radius per size change of the ball
-	static const float GRAVITY_ACCELERATION;		// Acceleration of gravity pulling the ball downwards
+	static const float MAX_ROATATION_SPEED;         // Speed of rotation in degrees/sec
+	static const float SECONDS_TO_CHANGE_SIZE;	    // Number of seconds for the ball to grow/shrink
+	static const float RADIUS_DIFF_PER_SIZE;        // The difference in radius per size change of the ball
+	static const float GRAVITY_ACCELERATION;        // Acceleration of gravity pulling the ball downwards
+
+    static const float BOOST_DECCELERATION;         // The decceleration after a ball is boosted
+    static const float BOOST_TEMP_SPD_INCREASE_AMT; // The total speed increase given to the ball (temporarally) when it's boosted
 
 	Vector3D rotationInDegs;	// Used for random rotation of the ball, gives the view the option to use it
 

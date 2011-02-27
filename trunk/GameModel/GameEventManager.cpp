@@ -282,10 +282,10 @@ void GameEventManager::ActionScoreChanged(int newScore) {
 }
 
 // Action for when the score multiplier changes
-void GameEventManager::ActionScoreMultiplierChanged(int newScoreMultiplier) {
+void GameEventManager::ActionScoreMultiplierChanged(int newMultiplier, const Point2D& position) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->ScoreMultiplierChangedEvent(newScoreMultiplier);
+		(*this->listenerIter)->ScoreMultiplierChangedEvent(newMultiplier, position);
 	}	
 }
 
@@ -491,9 +491,9 @@ void GameEventManager::ActionBlockIceShattered(const LevelPiece& block) {
 }
 
 // Action for when points are awarded and the GUI needs to be notified
-void GameEventManager::ActionPointNotification(const std::string& name, int pointAmount) {
+void GameEventManager::ActionPointNotification(const PointAward& pointAward) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->PointNotificationEvent(name, pointAmount);
+		(*this->listenerIter)->PointNotificationEvent(pointAward);
 	}
 }

@@ -30,7 +30,7 @@
 #include "GameItemFactory.h"
 #include "Projectile.h"
 #include "GameTransformMgr.h"
-
+#include "PointAward.h"
 
 class CollateralBlock;
 
@@ -106,7 +106,7 @@ private:
 	void UpdateActiveProjectiles(double seconds);
 	void UpdateActiveBeams(double seconds);
 
-	void SetNumInterimBlocksDestroyed(int value);
+	void SetNumInterimBlocksDestroyed(int value, const Point2D& pos = Point2D());
     int GetNumInterimBlocksDestroyed() const { return this->numInterimBlocksDestroyed; }
     int GetCurrentMultiplier() const;
 
@@ -125,13 +125,15 @@ public:
 	// PausePaddle: Only pauses the paddle movement, animations, etc.
 	// PauseGame: Pauses the entire game - should be used when the user pauses the game.
 	// AllPause: All possible pauses are active
-	enum PauseType { NoPause = 0x00000000, PauseState = 0x00000001, PausePaddle = 0x00000002, PauseGame = 0x80000000, PauseBall = 0x00000004, AllPause = 0xFFFFFFFF };
+	enum PauseType { NoPause = 0x00000000, PauseState = 0x00000001, PausePaddle = 0x00000002, 
+                     PauseGame = 0x80000000, PauseBall = 0x00000004, AllPause = 0xFFFFFFFF };
 
 	GameModel();
 	~GameModel();
 
-    void IncrementScore(int amt);
-    void IncrementNumInterimBlocksDestroyed() { this->SetNumInterimBlocksDestroyed(this->GetNumInterimBlocksDestroyed()+1); }
+    void IncrementScore(PointAward& pointAward);
+    void IncrementScore(std::list<PointAward>& pointAwardsList);
+    void IncrementNumInterimBlocksDestroyed(const Point2D& pos) { this->SetNumInterimBlocksDestroyed(this->GetNumInterimBlocksDestroyed()+1, pos); }
 
 	GameState::GameStateType GetCurrentStateType() const {
 		if (this->currState != NULL) {

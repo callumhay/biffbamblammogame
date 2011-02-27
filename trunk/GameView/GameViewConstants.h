@@ -217,6 +217,7 @@ public:
 	const char* DECO_BLOCK_MESH_PATH;
 
     const Colour& GetItemColourFromDisposition(const GameItem::ItemDisposition& itemDisposition) const;
+    const Colour& GetMultiplierColour(int multiplier);
 
 private:
 	static GameViewConstants* Instance;

@@ -96,12 +96,12 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) 
 		return this;
 	}
 
-	// Tell the ball what the last piece it collided with was...
-	ball.SetLastPieceCollidedWith(this);
-	
 	// Toggle the electricity to the tesla block
 	GameLevel* currLevel = gameModel->GetCurrentLevel();
 	this->ToggleElectricity(*gameModel, *currLevel);
+
+	// Tell the ball what the last piece it collided with was...
+	ball.SetLastPieceCollidedWith(this);
 
 	return this;
 }

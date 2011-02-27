@@ -33,38 +33,61 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
 	// Update the position of the ball based on its velocity (and if applicable, acceleration)
 	Vector2D currVelocity;
 
-	if ((this->gameBall->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall) {
-		// Keep track of the last gravity speed calculated based on the gravity pulling the ball down
-		// The gravitySpeed variable is basically a mirror of currSpeed but it tracks 
-		// the speed of the ball as it gets pulled down by gravity - currSpeed does not do this
-		Vector2D currGravityVelocity = (this->gameBall->gravitySpeed * this->gameBall->currDir);
-		
-		// If the ball ever exceeds the current ball speed projected on the gravity vector then slow it down along that axis
-		// Figure out the projected gravity vector and speed
-		Vector2D nGravityDir = Vector2D::Normalize(worldSpaceGravityDir);
-		float projectedGravitySpeed  = Vector2D::Dot(currGravityVelocity, nGravityDir);
-		Vector2D projectedGravityVec = projectedGravitySpeed * nGravityDir;
+    if (this->gameBall->IsBallBoosting()) {
+        // Figure out how much loss of speed there is for the ball
+        float currBoostDecceleration = seconds * GameBall::BOOST_DECCELERATION;
+        //float prevSpdCounter = this->gameBall->boostSpdDecreaseCounter;
+        this->gameBall->boostSpdDecreaseCounter += currBoostDecceleration;
 
-		if (projectedGravitySpeed > this->gameBall->currSpeed) {
-			currVelocity = currGravityVelocity - projectedGravityVec + (this->gameBall->currSpeed * nGravityDir);
-		}
-		else {
-			currVelocity = currGravityVelocity + (seconds * GameBall::GRAVITY_ACCELERATION * nGravityDir);
-		}
+        if (this->gameBall->boostSpdDecreaseCounter > GameBall::BOOST_TEMP_SPD_INCREASE_AMT) {
+            float subtractAmt = this->gameBall->boostSpdDecreaseCounter - GameBall::BOOST_TEMP_SPD_INCREASE_AMT;
+            this->gameBall->boostSpdDecreaseCounter = GameBall::BOOST_TEMP_SPD_INCREASE_AMT;
+            currBoostDecceleration -= subtractAmt;//GameBall::BOOST_TEMP_SPD_INCREASE_AMT - prevSpdCounter;
+            assert(currBoostDecceleration > 0);
+        }
 
-		float newVelocityMag    = Vector2D::Magnitude(currVelocity);
-		Vector2D newVelocityDir = (currVelocity / newVelocityMag);
-		this->gameBall->SetGravityVelocity(newVelocityMag, newVelocityDir);
-	}
-	else {
-		currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
-		this->gameBall->gravitySpeed = this->gameBall->currSpeed;
-	}
+        // Slow the ball down and recalculate velocities
+        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currBoostDecceleration);
+        currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
+        this->gameBall->gravitySpeed = this->gameBall->currSpeed;
+    }
+    else {
+        // When the ball has gravity augment the velocity to constantly be accelerating downwards,
+        // in the case of when it's attached to the paddle, don't do this
+	    if ((this->gameBall->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall &&
+            gameModel->GetPlayerPaddle()->GetAttachedBall() != this->gameBall) {
+		    // Keep track of the last gravity speed calculated based on the gravity pulling the ball down
+		    // The gravitySpeed variable is basically a mirror of currSpeed but it tracks 
+		    // the speed of the ball as it gets pulled down by gravity - currSpeed does not do this
+		    Vector2D currGravityVelocity = (this->gameBall->gravitySpeed * this->gameBall->currDir);
+    		
+		    // If the ball ever exceeds the current ball speed projected on the gravity vector then slow it down along that axis
+		    // Figure out the projected gravity vector and speed
+		    Vector2D nGravityDir = Vector2D::Normalize(worldSpaceGravityDir);
+		    float projectedGravitySpeed  = Vector2D::Dot(currGravityVelocity, nGravityDir);
+		    Vector2D projectedGravityVec = projectedGravitySpeed * nGravityDir;
 
-	// Crazy ball manipulates the direction and acceleration of the ball... *unless it's attached to a paddle
-	if ((this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
-		this->ApplyCrazyBallVelocityChange(seconds, currVelocity);
-	}
+		    if (projectedGravitySpeed > this->gameBall->currSpeed) {
+			    currVelocity = currGravityVelocity - projectedGravityVec + (this->gameBall->currSpeed * nGravityDir);
+		    }
+		    else {
+			    currVelocity = currGravityVelocity + (seconds * GameBall::GRAVITY_ACCELERATION * nGravityDir);
+		    }
+
+		    float newVelocityMag    = Vector2D::Magnitude(currVelocity);
+		    Vector2D newVelocityDir = (currVelocity / newVelocityMag);
+		    this->gameBall->SetGravityVelocity(newVelocityMag, newVelocityDir);
+	    }
+	    else {
+		    currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
+		    this->gameBall->gravitySpeed = this->gameBall->currSpeed;
+	    }
+
+	    // Crazy ball manipulates the direction and acceleration of the ball... *unless it's attached to a paddle
+	    if ((this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
+		    this->ApplyCrazyBallVelocityChange(seconds, currVelocity);
+	    }
+    }
 
 	Vector2D dDist = (static_cast<float>(seconds) * currVelocity);
 	this->gameBall->bounds.SetCenter(this->gameBall->bounds.Center() + dDist);

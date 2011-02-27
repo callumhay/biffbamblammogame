@@ -3,9 +3,9 @@
 
 #include "DisplayState.h"
 #include "GameMenu.h"
+#include "InGameRenderPipeline.h"
 
 class InGameDisplayState;
-
 
 /**
  * State for displaying the in-game menu (i.e., when you pause the game while
@@ -32,6 +32,8 @@ private:
 
 	enum NextAction { Nothing, ResumeGame, ReturnToMainMenu, ExitToDesktop };
 	NextAction nextAction;
+
+    InGameRenderPipeline renderPipeline;
 
 	// Top Level Menu variables
 	GameMenu* topMenu; // Main (top-most/parent) menu (features options "Return to Main Menu", etc.)

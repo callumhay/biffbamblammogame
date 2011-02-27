@@ -1026,16 +1026,54 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
 }
 
-int PlayerPaddle::GetPointsForHittingBall(const GameBall& ball) const {
-    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-        // No points are awarded if there's a shield on the paddle
-        return 0;
+/**
+ * Calculates the number of points the player will get when the paddle hits the ball.
+ * Each point amount is added to a list with a possible description of what the points were for.
+ */
+std::list<PointAward> PlayerPaddle::GetPointsForHittingBall(const GameBall& ball) const {
+    std::list<PointAward> pointPairs;
+
+    // Make sure we only award points for a single paddle ball contact - multiple can occur when the player
+    // is moving the paddle into the ball
+    static long timeSinceLastPtsAwarded = 0;
+	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+    if ((currSystemTime - timeSinceLastPtsAwarded) < 100) {
+        return pointPairs;
+    }
+    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle ||
+        (this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+        // No points are awarded if there's a shield on the paddle or if it's sticky
+        return pointPairs;
+    }
+    
+    // Two major things factor into this: 
+    // 1. How far the ball is from the paddle center (further = more points); exception: bullseye bonus (very close to center)
+    // 2. How fast the paddle is moving when it hits the ball (faster = more points)
+    float centerDiff = fabs(this->GetCenterPosition()[0] - ball.GetCenterPosition2D()[0]);
+    float paddleSpdDiff = (this->maxSpeed - this->currSpeed);
+    assert(centerDiff >= 0.0f);
+    assert(paddleSpdDiff >= 0.0f);
+
+    // Award the points for distance from the paddle center
+    static const int DAREDEVIL_BONUS_POINTS = 200;
+    //static const int BULLSEYE_BONUS_POINTS  = 100;
+    //float oneFifthHalfWidth = this->GetHalfDepthTotal() / 5.0f;
+
+    // Check for the bullseye bonus
+    //if (centerDiff < oneFifthHalfWidth) {
+    //    pointPairs.push_back(PointAward(BULLSEYE_BONUS_POINTS, ScoreTypes::PaddleBullseyeBonus, ball.GetCenterPosition2D()));
+    //}
+    if (centerDiff > (0.5f * ball.GetBounds().Radius() + this->GetHalfWidthTotal())) {
+        // Bonus points are awarded if the player JUST hit the ball on the edge of the paddle
+        pointPairs.push_back(PointAward(DAREDEVIL_BONUS_POINTS, ScoreTypes::PaddleDaredevilBonus, ball.GetCenterPosition2D()));
     }
 
-    // Two major things factor into this: 
-    // 1. How far the ball is from the paddle center (further = more points)
-    // 2. How fast the paddle is moving when it hits the ball (faster = more points)
-    
+    // Award points for paddle speed
+    static const int SPEED_BONUS_POINTS = 50;
+    if (paddleSpdDiff <= EPSILON) {
+        pointPairs.push_back(PointAward(SPEED_BONUS_POINTS, ScoreTypes::SpeedyPaddleBonus, ball.GetCenterPosition2D()));
+    }
 
-
+    timeSinceLastPtsAwarded = currSystemTime;
+    return pointPairs;
 }

@@ -17,6 +17,8 @@
 #include "LevelCompleteState.h"
 #include "PaddleLaserBeam.h"
 #include "CollateralBlock.h"
+#include "PointAward.h"
+
 
 #include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
@@ -667,33 +669,41 @@ void GameModel::UpdateActiveBeams(double seconds) {
 }
 
 // Increment the player's score in the game
-void GameModel::IncrementScore(int amt) {
-	if (amt != 0) {
+void GameModel::IncrementScore(PointAward& pointAward) {
+	if (pointAward.GetPointAmount() != 0) {
         int currMultiplier = this->GetCurrentMultiplier();
-        int incrementAmt   = currMultiplier * amt;
+        int incrementAmt   = currMultiplier * pointAward.GetPointAmount();
         this->currPlayerScore += incrementAmt;
+
+        pointAward.SetMultiplierAmount(currMultiplier);
 
 		// EVENT: Score was changed
         GameEventManager::Instance()->ActionScoreChanged(this->currPlayerScore);
-	
-        // TODO: GET RID OF THIS
-        GameEventManager::Instance()->ActionPointNotification("Random Bonus", 100);
+        // EVENT: Point notification
+        GameEventManager::Instance()->ActionPointNotification(pointAward);
 
         // TODO: Check to see if a star was obtained...
-
+    }
+}
+void GameModel::IncrementScore(std::list<PointAward>& pointAwardsList) {
+    for (std::list<PointAward>::iterator iter = pointAwardsList.begin(); iter != pointAwardsList.end(); ++iter) {
+        this->IncrementScore(*iter);
     }
 }
 
 // Set the number of consecutive blocks hit by the ball in the interrum between
 // when it leaves and returns to the player paddle
-void GameModel::SetNumInterimBlocksDestroyed(int value) {
+void GameModel::SetNumInterimBlocksDestroyed(int value, const Point2D& pos) {
 	assert(value >= 0);
 	if (value != this->numInterimBlocksDestroyed) {
+        int oldMultiplier = this->GetCurrentMultiplier();
 		this->numInterimBlocksDestroyed = value;
         int newMultiplier = this->GetCurrentMultiplier();
 		
 		// EVENT: The score multiplier has changed
-		GameEventManager::Instance()->ActionScoreMultiplierChanged(newMultiplier);
+        if (oldMultiplier != newMultiplier) {
+		    GameEventManager::Instance()->ActionScoreMultiplierChanged(newMultiplier, pos);
+        }
 	}
 }
 

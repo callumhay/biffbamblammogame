@@ -145,6 +145,9 @@ bool SwitchBlock::ProjectilePassesThrough(Projectile* projectile) const {
 }
 
 LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+    if (ball.IsLastPieceCollidedWith(this)) {
+        return this;
+    }
 
 	bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
 	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
@@ -166,7 +169,7 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
         }
 	}
 
-    ball.SetLastPieceCollidedWith(NULL);
+    ball.SetLastPieceCollidedWith(this);
     return this;
 }
 

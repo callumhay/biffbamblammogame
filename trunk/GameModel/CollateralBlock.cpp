@@ -106,7 +106,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 		}
 	}
 
-	ball.SetLastPieceCollidedWith(this);
+	ball.SetLastPieceCollidedWith(resultingPiece);
 	return resultingPiece;
 }
 

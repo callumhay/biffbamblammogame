@@ -15,14 +15,14 @@ const Colour InGameMenuState::MENU_ITEM_SEL_COLOUR		= Colour(1, 0.65f, 0);
 const Colour InGameMenuState::MENU_ITEM_ACTIVE_COLOUR	= Colour(0.49f, 0.98f, 1.0f);
 const Colour InGameMenuState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
 
-InGameMenuState::InGameMenuState(GameDisplay* display) : DisplayState(display), nextAction(InGameMenuState::Nothing),
+InGameMenuState::InGameMenuState(GameDisplay* display) : 
+DisplayState(display), renderPipeline(display), nextAction(InGameMenuState::Nothing),
 topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL) {
 
 	// Pause all world sounds
 	this->display->GetAssets()->GetSoundAssets()->PauseWorldSounds();	
 	// Pause the game itself
 	this->display->GetModel()->SetPause(GameModel::PauseGame);
-
 
 	this->InitTopMenu();
 }
@@ -76,6 +76,7 @@ void InGameMenuState::RenderFrame(double dT) {
 	assert(lastFullscreenRendering != NULL);
 
 	lastFullscreenRendering->GetFBOTexture()->RenderTextureToFullscreenQuad(-1.0f);
+    renderPipeline.RenderHUD(0.0);
 
 	// Render an overlay that dulls the background rendering...
 	glPushAttrib(GL_ENABLE_BIT);

@@ -58,6 +58,11 @@ public:
 	bool ProjectilePassesThrough(Projectile* projectile) const;
     int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
+	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                      const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                      const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                      const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
+
 	// Collision related stuffs
 	LevelPiece* Destroy(GameModel* gameModel);	
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);

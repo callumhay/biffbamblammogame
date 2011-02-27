@@ -32,13 +32,16 @@ const float GameBall::MAX_ROATATION_SPEED	= 70;
 const Vector2D GameBall::STD_INIT_VEL_DIR = Vector2D(0, GameBall::NormalSpeed);
 
 // Acceleration of the ball towards the ground when gravity ball is activated
-const float GameBall::GRAVITY_ACCELERATION = 8.0f;
+const float GameBall::GRAVITY_ACCELERATION  = 8.0f;
+const float GameBall::BOOST_DECCELERATION   = 10.0f;
+
+const float GameBall::BOOST_TEMP_SPD_INCREASE_AMT = 5.0f;
 
 GameBall* GameBall::currBallCamBall = NULL;
 
 GameBall::GameBall() : bounds(Point2D(0.0f, 0.0f), DEFAULT_BALL_RADIUS), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
 currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballballCollisionsDisabledTimer(0.0),
-lastThingCollidedWith(NULL), zCenterPos(0.0), currState(NULL), timeSinceLastCollision(0.0f) {
+lastThingCollidedWith(NULL), zCenterPos(0.0), currState(NULL), timeSinceLastCollision(0.0f), boostSpdDecreaseCounter(BOOST_TEMP_SPD_INCREASE_AMT) {
 	this->ResetBallAttributes();
 }
 
@@ -47,7 +50,7 @@ currType(gameBall.currType), currSize(gameBall.currSize), currScaleFactor(gameBa
 rotationInDegs(gameBall.rotationInDegs), ballballCollisionsDisabledTimer(0.0), lastThingCollidedWith(gameBall.lastThingCollidedWith),
 zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributingGravityColour), 
 contributingCrazyColour(gameBall.contributingCrazyColour), contributingIceColour(gameBall.contributingIceColour),
-timeSinceLastCollision(gameBall.timeSinceLastCollision),
+timeSinceLastCollision(gameBall.timeSinceLastCollision), boostSpdDecreaseCounter(gameBall.boostSpdDecreaseCounter),
 blockCollisionsDisabled(false),
 paddleCollisionsDisabled(false),
 currState(NULL) {
@@ -105,6 +108,7 @@ void GameBall::ResetBallAttributes() {
 	this->paddleCollisionsDisabled = false;
 	this->ballballCollisionsDisabledTimer = 0.0;
 	this->timeSinceLastCollision = 0.0;
+    this->boostSpdDecreaseCounter = BOOST_TEMP_SPD_INCREASE_AMT;
 
 	// Set the ball state back to its typical state (how it normally interacts with the world)
 	this->SetBallState(new NormalBallState(this), true);
@@ -229,4 +233,20 @@ void GameBall::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
 	// we cache it in the "InCannonBallState" and it will change back once
 	// that state is complete
 	this->SetBallState(new InCannonBallState(this, cannonBlock, this->currState), false);
+}
+
+/**
+ * Causes a ball boost based on the given angle in degrees - this angle is measured from
+ * the upwards (0, 1) direction of the ball.
+ */
+void GameBall::ExecuteBallBoost(float angleInDegs) {
+
+    Vector2D newDir(0, 1);
+    newDir.Rotate(angleInDegs);
+    newDir.Normalize();
+
+    // Add a temporary boost in speed and reset the boost decceleration counter
+    this->boostSpdDecreaseCounter = 0.0f; // This value will need to accumulate back up to BOOST_TEMP_SPD_INCREASE_AMT
+                                          // So that the ball knows to stop deccelerating after being boosted
+    this->SetVelocity(this->GetSpeed() + BOOST_TEMP_SPD_INCREASE_AMT, newDir);
 }

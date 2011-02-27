@@ -191,6 +191,8 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 			resultingPiece = this->Destroy(gameModel);
 		}
 	}
+
+    ball.SetLastPieceCollidedWith(resultingPiece);   
 	return resultingPiece;
 }
 

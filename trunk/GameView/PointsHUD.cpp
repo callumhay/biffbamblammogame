@@ -19,6 +19,7 @@
 #include "../BlammoEngine/Texture.h"
 
 #include "../GameModel/GameLevel.h"
+#include "../GameModel/PointAward.h"
 
 #include "../ResourceManager.h"
 
@@ -176,7 +177,12 @@ void PointsHUD::SetScore(long pointScore) {
     }
 }
 
-void PointsHUD::PostPointNotification(const std::string& name, int pointAmount) {
+void PointsHUD::PostPointNotification(const PointAward& pointAward) {
+    // Don't notify the HUD unless there's specific bonus for the point award
+    if (pointAward.GetType() == ScoreTypes::UndefinedBonus) {
+        return;
+    }
+
     // Figure out where the notification is going to appear and move to
     float finalTopY = this->ptScoreLabel->GetTopLeftCorner()[1] - this->ptScoreLabel->GetHeight();
     float initialTopY;
@@ -192,9 +198,25 @@ void PointsHUD::PostPointNotification(const std::string& name, int pointAmount) 
                       static_cast<float>(this->ptNotifications.back()->GetHeight()) - 
                       PointsHUD::PointNotification::NOTIFIER_TO_NOTIFIER_VERTICAL_GAP;
     }
-    
-    PointNotification* ptNotify = new PointNotification(name, pointAmount, initialTopY, finalTopY);
+
+    PointNotification* ptNotify = new PointNotification(pointAward, initialTopY, finalTopY);
     this->ptNotifications.push_back(ptNotify);
+}
+
+const char* PointsHUD::GetPointNotificationName(const PointAward& pointAward) {
+    switch (pointAward.GetType()) {
+        case ScoreTypes::UndefinedBonus:
+            return "";
+        case ScoreTypes::PaddleBullseyeBonus:
+            return "Bullseye!";
+        case ScoreTypes::PaddleDaredevilBonus:
+            return "Paddle Daredevil";
+        case ScoreTypes::SpeedyPaddleBonus:
+            return "Speedy Paddle Save";
+        default:
+            assert(false);
+            return NULL;
+    }
 }
 
 void PointsHUD::ClearNotifications() {
@@ -220,13 +242,23 @@ void PointsHUD::SetAlpha(float alpha) {
 }
 
 const int PointsHUD::PointNotification::NOTIFIER_TO_NOTIFIER_VERTICAL_GAP = -2;
-const int PointsHUD::PointNotification::INITIAL_NOTIFY_VERTICAL_GAP = 20;
+const int PointsHUD::PointNotification::INITIAL_NOTIFY_VERTICAL_GAP = 50;
 const int PointsHUD::PointNotification::NAME_POINT_VERTICAL_GAP     = 5;
 
-PointsHUD::PointNotification::PointNotification(const std::string& name, int pointAmount, 
+PointsHUD::PointNotification::PointNotification(const PointAward& pointAward, 
                                                 float initialTopY, float finalTopY) :
 pointLabel(NULL), notificationName(NULL), pointAmount(pointAmount), moveAnimation(0.0f) {
-    assert(pointAmount != 0);
+    // Make sure the award has a notification name
+    const char* notificationName = PointsHUD::GetPointNotificationName(pointAward);
+    std::string name;
+    if (notificationName == NULL) {
+        assert(false);
+    }
+    else {
+        name = notificationName;
+    }
+    int pointAmount = pointAward.GetPointAmount();
+    int multiplyAmount = pointAward.GetMultiplierAmount();
 
     bool isPositive = (pointAmount > 0);
     std::string positiveSign("");
@@ -239,11 +271,11 @@ pointLabel(NULL), notificationName(NULL), pointAmount(pointAmount), moveAnimatio
         labelColour = GameViewConstants::GetInstance()->ITEM_BAD_COLOUR;
     }
 
-
     float topY = initialTopY;
     if (!name.empty()) {
         this->notificationName = new TextLabel2D(
             GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), name);
+        this->notificationName->SetScale(0.9f);
         this->notificationName->SetDropShadow(Colour(0,0,0), 0.07f);
         this->notificationName->SetColour(labelColour);
         this->notificationName->SetTopLeftCorner(0, topY);
@@ -252,6 +284,10 @@ pointLabel(NULL), notificationName(NULL), pointAmount(pointAmount), moveAnimatio
 
     std::stringstream pointStr;
     pointStr << positiveSign << pointAmount;
+    if (multiplyAmount > 1) {
+        pointStr << " x " << multiplyAmount;
+    }
+
     this->pointLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
         pointStr.str());
@@ -259,14 +295,18 @@ pointLabel(NULL), notificationName(NULL), pointAmount(pointAmount), moveAnimatio
     this->pointLabel->SetColour(labelColour);
     this->pointLabel->SetTopLeftCorner(0, topY);
 
-    this->moveAnimation.SetLerp(0.0, 2.0, initialTopY, finalTopY);
+    // Make sure all labels move at the same speed
+    static const double NOTIFY_SPEED_PIXELS_PER_SECOND = 50;
+    double distance = finalTopY - initialTopY;
+    double time     = std::max<double>(0.5, distance / NOTIFY_SPEED_PIXELS_PER_SECOND);
+    this->moveAnimation.SetLerp(0.0, time, initialTopY, finalTopY);
     this->moveAnimation.SetRepeat(false);
 
     std::vector<double> timeVals;
     timeVals.push_back(0.0);
     timeVals.push_back(0.3);
     timeVals.push_back(0.5);
-    timeVals.push_back(2.0);
+    timeVals.push_back(time);
     std::vector<ColourRGBA> colourVals;
     colourVals.push_back(ColourRGBA(labelColour, 0.0f));
     colourVals.push_back(ColourRGBA(1, 1, 1, 1));
@@ -525,7 +565,7 @@ void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& st
                 std::vector<ColourRGBA> colourVals;
                 colourVals.push_back(this->rgbaLabelAnim.GetInterpolantValue());
                 colourVals.push_back(ColourRGBA(1,1,1,1));
-                colourVals.push_back(ColourRGBA(MultiplierHUD::GetMultiplierColour(this->currPtMultiplier), 1));
+                colourVals.push_back(ColourRGBA(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), 1));
 
                 this->rgbaLabelAnim.SetLerp(timeVals, colourVals);
                 this->rgbaLabelAnim.SetRepeat(false);
@@ -554,7 +594,7 @@ void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& st
                 std::vector<ColourRGBA> colourVals;
                 colourVals.push_back(this->rgbaLabelAnim.GetInterpolantValue());
                 colourVals.push_back(ColourRGBA(1,1,1,1));
-                colourVals.push_back(ColourRGBA(MultiplierHUD::GetMultiplierColour(this->currPtMultiplier), 1));
+                colourVals.push_back(ColourRGBA(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), 1));
 
                 this->rgbaLabelAnim.SetLerp(timeVals, colourVals);
                 this->rgbaLabelAnim.SetRepeat(false);
@@ -578,11 +618,12 @@ void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& st
                 timeVals.push_back(2.0);
                 timeVals.push_back(3.0);
                 
-                colourVals.push_back(ColourRGBA(MultiplierHUD::GetMultiplierColour(this->currPtMultiplier), 1));
-                colourVals.push_back(ColourRGBA(MultiplierHUD::GetMultiplierColour(this->currPtMultiplier), 1));
+                ColourRGBA multiplyColour(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), 1);
+                colourVals.push_back(multiplyColour);
+                colourVals.push_back(multiplyColour);
                 colourVals.push_back(ColourRGBA(1,1,1,1));
-                colourVals.push_back(ColourRGBA(MultiplierHUD::GetMultiplierColour(this->currPtMultiplier), 1));
-                colourVals.push_back(ColourRGBA(MultiplierHUD::GetMultiplierColour(this->currPtMultiplier), 1));
+                colourVals.push_back(multiplyColour);
+                colourVals.push_back(multiplyColour);
                 
                 this->rgbaLabelAnim.SetLerp(timeVals, colourVals);
                 this->rgbaLabelAnim.SetRepeat(true);
@@ -617,23 +658,6 @@ void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& st
     }
 
     this->currState = state;
-}
-
-Colour PointsHUD::MultiplierHUD::GetMultiplierColour(int multiplier) {
-    switch (multiplier) {
-        case 1:
-            break;
-        case 2:
-            return GameViewConstants::GetInstance()->TWO_TIMES_MULTIPLIER_COLOUR;
-        case 3:
-            return GameViewConstants::GetInstance()->THREE_TIMES_MULTIPLIER_COLOUR;
-        case 4:
-            return GameViewConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_COLOUR;
-        default:
-            assert(false);
-            break;
-    }
-    return Colour(0,0,0);
 }
 
 float PointsHUD::MultiplierHUD::GetMultiplierScale(int multiplier) {
