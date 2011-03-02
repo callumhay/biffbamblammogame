@@ -41,11 +41,15 @@ private:
 	GameState* nextState;
 
 	// Player-controllable game assets
-	PlayerPaddle* playerPaddle;														// The one and only player paddle
-	std::list<GameBall*> balls;														// Current set of balls active in the game
-	std::list<Projectile*> projectiles;										// Projectiles spawned as the game is played
-	std::list<Beam*> beams;																// Beams spawned as the game is played
-	std::map<LevelPiece*, int32_t> statusUpdatePieces;		// Pieces that require updating every frame due to status effects
+	PlayerPaddle* playerPaddle;                         // The one and only player paddle
+	std::list<GameBall*> balls;                         // Current set of balls active in the game
+	std::list<Projectile*> projectiles;                 // Projectiles spawned as the game is played
+	std::list<Beam*> beams;                             // Beams spawned as the game is played
+	std::map<LevelPiece*, int32_t> statusUpdatePieces;  // Pieces that require updating every frame due to status effects
+
+    Vector2D ballBoostDir;                              // The direction to boost the ball in when the player triggers it
+    double timeDialationFactor;                         // Used to slow time down 'bullet-time', when the ball boost power is activated
+
 
 	// Current world and level information
 	unsigned int currWorldNum;
@@ -316,6 +320,57 @@ public:
 			this->currState->BallReleaseKeyPressed();
 		}
 	}
+
+    void SetBallBoostDir(const Vector2D& dir) {
+        if (!this->IsBallBoostAvailable()) {
+            // No boost means there's no boost direction and no time dialation of the game
+            this->ballBoostDir[0] = 0;
+            this->ballBoostDir[1] = 0;
+            this->timeDialationFactor = 1.0f;
+        }
+        else {
+            if (dir.IsZero()) {
+                this->timeDialationFactor = 1.0;
+            }
+            else {
+                this->timeDialationFactor = 0.1;
+            }
+            this->ballBoostDir = dir;
+        }
+    }
+    bool ExecuteBallBoost();
+
+    /**
+     * Check to see whether the ball boost has regenerated for use by the player.
+     */
+    bool IsBallBoostAvailable() const {
+        // TODO: Have a limited number of boosts...
+
+        // The ball is not allowed to boost if it's currently boosting!
+        bool isBoosting = false;
+        for (std::list<GameBall*>::const_iterator iter = this->balls.begin(); iter != this->balls.end(); ++iter) {
+            const GameBall* currBall = *iter;
+            if (currBall->IsBallBoosting()) {
+                isBoosting = true;
+                break;
+            }
+        }
+
+        return !isBoosting;
+    }
+    /**
+     * Returns true when the user is holding down a direction that the ball is able to activate in.
+     */
+    bool IsBallBoostAbleToActivate() const {
+        return this->IsBallBoostAvailable() && !this->ballBoostDir.IsZero();
+    }
+    /**
+     * Gets the multiplier of the current dT per tick of the game - this can add a 'bullet-time'
+     * like effect to the game.
+     */
+    double GetTimeDialationFactor() const {
+        return this->timeDialationFactor;
+    }
 
 	// Pauses the game
 	void SetPause(PauseType pause) {

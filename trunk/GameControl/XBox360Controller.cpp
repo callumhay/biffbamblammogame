@@ -1,3 +1,13 @@
+/**
+ * XBox360Controller.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2011
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the
+ * resulting work only under the same or similar licence to this one.
+ */
 
 #include "XBox360Controller.h"
 
@@ -35,7 +45,8 @@ static WORD GetXBoxVibrationAmtFromEnum(const BBBGameController::VibrateAmount& 
 XBox360Controller::XBox360Controller(GameModel* model, GameDisplay* display, int controllerNum) : 
 BBBGameController(model, display), controllerNum(controllerNum), vibrateLengthInSeconds(0.0), vibrateTimeTracker(0.0) {
 	this->enterActionOn = this->leftActionOn = this->rightActionOn =
-	this->upActionOn = this->downActionOn =	this->escapeActionOn = this->pauseActionOn = false;
+	this->upActionOn = this->downActionOn =	this->escapeActionOn = 
+    this->pauseActionOn = this->specialDirOn = false;
 }
 
 XBox360Controller::~XBox360Controller() {
@@ -227,6 +238,19 @@ bool XBox360Controller::ProcessState() {
 			this->rightActionOn = false;
 		}
 	}
+
+    // Special stuff...
+    if (abs(controllerState.Gamepad.sThumbRX) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ||
+        abs(controllerState.Gamepad.sThumbRY) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) {
+        this->display->SpecialDirectionPressed(controllerState.Gamepad.sThumbRX, controllerState.Gamepad.sThumbRY);
+        this->specialDirOn = true;
+    }
+    else {
+        if (this->specialDirOn) {
+            this->display->SpecialDirectionReleased();
+            this->specialDirOn = false;
+        }
+    }
 
 	return false;
 }

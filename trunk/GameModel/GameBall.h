@@ -9,7 +9,6 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-
 #ifndef __GAMEBALL_H__
 #define __GAMEBALL_H__
 
@@ -335,10 +334,9 @@ public:
 	bool IsLoadedInCannonBlock() const;
 	const CannonBlock* GetCannonBlock() const;
 
-    void ExecuteBallBoost(float angleInDegs);
-    bool IsBallBoosting() const {
-        return (this->boostSpdDecreaseCounter < BOOST_TEMP_SPD_INCREASE_AMT);
-    }
+    bool IsBallAllowedToBoost() const;
+    bool ExecuteBallBoost(const Vector2D& dir);
+    bool IsBallBoosting() const;
 
 private:
 	BallState* currState;
@@ -396,6 +394,37 @@ inline const CannonBlock* GameBall::GetCannonBlock() const {
 
 inline bool GameBall::IsLoadedInCannonBlock() const {
 	return this->currState->GetBallStateType() == BallState::InCannonBallState;
+}
+
+/**
+ * Queries whether the ball is allowed to boost or not based on its current state.
+ * Returns: true if allowed to boost, false otherwise.
+ */
+inline bool GameBall::IsBallAllowedToBoost() const {
+    // We don't allow boosting if the ball is already being boosted, inside a cannon or
+    // the camera is inside the ball
+    return (!this->IsBallBoosting() && !this->IsLoadedInCannonBlock() && !this->GetIsBallCameraOn() &&
+            !this->blockCollisionsDisabled && !this->paddleCollisionsDisabled &&
+            !currDir.IsZero());
+}
+
+/**
+ * Causes a ball boost based on the given direction (it will boost in the same direction as the one given).
+ */
+inline bool GameBall::ExecuteBallBoost(const Vector2D& dir) {
+    if (!this->IsBallAllowedToBoost()) {
+        return false;
+    }
+
+    // Add a temporary boost in speed and reset the boost decceleration counter
+    this->boostSpdDecreaseCounter = 0.0f; // This value will need to accumulate back up to BOOST_TEMP_SPD_INCREASE_AMT
+                                          // So that the ball knows to stop deccelerating after being boosted
+    this->SetVelocity(this->GetSpeed() + BOOST_TEMP_SPD_INCREASE_AMT, Vector2D::Normalize(dir));
+    return true;
+}
+
+inline bool GameBall::IsBallBoosting() const {
+    return (this->boostSpdDecreaseCounter < BOOST_TEMP_SPD_INCREASE_AMT);
 }
 
 #endif

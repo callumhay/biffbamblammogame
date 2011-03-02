@@ -542,10 +542,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ESPEngine\ESPUtil.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\ESPEngine\ESPVolumeEmitter.cpp"
 					>
 				</File>
@@ -557,10 +553,6 @@
 			<Filter
 				Name="Header Files"
 				>
-				<File
-					RelativePath=".\GameView\BallSafetyNetMesh.h"
-					>
-				</File>
 				<File
 					RelativePath=".\GameView\BlockStatusEffectRenderer.h"
 					>
@@ -617,10 +609,6 @@
 			<Filter
 				Name="Source Files"
 				>
-				<File
-					RelativePath=".\GameView\BallSafetyNetMesh.cpp"
-					>
-				</File>
 				<File
 					RelativePath=".\GameView\BlockStatusEffectRenderer.cpp"
 					>
@@ -939,11 +927,15 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="Block Meshes"
+				Name="Block/World Meshes"
 				>
 				<Filter
 					Name="Header Files"
 					>
+					<File
+						RelativePath=".\GameView\BallSafetyNetMesh.h"
+						>
+					</File>
 					<File
 						RelativePath=".\GameView\CannonBlockMesh.h"
 						>
@@ -976,6 +968,10 @@
 				<Filter
 					Name="Source Files"
 					>
+					<File
+						RelativePath=".\GameView\BallSafetyNetMesh.cpp"
+						>
+					</File>
 					<File
 						RelativePath=".\GameView\CannonBlockMesh.cpp"
 						>
@@ -1194,6 +1190,10 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\GameModel\BallBoostModel.h"
+					>
+				</File>
+				<File
 					RelativePath=".\GameModel\BallState.h"
 					>
 				</File>
@@ -1273,6 +1273,10 @@
 			<Filter
 				Name="Source Files"
 				>
+				<File
+					RelativePath=".\GameModel\BallBoostModel.cpp"
+					>
+				</File>
 				<File
 					RelativePath=".\GameModel\Beam.cpp"
 					>

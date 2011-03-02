@@ -44,6 +44,8 @@ public:
     return *this;
   }
 
+  bool IsZero() const;
+
 	const float* begin() const {
 		return v_;
 	}
@@ -141,6 +143,10 @@ inline void Vector2D::Rotate(float angInDegs) {
 
 	v_[0] = x;
 	v_[1] = y;
+}
+
+inline bool Vector2D::IsZero() const {
+    return (*this == Vector2D(0,0));
 }
 
 // 3D Vector -----------------------------------------------------
