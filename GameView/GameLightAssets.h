@@ -1,3 +1,14 @@
+/**
+ * GameLightAssets.h
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2011
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #ifndef __GAMELIGHTASSETS_H__
 #define __GAMELIGHTASSETS_H__
 
@@ -12,16 +23,17 @@
 class GameLightAssets {
 	
 public:
-	enum GameLightType { FGKeyLight,				// Foreground key light  (key light affecting all foreground objects except the paddle and ball)
-											 FGFillLight,				// Foreground fill light (fill light affecting all foreground objects except the paddle and ball)
-											 FGBallLight,				// Foreground ball light (light coming from the ball that affects all foreground objects except the ball)
-											 BGKeyLight,				// Background key light  (key light affecting all background objects)
-											 BGFillLight,				// Background fill light (fill light affecting all background objects)
-											 BallKeyLight,			// Key light affecting only the ball
-											 BallFillLight,			// Fill light affecting only the ball
-											 PaddleKeyLight,		// Key light affecting only the paddle
-											 PaddleFillLight		// Fill light affecting only the paddle
-											};
+	enum GameLightType { 
+        FGKeyLight,         // Foreground key light  (key light affecting all foreground objects except the paddle and ball)
+        FGFillLight,        // Foreground fill light (fill light affecting all foreground objects except the paddle and ball)
+        FGBallLight,        // Foreground ball light (light coming from the ball that affects all foreground objects except the ball)
+        BGKeyLight,         // Background key light  (key light affecting all background objects)
+        BGFillLight,        // Background fill light (fill light affecting all background objects)
+        BallKeyLight,       // Key light affecting only the ball
+        BallFillLight,      // Fill light affecting only the ball
+        PaddleKeyLight,     // Key light affecting only the paddle
+        PaddleFillLight     // Fill light affecting only the paddle
+    };
 
 	GameLightAssets();
 	~GameLightAssets();

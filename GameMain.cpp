@@ -66,7 +66,7 @@ static void CleanUpMVC() {
  */
 static void GameRenderLoop() {
 	double frameTimeDelta = 0.0;
-	const double maxDelta = 1.0 / 30.0;
+	const double maxDelta = 1.0 / 15.0;
 	bool quitGame = false;
 
 	// Main render loop...

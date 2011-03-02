@@ -1,3 +1,14 @@
+/**
+ * GameDisplay.cpp
+ *
+ * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * Callum Hay, 2011
+ *
+ * You may not use this work for commercial purposes.
+ * If you alter, transform, or build upon this work, you may distribute the 
+ * resulting work only under the same or similar licence to this one.
+ */
+
 #include "GameDisplay.h"
 #include "GameAssets.h"
 #include "GameEventsListener.h"
@@ -22,7 +33,7 @@ const unsigned long GameDisplay::FRAME_SLEEP_MS	= 1000 / GameDisplay::MAX_FRAMER
 
 GameDisplay::GameDisplay(GameModel* model, int initWidth, int initHeight): 
 gameListener(NULL), currState(NULL), model(model), assets(new GameAssets(initWidth, initHeight)), 
-gameExited(false), gameReinitialized(false), 
+gameExited(false), gameReinitialized(false),
 gameCamera(initWidth, initHeight) {
 	assert(model != NULL);
 
@@ -85,6 +96,9 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 }
 
 void GameDisplay::Render(double dT) {
+    // Dialate time if necessary...
+    dT *= this->model->GetTimeDialationFactor();
+
 	// Render the current state
 	this->currState->RenderFrame(dT);
 	debug_opengl_state();
@@ -103,6 +117,14 @@ float GameDisplay::GetTextScalingFactor() const {
 	float currYRes = this->gameCamera.GetWindowHeight();
 
 	return std::min<float>(currXRes / BASE_X_RESOLUTION, currYRes / BASE_Y_RESOLUTION);
+}
+
+void GameDisplay::SpecialDirectionPressed(int x, int y) {
+    this->model->SetBallBoostDir(-Vector2D(x, y));
+}
+
+void GameDisplay::SpecialDirectionReleased() {
+    this->model->SetBallBoostDir(Vector2D(0, 0));
 }
 
 // LISTENER FUNCTIONS ***************************************************

@@ -31,11 +31,12 @@ const float GameBall::MAX_ROATATION_SPEED	= 70;
 // Typical initial velocity for the ball when released from the player paddle
 const Vector2D GameBall::STD_INIT_VEL_DIR = Vector2D(0, GameBall::NormalSpeed);
 
+// Temporary speed increase gained by boosting the ball
+const float GameBall::BOOST_TEMP_SPD_INCREASE_AMT = 6.0f;
+
 // Acceleration of the ball towards the ground when gravity ball is activated
 const float GameBall::GRAVITY_ACCELERATION  = 8.0f;
-const float GameBall::BOOST_DECCELERATION   = 10.0f;
-
-const float GameBall::BOOST_TEMP_SPD_INCREASE_AMT = 5.0f;
+const float GameBall::BOOST_DECCELERATION   = BOOST_TEMP_SPD_INCREASE_AMT;
 
 GameBall* GameBall::currBallCamBall = NULL;
 
@@ -233,20 +234,4 @@ void GameBall::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
 	// we cache it in the "InCannonBallState" and it will change back once
 	// that state is complete
 	this->SetBallState(new InCannonBallState(this, cannonBlock, this->currState), false);
-}
-
-/**
- * Causes a ball boost based on the given angle in degrees - this angle is measured from
- * the upwards (0, 1) direction of the ball.
- */
-void GameBall::ExecuteBallBoost(float angleInDegs) {
-
-    Vector2D newDir(0, 1);
-    newDir.Rotate(angleInDegs);
-    newDir.Normalize();
-
-    // Add a temporary boost in speed and reset the boost decceleration counter
-    this->boostSpdDecreaseCounter = 0.0f; // This value will need to accumulate back up to BOOST_TEMP_SPD_INCREASE_AMT
-                                          // So that the ball knows to stop deccelerating after being boosted
-    this->SetVelocity(this->GetSpeed() + BOOST_TEMP_SPD_INCREASE_AMT, newDir);
 }

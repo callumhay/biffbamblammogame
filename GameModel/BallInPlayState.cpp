@@ -42,6 +42,13 @@ void BallInPlayState::DebugDropItem(GameItem* item) {
  */
 void BallInPlayState::BallReleaseKeyPressed() {
 
+    // Always boost the ball when possible (if the player is indicating that they want to)
+    if (this->gameModel->IsBallBoostAbleToActivate()) {
+        if (this->gameModel->ExecuteBallBoost()) {
+            return;
+        }
+    }
+
 	// Check for paddle items that use the action key...
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	paddle->Shoot(this->gameModel);
