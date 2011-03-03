@@ -24,15 +24,22 @@ namespace Collision {
 	private:
 		Point2D minCoord, maxCoord;
 	public:
-		AABB2D(const Point2D &min, const Point2D &max): minCoord(min), maxCoord(max) {}
+        AABB2D() : minCoord(0, 0), maxCoord(0, 0) {}
+        AABB2D(const Point2D &min, const Point2D &max): minCoord(min), maxCoord(max) {}
 		~AABB2D() {}
 
 		const Point2D& GetMin() const {
 			return this->minCoord;
 		}
+        void SetMin(const Point2D& min) {
+            this->minCoord = min;
+        }
 		const Point2D& GetMax() const {
 			return this->maxCoord;
 		}
+        void SetMax(const Point2D& max) {
+            this->maxCoord = max;
+        }
 
 		Point2D GetCenter() const {
 			return Point2D::GetMidPoint(this->maxCoord, this->minCoord);

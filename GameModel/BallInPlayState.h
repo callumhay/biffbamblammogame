@@ -50,8 +50,12 @@ public:
 		return GameState::BallInPlayStateType;
 	}
 
-	void Tick(double seconds);
 	void BallReleaseKeyPressed();
+    void BallBoostDirectionPressed(int x, int y);
+    void BallBoostDirectionReleased();
+
+	void Tick(double seconds);
+
 	void DebugDropItem(GameItem* item);
 };
 

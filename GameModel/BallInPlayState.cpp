@@ -19,12 +19,22 @@
 #include "GameItem.h"
 #include "GameItemFactory.h"
 #include "Beam.h"
+#include "BallBoostModel.h"
 
 BallInPlayState::BallInPlayState(GameModel* gm) : 
 GameState(gm), timeSinceGhost(DBL_MAX) {
+
+    // The ball in play state is the only state that allows for ball boosting -
+    // create a ball boost model for it in the game model
+    assert(this->gameModel->boostModel == NULL);
+    this->gameModel->boostModel = new BallBoostModel(&gm->GetGameBalls());
 }
 
 BallInPlayState::~BallInPlayState() {
+    assert(this->gameModel->boostModel != NULL);
+    // Clean up the boost model - it's only allowed to exist while the ball is in play
+    delete this->gameModel->boostModel;
+    this->gameModel->boostModel = NULL;
 }
 
 /**
@@ -43,15 +53,24 @@ void BallInPlayState::DebugDropItem(GameItem* item) {
 void BallInPlayState::BallReleaseKeyPressed() {
 
     // Always boost the ball when possible (if the player is indicating that they want to)
-    if (this->gameModel->IsBallBoostAbleToActivate()) {
-        if (this->gameModel->ExecuteBallBoost()) {
-            return;
-        }
+    assert(this->gameModel->boostModel != NULL);
+    if (this->gameModel->boostModel->BallBoosterPressed()) {
+        return;
     }
 
 	// Check for paddle items that use the action key...
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	paddle->Shoot(this->gameModel);
+}
+
+void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
+    assert(this->gameModel->boostModel != NULL);
+    this->gameModel->boostModel->BallBoostDirectionPressed(x, y);
+}
+
+void BallInPlayState::BallBoostDirectionReleased() {
+    assert(this->gameModel->boostModel != NULL);
+    this->gameModel->boostModel->BallBoostDirectionReleased();
 }
 
 /**
