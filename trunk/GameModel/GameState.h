@@ -33,12 +33,21 @@ public:
 	virtual void Tick(double seconds) = 0;
 	virtual void BallReleaseKeyPressed() = 0;
 	virtual void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement);
-
-    //virtual void BallBoostDirectionPressed(int x, int y);
-    //virtual void BallBoostDirectionReleased();
+    virtual void BallBoostDirectionPressed(int x, int y);
+    virtual void BallBoostDirectionReleased();
 
 	bool DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttachedBallCollision);
 
 };
+
+inline void GameState::BallBoostDirectionPressed(int x, int y) {
+    UNUSED_PARAMETER(x);
+    UNUSED_PARAMETER(y);
+    // Do nothing by default
+}
+
+inline void GameState::BallBoostDirectionReleased() {
+    // Do nothing by default
+}
 
 #endif

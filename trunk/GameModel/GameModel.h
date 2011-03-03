@@ -31,6 +31,7 @@
 #include "Projectile.h"
 #include "GameTransformMgr.h"
 #include "PointAward.h"
+#include "BallBoostModel.h"
 
 class CollateralBlock;
 
@@ -46,10 +47,7 @@ private:
 	std::list<Projectile*> projectiles;                 // Projectiles spawned as the game is played
 	std::list<Beam*> beams;                             // Beams spawned as the game is played
 	std::map<LevelPiece*, int32_t> statusUpdatePieces;  // Pieces that require updating every frame due to status effects
-
-    Vector2D ballBoostDir;                              // The direction to boost the ball in when the player triggers it
-    double timeDialationFactor;                         // Used to slow time down 'bullet-time', when the ball boost power is activated
-
+    BallBoostModel* boostModel;                         // This is only not NULL when the ball is in play - it contains the model/state for ball boosting
 
 	// Current world and level information
 	unsigned int currWorldNum;
@@ -321,55 +319,26 @@ public:
 		}
 	}
 
-    void SetBallBoostDir(const Vector2D& dir) {
-        if (!this->IsBallBoostAvailable()) {
-            // No boost means there's no boost direction and no time dialation of the game
-            this->ballBoostDir[0] = 0;
-            this->ballBoostDir[1] = 0;
-            this->timeDialationFactor = 1.0f;
-        }
-        else {
-            if (dir.IsZero()) {
-                this->timeDialationFactor = 1.0;
-            }
-            else {
-                this->timeDialationFactor = 0.1;
-            }
-            this->ballBoostDir = dir;
-        }
+    void BallBoostDirectionPressed(int x, int y) {
+		// Can only do this if the state exists and is not paused
+		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
+			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
+			this->currState->BallBoostDirectionPressed(x, y);
+		}
     }
-    bool ExecuteBallBoost();
-
-    /**
-     * Check to see whether the ball boost has regenerated for use by the player.
-     */
-    bool IsBallBoostAvailable() const {
-        // TODO: Have a limited number of boosts...
-
-        // The ball is not allowed to boost if it's currently boosting!
-        bool isBoosting = false;
-        for (std::list<GameBall*>::const_iterator iter = this->balls.begin(); iter != this->balls.end(); ++iter) {
-            const GameBall* currBall = *iter;
-            if (currBall->IsBallBoosting()) {
-                isBoosting = true;
-                break;
-            }
-        }
-
-        return !isBoosting;
+    void BallBoostDirectionReleased() {
+		// Can only do this if the state exists and is not paused
+		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
+			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
+			this->currState->BallBoostDirectionReleased();
+		}
     }
-    /**
-     * Returns true when the user is holding down a direction that the ball is able to activate in.
-     */
-    bool IsBallBoostAbleToActivate() const {
-        return this->IsBallBoostAvailable() && !this->ballBoostDir.IsZero();
+    float GetTimeDialationFactor() const {
+        if (this->boostModel == NULL) { return 1.0f; }
+        return this->boostModel->GetTimeDialationFactor();
     }
-    /**
-     * Gets the multiplier of the current dT per tick of the game - this can add a 'bullet-time'
-     * like effect to the game.
-     */
-    double GetTimeDialationFactor() const {
-        return this->timeDialationFactor;
+    const BallBoostModel* GetBallBoostModel() const {
+        return this->boostModel;
     }
 
 	// Pauses the game

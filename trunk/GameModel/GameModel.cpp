@@ -24,10 +24,9 @@
 #include "../ResourceManager.h"
 
 GameModel::GameModel() : 
-currWorldNum(0), currState(NULL), currPlayerScore(0), ballBoostDir(0,0),
-currLivesLeft(0), pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false),
-gameTransformInfo(new GameTransformMgr()), nextState(NULL), 
-doingPieceStatusListIteration(false), timeDialationFactor(1.0) {
+currWorldNum(0), currState(NULL), currPlayerScore(0), currLivesLeft(0), pauseBitField(GameModel::NoPause), 
+isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
+nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false){
 	
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
     std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
@@ -78,6 +77,9 @@ GameModel::~GameModel() {
 	}
 	delete this->playerPaddle;
 	this->playerPaddle = NULL;
+
+    // The boost model should always have been destroyed by now!
+    assert(this->boostModel == NULL);
 }
 
 /**
@@ -112,10 +114,6 @@ void GameModel::ClearGameState() {
 	this->ClearActiveTimers();
 	this->ClearProjectiles();
 	this->ClearBeams();
-
-    // Make sure the ball boost stuff is reset just in case
-    this->ballBoostDir        = Vector2D(0,0);
-    this->timeDialationFactor = 1.0;
 
 	// Delete the state
 	delete this->currState;
@@ -807,26 +805,6 @@ bool GameModel::RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type)
 		}
 	}
 	return foundItemType;
-}
-
-bool GameModel::ExecuteBallBoost() {
-    assert(this->IsBallBoostAvailable());
-
-    bool ballWasBoosted = false;
-    if (this->currState != NULL && (this->pauseBitField & GameModel::PauseState) == 0x0 &&
-        this->currState->GetType() == GameState::BallInPlayStateType) {
-
-        // The boost is applied to all balls in play
-        for (std::list<GameBall*>::iterator iter = this->balls.begin(); iter != this->balls.end(); ++iter) {
-            GameBall* currBall = *iter;
-
-            // Don't execute ball boosts for any balls that are attached to a paddle...
-            if (currBall != this->playerPaddle->GetAttachedBall()) {
-                ballWasBoosted |= currBall->ExecuteBallBoost(this->ballBoostDir);
-            }
-        }
-    }
-    return ballWasBoosted;
 }
 
 /**

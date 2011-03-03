@@ -120,11 +120,11 @@ float GameDisplay::GetTextScalingFactor() const {
 }
 
 void GameDisplay::SpecialDirectionPressed(int x, int y) {
-    this->model->SetBallBoostDir(-Vector2D(x, y));
+    this->model->BallBoostDirectionPressed(-x, -y);
 }
 
 void GameDisplay::SpecialDirectionReleased() {
-    this->model->SetBallBoostDir(Vector2D(0, 0));
+    this->model->BallBoostDirectionReleased();
 }
 
 // LISTENER FUNCTIONS ***************************************************
