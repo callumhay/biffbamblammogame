@@ -10,23 +10,71 @@
  */
 
 #include "BallBoostModel.h"
+#include "GameEventManager.h"
 
 // Amounts of time to fade in and out of bullet time when it's activated/deactivated
-const double BallBoostModel::BULLET_TIME_FADE_IN_SECONDS    = 0.33;
-const double BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS   = 0.2;
+const double BallBoostModel::BULLET_TIME_FADE_IN_SECONDS        = 0.30;
+const double BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS       = 0.20;
+// The maximum duration of bullet time before the ball is automatically boosted
+const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 3.0;
 
 // The time dialation factor used (multiplies the delta time of each game frame)
 // when full bullet time is active
 const float BallBoostModel::MIN_TIME_DIALATION_FACTOR       = 0.1f;
 
 BallBoostModel::BallBoostModel(const std::list<GameBall*>* balls) : 
-balls(balls), ballBoostDir(0,0), timeDialationFactor(1.0f), numAvailableBoosts(3000), 
-isBallBoostDirPressed(false) {
+balls(balls), ballBoostDir(0,0), numAvailableBoosts(3000), 
+isBallBoostDirPressed(false), currState(NotInBulletTime), 
+timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0) {
     assert(balls != NULL);
     assert(!balls->empty());
+
+    // Setup the initial states for the various animations...
+    timeDialationAnim.SetInterpolantValue(1.0f);
+    timeDialationAnim.SetRepeat(false);
+
 }
 
 BallBoostModel::~BallBoostModel() {
+}
+
+void BallBoostModel::Tick(double dT) {
+    static bool animationDone = false;
+
+    switch (this->currState) {
+
+        case NotInBulletTime:
+            this->totalBulletTimeElapsed = 0.0;
+            break;
+
+        case BulletTimeFadeIn:
+            animationDone = this->timeDialationAnim.Tick(dT);
+            if (animationDone) {
+                this->SetCurrentState(BulletTime);
+            }
+            break;
+
+        case BulletTime:
+            // Increment the total bullet time counter, if it exceeds the max allowed bullet time
+            // then we automatically boost the ball in its current direction
+            this->totalBulletTimeElapsed += dT;
+            if (this->totalBulletTimeElapsed > BULLET_TIME_MAX_DURATION_SECONDS) {
+                this->BallBoosterPressed();
+            }
+
+            break;
+
+        case BulletTimeFadeOut:
+            animationDone = this->timeDialationAnim.Tick(dT);
+            if (animationDone) {
+                this->SetCurrentState(NotInBulletTime);
+            }
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
 }
 
 void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
@@ -43,12 +91,13 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
             // This is the first time (for this boost) that the direction has been pressed,
             // we need to setup the time dialation animation
             this->isBallBoostDirPressed = true;
-            // TODO: time dialation animation...
-            this->timeDialationFactor = MIN_TIME_DIALATION_FACTOR;
 
             // Recalculate the zoom bounds - this provides the display with the max and min
             // coordinates of the ball(s) in play so it can properly zoom in on it/them
             this->RecalculateBallZoomBounds();
+
+            // Start the bullet time state...
+            this->SetCurrentState(BulletTimeFadeIn);
         }
 
         this->ballBoostDir[0] = x;
@@ -56,20 +105,22 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
     }
     else {
         // Boosting is disallowed currently, make sure the members are properly set
-        assert(!this->isBallBoostDirPressed);
-        assert(this->ballBoostDir.IsZero());
+        this->ballBoostDir[0]       = 0.0f;
+        this->ballBoostDir[1]       = 0.0f;
+        this->isBallBoostDirPressed = false;
+        this->SetCurrentState(NotInBulletTime);
     }
 }
 
 void BallBoostModel::BallBoostDirectionReleased() {
     if (this->isBallBoostDirPressed) {
         // The player has decided to NOT boost at this time, clean up the about-to-boost state
-        // TODO: time dialation animation...
-        this->timeDialationFactor   = 1.0f;
-
         this->ballBoostDir[0] = 0.0f;
         this->ballBoostDir[1] = 0.0f;
         this->isBallBoostDirPressed = false;
+
+        // End the bullet time state...
+        this->SetCurrentState(BulletTimeFadeOut);
     }
 }
 
@@ -94,13 +145,17 @@ bool BallBoostModel::BallBoosterPressed() {
         ballWasBoosted |= currBall->ExecuteBallBoost(this->ballBoostDir);
     }
 
-    if (ballWasBoosted) {
-        // Force a release of the boost direction and the entire boosting state
-        this->BallBoostDirectionReleased();
-        // A boost was just expended...
-        this->numAvailableBoosts--;
-        assert(this->numAvailableBoosts >= 0);
-    }
+    // Sanity: The ball should be allowed to boost!!
+    assert(ballWasBoosted);
+
+    // Force a release of the boost direction and the entire boosting state
+    this->BallBoostDirectionReleased();
+    // A boost was just expended...
+    this->numAvailableBoosts--;
+    assert(this->numAvailableBoosts >= 0);
+
+    // End the bullet time state...
+    this->SetCurrentState(BulletTimeFadeOut);
 
     return ballWasBoosted;
 }
@@ -120,6 +175,36 @@ bool BallBoostModel::IsBallAvailableForBoosting() const {
     }
 
     return ballIsAvailable;
+}
+
+void BallBoostModel::SetCurrentState(const BulletTimeState& newState) {
+    switch (newState) {
+        case NotInBulletTime:
+            this->timeDialationAnim.SetInterpolantValue(1.0f);
+            break;
+
+        case BulletTimeFadeIn:
+            this->timeDialationAnim.SetLerp(BULLET_TIME_FADE_IN_SECONDS, MIN_TIME_DIALATION_FACTOR);
+            break;
+
+        case BulletTime:
+            this->totalBulletTimeElapsed = 0.0;
+            this->timeDialationAnim.SetInterpolantValue(MIN_TIME_DIALATION_FACTOR);
+            break;
+
+        case BulletTimeFadeOut:
+            this->timeDialationAnim.SetLerp(BULLET_TIME_FADE_OUT_SECONDS, 1.0f);
+            break;
+
+        default:
+            assert(false);
+            return;
+    }
+
+    this->currState = newState;
+
+    // EVENT: The ball boost model state has changed
+    GameEventManager::Instance()->ActionBulletTimeStateChanged(*this);
 }
 
 /**

@@ -15,11 +15,14 @@
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/FBObj.h"
 
+#include "../GameModel/BallBoostModel.h"
+
 #include "CgFxGaussianBlur.h"
 #include "CgFxAfterImage.h"
 #include "CgFxBloom.h"
 #include "CgFxFullscreenGoo.h"
 #include "CgFxInkSplatter.h"
+#include "CgFxPostBulletTime.h"
 
 class GameModel;
 class GameItem;
@@ -53,6 +56,7 @@ private:
 	CgFxPostUberIntense* uberIntenseCamEffect;
 	CgFxFullscreenGoo* shieldPaddleCamEffect;
 	CgFxPostFirey* fireBallCamEffect;
+    CgFxPostBulletTime* bulletTimeEffect;
 
 	// Misc. Textures and overlays
 	Texture* barrelOverlayTex;	// Texture for overlay of the cannon barrel
@@ -140,6 +144,9 @@ public:
 	}
 
 	void SetupPaddleShieldEffect();
+    void UpdateBulletTimeState(const BallBoostModel::BulletTimeState& state) {
+        this->bulletTimeEffect->UpdateBulletTimeState(state);
+    }
 
 };
 #endif

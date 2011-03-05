@@ -33,6 +33,7 @@
 #include "../GameModel/TeslaBlock.h"
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/PaddleRocketProjectile.h"
+#include "../GameModel/BallBoostModel.h"
 
 #include "../GameControl/GameControllerManager.h"
 
@@ -765,6 +766,11 @@ void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBloc
     //this->PlayWorldSound(GameSoundAssets::WorldSoundActionSwitchBlockActivated,  GameSoundAssets::NormalVolume);
 
     debug_output("EVENT: Switch block activated");
+}
+
+void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boostModel) {
+    this->display->GetAssets()->GetFBOAssets()->UpdateBulletTimeState(boostModel.GetBulletTimeState());
+    debug_output("EVENT: Bullet time state changed");
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {

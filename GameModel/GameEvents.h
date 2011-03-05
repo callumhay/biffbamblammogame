@@ -31,6 +31,7 @@ class Projectile;
 class Beam;
 class PaddleRocketProjectile;
 class PointAward;
+class BallBoostModel;
 
 class GameEvents {
 public:
@@ -262,6 +263,12 @@ public:
 	virtual void BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle) = 0;
 	// Same as above, only a projectile did it.
 	virtual void BallSafetyNetDestroyedEvent(const Projectile& projectile) = 0;
+
+    /**
+     * Event triggered when the bullet time state has changed. Triggered right after the state changed.
+     * Arguements: boostModel - The ball boost model that contains the new bullet time state.
+     */
+    virtual void BulletTimeStateChangedEvent(const BallBoostModel& boostModel) = 0;
 
 
 	/**

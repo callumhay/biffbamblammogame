@@ -51,8 +51,10 @@ struct MaterialProperties {
 	std::string materialType;
 	std::string geomType;
 
-	MaterialProperties(): diffuseTexture(NULL), materialType(MATERIAL_CELBASIC_TYPE), geomType(MATERIAL_GEOM_BG_TYPE),
-		diffuse(Colour(1,1,1)), specular(Colour(1,1,1)), outlineColour(Colour(0,0,0)), shininess(128.0f), outlineSize(1.0f), alphaMultiplier(1.0f) {}
+	MaterialProperties(): diffuseTexture(NULL), materialType(MATERIAL_CELBASIC_TYPE), 
+        geomType(MATERIAL_GEOM_BG_TYPE), diffuse(Colour(1,1,1)), 
+        specular(Colour(1,1,1)), outlineColour(Colour(0,0,0)), 
+        shininess(128.0f), outlineSize(1.0f), alphaMultiplier(1.0f) {}
 
 	~MaterialProperties() {
 		if (this->diffuseTexture != NULL) {
@@ -67,21 +69,8 @@ struct MaterialProperties {
  * Superclass for post-processing CgFX effects.
  */
 class CgFxPostProcessingEffect {
-
-protected:
-	// The Cg Effect pointer
-	CGeffect cgEffect;
-
-	// The current technique and a set of all techniques for this effect
-	CGtechnique currTechnique;
-	std::map<std::string, CGtechnique> techniques;
-
-	// Pointer to the scene FBO - this must be passed to the effect
-	FBObj* sceneFBO;
-
 public:
 	CgFxPostProcessingEffect(const std::string& effectPath, FBObj* sceneFBO) : sceneFBO(sceneFBO) {
-		assert(sceneFBO != NULL);
 		// Load the effect and its techniques from file
 		ResourceManager::GetInstance()->GetCgFxEffectResource(effectPath, this->cgEffect, this->techniques);
 		assert(this->cgEffect != NULL);
@@ -117,31 +106,6 @@ public:
 		}
 	}
 
-};
-
-/**
- * Superclass for most CgFX effects.
- */
-class CgFxEffectBase {
-
-private:
-	/**
-	 * Draw the given display list in the given pass using
-	 * the Cg runtime.
-	 */
-	static void DrawPass(CGpass pass, GLuint displayListID) {
-		cgSetPassState(pass);
-		glCallList(displayListID);
-		cgResetPassState(pass);
-	}
-	static void DrawPass(CGpass pass, const std::vector<GLuint> &displayListIDs) {
-		assert(displayListIDs.size() > 0);
-		cgSetPassState(pass);
-		glListBase(0);
-		glCallLists(displayListIDs.size(), GL_UNSIGNED_INT, &displayListIDs[0]);
-		cgResetPassState(pass);
-	}
-
 protected:
 	// The Cg Effect pointer
 	CGeffect cgEffect;
@@ -150,8 +114,17 @@ protected:
 	CGtechnique currTechnique;
 	std::map<std::string, CGtechnique> techniques;
 
-	virtual void SetupBeforePasses(const Camera& camera) = 0;
+	// Pointer to the scene FBO - this must be passed to the effect
+	FBObj* sceneFBO;
 
+private:
+    DISALLOW_COPY_AND_ASSIGN(CgFxPostProcessingEffect);
+};
+
+/**
+ * Superclass for most CgFX effects.
+ */
+class CgFxEffectBase {
 public:
 	CgFxEffectBase(const std::string& effectPath);
 	virtual ~CgFxEffectBase();
@@ -197,15 +170,58 @@ public:
 			this->currTechnique = temp;
 		}
 	}
+protected:
+	// The Cg Effect pointer
+	CGeffect cgEffect;
 
+	// The current technique and a set of all techniques for this effect
+	CGtechnique currTechnique;
+	std::map<std::string, CGtechnique> techniques;
+
+	virtual void SetupBeforePasses(const Camera& camera) = 0;
+
+private:
+	/**
+	 * Draw the given display list in the given pass using
+	 * the Cg runtime.
+	 */
+	static void DrawPass(CGpass pass, GLuint displayListID) {
+		cgSetPassState(pass);
+		glCallList(displayListID);
+		cgResetPassState(pass);
+	}
+	static void DrawPass(CGpass pass, const std::vector<GLuint> &displayListIDs) {
+		assert(displayListIDs.size() > 0);
+		cgSetPassState(pass);
+		glListBase(0);
+		glCallLists(displayListIDs.size(), GL_UNSIGNED_INT, &displayListIDs[0]);
+		cgResetPassState(pass);
+	}
+
+    DISALLOW_COPY_AND_ASSIGN(CgFxEffectBase);
 };
 
 /**
  * Base class for loading and dealing with CgFx material shaders.
  */
-class CgFxMaterialEffect : public CgFxEffectBase {
-private:
-	void LoadParameters();
+class CgFxMaterialEffect : public CgFxEffectBase {	
+public:
+	CgFxMaterialEffect(const std::string& effectPath, MaterialProperties* props);
+	virtual ~CgFxMaterialEffect();
+
+	MaterialProperties* GetProperties() {
+		return this->properties;
+	}
+
+	void SetKeyLight(const BasicPointLight& keyLight) {
+		keyLight.Copy(this->keyLight);
+	}
+	void SetFillLight(const BasicPointLight& fillLight) {
+		fillLight.Copy(this->fillLight);
+	}
+	void SetBallLight(const BasicPointLight& ballLight) {
+		ballLight.Copy(this->ballLight);
+	}
 
 protected:
 	virtual void SetupBeforePasses(const Camera& camera);
@@ -244,25 +260,10 @@ protected:
 
 	// Properties of this material
 	MaterialProperties* properties;
-	
-public:
-	CgFxMaterialEffect(const std::string& effectPath, MaterialProperties* props);
-	virtual ~CgFxMaterialEffect();
 
-	MaterialProperties* GetProperties() {
-		return this->properties;
-	}
-
-	void SetKeyLight(const BasicPointLight& keyLight) {
-		keyLight.Copy(this->keyLight);
-	}
-	void SetFillLight(const BasicPointLight& fillLight) {
-		fillLight.Copy(this->fillLight);
-	}
-	void SetBallLight(const BasicPointLight& ballLight) {
-		ballLight.Copy(this->ballLight);
-	}
-
+private:
+	void LoadParameters();
+    DISALLOW_COPY_AND_ASSIGN(CgFxMaterialEffect);
 };
 
 #endif

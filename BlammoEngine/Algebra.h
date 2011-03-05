@@ -89,11 +89,19 @@ inline float NumberFuncs::Clamp(float n, float min, float max) {
 	return n;
 }
 
+/**
+ * Returns the expected linear interpolation value of 'y' with the given x range [x0, x1] and y range [y0, y1] with
+ * the given value of x.
+ */
+//template <typename T> T NumberFuncs::Lerp(const T& x0, const T& x1, const T& y0, const T& y1, const T& x) {
+//    return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+//}
+
 class Randomizer {
 private:
 	static Randomizer* instance;
 
-	MTRand_int32  randomIntGen;			// Generates random 32-bit integers
+	MTRand_int32  randomIntGen;     // Generates random 32-bit integers
 	MTRand_closed randomDoubleGen;	// Generates random double precision floating point numbers in [0, 1]
 
 	Randomizer();

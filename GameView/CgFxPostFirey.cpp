@@ -21,7 +21,7 @@
 const char* CgFxPostFirey::POSTFIREY_TECHNIQUE_NAME = "PostFirey";
 
 CgFxPostFirey::CgFxPostFirey(FBObj* outputFBO) :
-CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_FULLSCREEN_POSTFIREY_SHADER, sceneFBO), resultFBO(outputFBO),
+CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_FULLSCREEN_POSTFIREY_SHADER, NULL), resultFBO(outputFBO),
 timerParam(NULL), frequencyParam(NULL), fadeParam(NULL), sceneSamplerParam(NULL),
 freq(1.25f), timer(0.0f), fade(1.0f), scale(0.25f) {
 	
@@ -29,10 +29,10 @@ freq(1.25f), timer(0.0f), fade(1.0f), scale(0.25f) {
 	this->currTechnique = this->techniques[CgFxPostFirey::POSTFIREY_TECHNIQUE_NAME];
 
 	// Initialize CG simple float parameters
-	this->timerParam					= cgGetNamedEffectParameter(this->cgEffect, "Timer");
+	this->timerParam				= cgGetNamedEffectParameter(this->cgEffect, "Timer");
 	this->frequencyParam			= cgGetNamedEffectParameter(this->cgEffect, "Freq");
-	this->fadeParam						= cgGetNamedEffectParameter(this->cgEffect, "Fade");
-	this->scaleParam					= cgGetNamedEffectParameter(this->cgEffect, "Scale");
+	this->fadeParam					= cgGetNamedEffectParameter(this->cgEffect, "Fade");
+	this->scaleParam				= cgGetNamedEffectParameter(this->cgEffect, "Scale");
 
 	// Initialize CG sampler parameters
 	this->noiseSamplerParam		= cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");

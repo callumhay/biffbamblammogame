@@ -33,6 +33,7 @@ class Projectile;
 class Beam;
 class PaddleRocketProjectile;
 class PointAward;
+class BallBoostModel;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
@@ -93,6 +94,7 @@ public:
 	void ActionItemTimerStopped(const GameItemTimer& itemTimer);
 	void ActionItemDropBlockItemChange(const ItemDropBlock& dropBlock);
     void ActionSwitchBlockActivated(const SwitchBlock& switchBlock);
+    void ActionBulletTimeStateChanged(const BallBoostModel& boostModel);
 
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);

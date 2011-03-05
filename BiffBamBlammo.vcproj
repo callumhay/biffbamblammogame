@@ -713,6 +713,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxPostBulletTime.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxPostFirey.h"
 						>
 					</File>
@@ -786,6 +790,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxPortalBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPostBulletTime.cpp"
 						>
 					</File>
 					<File
