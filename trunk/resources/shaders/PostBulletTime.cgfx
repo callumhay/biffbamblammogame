@@ -1,0 +1,110 @@
+/**
+ * PostBulletTime.cgfx
+ * Created By: Callum Hay
+ *
+ * Used to simulate the slow down of time when going into bullet time mode.
+ * This effect will greyscale and radial blur the scene as a post-processing effect.
+ */
+
+ // Constant samples used in the radial blur
+const float SAMPLES[10] = {-0.08, -0.05, -0.03, -0.02, -0.01, 0.01, 0.02, 0.03, 0.05, 0.08};
+
+/*
+ * For a value of zero the full colour of the scene is displayed,
+ * for a value of one the entire scene will be in black and white,
+ * inbetween values are lerped.
+ */
+float DesaturateFraction <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "Desaturation";
+> = 0.0f;
+
+/*
+ * SampleDistance will break-up the sampling of the blur if it is made too high,
+ * resulting in a very discretized and and poorly sampled blur. However, if made
+ * high enough it will also result in a very strong blur.
+ */
+float SampleDistance <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 2.0;
+    float UIStep = 0.01;
+    string UIName =  "Sample Distance";
+> = 0.25f;
+
+/*
+ * SampleStrength is how much of the blur actually shows - this will be weighted
+ * away from the center i.e., the center will always show the least amount of blur
+ * unless SampleStrength is very high.
+ */
+float SampleStrength <
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 35.0;
+    float UIStep = 0.01;
+    string UIName =  "Sample Strength";
+> = 2.1f;
+	
+// Texture and Sampler of the currently rendered scene
+texture SceneTex <
+    string ResourceName = "EarthDay.dds";
+    string UIName = "Scene Texture";
+    string ResourceType = "2D";
+>;
+sampler2D SceneSampler = sampler_state {
+    Texture = <SceneTex>;   
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
+    MinFilter = Nearest;
+    MagFilter = Nearest;    
+};
+
+/**
+ * Radial blur function, makes use of the current texture coordinate
+ * to look up the current fragment colour and do a radial blur on it by
+ * sampling away from the pixel in the direction of the center of the screen.
+ * Executes a post-processing radial blur on a given fullscreen texture.
+ * The two important tweakable parameters are SampleDistance and SampleStrength.
+ */
+float4 ToRadialBlur(float4 sceneColour, float2 UV) {  
+	float2 blurDirection = float2(0.5f, 0.5f) - UV;
+	float  blurLength    = length(blurDirection);
+	blurDirection = blurDirection/blurLength;
+	
+	// Calculate the average colour along the radius towards the center
+	float4 sum = sceneColour;
+	for (int i = 0; i < 10; i++) {
+		sum += tex2D(SceneSampler, UV + (blurDirection * SAMPLES[i] * SampleDistance));
+	}
+	sum /= 11.0f;
+	
+	// Weight the amount of 
+	float weightedAmt = blurLength * SampleStrength;
+	weightedAmt = saturate(weightedAmt);
+	
+	return lerp(sceneColour, sum, weightedAmt);
+}
+
+/**
+ * Black and White conversion function that desaturates a given colour.
+ */
+float4 ToBlackAndWhite(float3 sceneColour) {
+	float  sceneTone   = (sceneColour.r + sceneColour.g + sceneColour.b) / 3.0f;
+	float3 finalColour = lerp(sceneColour, float3(sceneTone), DesaturateFraction);
+	return float4(finalColour, 1.0f);
+}
+
+float4 PostBallBulletTimePS(float2 UV : TEXCOORD0) : COLOR {
+	float4 sceneColour        = tex2D(SceneSampler, UV).rgba;
+	float4 blurredSceneColour = ToRadialBlur(sceneColour, UV);
+	return ToBlackAndWhite(blurredSceneColour.rgb);
+}
+
+technique PostBulletTime <string Script = "Pass=p0;";> {
+    pass p0 <string Script = "Draw=geometry;";> {
+        FragmentProgram = compile arbfp1 PostBallBulletTimePS();
+    }
+}

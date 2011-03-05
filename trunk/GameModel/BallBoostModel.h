@@ -23,6 +23,14 @@
  */
 class BallBoostModel {
 public:
+    enum BulletTimeState { NotInBulletTime, BulletTimeFadeIn, BulletTime, BulletTimeFadeOut };
+
+    static const float  MIN_TIME_DIALATION_FACTOR;
+
+    static const double BULLET_TIME_FADE_IN_SECONDS;
+    static const double BULLET_TIME_FADE_OUT_SECONDS;
+    static const double BULLET_TIME_MAX_DURATION_SECONDS;
+
     BallBoostModel(const std::list<GameBall*>* balls);
     ~BallBoostModel();
 
@@ -41,34 +49,34 @@ public:
     bool IsBoostAvailable() const;
     bool IsBallAvailableForBoosting() const;
 
+    const BallBoostModel::BulletTimeState& GetBulletTimeState() const;
+    double GetTotalBulletTimeElapsed() const;
+
 private:
-    static const float MIN_TIME_DIALATION_FACTOR;
-    const std::list<GameBall*>* balls;
+    
+    
+    BulletTimeState currState;                  // The current bullet time state
+    AnimationLerp<float> timeDialationAnim;     // Animation lerp for time dialation, changes based on state
+    double totalBulletTimeElapsed;              // Counter for the total seconds of elapsed bullet time (in the BulletTime state)
 
-    int numAvailableBoosts;
-
-    bool isBallBoostDirPressed;
-    Vector2D ballBoostDir;         // The direction to boost the ball in when the player triggers it - NOT necessarily normalized!
-    float timeDialationFactor;     // Used to slow time down 'bullet-time', when the ball boost power is activated
-
+    const std::list<GameBall*>* balls;  // The balls that are currently in play in the game model
+    int numAvailableBoosts;             // The number of available boosts left for use by the player
+    bool isBallBoostDirPressed;         // Whether or not the player has the boost direction pressed
+    Vector2D ballBoostDir;              // The direction to boost the ball in when the player triggers it - NOT necessarily normalized!
     Collision::AABB2D ballZoomBounds;   // The 2D rectangle that holds all balls when bullet-time is activated for a ball boost
 
+    void SetCurrentState(const BulletTimeState& newState);
     void RecalculateBallZoomBounds();
         
     DISALLOW_COPY_AND_ASSIGN(BallBoostModel);
 };
-
-inline void BallBoostModel::Tick(double dT) {
-    UNUSED_PARAMETER(dT);
-    // TODO...
-}
 
 /**
  * Gets the multiplier of the current dT per tick of the game - this can add a 'bullet-time'
  * like effect to the game.
  */
 inline float BallBoostModel::GetTimeDialationFactor() const {
-    return this->timeDialationFactor;
+    return this->timeDialationAnim.GetInterpolantValue();
 }
 /**
  * Gets the direction that the ball is being told to boost towards.
@@ -106,6 +114,20 @@ inline int BallBoostModel::GetNumBallsAllowedToBoost() const {
  */
 inline bool BallBoostModel::IsBoostAvailable() const {
     return (this->numAvailableBoosts > 0);
+}
+
+/**
+ * Get the current bullet time state.
+ */
+inline const BallBoostModel::BulletTimeState& BallBoostModel::GetBulletTimeState() const {
+    return this->currState;
+}
+
+/**
+ * Get the total time in seconds that bullet time has been active for.
+ */
+inline double BallBoostModel::GetTotalBulletTimeElapsed() const {
+    return this->totalBulletTimeElapsed;
 }
 
 #endif // __BALLBOOSTMODEL_H__

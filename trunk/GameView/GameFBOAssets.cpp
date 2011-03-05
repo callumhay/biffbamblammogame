@@ -22,35 +22,36 @@ GameFBOAssets::GameFBOAssets(int displayWidth, int displayHeight) : bgFBO(NULL),
 postFgAndBgFBO(NULL), initialFSEffectFBO(NULL), finalFSEffectFBO(NULL), tempFBO(NULL),
 fgAndBgBlurEffect(NULL), bloomEffect(NULL), afterImageEffect(NULL), inkSplatterEffect(NULL), 
 stickyPaddleCamEffect(NULL), shieldPaddleCamEffect(NULL), smokeyCamEffect(NULL), icyCamEffect(NULL), 
-uberIntenseCamEffect(NULL), fireBallCamEffect(NULL), drawItemsInLastPass(true) {
+uberIntenseCamEffect(NULL), fireBallCamEffect(NULL), bulletTimeEffect(NULL), drawItemsInLastPass(true) {
 	
 	// Framebuffer object setup
-	this->fgAndBgFBO					= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->bgFBO								= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->postFgAndBgFBO			= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->initialFSEffectFBO	= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
-	this->finalFSEffectFBO		= new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
+	this->fgAndBgFBO            = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
+	this->bgFBO                 = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
+	this->postFgAndBgFBO        = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
+	this->initialFSEffectFBO    = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
+	this->finalFSEffectFBO      = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 
 	this->tempFBO = new FBObj(displayWidth, displayHeight, Texture::Nearest, FBObj::DepthAttachment);
 
 	// Effects setup
-	this->fgAndBgBlurEffect			= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
-	this->bloomEffect						= new CgFxBloom(this->postFgAndBgFBO);
+	this->fgAndBgBlurEffect         = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
+	this->bloomEffect               = new CgFxBloom(this->postFgAndBgFBO);
 	this->afterImageEffect			= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
 	this->inkSplatterEffect			= new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
-	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
+	this->stickyPaddleCamEffect     = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
-	this->smokeyCamEffect				= new CgFxPostSmokey(this->tempFBO);
+	this->smokeyCamEffect           = new CgFxPostSmokey(this->tempFBO);
 
-	this->icyCamEffect					= new CgFxPostSmokey(this->tempFBO);
+	this->icyCamEffect              = new CgFxPostSmokey(this->tempFBO);
 	this->icyCamEffect->SetTechnique(CgFxPostSmokey::POST_ICY_TECHNIQUE_NAME);
 	this->icyCamEffect->SetScale(0.4f);
 	this->icyCamEffect->SetFrequency(0.4f);
 
-	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->tempFBO);
+	this->uberIntenseCamEffect  = new CgFxPostUberIntense(this->tempFBO);
 	this->fireBallCamEffect     = new CgFxPostFirey(this->tempFBO);
-	this->SetupPaddleShieldEffect();
+    this->bulletTimeEffect      = new CgFxPostBulletTime(this->tempFBO);
 
+	this->SetupPaddleShieldEffect();
 
 	this->barrelOverlayTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BARREL_OVERLAY, Texture::Trilinear);
 	assert(this->barrelOverlayTex != NULL);
@@ -92,6 +93,8 @@ GameFBOAssets::~GameFBOAssets() {
 	this->shieldPaddleCamEffect = NULL;
 	delete this->fireBallCamEffect;
 	this->fireBallCamEffect = NULL;
+    delete this->bulletTimeEffect;
+    this->bulletTimeEffect = NULL;
 
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->barrelOverlayTex);
 	assert(success);
@@ -150,22 +153,24 @@ void GameFBOAssets::ResizeFBOAssets(int width, int height) {
 	delete this->uberIntenseCamEffect;
 	delete this->shieldPaddleCamEffect;
 	delete this->fireBallCamEffect;
+    delete this->bulletTimeEffect;
 
-	this->fgAndBgBlurEffect			= new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
-	this->bloomEffect						= new CgFxBloom(this->postFgAndBgFBO);
-	this->afterImageEffect			= new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
-	this->inkSplatterEffect			= new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
+	this->fgAndBgBlurEffect     = new CgFxGaussianBlur(CgFxGaussianBlur::Kernel3x3, this->postFgAndBgFBO);
+	this->bloomEffect           = new CgFxBloom(this->postFgAndBgFBO);
+	this->afterImageEffect      = new CgFxAfterImage(this->postFgAndBgFBO, this->initialFSEffectFBO);
+	this->inkSplatterEffect     = new CgFxInkSplatter(this->tempFBO, GameViewConstants::GetInstance()->TEXTURE_INKSPLATTER);
 	this->stickyPaddleCamEffect = new CgFxFullscreenGoo(this->tempFBO);
 	this->stickyPaddleCamEffect->SetColour(GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR);
-	this->smokeyCamEffect				= new CgFxPostSmokey(this->tempFBO);
+	this->smokeyCamEffect       = new CgFxPostSmokey(this->tempFBO);
 	
-	this->icyCamEffect					= new CgFxPostSmokey(this->tempFBO);
+	this->icyCamEffect = new CgFxPostSmokey(this->tempFBO);
 	this->icyCamEffect->SetTechnique(CgFxPostSmokey::POST_ICY_TECHNIQUE_NAME);
 	this->icyCamEffect->SetScale(0.4f);
 	this->icyCamEffect->SetFrequency(0.4f);
 
 	this->uberIntenseCamEffect	= new CgFxPostUberIntense(this->tempFBO);
 	this->fireBallCamEffect     = new CgFxPostFirey(this->tempFBO);
+    this->bulletTimeEffect      = new CgFxPostBulletTime(this->tempFBO);
 	this->SetupPaddleShieldEffect();
 
 	debug_opengl_state();
@@ -331,8 +336,13 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 			inputFBO = outputFBO;
 			outputFBO = swapFBO;
 		}
-
 	}
+    else {
+        // Neither the ball or paddle camera is on - the player could be entering, exiting or 
+        // experiencing the ball bullet time for the boost mechanic, update the bullet time effect
+        // with the current boost state and possibly draw it
+        this->bulletTimeEffect->UpdateAndDraw(dT, gameModel.GetBallBoostModel(), inputFBO, outputFBO);
+    }
 
 	assert(inputFBO != NULL);
 	assert(outputFBO != NULL);
@@ -444,7 +454,6 @@ void GameFBOAssets::DrawCannonBarrelOverlay(int width, int height, float alpha) 
 		this->barrelOverlayTex->UnbindTexture();	
 	}
 	
-
 	glPopMatrix();
 
 	glMatrixMode(GL_PROJECTION);

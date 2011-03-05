@@ -99,6 +99,9 @@ void BallInPlayState::Tick(double seconds) {
 	// Update any beams that are currently active
 	this->gameModel->UpdateActiveBeams(seconds);
 
+    // Update the boost model for the ball(s)
+    this->gameModel->boostModel->Tick(seconds);
+
 	// Variables that will be needed for collision detection
 	Vector2D n;
 	Collision::LineSeg2D collisionLine;
