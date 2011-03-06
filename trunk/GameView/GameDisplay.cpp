@@ -97,7 +97,9 @@ void GameDisplay::ChangeDisplaySize(int w, int h) {
 
 void GameDisplay::Render(double dT) {
     // Dialate time if necessary...
-    dT *= this->model->GetTimeDialationFactor();
+    if (this->currState->GetType() == DisplayState::InGame) {
+        dT *= this->model->GetTimeDialationFactor();
+    }
 
 	// Render the current state
 	this->currState->RenderFrame(dT);

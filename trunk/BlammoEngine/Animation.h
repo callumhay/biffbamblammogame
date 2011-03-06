@@ -243,6 +243,18 @@ public:
 		assert(this->interpolationPts.size() > 0);
 		this->interpolationPts[this->interpolationPts.size()-1] = value;
 	}
+    const T& GetFinalInterpolationValue() const {
+        assert(this->interpolationPts.size() > 0);
+        return this->interpolationPts[this->interpolationPts.size()-1];
+    }
+    void SetInterpolationValue(int idx, const T& value) {
+		assert(idx < this->interpolationPts.size());
+		this->interpolationPts[idx] = value;
+    }
+    const T& GetInterpolationValue(int idx) {
+		assert(idx < this->interpolationPts.size());
+		return this->interpolationPts[idx];
+    }
 
 	std::vector<double> GetTimeValues() const {
 		return this->timePts;

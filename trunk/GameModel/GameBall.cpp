@@ -32,7 +32,7 @@ const float GameBall::MAX_ROATATION_SPEED	= 70;
 const Vector2D GameBall::STD_INIT_VEL_DIR = Vector2D(0, GameBall::NormalSpeed);
 
 // Temporary speed increase gained by boosting the ball
-const float GameBall::BOOST_TEMP_SPD_INCREASE_AMT = 6.0f;
+const float GameBall::BOOST_TEMP_SPD_INCREASE_AMT = 7.0f;
 
 // Acceleration of the ball towards the ground when gravity ball is activated
 const float GameBall::GRAVITY_ACCELERATION  = 8.0f;

@@ -36,7 +36,7 @@ prevFrameFBO(NULL), outputFBO(outputFBO), blurStrength(CgFxAfterImage::AFTERIMAG
 	this->currTechnique = this->techniques[CgFxAfterImage::AFTERIMAGE_TECHNIQUE_NAME];
 
 	// Setup the CgFx parameters
-	this->blurStrengthParam			= cgGetNamedEffectParameter(this->cgEffect, "BlurStrength");
+	this->blurStrengthParam		= cgGetNamedEffectParameter(this->cgEffect, "BlurStrength");
 	this->currFrameSamplerParam	= cgGetNamedEffectParameter(this->cgEffect, "CurrFrameSampler");
 
 	debug_cg_state();

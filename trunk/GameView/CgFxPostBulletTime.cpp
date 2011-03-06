@@ -50,6 +50,10 @@ void CgFxPostBulletTime::UpdateBulletTimeState(const BallBoostModel::BulletTimeS
     static const float FADE_IN_SAMPLE_DISTANCE  = 0.25f;
     static const float FADE_IN_SAMPLE_STRENGTH  = 2.0f;
 
+    static const float MAX_DESATURATION     = 0.85f;
+    static const float MAX_SAMPLE_DISTANCE  = 0.60f;
+    static const float MAX_SAMPLE_STRENGTH  = 4.5f;
+
     switch (state) {
         case BallBoostModel::NotInBulletTime:
             this->desaturateFrac.SetInterpolantValue(0.0f);
@@ -70,6 +74,9 @@ void CgFxPostBulletTime::UpdateBulletTimeState(const BallBoostModel::BulletTimeS
             break;
 
         case BallBoostModel::BulletTime:
+            this->desaturateFrac.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_DESATURATION);
+            this->sampleDistance.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_SAMPLE_DISTANCE);
+            this->sampleStrength.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_SAMPLE_STRENGTH);
             break;
 
         default:
@@ -90,8 +97,10 @@ void CgFxPostBulletTime::UpdateAndDraw(double dT, const BallBoostModel* boostMod
     // Draw the effect
     this->sceneFBO  = sceneIn;
     this->resultFBO = renderOut;
+
+    // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
     this->Draw(renderOut->GetFBOTexture()->GetWidth(), 
-               renderOut->GetFBOTexture()->GetHeight(), dT);
+               renderOut->GetFBOTexture()->GetHeight(), dT * boostModel->GetInverseTimeDialation());
 
     // Swap the input and output FBOs that were given to this function
 	tempSwapFBO = sceneIn;

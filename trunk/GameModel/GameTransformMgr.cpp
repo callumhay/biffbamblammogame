@@ -14,6 +14,7 @@
 #include "PlayerPaddle.h"
 #include "GameBall.h"
 #include "CannonBlock.h"
+#include "BallBoostModel.h"
 
 #include "../BlammoEngine/Camera.h"
 
@@ -171,6 +172,20 @@ void GameTransformMgr::SetBallDeathCamera(bool turnOnBallDeathCam) {
 	this->animationQueue.push_front(transformAnim);
 }
 
+void GameTransformMgr::SetBulletTimeCamera(bool turnOnBulletTimeCam) {
+    GameTransformMgr::TransformAnimationType animType;
+    if (turnOnBulletTimeCam) {
+        animType = GameTransformMgr::ToBulletTimeCamAnimation;
+		// Clear up all other transforms that may manipulate the camera...
+		this->ClearSpecialCamEffects();
+    }
+    else {
+        animType = GameTransformMgr::FromBulletTimeCamAnimation;
+    }
+	TransformAnimation transformAnim(animType);
+	this->animationQueue.push_front(transformAnim);
+}
+
 /**
  * This needs to be called whenever a new level is being loaded - this will make sure
  * that the default camera position is calculated and made available to the view.
@@ -182,7 +197,7 @@ void GameTransformMgr::SetupLevelCameraDefaultPosition(const GameLevel& level) {
 	
 	// Telling the world to translate by (0, 0, -distance), telling the camera to translate by (0, 0, distance)
 	this->defaultCamOrientation = Orientation3D(Vector3D(0, 0, distance), Vector3D(0,0,0));
-	this->currCamOrientation		= this->defaultCamOrientation;
+	this->currCamOrientation	= this->defaultCamOrientation;
 }
 
 /**
@@ -244,6 +259,19 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 				}
 				else {
 					this->StartBallDeathAnimation(dT, gameModel);
+				}
+				break;
+
+            case GameTransformMgr::ToBulletTimeCamAnimation:
+            case GameTransformMgr::FromBulletTimeCamAnimation:
+				if (currAnimation.hasStarted) {
+                    bool finished = this->TickBulletTimeCamAnimation(dT, gameModel);
+					if (finished) {
+						this->FinishBulletTimeCamAnimation(dT, gameModel);
+					}
+				}
+				else {
+					this->StartBulletTimeCamAnimation(dT, gameModel);
 				}
 				break;
 
@@ -897,7 +925,6 @@ void GameTransformMgr::StartBallDeathAnimation(double dT, GameModel& gameModel) 
 		toBallDeathAnim.SetRepeat(false);
 		this->ballDeathAnimations.push_back(toBallDeathAnim);
 
-
 		// Make the camera's field of view angle normal again
 		AnimationMultiLerp<float> camFOVChangeAnim(&this->cameraFOVAngle);
 		camFOVChangeAnim.SetLerp(timeToAnimate, Camera::FOV_ANGLE_IN_DEGS);
@@ -934,6 +961,116 @@ void GameTransformMgr::FinishBallDeathAnimation(double dT, GameModel& gameModel)
 	else {
 		this->isBallDeathCamIsOn = false;
 	}
+
+	// Pop the animation off the queue
+	this->animationQueue.pop_front();
+}
+
+bool GameTransformMgr::TickBulletTimeCamAnimation(double dT, GameModel& gameModel) {
+    UNUSED_PARAMETER(gameModel);
+
+    const BallBoostModel* currBoostModel = gameModel.GetBallBoostModel();
+    float invTimeDialation = 1.0f;   
+    if (currBoostModel != NULL) {
+        invTimeDialation = currBoostModel->GetInverseTimeDialation();
+    
+	    // Grab the current transform animation information from the front of the queue
+	    TransformAnimation& ballDeathAnim = this->animationQueue.front();
+	    assert(ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation || 
+               ballDeathAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
+
+	    if (ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
+            const Collision::AABB2D& ballBounds = currBoostModel->GetBallZoomBounds();
+            const GameLevel* currLevel = gameModel.GetCurrentLevel();
+	        Vector2D halfLevelDim	   = 0.5 * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
+            Point2D ballsCenter        = ballBounds.GetCenter() - halfLevelDim;
+
+
+            Vector3D translation1 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], 
+                this->bulletTimeCamAnimation.GetInterpolationValue(1).GetTranslation()[2]);
+            Vector3D translation2 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], 
+                this->bulletTimeCamAnimation.GetFinalInterpolationValue().GetTranslation()[2]);
+
+            this->bulletTimeCamAnimation.SetInterpolationValue(1, Orientation3D(translation1, 
+                this->bulletTimeCamAnimation.GetInterpolationValue(1).GetRotation()));
+            this->bulletTimeCamAnimation.SetFinalInterpolationValue(Orientation3D(translation2, 
+                this->bulletTimeCamAnimation.GetFinalInterpolationValue().GetRotation()));
+        }
+    }
+
+    // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
+	return this->bulletTimeCamAnimation.Tick(invTimeDialation * dT);
+}
+
+void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameModel) {
+    UNUSED_PARAMETER(dT);
+
+    // Grab the current transform animation information from the front of the queue
+	TransformAnimation& bulletTimeAnim = this->animationQueue.front();
+	assert(bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation || 
+           bulletTimeAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
+
+	// Clear any previous ball death animations
+	this->bulletTimeCamAnimation = AnimationMultiLerp<Orientation3D>(&this->currCamOrientation);
+
+	// Based on the animation, set the animations for the camera's orientation
+    if (bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
+        const BallBoostModel* currBoostModel = gameModel.GetBallBoostModel();
+        assert(currBoostModel != NULL);
+        
+        // Calculate the extent to which we should zoom in...
+        static const float BORDER_AROUND_BOUNDS1 = 5 * LevelPiece::PIECE_WIDTH;
+        static const float BORDER_AROUND_BOUNDS2 = 2 * LevelPiece::PIECE_WIDTH;
+
+        const Collision::AABB2D& ballBounds = currBoostModel->GetBallZoomBounds();
+
+        const GameLevel* currLevel = gameModel.GetCurrentLevel();
+		Vector2D halfLevelDim	   = 0.5 * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
+        Point2D ballsCenter        = ballBounds.GetCenter() - halfLevelDim;
+
+        float minCamDistance1 = (std::max<float>(ballBounds.GetHeight(), ballBounds.GetWidth()) + BORDER_AROUND_BOUNDS1) / 
+                               (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f)));
+        float minCamDistance2 = (std::max<float>(ballBounds.GetHeight(), ballBounds.GetWidth()) + BORDER_AROUND_BOUNDS2) / 
+                               (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f)));
+        Vector3D translation1 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], minCamDistance1);
+        Vector3D translation2 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], minCamDistance2);
+
+        std::vector<double> timeVals;
+        timeVals.push_back(0.0);
+        timeVals.push_back(BallBoostModel::BULLET_TIME_FADE_IN_SECONDS);
+        timeVals.push_back(BallBoostModel::BULLET_TIME_FADE_IN_SECONDS +
+                           BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS);
+        std::vector<Orientation3D> orientVals;
+        orientVals.push_back(this->currCamOrientation);
+        orientVals.push_back(Orientation3D(translation1, this->currCamOrientation.GetRotation()));
+        orientVals.push_back(Orientation3D(translation2, this->currCamOrientation.GetRotation()));
+
+        this->bulletTimeCamAnimation.SetLerp(timeVals, orientVals);
+        this->bulletTimeCamAnimation.SetRepeat(false);
+    }
+    else {
+        this->bulletTimeCamAnimation.SetLerp(BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS, this->defaultCamOrientation);
+        this->bulletTimeCamAnimation.SetRepeat(false);
+    }
+    bulletTimeAnim.hasStarted = true;
+}
+
+void GameTransformMgr::FinishBulletTimeCamAnimation(double dT, GameModel& gameModel) {
+	UNUSED_PARAMETER(dT);
+    UNUSED_PARAMETER(gameModel);
+
+	// Grab the current transform animation information from the front of the queue
+	TransformAnimation& ballDeathAnim = this->animationQueue.front();
+	assert(ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation || 
+           ballDeathAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
+	/*
+	if (ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
+		this->isBulletTimeCamOn = true;
+	}
+	else {
+		this->isBulletTimeCamOn = false;
+	}
+    */
 
 	// Pop the animation off the queue
 	this->animationQueue.pop_front();
