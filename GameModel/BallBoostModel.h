@@ -18,6 +18,8 @@
 #include "../BlammoEngine/Collision.h"
 #include "GameBall.h"
 
+class GameTransformMgr;
+
 /**
  * Encapsulates the model/state of the ball boost for the GameModel.
  */
@@ -25,13 +27,14 @@ class BallBoostModel {
 public:
     enum BulletTimeState { NotInBulletTime, BulletTimeFadeIn, BulletTime, BulletTimeFadeOut };
 
-    static const float  MIN_TIME_DIALATION_FACTOR;
+    static const float MIN_TIME_DIALATION_FACTOR;
+    static const float INV_MIN_TIME_DIALATION_FACTOR;
 
     static const double BULLET_TIME_FADE_IN_SECONDS;
     static const double BULLET_TIME_FADE_OUT_SECONDS;
     static const double BULLET_TIME_MAX_DURATION_SECONDS;
 
-    BallBoostModel(const std::list<GameBall*>* balls);
+    BallBoostModel(GameTransformMgr* gameTransformMgr, const std::list<GameBall*>* balls);
     ~BallBoostModel();
 
     void Tick(double dT);
@@ -42,6 +45,7 @@ public:
     bool BallBoosterPressed();
 
     float GetTimeDialationFactor() const;
+    float GetInverseTimeDialation() const;
     const Vector2D& GetBallBoostDirection() const;
     const Collision::AABB2D& GetBallZoomBounds() const;
 
@@ -59,6 +63,7 @@ private:
     AnimationLerp<float> timeDialationAnim;     // Animation lerp for time dialation, changes based on state
     double totalBulletTimeElapsed;              // Counter for the total seconds of elapsed bullet time (in the BulletTime state)
 
+    GameTransformMgr* gameTransformMgr; // The game transform manager
     const std::list<GameBall*>* balls;  // The balls that are currently in play in the game model
     int numAvailableBoosts;             // The number of available boosts left for use by the player
     bool isBallBoostDirPressed;         // Whether or not the player has the boost direction pressed
@@ -78,6 +83,11 @@ private:
 inline float BallBoostModel::GetTimeDialationFactor() const {
     return this->timeDialationAnim.GetInterpolantValue();
 }
+
+inline float BallBoostModel::GetInverseTimeDialation() const {
+    return 1.0f / this->timeDialationAnim.GetInterpolantValue();
+}
+
 /**
  * Gets the direction that the ball is being told to boost towards.
  */

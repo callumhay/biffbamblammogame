@@ -57,9 +57,7 @@ texture SceneTex <
 sampler2D SceneSampler = sampler_state {
     Texture = <SceneTex>;   
     WrapS = ClampToEdge;
-    WrapT = ClampToEdge;
-    MinFilter = Nearest;
-    MagFilter = Nearest;    
+    WrapT = ClampToEdge;   
 };
 
 /**
@@ -69,7 +67,7 @@ sampler2D SceneSampler = sampler_state {
  * Executes a post-processing radial blur on a given fullscreen texture.
  * The two important tweakable parameters are SampleDistance and SampleStrength.
  */
-float4 ToRadialBlur(float4 sceneColour, float2 UV) {  
+float4 ToRadialBlur(float4 sceneColour, float2 UV) {
 	float2 blurDirection = float2(0.5f, 0.5f) - UV;
 	float  blurLength    = length(blurDirection);
 	blurDirection = blurDirection/blurLength;

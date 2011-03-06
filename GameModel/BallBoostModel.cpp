@@ -11,19 +11,21 @@
 
 #include "BallBoostModel.h"
 #include "GameEventManager.h"
+#include "GameTransformMgr.h"
 
 // Amounts of time to fade in and out of bullet time when it's activated/deactivated
-const double BallBoostModel::BULLET_TIME_FADE_IN_SECONDS        = 0.30;
-const double BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS       = 0.20;
+const double BallBoostModel::BULLET_TIME_FADE_IN_SECONDS        = 0.35;
+const double BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS       = 0.15;
 // The maximum duration of bullet time before the ball is automatically boosted
-const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 3.0;
+const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 2.0;
 
 // The time dialation factor used (multiplies the delta time of each game frame)
 // when full bullet time is active
-const float BallBoostModel::MIN_TIME_DIALATION_FACTOR       = 0.1f;
+const float BallBoostModel::MIN_TIME_DIALATION_FACTOR       = 0.075f;
+const float BallBoostModel::INV_MIN_TIME_DIALATION_FACTOR   = 1.0f / MIN_TIME_DIALATION_FACTOR;
 
-BallBoostModel::BallBoostModel(const std::list<GameBall*>* balls) : 
-balls(balls), ballBoostDir(0,0), numAvailableBoosts(3000), 
+BallBoostModel::BallBoostModel(GameTransformMgr* gameTransformMgr, const std::list<GameBall*>* balls) : 
+balls(balls), ballBoostDir(0,0), numAvailableBoosts(3000), gameTransformMgr(gameTransformMgr),
 isBallBoostDirPressed(false), currState(NotInBulletTime), 
 timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0) {
     assert(balls != NULL);
@@ -36,6 +38,7 @@ timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0) {
 }
 
 BallBoostModel::~BallBoostModel() {
+    this->gameTransformMgr->SetBulletTimeCamera(false);
 }
 
 void BallBoostModel::Tick(double dT) {
@@ -48,7 +51,10 @@ void BallBoostModel::Tick(double dT) {
             break;
 
         case BulletTimeFadeIn:
-            animationDone = this->timeDialationAnim.Tick(dT);
+
+            // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
+            animationDone = this->timeDialationAnim.Tick(this->GetInverseTimeDialation() * dT);
+            this->RecalculateBallZoomBounds();
             if (animationDone) {
                 this->SetCurrentState(BulletTime);
             }
@@ -57,15 +63,18 @@ void BallBoostModel::Tick(double dT) {
         case BulletTime:
             // Increment the total bullet time counter, if it exceeds the max allowed bullet time
             // then we automatically boost the ball in its current direction
-            this->totalBulletTimeElapsed += dT;
-            if (this->totalBulletTimeElapsed > BULLET_TIME_MAX_DURATION_SECONDS) {
+            // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
+            this->totalBulletTimeElapsed += INV_MIN_TIME_DIALATION_FACTOR * dT;
+            this->RecalculateBallZoomBounds();
+            if (this->totalBulletTimeElapsed >= BULLET_TIME_MAX_DURATION_SECONDS) {
                 this->BallBoosterPressed();
             }
 
             break;
 
         case BulletTimeFadeOut:
-            animationDone = this->timeDialationAnim.Tick(dT);
+            animationDone = this->timeDialationAnim.Tick(this->GetInverseTimeDialation() * dT);
+            this->RecalculateBallZoomBounds();
             if (animationDone) {
                 this->SetCurrentState(NotInBulletTime);
             }
@@ -94,7 +103,7 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
 
             // Recalculate the zoom bounds - this provides the display with the max and min
             // coordinates of the ball(s) in play so it can properly zoom in on it/them
-            this->RecalculateBallZoomBounds();
+            //this->RecalculateBallZoomBounds();
 
             // Start the bullet time state...
             this->SetCurrentState(BulletTimeFadeIn);
@@ -184,6 +193,7 @@ void BallBoostModel::SetCurrentState(const BulletTimeState& newState) {
             break;
 
         case BulletTimeFadeIn:
+            this->gameTransformMgr->SetBulletTimeCamera(true);
             this->timeDialationAnim.SetLerp(BULLET_TIME_FADE_IN_SECONDS, MIN_TIME_DIALATION_FACTOR);
             break;
 
@@ -193,6 +203,7 @@ void BallBoostModel::SetCurrentState(const BulletTimeState& newState) {
             break;
 
         case BulletTimeFadeOut:
+            this->gameTransformMgr->SetBulletTimeCamera(false);
             this->timeDialationAnim.SetLerp(BULLET_TIME_FADE_OUT_SECONDS, 1.0f);
             break;
 
