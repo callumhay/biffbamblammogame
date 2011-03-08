@@ -22,7 +22,7 @@ public:
 	CgFxPostBulletTime(FBObj* outputFBO);
 	~CgFxPostBulletTime();
 
-    void UpdateBulletTimeState(const BallBoostModel::BulletTimeState& state);
+    void UpdateBulletTimeState(const BallBoostModel& boostModel);
     void UpdateAndDraw(double dT, const BallBoostModel* boostModel, FBObj*& sceneIn, FBObj*& renderOut);
     
 private:

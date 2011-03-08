@@ -60,6 +60,12 @@ public:
     return v_[ idx ];
   }
 
+  Vector2D& operator*=(float f) {
+    v_[0] *= f;
+    v_[1] *= f;
+    return (*this);
+  }
+
 	static float Magnitude(const Vector2D& v1) {
 		return sqrtf(v1[0]*v1[0] + v1[1]*v1[1]);
 	}

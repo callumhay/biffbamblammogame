@@ -247,11 +247,11 @@ public:
         assert(this->interpolationPts.size() > 0);
         return this->interpolationPts[this->interpolationPts.size()-1];
     }
-    void SetInterpolationValue(int idx, const T& value) {
+    void SetInterpolationValue(size_t idx, const T& value) {
 		assert(idx < this->interpolationPts.size());
 		this->interpolationPts[idx] = value;
     }
-    const T& GetInterpolationValue(int idx) {
+    const T& GetInterpolationValue(size_t idx) {
 		assert(idx < this->interpolationPts.size());
 		return this->interpolationPts[idx];
     }

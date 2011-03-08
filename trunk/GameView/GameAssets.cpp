@@ -182,11 +182,80 @@ GameAssets::~GameAssets() {
     this->pointsHUD = NULL;
 }
 
+/**
+ * Called before drawing the balls - used to add effects that need to be behind the balls.
+ */
+void GameAssets::DrawGameBallsPreEffects(double dT, GameModel& gameModel, const Camera& camera) {
+    // Exit immediately if there's no bullet time effects currently active
+    if (gameModel.GetBallBoostModel() == NULL || !gameModel.GetBallBoostModel()->IsInBulletTime()) {
+        return;
+    }
 
-// Draw the game's ball (the thing that bounces and blows stuff up), position it, 
+    // Ball boost direction (should already be normalized)
+    Vector2D ballBoostDir = gameModel.GetBallBoostModel()->GetBallBoostDirection();
+    Vector2D ballBoostRotated90(-ballBoostDir[1], ballBoostDir[0]);
+    ballBoostDir *= 2*LevelPiece::PIECE_WIDTH;
+
+    // Calculate an alpha based on how far into the bullet time the player
+    // currently is and always have a bit of alpha so the player can always
+    // see the boost streaks behind the ball(s)
+    float alpha = 0.15f + (0.5f * static_cast<float>(gameModel.GetBallBoostModel()->GetTotalBulletTimeElapsed() / 
+                                                     BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS));
+
+    // Generate a screen aligned matrix from the current camera
+    static Matrix4x4 screenAlignedMatrix;
+    screenAlignedMatrix = camera.GenerateScreenAlignMatrix();
+
+    glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT);
+    glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Go through each ball in the game, draw any pre-effects accordingly
+	const std::list<GameBall*>& balls = gameModel.GetGameBalls();
+	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ++ballIter) {
+        GameBall* currBall = *ballIter;
+        
+        Vector2D fullRadiusVec = 0.99f * currBall->GetBounds().Radius() * ballBoostRotated90;
+        Vector2D halfRadiusVec = 0.5f  * fullRadiusVec;
+
+        const Point2D& ballPos = currBall->GetCenterPosition2D();
+        glPushMatrix();
+        glTranslatef(ballPos[0], ballPos[1], 0);
+        glMultMatrixf(screenAlignedMatrix.begin());
+        
+        // Draw the movement streaks behind the ball in the direction 
+        // away from where the boost will take place
+        glBegin(GL_QUADS);
+
+        // First quad is biggest and extends behind the ball
+        glColor4f(1, 1, 1, alpha);
+        glVertex3f(fullRadiusVec[0], fullRadiusVec[1], 0);
+        glVertex3f(-fullRadiusVec[0], -fullRadiusVec[1], 0);
+        glColor4f(0, 0, 0, 0);
+        glVertex3f(-fullRadiusVec[0] - ballBoostDir[0], -fullRadiusVec[1] - ballBoostDir[1], 0);
+        glVertex3f(fullRadiusVec[0] - ballBoostDir[0], fullRadiusVec[1] - ballBoostDir[1], 0);
+
+        // Next quad is a bit smaller and fits inside
+        glColor4f(1, 1, 1, alpha);
+        glVertex3f(halfRadiusVec[0], halfRadiusVec[1], 0);
+        glVertex3f(-halfRadiusVec[0], -halfRadiusVec[1], 0);
+        glColor4f(0, 0, 0, 0);
+        glVertex3f(-halfRadiusVec[0] - ballBoostDir[0], -halfRadiusVec[1] - ballBoostDir[1], 0);
+        glVertex3f(halfRadiusVec[0] - ballBoostDir[0], halfRadiusVec[1] - ballBoostDir[1], 0);
+
+        glEnd();
+
+        glPopMatrix();
+    }
+
+    glPopAttrib();
+}
+
+// Draw the game's ball(s) (the thing that bounces and blows stuff up), position it, 
 // draw the materials and draw the mesh.
 void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& camera, const Vector2D& worldT) {
-	
+	this->DrawGameBallsPreEffects(dT, gameModel, camera);
+
 	// Average values used to calculate the colour and position of the ball light
 	Point3D avgBallPosition(0,0,0);
 	Colour avgBallColour(0,0,0);
@@ -201,11 +270,11 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		CgFxEffectBase* ballEffectTemp = NULL;
 		Colour currBallColour(0,0,0);
 
-		Point3D ballPos = currBall->GetCenterPosition();
+		const Point2D& ballPos = currBall->GetCenterPosition2D();
 
 		if (currBall->GetBallType() == GameBall::NormalBall) {
 			// Normal ball with a regular light
-			avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], ballPos[2]);
+			avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], 0);
 			avgBallColour = avgBallColour + GameViewConstants::GetInstance()->DEFAULT_BALL_LIGHT_COLOUR;
 			visibleBallCount++;
 		}
@@ -313,7 +382,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			}
 			else {
 				// We only take the average of visible balls.
-				avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], ballPos[2]);
+				avgBallPosition = avgBallPosition + Vector3D(ballPos[0], ballPos[1], 0);
 			
 				numColoursApplied = std::max<int>(1, numColoursApplied);
 				avgBallColour = avgBallColour + (currBallColour / numColoursApplied);
@@ -333,9 +402,9 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 		glPushMatrix();
 		float ballScaleFactor = currBall->GetBallScaleFactor();
-		glTranslatef(ballPos[0], ballPos[1], ballPos[2]);
+		glTranslatef(ballPos[0], ballPos[1], 0);
 		
-		// Draw background effects for the ball
+		// Draw background/pre-effects for the ball
 		this->espAssets->DrawBackgroundBallEffects(dT, camera, *currBall);
 
 		Vector3D ballRot = currBall->GetRotation();

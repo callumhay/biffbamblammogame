@@ -144,8 +144,8 @@ public:
 	}
 
 	void SetupPaddleShieldEffect();
-    void UpdateBulletTimeState(const BallBoostModel::BulletTimeState& state) {
-        this->bulletTimeEffect->UpdateBulletTimeState(state);
+    void UpdateBulletTimeState(const BallBoostModel& boostModel) {
+        this->bulletTimeEffect->UpdateBulletTimeState(boostModel);
     }
 
 };

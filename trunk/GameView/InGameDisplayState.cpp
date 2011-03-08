@@ -95,6 +95,12 @@ void InGameDisplayState::DebugDrawBounds() {
 		(*iter)->DebugDraw();
 	}
 
+    // Draw the debug bounds of all balls
+    const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
+    if (boostModel != NULL && boostModel->GetBulletTimeState() != BallBoostModel::NotInBulletTime) {
+        boostModel->DebugDraw();
+    }
+
 	glPopMatrix();
 	debug_opengl_state();
 }

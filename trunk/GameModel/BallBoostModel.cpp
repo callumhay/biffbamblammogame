@@ -17,7 +17,7 @@
 const double BallBoostModel::BULLET_TIME_FADE_IN_SECONDS        = 0.35;
 const double BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS       = 0.15;
 // The maximum duration of bullet time before the ball is automatically boosted
-const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 2.0;
+const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 1.3;
 
 // The time dialation factor used (multiplies the delta time of each game frame)
 // when full bullet time is active
@@ -26,8 +26,7 @@ const float BallBoostModel::INV_MIN_TIME_DIALATION_FACTOR   = 1.0f / MIN_TIME_DI
 
 BallBoostModel::BallBoostModel(GameTransformMgr* gameTransformMgr, const std::list<GameBall*>* balls) : 
 balls(balls), ballBoostDir(0,0), numAvailableBoosts(3000), gameTransformMgr(gameTransformMgr),
-isBallBoostDirPressed(false), currState(NotInBulletTime), 
-timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0) {
+currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0) {
     assert(balls != NULL);
     assert(!balls->empty());
 
@@ -51,9 +50,11 @@ void BallBoostModel::Tick(double dT) {
             break;
 
         case BulletTimeFadeIn:
-
             // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
             animationDone = this->timeDialationAnim.Tick(this->GetInverseTimeDialation() * dT);
+
+            // Recalculate the zoom bounds - this provides the display with the max and min
+            // coordinates of the ball(s) in play so it can properly zoom in on it/them
             this->RecalculateBallZoomBounds();
             if (animationDone) {
                 this->SetCurrentState(BulletTime);
@@ -64,7 +65,10 @@ void BallBoostModel::Tick(double dT) {
             // Increment the total bullet time counter, if it exceeds the max allowed bullet time
             // then we automatically boost the ball in its current direction
             // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
-            this->totalBulletTimeElapsed += INV_MIN_TIME_DIALATION_FACTOR * dT;
+            this->totalBulletTimeElapsed += (INV_MIN_TIME_DIALATION_FACTOR * dT);
+
+            // Recalculate the zoom bounds - this provides the display with the max and min
+            // coordinates of the ball(s) in play so it can properly zoom in on it/them
             this->RecalculateBallZoomBounds();
             if (this->totalBulletTimeElapsed >= BULLET_TIME_MAX_DURATION_SECONDS) {
                 this->BallBoosterPressed();
@@ -74,6 +78,9 @@ void BallBoostModel::Tick(double dT) {
 
         case BulletTimeFadeOut:
             animationDone = this->timeDialationAnim.Tick(this->GetInverseTimeDialation() * dT);
+
+            // Recalculate the zoom bounds - this provides the display with the max and min
+            // coordinates of the ball(s) in play so it can properly zoom in on it/them
             this->RecalculateBallZoomBounds();
             if (animationDone) {
                 this->SetCurrentState(NotInBulletTime);
@@ -96,37 +103,31 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
 
         // NOTE: If the direction button has already been pressed and therefore is being held down,
         // reset the boost direction but do not change anything else
-        if (!this->isBallBoostDirPressed) {
-            // This is the first time (for this boost) that the direction has been pressed,
-            // we need to setup the time dialation animation
-            this->isBallBoostDirPressed = true;
-
-            // Recalculate the zoom bounds - this provides the display with the max and min
-            // coordinates of the ball(s) in play so it can properly zoom in on it/them
-            //this->RecalculateBallZoomBounds();
-
-            // Start the bullet time state...
+        if (this->currState == NotInBulletTime) {
+            // This is the first time (for this boost) that the direction has been pressed - 
+            // start up bullet time...
             this->SetCurrentState(BulletTimeFadeIn);
         }
 
         this->ballBoostDir[0] = x;
         this->ballBoostDir[1] = y;
+
+        // Make sure the boost direction is normalized
+        this->ballBoostDir.Normalize();
     }
     else {
         // Boosting is disallowed currently, make sure the members are properly set
         this->ballBoostDir[0]       = 0.0f;
         this->ballBoostDir[1]       = 0.0f;
-        this->isBallBoostDirPressed = false;
         this->SetCurrentState(NotInBulletTime);
     }
 }
 
 void BallBoostModel::BallBoostDirectionReleased() {
-    if (this->isBallBoostDirPressed) {
+    if (this->currState != NotInBulletTime) {
         // The player has decided to NOT boost at this time, clean up the about-to-boost state
         this->ballBoostDir[0] = 0.0f;
         this->ballBoostDir[1] = 0.0f;
-        this->isBallBoostDirPressed = false;
 
         // End the bullet time state...
         this->SetCurrentState(BulletTimeFadeOut);
@@ -138,13 +139,11 @@ void BallBoostModel::BallBoostDirectionReleased() {
  * Returns: true if there was a ball boost, false otherwise.
  */
 bool BallBoostModel::BallBoosterPressed() {
-    if (!this->isBallBoostDirPressed) {
+    // In order to boost the ball the player must entirely be in the bullet time state
+    if (this->currState != BulletTime) {
         return false;
     }
     assert(!this->ballBoostDir.IsZero());
-
-    // Make sure the boost direction is normalized
-    this->ballBoostDir.Normalize();
     
     // Boost any balls that can be boosted
     bool ballWasBoosted = false;
@@ -162,6 +161,9 @@ bool BallBoostModel::BallBoosterPressed() {
     // A boost was just expended...
     this->numAvailableBoosts--;
     assert(this->numAvailableBoosts >= 0);
+
+    // EVENT: Ball has been boosted
+    GameEventManager::Instance()->ActionBallBoostExecuted(*this);
 
     // End the bullet time state...
     this->SetCurrentState(BulletTimeFadeOut);
@@ -186,6 +188,11 @@ bool BallBoostModel::IsBallAvailableForBoosting() const {
     return ballIsAvailable;
 }
 
+/**
+ * Set the current state of the bullet time in the ball boost model - this will setup
+ * any necessary member variables and animations for the new state and then set the state
+ * member itself.
+ */
 void BallBoostModel::SetCurrentState(const BulletTimeState& newState) {
     switch (newState) {
         case NotInBulletTime:
@@ -238,4 +245,30 @@ void BallBoostModel::RecalculateBallZoomBounds() {
         this->ballZoomBounds.AddPoint(currBall->GetCenterPosition2D() - radiusVec);
         this->ballZoomBounds.AddPoint(currBall->GetCenterPosition2D() + radiusVec);
     }
+}
+
+void BallBoostModel::DebugDraw() const {
+    const Collision::AABB2D& bounds = this->GetBallZoomBounds();
+
+	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT | GL_POINT_BIT);
+	glDisable(GL_DEPTH_TEST);
+
+	// Draw bounding lines
+	glLineWidth(1.0f);
+	glColor3f(1,0,1);
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(bounds.GetMin()[0], bounds.GetMin()[1]);
+	glVertex2f(bounds.GetMin()[0], bounds.GetMax()[1]);
+    glVertex2f(bounds.GetMax()[0], bounds.GetMax()[1]);
+    glVertex2f(bounds.GetMax()[0], bounds.GetMin()[1]);
+	glEnd();
+
+    // Draw the center
+    glColor3f(0, 1, 0);
+    glPointSize(5.0f);
+    glBegin(GL_POINTS);
+    glVertex2f(bounds.GetCenter()[0], bounds.GetCenter()[1]);
+    glEnd();
+
+	glPopAttrib();
 }

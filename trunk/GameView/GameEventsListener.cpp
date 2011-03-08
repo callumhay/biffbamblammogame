@@ -769,8 +769,14 @@ void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBloc
 }
 
 void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boostModel) {
-    this->display->GetAssets()->GetFBOAssets()->UpdateBulletTimeState(boostModel.GetBulletTimeState());
-    debug_output("EVENT: Bullet time state changed");
+    this->display->GetAssets()->GetFBOAssets()->UpdateBulletTimeState(boostModel);
+    //debug_output("EVENT: Bullet time state changed");
+}
+
+void GameEventsListener::BallBoostExecutedEvent(const BallBoostModel& boostModel) {
+    UNUSED_PARAMETER(boostModel);
+    // TODO.. effects for a ball boost go here...
+    debug_output("EVENT: Ball boost executed");
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
