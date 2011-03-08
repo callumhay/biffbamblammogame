@@ -377,6 +377,14 @@ void GameEventManager::ActionBulletTimeStateChanged(const BallBoostModel& boostM
 	}	
 }
 
+// Action for when the ball is boosted
+void GameEventManager::ActionBallBoostExecuted(const BallBoostModel& boostModel) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BallBoostExecutedEvent(boostModel);
+	}	
+}
+
 // Action for when a projectile is fired/spawned
 void GameEventManager::ActionProjectileSpawned(const Projectile& projectile) {
 	this->listenerIter = this->eventListeners.begin();

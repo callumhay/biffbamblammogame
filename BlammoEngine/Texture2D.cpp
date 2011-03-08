@@ -34,6 +34,14 @@ void Texture2D::RenderTextureToFullscreenQuad(float depth) const {
 	debug_opengl_state();
 }
 
+void Texture2D::RenderTextureToFullscreenQuad(float depth, float uvX, float uvY) const {
+	// Draw the full screen quad
+	this->BindTexture();
+	GeometryMaker::GetInstance()->DrawFullScreenQuad(this->width, this->height, depth, uvX, uvY);
+	this->UnbindTexture();
+	debug_opengl_state();
+}
+
 Texture2D* Texture2D::CreateEmptyTextureRectangle(int width, int height, Texture::TextureFilterType filter) {
 
 

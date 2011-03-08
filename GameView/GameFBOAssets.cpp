@@ -239,6 +239,9 @@ void GameFBOAssets::RenderFinalFullscreenEffects(int width, int height, double d
 		outputFBO = swapFBO;
 	}
 
+
+    // This is a bit of a hack to make sure that the radial blur doesn't cause strange artifacts
+    // around the edges of the screen when bullet time mode is activated...
 	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
 	if (paddle->GetIsPaddleCameraOn()) {
 		

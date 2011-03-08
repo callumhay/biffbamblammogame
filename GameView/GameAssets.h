@@ -55,53 +55,6 @@ class OmniLaserBallEffect;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
-
-private:
-	GameWorldAssets* worldAssets;	// World-related assets
-	GameESPAssets* espAssets;       // Emitter/Sprite/Particle assets
-	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
-	GameFBOAssets* fboAssets;       // Framebuffer Object related assets
-	GameLightAssets* lightAssets;   // Light assets in the foreground and background
-	GameSoundAssets* soundAssets;   // Sound assets for everything
-
-	LivesLeftHUD* lifeHUD;
-	CrosshairLaserHUD* crosshairHUD;
-	PlayerHurtHUD* painHUD;
-	FlashHUD* flashHUD;
-    PointsHUD* pointsHUD;
-
-	// Level-related meshes
-	LevelMesh* currentLevelMesh;
-
-	// Regular meshes - these persist throughout the entire game
-	Mesh* ball;																// Ball used to break blocks
-	Mesh* spikeyBall;													// What happens to the ball when it becomes uber
-	PaddleRocketMesh* rocketMesh;							// The rocket that can be fired from the paddle as a power-up
-
-	Mesh* paddleBeamAttachment;                 // Laser beam attachment for paddle
-	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
-	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
-	PaddleShield* paddleShield;                 // Refractive glowy shield for the paddle
-
-	RandomToItemAnimation randomToItemAnimation;
-
-	// Special effects - persistant special effects in the game
-	CgFxPostRefract* invisiBallEffect;
-	CgFxVolumetricEffect* ghostBallEffect;
-	CgFxFireBallEffect* fireBallEffect;
-
-    OmniLaserBallEffect* omniLaserBallEffect;
-
-	void DeleteRegularEffectAssets();
-
-	// Asset loading helper functions
-	void LoadRegularMeshAssets();
-	void LoadRegularEffectAssets();
-
-	// Projectile specific functionality
-	void FirePaddleLaser(const PlayerPaddle& paddle);
-	void FirePaddleRocket(const Projectile& rocketProjectile);
-
 public:
 	GameAssets(int screenWidth, int screenHeight);
 	~GameAssets();
@@ -180,6 +133,57 @@ public:
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 	void RocketExplosion(const PaddleRocketProjectile& rocket, Camera& camera);
+
+private:
+	GameWorldAssets* worldAssets;	// World-related assets
+	GameESPAssets* espAssets;       // Emitter/Sprite/Particle assets
+	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
+	GameFBOAssets* fboAssets;       // Framebuffer Object related assets
+	GameLightAssets* lightAssets;   // Light assets in the foreground and background
+	GameSoundAssets* soundAssets;   // Sound assets for everything
+
+	LivesLeftHUD* lifeHUD;
+	CrosshairLaserHUD* crosshairHUD;
+	PlayerHurtHUD* painHUD;
+	FlashHUD* flashHUD;
+    PointsHUD* pointsHUD;
+
+	// Level-related meshes
+	LevelMesh* currentLevelMesh;
+
+	// Regular meshes - these persist throughout the entire game
+	Mesh* ball;																// Ball used to break blocks
+	Mesh* spikeyBall;													// What happens to the ball when it becomes uber
+	PaddleRocketMesh* rocketMesh;							// The rocket that can be fired from the paddle as a power-up
+
+	Mesh* paddleBeamAttachment;                 // Laser beam attachment for paddle
+	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
+	StickyPaddleGoo* paddleStickyAttachment;	// Sticky goo attachment for the paddle
+	PaddleShield* paddleShield;                 // Refractive glowy shield for the paddle
+
+	RandomToItemAnimation randomToItemAnimation;
+
+	// Special effects - persistant special effects in the game
+	CgFxPostRefract* invisiBallEffect;
+	CgFxVolumetricEffect* ghostBallEffect;
+	CgFxFireBallEffect* fireBallEffect;
+
+    OmniLaserBallEffect* omniLaserBallEffect;
+
+	void DeleteRegularEffectAssets();
+
+	// Asset loading helper functions
+	void LoadRegularMeshAssets();
+	void LoadRegularEffectAssets();
+
+	// Projectile specific functionality
+	void FirePaddleLaser(const PlayerPaddle& paddle);
+	void FirePaddleRocket(const Projectile& rocketProjectile);
+
+    // Private draw functions
+    void DrawGameBallsPreEffects(double dT, GameModel& gameModel, const Camera& camera);
+
+    DISALLOW_COPY_AND_ASSIGN(GameAssets);
 };
 
 // Draw any currently active tesla lightning bolts in the game.

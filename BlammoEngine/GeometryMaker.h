@@ -117,6 +117,42 @@ public:
 		debug_opengl_state();
 	};
 
+	inline void DrawFullScreenQuad(int width, int height, float uvX, float uvY, 
+                                   float depth = 0.0f, const ColourRGBA& colour = ColourRGBA(1,1,1,1)) {
+		glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_CURRENT_BIT | GL_TRANSFORM_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluOrtho2D(0, width, 0, height);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glPolygonMode(GL_FRONT, GL_FILL);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_ALWAYS);
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+
+		glColor4f(colour.R(), colour.G(), colour.B(), colour.A());
+		glBegin(GL_QUADS);
+				glTexCoord2f(1-uvX,  1-uvY); glVertex3f(0, 0, depth);
+				glTexCoord2f(uvX, 1-uvY); glVertex3f(width, 0, depth);
+				glTexCoord2f(uvX, uvY); glVertex3f(width, height, depth);
+				glTexCoord2f(1-uvX, uvY); glVertex3f(0, height, depth);
+		glEnd();
+
+		glPopMatrix();
+
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glPopAttrib();
+
+		debug_opengl_state();
+	};
+
 
 };
 #endif

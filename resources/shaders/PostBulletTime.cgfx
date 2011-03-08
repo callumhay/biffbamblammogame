@@ -60,6 +60,14 @@ sampler2D SceneSampler = sampler_state {
     WrapT = ClampToEdge;   
 };
 
+float BlurWidth <
+    string UIName = "Blur Width";
+    string UIWidget = "slider";
+    float UIMin = -1.0f;
+    float UIMax = 1.0f;
+    float UIStep = 0.01f;
+> = -0.2f;
+
 /**
  * Radial blur function, makes use of the current texture coordinate
  * to look up the current fragment colour and do a radial blur on it by
@@ -78,12 +86,12 @@ float4 ToRadialBlur(float4 sceneColour, float2 UV) {
 		sum += tex2D(SceneSampler, UV + (blurDirection * SAMPLES[i] * SampleDistance));
 	}
 	sum /= 11.0f;
-	
+
 	// Weight the amount of 
 	float weightedAmt = blurLength * SampleStrength;
 	weightedAmt = saturate(weightedAmt);
 	
-	return lerp(sceneColour, sum, weightedAmt);
+	return lerp(sceneColour, sum, weightedAmt) * smoothstep(1, 0, saturate(1.1f * blurLength));
 }
 
 /**

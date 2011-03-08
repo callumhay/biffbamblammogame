@@ -75,6 +75,7 @@ public:
 	void ItemDropBlockItemChangeEvent(const ItemDropBlock& dropBlock);
     void SwitchBlockActivatedEvent(const SwitchBlock& switchBlock);
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
+    void BallBoostExecutedEvent(const BallBoostModel& boostModel);
 
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);

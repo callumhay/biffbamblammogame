@@ -270,6 +270,12 @@ public:
      */
     virtual void BulletTimeStateChangedEvent(const BallBoostModel& boostModel) = 0;
 
+    /**
+     * Event triggered when the ball is boosted. The event is triggered once right after the
+     * boost has been applied to the ball.
+     * Arguements: boostModel - The ball boost model.
+     */
+    virtual void BallBoostExecutedEvent(const BallBoostModel& boostModel) = 0;
 
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same

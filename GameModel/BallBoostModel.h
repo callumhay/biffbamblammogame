@@ -49,16 +49,18 @@ public:
     const Vector2D& GetBallBoostDirection() const;
     const Collision::AABB2D& GetBallZoomBounds() const;
 
+    size_t GetCurrentNumBalls() const;
     int GetNumBallsAllowedToBoost() const;
     bool IsBoostAvailable() const;
     bool IsBallAvailableForBoosting() const;
 
+    bool IsInBulletTime() const;
     const BallBoostModel::BulletTimeState& GetBulletTimeState() const;
     double GetTotalBulletTimeElapsed() const;
 
+    void DebugDraw() const;
+
 private:
-    
-    
     BulletTimeState currState;                  // The current bullet time state
     AnimationLerp<float> timeDialationAnim;     // Animation lerp for time dialation, changes based on state
     double totalBulletTimeElapsed;              // Counter for the total seconds of elapsed bullet time (in the BulletTime state)
@@ -66,7 +68,6 @@ private:
     GameTransformMgr* gameTransformMgr; // The game transform manager
     const std::list<GameBall*>* balls;  // The balls that are currently in play in the game model
     int numAvailableBoosts;             // The number of available boosts left for use by the player
-    bool isBallBoostDirPressed;         // Whether or not the player has the boost direction pressed
     Vector2D ballBoostDir;              // The direction to boost the ball in when the player triggers it - NOT necessarily normalized!
     Collision::AABB2D ballZoomBounds;   // The 2D rectangle that holds all balls when bullet-time is activated for a ball boost
 
@@ -103,6 +104,13 @@ inline const Collision::AABB2D& BallBoostModel::GetBallZoomBounds() const {
 }
 
 /**
+ * Get the total number of balls currently in play.
+ */
+inline size_t BallBoostModel::GetCurrentNumBalls() const {
+    return this->balls->size();
+}
+
+/**
  * Gets the number of balls that could boost currently.
  * Returns: The number of boostable balls in play.
  */
@@ -124,6 +132,10 @@ inline int BallBoostModel::GetNumBallsAllowedToBoost() const {
  */
 inline bool BallBoostModel::IsBoostAvailable() const {
     return (this->numAvailableBoosts > 0);
+}
+
+inline bool BallBoostModel::IsInBulletTime() const {
+    return this->currState != BallBoostModel::NotInBulletTime;
 }
 
 /**

@@ -45,16 +45,21 @@ sampleStrengthParam(NULL), desaturateFrac(0.0f), sampleDistance(0.0f), sampleStr
 CgFxPostBulletTime::~CgFxPostBulletTime() {
 }
 
-void CgFxPostBulletTime::UpdateBulletTimeState(const BallBoostModel::BulletTimeState& state) {
+void CgFxPostBulletTime::UpdateBulletTimeState(const BallBoostModel& boostModel) {
     static const float FADE_IN_DESATURATION     = 0.6f;
     static const float FADE_IN_SAMPLE_DISTANCE  = 0.25f;
     static const float FADE_IN_SAMPLE_STRENGTH  = 2.0f;
+
+    static const float MAX_MULTIBALL_SAMPLE_DISTANCE  = 0.35f;
+    static const float MAX_MULTIBALL_SAMPLE_STRENGTH  = 3.0f;
 
     static const float MAX_DESATURATION     = 0.85f;
     static const float MAX_SAMPLE_DISTANCE  = 0.60f;
     static const float MAX_SAMPLE_STRENGTH  = 4.5f;
 
-    switch (state) {
+
+
+    switch (boostModel.GetBulletTimeState()) {
         case BallBoostModel::NotInBulletTime:
             this->desaturateFrac.SetInterpolantValue(0.0f);
             this->sampleDistance.SetInterpolantValue(0.0f);
@@ -75,8 +80,17 @@ void CgFxPostBulletTime::UpdateBulletTimeState(const BallBoostModel::BulletTimeS
 
         case BallBoostModel::BulletTime:
             this->desaturateFrac.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_DESATURATION);
-            this->sampleDistance.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_SAMPLE_DISTANCE);
-            this->sampleStrength.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_SAMPLE_STRENGTH);
+
+            // We diminish the total blur if there's more than one ball and they're far apart from each other
+            if (boostModel.GetCurrentNumBalls() > 1 &&
+                std::max<float>(boostModel.GetBallZoomBounds().GetWidth(), boostModel.GetBallZoomBounds().GetHeight()) > 2*LevelPiece::PIECE_WIDTH) {
+                this->sampleDistance.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_MULTIBALL_SAMPLE_DISTANCE);
+                this->sampleStrength.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_MULTIBALL_SAMPLE_STRENGTH);
+            }
+            else {
+                this->sampleDistance.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_SAMPLE_DISTANCE);
+                this->sampleStrength.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_SAMPLE_STRENGTH);
+            }
             break;
 
         default:
