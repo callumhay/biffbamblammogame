@@ -61,6 +61,11 @@ void XBox360Controller::Vibrate(double lengthInSeconds, const VibrateAmount& lef
 	this->vibrateTimeTracker     = 0.0;
 }
 
+void XBox360Controller::ClearVibration() {
+    this->SetVibration(BBBGameController::NoVibration, BBBGameController::NoVibration);
+    this->vibrateTimeTracker = this->vibrateLengthInSeconds = 0.0;
+}
+
 void XBox360Controller::SetVibration(const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt) {
 	// Create a Vibraton State
 	XINPUT_VIBRATION vibration;

@@ -21,11 +21,7 @@
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Camera.h"
 
-
-#include "../ESPEngine/ESPParticleColourEffector.h"
-#include "../ESPEngine/ESPParticleScaleEffector.h"
-#include "../ESPEngine/ESPParticleAccelEffector.h"
-#include "../ESPEngine/ESPParticleRotateEffector.h"
+#include "../ESPEngine/ESP.h"
 
 #include "../GameModel/Onomatoplex.h"
 #include "../GameModel/GameItem.h"
@@ -34,12 +30,7 @@ class LevelPiece;
 class PortalBlock;
 class GameBall;
 class GameItem;
-class ESPEmitter;
-class ESPPointEmitter;
-class ESPVolumeEmitter;
-class ESPPointToPointBeam;
 class Texture;
-class ESPShaderParticle;
 class Projectile;
 class PlayerPaddle;
 class GameModel;
@@ -159,6 +150,7 @@ private:
 
 	// Cached Ball effects
 	ESPPointEmitter* crazyBallAura;
+    ESPPointEmitter* boostSparkleEmitter;
 
 	// Laser and beam effects
 	ESPPointEmitter*  paddleLaserGlowAura;
@@ -297,7 +289,6 @@ public:
 	void DrawBeamEffects(double dT, const Camera& camera, const Vector3D& worldTranslation);
 	void DrawProjectileEffects(double dT, const Camera& camera);
 
-
 	void DrawItemDropEffects(double dT, const Camera& camera, const GameItem& item);
 
 	void DrawUberBallEffects(double dT, const Camera& camera, const GameBall& ball);
@@ -309,6 +300,9 @@ public:
 	void DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	void DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	
+    void ResetBallBoostEffects();
+    void DrawBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel);
+
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera);
 
@@ -319,4 +313,9 @@ public:
 	void DrawTeslaLightningArcs(double dT, const Camera& camera);
 	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };
+
+inline void GameESPAssets::ResetBallBoostEffects() {
+    this->boostSparkleEmitter->Reset();
+}
+
 #endif

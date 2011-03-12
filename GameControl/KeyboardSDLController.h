@@ -23,6 +23,7 @@ public:
 	~KeyboardSDLController();
 
 	void Vibrate(double lengthInSeconds, const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt);
+    void ClearVibration();
 	bool IsConnected() const;
 
 	bool ProcessState();
@@ -49,6 +50,9 @@ inline void KeyboardSDLController::Vibrate(double lengthInSeconds, const Vibrate
 	UNUSED_PARAMETER(leftMotorAmt);
 	UNUSED_PARAMETER(rightMotorAmt);
 	// Unfortunately, keyboards tend not to vibrate.
+}
+
+inline void KeyboardSDLController::ClearVibration() {
 }
 
 inline bool KeyboardSDLController::IsConnected() const {

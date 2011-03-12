@@ -60,13 +60,6 @@ sampler2D SceneSampler = sampler_state {
     WrapT = ClampToEdge;   
 };
 
-float BlurWidth <
-    string UIName = "Blur Width";
-    string UIWidget = "slider";
-    float UIMin = -1.0f;
-    float UIMax = 1.0f;
-    float UIStep = 0.01f;
-> = -0.2f;
 
 /**
  * Radial blur function, makes use of the current texture coordinate

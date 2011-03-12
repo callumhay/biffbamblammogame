@@ -182,6 +182,7 @@ private:
 
     // Private draw functions
     void DrawGameBallsPreEffects(double dT, GameModel& gameModel, const Camera& camera);
+    void DrawGameBallsBoostPostEffects(double dT, GameModel& gameModel, const Camera& camera);
 
     DISALLOW_COPY_AND_ASSIGN(GameAssets);
 };

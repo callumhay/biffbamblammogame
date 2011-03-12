@@ -32,6 +32,8 @@ public:
 	static bool IsConnected(int controllerNum);
 
 	void Vibrate(double lengthInSeconds, const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt);
+    void ClearVibration();
+
 	bool ProcessState();
 	void Sync(size_t frameID, double dT);
 	bool IsConnected() const;

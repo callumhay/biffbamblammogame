@@ -26,6 +26,7 @@ public:
 
 	enum VibrateAmount { NoVibration = 0, VerySoftVibration, SoftVibration, MediumVibration, HeavyVibration, VeryHeavyVibration };
 	virtual void Vibrate(double lengthInSeconds, const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt) = 0;
+    virtual void ClearVibration() = 0;
 
 	virtual bool ProcessState()  = 0;
 	virtual void Sync(size_t frameID, double dT) = 0;

@@ -108,6 +108,7 @@ private:
 	void UpdateActiveProjectiles(double seconds);
 	void UpdateActiveBeams(double seconds);
 
+    void ResetScore();
 	void SetNumInterimBlocksDestroyed(int value, const Point2D& pos = Point2D());
     int GetNumInterimBlocksDestroyed() const { return this->numInterimBlocksDestroyed; }
     int GetCurrentMultiplier() const;
@@ -285,6 +286,9 @@ public:
 	std::list<GameBall*>& GetGameBalls() {
 		return this->balls;
 	}
+    const std::list<GameBall*>& GetGameBalls() const {
+        return this->balls;
+    }
 
 	// Paddle and ball related manipulators *********************************
 
@@ -415,6 +419,12 @@ public:
 	friend class BallDeathState;
 	friend class GameOverState;
 };
+
+inline void GameModel::ResetScore() {
+    this->currPlayerScore = GameModelConstants::GetInstance()->INIT_SCORE;
+    // EVENT: Score was changed
+    GameEventManager::Instance()->ActionScoreChanged(this->currPlayerScore);
+}
 
 inline void GameModel::ClearStatusUpdatePieces() {
 	assert(!this->doingPieceStatusListIteration);
