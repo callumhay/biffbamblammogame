@@ -47,7 +47,8 @@ public:
 	bool ProcessControllers();
 	void SyncControllers(double dT);
 	void VibrateControllers(double lengthInSeconds, const BBBGameController::VibrateAmount& leftMotorAmt, 
-											    const BBBGameController::VibrateAmount& rightMotorAmt);
+                            const BBBGameController::VibrateAmount& rightMotorAmt);
+    void ClearControllerVibration();
 
 private:
 	static GameControllerManager* instance;
@@ -120,8 +121,8 @@ inline void GameControllerManager::SyncControllers(double dT) {
 }
 
 inline void GameControllerManager::VibrateControllers(double lengthInSeconds, 
-																											const BBBGameController::VibrateAmount& leftMotorAmt, 
-																											const BBBGameController::VibrateAmount& rightMotorAmt) {
+                                                      const BBBGameController::VibrateAmount& leftMotorAmt, 
+                                                      const BBBGameController::VibrateAmount& rightMotorAmt) {
 	BBBGameController* currController;
 	for (std::list<BBBGameController*>::iterator iter = this->loadedGameControllers.begin(); iter != this->loadedGameControllers.end(); ++iter) {
 		currController = *iter;
@@ -129,6 +130,13 @@ inline void GameControllerManager::VibrateControllers(double lengthInSeconds,
 	}
 }
 
+inline void GameControllerManager::ClearControllerVibration() {
+	BBBGameController* currController;
+	for (std::list<BBBGameController*>::iterator iter = this->loadedGameControllers.begin(); iter != this->loadedGameControllers.end(); ++iter) {
+		currController = *iter;
+		currController->ClearVibration();
+	}
+}
 
 //inline const std::list<BBBGameController*>& GameControllerManager::GetLoadedGameControllers() const {
 //	return this->loadedGameControllers;

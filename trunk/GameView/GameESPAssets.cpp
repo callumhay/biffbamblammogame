@@ -32,8 +32,6 @@
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Plane.h"
 
-#include "../ESPEngine/ESP.h"
-
 #include "../ResourceManager.h"
 
 GameESPAssets::GameESPAssets() : 
@@ -67,6 +65,8 @@ iceBallAccel(Vector3D(1,1,1)),
 gravity(Vector3D(0, -9.8, 0)),
 
 crazyBallAura(NULL),
+boostSparkleEmitter(NULL),
+
 paddleLaserGlowAura(NULL),
 paddleLaserGlowSparks(NULL),
 paddleBeamGlowSparks(NULL),
@@ -209,6 +209,9 @@ GameESPAssets::~GameESPAssets() {
 	// Delete any standalone effects
 	delete this->crazyBallAura;
 	this->crazyBallAura = NULL;
+    delete this->boostSparkleEmitter;
+    this->boostSparkleEmitter = NULL;
+
 	delete this->paddleLaserGlowAura;
 	this->paddleLaserGlowAura = NULL;
 	delete this->paddleLaserGlowSparks;
@@ -796,6 +799,7 @@ void GameESPAssets::AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& ef
  */
 void GameESPAssets::InitLaserPaddleESPEffects() {
 	assert(this->crazyBallAura == NULL);
+    assert(this->boostSparkleEmitter == NULL);
 	assert(this->paddleLaserGlowAura == NULL);
 	assert(this->paddleLaserGlowSparks == NULL);
 	assert(this->paddleBeamGlowSparks == NULL);
@@ -816,6 +820,22 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->crazyBallAura->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.0f), ESPInterval(1.0f));
 	this->crazyBallAura->AddEffector(&this->particlePulsePaddleLaser);
 	result = this->crazyBallAura->SetParticles(1, this->circleGradientTex);
+
+    this->boostSparkleEmitter = new ESPPointEmitter();
+    this->boostSparkleEmitter->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
+    this->boostSparkleEmitter->SetInitialSpd(ESPInterval(2*GameBall::DEFAULT_BALL_RADIUS, 4*GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitter->SetParticleLife(ESPInterval(0.75f, 1.5f));
+    this->boostSparkleEmitter->SetParticleSize(ESPInterval(1.25f * GameBall::DEFAULT_BALL_RADIUS, 2.5f * GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitter->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+    this->boostSparkleEmitter->SetEmitAngleInDegrees(0);
+    this->boostSparkleEmitter->SetEmitDirection(Vector3D(1, 0, 0));
+    this->boostSparkleEmitter->SetEmitPosition(Point3D(0,0,0));
+    this->boostSparkleEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    this->boostSparkleEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->boostSparkleEmitter->AddEffector(&this->particleMediumShrink);
+    this->boostSparkleEmitter->AddEffector(&this->particleFader);
+    result = this->boostSparkleEmitter->SetParticles(30, this->sparkleTex);
+    assert(result);
 
 	this->paddleLaserGlowAura = new ESPPointEmitter();
 	this->paddleLaserGlowAura->SetSpawnDelta(ESPInterval(-1));
@@ -4613,6 +4633,34 @@ void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const Ga
 	ballCamPaddleEffectList[0]->Tick(dT);
 
 	glPopMatrix();
+}
+
+void GameESPAssets::DrawBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel) {
+    const BallBoostModel* boostModel = gameModel.GetBallBoostModel();
+    assert(boostModel != NULL);
+    const Vector2D& boostDir  = boostModel->GetBallBoostDirection();
+    float rotationAngleInDegs = Trig::radiansToDegrees(atan2(-boostDir[1], -boostDir[0]));
+
+    // Tick the effect...
+    this->boostSparkleEmitter->Tick(dT * boostModel->GetInverseTimeDialation());
+    
+    Point2D emitterPos;
+    const std::list<GameBall*>& balls = gameModel.GetGameBalls();
+    
+    for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ++ballIter) {
+        GameBall* currBall = *ballIter;
+        emitterPos = currBall->GetCenterPosition2D() - (currBall->GetBounds().Radius() * boostDir);
+
+        glPushMatrix();
+        glTranslatef(emitterPos[0], emitterPos[1], 0);
+
+        // The emitter, by default, is emitting on the x-axis direction, we need to rotate it to suit
+        // the direction of the boost...
+        glRotatef(rotationAngleInDegs, 0, 0, 1);
+
+        this->boostSparkleEmitter->Draw(camera);
+        glPopMatrix();
+    }
 }
 
 /**

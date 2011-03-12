@@ -47,6 +47,9 @@ void LevelCompleteState::Tick(double seconds) {
 	
 	// Reset the multiplier
 	this->gameModel->SetNumInterimBlocksDestroyed(0);
+    // Reset the score
+    this->gameModel->ResetScore();
+
 	// Reset the game transform manager
 	this->gameModel->GetTransformInfo()->Reset();
 

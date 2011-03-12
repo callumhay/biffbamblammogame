@@ -186,6 +186,8 @@ GameAssets::~GameAssets() {
  * Called before drawing the balls - used to add effects that need to be behind the balls.
  */
 void GameAssets::DrawGameBallsPreEffects(double dT, GameModel& gameModel, const Camera& camera) {
+    UNUSED_PARAMETER(dT);
+
     // Exit immediately if there's no bullet time effects currently active
     if (gameModel.GetBallBoostModel() == NULL || !gameModel.GetBallBoostModel()->IsInBulletTime()) {
         return;
@@ -249,6 +251,14 @@ void GameAssets::DrawGameBallsPreEffects(double dT, GameModel& gameModel, const 
     }
 
     glPopAttrib();
+}
+
+void GameAssets::DrawGameBallsBoostPostEffects(double dT, GameModel& gameModel, const Camera& camera) {
+    // Exit immediately if there's no bullet time effects currently active
+    if (gameModel.GetBallBoostModel() == NULL || !gameModel.GetBallBoostModel()->IsInBulletTime()) {
+        return;
+    }
+    this->espAssets->DrawBallsBoostEffects(dT, camera, gameModel);
 }
 
 // Draw the game's ball(s) (the thing that bounces and blows stuff up), position it, 
@@ -412,6 +422,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		glRotatef(ballRot[1], 0.0f, 1.0f, 0.0f);
 		glRotatef(ballRot[2], 0.0f, 0.0f, 1.0f);
 		glScalef(ballScaleFactor, ballScaleFactor, ballScaleFactor);
+
 		// Always make the colour of the invisiball to be plain white - we don't want to affect
 		// the cloaking effect
 		if (ballIsInvisible) {
@@ -433,6 +444,9 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 
 		glPopMatrix();
 	}
+
+    // If the ball boost direction is being decided then we need to draw the boost effect
+    this->DrawGameBallsBoostPostEffects(dT, gameModel, camera);
 
 	// Calculate the average position and colour of all the visible balls in the game
 	if (visibleBallCount > 0) {

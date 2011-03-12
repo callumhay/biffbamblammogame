@@ -508,7 +508,7 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	menuCam.ApplyCameraTransform(0.0);
+	menuCam.ApplyCameraTransform();
 
 	// Draw the "Biff!" Text
 	const Point3D BIFF_EMIT_COORD = Point3D(X_INDENT, MAX_Y_COORD - 3.0f, 0);
@@ -571,7 +571,7 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	menuCam.ApplyCameraTransform(0.0);
+	menuCam.ApplyCameraTransform();
 
 	// Go through all the active emitters and tick/draw them
 	for (std::list<ESPPointEmitter*>::iterator iter = this->aliveBangEffects.begin(); iter != this->aliveBangEffects.end();) {

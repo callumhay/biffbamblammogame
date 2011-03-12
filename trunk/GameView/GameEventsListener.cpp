@@ -770,6 +770,12 @@ void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBloc
 
 void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boostModel) {
     this->display->GetAssets()->GetFBOAssets()->UpdateBulletTimeState(boostModel);
+
+    if (boostModel.GetBulletTimeState() == BallBoostModel::BulletTimeFadeIn) {
+        // Reset the effects for the bullet time direction
+        this->display->GetAssets()->GetESPAssets()->ResetBallBoostEffects();
+    }
+
     //debug_output("EVENT: Bullet time state changed");
 }
 

@@ -37,6 +37,17 @@ private:
 	int windowWidth;
 	int windowHeight;
 
+public:
+	static const float FOV_ANGLE_IN_DEGS;
+	static const float NEAR_PLANE_DIST;
+	static const float FAR_PLANE_DIST;
+
+	static const Vector3D DEFAULT_FORWARD_VEC;
+	static const Vector3D DEFAULT_LEFT_VEC;
+	static const Vector3D DEFAULT_UP_VEC;
+
+	Camera(int width, int height);
+
 	void ApplyCameraShakeTransform(double dT) {
 		if (this->shakeTimeElapsed < this->shakeTimeTotal) {
 
@@ -54,17 +65,6 @@ private:
 			this->shakeTimeElapsed += dT;
 		}
 	}
-
-public:
-	static const float FOV_ANGLE_IN_DEGS;
-	static const float NEAR_PLANE_DIST;
-	static const float FAR_PLANE_DIST;
-
-	static const Vector3D DEFAULT_FORWARD_VEC;
-	static const Vector3D DEFAULT_LEFT_VEC;
-	static const Vector3D DEFAULT_UP_VEC;
-
-	Camera(int width, int height);
 
 	void SetWindowDimensions(int w, int h) {
 		assert(w > 0 && h > 0);
@@ -144,9 +144,8 @@ public:
 		this->shakeSpeed = 0;
 	}
 
-	void ApplyCameraTransform(double dT) {
+	void ApplyCameraTransform() {
 		glMultMatrixf(this->viewMatrix.begin());
-		this->ApplyCameraShakeTransform(dT);
 	}
 
 	Point3D GetCurrentCameraPosition() const {

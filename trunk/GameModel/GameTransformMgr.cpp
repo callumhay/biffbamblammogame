@@ -982,7 +982,7 @@ bool GameTransformMgr::TickBulletTimeCamAnimation(double dT, GameModel& gameMode
 	    if (ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
             const Collision::AABB2D& ballBounds = currBoostModel->GetBallZoomBounds();
             const GameLevel* currLevel = gameModel.GetCurrentLevel();
-	        Vector2D halfLevelDim	   = 0.5 * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
+	        Vector2D halfLevelDim	   = 0.5f * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
             Point2D ballsCenter        = ballBounds.GetCenter() - halfLevelDim;
 
 
@@ -1018,9 +1018,26 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
         const BallBoostModel* currBoostModel = gameModel.GetBallBoostModel();
         assert(currBoostModel != NULL);
         
-        // Calculate the extent to which we should zoom in...
-        static const float BORDER_AROUND_BOUNDS1 = 5 * LevelPiece::PIECE_WIDTH;
-        static const float BORDER_AROUND_BOUNDS2 = 2 * LevelPiece::PIECE_WIDTH;
+        // Calculate the extent to which we should zoom in, this changes based
+        // on the number of balls present - with more balls we make the border around them smaller
+        // since it could be quite large, with a single ball we can make it larger... we also
+        // make this depend on how close balls are to one another (in the case of multiple balls)
+        static const float BORDER_AROUND_ONE_BALL_BOUNDS1 = 6.0f * LevelPiece::PIECE_WIDTH;
+        static const float BORDER_AROUND_ONE_BALL_BOUNDS2 = 3.0f * LevelPiece::PIECE_WIDTH;
+        static const float BORDER_AROUND_MULTI_BALL_BOUNDS1 = 4.5f * LevelPiece::PIECE_WIDTH;
+        static const float BORDER_AROUND_MULTI_BALL_BOUNDS2 = 1.5f * LevelPiece::PIECE_WIDTH;
+
+        float border1, border2;
+        float maxBallBoundsSize = std::max<float>(currBoostModel->GetBallZoomBounds().GetWidth(), 
+                                                  currBoostModel->GetBallZoomBounds().GetHeight());
+        if (currBoostModel->GetCurrentNumBalls() > 1 && maxBallBoundsSize > 2*LevelPiece::PIECE_WIDTH) {
+            border1 = BORDER_AROUND_MULTI_BALL_BOUNDS1;
+            border2 = BORDER_AROUND_MULTI_BALL_BOUNDS2;
+        }
+        else {
+            border1 = BORDER_AROUND_ONE_BALL_BOUNDS1;
+            border2 = BORDER_AROUND_ONE_BALL_BOUNDS2;
+        }
 
         const Collision::AABB2D& ballBounds = currBoostModel->GetBallZoomBounds();
 
@@ -1028,9 +1045,9 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
 		Vector2D halfLevelDim	   = 0.5 * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
         Point2D ballsCenter        = ballBounds.GetCenter() - halfLevelDim;
 
-        float minCamDistance1 = (std::max<float>(ballBounds.GetHeight(), ballBounds.GetWidth()) + BORDER_AROUND_BOUNDS1) / 
+        float minCamDistance1 = (std::max<float>(ballBounds.GetHeight(), ballBounds.GetWidth()) + border1) / 
                                (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f)));
-        float minCamDistance2 = (std::max<float>(ballBounds.GetHeight(), ballBounds.GetWidth()) + BORDER_AROUND_BOUNDS2) / 
+        float minCamDistance2 = (std::max<float>(ballBounds.GetHeight(), ballBounds.GetWidth()) + border2) / 
                                (2.0f * tanf(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS * 0.5f)));
         Vector3D translation1 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], minCamDistance1);
         Vector3D translation2 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], minCamDistance2);

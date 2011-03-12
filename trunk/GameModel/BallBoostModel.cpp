@@ -21,7 +21,7 @@ const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 1.3;
 
 // The time dialation factor used (multiplies the delta time of each game frame)
 // when full bullet time is active
-const float BallBoostModel::MIN_TIME_DIALATION_FACTOR       = 0.075f;
+const float BallBoostModel::MIN_TIME_DIALATION_FACTOR       = 0.060f;
 const float BallBoostModel::INV_MIN_TIME_DIALATION_FACTOR   = 1.0f / MIN_TIME_DIALATION_FACTOR;
 
 BallBoostModel::BallBoostModel(GameTransformMgr* gameTransformMgr, const std::list<GameBall*>* balls) : 

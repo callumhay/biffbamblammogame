@@ -18,6 +18,7 @@
 
 #include "../BlammoEngine/Camera.h"
 #include "../GameModel/GameModel.h"
+#include "../GameControl/GameControllerManager.h"
 
 const unsigned int InGameRenderPipeline::HUD_X_INDENT = 10;	
 const unsigned int InGameRenderPipeline::HUD_Y_INDENT = 10;
@@ -64,7 +65,17 @@ void InGameRenderPipeline::ApplyInGameCamera(double dT) {
 #else
 	camera.SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
 #endif	
-	camera.ApplyCameraTransform(dT);
+	camera.ApplyCameraTransform();
+
+    // Don't apply the camera shake if we're in bullet time mode, also clear any existing camera shakes
+    if (this->display->GetModel()->GetBallBoostModel() != NULL &&
+        this->display->GetModel()->GetBallBoostModel()->IsInBulletTime()) {
+        camera.ClearCameraShake();
+        GameControllerManager::GetInstance()->ClearControllerVibration();
+    }
+    else {
+        camera.ApplyCameraShakeTransform(dT);
+    }
 }
 
 // Render just the background (includes the skybox, background geometry and effects), the rendering

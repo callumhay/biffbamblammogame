@@ -121,6 +121,7 @@ void GameModel::ClearGameState() {
 	this->SetNextState(NULL);
 
 	this->gameTransformInfo->Reset();
+    this->ResetScore();
 }
 
 void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum) {
