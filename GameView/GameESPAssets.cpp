@@ -36,6 +36,7 @@
 
 GameESPAssets::GameESPAssets() : 
 particleFader(1, 0),
+particleBoostFader(0.8f, 0.0f),
 particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 fireBallColourFader(ColourRGBA(1.0f, 1.0f, 0.0f, 1.0f), ColourRGBA(0.4f, 0.15f, 0.0f, 0.2f)),
 iceBallColourFader(ColourRGBA(GameModelConstants::GetInstance()->ICE_BALL_COLOUR, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.1f)),
@@ -100,7 +101,8 @@ hugeExplosionTex(NULL),
 lightningBoltTex(NULL),
 sphereNormalsTex(NULL),
 //rectPrismTexture(NULL),
-cloudTex(NULL) {
+cloudTex(NULL),
+vapourTrailTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -205,6 +207,8 @@ GameESPAssets::~GameESPAssets() {
 	//assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTex);
 	assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->vapourTrailTex);
+    assert(removed);
 
 	// Delete any standalone effects
 	delete this->crazyBallAura;
@@ -351,6 +355,19 @@ void GameESPAssets::KillAllActiveEffects() {
 		emitterList.clear();
 	}
 	this->activeTimerHUDEmitters.clear();
+
+    // Clear boost effects
+    for (BallEffectsMapIter iter1 = this->boostBallEmitters.begin(); iter1 != this->boostBallEmitters.end(); ++iter1) {
+        std::list<ESPPointEmitter*>& ballEmitters = iter1->second;
+
+        for (std::list<ESPPointEmitter*>::iterator iter2 = ballEmitters.begin(); iter2 != ballEmitters.end(); ++iter2) {
+            ESPPointEmitter* currEmitter = *iter2;
+            delete currEmitter;
+            currEmitter = NULL;
+        }
+    }
+    this->boostBallEmitters.clear();
+
 }
 
 void GameESPAssets::KillAllActiveTeslaLightningArcs() {
@@ -593,6 +610,10 @@ void GameESPAssets::InitESPTextures() {
 		this->cloudTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
 		assert(this->cloudTex != NULL);
 	}
+    if (this->vapourTrailTex == NULL) {
+        this->vapourTrailTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_VAPOUR_TRAIL, Texture::Trilinear));
+        assert(this->vapourTrailTex != NULL);
+    }
 
 	debug_opengl_state();
 }
@@ -1007,6 +1028,11 @@ void GameESPAssets::InitStandaloneESPEffects() {
 	this->normalTexRefractEffect.SetIndexOfRefraction(1.2f);
 	this->normalTexRefractEffect.SetNormalTexture(this->sphereNormalsTex);
 
+    this->vapourTrailRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
+	this->vapourTrailRefractEffect.SetWarpAmountParam(20.0f);
+	this->vapourTrailRefractEffect.SetIndexOfRefraction(1.33f);
+	this->vapourTrailRefractEffect.SetNormalTexture(this->vapourTrailTex);
+
 	//this->iceRefractEffect.SetTechnique(CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME);
 	//this->iceRefractEffect.SetWarpAmountParam(50.0f);
 	//this->iceRefractEffect.SetIndexOfRefraction(1.33f);
@@ -1356,6 +1382,7 @@ ESPPointEmitter* GameESPAssets::CreateTeleportEffect(const Point2D& center, cons
 // Updates any required values that need to be refreshed every frame
 void GameESPAssets::UpdateBGTexture(const Texture2D& bgTexture) {
 	this->normalTexRefractEffect.SetFBOTexture(&bgTexture);
+    this->vapourTrailRefractEffect.SetFBOTexture(&bgTexture);
 }
 
 /**
@@ -3607,6 +3634,75 @@ void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& posi
 //    this->activeGeneralEmitters.push_back(ptTextEffect);
 //}
 
+void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
+    bool result = false;
+    const Vector2D& boostDir = boostModel.GetBallBoostDirection();
+
+    // Add a boost effect for every ball that may have been boosted by the boost model...
+    const std::list<GameBall*>& boostedBalls =  boostModel.GetBalls();
+    for (std::list<GameBall*>::const_iterator iter = boostedBalls.begin(); iter != boostedBalls.end(); ++iter) {
+        const GameBall* currGameBall = *iter;
+        float ballRadius     = currGameBall->GetBounds().Radius();
+        Point3D ballPosition = currGameBall->GetCenterPosition();
+        Vector3D emitDir(-boostDir);
+        //Point2D boostPos = currGameBall->GetCenterPosition2D() - ballRadius * boostDir;
+
+	    ESPPointEmitter* boostSparkles = new ESPPointEmitter();
+	    boostSparkles->SetNumParticleLives(1);
+	    boostSparkles->SetSpawnDelta(ESPInterval(0.005f, 0.008f));
+	    boostSparkles->SetInitialSpd(ESPInterval(2.0f, 3.0f));
+	    boostSparkles->SetParticleLife(ESPInterval(0.9f, 2.0f));
+        boostSparkles->SetParticleSize(ESPInterval(ballRadius * 2.0f, ballRadius * 3.0f));
+	    boostSparkles->SetParticleColour(ESPInterval(0.75f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	    boostSparkles->SetEmitAngleInDegrees(17);
+	    boostSparkles->SetEmitDirection(emitDir);
+	    boostSparkles->SetAsPointSpriteEmitter(true);
+        boostSparkles->SetEmitPosition(ballPosition);
+	    boostSparkles->AddEffector(&this->particleFader);
+        boostSparkles->AddEffector(&this->particleMediumShrink);
+	    result = boostSparkles->SetParticles(20, this->sparkleTex);
+	    assert(result);
+
+
+	    ESPPointEmitter* glowEmitterTrail = new ESPPointEmitter();
+        glowEmitterTrail->SetNumParticleLives(1);
+	    glowEmitterTrail->SetSpawnDelta(ESPInterval(0.00575f));
+	    glowEmitterTrail->SetInitialSpd(ESPInterval(0.0f));
+	    glowEmitterTrail->SetParticleLife(ESPInterval(ballRadius*2.5f));
+	    glowEmitterTrail->SetParticleSize(ESPInterval(1.3f), ESPInterval(1.3f));
+	    glowEmitterTrail->SetEmitAngleInDegrees(0);
+	    glowEmitterTrail->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	    glowEmitterTrail->SetParticleAlignment(ESP::ScreenAligned);
+	    glowEmitterTrail->SetEmitPosition(Point3D(0, 0, 0));
+        glowEmitterTrail->SetParticleColour(ESPInterval(0.70f, 1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+        glowEmitterTrail->AddEffector(&this->particleBoostFader);
+	    glowEmitterTrail->AddEffector(&this->particleShrinkToNothing);
+	    result = glowEmitterTrail->SetParticles(30, this->circleGradientTex);
+	    assert(result);
+
+        ESPPointEmitter* vapourTrailEffect = new ESPPointEmitter();
+        vapourTrailEffect->SetNumParticleLives(1);
+	    vapourTrailEffect->SetSpawnDelta(ESPInterval(0.0235f));
+	    vapourTrailEffect->SetInitialSpd(ESPInterval(3.0f));
+	    vapourTrailEffect->SetParticleLife(ESPInterval(1.0f));
+	    vapourTrailEffect->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	    vapourTrailEffect->SetEmitPosition(ballPosition);
+        vapourTrailEffect->SetEmitDirection(emitDir);
+	    vapourTrailEffect->SetParticleSize(ESPInterval(ballRadius*2.5f));
+	    vapourTrailEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+        vapourTrailEffect->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
+        vapourTrailEffect->SetToggleEmitOnPlane(true);
+	    vapourTrailEffect->AddEffector(&this->particleFader);
+        vapourTrailEffect->AddEffector(&this->particleLargeGrowth);
+        result = vapourTrailEffect->SetParticles(6, &this->vapourTrailRefractEffect);
+	    assert(result);
+
+        this->boostBallEmitters[currGameBall].push_back(vapourTrailEffect);
+        this->boostBallEmitters[currGameBall].push_back(glowEmitterTrail);
+        this->boostBallEmitters[currGameBall].push_back(boostSparkles);
+    }
+}
+
 // Add the effect for when the rocket goes off after it hits a block
 void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& loc) {
 	ESPInterval bangLifeInterval		= ESPInterval(1.2f);
@@ -4635,7 +4731,7 @@ void GameESPAssets::DrawBallCamEffects(double dT, const Camera& camera, const Ga
 	glPopMatrix();
 }
 
-void GameESPAssets::DrawBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel) {
+void GameESPAssets::DrawBulletTimeBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel) {
     const BallBoostModel* boostModel = gameModel.GetBallBoostModel();
     assert(boostModel != NULL);
     const Vector2D& boostDir  = boostModel->GetBallBoostDirection();
@@ -4660,6 +4756,41 @@ void GameESPAssets::DrawBallsBoostEffects(double dT, const Camera& camera, const
 
         this->boostSparkleEmitter->Draw(camera);
         glPopMatrix();
+    }
+}
+
+void GameESPAssets::DrawBallBoostingEffects(double dT, const Camera& camera) {
+    for (BallEffectsMapIter iter1 = this->boostBallEmitters.begin(); iter1 != this->boostBallEmitters.end();) {
+        const GameBall* currBall = iter1->first;
+        std::list<ESPPointEmitter*>& ballEmitters = iter1->second;
+
+        for (std::list<ESPPointEmitter*>::iterator iter2 = ballEmitters.begin(); iter2 != ballEmitters.end();) {
+            ESPPointEmitter* currEmitter = *iter2;
+		    // Check to see if dead, if so erase it...
+		    if (currEmitter->IsDead()) {
+			    delete currEmitter;
+			    currEmitter = NULL;
+			    iter2 = ballEmitters.erase(iter2);
+		    }
+		    else {
+			    // Not dead yet, update its position based on the current ball's positon
+                // and draw/tick it
+                currEmitter->SetEmitPosition(currBall->GetCenterPosition());
+                currEmitter->SetEmitDirection(Vector3D(-currBall->GetDirection()));
+
+			    currEmitter->Draw(camera);
+			    currEmitter->Tick(dT);
+			    ++iter2;
+		    }
+        }
+        
+        // Remove the ball from the map of boost effect entries if it's done
+        if (ballEmitters.empty()) {
+            iter1 = this->boostBallEmitters.erase(iter1);
+        }
+        else {
+            ++iter1;
+        }
     }
 }
 
@@ -4732,47 +4863,7 @@ void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera)
 	}
 }
 
-/**
- * Draw particle effects associated with the laser bullet paddle.
- * NOTE: You must transform these effects to be where the paddle is first!
- */
-void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
-	float effectPos = paddle.GetHalfHeight() + this->paddleLaserGlowAura->GetParticleSizeY().maxValue * 0.5f;
-	this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, effectPos, 0));
-	this->paddleLaserGlowSparks->SetEmitPosition(Point3D(0, effectPos, 0));
 
-	this->paddleLaserGlowAura->Draw(camera);
-	this->paddleLaserGlowAura->Tick(dT);
-	this->paddleLaserGlowSparks->Draw(camera);
-	this->paddleLaserGlowSparks->Tick(dT);
-}
-
-/**
- * Draw particle effects associated with the laser beam paddle.
- * NOTE: You must transform these effects to be where the paddle is first!
- */
-void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
-	float tempXBound = 0.7f * paddle.GetHalfFlatTopWidth();
-	float tempZBound = 0.9f * paddle.GetHalfDepthTotal();
-	assert(tempXBound > 0);
-	assert(tempZBound > 0);
-
-	this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, 0, -tempZBound), Point3D(tempXBound, 0, tempZBound));
-	this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
-
-	this->paddleBeamGlowSparks->Draw(camera, Vector3D(0, 0, 0), true);
-	this->paddleBeamGlowSparks->Tick(dT);
-}
-
-void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
-	ESPInterval xSize(paddle.GetHalfFlatTopWidth() * 0.3f, paddle.GetHalfFlatTopWidth() * 0.6f);
-
-	this->paddleBeamBlastBits->SetEmitPosition(Point3D(0, 0, -paddle.GetHalfHeight()));
-	this->paddleBeamBlastBits->SetParticleSize(xSize);
-
-	this->paddleBeamBlastBits->Draw(camera);
-	this->paddleBeamBlastBits->Tick(dT);
-}
 
 void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {
 	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator iter = this->teslaLightningArcs.begin();

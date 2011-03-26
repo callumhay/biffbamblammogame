@@ -236,19 +236,19 @@ void SelectLevelMenuState::ButtonPressed(const GameControl::ActionButton& presse
             break;
 
         case GameControl::LeftButtonAction:
-            this->selectedItem--;
-            if (this->selectedItem < 0) {
-                this->selectedItem = (this->levelItems.size()-1);
-            }
+            this->MoveSelectionX(false);
             break;
 
         case GameControl::RightButtonAction:
-            this->selectedItem = (this->selectedItem + 1) % this->levelItems.size();
+            this->MoveSelectionX(true);
             break;
 
         case GameControl::UpButtonAction:
+            this->MoveSelectionY(true);
+            break;
+
         case GameControl::DownButtonAction:
-            // TODO...
+            this->MoveSelectionY(false);
             break;
 
         default:
@@ -445,13 +445,13 @@ void SelectLevelMenuState::SetupLevelItems() {
     float amtForItems = camera.GetWindowWidth() - 2 * SIDE_TO_ITEM_GAP_SIZE;
     
     float itemWidth = 0;
-    int numItemsPerRow = 5; 
+    this->numItemsPerRow = 5; 
     while (itemWidth < MIN_ITEM_SIZE && numItemsPerRow >= 2) {
-        numItemsPerRow--;
+        this->numItemsPerRow--;
         itemWidth = static_cast<float>(amtForItems - (ITEM_X_GAP_SIZE * (numItemsPerRow-1))) / 
-                    static_cast<float>(numItemsPerRow);
+                    static_cast<float>(this->numItemsPerRow);
     }
-    assert(numItemsPerRow >= 2);
+    assert(this->numItemsPerRow >= 2);
     
     float itemX = SIDE_TO_ITEM_GAP_SIZE;
     float itemY = camera.GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
@@ -460,6 +460,34 @@ void SelectLevelMenuState::SetupLevelItems() {
     int tempCount = 0;
     int totalNumStarsCollected = 0;
     const std::vector<GameLevel*>& levels = this->world->GetAllLevelsInWorld();
+
+    /*
+    int numRows = levels.size() / numItemsPerRow;
+    for (int row = 0; row < numRows; row++) {
+        for (int col = 0; col < numItemsPerRow; col++) {
+            int currLevelIdx = row * numItemsPerRow + col;
+            if (currLevelIdx >= levels.size()) {
+                break;
+            }
+
+            const GameLevel* currLevel = levels.at(currLevelIdx);
+            assert(currLevel != NULL);
+
+            LevelMenuItem* levelItem = new LevelMenuItem(currLevelIdx+1, currLevel, itemWidth, 
+                Point2D(itemX, itemY), this->starTexture);
+            this->levelItems.push_back(levelItem);
+            
+            tempCount++;
+            if (tempCount == numItemsPerRow) {
+                itemY -= ITEM_Y_GAP_SIZE + levelItem->GetHeight();
+                tempCount = 0;
+            }
+            itemX += itemWidth + ITEM_X_GAP_SIZE;
+
+        }
+    }
+    */
+
     for (size_t levelIdx = 0; levelIdx < levels.size(); levelIdx++) {
         const GameLevel* currLevel = levels.at(levelIdx);
         assert(currLevel != NULL);
@@ -471,11 +499,14 @@ void SelectLevelMenuState::SetupLevelItems() {
         this->levelItems.push_back(levelItem);
         
         tempCount++;
-        if (tempCount == numItemsPerRow) {
+        if (tempCount == this->numItemsPerRow) {
+            itemX  = SIDE_TO_ITEM_GAP_SIZE;
             itemY -= ITEM_Y_GAP_SIZE + levelItem->GetHeight();
             tempCount = 0;
         }
-        itemX += itemWidth + ITEM_X_GAP_SIZE;
+        else {
+            itemX += itemWidth + ITEM_X_GAP_SIZE;
+        }
     }
     
     assert(!this->levelItems.empty());
@@ -513,6 +544,39 @@ void SelectLevelMenuState::SetupLevelItems() {
     this->totalNumStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Medium), totalNumStarsTxt.str());
     this->totalNumStarsLabel->SetColour(Colour(0,0,0));
+}
+
+void SelectLevelMenuState::MoveSelectionX(bool right) {
+    //if (this->GetSelectedItem() == NULL || this->itemIsActivated) { return; }
+    int x = right ? 1 : -1;
+    int currRowIndex  = this->selectedItem / this->numItemsPerRow;
+    int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
+    int wrapAroundX   = (numItemsOnRow + (this->selectedItem - currRowIndex * this->numItemsPerRow) + x) % numItemsOnRow;
+
+    this->selectedItem = this->numItemsPerRow * currRowIndex + wrapAroundX;
+}
+
+void SelectLevelMenuState::MoveSelectionY(bool up) {
+    //if (this->GetSelectedItem() == NULL || this->itemIsActivated) { return; }
+    int y = up ? 1 : -1;
+
+    int numRows = (this->levelItems.size() / this->numItemsPerRow) + 1;
+    int rowsAllFilledNumItems = (numRows * this->numItemsPerRow);
+    int newSelectedIndex = (rowsAllFilledNumItems + this->selectedItem - y * this->numItemsPerRow) % rowsAllFilledNumItems;
+    if (newSelectedIndex >= static_cast<int>(this->levelItems.size())) {
+        if (up) {
+            newSelectedIndex -= this->numItemsPerRow;
+        }
+        else {
+            newSelectedIndex %= this->numItemsPerRow;
+        }
+    }
+    this->selectedItem = newSelectedIndex;
+}
+
+int SelectLevelMenuState::GetNumItemsOnRow(int rowIdx) {
+    int temp = static_cast<int>(this->levelItems.size()) - (static_cast<int>(this->numItemsPerRow) * rowIdx);
+    return std::min<int>(temp, this->numItemsPerRow);
 }
 
 const float SelectLevelMenuState::LevelMenuItem::NUM_TO_NAME_GAP = 8;

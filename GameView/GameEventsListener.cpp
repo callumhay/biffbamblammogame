@@ -773,7 +773,7 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
 
     if (boostModel.GetBulletTimeState() == BallBoostModel::BulletTimeFadeIn) {
         // Reset the effects for the bullet time direction
-        this->display->GetAssets()->GetESPAssets()->ResetBallBoostEffects();
+        this->display->GetAssets()->GetESPAssets()->ResetBulletTimeBallBoostEffects();
     }
 
     //debug_output("EVENT: Bullet time state changed");
@@ -781,7 +781,7 @@ void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boost
 
 void GameEventsListener::BallBoostExecutedEvent(const BallBoostModel& boostModel) {
     UNUSED_PARAMETER(boostModel);
-    // TODO.. effects for a ball boost go here...
+    this->display->GetAssets()->GetESPAssets()->AddBallBoostEffect(boostModel);
     debug_output("EVENT: Ball boost executed");
 }
 

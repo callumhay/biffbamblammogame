@@ -69,6 +69,10 @@ private:
     void GoToStartLevel();
     void SetupLevelItems();
 
+    void MoveSelectionX(bool right);
+    void MoveSelectionY(bool up);
+    int GetNumItemsOnRow(int rowIdx);
+
     class LevelMenuItem {
     public:
         LevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner, const Texture* starTexture);
@@ -105,6 +109,7 @@ private:
         DISALLOW_COPY_AND_ASSIGN(LevelMenuItem);
     };
 
+    int numItemsPerRow;
     int selectedItem;
     std::vector<LevelMenuItem*> levelItems;
 
