@@ -45,10 +45,14 @@ struct ESPInterval;
 class GameESPAssets {
 
 private:
+    typedef std::map<const GameBall*, std::list<ESPPointEmitter*> > BallEffectsMap;
+    typedef BallEffectsMap::iterator BallEffectsMapIter;
+
 	// Currently active particle systems
 	std::list<ESPEmitter*> activeGeneralEmitters;
 	std::list<ESPEmitter*> activePaddleEmitters;
 	std::map<const GameBall*, std::list<ESPEmitter*> > activeBallBGEmitters;
+    BallEffectsMap boostBallEmitters;
 	std::map<const GameItem*, std::list<ESPEmitter*> > activeItemDropEmitters;
 	std::map<const Projectile*, std::list<ESPPointEmitter*> > activeProjectileEmitters;
 	std::map<const Beam*, std::list<ESPEmitter*> > activeBeamEmitters;
@@ -58,6 +62,7 @@ private:
 	
 	// Standard effectors for the various ESP effects
 	ESPParticleColourEffector particleFader;
+    ESPParticleColourEffector particleBoostFader;
 	ESPParticleColourEffector particleFireColourFader;
 	ESPParticleColourEffector fireBallColourFader;
 	ESPParticleColourEffector iceBallColourFader;
@@ -126,6 +131,7 @@ private:
 	Texture2D* sphereNormalsTex;
 	//Texture2D* rectPrismTexture;
 	Texture2D* cloudTex;
+    Texture2D* vapourTrailTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -168,8 +174,9 @@ private:
 	CgFxVolumetricEffect fireEffect;
 	CgFxVolumetricEffect fireBallTrailEffect;
 	CgFxVolumetricEffect iceBallTrailEffect;
-	//CgFxPostRefract iceRefractEffect;
+
 	CgFxPostRefract normalTexRefractEffect;
+    CgFxPostRefract vapourTrailRefractEffect;
 
 	// Initialization functions for effect stuffs
 	void InitESPTextures();
@@ -236,6 +243,8 @@ public:
 	// Specific effects that can be made to occur in the game
 	//void AddBallBounceEffect(const Camera& camera, const GameBall& ball);	
 
+    void AddBallBoostEffect(const BallBoostModel& boostModel);
+
     void AddRocketBlastEffect(float rocketSizeFactor, const Point2D& loc);
 
 	ESPPointEmitter* CreateBallBounceEffect(const GameBall& ball, Onomatoplex::SoundType soundType); 
@@ -300,8 +309,9 @@ public:
 	void DrawPaddleCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	void DrawBallCamEffects(double dT, const Camera& camera, const GameBall& ball, const PlayerPaddle& paddle);
 	
-    void ResetBallBoostEffects();
-    void DrawBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel);
+    void ResetBulletTimeBallBoostEffects();
+    void DrawBulletTimeBallsBoostEffects(double dT, const Camera& camera, const GameModel& gameModel);
+    void DrawBallBoostingEffects(double dT, const Camera& camera);
 
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera);
@@ -314,8 +324,50 @@ public:
 	void DrawTimerHUDEffect(double dT, const Camera& camera, GameItem::ItemType type);
 };
 
-inline void GameESPAssets::ResetBallBoostEffects() {
+inline void GameESPAssets::ResetBulletTimeBallBoostEffects() {
     this->boostSparkleEmitter->Reset();
+}
+
+/**
+ * Draw particle effects associated with the laser bullet paddle.
+ * NOTE: You must transform these effects to be where the paddle is first!
+ */
+inline void GameESPAssets::DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+	float effectPos = paddle.GetHalfHeight() + this->paddleLaserGlowAura->GetParticleSizeY().maxValue * 0.5f;
+	this->paddleLaserGlowAura->SetEmitPosition(Point3D(0, effectPos, 0));
+	this->paddleLaserGlowSparks->SetEmitPosition(Point3D(0, effectPos, 0));
+
+	this->paddleLaserGlowAura->Draw(camera);
+	this->paddleLaserGlowAura->Tick(dT);
+	this->paddleLaserGlowSparks->Draw(camera);
+	this->paddleLaserGlowSparks->Tick(dT);
+}
+
+/**
+ * Draw particle effects associated with the laser beam paddle.
+ * NOTE: You must transform these effects to be where the paddle is first!
+ */
+inline void GameESPAssets::DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+	float tempXBound = 0.7f * paddle.GetHalfFlatTopWidth();
+	float tempZBound = 0.9f * paddle.GetHalfDepthTotal();
+	assert(tempXBound > 0);
+	assert(tempZBound > 0);
+
+	this->paddleBeamGlowSparks->SetEmitVolume(Point3D(-tempXBound, 0, -tempZBound), Point3D(tempXBound, 0, tempZBound));
+	this->paddleBeamGlowSparks->SetParticleSize(ESPInterval(0.1f * paddle.GetHalfFlatTopWidth(), 0.2f * paddle.GetHalfFlatTopWidth()));
+
+	this->paddleBeamGlowSparks->Draw(camera, Vector3D(0, 0, 0), true);
+	this->paddleBeamGlowSparks->Tick(dT);
+}
+
+inline void GameESPAssets::DrawPaddleLaserBeamFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle) {
+	ESPInterval xSize(paddle.GetHalfFlatTopWidth() * 0.3f, paddle.GetHalfFlatTopWidth() * 0.6f);
+
+	this->paddleBeamBlastBits->SetEmitPosition(Point3D(0, 0, -paddle.GetHalfHeight()));
+	this->paddleBeamBlastBits->SetParticleSize(xSize);
+
+	this->paddleBeamBlastBits->Draw(camera);
+	this->paddleBeamBlastBits->Tick(dT);
 }
 
 #endif

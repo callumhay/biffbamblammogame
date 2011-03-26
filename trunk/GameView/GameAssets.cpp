@@ -254,11 +254,16 @@ void GameAssets::DrawGameBallsPreEffects(double dT, GameModel& gameModel, const 
 }
 
 void GameAssets::DrawGameBallsBoostPostEffects(double dT, GameModel& gameModel, const Camera& camera) {
+    // This will draw any affects that occur right after a boost takes place
+    this->espAssets->DrawBallBoostingEffects(dT, camera);
+
     // Exit immediately if there's no bullet time effects currently active
     if (gameModel.GetBallBoostModel() == NULL || !gameModel.GetBallBoostModel()->IsInBulletTime()) {
         return;
     }
-    this->espAssets->DrawBallsBoostEffects(dT, camera, gameModel);
+
+    // This will draw any effects during the ball boost bullet-time
+    this->espAssets->DrawBulletTimeBallsBoostEffects(dT, camera, gameModel);
 }
 
 // Draw the game's ball(s) (the thing that bounces and blows stuff up), position it, 

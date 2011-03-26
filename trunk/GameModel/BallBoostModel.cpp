@@ -155,16 +155,14 @@ bool BallBoostModel::BallBoosterPressed() {
 
     // Sanity: The ball should be allowed to boost!!
     assert(ballWasBoosted);
+    // EVENT: Ball(s) have been boosted
+    GameEventManager::Instance()->ActionBallBoostExecuted(*this);
 
     // Force a release of the boost direction and the entire boosting state
     this->BallBoostDirectionReleased();
     // A boost was just expended...
     this->numAvailableBoosts--;
     assert(this->numAvailableBoosts >= 0);
-
-    // EVENT: Ball has been boosted
-    GameEventManager::Instance()->ActionBallBoostExecuted(*this);
-
     // End the bullet time state...
     this->SetCurrentState(BulletTimeFadeOut);
 

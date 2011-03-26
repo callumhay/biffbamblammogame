@@ -50,6 +50,7 @@ public:
     const Collision::AABB2D& GetBallZoomBounds() const;
 
     size_t GetCurrentNumBalls() const;
+    const std::list<GameBall*>& GetBalls() const;
     int GetNumBallsAllowedToBoost() const;
     bool IsBoostAvailable() const;
     bool IsBallAvailableForBoosting() const;
@@ -108,6 +109,13 @@ inline const Collision::AABB2D& BallBoostModel::GetBallZoomBounds() const {
  */
 inline size_t BallBoostModel::GetCurrentNumBalls() const {
     return this->balls->size();
+}
+
+/**
+ * Gets the list of balls that will be / are being boosted by this.
+ */
+inline const std::list<GameBall*>& BallBoostModel::GetBalls() const {
+    return *(this->balls);
 }
 
 /**
