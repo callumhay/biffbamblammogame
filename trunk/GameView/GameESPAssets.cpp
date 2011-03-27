@@ -3663,7 +3663,6 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
 	    result = boostSparkles->SetParticles(20, this->sparkleTex);
 	    assert(result);
 
-
 	    ESPPointEmitter* glowEmitterTrail = new ESPPointEmitter();
         glowEmitterTrail->SetNumParticleLives(1);
 	    glowEmitterTrail->SetSpawnDelta(ESPInterval(0.00575f));

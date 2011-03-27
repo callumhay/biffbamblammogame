@@ -13,6 +13,7 @@
 #define __KEYBOARDSDLCONTROLLER_H__
 
 #include "BBBGameController.h"
+#include "../BlammoEngine/Vector.h"
 
 // SDL library include
 #include "SDL.h"
@@ -30,6 +31,8 @@ public:
 	void Sync(size_t frameID, double dT);
 
 private:
+    bool specialDirOn;
+
 	bool keyPressed[SDLK_LAST];
 	void SetKeyPress(int key, bool isPressed);
 
@@ -39,6 +42,8 @@ private:
 	void ExecuteDisplayKeyPressedNotifications(SDLKey key);
 	void ExecuteDisplayKeyReleasedNotifications(SDLKey key);
 	
+    void GetSpecialDirectionVector(Vector2D& dir);
+
 	void DebugRepeatActions();
 	void DebugKeyDownActions(SDLKey key);
 
@@ -66,6 +71,25 @@ inline void KeyboardSDLController::SetKeyPress(int key, bool isPressed) {
 	}
 	this->keyPressed[key] = isPressed;
 	//std::cout << "KeyPressed (" << isPressed << ") : " << SDL_GetKeyName((SDLKey)key) << std::endl;
+}
+
+inline void KeyboardSDLController::GetSpecialDirectionVector(Vector2D& dir) {
+    if (this->keyPressed[SDLK_w]) {
+        dir[0] += 0;
+        dir[1] += 1;
+    }
+    if (this->keyPressed[SDLK_a]) {
+        dir[0] += -1;
+        dir[1] += 0;
+    }
+    if (this->keyPressed[SDLK_s]) {
+        dir[0] += 0;
+        dir[1] += -1;
+    }
+    if (this->keyPressed[SDLK_d]) {
+        dir[0] += 1;
+        dir[1] += 0;
+    }
 }
 
 #endif // __KEYBOARDSDLCONTROLLER_H__
