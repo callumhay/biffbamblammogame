@@ -58,6 +58,19 @@ double MultiBallItem::Activate() {
 		ballSpd = GameBall::NormalSpeed;
 	}
 
+    // When we copy the ball we also copy all of the item effects that have been applied to that ball,
+    // therefore all timers with effects associated with the ball being copied need to be informed of
+    // all the new associations...
+    std::list<GameItemTimer*> relevantTimers;
+    const std::list<GameItemTimer*>& activeItemTimers = this->gameModel->GetActiveTimers();
+    for (std::list<GameItemTimer*>::const_iterator iter = activeItemTimers.begin(); iter != activeItemTimers.end(); ++iter) {
+        GameItemTimer* itemTimer = *iter;
+        assert(itemTimer != NULL);
+        if (itemTimer->GetAssociatedBalls().find(affectedBall) != itemTimer->GetAssociatedBalls().end()) {
+            relevantTimers.push_back(itemTimer);
+        }
+    }
+
 	// Create all the copies of the current ball
 	for (unsigned int copyNum = 0; copyNum < this->numNewSpawnedBalls; copyNum++) {
 		GameBall* newBall = new GameBall(*affectedBall);
@@ -67,8 +80,14 @@ double MultiBallItem::Activate() {
 		newBall->SetVelocity(ballSpd, Vector2D::Rotate(currRotationInDegs, ballDir));
 
 		newBalls.push_back(newBall);
-	}
 
+        // The new ball requires association with all the relevant, active timers whose effects are now
+        // being applied to this new ball...
+        for (std::list<GameItemTimer*>::const_iterator iter = relevantTimers.begin(); iter != relevantTimers.end(); ++iter) {
+            GameItemTimer* itemTimer = *iter;
+            itemTimer->AddAssociatedBall(newBall);
+        }
+	}
 
 	// Now add all the newly created balls into the game model's list of balls
 	for (std::vector<GameBall*>::iterator iter = newBalls.begin(); iter != newBalls.end(); ++iter) {

@@ -66,7 +66,8 @@ iceBallAccel(Vector3D(1,1,1)),
 gravity(Vector3D(0, -9.8, 0)),
 
 crazyBallAura(NULL),
-boostSparkleEmitter(NULL),
+boostSparkleEmitterLight(NULL),
+boostSparkleEmitterDark(NULL),
 
 paddleLaserGlowAura(NULL),
 paddleLaserGlowSparks(NULL),
@@ -213,8 +214,10 @@ GameESPAssets::~GameESPAssets() {
 	// Delete any standalone effects
 	delete this->crazyBallAura;
 	this->crazyBallAura = NULL;
-    delete this->boostSparkleEmitter;
-    this->boostSparkleEmitter = NULL;
+    delete this->boostSparkleEmitterLight;
+    this->boostSparkleEmitterLight = NULL;
+    delete this->boostSparkleEmitterDark;
+    this->boostSparkleEmitterDark = NULL;
 
 	delete this->paddleLaserGlowAura;
 	this->paddleLaserGlowAura = NULL;
@@ -820,7 +823,8 @@ void GameESPAssets::AddBallCamPaddleESPEffects(std::vector<ESPPointEmitter*>& ef
  */
 void GameESPAssets::InitLaserPaddleESPEffects() {
 	assert(this->crazyBallAura == NULL);
-    assert(this->boostSparkleEmitter == NULL);
+    assert(this->boostSparkleEmitterLight == NULL);
+    assert(this->boostSparkleEmitterDark == NULL);
 	assert(this->paddleLaserGlowAura == NULL);
 	assert(this->paddleLaserGlowSparks == NULL);
 	assert(this->paddleBeamGlowSparks == NULL);
@@ -842,20 +846,36 @@ void GameESPAssets::InitLaserPaddleESPEffects() {
 	this->crazyBallAura->AddEffector(&this->particlePulsePaddleLaser);
 	result = this->crazyBallAura->SetParticles(1, this->circleGradientTex);
 
-    this->boostSparkleEmitter = new ESPPointEmitter();
-    this->boostSparkleEmitter->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
-    this->boostSparkleEmitter->SetInitialSpd(ESPInterval(2*GameBall::DEFAULT_BALL_RADIUS, 4*GameBall::DEFAULT_BALL_RADIUS));
-    this->boostSparkleEmitter->SetParticleLife(ESPInterval(0.75f, 1.5f));
-    this->boostSparkleEmitter->SetParticleSize(ESPInterval(1.25f * GameBall::DEFAULT_BALL_RADIUS, 2.5f * GameBall::DEFAULT_BALL_RADIUS));
-    this->boostSparkleEmitter->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
-    this->boostSparkleEmitter->SetEmitAngleInDegrees(0);
-    this->boostSparkleEmitter->SetEmitDirection(Vector3D(1, 0, 0));
-    this->boostSparkleEmitter->SetEmitPosition(Point3D(0,0,0));
-    this->boostSparkleEmitter->SetParticleAlignment(ESP::ScreenAligned);
-    this->boostSparkleEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-    this->boostSparkleEmitter->AddEffector(&this->particleMediumShrink);
-    this->boostSparkleEmitter->AddEffector(&this->particleFader);
-    result = this->boostSparkleEmitter->SetParticles(30, this->sparkleTex);
+    this->boostSparkleEmitterLight = new ESPPointEmitter();
+    this->boostSparkleEmitterLight->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
+    this->boostSparkleEmitterLight->SetInitialSpd(ESPInterval(2*GameBall::DEFAULT_BALL_RADIUS, 4*GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitterLight->SetParticleLife(ESPInterval(0.75f, 1.5f));
+    this->boostSparkleEmitterLight->SetParticleSize(ESPInterval(1.25f * GameBall::DEFAULT_BALL_RADIUS, 2.5f * GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitterLight->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+    this->boostSparkleEmitterLight->SetEmitAngleInDegrees(0);
+    this->boostSparkleEmitterLight->SetEmitDirection(Vector3D(1, 0, 0));
+    this->boostSparkleEmitterLight->SetEmitPosition(Point3D(0,0,0));
+    this->boostSparkleEmitterLight->SetParticleAlignment(ESP::ScreenAligned);
+    this->boostSparkleEmitterLight->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->boostSparkleEmitterLight->AddEffector(&this->particleMediumShrink);
+    this->boostSparkleEmitterLight->AddEffector(&this->particleFader);
+    result = this->boostSparkleEmitterLight->SetParticles(26, this->sparkleTex);
+    assert(result);
+
+    this->boostSparkleEmitterDark = new ESPPointEmitter();
+    this->boostSparkleEmitterDark->SetSpawnDelta(ESPInterval(0.02f, 0.04f));
+    this->boostSparkleEmitterDark->SetInitialSpd(ESPInterval(2*GameBall::DEFAULT_BALL_RADIUS, 4*GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitterDark->SetParticleLife(ESPInterval(0.75f, 1.5f));
+    this->boostSparkleEmitterDark->SetParticleSize(ESPInterval(1.45f * GameBall::DEFAULT_BALL_RADIUS, 2.66f * GameBall::DEFAULT_BALL_RADIUS));
+    this->boostSparkleEmitterDark->SetParticleColour(ESPInterval(0), ESPInterval(0), ESPInterval(0), ESPInterval(1));
+    this->boostSparkleEmitterDark->SetEmitAngleInDegrees(0);
+    this->boostSparkleEmitterDark->SetEmitDirection(Vector3D(1, 0, 0));
+    this->boostSparkleEmitterDark->SetEmitPosition(Point3D(0,0,0));
+    this->boostSparkleEmitterDark->SetParticleAlignment(ESP::ScreenAligned);
+    this->boostSparkleEmitterDark->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    this->boostSparkleEmitterDark->AddEffector(&this->particleMediumShrink);
+    this->boostSparkleEmitterDark->AddEffector(&this->particleFader);
+    result = this->boostSparkleEmitterDark->SetParticles(13, this->sparkleTex);
     assert(result);
 
 	this->paddleLaserGlowAura = new ESPPointEmitter();
@@ -4737,8 +4757,10 @@ void GameESPAssets::DrawBulletTimeBallsBoostEffects(double dT, const Camera& cam
     float rotationAngleInDegs = Trig::radiansToDegrees(atan2(-boostDir[1], -boostDir[0]));
 
     // Tick the effect...
-    this->boostSparkleEmitter->Tick(dT * boostModel->GetInverseTimeDialation());
-    
+    float actualTickAmt = dT * boostModel->GetInverseTimeDialation();
+    this->boostSparkleEmitterLight->Tick(actualTickAmt);
+    this->boostSparkleEmitterDark->Tick(actualTickAmt);
+
     Point2D emitterPos;
     const std::list<GameBall*>& balls = gameModel.GetGameBalls();
     
@@ -4753,7 +4775,9 @@ void GameESPAssets::DrawBulletTimeBallsBoostEffects(double dT, const Camera& cam
         // the direction of the boost...
         glRotatef(rotationAngleInDegs, 0, 0, 1);
 
-        this->boostSparkleEmitter->Draw(camera);
+        this->boostSparkleEmitterDark->Draw(camera);
+        this->boostSparkleEmitterLight->Draw(camera);
+        
         glPopMatrix();
     }
 }

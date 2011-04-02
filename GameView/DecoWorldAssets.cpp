@@ -319,7 +319,8 @@ void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 	glPushAttrib(GL_CURRENT_BIT);
 
 	// Draw deco background beams:
-	glColor4f(1, 1, 1, currBGAlpha);
+    static const float BEAM_AMT = 0.95f;
+    glColor4f(BEAM_AMT, BEAM_AMT, BEAM_AMT, std::min<float>(currBGAlpha, 0.85f));
 
 	// Back beams...
 	glPushMatrix();

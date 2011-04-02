@@ -120,7 +120,8 @@ private:
 	void ClearStatusUpdatePieces();
 
 	bool RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type);
-
+    void RemoveActiveGameItemsForThisBallOnly(const GameBall* ball);
+    
 public:
 	// Pause functionality for the game:
 	// NoPause: no pauses at all in the game model execution.

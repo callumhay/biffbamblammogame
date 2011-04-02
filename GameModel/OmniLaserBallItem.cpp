@@ -55,10 +55,14 @@ void OmniLaserBallItem::Deactivate() {
 		return;
 	}
 
-    GameBall* ball = this->GetBallAffected();
-    assert(ball != NULL);
-    ball->RemoveBallType(GameBall::OmniLaserBulletBall);
-	
+	// Make each ball normal again
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ++ballIter) {
+		GameBall* currBall = *ballIter;
+		assert(currBall != NULL);	
+		currBall->RemoveBallType(GameBall::OmniLaserBulletBall);
+	}
+
 	this->isActive = false;
 	GameItem::Deactivate();
 }
