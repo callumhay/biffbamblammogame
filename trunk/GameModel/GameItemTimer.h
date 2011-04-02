@@ -100,6 +100,9 @@ public:
     inline void AddAssociatedBall(const GameBall* ball) {
         this->assocGameBalls.insert(ball);
     }
+    inline void RemoveAssociatedBall(const GameBall* ball) {
+        this->assocGameBalls.erase(ball);
+    }
 
 private:
 	GameItem* assocGameItem;	// The game item associated with this timer

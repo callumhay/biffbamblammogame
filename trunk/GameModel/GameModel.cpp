@@ -813,16 +813,17 @@ void GameModel::RemoveActiveGameItemsForThisBallOnly(const GameBall* ball) {
     // if so we expire and remove them 
     for (std::list<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end();) {
 	    GameItemTimer* currTimer = *iter;
-        if (currTimer->GetAssociatedBalls().size() == 1 && 
-            currTimer->GetAssociatedBalls().find(ball) != currTimer->GetAssociatedBalls().end()) {
-            
-		    iter = this->activeTimers.erase(iter);
-		    delete currTimer;
-		    currTimer = NULL;
+        if (currTimer->GetAssociatedBalls().find(ball) != currTimer->GetAssociatedBalls().end()) {
+            currTimer->RemoveAssociatedBall(ball);
+            if (currTimer->GetAssociatedBalls().empty()) {
+		        iter = this->activeTimers.erase(iter);
+		        delete currTimer;
+		        currTimer = NULL;
+            }
+	        else {
+		         ++iter;
+	        }
         }
-	    else {
-		     ++iter;
-	    }
     }
 }
 
