@@ -595,7 +595,9 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		this.paintPieces(e.getPoint());
+		if (e.getButton() == MouseEvent.BUTTON1 && !e.isPopupTrigger()) {
+			this.paintPieces(e.getPoint());
+		}
 	}
 
 	@Override
@@ -631,22 +633,35 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		if (editPiece.getIsPortal()) {
 			this.portalIDs.remove(editPiece.getBlockID());
 		}
+		else if (editPiece.getIsTesla()) {
+			this.teslaIDs.remove(editPiece.getTeslaID());
+		}
 		
 		LevelPiece oldPiece = editPiece.getLevelPiece();
 		editPiece.setLevelPiece(newPiece);
 		this.hasBeenModified = true;
 		
 		// In the case of a portal block we ask the user for a valid, unique character ID
+		boolean wasSet = true;
 		if (editPiece.getIsPortal()) {
-			this.readIDAndSiblings(editPiece, oldPiece, false);
+			wasSet = this.readIDAndSiblings(editPiece, oldPiece, false);
 		}
 		else if (editPiece.getIsTesla()) {
-			this.readIDAndSiblings(editPiece, oldPiece, true);
+			wasSet = this.readIDAndSiblings(editPiece, oldPiece, true);
 		}
 		
+		if (!wasSet) {
+			// Operation was canceled, add the ID back...
+			if (editPiece.getIsPortal()) {
+				this.portalIDs.add(editPiece.getBlockID());
+			}
+			else if (editPiece.getIsTesla()) {
+				this.teslaIDs.add(editPiece.getTeslaID());
+			}	
+		}
 	}
 
-	private void readIDAndSiblings(LevelPieceImageLabel editPiece, LevelPiece oldPiece, boolean allowMultipleSiblings) {
+	private boolean readIDAndSiblings(LevelPieceImageLabel editPiece, LevelPiece oldPiece, boolean allowMultipleSiblings) {
 		// Start with getting just the block ID
 		char blockID = ' ';
 		String blockIDStr = "";
@@ -661,7 +676,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			// The user cancelled the operation...
 			if (blockIDStr == null) {
 				editPiece.setLevelPiece(oldPiece);
-				return;
+				return false;
 			}
 			
 			if (blockIDStr.length() != 1 || !LevelPieceImageLabel.IsValidBlockID(blockIDStr.charAt(0))) {
@@ -680,8 +695,6 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				}
 			}
 		}
-		
-		
 		
 		// Now get the sibling(s) of the block
 		Set<Character> siblingIDs = null;
@@ -743,10 +756,12 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				// The user cancelled the operation...
 				if (inputSiblingID == null) {
 					editPiece.setLevelPiece(oldPiece);
-					return;
+					return false;
 				}
 				
-				if (inputSiblingID.length() == 1 && !inputSiblingID.equals(blockID) && LevelPieceImageLabel.IsValidBlockID(inputSiblingID.charAt(0))) {
+				if (inputSiblingID.length() == 1 && !inputSiblingID.equals(blockID) && 
+					LevelPieceImageLabel.IsValidBlockID(inputSiblingID.charAt(0))) {
+					
 					siblingIDs = new TreeSet<Character>();
 					siblingIDs.add(inputSiblingID.charAt(0));
 				}
@@ -768,6 +783,8 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			editPiece.setPortalSiblingID(siblingIDs.iterator().next());
 			this.portalIDs.add(blockID);
 		}
+		
+		return true;
 	}
 	
 	@Override
@@ -853,7 +870,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		if (e.getButton() == MouseEvent.BUTTON1) {
+		if (e.getButton() == MouseEvent.BUTTON1 && !e.isPopupTrigger()) {
 			this.paintPieces(e.getPoint());
 		}
 	}

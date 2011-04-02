@@ -286,6 +286,7 @@ public class LevelPieceImageLabel extends JLabel {
 	public void paint(Graphics g) {
 		super.paint(g);
 		g.drawImage(image, 0, 0, this.getWidth(), this.getHeight(), this.imageObserver);
+		
 		if (this.getIsPortal()) {
 			String portalString = this.getBlockID() + " : " + this.getPortalSiblingID();
 			g.setFont(LevelPieceImageLabel.portalFont);
@@ -294,7 +295,7 @@ public class LevelPieceImageLabel extends JLabel {
 			g.setColor(Color.CYAN);
 			g.drawString(portalString, 2, this.getHeight()/2);
 			
-			this.setToolTipText("Portal block: " + portalString);
+			//this.setToolTipText("Portal block: " + portalString);
 		}
 		else if (this.getIsTesla()) {
 			String teslaString = this.getTeslaID() + " : (";
@@ -314,8 +315,9 @@ public class LevelPieceImageLabel extends JLabel {
 			String onOffString = this.teslaBlockStartsOn ? "On" : "Off";
 			g.drawString(onOffString, 2, 2);
 			
-			this.setToolTipText("Tesla block: " + onOffString + ", " + teslaString);
+			//this.setToolTipText("Tesla block: " + onOffString + ", " + teslaString);
 		}
+
 		
 	}
 }
