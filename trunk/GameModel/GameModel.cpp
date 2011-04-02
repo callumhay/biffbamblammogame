@@ -315,6 +315,7 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 
 	// EVENT: A Ball has died
 	GameEventManager::Instance()->ActionBallDied(*deadBall);
+    this->RemoveActiveGameItemsForThisBallOnly(deadBall);
 
 	// Do nasty stuff to player only if that was the last ball left
 	if (this->balls.size() == 1) {
@@ -341,7 +342,6 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 	}
 	else {
 		// There is still at least 1 ball left in play - delete the given dead ball from the game
-		
 		stateChanged = false;
 	}
 }
@@ -806,6 +806,24 @@ bool GameModel::RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type)
 		}
 	}
 	return foundItemType;
+}
+
+void GameModel::RemoveActiveGameItemsForThisBallOnly(const GameBall* ball) {
+    // Check to see if there are any active effect timers that JUST concern the ball that just died,
+    // if so we expire and remove them 
+    for (std::list<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end();) {
+	    GameItemTimer* currTimer = *iter;
+        if (currTimer->GetAssociatedBalls().size() == 1 && 
+            currTimer->GetAssociatedBalls().find(ball) != currTimer->GetAssociatedBalls().end()) {
+            
+		    iter = this->activeTimers.erase(iter);
+		    delete currTimer;
+		    currTimer = NULL;
+        }
+	    else {
+		     ++iter;
+	    }
+    }
 }
 
 /**

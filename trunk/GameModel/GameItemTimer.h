@@ -24,15 +24,7 @@
  * item expire.
  */
 class GameItemTimer {
-
-private:
-	GameItem* assocGameItem;	// The game item associated with this timer
-	double timeLengthInSecs;	// Total length of the timer in seconds
-	double timeElapsedInSecs;	// Amount of time elapsed on the timer so far
-	bool wasStopped;
-
-	bool deactivateItemOnStop;
-
+	friend std::ostream& operator <<(std::ostream& os, const GameItemTimer& itemTimer);
 public:
 	static const float ZERO_TIME_TIMER_IN_SECS;
 
@@ -102,7 +94,25 @@ public:
 		return timeLeft;
 	}
 
-	friend std::ostream& operator <<(std::ostream& os, const GameItemTimer& itemTimer);
+    inline const std::set<const GameBall*>& GetAssociatedBalls() const {
+        return this->assocGameBalls;
+    }
+    inline void AddAssociatedBall(const GameBall* ball) {
+        this->assocGameBalls.insert(ball);
+    }
+
+private:
+	GameItem* assocGameItem;	// The game item associated with this timer
+	double timeLengthInSecs;	// Total length of the timer in seconds
+	double timeElapsedInSecs;	// Amount of time elapsed on the timer so far
+	bool wasStopped;
+
+	bool deactivateItemOnStop;
+
+    std::set<const GameBall*> assocGameBalls; // The game balls that this item timer is associated with
+                                              // if the timer does not affect a ball then this set will be empty
+
+    DISALLOW_COPY_AND_ASSIGN(GameItemTimer);
 };
 
 

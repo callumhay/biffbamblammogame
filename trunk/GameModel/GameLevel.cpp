@@ -256,10 +256,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 					break;
 
 				case TESLA_BLOCK_CHAR: {
-						// A([1|0], a, B) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
-					  // [1|0]: A '1' or a '0' to indicated whether it starts on (1) or off (0).
-						// a : The single character name of this tesla block.
-						// B : One or more other named tesla blocks seperated by commas.
+                        // A([1|0], [1|0], a, b) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
+                        // [1|0]: A '1' or a '0' to indicated whether it starts on (1) or off (0).
+                        // [1|0]: A '1' or a '0' to indicated whether it can be turned on/off (1) or is unchangable (0).
+                        // a : The single character name of this tesla block.
+                        // b : One or more other named tesla blocks seperated by commas.
 
 						char tempChar;
 

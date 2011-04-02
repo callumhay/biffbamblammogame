@@ -357,6 +357,8 @@ void BallInPlayState::Tick(double seconds) {
 			assert(wasRemoved);
 		}
 
+        this->gameModel->RemoveActiveGameItemsForThisBallOnly(ballToDestroy);
+
 		gameBalls.erase(*iter);
 		delete ballToDestroy;
 		ballToDestroy = NULL;

@@ -1,6 +1,6 @@
 Tesla on the outside
 15 30
-A(1,0,b,a,c) E E E E E E E E E E E E E A(1,0,c,b,d) 
+A(0,0,a,b,d) E E E E E E E E E E E E E A(0,0,b,a,c) 
 E T(S,ul) E E E E E E E E E E E T(S,ur) E 
 E Y Y Y Y Y Y Y Y Y Y Y Y Y E 
 E Y Y B Y Y Y B Y Y Y Y Y Y E 
@@ -17,6 +17,7 @@ E G G E E E E E E E E E G G E
 E G G G E E E E E E E G G G E 
 E G G G G E E E E E G G G G E 
 E G G G G G G I G G G G G G E 
+E E E E E E E B E E E E E E E 
 E E E E E E E E E E E E E E E 
 E E E E E E E E E E E E E E E 
 E E E E E E E E E E E E E E E 
@@ -27,9 +28,8 @@ E E E E E E E E E E E E E E E
 E E E E E E E E E E E E E E E 
 E E E E E E E E E E E E E E E 
 E E E E E E E E E E E E E E E 
+A(0,0,d,a) T(S,ll) E E E E E E E E E E E T(S,lr) A(0,0,c,b) 
 E E E E E E E E E E E E E E E 
-E T(S,ll) E E E E E E E E E E E T(S,lr) E 
-A(1,0,a,b) E E E E E E E E E E E E E A(1,0,d,c) 
 
 PaddleGrow 2
 PoisonPaddle 2
@@ -44,6 +44,8 @@ LaserBulletPaddle 2
 PaddleShrink 2
 InvisiBall 2
 LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
 RocketPaddle 2
 GhostBall 2
 BallShrink 2
@@ -51,6 +53,7 @@ UpsideDown 2
 MultiBall5 2
 BallCam 2
 MultiBall3 2
+IceBall 2
 SlowBall 2
 GravityBall 2
 CrazyBall 2

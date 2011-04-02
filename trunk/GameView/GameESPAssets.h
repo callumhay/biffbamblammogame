@@ -156,7 +156,8 @@ private:
 
 	// Cached Ball effects
 	ESPPointEmitter* crazyBallAura;
-    ESPPointEmitter* boostSparkleEmitter;
+    ESPPointEmitter* boostSparkleEmitterLight;
+    ESPPointEmitter* boostSparkleEmitterDark;
 
 	// Laser and beam effects
 	ESPPointEmitter*  paddleLaserGlowAura;
@@ -325,7 +326,8 @@ public:
 };
 
 inline void GameESPAssets::ResetBulletTimeBallBoostEffects() {
-    this->boostSparkleEmitter->Reset();
+    this->boostSparkleEmitterLight->Reset();
+    this->boostSparkleEmitterDark->Reset();
 }
 
 /**
