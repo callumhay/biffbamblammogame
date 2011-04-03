@@ -43,6 +43,8 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private File savedFileOnDisk = null;
 	private boolean hasBeenModified = false;
 	
+	private boolean paintingPieces = false;
+	
 	private JPanel levelDisplayPanel;           // panel where the level is displayed
 
 	// access to the level piece names in this document [row (starting at the top)][col]
@@ -595,7 +597,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		if (e.getButton() == MouseEvent.BUTTON1 && !e.isPopupTrigger()) {
+		if (this.paintingPieces) {
 			this.paintPieces(e.getPoint());
 		}
 	}
@@ -872,12 +874,17 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	public void mousePressed(MouseEvent e) {
 		if (e.getButton() == MouseEvent.BUTTON1 && !e.isPopupTrigger()) {
 			this.paintPieces(e.getPoint());
+			this.paintingPieces = true;
+		}
+		else {
+			this.paintingPieces = false;
 		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		this.maybeShowContextMenu(e);
+		this.paintingPieces = false;
 	}
 
 	@Override

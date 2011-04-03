@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
+<jardesc>
+    <jar path="C:/Projects/BiffBamBlammo/LevelEditor/BBBLevelEditor.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/BBBLevelEditor/src/bbbleveleditor/bbb_jar_settings.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" mainClassHandleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{BBBLevelEditorMain.java[BBBLevelEditorMain" manifestLocation="/BBBLevelEditor/BBBLevelEditor.manifest" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/solid.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/up_arrow.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/tesla.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{EditDimensionsDialog.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/red_breakable_lr.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/orange_breakable_ur.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/right_arrow.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{BBBLevelEditorMenuBar.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/orange_breakable_ll.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/eraser_icon_32x32.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{EditItemDropsDialog.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/minus_icon_16x16.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/yellow_breakable.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{BBBLevelEditDocumentWindow.java"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{LevelPieceTriggerIDDialog.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/prism_ll.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{BBBLevelEditorToolBar.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/red_breakable_ul.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/red_breakable_ll.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{ItemDropTableModel.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/orange_breakable.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/bbb_block_types.txt"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/down_arrow.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/yellow_breakable_ul.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/prism_lr.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/prism_ur.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/solid_ur.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/item_drop.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/green_breakable_ur.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/portal.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{LevelPieceEditDialog.java"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{BBBLevelFileFilter.java"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{LevelPieceListRenderer.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/empty.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/eraser_icon_16x16.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{ItemDrop.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/paintbrush_icon_32x32.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/switch.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{LevelPieceImageLabel.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/yellow_breakable_lr.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/green_breakable.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/bomb.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/red_breakable.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/solid_ul.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/collateral.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/green_breakable_ul.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/solid_lr.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{EditLevelPropertiesDialog.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/ink.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/paintbrush_icon_16x16.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/green_breakable_lr.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{LevelPiece.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/left_arrow.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/yellow_breakable_ur.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/bbb_item_types.txt"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/yellow_breakable_ll.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/selection_icon_16x16.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/cannon.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{BBBLevelEditorMain.java"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{NewLevelEditDialog.java"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{BBBLevelEditMainWindow.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/plus_icon_16x16.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/green_breakable_ll.png"/>
+        <javaElement handleIdentifier="=BBBLevelEditor/src&lt;bbbleveleditor{ItemDropTable.java"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/orange_breakable_lr.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/red_breakable_ur.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/orange_breakable_ul.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/prism.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/solid_ll.png"/>
+        <file path="/BBBLevelEditor/src/bbbleveleditor/resources/prism_ul.png"/>
+    </selectedElements>
+</jardesc>
