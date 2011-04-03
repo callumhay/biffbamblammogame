@@ -1,0 +1,58 @@
+Death From Above
+10 26
+S S S S S S S S S S 
+S G L L E E L L G S 
+S G S S E E S S G S 
+S G S S E E S S G S 
+S G S S E E S S G S 
+S G S S E E S S G S 
+S G S S E E S S G S 
+S S S S R R S S S S 
+S E E E E E E E E S 
+S E E L E E L E E S 
+S G Y O L L O Y G S 
+S G B O R R O B G S 
+S G Y O R R O Y G S 
+S I B O R R O B I S 
+S G Y O R R O Y G S 
+S G B O R R O B G S 
+S G G G G G G G G S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+S E E E E E E E E S 
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiBall 2
+LaserBeamPaddle 0
+OmniLaserBall 2
+FireBall 0
+RocketPaddle 1
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 1
+BallCam 0
+MultiBall3 2
+IceBall 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0
