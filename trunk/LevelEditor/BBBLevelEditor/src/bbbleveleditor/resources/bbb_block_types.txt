@@ -19,7 +19,7 @@ red_breakable_ll.png
 T(R,ll)
 
 Red (Breakable) LR Triangle
-red_breakable_ul.png
+red_breakable_lr.png
 T(R,ul)
 
 Orange (Breakable)

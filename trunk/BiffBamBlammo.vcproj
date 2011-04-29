@@ -1145,6 +1145,10 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameView\BallBoostHUD.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CrosshairLaserHUD.h"
 						>
 					</File>
@@ -1168,6 +1172,10 @@
 				<Filter
 					Name="Source Files"
 					>
+					<File
+						RelativePath=".\GameView\BallBoostHUD.cpp"
+						>
+					</File>
 					<File
 						RelativePath=".\GameView\CrosshairLaserHUD.cpp"
 						>

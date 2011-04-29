@@ -96,6 +96,8 @@ public:
     void ActionSwitchBlockActivated(const SwitchBlock& switchBlock);
     void ActionBulletTimeStateChanged(const BallBoostModel& boostModel);
     void ActionBallBoostExecuted(const BallBoostModel& boostModel);
+    void ActionBallBoostGained();
+    void ActionBallBoostLost();
 
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);

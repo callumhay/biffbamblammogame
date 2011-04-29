@@ -19,14 +19,17 @@ const double BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS       = 0.15;
 // The maximum duration of bullet time before the ball is automatically boosted
 const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 1.3;
 
+// Amount of time it takes for a ball boost to charge
+const float BallBoostModel::BOOST_CHARGE_TIME_SECONDS = 5.0f;
+
 // The time dialation factor used (multiplies the delta time of each game frame)
 // when full bullet time is active
 const float BallBoostModel::MIN_TIME_DIALATION_FACTOR       = 0.060f;
 const float BallBoostModel::INV_MIN_TIME_DIALATION_FACTOR   = 1.0f / MIN_TIME_DIALATION_FACTOR;
 
 BallBoostModel::BallBoostModel(GameTransformMgr* gameTransformMgr, const std::list<GameBall*>* balls) : 
-balls(balls), ballBoostDir(0,0), numAvailableBoosts(3000), gameTransformMgr(gameTransformMgr),
-currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0) {
+balls(balls), ballBoostDir(0,0), numAvailableBoosts(0), gameTransformMgr(gameTransformMgr),
+currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0), currBoostChargeTime(0.0) {
     assert(balls != NULL);
     assert(!balls->empty());
 
@@ -38,6 +41,11 @@ currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0)
 
 BallBoostModel::~BallBoostModel() {
     this->gameTransformMgr->SetBulletTimeCamera(false);
+    while (this->numAvailableBoosts > 0) {
+        this->numAvailableBoosts--;
+        // EVENT: Ball Boost lost
+        GameEventManager::Instance()->ActionBallBoostLost();
+    }
 }
 
 void BallBoostModel::Tick(double dT) {
@@ -47,6 +55,19 @@ void BallBoostModel::Tick(double dT) {
 
         case NotInBulletTime:
             this->totalBulletTimeElapsed = 0.0;
+            
+            // Increment the time towards the next boost and add any new boosts if
+            // the charge time has been hit/exceeded
+            if (this->numAvailableBoosts < TOTAL_NUM_BOOSTS) {
+                this->currBoostChargeTime += dT;
+                if (this->currBoostChargeTime >= BOOST_CHARGE_TIME_SECONDS) {
+                    this->currBoostChargeTime = 0.0;
+                    this->numAvailableBoosts++;
+                    // EVENT: New ball boost gained
+                    GameEventManager::Instance()->ActionBallBoostGained();
+                }
+            }
+            
             break;
 
         case BulletTimeFadeIn:
@@ -160,9 +181,13 @@ bool BallBoostModel::BallBoosterPressed() {
 
     // Force a release of the boost direction and the entire boosting state
     this->BallBoostDirectionReleased();
+
     // A boost was just expended...
     this->numAvailableBoosts--;
     assert(this->numAvailableBoosts >= 0);
+    // EVENT: Ball Boost lost
+    GameEventManager::Instance()->ActionBallBoostLost();
+
     // End the bullet time state...
     this->SetCurrentState(BulletTimeFadeOut);
 

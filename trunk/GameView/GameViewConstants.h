@@ -118,6 +118,12 @@ public:
 	const char* TEXTURE_FULLSCREEN_FROST;
     const char* TEXTURE_VAPOUR_TRAIL;
 
+    const char* TEXTURE_BOOST_HUD_OUTLINE;
+    const char* TEXTURE_BOOST_HUD_BALLFILL;
+    const char* TEXTURE_BOOST_HUD_TRAILFILL_1;
+    const char* TEXTURE_BOOST_HUD_TRAILFILL_2;
+    const char* TEXTURE_BOOST_HUD_TRAILFILL_3;
+
 	const char* TEXTURE_STARFIELD;
 	
 	const char* TEXTURE_INKSPLATTER;

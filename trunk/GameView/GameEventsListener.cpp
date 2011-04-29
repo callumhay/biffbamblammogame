@@ -18,6 +18,7 @@
 #include "GameCompleteDisplayState.h"
 #include "LivesLeftHUD.h"
 #include "PointsHUD.h"
+#include "BallBoostHUD.h"
 #include "BallSafetyNetMesh.h"
 
 #include "../Blammopedia.h"
@@ -783,6 +784,19 @@ void GameEventsListener::BallBoostExecutedEvent(const BallBoostModel& boostModel
     UNUSED_PARAMETER(boostModel);
     this->display->GetAssets()->GetESPAssets()->AddBallBoostEffect(boostModel);
     debug_output("EVENT: Ball boost executed");
+}
+
+void GameEventsListener::BallBoostGainedEvent() {
+    this->display->GetAssets()->GetBoostHUD()->BoostGained();
+
+    // TODO: Other effects on the ball that might bring attention to the newly available boost...
+    
+    debug_output("EVENT: Ball boost gained");
+}
+
+void GameEventsListener::BallBoostLostEvent() {
+    this->display->GetAssets()->GetBoostHUD()->BoostLost();
+    debug_output("EVENT: Ball boost lost");
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {

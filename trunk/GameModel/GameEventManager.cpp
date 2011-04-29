@@ -385,6 +385,22 @@ void GameEventManager::ActionBallBoostExecuted(const BallBoostModel& boostModel)
 	}	
 }
 
+// Action for when a boost is gained
+void GameEventManager::ActionBallBoostGained() {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BallBoostGainedEvent();
+	}	
+}
+
+// Action for when a boost is lost
+void GameEventManager::ActionBallBoostLost() {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->BallBoostLostEvent();
+	}	
+}
+
 // Action for when a projectile is fired/spawned
 void GameEventManager::ActionProjectileSpawned(const Projectile& projectile) {
 	this->listenerIter = this->eventListeners.begin();

@@ -26,6 +26,8 @@ class GameTransformMgr;
 class BallBoostModel {
 public:
     enum BulletTimeState { NotInBulletTime, BulletTimeFadeIn, BulletTime, BulletTimeFadeOut };
+    
+    static const int TOTAL_NUM_BOOSTS = 3;
 
     static const float MIN_TIME_DIALATION_FACTOR;
     static const float INV_MIN_TIME_DIALATION_FACTOR;
@@ -59,9 +61,14 @@ public:
     const BallBoostModel::BulletTimeState& GetBulletTimeState() const;
     double GetTotalBulletTimeElapsed() const;
 
+    float GetBoostChargePercentage() const;
+    int GetNumAvailableBoosts() const;
+
     void DebugDraw() const;
 
 private:
+    static const float BOOST_CHARGE_TIME_SECONDS;
+
     BulletTimeState currState;                  // The current bullet time state
     AnimationLerp<float> timeDialationAnim;     // Animation lerp for time dialation, changes based on state
     double totalBulletTimeElapsed;              // Counter for the total seconds of elapsed bullet time (in the BulletTime state)
@@ -71,6 +78,8 @@ private:
     int numAvailableBoosts;             // The number of available boosts left for use by the player
     Vector2D ballBoostDir;              // The direction to boost the ball in when the player triggers it - NOT necessarily normalized!
     Collision::AABB2D ballZoomBounds;   // The 2D rectangle that holds all balls when bullet-time is activated for a ball boost
+
+    double currBoostChargeTime;  // Total time counted (in seconds) towards charging the next boost
 
     void SetCurrentState(const BulletTimeState& newState);
     void RecalculateBallZoomBounds();
@@ -158,6 +167,23 @@ inline const BallBoostModel::BulletTimeState& BallBoostModel::GetBulletTimeState
  */
 inline double BallBoostModel::GetTotalBulletTimeElapsed() const {
     return this->totalBulletTimeElapsed;
+}
+
+/**
+ * Get the percentage towards the next boost.
+ */
+inline float BallBoostModel::GetBoostChargePercentage() const {
+    if (this->numAvailableBoosts == TOTAL_NUM_BOOSTS) {
+        return 1.0f;
+    }
+    return static_cast<float>(this->currBoostChargeTime / BOOST_CHARGE_TIME_SECONDS);
+}
+
+/**
+ * Get the number of currently available boosts.
+ */
+inline int BallBoostModel::GetNumAvailableBoosts() const {
+    return this->numAvailableBoosts;
 }
 
 #endif // __BALLBOOSTMODEL_H__
