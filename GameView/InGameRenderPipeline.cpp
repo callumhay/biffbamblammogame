@@ -15,6 +15,7 @@
 #include "GameFontAssetsManager.h"
 #include "LivesLeftHUD.h"
 #include "PointsHUD.h"
+#include "BallBoostHUD.h"
 
 #include "../BlammoEngine/Camera.h"
 #include "../GameModel/GameModel.h"
@@ -268,7 +269,11 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 	// Draw the number of lives left in the top-left corner of the display
 	gameAssets->GetLifeHUD()->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	
-	// Draw the timers that are currently in existance
+	// Draw the ball boost HUD display in the top-left corner, under the number of balls left
+    BallBoostHUD* boostHUD = gameAssets->GetBoostHUD();
+    boostHUD->Draw(gameModel->GetBallBoostModel(), DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
+
+    // Draw the timers that are currently in existance
 	gameAssets->DrawTimers(dT, camera);
 
 	// Draw any HUD special elements based on currently active items, etc.

@@ -277,6 +277,14 @@ public:
      */
     virtual void BallBoostExecutedEvent(const BallBoostModel& boostModel) = 0;
 
+
+    /**
+     * Events triggered when a ball boost is gained/lost, respectively. The events are triggered
+     * right after the number of available boosts is incremented/decremented.
+     */
+    virtual void BallBoostGainedEvent() = 0;
+    virtual void BallBoostLostEvent()   = 0;
+
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same
 	 * object or to a different object. Only occurs once as the piece changes - this may be triggered along side
