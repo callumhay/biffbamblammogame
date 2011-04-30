@@ -1,37 +1,37 @@
 Chain of BOOM
-13 25
-E T(S,lr) S S S S S S S S S T(S,ll) E 
-T(S,lr) T(S,ul) R R B R B R B R R T(S,ur) T(S,ll) 
-S R R B R B R B R B R R S 
-S B R O B O O O B O R B S 
-S R B O Y B Y B Y O B R S 
-S B R O B G B G B O R B S 
-S R B O Y G E G Y O B R S 
-S B R O Y G E G Y O R B S 
-S R B O Y G E G Y O B R S 
-S B R O Y G E G Y O R B S 
-S R B O Y G E G Y O B R S 
-S B R O Y G E G Y O R B S 
-S R B O Y G E G Y O B R S 
-S B R O Y G E G Y O R B S 
-S R B O Y G E G Y O B R S 
-S B R O Y G E G Y O R B S 
-S G G G G G G G G G G G S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
-S E E E E E E E E E E E S 
+11 25
+E T(S,lr) S S S S S S S T(S,ll) E 
+T(S,lr) T(S,ul) B R E R E R B T(S,ur) T(S,ll) 
+S R R B R B R B R R S 
+S B O O B O B O O B S 
+S R O Y Y B Y Y O R S 
+S B O Y G E G Y O B S 
+S R O Y G E G Y O R S 
+S B O Y G E G Y O B S 
+S R O Y G E G Y O R S 
+S B O Y G E G Y O B S 
+S R O Y G E G Y O R S 
+S B O Y G E G Y O B S 
+S R O Y G E G Y O R S 
+S B O Y G E G Y O B S 
+S R O Y G E G Y O R S 
+S B O Y G G G Y O B S 
+S R O O Y Y Y O O R S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0

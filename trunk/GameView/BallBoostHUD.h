@@ -37,6 +37,8 @@ public:
     void BoostLost();
     void Reinitialize();
 
+    void SetAlpha(float alpha);
+
 private:
     static const int LIVES_BOOST_GAP  = 10;
     static const int H_BORDER_SPACING = LivesLeftHUD::BORDER_SPACING;
@@ -51,6 +53,8 @@ private:
     static const float BALL_FILL_END_PERCENT;
     static const float BALL_FILL_DIFF_PERCENT;
 
+    float alpha;
+
     Texture* ballHUDOutlineTex;
     Texture* ballFillTex;
     
@@ -64,7 +68,7 @@ private:
     // Intended to encapsulate more complicated animations and effects associated with each tail.
     class TrailFill {
     public:
-        TrailFill(const char* trailTexFilepath, const Colour& colour);
+        TrailFill(const char* trailTexFilepath, const ColourRGBA& colour);
         ~TrailFill();
         
         void Draw(double dT);
@@ -73,14 +77,15 @@ private:
         void Lost();
         void Clear();
 
-        const Colour& GetColour() const { return this->colour; }
+        void SetAlpha(float alpha) { this->colour[3] = alpha; }
+        const Colour& GetColour() const { return this->colour.GetColour(); }
 
     private:
         static const double FILL_TIME_IN_SECONDS;
         static const double UNFILL_TIME_IN_SECONDS;
 
         Texture* trailTex;
-        Colour colour;
+        ColourRGBA colour;
         AnimationLerp<float> widthAnim;
 
         DISALLOW_COPY_AND_ASSIGN(TrailFill);

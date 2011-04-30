@@ -146,6 +146,8 @@ void LevelStartDisplayState::RenderFrame(double dT) {
 	ball->SetAlpha(ballAlpha);
 
 	renderPipeline.RenderFrameWithoutHUD(dT);
+    // Render the HUD with alpha...
+    renderPipeline.RenderHUDWithAlpha(0.0, this->blockFadeInAnimation.GetInterpolantValue());
 
 	// If the ball is appearing, draw the emitters around the ball for a cool, flashy enterance
 	if (ballAlpha > 0.0f) {
