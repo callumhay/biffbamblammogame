@@ -809,7 +809,7 @@ bool GameModel::RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type)
 }
 
 void GameModel::RemoveActiveGameItemsForThisBallOnly(const GameBall* ball) {
-    // Check to see if there are any active effect timers that JUST concern the ball that just died,
+    // Check to see if there are any active effect timers that JUST concern the ball that died,
     // if so we expire and remove them 
     for (std::list<GameItemTimer*>::iterator iter = this->activeTimers.begin(); iter != this->activeTimers.end();) {
 	    GameItemTimer* currTimer = *iter;
@@ -819,11 +819,10 @@ void GameModel::RemoveActiveGameItemsForThisBallOnly(const GameBall* ball) {
 		        iter = this->activeTimers.erase(iter);
 		        delete currTimer;
 		        currTimer = NULL;
+                continue;
             }
-	        else {
-		         ++iter;
-	        }
         }
+        ++iter;
     }
 }
 

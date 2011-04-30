@@ -23,7 +23,7 @@ const float BallBoostHUD::BALL_FILL_END_PERCENT   = 0.828f;
 const float BallBoostHUD::BALL_FILL_DIFF_PERCENT  = BALL_FILL_END_PERCENT - BALL_FILL_START_PERCENT;
 
 BallBoostHUD::BallBoostHUD(int displayHeight) : ballHUDOutlineTex(NULL), ballFillTex(NULL), currNumTrailFills(0),
-haloTexture(NULL), boostGainedHaloEmitter(NULL), haloExpander(1.0f, 2.75f), haloFader(1.0f, 0.10f) {
+haloTexture(NULL), boostGainedHaloEmitter(NULL), haloExpander(1.0f, 2.75f), haloFader(1.0f, 0.10f), alpha(0.0f) {
 
     // Initialize the textures for the ball boost HUD
     this->ballHUDOutlineTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_OUTLINE,  Texture::Trilinear, GL_TEXTURE_2D);
@@ -36,9 +36,9 @@ haloTexture(NULL), boostGainedHaloEmitter(NULL), haloExpander(1.0f, 2.75f), halo
 
     // Initialize the trail fill components
     this->trailFills.reserve(3);
-    this->trailFills.push_back(new BallBoostHUD::TrailFill(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_1, Colour(1.0f, 1.0f, 0.0f)));
-    this->trailFills.push_back(new BallBoostHUD::TrailFill(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_2, Colour(1.0f, 0.7f, 0.0f)));
-    this->trailFills.push_back(new BallBoostHUD::TrailFill(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_3, Colour(1.0f, 0.3f, 0.0f)));
+    this->trailFills.push_back(new BallBoostHUD::TrailFill(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_1, ColourRGBA(1.0f, 1.0f, 0.0f, this->alpha)));
+    this->trailFills.push_back(new BallBoostHUD::TrailFill(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_2, ColourRGBA(1.0f, 0.7f, 0.0f, this->alpha)));
+    this->trailFills.push_back(new BallBoostHUD::TrailFill(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TRAILFILL_3, ColourRGBA(1.0f, 0.3f, 0.0f, this->alpha)));
 
     // Initialize the emitter/effect for when boosts are gained
     static const float TOTAL_HALO_LIFE  = 0.8f;
@@ -86,6 +86,9 @@ BallBoostHUD::~BallBoostHUD() {
 
 void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
                         int displayHeight, double dT) {
+    if (this->alpha == 0.0f) {
+        return;
+    }
 
 	// Prepare OGL for drawing the timer
 	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
@@ -112,7 +115,6 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
             iter = this->activeEffects.erase(iter);
             continue;
         }
-
         currEmitter->Draw(camera);
         currEmitter->Tick(dT);
         ++iter;
@@ -131,7 +133,7 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
         // the current one that's filling up
         if (model->GetNumAvailableBoosts() != 0 && percentBallFill < 1.0) {
             const Colour& prevColour = this->trailFills[model->GetNumAvailableBoosts()-1]->GetColour();
-            glColor4f(prevColour.R(), prevColour.G(), prevColour.B(), 1);
+            glColor4f(prevColour.R(), prevColour.G(), prevColour.B(), this->alpha);
 	        glBegin(GL_QUADS);
 	        glTexCoord2d(0, 0); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
 	        glTexCoord2d(1, 0); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
@@ -145,7 +147,7 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
         float texCoord = currBallHeight / BALL_BOOST_HUD_HEIGHT;
 
         const Colour& currColour = this->GetCurrentTrailFill()->GetColour();
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), 1);
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), this->alpha);
 	    glBegin(GL_QUADS);
 	    glTexCoord2d(0, 0);        glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
 	    glTexCoord2d(1, 0);        glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
@@ -164,7 +166,7 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
     // Draw the HUD outline over the fill stuffs...
     this->ballHUDOutlineTex->BindTexture();
     glScalef(BALL_BOOST_HUD_WIDTH, BALL_BOOST_HUD_HEIGHT, 0.0f);
-    glColor3f(1,1,1);
+    glColor4f(1,1,1, this->alpha);
     GeometryMaker::GetInstance()->DrawQuad();
 
 	// Pop modelview matrix
@@ -190,6 +192,7 @@ void BallBoostHUD::BoostGained() {
 
 void BallBoostHUD::BoostLost() {
     assert(this->currNumTrailFills > 0);
+    this->activeEffects.clear();
     this->currNumTrailFills = std::max<int>(0, this->currNumTrailFills - 1);
     this->trailFills[this->currNumTrailFills]->Lost();
 }
@@ -203,10 +206,19 @@ void BallBoostHUD::Reinitialize() {
     }
 }
 
+void BallBoostHUD::SetAlpha(float alpha) {
+    this->alpha = alpha;
+    for (std::vector<BallBoostHUD::TrailFill*>::iterator iter = this->trailFills.begin();
+         iter != this->trailFills.end(); ++iter) {
+        BallBoostHUD::TrailFill* trailFill = *iter;
+        trailFill->SetAlpha(alpha);
+    }
+}
+
 const double BallBoostHUD::TrailFill::FILL_TIME_IN_SECONDS    = 0.75;
 const double BallBoostHUD::TrailFill::UNFILL_TIME_IN_SECONDS  = 0.55;
 
-BallBoostHUD::TrailFill::TrailFill(const char* trailTexFilepath, const Colour& colour) : widthAnim(0.0f), colour(colour) {
+BallBoostHUD::TrailFill::TrailFill(const char* trailTexFilepath, const ColourRGBA& colour) : widthAnim(0.0f), colour(colour) {
     this->trailTex = ResourceManager::GetInstance()->GetImgTextureResource(trailTexFilepath, Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->trailTex != NULL);
 

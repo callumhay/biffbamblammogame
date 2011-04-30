@@ -33,6 +33,7 @@ public:
 	FBObj* RenderForegroundToFBO(FBObj* backgroundFBO, double dT);
 	void RenderFinalGather(double dT);
 	void RenderHUD(double dT);
+    void RenderHUDWithAlpha(double dT, float alpha);
 
 private:
 	GameDisplay* display;	// Not owned by this object

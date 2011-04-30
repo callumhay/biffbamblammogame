@@ -285,3 +285,10 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 
 	debug_opengl_state();
 }
+
+void InGameRenderPipeline::RenderHUDWithAlpha(double dT, float alpha) {
+    GameAssets* gameAssets = this->display->GetAssets();
+    BallBoostHUD* boostHUD = gameAssets->GetBoostHUD();
+    boostHUD->SetAlpha(alpha);
+    this->RenderHUD(dT);
+}

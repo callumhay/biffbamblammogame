@@ -2,18 +2,18 @@ Boosting Your Way to Victory
 11 28
 S S S S S S S S S S S 
 S G G G G E E E E E S 
-S E E E S E E E E E S 
+S E E E G E E E E E S 
 S E E E T(S,ur) S T(S,ll) E E E S 
 S G Y Y Y T(S,ur) S T(S,ll) E E S 
 S G O B O B T(S,ur) S S E S 
 S G R R R R R T(S,ur) S G S 
 S E E E E E E E T(S,ur) S S 
 S E E E E E E E E T(S,ur) S 
-S R R R R R R R G G S 
-S O B O B O B O G G S 
-S Y Y Y Y Y Y Y G G S 
-S G G G G G G G G G S 
-S G G G G G G G G G S 
+S R R R R R R R E G S 
+S O B O B O B O E Y S 
+S Y Y Y Y Y Y Y E G S 
+S G G G G G G G E Y S 
+S G G G G G G G E G S 
 S T(O,ul) E E E E E E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E T(O,lr) S 
