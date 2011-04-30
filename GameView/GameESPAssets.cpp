@@ -3722,6 +3722,49 @@ void GameESPAssets::AddBallBoostEffect(const BallBoostModel& boostModel) {
     }
 }
 
+void GameESPAssets::AddBallAcquiredBoostEffect(const GameBall& ball, const Colour& colour) {
+    // Create the emitters/effects for when boosts are gained
+    static const float TOTAL_HALO_LIFE  = 0.8f;
+    static const int NUM_HALO_PARTICLES = 3;
+
+    ESPPointEmitter* boostGainedHaloEmitter = new ESPPointEmitter();
+    boostGainedHaloEmitter->SetSpawnDelta(ESPInterval(TOTAL_HALO_LIFE / static_cast<float>(NUM_HALO_PARTICLES)));
+	boostGainedHaloEmitter->SetInitialSpd(ESPInterval(0));
+	boostGainedHaloEmitter->SetParticleLife(ESPInterval(TOTAL_HALO_LIFE));
+    boostGainedHaloEmitter->SetNumParticleLives(1);
+    boostGainedHaloEmitter->SetParticleSize(ESPInterval(2.5f * ball.GetBounds().Radius()));
+	boostGainedHaloEmitter->SetEmitAngleInDegrees(0);
+	boostGainedHaloEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+    boostGainedHaloEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	boostGainedHaloEmitter->SetEmitPosition(Point3D(0,0,0));
+    boostGainedHaloEmitter->SetParticleColour(ESPInterval(colour.R()), ESPInterval(colour.G()), ESPInterval(colour.B()), ESPInterval(1.0f));
+    boostGainedHaloEmitter->AddEffector(&this->particleSuperGrowth);
+	boostGainedHaloEmitter->AddEffector(&this->particleFader);
+    bool result = boostGainedHaloEmitter->SetParticles(NUM_HALO_PARTICLES, this->haloTex);
+	assert(result);
+
+	ESPPointEmitter* sinkParticles = new ESPPointEmitter();
+	sinkParticles->SetSpawnDelta(ESPInterval(0.025f, 0.05f));
+	sinkParticles->SetNumParticleLives(1);
+	sinkParticles->SetInitialSpd(ESPInterval(2.6f, 4.5f));
+	sinkParticles->SetParticleLife(ESPInterval(1.0f, 1.25f));
+	sinkParticles->SetParticleSize(ESPInterval(ESPInterval(2.25f * ball.GetBounds().Radius(), 3.5f * ball.GetBounds().Radius())));
+	sinkParticles->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.75f * ball.GetBounds().Radius()));
+    sinkParticles->SetParticleAlignment(ESP::ScreenAligned);
+	sinkParticles->SetEmitPosition(Point3D(0,0,0));
+	sinkParticles->SetEmitDirection(Vector3D(0, 1, 0));
+	sinkParticles->SetEmitAngleInDegrees(180);
+	sinkParticles->SetIsReversed(true);
+    sinkParticles->SetParticleColour(ESPInterval(colour.R(), 1.0f), ESPInterval(colour.G(), 1.0f) , 
+                                     ESPInterval(colour.B()), ESPInterval(1.0f));
+	sinkParticles->AddEffector(&this->particleFader);
+	sinkParticles->AddEffector(&this->particleMediumShrink);    
+    sinkParticles->SetParticles(15, this->sparkleTex);
+
+    this->activeBallBGEmitters[&ball].push_back(boostGainedHaloEmitter);
+    this->activeBallBGEmitters[&ball].push_back(sinkParticles);
+}
+
 // Add the effect for when the rocket goes off after it hits a block
 void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& loc) {
 	ESPInterval bangLifeInterval		= ESPInterval(1.2f);

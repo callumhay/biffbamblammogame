@@ -245,6 +245,7 @@ public:
 	//void AddBallBounceEffect(const Camera& camera, const GameBall& ball);	
 
     void AddBallBoostEffect(const BallBoostModel& boostModel);
+    void AddBallAcquiredBoostEffect(const GameBall& ball, const Colour& colour);
 
     void AddRocketBlastEffect(float rocketSizeFactor, const Point2D& loc);
 

@@ -271,7 +271,7 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 	
 	// Draw the ball boost HUD display in the top-left corner, under the number of balls left
     BallBoostHUD* boostHUD = gameAssets->GetBoostHUD();
-    boostHUD->Draw(gameModel->GetBallBoostModel(), DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
+    boostHUD->Draw(camera, gameModel->GetBallBoostModel(), DISPLAY_HEIGHT, dT);
 
     // Draw the timers that are currently in existance
 	gameAssets->DrawTimers(dT, camera);

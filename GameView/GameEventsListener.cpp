@@ -787,10 +787,18 @@ void GameEventsListener::BallBoostExecutedEvent(const BallBoostModel& boostModel
 }
 
 void GameEventsListener::BallBoostGainedEvent() {
-    this->display->GetAssets()->GetBoostHUD()->BoostGained();
+    BallBoostHUD* boostHUD = this->display->GetAssets()->GetBoostHUD();
 
-    // TODO: Other effects on the ball that might bring attention to the newly available boost...
+    // Effects on the ball that might bring attention to the newly available boost...
+    // NOTE: Make sure this happens BEFORE telling the HUD that it's gained the boost -
+    // that way we get the correct colour from it
+    const std::list<GameBall*>& balls = this->display->GetModel()->GetGameBalls();
+    for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
+        this->display->GetAssets()->GetESPAssets()->AddBallAcquiredBoostEffect(**iter, boostHUD->GetCurrentBoostColour());
+    }
     
+    // Make the HUD change for indicating the number of boosts that the player has
+    boostHUD->BoostGained();
     debug_output("EVENT: Ball boost gained");
 }
 
