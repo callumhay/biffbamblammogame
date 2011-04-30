@@ -118,7 +118,7 @@ omniLaserBallEffect(NULL)
 	this->painHUD       = new PlayerHurtHUD();
 	this->flashHUD      = new FlashHUD();
     this->pointsHUD     = new PointsHUD();
-    this->boostHUD      = new BallBoostHUD();
+    this->boostHUD      = new BallBoostHUD(screenHeight);
 
 	// Initialize the light assets
 	this->lightAssets = new GameLightAssets();

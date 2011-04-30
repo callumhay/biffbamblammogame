@@ -591,6 +591,11 @@ void ESPEmitter::Reset() {
 	}
 	this->aliveParticles.clear();
 
+    for (std::map<const ESPParticle*, int>::iterator iter = this->particleLivesLeft.begin();
+         iter != this->particleLivesLeft.end(); ++iter) {
+        iter->second = this->numParticleLives;
+    }
+
 	// Reset time...
 	this->timeSinceLastSpawn = 0.0f;
 }
