@@ -42,6 +42,7 @@ public:
 
     void SetNumStars(int numStars);
     void SetScore(long pointScore);
+    void SetMultiplierCounter(int count);
     void SetMultiplier(int multiplierAmt);
     void PostPointNotification(const PointAward& pointAward);
 
@@ -142,6 +143,10 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(PointsHUD);
 };
+
+inline void PointsHUD::SetMultiplierCounter(int count) {
+    // TODO
+}
 
 inline void PointsHUD::SetMultiplier(int multiplierAmt) {
     assert(multiplierAmt >= 1);

@@ -920,6 +920,13 @@ void GameEventsListener::ScoreChangedEvent(int newScore) {
 	debug_output("EVENT: Score Change: " << newScore);
 }
 
+void GameEventsListener::ScoreMultiplierCounterChangedEvent(int newCounterValue) {
+    PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
+    pointsHUD->SetMultiplierCounter(newCounterValue);
+
+    debug_output("EVENT: Multiplier Counter Change: " << newCounterValue);
+}
+
 void GameEventsListener::ScoreMultiplierChangedEvent(int newMultiplier, const Point2D& position) {
     PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
     pointsHUD->SetMultiplier(newMultiplier);

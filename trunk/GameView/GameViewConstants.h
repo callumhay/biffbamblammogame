@@ -98,7 +98,6 @@ public:
 	const char* TEXTURE_LASER_BEAM;
 	const char* TEXTURE_UP_ARROW;
 	const char* TEXTURE_BALL_LIFE_HUD;
-    const char* TEXTURE_MULTIPLIER_BANG;
 	const char* TEXTURE_SPARKLE;
 	const char* TEXTURE_SPIRAL_SMALL;
 	const char* TEXTURE_SPIRAL_MEDIUM;
@@ -117,6 +116,19 @@ public:
 	const char* TEXTURE_FROST;
 	const char* TEXTURE_FULLSCREEN_FROST;
     const char* TEXTURE_VAPOUR_TRAIL;
+
+    const char* TEXTURE_MULTIPLIER_BANG;
+    const char* TEXTURE_MULTIPLIER_GAGE_OUTLINE;
+    const char* TEXTURE_MULTIPLIER_GAGE_GRADIENT;
+    const char* TEXTURE_MULTIPLIER_GAGE_FILL_1;
+    const char* TEXTURE_MULTIPLIER_GAGE_FILL_2;
+    const char* TEXTURE_MULTIPLIER_GAGE_FILL_3;
+    const char* TEXTURE_MULTIPLIER_GAGE_FILL_4;
+    const char* TEXTURE_MULTIPLIER_GAGE_FILL_5;
+    const char* TEXTURE_MULTIPLIER_GAGE_FILL_6;
+    const char* TEXTURE_MULTIPLIER_GAGE_FILL_7;
+    const char* TEXTURE_MULTIPLIER_GAGE_FILL_8;
+    const char* TEXTURE_MULTIPLIER_GAGE_FILL_9;
 
     const char* TEXTURE_BOOST_HUD_OUTLINE;
     const char* TEXTURE_BOOST_HUD_BALLFILL;
