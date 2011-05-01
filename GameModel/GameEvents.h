@@ -476,6 +476,14 @@ public:
 	 */
 	virtual void ScoreChangedEvent(int newScore) = 0;
 
+
+    /**
+     * Event triggered whenever a block is destroyed or something happens that causes the multiplier
+     * counter to increase or decrease - the counter is what causes the multiplier to change.
+     * Arguements: newCounterValue - The new counter value (0 to 9).
+     */
+    virtual void ScoreMultiplierCounterChangedEvent(int newCounterValue) = 0;
+
 	/**
 	 * Event triggered when there is a change to the player's score multiplier. 
 	 * Only occurs once per change.

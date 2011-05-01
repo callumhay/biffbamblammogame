@@ -700,10 +700,14 @@ void GameModel::IncrementScore(std::list<PointAward>& pointAwardsList) {
 void GameModel::SetNumInterimBlocksDestroyed(int value, const Point2D& pos) {
 	assert(value >= 0);
 	if (value != this->numInterimBlocksDestroyed) {
+
         int oldMultiplier = this->GetCurrentMultiplier();
 		this->numInterimBlocksDestroyed = value;
         int newMultiplier = this->GetCurrentMultiplier();
 		
+        // EVENT: The value has changed for the number of interim blocks destroyed (the multiplier part counter)
+        GameEventManager::Instance()->ActionScoreMultiplierCounterChanged(this->numInterimBlocksDestroyed);
+
 		// EVENT: The score multiplier has changed
         if (oldMultiplier != newMultiplier) {
 		    GameEventManager::Instance()->ActionScoreMultiplierChanged(newMultiplier, pos);

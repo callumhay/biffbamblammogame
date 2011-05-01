@@ -273,21 +273,6 @@ void GameEventManager::ActionLevelPieceAllStatusRemoved(const LevelPiece& piece)
 	}	
 }
 
-// Action for when the player's score changes
-void GameEventManager::ActionScoreChanged(int newScore) {
-	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->ScoreChangedEvent(newScore);
-	}	
-}
-
-// Action for when the score multiplier changes
-void GameEventManager::ActionScoreMultiplierChanged(int newMultiplier, const Point2D& position) {
-	this->listenerIter = this->eventListeners.begin();
-	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->ScoreMultiplierChangedEvent(newMultiplier, position);
-	}	
-}
 
 // Action for when a new item is spawned in the game
 void GameEventManager::ActionItemSpawned(const GameItem& item) {
@@ -528,4 +513,28 @@ void GameEventManager::ActionPointNotification(const PointAward& pointAward) {
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->PointNotificationEvent(pointAward);
 	}
+}
+
+// Action for when the player's score changes
+void GameEventManager::ActionScoreChanged(int newScore) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->ScoreChangedEvent(newScore);
+	}	
+}
+
+// Action for when the multiplier counter changes
+void GameEventManager::ActionScoreMultiplierCounterChanged(int newCounterValue) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->ScoreMultiplierCounterChangedEvent(newCounterValue);
+	}	
+}
+
+// Action for when the score multiplier changes
+void GameEventManager::ActionScoreMultiplierChanged(int newMultiplier, const Point2D& position) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->ScoreMultiplierChangedEvent(newMultiplier, position);
+	}	
 }
