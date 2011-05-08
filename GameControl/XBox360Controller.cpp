@@ -82,32 +82,33 @@ void XBox360Controller::SetVibration(const VibrateAmount& leftMotorAmt, const Vi
 }
 
 void XBox360Controller::NotInGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState) {
-		if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_A) {
-			if (!this->enterActionOn) {
-				this->display->ButtonPressed(GameControl::EnterButtonAction);
-				this->enterActionOn = true;
-			}
+	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_A) {
+		if (!this->enterActionOn) {
+			this->display->ButtonPressed(GameControl::EnterButtonAction);
+			this->enterActionOn = true;
 		}
-		else {
-			if (this->enterActionOn) {
-				this->display->ButtonReleased(GameControl::EnterButtonAction);
-				this->enterActionOn = false;
-			}
+	}
+	else {
+		if (this->enterActionOn) {
+			this->display->ButtonReleased(GameControl::EnterButtonAction);
+			this->enterActionOn = false;
 		}
+	}
 
-		if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_B || controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK ||
-			  controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) {
-			if (!this->escapeActionOn) {
-				this->display->ButtonPressed(GameControl::EscapeButtonAction);
-				this->escapeActionOn = true;
-			}
+	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_B || controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) {
+		if (!this->escapeActionOn) {
+			this->display->ButtonPressed(GameControl::EscapeButtonAction);
+			this->escapeActionOn = true;
 		}
-		else {
-			if (this->escapeActionOn) {
-				this->display->ButtonReleased(GameControl::EscapeButtonAction);
-				this->escapeActionOn = false;
-			}
+	}
+	else {
+		if (this->escapeActionOn) {
+			this->display->ButtonReleased(GameControl::EscapeButtonAction);
+			this->escapeActionOn = false;
 		}
+	}
+
+    this->UpdateDirections(controllerState, 2*XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 }
 
 void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState) {
@@ -143,6 +144,8 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
 		}
 	}
 
+    this->UpdateDirections(controllerState, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+
 	// Triggers
 	if (controllerState.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) {
 		this->model->ShootActionReleaseUse();
@@ -150,6 +153,19 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
 	if (controllerState.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) {
 		this->model->ShootActionReleaseUse();
 	}
+
+    // Special stuff (ball bullet time)...
+    if (abs(controllerState.Gamepad.sThumbRX) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ||
+        abs(controllerState.Gamepad.sThumbRY) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) {
+        this->display->SpecialDirectionPressed(controllerState.Gamepad.sThumbRX, controllerState.Gamepad.sThumbRY);
+        this->specialDirOn = true;
+    }
+    else {
+        if (this->specialDirOn) {
+            this->display->SpecialDirectionReleased();
+            this->specialDirOn = false;
+        }
+    }
 }
 
 bool XBox360Controller::ProcessState() {
@@ -182,11 +198,15 @@ bool XBox360Controller::ProcessState() {
 		}
 	}
 
+	return false;
+}
 
+void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState, 
+                                         int sensitivityLeft) {
 	// Movement controls:
 	// D-Pad
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP ||
-		(abs(controllerState.Gamepad.sThumbLY) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && controllerState.Gamepad.sThumbLY > 0)) {
+		(abs(controllerState.Gamepad.sThumbLY) > sensitivityLeft && controllerState.Gamepad.sThumbLY > 0)) {
 
 		if (!this->upActionOn) {
 			this->display->ButtonPressed(GameControl::UpButtonAction);
@@ -201,7 +221,7 @@ bool XBox360Controller::ProcessState() {
 	}
 
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN ||
-		(abs(controllerState.Gamepad.sThumbLY) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && controllerState.Gamepad.sThumbLY < 0)) {
+		(abs(controllerState.Gamepad.sThumbLY) > sensitivityLeft && controllerState.Gamepad.sThumbLY < 0)) {
 
 		if (!this->downActionOn) {
 			this->display->ButtonPressed(GameControl::DownButtonAction);
@@ -216,7 +236,7 @@ bool XBox360Controller::ProcessState() {
 	}
 
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT || 
-		  (abs(controllerState.Gamepad.sThumbLX) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && controllerState.Gamepad.sThumbLX < 0)) {
+		  (abs(controllerState.Gamepad.sThumbLX) > sensitivityLeft && controllerState.Gamepad.sThumbLX < 0)) {
 
 		if (!this->leftActionOn) {
 			this->display->ButtonPressed(GameControl::LeftButtonAction);
@@ -230,7 +250,7 @@ bool XBox360Controller::ProcessState() {
 		}
 	}
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT || 
-		  (abs(controllerState.Gamepad.sThumbLX) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && controllerState.Gamepad.sThumbLX > 0)) {
+		  (abs(controllerState.Gamepad.sThumbLX) > sensitivityLeft && controllerState.Gamepad.sThumbLX > 0)) {
 
 		if (!this->rightActionOn) {
 			this->display->ButtonPressed(GameControl::RightButtonAction);
@@ -244,20 +264,7 @@ bool XBox360Controller::ProcessState() {
 		}
 	}
 
-    // Special stuff...
-    if (abs(controllerState.Gamepad.sThumbRX) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ||
-        abs(controllerState.Gamepad.sThumbRY) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) {
-        this->display->SpecialDirectionPressed(controllerState.Gamepad.sThumbRX, controllerState.Gamepad.sThumbRY);
-        this->specialDirOn = true;
-    }
-    else {
-        if (this->specialDirOn) {
-            this->display->SpecialDirectionReleased();
-            this->specialDirOn = false;
-        }
-    }
 
-	return false;
 }
 
 void XBox360Controller::Sync(size_t frameID, double dT) {

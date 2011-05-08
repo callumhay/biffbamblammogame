@@ -122,6 +122,13 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
     glTranslatef(H_BORDER_SPACING + BALL_BOOST_HUD_HALF_WIDTH, 
                  displayHeight - V_BORDER_SPACING - BALL_BOOST_HUD_HALF_HEIGHT, 0);
     
+    // Boost trail fills...
+    for (std::vector<BallBoostHUD::TrailFill*>::iterator iter = this->trailFills.begin();
+         iter != this->trailFills.end(); ++iter) {
+        BallBoostHUD::TrailFill* trailFill = *iter;
+        trailFill->Draw(dT);
+    }
+
     // Draw the fills that are currently present in the HUD - these will only be present
     // if there's a boost model present
     if (model != NULL) {
@@ -154,12 +161,6 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
 	    glTexCoord2d(0, texCoord); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, ballFillHeight);
 	    glEnd();
 
-        // Boost trail fills...
-        for (std::vector<BallBoostHUD::TrailFill*>::iterator iter = this->trailFills.begin();
-             iter != this->trailFills.end(); ++iter) {
-            BallBoostHUD::TrailFill* trailFill = *iter;
-            trailFill->Draw(dT);
-        }
     }
 
     // Draw the HUD outline over the fill stuffs...
@@ -260,5 +261,6 @@ void BallBoostHUD::TrailFill::Lost() {
 }
 
 void BallBoostHUD::TrailFill::Clear() {
+    this->widthAnim.ClearLerp();
     this->widthAnim.SetInterpolantValue(0.0f);
 }

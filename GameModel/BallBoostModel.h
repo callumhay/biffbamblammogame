@@ -18,7 +18,7 @@
 #include "../BlammoEngine/Collision.h"
 #include "GameBall.h"
 
-class GameTransformMgr;
+class GameModel;
 
 /**
  * Encapsulates the model/state of the ball boost for the GameModel.
@@ -36,7 +36,7 @@ public:
     static const double BULLET_TIME_FADE_OUT_SECONDS;
     static const double BULLET_TIME_MAX_DURATION_SECONDS;
 
-    BallBoostModel(GameTransformMgr* gameTransformMgr, const std::list<GameBall*>* balls);
+    BallBoostModel(GameModel* gameModel, const std::list<GameBall*>* balls);
     ~BallBoostModel();
 
     void Tick(double dT);
@@ -73,7 +73,7 @@ private:
     AnimationLerp<float> timeDialationAnim;     // Animation lerp for time dialation, changes based on state
     double totalBulletTimeElapsed;              // Counter for the total seconds of elapsed bullet time (in the BulletTime state)
 
-    GameTransformMgr* gameTransformMgr; // The game transform manager
+    GameModel* gameModel;
     const std::list<GameBall*>* balls;  // The balls that are currently in play in the game model
     int numAvailableBoosts;             // The number of available boosts left for use by the player
     Vector2D ballBoostDir;              // The direction to boost the ball in when the player triggers it - NOT necessarily normalized!

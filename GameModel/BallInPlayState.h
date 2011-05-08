@@ -28,20 +28,6 @@ class LineSeg2D;
 
 class BallInPlayState : public GameState {
 
-private:
-	double timeSinceGhost;		// The time since the ball stopped colliding with blocks
-
-	
-
-	void DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision);
-	void DoBallCollision(GameBall& ball1, GameBall& ball2);
-	void DoItemCollision();
-
-	void AugmentBallDirectionToBeNotDownwards(GameBall& b);
-	
-	//void UpdateActiveBalls(double seconds);
-
-
 public:
 	BallInPlayState(GameModel* gm);
 	~BallInPlayState();
@@ -57,6 +43,18 @@ public:
 	void Tick(double seconds);
 
 	void DebugDropItem(GameItem* item);
+
+private:
+	double timeSinceGhost;		// The time since the ball stopped colliding with blocks
+
+	void DoBallCollision(GameBall& b, const Vector2D& n, Collision::LineSeg2D& collisionLine, double dT, double timeSinceCollision);
+	void DoBallCollision(GameBall& ball1, GameBall& ball2);
+	void DoItemCollision();
+
+	void AugmentBallDirectionToBeNotDownwards(GameBall& b);
+	
+	//void UpdateActiveBalls(double seconds);
+    DISALLOW_COPY_AND_ASSIGN(BallInPlayState);
 };
 
 // Makes sure that the ball's direction is upwards and changes it to be upwards - when it gets

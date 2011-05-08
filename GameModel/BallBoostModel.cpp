@@ -11,7 +11,7 @@
 
 #include "BallBoostModel.h"
 #include "GameEventManager.h"
-#include "GameTransformMgr.h"
+#include "GameModel.h"
 
 // Amounts of time to fade in and out of bullet time when it's activated/deactivated
 const double BallBoostModel::BULLET_TIME_FADE_IN_SECONDS        = 0.35;
@@ -27,8 +27,8 @@ const float BallBoostModel::BOOST_CHARGE_TIME_SECONDS = 5.0f;
 const float BallBoostModel::MIN_TIME_DIALATION_FACTOR       = 0.060f;
 const float BallBoostModel::INV_MIN_TIME_DIALATION_FACTOR   = 1.0f / MIN_TIME_DIALATION_FACTOR;
 
-BallBoostModel::BallBoostModel(GameTransformMgr* gameTransformMgr, const std::list<GameBall*>* balls) : 
-balls(balls), ballBoostDir(0,0), numAvailableBoosts(0), gameTransformMgr(gameTransformMgr),
+BallBoostModel::BallBoostModel(GameModel* gameModel, const std::list<GameBall*>* balls) : 
+balls(balls), ballBoostDir(0,0), numAvailableBoosts(0), gameModel(gameModel),
 currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0), currBoostChargeTime(0.0) {
     assert(balls != NULL);
     assert(!balls->empty());
@@ -40,7 +40,7 @@ currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0)
 }
 
 BallBoostModel::~BallBoostModel() {
-    this->gameTransformMgr->SetBulletTimeCamera(false);
+    this->gameModel->GetTransformInfo()->SetBulletTimeCamera(false);
     while (this->numAvailableBoosts > 0) {
         this->numAvailableBoosts--;
         // EVENT: Ball Boost lost
@@ -199,6 +199,11 @@ bool BallBoostModel::BallBoosterPressed() {
  * Returns: true if there's a ball that can be boosted, false otherwise.
  */
 bool BallBoostModel::IsBallAvailableForBoosting() const {
+    // No boosting allowed if ball camera or paddle camera is active
+    if (gameModel->GetPlayerPaddle()->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
+        return false;
+    }
+
     bool ballIsAvailable = false;
     for (std::list<GameBall*>::const_iterator iter = this->balls->begin(); iter != this->balls->end(); ++iter) {
         const GameBall* currBall = *iter;
@@ -223,7 +228,7 @@ void BallBoostModel::SetCurrentState(const BulletTimeState& newState) {
             break;
 
         case BulletTimeFadeIn:
-            this->gameTransformMgr->SetBulletTimeCamera(true);
+            this->gameModel->GetTransformInfo()->SetBulletTimeCamera(true);
             this->timeDialationAnim.SetLerp(BULLET_TIME_FADE_IN_SECONDS, MIN_TIME_DIALATION_FACTOR);
             break;
 
@@ -233,7 +238,7 @@ void BallBoostModel::SetCurrentState(const BulletTimeState& newState) {
             break;
 
         case BulletTimeFadeOut:
-            this->gameTransformMgr->SetBulletTimeCamera(false);
+            this->gameModel->GetTransformInfo()->SetBulletTimeCamera(false);
             this->timeDialationAnim.SetLerp(BULLET_TIME_FADE_OUT_SECONDS, 1.0f);
             break;
 

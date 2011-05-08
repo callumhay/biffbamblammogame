@@ -2,7 +2,7 @@ Death From Above
 10 26
 S S S S S S S S S S 
 S G L L E E L L G S 
-S G S S E E S S G S 
+S G T(S,ll) E E E E T(S,lr) G S 
 S G S S E E S S G S 
 S G S S E E S S G S 
 S G S S E E S S G S 
@@ -31,8 +31,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
