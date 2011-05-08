@@ -57,6 +57,8 @@ private:
 	void InGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState);
 
 	void SetVibration(const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt);
+    void UpdateDirections(const XINPUT_STATE& controllerState, int sensitivityLeft);
+
 
 	void DebugRepeatActions();
 

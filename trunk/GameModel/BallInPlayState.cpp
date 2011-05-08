@@ -27,7 +27,7 @@ GameState(gm), timeSinceGhost(DBL_MAX) {
     // The ball in play state is the only state that allows for ball boosting -
     // create a ball boost model for it in the game model
     assert(this->gameModel->boostModel == NULL);
-    this->gameModel->boostModel = new BallBoostModel(gm->GetTransformInfo(), &gm->GetGameBalls());
+    this->gameModel->boostModel = new BallBoostModel(gm, &gm->GetGameBalls());
 }
 
 BallInPlayState::~BallInPlayState() {

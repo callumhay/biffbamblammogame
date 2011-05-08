@@ -22,10 +22,7 @@ CollateralBlockMesh::~CollateralBlockMesh() {
 }
 
 void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-															 const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
-	static double SHAKE_TIME_COUNT = 0.0;
-	SHAKE_TIME_COUNT += dT;
-
+                               const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
 	float currRotation;
 	Vector3D shake;
 	Colour colour;
@@ -45,7 +42,7 @@ void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 		// Based on whether it's in warning mode, change its colour and position to indicate that
 		// it's about to 'go off'
 		// TODO
-		if (collateralBlock->GetState() == CollateralBlock::WarningState && SHAKE_TIME_COUNT >= 0.016) {
+		if (collateralBlock->GetState() == CollateralBlock::WarningState) {
 			// Randomly shake the block around...
 			shake[0] = Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_DIST;
 			shake[1] = Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_DIST;
@@ -57,8 +54,6 @@ void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 			colour[1] = Randomizer::GetInstance()->RandomNumZeroToOne();
 			colour[2] = 0.0f;
 			glColor4f(colour[0], colour[1], colour[2], 1);
-
-			SHAKE_TIME_COUNT = 0.0;
 		}
 		else {
 			glColor4f(1, 1, 1, 1);

@@ -74,10 +74,10 @@ particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
 	this->cfgOptions = ResourceManager::ReadConfigurationOptions(true);
 
 	// Setup handlers for menus and initialize the menus
-	this->mainMenuEventHandler		= new MainMenuEventHandler(this);
+	this->mainMenuEventHandler    = new MainMenuEventHandler(this);
 	this->optionsMenuEventHandler = new OptionsSubMenuEventHandler(this);
-	this->itemsEventHandler				= new AllMenuItemsEventHandler(this);
-	this->particleEventHandler		= new BangParticleEventHandler(this);
+	this->itemsEventHandler       = new AllMenuItemsEventHandler(this);
+	this->particleEventHandler    = new BangParticleEventHandler(this);
 	this->InitializeMainMenu();
 
 	// Setup the fade-in animation

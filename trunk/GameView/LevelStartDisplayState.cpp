@@ -16,6 +16,7 @@
 #include "LevelMesh.h"
 #include "LivesLeftHUD.h"
 #include "PointsHUD.h"
+#include "BallBoostHUD.h"
 
 #include "../ESPEngine/ESPPointEmitter.h"
 #include "../GameModel/GameModel.h"
@@ -107,6 +108,8 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	// at the beginning of each level
 	this->display->GetAssets()->GetLifeHUD()->Reinitialize();
 	this->display->GetAssets()->GetLifeHUD()->LivesGained(this->display->GetModel()->GetLivesLeft());
+    this->display->GetAssets()->GetBoostHUD()->Reinitialize();
+    this->display->GetAssets()->GetPointsHUD()->Reinitialize();
 }
 
 LevelStartDisplayState::~LevelStartDisplayState() {
