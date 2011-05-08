@@ -54,6 +54,7 @@ private:
     static const int STAR_TO_SCORE_VERTICAL_GAP;
     static const int SCORE_TO_MULTIPLER_HORIZONTAL_GAP;
     static const int ALL_STARS_WIDTH;
+    
 
     class PointNotification {
     public:
@@ -94,12 +95,14 @@ private:
 
     private:
         static const float BANG_TEXT_BORDER;
+        
 
         enum AnimationState { None, CreationAnimation, IncreaseAnimation, IdleAnimation, LeaveAnimation };
         AnimationState currState;
 
         float size;                     // The total size (width/height) of the multiplier
         int currPtMultiplier;           // The current score multiplier
+        
         TextLabel2D* ptMultiplierLabel; // The display label for the multiplier
         Texture* multiplierBangTex;     // The 'bang' texture behind the multiplier label
 
@@ -110,10 +113,34 @@ private:
         void DrawHUD(float rightMostX, float topMostY);
         void SetCurrentAnimationState(const AnimationState& state);
 
-        
         static float  GetMultiplierScale(int multiplier);
 
         DISALLOW_COPY_AND_ASSIGN(MultiplierHUD);
+    };
+
+    class MultiplierGageHUD {
+    public:
+        static const int MULTIPLIER_GAGE_SIZE;
+        static const int HALF_MULTIPLIER_GAGE_SIZE;
+
+        MultiplierGageHUD();
+        ~MultiplierGageHUD();
+
+        void Reinitialize();
+
+        void SetAlpha(float alpha);
+        void SetMultiplierCounterAmount(int multiplierCntAmt);
+        void Draw(float rightMostX, float topMostY, double dT);
+
+    private:
+        float alpha;
+
+        int currMultiplierCounterIdx;
+        Texture* multiplierGageOutlineTex;                 // The outline for the multiplier gage
+        Texture* multiplierGageGradientTex;
+        std::vector<Texture*> multiplierGageFillTexs;      // Fills for the multiplier gage (there are 9 of them)
+
+        DISALLOW_COPY_AND_ASSIGN(MultiplierGageHUD);
     };
 
     typedef std::list<PointNotification*> PointNotifyList;
@@ -124,8 +151,9 @@ private:
 
     int numStars;                                   // The current number of stars awarded to the player
     long currPtScore;                               // The current score
-    std::list<PointNotification*> ptNotifications;  // FIFO Queue of current point notifications
+    //std::list<PointNotification*> ptNotifications;  // FIFO Queue of current point notifications
     MultiplierHUD* multiplier;                      // HUD for the multiplier
+    MultiplierGageHUD* multiplierGage;
     
     // Labels
     TextLabel2D* ptScoreLabel;
@@ -145,12 +173,21 @@ private:
 };
 
 inline void PointsHUD::SetMultiplierCounter(int count) {
-    // TODO
+    this->multiplierGage->SetMultiplierCounterAmount(count);
 }
 
 inline void PointsHUD::SetMultiplier(int multiplierAmt) {
     assert(multiplierAmt >= 1);
     this->multiplier->SetMultiplier(multiplierAmt);
+}
+
+inline void PointsHUD::MultiplierGageHUD::SetMultiplierCounterAmount(int multiplierCntAmt) {
+    assert(multiplierCntAmt >= 0);
+    this->currMultiplierCounterIdx = std::min<int>(static_cast<int>(this->multiplierGageFillTexs.size()), multiplierCntAmt) - 1;
+}
+
+inline void PointsHUD::MultiplierGageHUD::SetAlpha(float alpha) {
+    this->alpha = alpha;
 }
 
 #endif // __POINTSHUD_H__

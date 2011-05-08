@@ -136,6 +136,49 @@ float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string
 	return textLength;
 }
 
+float TextureFontSet::OrthoPrint(const Point3D& topLeftCorner, const std::string& s, 
+                                 float rotationInDegs, float scale) const {
+	assert(s.find('\n') == std::string::npos);
+	assert(s.find('\r') == std::string::npos);
+
+	// Make world coordinates equal window coordinates
+	Camera::PushWindowCoords();
+
+	// Prepare OGL for drawing the text
+	glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT | GL_COLOR_BUFFER_BIT); 
+
+	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
+
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(topLeftCorner[0], topLeftCorner[1] - this->heightInPixels*scale, topLeftCorner[2]);
+	glRotatef(rotationInDegs, 0, 0, 1);
+    glScalef(scale, scale, 1.0f);
+	glRasterPos2i(0, 0);
+
+	// Draw the text
+	glListBase(this->baseDisplayList);
+	glCallLists(s.length(), GL_UNSIGNED_BYTE, s.c_str());
+
+	float rpos[4];
+	glGetFloatv(GL_CURRENT_RASTER_POSITION, rpos);
+	float textLength = rpos[0] - topLeftCorner[0];
+	
+	glPopMatrix();
+	glPopAttrib();  
+
+	// Pop the projection matrix
+	Camera::PopWindowCoords();
+	
+	debug_opengl_state();
+
+	return textLength;
+}
+
 /** 
  * A 3D version of printing text - this will print the text to a billboard that 
  * it initially centered at the origin and pointing in the direction of the z-axis,
@@ -161,8 +204,8 @@ void TextureFontSet::Print(const std::string& s) const {
  * Returns: A mapping of the given heights to texture sets - returns empty map on error.
  */
 std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF(const std::string& ttfFilepath, 
-																																								 const std::vector<unsigned int>& heightsInPixels, 
-																																								 Texture::TextureFilterType filterType) {
+                                                                                 const std::vector<unsigned int>& heightsInPixels, 
+                                                                                 Texture::TextureFilterType filterType) {
 	
 	std::map<unsigned int, TextureFontSet*> newFontSets;
 
@@ -214,9 +257,9 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF
  * Returns: A new TextureFontSet of the particular font if all goes well, otherwise it will
  * return NULL.
  */
-std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF(PHYSFS_File* fileHandle, 
-																																								 const std::vector<unsigned int>& heightsInPixels, 
-																																								 Texture::TextureFilterType filterType) {
+std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF(PHYSFS_File* fileHandle,
+                                                                                 const std::vector<unsigned int>& heightsInPixels,
+                                                                                 Texture::TextureFilterType filterType) {
 	std::map<unsigned int, TextureFontSet*> newFontSets;
 
 	// Grab the in-memory buffer for the file from the physfs filehandle
@@ -281,9 +324,9 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF
 	return newFontSets;
 }
 
-std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromBuffer(unsigned char* buffer, long length, 
-																																										const std::vector<unsigned int>& heightsInPixels,
-																																										Texture::TextureFilterType filterType) {
+std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromBuffer(unsigned char* buffer, long length,
+                                                                                    const std::vector<unsigned int>& heightsInPixels,
+                                                                                    Texture::TextureFilterType filterType) {
 	std::map<unsigned int, TextureFontSet*> newFontSets;
 
 	// Create And Initilize A FreeType Font Library.
@@ -333,8 +376,9 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromBuf
  * Returns: A new TextureFontSet of the particular font if all goes well, otherwise it will
  * return NULL.
  */
-void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library, FT_Face face, unsigned int heightInPixels,
-																							Texture::TextureFilterType filterType) {
+void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library,
+                                              FT_Face face, unsigned int heightInPixels,
+											  Texture::TextureFilterType filterType) {
 	assert(library != NULL);
 	assert(face != NULL);
 

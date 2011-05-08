@@ -131,6 +131,7 @@ public:
 	}
 
 	void Draw(bool depthTestOn = false, float depth = 0.0);
+    void Draw(float rotationInDegs);
 
 private:
 	float lastRasterWidth;
