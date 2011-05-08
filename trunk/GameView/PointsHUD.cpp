@@ -23,22 +23,22 @@
 
 #include "../ResourceManager.h"
 
-const int PointsHUD::STAR_SIZE                          = 40;
+const int PointsHUD::STAR_SIZE                          = 30;
 const int PointsHUD::STAR_GAP                           = 3;
-const int PointsHUD::SCREEN_EDGE_VERTICAL_GAP           = 10;
-const int PointsHUD::SCREEN_EDGE_HORIZONTAL_GAP         = 15;
+const int PointsHUD::SCREEN_EDGE_VERTICAL_GAP           = 5;
+const int PointsHUD::SCREEN_EDGE_HORIZONTAL_GAP         = 5;
 const int PointsHUD::STAR_TO_SCORE_VERTICAL_GAP         = 5;
 const int PointsHUD::SCORE_TO_MULTIPLER_HORIZONTAL_GAP  = 5;
-const int PointsHUD::ALL_STARS_WIDTH = (STAR_GAP * (GameLevel::MAX_STARS_PER_LEVEL-1) + STAR_SIZE * GameLevel::MAX_STARS_PER_LEVEL);
+const int PointsHUD::ALL_STARS_WIDTH                    = (STAR_GAP * (GameLevel::MAX_STARS_PER_LEVEL-1) + STAR_SIZE * GameLevel::MAX_STARS_PER_LEVEL);
 
 PointsHUD::PointsHUD() : numStars(0), currPtScore(0), 
-ptScoreLabel(NULL), starTex(NULL), multiplier(new MultiplierHUD()) {
+ptScoreLabel(NULL), starTex(NULL), multiplier(new MultiplierHUD()), multiplierGage(new MultiplierGageHUD()) {
 
     this->ptScoreLabel = new TextLabel2D(
-        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "0");
-    this->ptScoreLabel->SetColour(Colour(1.0f, 0.4f, 0.0f));
-    this->ptScoreLabel->SetDropShadow(Colour(1,1,1), 0.05f);
-    this->ptScoreLabel->SetScale(0.85f);
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "0");
+    this->ptScoreLabel->SetColour(Colour(0.0f, 0.6f, 1.0f));
+    this->ptScoreLabel->SetDropShadow(Colour(0,0,0), 0.05f);
+    this->ptScoreLabel->SetScale(0.95f);
     
     this->scoreAnimator = AnimationLerp<long>(&this->currPtScore);
     this->scoreAnimator.SetRepeat(false);
@@ -53,6 +53,8 @@ PointsHUD::~PointsHUD() {
     this->ptScoreLabel = NULL;
     delete this->multiplier;
     this->multiplier = NULL;
+    delete this->multiplierGage;
+    this->multiplierGage = NULL;
 
     // Clean up any leftover notifications
     this->ClearNotifications();
@@ -65,9 +67,6 @@ PointsHUD::~PointsHUD() {
 void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
     this->scoreAnimator.Tick(dT);
 
-    float currentX = displayWidth  - SCREEN_EDGE_HORIZONTAL_GAP;
-    float currentY = displayHeight - SCREEN_EDGE_VERTICAL_GAP;
-    
 	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -77,39 +76,41 @@ void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
     glPushMatrix();
 	glLoadIdentity();
 
-    // Draw the current star score
-    this->DrawIdleStars(currentX, currentY, dT);
-    currentY -= (STAR_SIZE + STAR_TO_SCORE_VERTICAL_GAP);
+    // Draw the multiplier gage
+    this->multiplierGage->Draw(displayWidth - SCREEN_EDGE_HORIZONTAL_GAP, displayHeight - SCREEN_EDGE_VERTICAL_GAP, dT);
+    // Draw the multiplier
+    this->multiplier->Draw(displayWidth - SCREEN_EDGE_HORIZONTAL_GAP - 20, displayHeight - SCREEN_EDGE_VERTICAL_GAP - 15, dT);
 
     // Draw the current total point score
     std::stringstream ptScoreString;
     ptScoreString << this->currPtScore;
     this->ptScoreLabel->SetText(ptScoreString.str());
-    
-    currentX = displayWidth - SCREEN_EDGE_HORIZONTAL_GAP - this->ptScoreLabel->GetLastRasterWidth();
-    this->ptScoreLabel->SetTopLeftCorner(currentX, currentY);
+
+    this->ptScoreLabel->SetTopLeftCorner(displayWidth - SCREEN_EDGE_HORIZONTAL_GAP - 
+        MultiplierGageHUD::MULTIPLIER_GAGE_SIZE - this->ptScoreLabel->GetLastRasterWidth(),
+        displayHeight - SCREEN_EDGE_VERTICAL_GAP - 20);
     this->ptScoreLabel->Draw();
 
-    // Draw the multiplier if it's something greater than 1
-    this->multiplier->Draw(displayWidth - SCREEN_EDGE_HORIZONTAL_GAP - ALL_STARS_WIDTH - 
-                           SCORE_TO_MULTIPLER_HORIZONTAL_GAP, currentY + STAR_SIZE/2, dT);
+    // Draw the current star score
+    this->DrawIdleStars(displayWidth - SCREEN_EDGE_HORIZONTAL_GAP - 
+        MultiplierGageHUD::MULTIPLIER_GAGE_SIZE, this->ptScoreLabel->GetTopLeftCorner()[1] - this->ptScoreLabel->GetHeight() - 3, dT);
 
     Camera::PopWindowCoords();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
     // Draw any point notifications
-    for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
-        PointNotification* ptNotification = *iter;
-        if (ptNotification->Draw(displayWidth, dT)) {
-            delete ptNotification;
-            ptNotification = NULL;
-            iter = this->ptNotifications.erase(iter);
-        }
-        else {
-            ++iter;
-        }
-    }
+    //for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
+    //    PointNotification* ptNotification = *iter;
+    //    if (ptNotification->Draw(displayWidth, dT)) {
+    //        delete ptNotification;
+    //        ptNotification = NULL;
+    //        iter = this->ptNotifications.erase(iter);
+    //    }
+    //    else {
+    //        ++iter;
+    //    }
+    //}
 
     glPopAttrib();
 }
@@ -160,6 +161,7 @@ void PointsHUD::Reinitialize() {
     this->numStars         = 0;
     this->currPtScore      = 0;
     this->multiplier->Reinitialize();
+    this->multiplierGage->Reinitialize();
 }
 
 void PointsHUD::SetNumStars(int numStars) {
@@ -178,6 +180,8 @@ void PointsHUD::SetScore(long pointScore) {
 }
 
 void PointsHUD::PostPointNotification(const PointAward& pointAward) {
+    UNUSED_PARAMETER(pointAward);
+    /*
     // Don't notify the HUD unless there's specific bonus for the point award
     if (pointAward.GetType() == ScoreTypes::UndefinedBonus) {
         return;
@@ -201,6 +205,7 @@ void PointsHUD::PostPointNotification(const PointAward& pointAward) {
 
     PointNotification* ptNotify = new PointNotification(pointAward, initialTopY, finalTopY);
     this->ptNotifications.push_back(ptNotify);
+    */
 }
 
 const char* PointsHUD::GetPointNotificationName(const PointAward& pointAward) {
@@ -220,12 +225,14 @@ const char* PointsHUD::GetPointNotificationName(const PointAward& pointAward) {
 }
 
 void PointsHUD::ClearNotifications() {
+    /*
     for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end(); ++iter) {
         PointNotification* ptNotify = *iter;
         delete ptNotify;
         ptNotify = NULL;
     }
     this->ptNotifications.clear();
+    */
 }
 
 /**
@@ -235,10 +242,11 @@ void PointsHUD::ClearNotifications() {
 void PointsHUD::SetAlpha(float alpha) {
     this->ptScoreLabel->SetAlpha(alpha);
     this->multiplier->SetAlpha(alpha);
-    for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
-        PointNotification* ptNotification = *iter;
-        ptNotification->SetAlpha(alpha);
-    }
+    this->multiplierGage->SetAlpha(alpha);
+    //for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
+    //    PointNotification* ptNotification = *iter;
+    //    ptNotification->SetAlpha(alpha);
+    //}
 }
 
 const int PointsHUD::PointNotification::NOTIFIER_TO_NOTIFIER_VERTICAL_GAP = -2;
@@ -388,6 +396,7 @@ size(0), currState(None), scaleAnim(0.0f) {
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "");
     this->ptMultiplierLabel->SetColour(multiplierLabelColour);
     this->ptMultiplierLabel->SetDropShadow(Colour(0,0,0), 0.09f);
+    this->ptMultiplierLabel->SetScale(1.1f);
 
     this->multiplierBangTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_BANG,
         Texture::Trilinear, GL_TEXTURE_2D);
@@ -410,7 +419,12 @@ PointsHUD::MultiplierHUD::~MultiplierHUD() {
 
 void PointsHUD::MultiplierHUD::Reinitialize() {
     // Clean up all animations...
-
+    ColourRGBA multiplierLabelColour(1.0f, 0.4f, 0.0f, 0.0f);
+    this->rgbaLabelAnim.ClearLerp();
+    this->rgbaLabelAnim.SetInterpolantValue(multiplierLabelColour);
+    
+    this->scaleAnim.ClearLerp();
+    this->scaleAnim.SetInterpolantValue(0.0f);
     this->currPtMultiplier = 1;
 }
 
@@ -507,7 +521,7 @@ void PointsHUD::MultiplierHUD::Draw(float rightMostX, float topMostY, double dT)
 
         default:
             assert(false);
-            return;
+            break;
     }
 }
 
@@ -518,8 +532,8 @@ void PointsHUD::MultiplierHUD::DrawHUD(float rightMostX, float topMostY) {
     const ColourRGBA& labelColour = this->rgbaLabelAnim.GetInterpolantValue();
     
     this->ptMultiplierLabel->SetTopLeftCorner((rightMostX - MAX_SIZE) + 
-        (MAX_SIZE - this->ptMultiplierLabel->GetLastRasterWidth()) / 2.0f, 
-        topMostY - (MAX_SIZE - this->ptMultiplierLabel->GetHeight())/2.0f);
+        (MAX_SIZE - this->ptMultiplierLabel->GetLastRasterWidth()) / 2.0f - 4, 
+        topMostY - (MAX_SIZE - this->ptMultiplierLabel->GetHeight())/2.0f + 8);
 
     float centerX = rightMostX - MAX_SIZE / 2.0f;
     float centerY = topMostY   - MAX_SIZE / 2.0f;
@@ -529,13 +543,14 @@ void PointsHUD::MultiplierHUD::DrawHUD(float rightMostX, float topMostY) {
     glColor4f(1,1,1,1);
     glPushMatrix();
     glTranslatef(centerX, centerY, 0.0f);
+    glRotatef(-10.0f, 0, 0, 1.0f);
     glScalef(scaledSize, scaledSize, 1.0f);
     GeometryMaker::GetInstance()->DrawQuad();
     glPopMatrix();
 
     // Draw the multiplier text label...
     this->ptMultiplierLabel->SetColour(labelColour);
-    this->ptMultiplierLabel->Draw();
+    this->ptMultiplierLabel->Draw(-8.0f);
 }
 
 void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& state) {
@@ -675,4 +690,114 @@ float PointsHUD::MultiplierHUD::GetMultiplierScale(int multiplier) {
             break;
     }
     return 0.0f;
+}
+
+// MultiplierGageHUD FUNCTIONS ********************************************************
+
+const int PointsHUD::MultiplierGageHUD::MULTIPLIER_GAGE_SIZE = 110;
+const int PointsHUD::MultiplierGageHUD::HALF_MULTIPLIER_GAGE_SIZE = MULTIPLIER_GAGE_SIZE/2;
+
+PointsHUD::MultiplierGageHUD::MultiplierGageHUD() : 
+currMultiplierCounterIdx(-1), multiplierGageOutlineTex(NULL), alpha(1.0) {
+    this->multiplierGageOutlineTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_OUTLINE,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->multiplierGageOutlineTex != NULL);
+
+    this->multiplierGageGradientTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_GRADIENT,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->multiplierGageGradientTex != NULL);
+
+    Texture* tempTex = NULL;
+    tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_1,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(tempTex != NULL);
+    this->multiplierGageFillTexs.push_back(tempTex);
+    tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_2,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(tempTex != NULL);
+    this->multiplierGageFillTexs.push_back(tempTex);
+    tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_3,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(tempTex != NULL);
+    this->multiplierGageFillTexs.push_back(tempTex);
+    tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_4,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(tempTex != NULL);
+    this->multiplierGageFillTexs.push_back(tempTex);
+    tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_5,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(tempTex != NULL);
+    this->multiplierGageFillTexs.push_back(tempTex);
+    tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_6,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(tempTex != NULL);
+    this->multiplierGageFillTexs.push_back(tempTex);
+    tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_7,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(tempTex != NULL);
+    this->multiplierGageFillTexs.push_back(tempTex);
+    tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_8,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(tempTex != NULL);
+    this->multiplierGageFillTexs.push_back(tempTex);
+    tempTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_GAGE_FILL_9,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(tempTex != NULL);
+    this->multiplierGageFillTexs.push_back(tempTex);
+}
+
+PointsHUD::MultiplierGageHUD::~MultiplierGageHUD() {
+    bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierGageOutlineTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierGageGradientTex);
+    assert(success);
+
+    for (std::vector<Texture*>::iterator iter = this->multiplierGageFillTexs.begin();
+         iter != this->multiplierGageFillTexs.end(); ++iter) {
+        Texture* currTex = *iter;
+        assert(currTex != NULL);
+        success = ResourceManager::GetInstance()->ReleaseTextureResource(currTex);
+        assert(success);
+    }
+}
+
+void PointsHUD::MultiplierGageHUD::Reinitialize() {
+    this->currMultiplierCounterIdx = -1;
+}
+
+void PointsHUD::MultiplierGageHUD::Draw(float rightMostX, float topMostY, double dT) {
+    UNUSED_PARAMETER(dT);
+
+    glPushMatrix();
+    glTranslatef(rightMostX - HALF_MULTIPLIER_GAGE_SIZE, topMostY - HALF_MULTIPLIER_GAGE_SIZE, 0.0f);
+    glScalef(MULTIPLIER_GAGE_SIZE, MULTIPLIER_GAGE_SIZE, 1.0f);
+
+    if (this->currMultiplierCounterIdx >= 0) {
+        // Draw any fills on the multiplier gage
+        glColor4f(1, 1, 1, this->alpha);
+        this->multiplierGageFillTexs[this->currMultiplierCounterIdx]->BindTexture();
+        GeometryMaker::GetInstance()->DrawQuad();
+    }
+
+    glColor4f(1, 1, 1, 0.25f * this->alpha);
+    this->multiplierGageGradientTex->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+
+    // Draw the outline of the gage...
+    glColor4f(1, 1, 1, this->alpha);
+    this->multiplierGageOutlineTex->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+
+    glPopMatrix();
 }

@@ -57,14 +57,14 @@ void GameFontAssetsManager::LoadMinimalFonts() {
 	sizeSet.push_back(Medium);
 	sizeSet.push_back(Big);
 	sizeSet.push_back(Huge);
-	this->fonts[ExplosionBoom]	= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, sizeSet, Texture::Linear);
-	this->fonts[AllPurpose]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, sizeSet, Texture::Linear);
+    this->fonts[ExplosionBoom]	= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_EXPLOSIONBOOM, sizeSet, Texture::Bilinear);
+	this->fonts[AllPurpose]		= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_ALLPURPOSE, sizeSet, Texture::Bilinear);
 
 	sizeSet.clear();
 	sizeSet.push_back(Medium);
-	this->fonts[SadBadGoo]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_SADBAD, sizeSet, Texture::Linear);
-	this->fonts[HappyGood]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, sizeSet, Texture::Linear);
-	this->fonts[ElectricZap]		= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, sizeSet, Texture::Linear);
+	this->fonts[SadBadGoo]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_SADBAD, sizeSet, Texture::Bilinear);
+	this->fonts[HappyGood]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, sizeSet, Texture::Bilinear);
+	this->fonts[ElectricZap]		= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, sizeSet, Texture::Bilinear);
 
 	glPopAttrib();
 	this->minimalFontsLoaded = true;

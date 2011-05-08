@@ -537,7 +537,9 @@ GLubyte* ResourceManager::ReadNoiseOctave3DTextureData() {
  * Obtain a font texture resource from the physfs file system.
  * Returns: The font set on successful load, false otherwise.
  */
-std::map<unsigned int, TextureFontSet*> ResourceManager::LoadFont(const std::string &filepath, const std::vector<unsigned int>& heights, Texture::TextureFilterType filterType) {
+std::map<unsigned int, TextureFontSet*> ResourceManager::LoadFont(const std::string &filepath,
+                                                                  const std::vector<unsigned int>& heights,
+                                                                  Texture::TextureFilterType filterType) {
 	std::map<unsigned int, TextureFontSet*> fontSets;
 	
 	long bufferLength = 0;
