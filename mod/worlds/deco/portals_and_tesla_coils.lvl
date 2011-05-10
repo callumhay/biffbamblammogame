@@ -1,0 +1,62 @@
+Portals and Tesla Coils
+12 30
+S S S S S S S S S S S S 
+S X(d,c) S G G G G G G S X(b,a) S 
+S R S B G G G G B S R S 
+S R S Y G Y Y G Y S R S 
+S R S B Y O O Y B S R S 
+S R S Y G Y Y G Y S R S 
+S R S B G G G G B S X(c,d) S 
+S R S G G B B G G S S S 
+S A(0,1,g,h) S S S S S S S S A(0,1,h,g) S 
+S R R R R R R R G G L S 
+S O O O O O O O O G G S 
+S Y Y Y Y Y Y Y Y Y Y S 
+S E E E E E E E E E Y S 
+S E E E E E E E E E Y S 
+S E E E E E E E E E Y S 
+S E E E E E E E E E Y S 
+S O O O O O O O O O Y S 
+S Y Y Y Y Y Y Y Y T(G,ul) T(S,lr) S 
+S G G G G G G G T(G,ul) T(S,lr) S S 
+S E E E E E E E E S S S 
+S E E E E E E E E S X(a,b) S 
+S E E E E E E E E T(S,ur) S S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 1
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 0
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 1
+MultiBall3 2
+IceBall 0
+SlowBall 2
+GravityBall 2
+CrazyBall 1
+Random 2
+FastBall 2
+PaddleCam 2

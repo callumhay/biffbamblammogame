@@ -28,7 +28,9 @@ void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 	Colour colour;
 	static const float SHAKE_DIST = 0.15f * std::min<float>(LevelPiece::PIECE_HEIGHT, LevelPiece::PIECE_WIDTH);
 
-	for (std::set<const CollateralBlock*>::const_iterator iter = this->collateralBlocks.begin(); iter != this->collateralBlocks.end(); ++iter) {
+	for (std::set<const CollateralBlock*>::const_iterator iter = this->collateralBlocks.begin();
+         iter != this->collateralBlocks.end(); ++iter) {
+
 		const CollateralBlock* collateralBlock = *iter;
 		assert(collateralBlock != NULL);
 
@@ -41,7 +43,6 @@ void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
 
 		// Based on whether it's in warning mode, change its colour and position to indicate that
 		// it's about to 'go off'
-		// TODO
 		if (collateralBlock->GetState() == CollateralBlock::WarningState) {
 			// Randomly shake the block around...
 			shake[0] = Randomizer::GetInstance()->RandomNumNegOneToOne() * SHAKE_DIST;

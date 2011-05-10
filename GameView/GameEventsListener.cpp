@@ -258,7 +258,7 @@ void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
 	
 	// Kill all effects that may have previously been occuring...
 	this->display->GetAssets()->DeactivateLastBallDeathEffects();
-	this->display->GetAssets()->GetESPAssets()->KillAllActiveEffects();
+	this->display->GetAssets()->GetESPAssets()->KillAllActiveEffects(false);
 		
 	// Check to see if it's game over, and switch the display state appropriately
 	if (this->display->GetModel()->IsGameOver()) {

@@ -78,7 +78,7 @@ public class LevelPieceImageLabel extends JLabel {
 					if (i == 0) {
 						this.teslaBlockStartsOn = (currSiblingID.charAt(0) == '1') ? true : false;
 					}
-					if (i == 1) {
+					else if (i == 1) {
 						this.teslaIsChangable = (currSiblingID.charAt(0) == '1') ? true : false;
 					}
 					else if (i == 2) {

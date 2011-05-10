@@ -291,7 +291,7 @@ public:
 
 	void TurnOffCurrentItemDropStars();
 
-	void KillAllActiveEffects();
+	void KillAllActiveEffects(bool killProjectiles);
 	void KillAllActiveBallEffects(const GameBall& ball);
 	void KillAllActiveTeslaLightningArcs();
 

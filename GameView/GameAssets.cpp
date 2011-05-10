@@ -1307,7 +1307,7 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
  */
 void GameAssets::DeactivateMiscEffects() {
 	this->fboAssets->DeactivateInkSplatterEffect();
-	this->espAssets->KillAllActiveEffects();
+	this->espAssets->KillAllActiveEffects(true);
 	this->espAssets->KillAllActiveTeslaLightningArcs();
 	this->itemAssets->ClearTimers();
 	// Disable any overlay stuff

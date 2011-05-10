@@ -57,7 +57,7 @@ public:
 	static const char* POWERNEUTRAL_ITEM_TYPES_KEYWORD;
 	static const char* POWERDOWN_ITEM_TYPES_KEYWORD;
 
-	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 5;
+	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 7;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;
 
 	~GameLevel();
