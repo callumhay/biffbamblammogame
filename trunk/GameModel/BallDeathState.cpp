@@ -55,11 +55,15 @@ BallDeathState::~BallDeathState() {
 	// Place the camera back in its default position
 	this->gameModel->GetTransformInfo()->SetBallDeathCamera(false);	
 	
-	// If we are exiting being in play then clear all projectiles, items and timers
-	this->gameModel->ClearProjectiles();
+	// If we are exiting being in play then clear all items and timers
 	this->gameModel->ClearBeams();
 	this->gameModel->ClearActiveTimers();
 	
+    // Only clear projectiles if it's game over
+    if (this->gameModel->IsGameOver()) {
+        this->gameModel->ClearProjectiles();
+    }
+
 	// Allow the player to control the paddle again
 	this->gameModel->UnsetPause(GameModel::PausePaddle);
 }
@@ -105,12 +109,14 @@ void BallDeathState::ExecuteSpiralingToDeathState(double dT) {
 
 	// Figure out which way to make it spiral
 	float spiralXMultiplier	= -NumberFuncs::SignOf(this->initialBallVelocityDir[0]);
-	float modifiedRadius		= spiralXMultiplier * this->spiralRadius;
+	float modifiedRadius    = spiralXMultiplier * this->spiralRadius;
 
 	// To make the ball spiral we use a parameteric equation:
-	Vector2D ballTranslation(modifiedRadius * cos(circleDistTravelled) - modifiedRadius, (-this->spiralRadius * sin(circleDistTravelled)));
+	Vector2D ballTranslation(modifiedRadius * cos(circleDistTravelled) - modifiedRadius, 
+        (-this->spiralRadius * sin(circleDistTravelled)));
 
-	Point2D newBallPos = this->initialBallPosition + ballTranslation + (0.85f * this->initialBallVelocityMag * this->timeElapsed * this->initialBallVelocityDir);
+	Point2D newBallPos = this->initialBallPosition + ballTranslation + 
+        (0.85f * this->initialBallVelocityMag * this->timeElapsed * this->initialBallVelocityDir);
 	this->lastBallToBeAlive->SetCenterPosition(newBallPos);
 	
 	// Check to see if the spiral animation is completed... if it has then we move onto the next state

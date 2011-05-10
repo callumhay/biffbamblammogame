@@ -110,7 +110,7 @@ vapourTrailTex(NULL) {
 }
 
 GameESPAssets::~GameESPAssets() {
-	this->KillAllActiveEffects();
+	this->KillAllActiveEffects(true);
 	this->KillAllActiveTeslaLightningArcs();
 
 	// Delete any effect textures
@@ -234,7 +234,7 @@ GameESPAssets::~GameESPAssets() {
 /**
  * Kills all active effects currently being displayed in-game.
  */
-void GameESPAssets::KillAllActiveEffects() {
+void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
 	// Delete any leftover emitters
 	for (std::list<ESPEmitter*>::iterator iter = this->activeGeneralEmitters.begin();
 		iter != this->activeGeneralEmitters.end(); ++iter) {
@@ -275,20 +275,21 @@ void GameESPAssets::KillAllActiveEffects() {
 	}
 	this->activeItemDropEmitters.clear();
 
-	// Clear projectile emitters
-	for (std::map<const Projectile*, std::list<ESPPointEmitter*> >::iterator iter1 = this->activeProjectileEmitters.begin();
-		iter1 != this->activeProjectileEmitters.end(); ++iter1) {
-	
-			std::list<ESPPointEmitter*>& projEmitters = iter1->second;
-			
-			for (std::list<ESPPointEmitter*>::iterator iter2 = projEmitters.begin(); iter2 != projEmitters.end(); ++iter2) {
-				delete *iter2;
-				*iter2 = NULL;
-			}
-			projEmitters.clear();
-	}
-	this->activeProjectileEmitters.clear();
-
+    if (killProjectiles) {
+	    // Clear projectile emitters
+	    for (std::map<const Projectile*, std::list<ESPPointEmitter*> >::iterator iter1 = this->activeProjectileEmitters.begin();
+		    iter1 != this->activeProjectileEmitters.end(); ++iter1) {
+    	
+			    std::list<ESPPointEmitter*>& projEmitters = iter1->second;
+    			
+			    for (std::list<ESPPointEmitter*>::iterator iter2 = projEmitters.begin(); iter2 != projEmitters.end(); ++iter2) {
+				    delete *iter2;
+				    *iter2 = NULL;
+			    }
+			    projEmitters.clear();
+	    }
+	    this->activeProjectileEmitters.clear();
+    }
 
 	// Clear beam emitters
 	for (std::vector<ESPPointEmitter*>::iterator iter = this->beamEndEmitters.begin(); iter != this->beamEndEmitters.end(); ++iter) {
@@ -370,7 +371,6 @@ void GameESPAssets::KillAllActiveEffects() {
         }
     }
     this->boostBallEmitters.clear();
-
 }
 
 void GameESPAssets::KillAllActiveTeslaLightningArcs() {
