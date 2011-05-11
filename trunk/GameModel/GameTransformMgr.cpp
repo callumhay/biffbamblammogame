@@ -55,6 +55,7 @@ void GameTransformMgr::ClearSpecialCamEffects() {
 	this->paddleCamAnimations.clear();
 	this->ballCamAnimations.clear();
 	this->camFOVAnimations.clear();
+    this->bulletTimeCamAnimation.ClearLerp();
 }
 
 /** 
@@ -1010,14 +1011,20 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
 	assert(bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation || 
            bulletTimeAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
 
+    // Don't do anything if there's no boost model ...
+    const BallBoostModel* currBoostModel = gameModel.GetBallBoostModel();
+    if (currBoostModel == NULL) {
+        // Pop the animation off the queue and get out
+	    this->animationQueue.pop_front();
+        return;
+    }
+
 	// Clear any previous ball death animations
 	this->bulletTimeCamAnimation = AnimationMultiLerp<Orientation3D>(&this->currCamOrientation);
 
 	// Based on the animation, set the animations for the camera's orientation
     if (bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
-        const BallBoostModel* currBoostModel = gameModel.GetBallBoostModel();
-        assert(currBoostModel != NULL);
-        
+
         // Calculate the extent to which we should zoom in, this changes based
         // on the number of balls present - with more balls we make the border around them smaller
         // since it could be quite large, with a single ball we can make it larger... we also

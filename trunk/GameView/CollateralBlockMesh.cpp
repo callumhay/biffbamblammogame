@@ -23,6 +23,8 @@ CollateralBlockMesh::~CollateralBlockMesh() {
 
 void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                                const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
+    UNUSED_PARAMETER(dT);
+
 	float currRotation;
 	Vector3D shake;
 	Colour colour;
