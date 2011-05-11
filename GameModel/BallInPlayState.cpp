@@ -65,7 +65,12 @@ void BallInPlayState::BallReleaseKeyPressed() {
 
 void BallInPlayState::BallBoostDirectionPressed(int x, int y) {
     assert(this->gameModel->boostModel != NULL);
-    this->gameModel->boostModel->BallBoostDirectionPressed(x, y);
+    if (this->gameModel->AreControlsFlipped()) {
+        this->gameModel->boostModel->BallBoostDirectionPressed(-x, -y);
+    }
+    else {
+        this->gameModel->boostModel->BallBoostDirectionPressed(x, y);
+    }
 }
 
 void BallInPlayState::BallBoostDirectionReleased() {
@@ -186,11 +191,17 @@ void BallInPlayState::Tick(double seconds) {
 				// Tell the model that a ball collision occurred with the paddle
 				this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
+                int count = 0;
 				if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
 				    // Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
 				    // still see it fly into the void - of course, if the shield is active then no help is provided
                     this->AugmentBallDirectionToBeNotDownwards(*currBall);
 				}
+                else {
+                    // The shield paddle has some wonky collision detection so fix it so that it doesn't
+                    // iterate for too long
+                    count = 4;
+                }
 
 				// If there are multiple balls and the one that just hit the paddle is not
 				// the first one in the list, then we need to move this one to the front
@@ -198,14 +209,18 @@ void BallInPlayState::Tick(double seconds) {
 					ballToMoveToFront = currBall;
 				}
 
-				// Make sure that the ball is no longer colliding!
-				Vector2D tempN;
-				Collision::LineSeg2D tempLine;
-				double tempTime;
-				while (paddle->CollisionCheck(*currBall, 0.0, tempN, tempLine, tempTime)) {
-					currBall->SetCenterPosition(currBall->GetCenterPosition2D() + currBall->GetBounds().Radius() * n);
-				}
-
+                // Check to see whether the ball is hitting both a wall AND the paddle - if so the paddle should
+                // be repelled by the opposing force of the wall against the ball...
+                if (!paddle->UpdateForOpposingForceBallCollision(*currBall, seconds)) {
+				    // Make sure that the ball is no longer colliding!
+			        static Vector2D tempN;
+			        static Collision::LineSeg2D tempLine;
+			        static double tempTime;
+			        while (paddle->CollisionCheck(*currBall, 0.0, tempN, tempLine, tempTime) && count < 5) {
+				        currBall->SetCenterPosition(currBall->GetCenterPosition2D() + currBall->GetBounds().Radius() * n);
+                        count++;
+			        }
+                }
 			}
 		}
 

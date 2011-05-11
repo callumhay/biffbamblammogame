@@ -31,7 +31,7 @@ const Vector2D PlayerPaddle::DEFAULT_PADDLE_UP_VECTOR(0, 1);
 const Vector2D PlayerPaddle::DEFAULT_PADDLE_RIGHT_VECTOR(1, 0);
 
 // The difference in width per size change of the paddle
-const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.8f;
+const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.65f;
 
 // Number of seconds it takes for the paddle to change between sizes
 // (bigger is slower, smaller is faster)
@@ -1076,4 +1076,43 @@ std::list<PointAward> PlayerPaddle::GetPointsForHittingBall(const GameBall& ball
 
     timeSinceLastPtsAwarded = currSystemTime;
     return pointPairs;
+}
+
+/**
+ * Used to detect and react to situations where the ball is forced up against a wall by the paddle.
+ */
+bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, double dT) {
+    // Check to see if the ball is hitting the bounds of the level...
+    float ballMinX = ball.GetCenterPosition2D()[0] - ball.GetBounds().Radius();
+    float ballMaxX = ball.GetCenterPosition2D()[0] + ball.GetBounds().Radius();
+
+    static Vector2D normal;
+    static Collision::LineSeg2D collisionLine;
+    static double timeSinceCollision;
+
+    if (ballMinX <= this->minBound) {
+        // The ball is currently intersecting the line that defines the 
+        // minimum X position for the paddle to move to
+
+        // Check for the paddle collision...
+        if (this->CollisionCheck(ball, dT, normal, collisionLine, timeSinceCollision)) {
+            // The paddle is also colliding - we want to push the paddle back so that it is no longer colliding...
+            this->ApplyImpulseForce(std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed()));
+            return true;
+        }
+        
+    }
+    else if (ballMaxX >= this->maxBound) {
+        // The ball is currently intersecting the line that defines the
+        // maximum X position for the paddle to move to
+
+        // Check for the paddle collision...
+        if (this->CollisionCheck(ball, dT, normal, collisionLine, timeSinceCollision)) {
+            // The paddle is also colliding - we want to push the paddle back so that it is no longer colliding...
+            this->ApplyImpulseForce(std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed()));
+            return true;
+        }
+    }
+
+    return false;
 }

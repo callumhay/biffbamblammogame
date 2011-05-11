@@ -71,6 +71,17 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 			maxValue = Math.max(maxValue, countValueIter.next());
 		}
 		
+		// Set everything to NONE to begin with
+		for (int i = 0; i < powerUpsData.getRowCount(); i++) {
+			powerUpsData.setItemLikelihoodAtRow(i, ItemDrop.NO_LIKELIHOOD);
+		}
+		for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
+			powerNeutralsData.setItemLikelihoodAtRow(i, ItemDrop.NO_LIKELIHOOD);
+		}
+		for (int i = 0; i < powerDownsData.getRowCount(); i++) {
+			powerDownsData.setItemLikelihoodAtRow(i, ItemDrop.NO_LIKELIHOOD);
+		}
+		
 		Iterator<Entry<String, Integer>> hashEntryIter = itemCounts.entrySet().iterator();
 		while (hashEntryIter.hasNext()) {
 			Entry<String, Integer> currEntry = hashEntryIter.next();
@@ -266,9 +277,131 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 		return settings;
 	}
 	
+	public void DoApply() {
+		if (this.itemDropPiece == null) {
+			return;
+		}
+		
+		ItemDropTableModel powerUpsData      = (ItemDropTableModel)this.powerUpsTable.getModel();
+		ItemDropTableModel powerNeutralsData = (ItemDropTableModel)this.powerNeutralsTable.getModel();
+		ItemDropTableModel powerDownsData    = (ItemDropTableModel)this.powerDownsTable.getModel();
+		
+		ArrayList<String> itemDropTypeStrs = new ArrayList<String>();
+		
+		// Start with power-ups check to see if every power up is included with the same likelihood...
+		boolean allSame = true;
+		boolean allAreAllSame = true;
+		int commonLikelihood = powerUpsData.getItemLikelihoodAtRow(0);
+		if (commonLikelihood != ItemDrop.NO_LIKELIHOOD) {
+			for (int i = 0; i < powerUpsData.getRowCount(); i++) {
+				if (powerUpsData.getItemLikelihoodAtRow(i) != commonLikelihood) {
+					allSame = false;
+					break;
+				}
+			}
+		}
+		else {
+			allSame = false;
+		}
+		
+		if (allSame) {
+			itemDropTypeStrs.add("powerups");
+		}
+		else {
+			allAreAllSame = false;
+			// Add each power-up individually...
+			for (int i = 0; i < powerUpsData.getRowCount(); i++) {
+				for (int j = 0; j < powerUpsData.getItemLikelihoodAtRow(i); j++) {
+					itemDropTypeStrs.add(powerUpsData.getItemNameAtRow(i));
+				}
+			}
+		}
+		
+		// Now do the same for power-neutrals
+		allSame = true;
+		commonLikelihood = powerNeutralsData.getItemLikelihoodAtRow(0);
+		if (commonLikelihood != ItemDrop.NO_LIKELIHOOD) {
+			for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
+				if (powerNeutralsData.getItemLikelihoodAtRow(i) != commonLikelihood) {
+					allSame = false;
+					break;
+				}
+			}
+		}
+		else {
+			allSame = false;
+		}
+
+		if (allSame) {
+			itemDropTypeStrs.add("powerneutrals");
+		}
+		else {
+			allAreAllSame = false;
+			// Add each power-neutral individually...
+			for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
+				for (int j = 0; j < powerNeutralsData.getItemLikelihoodAtRow(i); j++) {
+					itemDropTypeStrs.add(powerNeutralsData.getItemNameAtRow(i));
+				}
+			}
+		}
+		
+		// And finally, power-downs...
+		allSame = true;
+		commonLikelihood = powerDownsData.getItemLikelihoodAtRow(0);
+		if (commonLikelihood != ItemDrop.NO_LIKELIHOOD) {
+			for (int i = 0; i < powerDownsData.getRowCount(); i++) {
+				if (powerDownsData.getItemLikelihoodAtRow(i) != commonLikelihood) {
+					allSame = false;
+					break;
+				}
+			}
+		}
+		else {
+			allSame = false;
+		}
+		if (allSame) {
+			itemDropTypeStrs.add("powerdowns");
+		}
+		else {
+			allAreAllSame = false;
+			// Add each power-down individually...
+			for (int i = 0; i < powerDownsData.getRowCount(); i++) {
+				for (int j = 0; j < powerDownsData.getItemLikelihoodAtRow(i); j++) {
+					itemDropTypeStrs.add(powerDownsData.getItemNameAtRow(i));
+				}
+			}
+		}
+		
+		if (allAreAllSame) {
+			itemDropTypeStrs.clear();
+			itemDropTypeStrs.add("all");
+		}
+		else {
+			// Go through the string and eliminate duplicates...
+			Iterator<String> iter = itemDropTypeStrs.iterator();
+			String currStr = "";
+			String lastStr = "";
+			while (iter.hasNext()) {
+				currStr = iter.next();
+				if (currStr.equals(lastStr)) {
+					iter.remove();
+				}
+				lastStr = currStr;
+			}
+		}
+		
+		this.itemDropPiece.setItemDropTypes(itemDropTypeStrs);
+		
+
+		if (this.levelEditWindow != null) {
+			this.levelEditWindow.setItemDropsForLevelEditDocument(this.getItemDropSettings());
+		}
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("OK")) {
+			this.DoApply();
 			this.exitWithOK = true;
 			this.setVisible(false);
 		}
@@ -277,93 +410,7 @@ public class EditItemDropsDialog extends JDialog implements ActionListener {
 			this.setVisible(false);
 		}
 		else if (e.getActionCommand().equals("Apply")) {
-			if (this.itemDropPiece != null) {
-				ItemDropTableModel powerUpsData      = (ItemDropTableModel)this.powerUpsTable.getModel();
-				ItemDropTableModel powerNeutralsData = (ItemDropTableModel)this.powerNeutralsTable.getModel();
-				ItemDropTableModel powerDownsData    = (ItemDropTableModel)this.powerDownsTable.getModel();
-				
-				ArrayList<String> itemDropTypeStrs = new ArrayList<String>();
-				
-				// Start with power-ups check to see if every power up is included with the same likelihood...
-				boolean allSame = true;
-				boolean allAreAllSame = true;
-				int commonLikelihood = powerUpsData.getItemLikelihoodAtRow(0);
-				for (int i = 0; i < powerUpsData.getRowCount(); i++) {
-					if (powerUpsData.getItemLikelihoodAtRow(i) != commonLikelihood) {
-						allSame = false;
-						break;
-					}
-				}
-				
-				if (allSame) {
-					itemDropTypeStrs.add("powerups");
-				}
-				else {
-					allAreAllSame = false;
-					// Add each power-up individually...
-					for (int i = 0; i < powerUpsData.getRowCount(); i++) {
-						for (int j = 0; j < powerUpsData.getItemLikelihoodAtRow(i); j++) {
-							itemDropTypeStrs.add(powerUpsData.getItemNameAtRow(i));
-						}
-					}
-				}
-				
-				// Now do the same for power-neutrals
-				allSame = true;
-				commonLikelihood = powerNeutralsData.getItemLikelihoodAtRow(0);
-				for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
-					if (powerNeutralsData.getItemLikelihoodAtRow(i) != commonLikelihood) {
-						allSame = false;
-						break;
-					}
-				}
-				if (allSame) {
-					itemDropTypeStrs.add("powerneutrals");
-				}
-				else {
-					allAreAllSame = false;
-					// Add each power-neutral individually...
-					for (int i = 0; i < powerNeutralsData.getRowCount(); i++) {
-						for (int j = 0; j < powerNeutralsData.getItemLikelihoodAtRow(i); j++) {
-							itemDropTypeStrs.add(powerNeutralsData.getItemNameAtRow(i));
-						}
-					}
-				}
-				
-				// And finally, power-downs...
-				allSame = true;
-				commonLikelihood = powerDownsData.getItemLikelihoodAtRow(0);
-				for (int i = 0; i < powerDownsData.getRowCount(); i++) {
-					if (powerDownsData.getItemLikelihoodAtRow(i) != commonLikelihood) {
-						allSame = false;
-						break;
-					}
-				}
-				if (allSame) {
-					itemDropTypeStrs.add("powerdowns");
-				}
-				else {
-					allAreAllSame = false;
-					// Add each power-down individually...
-					for (int i = 0; i < powerDownsData.getRowCount(); i++) {
-						for (int j = 0; j < powerDownsData.getItemLikelihoodAtRow(i); j++) {
-							itemDropTypeStrs.add(powerDownsData.getItemNameAtRow(i));
-						}
-					}
-				}
-				
-				if (allAreAllSame) {
-					itemDropTypeStrs.clear();
-					itemDropTypeStrs.add("all");
-				}
-				
-				this.itemDropPiece.setItemDropTypes(itemDropTypeStrs);
-				
-			}
-			else if (this.levelEditWindow != null) {
-				this.levelEditWindow.setItemDropsForLevelEditDocument(this.getItemDropSettings());
-			}
-
+			this.DoApply();
 		}
 		else if (e.getActionCommand().equals("AllPowerUpsComboBox")) {
 			ItemDropTableModel powerUpsData      = (ItemDropTableModel)this.powerUpsTable.getModel();

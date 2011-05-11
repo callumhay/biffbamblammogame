@@ -20,7 +20,7 @@ const double BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS       = 0.15;
 const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 1.3;
 
 // Amount of time it takes for a ball boost to charge
-const float BallBoostModel::BOOST_CHARGE_TIME_SECONDS = 5.0f;
+const float BallBoostModel::BOOST_CHARGE_TIME_SECONDS = 18.5f;
 
 // The time dialation factor used (multiplies the delta time of each game frame)
 // when full bullet time is active

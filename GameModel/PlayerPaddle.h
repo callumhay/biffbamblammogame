@@ -217,6 +217,8 @@ public:
 	bool CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const;
 	bool CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType, const BoundingLines& bounds) const;
 	
+    bool UpdateForOpposingForceBallCollision(const GameBall& ball, double dT);
+
 	Collision::AABB2D GetPaddleAABB(bool includeAttachedBall) const;
     std::list<PointAward> GetPointsForHittingBall(const GameBall& ball) const;
 
@@ -291,7 +293,7 @@ private:
 
 	Collision::Circle2D CreatePaddleShieldBounds() const;
 	void GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const;
-    
+
     DISALLOW_COPY_AND_ASSIGN(PlayerPaddle);
 };
 
@@ -330,7 +332,7 @@ inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector
 			collisionLine = Collision::LineSeg2D(approxCircleCollisionPt - perpendicularVec, approxCircleCollisionPt + perpendicularVec);
 			// A rough approximate of the the time since collision is the distance between the 
 			// ball's center and the shield barrier divided by the ball's velocity
-			timeSinceCollision = Vector2D::Magnitude(approxCircleCollisionPt - ball.GetBounds().Center()) / ball.GetSpeed();
+            timeSinceCollision = Vector2D::Magnitude(approxCircleCollisionPt - ball.GetBounds().Center() + ball.GetBounds().Radius()*n) / ball.GetSpeed();
 
 			return true;
 		}
