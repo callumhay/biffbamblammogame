@@ -37,6 +37,8 @@ private:
 	int windowWidth;
 	int windowHeight;
 
+    static float aspectRatio;
+        
 public:
 	static const float FOV_ANGLE_IN_DEGS;
 	static const float NEAR_PLANE_DIST;
@@ -70,6 +72,7 @@ public:
 		assert(w > 0 && h > 0);
 		this->windowWidth = w;
 		this->windowHeight = h;
+        aspectRatio = static_cast<float>(w) / static_cast<float>(h);
 	}
 	int GetWindowWidth() const {
 		return this->windowWidth;
@@ -77,6 +80,10 @@ public:
 	int GetWindowHeight() const {
 		return this->windowHeight;
 	}
+    inline static float Camera::GetAspectRatio() {
+        return Camera::aspectRatio;
+    }
+
 	float GetFOVAngleInDegrees() const {
 		return this->fovAngleInDegrees;
 	}

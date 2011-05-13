@@ -347,11 +347,11 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement) {
 		else {
 			currAcceleration = this->decceleration;
 		}
-		this->currSpeed = std::max<float>(0.0f, std::min<float>(this->maxSpeed, this->currSpeed + currAcceleration * seconds));
+		this->currSpeed = std::max<float>(0.0f, std::min<float>(this->maxSpeed, this->currSpeed + currAcceleration * seconds + this->impulse * seconds));
 		distanceTravelled = this->GetSpeed() * seconds;
 	}
 
-	float newCenterX = this->centerPos[0] + distanceTravelled + this->impulse;
+	float newCenterX = this->centerPos[0] + distanceTravelled /*+ this->impulse*/;
 	this->impulse = 0.0f;
 
 	float minNewXPos = newCenterX - this->currHalfWidthTotal;
