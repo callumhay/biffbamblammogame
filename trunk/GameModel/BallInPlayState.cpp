@@ -236,7 +236,7 @@ void BallInPlayState::Tick(double seconds) {
                 pieceIter != collisionPieces.end(); ++pieceIter) {
 				
 				LevelPiece *currPiece = *pieceIter;
-
+                
 				didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
 				if (didCollideWithBlock) {
 					// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
@@ -302,14 +302,18 @@ void BallInPlayState::Tick(double seconds) {
 						this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 					}
 					
+                    bool currPieceIsBreakableByBall = currPiece->CanBeDestroyedByBall();
 					// Tell the model that a ball collision occurred with currPiece
                     this->gameModel->CollisionOccurred(*currBall, currPiece);
                     
                     // Recalculate the blocks we're dealing with in this loop since 
-                    // some blocks may no longer exist after a collision
-				    collisionPieces = currLevel->GetLevelPieceCollisionCandidates(currBall->GetBounds().Center(), 
-                                                                                  currBall->GetBounds().Radius());
-                    pieceIter = collisionPieces.begin();
+                    // some blocks may no longer exist after a collision - of course this would only happen if the piece
+                    // that collided could be destroyed during this loop by the ball
+                    if (currPieceIsBreakableByBall) {
+				        collisionPieces = currLevel->GetLevelPieceCollisionCandidates(currBall->GetBounds().Center(), 
+                                                                                      currBall->GetBounds().Radius());
+                        pieceIter = collisionPieces.begin();
+                    }
                 }
 			}
 		}

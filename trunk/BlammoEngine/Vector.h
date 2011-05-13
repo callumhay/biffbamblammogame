@@ -152,7 +152,8 @@ inline void Vector2D::Rotate(float angInDegs) {
 }
 
 inline bool Vector2D::IsZero() const {
-    return (*this == Vector2D(0,0));
+    static Vector2D zeroVec2D(0,0);
+    return (*this == zeroVec2D);
 }
 
 // 3D Vector -----------------------------------------------------
