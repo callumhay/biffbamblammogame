@@ -294,9 +294,8 @@ void BallInPlayState::Tick(double seconds) {
 						
 						// Make sure it's normalized (just use signof function to get either -1 or 1)
 						xRecoilDir = NumberFuncs::SignOf(xRecoilDir);
-						
 						// Now we need to apply an impulse to the paddle in the direction of the recoil...
-						paddle->ApplyImpulseForce(fabs(paddle->GetSpeed()) * xRecoilDir);
+                        paddle->ApplyImpulseForce(std::max<float>(PlayerPaddle::DEFAULT_MAX_SPEED/2.0f * xRecoilDir, fabs(paddle->GetSpeed()) * xRecoilDir));
 					}
 					else {
 						// Make the ball react to the collision
