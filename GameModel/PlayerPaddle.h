@@ -448,7 +448,7 @@ inline Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) c
 inline void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce) {
 	assert(xDirectionalForce != 0.0f);
 	this->lastDirection = NumberFuncs::SignOf(xDirectionalForce);
-	this->impulse += xDirectionalForce;
+	this->impulse = xDirectionalForce;
 }
 
 inline void PlayerPaddle::GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const {

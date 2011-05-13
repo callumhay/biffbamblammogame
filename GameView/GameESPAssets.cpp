@@ -4842,8 +4842,9 @@ void GameESPAssets::DrawBallBoostingEffects(double dT, const Camera& camera) {
 			    // Not dead yet, update its position based on the current ball's positon
                 // and draw/tick it
                 currEmitter->SetEmitPosition(currBall->GetCenterPosition());
-                currEmitter->SetEmitDirection(Vector3D(-currBall->GetDirection()));
-
+                if (!currBall->GetDirection().IsZero()) {
+                    currEmitter->SetEmitDirection(Vector3D(-currBall->GetDirection()));
+                }
 			    currEmitter->Draw(camera);
 			    currEmitter->Tick(dT);
 			    ++iter2;

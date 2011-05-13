@@ -192,7 +192,7 @@ void GameTransformMgr::SetBulletTimeCamera(bool turnOnBulletTimeCam) {
  * that the default camera position is calculated and made available to the view.
  */
 void GameTransformMgr::SetupLevelCameraDefaultPosition(const GameLevel& level) {
-    static const float VERT_BORDER_LOOKS_NICE_RATIO  = 8.0f / (12.0f * LevelPiece::PIECE_WIDTH);
+    static const float VERT_BORDER_LOOKS_NICE_RATIO  = 8.2f / (12.0f * LevelPiece::PIECE_WIDTH);
 
 	// Calculate the distance along the z axis that the camera needs to be from the origin in order
 	// to see the entire level - this will be the default translation for the camera
