@@ -76,7 +76,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 							Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
 
 
-    static const int NUM_COLLISON_SAMPLES = 12;
+    static const int NUM_COLLISON_SAMPLES = 15;
 
     bool zeroVelocity = (velocity == Vector2D(0.0f, 0.0f));
     int numCollisionSamples;
