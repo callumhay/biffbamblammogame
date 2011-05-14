@@ -436,9 +436,9 @@ void SelectLevelMenuState::GoToStartLevel() {
 void SelectLevelMenuState::SetupLevelItems() {
     const Camera& camera = this->display->GetCamera();
 
-    static const int TITLE_TO_ITEM_Y_GAP_SIZE = 80;
+    static const int TITLE_TO_ITEM_Y_GAP_SIZE = 57;
     static const int SIDE_TO_ITEM_GAP_SIZE    = 60;
-    static const int ITEM_X_GAP_SIZE          = 40;
+    static const int ITEM_X_GAP_SIZE          = 50;
     static const int ITEM_Y_GAP_SIZE          = 50;
     static const int MIN_ITEM_SIZE            = 180;
 

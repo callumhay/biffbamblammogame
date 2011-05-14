@@ -121,14 +121,19 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
 // Apply the crazy ball item's effect to the velocity of the ball by changing it somewhat randomly
 // and strangely to make it difficult to track where the ball will go
 void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity) {
-	// If the ball has no velocity then just exit, we're not going to be able to change it...
-	if (currVelocity == Vector2D(0.0f, 0.0f)) {
-		return;
-	}
-
 	static double TIME_TRACKER = 0.0;
 	static double NEXT_TIME    = 0.0;
 	static const double WAIT_TIME_BETWEEN_COLLISIONS = 1.00;
+
+	// If the ball has no velocity then just exit, we're not going to be able to change it...
+    if (currVelocity == Vector2D(0.0f, 0.0f)) {
+        // We reset the time tracker and make sure the next time is fairly large so that
+        // if the ball is stuck to a sticky paddle or some such thing, that it doesn't go crazy (i.e., out of play)
+        // immediately after the player lets the ball go
+        TIME_TRACKER = 0.0;
+        NEXT_TIME    = 1.5;
+		return;
+	}
 
 	TIME_TRACKER += dT;
 
