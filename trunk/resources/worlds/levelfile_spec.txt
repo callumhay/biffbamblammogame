@@ -58,4 +58,8 @@ The following specifies the .lvl format.
 // contained within curly brackets at the end of the block signature.
 // e.g., R{12}, X(z,j){1}, ...
 
+// F(a) - One-way block:
+// a : The direction that the block allows the ball to travel through it, allowable options are:
+//     {u, d, l, r} for up, down, left and right, respectively.
+
 <block list in order of top-left to bottom-right>

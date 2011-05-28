@@ -130,17 +130,27 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         // Calculate the normal of the collision along with the line segment where the collision occurred...
         // Find a line with a normal that is pointing the most opposite to the velocity...
         Vector2D nVelocity = Vector2D::Normalize(velocity);
-        float dotProductVal;
+
+        // Go through all of the collision list and find the lowest possible dot product value
+        // for collision between the given velocity and the normal of the colliding line
+        float lowestDotProduct = FLT_MAX;
         for (std::list<size_t>::const_iterator iter = collisionList.begin(); 
              iter != collisionList.end(); ++iter) {
-
+            
             const Vector2D& currNormal = this->normals[*iter];
-            dotProductVal = Vector2D::Dot(currNormal, nVelocity);
-            if (dotProductVal < 0.0) {
-               n = n + currNormal;
-            }
-            else {
-               n = n + (0.25f) * currNormal;
+            lowestDotProduct = std::min<float>(lowestDotProduct, Vector2D::Dot(currNormal, nVelocity));
+        }
+
+        // Go through the collision list again, this time accumulate the normals that are closest
+        // to the opposite of the velocity...
+        float tempDotProductVal;
+        for (std::list<size_t>::const_iterator iter = collisionList.begin(); 
+             iter != collisionList.end(); ++iter) {
+        
+            const Vector2D& currNormal = this->normals[*iter];
+            tempDotProductVal = Vector2D::Dot(currNormal, nVelocity);
+            if (fabs(tempDotProductVal - lowestDotProduct) < 0.1) {
+                n = n + currNormal;
             }
         }
     }

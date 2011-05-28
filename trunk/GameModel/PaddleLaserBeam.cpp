@@ -128,7 +128,7 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 				// In the case where a portal block is collided with then we need to account for its sibling
 				// as a collider for the new beam we spawn
 				if (pieceCollidedWith->GetType() == LevelPiece::Portal) {
-					PortalBlock* portalBlock = dynamic_cast<PortalBlock*>(pieceCollidedWith);
+					PortalBlock* portalBlock = static_cast<PortalBlock*>(pieceCollidedWith);
 					assert(portalBlock != NULL);
 					pieceCollidedWith = portalBlock->GetSiblingPortal();
 					insertResult = piecesCollidedWith.insert(pieceCollidedWith);

@@ -26,9 +26,9 @@ powerNeutralSparkEmitter(NULL), powerDownSparkEmitter(NULL) {
 	this->LoadMesh();
 
 	// Load emitters that come out of the block to indicate that it drops items
-	this->flareTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+	this->flareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
 	assert(this->flareTex != NULL);
-	this->sparkTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
+	this->sparkTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
 	assert(this->sparkTex != NULL);
 
 	Point3D minPt(-LevelPiece::PIECE_WIDTH / 2.0f, -LevelPiece::PIECE_HEIGHT / 2.0f, -LevelPiece::PIECE_DEPTH / 2.0f);

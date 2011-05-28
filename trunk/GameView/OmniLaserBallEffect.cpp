@@ -19,11 +19,11 @@
 #include "../ResourceManager.h"
 
 OmniLaserBallEffect::OmniLaserBallEffect() : sentryTexture(NULL) {
-    this->sentryTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, 
+    this->sentryTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, 
         Texture::Trilinear, GL_TEXTURE_2D));
     assert(this->sentryTexture != NULL);
     
-    //this->flareTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, 
+    //this->flareTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, 
     //    Texture::Trilinear, GL_TEXTURE_2D));
     //assert(this->flareTexture != NULL);
 

@@ -28,6 +28,7 @@
 #include "TeslaBlock.h"
 #include "ItemDropBlock.h"
 #include "SwitchBlock.h"
+#include "OneWayBlock.h"
 #include "GameModel.h"
 #include "Projectile.h"
 #include "PointAward.h"
@@ -55,6 +56,7 @@ const char GameLevel::COLLATERAL_BLOCK_CHAR	    = 'L';
 const char GameLevel::TESLA_BLOCK_CHAR          = 'A';
 const char GameLevel::ITEM_DROP_BLOCK_CHAR      = 'D';
 const char GameLevel::SWITCH_BLOCK_CHAR         = 'W';
+const char GameLevel::ONE_WAY_BLOCK_CHAR        = 'F';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -701,6 +703,40 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
                     }
                     break;
 
+                case GameLevel::ONE_WAY_BLOCK_CHAR:
+                    {
+                        // F(a) - One-way block:
+                        // a : The direction that the block allows the ball to travel through it, allowable options are:
+                        //     {u, d, l, r} for up, down, left and right, respectively.
+                        
+                        char tempChar;
+                        *inFile >> tempChar;
+					    if (tempChar != '(') {
+					        debug_output("ERROR: poorly formed one-way block syntax, missing '('");
+						    break;
+					    }
+
+
+                        // The next value will be the direction of the one-way...
+                        char oneWayChar;
+                        OneWayBlock::OneWayDir oneWayEnum;
+                        *inFile >> oneWayChar;
+                        if (!OneWayBlock::ConvertCharToOneWayDir(oneWayChar, oneWayEnum)) {
+					        debug_output("ERROR: illegal character found in one-way block syntax, character must be one of 'u', 'd', 'l' or 'r'.");
+						    break;
+                        }
+
+					    // Read in the closing bracket
+					    *inFile >> tempChar;
+					    if (tempChar != ')') {
+						    debug_output("ERROR: poorly formed one-way block syntax, missing ')'");
+						    break;
+					    }
+
+                        newPiece = new OneWayBlock(oneWayEnum, pieceWLoc, pieceHLoc);
+                    }
+                    break;
+
 				default:
 					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc);
 					delete inFile;
@@ -1038,12 +1074,19 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const Projectile* r
 	}
 
 	// EVENT: Rocket exploded!!
-	const PaddleRocketProjectile* rocketProjectile = dynamic_cast<const PaddleRocketProjectile*>(rocket);
+	const PaddleRocketProjectile* rocketProjectile = static_cast<const PaddleRocketProjectile*>(rocket);
 	assert(rocketProjectile != NULL);
 	GameEventManager::Instance()->ActionRocketExploded(*rocketProjectile);
 
 	return resultPiece;
 }
+void GameLevel::RocketExplosionNoPieces(GameModel* gameModel, const Projectile* rocket) {
+	// EVENT: Rocket exploded!!
+	const PaddleRocketProjectile* rocketProjectile = static_cast<const PaddleRocketProjectile*>(rocket);
+	assert(rocketProjectile != NULL);
+	GameEventManager::Instance()->ActionRocketExploded(*rocketProjectile);
+}
+
 
 std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex) {
 	std::vector<LevelPiece*> affectedPieces;
@@ -1191,7 +1234,10 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const PlayerPa
  * Returns: The first piece closest to the origin of the given ray that collides with it, NULL
  * if no collision found.
  */
-LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray, std::set<const LevelPiece*> ignorePieces, float& rayT, float toleranceRadius) const {
+LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
+                                                  std::set<const LevelPiece*> ignorePieces,
+                                                  float& rayT, float toleranceRadius) const {
+
 	// Step along the ray - not a perfect algorithm but will result in something very reasonable
 	const float LEVEL_WIDTH					 = this->GetLevelUnitWidth();
 	const float LEVEL_HEIGHT				 = this->GetLevelUnitHeight();
@@ -1228,7 +1274,7 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray, s
 				}
 				else if (toleranceRadius != 0.0f) {
 					toleranceCircle.SetCenter(currSamplePoint);
-					if (currSamplePiece->CollisionCheck(toleranceCircle)) {
+                    if (currSamplePiece->CollisionCheck(toleranceCircle, ray.GetUnitDirection())) {
 						// TODO: Project the center onto the ray...
 						minRayT = i * STEP_SIZE;
 						returnPiece = currSamplePiece;
@@ -1503,7 +1549,7 @@ void GameLevel::InitAfterLevelLoad(GameModel* model) {
 		for (size_t w = 0; w < this->currentLevelPieces[h].size(); w++) {
 			LevelPiece* currPiece = this->currentLevelPieces[h][w];
 			if (currPiece->GetType() == LevelPiece::Tesla) {
-				TeslaBlock* currTeslaBlk = dynamic_cast<TeslaBlock*>(currPiece);
+				TeslaBlock* currTeslaBlk = static_cast<TeslaBlock*>(currPiece);
 				assert(currTeslaBlk != NULL);
 				std::list<TeslaBlock*> activeConnectedBlks = currTeslaBlk->GetLightningArcTeslaBlocks();
 				for (std::list<TeslaBlock*>::const_iterator iter = activeConnectedBlks.begin(); iter != activeConnectedBlks.end(); ++iter) {

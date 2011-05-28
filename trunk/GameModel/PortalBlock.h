@@ -91,9 +91,8 @@ public:
 	}
 
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
-	bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	bool CollisionCheck(const BoundingLines& boundingLines) const;
+	bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
                       const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
                       const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
@@ -111,6 +110,17 @@ protected:
 
 	static bool portalGeneratorReset;
 
+    DISALLOW_COPY_AND_ASSIGN(PortalBlock);
 };
+
+inline bool PortalBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	return this->bounds.CollisionCheck(ray, rayT);	
+}
+
+inline bool PortalBlock::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
+    UNUSED_PARAMETER(velDir);
+	return this->bounds.CollisionCheck(boundingLines);
+}
+
 
 #endif // __PORTALBLOCK_H__

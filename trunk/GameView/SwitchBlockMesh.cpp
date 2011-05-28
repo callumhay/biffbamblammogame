@@ -22,15 +22,15 @@ greenOnSwitchTexture(NULL), redOnSwitchTexture(NULL), offSwitchTexture(NULL), ha
 haloExpandPulse(1.0f, 3.0f), haloFader(1.0f, 0.15f) {
     this->LoadMesh();
 
-    this->greenOnSwitchTexture  = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_GREEN_ON_SWITCH, Texture::Trilinear));
-    this->redOnSwitchTexture    = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_RED_ON_SWITCH, Texture::Trilinear));
-    this->offSwitchTexture      = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_OFF_SWITCH, Texture::Trilinear));
+    this->greenOnSwitchTexture  = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_GREEN_ON_SWITCH, Texture::Trilinear));
+    this->redOnSwitchTexture    = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_RED_ON_SWITCH, Texture::Trilinear));
+    this->offSwitchTexture      = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_OFF_SWITCH, Texture::Trilinear));
     assert(this->greenOnSwitchTexture != NULL);
     assert(this->redOnSwitchTexture != NULL);
     assert(this->offSwitchTexture != NULL);
 
 	assert(this->haloTexture == NULL);
-	this->haloTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+	this->haloTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 	assert(this->haloTexture != NULL);
 
     this->InitEmitters();
@@ -220,8 +220,8 @@ particleFader(1, 0.1f), particleGrower(1.0f, 1.5f) {
     assert(switchBlock != NULL);
     assert(triggeredPiece != NULL);
     
-    this->glowBitTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear, GL_TEXTURE_2D));
-    this->sparkleTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear, GL_TEXTURE_2D));
+    this->glowBitTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear, GL_TEXTURE_2D));
+    this->sparkleTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear, GL_TEXTURE_2D));
     this->glowEmitter1 = this->BuildGlowEmitter(triggeredPiece->GetCenter(), this->glowBitTexture);
     this->glowEmitter2 = this->BuildGlowEmitter(triggeredPiece->GetCenter(), this->sparkleTexture);
     

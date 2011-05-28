@@ -66,7 +66,7 @@ currState(NULL) {
 		// In the case of the cannon state (i.e., the ball is inside a cannon block) we don't copy that
 		// (since only one ball can be inside the cannon block at once), and we just take the previous state
 		// and copy that instead...
-		InCannonBallState* cannonState = dynamic_cast<InCannonBallState*>(gameBall.currState);
+		InCannonBallState* cannonState = static_cast<InCannonBallState*>(gameBall.currState);
 		assert(cannonState != NULL);
 		BallState* newState = cannonState->GetPreviousState();
 		assert(newState != NULL);

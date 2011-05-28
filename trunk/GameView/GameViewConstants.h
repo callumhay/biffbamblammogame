@@ -219,7 +219,7 @@ public:
 	const Point3D DEFAULT_PADDLE_KEY_LIGHT_POSITION;
 	const Point3D DEFAULT_PADDLE_FILL_LIGHT_POSITION;
 
-	// World specific path constants ************************
+	// General Mesh Constants ******************************
 	const char* BALL_MESH;
 	const char* SPIKEY_BALL_MESH;
 	const char* BASIC_BLOCK_MESH_PATH;
@@ -240,6 +240,13 @@ public:
 	const char* PADDLE_BEAM_ATTACHMENT_MESH;
 	const char* PADDLE_STICKY_ATTACHMENT_MESH;
 	const char* PADDLE_ROCKET_MESH;
+
+    const char* ONE_WAY_BLOCK_UP_MESH;
+    const char* ONE_WAY_BLOCK_DOWN_MESH;
+    const char* ONE_WAY_BLOCK_LEFT_MESH;
+    const char* ONE_WAY_BLOCK_RIGHT_MESH;
+
+    // World specific path constants ************************
 
 	// DECO WORLD
 	const char* DECO_PADDLE_MESH;

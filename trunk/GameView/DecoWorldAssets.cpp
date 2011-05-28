@@ -106,15 +106,15 @@ DecoWorldAssets::~DecoWorldAssets() {
 void DecoWorldAssets::InitializeEmitters() {
 	// Load the textures for the emitter particles
 	assert(this->spiralTexSm == NULL);
-	this->spiralTexSm = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_SMALL, Texture::Trilinear, GL_TEXTURE_2D));
+	this->spiralTexSm = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_SMALL, Texture::Trilinear, GL_TEXTURE_2D));
 	assert(this->spiralTexSm != NULL);
 	
 	assert(this->spiralTexMed == NULL);
-	this->spiralTexMed = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_MEDIUM, Texture::Trilinear, GL_TEXTURE_2D));
+	this->spiralTexMed = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_MEDIUM, Texture::Trilinear, GL_TEXTURE_2D));
 	assert(this->spiralTexMed != NULL);
 
 	assert(this->spiralTexLg == NULL);
-	this->spiralTexLg = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_LARGE, Texture::Trilinear, GL_TEXTURE_2D));
+	this->spiralTexLg = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPIRAL_LARGE, Texture::Trilinear, GL_TEXTURE_2D));
 	assert(this->spiralTexLg != NULL);
 
 	// Setup the spiral emitters that come out at the very back, behind the buildings

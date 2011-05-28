@@ -118,6 +118,7 @@ private:
 	void ClearLiveItems();
 	void ClearActiveTimers();
 	void ClearStatusUpdatePieces();
+    void ClearBallsToOne();
 
 	bool RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type);
     void RemoveActiveGameItemsForThisBallOnly(const GameBall* ball);

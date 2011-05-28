@@ -45,21 +45,22 @@ LevelPiece::~LevelPiece() {
 // Static function to determine if the piece type given is valid
 bool LevelPiece::IsValidLevelPieceType(int pieceType) {
     switch (pieceType) {
-        case Breakable:
-        case Solid:
-        case Empty:
-        case Bomb:
-        case SolidTriangle:
-        case BreakableTriangle:
-        case Ink:
-        case Prism:
-        case Portal:
-        case PrismTriangle:
-        case Cannon:
-        case Collateral:
-        case Tesla:
-        case ItemDrop:
-        case Switch:
+        case LevelPiece::Breakable:
+        case LevelPiece::Solid:
+        case LevelPiece::Empty:
+        case LevelPiece::Bomb:
+        case LevelPiece::SolidTriangle:
+        case LevelPiece::BreakableTriangle:
+        case LevelPiece::Ink:
+        case LevelPiece::Prism:
+        case LevelPiece::Portal:
+        case LevelPiece::PrismTriangle:
+        case LevelPiece::Cannon:
+        case LevelPiece::Collateral:
+        case LevelPiece::Tesla:
+        case LevelPiece::ItemDrop:
+        case LevelPiece::Switch:
+        case LevelPiece::OneWay:
             return true;
         default:
             assert(false);

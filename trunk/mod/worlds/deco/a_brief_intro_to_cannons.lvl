@@ -1,9 +1,9 @@
 A Brief Introduction to Cannons
 15 25
-S S S S S S S S S S S S S S S 
-S E E E E E E E E E E E E E S 
-S E C(180) E O L E E E E E E C(270) E S 
-S E E E E E E E E E E E E E S 
+S S S S S S S S S S S S S T(S,ll) E 
+S E E E F(l) E E E E E E E E S E 
+S E C(180) E O L E E E E E E C(270) S E 
+S E E E F(l) E E E E E E E E S S 
 S E E E S R R R R R R G G G S 
 S E E E S R R R R R R G G G S 
 S E E E S E E E E E E E E E S 
@@ -11,20 +11,20 @@ S R B R S E E E E I E E E E S
 S E R E S E E E E E E E E E S 
 S E E E S O R O R O R G Y G S 
 S E E E S Y O Y O Y O Y O Y S 
-S E E E E E E E Y O Y O Y O S 
-S C(180) E E O E E C(270) O Y O Y O Y S 
-S E E E E E E E Y G Y G Y G S 
+S E E E F(l) E E E T(S,ll) O Y O Y O S 
+S C(180) E E O E E C(270) S Y O Y O Y S 
+S E E E F(l) E E E T(S,ul) G Y G Y G S 
 S E E E S Y G Y G Y G Y G Y S 
 S E E E S G Y G Y G Y G Y G S 
 S E E E S E E E E E E E E E S 
 S E E E S E E E E E E E E E S 
 S B B B S E E E E E E E E E S 
 S R R R S E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E S 
+E E E E F(r) E E E E E E E E E S 
+E E E E F(r) E E E E E E E E E S 
+E E E E F(r) E E E E E E E E E S 
+E E C(90) E F(r) E E E E E E E E E S 
+E C(90) E E F(r) E E E E E E E E E S 
 
 PaddleGrow 2
 PoisonPaddle 1

@@ -225,6 +225,11 @@ PADDLE_BEAM_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_beam_attachment.obj"),
 PADDLE_STICKY_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_sticky_attachment.obj"),
 PADDLE_ROCKET_MESH(MESH_DIRECTORY "/paddle_rocket.obj"),
 
+ONE_WAY_BLOCK_UP_MESH(MESH_DIRECTORY    "/one_way_block_up.obj"),
+ONE_WAY_BLOCK_DOWN_MESH(MESH_DIRECTORY  "/one_way_block_down.obj"),
+ONE_WAY_BLOCK_LEFT_MESH(MESH_DIRECTORY  "/one_way_block_left.obj"),
+ONE_WAY_BLOCK_RIGHT_MESH(MESH_DIRECTORY "/one_way_block_right.obj"),
+
 // Deco Asset Paths
 DECO_PADDLE_MESH(MESH_DIRECTORY "/deco_paddle.obj"),
 DECO_BACKGROUND_MESH(MESH_DIRECTORY "/deco_background.obj"),

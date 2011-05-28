@@ -33,17 +33,17 @@ scale(0.5f), frequency(0.5f), colour(GameModelConstants::GetInstance()->GHOST_BA
 	// Initialize CG simple float parameters
 	this->timerParam					= cgGetNamedEffectParameter(this->cgEffect, "Timer");
 	this->scaleParam					= cgGetNamedEffectParameter(this->cgEffect, "Scale");
-	this->frequencyParam			= cgGetNamedEffectParameter(this->cgEffect, "Freq");
+	this->frequencyParam			    = cgGetNamedEffectParameter(this->cgEffect, "Freq");
 	this->fadeParam						= cgGetNamedEffectParameter(this->cgEffect, "Fade");
 	this->colourParam					= cgGetNamedEffectParameter(this->cgEffect, "Colour");
 
 	// Initialize CG sampler parameters
 	this->noiseSamplerParam		= cgGetNamedEffectParameter(this->cgEffect, "NoiseSampler");
 	this->sceneSamplerParam		= cgGetNamedEffectParameter(this->cgEffect, "SceneSampler");
-	this->overlaySamplerParam = cgGetNamedEffectParameter(this->cgEffect, "OverlaySampler");
+	this->overlaySamplerParam   = cgGetNamedEffectParameter(this->cgEffect, "OverlaySampler");
 
 	// The overlay texture is for the post-icy effect... get a semi-transparent frost texture
-	this->overlayTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FULLSCREEN_FROST, Texture::Trilinear));
+	this->overlayTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FULLSCREEN_FROST, Texture::Trilinear));
 	assert(this->overlayTex != NULL);
 
 	debug_cg_state();

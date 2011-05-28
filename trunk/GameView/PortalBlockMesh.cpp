@@ -26,9 +26,8 @@ haloExpandPulse(1.0f, 3.0f), haloFader(HALO_FADER_START, HALO_FADER_END) {
 	assert(this->portalEffect != NULL);
 
 	assert(this->haloTexture == NULL);
-	this->haloTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+	this->haloTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 	assert(this->haloTexture != NULL);
-
 }
 
 PortalBlockMesh::~PortalBlockMesh() {
@@ -81,5 +80,6 @@ void PortalBlockMesh::LoadMesh() {
 	assert(portalMaterialGrps.size() == 1);
 
 	MaterialGroup* portalMatGrp = portalMaterialGrps.begin()->second;
-	this->portalEffect = dynamic_cast<CgFxPortalBlock*>(portalMatGrp->GetMaterial());
+	this->portalEffect = static_cast<CgFxPortalBlock*>(portalMatGrp->GetMaterial());
+    assert(this->portalEffect != NULL);
 }

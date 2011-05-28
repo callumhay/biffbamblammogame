@@ -61,27 +61,6 @@ LevelPiece* CannonBlock::Destroy(GameModel* gameModel) {
 	return this;
 }
 
-// We need to override this in order to make sure it actually checks for a collision
-bool CannonBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
-																 Collision::LineSeg2D& collisionLine, 
-																 double& timeSinceCollision) const {
-
-    return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
-}
-
-bool CannonBlock::CollisionCheck(const Collision::AABB2D& aabb) const {
-	// See if there's a collision between this and the given AABB
-	return Collision::IsCollision(this->bounds.GenerateAABBFromLines(), aabb);	
-}
-
-bool CannonBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-	return Collision::IsCollision(ray, this->GetAABB(), rayT);
-}
-
-bool CannonBlock::CollisionCheck(const BoundingLines& boundingLines) const {
-	return this->bounds.CollisionCheck(boundingLines);
-}
-
 /**
  * Updating the bounds on the cannon block is overridden - we only want the ball to go 
  * into the cannon block if it actually hits the cannon.
@@ -193,7 +172,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			// If the cannon isn't already loaded with a projectile then
 			// the rocket gets captured by the cannon block and shot somewhere else...
 			if (!projectile->IsLastLevelPieceCollidedWith(this) && !this->GetIsLoaded()) {
-				PaddleRocketProjectile* rocketProjectile = dynamic_cast<PaddleRocketProjectile*>(projectile);
+				PaddleRocketProjectile* rocketProjectile = static_cast<PaddleRocketProjectile*>(projectile);
 				assert(rocketProjectile != NULL);
 				this->SetupCannonFireTimeAndDirection();
 				rocketProjectile->LoadIntoCannonBlock(this);

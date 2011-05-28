@@ -45,6 +45,7 @@ public:
 	static const char TESLA_BLOCK_CHAR;
 	static const char ITEM_DROP_BLOCK_CHAR;
     static const char SWITCH_BLOCK_CHAR;
+    static const char ONE_WAY_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
@@ -155,6 +156,7 @@ public:
 
 	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter);
 	LevelPiece* RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece);
+    void RocketExplosionNoPieces(GameModel* gameModel, const Projectile* rocket);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
 
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);

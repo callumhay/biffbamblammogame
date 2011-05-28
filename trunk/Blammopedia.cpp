@@ -75,7 +75,8 @@ Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
     this->blockEntries.insert(std::make_pair(LevelPiece::Tesla,        new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("tesla_block.txt"))));
     this->blockEntries.insert(std::make_pair(LevelPiece::ItemDrop,     new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("item_drop_block.txt"))));
     this->blockEntries.insert(std::make_pair(LevelPiece::Switch,       new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("switch_block.txt"))));
-    
+    this->blockEntries.insert(std::make_pair(LevelPiece::OneWay,       new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("one_way_block.txt"))));
+
 	// Status Effect Entry Types...
 
 }
@@ -248,7 +249,7 @@ bool Blammopedia::InitializeEntries() {
 
 	// Load the locked item texture...
 	assert(this->lockedItemTexture == NULL);
-	this->lockedItemTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+	this->lockedItemTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
 		GameViewConstants::GetInstance()->TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY, Texture::Trilinear, GL_TEXTURE_2D));
 	if (this->lockedItemTexture == NULL) {
 		allSuccess = false;
@@ -437,7 +438,7 @@ bool Blammopedia::ItemEntry::PopulateFromFile() {
 				this->itemTextureFilename = ResourceManager::GetTextureResourceDir() + tempReadStr;
 
 				// Read the texture from the resource manager...
-				this->itemTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(this->itemTextureFilename, Texture::Trilinear, GL_TEXTURE_2D));
+				this->itemTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(this->itemTextureFilename, Texture::Trilinear, GL_TEXTURE_2D));
 				if (this->itemTexture == NULL) {
 					assert(false);
 					success = false;
@@ -458,7 +459,7 @@ bool Blammopedia::ItemEntry::PopulateFromFile() {
 				this->hudOutlineTextureFilename = ResourceManager::GetTextureResourceDir() + tempReadStr;
 			
 				// Read the texture from the resource manager...
-				this->hudOutlineTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(this->hudOutlineTextureFilename, 
+				this->hudOutlineTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(this->hudOutlineTextureFilename, 
 																													 Texture::Trilinear, GL_TEXTURE_2D));
 				if (this->hudOutlineTexture == NULL) {
 					assert(false);
@@ -485,7 +486,7 @@ bool Blammopedia::ItemEntry::PopulateFromFile() {
 				this->hudFillTextureFilename = ResourceManager::GetTextureResourceDir() + tempReadStr;
 
 				// Read the texture from the resource manager...
-				this->hudFillTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(this->hudFillTextureFilename, 
+				this->hudFillTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(this->hudFillTextureFilename, 
 																												Texture::Trilinear, GL_TEXTURE_2D));
 				if (this->hudFillTexture == NULL) {
 					assert(false);
@@ -546,7 +547,7 @@ bool Blammopedia::BlockEntry::PopulateFromFile() {
                 this->blockTextureFilename = ResourceManager::GetTextureResourceDir() + tempReadStr;
 
 				// Read the texture from the resource manager...
-				this->blockTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(this->blockTextureFilename, Texture::Trilinear, GL_TEXTURE_2D));
+				this->blockTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(this->blockTextureFilename, Texture::Trilinear, GL_TEXTURE_2D));
 				if (this->blockTexture == NULL) {
 					assert(false);
 					success = false;

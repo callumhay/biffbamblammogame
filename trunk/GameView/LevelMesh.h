@@ -71,7 +71,7 @@ private:
 	// Meshes for all types of level pieces
 	Mesh* basicBlock;
 	Mesh* bombBlock;
-	Mesh* triangleBlockUR;								// Triangle block (default position in upper-right)
+	Mesh* triangleBlockUR;                  // Triangle block (default position in upper-right)
 	Mesh* inkBlock;
 	PortalBlockMesh* portalBlock;
 	PrismBlockMesh* prismBlockDiamond;		// Prism diamond block
@@ -81,6 +81,10 @@ private:
 	TeslaBlockMesh* teslaBlock;
 	ItemDropBlockMesh* itemDropBlock;
     SwitchBlockMesh* switchBlock;
+    Mesh* oneWayUpBlock;
+    Mesh* oneWayDownBlock;
+    Mesh* oneWayLeftBlock;
+    Mesh* oneWayRightBlock;
 
 	// Style-specific level pieces
 	Mesh* styleBlock;
@@ -101,7 +105,7 @@ private:
 	// Block status rendering object
 	BlockStatusEffectRenderer* statusEffectRenderer;
 
-	const std::map<std::string, MaterialGroup*>* GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const;
+	const std::map<std::string, MaterialGroup*>* GetMaterialGrpsForPieceType(const LevelPiece* piece) const;
 	void CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation);
 	void CreateDisplayListForBallSafetyNet(float levelWidth);

@@ -20,8 +20,13 @@ BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(t
 	
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	assert(paddle != NULL);
+
+    // Make sure there's only one ball, then get that one ball
+    this->gameModel->ClearBallsToOne();
 	GameBall* ball = this->GetGameBall();
 	assert(ball != NULL);
+
+
 	GameLevel* currLevel = this->gameModel->GetCurrentLevel();
 	assert(currLevel != NULL);
 

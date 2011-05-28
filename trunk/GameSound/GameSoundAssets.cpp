@@ -306,6 +306,7 @@ void GameSoundAssets::PlayBallHitBlockEvent(const GameBall& ball, const LevelPie
 		case LevelPiece::PrismTriangle:
 		case LevelPiece::Tesla:
 		case LevelPiece::ItemDrop:
+        case LevelPiece::OneWay:
 			this->PlayWorldSound(GameSoundAssets::WorldSoundBallBlockCollisionEvent, volume);
 			break;
 		
@@ -379,17 +380,17 @@ void GameSoundAssets::LoadSounds(const std::string& filepath, GameSoundAssets::S
 		switch (currSound->GetType()) {
 			case Sound::EventSound:
 			case Sound::MaskSound: {
-					EventSound* eventSound = dynamic_cast<EventSound*>(currSound);
-					eventSound->SetVolume(GameSoundAssets::CalculateFinalVolume(eventSound->GetType(), GameSoundAssets::NormalVolume));
+					EventSound* eventSound = static_cast<EventSound*>(currSound);
 					assert(eventSound != NULL);
+                    eventSound->SetVolume(GameSoundAssets::CalculateFinalVolume(eventSound->GetType(), GameSoundAssets::NormalVolume));
 					this->loadedEventSounds[pallet].insert(std::make_pair(iter->first, eventSound));	
 				}
 				break;
 
 			case Sound::MusicSound: {
-					MusicSound* musicSound = dynamic_cast<MusicSound*>(currSound);
-					musicSound->SetVolume(GameSoundAssets::CalculateFinalVolume(Sound::MusicSound, GameSoundAssets::NormalVolume));
+					MusicSound* musicSound = static_cast<MusicSound*>(currSound);
 					assert(musicSound != NULL);
+                    musicSound->SetVolume(GameSoundAssets::CalculateFinalVolume(Sound::MusicSound, GameSoundAssets::NormalVolume));
 					this->loadedMusicSounds[pallet] = musicSound;
 				}
 				break;
