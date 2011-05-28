@@ -425,13 +425,13 @@ void GameESPAssets::InitESPTextures() {
 	// Initialize bang textures (big boom thingys when there are explosions)
 	if (this->bangTextures.empty()) {
 		this->bangTextures.reserve(3);
-		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear));
+		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->bangTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture::Trilinear));
 		assert(temp != NULL);
 		this->bangTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture::Trilinear));
 		assert(temp != NULL);
 		this->bangTextures.push_back(temp);
 	}
@@ -439,7 +439,7 @@ void GameESPAssets::InitESPTextures() {
 	// Initialize splat textures (splatty thingys when ink blocks and other messy, gooey things explode)
 	if (this->splatTextures.empty()) {
 		this->splatTextures.reserve(1);
-		Texture2D* temp =  dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPLAT1, Texture::Trilinear));
+		Texture2D* temp =  static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPLAT1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->splatTextures.push_back(temp);
 	}
@@ -447,22 +447,22 @@ void GameESPAssets::InitESPTextures() {
 	// Initialize smoke textures (cartoony puffs of smoke)
 	if (this->smokeTextures.empty()) {
 		this->smokeTextures.reserve(NUM_SMOKE_TEXTURES);
-		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
+		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
 		assert(temp != NULL);
 		this->smokeTextures.push_back(temp);	
 	}
@@ -470,13 +470,13 @@ void GameESPAssets::InitESPTextures() {
 	// Initialize all the fire glob textures
 	//if (this->fireGlobTextures.empty()) {
 	//	this->fireGlobTextures.reserve(3);
-	//	Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB1, Texture::Trilinear));
+	//	Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB1, Texture::Trilinear));
 	//	assert(temp != NULL);
 	//	this->fireGlobTextures.push_back(temp);
-	//	temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB2, Texture::Trilinear));
+	//	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB2, Texture::Trilinear));
 	//	assert(temp != NULL);
 	//	this->fireGlobTextures.push_back(temp);
-	//	temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB3, Texture::Trilinear));
+	//	temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_FIRE_GLOB3, Texture::Trilinear));
 	//	assert(temp != NULL);
 	//	this->fireGlobTextures.push_back(temp);
 	//}
@@ -484,13 +484,13 @@ void GameESPAssets::InitESPTextures() {
 	// Initialize all the snowflake textures
 	if (this->snowflakeTextures.empty()) {
 		this->snowflakeTextures.reserve(3);
-		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE1, Texture::Trilinear));
+		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->snowflakeTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE2, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE2, Texture::Trilinear));
 		assert(temp != NULL);
 		this->snowflakeTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE3, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SNOWFLAKE3, Texture::Trilinear));
 		assert(temp != NULL);
 		this->snowflakeTextures.push_back(temp);
 	}
@@ -498,19 +498,19 @@ void GameESPAssets::InitESPTextures() {
 	// Initialize all rock textures
 	if (this->rockTextures.empty()) {
 		this->rockTextures.reserve(5);
-		Texture2D* temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK1, Texture::Trilinear));
+		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK1, Texture::Trilinear));
 		assert(temp != NULL);
 		this->rockTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK2, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK2, Texture::Trilinear));
 		assert(temp != NULL);
 		this->rockTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK3, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK3, Texture::Trilinear));
 		assert(temp != NULL);
 		this->rockTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK4, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK4, Texture::Trilinear));
 		assert(temp != NULL);
 		this->rockTextures.push_back(temp);
-		temp = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK5, Texture::Trilinear));
+		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_ROCK5, Texture::Trilinear));
 		assert(temp != NULL);
 		this->rockTextures.push_back(temp);
 	}
@@ -530,91 +530,91 @@ void GameESPAssets::InitESPTextures() {
 	}
 
 	if (this->circleGradientTex == NULL) {
-		this->circleGradientTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
+		this->circleGradientTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
 		assert(this->circleGradientTex != NULL);
 	}
 	if (this->starTex == NULL) {
-		this->starTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear));
+		this->starTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear));
 		assert(this->starTex != NULL);	
 	}
 	if (this->starOutlineTex == NULL) {
-		this->starOutlineTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear));
+		this->starOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR_OUTLINE, Texture::Trilinear));
 		assert(this->starOutlineTex != NULL);
 	}
 	if (this->evilStarTex == NULL) {
-		this->evilStarTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR, Texture::Trilinear));
+		this->evilStarTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR, Texture::Trilinear));
 		assert(this->evilStarTex != NULL);	
 	}
 	if (this->evilStarOutlineTex == NULL) {
-		this->evilStarOutlineTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR_OUTLINE, Texture::Trilinear));
+		this->evilStarOutlineTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EVIL_STAR_OUTLINE, Texture::Trilinear));
 		assert(this->evilStarOutlineTex != NULL);		
 	}
 	if (this->explosionTex == NULL) {
-		this->explosionTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD, Texture::Trilinear));
+		this->explosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_CLOUD, Texture::Trilinear));
 		assert(this->explosionTex != NULL);
 	}
 	if (this->explosionRayTex == NULL) {
-		this->explosionRayTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS, Texture::Trilinear));
+		this->explosionRayTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_RAYS, Texture::Trilinear));
 		assert(this->explosionRayTex != NULL);
 	}
 	if (this->laserBeamTex == NULL) {
-		this->laserBeamTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM, Texture::Trilinear));
+		this->laserBeamTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LASER_BEAM, Texture::Trilinear));
 		assert(this->laserBeamTex != NULL);
 	}
 	if (this->upArrowTex == NULL) {
-		this->upArrowTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear));
+		this->upArrowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear));
 		assert(this->upArrowTex != NULL);
 	}
 	if (this->ballTex == NULL) {
-		this->ballTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear));
+		this->ballTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear));
 		assert(this->ballTex != NULL);
 	}
 	if (this->targetTex == NULL) {
-		this->targetTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALLTARGET, Texture::Trilinear));
+		this->targetTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALLTARGET, Texture::Trilinear));
 		assert(this->targetTex != NULL);
 	}
 	if (this->haloTex == NULL) {
-		this->haloTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+		this->haloTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 		assert(this->haloTex != NULL);
 	}
 	if (this->lensFlareTex == NULL) {
-		this->lensFlareTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear));
+		this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear));
 		assert(this->lensFlareTex != NULL);
 	}
 	if (this->sparkleTex == NULL) {
-		this->sparkleTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+		this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
 		assert(this->sparkleTex != NULL);
 	}
 	if (this->spiralTex == NULL) {
-		this->spiralTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_TWISTED_SPIRAL, Texture::Trilinear));
+		this->spiralTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_TWISTED_SPIRAL, Texture::Trilinear));
 		assert(this->spiralTex != NULL);
 	}
 	if (this->sideBlastTex == NULL) {
-		this->sideBlastTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST, Texture::Trilinear));
+		this->sideBlastTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SIDEBLAST, Texture::Trilinear));
 		assert(this->sideBlastTex != NULL);
 	}
 	if (this->hugeExplosionTex == NULL) {
-		this->hugeExplosionTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION, Texture::Trilinear));
+		this->hugeExplosionTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HUGE_EXPLOSION, Texture::Trilinear));
 		assert(this->hugeExplosionTex != NULL);
 	}
 	if (this->lightningBoltTex == NULL) {
-		this->lightningBoltTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT, Texture::Trilinear));
+		this->lightningBoltTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LIGHTNING_BOLT, Texture::Trilinear));
 		assert(this->lightningBoltTex != NULL);
 	}
 	if (this->sphereNormalsTex == NULL) {
-		this->sphereNormalsTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
+		this->sphereNormalsTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
 		assert(this->sphereNormalsTex != NULL);
 	}
 	//if (this->rectPrismTexture != NULL) {
-	//	this->rectPrismTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_RECT_PRISM_NORMALS, Texture::Trilinear));
+	//	this->rectPrismTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_RECT_PRISM_NORMALS, Texture::Trilinear));
 	//	assert(this->rectPrismTexture != NULL);
 	//}	
 	if (this->cloudTex == NULL) {
-		this->cloudTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
+		this->cloudTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CLOUD, Texture::Trilinear));
 		assert(this->cloudTex != NULL);
 	}
     if (this->vapourTrailTex == NULL) {
-        this->vapourTrailTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_VAPOUR_TRAIL, Texture::Trilinear));
+        this->vapourTrailTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_VAPOUR_TRAIL, Texture::Trilinear));
         assert(this->vapourTrailTex != NULL);
     }
 
@@ -1221,6 +1221,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 					break;
 
 				case LevelPiece::Solid:
+                case LevelPiece::OneWay:
 				case LevelPiece::SolidTriangle:
 				case LevelPiece::Breakable:
 				case LevelPiece::BreakableTriangle: 
@@ -1619,6 +1620,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
 
 		case LevelPiece::ItemDrop:
 		case LevelPiece::Collateral:
+        case LevelPiece::OneWay:
 			severity = Onomatoplex::SUPER_AWESOME;
 			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 
 																						ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
@@ -4809,6 +4811,10 @@ void GameESPAssets::DrawBulletTimeBallsBoostEffects(double dT, const Camera& cam
     
     for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ++ballIter) {
         GameBall* currBall = *ballIter;
+        // Don't draw the effect for balls that cannot currently boost...
+        if (!currBall->IsBallAllowedToBoost()) {
+            continue;
+        }
         emitterPos = currBall->GetCenterPosition2D() - (currBall->GetBounds().Radius() * boostDir);
 
         glPushMatrix();
@@ -4829,7 +4835,6 @@ void GameESPAssets::DrawBallBoostingEffects(double dT, const Camera& camera) {
     for (BallEffectsMapIter iter1 = this->boostBallEmitters.begin(); iter1 != this->boostBallEmitters.end();) {
         const GameBall* currBall = iter1->first;
         std::list<ESPPointEmitter*>& ballEmitters = iter1->second;
-
         for (std::list<ESPPointEmitter*>::iterator iter2 = ballEmitters.begin(); iter2 != ballEmitters.end();) {
             ESPPointEmitter* currEmitter = *iter2;
 		    // Check to see if dead, if so erase it...
@@ -4839,6 +4844,11 @@ void GameESPAssets::DrawBallBoostingEffects(double dT, const Camera& camera) {
 			    iter2 = ballEmitters.erase(iter2);
 		    }
 		    else {
+                if (!currBall->IsBallAllowedToBoost()) {
+                    currEmitter->Tick(dT);
+                    continue;
+                }
+
 			    // Not dead yet, update its position based on the current ball's positon
                 // and draw/tick it
                 currEmitter->SetEmitPosition(currBall->GetCenterPosition());

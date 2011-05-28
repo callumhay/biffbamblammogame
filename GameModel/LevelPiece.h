@@ -48,7 +48,7 @@ public:
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
                           Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop,
-                          Switch };
+                          Switch, OneWay };
 	virtual LevelPieceType GetType() const = 0;
     static bool IsValidLevelPieceType(int pieceType);
 
@@ -73,10 +73,9 @@ public:
 
 	virtual Collision::AABB2D GetAABB() const;
 	virtual bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
-	virtual bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	virtual bool CollisionCheck(const BoundingLines& boundingLines) const;
-	virtual bool CollisionCheck(const Collision::Circle2D& c) const;
+	virtual bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
+	virtual bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
 
 	// Collision related stuffs
 	virtual LevelPiece* Destroy(GameModel* gameModel) = 0;
@@ -186,19 +185,6 @@ inline bool LevelPiece::CollisionCheck(const GameBall& ball, double dT, Vector2D
 }
 
 /**
- * Check for a collision of a given AABB with this block.
- * Returns: true on collision, false otherwise.
- */
-inline bool LevelPiece::CollisionCheck(const Collision::AABB2D& aabb) const {
-	if (this->IsNoBoundsPieceType()) {
-		return false;
-	}
-
-	// See if there's a collision between this and the piece using AABBs
-	return Collision::IsCollision(aabb, this->GetAABB());	
-}
-
-/**
  * Check for a collision of a given ray with this block. Also, on collision, will
  * set the value rayT to the value on the ray where the collision occurred.
  * Returns: true on collision, false otherwise.
@@ -214,7 +200,8 @@ inline bool LevelPiece::CollisionCheck(const Collision::Ray2D& ray, float& rayT)
  * Check for a collision of a given set of bounding lines with this block.
  * Returns: true on collision, false otherwise.
  */
-inline bool LevelPiece::CollisionCheck(const BoundingLines& boundingLines) const {
+inline bool LevelPiece::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
+    UNUSED_PARAMETER(velDir);
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}
@@ -222,7 +209,8 @@ inline bool LevelPiece::CollisionCheck(const BoundingLines& boundingLines) const
 	return this->bounds.CollisionCheck(boundingLines);
 }
 
-inline bool LevelPiece::CollisionCheck(const Collision::Circle2D& c) const {
+inline bool LevelPiece::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {
+    UNUSED_PARAMETER(velDir);
 	if (this->IsNoBoundsPieceType()) {
 		return false;
 	}

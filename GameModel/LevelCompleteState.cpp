@@ -53,28 +53,13 @@ void LevelCompleteState::Tick(double seconds) {
 	// Reset the game transform manager
 	this->gameModel->GetTransformInfo()->Reset();
 
-	// Set the number of balls that exist to just 1
-	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	if (gameBalls.size() > 1) {
-		std::list<GameBall*>::iterator ballIter = gameBalls.begin();
-		++ballIter;
-		for (; ballIter != gameBalls.end(); ++ballIter) {
-			GameBall* ballToDestroy = *ballIter;
-			delete ballToDestroy;
-			ballToDestroy = NULL;
-		}
-
-		// Grab the last ball left and make it the only element in the entire game balls array
-		GameBall* onlyBallLeft = (*gameBalls.begin());
-		assert(onlyBallLeft != NULL);
-		gameBalls.clear();
-		gameBalls.push_back(onlyBallLeft);
-	}
+    // Make sure there's only one ball
+    this->gameModel->ClearBallsToOne();
 
 	GameWorld* currWorld = this->gameModel->GetCurrentWorld();
 
-  // Determine the next level to increment to and then load the appropriate
-  // level, world or end of game depending on what comes next.
+    // Determine the next level to increment to and then load the appropriate
+    // level, world or end of game depending on what comes next.
 	if (currWorld->IsLastLevel()) {
 		// World is complete!!!
 		// Go to the world complete state!

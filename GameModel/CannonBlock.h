@@ -76,9 +76,8 @@ public:
 	LevelPiece* Destroy(GameModel* gameModel);
 	
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
-	bool CollisionCheck(const Collision::AABB2D& aabb) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	bool CollisionCheck(const BoundingLines& boundingLines) const;
+	bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 										const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 										const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
@@ -121,6 +120,23 @@ private:
 
 	BoundingLines BuildBounds() const;
 };
+
+// We need to override this in order to make sure it actually checks for a collision
+inline bool CannonBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, 
+																 Collision::LineSeg2D& collisionLine, 
+																 double& timeSinceCollision) const {
+
+    return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+}
+
+inline bool CannonBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	return Collision::IsCollision(ray, this->GetAABB(), rayT);
+}
+
+inline bool CannonBlock::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
+    UNUSED_PARAMETER(velDir);
+	return this->bounds.CollisionCheck(boundingLines);
+}
 
 /**
  * Query the current pointing direction of the cannon.

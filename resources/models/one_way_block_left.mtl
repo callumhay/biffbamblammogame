@@ -1,0 +1,10 @@
+newmtl one_way_left
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ns 90
+map_Kd resources/textures/one_way_block_texture_512x256.jpg
+type outlinedcel
+outlinesize 1.5
+geomtype fg
+

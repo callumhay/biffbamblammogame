@@ -221,6 +221,9 @@ void GameAssets::DrawGameBallsPreEffects(double dT, GameModel& gameModel, const 
 	const std::list<GameBall*>& balls = gameModel.GetGameBalls();
 	for (std::list<GameBall*>::const_iterator ballIter = balls.begin(); ballIter != balls.end(); ++ballIter) {
         GameBall* currBall = *ballIter;
+        if (!currBall->IsBallAllowedToBoost()) {
+            continue;
+        }
         
         Vector2D fullRadiusVec = 0.99f * currBall->GetBounds().Radius() * ballBoostRotated90;
         Vector2D halfRadiusVec = 0.5f  * fullRadiusVec;
@@ -1011,8 +1014,8 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
 
 	switch (projectile.GetType()) {
 		case Projectile::PaddleRocketBulletProjectile:
-			this->rocketMesh->Deactivate(dynamic_cast<const PaddleRocketProjectile*>(&projectile));
-			// Turn off the sound for the rocket mask and play the explosion sound
+			this->rocketMesh->Deactivate(static_cast<const PaddleRocketProjectile*>(&projectile));
+			// Turn off the sound for the rocket mask
 			this->soundAssets->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
 			break;
         
@@ -1038,7 +1041,7 @@ void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
  */
 void GameAssets::FirePaddleRocket(const Projectile& rocketProjectile) {
 	assert(rocketProjectile.GetType() == Projectile::PaddleRocketBulletProjectile);
-	this->rocketMesh->Activate(dynamic_cast<const PaddleRocketProjectile*>(&rocketProjectile));
+	this->rocketMesh->Activate(static_cast<const PaddleRocketProjectile*>(&rocketProjectile));
 	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
 }
 

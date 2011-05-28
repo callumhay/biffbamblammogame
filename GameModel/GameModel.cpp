@@ -475,7 +475,7 @@ void GameModel::DoProjectileCollisions() {
 			LevelPiece *currPiece = *pieceIter;
 			
 			// Test for a collision between the projectile and current level piece
-			didCollide = currPiece->CollisionCheck(projectileBoundingLines);
+			didCollide = currPiece->CollisionCheck(projectileBoundingLines, currProjectile->GetVelocityDirection());
 			if (didCollide) {
 				// This needs to be before the call to CollisionOccurred or else the currPiece may already be destroyed.
 				destroyProjectile = !currPiece->ProjectilePassesThrough(currProjectile);
@@ -740,7 +740,11 @@ int GameModel::GetCurrentMultiplier() const {
  * Clears the list of all projectiles that are currently in existance in the game.
  */
 void GameModel::ClearProjectiles() {
-	for (std::list<Projectile*>::iterator iter = this->projectiles.begin(); iter != this->projectiles.end(); ++iter) {
+    
+
+	for (std::list<Projectile*>::iterator iter = this->projectiles.begin();
+         iter != this->projectiles.end(); ++iter) {
+
 		Projectile* currProjectile = *iter;
 		// EVENT: Projectile removed from the game
 		GameEventManager::Instance()->ActionProjectileRemoved(*currProjectile);
@@ -789,6 +793,32 @@ void GameModel::ClearActiveTimers() {
 		currTimer = NULL;
 	}
 	this->activeTimers.clear();
+}
+
+void GameModel::ClearBallsToOne() {
+	// Set the number of balls that exist to just 1
+	if (this->balls.size() == 1) {
+        return;
+    }
+    else if (this->balls.size() == 0) {
+        this->balls.push_back(new GameBall());
+        return;
+    }
+
+	std::list<GameBall*>::iterator ballIter = this->balls.begin();
+	++ballIter;
+	for (; ballIter != this->balls.end(); ++ballIter) {
+		GameBall* ballToDestroy = *ballIter;
+		delete ballToDestroy;
+		ballToDestroy = NULL;
+	}
+
+	// Grab the last ball left and make it the only element in the entire game balls array
+	GameBall* onlyBallLeft = (*this->balls.begin());
+	assert(onlyBallLeft != NULL);
+	this->balls.clear();
+	this->balls.push_back(onlyBallLeft);
+
 }
 
 /**

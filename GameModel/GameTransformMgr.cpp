@@ -192,21 +192,17 @@ void GameTransformMgr::SetBulletTimeCamera(bool turnOnBulletTimeCam) {
  * that the default camera position is calculated and made available to the view.
  */
 void GameTransformMgr::SetupLevelCameraDefaultPosition(const GameLevel& level) {
-    static const float VERT_BORDER_LOOKS_NICE_RATIO  = 2.0f  / (12.0f * LevelPiece::PIECE_HEIGHT);
-    static const float HORIZ_BORDER_LOOKS_NICE_RATIO = 12.0f / (12.0f * LevelPiece::PIECE_WIDTH);
-
 	// Calculate the distance along the z axis that the camera needs to be from the origin in order
 	// to see the entire level - this will be the default translation for the camera
-    float distance    = 0;
+    float distance1, distance2    = 0;
     float levelWidth  = level.GetLevelUnitWidth();
     float levelHeight = level.GetLevelUnitHeight();
-    if (levelWidth < levelHeight) {
-        distance = (levelHeight + levelHeight * VERT_BORDER_LOOKS_NICE_RATIO) / (2.0f * tanf(Trig::degreesToRadians(0.5f * Camera::FOV_ANGLE_IN_DEGS)));
-    }
-    else {
-        float horizontalFOV = Camera::FOV_ANGLE_IN_DEGS * Camera::GetAspectRatio();
-        distance = (levelWidth + levelWidth * HORIZ_BORDER_LOOKS_NICE_RATIO * Camera::GetAspectRatio()) / (2.0f * tanf(Trig::degreesToRadians(0.5f * horizontalFOV)));
-    }
+    
+    distance1 = (levelHeight + 4 * LevelPiece::PIECE_HEIGHT) / (2.0f * tanf(Trig::degreesToRadians(0.5f * Camera::FOV_ANGLE_IN_DEGS)));
+    float horizontalFOV = Camera::FOV_ANGLE_IN_DEGS * Camera::GetAspectRatio();
+    distance2 = (levelWidth + 6 * LevelPiece::PIECE_WIDTH) / (2.0f * tanf(Trig::degreesToRadians(0.5f * horizontalFOV)));
+
+    float distance = std::max<float>(distance1, distance2);
 
 	// Telling the world to translate by (0, 0, -distance), telling the camera to translate by (0, 0, distance)
 	this->defaultCamOrientation = Orientation3D(Vector3D(0, 0, distance), Vector3D(0,0,0));

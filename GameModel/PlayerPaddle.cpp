@@ -537,8 +537,9 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		// The rocket immediately is fired from the paddle - create a projectile for it and add it to the model (i.e., fire it!)
 		Point2D rocketSpawnPos;
 		float rocketHeight, rocketWidth;
-		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
-		Projectile* rocketProjectile = new PaddleRocketProjectile(rocketSpawnPos, rocketWidth, rocketHeight);
+        this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
+		PaddleRocketProjectile* rocketProjectile = new PaddleRocketProjectile(rocketSpawnPos, 
+            Vector2D::Normalize(this->GetUpVector()), rocketWidth, rocketHeight);
 
 		// Make sure the rocket doesn't explode if it's lying up against a block when launched...
 		const GameLevel* currLevel = gameModel->GetCurrentLevel();
@@ -932,7 +933,7 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const Project
 		currentLevel->RocketExplosion(gameModel, &projectile, *levelPieces.begin());
 	}
 	else {
-		assert(false);
+		currentLevel->RocketExplosionNoPieces(gameModel, &projectile);
 	}
 }
 

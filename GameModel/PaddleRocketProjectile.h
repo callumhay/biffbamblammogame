@@ -22,7 +22,7 @@ public:
 	static const float PADDLEROCKET_HEIGHT_DEFAULT;
 	static const float PADDLEROCKET_WIDTH_DEFAULT;
 
-	PaddleRocketProjectile(const Point2D& spawnLoc, float width, float height);
+	PaddleRocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir, float width, float height);
 	~PaddleRocketProjectile();
 
 	void Tick(double seconds);

@@ -28,7 +28,7 @@ haloTexture(NULL), boostGainedHaloEmitter(NULL), haloExpander(1.0f, 2.75f), halo
     // Initialize the textures for the ball boost HUD
     this->ballHUDOutlineTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_OUTLINE,  Texture::Trilinear, GL_TEXTURE_2D);
     this->ballFillTex       = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_BALLFILL, Texture::Trilinear, GL_TEXTURE_2D);
-    this->haloTexture       = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+    this->haloTexture       = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
     
     assert(this->ballHUDOutlineTex != NULL);
     assert(this->ballFillTex       != NULL);

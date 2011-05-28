@@ -44,23 +44,10 @@ bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, C
 	return (this->bounds.CollisionCheckIndices(sweptCenter).size() > 0);
 }
 
-bool PortalBlock::CollisionCheck(const Collision::AABB2D& aabb) const {
-	// Check to see if the center of the AABB is in the bounding lines
-	return this->bounds.IsInside(Point2D::GetMidPoint(aabb.GetMin(), aabb.GetMax()));
-}
-
-bool PortalBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-	return this->bounds.CollisionCheck(ray, rayT);	
-}
-
-bool PortalBlock::CollisionCheck(const BoundingLines& boundingLines) const {
-	return this->bounds.CollisionCheck(boundingLines);
-}
-
 void PortalBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-															 const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-															 const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-															 const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                               const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                               const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                               const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	UNUSED_PARAMETER(leftNeighbor);
 	UNUSED_PARAMETER(bottomNeighbor);

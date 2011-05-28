@@ -35,11 +35,13 @@
 #include "../GameModel/CollateralBlock.h"
 #include "../GameModel/TeslaBlock.h"
 #include "../GameModel/SwitchBlock.h"
+#include "../GameModel/OneWayBlock.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL),
-teslaBlock(NULL), statusEffectRenderer(NULL) {
+teslaBlock(NULL), switchBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
+oneWayRightBlock(NULL), statusEffectRenderer(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
 	this->basicBlock					= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
@@ -54,55 +56,35 @@ teslaBlock(NULL), statusEffectRenderer(NULL) {
 	this->teslaBlock                    = new TeslaBlockMesh();
 	this->itemDropBlock					= new ItemDropBlockMesh();
     this->switchBlock                   = new SwitchBlockMesh();
+    this->oneWayUpBlock                 = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_UP_MESH);
+    this->oneWayDownBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_DOWN_MESH);
+    this->oneWayLeftBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_LEFT_MESH);
+    this->oneWayRightBlock              = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_RIGHT_MESH);
 
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
 	// Add the typical level meshes to the list of materials...
-	const std::map<std::string, MaterialGroup*>& basicBlockMatGrps		= this->basicBlock->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& triangleBlockMatGrps	= this->triangleBlockUR->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& bombBlockMatGrps		= this->bombBlock->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& inkBlockMatGrps		= this->inkBlock->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& prismBlockMatGrps		= this->prismBlockDiamond->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& prismTriBlockMatGrps	= this->prismBlockTriangleUR->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& portalBlockMatGrps     = this->portalBlock->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& cannonBlockMatGrps		= this->cannonBlock->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& teslaBlockMatGrps		= this->teslaBlock->GetMaterialGroups();
-	const std::map<std::string, MaterialGroup*>& itemDropBlockMatGrps   = this->itemDropBlock->GetMaterialGroups();
-    const std::map<std::string, MaterialGroup*>& switchBlockMatGrps     = this->switchBlock->GetMaterialGroups();
-	
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = basicBlockMatGrps.begin(); iter != basicBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = triangleBlockMatGrps.begin(); iter != triangleBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = bombBlockMatGrps.begin(); iter != bombBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = inkBlockMatGrps.begin(); iter != inkBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = prismBlockMatGrps.begin(); iter != prismBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = prismTriBlockMatGrps.begin(); iter != prismTriBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = portalBlockMatGrps.begin(); iter != portalBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}	
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = cannonBlockMatGrps.begin(); iter != cannonBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}	
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = teslaBlockMatGrps.begin(); iter != teslaBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}	
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = itemDropBlockMatGrps.begin(); iter != itemDropBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}	
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = switchBlockMatGrps.begin(); iter != switchBlockMatGrps.end(); ++iter) {
-		this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial()));
-	}
+#define INSERT_MATERIAL_GRPS(block) { const std::map<std::string, MaterialGroup*>& matGrps = block->GetMaterialGroups(); \
+    for (std::map<std::string, MaterialGroup*>::const_iterator iter = matGrps.begin(); iter != matGrps.end(); ++iter) { \
+    this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial())); } }
+    
+    INSERT_MATERIAL_GRPS(this->basicBlock);
+    INSERT_MATERIAL_GRPS(this->triangleBlockUR);
+    INSERT_MATERIAL_GRPS(this->bombBlock);
+    INSERT_MATERIAL_GRPS(this->inkBlock);
+    INSERT_MATERIAL_GRPS(this->prismBlockDiamond);
+    INSERT_MATERIAL_GRPS(this->prismBlockTriangleUR);
+    INSERT_MATERIAL_GRPS(this->portalBlock);
+    INSERT_MATERIAL_GRPS(this->cannonBlock);
+    INSERT_MATERIAL_GRPS(this->teslaBlock);
+    INSERT_MATERIAL_GRPS(this->itemDropBlock);
+    INSERT_MATERIAL_GRPS(this->switchBlock);
+    INSERT_MATERIAL_GRPS(this->oneWayUpBlock);
+    INSERT_MATERIAL_GRPS(this->oneWayDownBlock);
+    INSERT_MATERIAL_GRPS(this->oneWayLeftBlock);
+    INSERT_MATERIAL_GRPS(this->oneWayRightBlock);
+
+#undef INSERT_MATERIAL_GRPS
 
 	// Initialize the status renderer
 	this->statusEffectRenderer = new BlockStatusEffectRenderer();
@@ -242,28 +224,28 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 			// 1) Case of a cannon block - we need to store all the cannon blocks we can
 			// properly draw their barrels oriented unique for each one
 			if (currPiece->GetType() == LevelPiece::Cannon) {
-				const CannonBlock* cannonLvlPiece = dynamic_cast<const CannonBlock*>(currPiece);
+				const CannonBlock* cannonLvlPiece = static_cast<const CannonBlock*>(currPiece);
 				assert(cannonLvlPiece != NULL);
 				this->cannonBlock->AddCannonBlock(cannonLvlPiece);
 			}
 			// 2) Collateral block - we need to store all of them so that they can be drawn dynamically
 			// when the go into collateral mode
 			else if (currPiece->GetType() == LevelPiece::Collateral) {
-				const CollateralBlock* collateralLvlPiece = dynamic_cast<const CollateralBlock*>(currPiece);
+				const CollateralBlock* collateralLvlPiece = static_cast<const CollateralBlock*>(currPiece);
 				assert(collateralLvlPiece != NULL);
 				this->collateralBlock->AddCollateralBlock(collateralLvlPiece);
 			}
 			// 3) Tesla block - similar to the cannon block, we store all of them to draw certain
 			// parts of the block oriented differently / animating
 			else if (currPiece->GetType() == LevelPiece::Tesla) {
-				const TeslaBlock* telsaLvlPiece = dynamic_cast<const TeslaBlock*>(currPiece);
+				const TeslaBlock* telsaLvlPiece = static_cast<const TeslaBlock*>(currPiece);
 				assert(telsaLvlPiece != NULL);
 				this->teslaBlock->AddTeslaBlock(telsaLvlPiece);
 			}
 			// 4) Item drop block - like the above - since we need to set the texture for the item
 			// each block will drop next, we need to store them in a seperate container object
 			else if (currPiece->GetType() == LevelPiece::ItemDrop) {
-				const ItemDropBlock* itemDrpPiece = dynamic_cast<const ItemDropBlock*>(currPiece);
+				const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(currPiece);
 				assert(itemDrpPiece != NULL);
 
 				// Figure out what texture is associated with the next item to be dropped from the block
@@ -272,7 +254,7 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 			}
             // 5) Switch block
             else if (currPiece->GetType() == LevelPiece::Switch) {
-                const SwitchBlock* switchPiece = dynamic_cast<const SwitchBlock*>(currPiece);
+                const SwitchBlock* switchPiece = static_cast<const SwitchBlock*>(currPiece);
                 assert(switchPiece != NULL);
                 this->switchBlock->AddSwitchBlock(switchPiece);
             }
@@ -338,7 +320,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 	switch (piece.GetType()) {
 		case LevelPiece::Cannon:
 			{
-				const CannonBlock* cannonLvlPiece = dynamic_cast<const CannonBlock*>(&piece);
+				const CannonBlock* cannonLvlPiece = static_cast<const CannonBlock*>(&piece);
 				assert(cannonLvlPiece != NULL);
 				this->cannonBlock->RemoveCannonBlock(cannonLvlPiece);
 			}
@@ -346,7 +328,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 
 		case LevelPiece::Collateral:
 			{
-				const CollateralBlock* collateralLvlPiece = dynamic_cast<const CollateralBlock*>(&piece);
+				const CollateralBlock* collateralLvlPiece = static_cast<const CollateralBlock*>(&piece);
 				assert(collateralLvlPiece != NULL);
 				this->collateralBlock->RemoveCollateralBlock(collateralLvlPiece);
 			}
@@ -354,7 +336,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 
 		case LevelPiece::Tesla:
 			{
-				const TeslaBlock* teslaLvlPiece = dynamic_cast<const TeslaBlock*>(&piece);
+				const TeslaBlock* teslaLvlPiece = static_cast<const TeslaBlock*>(&piece);
 				assert(teslaLvlPiece != NULL);
 				this->teslaBlock->RemoveTeslaBlock(teslaLvlPiece);
 			}
@@ -362,7 +344,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 
 		case LevelPiece::ItemDrop:
 			{
-				const ItemDropBlock* itemDrpPiece = dynamic_cast<const ItemDropBlock*>(&piece);
+				const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(&piece);
 				assert(itemDrpPiece != NULL);
 				this->itemDropBlock->RemoveItemDropBlock(itemDrpPiece);
 			}
@@ -370,7 +352,7 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 
         case LevelPiece::Switch:
             {
-				const SwitchBlock* switchPiece = dynamic_cast<const SwitchBlock*>(&piece);
+				const SwitchBlock* switchPiece = static_cast<const SwitchBlock*>(&piece);
 				assert(switchPiece != NULL);
 				this->switchBlock->RemoveSwitchBlock(switchPiece);
             }
@@ -384,8 +366,10 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 /**
  * Draw the current level mesh pieces (i.e., blocks that make up the level).
  */
-void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
-													 const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture) {
+void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera,
+                           bool lightsAreOut, const BasicPointLight& keyLight, 
+                           const BasicPointLight& fillLight, const BasicPointLight& ballLight,
+                           const Texture2D* sceneTexture) {
 
 	// Set any appropriate parameters on the various meshes materials, etc.
 	this->prismBlockDiamond->SetSceneTexture(sceneTexture);
@@ -434,7 +418,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
  */
 void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector3D &worldTranslation) {
 	assert(piece != NULL);
-	const std::map<std::string, MaterialGroup*>* pieceMatGrps = this->GetMaterialGrpsForPieceType(piece->GetType());
+	const std::map<std::string, MaterialGroup*>* pieceMatGrps = this->GetMaterialGrpsForPieceType(piece);
 	if (pieceMatGrps == NULL) {
 		return;
 	}
@@ -516,8 +500,10 @@ void LevelMesh::CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vect
  * Returns: A map of the identifiers to corresponding material groups for a particular mesh representation
  * of the given level piece type.
  */
-const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceType(LevelPiece::LevelPieceType type) const {
-	switch (type) {
+const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceType(const LevelPiece* piece) const {
+    assert(piece != NULL);
+
+    switch (piece->GetType()) {
 		case LevelPiece::Solid :
 			return &this->styleBlock->GetMaterialGroups();
 			break;
@@ -559,6 +545,25 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
             break;
 		case LevelPiece::Collateral:
 			break;
+        case LevelPiece::OneWay:
+            {
+                const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(piece);
+                assert(oneWayBlock != NULL);
+                switch (oneWayBlock->GetDirType()) {
+                    case OneWayBlock::OneWayUp:
+                        return &this->oneWayUpBlock->GetMaterialGroups();
+                    case OneWayBlock::OneWayDown:
+                        return &this->oneWayDownBlock->GetMaterialGroups();
+                    case OneWayBlock::OneWayLeft:
+                        return &this->oneWayLeftBlock->GetMaterialGroups();
+                    case OneWayBlock::OneWayRight:
+                        return &this->oneWayRightBlock->GetMaterialGroups();
+                    default:
+                        assert(false);
+                        break;
+                }
+            }
+            break;
 		case LevelPiece::Empty:
 			break;
 		default:

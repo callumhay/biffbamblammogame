@@ -23,7 +23,7 @@ activeCannonEffectEmitter(NULL) {
 	this->LoadMesh();
 
 	assert(this->haloTexture == NULL);
-	this->haloTexture = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+	this->haloTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 	assert(this->haloTexture != NULL);
 
 	// Halo effect that pulses outwards

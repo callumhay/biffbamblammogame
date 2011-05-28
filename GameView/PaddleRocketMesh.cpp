@@ -27,7 +27,7 @@ PaddleRocketMesh::PaddleRocketMesh() :
 rocketMesh(NULL), rocketGlowEmitter(NULL), pulseEffector(0,0) {
 	this->LoadMesh();
 
-	this->glowTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Bilinear));
+	this->glowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Bilinear));
 	assert(this->glowTex != NULL);
 	
 	ScaleEffect pulseSettings;

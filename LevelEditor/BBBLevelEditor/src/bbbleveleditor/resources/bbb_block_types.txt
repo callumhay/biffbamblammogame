@@ -153,3 +153,19 @@ T(P,ll)
 Prism LR Triangle
 prism_lr.png
 T(P,lr)
+
+One-Way Up
+one_way_u.png
+F(u)
+
+One-Way Down
+one_way_d.png
+F(d)
+
+One-Way Left
+one_way_l.png
+F(l)
+
+One-Way Right
+one_way_r.png
+F(r)

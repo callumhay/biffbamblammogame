@@ -24,11 +24,11 @@ const double PaddleShield::DEACTIVATING_TIME	= 0.4f; // Time it takes to go from
 PaddleShield::PaddleShield() : SHIELD_COLOUR(0.7f, 0.8f, 1.0f), particleFader(1.0f, 0.0f), particleShrink(1.0f, 0.25f),
 state(PaddleShield::Deactivated), sphereNormalsTex(NULL), haloTex(NULL), shieldRefractEffect(NULL), sparkleTex(NULL), 
 auraEnergyOut(NULL), particleGrowth(1.0f, 1.8f), particleEnergyInAndOut(NULL) {
-	this->sphereNormalsTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
+	this->sphereNormalsTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE_NORMALS, Texture::Trilinear));
 	assert(this->sphereNormalsTex != NULL);
-	this->sparkleTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+	this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
 	assert(this->sparkleTex != NULL);
-	this->haloTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+	this->haloTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 	assert(this->haloTex != NULL);
 
 	// TODO: change this to use noise as well...

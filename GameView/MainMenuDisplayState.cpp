@@ -176,7 +176,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 	this->biffEmitter.SetParticleAlignment(ESP::ScreenAligned);
 	this->biffEmitter.SetParticleRotation(ESPInterval(-10));
 	this->biffEmitter.SetParticleSize(ESPInterval(10), ESPInterval(5));
-	this->biffEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTextures[0]));
+	this->biffEmitter.SetParticles(1, static_cast<Texture2D*>(this->bangTextures[0]));
 
 	this->biffTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
 	this->biffTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
@@ -199,7 +199,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 	this->bamEmitter.SetParticleAlignment(ESP::ScreenAligned);
 	this->bamEmitter.SetParticleRotation(ESPInterval(-15));
 	this->bamEmitter.SetParticleSize(ESPInterval(11.0f), ESPInterval(5.0f));
-	this->bamEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTextures[1]));
+	this->bamEmitter.SetParticles(1, static_cast<Texture2D*>(this->bangTextures[1]));
 
 	this->bamTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
 	this->bamTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
@@ -222,7 +222,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 	this->blammoEmitter.SetParticleAlignment(ESP::ScreenAligned);
 	this->blammoEmitter.SetParticleRotation(ESPInterval(-8));
 	this->blammoEmitter.SetParticleSize(ESPInterval(12.0f), ESPInterval(6.5f));
-	this->blammoEmitter.SetParticles(1, dynamic_cast<Texture2D*>(this->bangTextures[2]));
+	this->blammoEmitter.SetParticles(1, static_cast<Texture2D*>(this->bangTextures[2]));
 
 	this->blammoTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
 	this->blammoTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
@@ -610,7 +610,7 @@ void MainMenuDisplayState::RenderBackgroundEffects(double dT, Camera& menuCam) {
 void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX, float minY, float maxY, float minZ, float maxZ) {
 	// Choose a random bang texture
 	unsigned int randomBangTexIndex = Randomizer::GetInstance()->RandomUnsignedInt() % this->bangTextures.size();
-	Texture2D* randomBangTex = dynamic_cast<Texture2D*>(this->bangTextures[randomBangTexIndex]);
+	Texture2D* randomBangTex = static_cast<Texture2D*>(this->bangTextures[randomBangTexIndex]);
 	
 	// Establish some of the values we will use to create the emitter for a 'BANG!" effect
 	static const ESPInterval bangLifeInterval(2.0f, 3.5f);
@@ -926,7 +926,7 @@ void MainMenuDisplayState::AllMenuItemsEventHandler::MenuItemCancelled() {
  * Triggered event when a sound onomatopiea particle spawns for the background 'bang' particle effects.
  */
 void MainMenuDisplayState::BangParticleEventHandler::ParticleSpawnedEvent(const ESPParticle* particle) {
-	const ESPOnomataParticle* soundParticle = dynamic_cast<const ESPOnomataParticle*>(particle);
+	const ESPOnomataParticle* soundParticle = static_cast<const ESPOnomataParticle*>(particle);
 	assert(soundParticle != NULL);
 
 	// Based on the extremeness of the onomata particle just spawned, we signify a sound event

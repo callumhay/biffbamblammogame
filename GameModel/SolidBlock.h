@@ -15,7 +15,6 @@
 #include "LevelPiece.h"
 #include "GameBall.h"
 
-
 class SolidBlock : public LevelPiece {
 
 public:

@@ -307,7 +307,7 @@ void GameEventsListener::BallBlockCollisionEvent(const GameBall& ball, const Lev
 
 		// We shake things up if the ball is uber and the block is indestructible...
 		if ((ball.GetBallType() & GameBall::InvisiBall) != GameBall::InvisiBall &&
-			  (ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.BallBlastsThrough(ball)) {
+			(ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall && !block.BallBlastsThrough(ball)) {
 
 			float shakeMagnitude, shakeLength;
 			BBBGameController::VibrateAmount controllerVibeAmt;
@@ -497,6 +497,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::SolidTriangle:
 		case LevelPiece::Tesla:
         case LevelPiece::Switch:
+        case LevelPiece::OneWay:
 			if (wasFrozen) {
 				// Add ice break effect
 				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());

@@ -24,7 +24,7 @@ teslaCenterFlare(NULL), flareTex(NULL), shieldTex(NULL), shieldAlpha(1.0f) {
 	this->LoadMesh();
 	
 	// Grab the flare texture
-	this->flareTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE, 
+	this->flareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BRIGHT_FLARE, 
 																																																  Texture::Trilinear, GL_TEXTURE_2D));
 	assert(this->flareTex != NULL);
 
@@ -54,7 +54,7 @@ teslaCenterFlare(NULL), flareTex(NULL), shieldTex(NULL), shieldAlpha(1.0f) {
 	// DECIDED NOT TO DO SPARKS SINCE EACH TESLA BLOCK WOULD NEED ITS OWN AND THEY WOULD NEED TO BE RESET
 	// EVERY TIME A TESLA BLOCK TURNS OFF.. NOT WORTH IT
 	// Grab the spark texture
-	this->sparkTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, 
+	this->sparkTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, 
 		Texture::Trilinear, GL_TEXTURE_2D));
 	assert(this->sparkTex != NULL);
 	
@@ -62,7 +62,7 @@ teslaCenterFlare(NULL), flareTex(NULL), shieldTex(NULL), shieldAlpha(1.0f) {
 	// ...
 	*/
 
-	this->shieldTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
+	this->shieldTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear));
 	assert(this->shieldTex != NULL);
 }
 

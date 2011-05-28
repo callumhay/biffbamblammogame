@@ -45,5 +45,6 @@ void PrismBlockMesh::LoadMesh(PrismBlockType type) {
 	assert(prismMaterialGrps.size() == 1);
 
 	MaterialGroup* prismMatGrp = prismMaterialGrps.begin()->second;
-	this->prismEffect = dynamic_cast<CgFxPrism*>(prismMatGrp->GetMaterial());
+	this->prismEffect = static_cast<CgFxPrism*>(prismMatGrp->GetMaterial());
+    assert(this->prismEffect != NULL);
 }

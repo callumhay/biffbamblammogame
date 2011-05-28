@@ -1,28 +1,69 @@
 /**
- * SolidBlock.cpp
+ * OneWayBlock.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2009-2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
  * resulting work only under the same or similar licence to this one.
  */
 
-#include "SolidBlock.h"
+#include "OneWayBlock.h"
+
 #include "EmptySpaceBlock.h"
 #include "Projectile.h"
 #include "GameModel.h"
 #include "GameEventManager.h"
 
-SolidBlock::SolidBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {
+OneWayBlock::OneWayBlock(const OneWayDir& dir, unsigned int wLoc, unsigned int hLoc) :
+LevelPiece(wLoc, hLoc), dirType(dir) {
+
+    switch (dir) {
+        case OneWayBlock::OneWayUp:
+            this->oneWayDir = Vector2D(0, 1);
+            break;
+        case OneWayBlock::OneWayDown:
+            this->oneWayDir = Vector2D(0, -1);
+            break;
+        case OneWayBlock::OneWayLeft:
+            this->oneWayDir = Vector2D(-1, 0);
+            break;
+        case OneWayBlock::OneWayRight:
+            this->oneWayDir = Vector2D(1, 0);
+            break;
+        default:
+            assert(false);
+            break;
+    }
 }
 
-SolidBlock::~SolidBlock() {
+OneWayBlock::~OneWayBlock() {
+}
+
+bool OneWayBlock::ConvertCharToOneWayDir(const char& oneWayChar, OneWayBlock::OneWayDir& oneWayDirEnum) {
+    switch (oneWayChar) {
+        case 'u':
+            oneWayDirEnum = OneWayBlock::OneWayUp;
+            break;
+        case 'd':
+            oneWayDirEnum = OneWayBlock::OneWayDown;
+            break;
+        case 'l':
+            oneWayDirEnum = OneWayBlock::OneWayLeft;
+            break;
+        case 'r':
+            oneWayDirEnum = OneWayBlock::OneWayRight;
+            break;
+        default:
+            assert(false);
+            return false;
+    }
+    return true;
 }
 
 // Determine whether the given projectile will pass through this block...
-bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) const {
+bool OneWayBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	switch (projectile->GetType()) {
 
 		case Projectile::PaddleLaserBulletProjectile:
@@ -48,14 +89,14 @@ bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) const {
 /**
  * Get the number of points when this piece changes to the given piece.
  */
-int SolidBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
+int OneWayBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
     if (changeToPiece.GetType() == LevelPiece::Empty) {
-        return SolidBlock::POINTS_ON_BLOCK_DESTROYED;
+        return OneWayBlock::POINTS_ON_BLOCK_DESTROYED;
     }
     return 0;
 }
 
-LevelPiece* SolidBlock::Destroy(GameModel* gameModel) {
+LevelPiece* OneWayBlock::Destroy(GameModel* gameModel) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
@@ -83,13 +124,12 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel) {
 }
 
 /**
- * Update the collision boundries of this solid block, solid blocks are special in that they will
- * ALWAYS have all possible collision boundries enabled and created.
+ * Update the collision boundries of this block.
  */
-void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-                              const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-                              const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-                              const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                               const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                               const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                               const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 
 	// We ALWAYS create boundries unless the neighbour does not exist (NULL) 
 	// or is another solid block.
@@ -100,7 +140,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 	// Left boundry of the piece
 	if (leftNeighbor != NULL) {
-		if (leftNeighbor->GetType() != LevelPiece::Solid) {
+        if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::OneWay) {
 			Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n1(-1, 0);
@@ -111,7 +151,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 	// Bottom boundry of the piece
 	if (bottomNeighbor != NULL) {
-		if (bottomNeighbor->GetType() != LevelPiece::Solid) {
+		if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::OneWay) {
 			Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n2(0, -1);
@@ -122,7 +162,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 	// Right boundry of the piece
 	if (rightNeighbor != NULL) {
-		if (rightNeighbor->GetType() != LevelPiece::Solid) {
+		if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::OneWay) {
 			Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n3(1, 0);
@@ -133,7 +173,7 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 
 	// Top boundry of the piece
 	if (topNeighbor != NULL) {
-		if (topNeighbor->GetType() != LevelPiece::Solid) {
+		if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::OneWay) {
 			Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n4(0, 1);
@@ -143,15 +183,11 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-		 							topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-}
-
-bool SolidBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-	return Collision::IsCollision(ray, this->GetAABB(), rayT);
+		 						 topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
 // Doesn't matter if a ball collides with solid block, it does nothing to the block.
-LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
+LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	ball.SetLastPieceCollidedWith(NULL);
 
 	// Solid blocks can be frozen, but they still can't be destroyed (in most cases)
@@ -182,7 +218,7 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) 
  * Called when the solid block is hit by a projectile. Tends to cause the projectile to
  * extinguish, however for the collateral block projectile, it will completely destroy this.
  */
-LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 	LevelPiece* resultingPiece = this;
 
 	switch (projectile->GetType()) {
