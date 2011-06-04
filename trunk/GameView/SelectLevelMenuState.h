@@ -64,10 +64,11 @@ private:
     
     void DrawStarTotalLabel(const Camera& camera);
     void DrawTitleStrip(const Camera& camera) const;
+    void DrawPageSelection(const Camera& camera) const;
     void DrawLevelSelectMenu(const Camera& camera, double dT);
     void GoBackToWorldSelectMenu();
     void GoToStartLevel();
-    void SetupLevelItems();
+    void SetupLevelPages();
 
     void MoveSelectionX(bool right);
     void MoveSelectionY(bool up);
@@ -109,9 +110,28 @@ private:
         DISALLOW_COPY_AND_ASSIGN(LevelMenuItem);
     };
 
+    class LevelMenuPage {
+    public:
+        LevelMenuPage() : selectedItem(0) {}
+        ~LevelMenuPage();
+        
+        size_t GetSelectedItemIndex() const { return this->selectedItem; }
+        LevelMenuItem* GetSelectedItem() const { return this->levelItems[this->selectedItem]; }
+        size_t GetNumLevelItems() const { return this->levelItems.size(); }
+
+        void SetSelectedItemIndex(size_t idx) { assert(idx < this->levelItems.size()); this->selectedItem = idx; }
+        void AddLevelItem(LevelMenuItem* item) { assert(item != NULL); this->levelItems.push_back(item); }
+        void Draw(const Camera& camera, double dT);
+        
+    private:
+        size_t selectedItem;
+        std::vector<LevelMenuItem*> levelItems;
+    };
+
     int numItemsPerRow;
-    int selectedItem;
-    std::vector<LevelMenuItem*> levelItems;
+    
+    int selectedPage;
+    std::vector<LevelMenuPage*> pages;
 
     DISALLOW_COPY_AND_ASSIGN(SelectLevelMenuState);
 };
@@ -123,6 +143,12 @@ inline void SelectLevelMenuState::DisplaySizeChanged(int width, int height) {
 
 inline DisplayState::DisplayStateType SelectLevelMenuState::GetType() const {
     return DisplayState::SelectLevelMenu;
+}
+
+inline void SelectLevelMenuState::LevelMenuPage::Draw(const Camera& camera, double dT) {
+    for (size_t i = 0; i < this->levelItems.size(); i++) {
+        this->levelItems[i]->Draw(camera, dT);
+    }
 }
 
 #endif // __SELECTLEVELMENUSTATE_H__

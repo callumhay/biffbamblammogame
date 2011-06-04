@@ -425,7 +425,7 @@ namespace Collision {
 		rayT = Vector2D::Dot(perpD1, P1MinusP0) / dotPerpD1D0;
 		float lineT = Vector2D::Dot(perpD0, P1MinusP0) / dotPerpD1D0;
 
-		return (rayT >= 0 && lineT >= 0 && lineT <= 1);
+		return (rayT >= 0 && lineT >= -EPSILON && lineT <= (1+EPSILON));
 	}
 
 	inline bool IsCollision(const Ray2D& ray, const Circle2D& circle, float& rayT) {

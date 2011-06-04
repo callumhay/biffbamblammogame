@@ -70,7 +70,7 @@ selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderA
 	this->fadeAnimation.SetRepeat(false);
 	this->fadeAnimation.SetInterpolantValue(1.0f);
 
-    this->SetupLevelItems();
+    this->SetupLevelPages();
 }
 
 SelectLevelMenuState::~SelectLevelMenuState() {
@@ -88,12 +88,12 @@ SelectLevelMenuState::~SelectLevelMenuState() {
     delete this->keyEscLabel;
     this->keyEscLabel = NULL;
 
-    for (size_t i = 0; i < this->levelItems.size(); i++) {
-        LevelMenuItem* levelItem = this->levelItems.at(i);
-        delete levelItem;
-        levelItem = NULL;
+    for (size_t i = 0; i < this->pages.size(); i++) {
+        LevelMenuPage* page = this->pages[i];
+        delete page;
+        page = NULL;
     }
-    this->levelItems.clear();
+    this->pages.clear();
 
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTexture);
     assert(success);
@@ -138,6 +138,9 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 
     // Draw the label showing how many stars have been acquired for the world...
     this->DrawStarTotalLabel(camera);
+
+    // Draw the page selection squares
+    this->DrawPageSelection(camera);
 
 	// Draw a fade overlay if necessary
     bool fadeDone = this->fadeAnimation.Tick(dT);
@@ -204,7 +207,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     // Handle the case where the player selected a level
     if (this->goToStartLevel && fadeDone) {
         // Start the currently selected level
-        LevelMenuItem* selectedLevelItem = this->levelItems[this->selectedItem];
+        LevelMenuItem* selectedLevelItem = this->pages[this->selectedPage]->GetSelectedItem();
         const GameLevel* selectedLevel = selectedLevelItem->GetLevel();
 
 		// Turn off all the sounds first (waiting for any unfinished sounds), then switch states
@@ -327,6 +330,63 @@ void SelectLevelMenuState::DrawTitleStrip(const Camera& camera) const {
     glEnd();
 }
 
+void SelectLevelMenuState::DrawPageSelection(const Camera& camera) const {
+    static const int SQUARE_SIZE         = 16;
+    static const int SQUARE_GAP_SIZE     = 5;
+    static const int SQUARE_BOTTOM_Y_POS = VERTICAL_TITLE_GAP;
+    static const int SQUARE_TOP_Y_POS    = SQUARE_BOTTOM_Y_POS + SQUARE_SIZE;
+    
+    int totalWidth = SQUARE_SIZE * this->pages.size() + SQUARE_GAP_SIZE * (this->pages.size()-1);
+    int currX = (camera.GetWindowWidth() - totalWidth) / 2;
+
+    glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glPushMatrix();
+
+    // Draw a square for each page, the selected page is coloured in, the rest are grey
+    glBegin(GL_QUADS);
+    for (size_t i = 0; i < this->pages.size(); i++) {
+        if (i == static_cast<size_t>(this->selectedPage)) {
+            glColor4f(1, 0.65f, 0, 1);
+        }
+        else {
+            glColor4f(0.66f, 0.66f, 0.66f, 1);
+        }
+
+        glVertex2f(currX, SQUARE_TOP_Y_POS);
+        glVertex2f(currX, SQUARE_BOTTOM_Y_POS);
+        glVertex2f(currX+SQUARE_SIZE, SQUARE_BOTTOM_Y_POS);
+        glVertex2f(currX+SQUARE_SIZE, SQUARE_TOP_Y_POS);
+
+        currX += SQUARE_SIZE + SQUARE_GAP_SIZE;
+    }
+    glEnd();
+    
+    // Draw outlines...
+    glLineWidth(1.0f);
+    glColor4f(0, 0, 0, 1);
+    currX = (camera.GetWindowWidth() - totalWidth) / 2;
+    for (size_t i = 0; i < this->pages.size(); i++) {
+        
+        glBegin(GL_LINE_LOOP);
+        glVertex2f(currX, SQUARE_TOP_Y_POS);
+        glVertex2f(currX, SQUARE_BOTTOM_Y_POS);
+        glVertex2f(currX+SQUARE_SIZE, SQUARE_BOTTOM_Y_POS);
+        glVertex2f(currX+SQUARE_SIZE, SQUARE_TOP_Y_POS);
+        glEnd();
+
+        currX += SQUARE_SIZE + SQUARE_GAP_SIZE;
+    }
+    
+    glPopMatrix();
+    glPopAttrib();
+}
+
 /**
  * Draw the menu of level selection items, including the selected item which has a glowing border
  * drawn around it.
@@ -340,7 +400,7 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Draw the currently selected level item's selection border
-    LevelMenuItem* selectedItem = this->levelItems[this->selectedItem];
+    LevelMenuItem* selectedItem = this->pages[this->selectedPage]->GetSelectedItem();
     assert(selectedItem != NULL);
     static const float BORDER_GAP = 10;
     float leftX  = selectedItem->GetTopLeftCorner()[0] - BORDER_GAP;
@@ -398,11 +458,9 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
     glVertex2f(rightX, topY);
     glEnd();
 
+    // Draw the current page of level items
+    this->pages[this->selectedPage]->Draw(camera, dT);
 
-    // Draw all the level selection items
-    for (size_t i = 0; i < this->levelItems.size(); i++) {
-        this->levelItems[i]->Draw(camera, dT);
-    }
     glPopAttrib();
 }
 
@@ -420,7 +478,7 @@ void SelectLevelMenuState::GoBackToWorldSelectMenu() {
 }
 
 void SelectLevelMenuState::GoToStartLevel() {
-    if (this->levelItems[this->selectedItem]->GetIsEnabled()) {
+    if (this->pages[this->selectedPage]->GetSelectedItem()->GetIsEnabled()) {
         // Finishing animation for starting the level
         this->fadeAnimation.SetLerp(0.5f, 1.0f);
 	    this->fadeAnimation.SetRepeat(false);
@@ -433,7 +491,7 @@ void SelectLevelMenuState::GoToStartLevel() {
     }
 }
 
-void SelectLevelMenuState::SetupLevelItems() {
+void SelectLevelMenuState::SetupLevelPages() {
     const Camera& camera = this->display->GetCamera();
 
     static const int TITLE_TO_ITEM_Y_GAP_SIZE = 57;
@@ -457,37 +515,46 @@ void SelectLevelMenuState::SetupLevelItems() {
     float itemY = camera.GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
 
     // Build the menu items for level selection
-    int tempCount = 0;
     int totalNumStarsCollected = 0;
+    int totalNumStars = 0;
     const std::vector<GameLevel*>& levels = this->world->GetAllLevelsInWorld();
-
-    /*
-    int numRows = levels.size() / numItemsPerRow;
+    this->pages.push_back(new LevelMenuPage());
+    LevelMenuItem* levelItem   = NULL;
+    int numRows = static_cast<int>(ceil(static_cast<float>(levels.size()) / static_cast<float>(numItemsPerRow)));
     for (int row = 0; row < numRows; row++) {
+
         for (int col = 0; col < numItemsPerRow; col++) {
             int currLevelIdx = row * numItemsPerRow + col;
-            if (currLevelIdx >= levels.size()) {
+            if (currLevelIdx >= static_cast<int>(levels.size())) {
                 break;
             }
 
             const GameLevel* currLevel = levels.at(currLevelIdx);
             assert(currLevel != NULL);
 
-            LevelMenuItem* levelItem = new LevelMenuItem(currLevelIdx+1, currLevel, itemWidth, 
-                Point2D(itemX, itemY), this->starTexture);
-            this->levelItems.push_back(levelItem);
-            
-            tempCount++;
-            if (tempCount == numItemsPerRow) {
-                itemY -= ITEM_Y_GAP_SIZE + levelItem->GetHeight();
-                tempCount = 0;
-            }
-            itemX += itemWidth + ITEM_X_GAP_SIZE;
+            //totalNumStarsCollected += currLevel->GetNumStars();
+            totalNumStars += GameLevel::MAX_STARS_PER_LEVEL;
 
+            levelItem = new LevelMenuItem(currLevelIdx+1, currLevel, itemWidth, 
+                Point2D(itemX, itemY), this->starTexture);
+            this->pages[this->pages.size()-1]->AddLevelItem(levelItem);
+            
+
+            itemX += itemWidth + ITEM_X_GAP_SIZE;
+        }
+
+        assert(levelItem != NULL);
+        itemX  = SIDE_TO_ITEM_GAP_SIZE;
+        itemY -= ITEM_Y_GAP_SIZE + levelItem->GetHeight();
+
+        // Check to see if we've exceeded the size of the page so that we make the next page...
+        if (row != numRows-1 && itemY <= (this->keyEscLabel->GetHeight() + VERTICAL_TITLE_GAP)) {
+            itemY = camera.GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
+            this->pages.push_back(new LevelMenuPage());
         }
     }
-    */
 
+    /*
     for (size_t levelIdx = 0; levelIdx < levels.size(); levelIdx++) {
         const GameLevel* currLevel = levels.at(levelIdx);
         assert(currLevel != NULL);
@@ -508,9 +575,10 @@ void SelectLevelMenuState::SetupLevelItems() {
             itemX += itemWidth + ITEM_X_GAP_SIZE;
         }
     }
-    
-    assert(!this->levelItems.empty());
-    this->selectedItem = 0;
+    */
+
+    assert(!this->pages.empty());
+    this->selectedPage = 0;
 
     // Setup the selection animation
     std::vector<double> timeVals;
@@ -540,30 +608,71 @@ void SelectLevelMenuState::SetupLevelItems() {
     this->selectionBorderAddAnim.SetRepeat(true);
 
     std::stringstream totalNumStarsTxt;
-    totalNumStarsTxt << totalNumStarsCollected << "/" << (this->levelItems.size() * GameLevel::MAX_STARS_PER_LEVEL);
+    totalNumStarsTxt << totalNumStarsCollected << "/" << totalNumStars;
     this->totalNumStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Medium), totalNumStarsTxt.str());
     this->totalNumStarsLabel->SetColour(Colour(0,0,0));
 }
 
 void SelectLevelMenuState::MoveSelectionX(bool right) {
-    //if (this->GetSelectedItem() == NULL || this->itemIsActivated) { return; }
     int x = right ? 1 : -1;
-    int currRowIndex  = this->selectedItem / this->numItemsPerRow;
-    int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
-    int wrapAroundX   = (numItemsOnRow + (this->selectedItem - currRowIndex * this->numItemsPerRow) + x) % numItemsOnRow;
 
-    this->selectedItem = this->numItemsPerRow * currRowIndex + wrapAroundX;
+    // Check to see if we're spilling over the edge of the current page - if there's a page to either
+    // side then the selection will move to that new page...
+    size_t selectedItem = this->pages[this->selectedPage]->GetSelectedItemIndex();
+    
+    assert(this->numItemsPerRow-1 > 0);
+
+    bool isFirstItem      = selectedItem == 0;
+    bool isLastItem       = selectedItem == (this->pages[this->selectedPage]->GetNumLevelItems()-1);
+
+    if (this->pages.size() > 1 && (isFirstItem || isLastItem)) {
+        if (isFirstItem && !right) {
+            // The user is moving the selection off the page to the left
+            size_t newPageNum = (this->pages.size() + (static_cast<int>(this->selectedPage) - 1)) % this->pages.size();
+            this->selectedPage = newPageNum;
+            LevelMenuPage* currPage = this->pages[this->selectedPage];
+            currPage->SetSelectedItemIndex(currPage->GetNumLevelItems()-1);
+            return;
+        }
+        else if (isLastItem && right) {
+            // The user is moving the selection off the page to the right
+            size_t newPageNum = (this->selectedPage + 1) % this->pages.size();
+            this->selectedPage = newPageNum;
+            LevelMenuPage* currPage = this->pages[this->selectedPage];
+            currPage->SetSelectedItemIndex(0);
+            return;
+        }
+    }
+
+    int currRowIndex  = selectedItem / this->numItemsPerRow;
+    int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
+    int wrapAroundX   = (numItemsOnRow + (selectedItem - currRowIndex * this->numItemsPerRow) + x) % numItemsOnRow;
+
+    bool isFirstItemInRow = (selectedItem % this->numItemsPerRow) == 0;
+    bool isLastItemInRow  = (selectedItem % this->numItemsPerRow) == static_cast<size_t>(this->numItemsPerRow-1);
+
+    if (right && !isLastItem && isLastItemInRow) {
+        this->pages[this->selectedPage]->SetSelectedItemIndex(this->numItemsPerRow * (currRowIndex+1) + wrapAroundX);
+    }
+    else if(!right && currRowIndex != 0 && isFirstItemInRow) {
+        this->pages[this->selectedPage]->SetSelectedItemIndex(this->numItemsPerRow * (currRowIndex-1) + wrapAroundX);
+    }
+    else {
+        this->pages[this->selectedPage]->SetSelectedItemIndex(this->numItemsPerRow * currRowIndex + wrapAroundX);
+    }
 }
 
 void SelectLevelMenuState::MoveSelectionY(bool up) {
-    //if (this->GetSelectedItem() == NULL || this->itemIsActivated) { return; }
     int y = up ? 1 : -1;
 
-    int numRows = (this->levelItems.size() / this->numItemsPerRow) + 1;
+    size_t selectedItem  = this->pages[this->selectedPage]->GetSelectedItemIndex();
+    size_t numLevelItems = this->pages[this->selectedPage]->GetNumLevelItems();
+
+    int numRows = (numLevelItems / this->numItemsPerRow) + 1;
     int rowsAllFilledNumItems = (numRows * this->numItemsPerRow);
-    int newSelectedIndex = (rowsAllFilledNumItems + this->selectedItem - y * this->numItemsPerRow) % rowsAllFilledNumItems;
-    if (newSelectedIndex >= static_cast<int>(this->levelItems.size())) {
+    int newSelectedIndex = (rowsAllFilledNumItems + selectedItem - y * this->numItemsPerRow) % rowsAllFilledNumItems;
+    if (newSelectedIndex >= static_cast<int>(numLevelItems)) {
         if (up) {
             newSelectedIndex -= this->numItemsPerRow;
         }
@@ -571,11 +680,12 @@ void SelectLevelMenuState::MoveSelectionY(bool up) {
             newSelectedIndex %= this->numItemsPerRow;
         }
     }
-    this->selectedItem = newSelectedIndex;
+    this->pages[this->selectedPage]->SetSelectedItemIndex(newSelectedIndex);
 }
 
 int SelectLevelMenuState::GetNumItemsOnRow(int rowIdx) {
-    int temp = static_cast<int>(this->levelItems.size()) - (static_cast<int>(this->numItemsPerRow) * rowIdx);
+    size_t numLevelItems = this->pages[this->selectedPage]->GetNumLevelItems();
+    int temp = static_cast<int>(numLevelItems) - (static_cast<int>(this->numItemsPerRow) * rowIdx);
     return std::min<int>(temp, this->numItemsPerRow);
 }
 
@@ -687,4 +797,14 @@ void SelectLevelMenuState::LevelMenuItem::Draw(const Camera& camera, double dT) 
     
     // Draw the number of stars earned for the level
     glCallList(this->starDisplayList);
+}
+
+
+SelectLevelMenuState::LevelMenuPage::~LevelMenuPage() {
+    for (size_t i = 0; i < this->levelItems.size(); i++) {
+        LevelMenuItem* levelItem = this->levelItems.at(i);
+        delete levelItem;
+        levelItem = NULL;
+    }
+    this->levelItems.clear();
 }

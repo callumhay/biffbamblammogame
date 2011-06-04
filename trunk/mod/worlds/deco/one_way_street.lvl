@@ -1,0 +1,58 @@
+One-way Street
+15 26
+S S S S S S S S S S S S S S S 
+S G E G E G E G E G E G E G S 
+S E G E G E G E G E G E G E S 
+S G E G E G E G E G E G E G S 
+S E G E G E G E G E G E G E S 
+S G B G B G B G B G B G B G S 
+S Y Y Y Y Y Y Y Y Y Y Y Y Y S 
+S O O O O O O F(d) O O O O O O S 
+S R R R R S T(S,ul) E T(S,ur) S R R R R S 
+S G E G E F(l) E E E F(r) E G E G S 
+S E Y E E F(l) E E E F(r) E E Y E S 
+S G E G E F(l) E E E F(r) E G E G S 
+S E Y E E F(l) E E E F(r) E E Y E S 
+S G E G E F(l) E E E F(r) E G E G S 
+S E Y E E F(l) E E E F(r) E E Y E S 
+S R R R R S F(u) F(u) F(u) S R R R R S 
+S Y Y Y Y Y O O O Y Y Y Y Y S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 1
+FireBall 1
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MultiBall3 2
+IceBall 1
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

@@ -16,7 +16,7 @@
 #include "GameLevel.h"
 #include "GameEventManager.h"
 
-const float Beam::MIN_BEAM_RADIUS = 0.1f;
+const float Beam::MIN_BEAM_RADIUS = 0.05f;
 const int   Beam::MIN_DMG_PER_SEC = 1;
 
 Beam::Beam(BeamType type, int dmgPerSec, double lifeTimeInSec) : 
@@ -146,7 +146,7 @@ LevelPiece* BeamSegment::FireBeamSegmentIntoLevel(const GameLevel* level) {
 
 	// Collide the ray of this beam with the level - find out where the collision occurs
 	// and what piece is being collided with - set those values for the members of this beam segment.
-	this->collidingPiece = level->GetLevelPieceFirstCollider(this->ray, ignorePieces, this->endT);
+    this->collidingPiece = level->GetLevelPieceFirstCollider(this->ray, ignorePieces, this->endT);
 
 	// Make sure that the endT isn't set if there was no collision - it flies out of the level...
 	if (this->collidingPiece == NULL) {
