@@ -31,7 +31,7 @@
 #define SQRT_2 1.4142135623730950488
 
 // Epsilon value for doing equivalence operations and the like
-#define EPSILON 0.000001f
+#define EPSILON 0.00001f
 
 // Trigonometry namespace for functions that are nice to have
 // for basic conversions and trigonometric math stuffs
