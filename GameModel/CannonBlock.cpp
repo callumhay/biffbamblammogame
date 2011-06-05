@@ -171,12 +171,12 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 		case Projectile::PaddleRocketBulletProjectile:
 			// If the cannon isn't already loaded with a projectile then
 			// the rocket gets captured by the cannon block and shot somewhere else...
-			if (!projectile->IsLastLevelPieceCollidedWith(this) && !this->GetIsLoaded()) {
+			if (!projectile->IsLastThingCollidedWith(this) && !this->GetIsLoaded()) {
 				PaddleRocketProjectile* rocketProjectile = static_cast<PaddleRocketProjectile*>(projectile);
 				assert(rocketProjectile != NULL);
 				this->SetupCannonFireTimeAndDirection();
 				rocketProjectile->LoadIntoCannonBlock(this);
-				rocketProjectile->SetLastLevelPieceCollidedWith(this);
+				rocketProjectile->SetLastThingCollidedWith(this);
 				this->loadedRocket = rocketProjectile;
 			}
 			break;

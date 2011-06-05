@@ -19,11 +19,11 @@
 // Projectile ====================================================================================================================
 
 Projectile::Projectile(const Point2D& spawnLoc, float width, float height) : 
-position(spawnLoc), lastPieceCollidedWith(NULL), currWidth(width), currHeight(height) {
+position(spawnLoc), lastThingCollidedWith(NULL), currWidth(width), currHeight(height) {
 }
 
 Projectile::Projectile(const Projectile& copy) : position(copy.position),
-lastPieceCollidedWith(copy.lastPieceCollidedWith), currWidth(copy.currWidth), currHeight(copy.currHeight),
+lastThingCollidedWith(copy.lastThingCollidedWith), currWidth(copy.currWidth), currHeight(copy.currHeight),
 velocityDir(copy.velocityDir), velocityMag(copy.velocityMag), rightVec(copy.rightVec) {
 }
 

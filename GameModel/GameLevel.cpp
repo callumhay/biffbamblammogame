@@ -1080,7 +1080,7 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const Projectile* r
 
 	return resultPiece;
 }
-void GameLevel::RocketExplosionNoPieces(GameModel* gameModel, const Projectile* rocket) {
+void GameLevel::RocketExplosionNoPieces(const Projectile* rocket) {
 	// EVENT: Rocket exploded!!
 	const PaddleRocketProjectile* rocketProjectile = static_cast<const PaddleRocketProjectile*>(rocket);
 	assert(rocketProjectile != NULL);

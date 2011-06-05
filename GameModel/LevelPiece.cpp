@@ -260,7 +260,7 @@ void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, Gam
 
 	// Need to figure out if this laser bullet already collided with this block... 
 	// If it has then we just ignore it
-	if (projectile->IsLastLevelPieceCollidedWith(this)) {
+	if (projectile->IsLastThingCollidedWith(this)) {
 		return;
 	}
 	
@@ -272,7 +272,7 @@ void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, Gam
 	// The first ray is how the current projectile gets transmitted through this block...
 	projectile->SetPosition(rayIter->GetOrigin());
 	projectile->SetVelocity(rayIter->GetUnitDirection(), projectile->GetVelocityMagnitude());
-	projectile->SetLastLevelPieceCollidedWith(this);
+	projectile->SetLastThingCollidedWith(this);
 
 	// All the other rays were created via refraction or some such thing, so spawn new particles for them
 	++rayIter;
@@ -280,7 +280,7 @@ void LevelPiece::DoIceCubeReflectRefractLaserBullets(Projectile* projectile, Gam
         Projectile* newProjectile = Projectile::CreateProjectileFromCopy(projectile);
 		newProjectile->SetPosition(rayIter->GetOrigin());
 		newProjectile->SetVelocity(rayIter->GetUnitDirection(), projectile->GetVelocityMagnitude());
-		newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
+		newProjectile->SetLastThingCollidedWith(this); // If we don't do this then it will cause recursive doom
 		gameModel->AddProjectile(newProjectile);
 	}
 }

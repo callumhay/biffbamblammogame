@@ -123,14 +123,20 @@ public:
 	}
 
 	float GetPaddleMinBound() const {
-		LevelPiece* temp = this->currentLevelPieces[0][0];
+		LevelPiece* temp = this->GetMinBoundPiece();
 		return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
 	}
 
 	float GetPaddleMaxBound() const {
-		LevelPiece* temp = this->currentLevelPieces[0][this->width-1];
+		LevelPiece* temp = this->GetMaxBoundPiece();
 		return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;	
 	}
+    LevelPiece* GetMinBoundPiece() const {
+        return this->currentLevelPieces[0][0];
+    }
+    LevelPiece* GetMaxBoundPiece() const {
+        return this->currentLevelPieces[0][this->width-1];
+    }
 
 	float GetLevelUnitWidth() const {
 		return this->width * LevelPiece::PIECE_WIDTH;
@@ -156,7 +162,7 @@ public:
 
 	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter);
 	LevelPiece* RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece);
-    void RocketExplosionNoPieces(GameModel* gameModel, const Projectile* rocket);
+    void RocketExplosionNoPieces(const Projectile* rocket);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
 
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);

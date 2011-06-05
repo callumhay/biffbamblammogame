@@ -315,7 +315,7 @@ void PlayerPaddle::MoveAttachedBallToNewBounds(double dT) {
 	this->attachedBall->SetCenterPosition(closestPtOnBounds + this->attachedBall->GetBounds().Radius() * this->GetUpVector());
 }
 
-void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement) {
+void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gameModel) {
 	Point2D startingCenterPos = this->centerPos;
 	Point2D defaultCenterPos = this->GetDefaultCenterPosition();
 
@@ -388,6 +388,13 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement) {
 		
 		// Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
 		if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
+            
+            if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
+                LevelPiece* piece = gameModel.GetCurrentLevel()->GetMinBoundPiece();
+                LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
+                assert(resultingPiece == piece);
+            }
+
 			// EVENT: paddle hit left wall for first time
 			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-halfWidthTotalWithBallMin, 0));
 		}
@@ -400,6 +407,13 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement) {
 		
 		// Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
 		if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
+
+            if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
+                LevelPiece* piece = gameModel.GetCurrentLevel()->GetMaxBoundPiece();
+                LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
+                assert(resultingPiece == piece);
+            }
+
 			// EVENT: paddle hit right wall for first time
 			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(halfWidthTotalWithBallMax, 0));
 		}
@@ -542,15 +556,22 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
             Vector2D::Normalize(this->GetUpVector()), rocketWidth, rocketHeight);
 
 		// Make sure the rocket doesn't explode if it's lying up against a block when launched...
+        bool foundPiece = false;
 		const GameLevel* currLevel = gameModel->GetCurrentLevel();
 		std::set<LevelPiece*> levelPieces = currLevel->GetLevelPieceCollisionCandidates(*rocketProjectile);
 		for (std::set<LevelPiece*>::const_iterator iter = levelPieces.begin(); iter != levelPieces.end(); ++iter) {
 			const LevelPiece* currPiece = *iter;
 			if (!currPiece->ProjectilePassesThrough(rocketProjectile)) {
-				rocketProjectile->SetLastLevelPieceCollidedWith(currPiece);
+				rocketProjectile->SetLastThingCollidedWith(currPiece);
+                foundPiece = true;
 				break;
 			}
 		}
+
+        // Make the last thing the rocket collided with the paddle - if there are no pieces to do this with
+        if (!foundPiece) {
+            rocketProjectile->SetLastThingCollidedWith(this);
+        }
 
 		gameModel->AddProjectile(rocketProjectile);
 		this->RemovePaddleType(PlayerPaddle::RocketPaddle);
@@ -572,6 +593,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 			// Create the right type of projectile in the right place
 			Projectile* newProjectile = Projectile::CreateProjectileFromType(Projectile::PaddleLaserBulletProjectile, 
 				this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight));
+            newProjectile->SetLastThingCollidedWith(this);
 
 			// Modify the fired bullet based on the current paddle's properties...
 			newProjectile->SetWidth(projectileWidth);
@@ -691,7 +713,7 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
 
 				        // Be sure to reset the last piece the projectile collided with since it technically just collided
 				        // off of the paddle's shield
-				        projectile.SetLastLevelPieceCollidedWith(NULL);
+				        projectile.SetLastThingCollidedWith(NULL);
 
 				        // EVENT: Projectile deflected by shield
 				        GameEventManager::Instance()->ActionProjectileDeflectedByPaddleShield(projectile, *this);
@@ -933,7 +955,7 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const Project
 		currentLevel->RocketExplosion(gameModel, &projectile, *levelPieces.begin());
 	}
 	else {
-		currentLevel->RocketExplosionNoPieces(gameModel, &projectile);
+		currentLevel->RocketExplosionNoPieces(&projectile);
 	}
 }
 

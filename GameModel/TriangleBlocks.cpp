@@ -146,7 +146,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 				// Based on where the laser bullet hits, we change its direction
 				
 				// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
-				if (!projectile->IsLastLevelPieceCollidedWith(this)) {
+				if (!projectile->IsLastThingCollidedWith(this)) {
 
 					// Obtain all the normals of the lines that the projectile is colliding with...
 					std::vector<int> collidingIndices = this->reflectRefractBounds.CollisionCheckIndices(projectile->BuildBoundingLines());
@@ -202,16 +202,17 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 							// Split the laser in two and send it out both the long and short side of the triangle
 							Vector2D shortSideNormal = TriangleBlock::GetSideNormal(true, TriangleBlock::ShortSide, this->orient);
 							Vector2D longSideNormal  = TriangleBlock::GetSideNormal(true, TriangleBlock::LongSide, this->orient);
-							Point2D splitPosition    = projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection();
 
 							// Send the current projectile out the long side, spawn a new one for the short side
                             Projectile* newProjectile  = Projectile::CreateProjectileFromCopy(projectile); 
-							newProjectile->SetPosition(splitPosition);
+                            newProjectile->SetPosition(Point2D(projectile->GetPosition()[0], this->GetCenter()[1])
+                                                       + projectile->GetHalfHeight() * shortSideNormal);
 							newProjectile->SetVelocity(shortSideNormal, projectile->GetVelocityMagnitude());
-							newProjectile->SetLastLevelPieceCollidedWith(this);
+							newProjectile->SetLastThingCollidedWith(this);
 							gameModel->AddProjectile(newProjectile);
 
-							projectile->SetPosition(splitPosition);
+							projectile->SetPosition(Point2D(this->GetCenter()[0], projectile->GetPosition()[1])
+                                                    + projectile->GetHalfHeight() * shortSideNormal);
 							projectile->SetVelocity(longSideNormal, projectile->GetVelocityMagnitude());
 						}
 					}
@@ -225,7 +226,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 						projectile->SetVelocity(newVelDir, projectile->GetVelocityMagnitude());
 					}
 
-					projectile->SetLastLevelPieceCollidedWith(this);
+					projectile->SetLastThingCollidedWith(this);
 				}
 			}
 			break;

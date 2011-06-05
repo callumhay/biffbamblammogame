@@ -41,7 +41,6 @@ public:
 	void SetWidth(float width) { this->currWidth = width; }
 	void SetHeight(float height) { this->currHeight = height; }
 
-	
 	const Point2D& GetPosition() const { return this->position; }
 
 	const Vector2D& GetVelocityDirection() const { return this->velocityDir; }
@@ -67,8 +66,8 @@ public:
 
 	// Functionality for storing the last level piece that the particle collided with
 	// and for querying it
-	void SetLastLevelPieceCollidedWith(const LevelPiece* p) { this->lastPieceCollidedWith = p; }
-	bool IsLastLevelPieceCollidedWith(const LevelPiece* p) const { return this->lastPieceCollidedWith == p; }
+	void SetLastThingCollidedWith(const void* p) { this->lastThingCollidedWith = p; }
+	bool IsLastThingCollidedWith(const void* p) const { return this->lastThingCollidedWith == p; }
 
 	static Projectile* CreateProjectileFromType(ProjectileType type, const Point2D& spawnLoc);
     static Projectile* CreateProjectileFromCopy(const Projectile* p);
@@ -87,7 +86,7 @@ protected:
 	Vector2D velocityDir;	// Velocity direction of the projectile
 	Vector2D rightVec;		// Unit vector pointing outwards to the right of the particle, perpendicular to the velocity direction
 	float velocityMag;		// Velocity magnitude of the projectile in game units / second
-	const LevelPiece* lastPieceCollidedWith;
+	const void* lastThingCollidedWith;
 };
 
 

@@ -211,7 +211,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 			break;
 
 		case Projectile::FireGlobProjectile:
-			if (!projectile->IsLastLevelPieceCollidedWith(this)) {
+			if (!projectile->IsLastThingCollidedWith(this)) {
 				// This piece may catch on fire...
 				this->LightPieceOnFire(gameModel);
 			}
@@ -257,7 +257,7 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 
 				// Drop a glob of fire downwards from the block...
 				Projectile* fireGlobProjectile = new FireGlobProjectile(dropPos, globSize);
-				fireGlobProjectile->SetLastLevelPieceCollidedWith(this);
+				fireGlobProjectile->SetLastThingCollidedWith(this);
 				gameModel->AddProjectile(fireGlobProjectile);
 			}
 		}
@@ -301,7 +301,7 @@ bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) const {
 
 		case Projectile::FireGlobProjectile:
 			// Let fire globs pass through if they spawned on this block
-			if (projectile->IsLastLevelPieceCollidedWith(this)) {
+			if (projectile->IsLastThingCollidedWith(this)) {
 				return true;
 			}
 			break;

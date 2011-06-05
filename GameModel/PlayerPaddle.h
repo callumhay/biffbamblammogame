@@ -105,7 +105,7 @@ public:
 		return Vector2D::Rotate(this->rotAngleZAnimation.GetInterpolantValue(), PlayerPaddle::DEFAULT_PADDLE_UP_VECTOR);
 	}
 
-	void Tick(double seconds, bool pausePaddleMovement);
+	void Tick(double seconds, bool pausePaddleMovement, GameModel& gameModel);
 	void Animate(double seconds);
 
 	enum PaddleMovement { LeftPaddleMovement = -1, NoPaddleMovement = 0, RightPaddleMovement = 1 };
