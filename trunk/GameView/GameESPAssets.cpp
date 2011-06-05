@@ -401,6 +401,26 @@ void GameESPAssets::KillAllActiveBallEffects(const GameBall& ball) {
 		return;
 	}
 
+    // Get rid of all ball boosting effects for the ball as well
+    for (BallEffectsMapIter iter1 = this->boostBallEmitters.begin(); iter1 != this->boostBallEmitters.end();) {
+        const GameBall* currBall = iter1->first;
+        if (currBall == &ball) {
+            std::list<ESPPointEmitter*>& ballEmitters = iter1->second;
+            // Kill the boost-related emitters for the ball
+            for (std::list<ESPPointEmitter*>::iterator iter2 = ballEmitters.begin(); iter2 != ballEmitters.end(); ++iter2) {
+                ESPPointEmitter* currEmitter = *iter2;
+			    delete currEmitter;
+			    currEmitter = NULL;
+            }
+            ballEmitters.clear();
+            iter1 = this->boostBallEmitters.erase(iter1);
+            break;
+        }
+        else {
+            ++iter1;
+        }
+    }
+
 	// Iterate through all effects and delete them, then remove them from the list
 	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); ++iter) {
 		std::vector<ESPPointEmitter*>& effectList = iter->second;
@@ -4834,7 +4854,19 @@ void GameESPAssets::DrawBulletTimeBallsBoostEffects(double dT, const Camera& cam
 void GameESPAssets::DrawBallBoostingEffects(double dT, const Camera& camera) {
     for (BallEffectsMapIter iter1 = this->boostBallEmitters.begin(); iter1 != this->boostBallEmitters.end();) {
         const GameBall* currBall = iter1->first;
+
         std::list<ESPPointEmitter*>& ballEmitters = iter1->second;
+
+        if (!currBall->IsBallAllowedToBoostIgnoreAlreadyBoosting()) {
+            // Kill the emitters for the ball since it can't boost...
+            for (std::list<ESPPointEmitter*>::iterator iter2 = ballEmitters.begin(); iter2 != ballEmitters.end(); ++iter2) {
+                ESPPointEmitter* currEmitter = *iter2;
+			    delete currEmitter;
+			    currEmitter = NULL;
+            }
+            ballEmitters.clear();
+        }
+
         for (std::list<ESPPointEmitter*>::iterator iter2 = ballEmitters.begin(); iter2 != ballEmitters.end();) {
             ESPPointEmitter* currEmitter = *iter2;
 		    // Check to see if dead, if so erase it...
@@ -4844,11 +4876,6 @@ void GameESPAssets::DrawBallBoostingEffects(double dT, const Camera& camera) {
 			    iter2 = ballEmitters.erase(iter2);
 		    }
 		    else {
-                if (!currBall->IsBallAllowedToBoost()) {
-                    currEmitter->Tick(dT);
-                    continue;
-                }
-
 			    // Not dead yet, update its position based on the current ball's positon
                 // and draw/tick it
                 currEmitter->SetEmitPosition(currBall->GetCenterPosition());

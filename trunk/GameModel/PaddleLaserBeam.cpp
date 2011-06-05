@@ -134,13 +134,10 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 					insertResult = piecesCollidedWith.insert(pieceCollidedWith);
 				}
 
-				// We only allow a new ray to spawn if a) there is just one ray to spawn (in which case it will have the same radius as the current beam segment)
-				// or b) There are multiple new rays but the current beam segment has a suitable radius to be divided.
-				if (spawnedRays.size() == 1 || (spawnedRays.size() > 1 && currBeamSegment->GetRadius() > Beam::MIN_BEAM_RADIUS)) {
-					
+				if (spawnedRays.size() >= 1) {
 					// The radius of the spawned beams will be a fraction of the current radius based
 					// on the number of reflection/refraction rays
-					const float NEW_BEAM_SEGMENT_RADIUS = currBeamSegment->GetRadius() / static_cast<float>(spawnedRays.size());
+                    const float NEW_BEAM_SEGMENT_RADIUS = std::max<float>(currBeamSegment->GetRadius() / static_cast<float>(spawnedRays.size()), Beam::MIN_BEAM_RADIUS);
 					const int   NEW_BEAM_DMG_PER_SECOND = std::max<int>(Beam::MIN_DMG_PER_SEC, currBeamSegment->GetDamagePerSecond() / spawnedRays.size());
 					
 					// Now add the new beams to the list of beams we need to fire into the level and repeat this whole process with

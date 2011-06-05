@@ -126,7 +126,7 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 	UNUSED_PARAMETER(gameModel);
 
 	// Ignore the collision if this was the last piece collided with
-	if (projectile->IsLastLevelPieceCollidedWith(this)) {
+	if (projectile->IsLastThingCollidedWith(this)) {
 		return this;
 	}
 
@@ -146,7 +146,7 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 
 	// Make sure the projectile knows that the last piece it collided with was the sibling so
 	// that when it comes out of the sibling it doesn't collide again
-	projectile->SetLastLevelPieceCollidedWith(this->sibling);
+	projectile->SetLastThingCollidedWith(this->sibling);
 
 	return this;
 }

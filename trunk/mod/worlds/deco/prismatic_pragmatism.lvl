@@ -1,7 +1,7 @@
 Prismatic Pragmatism
 15 25
 S S S S S S S S S S S S T(P,ul) E T(P,ur) 
-S T(P,ul) O Y Y O R P O Y T(P,ur) S E D(LaserBulletPaddle,LaserBeamPaddle){0} E 
+S T(P,ul) O Y Y O R P O Y T(P,ur) S E D(LaserBulletPaddle,LaserBeamPaddle,{0}) E 
 S R O Y Y O O O O Y G S E E E 
 S T(P,ul) O Y Y Y Y Y Y Y G S E E E 
 S O O Y G G G G G G G S E E E 
@@ -23,7 +23,7 @@ S G G G G E E E E E E S O E E
 S G G G E E E E E E E S Y E E 
 S G G E E E E E E E E S G E E 
 S G E E E E E E E E E S S S S 
-S E E E E E E E E E E E E E S 
+S E E E E E E E E E E S S S S 
 S E E E E E E E E E E E E E W(0) 
 
 PaddleGrow 2

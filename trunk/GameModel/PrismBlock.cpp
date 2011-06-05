@@ -135,10 +135,10 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 		case Projectile::PaddleLaserBulletProjectile: {
 		    // Based on where the laser bullet hits, we change its direction	
 			// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it
-			if (!projectile->IsLastLevelPieceCollidedWith(this)) {
+			if (!projectile->IsLastThingCollidedWith(this)) {
 				
-				const float PROJECTILE_VELOCITY_MAG			= projectile->GetVelocityMagnitude();
-				const Vector2D PROJECTILE_VELOCITY_DIR	= projectile->GetVelocityDirection();
+				const float PROJECTILE_VELOCITY_MAG    = projectile->GetVelocityMagnitude();
+				const Vector2D PROJECTILE_VELOCITY_DIR = projectile->GetVelocityDirection();
 				const Point2D IMPACT_POINT = projectile->GetPosition() + projectile->GetHalfHeight()*PROJECTILE_VELOCITY_DIR;
 
 				std::list<Collision::Ray2D> rays;
@@ -149,15 +149,15 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 				// The first ray is how the current projectile gets transmitted through this block...
 				projectile->SetPosition(rayIter->GetOrigin());
 				projectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
-				projectile->SetLastLevelPieceCollidedWith(this);
+				projectile->SetLastThingCollidedWith(this);
 
 				// All the other rays were created via refraction or some such thing, so spawn new particles for them
 				++rayIter;
 				for (; rayIter != rays.end(); ++rayIter) {
                     Projectile* newProjectile = Projectile::CreateProjectileFromCopy(projectile);
-					newProjectile->SetPosition(rayIter->GetOrigin());
+					newProjectile->SetPosition(rayIter->GetOrigin() + newProjectile->GetHalfHeight() * rayIter->GetUnitDirection());
 					newProjectile->SetVelocity(rayIter->GetUnitDirection(), PROJECTILE_VELOCITY_MAG);
-					newProjectile->SetLastLevelPieceCollidedWith(this); // If we don't do this then it will cause recursive doom
+					newProjectile->SetLastThingCollidedWith(this); // If we don't do this then it will cause recursive doom
 					gameModel->AddProjectile(newProjectile);
 				}
 			}
@@ -194,9 +194,9 @@ void PrismBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vect
 	Collision::Ray2D defaultRay(hitPoint, impactDir);	// This is what happens to the original ray
 
 	// Determine how the ray will move through the prism based on where it hit...
-	const Vector2D OLD_PROJECTILE_DELTA			= hitPoint - this->GetCenter();
-	const float MIDDLE_HALF_INTERVAL_X			= LevelPiece::PIECE_WIDTH / 6.0f;
-	const float MIDDLE_HALF_INTERVAL_Y			= LevelPiece::PIECE_HEIGHT / 5.0f;
+	const Vector2D OLD_PROJECTILE_DELTA     = hitPoint - this->GetCenter();
+	const float MIDDLE_HALF_INTERVAL_X      = LevelPiece::PIECE_WIDTH / 5.25f;
+	const float MIDDLE_HALF_INTERVAL_Y      = LevelPiece::PIECE_HEIGHT / 3.5f;
 	const float REFLECTION_REFRACTION_ANGLE	= 15.0f;
 	
 	if (fabs(OLD_PROJECTILE_DELTA[0]) <= MIDDLE_HALF_INTERVAL_X) {

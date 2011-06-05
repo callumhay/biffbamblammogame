@@ -129,12 +129,12 @@ void PointsHUD::DrawIdleStars(float rightMostX, float topMostY, double dT) {
     this->starTex->BindTexture();
 
     int currStarIdx = 0;
-    glColor4f(activeStarColour.R(), activeStarColour.G(), activeStarColour.B(), 1.0f);
+    glColor4f(activeStarColour.R(), activeStarColour.G(), activeStarColour.B(), 0.75f);
     for (; currStarIdx < this->numStars; currStarIdx++) {
         this->DrawQuad(currentCenterX , centerY, STAR_SIZE);
         currentCenterX += STAR_SIZE + STAR_GAP;
     }
-    glColor4f(inactiveStarColour.R(), inactiveStarColour.G(), inactiveStarColour.B(), 1.0f);
+    glColor4f(inactiveStarColour.R(), inactiveStarColour.G(), inactiveStarColour.B(), 0.75f);
     for (; currStarIdx < GameLevel::MAX_STARS_PER_LEVEL; currStarIdx++) {
         this->DrawQuad(currentCenterX , centerY, STAR_SIZE);
         currentCenterX += STAR_SIZE + STAR_GAP;
@@ -554,6 +554,7 @@ void PointsHUD::MultiplierHUD::DrawHUD(float rightMostX, float topMostY) {
 }
 
 void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& state) {
+    static const float MULTIPLIER_NUM_BASE_ALPHA = 1.0f;
     switch (state) {
         case None:
             assert(this->currPtMultiplier < 2);
@@ -580,7 +581,7 @@ void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& st
                 std::vector<ColourRGBA> colourVals;
                 colourVals.push_back(this->rgbaLabelAnim.GetInterpolantValue());
                 colourVals.push_back(ColourRGBA(1,1,1,1));
-                colourVals.push_back(ColourRGBA(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), 1));
+                colourVals.push_back(ColourRGBA(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), MULTIPLIER_NUM_BASE_ALPHA));
 
                 this->rgbaLabelAnim.SetLerp(timeVals, colourVals);
                 this->rgbaLabelAnim.SetRepeat(false);
@@ -609,7 +610,7 @@ void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& st
                 std::vector<ColourRGBA> colourVals;
                 colourVals.push_back(this->rgbaLabelAnim.GetInterpolantValue());
                 colourVals.push_back(ColourRGBA(1,1,1,1));
-                colourVals.push_back(ColourRGBA(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), 1));
+                colourVals.push_back(ColourRGBA(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), MULTIPLIER_NUM_BASE_ALPHA));
 
                 this->rgbaLabelAnim.SetLerp(timeVals, colourVals);
                 this->rgbaLabelAnim.SetRepeat(false);
@@ -633,10 +634,10 @@ void PointsHUD::MultiplierHUD::SetCurrentAnimationState(const AnimationState& st
                 timeVals.push_back(2.0);
                 timeVals.push_back(3.0);
                 
-                ColourRGBA multiplyColour(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), 1);
+                ColourRGBA multiplyColour(GameViewConstants::GetInstance()->GetMultiplierColour(this->currPtMultiplier), MULTIPLIER_NUM_BASE_ALPHA);
                 colourVals.push_back(multiplyColour);
                 colourVals.push_back(multiplyColour);
-                colourVals.push_back(ColourRGBA(1,1,1,1));
+                colourVals.push_back(ColourRGBA(1,1,1,MULTIPLIER_NUM_BASE_ALPHA));
                 colourVals.push_back(multiplyColour);
                 colourVals.push_back(multiplyColour);
                 
@@ -785,7 +786,7 @@ void PointsHUD::MultiplierGageHUD::Draw(float rightMostX, float topMostY, double
 
     if (this->currMultiplierCounterIdx >= 0) {
         // Draw any fills on the multiplier gage
-        glColor4f(1, 1, 1, this->alpha);
+        glColor4f(1, 1, 1, 0.8f * this->alpha);
         this->multiplierGageFillTexs[this->currMultiplierCounterIdx]->BindTexture();
         GeometryMaker::GetInstance()->DrawQuad();
     }

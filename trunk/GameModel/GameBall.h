@@ -335,6 +335,7 @@ public:
 	const CannonBlock* GetCannonBlock() const;
 
     bool IsBallAllowedToBoost() const;
+    bool IsBallAllowedToBoostIgnoreAlreadyBoosting() const;
     bool ExecuteBallBoost(const Vector2D& dir);
     bool IsBallBoosting() const;
 
@@ -403,7 +404,11 @@ inline bool GameBall::IsLoadedInCannonBlock() const {
 inline bool GameBall::IsBallAllowedToBoost() const {
     // We don't allow boosting if the ball is already being boosted, inside a cannon or
     // the camera is inside the ball
-    return (!this->IsBallBoosting() && !this->IsLoadedInCannonBlock() && !this->GetIsBallCameraOn() &&
+    return (!this->IsBallBoosting() && this->IsBallAllowedToBoostIgnoreAlreadyBoosting());
+}
+
+inline bool GameBall::IsBallAllowedToBoostIgnoreAlreadyBoosting() const {
+    return (!this->IsLoadedInCannonBlock() && !this->GetIsBallCameraOn() &&
             !this->blockCollisionsDisabled && !this->paddleCollisionsDisabled &&
             !currDir.IsZero());
 }

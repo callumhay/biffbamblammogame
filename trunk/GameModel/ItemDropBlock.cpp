@@ -17,7 +17,7 @@
 // Amount of damage the block will take before dropping an item while being hit by a beam
 const float ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP = 150.0f;
 // Amount of time (in milliseconds) that must be waited until another item drop is allowed (for things other than beam damage)
-const unsigned long ItemDropBlock::DISABLE_DROP_TIME = 750;
+const unsigned long ItemDropBlock::DISABLE_DROP_TIME = 1000;
 
 ItemDropBlock::ItemDropBlock(const std::vector<GameItem::ItemType>& droppableItemTypes, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), allowedItemDropTypes(droppableItemTypes), hitPointsBeforeNextDrop(ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP),

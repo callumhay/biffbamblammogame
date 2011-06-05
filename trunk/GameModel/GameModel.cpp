@@ -160,29 +160,6 @@ void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum) {
 }
 
 /**
- * Cause the game model to execute over the given amount of time in seconds.
- */
-void GameModel::Tick(double seconds) {
-	// If the entire game has been paused then we exit immediately
-	if ((this->pauseBitField & GameModel::PauseGame) == GameModel::PauseGame) {
-		return;
-	}
-
-	if (currState != NULL) {
-		if ((this->pauseBitField & GameModel::PauseState) == 0x00000000) {
-			this->currState->Tick(seconds);
-		}
-
-		if (this->playerPaddle != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0) {
-			this->playerPaddle->Tick(seconds, (this->pauseBitField & GameModel::PauseState) == GameModel::PauseState);
-		}
-
-	}
-
-	this->gameTransformInfo->Tick(seconds, *this);
-}
-
-/**
  * Called when a collision occurs between a projectile and a level piece.
  * Deals with all the important effects a collision could have on the game model.
  * Precondition: p != NULL
@@ -191,7 +168,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
 	assert(p != NULL);
 	assert(p->GetType() != LevelPiece::Empty);
 
-	bool alreadyCollided = projectile->IsLastLevelPieceCollidedWith(p);
+	bool alreadyCollided = projectile->IsLastThingCollidedWith(p);
 
 	// Collide the projectile with the piece...
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, projectile); 	// WARNING: This can destroy p.
