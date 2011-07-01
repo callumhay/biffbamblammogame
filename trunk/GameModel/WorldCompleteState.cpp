@@ -12,6 +12,7 @@
 #include "WorldCompleteState.h"
 #include "BallOnPaddleState.h"
 #include "GameCompleteState.h"
+#include "LevelStartState.h"
 #include "GameModel.h"
 
 WorldCompleteState::WorldCompleteState(GameModel* gm) : GameState(gm) {
@@ -43,6 +44,6 @@ void WorldCompleteState::Tick(double seconds) {
 		// Increment the world...
 		this->gameModel->SetCurrentWorldAndLevel(this->gameModel->currWorldNum + 1, 0);
 		// Place the ball back on the paddle, and let the next level/world begin!
-		this->gameModel->SetNextState(new BallOnPaddleState(this->gameModel));
+		this->gameModel->SetNextState(new LevelStartState(this->gameModel));
 	}
 }

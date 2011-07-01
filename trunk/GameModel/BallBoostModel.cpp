@@ -44,7 +44,7 @@ BallBoostModel::~BallBoostModel() {
     while (this->numAvailableBoosts > 0) {
         this->numAvailableBoosts--;
         // EVENT: Ball Boost lost
-        GameEventManager::Instance()->ActionBallBoostLost();
+        //GameEventManager::Instance()->ActionBallBoostLost();
     }
 }
 

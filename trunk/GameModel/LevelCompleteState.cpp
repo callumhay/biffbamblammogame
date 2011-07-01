@@ -12,6 +12,7 @@
 #include "LevelCompleteState.h"
 #include "WorldCompleteState.h"
 #include "BallOnPaddleState.h"
+#include "LevelStartState.h"
 #include "GameModel.h"
 
 /**
@@ -45,11 +46,6 @@ void LevelCompleteState::Tick(double seconds) {
 
 	// Clean up all the level-related state stuff in preparation for the next level/world/?
 	
-	// Reset the multiplier
-	this->gameModel->SetNumInterimBlocksDestroyed(0);
-    // Reset the score
-    this->gameModel->ResetScore();
-
 	// Reset the game transform manager
 	this->gameModel->GetTransformInfo()->Reset();
 
@@ -69,6 +65,6 @@ void LevelCompleteState::Tick(double seconds) {
 		// We are infact going to the next level...
 		currWorld->IncrementLevel(this->gameModel);
 		// Place the ball back on the paddle, and let the next level begin!
-		this->gameModel->SetNextState(new BallOnPaddleState(this->gameModel));
+		this->gameModel->SetNextState(new LevelStartState(this->gameModel));
 	}
 }

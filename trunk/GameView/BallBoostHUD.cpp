@@ -191,7 +191,9 @@ void BallBoostHUD::BoostGained() {
 }
 
 void BallBoostHUD::BoostLost() {
-    assert(this->currNumTrailFills > 0);
+    if (this->currNumTrailFills == 0) {
+        return;
+    }
     this->activeEffects.clear();
     this->currNumTrailFills = std::max<int>(0, this->currNumTrailFills - 1);
     this->trailFills[this->currNumTrailFills]->Lost();

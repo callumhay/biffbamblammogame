@@ -164,20 +164,6 @@ void PointsHUD::Reinitialize() {
     this->multiplierGage->Reinitialize();
 }
 
-void PointsHUD::SetNumStars(int numStars) {
-    assert(numStars >= 0);
-
-    // TODO...
-    this->numStars = numStars;
-}
-
-void PointsHUD::SetScore(long pointScore) {
-
-    // This will animated and update the score as calls to Draw are made
-    if (this->scoreAnimator.GetTargetValue() != pointScore) {
-        this->scoreAnimator.SetLerp(0.25, pointScore);
-    }
-}
 
 void PointsHUD::PostPointNotification(const PointAward& pointAward) {
     UNUSED_PARAMETER(pointAward);

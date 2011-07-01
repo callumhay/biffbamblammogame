@@ -30,6 +30,7 @@ public:
 	DisplayState(GameDisplay* display) : display(display) {}
 	virtual ~DisplayState() {};
 
+    virtual bool AllowsGameModelUpdates() const = 0;
 	virtual void RenderFrame(double dT) = 0;
 
 	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton)   = 0;
