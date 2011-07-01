@@ -856,6 +856,14 @@ void GameAssets::DrawInformativeGameElements(const Camera& camera, double dT, co
 		return;
 	}
 
+    // Don't show and stop the informative random item animation if the player is in ball camera or
+    // paddle camera mode
+	const PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+    if (GameBall::GetIsBallCameraOn() || paddle->GetIsPaddleCameraOn()) {
+        this->randomToItemAnimation.Stop();
+        return;
+    }
+
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_DEPTH_TEST);
 
@@ -871,7 +879,6 @@ void GameAssets::DrawInformativeGameElements(const Camera& camera, double dT, co
 	glPopMatrix();
 
 	glPopAttrib();
-
 }
 
 /**

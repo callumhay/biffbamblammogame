@@ -139,6 +139,8 @@ public:
 	MainMenuDisplayState(GameDisplay* display);
 	~MainMenuDisplayState();
 
+    bool AllowsGameModelUpdates() const { return true; }
+
 	void RenderFrame(double dT);
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);

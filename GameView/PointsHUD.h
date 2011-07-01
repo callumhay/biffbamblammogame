@@ -40,6 +40,8 @@ public:
 
     void Reinitialize();
 
+    void DoImmediatePointAnimation();
+
     void SetNumStars(int numStars);
     void SetScore(long pointScore);
     void SetMultiplierCounter(int count);
@@ -172,6 +174,25 @@ private:
     DISALLOW_COPY_AND_ASSIGN(PointsHUD);
 };
 
+inline void PointsHUD::DoImmediatePointAnimation() {
+    this->scoreAnimator.SetInterpolantValue(this->scoreAnimator.GetTargetValue());
+}
+
+inline void PointsHUD::SetNumStars(int numStars) {
+    assert(numStars >= 0);
+
+    // TODO...
+    this->numStars = numStars;
+}
+
+inline void PointsHUD::SetScore(long pointScore) {
+
+    // This will animated and update the score as calls to Draw are made
+    if (this->scoreAnimator.GetTargetValue() != pointScore) {
+        this->scoreAnimator.SetLerp(0.25, pointScore);
+    }
+}
+
 inline void PointsHUD::SetMultiplierCounter(int count) {
     this->multiplierGage->SetMultiplierCounterAmount(count);
 }
@@ -189,5 +210,6 @@ inline void PointsHUD::MultiplierGageHUD::SetMultiplierCounterAmount(int multipl
 inline void PointsHUD::MultiplierGageHUD::SetAlpha(float alpha) {
     this->alpha = alpha;
 }
+
 
 #endif // __POINTSHUD_H__

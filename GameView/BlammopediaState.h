@@ -26,6 +26,8 @@ public:
 	BlammopediaState(GameDisplay* display);
 	~BlammopediaState();
 
+    bool AllowsGameModelUpdates() const { return true; }
+
 	void RenderFrame(double dT);
 
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);

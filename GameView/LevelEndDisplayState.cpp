@@ -13,6 +13,9 @@
 #include "GameDisplay.h"
 #include "GameAssets.h"
 #include "GameFBOAssets.h"
+#include "PointsHUD.h"
+#include "LivesLeftHUD.h"
+#include "BallBoostHUD.h"
 
 #include "../GameModel/GameModel.h"
 #include "../BlammoEngine/Camera.h"
@@ -21,6 +24,8 @@ const double LevelEndDisplayState::FADE_TIME = 2.0;
 
 LevelEndDisplayState::LevelEndDisplayState(GameDisplay* display) : DisplayState(display),
 renderPipeline(display) {
+    // Update the points HUD with the latest score (this makes sure that the last block's points are counted).
+    //this->display->GetAssets()->GetPointsHUD()->DoImmediatePointAnimation();
 
 	// Pause all game play elements in the game model
 	this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
@@ -47,6 +52,7 @@ void LevelEndDisplayState::RenderFrame(double dT) {
 	// Draw a fullscreen quad of the last fully rendered frame from the game...
 	const Texture2D* lastSceneTexture = this->display->GetAssets()->GetFBOAssets()->GetFinalFullScreenFBO()->GetFBOTexture();
 	lastSceneTexture->RenderTextureToFullscreenQuad();
+
 	this->renderPipeline.RenderHUD(dT);
 
 	bool fadeIsDone = this->fadeToWhiteAnimation.Tick(dT);
@@ -62,7 +68,10 @@ void LevelEndDisplayState::RenderFrame(double dT) {
 	glPopAttrib();
 
 	if (fadeIsDone) {
-		this->display->SetCurrentStateAsNextQueuedState();
+        // Update the game model until there's a new queued state
+        while (!this->display->SetCurrentStateAsNextQueuedState()) {
+            this->display->UpdateModel(dT);
+        }
 		return;
 	}
 }

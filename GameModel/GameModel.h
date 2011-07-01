@@ -21,7 +21,6 @@
 #include "PlayerPaddle.h"
 #include "GameBall.h"
 #include "GameState.h"
-#include "BallInPlayState.h"
 #include "GameLevel.h"
 #include "GameWorld.h"
 #include "GameEventManager.h"
@@ -33,7 +32,9 @@
 #include "PointAward.h"
 #include "BallBoostModel.h"
 
+class BallInPlayState;
 class CollateralBlock;
+class LevelStartState;
 
 class GameModel {
 
@@ -401,13 +402,7 @@ public:
 
 	// Debug functions
 #ifdef _DEBUG
-	void DropItem(GameItem::ItemType itemType) {
-		BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
-		if (state != NULL) {
-			Vector2D levelDim = this->GetLevelUnitDimensions();
-			state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType, Point2D(0,0) + 0.5f*levelDim, this));
-		}
-	}
+	void DropItem(GameItem::ItemType itemType);
 #endif
 
 	// Befriend all state machine classes... 
@@ -415,6 +410,7 @@ public:
 	friend class GameState;
 	friend class BallOnPaddleState;
 	friend class BallInPlayState;
+    friend class LevelStartState;
 	friend class LevelCompleteState;
 	friend class WorldCompleteState;
 

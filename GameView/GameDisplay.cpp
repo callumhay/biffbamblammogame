@@ -18,7 +18,6 @@
 #include "MainMenuDisplayState.h"
 
 // Model includes
-#include "../GameModel/GameModel.h"
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameEventManager.h"
 
@@ -81,33 +80,21 @@ void GameDisplay::SetInitialRenderOptions() {
 // Sets the current state to be the next state lined up on the
 // state queue - these get pushed on as the game model sends events to the view
 // and as the game view states progress
-void GameDisplay::SetCurrentStateAsNextQueuedState() {
-	assert(!this->stateQueue.empty());
+bool GameDisplay::SetCurrentStateAsNextQueuedState() {
+    if (this->stateQueue.empty()) {
+        return false;
+    }
 
 	DisplayState::DisplayStateType nextStateType = this->stateQueue.front();
 	this->stateQueue.pop_front();
 	this->SetCurrentState(DisplayState::BuildDisplayStateFromType(nextStateType, this));
+    return true;
 }
 
 void GameDisplay::ChangeDisplaySize(int w, int h) {
 	this->gameCamera.SetWindowDimensions(w, h);
 	this->gameCamera.SetPerspective();
 	this->currState->DisplaySizeChanged(w, h);
-}
-
-void GameDisplay::Render(double dT) {
-    // Dialate time if necessary...
-    if (this->currState->GetType() == DisplayState::InGame) {
-        dT *= this->model->GetTimeDialationFactor();
-    }
-
-	// Render the current state
-	this->currState->RenderFrame(dT);
-	debug_opengl_state();
-
-	// Update the game model
-	this->model->Tick(dT);
-	this->model->UpdateState();
 }
 
 float GameDisplay::GetTextScalingFactor() const {

@@ -11,10 +11,12 @@
 
 #include "GameModel.h"
 
+#include "BallInPlayState.h"
 #include "BallOnPaddleState.h"
 #include "GameCompleteState.h"
 #include "GameOverState.h"
 #include "LevelCompleteState.h"
+#include "LevelStartState.h"
 #include "PaddleLaserBeam.h"
 #include "CollateralBlock.h"
 #include "PointAward.h"
@@ -94,7 +96,7 @@ void GameModel::StartGameAtWorldAndLevel(int worldNum, int levelNum) {
 	this->numInterimBlocksDestroyed = 0;	// Don't use set here, we don't want an event
 	this->gameTransformInfo->Reset();
 
-	this->SetNextState(new BallOnPaddleState(this));
+	this->SetNextState(new LevelStartState(this));
 }
 
 /**
@@ -400,7 +402,7 @@ void GameModel::DoProjectileCollisions() {
 		BoundingLines projectileBoundingLines = currProjectile->BuildBoundingLines();
 
 		// Check to see if the projectile collided with the player paddle
-		if (this->playerPaddle->CollisionCheckWithProjectile(currProjectile->GetType(), projectileBoundingLines)) {
+		if (this->playerPaddle->CollisionCheckWithProjectile(*currProjectile, projectileBoundingLines)) {
 			
 			this->CollisionOccurred(currProjectile, this->playerPaddle);
 
@@ -1004,3 +1006,13 @@ void GameModel::WipePieceFromAuxLists(LevelPiece* piece) {
 		}
 	}
 }
+
+#ifdef _DEBUG
+void GameModel::DropItem(GameItem::ItemType itemType) {
+	BallInPlayState* state = dynamic_cast<BallInPlayState*>(this->currState);
+	if (state != NULL) {
+		Vector2D levelDim = this->GetLevelUnitDimensions();
+		state->DebugDropItem(GameItemFactory::GetInstance()->CreateItem(itemType, Point2D(0,0) + 0.5f*levelDim, this));
+	}
+}
+#endif

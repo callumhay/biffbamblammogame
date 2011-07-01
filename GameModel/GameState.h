@@ -25,8 +25,8 @@ public:
 	virtual ~GameState() {}
 
 	enum GameStateType { NULLStateType, BallDeathStateType, BallInPlayStateType, BallOnPaddleStateType, 
-											 BallWormholeStateType, GameCompleteStateType, GameOverStateType, 
-											 LevelCompleteStateType, WorldCompleteStateType };
+                         BallWormholeStateType, GameCompleteStateType, GameOverStateType, 
+                         LevelStartStateType, LevelCompleteStateType, WorldCompleteStateType };
 
 	virtual GameState::GameStateType GetType() const = 0;
 

@@ -34,8 +34,15 @@ LevelStartDisplayState::LevelStartDisplayState(GameDisplay* display) :
 DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL),
 levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "") {
 
+    GameModel* gameModel = this->display->GetModel();
+    // Make sure the game is in the "BallOnPaddleState" before going through with the 
+    // initialization for the visuals
+    while (gameModel->GetCurrentStateType() != GameState::BallOnPaddleStateType) {
+        this->display->UpdateModel(1.0);
+    }
+
 	// Pause all game play elements in the game model
-	this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
+	gameModel->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
 
 	Camera& camera = this->display->GetCamera();
 

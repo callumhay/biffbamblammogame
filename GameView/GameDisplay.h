@@ -16,6 +16,8 @@
 #include "../BlammoEngine/Camera.h"
 #include "DisplayState.h"
 
+#include "../GameModel/GameModel.h"
+
 class GameModel;
 class GameAssets;
 class GameSoundAssets;
@@ -47,13 +49,14 @@ public:
 	}
 
 	void AddStateToQueue(const DisplayState::DisplayStateType& type);
-	void SetCurrentStateAsNextQueuedState();
+	bool SetCurrentStateAsNextQueuedState();
 	DisplayState::DisplayStateType GetCurrentDisplayState() const {
 		return this->currState->GetType();
 	}
 
 	void ChangeDisplaySize(int w, int h);
 	void Render(double dT);
+    void UpdateModel(double dT);
 
 	// Functions for setting up different types of render options
 	static void SetInitialRenderOptions();
@@ -130,6 +133,27 @@ private:
 #endif
 
 };
+
+inline void GameDisplay::Render(double dT) {
+    // Dialate time if necessary...
+    if (this->currState->GetType() == DisplayState::InGame) {
+        dT *= this->model->GetTimeDialationFactor();
+    }
+
+	// Render the current state
+	this->currState->RenderFrame(dT);
+	debug_opengl_state();
+
+	// Update the game model
+    if (this->currState->AllowsGameModelUpdates()) {
+        this->UpdateModel(dT);
+    }
+}
+
+inline void GameDisplay::UpdateModel(double dT) {
+    this->model->Tick(dT);
+    this->model->UpdateState();
+}
 
 inline void GameDisplay::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	this->currState->ButtonPressed(pressedButton);

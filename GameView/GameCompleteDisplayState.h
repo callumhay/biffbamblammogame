@@ -32,6 +32,8 @@ public:
 	GameCompleteDisplayState(GameDisplay* display);
 	~GameCompleteDisplayState();
 
+    bool AllowsGameModelUpdates() const { return true; }
+
 	void RenderFrame(double dT);
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);

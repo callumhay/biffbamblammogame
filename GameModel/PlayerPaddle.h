@@ -215,7 +215,7 @@ public:
 	// TODO: Add the parameter: "bool includeAttachedBallCheck" to all paddle collision checks...
 	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 	bool CollisionCheck(const BoundingLines& bounds, bool includeAttachedBallCheck) const;
-	bool CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType, const BoundingLines& bounds) const;
+	bool CollisionCheckWithProjectile(const Projectile& projectile, const BoundingLines& bounds) const;
 	
     bool UpdateForOpposingForceBallCollision(const GameBall& ball, double dT);
 
@@ -378,10 +378,22 @@ inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds,
 }
 
 // Check for a collision with the given projectile
-inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile::ProjectileType& projectileType,
+inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile,
                                                        const BoundingLines& bounds) const {
-	UNUSED_PARAMETER(projectileType);
-	return this->CollisionCheck(bounds, true);
+    switch (projectile.GetType()) {
+
+        case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::PaddleRocketBulletProjectile:
+            // The rocket can only collide with the paddle if it's NOT going upwards into the level
+            if (Vector2D::Dot(projectile.GetVelocityDirection(), this->GetUpVector()) <= 0) {
+                return this->CollisionCheck(bounds, true);
+            }
+            break;
+
+        default:
+            return this->CollisionCheck(bounds, true);
+    }
+    return false;
 }
 
 // The paddle destroys all projectiles that collide with it, currently
