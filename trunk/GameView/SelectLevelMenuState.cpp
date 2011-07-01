@@ -24,14 +24,63 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameWorld.h"
 
+static const float BORDER_GAP = 10;
+
 SelectLevelMenuState::SelectLevelMenuState(GameDisplay* display, const GameWorld* world) : 
 DisplayState(display), worldLabel(NULL), world(world), pressEscAlphaAnim(0.0f), 
 goBackToWorldSelectMenu(false), goToStartLevel(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
+arrowTexture(NULL), nextPgArrowEmitter(NULL), prevPgArrowEmitter(NULL),
 selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderAddAnim(0.0f), totalNumStarsLabel(NULL) {
 
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->starTexture != NULL);
+    this->arrowTexture = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_UP_ARROW, Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->arrowTexture != NULL);
+
+    std::vector<ColourRGBA> arrowColours;
+    arrowColours.reserve(3);
+    arrowColours.push_back(ColourRGBA(0,1,0,0));
+    arrowColours.push_back(ColourRGBA(0,1,0,1));
+    arrowColours.push_back(ColourRGBA(0,1,0,0));
+    this->nextArrowFader.SetColours(arrowColours);
+
+    static const int NUM_ARROWS = 10;
+    static const float ARROW_LIFE_TIME_MIN = 2.2f;
+    static const float ARROW_LIFE_TIME_MAX = 3.0f;
+    static const float ARROW_SPAWN_DELTA   = 0.45f;
+    static const float ARROW_WIDTH  = 25;
+    static const float ARROW_HEIGHT = 35;
+    static const float ARROW_SPD    = 30.0f;
+
+    this->nextPgArrowEmitter = new ESPVolumeEmitter();
+	this->nextPgArrowEmitter->SetSpawnDelta(ESPInterval(ARROW_SPAWN_DELTA));
+	this->nextPgArrowEmitter->SetInitialSpd(ESPInterval(ARROW_SPD));
+	this->nextPgArrowEmitter->SetParticleLife(ESPInterval(ARROW_LIFE_TIME_MIN, ARROW_LIFE_TIME_MAX));
+    this->nextPgArrowEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+	this->nextPgArrowEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	this->nextPgArrowEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	this->nextPgArrowEmitter->SetParticleRotation(ESPInterval(90));
+    this->nextPgArrowEmitter->SetEmitDirection(Vector3D(1,0,0));
+	this->nextPgArrowEmitter->SetParticleSize(ESPInterval(ARROW_WIDTH), ESPInterval(ARROW_HEIGHT));
+    this->nextPgArrowEmitter->SetParticleColour(ESPInterval(0), ESPInterval(1), ESPInterval(0), ESPInterval(1));
+    this->nextPgArrowEmitter->SetParticles(NUM_ARROWS, static_cast<Texture2D*>(this->arrowTexture));
+    this->nextPgArrowEmitter->AddEffector(&nextArrowFader);
+
+    this->prevPgArrowEmitter = new ESPVolumeEmitter();
+	this->prevPgArrowEmitter->SetSpawnDelta(ESPInterval(ARROW_SPAWN_DELTA));
+	this->prevPgArrowEmitter->SetInitialSpd(ESPInterval(ARROW_SPD));
+	this->prevPgArrowEmitter->SetParticleLife(ESPInterval(ARROW_LIFE_TIME_MIN, ARROW_LIFE_TIME_MAX));
+    this->prevPgArrowEmitter->SetNumParticleLives(ESPParticle::INFINITE_PARTICLE_LIVES);
+	this->prevPgArrowEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	this->prevPgArrowEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	this->prevPgArrowEmitter->SetParticleRotation(ESPInterval(-90));
+    this->prevPgArrowEmitter->SetEmitDirection(Vector3D(-1,0,0));
+	this->prevPgArrowEmitter->SetParticleSize(ESPInterval(ARROW_WIDTH), ESPInterval(ARROW_HEIGHT));
+    this->prevPgArrowEmitter->SetParticleColour(ESPInterval(0), ESPInterval(1), ESPInterval(0), ESPInterval(1));
+    this->prevPgArrowEmitter->SetParticles(NUM_ARROWS, static_cast<Texture2D*>(this->arrowTexture));
+    this->prevPgArrowEmitter->AddEffector(&nextArrowFader);
 
     // Build a framebuffer object for the menu
     const Camera& camera = this->display->GetCamera();
@@ -97,7 +146,15 @@ SelectLevelMenuState::~SelectLevelMenuState() {
 
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTexture);
     assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->arrowTexture);
+    assert(success);
+
+    delete this->nextPgArrowEmitter;
+    this->nextPgArrowEmitter = NULL;
+    delete this->prevPgArrowEmitter;
+    this->prevPgArrowEmitter = NULL;
 }
+
 
 void SelectLevelMenuState::RenderFrame(double dT) {
     this->pressEscAlphaAnim.Tick(dT);
@@ -263,6 +320,15 @@ void SelectLevelMenuState::ButtonReleased(const GameControl::ActionButton& relea
     UNUSED_PARAMETER(releasedButton);
 }
 
+// Event called whenever the selection of a level in the menu changes
+void SelectLevelMenuState::LevelSelectionChanged() {
+    // TODO ?
+}
+void SelectLevelMenuState::PageSelectionChanged() {
+    this->nextPgArrowEmitter->Reset();
+    this->prevPgArrowEmitter->Reset();
+}
+
 void SelectLevelMenuState::DrawStarTotalLabel(const Camera& camera) {
     float labelTopCornerX = camera.GetWindowWidth() - this->totalNumStarsLabel->GetLastRasterWidth() - HORIZONTAL_TITLE_GAP;
     float labelTopCornerY = this->totalNumStarsLabel->GetHeight() + VERTICAL_TITLE_GAP/2;
@@ -399,10 +465,9 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Draw the currently selected level item's selection border
     LevelMenuItem* selectedItem = this->pages[this->selectedPage]->GetSelectedItem();
     assert(selectedItem != NULL);
-    static const float BORDER_GAP = 10;
+    
     float leftX  = selectedItem->GetTopLeftCorner()[0] - BORDER_GAP;
     float rightX = selectedItem->GetTopLeftCorner()[0] + selectedItem->GetWidth() + BORDER_GAP;
     float topY = selectedItem->GetTopLeftCorner()[1] + BORDER_GAP;
@@ -421,6 +486,30 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
     float orangeAlpha  = this->selectionAlphaOrangeAnim.GetInterpolantValue();
     float selectionAdd = this->selectionBorderAddAnim.GetInterpolantValue();
 
+
+    // Draw any indicator arrows to show that the selection can be moved to another page
+    if (this->selectedPage != static_cast<int>(this->pages.size())-1) {
+        const LevelMenuItem* lastItem = this->pages[this->selectedPage]->GetLastItem();
+        this->nextPgArrowEmitter->SetEmitVolume(Point3D(lastItem->GetTopLeftCorner()[0] + lastItem->GetWidth(), 
+                                                        lastItem->GetTopLeftCorner()[1] - lastItem->GetHeight()+5, 0),
+                                                Point3D(lastItem->GetTopLeftCorner()[0] + lastItem->GetWidth(),
+                                                        lastItem->GetTopLeftCorner()[1]-5, 0));
+
+        this->nextPgArrowEmitter->Tick(dT);
+        this->nextPgArrowEmitter->Draw(camera);
+    }
+
+    if (this->selectedPage != 0) {
+        const LevelMenuItem* firstItem = this->pages[this->selectedPage]->GetFirstItem();
+        this->prevPgArrowEmitter->SetEmitVolume(Point3D(firstItem->GetTopLeftCorner()[0], 
+                                                        firstItem->GetTopLeftCorner()[1] - firstItem->GetHeight()+5, 0),
+                                                Point3D(firstItem->GetTopLeftCorner()[0],
+                                                        firstItem->GetTopLeftCorner()[1]-5, 0));
+        this->prevPgArrowEmitter->Tick(dT);
+        this->prevPgArrowEmitter->Draw(camera);
+    }
+
+     // Draw the currently selected level item's selection border
     glPushMatrix();
     glTranslatef(centerX, centerY, 0.0f);
     
@@ -440,7 +529,7 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
 
     glPopMatrix();
 
-    // Draw slightly highlighted yellow for the background of the item
+    // Draw the yellowish highlight background
     glColor4f(0.98f, 1.0f, 0.66f, 1.0f);
     glBegin(GL_QUADS);
     glVertex2f(leftX, topY);
@@ -449,6 +538,7 @@ void SelectLevelMenuState::DrawLevelSelectMenu(const Camera& camera, double dT) 
     glVertex2f(rightX, topY);
     glEnd();
 
+    // Draw the black outline around the selection
     glColor4f(0, 0, 0, 1);
     glLineWidth(3.0f);
     glBegin(GL_LINE_LOOP);
@@ -621,11 +711,15 @@ void SelectLevelMenuState::MoveSelectionX(bool right) {
     // side then the selection will move to that new page...
     size_t selectedItem = this->pages[this->selectedPage]->GetSelectedItemIndex();
     
+    size_t prevSelectedItem = selectedItem;
+    int prevSelectedPg   = this->selectedPage;
+
     assert(this->numItemsPerRow-1 > 0);
 
     bool isFirstItem      = selectedItem == 0;
     bool isLastItem       = selectedItem == (this->pages[this->selectedPage]->GetNumLevelItems()-1);
 
+    bool fallThrough = false;
     if (this->pages.size() > 1 && (isFirstItem || isLastItem)) {
         if (isFirstItem && !right) {
             // The user is moving the selection off the page to the left
@@ -633,7 +727,6 @@ void SelectLevelMenuState::MoveSelectionX(bool right) {
             this->selectedPage = newPageNum;
             LevelMenuPage* currPage = this->pages[this->selectedPage];
             currPage->SetSelectedItemIndex(currPage->GetNumLevelItems()-1);
-            return;
         }
         else if (isLastItem && right) {
             // The user is moving the selection off the page to the right
@@ -641,32 +734,48 @@ void SelectLevelMenuState::MoveSelectionX(bool right) {
             this->selectedPage = newPageNum;
             LevelMenuPage* currPage = this->pages[this->selectedPage];
             currPage->SetSelectedItemIndex(0);
-            return;
+        }
+        else {
+            fallThrough = true;
+        }
+    }
+    else {
+        fallThrough = true;
+    }
+
+    if (fallThrough) {
+        int currRowIndex  = selectedItem / this->numItemsPerRow;
+        int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
+        int wrapAroundX   = (numItemsOnRow + (selectedItem - currRowIndex * this->numItemsPerRow) + x) % numItemsOnRow;
+
+        bool isFirstItemInRow = (selectedItem % this->numItemsPerRow) == 0;
+        bool isLastItemInRow  = (selectedItem % this->numItemsPerRow) == static_cast<size_t>(this->numItemsPerRow-1);
+
+        if (right && !isLastItem && isLastItemInRow) {
+            this->pages[this->selectedPage]->SetSelectedItemIndex(this->numItemsPerRow * (currRowIndex+1) + wrapAroundX);
+        }
+        else if(!right && currRowIndex != 0 && isFirstItemInRow) {
+            this->pages[this->selectedPage]->SetSelectedItemIndex(this->numItemsPerRow * (currRowIndex-1) + wrapAroundX);
+        }
+        else {
+            this->pages[this->selectedPage]->SetSelectedItemIndex(this->numItemsPerRow * currRowIndex + wrapAroundX);
         }
     }
 
-    int currRowIndex  = selectedItem / this->numItemsPerRow;
-    int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
-    int wrapAroundX   = (numItemsOnRow + (selectedItem - currRowIndex * this->numItemsPerRow) + x) % numItemsOnRow;
-
-    bool isFirstItemInRow = (selectedItem % this->numItemsPerRow) == 0;
-    bool isLastItemInRow  = (selectedItem % this->numItemsPerRow) == static_cast<size_t>(this->numItemsPerRow-1);
-
-    if (right && !isLastItem && isLastItemInRow) {
-        this->pages[this->selectedPage]->SetSelectedItemIndex(this->numItemsPerRow * (currRowIndex+1) + wrapAroundX);
+    // Check to see if we should raise a level selection changed event
+    if (this->selectedPage != prevSelectedPg) {
+        this->PageSelectionChanged();
+        this->LevelSelectionChanged();
     }
-    else if(!right && currRowIndex != 0 && isFirstItemInRow) {
-        this->pages[this->selectedPage]->SetSelectedItemIndex(this->numItemsPerRow * (currRowIndex-1) + wrapAroundX);
-    }
-    else {
-        this->pages[this->selectedPage]->SetSelectedItemIndex(this->numItemsPerRow * currRowIndex + wrapAroundX);
+    else if (this->pages[this->selectedPage]->GetSelectedItemIndex() != prevSelectedItem) {
+        this->LevelSelectionChanged();
     }
 }
 
 void SelectLevelMenuState::MoveSelectionY(bool up) {
     int y = up ? 1 : -1;
 
-    size_t selectedItem  = this->pages[this->selectedPage]->GetSelectedItemIndex();
+    int selectedItem  = this->pages[this->selectedPage]->GetSelectedItemIndex();
     size_t numLevelItems = this->pages[this->selectedPage]->GetNumLevelItems();
 
     int numRows = (numLevelItems / this->numItemsPerRow) + 1;
@@ -681,6 +790,11 @@ void SelectLevelMenuState::MoveSelectionY(bool up) {
         }
     }
     this->pages[this->selectedPage]->SetSelectedItemIndex(newSelectedIndex);
+
+    // Check to see if we should raise a level selection changed event
+    if (selectedItem != newSelectedIndex) {
+        this->LevelSelectionChanged();
+    }
 }
 
 int SelectLevelMenuState::GetNumItemsOnRow(int rowIdx) {
@@ -784,9 +898,34 @@ float SelectLevelMenuState::LevelMenuItem::GetHeight() const {
            this->highScoreLabel->GetHeight() + HIGH_SCORE_TO_STAR_Y_GAP + this->starSize;
 }
 
-void SelectLevelMenuState::LevelMenuItem::Draw(const Camera& camera, double dT) {
+void SelectLevelMenuState::LevelMenuItem::Draw(const Camera& camera, double dT, bool isSelected) {
     UNUSED_PARAMETER(camera);
     UNUSED_PARAMETER(dT);
+    UNUSED_PARAMETER(isSelected);
+
+    /*
+    static const float SLIGHTLY_SMALLER_BORDER_GAP = BORDER_GAP-1;
+
+    float leftX  = this->GetTopLeftCorner()[0] - SLIGHTLY_SMALLER_BORDER_GAP;
+    float rightX = this->GetTopLeftCorner()[0] + this->GetWidth() + SLIGHTLY_SMALLER_BORDER_GAP;
+    float topY = this->GetTopLeftCorner()[1] + SLIGHTLY_SMALLER_BORDER_GAP;
+    float bottomY = this->GetTopLeftCorner()[1] - this->GetHeight() - SLIGHTLY_SMALLER_BORDER_GAP;
+    float centerX = (leftX + rightX) / 2.0f;
+    float centerY = (topY + bottomY) / 2.0f;
+
+    // Draw a opaque background for the item
+    glPushMatrix();
+    glTranslatef(centerX, centerY, 0);
+    if (isSelected) {
+        glColor4f(0.98f, 1.0f, 0.66f, 1.0f);
+    }
+    else {
+        glColor4f(1,1,1,1);
+    }
+    glScalef(rightX - leftX, topY - bottomY, 1);
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+    */
 
     // Draw the level number and name
     this->numLabel->Draw();

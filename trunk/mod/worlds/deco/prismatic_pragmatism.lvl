@@ -9,7 +9,7 @@ S Y Y Y G G E E E E E S E E E
 S G G G G E E G G G G S E E E 
 S G G G E E G G Y Y Y S E E E 
 S G G E E G G G Y O O S E E E 
-S G G G G G G G Y O O S E E E 
+S G G G G G G G Y O O T(S,ur) E E E 
 S G G Y Y Y Y Y Y O R T(P,lr) E E T(P,lr) 
 S G G Y O O O Y Y O O S E E E 
 S G G Y O P O Y Y O O S E E E 
@@ -18,9 +18,9 @@ S G G Y O O O Y G G E S E E E
 S G G Y Y Y Y Y G E E S E E E 
 S G G G G G G G E E E S E E E 
 S G G G G G G E E E E S E E E 
-S G G G G G E E E E E S R E E 
-S G G G G E E E E E E S O E E 
-S G G G E E E E E E E S Y E E 
+S G G G G G E E E E E S G E E 
+S G G G G E E E E E E S G E E 
+S G G G E E E E E E E S G E E 
 S G G E E E E E E E E S G E E 
 S G E E E E E E E E E S S S S 
 S E E E E E E E E E E S S S S 

@@ -20,16 +20,6 @@
 class Camera;
 
 class FBObj {
-private:
-	GLuint fboID;											// OGL Framebuffer object ID
-	GLuint depthBuffID;								// OGL depth renderbuffer object ID
-	GLuint stencilBuffID;							// OGL stencil renderbuffer object ID
-	GLuint packedStencilDepthBuffID;	// OGL packed depth-stencil renderbuffer object ID
-
-	Texture2D* fboTex;
-
-	static bool CheckFBOStatus();
-
 public:
 	enum FBOAttachments {NoAttachment = 0x00000000, DepthAttachment = 0x00000001, StencilAttachment = 0x00000010};
 
@@ -51,5 +41,16 @@ public:
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,  GL_RENDERBUFFER_EXT, this->depthBuffID);
 	}
 
+private:
+	GLuint fboID;											// OGL Framebuffer object ID
+	GLuint depthBuffID;								// OGL depth renderbuffer object ID
+	GLuint stencilBuffID;							// OGL stencil renderbuffer object ID
+	GLuint packedStencilDepthBuffID;	// OGL packed depth-stencil renderbuffer object ID
+
+	Texture2D* fboTex;
+
+	static bool CheckFBOStatus();
+
+    DISALLOW_COPY_AND_ASSIGN(FBObj);
 };
 #endif
