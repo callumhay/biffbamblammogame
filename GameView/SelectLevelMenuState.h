@@ -16,6 +16,10 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Point.h"
 
+#include "../ESPEngine/ESPMultiColourEffector.h"
+#include "../ESPEngine/ESPPointEmitter.h"
+#include "../ESPEngine/ESPVolumeEmitter.h"
+
 class FBObj;
 class CgFxBloom;
 class TextLabel2D;
@@ -33,6 +37,10 @@ public:
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 	void DisplaySizeChanged(int width, int height);
+
+    void LevelSelectionChanged();
+    void PageSelectionChanged();
+
 	DisplayState::DisplayStateType GetType() const;
 
 private:
@@ -52,9 +60,15 @@ private:
     AnimationMultiLerp<float> selectionAlphaYellowAnim;   
     AnimationMultiLerp<float> selectionBorderAddAnim; 
 
+    Texture* arrowTexture;
     Texture* starTexture;
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
+
+    ESPVolumeEmitter* nextPgArrowEmitter;
+    ESPMultiColourEffector nextArrowFader;
+    ESPVolumeEmitter* prevPgArrowEmitter;
+    ESPMultiColourEffector prevArrowFader;
 
     bool goBackToWorldSelectMenu;
     AnimationLerp<float> goBackMenuMoveAnim;
@@ -85,7 +99,7 @@ private:
         const GameLevel* GetLevel() const { return this->level; }
         bool GetIsEnabled() const { return this->isEnabled; }
 
-        void Draw(const Camera& camera, double dT);
+        void Draw(const Camera& camera, double dT, bool isSelected);
 
     private:
         static const float NUM_TO_NAME_GAP;
@@ -123,6 +137,9 @@ private:
         void AddLevelItem(LevelMenuItem* item) { assert(item != NULL); this->levelItems.push_back(item); }
         void Draw(const Camera& camera, double dT);
         
+        const LevelMenuItem* GetFirstItem() const { return this->levelItems.front(); }
+        const LevelMenuItem* GetLastItem() const { return this->levelItems.back(); }
+
     private:
         size_t selectedItem;
         std::vector<LevelMenuItem*> levelItems;
@@ -147,7 +164,7 @@ inline DisplayState::DisplayStateType SelectLevelMenuState::GetType() const {
 
 inline void SelectLevelMenuState::LevelMenuPage::Draw(const Camera& camera, double dT) {
     for (size_t i = 0; i < this->levelItems.size(); i++) {
-        this->levelItems[i]->Draw(camera, dT);
+        this->levelItems[i]->Draw(camera, dT, this->selectedItem == i);
     }
 }
 

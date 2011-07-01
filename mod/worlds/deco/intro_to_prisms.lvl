@@ -1,0 +1,57 @@
+Intro to Prisms
+11 25
+E E E E E S S S S S S 
+E E E S S T(P,ul) E E E G S 
+S S S T(P,ul) E E E E E G S 
+S T(P,ul) O E R R R F(d) F(d) F(d) S 
+S Y E E R R R E E E S 
+S E O E R E R E E E S 
+S Y E Y E R E R R R S 
+S E R E Y E Y E R E S 
+S O E O E R E O E O S 
+S E R E R B R E R E S 
+S Y E O E O E O E Y S 
+S E Y E G E G E Y E S 
+S Y E O E Y E O E Y S 
+S E R E Y E Y E R E S 
+S G E G E G E G E G S 
+S Y Y Y T(S,lr) P T(S,ll) Y Y Y S 
+S E E T(G,ur) G G G T(G,ul) E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+
+PaddleGrow 1
+PoisonPaddle 0
+BallSafetyNet 1
+Blackout 1
+UberBall 0
+BallGrow 0
+StickyPaddle 0
+ShieldPaddle 1
+LaserBulletPaddle 3
+1Up 2
+PaddleShrink 1
+InvisiBall 1
+LaserBeamPaddle 3
+OmniLaserBall 1
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 0
+UpsideDown 1
+MultiBall5 0
+BallCam 0
+MultiBall3 0
+IceBall 0
+SlowBall 1
+GravityBall 1
+CrazyBall 0
+Random 0
+FastBall 1
+PaddleCam 0
