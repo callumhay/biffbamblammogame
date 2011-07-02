@@ -215,6 +215,9 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 			// Obtain the current level piece and create a display list for it if necessary
 			LevelPiece* currPiece	= levelPieces[h][w];
 
+            // Unlock the blammopedia entry for the piece
+            ResourceManager::GetInstance()->GetBlammopedia()->UnlockBlock(currPiece->GetType());
+
 			// Create the appropriate display lists for the piece...
 			this->CreateDisplayListsForPiece(currPiece, worldTransform);
 			// Create the emitters/effects for the piece...

@@ -125,6 +125,7 @@ public:
 	Blammopedia::MiscEntry*  GetMiscEntry(const LevelPiece::PieceStatus& statusType) const;
 
     void UnlockItem(const GameItem::ItemType& itemType);
+    void UnlockBlock(const LevelPiece::LevelPieceType& blockType);
 
 	const Blammopedia::ItemEntryMap& GetItemEntries() const;
 	const Blammopedia::BlockEntryMap& GetBlockEntries() const;
@@ -164,6 +165,9 @@ inline Blammopedia::ItemEntry* Blammopedia::GetItemEntry(const GameItem::ItemTyp
 }
 
 inline Blammopedia::BlockEntry* Blammopedia::GetBlockEntry(const LevelPiece::LevelPieceType& blockType) const {
+    if (blockType == LevelPiece::Empty) {
+        return NULL;
+    }
 	std::map<LevelPiece::LevelPieceType, Blammopedia::BlockEntry*>::const_iterator findIter = this->blockEntries.find(blockType);
 	if (findIter == this->blockEntries.end()) {
 		assert(false);
@@ -185,7 +189,16 @@ inline Blammopedia::MiscEntry* Blammopedia::GetMiscEntry(const LevelPiece::Piece
 
 inline void Blammopedia::UnlockItem(const GameItem::ItemType& itemType) {
     Blammopedia::ItemEntry* itemEntry = this->GetItemEntry(itemType);
+    assert(itemEntry != NULL);
     itemEntry->SetIsLocked(false);
+}
+
+inline void Blammopedia::UnlockBlock(const LevelPiece::LevelPieceType& blockType) {
+    Blammopedia::BlockEntry* blockEntry = this->GetBlockEntry(blockType);
+    if (blockEntry == NULL) {
+        return;
+    }
+    blockEntry->SetIsLocked(false);
 }
 
 inline const Blammopedia::ItemEntryMap& Blammopedia::GetItemEntries() const {

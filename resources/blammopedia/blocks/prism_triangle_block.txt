@@ -1,0 +1,3 @@
+Name: Triangular Prism Block
+DisplayTexture: prism_triangle_block_256x128.png
+Desc: Some Description for the Triangular Prism block goes here.
