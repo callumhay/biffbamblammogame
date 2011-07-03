@@ -30,7 +30,6 @@
 #include "Projectile.h"
 #include "GameTransformMgr.h"
 #include "PointAward.h"
-#include "BallBoostModel.h"
 
 class BallInPlayState;
 class CollateralBlock;
@@ -149,12 +148,24 @@ public:
 	}
 	
 	// The given next state will become the next state when update state is called
-	void SetNextState(GameState* nextState) {
+    void SetNextState(const GameState::GameStateType& nextStateType) {
+		if (this->nextState != NULL) {
+            // Make sure we aren't setting the same state twice
+            if (nextStateType == this->nextState->GetType()) {
+                return;
+            }
+
+			delete this->nextState;
+		}
+        this->nextState = GameState::Build(nextStateType, this);
+	}
+    void SetNextState(GameState* nextState) {
 		if (this->nextState != NULL) {
 			delete this->nextState;
 		}
-		this->nextState = nextState;
+        this->nextState = nextState;
 	}
+
 	// Update the current state to the next state if there is a next state set
 	void UpdateState() {
 		if (this->nextState != NULL) {
@@ -340,10 +351,7 @@ public:
 			this->currState->BallBoostDirectionReleased();
 		}
     }
-    float GetTimeDialationFactor() const {
-        if (this->boostModel == NULL) { return 1.0f; }
-        return this->boostModel->GetTimeDialationFactor();
-    }
+    float GetTimeDialationFactor() const;
     const BallBoostModel* GetBallBoostModel() const {
         return this->boostModel;
     }

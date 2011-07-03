@@ -21,10 +21,11 @@
  * all the craziness of the previous level's state...
  */
 LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
-	GameWorld* currWorld = this->gameModel->GetCurrentWorld();
-	GameLevel* currLevel = currWorld->GetCurrentLevel();
-	// EVENT: Level is complete
-	GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
+    GameWorld* currWorld = this->gameModel->GetCurrentWorld();
+    GameLevel* currLevel = currWorld->GetCurrentLevel();
+
+    // EVENT: Level is complete
+    GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
 }
 
 LevelCompleteState::~LevelCompleteState() {
@@ -43,6 +44,17 @@ LevelCompleteState::~LevelCompleteState() {
  */
 void LevelCompleteState::Tick(double seconds) {
 	UNUSED_PARAMETER(seconds);
+
+    /*
+    if (!firstTickDone) {
+	    GameWorld* currWorld = this->gameModel->GetCurrentWorld();
+	    GameLevel* currLevel = currWorld->GetCurrentLevel();
+
+	    // EVENT: Level is complete
+	    GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
+        firstTickDone = true;
+    }
+    */
 
 	// Clean up all the level-related state stuff in preparation for the next level/world/?
 	

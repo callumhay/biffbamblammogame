@@ -17,8 +17,7 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Collision.h"
 #include "GameBall.h"
-
-class GameModel;
+#include "GameModel.h"
 
 /**
  * Encapsulates the model/state of the ball boost for the GameModel.
@@ -36,7 +35,7 @@ public:
     static const double BULLET_TIME_FADE_OUT_SECONDS;
     static const double BULLET_TIME_MAX_DURATION_SECONDS;
 
-    BallBoostModel(GameModel* gameModel, const std::list<GameBall*>* balls);
+    BallBoostModel(GameModel* gameModel);
     ~BallBoostModel();
 
     void Tick(double dT);
@@ -74,7 +73,6 @@ private:
     double totalBulletTimeElapsed;              // Counter for the total seconds of elapsed bullet time (in the BulletTime state)
 
     GameModel* gameModel;
-    const std::list<GameBall*>* balls;  // The balls that are currently in play in the game model
     int numAvailableBoosts;             // The number of available boosts left for use by the player
     Vector2D ballBoostDir;              // The direction to boost the ball in when the player triggers it - NOT necessarily normalized!
     Collision::AABB2D ballZoomBounds;   // The 2D rectangle that holds all balls when bullet-time is activated for a ball boost
@@ -117,14 +115,14 @@ inline const Collision::AABB2D& BallBoostModel::GetBallZoomBounds() const {
  * Get the total number of balls currently in play.
  */
 inline size_t BallBoostModel::GetCurrentNumBalls() const {
-    return this->balls->size();
+    return this->gameModel->GetGameBalls().size();
 }
 
 /**
  * Gets the list of balls that will be / are being boosted by this.
  */
 inline const std::list<GameBall*>& BallBoostModel::GetBalls() const {
-    return *(this->balls);
+    return this->gameModel->GetGameBalls();
 }
 
 /**
@@ -133,7 +131,8 @@ inline const std::list<GameBall*>& BallBoostModel::GetBalls() const {
  */
 inline int BallBoostModel::GetNumBallsAllowedToBoost() const {
     int count = 0;
-    for (std::list<GameBall*>::const_iterator iter = this->balls->begin(); iter != this->balls->end(); ++iter) {
+    const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
+    for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
         const GameBall* currBall = *iter;
         if (currBall->IsBallAllowedToBoost()) {
             count++;

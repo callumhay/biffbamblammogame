@@ -11,7 +11,47 @@
 
 #include "GameState.h"
 #include "GameModel.h"
+
+#include "BallDeathState.h"
+#include "BallInPlayState.h"
+#include "BallOnPaddleState.h"
+#include "BallWormholeState.h"
+#include "GameCompleteState.h"
+#include "GameOverState.h"
+#include "LevelStartState.h"
 #include "LevelCompleteState.h"
+#include "WorldCompleteState.h"
+
+
+GameState* GameState::Build(const GameState::GameStateType& stateType, GameModel* gameModel) {
+    switch (stateType) {
+
+        case BallDeathStateType:
+            return new BallDeathState(gameModel->GetGameBalls().front(), gameModel);
+        case BallInPlayStateType:
+            return new BallInPlayState(gameModel);
+        case BallOnPaddleStateType:
+            return new BallOnPaddleState(gameModel);
+        case BallWormholeStateType:
+            return new BallWormholeState(gameModel);
+        case GameCompleteStateType:
+            return new GameCompleteState(gameModel);
+        case GameOverStateType:
+            return new GameOverState(gameModel);
+        case LevelStartStateType:
+            return new LevelStartState(gameModel);
+        case LevelCompleteStateType:
+            return new LevelCompleteState(gameModel);
+        case WorldCompleteStateType:
+            return new WorldCompleteState(gameModel);
+
+        case NULLStateType:
+        default:
+            assert(false);
+            return NULL;
+    }
+
+}
 
 /**
  * Default action here is to just move the paddle around.

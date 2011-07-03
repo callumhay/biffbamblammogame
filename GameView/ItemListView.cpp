@@ -197,7 +197,9 @@ void ItemListView::Draw(const Camera& camera) {
         glPushMatrix();
         glLoadIdentity();
         
-        // Draw the stripe background of for the title
+        glDisable(GL_TEXTURE_2D);
+
+        // Draw the stripe background for the title
         glColor4f(itemColour.R(), itemColour.G(), itemColour.B(), activatedItemAlpha);
         glBegin(GL_QUADS);
         glVertex2f(0, itemAndTitleYTopLeftCorner + STRIPE_BORDER);

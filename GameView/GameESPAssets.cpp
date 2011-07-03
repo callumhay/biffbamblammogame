@@ -23,6 +23,7 @@
 #include "../GameModel/Projectile.h"
 #include "../GameModel/PlayerPaddle.h"
 #include "../GameModel/Beam.h"
+#include "../GameModel/BallBoostModel.h"
 #include "../GameModel/PortalBlock.h"
 #include "../GameModel/CannonBlock.h"
 #include "../GameModel/TeslaBlock.h"
@@ -394,12 +395,6 @@ void GameESPAssets::KillAllActiveTeslaLightningArcs() {
  * (for when the ball dies or something like that).
  */
 void GameESPAssets::KillAllActiveBallEffects(const GameBall& ball) {
-	// Check to see if there are any active effects for the ball, if not
-	// then just exit this function
-	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
-	if (foundBallEffects == this->ballEffects.end()) {
-		return;
-	}
 
     // Get rid of all ball boosting effects for the ball as well
     for (BallEffectsMapIter iter1 = this->boostBallEmitters.begin(); iter1 != this->boostBallEmitters.end();) {
@@ -421,18 +416,23 @@ void GameESPAssets::KillAllActiveBallEffects(const GameBall& ball) {
         }
     }
 
-	// Iterate through all effects and delete them, then remove them from the list
-	for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); ++iter) {
-		std::vector<ESPPointEmitter*>& effectList = iter->second;
-		for (std::vector<ESPPointEmitter*>::iterator iter2 = effectList.begin(); iter2 != effectList.end(); ++iter2) {
-			ESPPointEmitter* currEmitter = *iter2;
-			delete currEmitter;
-			currEmitter = NULL;
-		}
-		effectList.clear();
-	}
+	// Check to see if there are any active effects for the ball, if not
+	// then just exit this function
+	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator foundBallEffects = this->ballEffects.find(&ball);
+	if (foundBallEffects != this->ballEffects.end()) {
+	    // Iterate through all effects and delete them, then remove them from the list
+	    for (std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> >::iterator iter = foundBallEffects->second.begin(); iter != foundBallEffects->second.end(); ++iter) {
+		    std::vector<ESPPointEmitter*>& effectList = iter->second;
+		    for (std::vector<ESPPointEmitter*>::iterator iter2 = effectList.begin(); iter2 != effectList.end(); ++iter2) {
+			    ESPPointEmitter* currEmitter = *iter2;
+			    delete currEmitter;
+			    currEmitter = NULL;
+		    }
+		    effectList.clear();
+	    }
 
-	this->ballEffects.erase(foundBallEffects);
+	    this->ballEffects.erase(foundBallEffects);
+    }
 }
 
 /**

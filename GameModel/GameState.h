@@ -17,19 +17,16 @@
 class GameModel;
 
 class GameState {
-protected:
-	GameModel* gameModel;
-
 public:
-	GameState(GameModel* gm) : gameModel(gm) {}
 	virtual ~GameState() {}
 
 	enum GameStateType { NULLStateType, BallDeathStateType, BallInPlayStateType, BallOnPaddleStateType, 
                          BallWormholeStateType, GameCompleteStateType, GameOverStateType, 
                          LevelStartStateType, LevelCompleteStateType, WorldCompleteStateType };
 
-	virtual GameState::GameStateType GetType() const = 0;
+    static GameState* Build(const GameState::GameStateType& stateType, GameModel* gameModel);
 
+	virtual GameState::GameStateType GetType() const = 0;
 	virtual void Tick(double seconds) = 0;
 	virtual void BallReleaseKeyPressed() = 0;
 	virtual void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement);
@@ -38,6 +35,13 @@ public:
 
 	bool DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttachedBallCollision);
 
+protected:
+    GameState(GameModel* gm) : gameModel(gm) {}
+
+	GameModel* gameModel;
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(GameState);
 };
 
 inline void GameState::BallBoostDirectionPressed(int x, int y) {

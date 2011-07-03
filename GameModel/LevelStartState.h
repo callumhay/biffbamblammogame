@@ -34,7 +34,7 @@ public:
         this->gameModel->ResetScore();
 
         // Place the ball back on the paddle, and let the level begin!
-		this->gameModel->SetNextState(new BallOnPaddleState(this->gameModel));
+        this->gameModel->SetNextState(GameState::BallOnPaddleStateType);
     }
 
 	void BallReleaseKeyPressed() { /* does nothing */ } 

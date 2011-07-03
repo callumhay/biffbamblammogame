@@ -27,7 +27,7 @@ GameState(gm), timeSinceGhost(DBL_MAX) {
     // The ball in play state is the only state that allows for ball boosting -
     // create a ball boost model for it in the game model
     assert(this->gameModel->boostModel == NULL);
-    this->gameModel->boostModel = new BallBoostModel(gm, &gm->GetGameBalls());
+    this->gameModel->boostModel = new BallBoostModel(gm);
 }
 
 BallInPlayState::~BallInPlayState() {
@@ -104,9 +104,6 @@ void BallInPlayState::Tick(double seconds) {
 	// Update any beams that are currently active
 	this->gameModel->UpdateActiveBeams(seconds);
 
-    // Update the boost model for the ball(s)
-    this->gameModel->boostModel->Tick(seconds);
-
 	// Variables that will be needed for collision detection
 	Vector2D n;
 	Collision::LineSeg2D collisionLine;
@@ -139,7 +136,7 @@ void BallInPlayState::Tick(double seconds) {
 		// Check for death (ball went out of bounds)
 		if (this->gameModel->IsOutOfGameBounds(currBall->GetBounds().Center())) {
 			if (gameBalls.size() == 1) {
-				this->gameModel->SetNextState(new BallDeathState(currBall, this->gameModel));
+                this->gameModel->SetNextState(new BallDeathState(currBall, this->gameModel));
 				return;
 			}
 			else {
@@ -416,6 +413,9 @@ void BallInPlayState::Tick(double seconds) {
 	this->gameModel->DoProjectileCollisions();
 	// Tick/update any level pieces that require it...
 	this->gameModel->DoPieceStatusUpdates(seconds);
+
+    // Update the boost model for the ball(s)
+    this->gameModel->boostModel->Tick(seconds);
 }
 
 
