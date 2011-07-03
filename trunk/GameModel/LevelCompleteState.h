@@ -27,6 +27,10 @@ public:
 	void Tick(double seconds);
 	void BallReleaseKeyPressed() { /* does nothing */ } 
 
+private:
+    //bool firstTickDone;
+    DISALLOW_COPY_AND_ASSIGN(LevelCompleteState);
+
 };
 
 #endif // __LEVELCOMPLETESTATE_H__

@@ -117,7 +117,9 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 	this->display->GetAssets()->DeactivateMiscEffects();
 	
 	// Queue up the state for ending a level - this will display the level name and do proper animations, fade-outs, etc.
-	this->display->AddStateToQueue(DisplayState::LevelEnd);
+    this->display->AddStateToQueue(DisplayState::LevelEnd);
+	this->display->AddStateToQueue(DisplayState::LevelCompleteSummary);
+    
 	this->display->SetCurrentStateAsNextQueuedState();
 
 	debug_output("EVENT: Level completed");

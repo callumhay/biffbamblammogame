@@ -111,5 +111,5 @@ void BallOnPaddleState::BallReleaseKeyPressed() {
 	this->gameModel->GetPlayerPaddle()->Shoot(this->gameModel);
 
 	// Now change the game model's state machine to have the ball in play
-	this->gameModel->SetNextState(new BallInPlayState(this->gameModel));
+    this->gameModel->SetNextState(GameState::BallInPlayStateType);
 }

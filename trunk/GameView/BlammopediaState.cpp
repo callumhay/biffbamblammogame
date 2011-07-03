@@ -263,7 +263,7 @@ void BlammopediaState::RenderFrame(double dT) {
                 this->selectedItemNameLbl.SetColour(Colour(0.66f, 0.66f, 0.66f));
             }
             else {
-                this->selectedItemNameLbl.SetColour(Colour(0.49f, 0.98f, 1.0f));
+                this->selectedItemNameLbl.SetColour(Colour(0.2f, 0.6f, 1.0f));
             }
             this->selectedItemNameLbl.SetText(currItem->GetNameLbl()->GetText());
             this->selectedItemNameLbl.SetTopLeftCorner(camera.GetWindowWidth() - 
@@ -414,19 +414,23 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
 	const Camera& camera = this->display->GetCamera();
 	ItemListView* blockListView = new ItemListView(camera.GetWindowWidth());
 
+	// Add each block in the game to the list... check each one to see if it has been unlocked,
+	// if not then just place a 'locked' texture...
     std::string currName;
+    std::string currDesc;
     const Blammopedia::BlockEntryMap& blockEntries = blammopedia->GetBlockEntries();
     for (Blammopedia::BlockEntryMapConstIter iter = blockEntries.begin(); iter != blockEntries.end(); ++iter) {
         Blammopedia::BlockEntry* blockEntry = iter->second;
         const Texture2D* texture = blammopedia->GetLockedItemTexture();
         if (!blockEntry->GetIsLocked()) {
-            texture = blockEntry->GetBlockTexture();
+            texture  = blockEntry->GetBlockTexture();
             currName = blockEntry->GetName();
+            currDesc = blockEntry->GetDescription();
         }
         else {
             currName = LOCKED_NAME;
         }
-        blockListView->AddItem(currName, "", Colour(1, 0.65f, 0), texture, blockEntry->GetIsLocked());
+        blockListView->AddItem(currName, currDesc, Colour(1, 0.65f, 0), texture, blockEntry->GetIsLocked());
     }
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);

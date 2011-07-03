@@ -16,7 +16,7 @@
 #include "GameBall.h"
 #include "GameEventManager.h"
 
-const double BallDeathState::SPIRAL_ANIMATION_TIME_TOTAL		= 1.5;	// Total time of the spiral animation in seconds
+const double BallDeathState::SPIRAL_ANIMATION_TIME_TOTAL    = 1.5;	// Total time of the spiral animation in seconds
 const double BallDeathState::EXPLOSION_ANIMATION_TIME_TOTAL	= 1.0;	// Total time of the explosion animation in seconds
 
 BallDeathState::BallDeathState(GameBall* lastBallToBeAlive, GameModel* gm) : 

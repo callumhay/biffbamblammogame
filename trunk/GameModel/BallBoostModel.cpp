@@ -27,11 +27,9 @@ const float BallBoostModel::BOOST_CHARGE_TIME_SECONDS = 16.0f;
 const float BallBoostModel::MIN_TIME_DIALATION_FACTOR       = 0.060f;
 const float BallBoostModel::INV_MIN_TIME_DIALATION_FACTOR   = 1.0f / MIN_TIME_DIALATION_FACTOR;
 
-BallBoostModel::BallBoostModel(GameModel* gameModel, const std::list<GameBall*>* balls) : 
-balls(balls), ballBoostDir(0,0), numAvailableBoosts(0), gameModel(gameModel),
+BallBoostModel::BallBoostModel(GameModel* gameModel) : 
+ballBoostDir(0,0), numAvailableBoosts(0), gameModel(gameModel),
 currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0), currBoostChargeTime(0.0) {
-    assert(balls != NULL);
-    assert(!balls->empty());
 
     // Setup the initial states for the various animations...
     timeDialationAnim.SetInterpolantValue(1.0f);
@@ -169,7 +167,8 @@ bool BallBoostModel::BallBoosterPressed() {
     
     // Boost any balls that can be boosted
     bool ballWasBoosted = false;
-    for (std::list<GameBall*>::const_iterator iter = this->balls->begin(); iter != this->balls->end(); ++iter) {
+    std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
+    for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
 
         GameBall* currBall = *iter;
         ballWasBoosted |= currBall->ExecuteBallBoost(this->ballBoostDir);
@@ -206,7 +205,8 @@ bool BallBoostModel::IsBallAvailableForBoosting() const {
     }
 
     bool ballIsAvailable = false;
-    for (std::list<GameBall*>::const_iterator iter = this->balls->begin(); iter != this->balls->end(); ++iter) {
+    const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
+    for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
         const GameBall* currBall = *iter;
         if (currBall->IsBallAllowedToBoost()) {
             ballIsAvailable = true;
@@ -258,9 +258,10 @@ void BallBoostModel::SetCurrentState(const BulletTimeState& newState) {
  * Recalculates the maximum extents of the ball(s) that are in play.
  */
 void BallBoostModel::RecalculateBallZoomBounds() {
-    assert(!this->balls->empty());
+    const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
+    assert(!balls.empty());
     
-    std::list<GameBall*>::const_iterator iter = this->balls->begin();
+    std::list<GameBall*>::const_iterator iter = balls.begin();
     const GameBall* currBall = *iter;
     Vector2D radiusVec(currBall->GetBounds().Radius(), currBall->GetBounds().Radius());
 
@@ -268,7 +269,7 @@ void BallBoostModel::RecalculateBallZoomBounds() {
     this->ballZoomBounds.SetMax(currBall->GetCenterPosition2D() + radiusVec);
     ++iter;
     
-    for (; iter != this->balls->end(); ++iter) {
+    for (; iter != balls.end(); ++iter) {
         currBall = *iter;
         radiusVec[0] = radiusVec[1] = currBall->GetBounds().Radius();
         this->ballZoomBounds.AddPoint(currBall->GetCenterPosition2D() - radiusVec);

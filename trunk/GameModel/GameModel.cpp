@@ -20,7 +20,7 @@
 #include "PaddleLaserBeam.h"
 #include "CollateralBlock.h"
 #include "PointAward.h"
-
+#include "BallBoostModel.h"
 
 #include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
@@ -96,7 +96,7 @@ void GameModel::StartGameAtWorldAndLevel(int worldNum, int levelNum) {
 	this->numInterimBlocksDestroyed = 0;	// Don't use set here, we don't want an event
 	this->gameTransformInfo->Reset();
 
-	this->SetNextState(new LevelStartState(this));
+    this->SetNextState(GameState::LevelStartStateType);
 }
 
 /**
@@ -119,9 +119,12 @@ void GameModel::ClearGameState() {
 
 	// Delete the state
 	delete this->currState;
-	this->currState = NULL;	
-	this->SetNextState(NULL);
-
+	this->currState = NULL;
+    if (this->nextState != NULL) {
+        delete this->nextState;
+        this->nextState = NULL;
+    }
+    
 	this->gameTransformInfo->Reset();
     this->ResetScore();
 }
@@ -185,7 +188,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
 	if (currLevel->IsLevelComplete()) {
 
 		// The level was completed, move to the level completed state
-		this->SetNextState(new LevelCompleteState(this));
+        this->SetNextState(GameState::LevelCompleteStateType);
 	}
 }
 
@@ -201,7 +204,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle) 
 	if (currLevel->IsLevelComplete()) {
 
 		// The level was completed, move to the level completed state
-		this->SetNextState(new LevelCompleteState(this));
+		this->SetNextState(GameState::LevelCompleteStateType);
 	}
 }
 
@@ -238,8 +241,13 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	// Check to see if the level is done
 	if (currLevel->IsLevelComplete()) {
 		// The level was completed, move to the level completed state
-		this->SetNextState(new LevelCompleteState(this));
+		this->SetNextState(GameState::LevelCompleteStateType);
 	}
+}
+
+float GameModel::GetTimeDialationFactor() const {
+    if (this->boostModel == NULL) { return 1.0f; }
+    return this->boostModel->GetTimeDialationFactor();
 }
 
 void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
@@ -312,10 +320,10 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 		// Set the appropriate state based on the number of lives left...
 		if (this->IsGameOver()) {
 			// Game Over
-			this->SetNextState(new GameOverState(this));
+            this->SetNextState(GameState::GameOverStateType);
 		}
 		else {
-			this->SetNextState(new BallOnPaddleState(this));
+            this->SetNextState(GameState::BallOnPaddleStateType);
 		}
 		stateChanged = true;
 	}
@@ -374,7 +382,7 @@ void GameModel::DoPieceStatusUpdates(double dT) {
 	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
 	if (currLevel->IsLevelComplete()) {
 		// The level was completed, move to the level completed state
-		this->SetNextState(new LevelCompleteState(this));
+		this->SetNextState(GameState::LevelCompleteStateType);
 	}
 }
 
@@ -483,7 +491,7 @@ void GameModel::DoProjectileCollisions() {
 	// Check to see if the level is done
     if (currLevel->IsLevelComplete()) {
 		// The level was completed, move to the level completed state
-		this->SetNextState(new LevelCompleteState(this));
+		this->SetNextState(GameState::LevelCompleteStateType);
 	}
 
 }
@@ -621,7 +629,7 @@ void GameModel::UpdateActiveBeams(double seconds) {
 				// Check to see if the level is done
 				if (currentLevel->IsLevelComplete()) {
 					// The level was completed, move to the level completed state
-					this->SetNextState(new LevelCompleteState(this));
+					this->SetNextState(GameState::LevelCompleteStateType);
 				}
 
 				// HACK: If we destroy a piece get out of this loop - so that if the piece is attached to
