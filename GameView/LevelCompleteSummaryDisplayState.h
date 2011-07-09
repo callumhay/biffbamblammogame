@@ -17,6 +17,7 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
 
+
 class LevelCompleteSummaryDisplayState : public DisplayState {
 public:
     LevelCompleteSummaryDisplayState(GameDisplay* display);
@@ -35,14 +36,37 @@ public:
 private:
     static const double FADE_OUT_TIME;
     static const double FOOTER_FLASH_TIME;
+    static const float FOOTER_VERTICAL_PADDING;
+    static const float LEVEL_NAME_HORIZONTAL_PADDING;
+    static const float HEADER_LEVEL_NAME_VERTICAL_PADDING;
+    static const float HEADER_INBETWEEN_VERTICAL_PADDING;
+    static const float TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING;
+    static const float HEADER_SCORE_INBETWEEN_VERTICAL_PADDING;
+
+    static const double POINTS_PER_SECOND;
 
     bool waitingForKeyPress;
+    AnimationLerp<double> scoreValueAnimation;
     AnimationLerp<float> fadeAnimation;
     AnimationMultiLerp<Colour> footerColourAnimation;
 
     TextLabel2D pressAnyKeyLabel;
+    TextLabel2D levelCompleteLabel;
+    TextLabel2DFixedWidth* levelNameLabel;
 
+    TextLabel2D totalScoreLabel;
+    TextLabel2D scoreValueLabel;
+    float maxScoreValueWidth;
+
+    Texture* starTexture;
+
+    void DrawLevelNameLabel(float screenWidth, float screenHeight);
+    void DrawLevelCompleteLabel(float screenWidth, float screenHeight);
+    void DrawStars(float screenWidth, float screenHeight);
+    void DrawTotalScoreLabel(float screenWidth, float screenHeight);
     void DrawPressAnyKeyTextFooter(float screenWidth);
+
+    void DrawStar(float leftX, float bottomY, const Colour& colour);
 
     DISALLOW_COPY_AND_ASSIGN(LevelCompleteSummaryDisplayState);
 };
@@ -56,6 +80,8 @@ inline void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::A
 	if (this->waitingForKeyPress) {
 		// Start the fade out animation - the user wants to start playing!
 		this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
+        // Automatically finish the score tally
+        this->scoreValueAnimation.SetInterpolantValue(this->scoreValueAnimation.GetTargetValue());
         waitingForKeyPress = false;
 	}
 }
