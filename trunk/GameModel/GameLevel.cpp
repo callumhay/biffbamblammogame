@@ -110,6 +110,13 @@ filepath(filepath), levelName(levelName), highScore(0) {
         }
     }
 
+    // TODO: Make this programmable/readable per-level
+    this->starAwardScores[0] = 500;
+    this->starAwardScores[1] = 700;
+    this->starAwardScores[2] = 1000;
+    this->starAwardScores[3] = 1500;
+    this->starAwardScores[4] = 2000;
+
 	// Set the quad tree for the level
 	//Point2D levelMax(this->GetLevelUnitWidth(), this->GetLevelUnitHeight());
 	//this->levelTree = new QuadTree(Collision::AABB2D(Point2D(0, 0), levelMax), Vector2D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT));

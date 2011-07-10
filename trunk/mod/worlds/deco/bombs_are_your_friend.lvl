@@ -3,7 +3,7 @@ Bombs Are Your Friend
 S S S S S S S S S S S 
 S R R E E E E E R R S 
 S B R E E E E E R B S 
-S O R G G G G G R O S 
+S Y O G G G G G O Y S 
 S R O O O O O O O R S 
 S B Y Y Y Y Y Y Y B S 
 S G B G G B G G B G S 
@@ -30,8 +30,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 2

@@ -122,6 +122,7 @@ public:
 	void ActionScoreChanged(int newScore);
     void ActionScoreMultiplierCounterChanged(int newCounterValue);
 	void ActionScoreMultiplierChanged(int newMultiplier, const Point2D& position);
+    void ActionNumStarsChanged(int oldNumStars, int newNumStars);
 
 protected:
 	GameEventManager();

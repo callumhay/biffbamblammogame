@@ -168,8 +168,12 @@ public:
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);
     const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;
 
-    size_t GetHighScore() const;
-    void SetHighScore(size_t highScore);
+    long GetHighScore() const;
+    void SetHighScore(long highScore);
+    bool GetHasNewHighScore() const;
+    void SetNewHighScore(bool newHighScore);
+
+    int GetNumStarsForScore(long score) const;
 
 private:	
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
@@ -187,8 +191,9 @@ private:
 
 
     // Persistant scoring variables - used to mark previously saved scores and calculate high scores
-    //size_t starAwardScores[5];    // Scores where stars are awarded
-    size_t highScore;             // Current high score for this level
+    int starAwardScores[5];   // Scores where stars are awarded
+    long highScore;           // Current high score for this level
+    bool newHighScore;        // If a new high score was achieved on the last play through of this level
 
 	std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
 	size_t randomItemProbabilityNum;                    // A number >= 0 for random item probability in the level
@@ -217,12 +222,29 @@ inline const LevelPiece* GameLevel::GetTriggerableLevelPiece(const LevelPiece::T
     return findIter->second;
 }
 
-inline size_t GameLevel::GetHighScore() const {
+inline long GameLevel::GetHighScore() const {
     return this->highScore;
 }
 
-inline void GameLevel::SetHighScore(size_t highScore) {
+inline void GameLevel::SetHighScore(long highScore) {
     this->highScore = highScore;
+    // TODO: Save game progress to file
+}
+
+// Get whether this level has a new high score due to its most recent play-through this game
+inline bool GameLevel::GetHasNewHighScore() const {
+    return this->newHighScore;
+}
+inline void GameLevel::SetNewHighScore(bool newHighScore) {
+    this->newHighScore = newHighScore;
+}
+
+inline int GameLevel::GetNumStarsForScore(long score) const {
+    int starIdx = 0;
+    while (score >= this->starAwardScores[starIdx] && starIdx < MAX_STARS_PER_LEVEL) {
+        starIdx++;
+    }
+    return starIdx;
 }
 
 #endif

@@ -42,48 +42,60 @@ private:
     static const float HEADER_INBETWEEN_VERTICAL_PADDING;
     static const float TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING;
     static const float HEADER_SCORE_INBETWEEN_VERTICAL_PADDING;
+    static const float SCORE_INBETWEEN_VERTICAL_PADDING;
+    static const float FINAL_SCORE_INBETWEEN_VERTICAL_PADDING;
+    static const float STAR_SIZE;
+    static const float STAR_HORIZONTAL_GAP;
+    static const float SCORE_LABEL_SIDE_PADDING;
 
     static const double POINTS_PER_SECOND;
 
     bool waitingForKeyPress;
     AnimationLerp<double> scoreValueAnimation;
     AnimationLerp<float> fadeAnimation;
+    AnimationLerp<float> levelCompleteTextScaleAnimation;
+    AnimationLerp<float> newHighScoreFade;
     AnimationMultiLerp<Colour> footerColourAnimation;
+    std::vector<AnimationLerp<float>* > starAnimations;
+    AnimationLerp<float> totalScoreFlyInAnimation;
 
     TextLabel2D pressAnyKeyLabel;
     TextLabel2D levelCompleteLabel;
+    TextLabel2D newHighScoreLabel;
     TextLabel2DFixedWidth* levelNameLabel;
+
+    // Statistics labels
+    TextLabel2DFixedWidth* maxBlocksTextLabel;
+    TextLabel2D maxBlocksValueLabel;
+
+    TextLabel2DFixedWidth* itemsAcquiredTextLabel;
+    TextLabel2D itemsAcquiredValueLabel;
+
+    TextLabel2DFixedWidth* levelTimeTextLabel;
+    TextLabel2D levelTimeValueLabel;
 
     TextLabel2D totalScoreLabel;
     TextLabel2D scoreValueLabel;
+
     float maxScoreValueWidth;
+    float maxTotalLabelHeight;
 
     Texture* starTexture;
 
-    void DrawLevelNameLabel(float screenWidth, float screenHeight);
-    void DrawLevelCompleteLabel(float screenWidth, float screenHeight);
-    void DrawStars(float screenWidth, float screenHeight);
-    void DrawTotalScoreLabel(float screenWidth, float screenHeight);
+    void DrawLevelNameLabel(float currYPos, float screenWidth, float screenHeight);
+    void DrawLevelCompleteLabel(float currYPos, float screenWidth, float screenHeight);
+    void DrawStars(float currYPos, float screenWidth, float screenHeight);
+    void DrawMaxBlocksLabel(float currYPos, float screenWidth);
+    void DrawNumItemsLabel(float currYPos, float screenWidth);
+    void DrawTotalTimeLabel(float currYPos, float screenWidth);
+    void DrawTotalScoreLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawPressAnyKeyTextFooter(float screenWidth);
-
-    void DrawStar(float leftX, float bottomY, const Colour& colour);
 
     DISALLOW_COPY_AND_ASSIGN(LevelCompleteSummaryDisplayState);
 };
 
 inline bool LevelCompleteSummaryDisplayState::AllowsGameModelUpdates() const {
     return false;
-}
-
-inline void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
-    UNUSED_PARAMETER(pressedButton);
-	if (this->waitingForKeyPress) {
-		// Start the fade out animation - the user wants to start playing!
-		this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
-        // Automatically finish the score tally
-        this->scoreValueAnimation.SetInterpolantValue(this->scoreValueAnimation.GetTargetValue());
-        waitingForKeyPress = false;
-	}
 }
 
 inline void LevelCompleteSummaryDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {

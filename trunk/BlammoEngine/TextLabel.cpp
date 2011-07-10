@@ -75,7 +75,7 @@ void TextLabel2D::Draw(float rotationInDegs) {
 
 TextLabel2DFixedWidth::TextLabel2DFixedWidth(const TextureFontSet* font, 
                                              float width, const std::string& text) : 
-TextLabel(font), fixedWidth(width), lineSpacing(8.0f) {
+TextLabel(font), alignment(TextLabel2DFixedWidth::LeftAligned), fixedWidth(width), lineSpacing(8.0f) {
     assert(font != NULL);
     this->SetText(text);
 }
@@ -122,11 +122,37 @@ void TextLabel2DFixedWidth::Draw() {
 
 void TextLabel2DFixedWidth::DrawTextLines(float xOffset, float yOffset) {
     Point3D currTextTopLeftPos(this->topLeftCorner[0] + xOffset, this->topLeftCorner[1] + yOffset, 0);
-    for (std::vector<std::string>::const_iterator iter = this->textLines.begin(); 
-         iter != this->textLines.end(); ++iter) {
 
-        const std::string& currLineTxt = *iter;
-        this->font->OrthoPrint(currTextTopLeftPos, currLineTxt, false, this->scale);
-        currTextTopLeftPos[1] -= (this->scale * this->font->GetHeight() + this->lineSpacing);
+    switch (this->alignment) {
+        case TextLabel2DFixedWidth::LeftAligned:
+
+            for (std::vector<std::string>::const_iterator iter = this->textLines.begin(); 
+                 iter != this->textLines.end(); ++iter) {
+
+                const std::string& currLineTxt = *iter;
+                this->font->OrthoPrint(currTextTopLeftPos, currLineTxt, false, this->scale);
+                currTextTopLeftPos[1] -= (this->scale * this->font->GetHeight() + this->lineSpacing);
+            }
+
+            break;
+
+        case TextLabel2DFixedWidth::RightAligned:
+            {
+                float baseTopLeftX = currTextTopLeftPos[0] + this->fixedWidth;
+                for (std::vector<std::string>::const_iterator iter = this->textLines.begin(); 
+                     iter != this->textLines.end(); ++iter) {
+                    
+                    const std::string& currLineTxt = *iter;
+                    currTextTopLeftPos[0] = baseTopLeftX - (this->scale * this->font->GetWidth(currLineTxt));
+                    this->font->OrthoPrint(currTextTopLeftPos, currLineTxt, false, this->scale);
+                    currTextTopLeftPos[1] -= (this->scale * this->font->GetHeight() + this->lineSpacing);
+                }
+            }
+
+            break;
+
+        default:
+            assert(false);
+            break;
     }
 }

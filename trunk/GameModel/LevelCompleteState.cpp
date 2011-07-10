@@ -24,6 +24,16 @@ LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
     GameWorld* currWorld = this->gameModel->GetCurrentWorld();
     GameLevel* currLevel = currWorld->GetCurrentLevel();
 
+    // Check to see whether the highscore for the level was beaten...
+    if (currLevel->GetHighScore() < gm->GetScore()) {
+        // Set the new high score for the level and indicate that the high score was beaten
+        currLevel->SetHighScore(gm->GetScore());
+        currLevel->SetNewHighScore(true);
+    }
+    else {
+        currLevel->SetNewHighScore(false);
+    }
+
     // EVENT: Level is complete
     GameEventManager::Instance()->ActionLevelCompleted(*currWorld, *currLevel);
 }

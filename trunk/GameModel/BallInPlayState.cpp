@@ -595,17 +595,20 @@ void BallInPlayState::DoBallCollision(GameBall& ball1, GameBall& ball2) {
  */
 void BallInPlayState::DoItemCollision() {
 	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
-	std::list<GameItem*>& currLiveItems			= this->gameModel->GetLiveItems();
+	std::list<GameItem*>& currLiveItems     = this->gameModel->GetLiveItems();
 	std::vector<GameItem*> removeItems;
 
 	// Check to see if the paddle hit any items, if so, activate those items
-	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); ++iter) {
+	for (std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); ++iter) {
 		GameItem *currItem = *iter;
 		
 		if (currItem->CollisionCheck(*this->gameModel->GetPlayerPaddle())) {
 			// EVENT: Item was obtained by the player paddle
 			GameEventManager::Instance()->ActionItemPaddleCollision(*currItem, *this->gameModel->GetPlayerPaddle());
-			
+            
+            // Increment the number of items acquired
+            this->gameModel->IncrementNumAcquiredItems(currItem);
+
 			// There was a collision with the item and the player paddle: activate the item
 			// and then delete it. If the item causes the creation of a timer then add the timer to the list
 			// of active timers.
@@ -622,6 +625,5 @@ void BallInPlayState::DoItemCollision() {
 		GameItem* currItem = removeItems[i];
 		currLiveItems.remove(currItem);
 	}
-
 }
 

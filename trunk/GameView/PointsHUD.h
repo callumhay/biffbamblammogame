@@ -16,6 +16,8 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Colour.h"
 
+#include "../GameModel/GameLevel.h"
+
 class Camera;
 class Texture;
 class TextLabel2D;
@@ -180,6 +182,7 @@ inline void PointsHUD::DoImmediatePointAnimation() {
 
 inline void PointsHUD::SetNumStars(int numStars) {
     assert(numStars >= 0);
+    assert(numStars <= GameLevel::MAX_STARS_PER_LEVEL);
 
     // TODO...
     this->numStars = numStars;
