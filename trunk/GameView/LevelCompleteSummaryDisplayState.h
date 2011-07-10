@@ -49,15 +49,22 @@ private:
     static const float SCORE_LABEL_SIDE_PADDING;
 
     static const double POINTS_PER_SECOND;
+    static const double PER_SCORE_VALUE_FADE_IN_TIME;
 
     bool waitingForKeyPress;
     AnimationLerp<double> scoreValueAnimation;
     AnimationLerp<float> fadeAnimation;
     AnimationLerp<float> levelCompleteTextScaleAnimation;
     AnimationLerp<float> newHighScoreFade;
+    
+    AnimationLerp<float> maxBlocksFadeIn;
+    AnimationLerp<float> numItemsFadeIn;
+    AnimationLerp<float> totalTimeFadeIn;
+
     AnimationMultiLerp<Colour> footerColourAnimation;
     std::vector<AnimationLerp<float>* > starAnimations;
     AnimationLerp<float> totalScoreFlyInAnimation;
+    AnimationLerp<float> totalScoreFadeInAnimation;
 
     TextLabel2D pressAnyKeyLabel;
     TextLabel2D levelCompleteLabel;

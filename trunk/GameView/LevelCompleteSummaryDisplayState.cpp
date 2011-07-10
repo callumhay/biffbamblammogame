@@ -30,9 +30,10 @@ const float LevelCompleteSummaryDisplayState::SCORE_INBETWEEN_VERTICAL_PADDING  
 const float LevelCompleteSummaryDisplayState::FINAL_SCORE_INBETWEEN_VERTICAL_PADDING         = 40.0f;
 const float LevelCompleteSummaryDisplayState::STAR_SIZE                                      = 60.0f;
 const float LevelCompleteSummaryDisplayState::STAR_HORIZONTAL_GAP                            = 10.0f;
-const float LevelCompleteSummaryDisplayState::SCORE_LABEL_SIDE_PADDING                       = 50.0f;
+const float LevelCompleteSummaryDisplayState::SCORE_LABEL_SIDE_PADDING                       = 100.0f;
 
-const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND = 10000;
+const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND                = 10000;
+const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     = 0.2;
 
 LevelCompleteSummaryDisplayState::LevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), waitingForKeyPress(true),
@@ -52,39 +53,42 @@ maxScoreValueWidth(0), starTexture(NULL) {
     assert(gameModel != NULL);
     const Camera& camera = this->display->GetCamera();
 
+    const Colour smallScoreLabelColour(0.15f, 0.15f, 0.15f);
 
     this->maxBlocksTextLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
         camera.GetWindowWidth()/2 - SCORE_LABEL_SIDE_PADDING, "Maximum consecutive blocks destroyed:");
     this->maxBlocksTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
-    this->maxBlocksTextLabel->SetColour(Colour(0,0,0));
-    //this->maxBlocksTextLabel->SetScale(
+    this->maxBlocksTextLabel->SetColour(smallScoreLabelColour);
+    this->maxBlocksTextLabel->SetScale(0.8f);
 
     std::stringstream maxBlocksValStrStream;
     maxBlocksValStrStream << gameModel->GetMaxConsecutiveBlocksDestroyed();
     this->maxBlocksValueLabel.SetText(maxBlocksValStrStream.str());
-    this->maxBlocksValueLabel.SetScale(1.2f);
-    this->maxBlocksValueLabel.SetColour(Colour(0,0,0));
+    this->maxBlocksValueLabel.SetColour(smallScoreLabelColour);
+    this->maxBlocksValueLabel.SetScale(0.9f);
 
     this->itemsAcquiredTextLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
         camera.GetWindowWidth()/2 - SCORE_LABEL_SIDE_PADDING, "Number of items acquired:");
     this->itemsAcquiredTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
-    this->itemsAcquiredTextLabel->SetColour(Colour(0,0,0));
+    this->itemsAcquiredTextLabel->SetColour(smallScoreLabelColour);
+    this->itemsAcquiredTextLabel->SetScale(0.8f);
 
     std::stringstream itemsAcquiredValStrStream;
     int numGoodItems, numNeutralItems, numBadItems;
     gameModel->GetNumItemsAcquired(numGoodItems, numNeutralItems, numBadItems);
     itemsAcquiredValStrStream << (numGoodItems + numNeutralItems + numBadItems);
     this->itemsAcquiredValueLabel.SetText(itemsAcquiredValStrStream.str());
-    this->itemsAcquiredValueLabel.SetScale(1.2f);
-    this->itemsAcquiredValueLabel.SetColour(Colour(0,0,0));
+    this->itemsAcquiredValueLabel.SetScale(0.9f);
+    this->itemsAcquiredValueLabel.SetColour(smallScoreLabelColour);
 
     this->levelTimeTextLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
         camera.GetWindowWidth()/2 - SCORE_LABEL_SIDE_PADDING, "Total time:");
     this->levelTimeTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
-    this->levelTimeTextLabel->SetColour(Colour(0,0,0));
+    this->levelTimeTextLabel->SetColour(smallScoreLabelColour);
+    this->levelTimeTextLabel->SetScale(0.8f);
 
     std::stringstream levelTimeValStrStream;
     double levelTimeInSecs = gameModel->GetLevelTimeInSeconds();
@@ -103,8 +107,8 @@ maxScoreValueWidth(0), starTexture(NULL) {
         levelTimeValStrStream << seconds;
     }
     this->levelTimeValueLabel.SetText(levelTimeValStrStream.str());
-    this->levelTimeValueLabel.SetScale(1.2f);
-    this->levelTimeValueLabel.SetColour(Colour(0,0,0));
+    this->levelTimeValueLabel.SetScale(0.9f);
+    this->levelTimeValueLabel.SetColour(smallScoreLabelColour);
 
     this->totalScoreLabel.SetScale(1.2f);
     this->scoreValueLabel.SetScale(1.3f);
@@ -163,8 +167,26 @@ maxScoreValueWidth(0), starTexture(NULL) {
     this->levelNameLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
     this->levelNameLabel->SetDropShadow(Colour(0,0,0), 0.1f);
 
+    double nextStartTime = BEGIN_ANIM_END_TIME;
+    double nextEndTime   = nextStartTime + PER_SCORE_VALUE_FADE_IN_TIME;
+    maxBlocksFadeIn.SetInterpolantValue(0.0f);
+    maxBlocksFadeIn.SetLerp(nextStartTime, nextEndTime, 0.0f, 1.0f);
+    maxBlocksFadeIn.SetRepeat(false);
+
+    nextStartTime = nextEndTime;
+    nextEndTime  += PER_SCORE_VALUE_FADE_IN_TIME;
+    numItemsFadeIn.SetInterpolantValue(0.0f);
+    numItemsFadeIn.SetLerp(nextStartTime, nextEndTime, 0.0f, 1.0f);
+    numItemsFadeIn.SetRepeat(false);
+
+    nextStartTime = nextEndTime;
+    nextEndTime  += PER_SCORE_VALUE_FADE_IN_TIME;
+    totalTimeFadeIn.SetInterpolantValue(0.0f);
+    totalTimeFadeIn.SetLerp(nextStartTime, nextEndTime, 0.0f, 1.0f);
+    totalTimeFadeIn.SetRepeat(false);
+
     // Setup the animation for the score
-    static const double START_TALLEY_TIME = BEGIN_ANIM_END_TIME+0.5;
+    static const double START_TALLEY_TIME = nextEndTime + 0.5;
     double gameScore = static_cast<double>(gameModel->GetScore());
     double totalTime = gameScore / POINTS_PER_SECOND;
     this->scoreValueAnimation.SetInterpolantValue(0.0);
@@ -186,8 +208,12 @@ maxScoreValueWidth(0), starTexture(NULL) {
     float scoreStartX = -(this->maxScoreValueWidth + this->totalScoreLabel.GetLastRasterWidth() +
         2*TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING);
     this->totalScoreFlyInAnimation.SetInterpolantValue(scoreStartX);
-    this->totalScoreFlyInAnimation.SetLerp(BEGIN_ANIM_END_TIME, START_TALLEY_TIME, scoreStartX, totalScoreXPos);
+    this->totalScoreFlyInAnimation.SetLerp(nextEndTime, START_TALLEY_TIME, scoreStartX, totalScoreXPos);
     this->totalScoreFlyInAnimation.SetRepeat(false);
+
+    this->totalScoreFadeInAnimation.SetInterpolantValue(0.0f);
+    this->totalScoreFadeInAnimation.SetLerp(nextEndTime, START_TALLEY_TIME, 0.0f, 1.0f);
+    this->totalScoreFadeInAnimation.SetRepeat(false);
 
     this->newHighScoreFade.SetInterpolantValue(0.0f);
     this->newHighScoreFade.SetLerp(START_TALLEY_TIME+totalTime, START_TALLEY_TIME+totalTime+0.5, 0.0f, 1.0f);
@@ -237,7 +263,12 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
         }
 
         this->totalScoreFlyInAnimation.Tick(dT);
+        this->totalScoreFadeInAnimation.Tick(dT);
         this->newHighScoreFade.Tick(dT);
+
+        this->maxBlocksFadeIn.Tick(dT);
+        this->numItemsFadeIn.Tick(dT);
+        this->totalTimeFadeIn.Tick(dT);
 
         // Animate and draw the "Press any key..." label
         this->footerColourAnimation.Tick(dT);
@@ -408,6 +439,9 @@ void LevelCompleteSummaryDisplayState::DrawMaxBlocksLabel(float currYPos, float 
     this->maxBlocksValueLabel.SetTopLeftCorner(scoreValueX, currYPos -
         this->maxBlocksTextLabel->GetHeight() + this->maxBlocksValueLabel.GetHeight());
 
+    this->maxBlocksTextLabel->SetAlpha(this->maxBlocksFadeIn.GetInterpolantValue());
+    this->maxBlocksValueLabel.SetAlpha(this->maxBlocksFadeIn.GetInterpolantValue());
+
     this->maxBlocksTextLabel->Draw();
     this->maxBlocksValueLabel.Draw();
 }
@@ -420,6 +454,9 @@ void LevelCompleteSummaryDisplayState::DrawNumItemsLabel(float currYPos, float s
     this->itemsAcquiredValueLabel.SetTopLeftCorner(scoreValueX, currYPos - 
         this->itemsAcquiredTextLabel->GetHeight() + this->itemsAcquiredValueLabel.GetHeight());
 
+    this->itemsAcquiredTextLabel->SetAlpha(this->numItemsFadeIn.GetInterpolantValue());
+    this->itemsAcquiredValueLabel.SetAlpha(this->numItemsFadeIn.GetInterpolantValue());
+
     this->itemsAcquiredTextLabel->Draw();
     this->itemsAcquiredValueLabel.Draw();
 }
@@ -431,6 +468,9 @@ void LevelCompleteSummaryDisplayState::DrawTotalTimeLabel(float currYPos, float 
     this->levelTimeTextLabel->SetTopLeftCorner(currX, currYPos);
     this->levelTimeValueLabel.SetTopLeftCorner(scoreValueX, currYPos - 
         this->levelTimeTextLabel->GetHeight() + this->levelTimeValueLabel.GetHeight());
+
+    this->levelTimeTextLabel->SetAlpha(this->totalTimeFadeIn.GetInterpolantValue());
+    this->levelTimeValueLabel.SetAlpha(this->totalTimeFadeIn.GetInterpolantValue());
 
     this->levelTimeTextLabel->Draw();
     this->levelTimeValueLabel.Draw();
@@ -446,6 +486,9 @@ void LevelCompleteSummaryDisplayState::DrawTotalScoreLabel(float currYPos, float
 
     this->totalScoreLabel.SetTopLeftCorner(currX, currYPos);
     this->scoreValueLabel.SetTopLeftCorner(scoreValueX, currYPos);
+
+    this->totalScoreLabel.SetAlpha(this->totalScoreFadeInAnimation.GetInterpolantValue());
+    this->scoreValueLabel.SetAlpha(this->totalScoreFadeInAnimation.GetInterpolantValue());
 
     this->totalScoreLabel.Draw();
     this->scoreValueLabel.Draw();
@@ -488,7 +531,12 @@ void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionBu
         }
 
         this->totalScoreFlyInAnimation.SetInterpolantValue(this->totalScoreFlyInAnimation.GetTargetValue());
+        this->totalScoreFadeInAnimation.SetInterpolantValue(this->totalScoreFadeInAnimation.GetTargetValue());
         this->newHighScoreFade.SetInterpolantValue(this->newHighScoreFade.GetTargetValue());
+
+        this->maxBlocksFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
+        this->numItemsFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
+        this->totalTimeFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
 
         waitingForKeyPress = false;
 	}
