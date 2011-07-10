@@ -95,6 +95,7 @@ public:
     void ScoreMultiplierCounterChangedEvent(int newCounterValue);
 	void ScoreMultiplierChangedEvent(int newMultiplier, const Point2D& position);
     void PointNotificationEvent(const PointAward& pointAward);
+    void NumStarsChangedEvent(int oldNumStars, int newNumStars);
 
 private:
 	GameDisplay* display;

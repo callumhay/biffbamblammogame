@@ -142,6 +142,8 @@ private:
 class TextLabel2DFixedWidth : public TextLabel {
 
 public:
+    enum Alignment { LeftAligned, RightAligned };
+
     TextLabel2DFixedWidth(const TextureFontSet* font, float width, const std::string& text); 
     ~TextLabel2DFixedWidth();
 
@@ -161,6 +163,11 @@ public:
     float GetFixedWidth() const {
         return this->fixedWidth;
     }
+    void SetFixedWidth(float width) {
+        assert(width > 0);
+        this->fixedWidth = width;
+        this->SetText(this->GetText());
+    }
 
     void SetScale(float scale) {
 	    assert(scale != 0.0f);
@@ -178,9 +185,14 @@ public:
         this->lineSpacing = spacing;
     }
 
+    void SetAlignment(const TextLabel2DFixedWidth::Alignment& alignment) {
+        this->alignment = alignment;
+    }
+
     void Draw();
 
 private:
+    Alignment alignment;
     float lineSpacing;
     float fixedWidth;
     float currTextWidth;

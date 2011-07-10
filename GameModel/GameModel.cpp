@@ -26,7 +26,7 @@
 #include "../ResourceManager.h"
 
 GameModel::GameModel() : 
-currWorldNum(0), currState(NULL), currPlayerScore(0), currLivesLeft(0), pauseBitField(GameModel::NoPause), 
+currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0), pauseBitField(GameModel::NoPause), 
 isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false){
 	
@@ -91,9 +91,13 @@ GameModel::~GameModel() {
 void GameModel::StartGameAtWorldAndLevel(int worldNum, int levelNum) {
 	this->SetCurrentWorldAndLevel(worldNum, levelNum);
 	// Reset the score, lives, etc.
-	this->currPlayerScore	= GameModelConstants::GetInstance()->INIT_SCORE;
+	this->currPlayerScore = GameModelConstants::GetInstance()->INIT_SCORE;
+    this->numStarsAwarded = 0;
 	this->SetInitialNumberOfLives(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
 	this->numInterimBlocksDestroyed = 0;	// Don't use set here, we don't want an event
+    this->maxInterimBlocksDestroyed = 0;
+    this->ResetNumAcquiredItems();
+    this->ResetLevelTime();
 	this->gameTransformInfo->Reset();
 
     this->SetNextState(GameState::LevelStartStateType);
@@ -127,6 +131,8 @@ void GameModel::ClearGameState() {
     
 	this->gameTransformInfo->Reset();
     this->ResetScore();
+    this->ResetLevelTime();
+    this->ResetNumAcquiredItems();
 }
 
 void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum) {
@@ -673,7 +679,15 @@ void GameModel::IncrementScore(PointAward& pointAward) {
         // EVENT: Point notification
         GameEventManager::Instance()->ActionPointNotification(pointAward);
 
-        // TODO: Check to see if a star was obtained...
+        // Check to see if the number of stars changed...
+        GameLevel* currLevel = this->GetCurrentLevel();
+        int numStarsForCurrScore = currLevel->GetNumStarsForScore(this->currPlayerScore);
+        if (this->numStarsAwarded != numStarsForCurrScore) {
+            int oldNumStars = this->numStarsAwarded;
+            this->numStarsAwarded = numStarsForCurrScore;
+            // EVENT: The number of stars changed
+            GameEventManager::Instance()->ActionNumStarsChanged(oldNumStars, this->numStarsAwarded);
+        }
     }
 }
 void GameModel::IncrementScore(std::list<PointAward>& pointAwardsList) {
@@ -690,6 +704,8 @@ void GameModel::SetNumInterimBlocksDestroyed(int value, const Point2D& pos) {
 
         int oldMultiplier = this->GetCurrentMultiplier();
 		this->numInterimBlocksDestroyed = value;
+        this->maxInterimBlocksDestroyed = std::max<int>(this->maxInterimBlocksDestroyed, this->numInterimBlocksDestroyed);
+
         int newMultiplier = this->GetCurrentMultiplier();
 		
         // EVENT: The value has changed for the number of interim blocks destroyed (the multiplier part counter)
@@ -721,6 +737,24 @@ int GameModel::GetCurrentMultiplier() const {
     }
 
     return 1;
+}
+
+void GameModel::IncrementNumAcquiredItems(const GameItem* item) {
+    assert(item != NULL);
+    switch (item->GetItemDisposition()) {
+        case GameItem::Good:
+            this->numGoodItemsAcquired++;
+            break;
+        case GameItem::Neutral:
+            this->numNeutralItemsAcquired++;
+            break;
+        case GameItem::Bad:
+            this->numBadItemsAcquired++;
+            break;
+        default:
+            assert(false);
+            break;
+    }
 }
 
 /**

@@ -60,8 +60,12 @@ private:
 
 	// Player score and life information
 	long currPlayerScore;
+    int numStarsAwarded;
 	int numInterimBlocksDestroyed;
+    int maxInterimBlocksDestroyed;
 	int currLivesLeft;
+    int numGoodItemsAcquired, numNeutralItemsAcquired, numBadItemsAcquired;
+    double totalLevelTimeInSeconds;
 
 	// Holds the type of pausing that is currently being used on the game model (see PauseType enum)
 	int pauseBitField;
@@ -111,7 +115,15 @@ private:
     void ResetScore();
 	void SetNumInterimBlocksDestroyed(int value, const Point2D& pos = Point2D());
     int GetNumInterimBlocksDestroyed() const { return this->numInterimBlocksDestroyed; }
+    void SetMaxConsecutiveBlocksDestroyed(int value) { this->maxInterimBlocksDestroyed = value; }
     int GetCurrentMultiplier() const;
+
+    void ResetLevelTime() { this->totalLevelTimeInSeconds = 0; }
+
+    void ResetNumAcquiredItems() {
+        this->numGoodItemsAcquired = this->numNeutralItemsAcquired = this->numBadItemsAcquired = 0;
+    }
+    void IncrementNumAcquiredItems(const GameItem* item);
 
 	void ClearProjectiles();
 	void ClearBeams();
@@ -212,9 +224,22 @@ public:
 		return this->currPlayerScore;
 	}
 
+    int GetNumStarsAwarded() const {
+        return this->numStarsAwarded;
+    }
+
 	int GetNumConsecutiveBlocksHit() const {
 		return this->numInterimBlocksDestroyed;
 	}
+    int GetMaxConsecutiveBlocksDestroyed() const { return this->maxInterimBlocksDestroyed; }
+
+    void GetNumItemsAcquired(int& numGoodItems, int& numNeutralItems, int& numBadItems) {
+        numGoodItems = this->numGoodItemsAcquired;
+        numNeutralItems = this->numNeutralItemsAcquired;
+        numBadItems = this->numBadItemsAcquired;
+    }
+
+    double GetLevelTimeInSeconds() const { return this->totalLevelTimeInSeconds; }
 
 	int GetLivesLeft() const {
 		return this->currLivesLeft;
@@ -427,9 +452,16 @@ public:
 };
 
 inline void GameModel::ResetScore() {
+    // Reset the actual score
     this->currPlayerScore = GameModelConstants::GetInstance()->INIT_SCORE;
     // EVENT: Score was changed
     GameEventManager::Instance()->ActionScoreChanged(this->currPlayerScore);
+
+    // Reset the number of stars
+    int oldNumStars = this->numStarsAwarded;
+    this->numStarsAwarded = 0;
+    // EVENT: Number of stars changed
+    GameEventManager::Instance()->ActionNumStarsChanged(oldNumStars, this->numStarsAwarded);
 }
 
 inline void GameModel::ClearStatusUpdatePieces() {
@@ -456,6 +488,7 @@ inline void GameModel::Tick(double seconds) {
 	if (currState != NULL) {
 		if ((this->pauseBitField & GameModel::PauseState) == 0x00000000) {
 			this->currState->Tick(seconds);
+            this->totalLevelTimeInSeconds += seconds;
 		}
 		if (this->playerPaddle != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0) {
 			this->playerPaddle->Tick(seconds, (this->pauseBitField & GameModel::PauseState) == GameModel::PauseState, *this);

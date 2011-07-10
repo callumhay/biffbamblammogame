@@ -538,3 +538,11 @@ void GameEventManager::ActionScoreMultiplierChanged(int newMultiplier, const Poi
 		(*this->listenerIter)->ScoreMultiplierChangedEvent(newMultiplier, position);
 	}	
 }
+
+// Action for when the number of awarded stars changes
+void GameEventManager::ActionNumStarsChanged(int oldNumStars, int newNumStars) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->NumStarsChangedEvent(oldNumStars, newNumStars);
+	}
+}

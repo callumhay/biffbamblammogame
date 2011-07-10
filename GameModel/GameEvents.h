@@ -491,6 +491,14 @@ public:
      *             position      - The position in the game where the event occurred that changed the multiplier.
 	 */
 	virtual void ScoreMultiplierChangedEvent(int newMultiplier, const Point2D& position) = 0;
+
+    /**
+     * Event triggered when the number of stars awarded to the player has changed
+     * Occurs once per change, right after the change occurs.
+     * Arguements: oldNumStars - The previous number of stars.
+     *             newNumStars - The new number of stars.
+     */
+    virtual void NumStarsChangedEvent(int oldNumStars, int newNumStars) = 0;
 };
 
 

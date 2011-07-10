@@ -18,14 +18,19 @@
 #include "../GameModel/GameModel.h"
 #include "../ResourceManager.h"
 
-const double LevelCompleteSummaryDisplayState::FADE_OUT_TIME                 = 0.75;
-const double LevelCompleteSummaryDisplayState::FOOTER_FLASH_TIME             = 0.5;
-const float LevelCompleteSummaryDisplayState::FOOTER_VERTICAL_PADDING        = 20.0f;
-const float LevelCompleteSummaryDisplayState::LEVEL_NAME_HORIZONTAL_PADDING  = 20.0f;
-const float LevelCompleteSummaryDisplayState::HEADER_LEVEL_NAME_VERTICAL_PADDING = 20.0f;
-const float LevelCompleteSummaryDisplayState::HEADER_INBETWEEN_VERTICAL_PADDING  = 20.0f;
+const double LevelCompleteSummaryDisplayState::FADE_OUT_TIME                                 = 0.75;
+const double LevelCompleteSummaryDisplayState::FOOTER_FLASH_TIME                             = 0.5;
+const float LevelCompleteSummaryDisplayState::FOOTER_VERTICAL_PADDING                        = 20.0f;
+const float LevelCompleteSummaryDisplayState::LEVEL_NAME_HORIZONTAL_PADDING                  = 20.0f;
+const float LevelCompleteSummaryDisplayState::HEADER_LEVEL_NAME_VERTICAL_PADDING             = 20.0f;
+const float LevelCompleteSummaryDisplayState::HEADER_INBETWEEN_VERTICAL_PADDING              = 30.0f;
 const float LevelCompleteSummaryDisplayState::TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING = 10.0f;
-const float LevelCompleteSummaryDisplayState::HEADER_SCORE_INBETWEEN_VERTICAL_PADDING = 50.0f;
+const float LevelCompleteSummaryDisplayState::HEADER_SCORE_INBETWEEN_VERTICAL_PADDING        = 50.0f;
+const float LevelCompleteSummaryDisplayState::SCORE_INBETWEEN_VERTICAL_PADDING               = 30.0f;
+const float LevelCompleteSummaryDisplayState::FINAL_SCORE_INBETWEEN_VERTICAL_PADDING         = 40.0f;
+const float LevelCompleteSummaryDisplayState::STAR_SIZE                                      = 60.0f;
+const float LevelCompleteSummaryDisplayState::STAR_HORIZONTAL_GAP                            = 10.0f;
+const float LevelCompleteSummaryDisplayState::SCORE_LABEL_SIDE_PADDING                       = 50.0f;
 
 const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND = 10000;
 
@@ -34,12 +39,78 @@ DisplayState(display), waitingForKeyPress(true),
 levelNameLabel(NULL),
 levelCompleteLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "Level Complete!"),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "- Press Any Key to Continue -"),
-totalScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "Total Score:"),
-scoreValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "0"),
+maxBlocksTextLabel(NULL), itemsAcquiredTextLabel(NULL), levelTimeTextLabel(NULL),
+itemsAcquiredValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), ""),
+maxBlocksValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), ""),
+levelTimeValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), ""),
+totalScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "Total score:"),
+scoreValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "0"),
+newHighScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "New High Score!"),
 maxScoreValueWidth(0), starTexture(NULL) {
-
+    
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
+    const Camera& camera = this->display->GetCamera();
+
+
+    this->maxBlocksTextLabel = new TextLabel2DFixedWidth(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
+        camera.GetWindowWidth()/2 - SCORE_LABEL_SIDE_PADDING, "Maximum consecutive blocks destroyed:");
+    this->maxBlocksTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
+    this->maxBlocksTextLabel->SetColour(Colour(0,0,0));
+    //this->maxBlocksTextLabel->SetScale(
+
+    std::stringstream maxBlocksValStrStream;
+    maxBlocksValStrStream << gameModel->GetMaxConsecutiveBlocksDestroyed();
+    this->maxBlocksValueLabel.SetText(maxBlocksValStrStream.str());
+    this->maxBlocksValueLabel.SetScale(1.2f);
+    this->maxBlocksValueLabel.SetColour(Colour(0,0,0));
+
+    this->itemsAcquiredTextLabel = new TextLabel2DFixedWidth(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
+        camera.GetWindowWidth()/2 - SCORE_LABEL_SIDE_PADDING, "Number of items acquired:");
+    this->itemsAcquiredTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
+    this->itemsAcquiredTextLabel->SetColour(Colour(0,0,0));
+
+    std::stringstream itemsAcquiredValStrStream;
+    int numGoodItems, numNeutralItems, numBadItems;
+    gameModel->GetNumItemsAcquired(numGoodItems, numNeutralItems, numBadItems);
+    itemsAcquiredValStrStream << (numGoodItems + numNeutralItems + numBadItems);
+    this->itemsAcquiredValueLabel.SetText(itemsAcquiredValStrStream.str());
+    this->itemsAcquiredValueLabel.SetScale(1.2f);
+    this->itemsAcquiredValueLabel.SetColour(Colour(0,0,0));
+
+    this->levelTimeTextLabel = new TextLabel2DFixedWidth(
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
+        camera.GetWindowWidth()/2 - SCORE_LABEL_SIDE_PADDING, "Total time:");
+    this->levelTimeTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
+    this->levelTimeTextLabel->SetColour(Colour(0,0,0));
+
+    std::stringstream levelTimeValStrStream;
+    double levelTimeInSecs = gameModel->GetLevelTimeInSeconds();
+    if (levelTimeInSecs >= 3600) {
+        levelTimeValStrStream << static_cast<int>(levelTimeInSecs/3600.0) << ":";
+        levelTimeValStrStream << ((static_cast<int>(levelTimeInSecs) % 3600)/60) << ":";
+        levelTimeValStrStream << (static_cast<int>(levelTimeInSecs) % 60);
+    }
+    else {
+        levelTimeValStrStream << static_cast<int>(levelTimeInSecs/60.0) << ":";
+        
+        int seconds = static_cast<int>(levelTimeInSecs) % 60;
+        if (seconds < 10) {
+            levelTimeValStrStream << "0";
+        }
+        levelTimeValStrStream << seconds;
+    }
+    this->levelTimeValueLabel.SetText(levelTimeValStrStream.str());
+    this->levelTimeValueLabel.SetScale(1.2f);
+    this->levelTimeValueLabel.SetColour(Colour(0,0,0));
+
+    this->totalScoreLabel.SetScale(1.2f);
+    this->scoreValueLabel.SetScale(1.3f);
+    this->maxTotalLabelHeight = this->totalScoreLabel.GetHeight();
+    this->newHighScoreLabel.SetDropShadow(Colour(0,0,0), 0.1f);
+
 
 	// Pause all game play elements in the game model
 	gameModel->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
@@ -48,6 +119,22 @@ maxScoreValueWidth(0), starTexture(NULL) {
 	this->fadeAnimation.SetInterpolantValue(0.0f);
 	this->fadeAnimation.SetLerp(0.0f, 0.0f, 0.0f, 0.0f);
 	this->fadeAnimation.SetRepeat(false);
+
+    static const double BEGIN_ANIM_END_TIME = 0.5;
+    this->levelCompleteTextScaleAnimation.SetInterpolantValue(0.0f);
+    this->levelCompleteTextScaleAnimation.SetLerp(0.0, BEGIN_ANIM_END_TIME, 0.01f, 1.0f);
+    this->levelCompleteTextScaleAnimation.SetRepeat(false);
+
+    static const double STAR_ANIM_TIME_LENGTH = 0.2;
+    double starAnimBeginTime = BEGIN_ANIM_END_TIME;
+    for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+        double starAnimEndTime = starAnimBeginTime + STAR_ANIM_TIME_LENGTH;
+        AnimationLerp<float>* starAnimation = new AnimationLerp<float>();
+        starAnimation->SetLerp(starAnimBeginTime, starAnimEndTime, 0.01f, 1.0f);
+        this->starAnimations.push_back(starAnimation);
+        starAnimBeginTime = starAnimEndTime;
+    }
+
 
 	// Setup the label for the press any key text...
 	this->pressAnyKeyLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
@@ -77,11 +164,11 @@ maxScoreValueWidth(0), starTexture(NULL) {
     this->levelNameLabel->SetDropShadow(Colour(0,0,0), 0.1f);
 
     // Setup the animation for the score
-    
+    static const double START_TALLEY_TIME = BEGIN_ANIM_END_TIME+0.5;
     double gameScore = static_cast<double>(gameModel->GetScore());
     double totalTime = gameScore / POINTS_PER_SECOND;
     this->scoreValueAnimation.SetInterpolantValue(0.0);
-    this->scoreValueAnimation.SetLerp(0.0, totalTime, 0.0, gameScore);
+    this->scoreValueAnimation.SetLerp(START_TALLEY_TIME, START_TALLEY_TIME+totalTime, 0.0, gameScore);
     this->scoreValueAnimation.SetRepeat(false);
 
     // Figure out the maximum score value label width
@@ -93,6 +180,18 @@ maxScoreValueWidth(0), starTexture(NULL) {
     std::stringstream initScoreValueStrStream;
     maxScoreValueStrStream << static_cast<int>(this->scoreValueAnimation.GetInterpolantValue());
     this->scoreValueLabel.SetText(initScoreValueStrStream.str());
+    
+    const float totalScoreXSize = this->totalScoreLabel.GetLastRasterWidth();
+    float totalScoreXPos = camera.GetWindowWidth()/2 - totalScoreXSize;
+    float scoreStartX = -(this->maxScoreValueWidth + this->totalScoreLabel.GetLastRasterWidth() +
+        2*TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING);
+    this->totalScoreFlyInAnimation.SetInterpolantValue(scoreStartX);
+    this->totalScoreFlyInAnimation.SetLerp(BEGIN_ANIM_END_TIME, START_TALLEY_TIME, scoreStartX, totalScoreXPos);
+    this->totalScoreFlyInAnimation.SetRepeat(false);
+
+    this->newHighScoreFade.SetInterpolantValue(0.0f);
+    this->newHighScoreFade.SetLerp(START_TALLEY_TIME+totalTime, START_TALLEY_TIME+totalTime+0.5, 0.0f, 1.0f);
+    this->newHighScoreFade.SetRepeat(false);
 
     // Grab any required texture resources
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR, 
@@ -103,9 +202,20 @@ maxScoreValueWidth(0), starTexture(NULL) {
 LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
     delete this->levelNameLabel;
     this->levelNameLabel = NULL;
+    delete this->maxBlocksTextLabel;
+    this->maxBlocksTextLabel = NULL;
+    delete this->itemsAcquiredTextLabel;
+    this->itemsAcquiredTextLabel = NULL;
+    delete this->levelTimeTextLabel;
+    this->levelTimeTextLabel = NULL;
 
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTexture);
     assert(success);
+
+    for (size_t i = 0; i < this->starAnimations.size(); i++) {
+        delete this->starAnimations[i];
+    }
+    this->starAnimations.clear();
 }
 
 void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
@@ -118,25 +228,86 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
     if (this->waitingForKeyPress) {
         // Set the score animation value
         this->scoreValueAnimation.Tick(dT);
-        std::stringstream scoreValueStrStream;
-        scoreValueStrStream << static_cast<int>(this->scoreValueAnimation.GetInterpolantValue());
-        this->scoreValueLabel.SetText(scoreValueStrStream.str());
 
+        this->levelCompleteTextScaleAnimation.Tick(dT);
+        this->levelCompleteLabel.SetScale(this->levelCompleteTextScaleAnimation.GetInterpolantValue());
+
+        for (size_t i = 0; i < this->starAnimations.size(); i++) {
+            this->starAnimations[i]->Tick(dT);
+        }
+
+        this->totalScoreFlyInAnimation.Tick(dT);
+        this->newHighScoreFade.Tick(dT);
 
         // Animate and draw the "Press any key..." label
         this->footerColourAnimation.Tick(dT);
         this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
     }
 
-	//Camera::PushWindowCoords();
+    long currScoreTally = static_cast<long>(this->scoreValueAnimation.GetInterpolantValue());
+    std::string scoreStr;
+
+    // Add comma separators for every grouping of 3 digits...
+    for (;;) {
+        
+        std::stringstream scorePartStrStream;
+        int tempThreeDigitValue = (currScoreTally % 1000);
+        bool isMoreNumber = currScoreTally >= 1000;
+
+        // There is no preservation of the zeros when we mod - we want
+        // a zero value to show up as three zeros! Or a tens value to show
+        // up as a zero followed by that value. 
+        // NOTE: We only do this if we're stuck in the middle of breaking apart the number
+        if (isMoreNumber) {
+            if (tempThreeDigitValue < 100) {
+                scorePartStrStream << "0";
+                if (tempThreeDigitValue < 10) {
+                    scorePartStrStream << "0";
+                }
+            }
+        }
+            
+        scorePartStrStream << tempThreeDigitValue;
+        scoreStr = scorePartStrStream.str() + scoreStr;
+
+        if (!isMoreNumber) {
+            break;
+        }
+        else {
+            currScoreTally /= 1000;
+            scoreStr = std::string(",") + scoreStr;
+        }
+    }
+    
+    this->scoreValueLabel.SetText(scoreStr);
+
+    Camera::PushWindowCoords();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-    this->DrawLevelNameLabel(camera.GetWindowWidth(), camera.GetWindowHeight());
-    this->DrawLevelCompleteLabel(camera.GetWindowWidth(), camera.GetWindowHeight());
-    this->DrawTotalScoreLabel(camera.GetWindowWidth(), camera.GetWindowHeight());
+    float yPos = camera.GetWindowHeight() - HEADER_LEVEL_NAME_VERTICAL_PADDING;
+    this->DrawLevelNameLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+    yPos -= (2*this->maxTotalLabelHeight + HEADER_INBETWEEN_VERTICAL_PADDING);
+    this->DrawLevelCompleteLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+    yPos -= HEADER_INBETWEEN_VERTICAL_PADDING;
+    this->DrawStars(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+    
+    // Draw the various level score statistics
+    yPos -= (STAR_SIZE + HEADER_SCORE_INBETWEEN_VERTICAL_PADDING);
+    this->DrawMaxBlocksLabel(yPos, camera.GetWindowWidth());
+    yPos -= (SCORE_INBETWEEN_VERTICAL_PADDING + 
+        std::max<size_t>(this->maxBlocksTextLabel->GetHeight(), this->maxBlocksValueLabel.GetHeight()));
+    this->DrawNumItemsLabel(yPos, camera.GetWindowWidth());
+    yPos -= (SCORE_INBETWEEN_VERTICAL_PADDING + 
+        std::max<size_t>(this->itemsAcquiredTextLabel->GetHeight(), this->itemsAcquiredValueLabel.GetHeight()));
+    this->DrawTotalTimeLabel(yPos, camera.GetWindowWidth());
+    yPos -= (FINAL_SCORE_INBETWEEN_VERTICAL_PADDING + 
+        std::max<size_t>(this->levelTimeTextLabel->GetHeight(), this->levelTimeValueLabel.GetHeight()));
 
-    //Camera::PopWindowCoords();
+    // Draw the total score
+    this->DrawTotalScoreLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+   
+    Camera::PopWindowCoords();
 
     if (!this->waitingForKeyPress) {
         // We're no longer waiting for a key press - fade out to white and then switch to the next state
@@ -165,46 +336,130 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
     }
 }
 
-void LevelCompleteSummaryDisplayState::DrawLevelNameLabel(float screenWidth, float screenHeight) {
+void LevelCompleteSummaryDisplayState::DrawLevelNameLabel(float currYPos, float screenWidth, float screenHeight) {
+    UNUSED_PARAMETER(screenHeight);
+
     const float horizontalLabelSize = this->levelNameLabel->GetWidth();
-    this->levelNameLabel->SetTopLeftCorner((screenWidth - horizontalLabelSize) / 2.0f, 
-        screenHeight - HEADER_LEVEL_NAME_VERTICAL_PADDING);
+    this->levelNameLabel->SetTopLeftCorner((screenWidth - horizontalLabelSize) / 2.0f, currYPos);
     this->levelNameLabel->Draw();
 }
 
-void LevelCompleteSummaryDisplayState::DrawLevelCompleteLabel(float screenWidth, float screenHeight) {
+void LevelCompleteSummaryDisplayState::DrawLevelCompleteLabel(float currYPos, float screenWidth, float screenHeight) {
+    UNUSED_PARAMETER(screenHeight);
     
     const float horizontalLabelSize = this->levelCompleteLabel.GetLastRasterWidth();
-    this->levelCompleteLabel.SetTopLeftCorner((screenWidth - horizontalLabelSize) / 2.0f, 
-        screenHeight - (this->levelNameLabel->GetHeight() + HEADER_LEVEL_NAME_VERTICAL_PADDING + HEADER_INBETWEEN_VERTICAL_PADDING));
+    const float verticalLabelSize   = this->levelCompleteLabel.GetHeight();
+    this->levelCompleteLabel.SetTopLeftCorner((screenWidth - horizontalLabelSize) / 2.0f, currYPos + verticalLabelSize);
     this->levelCompleteLabel.Draw();
 }
 
-void LevelCompleteSummaryDisplayState::DrawStars(float screenWidth, float screenHeight) {
+void LevelCompleteSummaryDisplayState::DrawStars(float currYPos, float screenWidth, float screenHeight) {
+    UNUSED_PARAMETER(screenHeight);
+
+    GameModel* gameModel = this->display->GetModel();
+
     glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT);
+    
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glPolygonMode(GL_FRONT, GL_FILL);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    this->starTexture->BindTexture();
+    
+    float currX = screenWidth/2 - ((STAR_SIZE*GameLevel::MAX_STARS_PER_LEVEL + STAR_HORIZONTAL_GAP*(GameLevel::MAX_STARS_PER_LEVEL-1))/2);
+    currX += STAR_SIZE/2;
+    currYPos -= STAR_SIZE/2;
 
+    Colour starColour;
+    for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+        
+        AnimationLerp<float>* starAnimation = this->starAnimations[i];
+        if (i < gameModel->GetNumStarsAwarded()) {
+            starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+        }
+        else {
+            starColour = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
+        }
+
+        glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
+       
+        glPushMatrix();
+        glTranslatef(currX, currYPos, 0);
+        glScalef(STAR_SIZE*starAnimation->GetInterpolantValue(), STAR_SIZE*starAnimation->GetInterpolantValue(), 1);
+        GeometryMaker::GetInstance()->DrawQuad();
+        glPopMatrix();
+
+        currX += STAR_SIZE + STAR_HORIZONTAL_GAP;
+    }
 
     glPopAttrib();
+
+    debug_opengl_state();
 }
 
-void LevelCompleteSummaryDisplayState::DrawTotalScoreLabel(float screenWidth, float screenHeight) {
-    const float totalScoreXSize = this->totalScoreLabel.GetLastRasterWidth();
-    //const float scoreValueXSize = this->scoreValueLabel.GetLastRasterWidth();
+void LevelCompleteSummaryDisplayState::DrawMaxBlocksLabel(float currYPos, float screenWidth) {
     
-    float totalScoreXPos = screenWidth/2 - TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING - totalScoreXSize;
-    float scoreValueXPos = screenWidth/2 + TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING;
+    float currX = screenWidth/2 - this->maxBlocksTextLabel->GetFixedWidth(); 
+    float scoreValueX = screenWidth/2 + 2*TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING;
 
-    float yPos = screenHeight - (HEADER_LEVEL_NAME_VERTICAL_PADDING + this->levelNameLabel->GetHeight() +
-        HEADER_INBETWEEN_VERTICAL_PADDING + this->levelCompleteLabel.GetHeight() + HEADER_SCORE_INBETWEEN_VERTICAL_PADDING);
-    
-    this->totalScoreLabel.SetTopLeftCorner(totalScoreXPos, yPos);
-    this->scoreValueLabel.SetTopLeftCorner(scoreValueXPos, yPos);
+    this->maxBlocksTextLabel->SetTopLeftCorner(currX, currYPos);
+    this->maxBlocksValueLabel.SetTopLeftCorner(scoreValueX, currYPos -
+        this->maxBlocksTextLabel->GetHeight() + this->maxBlocksValueLabel.GetHeight());
+
+    this->maxBlocksTextLabel->Draw();
+    this->maxBlocksValueLabel.Draw();
+}
+
+void LevelCompleteSummaryDisplayState::DrawNumItemsLabel(float currYPos, float screenWidth) {
+    float currX = screenWidth/2 - this->itemsAcquiredTextLabel->GetFixedWidth(); 
+    float scoreValueX = screenWidth/2 + 2*TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING;
+
+    this->itemsAcquiredTextLabel->SetTopLeftCorner(currX, currYPos);
+    this->itemsAcquiredValueLabel.SetTopLeftCorner(scoreValueX, currYPos - 
+        this->itemsAcquiredTextLabel->GetHeight() + this->itemsAcquiredValueLabel.GetHeight());
+
+    this->itemsAcquiredTextLabel->Draw();
+    this->itemsAcquiredValueLabel.Draw();
+}
+
+void LevelCompleteSummaryDisplayState::DrawTotalTimeLabel(float currYPos, float screenWidth) {
+    float currX = screenWidth/2 - this->levelTimeTextLabel->GetFixedWidth(); 
+    float scoreValueX = screenWidth/2 + 2*TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING;
+
+    this->levelTimeTextLabel->SetTopLeftCorner(currX, currYPos);
+    this->levelTimeValueLabel.SetTopLeftCorner(scoreValueX, currYPos - 
+        this->levelTimeTextLabel->GetHeight() + this->levelTimeValueLabel.GetHeight());
+
+    this->levelTimeTextLabel->Draw();
+    this->levelTimeValueLabel.Draw();
+}
+
+void LevelCompleteSummaryDisplayState::DrawTotalScoreLabel(float currYPos, float screenWidth, float screenHeight) {
+    UNUSED_PARAMETER(screenHeight);
+    UNUSED_PARAMETER(screenWidth);
+
+    float currX = this->totalScoreFlyInAnimation.GetInterpolantValue();
+    float scoreValueX = currX + this->totalScoreLabel.GetLastRasterWidth() + 
+        2*TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING;
+
+    this->totalScoreLabel.SetTopLeftCorner(currX, currYPos);
+    this->scoreValueLabel.SetTopLeftCorner(scoreValueX, currYPos);
 
     this->totalScoreLabel.Draw();
     this->scoreValueLabel.Draw();
+
+    GameModel* gameModel = this->display->GetModel();
+    GameLevel* gameLevel = gameModel->GetCurrentLevel();
+
+    // Check to see if the player has a new high score
+    if (gameLevel->GetHasNewHighScore()) {
+        this->newHighScoreLabel.SetColour(this->footerColourAnimation.GetInterpolantValue());
+        this->newHighScoreLabel.SetAlpha(this->newHighScoreFade.GetInterpolantValue());
+        this->newHighScoreLabel.SetTopLeftCorner(scoreValueX + 3, currYPos - this->scoreValueLabel.GetHeight() - 10);
+        this->newHighScoreLabel.Draw();
+    }
 }
 
 void LevelCompleteSummaryDisplayState::DrawPressAnyKeyTextFooter(float screenWidth) {
@@ -217,20 +472,24 @@ void LevelCompleteSummaryDisplayState::DrawPressAnyKeyTextFooter(float screenWid
 	this->pressAnyKeyLabel.Draw();
 }
 
-void LevelCompleteSummaryDisplayState::DrawStar(float leftX, float bottomY, const Colour& colour) {
 
+void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+    UNUSED_PARAMETER(pressedButton);
+	if (this->waitingForKeyPress) {
+		// Start the fade out animation - the user wants to start playing!
+		this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
+        
+        // Automatically finish the score tally and other animations
+        this->scoreValueAnimation.SetInterpolantValue(this->scoreValueAnimation.GetTargetValue());
+        this->levelCompleteTextScaleAnimation.SetInterpolantValue(this->levelCompleteTextScaleAnimation.GetTargetValue());
 
-    const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
-    this->starTexture->BindTexture();
-    glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2i(0, 1);
-    glVertex2f(starLeftX,  starTopY);
-    glTexCoord2i(0, 0);
-    glVertex2f(starLeftX,  starBottomY);
-    glTexCoord2i(1, 0);
-    glVertex2f(starRightX, starBottomY);
-    glTexCoord2i(1, 1);
-    glVertex2f(starRightX, starTopY);
-    glEnd();
+        for (size_t i = 0; i < this->starAnimations.size(); i++) {
+            this->starAnimations[i]->SetInterpolantValue(this->starAnimations[i]->GetTargetValue());
+        }
+
+        this->totalScoreFlyInAnimation.SetInterpolantValue(this->totalScoreFlyInAnimation.GetTargetValue());
+        this->newHighScoreFade.SetInterpolantValue(this->newHighScoreFade.GetTargetValue());
+
+        waitingForKeyPress = false;
+	}
 }

@@ -916,6 +916,14 @@ void GameEventsListener::PointNotificationEvent(const PointAward& pointAward) {
     debug_output("EVENT: Point notification");
 }
 
+void GameEventsListener::NumStarsChangedEvent(int oldNumStars, int newNumStars) {
+    UNUSED_PARAMETER(oldNumStars);
+    PointsHUD* pointHUD = this->display->GetAssets()->GetPointsHUD();
+    pointHUD->SetNumStars(newNumStars);
+
+    debug_output("EVENT: Number of stars changed");
+}
+
 void GameEventsListener::ScoreChangedEvent(int newScore) {
     PointsHUD* pointsHUD = this->display->GetAssets()->GetPointsHUD();
     pointsHUD->SetScore(newScore);

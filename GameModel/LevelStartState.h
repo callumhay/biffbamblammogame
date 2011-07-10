@@ -28,10 +28,16 @@ public:
     void Tick(double seconds) {
         UNUSED_PARAMETER(seconds);
 
-	    // Reset the multiplier
+	    // Reset the multiplier and the max number of blocks destroyed
 	    this->gameModel->SetNumInterimBlocksDestroyed(0);
+        this->gameModel->SetMaxConsecutiveBlocksDestroyed(0);
+
         // Reset the score
         this->gameModel->ResetScore();
+
+        // Reset other stats for a level
+        this->gameModel->ResetNumAcquiredItems();
+        this->gameModel->ResetLevelTime();
 
         // Place the ball back on the paddle, and let the level begin!
         this->gameModel->SetNextState(GameState::BallOnPaddleStateType);
