@@ -111,7 +111,7 @@ filepath(filepath), levelName(levelName), highScore(0) {
     }
 
     // TODO: Make this programmable/readable per-level
-    this->starAwardScores[0] = 500;
+    this->starAwardScores[0] = 100;
     this->starAwardScores[1] = 700;
     this->starAwardScores[2] = 1000;
     this->starAwardScores[3] = 1500;

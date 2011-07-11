@@ -47,7 +47,7 @@ levelTimeValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssets
 totalScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "Total score:"),
 scoreValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "0"),
 newHighScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "New High Score!"),
-maxScoreValueWidth(0), starTexture(NULL) {
+maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE) {
     
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
@@ -223,6 +223,30 @@ maxScoreValueWidth(0), starTexture(NULL) {
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR, 
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->starTexture != NULL);
+    this->glowTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, 
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->glowTexture != NULL);
+
+    // Initialize any of the shiny background emitters for stars that were acquired
+    this->starBgEmitters.reserve(gameModel->GetNumStarsAwarded());
+    const Colour STAR_COLOUR_BG = 1.2f * GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+    for (int i = 0; i < gameModel->GetNumStarsAwarded(); i++) {
+
+        ESPPointEmitter* starBgEmitter = new ESPPointEmitter();
+        starBgEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	    starBgEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	    starBgEmitter->SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+	    starBgEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	    starBgEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	    starBgEmitter->SetParticleRotation(ESPInterval(0));
+        starBgEmitter->SetParticleColour(ESPInterval(STAR_COLOUR_BG.R()), ESPInterval(STAR_COLOUR_BG.G()), 
+            ESPInterval(STAR_COLOUR_BG.B()), ESPInterval(1));
+	    starBgEmitter->SetParticleSize(ESPInterval(1.4f*STAR_SIZE));
+        starBgEmitter->AddEffector(&this->starBgRotator);
+        starBgEmitter->SetParticles(1, static_cast<Texture2D*>(this->glowTexture));
+
+        this->starBgEmitters.push_back(starBgEmitter);
+    }
 }
 
 LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
@@ -237,11 +261,17 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
 
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTexture);
     assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->glowTexture);
+    assert(success);
 
     for (size_t i = 0; i < this->starAnimations.size(); i++) {
         delete this->starAnimations[i];
     }
     this->starAnimations.clear();
+    for (size_t i = 0; i < this->starBgEmitters.size(); i++) {
+        delete this->starBgEmitters[i];
+    }
+    this->starBgEmitters.clear();
 }
 
 void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
@@ -321,7 +351,7 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
     yPos -= (2*this->maxTotalLabelHeight + HEADER_INBETWEEN_VERTICAL_PADDING);
     this->DrawLevelCompleteLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
     yPos -= HEADER_INBETWEEN_VERTICAL_PADDING;
-    this->DrawStars(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+    this->DrawStars(dT, yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
     
     // Draw the various level score statistics
     yPos -= (STAR_SIZE + HEADER_SCORE_INBETWEEN_VERTICAL_PADDING);
@@ -384,7 +414,7 @@ void LevelCompleteSummaryDisplayState::DrawLevelCompleteLabel(float currYPos, fl
     this->levelCompleteLabel.Draw();
 }
 
-void LevelCompleteSummaryDisplayState::DrawStars(float currYPos, float screenWidth, float screenHeight) {
+void LevelCompleteSummaryDisplayState::DrawStars(double dT, float currYPos, float screenWidth, float screenHeight) {
     UNUSED_PARAMETER(screenHeight);
 
     GameModel* gameModel = this->display->GetModel();
@@ -407,8 +437,15 @@ void LevelCompleteSummaryDisplayState::DrawStars(float currYPos, float screenWid
     for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
         
         AnimationLerp<float>* starAnimation = this->starAnimations[i];
+        ESPPointEmitter* starBGEmitter = NULL;
         if (i < gameModel->GetNumStarsAwarded()) {
             starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+
+            starBGEmitter = this->starBgEmitters[i];
+            starBGEmitter->SetParticleAlpha(ESPInterval(0.75f*starAnimation->GetInterpolantValue()));
+            starBGEmitter->SetEmitPosition(Point3D(currX, currYPos, 0));
+            starBGEmitter->Tick(dT);
+            starBGEmitter->Draw(this->display->GetCamera());
         }
         else {
             starColour = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
