@@ -16,7 +16,8 @@
 
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
-
+#include "../ESPEngine/ESPParticleRotateEffector.h"
+#include "../ESPEngine/ESPPointEmitter.h"
 
 class LevelCompleteSummaryDisplayState : public DisplayState {
 public:
@@ -88,10 +89,13 @@ private:
     float maxTotalLabelHeight;
 
     Texture* starTexture;
+    Texture* glowTexture;
+    std::vector<ESPPointEmitter*> starBgEmitters;
+    ESPParticleRotateEffector starBgRotator;
 
     void DrawLevelNameLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawLevelCompleteLabel(float currYPos, float screenWidth, float screenHeight);
-    void DrawStars(float currYPos, float screenWidth, float screenHeight);
+    void DrawStars(double dT, float currYPos, float screenWidth, float screenHeight);
     void DrawMaxBlocksLabel(float currYPos, float screenWidth);
     void DrawNumItemsLabel(float currYPos, float screenWidth);
     void DrawTotalTimeLabel(float currYPos, float screenWidth);
