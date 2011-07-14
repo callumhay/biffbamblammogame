@@ -60,25 +60,41 @@ inline void Tokenize(const std::string& str, std::vector<std::string>& tokens, c
  * Adds commas to a basic number stored in the given string.
  * e.g., given 243556 will return 243,556
  */
-inline std::string AddNumberCommas(const std::string& number) {
-    if (number.size() <= 3) {
-        return number;
-    }
+inline std::string AddNumberCommas(long number) {
+    std::string scoreStr;
+    long currNumber = number;
 
-    std::string result;
-    int numCommas = (number.size()-1) / 3;
-    int count = 0;
-    for (int i = static_cast<int>(number.size()); i >= 0 && numCommas > 0; i--) {
-        result = number[i] + result;
-        count++;
-        if (count == 3) {
-            result = std::string(",") + result;
-            count = 0;
-            numCommas--;
+    // Add comma separators for every grouping of 3 digits...
+    for (;;) {
+        std::stringstream scorePartStrStream;
+        int tempThreeDigitValue = (currNumber % 1000);
+        bool isMoreNumber = currNumber >= 1000;
+
+        // There is no preservation of the zeros when we mod - we want
+        // a zero value to show up as three zeros! Or a tens value to show
+        // up as a zero followed by that value. 
+        // NOTE: We only do this if we're stuck in the middle of breaking apart the number
+        if (isMoreNumber) {
+            if (tempThreeDigitValue < 100) {
+                scorePartStrStream << "0";
+                if (tempThreeDigitValue < 10) {
+                    scorePartStrStream << "0";
+                }
+            }
+        }
+            
+        scorePartStrStream << tempThreeDigitValue;
+        scoreStr = scorePartStrStream.str() + scoreStr;
+
+        if (!isMoreNumber) {
+            break;
+        }
+        else {
+            currNumber /= 1000;
+            scoreStr = std::string(",") + scoreStr;
         }
     }
-
-    return result;
+    return scoreStr;
 }
 
 };

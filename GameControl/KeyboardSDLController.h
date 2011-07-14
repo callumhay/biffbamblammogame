@@ -39,9 +39,15 @@ private:
 	void KeyDown(SDLKey key);
 	void KeyUp(SDLKey key);
 
+    void MouseButtonDown(unsigned int button, unsigned int x, unsigned int y);
+    void MouseButtonUp(unsigned int button);
+    void MouseMotion(unsigned int x, unsigned int y, int relX, int relY);
+
 	void ExecuteDisplayKeyPressedNotifications(SDLKey key);
 	void ExecuteDisplayKeyReleasedNotifications(SDLKey key);
-	
+
+    
+
     void GetSpecialDirectionVector(Vector2D& dir);
 
 	void DebugRepeatActions();

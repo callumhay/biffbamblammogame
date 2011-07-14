@@ -174,6 +174,7 @@ public:
     void SetNewHighScore(bool newHighScore);
 
     int GetNumStarsForScore(long score) const;
+    int GetHighScoreNumStars() const { return this->GetNumStarsForScore(this->highScore); }
 
 private:	
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format

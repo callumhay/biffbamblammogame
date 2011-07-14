@@ -17,6 +17,7 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
 #include "../ESPEngine/ESPParticleRotateEffector.h"
+#include "../ESPEngine/ESPParticleScaleEffector.h"
 #include "../ESPEngine/ESPPointEmitter.h"
 
 class LevelCompleteSummaryDisplayState : public DisplayState {
@@ -51,6 +52,8 @@ private:
 
     static const double POINTS_PER_SECOND;
     static const double PER_SCORE_VALUE_FADE_IN_TIME;
+
+    bool gameProgressWasSaved;
 
     bool waitingForKeyPress;
     AnimationLerp<double> scoreValueAnimation;
@@ -90,8 +93,12 @@ private:
 
     Texture* starTexture;
     Texture* glowTexture;
+    Texture* sparkleTexture;
     std::vector<ESPPointEmitter*> starBgEmitters;
+    std::vector<ESPPointEmitter*> starFgEmitters;
     ESPParticleRotateEffector starBgRotator;
+    ESPParticleRotateEffector starFgRotator;
+    ESPParticleScaleEffector starFgPulser;
 
     void DrawLevelNameLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawLevelCompleteLabel(float currYPos, float screenWidth, float screenHeight);

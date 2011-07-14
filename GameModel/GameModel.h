@@ -81,6 +81,7 @@ private:
 	// ***************************************************
 
 	bool doingPieceStatusListIteration;
+    bool progressLoadedSuccessfully;
 
 	// Private getters and setters ****************************************
 	void SetCurrentWorldAndLevel(int worldNum, int levelNum);
@@ -151,6 +152,8 @@ public:
     void IncrementScore(PointAward& pointAward);
     void IncrementScore(std::list<PointAward>& pointAwardsList);
     void IncrementNumInterimBlocksDestroyed(const Point2D& pos) { this->SetNumInterimBlocksDestroyed(this->GetNumInterimBlocksDestroyed()+1, pos); }
+
+    GameWorld* GetWorldByName(const std::string& name);
 
 	GameState::GameStateType GetCurrentStateType() const {
 		if (this->currState != NULL) {

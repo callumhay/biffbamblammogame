@@ -28,6 +28,7 @@ public:
 	float pulseRate;				// (Hz) Pulse rate in number of pulses per second
 	float pulseGrowthScale;	// Amount of growth of a single pulse from smallest scale to largest
 
+    ScaleEffect(float pulseRate, float pulseGrowthScale) : isInit(false), pulseRate(pulseRate), pulseGrowthScale(pulseGrowthScale) {}
 	ScaleEffect() : isInit(false), pulseRate(0), pulseGrowthScale(1) {}
 
 	friend class ESPParticleScaleEffector;

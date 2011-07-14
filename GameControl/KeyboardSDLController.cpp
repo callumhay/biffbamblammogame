@@ -16,6 +16,7 @@
 #include "../GameView/GameDisplay.h"
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
+#include "../GameModel/BallBoostModel.h"
 
 KeyboardSDLController::KeyboardSDLController(GameModel* model, GameDisplay* display) :
 BBBGameController(model, display), specialDirOn(false) {
@@ -41,6 +42,19 @@ bool KeyboardSDLController::ProcessState() {
 				this->KeyUp(keyEvent.key.keysym.sym);
 				break;
 
+            case SDL_MOUSEBUTTONDOWN:
+                this->MouseButtonDown(keyEvent.button.button, keyEvent.button.x, keyEvent.button.y);
+                break;
+
+            case SDL_MOUSEBUTTONUP:
+                this->MouseButtonUp(keyEvent.button.button);
+                break;
+
+            case SDL_MOUSEMOTION:
+                this->MouseMotion(keyEvent.motion.x, keyEvent.motion.y,
+                    keyEvent.motion.xrel, keyEvent.motion.yrel);
+                break;
+
 			case SDL_QUIT:
 				return true;
 
@@ -56,11 +70,11 @@ void KeyboardSDLController::Sync(size_t frameID, double dT) {
 	UNUSED_PARAMETER(dT);
 
 	// Paddle controls (NOTE: the else is to make the feedback more exacting)
-	if (this->keyPressed[SDLK_LEFT]) {
+    if (this->keyPressed[SDLK_LEFT] || this->keyPressed[SDLK_a]) {
 		PlayerPaddle::PaddleMovement leftDir = this->model->AreControlsFlipped() ? PlayerPaddle::RightPaddleMovement : PlayerPaddle::LeftPaddleMovement;
 		this->model->MovePaddle(frameID, leftDir);
 	}
-	else if (this->keyPressed[SDLK_RIGHT]) {
+	else if (this->keyPressed[SDLK_RIGHT] || this->keyPressed[SDLK_d]) {
 		PlayerPaddle::PaddleMovement rightDir = this->model->AreControlsFlipped() ? PlayerPaddle::LeftPaddleMovement : PlayerPaddle::RightPaddleMovement;
 		this->model->MovePaddle(frameID, rightDir);
 	}
@@ -92,10 +106,110 @@ void KeyboardSDLController::KeyUp(SDLKey key) {
 	this->ExecuteDisplayKeyReleasedNotifications(key);
 }
 
+void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x, unsigned int y) {
+    if (this->model->GetCurrentStateType() != GameState::BallInPlayStateType) {
+        return;
+    }
+    const BallBoostModel* boostModel = this->model->GetBallBoostModel();
+    if (boostModel == NULL) {
+        return;
+    }
+
+    unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
+    const Camera& camera = this->display->GetCamera();
+    Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
+    Vector2D boostDir = Vector2D(x,openGLYCoord) - windowCenterPos;
+    if (boostDir.IsZero()) {
+        boostDir[0] = 1;
+    }
+    
+    switch (button) {
+        case SDL_BUTTON_LEFT:
+            this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
+            //debug_output("Left button pressed.");
+            break;
+        case SDL_BUTTON_RIGHT:
+            if (boostModel->IsInBulletTime()) {
+                this->model->ShootActionReleaseUse();
+            }
+            else {
+                this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
+            }
+            //debug_output("Right button pressed.");
+            break;
+        default:
+            break;
+    }
+}
+
+void KeyboardSDLController::MouseButtonUp(unsigned int button) {
+
+    switch (button) {
+        case SDL_BUTTON_LEFT:
+            this->display->SpecialDirectionReleased();
+            //debug_output("Left button released.");
+            break;
+        case SDL_BUTTON_RIGHT:
+            //debug_output("Right button released.");
+            break;
+        default:
+            break;
+    }
+}
+
+/**
+ * Triggered when there's mouse motion, (x,y) are in screen coordinates with the 
+ * upper-left corner as the origin.
+ */
+void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX, int relY) {
+    // Convert to OpenGL screen-space coordinates system (origin in lower-left corner)...
+    unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
+    //debug_output("Mouse motion (absolute): " << x << ", " << openGLYCoord);
+    int openGLRelYCoord = -relY;
+    //debug_output("Mouse motion (relative): " << relX << ", " << openGLRelYCoord);
+
+    if (this->model->GetCurrentStateType() == GameState::BallInPlayStateType) {
+        const BallBoostModel* boostModel = this->model->GetBallBoostModel();
+        if (boostModel == NULL) {
+            return;
+        }
+
+        if (boostModel->IsInBulletTime()) {
+            Vector2D previousBoostDir = -boostModel->GetBallBoostDirection();
+
+            // Calculate the angular difference from the previous mouse position to the current,
+            // this, added to the previous boost direction, determines the special direction used for ball boosting
+            const Camera& camera = this->display->GetCamera();
+            Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
+
+            Vector2D previousMousePos(x - relX, openGLYCoord - openGLRelYCoord);
+            previousMousePos = previousMousePos - windowCenterPos;
+            previousMousePos.Normalize();
+
+            Vector2D currMousePos(x, openGLYCoord);
+            currMousePos = currMousePos - windowCenterPos;
+            currMousePos.Normalize();
+            
+            float angleInRadians = acos(Vector2D::Dot(previousMousePos, currMousePos));
+            float sign = NumberFuncs::SignOf(Vector3D::cross(Vector3D(previousMousePos), Vector3D(currMousePos))[2]);
+            previousBoostDir.Rotate(sign * Trig::radiansToDegrees(angleInRadians));
+            previousBoostDir = 1000 * previousBoostDir;
+
+            if (previousBoostDir.IsZero()) {
+                return;
+            }
+
+            this->display->SpecialDirectionPressed(previousBoostDir[0], previousBoostDir[1]);
+        }
+    }
+}
+
 /**
  * Informs the display about a key pressed event in this controller.
  */
 void KeyboardSDLController::ExecuteDisplayKeyPressedNotifications(SDLKey key) {
+
+    /*
     Vector2D specialDir(0,0);
     this->GetSpecialDirectionVector(specialDir);
     if (!specialDir.IsZero()) {
@@ -105,6 +219,7 @@ void KeyboardSDLController::ExecuteDisplayKeyPressedNotifications(SDLKey key) {
             this->model->ShootActionReleaseUse();
         }
     }
+    */
 
 	switch (key) {
 		case SDLK_DOWN:
@@ -115,13 +230,15 @@ void KeyboardSDLController::ExecuteDisplayKeyPressedNotifications(SDLKey key) {
 			break;
 
 		case SDLK_LEFT:
-		case SDLK_LEFTBRACKET:
+        case SDLK_a:
+        case SDLK_LEFTBRACKET:
 		case SDLK_LEFTPAREN:
 		case SDLK_KP4:
 			this->display->ButtonPressed(GameControl::LeftButtonAction);
 			break;
 
 		case SDLK_RIGHT:
+        case SDLK_d:
 		case SDLK_RIGHTBRACKET:
 		case SDLK_RIGHTPAREN:
 		case SDLK_KP6:
@@ -147,6 +264,7 @@ void KeyboardSDLController::ExecuteDisplayKeyPressedNotifications(SDLKey key) {
  */
 void KeyboardSDLController::ExecuteDisplayKeyReleasedNotifications(SDLKey key) {
 
+    /*
     Vector2D specialDir(0,0);
     this->GetSpecialDirectionVector(specialDir);
 
@@ -161,6 +279,7 @@ void KeyboardSDLController::ExecuteDisplayKeyReleasedNotifications(SDLKey key) {
         this->display->SpecialDirectionReleased();
         this->specialDirOn = false;
     }
+    */
 
 	switch (key) {
 		case SDLK_DOWN:
