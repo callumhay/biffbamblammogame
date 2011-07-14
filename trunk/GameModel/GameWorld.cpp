@@ -147,6 +147,18 @@ bool GameWorld::Unload() {
 	return true;
 }
 
+// Get the level with the given name, NULL if no such level exists
+GameLevel* GameWorld::GetLevelByName(const std::string& name) {
+    for (std::vector<GameLevel*>::const_iterator iter = this->loadedLevels.begin();
+         iter != this->loadedLevels.end(); ++iter) {
+        GameLevel* level = *iter;
+        if (level->GetName().compare(name) == 0) {
+            return level;
+        }
+    }
+    return NULL;
+}
+
 /*
  * Figures out if the given string is a world style.
  * Precondition: true.

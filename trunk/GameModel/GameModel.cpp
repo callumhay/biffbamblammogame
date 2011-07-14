@@ -21,6 +21,7 @@
 #include "CollateralBlock.h"
 #include "PointAward.h"
 #include "BallBoostModel.h"
+#include "GameProgressIO.h"
 
 #include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
@@ -28,7 +29,7 @@
 GameModel::GameModel() : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0), pauseBitField(GameModel::NoPause), 
 isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
-nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false){
+nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false) {
 	
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
     std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
@@ -49,6 +50,9 @@ nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false){
     }
     delete inFile;
     inFile = NULL;
+
+    // Load data for all the worlds
+    this->progressLoadedSuccessfully = GameProgressIO::LoadGameProgress(this);
 
 	// Initialize paddle and the first ball
 	this->playerPaddle = new PlayerPaddle();
@@ -138,9 +142,11 @@ void GameModel::ClearGameState() {
 void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum) {
 	assert(worldNum >= 0 && worldNum < static_cast<int>(this->worlds.size()));
 	
+    // NOTE: We don't unload anything since it all gets loaded when the game model is initialized
+    // worlds don't take up too much memory so this is fine
 	// Clean up the previous world
-	GameWorld* prevWorld = this->GetCurrentWorld();
-	prevWorld->Unload();
+	//GameWorld* prevWorld = this->GetCurrentWorld();
+	//prevWorld->Unload();
 
 	// Get the world we want to set as current
 	GameWorld* world = this->worlds[worldNum];
@@ -168,6 +174,17 @@ void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum) {
 	// Tell the paddle what the boundries of the level are and reset the paddle
 	this->playerPaddle->SetNewMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound()); // resets the paddle
 	//this->playerPaddle->ResetPaddle();
+}
+
+// Get the world with the given name in this model, NULL if no such world exists
+GameWorld* GameModel::GetWorldByName(const std::string& name) {
+    for (std::vector<GameWorld*>::const_iterator iter = this->worlds.begin(); iter != this->worlds.end(); ++iter) {
+        GameWorld* world = *iter;
+        if (world->GetName().compare(name) == 0) {
+            return world;
+        }
+    }
+    return NULL;
 }
 
 /**

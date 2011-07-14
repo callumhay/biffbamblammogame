@@ -622,7 +622,7 @@ void SelectLevelMenuState::SetupLevelPages() {
             const GameLevel* currLevel = levels.at(currLevelIdx);
             assert(currLevel != NULL);
 
-            //totalNumStarsCollected += currLevel->GetNumStars();
+            totalNumStarsCollected += currLevel->GetHighScoreNumStars();
             totalNumStars += GameLevel::MAX_STARS_PER_LEVEL;
 
             levelItem = new LevelMenuItem(currLevelIdx+1, currLevel, itemWidth, 
@@ -833,11 +833,8 @@ level(level), topLeftCorner(topLeftCorner), starTexture(starTexture), width(widt
     float nameYPos = this->topLeftCorner[1] - std::max<float>(0, ((this->numLabel->GetHeight() - this->nameLabel->GetHeight()) / 2.0f));
     this->nameLabel->SetTopLeftCorner(nameXPos, nameYPos);
 
-    std::stringstream highScoreNumStr;
-    highScoreNumStr << this->level->GetHighScore();
-    
     std::stringstream highScoreStr;
-    highScoreStr << "High Score: " << stringhelper::AddNumberCommas(highScoreNumStr.str()) ;
+    highScoreStr << "High Score: " << stringhelper::AddNumberCommas(this->level->GetHighScore()) ;
 
     this->highScoreLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
@@ -862,10 +859,19 @@ level(level), topLeftCorner(topLeftCorner), starTexture(starTexture), width(widt
         this->highScoreLabel->GetTopLeftCorner()[1] - this->highScoreLabel->GetHeight() - HIGH_SCORE_TO_STAR_Y_GAP, 0.0f);
     glTranslatef(-STAR_GAP - halfStarSize, -halfStarSize, 0);
     this->starTexture->BindTexture();
-    glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
+    
+    int numStars = level->GetHighScoreNumStars();
+    const Colour& ACTIVE_STAR_COLOUR   = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+    const Colour& INACTIVE_STAR_COLOUR = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
     for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
-        glTranslatef(STAR_GAP + starSize, 0, 0);
+        if (i < numStars) {
+            glColor4f(ACTIVE_STAR_COLOUR.R(), ACTIVE_STAR_COLOUR.G(), ACTIVE_STAR_COLOUR.B(), 1.0f);
+        }
+        else {
+            glColor4f(INACTIVE_STAR_COLOUR.R(), INACTIVE_STAR_COLOUR.G(), INACTIVE_STAR_COLOUR.B(), 1.0f);
+        }
 
+        glTranslatef(STAR_GAP + starSize, 0, 0);
 	    glBegin(GL_QUADS);
 		    glTexCoord2i(0, 0); glVertex2f(-halfStarSize, -halfStarSize);
 		    glTexCoord2i(1, 0); glVertex2f( halfStarSize, -halfStarSize);

@@ -14,8 +14,10 @@
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
 
+#include "../BlammoEngine/StringHelper.h"
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../GameModel/GameModel.h"
+#include "../GameModel/GameProgressIO.h"
 #include "../ResourceManager.h"
 
 const double LevelCompleteSummaryDisplayState::FADE_OUT_TIME                                 = 0.75;
@@ -33,7 +35,7 @@ const float LevelCompleteSummaryDisplayState::STAR_HORIZONTAL_GAP               
 const float LevelCompleteSummaryDisplayState::SCORE_LABEL_SIDE_PADDING                       = 100.0f;
 
 const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND                = 10000;
-const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     = 0.2;
+const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     = 0.25;
 
 LevelCompleteSummaryDisplayState::LevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), waitingForKeyPress(true),
@@ -47,10 +49,15 @@ levelTimeValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssets
 totalScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "Total score:"),
 scoreValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "0"),
 newHighScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "New High Score!"),
-maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE) {
+maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), sparkleTexture(NULL), starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
+starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEffect(1.0f, 1.5f)), gameProgressWasSaved(false) {
     
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
+
+    // Save game progress
+    this->gameProgressWasSaved = GameProgressIO::SaveGameProgress(gameModel);
+
     const Camera& camera = this->display->GetCamera();
 
     const Colour smallScoreLabelColour(0.15f, 0.15f, 0.15f);
@@ -226,11 +233,33 @@ maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), starBgRotator(90.0f
     this->glowTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, 
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->glowTexture != NULL);
+    this->sparkleTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPARKLE, 
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->sparkleTexture != NULL);
 
     // Initialize any of the shiny background emitters for stars that were acquired
     this->starBgEmitters.reserve(gameModel->GetNumStarsAwarded());
+    this->starFgEmitters.reserve(gameModel->GetNumStarsAwarded());
     const Colour STAR_COLOUR_BG = 1.2f * GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+    const Colour STAR_COLOUR_FG = 1.5f * GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
     for (int i = 0; i < gameModel->GetNumStarsAwarded(); i++) {
+
+        
+        ESPPointEmitter* starFgEmitter = new ESPPointEmitter();
+        starFgEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	    starFgEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	    starFgEmitter->SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
+	    starFgEmitter->SetRadiusDeviationFromCenter(ESPInterval(0, 0));
+	    starFgEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	    starFgEmitter->SetParticleRotation(ESPInterval(0));
+        starFgEmitter->SetParticleColour(ESPInterval(STAR_COLOUR_FG.R()), ESPInterval(STAR_COLOUR_FG.G()), 
+            ESPInterval(STAR_COLOUR_FG.B()), ESPInterval(1));
+	    starFgEmitter->SetParticleSize(ESPInterval(STAR_SIZE));
+        starFgEmitter->AddEffector(&this->starFgRotator);
+        starFgEmitter->AddEffector(&this->starFgPulser);
+        starFgEmitter->SetParticles(1, static_cast<Texture2D*>(this->sparkleTexture));
+
+        this->starFgEmitters.push_back(starFgEmitter);
 
         ESPPointEmitter* starBgEmitter = new ESPPointEmitter();
         starBgEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
@@ -263,6 +292,8 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->glowTexture);
     assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTexture);
+    assert(success);
 
     for (size_t i = 0; i < this->starAnimations.size(); i++) {
         delete this->starAnimations[i];
@@ -272,6 +303,10 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
         delete this->starBgEmitters[i];
     }
     this->starBgEmitters.clear();
+    for (size_t i = 0; i < this->starFgEmitters.size(); i++) {
+        delete this->starFgEmitters[i];
+    }
+    this->starFgEmitters.clear();
 }
 
 void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
@@ -306,40 +341,7 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
     }
 
     long currScoreTally = static_cast<long>(this->scoreValueAnimation.GetInterpolantValue());
-    std::string scoreStr;
-
-    // Add comma separators for every grouping of 3 digits...
-    for (;;) {
-        
-        std::stringstream scorePartStrStream;
-        int tempThreeDigitValue = (currScoreTally % 1000);
-        bool isMoreNumber = currScoreTally >= 1000;
-
-        // There is no preservation of the zeros when we mod - we want
-        // a zero value to show up as three zeros! Or a tens value to show
-        // up as a zero followed by that value. 
-        // NOTE: We only do this if we're stuck in the middle of breaking apart the number
-        if (isMoreNumber) {
-            if (tempThreeDigitValue < 100) {
-                scorePartStrStream << "0";
-                if (tempThreeDigitValue < 10) {
-                    scorePartStrStream << "0";
-                }
-            }
-        }
-            
-        scorePartStrStream << tempThreeDigitValue;
-        scoreStr = scorePartStrStream.str() + scoreStr;
-
-        if (!isMoreNumber) {
-            break;
-        }
-        else {
-            currScoreTally /= 1000;
-            scoreStr = std::string(",") + scoreStr;
-        }
-    }
-    
+    std::string scoreStr = stringhelper::AddNumberCommas(currScoreTally);
     this->scoreValueLabel.SetText(scoreStr);
 
     Camera::PushWindowCoords();
@@ -437,11 +439,10 @@ void LevelCompleteSummaryDisplayState::DrawStars(double dT, float currYPos, floa
     for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
         
         AnimationLerp<float>* starAnimation = this->starAnimations[i];
-        ESPPointEmitter* starBGEmitter = NULL;
         if (i < gameModel->GetNumStarsAwarded()) {
             starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
 
-            starBGEmitter = this->starBgEmitters[i];
+            ESPPointEmitter* starBGEmitter = this->starBgEmitters[i];
             starBGEmitter->SetParticleAlpha(ESPInterval(0.75f*starAnimation->GetInterpolantValue()));
             starBGEmitter->SetEmitPosition(Point3D(currX, currYPos, 0));
             starBGEmitter->Tick(dT);
@@ -458,6 +459,14 @@ void LevelCompleteSummaryDisplayState::DrawStars(double dT, float currYPos, floa
         glScalef(STAR_SIZE*starAnimation->GetInterpolantValue(), STAR_SIZE*starAnimation->GetInterpolantValue(), 1);
         GeometryMaker::GetInstance()->DrawQuad();
         glPopMatrix();
+
+        if (i < gameModel->GetNumStarsAwarded()) {
+            ESPPointEmitter* starFGEmitter = this->starFgEmitters[i];
+            starFGEmitter->SetParticleAlpha(ESPInterval(0.85f*starAnimation->GetInterpolantValue()));
+            starFGEmitter->SetEmitPosition(Point3D(currX + STAR_SIZE/7, currYPos + STAR_SIZE/7, 0));
+            starFGEmitter->Tick(dT);
+            starFGEmitter->Draw(this->display->GetCamera());
+        }
 
         currX += STAR_SIZE + STAR_HORIZONTAL_GAP;
     }
