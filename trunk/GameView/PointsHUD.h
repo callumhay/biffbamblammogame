@@ -54,6 +54,7 @@ public:
 
 private:
     static const int STAR_SIZE;
+    static const float STAR_ALPHA;
     static const int STAR_GAP;
     static const int STAR_TO_SCORE_VERTICAL_GAP;
     static const int SCORE_TO_MULTIPLER_HORIZONTAL_GAP;
@@ -161,14 +162,22 @@ private:
     
     // Labels
     TextLabel2D* ptScoreLabel;
+    
+    
     // Animations
     AnimationLerp<long> scoreAnimator;   // Animates the current score (so that it looks like it's tallying points over time)
+    
+    std::vector<AnimationMultiLerp<float>*> starSizeAnimators;
+    std::vector<AnimationMultiLerp<ColourRGBA>*> starColourAnimators;
+
     // Textures
     Texture* starTex;
 
     void DrawMultiplier(float rightMostX, float topMostY);
     void DrawIdleStars(float rightMostX, float topMostY, double dT);
     void DrawQuad(float centerX, float centerY, float size);
+
+    void SetStarAcquiredAnimation(size_t starIdx);
 
     void SetAlpha(float alpha);
     void ClearNotifications();
@@ -184,7 +193,14 @@ inline void PointsHUD::SetNumStars(int numStars) {
     assert(numStars >= 0);
     assert(numStars <= GameLevel::MAX_STARS_PER_LEVEL);
 
-    // TODO...
+    // Setup the animations for any acquired stars
+    int starDiff = numStars - this->numStars;
+    if (starDiff > 0) {
+        for (int i = 0; i < starDiff; i++) {
+            this->SetStarAcquiredAnimation(this->numStars + i);
+        }
+    }
+
     this->numStars = numStars;
 }
 

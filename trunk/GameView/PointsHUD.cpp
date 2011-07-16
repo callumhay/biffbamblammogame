@@ -24,6 +24,7 @@
 #include "../ResourceManager.h"
 
 const int PointsHUD::STAR_SIZE                          = 30;
+const float PointsHUD::STAR_ALPHA                       = 0.75f;
 const int PointsHUD::STAR_GAP                           = 3;
 const int PointsHUD::SCREEN_EDGE_VERTICAL_GAP           = 5;
 const int PointsHUD::SCREEN_EDGE_HORIZONTAL_GAP         = 5;
@@ -46,6 +47,23 @@ ptScoreLabel(NULL), starTex(NULL), multiplier(new MultiplierHUD()), multiplierGa
     this->starTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->starTex != NULL);
+
+    // Setup the star animators
+    this->starSizeAnimators.reserve(GameLevel::MAX_STARS_PER_LEVEL);
+    this->starColourAnimators.reserve(GameLevel::MAX_STARS_PER_LEVEL);
+    for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+        AnimationMultiLerp<float>* starSizeAnim = new AnimationMultiLerp<float>();
+        starSizeAnim->SetInterpolantValue(1.0f);
+        starSizeAnim->SetRepeat(false);
+        this->starSizeAnimators.push_back(starSizeAnim);
+
+        AnimationMultiLerp<ColourRGBA>* starColourAnim = new AnimationMultiLerp<ColourRGBA>();
+        starColourAnim->SetInterpolantValue(ColourRGBA(GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR, STAR_ALPHA));
+        starColourAnim->SetRepeat(false);
+        this->starColourAnimators.push_back(starColourAnim);
+    }
+    
+
 }
 
 PointsHUD::~PointsHUD() {
@@ -58,6 +76,15 @@ PointsHUD::~PointsHUD() {
 
     // Clean up any leftover notifications
     this->ClearNotifications();
+
+    for (size_t i = 0; i < this->starSizeAnimators.size(); i++) {
+        delete this->starSizeAnimators[i];
+    }
+    this->starSizeAnimators.clear();
+    for (size_t i = 0; i < this->starColourAnimators.size(); i++) {
+        delete this->starColourAnimators[i];
+    }
+    this->starColourAnimators.clear();
 
     // Release textures
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTex);
@@ -119,26 +146,25 @@ void PointsHUD::DrawIdleStars(float rightMostX, float topMostY, double dT) {
     UNUSED_PARAMETER(dT);
 
     static const float STAR_HALF_SIZE  = STAR_SIZE / 2.0f;
-    
-    const Colour& activeStarColour   = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
-    const Colour& inactiveStarColour = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
 
     float currentCenterX = rightMostX - ALL_STARS_WIDTH + STAR_HALF_SIZE;
     float centerY = topMostY - STAR_HALF_SIZE;
 
     this->starTex->BindTexture();
+    for (int currStarIdx = 0; currStarIdx < GameLevel::MAX_STARS_PER_LEVEL; currStarIdx++) {
 
-    int currStarIdx = 0;
-    glColor4f(activeStarColour.R(), activeStarColour.G(), activeStarColour.B(), 0.75f);
-    for (; currStarIdx < this->numStars; currStarIdx++) {
-        this->DrawQuad(currentCenterX , centerY, STAR_SIZE);
+        starColourAnimators[currStarIdx]->Tick(dT);
+        const ColourRGBA& starColour = starColourAnimators[currStarIdx]->GetInterpolantValue();
+        glColor4fv(starColour.begin());
+
+        this->starSizeAnimators[currStarIdx]->Tick(dT);
+        float sizeMultiplier = this->starSizeAnimators[currStarIdx]->GetInterpolantValue();
+        float totalStarSize  = sizeMultiplier * STAR_SIZE;
+
+        this->DrawQuad(currentCenterX , centerY, totalStarSize);
         currentCenterX += STAR_SIZE + STAR_GAP;
     }
-    glColor4f(inactiveStarColour.R(), inactiveStarColour.G(), inactiveStarColour.B(), 0.75f);
-    for (; currStarIdx < GameLevel::MAX_STARS_PER_LEVEL; currStarIdx++) {
-        this->DrawQuad(currentCenterX , centerY, STAR_SIZE);
-        currentCenterX += STAR_SIZE + STAR_GAP;
-    }
+    
 }
 
 void PointsHUD::DrawQuad(float centerX, float centerY, float size) {
@@ -149,6 +175,31 @@ void PointsHUD::DrawQuad(float centerX, float centerY, float size) {
     glPopMatrix();
 }
 
+void PointsHUD::SetStarAcquiredAnimation(size_t starIdx) {
+    assert(starIdx < this->starSizeAnimators.size());
+
+    std::vector<double> timeValues;
+    timeValues.reserve(3);
+    timeValues.push_back(0.0);
+    timeValues.push_back(0.33);
+    timeValues.push_back(1.0);
+
+    std::vector<float> sizeValues;
+    sizeValues.reserve(3);
+    sizeValues.push_back(1.0f);
+    sizeValues.push_back(2.0f);
+    sizeValues.push_back(1.0f);
+
+    std::vector<ColourRGBA> colourValues;
+    colourValues.reserve(3);
+    colourValues.push_back(ColourRGBA(GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR, STAR_ALPHA));
+    colourValues.push_back(ColourRGBA(1,1,1,1));
+    colourValues.push_back(ColourRGBA(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR, 1.2f * STAR_ALPHA));
+
+    this->starSizeAnimators[starIdx]->SetLerp(timeValues, sizeValues);
+    this->starColourAnimators[starIdx]->SetLerp(timeValues, colourValues);
+}
+
 /**
  * Call this to reinitialize the points HUD to what you would expect it
  * to look like at the very start of a level.
@@ -156,6 +207,12 @@ void PointsHUD::DrawQuad(float centerX, float centerY, float size) {
 void PointsHUD::Reinitialize() {
     this->scoreAnimator.ClearLerp();
     this->scoreAnimator.SetInterpolantValue(0);
+
+    for (size_t i = 0; i < this->starSizeAnimators.size(); i++) {
+        this->starSizeAnimators[i]->ClearLerp();
+        this->starSizeAnimators[i]->SetInterpolantValue(1.0f);
+    }
+
     this->ClearNotifications();
 
     this->numStars         = 0;
