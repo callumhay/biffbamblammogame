@@ -42,7 +42,6 @@ private:
     static const int TOTAL_MENU_HEIGHT;
 	static const size_t ITEMS_LIST_VIEW_INDEX;
 	static const size_t BLOCKS_LIST_VIEW_INDEX;
-	static const size_t STATUS_LIST_VIEW_INDEX;
 
 	size_t currListViewIndex;
 	std::vector<ItemListView*> listViews;
@@ -55,9 +54,8 @@ private:
     static const int NO_MENU_ITEM_INDEX     = -1;
     static const int ITEMS_MENU_ITEM_INDEX  = 0; 
     static const int BLOCK_MENU_ITEM_INDEX  = 1;
-    static const int STATUS_MENU_ITEM_INDEX = 2;
-    static const int BACK_MENU_ITEM_INDEX   = 3;
-    static const int TOTAL_NUM_MENU_ITEMS   = 4;
+    static const int BACK_MENU_ITEM_INDEX   = 2;
+    static const int TOTAL_NUM_MENU_ITEMS   = 3;
     
     static const char* LOCKED_NAME;
 
@@ -73,7 +71,6 @@ private:
     //TextLabel2D backMenuItem;
     //TextLabel2D itemListMenuItem;
     //TextLabel2D blockListMenuItem;
-    //TextLabel2D statusListMenuItem;
 
     AnimationLerp<float> itemSelTabAnim;     // Animation for when an item is selected in the menu and the tab to highlight it moves
     AnimationMultiLerp<float> itemHighlightWiggle; // Animation to wiggle the highlighted item
@@ -82,7 +79,6 @@ private:
 
 	ItemListView* BuildGameItemsListView(Blammopedia* blammopedia) const;
 	ItemListView* BuildGameBlockListView(Blammopedia* blammopedia) const;
-	ItemListView* BuildStatusEffectListView(Blammopedia* blammopedia) const;
 
     ItemListView* GetCurrentListView() const;
         
