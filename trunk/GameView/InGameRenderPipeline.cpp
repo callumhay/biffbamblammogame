@@ -264,7 +264,7 @@ void InGameRenderPipeline::RenderHUD(double dT) {
     PointsHUD* pointsHUD = gameAssets->GetPointsHUD();
     //pointsHUD->SetScore(gameModel->GetScore());
     //pointsHUD->SetMultiplier(gameModel->GetMultiplier());
-    pointsHUD->Draw(DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
+    pointsHUD->Draw(camera, DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
 
 	// Draw the number of lives left in the top-left corner of the display
 	gameAssets->GetLifeHUD()->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
