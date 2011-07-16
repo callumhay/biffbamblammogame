@@ -52,10 +52,9 @@ goBackToMainMenu(false) {
 
     Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
     assert(blammopedia != NULL);
-	this->listViews.reserve(3);
+	this->listViews.reserve(2);
 	this->listViews.push_back(this->BuildGameItemsListView(blammopedia));
 	this->listViews.push_back(this->BuildGameBlockListView(blammopedia));
-	this->listViews.push_back(this->BuildStatusEffectListView(blammopedia));
 
     this->selectedItemNameLbl.SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
         GameFontAssetsManager::Medium));
@@ -80,17 +79,7 @@ goBackToMainMenu(false) {
 
     float blockMenuItemScaledWidth = BlammopediaState::SELECTION_SCALE *  blockMenuItem->GetLastRasterWidth();
 
-    TextLabel2D* statusMenuItem = new TextLabel2D();
-    statusMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
-        GameFontAssetsManager::Small));
-    statusMenuItem->SetText("Status Effects");
-    statusMenuItem->SetColour(IDLE_COLOUR);
-    statusMenuItem->SetDropShadow(Colour(0,0,0), NO_SELECTION_DROP_SHADOW_AMT);
-
-    float statusMenuItemScaledWidth = BlammopediaState::SELECTION_SCALE *  statusMenuItem->GetLastRasterWidth(); 
-
-    float startMenuItemsX = (camera.GetWindowWidth() - itemListMenuItemScaledWidth - blockMenuItemScaledWidth -
-        statusMenuItemScaledWidth - 2 * LABEL_ITEM_GAP)/2;
+    float startMenuItemsX = (camera.GetWindowWidth() - itemListMenuItemScaledWidth - blockMenuItemScaledWidth - 2 * LABEL_ITEM_GAP)/2;
     float topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - itemListMenuItem->GetHeight()) / 2.0f + itemListMenuItem->GetHeight();
     itemListMenuItem->SetTopLeftCorner(Point2D(startMenuItemsX, topLeftY));
     startMenuItemsX += itemListMenuItem->GetLastRasterWidth() + LABEL_ITEM_GAP;
@@ -98,10 +87,6 @@ goBackToMainMenu(false) {
     topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - blockMenuItem->GetHeight()) / 2.0f + blockMenuItem->GetHeight();
     blockMenuItem->SetTopLeftCorner(Point2D(startMenuItemsX, topLeftY));
     startMenuItemsX += blockMenuItem->GetLastRasterWidth() + LABEL_ITEM_GAP;
-
-    topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - statusMenuItem->GetHeight()) / 2.0f + statusMenuItem->GetHeight();
-    statusMenuItem->SetTopLeftCorner(Point2D(startMenuItemsX, topLeftY));
-    startMenuItemsX += statusMenuItem->GetLastRasterWidth() + LABEL_ITEM_GAP;
 
     TextLabel2D* backMenuItem = new TextLabel2D();
     backMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
@@ -134,7 +119,6 @@ goBackToMainMenu(false) {
     this->blammoMenuLabels.resize(TOTAL_NUM_MENU_ITEMS);
     this->blammoMenuLabels[ITEMS_MENU_ITEM_INDEX]  = itemListMenuItem;
     this->blammoMenuLabels[BLOCK_MENU_ITEM_INDEX]  = blockMenuItem;
-    this->blammoMenuLabels[STATUS_MENU_ITEM_INDEX] = statusMenuItem;
     this->blammoMenuLabels[BACK_MENU_ITEM_INDEX]   = backMenuItem;
 
     this->SetBlammoMenuItemHighlighted(ITEMS_MENU_ITEM_INDEX);
@@ -263,7 +247,7 @@ void BlammopediaState::RenderFrame(double dT) {
                 this->selectedItemNameLbl.SetColour(Colour(0.66f, 0.66f, 0.66f));
             }
             else {
-                this->selectedItemNameLbl.SetColour(Colour(0.2f, 0.6f, 1.0f));
+                this->selectedItemNameLbl.SetColour(currItem->GetColour());
             }
             this->selectedItemNameLbl.SetText(currItem->GetNameLbl()->GetText());
             this->selectedItemNameLbl.SetTopLeftCorner(camera.GetWindowWidth() - 
@@ -430,21 +414,12 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
         else {
             currName = LOCKED_NAME;
         }
-        blockListView->AddItem(currName, currDesc, Colour(1, 0.65f, 0), texture, blockEntry->GetIsLocked());
+        blockListView->AddItem(currName, currDesc, Colour(0.3f, 0.6f, 0.85f), texture, blockEntry->GetIsLocked());
     }
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
 
 	return blockListView;
-}
-
-ItemListView* BlammopediaState::BuildStatusEffectListView(Blammopedia* blammopedia) const {
-	const Camera& camera = this->display->GetCamera();
-	ItemListView* statusListView = new ItemListView(camera.GetWindowWidth());
-
-
-	//assert(false);
-	return statusListView;
 }
 
 // Sets the fade to fade to white and says that after the fade is done we'll switch

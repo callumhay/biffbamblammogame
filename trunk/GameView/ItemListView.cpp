@@ -86,6 +86,19 @@ activatedItemAlphaAnim(0.0f), pressEscAlphaAnim(0.0f) {
     this->activatedItemXPicAnim.SetInterpolantValue(width + this->itemPixelWidth);
     this->activatedItemAlphaAnim.SetInterpolantValue(0.0f);
     this->pressEscAlphaAnim.SetInterpolantValue(0.0f);
+
+    timeValues.clear();
+    timeValues.push_back(0.0);
+    timeValues.push_back(0.75);
+    timeValues.push_back(1.5);
+    std::vector<ColourRGBA> colourValues;
+    colourValues.push_back(ColourRGBA(1.0f, 0.8f, 0.0f, 0.0f));
+    colourValues.push_back(ColourRGBA(1.0f, 0.8f, 0.0f, 1.0f));
+    colourValues.push_back(ColourRGBA(1.0f, 0.8f, 0.0f, 0.0f));
+
+    this->arrowFlashAnim.SetLerp(timeValues, colourValues);
+    this->arrowFlashAnim.SetRepeat(true);
+
 }
 
 ItemListView::~ItemListView() {
@@ -111,6 +124,7 @@ void ItemListView::Tick(double dT) {
     this->activatedItemXPicAnim.Tick(dT);
     this->activatedItemAlphaAnim.Tick(dT);
     this->pressEscAlphaAnim.Tick(dT);
+    this->arrowFlashAnim.Tick(dT);
 
     for (int i = 0; i < static_cast<int>(this->items.size()); i++) {
         ListItem* currItem = this->items[i];
@@ -217,6 +231,43 @@ void ItemListView::Draw(const Camera& camera) {
         glVertex2f(camera.GetWindowWidth(), itemAndTitleYUnderPic - STRIPE_BORDER);
         glEnd();
 
+        // Draw next arrows if there are other items the player could select
+        if (this->nonLockedItemsMap.size() > 1) {
+            static const float HORIZ_BORDER = 10.0f;
+            static const float VERT_BORDER  = 10.0f;
+            static const float TRI_SIZE_HORIZ = 30.0f;
+            static const float TRI_SIZE_VERT  = 60.0f;
+
+            const ColourRGBA& arrowColour = arrowFlashAnim.GetInterpolantValue();
+
+            glBegin(GL_TRIANGLES);
+            glColor4f(arrowColour.R(), arrowColour.G(), arrowColour.B(), arrowColour.A()*activatedItemAlpha);
+
+            glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
+            glVertex2f(HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
+            glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
+            
+            glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
+            glVertex2f(camera.GetWindowWidth() - HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
+            glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
+
+            glEnd();
+
+            //glColor4f(0, 0, 0, arrowColour.A());
+            //glBegin(GL_LINE_LOOP);
+            //glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
+            //glVertex2f(HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
+            //glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
+            //glEnd();
+            //glBegin(GL_LINE_LOOP);
+            //glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
+            //glVertex2f(camera.GetWindowWidth() - HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
+            //glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
+            //glEnd();
+
+        }
+
+
         glPushMatrix();
         glTranslatef(itemPicX, itemAndTitleYUnderPic, 0);
         this->GetSelectedItem()->DrawItem(camera, this->itemPixelWidth, this->itemPixelHeight, activatedItemAlpha);
@@ -289,8 +340,15 @@ void ItemListView::DrawPost(const Camera& camera) {
 // Adds a new list item to the end of the current list 
 ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const std::string& description, const Colour& colour,
                                               const Texture* itemTexture, bool isLocked) {
-	ItemListView::ListItem* newItem = new ItemListView::ListItem(this, name, description, colour, itemTexture, isLocked);
+
+    ItemListView::ListItem* newItem = new ItemListView::ListItem(this, 
+        this->items.size(), name, description, colour, itemTexture, isLocked);
 	this->items.push_back(newItem);
+
+    if (!isLocked) {
+        this->nonLockedItemsMap.insert(std::make_pair(newItem->GetIndex(), newItem));
+    }
+
 	return newItem;
 }
 
@@ -339,12 +397,42 @@ size_t ItemListView::AdjustItemWidthAndListLayout(size_t width) {
 }
 
 void ItemListView::MoveSelectionX(bool right) {
-    if (this->GetSelectedItem() == NULL || this->itemIsActivated) { return; }
-    int x = right ? 1 : -1;
-    int currRowIndex  = this->selectedItemIndex / this->numItemsPerRow;
-    int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
-    int wrapAroundX   = (numItemsOnRow + (this->selectedItemIndex - currRowIndex * this->numItemsPerRow) + x) % numItemsOnRow;
-    this->SetSelection(this->numItemsPerRow * currRowIndex + wrapAroundX);
+    if (this->GetSelectedItem() == NULL) { return; }
+
+    int wrapAroundX;
+    if (this->itemIsActivated) {
+        // Can't go to another item if only one is unlocked.
+        if (this->nonLockedItemsMap.size() == 1) {
+            return;
+        }
+
+        // When an item is activated we want the selection to traverse the entire list for non-locked items
+        std::map<size_t, ListItem*>::const_iterator findIter = this->nonLockedItemsMap.find(this->GetSelectedItem()->GetIndex());
+        assert(findIter != this->nonLockedItemsMap.end());
+        
+        if (right) {
+            // Use a forward iterator to get to the next item...
+            ++findIter;
+            if (findIter == this->nonLockedItemsMap.end()) {
+                findIter = this->nonLockedItemsMap.begin();
+            }
+        }
+        else {
+            --findIter;
+            if (findIter == this->nonLockedItemsMap.end()) {
+                --findIter;
+            }
+        }
+        
+        this->SetSelection(findIter->second->GetIndex());
+    }
+    else {
+        int x = right ? 1 : -1;
+        int currRowIndex  = this->selectedItemIndex / this->numItemsPerRow;
+        int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
+        wrapAroundX = (numItemsOnRow + (this->selectedItemIndex - currRowIndex * this->numItemsPerRow) + x) % numItemsOnRow;
+        this->SetSelection(this->numItemsPerRow * currRowIndex + wrapAroundX);
+    }
 
     assert(this->GetSelectedItem() != NULL);
 }
@@ -375,6 +463,7 @@ int ItemListView::GetNumItemsOnRow(int rowIdx) {
 }
 
 void ItemListView::ItemActivated() {
+    this->arrowFlashAnim.ResetToStart();
     ListItem* selectedItem = this->GetSelectedItem();
     if (selectedItem == NULL) { return; }
 
@@ -416,6 +505,7 @@ void ItemListView::ItemActivated() {
 }
 
 void ItemListView::ItemDeactivated() {
+    this->arrowFlashAnim.ResetToStart();
     if (this->itemIsActivated) {
         this->itemIsActivated = false;
 
@@ -495,10 +585,10 @@ void ItemListView::SetSelection(int index) {
 
 // ListItem Methods --------------------------------------------------------------------------
 
-ItemListView::ListItem::ListItem(const ItemListView* parent, const std::string& name, 
+ItemListView::ListItem::ListItem(const ItemListView* parent, size_t index, const std::string& name, 
                                  const std::string& description, const Colour& colour,
                                  const Texture* itemTexture, bool isLocked) : 
-texture(itemTexture), isLocked(isLocked), colour(colour),
+texture(itemTexture), isLocked(isLocked), colour(colour), index(index),
 nameLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), name)), 
 descriptionLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
                GameFontAssetsManager::Big), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, description))

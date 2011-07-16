@@ -833,12 +833,10 @@ level(level), topLeftCorner(topLeftCorner), starTexture(starTexture), width(widt
     float nameYPos = this->topLeftCorner[1] - std::max<float>(0, ((this->numLabel->GetHeight() - this->nameLabel->GetHeight()) / 2.0f));
     this->nameLabel->SetTopLeftCorner(nameXPos, nameYPos);
 
-    std::stringstream highScoreStr;
-    highScoreStr << "High Score: " << stringhelper::AddNumberCommas(this->level->GetHighScore()) ;
-
+    std::string highScoreStr = "High Score: " + stringhelper::AddNumberCommas(this->level->GetHighScore()) ;
     this->highScoreLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
-        GameFontAssetsManager::Small), highScoreStr.str());
+        GameFontAssetsManager::Small), highScoreStr);
     this->highScoreLabel->SetColour(Colour(0.25, 0.25, 0.25));
     //this->highScoreLabel->SetTopLeftCorner(this->nameLabel->GetTopLeftCorner() - Vector2D(0, NAME_TO_HIGH_SCORE_Y_GAP + this->nameLabel->GetHeight()));
     this->highScoreLabel->SetTopLeftCorner(this->nameLabel->GetTopLeftCorner()[0],

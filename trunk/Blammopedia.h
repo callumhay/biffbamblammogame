@@ -97,8 +97,6 @@ public:
 
 	};
 
-
-
 	class MiscEntry : public Entry {
 	public:
 		MiscEntry(const std::string& filename) : Entry(filename) {}

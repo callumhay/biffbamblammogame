@@ -33,7 +33,7 @@ public:
 
 	class ListItem {
 	public:
-		ListItem(const ItemListView* parent, const std::string& name, 
+		ListItem(const ItemListView* parent, size_t index, const std::string& name, 
                  const std::string& description, const Colour& colour,
                  const Texture* itemTexture, bool isLocked);
 		~ListItem();
@@ -51,9 +51,11 @@ public:
 		TextLabel2D* GetNameLbl() const { return this->nameLbl; }
         TextLabel2DFixedWidth* GetDescriptionLbl() const { return this->descriptionLbl; }
 
+        size_t GetIndex() const { return this->index; }
         bool GetIsLocked() const { return this->isLocked; }
 
 	private:
+        size_t index;
 		bool isLocked;
         Colour colour;
         TextLabel2D* nameLbl;
@@ -104,12 +106,15 @@ private:
 	int selectedItemIndex;
 	std::vector<ListItem*> items;	// List items in order of rendering from
 									// the top left corner of the list to the bottom right
+    std::map<size_t, ListItem*> nonLockedItemsMap;
     
     // Animation of the alphas for the selection indicator
     AnimationMultiLerp<float> selectionAlphaOrangeAnim;   
     AnimationMultiLerp<float> selectionAlphaYellowAnim;   
     // Animation of the scales for the selection indicator
     AnimationMultiLerp<float> selectionBorderAddYellowAnim; 
+
+    AnimationMultiLerp<ColourRGBA> arrowFlashAnim;
 
     // Animations for selection
     AnimationMultiLerp<float> lockedSelectionAnim;
