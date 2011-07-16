@@ -14,16 +14,18 @@
 #include "GameViewConstants.h"
 
 #include "../BlammoEngine/Camera.h"
-#include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../BlammoEngine/Texture.h"
+
+#include "../ESPEngine/ESPPointEmitter.h"
 
 #include "../GameModel/GameLevel.h"
 #include "../GameModel/PointAward.h"
 
 #include "../ResourceManager.h"
 
-const int PointsHUD::STAR_SIZE                          = 30;
+const int PointsHUD::STAR_SIZE                          = 32;
+const float  PointsHUD::STAR_HALF_SIZE                  = STAR_SIZE / 2.0f;
 const float PointsHUD::STAR_ALPHA                       = 0.75f;
 const int PointsHUD::STAR_GAP                           = 3;
 const int PointsHUD::SCREEN_EDGE_VERTICAL_GAP           = 5;
@@ -33,7 +35,9 @@ const int PointsHUD::SCORE_TO_MULTIPLER_HORIZONTAL_GAP  = 5;
 const int PointsHUD::ALL_STARS_WIDTH                    = (STAR_GAP * (GameLevel::MAX_STARS_PER_LEVEL-1) + STAR_SIZE * GameLevel::MAX_STARS_PER_LEVEL);
 
 PointsHUD::PointsHUD() : numStars(0), currPtScore(0), 
-ptScoreLabel(NULL), starTex(NULL), multiplier(new MultiplierHUD()), multiplierGage(new MultiplierGageHUD()) {
+ptScoreLabel(NULL), starTex(NULL), lensFlareTex(NULL), haloTex(NULL),
+multiplier(new MultiplierHUD()), multiplierGage(new MultiplierGageHUD()),
+haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f), flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
 
     this->ptScoreLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "0");
@@ -47,6 +51,12 @@ ptScoreLabel(NULL), starTex(NULL), multiplier(new MultiplierHUD()), multiplierGa
     this->starTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR,
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->starTex != NULL);
+    this->lensFlareTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_LENSFLARE,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->lensFlareTex != NULL);
+    this->haloTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HALO,
+        Texture::Trilinear, GL_TEXTURE_2D);
+    assert(this->lensFlareTex != NULL);
 
     // Setup the star animators
     this->starSizeAnimators.reserve(GameLevel::MAX_STARS_PER_LEVEL);
@@ -62,8 +72,6 @@ ptScoreLabel(NULL), starTex(NULL), multiplier(new MultiplierHUD()), multiplierGa
         starColourAnim->SetRepeat(false);
         this->starColourAnimators.push_back(starColourAnim);
     }
-    
-
 }
 
 PointsHUD::~PointsHUD() {
@@ -77,6 +85,7 @@ PointsHUD::~PointsHUD() {
     // Clean up any leftover notifications
     this->ClearNotifications();
 
+    // Clean up all the star animations and emitters
     for (size_t i = 0; i < this->starSizeAnimators.size(); i++) {
         delete this->starSizeAnimators[i];
     }
@@ -86,12 +95,24 @@ PointsHUD::~PointsHUD() {
     }
     this->starColourAnimators.clear();
 
+    for (std::list<ESPPointEmitter*>::iterator iter = this->starEffectEmitters.begin();
+         iter != this->starEffectEmitters.end(); ++iter) {
+        ESPPointEmitter* emitter = *iter;
+        delete emitter;
+        emitter = NULL;
+    }
+    this->starEffectEmitters.clear();
+
     // Release textures
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTex);
     assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
+    assert(success);
 }
 
-void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
+void PointsHUD::Draw(const Camera& camera, int displayWidth, int displayHeight, double dT) {
     this->scoreAnimator.Tick(dT);
 
 	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
@@ -119,8 +140,8 @@ void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
     this->ptScoreLabel->Draw();
 
     // Draw the current star score
-    this->DrawIdleStars(displayWidth - SCREEN_EDGE_HORIZONTAL_GAP - 
-        MultiplierGageHUD::MULTIPLIER_GAGE_SIZE, this->ptScoreLabel->GetTopLeftCorner()[1] - this->ptScoreLabel->GetHeight() - 3, dT);
+    Point2D starStartPos = this->GetStarStartPos(displayWidth);
+    this->DrawIdleStars(camera, starStartPos[0], starStartPos[1], dT);
 
     Camera::PopWindowCoords();
     glMatrixMode(GL_MODELVIEW);
@@ -142,11 +163,7 @@ void PointsHUD::Draw(int displayWidth, int displayHeight, double dT) {
     glPopAttrib();
 }
 
-void PointsHUD::DrawIdleStars(float rightMostX, float topMostY, double dT) {
-    UNUSED_PARAMETER(dT);
-
-    static const float STAR_HALF_SIZE  = STAR_SIZE / 2.0f;
-
+void PointsHUD::DrawIdleStars(const Camera& camera, float rightMostX, float topMostY, double dT) {
     float currentCenterX = rightMostX - ALL_STARS_WIDTH + STAR_HALF_SIZE;
     float centerY = topMostY - STAR_HALF_SIZE;
 
@@ -165,6 +182,22 @@ void PointsHUD::DrawIdleStars(float rightMostX, float topMostY, double dT) {
         currentCenterX += STAR_SIZE + STAR_GAP;
     }
     
+    for (std::list<ESPPointEmitter*>::iterator iter = this->starEffectEmitters.begin();
+         iter != this->starEffectEmitters.end();) {
+
+        ESPPointEmitter* emitter = *iter;
+        emitter->Tick(dT);
+        emitter->Draw(camera);
+
+        if (emitter->IsDead()) {
+            delete emitter;
+            emitter = NULL;
+            iter = this->starEffectEmitters.erase(iter);
+        }
+        else {
+            ++iter;
+        }
+    }
 }
 
 void PointsHUD::DrawQuad(float centerX, float centerY, float size) {
@@ -175,9 +208,10 @@ void PointsHUD::DrawQuad(float centerX, float centerY, float size) {
     glPopMatrix();
 }
 
-void PointsHUD::SetStarAcquiredAnimation(size_t starIdx) {
+void PointsHUD::SetStarAcquiredAnimation(const Camera& camera, size_t starIdx) {
     assert(starIdx < this->starSizeAnimators.size());
 
+    // Set up animations for size and colour
     std::vector<double> timeValues;
     timeValues.reserve(3);
     timeValues.push_back(0.0);
@@ -198,6 +232,37 @@ void PointsHUD::SetStarAcquiredAnimation(size_t starIdx) {
 
     this->starSizeAnimators[starIdx]->SetLerp(timeValues, sizeValues);
     this->starColourAnimators[starIdx]->SetLerp(timeValues, colourValues);
+
+    Point2D starCenter = this->GetStarStartPos(camera.GetWindowWidth());
+    starCenter[0] = starCenter[0] - ALL_STARS_WIDTH + STAR_HALF_SIZE;
+    starCenter[1] = starCenter[1] - STAR_HALF_SIZE;
+    for (size_t i = 0; i < starIdx; i++) {
+        starCenter[0] += STAR_SIZE + STAR_GAP;
+    }
+
+    // Setup any effects emitters
+    ESPPointEmitter* flareEmitter = new ESPPointEmitter();
+    flareEmitter->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+	flareEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	flareEmitter->SetParticleLife(ESPInterval(1.0));
+	flareEmitter->SetParticleSize(ESPInterval(2.0f * STAR_SIZE));
+	flareEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    flareEmitter->SetEmitPosition(Point3D(starCenter + Vector2D(STAR_SIZE*0.15f, STAR_SIZE*0.15f), 0.0f));
+    flareEmitter->AddEffector(&this->flareRotator);
+    flareEmitter->SetParticles(1, static_cast<Texture2D*>(this->lensFlareTex));
+    this->starEffectEmitters.push_back(flareEmitter);
+
+    ESPPointEmitter* haloEmitter = new ESPPointEmitter();
+    haloEmitter->SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+	haloEmitter->SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	haloEmitter->SetParticleLife(ESPInterval(1.5));
+	haloEmitter->SetParticleSize(ESPInterval(1.25f * STAR_SIZE));
+	haloEmitter->SetParticleAlignment(ESP::ScreenAligned);
+    haloEmitter->SetEmitPosition(Point3D(starCenter, 0.0f));
+    haloEmitter->AddEffector(&this->haloGrower);
+    haloEmitter->AddEffector(&this->haloFader);
+    haloEmitter->SetParticles(1, static_cast<Texture2D*>(this->haloTex));
+    this->starEffectEmitters.push_back(haloEmitter);
 }
 
 /**
@@ -212,6 +277,18 @@ void PointsHUD::Reinitialize() {
         this->starSizeAnimators[i]->ClearLerp();
         this->starSizeAnimators[i]->SetInterpolantValue(1.0f);
     }
+    for (size_t i = 0; i < this->starColourAnimators.size(); i++) {
+        this->starColourAnimators[i]->ClearLerp();
+        this->starColourAnimators[i]->SetInterpolantValue(ColourRGBA(GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR, STAR_ALPHA));
+    }
+
+    for (std::list<ESPPointEmitter*>::iterator iter = this->starEffectEmitters.begin();
+         iter != this->starEffectEmitters.end(); ++iter) {
+        ESPPointEmitter* emitter = *iter;
+        delete emitter;
+        emitter = NULL;
+    }
+    this->starEffectEmitters.clear();
 
     this->ClearNotifications();
 

@@ -15,13 +15,19 @@
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/TextLabel.h"
+
+#include "../ESPEngine/ESPParticleRotateEffector.h"
+#include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESPParticleColourEffector.h"
 
 #include "../GameModel/GameLevel.h"
 
+
 class Camera;
 class Texture;
-class TextLabel2D;
 class PointAward;
+class ESPPointEmitter;
 
 /**
  * Class for encapsulating all animations and display for the Points Heads-up-display
@@ -38,13 +44,13 @@ public:
 
     //enum AnimationType { CreationAnimation, IdleAnimation };
 
-    void Draw(int displayWidth, int displayHeight, double dT);
+    void Draw(const Camera& camera, int displayWidth, int displayHeight, double dT);
 
     void Reinitialize();
 
     void DoImmediatePointAnimation();
 
-    void SetNumStars(int numStars);
+    void SetNumStars(const Camera& camera, int numStars);
     void SetScore(long pointScore);
     void SetMultiplierCounter(int count);
     void SetMultiplier(int multiplierAmt);
@@ -54,13 +60,13 @@ public:
 
 private:
     static const int STAR_SIZE;
+    static const float STAR_HALF_SIZE;
     static const float STAR_ALPHA;
     static const int STAR_GAP;
     static const int STAR_TO_SCORE_VERTICAL_GAP;
     static const int SCORE_TO_MULTIPLER_HORIZONTAL_GAP;
     static const int ALL_STARS_WIDTH;
     
-
     class PointNotification {
     public:
         static const int NOTIFIER_TO_NOTIFIER_VERTICAL_GAP;
@@ -163,21 +169,30 @@ private:
     // Labels
     TextLabel2D* ptScoreLabel;
     
-    
     // Animations
     AnimationLerp<long> scoreAnimator;   // Animates the current score (so that it looks like it's tallying points over time)
-    
+  
     std::vector<AnimationMultiLerp<float>*> starSizeAnimators;
     std::vector<AnimationMultiLerp<ColourRGBA>*> starColourAnimators;
 
     // Textures
     Texture* starTex;
+    Texture* lensFlareTex;
+    Texture* haloTex;
+
+    // Emitters
+    ESPParticleRotateEffector flareRotator;
+    ESPParticleScaleEffector haloGrower;
+    ESPParticleColourEffector haloFader;
+    std::list<ESPPointEmitter*> starEffectEmitters;
+
+    Point2D GetStarStartPos(float displayWidth) const;
 
     void DrawMultiplier(float rightMostX, float topMostY);
-    void DrawIdleStars(float rightMostX, float topMostY, double dT);
+    void DrawIdleStars(const Camera& camera, float rightMostX, float topMostY, double dT);
     void DrawQuad(float centerX, float centerY, float size);
 
-    void SetStarAcquiredAnimation(size_t starIdx);
+    void SetStarAcquiredAnimation(const Camera& camera, size_t starIdx);
 
     void SetAlpha(float alpha);
     void ClearNotifications();
@@ -189,7 +204,7 @@ inline void PointsHUD::DoImmediatePointAnimation() {
     this->scoreAnimator.SetInterpolantValue(this->scoreAnimator.GetTargetValue());
 }
 
-inline void PointsHUD::SetNumStars(int numStars) {
+inline void PointsHUD::SetNumStars(const Camera& camera, int numStars) {
     assert(numStars >= 0);
     assert(numStars <= GameLevel::MAX_STARS_PER_LEVEL);
 
@@ -197,7 +212,7 @@ inline void PointsHUD::SetNumStars(int numStars) {
     int starDiff = numStars - this->numStars;
     if (starDiff > 0) {
         for (int i = 0; i < starDiff; i++) {
-            this->SetStarAcquiredAnimation(this->numStars + i);
+            this->SetStarAcquiredAnimation(camera, this->numStars + i);
         }
     }
 
@@ -224,6 +239,12 @@ inline void PointsHUD::SetMultiplier(int multiplierAmt) {
 inline void PointsHUD::MultiplierGageHUD::SetMultiplierCounterAmount(int multiplierCntAmt) {
     assert(multiplierCntAmt >= 0);
     this->currMultiplierCounterIdx = std::min<int>(static_cast<int>(this->multiplierGageFillTexs.size()), multiplierCntAmt) - 1;
+}
+
+inline Point2D PointsHUD::GetStarStartPos(float displayWidth) const {
+    return Point2D(displayWidth - SCREEN_EDGE_HORIZONTAL_GAP - 
+        MultiplierGageHUD::MULTIPLIER_GAGE_SIZE, this->ptScoreLabel->GetTopLeftCorner()[1] - 
+        this->ptScoreLabel->GetHeight() - 3);
 }
 
 inline void PointsHUD::MultiplierGageHUD::SetAlpha(float alpha) {
