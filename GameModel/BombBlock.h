@@ -66,7 +66,7 @@ public:
 	bool ProjectilePassesThrough(Projectile* projectile) const;
 
 	// Collision related stuffs
-	LevelPiece* Destroy(GameModel* gameModel);
+	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);

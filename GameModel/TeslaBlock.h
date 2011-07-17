@@ -72,8 +72,9 @@ public:
         return 0;
     }
 
-	LevelPiece* Destroy(GameModel* gameModel) {
+	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 		UNUSED_PARAMETER(gameModel);
+        UNUSED_PARAMETER(method);
 		return this;
 	}
 

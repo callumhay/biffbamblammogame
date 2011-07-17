@@ -180,8 +180,8 @@ void BallInPlayState::Tick(double seconds) {
                 // only occurs if the paddle is not shielded or sticky
                 // NOTE: Be sure to call this before telling the model about the collision occuring, we
                 // want the score to be multiplied by any multiplier that exists before being reset by the collision!
-                std::list<PointAward> pointPairsList = paddle->GetPointsForHittingBall(*currBall);
-                this->gameModel->IncrementScore(pointPairsList);
+                //std::list<PointAward> pointPairsList = paddle->GetPointsForHittingBall(*currBall);
+                //this->gameModel->IncrementScore(pointPairsList);
 
 				// Do ball-paddle collision
 				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);

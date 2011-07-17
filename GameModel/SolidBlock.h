@@ -66,7 +66,7 @@ public:
 	bool ProjectilePassesThrough(Projectile* projectile) const;
     int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
-	LevelPiece* Destroy(GameModel* gameModel);
+	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 
 	virtual bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 

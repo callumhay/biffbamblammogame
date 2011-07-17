@@ -36,7 +36,7 @@ public:
 
 		const std::string& GetName() const { return this->name; }
 		const std::string& GetDescription() const { return this->description; }
-
+        const std::string& GetFinePrint() const { return this->finePrint; }
 	protected:
 		// Item, block and status effect file keywords/syntax constants
 		static const char* NAME_KEYWORD;
@@ -44,6 +44,7 @@ public:
 		static const char* HUD_OUTLINE_TEXTURE_KEYWORD;
 		static const char* HUD_FILL_TEXTURE_KEYWORD;
 		static const char* DESCRIPTION_KEYWORD;
+        static const char* FINEPRINT_KEYWORD;
         static const char* DISPLAY_TEXTURE_KEYWORD;
 
 		std::string filename;
@@ -51,6 +52,7 @@ public:
 		bool isLocked;
 		std::string name;
 		std::string description;
+        std::string finePrint;
 
 		virtual bool PopulateFromFile() = 0;
 		bool PopulateBaseValuesFromStream(std::istream& inStream);

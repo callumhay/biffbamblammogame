@@ -34,7 +34,7 @@ public:
 	class ListItem {
 	public:
 		ListItem(const ItemListView* parent, size_t index, const std::string& name, 
-                 const std::string& description, const Colour& colour,
+            const std::string& description, const std::string& finePrint, const Colour& colour,
                  const Texture* itemTexture, bool isLocked);
 		~ListItem();
 
@@ -50,6 +50,7 @@ public:
         const Colour& GetColour() const { return this->colour; }
 		TextLabel2D* GetNameLbl() const { return this->nameLbl; }
         TextLabel2DFixedWidth* GetDescriptionLbl() const { return this->descriptionLbl; }
+        TextLabel2DFixedWidth* GetFinePrintLbl() const { return this->finePrintLbl; }
 
         size_t GetIndex() const { return this->index; }
         bool GetIsLocked() const { return this->isLocked; }
@@ -60,6 +61,7 @@ public:
         Colour colour;
         TextLabel2D* nameLbl;
         TextLabel2DFixedWidth* descriptionLbl;
+        TextLabel2DFixedWidth* finePrintLbl;
 		const Texture* texture;
 
         float halfSelectionBorderSize;
@@ -80,7 +82,7 @@ public:
 	void Draw(const Camera& camera);
     void DrawPost(const Camera& camera);
 
-	ItemListView::ListItem* AddItem(const std::string& name, const std::string& description, 
+    ItemListView::ListItem* AddItem(const std::string& name, const std::string& description, const std::string& finePrint,
                                     const Colour& colour, const Texture* itemTexture, bool isLocked);
     void SetSelectedItemIndex(int index);
 	ItemListView::ListItem* GetSelectedItem() const;

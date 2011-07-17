@@ -232,7 +232,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 			break;
 
 		case Projectile::CollateralBlockProjectile:
-			resultingPiece = this->Destroy(gameModel);
+            resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:

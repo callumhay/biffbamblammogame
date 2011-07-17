@@ -23,6 +23,7 @@ const char* Blammopedia::Entry::ITEM_TEXTURE_KEYWORD		= "ItemTexture:";
 const char* Blammopedia::Entry::HUD_OUTLINE_TEXTURE_KEYWORD	= "HUDOutlineTexture:";
 const char* Blammopedia::Entry::HUD_FILL_TEXTURE_KEYWORD	= "HUDFillTexture:";
 const char* Blammopedia::Entry::DESCRIPTION_KEYWORD			= "Desc:";
+const char* Blammopedia::Entry::FINEPRINT_KEYWORD           = "FinePrint:";
 const char* Blammopedia::Entry::DISPLAY_TEXTURE_KEYWORD     = "DisplayTexture:";
 
 Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
@@ -394,6 +395,17 @@ bool Blammopedia::Entry::PopulateBaseValuesFromStream(std::istream& inStream) {
 				break;
 			}
 		}
+        else if (tempReadStr.compare(FINEPRINT_KEYWORD) == 0) {
+			if (std::getline(inStream, tempReadStr)) {
+				tempReadStr = stringhelper::trim(tempReadStr);
+				this->finePrint = tempReadStr;
+			}
+			else {
+				success = false;
+				debug_output("Failed to read fineprint for blammopedia entry: " << this->filename);
+				break;
+			}
+        }
 	}
 	return success;
 }

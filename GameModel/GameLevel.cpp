@@ -975,7 +975,8 @@ void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces
  * Call this when a level piece changes in this level. This function is meant to 
  * change the piece and manage the other level pieces accordingly.
  */
-void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter) {
+void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, 
+                             LevelPiece* pieceAfter, const LevelPiece::DestructionMethod& method) {
 	assert(gameModel != NULL);
 	assert(pieceBefore != NULL);
 	assert(pieceAfter != NULL);
@@ -984,6 +985,7 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, Leve
     // NOTE: Make sure this is done before incrementing the number of interim
     // blocks destroyed - otherwise the multiplier will be applied before the incremented score!
     PointAward ptAward(pieceBefore->GetPointsOnChange(*pieceAfter), ScoreTypes::UndefinedBonus, pieceBefore->GetCenter());
+    ptAward.SetDestructionMethod(method);
     gameModel->IncrementScore(ptAward);
 
 	// EVENT: Level piece has changed...
@@ -1055,7 +1057,7 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const Projectile* r
 	// Destroy the hit piece if we can...
 	LevelPiece* resultPiece = hitPiece;
 	if (hitPiece->CanBeDestroyedByBall()) {
-		resultPiece = hitPiece->Destroy(gameModel);
+        resultPiece = hitPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
 	}
 
 	// Grab all the pieces that are going to be affected around the central given hit piece
@@ -1071,7 +1073,7 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const Projectile* r
 	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
 		LevelPiece* currAffectedPiece = *iter;
 		if (currAffectedPiece != NULL && currAffectedPiece->CanBeDestroyedByBall()) {
-			currAffectedPiece->Destroy(gameModel);
+			currAffectedPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
 			// Update all the affected pieces again...
 			affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, hIndex, wIndex);
 			iter = affectedPieces.begin();
@@ -1398,7 +1400,7 @@ void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock*
 			assert(rayT >= 0.0f);
 
 			// Destroy the piece in the lightning arc...
-			ignorePieces.insert(pieceInArc->Destroy(gameModel));
+            ignorePieces.insert(pieceInArc->Destroy(gameModel, LevelPiece::TeslaDestruction));
 			// Reevaluate the next collider using a new ray from the new ignore piece
 			rayFromBlock.SetOrigin(rayFromBlock.GetPointAlongRayFromOrigin(rayT));
 		}

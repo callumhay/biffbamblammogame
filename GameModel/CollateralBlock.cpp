@@ -52,7 +52,7 @@ bool CollateralBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	return false;
 }
 
-LevelPiece* CollateralBlock::Destroy(GameModel* gameModel) {
+LevelPiece* CollateralBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
@@ -66,7 +66,7 @@ LevelPiece* CollateralBlock::Destroy(GameModel* gameModel) {
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece, method);
 
 	// Obliterate all that is left of this block...
 	LevelPiece* tempThis = this;
@@ -129,7 +129,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			break;
 
 		case Projectile::CollateralBlockProjectile:
-			newLevelPiece = this->Destroy(gameModel);
+            newLevelPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
@@ -259,7 +259,7 @@ LevelPiece* CollateralBlock::Detonate(GameModel* gameModel) {
 	// memory of the piece, we're just changing it to avoid collision detection issues in the level)
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece);
+    level->PieceChanged(gameModel, this, emptyPiece, LevelPiece::NotApplicableDestruction);
 
 	// Add the collateral block to the game model as a special type of soon-to-be-falling projectile...
 	/**

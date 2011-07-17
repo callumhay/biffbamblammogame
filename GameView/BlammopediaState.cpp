@@ -369,15 +369,17 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
     Colour itemColour;
     std::string currName;
     std::string currDesc;
+    std::string finePrint;
     const Blammopedia::ItemEntryMap& itemEntries = blammopedia->GetItemEntries();
     for (Blammopedia::ItemEntryMapConstIter iter = itemEntries.begin(); iter != itemEntries.end(); ++iter) {
         Blammopedia::ItemEntry* itemEntry = iter->second;
         const Texture2D* texture = blammopedia->GetLockedItemTexture();
         if (!itemEntry->GetIsLocked()) {
 
-            texture  = itemEntry->GetItemTexture();
-            currName = itemEntry->GetName();
-            currDesc = itemEntry->GetDescription();
+            texture   = itemEntry->GetItemTexture();
+            currName  = itemEntry->GetName();
+            currDesc  = itemEntry->GetDescription();
+            finePrint = itemEntry->GetFinePrint();
             
             GameItem::ItemDisposition itemDisposition = GameItemFactory::GetInstance()->GetItemTypeDisposition(iter->first);
             itemColour = GameViewConstants::GetInstance()->GetItemColourFromDisposition(itemDisposition);
@@ -387,7 +389,7 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
             currName = LOCKED_NAME;
             currDesc = "";
         }
-        itemsListView->AddItem(currName, currDesc, itemColour, texture, itemEntry->GetIsLocked());
+        itemsListView->AddItem(currName, currDesc, finePrint, itemColour, texture, itemEntry->GetIsLocked());
     }
 
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
@@ -402,19 +404,21 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
 	// if not then just place a 'locked' texture...
     std::string currName;
     std::string currDesc;
+    std::string finePrint;
     const Blammopedia::BlockEntryMap& blockEntries = blammopedia->GetBlockEntries();
     for (Blammopedia::BlockEntryMapConstIter iter = blockEntries.begin(); iter != blockEntries.end(); ++iter) {
         Blammopedia::BlockEntry* blockEntry = iter->second;
         const Texture2D* texture = blammopedia->GetLockedItemTexture();
         if (!blockEntry->GetIsLocked()) {
-            texture  = blockEntry->GetBlockTexture();
-            currName = blockEntry->GetName();
-            currDesc = blockEntry->GetDescription();
+            texture   = blockEntry->GetBlockTexture();
+            currName  = blockEntry->GetName();
+            currDesc  = blockEntry->GetDescription();
+            finePrint = blockEntry->GetFinePrint();
         }
         else {
             currName = LOCKED_NAME;
         }
-        blockListView->AddItem(currName, currDesc, Colour(0.3f, 0.6f, 0.85f), texture, blockEntry->GetIsLocked());
+        blockListView->AddItem(currName, currDesc, finePrint, Colour(0.3f, 0.6f, 0.85f), texture, blockEntry->GetIsLocked());
     }
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);

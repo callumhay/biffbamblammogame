@@ -684,12 +684,16 @@ void GameModel::UpdateActiveBeams(double seconds) {
 
 // Increment the player's score in the game
 void GameModel::IncrementScore(PointAward& pointAward) {
-	if (pointAward.GetPointAmount() != 0) {
-        int currMultiplier = this->GetCurrentMultiplier();
-        int incrementAmt   = currMultiplier * pointAward.GetPointAmount();
-        this->currPlayerScore += incrementAmt;
 
-        pointAward.SetMultiplierAmount(currMultiplier);
+	if (pointAward.GetPointAmount() != 0) {
+        
+        // Let the point award augment the current multiplier based on its properties...
+        pointAward.SetMultiplierAmount(this->GetCurrentMultiplier());
+        float currMultiplier = pointAward.GetMultiplierAmount();
+
+        // Calculate the final score increment amount
+        int incrementAmt = static_cast<int>(currMultiplier * pointAward.GetPointAmount());
+        this->currPlayerScore += incrementAmt;
 
 		// EVENT: Score was changed
         GameEventManager::Instance()->ActionScoreChanged(this->currPlayerScore);
@@ -707,11 +711,11 @@ void GameModel::IncrementScore(PointAward& pointAward) {
         }
     }
 }
-void GameModel::IncrementScore(std::list<PointAward>& pointAwardsList) {
-    for (std::list<PointAward>::iterator iter = pointAwardsList.begin(); iter != pointAwardsList.end(); ++iter) {
-        this->IncrementScore(*iter);
-    }
-}
+//void GameModel::IncrementScore(std::list<PointAward>& pointAwardsList) {
+//    for (std::list<PointAward>::iterator iter = pointAwardsList.begin(); iter != pointAwardsList.end(); ++iter) {
+//        this->IncrementScore(*iter);
+//    }
+//}
 
 // Set the number of consecutive blocks hit by the ball in the interrum between
 // when it leaves and returns to the player paddle

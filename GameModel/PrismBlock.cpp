@@ -20,14 +20,14 @@ PrismBlock::PrismBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, 
 PrismBlock::~PrismBlock() {
 }
 
-LevelPiece* PrismBlock::Destroy(GameModel* gameModel) {
+LevelPiece* PrismBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece, method);
 
 	// Obliterate all that is left of this block...
 	LevelPiece* tempThis = this;
@@ -166,7 +166,7 @@ LevelPiece* PrismBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 
 		case Projectile::CollateralBlockProjectile:
 			// The collateral block projectile will actually completely destroy the prism block
-			resultingPiece = this->Destroy(gameModel);
+            resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:

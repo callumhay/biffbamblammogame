@@ -22,7 +22,6 @@
 #include "GameBall.h"
 #include "Projectile.h"
 #include "PaddleRocketProjectile.h"
-#include "PointAward.h"
 
 class GameModel;
 class GameBall;
@@ -220,7 +219,7 @@ public:
     bool UpdateForOpposingForceBallCollision(const GameBall& ball, double dT);
 
 	Collision::AABB2D GetPaddleAABB(bool includeAttachedBall) const;
-    std::list<PointAward> GetPointsForHittingBall(const GameBall& ball) const;
+    //std::list<PointAward> GetPointsForHittingBall(const GameBall& ball) const;
 
 	void DebugDraw() const;
 

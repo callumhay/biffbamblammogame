@@ -78,7 +78,7 @@ public:
 	}
 
 	// Collision related stuffs
-	LevelPiece* Destroy(GameModel* gameModel);	
+	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);	
 	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
 	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
@@ -107,8 +107,8 @@ protected:
 		this->colour    = BreakableBlock::GetColourOfBreakableType(this->pieceType);
 	}
 
-	LevelPiece* DiminishPiece(GameModel* gameModel);
-	LevelPiece* EatAwayAtPiece(double dT, int dmgPerSec, GameModel* gameModel);
+	LevelPiece* DiminishPiece(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
+	LevelPiece* EatAwayAtPiece(double dT, int dmgPerSec, GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 
 private:
 	double fireGlobTimeCounter;	// Used to keep track of the amount of time this block has been on fire and
@@ -119,7 +119,8 @@ private:
 /**
  * Called as this piece is being hit by the given beam over the given amount of time in seconds.
  */
-inline LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
+inline LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment,
+                                                     GameModel* gameModel) {
 	assert(beamSegment != NULL);
 	assert(gameModel != NULL);
 
@@ -127,16 +128,19 @@ inline LevelPiece* BreakableBlock::TickBeamCollision(double dT, const BeamSegmen
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 		return this;
 	}
-	return this->EatAwayAtPiece(dT, beamSegment->GetDamagePerSecond(), gameModel);
+    return this->EatAwayAtPiece(dT, beamSegment->GetDamagePerSecond(),
+        gameModel, LevelPiece::LaserBeamDestruction);
 }
 
 /**
  * Tick the collision with the paddle shield - the shield will eat away at the block until it's destroyed.
  * Returns: The block that this block is/has become.
  */
-inline LevelPiece* BreakableBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel) {
+inline LevelPiece* BreakableBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle,
+                                                             GameModel* gameModel) {
 	assert(gameModel != NULL);
-	return this->EatAwayAtPiece(dT, paddle.GetShieldDamagePerSecond(), gameModel);
+    return this->EatAwayAtPiece(dT, paddle.GetShieldDamagePerSecond(),
+        gameModel, LevelPiece::PaddleShieldDestruction);
 }
 
 
