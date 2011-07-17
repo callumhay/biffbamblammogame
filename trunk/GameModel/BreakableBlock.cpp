@@ -32,7 +32,7 @@ BreakableBlock::~BreakableBlock() {
 /**
  * Inherited private function for destroying this breakable block.
  */
-LevelPiece* BreakableBlock::Destroy(GameModel* gameModel) {
+LevelPiece* BreakableBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
@@ -42,7 +42,7 @@ LevelPiece* BreakableBlock::Destroy(GameModel* gameModel) {
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece, method);
 
 	// Obliterate all that is left of this block...
 	LevelPiece* tempThis = this;
@@ -96,20 +96,20 @@ Colour BreakableBlock::GetColourOfBreakableType(BreakableBlock::BreakablePieceTy
  * Returns: The resulting piece in its next form after being diminished from the
  * current one.
  */
-LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel) {
+LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	assert(gameModel != NULL);
 	LevelPiece* newPiece = this;
 
 	switch(this->pieceType) {
 		case GreenBreakable:
-			newPiece = this->Destroy(gameModel);
+			newPiece = this->Destroy(gameModel, method);
 			break;
 		default:
 			// By default any other type of block is simply decremented
 			this->DecrementPieceType();
 			{
 				GameLevel* level = gameModel->GetCurrentLevel();
-				level->PieceChanged(gameModel, this, this);
+				level->PieceChanged(gameModel, this, this, method);
 			}
 			newPiece = this;
 			break;
@@ -120,14 +120,15 @@ LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel) {
 
 // Eat away at this block over the given dT time at the given damage per second...
 // Returns: The resulting level piece that this becomes after exposed to the damage
-LevelPiece* BreakableBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel* gameModel) {
+LevelPiece* BreakableBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel* gameModel,
+                                           const LevelPiece::DestructionMethod& method) {
 	this->currLifePoints -= static_cast<float>(dT * dmgPerSec);
 	
 	LevelPiece* newPiece = this;
 	if (currLifePoints <= 0) {
 		// The piece is dead... spawn the next one in sequence
 		this->currLifePoints = BreakableBlock::PIECE_STARTING_LIFE_POINTS;
-		newPiece = this->DiminishPiece(gameModel);
+		newPiece = this->DiminishPiece(gameModel, method);
 	}
 
 	return newPiece;
@@ -154,7 +155,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 			// EVENT: Ice was shattered
 			GameEventManager::Instance()->ActionBlockIceShattered(*this);
 			// If the piece is frozen it shatters and is immediately destroyed on ball impact
-			newPiece = this->Destroy(gameModel);
+            newPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
 		}
 		else {
 			bool isUberBall = ((ball.GetBallType() & GameBall::UberBall) == GameBall::UberBall);
@@ -165,7 +166,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 				this->DecrementPieceType();
 			}
 
-			newPiece = this->DiminishPiece(gameModel);
+            newPiece = this->DiminishPiece(gameModel, LevelPiece::RegularDestruction);
 		}
 	}
 	else if (isFireBall) {
@@ -197,13 +198,13 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 			}
 			else {	
 				// Laser bullets dimish the piece, but don't necessarily obliterated/destroy it
-				newPiece = this->DiminishPiece(gameModel);
+                newPiece = this->DiminishPiece(gameModel, LevelPiece::LaserProjectileDestruction);
 			}
 			break;
 
 		case Projectile::CollateralBlockProjectile:
 			// Completely destroy the block...
-			newPiece = this->Destroy(gameModel);
+            newPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
@@ -264,7 +265,9 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 
 		// Fire will continue to diminish the piece... 
 		// NOTE: This can destroy this piece resulting in a new level piece to replace it (i.e., an empty piece)
-		resultingPiece = this->EatAwayAtPiece(dT, GameModelConstants::GetInstance()->FIRE_DAMAGE_PER_SECOND, gameModel);
+		resultingPiece = this->EatAwayAtPiece(dT, GameModelConstants::GetInstance()->FIRE_DAMAGE_PER_SECOND, gameModel,
+            LevelPiece::FireDestruction);
+
 		// Technically if the above destroys the block then the block automatically loses all of its status
 		// this is done in the destructor of LevelPiece
 	}

@@ -29,11 +29,11 @@
 #include "GameItemFactory.h"
 #include "Projectile.h"
 #include "GameTransformMgr.h"
-#include "PointAward.h"
 
 class BallInPlayState;
 class CollateralBlock;
 class LevelStartState;
+class PointAward;
 
 class GameModel {
 
@@ -150,7 +150,7 @@ public:
 	~GameModel();
 
     void IncrementScore(PointAward& pointAward);
-    void IncrementScore(std::list<PointAward>& pointAwardsList);
+    //void IncrementScore(std::list<PointAward>& pointAwardsList);
     void IncrementNumInterimBlocksDestroyed(const Point2D& pos) { this->SetNumInterimBlocksDestroyed(this->GetNumInterimBlocksDestroyed()+1, pos); }
 
     GameWorld* GetWorldByName(const std::string& name);

@@ -160,7 +160,8 @@ public:
     // Get the zero-based level number/index in its world
     size_t GetLevelNumIndex() const { return this->levelNum; }
 
-	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter);
+	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter,
+                      const LevelPiece::DestructionMethod& method);
 	LevelPiece* RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece);
     void RocketExplosionNoPieces(const Projectile* rocket);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);

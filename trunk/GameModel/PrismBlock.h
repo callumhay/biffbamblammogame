@@ -79,7 +79,7 @@ public:
         return true;
     }
 
-    LevelPiece* Destroy(GameModel* gameModel);
+    LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
     virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
         const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
         const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,

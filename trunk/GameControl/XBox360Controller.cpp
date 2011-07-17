@@ -46,7 +46,7 @@ XBox360Controller::XBox360Controller(GameModel* model, GameDisplay* display, int
 BBBGameController(model, display), controllerNum(controllerNum), vibrateLengthInSeconds(0.0), vibrateTimeTracker(0.0) {
 	this->enterActionOn = this->leftActionOn = this->rightActionOn =
 	this->upActionOn = this->downActionOn =	this->escapeActionOn = 
-    this->pauseActionOn = this->specialDirOn = false;
+    this->pauseActionOn = this->specialDirOn = this->triggerActionOn = false;
 }
 
 XBox360Controller::~XBox360Controller() {
@@ -117,9 +117,8 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
 			controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_X ||
 			controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) {
 
-		this->model->ShootActionReleaseUse();
-
 		if (!this->enterActionOn) {
+            this->model->ShootActionReleaseUse();
 			this->display->ButtonPressed(GameControl::EnterButtonAction);
 			this->enterActionOn = true;
 		}
@@ -147,12 +146,17 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
     this->UpdateDirections(controllerState, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 
 	// Triggers
-	if (controllerState.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) {
-		this->model->ShootActionReleaseUse();
-	}
-	if (controllerState.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) {
-		this->model->ShootActionReleaseUse();
-	}
+	if (controllerState.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD || 
+        controllerState.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) {
+
+        if (!this->triggerActionOn) {
+		    this->model->ShootActionReleaseUse();
+            this->triggerActionOn = true;
+        }
+    }
+    else if (this->triggerActionOn) {
+        this->triggerActionOn = false;
+    }
 
     // Special stuff (ball bullet time)...
     if (abs(controllerState.Gamepad.sThumbRX) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ||

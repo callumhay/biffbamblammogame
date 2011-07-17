@@ -1,3 +1,4 @@
 Name: Laser Beam
 ItemTexture: laserbeampaddle_powerup_256x128.jpg
 Desc: Laser effing beams. It'll melt blocks like lego in a microwave. Imagine the carnage! Need I say more? (Sharks sold separately.)
+FinePrint: *NOTE: Blocks that are destroyed by lasers receive no multiplier bonuses.

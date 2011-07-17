@@ -54,8 +54,9 @@ bool CannonBlock::ProjectilePassesThrough(Projectile* projectile) const {
 	return false;
 }
 
-LevelPiece* CannonBlock::Destroy(GameModel* gameModel) {
+LevelPiece* CannonBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(method);
 
 	// You can't destroy the cannon block...
 	return this;

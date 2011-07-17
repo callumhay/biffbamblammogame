@@ -13,6 +13,7 @@
 #define __POINTAWARD_H__
 
 #include "ScoreTypes.h"
+#include "LevelPiece.h"
 
 class PointAward {
 public:
@@ -20,14 +21,16 @@ public:
     PointAward(const PointAward& copy) { *this = copy; };
     ~PointAward() {};
 
+    const LevelPiece::DestructionMethod& GetDestructionMethod() const { return this->destructionMethod; }
     const ScoreTypes::BonusTypes& GetType() const { return this->type; }
     int GetPointAmount() const { return this->amount; }
     int GetTotalPointAmount() const { return this->amount * this->multiplier; }
-    int GetMultiplierAmount() const { return this->multiplier; }
+    float GetMultiplierAmount() const { return this->multiplier; }
     const Point2D& GetLocation() const { return this->location; }
 
+    void SetDestructionMethod(const LevelPiece::DestructionMethod& method) { this->destructionMethod = method; }
     void SetPointAmount(int amt) { this->amount = amt; };
-    void SetMultiplierAmount(int amt) { this->multiplier = amt; }
+    void SetMultiplierAmount(float amt);
 
     PointAward& operator=(const PointAward& copy) {
         this->type = copy.type;
@@ -37,14 +40,36 @@ public:
     }
 
 private:
+    LevelPiece::DestructionMethod destructionMethod;    // Any destruction method that may be associated with the point award
     ScoreTypes::BonusTypes type;
     int amount;                     // The base point amount awarded (without multiplier)
-    int multiplier;                 // The multiplier when awarded
+    float multiplier;               // The multiplier when awarded
     Point2D location;               // Location in the level that the points were awarded
 };
 
 inline PointAward::PointAward(int amount, const ScoreTypes::BonusTypes& type, const Point2D& location) :
 amount(amount), type(type), location(location), multiplier(1) {
+}
+
+inline void PointAward::SetMultiplierAmount(float amt) {
+    
+    switch (this->destructionMethod) {
+
+        // Multipliers have no affect when the destruction is by lasers
+        case LevelPiece::LaserProjectileDestruction:
+        case LevelPiece::LaserBeamDestruction:
+            this->multiplier = 1;
+            break;
+
+        // Multipliers are halved when the destruction is by rockets
+        case LevelPiece::RocketDestruction:
+            this->multiplier = std::max<float>(1.0f, 0.5f * amt);
+            break;
+
+        default:
+            this->multiplier = amt;
+            break;
+    }
 }
 
 #endif // __POINTAWARD_H__

@@ -46,6 +46,10 @@ public:
 	static const float HALF_PIECE_HEIGHT;
 	static const float HALF_PIECE_DEPTH;
 
+    enum DestructionMethod { NotApplicableDestruction, RegularDestruction, LaserProjectileDestruction, RocketDestruction, LaserBeamDestruction,
+                             CollateralDestruction, PaddleShieldDestruction, BombDestruction, FireDestruction,
+                             TeslaDestruction }; 
+
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
                           Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop,
                           Switch, OneWay };
@@ -78,7 +82,7 @@ public:
 	virtual bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
 
 	// Collision related stuffs
-	virtual LevelPiece* Destroy(GameModel* gameModel) = 0;
+    virtual LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) = 0;
 	virtual void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
 													  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
 														const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,

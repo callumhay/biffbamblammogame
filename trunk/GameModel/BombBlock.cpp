@@ -59,7 +59,7 @@ int BombBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
     return 0;
 }
 
-LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
+LevelPiece* BombBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// Obtain the level from the model...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	
@@ -133,19 +133,23 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 
 				// Only allow the piece to be destroyed if the ball can destroy it as well...
 				if (currDestroyedPiece->CanBeDestroyedByBall()) {
-					currDestroyedPiece->Destroy(gameModel);
+                    currDestroyedPiece->Destroy(gameModel, LevelPiece::BombDestruction);
 				}
 
 			}
 		}
 
-		// Go through a set of every UNIQUE bomb that was destroyed (including this bomb) and destroy each bomb properly
+		// Go through a set of every UNIQUE bomb that was destroyed and destroy each properly
 		for (std::set<LevelPiece*>::iterator iter = destroyedBombs.begin(); iter != destroyedBombs.end(); ++iter) {
 			LevelPiece* currDestroyedBomb = *iter;
 			assert(currDestroyedBomb->GetType() == LevelPiece::Bomb);
 			if (currDestroyedBomb != this) {
 				GameEventManager::Instance()->ActionBlockDestroyed(*currDestroyedBomb);
-				level->PieceChanged(gameModel, currDestroyedBomb, new EmptySpaceBlock(currDestroyedBomb->GetWidthIndex(), currDestroyedBomb->GetHeightIndex()));
+				
+                level->PieceChanged(gameModel, currDestroyedBomb, 
+                    new EmptySpaceBlock(currDestroyedBomb->GetWidthIndex(), currDestroyedBomb->GetHeightIndex()),
+                    LevelPiece::BombDestruction);
+
 				delete currDestroyedBomb;
 				currDestroyedBomb = NULL;
 			}
@@ -156,12 +160,11 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel) {
 		GameEventManager::Instance()->ActionBlockIceShattered(*this);
 	}
 
-
 	// Obliterate this bomb
 	// EVENT: Bomb Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 	LevelPiece* emptyPieceForBomb = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPieceForBomb);
+	level->PieceChanged(gameModel, this, emptyPieceForBomb, method);
 	LevelPiece* tempThis = this;
 	delete tempThis;
 	tempThis = NULL;
@@ -188,7 +191,7 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 			}
 		}
 		else {
-			resultingPiece = this->Destroy(gameModel);
+            resultingPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
 		}
 	}
 
@@ -211,12 +214,12 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* proje
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			else {
-				resultingPiece = this->Destroy(gameModel);
+                resultingPiece = this->Destroy(gameModel, LevelPiece::LaserProjectileDestruction);
 			}
 			break;
 
 		case Projectile::CollateralBlockProjectile:
-			resultingPiece = this->Destroy(gameModel);
+            resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
@@ -260,7 +263,7 @@ LevelPiece* BombBlock::TickBeamCollision(double dT, const BeamSegment* beamSegme
 	if (currLifePoints <= 0) {
 		// The piece is dead... destroy it
 		this->currLifePoints = 0;
-		newPiece = this->Destroy(gameModel);
+        newPiece = this->Destroy(gameModel, LevelPiece::LaserBeamDestruction);
 	}
 
 	return newPiece;
@@ -279,7 +282,7 @@ LevelPiece* BombBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& 
 	if (currLifePoints <= 0) {
 		// The piece is dead... destroy it
 		this->currLifePoints = 0;
-		newPiece = this->Destroy(gameModel);
+        newPiece = this->Destroy(gameModel, LevelPiece::PaddleShieldDestruction);
 	}
 
 	return newPiece;

@@ -195,13 +195,17 @@ void ItemListView::Draw(const Camera& camera) {
         const Colour& itemColour = this->GetSelectedItem()->GetColour();
         TextLabel2D* nameLbl = this->GetSelectedItem()->GetNameLbl();
         TextLabel2DFixedWidth* descLbl = this->GetSelectedItem()->GetDescriptionLbl();
+        TextLabel2DFixedWidth* finePrintLbl = this->GetSelectedItem()->GetFinePrintLbl();
         assert(nameLbl != NULL);
         assert(descLbl != NULL);
+        assert(finePrintLbl != NULL);
 
         static const float PIC_TITLE_GAP = 40;
+        static const float FINE_PRINT_DESC_GAP = 30;
         static const float STRIPE_BORDER = 20;
         
-        float totalItemDisplayHeight = (this->itemPixelHeight + PIC_TITLE_GAP + descLbl->GetHeight());
+        float totalItemDisplayHeight = (this->itemPixelHeight + PIC_TITLE_GAP + descLbl->GetHeight() +
+            FINE_PRINT_DESC_GAP + finePrintLbl->GetHeight());
         float itemPicX = this->activatedItemXPicAnim.GetInterpolantValue();
 
         float interiorHeight = (camera.GetWindowHeight() - (2 * ItemListView::BLACK_BORDER_HEIGHT) - totalItemDisplayHeight) / 2.0f;
@@ -281,6 +285,10 @@ void ItemListView::Draw(const Camera& camera) {
         descLbl->SetAlpha(activatedItemAlpha);
         descLbl->Draw();
 
+        finePrintLbl->SetTopLeftCorner(itemPicX, itemAndTitleYUnderPic - PIC_TITLE_GAP - descLbl->GetHeight() - FINE_PRINT_DESC_GAP);
+        finePrintLbl->SetAlpha(activatedItemAlpha);
+        finePrintLbl->Draw();
+
         glPopMatrix();
     }
 
@@ -338,11 +346,12 @@ void ItemListView::DrawPost(const Camera& camera) {
 }
 
 // Adds a new list item to the end of the current list 
-ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const std::string& description, const Colour& colour,
+ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const std::string& description, 
+                                              const std::string& finePrint, const Colour& colour,
                                               const Texture* itemTexture, bool isLocked) {
 
     ItemListView::ListItem* newItem = new ItemListView::ListItem(this, 
-        this->items.size(), name, description, colour, itemTexture, isLocked);
+        this->items.size(), name, description, finePrint, colour, itemTexture, isLocked);
 	this->items.push_back(newItem);
 
     if (!isLocked) {
@@ -586,12 +595,14 @@ void ItemListView::SetSelection(int index) {
 // ListItem Methods --------------------------------------------------------------------------
 
 ItemListView::ListItem::ListItem(const ItemListView* parent, size_t index, const std::string& name, 
-                                 const std::string& description, const Colour& colour,
-                                 const Texture* itemTexture, bool isLocked) : 
+                                 const std::string& description, const std::string& finePrint,
+                                 const Colour& colour, const Texture* itemTexture, bool isLocked) : 
 texture(itemTexture), isLocked(isLocked), colour(colour), index(index),
 nameLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), name)), 
 descriptionLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
-               GameFontAssetsManager::Big), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, description))
+               GameFontAssetsManager::Big), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, description)),
+finePrintLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+             GameFontAssetsManager::Medium), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, finePrint))
 {
 	assert(parent != NULL);
     assert(itemTexture != NULL);
@@ -613,6 +624,8 @@ ItemListView::ListItem::~ListItem() {
     this->nameLbl = NULL;
     delete this->descriptionLbl;
     this->descriptionLbl = NULL;
+    delete this->finePrintLbl;
+    this->finePrintLbl = NULL;
 }
 
 void ItemListView::ListItem::Tick(double dT) {

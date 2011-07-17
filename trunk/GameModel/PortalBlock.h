@@ -85,8 +85,9 @@ public:
 	}
 
 	// Portal blocks are never destroyed.
-	LevelPiece* Destroy(GameModel* gameModel) {
+	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 		UNUSED_PARAMETER(gameModel);
+        UNUSED_PARAMETER(method);
 		return this;
 	}
 

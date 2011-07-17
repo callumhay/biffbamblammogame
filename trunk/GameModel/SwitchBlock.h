@@ -40,7 +40,7 @@ public:
 
     void Triggered(GameModel* gameModel);
 
-	LevelPiece* Destroy(GameModel* gameModel);
+	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
@@ -102,8 +102,9 @@ inline void SwitchBlock::Triggered(GameModel* gameModel) {
     this->SwitchPressed(gameModel);
 }
 
-inline LevelPiece* SwitchBlock::Destroy(GameModel* gameModel) {
+inline LevelPiece* SwitchBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(method);
 	return this;
 }
 

@@ -54,7 +54,7 @@ bool ItemDropBlock::ProjectilePassesThrough(Projectile* projectile) const {
  * be destroyed by a collateral block falling on top of it)... hopefully the level designer doesn't depend
  * on it existing if they setup a level where it can be destroyed..
  */
-LevelPiece* ItemDropBlock::Destroy(GameModel* gameModel) {
+LevelPiece* ItemDropBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 		// EVENT: Ice was shattered
 		GameEventManager::Instance()->ActionBlockIceShattered(*this);
@@ -72,7 +72,7 @@ LevelPiece* ItemDropBlock::Destroy(GameModel* gameModel) {
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece, method);
 
 	// Obliterate all that is left of this block...
 	LevelPiece* tempThis = this;
@@ -134,7 +134,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 		case Projectile::CollateralBlockProjectile:
 			// Both the collateral block and the item drop block will be destroyed in horrible, 
 			// horrible gory glory
-			resultingPiece = this->Destroy(gameModel);
+            resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:

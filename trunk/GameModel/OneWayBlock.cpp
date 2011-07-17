@@ -96,7 +96,7 @@ int OneWayBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
     return 0;
 }
 
-LevelPiece* OneWayBlock::Destroy(GameModel* gameModel) {
+LevelPiece* OneWayBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
@@ -113,7 +113,7 @@ LevelPiece* OneWayBlock::Destroy(GameModel* gameModel) {
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece, method);
 
 	// Obliterate all that is left of this block...
 	LevelPiece* tempThis = this;
@@ -231,7 +231,7 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			break;
 		
 		case Projectile::CollateralBlockProjectile:
-			resultingPiece = this->Destroy(gameModel);
+            resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:

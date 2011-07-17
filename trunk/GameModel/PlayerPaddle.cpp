@@ -1053,6 +1053,7 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
  * Calculates the number of points the player will get when the paddle hits the ball.
  * Each point amount is added to a list with a possible description of what the points were for.
  */
+/*
 std::list<PointAward> PlayerPaddle::GetPointsForHittingBall(const GameBall& ball) const {
     std::list<PointAward> pointPairs;
 
@@ -1100,6 +1101,7 @@ std::list<PointAward> PlayerPaddle::GetPointsForHittingBall(const GameBall& ball
     timeSinceLastPtsAwarded = currSystemTime;
     return pointPairs;
 }
+*/
 
 /**
  * Used to detect and react to situations where the ball is forced up against a wall by the paddle.

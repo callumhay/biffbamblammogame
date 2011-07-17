@@ -116,7 +116,7 @@ int InkBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
  * The ink block is destroyed and replaced by an empty space.
  * Returns: A new empty space block.
  */
-LevelPiece* InkBlock::Destroy(GameModel* gameModel) {
+LevelPiece* InkBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
@@ -131,7 +131,7 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel) {
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
 	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece);
+	level->PieceChanged(gameModel, this, emptyPiece, method);
 
 	// Obliterate all that is left of this block...
 	LevelPiece* tempThis = this;
@@ -156,11 +156,11 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 				assert(success);
 			}
             else {
-                resultingPiece = this->Destroy(gameModel);
+                resultingPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
             }
 		}
         else {
-            resultingPiece = this->Destroy(gameModel);
+            resultingPiece = this->Destroy(gameModel, LevelPiece::RegularDestruction);
         }
 	}
 
@@ -179,12 +179,12 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
 			else {
-				resultingPiece = this->Destroy(gameModel);
+                resultingPiece = this->Destroy(gameModel, LevelPiece::LaserProjectileDestruction);
 			}
 			break;
 
 		case Projectile::CollateralBlockProjectile:
-			resultingPiece = this->Destroy(gameModel);
+            resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
@@ -223,7 +223,7 @@ LevelPiece* InkBlock::TickBeamCollision(double dT, const BeamSegment* beamSegmen
 	if (currLifePoints <= 0) {
 		// The piece is dead... destroy it
 		this->currLifePoints = 0;
-		newPiece = this->Destroy(gameModel);
+        newPiece = this->Destroy(gameModel, LevelPiece::LaserBeamDestruction);
 	}
 
 	return newPiece;
@@ -242,7 +242,7 @@ LevelPiece* InkBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& p
 	if (currLifePoints <= 0) {
 		// The piece is dead... destroy it
 		this->currLifePoints = 0;
-		newPiece = this->Destroy(gameModel);
+        newPiece = this->Destroy(gameModel, LevelPiece::PaddleShieldDestruction);
 	}
 
 	return newPiece;

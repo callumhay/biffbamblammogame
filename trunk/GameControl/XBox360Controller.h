@@ -49,6 +49,7 @@ private:
 	bool escapeActionOn;
 	bool pauseActionOn;
     bool specialDirOn;
+    bool triggerActionOn;
 
 	double vibrateTimeTracker;
 	double vibrateLengthInSeconds;
