@@ -44,6 +44,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private boolean hasBeenModified = false;
 	
 	private boolean paintingPieces = false;
+	private int[] starPointAmounts = new int[5];
 	
 	private JPanel levelDisplayPanel;           // panel where the level is displayed
 
@@ -64,6 +65,13 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		this.fileName = this.levelName = "";
 		this.currWidth = 0;
 		this.currHeight = 0;
+		
+		this.starPointAmounts[0] = 100;
+		this.starPointAmounts[1] = 500;
+		this.starPointAmounts[2] = 1000;
+		this.starPointAmounts[3] = 2000;
+		this.starPointAmounts[4] = 5000;
+		
 		this.pieces = null;
 		this.itemDropSettings = ItemDrop.populateDefaultItemDropSettings();
 		this.hasBeenModified = true;
@@ -78,6 +86,12 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		this.currHeight = height;
 		this.itemDropSettings = ItemDrop.populateDefaultItemDropSettings();
 		this.hasBeenModified = true;
+		
+		this.starPointAmounts[0] = 100;
+		this.starPointAmounts[1] = 500;
+		this.starPointAmounts[2] = 1000;
+		this.starPointAmounts[3] = 2000;
+		this.starPointAmounts[4] = 5000;
 		
 		this.setupUI();
 		this.initDefaultPieces();
