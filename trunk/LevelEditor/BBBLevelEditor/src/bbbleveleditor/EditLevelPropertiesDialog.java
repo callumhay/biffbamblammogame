@@ -2,14 +2,22 @@ package bbbleveleditor;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Point;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class EditLevelPropertiesDialog extends JDialog {
 
@@ -17,6 +25,13 @@ public class EditLevelPropertiesDialog extends JDialog {
 	
 	private BBBLevelEditDocumentWindow docWindow;
 	private JTextField levelNameTxtField;
+	
+	private JSpinner firstStarPtAmtSpinner;
+	private JSpinner secondStarPtAmtSpinner;
+	private JSpinner thirdStarPtAmtSpinner;
+	private JSpinner fourthStarPtAmtSpinner;
+	private JSpinner fifthStarPtAmtSpinner;
+	
 	private JButton okButton;
 	private JButton cancelButton;
 	
@@ -36,8 +51,64 @@ public class EditLevelPropertiesDialog extends JDialog {
 		namePanel.add(new JLabel("Level Name:"));
 		namePanel.add(this.levelNameTxtField);	
 		
+		this.firstStarPtAmtSpinner  = new JSpinner(new SpinnerNumberModel(100, 0, 9999999, 1));
+		this.firstStarPtAmtSpinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				starPointSpinnerChanged(e);
+			}
+		});
+		
+		this.secondStarPtAmtSpinner = new JSpinner(new SpinnerNumberModel(500, 0, 9999999, 1));
+		this.secondStarPtAmtSpinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				starPointSpinnerChanged(e);
+			}
+		});
+		
+		this.thirdStarPtAmtSpinner  = new JSpinner(new SpinnerNumberModel(1000, 0, 9999999, 1));
+		this.thirdStarPtAmtSpinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				starPointSpinnerChanged(e);
+			}
+		});
+		
+		this.fourthStarPtAmtSpinner = new JSpinner(new SpinnerNumberModel(2000, 0, 9999999, 1));
+		this.fourthStarPtAmtSpinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				starPointSpinnerChanged(e);
+			}
+		});
+		
+		this.fifthStarPtAmtSpinner  = new JSpinner(new SpinnerNumberModel(5000, 0, 9999999, 1));
+		this.fifthStarPtAmtSpinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				starPointSpinnerChanged(e);
+			}
+		});
+		
+		// Setup the star points panel - for defining the point milestones for stars
+		JPanel starPanel = new JPanel();
+		TitledBorder starBorder = BorderFactory.createTitledBorder("Star Point Milestones"); 
+		starPanel.setBorder(starBorder);
+		starPanel.setLayout(new GridLayout(5, 2));
+		starPanel.add(new JLabel("First Star Point Amount:"));
+		starPanel.add(this.firstStarPtAmtSpinner);
+		starPanel.add(new JLabel("Second Star Point Amount:"));
+		starPanel.add(this.secondStarPtAmtSpinner);
+		starPanel.add(new JLabel("Third Star Point Amount:"));
+		starPanel.add(this.thirdStarPtAmtSpinner);
+		starPanel.add(new JLabel("Fourth Star Point Amount:"));
+		starPanel.add(this.fourthStarPtAmtSpinner);
+		starPanel.add(new JLabel("Fifth Star Point Amount:"));
+		starPanel.add(this.fifthStarPtAmtSpinner);
+		
+		JPanel bodyPanel = new JPanel();
+		bodyPanel.setLayout(new BoxLayout(bodyPanel, BoxLayout.Y_AXIS));
+		bodyPanel.add(namePanel);
+		bodyPanel.add(starPanel);
+		
 		this.setLayout(new BorderLayout());
-		this.add(namePanel, BorderLayout.CENTER);
+		this.add(bodyPanel, BorderLayout.CENTER);
 		
 		this.okButton = new JButton("OK");
 		this.okButton.setActionCommand("OK");
@@ -71,6 +142,44 @@ public class EditLevelPropertiesDialog extends JDialog {
 	private void nameTextFieldChangedActionPerformed(java.awt.event.ActionEvent evt) {
 	}
 	
+	private void starPointSpinnerChanged(ChangeEvent evt) {
+		// Make sure the points values are all updated
+		SpinnerNumberModel firstStarNumModel = (SpinnerNumberModel)this.firstStarPtAmtSpinner.getModel();
+		SpinnerNumberModel secondStarNumModel = (SpinnerNumberModel)this.secondStarPtAmtSpinner.getModel();
+		SpinnerNumberModel thirdStarNumModel = (SpinnerNumberModel)this.thirdStarPtAmtSpinner.getModel();
+		SpinnerNumberModel fourthStarNumModel = (SpinnerNumberModel)this.fourthStarPtAmtSpinner.getModel();
+		SpinnerNumberModel fifthStarNumModel = (SpinnerNumberModel)this.fifthStarPtAmtSpinner.getModel();
+		
+		int firstStarIntValue  = firstStarNumModel.getNumber().intValue();
+		int secondStarIntValue = secondStarNumModel.getNumber().intValue();
+		int thirdStarIntValue  = thirdStarNumModel.getNumber().intValue();
+		int fourthStarIntValue = fourthStarNumModel.getNumber().intValue();
+		int fifthStarIntValue  = fifthStarNumModel.getNumber().intValue();
+		
+		int nextValue = firstStarIntValue;
+		if (secondStarIntValue < nextValue) {
+			this.secondStarPtAmtSpinner.setValue(new Integer(nextValue));
+		}
+		else {
+			nextValue = secondStarIntValue;
+		}
+		if (thirdStarIntValue < nextValue) {
+			this.thirdStarPtAmtSpinner.setValue(new Integer(nextValue));
+		}
+		else {
+			nextValue = thirdStarIntValue;
+		}
+		if (fourthStarIntValue < nextValue) {
+			this.fourthStarPtAmtSpinner.setValue(new Integer(nextValue));
+		}
+		else {
+			nextValue = fourthStarIntValue;
+		}
+		if (fifthStarIntValue < nextValue) {
+			this.fifthStarPtAmtSpinner.setValue(new Integer(nextValue));
+		}
+	}
+	
 	private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		if (this.levelNameTxtField.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(this,
@@ -81,6 +190,9 @@ public class EditLevelPropertiesDialog extends JDialog {
 		}
 		
 		this.docWindow.setLevelName(this.levelNameTxtField.getText());
+		
+		// TODO: Set the point amounts...
+		
 		this.setVisible(false);
 	}
 	
