@@ -27,6 +27,13 @@ S E E E E E E E E S
 S E E E E E E E E S 
 S E E E E E E E E S 
 
+STARS:
+2000
+5000
+7000
+8000
+10000
+
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
@@ -40,6 +47,7 @@ LaserBulletPaddle 2
 PaddleShrink 2
 InvisiBall 2
 LaserBeamPaddle 2
+OmniLaserBall 2
 FireBall 0
 RocketPaddle 2
 GhostBall 2

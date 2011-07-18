@@ -97,6 +97,13 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		this.initDefaultPieces();
 	}
 	
+	public int[] getStarPointAmounts() {
+		return this.starPointAmounts;
+	}
+	public void setStarPointAmounts(int[] amounts) {
+		this.starPointAmounts = amounts;
+	}
+	
 	public String getLevelName() {
 		return this.levelName;
 	}
@@ -361,14 +368,14 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				}
 				this.pack();
 				
-				// Read the various item likelihoods - this can be variable for backwards compatibility
-				while (levelFileScanner.hasNext()) {
-					String possibleItemDropName = levelFileScanner.next();
-					boolean itemExists = this.itemDropSettings.containsKey(possibleItemDropName);
-					if (itemExists) {
-						int likelihood = levelFileScanner.nextInt();
-						this.itemDropSettings.put(possibleItemDropName, likelihood);
-					}
+				// Read the stars or the various item likelihoods - this can be variable for backwards compatibility
+				if (levelFileScanner.hasNext("STARS:")) {
+					this.readStarAmounts(levelFileScanner);
+					this.readItemLiklihoods(levelFileScanner);
+				}
+				else {
+					this.readItemLiklihoods(levelFileScanner);
+					this.readStarAmounts(levelFileScanner);
 				}
 				
 				this.fileName = this.savedFileOnDisk.getName();
@@ -400,6 +407,29 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		}
 		
 		this.hasBeenModified = false;
+		return true;
+	}
+	
+	private boolean readStarAmounts(Scanner levelFileScanner) {
+		if (!levelFileScanner.hasNext("STARS:")) { return true; }
+		// Read the "STARS:" header
+		levelFileScanner.next();
+		for (int i = 0; i < 5; i++) {
+			this.starPointAmounts[i] = levelFileScanner.nextInt();
+		}
+		return true;
+	}
+	
+	private boolean readItemLiklihoods(Scanner levelFileScanner) {
+		while (levelFileScanner.hasNext()) {
+			String possibleItemDropName = levelFileScanner.next();
+			boolean itemExists = this.itemDropSettings.containsKey(possibleItemDropName);
+			if (itemExists) {
+				int likelihood = levelFileScanner.nextInt();
+				this.itemDropSettings.put(possibleItemDropName, likelihood);
+			}
+		}
+		
 		return true;
 	}
 	
@@ -542,6 +572,14 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					
 					levelFileWriter.write(" ");
 				}
+				levelFileWriter.write("\r\n");
+			}
+			levelFileWriter.write("\r\n");
+			
+			// Add the star point milestones
+			levelFileWriter.write("STARS:\r\n");
+			for (int i = 0; i < 5; i++) {
+				levelFileWriter.write("" + this.starPointAmounts[i]);
 				levelFileWriter.write("\r\n");
 			}
 			levelFileWriter.write("\r\n");

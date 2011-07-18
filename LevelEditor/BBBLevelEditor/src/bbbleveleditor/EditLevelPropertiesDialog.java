@@ -51,35 +51,37 @@ public class EditLevelPropertiesDialog extends JDialog {
 		namePanel.add(new JLabel("Level Name:"));
 		namePanel.add(this.levelNameTxtField);	
 		
-		this.firstStarPtAmtSpinner  = new JSpinner(new SpinnerNumberModel(100, 0, 9999999, 1));
+		int[] starPointAmts = docWindow.getStarPointAmounts();
+		
+		this.firstStarPtAmtSpinner  = new JSpinner(new SpinnerNumberModel(starPointAmts[0], 0, 9999999, 1));
 		this.firstStarPtAmtSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				starPointSpinnerChanged(e);
 			}
 		});
 		
-		this.secondStarPtAmtSpinner = new JSpinner(new SpinnerNumberModel(500, 0, 9999999, 1));
+		this.secondStarPtAmtSpinner = new JSpinner(new SpinnerNumberModel(starPointAmts[1], 0, 9999999, 1));
 		this.secondStarPtAmtSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				starPointSpinnerChanged(e);
 			}
 		});
 		
-		this.thirdStarPtAmtSpinner  = new JSpinner(new SpinnerNumberModel(1000, 0, 9999999, 1));
+		this.thirdStarPtAmtSpinner  = new JSpinner(new SpinnerNumberModel(starPointAmts[2], 0, 9999999, 1));
 		this.thirdStarPtAmtSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				starPointSpinnerChanged(e);
 			}
 		});
 		
-		this.fourthStarPtAmtSpinner = new JSpinner(new SpinnerNumberModel(2000, 0, 9999999, 1));
+		this.fourthStarPtAmtSpinner = new JSpinner(new SpinnerNumberModel(starPointAmts[3], 0, 9999999, 1));
 		this.fourthStarPtAmtSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				starPointSpinnerChanged(e);
 			}
 		});
 		
-		this.fifthStarPtAmtSpinner  = new JSpinner(new SpinnerNumberModel(5000, 0, 9999999, 1));
+		this.fifthStarPtAmtSpinner  = new JSpinner(new SpinnerNumberModel(starPointAmts[4], 0, 9999999, 1));
 		this.fifthStarPtAmtSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				starPointSpinnerChanged(e);
@@ -142,6 +144,8 @@ public class EditLevelPropertiesDialog extends JDialog {
 	private void nameTextFieldChangedActionPerformed(java.awt.event.ActionEvent evt) {
 	}
 	
+	
+	
 	private void starPointSpinnerChanged(ChangeEvent evt) {
 		// Make sure the points values are all updated
 		SpinnerNumberModel firstStarNumModel = (SpinnerNumberModel)this.firstStarPtAmtSpinner.getModel();
@@ -190,7 +194,21 @@ public class EditLevelPropertiesDialog extends JDialog {
 		}
 		
 		this.docWindow.setLevelName(this.levelNameTxtField.getText());
+
+
+		SpinnerNumberModel firstStarNumModel = (SpinnerNumberModel)this.firstStarPtAmtSpinner.getModel();
+		SpinnerNumberModel secondStarNumModel = (SpinnerNumberModel)this.secondStarPtAmtSpinner.getModel();
+		SpinnerNumberModel thirdStarNumModel = (SpinnerNumberModel)this.thirdStarPtAmtSpinner.getModel();
+		SpinnerNumberModel fourthStarNumModel = (SpinnerNumberModel)this.fourthStarPtAmtSpinner.getModel();
+		SpinnerNumberModel fifthStarNumModel = (SpinnerNumberModel)this.fifthStarPtAmtSpinner.getModel();
 		
+		int[] starPointAmts = new int[5];
+		starPointAmts[0] = firstStarNumModel.getNumber().intValue();
+		starPointAmts[1] = secondStarNumModel.getNumber().intValue();
+		starPointAmts[2] = thirdStarNumModel.getNumber().intValue();
+		starPointAmts[3] = fourthStarNumModel.getNumber().intValue();
+		starPointAmts[4] = fifthStarNumModel.getNumber().intValue();
+		this.docWindow.setStarPointAmounts(starPointAmts);
 		// TODO: Set the point amounts...
 		
 		this.setVisible(false);
