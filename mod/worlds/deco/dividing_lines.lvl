@@ -5,8 +5,8 @@ S E E E E E E E E E E E E E E E E S
 S E E E E E E E E E E E E E E E E S 
 S E E E E L I G G G G I L E E E E S 
 S G G G G S E E E E E E S G G G G S 
-S E E E E S E E E E E E S E E E E S 
-S E E E E S E E E E E E S E E E E S 
+S Y Y Y Y S E E E E E E S Y Y Y Y S 
+S E E E E S R R R R R R S E E E E S 
 S E E E E S O O O O O O S E E E E S 
 S E E E E S Y Y Y Y Y Y S E E E E S 
 S E E E E S B E E E E B S E E E E S 
@@ -24,12 +24,19 @@ S E E E E S E E E E E E S E E E E S
 S E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
 
+STARS:
+12000
+20000
+50000
+75000
+85000
+
 PaddleGrow 1
 PoisonPaddle 2
 BallSafetyNet 3
 Blackout 2
-UberBall 2
 BallGrow 1
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 2

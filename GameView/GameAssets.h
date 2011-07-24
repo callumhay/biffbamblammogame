@@ -106,6 +106,8 @@ public:
 	void ActivateLastBallDeathEffects(const GameBall& lastBall);
 	void DeactivateLastBallDeathEffects();
 
+    void ReinitializeAssets();
+
 	GameItemAssets* GetItemAssets() const {
 		return this->itemAssets;
 	}

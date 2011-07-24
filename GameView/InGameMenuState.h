@@ -43,14 +43,16 @@ private:
 	static const Colour MENU_ITEM_ACTIVE_COLOUR;
 	static const Colour MENU_ITEM_GREYED_COLOUR;
 
-	enum NextAction { Nothing, ResumeGame, ReturnToMainMenu, ExitToDesktop };
+	enum NextAction { Nothing, ResumeGame, RestartLevel, ReturnToMainMenu, ExitToDesktop };
 	NextAction nextAction;
 
     InGameRenderPipeline renderPipeline;
 
 	// Top Level Menu variables
 	GameMenu* topMenu; // Main (top-most/parent) menu (features options "Return to Main Menu", etc.)
-	int resumeItem;
+	
+    int resumeItem;
+    int restartItem;
 	//int audioMenu;
 	int returnToMainItem;
 	int exitToDesktopItem;

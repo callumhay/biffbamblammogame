@@ -52,6 +52,61 @@ LevelPiece* BreakableBlock::Destroy(GameModel* gameModel, const LevelPiece::Dest
 	return emptyPiece;
 }
 
+void BreakableBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
+                              const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                              const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                              const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+
+	UNUSED_PARAMETER(bottomLeftNeighbor);
+	UNUSED_PARAMETER(bottomRightNeighbor);
+	UNUSED_PARAMETER(topRightNeighbor);
+	UNUSED_PARAMETER(topLeftNeighbor);
+
+	// Set the bounding lines for a rectangular block - these are also used when any block is frozen in an ice cube
+	std::vector<Collision::LineSeg2D> boundingLines;
+	std::vector<Vector2D>  boundingNorms;
+
+	// Left boundry of the piece
+    if (leftNeighbor != NULL && (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::Breakable)) {
+		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+		Vector2D n1(-1, 0);
+		boundingLines.push_back(l1);
+		boundingNorms.push_back(n1);
+	}
+
+	// Bottom boundry of the piece
+	if (bottomNeighbor != NULL && (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::Breakable)) {
+		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+		Vector2D n2(0, -1);
+		boundingLines.push_back(l2);
+		boundingNorms.push_back(n2);
+	}
+
+	// Right boundry of the piece
+	if (rightNeighbor != NULL && (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::Breakable)) {
+		Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+		Vector2D n3(1, 0);
+		boundingLines.push_back(l3);
+		boundingNorms.push_back(n3);
+	}
+
+	// Top boundry of the piece
+	if (topNeighbor != NULL && (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::Breakable)) {
+		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+		Vector2D n4(0, 1);
+		boundingLines.push_back(l4);
+		boundingNorms.push_back(n4);
+	}
+
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor,
+                                  rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, 
+                                  bottomRightNeighbor, bottomLeftNeighbor);
+}
+
 /**
  * Private static helper function used to move the colour of this breakable
  * down to the next level (thus decrementing it appropriately). For example

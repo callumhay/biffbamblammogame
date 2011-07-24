@@ -31,6 +31,13 @@ E E E E E E E E E E E E E E E
 A(0,0,d,a) T(S,ll) E E E E E E E E E E E T(S,lr) A(0,0,c,b) 
 E E E E E E E E E E E E E E E 
 
+STARS:
+100
+500
+1000
+2000
+5000
+
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2

@@ -21,6 +21,13 @@ S S S F(u) F(u) F(u) F(u) S S S
 S S T(S,ul) E E E E T(S,ur) S S 
 S T(S,ul) E E E E E E T(S,ur) S 
 
+STARS:
+100
+500
+1000
+2000
+5000
+
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2

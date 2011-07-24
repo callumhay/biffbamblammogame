@@ -27,8 +27,8 @@
 #include "../ResourceManager.h"
 
 GameModel::GameModel() : 
-currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0), pauseBitField(GameModel::NoPause), 
-isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
+currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0), livesAtStartOfLevel(0),
+pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false) {
 	
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
@@ -88,22 +88,36 @@ GameModel::~GameModel() {
     assert(this->boostModel == NULL);
 }
 
+void GameModel::ResetLevelValues(int numLives) {
+	// Reset the score, lives, etc.
+	this->currPlayerScore = GameModelConstants::GetInstance()->INIT_SCORE;
+    this->numStarsAwarded = 0;
+	this->SetInitialNumberOfLives(numLives);
+	this->numInterimBlocksDestroyed = 0;	// Don't use set here, we don't want an event
+    this->maxInterimBlocksDestroyed = 0;
+    this->ResetNumAcquiredItems();
+    this->ResetLevelTime();
+
+	// Clear up the model
+    this->ClearStatusUpdatePieces();
+    this->ClearProjectiles();
+    this->ClearBeams();
+    this->ClearLiveItems();
+    this->ClearActiveTimers();
+	this->gameTransformInfo->Reset();
+
+    this->ResetScore();
+    this->ResetLevelTime();
+    this->ResetNumAcquiredItems();
+}
+
 /**
  * Called in order to completely reset the game state and load the
  * given zero-based index world and level number.
  */
 void GameModel::StartGameAtWorldAndLevel(int worldNum, int levelNum) {
-	this->SetCurrentWorldAndLevel(worldNum, levelNum);
-	// Reset the score, lives, etc.
-	this->currPlayerScore = GameModelConstants::GetInstance()->INIT_SCORE;
-    this->numStarsAwarded = 0;
-	this->SetInitialNumberOfLives(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
-	this->numInterimBlocksDestroyed = 0;	// Don't use set here, we don't want an event
-    this->maxInterimBlocksDestroyed = 0;
-    this->ResetNumAcquiredItems();
-    this->ResetLevelTime();
-	this->gameTransformInfo->Reset();
-
+	this->SetCurrentWorldAndLevel(worldNum, levelNum, true);
+    this->ResetLevelValues(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
     this->SetNextState(GameState::LevelStartStateType);
 }
 
@@ -114,6 +128,12 @@ void GameModel::StartGameAtWorldAndLevel(int worldNum, int levelNum) {
  */
 void GameModel::BeginOrRestartGame() {
     this->StartGameAtWorldAndLevel(GameModelConstants::GetInstance()->INITIAL_WORLD_NUM, 0);
+}
+
+void GameModel::ResetCurrentLevel() {
+    this->SetCurrentWorldAndLevel(this->currWorldNum, static_cast<int>(this->GetCurrentLevel()->GetLevelNumIndex()), false);
+    this->ResetLevelValues(this->GetLivesAtStartOfLevel());
+    this->SetNextState(GameState::LevelStartStateType);
 }
 
 // Called in order to make sure the game is no longer processing or generating anything
@@ -139,7 +159,7 @@ void GameModel::ClearGameState() {
     this->ResetNumAcquiredItems();
 }
 
-void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum) {
+void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum, bool sendNewWorldEvent) {
 	assert(worldNum >= 0 && worldNum < static_cast<int>(this->worlds.size()));
 	
     // NOTE: We don't unload anything since it all gets loaded when the game model is initialized
@@ -166,14 +186,20 @@ void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum) {
 	GameLevel* currLevel = world->GetCurrentLevel();
 	assert(currLevel != NULL);
 
-	// EVENT: World started...
-	GameEventManager::Instance()->ActionWorldStarted(*world);
+    if (sendNewWorldEvent) {
+	    // EVENT: World started...    
+	    GameEventManager::Instance()->ActionWorldStarted(*world);
+    }
+
 	// EVENT: New Level Started
 	GameEventManager::Instance()->ActionLevelStarted(*world, *currLevel);
 
 	// Tell the paddle what the boundries of the level are and reset the paddle
 	this->playerPaddle->SetNewMinMaxLevelBound(currLevel->GetPaddleMinBound(), currLevel->GetPaddleMaxBound()); // resets the paddle
 	//this->playerPaddle->ResetPaddle();
+
+    // Reload all progress numbers
+    this->progressLoadedSuccessfully = GameProgressIO::LoadGameProgress(this);
 }
 
 // Get the world with the given name in this model, NULL if no such world exists

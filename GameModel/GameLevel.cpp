@@ -69,12 +69,14 @@ const char* GameLevel::POWERUP_ITEM_TYPES_KEYWORD           = "powerups";
 const char* GameLevel::POWERNEUTRAL_ITEM_TYPES_KEYWORD      = "powerneutrals";
 const char* GameLevel::POWERDOWN_ITEM_TYPES_KEYWORD         = "powerdowns";
 
+const char* GameLevel::STAR_POINT_MILESTONE_KEYWORD = "STARS:";
+
 // Private constructor, requires all the pieces that make up the level
 GameLevel::GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, 
                      unsigned int numBlocks, 
                      const std::vector<std::vector<LevelPiece*> >& pieces,
                      const std::vector<GameItem::ItemType>& allowedDropTypes, 
-                     size_t randomItemProbabilityNum): 
+                     size_t randomItemProbabilityNum, long* starAwardScores): 
 levelNum(levelNumber),
 currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum),
@@ -110,16 +112,10 @@ filepath(filepath), levelName(levelName), highScore(0) {
         }
     }
 
-    // TODO: Make this programmable/readable per-level
-    this->starAwardScores[0] = 100;
-    this->starAwardScores[1] = 700;
-    this->starAwardScores[2] = 1000;
-    this->starAwardScores[3] = 1500;
-    this->starAwardScores[4] = 2000;
-
-	// Set the quad tree for the level
-	//Point2D levelMax(this->GetLevelUnitWidth(), this->GetLevelUnitHeight());
-	//this->levelTree = new QuadTree(Collision::AABB2D(Point2D(0, 0), levelMax), Vector2D(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT));
+    // Set all of the star reward milestone scores
+    for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+        this->starAwardScores[i] = starAwardScores[i];
+    }
 }
 
 // Destructor, clean up heap stuffs
@@ -751,6 +747,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 					GameLevel::CleanUpFileReadData(levelPieces);
 					return NULL;
 			}
+
             // Check to see if there's a trigger ID for the block...
             if (newPiece != NULL) {
                 char nextChar = inFile->peek();
@@ -802,6 +799,32 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 		levelPieces.insert(levelPieces.begin(), currentRowPieces);
 	}
 
+    // Get the star milestone totals
+    std::string tempReadStr;
+    long pointAmount;
+    long starAwardScores[GameLevel::MAX_STARS_PER_LEVEL];
+    if ((*inFile >> tempReadStr) && tempReadStr.compare(GameLevel::STAR_POINT_MILESTONE_KEYWORD) == 0) {
+        for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+            if (*inFile >> pointAmount) {
+                starAwardScores[i] = pointAmount;
+            }
+            else {
+                debug_output("ERROR: No star point milestone for star #" << i << " was found.");
+	            GameLevel::CleanUpFileReadData(levelPieces);
+	            delete inFile;
+	            inFile = NULL;
+	            return NULL;
+            }
+        }
+    }
+    else {
+        debug_output("ERROR: No '" << GameLevel::STAR_POINT_MILESTONE_KEYWORD << "' keyword was found.");
+	    GameLevel::CleanUpFileReadData(levelPieces);
+	    delete inFile;
+	    inFile = NULL;
+	    return NULL;
+    }
+    
 	// Finished reading in all the blocks for the level, now read in the allowed item drops and their probabilities...
 	std::string itemTypeName;
 	int probabilityNum = 0;
@@ -836,10 +859,10 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 		else {
 			if (!GameItemFactory::GetInstance()->IsValidItemTypeName(itemTypeName)) {
 				debug_output("ERROR: Invalid item type name found in allowable item drop probability list: '" << itemTypeName << "'");
-					GameLevel::CleanUpFileReadData(levelPieces);
-					delete inFile;
-					inFile = NULL;
-					return NULL;
+				GameLevel::CleanUpFileReadData(levelPieces);
+				delete inFile;
+				inFile = NULL;
+				return NULL;
 			}
 
 			if (*inFile >> probabilityNum) {
@@ -897,7 +920,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 		}
 	}
 
-	return new GameLevel(levelNumber, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum);
+	return new GameLevel(levelNumber, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum, starAwardScores);
 }
 
 void GameLevel::CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& levelPieces) {
@@ -946,7 +969,7 @@ void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces
 		}
 	}
 
-	if (wIndex != pieces[wIndex].size()-1) {
+	if (wIndex != pieces[hIndex].size()-1) {
 		int rightIndex = wIndex+1;
 		rightNeighbor = pieces[hIndex][rightIndex];
 

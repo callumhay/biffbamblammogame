@@ -35,8 +35,10 @@ DisplayState(display), renderPipeline(display), shockwaveEmitter(NULL),
 levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), "") {
 
     GameModel* gameModel = this->display->GetModel();
+    
     // Make sure the game is in the "BallOnPaddleState" before going through with the 
     // initialization for the visuals
+    this->display->GetModel()->UnsetPause(GameModel::PauseGame);
     while (gameModel->GetCurrentStateType() != GameState::BallOnPaddleStateType) {
         this->display->UpdateModel(1.0);
     }
