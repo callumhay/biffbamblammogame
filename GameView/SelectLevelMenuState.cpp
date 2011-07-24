@@ -586,8 +586,8 @@ void SelectLevelMenuState::SetupLevelPages() {
 
     static const int TITLE_TO_ITEM_Y_GAP_SIZE = 57;
     static const int SIDE_TO_ITEM_GAP_SIZE    = 60;
-    static const int ITEM_X_GAP_SIZE          = 50;
-    static const int ITEM_Y_GAP_SIZE          = 50;
+    static const int ITEM_X_GAP_SIZE          = 40;
+    static const int ITEM_Y_GAP_SIZE          = 40;
     static const int MIN_ITEM_SIZE            = 180;
 
     float amtForItems = camera.GetWindowWidth() - 2 * SIDE_TO_ITEM_GAP_SIZE;
@@ -638,34 +638,11 @@ void SelectLevelMenuState::SetupLevelPages() {
         itemY -= ITEM_Y_GAP_SIZE + levelItem->GetHeight();
 
         // Check to see if we've exceeded the size of the page so that we make the next page...
-        if (row != numRows-1 && itemY <= (this->keyEscLabel->GetHeight() + VERTICAL_TITLE_GAP)) {
+        if (row != numRows-1 && (itemY - levelItem->GetHeight()) <= (this->keyEscLabel->GetHeight() + VERTICAL_TITLE_GAP)) {
             itemY = camera.GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
             this->pages.push_back(new LevelMenuPage());
         }
     }
-
-    /*
-    for (size_t levelIdx = 0; levelIdx < levels.size(); levelIdx++) {
-        const GameLevel* currLevel = levels.at(levelIdx);
-        assert(currLevel != NULL);
-        
-        //totalNumStarsCollected += currLevel->GetNumStars();
-
-        LevelMenuItem* levelItem = new LevelMenuItem(levelIdx+1, currLevel, itemWidth, 
-            Point2D(itemX, itemY), this->starTexture);
-        this->levelItems.push_back(levelItem);
-        
-        tempCount++;
-        if (tempCount == this->numItemsPerRow) {
-            itemX  = SIDE_TO_ITEM_GAP_SIZE;
-            itemY -= ITEM_Y_GAP_SIZE + levelItem->GetHeight();
-            tempCount = 0;
-        }
-        else {
-            itemX += itemWidth + ITEM_X_GAP_SIZE;
-        }
-    }
-    */
 
     assert(!this->pages.empty());
     this->selectedPage = 0;
