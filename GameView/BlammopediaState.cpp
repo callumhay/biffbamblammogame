@@ -1,7 +1,7 @@
 /**
  * BlammopediaState.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2010-2011
  *
  * You may not use this work for commercial purposes.
@@ -393,6 +393,7 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
     }
 
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
+    itemsListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
 	return itemsListView;
 }
 
@@ -422,7 +423,7 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
     }
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
-
+    blockListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
 	return blockListView;
 }
 

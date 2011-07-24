@@ -1,7 +1,7 @@
 /**
  * ESPPointEmitter.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -84,6 +84,15 @@ Point3D ESPPointEmitter::CalculateRandomInitParticlePos() const {
 	Point3D initialPt = this->emitPt + Vector3D(randomPtX, randomPtY, randomPtZ);
 
 	return initialPt;
+}
+
+// Sets all future emit positions and the position of all alive particles
+void ESPPointEmitter::OverwriteEmittedPosition(const Point3D& pt) {
+    this->SetEmitPosition(pt);
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+		ESPParticle* currParticle = *iter;
+        currParticle->SetPosition(pt);
+	}
 }
 
 /**

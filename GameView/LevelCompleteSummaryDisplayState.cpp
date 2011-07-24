@@ -1,7 +1,7 @@
 /**
  * LevelCompleteSummaryDisplayState.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -64,38 +64,38 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
 
     this->maxBlocksTextLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
-        camera.GetWindowWidth()/2 - SCORE_LABEL_SIDE_PADDING, "Maximum consecutive blocks destroyed:");
+        camera.GetWindowWidth()/2 - this->display->GetTextScalingFactor() * SCORE_LABEL_SIDE_PADDING, "Maximum consecutive blocks destroyed:");
     this->maxBlocksTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
     this->maxBlocksTextLabel->SetColour(smallScoreLabelColour);
-    this->maxBlocksTextLabel->SetScale(0.8f);
+    this->maxBlocksTextLabel->SetScale(this->display->GetTextScalingFactor() * 0.8f);
 
     std::stringstream maxBlocksValStrStream;
     maxBlocksValStrStream << gameModel->GetMaxConsecutiveBlocksDestroyed();
     this->maxBlocksValueLabel.SetText(maxBlocksValStrStream.str());
     this->maxBlocksValueLabel.SetColour(smallScoreLabelColour);
-    this->maxBlocksValueLabel.SetScale(0.9f);
+    this->maxBlocksValueLabel.SetScale(this->display->GetTextScalingFactor() * 0.9f);
 
     this->itemsAcquiredTextLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
-        camera.GetWindowWidth()/2 - SCORE_LABEL_SIDE_PADDING, "Number of items acquired:");
+        camera.GetWindowWidth()/2 - this->display->GetTextScalingFactor() * SCORE_LABEL_SIDE_PADDING, "Number of items acquired:");
     this->itemsAcquiredTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
     this->itemsAcquiredTextLabel->SetColour(smallScoreLabelColour);
-    this->itemsAcquiredTextLabel->SetScale(0.8f);
+    this->itemsAcquiredTextLabel->SetScale(this->display->GetTextScalingFactor() * 0.8f);
 
     std::stringstream itemsAcquiredValStrStream;
     int numGoodItems, numNeutralItems, numBadItems;
     gameModel->GetNumItemsAcquired(numGoodItems, numNeutralItems, numBadItems);
     itemsAcquiredValStrStream << (numGoodItems + numNeutralItems + numBadItems);
     this->itemsAcquiredValueLabel.SetText(itemsAcquiredValStrStream.str());
-    this->itemsAcquiredValueLabel.SetScale(0.9f);
+    this->itemsAcquiredValueLabel.SetScale(this->display->GetTextScalingFactor() * 0.9f);
     this->itemsAcquiredValueLabel.SetColour(smallScoreLabelColour);
 
     this->levelTimeTextLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
-        camera.GetWindowWidth()/2 - SCORE_LABEL_SIDE_PADDING, "Total time:");
+        camera.GetWindowWidth()/2 - this->display->GetTextScalingFactor() * SCORE_LABEL_SIDE_PADDING, "Total time:");
     this->levelTimeTextLabel->SetAlignment(TextLabel2DFixedWidth::RightAligned);
     this->levelTimeTextLabel->SetColour(smallScoreLabelColour);
-    this->levelTimeTextLabel->SetScale(0.8f);
+    this->levelTimeTextLabel->SetScale(this->display->GetTextScalingFactor() * 0.8f);
 
     std::stringstream levelTimeValStrStream;
     double levelTimeInSecs = gameModel->GetLevelTimeInSeconds();
@@ -114,13 +114,13 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
         levelTimeValStrStream << seconds;
     }
     this->levelTimeValueLabel.SetText(levelTimeValStrStream.str());
-    this->levelTimeValueLabel.SetScale(0.9f);
+    this->levelTimeValueLabel.SetScale(this->display->GetTextScalingFactor() * 0.9f);
     this->levelTimeValueLabel.SetColour(smallScoreLabelColour);
 
-    this->totalScoreLabel.SetScale(1.2f);
-    this->scoreValueLabel.SetScale(1.3f);
+    this->totalScoreLabel.SetScale(this->display->GetTextScalingFactor() * 1.2f);
+    this->scoreValueLabel.SetScale(this->display->GetTextScalingFactor() * 1.3f);
     this->maxTotalLabelHeight = this->totalScoreLabel.GetHeight();
-    this->newHighScoreLabel.SetDropShadow(Colour(0,0,0), 0.1f);
+    this->newHighScoreLabel.SetDropShadow(Colour(0,0,0), this->display->GetTextScalingFactor() * 0.1f);
 
 
 	// Pause all game play elements in the game model
@@ -148,7 +148,7 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
 
 
 	// Setup the label for the press any key text...
-	this->pressAnyKeyLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+	this->pressAnyKeyLabel.SetDropShadow(Colour(0, 0, 0), this->display->GetTextScalingFactor() * 0.1f);
 	this->pressAnyKeyLabel.SetScale(this->display->GetTextScalingFactor());
 
 	// Set the footer colour flash animation
@@ -166,13 +166,13 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
 	this->footerColourAnimation.SetRepeat(true);
 
     this->levelCompleteLabel.SetColour(Colour(1.0f, 0.8f, 0.0f));
-    this->levelCompleteLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
+    this->levelCompleteLabel.SetDropShadow(Colour(0, 0, 0), this->display->GetTextScalingFactor() * 0.1f);
 
     this->levelNameLabel = new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), 
         display->GetCamera().GetWindowWidth() - 2*LEVEL_NAME_HORIZONTAL_PADDING, 
         std::string("\"") + this->display->GetModel()->GetCurrentLevel()->GetName() + std::string("\""));
     this->levelNameLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
-    this->levelNameLabel->SetDropShadow(Colour(0,0,0), 0.1f);
+    this->levelNameLabel->SetDropShadow(Colour(0,0,0), this->display->GetTextScalingFactor() * 0.1f);
 
     double nextStartTime = BEGIN_ANIM_END_TIME;
     double nextEndTime   = nextStartTime + PER_SCORE_VALUE_FADE_IN_TIME;
@@ -364,7 +364,7 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
     yPos -= (SCORE_INBETWEEN_VERTICAL_PADDING + 
         std::max<size_t>(this->itemsAcquiredTextLabel->GetHeight(), this->itemsAcquiredValueLabel.GetHeight()));
     this->DrawTotalTimeLabel(yPos, camera.GetWindowWidth());
-    yPos -= (FINAL_SCORE_INBETWEEN_VERTICAL_PADDING + 
+    yPos -= (this->display->GetTextScalingFactor() * FINAL_SCORE_INBETWEEN_VERTICAL_PADDING + 
         std::max<size_t>(this->levelTimeTextLabel->GetHeight(), this->levelTimeValueLabel.GetHeight()));
 
     // Draw the total score

@@ -1,7 +1,7 @@
 /**
  * ItemListView.h
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2010
  *
  * You may not use this work for commercial purposes.
@@ -28,6 +28,7 @@ public:
 	static const int NO_ITEM_SELECTED_INDEX;
     static const int DEFAULT_NUM_ITEMS_PER_ROW;
     static const int MAX_ITEM_WIDTH;
+    static const int MIN_ITEM_WIDTH;
     static const int HORIZ_ITEM_ACTIVATED_BORDER;
     static const int BLACK_BORDER_HEIGHT;
 
@@ -90,6 +91,8 @@ public:
 
     size_t GetListWidth() const;
     size_t GetSmallestBorderSize() const;
+
+    void AdjustSizeToHeight(size_t height);
 
     void ButtonPressed(const GameControl::ActionButton& pressedButton);
 

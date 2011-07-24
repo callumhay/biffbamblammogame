@@ -1,7 +1,7 @@
 /**
  * GameEventsListener.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2009
  *
  * You may not use this work for commercial purposes.
@@ -58,11 +58,10 @@ GameEventsListener::~GameEventsListener() {
 void GameEventsListener::GameCompletedEvent() {
 	debug_output("EVENT: Game completed");
 
-	// Set the state to the end of game display
-	this->display->SetCurrentState(new GameCompleteDisplayState(this->display));
-
 	// Stop world background music (if it's still going)
 	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldBackgroundMusic);
+	// Queue the game complete state
+    this->display->AddStateToQueue(DisplayState::GameComplete);
 }
 
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {

@@ -1,7 +1,7 @@
 /**
  * GameCompleteDisplayState.h
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -13,21 +13,17 @@
 #define __GAMECOMPLETEDISPLAYSTATE_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
 
 #include "DisplayState.h"
+#include "BBBTitleDisplay.h"
 
 /**
  * State for displaying the completion of the game animation and
  * end credits.
  */
 class GameCompleteDisplayState : public DisplayState {
-
-private:
-	static const char* GAME_COMPLETE_TEXT;
-	TextLabel2D gameCompleteLabel;
-	float gameCompleteLabelRasterWidth;
-
 public:
 	GameCompleteDisplayState(GameDisplay* display);
 	~GameCompleteDisplayState();
@@ -39,6 +35,38 @@ public:
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
 	void DisplaySizeChanged(int width, int height);
 	DisplayState::DisplayStateType GetType() const;
+
+
+private:
+	static const char* DEMO_COMPLETE_TITLE_TEXT;
+    static const char* CONGRATS_TEXT;
+    static const char* NOTE_TEXT;
+
+    static const float TITLE_Y_GAP;
+    static const float TITLE_CONGRATS_Y_GAP;
+    static const float CONGRATS_NOTE_Y_GAP;
+    static const float TEXT_LABEL_X_PADDING;
+
+    static const float CAM_DIST_FROM_ORIGIN;
+
+    static const double FADE_IN_TIME;
+    static const double FADE_OUT_TIME;
+
+	TextLabel2D titleLabel;
+    TextLabel2DFixedWidth* congratsLabel;
+    TextLabel2DFixedWidth* noteLabel;
+
+    TextLabel2D creditLabel;
+    TextLabel2D licenseLabel;
+
+    BBBTitleDisplay bbbTitleDisplay;
+
+	float gameCompleteLabelRasterWidth;
+   
+    bool goBackToMainMenu;
+    AnimationLerp<float> fadeAnim;
+
+    DISALLOW_COPY_AND_ASSIGN(GameCompleteDisplayState);
 };
 
 inline void GameCompleteDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {

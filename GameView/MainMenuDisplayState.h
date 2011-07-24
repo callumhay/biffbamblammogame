@@ -1,7 +1,7 @@
 /**
  * MainMenuDisplayState.h
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2009
  *
  * You may not use this work for commercial purposes.
@@ -23,6 +23,7 @@
 
 #include "GameMenu.h"
 #include "DisplayState.h"
+#include "BBBTitleDisplay.h"
 
 #include "../ConfigOptions.h"
 
@@ -37,12 +38,7 @@ class CgFxBloom;
 class MainMenuDisplayState : public DisplayState {
 
 private:
-	// Title and menu text
-	static const char* TITLE_TEXT;
-	static const char* TITLE_BIFF_TEXT;
-	static const char* TITLE_BAM_TEXT;
-	static const char* TITLE_BLAMMO_TEXT;
-
+	// Menu text
 	static const char* NEW_GAME_MENUITEM;
 	static const char* PLAY_LEVEL_MENUITEM;
     static const char* BLAMMOPEDIA_MENUITEM;
@@ -64,6 +60,9 @@ private:
 	// The configuration options for the game
 	ConfigOptions cfgOptions;
 
+    // Title display
+    BBBTitleDisplay titleDisplay;
+
 	// Indices for the main menu
 	int newGameMenuItemIndex;
 	int playLevelMenuItemIndex;
@@ -83,20 +82,15 @@ private:
 	static const unsigned int MENU_Y_INDENT = 320;
 	static const unsigned int MENU_ITEM_PADDING = 15;
 
-	float biffTitleWidth, bamTitleWidth, blammoTitleWidth;
-
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
 
-	// Particle-related variables
-	ESPPointEmitter biffEmitter, bamEmitter, blammoEmitter;
-	ESPPointEmitter biffTextEmitter, bamTextEmitter, blammoTextEmitter;
-	
-	//ESPParticleColourEffector particleFader;
+    TextLabel2D madeByTextLabel;
+    TextLabel2D licenseLabel;
+
 	ESPMultiColourEffector particleFadeInAndOut;
 	ESPParticleScaleEffector particleSmallGrowth;
 	ESPParticleScaleEffector particleMediumGrowth;
-
 
 	std::vector<Texture*> bangTextures;
 	

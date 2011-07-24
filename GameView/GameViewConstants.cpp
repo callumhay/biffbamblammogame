@@ -1,7 +1,7 @@
 /**
  * GameViewConstants.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -28,6 +28,9 @@ MESH_DIR(MESH_DIRECTORY),
 SHADER_DIR(SHADER_DIRECTORY),
 TEXTURE_DIR(TEXTURE_DIRECTORY),
 SOUND_DIR(SOUND_DIRECTORY),
+
+GAME_CREDITS_TEXT("A game by Callum Hay"),
+LICENSE_TEXT("(CC) BY-NC, 2011"),
 
 // Shader Asset Paths
 CGFX_CEL_SHADER(SHADER_DIRECTORY                    "/CelShading.cgfx"),

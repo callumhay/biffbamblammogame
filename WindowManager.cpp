@@ -1,7 +1,7 @@
 /**
  * WindowManager.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -155,7 +155,12 @@ std::vector<std::string> WindowManager::GetPossibleResolutionsList() {
 	while (EnumDisplaySettings(NULL, count, &devMode) != NULL) {
 		std::stringstream resolutionStrStream;
 		resolutionStrStream << devMode.dmPelsWidth << " x " << devMode.dmPelsHeight;
-		
+        // Don't accept resolutions under 800 x *
+        if (devMode.dmPelsWidth < 800) {
+            count++;
+            continue;
+        }
+
 		// We use the set as a detector for unique resolutions, and we only insert
 		// unique ones into the vector that we will be returning
 		resolutionSet.insert(resolutionStrStream.str());
