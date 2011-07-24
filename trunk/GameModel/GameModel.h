@@ -358,7 +358,8 @@ public:
 
 		// Can only move the paddle if the state exists and is not paused
 		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
-			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
+		   (this->pauseBitField & GameModel::PauseState) == 0x0  &&
+           (this->pauseBitField & GameModel::PauseGame) == 0x0) {
 				 this->currState->MovePaddleKeyPressed(paddleMovement);
 		}
 	}
@@ -367,7 +368,8 @@ public:
 	void ShootActionReleaseUse() {
 		// Can only release the ball if the state exists and is not paused
 		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
-			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
+			 (this->pauseBitField & GameModel::PauseState) == 0x0 &&
+             (this->pauseBitField & GameModel::PauseGame) == 0x0) {
 			this->currState->BallReleaseKeyPressed();
 		}
 	}
@@ -375,14 +377,16 @@ public:
     void BallBoostDirectionPressed(int x, int y) {
 		// Can only do this if the state exists and is not paused
 		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
-			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
+		   (this->pauseBitField & GameModel::PauseState) == 0x0 &&
+           (this->pauseBitField & GameModel::PauseGame) == 0x0) {
 			this->currState->BallBoostDirectionPressed(x, y);
 		}
     }
     void BallBoostDirectionReleased() {
 		// Can only do this if the state exists and is not paused
 		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
-			 (this->pauseBitField & GameModel::PauseState) == 0x0) {
+		   (this->pauseBitField & GameModel::PauseState) == 0x0 &&
+           (this->pauseBitField & GameModel::PauseGame) == 0x0) {
 			this->currState->BallBoostDirectionReleased();
 		}
     }

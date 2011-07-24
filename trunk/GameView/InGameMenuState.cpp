@@ -122,7 +122,8 @@ void InGameMenuState::RenderFrame(double dT) {
 void InGameMenuState::ResumeTheGame() {
 	// Resume world sounds - these are initially paused when coming to this state (in the constructor)
 	this->display->GetAssets()->GetSoundAssets()->UnpauseWorldSounds();
-	// Unpause the game
+	
+    // Unpause the game
 	this->display->GetModel()->UnsetPause(GameModel::PauseGame);
 
 	// Go back to the in-game display state

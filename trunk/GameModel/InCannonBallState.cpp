@@ -28,6 +28,7 @@ BallState(ball), cannonBlock(cannonBlock), previousState(prevState) {
 	// The ball also should be ignoring collisions until it's fired back out of the cannon
 	this->gameBall->SetBallBallCollisionsDisabled();
 	this->gameBall->SetBallBlockCollisionsDisabled();
+
 }
 
 InCannonBallState::~InCannonBallState() {	

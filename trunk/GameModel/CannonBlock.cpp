@@ -147,6 +147,9 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 	ball.SetLastPieceCollidedWith(this);
 	this->loadedBall = &ball;
 
+    // Disable any boosting for the ball
+    gameModel->BallBoostDirectionReleased();
+
 	return this;
 }
 
