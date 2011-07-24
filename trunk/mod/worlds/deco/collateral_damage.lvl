@@ -3,10 +3,10 @@ Collateral Damage
 S S S S S S S S S S S S S 
 S E E E E E E E E E E E S 
 S E E E L E E E L E E E S 
-S R R R S G G G S R R R S 
-S O O O S Y L Y S O O O S 
-S Y Y Y S T(S,lr) S T(S,ll) S Y Y Y S 
-S G G G S S I S S G G G S 
+S E E E S G G G S E E E S 
+S R R R S Y L Y S R R R S 
+S O O O S T(S,lr) S T(S,ll) S O O O S 
+S Y Y Y S S I S S Y Y Y S 
 S G G G S S S S S G G G S 
 S T(G,ul) E T(G,ur) G G G G G T(G,ul) E T(G,ur) S 
 S E E L O G G G O L E E S 
@@ -17,7 +17,7 @@ S E E R O G G G O R E E S
 S E E R G G G G G R E E S 
 S Y Y R G G G G G R Y Y S 
 S G G S G G G G G S G G S 
-S E E S R R R R R S E E S 
+S E E S Y Y Y Y Y S E E S 
 S E E T(S,ur) R R R R R T(S,ul) E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -30,12 +30,19 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 
+STARS:
+19000
+26000
+37000
+49000
+65000
+
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

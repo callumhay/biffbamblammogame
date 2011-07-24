@@ -95,9 +95,6 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
 
-	// We only create boundries in cases where neighbours exist AND they are empty 
-	// (i.e., the ball can actually get to them).
-
 	// Left boundry of the piece
     if (leftNeighbor != NULL && leftNeighbor->GetType() != LevelPiece::Solid) {
 		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 

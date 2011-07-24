@@ -64,6 +64,7 @@ private:
 	int numInterimBlocksDestroyed;
     int maxInterimBlocksDestroyed;
 	int currLivesLeft;
+    int livesAtStartOfLevel;
     int numGoodItemsAcquired, numNeutralItemsAcquired, numBadItemsAcquired;
     double totalLevelTimeInSeconds;
 
@@ -84,7 +85,7 @@ private:
     bool progressLoadedSuccessfully;
 
 	// Private getters and setters ****************************************
-	void SetCurrentWorldAndLevel(int worldNum, int levelNum);
+	void SetCurrentWorldAndLevel(int worldNum, int levelNum, bool sendNewWorldEvent);
 
 	GameWorld* GetCurrentWorld() const {
 		return this->worlds[this->currWorldNum];
@@ -136,6 +137,8 @@ private:
 	bool RemoveActiveGameItemsOfGivenType(const GameItem::ItemType& type);
     void RemoveActiveGameItemsForThisBallOnly(const GameBall* ball);
     
+    void ResetLevelValues(int numLives);
+
 public:
 	// Pause functionality for the game:
 	// NoPause: no pauses at all in the game model execution.
@@ -195,6 +198,7 @@ public:
 	// Level/World related queries *****************************************
     void StartGameAtWorldAndLevel(int worldNum, int levelNum);
 	void BeginOrRestartGame();
+    void ResetCurrentLevel();
 	void ClearGameState();
 	
     const std::vector<GameWorld*>& GetGameWorlds() const {
@@ -247,6 +251,9 @@ public:
 	int GetLivesLeft() const {
 		return this->currLivesLeft;
 	}
+    int GetLivesAtStartOfLevel() const {
+        return this->livesAtStartOfLevel;
+    }
 	void SetLivesLeft(int lives) {
 		assert(lives >= 0);
 

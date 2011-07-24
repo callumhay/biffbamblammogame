@@ -119,13 +119,25 @@ void CgFxMaterialEffect::LoadParameters() {
  */
 void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	// Transforms
-	cgGLSetStateMatrixParameter(this->wvpMatrixParam,     CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-	cgGLSetStateMatrixParameter(this->worldMatrixParam,   CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
-	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
-	
+	cgGLSetStateMatrixParameter(this->wvpMatrixParam, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+
+	// Obtain the current model view and inverse view transforms
+	float tempMVXfVals[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, tempMVXfVals);
+	Matrix4x4 tempMVXf(tempMVXfVals);
 	const Matrix4x4& invViewXf = camera.GetInvViewTransform();
-	cgGLSetMatrixParameterfc(this->viewInvMatrixParam, invViewXf.begin());
-	
+    cgGLSetMatrixParameterfc(this->viewInvMatrixParam, invViewXf.begin());
+
+	// Make sure that JUST the world transform is set
+	glPushMatrix();
+	glLoadIdentity();
+	glMultMatrixf(invViewXf.begin());
+	glMultMatrixf(tempMVXf.begin());
+	// Set the world transform parameters
+	cgGLSetStateMatrixParameter(this->worldITMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
+	cgGLSetStateMatrixParameter(this->worldMatrixParam, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY);
+	glPopMatrix();    
+    
 	// Textures
 	if (this->properties->diffuseTexture != NULL) {
 		cgGLSetTextureParameter(this->texSamplerParam, this->properties->diffuseTexture->GetTextureID());
@@ -158,9 +170,9 @@ void CgFxMaterialEffect::SetupBeforePasses(const Camera& camera) {
 	if (this->properties->geomType == MaterialProperties::MATERIAL_GEOM_FG_TYPE) {
 		// Foreground: also has a Ball light
 		
-		const Point3D& ballLightPos				= this->ballLight.GetPosition();
-		const Colour& ballLightDiffuse		= this->ballLight.GetDiffuseColour();
-		float ballLightLinearAtten				= this->ballLight.GetLinearAttenuation();
+		const Point3D& ballLightPos      = this->ballLight.GetPosition();
+		const Colour& ballLightDiffuse   = this->ballLight.GetDiffuseColour();
+		float ballLightLinearAtten       = this->ballLight.GetLinearAttenuation();
 
 		// Ball
 		cgGLSetParameter3fv(this->ballPointLightPosParam,     ballLightPos.begin());

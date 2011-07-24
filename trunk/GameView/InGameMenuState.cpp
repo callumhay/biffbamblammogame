@@ -12,6 +12,7 @@
 #include "InGameMenuState.h"
 #include "InGameDisplayState.h"
 #include "MainMenuDisplayState.h"
+#include "LevelStartDisplayState.h"
 #include "GameDisplay.h"
 #include "GameAssets.h"
 
@@ -53,13 +54,29 @@ InGameMenuState::~InGameMenuState() {
  */
 void InGameMenuState::RenderFrame(double dT) {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	switch (this->nextAction) {
 
 		case InGameMenuState::ResumeGame:
 			this->ResumeTheGame();
 			return;
+
+        case InGameMenuState::RestartLevel:
+			// Clean up any misc. visual effects
+			this->display->GetAssets()->DeactivateMiscEffects();
+			// Kill all sounds
+			this->display->GetAssets()->GetSoundAssets()->StopAllSounds();
+
+            // Reset the level
+            this->display->GetModel()->ResetCurrentLevel();
+
+            // Un-Pause the game and go to the start of level state which will have
+            // been queued when we told the model to reset the level
+            this->display->GetModel()->UnsetPause(GameModel::PauseGame);
+            this->display->SetCurrentStateAsNextQueuedState();
+
+            return;
 
 		case InGameMenuState::ReturnToMainMenu:
 			// Clean up any misc. visual effects
@@ -160,6 +177,11 @@ void InGameMenuState::InitTopMenu() {
 	const float dropShadowAmtLg = 0.10f;
 	const Colour dropShadowColour = Colour(0.0f, 0.0f, 0.0f);
 
+    static const char* VERIFY_MENU_TEXT = "All progress in this level will be lost, exit to the main menu?";
+    static const char* VERIFY_MENU_YES  = "Yes!";
+    static const char* VERIFY_MENU_NO   = "NOoo!";
+
+    // Resume Item...
 	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  "Resume");
 	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),     "Resume");
 	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
@@ -170,6 +192,21 @@ void InGameMenuState::InitTopMenu() {
 	// Add items to the menu in their order (first to last)
 	this->resumeItem = this->topMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
 	
+    // Restart Item...
+	tempLabelSm.SetText("Restart Level");
+	tempLabelLg.SetText("Restart Level");
+
+	VerifyMenuItem* restartLevelItem = new VerifyMenuItem(tempLabelSm, tempLabelLg, 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
+
+	restartLevelItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
+	restartLevelItem->SetVerifyMenuText(VERIFY_MENU_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
+	restartLevelItem->SetEventHandler(this->verifyMenuEventHandler);
+
+    this->restartItem = this->topMenu->AddMenuItem(restartLevelItem);
+
 	// The exit/return to main menu item has a verify menu...
 	tempLabelSm.SetText("Return to Main Menu");
 	tempLabelLg.SetText("Return to Main Menu");
@@ -180,7 +217,7 @@ void InGameMenuState::InitTopMenu() {
 		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
 
 	returnToMainMenuItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
-	returnToMainMenuItem->SetVerifyMenuText("All unsaved progress will be lost, exit to the main menu?", "Yes!", "NOoo!");
+	returnToMainMenuItem->SetVerifyMenuText(VERIFY_MENU_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
 	returnToMainMenuItem->SetEventHandler(this->verifyMenuEventHandler);
 
 	this->returnToMainItem = this->topMenu->AddMenuItem(returnToMainMenuItem);
@@ -195,7 +232,7 @@ void InGameMenuState::InitTopMenu() {
 		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
 
 	exitToDesktopMenuItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
-	exitToDesktopMenuItem->SetVerifyMenuText("All unsaved progress will be lost, exit to the desktop?", "Yes!", "NOoo!");
+	exitToDesktopMenuItem->SetVerifyMenuText(VERIFY_MENU_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
 	exitToDesktopMenuItem->SetEventHandler(this->verifyMenuEventHandler);
 
 	this->exitToDesktopItem = this->topMenu->AddMenuItem(exitToDesktopMenuItem);
@@ -220,7 +257,10 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemInde
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
-	if (itemIndex == this->inGameMenuState->returnToMainItem) {
+    if (itemIndex == this->inGameMenuState->restartItem) {
+        this->inGameMenuState->nextAction = InGameMenuState::RestartLevel;
+    }
+    else if (itemIndex == this->inGameMenuState->returnToMainItem) {
 		this->inGameMenuState->nextAction = InGameMenuState::ReturnToMainMenu;
 	}	
 	else if (itemIndex == this->inGameMenuState->exitToDesktopItem) {

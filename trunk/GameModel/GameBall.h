@@ -199,9 +199,13 @@ public:
 	}
 	// Set the current speed of this ball
 	void SetSpeed(float speed) {
+
 		this->currSpeed    = speed;
 		this->gravitySpeed = speed;
 	}
+    void TurnOffBoost() {
+        this->boostSpdDecreaseCounter = BOOST_TEMP_SPD_INCREASE_AMT;
+    }
 
 	int32_t GetBallType() const {
 		return this->currType;

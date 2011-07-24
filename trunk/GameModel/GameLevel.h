@@ -58,6 +58,8 @@ public:
 	static const char* POWERNEUTRAL_ITEM_TYPES_KEYWORD;
 	static const char* POWERDOWN_ITEM_TYPES_KEYWORD;
 
+    static const char* STAR_POINT_MILESTONE_KEYWORD;
+
 	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 7;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;
 
@@ -177,37 +179,36 @@ public:
     int GetNumStarsForScore(long score) const;
     int GetHighScoreNumStars() const { return this->GetNumStarsForScore(this->highScore); }
 
-private:	
-	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
-    std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
-
-    size_t levelNum;                // The zero-based index of this level in its world
-	size_t piecesLeft;              // Pieces left before the end of the level
-	size_t width, height;           // Size values for the level
-	bool ballSafetyNetActive;
-	BoundingLines safetyNetBounds;
-	std::string filepath;
-	std::string levelName;
-    
-    //bool isLocked;    // Whether this level has been unlocked or not
-
-
-    // Persistant scoring variables - used to mark previously saved scores and calculate high scores
-    int starAwardScores[5];   // Scores where stars are awarded
-    long highScore;           // Current high score for this level
-    bool newHighScore;        // If a new high score was achieved on the last play through of this level
-
-	std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
-	size_t randomItemProbabilityNum;                    // A number >= 0 for random item probability in the level
-
+private:
 	// Map of the pairings of tesla blocks and their active lightning arc that enforces bounds
 	// on the level as long as it's active
 	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D> teslaLightning;
 
-	//QuadTree* levelTree;	// A quad tree representing the boundries of this entire level and all its pieces
+	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
+    std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
+
+	BoundingLines safetyNetBounds;
+	std::string filepath;
+	std::string levelName;
+
+    size_t levelNum;                    // The zero-based index of this level in its world
+	size_t piecesLeft;                  // Pieces left before the end of the level
+	size_t width, height;               // Size values for the level
+    size_t randomItemProbabilityNum;    // A number >= 0 for random item probability in the level
+
+    std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
+
+    // Persistant scoring variables - used to mark previously saved scores and calculate high scores
+    long starAwardScores[5];   // Scores where stars are awarded
+    long highScore;            // Current high score for this level
+
+    bool newHighScore;        // If a new high score was achieved on the last play through of this level
+    bool ballSafetyNetActive;
+	//bool isLocked;    // Whether this level has been unlocked or not
 
 	GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
-		const std::vector<std::vector<LevelPiece*> >& pieces, const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum);
+		const std::vector<std::vector<LevelPiece*> >& pieces, const std::vector<GameItem::ItemType>& allowedDropTypes,
+        size_t randomItemProbabilityNum, long* starAwardScores);
 	
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
 	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;

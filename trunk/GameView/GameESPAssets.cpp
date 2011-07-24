@@ -258,8 +258,8 @@ void GameESPAssets::KillAllActiveEffects(bool killProjectiles) {
 
 		std::list<ESPEmitter*>& currEmitterList = iter->second;
 		for (std::list<ESPEmitter*>::iterator iter2 = currEmitterList.begin(); iter2 != currEmitterList.end(); ++iter2) {
-				delete *iter2;
-				*iter2 = NULL;
+		    delete *iter2;
+		    *iter2 = NULL;
 		}
 		currEmitterList.clear();
 	}

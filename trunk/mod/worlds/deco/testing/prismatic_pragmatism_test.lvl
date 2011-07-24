@@ -26,6 +26,13 @@ S E E E E E E E E E E S S S S
 S E E E E E E E E E E S S S S 
 S E E E E E E E E E E E E E W(0) 
 
+STARS:
+100
+500
+1000
+2000
+5000
+
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2

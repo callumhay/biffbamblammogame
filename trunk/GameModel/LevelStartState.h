@@ -18,7 +18,8 @@
 class LevelStartState : public GameState {
 
 public:
-    LevelStartState(GameModel* gm) : GameState(gm) {}
+    LevelStartState(GameModel* gm) : GameState(gm) {
+    }
     ~LevelStartState() {}
 
 	GameState::GameStateType GetType() const {
@@ -38,6 +39,8 @@ public:
         // Reset other stats for a level
         this->gameModel->ResetNumAcquiredItems();
         this->gameModel->ResetLevelTime();
+
+        this->gameModel->livesAtStartOfLevel = this->gameModel->GetLivesLeft();
 
         // Place the ball back on the paddle, and let the level begin!
         this->gameModel->SetNextState(GameState::BallOnPaddleStateType);

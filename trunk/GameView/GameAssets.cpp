@@ -472,7 +472,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 		Point3D newAvgBallPos =  gameModel.GetTransformInfo()->GetGameTransform() * avgBallPosition;
 
 		// Set the ball light to the correct position
-		this->lightAssets->GetBallLight().SetPosition(newAvgBallPos);
+        this->lightAssets->GetBallLight().SetPosition(newAvgBallPos);
 	}
 	else {
 		avgBallColour = Colour(0,0,0);
@@ -1152,9 +1152,13 @@ void GameAssets::LoadWorldAssets(const GameWorld& world) {
 		// Make sure the sound and world assets are in sync
 		assert(this->soundAssets->GetActiveWorldSounds() == world.GetStyle());
 	}
-	this->worldAssets->ResetToInitialState();
 
 	LoadingScreen::GetInstance()->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
+    this->ReinitializeAssets();
+}
+
+void GameAssets::ReinitializeAssets() {
+	this->worldAssets->ResetToInitialState();
 
 	// Reinitialize the life HUD elements
 	this->lifeHUD->Reinitialize();

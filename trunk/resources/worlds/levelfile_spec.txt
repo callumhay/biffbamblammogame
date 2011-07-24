@@ -63,3 +63,31 @@ The following specifies the .lvl format.
 //     {u, d, l, r} for up, down, left and right, respectively.
 
 <block list in order of top-left to bottom-right>
+
+// After the blocks are enumerated, the star milestone totals
+// are declared, they begin with the keyword "STARS:" and 5 values
+// are then listed, each on a newline. The values listed correspond to
+// the number of points required to get that star starting with the first
+// listed line.
+
+STARS:
+<point_milestone_for_star_1>
+<point_milestone_for_star_2>
+<point_milestone_for_star_3>
+<point_milestone_for_star_4>
+<point_milestone_for_star_5>
+
+
+// The final set of values are a listing of the various items and a
+// number that defines their probability/likelihood of being dropped
+// in the level. There are several options here - each item may be
+// listed seperately with its item name and a number
+// e.g., "PaddleGrow 2"
+//
+// In this case the number is from 0 to 2, where 0 has no likelihood of
+// dropping and 2 is most likely.
+//
+// The keywords "all", "powerups", "powerneutrals" and "powerdowns"
+// may also be used along with a number to signify all of those item types.
+
+<item_name_or_keyword> <likelihood_number_[0,2]>

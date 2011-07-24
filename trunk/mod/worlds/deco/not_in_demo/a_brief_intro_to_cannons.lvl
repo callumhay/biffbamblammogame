@@ -26,12 +26,19 @@ E E E E F(r) E E E E E E E E E S
 E E C(90) E F(r) E E E E E E E E E S 
 E C(90) E E F(r) E E E E E E E E E S 
 
+STARS:
+100
+500
+1000
+2000
+5000
+
 PaddleGrow 2
 PoisonPaddle 1
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 2

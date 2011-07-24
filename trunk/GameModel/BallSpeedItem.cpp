@@ -120,6 +120,7 @@ void BallSpeedItem::Deactivate() {
 	for (std::list<GameBall*>::iterator ballIter = gameBalls.begin(); ballIter != gameBalls.end(); ++ballIter) {
 		GameBall* currBall = *ballIter;
 		assert(currBall != NULL);
+        currBall->TurnOffBoost();
 		currBall->SetSpeed(GameBall::NormalSpeed);
 	}
 

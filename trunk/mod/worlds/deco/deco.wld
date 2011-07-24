@@ -4,20 +4,9 @@ Deco
 
 resources/textures/deco_world_select_256x256.jpg
 
-
-resources/worlds/deco/an_almost_empty_level.lvl
 resources/worlds/deco/simple_beginnings.lvl
-resources/worlds/deco/bombs_are_your_friend.lvl
-resources/worlds/deco/chain_of_boom.lvl
-resources/worlds/deco/boost_your_way_to_victory.lvl
-resources/worlds/deco/heres_ink_in_ur_eye.lvl
-resources/worlds/deco/death_from_above.lvl
-resources/worlds/deco/one_way_street.lvl
-resources/worlds/deco/back_and_forth.lvl
-resources/worlds/deco/freezing_hot.lvl
+resources/worlds/deco/spike_jonze.lvl
+resources/worlds/deco/collateral_damage.lvl
 resources/worlds/deco/a_sticky_situation.lvl
+resources/worlds/deco/shutin.lvl
 resources/worlds/deco/dividing_lines.lvl
-resources/worlds/deco/prismatic_pragmatism.lvl
-resources/worlds/deco/a_brief_intro_to_cannons.lvl
-resources/worlds/deco/portals_and_tesla_coils.lvl
-resources/worlds/deco/test_lots_of_cannons.lvl

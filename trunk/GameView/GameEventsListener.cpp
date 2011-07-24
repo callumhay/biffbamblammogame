@@ -91,12 +91,9 @@ void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
 void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLevel& level) {
 	UNUSED_PARAMETER(world);
 
-	// Set up the initial game camera for the level
-	//this->display->GetCamera().Reset();
-	//this->display->GetCamera().SetTransform(this->display->GetModel()->GetTransformInfo()->GetCameraTransform());
-
 	// Load the level geometry/mesh data for display...
 	this->display->GetAssets()->LoadNewLevelMesh(level);
+    this->display->GetAssets()->ReinitializeAssets();
 
     // Any new blocks that are being revealed in this level should affect the blammopedia...
     //const std::vector<std::vector<LevelPiece*> >& levelPieces = level.GetCurrentLevelLayout();
@@ -792,12 +789,16 @@ void GameEventsListener::BallBoostExecutedEvent(const BallBoostModel& boostModel
 void GameEventsListener::BallBoostGainedEvent() {
     BallBoostHUD* boostHUD = this->display->GetAssets()->GetBoostHUD();
 
-    // Effects on the ball that might bring attention to the newly available boost...
-    // NOTE: Make sure this happens BEFORE telling the HUD that it's gained the boost -
-    // that way we get the correct colour from it
-    const std::list<GameBall*>& balls = this->display->GetModel()->GetGameBalls();
-    for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
-        this->display->GetAssets()->GetESPAssets()->AddBallAcquiredBoostEffect(**iter, boostHUD->GetCurrentBoostColour());
+    // Don't show any effects if the ball is in the throes of death
+    if (this->display->GetModel()->GetCurrentStateType() != GameState::BallDeathStateType) {
+
+        // Effects on the ball that might bring attention to the newly available boost...
+        // NOTE: Make sure this happens BEFORE telling the HUD that it's gained the boost -
+        // that way we get the correct colour from it
+        const std::list<GameBall*>& balls = this->display->GetModel()->GetGameBalls();
+        for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
+            this->display->GetAssets()->GetESPAssets()->AddBallAcquiredBoostEffect(**iter, boostHUD->GetCurrentBoostColour());
+        }
     }
     
     // Make the HUD change for indicating the number of boosts that the player has

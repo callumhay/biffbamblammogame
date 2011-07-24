@@ -34,19 +34,33 @@ namespace TriangleBlock {
 	Matrix4x4 GetInvOrientationMatrix(Orientation orient);
 
 	Vector2D GetSideNormal(bool generateReflectRefractNormals, SideType side, Orientation orient);
+
+    static inline bool IsTriangleType(const LevelPiece& piece) {
+        return (piece.GetType() == LevelPiece::BreakableTriangle || piece.GetType() == LevelPiece::SolidTriangle ||
+               piece.GetType() == LevelPiece::PrismTriangle);
+    }
+};
+
+class TriangleBlockInterface {
+public:
+    virtual TriangleBlock::Orientation GetOrientation() const = 0;
 };
 
 /**
  * Triangle block that acts like breakable blocks. Only major difference is its shape
  * and orientation.
  */
-class BreakableTriangleBlock : public BreakableBlock {
+class BreakableTriangleBlock : public BreakableBlock, public TriangleBlockInterface {
 protected:
 	TriangleBlock::Orientation orient;	// Orientation of the triangle - i.e., where the apex corner is located
 
 public:
 	BreakableTriangleBlock(char type, TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc);
 	~BreakableTriangleBlock();
+
+    TriangleBlock::Orientation GetOrientation() const {
+        return this->orient;
+    }
 
 	LevelPieceType GetType() const {
 		return LevelPiece::BreakableTriangle;
@@ -66,13 +80,17 @@ public:
  * Triangle block that acts like solid blocks. Only major difference is its shape
  * and orientation.
  */
-class SolidTriangleBlock : public SolidBlock {
+class SolidTriangleBlock : public SolidBlock, public TriangleBlockInterface {
 protected:
 	TriangleBlock::Orientation orient;	// Orientation of the triangle - i.e., where the apex corner is located
 
 public:
 	SolidTriangleBlock(TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc);
 	~SolidTriangleBlock();
+
+    TriangleBlock::Orientation GetOrientation() const {
+        return this->orient;
+    }
 
 	LevelPieceType GetType() const {
 		return LevelPiece::SolidTriangle;
@@ -94,13 +112,17 @@ public:
  * Triangle block that acts like prism blocks - only it can reflect lasers based on its
  * different shape and orientation.
  */
-class PrismTriangleBlock : public PrismBlock {
+class PrismTriangleBlock : public PrismBlock, public TriangleBlockInterface {
 protected:
 	TriangleBlock::Orientation orient;	// Orientation of the triangle - i.e., where the apex corner is located
 	BoundingLines reflectRefractBounds;	// Bounds used for reflection/refraction of beams
 public:
 	PrismTriangleBlock(TriangleBlock::Orientation orientation, unsigned int wLoc, unsigned int hLoc);
 	~PrismTriangleBlock();
+
+    TriangleBlock::Orientation GetOrientation() const {
+        return this->orient;
+    }
 
 	LevelPieceType GetType() const {
 		return LevelPiece::PrismTriangle;

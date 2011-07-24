@@ -34,7 +34,7 @@ const float LevelCompleteSummaryDisplayState::STAR_SIZE                         
 const float LevelCompleteSummaryDisplayState::STAR_HORIZONTAL_GAP                            = 10.0f;
 const float LevelCompleteSummaryDisplayState::SCORE_LABEL_SIDE_PADDING                       = 100.0f;
 
-const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND                = 10000;
+const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND                = 20000;
 const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     = 0.25;
 
 LevelCompleteSummaryDisplayState::LevelCompleteSummaryDisplayState(GameDisplay* display) :
