@@ -1,7 +1,7 @@
 /**
  * LaserBeamPaddleItem.h
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2009
  *
  * You may not use this work for commercial purposes.

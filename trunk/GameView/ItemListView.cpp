@@ -1,7 +1,7 @@
 /**
  * ItemListView.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2010
  *
  * You may not use this work for commercial purposes.
@@ -25,6 +25,7 @@
 const int ItemListView::NO_ITEM_SELECTED_INDEX      = -1;
 const int ItemListView::DEFAULT_NUM_ITEMS_PER_ROW   = 4;
 const int ItemListView::MAX_ITEM_WIDTH              = 200;
+const int ItemListView::MIN_ITEM_WIDTH              = 70;
 
 const int ItemListView::BLACK_BORDER_HEIGHT         = 100;
 const int ItemListView::HORIZ_ITEM_ACTIVATED_BORDER = 50;
@@ -359,6 +360,29 @@ ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const std
     }
 
 	return newItem;
+}
+
+void ItemListView::AdjustSizeToHeight(size_t height) {
+    // Adjust the number of items per row, pixel width and thus pixel height so that
+    // all the items fit into the height provided
+    while ((ceilf(static_cast<float>(this->items.size())/static_cast<float>(this->numItemsPerRow)) * this->itemPixelHeight) > height) {
+        this->numItemsPerRow++;
+
+        int itemWidth = (this->listWidth - 2 * this->horizontalBorder - (this->numItemsPerRow -1) * this->horizontalGap) / this->numItemsPerRow;
+	    if (itemWidth < 0) {
+		    assert(false);
+		    return;
+	    }
+        // Make sure the item width does not exceed the maximum - if it does then we need to scale the item width down...
+        while (itemWidth > MAX_ITEM_WIDTH) {
+            this->numItemsPerRow++;
+            itemWidth = (this->listWidth - 2 * this->horizontalBorder - (this->numItemsPerRow -1) * this->horizontalGap) / this->numItemsPerRow;
+        }
+        
+        this->itemPixelWidth = itemWidth;
+        this->itemPixelHeight = this->itemPixelWidth / 2;
+    }
+    
 }
 
 void ItemListView::ButtonPressed(const GameControl::ActionButton& pressedButton) {

@@ -1101,6 +1101,10 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameView\BBBTitleDisplay.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\GameMenu.h"
 						>
 					</File>
@@ -1124,6 +1128,10 @@
 				<Filter
 					Name="Source Files"
 					>
+					<File
+						RelativePath=".\GameView\BBBTitleDisplay.cpp"
+						>
+					</File>
 					<File
 						RelativePath=".\GameView\GameMenu.cpp"
 						>

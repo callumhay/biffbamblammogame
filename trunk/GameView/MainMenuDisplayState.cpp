@@ -1,7 +1,7 @@
 /**
  * MainMenuDisplayState.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2009
  *
  * You may not use this work for commercial purposes.
@@ -23,11 +23,6 @@
 #include "../GameSound/GameSoundAssets.h"
 #include "../ESPEngine/ESPOnomataParticle.h"
 #include "../WindowManager.h"
-
-// 3 sprites for "Biff" "Bam" and "Blammo" respectively
-const char* MainMenuDisplayState::TITLE_BIFF_TEXT			= "Biff!";
-const char* MainMenuDisplayState::TITLE_BAM_TEXT			= "Bam!!";
-const char* MainMenuDisplayState::TITLE_BLAMMO_TEXT         = "Blammo!?!";
 
 const int MainMenuDisplayState::MENU_SEL_ON_INDEX	= 0;
 const int MainMenuDisplayState::MENU_SEL_OFF_INDEX	= 1;
@@ -55,8 +50,18 @@ DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL),
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NULL), particleEventHandler(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false),
 menuFBO(NULL), bloomEffect(NULL),
-particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f)
+particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f),
+madeByTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
+                GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
+licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
+             GameViewConstants::GetInstance()->LICENSE_TEXT),
+titleDisplay(1.0f)
 {
+
+    this->madeByTextLabel.SetColour(Colour(0,0,0));
+    this->madeByTextLabel.SetScale(this->display->GetTextScalingFactor());
+    this->licenseLabel.SetColour(Colour(0.33f, 0.33f, 0.33f));
+    this->licenseLabel.SetScale(0.75f * this->display->GetTextScalingFactor());
 
 	// Make sure the game state is cleared
 	this->display->GetModel()->ClearGameState();
@@ -167,76 +172,6 @@ void MainMenuDisplayState::InitializeESPEffects() {
 	fadeInOutColours.push_back(ColourRGBA(1, 1, 1, 1));
 	fadeInOutColours.push_back(ColourRGBA(1, 1, 1, 0));
 	this->particleFadeInAndOut.SetColours(fadeInOutColours);
-
-	// "Biff!" Bang Title Text
-	this->biffEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->biffEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->biffEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->biffEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->biffEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->biffEmitter.SetParticleRotation(ESPInterval(-10));
-	this->biffEmitter.SetParticleSize(ESPInterval(10), ESPInterval(5));
-	this->biffEmitter.SetParticles(1, static_cast<Texture2D*>(this->bangTextures[0]));
-
-	this->biffTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->biffTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->biffTextEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->biffTextEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->biffTextEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->biffTextEmitter.SetParticleRotation(ESPInterval(-10));
-	this->biffTextEmitter.SetParticleSize(ESPInterval(1), ESPInterval(1));
-	
-	TextLabel2D biffTitleText(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), MainMenuDisplayState::TITLE_BIFF_TEXT);
-	biffTitleText.SetDropShadow(Colour(0,0,0), 0.1f);
-	this->biffTitleWidth = biffTitleText.GetLastRasterWidth();
-	this->biffTextEmitter.SetParticles(1, biffTitleText);
-
-	// "Bam!!" Bang title text
-	this->bamEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->bamEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->bamEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->bamEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->bamEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->bamEmitter.SetParticleRotation(ESPInterval(-15));
-	this->bamEmitter.SetParticleSize(ESPInterval(11.0f), ESPInterval(5.0f));
-	this->bamEmitter.SetParticles(1, static_cast<Texture2D*>(this->bangTextures[1]));
-
-	this->bamTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->bamTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->bamTextEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->bamTextEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->bamTextEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->bamTextEmitter.SetParticleRotation(ESPInterval(-15));
-	this->bamTextEmitter.SetParticleSize(ESPInterval(1), ESPInterval(1));
-
-	TextLabel2D bamTitleText(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), MainMenuDisplayState::TITLE_BAM_TEXT);
-	bamTitleText.SetDropShadow(Colour(0,0,0), 0.1f);
-	this->bamTitleWidth = bamTitleText.GetLastRasterWidth();
-	this->bamTextEmitter.SetParticles(1, bamTitleText);
-
-	// "Blammo!?!" Bang title text
-	this->blammoEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->blammoEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->blammoEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->blammoEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->blammoEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->blammoEmitter.SetParticleRotation(ESPInterval(-8));
-	this->blammoEmitter.SetParticleSize(ESPInterval(12.0f), ESPInterval(6.5f));
-	this->blammoEmitter.SetParticles(1, static_cast<Texture2D*>(this->bangTextures[2]));
-
-	this->blammoTextEmitter.SetSpawnDelta(ESPInterval(-1, -1));
-	this->blammoTextEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	this->blammoTextEmitter.SetParticleLife(ESPParticle::INFINITE_PARTICLE_LIFETIME);
-	this->blammoTextEmitter.SetRadiusDeviationFromCenter(ESPInterval(0, 0));
-	this->blammoTextEmitter.SetParticleAlignment(ESP::ScreenAligned);
-	this->blammoTextEmitter.SetParticleRotation(ESPInterval(-8));
-	this->blammoTextEmitter.SetParticleSize(ESPInterval(1), ESPInterval(1));
-
-	TextLabel2D blammoTitleText(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), 
-		MainMenuDisplayState::TITLE_BLAMMO_TEXT);
-	blammoTitleText.SetDropShadow(Colour(0,0,0), 0.1f);
-	this->blammoTitleWidth = blammoTitleText.GetLastRasterWidth();
-	this->blammoTextEmitter.SetParticles(1, blammoTitleText);
 }
 
 /**
@@ -461,7 +396,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
         }
     }
 	
-	const Camera& camera			= this->display->GetCamera();
+	const Camera& camera		= this->display->GetCamera();
 	const int DISPLAY_WIDTH		= camera.GetWindowWidth();
 	const int DISPLAY_HEIGHT	= camera.GetWindowHeight();
 
@@ -483,6 +418,16 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->mainMenu->SetTopLeftCorner(menuTopLeftCorner);
 	this->mainMenu->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
+    // Render created by text
+    static const int NAME_LICENCE_Y_PADDING = 5;
+    static const int NAME_LICENCE_X_PADDING = 10;
+    this->madeByTextLabel.SetTopLeftCorner(DISPLAY_WIDTH - (this->madeByTextLabel.GetLastRasterWidth() + NAME_LICENCE_X_PADDING),
+        this->madeByTextLabel.GetHeight() + this->licenseLabel.GetHeight() + 2.5f*NAME_LICENCE_Y_PADDING);
+    this->madeByTextLabel.Draw();
+    this->licenseLabel.SetTopLeftCorner(DISPLAY_WIDTH - (this->licenseLabel.GetLastRasterWidth() + NAME_LICENCE_X_PADDING),
+        this->licenseLabel.GetHeight() + NAME_LICENCE_Y_PADDING);
+    this->licenseLabel.Draw();
+
 	// Fade-in/out overlay
     this->DrawFadeOverlay(DISPLAY_WIDTH, DISPLAY_HEIGHT, this->fadeAnimation.GetInterpolantValue());
 	this->menuFBO->UnbindFBObj();
@@ -502,47 +447,14 @@ void MainMenuDisplayState::RenderTitle(Camera& menuCam) {
 
 	const float MAX_Y_COORD = CAM_DIST_FROM_ORIGIN * tan(Trig::degreesToRadians(Camera::FOV_ANGLE_IN_DEGS) / 2.0f);
 	const float MAX_X_COORD = static_cast<float>(displayCam.GetWindowWidth()) / static_cast<float>(displayCam.GetWindowHeight()) * MAX_Y_COORD;
-	const float MENU_WIDTH = 5.0f + (2*0.82f*this->blammoTitleWidth*MAX_X_COORD / static_cast<float>(displayCam.GetWindowWidth()));
+    const float MENU_WIDTH = 5.0f + (2*0.82f*this->titleDisplay.GetBlammoWidth()*MAX_X_COORD / static_cast<float>(displayCam.GetWindowWidth()));
 	const float X_INDENT = -MAX_X_COORD + (2.0f * MAX_X_COORD - MENU_WIDTH) / 2.0f;
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 	menuCam.ApplyCameraTransform();
-
-	// Draw the "Biff!" Text
-	const Point3D BIFF_EMIT_COORD = Point3D(X_INDENT, MAX_Y_COORD - 3.0f, 0);
-
-	this->biffEmitter.SetEmitPosition(BIFF_EMIT_COORD);
-	this->biffEmitter.Tick(0.1);
-	this->biffEmitter.Draw(menuCam);
-
-	this->biffTextEmitter.SetEmitPosition(BIFF_EMIT_COORD);
-	this->biffTextEmitter.Tick(0.1);
-	this->biffTextEmitter.Draw(menuCam);
-
-	// Draw the "Bam!!" Text
-	const Point3D BAM_EMIT_COORD = Point3D(X_INDENT + 5.5f, MAX_Y_COORD - 4.5f, 0);
-
-	this->bamEmitter.SetEmitPosition(BAM_EMIT_COORD);
-	this->bamEmitter.Tick(0.1);
-	this->bamEmitter.Draw(menuCam);
-	
-	this->bamTextEmitter.SetEmitPosition(BAM_EMIT_COORD);
-	this->bamTextEmitter.Tick(0.1);
-	this->bamTextEmitter.Draw(menuCam);
-
-	// Draw the "Blammo!?!" Text
-	const Point3D BLAMMO_EMIT_COORD = Point3D(X_INDENT + 11.0f, MAX_Y_COORD - 6.5f, 0);
-
-	this->blammoEmitter.SetEmitPosition(BLAMMO_EMIT_COORD);
-	this->blammoEmitter.Tick(0.1);
-	this->blammoEmitter.Draw(menuCam);
-
-	this->blammoTextEmitter.SetEmitPosition(BLAMMO_EMIT_COORD);
-	this->blammoTextEmitter.Tick(0.1);
-	this->blammoTextEmitter.Draw(menuCam);
-
+    this->titleDisplay.Draw(X_INDENT, MAX_Y_COORD, menuCam);
 	glPopMatrix();
 }
 

@@ -1,7 +1,7 @@
 /**
  * ESPPointEmitter.h
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -22,6 +22,7 @@ public:
 	ESPPointEmitter();
 	virtual ~ESPPointEmitter();
 
+    void OverwriteEmittedPosition(const Point3D& pt);
 	void SetEmitPosition(const Point3D& pt);
 	void SetEmitDirection(const Vector3D& dir);
 	void SetToggleEmitOnPlane(bool emitOnPlane, const Vector3D& planeNormal = Vector3D(0, 0, 1));

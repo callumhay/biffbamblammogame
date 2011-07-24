@@ -1,7 +1,7 @@
 /**
  * TextLabel.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2009
  *
  * You may not use this work for commercial purposes.
@@ -124,6 +124,27 @@ void TextLabel2DFixedWidth::DrawTextLines(float xOffset, float yOffset) {
     Point3D currTextTopLeftPos(this->topLeftCorner[0] + xOffset, this->topLeftCorner[1] + yOffset, 0);
 
     switch (this->alignment) {
+        case TextLabel2DFixedWidth::CenterAligned:
+            {
+                float maxWidth = 0.0f;
+                for (std::vector<std::string>::const_iterator iter = this->textLines.begin(); 
+                     iter != this->textLines.end(); ++iter) {
+                    const std::string& currLineTxt = *iter;
+                    maxWidth = std::max<float>(this->scale * this->font->GetWidth(currLineTxt), maxWidth);
+                }
+
+                Point3D currTopLeftCorner = currTextTopLeftPos;
+                for (std::vector<std::string>::const_iterator iter = this->textLines.begin(); 
+                     iter != this->textLines.end(); ++iter) {
+
+                    const std::string& currLineTxt = *iter;
+                    currTopLeftCorner[0] = currTextTopLeftPos[0] + ((maxWidth - (this->scale * this->font->GetWidth(currLineTxt))) / 2.0f);
+                    this->font->OrthoPrint(currTopLeftCorner, currLineTxt, false, this->scale);
+                    currTopLeftCorner[1] -= (this->scale * this->font->GetHeight() + this->lineSpacing);
+                }
+            }
+            break;
+
         case TextLabel2DFixedWidth::LeftAligned:
 
             for (std::vector<std::string>::const_iterator iter = this->textLines.begin(); 

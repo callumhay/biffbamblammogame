@@ -1,7 +1,7 @@
 /**
  * GameViewConstants.h
  *
- * (cc) Creative Commons Attribution-Noncommercial-Share Alike 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -45,6 +45,10 @@ public:
 	const char* SHADER_DIR;
 	const char* TEXTURE_DIR;
 	const char* SOUND_DIR;
+
+    // Author, credits, Licensing Text **********************
+    const char* GAME_CREDITS_TEXT;
+    const char* LICENSE_TEXT;
 
 	// Shader path constants ********************************
 	const char* CGFX_CEL_SHADER;
