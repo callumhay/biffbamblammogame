@@ -177,11 +177,7 @@ void MainMenuDisplayState::InitializeESPEffects() {
 /**
  * Used as a private helper method to initialize the menu and other related display stuffs.
  */
-void MainMenuDisplayState::InitializeMainMenu() {
-	const float dropShadowAmtSm = 0.15f;
-	const float dropShadowAmtLg = 0.15f;
-	const Colour dropShadowColour = Colour(0, 0, 0);
-
+void MainMenuDisplayState::InitializeMainMenu()  {
 	// Setup the main menu attributes
 	const Camera& camera = this->display->GetCamera();
 	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, camera.GetWindowHeight() - MENU_Y_INDENT);
@@ -190,13 +186,17 @@ void MainMenuDisplayState::InitializeMainMenu() {
 	this->mainMenu = new GameMenu(menuTopLeftCorner);
 	this->mainMenu->AddEventHandler(this->mainMenuEventHandler);
 	this->mainMenu->SetColourScheme(MainMenuDisplayState::MENU_ITEM_IDLE_COLOUR, MainMenuDisplayState::MENU_ITEM_SEL_COLOUR, 
-																	MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR, MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR);
+	                                MainMenuDisplayState::MENU_ITEM_ACTIVE_COLOUR, MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR);
 
 	// Setup submenues
 	this->InitializeOptionsSubMenu();
 
 	// Scale the labels based on the height/width of the window
 	float textScaleFactor = this->display->GetTextScalingFactor();
+
+	const float dropShadowAmtSm = textScaleFactor * 0.15f;
+	const float dropShadowAmtLg = textScaleFactor * 0.15f;
+	const Colour dropShadowColour = Colour(0, 0, 0);
 
 	// Add items to the menu in their order (first to last)
 	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  NEW_GAME_MENUITEM);
@@ -244,13 +244,13 @@ void MainMenuDisplayState::InitializeMainMenu() {
  * Private helper function for initializing the options sub menu.
  */
 void MainMenuDisplayState::InitializeOptionsSubMenu() {
-	// Setup the options menu attributes
-	const float dropShadowAmtSm = 0.10f;
-	const float dropShadowAmtLg = 0.15f;
-	const Colour dropShadowColour = Colour(0, 0, 0);
-
 	// Scale the labels based on the height/width of the window
 	float textScaleFactor = this->display->GetTextScalingFactor();
+
+	// Setup the options menu attributes
+	const float dropShadowAmtSm = textScaleFactor * 0.10f;
+	const float dropShadowAmtLg = textScaleFactor * 0.15f;
+	const Colour dropShadowColour = Colour(0, 0, 0);
 
 	TextLabel2D subMenuLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),  "Fullscreen");
 	TextLabel2D subMenuLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "Fullscreen");
@@ -262,9 +262,9 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	// Options Menu
 	this->optionsSubMenu = new GameSubMenu();
 	this->optionsSubMenu->AddEventHandler(this->optionsMenuEventHandler);
-	this->optionsSubMenu->SetPaddingBetweenMenuItems(MENU_ITEM_PADDING);
+	this->optionsSubMenu->SetPaddingBetweenMenuItems(textScaleFactor*MENU_ITEM_PADDING);
 	this->optionsSubMenu->SetColourScheme(MainMenuDisplayState::SUBMENU_ITEM_IDLE_COLOUR, MainMenuDisplayState::MENU_ITEM_SEL_COLOUR, 
-																				MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR, MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR);
+	                                      MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR, MainMenuDisplayState::MENU_ITEM_GREYED_COLOUR);
 
 	// Add the toggle fullscreen item
 	//subMenuLabelSm.SetText("TODO: Fullscreen:");

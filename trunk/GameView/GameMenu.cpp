@@ -106,7 +106,12 @@ void GameMenu::SetupAnimations() {
  * this menu.
  */
 float GameMenu::GetMenuItemPadding() const {
-	return this->menuItemPadding + GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING + GameMenu::UP_DOWN_ARROW_TOP_PADDING + GameMenu::UP_DOWN_ARROW_HEIGHT;
+    float scaling = 1.0f;
+    if (!this->menuItems.empty()) {
+        scaling = this->menuItems.front()->GetCurrLabel()->GetScale();
+    }
+
+	return this->menuItemPadding + scaling * (GameMenu::UP_DOWN_ARROW_BOTTOM_PADDING + GameMenu::UP_DOWN_ARROW_TOP_PADDING + GameMenu::UP_DOWN_ARROW_HEIGHT);
 }
 
 void GameMenu::DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight) {

@@ -155,8 +155,8 @@ std::vector<std::string> WindowManager::GetPossibleResolutionsList() {
 	while (EnumDisplaySettings(NULL, count, &devMode) != NULL) {
 		std::stringstream resolutionStrStream;
 		resolutionStrStream << devMode.dmPelsWidth << " x " << devMode.dmPelsHeight;
-        // Don't accept resolutions under 800 x *
-        if (devMode.dmPelsWidth < 800) {
+        // Don't accept resolutions under 800 width or 600 height
+        if (devMode.dmPelsWidth < 800 || devMode.dmPelsHeight < 600) {
             count++;
             continue;
         }
