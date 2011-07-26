@@ -5,6 +5,10 @@ Name "Biff! Bam!! Blammo!?!"
 
 RequestExecutionLevel user
 
+Function create_desktop_shortcut_action
+SetOutPath $INSTDIR
+CreateShortcut "$DESKTOP\Biff Bam Blammo.lnk" "$INSTDIR\BiffBamBlammo.exe"
+FunctionEnd
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
 !define VERSION 1.0
@@ -13,12 +17,19 @@ RequestExecutionLevel user
 
 # MUI Symbol Definitions
 !define MUI_ICON "..\BiffBamBlammo_Install.ico"  #"${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
-!define MUI_FINISHPAGE_NOAUTOCLOSE
+
 !define MUI_LICENSEPAGE_CHECKBOX
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT HKLM
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${REGKEY}
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME StartMenuGroup
 !define MUI_STARTMENUPAGE_DEFAULTFOLDER "Biff Bam Blammo"
+!define MUI_FINISHPAGE_NOAUTOCLOSE
+!define MUI_FINISHPAGE_RUN "$INSTDIR\BiffBamBlammo.exe"
+!define MUI_FINISHPAGE_RUN_TEXT "Run $(^Name)"
+!define MUI_FINISHPAGE_SHOWREADME ""
+!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION create_desktop_shortcut_action
 !define MUI_UNICON "..\BiffBamBlammo_Uninstall.ico" #"${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
 !define MUI_UNFINISHPAGE_NOAUTOCLOSE
 
@@ -60,7 +71,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} ProductVersion "${VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} CompanyName "${COMPANY}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} FileVersion "${VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} FileDescription ""
-VIAddVersionKey /LANG=${LANG_ENGLISH} LegalCopyright ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} LegalCopyright "(cc) BY-NC, 2011"
 InstallDirRegKey HKLM "${REGKEY}" Path
 ShowUninstDetails show
 
@@ -115,7 +126,8 @@ Section -post SEC0002
     SetOutPath $INSTDIR
     WriteUninstaller $INSTDIR\bbb_uninstaller.exe
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-    SetOutPath $SMPROGRAMS\$StartMenuGroup
+    SetOutPath $INSTDIR
+	CreateDirectory $SMPROGRAMS\$StartMenuGroup
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^UninstallLink).lnk" $INSTDIR\bbb_uninstaller.exe
     !insertmacro MUI_STARTMENU_WRITE_END
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayName "$(^Name)"
@@ -160,12 +172,14 @@ SectionEnd
 Section -un.post UNSEC0002
     DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\$(^UninstallLink).lnk"
+    Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\$(^ExeLink).lnk"
+    Delete /REBOOTOK "$DESKTOP\Biff Bam Blammo.lnk"
     Delete /REBOOTOK $INSTDIR\bbb_uninstaller.exe
     DeleteRegValue HKLM "${REGKEY}" StartMenuGroup
     DeleteRegValue HKLM "${REGKEY}" Path
     DeleteRegKey /IfEmpty HKLM "${REGKEY}\Components"
     DeleteRegKey /IfEmpty HKLM "${REGKEY}"
-    RmDir /REBOOTOK $SMPROGRAMS\$StartMenuGroup
+    RmDir /r /REBOOTOK $SMPROGRAMS\$StartMenuGroup
     RmDir /REBOOTOK $INSTDIR
     Push $R0
     StrCpy $R0 $StartMenuGroup 1
@@ -200,4 +214,5 @@ FunctionEnd
 # Installer Language Strings
 # TODO Update the Language Strings with the appropriate translations.
 
-LangString ^UninstallLink ${LANG_ENGLISH} "Uninstall $(^Name)"
+LangString ^UninstallLink ${LANG_ENGLISH} "Uninstall Biff Bam Blammo"
+LangString ^ExeLink ${LANG_ENGLISH} "Biff Bam Blammo"

@@ -1,7 +1,7 @@
 /**
  * ResourceManager.h
  *
- * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -77,6 +77,9 @@ public:
 	bool ReleaseMusicSoundResource(Mix_Music* music);
 
 	// Initialization configuration loading
+    static void SetLoadDir(const char* loadDir);
+    static inline const std::string& GetLoadDir() { return baseLoadDir; }
+
 	static ConfigOptions ReadConfigurationOptions(bool forceReadFromFile);
 	static bool WriteConfigurationOptionsToFile(const ConfigOptions& cfgOptions);
 
@@ -100,6 +103,8 @@ private:
 	static const char* TEXTURE_DIRECTORY;
 	static const char* BLAMMOPEDIA_DIRECTORY;
 	static const char* MOD_DIRECTORY;
+
+    static std::string baseLoadDir;
 
 	std::map<std::string, Mesh*> loadedMeshes;	// Meshes already loaded into the blammo engine from file
 	

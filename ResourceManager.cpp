@@ -1,7 +1,7 @@
 /**
  * ResourceManager.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -39,6 +39,8 @@ const char* ResourceManager::BLAMMOPEDIA_DIRECTORY	= "blammopedia";
 // The modifications resource directory - this takes loading presedant over the 
 // resource zip file when in debug mode, otherwise it is ignored.
 const char* ResourceManager::MOD_DIRECTORY = "mod";
+
+std::string ResourceManager::baseLoadDir;
 
 ResourceManager::ResourceManager(const std::string& resourceZip, const char* argv0) : 
 cgContext(NULL), inkBlockMesh(NULL), portalBlockMesh(NULL), celShadingTexture(NULL), blammopedia(NULL) {
@@ -849,6 +851,21 @@ bool ResourceManager::ReleaseMusicSoundResource(Mix_Music* music) {
 	}
 	
 	return true;
+}
+
+void ResourceManager::SetLoadDir(const char* loadDir) {
+    assert(loadDir != NULL);
+
+    baseLoadDir = std::string(loadDir);
+    size_t lastSlashPos = baseLoadDir.find_last_of('/');
+    if (lastSlashPos == std::string::npos) {
+        lastSlashPos = baseLoadDir.find_last_of('\\');
+    }
+    if (lastSlashPos != std::string::npos) {
+        lastSlashPos++;
+    }
+
+    baseLoadDir = baseLoadDir.substr(0, lastSlashPos);
 }
 
 /**

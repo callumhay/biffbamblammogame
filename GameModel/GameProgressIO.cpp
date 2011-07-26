@@ -1,7 +1,7 @@
 /**
  * GameProgressIO.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -11,6 +11,8 @@
 
 #include "GameProgressIO.h"
 #include "GameModel.h"
+
+#include "../ResourceManager.h"
 
 const char* GameProgressIO::PROGRESS_FILENAME = "bbb_progress.dat";
 
@@ -22,7 +24,7 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
         return false;
     }
 
-    std::ifstream inFile(PROGRESS_FILENAME, std::ifstream::in | std::ifstream::binary);
+    std::ifstream inFile((ResourceManager::GetLoadDir() + std::string(PROGRESS_FILENAME)).c_str(), std::ifstream::in | std::ifstream::binary);
     bool success = inFile.is_open();
 
 	if (success) {
@@ -80,7 +82,7 @@ bool GameProgressIO::SaveGameProgress(const GameModel* model) {
         return false;
     }
 
-    std::ofstream outFile(PROGRESS_FILENAME, std::ios::out | std::ios::binary);
+    std::ofstream outFile((ResourceManager::GetLoadDir() + std::string(PROGRESS_FILENAME)).c_str(), std::ios::out | std::ios::binary);
     if (!outFile.is_open()) {
         return false;
     }

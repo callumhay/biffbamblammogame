@@ -1,7 +1,7 @@
 /**
  * GameMain.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2009
  *
  * You may not use this work for commercial purposes.
@@ -138,10 +138,13 @@ int main(int argc, char *argv[]) {
 
 	// One-Time Initialization stuff **************************************
 
+    // Set the base directory to load files from
+    assert(argc > 0 && argv != NULL);
+    ResourceManager::SetLoadDir(argv[0]);
+
 	// Set the default config options - these will be read from and written to
 	// the .ini file as we need them
 	ConfigOptions initCfgOptions;
-
 	// ********************************************************************
 
 	// We continue to run the game until a definitive quit has been issued
@@ -159,7 +162,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		// Establish the resource manager
-		ResourceManager::InitResourceManager(RESOURCE_ZIP, argv[0]);
+		ResourceManager::InitResourceManager(ResourceManager::GetLoadDir() + std::string(RESOURCE_ZIP), argv[0]);
 
 		// Load extensions
 		GLenum err = glewInit();
@@ -179,7 +182,7 @@ int main(int argc, char *argv[]) {
 
 		// Load the blammopedia...
 		LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading blammopedia...");
-		if (!ResourceManager::GetInstance()->LoadBlammopedia(std::string("blammopedia.dat"))) {
+        if (!ResourceManager::GetInstance()->LoadBlammopedia(ResourceManager::GetLoadDir() + std::string("blammopedia.dat"))) {
 			quitGame = true;
 			break;
 		}
