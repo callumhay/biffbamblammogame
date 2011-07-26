@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<workbench progressCount="9" version="2.0">
+<workbench progressCount="10" version="2.0">
 <workbenchAdvisor/>
 <window height="768" maximized="true" width="1352" x="298" y="219">
 <fastViewData fastViewLocation="1024"/>
@@ -34,13 +34,18 @@
 <folder appearance="1" expanded="2">
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
 <part id="0"/>
+<part id="1"/>
 </presentation>
 </folder>
 </info>
 </editorArea>
 <editor activePart="true" focus="true" id="net.sf.eclipsensis.editor.NSISEditor" name="bbb_setup.nsi" partName="bbb_setup.nsi" title="bbb_setup.nsi" tooltip="C:\projects\BiffBamBlammo\BBBInstaller\bbb_setup.nsi" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/C:/projects/BiffBamBlammo/BBBInstaller/bbb_setup.nsi"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="5743" selectionTopPixel="2200"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="3885" selectionTopPixel="1700"/>
+</editor>
+<editor id="net.sf.eclipsensis.editor.NSISEditor" name="bbb_demo_setup.nsi" partName="bbb_demo_setup.nsi" title="bbb_demo_setup.nsi" tooltip="C:\projects\BiffBamBlammo\BBBInstaller\bbb_demo_setup.nsi" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/C:/projects/BiffBamBlammo/BBBInstaller/bbb_demo_setup.nsi"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="112" selectionTopPixel="0"/>
 </editor>
 </editors>
 <views>
@@ -109,7 +114,9 @@
 </view>
 <view id="org.eclipse.jdt.ui.PackageExplorer" partName="Package Explorer">
 <viewState group_libraries="1" layout="2" linkWithEditor="0" rootMode="1" workingSetName="">
-<customFilters userDefinedPatternsEnabled="false">&#x0A;<xmlDefinedFilters>&#x0A;<child filterId="org.eclipse.jdt.ui.PackageExplorer.LibraryFilter" isEnabled="false"/>
+<customFilters userDefinedPatternsEnabled="false">
+<xmlDefinedFilters>
+<child filterId="org.eclipse.jdt.ui.PackageExplorer.LibraryFilter" isEnabled="false"/>
 <child filterId="org.eclipse.jdt.ui.PackageExplorer.CuAndClassFileFilter" isEnabled="false"/>
 <child filterId="org.eclipse.pde.ui.ExternalPluginLibrariesFilter1" isEnabled="true"/>
 <child filterId="org.eclipse.jdt.ui.PackageExplorer_patternFilterId_RemoteSystemsConnections" isEnabled="true"/>
@@ -405,6 +412,7 @@
 <editors>
 <editor factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="net.sf.eclipsensis.installoptions.editor.InstallOptionsDesignEditor" uri="file:/C:/projects/BiffBamBlammo/BBBInstaller/bbb_installer.ini"/>
 <editor factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="net.sf.eclipsensis.editor.NSISEditor" uri="file:/C:/projects/BiffBamBlammo/BBBInstaller/bbb_setup.nsi"/>
+<editor factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="net.sf.eclipsensis.editor.NSISEditor" uri="file:/C:/projects/BiffBamBlammo/BBBInstaller/bbb_demo_setup.nsi"/>
 </editors>
 <item historyLabel="bbb_installer.ini" index="0"/>
 <item historyLabel="bbb_setup.nsi" index="1">
@@ -413,8 +421,128 @@
 <item historyLabel="bbb_setup.nsi" index="1">
 <position info="not_deleted" x="2653" y="0"/>
 </item>
-<item active="true" historyLabel="bbb_setup.nsi" index="1">
+<item historyLabel="bbb_setup.nsi" index="1">
 <position info="not_deleted" x="2427" y="165"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="2008" y="16"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="617" y="14"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="617" y="14"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="617" y="14"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="617" y="14"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="617" y="14"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="617" y="14"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="77" y="33"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="3521" y="0"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="2765" y="0"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="2021" y="0"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="4387" y="0"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="0" y="45"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="7340" y="0"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="0" y="45"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="1720" y="0"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="1867" y="0"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="1867" y="0"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="112" y="0"/>
+</item>
+<item historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="3644" y="0"/>
+</item>
+<item historyLabel="bbb_demo_setup.nsi" index="2">
+<position info="not_deleted" x="112" y="0"/>
+</item>
+<item active="true" historyLabel="bbb_setup.nsi" index="1">
+<position info="not_deleted" x="3644" y="0"/>
 </item>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
@@ -433,6 +561,9 @@
 </trimLayout>
 </window>
 <mruList>
+<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="net.sf.eclipsensis.editor.NSISEditor" name="bbb_demo_setup.nsi" tooltip="C:\projects\BiffBamBlammo\BBBInstaller\bbb_demo_setup.nsi">
+<persistable uri="file:/C:/projects/BiffBamBlammo/BBBInstaller/bbb_demo_setup.nsi"/>
+</file>
 <file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.eclipse.ui.DefaultTextEditor" name="cc_license.txt" tooltip="C:\projects\BiffBamBlammo\BBBInstaller\cc_license.txt">
 <persistable uri="file:/C:/projects/BiffBamBlammo/BBBInstaller/cc_license.txt"/>
 </file>

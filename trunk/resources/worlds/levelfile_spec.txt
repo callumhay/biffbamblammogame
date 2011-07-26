@@ -1,93 +1,28 @@
 The following specifies the .lvl format.
 
-// The start of the file begins with the level name
-<level_name>
-
-// The next element is the width and height
-// in 'block' units, these are the building blocks of a level.
+// the start of the file begins with the width and height
+// in 'block' units, these are the building blocks of a level
+// The width and height here correspond to the interior of the
+// level (i.e., not including the walls and paddle)
 <w> <h>
 
 // Next is an array making up the interior of the level
 // The array consists of the following:
 
-// R - Red breakable block (requires 4 hits to break)
-// O - Orange breakable block (requires 3 hits to break)
-// Y - Yellow breakable block (requires 2 hits to break)
-// G - Green breakable block (requires 1 hit to break)
-// B - Bomb block
-// S - A solid unbreakable block
-// E - Empty spot
-// I - Ink block   (When hit it splats all over the player's vision)
-// P - Prism block (Unbreakable, but if hit by any sort of laser it reflects/refracts the laser)
-// L - Collateral block (when hit it falls downwards destroying almost everything in its path)
+// R 	- Red breakable block (requires 4 hits to break)
+// O 	- Orange breakable block (requires 3 hits to break)
+// Y 	- Yellow breakable block (requires 2 hits to break)
+// G 	- Green breakable block (requires 1 hit to break)
+// B 	- Bomb
+// S 	- A solid unbreakable block
+// E 	- Empty spot
 
-// C(d) - Cannon block
-// d: The direction to always fire the cannon block in (or specify random firing direction)
-//    the value can be any degree angle starting at 0 going to 359, the special value of -1 can be used
-//    to specify a random direction. The angle starts by firing directly upwards and moves around the circle
-// of angles clockwise (e.g., 90 will always fire the ball perfectly to the right of the cannon, 180 will always
-// fire the ball downwards from the cannon, ...).
-
-// T(x,p) - Triangle block: 
-// x: type of block from the above, can be any of the following: {R, O, Y, G, S, P}
+// T(x,p) - Triangle block, 
+// x: type of block from the above, can be any of the following: {R, O, Y, G, S}
 // p: the orientation of the triangle (where the outer corner is located), can be any of the following: {ul, ur, ll, lr}
 // i.e., upper-left = ul, lower-right = lr, etc.
 
-// X(a,b) - Portal block:
-// a: A single character name for this portal block
-// b: The single character name of the sibling portal block that this portal block is
-// the enterence and exit for.
+// I - Ink block
 
-// A([1|0], [1|0], a, b) - Tesla Block (When active with another tesla block, forms an arc of lightning between the two)
-// [1|0]: A '1' or a '0' to indicated whether it starts on (1) or off (0).
-// [1|0]: A '1' or a '0' to indicated whether it can be turned on/off (1) or is unchangable (0).
-// a : The single character name of this tesla block.
-// b : One or more other named tesla blocks seperated by commas.
-
-// D(i0, i1, i2, ...) - Item drop block:
-// i0, i1, i2, ... : The names of all the item types that the block is allowed to drop, names can be 
-//                   repeated in order to make higher probabilities of drops. Also, there are several special key
-//                   words that can be used: (all, powerups, powerdowns, powerneutrals), which cause the block to drop 
-//                   all items of those respective designations.
-
-// W(a) - Switch block:
-// a : The trigger ID of the block that gets triggered by the switch 
-//     (switch is turned on when a ball/projectile hits it).
-
-// NOTE: All blocks may have an optional trigger ID, which must be a 0 or positive integer 
-// contained within curly brackets at the end of the block signature.
-// e.g., R{12}, X(z,j){1}, ...
-
-// F(a) - One-way block:
-// a : The direction that the block allows the ball to travel through it, allowable options are:
-//     {u, d, l, r} for up, down, left and right, respectively.
 
 <block list in order of top-left to bottom-right>
-
-// After the blocks are enumerated, the star milestone totals
-// are declared, they begin with the keyword "STARS:" and 5 values
-// are then listed, each on a newline. The values listed correspond to
-// the number of points required to get that star starting with the first
-// listed line.
-
-STARS:
-<point_milestone_for_star_1>
-<point_milestone_for_star_2>
-<point_milestone_for_star_3>
-<point_milestone_for_star_4>
-<point_milestone_for_star_5>
-
-
-// The final set of values are a listing of the various items and a
-// number that defines their probability/likelihood of being dropped
-// in the level. There are several options here - each item may be
-// listed seperately with its item name and a number
-// e.g., "PaddleGrow 2"
-//
-// In this case the number is from 0 to 2, where 0 has no likelihood of
-// dropping and 2 is most likely.
-//
-// The keywords "all", "powerups", "powerneutrals" and "powerdowns"
-// may also be used along with a number to signify all of those item types.
-
-<item_name_or_keyword> <likelihood_number_[0,2]>

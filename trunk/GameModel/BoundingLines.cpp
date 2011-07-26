@@ -1,7 +1,7 @@
 /**
  * BoundingLines.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2009
  *
  * You may not use this work for commercial purposes.

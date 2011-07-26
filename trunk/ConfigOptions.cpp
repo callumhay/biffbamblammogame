@@ -1,7 +1,7 @@
 /**
  * ConfigOptions.cpp
  *
- * (cc) Creative Commons Attribution-Noncommercial 2.5 Licence
+ * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
@@ -64,7 +64,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 
 	// Open the .ini file off disk
 	std::ifstream inFile;
-	inFile.open(ConfigOptions::INI_FILEPATH);
+    inFile.open((ResourceManager::GetLoadDir() + std::string(ConfigOptions::INI_FILEPATH)).c_str());
 	if (!inFile.is_open()) {
 		// Couldn't find or open the file
 		inFile.close();
@@ -156,7 +156,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 bool ConfigOptions::WriteConfigOptionsToFile() const {
 	// Open or create the .ini file for writing
 	std::ofstream outFile;
-	outFile.open(ConfigOptions::INI_FILEPATH);
+	outFile.open((ResourceManager::GetLoadDir() + std::string(ConfigOptions::INI_FILEPATH)).c_str());
 	if (!outFile.is_open()) {
 		// Couldn't open for writing...
 		outFile.close();

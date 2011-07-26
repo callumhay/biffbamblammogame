@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="net.sf.eclipsensis.launch.nsisLaunchConfigType">
+<intAttribute key="compressor" value="0"/>
+<booleanAttribute key="hdrInfo" value="false"/>
+<listAttribute key="instructions"/>
+<booleanAttribute key="license" value="false"/>
+<booleanAttribute key="noCD" value="false"/>
+<booleanAttribute key="noConfig" value="false"/>
+<stringAttribute key="pluginVersion" value="0.9.8"/>
+<intAttribute key="processPriority" value="-1"/>
+<booleanAttribute key="runInstaller" value="false"/>
+<stringAttribute key="script" value="C:\projects\BiffBamBlammo\BBBInstaller\bbb_demo_setup.nsi"/>
+<booleanAttribute key="solidCompression" value="false"/>
+<listAttribute key="symbols"/>
+<intAttribute key="verbosity" value="-1"/>
+</launchConfiguration>
