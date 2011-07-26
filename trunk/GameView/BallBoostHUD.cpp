@@ -61,6 +61,10 @@ haloTexture(NULL), boostGainedHaloEmitter(NULL), haloExpander(1.0f, 2.75f), halo
 	this->boostGainedHaloEmitter->AddEffector(&this->haloFader);
 	bool result = this->boostGainedHaloEmitter->SetParticles(NUM_HALO_PARTICLES, this->haloTexture);
 	assert(result);
+
+    this->tempFillLostAnim.ClearLerp();
+    this->tempFillLostAnim.SetInterpolantValue(0.0f);
+    this->tempFillLostAnim.SetRepeat(false);
 }
 
 BallBoostHUD::~BallBoostHUD() {
@@ -131,21 +135,24 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
 
     // Draw the fills that are currently present in the HUD - these will only be present
     // if there's a boost model present
-    if (model != NULL) {
+    
+
+    if (model != NULL && this->tempFillLostAnim.GetInterpolantValue() == 0.0f) {
         float percentBallFill = model->GetBoostChargePercentage();
+        
         this->ballFillTex->BindTexture();
 
         // Ball fill: If this isn't the first boost then we draw the previous boost fill as well as
         // the current one that's filling up
-        if (model->GetNumAvailableBoosts() != 0 && percentBallFill < 1.0) {
+        if (model->GetNumAvailableBoosts() != 0) {
             const Colour& prevColour = this->trailFills[model->GetNumAvailableBoosts()-1]->GetColour();
             glColor4f(prevColour.R(), prevColour.G(), prevColour.B(), this->alpha);
-	        glBegin(GL_QUADS);
-	        glTexCoord2d(0, 0); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
-	        glTexCoord2d(1, 0); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
-	        glTexCoord2d(1, 1); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH,  BALL_BOOST_HUD_HALF_HEIGHT);
-	        glTexCoord2d(0, 1); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH,  BALL_BOOST_HUD_HALF_HEIGHT);
-	        glEnd();
+            glBegin(GL_QUADS);
+            glTexCoord2d(0, 0); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
+            glTexCoord2d(1, 0); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
+            glTexCoord2d(1, 1); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH,  BALL_BOOST_HUD_HALF_HEIGHT);
+            glTexCoord2d(0, 1); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH,  BALL_BOOST_HUD_HALF_HEIGHT);
+            glEnd();
         }
 
         float currBallHeight = BALL_BOOST_HUD_HEIGHT * BALL_FILL_START_PERCENT + BALL_BOOST_HUD_HEIGHT * BALL_FILL_DIFF_PERCENT * percentBallFill;
@@ -154,13 +161,54 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
 
         const Colour& currColour = this->GetCurrentTrailFill()->GetColour();
         glColor4f(currColour.R(), currColour.G(), currColour.B(), this->alpha);
-	    glBegin(GL_QUADS);
-	    glTexCoord2d(0, 0);        glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
-	    glTexCoord2d(1, 0);        glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
-	    glTexCoord2d(1, texCoord); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, ballFillHeight);
-	    glTexCoord2d(0, texCoord); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, ballFillHeight);
-	    glEnd();
+        glBegin(GL_QUADS);
+        glTexCoord2d(0, 0);        glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
+        glTexCoord2d(1, 0);        glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
+        glTexCoord2d(1, texCoord); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, ballFillHeight);
+        glTexCoord2d(0, texCoord); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, ballFillHeight);
+        glEnd();
+    }
+    else if (this->tempFillLostAnim.GetInterpolantValue() > 0.0f) {
+        this->tempFillLostAnim.Tick(dT);
 
+        float fIntPart;
+        float percentBallFill = modf(this->tempFillLostAnim.GetInterpolantValue(), &fIntPart);
+        int intPart = static_cast<int>(fIntPart);
+        if (intPart == 4) {
+            intPart = 2;
+            percentBallFill = 1.0f;
+        }
+        else if (intPart == 3) {
+            intPart = 2;
+        }
+
+        this->ballFillTex->BindTexture();
+        if (intPart > 0) {
+
+            BallBoostHUD::TrailFill* bgTrailFill = this->trailFills[intPart-1];
+            const Colour& prevColour = bgTrailFill->GetColour();
+            glColor4f(prevColour.R(), prevColour.G(), prevColour.B(), this->alpha);
+            glBegin(GL_QUADS);
+            glTexCoord2d(0, 0); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
+            glTexCoord2d(1, 0); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
+            glTexCoord2d(1, 1); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH,  BALL_BOOST_HUD_HALF_HEIGHT);
+            glTexCoord2d(0, 1); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH,  BALL_BOOST_HUD_HALF_HEIGHT);
+            glEnd();
+
+        }
+
+        float currBallHeight = BALL_BOOST_HUD_HEIGHT * BALL_FILL_START_PERCENT + BALL_BOOST_HUD_HEIGHT * BALL_FILL_DIFF_PERCENT * percentBallFill;
+        float ballFillHeight = -BALL_BOOST_HUD_HALF_HEIGHT + currBallHeight;
+        float texCoord = currBallHeight / BALL_BOOST_HUD_HEIGHT;
+
+        const Colour& currColour = this->trailFills[intPart]->GetColour();
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), this->alpha * percentBallFill);
+        glBegin(GL_QUADS);
+        glTexCoord2d(0, 0);        glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
+        glTexCoord2d(1, 0);        glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, -BALL_BOOST_HUD_HALF_HEIGHT);
+        glTexCoord2d(1, texCoord); glVertex2d( BALL_BOOST_HUD_HALF_WIDTH, ballFillHeight);
+        glTexCoord2d(0, texCoord); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, ballFillHeight);
+        glEnd();
     }
 
     // Draw the HUD outline over the fill stuffs...
@@ -199,6 +247,31 @@ void BallBoostHUD::BoostLost() {
     this->trailFills[this->currNumTrailFills]->Lost();
 }
 
+void BallBoostHUD::AllBoostsLost(const BallBoostModel* model) {
+    assert(model != NULL);
+
+    static const double TIME_FOR_EACH_FILL_TO_DEPLETE = 0.4; 
+
+    this->activeEffects.clear();
+    double startTime = 0.0;
+    int trailFillCount = static_cast<int>(this->trailFills.size());
+    for (std::vector<BallBoostHUD::TrailFill*>::reverse_iterator iter = this->trailFills.rbegin();
+         iter != this->trailFills.rend(); ++iter) {
+        BallBoostHUD::TrailFill* trailFill = *iter;
+        trailFill->Lost(startTime);
+        if (this->currNumTrailFills >= trailFillCount) {
+            startTime += TIME_FOR_EACH_FILL_TO_DEPLETE;
+        }
+        trailFillCount--;
+    }
+    
+    startTime += BallBoostHUD::TrailFill::UNFILL_TIME_IN_SECONDS;
+    this->tempFillLostAnim.SetLerp(0.0, startTime, this->currNumTrailFills + model->GetBoostChargePercentage(), 0.0f);
+    this->tempFillLostAnim.SetInterpolantValue(model->GetBoostChargePercentage());
+
+    this->currNumTrailFills = 0;
+}
+
 void BallBoostHUD::Reinitialize() {
     this->currNumTrailFills = 0;
     for (std::vector<BallBoostHUD::TrailFill*>::iterator iter = this->trailFills.begin();
@@ -206,6 +279,8 @@ void BallBoostHUD::Reinitialize() {
         BallBoostHUD::TrailFill* trailFill = *iter;
         trailFill->Clear();
     }
+    this->tempFillLostAnim.ClearLerp();
+    this->tempFillLostAnim.SetInterpolantValue(0.0f);
 }
 
 void BallBoostHUD::SetAlpha(float alpha) {
@@ -258,8 +333,8 @@ void BallBoostHUD::TrailFill::Gained() {
     this->widthAnim.SetLerp(FILL_TIME_IN_SECONDS, BALL_BOOST_HUD_WIDTH);
 }
 
-void BallBoostHUD::TrailFill::Lost() {
-    this->widthAnim.SetLerp(UNFILL_TIME_IN_SECONDS, 0.0f);
+void BallBoostHUD::TrailFill::Lost(double startTime) {
+    this->widthAnim.SetLerp(startTime, startTime + UNFILL_TIME_IN_SECONDS, this->widthAnim.GetInterpolantValue(), 0.0f);
 }
 
 void BallBoostHUD::TrailFill::Clear() {

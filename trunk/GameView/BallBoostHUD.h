@@ -35,6 +35,7 @@ public:
     void Draw(const Camera& camera, const BallBoostModel* model, int displayHeight, double dT);
     void BoostGained();
     void BoostLost();
+    void AllBoostsLost(const BallBoostModel* model);
     void Reinitialize();
 
     void SetAlpha(float alpha);
@@ -64,26 +65,29 @@ private:
     ESPPointEmitter* boostGainedHaloEmitter;
     std::list<ESPPointEmitter*> activeEffects;
 
+    AnimationLerp<float> tempFillLostAnim;
+
     // Private class for representing each of the fills on the tail of the boost HUD.
     // Intended to encapsulate more complicated animations and effects associated with each tail.
     class TrailFill {
     public:
+        static const double FILL_TIME_IN_SECONDS;
+        static const double UNFILL_TIME_IN_SECONDS;
+
         TrailFill(const char* trailTexFilepath, const ColourRGBA& colour);
         ~TrailFill();
         
         void Draw(double dT);
 
         void Gained();
-        void Lost();
+        void Lost(double startTime = 0.0);
         void Clear();
 
+        float GetCurrWidth() const { return this->widthAnim.GetInterpolantValue(); }
         void SetAlpha(float alpha) { this->colour[3] = alpha; }
         const Colour& GetColour() const { return this->colour.GetColour(); }
 
     private:
-        static const double FILL_TIME_IN_SECONDS;
-        static const double UNFILL_TIME_IN_SECONDS;
-
         Texture* trailTex;
         ColourRGBA colour;
         AnimationLerp<float> widthAnim;

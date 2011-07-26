@@ -95,7 +95,7 @@ public:
     void ActionBulletTimeStateChanged(const BallBoostModel& boostModel);
     void ActionBallBoostExecuted(const BallBoostModel& boostModel);
     void ActionBallBoostGained();
-    void ActionBallBoostLost();
+    void ActionBallBoostLost(bool allBoostsLost);
 
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);

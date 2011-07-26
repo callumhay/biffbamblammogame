@@ -20,7 +20,7 @@ const double BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS       = 0.15;
 const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 1.3;
 
 // Amount of time it takes for a ball boost to charge
-const float BallBoostModel::BOOST_CHARGE_TIME_SECONDS = 16.0f;
+const float BallBoostModel::BOOST_CHARGE_TIME_SECONDS = 5.0f;//15.0f;
 
 // The time dialation factor used (multiplies the delta time of each game frame)
 // when full bullet time is active
@@ -39,12 +39,8 @@ currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0)
 
 BallBoostModel::~BallBoostModel() {
     this->gameModel->GetTransformInfo()->SetBulletTimeCamera(false);
-    while (this->numAvailableBoosts > 0) {
-        this->numAvailableBoosts--;
-
-        // EVENT: Ball Boost lost
-        GameEventManager::Instance()->ActionBallBoostLost();
-    }
+    // EVENT: Ball Boost lost
+    GameEventManager::Instance()->ActionBallBoostLost(true);
 }
 
 void BallBoostModel::Tick(double dT) {
@@ -167,11 +163,20 @@ bool BallBoostModel::BallBoosterPressed() {
     
     // Boost any balls that can be boosted
     bool ballWasBoosted = false;
+    bool currBallBoosted = false;
     std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
     for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
 
         GameBall* currBall = *iter;
-        ballWasBoosted |= currBall->ExecuteBallBoost(this->ballBoostDir);
+        currBallBoosted = currBall->ExecuteBallBoost(this->ballBoostDir);
+        ballWasBoosted |= currBallBoosted;
+
+        if (currBallBoosted) {
+            // If the ball boost is pressed we reset the last thing it collided with,
+            // this makes sure that if it gets shot back at the last thing it collided with
+            // that it will properly collide with it again
+            currBall->SetLastThingCollidedWith(NULL);
+        }
     }
 
     // Sanity: The ball should be allowed to boost!!
@@ -186,7 +191,7 @@ bool BallBoostModel::BallBoosterPressed() {
     this->numAvailableBoosts--;
     assert(this->numAvailableBoosts >= 0);
     // EVENT: Ball Boost lost
-    GameEventManager::Instance()->ActionBallBoostLost();
+    GameEventManager::Instance()->ActionBallBoostLost(false);
 
     // End the bullet time state...
     this->SetCurrentState(BulletTimeFadeOut);

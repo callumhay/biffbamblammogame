@@ -283,7 +283,8 @@ public:
      * right after the number of available boosts is incremented/decremented.
      */
     virtual void BallBoostGainedEvent() = 0;
-    virtual void BallBoostLostEvent()   = 0;
+    // Args: allBoostsLost - true if all boosts were lost
+    virtual void BallBoostLostEvent(bool allBoostsLost)   = 0;
 
 	/**
 	 * Event triggered when a level piece / block changes from one type to another either within the same
