@@ -379,10 +379,10 @@ void GameEventManager::ActionBallBoostGained() {
 }
 
 // Action for when a boost is lost
-void GameEventManager::ActionBallBoostLost() {
+void GameEventManager::ActionBallBoostLost(bool allBoostsLost) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->BallBoostLostEvent();
+		(*this->listenerIter)->BallBoostLostEvent(allBoostsLost);
 	}	
 }
 

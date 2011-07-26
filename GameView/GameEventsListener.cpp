@@ -805,9 +805,15 @@ void GameEventsListener::BallBoostGainedEvent() {
     debug_output("EVENT: Ball boost gained");
 }
 
-void GameEventsListener::BallBoostLostEvent() {
-    this->display->GetAssets()->GetBoostHUD()->BoostLost();
-    debug_output("EVENT: Ball boost lost");
+void GameEventsListener::BallBoostLostEvent(bool allBoostsLost) {
+    if (allBoostsLost) {
+        this->display->GetAssets()->GetBoostHUD()->AllBoostsLost(this->display->GetModel()->GetBallBoostModel());
+        debug_output("EVENT: All ball boosts lost");
+    }
+    else {
+        this->display->GetAssets()->GetBoostHUD()->BoostLost();
+        debug_output("EVENT: Ball boost lost");
+    }
 }
 
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {

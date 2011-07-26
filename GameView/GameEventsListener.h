@@ -77,7 +77,7 @@ public:
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
     void BallBoostExecutedEvent(const BallBoostModel& boostModel);
     void BallBoostGainedEvent();
-    void BallBoostLostEvent();
+    void BallBoostLostEvent(bool allBoostsLost);
 
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
