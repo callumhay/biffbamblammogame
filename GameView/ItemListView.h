@@ -88,6 +88,7 @@ public:
     void SetSelectedItemIndex(int index);
 	ItemListView::ListItem* GetSelectedItem() const;
     bool GetIsItemActivated() const;
+    bool GetIsSelectedItemOnLastRow() const;
 
     size_t GetListWidth() const;
     size_t GetSmallestBorderSize() const;
@@ -168,6 +169,11 @@ inline ItemListView::ListItem* ItemListView::GetSelectedItem() const {
 
 inline bool ItemListView::GetIsItemActivated() const {
     return this->itemIsActivated;
+}
+
+inline bool ItemListView::GetIsSelectedItemOnLastRow() const {
+    const ItemListView::ListItem* selectedItem = this->GetSelectedItem();
+    return (selectedItem->GetIndex() >= this->items.size() - this->numItemsPerRow);
 }
 
 inline size_t ItemListView::GetSmallestBorderSize() const {

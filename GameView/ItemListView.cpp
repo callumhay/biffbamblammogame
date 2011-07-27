@@ -474,6 +474,11 @@ void ItemListView::MoveSelectionY(bool up) {
     if (this->GetSelectedItem() == NULL || this->itemIsActivated) { return; }
     int y = up ? 1 : -1;
 
+    // Ignore if we're at the top row and we're trying to move up
+    if (y == 1 && this->selectedItemIndex < this->numItemsPerRow) {
+        return;
+    }
+
     int numRows = (this->items.size() / this->numItemsPerRow) + 1;
     int rowsAllFilledNumItems = (numRows * this->numItemsPerRow);
     int newSelectedIndex = (rowsAllFilledNumItems + this->selectedItemIndex - y * this->numItemsPerRow) % rowsAllFilledNumItems;

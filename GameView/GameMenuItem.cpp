@@ -399,10 +399,15 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	}
 
 	Camera::PushWindowCoords();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
 	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_2D);
 
 	// Draw the left pointing scroller arrow
 	const float BASE_LABEL_WIDTH  = this->currLabel->GetLastRasterWidth();
@@ -419,8 +424,8 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	const float SCROLLER_X_WIDTH		  = wiggleTopLeftCorner[0] + SCROLLER_WIDTH;
 	const float SCROLLER_Y_HEIGHT		  = NEW_Y_POS - SCROLLER_HEIGHT;
 	const float SCROLLER_FILL_X_WIDTH = wiggleTopLeftCorner[0] + SCROLLER_WIDTH * ((this->currentValue - this->minValue) / (this->maxValue - this->minValue));
-	glPolygonMode(GL_FRONT, GL_FILL);
 	
+    glPolygonMode(GL_FRONT, GL_FILL);
 	glBegin(GL_QUADS);
 	
 	// Shadowy background
@@ -453,6 +458,7 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(AmountScrollerMenuItem::SCROLLER_WIDTH + AmountScrollerMenuItem::INTERIOR_PADDING_ARROWS_SCROLLER, 0.0f);
 	this->DrawScrollerArrow(wiggleTopLeftCorner, SCROLLER_HEIGHT, false);
 
+    glPopMatrix();
 	glPopAttrib();
 	Camera::PopWindowCoords();
 }
