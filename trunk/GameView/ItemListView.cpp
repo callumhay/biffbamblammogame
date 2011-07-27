@@ -205,12 +205,12 @@ void ItemListView::Draw(const Camera& camera) {
         static const float FINE_PRINT_DESC_GAP = 30;
         static const float STRIPE_BORDER = 20;
         
-        float totalItemDisplayHeight = (this->itemPixelHeight + PIC_TITLE_GAP + descLbl->GetHeight() +
-            FINE_PRINT_DESC_GAP + finePrintLbl->GetHeight());
+        //float totalItemDisplayHeight = (this->itemPixelHeight + PIC_TITLE_GAP + descLbl->GetHeight() +
+        //    FINE_PRINT_DESC_GAP + finePrintLbl->GetHeight());
         float itemPicX = this->activatedItemXPicAnim.GetInterpolantValue();
 
-        float interiorHeight = (camera.GetWindowHeight() - (2 * ItemListView::BLACK_BORDER_HEIGHT) - totalItemDisplayHeight) / 2.0f;
-        float itemAndTitleYTopLeftCorner = camera.GetWindowHeight() - ItemListView::BLACK_BORDER_HEIGHT - interiorHeight;
+        //float interiorHeight = (camera.GetWindowHeight() - (2 * ItemListView::BLACK_BORDER_HEIGHT) - totalItemDisplayHeight) / 2.0f;
+        float itemAndTitleYTopLeftCorner = camera.GetWindowHeight() - 2*ItemListView::BLACK_BORDER_HEIGHT;
         float itemAndTitleYUnderPic = itemAndTitleYTopLeftCorner - this->itemPixelHeight;
             
         glPushMatrix();

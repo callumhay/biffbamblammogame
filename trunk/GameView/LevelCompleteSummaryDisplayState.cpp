@@ -334,10 +334,12 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
         this->maxBlocksFadeIn.Tick(dT);
         this->numItemsFadeIn.Tick(dT);
         this->totalTimeFadeIn.Tick(dT);
-
-        // Animate and draw the "Press any key..." label
-        this->footerColourAnimation.Tick(dT);
-        this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
+        
+        if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
+            // Animate and draw the "Press any key..." label
+            this->footerColourAnimation.Tick(dT);
+            this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
+        }
     }
 
     long currScoreTally = static_cast<long>(this->scoreValueAnimation.GetInterpolantValue());
@@ -565,25 +567,42 @@ void LevelCompleteSummaryDisplayState::DrawPressAnyKeyTextFooter(float screenWid
 void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
     UNUSED_PARAMETER(pressedButton);
 	if (this->waitingForKeyPress) {
-		// Start the fade out animation - the user wants to start playing!
-		this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
-        
-        // Automatically finish the score tally and other animations
-        this->scoreValueAnimation.SetInterpolantValue(this->scoreValueAnimation.GetTargetValue());
-        this->levelCompleteTextScaleAnimation.SetInterpolantValue(this->levelCompleteTextScaleAnimation.GetTargetValue());
 
-        for (size_t i = 0; i < this->starAnimations.size(); i++) {
-            this->starAnimations[i]->SetInterpolantValue(this->starAnimations[i]->GetTargetValue());
+        if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
+            // Start the fade out animation - the user wants to start playing!
+		    this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
+            waitingForKeyPress = false;
         }
+        else {
+            // Automatically finish the score tally and other animations
+            this->scoreValueAnimation.SetInterpolantValue(this->scoreValueAnimation.GetTargetValue());
+            this->scoreValueAnimation.ClearLerp();
 
-        this->totalScoreFlyInAnimation.SetInterpolantValue(this->totalScoreFlyInAnimation.GetTargetValue());
-        this->totalScoreFadeInAnimation.SetInterpolantValue(this->totalScoreFadeInAnimation.GetTargetValue());
-        this->newHighScoreFade.SetInterpolantValue(this->newHighScoreFade.GetTargetValue());
+            this->levelCompleteTextScaleAnimation.SetInterpolantValue(this->levelCompleteTextScaleAnimation.GetTargetValue());
+            this->levelCompleteTextScaleAnimation.ClearLerp();
 
-        this->maxBlocksFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
-        this->numItemsFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
-        this->totalTimeFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
+            for (size_t i = 0; i < this->starAnimations.size(); i++) {
+                this->starAnimations[i]->SetInterpolantValue(this->starAnimations[i]->GetTargetValue());
+                this->starAnimations[i]->ClearLerp();
+            }
 
-        waitingForKeyPress = false;
+            this->totalScoreFlyInAnimation.SetInterpolantValue(this->totalScoreFlyInAnimation.GetTargetValue());
+            this->totalScoreFlyInAnimation.ClearLerp();
+
+            this->totalScoreFadeInAnimation.SetInterpolantValue(this->totalScoreFadeInAnimation.GetTargetValue());
+            this->totalScoreFadeInAnimation.ClearLerp();
+
+            this->newHighScoreFade.SetInterpolantValue(this->newHighScoreFade.GetTargetValue());
+            this->newHighScoreFade.ClearLerp();
+
+            this->maxBlocksFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
+            this->maxBlocksFadeIn.ClearLerp();
+
+            this->numItemsFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
+            this->numItemsFadeIn.ClearLerp();
+
+            this->totalTimeFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
+            this->totalTimeFadeIn.ClearLerp();
+        }
 	}
 }

@@ -44,13 +44,21 @@ public:
     void SetAlpha(float alpha);
     void SetBeforeAndAfterTextColour(const Colour& c);
 
+    void ShowXBoxButton(bool show);
+
     void Draw();
 
 private:
     float alpha;
 
+    bool xboxButtonDisplayOn;
+
     Texture* keyTexture;
+    Texture* xboxButtonTexture;
+
     TextLabel2D* keyLbl;
+    TextLabel2D* buttonLbl;
+    TextLabel2D* orLbl;
     TextLabel2D* beforeLbl;
     TextLabel2D* afterLbl;
 
@@ -87,6 +95,10 @@ inline void KeyboardHelperLabel::SetTopLeftCorner(float x, float y) {
 
 inline void KeyboardHelperLabel::SetAlpha(float alpha) {
     this->alpha = alpha;
+}
+
+inline void KeyboardHelperLabel::ShowXBoxButton(bool show) {
+    this->xboxButtonDisplayOn = show;
 }
 
 inline void KeyboardHelperLabel::SetBeforeAndAfterTextColour(const Colour& c) {

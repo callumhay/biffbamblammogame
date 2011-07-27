@@ -159,6 +159,7 @@ public:
 	const char* TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY;
 
     const char* TEXTURE_KEYBOARD_KEY;
+    const char* TEXTURE_XBOX_CONTROLLER_BUTTON;
 
 	// Font path constants **********************************
 	const char* FONT_SADBAD;
