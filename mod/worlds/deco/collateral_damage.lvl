@@ -5,7 +5,7 @@ S E E E E E E E E E E E S
 S E E E L E E E L E E E S 
 S E E E S G G G S E E E S 
 S R R R S Y L Y S R R R S 
-S O O O S T(S,lr) S T(S,ll) S O O O S 
+S O B O S T(S,lr) S T(S,ll) S O B O S 
 S Y Y Y S S I S S Y Y Y S 
 S G G G S S S S S G G G S 
 S T(G,ul) E T(G,ur) G G G G G T(G,ul) E T(G,ur) S 
@@ -34,8 +34,8 @@ STARS:
 19000
 26000
 37000
-49000
-65000
+52000
+73000
 
 PaddleGrow 2
 PoisonPaddle 2

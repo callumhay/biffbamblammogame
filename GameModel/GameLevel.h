@@ -60,7 +60,7 @@ public:
 
     static const char* STAR_POINT_MILESTONE_KEYWORD;
 
-	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 7;
+	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 9;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;
 
 	~GameLevel();
