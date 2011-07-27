@@ -308,7 +308,19 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
     // Only give the list a button event when the list has focus and not the blammopedia menu
     if (this->currMenuItemIndex == NO_MENU_ITEM_INDEX) {
         itemWasActivated = currList->GetIsItemActivated();
-        currList->ButtonPressed(pressedButton);
+
+        // In the case where down is pressed on the last row of the selected list, we exit the list
+        if (!itemWasActivated && pressedButton == GameControl::DownButtonAction &&
+            currList->GetIsSelectedItemOnLastRow()) {
+            
+            // Turn off the currently active list from showing a selected item
+            currList->ButtonPressed(GameControl::EscapeButtonAction);
+            currList->SetSelectedItemIndex(-1);
+            this->SetBlammoMenuItemDeselection();
+        }
+        else {
+            currList->ButtonPressed(pressedButton);
+        }
     }
     else {
         // Turn off the currently active list from showing a selected item
@@ -317,8 +329,10 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
         // TODO: select the appropriate blammopedia menu entry and change the list being displayed...
         switch (pressedButton) {
             case GameControl::EnterButtonAction:
+            case GameControl::UpButtonAction:
                 this->SetBlammoMenuItemSelection();
                 break;
+
             case GameControl::LeftButtonAction: {
                     int tempIndex = this->currMenuItemIndex - 1;
                     if (tempIndex < 0) {
@@ -327,6 +341,7 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
                     this->SetBlammoMenuItemHighlighted(tempIndex);
                 }
                 break;
+
             case GameControl::RightButtonAction:
                 this->SetBlammoMenuItemHighlighted((this->currMenuItemIndex + 1) % TOTAL_NUM_MENU_ITEMS);
                 break;
