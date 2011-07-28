@@ -72,7 +72,7 @@ public:
 	enum MenuAlignment { LeftJustified, CenterJustified };
 
 	static const float BACKGROUND_PADDING;
-	static const int NUM_RAND_COLOURS = 18;
+	static const int NUM_RAND_COLOURS = 13;
 	static const Colour RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS];
 
 	GameMenu();

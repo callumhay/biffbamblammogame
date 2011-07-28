@@ -621,7 +621,9 @@ const float VerifyMenuItem::VERIFY_MENU_OPTION_VSPACING	= 40.0f;	// Vertical pad
 const float VerifyMenuItem::VERIFY_MENU_OPTION_WOBBLE_FREQ	= 0.2f;	// Frequency of wobble of menu items on selection	
 
 VerifyMenuItem::VerifyMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, 
-															 const TextureFontSet* verifyDescFont, const TextureFontSet* verifyIdleFont, const TextureFontSet* verifySelFont) :
+                               const TextureFontSet* verifyDescFont,
+                               const TextureFontSet* verifyIdleFont,
+                               const TextureFontSet* verifySelFont) :
 GameMenuItem(smLabel, lgLabel, NULL), selectedOption(VerifyMenuItem::Cancel),
 descriptionLabel(lgLabel), confirmLabel(smLabel), cancelLabel(smLabel),
 verifyMenuWidth(0), verifyMenuHeight(0), verifyMenuActive(false), 
@@ -721,7 +723,7 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 
 	// Draw verify menu stuff
 	const Point2D verifyMenuTopLeft((windowWidth - this->verifyMenuWidth) / 2.0f, 
-																	windowHeight - ((windowHeight - this->verifyMenuHeight) / 2.0f));
+                                    windowHeight - ((windowHeight - this->verifyMenuHeight) / 2.0f));
 
 	const float HALF_VERIFY_MENU_WIDTH	= (this->verifyMenuWidth / 2.0f);
 	const float HALF_VERIFY_MENU_HEIGHT	= (this->verifyMenuHeight / 2.0f);
