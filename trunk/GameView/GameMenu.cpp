@@ -27,16 +27,11 @@ const float GameMenu::BACKGROUND_PADDING            = 12.0f;
 const Colour GameMenu::RAND_COLOUR_LIST[GameMenu::NUM_RAND_COLOURS] = {
 	Colour(0.89f, 0.149f, 0.2118f),                 // Alizarin Red
 	Colour(0.6f, 0.4f, 0.8f),                       // Amethyst Purple
-	Colour(0.5f, 1.0f, 0.83f),                      // Aquamarine
 	Colour(0.0f, 0.5f, 1.0f),                       // Azure Blue
-	Colour(0.5f, 1.0f, 0.0f),                       // Chartreuse
 	Colour(0.8588235f, 0.439215686f, 0.57647f),     // Pale Violet
 	Colour(1.0f, 0.3333f, 0.639f),                  // Rose
-	Colour(1.0f, 0.7176f, 0.77f),                   // Light Pink
 	Colour(0.39f, 0.5843f, 0.9294f),                // Cornflower Blue
 	Colour(0.4f, 0.69f, 0.196f),                    // Puke Green
-	Colour(0.596f, 1.0f, 0.596f),                   // Mint Green
-	Colour(0.0f, 1.0f, 0.5f),                       // Spring Green
 	Colour(0.8745f, 0.451f, 1.0f),                  // Pinkish-Purple (Heliotrope)
 	Colour(0.251f, 0.8784f, 0.815686f),             // Turquoise
 	Colour(0.3137f, 0.7843f, 0.47f),                // Emerald Green

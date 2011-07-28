@@ -104,6 +104,7 @@ inline void KeyboardHelperLabel::ShowXBoxButton(bool show) {
 inline void KeyboardHelperLabel::SetBeforeAndAfterTextColour(const Colour& c) {
     this->beforeLbl->SetColour(c);
     this->afterLbl->SetColour(c);
+    this->orLbl->SetColour(c);
 }
 
 #endif // __KEYBOARDHELPERLABEL_H__
