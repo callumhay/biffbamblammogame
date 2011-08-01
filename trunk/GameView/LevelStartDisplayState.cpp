@@ -39,12 +39,13 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
     // Make sure the game is in the "BallOnPaddleState" before going through with the 
     // initialization for the visuals
     this->display->GetModel()->UnsetPause(GameModel::PauseGame);
+    this->display->GetModel()->UnsetPause(GameModel::PauseState);
     while (gameModel->GetCurrentStateType() != GameState::BallOnPaddleStateType) {
-        this->display->UpdateModel(1.0);
+        this->display->UpdateModel(EPSILON);
     }
 
 	// Pause all game play elements in the game model
-	gameModel->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
+	gameModel->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall | GameModel::PauseState);
 
 	Camera& camera = this->display->GetCamera();
 

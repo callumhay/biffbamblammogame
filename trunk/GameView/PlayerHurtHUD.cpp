@@ -26,16 +26,16 @@ void PlayerHurtHUD::Activate(PlayerHurtHUD::PainIntensity intensity) {
 	// and then fade it out fairly fast - this is all based on the given intensity
 	switch (intensity) {
 		case PlayerHurtHUD::MinorPain:
-			totalFadeOutTime = 1.0;
-			initialOverlayIntensity = 0.3f;
+			totalFadeOutTime = 0.8;
+			initialOverlayIntensity = 0.25f;
 			break;
 		case PlayerHurtHUD::ModeratePain:
-			totalFadeOutTime = 1.5;
-			initialOverlayIntensity = 0.6f;
+			totalFadeOutTime = 1.0;
+			initialOverlayIntensity = 0.5f;
 			break;
 		case PlayerHurtHUD::MajorPain:
-			totalFadeOutTime = 2.0;
-			initialOverlayIntensity = 0.85f;
+			totalFadeOutTime = 1.33;
+			initialOverlayIntensity = 0.75f;
 			break;
 		default:
 			assert(false);

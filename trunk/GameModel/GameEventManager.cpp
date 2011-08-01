@@ -375,7 +375,7 @@ void GameEventManager::ActionBallBoostGained() {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallBoostGainedEvent();
-	}	
+	}
 }
 
 // Action for when a boost is lost
@@ -383,7 +383,15 @@ void GameEventManager::ActionBallBoostLost(bool allBoostsLost) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->BallBoostLostEvent(allBoostsLost);
-	}	
+	}
+}
+
+// Action for when the release timer starts up
+void GameEventManager::ActionReleaseTimerStarted() {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->ReleaseTimerStartedEvent();
+	}
 }
 
 // Action for when a projectile is fired/spawned

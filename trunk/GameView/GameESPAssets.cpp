@@ -2393,36 +2393,36 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	switch (projectile.GetType()) {
 		case Projectile::CollateralBlockProjectile:
 			severity = Onomatoplex::SUPER_AWESOME;
-			size.minValue = 1.0f;
-			size.maxValue = 1.5f;
+			size.minValue = 0.5f;
+			size.maxValue = 0.9f;
 			break;
 		case Projectile::PaddleLaserBulletProjectile:
 			severity = Onomatoplex::GOOD;
-			size.minValue = 0.4f;
-			size.maxValue = 0.65f;
+			size.minValue = 0.35f;
+			size.maxValue = 0.45f;
 			break;
         case Projectile::BallLaserBulletProjectile:
             severity = Onomatoplex::NORMAL;
-            size.minValue = 0.35f;
-			size.maxValue = 0.55f;
+            size.minValue = 0.2f;
+			size.maxValue = 0.3f;
             break;
 		case Projectile::FireGlobProjectile: {
 				const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
 				switch (fireGlobProjectile->GetRelativeSize()) {
 					case FireGlobProjectile::Small:
 						severity = Onomatoplex::GOOD;
-						size.minValue = 0.5f;
-						size.maxValue = 0.7f;
+						size.minValue = 0.2f;
+						size.maxValue = 0.4f;
 						break;
 					case FireGlobProjectile::Medium:
 						severity = Onomatoplex::GOOD;
-						size.minValue = 0.6f;
-						size.maxValue = 1.0f;
+						size.minValue = 0.3f;
+						size.maxValue = 0.5f;
 						break;
 					case FireGlobProjectile::Large:
 						severity = Onomatoplex::AWESOME;
-						size.minValue = 0.8f;
-						size.maxValue = 1.25f;
+						size.minValue = 0.4f;
+						size.maxValue = 0.75f;
 						break;
 					default:
 						assert(false);

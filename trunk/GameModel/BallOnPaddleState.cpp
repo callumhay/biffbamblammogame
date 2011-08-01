@@ -15,7 +15,11 @@
 #include "GameBall.h"
 #include "GameEventManager.h"
 
-BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), firstTick(true) {
+const double BallOnPaddleState::START_RELEASE_TIMER_TIME_IN_SECS = 2.5;
+const double BallOnPaddleState::TOTAL_RELEASE_TIMER_TIME_IN_SECS = START_RELEASE_TIMER_TIME_IN_SECS + 6.0;
+
+BallOnPaddleState::BallOnPaddleState(GameModel* gm) : GameState(gm), 
+firstTick(true), releaseTimerStarted(false), releaseTimerCounter(0.0) {
 	assert(gm != NULL);
 	
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
@@ -93,10 +97,26 @@ void BallOnPaddleState::Tick(double seconds) {
 	// been spawned on the player paddle
 	if (this->firstTick) {
 		this->firstTick = false;
+        this->releaseTimerCounter = 0.0;
 
 		// EVENT: Ball (Re)spawning
 		GameEventManager::Instance()->ActionBallSpawn(*this->GetGameBall());
 	}
+    else {
+        // Logic for the release timer
+        this->releaseTimerCounter += seconds;
+
+        // Check to see whether we should start the release timer yet, we only send an event for
+        // right when it starts
+        if (this->releaseTimerCounter > START_RELEASE_TIMER_TIME_IN_SECS && !releaseTimerStarted) {
+            GameEventManager::Instance()->ActionReleaseTimerStarted();
+            this->releaseTimerStarted = true;
+        }
+        // If the timer expires then the ball is automatically released
+        else if (this->releaseTimerCounter >= TOTAL_RELEASE_TIMER_TIME_IN_SECS) {
+            this->BallReleaseKeyPressed();
+        }
+    }
 }
 
 /**

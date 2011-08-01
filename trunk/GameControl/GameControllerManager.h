@@ -42,6 +42,8 @@ public:
 	bool ControllersCanStillPlugAndPlay() const;
 	void TryToLoadPlugAndPlayControllers();
 
+    void SetControllerSensitivity(int sensitivity);
+
 	//const std::list<BBBGameController*>& GetLoadedGameControllers() const;
 
 	bool ProcessControllers();

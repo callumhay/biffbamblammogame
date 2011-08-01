@@ -16,6 +16,7 @@
 #include "LivesLeftHUD.h"
 #include "PointsHUD.h"
 #include "BallBoostHUD.h"
+#include "BallReleaseHUD.h"
 
 #include "../BlammoEngine/Camera.h"
 #include "../GameModel/GameModel.h"
@@ -272,6 +273,10 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 	// Draw the ball boost HUD display in the top-left corner, under the number of balls left
     BallBoostHUD* boostHUD = gameAssets->GetBoostHUD();
     boostHUD->Draw(camera, gameModel->GetBallBoostModel(), DISPLAY_HEIGHT, dT);
+
+    // Draw the ball release timer HUD display
+    BallReleaseHUD* ballReleaseHUD = gameAssets->GetBallReleaseHUD();
+    ballReleaseHUD->Draw(dT, camera, *gameModel);
 
     // Draw the timers that are currently in existance
 	gameAssets->DrawTimers(dT, camera);

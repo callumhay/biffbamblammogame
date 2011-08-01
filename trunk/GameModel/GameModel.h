@@ -395,6 +395,8 @@ public:
         return this->boostModel;
     }
 
+    float GetPercentBallReleaseTimerElapsed() const;
+
 	// Pauses the game
 	void SetPause(PauseType pause) {
 		this->pauseBitField |= pause;
@@ -510,6 +512,5 @@ inline void GameModel::Tick(double seconds) {
 	}
 	this->gameTransformInfo->Tick(seconds, *this);
 }
-
 
 #endif

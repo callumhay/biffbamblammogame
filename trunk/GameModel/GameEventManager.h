@@ -97,6 +97,8 @@ public:
     void ActionBallBoostGained();
     void ActionBallBoostLost(bool allBoostsLost);
 
+    void ActionReleaseTimerStarted();
+
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);
 	void ActionRocketExploded(const PaddleRocketProjectile& rocket);

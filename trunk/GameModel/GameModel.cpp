@@ -943,23 +943,25 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 	}
 
 	// Make sure we don't drop an item close to another dropping item in the same column of the level...
-	for (std::list<GameItem*>::const_iterator iter = this->currLiveItems.begin(); iter != this->currLiveItems.end(); ++iter) {
+	for (std::list<GameItem*>::const_iterator iter = this->currLiveItems.begin();
+         iter != this->currLiveItems.end(); ++iter) {
+
 		const GameItem* currItem = *iter;
 		if (fabs(currItem->GetCenter()[0] - p.GetCenter()[0]) < EPSILON) {
-			if (fabs(currItem->GetCenter()[1] - p.GetCenter()[1]) < 3 * GameItem::HALF_ITEM_HEIGHT) {
+			if (fabs(currItem->GetCenter()[1] - p.GetCenter()[1]) < 5 * GameItem::HALF_ITEM_HEIGHT) {
 				return;
 			}
 		}
 	}
 
-	// We will drop an item based on probablility
-	// TODO: Add probability based off multiplier and score stuff...
-	double itemDropProb = GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP;
-	double randomNum    = Randomizer::GetInstance()->RandomNumZeroToOne();
+	// We will drop an item based on probablility, we add greater probability based off the current multiplier
+    double itemDropProb     = GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP + (0.025 * this->GetCurrentMultiplier());
+    double halfItemDropProb = itemDropProb / 2.0;
+	double randomNum        = Randomizer::GetInstance()->RandomNumZeroToOne();
 	
 	debug_output("Probability of drop: " << itemDropProb << " Number for deciding: " << randomNum);
 
-	if (randomNum <= itemDropProb) {
+	if (randomNum < halfItemDropProb || randomNum > (1.0 - halfItemDropProb)) {
 		// If there are no allowable item drops for the current level then we drop nothing anyway
 		if (this->GetCurrentLevel()->GetAllowableItemDropTypes().empty()) {
 			return;
@@ -1095,6 +1097,14 @@ void GameModel::WipePieceFromAuxLists(LevelPiece* piece) {
 		}
 	}
 }
+
+float GameModel::GetPercentBallReleaseTimerElapsed() const {
+    if (this->GetCurrentStateType() != GameState::BallOnPaddleStateType) {
+        return 1.0f;
+    }
+    return (static_cast<BallOnPaddleState*>(this->currState))->GetReleaseTimerPercentDone();
+}
+
 
 #ifdef _DEBUG
 void GameModel::DropItem(GameItem::ItemType itemType) {

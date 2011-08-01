@@ -92,7 +92,7 @@ private:
 
     class LevelMenuItem {
     public:
-        LevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner, const Texture* starTexture);
+        LevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner, const Texture* starTexture, bool isEnabled);
         ~LevelMenuItem();
         
         const Point2D& GetTopLeftCorner() const { return this->topLeftCorner; }
@@ -120,6 +120,8 @@ private:
         TextLabel2D* numLabel;
         TextLabel2DFixedWidth* nameLabel;
         TextLabel2D* highScoreLabel; 
+
+        TextLabel2D* lockedLabel;
 
         const Texture* starTexture;
         

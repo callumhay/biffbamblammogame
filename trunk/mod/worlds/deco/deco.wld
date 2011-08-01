@@ -4,10 +4,11 @@ Deco
 
 resources/textures/deco_world_select_256x256.jpg
 
+resources/worlds/deco/testing/an_almost_empty_level.lvl
 resources/worlds/deco/simple_beginnings.lvl
 resources/worlds/deco/spike_jonze.lvl
 resources/worlds/deco/collateral_damage.lvl
 resources/worlds/deco/a_sticky_situation.lvl
 resources/worlds/deco/shutin.lvl
 resources/worlds/deco/dividing_lines.lvl
-resources/worlds/deco/testing/an_almost_empty_level.lvl
+

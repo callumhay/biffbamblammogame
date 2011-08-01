@@ -177,8 +177,10 @@ int main(int argc, char *argv[]) {
 
 		// Create the MVC while showing the loading screen...
 		LoadingScreen::GetInstance()->StartShowLoadingScreen(initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight(), 7);
-		// Set the volume from the initial configuration options...
+		// Set the volume from the initial configuration options
 		GameSoundAssets::SetGameVolume(initCfgOptions.GetVolume());
+        // Set the controller sensitivity from the initial configuration options
+        //GameControllerManager::GetInstance()->SetControllerSensitivity(initCfgOptions.GetControllerSensitivity());
 
 		// Load the blammopedia...
 		LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading blammopedia...");

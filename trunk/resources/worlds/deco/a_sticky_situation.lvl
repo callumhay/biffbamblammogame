@@ -1,0 +1,59 @@
+A Sticky Situation
+16 20
+S S S S S S S S S S S S S S S S 
+S E E E E S R B O G D(StickyPaddle) G O B R S 
+S E E E E S R O Y G G G Y O R S 
+S E E E E S R O Y G G G Y O R S 
+S E E E E S I B O G G G O B I S 
+S E E E E S R O Y G G G Y O R S 
+S E E E E S R O Y Y I Y Y O R S 
+S E E E E S R B O O B O O B R S 
+S E G G E S R R R R R R R R R S 
+S E G G E S E E E E E E E E E S 
+S E E I E S E E E E E E E E E S 
+S E E E E S E E E E E E E E E S 
+S E E E E S E G E E G E E G E S 
+S E E E E S E E E E E E E E E S 
+S E E E E S E E E E E E E E E S 
+S E E E E S E E E E E E E E E S 
+S E E E E S E E E E E E E E E S 
+S E E E E S E E E E E E E E E S 
+S E E E E S E E E E E E E E E S 
+S E E E E E E E E E E E E E E S 
+
+STARS:
+9000
+13500
+19000
+25000
+34000
+
+PaddleGrow 0
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+BallGrow 0
+UberBall 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 3
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 1
+FireBall 1
+RocketPaddle 1
+GhostBall 2
+BallShrink 3
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MultiBall3 2
+IceBall 1
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

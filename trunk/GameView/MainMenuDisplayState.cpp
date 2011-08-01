@@ -20,6 +20,7 @@
 
 #include "../BlammoEngine/FBObj.h"
 #include "../GameModel/GameModel.h"
+#include "../GameControl/GameControllerManager.h"
 #include "../GameSound/GameSoundAssets.h"
 #include "../ESPEngine/ESPOnomataParticle.h"
 #include "../WindowManager.h"
@@ -332,6 +333,16 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	this->soundVolumeMenuItem->SetConstantChangeFeedback(true);
 	this->soundVolumeMenuItem->SetEventHandler(this->itemsEventHandler);
 	this->optionsSoundVolumeIndex = this->optionsSubMenu->AddMenuItem(this->soundVolumeMenuItem);
+
+	// Add a controller sensitivity option
+	//subMenuLabelSm.SetText("Controller Sensitivity");
+	//subMenuLabelLg.SetText("Controller Sensitivity");
+
+    //int currentSensitivity = 100;//cfgOptions.GetControllerSensitivity();
+    //this->controllerSensitivityItem = new AmountScrollerMenuItem(subMenuLabelSm, subMenuLabelLg,
+	//	ConfigOptions::MIN_CONTROLLER_SENSITIVITY, ConfigOptions::MAX_CONTROLLER_SENSITIVITY, currentSensitivity, 5.0f);
+    //this->controllerSensitivityItem->SetConstantChangeFeedback(true);
+    //this->optionsControllerSensitivityIndex = this->optionsSubMenu->AddMenuItem(this->controllerSensitivityItem);
 
 	// Add an option for getting out of the menu
 	subMenuLabelSm.SetText("Back");
@@ -789,13 +800,24 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 	else if (itemIndex == this->mainMenuState->optionsSoundVolumeIndex) {
 		int volumeLevel = static_cast<int>(this->mainMenuState->soundVolumeMenuItem->GetScrollerValue());
 		
-		// Set the configuration options
+		// Set the configuration option
 		this->mainMenuState->cfgOptions.SetVolume(volumeLevel);
 		
 		// Set the actual volume...
 		//GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 		GameSoundAssets::SetGameVolume(volumeLevel);
 	}
+    /*
+    else if (itemIndex == this->mainMenuState->optionsControllerSensitivityIndex) {
+        // Controller sensitivity option...
+        int sensitivityLvl = static_cast<int>(this->mainMenuState->controllerSensitivityItem->GetScrollerValue());
+        
+        // Set the configuration option
+        //this->mainMenuState->cfgOptions.SetControllerSensitivity(sensitivityLvl);
+        // Set the actual sensitivity...
+        GameControllerManager::GetInstance()->SetControllerSensitivity(sensitivityLvl);
+    }
+    */
 	else {
 		assert(false);
 	}

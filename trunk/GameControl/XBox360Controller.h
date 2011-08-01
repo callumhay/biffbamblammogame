@@ -26,10 +26,15 @@ class XBox360Controller : public BBBGameController {
 public:
 	static const int MAX_CONTROLLERS = 4;
 
+    static const int MIN_SENSITIVITY     = 1;
+    static const int MAX_SENSITIVITY     = 100;
+    static const int DEFAULT_SENSITIVITY = 100;
+
 	XBox360Controller(GameModel* model, GameDisplay* display, int controllerNum);
 	~XBox360Controller();
 
 	static bool IsConnected(int controllerNum);
+    static bool SetSensitivity(int sensitivity);
 
 	void Vibrate(double lengthInSeconds, const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt);
     void ClearVibration();
@@ -39,6 +44,8 @@ public:
 	bool IsConnected() const;
 
 private:
+    static int sensitivity;
+
 	int controllerNum;
 
 	bool enterActionOn;
@@ -60,10 +67,23 @@ private:
 	void SetVibration(const VibrateAmount& leftMotorAmt, const VibrateAmount& rightMotorAmt);
     void UpdateDirections(const XINPUT_STATE& controllerState, int sensitivityLeft);
 
-
 	void DebugRepeatActions();
+
+    static float GetSensitivityFraction();
 
 	DISALLOW_COPY_AND_ASSIGN(XBox360Controller);
 };
+
+inline bool XBox360Controller::SetSensitivity(int sensitivity) {
+    if (sensitivity > MAX_SENSITIVITY || sensitivity < MIN_SENSITIVITY) {
+        return false;
+    }
+    XBox360Controller::sensitivity = sensitivity;
+    return true;
+}
+
+inline float XBox360Controller::GetSensitivityFraction() {
+    return static_cast<float>(XBox360Controller::sensitivity) / static_cast<float>(XBox360Controller::MAX_SENSITIVITY);
+}
 
 #endif // __XBOX360GAMECONTROLLER_H__
