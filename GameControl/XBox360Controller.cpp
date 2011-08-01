@@ -20,6 +20,8 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameItem.h"
 
+int XBox360Controller::sensitivity = XBox360Controller::DEFAULT_SENSITIVITY;
+
 static WORD GetXBoxVibrationAmtFromEnum(const BBBGameController::VibrateAmount& vibeAmt) {
 	switch (vibeAmt) {
 		case BBBGameController::NoVibration:
@@ -108,14 +110,15 @@ void XBox360Controller::NotInGameOnProcessStateSpecificActions(const XINPUT_STAT
 		}
 	}
 
+
     this->UpdateDirections(controllerState, 2*XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 }
 
 void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState) {
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_A ||
-			controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_B ||
-			controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_X ||
-			controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) {
+        controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_B ||
+        controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_X ||
+        controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) {
 
 		if (!this->enterActionOn) {
             this->model->ShootActionReleaseUse();
@@ -143,6 +146,9 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
 		}
 	}
 
+    //float addedSensitivityDeadZoneLThumb = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE * (1.0f - XBox360Controller::GetSensitivityFraction());
+    //float addedSensitivityDeadZoneRThumb = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE * (1.0f - XBox360Controller::GetSensitivityFraction());
+
     this->UpdateDirections(controllerState, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 
 	// Triggers
@@ -159,9 +165,10 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
     }
 
     // Special stuff (ball bullet time)...
-    if (abs(controllerState.Gamepad.sThumbRX) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ||
-        abs(controllerState.Gamepad.sThumbRY) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) {
-        this->display->SpecialDirectionPressed(controllerState.Gamepad.sThumbRX, controllerState.Gamepad.sThumbRY);
+    if (abs(controllerState.Gamepad.sThumbRX) > (XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) ||
+        abs(controllerState.Gamepad.sThumbRY) > (XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)) {
+        this->display->SpecialDirectionPressed(controllerState.Gamepad.sThumbRX, 
+                                               controllerState.Gamepad.sThumbRY);
         this->specialDirOn = true;
     }
     else {

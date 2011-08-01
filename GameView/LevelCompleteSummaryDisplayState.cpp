@@ -352,7 +352,7 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 
     float yPos = camera.GetWindowHeight() - HEADER_LEVEL_NAME_VERTICAL_PADDING;
     this->DrawLevelNameLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
-    yPos -= (2*this->maxTotalLabelHeight + HEADER_INBETWEEN_VERTICAL_PADDING);
+    yPos -= (this->levelCompleteLabel.GetHeight() + HEADER_INBETWEEN_VERTICAL_PADDING + 10);
     this->DrawLevelCompleteLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
     yPos -= HEADER_INBETWEEN_VERTICAL_PADDING;
     this->DrawStars(dT, yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
@@ -446,7 +446,7 @@ void LevelCompleteSummaryDisplayState::DrawStars(double dT, float currYPos, floa
 
             ESPPointEmitter* starBGEmitter = this->starBgEmitters[i];
             starBGEmitter->SetParticleAlpha(ESPInterval(0.75f*starAnimation->GetInterpolantValue()));
-            starBGEmitter->SetEmitPosition(Point3D(currX, currYPos, 0));
+            starBGEmitter->OverwriteEmittedPosition(Point3D(currX, currYPos, 0));
             starBGEmitter->Tick(dT);
             starBGEmitter->Draw(this->display->GetCamera());
         }
@@ -465,7 +465,7 @@ void LevelCompleteSummaryDisplayState::DrawStars(double dT, float currYPos, floa
         if (i < gameModel->GetNumStarsAwarded()) {
             ESPPointEmitter* starFGEmitter = this->starFgEmitters[i];
             starFGEmitter->SetParticleAlpha(ESPInterval(0.85f*starAnimation->GetInterpolantValue()));
-            starFGEmitter->SetEmitPosition(Point3D(currX + STAR_SIZE/7, currYPos + STAR_SIZE/7, 0));
+            starFGEmitter->OverwriteEmittedPosition(Point3D(currX + STAR_SIZE/7, currYPos + STAR_SIZE/7, 0));
             starFGEmitter->Tick(dT);
             starFGEmitter->Draw(this->display->GetCamera());
         }

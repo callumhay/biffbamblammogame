@@ -76,7 +76,7 @@ TeslaBlockMesh::~TeslaBlockMesh() {
 }
 
 void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
-													const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+                          const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 	
 	glPushAttrib(GL_CURRENT_BIT);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);

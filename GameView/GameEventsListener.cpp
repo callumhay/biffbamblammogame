@@ -19,6 +19,7 @@
 #include "LivesLeftHUD.h"
 #include "PointsHUD.h"
 #include "BallBoostHUD.h"
+#include "BallReleaseHUD.h"
 #include "BallSafetyNetMesh.h"
 
 #include "../Blammopedia.h"
@@ -278,6 +279,7 @@ void GameEventsListener::BallSpawnEvent(const GameBall& spawnedBall) {
 
 void GameEventsListener::BallShotEvent(const GameBall& shotBall) {
 	UNUSED_PARAMETER(shotBall);
+    this->display->GetAssets()->GetBallReleaseHUD()->BallReleased();
 	debug_output("EVENT: Ball shot");
 }
 
@@ -905,6 +907,11 @@ void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAft
 void GameEventsListener::BlockIceShatteredEvent(const LevelPiece& block) {
 	this->display->GetAssets()->GetESPAssets()->AddIceBitsBreakEffect(block);
 	debug_output("EVENT: Ice shattered");
+}
+
+void GameEventsListener::ReleaseTimerStartedEvent() {
+    this->display->GetAssets()->GetBallReleaseHUD()->TimerStarted();
+    debug_output("EVENT: Ball release timer started");
 }
 
 void GameEventsListener::PointNotificationEvent(const PointAward& pointAward) {

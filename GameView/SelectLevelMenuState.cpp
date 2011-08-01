@@ -611,8 +611,9 @@ void SelectLevelMenuState::SetupLevelPages() {
     this->pages.push_back(new LevelMenuPage());
     LevelMenuItem* levelItem   = NULL;
     int numRows = static_cast<int>(ceil(static_cast<float>(levels.size()) / static_cast<float>(numItemsPerRow)));
-    for (int row = 0; row < numRows; row++) {
+    bool noScoreEncountered = false;
 
+    for (int row = 0; row < numRows; row++) {
         for (int col = 0; col < numItemsPerRow; col++) {
             int currLevelIdx = row * numItemsPerRow + col;
             if (currLevelIdx >= static_cast<int>(levels.size())) {
@@ -626,9 +627,12 @@ void SelectLevelMenuState::SetupLevelPages() {
             totalNumStars += GameLevel::MAX_STARS_PER_LEVEL;
 
             levelItem = new LevelMenuItem(currLevelIdx+1, currLevel, itemWidth, 
-                Point2D(itemX, itemY), this->starTexture);
+                Point2D(itemX, itemY), this->starTexture, !noScoreEncountered);
             this->pages[this->pages.size()-1]->AddLevelItem(levelItem);
             
+            if (currLevel->GetHighScore() == 0) {
+                noScoreEncountered = true;
+            }
 
             itemX += itemWidth + ITEM_X_GAP_SIZE;
         }
@@ -786,25 +790,27 @@ const float SelectLevelMenuState::LevelMenuItem::HIGH_SCORE_TO_STAR_Y_GAP = 4;
 
 SelectLevelMenuState::LevelMenuItem::LevelMenuItem(int levelNum, const GameLevel* level, 
                                                    float width, const Point2D& topLeftCorner, 
-                                                   const Texture* starTexture) : 
-level(level), topLeftCorner(topLeftCorner), starTexture(starTexture), width(width) {
+                                                   const Texture* starTexture, bool isEnabled) : lockedLabel(NULL),
+level(level), topLeftCorner(topLeftCorner), starTexture(starTexture), width(width), isEnabled(isEnabled) {
     assert(level != NULL);
     assert(levelNum > 0);
 
     std::stringstream levelNumStr;
     levelNumStr << levelNum;
 
+    const Colour DISABLED_COLOUR(0.78f, 0.78f, 0.78f);
+
     this->numLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Huge), levelNumStr.str());
     this->numLabel->SetDropShadow(Colour(0.0f, 0.0f, 0.0f), 0.04f);
-    this->numLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
     this->numLabel->SetTopLeftCorner(this->topLeftCorner);
 
     float nameLabelWidth = width - NUM_TO_NAME_GAP - this->numLabel->GetLastRasterWidth();
+    std::string levelName = isEnabled ? level->GetName() : std::string("???");
     this->nameLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
-        GameFontAssetsManager::Small), nameLabelWidth, level->GetName());
-    this->nameLabel->SetColour(Colour(0,0,0));
+        GameFontAssetsManager::Small), nameLabelWidth, levelName);
+
     this->nameLabel->SetLineSpacing(4.0f);
     float nameXPos = this->topLeftCorner[0] + NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth();
     float nameYPos = this->topLeftCorner[1] - std::max<float>(0, ((this->numLabel->GetHeight() - this->nameLabel->GetHeight()) / 2.0f));
@@ -814,10 +820,27 @@ level(level), topLeftCorner(topLeftCorner), starTexture(starTexture), width(widt
     this->highScoreLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Small), highScoreStr);
-    this->highScoreLabel->SetColour(Colour(0.25, 0.25, 0.25));
+    
     //this->highScoreLabel->SetTopLeftCorner(this->nameLabel->GetTopLeftCorner() - Vector2D(0, NAME_TO_HIGH_SCORE_Y_GAP + this->nameLabel->GetHeight()));
     this->highScoreLabel->SetTopLeftCorner(this->nameLabel->GetTopLeftCorner()[0],
         this->numLabel->GetTopLeftCorner()[1] - (NUM_TO_HIGH_SCORE_Y_GAP + this->numLabel->GetHeight()));
+
+    if (isEnabled) {
+        this->nameLabel->SetColour(Colour(0,0,0));
+        this->numLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
+        this->highScoreLabel->SetColour(Colour(0.25, 0.25, 0.25));
+    }
+    else {
+        this->nameLabel->SetColour(DISABLED_COLOUR);
+        this->numLabel->SetColour(DISABLED_COLOUR);
+        this->highScoreLabel->SetColour(DISABLED_COLOUR);
+
+        this->lockedLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+            GameFontAssetsManager::Huge), "LOCKED");
+        this->lockedLabel->SetColour(Colour(1,0,0));
+        this->lockedLabel->SetDropShadow(Colour(0,0,0), 0.07f);
+        this->lockedLabel->SetTopLeftCorner(this->highScoreLabel->GetTopLeftCorner());
+    }
 
     this->starDisplayList = glGenLists(1);
 	glNewList(this->starDisplayList, GL_COMPILE);
@@ -835,24 +858,38 @@ level(level), topLeftCorner(topLeftCorner), starTexture(starTexture), width(widt
     glTranslatef(-STAR_GAP - halfStarSize, -halfStarSize, 0);
     this->starTexture->BindTexture();
     
-    int numStars = level->GetHighScoreNumStars();
-    const Colour& ACTIVE_STAR_COLOUR   = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
-    const Colour& INACTIVE_STAR_COLOUR = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
-    for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
-        if (i < numStars) {
-            glColor4f(ACTIVE_STAR_COLOUR.R(), ACTIVE_STAR_COLOUR.G(), ACTIVE_STAR_COLOUR.B(), 1.0f);
-        }
-        else {
-            glColor4f(INACTIVE_STAR_COLOUR.R(), INACTIVE_STAR_COLOUR.G(), INACTIVE_STAR_COLOUR.B(), 1.0f);
-        }
+    if (isEnabled) {
+        int numStars = level->GetHighScoreNumStars();
+        const Colour& ACTIVE_STAR_COLOUR   = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+        const Colour& INACTIVE_STAR_COLOUR = GameViewConstants::GetInstance()->INACTIVE_POINT_STAR_COLOUR;
+        for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+            if (i < numStars) {
+                glColor4f(ACTIVE_STAR_COLOUR.R(), ACTIVE_STAR_COLOUR.G(), ACTIVE_STAR_COLOUR.B(), 1.0f);
+            }
+            else {
+                glColor4f(INACTIVE_STAR_COLOUR.R(), INACTIVE_STAR_COLOUR.G(), INACTIVE_STAR_COLOUR.B(), 1.0f);
+            }
 
-        glTranslatef(STAR_GAP + starSize, 0, 0);
-	    glBegin(GL_QUADS);
-		    glTexCoord2i(0, 0); glVertex2f(-halfStarSize, -halfStarSize);
-		    glTexCoord2i(1, 0); glVertex2f( halfStarSize, -halfStarSize);
-		    glTexCoord2i(1, 1); glVertex2f( halfStarSize,  halfStarSize);
-		    glTexCoord2i(0, 1); glVertex2f(-halfStarSize,  halfStarSize);
-	    glEnd();
+            glTranslatef(STAR_GAP + starSize, 0, 0);
+	        glBegin(GL_QUADS);
+		        glTexCoord2i(0, 0); glVertex2f(-halfStarSize, -halfStarSize);
+		        glTexCoord2i(1, 0); glVertex2f( halfStarSize, -halfStarSize);
+		        glTexCoord2i(1, 1); glVertex2f( halfStarSize,  halfStarSize);
+		        glTexCoord2i(0, 1); glVertex2f(-halfStarSize,  halfStarSize);
+	        glEnd();
+        }
+    }
+    else {
+        glColor4f(DISABLED_COLOUR.R(), DISABLED_COLOUR.G(), DISABLED_COLOUR.B(), 1.0f);
+        for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+            glTranslatef(STAR_GAP + starSize, 0, 0);
+	        glBegin(GL_QUADS);
+		        glTexCoord2i(0, 0); glVertex2f(-halfStarSize, -halfStarSize);
+		        glTexCoord2i(1, 0); glVertex2f( halfStarSize, -halfStarSize);
+		        glTexCoord2i(1, 1); glVertex2f( halfStarSize,  halfStarSize);
+		        glTexCoord2i(0, 1); glVertex2f(-halfStarSize,  halfStarSize);
+	        glEnd();
+        }
     }
     this->starTexture->UnbindTexture();
 
@@ -869,6 +906,11 @@ SelectLevelMenuState::LevelMenuItem::~LevelMenuItem() {
     this->nameLabel = NULL;
     delete this->highScoreLabel;
     this->highScoreLabel = NULL;
+
+    if (this->lockedLabel != NULL) {
+        delete this->lockedLabel;
+        this->lockedLabel = NULL;
+    }
 
     glDeleteLists(this->starDisplayList, 1);
     this->starDisplayList = 0;
@@ -917,6 +959,11 @@ void SelectLevelMenuState::LevelMenuItem::Draw(const Camera& camera, double dT, 
     
     // Draw the number of stars earned for the level
     glCallList(this->starDisplayList);
+
+    if (!this->isEnabled) {
+        assert(this->lockedLabel != NULL);
+        this->lockedLabel->Draw(15.0f);
+    }
 }
 
 

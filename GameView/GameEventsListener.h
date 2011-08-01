@@ -91,6 +91,8 @@ public:
 
 	void BlockIceShatteredEvent(const LevelPiece& block);
 
+    void ReleaseTimerStartedEvent();
+
 	void ScoreChangedEvent(int newScore);
     void ScoreMultiplierCounterChangedEvent(int newCounterValue);
 	void ScoreMultiplierChangedEvent(int newMultiplier, const Point2D& position);

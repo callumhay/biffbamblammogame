@@ -76,6 +76,7 @@ private:
 	int optionsVSyncIndex;
 	int optionsResolutionIndex;
 	int optionsSoundVolumeIndex;
+    //int optionsControllerSensitivityIndex;
 
 	// Indents and spacing
 	static const unsigned int MENU_X_INDENT = 50;
@@ -94,16 +95,15 @@ private:
 
 	std::vector<Texture*> bangTextures;
 	
-	GameMenu* mainMenu;						// Main (top-most/parent) menu
-	GameSubMenu* optionsSubMenu;	// Options sub-menu
+	GameMenu* mainMenu;             // Main (top-most/parent) menu
+	GameSubMenu* optionsSubMenu;    // Options sub-menu
 
 	// Pointers for tracking the menu items in the options menu
 	SelectionListMenuItem* fullscreenMenuItem;
 	SelectionListMenuItem* resolutionMenuItem;
 	SelectionListMenuItem* vSyncMenuItem;
 	AmountScrollerMenuItem* soundVolumeMenuItem;
-
-	// 
+    //AmountScrollerMenuItem* controllerSensitivityItem;
 
 	AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value
 

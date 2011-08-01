@@ -462,6 +462,12 @@ public:
 	virtual void BlockIceShatteredEvent(const LevelPiece& block) = 0;
 
 
+    /**
+     * Event triggered when the release timer starts ticking while the ball is on the paddle. Only
+     * occurs once just as the timer starts.
+     */
+    virtual void ReleaseTimerStartedEvent() = 0;
+
     // Point related events ****************************************************************
 
     /**

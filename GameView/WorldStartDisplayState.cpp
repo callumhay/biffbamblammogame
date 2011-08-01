@@ -28,7 +28,7 @@ nowEnteringLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "- Press Any Key to Continue -"){
 
 	// Pause all game play elements in the game model
-	this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
+    this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall | GameModel::PauseState);
 
 	// Setup the fade animation to be inactive to start off
 	this->fadeAnimation.SetInterpolantValue(0.0f);

@@ -11,24 +11,24 @@
 
 #include "ConfigOptions.h"
 
-const char* ConfigOptions::INI_FILEPATH				= "BiffBamBlammo.ini";
+const char* ConfigOptions::INI_FILEPATH           = "BiffBamBlammo.ini";
 
-const char* ConfigOptions::WINDOW_HEIGHT_VAR			= "window_height";
-const char* ConfigOptions::WINDOW_WIDTH_VAR				= "window_width";
-const char* ConfigOptions::WINDOW_FULLSCREEN_VAR	= "fullscreen";
-const char* ConfigOptions::WINDOW_VSYNC_VAR				= "vsync";
-const char* ConfigOptions::VOLUME_VAR							= "volume";
+const char* ConfigOptions::WINDOW_HEIGHT_VAR      = "window_height";
+const char* ConfigOptions::WINDOW_WIDTH_VAR       = "window_width";
+const char* ConfigOptions::WINDOW_FULLSCREEN_VAR  = "fullscreen";
+const char* ConfigOptions::WINDOW_VSYNC_VAR       = "vsync";
+const char* ConfigOptions::VOLUME_VAR             = "volume";
 
 const int ConfigOptions::MIN_WINDOW_SIZE	= 480;
 const int ConfigOptions::MAX_WINDOW_SIZE	= 2048;
-const int ConfigOptions::MIN_VOLUME				= 0;
-const int ConfigOptions::MAX_VOLUME				= 100;
+const int ConfigOptions::MIN_VOLUME         = 0;
+const int ConfigOptions::MAX_VOLUME         = 100;
 
-const int  ConfigOptions::DEFAULT_WINDOW_WIDTH				= 1024;
-const int  ConfigOptions::DEFAULT_WINDOW_HEIGHT				= 768;
+const int  ConfigOptions::DEFAULT_WINDOW_WIDTH          = 1024;
+const int  ConfigOptions::DEFAULT_WINDOW_HEIGHT         = 768;
 const bool ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE		= false;
-const bool ConfigOptions::DEFAULT_VSYNC_TOGGLE				= false;
-const int  ConfigOptions::DEFAULT_VOLUME							= ConfigOptions::MAX_VOLUME;
+const bool ConfigOptions::DEFAULT_VSYNC_TOGGLE          = false;
+const int  ConfigOptions::DEFAULT_VOLUME                = ConfigOptions::MAX_VOLUME;
 
 ConfigOptions::ConfigOptions() : windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT),
 fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), volume(ConfigOptions::DEFAULT_VOLUME) {
