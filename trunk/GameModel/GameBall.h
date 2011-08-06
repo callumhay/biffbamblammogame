@@ -126,6 +126,8 @@ public:
 		return sqLength < sqRadii;
 	}
 
+    void ApplyImpulseForce(float amount);
+
 	/** 
 	 * Set ball-ball collisions for this ball to be diabled for the given duration in seconds.
 	 */
@@ -344,11 +346,18 @@ public:
     bool IsBallBoosting() const;
 
 private:
+    static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL
 	BallState* currState;
+    AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
 
-	Collision::Circle2D bounds;	// The bounds of the ball, constantly updated to world space
-	float zCenterPos;           // VERY occasionally (some animations), the ball needs a z-coordinate
-
+    // The colour multiply of the paddle, including its visibility/alpha
+	ColourRGBA colour;
+	Colour contributingGravityColour;
+	Colour contributingCrazyColour;
+	Colour contributingIceColour;
+    
+    Collision::Circle2D bounds;	// The bounds of the ball, constantly updated to world space
+	
 	Vector2D currDir;           // The current direction of movement of the ball
 	float currSpeed;            // The current speed of the ball
 	float gravitySpeed;			// The current gravity speed of the ball
@@ -363,16 +372,11 @@ private:
 
 	double timeSinceLastCollision;
 
+    float zCenterPos;                   // VERY occasionally (some animations), the ball needs a z-coordinate
     float boostSpdDecreaseCounter;      // Counts the boost deceleration so far, when this reaches BOOST_TEMP_SPD_INCREASE_AMT
                                         // the ball will no longer decelerate from a boost
 
-	ColourRGBA colour;                  // The colour multiply of the paddle, including its visibility/alpha
-	Colour contributingGravityColour;
-	Colour contributingCrazyColour;
-	Colour contributingIceColour;
-	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
-
-	static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL
+    float impulse; // Temporary impulses applied to the ball
 
 	const void* lastThingCollidedWith;	// This is just used to check equality with POINTERS DO NOT CAST THIS!!!
 
@@ -434,6 +438,10 @@ inline bool GameBall::ExecuteBallBoost(const Vector2D& dir) {
 
 inline bool GameBall::IsBallBoosting() const {
     return (this->boostSpdDecreaseCounter < BOOST_TEMP_SPD_INCREASE_AMT);
+}
+
+inline void GameBall::ApplyImpulseForce(float amount) {
+    this->impulse = amount;
 }
 
 #endif

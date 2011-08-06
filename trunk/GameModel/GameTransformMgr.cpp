@@ -1093,6 +1093,7 @@ void GameTransformMgr::FinishBulletTimeCamAnimation(double dT, GameModel& gameMo
 
 	// Grab the current transform animation information from the front of the queue
 	TransformAnimation& ballDeathAnim = this->animationQueue.front();
+    UNUSED_VARIABLE(ballDeathAnim);
 	assert(ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation || 
            ballDeathAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
 	/*

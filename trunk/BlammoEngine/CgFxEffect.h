@@ -60,6 +60,8 @@ struct MaterialProperties {
 		if (this->diffuseTexture != NULL) {
 			bool resourceRemoved = ResourceManager::GetInstance()->ReleaseTextureResource(this->diffuseTexture);
 			assert(resourceRemoved);
+            UNUSED_VARIABLE(resourceRemoved);
+
 			this->diffuseTexture = NULL;
 		}
 	}
@@ -80,6 +82,7 @@ public:
 	virtual ~CgFxPostProcessingEffect() {
 		// Release the effect resource
 		bool success = ResourceManager::GetInstance()->ReleaseCgFxEffectResource(this->cgEffect);
+        UNUSED_VARIABLE(success);
 		assert(success);
 	}
 

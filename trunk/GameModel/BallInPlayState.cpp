@@ -185,6 +185,9 @@ void BallInPlayState::Tick(double seconds) {
 
 				// Do ball-paddle collision
 				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+                // Apply an impulse to the ball based on the speed of the paddle...
+                currBall->ApplyImpulseForce(paddle->GetSpeed());
+
 				// Tell the model that a ball collision occurred with the paddle
 				this->gameModel->BallPaddleCollisionOccurred(*currBall);
 
@@ -192,7 +195,7 @@ void BallInPlayState::Tick(double seconds) {
 				if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
 				    // Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
 				    // still see it fly into the void - of course, if the shield is active then no help is provided
-                    this->AugmentBallDirectionToBeNotDownwards(*currBall);
+                    this->AugmentBallDirectionToBeNotTooDownwards(*currBall, n);
 				}
                 else {
                     // The shield paddle has some wonky collision detection so fix it so that it doesn't
@@ -369,6 +372,7 @@ void BallInPlayState::Tick(double seconds) {
 		if (ballToDestroy == GameBall::GetBallCameraBall()) {
 			// Deactivate the ball camera item!!!
 			bool wasRemoved = this->gameModel->RemoveActiveGameItemsOfGivenType(GameItem::BallCamItem);
+            UNUSED_VARIABLE(wasRemoved);
 			assert(wasRemoved);
 		}
 
@@ -465,7 +469,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
 	// Figure out the angle between the normal and the reflection...
 	float angleOfReflInDegs = Trig::radiansToDegrees(acosf(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(n, reflVecHat)))));
-	float diffAngleInDegs		= GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(angleOfReflInDegs);
+	float diffAngleInDegs   = GameBall::MIN_BALL_ANGLE_IN_DEGS - fabs(angleOfReflInDegs);
 
 	// Make sure the reflection is big enough to not cause an annoying slow down in the game
 	// or to make a ridiculous gracing angle
@@ -627,3 +631,19 @@ void BallInPlayState::DoItemCollision() {
 	}
 }
 
+// Makes sure that the ball's direction is upwards and changes it to be upwards - when it gets
+// hit by the paddle this is called.
+void BallInPlayState::AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const Vector2D& collisionNormal) {
+    // We are unforgiving if the collision normal was pointing very downwards as well
+    if (collisionNormal[1] < -0.8) {
+        return;
+    }
+
+	Vector2D ballDirection = b.GetDirection();
+
+	if (ballDirection[1] < 0) {
+		ballDirection[1] = fabs(ballDirection[0] * tanf(GameBall::MIN_BALL_ANGLE_IN_RADS));
+		ballDirection.Normalize();
+		b.SetDirection(ballDirection);
+	}
+}

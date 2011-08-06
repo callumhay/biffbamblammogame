@@ -104,6 +104,7 @@ LevelPiece* OneWayBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruc
 			// EVENT: Ice was shattered
 			GameEventManager::Instance()->ActionBlockIceShattered(*this);
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+            UNUSED_VARIABLE(success);
 			assert(success);
 	}
 
@@ -207,6 +208,7 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 		// Unfreeze a frozen solid block
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+            UNUSED_VARIABLE(success);
 			assert(success);
 		}
 	}
@@ -240,6 +242,7 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
             if (this->HasStatus(LevelPiece::IceCubeStatus)) {
                 GameEventManager::Instance()->ActionBlockIceShattered(*this);
                 bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
                 assert(success);
             }
 
@@ -250,6 +253,7 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			// in that case, unfreeze a frozen solid block
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
 				assert(success);
 			}
 			break;

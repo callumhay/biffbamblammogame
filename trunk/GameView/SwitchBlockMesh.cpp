@@ -209,6 +209,7 @@ void SwitchBlockMesh::InitEmitters() {
 	this->onEmitter->AddEffector(&this->haloExpandPulse);
 	this->onEmitter->AddEffector(&this->haloFader);
 	bool result = this->onEmitter->SetParticles(NUM_HALOS, this->haloTexture);
+    UNUSED_VARIABLE(result);
 	assert(result);
 }
 

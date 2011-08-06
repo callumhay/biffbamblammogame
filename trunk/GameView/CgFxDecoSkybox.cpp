@@ -49,6 +49,7 @@ timer(0.0f), freq(0.025f), noiseTexID(Noise::GetInstance()->GetNoise3DTexture()-
 CgFxDecoSkybox::~CgFxDecoSkybox() {
 	// Release the skybox texture
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->skyTex);
+    UNUSED_VARIABLE(success);
 	assert(success);
 }
 

@@ -89,6 +89,7 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
 		if (didCollideWithPiece) {
 			paddle->UpdateBoundsByPieceCollision(*currPiece, doAttachedBallCollision);
             LevelPiece* resultingPiece = currPiece->CollisionOccurred(this->gameModel, *paddle);
+            UNUSED_VARIABLE(resultingPiece);
             assert(resultingPiece == currPiece);
 
 			/*

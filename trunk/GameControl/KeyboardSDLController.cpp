@@ -125,9 +125,15 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
     
     switch (button) {
         case SDL_BUTTON_LEFT:
-            this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
+            if (boostModel->IsInBulletTime()) {
+                this->model->ShootActionReleaseUse();
+            }
+            else {
+                this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
+            }
             //debug_output("Left button pressed.");
             break;
+
         case SDL_BUTTON_RIGHT:
             if (boostModel->IsInBulletTime()) {
                 this->model->ShootActionReleaseUse();
@@ -354,7 +360,7 @@ void KeyboardSDLController::DebugRepeatActions() {
 }
 
 void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
-
+    UNUSED_PARAMETER(key);
     
     // Debug Item drops
 #ifdef _DEBUG

@@ -89,6 +89,7 @@ Blammopedia::~Blammopedia() {
 	// Clean up the locked item texture
 	if (this->lockedItemTexture != NULL) {
 		bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lockedItemTexture);
+        UNUSED_VARIABLE(success);
 		assert(success);
 	}
 
@@ -530,6 +531,7 @@ bool Blammopedia::ItemEntry::PopulateFromFile() {
 
 Blammopedia::BlockEntry::~BlockEntry() {
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->blockTexture);
+    UNUSED_VARIABLE(success);
 	assert(success);
 }
 

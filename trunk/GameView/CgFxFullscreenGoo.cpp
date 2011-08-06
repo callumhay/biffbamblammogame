@@ -51,6 +51,7 @@ CgFxFullscreenGoo::~CgFxFullscreenGoo() {
 	// Free the mask texture if it exists
 	if (this->maskTex != NULL) {
 		bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->maskTex);
+        UNUSED_VARIABLE(success);
 		assert(success);
 	}
 }
@@ -62,6 +63,7 @@ CgFxFullscreenGoo::~CgFxFullscreenGoo() {
 void CgFxFullscreenGoo::SetMask(const std::string& texMaskFilepath) {
 	if (this->maskTex != NULL) {
 		bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->maskTex);
+        UNUSED_VARIABLE(success);
 		assert(success);
 	}
 	// Initialize the texture

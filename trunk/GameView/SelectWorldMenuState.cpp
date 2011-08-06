@@ -351,6 +351,7 @@ selectedLabel(NULL), baseSize(size), isSelected(false), sizeAnim(size) {
 
 SelectWorldMenuState::WorldSelectItem::~WorldSelectItem() {
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->image);
+    UNUSED_VARIABLE(success);
     assert(success);
     
     delete this->label;

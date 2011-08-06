@@ -129,6 +129,7 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 				// The rocket should not destroy this block, however it certainly
 				// is allowed to destroy blocks around it!
 				LevelPiece* resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+                UNUSED_VARIABLE(resultingPiece);
 				assert(resultingPiece == this);
 				this->ToggleElectricity(*gameModel, *currLevel);
 			}

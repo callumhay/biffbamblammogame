@@ -42,7 +42,8 @@ GameBall* GameBall::currBallCamBall = NULL;
 
 GameBall::GameBall() : bounds(Point2D(0.0f, 0.0f), DEFAULT_BALL_RADIUS), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
 currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballballCollisionsDisabledTimer(0.0),
-lastThingCollidedWith(NULL), zCenterPos(0.0), currState(NULL), timeSinceLastCollision(0.0f), boostSpdDecreaseCounter(BOOST_TEMP_SPD_INCREASE_AMT) {
+lastThingCollidedWith(NULL), zCenterPos(0.0), currState(NULL), timeSinceLastCollision(0.0f), 
+boostSpdDecreaseCounter(BOOST_TEMP_SPD_INCREASE_AMT), impulse(0) {
 	this->ResetBallAttributes();
 }
 
@@ -53,7 +54,7 @@ zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributing
 contributingCrazyColour(gameBall.contributingCrazyColour), contributingIceColour(gameBall.contributingIceColour),
 timeSinceLastCollision(gameBall.timeSinceLastCollision), boostSpdDecreaseCounter(gameBall.boostSpdDecreaseCounter),
 blockCollisionsDisabled(false),
-paddleCollisionsDisabled(false),
+paddleCollisionsDisabled(false), impulse(0),
 currState(NULL) {
 
 	this->SetColour(ColourRGBA(1,1,1,1));
@@ -110,6 +111,7 @@ void GameBall::ResetBallAttributes() {
 	this->ballballCollisionsDisabledTimer = 0.0;
 	this->timeSinceLastCollision = 0.0;
     this->boostSpdDecreaseCounter = BOOST_TEMP_SPD_INCREASE_AMT;
+    this->impulse = 0.0f;
 
 	// Set the ball state back to its typical state (how it normally interacts with the world)
 	this->SetBallState(new NormalBallState(this), true);

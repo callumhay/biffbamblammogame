@@ -245,6 +245,8 @@ inline void LevelPiece::GetReflectionRefractionRays(const Point2D& hitPoint, con
 
 inline LevelPiece* LevelPiece::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
 	UNUSED_PARAMETER(dT);
+    UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(beamSegment);
 
 	assert(beamSegment != NULL);
 	assert(gameModel != NULL);
@@ -253,8 +255,10 @@ inline LevelPiece* LevelPiece::TickBeamCollision(double dT, const BeamSegment* b
 
 inline LevelPiece* LevelPiece::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel) {
 	// By default this does nothing
+    UNUSED_PARAMETER(gameModel);
 	UNUSED_PARAMETER(dT);
 	UNUSED_PARAMETER(paddle);
+
 	assert(gameModel != NULL);
 	return this;
 }

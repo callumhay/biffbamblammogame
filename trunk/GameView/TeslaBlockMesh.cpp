@@ -48,6 +48,7 @@ teslaCenterFlare(NULL), flareTex(NULL), shieldTex(NULL), shieldAlpha(1.0f) {
 	this->teslaCenterFlare->AddEffector(&this->flarePulse);
 	
 	bool result = this->teslaCenterFlare->SetParticles(1, this->flareTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	/*

@@ -125,6 +125,7 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructio
 			// EVENT: Ice was shattered
 			GameEventManager::Instance()->ActionBlockIceShattered(*this);
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+            UNUSED_VARIABLE(success);
 			assert(success);
 	}
 
@@ -153,6 +154,7 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 			// Unfreeze a frozen ink block if it gets hit by a fireball
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
 				assert(success);
 			}
             else {
@@ -196,6 +198,7 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 			// in that case, unfreeze a frozen ink block
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
 				assert(success);
 			}
 			break;

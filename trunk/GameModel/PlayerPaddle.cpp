@@ -392,6 +392,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
             if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
                 LevelPiece* piece = gameModel.GetCurrentLevel()->GetMinBoundPiece();
                 LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
+                UNUSED_VARIABLE(resultingPiece);
                 assert(resultingPiece == piece);
             }
 
@@ -411,6 +412,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
             if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
                 LevelPiece* piece = gameModel.GetCurrentLevel()->GetMaxBoundPiece();
                 LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
+                UNUSED_VARIABLE(resultingPiece);
                 assert(resultingPiece == piece);
             }
 
