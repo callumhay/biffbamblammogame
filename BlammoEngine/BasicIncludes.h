@@ -31,6 +31,7 @@
 #endif
 
 #define UNUSED_PARAMETER(p) ((void)p)
+#define UNUSED_VARIABLE(p)  ((void)p)
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
   TypeName(const TypeName&);               \
@@ -157,7 +158,7 @@ inline static bool ResolutionCompare(const std::string& res1, const std::string&
 #define debug_output(s) ((void)0)
 inline void debug_opengl_state() {}
 inline void debug_openal_state() {}
-inline void debug_physfs_state(int physfsReturnVal) {}
+inline void debug_physfs_state(int) {}
 inline void debug_cg_state() {}
 #else
 #define debug_output(s) (std::cout << s << std::endl)

@@ -60,6 +60,7 @@ haloTexture(NULL), boostGainedHaloEmitter(NULL), haloExpander(1.0f, 2.75f), halo
 	this->boostGainedHaloEmitter->AddEffector(&this->haloExpander);
 	this->boostGainedHaloEmitter->AddEffector(&this->haloFader);
 	bool result = this->boostGainedHaloEmitter->SetParticles(NUM_HALO_PARTICLES, this->haloTexture);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
     this->tempFillLostAnim.ClearLerp();
@@ -306,6 +307,7 @@ BallBoostHUD::TrailFill::TrailFill(const char* trailTexFilepath, const ColourRGB
 BallBoostHUD::TrailFill::~TrailFill() {
     // Clean up the texture
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->trailTex);
+    UNUSED_VARIABLE(success);
     assert(success);
 }
 

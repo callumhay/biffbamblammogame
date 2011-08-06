@@ -534,6 +534,7 @@ PointsHUD::MultiplierHUD::~MultiplierHUD() {
     this->ptMultiplierLabel = NULL;
 
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierBangTex);
+    UNUSED_VARIABLE(success);
     assert(success);
 }
 

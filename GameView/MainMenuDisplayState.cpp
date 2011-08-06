@@ -137,6 +137,7 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	// Release texture assets that we no longer need
 	for (size_t i = 0; i < this->bangTextures.size(); i++) {
 		bool releaseTexSuccess = ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTextures[i]);
+        UNUSED_VARIABLE(releaseTexSuccess);
 		assert(releaseTexSuccess);
 	}
 

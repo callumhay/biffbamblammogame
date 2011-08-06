@@ -40,6 +40,7 @@ activeCannonEffectEmitter(NULL) {
 	this->activeCannonEffectEmitter->AddEffector(&this->haloExpandPulse);
 	this->activeCannonEffectEmitter->AddEffector(&this->haloFader);
 	bool result = this->activeCannonEffectEmitter->SetParticles(1, this->haloTexture);
+    UNUSED_VARIABLE(result);
 	assert(result);
 }
 

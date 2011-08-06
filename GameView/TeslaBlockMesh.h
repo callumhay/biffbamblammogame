@@ -85,6 +85,7 @@ inline void TeslaBlockMesh::AddTeslaBlock(const TeslaBlock* teslaBlock) {
 
 inline void TeslaBlockMesh::RemoveTeslaBlock(const TeslaBlock* teslaBlock) {
 	size_t numRemoved = this->teslaBlocks.erase(teslaBlock);
+    UNUSED_VARIABLE(numRemoved);
 	assert(numRemoved == 1);
 	this->rotations.erase(teslaBlock);
 }

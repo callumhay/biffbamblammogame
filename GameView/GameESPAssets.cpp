@@ -114,11 +114,14 @@ GameESPAssets::~GameESPAssets() {
 	this->KillAllActiveEffects(true);
 	this->KillAllActiveTeslaLightningArcs();
 
+    bool removed = false;
+    UNUSED_VARIABLE(removed);
+
 	// Delete any effect textures
 	for (std::vector<Texture2D*>::iterator iter = this->bangTextures.begin();
 		iter != this->bangTextures.end(); ++iter) {
 		
-		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
 		assert(removed);	
 	}
 	this->bangTextures.clear();
@@ -126,7 +129,7 @@ GameESPAssets::~GameESPAssets() {
 	for (std::vector<Texture2D*>::iterator iter = this->splatTextures.begin();
 		iter != this->splatTextures.end(); ++iter) {
 		
-		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
 		assert(removed);	
 	}
 	this->splatTextures.clear();
@@ -134,7 +137,7 @@ GameESPAssets::~GameESPAssets() {
 	for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
 		iter != this->smokeTextures.end(); ++iter) {
 		
-		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
 		assert(removed);	
 	}
 	this->smokeTextures.clear();
@@ -142,7 +145,7 @@ GameESPAssets::~GameESPAssets() {
 	for (std::vector<Texture2D*>::iterator iter = this->snowflakeTextures.begin();
 		iter != this->snowflakeTextures.end(); ++iter) {
 		
-		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
 		assert(removed);	
 	}
 	this->snowflakeTextures.clear();
@@ -155,7 +158,7 @@ GameESPAssets::~GameESPAssets() {
 	//this->fireGlobTextures.clear();
 
 	for (std::vector<Texture2D*>::iterator iter = this->rockTextures.begin(); iter != this->rockTextures.end(); ++iter) {
-		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
 		assert(removed);
 	}
 	this->rockTextures.clear();
@@ -167,7 +170,7 @@ GameESPAssets::~GameESPAssets() {
 	}
 	this->moltenRockEffects.clear();
 
-	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleGradientTex);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->circleGradientTex);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTex);
 	assert(removed);
@@ -702,6 +705,7 @@ void GameESPAssets::AddGhostBallESPEffects(std::vector<ESPPointEmitter*>& effect
 	ghostBallEmitterTrail->AddEffector(&this->particleFader);
 	ghostBallEmitterTrail->AddEffector(&this->ghostBallAccel1);
 	bool result = ghostBallEmitterTrail->SetParticles(GameESPAssets::NUM_GHOST_SMOKE_PARTICLES, &this->ghostBallSmoke);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	effectsList.push_back(ghostBallEmitterTrail);
@@ -725,6 +729,7 @@ void GameESPAssets::AddFireBallESPEffects(const GameBall* ball, std::vector<ESPP
 	fireBallEmitterTrail->AddEffector(&this->particleMediumGrowth);
 	fireBallEmitterTrail->AddEffector(&this->fireBallAccel1);
 	bool result = fireBallEmitterTrail->SetParticles(GameESPAssets::NUM_FIRE_BALL_PARTICLES, &this->fireBallTrailEffect);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	effectsList.push_back(fireBallEmitterTrail);
@@ -988,6 +993,7 @@ ESPPointEmitter* GameESPAssets::CreateSpinningTargetESPEffect() {
 	spinningTarget->AddEffector(&this->loopRotateEffectorCW);
 
 	bool result = spinningTarget->SetParticles(1, this->targetTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	return spinningTarget;
@@ -1351,6 +1357,7 @@ void GameESPAssets::AddBallHitLightningArcEffect(const GameBall& ball) {
 	lightningBoltEffect->AddEffector(&this->particleFader);
 	lightningBoltEffect->AddEffector(&this->particleMediumGrowth);
 	bool result = lightningBoltEffect->SetParticles(1, this->lightningBoltTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	// Create an emitter for the sound of onomatopeia of the breaking block
@@ -1446,6 +1453,7 @@ ESPPointEmitter* GameESPAssets::CreateShockwaveEffect(const Point3D& center, flo
 	shockwaveEffect->AddEffector(&this->particleFader);
 	shockwaveEffect->AddEffector(&this->particleSuperGrowth);
 	bool result = shockwaveEffect->SetParticles(1, &this->normalTexRefractEffect);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	return shockwaveEffect;
@@ -2133,6 +2141,7 @@ void GameESPAssets::AddInkBlockBreakEffect(const Camera& camera, const LevelPiec
 	splatEffect->AddEffector(&this->particleFader);
 	splatEffect->AddEffector(&this->particleMediumGrowth);
 	bool result = splatEffect->SetParticles(1, randomSplatTex);
+	UNUSED_VARIABLE(result);
 	assert(result);
 
 	this->activeGeneralEmitters.push_back(inkyClouds1);
@@ -2273,6 +2282,7 @@ void GameESPAssets::AddFireGlobDestroyedEffect(const Projectile& projectile) {
     fireDisperseEffect->AddEffector(&this->particleMediumGrowth);
     size_t randomTexIdx = Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size();
     bool result = fireDisperseEffect->SetParticles(8, this->smokeTextures[randomTexIdx]);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
     this->activeGeneralEmitters.push_back(fireDisperseEffect);
@@ -2899,6 +2909,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndEffect() {
 	beamEndEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	beamEndEffect->AddEffector(&this->beamEndPulse);
 	bool result = beamEndEffect->SetParticles(1, this->circleGradientTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	return beamEndEffect;
@@ -2924,6 +2935,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamEndBlockEffect() {
 	//beamBlockEndEffect->AddEffector(&this->particleFader);
 	//beamBlockEndEffect->AddEffector(&this->gravity);
 	bool result = beamBlockEndEffect->SetParticles(35, this->circleGradientTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	return beamBlockEndEffect;	
@@ -2948,6 +2960,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamFallingBitEffect() {
 	beamFallingBitEffect->AddEffector(&this->particleMediumShrink);
 	beamFallingBitEffect->AddEffector(&this->gravity);
 	bool result = beamFallingBitEffect->SetParticles(25, this->circleGradientTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	return beamFallingBitEffect;	
@@ -2968,6 +2981,7 @@ ESPPointEmitter* GameESPAssets::CreateBeamFlareEffect() {
 	beamFlareEffect->SetParticleColour(ESPInterval(0.75f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(0.8f));
 	beamFlareEffect->AddEffector(&this->beamEndPulse);
 	bool result = beamFlareEffect->SetParticles(1, this->lensFlareTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	return beamFlareEffect;
@@ -3763,6 +3777,7 @@ void GameESPAssets::AddBallAcquiredBoostEffect(const GameBall& ball, const Colou
     boostGainedHaloEmitter->AddEffector(&this->particleSuperGrowth);
 	boostGainedHaloEmitter->AddEffector(&this->particleFader);
     bool result = boostGainedHaloEmitter->SetParticles(NUM_HALO_PARTICLES, this->haloTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	ESPPointEmitter* sinkParticles = new ESPPointEmitter();
@@ -3817,6 +3832,7 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	
 	// Add the explosion particle...
 	bool result = explosionEffect->SetParticles(1, this->hugeExplosionTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	// Explosion rays...
@@ -3993,7 +4009,9 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		haloExpandingAura->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(0.8f));
 		haloExpandingAura->AddEffector(&this->particleLargeGrowth);
 		haloExpandingAura->AddEffector(&this->particleFader);
+
 		bool result = haloExpandingAura->SetParticles(1, this->haloTex);
+        UNUSED_VARIABLE(result);
 		assert(result);
 
 		this->activePaddleEmitters.push_back(haloExpandingAura);
@@ -4990,6 +5008,7 @@ void GameESPAssets::DrawBeamEffects(double dT, const Camera& camera, const Vecto
 		iter != this->activeBeamEmitters.end(); ++iter) {
 
 		const Beam* beam = iter->first;
+        UNUSED_VARIABLE(beam);
 		std::list<ESPEmitter*>& beamEmitters = iter->second;
 		assert(beam != NULL);
 

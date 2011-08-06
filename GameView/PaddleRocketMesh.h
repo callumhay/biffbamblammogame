@@ -62,6 +62,7 @@ inline void PaddleRocketMesh::Activate(const PaddleRocketProjectile* rocketProje
 // Deactivates the rocket projectile - stops it from being drawn until next time it is activated
 inline void PaddleRocketMesh::Deactivate(const PaddleRocketProjectile* rocketProjectile) {
 	size_t numErased = this->rocketProjectiles.erase(rocketProjectile);
+    UNUSED_VARIABLE(numErased);
 	assert(numErased == 1);
 }
 

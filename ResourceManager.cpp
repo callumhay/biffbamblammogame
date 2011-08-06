@@ -82,6 +82,7 @@ ResourceManager::~ResourceManager() {
 	// on physfs and various textures / resources
 	if (this->blammopedia != NULL) {
         bool success = this->blammopedia->WriteAsEntryStatusFile();
+        UNUSED_VARIABLE(success);
         assert(success);
 		delete this->blammopedia;
 		this->blammopedia = NULL;
@@ -677,7 +678,9 @@ bool ResourceManager::ReleaseCgFxEffectResource(CGeffect &effect) {
 
 		std::map<CGeffect, std::map<std::string, CGtechnique> >::iterator techniquesIter = this->loadedEffectTechniques.find(effectResource);
 		assert(techniquesIter != this->loadedEffectTechniques.end());
+
 		std::map<std::string, CGtechnique>& techniques = techniquesIter->second;
+        UNUSED_VARIABLE(techniques);
 		assert(techniques.size() > 0);
 
 		cgDestroyEffect(effectResource);
@@ -898,9 +901,10 @@ ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile) 
 		// new one with the default settings and values in it
 		
 		ResourceManager::configOptions = new ConfigOptions(); // By calling the default construtor 
-																													// we populate the object with default settings
+                                                              // we populate the object with default settings
 
 		bool writeResult = ResourceManager::configOptions->WriteConfigOptionsToFile();
+        UNUSED_VARIABLE(writeResult);
 		assert(writeResult);
 	}
 

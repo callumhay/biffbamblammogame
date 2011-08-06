@@ -97,6 +97,7 @@ GameFBOAssets::~GameFBOAssets() {
     this->bulletTimeEffect = NULL;
 
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->barrelOverlayTex);
+    UNUSED_VARIABLE(success);
 	assert(success);
 }
 

@@ -37,6 +37,7 @@ LivesLeftHUD::LivesLeftHUD() : currNumLivesLeft(0), ballLifeHUDTex(NULL) {
 LivesLeftHUD::~LivesLeftHUD() {
 	// Delete the HUD texture
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballLifeHUDTex);
+    UNUSED_VARIABLE(success);
 	assert(success);
 }
 

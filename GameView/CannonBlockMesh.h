@@ -65,6 +65,7 @@ inline void CannonBlockMesh::AddCannonBlock(const CannonBlock* cannonBlock) {
 
 inline void CannonBlockMesh::RemoveCannonBlock(const CannonBlock* cannonBlock) {
 	size_t numRemoved = this->cannonBlocks.erase(cannonBlock);
+    UNUSED_VARIABLE(numRemoved);
 	assert(numRemoved == 1);
 }
 

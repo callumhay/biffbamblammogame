@@ -95,6 +95,7 @@ omniLaserBallEffect(NULL)
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading game items...");
 	this->itemAssets = new GameItemAssets(this->espAssets);
 	bool didItemAssetsLoad = this->itemAssets->LoadItemAssets();
+    UNUSED_VARIABLE(didItemAssetsLoad);
 	assert(didItemAssetsLoad);
 
 	// Load basic default in-memory sounds
@@ -151,6 +152,7 @@ GameAssets::~GameAssets() {
 	}
 
 	bool success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleBeamAttachment);
+    UNUSED_VARIABLE(success);
 	assert(success);
 
 	delete this->rocketMesh;
@@ -1269,6 +1271,8 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
  * which needs manual clean up.
  */
 void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameItem& item) {
+    UNUSED_PARAMETER(gameModel);
+
 	// Also make the FBO assets aware of the deactivated effect
 	this->fboAssets->DeactivateItemEffects(item);
 

@@ -46,6 +46,7 @@ powerNeutralSparkEmitter(NULL), powerDownSparkEmitter(NULL) {
 	this->flareParticleEmitter->SetEmitVolume(minPt, maxPt);
 	this->flareParticleEmitter->AddEffector(&this->particleFader);
 	bool result = this->flareParticleEmitter->SetParticles(7, this->flareTex);
+	UNUSED_VARIABLE(result);
 	assert(result);
 
 	this->powerUpSparkEmitter      = this->InitSparkEmitter(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR);
@@ -162,6 +163,7 @@ ESPVolumeEmitter* ItemDropBlockMesh::InitSparkEmitter(const Colour& colour) {
 	emitter->SetEmitVolume(minPt, maxPt);
 	emitter->AddEffector(&this->particleFader);
 	bool result = emitter->SetParticles(10, this->sparkTex);
+    UNUSED_VARIABLE(result);
 	assert(result);
 
 	return emitter;

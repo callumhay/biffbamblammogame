@@ -522,6 +522,7 @@ GameSubMenu::GameSubMenu() : GameMenu(), arrowTex(NULL) {
 GameSubMenu::~GameSubMenu() {
 	// Release the arrow texture
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->arrowTex);
+    UNUSED_VARIABLE(success);
 	assert(success);
 }
 

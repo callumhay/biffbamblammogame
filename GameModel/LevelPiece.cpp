@@ -218,6 +218,7 @@ void LevelPiece::LightPieceOnFire(GameModel* gameModel) {
 		// make the block catch on fire...
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+            UNUSED_VARIABLE(success);
 			assert(success);
 		}
 		else {
@@ -235,6 +236,7 @@ void LevelPiece::FreezePieceInIce(GameModel* gameModel) {
 		// the piece will no longer be on fire
 		if (this->HasStatus(LevelPiece::OnFireStatus)) {
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::OnFireStatus);
+            UNUSED_VARIABLE(success);
 			assert(success);
 		}
 		else {

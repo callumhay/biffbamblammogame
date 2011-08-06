@@ -51,6 +51,7 @@ scale(0.5f), frequency(0.5f), colour(GameModelConstants::GetInstance()->GHOST_BA
 
 CgFxPostSmokey::~CgFxPostSmokey() {
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->overlayTex);
+    UNUSED_VARIABLE(success);
 	assert(success);
 }
 

@@ -162,6 +162,7 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
             }
             // Unfreeze a frozen block
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+            UNUSED_VARIABLE(success);
 			assert(success);
         }
         else {
@@ -204,6 +205,7 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
             if (this->HasStatus(LevelPiece::IceCubeStatus)) {
                 GameEventManager::Instance()->ActionBlockIceShattered(*this);
                 bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
                 assert(success);
             }
 
@@ -215,6 +217,7 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			// in that case, unfreeze a frozen switch block
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
 				assert(success);
 			}
             else {
@@ -237,6 +240,7 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, PlayerPaddle& p
 	    GameEventManager::Instance()->ActionBlockIceShattered(*this);
         // Unfreeze a frozen block
 		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
 		assert(success);
     }
     else {

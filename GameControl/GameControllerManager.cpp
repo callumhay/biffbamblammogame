@@ -93,5 +93,6 @@ void GameControllerManager::TryToLoadPlugAndPlayControllers() {
 
 void GameControllerManager::SetControllerSensitivity(int sensitivity) {
     bool success = XBox360Controller::SetSensitivity(sensitivity);
+    UNUSED_VARIABLE(success);
     assert(success);
 }

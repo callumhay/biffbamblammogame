@@ -32,6 +32,7 @@ haloExpandPulse(1.0f, 3.0f), haloFader(HALO_FADER_START, HALO_FADER_END) {
 
 PortalBlockMesh::~PortalBlockMesh() {
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTexture);
+    UNUSED_VARIABLE(success);
 	assert(success);
 }
 
@@ -57,6 +58,7 @@ std::list<ESPEmitter*> PortalBlockMesh::CreatePortalBlockEmitters(const Colour& 
 	haloExpandingPulse->AddEffector(&this->haloExpandPulse);
 	haloExpandingPulse->AddEffector(&this->haloFader);
 	bool result = haloExpandingPulse->SetParticles(NUM_HALOS, this->haloTexture);
+    UNUSED_VARIABLE(result);
 	assert(result);
 	portalEmitters.push_back(haloExpandingPulse);
 

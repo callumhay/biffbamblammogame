@@ -92,8 +92,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     Vector2D sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples+1);
     double   sampleIncTime = dT / static_cast<double>(numCollisionSamples+1);
 
-    Point2D  currSamplePt = c.Center() - (dT * velocity) + sampleIncDist;
-    double   currTimeSinceCollision = dT - sampleIncTime;
+    Point2D currSamplePt = c.Center() - (dT * velocity) + sampleIncDist;
+    double currTimeSinceCollision = dT - sampleIncTime;
 
     // Keep track of all the indices collided with and the collision point collided at
     std::list<size_t> collisionList;

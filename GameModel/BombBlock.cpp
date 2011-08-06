@@ -187,6 +187,7 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 			// Unfreeze a frozen bomb block if it gets hit by a fireball
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
 				assert(success);
 			}
 		}
@@ -231,6 +232,7 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* proje
 			// in that case, unfreeze a frozen bomb block
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
 				assert(success);
 			}
 			break;

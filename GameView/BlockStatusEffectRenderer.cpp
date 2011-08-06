@@ -62,16 +62,20 @@ BlockStatusEffectRenderer::~BlockStatusEffectRenderer() {
 	}
 	this->pieceStatusEffects.clear();
 
+    bool removed;
+    UNUSED_VARIABLE(removed);
+
 	// Release all the persistant texture resources
 	for (std::vector<Texture2D*>::iterator iter = this->smokePuffTextures.begin();
 		iter != this->smokePuffTextures.end(); ++iter) {
 		
-		bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+		removed = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
+        UNUSED_VARIABLE(removed);
 		assert(removed);	
 	}
 	this->smokePuffTextures.clear();
 
-	bool removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTexture);
+	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTexture);
 	assert(removed);
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->gritTexture);
 	assert(removed);
@@ -290,6 +294,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireFlameEffect(const Le
 		pulsingFlame->AddEffector(&this->smokeRotatorCCW);
 	}
 	bool result = pulsingFlame->SetParticles(10, &this->fireEffect);
+    UNUSED_VARIABLE(result);
 	pulsingFlame->SimulateTicking(Randomizer::GetInstance()->RandomNumZeroToOne() * 10);
 	assert(result);
 

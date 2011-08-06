@@ -60,6 +60,7 @@ LevelPiece* CollateralBlock::Destroy(GameModel* gameModel, const LevelPiece::Des
 		// EVENT: Ice was shattered
 		GameEventManager::Instance()->ActionBlockIceShattered(*this);
 		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
 		assert(success);
 	}
 
@@ -97,6 +98,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, GameBall& b
 		// Unfreeze a frozen solid block
 		if (isInIceCube) {
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+            UNUSED_VARIABLE(success);
 			assert(success);
 		}
 		else {
@@ -142,6 +144,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			// in that case, unfreeze a frozen collateral block
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
 				assert(success);
 			}
 			break;
@@ -244,6 +247,7 @@ LevelPiece* CollateralBlock::Detonate(GameModel* gameModel) {
 		GameEventManager::Instance()->ActionBlockIceShattered(*this);
 		// Remove the ice status immediately...
 		bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+        UNUSED_VARIABLE(success);
 		assert(success);
 	}
 

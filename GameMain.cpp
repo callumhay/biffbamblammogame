@@ -222,6 +222,7 @@ int main(int argc, char *argv[]) {
 	// Write whatever the current state of the configuration is back to the config (.ini) file
 	initCfgOptions = ResourceManager::ReadConfigurationOptions(true);
 	bool iniWriteResult = ResourceManager::WriteConfigurationOptionsToFile(initCfgOptions);
+    UNUSED_VARIABLE(iniWriteResult);
 	assert(iniWriteResult);
 
 	ResourceManager::DeleteInstance();

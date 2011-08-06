@@ -89,6 +89,14 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
 	    }
     }
 
+    // The impulse applies a sudden acceleration that diminishes
+    if (this->gameBall->impulse > 0) {
+        static const float IMPULSE_ACCELERATION = 10;
+        currVelocity = currVelocity + this->gameBall->impulse * IMPULSE_ACCELERATION * seconds * this->gameBall->GetDirection();
+        this->gameBall->impulse -= static_cast<float>(seconds);
+    }
+
+
 	Vector2D dDist = (static_cast<float>(seconds) * currVelocity);
 	this->gameBall->bounds.SetCenter(this->gameBall->bounds.Center() + dDist);
 
