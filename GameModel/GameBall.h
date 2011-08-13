@@ -126,7 +126,7 @@ public:
 		return sqLength < sqRadii;
 	}
 
-    void ApplyImpulseForce(float amount);
+    void ApplyImpulseForce(float impulseAmt, float deceleration);
 
 	/** 
 	 * Set ball-ball collisions for this ball to be diabled for the given duration in seconds.
@@ -205,8 +205,14 @@ public:
 		this->currSpeed    = speed;
 		this->gravitySpeed = speed;
 	}
+
     void TurnOffBoost() {
         this->boostSpdDecreaseCounter = BOOST_TEMP_SPD_INCREASE_AMT;
+    }
+    void TurnOffImpulse() {
+        this->impulseAmount = 0;
+        this->impulseDeceleration = 0;
+        this->impulseSpdDecreaseCounter = 0;
     }
 
 	int32_t GetBallType() const {
@@ -376,7 +382,9 @@ private:
     float boostSpdDecreaseCounter;      // Counts the boost deceleration so far, when this reaches BOOST_TEMP_SPD_INCREASE_AMT
                                         // the ball will no longer decelerate from a boost
 
-    float impulse; // Temporary impulses applied to the ball
+    float impulseAmount;
+    float impulseDeceleration;
+    float impulseSpdDecreaseCounter;
 
 	const void* lastThingCollidedWith;	// This is just used to check equality with POINTERS DO NOT CAST THIS!!!
 
@@ -438,10 +446,6 @@ inline bool GameBall::ExecuteBallBoost(const Vector2D& dir) {
 
 inline bool GameBall::IsBallBoosting() const {
     return (this->boostSpdDecreaseCounter < BOOST_TEMP_SPD_INCREASE_AMT);
-}
-
-inline void GameBall::ApplyImpulseForce(float amount) {
-    this->impulse = amount;
 }
 
 #endif

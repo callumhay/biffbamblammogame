@@ -136,8 +136,12 @@ public:
     bool AllowsGameModelUpdates() const { return true; }
 
 	void RenderFrame(double dT);
+
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
+    void MousePressed(const GameControl::MouseButton& pressedButton) { UNUSED_PARAMETER(pressedButton); };
+    void MouseReleased(const GameControl::MouseButton& releasedButton) { UNUSED_PARAMETER(releasedButton); };
+
 	void DisplaySizeChanged(int width, int height);
 	DisplayState::DisplayStateType GetType() const;
 

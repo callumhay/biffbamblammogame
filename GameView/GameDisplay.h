@@ -79,6 +79,8 @@ public:
 	// to inform it of inputs from the user in a general way
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
+    void MousePressed(const GameControl::MouseButton& pressedButton);
+    void MouseReleased(const GameControl::MouseButton& releasedButton);
 
     void SpecialDirectionPressed(int x, int y);
     void SpecialDirectionReleased();
@@ -161,6 +163,14 @@ inline void GameDisplay::ButtonPressed(const GameControl::ActionButton& pressedB
 
 inline void GameDisplay::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	this->currState->ButtonReleased(releasedButton);
+}
+
+inline void GameDisplay::MousePressed(const GameControl::MouseButton& pressedButton) {
+	this->currState->MousePressed(pressedButton);
+}
+
+inline void GameDisplay::MouseReleased(const GameControl::MouseButton& releasedButton) {
+	this->currState->MouseReleased(releasedButton);
 }
 
 inline void GameDisplay::AddStateToQueue(const DisplayState::DisplayStateType& type) {

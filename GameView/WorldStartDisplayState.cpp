@@ -133,7 +133,15 @@ void WorldStartDisplayState::RenderFrame(double dT) {
 
 void WorldStartDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	UNUSED_PARAMETER(pressedButton);
+    this->AnyKeyWasPressed();
+}
 
+void WorldStartDisplayState::MousePressed(const GameControl::MouseButton& pressedButton) {
+	UNUSED_PARAMETER(pressedButton);
+    this->AnyKeyWasPressed();
+}
+
+void WorldStartDisplayState::AnyKeyWasPressed() {
 	if (this->waitingForKeyPress) {
 		// Start the fade out animation - the user wants to start playing!
 		this->fadeAnimation.SetLerp(WorldStartDisplayState::FADE_OUT_TIME, 1.0f);

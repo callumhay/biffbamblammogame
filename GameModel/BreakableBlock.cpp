@@ -195,7 +195,7 @@ LevelPiece* BreakableBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel* 
  */
 LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	assert(gameModel != NULL);
-    if (ball.IsLastPieceCollidedWith(this)) {
+    if (ball.IsLastPieceCollidedWith(this) && ball.GetTimeSinceLastCollision() < 0.01) {
         return this;
     }
 

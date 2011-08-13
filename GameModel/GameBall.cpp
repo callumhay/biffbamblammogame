@@ -43,7 +43,8 @@ GameBall* GameBall::currBallCamBall = NULL;
 GameBall::GameBall() : bounds(Point2D(0.0f, 0.0f), DEFAULT_BALL_RADIUS), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
 currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballballCollisionsDisabledTimer(0.0),
 lastThingCollidedWith(NULL), zCenterPos(0.0), currState(NULL), timeSinceLastCollision(0.0f), 
-boostSpdDecreaseCounter(BOOST_TEMP_SPD_INCREASE_AMT), impulse(0) {
+boostSpdDecreaseCounter(BOOST_TEMP_SPD_INCREASE_AMT), impulseAmount(0), 
+impulseDeceleration(0), impulseSpdDecreaseCounter(0)  {
 	this->ResetBallAttributes();
 }
 
@@ -54,7 +55,9 @@ zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributing
 contributingCrazyColour(gameBall.contributingCrazyColour), contributingIceColour(gameBall.contributingIceColour),
 timeSinceLastCollision(gameBall.timeSinceLastCollision), boostSpdDecreaseCounter(gameBall.boostSpdDecreaseCounter),
 blockCollisionsDisabled(false),
-paddleCollisionsDisabled(false), impulse(0),
+paddleCollisionsDisabled(false), impulseAmount(gameBall.impulseAmount), 
+impulseDeceleration(gameBall.impulseDeceleration), 
+impulseSpdDecreaseCounter(gameBall.impulseSpdDecreaseCounter),
 currState(NULL) {
 
 	this->SetColour(ColourRGBA(1,1,1,1));
@@ -111,7 +114,7 @@ void GameBall::ResetBallAttributes() {
 	this->ballballCollisionsDisabledTimer = 0.0;
 	this->timeSinceLastCollision = 0.0;
     this->boostSpdDecreaseCounter = BOOST_TEMP_SPD_INCREASE_AMT;
-    this->impulse = 0.0f;
+    this->TurnOffImpulse();
 
 	// Set the ball state back to its typical state (how it normally interacts with the world)
 	this->SetBallState(new NormalBallState(this), true);
@@ -236,4 +239,16 @@ void GameBall::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
 	// we cache it in the "InCannonBallState" and it will change back once
 	// that state is complete
 	this->SetBallState(new InCannonBallState(this, cannonBlock, this->currState), false);
+}
+
+void GameBall::ApplyImpulseForce(float impulseAmt, float deceleration) {
+    if (this->impulseSpdDecreaseCounter < this->impulseAmount) {
+        // Ignore the impulse if there already is one
+        return;
+    }
+
+    this->SetSpeed(this->GetSpeed() + impulseAmt);
+    this->impulseAmount = impulseAmt;
+    this->impulseDeceleration = fabs(deceleration); // keep it positive when memoized
+    this->impulseSpdDecreaseCounter = 0.0f;
 }

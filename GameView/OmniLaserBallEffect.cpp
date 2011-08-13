@@ -43,6 +43,7 @@ OmniLaserBallEffect::OmniLaserBallEffect() : sentryTexture(NULL) {
 
 OmniLaserBallEffect::~OmniLaserBallEffect() {
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sentryTexture);
+    UNUSED_VARIABLE(success);
     assert(success);
     //success = ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTexture);
     //assert(success);
