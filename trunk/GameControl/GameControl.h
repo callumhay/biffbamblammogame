@@ -18,6 +18,8 @@ public:
                         EnterButtonAction, EscapeButtonAction, PauseButtonAction,
                         OtherButtonAction};
 
+    enum MouseButton { LeftMouseButton, RightMouseButton };
+
 private:
 	GameControl(){};
 	~GameControl(){};

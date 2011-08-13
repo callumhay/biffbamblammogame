@@ -36,13 +36,12 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
     if (this->gameBall->IsBallBoosting()) {
         // Figure out how much loss of speed there is for the ball
         float currBoostDecceleration = seconds * GameBall::BOOST_DECCELERATION;
-        //float prevSpdCounter = this->gameBall->boostSpdDecreaseCounter;
         this->gameBall->boostSpdDecreaseCounter += currBoostDecceleration;
 
         if (this->gameBall->boostSpdDecreaseCounter > GameBall::BOOST_TEMP_SPD_INCREASE_AMT) {
             float subtractAmt = this->gameBall->boostSpdDecreaseCounter - GameBall::BOOST_TEMP_SPD_INCREASE_AMT;
             this->gameBall->boostSpdDecreaseCounter = GameBall::BOOST_TEMP_SPD_INCREASE_AMT;
-            currBoostDecceleration -= subtractAmt;//GameBall::BOOST_TEMP_SPD_INCREASE_AMT - prevSpdCounter;
+            currBoostDecceleration -= subtractAmt;
             assert(currBoostDecceleration > 0);
         }
 
@@ -90,12 +89,21 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
     }
 
     // The impulse applies a sudden acceleration that diminishes
-    if (this->gameBall->impulse > 0) {
-        static const float IMPULSE_ACCELERATION = 10;
-        currVelocity = currVelocity + this->gameBall->impulse * IMPULSE_ACCELERATION * seconds * this->gameBall->GetDirection();
-        this->gameBall->impulse -= static_cast<float>(seconds);
-    }
+    if (this->gameBall->impulseSpdDecreaseCounter < this->gameBall->impulseAmount) {
+        float currImpulseDeceleration   = this->gameBall->impulseDeceleration * seconds;
+        this->gameBall->impulseSpdDecreaseCounter += currImpulseDeceleration;
+        
+        if (this->gameBall->impulseSpdDecreaseCounter > this->gameBall->impulseAmount) {
+            float subtractAmt = this->gameBall->impulseSpdDecreaseCounter - this->gameBall->impulseAmount;
+            this->gameBall->impulseSpdDecreaseCounter = this->gameBall->impulseAmount;
+            currImpulseDeceleration -= subtractAmt;
+            assert(currImpulseDeceleration > 0);
+        }
 
+        this->gameBall->SetSpeed(this->gameBall->GetSpeed() - currImpulseDeceleration);
+        currVelocity = this->gameBall->currSpeed * this->gameBall->currDir;
+        this->gameBall->gravitySpeed = this->gameBall->currSpeed;
+    }
 
 	Vector2D dDist = (static_cast<float>(seconds) * currVelocity);
 	this->gameBall->bounds.SetCenter(this->gameBall->bounds.Center() + dDist);
@@ -181,7 +189,8 @@ void NormalBallState::AttemptFireOfOmniBullets(double dT, GameModel* gameModel) 
         float projectileHeight = 1.75f * projectileWidth; 
 
 		Projectile* newProjectile = Projectile::CreateProjectileFromType(Projectile::BallLaserBulletProjectile, 
-            this->gameBall->GetCenterPosition2D() + (this->gameBall->GetBounds().Radius() + projectileHeight * 0.5f) * randomVector);
+            this->gameBall->GetCenterPosition2D() + (this->gameBall->GetBounds().Radius() + 
+            projectileHeight * 0.5f) * randomVector);
 		newProjectile->SetWidth(projectileWidth);
 		newProjectile->SetHeight(projectileHeight);
 

@@ -30,6 +30,8 @@ public:
 
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
+    void MousePressed(const GameControl::MouseButton& pressedButton);
+    void MouseReleased(const GameControl::MouseButton& releasedButton) { UNUSED_PARAMETER(releasedButton); };
 
 	void DisplaySizeChanged(int width, int height);
 
@@ -109,6 +111,8 @@ private:
     void DrawTotalScoreLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawPressAnyKeyTextFooter(float screenWidth);
 
+    void AnyKeyWasPressed();
+        
     DISALLOW_COPY_AND_ASSIGN(LevelCompleteSummaryDisplayState);
 };
 
@@ -127,6 +131,16 @@ inline void LevelCompleteSummaryDisplayState::DisplaySizeChanged(int width, int 
 
 inline DisplayState::DisplayStateType LevelCompleteSummaryDisplayState::GetType() const {
     return DisplayState::LevelCompleteSummary;
+}
+
+inline void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+    UNUSED_PARAMETER(pressedButton);
+    this->AnyKeyWasPressed();
+}
+
+inline void LevelCompleteSummaryDisplayState::MousePressed(const GameControl::MouseButton& pressedButton) {
+	UNUSED_PARAMETER(pressedButton);
+    this->AnyKeyWasPressed();
 }
 
 #endif // __LEVELCOMPLETESUMMARYDISPLAYSTATE_H__

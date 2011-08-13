@@ -563,9 +563,7 @@ void LevelCompleteSummaryDisplayState::DrawPressAnyKeyTextFooter(float screenWid
 	this->pressAnyKeyLabel.Draw();
 }
 
-
-void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
-    UNUSED_PARAMETER(pressedButton);
+void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
 	if (this->waitingForKeyPress) {
 
         if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {

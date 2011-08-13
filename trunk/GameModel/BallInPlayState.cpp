@@ -186,7 +186,8 @@ void BallInPlayState::Tick(double seconds) {
 				// Do ball-paddle collision
 				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
                 // Apply an impulse to the ball based on the speed of the paddle...
-                currBall->ApplyImpulseForce(paddle->GetSpeed());
+                float dPaddleSpd = 0.01*paddle->GetSpeed();
+                currBall->ApplyImpulseForce(dPaddleSpd, (3*dPaddleSpd));
 
 				// Tell the model that a ball collision occurred with the paddle
 				this->gameModel->BallPaddleCollisionOccurred(*currBall);

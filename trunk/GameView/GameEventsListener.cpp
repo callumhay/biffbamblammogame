@@ -253,6 +253,7 @@ void GameEventsListener::LastBallExploded(const GameBall& explodedBall) {
 }
 
 void GameEventsListener::AllBallsDeadEvent(int livesLeft) {
+    UNUSED_PARAMETER(livesLeft);
 	debug_output("EVENT: Ball death, lives left: " << livesLeft);
 	
 	// Kill all effects that may have previously been occuring...

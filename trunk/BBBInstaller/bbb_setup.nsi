@@ -164,7 +164,14 @@ Section /o "-un.Biff! Bam!! Blammo!?! Install" UNSEC0000
     Delete /REBOOTOK $INSTDIR\cgGL.dll
     Delete /REBOOTOK $INSTDIR\cg.dll
     Delete /REBOOTOK $INSTDIR\XInput9_1_0.dll
+
+    MessageBox MB_YESNO "Would you like to keep all game progress and configuration files? (Warning: By clicking 'No' you will delete all game progress you've made in Biff! Bam!! Blammo!?!)." IDNO delete_progress IDYES keep_progress
+    delete_progress:
     Delete /REBOOTOK $INSTDIR\BiffBamBlammo.ini
+    Delete /REBOOTOK $INSTDIR\bbb_progress.dat
+    Delete /REBOOTOK $INSTDIR\blammopedia.dat
+    keep_progress:
+
     Delete /REBOOTOK $INSTDIR\BiffBamBlammoIcon.bmp
     DeleteRegValue HKLM "${REGKEY}\Components" "Biff! Bam!! Blammo!?! Install"
 SectionEnd

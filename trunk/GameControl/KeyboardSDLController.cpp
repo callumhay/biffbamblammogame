@@ -107,6 +107,20 @@ void KeyboardSDLController::KeyUp(SDLKey key) {
 }
 
 void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x, unsigned int y) {
+
+    // Always relay the signal to the display
+    switch (button) {
+        case SDL_BUTTON_LEFT:
+            this->display->MousePressed(GameControl::LeftMouseButton);
+            break;
+
+        case SDL_BUTTON_RIGHT:
+            this->display->MousePressed(GameControl::RightMouseButton);
+            break;
+        default:
+            break;
+    }
+
     if (this->model->GetCurrentStateType() != GameState::BallInPlayStateType) {
         return;
     }
@@ -131,6 +145,7 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
             else {
                 this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
             }
+            this->display->MousePressed(GameControl::LeftMouseButton);
             //debug_output("Left button pressed.");
             break;
 
@@ -141,6 +156,7 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
             else {
                 this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
             }
+            this->display->MousePressed(GameControl::RightMouseButton);
             //debug_output("Right button pressed.");
             break;
         default:
@@ -153,10 +169,13 @@ void KeyboardSDLController::MouseButtonUp(unsigned int button) {
     switch (button) {
         case SDL_BUTTON_LEFT:
             this->display->SpecialDirectionReleased();
+            this->display->MouseReleased(GameControl::LeftMouseButton);
             //debug_output("Left button released.");
             break;
         case SDL_BUTTON_RIGHT:
+            this->display->MouseReleased(GameControl::RightMouseButton);
             //debug_output("Right button released.");
+
             break;
         default:
             break;

@@ -35,6 +35,8 @@ public:
 
 	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton)   = 0;
 	virtual void ButtonReleased(const GameControl::ActionButton& releasedButton) = 0;
+    virtual void MousePressed(const GameControl::MouseButton& pressedButton)     = 0;
+    virtual void MouseReleased(const GameControl::MouseButton& releasedButton)    = 0;
 
 	virtual void DisplaySizeChanged(int width, int height) = 0;
 
