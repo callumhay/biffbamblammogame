@@ -15,8 +15,8 @@
 
 #include "../BlammoEngine/Algebra.h"
 
-const double NormalBallState::OMNI_BULLET_WAIT_TIME_IN_SECS = 0.5;
-const int NormalBallState::MAX_BULLETS_AT_A_TIME            = 5;
+const double NormalBallState::OMNI_BULLET_WAIT_TIME_IN_SECS = 0.6;
+const int NormalBallState::MAX_BULLETS_AT_A_TIME            = 3;
 
 NormalBallState::NormalBallState(GameBall* ball) : BallState(ball), timeSinceLastOmniBullets(0.0) {
 }

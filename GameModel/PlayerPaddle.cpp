@@ -38,13 +38,13 @@ const float PlayerPaddle::WIDTH_DIFF_PER_SIZE = 0.65f;
 const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 
 // Default speed of the paddle (units/sec)
-const float PlayerPaddle::DEFAULT_MAX_SPEED = 24.0f;
+const float PlayerPaddle::DEFAULT_MAX_SPEED = 26.0f;
 // Default acceleration/decceleration of the paddle (units/sec^2)
-const float PlayerPaddle::DEFAULT_ACCELERATION  = 120.0f;
-const float PlayerPaddle::DEFAULT_DECCELERATION = -130.0f;
+const float PlayerPaddle::DEFAULT_ACCELERATION  = 138.0f;
+const float PlayerPaddle::DEFAULT_DECCELERATION = -150.0f;
 
 // Speed amount to diminish from the max speed when the paddle is poisoned
-const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 2.9f;
+const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 3.0f;
 
 // The coefficent angle change of the ball when deflected by a moving paddle
 const int PlayerPaddle::DEFLECTION_DEGREE_ANGLE = 20; // TODO: Fix this...
