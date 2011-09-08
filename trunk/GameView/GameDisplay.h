@@ -47,6 +47,10 @@ public:
 		}
 		this->currState = state;
 	}
+    void SetCurrentStateNoDeletePreviousState(DisplayState* state) {
+        assert(state != NULL);
+        this->currState = state;
+    }
 
 	void AddStateToQueue(const DisplayState::DisplayStateType& type);
 	bool SetCurrentStateAsNextQueuedState();

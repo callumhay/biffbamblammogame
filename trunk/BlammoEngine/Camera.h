@@ -166,14 +166,16 @@ public:
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glViewport(0, 0, this->windowWidth, this->windowHeight);
-		gluPerspective(this->fovAngleInDegrees, static_cast<double>(this->windowWidth) / static_cast<double>(this->windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
+		gluPerspective(this->fovAngleInDegrees, static_cast<double>(this->windowWidth) / 
+            static_cast<double>(this->windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
 	void SetPerspective() {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glViewport(0, 0, this->windowWidth, this->windowHeight);
-		gluPerspective(this->fovAngleInDegrees, static_cast<double>(this->windowWidth) / static_cast<double>(this->windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
+		gluPerspective(this->fovAngleInDegrees, static_cast<double>(this->windowWidth) / 
+            static_cast<double>(this->windowHeight), NEAR_PLANE_DIST, FAR_PLANE_DIST);
 	}
 
 	// Functions for changing the current view transform to a full ortho2D,

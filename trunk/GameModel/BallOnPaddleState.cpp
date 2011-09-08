@@ -62,8 +62,8 @@ GameBall* BallOnPaddleState::GetGameBall() {
  * of the player paddle.
  */
 void BallOnPaddleState::UpdateBallPosition() {
-	GameBall* ball				= this->GetGameBall();
-	PlayerPaddle* paddle	= this->gameModel->GetPlayerPaddle();
+	GameBall* ball       = this->GetGameBall();
+	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 
 	Vector2D disp = Vector2D(0.0f, ball->GetBounds().Radius() + paddle->GetHalfHeight() + 0.1f);
 	Point2D ballLoc = paddle->GetCenterPosition() + disp;
@@ -102,7 +102,7 @@ void BallOnPaddleState::Tick(double seconds) {
 		// EVENT: Ball (Re)spawning
 		GameEventManager::Instance()->ActionBallSpawn(*this->GetGameBall());
 	}
-    else {
+    else if (PlayerPaddle::GetIsPaddleReleaseTimerEnabled()) {
         // Logic for the release timer
         this->releaseTimerCounter += seconds;
 

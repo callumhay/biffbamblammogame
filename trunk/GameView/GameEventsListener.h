@@ -21,7 +21,7 @@ class GameDisplay;
 class GameEventsListener : public GameEvents {
 public:
 	GameEventsListener(GameDisplay* d);
-	virtual ~GameEventsListener();
+	~GameEventsListener();
 
 	// Global / Game events
 	void GameCompletedEvent();

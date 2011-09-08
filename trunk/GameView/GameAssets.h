@@ -31,6 +31,7 @@
 #include "GameItemAssets.h"
 #include "GameFBOAssets.h"
 #include "GameLightAssets.h"
+#include "GameTutorialAssets.h"
 #include "RandomToItemAnimation.h"
 #include "LevelMesh.h"
 
@@ -124,6 +125,9 @@ public:
 	GameSoundAssets* GetSoundAssets() {
 		return this->soundAssets;
 	}
+    GameTutorialAssets* GetTutorialAssets() {
+        return this->tutorialAssets;
+    }
 
 	LivesLeftHUD* GetLifeHUD() const {
 		return this->lifeHUD;
@@ -145,12 +149,13 @@ public:
 	void RocketExplosion(const PaddleRocketProjectile& rocket, Camera& camera);
 
 private:
-	GameWorldAssets* worldAssets;	// World-related assets
-	GameESPAssets* espAssets;       // Emitter/Sprite/Particle assets
-	GameItemAssets* itemAssets;		// Item-related assets (item drops, timers, etc.)
-	GameFBOAssets* fboAssets;       // Framebuffer Object related assets
-	GameLightAssets* lightAssets;   // Light assets in the foreground and background
-	GameSoundAssets* soundAssets;   // Sound assets for everything
+	GameWorldAssets* worldAssets;	    // World-related assets
+	GameESPAssets* espAssets;           // Emitter/Sprite/Particle assets
+	GameItemAssets* itemAssets;		    // Item-related assets (item drops, timers, etc.)
+	GameFBOAssets* fboAssets;           // Framebuffer Object related assets
+	GameLightAssets* lightAssets;       // Light assets in the foreground and background
+	GameSoundAssets* soundAssets;       // Sound assets for everything
+    GameTutorialAssets* tutorialAssets; // Tutorial texture assets
 
 	LivesLeftHUD* lifeHUD;
 	CrosshairLaserHUD* crosshairHUD;

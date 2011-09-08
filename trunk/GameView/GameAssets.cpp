@@ -60,6 +60,7 @@ itemAssets(NULL),
 fboAssets(NULL),
 lightAssets(NULL),
 soundAssets(NULL),
+tutorialAssets(NULL),
 
 lifeHUD(NULL),
 crosshairHUD(NULL),
@@ -86,7 +87,8 @@ omniLaserBallEffect(NULL)
 
 	// Load ESP assets
 	LoadingScreen::GetInstance()->UpdateLoadingScreen("Loading purdy pictures...");
-	this->espAssets = new GameESPAssets();
+	this->espAssets      = new GameESPAssets();
+    this->tutorialAssets = new GameTutorialAssets();
 
 	// Load FBO assets
 	this->fboAssets = new GameFBOAssets(screenWidth, screenHeight);
@@ -164,6 +166,10 @@ GameAssets::~GameAssets() {
 	this->paddleStickyAttachment = NULL;
 	delete this->paddleShield;
 	this->paddleShield = NULL;
+
+    // Clean up tutotial assets
+    delete this->tutorialAssets;
+    this->tutorialAssets = NULL;
 
 	// Clear up the FrameBuffer Object assets
 	delete this->fboAssets;

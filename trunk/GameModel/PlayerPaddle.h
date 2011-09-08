@@ -223,6 +223,13 @@ public:
 
 	void DebugDraw() const;
 
+    static void SetEnablePaddleReleaseTimer(bool enabled) {
+        PlayerPaddle::paddleBallReleaseTimerEnabled = enabled;
+    }
+    static bool GetIsPaddleReleaseTimerEnabled() {
+        return PlayerPaddle::paddleBallReleaseTimerEnabled;
+    }
+
 private:
 	// Default values for the dimensions of the paddle
 	static const float PADDLE_WIDTH_ANGLED_SIDE;
@@ -232,6 +239,9 @@ private:
 	static const int AVG_OVER_TICKS  = 60;
 	
 	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
+
+    static bool paddleBallReleaseTimerEnabled;
+
 
 	bool hitWall;					// True when the paddle hits a wall
 

@@ -25,7 +25,7 @@ class InGameDisplayState;
 class InGameMenuState : public DisplayState {
 
 public:
-	InGameMenuState(GameDisplay* display);
+	InGameMenuState(GameDisplay* display, DisplayState* returnToDisplayState);
 	~InGameMenuState();
 
     bool AllowsGameModelUpdates() const { return true; }
@@ -52,6 +52,8 @@ private:
 
     InGameRenderPipeline renderPipeline;
 
+    DisplayState* returnToDisplayState;
+
 	// Top Level Menu variables
 	GameMenu* topMenu; // Main (top-most/parent) menu (features options "Return to Main Menu", etc.)
 	
@@ -64,6 +66,7 @@ private:
 	void InitTopMenu();
 
 	void ResumeTheGame();
+    void CleanUpReturnToDisplayState();
 
 	// Top Level Menu Handler class
 	class TopMenuEventHandler : public GameMenuEventHandler {
