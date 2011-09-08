@@ -100,7 +100,14 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 
 	// Queue up the state for starting a level - this will display the level name and do proper animations, fade-ins, etc.
 	this->display->AddStateToQueue(DisplayState::LevelStart);
-	this->display->AddStateToQueue(DisplayState::InGame);
+
+    // Queue the tutorial in-game state if this is the first world and first level of the game...
+    if (world.GetWorldIndex() == 0 && level.GetLevelNumIndex() == 0) {
+        this->display->AddStateToQueue(DisplayState::InTutorialGame);
+    }
+    else {
+	    this->display->AddStateToQueue(DisplayState::InGame);
+    }
 
 	debug_output("EVENT: Level started");
 

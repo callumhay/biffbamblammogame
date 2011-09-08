@@ -24,11 +24,12 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/Beam.h"
 
-InGameDisplayState::InGameDisplayState(GameDisplay* display) : DisplayState(display), renderPipeline(display) {
-	this->display->GetModel()->SetPauseState(GameModel::NoPause);
-
+InGameDisplayState::InGameDisplayState(GameDisplay* display) :
+DisplayState(display), renderPipeline(display) {
+	
 	// Clear up any stuff to an initial state in cases where things might still 
 	// be set unchanged from a previously loaded game
+    this->display->GetModel()->SetPauseState(GameModel::NoPause);
 	this->display->GetCamera().ClearCameraShake();
 
 	debug_opengl_state();
@@ -54,7 +55,7 @@ void InGameDisplayState::ButtonPressed(const GameControl::ActionButton& pressedB
 	// We only interpret one key press - when the user wants to access the in-game menu...
 	if (pressedButton == GameControl::EscapeButtonAction || pressedButton == GameControl::PauseButtonAction) {
 		// Go to the next state
-		this->display->SetCurrentState(new InGameMenuState(this->display));
+		this->display->SetCurrentStateNoDeletePreviousState(new InGameMenuState(this->display, this));
 	}
 }
 
@@ -65,43 +66,3 @@ void InGameDisplayState::ButtonPressed(const GameControl::ActionButton& pressedB
 void InGameDisplayState::DisplaySizeChanged(int width, int height) {
 	this->display->GetAssets()->GetFBOAssets()->ResizeFBOAssets(width, height);
 }
-
-#ifdef _DEBUG
-/**
- * Debugging function that draws the collision boundries of level pieces.
- */
-void InGameDisplayState::DebugDrawBounds() {
-	if (!GameDisplay::IsDrawDebugBoundsOn()) { return; }
-	Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
-
-	glPushMatrix();
-	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
-
-	// Draw boundry of paddle...
-	this->display->GetModel()->GetPlayerPaddle()->DebugDraw();
-	
-	// Draw of boundries of each block...
-	std::vector<std::vector<LevelPiece*>> pieces = this->display->GetModel()->GetCurrentLevel()->GetCurrentLevelLayout();
-	for (size_t i = 0; i < pieces.size(); i++) {
-		std::vector<LevelPiece*> setOfPieces = pieces[i];
-		for (size_t j = 0; j < setOfPieces.size(); j++) {
-			setOfPieces[j]->DebugDraw();
-		}
-	}
-
-	// Draw any beam rays...
-	std::list<Beam*>& beams = this->display->GetModel()->GetActiveBeams();
-	for (std::list<Beam*>::const_iterator iter = beams.begin(); iter != beams.end(); ++iter) {
-		(*iter)->DebugDraw();
-	}
-
-    // Draw the debug bounds of all balls
-    const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
-    if (boostModel != NULL && boostModel->GetBulletTimeState() != BallBoostModel::NotInBulletTime) {
-        boostModel->DebugDraw();
-    }
-
-	glPopMatrix();
-	debug_opengl_state();
-}
-#endif

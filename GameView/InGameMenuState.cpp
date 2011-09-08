@@ -27,9 +27,10 @@ const Colour InGameMenuState::MENU_ITEM_SEL_COLOUR		= Colour(1, 0.65f, 0);
 const Colour InGameMenuState::MENU_ITEM_ACTIVE_COLOUR	= Colour(0.49f, 0.98f, 1.0f);
 const Colour InGameMenuState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
 
-InGameMenuState::InGameMenuState(GameDisplay* display) : 
+InGameMenuState::InGameMenuState(GameDisplay* display, DisplayState* returnToDisplayState) : 
 DisplayState(display), renderPipeline(display), nextAction(InGameMenuState::Nothing),
-topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL) {
+topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL),
+returnToDisplayState(returnToDisplayState) {
 
 	// Pause all world sounds
 	this->display->GetAssets()->GetSoundAssets()->PauseWorldSounds();	
@@ -73,6 +74,7 @@ void InGameMenuState::RenderFrame(double dT) {
 
             // Un-Pause the game and go to the start of level state which will have
             // been queued when we told the model to reset the level
+            this->CleanUpReturnToDisplayState();
             this->display->GetModel()->UnsetPause(GameModel::PauseGame);
             this->display->SetCurrentStateAsNextQueuedState();
 
@@ -83,15 +85,20 @@ void InGameMenuState::RenderFrame(double dT) {
 			this->display->GetAssets()->DeactivateMiscEffects();
 			// Kill all sounds
 			this->display->GetAssets()->GetSoundAssets()->StopAllSounds();
+            
 			// Go back to the main menu state
+            this->CleanUpReturnToDisplayState();
 			this->display->SetCurrentState(new MainMenuDisplayState(this->display));
 			return;
 
 		case InGameMenuState::ExitToDesktop:
+            this->CleanUpReturnToDisplayState();
 			this->display->QuitGame();
 			return;
+
 		case InGameMenuState::Nothing:
 			break;
+
 		default:
 			assert(false);
 			break;
@@ -127,7 +134,21 @@ void InGameMenuState::ResumeTheGame() {
 	this->display->GetModel()->UnsetPause(GameModel::PauseGame);
 
 	// Go back to the in-game display state
-	this->display->SetCurrentState(new InGameDisplayState(this->display));
+    if (this->returnToDisplayState != NULL) {
+	    this->display->SetCurrentState(returnToDisplayState);
+    }
+    else {
+        this->display->SetCurrentState(new InGameDisplayState(this->display));
+    }
+}
+
+// Make sure this is called if we aren't going back to the returnToDisplayState
+// i.e., if we exit to main menu, desktop, etc.
+void InGameMenuState::CleanUpReturnToDisplayState() {
+    if (this->returnToDisplayState != NULL) {
+        delete this->returnToDisplayState;
+        this->returnToDisplayState = NULL;
+    }
 }
 
 /**

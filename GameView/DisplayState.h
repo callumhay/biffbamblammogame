@@ -24,7 +24,7 @@ class DisplayState {
 
 public:
 	enum DisplayStateType { MainMenu, SelectWorldMenu, SelectLevelMenu, BlammopediaMenu, LevelStart, WorldStart, 
-                            InGame, InGameMenu, LevelEnd, LevelCompleteSummary, GameComplete, GameOver };
+                            InTutorialGame, InGame, InGameMenu, LevelEnd, LevelCompleteSummary, GameComplete, GameOver };
 	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, GameDisplay* display);
 
 	DisplayState(GameDisplay* display) : display(display) {}
@@ -46,6 +46,10 @@ protected:
 	GameDisplay* display;
 
     void DrawFadeOverlay(int width, int height, float alpha);
+
+#ifdef _DEBUG
+	void DebugDrawBounds();
+#endif
 
 private:
 	DISALLOW_COPY_AND_ASSIGN(DisplayState);

@@ -140,8 +140,10 @@ TEXTURE_NOISE_OCTAVES(TEXTURE_DIRECTORY "/noise_octaves.raw"),
 
 TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY(TEXTURE_DIRECTORY "/locked_item_256x128.jpg"),
 
-TEXTURE_KEYBOARD_KEY(TEXTURE_DIRECTORY "/keyboard_button_64x64.png"),
-TEXTURE_XBOX_CONTROLLER_BUTTON(TEXTURE_DIRECTORY "/xbox_360_controller_button64x64.png"),
+TEXTURE_SHORT_KEYBOARD_KEY(TEXTURE_DIRECTORY "/keyboard_button_64x64.png"),
+TEXTURE_LONG_KEYBOARD_KEY(TEXTURE_DIRECTORY "/keyboard_long_button_128x64.png"),
+TEXTURE_XBOX_CONTROLLER_BUTTON(TEXTURE_DIRECTORY "/xbox_360_controller_button_64x64.png"),
+TEXTURE_XBOX_CONTROLLER_ANALOG_STICK(TEXTURE_DIRECTORY "/xbox_360_controller_analog_stick_64x64.png"),
 
 // Font Asset Paths
 FONT_SADBAD(FONT_DIRECTORY          "/sadbad.ttf"),
@@ -248,6 +250,76 @@ DECO_BLOCK_MESH_PATH(MESH_DIRECTORY "/deco_block.obj")
 }
 
 GameViewConstants::~GameViewConstants() {
+}
+
+// Gets the string of the texture file name for the given xbox 360 button type
+const char* GameViewConstants::GetXBoxButtonTextureName(GameViewConstants::XBoxButtonType buttonType) const {
+    switch (buttonType) {
+        case XBoxPushButton:
+            return this->TEXTURE_XBOX_CONTROLLER_BUTTON;
+        case XBoxAnalogStick:
+            return this->TEXTURE_XBOX_CONTROLLER_ANALOG_STICK;
+        default:
+            assert(false);
+            break;
+    }
+    return NULL;
+}
+
+// Gets the string of the texture file name for the given keyboard key type
+const char* GameViewConstants::GetKeyboardButtonTextureName(GameViewConstants::KeyboardButtonType buttonType) const {
+    switch (buttonType) {
+        case KeyboardChar:
+            return this->TEXTURE_SHORT_KEYBOARD_KEY;
+        case KeyboardSpaceBar:
+            return this->TEXTURE_LONG_KEYBOARD_KEY;
+        default:
+            assert(false);
+            break;
+    }
+    return NULL;
+}
+
+//const char* GameViewConstants::GetMoustButtonTextureName(MouseButtonType buttonType) const;
+// TODO
+
+
+// Get the offsets from the top left corner of the button for the label
+void GameViewConstants::GetXBoxButtonLabelOffset(XBoxButtonType buttonType, float buttonSize,
+                                                 float labelWidth, float labelHeight,
+                                                 float& offsetX, float& offsetY) const {
+    switch (buttonType) {
+        case XBoxPushButton:
+            offsetX = (buttonSize - labelWidth)  / 2.0f;
+            offsetY = -(buttonSize - labelHeight) / 2.0f;
+            break;
+        case XBoxAnalogStick:
+            offsetX = (buttonSize - labelWidth) / 2.0f;
+            offsetY = -(buttonSize + buttonSize * 0.1f);
+            break;
+        default:
+            assert(false);
+            break;
+    }
+}
+
+// Get the offsets from the top left corner of the button for the label
+void GameViewConstants::GetKeyboardButtonLabelOffset(KeyboardButtonType buttonType, float buttonSize,
+                                                     float labelWidth, float labelHeight,
+                                                     float& offsetX, float& offsetY) const {
+    switch (buttonType) {
+        case KeyboardChar:
+            offsetX = (buttonSize - labelWidth)  / 3.25f;
+            offsetY = -(buttonSize - labelHeight) / 3.0f;
+            break;
+        case KeyboardSpaceBar:
+            offsetX = (buttonSize - labelWidth)  / 2.0f;
+            offsetY = -(buttonSize - labelHeight) / 2.0f;
+            break;
+        default:
+            assert(false);
+            break;
+    }
 }
 
 /**

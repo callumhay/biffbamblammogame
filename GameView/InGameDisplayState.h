@@ -43,10 +43,6 @@ public:
 private:
 	InGameRenderPipeline renderPipeline;
 
-#ifdef _DEBUG
-	void DebugDrawBounds();
-#endif
-
 	DISALLOW_COPY_AND_ASSIGN(InGameDisplayState);
 };
 

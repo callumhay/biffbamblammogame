@@ -21,7 +21,7 @@ KeyboardHelperLabel::KeyboardHelperLabel(const GameFontAssetsManager::FontStyle&
 keyTexture(NULL), xboxButtonTexture(NULL), keyLbl(NULL), buttonLbl(NULL), orLbl(NULL), beforeLbl(NULL),
 afterLbl(NULL), alpha(1.0f), xboxButtonDisplayOn(true) {
 
-    this->keyTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_KEYBOARD_KEY, 
+    this->keyTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SHORT_KEYBOARD_KEY, 
         Texture::Trilinear, GL_TEXTURE_2D);
     assert(this->keyTexture != NULL);
 
