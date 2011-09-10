@@ -20,13 +20,17 @@ TutorialEventsListener::~TutorialEventsListener() {
 
 void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pressedButton) {
     switch (pressedButton) {
+
         case GameControl::LeftButtonAction:
         case GameControl::RightButtonAction:
             if (!this->movePaddleHintUnshown) {
-                this->movePaddleHint->Unshow(2.0);
+                this->movePaddleHint->Unshow(0.0, 1.0);
                 this->movePaddleHintUnshown = true;
+                this->shootHint->Show(1.0, 1.0);
             }
             break;
+
+
         default:
             break;
     }

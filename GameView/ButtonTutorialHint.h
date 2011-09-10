@@ -51,7 +51,10 @@ private:
         float GetLabelWidth() const { return this->buttonLabel.GetLastRasterWidth(); }
         float GetLabelHeight() const { return this->buttonLabel.GetHeight(); }
 
-        float GetWidth() const { return std::max<float>(this->GetLabelWidth(), this->height); }
+        float GetWidth() const { 
+            float widthHeightRatio = static_cast<float>(this->buttonTexture->GetWidth()) / static_cast<float>(this->buttonTexture->GetHeight());
+            return std::max<float>(this->GetLabelWidth(), widthHeightRatio*this->height);
+        }
         float GetHeight() const { return this->height; }
 
         void SetDimensions(float height, float offsetX, float offsetY);
@@ -86,7 +89,7 @@ inline void ButtonTutorialHint::SetTopLeftCorner(float x, float y) {
 }
 
 inline void ButtonTutorialHint::SetActionName(const std::string& action) {
-    this->actionLabel.SetText(action + std::string(" ="));
+    this->actionLabel.SetText(action + std::string(" = "));
 }
 
 

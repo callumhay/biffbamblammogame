@@ -223,11 +223,19 @@ public:
 
 	void DebugDraw() const;
 
+    // Enable options for the paddle - used during the tutorial
     static void SetEnablePaddleReleaseTimer(bool enabled) {
         PlayerPaddle::paddleBallReleaseTimerEnabled = enabled;
     }
     static bool GetIsPaddleReleaseTimerEnabled() {
         return PlayerPaddle::paddleBallReleaseTimerEnabled;
+    }
+
+    static void SetEnablePaddleRelease(bool enabled) {
+        PlayerPaddle::paddleBallReleaseEnabled = enabled;
+    }
+    static bool GetIsPaddleReleaseEnabled() {
+        return PlayerPaddle::paddleBallReleaseEnabled;
     }
 
 private:
@@ -241,6 +249,7 @@ private:
 	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
 
     static bool paddleBallReleaseTimerEnabled;
+    static bool paddleBallReleaseEnabled;
 
 
 	bool hitWall;					// True when the paddle hits a wall

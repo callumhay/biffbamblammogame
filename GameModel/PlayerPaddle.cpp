@@ -56,6 +56,7 @@ const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.3;
 const int PlayerPaddle::DEFAULT_SHIELD_DMG_PER_SECOND = 90;
 
 bool PlayerPaddle::paddleBallReleaseTimerEnabled = true;
+bool PlayerPaddle::paddleBallReleaseEnabled      = true;
 
 PlayerPaddle::PlayerPaddle() : 
 centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDirection(0.0f), 

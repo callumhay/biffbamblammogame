@@ -15,6 +15,7 @@
 #include "GameAssets.h"
 #include "TutorialHint.h"
 #include "TutorialEventsListener.h"
+#include "TutorialHintListeners.h"
 #include "ButtonTutorialHint.h"
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
@@ -22,7 +23,7 @@ DisplayState(display), renderPipeline(display), tutorialListener(new TutorialEve
 
     // Disable the paddle release timer for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(false);
-
+    
 	// Clear up any stuff to an initial state in cases where things might still 
 	// be set unchanged from a previously loaded game
     this->display->GetModel()->SetPauseState(GameModel::NoPause);
@@ -38,8 +39,9 @@ DisplayState(display), renderPipeline(display), tutorialListener(new TutorialEve
 }
 
 InTutorialGameDisplayState::~InTutorialGameDisplayState() {
-    // Re-enable the paddle release timer
+    // Re-enable any unusual stuff that was disabled for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(true);
+    PlayerPaddle::SetEnablePaddleRelease(true);
 
     // Clean up all the tutorial hints
     for (std::vector<TutorialHint*>::iterator iter = this->tutorialHints.begin();
@@ -127,7 +129,6 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     //Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
     const Camera& camera = this->display->GetCamera();
 
-
     std::list<GameViewConstants::KeyboardButtonType> buttonTypes;
     std::list<std::string> buttonTexts;
 
@@ -142,18 +143,22 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     buttonTexts.push_back("A");
     buttonTexts.push_back("D");
 
+    movePaddleHint->SetListener(new MovePaddleHintListener());
     movePaddleHint->SetKeyboardButtons(buttonTypes, buttonTexts);
     movePaddleHint->SetTopLeftCorner((camera.GetWindowWidth() - movePaddleHint->GetWidth()) / 2.0f, 
         movePaddleHint->GetHeight() + 150.0f);
-                                     
-    // TODO: Keyboard buttons too...
 
     this->tutorialListener->SetMovePaddleHint(movePaddleHint);
     this->tutorialHints.push_back(movePaddleHint);
     
-
     // Tutorial hint for firing the ball
-
+    ButtonTutorialHint* shootHint = new ButtonTutorialHint(tutorialAssets, "Shoot");
+    shootHint->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
+    shootHint->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    shootHint->SetTopLeftCorner((camera.GetWindowWidth() - shootHint->GetWidth()) / 2.0f, shootHint->GetHeight() + 150.0f);
+    
+    this->tutorialListener->SetShootHint(shootHint);
+    this->tutorialHints.push_back(shootHint);
 
     // Tutorial hint for falling items
 

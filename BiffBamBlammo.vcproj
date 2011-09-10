@@ -609,6 +609,10 @@
 					RelativePath=".\GameView\TutorialEventsListener.h"
 					>
 				</File>
+				<File
+					RelativePath=".\GameView\TutorialHintListeners.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"

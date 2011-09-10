@@ -313,8 +313,8 @@ void GameViewConstants::GetKeyboardButtonLabelOffset(KeyboardButtonType buttonTy
             offsetY = -(buttonSize - labelHeight) / 3.0f;
             break;
         case KeyboardSpaceBar:
-            offsetX = (buttonSize - labelWidth)  / 2.0f;
-            offsetY = -(buttonSize - labelHeight) / 2.0f;
+            offsetX = (buttonSize - labelWidth)  / 3.25f;
+            offsetY = -(buttonSize - labelHeight) / 3.0f;
             break;
         default:
             assert(false);
