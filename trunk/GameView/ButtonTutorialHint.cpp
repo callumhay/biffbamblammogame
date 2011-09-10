@@ -25,7 +25,7 @@ TutorialHint(), tutorialAssets(tutorialAssets),
 actionLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
 GameFontAssetsManager::Medium), ""),
 orLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
-GameFontAssetsManager::Medium), "or"),
+GameFontAssetsManager::Medium), " or  "),
 commaLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
 GameFontAssetsManager::Medium), ","),
 xboxButtonLabel(NULL) {
@@ -180,7 +180,7 @@ void ButtonTutorialHint::Draw(const Camera& camera) {
             this->orLabel.SetTopLeftCorner(currX, actualCenterY + this->orLabel.GetHeight()/2.0f);
             this->orLabel.SetAlpha(alpha);
             this->orLabel.Draw();
-            currX += 2*this->orLabel.GetLastRasterWidth();
+            currX += this->orLabel.GetLastRasterWidth();
         }
     }
 
@@ -218,7 +218,7 @@ GameFontAssetsManager::Small), buttonText), buttonColour(buttonColour) {
     assert(buttonTexture != NULL);
     this->buttonLabel.SetColour(Colour(1,1,1));
     this->buttonLabel.SetDropShadow(Colour(0,0,0), 0.05f);
-    this->buttonLabel.SetScale(0.75f);
+    this->buttonLabel.SetScale(0.9f);
     this->SetDimensions(height, offsetX, offsetY);
 }
 
@@ -232,9 +232,11 @@ void ButtonTutorialHint::ButtonGlyphLabel::SetDimensions(float height, float off
 }
 
 void ButtonTutorialHint::ButtonGlyphLabel::Draw(float centerX, float centerY, float scale, float alpha) {
+    float widthHeightRatio = static_cast<float>(this->buttonTexture->GetWidth()) / static_cast<float>(this->buttonTexture->GetHeight());
+
     glPushMatrix();
     glTranslatef(centerX, centerY, 0.0f);
-    glScalef(scale*this->height, scale*this->height, 1.0f);
+    glScalef(widthHeightRatio*scale*this->height, scale*this->height, 1.0f);
 
     glColor4f(this->buttonColour.R(), this->buttonColour.G(), this->buttonColour.B(), alpha);
     this->buttonTexture->BindTexture();

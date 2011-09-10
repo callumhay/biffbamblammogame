@@ -30,10 +30,11 @@ public:
     void MousePressed(const GameControl::MouseButton& pressedButton);
 
     // Overridden event methods
+    void BallShotEvent(const GameBall& shotBall);
     void BlockDestroyedEvent(const LevelPiece& block);
 
     // Set methods for various tutorial hints
-    void SetMovePaddleHint(ButtonTutorialHint* hint) { this->movePaddleHint = hint; hint->Show(2.0); }
+    void SetMovePaddleHint(ButtonTutorialHint* hint) { this->movePaddleHint = hint; hint->Show(0.0, 1.0); }
     void SetShootHint(ButtonTutorialHint* hint) { this->shootHint = hint; }
 
 private:
@@ -52,6 +53,11 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
 };
+
+inline void TutorialEventsListener::BallShotEvent(const GameBall& shotBall) {
+    UNUSED_PARAMETER(shotBall);
+    this->shootHint->Unshow(0.0, 1.0);
+}
 
 inline void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
     UNUSED_PARAMETER(block);

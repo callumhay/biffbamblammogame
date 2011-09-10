@@ -15,8 +15,10 @@
 #include "../BlammoEngine/Animation.h"
 #include "../GameControl/GameControl.h"
 
+
 class GameModel;
 class Camera;
+class TutorialHintListener;
 
 /**
  * Abstract super-class for all tutorial hints - graphical hints that pop-up
@@ -27,6 +29,8 @@ public:
     TutorialHint();
     virtual ~TutorialHint();
 
+    void SetListener(TutorialHintListener* listener);
+
     // Triggers - these can do various things to the tooltip depending on how they are
     // overriden in child classes
     virtual void ButtonPressed(const GameControl::ActionButton& pressedButton)   { UNUSED_PARAMETER(pressedButton);  }
@@ -34,8 +38,8 @@ public:
     virtual void MousePressed(const GameControl::MouseButton& pressedButton)     { UNUSED_PARAMETER(pressedButton);  }
     virtual void MouseReleased(const GameControl::MouseButton& releasedButton)   { UNUSED_PARAMETER(releasedButton); }
 
-    void Show(double fadeInTimeInSeconds);
-    void Unshow(double fadeOutTimeInSeconds);
+    void Show(double delayInSeconds, double fadeInTimeInSeconds);
+    void Unshow(double delayInSeconds, double fadeOutTimeInSeconds);
 
     virtual void Tick(double dT);
     virtual void Draw(const Camera& camera) = 0;    
@@ -48,16 +52,19 @@ protected:
     //State currState;
 
     AnimationLerp<float> fadeAnim;
-    AnimationLerp<float> scaleAnim;
+    //AnimationLerp<float> scaleAnim;
     //double lifeTimeInSecs;
 
 private:
+    TutorialHintListener* listener;
+    bool isShown;
+
     DISALLOW_COPY_AND_ASSIGN(TutorialHint);
 };
 
 inline void TutorialHint::Tick(double dT) {
-    fadeAnim.Tick(dT);
-    scaleAnim.Tick(dT);
+    this->fadeAnim.Tick(dT);
+    //this->scaleAnim.Tick(dT);
 }
 
 #endif // __TUTORIALHINT_H__

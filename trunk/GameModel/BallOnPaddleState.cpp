@@ -127,9 +127,11 @@ void BallOnPaddleState::BallReleaseKeyPressed() {
 	// Make sure the ball's position is updated first
 	this->UpdateBallPosition();
 
-	// Fire the ball off the paddle
-	this->gameModel->GetPlayerPaddle()->Shoot(this->gameModel);
-
-	// Now change the game model's state machine to have the ball in play
-    this->gameModel->SetNextState(GameState::BallInPlayStateType);
+    // Only fire the ball if it's enabled
+    if (PlayerPaddle::GetIsPaddleReleaseEnabled()) {
+	    // Fire the ball off the paddle
+	    this->gameModel->GetPlayerPaddle()->Shoot(this->gameModel);
+	    // Now change the game model's state machine to have the ball in play
+        this->gameModel->SetNextState(GameState::BallInPlayStateType);
+    }
 }

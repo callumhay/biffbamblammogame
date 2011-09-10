@@ -10,32 +10,57 @@
  */
 
 #include "TutorialHint.h"
+#include "TutorialHintListeners.h"
 
 const float TutorialHint::FADE_IN_SCALE_START = 2.25f;
 const float TutorialHint::FADE_OUT_SCALE_END  = 2.25f;
 
-TutorialHint::TutorialHint() {
+TutorialHint::TutorialHint() : listener(NULL), isShown(false) {
     this->fadeAnim.ClearLerp();
     this->fadeAnim.SetInterpolantValue(0.0f);
     this->fadeAnim.SetRepeat(false);
-    this->scaleAnim.ClearLerp();
-    this->scaleAnim.SetInterpolantValue(0.0f);
-    this->scaleAnim.SetRepeat(false);
+    //this->scaleAnim.ClearLerp();
+    //this->scaleAnim.SetInterpolantValue(0.0f);
+    //this->scaleAnim.SetRepeat(false);
 }
 
 TutorialHint::~TutorialHint() {
+    this->SetListener(NULL);
 }
 
-void TutorialHint::Show(double fadeInTimeInSeconds) {
-    this->fadeAnim.SetLerp(0.9 * fadeInTimeInSeconds, 1.0f);
-    this->fadeAnim.SetRepeat(false);
-    this->scaleAnim.SetLerp(0.0, fadeInTimeInSeconds, TutorialHint::FADE_IN_SCALE_START, 1.0f);
-    this->scaleAnim.SetRepeat(false);
+void TutorialHint::SetListener(TutorialHintListener* listener) {
+    if (this->listener != NULL) {
+        delete this->listener;
+    }
+    this->listener = listener;
 }
 
-void TutorialHint::Unshow(double fadeOutTimeInSeconds) {
-    this->fadeAnim.SetLerp(fadeOutTimeInSeconds, 0.0f);
+void TutorialHint::Show(double delayInSeconds, double fadeInTimeInSeconds) {
+    if (this->isShown) { return; }
+
+    this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeInTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 1.0f);
     this->fadeAnim.SetRepeat(false);
-    this->scaleAnim.SetLerp(fadeOutTimeInSeconds, TutorialHint::FADE_OUT_SCALE_END);
-    this->scaleAnim.SetRepeat(false);
+    //this->scaleAnim.SetLerp(delayInSeconds, delayInSeconds+fadeInTimeInSeconds, TutorialHint::FADE_IN_SCALE_START, 1.0f);
+    //this->scaleAnim.SetRepeat(false);
+
+    if (this->listener != NULL) {
+        this->listener->OnTutorialHintShown();
+    }
+
+    this->isShown = true;
+}
+
+void TutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSeconds) {
+    if (!this->isShown) { return; }
+
+    this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeOutTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 0.0f);
+    this->fadeAnim.SetRepeat(false);
+    //this->scaleAnim.SetLerp(delayInSeconds, fadeOutTimeInSeconds, this->scaleAnim.GetInterpolantValue(), TutorialHint::FADE_OUT_SCALE_END);
+    //this->scaleAnim.SetRepeat(false);
+
+    if (this->listener != NULL) {
+        this->listener->OnTutorialHintUnshown();
+    }
+
+    this->isShown = false;
 }
