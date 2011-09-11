@@ -10,15 +10,20 @@
  */
 
 #include "TutorialEventsListener.h"
-#include "../GameModel/GameItem.h"
+#include "GameDisplay.h"
 
-TutorialEventsListener::TutorialEventsListener() : 
+#include "../GameModel/GameItem.h"
+#include "../GameModel/BallBoostModel.h"
+
+TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
-shootBallHint(NULL), fireWeaponHint(NULL) {
+shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL) {
+    assert(display != NULL);
 }
 
 TutorialEventsListener::~TutorialEventsListener() {
 }
+
 
 void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pressedButton) {
     switch (pressedButton) {
@@ -48,11 +53,43 @@ void TutorialEventsListener::ItemActivatedEvent(const GameItem& item) {
         case GameItem::RocketPaddleItem:
             if (!this->fireWeaponAlreadyShown) {
                 this->fireWeaponHint->Show(0.0, 1.0);
+                this->fireWeaponHint->Unshow(6.0, 1.0);
                 this->fireWeaponAlreadyShown = true;
             }
             break;
         default:
             break;
     
+    }
+}
+
+void TutorialEventsListener::BallBoostGainedEvent() {
+    const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
+    if (boostModel == NULL) { return; }
+    
+    if (boostModel->GetNumAvailableBoosts() == 1) {
+        this->startBoostHint->Show(0.0, 1.0);   
+    }
+}
+
+void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boostModel) {
+    switch (boostModel.GetBulletTimeState()) {
+        case BallBoostModel::NotInBulletTime:
+            //if (boostModel.GetNumAvailableBoosts() == 1) {
+            //}
+            break;
+
+        case BallBoostModel::BulletTimeFadeIn:
+            this->startBoostHint->Unshow(0.0, 0.5);
+        case BallBoostModel::BulletTime:
+            // Show the hint for telling the user how to boost the ball while in bullet time
+            
+            break;
+
+        case BallBoostModel::BulletTimeFadeOut:
+            break;
+        default:
+            assert(false);
+            break;
     }
 }

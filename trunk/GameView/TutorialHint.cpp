@@ -50,8 +50,8 @@ void TutorialHint::Show(double delayInSeconds, double fadeInTimeInSeconds) {
     this->isShown = true;
 }
 
-void TutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSeconds) {
-    if (!this->isShown) { return; }
+void TutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow) {
+    if (!this->isShown && !overridePrevUnshow) { return; }
 
     this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeOutTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 0.0f);
     this->fadeAnim.SetRepeat(false);
