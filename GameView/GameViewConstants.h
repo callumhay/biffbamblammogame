@@ -158,22 +158,27 @@ public:
 
 	const char* TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY;
 
-    enum XBoxButtonType { XBoxPushButton, XBoxAnalogStick };
+    enum XBoxButtonType { XBoxPushButton, XBoxAnalogStick, XBoxTrigger };
     enum KeyboardButtonType { KeyboardChar, KeyboardSpaceBar };
-    //enum MouseButtonType { LeftMouseButton, RightMouseButton };
+    enum MouseButtonType { LeftMouseButton, RightMouseButton };
 
     const char* TEXTURE_SHORT_KEYBOARD_KEY;
     const char* TEXTURE_LONG_KEYBOARD_KEY;
+    const char* TEXTURE_LEFT_MOUSE_BUTTON;
+    const char* TEXTURE_RIGHT_MOUSE_BUTTON;
     const char* TEXTURE_XBOX_CONTROLLER_BUTTON;
     const char* TEXTURE_XBOX_CONTROLLER_ANALOG_STICK;
+    const char* TEXTURE_XBOX_CONTROLLER_TRIGGER;
 
     const char* GetXBoxButtonTextureName(XBoxButtonType buttonType) const;
     const char* GetKeyboardButtonTextureName(KeyboardButtonType buttonType) const;
-    //const char* GetMoustButtonTextureName(MouseButtonType buttonType) const;
+    const char* GetMoustButtonTextureName(MouseButtonType buttonType) const;
 
-    void GetXBoxButtonLabelOffset(XBoxButtonType buttonType, float buttonSize,
+    void GetXBoxButtonLabelOffset(XBoxButtonType buttonType, float buttonWidth, float buttonHeight,
         float labelWidth, float labelHeight, float& offsetX, float& offsetY) const;
     void GetKeyboardButtonLabelOffset(KeyboardButtonType buttonType, float buttonSize,
+        float labelWidth, float labelHeight, float& offsetX, float& offsetY) const;
+    void GetMouseButtonLabelOffset(MouseButtonType buttonType, float buttonSize,
         float labelWidth, float labelHeight, float& offsetX, float& offsetY) const;
 
 	// Font path constants **********************************

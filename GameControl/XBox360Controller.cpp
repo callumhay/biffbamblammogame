@@ -115,10 +115,10 @@ void XBox360Controller::NotInGameOnProcessStateSpecificActions(const XINPUT_STAT
 }
 
 void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState) {
-	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_A ||
-        controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_B ||
-        controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_X ||
-        controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) {
+    if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_A) {
+        //controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_B ||
+        //controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_X ||
+        //controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) {
 
 		if (!this->enterActionOn) {
             this->model->ShootActionReleaseUse();

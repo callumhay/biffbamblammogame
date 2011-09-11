@@ -147,6 +147,11 @@ public:
 	 */
     virtual void BallShotEvent(const GameBall& shotBall) { UNUSED_PARAMETER(shotBall); }
 
+    /** 
+     * Event triggered whenever a weapon is fired from the paddle during the game.
+     */
+    virtual void PaddleWeaponFiredEvent() {}
+
 	/**
 	 * Event triggered when the ball collides with a level block. Only occurs once as the ball
 	 * collides with the block.

@@ -32,11 +32,14 @@ public:
     // Overridden event methods
     void BallShotEvent(const GameBall& shotBall);
     void BlockDestroyedEvent(const LevelPiece& block);
+    void ItemActivatedEvent(const GameItem& item);
+    void PaddleWeaponFiredEvent();
 
     // Set methods for various tutorial hints
     void SetMovePaddleHint(ButtonTutorialHint* hint) { this->movePaddleHint = hint; hint->Show(0.0, 1.0); }
-    void SetShootHint(ButtonTutorialHint* hint) { this->shootHint = hint; }
-
+    void SetShootBallHint(ButtonTutorialHint* hint)  { this->shootBallHint = hint; }
+    void SetFireWeaponHint(ButtonTutorialHint* hint) { this->fireWeaponHint = hint; }
+        
 private:
     // Basic values to keep track of part of the game state, used to determine
     // whether certain tutorial hints are shown or not
@@ -45,10 +48,12 @@ private:
     // Flags for showing or not showing certain tutorial hints
     // int numTimesShootHintShown;
     bool movePaddleHintUnshown;
+    bool fireWeaponAlreadyShown;
 
     // Tutorial hints
     ButtonTutorialHint* movePaddleHint;
-    ButtonTutorialHint* shootHint;
+    ButtonTutorialHint* shootBallHint;
+    ButtonTutorialHint* fireWeaponHint;
 
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
@@ -56,12 +61,16 @@ private:
 
 inline void TutorialEventsListener::BallShotEvent(const GameBall& shotBall) {
     UNUSED_PARAMETER(shotBall);
-    this->shootHint->Unshow(0.0, 1.0);
+    this->shootBallHint->Unshow(0.0, 1.0);
 }
 
 inline void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
     UNUSED_PARAMETER(block);
     this->numBlocksDestroyed++;
+}
+
+inline void TutorialEventsListener::PaddleWeaponFiredEvent() {
+    this->fireWeaponHint->Unshow(0.0, 1.0);
 }
 
 #endif // __TUTORIALEVENTSLISTENER_H__

@@ -127,6 +127,14 @@ void GameEventManager::ActionBallShot(const GameBall& shotBall) {
 	}		
 }
 
+// Action for when a weapon is fired from the paddle
+void GameEventManager::ActionPaddleWeaponFired() {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->PaddleWeaponFiredEvent();
+	}		
+}
+
 // Action for when a projectile collides with a block in the level
 void GameEventManager::ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block) {
 	this->listenerIter = this->eventListeners.begin();

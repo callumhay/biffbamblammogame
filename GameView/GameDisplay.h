@@ -142,7 +142,8 @@ private:
 
 inline void GameDisplay::Render(double dT) {
     // Dialate time if necessary...
-    if (this->currState->GetType() == DisplayState::InGame) {
+    if (this->currState->GetType() == DisplayState::InGame || 
+        this->currState->GetType() == DisplayState::InTutorialGame) {
         dT *= this->model->GetTimeDialationFactor();
     }
 

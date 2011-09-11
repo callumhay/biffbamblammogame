@@ -33,9 +33,14 @@ public:
 
     void SetXBoxButton(GameViewConstants::XBoxButtonType buttonType, const std::string& buttonText,
         const Colour& buttonColour);
+    void SetXBoxButtons(const std::list<GameViewConstants::XBoxButtonType>& buttonTypes,
+        const std::list<std::string>& buttonTexts, const std::list<Colour>& buttonColours);
+
     void SetKeyboardButton(GameViewConstants::KeyboardButtonType buttonType, const std::string& buttonText);
     void SetKeyboardButtons(const std::list<GameViewConstants::KeyboardButtonType>& buttonTypes,
         const std::list<std::string>& buttonTexts);
+
+    void SetMouseButton(GameViewConstants::MouseButtonType buttonType, const std::string& buttonText);
 
     void Draw(const Camera& camera);
 
@@ -70,15 +75,19 @@ private:
         DISALLOW_COPY_AND_ASSIGN(ButtonGlyphLabel);
     };
 
-
     const GameTutorialAssets* tutorialAssets;
-    ButtonGlyphLabel* xboxButtonLabel;
+
     std::vector<ButtonGlyphLabel*> keyboardKeyLabels;
+    std::vector<ButtonGlyphLabel*> xboxLabels;
+    ButtonGlyphLabel* mouseLabel;
+
     TextLabel2D actionLabel;
     TextLabel2D orLabel;
     TextLabel2D commaLabel;
 
     void ClearKeyboardKeyLabels();
+    void ClearXBoxLabels();
+    void ClearMouseLabel();
 
     DISALLOW_COPY_AND_ASSIGN(ButtonTutorialHint);
 };

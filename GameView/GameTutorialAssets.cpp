@@ -18,7 +18,8 @@
 
 GameTutorialAssets::GameTutorialAssets() : 
 xbox360ButtonTex(NULL), xbox360AnalogStickTex(NULL),
-keyboardShortButtonTex(NULL), keyboardLongButtonTex(NULL) {
+keyboardShortButtonTex(NULL), keyboardLongButtonTex(NULL),
+leftMouseButtonTex(NULL), rightMouseButtonTex(NULL) {
     this->Init();
 }
 
@@ -32,6 +33,8 @@ const Texture2D* GameTutorialAssets::GetXBox360Texture(GameViewConstants::XBoxBu
             return this->GetXBox360ButtonTexture();
         case GameViewConstants::XBoxAnalogStick:
             return this->GetXBox360AnalogStickTexture();
+        case GameViewConstants::XBoxTrigger:
+            return this->GetXBox360TriggerTexture();
         default:
             assert(false);
             break;
@@ -52,6 +55,19 @@ const Texture2D* GameTutorialAssets::GetKeyboardTexture(GameViewConstants::Keybo
     return NULL;
 }
 
+const Texture2D* GameTutorialAssets::GetMouseTexture(GameViewConstants::MouseButtonType buttonType) const {
+    switch (buttonType) {
+        case GameViewConstants::LeftMouseButton:
+            return this->GetLeftMouseButtonTexture();
+        case GameViewConstants::RightMouseButton:
+            return this->GetRightMouseButtonTexture();
+        default:
+            assert(false);
+            break;
+    }
+    return NULL;
+}
+
 void GameTutorialAssets::Init() {
     this->xbox360ButtonTex = 
         dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -63,6 +79,11 @@ void GameTutorialAssets::Init() {
         GameViewConstants::GetInstance()->TEXTURE_XBOX_CONTROLLER_ANALOG_STICK, Texture::Trilinear));
     assert(this->xbox360AnalogStickTex != NULL);
 
+    this->xbox360TriggerTex =
+        dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_XBOX_CONTROLLER_TRIGGER, Texture::Trilinear));
+    assert(this->xbox360TriggerTex != NULL);
+
     this->keyboardShortButtonTex =
         dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_SHORT_KEYBOARD_KEY, Texture::Trilinear));
@@ -72,6 +93,16 @@ void GameTutorialAssets::Init() {
         dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_LONG_KEYBOARD_KEY, Texture::Trilinear));
     assert(this->keyboardLongButtonTex != NULL);
+
+    this->leftMouseButtonTex =
+        dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_LEFT_MOUSE_BUTTON, Texture::Trilinear));
+    assert(this->leftMouseButtonTex != NULL);
+
+    this->rightMouseButtonTex =
+        dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_RIGHT_MOUSE_BUTTON, Texture::Trilinear));
+    assert(this->rightMouseButtonTex != NULL);
 }
 
 void GameTutorialAssets::Release() {
@@ -80,8 +111,14 @@ void GameTutorialAssets::Release() {
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->xbox360AnalogStickTex);
     assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->xbox360TriggerTex);
+    assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->keyboardShortButtonTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->keyboardLongButtonTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->leftMouseButtonTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->rightMouseButtonTex);
     assert(success);
 }
