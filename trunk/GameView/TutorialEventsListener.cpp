@@ -10,9 +10,11 @@
  */
 
 #include "TutorialEventsListener.h"
+#include "../GameModel/GameItem.h"
 
 TutorialEventsListener::TutorialEventsListener() : 
-numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), shootHint(NULL) {
+numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
+shootBallHint(NULL), fireWeaponHint(NULL) {
 }
 
 TutorialEventsListener::~TutorialEventsListener() {
@@ -26,10 +28,9 @@ void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pres
             if (!this->movePaddleHintUnshown) {
                 this->movePaddleHint->Unshow(0.0, 1.0);
                 this->movePaddleHintUnshown = true;
-                this->shootHint->Show(1.0, 1.0);
+                this->shootBallHint->Show(1.0, 1.0);
             }
             break;
-
 
         default:
             break;
@@ -38,4 +39,20 @@ void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pres
 
 void TutorialEventsListener::MousePressed(const GameControl::MouseButton& pressedButton) {
     UNUSED_PARAMETER(pressedButton);
+}
+
+void TutorialEventsListener::ItemActivatedEvent(const GameItem& item) {
+    switch (item.GetItemType()) {
+        case GameItem::LaserBulletPaddleItem:
+        case GameItem::LaserBeamPaddleItem:
+        case GameItem::RocketPaddleItem:
+            if (!this->fireWeaponAlreadyShown) {
+                this->fireWeaponHint->Show(0.0, 1.0);
+                this->fireWeaponAlreadyShown = true;
+            }
+            break;
+        default:
+            break;
+    
+    }
 }

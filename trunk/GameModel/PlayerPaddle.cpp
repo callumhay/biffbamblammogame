@@ -580,11 +580,17 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 
 		gameModel->AddProjectile(rocketProjectile);
 		this->RemovePaddleType(PlayerPaddle::RocketPaddle);
+
+        // EVENT: Paddle just fired a rocket
+        GameEventManager::Instance()->ActionPaddleWeaponFired();
 	}
 	// Check for laser beam paddle 
 	else if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !this->isFiringBeam) {
 		// We add the beam to the game model, the rest will be taken care of by the beam and model
 		gameModel->AddBeam(Beam::PaddleLaserBeam);
+
+        // EVENT: Paddle just fired a beam
+        GameEventManager::Instance()->ActionPaddleWeaponFired();
 	}
 	// Check for laser bullet paddle (shoots little laser bullets from the paddle)
 	else if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
@@ -609,6 +615,9 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 
 			// Reset the timer for the next laser blast
 			this->timeSinceLastLaserBlast = 0;
+
+            // EVENT: Paddle just fired a laser bullet
+            GameEventManager::Instance()->ActionPaddleWeaponFired();
 		}
 	}
 

@@ -62,6 +62,7 @@ public:
 	void ActionAllBallsDead(int livesLeft);
 	void ActionBallSpawn(const GameBall& spawnBall);
 	void ActionBallShot(const GameBall& shotBall);
+    void ActionPaddleWeaponFired();
 	void ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block);
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal);

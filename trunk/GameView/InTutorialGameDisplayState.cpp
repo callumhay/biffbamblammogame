@@ -129,22 +129,24 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     //Vector2D negHalfLevelDim = -0.5f * this->display->GetModel()->GetLevelUnitDimensions();
     const Camera& camera = this->display->GetCamera();
 
-    std::list<GameViewConstants::KeyboardButtonType> buttonTypes;
+    std::list<GameViewConstants::KeyboardButtonType> keyboardButtonTypes;
+    std::list<GameViewConstants::XBoxButtonType> xboxButtonTypes;
     std::list<std::string> buttonTexts;
+    std::list<Colour> buttonColours;
 
     // Tutorial hints for moving the paddle around
     ButtonTutorialHint* movePaddleHint = new ButtonTutorialHint(tutorialAssets, "Move");
     movePaddleHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "(Left Analog)", Colour(1,1,1));
     
-    buttonTypes.clear();
-    buttonTypes.push_back(GameViewConstants::KeyboardChar);
-    buttonTypes.push_back(GameViewConstants::KeyboardChar);
+    keyboardButtonTypes.clear();
+    keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
+    keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
     buttonTexts.clear();
     buttonTexts.push_back("A");
     buttonTexts.push_back("D");
 
     movePaddleHint->SetListener(new MovePaddleHintListener());
-    movePaddleHint->SetKeyboardButtons(buttonTypes, buttonTexts);
+    movePaddleHint->SetKeyboardButtons(keyboardButtonTypes, buttonTexts);
     movePaddleHint->SetTopLeftCorner((camera.GetWindowWidth() - movePaddleHint->GetWidth()) / 2.0f, 
         movePaddleHint->GetHeight() + 150.0f);
 
@@ -152,17 +154,45 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->tutorialHints.push_back(movePaddleHint);
     
     // Tutorial hint for firing the ball
-    ButtonTutorialHint* shootHint = new ButtonTutorialHint(tutorialAssets, "Shoot");
-    shootHint->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
-    shootHint->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
-    shootHint->SetTopLeftCorner((camera.GetWindowWidth() - shootHint->GetWidth()) / 2.0f, shootHint->GetHeight() + 150.0f);
+    ButtonTutorialHint* shootBallHint = new ButtonTutorialHint(tutorialAssets, "Shoot Ball");
+    shootBallHint->SetXBoxButton(GameViewConstants::XBoxPushButton, "A", GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
+    shootBallHint->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    shootBallHint->SetTopLeftCorner((camera.GetWindowWidth() - shootBallHint->GetWidth()) / 2.0f, shootBallHint->GetHeight() + 150.0f);
     
-    this->tutorialListener->SetShootHint(shootHint);
-    this->tutorialHints.push_back(shootHint);
+    this->tutorialListener->SetShootBallHint(shootBallHint);
+    this->tutorialHints.push_back(shootBallHint);
+
+    // Tutorial hint for firing weapons
+    ButtonTutorialHint* fireWeaponHint = new ButtonTutorialHint(tutorialAssets, "Fire Weapons");
+
+    xboxButtonTypes.clear();
+    xboxButtonTypes.push_back(GameViewConstants::XBoxPushButton);
+    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+    buttonTexts.clear();
+    buttonTexts.push_back("A");
+    buttonTexts.push_back("RT");
+    buttonTexts.push_back("LT");
+    buttonColours.clear();
+    buttonColours.push_back(GameViewConstants::GetInstance()->XBOX_CONTROLLER_A_BUTTON_COLOUR);
+    buttonColours.push_back(Colour(1,1,1));
+    buttonColours.push_back(Colour(1,1,1));
+
+    fireWeaponHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+    fireWeaponHint->SetKeyboardButton(GameViewConstants::KeyboardSpaceBar, "Space");
+    fireWeaponHint->SetTopLeftCorner((camera.GetWindowWidth() - fireWeaponHint->GetWidth()) / 2.0f,
+        fireWeaponHint->GetHeight() + 150.0f);
+    
+    this->tutorialListener->SetFireWeaponHint(fireWeaponHint);
+    this->tutorialHints.push_back(fireWeaponHint);
+
 
     // Tutorial hint for falling items
-
+    
 
     // Tutorial hints for boosting
+    
+
+
 
 }

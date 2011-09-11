@@ -142,8 +142,11 @@ TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY(TEXTURE_DIRECTORY "/locked_item_256x128.jpg"),
 
 TEXTURE_SHORT_KEYBOARD_KEY(TEXTURE_DIRECTORY "/keyboard_button_64x64.png"),
 TEXTURE_LONG_KEYBOARD_KEY(TEXTURE_DIRECTORY "/keyboard_long_button_128x64.png"),
+TEXTURE_LEFT_MOUSE_BUTTON(TEXTURE_DIRECTORY "/left_mouse_button_64x64.png"),
+TEXTURE_RIGHT_MOUSE_BUTTON(TEXTURE_DIRECTORY "/right_mouse_button_64x64.png"),
 TEXTURE_XBOX_CONTROLLER_BUTTON(TEXTURE_DIRECTORY "/xbox_360_controller_button_64x64.png"),
 TEXTURE_XBOX_CONTROLLER_ANALOG_STICK(TEXTURE_DIRECTORY "/xbox_360_controller_analog_stick_64x64.png"),
+TEXTURE_XBOX_CONTROLLER_TRIGGER(TEXTURE_DIRECTORY "/xbox_360_controller_trigger_64x64.png"),
 
 // Font Asset Paths
 FONT_SADBAD(FONT_DIRECTORY          "/sadbad.ttf"),
@@ -259,6 +262,8 @@ const char* GameViewConstants::GetXBoxButtonTextureName(GameViewConstants::XBoxB
             return this->TEXTURE_XBOX_CONTROLLER_BUTTON;
         case XBoxAnalogStick:
             return this->TEXTURE_XBOX_CONTROLLER_ANALOG_STICK;
+        case XBoxTrigger:
+            return this->TEXTURE_XBOX_CONTROLLER_TRIGGER;
         default:
             assert(false);
             break;
@@ -280,22 +285,36 @@ const char* GameViewConstants::GetKeyboardButtonTextureName(GameViewConstants::K
     return NULL;
 }
 
-//const char* GameViewConstants::GetMoustButtonTextureName(MouseButtonType buttonType) const;
-// TODO
+const char* GameViewConstants::GetMoustButtonTextureName(MouseButtonType buttonType) const {
+    switch (buttonType) {
+        case LeftMouseButton:
+            return this->TEXTURE_LEFT_MOUSE_BUTTON;
+        case RightMouseButton:
+            return this->TEXTURE_RIGHT_MOUSE_BUTTON;
+        default:
+            assert(false);
+            break;
+    }
+    return NULL;
+}
 
 
 // Get the offsets from the top left corner of the button for the label
-void GameViewConstants::GetXBoxButtonLabelOffset(XBoxButtonType buttonType, float buttonSize,
+void GameViewConstants::GetXBoxButtonLabelOffset(XBoxButtonType buttonType, float buttonWidth, float buttonHeight,
                                                  float labelWidth, float labelHeight,
                                                  float& offsetX, float& offsetY) const {
     switch (buttonType) {
         case XBoxPushButton:
-            offsetX = (buttonSize - labelWidth)  / 2.0f;
-            offsetY = -(buttonSize - labelHeight) / 2.0f;
+            offsetX = (buttonWidth - labelWidth)  / 2.0f;
+            offsetY = -(buttonHeight - labelHeight) / 2.0f;
             break;
         case XBoxAnalogStick:
-            offsetX = (buttonSize - labelWidth) / 2.0f;
-            offsetY = -(buttonSize + buttonSize * 0.1f);
+            offsetX = (buttonHeight - labelWidth) / 2.0f;
+            offsetY = -(1.1f * buttonHeight);
+            break;
+        case XBoxTrigger:
+            offsetX = (buttonHeight - labelWidth) / 2.0f;
+            offsetY = -buttonHeight + labelHeight + 0.2*buttonHeight;
             break;
         default:
             assert(false);
@@ -315,6 +334,25 @@ void GameViewConstants::GetKeyboardButtonLabelOffset(KeyboardButtonType buttonTy
         case KeyboardSpaceBar:
             offsetX = (buttonSize - labelWidth)  / 3.25f;
             offsetY = -(buttonSize - labelHeight) / 3.0f;
+            break;
+        default:
+            assert(false);
+            break;
+    }
+}
+
+void GameViewConstants::GetMouseButtonLabelOffset(MouseButtonType buttonType, float buttonSize,
+                                                  float labelWidth, float labelHeight,
+                                                  float& offsetX, float& offsetY) const {
+    UNUSED_PARAMETER(labelHeight);
+    switch (buttonType) {
+        case LeftMouseButton:
+            offsetX = (buttonSize - labelWidth)  / 2.0f;
+            offsetY = -(1.1f * buttonSize);
+            break;
+        case RightMouseButton:
+            offsetX = (buttonSize - labelWidth)  / 2.0f;
+            offsetY = -(1.1f * buttonSize);
             break;
         default:
             assert(false);
