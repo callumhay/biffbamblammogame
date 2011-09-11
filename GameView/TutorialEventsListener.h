@@ -22,8 +22,10 @@ class GameDisplay;
 
 class TutorialEventsListener : public GameEvents {
 public:
-    TutorialEventsListener();
+    TutorialEventsListener(GameDisplay* display);
     ~TutorialEventsListener();
+
+    //void Tick(double dT);
 
     // Additional event methods
     void ButtonPressed(const GameControl::ActionButton& pressedButton);
@@ -35,12 +37,18 @@ public:
     void ItemActivatedEvent(const GameItem& item);
     void PaddleWeaponFiredEvent();
 
+    void BallBoostGainedEvent();
+    void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
+
     // Set methods for various tutorial hints
     void SetMovePaddleHint(ButtonTutorialHint* hint) { this->movePaddleHint = hint; hint->Show(0.0, 1.0); }
     void SetShootBallHint(ButtonTutorialHint* hint)  { this->shootBallHint = hint; }
     void SetFireWeaponHint(ButtonTutorialHint* hint) { this->fireWeaponHint = hint; }
+    void SetStartBoostHint(ButtonTutorialHint* hint) { this->startBoostHint = hint; }
         
 private:
+    GameDisplay* display;
+
     // Basic values to keep track of part of the game state, used to determine
     // whether certain tutorial hints are shown or not
     int numBlocksDestroyed;
@@ -54,6 +62,7 @@ private:
     ButtonTutorialHint* movePaddleHint;
     ButtonTutorialHint* shootBallHint;
     ButtonTutorialHint* fireWeaponHint;
+    ButtonTutorialHint* startBoostHint;
 
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
@@ -70,7 +79,7 @@ inline void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block)
 }
 
 inline void TutorialEventsListener::PaddleWeaponFiredEvent() {
-    this->fireWeaponHint->Unshow(0.0, 1.0);
+    this->fireWeaponHint->Unshow(0.0, 1.0, true);
 }
 
 #endif // __TUTORIALEVENTSLISTENER_H__

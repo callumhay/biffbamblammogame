@@ -229,7 +229,15 @@ float ButtonTutorialHint::GetWidth() const {
         const ButtonGlyphLabel* buttonLabel = *iter;
         width += buttonLabel->GetWidth();
     }
-    width += std::max<float>(0, (this->keyboardKeyLabels.size()-1)) * this->commaLabel.GetLastRasterWidth();
+    width += std::max<float>(0, (static_cast<float>(this->keyboardKeyLabels.size()) - 1.0f)) * this->commaLabel.GetLastRasterWidth();
+
+    if ((!this->xboxLabels.empty() || !this->keyboardKeyLabels.empty()) && this->mouseLabel != NULL) {
+        width += this->orLabel.GetLastRasterWidth();
+    }
+
+    if (this->mouseLabel != NULL) {
+        width += this->mouseLabel->GetWidth();
+    }
 
     return width;
 }
@@ -299,6 +307,17 @@ void ButtonTutorialHint::Draw(const Camera& camera) {
         }
     }
 
+    if (this->mouseLabel != NULL) {
+        if ((!this->xboxLabels.empty() || !this->keyboardKeyLabels.empty())) {
+            // Draw an 'or' label...
+            this->orLabel.SetTopLeftCorner(currX, actualCenterY + this->orLabel.GetHeight()/2.0f);
+            this->orLabel.SetAlpha(alpha);
+            this->orLabel.Draw();
+            currX += this->orLabel.GetLastRasterWidth();
+        }
+        currX += this->mouseLabel->GetWidth() / 2.0f;
+        this->mouseLabel->Draw(currX, actualCenterY, scale, alpha);
+    }
 }
 
 ButtonTutorialHint::ButtonGlyphLabel::ButtonGlyphLabel(const Texture* buttonTexture, const std::string& buttonText,

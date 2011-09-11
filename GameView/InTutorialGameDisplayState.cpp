@@ -19,7 +19,7 @@
 #include "ButtonTutorialHint.h"
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
-DisplayState(display), renderPipeline(display), tutorialListener(new TutorialEventsListener()) {
+DisplayState(display), renderPipeline(display), tutorialListener(new TutorialEventsListener(display)) {
 
     // Disable the paddle release timer for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(false);
@@ -88,6 +88,8 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
     glPopAttrib();
     debug_opengl_state();
 
+    //this->tutorialListener->Tick(dT);
+
 #ifdef _DEBUG
 	this->DebugDrawBounds();
 	this->display->GetAssets()->DebugDrawLights();
@@ -136,7 +138,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     // Tutorial hints for moving the paddle around
     ButtonTutorialHint* movePaddleHint = new ButtonTutorialHint(tutorialAssets, "Move");
-    movePaddleHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "(Left Analog)", Colour(1,1,1));
+    movePaddleHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Left Analog", Colour(1,1,1));
     
     keyboardButtonTypes.clear();
     keyboardButtonTypes.push_back(GameViewConstants::KeyboardChar);
@@ -186,13 +188,38 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->tutorialListener->SetFireWeaponHint(fireWeaponHint);
     this->tutorialHints.push_back(fireWeaponHint);
 
-
     // Tutorial hint for falling items
-    
+    // TODO ?
 
     // Tutorial hints for boosting
-    
+    ButtonTutorialHint* startingToBoostHint = new ButtonTutorialHint(tutorialAssets, "Boost Mode");
+    startingToBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
+    startingToBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
+    startingToBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - startingToBoostHint->GetWidth()) / 2.0f,
+        startingToBoostHint->GetHeight() + 200.0f);
+
+    this->tutorialListener->SetStartBoostHint(startingToBoostHint);
+    this->tutorialHints.push_back(startingToBoostHint);
+
+    /*
+    ????ButtonTutorialHint* boostDirectionHint = new ButtonTutorialHint(tutorialAssets, "Boost");
 
 
+    ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "Boost");
 
+    xboxButtonTypes.clear();
+    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+    xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
+    buttonTexts.clear();
+    buttonTexts.push_back("RT");
+    buttonTexts.push_back("LT");
+    buttonColours.clear();
+    buttonColours.push_back(Colour(1,1,1));
+    buttonColours.push_back(Colour(1,1,1));
+
+    whileInBoostTimeHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+    whileInBoostTimeHint->SetMouseButton(GameViewConstants::RightMouseButton, "RMB");
+    whileInBoostTimeHint->SetTopLeftCorner((camera.GetWindowWidth() - whileInBoostTimeHint->GetWidth() - 100.0f),
+        whileInBoostTimeHint->GetHeight() + 100.0f);
+    */
 }

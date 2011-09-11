@@ -39,7 +39,7 @@ public:
     virtual void MouseReleased(const GameControl::MouseButton& releasedButton)   { UNUSED_PARAMETER(releasedButton); }
 
     void Show(double delayInSeconds, double fadeInTimeInSeconds);
-    void Unshow(double delayInSeconds, double fadeOutTimeInSeconds);
+    void Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow = false);
 
     virtual void Tick(double dT);
     virtual void Draw(const Camera& camera) = 0;    
