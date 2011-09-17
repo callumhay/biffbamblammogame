@@ -16,8 +16,12 @@
 // Amounts of time to fade in and out of bullet time when it's activated/deactivated
 const double BallBoostModel::BULLET_TIME_FADE_IN_SECONDS        = 0.35;
 const double BallBoostModel::BULLET_TIME_FADE_OUT_SECONDS       = 0.15;
+
+// Default amount of time to set for the duration of ball bullet time
+const double BallBoostModel::DEFAULT_BULLET_TIME_DURATION = 1.3;
+
 // The maximum duration of bullet time before the ball is automatically boosted
-const double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS   = 1.3;
+double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS = BallBoostModel::DEFAULT_BULLET_TIME_DURATION;
 
 // Amount of time it takes for a ball boost to charge
 const float BallBoostModel::BOOST_CHARGE_TIME_SECONDS = 15.0f;

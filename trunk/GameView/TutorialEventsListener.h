@@ -36,15 +36,18 @@ public:
     void BlockDestroyedEvent(const LevelPiece& block);
     void ItemActivatedEvent(const GameItem& item);
     void PaddleWeaponFiredEvent();
+    void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
 
     void BallBoostGainedEvent();
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
 
     // Set methods for various tutorial hints
-    void SetMovePaddleHint(ButtonTutorialHint* hint) { this->movePaddleHint = hint; hint->Show(0.0, 1.0); }
+    void SetMovePaddleHint(ButtonTutorialHint* hint) { this->movePaddleHint = hint; hint->Show(0.0, 0.75); }
     void SetShootBallHint(ButtonTutorialHint* hint)  { this->shootBallHint = hint; }
     void SetFireWeaponHint(ButtonTutorialHint* hint) { this->fireWeaponHint = hint; }
     void SetStartBoostHint(ButtonTutorialHint* hint) { this->startBoostHint = hint; }
+    void SetDoBoostHint(ButtonTutorialHint* hint)    { this->doBoostHint = hint; }
+    void SetHoldBoostHint(ButtonTutorialHint* hint)  { this->holdBoostHint = hint; }
         
 private:
     GameDisplay* display;
@@ -63,14 +66,15 @@ private:
     ButtonTutorialHint* shootBallHint;
     ButtonTutorialHint* fireWeaponHint;
     ButtonTutorialHint* startBoostHint;
-
+    ButtonTutorialHint* doBoostHint;
+    ButtonTutorialHint* holdBoostHint;
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
 };
 
 inline void TutorialEventsListener::BallShotEvent(const GameBall& shotBall) {
     UNUSED_PARAMETER(shotBall);
-    this->shootBallHint->Unshow(0.0, 1.0);
+    this->shootBallHint->Unshow(0.0, 0.5);
 }
 
 inline void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block) {

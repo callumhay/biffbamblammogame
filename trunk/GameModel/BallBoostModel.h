@@ -27,13 +27,16 @@ public:
     enum BulletTimeState { NotInBulletTime, BulletTimeFadeIn, BulletTime, BulletTimeFadeOut };
     
     static const int TOTAL_NUM_BOOSTS = 3;
+    static const double DEFAULT_BULLET_TIME_DURATION;
 
     static const float MIN_TIME_DIALATION_FACTOR;
     static const float INV_MIN_TIME_DIALATION_FACTOR;
 
     static const double BULLET_TIME_FADE_IN_SECONDS;
     static const double BULLET_TIME_FADE_OUT_SECONDS;
-    static const double BULLET_TIME_MAX_DURATION_SECONDS;
+
+    static double BULLET_TIME_MAX_DURATION_SECONDS;
+    static void SetMaxBulletTimeDuration(double seconds);
 
     BallBoostModel(GameModel* gameModel);
     ~BallBoostModel();
@@ -84,6 +87,11 @@ private:
         
     DISALLOW_COPY_AND_ASSIGN(BallBoostModel);
 };
+
+inline void BallBoostModel::SetMaxBulletTimeDuration(double seconds) {
+    assert(seconds > 0.0);
+    BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS = seconds;
+}
 
 /**
  * Gets the multiplier of the current dT per tick of the game - this can add a 'bullet-time'

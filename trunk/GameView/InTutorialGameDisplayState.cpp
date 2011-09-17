@@ -23,7 +23,12 @@ DisplayState(display), renderPipeline(display), tutorialListener(new TutorialEve
 
     // Disable the paddle release timer for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(false);
+    // Make the boost time longer for the tutorial
+    BallBoostModel::SetMaxBulletTimeDuration(4.5);
     
+    // Set the life HUD to display an infinite number of lives
+    this->display->GetAssets()->GetLifeHUD()->ToggleInfiniteLivesDisplay(true);
+
 	// Clear up any stuff to an initial state in cases where things might still 
 	// be set unchanged from a previously loaded game
     this->display->GetModel()->SetPauseState(GameModel::NoPause);
@@ -42,6 +47,8 @@ InTutorialGameDisplayState::~InTutorialGameDisplayState() {
     // Re-enable any unusual stuff that was disabled for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(true);
     PlayerPaddle::SetEnablePaddleRelease(true);
+    BallBoostModel::SetMaxBulletTimeDuration(BallBoostModel::DEFAULT_BULLET_TIME_DURATION);
+    this->display->GetAssets()->GetLifeHUD()->ToggleInfiniteLivesDisplay(false);
 
     // Clean up all the tutorial hints
     for (std::vector<TutorialHint*>::iterator iter = this->tutorialHints.begin();
@@ -78,7 +85,7 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
          iter != this->tutorialHints.end(); ++iter) {
         TutorialHint* hint = *iter;
         hint->Draw(this->display->GetCamera());
-        hint->Tick(dT);
+        hint->Tick(dT / this->display->GetModel()->GetTimeDialationFactor());
     }
 
     glPopMatrix();
@@ -192,7 +199,8 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     // TODO ?
 
     // Tutorial hints for boosting
-    ButtonTutorialHint* startingToBoostHint = new ButtonTutorialHint(tutorialAssets, "Boost Mode");
+    ButtonTutorialHint* startingToBoostHint = new ButtonTutorialHint(tutorialAssets, "");
+    startingToBoostHint->SetActionName("Boost Mode = Hold ", false);
     startingToBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     startingToBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
     startingToBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - startingToBoostHint->GetWidth()) / 2.0f,
@@ -201,9 +209,19 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->tutorialListener->SetStartBoostHint(startingToBoostHint);
     this->tutorialHints.push_back(startingToBoostHint);
 
+    ButtonTutorialHint* holdBoostHint = new ButtonTutorialHint(tutorialAssets, "");
+    holdBoostHint->SetActionName("Hold and Move ", false);
+    holdBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
+    holdBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
+    holdBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - holdBoostHint->GetWidth()) / 2.0f,
+        camera.GetWindowHeight() - 100.0f);
+
+    this->tutorialListener->SetHoldBoostHint(holdBoostHint);
+    this->tutorialHints.push_back(holdBoostHint);
+
     /*
     ????ButtonTutorialHint* boostDirectionHint = new ButtonTutorialHint(tutorialAssets, "Boost");
-
+    */
 
     ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "Boost");
 
@@ -217,9 +235,11 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     buttonColours.push_back(Colour(1,1,1));
     buttonColours.push_back(Colour(1,1,1));
 
-    whileInBoostTimeHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
-    whileInBoostTimeHint->SetMouseButton(GameViewConstants::RightMouseButton, "RMB");
-    whileInBoostTimeHint->SetTopLeftCorner((camera.GetWindowWidth() - whileInBoostTimeHint->GetWidth() - 100.0f),
-        whileInBoostTimeHint->GetHeight() + 100.0f);
-    */
+    doBoostHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+    doBoostHint->SetMouseButton(GameViewConstants::RightMouseButton, "RMB");
+    doBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - doBoostHint->GetWidth()) / 2.0f,
+        doBoostHint->GetHeight() + 100.0f);
+
+    this->tutorialListener->SetDoBoostHint(doBoostHint);
+    this->tutorialHints.push_back(doBoostHint);
 }
