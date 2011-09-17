@@ -31,6 +31,8 @@ public:
 	LivesLeftHUD();
 	~LivesLeftHUD();
 
+    void ToggleInfiniteLivesDisplay(bool infiniteLivesOn);
+
 	void Reinitialize();
 	void LivesLost(int numLives);
 	void LivesGained(int numLives);
@@ -58,9 +60,15 @@ private:
 
 	int currNumLivesLeft;
 	Texture *ballLifeHUDTex;
+    bool infiniteLivesOn;
 
 	void InitIdleColourInterpolations();
 
     DISALLOW_COPY_AND_ASSIGN(LivesLeftHUD);
 };
+
+inline void LivesLeftHUD::ToggleInfiniteLivesDisplay(bool infiniteLivesOn) {
+    this->infiniteLivesOn = infiniteLivesOn;
+}
+
 #endif

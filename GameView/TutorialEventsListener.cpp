@@ -17,7 +17,7 @@
 
 TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
-shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL) {
+shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), doBoostHint(NULL), holdBoostHint(NULL) {
     assert(display != NULL);
 }
 
@@ -31,9 +31,9 @@ void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pres
         case GameControl::LeftButtonAction:
         case GameControl::RightButtonAction:
             if (!this->movePaddleHintUnshown) {
-                this->movePaddleHint->Unshow(0.0, 1.0);
+                this->movePaddleHint->Unshow(0.0, 0.5);
                 this->movePaddleHintUnshown = true;
-                this->shootBallHint->Show(1.0, 1.0);
+                this->shootBallHint->Show(0.5, 0.5);
             }
             break;
 
@@ -68,7 +68,7 @@ void TutorialEventsListener::BallBoostGainedEvent() {
     if (boostModel == NULL) { return; }
     
     if (boostModel->GetNumAvailableBoosts() == 1) {
-        this->startBoostHint->Show(0.0, 1.0);   
+        this->startBoostHint->Show(0.0, 0.5);   
     }
 }
 
@@ -80,16 +80,33 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
             break;
 
         case BallBoostModel::BulletTimeFadeIn:
-            this->startBoostHint->Unshow(0.0, 0.5);
-        case BallBoostModel::BulletTime:
             // Show the hint for telling the user how to boost the ball while in bullet time
-            
+            this->startBoostHint->Unshow(0.0, 0.5);
+            this->doBoostHint->Show(0.0, 0.5);
+            this->holdBoostHint->Show(0.0, 0.5);
+        case BallBoostModel::BulletTime:
+
             break;
 
         case BallBoostModel::BulletTimeFadeOut:
+            this->doBoostHint->Unshow(0.0, 0.5);
+            this->holdBoostHint->Unshow(0.0, 0.5);
             break;
         default:
             assert(false);
             break;
+    }
+}
+
+void TutorialEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAfter) {
+    if (livesLeftBefore != livesLeftAfter) {
+
+        // We don't let the player lose or gain any lives - i.e., they sustain the starting
+        // number of lives throughout the tutorial
+        GameModel* gameModel = this->display->GetModel();
+
+        // Since the call to "SetLivesLeft" causes this event to be called again we need
+        // to tell the method not to signal any further events
+	    gameModel->SetLivesLeft(livesLeftBefore, false);
     }
 }

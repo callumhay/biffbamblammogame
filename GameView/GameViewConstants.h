@@ -155,6 +155,7 @@ public:
 
 	const char* TEXTURE_CEL_GRADIENT;
 	const char* TEXTURE_NOISE_OCTAVES;
+    const char* TEXTURE_INFINITY_CHAR;
 
 	const char* TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY;
 

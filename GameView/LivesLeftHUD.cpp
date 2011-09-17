@@ -19,14 +19,15 @@
 
 #include "../ResourceManager.h"
 
-const Colour LivesLeftHUD::ELEMENT_BASE_COLOURS[] = { Colour(1.0f, 0.0f, 0.0f), Colour(1.0f, 0.5f, 0.0f),
-																										  Colour(1.0f, 1.0f, 0.0f), Colour(0.6f, 1.0f, 0.0f),
-																											Colour(0.0f, 1.0f, 0.0f), Colour(0.0f, 1.0f, 1.0f),
-																											Colour(0.0f, 0.5f, 1.0f), Colour(0.0f, 0.0f, 1.0f),
-																											Colour(0.3f, 0.0f, 1.0f), Colour(0.7f, 0.0f, 1.0f), 
-																											Colour(1.0f, 0.0f, 1.0f)};
+const Colour LivesLeftHUD::ELEMENT_BASE_COLOURS[] = {
+    Colour(1.0f, 0.0f, 0.0f), Colour(1.0f, 0.5f, 0.0f),
+    Colour(1.0f, 1.0f, 0.0f), Colour(0.6f, 1.0f, 0.0f),
+    Colour(0.0f, 1.0f, 0.0f), Colour(0.0f, 1.0f, 1.0f),
+    Colour(0.0f, 0.5f, 1.0f), Colour(0.0f, 0.0f, 1.0f),
+    Colour(0.3f, 0.0f, 1.0f), Colour(0.7f, 0.0f, 1.0f), 
+    Colour(1.0f, 0.0f, 1.0f)};
 
-LivesLeftHUD::LivesLeftHUD() : currNumLivesLeft(0), ballLifeHUDTex(NULL) {
+LivesLeftHUD::LivesLeftHUD() : currNumLivesLeft(0), ballLifeHUDTex(NULL), infiniteLivesOn(false) {
 	// Load ball life HUD texture
 	this->ballLifeHUDTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear);
 	assert(this->ballLifeHUDTex != NULL);
@@ -98,6 +99,7 @@ void LivesLeftHUD::Reinitialize() {
 	this->destructionColourAnimations.clear();
 	this->destructionFallAnimations.clear();
 	this->currNumLivesLeft = 0;
+    this->infiniteLivesOn  = false;
 }
 
 /**
@@ -105,6 +107,7 @@ void LivesLeftHUD::Reinitialize() {
  * cause the HUD to update itself appropriately.
  */
 void LivesLeftHUD::LivesLost(int numLives) {
+    if (infiniteLivesOn) { return; }
 
 	// Prompt animations and destruction of lives in the HUD
 	int livesLeftAfter = this->currNumLivesLeft - numLives;
@@ -137,6 +140,7 @@ void LivesLeftHUD::LivesLost(int numLives) {
  * cause the HUD to update itself appropriately.
  */
 void LivesLeftHUD::LivesGained(int numLives) {
+    if (infiniteLivesOn) { return; }
 
 	// Prompt animations and creation of lives in the HUD
 	int livesLeftAfter = this->currNumLivesLeft + numLives;

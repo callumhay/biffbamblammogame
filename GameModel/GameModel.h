@@ -254,7 +254,7 @@ public:
     int GetLivesAtStartOfLevel() const {
         return this->livesAtStartOfLevel;
     }
-	void SetLivesLeft(int lives) {
+	void SetLivesLeft(int lives, bool triggerEvent = true) {
 		assert(lives >= 0);
 
 		int livesLeftBefore = this->currLivesLeft;
@@ -264,7 +264,7 @@ public:
 			this->currLivesLeft = GameModelConstants::GetInstance()->MAX_LIVES_LEFT;
 		}
 		
-		if (livesLeftBefore != this->currLivesLeft) {
+		if (livesLeftBefore != this->currLivesLeft && triggerEvent) {
 			// EVENT: Number of lives just changed
 			GameEventManager::Instance()->ActionLivesChanged(livesLeftBefore, this->currLivesLeft);
 		}
