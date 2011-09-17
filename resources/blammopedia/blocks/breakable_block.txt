@@ -1,3 +1,0 @@
-Name: Basic Breakable Block
-DisplayTexture: breakable_block_256x128.png
-Desc: Some Description for the basic breakable block goes here.

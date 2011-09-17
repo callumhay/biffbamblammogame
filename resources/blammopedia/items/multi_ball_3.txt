@@ -1,3 +1,0 @@
-Name: Multi-ball (3)
-ItemTexture: multiball3_powerup256x128.jpg
-Desc: Your ball will instantly triplicate, and in a fit of confusion, the resulting spawn will fire off in random directions from the original ball.

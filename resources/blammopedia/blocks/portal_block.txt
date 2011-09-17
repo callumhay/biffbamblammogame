@@ -1,3 +1,0 @@
-Name: Portal Block
-DisplayTexture: portal_block_256x128.png
-Desc: Some Description for the Portal block goes here.

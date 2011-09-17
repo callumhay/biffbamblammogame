@@ -1,5 +1,0 @@
-Name: Fast Ball
-ItemTexture: fastball_powerdown256x128.jpg
-HUDOutlineTexture: fastball_timer_hud256x128.png
-HUDFillTexture: ballspeed_timer_fill_hud256x128.png
-Desc: The ultimate test of hand-eye coordination, this power-down gives the ball a sudden hankering for velocity, making it real tough to handle. It's like playing dodge ball with that absurdly fast and nimble kid in your class that you used to hate, only you won't get a detention for actually hitting it.

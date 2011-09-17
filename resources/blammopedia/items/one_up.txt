@@ -1,3 +1,0 @@
-Name: 1-UP
-ItemTexture: 1up_powerup256x128.jpg
-Desc: This awesome power-up gives you an extra life so you can lose it, and not feel so bad about it.
