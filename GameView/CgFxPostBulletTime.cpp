@@ -79,17 +79,17 @@ void CgFxPostBulletTime::UpdateBulletTimeState(const BallBoostModel& boostModel)
             break;
 
         case BallBoostModel::BulletTime:
-            this->desaturateFrac.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_DESATURATION);
+            this->desaturateFrac.SetLerp(BallBoostModel::GetMaxBulletTimeDuration(), MAX_DESATURATION);
 
             // We diminish the total blur if there's more than one ball and they're far apart from each other
             if (boostModel.GetCurrentNumBalls() > 1 &&
                 std::max<float>(boostModel.GetBallZoomBounds().GetWidth(), boostModel.GetBallZoomBounds().GetHeight()) > 2*LevelPiece::PIECE_WIDTH) {
-                this->sampleDistance.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_MULTIBALL_SAMPLE_DISTANCE);
-                this->sampleStrength.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_MULTIBALL_SAMPLE_STRENGTH);
+                this->sampleDistance.SetLerp(BallBoostModel::GetMaxBulletTimeDuration(), MAX_MULTIBALL_SAMPLE_DISTANCE);
+                this->sampleStrength.SetLerp(BallBoostModel::GetMaxBulletTimeDuration(), MAX_MULTIBALL_SAMPLE_STRENGTH);
             }
             else {
-                this->sampleDistance.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_SAMPLE_DISTANCE);
-                this->sampleStrength.SetLerp(BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS, MAX_SAMPLE_STRENGTH);
+                this->sampleDistance.SetLerp(BallBoostModel::GetMaxBulletTimeDuration(), MAX_SAMPLE_DISTANCE);
+                this->sampleStrength.SetLerp(BallBoostModel::GetMaxBulletTimeDuration(), MAX_SAMPLE_STRENGTH);
             }
             break;
 

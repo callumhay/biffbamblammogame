@@ -17,9 +17,11 @@
 #include "TutorialEventsListener.h"
 #include "TutorialHintListeners.h"
 #include "ButtonTutorialHint.h"
+#include "LivesLeftHUD.h"
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
-DisplayState(display), renderPipeline(display), tutorialListener(new TutorialEventsListener(display)) {
+DisplayState(display), renderPipeline(display),
+tutorialListener(new TutorialEventsListener(display)), boostCountdownHUD() {
 
     // Disable the paddle release timer for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(false);
@@ -39,6 +41,8 @@ DisplayState(display), renderPipeline(display), tutorialListener(new TutorialEve
 
     // Register the tutorial listener (for knowing when to show and hide tutorial tips)
     GameEventManager::Instance()->RegisterGameEventListener(this->tutorialListener);
+
+    this->boostCountdownHUD.Reset();
 
 	debug_opengl_state();
 }
@@ -67,7 +71,7 @@ InTutorialGameDisplayState::~InTutorialGameDisplayState() {
 
 void InTutorialGameDisplayState::RenderFrame(double dT) {
 	this->renderPipeline.RenderFrame(dT);
-
+    
     // Update and draw tutorial graphics hints
     glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
 
@@ -81,12 +85,15 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
 	glPushMatrix();
 	glLoadIdentity();
 
+    double actualDt = dT / this->display->GetModel()->GetTimeDialationFactor();
     for (std::vector<TutorialHint*>::iterator iter = this->tutorialHints.begin();
          iter != this->tutorialHints.end(); ++iter) {
         TutorialHint* hint = *iter;
         hint->Draw(this->display->GetCamera());
-        hint->Tick(dT / this->display->GetModel()->GetTimeDialationFactor());
+        hint->Tick(actualDt);
     }
+
+    this->boostCountdownHUD.Draw(this->display->GetCamera(), *this->display->GetModel(), actualDt);
 
     glPopMatrix();
 

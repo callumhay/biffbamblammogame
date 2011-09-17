@@ -220,7 +220,7 @@ void GameAssets::DrawGameBallsPreEffects(double dT, GameModel& gameModel, const 
     // currently is and always have a bit of alpha so the player can always
     // see the boost streaks behind the ball(s)
     float alpha = 0.15f + (0.5f * static_cast<float>(gameModel.GetBallBoostModel()->GetTotalBulletTimeElapsed() / 
-                                                     BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS));
+                                                     BallBoostModel::GetMaxBulletTimeDuration()));
 
     // Generate a screen aligned matrix from the current camera
     static Matrix4x4 screenAlignedMatrix;

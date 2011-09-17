@@ -59,7 +59,8 @@ private:
 	std::map<int, AnimationLerp<float> > destructionFallAnimations;
 
 	int currNumLivesLeft;
-	Texture *ballLifeHUDTex;
+	Texture* ballLifeHUDTex;
+    Texture* infinityTex;
     bool infiniteLivesOn;
 
 	void InitIdleColourInterpolations();
