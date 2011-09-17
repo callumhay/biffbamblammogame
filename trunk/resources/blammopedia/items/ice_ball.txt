@@ -1,5 +1,0 @@
-Name: Ice Ball
-ItemTexture: iceball_powerneutral_256x128.jpg
-HUDOutlineTexture: iceball_timer_hud256x128.png
-HUDFillTexture: iceball_timer_fill_hud256x128.png
-Desc: TODO

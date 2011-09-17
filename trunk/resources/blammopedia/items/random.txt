@@ -1,3 +1,0 @@
-Name: Random
-ItemTexture: random_powerneutral_256x128.jpg
-Desc: The-ever-cryptic-utterly-impossible-to-decipher-and-completely-fun-to-gamble-your-life-on random item. The only item this cannot be is another random item, since that could be infinitely recursive and infinite recursion is the enemy of all things, namely computer programs.

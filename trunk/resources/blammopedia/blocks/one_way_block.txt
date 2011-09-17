@@ -1,3 +1,0 @@
-Name: One-way Block
-DisplayTexture: one_way_block_256x128.png
-Desc: Some Description for the One-way block goes here.

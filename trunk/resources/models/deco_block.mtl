@@ -1,7 +1,0 @@
-newmtl DecoBlockMaterial
-Kd 0.90000 0.90000 0.90000
-Ks 0.50000 0.50000 0.50000
-Ns 100
-map_Kd resources/textures/deco_block256x256.jpg
-type phong
-geomtype fg

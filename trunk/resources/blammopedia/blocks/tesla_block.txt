@@ -1,3 +1,0 @@
-Name: Tesla Block
-DisplayTexture: tesla_block_256x128.png
-Desc: Some Description for the Tesla block goes here.

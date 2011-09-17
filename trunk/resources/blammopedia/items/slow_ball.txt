@@ -1,5 +1,0 @@
-Name: Slow Ball
-ItemTexture: slowball_powerup256x128.jpg
-HUDOutlineTexture: slowball_timer_hud256x128.png
-HUDFillTexture: ballspeed_timer_fill_hud256x128.png
-Desc: This power-up actually speeds up reality to make it appear as though your ball is moving a whole lot slower. It can be stacked up to two times resulting in a rrrrrreeeeeeaaallllllyyyy slllllooooowwww bbbbaaallllll.

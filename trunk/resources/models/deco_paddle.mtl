@@ -1,8 +1,0 @@
-newmtl PaddleMaterial
-Ka 0.000000 0.000000 0.000000
-Kd 1.000000 1.000000 1.000000
-Ks 0.600000 0.600000 0.600000
-Ns 80
-map_Kd resources/textures/deco_block256x256.jpg
-type phong
-geomtype fg

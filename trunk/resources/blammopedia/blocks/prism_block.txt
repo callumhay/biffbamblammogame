@@ -1,3 +1,0 @@
-Name: Basic Prism Block
-DisplayTexture: prism_block_256x128.png
-Desc: Some Description for the Prism block goes here.

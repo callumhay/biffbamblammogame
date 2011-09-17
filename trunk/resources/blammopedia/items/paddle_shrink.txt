@@ -1,3 +1,0 @@
-Name: Paddle Shrink
-ItemTexture: paddleshrink_powerdown256x128.jpg
-Desc: When activated, the paddle will decrease in size, making it harder to hit balls (your goal in life). This item can stack up to three times resulting in a paddle of microscopic proportions.
