@@ -39,6 +39,8 @@ public:
 
 	void DisplaySizeChanged(int width, int height);
 	DisplayState::DisplayStateType GetType() const;
+    
+    void CleanUpReturnToDisplayState();
 
 private:
 
@@ -66,8 +68,7 @@ private:
 	void InitTopMenu();
 
 	void ResumeTheGame();
-    void CleanUpReturnToDisplayState();
-
+    
 	// Top Level Menu Handler class
 	class TopMenuEventHandler : public GameMenuEventHandler {
 	private:

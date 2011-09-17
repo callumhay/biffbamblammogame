@@ -1213,6 +1213,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\BoostCountdownHUD.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CrosshairLaserHUD.h"
 						>
 					</File>
@@ -1242,6 +1246,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\BallReleaseHUD.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\BoostCountdownHUD.cpp"
 						>
 					</File>
 					<File

@@ -15,6 +15,7 @@
 
 // State includes
 #include "InGameDisplayState.h"
+#include "InGameMenuState.h"
 #include "MainMenuDisplayState.h"
 
 // Model includes
@@ -22,9 +23,9 @@
 #include "../GameModel/GameEventManager.h"
 
 #ifdef _DEBUG
-bool GameDisplay::drawDebugBounds					= false;
-bool GameDisplay::drawDebugLightGeometry	= false;
-bool GameDisplay::detachedCamera					= false;
+bool GameDisplay::drawDebugBounds           = false;
+bool GameDisplay::drawDebugLightGeometry    = false;
+bool GameDisplay::detachedCamera            = false;
 #endif
 
 const int GameDisplay::MAX_FRAMERATE						= 500;
@@ -46,6 +47,13 @@ GameDisplay::~GameDisplay() {
 	// Delete any current state
 	assert(this->currState != NULL);
 	if (this->currState != NULL) {
+
+        // Annoying: If the game is exited abruptly from the in-game menu then we need
+        // to make sure we clean up the game state that it temporarily stores as well
+        if (this->currState->GetType() == DisplayState::InGameMenu) {
+            static_cast<InGameMenuState*>(this->currState)->CleanUpReturnToDisplayState();
+        }
+
 		delete this->currState;
 		this->currState = NULL;
 	}

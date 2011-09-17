@@ -1071,7 +1071,7 @@ void GameTransformMgr::StartBulletTimeCamAnimation(double dT, GameModel& gameMod
         timeVals.push_back(0.0);
         timeVals.push_back(BallBoostModel::BULLET_TIME_FADE_IN_SECONDS);
         timeVals.push_back(BallBoostModel::BULLET_TIME_FADE_IN_SECONDS +
-                           BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS);
+                           BallBoostModel::GetMaxBulletTimeDuration());
         std::vector<Orientation3D> orientVals;
         orientVals.push_back(this->currCamOrientation);
         orientVals.push_back(Orientation3D(translation1, this->currCamOrientation.GetRotation()));

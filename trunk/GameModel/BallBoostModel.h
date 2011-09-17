@@ -35,8 +35,9 @@ public:
     static const double BULLET_TIME_FADE_IN_SECONDS;
     static const double BULLET_TIME_FADE_OUT_SECONDS;
 
-    static double BULLET_TIME_MAX_DURATION_SECONDS;
+    
     static void SetMaxBulletTimeDuration(double seconds);
+    static double GetMaxBulletTimeDuration();
 
     BallBoostModel(GameModel* gameModel);
     ~BallBoostModel();
@@ -70,6 +71,7 @@ public:
 
 private:
     static const float BOOST_CHARGE_TIME_SECONDS;
+    static double BULLET_TIME_MAX_DURATION_SECONDS;
 
     BulletTimeState currState;                  // The current bullet time state
     AnimationLerp<float> timeDialationAnim;     // Animation lerp for time dialation, changes based on state
@@ -91,6 +93,10 @@ private:
 inline void BallBoostModel::SetMaxBulletTimeDuration(double seconds) {
     assert(seconds > 0.0);
     BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS = seconds;
+}
+
+inline double BallBoostModel::GetMaxBulletTimeDuration() {
+    return BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS;
 }
 
 /**

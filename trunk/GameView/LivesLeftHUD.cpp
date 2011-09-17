@@ -27,10 +27,18 @@ const Colour LivesLeftHUD::ELEMENT_BASE_COLOURS[] = {
     Colour(0.3f, 0.0f, 1.0f), Colour(0.7f, 0.0f, 1.0f), 
     Colour(1.0f, 0.0f, 1.0f)};
 
-LivesLeftHUD::LivesLeftHUD() : currNumLivesLeft(0), ballLifeHUDTex(NULL), infiniteLivesOn(false) {
+LivesLeftHUD::LivesLeftHUD() : currNumLivesLeft(0), ballLifeHUDTex(NULL), 
+infinityTex(NULL), infiniteLivesOn(false) {
+
 	// Load ball life HUD texture
-	this->ballLifeHUDTex = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear);
+	this->ballLifeHUDTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear);
 	assert(this->ballLifeHUDTex != NULL);
+
+    // Load infinity character texture
+    this->infinityTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_INFINITY_CHAR, Texture::Trilinear);
+    assert(this->infinityTex != NULL);
 
 	this->InitIdleColourInterpolations();
 }
@@ -40,6 +48,8 @@ LivesLeftHUD::~LivesLeftHUD() {
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballLifeHUDTex);
     UNUSED_VARIABLE(success);
 	assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->infinityTex);
+    assert(success);
 }
 
 void LivesLeftHUD::InitIdleColourInterpolations() {
@@ -217,7 +227,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 	// For each of the lives we draw a ball in the upper-left corner of the screen
 	for (int i = 0; i < this->currNumLivesLeft; i++) {
 
-		const BallElementAnimations currAnimationType = this->elementCurrAnimationTypes[i];
+		const BallElementAnimations& currAnimationType = this->elementCurrAnimationTypes[i];
 
 		const Colour* currColour = &this->idleColourAnimations[i].GetInterpolantValue();
 		const float& currSize = this->idleSizeAnimations[i].GetInterpolantValue();
@@ -303,6 +313,34 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 	}
 
 	this->ballLifeHUDTex->UnbindTexture();
+
+    // If the infinite lives toggle is on then we draw the infinity character
+    // over the top-most ball in the HUD
+    if (this->infiniteLivesOn) {
+        int lastNumLivesIdx = this->currNumLivesLeft-1;
+        const BallElementAnimations& currAnimationType = this->elementCurrAnimationTypes[lastNumLivesIdx];
+        if (currAnimationType == IdleAnimation) {
+            float currSize = this->idleSizeAnimations[lastNumLivesIdx].GetInterpolantValue();
+            currSize *= 0.75f;
+            currXPos -= LivesLeftHUD::ELEMENT_OVERLAP;
+            
+            glPushMatrix();
+		    glTranslatef(currXPos, currYPos, 0.0f);
+            glScalef(currSize, currSize, currSize);
+            
+            this->infinityTex->BindTexture();
+		    glColor4f(1, 1, 1, 1);
+            glBegin(GL_QUADS);
+		    glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+		    glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+		    glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+		    glTexCoord2i(0, 1); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+		    glEnd();
+            this->infinityTex->UnbindTexture();
+
+            glPopMatrix();
+        }
+    }
 
 	// Pop modelview matrix
 	glPopMatrix();
