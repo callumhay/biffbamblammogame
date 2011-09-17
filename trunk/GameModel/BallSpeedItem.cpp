@@ -122,7 +122,7 @@ void BallSpeedItem::Deactivate() {
 		assert(currBall != NULL);
         currBall->TurnOffBoost();
         currBall->TurnOffImpulse();
-		currBall->SetSpeed(GameBall::NormalSpeed);
+		currBall->SetSpeed(GameBall::GetNormalSpeed());
 	}
 
 	this->isActive = false;

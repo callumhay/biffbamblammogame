@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 
-		model = new GameModel();
+		model = new GameModel(initCfgOptions.GetDifficulty());
 		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
 
 		// Initialize all controllers that we can...

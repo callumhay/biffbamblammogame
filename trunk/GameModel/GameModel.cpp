@@ -26,7 +26,7 @@
 #include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
 
-GameModel::GameModel() : 
+GameModel::GameModel(const GameModel::Difficulty& initDifficulty) : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0), livesAtStartOfLevel(0),
 pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false) {
@@ -57,6 +57,8 @@ nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progres
 	// Initialize paddle and the first ball
 	this->playerPaddle = new PlayerPaddle();
 	this->balls.push_back(new GameBall());
+
+    this->SetDifficulty(initDifficulty);
 }
 
 GameModel::~GameModel() {
@@ -211,6 +213,52 @@ GameWorld* GameModel::GetWorldByName(const std::string& name) {
         }
     }
     return NULL;
+}
+
+void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
+    switch (difficulty) {
+        case GameModel::EasyDifficulty:
+            // Disable the paddle release timer
+            PlayerPaddle::SetEnablePaddleReleaseTimer(false);
+            // Make the boost time longer
+            BallBoostModel::SetMaxBulletTimeDuration(4.0);
+            // Make ball speed slower
+            GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED - 1.33f);
+
+            // Make chance of nice item drops higher (done automatically in GameItemFactory)
+
+            break;
+        
+        case GameModel::MediumDifficulty:
+            // Enable the paddle release timer
+            PlayerPaddle::SetEnablePaddleReleaseTimer(true);
+            // Make the boost time typical
+            BallBoostModel::SetMaxBulletTimeDuration(2.0);
+            // Make ball speed normal
+            GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED);
+
+            // Make item drops normal random (done automatically in GameItemFactory)
+
+            break;
+        
+        case GameModel::HardDifficulty:
+            // Enable the paddle release timer
+            PlayerPaddle::SetEnablePaddleReleaseTimer(true);
+            // Make the boost time short
+            BallBoostModel::SetMaxBulletTimeDuration(1.25);
+            // Make ball speed faster
+            GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + 1.5f);
+            
+            // Make chance of not-so-nice item drops higher (done automatically in GameItemFactory)
+
+            break;
+
+        default:
+            assert(false);
+            return;
+
+    }
+    this->difficulty = difficulty;
 }
 
 /**

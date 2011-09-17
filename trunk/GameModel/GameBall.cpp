@@ -14,6 +14,17 @@
 #include "InCannonBallState.h"
 #include "CannonBlock.h"
 
+const float GameBall::DEFAULT_NORMAL_SPEED = 15.33f;
+
+float GameBall::ZeroSpeed    = 0.0f;
+float GameBall::NormalSpeed  = GameBall::DEFAULT_NORMAL_SPEED;
+
+float GameBall::SlowestSpeed          = GameBall::NormalSpeed - 5.5f;
+float GameBall::SlowSpeed             = GameBall::NormalSpeed - 2.5f;
+float GameBall::FastSpeed             = GameBall::NormalSpeed + 5.0f;
+float GameBall::FastestSpeed          = GameBall::NormalSpeed + 9.5f;
+float GameBall::FastestSpeedWithBoost = GameBall::NormalSpeed + 14.0f;
+
 // Default radius of the ball - for defining its boundries
 const float GameBall::DEFAULT_BALL_RADIUS = 0.5f;
 
@@ -39,6 +50,15 @@ const float GameBall::GRAVITY_ACCELERATION  = 8.0f;
 const float GameBall::BOOST_DECCELERATION   = BOOST_TEMP_SPD_INCREASE_AMT;
 
 GameBall* GameBall::currBallCamBall = NULL;
+
+void GameBall::SetNormalSpeed(float speed) {
+    NormalSpeed            = speed;
+    SlowestSpeed           = GameBall::NormalSpeed - 5.5f;
+    SlowSpeed              = GameBall::NormalSpeed - 2.5f;
+    FastSpeed              = GameBall::NormalSpeed + 5.0f;
+    FastestSpeed           = GameBall::NormalSpeed + 9.5f;
+    FastestSpeedWithBoost  = GameBall::NormalSpeed + 14.0f;
+}
 
 GameBall::GameBall() : bounds(Point2D(0.0f, 0.0f), DEFAULT_BALL_RADIUS), currDir(Vector2D(0.0f, 0.0f)), currSpeed(GameBall::ZeroSpeed),
 currType(GameBall::NormalBall), rotationInDegs(0.0f, 0.0f, 0.0f), currScaleFactor(1), currSize(NormalSize), ballballCollisionsDisabledTimer(0.0),

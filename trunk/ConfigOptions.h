@@ -13,39 +13,19 @@
 #define __CONFIGOPTIONS_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../GameModel/GameModel.h"
 #include "ResourceManager.h"
+
 
 /**
  * Stores data for initializing video, audio, etc. options,
  * created by the resource manager on loading the game's .ini file.
  */
 class ConfigOptions {
-private:
-	// Filepath to the game's .ini file
-	static const char* INI_FILEPATH;
-
-	// The variable (initialization string) names for the various values in the .ini file
-	static const char* WINDOW_HEIGHT_VAR;
-	static const char* WINDOW_WIDTH_VAR;
-	static const char* WINDOW_FULLSCREEN_VAR;
-	static const char* WINDOW_VSYNC_VAR;
-	static const char* VOLUME_VAR; 
-
-	// Default values for each initialization variable
-	static const int  DEFAULT_WINDOW_WIDTH;
-	static const int  DEFAULT_WINDOW_HEIGHT;
-	static const bool DEFAULT_FULLSCREEN_TOGGLE;
-	static const bool DEFAULT_VSYNC_TOGGLE;
-	static const int  DEFAULT_VOLUME;
-
-	// Variables for storing the configuration values in memory
-	int windowWidth, windowHeight;
-	bool fullscreenIsOn;
-	bool vSyncIsOn;
-	int volume;
-
-	static ConfigOptions* ReadConfigOptionsFromFile();
-	bool WriteConfigOptionsToFile() const;
+	// Befriend the reading and writing functions in the resource manager - we want the
+	// resource manager to be able to use this class easily
+	friend ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile);
+	friend bool ResourceManager::WriteConfigurationOptionsToFile(const ConfigOptions& configOptions);
 
 public:
 	// Boundry values for each variable
@@ -69,6 +49,7 @@ public:
 	inline bool GetIsFullscreenOn() const { return this->fullscreenIsOn; }
 	inline bool GetIsVSyncOn() const { return this->vSyncIsOn; }
 	inline int GetVolume() const { return this->volume; }
+    inline GameModel::Difficulty GetDifficulty() const { return this->difficulty; }
 
 	// Setter functions for all the configuration options
 	inline void SetWindowWidth(int width) { 
@@ -86,11 +67,46 @@ public:
 		assert(volume >= MIN_VOLUME && volume <= MAX_VOLUME);
 		this->volume = std::max<int>(MIN_VOLUME, std::min<int>(MAX_VOLUME, volume));
 	}
+    inline void SetDifficulty(GameModel::Difficulty difficulty) {
+        this->difficulty = difficulty;
+    }
 
-	// Befriend the reading and writing functions in the resource manager - we want the
-	// resource manager to be able to use this class easily
-	friend ConfigOptions ResourceManager::ReadConfigurationOptions(bool forceReadFromFile);
-	friend bool ResourceManager::WriteConfigurationOptionsToFile(const ConfigOptions& configOptions);
+private:
+	// Filepath to the game's .ini file
+	static const char* INI_FILEPATH;
+
+	// The variable (initialization string) names for the various values in the .ini file
+	static const char* WINDOW_HEIGHT_VAR;
+	static const char* WINDOW_WIDTH_VAR;
+	static const char* WINDOW_FULLSCREEN_VAR;
+	static const char* WINDOW_VSYNC_VAR;
+	static const char* VOLUME_VAR;
+    static const char* DIFFICULTY_VAR;
+
+	// Default values for each initialization variable
+	static const int  DEFAULT_WINDOW_WIDTH;
+	static const int  DEFAULT_WINDOW_HEIGHT;
+	static const bool DEFAULT_FULLSCREEN_TOGGLE;
+	static const bool DEFAULT_VSYNC_TOGGLE;
+	static const int  DEFAULT_VOLUME;
+    static const GameModel::Difficulty DEFAULT_DIFFICULTY;
+
+	// Variables for storing the configuration values in memory
+	int windowWidth, windowHeight;
+	bool fullscreenIsOn;
+	bool vSyncIsOn;
+	int volume;
+    GameModel::Difficulty difficulty;
+
+	static ConfigOptions* ReadConfigOptionsFromFile();
+	bool WriteConfigOptionsToFile() const;
+
+    static const char* EASY_DIFFICULTY_STR;
+    static const char* MEDIUM_DIFFICULTY_STR;
+    static const char* HARD_DIFFICULTY_STR;
+
+    static bool DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr);
+    static bool StringToDifficulty(const std::string& difficultyStr, GameModel::Difficulty& difficulty);
 };
 
 #endif

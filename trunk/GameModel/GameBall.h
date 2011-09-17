@@ -33,15 +33,13 @@ class GameBall {
 	friend class InCannonBallState;
 
 public:
-    //static const float ZeroSpeed;
-    //static const float SlowestSpeed;
-    //static const float SlowSpeed;
-    //static const float NormalSpeed;
-    //static const float FastSpeed;
-    //static const float FastestSpeed;
+    static const float DEFAULT_NORMAL_SPEED;
+    static void SetNormalSpeed(float speed);
+    static float GetZeroSpeed() { return GameBall::ZeroSpeed; }
+    static float GetNormalSpeed() { return GameBall::NormalSpeed; }
 
-	enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 10, SlowSpeed = 13, NormalSpeed = 16, 
-                     FastSpeed = 21, FastestSpeed = 26, FastestSpeedWithBoost = 30 };
+	//enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 10, SlowSpeed = 13, NormalSpeed = 16, 
+    //                 FastSpeed = 21, FastestSpeed = 26, FastestSpeedWithBoost = 30 };
 	enum BallSize  { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 	enum BallType  { NormalBall = 0x00000000, UberBall = 0x00000001,  InvisiBall = 0x00000002, GhostBall = 0x00000004, 
 		             GraviBall = 0x00000008,  CrazyBall = 0x00000010, FireBall = 0x00000020, IceBall = 0x00000040,
@@ -292,7 +290,7 @@ public:
 	}
 
 	// Set the velocity of the ball; (0, 1) is up and (1, 0) is right
-	void SetVelocity(const BallSpeed &magnitude, const Vector2D& dir) {
+	void SetVelocity(float magnitude, const Vector2D& dir) {
 		this->currDir = dir;
 		// If the ball is travelling directly sideways we should nudge it a bit up,
 		// just to make sure it doesn't go sideways forever
@@ -301,10 +299,6 @@ public:
 			this->currDir.Normalize();
 		}
 
-		this->SetSpeed(magnitude);
-	}
-	void SetVelocity(float magnitude, const Vector2D& dir) {
-		this->currDir = dir;
 		this->SetSpeed(magnitude);
 	}
 
@@ -352,6 +346,14 @@ public:
     bool IsBallBoosting() const;
 
 private:
+    static float ZeroSpeed;
+    static float SlowestSpeed;
+    static float SlowSpeed;
+    static float NormalSpeed;
+    static float FastSpeed;
+    static float FastestSpeed;
+    static float FastestSpeedWithBoost;
+
     static GameBall* currBallCamBall;	// The current ball that has the ball camera active on it, if none then NULL
 	BallState* currState;
     AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour

@@ -345,6 +345,19 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
     //this->controllerSensitivityItem->SetConstantChangeFeedback(true);
     //this->optionsControllerSensitivityIndex = this->optionsSubMenu->AddMenuItem(this->controllerSensitivityItem);
 
+	subMenuLabelSm.SetText("Game Difficulty");
+	subMenuLabelLg.SetText("Game Difficulty");
+    std::vector<std::string> difficultyOptions;
+    difficultyOptions.reserve(3);
+    difficultyOptions.push_back("Easy");
+    difficultyOptions.push_back("Medium");
+    difficultyOptions.push_back("Hard");
+
+    this->difficultyItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, difficultyOptions);
+    this->difficultyItem->SetSelectedItem(static_cast<int>(this->cfgOptions.GetDifficulty()));
+	this->difficultyItem->SetEventHandler(this->itemsEventHandler);
+	this->optionsDifficultyIndex = this->optionsSubMenu->AddMenuItem(this->difficultyItem);
+
 	// Add an option for getting out of the menu
 	subMenuLabelSm.SetText("Back");
 	subMenuLabelLg.SetText("Back");
@@ -787,6 +800,13 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 			this->mainMenuState->cfgOptions.SetIsVSyncOn(false);
 		}
 	}
+    else if (itemIndex == this->mainMenuState->optionsDifficultyIndex) {
+        int currSelectionIdx = this->mainMenuState->difficultyItem->GetSelectedItemIndex();
+        GameModel::Difficulty difficultyToSet = static_cast<GameModel::Difficulty>(currSelectionIdx);
+
+        this->mainMenuState->cfgOptions.SetDifficulty(difficultyToSet);
+        this->mainMenuState->display->GetModel()->SetDifficulty(difficultyToSet);
+    }
 	else if (itemIndex == this->mainMenuState->optionsResolutionIndex) {
 		std::string currSelectionStr = this->mainMenuState->resolutionMenuItem->GetSelectedItemText();
 

@@ -463,7 +463,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 	float reflSpd = b.GetSpeed();
 	
 	// This should NEVER happen
-	if (reflSpd == GameBall::ZeroSpeed) {
+	if (reflSpd == GameBall::GetZeroSpeed()) {
 		assert(false);
 		return;
 	}

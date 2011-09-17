@@ -18,20 +18,27 @@ const char* ConfigOptions::WINDOW_WIDTH_VAR       = "window_width";
 const char* ConfigOptions::WINDOW_FULLSCREEN_VAR  = "fullscreen";
 const char* ConfigOptions::WINDOW_VSYNC_VAR       = "vsync";
 const char* ConfigOptions::VOLUME_VAR             = "volume";
+const char* ConfigOptions::DIFFICULTY_VAR         = "difficulty";
 
 const int ConfigOptions::MIN_WINDOW_SIZE	= 480;
 const int ConfigOptions::MAX_WINDOW_SIZE	= 2048;
 const int ConfigOptions::MIN_VOLUME         = 0;
 const int ConfigOptions::MAX_VOLUME         = 100;
 
-const int  ConfigOptions::DEFAULT_WINDOW_WIDTH          = 1024;
-const int  ConfigOptions::DEFAULT_WINDOW_HEIGHT         = 768;
-const bool ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE		= false;
-const bool ConfigOptions::DEFAULT_VSYNC_TOGGLE          = false;
-const int  ConfigOptions::DEFAULT_VOLUME                = ConfigOptions::MAX_VOLUME;
+const int  ConfigOptions::DEFAULT_WINDOW_WIDTH                  = 1024;
+const int  ConfigOptions::DEFAULT_WINDOW_HEIGHT                 = 768;
+const bool ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE		        = false;
+const bool ConfigOptions::DEFAULT_VSYNC_TOGGLE                  = false;
+const int  ConfigOptions::DEFAULT_VOLUME                        = ConfigOptions::MAX_VOLUME;
+const GameModel::Difficulty ConfigOptions::DEFAULT_DIFFICULTY   = GameModel::MediumDifficulty;
+
+const char* ConfigOptions::EASY_DIFFICULTY_STR      = "easy";
+const char* ConfigOptions::MEDIUM_DIFFICULTY_STR    = "medium";
+const char* ConfigOptions::HARD_DIFFICULTY_STR      = "hard";
 
 ConfigOptions::ConfigOptions() : windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT),
-fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), volume(ConfigOptions::DEFAULT_VOLUME) {
+fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), volume(ConfigOptions::DEFAULT_VOLUME),
+difficulty(DEFAULT_DIFFICULTY) {
 }
 
 /**
@@ -79,15 +86,17 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 	std::string currStr;	// stores the currently read string from file
 	char skipEquals;			// temporary variable for throwing away the '='
 
+#define READ_IN_FILE_FAIL(inFile, valueToRead) if (!(inFile >> valueToRead)) { inFile.close(); return cfgOptions; }
+
 	while (inFile >> currStr) {
 		
 		// Window width config
 		if (currStr == ConfigOptions::WINDOW_WIDTH_VAR) {
-			inFile >> skipEquals;
+			READ_IN_FILE_FAIL(inFile, skipEquals);
 
 			// Read the window width
 			int tempWinWidth = ConfigOptions::DEFAULT_WINDOW_WIDTH;
-			inFile >> tempWinWidth;
+			READ_IN_FILE_FAIL(inFile, tempWinWidth);
 
 			if (tempWinWidth <= ConfigOptions::MAX_WINDOW_SIZE && tempWinWidth >= ConfigOptions::MIN_WINDOW_SIZE) {
 				cfgOptions->windowWidth = tempWinWidth;
@@ -95,11 +104,11 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 		}
 		// Window height config
 		else if (currStr == ConfigOptions::WINDOW_HEIGHT_VAR) {
-			inFile >> skipEquals;
+			READ_IN_FILE_FAIL(inFile, skipEquals);
 
 			// Read the window width
 			int tempWinHeight = ConfigOptions::DEFAULT_WINDOW_HEIGHT;
-			inFile >> tempWinHeight;
+			READ_IN_FILE_FAIL(inFile, tempWinHeight);
 
 			if (tempWinHeight <= ConfigOptions::MAX_WINDOW_SIZE && tempWinHeight >= ConfigOptions::MIN_WINDOW_SIZE) {
 				cfgOptions->windowHeight = tempWinHeight;
@@ -107,11 +116,11 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 		}
 		// Fullscreen config
 		else if (currStr == ConfigOptions::WINDOW_FULLSCREEN_VAR) {
-			inFile >> skipEquals;
+			READ_IN_FILE_FAIL(inFile, skipEquals);
 
 			// Read whether the window is fullscreen or not
 			int isFullscreen = ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE ? 1 : 0;
-			inFile >> isFullscreen;
+			READ_IN_FILE_FAIL(inFile, isFullscreen);
 
 			if (isFullscreen == 0) {
 				cfgOptions->fullscreenIsOn = false;
@@ -122,7 +131,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 		}
 		// Vertical Sync config
 		else if (currStr == ConfigOptions::WINDOW_VSYNC_VAR) {
-			inFile >> skipEquals;
+			READ_IN_FILE_FAIL(inFile, skipEquals);
 
 			// Read in whether the frames are synced with the monitor
 			int isVSynced = ConfigOptions::DEFAULT_VSYNC_TOGGLE ? 1 : 0;
@@ -136,17 +145,33 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 			}
 		}
 		else if (currStr == ConfigOptions::VOLUME_VAR) {
-			inFile >> skipEquals;
+			READ_IN_FILE_FAIL(inFile, skipEquals);
 
 			// Read in the sound/music volume for the game
 			int volume = ConfigOptions::DEFAULT_VOLUME;
-			inFile >> volume;
+			READ_IN_FILE_FAIL(inFile, volume);
 			cfgOptions->volume = std::max<int>(ConfigOptions::MIN_VOLUME, std::min<int>(ConfigOptions::MAX_VOLUME, volume));
 		}
+        else if (currStr == ConfigOptions::DIFFICULTY_VAR) {
+            READ_IN_FILE_FAIL(inFile, skipEquals);
+            
+            std::string difficultyStr;
+            bool success = ConfigOptions::DifficultyToString(ConfigOptions::DEFAULT_DIFFICULTY, difficultyStr);
+            assert(success);
+
+            READ_IN_FILE_FAIL(inFile, difficultyStr);
+
+            success = ConfigOptions::StringToDifficulty(difficultyStr, cfgOptions->difficulty);
+            if (!success) { 
+                cfgOptions->difficulty = ConfigOptions::DEFAULT_DIFFICULTY;
+            }
+        }
 	}
 	
 	inFile.close();
 	return cfgOptions;
+
+#undef READ_IN_FILE_FAIL
 }
 
 /**
@@ -192,7 +217,50 @@ bool ConfigOptions::WriteConfigOptionsToFile() const {
 	outFile << "// Volume (0 - mute, 100 - loudest)" << std::endl;
 	outFile << ConfigOptions::VOLUME_VAR << " = " << (this->volume) << std::endl;
 	outFile << std::endl;
-		
+	
+    std::string difficultyString;
+    bool success = this->DifficultyToString(this->difficulty, difficultyString);
+    assert(success);
+
+    outFile << "// Difficulty of the game {easy, medium, hard}" << std::endl;
+    outFile << ConfigOptions::DIFFICULTY_VAR << " = " << difficultyString << std::endl;
+
 	outFile.close();
-	return true;
+	return success;
+}
+
+bool ConfigOptions::DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr) {
+    switch (difficulty) {
+        case GameModel::EasyDifficulty:
+            difficultyStr = ConfigOptions::EASY_DIFFICULTY_STR;
+            break;
+        case GameModel::MediumDifficulty:
+            difficultyStr = ConfigOptions::MEDIUM_DIFFICULTY_STR;
+            break;
+        case GameModel::HardDifficulty:
+            difficultyStr = ConfigOptions::HARD_DIFFICULTY_STR;
+            break;
+        default:
+            assert(false);
+            return false;
+    }
+
+    return true;
+}
+
+bool ConfigOptions::StringToDifficulty(const std::string& difficultyStr, GameModel::Difficulty& difficulty) {
+    if (difficultyStr.compare(ConfigOptions::EASY_DIFFICULTY_STR) == 0) {
+        difficulty = GameModel::EasyDifficulty;
+    }
+    else if (difficultyStr.compare(ConfigOptions::MEDIUM_DIFFICULTY_STR) == 0) {
+        difficulty = GameModel::MediumDifficulty;
+    }
+    else if (difficultyStr.compare(ConfigOptions::HARD_DIFFICULTY_STR) == 0) {
+        difficulty = GameModel::HardDifficulty;
+    }
+    else {
+        return false;
+    }
+
+    return true;
 }
