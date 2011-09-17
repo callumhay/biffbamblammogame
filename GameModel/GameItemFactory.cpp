@@ -318,6 +318,30 @@ GameItem::ItemType GameItemFactory::CreateRandomItemTypeForCurrentLevel(GameMode
 	}
 	else {
 		randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size();
+
+        // special stuff: if the game is on easy difficulty and the random item was a 'bad' item
+        // and we have some probability then we look for another item,
+        // vice-versa for hard difficulty
+        switch (gameModel->GetDifficulty()) {
+            case GameModel::EasyDifficulty:
+                if (this->allPowerDownItemTypes.find(allowableItemDrops.at(randomNum)) != this->allPowerDownItemTypes.end()) {
+                    if (Randomizer::GetInstance()->RandomUnsignedInt() % 10 > 3) {
+                        randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size();
+                    }
+                }
+                break;
+
+            case GameModel::HardDifficulty:
+                if (this->allPowerUpItemTypes.find(allowableItemDrops.at(randomNum)) != this->allPowerUpItemTypes.end()) {
+                    if (Randomizer::GetInstance()->RandomUnsignedInt() % 10 > 3) {
+                        randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size();
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
 	}
 
 	return allowableItemDrops.at(randomNum);

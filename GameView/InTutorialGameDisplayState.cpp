@@ -26,7 +26,7 @@ tutorialListener(new TutorialEventsListener(display)), boostCountdownHUD() {
     // Disable the paddle release timer for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(false);
     // Make the boost time longer for the tutorial
-    BallBoostModel::SetMaxBulletTimeDuration(4.5);
+    BallBoostModel::SetMaxBulletTimeDuration(5.0);
     
     // Set the life HUD to display an infinite number of lives
     this->display->GetAssets()->GetLifeHUD()->ToggleInfiniteLivesDisplay(true);

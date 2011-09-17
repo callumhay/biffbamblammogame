@@ -270,7 +270,7 @@ void PlayerPaddle::FireAttachedBall() {
 		else {
 			// The paddle appears to be moving, modify the ball's release velocity
 			// to reflect some of this movement
-			float multiplier = PlayerPaddle::DEFAULT_MAX_SPEED / static_cast<float>(GameBall::NormalSpeed);
+			float multiplier = PlayerPaddle::DEFAULT_MAX_SPEED / static_cast<float>(GameBall::GetNormalSpeed());
 			Vector2D newBallDir = Vector2D::Normalize(ballReleaseDir + multiplier * avgPaddleVel);
 			
 			// and, of course, add some randomness...

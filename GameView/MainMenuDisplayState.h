@@ -77,6 +77,7 @@ private:
 	int optionsResolutionIndex;
 	int optionsSoundVolumeIndex;
     //int optionsControllerSensitivityIndex;
+    int optionsDifficultyIndex;
 
 	// Indents and spacing
 	static const unsigned int MENU_X_INDENT = 50;
@@ -103,6 +104,7 @@ private:
 	SelectionListMenuItem* resolutionMenuItem;
 	SelectionListMenuItem* vSyncMenuItem;
 	AmountScrollerMenuItem* soundVolumeMenuItem;
+    SelectionListMenuItem* difficultyItem;
     //AmountScrollerMenuItem* controllerSensitivityItem;
 
 	AnimationLerp<float> fadeAnimation;	// Animation for fading in/out of the menu screen - represents alpha fade value

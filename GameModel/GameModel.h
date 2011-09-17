@@ -36,7 +36,26 @@ class LevelStartState;
 class PointAward;
 
 class GameModel {
+public:
+	// Pause functionality for the game:
+	// NoPause: no pauses at all in the game model execution.
+	// PauseState: Only the current state is paused - thus if the game is in play no movement of paddle, ball, items, etc. will occur.
+	// PausePaddle: Only pauses the paddle movement, animations, etc.
+	// PauseGame: Pauses the entire game - should be used when the user pauses the game.
+	// AllPause: All possible pauses are active
+	enum PauseType { NoPause = 0x00000000, PauseState = 0x00000001, PausePaddle = 0x00000002, 
+                     PauseGame = 0x80000000, PauseBall = 0x00000004, AllPause = 0xFFFFFFFF };
 
+    
+    // Difficulty of the game:
+    // EasyDifficulty: The game is significantly easier to play - ball moves slower, more boost time, no
+    // paddle timer when releasing the ball
+    // MediumDifficulty: The game is typical difficulty, ball moves normal speed, typical boost time,
+    // there is a paddle timer when releasing the ball
+    // HardDifficulty: The game is quite difficult, ball moves a bit faster than normal, boost time is quite short,
+    // there is a paddle timer when releasing the ball
+    enum Difficulty { EasyDifficulty = 0, MediumDifficulty = 1, HardDifficulty = 2};
+    
 private:
 	GameState* currState;		// The current game state
 	GameState* nextState;
@@ -52,6 +71,9 @@ private:
 	// Current world and level information
 	unsigned int currWorldNum;
 	std::vector<GameWorld*> worlds;
+
+    // Difficulty setting of the game
+    GameModel::Difficulty difficulty;
 
 	// Items that are currently available to be picked up in-game
 	std::list<GameItem*> currLiveItems;
@@ -140,16 +162,7 @@ private:
     void ResetLevelValues(int numLives);
 
 public:
-	// Pause functionality for the game:
-	// NoPause: no pauses at all in the game model execution.
-	// PauseState: Only the current state is paused - thus if the game is in play no movement of paddle, ball, items, etc. will occur.
-	// PausePaddle: Only pauses the paddle movement, animations, etc.
-	// PauseGame: Pauses the entire game - should be used when the user pauses the game.
-	// AllPause: All possible pauses are active
-	enum PauseType { NoPause = 0x00000000, PauseState = 0x00000001, PausePaddle = 0x00000002, 
-                     PauseGame = 0x80000000, PauseBall = 0x00000004, AllPause = 0xFFFFFFFF };
-
-	GameModel();
+    GameModel(const GameModel::Difficulty& initDifficulty);
 	~GameModel();
 
     void IncrementScore(PointAward& pointAward);
@@ -164,7 +177,10 @@ public:
 		}
 		return GameState::NULLStateType;
 	}
-	
+
+    void SetDifficulty(const GameModel::Difficulty& difficulty);
+    const GameModel::Difficulty& GetDifficulty() const { return this->difficulty; }
+
 	// The given next state will become the next state when update state is called
     void SetNextState(const GameState::GameStateType& nextStateType) {
 		if (this->nextState != NULL) {

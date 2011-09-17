@@ -53,9 +53,9 @@ double MultiBallItem::Activate() {
 		ballDir = Vector2D(0, 1);
 	}
 	float ballSpd = affectedBall->GetSpeed();
-	if (ballSpd == GameBall::ZeroSpeed) {
+	if (ballSpd == GameBall::GetZeroSpeed()) {
 		assert(false);
-		ballSpd = GameBall::NormalSpeed;
+		ballSpd = GameBall::GetNormalSpeed();
 	}
 
     // When we copy the ball we also copy all of the item effects that have been applied to that ball,
