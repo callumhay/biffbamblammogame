@@ -168,6 +168,13 @@ public:
     GameModel(const GameModel::Difficulty& initDifficulty);
 	~GameModel();
 
+    bool IsCurrentLevelTheTutorialLevel() const {
+        const GameWorld* world = this->GetCurrentWorld();
+        const GameLevel* level = this->GetCurrentLevel();
+        // Zeroth world, zeroth level == tutorial level
+        return (world->GetWorldIndex() == 0 && level->GetLevelNumIndex() == 0);
+    }
+
     void IncrementScore(PointAward& pointAward);
     //void IncrementScore(std::list<PointAward>& pointAwardsList);
     void IncrementNumInterimBlocksDestroyed(const Point2D& pos) { this->SetNumInterimBlocksDestroyed(this->GetNumInterimBlocksDestroyed()+1, pos); }

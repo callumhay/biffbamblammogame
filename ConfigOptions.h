@@ -71,6 +71,15 @@ public:
         this->difficulty = difficulty;
     }
 
+    static std::vector<std::string> GetDifficultyItems() {
+        std::vector<std::string> difficultyItems;
+        difficultyItems.reserve(3);
+        difficultyItems.push_back("Easy");
+        difficultyItems.push_back("Medium");
+        difficultyItems.push_back("Hard");
+        return difficultyItems;
+    }
+
 private:
 	// Filepath to the game's .ini file
 	static const char* INI_FILEPATH;

@@ -21,6 +21,7 @@ class TextLabel2D;
 
 class OverlayPaneEventHandler {
 public:
+    virtual ~OverlayPaneEventHandler() {}
     virtual void OptionSelected(const std::string& optionText) = 0;
 };
 

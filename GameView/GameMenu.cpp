@@ -210,7 +210,7 @@ void GameMenu::SetCenteredOnScreen(int screenWidth, int screenHeight) {
  * Draw this game menu in its current state.
  */
 void GameMenu::Draw(double dT, int windowWidth, int windowHeight) {
-	Point2D currPos = this->topLeftCorner;
+	
 	GameMenu* subMenu = NULL;
 
 	// In the case of a center alignment we need to know what menu item is the largest
@@ -228,6 +228,9 @@ void GameMenu::Draw(double dT, int windowWidth, int windowHeight) {
 	// Draw the background of the menu
 	this->DrawMenuBackground(dT);
 
+    Point2D currPosItem      = this->topLeftCorner;
+    Point2D currPosIndicator = this->topLeftCorner;
+
 	// Draw the menu items
 	for (size_t i = 0; i < this->menuItems.size(); i++) {
 		GameMenuItem* currItem = this->menuItems[i];
@@ -236,7 +239,8 @@ void GameMenu::Draw(double dT, int windowWidth, int windowHeight) {
 			case GameMenu::LeftJustified:
 				break;
 			case GameMenu::CenterJustified:
-				currPos = Point2D(this->topLeftCorner[0] + maxHalfWidth - (0.5f * currItem->GetWidth()), currPos[1]);
+				currPosItem      = Point2D(this->topLeftCorner[0] + maxHalfWidth - (0.5f * currItem->GetWidth(false)), currPosItem[1]);
+                currPosIndicator = Point2D(this->topLeftCorner[0] + maxHalfWidth - (0.5f * currItem->GetWidth()), currPosIndicator[1]);
 				break;
 			default:
 				assert(false);
@@ -254,15 +258,18 @@ void GameMenu::Draw(double dT, int windowWidth, int windowHeight) {
 			}
 			else {
 				// The item has not been activated
-				this->DrawSelectionIndicator(dT, currPos, *currItem);
+				this->DrawSelectionIndicator(dT, currPosIndicator, *currItem);
 			}
 		}
 		else {
 			currItem->SetTextColour(this->idleColour);
 		}
 		
-		this->DrawMenuItem(dT, currPos, *currItem, windowWidth, windowHeight);
-		currPos = currPos - Vector2D(0, currItem->GetHeight() + this->GetMenuItemPadding());
+		this->DrawMenuItem(dT, currPosItem, *currItem, windowWidth, windowHeight);
+
+        Vector2D diff(0, currItem->GetHeight() + this->GetMenuItemPadding());
+		currPosItem = currPosItem - diff;
+        currPosIndicator = currPosIndicator - diff;
 	}
 	
 	// If there was a submenu then we draw it (this can lead to a nest of menu/submenus)

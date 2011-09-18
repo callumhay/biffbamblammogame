@@ -39,7 +39,7 @@ const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     
 
 LevelCompleteSummaryDisplayState::LevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), waitingForKeyPress(true),
-levelNameLabel(NULL),
+levelNameLabel(NULL), difficultyChoicePane(NULL), difficultyChoiceHandler(NULL),
 levelCompleteLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "Level Complete!"),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "- Press Any Key to Continue -"),
 maxBlocksTextLabel(NULL), itemsAcquiredTextLabel(NULL), levelTimeTextLabel(NULL),
@@ -52,13 +52,29 @@ newHighScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMa
 maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), sparkleTexture(NULL), starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
 starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEffect(1.0f, 1.5f)), gameProgressWasSaved(false) {
     
+    const Camera& camera = this->display->GetCamera();
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
+
+    // Depending on whether the level was the tutorial level or not, we create the difficulty choice pane
+    if (gameModel->IsCurrentLevelTheTutorialLevel()) {
+        this->difficultyChoiceHandler = new DifficultyPaneEventHandler();
+        this->difficultyChoicePane = new DecoratorOverlayPane(this->difficultyChoiceHandler,
+            static_cast<size_t>(camera.GetWindowWidth()*0.8f));
+
+        this->difficultyChoicePane->AddText("Based on your performance we'd recommend you try ???? difficulty for the best playing experience.");
+        this->difficultyChoicePane->AddText("You may select any difficulty you wish if you think this recommendation is lame:");
+        std::list<std::string> options;
+        options.push_back("Easy");
+        options.push_back("Medium");
+        options.push_back("Hard");
+        this->difficultyChoicePane->SetSelectableOptions(options, 1);
+    }
 
     // Save game progress
     this->gameProgressWasSaved = GameProgressIO::SaveGameProgress(gameModel);
 
-    const Camera& camera = this->display->GetCamera();
+    
 
     const Colour smallScoreLabelColour(0.15f, 0.15f, 0.15f);
 
@@ -307,6 +323,14 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
         delete this->starFgEmitters[i];
     }
     this->starFgEmitters.clear();
+
+    if (this->difficultyChoiceHandler != NULL) {
+        delete this->difficultyChoiceHandler;
+        this->difficultyChoiceHandler = NULL;
+        assert(this->difficultyChoicePane != NULL);
+        delete this->difficultyChoicePane;
+        this->difficultyChoicePane = NULL;
+    }
 }
 
 void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
@@ -603,4 +627,10 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
             this->totalTimeFadeIn.ClearLerp();
         }
 	}
+}
+
+// Callback function for when an option is selected in the difficulty pane
+void LevelCompleteSummaryDisplayState::DifficultyPaneEventHandler::OptionSelected(const std::string& optionText) {
+    UNUSED_PARAMETER(optionText);
+    // TODO
 }

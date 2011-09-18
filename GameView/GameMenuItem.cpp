@@ -38,7 +38,8 @@ unsigned int GameMenuItem::GetHeight() const {
 	return this->currLabel->GetHeight();
 }
 
-float GameMenuItem::GetWidth() const {
+float GameMenuItem::GetWidth(bool useMax) const {
+    UNUSED_PARAMETER(useMax);
 	return this->currLabel->GetLastRasterWidth();
 }
 
@@ -112,6 +113,22 @@ previouslySelectedIndex(SelectionListMenuItem::NO_SELECTION), baseLabelStr(lgLab
 SelectionListMenuItem::~SelectionListMenuItem() {
 }
 
+float SelectionListMenuItem::GetWidth(bool useMax) const {
+    if (useMax) {
+        return this->maxWidth;
+    }
+    else {
+        float width = 0.0f;
+        this->currLabel->SetText(this->baseLabelStr);
+        width += this->currLabel->GetLastRasterWidth();
+	    width += 2 * SelectionListMenuItem::INTERIOR_PADDING + 
+		    2 * SelectionListMenuItem::SELECTION_ARROW_WIDTH;
+        this->currLabel->SetText(this->selectionList[this->selectedIndex]);
+        width += this->currLabel->GetLastRasterWidth();
+        return width;
+    }
+}
+
 /**
  * Sets the list of selectable items in this menu item.
  */
@@ -165,7 +182,7 @@ void SelectionListMenuItem::Draw(double dT, const Point2D& topLeftCorner, int wi
 	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(SelectionListMenuItem::SELECTION_ARROW_WIDTH + SelectionListMenuItem::INTERIOR_PADDING, 0.0f);
 
 	// Draw the text for the currently selected item
-	const std::string CURR_SEL_ITEM_STR = this->selectionList[this->selectedIndex];
+	const std::string& CURR_SEL_ITEM_STR = this->selectionList[this->selectedIndex];
 	this->currLabel->SetText(CURR_SEL_ITEM_STR);
 	this->currLabel->SetTopLeftCorner(wiggleTopLeftCorner);
 	this->currLabel->Draw();
@@ -192,34 +209,15 @@ void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, flo
 	// We set the alpha of the arrows based on the text
 	const ColourRGBA& currTextColour = this->currLabel->GetColour();
 
-	glPushAttrib(GL_ENABLE_BIT);
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT | GL_POLYGON_BIT);
 	Camera::PushWindowCoords();
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// Draw the outlines of the arrows
-	glPolygonMode(GL_FRONT, GL_LINE);
-	glLineWidth(2.0f);
-	glColor4f(0.0f, 0.0f, 0.0f, currTextColour.A());
-	
 	glPushMatrix();
+    glLoadIdentity();
 	glTranslatef(topLeftCorner[0] + HALF_ARROW_WIDTH, topLeftCorner[1] - HALF_ARROW_HEIGHT, 0.0f);
-
-	if (isLeftPointing) {
-		glBegin(GL_TRIANGLES);
-			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
-			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
-			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
-		glEnd();
-	}
-	else {
-		glBegin(GL_TRIANGLES);
-			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
-			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
-			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
-		glEnd();
-	}
 
 	// Fill in the arrows
 	glPolygonMode(GL_FRONT, GL_FILL);
@@ -240,6 +238,27 @@ void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, flo
 		glEnd();
 	}
 	
+	// Draw the outlines of the arrows
+	glPolygonMode(GL_FRONT, GL_LINE);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glLineWidth(2.0f);
+	glColor4f(0.0f, 0.0f, 0.0f, currTextColour.A());
+
+	if (isLeftPointing) {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+		glEnd();
+	}
+	else {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+		glEnd();
+	}
+
 	glPopMatrix();
 	Camera::PopWindowCoords();
 	glPopAttrib();
@@ -403,7 +422,7 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
     glPushMatrix();
     glLoadIdentity();
 
-	glPushAttrib(GL_ENABLE_BIT);
+	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT | GL_POLYGON_BIT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
@@ -446,6 +465,8 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 
 	// Black outline around the scroller widget
 	glPolygonMode(GL_FRONT, GL_LINE);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glLineWidth(2.0f);
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 	glBegin(GL_QUADS);
 	glVertex2f(wiggleTopLeftCorner[0], NEW_Y_POS);
@@ -564,30 +585,15 @@ void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, flo
 	// We set the alpha of the arrows based on the text
 	const ColourRGBA& currTextColour = this->currLabel->GetColour();
 	
-	// Draw the outlines of the arrows
-	glPolygonMode(GL_FRONT, GL_LINE);
-	glLineWidth(2.0f);
-	glColor4f(0.0f, 0.0f, 0.0f, currTextColour.A());
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT | GL_POLYGON_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	glPushMatrix();
+    glLoadIdentity();
 	glTranslatef(topLeftCorner[0] + HALF_ARROW_WIDTH, topLeftCorner[1] - HALF_ARROW_HEIGHT, 0.0f);
 	glScalef(multiplier, multiplier, 0.0f);
-
-	// Draw the arrows
-	if (isLeftPointing) {
-		glBegin(GL_TRIANGLES);
-			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
-			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
-			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
-		glEnd();
-	}
-	else {
-		glBegin(GL_TRIANGLES);
-			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
-			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
-			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
-		glEnd();
-	}
 
 	// Fill in the arrows
 	glPolygonMode(GL_FRONT, GL_FILL);
@@ -608,7 +614,28 @@ void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, flo
 		glEnd();
 	}
 	
+	// Draw the outlines of the arrows
+	glPolygonMode(GL_FRONT, GL_LINE);
+	glLineWidth(2.0f);
+	glColor4f(0.0f, 0.0f, 0.0f, currTextColour.A());
+
+	if (isLeftPointing) {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+		glEnd();
+	}
+	else {
+		glBegin(GL_TRIANGLES);
+			glVertex2f(APEX_POINT[0], APEX_POINT[1]);
+			glVertex2f(TOP_POINT[0], TOP_POINT[1]);
+			glVertex2f(BOTTOM_POINT[0], BOTTOM_POINT[1]);
+		glEnd();
+	}
+
 	glPopMatrix();
+    glPopAttrib();
 }
 
 

@@ -102,7 +102,7 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 	this->display->AddStateToQueue(DisplayState::LevelStart);
 
     // Queue the tutorial in-game state if this is the first world and first level of the game...
-    if (world.GetWorldIndex() == 0 && level.GetLevelNumIndex() == 0) {
+    if (this->display->GetModel()->IsCurrentLevelTheTutorialLevel()) {
         this->display->AddStateToQueue(DisplayState::InTutorialGame);
     }
     else {
