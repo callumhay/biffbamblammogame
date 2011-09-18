@@ -15,6 +15,7 @@
 #include "DisplayState.h"
 #include "GameMenu.h"
 #include "InGameRenderPipeline.h"
+#include "../ConfigOptions.h"
 
 class InGameDisplayState;
 
@@ -56,14 +57,20 @@ private:
 
     DisplayState* returnToDisplayState;
 
+	// The configuration options for the game
+	ConfigOptions cfgOptions;
+
 	// Top Level Menu variables
 	GameMenu* topMenu; // Main (top-most/parent) menu (features options "Return to Main Menu", etc.)
 	
     int resumeItem;
     int restartItem;
 	//int audioMenu;
+    int difficultyItem;
 	int returnToMainItem;
 	int exitToDesktopItem;
+
+    SelectionListMenuItem* difficultyMenuItem;
 
 	void InitTopMenu();
 
@@ -85,8 +92,6 @@ private:
 
 	// Event handler for verify menus
 	class VerifyMenuEventHandler : public GameMenuItemEventHandler {
-	private:
-		InGameMenuState* inGameMenuState;
 	public:
 		VerifyMenuEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
 		~VerifyMenuEventHandler() {}
@@ -94,10 +99,25 @@ private:
 		void MenuItemScrolled();
 		void MenuItemEnteredAndSet();
 		void MenuItemCancelled();
+
+	private:
+		InGameMenuState* inGameMenuState;
 	};
+
+    class DifficultyEventHandler : public GameMenuItemEventHandler {
+    public:
+        DifficultyEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
+        void MenuItemScrolled() {};
+        void MenuItemEnteredAndSet() {};
+        void MenuItemCancelled() {};
+
+	private:
+		InGameMenuState* inGameMenuState;
+    };
 
 	TopMenuEventHandler* topMenuEventHandler;
 	VerifyMenuEventHandler* verifyMenuEventHandler;
+    DifficultyEventHandler* difficultyEventHandler;
 
 	DISALLOW_COPY_AND_ASSIGN(InGameMenuState);
 };

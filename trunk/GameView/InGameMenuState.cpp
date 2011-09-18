@@ -22,20 +22,23 @@
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../BlammoEngine/Camera.h"
 
-const Colour InGameMenuState::MENU_ITEM_IDLE_COLOUR		= Colour(1.0f, 1.0f, 1.0f);
-const Colour InGameMenuState::MENU_ITEM_SEL_COLOUR		= Colour(1, 0.65f, 0);
-const Colour InGameMenuState::MENU_ITEM_ACTIVE_COLOUR	= Colour(0.49f, 0.98f, 1.0f);
+const Colour InGameMenuState::MENU_ITEM_IDLE_COLOUR		= Colour(0.75f, 0.75f, 0.75f);
+const Colour InGameMenuState::MENU_ITEM_SEL_COLOUR		= Colour(1, 0.8f, 0);
+const Colour InGameMenuState::MENU_ITEM_ACTIVE_COLOUR	= Colour(1.0f, 1.0f, 1.0f);
 const Colour InGameMenuState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f);
 
 InGameMenuState::InGameMenuState(GameDisplay* display, DisplayState* returnToDisplayState) : 
 DisplayState(display), renderPipeline(display), nextAction(InGameMenuState::Nothing),
-topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL),
+topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL), difficultyEventHandler(NULL),
 returnToDisplayState(returnToDisplayState) {
 
 	// Pause all world sounds
-	this->display->GetAssets()->GetSoundAssets()->PauseWorldSounds();	
+	this->display->GetAssets()->GetSoundAssets()->PauseWorldSounds();
 	// Pause the game itself
 	this->display->GetModel()->SetPause(GameModel::PauseGame);
+
+	// Read the configuration file to figure out how to initialize each of the options
+	this->cfgOptions = ResourceManager::ReadConfigurationOptions(true);
 
 	this->InitTopMenu();
 }
@@ -47,6 +50,8 @@ InGameMenuState::~InGameMenuState() {
 	this->topMenuEventHandler = NULL;
 	delete this->verifyMenuEventHandler;
 	this->verifyMenuEventHandler = NULL;
+    delete this->difficultyEventHandler;
+    this->difficultyEventHandler = NULL;
 }
 
 /**
@@ -184,8 +189,9 @@ void InGameMenuState::InitTopMenu() {
 	const float textScaleFactor = this->display->GetTextScalingFactor();
 
 	// Set up the handlers
-	this->topMenuEventHandler			= new TopMenuEventHandler(this);
-	this->verifyMenuEventHandler	= new VerifyMenuEventHandler(this);
+	this->topMenuEventHandler    = new TopMenuEventHandler(this);
+	this->verifyMenuEventHandler = new VerifyMenuEventHandler(this);
+    this->difficultyEventHandler = new DifficultyEventHandler(this);
 
 	// Setup the top menu attributes
 	this->topMenu = new GameMenu();
@@ -228,6 +234,17 @@ void InGameMenuState::InitTopMenu() {
 	restartLevelItem->SetEventHandler(this->verifyMenuEventHandler);
 
     this->restartItem = this->topMenu->AddMenuItem(restartLevelItem);
+
+    // Difficulty Item...
+    tempLabelSm.SetText("Difficulty");
+	tempLabelLg.SetText("Difficulty");
+    std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
+
+    this->difficultyMenuItem = new SelectionListMenuItem(tempLabelSm, tempLabelLg, difficultyOptions);
+    this->difficultyMenuItem->SetSelectedItem(static_cast<int>(this->cfgOptions.GetDifficulty()));
+    this->difficultyMenuItem->SetEventHandler(this->difficultyEventHandler);
+
+    this->difficultyItem = this->topMenu->AddMenuItem(this->difficultyMenuItem); 
 
 	// The exit/return to main menu item has a verify menu...
 	tempLabelSm.SetText("Return to Main Menu");
@@ -275,7 +292,23 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemActivatedEvent(int itemIn
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
-	UNUSED_PARAMETER(itemIndex);
+    if (itemIndex == this->inGameMenuState->difficultyItem) {
+        int currSelectionIdx = this->inGameMenuState->difficultyMenuItem->GetSelectedItemIndex();
+        GameModel::Difficulty difficultyToSet = static_cast<GameModel::Difficulty>(currSelectionIdx);
+        this->inGameMenuState->cfgOptions.SetDifficulty(difficultyToSet);
+
+        // Don't set the model's difficulty directly if we're currently in the tutorial
+        GameModel* gameModel = this->inGameMenuState->display->GetModel();
+        if (!gameModel->IsCurrentLevelTheTutorialLevel()) {
+            gameModel->SetDifficulty(difficultyToSet);
+        }
+    }
+    else {
+        return;
+    }
+
+    // A configuration option has changed - rewrite the configuration file to accomodate the change
+    ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->inGameMenuState->cfgOptions);
 }
 
 void InGameMenuState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {

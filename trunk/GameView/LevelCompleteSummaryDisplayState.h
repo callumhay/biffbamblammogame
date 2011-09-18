@@ -13,6 +13,7 @@
 #define __LEVELCOMPLETESUMMARYDISPLAYSTATE_H__
 
 #include "DisplayState.h"
+#include "DecoratorOverlayPane.h"
 
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
@@ -102,6 +103,13 @@ private:
     ESPParticleRotateEffector starFgRotator;
     ESPParticleScaleEffector starFgPulser;
 
+    class DifficultyPaneEventHandler : public OverlayPaneEventHandler {
+    public:
+        void OptionSelected(const std::string& optionText);
+    };
+    DifficultyPaneEventHandler* difficultyChoiceHandler;
+    DecoratorOverlayPane* difficultyChoicePane;
+
     void DrawLevelNameLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawLevelCompleteLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawStars(double dT, float currYPos, float screenWidth, float screenHeight);
@@ -134,8 +142,12 @@ inline DisplayState::DisplayStateType LevelCompleteSummaryDisplayState::GetType(
 }
 
 inline void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
-    UNUSED_PARAMETER(pressedButton);
-    this->AnyKeyWasPressed();
+    if (this->difficultyChoicePane != NULL) {
+        this->difficultyChoicePane->ButtonPressed(pressedButton);
+    }
+    else {
+        this->AnyKeyWasPressed();
+    }
 }
 
 inline void LevelCompleteSummaryDisplayState::MousePressed(const GameControl::MouseButton& pressedButton) {

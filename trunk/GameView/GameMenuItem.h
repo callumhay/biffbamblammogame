@@ -67,7 +67,7 @@ public:
 	}
 
 	unsigned int GetHeight() const;
-	virtual float GetWidth() const;
+	virtual float GetWidth(bool useMax = true) const;
 	
 	const TextLabel2D* GetCurrLabel() const {
 		return this->currLabel;
@@ -128,7 +128,7 @@ public:
 
 	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
-	float GetWidth() const { return this->maxWidth; }
+    float GetWidth(bool useMax) const;
 	void Activate();
 
 private:
@@ -173,7 +173,7 @@ public:
 	void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
-	float GetWidth() const { return this->maxWidth; }
+    float GetWidth(bool useMax) const { UNUSED_PARAMETER(useMax); return this->maxWidth; }
 
 private:
 	static const float INTERIOR_PADDING_TEXT_ARROWS;

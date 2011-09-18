@@ -347,11 +347,7 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 
 	subMenuLabelSm.SetText("Game Difficulty");
 	subMenuLabelLg.SetText("Game Difficulty");
-    std::vector<std::string> difficultyOptions;
-    difficultyOptions.reserve(3);
-    difficultyOptions.push_back("Easy");
-    difficultyOptions.push_back("Medium");
-    difficultyOptions.push_back("Hard");
+    std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
 
     this->difficultyItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, difficultyOptions);
     this->difficultyItem->SetSelectedItem(static_cast<int>(this->cfgOptions.GetDifficulty()));
