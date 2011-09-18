@@ -27,7 +27,7 @@
 #include "../ResourceManager.h"
 
 GameModel::GameModel(const GameModel::Difficulty& initDifficulty) : 
-currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0), livesAtStartOfLevel(0),
+currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0), livesAtStartOfLevel(0), numLivesLostInLevel(0),
 pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false) {
 	
@@ -99,6 +99,7 @@ void GameModel::ResetLevelValues(int numLives) {
     this->maxInterimBlocksDestroyed = 0;
     this->ResetNumAcquiredItems();
     this->ResetLevelTime();
+    
 
 	// Clear up the model
     this->ClearStatusUpdatePieces();
@@ -111,6 +112,7 @@ void GameModel::ResetLevelValues(int numLives) {
     this->ResetScore();
     this->ResetLevelTime();
     this->ResetNumAcquiredItems();
+    this->ResetLivesLostCounter();
 }
 
 /**
@@ -159,6 +161,7 @@ void GameModel::ClearGameState() {
     this->ResetScore();
     this->ResetLevelTime();
     this->ResetNumAcquiredItems();
+    this->ResetLivesLostCounter();
 }
 
 void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum, bool sendNewWorldEvent) {
@@ -405,6 +408,8 @@ void GameModel::BallDied(GameBall* deadBall, bool& stateChanged) {
 	if (this->balls.size() == 1) {
 		// Reset the multiplier
 		this->SetNumInterimBlocksDestroyed(0);
+        // Increment the number of lives lost in the current level
+        this->numLivesLostInLevel++;
 		
 		// Decrement the number of lives left
 		this->SetLivesLeft(this->currLivesLeft-1);
@@ -438,7 +443,7 @@ void GameModel::DoPieceStatusUpdates(double dT) {
 	int32_t statusesToRemove = static_cast<int32_t>(LevelPiece::NormalStatus);
 	bool pieceMustBeRemoved = false;
 	this->doingPieceStatusListIteration = true;	// This makes sure that no other functions try to modify the status update pieces
-																							// when we're currently in the process of doing so
+												// when we're currently in the process of doing so
 
 	for (std::map<LevelPiece*, int32_t>::iterator iter = this->statusUpdatePieces.begin(); iter != this->statusUpdatePieces.end();) {
 		currLevelPiece = iter->first;
