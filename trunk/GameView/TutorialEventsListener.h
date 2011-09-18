@@ -55,6 +55,7 @@ private:
     // Basic values to keep track of part of the game state, used to determine
     // whether certain tutorial hints are shown or not
     int numBlocksDestroyed;
+    int numBallDeaths;
 
     // Flags for showing or not showing certain tutorial hints
     // int numTimesShootHintShown;

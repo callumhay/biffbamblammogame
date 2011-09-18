@@ -1137,6 +1137,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\DecoratorOverlayPane.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\GameMenu.h"
 						>
 					</File>
@@ -1170,6 +1174,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\ButtonTutorialHint.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\DecoratorOverlayPane.cpp"
 						>
 					</File>
 					<File

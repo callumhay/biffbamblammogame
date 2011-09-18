@@ -324,16 +324,18 @@ GameItem::ItemType GameItemFactory::CreateRandomItemTypeForCurrentLevel(GameMode
         // vice-versa for hard difficulty
         switch (gameModel->GetDifficulty()) {
             case GameModel::EasyDifficulty:
+                // 1/4 chance of re-rolling when it's a power-down
                 if (this->allPowerDownItemTypes.find(allowableItemDrops.at(randomNum)) != this->allPowerDownItemTypes.end()) {
-                    if (Randomizer::GetInstance()->RandomUnsignedInt() % 10 > 3) {
+                    if (Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) {
                         randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size();
                     }
                 }
                 break;
 
             case GameModel::HardDifficulty:
+                // 1/4 chance of re-rolling when it's a power-up
                 if (this->allPowerUpItemTypes.find(allowableItemDrops.at(randomNum)) != this->allPowerUpItemTypes.end()) {
-                    if (Randomizer::GetInstance()->RandomUnsignedInt() % 10 > 3) {
+                    if (Randomizer::GetInstance()->RandomUnsignedInt() % 4 == 0) {
                         randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size();
                     }
                 }

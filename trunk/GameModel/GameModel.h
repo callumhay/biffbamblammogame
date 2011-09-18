@@ -85,6 +85,7 @@ private:
     int numStarsAwarded;
 	int numInterimBlocksDestroyed;
     int maxInterimBlocksDestroyed;
+    int numLivesLostInLevel;
 	int currLivesLeft;
     int livesAtStartOfLevel;
     int numGoodItemsAcquired, numNeutralItemsAcquired, numBadItemsAcquired;
@@ -141,8 +142,10 @@ private:
     int GetNumInterimBlocksDestroyed() const { return this->numInterimBlocksDestroyed; }
     void SetMaxConsecutiveBlocksDestroyed(int value) { this->maxInterimBlocksDestroyed = value; }
     int GetCurrentMultiplier() const;
+    int GetNumLivesLostInCurrentLevel() const { return this->numLivesLostInLevel; }
 
     void ResetLevelTime() { this->totalLevelTimeInSeconds = 0; }
+    void ResetLivesLostCounter() { this->numLivesLostInLevel = 0; }
 
     void ResetNumAcquiredItems() {
         this->numGoodItemsAcquired = this->numNeutralItemsAcquired = this->numBadItemsAcquired = 0;
