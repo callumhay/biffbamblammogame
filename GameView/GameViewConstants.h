@@ -229,6 +229,8 @@ public:
 	const Colour PRISM_BLOCK_COLOUR;
 	const Colour LASER_BEAM_COLOUR;
 
+    const Colour TUTORIAL_PANE_COLOUR;
+
     const Colour ACTIVE_POINT_STAR_COLOUR;
     const Colour INACTIVE_POINT_STAR_COLOUR;
 

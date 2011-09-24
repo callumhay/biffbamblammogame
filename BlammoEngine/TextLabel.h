@@ -119,8 +119,8 @@ public:
 	}
 
 	// Obtain the height of this label
-	size_t GetHeight() const {
-		return this->scale * this->font->GetHeight();
+	float GetHeight() const {
+		return this->scale * static_cast<float>(this->font->GetHeight());
 	}
 	float GetLastRasterWidth() const {
 		return this->scale * this->lastRasterWidth;

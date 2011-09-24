@@ -18,6 +18,7 @@
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameProgressIO.h"
+#include "../ConfigOptions.h"
 #include "../ResourceManager.h"
 
 const double LevelCompleteSummaryDisplayState::FADE_OUT_TIME                                 = 0.75;
@@ -36,6 +37,10 @@ const float LevelCompleteSummaryDisplayState::SCORE_LABEL_SIDE_PADDING          
 
 const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND                = 20000;
 const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     = 0.25;
+
+const double LevelCompleteSummaryDisplayState::SHOW_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
+const double LevelCompleteSummaryDisplayState::HIDE_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
+
 
 LevelCompleteSummaryDisplayState::LevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), waitingForKeyPress(true),
@@ -56,25 +61,8 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
 
-    // Depending on whether the level was the tutorial level or not, we create the difficulty choice pane
-    if (gameModel->IsCurrentLevelTheTutorialLevel()) {
-        this->difficultyChoiceHandler = new DifficultyPaneEventHandler();
-        this->difficultyChoicePane = new DecoratorOverlayPane(this->difficultyChoiceHandler,
-            static_cast<size_t>(camera.GetWindowWidth()*0.8f));
-
-        this->difficultyChoicePane->AddText("Based on your performance we'd recommend you try ???? difficulty for the best playing experience.");
-        this->difficultyChoicePane->AddText("You may select any difficulty you wish if you think this recommendation is lame:");
-        std::list<std::string> options;
-        options.push_back("Easy");
-        options.push_back("Medium");
-        options.push_back("Hard");
-        this->difficultyChoicePane->SetSelectableOptions(options, 1);
-    }
-
     // Save game progress
     this->gameProgressWasSaved = GameProgressIO::SaveGameProgress(gameModel);
-
-    
 
     const Colour smallScoreLabelColour(0.15f, 0.15f, 0.15f);
 
@@ -292,6 +280,58 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
 
         this->starBgEmitters.push_back(starBgEmitter);
     }
+
+    // Depending on whether the level was the tutorial level or not, we create the difficulty choice pane
+    if (gameModel->IsCurrentLevelTheTutorialLevel()) {
+        this->difficultyChoiceHandler = new DifficultyPaneEventHandler(this);
+        this->difficultyChoicePane = new DecoratorOverlayPane(this->difficultyChoiceHandler,
+            static_cast<size_t>(camera.GetWindowWidth() * 0.65f),
+            GameViewConstants::GetInstance()->TUTORIAL_PANE_COLOUR);
+
+        // Determine the suggested difficulty level based on how they did in the tutorial...
+        int numStars             = gameModel->GetNumStarsAwarded();
+        int numLivesLost         = gameModel->GetNumLivesLostInCurrentLevel();
+        int maxConsecutiveBlocks = gameModel->GetMaxConsecutiveBlocksDestroyed();
+        //GameModelConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_NUM_BLOCKS;
+
+        GameModel::Difficulty difficulty = GameModel::MediumDifficulty;
+        if (numLivesLost <= 2) {
+            if (numStars >= 3) {
+                if (maxConsecutiveBlocks >= GameModelConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_NUM_BLOCKS) {
+                    if (numLivesLost <= 1) {
+                        difficulty = GameModel::HardDifficulty;
+                    }
+                    else {
+                        difficulty = GameModel::MediumDifficulty;
+                    }
+                }
+                else {
+                    difficulty = GameModel::MediumDifficulty;
+                }
+            }
+            else {
+                if (numLivesLost <= 1) {
+                    difficulty = GameModel::MediumDifficulty;
+                }
+                else {
+                    difficulty = GameModel::EasyDifficulty;
+                }
+            }
+        }
+        else {
+            // They lost more than 2 lives... that's pretty bad
+            difficulty = GameModel::EasyDifficulty;
+        }
+        std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
+        
+        this->difficultyChoicePane->AddText("Based on your performance we'd recommend you try playing on a difficulty setting of...");
+        this->difficultyChoicePane->AddText(difficultyOptions[static_cast<int>(difficulty)], Colour(1, 0.75f, 0.0f), 1.2f);
+        this->difficultyChoicePane->AddText("You may select any difficulty you wish if you think this recommendation is lame:");
+
+        this->difficultyChoicePane->SetSelectableOptions(difficultyOptions, static_cast<int>(difficulty));
+
+        this->difficultyChoicePane->Show(SHOW_DIFFICULTY_CHOICE_PANE_TIME);
+    }
 }
 
 LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
@@ -327,6 +367,7 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
     if (this->difficultyChoiceHandler != NULL) {
         delete this->difficultyChoiceHandler;
         this->difficultyChoiceHandler = NULL;
+
         assert(this->difficultyChoicePane != NULL);
         delete this->difficultyChoicePane;
         this->difficultyChoicePane = NULL;
@@ -340,63 +381,77 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    if (this->waitingForKeyPress) {
-        // Set the score animation value
-        this->scoreValueAnimation.Tick(dT);
-
-        this->levelCompleteTextScaleAnimation.Tick(dT);
-        this->levelCompleteLabel.SetScale(this->levelCompleteTextScaleAnimation.GetInterpolantValue());
-
-        for (size_t i = 0; i < this->starAnimations.size(); i++) {
-            this->starAnimations[i]->Tick(dT);
-        }
-
-        this->totalScoreFlyInAnimation.Tick(dT);
-        this->totalScoreFadeInAnimation.Tick(dT);
-        this->newHighScoreFade.Tick(dT);
-
-        this->maxBlocksFadeIn.Tick(dT);
-        this->numItemsFadeIn.Tick(dT);
-        this->totalTimeFadeIn.Tick(dT);
+    if (this->difficultyChoicePane != NULL) {
+        this->difficultyChoicePane->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
         
-        if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
-            // Animate and draw the "Press any key..." label
-            this->footerColourAnimation.Tick(dT);
-            this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
+        // If the difficulty pane is done, clean it up
+        if (this->difficultyChoicePane->IsFinished()) {
+            delete this->difficultyChoicePane;
+            this->difficultyChoicePane = NULL;
+            delete this->difficultyChoiceHandler;
+            this->difficultyChoiceHandler = NULL;
         }
     }
+    else {
 
-    long currScoreTally = static_cast<long>(this->scoreValueAnimation.GetInterpolantValue());
-    std::string scoreStr = stringhelper::AddNumberCommas(currScoreTally);
-    this->scoreValueLabel.SetText(scoreStr);
+        if (this->waitingForKeyPress) {
+            // Set the score animation value
+            this->scoreValueAnimation.Tick(dT);
 
-    Camera::PushWindowCoords();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+            this->levelCompleteTextScaleAnimation.Tick(dT);
+            this->levelCompleteLabel.SetScale(this->levelCompleteTextScaleAnimation.GetInterpolantValue());
 
-    float yPos = camera.GetWindowHeight() - HEADER_LEVEL_NAME_VERTICAL_PADDING;
-    this->DrawLevelNameLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
-    yPos -= (this->levelCompleteLabel.GetHeight() + HEADER_INBETWEEN_VERTICAL_PADDING + 10);
-    this->DrawLevelCompleteLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
-    yPos -= HEADER_INBETWEEN_VERTICAL_PADDING;
-    this->DrawStars(dT, yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
-    
-    // Draw the various level score statistics
-    yPos -= (STAR_SIZE + HEADER_SCORE_INBETWEEN_VERTICAL_PADDING);
-    this->DrawMaxBlocksLabel(yPos, camera.GetWindowWidth());
-    yPos -= (SCORE_INBETWEEN_VERTICAL_PADDING + 
-        std::max<size_t>(this->maxBlocksTextLabel->GetHeight(), this->maxBlocksValueLabel.GetHeight()));
-    this->DrawNumItemsLabel(yPos, camera.GetWindowWidth());
-    yPos -= (SCORE_INBETWEEN_VERTICAL_PADDING + 
-        std::max<size_t>(this->itemsAcquiredTextLabel->GetHeight(), this->itemsAcquiredValueLabel.GetHeight()));
-    this->DrawTotalTimeLabel(yPos, camera.GetWindowWidth());
-    yPos -= (this->display->GetTextScalingFactor() * FINAL_SCORE_INBETWEEN_VERTICAL_PADDING + 
-        std::max<size_t>(this->levelTimeTextLabel->GetHeight(), this->levelTimeValueLabel.GetHeight()));
+            for (size_t i = 0; i < this->starAnimations.size(); i++) {
+                this->starAnimations[i]->Tick(dT);
+            }
 
-    // Draw the total score
-    this->DrawTotalScoreLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
-   
-    Camera::PopWindowCoords();
+            this->totalScoreFlyInAnimation.Tick(dT);
+            this->totalScoreFadeInAnimation.Tick(dT);
+            this->newHighScoreFade.Tick(dT);
+
+            this->maxBlocksFadeIn.Tick(dT);
+            this->numItemsFadeIn.Tick(dT);
+            this->totalTimeFadeIn.Tick(dT);
+            
+            if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
+                // Animate and draw the "Press any key..." label
+                this->footerColourAnimation.Tick(dT);
+                this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
+            }
+        }
+
+        long currScoreTally = static_cast<long>(this->scoreValueAnimation.GetInterpolantValue());
+        std::string scoreStr = stringhelper::AddNumberCommas(currScoreTally);
+        this->scoreValueLabel.SetText(scoreStr);
+
+        Camera::PushWindowCoords();
+	    glMatrixMode(GL_MODELVIEW);
+	    glLoadIdentity();
+
+        float yPos = camera.GetWindowHeight() - HEADER_LEVEL_NAME_VERTICAL_PADDING;
+        this->DrawLevelNameLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+        yPos -= (this->levelCompleteLabel.GetHeight() + HEADER_INBETWEEN_VERTICAL_PADDING + 10);
+        this->DrawLevelCompleteLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+        yPos -= HEADER_INBETWEEN_VERTICAL_PADDING;
+        this->DrawStars(dT, yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+        
+        // Draw the various level score statistics
+        yPos -= (STAR_SIZE + HEADER_SCORE_INBETWEEN_VERTICAL_PADDING);
+        this->DrawMaxBlocksLabel(yPos, camera.GetWindowWidth());
+        yPos -= (SCORE_INBETWEEN_VERTICAL_PADDING + 
+            std::max<size_t>(this->maxBlocksTextLabel->GetHeight(), this->maxBlocksValueLabel.GetHeight()));
+        this->DrawNumItemsLabel(yPos, camera.GetWindowWidth());
+        yPos -= (SCORE_INBETWEEN_VERTICAL_PADDING + 
+            std::max<size_t>(this->itemsAcquiredTextLabel->GetHeight(), this->itemsAcquiredValueLabel.GetHeight()));
+        this->DrawTotalTimeLabel(yPos, camera.GetWindowWidth());
+        yPos -= (this->display->GetTextScalingFactor() * FINAL_SCORE_INBETWEEN_VERTICAL_PADDING + 
+            std::max<size_t>(this->levelTimeTextLabel->GetHeight(), this->levelTimeValueLabel.GetHeight()));
+
+        // Draw the total score
+        this->DrawTotalScoreLabel(yPos, camera.GetWindowWidth(), camera.GetWindowHeight());
+       
+        Camera::PopWindowCoords();
+    }
 
     if (!this->waitingForKeyPress) {
         // We're no longer waiting for a key press - fade out to white and then switch to the next state
@@ -631,6 +686,39 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
 
 // Callback function for when an option is selected in the difficulty pane
 void LevelCompleteSummaryDisplayState::DifficultyPaneEventHandler::OptionSelected(const std::string& optionText) {
-    UNUSED_PARAMETER(optionText);
-    // TODO
+    std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
+    for (int i = 0; i < static_cast<int>(difficultyOptions.size()); i++) {
+        
+        if (optionText.compare(difficultyOptions[i]) == 0) {
+            // Set the difficulty to the one selected...
+            ConfigOptions cfgOptions = ResourceManager::ReadConfigurationOptions(true);
+           
+            GameModel::Difficulty difficultyToSet = static_cast<GameModel::Difficulty>(i);
+            cfgOptions.SetDifficulty(difficultyToSet);
+            this->summaryState->display->GetModel()->SetDifficulty(difficultyToSet);
+
+            ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(cfgOptions);
+        }
+    }
+}
+
+void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+    if (this->difficultyChoicePane != NULL) {
+        this->difficultyChoicePane->ButtonPressed(pressedButton);
+        
+        if (this->difficultyChoicePane->IsOptionSelectedAndActive()) {
+            this->difficultyChoicePane->Hide(HIDE_DIFFICULTY_CHOICE_PANE_TIME);
+        }
+
+    }
+    else {
+        this->AnyKeyWasPressed();
+    }
+}
+
+void LevelCompleteSummaryDisplayState::MousePressed(const GameControl::MouseButton& pressedButton) {
+	UNUSED_PARAMETER(pressedButton);
+    if (this->difficultyChoicePane == NULL) {
+        this->AnyKeyWasPressed();
+    }
 }
