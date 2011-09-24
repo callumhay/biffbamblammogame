@@ -56,6 +56,9 @@ private:
     static const double POINTS_PER_SECOND;
     static const double PER_SCORE_VALUE_FADE_IN_TIME;
 
+    static const double SHOW_DIFFICULTY_CHOICE_PANE_TIME;
+    static const double HIDE_DIFFICULTY_CHOICE_PANE_TIME;
+
     bool gameProgressWasSaved;
 
     bool waitingForKeyPress;
@@ -105,7 +108,10 @@ private:
 
     class DifficultyPaneEventHandler : public OverlayPaneEventHandler {
     public:
+        DifficultyPaneEventHandler(LevelCompleteSummaryDisplayState* state) : summaryState(state) {}
+        LevelCompleteSummaryDisplayState* summaryState;
         void OptionSelected(const std::string& optionText);
+
     };
     DifficultyPaneEventHandler* difficultyChoiceHandler;
     DecoratorOverlayPane* difficultyChoicePane;
@@ -141,18 +147,5 @@ inline DisplayState::DisplayStateType LevelCompleteSummaryDisplayState::GetType(
     return DisplayState::LevelCompleteSummary;
 }
 
-inline void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
-    if (this->difficultyChoicePane != NULL) {
-        this->difficultyChoicePane->ButtonPressed(pressedButton);
-    }
-    else {
-        this->AnyKeyWasPressed();
-    }
-}
-
-inline void LevelCompleteSummaryDisplayState::MousePressed(const GameControl::MouseButton& pressedButton) {
-	UNUSED_PARAMETER(pressedButton);
-    this->AnyKeyWasPressed();
-}
 
 #endif // __LEVELCOMPLETESUMMARYDISPLAYSTATE_H__

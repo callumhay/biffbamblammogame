@@ -575,11 +575,11 @@ void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, flo
 		multiplier = 1.2f;
 	}
 	const float HALF_ARROW_HEIGHT = arrowHeight / 2.0f;
-	const float HALF_ARROW_WIDTH	= AmountScrollerMenuItem::SCROLLER_ARROW_WIDTH / 2.0f;
+	const float HALF_ARROW_WIDTH  = AmountScrollerMenuItem::SCROLLER_ARROW_WIDTH / 2.0f;
 
 	// Arrow vertices, centered on the origin
-	const Point2D APEX_POINT		= (isLeftPointing ? Point2D(-HALF_ARROW_WIDTH, 0.0f) : Point2D(HALF_ARROW_WIDTH, 0.0f));
-	const Point2D TOP_POINT			= (isLeftPointing ? Point2D(HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT) : Point2D(-HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT));
+	const Point2D APEX_POINT	= (isLeftPointing ? Point2D(-HALF_ARROW_WIDTH, 0.0f) : Point2D(HALF_ARROW_WIDTH, 0.0f));
+	const Point2D TOP_POINT		= (isLeftPointing ? Point2D(HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT) : Point2D(-HALF_ARROW_WIDTH, HALF_ARROW_HEIGHT));
 	const Point2D BOTTOM_POINT	= (isLeftPointing ? Point2D(HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT) : Point2D(-HALF_ARROW_WIDTH, -HALF_ARROW_HEIGHT));
 
 	// We set the alpha of the arrows based on the text

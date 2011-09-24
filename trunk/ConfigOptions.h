@@ -38,8 +38,8 @@ public:
 	~ConfigOptions() {}
 	
 	// Accessor functions for all of the configuration options
-	inline int  GetWindowWidth() const { return this->windowWidth; }
-	inline int  GetWindowHeight() const { return this->windowHeight; }
+	inline int GetWindowWidth() const { return this->windowWidth; }
+	inline int GetWindowHeight() const { return this->windowHeight; }
 	inline std::string GetResolutionString() const { 
 		std::stringstream resolutionStr;
 		resolutionStr << this->windowWidth << " x " << this->windowHeight;
@@ -80,6 +80,9 @@ public:
         return difficultyItems;
     }
 
+    static bool DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr);
+    static bool StringToDifficulty(const std::string& difficultyStr, GameModel::Difficulty& difficulty);
+
 private:
 	// Filepath to the game's .ini file
 	static const char* INI_FILEPATH;
@@ -114,8 +117,6 @@ private:
     static const char* MEDIUM_DIFFICULTY_STR;
     static const char* HARD_DIFFICULTY_STR;
 
-    static bool DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr);
-    static bool StringToDifficulty(const std::string& difficultyStr, GameModel::Difficulty& difficulty);
 };
 
 #endif
