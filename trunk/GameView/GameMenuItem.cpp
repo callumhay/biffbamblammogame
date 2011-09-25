@@ -166,7 +166,7 @@ void SelectionListMenuItem::Draw(double dT, const Point2D& topLeftCorner, int wi
 	Point2D wiggleTopLeftCorner = topLeftCorner + Vector2D(wiggleAmount, 0.0f);
 	this->currLabel->SetText(this->baseLabelStr);
 	this->currLabel->SetTopLeftCorner(wiggleTopLeftCorner);
-	this->currLabel->Draw();
+	this->currLabel->Draw(true);
 
 	// Exit after the base label if there's no item selected
 	if (this->selectedIndex == NO_SELECTION || this->selectionList.size() == 0) {
@@ -185,7 +185,7 @@ void SelectionListMenuItem::Draw(double dT, const Point2D& topLeftCorner, int wi
 	const std::string& CURR_SEL_ITEM_STR = this->selectionList[this->selectedIndex];
 	this->currLabel->SetText(CURR_SEL_ITEM_STR);
 	this->currLabel->SetTopLeftCorner(wiggleTopLeftCorner);
-	this->currLabel->Draw();
+	this->currLabel->Draw(true);
 
 	const float SEL_ITEM_LABEL_WIDTH = this->currLabel->GetLastRasterWidth();
 	wiggleTopLeftCorner = wiggleTopLeftCorner + Vector2D(SEL_ITEM_LABEL_WIDTH + SelectionListMenuItem::INTERIOR_PADDING, 0.0f);
@@ -211,7 +211,7 @@ void SelectionListMenuItem::DrawSelectionArrow(const Point2D& topLeftCorner, flo
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT | GL_POLYGON_BIT);
 	Camera::PushWindowCoords();
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -425,7 +425,7 @@ void AmountScrollerMenuItem::Draw(double dT, const Point2D& topLeftCorner, int w
 	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT | GL_POLYGON_BIT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
     glDisable(GL_TEXTURE_2D);
 
 	// Draw the left pointing scroller arrow
@@ -586,7 +586,7 @@ void AmountScrollerMenuItem::DrawScrollerArrow(const Point2D& topLeftCorner, flo
 	const ColourRGBA& currTextColour = this->currLabel->GetColour();
 	
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT | GL_POLYGON_BIT);
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
@@ -757,6 +757,8 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	const float HALF_ANIM_WIDTH	 = this->verifyMenuBGScaleAnim.GetInterpolantValue() * HALF_VERIFY_MENU_WIDTH;
 	const float HALF_ANIM_HEIGHT = this->verifyMenuBGScaleAnim.GetInterpolantValue() * HALF_VERIFY_MENU_HEIGHT;
 
+    glPushAttrib(GL_ENABLE_BIT);
+
 	// Make world coordinates equal window coordinates
 	Camera::PushWindowCoords();
 
@@ -840,6 +842,8 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	this->optionItemWiggleAnim.Tick(dT);
 	this->verifyMenuBGScaleAnim.Tick(dT);
 	this->verifyMenuBGFadeAnim.Tick(dT);
+
+    glPopAttrib();
 }
 
 void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButton) {

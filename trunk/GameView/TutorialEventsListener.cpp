@@ -17,7 +17,9 @@
 
 TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
-shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), doBoostHint(NULL), holdBoostHint(NULL) {
+boostPopupHintAlreadyShown(false), 
+shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), doBoostHint(NULL), holdBoostHint(NULL),
+boostPopupHint(NULL) {
     assert(display != NULL);
 }
 
@@ -26,6 +28,7 @@ TutorialEventsListener::~TutorialEventsListener() {
 
 
 void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+    
     switch (pressedButton) {
 
         case GameControl::LeftButtonAction:
@@ -40,6 +43,8 @@ void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pres
         default:
             break;
     }
+
+    this->boostPopupHint->ButtonPressed(pressedButton);
 }
 
 void TutorialEventsListener::MousePressed(const GameControl::MouseButton& pressedButton) {
@@ -68,7 +73,13 @@ void TutorialEventsListener::BallBoostGainedEvent() {
     if (boostModel == NULL) { return; }
     
     if (boostModel->GetNumAvailableBoosts() == 1) {
-        this->startBoostHint->Show(0.0, 0.5);   
+        if (this->boostPopupHintAlreadyShown) {
+            this->startBoostHint->Show(0.0, 0.5);
+        }
+        else {
+            this->boostPopupHint->Show(0.0, 1.0);
+            this->boostPopupHintAlreadyShown = true;
+        }
     }
 }
 
@@ -109,4 +120,13 @@ void TutorialEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLef
         // to tell the method not to signal any further events
 	    gameModel->SetLivesLeft(livesLeftBefore, false);
     }
+}
+
+void TutorialEventsListener::AllBallsDeadEvent(int livesLeft) {
+    UNUSED_PARAMETER(livesLeft);
+
+    // If all balls died then we should unshow all the tutorial hints for ball boosting
+    this->startBoostHint->Unshow(0.0, 0.5);
+    this->doBoostHint->Unshow(0.0, 0.5);
+    this->holdBoostHint->Unshow(0.0, 0.5);
 }

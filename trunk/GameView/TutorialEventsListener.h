@@ -17,6 +17,7 @@
 #include "../GameSound/GameSoundAssets.h"
 
 #include "ButtonTutorialHint.h"
+#include "PopupTutorialHint.h"
 
 class GameDisplay;
 
@@ -37,6 +38,7 @@ public:
     void ItemActivatedEvent(const GameItem& item);
     void PaddleWeaponFiredEvent();
     void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
+    void AllBallsDeadEvent(int livesLeft);
 
     void BallBoostGainedEvent();
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
@@ -48,6 +50,8 @@ public:
     void SetStartBoostHint(ButtonTutorialHint* hint) { this->startBoostHint = hint; }
     void SetDoBoostHint(ButtonTutorialHint* hint)    { this->doBoostHint = hint; }
     void SetHoldBoostHint(ButtonTutorialHint* hint)  { this->holdBoostHint = hint; }
+
+    void SetBoostPopupHint(PopupTutorialHint* hint) { this->boostPopupHint = hint; }
         
 private:
     GameDisplay* display;
@@ -61,6 +65,7 @@ private:
     // int numTimesShootHintShown;
     bool movePaddleHintUnshown;
     bool fireWeaponAlreadyShown;
+    bool boostPopupHintAlreadyShown;
 
     // Tutorial hints
     ButtonTutorialHint* movePaddleHint;
@@ -69,6 +74,8 @@ private:
     ButtonTutorialHint* startBoostHint;
     ButtonTutorialHint* doBoostHint;
     ButtonTutorialHint* holdBoostHint;
+
+    PopupTutorialHint* boostPopupHint;
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
 };

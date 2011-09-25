@@ -25,7 +25,7 @@ class TextLabel2D;
 class OverlayPaneEventHandler {
 public:
     virtual ~OverlayPaneEventHandler() {}
-    virtual void OptionSelected(const std::string& optionText) = 0;
+    virtual void OptionSelected(const std::string& optionText) { UNUSED_PARAMETER(optionText); };
 };
 
 class DecoratorOverlayPane {
@@ -34,7 +34,7 @@ public:
     ~DecoratorOverlayPane();
 
     void AddText(const std::string& text, const Colour& colour = Colour(1,1,1), float scale = 1.0f);
-    void AddImage(size_t width, size_t height, Texture* image);
+    void AddImage(size_t width, const Texture* image);
     void SetSelectableOptions(const std::vector<std::string>& options, int defaultIdx);
 
     void Show(double timeInSecs);
@@ -63,12 +63,12 @@ private:
 
     class Image {
     public:
-        Image(size_t topLeftX, size_t topLeftY, size_t width, size_t height, Texture* texture);
-        void Draw(float alpha);
+        Image(int topLeftX, int topLeftY, size_t width, size_t height, const Texture* texture);
+        void Draw(float alpha, float tX, float tY);
     private:
-        size_t topLeftX, topLeftY;
+        int topLeftX, topLeftY;
         size_t width, height;
-        Texture* texture;
+        const Texture* texture;
     };
 
     AnimationLerp<float> fgFadeAnimation;

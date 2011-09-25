@@ -92,11 +92,13 @@ void DecoratorOverlayPane::AddText(const std::string& text, const Colour& colour
     this->currYPos -= newLabel->GetHeight();
 }
 
-void DecoratorOverlayPane::AddImage(size_t width, size_t height, Texture* image) {
+void DecoratorOverlayPane::AddImage(size_t width, const Texture* image) {
     this->currYPos -= ITEM_SPACING;
-    Image* newImage = new Image((this->width - width) / 2.0f, this->currYPos, width, height, image);
+
+    float height = static_cast<float>(width) * (static_cast<float>(image->GetHeight()) / static_cast<float>(image->GetWidth()));
+    Image* newImage = new Image((this->width - width) / 2.0f, this->currYPos, width, static_cast<size_t>(height), image);
     this->images.push_back(newImage);
-    this->currYPos -= height;
+    this->currYPos -= static_cast<int>(height);
 }
 
 void DecoratorOverlayPane::SetSelectableOptions(const std::vector<std::string>& options, int defaultIdx) {
@@ -236,7 +238,7 @@ void DecoratorOverlayPane::Draw(double dT, size_t windowWidth, size_t windowHeig
              iter != this->images.end(); ++iter) {
 
             Image* image = *iter;
-            image->Draw(fgAlpha);
+            image->Draw(fgAlpha, labelXTranslation, labelYTranslation);
         }
         
         this->arrowPulseAnimation.Tick(dT);
@@ -265,8 +267,8 @@ void DecoratorOverlayPane::Draw(double dT, size_t windowWidth, size_t windowHeig
             label->SetAlpha(fgAlpha);
             label->Draw();
             
-            // Draw arrows on either side of the selection...
-            if (static_cast<int>(i) == this->selectedIdx) {
+            // Draw arrows on either side of the selection if there are other selections...
+            if (static_cast<int>(i) == this->selectedIdx && this->selectableOptions.size() > 1) {
                 this->DrawArrow(label->GetTopLeftCorner() - Vector2D(X_OPTION_GAP*0.6f, this->upAndDownAnimation.GetInterpolantValue()), fgAlpha, label->GetHeight(), true);
                 this->DrawArrow(label->GetTopLeftCorner() + Vector2D(label->GetLastRasterWidth() + X_OPTION_GAP*0.6f - label->GetHeight()*0.7f, 
                     - this->upAndDownAnimation.GetInterpolantValue()), fgAlpha, label->GetHeight(), false);
@@ -290,6 +292,13 @@ void DecoratorOverlayPane::ButtonPressed(const GameControl::ActionButton& presse
     // If the user has already selected an option (hit 'enter'), ignore
     // all further input
     if (this->optionActive) {
+        return;
+    }
+
+    // Only let events through if the pane is being shown
+    if (this->fgFadeAnimation.GetInterpolantValue() < 1.0f ||
+        this->bgFadeAnimation.GetInterpolantValue() < 1.0f ||
+        this->scaleAnimation.GetInterpolantValue() < 1.0f) {
         return;
     }
 
@@ -432,9 +441,9 @@ void DecoratorOverlayPane::DrawArrow(const Point2D& topLeftCorner, float alpha,
     glPopAttrib();
 }
 
-DecoratorOverlayPane::Image::Image(size_t topLeftX, size_t topLeftY, 
+DecoratorOverlayPane::Image::Image(int topLeftX, int topLeftY, 
                                    size_t width, size_t height, 
-                                   Texture* texture) :
+                                   const Texture* texture) :
 
 topLeftX(topLeftX), topLeftY(topLeftY), width(width), height(height), texture(texture) {
     assert(texture != NULL);
@@ -442,15 +451,26 @@ topLeftX(topLeftX), topLeftY(topLeftY), width(width), height(height), texture(te
     assert(height > 0);
 }
 
-void DecoratorOverlayPane::Image::Draw(float alpha) {
+void DecoratorOverlayPane::Image::Draw(float alpha, float tX, float tY) {
     glPushMatrix();
-    glTranslatef(this->topLeftX + this->width/2, this->topLeftY - this->height/2, 0.0f);
+    glLoadIdentity();
+    glTranslatef(this->topLeftX + tX + this->width/2, this->topLeftY + tY - this->height/2, 0.0f);
     glScalef(this->width, this->height, 1);
     
+    // Draw the image
     glColor4f(1,1,1,alpha);
     this->texture->BindTexture();
     GeometryMaker::GetInstance()->DrawQuad();
     this->texture->UnbindTexture();
+
+    // Draw an outline to frame the image
+    glPushAttrib(GL_POLYGON_BIT | GL_LINE_BIT);
+    glColor4f(0,0,0,alpha);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glPolygonMode(GL_FRONT, GL_LINE);
+    glLineWidth(1.0f);
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopAttrib();
 
     glPopMatrix();
 }

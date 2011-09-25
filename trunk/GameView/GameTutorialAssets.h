@@ -34,7 +34,11 @@ public:
     const Texture2D* GetKeyboardLongButtonTexture() const;
     const Texture2D* GetLeftMouseButtonTexture() const;
     const Texture2D* GetRightMouseButtonTexture() const;
-        
+    
+    const Texture2D* GetBoostTutorialHUDTexture() const;
+    const Texture2D* GetBoostTutorialDirTexture() const;
+    const Texture2D* GetMultiplierTutorialTexture() const;
+
 private:
     Texture2D* xbox360ButtonTex;
     Texture2D* xbox360AnalogStickTex;
@@ -43,6 +47,10 @@ private:
     Texture2D* keyboardLongButtonTex;
     Texture2D* leftMouseButtonTex;
     Texture2D* rightMouseButtonTex;
+
+    Texture2D* boostTutorialHUDTex;
+    Texture2D* boostTutorialDirTex;
+    Texture2D* multiplierTutorialTex;
 
     void Init();
     void Release();
@@ -76,6 +84,18 @@ inline const Texture2D* GameTutorialAssets::GetLeftMouseButtonTexture() const {
 
 inline const Texture2D* GameTutorialAssets::GetRightMouseButtonTexture() const {
     return this->rightMouseButtonTex;
+}
+
+inline const Texture2D* GameTutorialAssets::GetBoostTutorialHUDTexture() const {
+    return this->boostTutorialHUDTex;
+}
+
+inline const Texture2D* GameTutorialAssets::GetBoostTutorialDirTexture() const {
+    return this->boostTutorialDirTex;
+}
+
+inline const Texture2D* GameTutorialAssets::GetMultiplierTutorialTexture() const {
+    return this->multiplierTutorialTex;
 }
 
 #endif // __GAMETUTORIALASSETS_H__

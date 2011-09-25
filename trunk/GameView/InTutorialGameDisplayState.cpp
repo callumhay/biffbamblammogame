@@ -17,6 +17,7 @@
 #include "TutorialEventsListener.h"
 #include "TutorialHintListeners.h"
 #include "ButtonTutorialHint.h"
+#include "PopupTutorialHint.h"
 #include "LivesLeftHUD.h"
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
@@ -89,8 +90,7 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
     for (std::vector<TutorialHint*>::iterator iter = this->tutorialHints.begin();
          iter != this->tutorialHints.end(); ++iter) {
         TutorialHint* hint = *iter;
-        hint->Draw(this->display->GetCamera());
-        hint->Tick(actualDt);
+        hint->Draw(actualDt, this->display->GetCamera());
     }
 
     this->boostCountdownHUD.Draw(this->display->GetCamera(), *this->display->GetModel(), actualDt);
@@ -226,10 +226,6 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->tutorialListener->SetHoldBoostHint(holdBoostHint);
     this->tutorialHints.push_back(holdBoostHint);
 
-    /*
-    ????ButtonTutorialHint* boostDirectionHint = new ButtonTutorialHint(tutorialAssets, "Boost");
-    */
-
     ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "Boost");
 
     xboxButtonTypes.clear();
@@ -249,4 +245,40 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     this->tutorialListener->SetDoBoostHint(doBoostHint);
     this->tutorialHints.push_back(doBoostHint);
+
+
+    // Pop-up tutorial hints - these pause the game and explain to the user how to play
+    static const float TITLE_TEXT_SCALE = 1.25f;
+    static const float BODY_TEXT_SCALE  = 0.75f;
+    static const size_t POPUP_TUTORIAL_HINT_WIDTH = static_cast<size_t>(camera.GetWindowWidth() * 0.75f);
+
+    GameModel* gameModel = this->display->GetModel();
+    
+    PopupTutorialHint* boostPopupHint  = new PopupTutorialHint(gameModel, POPUP_TUTORIAL_HINT_WIDTH);
+    boostPopupHint->SetListener(new BoostPopupHintListener(startingToBoostHint));
+    DecoratorOverlayPane* boostPopupPane = boostPopupHint->GetPane();
+    boostPopupPane->AddText("Ball-Boosting", Colour(1,1,1), TITLE_TEXT_SCALE);
+    boostPopupPane->AddText(
+        std::string("As the ball remains in play the boost gauge in the top left-hand corner of the screen will fill up."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
+
+    const Texture2D* boostHUDImg = tutorialAssets->GetBoostTutorialHUDTexture();
+    boostPopupPane->AddImage(256, boostHUDImg);
+
+    boostPopupPane->AddText(std::string("Once a boost becomes available it may be used to temporarily slow down time and then direct the ball ") +
+        std::string("to shoot in a particular direction."), Colour(1,1,1), BODY_TEXT_SCALE);
+
+    const Texture2D* boostDirImg = tutorialAssets->GetBoostTutorialDirTexture();
+    boostPopupPane->AddImage(256, boostDirImg);
+
+    boostPopupPane->AddText(std::string("Becareful though: Once a boost is executed, the ball will gain a temporary burst of speed, ") +
+        std::string("which may or may not work to your favour."), Colour(1,1,1), BODY_TEXT_SCALE);
+
+    std::vector<std::string> continueOption;
+    continueOption.reserve(1);
+    continueOption.push_back("Continue");
+    boostPopupPane->SetSelectableOptions(continueOption, 0);
+
+    this->tutorialListener->SetBoostPopupHint(boostPopupHint);
+    this->tutorialHints.push_back(boostPopupHint);
 }
