@@ -42,11 +42,13 @@ void BallReleaseHUD::Draw(double dT, const Camera& camera, const GameModel& game
 
         case BallReleaseHUD::TICKING:
             {
-                assert(gameModel.GetCurrentStateType() == GameState::BallOnPaddleStateType);
                 this->DrawReleaseTimer(camera, gameModel, gameModel.GetPlayerPaddle()->GetCenterPosition(),
                     1.0f, 1.0f, 0.0f, gameModel.GetPercentBallReleaseTimerElapsed());
             
-                if (gameModel.GetPercentBallReleaseTimerElapsed() > 0.8f) {
+                if (gameModel.GetCurrentStateType() != GameState::BallOnPaddleStateType) {
+                    this->SetState(BallReleaseHUD::RELEASED);
+                }
+                else if (gameModel.GetPercentBallReleaseTimerElapsed() > 0.8f) {
                     this->SetState(BallReleaseHUD::ENDING);
                 }
             }

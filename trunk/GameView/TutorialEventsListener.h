@@ -42,6 +42,7 @@ public:
 
     void BallBoostGainedEvent();
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
+    void NumStarsChangedEvent(int oldNumStars, int newNumStars);
 
     // Set methods for various tutorial hints
     void SetMovePaddleHint(ButtonTutorialHint* hint) { this->movePaddleHint = hint; hint->Show(0.0, 0.75); }
@@ -51,7 +52,8 @@ public:
     void SetDoBoostHint(ButtonTutorialHint* hint)    { this->doBoostHint = hint; }
     void SetHoldBoostHint(ButtonTutorialHint* hint)  { this->holdBoostHint = hint; }
 
-    void SetBoostPopupHint(PopupTutorialHint* hint) { this->boostPopupHint = hint; }
+    void SetBoostPopupHint(PopupTutorialHint* hint)      { this->boostPopupHint = hint; }
+    void SetMultiplierPopupHint(PopupTutorialHint* hint) { this->multiplierPopupHint = hint; }
         
 private:
     GameDisplay* display;
@@ -66,6 +68,7 @@ private:
     bool movePaddleHintUnshown;
     bool fireWeaponAlreadyShown;
     bool boostPopupHintAlreadyShown;
+    bool multPopupHintAlreadyShown;
 
     // Tutorial hints
     ButtonTutorialHint* movePaddleHint;
@@ -76,6 +79,7 @@ private:
     ButtonTutorialHint* holdBoostHint;
 
     PopupTutorialHint* boostPopupHint;
+    PopupTutorialHint* multiplierPopupHint;
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
 };

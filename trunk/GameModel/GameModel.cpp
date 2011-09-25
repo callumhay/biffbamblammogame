@@ -862,7 +862,6 @@ void GameModel::IncrementNumAcquiredItems(const GameItem* item) {
  */
 void GameModel::ClearProjectiles() {
     
-
 	for (std::list<Projectile*>::iterator iter = this->projectiles.begin();
          iter != this->projectiles.end(); ++iter) {
 
@@ -1008,7 +1007,7 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 	}
 
 	// We will drop an item based on probablility, we add greater probability based off the current multiplier
-    double itemDropProb     = GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP + (0.025 * this->GetCurrentMultiplier());
+    double itemDropProb     = GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP + (0.02 * this->GetCurrentMultiplier());
     double halfItemDropProb = itemDropProb / 2.0;
 	double randomNum        = Randomizer::GetInstance()->RandomNumZeroToOne();
 	

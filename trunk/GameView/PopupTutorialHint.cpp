@@ -16,7 +16,7 @@
 #include "../BlammoEngine/Camera.h"
 #include "../GameModel/GameModel.h"
 
-const double PopupTutorialHint::UNSHOW_TIME = 0.4;
+const double PopupTutorialHint::UNSHOW_TIME = 0.33;
 
 PopupTutorialHint::PopupTutorialHint(GameModel* gameModel, size_t width) : 
 TutorialHint(), gameModel(gameModel), pane(NULL), timeToUnshow(0.0), paneHandler(NULL) {

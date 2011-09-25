@@ -2792,6 +2792,21 @@ void GameESPAssets::RemoveProjectileEffect(const Projectile& projectile) {
 	}
 }
 
+void GameESPAssets::RemoveAllProjectileEffects() {
+   	std::map<const Projectile*, std::list<ESPPointEmitter*> >::iterator projIter = this->activeProjectileEmitters.begin();
+	for (; projIter != this->activeProjectileEmitters.end(); ++projIter) {
+			
+		std::list<ESPPointEmitter*>& projEffects = projIter->second;
+		for (std::list<ESPPointEmitter*>::iterator effectIter = projEffects.begin(); effectIter != projEffects.end(); ++effectIter) {
+			ESPPointEmitter* currEmitter = *effectIter;
+			delete currEmitter;
+			currEmitter = NULL;
+		}
+		projEffects.clear();
+	}
+    this->activeProjectileEmitters.clear();
+}
+
 /**
  * Set the beam emitters for the paddle laser beam effect.
  */
