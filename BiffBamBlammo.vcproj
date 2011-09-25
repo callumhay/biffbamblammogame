@@ -1161,6 +1161,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\PopupTutorialHint.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\TutorialHint.h"
 						>
 					</File>
@@ -1198,6 +1202,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\LoadingScreen.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\PopupTutorialHint.cpp"
 						>
 					</File>
 					<File

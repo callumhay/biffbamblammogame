@@ -12,10 +12,12 @@
 #include "ButtonTutorialHint.h"
 #include "GameFontAssetsManager.h"
 #include "GameTutorialAssets.h"
+#include "TutorialHintListeners.h"
 
 #include "../ResourceManager.h"
 #include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/GeometryMaker.h"
+#include "../BlammoEngine/Camera.h"
 
 const float ButtonTutorialHint::BUTTON_SCALE_MULTIPLIER = 2.0f;
 
@@ -41,6 +43,13 @@ mouseLabel(NULL) {
     orLabel.SetDropShadow(Colour(0,0,0), 0.10f);
     commaLabel.SetColour(Colour(0.3882f, 0.72157f, 1.0f));
     commaLabel.SetDropShadow(Colour(0,0,0), 0.07f);
+
+    this->fadeAnim.ClearLerp();
+    this->fadeAnim.SetInterpolantValue(0.0f);
+    this->fadeAnim.SetRepeat(false);
+    //this->scaleAnim.ClearLerp();
+    //this->scaleAnim.SetInterpolantValue(0.0f);
+    //this->scaleAnim.SetRepeat(false);
 }
 
 ButtonTutorialHint::~ButtonTutorialHint() {
@@ -242,10 +251,42 @@ float ButtonTutorialHint::GetWidth() const {
     return width;
 }
 
-void ButtonTutorialHint::Draw(const Camera& camera) {
+void ButtonTutorialHint::Show(double delayInSeconds, double fadeInTimeInSeconds) {
+    if (this->isShown) { return; }
+
+    this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeInTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 1.0f);
+    this->fadeAnim.SetRepeat(false);
+    //this->scaleAnim.SetLerp(delayInSeconds, delayInSeconds+fadeInTimeInSeconds, TutorialHint::FADE_IN_SCALE_START, 1.0f);
+    //this->scaleAnim.SetRepeat(false);
+
+    if (this->listener != NULL) {
+        this->listener->OnTutorialHintShown();
+    }
+
+    this->isShown = true;
+}
+
+void ButtonTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow) {
+    if (!this->isShown && !overridePrevUnshow) { return; }
+
+    this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeOutTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 0.0f);
+    this->fadeAnim.SetRepeat(false);
+    //this->scaleAnim.SetLerp(delayInSeconds, fadeOutTimeInSeconds, this->scaleAnim.GetInterpolantValue(), TutorialHint::FADE_OUT_SCALE_END);
+    //this->scaleAnim.SetRepeat(false);
+
+    if (this->listener != NULL) {
+        this->listener->OnTutorialHintUnshown();
+    }
+
+    this->isShown = false;
+}
+
+void ButtonTutorialHint::Draw(double dT, const Camera& camera) {
     UNUSED_PARAMETER(camera);
 
     float alpha = this->fadeAnim.GetInterpolantValue();
+    this->fadeAnim.Tick(dT);
+
     if (alpha <= 0) {
         return;
     }

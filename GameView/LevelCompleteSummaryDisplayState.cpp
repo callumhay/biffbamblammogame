@@ -292,7 +292,6 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
         int numStars             = gameModel->GetNumStarsAwarded();
         int numLivesLost         = gameModel->GetNumLivesLostInCurrentLevel();
         int maxConsecutiveBlocks = gameModel->GetMaxConsecutiveBlocksDestroyed();
-        //GameModelConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_NUM_BLOCKS;
 
         GameModel::Difficulty difficulty = GameModel::MediumDifficulty;
         if (numLivesLost <= 2) {

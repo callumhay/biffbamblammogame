@@ -19,7 +19,8 @@
 GameTutorialAssets::GameTutorialAssets() : 
 xbox360ButtonTex(NULL), xbox360AnalogStickTex(NULL),
 keyboardShortButtonTex(NULL), keyboardLongButtonTex(NULL),
-leftMouseButtonTex(NULL), rightMouseButtonTex(NULL) {
+leftMouseButtonTex(NULL), rightMouseButtonTex(NULL),  boostTutorialHUDTex(NULL),
+boostTutorialDirTex(NULL), multiplierTutorialTex(NULL) {
     this->Init();
 }
 
@@ -103,6 +104,19 @@ void GameTutorialAssets::Init() {
         dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_RIGHT_MOUSE_BUTTON, Texture::Trilinear));
     assert(this->rightMouseButtonTex != NULL);
+
+
+    this->boostTutorialHUDTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BOOST_HUD_TUTORIAL, Texture::Trilinear));
+    assert(this->boostTutorialHUDTex != NULL);
+    
+    this->boostTutorialDirTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BOOST_DIR_TUTORIAL, Texture::Trilinear));
+    assert(this->boostTutorialDirTex != NULL);
+
+    this->multiplierTutorialTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_TUTORIAL, Texture::Trilinear));
+    assert(this->boostTutorialDirTex != NULL);
 }
 
 void GameTutorialAssets::Release() {
@@ -120,5 +134,12 @@ void GameTutorialAssets::Release() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->leftMouseButtonTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->rightMouseButtonTex);
+    assert(success);
+
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->boostTutorialHUDTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->boostTutorialDirTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierTutorialTex);
     assert(success);
 }

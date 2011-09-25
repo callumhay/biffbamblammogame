@@ -159,6 +159,10 @@ public:
 
 	const char* TEXTURE_LOCKED_BLAMMOPEDIA_ENTRY;
 
+    const char* TEXTURE_BOOST_DIR_TUTORIAL;
+    const char* TEXTURE_BOOST_HUD_TUTORIAL;
+    const char* TEXTURE_MULTIPLIER_TUTORIAL;
+
     enum XBoxButtonType { XBoxPushButton, XBoxAnalogStick, XBoxTrigger };
     enum KeyboardButtonType { KeyboardChar, KeyboardSpaceBar };
     enum MouseButtonType { LeftMouseButton, RightMouseButton };

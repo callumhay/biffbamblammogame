@@ -42,7 +42,10 @@ public:
 
     void SetMouseButton(GameViewConstants::MouseButtonType buttonType, const std::string& buttonText);
 
-    void Draw(const Camera& camera);
+    void Show(double delayInSeconds, double fadeInTimeInSeconds);
+    void Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow = false);
+
+    void Draw(double dT, const Camera& camera);
 
 private:
     static const float BUTTON_SCALE_MULTIPLIER;
@@ -76,6 +79,9 @@ private:
     };
 
     const GameTutorialAssets* tutorialAssets;
+
+    AnimationLerp<float> fadeAnim;
+    //AnimationLerp<float> scaleAnim;
 
     std::vector<ButtonGlyphLabel*> keyboardKeyLabels;
     std::vector<ButtonGlyphLabel*> xboxLabels;

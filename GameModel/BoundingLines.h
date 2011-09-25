@@ -78,6 +78,16 @@ public:
 		this->normals.clear();
 	}
 
+
+    void PopLastLineAndNormal() {
+        this->lines.pop_back();
+        this->normals.pop_back();
+    }
+    void PushLineAndNormal(const Collision::LineSeg2D& line, const Vector2D& normal) {
+        this->lines.push_back(line);
+        this->normals.push_back(normal);
+    }
+
 	// Debug stuffs
 	void DebugDraw() const;
 

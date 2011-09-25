@@ -13,6 +13,7 @@
 #define __TUTORIALHINTLISTENERS_H__
 
 #include "../GameModel/PlayerPaddle.h"
+#include "ButtonTutorialHint.h"
 
 /**
  * Superclass Event listener for tutorial hints.
@@ -42,6 +43,26 @@ public:
     void OnTutorialHintUnshown() {
         PlayerPaddle::SetEnablePaddleRelease(true);
     }
+};
+
+class BoostPopupHintListener : public TutorialHintListener {
+public:
+    BoostPopupHintListener(ButtonTutorialHint* startBoostHint) : startBoostHint(startBoostHint) {
+        assert(startBoostHint != NULL);
+    }
+
+    ~BoostPopupHintListener() {}
+
+    void OnTutorialHintShown() {
+    }
+
+    void OnTutorialHintUnshown() {
+        this->startBoostHint->Show(0.0, 0.5);
+    }
+
+private:
+    ButtonTutorialHint* startBoostHint;
+
 };
 
 
