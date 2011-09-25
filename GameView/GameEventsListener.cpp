@@ -119,6 +119,8 @@ void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameL
 
 	// Kill all effects that may have previously been occuring...
 	this->display->GetAssets()->DeactivateMiscEffects();
+    // Kill all particles...
+    this->display->GetAssets()->GetESPAssets()->RemoveAllProjectileEffects();
 	
 	// Queue up the state for ending a level - this will display the level name and do proper animations, fade-outs, etc.
     this->display->AddStateToQueue(DisplayState::LevelEnd);

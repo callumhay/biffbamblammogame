@@ -17,9 +17,9 @@
 
 TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
-boostPopupHintAlreadyShown(false), 
+boostPopupHintAlreadyShown(false), multPopupHintAlreadyShown(false),
 shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), doBoostHint(NULL), holdBoostHint(NULL),
-boostPopupHint(NULL) {
+boostPopupHint(NULL), multiplierPopupHint(NULL) {
     assert(display != NULL);
 }
 
@@ -45,6 +45,7 @@ void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pres
     }
 
     this->boostPopupHint->ButtonPressed(pressedButton);
+    this->multiplierPopupHint->ButtonPressed(pressedButton);
 }
 
 void TutorialEventsListener::MousePressed(const GameControl::MouseButton& pressedButton) {
@@ -129,4 +130,12 @@ void TutorialEventsListener::AllBallsDeadEvent(int livesLeft) {
     this->startBoostHint->Unshow(0.0, 0.5);
     this->doBoostHint->Unshow(0.0, 0.5);
     this->holdBoostHint->Unshow(0.0, 0.5);
+}
+
+void TutorialEventsListener::NumStarsChangedEvent(int oldNumStars, int newNumStars) {
+    UNUSED_PARAMETER(oldNumStars);
+    if (newNumStars == 2 && !this->multPopupHintAlreadyShown) {
+        this->multiplierPopupHint->Show(0.0, 1.0);
+        this->multPopupHintAlreadyShown = true;
+    }
 }

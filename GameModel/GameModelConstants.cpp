@@ -16,7 +16,7 @@ GameModelConstants* GameModelConstants::Instance = NULL;
 GameModelConstants::GameModelConstants() :
 RESOURCE_DIR("resources"),
 WORLD_DIR("worlds"),
-PROB_OF_ITEM_DROP(0.225),
+PROB_OF_ITEM_DROP(0.22),
 PROB_OF_CONSECTUIVE_ITEM_DROP(0.90),
 MAX_LIVE_ITEMS(3),
 PROB_OF_GHOSTBALL_BLOCK_MISS(0.33),

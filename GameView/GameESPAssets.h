@@ -278,6 +278,7 @@ public:
 
 	void AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile);
 	void RemoveProjectileEffect(const Projectile& projectile);
+    void RemoveAllProjectileEffects();
 
 	void AddBeamEffect(const Beam& beam);
 	void UpdateBeamEffect(const Beam& beam);
