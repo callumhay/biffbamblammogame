@@ -14,7 +14,10 @@
 #include "GameBall.h"
 #include "GameEventManager.h"
 
-PortalBlock::PortalBlock(unsigned int wLoc, unsigned int hLoc, PortalBlock* sibling) : LevelPiece(wLoc, hLoc), sibling(sibling) {
+const unsigned long PortalBlock::TIME_BETWEEN_BALL_USES_IN_MILLISECONDS = 650;
+
+PortalBlock::PortalBlock(unsigned int wLoc, unsigned int hLoc, PortalBlock* sibling) :
+LevelPiece(wLoc, hLoc), sibling(sibling), timeOfLastBallCollision(0) {
 }
 
 PortalBlock::~PortalBlock() {
@@ -25,13 +28,17 @@ PortalBlock::~PortalBlock() {
 // The portal block is a 'no-bounds' block, however it does still 'consider' collisions
 // since it needs to know if something hits it so that when it does it can move it to its sibling portal...
 
-bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+bool PortalBlock::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
+                                 Collision::LineSeg2D& collisionLine,
+                                 double& timeSinceCollision) const {
 	UNUSED_PARAMETER(n);
 	UNUSED_PARAMETER(collisionLine);
 	UNUSED_PARAMETER(timeSinceCollision);
 
-	// No collision if the ball has just previously collided with this portal block
-	if (ball.IsLastPieceCollidedWith(this)) {
+	// No collision if the ball has just previously collided with this portal block OR
+    // if the timer on this portal block for ball collisions is not past a certain time
+	if (ball.IsLastPieceCollidedWith(this) ||
+        (BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastBallCollision) < TIME_BETWEEN_BALL_USES_IN_MILLISECONDS) {
 		return false;
 	}
 
@@ -114,6 +121,9 @@ LevelPiece* PortalBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 
 	// Teleport the ball to the sibling portal block:
 	ball.SetCenterPosition(this->sibling->GetCenter());
+
+    // Tell the sibling that it's last ball collision is now
+    this->sibling->timeOfLastBallCollision = BlammoTime::GetSystemTimeInMillisecs();
 
 	return this;
 }

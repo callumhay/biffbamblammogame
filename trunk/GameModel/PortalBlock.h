@@ -107,9 +107,11 @@ public:
 	static const Colour& GeneratePortalColour();
 
 protected:
+    static const unsigned long TIME_BETWEEN_BALL_USES_IN_MILLISECONDS;
 	PortalBlock* sibling;
 
 	static bool portalGeneratorReset;
+    unsigned long timeOfLastBallCollision;
 
     DISALLOW_COPY_AND_ASSIGN(PortalBlock);
 };
@@ -118,7 +120,8 @@ inline bool PortalBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT
 	return this->bounds.CollisionCheck(ray, rayT);	
 }
 
-inline bool PortalBlock::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
+inline bool PortalBlock::CollisionCheck(const BoundingLines& boundingLines,
+                                        const Vector2D& velDir) const {
     UNUSED_PARAMETER(velDir);
 	return this->bounds.CollisionCheck(boundingLines);
 }
