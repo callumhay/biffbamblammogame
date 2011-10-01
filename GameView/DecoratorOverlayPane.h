@@ -33,6 +33,9 @@ public:
     DecoratorOverlayPane(OverlayPaneEventHandler* handler, size_t width, const Colour& bgColour);
     ~DecoratorOverlayPane();
 
+    enum LayoutType { Centered, TwoColumn };
+    void SetLayoutType(const LayoutType& layout) { this->layout = layout; }
+
     void AddText(const std::string& text, const Colour& colour = Colour(1,1,1), float scale = 1.0f);
     void AddImage(size_t width, const Texture* image);
     void SetSelectableOptions(const std::vector<std::string>& options, int defaultIdx);
@@ -56,6 +59,7 @@ private:
     static const float Y_BORDER;
     static const float ITEM_SPACING;
     static const float X_OPTION_GAP;
+    static const float COL_GAP;
     
     const Colour OPTION_IDLE_COLOUR;
     const Colour OPTION_SEL_COLOUR;	
@@ -90,6 +94,9 @@ private:
     bool optionActive;
 
     Colour bgColour;
+
+    LayoutType layout;
+    int currImgYPos;
 
     void ClearTextLabels();
     void ClearImages();

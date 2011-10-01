@@ -16,19 +16,22 @@
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/GeometryMaker.h"
 
-const float DecoratorOverlayPane::X_BORDER     = 12;
-const float DecoratorOverlayPane::Y_BORDER     = 12;
+const float DecoratorOverlayPane::X_BORDER     = 30;
+const float DecoratorOverlayPane::Y_BORDER     = 30;
 const float DecoratorOverlayPane::ITEM_SPACING = 20;
 const float DecoratorOverlayPane::X_OPTION_GAP = 50;
-
+const float DecoratorOverlayPane::COL_GAP      = 20;
 
 DecoratorOverlayPane::DecoratorOverlayPane(OverlayPaneEventHandler* handler,
                                            size_t width, const Colour& bgColour) :
-eventHandler(handler), width(width), currYPos(-Y_BORDER + ITEM_SPACING), selectedIdx(-1), optionActive(false),
+eventHandler(handler), width(width),
+currYPos(-Y_BORDER + ITEM_SPACING),
+currImgYPos(-Y_BORDER + ITEM_SPACING),
+selectedIdx(-1), optionActive(false),
 OPTION_IDLE_COLOUR(0.75f, 0.75f, 0.75f),
 OPTION_SEL_COLOUR(1.0f, 1.0f, 1.0f),
 OPTION_ACTIVE_COLOUR(1, 0.8f, 0),
-bgColour(bgColour) {
+bgColour(bgColour), layout(DecoratorOverlayPane::Centered) {
 
     assert(handler != NULL);
 
@@ -76,36 +79,89 @@ DecoratorOverlayPane::~DecoratorOverlayPane() {
 }
 
 void DecoratorOverlayPane::AddText(const std::string& text, const Colour& colour, float scale) {
-    this->currYPos -= ITEM_SPACING;
+    if (!this->textLabels.empty()) {
+        this->currYPos -= 2*ITEM_SPACING;
+    }
+    else {
+        this->currYPos -= ITEM_SPACING;
+    }
+
+    float labelWidth = 0;
+    switch (this->layout) {
+        case Centered:
+            labelWidth = this->width - 2*X_BORDER;
+            break;
+        case TwoColumn:
+            labelWidth = (this->width - 2*X_BORDER - COL_GAP - 256);
+            break;
+        default:
+            assert(false);
+            return;
+    }
 
     TextLabel2DFixedWidth* newLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
-        this->width - 2*X_BORDER, text);
+        labelWidth, text);
     
-    newLabel->SetTopLeftCorner(0, this->currYPos);
     newLabel->SetColour(colour);
     newLabel->SetDropShadow(Colour(0,0,0), 0.10f);
     newLabel->SetScale(scale);
-    newLabel->SetAlignment(TextLabel2DFixedWidth::CenterAligned);
+    
+    switch (this->layout) {
+        case Centered:
+            newLabel->SetTopLeftCorner((this->width - newLabel->GetWidth()) / 2.0f, this->currYPos);
+            newLabel->SetAlignment(TextLabel2DFixedWidth::CenterAligned);
+            this->currImgYPos -= ITEM_SPACING;
+            this->currImgYPos -= newLabel->GetHeight();
+            break;
+        case TwoColumn:
+            newLabel->SetTopLeftCorner(X_BORDER, this->currYPos);
+            newLabel->SetAlignment(TextLabel2DFixedWidth::LeftAligned);
+            break;
+        default:
+            assert(false);
+            return;
+    }
 
     this->textLabels.push_back(newLabel);
     this->currYPos -= newLabel->GetHeight();
+    
 }
 
 void DecoratorOverlayPane::AddImage(size_t width, const Texture* image) {
-    this->currYPos -= ITEM_SPACING;
-
     float height = static_cast<float>(width) * (static_cast<float>(image->GetHeight()) / static_cast<float>(image->GetWidth()));
-    Image* newImage = new Image((this->width - width) / 2.0f, this->currYPos, width, static_cast<size_t>(height), image);
-    this->images.push_back(newImage);
-    this->currYPos -= static_cast<int>(height);
+
+    switch (this->layout) {
+        case Centered: {
+            this->currYPos -= ITEM_SPACING;
+            Image* newImage = new Image((this->width - width) / 2.0f, this->currYPos, width, static_cast<size_t>(height), image);
+            this->images.push_back(newImage);
+            this->currYPos -= static_cast<int>(height);
+            break;
+        }
+        case TwoColumn: {
+            this->currImgYPos -= 2*ITEM_SPACING;
+            float xPos =  this->width - X_BORDER - 256;
+
+            Image* newImage = new Image(xPos, this->currImgYPos, width, static_cast<size_t>(height), image);
+            this->images.push_back(newImage);
+
+            this->currImgYPos -= static_cast<int>(height);
+            break;
+        }
+        default:
+            assert(false);
+            return;
+    }
 }
 
 void DecoratorOverlayPane::SetSelectableOptions(const std::vector<std::string>& options, int defaultIdx) {
     assert(defaultIdx >= 0 && defaultIdx < static_cast<int>(options.size()));
     assert(!options.empty());
 
-    this->currYPos -= 2*ITEM_SPACING;
+    this->currYPos    -= 2*ITEM_SPACING;
+    this->currImgYPos -= 2*ITEM_SPACING;
+    float selectableYPos = std::min<float>(this->currYPos, this->currImgYPos);
 
     float totalWidth = 0.0f;
     int count = 0;
@@ -123,7 +179,7 @@ void DecoratorOverlayPane::SetSelectableOptions(const std::vector<std::string>& 
 
         TextLabel2D* selLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
             GameFontAssetsManager::Big), currText);
-        selLabel->SetScale(0.9f);
+        selLabel->SetScale(0.75f);
         selLabel->SetColour(this->OPTION_SEL_COLOUR);
         selLabel->SetDropShadow(Colour(0,0,0), 0.125f);
 
@@ -143,14 +199,15 @@ void DecoratorOverlayPane::SetSelectableOptions(const std::vector<std::string>& 
 
         TextLabel2D* label = *iter;
         TextLabel2D* selLabel = *iterSel;
-        label->SetTopLeftCorner(currXPos, this->currYPos);
+        label->SetTopLeftCorner(currXPos, selectableYPos);
         selLabel->SetTopLeftCorner(currXPos - (selLabel->GetLastRasterWidth() - label->GetLastRasterWidth()) / 2.0f,
-            this->currYPos + (static_cast<float>(selLabel->GetHeight()) - static_cast<float>(label->GetHeight())) / 2.0f);
+            selectableYPos + (static_cast<float>(selLabel->GetHeight()) - static_cast<float>(label->GetHeight())) / 2.0f);
 
         currXPos += label->GetLastRasterWidth() + X_OPTION_GAP;
     }
 
-    this->currYPos -= this->selectableOptions[0]->GetHeight();
+    this->currYPos    -= this->selectableOptions[0]->GetHeight();
+    this->currImgYPos -= this->selectableOptions[0]->GetHeight();
     this->selectedIdx = defaultIdx;
 }
 
@@ -168,7 +225,7 @@ void DecoratorOverlayPane::Hide(double timeInSecs) {
 
 void DecoratorOverlayPane::Draw(double dT, size_t windowWidth, size_t windowHeight) {
 
-    float totalHeight       = abs(this->currYPos) + 2 * Y_BORDER;
+    float totalHeight       = std::max<float>(abs(this->currYPos), abs(this->currImgYPos)) + Y_BORDER;
     float halfTotalHeight   = totalHeight / 2.0f;
     float halfTotalWidth    = this->width / 2.0f;
     float halfWindowWidth   = windowWidth / 2.0f;
@@ -227,8 +284,7 @@ void DecoratorOverlayPane::Draw(double dT, size_t windowWidth, size_t windowHeig
 
             TextLabel2DFixedWidth* label = *iter;
             tempPt = label->GetTopLeftCorner();
-            label->SetTopLeftCorner(tempPt[0] + labelXTranslation + (this->width - label->GetWidth()) / 2.0f, 
-                tempPt[1] + labelYTranslation);
+            label->SetTopLeftCorner(tempPt[0] + labelXTranslation, tempPt[1] + labelYTranslation);
             label->SetAlpha(fgAlpha);
             label->Draw();
             label->SetTopLeftCorner(tempPt);
@@ -468,7 +524,7 @@ void DecoratorOverlayPane::Image::Draw(float alpha, float tX, float tY) {
     glColor4f(0,0,0,alpha);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glPolygonMode(GL_FRONT, GL_LINE);
-    glLineWidth(1.0f);
+    glLineWidth(2.0f);
     GeometryMaker::GetInstance()->DrawQuad();
     glPopAttrib();
 

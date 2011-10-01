@@ -323,7 +323,7 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
         }
         std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
         
-        this->difficultyChoicePane->AddText("Based on your performance we'd recommend you try playing on a difficulty setting of...");
+        this->difficultyChoicePane->AddText("Based on your performance, you should try playing on a difficulty setting of...");
         this->difficultyChoicePane->AddText(difficultyOptions[static_cast<int>(difficulty)], Colour(1, 0.75f, 0.0f), 1.2f);
         this->difficultyChoicePane->AddText("You may select any difficulty you wish if you think this recommendation is lame:");
 

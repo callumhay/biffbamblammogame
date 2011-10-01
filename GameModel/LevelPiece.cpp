@@ -61,6 +61,7 @@ bool LevelPiece::IsValidLevelPieceType(int pieceType) {
         case LevelPiece::ItemDrop:
         case LevelPiece::Switch:
         case LevelPiece::OneWay:
+        case LevelPiece::NoEntry:
             return true;
         default:
             assert(false);

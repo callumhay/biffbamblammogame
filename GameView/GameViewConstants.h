@@ -271,6 +271,7 @@ public:
 	const char* TESLA_BLOCK_COIL_MESH;
 	const char* ITEM_DROP_BLOCK_MESH;
     const char* SWITCH_BLOCK_MESH;
+    const char* NO_ENTRY_BLOCK_MESH;
 	const char* SKYBOX_MESH;
 	const char* ITEM_MESH;
 	const char* PADDLE_LASER_ATTACHMENT_MESH;
