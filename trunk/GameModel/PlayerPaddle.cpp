@@ -262,7 +262,8 @@ void PlayerPaddle::FireAttachedBall() {
 	}
 	else {
 		// Check to see if the paddle is moving, if not just use a random angle
-		if (fabs(avgPaddleVel[0]) <= EPSILON) {
+        if (fabs(avgPaddleVel[0]) <= EPSILON || this->centerPos[0] >= (this->maxBound - this->GetHalfWidthTotal() - EPSILON) ||
+            this->centerPos[0] <= (this->minBound + this->GetHalfWidthTotal() + EPSILON)) {
 			// Add some randomness to the velocity by deviating a straight-up shot by some random angle
 			float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::STILL_RAND_RELEASE_DEG;		
 			ballReleaseDir = Vector2D::Rotate(randomAngleInDegs, ballReleaseDir);

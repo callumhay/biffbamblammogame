@@ -54,8 +54,8 @@ public:
 
 	static const Vector2D STD_INIT_VEL_DIR;
 	// The largest possible random angle of release (for the ball) from a still paddle, in degrees
-	static const int STILL_RAND_RELEASE_DEG  = 5;
-	static const int MOVING_RAND_RELEASE_DEG = 5;
+	static const int STILL_RAND_RELEASE_DEG  = 3;
+	static const int MOVING_RAND_RELEASE_DEG = 3;
 
 	GameBall();
 	GameBall(const GameBall& gameBall);

@@ -28,7 +28,13 @@ public:
     bool BallBlastsThrough(const GameBall& b) const { UNUSED_PARAMETER(b); return false; }
 	bool GhostballPassesThrough() const { return false; }
     bool ProjectilePassesThrough(Projectile* projectile) const { UNUSED_PARAMETER(projectile); return true; }
-	bool IsLightReflectorRefractor() const { return true; }
+	bool IsLightReflectorRefractor() const {
+		// When frozen in ice a block can reflect/refract lasers and the like
+		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+			return true;
+		}
+		return false;
+    }
 
     int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
@@ -66,23 +72,29 @@ inline bool NoEntryBlock::CollisionCheck(const GameBall& ball, double dT, Vector
 }
 
 inline bool NoEntryBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-    return Collision::IsCollision(ray, this->GetAABB(), rayT);
+    UNUSED_PARAMETER(ray);
+    UNUSED_PARAMETER(rayT);
+    if (this->IsLightReflectorRefractor()) {
+		return Collision::IsCollision(ray, this->GetAABB(), rayT);
+	}
+    else {
+        return false;
+    }
 }
 
 inline bool NoEntryBlock::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
     UNUSED_PARAMETER(velDir);
-    return this->bounds.CollisionCheck(boundingLines);
+	if (this->IsLightReflectorRefractor()) {
+		return this->bounds.CollisionCheck(boundingLines);
+	}
+    else {
+        return false;
+    }
 }
 
 inline bool NoEntryBlock::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {
     UNUSED_PARAMETER(velDir);
     return Collision::IsCollision(this->GetAABB(), c);
-}
-
-inline LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-    UNUSED_PARAMETER(gameModel);
-    UNUSED_PARAMETER(projectile);
-    return this;
 }
 
 inline void NoEntryBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir,
