@@ -141,3 +141,54 @@ LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball
 
 	return this;
 }
+
+
+/**
+ * Called when the block is hit by a projectile. Projectiles tend to be able to pass right
+ * through this block type, however for the collateral block projectile, it will completely destroy this.
+ */
+LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
+	LevelPiece* resultingPiece = this;
+
+	switch (projectile->GetType()) {
+		
+		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::BallLaserBulletProjectile:
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
+			}
+			break;
+		
+		case Projectile::CollateralBlockProjectile:
+            resultingPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);
+			break;
+
+		case Projectile::PaddleRocketBulletProjectile:
+			
+            if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+                resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+                GameEventManager::Instance()->ActionBlockIceShattered(*this);
+                bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
+                assert(success);
+            }
+
+			break;
+
+		case Projectile::FireGlobProjectile:
+			// Fire glob just extinguishes on a solid block, unless it's frozen in an ice cube;
+			// in that case, unfreeze a frozen solid block
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
+				assert(success);
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
+
+	return resultingPiece;
+}

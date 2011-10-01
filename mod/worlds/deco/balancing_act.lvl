@@ -1,0 +1,67 @@
+Balancing Act
+13 28
+S S S S S S S S S S S S S 
+S S S S S S S S S S S S S 
+S F(r) F(r) F(r) E E D(LaserBulletPaddle,LaserBeamPaddle,RocketPaddle,OmniLaserBall) E E F(r) F(r) F(r) S 
+S C(90) F(r) F(r) E E E E E F(r) F(r) C(180) S 
+S F(u) F(r) F(r) E E E E E F(r) F(r) F(d) S 
+S E N N T(S,ll) E E E T(S,lr) N N E S 
+S E N R N E E E N R N E S 
+S E N O N N N N N O N E S 
+S E N Y Y Y Y Y Y Y N E S 
+S E N Y Y Y Y Y Y Y N E S 
+S E N G G G G G G G N E S 
+S E N G G G G G G G N E S 
+S E N G G G G G G G N E S 
+S E N G G G G G G G N E S 
+S E N G G G G G G G N E S 
+S E N Y Y Y Y Y Y Y N E S 
+S E N Y Y Y Y Y Y Y N E S 
+S E N O O O O O O O N E S 
+S E N R R R R R R R N E S 
+S C(0) N N N N N N N N N F(d) S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+
+STARS:
+3000
+7000
+9000
+12000
+13200
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 0
+StickyPaddle 2
+ShieldPaddle 0
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 0
+RocketPaddle 2
+GhostBall 0
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MultiBall3 2
+IceBall 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 0
+FastBall 2
+PaddleCam 0
