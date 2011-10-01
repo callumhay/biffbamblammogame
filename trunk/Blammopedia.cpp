@@ -80,9 +80,8 @@ Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
     this->blockEntries.insert(std::make_pair(LevelPiece::ItemDrop,          new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("item_drop_block.txt"))));
     this->blockEntries.insert(std::make_pair(LevelPiece::Switch,            new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("switch_block.txt"))));
     this->blockEntries.insert(std::make_pair(LevelPiece::OneWay,            new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("one_way_block.txt"))));
-
-	// Status Effect Entry Types...
-
+    this->blockEntries.insert(std::make_pair(LevelPiece::NoEntry,           new BlockEntry(BLAMMOPEDIA_BLOCKS_DIR + std::string("no_entry_block.txt"))));
+    
 }
 
 Blammopedia::~Blammopedia() {

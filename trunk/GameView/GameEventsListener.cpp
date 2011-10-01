@@ -508,6 +508,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 		case LevelPiece::Tesla:
         case LevelPiece::Switch:
         case LevelPiece::OneWay:
+        case LevelPiece::NoEntry:
 			if (wasFrozen) {
 				// Add ice break effect
 				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());

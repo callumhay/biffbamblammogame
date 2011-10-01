@@ -46,6 +46,7 @@ public:
 	static const char ITEM_DROP_BLOCK_CHAR;
     static const char SWITCH_BLOCK_CHAR;
     static const char ONE_WAY_BLOCK_CHAR;
+    static const char NO_ENTRY_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;

@@ -29,6 +29,7 @@
 #include "ItemDropBlock.h"
 #include "SwitchBlock.h"
 #include "OneWayBlock.h"
+#include "NoEntryBlock.h"
 #include "GameModel.h"
 #include "Projectile.h"
 #include "PointAward.h"
@@ -57,6 +58,8 @@ const char GameLevel::TESLA_BLOCK_CHAR          = 'A';
 const char GameLevel::ITEM_DROP_BLOCK_CHAR      = 'D';
 const char GameLevel::SWITCH_BLOCK_CHAR         = 'W';
 const char GameLevel::ONE_WAY_BLOCK_CHAR        = 'F';
+const char GameLevel::NO_ENTRY_BLOCK_CHAR       = 'N';
+
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -738,6 +741,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 
                         newPiece = new OneWayBlock(oneWayEnum, pieceWLoc, pieceHLoc);
                     }
+                    break;
+
+                case GameLevel::NO_ENTRY_BLOCK_CHAR:
+                    // N - No-entry block
+                    newPiece = new NoEntryBlock(pieceWLoc, pieceHLoc);
                     break;
 
 				default:

@@ -40,7 +40,7 @@
 LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL),
-teslaBlock(NULL), switchBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
+teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
 oneWayRightBlock(NULL), statusEffectRenderer(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
@@ -56,6 +56,7 @@ oneWayRightBlock(NULL), statusEffectRenderer(NULL) {
 	this->teslaBlock                    = new TeslaBlockMesh();
 	this->itemDropBlock					= new ItemDropBlockMesh();
     this->switchBlock                   = new SwitchBlockMesh();
+    this->noEntryBlock                  = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NO_ENTRY_BLOCK_MESH);
     this->oneWayUpBlock                 = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_UP_MESH);
     this->oneWayDownBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_DOWN_MESH);
     this->oneWayLeftBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_LEFT_MESH);
@@ -79,6 +80,7 @@ oneWayRightBlock(NULL), statusEffectRenderer(NULL) {
     INSERT_MATERIAL_GRPS(this->teslaBlock);
     INSERT_MATERIAL_GRPS(this->itemDropBlock);
     INSERT_MATERIAL_GRPS(this->switchBlock);
+    INSERT_MATERIAL_GRPS(this->noEntryBlock);
     INSERT_MATERIAL_GRPS(this->oneWayUpBlock);
     INSERT_MATERIAL_GRPS(this->oneWayDownBlock);
     INSERT_MATERIAL_GRPS(this->oneWayLeftBlock);
@@ -509,45 +511,49 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
     switch (piece->GetType()) {
 		case LevelPiece::Solid :
 			return &this->styleBlock->GetMaterialGroups();
-			break;
+
 		case LevelPiece::SolidTriangle:
 			return &this->triangleBlockUR->GetMaterialGroups();
-			break;
+
 		case LevelPiece::Breakable:
 			return &this->basicBlock->GetMaterialGroups();
-			break;
+
 		case LevelPiece::BreakableTriangle:
 			return &this->triangleBlockUR->GetMaterialGroups();
-			break;
+
 		case LevelPiece::Bomb:
 			return &this->bombBlock->GetMaterialGroups();
-			break;
+
 		case LevelPiece::Ink:
 			return &this->inkBlock->GetMaterialGroups();
-			break;
+
 		case LevelPiece::Prism:
 			return &this->prismBlockDiamond->GetMaterialGroups();
-			break;
+
 		case LevelPiece::PrismTriangle:
 			return &this->prismBlockTriangleUR->GetMaterialGroups();
-			break;
+
 		case LevelPiece::Portal:
 			return &this->portalBlock->GetMaterialGroups();
-			break;
+
 		case LevelPiece::Cannon:
 			return &this->cannonBlock->GetMaterialGroups();
-			break;
+
 		case LevelPiece::Tesla:
 			return &this->teslaBlock->GetMaterialGroups();
-			break;
+
 		case LevelPiece::ItemDrop:
 			return &this->itemDropBlock->GetMaterialGroups();
-			break;
+
         case LevelPiece::Switch:
             return &this->switchBlock->GetMaterialGroups();
-            break;
+
+        case LevelPiece::NoEntry:
+            return &this->noEntryBlock->GetMaterialGroups();
+
 		case LevelPiece::Collateral:
 			break;
+
         case LevelPiece::OneWay:
             {
                 const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(piece);
@@ -567,12 +573,15 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
                 }
             }
             break;
+
 		case LevelPiece::Empty:
 			break;
+
 		default:
 			assert(false);
 			break;
 	}
+
 	return NULL;
 }
 

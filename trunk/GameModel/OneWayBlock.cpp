@@ -187,11 +187,10 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 		 						 topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
 }
 
-// Doesn't matter if a ball collides with solid block, it does nothing to the block.
 LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	ball.SetLastPieceCollidedWith(NULL);
 
-	// Solid blocks can be frozen, but they still can't be destroyed (in most cases)
+	// One-way blocks can be frozen, but they still can't be destroyed (in most cases)
 	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
 	if (isIceBall) {
 		this->FreezePieceInIce(gameModel);
@@ -205,7 +204,7 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 			}
 		}
 
-		// Unfreeze a frozen solid block
+		// Unfreeze a frozen block
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 			bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
             UNUSED_VARIABLE(success);
@@ -217,7 +216,7 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball)
 }
 
 /**
- * Called when the solid block is hit by a projectile. Tends to cause the projectile to
+ * Called when the block is hit by a projectile. Tends to cause the projectile to
  * extinguish, however for the collateral block projectile, it will completely destroy this.
  */
 LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {

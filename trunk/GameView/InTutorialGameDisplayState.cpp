@@ -248,32 +248,36 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
 
     // Pop-up tutorial hints - these pause the game and explain to the user how to play
-    static const float TITLE_TEXT_SCALE = 1.25f;
+    static const float TITLE_TEXT_SCALE = 1.33f;
     static const float BODY_TEXT_SCALE  = 0.75f;
-    static const size_t POPUP_TUTORIAL_HINT_WIDTH = static_cast<size_t>(camera.GetWindowWidth() * 0.75f);
+    static const size_t POPUP_TUTORIAL_HINT_WIDTH = 700;
 
     GameModel* gameModel = this->display->GetModel();
     
     // Boosting tutorial hint pop-up
-    PopupTutorialHint* boostPopupHint  = new PopupTutorialHint(gameModel, POPUP_TUTORIAL_HINT_WIDTH);
+    PopupTutorialHint* boostPopupHint = new PopupTutorialHint(gameModel, POPUP_TUTORIAL_HINT_WIDTH);
     boostPopupHint->SetListener(new BoostPopupHintListener(startingToBoostHint));
     DecoratorOverlayPane* boostPopupPane = boostPopupHint->GetPane();
-    boostPopupPane->AddText("Ball-Boosting", Colour(1,1,1), TITLE_TEXT_SCALE);
+    boostPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
+    boostPopupPane->AddText("Ball Boosting", Colour(1,1,1), TITLE_TEXT_SCALE);
+    boostPopupPane->SetLayoutType(DecoratorOverlayPane::TwoColumn);
     boostPopupPane->AddText(
-        std::string("As the ball remains in play the boost gauge in the top left-hand corner of the screen will fill up."),
+        std::string("During gameplay the boost gauge in the top-left will fill up making boosts available."),
         Colour(1,1,1), BODY_TEXT_SCALE);
 
     const Texture2D* boostHUDImg = tutorialAssets->GetBoostTutorialHUDTexture();
     boostPopupPane->AddImage(256, boostHUDImg);
 
-    boostPopupPane->AddText(std::string("Once a boost becomes available it may be used to temporarily slow down time and then direct the ball ") +
-        std::string("to shoot in a particular direction."), Colour(1,1,1), BODY_TEXT_SCALE);
+    boostPopupPane->AddText(
+        std::string("Activate it by holding down the right analog stick or the left mouse button. ") +
+        std::string("This will momentarily slow down time so you can redirect the ball. Simply let go to cancel the boost."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
 
     const Texture2D* boostDirImg = tutorialAssets->GetBoostTutorialDirTexture();
     boostPopupPane->AddImage(256, boostDirImg);
 
-    boostPopupPane->AddText(std::string("Once a boost is executed, the ball will gain a temporary burst of speed, ") +
-        std::string("which may or may not work to your favour."), Colour(1,1,1), BODY_TEXT_SCALE);
+    boostPopupPane->AddText(std::string("Either way, act quickly because the ball's got places to be."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
 
     std::vector<std::string> continueOption;
     continueOption.reserve(1);
@@ -287,28 +291,21 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     PopupTutorialHint* multPopupHint  = new PopupTutorialHint(gameModel, POPUP_TUTORIAL_HINT_WIDTH);
     //multPopupHint->SetListener(...);
     DecoratorOverlayPane* multPopupPane = multPopupHint->GetPane();
+    multPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
     multPopupPane->AddText(std::string("Points and Multipliers"), Colour(1,1,1), TITLE_TEXT_SCALE);
-
+    multPopupPane->SetLayoutType(DecoratorOverlayPane::TwoColumn);
     multPopupPane->AddText(
-        std::string("Everytime you destroy a block you are awarded points, ") +
-        std::string("these points affect the number of stars you receive in a level. ") +
-        std::string("You can maximize your point score by acquiring and keeping high multipliers ") +
-        std::string("as you destroy blocks."), Colour(1,1,1), BODY_TEXT_SCALE);
-
-    const Texture2D* multiplierImg = tutorialAssets->GetMultiplierTutorialTexture();
-    multPopupPane->AddImage(512, multiplierImg);
-
-    multPopupPane->AddText(
-        std::string("Each block that you destroy will increment the multiplier gauge in the ") +
-        std::string("upper right-hand corner of the screen. At increments of 3, 6 and 9 blocks ") +
-        std::string("the multiplier will increase to x2, x3 and x4, respectively and be applied to all further points that you acquire. ") +
-        std::string("However, be aware that the gauge will reset everytime a ball hits the paddle or all balls are lost."),
+        std::string("Maximize your pointage by consecutively destroying blocks to earn higher multipliers."),
         Colour(1,1,1), BODY_TEXT_SCALE);
 
+    const Texture2D* multiplierImg = tutorialAssets->GetMultiplierTutorialTexture();
+    multPopupPane->AddImage(256, multiplierImg);
+
     multPopupPane->AddText(
-        std::string("Lastly, take note that any laser/rocket/bullet item that you fire from the paddle/ball, ") +
-        std::string("though useful in a tight situtation, will only give you ") +
-        std::string("a fraction of the score for any blocks it destroys."),
+        std::string("Any multiplier will reset when a ball hits the paddle or when you lose your balls."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
+    multPopupPane->AddText(
+        std::string("Though tempting to use, certain beneficial items (lasers!) will limit your score."),
         Colour(1,1,1), BODY_TEXT_SCALE);
 
     multPopupPane->SetSelectableOptions(continueOption, 0);

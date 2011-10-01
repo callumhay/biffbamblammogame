@@ -52,7 +52,8 @@ public:
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
                           Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop,
-                          Switch, OneWay };
+                          Switch, OneWay, NoEntry };
+
 	virtual LevelPieceType GetType() const = 0;
     static bool IsValidLevelPieceType(int pieceType);
 

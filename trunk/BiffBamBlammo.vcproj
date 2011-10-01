@@ -1485,6 +1485,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\NoEntryBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\OneWayBlock.h"
 						>
 					</File>
@@ -1542,6 +1546,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\LevelPiece.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\NoEntryBlock.cpp"
 						>
 					</File>
 					<File

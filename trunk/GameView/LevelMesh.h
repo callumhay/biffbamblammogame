@@ -81,6 +81,7 @@ private:
 	TeslaBlockMesh* teslaBlock;
 	ItemDropBlockMesh* itemDropBlock;
     SwitchBlockMesh* switchBlock;
+    Mesh* noEntryBlock;
     Mesh* oneWayUpBlock;
     Mesh* oneWayDownBlock;
     Mesh* oneWayLeftBlock;
