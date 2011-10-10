@@ -37,13 +37,14 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-BallGrow 2
 UberBall 1
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 1
 1Up 2
 PaddleShrink 2
+InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 1
 OmniLaserBall 1

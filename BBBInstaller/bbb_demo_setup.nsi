@@ -12,7 +12,7 @@ FunctionEnd
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 0.1
+!define VERSION 0.2
 !define COMPANY "Callum Hay"
 !define URL ""
 
@@ -121,8 +121,8 @@ Section "Biff! Bam!! Blammo!?! Demo" SEC0000
     File ..\lib\XInput9_1_0.dll
     File "/oname=BBBResources.zip" ..\BBBResources_Demo.zip
     File ..\BiffBamBlammoIcon.bmp
-    File "/oname=BiffBamBlammoDemo.exe" ..\Release\BiffBamBlammo.exe 
-    File ..\Release\BiffBamBlammo.ico
+    File "/oname=BiffBamBlammoDemo.exe" ..\DemoRelease\BiffBamBlammo.exe 
+    File ..\DemoRelease\BiffBamBlammo.ico
     #File vcredist_x86.exe
     WriteRegStr HKLM "${REGKEY}\Components" "Biff! Bam!! Blammo!?! Demo Install" 1
 SectionEnd

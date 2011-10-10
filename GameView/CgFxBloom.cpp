@@ -21,9 +21,9 @@ const char* CgFxBloom::BRIGHT_DOWNSAMPLE_LVL4_TECHNIQUE_NAME	= "BrightDownsample
 const char* CgFxBloom::BLOOM_COMPOSITION_TECHNIQUE_NAME				= "CompositeBloom";
 
 const float CgFxBloom::DEFAULT_HIGHLIGHT_THRESHOLD	= 0.55f;
-const float CgFxBloom::DEFAULT_SCENE_INTENSITY			= 0.85f;
-const float CgFxBloom::DEFAULT_GLOW_INTENSITY				= 0.3f;
-const float CgFxBloom::DEFAULT_HIGHLIGHT_INTENSITY	= 0.2f;
+const float CgFxBloom::DEFAULT_SCENE_INTENSITY		= 0.82f;
+const float CgFxBloom::DEFAULT_GLOW_INTENSITY		= 0.27f;
+const float CgFxBloom::DEFAULT_HIGHLIGHT_INTENSITY	= 0.18f;
 
 CgFxBloom::CgFxBloom(FBObj* sceneFBO) : 
 CgFxPostProcessingEffect(GameViewConstants::GetInstance()->CGFX_BLOOM_SHADER, sceneFBO),

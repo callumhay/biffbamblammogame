@@ -73,8 +73,8 @@ void RandomToItemAnimation::Start(const Texture* gameItemTexture, const GameMode
 	Vector2D halfLevelDim = 0.5f * gameModel.GetLevelUnitDimensions();
 
 	// Move it over the course of the entire animation
-	Point2D startLocation = Point2D(-1.5f * paddle.GetHalfWidthTotal() + halfLevelDim[0], -(paddle.GetHalfHeight() + 1.25f * LevelPiece::PIECE_HEIGHT));
-	Point2D endLocation   = Point2D( 1.5f * paddle.GetHalfWidthTotal() + halfLevelDim[0], -(paddle.GetHalfHeight() + 1.25f * LevelPiece::PIECE_HEIGHT));
+	Point2D startLocation = Point2D(-1.5f * paddle.GetHalfWidthTotal() + halfLevelDim[0], -(paddle.GetHalfHeight() + 0.5f * GameItem::ITEM_HEIGHT));
+	Point2D endLocation   = Point2D( 1.5f * paddle.GetHalfWidthTotal() + halfLevelDim[0], -(paddle.GetHalfHeight() + 0.5f * GameItem::ITEM_HEIGHT));
 	this->itemMoveAnim.SetLerp(TOTAL_INITIAL_FADE_IN_TIME, TOTAL_FADE_OUT_TO_FADE_IN_TIME + TOTAL_INITIAL_FADE_IN_TIME, startLocation, endLocation);
 	this->itemMoveAnim.SetInterpolantValue(startLocation);
 
@@ -122,7 +122,7 @@ void RandomToItemAnimation::Draw(const Camera& camera, double dT) {
 	float actualItemAlpha = (1.0f - this->randomFadeOutItemFadeInAnim.GetInterpolantValue()) * this->finalFadeOutAnim.GetInterpolantValue();
 
 	glMultMatrixf(screenAlignMatrix.begin());
-	glScalef(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT, 1.0f);
+    glScalef(GameItem::ITEM_WIDTH, GameItem::ITEM_HEIGHT, 1.0f);
 
 	bool didDraw = false;
 	float alphaOfDraw = 0.0f;

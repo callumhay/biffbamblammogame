@@ -76,8 +76,10 @@ public:
 	virtual void FadeBackground(bool fadeout, float fadeTime) = 0;
 	virtual void ResetToInitialState() = 0;
 
-	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, const BasicPointLight& keyLight, 
-								  const BasicPointLight& fillLight, const BasicPointLight& ballLight) const {
+	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, CgFxEffectBase* replacementMat, 
+                    const BasicPointLight& keyLight, const BasicPointLight& fillLight,
+                    const BasicPointLight& ballLight) const {
+
 		const ColourRGBA& paddleColour = p.GetColour();
 		if (paddleColour.A() < EPSILON) {
 			return;
@@ -91,7 +93,7 @@ public:
 		glRotatef(paddleZRotationAmt, 0, 0, 1);
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
 		glColor4f(paddleColour.R(), paddleColour.G(), paddleColour.B(), paddleColour.A());
-		this->playerPaddle->Draw(camera, keyLight, fillLight, ballLight);
+		this->playerPaddle->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
 		glPopMatrix();
 	}
 

@@ -1,0 +1,69 @@
+Electric Access
+11 29
+S S S S S S S S S S S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S G O G G G G G O G S 
+S Y Y B Y Y Y B Y Y S 
+S G O G G G G G O G S 
+S G G G G I G G G G S 
+S G E G E G E G E G S 
+S G E E E E E E E G S 
+S G Y E E Y E E Y G S 
+S G G O G O G O G G S 
+S E E E E E E E E E S 
+S A(0,1,a,b) S S S S S S S A(0,1,b,a) S 
+S R G G G G G G G R S 
+S G O G G G G G O G S 
+S Y Y B Y Y Y B Y Y S 
+S G O G G G G G O G S 
+S Y G Y Y I Y Y G Y S 
+S G Y O G Y O G Y O S 
+S E G E G E G E G E S 
+S E E E E E E E E E S 
+S E E G E G E G E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+
+STARS:
+13500
+19000
+24000
+29000
+35500
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 2
+MultiBall3 2
+IceBall 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 2

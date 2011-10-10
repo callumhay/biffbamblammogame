@@ -38,6 +38,7 @@
 #include "FireBallItem.h"
 #include "IceBallItem.h"
 #include "OmniLaserBallItem.h"
+#include "InvisiPaddleItem.h"
 
 #include "RandomItem.h"
 
@@ -73,6 +74,7 @@ GameItemFactory::GameItemFactory() {
 	itemNameToTypeMap.insert(std::make_pair(FireBallItem::FIRE_BALL_ITEM_NAME,                  GameItem::FireBallItem));
 	itemNameToTypeMap.insert(std::make_pair(IceBallItem::ICE_BALL_ITEM_NAME,                    GameItem::IceBallItem));
     itemNameToTypeMap.insert(std::make_pair(OmniLaserBallItem::OMNI_LASER_BALL_ITEM_NAME,       GameItem::OmniLaserBallItem));
+    itemNameToTypeMap.insert(std::make_pair(InvisiPaddleItem::INVISI_PADDLE_ITEM_NAME,          GameItem::InvisiPaddleItem));
 	itemNameToTypeMap.insert(std::make_pair(RandomItem::RANDOM_ITEM_NAME,                       GameItem::RandomItem));
 	
 	// Establish the set of ALL items except the random item!
@@ -104,6 +106,7 @@ GameItemFactory::GameItemFactory() {
 	allItemTypes.insert(GameItem::FireBallItem);
 	allItemTypes.insert(GameItem::IceBallItem);
     allItemTypes.insert(GameItem::OmniLaserBallItem);
+    allItemTypes.insert(GameItem::InvisiPaddleItem);
 	
 	// Establish the Power-up item set
 	allPowerUpItemTypes.insert(GameItem::BallSlowDownItem);
@@ -139,6 +142,7 @@ GameItemFactory::GameItemFactory() {
 	allPowerDownItemTypes.insert(GameItem::PaddleShrinkItem);
 	allPowerDownItemTypes.insert(GameItem::PoisonPaddleItem);
 	allPowerDownItemTypes.insert(GameItem::UpsideDownItem);
+    allPowerDownItemTypes.insert(GameItem::InvisiPaddleItem);
 
     atexit(GameItemFactory::DeleteInstance);
 }
@@ -276,6 +280,9 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 
         case GameItem::OmniLaserBallItem:
             return new OmniLaserBallItem(spawnOrigin, gameModel);
+
+        case GameItem::InvisiPaddleItem:
+            return new InvisiPaddleItem(spawnOrigin, gameModel);
 
 		// Random item is a very special kind of item that can't be generated anywhere else but here
 		case GameItem::RandomItem:

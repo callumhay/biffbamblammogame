@@ -18,10 +18,10 @@
 #include "../BlammoEngine/Texture3D.h"
 #include "../BlammoEngine/Texture2D.h"
 
-const char* CgFxPostRefract::BASIC_TECHNIQUE_NAME												= "PostRefractGeom";
-const char* CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME							= "PostRefractNormalTex";
+const char* CgFxPostRefract::BASIC_TECHNIQUE_NAME						= "PostRefractGeom";
+const char* CgFxPostRefract::NORMAL_TEXTURE_TECHNIQUE_NAME				= "PostRefractNormalTex";
 const char* CgFxPostRefract::NORMAL_TEXTURE_WITH_OVERLAY_TECHNIQUE_NAME	= "PostRefractNormalTexWithOverlay";
-const char* CgFxPostRefract::NORMAL_TEXTURE_WITH_NOISE_TECHNIQUE_NAME		= "PostRefractNormalTexWithNoise";
+const char* CgFxPostRefract::NORMAL_TEXTURE_WITH_NOISE_TECHNIQUE_NAME	= "PostRefractNormalTexWithNoise";
 
 // Default constructor
 CgFxPostRefract::CgFxPostRefract() : 

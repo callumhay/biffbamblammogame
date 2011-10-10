@@ -97,8 +97,13 @@ bool GameWorld::Load() {
 	// Read all the level file names
 	std::vector<std::string> levelFileList;
 	std::string currLvlFile;
-	while (*inFile >> currLvlFile) {
-		levelFileList.push_back(currLvlFile);
+    while (std::getline(*inFile, currLvlFile)) {
+        currLvlFile = stringhelper::trim(currLvlFile);
+        if (!currLvlFile.empty()) {
+            if (currLvlFile[0] != '#') {
+		        levelFileList.push_back(currLvlFile);
+            }
+        }
 	}
 
 	if (levelFileList.size() == 0) {

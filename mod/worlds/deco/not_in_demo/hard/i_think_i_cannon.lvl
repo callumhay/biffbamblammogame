@@ -1,0 +1,68 @@
+I Think I Cannon
+16 28
+S S S S S S S S S S S S E R E E 
+S E E N E E D(PaddleGrow) E E E E N R R R E 
+S E E N Y Y Y Y Y Y R N E R R E 
+S D(RocketPaddle,{2}) C(90) N O O O O O O R N E S R R 
+S E E N R R R R R R R N E R R E 
+S N N N G G G G G G G S R R R E 
+S G G G G G G G G G G S E R E E 
+S G G G G G G G G G G S E E E E 
+S R R R R R R R R R R S E E{1} E E 
+S O O G G G G G G O O S E E E E 
+S Y G I Y Y Y Y I G Y S E E E E 
+S G G G G G G G G G G S E E E E 
+S G G G G B B G G G G S E E E E 
+S G G E G E E G E G G S E E E E 
+S G G E E E E E E G G S E E E E 
+S G E O E O O E O E G S E E E E 
+S G G O O O O O O G G S E E E E 
+S E E G G G G G G E E S E E E E 
+S E E E E E E E E E E S E E E E 
+S E E E E E E E E E E S E E E E 
+S E E E E E E E E E E S E E E E 
+S E E E E E E E E E E S E E E E 
+S E E E E E E E E E E S E E E E 
+S E E E E E E E E E E S E E E E 
+S E E E E E E E E E E S E E E E 
+S E E E E E E E E E E S S S S S 
+S E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E W(2) 
+
+STARS:
+20000
+25000
+33000
+40000
+55000
+
+PaddleGrow 3
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 0
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MultiBall3 2
+IceBall 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

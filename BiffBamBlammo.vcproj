@@ -179,6 +179,169 @@
 				CommandLine="xcopy /Y /R $(ProjectDir)lib\*.dll $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BBBResources.zip $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BiffBamBlammoIcon.bmp $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BiffBamBlammo.ico $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
+		<Configuration
+			Name="DemoDebug|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/al&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_DEMO"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				TreatWChar_tAsBuiltInType="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="4"
+				DebugInformationFormat="4"
+				DisableSpecificWarnings="4996"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="SDLmain.lib SDL_mixerd.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
+				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
+				LinkIncremental="0"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
+				IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrt.lib"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="xcopy /Y /R $(ProjectDir)lib\*.dll $(OutDir)&#x0D;&#x0A;copy $(ProjectDir)BBBResources_Demo.zip $(OutDir)\BBBResources.zip&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BiffBamBlammoIcon.bmp $(OutDir)&#x0D;&#x0A;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DemoRelease|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/al&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_DEMO"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				TreatWChar_tAsBuiltInType="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="4"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="SDLmain.lib SDL_mixer.lib cg.lib cgGL.lib DevIL.lib freetype235.lib glutstatic.lib ILU.lib ILUT.lib glew32s.lib SDL.lib XInput.lib"
+				OutputFile="$(ProjectDir)$(ConfigurationName)\$(ProjectName).exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
+				IgnoreDefaultLibraryNames="libc.lib"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="xcopy /Y /R $(ProjectDir)lib\*.dll $(OutDir)&#x0D;&#x0A;copy $(ProjectDir)BBBResources_Demo.zip $(OutDir)\BBBResources.zip&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BiffBamBlammoIcon.bmp $(OutDir)&#x0D;&#x0A;xcopy /Y /R $(ProjectDir)BiffBamBlammo.ico $(OutDir)&#x0D;&#x0A;"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -1733,6 +1896,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\InvisiPaddleItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\LaserBeamPaddleItem.h"
 						>
 					</File>
@@ -1846,6 +2013,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\InvisiBallItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\InvisiPaddleItem.cpp"
 						>
 					</File>
 					<File

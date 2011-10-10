@@ -80,6 +80,9 @@ The camera goes inside the ball, looking down at the paddle.
 - PaddleShrink
 The paddle decreases in size.
 
+- InvisiPaddle
+The paddle becomes slightly invisible (cloaked) and thus more difficult to see.
+
 - PoisonPaddle
 The screen becomes blurry and difficult to see.
 

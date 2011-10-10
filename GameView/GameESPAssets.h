@@ -318,6 +318,7 @@ public:
 
 	void DrawBackgroundBallEffects(double dT, const Camera& camera, const GameBall& ball);
 	void DrawBackgroundPaddleEffects(double dT, const Camera& camera);
+    void TickButDontDrawBackgroundPaddleEffects(double dT);
 
 	void DrawPaddleLaserBulletEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);
 	void DrawPaddleLaserBeamBeforeFiringEffects(double dT, const Camera& camera, const PlayerPaddle& paddle);

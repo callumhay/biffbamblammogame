@@ -52,7 +52,7 @@ public:
 	// Whether or not the ghost ball can just pass through this block.
 	// Returns: true if it can, false otherwise.
 	bool GhostballPassesThrough() const {
-		return true;
+        return this->isChangable;
 	}
 
 	// Tesla blocks do not reflect or refract light.

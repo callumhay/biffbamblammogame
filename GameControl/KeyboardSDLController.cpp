@@ -468,7 +468,9 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
 	    else if (key == SDLK_1) {
 		    this->model->DropItem(GameItem::OneUpItem);
 	    }
-	    // 2
+        else if (key == SDLK_2) {
+            this->model->DropItem(GameItem::InvisiPaddleItem);
+        }
 	    else if (key == SDLK_3) {
 		    this->model->DropItem(GameItem::MultiBall3Item);
 	    }

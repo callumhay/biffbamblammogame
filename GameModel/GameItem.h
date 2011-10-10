@@ -55,6 +55,7 @@ public:
                     FireBallItem,
                     IceBallItem,
                     OmniLaserBallItem,
+                    InvisiPaddleItem,
 
                     RandomItem // MAKE SURE RANDOM ITEM IS ALWAYS THE LAST ONE!!
 	};

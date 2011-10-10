@@ -4975,34 +4975,47 @@ void GameESPAssets::DrawBackgroundBallEffects(double dT, const Camera& camera, c
  * Draw particle effects associated with the paddle, which get drawn behind the paddle.
  */
 void GameESPAssets::DrawBackgroundPaddleEffects(double dT, const Camera& camera) {
-	std::list<std::list<ESPEmitter*>::iterator> removeElements;
-
 	// Go through all the particles and do book keeping and drawing
 	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin();
-		iter != this->activePaddleEmitters.end(); ++iter) {
+		iter != this->activePaddleEmitters.end();) {
 	
 		ESPEmitter* curr = *iter;
 
 		// Check to see if dead, if so erase it...
 		if (curr->IsDead()) {
-			removeElements.push_back(iter);
+            iter = this->activePaddleEmitters.erase(iter);
+            delete curr;
+            curr = NULL;
 		}
 		else {
 			// Not dead yet so we draw and tick
 			curr->Draw(camera);
 			curr->Tick(dT);
+            ++iter;
 		}
-	}
-
-	for (std::list<std::list<ESPEmitter*>::iterator>::iterator iter = removeElements.begin(); iter != removeElements.end(); ++iter) {
-			ESPEmitter* currEmitter = (**iter);
-			this->activePaddleEmitters.erase(*iter);
-			delete currEmitter;
-			currEmitter = NULL;
 	}
 }
 
+void GameESPAssets::TickButDontDrawBackgroundPaddleEffects(double dT) {
+    // Just tick, don't draw
+	for (std::list<ESPEmitter*>::iterator iter = this->activePaddleEmitters.begin();
+		iter != this->activePaddleEmitters.end();) {
+	
+		ESPEmitter* curr = *iter;
 
+		// Check to see if dead, if so erase it...
+		if (curr->IsDead()) {
+            iter = this->activePaddleEmitters.erase(iter);
+            delete curr;
+            curr = NULL;
+		}
+		else {
+			// Not dead yet so we tick
+			curr->Tick(dT);
+            ++iter;
+		}
+	}
+}
 
 void GameESPAssets::DrawTeslaLightningArcs(double dT, const Camera& camera) {
 	for (std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, std::list<ESPPointToPointBeam*> >::iterator iter = this->teslaLightningArcs.begin();

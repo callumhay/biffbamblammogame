@@ -35,14 +35,15 @@ public:
 	 * Draws the paddle laser gun attachment - also is responsible for
 	 * animating the attachment and setting the appropriate transformations.
 	 */
-	inline void Draw(double dT, const PlayerPaddle& p, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight) {
+	inline void Draw(double dT, const PlayerPaddle& p, const Camera& camera, CgFxEffectBase* replacementMat,
+                     const BasicPointLight& keyLight, const BasicPointLight& fillLight) {
 		float paddleScaleFactor = p.GetPaddleScaleFactor();
 		this->laserGunRecoilAnim.Tick(dT);
 
 		glPushMatrix();
 		glTranslatef(0, 0, this->laserGunRecoilAnim.GetInterpolantValue());	// Animate recoil on fire
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
-		this->laserGunMesh->Draw(camera, keyLight, fillLight);
+		this->laserGunMesh->Draw(camera, replacementMat, keyLight, fillLight);
 		glPopMatrix();
 	}
 
