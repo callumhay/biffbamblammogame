@@ -117,6 +117,7 @@ GameBall::~GameBall() {
  * then it should be reset).
  */
 void GameBall::ResetBallAttributes() {
+    this->TurnOffImpulse();
 	this->SetSpeed(NormalSpeed);
 	this->currType  = NormalBall;
 	this->SetBallSize(NormalSize);
@@ -134,8 +135,7 @@ void GameBall::ResetBallAttributes() {
 	this->ballballCollisionsDisabledTimer = 0.0;
 	this->timeSinceLastCollision = 0.0;
     this->boostSpdDecreaseCounter = BOOST_TEMP_SPD_INCREASE_AMT;
-    this->TurnOffImpulse();
-
+    
 	// Set the ball state back to its typical state (how it normally interacts with the world)
 	this->SetBallState(new NormalBallState(this), true);
 }

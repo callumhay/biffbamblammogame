@@ -186,8 +186,8 @@ void BallInPlayState::Tick(double seconds) {
 				// Do ball-paddle collision
 				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
                 // Apply an impulse to the ball based on the speed of the paddle...
-                float dPaddleSpd = 0.01*paddle->GetSpeed();
-                currBall->ApplyImpulseForce(dPaddleSpd, (3*dPaddleSpd));
+                float dPaddleSpd = 0.0175f * fabs(paddle->GetSpeed());
+                currBall->ApplyImpulseForce(dPaddleSpd, (3.0f * dPaddleSpd));
 
 				// Tell the model that a ball collision occurred with the paddle
 				this->gameModel->BallPaddleCollisionOccurred(*currBall);
@@ -198,11 +198,6 @@ void BallInPlayState::Tick(double seconds) {
 				    // still see it fly into the void - of course, if the shield is active then no help is provided
                     this->AugmentBallDirectionToBeNotTooDownwards(*currBall, n);
 				}
-                else {
-                    // The shield paddle has some wonky collision detection so fix it so that it doesn't
-                    // iterate for too long
-                    count = 4;
-                }
 
 				// If there are multiple balls and the one that just hit the paddle is not
 				// the first one in the list, then we need to move this one to the front
@@ -213,14 +208,16 @@ void BallInPlayState::Tick(double seconds) {
                 // Check to see whether the ball is hitting both a wall AND the paddle - if so the paddle should
                 // be repelled by the opposing force of the wall against the ball...
                 if (!paddle->UpdateForOpposingForceBallCollision(*currBall, seconds)) {
-				    // Make sure that the ball is no longer colliding!
-			        static Vector2D tempN;
-			        static Collision::LineSeg2D tempLine;
-			        static double tempTime;
-			        while (paddle->CollisionCheck(*currBall, 0.0, tempN, tempLine, tempTime) && count < 5) {
-				        currBall->SetCenterPosition(currBall->GetCenterPosition2D() + currBall->GetBounds().Radius() * n);
-                        count++;
-			        }
+                    if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
+				        // Make sure that the ball is no longer colliding!
+			            static Vector2D tempN;
+			            static Collision::LineSeg2D tempLine;
+			            static double tempTime;
+			            while (paddle->CollisionCheck(*currBall, 0.0, tempN, tempLine, tempTime) && count < 5) {
+				            currBall->SetCenterPosition(currBall->GetCenterPosition2D() + currBall->GetBounds().Radius() * n);
+                            count++;
+			            }
+                    }
                 }
 			}
 		}
@@ -361,7 +358,9 @@ void BallInPlayState::Tick(double seconds) {
 	}
 	
 	// Get rid of all the balls that went out of bounds / are now dead
-	for (std::list<std::list<GameBall*>::iterator>::iterator iter = ballsToRemove.begin(); iter != ballsToRemove.end(); ++iter) {
+	for (std::list<std::list<GameBall*>::iterator>::iterator iter = ballsToRemove.begin();
+         iter != ballsToRemove.end(); ++iter) {
+
 		GameBall* ballToDestroy = (**iter);
 
 		// EVENT: Ball died

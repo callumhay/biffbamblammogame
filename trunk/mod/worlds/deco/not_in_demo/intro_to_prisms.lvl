@@ -44,6 +44,7 @@ ShieldPaddle 1
 LaserBulletPaddle 3
 1Up 2
 PaddleShrink 1
+InvisiPaddle 2
 InvisiBall 1
 LaserBeamPaddle 3
 OmniLaserBall 1

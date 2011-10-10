@@ -415,9 +415,13 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 
             if (gameModel.GetCurrentStateType() == GameState::BallInPlayStateType) {
                 LevelPiece* piece = gameModel.GetCurrentLevel()->GetMaxBoundPiece();
-                LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
-                UNUSED_VARIABLE(resultingPiece);
-                assert(resultingPiece == piece);
+                
+                // Make sure the piece is actually being collided with
+                if (fabs(this->maxBound - gameModel.GetCurrentLevel()->GetPaddleMaxBound()) < EPSILON) {
+                    LevelPiece* resultingPiece = piece->CollisionOccurred(&gameModel, *this);
+                    UNUSED_VARIABLE(resultingPiece);
+                    assert(resultingPiece == piece);
+                }
             }
 
 			// EVENT: paddle hit right wall for first time

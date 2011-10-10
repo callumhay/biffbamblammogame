@@ -78,7 +78,7 @@ paddleLaserAttachment(NULL),
 paddleStickyAttachment(NULL),
 paddleShield(NULL),
 
-invisiBallEffect(NULL), 
+invisibleEffect(NULL), 
 ghostBallEffect(NULL),
 fireBallEffect(NULL),
 
@@ -413,8 +413,8 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 			if (ballIsInvisible) {
 				// Obtain the POST full screen rendering from the previous frame - this is
 				// a bit of a hack but it saves us from reading/writing to the same FBO simultaneously
-				this->invisiBallEffect->SetFBOTexture(this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
-				ballEffectTemp = this->invisiBallEffect;
+				this->invisibleEffect->SetFBOTexture(this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
+				ballEffectTemp = this->invisibleEffect;
 			}
 			else {
 				// We only take the average of visible balls.
@@ -553,10 +553,22 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 		this->paddleShield->DrawAndTick(p, camera, dT);
 	}
 
-	// Draw any effects on the paddle (e.g., item acquiring effects)
-	this->espAssets->DrawBackgroundPaddleEffects(dT, camera);
+    // If the paddle is invisible then we don't draw any of the extraneous effects on it and we make sure
+    // to draw it with an invisible material...
+    bool paddleIsInvisible = (p.GetPaddleType() & PlayerPaddle::InvisiPaddle) == PlayerPaddle::InvisiPaddle;
+    CgFxEffectBase* paddleReplacementMat = NULL;
+    if (paddleIsInvisible) {
+        paddleReplacementMat = this->invisibleEffect;
+        // Just tick the effects on the paddle, no drawing
+        this->espAssets->TickButDontDrawBackgroundPaddleEffects(dT);
+    }
+    else {
+	    // Draw any effects on the paddle (e.g., item acquiring effects)
+	    this->espAssets->DrawBackgroundPaddleEffects(dT, camera);
+    }
+
 	// Draw the paddle
-	this->worldAssets->DrawPaddle(p, camera, paddleKeyLight, paddleFillLight, ballLight);
+	this->worldAssets->DrawPaddle(p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 
 	if ((p.GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
 		if (p.GetIsLaserBeamFiring()) {
@@ -579,11 +591,11 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		if ((p.GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 			// Draw attachment (gun) mesh
-			this->paddleLaserAttachment->Draw(dT, p, camera, paddleKeyLight, paddleFillLight);
+			this->paddleLaserAttachment->Draw(dT, p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight);
 		}
 		if ((p.GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
 			glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
-			this->paddleBeamAttachment->Draw(camera, paddleKeyLight, paddleFillLight);
+			this->paddleBeamAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight);
 		}
 	}
 
@@ -949,10 +961,10 @@ void GameAssets::LoadRegularMeshAssets() {
 }
 
 void GameAssets::LoadRegularEffectAssets() {
-	if (this->invisiBallEffect == NULL) {
-		this->invisiBallEffect = new CgFxPostRefract();
-		this->invisiBallEffect->SetWarpAmountParam(50.0f);
-		this->invisiBallEffect->SetIndexOfRefraction(1.33f);
+	if (this->invisibleEffect == NULL) {
+		this->invisibleEffect = new CgFxPostRefract();
+		this->invisibleEffect->SetWarpAmountParam(50.0f);
+		this->invisibleEffect->SetIndexOfRefraction(1.33f);
 	}
 	if (this->ghostBallEffect == NULL) {
 		this->ghostBallEffect = new CgFxVolumetricEffect();
@@ -977,9 +989,9 @@ void GameAssets::LoadRegularEffectAssets() {
 
 void GameAssets::DeleteRegularEffectAssets() {
 	// Delete the invisiball effect
-	if (this->invisiBallEffect != NULL) {
-		delete this->invisiBallEffect;
-		this->invisiBallEffect = NULL;
+	if (this->invisibleEffect != NULL) {
+		delete this->invisibleEffect;
+		this->invisibleEffect = NULL;
 	}
 
 	if (this->ghostBallEffect != NULL) {
@@ -1261,7 +1273,7 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 			break;
 
 		case GameItem::ShieldPaddleItem: {
-				const Texture2D* fullscreenFBOTex = this->GetFBOAssets()->GetFinalFullScreenFBO()->GetFBOTexture();
+				const Texture2D* fullscreenFBOTex = this->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture();
 				assert(fullscreenFBOTex != NULL);
 				this->paddleShield->ActivateShield(*gameModel.GetPlayerPaddle(), *fullscreenFBOTex);
 			}

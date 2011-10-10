@@ -13,8 +13,8 @@
 #include "GameModel.h"
 #include "GameItemTimer.h"
 
-const double InvisiBallItem::INVISI_BALL_TIMER_IN_SECS	= 12.0;
-const char* InvisiBallItem::INVISI_BALL_ITEM_NAME				= "InvisiBall";
+const double InvisiBallItem::INVISI_BALL_TIMER_IN_SECS	= 20.0;
+const char* InvisiBallItem::INVISI_BALL_ITEM_NAME		= "InvisiBall";
 
 InvisiBallItem::InvisiBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(INVISI_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Bad) {
@@ -38,10 +38,11 @@ double InvisiBallItem::Activate() {
 	}
 	// Remove the invisiball timers from the list of active timers
 	for (unsigned int i = 0; i < removeTimers.size(); i++) {
-			GameItemTimer* currTimer = removeTimers[i];
-			activeTimers.remove(currTimer);
-			delete currTimer;
-			currTimer = NULL;
+        GameItemTimer* currTimer = removeTimers[i];
+        currTimer->SetDeactivateItemOnStop(false);
+        activeTimers.remove(currTimer);
+        delete currTimer;
+        currTimer = NULL;
 	}
 
 	// Make the last ball to hit the paddle invisible!

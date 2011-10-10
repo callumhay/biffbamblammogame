@@ -67,6 +67,7 @@ oneWayRightBlock(NULL), statusEffectRenderer(NULL) {
 	// Add the typical level meshes to the list of materials...
 #define INSERT_MATERIAL_GRPS(block) { const std::map<std::string, MaterialGroup*>& matGrps = block->GetMaterialGroups(); \
     for (std::map<std::string, MaterialGroup*>::const_iterator iter = matGrps.begin(); iter != matGrps.end(); ++iter) { \
+    assert(this->levelMaterials.find(iter->first) == this->levelMaterials.end()); \
     this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial())); } }
     
     INSERT_MATERIAL_GRPS(this->basicBlock);
@@ -275,10 +276,12 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pieceAfter) {
 
 	// Find the changed piece and change its display list...
-	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint> >::iterator pieceInfoIter = this->pieceDisplayLists.find(&pieceBefore);
+	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint> >::iterator pieceInfoIter =
+        this->pieceDisplayLists.find(&pieceBefore);
 
 	if (pieceInfoIter != this->pieceDisplayLists.end()) {
-		// Go through each of the materials and clear up previous display lists and materials...
+		
+        // Go through each of the materials and clear up previous display lists and materials...
 		for (std::map<CgFxMaterialEffect*, GLuint>::iterator iter = pieceInfoIter->second.begin();
 			iter != pieceInfoIter->second.end(); ++iter) {
 			
@@ -287,7 +290,7 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 
 			// ... and remove it from other relevant maps/arrays/etc.
 			std::vector<GLuint>& displayLists = this->displayListsPerMaterial[iter->first];
-			for(std::vector<GLuint>::iterator iterDL = displayLists.begin(); iterDL != displayLists.end(); ++iterDL) {
+			for (std::vector<GLuint>::iterator iterDL = displayLists.begin(); iterDL != displayLists.end(); ++iterDL) {
 				if (*iterDL == iter->second)	{
 					displayLists.erase(iterDL);
 					break;
@@ -437,9 +440,9 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		std::map<std::string, CgFxMaterialEffect*>::iterator currMaterialIter = this->levelMaterials.find(iter->first);
 		assert(currMaterialIter != this->levelMaterials.end());
 
-		CgFxMaterialEffect* currMaterial	= currMaterialIter->second;
-		PolygonGroup* currPolyGrp					= iter->second->GetPolygonGroup();
-		const Colour& currColour					= piece->GetColour();
+		CgFxMaterialEffect* currMaterial = currMaterialIter->second;
+		PolygonGroup* currPolyGrp        = iter->second->GetPolygonGroup();
+		const Colour& currColour         = piece->GetColour();
 
 		assert(currMaterial != NULL);
 		assert(currPolyGrp != NULL);
@@ -467,8 +470,11 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		currPolyGrp->Transform(fullInvTransform);
 	
 		// Insert the new display list into the list of display lists...
-		this->pieceDisplayLists[piece].insert(std::make_pair<CgFxMaterialEffect*, GLuint>(currMaterial, newDisplayList));
-		this->displayListsPerMaterial[currMaterial].push_back(newDisplayList);
+		std::map<CgFxMaterialEffect*, GLuint>& currPieceMatMap = this->pieceDisplayLists[piece];
+        currPieceMatMap.insert(std::make_pair<CgFxMaterialEffect*, GLuint>(currMaterial, newDisplayList));
+		
+        std::vector<GLuint>& currDisplayListVec = this->displayListsPerMaterial[currMaterial];
+        currDisplayListVec.push_back(newDisplayList);
 	}
 
 	glPopAttrib();

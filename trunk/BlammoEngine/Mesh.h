@@ -241,6 +241,27 @@ public:
 	}
 
 	/**
+	 * Special override of the draw function - this will take the given material
+	 * and apply it to the entire mesh, regardless of the material groups, also applies given lights
+	 */
+	void Draw(const Camera& camera, CgFxEffectBase* replacementMat, const BasicPointLight& keyLight,
+              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
+		// In case the replacement material is NULL then we just do default draw...
+		if (replacementMat == NULL) {
+			this->Draw(camera, keyLight, fillLight, ballLight);
+		}
+		else {
+			// Draw each material group
+			std::map<std::string, MaterialGroup*>::const_iterator matGrpIter = this->matGrps.begin();
+			for (matGrpIter = this->matGrps.begin(); matGrpIter != this->matGrps.end(); ++matGrpIter) {
+				matGrpIter->second->Draw(camera, replacementMat);
+			}
+		}
+	}
+
+
+    /**
 	 * Draw all of the mesh without the material.
 	 */
 	void FastDraw() const {

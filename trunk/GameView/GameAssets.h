@@ -181,7 +181,7 @@ private:
 	RandomToItemAnimation randomToItemAnimation;
 
 	// Special effects - persistant special effects in the game
-	CgFxPostRefract* invisiBallEffect;
+	CgFxPostRefract* invisibleEffect;
 	CgFxVolumetricEffect* ghostBallEffect;
 	CgFxFireBallEffect* fireBallEffect;
 

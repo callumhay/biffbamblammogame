@@ -35,12 +35,14 @@ numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(
 	
 	// Create our various labels...
 	const TextureFontSet* loadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small);
-	this->loadingLabel = TextLabel2D(loadingFont, LoadingScreen::LOADING_TEXT);
+	assert(loadingFont != NULL);
+    this->loadingLabel = TextLabel2D(loadingFont, LoadingScreen::LOADING_TEXT);
 	this->loadingLabel.SetColour(Colour(0.457, 0.695, 0.863));
 	this->loadingLabel.SetDropShadow(Colour(0,0,0), 0.10);
 
 	const TextureFontSet* itemLoadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium);
-	this->itemLoadingLabel = TextLabel2D(itemLoadingFont, "");
+	assert(itemLoadingFont != NULL);
+    this->itemLoadingLabel = TextLabel2D(itemLoadingFont, "");
 	this->itemLoadingLabel.SetColour(Colour(0, 0, 0));
 	this->itemLoadingLabel.SetDropShadow(Colour(0,0,0), 0.05);
 
