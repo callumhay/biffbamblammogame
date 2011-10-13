@@ -359,16 +359,19 @@ inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector
 		}
 	}
 	else {
-        // Don't allow the bottom paddle collision boundry line to factor into the collision if the ball is traveling downward
-        // at the paddle...
+
         if (this->bounds.GetNumLines() == 3) {
             return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
         }
         else {
+
+            // Don't allow the bottom paddle collision boundry line to factor into the collision if the ball is traveling downward
+            // at the paddle or the ball is above the paddle
             assert(this->bounds.GetNumLines() == 4);
 
-            if (Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
-                // Ball is travelling upwards at the paddle...
+            if ((ball.GetCenterPosition2D()[1] < (this->GetCenterPosition()[1] - this->GetHalfHeight())) &&
+                Vector2D::Dot(ball.GetDirection(), this->GetUpVector()) > 0) {
+                // Ball is travelling upwards at the paddle from below it...
                 return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
             }
             else {

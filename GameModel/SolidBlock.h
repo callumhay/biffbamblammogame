@@ -84,7 +84,7 @@ public:
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
 private:
-    static const int POINTS_ON_BLOCK_DESTROYED = 700;
+    static const int POINTS_ON_BLOCK_DESTROYED = 500;
     DISALLOW_COPY_AND_ASSIGN(SolidBlock);
 };
 
