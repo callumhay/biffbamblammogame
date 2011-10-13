@@ -39,6 +39,9 @@ public:
 	bool CanBeDestroyedByBall() const {
 		return false;
 	}
+    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+        return false;
+    }
 
 	// Any type of ball can blast through an empty space...
 	bool BallBlastsThrough(const GameBall& b) const {

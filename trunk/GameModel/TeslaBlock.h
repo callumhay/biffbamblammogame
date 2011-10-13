@@ -41,6 +41,9 @@ public:
 	bool CanBeDestroyedByBall() const {
 		return false;
 	}
+    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+        return true;
+    }
 
 	// Whether or not the uber ball can just blast right through this block.
 	// Returns: true if it can, false otherwise.
@@ -77,6 +80,8 @@ public:
         UNUSED_PARAMETER(method);
 		return this;
 	}
+
+    void Triggered(GameModel* gameModel);
 
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 

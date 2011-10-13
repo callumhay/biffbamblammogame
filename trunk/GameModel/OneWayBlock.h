@@ -48,6 +48,9 @@ public:
 	bool CanBeDestroyedByBall() const {
 		return false;
 	}
+    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+        return false;
+    }
 
 	// Whether or not the ball can just blast right through this block.
 	// Returns: true if it can, false otherwise.

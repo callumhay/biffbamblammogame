@@ -57,13 +57,14 @@ public class LevelPieceImageLabel extends JLabel {
 	
 	// constructor with icon
 	public LevelPieceImageLabel(String pieceSymbol) throws Exception {
+		String justTheSymbol = pieceSymbol;
 		
 		// Clean up in the case of a portal block - since it has variables in it
 		if (pieceSymbol.length() == 6 && pieceSymbol.substring(0, 2).equals(LevelPiece.PORTAL_PIECE_SYMBOL + "(")) {
 			this.blockID  = pieceSymbol.charAt(2);
 			char siblingID = pieceSymbol.charAt(4);
 			this.siblingIDs.add(siblingID);
-			pieceSymbol = LevelPiece.PORTAL_PIECE_SYMBOL;
+			justTheSymbol = LevelPiece.PORTAL_PIECE_SYMBOL;
 		}
 		else if (pieceSymbol.length() >= 6 && pieceSymbol.substring(0, 2).equals(LevelPiece.TESLA_PIECE_SYMBOL + "(")) {
 			String siblingStr = pieceSymbol.substring(2);
@@ -72,7 +73,7 @@ public class LevelPieceImageLabel extends JLabel {
 				String currSiblingID = splitSiblingStr[i];
 				currSiblingID.trim();
 				if (currSiblingID.length() > 1) {
-					throw new Exception("Badly formed level file document.");
+					break;
 				}
 				else if (currSiblingID.length() == 1){
 					if (i == 0) {
@@ -89,7 +90,7 @@ public class LevelPieceImageLabel extends JLabel {
 					}
 				}
 			}
-			pieceSymbol = LevelPiece.TESLA_PIECE_SYMBOL;
+			justTheSymbol = LevelPiece.TESLA_PIECE_SYMBOL;
 		}
 		else if (pieceSymbol.length() >= 3 &&  pieceSymbol.substring(0, 2).equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL + "(")) {
 			String[] itemDropTypeNames = pieceSymbol.substring(2, pieceSymbol.length()).split("[\\(,\\)]");
@@ -99,27 +100,25 @@ public class LevelPieceImageLabel extends JLabel {
 				}
 			}
 			
-			pieceSymbol = LevelPiece.ITEM_DROP_PIECE_SYMBOL;
+			justTheSymbol = LevelPiece.ITEM_DROP_PIECE_SYMBOL;
 		}
 		else if (pieceSymbol.length() >= 3 &&  pieceSymbol.substring(0, 2).equals(LevelPiece.CANNON_PIECE_SYMBOL + "(")) {
 
 			String angleValue = pieceSymbol.substring(2, pieceSymbol.length()-1);
 			this.cannonDegAngle = Integer.parseInt(angleValue);
-			pieceSymbol = LevelPiece.CANNON_PIECE_SYMBOL;
+			justTheSymbol = LevelPiece.CANNON_PIECE_SYMBOL;
 		}
 		else if (pieceSymbol.length() >= 3 && pieceSymbol.substring(0, 2).equals(LevelPiece.SWITCH_PIECE_SYMBOL + "(")) {
 			String switchTriggerIDStr = pieceSymbol.substring(2, pieceSymbol.length()-1);
 			this.switchTriggerID = Integer.parseInt(switchTriggerIDStr);
-			pieceSymbol = LevelPiece.SWITCH_PIECE_SYMBOL;
+			justTheSymbol = LevelPiece.SWITCH_PIECE_SYMBOL;
 		}
 
 		// Check for a trigger ID...
-		String justTheSymbol = pieceSymbol;
 		int triggerIDStart = pieceSymbol.indexOf('{');
 		if (triggerIDStart != -1) {
 			String triggerIDStr = pieceSymbol.substring(triggerIDStart+1, pieceSymbol.length()-1);
 			this.triggerID = Integer.parseInt(triggerIDStr);
-			justTheSymbol = pieceSymbol.substring(0, triggerIDStart);
 		}
 		else {
 			this.triggerID = LevelPiece.NO_TRIGGER_ID;

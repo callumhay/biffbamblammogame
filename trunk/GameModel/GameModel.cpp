@@ -364,13 +364,14 @@ void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {
 		float fractionOfSpeed = fabs(paddleVel[0]) / PlayerPaddle::DEFAULT_MAX_SPEED;
 		float angleChange = angleDecSgn * fractionOfSpeed * PlayerPaddle::DEFLECTION_DEGREE_ANGLE;
 
-		// Set the ball to be just off the paddle
-		ball.SetCenterPosition(Point2D(ball.GetBounds().Center()[0], 
-			this->playerPaddle->GetCenterPosition()[1] + this->playerPaddle->GetHalfHeight() + ball.GetBounds().Radius() + EPSILON));
+        if ((this->playerPaddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+            // When the shield is active the ball should be just off the shield...
+            // NOTE: This is already should be done automatically
+        }
 
 		Vector2D ballVel    = ball.GetVelocity();
 		Vector2D ballVelHat = Vector2D::Normalize(ballVel);
-		float ballSpd			  = ball.GetSpeed(); 
+		float ballSpd		= ball.GetSpeed(); 
 
 		// Rotate the ball's velocity vector to reflect the momentum of the paddle
 		ball.SetVelocity(ballSpd, Vector2D::Rotate(angleChange, ballVelHat));

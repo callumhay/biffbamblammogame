@@ -27,7 +27,7 @@ public:
 
 	// Is this piece one without any boundries (i.e., no collision surface/line)?
 	// Return: true if non-collider, false otherwise.
-	virtual bool IsNoBoundsPieceType() const {
+	bool IsNoBoundsPieceType() const {
 		return false;
 	}
 	bool BallBouncesOffWhenHit() const {
@@ -35,12 +35,15 @@ public:
 	}
 
 	// Solid blocks can NEVER be destroyed...
-	virtual bool MustBeDestoryedToEndLevel() const {
+	bool MustBeDestoryedToEndLevel() const {
 		return false;
 	}
-	virtual bool CanBeDestroyedByBall() const {
+	bool CanBeDestroyedByBall() const {
 		return false;
 	}
+    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+        return false;
+    }
 
 	// Whether or not the ball can just blast right through this block.
 	// Returns: true if it can, false otherwise.

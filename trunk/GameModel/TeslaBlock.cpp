@@ -28,6 +28,10 @@ lifePointsUntilNextToggle(TOGGLE_ON_OFF_LIFE_POINTS) {
 TeslaBlock::~TeslaBlock() {
 }
 
+void TeslaBlock::Triggered(GameModel* gameModel) {
+    this->ToggleElectricity(*gameModel, *gameModel->GetCurrentLevel());
+}
+
 /**
  * Update the collision boundries of this tesla block, tesla blocks are special in that they will
  * ALWAYS have all possible collision boundries enabled and created.

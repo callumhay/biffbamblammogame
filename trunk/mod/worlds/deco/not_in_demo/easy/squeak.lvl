@@ -4,21 +4,21 @@ E E E S S S S S S S S E E E
 E E E S X(d,c) E Y G G G S E E E 
 E E E S T(S,ll) E Y G G G S E E E 
 S S S S N N N Y Y Y S S S S 
-S G G Y G G Y G G G N E X(c,d) S 
+S T(P,ul) G Y G G Y G G G N E X(c,d) S 
 S G G Y G G Y G G G N E E S 
-S Y Y N N N N Y Y N N Y Y S 
+S Y Y G G G G Y Y N N Y Y S 
 S X(e,f) E Y G G Y E E E O G G S 
-S E E Y G G Y E E E Y G G S 
-S Y Y N N N N E I E O G G S 
-S G G N T(S,ul) E Y E E E Y G G S 
-S G G N X(a,b) E Y E E E O G G S 
-S Y Y N N N N N N N N Y Y S 
-S G G Y G E I N E X(b,a) N G G S 
-S G G Y G E E N E E N G G S 
-S N N Y G E E N G G N G G S 
-S G G Y G E E N O Y N G G S 
-S G G Y G E X(f,e) N Y O Y G G S 
-S Y Y N N N N N R R R R R S 
+S E E N N N N E E E Y G G S 
+S Y Y N T(P,ul) E Y E I E O G G S 
+S G G N X(a,b) E Y E E E Y G G S 
+S Y Y N N N N N N N N G G S 
+S G G G Y E E N E E N Y Y S 
+S G G G Y E I N E X(b,a) N G G S 
+S O O G Y E E N E E N G G S 
+S O O G Y E E N G G N G G S 
+S G G G Y E X(f,e) N O Y N G G S 
+S G G G Y E E N Y O Y G G S 
+S Y Y N N N N N O R O R O S 
 S E E E E E E E E E E E E S 
 S E E E E E E E E E E E E S 
 S E E E E E E E E E E E E S 
@@ -40,8 +40,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 0
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

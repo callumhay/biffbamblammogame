@@ -23,7 +23,8 @@ public:
     OmniLaserBallEffect();
     ~OmniLaserBallEffect();
 
-    void Draw(double dT, const Camera& camera, const GameBall& ball);
+    void Draw(double dT, bool doTick, const Camera& camera, const GameBall& ball);
+    
 
 private:
     AnimationMultiLerp<float> rotAngleAnim;

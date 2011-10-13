@@ -1465,7 +1465,58 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 		return false;
 	}
 
-	const Point2D& currentBallPos	= b.GetCenterPosition2D();
+    static const int NUM_COLLISON_SAMPLES = 15;
+
+    bool zeroVelocity = (b.GetSpeed() < EPSILON);
+    int numCollisionSamples;
+    if (zeroVelocity) {
+        numCollisionSamples = 1;
+    }
+    else {
+        numCollisionSamples = NUM_COLLISON_SAMPLES;
+    }
+    
+    // Figure out the distance along the vector travelled since the last collision
+    // to take each sample at...
+    Vector2D adjustedVelocity =  1.1f * b.GetVelocity();
+    Vector2D sampleIncDist = dT * adjustedVelocity / static_cast<float>(numCollisionSamples+1);
+    double   sampleIncTime = dT / static_cast<double>(numCollisionSamples+1);
+
+    Point2D currSamplePt = ball.GetCenterPosition2D() - (dT * adjustedVelocity) + sampleIncDist;
+    double currTimeSinceCollision = dT - sampleIncTime;
+
+    // Keep track of all the indices collided with and the collision point collided at
+    Point2D collisionPt;
+    bool isCollision = false;
+
+    // Go through all of the samples starting with the first (which is just a bit off from the previous
+    // tick location) and moving towards the circle's current location, when a collision is found we exit
+    for (int i = 0; i < numCollisionSamples; i++) {
+
+	    std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::const_iterator iter = 
+            this->teslaLightning.begin();
+
+	    for (; iter != this->teslaLightning.end(); ++iter) {
+
+            const Collision::LineSeg2D& currLineSeg = iter->second;
+            
+            if (Collision::GetCollisionPoint(
+                Collision::Circle2D(currSamplePt, ball.GetBounds().Radius()),
+                currLineSeg, collisionPt)) {
+
+                collisionLine = currLineSeg;
+			    isCollision = true;
+			    break;
+            }
+        }
+
+        if (isCollision) { break; }
+        currSamplePt = currSamplePt + sampleIncDist;
+        currTimeSinceCollision -= sampleIncTime;
+    }
+
+    /*
+	const Point2D& currentBallPos = b.GetCenterPosition2D();
 	const Collision::Circle2D& ballBounds = b.GetBounds();
 	float sqBallRadius = 1.15f * ballBounds.Radius() * ballBounds.Radius();
 	
@@ -1486,6 +1537,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 			break;
 		}
 	}
+    */
 
 	// If there was no collision then just exit
 	if (!isCollision) {
@@ -1525,7 +1577,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 
 	// Change the normal slightly to make the ball reflection a bit random - make it harder on the player...
 	// Tend towards changing the normal to make a bigger reflection not a smaller one...
-	static const float MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS = static_cast<float>(M_PI / 4.0);	// Angle from the normal that's allowable
+    static const float MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS = Trig::degreesToRadians(80);	// Angle from the normal that's allowable
 	static const float MAX_ANGLE_LESS_REFLECTION_DEGS = 15.0f;
 	static const float MAX_ANGLE_MORE_REFLECTION_DEGS = 30.0f;
 	const Vector2D& ballVelocityDir = b.GetDirection();
