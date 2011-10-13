@@ -1126,13 +1126,13 @@ std::list<PointAward> PlayerPaddle::GetPointsForHittingBall(const GameBall& ball
  * Used to detect and react to situations where the ball is forced up against a wall by the paddle.
  */
 bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, double dT) {
-    // Check to see if the ball is hitting the bounds of the level...
-    float ballMinX = ball.GetCenterPosition2D()[0] - ball.GetBounds().Radius();
-    float ballMaxX = ball.GetCenterPosition2D()[0] + ball.GetBounds().Radius();
-
     static Vector2D normal;
     static Collision::LineSeg2D collisionLine;
     static double timeSinceCollision;
+    
+    // Check to see if the ball is hitting the bounds of the level...
+    float ballMinX = ball.GetCenterPosition2D()[0] - ball.GetBounds().Radius();
+    float ballMaxX = ball.GetCenterPosition2D()[0] + ball.GetBounds().Radius();
 
     if (ballMinX <= this->minBound) {
         // The ball is currently intersecting the line that defines the 

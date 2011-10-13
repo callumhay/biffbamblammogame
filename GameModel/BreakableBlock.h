@@ -41,12 +41,15 @@ public:
 	}
 	
 	// All breakable blocks must be destroyed to end a level...
-	virtual bool MustBeDestoryedToEndLevel() const {
+	bool MustBeDestoryedToEndLevel() const {
 		return true;
 	}
-	virtual bool CanBeDestroyedByBall() const {
+	bool CanBeDestroyedByBall() const {
 		return true;
 	}
+    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+        return true;
+    }
 
 	// Whether or not the uber ball can just blast right through this block.
 	// Returns: true if it can, false otherwise.

@@ -29,6 +29,8 @@ import javax.swing.JScrollPane;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Pattern;
+
 import bbbleveleditor.BBBLevelEditMainWindow.ToolMode;
 
 public class BBBLevelEditDocumentWindow extends JInternalFrame 
@@ -336,7 +338,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 				}
 				
 				// Now read in all the pieces in the level
-				//levelFileScanner.useDelimiter(Pattern.compile("\\s"));
+				//levelFileScanner.useDelimiter(java.util.regex.Pattern.compile("\\s"));
 				String currLevelPieceSymbol = "";
 				//LevelPiece currLevelPiece = null;
 				
@@ -350,7 +352,7 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 						
 						currLevelPieceSymbol = levelFileScanner.next();
 						LevelPieceImageLabel tempLabel = new LevelPieceImageLabel(currLevelPieceSymbol);
-						
+
 						if (tempLabel.getIsPortal()) {
 							this.portalIDs.add(tempLabel.getBlockID());
 							this.portalIDs.add(tempLabel.getPortalSiblingID());

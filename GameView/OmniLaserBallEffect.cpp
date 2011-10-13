@@ -50,7 +50,7 @@ OmniLaserBallEffect::~OmniLaserBallEffect() {
 }
 
 // Draw three glowing sentries orbiting around the ball
-void OmniLaserBallEffect::Draw(double dT, const Camera& camera, const GameBall& ball) {
+void OmniLaserBallEffect::Draw(double dT, bool doTick, const Camera& camera, const GameBall& ball) {
 
     float sentrySize = 1.25f * ball.GetBounds().Radius();
     const Point2D& ballPosition = ball.GetCenterPosition2D();
@@ -76,7 +76,9 @@ void OmniLaserBallEffect::Draw(double dT, const Camera& camera, const GameBall& 
     glPopMatrix();
     glPopAttrib();
 
-    this->rotAngleAnim.Tick(dT);
+    if (doTick) {
+        this->rotAngleAnim.Tick(dT);
+    }
 }
 
 void OmniLaserBallEffect::DrawSentries(const GameBall& ball, float size) {

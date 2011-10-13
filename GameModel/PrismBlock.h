@@ -32,7 +32,7 @@ public:
 
     // Is this piece one without any boundries (i.e., no collision surface/line)?
     // Return: true if non-collider, false otherwise.
-    virtual bool IsNoBoundsPieceType() const {
+    bool IsNoBoundsPieceType() const {
         return false;
     }
     bool BallBouncesOffWhenHit() const {
@@ -40,23 +40,26 @@ public:
     }
 
     // Prism blocks can NEVER be destroyed...
-    virtual bool MustBeDestoryedToEndLevel() const {
+    bool MustBeDestoryedToEndLevel() const {
         return false;
     }
-    virtual bool CanBeDestroyedByBall() const {
+    bool CanBeDestroyedByBall() const {
+        return false;
+    }
+    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
         return false;
     }
 
     // Whether or not the uber ball can just blast right through this block.
     // Returns: true if it can, false otherwise.
-    virtual bool BallBlastsThrough(const GameBall& b) const {
+    bool BallBlastsThrough(const GameBall& b) const {
         UNUSED_PARAMETER(b);
         return false;	// Cannot pass through prism blocks...
     }
 
     // Whether or not the ghost ball can just pass through this block.
     // Returns: true if it can, false otherwise.
-    virtual bool GhostballPassesThrough() const {
+    bool GhostballPassesThrough() const {
         return true; // Ghost ball can float through them, why not?
     }
 

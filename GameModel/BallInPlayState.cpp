@@ -185,6 +185,7 @@ void BallInPlayState::Tick(double seconds) {
 
 				// Do ball-paddle collision
 				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+
                 // Apply an impulse to the ball based on the speed of the paddle...
                 float dPaddleSpd = 0.0175f * fabs(paddle->GetSpeed());
                 currBall->ApplyImpulseForce(dPaddleSpd, (3.0f * dPaddleSpd));
@@ -300,14 +301,16 @@ void BallInPlayState::Tick(double seconds) {
 						this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 					}
 					
-                    bool currPieceIsBreakableByBall = currPiece->CanBeDestroyedByBall();
+                    bool currPieceCanChangeSelfOrPiecesAroundIt = currPiece->CanChangeSelfOrOtherPiecesWhenHitByBall() ||
+                                                                  currPiece->CanBeDestroyedByBall();
+
 					// Tell the model that a ball collision occurred with currPiece
                     this->gameModel->CollisionOccurred(*currBall, currPiece);
                     
                     // Recalculate the blocks we're dealing with in this loop since 
                     // some blocks may no longer exist after a collision - of course this would only happen if the piece
                     // that collided could be destroyed during this loop by the ball
-                    if (currPieceIsBreakableByBall) {
+                    if (currPieceCanChangeSelfOrPiecesAroundIt) {
 				        collisionPieces = currLevel->GetLevelPieceCollisionCandidates(currBall->GetBounds().Center(), 
                                                                                       currBall->GetBounds().Radius());
                         pieceIter = collisionPieces.begin();

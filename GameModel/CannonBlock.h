@@ -49,6 +49,9 @@ public:
 	bool CanBeDestroyedByBall() const {
 		return false;
 	}
+    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+        return false;
+    }
 	
 	// Even the uber ball just bounces off like a solid block
 	bool BallBlastsThrough(const GameBall& b) const {

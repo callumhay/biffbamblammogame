@@ -43,6 +43,9 @@ public:
 	bool CanBeDestroyedByBall() const {
 		return true;
 	}
+    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const {
+        return true;
+    }
 
 	bool BallBlastsThrough(const GameBall& b) const {
         UNUSED_PARAMETER(b);

@@ -156,19 +156,19 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 			break;
 		case PlayerPaddle::NormalSize:
 			shakeMagnitude = 0.2f;
-			shakeLength = 0.15f;
+			shakeLength = 0.125f;
 			volume = GameSoundAssets::NormalVolume;
 			controllerVibeAmt = BBBGameController::MediumVibration;
 			break;
 		case PlayerPaddle::BiggerSize:
 			shakeMagnitude = 0.33f;
-			shakeLength = 0.2f;
+			shakeLength = 0.15f;
 			volume = GameSoundAssets::LoudVolume;
 			controllerVibeAmt = BBBGameController::HeavyVibration;
 			break;
 		case PlayerPaddle::BiggestSize:
-			shakeMagnitude = 0.5f;
-			shakeLength = 0.25f;
+			shakeMagnitude = 0.44f;
+			shakeLength = 0.20f;
 			volume = GameSoundAssets::VeryLoudVolume;
 			controllerVibeAmt = BBBGameController::VeryHeavyVibration;
 			break;
@@ -487,8 +487,8 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 		this->display->GetAssets()->GetESPAssets()->AddBallHitLightningArcEffect(ball);
 
 		// Add a tiny camera and controller shake
-		this->display->GetCamera().SetCameraShake(1.2, Vector3D(0.75, 0.1, 0.1), 40);
-		GameControllerManager::GetInstance()->VibrateControllers(0.8f, BBBGameController::SoftVibration, BBBGameController::SoftVibration);
+		//this->display->GetCamera().SetCameraShake(1.2, Vector3D(0.75, 0.1, 0.1), 40);
+        GameControllerManager::GetInstance()->VibrateControllers(0.08f, BBBGameController::VerySoftVibration, BBBGameController::VerySoftVibration);
 	}
 
 	this->timeSinceLastBallTeslaCollisionEventInMS = currSystemTime;

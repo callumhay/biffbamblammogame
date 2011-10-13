@@ -296,6 +296,7 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
 	Point3D avgBallPosition(0,0,0);
 	Colour avgBallColour(0,0,0);
 	unsigned int visibleBallCount = 0;
+    bool ballWithOmniLaserDrawn = false;
 
 	// Go through each ball in the game, draw it accordingly
 	const std::list<GameBall*>& balls = gameModel.GetGameBalls();
@@ -403,7 +404,8 @@ void GameAssets::DrawGameBalls(double dT, GameModel& gameModel, const Camera& ca
             // OMNI LASER BALL CHECK
             if ((currBall->GetBallType() & GameBall::OmniLaserBulletBall) == GameBall::OmniLaserBulletBall && !ballIsInvisible) {
                 if (!GameBall::GetIsBallCameraOn() && !currBall->IsLoadedInCannonBlock()) {
-					this->omniLaserBallEffect->Draw(dT, camera, *currBall);
+					this->omniLaserBallEffect->Draw(dT, !ballWithOmniLaserDrawn, camera, *currBall);
+                    ballWithOmniLaserDrawn = true;
 				}
                 currBallColour = currBallColour + GameModelConstants::GetInstance()->OMNI_LASER_BALL_COLOUR;
                 numColoursApplied++;
