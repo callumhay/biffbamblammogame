@@ -1482,12 +1482,15 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
     Vector2D sampleIncDist = dT * adjustedVelocity / static_cast<float>(numCollisionSamples+1);
     double   sampleIncTime = dT / static_cast<double>(numCollisionSamples+1);
 
-    Point2D currSamplePt = ball.GetCenterPosition2D() - (dT * adjustedVelocity) + sampleIncDist;
+    Point2D currSamplePt = b.GetCenterPosition2D() - (dT * adjustedVelocity) + sampleIncDist;
     double currTimeSinceCollision = dT - sampleIncTime;
 
     // Keep track of all the indices collided with and the collision point collided at
     Point2D collisionPt;
     bool isCollision = false;
+
+    const TeslaBlock* teslaBlock1 = NULL;
+    const TeslaBlock* teslaBlock2 = NULL;
 
     // Go through all of the samples starting with the first (which is just a bit off from the previous
     // tick location) and moving towards the circle's current location, when a collision is found we exit
@@ -1501,11 +1504,14 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
             const Collision::LineSeg2D& currLineSeg = iter->second;
             
             if (Collision::GetCollisionPoint(
-                Collision::Circle2D(currSamplePt, ball.GetBounds().Radius()),
+                Collision::Circle2D(currSamplePt, b.GetBounds().Radius()),
                 currLineSeg, collisionPt)) {
 
                 collisionLine = currLineSeg;
 			    isCollision = true;
+
+                teslaBlock1 = iter->first.first;
+                teslaBlock2 = iter->first.second;
 			    break;
             }
         }
@@ -1515,40 +1521,18 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
         currTimeSinceCollision -= sampleIncTime;
     }
 
-    /*
-	const Point2D& currentBallPos = b.GetCenterPosition2D();
-	const Collision::Circle2D& ballBounds = b.GetBounds();
-	float sqBallRadius = 1.15f * ballBounds.Radius() * ballBounds.Radius();
-	
-	// Find the first collision between the ball and a tesla lightning arc
-	float lineToBallCenterSqDist = FLT_MAX;
-	bool isCollision = false;
-	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::const_iterator iter = this->teslaLightning.begin();
-	for (; iter != this->teslaLightning.end(); ++iter) {
-
-		const Collision::LineSeg2D& currLineSeg = iter->second;
-		lineToBallCenterSqDist = Collision::SqDistFromPtToLineSeg(currLineSeg, currentBallPos);
-
-		// Collision if the square radius is greater or equal to the sq distance between the line
-		// segment and the ball's center
-		if (lineToBallCenterSqDist <= sqBallRadius) {
-			collisionLine = iter->second;
-			isCollision = true;
-			break;
-		}
-	}
-    */
-
 	// If there was no collision then just exit
 	if (!isCollision) {
 		return false;
 	}
 
+    timeSinceCollision = currTimeSinceCollision;
+
 	// inline: There was a collision, figure out what the normal of the collision was
 	// and set all the other relevant parameter values
 	
 	// Get the vector from the line to the ball's center (the center of the ball dT time ago)
-	const Point2D previousBallPos = currentBallPos - dT * b.GetVelocity();
+	const Point2D previousBallPos = b.GetCenterPosition2D() - dT * b.GetVelocity();
 	const Point2D& linePt1        = collisionLine.P1();
 	const Point2D& linePt2        = collisionLine.P2();
 
@@ -1568,12 +1552,6 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 		n[1] = -lineVec[0];
 	}
 	n.Normalize();
-
-	// Now we need to calculate the time since the collision
-	assert(lineToBallCenterSqDist >= 0);
-	double collisionOverlapDist = fabs(ballBounds.Radius() - sqrt(lineToBallCenterSqDist));
-	timeSinceCollision = collisionOverlapDist / b.GetSpeed();
-	assert(timeSinceCollision >= 0.0);
 
 	// Change the normal slightly to make the ball reflection a bit random - make it harder on the player...
 	// Tend towards changing the normal to make a bigger reflection not a smaller one...
@@ -1596,7 +1574,7 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 	}
 
 	// EVENT: Ball hit a tesla lightning arc!
-	GameEventManager::Instance()->ActionBallHitTeslaLightningArc(b, *iter->first.first, *iter->first.second);
+	GameEventManager::Instance()->ActionBallHitTeslaLightningArc(b, *teslaBlock1, *teslaBlock2);
 
 	return true;
 }
