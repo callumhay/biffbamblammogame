@@ -1478,11 +1478,10 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
     
     // Figure out the distance along the vector travelled since the last collision
     // to take each sample at...
-    Vector2D adjustedVelocity =  1.1f * b.GetVelocity();
-    Vector2D sampleIncDist = dT * adjustedVelocity / static_cast<float>(numCollisionSamples+1);
+    Vector2D sampleIncDist = dT * b.GetVelocity() / static_cast<float>(numCollisionSamples+1);
     double   sampleIncTime = dT / static_cast<double>(numCollisionSamples+1);
 
-    Point2D currSamplePt = b.GetCenterPosition2D() - (dT * adjustedVelocity) + sampleIncDist;
+    Point2D currSamplePt = b.GetCenterPosition2D() - (dT * b.GetVelocity()) + sampleIncDist;
     double currTimeSinceCollision = dT - sampleIncTime;
 
     // Keep track of all the indices collided with and the collision point collided at
@@ -1492,33 +1491,26 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
     const TeslaBlock* teslaBlock1 = NULL;
     const TeslaBlock* teslaBlock2 = NULL;
 
-    // Go through all of the samples starting with the first (which is just a bit off from the previous
-    // tick location) and moving towards the circle's current location, when a collision is found we exit
-    for (int i = 0; i < numCollisionSamples; i++) {
+	const Collision::Circle2D& ballBounds = b.GetBounds();
+    float fullTimeRadius   = (ballBounds.Radius() + ballBounds.Radius() + (dT * b.GetVelocity()).Magnitude()) / 2.0f;
+	float sqfullTimeRadius =  fullTimeRadius * fullTimeRadius;
+	
+	// Find the first collision between the ball and a tesla lightning arc
+	std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::const_iterator iter = this->teslaLightning.begin();
+	for (; iter != this->teslaLightning.end(); ++iter) {
 
-	    std::map<std::pair<const TeslaBlock*, const TeslaBlock*>, Collision::LineSeg2D>::const_iterator iter = 
-            this->teslaLightning.begin();
+		const Collision::LineSeg2D& currLineSeg = iter->second;
+		float lineToBallCenterSqDist = Collision::SqDistFromPtToLineSeg(currLineSeg, b.GetCenterPosition2D());
 
-	    for (; iter != this->teslaLightning.end(); ++iter) {
-
-            const Collision::LineSeg2D& currLineSeg = iter->second;
-            
-            if (Collision::GetCollisionPoint(
-                Collision::Circle2D(currSamplePt, b.GetBounds().Radius()),
-                currLineSeg, collisionPt)) {
-
-                collisionLine = currLineSeg;
-			    isCollision = true;
-
-                teslaBlock1 = iter->first.first;
-                teslaBlock2 = iter->first.second;
-			    break;
-            }
+		// Collision if the square radius is greater or equal to the sq distance between the line
+		// segment and the ball's center
+		if (lineToBallCenterSqDist <= sqfullTimeRadius) {
+			collisionLine = iter->second;
+			isCollision = true;
+            teslaBlock1 = iter->first.first;
+            teslaBlock2 = iter->first.second;
+            break;
         }
-
-        if (isCollision) { break; }
-        currSamplePt = currSamplePt + sampleIncDist;
-        currTimeSinceCollision -= sampleIncTime;
     }
 
 	// If there was no collision then just exit
@@ -1526,9 +1518,32 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 		return false;
 	}
 
+    // There was a collision...
+
+    // Go through all of the samples starting with the first (which is just a bit off from the previous
+    // tick location) and moving towards the circle's current location, when a collision is found we exit
+    bool stillFindingACollision = false;
+    for (int i = 0; i < numCollisionSamples; i++) {
+
+        if (Collision::GetCollisionPoint(
+            Collision::Circle2D(currSamplePt, b.GetBounds().Radius()),
+            collisionLine, collisionPt)) {
+
+            stillFindingACollision = true;
+		    break;
+        }
+
+        currSamplePt = currSamplePt + sampleIncDist;
+        currTimeSinceCollision -= sampleIncTime;
+    }
+
+    if (!stillFindingACollision) {
+        return false;
+    }
+
     timeSinceCollision = currTimeSinceCollision;
 
-	// inline: There was a collision, figure out what the normal of the collision was
+	// Figure out what the normal of the collision was
 	// and set all the other relevant parameter values
 	
 	// Get the vector from the line to the ball's center (the center of the ball dT time ago)

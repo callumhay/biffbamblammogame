@@ -187,7 +187,7 @@ void BallInPlayState::Tick(double seconds) {
 				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 
                 // Apply an impulse to the ball based on the speed of the paddle...
-                float dPaddleSpd = 0.0175f * fabs(paddle->GetSpeed());
+                float dPaddleSpd = 0.025f * fabs(paddle->GetSpeed());
                 currBall->ApplyImpulseForce(dPaddleSpd, (3.0f * dPaddleSpd));
 
 				// Tell the model that a ball collision occurred with the paddle
@@ -197,7 +197,7 @@ void BallInPlayState::Tick(double seconds) {
 				if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
 				    // Make sure the ball's velocity direction is not downward - it's annoying to hit the ball with a paddle and
 				    // still see it fly into the void - of course, if the shield is active then no help is provided
-                    this->AugmentBallDirectionToBeNotTooDownwards(*currBall, n);
+                    this->AugmentBallDirectionToBeNotTooDownwards(*currBall, *paddle, n);
 				}
 
 				// If there are multiple balls and the one that just hit the paddle is not
@@ -636,9 +636,13 @@ void BallInPlayState::DoItemCollision() {
 
 // Makes sure that the ball's direction is upwards and changes it to be upwards - when it gets
 // hit by the paddle this is called.
-void BallInPlayState::AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const Vector2D& collisionNormal) {
+void BallInPlayState::AugmentBallDirectionToBeNotTooDownwards(GameBall& b, const PlayerPaddle& p, const Vector2D& collisionNormal) {
     // We are unforgiving if the collision normal was pointing very downwards as well
-    if (collisionNormal[1] < -0.8) {
+    if (collisionNormal[1] < -0.9f) {
+        return;
+    }
+    // We are also unforgiving if the ball is below the paddle...
+    if (b.GetCenterPosition2D()[1] < (p.GetCenterPosition()[1] - p.GetHalfHeight() - 0.9f*b.GetBounds().Radius())) {
         return;
     }
 
