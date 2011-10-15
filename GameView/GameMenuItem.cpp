@@ -776,10 +776,9 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 	// Draw the outline of the background
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glPolygonMode(GL_FRONT, GL_LINE);
 	glLineWidth(6.0f);
 	glColor4f(0.0f, 0.0f, 0.0f, this->verifyMenuBGFadeAnim.GetInterpolantValue());
-	GameMenu::DrawBackgroundQuad(HALF_ANIM_WIDTH, HALF_ANIM_HEIGHT);
+	GameMenu::DrawBackgroundQuadOutline(HALF_ANIM_WIDTH, HALF_ANIM_HEIGHT);
 	
 	// Draw points at each corner to get rid of ugly hard edges
 	glEnable(GL_POINT_SMOOTH);

@@ -80,6 +80,7 @@ public:
 	virtual ~GameMenu();
 
 	static void DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight);
+    static void DrawBackgroundQuadOutline(float halfMenuWidth, float halfMenuHeight);
 
 	void SetAlignment(MenuAlignment align) {
 		this->alignment = align;

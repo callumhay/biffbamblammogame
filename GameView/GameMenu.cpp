@@ -118,6 +118,15 @@ void GameMenu::DrawBackgroundQuad(float halfMenuWidth, float halfMenuHeight) {
 	glEnd();
 }
 
+void GameMenu::DrawBackgroundQuadOutline(float halfMenuWidth, float halfMenuHeight) {
+    glBegin(GL_LINE_LOOP);
+		glVertex2f(-halfMenuWidth, halfMenuHeight);
+		glVertex2f(-halfMenuWidth, -halfMenuHeight);
+		glVertex2f(halfMenuWidth, -halfMenuHeight);
+		glVertex2f(halfMenuWidth, halfMenuHeight);
+    glEnd();
+}
+
 /**
  * Draw an outline around the menu with a colourful plain background.
  */
@@ -569,7 +578,6 @@ void GameSubMenu::DrawMenuBackground(double dT) {
 	glPushMatrix();
 	glLoadIdentity();
 	glTranslatef(bgTopLeftCorner[0], bgTopLeftCorner[1], -0.5f);
-	glPolygonMode(GL_FRONT, GL_LINE);
 	glLineWidth(4.0f);
 
 	// Draw the outline of the ghost background
@@ -579,13 +587,13 @@ void GameSubMenu::DrawMenuBackground(double dT) {
 		glTranslatef(ghostBGTopLeftCorner[0], ghostBGTopLeftCorner[1], 0.0f);
 		
 		glColor4f(0, 0, 0, this->menuBGOpenGhostFade.GetInterpolantValue());
-		GameMenu::DrawBackgroundQuad(GHOST_MENU_WIDTH_DIV2, GHOST_MENU_HEIGHT_DIV2);
+		GameMenu::DrawBackgroundQuadOutline(GHOST_MENU_WIDTH_DIV2, GHOST_MENU_HEIGHT_DIV2);
 		
 		glPopMatrix();
 	}
 	// Draw the outline of the actual background
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-	GameMenu::DrawBackgroundQuad(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
+	GameMenu::DrawBackgroundQuadOutline(MENU_WIDTH_DIV2, MENU_HEIGHT_DIV2);
 	
 	glEnable(GL_POINT_SMOOTH);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);

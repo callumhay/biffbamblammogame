@@ -261,10 +261,9 @@ void DecoratorOverlayPane::Draw(double dT, size_t windowWidth, size_t windowHeig
 	    // Draw the outline of the background
 	    glEnable(GL_LINE_SMOOTH);
 	    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	    glPolygonMode(GL_FRONT, GL_LINE);
 	    glLineWidth(6.0f);
 	    glColor4f(0.0f, 0.0f, 0.0f, bgAlpha);
-	    GameMenu::DrawBackgroundQuad(halfTotalWidth, halfTotalHeight);
+	    GameMenu::DrawBackgroundQuadOutline(halfTotalWidth, halfTotalHeight);
     	
 	    // Draw points at each corner to get rid of ugly hard edges
 	    glEnable(GL_POINT_SMOOTH);
