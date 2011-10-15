@@ -29,8 +29,6 @@ import javax.swing.JScrollPane;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Pattern;
-
 import bbbleveleditor.BBBLevelEditMainWindow.ToolMode;
 
 public class BBBLevelEditDocumentWindow extends JInternalFrame 
@@ -556,7 +554,16 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 						levelFileWriter.write(outputStr);
 					}
 					else if (currPieceLbl.getIsCannonBlock()) {
-						String outputStr = currLvlPiece.getSymbol() + "(" + currPieceLbl.getCannonBlockDegAngle() + ")";
+						
+						
+						String outputStr = currLvlPiece.getSymbol() + "(";
+						if (currPieceLbl.getCannonBlockDegAngle1() == currPieceLbl.getCannonBlockDegAngle2()) {
+							outputStr = outputStr + currPieceLbl.getCannonBlockDegAngle1();
+						}
+						else {
+							outputStr = outputStr + currPieceLbl.getCannonBlockDegAngle1() + "-" + currPieceLbl.getCannonBlockDegAngle2();
+						}
+						outputStr = outputStr + ")";
 						levelFileWriter.write(outputStr);
 					}
 					else if (currPieceLbl.getIsSwitchBlock()) {

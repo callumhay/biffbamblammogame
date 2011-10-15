@@ -27,6 +27,7 @@ public:
 	static const int RANDOM_SET_ROTATION;
 
 	CannonBlock(unsigned int wLoc, unsigned int hLoc, int setRotation);
+    CannonBlock(unsigned int wLoc, unsigned int hLoc, const std::pair<int, int>& rotationInterval);
 	~CannonBlock();
 
 	LevelPieceType GetType() const { 
@@ -118,10 +119,8 @@ private:
 	double elapsedRotationTime;		// The elapsed rotation time from the start of the ball coming into the cannon
 	double totalRotationTime;		// The total time before the ball is fired from the cannon
     
-    //std::pair<int,int> rotationInterval;
-
-	int fixedRotation;				// The fixed rotation (i.e., the degree angle where the cannon block always fires,
-                                    // measured from 12 o'clock), -1 for random
+    std::pair<int,int> rotationInterval; // The interval of rotation (i.e., the degree angle(s) where the cannon block always fires,
+                                         // measured from 12 o'clock), -1 for random
 
 	void SetupCannonFireTimeAndDirection();
 
@@ -178,13 +177,13 @@ inline bool CannonBlock::GetIsLoaded() const {
 
 // Gets whether this cannon block fires in random directions or not
 inline bool CannonBlock::GetHasRandomRotation() const {
-	return (this->fixedRotation == -1);
+    return (this->rotationInterval.first != this->rotationInterval.second);
 }
 
 // Gets the degrees from the x-axis the rotation direction is...
 inline float CannonBlock::GetFixedRotationDegsFromX() const {
 	assert(!this->GetHasRandomRotation());
-	return 90 - this->fixedRotation;
+	return 90.0f - this->rotationInterval.first;
 }
 
 #endif // __CANNONBLOCK_H__
