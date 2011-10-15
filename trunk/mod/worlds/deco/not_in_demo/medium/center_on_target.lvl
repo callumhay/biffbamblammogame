@@ -1,0 +1,67 @@
+something
+17 27
+S S S S S S S S S S S S S S S S S 
+S E E S X(d,c) X(l,k) X(p,o) X(b,a) S X(h,g) X(f,e) X(j,i) X(n,m) S E E S 
+S E E S E E E E Y E E E E S E E S 
+S E E S E E E G Y G E E E S E E S 
+S E E F(r) E E G G G G G E E F(l) E E S 
+S E E F(r) E G G G G G G G E F(l) E E S 
+S C(-1) E F(r) E G G Y G Y G G E F(l) E C(-1) S 
+S E E F(r) E G Y O B O Y G E F(l) E E S 
+S E E F(r) E Y O R R R O Y E F(l) E E S 
+S X(a,b) E F(r) E G Y R R R Y G E F(l) E X(c,d) S 
+S C(-1) E F(r) E G Y R R R Y G E F(l) E C(-1) S 
+S E E F(r) E Y O R R R O Y E F(l) E E S 
+S E E F(r) E Y O R R R O Y E F(l) E E S 
+S X(e,f) E F(r) E G Y R R R Y G E F(l) E X(g,h) S 
+S C(-1) E F(r) E G Y R R R Y G E F(l) E C(-1) S 
+S E E F(r) E Y O R R R O Y E F(l) E E S 
+S E E F(r) E G Y O B O Y G E F(l) E E S 
+S X(i,j) E F(r) E G G Y G Y G G E F(l) E X(k,l) S 
+S C(-1) E F(r) E G G G G G G G E F(l) E C(-1) S 
+S E E F(r) E E G G G G G E E F(l) E E S 
+S E E F(r) E E E G Y G E E E F(l) E E S 
+S E E F(r) E E E E Y E E E E F(l) E E S 
+S X(m,n) E F(r) E E E E E E E E E F(l) E X(o,p) S 
+S S S S E E E E E E E E E S S S S 
+S E E S E E E E E E E E E S E E S 
+S E E S E E E E E E E E E S E E S 
+S E E S E E E E E E E E E S E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 0
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MultiBall3 2
+IceBall 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 2

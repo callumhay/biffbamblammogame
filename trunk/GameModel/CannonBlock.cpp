@@ -26,11 +26,11 @@ const float CannonBlock::HALF_CANNON_BARREL_HEIGHT	= CannonBlock::CANNON_BARREL_
 const int CannonBlock::RANDOM_SET_ROTATION					= -1;
 
 // Rotation will happen for some random period of time in between these values
-const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	= 1.0f;
-const double CannonBlock::MAX_ROTATION_TIME_IN_SECS = 2.8f;
+const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	= 0.8f;
+const double CannonBlock::MAX_ROTATION_TIME_IN_SECS = 2.0f;
 
 // Rotation will occur at some random speed in between these values
-const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC	= 150.0f;
+const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC = 150.0f;
 const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 450.0f;
 
 // When the rotation angle is fixed, we can still spin the cannon a whole bunch of times...
@@ -248,7 +248,9 @@ void CannonBlock::SetupCannonFireTimeAndDirection() {
 	if (this->GetHasRandomRotation()) {
 		// Pick a random rotation speed
 		this->currRotationSpeed = CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC	+ 
-			Randomizer::GetInstance()->RandomNumZeroToOne() * (CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC - CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC);
+			Randomizer::GetInstance()->RandomNumZeroToOne() * 
+            (CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC - CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC);
+
 		// Rotation direction is random as well...
 		this->currRotationSpeed *= Randomizer::GetInstance()->RandomNegativeOrPositive();
 
@@ -289,7 +291,7 @@ void CannonBlock::SetupCannonFireTimeAndDirection() {
 		}
 		
 		float approxTimePerRotation = MIN_DEGREES_PER_FIXED_ROTATION + Randomizer::GetInstance()->RandomNumZeroToOne() * 
-			                           (MAX_DEGREES_PER_FIXED_ROTATION - MIN_DEGREES_PER_FIXED_ROTATION);
+			                          (MAX_DEGREES_PER_FIXED_ROTATION - MIN_DEGREES_PER_FIXED_ROTATION);
 		int randomNumberOfRotations = std::max<int>(1, static_cast<int>(ceil(this->totalRotationTime / approxTimePerRotation)));
 		
 		float totalDegAngleDist = noSpinNumDegrees + (Randomizer::GetInstance()->RandomNegativeOrPositive() * 360.0f * randomNumberOfRotations);

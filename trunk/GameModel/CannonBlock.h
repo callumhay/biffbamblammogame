@@ -114,10 +114,14 @@ private:
 	PaddleRocketProjectile* loadedRocket;
 
 	float currRotationFromXInDegs;	// The current rotation from the x-axis (default position) in degrees
-	float currRotationSpeed;				// The current rotation speed of the cannon
-	double elapsedRotationTime;			// The elapsed rotation time from the start of the ball coming into the cannon
-	double totalRotationTime;				// The total time before the ball is fired from the cannon
-	int fixedRotation;							// The fixed rotation (i.e., the degree angle where the cannon block always fires, measured from 12 o'clock), -1 for random
+	float currRotationSpeed;		// The current rotation speed of the cannon
+	double elapsedRotationTime;		// The elapsed rotation time from the start of the ball coming into the cannon
+	double totalRotationTime;		// The total time before the ball is fired from the cannon
+    
+    //std::pair<int,int> rotationInterval;
+
+	int fixedRotation;				// The fixed rotation (i.e., the degree angle where the cannon block always fires,
+                                    // measured from 12 o'clock), -1 for random
 
 	void SetupCannonFireTimeAndDirection();
 
