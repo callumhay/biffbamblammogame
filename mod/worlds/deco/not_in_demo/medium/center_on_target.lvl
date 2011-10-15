@@ -1,27 +1,27 @@
-something
+Center, on Target
 17 27
 S S S S S S S S S S S S S S S S S 
 S E E S X(d,c) X(l,k) X(p,o) X(b,a) S X(h,g) X(f,e) X(j,i) X(n,m) S E E S 
-S E E S E E E E Y E E E E S E E S 
-S E E S E E E G Y G E E E S E E S 
-S E E F(r) E E G G G G G E E F(l) E E S 
-S E E F(r) E G G G G G G G E F(l) E E S 
-S C(-1) E F(r) E G G Y G Y G G E F(l) E C(-1) S 
-S E E F(r) E G Y O B O Y G E F(l) E E S 
-S E E F(r) E Y O R R R O Y E F(l) E E S 
-S X(a,b) E F(r) E G Y R R R Y G E F(l) E X(c,d) S 
-S C(-1) E F(r) E G Y R R R Y G E F(l) E C(-1) S 
-S E E F(r) E Y O R R R O Y E F(l) E E S 
-S E E F(r) E Y O R R R O Y E F(l) E E S 
-S X(e,f) E F(r) E G Y R R R Y G E F(l) E X(g,h) S 
-S C(-1) E F(r) E G Y R R R Y G E F(l) E C(-1) S 
-S E E F(r) E Y O R R R O Y E F(l) E E S 
-S E E F(r) E G Y O B O Y G E F(l) E E S 
-S X(i,j) E F(r) E G G Y G Y G G E F(l) E X(k,l) S 
-S C(-1) E F(r) E G G G G G G G E F(l) E C(-1) S 
-S E E F(r) E E G G G G G E E F(l) E E S 
-S E E F(r) E E E G Y G E E E F(l) E E S 
-S E E F(r) E E E E Y E E E E F(l) E E S 
+S E E S E E E E G E E E E S E E S 
+S E E S R G G G G G G G R S E E S 
+S E E S O B G G G G G B O S E E S 
+S E E F(r) E Y G G G G G Y E F(l) E E S 
+S C(90-140) E F(r) G R G Y G Y G R G F(l) E C(220-270) S 
+S E E F(r) E R Y O B O Y R E F(l) E E S 
+S E C(90-140) F(r) Y R O R R R O R Y F(l) C(225-270) E S 
+S X(a,b) E F(r) E R Y R R R Y R E F(l) E X(c,d) S 
+S C(70-140) E F(r) G R Y R R R Y R G F(l) E C(225-300) S 
+S E E F(r) E R O R R R O R E F(l) E E S 
+S E C(70-140) F(r) Y R O R R R O R Y F(l) C(225-300) E S 
+S X(e,f) E F(r) E R Y R R R Y R E F(l) E X(g,h) S 
+S C(70-140) E F(r) G R Y R R R Y R G F(l) E C(225-300) S 
+S E E F(r) E R O R R R O R E F(l) E E S 
+S E C(70-140) F(r) Y R Y O B O Y R Y F(l) C(225-300) E S 
+S X(i,j) E F(r) E R G Y G Y G R E F(l) E X(k,l) S 
+S C(70-140) E F(r) G R R R R R R R G F(l) E C(225-300) S 
+S E E F(r) E O O O O O O O E F(l) E E S 
+S E E F(r) E E E E E E E E E F(l) E E S 
+S E C(90-110) F(r) E E E E E E E E E F(l) C(250-270) E S 
 S X(m,n) E F(r) E E E E E E E E E F(l) E X(o,p) S 
 S S S S E E E E E E E E E S S S S 
 S E E S E E E E E E E E E S E E S 
@@ -29,11 +29,11 @@ S E E S E E E E E E E E E S E E S
 S E E S E E E E E E E E E S E E S 
 
 STARS:
-100
-500
-1000
-2000
-5000
+13900
+21000
+29200
+35300
+40100
 
 PaddleGrow 2
 PoisonPaddle 2
@@ -52,7 +52,7 @@ LaserBeamPaddle 2
 OmniLaserBall 2
 FireBall 2
 RocketPaddle 2
-GhostBall 2
+GhostBall 0
 BallShrink 2
 UpsideDown 2
 MultiBall5 2

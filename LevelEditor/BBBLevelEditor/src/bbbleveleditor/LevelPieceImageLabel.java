@@ -30,7 +30,8 @@ public class LevelPieceImageLabel extends JLabel {
 	private boolean teslaBlockStartsOn;
 	private boolean teslaIsChangable;
 	
-	private int cannonDegAngle;
+	private int cannonDegAngle1;
+	private int cannonDegAngle2;
 	private int triggerID;
 	
 	private ArrayList<String> itemDropTypes = new ArrayList<String>();
@@ -49,7 +50,8 @@ public class LevelPieceImageLabel extends JLabel {
 		this.teslaBlockStartsOn = false;
 		this.teslaIsChangable   = true;
 		this.setLevelPiece(piece);
-		this.cannonDegAngle = -1;
+		this.cannonDegAngle1 = 0;
+		this.cannonDegAngle2 = 0;
 		this.itemDropTypes.add("all");
 		this.triggerID = LevelPiece.NO_TRIGGER_ID;
 		this.switchTriggerID = 0;
@@ -104,8 +106,20 @@ public class LevelPieceImageLabel extends JLabel {
 		}
 		else if (pieceSymbol.length() >= 3 &&  pieceSymbol.substring(0, 2).equals(LevelPiece.CANNON_PIECE_SYMBOL + "(")) {
 
-			String angleValue = pieceSymbol.substring(2, pieceSymbol.length()-1);
-			this.cannonDegAngle = Integer.parseInt(angleValue);
+			String angleValue1, angleValue2;
+			int indexOfHyphen = pieceSymbol.indexOf('-');
+			
+			if (indexOfHyphen != -1 && indexOfHyphen != 2) {
+				angleValue1 = pieceSymbol.substring(2, indexOfHyphen);
+				angleValue2 = pieceSymbol.substring(indexOfHyphen+1, pieceSymbol.length()-1);
+			}
+			else {
+				angleValue1 = pieceSymbol.substring(2, pieceSymbol.length()-1);
+				angleValue2 = angleValue1;
+			}
+			
+			this.setCannonBlockDegAngle1(Integer.parseInt(angleValue1));
+			this.setCannonBlockDegAngle2(Integer.parseInt(angleValue2));
 			justTheSymbol = LevelPiece.CANNON_PIECE_SYMBOL;
 		}
 		else if (pieceSymbol.length() >= 3 && pieceSymbol.substring(0, 2).equals(LevelPiece.SWITCH_PIECE_SYMBOL + "(")) {
@@ -261,11 +275,29 @@ public class LevelPieceImageLabel extends JLabel {
 	}
 	
 	
-	public int getCannonBlockDegAngle() {
-		return this.cannonDegAngle;
+	public int getCannonBlockDegAngle1() {
+		return this.cannonDegAngle1;
 	}
-	public void setCannonBlockDegAngle(int angle) {
-		this.cannonDegAngle = angle;
+	public int getCannonBlockDegAngle2() {
+		return this.cannonDegAngle2;
+	}
+	public void setCannonBlockDegAngle1(int angle) {
+		if (angle == -1) {
+			this.cannonDegAngle1 = 0;
+			this.cannonDegAngle2 = 359;
+		}
+		else {
+			this.cannonDegAngle1 = angle;
+		}
+	}
+	public void setCannonBlockDegAngle2(int angle) {
+		if (angle == -1) {
+			this.cannonDegAngle1 = 0;
+			this.cannonDegAngle2 = 359;
+		}
+		else {
+			this.cannonDegAngle2 = angle;
+		}
 	}
 	
 	public char getPortalSiblingID() {

@@ -51,7 +51,8 @@ public class LevelPieceEditDialog extends JDialog {
 	
 	private JRadioButton randomCannonAngleRadio;
 	private JRadioButton specifyCannonAngleRadio;
-	private JSpinner cannonAngleValue;
+	private JSpinner cannonAngleValue1;
+	private JSpinner cannonAngleValue2;
 	
 	private JSpinner switchTriggerIDSpinner;
 	
@@ -296,32 +297,47 @@ public class LevelPieceEditDialog extends JDialog {
         	group.add(this.randomCannonAngleRadio);
         	group.add(this.specifyCannonAngleRadio);
         	
-        	SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0, 0, 356, 1);
-        	this.cannonAngleValue = new JSpinner(spinnerModel);
-        	this.cannonAngleValue.setEnabled(false);
-        	this.cannonAngleValue.addChangeListener(new ChangeListener() {
+        	SpinnerNumberModel spinnerModel1 = new SpinnerNumberModel(0, 0, 356, 1);
+        	this.cannonAngleValue1 = new JSpinner(spinnerModel1);
+        	this.cannonAngleValue1.setEnabled(false);
+        	this.cannonAngleValue1.addChangeListener(new ChangeListener() {
 
 				public void stateChanged(ChangeEvent arg0) {
-					cannonAngleValueChanged((Integer)cannonAngleValue.getValue());
+					cannonAngleValueChanged(true, (Integer)cannonAngleValue1.getValue());
+				}
+        	});
+        	SpinnerNumberModel spinnerModel2 = new SpinnerNumberModel(0, 0, 356, 1);
+        	this.cannonAngleValue2 = new JSpinner(spinnerModel2);
+        	this.cannonAngleValue2.setEnabled(false);
+        	this.cannonAngleValue2.addChangeListener(new ChangeListener() {
+
+				public void stateChanged(ChangeEvent arg0) {
+					cannonAngleValueChanged(false, (Integer)cannonAngleValue2.getValue());
 				}
         	});
         	
-        	if (this.levelPieceLbl.getCannonBlockDegAngle() == -1) {
+        	
+        	if (this.levelPieceLbl.getCannonBlockDegAngle1() == 0 && this.levelPieceLbl.getCannonBlockDegAngle2() == 359) {
         		this.randomCannonAngleRadio.setSelected(true);
         		this.specifyCannonAngleRadio.setSelected(false);
-        		this.cannonAngleValue.setEnabled(false);
+        		this.cannonAngleValue1.setEnabled(false);
+        		this.cannonAngleValue2.setEnabled(false);
         	}
         	else {
-        		this.cannonAngleValue.setValue(new Integer(this.levelPieceLbl.getCannonBlockDegAngle()));
+        		this.cannonAngleValue1.setValue(new Integer(this.levelPieceLbl.getCannonBlockDegAngle1()));
+        		this.cannonAngleValue2.setValue(new Integer(this.levelPieceLbl.getCannonBlockDegAngle2()));
         		this.randomCannonAngleRadio.setSelected(false);
         		this.specifyCannonAngleRadio.setSelected(true);
-        		this.cannonAngleValue.setEnabled(true);
+        		this.cannonAngleValue1.setEnabled(true);
+        		this.cannonAngleValue2.setEnabled(true);
         	}
         		
         	JPanel tempPanel = new JPanel(new FlowLayout());
         	tempPanel.add(this.randomCannonAngleRadio);
         	tempPanel.add(this.specifyCannonAngleRadio);
-        	tempPanel.add(this.cannonAngleValue);
+        	tempPanel.add(this.cannonAngleValue1);
+        	tempPanel.add(new JLabel("to"));
+        	tempPanel.add(this.cannonAngleValue2);
 
 	        buttonPanel.add(tempPanel);
         }
@@ -399,7 +415,15 @@ public class LevelPieceEditDialog extends JDialog {
     private void okBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtnActionPerformed
     	// Update the ID siblings and other attributes...
     	this.updateSiblingsFromList();
-    	// TODO
+    	
+    	int cannonValue1 = (Integer)this.cannonAngleValue1.getValue();
+    	int cannonValue2 = (Integer)this.cannonAngleValue2.getValue();
+    	if (cannonValue1 > cannonValue2) {
+    		cannonValue1 = cannonValue2;
+    	}
+    	
+    	this.levelPieceLbl.setCannonBlockDegAngle1(cannonValue1);
+    	this.levelPieceLbl.setCannonBlockDegAngle2(cannonValue2);
     	
     	this.setVisible(false);
     }//GEN-LAST:event_okBtnActionPerformed
@@ -419,18 +443,26 @@ public class LevelPieceEditDialog extends JDialog {
     
     private void cannonAngleRadioClicked(boolean random) {
     	if (random) {
-    		this.levelPieceLbl.setCannonBlockDegAngle(-1);
-    		this.cannonAngleValue.setEnabled(false);
+    		this.levelPieceLbl.setCannonBlockDegAngle1(-1);
+    		this.cannonAngleValue1.setEnabled(false);
+    		this.cannonAngleValue2.setEnabled(false);
     	}
     	else {
-    		this.cannonAngleValue.setEnabled(true);
-    		this.cannonAngleValueChanged((Integer)this.cannonAngleValue.getValue());
+    		this.cannonAngleValue1.setEnabled(true);
+    		this.cannonAngleValue2.setEnabled(true);
+    		this.cannonAngleValueChanged(true,  (Integer)this.cannonAngleValue1.getValue());
+    		this.cannonAngleValueChanged(false, (Integer)this.cannonAngleValue2.getValue());
     	}
     	
     }
     
-	private void cannonAngleValueChanged(int value) {
-		this.levelPieceLbl.setCannonBlockDegAngle(value);
+	private void cannonAngleValueChanged(boolean startValue, int value) {
+		if (startValue) {
+			this.levelPieceLbl.setCannonBlockDegAngle1(value);
+		}
+		else {
+			this.levelPieceLbl.setCannonBlockDegAngle2(value);
+		}
 	}
     
 	private void switchTriggerableIDChanged(int value) {

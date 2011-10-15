@@ -229,12 +229,13 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 					break;
 
 				case CANNON_BLOCK_CHAR: {
-						// C(d) - Cannon block
-						// d: The direction to always fire the cannon block in (or specify random firing direction)
-						//    the value can be any degree angle starting at 0 going to 359, the special value of -1 can be used
-						// to specify a random direction. The angle starts by firing directly upwards and moves around the circle
-						// of angles clockwise (e.g., 90 will always fire the ball perfectly to the right of the cannon, 180 will always
-						// fire the ball downwards from the cannon, ...).
+						// C(d[-e]) - Cannon block
+                        // d: The direction to always fire the cannon block in (or specify random firing direction)
+                        //    the value can be any degree angle starting at 0 going to 359.
+                        // The angle starts by firing directly upwards and moves around the circle
+                        // of angles clockwise (e.g., 90 will always fire the ball perfectly to the right of the cannon, 180 will always
+                        // fire the ball downwards from the cannon, ...). 
+                        // [-e]: is optional - it allows the specification of a angle range from d to e, inclusive.
 						char tempChar;
 
 						// Beginning bracket
@@ -245,21 +246,53 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 						}
 
 						// Degree angle value (or random -1)
-						int rotationValue;
-						*inFile >> rotationValue;
-						if (rotationValue != -1 && (rotationValue < 0 || rotationValue > 359)) {
+						int rotationValue1 = 0;
+						int rotationValue2 = 0;
+                        *inFile >> rotationValue1;
+						if (rotationValue1 != -1 && (rotationValue1 < 0 || rotationValue1 > 359)) {
 							debug_output("ERROR: poorly formed cannon block syntax, degree angle must either be -1 or in [0,359]");
 							break;
 						}
 
-						// Closing bracket
-						*inFile >> tempChar;
-						if (tempChar != ')') {
-							debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
-							break;
-						}
+                        if (rotationValue1 == -1) {
+                            rotationValue1 = 0;
+                            rotationValue2 = 359;
 
-						newPiece = new CannonBlock(pieceWLoc, pieceHLoc, rotationValue);
+						    // Closing bracket
+						    *inFile >> tempChar;
+						    if (tempChar != ')') {
+							    debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
+							    break;
+						    }
+                        }
+                        else {
+                            // Check for '-'
+						    *inFile >> tempChar;
+						    if (tempChar == '-') {
+                                *inFile >> rotationValue2;
+						        if (rotationValue2 != -1 && (rotationValue2 < 0 || rotationValue2 > 359)) {
+							        debug_output("ERROR: poorly formed cannon block syntax, degree angle must either be -1 or in [0,359]");
+							        break;
+						        }
+
+                                *inFile >> tempChar;
+                                if (tempChar != ')') {
+							        debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
+							        break;
+                                }
+						    }
+                            else {
+                                if (tempChar != ')') {
+							        debug_output("ERROR: poorly formed cannon block syntax, missing the beginning '('");
+							        break;
+                                }
+                                else {
+                                    rotationValue2 = rotationValue1;
+                                }
+                            }
+                        }
+
+                        newPiece = new CannonBlock(pieceWLoc, pieceHLoc, std::make_pair(rotationValue1, rotationValue2));
 					}
 					break;
 
