@@ -53,8 +53,6 @@ bool CollateralBlock::ProjectilePassesThrough(Projectile* projectile) const {
 }
 
 LevelPiece* CollateralBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
-	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 		// EVENT: Ice was shattered
@@ -63,6 +61,12 @@ LevelPiece* CollateralBlock::Destroy(GameModel* gameModel, const LevelPiece::Des
         UNUSED_VARIABLE(success);
 		assert(success);
 	}
+    else if (method == LevelPiece::RocketDestruction) {
+        return this->Detonate(gameModel);
+    }
+
+	// EVENT: Block is being destroyed
+	GameEventManager::Instance()->ActionBlockDestroyed(*this);
 
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();
