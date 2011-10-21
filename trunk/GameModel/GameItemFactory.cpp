@@ -39,7 +39,7 @@
 #include "IceBallItem.h"
 #include "OmniLaserBallItem.h"
 #include "InvisiPaddleItem.h"
-
+#include "MagnetPaddleItem.h"
 #include "RandomItem.h"
 
 GameItemFactory* GameItemFactory::instance = NULL;
@@ -75,6 +75,7 @@ GameItemFactory::GameItemFactory() {
 	itemNameToTypeMap.insert(std::make_pair(IceBallItem::ICE_BALL_ITEM_NAME,                    GameItem::IceBallItem));
     itemNameToTypeMap.insert(std::make_pair(OmniLaserBallItem::OMNI_LASER_BALL_ITEM_NAME,       GameItem::OmniLaserBallItem));
     itemNameToTypeMap.insert(std::make_pair(InvisiPaddleItem::INVISI_PADDLE_ITEM_NAME,          GameItem::InvisiPaddleItem));
+    itemNameToTypeMap.insert(std::make_pair(MagnetPaddleItem::MAGNET_PADDLE_ITEM_NAME,          GameItem::MagnetPaddleItem));
 	itemNameToTypeMap.insert(std::make_pair(RandomItem::RANDOM_ITEM_NAME,                       GameItem::RandomItem));
 	
 	// Establish the set of ALL items except the random item!
@@ -107,6 +108,7 @@ GameItemFactory::GameItemFactory() {
 	allItemTypes.insert(GameItem::IceBallItem);
     allItemTypes.insert(GameItem::OmniLaserBallItem);
     allItemTypes.insert(GameItem::InvisiPaddleItem);
+    allItemTypes.insert(GameItem::MagnetPaddleItem);
 	
 	// Establish the Power-up item set
 	allPowerUpItemTypes.insert(GameItem::BallSlowDownItem);
@@ -130,6 +132,7 @@ GameItemFactory::GameItemFactory() {
 	allPowerNeutralItemTypes.insert(GameItem::FireBallItem);
 	allPowerNeutralItemTypes.insert(GameItem::IceBallItem);
     allPowerNeutralItemTypes.insert(GameItem::OmniLaserBallItem);
+    allPowerNeutralItemTypes.insert(GameItem::MagnetPaddleItem);
     allPowerNeutralItemTypes.insert(GameItem::RandomItem);
 
 	// Establish the Power-down item set
@@ -283,6 +286,9 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 
         case GameItem::InvisiPaddleItem:
             return new InvisiPaddleItem(spawnOrigin, gameModel);
+
+        case GameItem::MagnetPaddleItem:
+            return new MagnetPaddleItem(spawnOrigin, gameModel);
 
 		// Random item is a very special kind of item that can't be generated anywhere else but here
 		case GameItem::RandomItem:

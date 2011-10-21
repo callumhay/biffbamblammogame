@@ -50,7 +50,7 @@ PaddleRocketProjectile::~PaddleRocketProjectile() {
  * Executed every game tick, updates the velocities, 
  * position and rotation of the rocket projectile.
  */
-void PaddleRocketProjectile::Tick(double seconds) {
+void PaddleRocketProjectile::Tick(double seconds, const GameModel& model) {
 
 	if (this->cannonBlock != NULL) {
 		// 'Tick' the cannon to spin the ball around inside it... eventually the function will say
@@ -69,6 +69,8 @@ void PaddleRocketProjectile::Tick(double seconds) {
 		}
 	}
 	else {
+        this->AugmentDirectionOnPaddleMagnet(seconds, model, 55.0f);
+
 		// Update the rocket's velocity and position
 		float dA = seconds * PaddleRocketProjectile::ACCELERATION_MAG;
 		this->velocityMag = std::min<float>(PaddleRocketProjectile::MAX_VELOCITY_MAG ,this->velocityMag + dA);

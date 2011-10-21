@@ -29,11 +29,11 @@ CollateralBlockProjectile::~CollateralBlockProjectile() {
 	this->collateralBlock = NULL;
 }
 
-void CollateralBlockProjectile::Tick(double seconds) {
+void CollateralBlockProjectile::Tick(double seconds, const GameModel& model) {
 	// The collateral block has several states that it goes through, in the case of this projectile
 	// it will start in its warning state then go into collateral damage mode and end via death,
 	// we tick the block to make this happen
-	this->collateralBlock->Tick(seconds, *this);
+	this->collateralBlock->Tick(seconds, model, *this);
 }
 
 /**

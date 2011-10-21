@@ -201,7 +201,7 @@ LevelPiece* CollateralBlock::TickPaddleShieldCollision(double dT, const PlayerPa
 	return newPiece;
 }
 
-void CollateralBlock::Tick(double dT, CollateralBlockProjectile& collateralProjectile) {
+void CollateralBlock::Tick(double dT, const GameModel& model, CollateralBlockProjectile& collateralProjectile) {
 	switch(this->currState) {
 
 		case CollateralBlock::WarningState:
@@ -214,23 +214,24 @@ void CollateralBlock::Tick(double dT, CollateralBlockProjectile& collateralProje
 			break;
 
 		case CollateralBlock::CollateralDamageState: {
-				// The collateral block moves down the level, rotating along the way 
-				// (for movement see the collateralblockprojectile)...
-				
-				Vector2D moveAmt = static_cast<float>(dT) * collateralProjectile.GetVelocityMagnitude() * 
-                                   collateralProjectile.GetVelocityDirection();
-				this->center = this->center + moveAmt;
+		    // The collateral block moves down the level, rotating along the way 
+		    // (for movement see the collateralblockprojectile)...
+            collateralProjectile.AugmentDirectionOnPaddleMagnet(dT, model, 35.0f); 	
 
-				// Keep the projectile in the same position as the block (sync em up!)
-				collateralProjectile.SetPosition(this->center);
+		    Vector2D moveAmt = static_cast<float>(dT) * collateralProjectile.GetVelocityMagnitude() * 
+                               collateralProjectile.GetVelocityDirection();
+		    this->center = this->center + moveAmt;
 
-				// Rotate...
-				this->currentRotation += rotationSgn * static_cast<float>(dT) * CollateralBlock::ROTATION_SPEED;
+		    // Keep the projectile in the same position as the block (sync em up!)
+		    collateralProjectile.SetPosition(this->center);
 
-				// We don't need to check to see if the collateral block is off the level yet - the game loop
-				// in BallInPlayState will do this for us with all projectiles.
-			}
-			break;
+		    // Rotate...
+		    this->currentRotation += rotationSgn * static_cast<float>(dT) * CollateralBlock::ROTATION_SPEED;
+
+		    // We don't need to check to see if the collateral block is off the level yet - the game loop
+		    // in BallInPlayState will do this for us with all projectiles.
+            break;
+		}
 
 		default:
 			assert(false);

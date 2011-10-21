@@ -81,7 +81,8 @@ public:
 
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses);
 
-	void Tick(double dT, CollateralBlockProjectile& collateralProjectile);
+	void Tick(double dT, const GameModel& model, CollateralBlockProjectile& collateralProjectile);
+
 	enum CollateralBlockState { InitialState, WarningState, CollateralDamageState };
 	CollateralBlock::CollateralBlockState GetState() const;
 	float GetCurrentRotation() const;

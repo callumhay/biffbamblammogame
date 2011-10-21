@@ -10,6 +10,7 @@
  */
 
 #include "LaserBulletProjectile.h"
+#include "GameModel.h"
 
 LaserBulletProjectile::LaserBulletProjectile(const Point2D& spawnLoc, float width, float height, 
                                              float velocityMag, const Vector2D& velocityDir) :
@@ -26,10 +27,11 @@ LaserBulletProjectile::~LaserBulletProjectile() {
  * Tick function - executed every frame with given delta seconds. This will
  * update the position and other relevant information for this paddle laser projectile.
  */
-void LaserBulletProjectile::Tick(double seconds) {
+void LaserBulletProjectile::Tick(double seconds, const GameModel& model) {
+    this->AugmentDirectionOnPaddleMagnet(seconds, model, 70.0f);
+
 	// Update the laser's position
-	Vector2D dV = seconds * this->velocityMag * this->velocityDir;
-	this->position = this->position + dV;
+	this->position = this->position + (seconds * this->velocityMag * this->velocityDir);
 }
 
 /**
@@ -40,10 +42,10 @@ BoundingLines LaserBulletProjectile::BuildBoundingLines() const {
     const Vector2D UP_DIR       = this->GetVelocityDirection();
     const Vector2D RIGHT_DIR	= this->GetRightVectorDirection();
 
-    Point2D topRight = this->GetPosition() + this->GetHalfHeight()*UP_DIR + this->GetHalfWidth()*RIGHT_DIR;
+    Point2D topRight    = this->GetPosition() + this->GetHalfHeight()*UP_DIR + this->GetHalfWidth()*RIGHT_DIR;
     Point2D bottomRight = topRight - this->GetHeight()*UP_DIR;
-    Point2D topLeft = topRight - this->GetWidth()*RIGHT_DIR;
-    Point2D bottomLeft = topLeft - this->GetHeight()*UP_DIR;
+    Point2D topLeft     = topRight - this->GetWidth()*RIGHT_DIR;
+    Point2D bottomLeft  = topLeft - this->GetHeight()*UP_DIR;
 
     std::vector<Collision::LineSeg2D> sideBounds;
     sideBounds.reserve(2);

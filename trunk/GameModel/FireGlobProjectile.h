@@ -19,7 +19,7 @@ public:
 	FireGlobProjectile(const Point2D& spawnLoc, float size);
 	~FireGlobProjectile();
 
-	void Tick(double seconds);
+	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
     ProjectileType GetType() const {
         return Projectile::FireGlobProjectile;

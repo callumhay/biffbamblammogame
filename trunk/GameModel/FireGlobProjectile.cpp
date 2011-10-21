@@ -35,7 +35,9 @@ Projectile(spawnLoc, size, size), totalTickTime(0.0) {
 FireGlobProjectile::~FireGlobProjectile() {
 }
 
-void FireGlobProjectile::Tick(double seconds) {
+void FireGlobProjectile::Tick(double seconds, const GameModel& model) {
+    this->AugmentDirectionOnPaddleMagnet(seconds, model, 65.0f);
+
 	// The glob just keeps falling down... but it does so in a semi-ossilating firey kinda way
 	Vector2D dDist = seconds * this->velocityMag * this->velocityDir;
 	this->SetPosition(this->GetPosition() + dDist);

@@ -1908,6 +1908,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\MagnetPaddleItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\MultiBallItem.h"
 						>
 					</File>
@@ -2025,6 +2029,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\LaserPaddleItem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\MagnetPaddleItem.cpp"
 						>
 					</File>
 					<File
