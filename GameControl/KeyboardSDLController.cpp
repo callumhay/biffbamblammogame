@@ -384,117 +384,132 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
     // Debug Item drops
 #ifdef _DEBUG
     if (SDL_GetModState() & KMOD_SHIFT) {
-	    if (key == SDLK_a) {
-		    this->model->DropItem(GameItem::PaddleGrowItem);
-	    }
-	    else if (key == SDLK_b) {
-		    this->model->DropItem(GameItem::BallCamItem);
-	    }
-	    else if (key == SDLK_c) {
-		    this->model->DropItem(GameItem::PaddleCamItem);
-	    }
-	    else if (key == SDLK_d) {
-		    this->model->DropItem(GameItem::LaserBeamPaddleItem);
-	    }
-	    else if (key == SDLK_e) {
-		    GameDisplay::ToggleDrawDebugLightGeometry();
-	    }
-	    else if (key == SDLK_f) {
-		    this->model->DropItem(GameItem::UpsideDownItem);
-	    }
-	    else if (key == SDLK_g) {
-		    this->model->DropItem(GameItem::GhostBallItem);
-	    }
-	    else if (key == SDLK_h) {
-		    this->model->DropItem(GameItem::GravityBallItem);
-	    }
-	    else if (key == SDLK_i) {
-		    this->model->DropItem(GameItem::InvisiBallItem);
-	    }
-	    else if (key == SDLK_j) {
-		    this->model->DropItem(GameItem::CrazyBallItem);
-	    }
-	    else if (key == SDLK_k) {
-		    this->model->DropItem(GameItem::BallGrowItem);
-	    }
-	    else if (key == SDLK_l) {
-		    this->model->DropItem(GameItem::LaserBulletPaddleItem);
-	    }
-	    else if (key == SDLK_m) {
-		    this->model->DropItem(GameItem::BallShrinkItem);
-	    }
-	    else if (key == SDLK_n) {
-		    this->model->DropItem(GameItem::BallSafetyNetItem);
-	    }
-	    else if (key == SDLK_o) {
-		    this->model->DropItem(GameItem::ShieldPaddleItem);
-	    }
-	    else if (key == SDLK_p) {
-		    this->model->TogglePause(GameModel::PauseGame);
-	    }
-	    else if (key == SDLK_q) {
-		    this->model->DropItem(GameItem::BallSpeedUpItem);
-	    }
-	    else if (key == SDLK_r) {
-		    this->model->DropItem(GameItem::RocketPaddleItem);
-	    }
-	    else if (key == SDLK_s) {
-		    this->model->DropItem(GameItem::BallSlowDownItem);
-	    }
-	    else if (key == SDLK_t) {
-		    this->model->DropItem(GameItem::FireBallItem);
-	    }
-	    else if (key == SDLK_u) {
-		    this->model->DropItem(GameItem::UberBallItem);
-	    }
-	    else if (key == SDLK_v) {
-		    this->model->DropItem(GameItem::IceBallItem);
-	    }
-	    else if (key == SDLK_w) {
-		    GameDisplay::ToggleDrawDebugBounds();
-	    }
-	    else if (key == SDLK_x) {
-		    this->model->DropItem(GameItem::PoisonPaddleItem);
-	    }
-	    else if (key == SDLK_y) {
-		    this->model->DropItem(GameItem::StickyPaddleItem);
-	    }
-	    else if (key == SDLK_z) {
-		    this->model->DropItem(GameItem::PaddleShrinkItem);
-	    }
-	    else if (key == SDLK_0) {
-		    this->model->DropItem(GameItem::BlackoutItem);
-	    }
-	    else if (key == SDLK_1) {
-		    this->model->DropItem(GameItem::OneUpItem);
-	    }
-        else if (key == SDLK_2) {
-            this->model->DropItem(GameItem::InvisiPaddleItem);
-        }
-	    else if (key == SDLK_3) {
-		    this->model->DropItem(GameItem::MultiBall3Item);
-	    }
-	    // 4
-	    else if (key == SDLK_5) {
-		    this->model->DropItem(GameItem::MultiBall5Item);
-	    }
-	    // 6
-	    // 7
-	    // 8
-        else if (key == SDLK_9) {
-            this->model->DropItem(GameItem::OmniLaserBallItem);
-        }
-	    else if (key == SDLK_BACKSLASH) {
-		    this->model->DropItem(GameItem::RandomItem);
-	    }
-	    // ...
 
-	    else if (key == SDLK_SLASH) {
-		    GameDisplay::ToggleDetachCamera();
-	    }
-	    else if (key == SDLK_COMMA) {
-		    this->model->TogglePause(GameModel::PauseBall);
-	    }
+        switch (key) {
+            case SDLK_a:
+                this->model->DropItem(GameItem::PaddleGrowItem);
+                break;
+            case SDLK_b:
+                this->model->DropItem(GameItem::BallCamItem);
+                break;
+            case SDLK_c:
+                this->model->DropItem(GameItem::PaddleCamItem);
+                break;
+            case SDLK_d:
+                this->model->DropItem(GameItem::LaserBeamPaddleItem);
+                break;
+            case SDLK_e:
+                GameDisplay::ToggleDrawDebugLightGeometry();
+                break;
+            case SDLK_f:
+                this->model->DropItem(GameItem::UpsideDownItem);
+                break;
+            case SDLK_g:
+                this->model->DropItem(GameItem::GhostBallItem);
+                break;
+            case SDLK_h:
+                this->model->DropItem(GameItem::GravityBallItem);
+                break;
+            case SDLK_i:
+                this->model->DropItem(GameItem::InvisiBallItem);
+                break;
+            case SDLK_j:
+                this->model->DropItem(GameItem::CrazyBallItem);
+                break;
+            case SDLK_k:
+                this->model->DropItem(GameItem::BallGrowItem);
+                break;
+            case SDLK_l:
+                this->model->DropItem(GameItem::LaserBulletPaddleItem);
+                break;
+            case SDLK_m:
+                this->model->DropItem(GameItem::BallShrinkItem);
+                break;
+            case SDLK_n:
+                this->model->DropItem(GameItem::BallSafetyNetItem);
+                break;
+            case SDLK_o:
+                this->model->DropItem(GameItem::ShieldPaddleItem);
+                break;
+            case SDLK_p:
+                this->model->TogglePause(GameModel::PauseGame);
+                break;
+            case SDLK_q:
+                this->model->DropItem(GameItem::BallSpeedUpItem);
+                break;
+            case SDLK_r:
+                this->model->DropItem(GameItem::RocketPaddleItem);
+                break;
+            case SDLK_s:
+                this->model->DropItem(GameItem::BallSlowDownItem);
+                break;
+            case SDLK_t:
+                this->model->DropItem(GameItem::FireBallItem);
+                break;
+            case SDLK_u:
+                this->model->DropItem(GameItem::UberBallItem);
+                break;
+            case SDLK_v:
+                this->model->DropItem(GameItem::IceBallItem);
+                break;
+            case SDLK_w:
+                GameDisplay::ToggleDrawDebugBounds();
+                break;
+            case SDLK_x:
+                this->model->DropItem(GameItem::PoisonPaddleItem);
+                break;
+            case SDLK_y:
+                this->model->DropItem(GameItem::StickyPaddleItem);
+                break;
+            case SDLK_z:
+                this->model->DropItem(GameItem::PaddleShrinkItem);
+                break;
+
+            case SDLK_0:
+                this->model->DropItem(GameItem::BlackoutItem);
+                break;
+            case SDLK_1:
+                this->model->DropItem(GameItem::OneUpItem);
+                break;
+            case SDLK_2:
+                this->model->DropItem(GameItem::InvisiPaddleItem);
+                break;
+            case SDLK_3:
+                this->model->DropItem(GameItem::MultiBall3Item);
+                break;
+            case SDLK_4:
+                this->model->DropItem(GameItem::MagnetPaddleItem);
+                break;
+            case SDLK_5:
+                this->model->DropItem(GameItem::MultiBall5Item);
+                break;
+            case SDLK_6:
+                // ...
+                break;
+            case SDLK_7:
+                // ...
+                break;
+            case SDLK_8:
+                // ...
+                break;
+            case SDLK_9:
+                this->model->DropItem(GameItem::OmniLaserBallItem);
+                break;
+            
+            case SDLK_BACKSLASH:
+                this->model->DropItem(GameItem::RandomItem);
+                break;
+            case SDLK_SLASH:
+                GameDisplay::ToggleDetachCamera();
+                break;
+            case SDLK_COMMA:
+                this->model->TogglePause(GameModel::PauseBall);
+                break;
+
+            
+            default:
+                break;
+        }
     }
 #endif
 }

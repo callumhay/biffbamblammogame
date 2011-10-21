@@ -19,6 +19,7 @@
 #include "BoundingLines.h"
 
 class LevelPiece;
+class GameModel;
 
 /**
  * An 'abstract class' for representing in-game projectiles.
@@ -30,9 +31,11 @@ public:
                           FireGlobProjectile };
 
 	virtual ~Projectile();
-	virtual void Tick(double seconds) = 0;
-	virtual BoundingLines BuildBoundingLines() const = 0;
-	virtual ProjectileType GetType() const  = 0;
+	virtual void Tick(double seconds, const GameModel& model) = 0;
+	virtual BoundingLines BuildBoundingLines() const          = 0;
+	virtual ProjectileType GetType() const                    = 0;
+
+    void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
 
 	float GetWidth() const { return this->currWidth; }
 	float GetHeight() const { return  this->currHeight; }

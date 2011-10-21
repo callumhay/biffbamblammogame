@@ -25,7 +25,7 @@ public:
 	PaddleRocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir, float width, float height);
 	~PaddleRocketProjectile();
 
-	void Tick(double seconds);
+	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
     ProjectileType GetType() const {
         return Projectile::PaddleRocketBulletProjectile;

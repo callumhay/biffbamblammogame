@@ -25,7 +25,7 @@ public:
 	CollateralBlockProjectile(CollateralBlock* collateralBlock);
 	~CollateralBlockProjectile();
 
-	void Tick(double seconds);
+	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
     ProjectileType GetType() const {
         return Projectile::CollateralBlockProjectile;

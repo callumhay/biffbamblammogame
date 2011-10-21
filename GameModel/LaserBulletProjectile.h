@@ -21,7 +21,7 @@ class LaserBulletProjectile : public Projectile {
 public:
 	virtual ~LaserBulletProjectile();
 
-	void Tick(double seconds);
+	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
 
 protected:

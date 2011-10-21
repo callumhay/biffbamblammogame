@@ -662,7 +662,7 @@ void GameModel::UpdateActiveItemDrops(double seconds) {
 	std::list<GameItem*>& currLiveItems = this->GetLiveItems();
 	for(std::list<GameItem*>::iterator iter = currLiveItems.begin(); iter != currLiveItems.end(); ++iter) {
 		GameItem *currItem = *iter;
-		currItem->Tick(seconds);
+		currItem->Tick(seconds, *this);
 		
 		// Check to see if any have left the playing area - if so destroy them
 		if (this->IsOutOfGameBounds(currItem->GetCenter())) {
@@ -690,7 +690,7 @@ void GameModel::UpdateActiveProjectiles(double seconds) {
 	
 	for (std::list<Projectile*>::iterator iter = currProjectiles.begin(); iter != currProjectiles.end();) {
 		Projectile* currProjectile = *iter;
-		currProjectile->Tick(seconds);
+		currProjectile->Tick(seconds, *this);
 
 		// If the projectile is out of game bounds, destroy it
 		if (this->IsOutOfGameBounds(currProjectile->GetPosition())) {

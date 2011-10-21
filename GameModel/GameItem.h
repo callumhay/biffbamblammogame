@@ -56,6 +56,7 @@ public:
                     IceBallItem,
                     OmniLaserBallItem,
                     InvisiPaddleItem,
+                    MagnetPaddleItem,
 
                     RandomItem // MAKE SURE RANDOM ITEM IS ALWAYS THE LAST ONE!!
 	};
@@ -104,7 +105,7 @@ public:
 	}
 	void AnimateItemFade(float endAlpha, double duration);
 
-	void Tick(double seconds);
+	void Tick(double seconds, const GameModel& model);
 	bool CollisionCheck(const PlayerPaddle &paddle);
 
 	// Returns the timer length for this item
@@ -119,15 +120,18 @@ public:
 		GameEventManager::Instance()->ActionItemDeactivated(*this);
 	}
 
+    void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model);
+
 	friend std::ostream& operator <<(std::ostream& os, const GameItem& item);
 
 protected:
-	std::string name;							// Name of this item
-	GameModel* gameModel;					// Items have to be able to manipulate what happens in the game...
-	Point2D center;								// The center x,y coord that this item is located at
-	ItemDisposition disposition;	// The disposition of the item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
-	bool isActive;								// Whether or not this item is currently active (i.e., has been accquired and is effecting the game play)
-	
+	std::string name;            // Name of this item
+	GameModel* gameModel;        // Items have to be able to manipulate what happens in the game...
+	Point2D center;              // The center x,y coord that this item is located at
+	ItemDisposition disposition; // The disposition of the item (e.g., power-up, power-down, ...), essentially if it's good or bad for the player
+	bool isActive;               // Whether or not this item is currently active (i.e., has been accquired and is effecting the game play)
+	Vector2D currVelocityDir;    // The direction that this item is moving in
+
 	ColourRGBA colour;													// Colour multiply of the item
 	AnimationLerp<ColourRGBA> colourAnimation;	// Animations associated with the colour
 	
