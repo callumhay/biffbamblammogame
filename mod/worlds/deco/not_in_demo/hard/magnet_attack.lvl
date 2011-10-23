@@ -1,0 +1,63 @@
+Magnet Attack
+19 22
+E E E E E S S S S S S S S S E E E E E 
+E E E E S S D(MagnetPaddle){1} T(P,ul) E E E T(P,ur) D(LaserBulletPaddle,RocketPaddle){2} S S E E E E 
+E E E E S E E N E E E N E E S E E E E 
+E E E E S E E N C(190-195) P C(165-170) N E E S E E E E 
+E E E E S G R Y R G R Y R G S E E E E 
+E E E E S O O O O O O O O O S E E E E 
+E E E E S Y Y Y Y Y Y Y Y Y S E E E E 
+E E E E S G G G G Y G G G G S E E E E 
+E E E E S E E E E Y E E E E S E E E E 
+E E E E S E E E E Y E E E E S E E E E 
+E E E E S E E E E Y E E E E S E E E E 
+E E E E N G G G G Y G G G G N E E E E 
+E E E E N Y Y Y Y Y Y Y Y Y N E E E E 
+E E E E N O O O O O O O O O N E E E E 
+E E E E N E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E N E E E E 
+E E E E N E E E E E E E E E N E E E E 
+E E G E N E E E E E E E E E N E G E E 
+E G G E N E E E E E E E E E N E G G E 
+E G G E N E E E E E E E E E N E G G E 
+S S S S S E E E E E E E E E S S S S S 
+W(2) E E E E E E E E E E E E E E E E E W(1) 
+
+STARS:
+4300
+6000
+9300
+12000
+14000
+
+PaddleGrow 0
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 0
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 0
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 1
+RocketPaddle 2
+GhostBall 0
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 3
+MultiBall3 2
+IceBall 1
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0
