@@ -593,35 +593,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ESPEngine\ESPMultiColourEffector.h"
-					>
-				</File>
-				<File
 					RelativePath=".\ESPEngine\ESPOnomataParticle.h"
 					>
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPParticle.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleAccelEffector.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleColourEffector.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleEffector.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleRotateEffector.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleScaleEffector.h"
 					>
 				</File>
 				<File
@@ -665,31 +641,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ESPEngine\ESPMultiColourEffector.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\ESPEngine\ESPOnomataParticle.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPParticle.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleAccelEffector.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleColourEffector.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleRotateEffector.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ESPEngine\ESPParticleScaleEffector.cpp"
 					>
 				</File>
 				<File
@@ -708,6 +664,70 @@
 					RelativePath=".\ESPEngine\ESPVolumeEmitter.cpp"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="Effectors"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\ESPEngine\ESPMultiColourEffector.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleAccelEffector.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleColourEffector.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleEffector.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleMagneticEffector.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleRotateEffector.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleScaleEffector.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\ESPEngine\ESPMultiColourEffector.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleAccelEffector.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleColourEffector.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleMagneticEffector.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleRotateEffector.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ESPEngine\ESPParticleScaleEffector.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -746,6 +766,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\LevelMesh.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\MagnetPaddleEffect.h"
 					>
 				</File>
 				<File
@@ -810,6 +834,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\LevelMesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\MagnetPaddleEffect.cpp"
 					>
 				</File>
 				<File

@@ -69,7 +69,7 @@ void GameItem::Tick(double seconds, const GameModel& model) {
 	// With every tick we simply move the item down at its
 	// descent speed, all other activity (e.g., player paddle collision) 
 	// is taken care of by the game
-    this->AugmentDirectionOnPaddleMagnet(seconds, model);
+    model.GetPlayerPaddle()->AugmentDirectionOnPaddleMagnet(seconds, 60.0f, this->center, this->currVelocityDir);
 	Vector2D dV = SPEED_OF_DESCENT * seconds * this->currVelocityDir;
 	this->center = this->center + dV;
 }
@@ -88,57 +88,4 @@ bool GameItem::CollisionCheck(const PlayerPaddle &paddle) {
 	Collision::AABB2D itemAABB(this->GetCenter() - Vector2D(HALF_ITEM_WIDTH, HALF_ITEM_HEIGHT), 
 														 this->GetCenter() + Vector2D(HALF_ITEM_WIDTH, HALF_ITEM_HEIGHT));
 	return Collision::IsCollision(paddleAABB, itemAABB);
-}
-
-void GameItem::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model) {
-    // If the paddle has the magnet item active and the item is moving towards the paddle, then we need to
-    // modify the velocity to make it move towards the paddle...
-    const PlayerPaddle* paddle = model.GetPlayerPaddle();
-    if ((paddle->GetPaddleType() & PlayerPaddle::MagnetPaddle) != PlayerPaddle::MagnetPaddle) {
-        return;
-    }
-   
-    // Also, don't keep augmenting the direction if the item has passed the paddle going out of bounds...
-    if (this->center[1] < paddle->GetCenterPosition()[1]) {
-        return;
-    }
-
-    // Figure out the vector from the item to the paddle...
-    Vector2D itemToPaddleVec = paddle->GetCenterPosition() - this->center;
-    itemToPaddleVec.Normalize();
-
-    if (Vector2D::Dot(this->currVelocityDir, itemToPaddleVec) <= 0) {
-        // The projectile is not within a 90 degree angle of the vector from the projectile to the paddle
-        return;
-    }
-
-    float currRotAngle   = atan2(this->currVelocityDir[1], this->currVelocityDir[0]);
-    // Don't let the angle get to sharp or the item will collide with the paddle no matter what
-    if (currRotAngle > Trig::degreesToRadians(-30) || currRotAngle < Trig::degreesToRadians(-150)) {
-        return;
-    }
-
-    float targetRotAngle = atan2(itemToPaddleVec[1],  itemToPaddleVec[0]);
-
-    if (fabs(targetRotAngle - currRotAngle) <= 0.01) {
-        // If the direction is already pointing at the paddle then exit immediately
-        return;
-    }
-
-    // Figure out the shortest way to get there...
-    float targetMinusCurr = targetRotAngle - currRotAngle;
-    float currMinusTarget = currRotAngle   - targetRotAngle;
-
-    float rotSgn;
-    if (fabs(targetMinusCurr) > fabs(currMinusTarget)) {
-        rotSgn = NumberFuncs::SignOf(currMinusTarget);
-    }
-    else {
-        rotSgn = NumberFuncs::SignOf(targetMinusCurr);
-    }
-    
-    static const float DEGREES_CHANGE_PER_SEC = 60.0f;
-    float rotationAmt = seconds * DEGREES_CHANGE_PER_SEC * rotSgn;
-    this->currVelocityDir.Rotate(rotationAmt);
-    this->currVelocityDir.Normalize();
 }

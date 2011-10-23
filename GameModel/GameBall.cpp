@@ -70,7 +70,7 @@ impulseDeceleration(0), impulseSpdDecreaseCounter(0)  {
 
 GameBall::GameBall(const GameBall& gameBall) : bounds(gameBall.bounds), currDir(gameBall.currDir), currSpeed(gameBall.currSpeed), 
 currType(gameBall.currType), currSize(gameBall.currSize), currScaleFactor(gameBall.currScaleFactor), 
-rotationInDegs(gameBall.rotationInDegs), ballballCollisionsDisabledTimer(0.0), lastThingCollidedWith(gameBall.lastThingCollidedWith),
+rotationInDegs(gameBall.rotationInDegs), ballballCollisionsDisabledTimer(0.0), lastThingCollidedWith(NULL),
 zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributingGravityColour), 
 contributingCrazyColour(gameBall.contributingCrazyColour), contributingIceColour(gameBall.contributingIceColour),
 timeSinceLastCollision(gameBall.timeSinceLastCollision), boostSpdDecreaseCounter(gameBall.boostSpdDecreaseCounter),

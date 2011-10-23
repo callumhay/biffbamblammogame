@@ -56,8 +56,12 @@ The ball becomes icy causing blocks that it hits to freeze instantly - making th
 ~ OmniLaserBall
 The ball gains the ability to shoot lasers randomly in all directions destroying blocks and knocking the paddle around.
 
+~ MagnetPaddle
+The paddle starts to attract all falling items, laser, collateral blocks, rockets, etc.
+
 ~ Random
 The completely random item type - the only item this may not be is random, since that would be infinitely recursive, now wouldn't it?
+
 
 - BallShrink
 The ball decreases in size.

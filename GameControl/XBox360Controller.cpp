@@ -149,7 +149,7 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
     //float addedSensitivityDeadZoneLThumb = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE * (1.0f - XBox360Controller::GetSensitivityFraction());
     //float addedSensitivityDeadZoneRThumb = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE * (1.0f - XBox360Controller::GetSensitivityFraction());
 
-    this->UpdateDirections(controllerState, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+    this->UpdateDirections(controllerState, static_cast<int>(1.85f * XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE));
 
 	// Triggers
 	if (controllerState.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD || 
@@ -250,7 +250,7 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT || 
 		  (abs(controllerState.Gamepad.sThumbLX) > sensitivityLeft && controllerState.Gamepad.sThumbLX < 0)) {
 
-		if (!this->leftActionOn) {
+		if (!this->leftActionOn && !this->rightActionOn) {
 			this->display->ButtonPressed(GameControl::LeftButtonAction);
 			this->leftActionOn = true;
 		}
@@ -261,10 +261,11 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 			this->leftActionOn = false;
 		}
 	}
+
 	if (controllerState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT || 
 		  (abs(controllerState.Gamepad.sThumbLX) > sensitivityLeft && controllerState.Gamepad.sThumbLX > 0)) {
 
-		if (!this->rightActionOn) {
+		if (!this->rightActionOn && !this->leftActionOn) {
 			this->display->ButtonPressed(GameControl::RightButtonAction);
 			this->rightActionOn = true;
 		}
@@ -275,7 +276,6 @@ void XBox360Controller::UpdateDirections(const XINPUT_STATE& controllerState,
 			this->rightActionOn = false;
 		}
 	}
-
 
 }
 

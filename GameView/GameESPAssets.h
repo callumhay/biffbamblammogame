@@ -159,8 +159,8 @@ private:
     ESPPointEmitter* boostSparkleEmitterLight;
     ESPPointEmitter* boostSparkleEmitterDark;
 
-	// Laser and beam effects
-	ESPPointEmitter*  paddleLaserGlowAura;
+	// Cached paddle effects
+    ESPPointEmitter*  paddleLaserGlowAura;
 	ESPPointEmitter*  paddleLaserGlowSparks;
 	ESPVolumeEmitter* paddleBeamGlowSparks;
 	ESPVolumeEmitter* paddleBeamOriginUp;

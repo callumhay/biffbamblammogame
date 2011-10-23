@@ -20,6 +20,7 @@
 #include "ESPParticleColourEffector.h"
 #include "ESPParticleScaleEffector.h"
 #include "ESPParticleRotateEffector.h"
+#include "ESPParticleMagneticEffector.h"
 
 // Emitters and particles
 #include "ESPEmitter.h"
