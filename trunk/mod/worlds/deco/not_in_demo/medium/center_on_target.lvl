@@ -24,9 +24,9 @@ S E E F(r) E E E E E E E E E F(l) E E S
 S E C(90-110) F(r) E E E E E E E E E F(l) C(250-270) E S 
 S X(m,n) E F(r) E E E E E E E E E F(l) E X(o,p) S 
 S S S S E E E E E E E E E S S S S 
-S E E S E E E E E E E E E S E E S 
-S E E S E E E E E E E E E S E E S 
-S E E S E E E E E E E E E S E E S 
+E E E S E E E E E E E E E S E E E 
+E E E S E E E E E E E E E S E E E 
+E E E S E E E E E E E E E S E E E 
 
 STARS:
 13900
@@ -39,8 +39,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 0
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -57,6 +57,7 @@ BallShrink 2
 UpsideDown 2
 MultiBall5 2
 BallCam 0
+MagnetPaddle 2
 MultiBall3 2
 IceBall 2
 SlowBall 2

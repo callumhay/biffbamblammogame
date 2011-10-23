@@ -113,7 +113,7 @@ void MagnetPaddleEffect::DrawLines(float scaleFactor) {
         
         float halfCurrWidth  = currWidth  / 2.0f;
 
-        glColor4f(1, 1, 1, 0.85f * this->GetAlphaFromTime(currTime));
+        glColor4f(1, 1, 1, 0.6f * this->GetAlphaFromTime(currTime));
 
         glPushMatrix();
         glTranslatef(halfCurrWidth, 0.0f, 0.0f);

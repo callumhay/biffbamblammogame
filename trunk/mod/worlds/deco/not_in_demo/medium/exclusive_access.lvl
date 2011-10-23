@@ -1,24 +1,24 @@
 Exclusive Access
 17 25
-S S S S S S S S S S S S S S S S S 
-S E E E E E G G G G G E E E E E S 
-S E E E E L G G Y G G L E E E E S 
-S E E E E S G Y B Y G S E E E E S 
-S O O O O S Y G Y G Y S O O O O S 
-S Y Y Y Y S B Y G Y B S Y Y Y Y S 
-S G G G G S Y G I G Y S G G G G S 
-S G G G G S G G G G G S G G G G S 
-S G G G G S G Y R Y G S G G G G S 
-S G G G G S G R B R G S G G G G S 
-S Y Y Y Y S G Y R Y G S Y Y Y Y S 
-S O O O O S G G G G G S O O O O S 
-S E E E E S G Y I Y G S E E E E S 
-S E E E E S G G G G G S E E E E S 
-S E E E L S Y R Y R Y S L E E E S 
-S E E L S S G O B O G S S L E E S 
-S E L S R R Y G Y G Y R R S L E S 
-S L S R R R G Y G Y G R R R S L S 
-S S R R R R Y Y Y Y Y R R R R S S 
+E S S S S S S S S S S S S S S S E 
+E S E E E E E E E E E E E E E S E 
+E S E E L E G G Y G G E L E E S E 
+E S E E S G G Y B Y G G S E E S E 
+E S O O S G Y G Y G Y G S O O S E 
+E S Y Y S G B Y G Y B G S Y Y S E 
+E S G G S G Y G I G Y G S G G S E 
+E S G G S G E G G G E G S G G S E 
+E S G G S E G G Y G G E S G G S E 
+E S G G S G E Y B Y E G S G G S E 
+E S Y Y S E G G Y G G E S Y Y S E 
+S S O O S G E G G G E G S O O S S 
+S E E E S G G Y I Y G G S E E E S 
+S E E L S G G G G G G G S L E E S 
+S E L S S G Y G Y G Y G S S L E S 
+S L S S S Y G O B O G Y S S S L S 
+S S S S S G Y G Y G Y G S S S S S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E S 
@@ -27,20 +27,20 @@ S E E E E E E E E E E E E E E E S
 S E E E E E E E E E E E E E E E S 
 
 STARS:
-10000
-15000
+8000
 20000
-25000
-35000
+50000
+70000
+82000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
-ShieldPaddle 2
+ShieldPaddle 0
 LaserBulletPaddle 2
 1Up 2
 PaddleShrink 2
@@ -55,6 +55,7 @@ BallShrink 2
 UpsideDown 2
 MultiBall5 2
 BallCam 2
+MagnetPaddle 2
 MultiBall3 2
 IceBall 2
 SlowBall 2

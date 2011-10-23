@@ -148,6 +148,7 @@ public class LevelPieceImageLabel extends JLabel {
 		this.image = icon.getImage();
 		this.imageObserver = icon.getImageObserver();
 		this.piece = piece;
+		this.triggerID = LevelPiece.NO_TRIGGER_ID;
 		
 		this.invalidate();
 		this.repaint();
