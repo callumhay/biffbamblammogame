@@ -29,6 +29,7 @@
 #include "PaddleRocketMesh.h"
 #include "PaddleShield.h"
 #include "OmniLaserBallEffect.h"
+#include "MagnetPaddleEffect.h"
 
 // Game Model includes
 #include "../GameModel/GameModel.h"
@@ -82,7 +83,8 @@ invisibleEffect(NULL),
 ghostBallEffect(NULL),
 fireBallEffect(NULL),
 
-omniLaserBallEffect(NULL)
+omniLaserBallEffect(NULL),
+magnetPaddleEffect(NULL)
 {
 
 	// Load ESP assets
@@ -567,6 +569,10 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
     else {
 	    // Draw any effects on the paddle (e.g., item acquiring effects)
 	    this->espAssets->DrawBackgroundPaddleEffects(dT, camera);
+
+        if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::MagnetPaddle) == PlayerPaddle::MagnetPaddle) {
+            this->magnetPaddleEffect->Draw(dT, p);
+        }
     }
 
 	// Draw the paddle
@@ -984,6 +990,9 @@ void GameAssets::LoadRegularEffectAssets() {
     if (this->omniLaserBallEffect == NULL) {
         this->omniLaserBallEffect = new OmniLaserBallEffect();
     }
+    if (this->magnetPaddleEffect == NULL) {
+        this->magnetPaddleEffect = new MagnetPaddleEffect();
+    }
 	if (this->paddleShield == NULL) {
 		this->paddleShield = new PaddleShield();
 	}
@@ -1009,6 +1018,11 @@ void GameAssets::DeleteRegularEffectAssets() {
     if (this->omniLaserBallEffect != NULL) {
         delete this->omniLaserBallEffect;
         this->omniLaserBallEffect = NULL;
+    }
+
+    if (this->magnetPaddleEffect != NULL) {
+        delete this->magnetPaddleEffect;
+        this->magnetPaddleEffect = NULL;
     }
 
 	// Delete any left behind particles
@@ -1280,6 +1294,10 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 				this->paddleShield->ActivateShield(*gameModel.GetPlayerPaddle(), *fullscreenFBOTex);
 			}
 			break;
+
+        case GameItem::MagnetPaddleItem:
+            this->magnetPaddleEffect->Reset();
+            break;
 
 		default:
 			break;

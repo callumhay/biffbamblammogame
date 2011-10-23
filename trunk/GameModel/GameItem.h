@@ -120,8 +120,6 @@ public:
 		GameEventManager::Instance()->ActionItemDeactivated(*this);
 	}
 
-    void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model);
-
 	friend std::ostream& operator <<(std::ostream& os, const GameItem& item);
 
 protected:

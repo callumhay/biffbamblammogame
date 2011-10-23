@@ -55,6 +55,7 @@ class PaddleRocketMesh;
 class PaddleShield;
 class RandomItem;
 class OmniLaserBallEffect;
+class MagnetPaddleEffect;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -186,6 +187,7 @@ private:
 	CgFxFireBallEffect* fireBallEffect;
 
     OmniLaserBallEffect* omniLaserBallEffect;
+    MagnetPaddleEffect* magnetPaddleEffect;
 
 	void DeleteRegularEffectAssets();
 

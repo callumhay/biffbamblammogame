@@ -32,8 +32,8 @@ protected:
 
 private:
 	Collision::LineSeg3D  emitLine; // The line along which particles are emitted
-	Vector3D emitDir;								// The direction off the line which particles are emitted in
-	float emitAngle;								// The angle variation from the emit dir that particle can be emitted within
+	Vector3D emitDir;               // The direction off the line which particles are emitted in
+	float emitAngle;                // The angle variation from the emit dir that particle can be emitted within
 
 };
 #endif

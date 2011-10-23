@@ -416,14 +416,16 @@ public class LevelPieceEditDialog extends JDialog {
     	// Update the ID siblings and other attributes...
     	this.updateSiblingsFromList();
     	
-    	int cannonValue1 = (Integer)this.cannonAngleValue1.getValue();
-    	int cannonValue2 = (Integer)this.cannonAngleValue2.getValue();
-    	if (cannonValue1 > cannonValue2) {
-    		cannonValue1 = cannonValue2;
+    	if (this.cannonAngleValue1 != null && this.cannonAngleValue2 != null) {
+	    	int cannonValue1 = (Integer)this.cannonAngleValue1.getValue();
+	    	int cannonValue2 = (Integer)this.cannonAngleValue2.getValue();
+	    	if (cannonValue1 > cannonValue2) {
+	    		cannonValue1 = cannonValue2;
+	    	}
+	    	
+	    	this.levelPieceLbl.setCannonBlockDegAngle1(cannonValue1);
+	    	this.levelPieceLbl.setCannonBlockDegAngle2(cannonValue2);
     	}
-    	
-    	this.levelPieceLbl.setCannonBlockDegAngle1(cannonValue1);
-    	this.levelPieceLbl.setCannonBlockDegAngle2(cannonValue2);
     	
     	this.setVisible(false);
     }//GEN-LAST:event_okBtnActionPerformed

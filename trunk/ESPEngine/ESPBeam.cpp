@@ -14,7 +14,7 @@
 #include "../BlammoEngine/Collision.h"
 
 ESPBeam::ESPBeam(const Vector3D& beamLineVec, const Vector3D& rotationalVec, 
-								 const ESPInterval& amplitudeVariationAmt, const ESPInterval& lineDistVariationAmt) : 
+                 const ESPInterval& amplitudeVariationAmt, const ESPInterval& lineDistVariationAmt) : 
 startSegment(new ESPBeamSegment(NULL)), 
 lifeTimeInSecs(0.0), currLifeTickCount(0.0),
 rotationalVec(rotationalVec), beamLineVec(beamLineVec), 

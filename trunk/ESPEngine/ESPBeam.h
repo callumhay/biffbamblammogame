@@ -17,9 +17,10 @@
 
 class ESPBeam {
 public:
-	static const int INFINITE_BEAM_LIFETIME				 = -1;
+	static const int INFINITE_BEAM_LIFETIME = -1;
 
-	ESPBeam(const Vector3D& beamLineVec, const Vector3D& rotationalVec, const ESPInterval& amplitudeVariationAmt, const ESPInterval& lineDistVariationAmt);
+	ESPBeam(const Vector3D& beamLineVec, const Vector3D& rotationalVec,
+            const ESPInterval& amplitudeVariationAmt, const ESPInterval& lineDistVariationAmt);
 	~ESPBeam();
 
 	ESPBeamSegment* GetStartSegment() const;
@@ -40,10 +41,10 @@ private:
 	double lifeTimeInSecs;
 
 	// Allowed interval of variation of the point over time
-	Vector3D rotationalVec;							// Vector orthogonal to the beam line
-	Vector3D beamLineVec;								// Vector from start to end of the beam (without any variations)
+	Vector3D rotationalVec;             // Vector orthogonal to the beam line
+	Vector3D beamLineVec;               // Vector from start to end of the beam (without any variations)
 	ESPInterval amplitudeVariationAmt;	// Interval of allowed variation from the beam line
-	ESPInterval lineDistVariationAmt;		// Interval of allowed variation along the beam line of any segment point
+	ESPInterval lineDistVariationAmt;   // Interval of allowed variation along the beam line of any segment point
 	float thickness;
 
 	//double variationSpd

@@ -1160,3 +1160,76 @@ bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, dou
 
     return false;
 }
+
+/**
+ * When the paddle magnet is active this routine will potentitally modify the given vector so that the object associated
+ * with it (as its velocity) and the given center position will start to migrate towards the paddle
+ * as if being attracted by it.
+ */
+void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesChangePerSec,
+                                                  const Point2D& centerPos, Vector2D& vectorToAugment) const {
+    // If the paddle has the magnet item active and the projectile is moving towards the paddle, then we need to
+    // modify the velocity to make it move towards the paddle...
+    if ((this->GetPaddleType() & PlayerPaddle::MagnetPaddle) != PlayerPaddle::MagnetPaddle) {
+        return;
+    }
+        
+    // Also, don't keep augmenting the direction if the projectile has passed the paddle going out of bounds...
+    if (centerPos[1] < this->GetCenterPosition()[1]) {
+        return;
+    }
+
+    // Figure out the vector from the projectile to the paddle...
+    Vector2D projectileToPaddleVec = this->GetCenterPosition() - centerPos;
+    projectileToPaddleVec.Normalize();
+
+    if (Vector2D::Dot(vectorToAugment, projectileToPaddleVec) <= 0) {
+        // The projectile is not within a 90 degree angle of the vector from the projectile to the paddle
+        return;
+    }
+    
+    float currRotAngle = atan2(vectorToAugment[1], vectorToAugment[0]);
+    
+    // Don't let the angle get too sharp or the projectile will collide with the paddle no matter what
+    bool wasInRange = true;
+    if (currRotAngle > Trig::degreesToRadians(-30) || currRotAngle < Trig::degreesToRadians(-150)) {
+        wasInRange = false;
+    }
+
+    float targetRotAngle = atan2(projectileToPaddleVec[1],  projectileToPaddleVec[0]);
+
+    if (fabs(targetRotAngle - currRotAngle) <= 0.01) {
+        // If the direction is already pointing at the paddle then exit immediately
+        return;
+    }
+
+    // Figure out the shortest way to get there...
+    float targetMinusCurr = targetRotAngle - currRotAngle;
+    float currMinusTarget = currRotAngle   - targetRotAngle;
+
+    float rotSgn;
+    if (fabs(targetMinusCurr) > fabs(currMinusTarget)) {
+        rotSgn = NumberFuncs::SignOf(currMinusTarget);
+    }
+    else {
+        rotSgn = NumberFuncs::SignOf(targetMinusCurr);
+    }
+
+    float rotationAmt = seconds * degreesChangePerSec * rotSgn;
+
+    Vector2D newVector(vectorToAugment);
+    newVector.Rotate(rotationAmt);
+    newVector.Normalize();
+
+    if (wasInRange) {
+        // Make sure the new vector is in range as well...
+        float newRotAngle = atan2(newVector[1], newVector[0]);
+        if (newRotAngle > Trig::degreesToRadians(-30) || newRotAngle < Trig::degreesToRadians(-150)) {
+            // We've gone out of range, don't change anything and exit
+            return;
+        }
+
+    }
+
+    vectorToAugment = newVector;
+}

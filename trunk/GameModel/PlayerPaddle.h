@@ -221,6 +221,9 @@ public:
 	Collision::AABB2D GetPaddleAABB(bool includeAttachedBall) const;
     //std::list<PointAward> GetPointsForHittingBall(const GameBall& ball) const;
 
+    void AugmentDirectionOnPaddleMagnet(double seconds, float degreesChangePerSec,
+        const Point2D& centerPos, Vector2D& vectorToAugment) const;
+
 	void DebugDraw() const;
 
     // Enable options for the paddle - used during the tutorial

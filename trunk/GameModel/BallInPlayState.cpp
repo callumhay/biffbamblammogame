@@ -221,7 +221,7 @@ void BallInPlayState::Tick(double seconds) {
                     }
                 }
 			}
-		}
+        }
 
 		// Make sure the ball can collide with level pieces (blocks) before running the block collision simulation
 		if (currBall->CanCollideWithBlocks()) {
