@@ -2,7 +2,7 @@
  * Mesh.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -145,6 +145,15 @@ void Mesh::SetColour(const Colour& c) {
 		MaterialProperties* currMatProps = currMaterial->GetProperties();
 		currMatProps->diffuse = c;
 	}
+}
+
+void Mesh::SetAlpha(float alpha) {
+    for (std::map<std::string, MaterialGroup*>::const_iterator iter = this->matGrps.begin();
+         iter != this->matGrps.end(); ++iter) {
+
+	    MaterialGroup* matGrp = iter->second;
+	    matGrp->GetMaterial()->GetProperties()->alphaMultiplier = alpha;
+    }
 }
 
 /**

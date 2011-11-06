@@ -2,7 +2,7 @@
  * InkBlock.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -17,7 +17,7 @@
 class InkBlock : public LevelPiece {
 public:
 	InkBlock(unsigned int wLoc, unsigned int hLoc);
-	virtual ~InkBlock();
+	~InkBlock();
 
 	LevelPieceType GetType() const { 
 		return LevelPiece::Ink;
@@ -63,10 +63,7 @@ public:
 	// Returns: false
 	bool IsLightReflectorRefractor() const {
 		// When frozen in ice a block can reflect/refract lasers and the like
-		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-			return true;
-		}
-		return false;
+		return this->HasStatus(LevelPiece::IceCubeStatus);
 	}
 
 	bool ProjectilePassesThrough(Projectile* projectile) const;

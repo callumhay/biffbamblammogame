@@ -29,8 +29,8 @@ public:
 	~TeslaBlockMesh();
 
 	void Flush();
-	void AddTeslaBlock(const TeslaBlock* cannonBlock);
-	void RemoveTeslaBlock(const TeslaBlock* cannonBlock);
+	void AddTeslaBlock(const TeslaBlock* teslaBlock);
+	void RemoveTeslaBlock(const TeslaBlock* teslaBlock);
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight);
@@ -41,7 +41,7 @@ private:
 
 	std::map<std::string, MaterialGroup*> materialGroups;	// Material groups for the static parts of the tesla block mesh
 	
-	std::set<const TeslaBlock*> teslaBlocks;														// A list of all the tesla blocks that are currently present in the game
+	std::set<const TeslaBlock*> teslaBlocks;                            // A list of all the tesla blocks that are currently present in the game
 	std::map<const TeslaBlock*, std::pair<Vector3D, float>> rotations;	// Rotations of the various tesla coils
 
 	Mesh* teslaBaseMesh;
@@ -60,9 +60,7 @@ private:
 
 	void LoadMesh();
 
-	// Disallow copy and assign
-	TeslaBlockMesh(const TeslaBlockMesh& t);
-	TeslaBlockMesh& operator=(const TeslaBlockMesh& t);
+    DISALLOW_COPY_AND_ASSIGN(TeslaBlockMesh);
 };
 
 inline void TeslaBlockMesh::Flush() {

@@ -2,7 +2,7 @@
  * PaddleLaserProjectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009-2011
+ * Callum Hay, 2011-2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -26,6 +26,7 @@ public:
     ProjectileType GetType() const {
         return Projectile::PaddleLaserBulletProjectile;
     }
+    float GetDamage() const { return 90.0f; }
 
 private:
     // Disallow assignment

@@ -1257,6 +1257,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::ItemDrop:
 				case LevelPiece::Collateral:
                 case LevelPiece::Switch:
+                case LevelPiece::LaserTurret:
 					{
 						bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
@@ -1651,6 +1652,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
 		case LevelPiece::Collateral:
         case LevelPiece::OneWay:
         case LevelPiece::NoEntry:
+        case LevelPiece::LaserTurret:
 			severity = Onomatoplex::SUPER_AWESOME;
 			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 
 																						ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
