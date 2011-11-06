@@ -2,7 +2,7 @@
  * FireGlobProjectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -24,6 +24,7 @@ public:
     ProjectileType GetType() const {
         return Projectile::FireGlobProjectile;
     }
+    float GetDamage() const { return 0.0f; }
 
 	enum RelativeSize { Small, Medium, Large };
 	const FireGlobProjectile::RelativeSize& GetRelativeSize() const;

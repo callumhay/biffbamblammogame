@@ -2,7 +2,7 @@
  * PaddleRocketProjectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -30,6 +30,7 @@ public:
     ProjectileType GetType() const {
         return Projectile::PaddleRocketBulletProjectile;
     }
+    float GetDamage() const { return (this->GetWidth() / PADDLEROCKET_WIDTH_DEFAULT) * 400.0f; }
 
 	float GetYRotation() const;
 

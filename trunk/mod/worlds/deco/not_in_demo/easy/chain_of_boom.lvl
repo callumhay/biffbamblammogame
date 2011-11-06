@@ -17,7 +17,7 @@ S B O Y G E G Y O B S
 S R B Y G E G Y B R S 
 S B O Y G G G Y O B S 
 S R O O Y Y Y O O R S 
-S E E E E E E E E E S 
+S E E E G G G E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -55,6 +55,7 @@ BallShrink 2
 UpsideDown 2
 MultiBall5 2
 BallCam 0
+MagnetPaddle 2
 MultiBall3 2
 IceBall 0
 SlowBall 2

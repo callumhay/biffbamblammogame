@@ -2,7 +2,7 @@
  * LevelMesh.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009-2010
+ * Callum Hay, 2011-2010
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -35,6 +35,7 @@ class CannonBlockMesh;
 class CollateralBlockMesh;
 class TeslaBlockMesh;
 class SwitchBlockMesh;
+class LaserTurretBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 
@@ -81,6 +82,7 @@ private:
 	TeslaBlockMesh* teslaBlock;
 	ItemDropBlockMesh* itemDropBlock;
     SwitchBlockMesh* switchBlock;
+    LaserTurretBlockMesh* laserTurretBlock;
     Mesh* noEntryBlock;
     Mesh* oneWayUpBlock;
     Mesh* oneWayDownBlock;

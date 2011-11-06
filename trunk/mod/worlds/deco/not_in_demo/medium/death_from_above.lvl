@@ -2,12 +2,12 @@ Death From Above
 10 26
 S S S S S S S S S S 
 S G L L E E L L G S 
-S G T(S,ll) E E E E T(S,lr) G S 
+S G R R E E R R G S 
 S G S S E E S S G S 
 S G S S E E S S G S 
 S G S S E E S S G S 
 S G S S E E S S G S 
-S S S S R R S S S S 
+S R S S R R S S R S 
 S E E E E E E E E S 
 S E E L E E L E E S 
 S G Y O L L O Y G S 
@@ -34,12 +34,12 @@ STARS:
 2000
 5000
 
-PaddleGrow 2
+PaddleGrow 0
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -56,6 +56,7 @@ BallShrink 2
 UpsideDown 2
 MultiBall5 1
 BallCam 0
+MagnetPaddle 2
 MultiBall3 2
 IceBall 0
 SlowBall 2

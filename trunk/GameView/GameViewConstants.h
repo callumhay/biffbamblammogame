@@ -272,6 +272,10 @@ public:
 	const char* ITEM_DROP_BLOCK_MESH;
     const char* SWITCH_BLOCK_MESH;
     const char* NO_ENTRY_BLOCK_MESH;
+    const char* LASER_TURRET_BASE_MESH;
+    const char* LASER_TURRET_HEAD_MESH;
+    const char* LASER_TURRET_BARREL_1;
+    const char* LASER_TURRET_BARREL_2;
 	const char* SKYBOX_MESH;
 	const char* ITEM_MESH;
 	const char* PADDLE_LASER_ATTACHMENT_MESH;

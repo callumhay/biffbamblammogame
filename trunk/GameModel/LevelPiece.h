@@ -2,7 +2,7 @@
  * LevelPiece.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -52,7 +52,7 @@ public:
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
                           Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop,
-                          Switch, OneWay, NoEntry };
+                          Switch, OneWay, NoEntry, LaserTurret };
 
 	virtual LevelPieceType GetType() const = 0;
     static bool IsValidLevelPieceType(int pieceType);

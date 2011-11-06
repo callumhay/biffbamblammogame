@@ -1176,6 +1176,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\LaserTurretBlockMesh.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\PortalBlockMesh.h"
 						>
 					</File>
@@ -1209,6 +1213,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\ItemDropBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\LaserTurretBlockMesh.cpp"
 						>
 					</File>
 					<File
@@ -1672,6 +1680,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\LaserTurretBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\LevelPiece.h"
 						>
 					</File>
@@ -1733,6 +1745,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\ItemDropBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LaserTurretBlock.cpp"
 						>
 					</File>
 					<File

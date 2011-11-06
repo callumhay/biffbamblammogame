@@ -2,7 +2,7 @@
  * GameEventsListener.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -509,6 +509,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
         case LevelPiece::Switch:
         case LevelPiece::OneWay:
         case LevelPiece::NoEntry:
+        case LevelPiece::LaserTurret:
 			if (wasFrozen) {
 				// Add ice break effect
 				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());

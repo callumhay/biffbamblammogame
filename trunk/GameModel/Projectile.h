@@ -2,7 +2,7 @@
  * Projectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009-2011
+ * Callum Hay, 2011-2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -34,6 +34,7 @@ public:
 	virtual void Tick(double seconds, const GameModel& model) = 0;
 	virtual BoundingLines BuildBoundingLines() const          = 0;
 	virtual ProjectileType GetType() const                    = 0;
+    virtual float GetDamage() const                           = 0;
 
     void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
 

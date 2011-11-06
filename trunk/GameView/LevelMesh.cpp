@@ -2,7 +2,7 @@
  * LevelMesh.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009-2010
+ * Callum Hay, 2011-2010
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -19,6 +19,7 @@
 #include "CollateralBlockMesh.h"
 #include "TeslaBlockMesh.h"
 #include "SwitchBlockMesh.h"
+#include "LaserTurretBlockMesh.h"
 
 #include "../ESPEngine/ESPEmitter.h"
 
@@ -36,12 +37,13 @@
 #include "../GameModel/TeslaBlock.h"
 #include "../GameModel/SwitchBlock.h"
 #include "../GameModel/OneWayBlock.h"
+#include "../GameModel/LaserTurretBlock.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
-oneWayRightBlock(NULL), statusEffectRenderer(NULL) {
+oneWayRightBlock(NULL), laserTurretBlock(NULL), statusEffectRenderer(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
 	this->basicBlock					= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
@@ -56,6 +58,7 @@ oneWayRightBlock(NULL), statusEffectRenderer(NULL) {
 	this->teslaBlock                    = new TeslaBlockMesh();
 	this->itemDropBlock					= new ItemDropBlockMesh();
     this->switchBlock                   = new SwitchBlockMesh();
+    this->laserTurretBlock              = new LaserTurretBlockMesh();
     this->noEntryBlock                  = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NO_ENTRY_BLOCK_MESH);
     this->oneWayUpBlock                 = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_UP_MESH);
     this->oneWayDownBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_DOWN_MESH);
@@ -81,6 +84,7 @@ oneWayRightBlock(NULL), statusEffectRenderer(NULL) {
     INSERT_MATERIAL_GRPS(this->teslaBlock);
     INSERT_MATERIAL_GRPS(this->itemDropBlock);
     INSERT_MATERIAL_GRPS(this->switchBlock);
+    INSERT_MATERIAL_GRPS(this->laserTurretBlock);
     INSERT_MATERIAL_GRPS(this->noEntryBlock);
     INSERT_MATERIAL_GRPS(this->oneWayUpBlock);
     INSERT_MATERIAL_GRPS(this->oneWayDownBlock);
@@ -119,6 +123,8 @@ LevelMesh::~LevelMesh() {
 	this->itemDropBlock = NULL;
     delete this->switchBlock;
     this->switchBlock = NULL;
+    delete this->laserTurretBlock;
+    this->laserTurretBlock = NULL;
 
 	// Delete the status effect renderer
 	delete this->statusEffectRenderer;
@@ -176,6 +182,7 @@ void LevelMesh::Flush() {
 	this->teslaBlock->Flush();
 	this->itemDropBlock->Flush();
     this->switchBlock->Flush();
+    this->laserTurretBlock->Flush();
 
 	// Clear the current level pointer
 	this->currLevel = NULL;
@@ -227,42 +234,59 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 			this->CreateEmitterEffectsForPiece(currPiece, worldTransform);
 
 			// Special cases:
-			// 1) Case of a cannon block - we need to store all the cannon blocks we can
-			// properly draw their barrels oriented unique for each one
-			if (currPiece->GetType() == LevelPiece::Cannon) {
-				const CannonBlock* cannonLvlPiece = static_cast<const CannonBlock*>(currPiece);
-				assert(cannonLvlPiece != NULL);
-				this->cannonBlock->AddCannonBlock(cannonLvlPiece);
-			}
-			// 2) Collateral block - we need to store all of them so that they can be drawn dynamically
-			// when the go into collateral mode
-			else if (currPiece->GetType() == LevelPiece::Collateral) {
-				const CollateralBlock* collateralLvlPiece = static_cast<const CollateralBlock*>(currPiece);
-				assert(collateralLvlPiece != NULL);
-				this->collateralBlock->AddCollateralBlock(collateralLvlPiece);
-			}
-			// 3) Tesla block - similar to the cannon block, we store all of them to draw certain
-			// parts of the block oriented differently / animating
-			else if (currPiece->GetType() == LevelPiece::Tesla) {
-				const TeslaBlock* telsaLvlPiece = static_cast<const TeslaBlock*>(currPiece);
-				assert(telsaLvlPiece != NULL);
-				this->teslaBlock->AddTeslaBlock(telsaLvlPiece);
-			}
-			// 4) Item drop block - like the above - since we need to set the texture for the item
-			// each block will drop next, we need to store them in a seperate container object
-			else if (currPiece->GetType() == LevelPiece::ItemDrop) {
-				const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(currPiece);
-				assert(itemDrpPiece != NULL);
+            switch (currPiece->GetType()) {
 
-				// Figure out what texture is associated with the next item to be dropped from the block
-				Texture2D* itemTexture = gameItemAssets.GetItemTexture(itemDrpPiece->GetNextDropItemType());
-				this->itemDropBlock->AddItemDropBlock(itemDrpPiece, itemTexture);
-			}
-            // 5) Switch block
-            else if (currPiece->GetType() == LevelPiece::Switch) {
-                const SwitchBlock* switchPiece = static_cast<const SwitchBlock*>(currPiece);
-                assert(switchPiece != NULL);
-                this->switchBlock->AddSwitchBlock(switchPiece);
+			    // 1) Case of a cannon block - we need to store all the cannon blocks we can
+			    // properly draw their barrels oriented unique for each one
+                case LevelPiece::Cannon: {
+				    const CannonBlock* cannonLvlPiece = static_cast<const CannonBlock*>(currPiece);
+				    this->cannonBlock->AddCannonBlock(cannonLvlPiece);
+                    break;
+			    }
+
+			    // 2) Collateral block - we need to store all of them so that they can be drawn dynamically
+			    // when the go into collateral mode
+                case LevelPiece::Collateral: {
+				    const CollateralBlock* collateralLvlPiece = static_cast<const CollateralBlock*>(currPiece);
+				    this->collateralBlock->AddCollateralBlock(collateralLvlPiece);
+                    break;
+			    }
+
+			    // 3) Tesla block - similar to the cannon block, we store all of them to draw certain
+			    // parts of the block oriented differently / animating
+                case LevelPiece::Tesla: {
+				    const TeslaBlock* telsaLvlPiece = static_cast<const TeslaBlock*>(currPiece);
+				    this->teslaBlock->AddTeslaBlock(telsaLvlPiece);
+                    break;
+			    }
+
+			    // 4) Item drop block - like the above - since we need to set the texture for the item
+			    // each block will drop next, we need to store them in a seperate container object
+                case LevelPiece::ItemDrop: {
+				    const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(currPiece);
+
+				    // Figure out what texture is associated with the next item to be dropped from the block
+				    Texture2D* itemTexture = gameItemAssets.GetItemTexture(itemDrpPiece->GetNextDropItemType());
+				    this->itemDropBlock->AddItemDropBlock(itemDrpPiece, itemTexture);
+                    break;
+			    }
+
+                // 5) Switch block
+                case LevelPiece::Switch: {
+                    const SwitchBlock* switchPiece = static_cast<const SwitchBlock*>(currPiece);
+                    this->switchBlock->AddSwitchBlock(switchPiece);
+                    break;
+                }
+                
+                // 6) Laser Turret Block
+                case LevelPiece::LaserTurret: {
+				    const LaserTurretBlock* laserTurretLvlPiece = static_cast<const LaserTurretBlock*>(currPiece);
+				    this->laserTurretBlock->AddLaserTurretBlock(laserTurretLvlPiece);
+                    break;
+                }
+
+                default:
+                    break;
             }
 		}
 	}
@@ -329,7 +353,6 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 		case LevelPiece::Cannon:
 			{
 				const CannonBlock* cannonLvlPiece = static_cast<const CannonBlock*>(&piece);
-				assert(cannonLvlPiece != NULL);
 				this->cannonBlock->RemoveCannonBlock(cannonLvlPiece);
 			}
 			break;
@@ -337,7 +360,6 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 		case LevelPiece::Collateral:
 			{
 				const CollateralBlock* collateralLvlPiece = static_cast<const CollateralBlock*>(&piece);
-				assert(collateralLvlPiece != NULL);
 				this->collateralBlock->RemoveCollateralBlock(collateralLvlPiece);
 			}
 			break;
@@ -345,7 +367,6 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 		case LevelPiece::Tesla:
 			{
 				const TeslaBlock* teslaLvlPiece = static_cast<const TeslaBlock*>(&piece);
-				assert(teslaLvlPiece != NULL);
 				this->teslaBlock->RemoveTeslaBlock(teslaLvlPiece);
 			}
 			break;
@@ -353,7 +374,6 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
 		case LevelPiece::ItemDrop:
 			{
 				const ItemDropBlock* itemDrpPiece = static_cast<const ItemDropBlock*>(&piece);
-				assert(itemDrpPiece != NULL);
 				this->itemDropBlock->RemoveItemDropBlock(itemDrpPiece);
 			}
             break;
@@ -361,10 +381,15 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
         case LevelPiece::Switch:
             {
 				const SwitchBlock* switchPiece = static_cast<const SwitchBlock*>(&piece);
-				assert(switchPiece != NULL);
 				this->switchBlock->RemoveSwitchBlock(switchPiece);
             }
             break;
+
+        case LevelPiece::LaserTurret: {
+            const LaserTurretBlock* laserTurretPiece = static_cast<const LaserTurretBlock*>(&piece);
+            this->laserTurretBlock->RemoveLaserTurretBlock(laserTurretPiece);
+            break;
+        }
 
 		default:
 			break;
@@ -404,6 +429,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->itemDropBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
+    this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 
 	ESPEmitter* emitter = NULL;
@@ -560,6 +586,9 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
 		case LevelPiece::Collateral:
 			break;
 
+        case LevelPiece::LaserTurret:
+            return &this->laserTurretBlock->GetMaterialGroups();
+
         case LevelPiece::OneWay:
             {
                 const OneWayBlock* oneWayBlock = static_cast<const OneWayBlock*>(piece);
@@ -640,4 +669,5 @@ void LevelMesh::SetLevelAlpha(float alpha) {
 	this->teslaBlock->SetAlphaMultiplier(alpha);
 	this->itemDropBlock->SetAlphaMultiplier(alpha);
     this->switchBlock->SetAlphaMultiplier(alpha);
+    this->laserTurretBlock->SetAlphaMultiplier(alpha);
 }

@@ -68,10 +68,16 @@ teslaCenterFlare(NULL), flareTex(NULL), shieldTex(NULL), shieldAlpha(1.0f) {
 }
 
 TeslaBlockMesh::~TeslaBlockMesh() {
-	ResourceManager::GetInstance()->ReleaseMeshResource(this->teslaBaseMesh);
-	ResourceManager::GetInstance()->ReleaseMeshResource(this->teslaCoilMesh);
-	ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTex);
-	ResourceManager::GetInstance()->ReleaseTextureResource(this->shieldTex);
+    bool success = false;
+	success = ResourceManager::GetInstance()->ReleaseMeshResource(this->teslaBaseMesh);
+    assert(success);
+	success = ResourceManager::GetInstance()->ReleaseMeshResource(this->teslaCoilMesh);
+    assert(success);
+	success = ResourceManager::GetInstance()->ReleaseTextureResource(this->flareTex);
+    assert(success);
+	success = ResourceManager::GetInstance()->ReleaseTextureResource(this->shieldTex);
+    assert(success);
+
 	delete this->teslaCenterFlare;
 	this->teslaCenterFlare = NULL;
 }
@@ -79,6 +85,10 @@ TeslaBlockMesh::~TeslaBlockMesh() {
 void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 
                           const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 	
+    if (this->teslaBlocks.empty()) {
+        return;
+    }
+
 	glPushAttrib(GL_CURRENT_BIT);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	float rotationAmt = dT * COIL_ROTATION_SPEED_DEGSPERSEC;
@@ -129,12 +139,7 @@ void TeslaBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight
 }
 
 void TeslaBlockMesh::SetAlphaMultiplier(float alpha) {
-	const std::map<std::string, MaterialGroup*>&  matGrps = this->teslaCoilMesh->GetMaterialGroups();
-	for (std::map<std::string, MaterialGroup*>::const_iterator iter = matGrps.begin(); iter != matGrps.end(); ++iter) {
-		MaterialGroup* matGrp = iter->second;
-		matGrp->GetMaterial()->GetProperties()->alphaMultiplier = alpha;
-	}
-
+	this->teslaCoilMesh->SetAlpha(alpha);
 	this->teslaCenterFlare->SetParticleAlpha(ESPInterval(alpha));
 	this->shieldAlpha = std::min<float>(alpha, 0.75f);
 }

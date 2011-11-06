@@ -2,7 +2,7 @@
  * CollateralBlockProjectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2009
+ * Callum Hay, 2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -30,7 +30,8 @@ public:
     ProjectileType GetType() const {
         return Projectile::CollateralBlockProjectile;
     }
-    
+    float GetDamage() const { return 9999.9999f; }
+
     void SetPosition(const Point2D& pos);
 
 private:
