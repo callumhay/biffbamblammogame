@@ -416,6 +416,7 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
 	switch (projectile.GetType()) {
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			// TODO?
 			break;
 
@@ -509,6 +510,19 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
         case LevelPiece::Switch:
         case LevelPiece::OneWay:
         case LevelPiece::NoEntry:
+			if (wasFrozen) {
+				// Add ice break effect
+				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
+				//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundFrozenBlockDestroyedEvent);
+			}
+			else {
+				// Typical break effect for basic breakable blocks
+				this->display->GetAssets()->GetESPAssets()->AddBasicBlockBreakEffect(block);
+				// Sound for basic breakable blocks
+				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
+			}
+			break;
+        
         case LevelPiece::LaserTurret:
 			if (wasFrozen) {
 				// Add ice break effect
@@ -521,6 +535,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 				// Sound for basic breakable blocks
 				this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundBasicBlockDestroyedEvent);
 			}
+            this->display->GetAssets()->GetCurrentLevelMesh()->RemovePiece(block);
 			break;
 
 		case LevelPiece::ItemDrop:

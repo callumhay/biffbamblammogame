@@ -127,6 +127,7 @@ bool SwitchBlock::ProjectilePassesThrough(Projectile* projectile) const {
     switch (projectile->GetType()) {	
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			// When frozen, projectiles can pass through
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				return true;
@@ -180,6 +181,7 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 	switch (projectile->GetType()) {
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}

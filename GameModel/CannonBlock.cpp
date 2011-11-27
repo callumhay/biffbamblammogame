@@ -174,6 +174,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 	switch (projectile->GetType()) {
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			// Do nothing, typical laser bullets just extinguish on contact
 			break;
 

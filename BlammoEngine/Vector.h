@@ -262,11 +262,15 @@ public:
                     v1[0] * v2[1] - v1[1] * v2[0]);
   }
 
-	static Vector3D Normalize(const Vector3D& v) {
-		Vector3D temp(v);
-		temp.Normalize();
-		return temp;
-	}
+  static Vector3D cross(const Vector2D& v1, const Vector2D& v2) {
+    return Vector3D(0, 0, v1[0] * v2[1] - v1[1] * v2[0]);
+  }
+
+static Vector3D Normalize(const Vector3D& v) {
+	Vector3D temp(v);
+	temp.Normalize();
+	return temp;
+}
 
 	/**
 	 * Finds the angle between two given vectors, in radians.

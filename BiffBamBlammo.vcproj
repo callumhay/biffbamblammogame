@@ -2152,6 +2152,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\LaserTurretProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleLaserProjectile.h"
 						>
 					</File>
@@ -2181,6 +2185,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\LaserBulletProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\LaserTurretProjectile.cpp"
 						>
 					</File>
 					<File

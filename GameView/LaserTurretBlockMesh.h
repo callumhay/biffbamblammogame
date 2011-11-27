@@ -77,6 +77,7 @@ inline const std::map<std::string, MaterialGroup*>& LaserTurretBlockMesh::GetMat
 inline void LaserTurretBlockMesh::SetAlphaMultiplier(float alpha) {
     this->barrel1Mesh->SetAlpha(alpha);
     this->barrel2Mesh->SetAlpha(alpha);
+    this->headMesh->SetAlpha(alpha);
 }
 
 #endif // __LASERTURRETBLOCKMESH_H__

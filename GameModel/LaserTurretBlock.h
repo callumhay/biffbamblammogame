@@ -16,6 +16,8 @@
 
 class LaserTurretBlock : public LevelPiece {
 public:
+    enum TurretAIState { SeekingTurretState = 0, TargetFoundTurretState, TargetLostTurretState };
+
 	LaserTurretBlock(unsigned int wLoc, unsigned int hLoc);
 	~LaserTurretBlock();
 
@@ -37,6 +39,8 @@ public:
 	bool ProjectilePassesThrough(Projectile* projectile) const;
     int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
+    bool IsAIPiece() const { return true; }
+
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
                       const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
                       const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
@@ -52,15 +56,67 @@ public:
 
 	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses); 
 
+    void AITick(double dT, GameModel* gameModel);
+
+    float GetRotationDegreesFromX() const;
+    float GetBarrel1ChargePercent() const;
+    float GetBarrel1RecoilAmount() const;
+    float GetBarrel2ChargePercent() const;
+    float GetBarrel2RecoilAmount() const;
+
 private:
     static const int POINTS_ON_BLOCK_DESTROYED  = 800;
     static const int PIECE_STARTING_LIFE_POINTS = 500;
     static const float BALL_DAMAGE_AMOUNT;
 
+    static const float MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
+    static const float ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;
+    static const float BARREL_RECOIL_TRANSLATION_AMT;
+
+    static const float FIRE_RATE_IN_BULLETS_PER_SEC;
+    static const float BARREL_RELOAD_TIME;
+    static const float BARREL_RECOIL_TIME;
+
+    static const float BARREL_OFFSET_ALONG_X;
+    static const float BARREL_OFFSET_ALONG_Y;
+    static const float BARREL_OFFSET_EXTENT_ALONG_Y;
+
     float currLifePoints;
+
+    // AI-related types and variables
+    enum BarrelAnimationState { OneForwardTwoBack = 0, OneFiringTwoReloading, TwoForwardOneBack, TwoFiringOneReloading };
+
+    TurretAIState currTurretState;
+    BarrelAnimationState barrelAnimState;
+
+    // Turret-and-appearence-related variables
+    float currRotationFromXInDegs;
+    float currRotationSpd;
+    float currRotationAccel;
+
+    AnimationLerp<float> barrel1ChargePercentAnim;
+    AnimationLerp<float> barrel2ChargePercentAnim;
+    AnimationLerp<float> barrel1RecoilAnim;
+    AnimationLerp<float> barrel2RecoilAnim;
+    
+    // AI update private members
+    bool ExecutePaddleSeekingAI(double dT, const GameModel* model);
+    bool ExecuteContinueTrackingAI(double dT, const GameModel* model);
+    bool ContinueTrackingStateUpdateFromView(const GameModel* model);
+    bool ExecuteLostAndFoundAI(double dT, const GameModel* model);
+
+    // State update private members
+    void SetTurretState(const TurretAIState& state);
+    void SetBarrelState(const BarrelAnimationState& state, GameModel* model);
+    void UpdateBarrelState(double dT, bool isAllowedToFire, GameModel* model);
+
+    void GetFiringDirection(Vector2D& unitDir) const;
+    void CanSeeAndFireAtPaddle(const GameModel* model, bool& canSeePaddle, bool& canFireAtPaddle) const;
 
     LevelPiece* DiminishPiece(float dmgAmount, GameModel* model, const LevelPiece::DestructionMethod& method);
     bool IsDead() const { return this->currLifePoints <= 0; }
+
+    void UpdateSpeed();
 
     DISALLOW_COPY_AND_ASSIGN(LaserTurretBlock);
 };
@@ -72,6 +128,22 @@ inline bool LaserTurretBlock::StatusTick(double dT, GameModel* gameModel, int32_
 
 	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
 	return false;
+}
+
+inline float LaserTurretBlock::GetRotationDegreesFromX() const {
+    return this->currRotationFromXInDegs;
+}
+inline float LaserTurretBlock::GetBarrel1ChargePercent() const {
+    return this->barrel1ChargePercentAnim.GetInterpolantValue();
+}
+inline float LaserTurretBlock::GetBarrel1RecoilAmount() const {
+    return this->barrel1RecoilAnim.GetInterpolantValue();
+}
+inline float LaserTurretBlock::GetBarrel2ChargePercent() const {
+    return this->barrel2ChargePercentAnim.GetInterpolantValue();
+}
+inline float LaserTurretBlock::GetBarrel2RecoilAmount() const {
+    return this->barrel2RecoilAnim.GetInterpolantValue();
 }
 
 #endif // __LASERTURRETBLOCK_H__

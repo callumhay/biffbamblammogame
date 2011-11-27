@@ -30,10 +30,10 @@
 #include "SwitchBlock.h"
 #include "OneWayBlock.h"
 #include "NoEntryBlock.h"
+#include "LaserTurretBlock.h"
 #include "GameModel.h"
 #include "Projectile.h"
 #include "PointAward.h"
-
 #include "PaddleRocketProjectile.h"
 
 #include "../BlammoEngine/StringHelper.h"
@@ -59,7 +59,7 @@ const char GameLevel::ITEM_DROP_BLOCK_CHAR      = 'D';
 const char GameLevel::SWITCH_BLOCK_CHAR         = 'W';
 const char GameLevel::ONE_WAY_BLOCK_CHAR        = 'F';
 const char GameLevel::NO_ENTRY_BLOCK_CHAR       = 'N';
-
+const char GameLevel::LASER_TURRET_BLOCK_CHAR   = 'H';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -105,12 +105,16 @@ filepath(filepath), levelName(levelName), highScore(0) {
 	
 	this->safetyNetBounds = BoundingLines(lines, normals);
 
-    // Initialize triggerable pieces...
+    // Initialize triggerable and AI pieces...
     for (size_t row = 0; row < this->height; row++) {
         for (size_t col = 0; col < this->width; col++) {
             LevelPiece* currPiece = this->currentLevelPieces[row][col];
+            
             if (currPiece->GetHasTriggerID()) {
                 this->triggerablePieces.insert(std::make_pair(currPiece->GetTriggerID(), currPiece));
+            }
+            if (currPiece->IsAIPiece()) {
+                aiEntities.insert(currPiece);
             }
         }
     }
@@ -781,6 +785,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
                     newPiece = new NoEntryBlock(pieceWLoc, pieceHLoc);
                     break;
 
+                case GameLevel::LASER_TURRET_BLOCK_CHAR:
+                    // L - Laser Turret Block
+                    newPiece = new LaserTurretBlock(pieceWLoc, pieceHLoc);
+                    break;
+
 				default:
 					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc);
 					delete inFile;
@@ -1089,6 +1098,13 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
             this->triggerablePieces.erase(findIter);
         }
 
+        // Check to see if the piece is inside the list of AI entities...
+        if (pieceBefore->IsAIPiece()) {
+            size_t numErased = this->aiEntities.erase(pieceBefore);
+            assert(numErased == 1);
+            UNUSED_VARIABLE(numErased);
+        }
+
 		// If the piece is in any auxillary lists within the game model then we need to remove it
 		gameModel->WipePieceFromAuxLists(pieceBefore);
 
@@ -1208,6 +1224,16 @@ void GameLevel::ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& trigg
     LevelPiece* triggerPiece = findIter->second;
     assert(triggerPiece != NULL);
     triggerPiece->Triggered(gameModel);
+}
+
+// Tick any active AI entities in this level
+void GameLevel::TickAIEntities(double dT, GameModel* gameModel) {
+    for (std::set<LevelPiece*>::const_iterator iter = this->aiEntities.begin();
+         iter != this->aiEntities.end(); ++iter) {
+        LevelPiece* currAIEntity = *iter;
+        assert(currAIEntity != NULL);
+        currAIEntity->AITick(dT, gameModel);
+    }
 }
 
 /**
@@ -1352,6 +1378,62 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 						minRayT = i * STEP_SIZE;
 						returnPiece = currSamplePiece;
 					}
+				}
+			}
+		}
+
+		// If we managed to find a suitable piece (with the lowest ray t), then return it
+		if (returnPiece != NULL) {
+			rayT = minRayT;
+			return returnPiece;
+		}
+	}
+
+	return NULL;
+}
+
+LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
+                                                  float& rayT, float toleranceRadius) const {
+
+	// Step along the ray - not a perfect algorithm but will result in something very reasonable
+	const float LEVEL_WIDTH					 = this->GetLevelUnitWidth();
+	const float LEVEL_HEIGHT				 = this->GetLevelUnitHeight();
+	const float LONGEST_POSSIBLE_RAY = sqrt(LEVEL_WIDTH*LEVEL_WIDTH + LEVEL_HEIGHT*LEVEL_HEIGHT);
+
+	// NOTE: if the step size is too large then the ray might skip over entire sections of blocks - BECAREFUL!
+	const float STEP_SIZE = 0.5f * std::min<float>(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
+	int NUM_STEPS = static_cast<int>(LONGEST_POSSIBLE_RAY / STEP_SIZE);
+
+	LevelPiece* returnPiece = NULL;
+	Collision::Circle2D toleranceCircle(Point2D(0,0), toleranceRadius);
+
+	for (int i = 0; i < NUM_STEPS; i++) {
+		Point2D currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
+		
+
+		// Indices of the sampled level piece can be found using the point...
+		std::set<LevelPiece*> collisionCandidates = this->GetLevelPieceCollisionCandidates(currSamplePoint, toleranceRadius);
+		float minRayT = FLT_MAX;
+		for (std::set<LevelPiece*>::iterator iter = collisionCandidates.begin(); iter != collisionCandidates.end(); ++iter) {
+			
+			LevelPiece* currSamplePiece = *iter;
+			assert(currSamplePiece != NULL);
+
+			// Check to see if the piece can be collided with, if so try to collide the ray with
+			// the actual block bounds, if there's a collision we get out of here and just return the piece
+			if (currSamplePiece->CollisionCheck(ray, rayT)) {
+				// Make sure the piece is along the direction of the ray and not behind it
+				if (rayT < minRayT) {
+					returnPiece = currSamplePiece;
+					minRayT = rayT;
+				}
+			}
+			else if (toleranceRadius != 0.0f) {
+				toleranceCircle.SetCenter(currSamplePoint);
+                if (currSamplePiece->CollisionCheck(toleranceCircle, ray.GetUnitDirection())) {
+					// TODO: Project the center onto the ray...
+					minRayT = i * STEP_SIZE;
+					returnPiece = currSamplePiece;
 				}
 			}
 		}
@@ -1646,6 +1728,7 @@ bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
     switch (p.GetType()) {
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
         case Projectile::FireGlobProjectile:
             return false;
         

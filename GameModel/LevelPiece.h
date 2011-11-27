@@ -111,7 +111,9 @@ public:
 
     virtual int GetPointsOnChange(const LevelPiece& changeToPiece) const = 0;
 
-
+    virtual bool IsAIPiece() const { return false; }
+    virtual void AITick(double dT, GameModel* gameModel) { UNUSED_PARAMETER(dT); UNUSED_PARAMETER(gameModel); }
+    
     virtual void Triggered(GameModel* gameModel);
     void SetTriggerID(const LevelPiece::TriggerID& id) { this->triggerID = id; }
     const LevelPiece::TriggerID& GetTriggerID() const { return this->triggerID; }

@@ -173,3 +173,7 @@ F(r)
 No-Entry
 no_entry.png
 N
+
+Laser Turret
+laser_turret.png
+H

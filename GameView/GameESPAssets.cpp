@@ -1235,6 +1235,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 	switch (projectile.GetType()) {
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			switch(block.GetType()) {
 
 				case LevelPiece::PrismTriangle:
@@ -2411,6 +2412,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 			size.maxValue = 0.9f;
 			break;
 		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			severity = Onomatoplex::GOOD;
 			size.minValue = 0.35f;
 			size.maxValue = 0.45f;
@@ -2549,6 +2551,7 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 		case Projectile::CollateralBlockProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 		case Projectile::FireGlobProjectile:
 			this->AddBasicPaddleHitByProjectileEffect(paddle, projectile);
 			break;
@@ -2757,6 +2760,10 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 		case Projectile::PaddleLaserBulletProjectile:
 			this->AddLaserPaddleESPEffects(gameModel, projectile);
 			break;
+
+        case Projectile::LaserTurretBulletProjectile:
+            this->AddLaserTurretESPEffects(gameModel, projectile);
+            break;
 
 		case Projectile::PaddleRocketBulletProjectile:
 			this->AddRocketProjectileEffects(projectile);
@@ -3448,7 +3455,7 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 
 	// We only do the laser onomatopiea if we aren't in a special camera mode...
 	if (!paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
-		// Create laser onomatopiea
+		// Create laser onomatopeia
 		ESPPointEmitter* laserOnoEffect = new ESPPointEmitter();
 		// Set up the emitter...
 		laserOnoEffect->SetSpawnDelta(ESPInterval(-1));
@@ -3481,14 +3488,21 @@ void GameESPAssets::AddLaserPaddleESPEffects(const GameModel& gameModel, const P
 		this->activeGeneralEmitters.push_back(laserOnoEffect);
 	}
 
-    this->AddLaserESPEffects(gameModel, projectile);
+    this->AddLaserESPEffects(gameModel, projectile, Colour(0.5f, 1.0f, 1.0f), Colour(0.8f, 1.0f, 1.0f));
 }
 
 void GameESPAssets::AddLaserBallESPEffects(const GameModel& gameModel, const Projectile& projectile) {
-    this->AddLaserESPEffects(gameModel, projectile);
+    this->AddLaserESPEffects(gameModel, projectile, Colour(0.5f, 1.0f, 1.0f), Colour(0.8f, 1.0f, 1.0f));
 }
 
-void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Projectile& projectile) {
+void GameESPAssets::AddLaserTurretESPEffects(const GameModel& gameModel, const Projectile& projectile) {
+    // TODO: Add onomatopeia?
+    this->AddLaserESPEffects(gameModel, projectile, Colour(0.25f, 1.0f, 0.75f), Colour(0.3f, 1.0f, 1.0f));
+}
+
+void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Projectile& projectile,
+                                       const Colour& baseColour, const Colour& brightColour) {
+
 	const Point2D& projectilePos2D  = projectile.GetPosition();
 	Point3D projectilePos3D         = Point3D(projectilePos2D[0], projectilePos2D[1], 0.0f);
 	float projectileSpd             = projectile.GetVelocityMagnitude();
@@ -3512,7 +3526,8 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	laserBeamEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	laserBeamEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	laserBeamEmitter->SetEmitPosition(Point3D(0,0,0));
-	laserBeamEmitter->SetParticleColour(ESPInterval(0.5f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    laserBeamEmitter->SetParticleColour(ESPInterval(baseColour.R()),
+        ESPInterval(baseColour.G()), ESPInterval(baseColour.B()), ESPInterval(1.0f));
 	laserBeamEmitter->SetParticles(1, this->laserBeamTex);
 
 	// Create the slightly-pulsing-glowing aura
@@ -3531,7 +3546,8 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	laserAuraEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	laserAuraEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	laserAuraEmitter->SetEmitPosition(Point3D(0,0,0));
-	laserAuraEmitter->SetParticleColour(ESPInterval(0.65f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	laserAuraEmitter->SetParticleColour(ESPInterval(1.3f * baseColour.R()), ESPInterval(1.3f * baseColour.G()),
+        ESPInterval(1.3f * baseColour.B()), ESPInterval(1.0f));
 	laserAuraEmitter->AddEffector(&this->particlePulsePaddleLaser);
 	laserAuraEmitter->SetParticles(1, this->circleGradientTex);
 
@@ -3541,7 +3557,8 @@ void GameESPAssets::AddLaserESPEffects(const GameModel& gameModel, const Project
 	laserTrailSparks->SetInitialSpd(ESPInterval(projectileSpd));
 	laserTrailSparks->SetParticleLife(ESPInterval(0.5f, 0.6f));
 	laserTrailSparks->SetParticleSize(ESPInterval(0.8f * projectile.GetHalfWidth(), 0.8f * projectile.GetWidth()));
-	laserTrailSparks->SetParticleColour(ESPInterval(0.5f, 0.8f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    laserTrailSparks->SetParticleColour(ESPInterval(baseColour.R(), brightColour.R()), ESPInterval(baseColour.G(), brightColour.G()),
+        ESPInterval(baseColour.B(), brightColour.B()), ESPInterval(1.0f));
 	laserTrailSparks->SetEmitAngleInDegrees(15);
 	laserTrailSparks->SetEmitDirection(Vector3D(-projectileDir[0], -projectileDir[1], 0.0f));
 	laserTrailSparks->SetRadiusDeviationFromCenter(ESPInterval(0.5f * projectile.GetHalfWidth()));

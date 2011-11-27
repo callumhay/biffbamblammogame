@@ -26,7 +26,7 @@ class GameModel;
  */
 class Projectile {
 public:
-	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile,
+	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
                           CollateralBlockProjectile, PaddleRocketBulletProjectile, 
                           FireGlobProjectile };
 
@@ -73,7 +73,6 @@ public:
 	void SetLastThingCollidedWith(const void* p) { this->lastThingCollidedWith = p; }
 	bool IsLastThingCollidedWith(const void* p) const { return this->lastThingCollidedWith == p; }
 
-	static Projectile* CreateProjectileFromType(ProjectileType type, const Point2D& spawnLoc);
     static Projectile* CreateProjectileFromCopy(const Projectile* p);
 
 	virtual bool GetIsActive() const {

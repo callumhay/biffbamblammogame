@@ -142,7 +142,8 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 	switch (projectile->GetType()) {
 
         case Projectile::BallLaserBulletProjectile:
-		case Projectile::PaddleLaserBulletProjectile: {
+		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile: {
 				// Based on where the laser bullet hits, we change its direction
 				
 				// Need to figure out if this laser bullet already collided with this block... if it has then we just ignore it

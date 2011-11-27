@@ -68,6 +68,7 @@ bool OneWayBlock::ProjectilePassesThrough(Projectile* projectile) const {
 
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			// When frozen, projectiles can pass through
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				return true;
@@ -230,6 +231,7 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 		
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}

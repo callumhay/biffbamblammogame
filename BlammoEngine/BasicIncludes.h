@@ -41,6 +41,10 @@
 //#ifdef _SECURE_SCL
 //#undef _SECURE_SCL
 //#endif
+
+#undef max
+#undef min
+
 #include <algorithm>
 #include <limits>
 #include <vector>
@@ -54,6 +58,7 @@
 #include <fstream>
 #include <sstream>
 #include <ostream>
+#include <limits>
 
 #define GLUT_DISABLE_ATEXIT_HACK 1
 

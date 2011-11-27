@@ -27,6 +27,7 @@ bool SolidBlock::ProjectilePassesThrough(Projectile* projectile) const {
 
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			// When frozen, projectiles can pass through
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				return true;
@@ -187,6 +188,7 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 		
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
