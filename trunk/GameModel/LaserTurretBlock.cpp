@@ -14,11 +14,45 @@
 #include "GameModel.h"
 #include "EmptySpaceBlock.h"
 #include "Beam.h"
+#include "LaserTurretProjectile.h"
 
-const float LaserTurretBlock::BALL_DAMAGE_AMOUNT = LaserTurretBlock::PIECE_STARTING_LIFE_POINTS / 5.0f;
+const float LaserTurretBlock::BALL_DAMAGE_AMOUNT                  = LaserTurretBlock::PIECE_STARTING_LIFE_POINTS / 5.0f;
+const float LaserTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC  = 200.0f;
+const float LaserTurretBlock::ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD = 400.0f;
+const float LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT       = -0.25f;
+
+const float LaserTurretBlock::FIRE_RATE_IN_BULLETS_PER_SEC = 1.75f;
+const float LaserTurretBlock::BARREL_RELOAD_TIME           = 1.0f / (2.0f * LaserTurretBlock::FIRE_RATE_IN_BULLETS_PER_SEC);
+const float LaserTurretBlock::BARREL_RECOIL_TIME           = LaserTurretBlock::BARREL_RELOAD_TIME / 4.0f;
+
+// Distance along the x-axis that the base of a barrel lies (from the origin of the block)
+// in when the barrel is in its 'base' position with no turret rotation
+const float LaserTurretBlock::BARREL_OFFSET_ALONG_X = 0.32f;
+// Absolute distance along the y-axis that the base of a barrel is from the origin of the block in its
+// base position with no turret rotation
+const float LaserTurretBlock::BARREL_OFFSET_ALONG_Y = 0.13f;
+// The maximum extent along the y-axis (in the base position - no rotation, of the block), from the origin of the block
+const float LaserTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y = 0.28f;
 
 LaserTurretBlock::LaserTurretBlock(unsigned int wLoc, unsigned int hLoc) :
-LevelPiece(wLoc, hLoc), currLifePoints(LaserTurretBlock::PIECE_STARTING_LIFE_POINTS) {
+LevelPiece(wLoc, hLoc), currLifePoints(LaserTurretBlock::PIECE_STARTING_LIFE_POINTS),
+currTurretState(SeekingTurretState), currRotationFromXInDegs(0.0f), currRotationSpd(0.0f) {
+
+    // Add a bit of variety - different barrel configurations
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        this->SetBarrelState(OneForwardTwoBack, NULL);
+    }
+    else {
+        this->SetBarrelState(TwoForwardOneBack, NULL);
+    }
+    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+        this->currRotationAccel = ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;
+    }
+    else {
+        this->currRotationAccel = -ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;
+    }
+
+    this->colour = Colour(0.65f, 0.65f, 0.65f);
 }
 
 LaserTurretBlock::~LaserTurretBlock() {
@@ -28,8 +62,14 @@ LaserTurretBlock::~LaserTurretBlock() {
 bool LaserTurretBlock::ProjectilePassesThrough(Projectile* projectile) const {
     switch (projectile->GetType()) {
 
+        case Projectile::LaserTurretBulletProjectile:
+            // Lasers shot from this turret should not be destroyed by this turret!
+            if (projectile->IsLastThingCollidedWith(this)) {
+                return true;
+            }
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        
             // When frozen, projectiles can pass through
             if (this->HasStatus(LevelPiece::IceCubeStatus)) {
                 return true;
@@ -67,7 +107,7 @@ void LaserTurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelP
 
     // Left boundry of the piece
     if (leftNeighbor != NULL) {
-        if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() == LevelPiece::LaserTurret &&
+        if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::LaserTurret &&
             leftNeighbor->GetType() != LevelPiece::Breakable) {
                 Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
                     this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -79,7 +119,7 @@ void LaserTurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelP
 
     // Bottom boundry of the piece
     if (bottomNeighbor != NULL) {
-        if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() == LevelPiece::LaserTurret &&
+        if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::LaserTurret &&
             bottomNeighbor->GetType() != LevelPiece::Breakable) {
                 Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
                     this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
@@ -91,7 +131,7 @@ void LaserTurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelP
 
     // Right boundry of the piece
     if (rightNeighbor != NULL) {
-        if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() == LevelPiece::LaserTurret &&
+        if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::LaserTurret &&
             rightNeighbor->GetType() != LevelPiece::Breakable) {
                 Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
                     this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -103,7 +143,7 @@ void LaserTurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelP
 
     // Top boundry of the piece
     if (topNeighbor != NULL) {
-        if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() == LevelPiece::LaserTurret &&
+        if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret &&
             topNeighbor->GetType() != LevelPiece::Breakable) {
                 Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
                     this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
@@ -182,12 +222,18 @@ LevelPiece* LaserTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile
 	assert(gameModel != NULL);
 	assert(projectile != NULL);
 
-	LevelPiece* newPiece = this;
-    
+    LevelPiece* newPiece = this;
 	switch (projectile->GetType()) {
-	
+
+	    case Projectile::LaserTurretBulletProjectile:
+            // Deal with lasers that have been fired from the barrels of this turret - they
+            // shouldn't collide with this block!
+            if (projectile->IsLastThingCollidedWith(this)) {
+                return this;
+            }
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
@@ -256,10 +302,314 @@ LevelPiece* LaserTurretBlock::TickPaddleShieldCollision(double dT, const PlayerP
 	return newPiece;
 }
 
+void LaserTurretBlock::AITick(double dT, GameModel* gameModel) {
+
+    if (gameModel->GetCurrentStateType() == GameState::BallInPlayStateType) {
+
+        switch (this->currTurretState) {
+            case SeekingTurretState:
+                this->UpdateBarrelState(dT, this->ExecutePaddleSeekingAI(dT, gameModel), gameModel);
+                break;
+
+            case TargetFoundTurretState:
+                this->UpdateBarrelState(dT, this->ExecuteContinueTrackingAI(dT, gameModel), gameModel);
+                break;
+
+            case TargetLostTurretState:
+                this->UpdateBarrelState(dT, this->ExecuteLostAndFoundAI(dT, gameModel), gameModel);
+                break;
+
+            default:
+                assert(false);
+                break;
+        }
+
+    }
+    else  {
+        // What about when the ball isn't in play... what does a turret do then??
+    }
+}
+
+// Executes the AI for the turret attempting to find the paddle
+// Returns: true if the turret may start to fire on the paddle, false if not
+bool LaserTurretBlock::ExecutePaddleSeekingAI(double dT, const GameModel* model) {
+
+    this->UpdateSpeed();
+    float rotationAmt = dT * currRotationSpd;
+    this->currRotationFromXInDegs += rotationAmt;
+    
+    bool canSeePaddle, canFireAtPaddle;
+    this->CanSeeAndFireAtPaddle(model, canSeePaddle, canFireAtPaddle);
+    
+    if (canSeePaddle) {
+        this->SetTurretState(TargetFoundTurretState);
+        return canFireAtPaddle;
+    }
+
+    return false;
+}
+
+// Executes the AI for continuing to track the player's paddle in order to shoot
+// at it as much as possible.
+// Returns: true if the turret still has a bead on the paddle, false if the turret
+// has lost sight of the paddle and should no longer fire.
+bool LaserTurretBlock::ExecuteContinueTrackingAI(double dT, const GameModel* model) {
+    const Point2D& paddlePos = model->GetPlayerPaddle()->GetCenterPosition();
+    
+    Vector2D fireDir;
+    this->GetFiringDirection(fireDir);
+    
+    Vector2D blockToPaddleDir = paddlePos - this->GetCenter();
+    Vector3D perpendicularDir = Vector3D::cross(fireDir, blockToPaddleDir);
+    if (fabs(perpendicularDir[2]) < EPSILON) {
+        // We don't need to adjust if the two vectors are the same
+        // Check to see whether the paddle is still in view and can still be shot at
+        return this->ContinueTrackingStateUpdateFromView(model);
+    }
+
+    blockToPaddleDir.Normalize();
+    float requiredTackingRotation = fabs(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(fireDir, blockToPaddleDir)))));
+
+    // Rotate towards the paddle...
+    this->currRotationAccel = NumberFuncs::SignOf(perpendicularDir[2]) * ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;
+    this->UpdateSpeed();
+    float rotationAmt =  dT * currRotationSpd;
+    if (fabs(rotationAmt) > requiredTackingRotation) {
+        rotationAmt = NumberFuncs::SignOf(rotationAmt) * requiredTackingRotation; 
+    }
+    this->currRotationFromXInDegs += rotationAmt;
+
+    // Check to see whether the paddle is still in view and can still be shot at
+    return this->ContinueTrackingStateUpdateFromView(model);
+}
+
+// Function for centralizing code used by the ExecuteContinueTrackingAI method for
+// changing the state of the turret AI based on whether or not the turret still sees the paddle.
+// Returns: true if the paddle can be fired at, false if the paddle can't be fired at.
+bool LaserTurretBlock::ContinueTrackingStateUpdateFromView(const GameModel* model) {
+    bool canSeePaddle, canFireAtPaddle;
+    this->CanSeeAndFireAtPaddle(model, canSeePaddle, canFireAtPaddle);
+    if (canSeePaddle) {
+        return canFireAtPaddle;
+    }
+
+    this->SetTurretState(TargetLostTurretState);
+    return false;
+}
+
+bool LaserTurretBlock::ExecuteLostAndFoundAI(double dT, const GameModel* model) {
+    // For the time being we just go back to seeking..
+    return this->ExecutePaddleSeekingAI(dT, model);
+}
+
+void LaserTurretBlock::SetTurretState(const TurretAIState& state) {
+    // TODO?
+    this->currTurretState = state;
+}
+
+void LaserTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameModel* model) {
+
+    switch (state) {
+
+        case OneForwardTwoBack:
+            // The first barrel is fully charged and the second is fully uncharged
+            this->barrel1ChargePercentAnim.SetInterpolantValue(1.0f);
+            this->barrel1ChargePercentAnim.ClearLerp();
+            this->barrel2ChargePercentAnim.SetInterpolantValue(0.0f);
+            this->barrel2ChargePercentAnim.ClearLerp();
+            
+            // The first barrel has no recoil, the second has full recoil
+            this->barrel1RecoilAnim.SetInterpolantValue(0.0f);
+            this->barrel1RecoilAnim.ClearLerp();
+            this->barrel2RecoilAnim.SetInterpolantValue(LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT);
+            this->barrel2RecoilAnim.ClearLerp();
+            
+            break;
+
+        case OneFiringTwoReloading: {
+            assert(model != NULL);
+
+            // Fire a laser from the first barrel...
+            Vector2D velocityDir(BARREL_OFFSET_ALONG_X, BARREL_OFFSET_ALONG_Y);
+            velocityDir.Rotate(this->currRotationFromXInDegs);
+            Point2D laserOrigin = this->GetCenter() + velocityDir;
+            this->GetFiringDirection(velocityDir);
+
+            LaserTurretProjectile* turretProjectile = new LaserTurretProjectile(laserOrigin, velocityDir);
+            turretProjectile->SetLastThingCollidedWith(this);
+            model->AddProjectile(turretProjectile);
+
+            // The first barrel is preparing its recoil and laser discharge, while the second
+            // is gathering its charge and recovering from its previous recoil
+            this->barrel1ChargePercentAnim.SetLerp(LaserTurretBlock::BARREL_RECOIL_TIME, 0.0f);
+            this->barrel2ChargePercentAnim.SetLerp(LaserTurretBlock::BARREL_RELOAD_TIME, 1.0f);
+            this->barrel1RecoilAnim.SetLerp(LaserTurretBlock::BARREL_RECOIL_TIME, LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT);
+            this->barrel2RecoilAnim.SetLerp(LaserTurretBlock::BARREL_RELOAD_TIME, 0.0f);
+            break;
+        }
+
+        case TwoForwardOneBack:
+            // The second barrel is fully charged and the first is fully uncharged
+            this->barrel2ChargePercentAnim.SetInterpolantValue(1.0f);
+            this->barrel2ChargePercentAnim.ClearLerp();
+            this->barrel1ChargePercentAnim.SetInterpolantValue(0.0f);
+            this->barrel1ChargePercentAnim.ClearLerp();
+            
+            // The second barrel has no recoil, the first has full recoil
+            this->barrel2RecoilAnim.SetInterpolantValue(0.0f);
+            this->barrel2RecoilAnim.ClearLerp();
+            this->barrel1RecoilAnim.SetInterpolantValue(LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT);
+            this->barrel1RecoilAnim.ClearLerp();
+            break;
+
+        case TwoFiringOneReloading: {
+            assert(model != NULL);
+
+            // Fire a laser from the second barrel...
+            Vector2D velocityDir(BARREL_OFFSET_ALONG_X, -BARREL_OFFSET_ALONG_Y);
+            velocityDir.Rotate(this->currRotationFromXInDegs);
+            Point2D laserOrigin = this->GetCenter() + velocityDir;
+            this->GetFiringDirection(velocityDir);
+
+            LaserTurretProjectile* turretProjectile = new LaserTurretProjectile(laserOrigin, velocityDir);
+            turretProjectile->SetLastThingCollidedWith(this);
+            model->AddProjectile(turretProjectile);
+
+            // The second barrel is preparing its recoil and laser discharge, while the first
+            // is gathering its charge and recovering from its previous recoil
+            this->barrel2ChargePercentAnim.SetLerp(LaserTurretBlock::BARREL_RECOIL_TIME, 0.0f);
+            this->barrel1ChargePercentAnim.SetLerp(LaserTurretBlock::BARREL_RELOAD_TIME, 1.0f);
+            this->barrel2RecoilAnim.SetLerp(LaserTurretBlock::BARREL_RECOIL_TIME, LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT);
+            this->barrel1RecoilAnim.SetLerp(LaserTurretBlock::BARREL_RELOAD_TIME, 0.0f);
+            break;
+        }
+
+        default:
+            assert(false);
+            return;
+    }
+
+    this->barrelAnimState = state;
+}
+
+void LaserTurretBlock::UpdateBarrelState(double dT, bool isAllowedToFire, GameModel* model) {
+
+    switch (this->barrelAnimState) {
+
+        case OneForwardTwoBack:
+            // Only change state if we're allowed to continue firing
+            if (isAllowedToFire) {
+                this->SetBarrelState(OneFiringTwoReloading, model);
+            }
+            break;
+
+        case OneFiringTwoReloading: {
+            // We're in the midst of firing a laser, finish off the animation and
+            // go to the next logical state for the barrels
+            bool isFinished = true;
+            isFinished &= this->barrel1ChargePercentAnim.Tick(dT);
+            isFinished &= this->barrel2ChargePercentAnim.Tick(dT);
+            isFinished &= this->barrel1RecoilAnim.Tick(dT);
+            isFinished &= this->barrel2RecoilAnim.Tick(dT);
+
+            if (isFinished) {
+                this->SetBarrelState(TwoForwardOneBack, model);
+            }
+
+            break;
+        }
+
+        case TwoForwardOneBack:
+            // Only change state if we're allowed to continue firing
+            if (isAllowedToFire) {
+                this->SetBarrelState(TwoFiringOneReloading, model);
+            }
+            break;
+
+        case TwoFiringOneReloading: {
+            // We're in the midst of firing a laser, finish off the animation and
+            // go to the next logical state for the barrels
+            bool isFinished = true;
+            isFinished &= this->barrel1ChargePercentAnim.Tick(dT);
+            isFinished &= this->barrel2ChargePercentAnim.Tick(dT);
+            isFinished &= this->barrel1RecoilAnim.Tick(dT);
+            isFinished &= this->barrel2RecoilAnim.Tick(dT);
+
+            if (isFinished) {
+                this->SetBarrelState(OneForwardTwoBack, model);
+            }
+
+            break;
+        }
+
+        default:
+            assert(false);
+            return;
+    }
+}
+
+void LaserTurretBlock::GetFiringDirection(Vector2D& unitDir) const {
+    unitDir[0] = 1;
+    unitDir[1] = 0;
+    unitDir.Rotate(this->currRotationFromXInDegs);
+    unitDir.Normalize();
+}
+
+void LaserTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canSeePaddle, bool& canFireAtPaddle) const {
+    // Check to see whether the paddle is in view or not...
+    Vector2D fireDir;
+    this->GetFiringDirection(fireDir);
+    Collision::Ray2D rayOfFire(this->GetCenter(), fireDir);
+    
+    float paddleRayT = 0.0f;
+    bool collidesWithPaddle = model->GetPlayerPaddle()->GetBounds().CollisionCheck(rayOfFire, paddleRayT);
+
+    // Check to see if the ray collides with the paddle before doing any further calculations...
+    if (collidesWithPaddle) {
+        // Now make sure the ray isn't colliding with any blocks before the paddle...
+        float levelPieceRayT = std::numeric_limits<float>::max();
+        std::set<const LevelPiece*> ignorePieces;
+        ignorePieces.insert(this);
+        LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire, ignorePieces, levelPieceRayT, BARREL_OFFSET_EXTENT_ALONG_Y);
+
+        if (collisionPiece == NULL || paddleRayT < levelPieceRayT) {
+            // The ray is unimpeded, fire ze lasers!
+            canSeePaddle    = true;
+            canFireAtPaddle = true;
+            return;
+        }
+        else {
+            canFireAtPaddle = false;
+
+            // Looks like the ray was impeded - try to find out whether or not the turret can
+            // even remotely view the paddle at all, this is difficult since it might be able to see the paddle
+            // through an open space between blocks via some ray in its fov... approximate this
+            LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire, ignorePieces, levelPieceRayT, 0);
+            if (collisionPiece == NULL || paddleRayT < levelPieceRayT) {
+                canSeePaddle = true;
+                return;
+            }
+        }
+    }
+
+    canSeePaddle    = false;
+    canFireAtPaddle = false;
+}
+
 LevelPiece* LaserTurretBlock::DiminishPiece(float dmgAmount, GameModel* model, const LevelPiece::DestructionMethod& method) {
     currLifePoints -= dmgAmount;
     if (currLifePoints <= 0.0f) {
         return this->Destroy(model, method);
     }
     return this;
+}
+
+void LaserTurretBlock::UpdateSpeed() {
+    this->currRotationSpd = NumberFuncs::SignOf(this->currRotationSpd) * fabs(this->currRotationSpd) + this->currRotationAccel;
+    if (this->currRotationSpd > MAX_ROTATION_SPEED_IN_DEGS_PER_SEC) {
+        this->currRotationSpd = MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
+    }
+    else if (this->currRotationSpd < -MAX_ROTATION_SPEED_IN_DEGS_PER_SEC) {
+        this->currRotationSpd = -MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
+    }
 }

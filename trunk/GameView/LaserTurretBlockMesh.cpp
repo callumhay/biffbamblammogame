@@ -36,7 +36,8 @@ LaserTurretBlockMesh::~LaserTurretBlockMesh() {
 
 void LaserTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
                                 const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
-    
+
+    UNUSED_PARAMETER(dT);
     if (this->blocks.empty()) {
         return;
     }
@@ -53,11 +54,19 @@ void LaserTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoin
 
 		glPushMatrix();
 		glTranslatef(blockCenter[0], blockCenter[1], 0.0f);
-        
-        // TODO: recoil animation transform...
-        this->barrel1Mesh->Draw(camera, keyLight, fillLight, ballLight);
-        this->barrel2Mesh->Draw(camera, keyLight, fillLight, ballLight);
+        glRotatef(currBlock->GetRotationDegreesFromX(), 0, 0, 1);
 
+        glPushMatrix();
+        glTranslatef(currBlock->GetBarrel1RecoilAmount(), 0, 0);
+        this->barrel1Mesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(currBlock->GetBarrel2RecoilAmount(), 0, 0);
+        this->barrel2Mesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+
+        this->headMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
 
@@ -78,13 +87,11 @@ void LaserTurretBlockMesh::LoadMesh() {
     const std::map<std::string, MaterialGroup*>& baseMatGrps = this->baseMesh->GetMaterialGroups();
     this->materialGroups.insert(baseMatGrps.begin(), baseMatGrps.end());
 
+    assert(this->materialGroups.size() > 0);
+
     // Load the head mesh (holds the turret's barrels)
     this->headMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->LASER_TURRET_HEAD_MESH);
     assert(this->headMesh != NULL);
-    const std::map<std::string, MaterialGroup*>& headMatGrps = this->headMesh->GetMaterialGroups();
-    this->materialGroups.insert(headMatGrps.begin(), headMatGrps.end());
-    
-    assert(this->materialGroups.size() > 0);
 
 	// We don't add the turret's barrel material groups, we will draw those manually for each laser turret block
 	// so that we can move them around (i.e., for recoil when the turret shoots lasers)

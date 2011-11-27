@@ -224,6 +224,10 @@ public:
     void AugmentDirectionOnPaddleMagnet(double seconds, float degreesChangePerSec,
         const Point2D& centerPos, Vector2D& vectorToAugment) const;
 
+    const BoundingLines& GetBounds() const {
+        return this->bounds;
+    }
+
 	void DebugDraw() const;
 
     // Enable options for the paddle - used during the tutorial
@@ -449,6 +453,7 @@ inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) 
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:
+            case Projectile::LaserTurretBulletProjectile:
                 return true;
             default:
                 break;

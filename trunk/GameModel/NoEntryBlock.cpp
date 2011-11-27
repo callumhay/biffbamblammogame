@@ -158,6 +158,7 @@ LevelPiece* NoEntryBlock::CollisionOccurred(GameModel* gameModel, Projectile* pr
 		
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}

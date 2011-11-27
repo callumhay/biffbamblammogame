@@ -607,7 +607,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 			float projectileHeight = this->GetPaddleScaleFactor() * PaddleLaserProjectile::HEIGHT_DEFAULT;
 
 			// Create the right type of projectile in the right place
-			Projectile* newProjectile = Projectile::CreateProjectileFromType(Projectile::PaddleLaserBulletProjectile, 
+			Projectile* newProjectile = new PaddleLaserProjectile(
 				this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight));
             newProjectile->SetLastThingCollidedWith(this);
 
@@ -690,6 +690,7 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
+        case Projectile::LaserTurretBulletProjectile:
 			this->LaserBulletProjectileCollision(projectile);
 			break;
 
@@ -719,6 +720,7 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:
+            case Projectile::LaserTurretBulletProjectile:
                 {
 			        // If the projectile is moving generally upwards and away from the paddle then we ignore this entirely...
 			        if (acos(std::max<float>(-1.0f, std::min<float>(1.0f, 

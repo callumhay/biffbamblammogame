@@ -12,6 +12,7 @@
 #include "NormalBallState.h"
 #include "Projectile.h"
 #include "GameModel.h"
+#include "BallLaserProjectile.h"
 
 #include "../BlammoEngine/Algebra.h"
 
@@ -188,7 +189,7 @@ void NormalBallState::AttemptFireOfOmniBullets(double dT, GameModel* gameModel) 
             (Randomizer::GetInstance()->RandomNumZeroToOne() * 0.75f * this->gameBall->GetBounds().Radius());
         float projectileHeight = 1.75f * projectileWidth; 
 
-		Projectile* newProjectile = Projectile::CreateProjectileFromType(Projectile::BallLaserBulletProjectile, 
+		Projectile* newProjectile = new BallLaserProjectile(
             this->gameBall->GetCenterPosition2D() + (this->gameBall->GetBounds().Radius() + 
             projectileHeight * 0.5f) * randomVector);
 		newProjectile->SetWidth(projectileWidth);

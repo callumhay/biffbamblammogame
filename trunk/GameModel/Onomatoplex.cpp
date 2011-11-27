@@ -2,7 +2,7 @@
  * Onomatoplex.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011-2010
+ * Callum Hay, 2010-2011
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 

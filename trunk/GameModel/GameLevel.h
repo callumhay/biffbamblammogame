@@ -47,6 +47,7 @@ public:
     static const char SWITCH_BLOCK_CHAR;
     static const char ONE_WAY_BLOCK_CHAR;
     static const char NO_ENTRY_BLOCK_CHAR;
+    static const char LASER_TURRET_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
@@ -90,7 +91,8 @@ public:
 
 	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, 
         std::set<const LevelPiece*> ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
-	
+	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, float& rayT, float toleranceRadius = 0.0f) const;
+
 	// Get whether or not the ball safety net is currently active
 	bool IsBallSafetyNetActive() const {
 		return this->ballSafetyNetActive;
@@ -180,6 +182,8 @@ public:
     int GetNumStarsForScore(long score) const;
     int GetHighScoreNumStars() const { return this->GetNumStarsForScore(this->highScore); }
 
+    void TickAIEntities(double dT, GameModel* gameModel);
+
 private:
 	// Map of the pairings of tesla blocks and their active lightning arc that enforces bounds
 	// on the level as long as it's active
@@ -187,6 +191,8 @@ private:
 
 	std::vector<std::vector<LevelPiece*> > currentLevelPieces; // The current layout of the level, stored in row major format
     std::map<LevelPiece::TriggerID, LevelPiece*> triggerablePieces;
+
+    std::set<LevelPiece*> aiEntities;
 
 	BoundingLines safetyNetBounds;
 	std::string filepath;

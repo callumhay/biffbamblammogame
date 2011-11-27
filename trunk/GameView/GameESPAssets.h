@@ -211,7 +211,8 @@ private:
 
 	void AddLaserPaddleESPEffects(const GameModel& gameModel, const Projectile& projectile);
     void AddLaserBallESPEffects(const GameModel& gameModel, const Projectile& projectile);
-    void AddLaserESPEffects(const GameModel& gameModel, const Projectile& projectile);
+    void AddLaserTurretESPEffects(const GameModel& gameModel, const Projectile& projectile);
+    void AddLaserESPEffects(const GameModel& gameModel, const Projectile& projectile, const Colour& baseColour, const Colour& brightColour);
 
 	void AddLaserHitPrismBlockEffect(const Point2D& loc);
 	void AddLaserHitWallEffect(const Point2D& loc);

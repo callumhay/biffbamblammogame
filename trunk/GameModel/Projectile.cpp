@@ -15,6 +15,7 @@
 #include "PaddleLaserProjectile.h"
 #include "PaddleRocketProjectile.h"
 #include "BallLaserProjectile.h"
+#include "LaserTurretProjectile.h"
 #include "GameModel.h"
 
 // Projectile ====================================================================================================================
@@ -38,23 +39,6 @@ void Projectile::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel&
     paddle->AugmentDirectionOnPaddleMagnet(seconds, degreesChangePerSec, this->position, this->velocityDir);
 }
 
-/**
- * Static factory creator pattern method for making projectiles based on the given type.
- */
-Projectile* Projectile::CreateProjectileFromType(ProjectileType type, const Point2D& spawnLoc) {
-	switch (type) {
-		case Projectile::PaddleLaserBulletProjectile:
-			return new PaddleLaserProjectile(spawnLoc);
-        case Projectile::BallLaserBulletProjectile:
-            return new BallLaserProjectile(spawnLoc);
-		default:
-			assert(false);
-			break;
-	}
-
-	return NULL;
-}
-
 Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
     assert(p != NULL);
 	switch (p->GetType()) {
@@ -62,7 +46,11 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
 			return new PaddleLaserProjectile(*static_cast<const PaddleLaserProjectile*>(p));
         case Projectile::BallLaserBulletProjectile:
             return new BallLaserProjectile(*static_cast<const BallLaserProjectile*>(p));
-		default:
+        case Projectile::LaserTurretBulletProjectile:
+            return new LaserTurretProjectile(*static_cast<const LaserTurretProjectile*>(p));
+        case Projectile::PaddleRocketBulletProjectile:
+            return new PaddleRocketProjectile(*static_cast<const PaddleRocketProjectile*>(p));
+        default:
 			assert(false);
 			break;
 	}
