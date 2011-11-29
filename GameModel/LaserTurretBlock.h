@@ -64,6 +64,8 @@ public:
     float GetBarrel2ChargePercent() const;
     float GetBarrel2RecoilAmount() const;
 
+    float GetHealthPercent() const;
+
 private:
     static const int POINTS_ON_BLOCK_DESTROYED  = 800;
     static const int PIECE_STARTING_LIFE_POINTS = 500;
@@ -144,6 +146,10 @@ inline float LaserTurretBlock::GetBarrel2ChargePercent() const {
 }
 inline float LaserTurretBlock::GetBarrel2RecoilAmount() const {
     return this->barrel2RecoilAnim.GetInterpolantValue();
+}
+
+inline float LaserTurretBlock::GetHealthPercent() const {
+    return this->currLifePoints / static_cast<float>(PIECE_STARTING_LIFE_POINTS);
 }
 
 #endif // __LASERTURRETBLOCK_H__

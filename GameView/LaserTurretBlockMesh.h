@@ -16,7 +16,7 @@
 #include "../BlammoEngine/Algebra.h"
 #include "../BlammoEngine/Mesh.h"
 
-#include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESP.h"
 
 class LaserTurretBlock;
 
@@ -37,7 +37,35 @@ public:
 	void SetAlphaMultiplier(float alpha);
 
 private:
-    std::set<const LaserTurretBlock*> blocks;  // A list of all the laser turret blocks that are currently present in the game
+    class BlockData {
+    public:
+        BlockData(const LaserTurretBlock& block, std::vector<Texture2D*>& smokeTextures);
+        ~BlockData();
+
+        void DrawBlockEffects(double dT, const Camera& camera);
+        float GetFlashIntensity() const;
+    private:
+        const LaserTurretBlock& block;
+
+        AnimationMultiLerp<float> redColourMultiplierAnim;
+        ESPPointEmitter* fireySmokeEmitter;
+        ESPPointEmitter* smokeySmokeEmitter;
+        //ESPPointEmitter* fireEmitter;
+
+        ESPParticleScaleEffector  particleLargeGrowth;
+        ESPParticleScaleEffector  particleMediumGrowth;
+        ESPParticleColourEffector smokeColourFader;
+	    ESPParticleRotateEffector rotateEffectorCW;
+	    ESPParticleRotateEffector rotateEffectorCCW;
+        ESPParticleColourEffector particleFireColourFader;
+
+    };
+
+    typedef std::map<const LaserTurretBlock*, BlockData*> BlockCollection;
+    typedef BlockCollection::iterator BlockCollectionIter;
+    typedef BlockCollection::const_iterator BlockCollectionConstIter;
+    
+    BlockCollection blocks;  // A list of all the laser turret blocks that are currently present in the game
 
 	std::map<std::string, MaterialGroup*> materialGroups; // Material groups for the static parts of the laser turret block mesh
 	
@@ -48,27 +76,12 @@ private:
     Mesh* headMesh;
     Mesh* baseMesh;
 
+    std::vector<Texture2D*> smokeTextures;
+
     void LoadMesh();
 
     DISALLOW_COPY_AND_ASSIGN(LaserTurretBlockMesh);
 };
-
-inline void LaserTurretBlockMesh::Flush() {
-	this->blocks.clear();
-}
-
-inline void LaserTurretBlockMesh::AddLaserTurretBlock(const LaserTurretBlock* laserTurretBlock) {
-	assert(laserTurretBlock != NULL);
-	std::pair<std::set<const LaserTurretBlock*>::iterator, bool> insertResult =
-        this->blocks.insert(laserTurretBlock);
-	assert(insertResult.second);
-}
-
-inline void LaserTurretBlockMesh::RemoveLaserTurretBlock(const LaserTurretBlock* laserTurretBlock) {
-	size_t numRemoved = this->blocks.erase(laserTurretBlock);
-    UNUSED_VARIABLE(numRemoved);
-	assert(numRemoved == 1);
-}
 
 inline const std::map<std::string, MaterialGroup*>& LaserTurretBlockMesh::GetMaterialGroups() const {
 	return this->materialGroups;
