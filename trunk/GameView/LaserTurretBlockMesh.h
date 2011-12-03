@@ -18,7 +18,7 @@
 
 #include "../ESPEngine/ESP.h"
 
-class LaserTurretBlock;
+#include "../GameModel/LaserTurretBlock.h"
 
 // A holder for the mesh assets of the LaserTurretBlock, this class holds all of the current
 // level's blocks and draws the interactive parts of them.
@@ -36,21 +36,39 @@ public:
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	void SetAlphaMultiplier(float alpha);
 
+    void AIStateChanged(const LaserTurretBlock* block, const LaserTurretBlock::TurretAIState& oldState,
+        const LaserTurretBlock::TurretAIState& newState);
+
 private:
     class BlockData {
     public:
-        BlockData(const LaserTurretBlock& block, std::vector<Texture2D*>& smokeTextures);
+        BlockData(const LaserTurretBlock& block, Texture2D* glowTexture,
+            Texture2D* sparkleTexture, std::vector<Texture2D*>& smokeTextures);
         ~BlockData();
 
-        void DrawBlockEffects(double dT, const Camera& camera);
+        void DrawBlockEffects(double dT, const Camera& camera, float lightPulseAmt);
         float GetFlashIntensity() const;
+
+        void BlockStateChanged(const LaserTurretBlock::TurretAIState& oldState,
+            const LaserTurretBlock::TurretAIState& newState);
+
+        void SetAlpha(float alpha);
+
     private:
         const LaserTurretBlock& block;
+
+        float alpha;
 
         AnimationMultiLerp<float> redColourMultiplierAnim;
         ESPPointEmitter* fireySmokeEmitter;
         ESPPointEmitter* smokeySmokeEmitter;
         //ESPPointEmitter* fireEmitter;
+
+        Texture2D* glowTexture;
+        Texture2D* sparkleTexture;
+
+        TextLabel2D* emoteLabel;
+        AnimationMultiLerp<float> emoteScaleAnim;
 
         ESPParticleScaleEffector  particleLargeGrowth;
         ESPParticleScaleEffector  particleMediumGrowth;
@@ -59,6 +77,9 @@ private:
 	    ESPParticleRotateEffector rotateEffectorCCW;
         ESPParticleColourEffector particleFireColourFader;
 
+        void DrawLights(float pulse);
+
+        static void InitTimeValueEmoteAnimVectors(std::vector<double>& times, std::vector<float>& values, float lifeTimeInSecs);
     };
 
     typedef std::map<const LaserTurretBlock*, BlockData*> BlockCollection;
@@ -77,6 +98,10 @@ private:
     Mesh* baseMesh;
 
     std::vector<Texture2D*> smokeTextures;
+    Texture2D* glowTexture;
+    Texture2D* sparkleTexture;
+
+    AnimationMultiLerp<float> lightPulseAnim;
 
     void LoadMesh();
 
@@ -87,10 +112,8 @@ inline const std::map<std::string, MaterialGroup*>& LaserTurretBlockMesh::GetMat
 	return this->materialGroups;
 }
 
-inline void LaserTurretBlockMesh::SetAlphaMultiplier(float alpha) {
-    this->barrel1Mesh->SetAlpha(alpha);
-    this->barrel2Mesh->SetAlpha(alpha);
-    this->headMesh->SetAlpha(alpha);
+inline float LaserTurretBlockMesh::BlockData::GetFlashIntensity() const {
+    return this->redColourMultiplierAnim.GetInterpolantValue();
 }
 
 #endif // __LASERTURRETBLOCKMESH_H__

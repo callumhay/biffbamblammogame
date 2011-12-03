@@ -25,6 +25,7 @@
 #include "../GameModel/GameLevel.h"
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/ItemDropBlock.h"
+#include "../GameModel/LaserTurretBlock.h"
 
 class GameWorldAssets;
 class BallSafetyNetMesh;
@@ -62,6 +63,9 @@ public:
 	void LevelPieceAllStatusRemoved(const LevelPiece& piece);
 
     void SwitchActivated(const SwitchBlock* block, const GameLevel* currLevel);
+    void LaserTurretAIStateChanged(const LaserTurretBlock* block, const LaserTurretBlock::TurretAIState& oldState,
+        const LaserTurretBlock::TurretAIState& newState);
+
 	void PaddleCameraActiveToggle(bool isActive);
 	void SetLevelAlpha(float alpha);
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);

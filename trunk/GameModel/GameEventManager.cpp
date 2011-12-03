@@ -562,3 +562,12 @@ void GameEventManager::ActionNumStarsChanged(int oldNumStars, int newNumStars) {
 		(*this->listenerIter)->NumStarsChangedEvent(oldNumStars, newNumStars);
 	}
 }
+
+void GameEventManager::ActionLaserTurretAIStateChanged(const LaserTurretBlock& block,
+                                                       LaserTurretBlock::TurretAIState oldState,
+                                                       LaserTurretBlock::TurretAIState newState) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->LaserTurretAIStateChangedEvent(block, oldState, newState);
+	}
+}

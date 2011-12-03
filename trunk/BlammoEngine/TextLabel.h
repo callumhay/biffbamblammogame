@@ -17,6 +17,7 @@
 
 #include "Point.h"
 #include "Colour.h"
+#include "Camera.h"
 
 struct DropShadow {
 	bool isSet;
@@ -130,8 +131,9 @@ public:
 		return this->text;
 	}
 
-	void Draw(bool depthTestOn = false, float depth = 0.0);
+	void Draw(bool depthTestOn = false, float depth = 0.0f);
     void Draw(float rotationInDegs);
+    void Draw3D(const Camera& camera, float rotationInDegs = 0.0f, float z = 0.0f);
 
 private:
 	float lastRasterWidth;

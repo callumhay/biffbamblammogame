@@ -990,6 +990,14 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int newMultiplier, const Po
 	debug_output("EVENT: Score Multiplier Change: " << newMultiplier); 
 }
 
+void GameEventsListener::LaserTurretAIStateChangedEvent(const LaserTurretBlock& block,
+                                                        LaserTurretBlock::TurretAIState oldState,
+                                                        LaserTurretBlock::TurretAIState newState) {
+
+    this->display->GetAssets()->GetCurrentLevelMesh()->LaserTurretAIStateChanged(&block, oldState, newState);
+    debug_output("EVENT: Laser Turret AI State Changed.");
+}
+
 /**
  * Calculate the volume and shake for a ball of a given size (if we want the size to have an effect on such things).
  */

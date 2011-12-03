@@ -16,7 +16,7 @@
 #include "Beam.h"
 #include "LaserTurretProjectile.h"
 
-const float LaserTurretBlock::BALL_DAMAGE_AMOUNT                  = LaserTurretBlock::PIECE_STARTING_LIFE_POINTS / 5.0f;
+const float LaserTurretBlock::BALL_DAMAGE_AMOUNT                  = static_cast<float>(LaserTurretBlock::PIECE_STARTING_LIFE_POINTS) / 6.0f;
 const float LaserTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC  = 200.0f;
 const float LaserTurretBlock::ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD = 400.0f;
 const float LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT       = -0.25f;
@@ -24,6 +24,15 @@ const float LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT       = -0.25f;
 const float LaserTurretBlock::FIRE_RATE_IN_BULLETS_PER_SEC = 1.75f;
 const float LaserTurretBlock::BARREL_RELOAD_TIME           = 1.0f / (2.0f * LaserTurretBlock::FIRE_RATE_IN_BULLETS_PER_SEC);
 const float LaserTurretBlock::BARREL_RECOIL_TIME           = LaserTurretBlock::BARREL_RELOAD_TIME / 4.0f;
+
+const double LaserTurretBlock::LOST_AND_FOUND_MIN_SEEK_TIME = 100.0f / LaserTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
+const double LaserTurretBlock::LOST_AND_FOUND_MAX_SEEK_TIME = 175.0f / LaserTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
+
+const int LaserTurretBlock::LOST_AND_FOUND_MIN_NUM_LOOK_TIMES = 3;
+const int LaserTurretBlock::LOST_AND_FOUND_MAX_NUM_LOOK_TIMES = 7;
+
+const float LaserTurretBlock::ONE_MORE_BALL_HIT_LIFE_PERCENT = 
+    LaserTurretBlock::BALL_DAMAGE_AMOUNT / static_cast<float>(LaserTurretBlock::PIECE_STARTING_LIFE_POINTS);
 
 // Distance along the x-axis that the base of a barrel lies (from the origin of the block)
 // in when the barrel is in its 'base' position with no turret rotation
@@ -36,7 +45,8 @@ const float LaserTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y = 0.28f;
 
 LaserTurretBlock::LaserTurretBlock(unsigned int wLoc, unsigned int hLoc) :
 LevelPiece(wLoc, hLoc), currLifePoints(LaserTurretBlock::PIECE_STARTING_LIFE_POINTS),
-currTurretState(SeekingTurretState), currRotationFromXInDegs(0.0f), currRotationSpd(0.0f) {
+currTurretState(SeekingTurretState), currRotationFromXInDegs(0.0f), currRotationSpd(0.0f),
+lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0) {
 
     // Add a bit of variety - different barrel configurations
     if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
@@ -305,8 +315,15 @@ LevelPiece* LaserTurretBlock::TickPaddleShieldCollision(double dT, const PlayerP
 void LaserTurretBlock::AITick(double dT, GameModel* gameModel) {
 
     if (gameModel->GetCurrentStateType() == GameState::BallInPlayStateType) {
+        
 
         switch (this->currTurretState) {
+            case IdleTurretState:
+                // The turret should never be idle when the ball is in play, set it to start seeking out the paddle
+                this->SetTurretState(SeekingTurretState);
+                this->UpdateBarrelState(dT, this->ExecutePaddleSeekingAI(dT, gameModel), gameModel);
+                break;
+
             case SeekingTurretState:
                 this->UpdateBarrelState(dT, this->ExecutePaddleSeekingAI(dT, gameModel), gameModel);
                 break;
@@ -323,16 +340,19 @@ void LaserTurretBlock::AITick(double dT, GameModel* gameModel) {
                 assert(false);
                 break;
         }
-
     }
     else  {
-        // What about when the ball isn't in play... what does a turret do then??
+        // When the ball isn't in play we set it to the idle state
+        if (this->currTurretState != IdleTurretState) {
+            this->SetTurretState(IdleTurretState);
+        }
     }
 }
 
 // Executes the AI for the turret attempting to find the paddle
 // Returns: true if the turret may start to fire on the paddle, false if not
 bool LaserTurretBlock::ExecutePaddleSeekingAI(double dT, const GameModel* model) {
+    //assert(this->currTurretState == SeekingTurretState);
 
     this->UpdateSpeed();
     float rotationAmt = dT * currRotationSpd;
@@ -354,6 +374,8 @@ bool LaserTurretBlock::ExecutePaddleSeekingAI(double dT, const GameModel* model)
 // Returns: true if the turret still has a bead on the paddle, false if the turret
 // has lost sight of the paddle and should no longer fire.
 bool LaserTurretBlock::ExecuteContinueTrackingAI(double dT, const GameModel* model) {
+    assert(this->currTurretState == TargetFoundTurretState);
+
     const Point2D& paddlePos = model->GetPlayerPaddle()->GetCenterPosition();
     
     Vector2D fireDir;
@@ -398,13 +420,55 @@ bool LaserTurretBlock::ContinueTrackingStateUpdateFromView(const GameModel* mode
 }
 
 bool LaserTurretBlock::ExecuteLostAndFoundAI(double dT, const GameModel* model) {
-    // For the time being we just go back to seeking..
+    assert(this->currTurretState == TargetLostTurretState);
+
+    // Keep rotating in the direction we were already going... hopefully we'll find the
+    // paddle again pretty quickly...
+    
+    this->lostAndFoundTimeCounter += dT;
+    if (this->lostAndFoundTimeCounter > this->nextLostAndFoundSeekTime) {
+        // The time for lost and found searching has expired...
+        this->numSearchTimesCounter++;
+        if (this->numSearchTimesCounter >= this->numTimesToSearch) {
+            // Failed to find the paddle across all searches, go back to the seeking state
+            this->SetTurretState(SeekingTurretState);
+        }
+        else {
+            // Reverse the direction of the search...
+            this->currRotationAccel = -NumberFuncs::SignOf(this->currRotationAccel) * ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;
+            this->lostAndFoundTimeCounter = 0.0;
+            if (this->numSearchTimesCounter == 1) {
+                this->nextLostAndFoundSeekTime = 2.0 * this->nextLostAndFoundSeekTime;
+            }
+
+        }
+        return false;
+    }
+
     return this->ExecutePaddleSeekingAI(dT, model);
 }
 
 void LaserTurretBlock::SetTurretState(const TurretAIState& state) {
-    // TODO?
-    this->currTurretState = state;
+    TurretAIState newState = state;
+    if (this->currTurretState == TargetLostTurretState && newState == TargetLostTurretState) {
+        newState = SeekingTurretState;
+    }
+
+    if (newState == TargetLostTurretState) {
+        this->lostAndFoundTimeCounter = 0.0;
+        this->nextLostAndFoundSeekTime = LOST_AND_FOUND_MIN_SEEK_TIME +
+        Randomizer::GetInstance()->RandomNumZeroToOne() * (LOST_AND_FOUND_MAX_SEEK_TIME - LOST_AND_FOUND_MIN_SEEK_TIME);
+
+        this->numSearchTimesCounter = 0;
+        this->numTimesToSearch = LOST_AND_FOUND_MIN_NUM_LOOK_TIMES + Randomizer::GetInstance()->RandomUnsignedInt() %
+            (LOST_AND_FOUND_MAX_NUM_LOOK_TIMES - LOST_AND_FOUND_MIN_NUM_LOOK_TIMES + 1);
+    }
+
+    LaserTurretBlock::TurretAIState prevState = this->currTurretState;
+    this->currTurretState = newState;
+
+    // EVENT: The AI state of the laser turret block has changed
+    GameEventManager::Instance()->ActionLaserTurretAIStateChanged(*this, prevState, this->currTurretState);
 }
 
 void LaserTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameModel* model) {
@@ -412,12 +476,6 @@ void LaserTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMod
     switch (state) {
 
         case OneForwardTwoBack:
-            // The first barrel is fully charged and the second is fully uncharged
-            this->barrel1ChargePercentAnim.SetInterpolantValue(1.0f);
-            this->barrel1ChargePercentAnim.ClearLerp();
-            this->barrel2ChargePercentAnim.SetInterpolantValue(0.0f);
-            this->barrel2ChargePercentAnim.ClearLerp();
-            
             // The first barrel has no recoil, the second has full recoil
             this->barrel1RecoilAnim.SetInterpolantValue(0.0f);
             this->barrel1RecoilAnim.ClearLerp();
@@ -441,20 +499,12 @@ void LaserTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMod
 
             // The first barrel is preparing its recoil and laser discharge, while the second
             // is gathering its charge and recovering from its previous recoil
-            this->barrel1ChargePercentAnim.SetLerp(LaserTurretBlock::BARREL_RECOIL_TIME, 0.0f);
-            this->barrel2ChargePercentAnim.SetLerp(LaserTurretBlock::BARREL_RELOAD_TIME, 1.0f);
             this->barrel1RecoilAnim.SetLerp(LaserTurretBlock::BARREL_RECOIL_TIME, LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT);
             this->barrel2RecoilAnim.SetLerp(LaserTurretBlock::BARREL_RELOAD_TIME, 0.0f);
             break;
         }
 
         case TwoForwardOneBack:
-            // The second barrel is fully charged and the first is fully uncharged
-            this->barrel2ChargePercentAnim.SetInterpolantValue(1.0f);
-            this->barrel2ChargePercentAnim.ClearLerp();
-            this->barrel1ChargePercentAnim.SetInterpolantValue(0.0f);
-            this->barrel1ChargePercentAnim.ClearLerp();
-            
             // The second barrel has no recoil, the first has full recoil
             this->barrel2RecoilAnim.SetInterpolantValue(0.0f);
             this->barrel2RecoilAnim.ClearLerp();
@@ -477,8 +527,6 @@ void LaserTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMod
 
             // The second barrel is preparing its recoil and laser discharge, while the first
             // is gathering its charge and recovering from its previous recoil
-            this->barrel2ChargePercentAnim.SetLerp(LaserTurretBlock::BARREL_RECOIL_TIME, 0.0f);
-            this->barrel1ChargePercentAnim.SetLerp(LaserTurretBlock::BARREL_RELOAD_TIME, 1.0f);
             this->barrel2RecoilAnim.SetLerp(LaserTurretBlock::BARREL_RECOIL_TIME, LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT);
             this->barrel1RecoilAnim.SetLerp(LaserTurretBlock::BARREL_RELOAD_TIME, 0.0f);
             break;
@@ -507,8 +555,6 @@ void LaserTurretBlock::UpdateBarrelState(double dT, bool isAllowedToFire, GameMo
             // We're in the midst of firing a laser, finish off the animation and
             // go to the next logical state for the barrels
             bool isFinished = true;
-            isFinished &= this->barrel1ChargePercentAnim.Tick(dT);
-            isFinished &= this->barrel2ChargePercentAnim.Tick(dT);
             isFinished &= this->barrel1RecoilAnim.Tick(dT);
             isFinished &= this->barrel2RecoilAnim.Tick(dT);
 
@@ -530,8 +576,6 @@ void LaserTurretBlock::UpdateBarrelState(double dT, bool isAllowedToFire, GameMo
             // We're in the midst of firing a laser, finish off the animation and
             // go to the next logical state for the barrels
             bool isFinished = true;
-            isFinished &= this->barrel1ChargePercentAnim.Tick(dT);
-            isFinished &= this->barrel2ChargePercentAnim.Tick(dT);
             isFinished &= this->barrel1RecoilAnim.Tick(dT);
             isFinished &= this->barrel2RecoilAnim.Tick(dT);
 

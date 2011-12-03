@@ -16,7 +16,10 @@
 
 class LaserTurretBlock : public LevelPiece {
 public:
-    enum TurretAIState { SeekingTurretState = 0, TargetFoundTurretState, TargetLostTurretState };
+    static const float BALL_DAMAGE_AMOUNT;
+    static const float ONE_MORE_BALL_HIT_LIFE_PERCENT;
+
+    enum TurretAIState { IdleTurretState = 0, SeekingTurretState, TargetFoundTurretState, TargetLostTurretState };
 
 	LaserTurretBlock(unsigned int wLoc, unsigned int hLoc);
 	~LaserTurretBlock();
@@ -59,17 +62,17 @@ public:
     void AITick(double dT, GameModel* gameModel);
 
     float GetRotationDegreesFromX() const;
-    float GetBarrel1ChargePercent() const;
     float GetBarrel1RecoilAmount() const;
-    float GetBarrel2ChargePercent() const;
     float GetBarrel2RecoilAmount() const;
 
     float GetHealthPercent() const;
 
+    LaserTurretBlock::TurretAIState GetTurretAIState() const;
+
 private:
     static const int POINTS_ON_BLOCK_DESTROYED  = 800;
-    static const int PIECE_STARTING_LIFE_POINTS = 500;
-    static const float BALL_DAMAGE_AMOUNT;
+    static const int PIECE_STARTING_LIFE_POINTS = 600;
+    
 
     static const float MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
     static const float ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;
@@ -83,6 +86,12 @@ private:
     static const float BARREL_OFFSET_ALONG_Y;
     static const float BARREL_OFFSET_EXTENT_ALONG_Y;
 
+    static const double LOST_AND_FOUND_MIN_SEEK_TIME;
+    static const double LOST_AND_FOUND_MAX_SEEK_TIME;
+
+    static const int LOST_AND_FOUND_MIN_NUM_LOOK_TIMES;
+    static const int LOST_AND_FOUND_MAX_NUM_LOOK_TIMES;
+
     float currLifePoints;
 
     // AI-related types and variables
@@ -91,13 +100,17 @@ private:
     TurretAIState currTurretState;
     BarrelAnimationState barrelAnimState;
 
+    double lostAndFoundTimeCounter;
+    double nextLostAndFoundSeekTime;
+    int numSearchTimesCounter;
+    int numTimesToSearch;
+    
+
     // Turret-and-appearence-related variables
     float currRotationFromXInDegs;
     float currRotationSpd;
     float currRotationAccel;
 
-    AnimationLerp<float> barrel1ChargePercentAnim;
-    AnimationLerp<float> barrel2ChargePercentAnim;
     AnimationLerp<float> barrel1RecoilAnim;
     AnimationLerp<float> barrel2RecoilAnim;
     
@@ -135,14 +148,8 @@ inline bool LaserTurretBlock::StatusTick(double dT, GameModel* gameModel, int32_
 inline float LaserTurretBlock::GetRotationDegreesFromX() const {
     return this->currRotationFromXInDegs;
 }
-inline float LaserTurretBlock::GetBarrel1ChargePercent() const {
-    return this->barrel1ChargePercentAnim.GetInterpolantValue();
-}
 inline float LaserTurretBlock::GetBarrel1RecoilAmount() const {
     return this->barrel1RecoilAnim.GetInterpolantValue();
-}
-inline float LaserTurretBlock::GetBarrel2ChargePercent() const {
-    return this->barrel2ChargePercentAnim.GetInterpolantValue();
 }
 inline float LaserTurretBlock::GetBarrel2RecoilAmount() const {
     return this->barrel2RecoilAnim.GetInterpolantValue();
@@ -150,6 +157,10 @@ inline float LaserTurretBlock::GetBarrel2RecoilAmount() const {
 
 inline float LaserTurretBlock::GetHealthPercent() const {
     return this->currLifePoints / static_cast<float>(PIECE_STARTING_LIFE_POINTS);
+}
+
+inline LaserTurretBlock::TurretAIState LaserTurretBlock::GetTurretAIState() const {
+    return this->currTurretState;
 }
 
 #endif // __LASERTURRETBLOCK_H__
