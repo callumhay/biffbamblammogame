@@ -99,6 +99,9 @@ public:
     void PointNotificationEvent(const PointAward& pointAward);
     void NumStarsChangedEvent(int oldNumStars, int newNumStars);
 
+    void LaserTurretAIStateChangedEvent(const LaserTurretBlock& block,
+        LaserTurretBlock::TurretAIState oldState, LaserTurretBlock::TurretAIState newState);
+
 private:
 	GameDisplay* display;
 	long timeSinceLastBallBlockCollisionEventInMS;

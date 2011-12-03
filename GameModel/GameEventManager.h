@@ -14,6 +14,7 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "LevelPiece.h"
+#include "LaserTurretBlock.h"
 
 class GameEvents;
 class GameBall;
@@ -126,6 +127,9 @@ public:
     void ActionScoreMultiplierCounterChanged(int newCounterValue);
 	void ActionScoreMultiplierChanged(int newMultiplier, const Point2D& position);
     void ActionNumStarsChanged(int oldNumStars, int newNumStars);
+
+    void ActionLaserTurretAIStateChanged(const LaserTurretBlock& block, LaserTurretBlock::TurretAIState oldState,
+                                         LaserTurretBlock::TurretAIState newState);
 
 protected:
 	GameEventManager();

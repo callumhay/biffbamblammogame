@@ -53,7 +53,7 @@ void TextLabel2D::Draw(bool depthTestOn, float depth) {
 	// Draw coloured text part
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->colour.A());
 	this->font->OrthoPrint(Point3D(this->topLeftCorner, depth), this->text, depthTestOn, this->scale);
-	this->lastRasterWidth = this->font->GetWidth(this->text);
+	//this->lastRasterWidth = this->font->GetWidth(this->text);
 }
 
 void TextLabel2D::Draw(float rotationInDegs) {
@@ -70,8 +70,53 @@ void TextLabel2D::Draw(float rotationInDegs) {
 	// Draw coloured text part
 	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->colour.A());
     this->font->OrthoPrint(Point3D(this->topLeftCorner, 0.0f), this->text, rotationInDegs, this->scale);
-	this->lastRasterWidth = this->font->GetWidth(this->text);
+	//this->lastRasterWidth = this->font->GetWidth(this->text);
 }
+
+void TextLabel2D::Draw3D(const Camera& camera, float rotationInDegs, float z) {
+
+    // Setup a screen-aligned matrix...
+	Vector3D alignNormalVec = -camera.GetNormalizedViewVector();
+	Vector3D alignUpVec		 = camera.GetNormalizedUpVector();
+	Vector3D alignRightVec	 = Vector3D::Normalize(Vector3D::cross(alignUpVec, alignNormalVec));
+    Matrix4x4 personalAlignXF(alignRightVec, alignUpVec, alignNormalVec);
+
+    float half3DRenderWidth  = TextureFontSet::TEXT_3D_SCALE * this->lastRasterWidth * 0.5f;
+    float half3DRenderHeight = TextureFontSet::TEXT_3D_SCALE * this->GetHeight() * 0.5f;
+
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
+
+	// If set, draw the drop shadow
+	if (this->dropShadow.isSet) {
+		float dropAmt = TextureFontSet::TEXT_3D_SCALE * this->lastRasterWidth * this->dropShadow.amountPercentage;
+        float dsScale = this->dropShadow.scale * this->scale;
+		glPushMatrix();
+		glTranslatef(this->topLeftCorner[0] + dropAmt, this->topLeftCorner[1] - dropAmt, 0.0f); 
+		glMultMatrixf(personalAlignXF.begin());
+        glScalef(dsScale, dsScale, 1.0f);
+		glRotatef(rotationInDegs, 0, 0, -1);
+		glTranslatef(-half3DRenderWidth, -half3DRenderHeight, z);
+        glColor4f(this->dropShadow.colour.R(), this->dropShadow.colour.G(), this->dropShadow.colour.B(), this->colour.A());
+        this->font->Print(this->text);
+		glPopMatrix();
+	}
+
+	// Draw the font itself
+	glPushMatrix();
+	glTranslatef(this->topLeftCorner[0], this->topLeftCorner[1], 0.0f);
+	glMultMatrixf(personalAlignXF.begin());
+	glRotatef(rotationInDegs, 0, 0, -1);
+	glScalef(this->scale, this->scale, 1.0f);
+	glTranslatef(-half3DRenderWidth, -half3DRenderHeight, z);
+	glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), this->colour.A());
+	this->font->Print(this->text);
+	glPopMatrix();
+
+    glPopAttrib();
+}
+
 
 TextLabel2DFixedWidth::TextLabel2DFixedWidth(const TextureFontSet* font, 
                                              float width, const std::string& text) : 

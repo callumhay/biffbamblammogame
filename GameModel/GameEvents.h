@@ -20,6 +20,7 @@
 #include "TeslaBlock.h"
 #include "SwitchBlock.h"
 #include "ItemDropBlock.h"
+#include "LaserTurretBlock.h"
 #include "RandomItem.h"
 #include "Beam.h"
 #include "PointAward.h"
@@ -559,6 +560,23 @@ public:
         UNUSED_PARAMETER(oldNumStars);
         UNUSED_PARAMETER(newNumStars);
     }
+
+    // AI Events ***********************************************************
+
+    /**
+     * Event triggered when the laser turret AI state of a particular block changes.
+     * Only occurs once per change.
+     * Arguements: block - The block with the changed state.
+     *             oldState - The state that the block used to have.
+     *             newState - The state that the block changed to.
+     */
+    virtual void LaserTurretAIStateChangedEvent(const LaserTurretBlock& block, LaserTurretBlock::TurretAIState oldState,
+                                                LaserTurretBlock::TurretAIState newState) {
+        UNUSED_PARAMETER(block);
+        UNUSED_PARAMETER(oldState);
+        UNUSED_PARAMETER(newState);
+    }
+
 };
 
 

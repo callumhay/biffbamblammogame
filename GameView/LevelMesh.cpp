@@ -641,6 +641,12 @@ void LevelMesh::SwitchActivated(const SwitchBlock* block, const GameLevel* currL
     this->switchBlock->SwitchBlockActivated(block, currLevel->GetTriggerableLevelPiece(block->GetIDTriggeredBySwitch()));
 }
 
+void LevelMesh::LaserTurretAIStateChanged(const LaserTurretBlock* block,
+                                          const LaserTurretBlock::TurretAIState& oldState,
+                                          const LaserTurretBlock::TurretAIState& newState) {
+    this->laserTurretBlock->AIStateChanged(block, oldState, newState);
+}
+
 /**
  * Call when the camera mode changes from/to paddle camera.
  */
