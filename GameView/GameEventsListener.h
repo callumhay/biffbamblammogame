@@ -50,8 +50,8 @@ public:
 	void BallPortalBlockTeleportEvent(const GameBall& ball, const PortalBlock& enterPortal);
 	void ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal);
 	void BallFiredFromCannonEvent(const GameBall& ball, const CannonBlock& cannonBlock);
-	void RocketEnteredCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock);
-	void RocketFiredFromCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock);
+	void RocketEnteredCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock);
+	void RocketFiredFromCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock);
 	void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
 
 	// Misc game events
@@ -101,6 +101,8 @@ public:
 
     void LaserTurretAIStateChangedEvent(const LaserTurretBlock& block,
         LaserTurretBlock::TurretAIState oldState, LaserTurretBlock::TurretAIState newState);
+    void RocketTurretAIStateChangedEvent(const RocketTurretBlock& block,
+        RocketTurretBlock::TurretAIState oldState, RocketTurretBlock::TurretAIState newState);
 
 private:
 	GameDisplay* display;

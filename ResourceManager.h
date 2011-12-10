@@ -107,7 +107,8 @@ private:
     static std::string baseLoadDir;
 
 	std::map<std::string, Mesh*> loadedMeshes;	// Meshes already loaded into the blammo engine from file
-	
+    std::map<Mesh*, unsigned int> numRefPerMesh; // Number of references per mesh handed out
+
 	// Independant meshes for specific special-material things in the game
 	Mesh* inkBlockMesh;
 	Mesh* portalBlockMesh;

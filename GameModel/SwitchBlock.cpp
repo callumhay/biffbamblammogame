@@ -198,10 +198,13 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 	        this->SwitchPressed(gameModel);
 			break;
 
-		case Projectile::PaddleRocketBulletProjectile: 
+		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
+
 			// The rocket should not destroy this block, however it certainly
 			// is allowed to destroy blocks around it!
-			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+            assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);
+			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
             assert(resultingPiece == this);
 
             if (this->HasStatus(LevelPiece::IceCubeStatus)) {

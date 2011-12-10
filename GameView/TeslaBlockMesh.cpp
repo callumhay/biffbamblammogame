@@ -78,6 +78,8 @@ TeslaBlockMesh::~TeslaBlockMesh() {
 	success = ResourceManager::GetInstance()->ReleaseTextureResource(this->shieldTex);
     assert(success);
 
+    UNUSED_VARIABLE(success);
+
 	delete this->teslaCenterFlare;
 	this->teslaCenterFlare = NULL;
 }

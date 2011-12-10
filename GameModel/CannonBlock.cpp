@@ -57,10 +57,7 @@ CannonBlock::~CannonBlock() {
 
 // Determine whether the given projectile will pass through this block...
 bool CannonBlock::ProjectilePassesThrough(Projectile* projectile) const {
-	if (projectile->GetType() == Projectile::PaddleRocketBulletProjectile) {
-		return true;
-	}
-	return false;
+	return projectile->IsRocket();
 }
 
 LevelPiece* CannonBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
@@ -183,6 +180,7 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
 			// If the cannon isn't already loaded with a projectile then
 			// the rocket gets captured by the cannon block and shot somewhere else...
 			if (!projectile->IsLastThingCollidedWith(this) && !this->GetIsLoaded()) {

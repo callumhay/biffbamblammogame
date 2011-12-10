@@ -141,8 +141,13 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
+
 			newLevelPiece = this->Detonate(gameModel);
-			newLevelPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, newLevelPiece);
+
+            assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);
+			newLevelPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), newLevelPiece);
+
 			break;
 
 		case Projectile::FireGlobProjectile:

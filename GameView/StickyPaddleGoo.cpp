@@ -23,9 +23,10 @@ StickyPaddleGoo::StickyPaddleGoo() : paddleGooMesh(NULL), stickyGooMatEffect(NUL
 }
 
 StickyPaddleGoo::~StickyPaddleGoo() {
-	// Clean-up the mesh (this will also take care of the materials attached to it)
-	//delete this->paddleGooMesh;
-	//this->paddleGooMesh = NULL;
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleGooMesh);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 /**

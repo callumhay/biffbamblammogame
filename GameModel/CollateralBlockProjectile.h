@@ -25,6 +25,9 @@ public:
 	CollateralBlockProjectile(CollateralBlock* collateralBlock);
 	~CollateralBlockProjectile();
 
+    bool IsRocket() const { return false; }
+    bool IsRefractableOrReflectable() const { return false; }
+
 	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
     ProjectileType GetType() const {

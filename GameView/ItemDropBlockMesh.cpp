@@ -67,6 +67,8 @@ ItemDropBlockMesh::~ItemDropBlockMesh() {
 	success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkTex);
 	assert(success);
 
+    UNUSED_VARIABLE(success);
+
 	delete this->flareParticleEmitter;
 	this->flareParticleEmitter = NULL;
 	delete this->powerUpSparkEmitter;

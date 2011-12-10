@@ -31,6 +31,7 @@
 #include "OneWayBlock.h"
 #include "NoEntryBlock.h"
 #include "LaserTurretBlock.h"
+#include "RocketTurretBlock.h"
 #include "GameModel.h"
 #include "Projectile.h"
 #include "PointAward.h"
@@ -60,6 +61,7 @@ const char GameLevel::SWITCH_BLOCK_CHAR         = 'W';
 const char GameLevel::ONE_WAY_BLOCK_CHAR        = 'F';
 const char GameLevel::NO_ENTRY_BLOCK_CHAR       = 'N';
 const char GameLevel::LASER_TURRET_BLOCK_CHAR   = 'H';
+const char GameLevel::ROCKET_TURRET_BLOCK_CHAR  = 'J';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -790,6 +792,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
                     newPiece = new LaserTurretBlock(pieceWLoc, pieceHLoc);
                     break;
 
+                case GameLevel::ROCKET_TURRET_BLOCK_CHAR:
+                    // J - Rocket Turret Block
+                    newPiece = new RocketTurretBlock(pieceWLoc, pieceHLoc);
+                    break;
+
 				default:
 					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc);
 					delete inFile;
@@ -1132,7 +1139,7 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
  *                          b
  * From the above ('o' is less than normal size, add 'a' for normal, add 'b' for bigger) is the normal scenario .
  */
-LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece) {
+LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece) {
 	
 	// Destroy the hit piece if we can...
 	LevelPiece* resultPiece = hitPiece;
@@ -1146,18 +1153,20 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const Projectile* r
 	unsigned int hIndex = resultPiece->GetHeightIndex();
 	unsigned int wIndex = resultPiece->GetWidthIndex();
 
-	float rocketSizeFactor = rocket->GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+	float rocketSizeFactor = rocket->GetHeight() / rocket->GetDefaultHeight();
 
 	std::vector<LevelPiece*> affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, hIndex, wIndex);
 	// Go through each affected piece and destroy it if we can
 	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
 		LevelPiece* currAffectedPiece = *iter;
 		if (currAffectedPiece != NULL && currAffectedPiece->CanBeDestroyedByBall()) {
-			currAffectedPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
-			// Update all the affected pieces again...
-			affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, hIndex, wIndex);
-			iter = affectedPieces.begin();
-			continue;
+			LevelPiece* resultPiece = currAffectedPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
+            if (resultPiece != currAffectedPiece) {
+			    // Update all the affected pieces again...
+			    affectedPieces = this->GetRocketExplosionAffectedLevelPieces(rocketSizeFactor, hIndex, wIndex);
+			    iter = affectedPieces.begin();
+                continue;
+            }
 		}
 		++iter;
 	}
@@ -1733,7 +1742,8 @@ bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
             return false;
         
         case Projectile::CollateralBlockProjectile:
-        case Projectile::PaddleRocketBulletProjectile: 
+        case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
             return true;
 
         default:

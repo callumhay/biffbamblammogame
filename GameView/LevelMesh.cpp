@@ -20,6 +20,7 @@
 #include "TeslaBlockMesh.h"
 #include "SwitchBlockMesh.h"
 #include "LaserTurretBlockMesh.h"
+#include "RocketTurretBlockMesh.h"
 
 #include "../ESPEngine/ESPEmitter.h"
 
@@ -38,12 +39,13 @@
 #include "../GameModel/SwitchBlock.h"
 #include "../GameModel/OneWayBlock.h"
 #include "../GameModel/LaserTurretBlock.h"
+#include "../GameModel/RocketTurretBlock.h"
 
 LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level) : currLevel(NULL),
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), ballSafetyNet(NULL), cannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
-oneWayRightBlock(NULL), laserTurretBlock(NULL), statusEffectRenderer(NULL) {
+oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), statusEffectRenderer(NULL) {
 	
 	// Load the basic block and all other block types that stay consistent between worlds
 	this->basicBlock					= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
@@ -59,6 +61,7 @@ oneWayRightBlock(NULL), laserTurretBlock(NULL), statusEffectRenderer(NULL) {
 	this->itemDropBlock					= new ItemDropBlockMesh();
     this->switchBlock                   = new SwitchBlockMesh();
     this->laserTurretBlock              = new LaserTurretBlockMesh();
+    this->rocketTurretBlock             = new RocketTurretBlockMesh();
     this->noEntryBlock                  = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->NO_ENTRY_BLOCK_MESH);
     this->oneWayUpBlock                 = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_UP_MESH);
     this->oneWayDownBlock               = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ONE_WAY_BLOCK_DOWN_MESH);
@@ -68,28 +71,34 @@ oneWayRightBlock(NULL), laserTurretBlock(NULL), statusEffectRenderer(NULL) {
 	this->ballSafetyNet = new BallSafetyNetMesh();
 
 	// Add the typical level meshes to the list of materials...
-#define INSERT_MATERIAL_GRPS(block) { const std::map<std::string, MaterialGroup*>& matGrps = block->GetMaterialGroups(); \
+#define INSERT_MATERIAL_GRPS(block, allowDuplicateMaterials) { const std::map<std::string, MaterialGroup*>& matGrps = block->GetMaterialGroups(); \
     for (std::map<std::string, MaterialGroup*>::const_iterator iter = matGrps.begin(); iter != matGrps.end(); ++iter) { \
-    assert(this->levelMaterials.find(iter->first) == this->levelMaterials.end()); \
+    if (this->levelMaterials.find(iter->first) != this->levelMaterials.end()) { if (allowDuplicateMaterials) { continue; } else { assert(false); } } \
     this->levelMaterials.insert(std::make_pair<std::string, CgFxMaterialEffect*>(iter->first, iter->second->GetMaterial())); } }
-    
-    INSERT_MATERIAL_GRPS(this->basicBlock);
-    INSERT_MATERIAL_GRPS(this->triangleBlockUR);
-    INSERT_MATERIAL_GRPS(this->bombBlock);
-    INSERT_MATERIAL_GRPS(this->inkBlock);
-    INSERT_MATERIAL_GRPS(this->prismBlockDiamond);
-    INSERT_MATERIAL_GRPS(this->prismBlockTriangleUR);
-    INSERT_MATERIAL_GRPS(this->portalBlock);
-    INSERT_MATERIAL_GRPS(this->cannonBlock);
-    INSERT_MATERIAL_GRPS(this->teslaBlock);
-    INSERT_MATERIAL_GRPS(this->itemDropBlock);
-    INSERT_MATERIAL_GRPS(this->switchBlock);
-    INSERT_MATERIAL_GRPS(this->laserTurretBlock);
-    INSERT_MATERIAL_GRPS(this->noEntryBlock);
-    INSERT_MATERIAL_GRPS(this->oneWayUpBlock);
-    INSERT_MATERIAL_GRPS(this->oneWayDownBlock);
-    INSERT_MATERIAL_GRPS(this->oneWayLeftBlock);
-    INSERT_MATERIAL_GRPS(this->oneWayRightBlock);
+
+#pragma warning(push)
+#pragma warning(disable: 4127)
+
+    INSERT_MATERIAL_GRPS(this->basicBlock, false);
+    INSERT_MATERIAL_GRPS(this->triangleBlockUR, false);
+    INSERT_MATERIAL_GRPS(this->bombBlock, false);
+    INSERT_MATERIAL_GRPS(this->inkBlock, false);
+    INSERT_MATERIAL_GRPS(this->prismBlockDiamond, false);
+    INSERT_MATERIAL_GRPS(this->prismBlockTriangleUR, false);
+    INSERT_MATERIAL_GRPS(this->portalBlock, false);
+    INSERT_MATERIAL_GRPS(this->cannonBlock, false);
+    INSERT_MATERIAL_GRPS(this->teslaBlock, false);
+    INSERT_MATERIAL_GRPS(this->itemDropBlock, false);
+    INSERT_MATERIAL_GRPS(this->switchBlock, false);
+    INSERT_MATERIAL_GRPS(this->laserTurretBlock, true);
+    INSERT_MATERIAL_GRPS(this->rocketTurretBlock, true);
+    INSERT_MATERIAL_GRPS(this->noEntryBlock, false);
+    INSERT_MATERIAL_GRPS(this->oneWayUpBlock, false);
+    INSERT_MATERIAL_GRPS(this->oneWayDownBlock, false);
+    INSERT_MATERIAL_GRPS(this->oneWayLeftBlock, false);
+    INSERT_MATERIAL_GRPS(this->oneWayRightBlock, false);
+
+#pragma warning(pop)
 
 #undef INSERT_MATERIAL_GRPS
 
@@ -125,6 +134,29 @@ LevelMesh::~LevelMesh() {
     this->switchBlock = NULL;
     delete this->laserTurretBlock;
     this->laserTurretBlock = NULL;
+    delete this->rocketTurretBlock;
+    this->rocketTurretBlock = NULL;
+
+    // Release all resources
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->noEntryBlock);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->oneWayUpBlock);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->oneWayDownBlock);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->oneWayLeftBlock);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->oneWayRightBlock);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->basicBlock);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->bombBlock);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->triangleBlockUR);
+    assert(success);
+
+    UNUSED_VARIABLE(success);
 
 	// Delete the status effect renderer
 	delete this->statusEffectRenderer;
@@ -183,6 +215,7 @@ void LevelMesh::Flush() {
 	this->itemDropBlock->Flush();
     this->switchBlock->Flush();
     this->laserTurretBlock->Flush();
+    this->rocketTurretBlock->Flush();
 
 	// Clear the current level pointer
 	this->currLevel = NULL;
@@ -282,6 +315,13 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
                 case LevelPiece::LaserTurret: {
 				    const LaserTurretBlock* laserTurretLvlPiece = static_cast<const LaserTurretBlock*>(currPiece);
 				    this->laserTurretBlock->AddLaserTurretBlock(laserTurretLvlPiece);
+                    break;
+                }
+
+                // 7) Rocket Turret Block
+                case LevelPiece::RocketTurret: {
+                    const RocketTurretBlock* rocketTurretLvlPiece = static_cast<const RocketTurretBlock*>(currPiece);
+                    this->rocketTurretBlock->AddRocketTurretBlock(rocketTurretLvlPiece);
                     break;
                 }
 
@@ -391,6 +431,12 @@ void LevelMesh::RemovePiece(const LevelPiece& piece) {
             break;
         }
 
+        case LevelPiece::RocketTurret: {
+            const RocketTurretBlock* rocketTurretPiece = static_cast<const RocketTurretBlock*>(&piece);
+            this->rocketTurretBlock->RemoveRocketTurretBlock(rocketTurretPiece);
+            break;
+        }
+
 		default:
 			break;
 	}
@@ -430,6 +476,7 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->teslaBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
     this->switchBlock->Draw(dT, camera, keyLight, fillLight, ballLight, lightsAreOut);
     this->laserTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
+    this->rocketTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 
 	ESPEmitter* emitter = NULL;
@@ -586,6 +633,9 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
         case LevelPiece::LaserTurret:
             return &this->laserTurretBlock->GetMaterialGroups();
 
+        case LevelPiece::RocketTurret:
+            return &this->rocketTurretBlock->GetMaterialGroups();
+
 		case LevelPiece::Collateral:
 			break;
 
@@ -647,6 +697,12 @@ void LevelMesh::LaserTurretAIStateChanged(const LaserTurretBlock* block,
     this->laserTurretBlock->AIStateChanged(block, oldState, newState);
 }
 
+void LevelMesh::RocketTurretAIStateChanged(const RocketTurretBlock* block,
+                                           const RocketTurretBlock::TurretAIState& oldState,
+                                           const RocketTurretBlock::TurretAIState& newState) {
+    this->rocketTurretBlock->AIStateChanged(block, oldState, newState);
+}
+
 /**
  * Call when the camera mode changes from/to paddle camera.
  */
@@ -676,4 +732,5 @@ void LevelMesh::SetLevelAlpha(float alpha) {
 	this->itemDropBlock->SetAlphaMultiplier(alpha);
     this->switchBlock->SetAlphaMultiplier(alpha);
     this->laserTurretBlock->SetAlphaMultiplier(alpha);
+    this->rocketTurretBlock->SetAlphaMultiplier(alpha);
 }

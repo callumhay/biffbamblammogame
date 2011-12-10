@@ -48,10 +48,14 @@ public:
 		this->skybox = NULL;
 
 		// Tell the resource manager to release any of the loaded meshes
-		ResourceManager::GetInstance()->ReleaseMeshResource(this->background);
-		ResourceManager::GetInstance()->ReleaseMeshResource(this->playerPaddle);
-		ResourceManager::GetInstance()->ReleaseMeshResource(this->styleBlock);
-	}
+        bool success = false;
+		success = ResourceManager::GetInstance()->ReleaseMeshResource(this->background);
+		assert(success);
+        success = ResourceManager::GetInstance()->ReleaseMeshResource(this->playerPaddle);
+		assert(success);
+        success = ResourceManager::GetInstance()->ReleaseMeshResource(this->styleBlock);
+	    assert(success);
+    }
 
 	Mesh* GetWorldStyleBlock() const {
 		return this->styleBlock;

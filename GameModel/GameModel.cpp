@@ -551,13 +551,15 @@ void GameModel::DoProjectileCollisions() {
         if (currLevel->IsDestroyedByTelsaLightning(*currProjectile)) {
             if (currLevel->TeslaLightningCollisionCheck(projectileBoundingLines)) {
                 // In the special case of a rocket projectile we cause an explosion...
-                if (currProjectile->GetType() == Projectile::PaddleRocketBulletProjectile) {
-                    std::set<LevelPiece*> collisionPieces = this->GetCurrentLevel()->GetLevelPieceCollisionCandidates(currProjectile->GetPosition(), EPSILON);
+                if (currProjectile->IsRocket()) {
+                    std::set<LevelPiece*> collisionPieces = 
+                        this->GetCurrentLevel()->GetLevelPieceCollisionCandidates(currProjectile->GetPosition(), EPSILON);
                     if (collisionPieces.empty()) {
                         assert(false);
                     }
                     else {
-                        currLevel->RocketExplosion(this, currProjectile, *collisionPieces.begin());
+                        assert(dynamic_cast<RocketProjectile*>(currProjectile) != NULL);
+                        currLevel->RocketExplosion(this, static_cast<RocketProjectile*>(currProjectile), *collisionPieces.begin());
                     }
                 }
 

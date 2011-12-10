@@ -1,5 +1,5 @@
 /**
- * PaddleRocketMesh.cpp
+ * RocketMesh.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
@@ -9,7 +9,7 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#include "PaddleRocketMesh.h"
+#include "RocketMesh.h"
 #include "GameViewConstants.h"
 
 #include "../ResourceManager.h"
@@ -20,10 +20,10 @@
 #include "../GameModel/PaddleRocketProjectile.h"
 #include "../GameModel/PlayerPaddle.h"
 
-const float PaddleRocketMesh::GLOW_X_SIZE	= 1.2f * PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT;
-const float PaddleRocketMesh::GLOW_Y_SIZE	= 1.1f * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+const float RocketMesh::GLOW_X_SIZE	= 1.2f * PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT;
+const float RocketMesh::GLOW_Y_SIZE	= 1.1f * PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
 
-PaddleRocketMesh::PaddleRocketMesh() : 
+RocketMesh::RocketMesh() : 
 rocketMesh(NULL), rocketGlowEmitter(NULL), pulseEffector(0,0) {
 	this->LoadMesh();
 
@@ -50,19 +50,24 @@ rocketMesh(NULL), rocketGlowEmitter(NULL), pulseEffector(0,0) {
 	this->rocketGlowEmitter->SetParticles(1, this->glowTex);
 }
 
-PaddleRocketMesh::~PaddleRocketMesh() {
+RocketMesh::~RocketMesh() {
 	this->rocketProjectiles.clear();
-	ResourceManager::GetInstance()->ReleaseMeshResource(this->rocketMesh);
-	ResourceManager::GetInstance()->ReleaseTextureResource(this->glowTex);
+	
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->rocketMesh);
+	assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->glowTex);
+    assert(success);
+    UNUSED_VARIABLE(success);
 
 	delete this->rocketGlowEmitter;
 	this->rocketGlowEmitter = NULL;
 }
 
 // Draw the rocket - if it's currently activated
-void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, 
-														const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
-														const BasicPointLight& ballLight) {
+void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camera, 
+                            const BasicPointLight& keyLight, const BasicPointLight& fillLight, 
+                            const BasicPointLight& ballLight) {
 
 	this->rocketGlowEmitter->Tick(dT);
 	if ((paddle.GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
@@ -86,8 +91,14 @@ void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera&
 			debug_opengl_state();
 	}
 
-	for (std::set<const PaddleRocketProjectile*>::iterator iter = this->rocketProjectiles.begin(); iter != this->rocketProjectiles.end(); ++iter) {
-		const PaddleRocketProjectile* rocketProjectile = *iter;
+    static float scaleFactor   = 1.0f;
+    static float currYRotation = 0.0f;
+    static float currZRotation = 0.0f;
+
+	for (std::set<const RocketProjectile*>::iterator iter = this->rocketProjectiles.begin();
+         iter != this->rocketProjectiles.end(); ++iter) {
+
+		const RocketProjectile* rocketProjectile = *iter;
 		assert(rocketProjectile != NULL);
 
 		// Draw the rocket if it's not inside a cannon block...
@@ -98,16 +109,17 @@ void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera&
 
 			// Grab positioning / orienting values from the rocket projectile 
 			// so we know where/how to draw the rocket
-			float currYRotation = rocketProjectile->GetYRotation();
+			currYRotation = rocketProjectile->GetYRotation();
 			const Vector2D& rocketDir = rocketProjectile->GetVelocityDirection();
-			float currZRotation = Trig::radiansToDegrees(-M_PI_DIV2 + atan2(rocketDir[1], rocketDir[0]));
+			currZRotation = Trig::radiansToDegrees(-M_PI_DIV2 + atan2(rocketDir[1], rocketDir[0]));
 			const Point2D& rocketPos = rocketProjectile->GetPosition();
 
 			glPushMatrix();
 			glTranslatef(rocketPos[0], rocketPos[1], 0.0f);
 
 			glPushMatrix();
-			glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
+            scaleFactor = rocketProjectile->GetWidth() / rocketProjectile->GetDefaultWidth();
+			glScalef(scaleFactor, scaleFactor, scaleFactor);
 			this->rocketGlowEmitter->SetParticleRotation(ESPInterval(-currZRotation));
 			this->rocketGlowEmitter->Draw(camera);
 			glPopMatrix();
@@ -117,7 +129,7 @@ void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera&
 			glMultMatrixf(Matrix4x4::rotationMatrix(Trig::degreesToRadians(currYRotation), Vector3D(rocketDir, 0.0f)).begin());
 			glRotatef(currZRotation, 0.0f, 0.0f, 1.0f);
 			
-			glScalef(paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor(), paddle.GetPaddleScaleFactor());
+			glScalef(scaleFactor, scaleFactor, scaleFactor);
 			this->rocketMesh->Draw(camera, keyLight, fillLight, ballLight);
 			glPopMatrix();
 
@@ -128,7 +140,7 @@ void PaddleRocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera&
 }
 
 // Private helper method to load the rocket mesh
-void PaddleRocketMesh::LoadMesh() {
+void RocketMesh::LoadMesh() {
 	assert(this->rocketMesh == NULL);
 	this->rocketMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_ROCKET_MESH);
 	assert(this->rocketMesh != NULL);

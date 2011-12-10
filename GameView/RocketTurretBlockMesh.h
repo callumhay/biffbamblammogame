@@ -1,5 +1,5 @@
 /**
- * LaserTurretBlockMesh.h
+ * RocketTurretBlockMesh.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
@@ -9,8 +9,8 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#ifndef __LASERTURRETBLOCKMESH_H__
-#define __LASERTURRETBLOCKMESH_H__
+#ifndef __ROCKETTURRETBLOCKMESH_H__
+#define __ROCKETTURRETBLOCKMESH_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Algebra.h"
@@ -18,44 +18,44 @@
 
 #include "../ESPEngine/ESP.h"
 
-#include "../GameModel/LaserTurretBlock.h"
+#include "../GameModel/RocketTurretBlock.h"
 
-// A holder for the mesh assets of the LaserTurretBlock, this class holds all of the current
+// A holder for the mesh assets of the RocketTurretBlock, this class holds all of the current
 // level's blocks and draws the interactive parts of them.
-class LaserTurretBlockMesh {
+class RocketTurretBlockMesh {
 public:
-	LaserTurretBlockMesh();
-	~LaserTurretBlockMesh();
+	RocketTurretBlockMesh();
+	~RocketTurretBlockMesh();
 
 	void Flush();
-	void AddLaserTurretBlock(const LaserTurretBlock* laserTurretBlock);
-	void RemoveLaserTurretBlock(const LaserTurretBlock* laserTurretBlock);
+	void AddRocketTurretBlock(const RocketTurretBlock* rocketTurretBlock);
+	void RemoveRocketTurretBlock(const RocketTurretBlock* rocketTurretBlock);
 	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 	void SetAlphaMultiplier(float alpha);
 
-    void AIStateChanged(const LaserTurretBlock* block, const LaserTurretBlock::TurretAIState& oldState,
-        const LaserTurretBlock::TurretAIState& newState);
+    void AIStateChanged(const RocketTurretBlock* block, const RocketTurretBlock::TurretAIState& oldState,
+        const RocketTurretBlock::TurretAIState& newState);
 
 private:
     class BlockData {
     public:
-        BlockData(const LaserTurretBlock& block, Texture2D* glowTexture,
+        BlockData(const RocketTurretBlock& block, Texture2D* glowTexture,
             Texture2D* sparkleTexture, std::vector<Texture2D*>& smokeTextures);
         ~BlockData();
 
         void DrawBlockEffects(double dT, const Camera& camera, float lightPulseAmt);
         float GetFlashIntensity() const;
 
-        void BlockStateChanged(const LaserTurretBlock::TurretAIState& oldState,
-            const LaserTurretBlock::TurretAIState& newState);
+        void BlockStateChanged(const RocketTurretBlock::TurretAIState& oldState,
+            const RocketTurretBlock::TurretAIState& newState);
 
         void SetAlpha(float alpha);
 
     private:
-        const LaserTurretBlock& block;
+        const RocketTurretBlock& block;
 
         float alpha;
 
@@ -81,7 +81,7 @@ private:
         static void InitTimeValueEmoteAnimVectors(std::vector<double>& times, std::vector<float>& values, float lifeTimeInSecs);
     };
 
-    typedef std::map<const LaserTurretBlock*, BlockData*> BlockCollection;
+    typedef std::map<const RocketTurretBlock*, BlockData*> BlockCollection;
     typedef BlockCollection::iterator BlockCollectionIter;
     typedef BlockCollection::const_iterator BlockCollectionConstIter;
     
@@ -91,8 +91,7 @@ private:
 	
     // Meshes for the two barrels of the laser turret block - these are
     // kept separate for animation purposes
-    Mesh* barrel1Mesh;
-    Mesh* barrel2Mesh;
+    Mesh* barrelMesh;
     Mesh* headMesh;
     Mesh* baseMesh;
 
@@ -104,15 +103,15 @@ private:
 
     void LoadMesh();
 
-    DISALLOW_COPY_AND_ASSIGN(LaserTurretBlockMesh);
+    DISALLOW_COPY_AND_ASSIGN(RocketTurretBlockMesh);
 };
 
-inline const std::map<std::string, MaterialGroup*>& LaserTurretBlockMesh::GetMaterialGroups() const {
+inline const std::map<std::string, MaterialGroup*>& RocketTurretBlockMesh::GetMaterialGroups() const {
 	return this->materialGroups;
 }
 
-inline float LaserTurretBlockMesh::BlockData::GetFlashIntensity() const {
+inline float RocketTurretBlockMesh::BlockData::GetFlashIntensity() const {
     return this->redColourMultiplierAnim.GetInterpolantValue();
 }
 
-#endif // __LASERTURRETBLOCKMESH_H__
+#endif // __ROCKETTURRETBLOCKMESH_H__

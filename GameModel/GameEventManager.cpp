@@ -175,7 +175,7 @@ void GameEventManager::ActionBallFiredFromCannon(const GameBall& ball, const Can
 }
 
 // Action for when a rocket enters/is loaded into a cannon block
-void GameEventManager::ActionRocketEnteredCannon(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+void GameEventManager::ActionRocketEnteredCannon(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->RocketEnteredCannonEvent(rocket, cannonBlock);
@@ -183,7 +183,7 @@ void GameEventManager::ActionRocketEnteredCannon(const PaddleRocketProjectile& r
 }
 
 // Action for when the rocket is fired from a cannon block
-void GameEventManager::ActionRocketFiredFromCannon(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+void GameEventManager::ActionRocketFiredFromCannon(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->RocketFiredFromCannonEvent(rocket, cannonBlock);
@@ -569,5 +569,14 @@ void GameEventManager::ActionLaserTurretAIStateChanged(const LaserTurretBlock& b
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->LaserTurretAIStateChangedEvent(block, oldState, newState);
+	}
+}
+
+void GameEventManager::ActionRocketTurretAIStateChanged(const RocketTurretBlock& block,
+                                                        RocketTurretBlock::TurretAIState oldState,
+                                                        RocketTurretBlock::TurretAIState newState) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->RocketTurretAIStateChangedEvent(block, oldState, newState);
 	}
 }

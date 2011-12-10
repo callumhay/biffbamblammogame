@@ -1,0 +1,61 @@
+Block Test
+18 20
+S S S S S S S S S S S S S S S S S S 
+S E E E E A(0,1,b,a) E E X(d,c) E E E E E E E E S 
+S T(S,ul) T(S,ur) E E E E E E E E E E E T(P,ul) T(P,ur) E S 
+S T(S,ll) T(S,lr) E E E E E E E E E E E T(P,ll) T(P,lr) E S 
+S E E E E E E E F(u) F(d) F(l) F(r) E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S H J E E E E E E E E E E E E E E S 
+S S S S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S R O Y G A(0,1,a,b) B C(180) X(c,d) I L D(all) W(0) P N F(d) E S 
+S E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+BallGrow 2
+UberBall 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 2
+MagnetPaddle 2
+MultiBall3 2
+IceBall 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 2

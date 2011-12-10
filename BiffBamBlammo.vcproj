@@ -777,10 +777,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\GameView\PaddleRocketMesh.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GameView\PaddleShield.h"
 					>
 				</File>
@@ -842,10 +838,6 @@
 				</File>
 				<File
 					RelativePath=".\GameView\OmniLaserBallEffect.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GameView\PaddleRocketMesh.cpp"
 					>
 				</File>
 				<File
@@ -1188,6 +1180,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\RocketMesh.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\RocketTurretBlockMesh.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\SwitchBlockMesh.h"
 						>
 					</File>
@@ -1225,6 +1225,14 @@
 					</File>
 					<File
 						RelativePath=".\GameView\PrismBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\RocketMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\RocketTurretBlockMesh.cpp"
 						>
 					</File>
 					<File
@@ -1704,6 +1712,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\RocketTurretBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\SolidBlock.h"
 						>
 					</File>
@@ -1769,6 +1781,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\PrismBlock.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\RocketTurretBlock.cpp"
 						>
 					</File>
 					<File
@@ -2167,6 +2183,14 @@
 						RelativePath=".\GameModel\Projectile.h"
 						>
 					</File>
+					<File
+						RelativePath=".\GameModel\RocketProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\TurretRocketProjectile.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -2201,6 +2225,14 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\Projectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\RocketProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\TurretRocketProjectile.cpp"
 						>
 					</File>
 				</Filter>

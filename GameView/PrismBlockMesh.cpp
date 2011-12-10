@@ -19,6 +19,10 @@ PrismBlockMesh::PrismBlockMesh(PrismBlockType type) : prismBlockGeometry(NULL), 
 }
 
 PrismBlockMesh::~PrismBlockMesh() {
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->prismBlockGeometry);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 /**

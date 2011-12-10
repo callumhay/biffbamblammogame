@@ -19,6 +19,9 @@ public:
 	FireGlobProjectile(const Point2D& spawnLoc, float size);
 	~FireGlobProjectile();
 
+    bool IsRocket() const { return false; }
+    bool IsRefractableOrReflectable() const { return false; }
+
 	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
     ProjectileType GetType() const {

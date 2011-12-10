@@ -310,7 +310,7 @@ private:
 
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
-	void RocketProjectileCollision(GameModel* gameModel, const Projectile& projectile);
+	void RocketProjectileCollision(GameModel* gameModel, const RocketProjectile& projectile);
 	void FireGlobProjectileCollision(const Projectile& projectile);
 	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter);
 	void SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, double totalHitEffectTime, 
@@ -433,6 +433,7 @@ inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& project
 
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
             // The rocket can only collide with the paddle if it's NOT going upwards into the level
             if (Vector2D::Dot(projectile.GetVelocityDirection(), this->GetUpVector()) <= 0) {
                 return this->CollisionCheck(bounds, true);
@@ -449,15 +450,19 @@ inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& project
 inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) {
 	// Projectiles can pass through when reflected by the paddle shield
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+
         switch (projectile.GetType()) {
+
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:
+            case Projectile::RocketTurretBulletProjectile:
             case Projectile::LaserTurretBulletProjectile:
                 return true;
             default:
                 break;
         }
+
 	}
 	return false;
 }

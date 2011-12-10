@@ -417,10 +417,11 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
-			// TODO?
+			// TODO? Maybe a neat rotating sparkle or line epicenter effect?
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
 		case Projectile::CollateralBlockProjectile: {
 				Point2D projectileTeleportPos = projectile.GetPosition() + projectile.GetHalfHeight() * projectile.GetVelocityDirection();
 				this->display->GetAssets()->GetESPAssets()->AddPortalTeleportEffect(projectileTeleportPos, enterPortal);
@@ -448,7 +449,7 @@ void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const Ca
 }
 
 
-void GameEventsListener::RocketEnteredCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+void GameEventsListener::RocketEnteredCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
 	UNUSED_PARAMETER(rocket);
 	UNUSED_PARAMETER(cannonBlock);
 
@@ -460,7 +461,7 @@ void GameEventsListener::RocketEnteredCannonEvent(const PaddleRocketProjectile& 
 	debug_output("EVENT: Rocket entered cannon block");
 }
 
-void GameEventsListener::RocketFiredFromCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+void GameEventsListener::RocketFiredFromCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
 	UNUSED_PARAMETER(rocket);
 
 	// Add the blast effect of the rocket exiting the cannon
@@ -524,6 +525,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 			break;
         
         case LevelPiece::LaserTurret:
+        case LevelPiece::RocketTurret:
 			if (wasFrozen) {
 				// Add ice break effect
 				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
@@ -996,6 +998,13 @@ void GameEventsListener::LaserTurretAIStateChangedEvent(const LaserTurretBlock& 
 
     this->display->GetAssets()->GetCurrentLevelMesh()->LaserTurretAIStateChanged(&block, oldState, newState);
     debug_output("EVENT: Laser Turret AI State Changed.");
+}
+
+void GameEventsListener::RocketTurretAIStateChangedEvent(const RocketTurretBlock& block,
+                                                         RocketTurretBlock::TurretAIState oldState,
+                                                         RocketTurretBlock::TurretAIState newState) {
+    this->display->GetAssets()->GetCurrentLevelMesh()->RocketTurretAIStateChanged(&block, oldState, newState);
+    debug_output("EVENT: Rocket Turret AI State Changed.");
 }
 
 /**

@@ -122,6 +122,7 @@ ResourceManager::~ResourceManager() {
 
 	// Clean up all loaded meshes - these must be deleted first so that the
 	// effects go with them and make the assertions below correct
+    assert(numRefPerMesh.empty());
 	for (std::map<std::string, Mesh*>::iterator iter = this->loadedMeshes.begin(); iter != this->loadedMeshes.end(); ++iter) {
 		delete iter->second;
 		iter->second = NULL;
@@ -154,8 +155,8 @@ ResourceManager::~ResourceManager() {
 	this->cgContext = NULL;
 
 	// Clean up all loaded textures
-	assert(this->numRefPerTexture.size() == 0);
-	assert(this->loadedTextures.size() == 0);
+	assert(this->numRefPerTexture.empty());
+	assert(this->loadedTextures.empty());
 	for (std::map<std::string, Texture*>::iterator iter = this->loadedTextures.begin(); iter != this->loadedTextures.end(); ++iter) {
 		delete iter->second;
 		iter->second = NULL;
@@ -239,6 +240,11 @@ Mesh* ResourceManager::GetInkBlockMeshResource() {
 	assert(ballMesh != NULL);
 
 	PolygonGroup* inkBlockPolyGrp = new PolygonGroup(*ballMesh->GetMaterialGroups().begin()->second->GetPolygonGroup());
+    
+    bool success = this->ReleaseMeshResource(ballMesh);
+    assert(success);
+    UNUSED_VARIABLE(success);
+
 	Matrix4x4 scaleMatrix = Matrix4x4::scaleMatrix(Vector3D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT, 1.0f));
 	inkBlockPolyGrp->Transform(scaleMatrix);
 	assert(inkBlockPolyGrp != NULL);
@@ -278,9 +284,12 @@ Mesh* ResourceManager::GetPortalBlockMeshResource() {
 	// Use the typical level block mesh but modify its material
 	Mesh* levelMesh = this->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
 	assert(levelMesh != NULL);
-
 	PolygonGroup* portalBlockPolyGrp = new PolygonGroup(*levelMesh->GetMaterialGroups().begin()->second->GetPolygonGroup());
-	
+    
+    bool success = this->ReleaseMeshResource(levelMesh);
+    assert(success);
+    UNUSED_VARIABLE(success);
+
 	// Create the material properties and effect (portal block cgfx shader)
 	MaterialProperties* portalMatProps = new MaterialProperties();
 	portalMatProps->materialType	= MaterialProperties::MATERIAL_PORTAL_TYPE;
@@ -323,6 +332,8 @@ Mesh* ResourceManager::GetObjMeshResource(const std::string &filepath) {
 		mesh = ObjReader::ReadMeshFromStream(filepath, *iStrStream);
 		assert(mesh != NULL);
 
+		// First reference to the mesh...
+		this->numRefPerMesh[mesh] = 1;
 		this->loadedMeshes[filepath] = mesh;
 
 		// Clean-up the stream
@@ -334,6 +345,9 @@ Mesh* ResourceManager::GetObjMeshResource(const std::string &filepath) {
 		// or make a copy if the user requested it
 		mesh = meshesLoadedIter->second;
 		assert(mesh != NULL);
+
+		assert(this->numRefPerMesh.find(mesh) != this->numRefPerMesh.end());
+		this->numRefPerMesh[mesh]++;
 	}
 
 	return mesh;
@@ -383,13 +397,23 @@ bool ResourceManager::ReleaseMeshResource(Mesh* mesh) {
 		return false;
 	}
 
-	// Release it
-	Mesh* meshResource = meshResourceIter->second;
-	assert(meshResource != NULL);
-	delete meshResource;
-	meshResource = NULL;
+	// Check the number of references if we have reached the last reference then
+	// we delete the mesh
+	std::map<Mesh*, unsigned int>::iterator numRefIter = this->numRefPerMesh.find(mesh);
+	assert(numRefIter != this->numRefPerMesh.end());
+	this->numRefPerMesh[mesh]--;
 
-	this->loadedMeshes.erase(meshResourceIter);
+	if (this->numRefPerMesh[mesh] == 0) {
+	    // Release it
+	    Mesh* meshResource = meshResourceIter->second;
+	    assert(meshResource != NULL);
+	    delete meshResource;
+	    meshResource = NULL;
+	    this->loadedMeshes.erase(meshResourceIter);
+		this->numRefPerMesh.erase(numRefIter);
+	}
+	
+	mesh = NULL;
 	return true;
 }
 
@@ -432,10 +456,10 @@ Texture* ResourceManager::GetImgTextureResource(const std::string &filepath, Tex
 		delete[] texBuffer;
 		texBuffer = NULL;
 
-    if (texture == NULL) {
-        debug_output("Failed to load texture into memory: " << filepath);
-        return NULL;
-    }
+        if (texture == NULL) {
+            debug_output("Failed to load texture into memory: " << filepath);
+            return NULL;
+        }
 
 		// First reference to the texture...
 		this->numRefPerTexture[texture] = 1;

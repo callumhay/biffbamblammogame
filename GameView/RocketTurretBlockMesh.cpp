@@ -1,5 +1,5 @@
 /**
- * LaserTurretBlockMesh.cpp
+ * RocketTurretBlockMesh.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
@@ -9,13 +9,13 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#include "LaserTurretBlockMesh.h"
+#include "RocketTurretBlockMesh.h"
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
 
 #include "../ResourceManager.h"
 
-LaserTurretBlockMesh::LaserTurretBlockMesh() : barrel1Mesh(NULL), barrel2Mesh(NULL),
+RocketTurretBlockMesh::RocketTurretBlockMesh() : barrelMesh(NULL),
 headMesh(NULL), baseMesh(NULL), glowTexture(NULL), sparkleTexture(NULL) {
     this->LoadMesh();
 
@@ -65,13 +65,11 @@ headMesh(NULL), baseMesh(NULL), glowTexture(NULL), sparkleTexture(NULL) {
     this->lightPulseAnim.SetRepeat(true);
 }
 
-LaserTurretBlockMesh::~LaserTurretBlockMesh() {
+RocketTurretBlockMesh::~RocketTurretBlockMesh() {
     this->Flush();
 
     bool success = false;
-	success = ResourceManager::GetInstance()->ReleaseMeshResource(this->barrel1Mesh);
-	assert(success);
-    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->barrel2Mesh);
+	success = ResourceManager::GetInstance()->ReleaseMeshResource(this->barrelMesh);
 	assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->headMesh);
 	assert(success);
@@ -93,7 +91,7 @@ LaserTurretBlockMesh::~LaserTurretBlockMesh() {
     assert(success);
 }
 
-void LaserTurretBlockMesh::Flush() {
+void RocketTurretBlockMesh::Flush() {
     // Clean up the block data...
     for (BlockCollectionIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
         BlockData* blockData = iter->second;
@@ -103,16 +101,16 @@ void LaserTurretBlockMesh::Flush() {
     this->blocks.clear();
 }
 
-void LaserTurretBlockMesh::AddLaserTurretBlock(const LaserTurretBlock* laserTurretBlock) {
-	assert(laserTurretBlock != NULL);
+void RocketTurretBlockMesh::AddRocketTurretBlock(const RocketTurretBlock* rocketTurretBlock) {
+	assert(rocketTurretBlock != NULL);
     std::pair<BlockCollectionIter, bool> insertResult = 
-        this->blocks.insert(std::make_pair(laserTurretBlock,
-        new BlockData(*laserTurretBlock, this->glowTexture, this->sparkleTexture, this->smokeTextures)));
+        this->blocks.insert(std::make_pair(rocketTurretBlock,
+        new BlockData(*rocketTurretBlock, this->glowTexture, this->sparkleTexture, this->smokeTextures)));
 	assert(insertResult.second);
 }
 
-void LaserTurretBlockMesh::RemoveLaserTurretBlock(const LaserTurretBlock* laserTurretBlock) {
-    BlockCollectionConstIter findIter = this->blocks.find(laserTurretBlock);
+void RocketTurretBlockMesh::RemoveRocketTurretBlock(const RocketTurretBlock* rocketTurretBlock) {
+    BlockCollectionConstIter findIter = this->blocks.find(rocketTurretBlock);
     assert(findIter != this->blocks.end());
 
     BlockData* blockData = findIter->second;
@@ -121,8 +119,8 @@ void LaserTurretBlockMesh::RemoveLaserTurretBlock(const LaserTurretBlock* laserT
     this->blocks.erase(findIter);
 }
 
-void LaserTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                                const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+void RocketTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
+                                 const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     if (this->blocks.empty()) {
         return;
     }
@@ -132,7 +130,7 @@ void LaserTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoin
 	// Go through each block and draw the barrels
     for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
 
-		const LaserTurretBlock* currBlock = iter->first;
+		const RocketTurretBlock* currBlock = iter->first;
         BlockData* currBlockData = iter->second;
 
 		const Point2D& blockCenter = currBlock->GetCenter();
@@ -149,13 +147,8 @@ void LaserTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoin
 
         // Draw moving geometry for the current block...
         glPushMatrix();
-        glTranslatef(currBlock->GetBarrel1RecoilAmount(), 0, 0);
-        this->barrel1Mesh->Draw(camera, keyLight, fillLight, ballLight);
-        glPopMatrix();
-
-        glPushMatrix();
-        glTranslatef(currBlock->GetBarrel2RecoilAmount(), 0, 0);
-        this->barrel2Mesh->Draw(camera, keyLight, fillLight, ballLight);
+        glTranslatef(currBlock->GetBarrelRecoilAmount(), 0, 0);
+        this->barrelMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
 
         this->headMesh->Draw(camera, keyLight, fillLight, ballLight);
@@ -167,9 +160,8 @@ void LaserTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoin
     this->lightPulseAnim.Tick(dT);
 }
 
-void LaserTurretBlockMesh::SetAlphaMultiplier(float alpha) {
-    this->barrel1Mesh->SetAlpha(alpha);
-    this->barrel2Mesh->SetAlpha(alpha);
+void RocketTurretBlockMesh::SetAlphaMultiplier(float alpha) {
+    this->barrelMesh->SetAlpha(alpha);
     this->headMesh->SetAlpha(alpha);
 
     for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
@@ -179,9 +171,9 @@ void LaserTurretBlockMesh::SetAlphaMultiplier(float alpha) {
 }
 
 // Informs the given block that it should emote that its state just changed
-void LaserTurretBlockMesh::AIStateChanged(const LaserTurretBlock* block,
-                                          const LaserTurretBlock::TurretAIState& oldState,
-                                          const LaserTurretBlock::TurretAIState& newState) {
+void RocketTurretBlockMesh::AIStateChanged(const RocketTurretBlock* block,
+                                           const RocketTurretBlock::TurretAIState& oldState,
+                                           const RocketTurretBlock::TurretAIState& newState) {
     assert(block != NULL);
     BlockCollectionConstIter findIter = this->blocks.find(block);
     assert(findIter != this->blocks.end());
@@ -191,9 +183,8 @@ void LaserTurretBlockMesh::AIStateChanged(const LaserTurretBlock* block,
 }
 
 // Loads all the mesh assets for the laser turret block mesh
-void LaserTurretBlockMesh::LoadMesh() {
-    assert(this->barrel1Mesh == NULL);
-	assert(this->barrel2Mesh == NULL);
+void RocketTurretBlockMesh::LoadMesh() {
+	assert(this->barrelMesh == NULL);
     assert(this->headMesh == NULL);
 	assert(this->baseMesh == NULL);
 	assert(this->materialGroups.size() == 0);
@@ -206,19 +197,17 @@ void LaserTurretBlockMesh::LoadMesh() {
 
     assert(this->materialGroups.size() > 0);
 
-    // Load the head mesh (holds the turret's barrels)
-    this->headMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->LASER_TURRET_HEAD_MESH);
+    // Load the head mesh (holds the turret's barrel)
+    this->headMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ROCKET_TURRET_HEAD_MESH);
     assert(this->headMesh != NULL);
 
-	// We don't add the turret's barrel material groups, we will draw those manually for each laser turret block
-	// so that we can move them around (i.e., for recoil when the turret shoots lasers)
-    this->barrel1Mesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->LASER_TURRET_BARREL_1_MESH);
-    assert(this->barrel1Mesh != NULL);
-    this->barrel2Mesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->LASER_TURRET_BARREL_2_MESH);
-    assert(this->barrel2Mesh != NULL);
+	// We don't add the turret's barrel material group, we will draw those manually for each rocket turret block
+	// so that we can move them around (i.e., for recoil when the turret shoots rockets)
+    this->barrelMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ROCKET_TURRET_BARREL_MESH);
+    assert(this->barrelMesh != NULL);
 }
 
-LaserTurretBlockMesh::BlockData::BlockData(const LaserTurretBlock& block, Texture2D* glowTexture,
+RocketTurretBlockMesh::BlockData::BlockData(const RocketTurretBlock& block, Texture2D* glowTexture,
                                            Texture2D* sparkleTexture, std::vector<Texture2D*>& smokeTextures) : 
 block(block), fireySmokeEmitter(NULL), smokeySmokeEmitter(NULL), glowTexture(glowTexture), sparkleTexture(sparkleTexture),
 emoteLabel(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small), "")),
@@ -290,7 +279,7 @@ alpha(1.0f) {
     this->emoteScaleAnim.SetRepeat(false);
 }
 
-LaserTurretBlockMesh::BlockData::~BlockData() {
+RocketTurretBlockMesh::BlockData::~BlockData() {
     delete this->smokeySmokeEmitter;
     this->smokeySmokeEmitter = NULL;
     delete this->fireySmokeEmitter;
@@ -299,7 +288,7 @@ LaserTurretBlockMesh::BlockData::~BlockData() {
     this->emoteLabel = NULL;
 }
 
-void LaserTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& camera, float lightPulseAmt) {
+void RocketTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& camera, float lightPulseAmt) {
 
     if (this->block.GetHealthPercent() <= 0.75f) {
         
@@ -320,7 +309,7 @@ void LaserTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& 
             this->fireySmokeEmitter->Draw(camera);
             this->fireySmokeEmitter->Tick(dT);
 
-            if (this->block.GetHealthPercent() <= LaserTurretBlock::ONE_MORE_BALL_HIT_LIFE_PERCENT) {
+            if (this->block.GetHealthPercent() <= RocketTurretBlock::ONE_MORE_BALL_HIT_LIFE_PERCENT) {
                 this->redColourMultiplierAnim.Tick(dT);
             }
         }
@@ -337,7 +326,7 @@ void LaserTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& 
     this->DrawLights(lightPulseAmt);
 }
 
-void LaserTurretBlockMesh::BlockData::DrawLights(float pulse) {
+void RocketTurretBlockMesh::BlockData::DrawLights(float pulse) {
     const float LIGHT_ALPHA = this->alpha * 0.8f;
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
@@ -346,7 +335,7 @@ void LaserTurretBlockMesh::BlockData::DrawLights(float pulse) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendEquation(GL_FUNC_ADD);
 
-    if (this->block.GetTurretAIState() == LaserTurretBlock::IdleTurretState) {
+    if (this->block.GetTurretAIState() == RocketTurretBlock::IdleTurretState) {
         glColor4f(1,0,0,LIGHT_ALPHA);    
     }
     else {
@@ -369,7 +358,7 @@ void LaserTurretBlockMesh::BlockData::DrawLights(float pulse) {
     glPopMatrix();
 
     float doubleGlowScale = 2.5f * glowScale;
-    if (this->block.GetTurretAIState() == LaserTurretBlock::IdleTurretState) {
+    if (this->block.GetTurretAIState() == RocketTurretBlock::IdleTurretState) {
         glColor4f(1.0f, 0.9f, 0.9f, LIGHT_ALPHA);    
     }
     else {
@@ -392,12 +381,12 @@ void LaserTurretBlockMesh::BlockData::DrawLights(float pulse) {
     glPopAttrib();
 }
 
-void LaserTurretBlockMesh::BlockData::BlockStateChanged(const LaserTurretBlock::TurretAIState& oldState,
-                                                        const LaserTurretBlock::TurretAIState& newState) {
+void RocketTurretBlockMesh::BlockData::BlockStateChanged(const RocketTurretBlock::TurretAIState& oldState,
+                                                         const RocketTurretBlock::TurretAIState& newState) {
 
     switch (newState) {
 
-        case LaserTurretBlock::IdleTurretState: {
+        case RocketTurretBlock::IdleTurretState: {
             this->emoteLabel->SetText("");
             this->emoteScaleAnim.ClearLerp();
             this->emoteScaleAnim.SetInterpolantValue(0.0f);
@@ -405,9 +394,9 @@ void LaserTurretBlockMesh::BlockData::BlockStateChanged(const LaserTurretBlock::
             break;
         }
 
-        case LaserTurretBlock::SeekingTurretState: {
+        case RocketTurretBlock::SeekingTurretState: {
             /*
-            if (oldState != LaserTurretBlock::IdleTurretState) {
+            if (oldState != RocketTurretBlock::IdleTurretState) {
                 this->emoteLabel->SetText("...");
                 this->emoteLabel->SetColour(Colour(1,1,1));
                 
@@ -422,8 +411,8 @@ void LaserTurretBlockMesh::BlockData::BlockStateChanged(const LaserTurretBlock::
             break;
         }
 
-        case LaserTurretBlock::TargetFoundTurretState: {
-            if (oldState != LaserTurretBlock::TargetFoundTurretState) {
+        case RocketTurretBlock::TargetFoundTurretState: {
+            if (oldState != RocketTurretBlock::TargetFoundTurretState) {
                 this->emoteLabel->SetText("!");
                 this->emoteLabel->SetColour(Colour(1,0,0));
 
@@ -437,8 +426,8 @@ void LaserTurretBlockMesh::BlockData::BlockStateChanged(const LaserTurretBlock::
             break;
         }
 
-        case LaserTurretBlock::TargetLostTurretState: {
-            if (oldState != LaserTurretBlock::TargetLostTurretState) {
+        case RocketTurretBlock::TargetLostTurretState: {
+            if (oldState != RocketTurretBlock::TargetLostTurretState) {
                 this->emoteLabel->SetText("?");
                 this->emoteLabel->SetColour(Colour(1, 0.7f, 0));
 
@@ -459,11 +448,11 @@ void LaserTurretBlockMesh::BlockData::BlockStateChanged(const LaserTurretBlock::
     }
 }
 
-void LaserTurretBlockMesh::BlockData::SetAlpha(float alpha) {
+void RocketTurretBlockMesh::BlockData::SetAlpha(float alpha) {
     this->alpha = alpha;
 }
 
-void LaserTurretBlockMesh::BlockData::InitTimeValueEmoteAnimVectors(std::vector<double>& times,
+void RocketTurretBlockMesh::BlockData::InitTimeValueEmoteAnimVectors(std::vector<double>& times,
                                                                     std::vector<float>& values,
                                                                     float lifeTimeInSecs) {
     values.reserve(4);
