@@ -130,10 +130,14 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			this->ToggleElectricity(*gameModel, *currLevel);
 			break;
 
-		case Projectile::PaddleRocketBulletProjectile: {
+		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile: {
 				// The rocket should not destroy this block, however it certainly
 				// is allowed to destroy blocks around it!
-				LevelPiece* resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+
+                assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);
+			    LevelPiece* resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
+
                 UNUSED_VARIABLE(resultingPiece);
 				assert(resultingPiece == this);
 				this->ToggleElectricity(*gameModel, *currLevel);

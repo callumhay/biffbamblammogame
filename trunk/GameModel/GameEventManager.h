@@ -15,6 +15,7 @@
 #include "../BlammoEngine/BasicIncludes.h"
 #include "LevelPiece.h"
 #include "LaserTurretBlock.h"
+#include "RocketTurretBlock.h"
 
 class GameEvents;
 class GameBall;
@@ -32,7 +33,7 @@ class GameWorld;
 class GameLevel;
 class Projectile;
 class Beam;
-class PaddleRocketProjectile;
+class RocketProjectile;
 class PointAward;
 class BallBoostModel;
 
@@ -69,8 +70,8 @@ public:
 	void ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal);
 	void ActionProjectilePortalBlockTeleport(const Projectile& projectile, const PortalBlock& enterPortal);
 	void ActionBallFiredFromCannon(const GameBall& ball, const CannonBlock& cannonBlock);
-	void ActionRocketEnteredCannon(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock);
-	void ActionRocketFiredFromCannon(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock);
+	void ActionRocketEnteredCannon(const RocketProjectile& rocket, const CannonBlock& cannonBlock);
+	void ActionRocketFiredFromCannon(const RocketProjectile& rocket, const CannonBlock& cannonBlock);
 	void ActionBallHitTeslaLightningArc(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
 
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
@@ -129,7 +130,9 @@ public:
     void ActionNumStarsChanged(int oldNumStars, int newNumStars);
 
     void ActionLaserTurretAIStateChanged(const LaserTurretBlock& block, LaserTurretBlock::TurretAIState oldState,
-                                         LaserTurretBlock::TurretAIState newState);
+        LaserTurretBlock::TurretAIState newState);
+    void ActionRocketTurretAIStateChanged(const RocketTurretBlock& block, RocketTurretBlock::TurretAIState oldState,
+        RocketTurretBlock::TurretAIState newState);
 
 protected:
 	GameEventManager();

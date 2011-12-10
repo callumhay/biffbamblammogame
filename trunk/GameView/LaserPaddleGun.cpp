@@ -20,6 +20,9 @@ LaserPaddleGun::LaserPaddleGun() : laserGunMesh(NULL) {
 }
 
 LaserPaddleGun::~LaserPaddleGun() {
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->laserGunMesh);
+    UNUSED_VARIABLE(success);
 }
 
 /**

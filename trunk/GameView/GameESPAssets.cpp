@@ -1259,6 +1259,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 				case LevelPiece::Collateral:
                 case LevelPiece::Switch:
                 case LevelPiece::LaserTurret:
+                case LevelPiece::RocketTurret:
 					{
 						bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
@@ -1300,25 +1301,8 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 		
 		case Projectile::PaddleRocketBulletProjectile:
-            /*
-            {
+        case Projectile::RocketTurretBulletProjectile:
             // NOTE: THIS IS NOW TAKEN CARE OF BY THE RocketExploded event
-			// No explosion when the rocket hits portals or cannons...
-			switch (block.GetType()) {
-				case LevelPiece::Portal:
-				case LevelPiece::Cannon:
-					break;
-
-				default: {
-						// A rocket just hit a block - KABOOOOOOM!!!
-						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter());
-						float rocketSizeFactor = projectile.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
-						this->AddRocketBlastEffect(rocketSizeFactor, midPoint);
-					}
-					break;
-				}
-			}
-            */
 			break;
 
 		case Projectile::CollateralBlockProjectile:
@@ -1654,6 +1638,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
         case LevelPiece::OneWay:
         case LevelPiece::NoEntry:
         case LevelPiece::LaserTurret:
+        case LevelPiece::RocketTurret:
 			severity = Onomatoplex::SUPER_AWESOME;
 			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 
 																						ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
@@ -2556,14 +2541,9 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 			this->AddBasicPaddleHitByProjectileEffect(paddle, projectile);
 			break;
 
-		case Projectile::PaddleRocketBulletProjectile: 
-            /*
+		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
             // NOTE: THIS IS NOW TAKEN CARE OF BY THE RocketExploded EVENT
-			{
-				float rocketSizeFactor = projectile.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
-				this->AddRocketBlastEffect(rocketSizeFactor, projectile.GetPosition());
-			}
-            */
 			break;
 
 		default:
@@ -2766,6 +2746,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
             break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
 			this->AddRocketProjectileEffects(projectile);
 			break;
 

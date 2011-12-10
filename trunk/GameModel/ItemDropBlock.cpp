@@ -142,6 +142,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				// EVENT: Ice was shattered
 				GameEventManager::Instance()->ActionBlockIceShattered(*this);

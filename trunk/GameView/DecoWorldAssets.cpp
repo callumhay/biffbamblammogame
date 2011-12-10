@@ -32,11 +32,13 @@ const Colour DecoWorldAssets::COLOUR_CHANGE_LIST[DecoWorldAssets::NUM_COLOUR_CHA
 
 // Basic constructor: Load all the basic assets for the deco world...
 DecoWorldAssets::DecoWorldAssets() : 
-	GameWorldAssets(new DecoSkybox(),
-								ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BACKGROUND_MESH),
-								ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_PADDLE_MESH),
-								ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BLOCK_MESH_PATH)),
+GameWorldAssets(new DecoSkybox(),
+        ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BACKGROUND_MESH),
+		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_PADDLE_MESH),
+		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BLOCK_MESH_PATH)),
+
 skybeam(ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_SKYBEAM_MESH)),
+
 beamEffect(new CgFxVolumetricEffect()),
 beamRotationfg1(0.0),
 beamRotationfg2(0.0),
@@ -98,6 +100,10 @@ DecoWorldAssets::~DecoWorldAssets() {
 	assert(success);
 	success = ResourceManager::GetInstance()->ReleaseTextureResource(this->spiralTexLg);
 	assert(success);
+
+    // Meshes
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->skybeam);
+    assert(success);
 }
 
 /**

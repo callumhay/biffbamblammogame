@@ -31,7 +31,7 @@ class GameBall;
 class PlayerPaddle;
 class GameItemTimer;
 class Projectile;
-class PaddleRocketProjectile;
+class RocketProjectile;
 
 class GameEvents {
 public:
@@ -232,7 +232,7 @@ public:
 	 * Arguements: rocket      - The rocket being loaded by the cannon.
 	 *             cannonBlock - The cannon block loading the rocket. 
 	 */
-    virtual void RocketEnteredCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+    virtual void RocketEnteredCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
         UNUSED_PARAMETER(rocket);
         UNUSED_PARAMETER(cannonBlock);
     }
@@ -243,7 +243,7 @@ public:
 	 * Arguements: rocket      - The rocket being fired out of the cannon.
 	 *             cannonBlock - The cannon block firing the rocket. 
 	 */
-    virtual void RocketFiredFromCannonEvent(const PaddleRocketProjectile& rocket, const CannonBlock& cannonBlock) {
+    virtual void RocketFiredFromCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
         UNUSED_PARAMETER(rocket);
         UNUSED_PARAMETER(cannonBlock);
     }
@@ -572,6 +572,20 @@ public:
      */
     virtual void LaserTurretAIStateChangedEvent(const LaserTurretBlock& block, LaserTurretBlock::TurretAIState oldState,
                                                 LaserTurretBlock::TurretAIState newState) {
+        UNUSED_PARAMETER(block);
+        UNUSED_PARAMETER(oldState);
+        UNUSED_PARAMETER(newState);
+    }
+
+    /**
+     * Event triggered when the rocket turret AI state of a particular block changes.
+     * Only occurs once per change.
+     * Arguements: block - The block with the changed state.
+     *             oldState - The state that the block used to have.
+     *             newState - The state that the block changed to.
+     */
+    virtual void RocketTurretAIStateChangedEvent(const RocketTurretBlock& block, RocketTurretBlock::TurretAIState oldState,
+                                                 RocketTurretBlock::TurretAIState newState) {
         UNUSED_PARAMETER(block);
         UNUSED_PARAMETER(oldState);
         UNUSED_PARAMETER(newState);

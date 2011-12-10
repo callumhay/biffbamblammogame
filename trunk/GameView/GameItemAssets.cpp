@@ -32,6 +32,11 @@ GameItemAssets::~GameItemAssets() {
 	this->UnloadItemMeshes();
 	// Delete all active HUD timers...
 	this->ClearTimers();
+
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->item);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 /**

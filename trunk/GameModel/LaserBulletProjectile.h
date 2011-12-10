@@ -21,6 +21,9 @@ class LaserBulletProjectile : public Projectile {
 public:
 	virtual ~LaserBulletProjectile();
 
+    bool IsRocket() const { return false; }
+    bool IsRefractableOrReflectable() const { return true; }
+
 	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
 

@@ -27,7 +27,7 @@ class GameModel;
 class Projectile {
 public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
-                          CollateralBlockProjectile, PaddleRocketBulletProjectile, 
+                          CollateralBlockProjectile, PaddleRocketBulletProjectile, RocketTurretBulletProjectile,
                           FireGlobProjectile };
 
 	virtual ~Projectile();
@@ -35,6 +35,8 @@ public:
 	virtual BoundingLines BuildBoundingLines() const          = 0;
 	virtual ProjectileType GetType() const                    = 0;
     virtual float GetDamage() const                           = 0;
+    virtual bool IsRocket() const                             = 0;
+    virtual bool IsRefractableOrReflectable() const           = 0;
 
     void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
 
@@ -90,6 +92,7 @@ protected:
 	Vector2D rightVec;		// Unit vector pointing outwards to the right of the particle, perpendicular to the velocity direction
 	float velocityMag;		// Velocity magnitude of the projectile in game units / second
 	const void* lastThingCollidedWith;
+
 };
 
 

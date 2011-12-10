@@ -177,3 +177,7 @@ N
 Laser Turret
 laser_turret.png
 H
+
+Rocket_Turret
+rocket_turret.png
+J

@@ -264,7 +264,9 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
-			newPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+        case Projectile::RocketTurretBulletProjectile:
+            assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);
+			newPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
 			break;
 
 		case Projectile::FireGlobProjectile:

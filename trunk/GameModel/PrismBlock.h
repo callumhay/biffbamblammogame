@@ -64,11 +64,7 @@ public:
     }
 
     bool ProjectilePassesThrough(Projectile* projectile) const {
-        if (projectile->GetType() == Projectile::PaddleRocketBulletProjectile) {
-            return false;
-        }
-
-        return true;
+        return projectile->IsRefractableOrReflectable();
     }
 
     int GetPointsOnChange(const LevelPiece& changeToPiece) const {

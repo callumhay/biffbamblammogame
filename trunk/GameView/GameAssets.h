@@ -51,11 +51,12 @@ class BallBoostHUD;
 class BallReleaseHUD;
 class StickyPaddleGoo;
 class LaserPaddleGun;
-class PaddleRocketMesh;
+class RocketMesh;
 class PaddleShield;
 class RandomItem;
 class OmniLaserBallEffect;
 class MagnetPaddleEffect;
+class RocketProjectile;
 
 // Includes all the models, textures, etc. for the game.
 class GameAssets {
@@ -147,7 +148,7 @@ public:
 	void RemoveProjectile(const Projectile& projectile);
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
-	void RocketExplosion(const PaddleRocketProjectile& rocket, Camera& camera);
+	void RocketExplosion(const RocketProjectile& rocket, Camera& camera);
 
 private:
 	GameWorldAssets* worldAssets;	    // World-related assets
@@ -172,7 +173,7 @@ private:
 	// Regular meshes - these persist throughout the entire game
 	Mesh* ball;																// Ball used to break blocks
 	Mesh* spikeyBall;													// What happens to the ball when it becomes uber
-	PaddleRocketMesh* rocketMesh;							// The rocket that can be fired from the paddle as a power-up
+	RocketMesh* rocketMesh;							// The rocket that can be fired from the paddle as a power-up
 
 	Mesh* paddleBeamAttachment;                 // Laser beam attachment for paddle
 	LaserPaddleGun* paddleLaserAttachment;		// Laser bullet/gun attachment for the paddle
@@ -197,7 +198,7 @@ private:
 
 	// Projectile specific functionality
 	void FirePaddleLaser(const PlayerPaddle& paddle);
-	void FirePaddleRocket(const Projectile& rocketProjectile);
+	void FireRocket(const RocketProjectile& rocketProjectile);
 
     // Private draw functions
     void DrawGameBallsPreEffects(double dT, GameModel& gameModel, const Camera& camera);

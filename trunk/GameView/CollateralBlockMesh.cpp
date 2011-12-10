@@ -18,7 +18,10 @@ CollateralBlockMesh::CollateralBlockMesh() : collateralBlockGeometry(NULL) {
 }
 
 CollateralBlockMesh::~CollateralBlockMesh() {
-	ResourceManager::GetInstance()->ReleaseMeshResource(this->collateralBlockGeometry);
+	bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->collateralBlockGeometry);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 void CollateralBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight, 

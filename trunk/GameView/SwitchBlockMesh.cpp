@@ -60,6 +60,8 @@ SwitchBlockMesh::~SwitchBlockMesh() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTexture);
 	assert(success);
 
+    UNUSED_VARIABLE(success);
+
     this->Flush();
 }
 

@@ -237,7 +237,9 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 			break;
 
 		case Projectile::PaddleRocketBulletProjectile:
-			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, projectile, this);
+        case Projectile::RocketTurretBulletProjectile:
+            assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);
+		    resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
 			break;
 
 		case Projectile::FireGlobProjectile:

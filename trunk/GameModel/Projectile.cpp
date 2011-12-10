@@ -14,6 +14,7 @@
 #include "GameEventManager.h"
 #include "PaddleLaserProjectile.h"
 #include "PaddleRocketProjectile.h"
+#include "TurretRocketProjectile.h"
 #include "BallLaserProjectile.h"
 #include "LaserTurretProjectile.h"
 #include "GameModel.h"
@@ -50,6 +51,8 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
             return new LaserTurretProjectile(*static_cast<const LaserTurretProjectile*>(p));
         case Projectile::PaddleRocketBulletProjectile:
             return new PaddleRocketProjectile(*static_cast<const PaddleRocketProjectile*>(p));
+        case Projectile::RocketTurretBulletProjectile:
+            return new TurretRocketProjectile(*static_cast<const TurretRocketProjectile*>(p));
         default:
 			assert(false);
 			break;

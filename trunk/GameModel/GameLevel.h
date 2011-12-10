@@ -48,6 +48,7 @@ public:
     static const char ONE_WAY_BLOCK_CHAR;
     static const char NO_ENTRY_BLOCK_CHAR;
     static const char LASER_TURRET_BLOCK_CHAR;
+    static const char ROCKET_TURRET_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
@@ -167,7 +168,7 @@ public:
 
 	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter,
                       const LevelPiece::DestructionMethod& method);
-	LevelPiece* RocketExplosion(GameModel* gameModel, const Projectile* rocket, LevelPiece* hitPiece);
+	LevelPiece* RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece);
     void RocketExplosionNoPieces(const Projectile* rocket);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
 

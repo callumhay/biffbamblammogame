@@ -37,6 +37,7 @@ class CollateralBlockMesh;
 class TeslaBlockMesh;
 class SwitchBlockMesh;
 class LaserTurretBlockMesh;
+class RocketTurretBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 
@@ -65,6 +66,8 @@ public:
     void SwitchActivated(const SwitchBlock* block, const GameLevel* currLevel);
     void LaserTurretAIStateChanged(const LaserTurretBlock* block, const LaserTurretBlock::TurretAIState& oldState,
         const LaserTurretBlock::TurretAIState& newState);
+    void RocketTurretAIStateChanged(const RocketTurretBlock* block, const RocketTurretBlock::TurretAIState& oldState,
+        const RocketTurretBlock::TurretAIState& newState);
 
 	void PaddleCameraActiveToggle(bool isActive);
 	void SetLevelAlpha(float alpha);
@@ -87,6 +90,7 @@ private:
 	ItemDropBlockMesh* itemDropBlock;
     SwitchBlockMesh* switchBlock;
     LaserTurretBlockMesh* laserTurretBlock;
+    RocketTurretBlockMesh* rocketTurretBlock;
     Mesh* noEntryBlock;
     Mesh* oneWayUpBlock;
     Mesh* oneWayDownBlock;

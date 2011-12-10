@@ -26,7 +26,7 @@
 #include "BallReleaseHUD.h"
 #include "StickyPaddleGoo.h"
 #include "LaserPaddleGun.h"
-#include "PaddleRocketMesh.h"
+#include "RocketMesh.h"
 #include "PaddleShield.h"
 #include "OmniLaserBallEffect.h"
 #include "MagnetPaddleEffect.h"
@@ -155,9 +155,15 @@ GameAssets::~GameAssets() {
 		this->itemAssets = NULL;
 	}
 
-	bool success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleBeamAttachment);
-    UNUSED_VARIABLE(success);
+	bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleBeamAttachment);
 	assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->ball);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->spikeyBall);
+    assert(success);
+
+    UNUSED_VARIABLE(success);
 
 	delete this->rocketMesh;
 	this->rocketMesh = NULL;
@@ -954,7 +960,7 @@ void GameAssets::LoadRegularMeshAssets() {
 		this->spikeyBall = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->SPIKEY_BALL_MESH);
 	}
 	if (this->rocketMesh == NULL) {
-		this->rocketMesh = new PaddleRocketMesh();
+		this->rocketMesh = new RocketMesh();
 	}
 	if (this->paddleBeamAttachment == NULL) {
 		this->paddleBeamAttachment = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_BEAM_ATTACHMENT_MESH);
@@ -1041,14 +1047,19 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 
 	// Add any other view-related effects for the given projectile
 	switch (projectile.GetType()) {
+
 		case Projectile::PaddleLaserBulletProjectile:
 			// Have the laser gun attachment move downwards in reaction to the laser being shot
 			this->FirePaddleLaser(*gameModel.GetPlayerPaddle());
 			break;
+
 		case Projectile::PaddleRocketBulletProjectile:
+        case Projectile::RocketTurretBulletProjectile:
+            assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
 			// Notify assets of the rocket...
-			this->FirePaddleRocket(projectile);
+			this->FireRocket(*static_cast<const RocketProjectile*>(&projectile));
 			break;
+
 		default:
 			break;
 	}
@@ -1061,9 +1072,14 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
 	this->espAssets->RemoveProjectileEffect(projectile);
 
 	switch (projectile.GetType()) {
+
 		case Projectile::PaddleRocketBulletProjectile:
-			this->rocketMesh->Deactivate(static_cast<const PaddleRocketProjectile*>(&projectile));
-			// Turn off the sound for the rocket mask
+        case Projectile::RocketTurretBulletProjectile:
+            assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
+			this->rocketMesh->DeactivateRocket(static_cast<const RocketProjectile*>(&projectile));
+
+			// Turn off the sound for the rocket mask if there are no rockets left...
+            // TODO: have separate masks for each rocket...
 			this->soundAssets->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
 			break;
         
@@ -1087,9 +1103,8 @@ void GameAssets::FirePaddleLaser(const PlayerPaddle& paddle) {
 /**
  * Private helper, causes the rocket to be fired and drawn.
  */
-void GameAssets::FirePaddleRocket(const Projectile& rocketProjectile) {
-	assert(rocketProjectile.GetType() == Projectile::PaddleRocketBulletProjectile);
-	this->rocketMesh->Activate(static_cast<const PaddleRocketProjectile*>(&rocketProjectile));
+void GameAssets::FireRocket(const RocketProjectile& rocketProjectile) {
+	this->rocketMesh->ActivateRocket(static_cast<const PaddleRocketProjectile*>(&rocketProjectile));
 	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
 }
 
@@ -1115,6 +1130,10 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
         case Projectile::LaserTurretBulletProjectile:
 			intensity = PlayerHurtHUD::MinorPain;
 			break;
+
+        case Projectile::RocketTurretBulletProjectile:
+            intensity = PlayerHurtHUD::ModeratePain;
+            break;
 
 		case Projectile::PaddleRocketBulletProjectile:
 			intensity = PlayerHurtHUD::MajorPain;
@@ -1149,8 +1168,8 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 }
 
 // Notifies assets that there was an explosion and there should be a fullscreen flash
-void GameAssets::RocketExplosion(const PaddleRocketProjectile& rocket, Camera& camera) {
-    float rocketSizeFactor = rocket.GetHeight() / PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT;
+void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera) {
+    float rocketSizeFactor = rocket.GetHeight() / rocket.GetDefaultHeight();
 	this->espAssets->AddRocketBlastEffect(rocketSizeFactor, rocket.GetPosition());
 
 	// Add a camera/controller shake and flash for when the rocket explodes...

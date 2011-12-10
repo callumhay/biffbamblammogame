@@ -63,6 +63,7 @@ bool LevelPiece::IsValidLevelPieceType(int pieceType) {
         case LevelPiece::OneWay:
         case LevelPiece::NoEntry:
         case LevelPiece::LaserTurret:
+        case LevelPiece::RocketTurret:
             return true;
         default:
             assert(false);
