@@ -64,6 +64,10 @@ bool OneWayBlock::ConvertCharToOneWayDir(const char& oneWayChar, OneWayBlock::On
 
 // Determine whether the given projectile will pass through this block...
 bool OneWayBlock::ProjectilePassesThrough(Projectile* projectile) const {
+    if (this->IsGoingTheOneWay(projectile->GetVelocityDirection())) {
+        return true;
+    }
+
 	switch (projectile->GetType()) {
 
 		case Projectile::PaddleLaserBulletProjectile:

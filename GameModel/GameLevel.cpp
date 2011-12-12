@@ -1343,7 +1343,7 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const PlayerPa
  * if no collision found.
  */
 LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
-                                                  std::set<const LevelPiece*> ignorePieces,
+                                                  const std::set<const LevelPiece*>& ignorePieces,
                                                   float& rayT, float toleranceRadius) const {
 
 	// Step along the ray - not a perfect algorithm but will result in something very reasonable
@@ -1357,11 +1357,11 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 
 	LevelPiece* returnPiece = NULL;
 	Collision::Circle2D toleranceCircle(Point2D(0,0), toleranceRadius);
+    Point2D currSamplePoint;
 
 	for (int i = 0; i < NUM_STEPS; i++) {
-		Point2D currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
+		currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
 		
-
 		// Indices of the sampled level piece can be found using the point...
 		std::set<LevelPiece*> collisionCandidates = this->GetLevelPieceCollisionCandidates(currSamplePoint, toleranceRadius);
 		float minRayT = FLT_MAX;
@@ -1401,8 +1401,10 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 	return NULL;
 }
 
-LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
-                                                  float& rayT, float toleranceRadius) const {
+void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const LevelPiece*>& ignorePieces,
+                                       const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes,
+                                       std::list<LevelPiece*>& result, float toleranceRadius) const {
+    result.clear();
 
 	// Step along the ray - not a perfect algorithm but will result in something very reasonable
 	const float LEVEL_WIDTH					 = this->GetLevelUnitWidth();
@@ -1413,16 +1415,21 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 	const float STEP_SIZE = 0.5f * std::min<float>(LevelPiece::PIECE_WIDTH, LevelPiece::PIECE_HEIGHT);
 	int NUM_STEPS = static_cast<int>(LONGEST_POSSIBLE_RAY / STEP_SIZE);
 
-	LevelPiece* returnPiece = NULL;
 	Collision::Circle2D toleranceCircle(Point2D(0,0), toleranceRadius);
 
+    Point2D currSamplePoint;
+    float rayT;
 	for (int i = 0; i < NUM_STEPS; i++) {
-		Point2D currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
-		
+		currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
+
+        // Exit the loop if the ray is out of bounds of all level pieces
+        if (currSamplePoint[0] > this->GetLevelUnitWidth() || currSamplePoint[0] < 0.0f ||
+            currSamplePoint[1] > this->GetLevelUnitHeight() || currSamplePoint[1] < 0.0f) {
+            break;
+        }
 
 		// Indices of the sampled level piece can be found using the point...
 		std::set<LevelPiece*> collisionCandidates = this->GetLevelPieceCollisionCandidates(currSamplePoint, toleranceRadius);
-		float minRayT = FLT_MAX;
 		for (std::set<LevelPiece*>::iterator iter = collisionCandidates.begin(); iter != collisionCandidates.end(); ++iter) {
 			
 			LevelPiece* currSamplePiece = *iter;
@@ -1430,31 +1437,23 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 
 			// Check to see if the piece can be collided with, if so try to collide the ray with
 			// the actual block bounds, if there's a collision we get out of here and just return the piece
-			if (currSamplePiece->CollisionCheck(ray, rayT)) {
-				// Make sure the piece is along the direction of the ray and not behind it
-				if (rayT < minRayT) {
-					returnPiece = currSamplePiece;
-					minRayT = rayT;
+			if (ignorePieces.find(currSamplePiece) == ignorePieces.end() &&
+                ignorePieceTypes.find(currSamplePiece->GetType()) == ignorePieceTypes.end()) {
+
+				if (currSamplePiece->CollisionCheck(ray, rayT)) {
+					// Make sure the piece is along the direction of the ray and not behind it
+					result.push_back(currSamplePiece);
 				}
-			}
-			else if (toleranceRadius != 0.0f) {
-				toleranceCircle.SetCenter(currSamplePoint);
-                if (currSamplePiece->CollisionCheck(toleranceCircle, ray.GetUnitDirection())) {
-					// TODO: Project the center onto the ray...
-					minRayT = i * STEP_SIZE;
-					returnPiece = currSamplePiece;
+				else if (toleranceRadius != 0.0f) {
+					toleranceCircle.SetCenter(currSamplePoint);
+                    if (currSamplePiece->CollisionCheck(toleranceCircle, ray.GetUnitDirection())) {
+						result.push_back(currSamplePiece);
+					}
 				}
 			}
 		}
 
-		// If we managed to find a suitable piece (with the lowest ray t), then return it
-		if (returnPiece != NULL) {
-			rayT = minRayT;
-			return returnPiece;
-		}
 	}
-
-	return NULL;
 }
 
 /**
@@ -1501,7 +1500,9 @@ bool GameLevel::ProjectileSafetyNetCollisionCheck(const Projectile& p, const Bou
 
 	// Make sure the projectile is a type that we want being able to destroy a safety net
 	bool isProjectileThatBreaksSafetyNet = (p.GetType() == Projectile::FireGlobProjectile) ||
-                                           (p.GetType() == Projectile::CollateralBlockProjectile);
+        (p.GetType() == Projectile::CollateralBlockProjectile) || (p.GetType() == Projectile::RocketTurretBulletProjectile) ||
+        (p.GetType() == Projectile::PaddleRocketBulletProjectile);
+
 	if (!isProjectileThatBreaksSafetyNet){ 
 		return false;
 	}

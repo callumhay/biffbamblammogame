@@ -91,8 +91,9 @@ public:
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const PlayerPaddle& p, bool includeAttachedBall) const;
 
 	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, 
-        std::set<const LevelPiece*> ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
-	LevelPiece* GetLevelPieceFirstCollider(const Collision::Ray2D& ray, float& rayT, float toleranceRadius = 0.0f) const;
+        const std::set<const LevelPiece*>& ignorePieces, float& rayT, float toleranceRadius = 0.0f) const;
+    void GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const LevelPiece*>& ignorePieces,
+        const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes, std::list<LevelPiece*>& result, float toleranceRadius = 0.0f) const;
 
 	// Get whether or not the ball safety net is currently active
 	bool IsBallSafetyNetActive() const {

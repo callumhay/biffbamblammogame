@@ -48,7 +48,7 @@ const float LaserTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y = 0.28f;
 
 LaserTurretBlock::LaserTurretBlock(unsigned int wLoc, unsigned int hLoc) :
 LevelPiece(wLoc, hLoc), currLifePoints(LaserTurretBlock::PIECE_STARTING_LIFE_POINTS),
-currTurretState(SeekingTurretState), currRotationFromXInDegs(0.0f), currRotationSpd(0.0f),
+currTurretState(SeekingTurretState), currRotationFromXInDegs(Randomizer::GetInstance()->RandomUnsignedInt() % 360), currRotationSpd(0.0f),
 lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0) {
 
     // Add a bit of variety - different barrel configurations
@@ -330,9 +330,9 @@ LevelPiece* LaserTurretBlock::TickPaddleShieldCollision(double dT, const PlayerP
 
 void LaserTurretBlock::AITick(double dT, GameModel* gameModel) {
 
-    if (gameModel->GetCurrentStateType() == GameState::BallInPlayStateType) {
+    if (gameModel->GetCurrentStateType() == GameState::BallInPlayStateType &&
+        !this->HasStatus(LevelPiece::IceCubeStatus)) {
         
-
         switch (this->currTurretState) {
             case IdleTurretState:
                 // The turret should never be idle when the ball is in play, set it to start seeking out the paddle

@@ -17,6 +17,7 @@
 #include "../GameModel/PlayerPaddle.h"
 
 #include "CgFxStickyPaddle.h"
+#include "CgFxPostRefract.h"
 
 class Camera;
 class PointLight;
@@ -31,6 +32,7 @@ class StickyPaddleGoo {
 private:
 	Mesh* paddleGooMesh;
 	CgFxStickyPaddle* stickyGooMatEffect;
+    CgFxPostRefract* invisibleEffect;
 
 	void LoadMesh();
 
@@ -42,13 +44,19 @@ public:
 	 * Draw the sticky goo - basically just wraps the draw method for the goo mesh.
 	 */
 	inline void StickyPaddleGoo::Draw(const PlayerPaddle& p, const Camera& camera, const BasicPointLight& keyLight, 
-																		const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+									  const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 		float paddleScaleFactor = p.GetPaddleScaleFactor();
 		glPushMatrix();
 		glRotatef(p.GetZRotation(), 0.0f, 0.0f, 1.0f);
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
-		this->paddleGooMesh->Draw(camera, keyLight, fillLight, ballLight);
-		glPopMatrix();
+
+        if ((p.GetPaddleType() & PlayerPaddle::InvisiPaddle) == PlayerPaddle::InvisiPaddle) {
+            this->paddleGooMesh->Draw(camera, this->invisibleEffect, keyLight, fillLight, ballLight);
+        }
+        else {
+		    this->paddleGooMesh->Draw(camera, keyLight, fillLight, ballLight);
+        }
+        glPopMatrix();
 	}
 
 	/**

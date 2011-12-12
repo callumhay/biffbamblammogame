@@ -883,8 +883,8 @@ void GameAssets::DrawProjectiles(double dT, const GameModel& gameModel, const Ca
 	BasicPointLight keyLight, fillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(keyLight, fillLight, ballLight);
 
+    this->espAssets->DrawProjectileEffects(dT, camera);
 	this->rocketMesh->Draw(dT, *gameModel.GetPlayerPaddle(), camera, keyLight, fillLight, ballLight);
-	this->espAssets->DrawProjectileEffects(dT, camera);
 }
 
 /**

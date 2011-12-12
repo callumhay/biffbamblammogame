@@ -80,7 +80,7 @@ void InGameMenuState::RenderFrame(double dT) {
             // Un-Pause the game and go to the start of level state which will have
             // been queued when we told the model to reset the level
             this->CleanUpReturnToDisplayState();
-            this->display->GetModel()->UnsetPause(GameModel::PauseGame);
+            
             this->display->SetCurrentStateAsNextQueuedState();
 
             return;
