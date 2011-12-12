@@ -697,10 +697,18 @@ void LevelMesh::LaserTurretAIStateChanged(const LaserTurretBlock* block,
     this->laserTurretBlock->AIStateChanged(block, oldState, newState);
 }
 
+void LevelMesh::LaserFired(const LaserTurretBlock* block) {
+    this->laserTurretBlock->LaserShotByBlock(block);
+}
+
 void LevelMesh::RocketTurretAIStateChanged(const RocketTurretBlock* block,
                                            const RocketTurretBlock::TurretAIState& oldState,
                                            const RocketTurretBlock::TurretAIState& newState) {
     this->rocketTurretBlock->AIStateChanged(block, oldState, newState);
+}
+
+void LevelMesh::RocketFired(const RocketTurretBlock* block) {
+    this->rocketTurretBlock->RocketShotByBlock(block);
 }
 
 /**

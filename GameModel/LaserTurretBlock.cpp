@@ -40,6 +40,9 @@ const float LaserTurretBlock::BARREL_OFFSET_ALONG_X = 0.32f;
 // Absolute distance along the y-axis that the base of a barrel is from the origin of the block in its
 // base position with no turret rotation
 const float LaserTurretBlock::BARREL_OFFSET_ALONG_Y = 0.13f;
+
+const float LaserTurretBlock::BARREL_OFFSET_ALONG_Z = 0.38f;
+
 // The maximum extent along the y-axis (in the base position - no rotation, of the block), from the origin of the block
 const float LaserTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y = 0.28f;
 
@@ -362,6 +365,18 @@ void LaserTurretBlock::AITick(double dT, GameModel* gameModel) {
     }
 }
 
+void LaserTurretBlock::GetBarrel1ExtentPosInLocalSpace(Point3D& pos) const {
+    Vector2D offsetDir(0.78f, BARREL_OFFSET_ALONG_Y);
+    offsetDir.Rotate(this->currRotationFromXInDegs);
+    pos = Point3D(offsetDir[0], offsetDir[1], BARREL_OFFSET_ALONG_Z);
+}
+
+void LaserTurretBlock::GetBarrel2ExtentPosInLocalSpace(Point3D& pos) const {
+    Vector2D offsetDir(0.78f, -BARREL_OFFSET_ALONG_Y);
+    offsetDir.Rotate(this->currRotationFromXInDegs);
+    pos = Point3D(offsetDir[0], offsetDir[1], BARREL_OFFSET_ALONG_Z);
+}
+
 // Executes the AI for the turret attempting to find the paddle
 // Returns: true if the turret may start to fire on the paddle, false if not
 bool LaserTurretBlock::ExecutePaddleSeekingAI(double dT, const GameModel* model) {
@@ -510,6 +525,9 @@ void LaserTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMod
             turretProjectile->SetLastThingCollidedWith(this);
             model->AddProjectile(turretProjectile);
 
+            // EVENT: Laser fired by this turret
+            GameEventManager::Instance()->ActionLaserFiredByTurret(*this);
+
             // The first barrel is preparing its recoil and laser discharge, while the second
             // is gathering its charge and recovering from its previous recoil
             this->barrel1RecoilAnim.SetLerp(LaserTurretBlock::BARREL_RECOIL_TIME, LaserTurretBlock::BARREL_RECOIL_TRANSLATION_AMT);
@@ -537,6 +555,9 @@ void LaserTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMod
             LaserTurretProjectile* turretProjectile = new LaserTurretProjectile(laserOrigin, velocityDir);
             turretProjectile->SetLastThingCollidedWith(this);
             model->AddProjectile(turretProjectile);
+
+            // EVENT: Laser fired by this turret
+            GameEventManager::Instance()->ActionLaserFiredByTurret(*this);
 
             // The second barrel is preparing its recoil and laser discharge, while the first
             // is gathering its charge and recovering from its previous recoil
@@ -628,7 +649,7 @@ void LaserTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canSe
         std::set<const LevelPiece*> ignorePieces;
         ignorePieces.insert(this);
         LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire,
-            ignorePieces, levelPieceRayT, BARREL_OFFSET_EXTENT_ALONG_Y);
+            ignorePieces, levelPieceRayT, 1.05f * BARREL_OFFSET_EXTENT_ALONG_Y);
 
         if (collisionPiece == NULL || paddleRayT < levelPieceRayT) {
             // The ray is unimpeded, fire ze lasers!

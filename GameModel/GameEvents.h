@@ -578,6 +578,14 @@ public:
     }
 
     /**
+     * Event triggered when a laser is fired by a laser turret.
+     * Arguements: block - The block that fired the laser.
+     */
+    virtual void LaserFiredByTurretEvent(const LaserTurretBlock& block) {
+        UNUSED_PARAMETER(block);
+    }
+
+    /**
      * Event triggered when the rocket turret AI state of a particular block changes.
      * Only occurs once per change.
      * Arguements: block - The block with the changed state.
@@ -590,7 +598,14 @@ public:
         UNUSED_PARAMETER(oldState);
         UNUSED_PARAMETER(newState);
     }
-
+    
+    /**
+     * Event triggered when the rocket turret fires a rocket.
+     * Arguements: block - the rocket turret block that fired.
+     */
+    virtual void RocketFiredByTurretEvent(const RocketTurretBlock& block) {
+        UNUSED_PARAMETER(block);
+    }
 };
 
 

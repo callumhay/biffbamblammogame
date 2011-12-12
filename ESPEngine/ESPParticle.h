@@ -68,6 +68,10 @@ public:
 	void SetScale(const Vector2D& scale) {
 		this->size = scale;
 	}
+    void SetScale(float x, float y) {
+        this->size[0] = x;
+        this->size[1] = y;
+    }
 	void MultiplyInitSizeScale(const Vector2D& mult) {
 		this->size[0] = mult[0] * this->initSize[0];
 		this->size[1] = mult[1] * this->initSize[1];

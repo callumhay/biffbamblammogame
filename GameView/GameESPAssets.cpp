@@ -1470,14 +1470,13 @@ void GameESPAssets::AddPortalTeleportEffect(const Point2D& enterPt, const Portal
 /**
  * Add an effect to the end of the cannon barrel for when it fires a ball out.
  */
-void GameESPAssets::AddCannonFireEffect(const CannonBlock& block) {
+void GameESPAssets::AddCannonFireEffect(const Point3D& endOfCannonPt, const Vector2D& fireDir) {
 	// Don't bother if the ball camera is on...
 	if (GameBall::GetIsBallCameraOn()) {
 		return;
 	}
 
-	Point3D endOfBarrelPt(block.GetEndOfBarrelPoint());
-	Vector3D emitDir(block.GetCurrentCannonDirection());
+	Vector3D emitDir(fireDir);
 	bool result = true;
 
 	// Basic bang
@@ -1485,12 +1484,12 @@ void GameESPAssets::AddCannonFireEffect(const CannonBlock& block) {
 	cannonBlast->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	cannonBlast->SetInitialSpd(ESPInterval(0.001f));
 	cannonBlast->SetParticleLife(ESPInterval(0.85f));
-	cannonBlast->SetParticleSize(ESPInterval(2 * CannonBlock::CANNON_BARREL_HEIGHT), ESPInterval(3 * CannonBlock::CANNON_BARREL_HEIGHT));
+	cannonBlast->SetParticleSize(ESPInterval(1.8 * CannonBlock::CANNON_BARREL_HEIGHT), ESPInterval(2.7 * CannonBlock::CANNON_BARREL_HEIGHT));
 	cannonBlast->SetEmitAngleInDegrees(0);
 	cannonBlast->SetAsPointSpriteEmitter(false);
 	cannonBlast->SetParticleAlignment(ESP::ScreenAlignedFollowVelocity);
 	cannonBlast->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	cannonBlast->SetEmitPosition(endOfBarrelPt + 1.5 * CannonBlock::CANNON_BARREL_HEIGHT * emitDir);
+	cannonBlast->SetEmitPosition(endOfCannonPt + 1.5 * CannonBlock::CANNON_BARREL_HEIGHT * emitDir);
 	cannonBlast->SetEmitDirection(emitDir);
 	cannonBlast->SetToggleEmitOnPlane(true, Vector3D(0, 0, 1));
 	cannonBlast->AddEffector(&this->particleFader);
@@ -1507,7 +1506,7 @@ void GameESPAssets::AddCannonFireEffect(const CannonBlock& block) {
 	debrisBits->SetEmitAngleInDegrees(50);
 	debrisBits->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	debrisBits->SetAsPointSpriteEmitter(true);
-	debrisBits->SetEmitPosition(endOfBarrelPt);
+	debrisBits->SetEmitPosition(endOfCannonPt);
 	debrisBits->SetEmitDirection(emitDir);
 	debrisBits->AddEffector(&this->particleFireColourFader);
 	result = debrisBits->SetParticles(15, this->starTex);
@@ -1523,7 +1522,7 @@ void GameESPAssets::AddCannonFireEffect(const CannonBlock& block) {
 	shotOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	shotOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
 	shotOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
-	shotOnoEffect->SetEmitPosition(endOfBarrelPt + Vector3D(0, -LevelPiece::PIECE_HEIGHT, 0));
+	shotOnoEffect->SetEmitPosition(endOfCannonPt + Vector3D(0, -LevelPiece::PIECE_HEIGHT, 0));
 	shotOnoEffect->SetEmitDirection(emitDir);
 	
 	// Add effectors...
@@ -2747,7 +2746,8 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
-			this->AddRocketProjectileEffects(projectile);
+            assert(dynamic_cast<const RocketProjectile*>(&projectile) != NULL);
+			this->AddRocketProjectileEffects(*static_cast<const RocketProjectile*>(&projectile));
 			break;
 
 		case Projectile::CollateralBlockProjectile:
@@ -3257,7 +3257,7 @@ void GameESPAssets::AddCollateralProjectileEffects(const Projectile& projectile)
 }
 
 // Add effects for the rocket projectile (e.g., fire trail and smoke)
-void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
+void GameESPAssets::AddRocketProjectileEffects(const RocketProjectile& projectile) {
 
 	ESPPointEmitter* fireyTrailEmitter = new ESPPointEmitter();
 	fireyTrailEmitter->SetSpawnDelta(ESPInterval(0.01f));
@@ -3268,7 +3268,7 @@ void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
 	fireyTrailEmitter->SetEmitDirection(Vector3D(0, -1, 0));
 	fireyTrailEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	fireyTrailEmitter->SetParticleAlignment(ESP::ScreenAligned);
-	fireyTrailEmitter->SetEmitPosition(Point3D(0, 0, 0));
+    fireyTrailEmitter->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
 	fireyTrailEmitter->AddEffector(&this->particleFireColourFader);
 	fireyTrailEmitter->AddEffector(&this->particleLargeGrowth);
 	bool result = fireyTrailEmitter->SetParticles(25, &this->fireEffect);
@@ -3286,7 +3286,7 @@ void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
 	smokeyTrailEmitter1->SetEmitDirection(Vector3D(0, -1, 0));
 	smokeyTrailEmitter1->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	smokeyTrailEmitter1->SetParticleAlignment(ESP::ScreenAligned);
-	smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, 0));
+	smokeyTrailEmitter1->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
 	smokeyTrailEmitter1->AddEffector(&this->particleFireColourFader);
 	smokeyTrailEmitter1->AddEffector(&this->particleLargeGrowth);
 	smokeyTrailEmitter1->AddEffector(&this->explosionRayRotatorCW);
@@ -3302,13 +3302,12 @@ void GameESPAssets::AddRocketProjectileEffects(const Projectile& projectile) {
 	smokeyTrailEmitter2->SetEmitDirection(Vector3D(0, -1, 0));
 	smokeyTrailEmitter2->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	smokeyTrailEmitter2->SetParticleAlignment(ESP::ScreenAligned);
-	smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, 0));
+	smokeyTrailEmitter2->SetEmitPosition(Point3D(0, 0, projectile.GetZOffset()));
 	smokeyTrailEmitter2->AddEffector(&this->particleFireColourFader);
 	smokeyTrailEmitter2->AddEffector(&this->particleLargeGrowth);
 	smokeyTrailEmitter2->AddEffector(&this->explosionRayRotatorCCW);
 	result = smokeyTrailEmitter2->SetParticles(5, this->smokeTextures[randomTexIndex2]);
 	assert(result);
-
 
 	std::list<ESPPointEmitter*>& projectileEmitters = this->activeProjectileEmitters[&projectile];
 	projectileEmitters.push_back(smokeyTrailEmitter1);
@@ -3821,7 +3820,7 @@ void GameESPAssets::AddBallAcquiredBoostEffect(const GameBall& ball, const Colou
 
 // Add the effect for when the rocket goes off after it hits a block
 void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& loc) {
-	ESPInterval bangLifeInterval		= ESPInterval(1.2f);
+	ESPInterval bangLifeInterval	= ESPInterval(1.2f);
 	ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.maxValue + 0.4f);
 	Point3D emitCenter(loc);
 
@@ -3907,7 +3906,17 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	bangTextLabel.SetColour(Colour(1, 1, 1));
 	bangTextLabel.SetDropShadow(Colour(0, 0, 0), 0.1f);
 
-	Onomatoplex::Extremeness severity = Onomatoplex::UBER;
+    Onomatoplex::Extremeness severity;
+    if (rocketSizeFactor >= 1) {
+	    severity = Onomatoplex::UBER;
+    }
+    else if (rocketSizeFactor > 0.6f) {
+        severity = Onomatoplex::AWESOME;
+    }
+    else {
+        severity = Onomatoplex::GOOD;
+    }
+
 	Onomatoplex::SoundType type = Onomatoplex::EXPLOSION;
 
 	bangOnoEffect->SetParticles(1, bangTextLabel, type, severity);
@@ -4459,8 +4468,6 @@ void GameESPAssets::DrawProjectileEffects(double dT, const Camera& camera) {
 		std::list<ESPPointEmitter*>& projEmitters = iter->second;
 
 		assert(currProjectile != NULL);
-		Point2D projectilePos2D		= currProjectile->GetPosition();
-		Vector2D projectileDir    = currProjectile->GetVelocityDirection();
 
 		// Update and draw the emitters, background then foreground...
 		for (std::list<ESPPointEmitter*>::iterator emitIter = projEmitters.begin(); emitIter != projEmitters.end(); ++emitIter) {
@@ -4494,7 +4501,7 @@ void GameESPAssets::DrawProjectileEmitter(double dT, const Camera& camera, const
 	else {
 		// We want all the emitting, moving particles attached to the projectile to move with the projectile and
 		// fire opposite its trajectory
-		Point3D emitPos = Point3D(projectile.GetPosition()) - projectile.GetHalfHeight() * Vector3D(projectile.GetVelocityDirection());
+        Point3D emitPos = Point3D(projectile.GetPosition() - projectile.GetHalfHeight() * projectile.GetVelocityDirection(), projectile.GetZOffset());
 		projectileEmitter->SetEmitPosition(emitPos);
 		projectileEmitter->SetEmitDirection(Vector3D(-projectile.GetVelocityDirection()[0], -projectile.GetVelocityDirection()[1], 0.0f));
 	}

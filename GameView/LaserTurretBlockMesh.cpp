@@ -190,6 +190,15 @@ void LaserTurretBlockMesh::AIStateChanged(const LaserTurretBlock* block,
     currBlockData->BlockStateChanged(oldState, newState);
 }
 
+void LaserTurretBlockMesh::LaserShotByBlock(const LaserTurretBlock* block) {
+    assert(block != NULL);
+    BlockCollectionConstIter findIter = this->blocks.find(block);
+    assert(findIter != this->blocks.end());
+
+    BlockData* currBlockData = findIter->second;
+    currBlockData->LaserShotByBlock();
+}
+
 // Loads all the mesh assets for the laser turret block mesh
 void LaserTurretBlockMesh::LoadMesh() {
     assert(this->barrel1Mesh == NULL);
@@ -220,11 +229,13 @@ void LaserTurretBlockMesh::LoadMesh() {
 
 LaserTurretBlockMesh::BlockData::BlockData(const LaserTurretBlock& block, Texture2D* glowTexture,
                                            Texture2D* sparkleTexture, std::vector<Texture2D*>& smokeTextures) : 
-block(block), fireySmokeEmitter(NULL), smokeySmokeEmitter(NULL), glowTexture(glowTexture), sparkleTexture(sparkleTexture),
+block(block), fireySmokeEmitter(NULL), smokeySmokeEmitter(NULL), laserAfterGlowEmitter(NULL),
+glowTexture(glowTexture), sparkleTexture(sparkleTexture),
 emoteLabel(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small), "")),
 particleMediumGrowth(1.0f, 1.6f), particleLargeGrowth(1.0f, 2.2f),
 smokeColourFader(ColourRGBA(0.7f, 0.7f, 0.7f, 1.0f), ColourRGBA(0.1f, 0.1f, 0.1f, 0.1f)),
 particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(1.0f, 0.1f, 0.1f, 0.0f)),
+particleFader(1.0f, 0.0f),
 rotateEffectorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
 rotateEffectorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
 alpha(1.0f) {
@@ -271,6 +282,19 @@ alpha(1.0f) {
 	result = this->smokeySmokeEmitter->SetParticles(10, smokeTextures[randomTexIndex2]);
 	assert(result);
 
+    this->laserAfterGlowEmitter = new ESPPointEmitter();
+    this->laserAfterGlowEmitter->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	this->laserAfterGlowEmitter->SetInitialSpd(ESPInterval(0.0f));
+    this->laserAfterGlowEmitter->SetParticleLife(ESPInterval(0.5f / LaserTurretBlock::FIRE_RATE_IN_BULLETS_PER_SEC));
+    this->laserAfterGlowEmitter->SetParticleSize(ESPInterval(2.5f * LaserTurretBlock::BARREL_OFFSET_ALONG_Y));
+	this->laserAfterGlowEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	this->laserAfterGlowEmitter->SetEmitPosition(Point3D(0.0f, 0.0f, 0.0f));
+    this->laserAfterGlowEmitter->SetParticleColour(ESPInterval(0.7f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	this->laserAfterGlowEmitter->AddEffector(&this->particleFader);
+	this->laserAfterGlowEmitter->AddEffector(&this->particleLargeGrowth);
+    result = this->laserAfterGlowEmitter->SetParticles(1, glowTexture);
+	assert(result);
+
     std::vector<float> values;
     values.reserve(3);
     values.push_back(0.0f);
@@ -295,6 +319,8 @@ LaserTurretBlockMesh::BlockData::~BlockData() {
     this->smokeySmokeEmitter = NULL;
     delete this->fireySmokeEmitter;
     this->fireySmokeEmitter = NULL;
+    delete this->laserAfterGlowEmitter;
+    this->laserAfterGlowEmitter = NULL;
     delete this->emoteLabel;
     this->emoteLabel = NULL;
 }
@@ -333,6 +359,9 @@ void LaserTurretBlockMesh::BlockData::DrawBlockEffects(double dT, const Camera& 
         this->emoteLabel->Draw3D(camera, 0.0f, 2*LevelPiece::PIECE_DEPTH);
     }
     this->emoteScaleAnim.Tick(dT);
+
+    this->laserAfterGlowEmitter->Draw(camera);
+    this->laserAfterGlowEmitter->Tick(dT);
 
     this->DrawLights(lightPulseAmt);
 }
@@ -457,6 +486,25 @@ void LaserTurretBlockMesh::BlockData::BlockStateChanged(const LaserTurretBlock::
             break;
 
     }
+}
+
+void LaserTurretBlockMesh::BlockData::LaserShotByBlock() {
+    Point3D emitPos;
+    switch (this->block.GetBarrelState()) {
+        case LaserTurretBlock::OneFiringTwoReloading:
+        case LaserTurretBlock::OneForwardTwoBack:
+            this->block.GetBarrel1ExtentPosInLocalSpace(emitPos);
+            break;
+        case LaserTurretBlock::TwoFiringOneReloading:
+        case LaserTurretBlock::TwoForwardOneBack:
+            this->block.GetBarrel2ExtentPosInLocalSpace(emitPos);
+            break;
+        default:
+            return;
+    }
+
+    this->laserAfterGlowEmitter->SetEmitPosition(emitPos);
+    this->laserAfterGlowEmitter->Reset();
 }
 
 void LaserTurretBlockMesh::BlockData::SetAlpha(float alpha) {

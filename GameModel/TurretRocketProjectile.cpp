@@ -12,8 +12,8 @@
 #include "TurretRocketProjectile.h"
 #include "RocketTurretBlock.h"
 
-const float TurretRocketProjectile::TURRETROCKET_WIDTH_DEFAULT  = 1.99f * RocketTurretBlock::ROCKET_HOLE_RADIUS;
-const float TurretRocketProjectile::TURRETROCKET_HEIGHT_DEFAULT = 1.9f * TURRETROCKET_WIDTH_DEFAULT;
+const float TurretRocketProjectile::TURRETROCKET_WIDTH_DEFAULT  = 0.41f;
+const float TurretRocketProjectile::TURRETROCKET_HEIGHT_DEFAULT = 0.72f;
 
 TurretRocketProjectile::TurretRocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir) :
 RocketProjectile(spawnLoc, rocketVelDir, TURRETROCKET_WIDTH_DEFAULT, TURRETROCKET_HEIGHT_DEFAULT) {

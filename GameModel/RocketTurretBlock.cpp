@@ -26,19 +26,22 @@ const float RocketTurretBlock::ROCKET_HOLE_RADIUS = 0.21f;
 
 const float RocketTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC  = 180.0f;
 const float RocketTurretBlock::ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD = 350.0f;
-const float RocketTurretBlock::BARREL_RECOIL_TRANSLATION_AMT       = -0.4f;
-const float RocketTurretBlock::ROCKET_DISPLACEMENT_ON_LOAD         = 0.75f * TurretRocketProjectile::TURRETROCKET_HEIGHT_DEFAULT;
+const float RocketTurretBlock::BARREL_RECOIL_TRANSLATION_AMT       = -0.35f;
 
-const float RocketTurretBlock::BARREL_OFFSET_EXTENT_ALONG_X = 0.62f;
+const float RocketTurretBlock::ROCKET_DISPLACEMENT_PRE_LOAD = BARREL_OFFSET_EXTENT_ALONG_X - 0.6f  * TurretRocketProjectile::TURRETROCKET_HEIGHT_DEFAULT;
+const float RocketTurretBlock::ROCKET_DISPLACEMENT_ON_LOAD  = BARREL_OFFSET_EXTENT_ALONG_X - 0.2f * TurretRocketProjectile::TURRETROCKET_HEIGHT_DEFAULT;
+
+const float RocketTurretBlock::BARREL_OFFSET_EXTENT_ALONG_X = 0.52f;
 const float RocketTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y = 0.0f;
+const float RocketTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Z = 0.51f;
 
 const float RocketTurretBlock::FIRE_RATE_IN_ROCKETS_PER_SEC = 0.5f;
 const float RocketTurretBlock::BARREL_RELOAD_TIME           = 0.7f * (1.0f / RocketTurretBlock::FIRE_RATE_IN_ROCKETS_PER_SEC);
-const float RocketTurretBlock::BARREL_RECOIL_TIME           = 0.1f * (1.0f / RocketTurretBlock::FIRE_RATE_IN_ROCKETS_PER_SEC);
-const float RocketTurretBlock::ROCKET_LOAD_TIME             = 0.2f * (1.0f / RocketTurretBlock::FIRE_RATE_IN_ROCKETS_PER_SEC);
+const float RocketTurretBlock::BARREL_RECOIL_TIME           = 0.02f * (1.0f / RocketTurretBlock::FIRE_RATE_IN_ROCKETS_PER_SEC);
+const float RocketTurretBlock::ROCKET_LOAD_TIME             = 0.28f * (1.0f / RocketTurretBlock::FIRE_RATE_IN_ROCKETS_PER_SEC);
 
-const double RocketTurretBlock::LOST_AND_FOUND_MIN_SEEK_TIME = 80.0f  / RocketTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
-const double RocketTurretBlock::LOST_AND_FOUND_MAX_SEEK_TIME = 110.0f / RocketTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
+const double RocketTurretBlock::LOST_AND_FOUND_MIN_SEEK_TIME = 90.0f  / RocketTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
+const double RocketTurretBlock::LOST_AND_FOUND_MAX_SEEK_TIME = 120.0f / RocketTurretBlock::MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
 
 const int RocketTurretBlock::LOST_AND_FOUND_MIN_NUM_LOOK_TIMES = 2;
 const int RocketTurretBlock::LOST_AND_FOUND_MAX_NUM_LOOK_TIMES = 5;
@@ -489,7 +492,8 @@ void RocketTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMo
         case BarrelForwardRocketLoading:
             this->barrelMovementAnim.SetInterpolantValue(0.0f);
             this->barrelMovementAnim.ClearLerp();
-            this->rocketMovementAnim.SetLerp(RocketTurretBlock::ROCKET_LOAD_TIME, ROCKET_DISPLACEMENT_ON_LOAD);
+            this->rocketMovementAnim.SetLerp(0.0, RocketTurretBlock::ROCKET_LOAD_TIME,
+                ROCKET_DISPLACEMENT_PRE_LOAD, ROCKET_DISPLACEMENT_ON_LOAD);
             break;
 
         case BarrelForwardRocketLoaded:
@@ -501,7 +505,7 @@ void RocketTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMo
             assert(model != NULL);
 
             // Fire a rocket from the barrel...
-            Vector2D vec(BARREL_OFFSET_EXTENT_ALONG_X + TurretRocketProjectile::TURRETROCKET_HEIGHT_DEFAULT/2.0f, BARREL_OFFSET_EXTENT_ALONG_Y);
+            Vector2D vec(ROCKET_DISPLACEMENT_ON_LOAD, BARREL_OFFSET_EXTENT_ALONG_Y);
             vec.Rotate(this->currRotationFromXInDegs);
             Point2D rocketOrigin = this->GetCenter() + vec;
             this->GetFiringDirection(vec);
@@ -509,6 +513,9 @@ void RocketTurretBlock::SetBarrelState(const BarrelAnimationState& state, GameMo
             TurretRocketProjectile* turretProjectile = new TurretRocketProjectile(rocketOrigin, vec);
             turretProjectile->SetLastThingCollidedWith(this);
             model->AddProjectile(turretProjectile);
+
+            // EVENT: The rocket turret just fired a rocket
+            GameEventManager::Instance()->ActionRocketFiredByTurret(*this);
 
             this->barrelMovementAnim.SetLerp(RocketTurretBlock::BARREL_RECOIL_TIME, RocketTurretBlock::BARREL_RECOIL_TRANSLATION_AMT);
             this->rocketMovementAnim.SetInterpolantValue(BARREL_OFFSET_EXTENT_ALONG_X - 1.05f*TurretRocketProjectile::TURRETROCKET_HEIGHT_DEFAULT);
@@ -578,6 +585,11 @@ void RocketTurretBlock::UpdateBarrelState(double dT, bool isAllowedToFire, GameM
     }
 }
 
+void RocketTurretBlock::GetBarrelInfo(Point3D& endOfBarrelPt, Vector2D& barrelDir) const {
+    this->GetFiringDirection(barrelDir);
+    endOfBarrelPt = Point3D(this->GetCenter() + BARREL_OFFSET_EXTENT_ALONG_X * barrelDir, BARREL_OFFSET_EXTENT_ALONG_Z);
+}
+
 void RocketTurretBlock::GetFiringDirection(Vector2D& unitDir) const {
     unitDir[0] = 1;
     unitDir[1] = 0;
@@ -601,7 +613,7 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
         std::set<const LevelPiece*> ignorePieces;
         ignorePieces.insert(this);
         LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire,
-            ignorePieces, levelPieceRayT, ROCKET_HOLE_RADIUS);
+            ignorePieces, levelPieceRayT, 0.525f * TurretRocketProjectile::TURRETROCKET_WIDTH_DEFAULT);
 
         if (collisionPiece == NULL || paddleRayT < levelPieceRayT) {
             // The ray is unimpeded, fire ze lasers!

@@ -572,11 +572,25 @@ void GameEventManager::ActionLaserTurretAIStateChanged(const LaserTurretBlock& b
 	}
 }
 
+void GameEventManager::ActionLaserFiredByTurret(const LaserTurretBlock& block) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->LaserFiredByTurretEvent(block);
+	}
+}
+
 void GameEventManager::ActionRocketTurretAIStateChanged(const RocketTurretBlock& block,
                                                         RocketTurretBlock::TurretAIState oldState,
                                                         RocketTurretBlock::TurretAIState newState) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->RocketTurretAIStateChangedEvent(block, oldState, newState);
+	}
+}
+
+void GameEventManager::ActionRocketFiredByTurret(const RocketTurretBlock& block) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->RocketFiredByTurretEvent(block);
 	}
 }

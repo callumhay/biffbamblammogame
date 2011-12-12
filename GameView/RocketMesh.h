@@ -41,14 +41,12 @@ public:
 	          const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
 private:
-	static const float GLOW_X_SIZE;
-	static const float GLOW_Y_SIZE;
-
 	ESPParticleScaleEffector pulseEffector;
 	Texture2D* glowTex;
 	ESPPointEmitter* rocketGlowEmitter;
 
-	Mesh* rocketMesh;
+	Mesh* paddleRocketMesh;
+    Mesh* turretRocketMesh;
 	std::set<const RocketProjectile*> rocketProjectiles;
 	
 	void LoadMesh();

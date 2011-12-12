@@ -13,6 +13,7 @@
 #define __TURRETROCKETPROJECTILE_H__
 
 #include "RocketProjectile.h"
+#include "RocketTurretBlock.h"
 
 class TurretRocketProjectile : public RocketProjectile {
 public:
@@ -30,10 +31,14 @@ public:
         return (this->GetWidth() / TURRETROCKET_WIDTH_DEFAULT) * 100.0f;
     }
 
-    float GetAccelerationMagnitude() const { return 5.0f; }
+    float GetZOffset() const { return RocketTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Z; }
+
+    float GetVisualScaleFactor() const { return this->GetWidth() / this->GetDefaultWidth(); }
+
+    float GetAccelerationMagnitude() const { return 7.0f; }
     float GetRotationAccelerationMagnitude() const { return 100.0f; }
 
-    float GetMaxVelocityMagnitude() const { return 20.0f; }
+    float GetMaxVelocityMagnitude() const { return 25.0f; }
     float GetMaxRotationVelocityMagnitude() const { return 400.0f; }
 
     float GetDefaultHeight() const { return TURRETROCKET_HEIGHT_DEFAULT; }

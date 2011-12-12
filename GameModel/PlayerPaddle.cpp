@@ -923,7 +923,7 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 	float percentNearCenter = this->GetPercentNearPaddleCenter(projectile.GetPosition(), distFromCenter);
 	float percentNearEdge = 1.0 - percentNearCenter;
 
-	static const float MAX_HIT_ROTATION = 170.0f;
+    const float MAX_HIT_ROTATION = 170.0f * projectile.GetForcePercentageFactor();
 	
 	float rotationAmount = percentNearEdge * MAX_HIT_ROTATION;
 	if (distFromCenter > 0.0) {
@@ -935,15 +935,15 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 	//}
 
 	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
-	static const double HIT_EFFECT_TIME = 5.0;
+	const double HIT_EFFECT_TIME = 5.0 * projectile.GetForcePercentageFactor();
 	std::vector<double> times;
 	times.reserve(3);
 	times.push_back(0.0f);
 	times.push_back(0.05f);
 	times.push_back(HIT_EFFECT_TIME);
 
-	static const float MIN_MOVE_DOWN_AMT = 4.0f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
-	float totalMaxMoveDown = MIN_MOVE_DOWN_AMT + percentNearCenter * 2.5f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+	static const float MIN_MOVE_DOWN_AMT = 4.0f * PlayerPaddle::PADDLE_HEIGHT_TOTAL * projectile.GetForcePercentageFactor();
+	float totalMaxMoveDown = MIN_MOVE_DOWN_AMT + percentNearCenter * 2.5f * PlayerPaddle::PADDLE_HEIGHT_TOTAL * projectile.GetForcePercentageFactor();
 
 	std::vector<float> moveDownValues;
 	moveDownValues.reserve(3);

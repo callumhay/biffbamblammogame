@@ -285,6 +285,7 @@ public:
 	const char* PADDLE_BEAM_ATTACHMENT_MESH;
 	const char* PADDLE_STICKY_ATTACHMENT_MESH;
 	const char* PADDLE_ROCKET_MESH;
+    const char* TURRET_ROCKET_MESH;
 
     const char* ONE_WAY_BLOCK_UP_MESH;
     const char* ONE_WAY_BLOCK_DOWN_MESH;

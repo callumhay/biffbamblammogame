@@ -11,8 +11,8 @@
 
 #include "PaddleRocketProjectile.h"
 
-const float PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT = 1.50f;
-const float PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT  = 0.8f;
+const float PaddleRocketProjectile::PADDLEROCKET_HEIGHT_DEFAULT = RocketProjectile::DEFAULT_VISUAL_HEIGHT;
+const float PaddleRocketProjectile::PADDLEROCKET_WIDTH_DEFAULT  = RocketProjectile::DEFAULT_VISUAL_WIDTH;
 
 PaddleRocketProjectile::PaddleRocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir,
                                                float width, float height) :
