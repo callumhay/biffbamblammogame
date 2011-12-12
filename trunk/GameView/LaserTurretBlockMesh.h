@@ -38,6 +38,7 @@ public:
 
     void AIStateChanged(const LaserTurretBlock* block, const LaserTurretBlock::TurretAIState& oldState,
         const LaserTurretBlock::TurretAIState& newState);
+    void LaserShotByBlock(const LaserTurretBlock* block);
 
 private:
     class BlockData {
@@ -51,6 +52,7 @@ private:
 
         void BlockStateChanged(const LaserTurretBlock::TurretAIState& oldState,
             const LaserTurretBlock::TurretAIState& newState);
+        void LaserShotByBlock();
 
         void SetAlpha(float alpha);
 
@@ -62,6 +64,7 @@ private:
         AnimationMultiLerp<float> redColourMultiplierAnim;
         ESPPointEmitter* fireySmokeEmitter;
         ESPPointEmitter* smokeySmokeEmitter;
+        ESPPointEmitter* laserAfterGlowEmitter;
 
         Texture2D* glowTexture;
         Texture2D* sparkleTexture;
@@ -75,6 +78,7 @@ private:
 	    ESPParticleRotateEffector rotateEffectorCW;
 	    ESPParticleRotateEffector rotateEffectorCCW;
         ESPParticleColourEffector particleFireColourFader;
+        ESPParticleColourEffector particleFader;
 
         void DrawLights(float pulse);
 

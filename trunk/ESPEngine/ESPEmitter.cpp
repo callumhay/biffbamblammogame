@@ -445,12 +445,23 @@ void ESPEmitter::SetParticleSize(const ESPInterval& particleSizeX, const ESPInte
 	this->particleSize[1] = particleSizeY;
 	this->makeSizeConstraintsEqual = false;
 
+    float valueX = particleSizeX.MeanValueInInterval();
+    float valueY = particleSizeY.MeanValueInInterval();
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+		ESPParticle* currParticle = *iter;
+        currParticle->SetScale(valueX, valueY);
+	}
 }
 void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
 	this->particleSize[0] = particleSize;
 	this->particleSize[1] = particleSize;
 	this->makeSizeConstraintsEqual = true;
 
+    float value = particleSize.MeanValueInInterval();
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+		ESPParticle* currParticle = *iter;
+        currParticle->SetScale(value, value);
+	}
 }
 /**
  * Sets the inclusive interval of random possible values that represent the initial

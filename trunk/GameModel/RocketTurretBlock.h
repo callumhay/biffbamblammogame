@@ -20,6 +20,10 @@ public:
     static const float ONE_MORE_BALL_HIT_LIFE_PERCENT;
     static const float ROCKET_HOLE_RADIUS;
 
+    static const float BARREL_OFFSET_EXTENT_ALONG_X;
+    static const float BARREL_OFFSET_EXTENT_ALONG_Y;
+    static const float BARREL_OFFSET_EXTENT_ALONG_Z;
+
     enum TurretAIState { IdleTurretState = 0, SeekingTurretState, TargetFoundTurretState, TargetLostTurretState };
 
 	RocketTurretBlock(unsigned int wLoc, unsigned int hLoc);
@@ -62,11 +66,18 @@ public:
 
     void AITick(double dT, GameModel* gameModel);
 
+    void GetBarrelInfo(Point3D& endOfBarrelPt, Vector2D& barrelDir) const;
+    void GetFiringDirection(Vector2D& unitDir) const;
     float GetRotationDegreesFromX() const;
     float GetBarrelRecoilAmount() const;
     float GetHealthPercent() const;
 
-    //bool GetLoadedRocketPosAndDir(Point2D& pos, Vector2D& dir) const;
+    bool HasRocketLoaded() const {
+        return (this->barrelState == BarrelForwardRocketLoading || this->barrelState == BarrelForwardRocketLoaded);
+    }
+    float GetRocketTranslationFromCenter() const {
+        return this->rocketMovementAnim.GetInterpolantValue();
+    }
 
     RocketTurretBlock::TurretAIState GetTurretAIState() const;
 
@@ -77,10 +88,8 @@ private:
     static const float MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
     static const float ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;
     static const float BARREL_RECOIL_TRANSLATION_AMT;
+    static const float ROCKET_DISPLACEMENT_PRE_LOAD;
     static const float ROCKET_DISPLACEMENT_ON_LOAD;
-
-    static const float BARREL_OFFSET_EXTENT_ALONG_X;
-    static const float BARREL_OFFSET_EXTENT_ALONG_Y;
 
     static const float FIRE_RATE_IN_ROCKETS_PER_SEC;
     static const float BARREL_RELOAD_TIME;
@@ -124,7 +133,7 @@ private:
     void UpdateBarrelState(double dT, bool isAllowedToFire, GameModel* model);
 
     bool IsDead() const { return this->currLifePoints <= 0; }
-    void GetFiringDirection(Vector2D& unitDir) const;
+    
     void CanSeeAndFireAtPaddle(const GameModel* model, bool& canSeePaddle, bool& canFireAtPaddle) const;
     LevelPiece* DiminishPiece(float dmgAmount, GameModel* model, const LevelPiece::DestructionMethod& method);
     void UpdateSpeed();

@@ -38,6 +38,7 @@ public:
 
     void AIStateChanged(const RocketTurretBlock* block, const RocketTurretBlock::TurretAIState& oldState,
         const RocketTurretBlock::TurretAIState& newState);
+    void RocketShotByBlock(const RocketTurretBlock* block);
 
 private:
     class BlockData {
@@ -51,6 +52,7 @@ private:
 
         void BlockStateChanged(const RocketTurretBlock::TurretAIState& oldState,
             const RocketTurretBlock::TurretAIState& newState);
+        void RocketShotByBlock();
 
         void SetAlpha(float alpha);
 
@@ -60,6 +62,7 @@ private:
         float alpha;
 
         AnimationMultiLerp<float> redColourMultiplierAnim;
+        
         ESPPointEmitter* fireySmokeEmitter;
         ESPPointEmitter* smokeySmokeEmitter;
 
@@ -94,6 +97,8 @@ private:
     Mesh* barrelMesh;
     Mesh* headMesh;
     Mesh* baseMesh;
+
+    Mesh* rocketMesh;
 
     std::vector<Texture2D*> smokeTextures;
     Texture2D* glowTexture;

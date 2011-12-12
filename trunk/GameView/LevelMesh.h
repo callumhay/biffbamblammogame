@@ -66,8 +66,10 @@ public:
     void SwitchActivated(const SwitchBlock* block, const GameLevel* currLevel);
     void LaserTurretAIStateChanged(const LaserTurretBlock* block, const LaserTurretBlock::TurretAIState& oldState,
         const LaserTurretBlock::TurretAIState& newState);
+    void LaserFired(const LaserTurretBlock* block);
     void RocketTurretAIStateChanged(const RocketTurretBlock* block, const RocketTurretBlock::TurretAIState& oldState,
         const RocketTurretBlock::TurretAIState& newState);
+    void RocketFired(const RocketTurretBlock* block);
 
 	void PaddleCameraActiveToggle(bool isActive);
 	void SetLevelAlpha(float alpha);

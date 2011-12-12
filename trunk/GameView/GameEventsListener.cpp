@@ -439,7 +439,8 @@ void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const Ca
 	UNUSED_PARAMETER(ball);
 
 	// Add the blast effect of the ball exiting the cannon
-	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(cannonBlock);
+	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(
+        Point3D(cannonBlock.GetEndOfBarrelPoint()), cannonBlock.GetCurrentCannonDirection());
 	// Stop the sound of the cannon rotating
 	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask);
 	// .. and the sound for the blast
@@ -465,7 +466,8 @@ void GameEventsListener::RocketFiredFromCannonEvent(const RocketProjectile& rock
 	UNUSED_PARAMETER(rocket);
 
 	// Add the blast effect of the rocket exiting the cannon
-	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(cannonBlock);
+	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(
+        Point3D(cannonBlock.GetEndOfBarrelPoint()), cannonBlock.GetCurrentCannonDirection());
 	// Stop the sound of the cannon rotating
 	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask);
 	// .. and the sound for the blast
@@ -1000,11 +1002,29 @@ void GameEventsListener::LaserTurretAIStateChangedEvent(const LaserTurretBlock& 
     debug_output("EVENT: Laser Turret AI State Changed.");
 }
 
+void GameEventsListener::LaserFiredByTurretEvent(const LaserTurretBlock& block) {
+   this->display->GetAssets()->GetCurrentLevelMesh()->LaserFired(&block);
+   debug_output("EVENT: Laser Turret AI State Changed.");
+}
+
 void GameEventsListener::RocketTurretAIStateChangedEvent(const RocketTurretBlock& block,
                                                          RocketTurretBlock::TurretAIState oldState,
                                                          RocketTurretBlock::TurretAIState newState) {
+
     this->display->GetAssets()->GetCurrentLevelMesh()->RocketTurretAIStateChanged(&block, oldState, newState);
-    debug_output("EVENT: Rocket Turret AI State Changed.");
+    debug_output("EVENT: Rocket Turret fired a laser.");
+}
+
+void GameEventsListener::RocketFiredByTurretEvent(const RocketTurretBlock& block) {
+    this->display->GetAssets()->GetCurrentLevelMesh()->RocketFired(&block);
+
+    Point3D endOfBarrelPt;
+    Vector2D barrelDir;
+    block.GetBarrelInfo(endOfBarrelPt, barrelDir);
+
+	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(endOfBarrelPt, barrelDir);
+
+    debug_output("EVENT: Rocket Turret fired a rocket.");
 }
 
 /**

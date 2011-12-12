@@ -16,19 +16,25 @@
 const Vector2D RocketProjectile::ROCKET_DEFAULT_VELOCITYDIR = Vector2D(0, 1);
 const Vector2D RocketProjectile::ROCKET_DEFAULT_RIGHTDIR    = Vector2D(1, 0);
 
+const float RocketProjectile::DEFAULT_VISUAL_WIDTH  = 1.5f;
+const float RocketProjectile::DEFAULT_VISUAL_HEIGHT = 0.8f;
+
 RocketProjectile::RocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir,
                                    float width, float height) :
 Projectile(spawnLoc, width, height), cannonBlock(NULL) {
 
     if (rocketVelDir.IsZero()) {
         assert(false);
-        this->velocityDir = ROCKET_DEFAULT_VELOCITYDIR; 
+        this->velocityDir = ROCKET_DEFAULT_VELOCITYDIR;
+        this->rightVec    = ROCKET_DEFAULT_RIGHTDIR;
     }
     else {
-        this->velocityDir   = rocketVelDir;
+        this->velocityDir = rocketVelDir;
+        this->rightVec    = Vector2D::Rotate(-90, rocketVelDir);
+        this->velocityDir.Normalize();
+        this->rightVec.Normalize();
     }
 
-	this->rightVec         = ROCKET_DEFAULT_RIGHTDIR;
 	this->velocityMag      = 0.0f;
 	this->currYRotation    = 0.0f;
 	this->currYRotationSpd = 0.0f;

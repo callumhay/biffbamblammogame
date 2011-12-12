@@ -131,8 +131,11 @@ public:
 
     void ActionLaserTurretAIStateChanged(const LaserTurretBlock& block, LaserTurretBlock::TurretAIState oldState,
         LaserTurretBlock::TurretAIState newState);
+    void ActionLaserFiredByTurret(const LaserTurretBlock& block);
     void ActionRocketTurretAIStateChanged(const RocketTurretBlock& block, RocketTurretBlock::TurretAIState oldState,
         RocketTurretBlock::TurretAIState newState);
+    void ActionRocketFiredByTurret(const RocketTurretBlock& block);
+    
 
 protected:
 	GameEventManager();

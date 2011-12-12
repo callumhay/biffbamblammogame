@@ -13,10 +13,12 @@
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
 
+#include "../GameModel/TurretRocketProjectile.h"
+
 #include "../ResourceManager.h"
 
 RocketTurretBlockMesh::RocketTurretBlockMesh() : barrelMesh(NULL),
-headMesh(NULL), baseMesh(NULL), glowTexture(NULL), sparkleTexture(NULL) {
+headMesh(NULL), baseMesh(NULL), glowTexture(NULL), sparkleTexture(NULL), rocketMesh(NULL) {
     this->LoadMesh();
 
 	if (this->smokeTextures.empty()) {
@@ -75,6 +77,10 @@ RocketTurretBlockMesh::~RocketTurretBlockMesh() {
 	assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->baseMesh);
     assert(success);
+
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->rocketMesh);
+    assert(success);
+
     UNUSED_VARIABLE(success);
 
 	for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
@@ -121,6 +127,7 @@ void RocketTurretBlockMesh::RemoveRocketTurretBlock(const RocketTurretBlock* roc
 
 void RocketTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
                                  const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
     if (this->blocks.empty()) {
         return;
     }
@@ -145,6 +152,15 @@ void RocketTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoi
 
         glRotatef(currBlock->GetRotationDegreesFromX(), 0, 0, 1);
 
+        // Draw the rocket geometry in the block...
+        if (currBlock->HasRocketLoaded()) {
+            glPushMatrix();
+            glTranslatef(currBlock->GetRocketTranslationFromCenter(), 0, RocketTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Z);
+            glRotatef(-90, 0, 0, 1);
+            this->rocketMesh->Draw(camera, keyLight, fillLight, ballLight);
+            glPopMatrix();
+        }
+
         // Draw moving geometry for the current block...
         glPushMatrix();
         glTranslatef(currBlock->GetBarrelRecoilAmount(), 0, 0);
@@ -163,6 +179,7 @@ void RocketTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoi
 void RocketTurretBlockMesh::SetAlphaMultiplier(float alpha) {
     this->barrelMesh->SetAlpha(alpha);
     this->headMesh->SetAlpha(alpha);
+    this->rocketMesh->SetAlpha(alpha);
 
     for (BlockCollectionConstIter iter = this->blocks.begin(); iter != this->blocks.end(); ++iter) {
         BlockData* currBlockData = iter->second;
@@ -182,13 +199,26 @@ void RocketTurretBlockMesh::AIStateChanged(const RocketTurretBlock* block,
     currBlockData->BlockStateChanged(oldState, newState);
 }
 
+void RocketTurretBlockMesh::RocketShotByBlock(const RocketTurretBlock* block) {
+    assert(block != NULL);
+    BlockCollectionConstIter findIter = this->blocks.find(block);
+    assert(findIter != this->blocks.end());
+
+    BlockData* currBlockData = findIter->second;
+    currBlockData->RocketShotByBlock();
+}
+
 // Loads all the mesh assets for the laser turret block mesh
 void RocketTurretBlockMesh::LoadMesh() {
 	assert(this->barrelMesh == NULL);
     assert(this->headMesh == NULL);
 	assert(this->baseMesh == NULL);
 	assert(this->materialGroups.size() == 0);
-	
+
+    // Load the rocket mesh
+    this->rocketMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TURRET_ROCKET_MESH);
+    assert(this->rocketMesh != NULL);
+
     // Load the base mesh
     this->baseMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TURRET_BASE_MESH);
     assert(this->baseMesh != NULL);
@@ -209,7 +239,8 @@ void RocketTurretBlockMesh::LoadMesh() {
 
 RocketTurretBlockMesh::BlockData::BlockData(const RocketTurretBlock& block, Texture2D* glowTexture,
                                            Texture2D* sparkleTexture, std::vector<Texture2D*>& smokeTextures) : 
-block(block), fireySmokeEmitter(NULL), smokeySmokeEmitter(NULL), glowTexture(glowTexture), sparkleTexture(sparkleTexture),
+block(block), fireySmokeEmitter(NULL), smokeySmokeEmitter(NULL), 
+glowTexture(glowTexture), sparkleTexture(sparkleTexture),
 emoteLabel(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Small), "")),
 particleMediumGrowth(1.0f, 1.6f), particleLargeGrowth(1.0f, 2.2f),
 smokeColourFader(ColourRGBA(0.7f, 0.7f, 0.7f, 1.0f), ColourRGBA(0.1f, 0.1f, 0.1f, 0.1f)),
@@ -446,6 +477,10 @@ void RocketTurretBlockMesh::BlockData::BlockStateChanged(const RocketTurretBlock
             break;
 
     }
+}
+
+void RocketTurretBlockMesh::BlockData::RocketShotByBlock() {
+
 }
 
 void RocketTurretBlockMesh::BlockData::SetAlpha(float alpha) {

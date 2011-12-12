@@ -101,8 +101,10 @@ public:
 
     void LaserTurretAIStateChangedEvent(const LaserTurretBlock& block,
         LaserTurretBlock::TurretAIState oldState, LaserTurretBlock::TurretAIState newState);
+    void LaserFiredByTurretEvent(const LaserTurretBlock& block);
     void RocketTurretAIStateChangedEvent(const RocketTurretBlock& block,
         RocketTurretBlock::TurretAIState oldState, RocketTurretBlock::TurretAIState newState);
+    void RocketFiredByTurretEvent(const RocketTurretBlock& block);
 
 private:
 	GameDisplay* display;

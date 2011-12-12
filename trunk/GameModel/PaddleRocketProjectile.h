@@ -35,6 +35,8 @@ public:
         return (this->GetWidth() / PADDLEROCKET_WIDTH_DEFAULT) * 400.0f;
     }
 
+    float GetVisualScaleFactor() const { return this->GetWidth() / this->GetDefaultWidth(); }
+    
     float GetAccelerationMagnitude() const { return 2.0f; }
     float GetRotationAccelerationMagnitude() const { return 60.0f; }
 

@@ -18,6 +18,9 @@ class CannonBlock;
 
 class RocketProjectile : public Projectile {
 public:
+    static const float DEFAULT_VISUAL_WIDTH;
+    static const float DEFAULT_VISUAL_HEIGHT;
+
 	RocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir, float width, float height);
     RocketProjectile(const RocketProjectile& copy);
 	virtual ~RocketProjectile();
@@ -36,6 +39,12 @@ public:
 
     bool GetIsActive() const;
 
+    virtual float GetForcePercentageFactor() const {
+        return this->GetWidth() / DEFAULT_VISUAL_WIDTH;
+    }
+
+    virtual float GetVisualScaleFactor() const = 0;
+
     virtual float GetAccelerationMagnitude() const = 0;
     virtual float GetRotationAccelerationMagnitude() const = 0;
 
@@ -45,7 +54,7 @@ public:
     virtual float GetDefaultHeight() const = 0;
     virtual float GetDefaultWidth() const  = 0;
 
-private:
+protected:
 	static const Vector2D ROCKET_DEFAULT_VELOCITYDIR;
 	static const Vector2D ROCKET_DEFAULT_RIGHTDIR;
 

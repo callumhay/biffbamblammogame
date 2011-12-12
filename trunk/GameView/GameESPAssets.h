@@ -204,7 +204,7 @@ private:
 	ESPPointEmitter* CreateTeleportEffect(const Point2D& center, const PortalBlock& block, bool isSibling);
 	
 	void AddCollateralProjectileEffects(const Projectile& projectile);
-	void AddRocketProjectileEffects(const Projectile& projectile);
+	void AddRocketProjectileEffects(const RocketProjectile& projectile);
 	void AddFireGlobProjectileEffects(const Projectile& projectile);
 
 	void AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
@@ -258,7 +258,7 @@ public:
 	void AddBallHitLightningArcEffect(const GameBall& ball);
 
 	void AddPortalTeleportEffect(const Point2D& enterPt, const PortalBlock& block);
-	void AddCannonFireEffect(const CannonBlock& block);
+	void AddCannonFireEffect(const Point3D& endOfCannonPt, const Vector2D& fireDir);
 	void AddBasicBlockBreakEffect(const LevelPiece& block);
 	void AddBombBlockBreakEffect(const LevelPiece& bomb);
 	void AddInkBlockBreakEffect(const Camera& camera, const LevelPiece& inkBlock, const GameLevel& level, bool shootSpray);

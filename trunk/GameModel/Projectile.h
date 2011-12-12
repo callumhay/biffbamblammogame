@@ -38,6 +38,8 @@ public:
     virtual bool IsRocket() const                             = 0;
     virtual bool IsRefractableOrReflectable() const           = 0;
 
+    virtual float GetZOffset() const { return 0.0f; }
+
     void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
 
 	float GetWidth() const { return this->currWidth; }

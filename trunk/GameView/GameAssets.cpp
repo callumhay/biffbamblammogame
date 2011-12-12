@@ -1169,12 +1169,13 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
 // Notifies assets that there was an explosion and there should be a fullscreen flash
 void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera) {
-    float rocketSizeFactor = rocket.GetHeight() / rocket.GetDefaultHeight();
-	this->espAssets->AddRocketBlastEffect(rocketSizeFactor, rocket.GetPosition());
+    float forcePercentage = rocket.GetForcePercentageFactor();
+    this->espAssets->AddRocketBlastEffect(forcePercentage, rocket.GetPosition());
 
 	// Add a camera/controller shake and flash for when the rocket explodes...
-	camera.SetCameraShake(1.2f, Vector3D(0.9f, 0.8f, 0.1f), 130);
-	GameControllerManager::GetInstance()->VibrateControllers(1.2f, BBBGameController::VeryHeavyVibration, BBBGameController::VeryHeavyVibration);
+	camera.SetCameraShake(forcePercentage * 1.2f, forcePercentage * Vector3D(0.9f, 0.8f, 0.1f), 130);
+    GameControllerManager::GetInstance()->VibrateControllers(forcePercentage * 1.2f,
+        BBBGameController::MediumVibration, BBBGameController::HeavyVibration);
 
 	this->flashHUD->Activate(0.5, 1.0f);
 	// Play the explosion sound

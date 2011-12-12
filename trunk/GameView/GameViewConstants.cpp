@@ -252,6 +252,7 @@ PADDLE_LASER_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_laser_attachment.obj"),
 PADDLE_BEAM_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_beam_attachment.obj"),
 PADDLE_STICKY_ATTACHMENT_MESH(MESH_DIRECTORY "/paddle_sticky_attachment.obj"),
 PADDLE_ROCKET_MESH(MESH_DIRECTORY "/paddle_rocket.obj"),
+TURRET_ROCKET_MESH(MESH_DIRECTORY "/turret_rocket.obj"),
 
 ONE_WAY_BLOCK_UP_MESH(MESH_DIRECTORY    "/one_way_block_up.obj"),
 ONE_WAY_BLOCK_DOWN_MESH(MESH_DIRECTORY  "/one_way_block_down.obj"),
