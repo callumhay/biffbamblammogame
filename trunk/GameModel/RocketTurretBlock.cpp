@@ -48,7 +48,7 @@ const int RocketTurretBlock::LOST_AND_FOUND_MAX_NUM_LOOK_TIMES = 5;
 
 RocketTurretBlock::RocketTurretBlock(unsigned int wLoc, unsigned int hLoc) :
 LevelPiece(wLoc, hLoc), currLifePoints(RocketTurretBlock::PIECE_STARTING_LIFE_POINTS),
-currTurretState(SeekingTurretState), currRotationFromXInDegs(0.0f), currRotationSpd(0.0f),
+currTurretState(SeekingTurretState), currRotationFromXInDegs(Randomizer::GetInstance()->RandomUnsignedInt() % 360), currRotationSpd(0.0f),
 lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0) {
 
     this->SetBarrelState(BarrelForwardRocketLoaded, NULL);
@@ -329,7 +329,8 @@ LevelPiece* RocketTurretBlock::TickPaddleShieldCollision(double dT, const Player
 
 void RocketTurretBlock::AITick(double dT, GameModel* gameModel) {
 
-    if (gameModel->GetCurrentStateType() == GameState::BallInPlayStateType) {
+    if (gameModel->GetCurrentStateType() == GameState::BallInPlayStateType &&
+        !this->HasStatus(LevelPiece::IceCubeStatus)) {
         
         switch (this->currTurretState) {
             case IdleTurretState:
@@ -608,20 +609,31 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
 
     // Check to see if the ray collides with the paddle before doing any further calculations...
     if (collidesWithPaddle) {
-        // Now make sure the ray isn't colliding with any blocks before the paddle...
-        float levelPieceRayT = std::numeric_limits<float>::max();
+
         std::set<const LevelPiece*> ignorePieces;
         ignorePieces.insert(this);
-        LevelPiece* collisionPiece = model->GetCurrentLevel()->GetLevelPieceFirstCollider(rayOfFire,
-            ignorePieces, levelPieceRayT, 0.525f * TurretRocketProjectile::TURRETROCKET_WIDTH_DEFAULT);
+        
+        static std::set<LevelPiece::LevelPieceType> ignoreTypes;
+        ignoreTypes.insert(LevelPiece::NoEntry);
+        ignoreTypes.insert(LevelPiece::Empty);
+        ignoreTypes.insert(LevelPiece::Cannon);
+        ignoreTypes.insert(LevelPiece::Prism);
+        ignoreTypes.insert(LevelPiece::PrismTriangle);
+        ignoreTypes.insert(LevelPiece::Portal);
+        ignoreTypes.insert(LevelPiece::OneWay);
 
-        if (collisionPiece == NULL || paddleRayT < levelPieceRayT) {
+        std::list<LevelPiece*> collisionPieces;
+        model->GetCurrentLevel()->GetLevelPieceColliders(rayOfFire, ignorePieces, ignoreTypes,
+            collisionPieces, 0.525f * TurretRocketProjectile::TURRETROCKET_WIDTH_DEFAULT);
+
+        if (collisionPieces.empty()) {
             // The ray is unimpeded, fire ze lasers!
             canSeePaddle    = true;
             canFireAtPaddle = true;
             return;
         }
         else {
+            float levelPieceRayT = std::numeric_limits<float>::max();         
             canFireAtPaddle = false;
 
             // Looks like the ray was impeded - try to find out whether or not the turret can

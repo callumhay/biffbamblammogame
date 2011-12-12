@@ -75,7 +75,8 @@ public:
 
 	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);
 
-	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
+        Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
 	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;

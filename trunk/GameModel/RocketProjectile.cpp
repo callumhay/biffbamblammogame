@@ -16,8 +16,8 @@
 const Vector2D RocketProjectile::ROCKET_DEFAULT_VELOCITYDIR = Vector2D(0, 1);
 const Vector2D RocketProjectile::ROCKET_DEFAULT_RIGHTDIR    = Vector2D(1, 0);
 
-const float RocketProjectile::DEFAULT_VISUAL_WIDTH  = 1.5f;
-const float RocketProjectile::DEFAULT_VISUAL_HEIGHT = 0.8f;
+const float RocketProjectile::DEFAULT_VISUAL_WIDTH  = 0.8f;
+const float RocketProjectile::DEFAULT_VISUAL_HEIGHT = 1.5f;
 
 RocketProjectile::RocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir,
                                    float width, float height) :

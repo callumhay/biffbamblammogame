@@ -117,8 +117,12 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 			glTranslatef(rocketPos[0], rocketPos[1], rocketProjectile->GetZOffset());
 
 			this->rocketGlowEmitter->SetParticleRotation(ESPInterval(-currZRotation));
-            this->rocketGlowEmitter->SetParticleSize(ESPInterval(1.2f*rocketProjectile->GetWidth()),
-                ESPInterval(1.2f*rocketProjectile->GetHeight()));
+
+            float scaleFactor = rocketProjectile->GetVisualScaleFactor();
+            this->rocketGlowEmitter->SetParticleSize(
+                ESPInterval(2.0f*rocketProjectile->GetWidth()),
+                ESPInterval(1.6f*rocketProjectile->GetHeight()));
+
 			this->rocketGlowEmitter->Draw(camera);
 
 			// The rocket may not always be firing upwards, we need to rotate it to suit
@@ -126,7 +130,7 @@ void RocketMesh::Draw(double dT, const PlayerPaddle& paddle, const Camera& camer
 			glMultMatrixf(Matrix4x4::rotationMatrix(Trig::degreesToRadians(currYRotation), Vector3D(rocketDir, 0.0f)).begin());
 			glRotatef(currZRotation, 0.0f, 0.0f, 1.0f);
 			
-            float scaleFactor = rocketProjectile->GetVisualScaleFactor();
+            
 			glScalef(scaleFactor, scaleFactor, scaleFactor);
             
             switch (rocketProjectile->GetType()) {

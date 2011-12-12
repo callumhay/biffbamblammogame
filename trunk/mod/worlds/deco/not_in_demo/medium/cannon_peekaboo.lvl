@@ -1,0 +1,67 @@
+Cannon Peek-a-boo
+11 26
+E E E E E R E E E E E 
+S S S S N N N S S S S 
+S E E E N G N E E E S 
+S E E E N G N E E E S 
+S E J E N Y N E J E S 
+S E E E N Y N E E E S 
+S N N N N O N N N N S 
+S Y R R R O R R R Y S 
+S G G G G B G G G G S 
+S Y Y Y Y E Y Y Y Y S 
+S Y I Y E F(u) E Y I Y S 
+S G G G E E E G G G S 
+S G G G E E E G G G S 
+S G G G O C(0) O G G G S 
+S Y E Y E R E Y E Y S 
+S G G G O G O G G G S 
+S G G G G G G G G G S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+S E E E E E E E E E S 
+
+STARS:
+6000
+8500
+12500
+15000
+20000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 1
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 0
+BallShrink 2
+UpsideDown 2
+MultiBall5 0
+BallCam 1
+MagnetPaddle 3
+MultiBall3 0
+IceBall 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 1

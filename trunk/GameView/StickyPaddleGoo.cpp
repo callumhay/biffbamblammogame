@@ -16,10 +16,12 @@
 
 #include "../ResourceManager.h"
 
-StickyPaddleGoo::StickyPaddleGoo() : paddleGooMesh(NULL), stickyGooMatEffect(NULL) {
+StickyPaddleGoo::StickyPaddleGoo() : paddleGooMesh(NULL), stickyGooMatEffect(NULL), invisibleEffect(NULL) {
 	this->LoadMesh();
+
 	assert(this->paddleGooMesh != NULL);
 	assert(this->stickyGooMatEffect != NULL);
+    assert(this->invisibleEffect != NULL);
 }
 
 StickyPaddleGoo::~StickyPaddleGoo() {
@@ -27,6 +29,9 @@ StickyPaddleGoo::~StickyPaddleGoo() {
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->paddleGooMesh);
     assert(success);
     UNUSED_VARIABLE(success);
+
+    delete this->invisibleEffect;
+    this->invisibleEffect = NULL;
 }
 
 /**
@@ -43,11 +48,15 @@ void StickyPaddleGoo::LoadMesh() {
 	// Create the material properties and effect (sticky paddle cgfx shader - makes the goo all wiggly, refractive and stuff)
 	MaterialProperties* gooMatProps = new MaterialProperties();
 	gooMatProps->materialType	= MaterialProperties::MATERIAL_STICKYGOO_TYPE;
-	gooMatProps->geomType			= MaterialProperties::MATERIAL_GEOM_FG_TYPE;
-	gooMatProps->diffuse			= GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR;
-	gooMatProps->specular			= Colour(0.7f, 0.7f, 0.7f);
+	gooMatProps->geomType		= MaterialProperties::MATERIAL_GEOM_FG_TYPE;
+	gooMatProps->diffuse		= GameViewConstants::GetInstance()->STICKYPADDLE_GOO_COLOUR;
+	gooMatProps->specular		= Colour(0.7f, 0.7f, 0.7f);
 	gooMatProps->shininess		= 100.0f;
-	this->stickyGooMatEffect = new CgFxStickyPaddle(gooMatProps);
+	
+    this->stickyGooMatEffect = new CgFxStickyPaddle(gooMatProps);
+	this->invisibleEffect    = new CgFxPostRefract();
+	this->invisibleEffect->SetWarpAmountParam(50.0f);
+	this->invisibleEffect->SetIndexOfRefraction(1.33f);
 
 	// Replace the material of the goo mesh with the sticky goo effect material
 	this->paddleGooMesh->ReplaceMaterial(this->stickyGooMatEffect);
