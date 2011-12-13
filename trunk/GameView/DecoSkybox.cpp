@@ -40,7 +40,7 @@ DecoSkybox::~DecoSkybox() {
 void DecoSkybox::Draw(const Camera& camera) {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-  glLoadIdentity();
+    glLoadIdentity();
 
 	Vector3D camView = camera.GetNormalizedViewVector();
 	Matrix4x4 camTransform = camera.GetViewTransform();

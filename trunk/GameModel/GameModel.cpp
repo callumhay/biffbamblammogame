@@ -100,7 +100,6 @@ void GameModel::ResetLevelValues(int numLives) {
     this->ResetNumAcquiredItems();
     this->ResetLevelTime();
     
-
 	// Clear up the model
     this->ClearStatusUpdatePieces();
     this->ClearProjectiles();
@@ -123,6 +122,7 @@ void GameModel::StartGameAtWorldAndLevel(int worldNum, int levelNum) {
 	this->SetCurrentWorldAndLevel(worldNum, levelNum, true);
     this->ResetLevelValues(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
     this->SetNextState(GameState::LevelStartStateType);
+    this->UpdateState();
 }
 
 /**
@@ -135,9 +135,9 @@ void GameModel::BeginOrRestartGame() {
 }
 
 void GameModel::ResetCurrentLevel() {
-    this->SetCurrentWorldAndLevel(this->currWorldNum, static_cast<int>(this->GetCurrentLevel()->GetLevelNumIndex()), false);
-    this->ResetLevelValues(this->GetLivesAtStartOfLevel());
     this->SetNextState(GameState::LevelStartStateType);
+    this->ResetLevelValues(this->GetLivesAtStartOfLevel());
+    this->SetCurrentWorldAndLevel(this->currWorldNum, static_cast<int>(this->GetCurrentLevel()->GetLevelNumIndex()), false);
 }
 
 // Called in order to make sure the game is no longer processing or generating anything

@@ -4,10 +4,10 @@ Deco
 
 resources/textures/deco_world_select_256x256.jpg
 
-resources/worlds/deco/a_brief_intro_to_blammo.lvl
-resources/worlds/deco/simple_beginnings.lvl
-resources/worlds/deco/spike_jonze.lvl
-resources/worlds/deco/collateral_damage.lvl
-resources/worlds/deco/a_sticky_situation.lvl
-resources/worlds/deco/shutin.lvl
-resources/worlds/deco/dividing_lines.lvl
+resources/worlds/demo_levels/a_brief_intro_to_blammo.lvl
+resources/worlds/demo_levels/simple_beginnings.lvl
+resources/worlds/demo_levels/collateral_damage.lvl
+resources/worlds/demo_levels/spike_jonze.lvl
+resources/worlds/demo_levels/a_sticky_situation.lvl
+resources/worlds/demo_levels/shutin.lvl
+resources/worlds/demo_levels/dividing_lines.lvl

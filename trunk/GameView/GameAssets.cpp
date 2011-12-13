@@ -1395,6 +1395,7 @@ void GameAssets::DeactivateMiscEffects() {
 	this->itemAssets->ClearTimers();
 	// Disable any overlay stuff
 	this->painHUD->Deactivate();
+    this->flashHUD->Deactivate();
 	this->randomToItemAnimation.Stop();
 }
 

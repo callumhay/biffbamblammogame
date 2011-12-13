@@ -35,7 +35,7 @@ DecoWorldAssets::DecoWorldAssets() :
 GameWorldAssets(new DecoSkybox(),
         ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BACKGROUND_MESH),
 		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_PADDLE_MESH),
-		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BLOCK_MESH_PATH)),
+		ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_BLOCK_MESH)),
 
 skybeam(ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->DECO_SKYBEAM_MESH)),
 
@@ -55,8 +55,7 @@ spiralTexSm(NULL),
 spiralTexMed(NULL),
 spiralTexLg(NULL),
 rotateEffectorCW(0, 5, ESPParticleRotateEffector::CLOCKWISE),
-rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE),
-bgFadeAnim(1)
+rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
 {
 	// Setup the beam effect
 	this->beamEffect->SetColour(Colour(1, 1, 1));
@@ -80,8 +79,6 @@ bgFadeAnim(1)
 	this->currBGMeshColourAnim.SetRepeat(true);
 	this->currBGMeshColourAnim.SetLerp(timeValues, colourValues);
 
-	// No animation to start for the background fade (needs to be activated via the appropriate member function)
-	this->bgFadeAnim.SetRepeat(false);
 
 	// Setup the background emitters
 	this->InitializeEmitters();
@@ -198,7 +195,6 @@ void DecoWorldAssets::Tick(double dT) {
 
 	// Interpolate the colour animation
 	this->currBGMeshColourAnim.Tick(dT);
-	this->bgFadeAnim.Tick(dT);
 
 	// Tick the effects with the appropriate colour and alpha set...
 	Colour spiralColour = this->currBGMeshColourAnim.GetInterpolantValue();
@@ -362,13 +358,7 @@ void DecoWorldAssets::DrawBackgroundEffects(const Camera& camera) {
  * will occur over the given amount of time.
  */
 void DecoWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
-	// Set the appropriate end alpha based on whether we are fading out or not
-	float finalAlpha = 1.0f;
-	if (fadeout) {
-		finalAlpha = 0.0f;
-	}
-
-	this->bgFadeAnim.SetLerp(fadeTime, finalAlpha);
+    GameWorldAssets::FadeBackground(fadeout, fadeTime);
 }
 
 /**
@@ -376,8 +366,8 @@ void DecoWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
  * and is ready to be see for the first time by the player.
  */
 void DecoWorldAssets::ResetToInitialState() {
-	this->bgFadeAnim.ClearLerp();
-	this->bgFadeAnim.SetInterpolantValue(1.0f);
+    GameWorldAssets::ResetToInitialState();
+
 	this->currBGMeshColourAnim.ResetToStart();
 
 	this->beamRotationfg1 = 0.0f;

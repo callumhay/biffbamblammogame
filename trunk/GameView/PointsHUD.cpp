@@ -541,12 +541,16 @@ PointsHUD::MultiplierHUD::~MultiplierHUD() {
 void PointsHUD::MultiplierHUD::Reinitialize() {
     // Clean up all animations...
     ColourRGBA multiplierLabelColour(1.0f, 0.4f, 0.0f, 0.0f);
+    
     this->rgbaLabelAnim.ClearLerp();
     this->rgbaLabelAnim.SetInterpolantValue(multiplierLabelColour);
     
     this->scaleAnim.ClearLerp();
     this->scaleAnim.SetInterpolantValue(0.0f);
+
     this->currPtMultiplier = 1;
+    this->ptMultiplierLabel->SetText("");
+    this->SetCurrentAnimationState(None);
 }
 
 void PointsHUD::MultiplierHUD::SetAlpha(float alpha) {
