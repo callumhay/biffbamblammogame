@@ -1,0 +1,70 @@
+Shutin
+15 30
+S S S S S S S S S S S S S S S 
+S T(P,ul) E G E E G S E R E R E T(P,ur) S 
+S G E E G E E S R B R B E E S 
+S E G E E G E S E R E R E F(u) S 
+S E E G E E G S E R E R E E S 
+S X(b,a) E E G E E S R B R B E X(d,c) S 
+S E E E E G E S E R E R E E S 
+S S S S S S S S S S S S S S S 
+S T(P,ul) E E E E T(P,ur) S G E G E G T(P,ur) S 
+S E G E G E G S E G E G E E S 
+S G I G I G I S G E G E E F(u) S 
+S E G E G E G S E G E G E E S 
+S X(m,i) E E E E E S G E G E E X(h,g) S 
+S E E E E E T(P,lr) S E G E G E E S 
+S S S S S S S S S S S S S S S 
+S E E E E E E D(StickyPaddle) E E E E E E S 
+S E X(a,b) E E X(i,m) E E E X(c,d) E E X(g,h) E S 
+S Y G Y G Y G Y G Y G Y G Y S 
+S G Y G Y G Y G Y G Y G Y G S 
+S G G G G G G G G G G G G G S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+
+STARS:
+8000
+12000
+16000
+20000
+26000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+BallGrow 2
+UberBall 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 2
+MultiBall3 2
+IceBall 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 2

@@ -1,10 +1,10 @@
 Here's ink in your eye
 11 25
 S S S S S S S S S S S 
-S G G G G G G G G G S 
-S Y G Y G Y G Y G Y S 
-S G E G E G E G E G S 
-S I G E G I G E G I S 
+S E E E E E E E E E S 
+S E G Y G Y G Y G E S 
+S G O G O G O G O G S 
+S I G E G R G E G I S 
 S G E G E G E G E G S 
 S G O R O G O R O G S 
 S E G B G I G B G E S 
@@ -13,8 +13,8 @@ S E E E E E E E E E S
 S E E E E E E E E E S 
 S G E E E E E E E G S 
 S I G G G G G G G I S 
-S G G G G G G G G G S 
-S G I G G I G G I G S 
+S G G Y G Y G Y G G S 
+S G G G G I G G G G S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -27,18 +27,18 @@ S E E E E E E E E E S
 S E E E E E E E E E S 
 
 STARS:
-100
-500
-1000
-2000
-5000
+10000
+15000
+20000
+25000
+34000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 1
 BallGrow 2
+UberBall 1
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 1
@@ -55,6 +55,7 @@ BallShrink 2
 UpsideDown 2
 MultiBall5 0
 BallCam 0
+MagnetPaddle 2
 MultiBall3 2
 IceBall 0
 SlowBall 2
