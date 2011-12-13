@@ -263,7 +263,12 @@ ONE_WAY_BLOCK_RIGHT_MESH(MESH_DIRECTORY "/one_way_block_right.obj"),
 DECO_PADDLE_MESH(MESH_DIRECTORY "/deco_paddle.obj"),
 DECO_BACKGROUND_MESH(MESH_DIRECTORY "/deco_background.obj"),
 DECO_SKYBEAM_MESH(MESH_DIRECTORY "/deco_background_beam.obj"),
-DECO_BLOCK_MESH_PATH(MESH_DIRECTORY "/deco_block.obj")
+DECO_BLOCK_MESH(MESH_DIRECTORY "/deco_block.obj"),
+
+// Futurism Asset Paths
+FUTURISM_PADDLE_MESH(MESH_DIRECTORY "/futurism_paddle.obj"),
+FUTURISM_BACKGROUND_MESH(MESH_DIRECTORY "/futurism_background.obj"),
+FUTURISM_BLOCK_MESH(MESH_DIRECTORY "/futurism_block.obj")
 {
 }
 

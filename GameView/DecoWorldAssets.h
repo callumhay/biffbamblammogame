@@ -26,14 +26,24 @@
 class CgFxVolumetricEffect;
 
 class DecoWorldAssets : public GameWorldAssets {
+public:
+	DecoWorldAssets();
+	~DecoWorldAssets();
+
+	GameWorld::WorldStyle GetStyle() const;
+	void DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight, const BasicPointLight& bgFillLight);
+	void DrawBackgroundEffects(const Camera& camera);
+	void FadeBackground(bool fadeout, float fadeTime);
+	void ResetToInitialState();
+
+	void Tick(double dT);
 
 private:
 	static const float COLOUR_CHANGE_TIME;
 	static const int NUM_COLOUR_CHANGES = 10;
 	static const Colour COLOUR_CHANGE_LIST[NUM_COLOUR_CHANGES];
 
-	AnimationMultiLerp<Colour> currBGMeshColourAnim;	// Colour animation progression of the background mesh
-	AnimationMultiLerp<float> bgFadeAnim;							// Fade animation (for the alpha) for when the background is being fadeded in/out
+	AnimationMultiLerp<Colour> currBGMeshColourAnim;  // Colour animation progression of the background mesh
 
 	enum RotationState { RotateCW, RotateCCW };		// CCW is moving in postive degrees, CW is negative...
 
@@ -57,18 +67,7 @@ private:
 	void InitializeEmitters();
 	void RotateSkybeams(double dT);
 
-public:
-	DecoWorldAssets();
-	~DecoWorldAssets();
-
-	GameWorld::WorldStyle GetStyle() const;
-	void DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight, const BasicPointLight& bgFillLight);
-	void DrawBackgroundEffects(const Camera& camera);
-	void FadeBackground(bool fadeout, float fadeTime);
-	void ResetToInitialState();
-
-	void Tick(double dT);
-
+    DISALLOW_COPY_AND_ASSIGN(DecoWorldAssets);
 };
 
 inline GameWorld::WorldStyle DecoWorldAssets::GetStyle() const {

@@ -298,7 +298,12 @@ public:
 	const char* DECO_PADDLE_MESH;
 	const char* DECO_BACKGROUND_MESH;
 	const char* DECO_SKYBEAM_MESH;
-	const char* DECO_BLOCK_MESH_PATH;
+	const char* DECO_BLOCK_MESH;
+
+    // FUTURISM WORLD
+    const char* FUTURISM_PADDLE_MESH;
+    const char* FUTURISM_BACKGROUND_MESH;
+    const char* FUTURISM_BLOCK_MESH;
 
     const Colour& GetItemColourFromDisposition(const GameItem::ItemDisposition& itemDisposition) const;
     const Colour& GetMultiplierColour(int multiplier);

@@ -1256,6 +1256,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\FuturismWorldAssets.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\GameAssets.h"
 						>
 					</File>
@@ -1293,6 +1297,10 @@
 					>
 					<File
 						RelativePath=".\GameView\DecoWorldAssets.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\FuturismWorldAssets.cpp"
 						>
 					</File>
 					<File

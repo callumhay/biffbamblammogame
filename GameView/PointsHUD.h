@@ -124,7 +124,7 @@ private:
         void DrawHUD(float rightMostX, float topMostY);
         void SetCurrentAnimationState(const AnimationState& state);
 
-        static float  GetMultiplierScale(int multiplier);
+        static float GetMultiplierScale(int multiplier);
 
         DISALLOW_COPY_AND_ASSIGN(MultiplierHUD);
     };

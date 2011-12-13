@@ -40,7 +40,7 @@ public:
 	StickyPaddleGoo();
 	~StickyPaddleGoo();
  
-  /**
+    /**
 	 * Draw the sticky goo - basically just wraps the draw method for the goo mesh.
 	 */
 	inline void StickyPaddleGoo::Draw(const PlayerPaddle& p, const Camera& camera, const BasicPointLight& keyLight, 

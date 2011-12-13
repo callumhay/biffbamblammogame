@@ -28,34 +28,9 @@
 // the specific meshes, effects, etc. associated with a particular
 // game world.
 class GameWorldAssets {
-
-protected:
-	Skybox* skybox;				// Skybox mesh and effect
-	Mesh* background;			// Meshes that make up the background scenery
-	Mesh* playerPaddle;		// Currently loaded player paddle mesh
-	Mesh* styleBlock;
-		
 public:
-	GameWorldAssets(Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* styleBlock) : 
-			skybox(skybox), background(bg), playerPaddle(paddle), styleBlock(styleBlock) {
-		assert(skybox != NULL);
-		assert(bg != NULL);
-		assert(paddle != NULL);
-	}
-
-	virtual ~GameWorldAssets() {
-		delete this->skybox;
-		this->skybox = NULL;
-
-		// Tell the resource manager to release any of the loaded meshes
-        bool success = false;
-		success = ResourceManager::GetInstance()->ReleaseMeshResource(this->background);
-		assert(success);
-        success = ResourceManager::GetInstance()->ReleaseMeshResource(this->playerPaddle);
-		assert(success);
-        success = ResourceManager::GetInstance()->ReleaseMeshResource(this->styleBlock);
-	    assert(success);
-    }
+	GameWorldAssets(Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* styleBlock);
+	virtual ~GameWorldAssets();
 
 	Mesh* GetWorldStyleBlock() const {
 		return this->styleBlock;
@@ -67,6 +42,7 @@ public:
 
 	virtual void Tick(double dT) {
 		this->skybox->Tick(dT);
+        this->bgFadeAnim.Tick(dT);
 	};
 
 	virtual void DrawSkybox(const Camera& camera) {
@@ -77,8 +53,8 @@ public:
 
 	virtual void DrawBackgroundEffects(const Camera& camera) = 0;
 	virtual void DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight, const BasicPointLight& bgFillLight) = 0;
-	virtual void FadeBackground(bool fadeout, float fadeTime) = 0;
-	virtual void ResetToInitialState() = 0;
+	virtual void FadeBackground(bool fadeout, float fadeTime);
+	virtual void ResetToInitialState();
 
 	void DrawPaddle(const PlayerPaddle& p, const Camera& camera, CgFxEffectBase* replacementMat, 
                     const BasicPointLight& keyLight, const BasicPointLight& fillLight,
@@ -103,6 +79,17 @@ public:
 
 	// Factory methods
 	static GameWorldAssets* CreateWorldAssets(GameWorld::WorldStyle world);
+
+protected:
+	Skybox* skybox;				// Skybox mesh and effect
+	Mesh* background;			// Meshes that make up the background scenery
+	Mesh* playerPaddle;		// Currently loaded player paddle mesh
+	Mesh* styleBlock;
+
+	AnimationMultiLerp<float> bgFadeAnim;			  // Fade animation (for the alpha) for when the background is being fadeded in/out
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(GameWorldAssets);
 
 };
 #endif
