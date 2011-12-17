@@ -98,6 +98,40 @@ void GameMenuItem::ToggleWiggleAnimationOff() {
 	this->wiggleAnimation.SetInterpolantValue(0.0f);
 }
 
+// GameMenuItemWithFlashLabel Functions ********************************************************************
+
+GameMenuItemWithFlashLabel::GameMenuItemWithFlashLabel(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, 
+                                                       const TextLabel2D& flashLabel, GameSubMenu* subMenu) :
+GameMenuItem(smLabel, lgLabel, subMenu), flashLbl(flashLabel) {
+
+    std::vector<double> timeVals;
+    timeVals.reserve(3);
+    timeVals.push_back(0.0);
+    timeVals.push_back(0.5);
+    timeVals.push_back(1.0);
+    std::vector<Colour> colourVals;
+    colourVals.reserve(3);
+    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+    colourVals.push_back(Colour(1.0f, 0.8f, 0.0f));
+    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+    this->flashAnimation.SetLerp(timeVals, colourVals);
+    this->flashAnimation.SetRepeat(true);
+}
+
+GameMenuItemWithFlashLabel::~GameMenuItemWithFlashLabel() {
+}
+
+void GameMenuItemWithFlashLabel::Draw(double dT, const Point2D& topLeftCorner,
+                                      int windowWidth, int windowHeight) {
+    GameMenuItem::Draw(dT, topLeftCorner, windowWidth, windowHeight);
+
+    // Draw flashy label...
+    this->flashAnimation.Tick(dT);
+    this->flashLbl.SetColour(this->flashAnimation.GetInterpolantValue());
+    this->flashLbl.SetTopLeftCorner(this->currLabel->GetTopLeftCorner() + Vector2D(this->currLabel->GetLastRasterWidth() + 10, 0));
+    this->flashLbl.Draw();
+}
+
 // SelectionListMenuItem Functions ***************************************************************************
 
 const float SelectionListMenuItem::INTERIOR_PADDING				= 10.0f;  // The padding between the text and arrows in the item

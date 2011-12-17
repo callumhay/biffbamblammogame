@@ -30,11 +30,11 @@ S E E E E E E E E E S
 S E E E E E E E E E S 
 
 STARS:
-100
-500
-1000
-2000
-5000
+13000
+17000
+20000
+26000
+34050
 
 PaddleGrow 2
 PoisonPaddle 2
@@ -58,6 +58,7 @@ BallShrink 2
 UpsideDown 2
 MultiBall5 0
 BallCam 0
+MagnetPaddle 2
 MultiBall3 0
 IceBall 0
 SlowBall 2

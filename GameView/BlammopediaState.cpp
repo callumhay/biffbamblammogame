@@ -12,11 +12,11 @@
 #include "BlammopediaState.h"
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
-#include "ItemListView.h"
+
 #include "GameFontAssetsManager.h"
 
 #include "../ResourceManager.h"
-#include "../Blammopedia.h"
+
 
 #include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/GeometryMaker.h"
@@ -320,6 +320,16 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
         }
         else {
             currList->ButtonPressed(pressedButton);
+            if (pressedButton == GameControl::EnterButtonAction) {
+                ItemListView::ListItem* selectedItem = currList->GetSelectedItem();
+                if (selectedItem != NULL) {
+                    if (!selectedItem->GetIsLocked()) {
+                        std::map<ItemListView::ListItem*, Blammopedia::Entry*>::iterator findIter = this->itemToEntryMap.find(selectedItem);
+                        assert(findIter != this->itemToEntryMap.end());
+                        findIter->second->SetHasBeenViewed(true);
+                    }
+                }
+            }
         }
     }
     else {
@@ -375,7 +385,7 @@ void BlammopediaState::ButtonReleased(const GameControl::ActionButton& releasedB
 	UNUSED_PARAMETER(releasedButton);
 }
 
-ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia) const {
+ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia) {
 	const Camera& camera = this->display->GetCamera();
 	ItemListView* itemsListView = new ItemListView(camera.GetWindowWidth());
 	
@@ -404,7 +414,10 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
             currName = LOCKED_NAME;
             currDesc = "";
         }
-        itemsListView->AddItem(currName, currDesc, finePrint, itemColour, texture, itemEntry->GetIsLocked());
+        ItemListView::ListItem* listItem = itemsListView->AddItem(currName, currDesc, finePrint, itemColour, texture,
+            itemEntry->GetIsLocked(), itemEntry->GetHasBeenViewed());
+
+        this->itemToEntryMap.insert(std::make_pair(listItem, itemEntry));
     }
 
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
@@ -412,7 +425,7 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
 	return itemsListView;
 }
 
-ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia) const {
+ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia) {
 	const Camera& camera = this->display->GetCamera();
 	ItemListView* blockListView = new ItemListView(camera.GetWindowWidth());
 
@@ -434,7 +447,10 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
         else {
             currName = LOCKED_NAME;
         }
-        blockListView->AddItem(currName, currDesc, finePrint, Colour(0.3f, 0.6f, 0.85f), texture, blockEntry->GetIsLocked());
+        ItemListView::ListItem* listItem = blockListView->AddItem(currName, currDesc, finePrint, Colour(0.3f, 0.6f, 0.85f), texture,
+            blockEntry->GetIsLocked(), blockEntry->GetHasBeenViewed());
+
+        itemToEntryMap.insert(std::make_pair(listItem, blockEntry));
     }
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);

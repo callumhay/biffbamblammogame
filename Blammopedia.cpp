@@ -120,11 +120,33 @@ Blammopedia::~Blammopedia() {
 	this->miscEntries.clear();
 }
 
+bool Blammopedia::HasUnviewed() const {
+    return (this->HasUnviewedBlocks() || this->HasUnviewedItems());
+}
+
+bool Blammopedia::HasUnviewedBlocks() const {
+    for (BlockEntryMapConstIter iter = this->blockEntries.begin(); iter != this->blockEntries.end(); ++iter) {
+        if (!iter->second->GetIsLocked() && !iter->second->GetHasBeenViewed()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Blammopedia::HasUnviewedItems() const {
+    for (ItemEntryMapConstIter iter = this->itemEntries.begin(); iter != this->itemEntries.end(); ++iter) {
+        if (!iter->second->GetIsLocked() && !iter->second->GetHasBeenViewed()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) {
     bool success = true;
-	std::map<GameItem::ItemType, bool> itemStatusMap;
-    std::map<LevelPiece::LevelPieceType, bool> blockStatusMap;
-	std::map<LevelPiece::PieceStatus, bool> statusEffectStatusMap;
+    
+    std::map<GameItem::ItemType, std::pair<bool, bool> > itemStatusMap;
+    std::map<LevelPiece::LevelPieceType, std::pair<bool, bool> > blockStatusMap;
 
 	// Start by reading in the unlock file which tells us which blammopedia entries are locked/unlocked...
     std::ifstream inFile(filepath.c_str(), std::ifstream::in | std::ifstream::binary);
@@ -157,21 +179,28 @@ Blammopedia* Blammopedia::BuildFromBlammopediaFile(const std::string &filepath) 
 	}
 	
 	// Set the lock/unlocked status for all entries and read each entry from its respective file...
-	for (std::map<GameItem::ItemType, bool>::const_iterator iter = itemStatusMap.begin(); iter != itemStatusMap.end(); ++iter) {
+    for (std::map<GameItem::ItemType, std::pair<bool, bool> >::const_iterator iter = itemStatusMap.begin();
+         iter != itemStatusMap.end(); ++iter) {
+
 		ItemEntry* itemEntry = blammopedia->GetItemEntry(iter->first);
 		assert(itemEntry != NULL);
-		itemEntry->SetIsLocked(iter->second);
-	}
-	for (std::map<LevelPiece::LevelPieceType, bool>::const_iterator iter = blockStatusMap.begin(); iter != blockStatusMap.end(); ++iter) {
+        itemEntry->SetIsLocked(iter->second.first);
+        itemEntry->SetHasBeenViewed(iter->second.second);
+    }
+	for (std::map<LevelPiece::LevelPieceType, std::pair<bool, bool> >::const_iterator iter = blockStatusMap.begin();
+         iter != blockStatusMap.end(); ++iter) {
+
 		BlockEntry* blockEntry = blammopedia->GetBlockEntry(iter->first);
 		assert(blockEntry != NULL);
-		blockEntry->SetIsLocked(iter->second);
+        blockEntry->SetIsLocked(iter->second.first);
+        blockEntry->SetHasBeenViewed(iter->second.second);
 	}
-	for (std::map<LevelPiece::PieceStatus, bool>::const_iterator iter = statusEffectStatusMap.begin(); iter != statusEffectStatusMap.end(); ++iter) {
-		MiscEntry* statusEntry = blammopedia->GetMiscEntry(iter->first);
-		assert(statusEntry != NULL);
-		statusEntry->SetIsLocked(iter->second);
-	}
+
+	//for (std::map<LevelPiece::PieceStatus, bool>::const_iterator iter = statusEffectStatusMap.begin(); iter != statusEffectStatusMap.end(); ++iter) {
+	//	MiscEntry* statusEntry = blammopedia->GetMiscEntry(iter->first);
+	//	assert(statusEntry != NULL);
+	//	statusEntry->SetIsLocked(iter->second);
+	//}
 	
 	// Go through all entries in the blammopedia an initialize them
 	success = blammopedia->InitializeEntries();
@@ -196,7 +225,7 @@ bool Blammopedia::WriteAsEntryStatusFile() const {
 	}
 
 	// Write all of the item entry's lock statuses first...
-    size_t itemOutDataSize = 2*this->itemEntries.size() + 1;
+    size_t itemOutDataSize = 3*this->itemEntries.size() + 1;
     char* itemOutData = new char[itemOutDataSize];
     
     assert(this->itemEntries.size() <= CHAR_MAX);
@@ -209,13 +238,14 @@ bool Blammopedia::WriteAsEntryStatusFile() const {
         assert(itemType <= CHAR_MAX);
         itemOutData[count++] = itemType;
         itemOutData[count++] = itemEntry->GetIsLocked() ? 1 : 0;
+        itemOutData[count++] = itemEntry->GetHasBeenViewed() ? 1 : 0;
     }
     outFile.write(itemOutData, itemOutDataSize);
     delete[] itemOutData;
     itemOutData = NULL;
 
 	// Same for blocks...
-    size_t blockOutDataSize = 2*this->blockEntries.size() + 1;
+    size_t blockOutDataSize = 3*this->blockEntries.size() + 1;
     char* blockOutData = new char[blockOutDataSize];
     assert(this->blockEntries.size() <= CHAR_MAX);
     blockOutData[0] = this->blockEntries.size();
@@ -227,14 +257,11 @@ bool Blammopedia::WriteAsEntryStatusFile() const {
         assert(pieceType <= CHAR_MAX);
         blockOutData[count++] = pieceType;
         blockOutData[count++] = blockEntry->GetIsLocked() ? 1 : 0;
+        blockOutData[count++] = blockEntry->GetHasBeenViewed() ? 1 : 0;
     }
     outFile.write(blockOutData, blockOutDataSize);
     delete[] blockOutData;
     blockOutData = NULL;
-
-	// ... and status effects...
-	//strStream << Blammopedia::STATUS_EFFECT_ENTRIES << std::endl;
-	//TODO
     
     outFile.close();
 	return true;
@@ -281,7 +308,7 @@ bool Blammopedia::InitializeEntries() {
 	return allSuccess;
 }
 
-bool Blammopedia::ReadItemEntires(std::istream& inStream, std::map<GameItem::ItemType, bool>& itemStatusMap) {
+bool Blammopedia::ReadItemEntires(std::istream& inStream, std::map<GameItem::ItemType, std::pair<bool, bool> >& itemStatusMap) {
     char tempReadChar;
     if (!inStream.read(&tempReadChar, 1)) {
 	    debug_output("Error while reading item entries from blammopedia file.");
@@ -311,8 +338,15 @@ bool Blammopedia::ReadItemEntires(std::istream& inStream, std::map<GameItem::Ite
         int isLockedInt = static_cast<int>(tempReadChar);
         bool isLockedBool = (isLockedInt == 1) ? true : false;
         
-	    std::pair<std::map<GameItem::ItemType, bool>::iterator, bool> insertResult = 
-		    itemStatusMap.insert(std::make_pair(itemType, isLockedBool));
+        if (!inStream.read(&tempReadChar, 1)) {
+	        debug_output("Error while reading blammopedia file could not read viewed status for item.");
+	        return false;
+        }
+        int isViewedInt = static_cast<int>(tempReadChar);
+        bool hasBeenViewed = (isViewedInt == 1) ? true : false;
+
+        std::pair<std::map<GameItem::ItemType, std::pair<bool, bool> >::iterator, bool> insertResult = 
+            itemStatusMap.insert(std::make_pair(itemType, std::make_pair(isLockedBool, hasBeenViewed)));
 	    if (!insertResult.second) {
 		    debug_output("Error while reading blammopedia file duplicate item type found: " << itemReadType);
 		    return false;
@@ -322,7 +356,7 @@ bool Blammopedia::ReadItemEntires(std::istream& inStream, std::map<GameItem::Ite
     return true;
 }
 
-bool Blammopedia::ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::LevelPieceType, bool>& blockStatusMap) {
+bool Blammopedia::ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::LevelPieceType, std::pair<bool, bool> >& blockStatusMap) {
     char tempReadChar;
     if (!inStream.read(&tempReadChar, 1)) {
 	    debug_output("Error while reading block entries from blammopedia file.");
@@ -352,8 +386,15 @@ bool Blammopedia::ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::
         int isLockedInt = static_cast<int>(tempReadChar);
         bool isLockedBool = (isLockedInt == 1) ? true : false;
         
-	    std::pair<std::map<LevelPiece::LevelPieceType, bool>::iterator, bool> insertResult = 
-		    blockStatusMap.insert(std::make_pair(levelPieceType, isLockedBool));
+        if (!inStream.read(&tempReadChar, 1)) {
+	        debug_output("Error while reading blammopedia file could not read viewed status for item.");
+	        return false;
+        }
+        int isViewedInt = static_cast<int>(tempReadChar);
+        bool hasBeenViewed = (isViewedInt == 1) ? true : false;
+
+        std::pair<std::map<LevelPiece::LevelPieceType, std::pair<bool, bool> >::iterator, bool> insertResult = 
+            blockStatusMap.insert(std::make_pair(levelPieceType, std::make_pair(isLockedBool, hasBeenViewed)));
 	    if (!insertResult.second) {
 		    debug_output("Error while reading blammopedia file duplicate level piece type found: " << levelPieceReadType);
 		    return false;
@@ -363,13 +404,14 @@ bool Blammopedia::ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::
     return true;
 }
 
+/*
 bool Blammopedia::ReadMiscEntries(std::istream& inStream, std::map<LevelPiece::PieceStatus, bool>& miscStatusMap) {
 	UNUSED_PARAMETER(inStream);
 	UNUSED_PARAMETER(miscStatusMap);
 	assert(false);
 	return false;
 }
-
+*/
 
 // Populates basic entry values from the given stream
 bool Blammopedia::Entry::PopulateBaseValuesFromStream(std::istream& inStream) {

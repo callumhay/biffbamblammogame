@@ -104,6 +104,22 @@ public:
 };
 
 /**
+ * A menu item with a flashy label appended to it.
+ */
+class GameMenuItemWithFlashLabel : public GameMenuItem {
+public:
+    GameMenuItemWithFlashLabel(const TextLabel2D& smLabel, const TextLabel2D& lgLabel, 
+        const TextLabel2D& flashLabel, GameSubMenu* subMenu);
+    ~GameMenuItemWithFlashLabel();
+
+    void Draw(double dT, const Point2D& topLeftCorner, int windowWidth, int windowHeight);
+
+private:
+    AnimationMultiLerp<Colour> flashAnimation;
+    TextLabel2D flashLbl;
+};
+
+/**
  * A specific kind of list item - one that offers a selection of options
  * that can be scrolled though and selected.
  */

@@ -160,6 +160,9 @@ void ItemListView::Draw(const Camera& camera) {
 		    currItem->DrawItem(camera, this->itemPixelWidth, this->itemPixelHeight, 
                                this->nonActivatedItemsFadeAnim.GetInterpolantValue(), 1);
 		    glPopMatrix();
+            currItem->DrawNewLabel(xTranslation, camera.GetWindowHeight() + yTranslation,
+                this->itemPixelWidth, this->itemPixelHeight, 
+                this->nonActivatedItemsFadeAnim.GetInterpolantValue(), 1);
 	    }
     }
 
@@ -182,11 +185,13 @@ void ItemListView::Draw(const Camera& camera) {
             this->selectionAlphaYellowAnim.GetInterpolantValue() * selectedItemAlpha,
             this->selectionBorderAddYellowAnim.GetInterpolantValue(), scalingFactor);
 
-        // Draw the item first
         glTranslatef(this->lockedSelectionAnim.GetInterpolantValue(), 0, 0);
         currItem->DrawItem(camera, this->itemPixelWidth, this->itemPixelHeight, 
                            selectedItemAlpha, scalingFactor);
         glPopMatrix();
+
+        currItem->DrawNewLabel(xTranslation, camera.GetWindowHeight() + yTranslation, 
+            this->itemPixelWidth, this->itemPixelHeight, selectedItemAlpha, scalingFactor);
     }
 
     
@@ -349,10 +354,10 @@ void ItemListView::DrawPost(const Camera& camera) {
 // Adds a new list item to the end of the current list 
 ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const std::string& description, 
                                               const std::string& finePrint, const Colour& colour,
-                                              const Texture* itemTexture, bool isLocked) {
+                                              const Texture* itemTexture, bool isLocked, bool hasBeenViewed) {
 
     ItemListView::ListItem* newItem = new ItemListView::ListItem(this, 
-        this->items.size(), name, description, finePrint, colour, itemTexture, isLocked);
+        this->items.size(), name, description, finePrint, colour, itemTexture, isLocked, hasBeenViewed);
 	this->items.push_back(newItem);
 
     if (!isLocked) {
@@ -539,6 +544,8 @@ void ItemListView::ItemActivated() {
         timeVals.push_back(4.0);
         this->pressEscAlphaAnim.SetLerp(timeVals, alphaVals);
         this->pressEscAlphaAnim.SetRepeat(true);
+
+        selectedItem->TurnOffNewLabel();
     }   
 }
 
@@ -625,13 +632,14 @@ void ItemListView::SetSelection(int index) {
 
 ItemListView::ListItem::ListItem(const ItemListView* parent, size_t index, const std::string& name, 
                                  const std::string& description, const std::string& finePrint,
-                                 const Colour& colour, const Texture* itemTexture, bool isLocked) : 
+                                 const Colour& colour, const Texture* itemTexture, bool isLocked, bool hasBeenViewed) : 
 texture(itemTexture), isLocked(isLocked), colour(colour), index(index),
 nameLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), name)), 
 descriptionLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
                GameFontAssetsManager::Big), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, description)),
 finePrintLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
-             GameFontAssetsManager::Medium), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, finePrint))
+             GameFontAssetsManager::Medium), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, finePrint)),
+newLbl(NULL)
 {
 	assert(parent != NULL);
     assert(itemTexture != NULL);
@@ -646,6 +654,27 @@ finePrintLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->Get
     this->sizeAnimation = AnimationLerp<float>(1.0f);
     this->sizeAnimation.SetInterpolantValue(1.0f);
     this->sizeAnimation.SetRepeat(false);
+
+    if (!isLocked && !hasBeenViewed) {
+        this->newLbl = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
+            GameFontAssetsManager::Medium), "NEW");
+
+	    std::vector<double> timeVals;
+	    timeVals.reserve(3);
+	    timeVals.push_back(0.0);
+	    timeVals.push_back(0.5);
+	    timeVals.push_back(1.0);
+	    std::vector<Colour> colourVals;
+	    colourVals.reserve(3);
+	    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+	    colourVals.push_back(Colour(1.0f, 0.8f, 0.0f));
+	    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+	    this->newColourFlashAnimation.SetLerp(timeVals, colourVals);
+	    this->newColourFlashAnimation.SetRepeat(true);
+
+        this->newLbl->SetColour(this->newColourFlashAnimation.GetInterpolantValue());
+        this->newLbl->SetDropShadow(Colour(0,0,0), 0.1f);
+    }
 }
 
 ItemListView::ListItem::~ListItem() {
@@ -655,10 +684,19 @@ ItemListView::ListItem::~ListItem() {
     this->descriptionLbl = NULL;
     delete this->finePrintLbl;
     this->finePrintLbl = NULL;
+
+    if (this->newLbl != NULL) {
+        delete this->newLbl;
+        this->newLbl = NULL;
+    }
 }
 
 void ItemListView::ListItem::Tick(double dT) {
     this->sizeAnimation.Tick(dT);
+    if (this->newLbl != NULL) {
+        this->newColourFlashAnimation.Tick(dT);
+        this->newLbl->SetColour(this->newColourFlashAnimation.GetInterpolantValue());
+    }
 }
 
 void ItemListView::ListItem::DrawSelection(const Camera& camera, 
@@ -737,6 +775,22 @@ void ItemListView::ListItem::DrawItem(const Camera& camera, size_t width, size_t
     glPopMatrix();
 }
 
+void ItemListView::ListItem::DrawNewLabel(float bottomLeftX, float bottomLeftY,
+                                          size_t width, size_t height,
+                                          float alpha, float scale) {
+    UNUSED_PARAMETER(height);
+    if (this->newLbl == NULL) {
+        return;
+    }
+
+    this->newLbl->SetTopLeftCorner(bottomLeftX + width - this->newLbl->GetLastRasterWidth(),
+                                   bottomLeftY + this->newLbl->GetHeight());
+    this->newLbl->SetAlpha(alpha);
+    this->newLbl->SetScale(scale);
+
+    this->newLbl->Draw();
+}
+
 void ItemListView::ListItem::SetSelected(bool isSelected) {
     if (isSelected) {
         this->sizeAnimation.SetLerp(0.2, 1.1f);
@@ -745,6 +799,13 @@ void ItemListView::ListItem::SetSelected(bool isSelected) {
     else {
         this->sizeAnimation.SetLerp(0.2, 1.0f);
         this->sizeAnimation.SetRepeat(false);
+    }
+}
+
+void ItemListView::ListItem::TurnOffNewLabel() {
+    if (this->newLbl != NULL) {
+        delete this->newLbl;
+        this->newLbl = NULL;
     }
 }
 

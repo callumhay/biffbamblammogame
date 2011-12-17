@@ -28,15 +28,19 @@ public:
 	class Entry {
 		friend class Blammopedia;
 	public:
-		Entry(const std::string& filename): filename(filename), isLocked(true) {}
+		Entry(const std::string& filename): filename(filename), isLocked(true), hasBeenViewed(false) {}
 		virtual ~Entry() {};
 
 		void SetIsLocked(bool locked) { this->isLocked = locked; }
 		bool GetIsLocked() const { return this->isLocked; }
 
+        void SetHasBeenViewed(bool viewed) { this->hasBeenViewed = viewed; }
+        bool GetHasBeenViewed() const { return this->hasBeenViewed; }
+
 		const std::string& GetName() const { return this->name; }
 		const std::string& GetDescription() const { return this->description; }
         const std::string& GetFinePrint() const { return this->finePrint; }
+
 	protected:
 		// Item, block and status effect file keywords/syntax constants
 		static const char* NAME_KEYWORD;
@@ -50,6 +54,7 @@ public:
 		std::string filename;
 
 		bool isLocked;
+        bool hasBeenViewed;
 		std::string name;
 		std::string description;
         std::string finePrint;
@@ -118,8 +123,7 @@ public:
 	typedef MiscEntryMap::const_iterator   MiscEntryMapConstIter;
 
 	~Blammopedia();
-	static Blammopedia* BuildFromBlammopediaFile(const std::string &filepath);
-
+	
 	Blammopedia::ItemEntry*  GetItemEntry(const GameItem::ItemType& itemType) const;
 	Blammopedia::BlockEntry* GetBlockEntry(const LevelPiece::LevelPieceType& blockType) const;
 	Blammopedia::MiscEntry*  GetMiscEntry(const LevelPiece::PieceStatus& statusType) const;
@@ -131,6 +135,11 @@ public:
 	const Blammopedia::BlockEntryMap& GetBlockEntries() const;
 	const Blammopedia::MiscEntryMap& GetMiscEntries() const;
 
+    bool HasUnviewed() const;
+    bool HasUnviewedBlocks() const;
+    bool HasUnviewedItems() const;
+
+    static Blammopedia* BuildFromBlammopediaFile(const std::string &filepath);
 	bool WriteAsEntryStatusFile() const;
 
 	const Texture2D* GetLockedItemTexture() const;
@@ -147,9 +156,9 @@ private:
 	Blammopedia();
 	bool InitializeEntries();
 
-	static bool ReadItemEntires(std::istream& inStream, std::map<GameItem::ItemType, bool>& itemStatusMap);
-	static bool ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::LevelPieceType, bool>& blockStatusMap);
-	static bool ReadMiscEntries(std::istream& inStream, std::map<LevelPiece::PieceStatus, bool>& miscStatusMap);
+	static bool ReadItemEntires(std::istream& inStream, std::map<GameItem::ItemType, std::pair<bool, bool> >& itemStatusMap);
+	static bool ReadBlockEntries(std::istream& inStream, std::map<LevelPiece::LevelPieceType, std::pair<bool, bool> >& blockStatusMap);
+	//static bool ReadMiscEntries(std::istream& inStream, std::map<LevelPiece::PieceStatus, bool>& miscStatusMap);
 		
 	DISALLOW_COPY_AND_ASSIGN(Blammopedia);
 };
