@@ -201,8 +201,8 @@ void MainMenuDisplayState::InitializeMainMenu()  {
 	const Colour dropShadowColour = Colour(0, 0, 0);
 
 	// Add items to the menu in their order (first to last)
-	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  NEW_GAME_MENUITEM);
-	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
+	TextLabel2D tempLabelSm(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  NEW_GAME_MENUITEM);
+	TextLabel2D tempLabelLg(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
 
 	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
 	tempLabelSm.SetScale(textScaleFactor);
@@ -218,7 +218,19 @@ void MainMenuDisplayState::InitializeMainMenu()  {
     // Place an item for the blammopedia
     tempLabelSm.SetText(BLAMMOPEDIA_MENUITEM);
     tempLabelLg.SetText(BLAMMOPEDIA_MENUITEM);
-	this->blammopediaItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+
+    TextLabel2D newLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "NEW");
+    newLabel.SetDropShadow(dropShadowColour, 0.05f);
+    newLabel.SetScale(0.8f * textScaleFactor);
+
+    Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
+    if (blammopedia->HasUnviewed()) {
+        GameMenuItemWithFlashLabel* blammopediaMenuItem = new GameMenuItemWithFlashLabel(tempLabelSm, tempLabelLg, newLabel, NULL);
+	    this->blammopediaItemIndex = this->mainMenu->AddMenuItem(blammopediaMenuItem);
+    }
+    else {
+        this->blammopediaItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+    }
 
 	// Setup the options item in the main menu and its submenu
 	tempLabelSm.SetText(OPTIONS_MENUITEM);

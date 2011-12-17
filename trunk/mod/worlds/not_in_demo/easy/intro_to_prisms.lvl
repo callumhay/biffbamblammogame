@@ -1,8 +1,8 @@
 Intro to Prisms
 11 25
 E E E E E S S S S S S 
-E E E S S T(P,ul) E E E G S 
-S S S T(P,ul) E E E E E G S 
+E E E S S T(P,ul) E N E G S 
+S S S T(P,ul) E E E N E G S 
 S T(P,ul) O E R R R S S S S 
 S Y E E R R R E D(LaserBulletPaddle,LaserBeamPaddle) E S 
 S E O E Y E R E E E S 

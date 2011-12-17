@@ -35,8 +35,8 @@ public:
 	class ListItem {
 	public:
 		ListItem(const ItemListView* parent, size_t index, const std::string& name, 
-            const std::string& description, const std::string& finePrint, const Colour& colour,
-                 const Texture* itemTexture, bool isLocked);
+                 const std::string& description, const std::string& finePrint, const Colour& colour,
+                 const Texture* itemTexture, bool isLocked, bool hasBeenViewed);
 		~ListItem();
 
         void Tick(double dT);
@@ -45,8 +45,10 @@ public:
 
 		void DrawItem(const Camera& camera, size_t width, size_t height, float alpha, float scale);
         void DrawItem(const Camera& camera, size_t width, size_t height, float alpha);
+        void DrawNewLabel(float bottomLeftX, float bottomLeftY, size_t width, size_t height, float alpha, float scale);
 
         void SetSelected(bool isSelected);
+        void TurnOffNewLabel();
 
         const Colour& GetColour() const { return this->colour; }
 		TextLabel2D* GetNameLbl() const { return this->nameLbl; }
@@ -63,11 +65,13 @@ public:
         TextLabel2D* nameLbl;
         TextLabel2DFixedWidth* descriptionLbl;
         TextLabel2DFixedWidth* finePrintLbl;
+        TextLabel2D* newLbl;
 		const Texture* texture;
 
         float halfSelectionBorderSize;
 
         AnimationLerp<float> sizeAnimation;
+        AnimationMultiLerp<Colour> newColourFlashAnimation;
 
         void DrawItemQuadBottomLeft(size_t width, size_t height);
         void DrawItemQuadCenter(float width, float height);
@@ -84,7 +88,7 @@ public:
     void DrawPost(const Camera& camera);
 
     ItemListView::ListItem* AddItem(const std::string& name, const std::string& description, const std::string& finePrint,
-                                    const Colour& colour, const Texture* itemTexture, bool isLocked);
+                                    const Colour& colour, const Texture* itemTexture, bool isLocked, bool hasBeenViewed);
     void SetSelectedItemIndex(int index);
 	ItemListView::ListItem* GetSelectedItem() const;
     bool GetIsItemActivated() const;

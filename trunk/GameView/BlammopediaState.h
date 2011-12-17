@@ -13,13 +13,14 @@
 #define __BLAMMOPEDIASTATE_H__
 
 #include "DisplayState.h"
+#include "ItemListView.h"
 
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
 
-class ItemListView;
+#include "../Blammopedia.h"
+
 class Texture;
-class Blammopedia;
 
 class BlammopediaState : public DisplayState {
 public:
@@ -52,6 +53,8 @@ private:
 
     TextLabel2D selectedItemNameLbl;
 
+    std::map<ItemListView::ListItem*, Blammopedia::Entry*> itemToEntryMap;
+
     // Menu items and states
     static const int NO_MENU_ITEM_INDEX     = -1;
     static const int ITEMS_MENU_ITEM_INDEX  = 0; 
@@ -79,8 +82,8 @@ private:
 
     bool goBackToMainMenu;
 
-	ItemListView* BuildGameItemsListView(Blammopedia* blammopedia) const;
-	ItemListView* BuildGameBlockListView(Blammopedia* blammopedia) const;
+	ItemListView* BuildGameItemsListView(Blammopedia* blammopedia);
+	ItemListView* BuildGameBlockListView(Blammopedia* blammopedia);
 
     ItemListView* GetCurrentListView() const;
         
