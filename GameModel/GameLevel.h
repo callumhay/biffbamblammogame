@@ -129,21 +129,11 @@ public:
 		return this->currentLevelPieces[hIndex][wIndex];
 	}
 
-	float GetPaddleMinBound() const {
-		LevelPiece* temp = this->GetMinBoundPiece();
-		return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
-	}
+	float GetPaddleMinBound() const;
+	float GetPaddleMaxBound() const;
 
-	float GetPaddleMaxBound() const {
-		LevelPiece* temp = this->GetMaxBoundPiece();
-		return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;	
-	}
-    LevelPiece* GetMinBoundPiece() const {
-        return this->currentLevelPieces[0][0];
-    }
-    LevelPiece* GetMaxBoundPiece() const {
-        return this->currentLevelPieces[0][this->width-1];
-    }
+    LevelPiece* GetMinPaddleBoundPiece() const;
+    LevelPiece* GetMaxPaddleBoundPiece() const;
 
 	float GetLevelUnitWidth() const {
 		return this->width * LevelPiece::PIECE_WIDTH;
@@ -257,6 +247,13 @@ inline int GameLevel::GetNumStarsForScore(long score) const {
         starIdx++;
     }
     return starIdx;
+}
+
+inline LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
+    return this->currentLevelPieces[0][0];
+}
+inline LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
+    return this->currentLevelPieces[0][this->width-1];
 }
 
 #endif

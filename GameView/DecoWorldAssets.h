@@ -39,11 +39,6 @@ public:
 	void Tick(double dT);
 
 private:
-	static const float COLOUR_CHANGE_TIME;
-	static const int NUM_COLOUR_CHANGES = 10;
-	static const Colour COLOUR_CHANGE_LIST[NUM_COLOUR_CHANGES];
-
-	AnimationMultiLerp<Colour> currBGMeshColourAnim;  // Colour animation progression of the background mesh
 
 	enum RotationState { RotateCW, RotateCCW };		// CCW is moving in postive degrees, CW is negative...
 

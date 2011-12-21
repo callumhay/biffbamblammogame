@@ -14,6 +14,15 @@
 
 #include "GameWorldAssets.h"
 
+#include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Colour.h"
+#include "../BlammoEngine/Animation.h"
+
+#include "../ESPEngine/ESPVolumeEmitter.h"
+#include "../ESPEngine/ESPParticleScaleEffector.h"
+#include "../ESPEngine/ESPParticleColourEffector.h"
+#include "../ESPEngine/ESPParticleRotateEffector.h"
+
 class FuturismWorldAssets : public GameWorldAssets {
 public:
     FuturismWorldAssets();
@@ -28,6 +37,14 @@ public:
 	void ResetToInitialState();
 
 private:
+
+    std::vector<Texture2D*> shardTextures;
+    std::vector<ESPVolumeEmitter*> shardEmitters;
+	ESPParticleRotateEffector rotateEffectorCW, rotateEffectorCCW;
+
+    void InitializeTextures();
+    void InitializeEmitters();
+
     DISALLOW_COPY_AND_ASSIGN(FuturismWorldAssets);
 };
 

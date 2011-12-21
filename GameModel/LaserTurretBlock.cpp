@@ -65,7 +65,7 @@ lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0) {
         this->currRotationAccel = -ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;
     }
 
-    this->colour = Colour(0.65f, 0.65f, 0.65f);
+    this->colour = ColourRGBA(0.65f, 0.65f, 0.65f, 1.0f);
 }
 
 LaserTurretBlock::~LaserTurretBlock() {

@@ -29,7 +29,7 @@ const float LevelPiece::HALF_PIECE_HEIGHT = PIECE_HEIGHT / 2.0f;
 const float LevelPiece::HALF_PIECE_DEPTH  = PIECE_DEPTH / 2.0f;
 
 LevelPiece::LevelPiece(unsigned int wLoc, unsigned int hLoc) : 
-colour(1,1,1), pieceStatus(LevelPiece::NormalStatus), leftNeighbor(NULL),
+colour(1,1,1,1), pieceStatus(LevelPiece::NormalStatus), leftNeighbor(NULL),
 bottomNeighbor(NULL), rightNeighbor(NULL), topNeighbor(NULL), topRightNeighbor(NULL),
 topLeftNeighbor(NULL), bottomRightNeighbor(NULL), bottomLeftNeighbor(NULL), 
 triggerID(LevelPiece::NO_TRIGGER_ID) {

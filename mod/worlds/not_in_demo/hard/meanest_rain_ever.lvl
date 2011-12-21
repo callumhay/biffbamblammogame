@@ -1,6 +1,6 @@
-meanest_rain_ever
+Meanest Rain Ever
 13 27
-E E D(powerdowns){0} E D(powerdowns){1} E D(powerdowns){2} E D(powerdowns){3} E D(powerdowns){4} E E 
+E E D(powerdowns,{0}) E D(powerdowns,{1}) E D(powerdowns,{2}) E D(powerdowns,{3}) E D(powerdowns,{4}) E E 
 S F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -29,18 +29,18 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 
 STARS:
-100
-500
-1000
-2000
-5000
+9000
+13000
+16000
+20000
+25000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 0
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

@@ -19,7 +19,7 @@ S E E F(r) E R O R R R O R E F(l) E E S
 S E C(70-140) F(r) Y R Y O B O Y R Y F(l) C(225-300) E S 
 S X(i,j) E F(r) E R G Y G Y G R E F(l) E X(k,l) S 
 S C(70-140) E F(r) G R R R R R R R G F(l) E C(225-300) S 
-S E E F(r) E O O O O O O O E F(l) E E S 
+S E E F(r) E E E E E E E E E F(l) E E S 
 S E E F(r) E E E E E E E E E F(l) E E S 
 S E C(90-110) F(r) E E E E E E E E E F(l) C(250-270) E S 
 S X(m,n) E F(r) E E E E E E E E E F(l) E X(o,p) S 
@@ -32,8 +32,8 @@ STARS:
 13900
 21000
 29200
-35300
-40100
+36300
+45000
 
 PaddleGrow 2
 PoisonPaddle 2

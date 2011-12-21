@@ -192,6 +192,7 @@ public:
 
 	// Attach/detach ball functions
 	void Shoot(GameModel* gameModel);
+    void ShootBall();
 	bool AttachBall(GameBall* ball);
 	
 	/** 

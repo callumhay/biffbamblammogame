@@ -1,10 +1,10 @@
 Watch for Falling Objects
 13 26
 S S S S S S S S S S S S S 
-S G Y G Y G Y G Y G Y G S 
-S G G G Y G G G Y G G G S 
-S G L G Y G L G Y G L G S 
-S G S G Y G S G Y G S G S 
+S E E G Y G Y G Y G E E S 
+S E G G Y G G G Y G G E S 
+S E L G Y G L G Y G L E S 
+S E S G Y G S G Y G S E S 
 S E Y E O E E E O E Y E S 
 S E Y E E E O E E E Y E S 
 S G G G G G Y G G G G G S 
@@ -28,18 +28,18 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 
 STARS:
-2000
-5000
-8000
 10000
-12000
+15000
+22000
+34000
+45000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -61,7 +61,7 @@ MultiBall3 2
 IceBall 2
 SlowBall 2
 GravityBall 2
-CrazyBall 2
+CrazyBall 0
 Random 2
 FastBall 2
 PaddleCam 2

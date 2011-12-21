@@ -515,7 +515,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 
 		CgFxMaterialEffect* currMaterial = currMaterialIter->second;
 		PolygonGroup* currPolyGrp        = iter->second->GetPolygonGroup();
-		const Colour& currColour         = piece->GetColour();
+		const ColourRGBA& currColour         = piece->GetColour();
 
 		assert(currMaterial != NULL);
 		assert(currPolyGrp != NULL);
@@ -532,7 +532,7 @@ void LevelMesh::CreateDisplayListsForPiece(const LevelPiece* piece, const Vector
 		
 		// TODO: other local transform operations to the mesh e.g., reflect, rotate, etc.
 		glNewList(newDisplayList, GL_COMPILE);
-		glColor3fv(currColour.begin());
+		glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
 		currPolyGrp->Draw();
 		glEndList();
 		

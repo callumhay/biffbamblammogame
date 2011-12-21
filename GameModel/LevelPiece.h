@@ -66,8 +66,8 @@ public:
 	const BoundingLines& GetBounds() const { return this->bounds; }
 	size_t GetWidthIndex() const { return this->wIndex; }
 	size_t GetHeightIndex() const { return this->hIndex; }
-	const Colour& GetColour() const { return this->colour; }
-	void SetColour(const Colour& c) { this->colour = c; }
+	const ColourRGBA& GetColour() const { return this->colour; }
+	void SetColour(const ColourRGBA& c) { this->colour = c; }
 
 	virtual Matrix4x4 GetPieceToLevelTransform() const {
 		return Matrix4x4::translationMatrix(Vector3D(this->center[0], this->center[1], 0.0f));
@@ -131,7 +131,7 @@ public:
 	void DebugDraw() const;
 
 protected:
-	Colour colour;            // The colour of this level piece
+	ColourRGBA colour;        // The colour of this level piece
 	Point2D center;           // The exact center of this piece in the game model
 	size_t wIndex, hIndex;    // The width and height index to where this block is in its level
 	BoundingLines bounds;     // The bounding box, rep. as lines forming the boundry of this, kept in world space

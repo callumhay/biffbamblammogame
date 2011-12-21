@@ -1,21 +1,21 @@
 Acute Electrocution
 13 30
-S S S S S S S S S A(0,1,a,b) S S S 
+S S S S S S S S S S S S S 
 S E E A(0,1,g,h){1} E E E E E E E E S 
-S G G S G G G G E E E E S 
-S G G S G G G G E E E E S 
-S G G S G G G G G S E E S 
+S G G S G G G G G E E E S 
+S G G S G G G G G E E E S 
+S G G S G G G G G E E E S 
 S G G S A(0,1,d,c) R S S S S S A(0,1,c,d){2} S 
-S G G S G G G G G S G G S 
-S Y Y S G G G G G S Y Y S 
-S Y Y S O O B O O S Y Y S 
-S G G S Y Y Y Y Y S G G S 
-S G G S G G G G G S G G S 
-S Y Y S Y Y Y Y Y S Y Y S 
-S Y Y S G G G G G A(0,1,b,a) Y Y S 
+S G G S G G G G G G G G S 
+S Y Y S G G G G G Y Y Y S 
+S Y Y S O O B O O Y Y Y S 
+S G G S Y Y Y Y Y G G G S 
+S G G S G G G G G G G G S 
+S Y Y S Y Y Y Y Y Y Y Y S 
+S Y Y S G G G G G Y Y Y S 
 S E E A(0,1,h,g) E E E E E E E E S 
 S E E E E E E E E E E E S 
-A(0,1,i,k) E E E E S S S S S S A(0,1,k,i) S 
+A(0,1,i,k){5} E E E E S S S S S S A(0,1,k,i) S 
 S O O O O Y Y Y Y Y Y R S 
 S G G G G G G G G G G G S 
 S E E E E E E E E E E E S 
@@ -29,14 +29,14 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
-W(1) E E E E E E E E E E E W(2) 
+W(5) E E E E E E E E E E E W(1) 
 
 STARS:
-33000
-44000
-65000
-75000
-83000
+25000
+30000
+40000
+50000
+64100
 
 PaddleGrow 2
 PoisonPaddle 2
@@ -60,6 +60,7 @@ BallShrink 3
 UpsideDown 2
 MultiBall5 2
 BallCam 2
+MagnetPaddle 2
 MultiBall3 2
 IceBall 2
 SlowBall 2

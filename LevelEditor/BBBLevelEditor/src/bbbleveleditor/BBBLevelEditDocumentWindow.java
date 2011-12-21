@@ -555,7 +555,6 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 					}
 					else if (currPieceLbl.getIsCannonBlock()) {
 						
-						
 						String outputStr = currLvlPiece.getSymbol() + "(";
 						if (currPieceLbl.getCannonBlockDegAngle1() == currPieceLbl.getCannonBlockDegAngle2()) {
 							outputStr = outputStr + currPieceLbl.getCannonBlockDegAngle1();

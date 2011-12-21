@@ -120,6 +120,10 @@ public:
 	const char* TEXTURE_FROST;
 	const char* TEXTURE_FULLSCREEN_FROST;
     const char* TEXTURE_VAPOUR_TRAIL;
+    const char* TEXTURE_FUTURISM_SHARD_1;
+    const char* TEXTURE_FUTURISM_SHARD_2;
+    const char* TEXTURE_FUTURISM_SHARD_3;
+    const char* TEXTURE_FUTURISM_SHARD_4;
 
     const char* TEXTURE_MULTIPLIER_BANG;
     const char* TEXTURE_MULTIPLIER_GAGE_OUTLINE;

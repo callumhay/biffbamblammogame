@@ -125,6 +125,27 @@ filepath(filepath), levelName(levelName), highScore(0) {
     for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
         this->starAwardScores[i] = starAwardScores[i];
     }
+
+    // When a no-entry block is in the paddle area we make its partially visible to indicate
+    // that the paddle can move through it
+    for (size_t i = 0; i < this->width; i++) {
+        LevelPiece* currPiece = this->currentLevelPieces[0][i];
+        if (currPiece->GetType() == LevelPiece::NoEntry) {
+            ColourRGBA currColour = currPiece->GetColour();
+            currColour[3] = 0.5f;
+            currPiece->SetColour(currColour);
+
+            if (this->height > 1) {
+                LevelPiece* pieceAbove = this->currentLevelPieces[1][i];
+                if (pieceAbove->GetType() == LevelPiece::NoEntry) {
+                    ColourRGBA currColour = pieceAbove->GetColour();
+                    currColour[3] = 0.5f;
+                    pieceAbove->SetColour(currColour);
+                }
+            }
+        }
+    }
+
 }
 
 // Destructor, clean up heap stuffs
@@ -551,8 +572,8 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 
 							// Set the same colour for both the current and sibling portal blocks
 							const Colour& portalBlockColour = PortalBlock::GeneratePortalColour();
-							currentPortalBlock->SetColour(portalBlockColour);
-							siblingPortalBlock->SetColour(portalBlockColour);
+							currentPortalBlock->SetColour(ColourRGBA(portalBlockColour, 1.0f));
+							siblingPortalBlock->SetColour(ColourRGBA(portalBlockColour, 1.0f));
 						}
 
 						newPiece = currentPortalBlock;
@@ -1770,4 +1791,14 @@ void GameLevel::InitAfterLevelLoad(GameModel* model) {
 			}
 		}
 	}
+}
+
+float GameLevel::GetPaddleMinBound() const {
+	LevelPiece* temp = this->GetMinPaddleBoundPiece();
+	return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+}
+
+float GameLevel::GetPaddleMaxBound() const {
+    LevelPiece* temp = this->GetMaxPaddleBoundPiece();
+	return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;	
 }
