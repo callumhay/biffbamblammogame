@@ -1,23 +1,23 @@
 Freezing Hot
 13 27
-E E E E E T(S,lr) S T(S,ll) E E E E E 
-S S S S S S R S S S S S S 
-S S S S E E R E E S S S S 
-S S D(FireBall) T(S,ul) E R R R E T(S,ur) D(IceBall) S S 
-S R E E E R R R E E E R S 
-S R E E R R O R R E E R S 
-S R E E R O O O R E E R S 
-S R E E R O Y O R E E R S 
-S O E R O O Y O O R E O S 
-S O E R O Y Y Y O R E O S 
-S O E R O Y Y Y O R E O S 
-S O E R O Y Y Y O R E O S 
-S O E R O Y Y Y O R E O S 
+E E E E S S S S S E E E E 
+E E E S S E R E S S E E E 
+E S S S E E R E E S S S E 
+S S E E E R R R E E E S S 
+S E E E E R R R E E E E S 
+S Y E E R R O R R E E Y S 
+S E E E R O O O R E E E S 
+S Y E T(R,lr) R O Y O R T(R,ll) E Y S 
+S E E R O O Y O O R E E S 
+S Y E R O Y Y Y O R E Y S 
+S E E R O Y Y Y O R E E S 
+S Y E R O Y Y Y O R E Y S 
+S E E R O Y Y Y O R E E S 
 S Y E T(R,ur) R Y Y Y R T(R,ul) E Y S 
-S Y E E R O Y O R E E Y S 
-S Y E E R O Y O R E E Y S 
-S Y E E E R R R E E E Y S 
-S Y E E E E R E E E E Y S 
+S E E E R O Y O R E E E S 
+S E E E R O Y O R E E E S 
+S E E E E R R R E E E E S 
+S E E E E E R E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -29,39 +29,40 @@ S E E E E E E E E E E E S
 S E E E E E E E E E E E S 
 
 STARS:
-100
-500
-1000
-2000
-5000
+4000
+6000
+9000
+18000
+22000
 
-PaddleGrow 2
-PoisonPaddle 2
-BallSafetyNet 2
-Blackout 2
-UberBall 2
-BallGrow 2
-StickyPaddle 2
-ShieldPaddle 2
-LaserBulletPaddle 2
-1Up 2
-PaddleShrink 2
-InvisiPaddle 2
-InvisiBall 2
-LaserBeamPaddle 2
-OmniLaserBall 2
-FireBall 3
+PaddleGrow 0
+PoisonPaddle 0
+BallSafetyNet 0
+Blackout 0
+UberBall 0
+BallGrow 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+1Up 0
+PaddleShrink 0
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 2
 RocketPaddle 0
-GhostBall 2
-BallShrink 2
-UpsideDown 2
-MultiBall5 2
+GhostBall 0
+BallShrink 0
+UpsideDown 0
+MultiBall5 0
 BallCam 0
-MultiBall3 2
-IceBall 3
-SlowBall 2
-GravityBall 2
-CrazyBall 2
-Random 2
-FastBall 2
+MagnetPaddle 0
+MultiBall3 0
+IceBall 2
+SlowBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+FastBall 0
 PaddleCam 0

@@ -293,7 +293,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireFlameEffect(const Le
 	else {
 		pulsingFlame->AddEffector(&this->smokeRotatorCCW);
 	}
-	bool result = pulsingFlame->SetParticles(10, &this->fireEffect);
+	bool result = pulsingFlame->SetParticles(8, &this->fireEffect);
     UNUSED_VARIABLE(result);
 	pulsingFlame->SimulateTicking(Randomizer::GetInstance()->RandomNumZeroToOne() * 10);
 	assert(result);
@@ -316,7 +316,7 @@ ESPPointEmitter* BlockStatusEffectRenderer::BuildBlockOnFireSmokeEffect(const Le
 	smokeClouds->SetEmitPosition(Point3D(piece.GetCenter()));
 	smokeClouds->SetEmitDirection(Vector3D(0, 1, 0));
 	smokeClouds->SetEmitAngleInDegrees(30.0f);
-	smokeClouds->SetParticles(5, this->smokePuffTextures[randomTexIdx]);
+	smokeClouds->SetParticles(4, this->smokePuffTextures[randomTexIdx]);
 	smokeClouds->AddEffector(&this->particleLargeGrowth);
 	smokeClouds->AddEffector(&this->fireColourEffector);
 

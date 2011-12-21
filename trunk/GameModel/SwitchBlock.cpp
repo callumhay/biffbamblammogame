@@ -54,6 +54,56 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
 
+	static const float HALF_SWITCH_HEIGHT_BOUND = LevelPiece::HALF_PIECE_HEIGHT;
+	static const float HALF_SWITCH_WIDTH_BOUND  = LevelPiece::HALF_PIECE_WIDTH;
+
+	// Left boundry of the piece
+	if (leftNeighbor != NULL) {
+        if (leftNeighbor->GetType() != LevelPiece::Solid) {
+		    Collision::LineSeg2D l1(this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND), 
+								     this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND));
+		    Vector2D n1(-1, 0);
+		    boundingLines.push_back(l1);
+		    boundingNorms.push_back(n1);
+        }
+	}
+
+	// Bottom boundry of the piece
+	if (bottomNeighbor != NULL) {
+        if (bottomNeighbor->GetType() != LevelPiece::Solid) {
+		    Collision::LineSeg2D l2(this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND),
+								     this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND));
+		    Vector2D n2(0, -1);
+		    boundingLines.push_back(l2);
+		    boundingNorms.push_back(n2);
+        }
+	}
+
+	// Right boundry of the piece
+	if (rightNeighbor != NULL) {
+        if (rightNeighbor->GetType() != LevelPiece::Solid) {
+		    Collision::LineSeg2D l3(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, -HALF_SWITCH_HEIGHT_BOUND),
+								     this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND));
+		    Vector2D n3(1, 0);
+		    boundingLines.push_back(l3);
+		    boundingNorms.push_back(n3);
+        }
+	}
+
+	// Top boundry of the piece
+	if (topNeighbor != NULL) {
+        if (topNeighbor->GetType() != LevelPiece::Solid) {
+		    Collision::LineSeg2D l4(this->center + Vector2D(HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND),
+								     this->center + Vector2D(-HALF_SWITCH_WIDTH_BOUND, HALF_SWITCH_HEIGHT_BOUND));
+		    Vector2D n4(0, 1);
+		    boundingLines.push_back(l4);
+		    boundingNorms.push_back(n4);
+        }
+	}
+
+	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
+        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+    /*
     static const float HALF_SWITCH_WIDTH  = SWITCH_WIDTH / 2.0f;
     static const float HALF_SWITCH_HEIGHT = SWITCH_HEIGHT / 2.0f;
 
@@ -121,6 +171,7 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
     
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
 		 			topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
+    */
 }
 
 bool SwitchBlock::ProjectilePassesThrough(Projectile* projectile) const {

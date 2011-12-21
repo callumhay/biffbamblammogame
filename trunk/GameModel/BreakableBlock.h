@@ -112,7 +112,7 @@ protected:
 	// Decrements this piecetype to the next lesser breakable piece type.
 	void DecrementPieceType() {
 		this->pieceType = BreakableBlock::GetDecrementedPieceType(this->pieceType);
-		this->colour    = BreakableBlock::GetColourOfBreakableType(this->pieceType);
+		this->colour    = ColourRGBA(BreakableBlock::GetColourOfBreakableType(this->pieceType), 1.0f);
 	}
 
 	LevelPiece* DiminishPiece(GameModel* gameModel, const LevelPiece::DestructionMethod& method);

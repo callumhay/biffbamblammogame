@@ -16,19 +16,7 @@
 
 #include "../ResourceManager.h"
 
-const float DecoWorldAssets::COLOUR_CHANGE_TIME = 10.0f;	// Amount of time in seconds to change from one colour to the next
-const Colour DecoWorldAssets::COLOUR_CHANGE_LIST[DecoWorldAssets::NUM_COLOUR_CHANGES] = {
-	Colour(0.4375f, 0.5f, 0.5647f),							// slate greyish-blue
-	Colour(0.2745098f, 0.5098039f, 0.70588f),		// steel blue
-	Colour(0.28235f, 0.2392f, 0.545098f),				// slate purple-blue
-	Colour(0.51372549f, 0.4352941f, 1.0f),			// slate purple
-	Colour(0.8588235f, 0.439215686f, 0.57647f),	// pale violet
-	Colour(0.8f, 0.55686f, 0.55686f),						// rosy brown 
-	Colour(0.7215686f, 0.52549f, 0.043f),				// goldenrod
-	Colour(0.4196f, 0.5568627f, 0.1372549f),		// olive
-	Colour(0.4f, 0.8039215f, 0.666667f),				// deep aquamarine
-	Colour(0.3725f, 0.6196078f, 0.62745098f)		// cadet (olive-) blue
-};
+
 
 // Basic constructor: Load all the basic assets for the deco world...
 DecoWorldAssets::DecoWorldAssets() : 
@@ -63,22 +51,6 @@ rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
 	this->beamEffect->SetScale(0.05f);
 	this->beamEffect->SetFrequency(4.0f);
 	this->beamEffect->SetAlphaMultiplier(0.55f);
-
-	// Setup the colour animations for the background mesh
-	const int colourChangesPlusOne = DecoWorldAssets::NUM_COLOUR_CHANGES + 1;
-	std::vector<double> timeValues;
-	timeValues.reserve(colourChangesPlusOne);
-	std::vector<Colour> colourValues;
-	colourValues.reserve(colourChangesPlusOne);
-
-	for (int i = 0; i < colourChangesPlusOne; i++) {
-		timeValues.push_back(i * DecoWorldAssets::COLOUR_CHANGE_TIME);
-		colourValues.push_back(DecoWorldAssets::COLOUR_CHANGE_LIST[i % DecoWorldAssets::NUM_COLOUR_CHANGES]);
-	}
-
-	this->currBGMeshColourAnim.SetRepeat(true);
-	this->currBGMeshColourAnim.SetLerp(timeValues, colourValues);
-
 
 	// Setup the background emitters
 	this->InitializeEmitters();
@@ -193,11 +165,8 @@ void DecoWorldAssets::Tick(double dT) {
 	// Rotate the background effect (sky beams)
 	this->RotateSkybeams(dT);
 
-	// Interpolate the colour animation
-	this->currBGMeshColourAnim.Tick(dT);
-
 	// Tick the effects with the appropriate colour and alpha set...
-	Colour spiralColour = this->currBGMeshColourAnim.GetInterpolantValue();
+	const Colour& spiralColour = this->currBGMeshColourAnim.GetInterpolantValue();
 	float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
 
 	this->spiralEmitterSm.Tick(dT);
@@ -295,11 +264,6 @@ void DecoWorldAssets::RotateSkybeams(double dT) {
 }
 
 void DecoWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight, const BasicPointLight& bgFillLight) {
-	float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
-	if (currBGAlpha == 0) {
-		return;
-	}
-	
 	// Draw spiral effects behind the background model
 	this->spiralEmitterSm.Draw(camera);
 	this->spiralEmitterMed.Draw(camera);
@@ -307,7 +271,7 @@ void DecoWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPoint
 
 	const Colour& currBGModelColour = this->currBGMeshColourAnim.GetInterpolantValue();
 	glPushAttrib(GL_CURRENT_BIT);
-	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), currBGAlpha);
+	glColor4f(currBGModelColour.R(), currBGModelColour.G(), currBGModelColour.B(), this->bgFadeAnim.GetInterpolantValue());
 	this->background->Draw(camera, bgKeyLight, bgFillLight);
 	glPopAttrib();
 }

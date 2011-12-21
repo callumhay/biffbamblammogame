@@ -22,7 +22,7 @@ LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLi
 fireGlobTimeCounter(0.0) {
 	assert(IsValidBreakablePieceType(type));
 
-	this->colour = BreakableBlock::GetColourOfBreakableType(this->pieceType);
+	this->colour = ColourRGBA(BreakableBlock::GetColourOfBreakableType(this->pieceType), 1.0f);
 }
 
 

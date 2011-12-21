@@ -97,7 +97,7 @@ public class LevelPieceImageLabel extends JLabel {
 		else if (pieceSymbol.length() >= 3 &&  pieceSymbol.substring(0, 2).equals(LevelPiece.ITEM_DROP_PIECE_SYMBOL + "(")) {
 			String[] itemDropTypeNames = pieceSymbol.substring(2, pieceSymbol.length()).split("[\\(,\\)]");
 			for (int i = 0; i < itemDropTypeNames.length; i++) {
-				if (itemDropTypeNames[i].length() > 1) {
+				if (itemDropTypeNames[i].length() > 1 && !itemDropTypeNames[i].contains("{") && !itemDropTypeNames[i].contains("}")) {
 					this.itemDropTypes.add(itemDropTypeNames[i]);
 				}
 			}
@@ -128,6 +128,9 @@ public class LevelPieceImageLabel extends JLabel {
 			justTheSymbol = LevelPiece.SWITCH_PIECE_SYMBOL;
 		}
 
+		LevelPiece piece = LevelPiece.LevelPieceCache.get(justTheSymbol);
+		this.setLevelPiece(piece);
+		
 		// Check for a trigger ID...
 		int triggerIDStart = pieceSymbol.indexOf('{');
 		if (triggerIDStart != -1) {
@@ -137,9 +140,6 @@ public class LevelPieceImageLabel extends JLabel {
 		else {
 			this.triggerID = LevelPiece.NO_TRIGGER_ID;
 		}
-		
-		LevelPiece piece = LevelPiece.LevelPieceCache.get(justTheSymbol);
-		this.setLevelPiece(piece);
 	}
 
 	public void setLevelPiece(LevelPiece piece) {
