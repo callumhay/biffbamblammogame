@@ -119,7 +119,7 @@ int InkBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
  */
 LevelPiece* InkBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this);
+	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
 	// Check to see if the ink block is frozen...
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {

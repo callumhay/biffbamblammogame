@@ -145,7 +145,7 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructi
 			LevelPiece* currDestroyedBomb = *iter;
 			assert(currDestroyedBomb->GetType() == LevelPiece::Bomb);
 			if (currDestroyedBomb != this) {
-				GameEventManager::Instance()->ActionBlockDestroyed(*currDestroyedBomb);
+                GameEventManager::Instance()->ActionBlockDestroyed(*currDestroyedBomb, LevelPiece::BombDestruction);
 				
                 level->PieceChanged(gameModel, currDestroyedBomb, 
                     new EmptySpaceBlock(currDestroyedBomb->GetWidthIndex(), currDestroyedBomb->GetHeightIndex()),
@@ -163,7 +163,7 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructi
 
 	// Obliterate this bomb
 	// EVENT: Bomb Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this);
+	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 	LevelPiece* emptyPieceForBomb = new EmptySpaceBlock(this->wIndex, this->hIndex);
 	level->PieceChanged(gameModel, this, emptyPieceForBomb, method);
 	LevelPiece* tempThis = this;

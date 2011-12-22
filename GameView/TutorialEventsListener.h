@@ -34,7 +34,7 @@ public:
 
     // Overridden event methods
     void BallShotEvent(const GameBall& shotBall);
-    void BlockDestroyedEvent(const LevelPiece& block);
+    void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
     void ItemActivatedEvent(const GameItem& item);
     void PaddleWeaponFiredEvent();
     void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
@@ -89,8 +89,9 @@ inline void TutorialEventsListener::BallShotEvent(const GameBall& shotBall) {
     this->shootBallHint->Unshow(0.0, 0.5);
 }
 
-inline void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
+inline void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
     UNUSED_PARAMETER(block);
+    UNUSED_PARAMETER(method);
     this->numBlocksDestroyed++;
 }
 

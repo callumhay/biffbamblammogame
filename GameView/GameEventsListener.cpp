@@ -499,7 +499,7 @@ void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, con
 	debug_output("EVENT: Ball hit tesla lightning arc");
 }
 
-void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
+void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
 	bool wasFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 
 	// Add the effects based on the type of block that is being destroyed...
@@ -579,7 +579,8 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block) {
 
 				// We do not do any ink blotches while in ball or paddle camera modes, also, if the ink block is frozen
 				// then it just shatters...
-				bool inkSplatter = !(paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) && !wasFrozen;
+				bool inkSplatter = !(paddle->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) && !wasFrozen &&
+                    method != LevelPiece::BombDestruction && method != LevelPiece::RocketDestruction;
 
 				if (wasFrozen) {
 					// Add ice break effect

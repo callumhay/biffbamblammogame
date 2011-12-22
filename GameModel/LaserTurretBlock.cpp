@@ -185,7 +185,7 @@ LevelPiece* LaserTurretBlock::Destroy(GameModel* gameModel, const LevelPiece::De
     }
     
     // EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this);
+	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
 	// Tell the level that this piece has changed to empty...
 	GameLevel* level = gameModel->GetCurrentLevel();

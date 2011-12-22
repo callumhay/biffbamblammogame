@@ -76,7 +76,7 @@ public:
 
 	void ActionBallPaddleCollision(const GameBall& ball, const PlayerPaddle& paddle);
 	void ActionBallBallCollision(const GameBall& ball1, const GameBall& ball2);
-	void ActionBlockDestroyed(const LevelPiece& block);
+	void ActionBlockDestroyed(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
 	void ActionBallSafetyNetCreated();
 	void ActionBallSafetyNetDestroyed(const GameBall& ball);
 	void ActionBallSafetyNetDestroyed(const PlayerPaddle& paddle);
