@@ -209,7 +209,8 @@ bool BallBoostModel::BallBoosterPressed() {
  */
 bool BallBoostModel::IsBallAvailableForBoosting() const {
     // No boosting allowed if ball camera or paddle camera is active
-    if (gameModel->GetPlayerPaddle()->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn()) {
+    if (this->gameModel->GetPlayerPaddle()->GetIsPaddleCameraOn() || GameBall::GetIsBallCameraOn() ||
+        this->gameModel->GetTransformInfo()->GetIsLevelFlipAnimationActive()) {
         return false;
     }
 

@@ -34,8 +34,9 @@ namespace TriangleBlock {
 	Matrix4x4 GetInvOrientationMatrix(Orientation orient);
 
 	Vector2D GetSideNormal(bool generateReflectRefractNormals, SideType side, Orientation orient);
+    bool GetOrientation(const LevelPiece* piece, Orientation& orient);
 
-    static inline bool IsTriangleType(const LevelPiece& piece) {
+    inline bool IsTriangleType(const LevelPiece& piece) {
         return (piece.GetType() == LevelPiece::BreakableTriangle || piece.GetType() == LevelPiece::SolidTriangle ||
                piece.GetType() == LevelPiece::PrismTriangle);
     }

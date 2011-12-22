@@ -14,6 +14,7 @@
 #include "Projectile.h"
 #include "GameModel.h"
 #include "GameEventManager.h"
+#include "TriangleBlocks.h"
 
 SolidBlock::SolidBlock(unsigned int wLoc, unsigned int hLoc) : LevelPiece(wLoc, hLoc) {
 }
@@ -101,11 +102,20 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::LaserTurret && 
             leftNeighbor->GetType() != LevelPiece::RocketTurret && leftNeighbor->GetType() != LevelPiece::NoEntry &&
             leftNeighbor->GetType() != LevelPiece::Tesla && leftNeighbor->GetType() != LevelPiece::Switch) {
-			Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
-									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n1(-1, 0);
-			boundingLines.push_back(l1);
-			boundingNorms.push_back(n1);
+
+            bool shouldGenBounds = true;
+            TriangleBlock::Orientation triOrientation;
+            if (TriangleBlock::GetOrientation(leftNeighbor, triOrientation)) {
+                shouldGenBounds = triOrientation != TriangleBlock::UpperRight && triOrientation != TriangleBlock::LowerRight;
+            }
+
+            if (shouldGenBounds) {
+			    Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
+									    this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+			    Vector2D n1(-1, 0);
+			    boundingLines.push_back(l1);
+			    boundingNorms.push_back(n1);
+            }
 		}
 	}
 
@@ -114,11 +124,20 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::LaserTurret && 
             bottomNeighbor->GetType() != LevelPiece::RocketTurret && bottomNeighbor->GetType() != LevelPiece::NoEntry &&
             bottomNeighbor->GetType() != LevelPiece::Tesla && bottomNeighbor->GetType() != LevelPiece::Switch) {
-			Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n2(0, -1);
-			boundingLines.push_back(l2);
-			boundingNorms.push_back(n2);
+
+            bool shouldGenBounds = true;
+            TriangleBlock::Orientation triOrientation;
+            if (TriangleBlock::GetOrientation(bottomNeighbor, triOrientation)) {
+                shouldGenBounds = triOrientation != TriangleBlock::UpperRight && triOrientation != TriangleBlock::UpperLeft;
+            }
+
+            if (shouldGenBounds) {
+			    Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+									     this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
+			    Vector2D n2(0, -1);
+			    boundingLines.push_back(l2);
+			    boundingNorms.push_back(n2);
+            }
 		}
 	}
 
@@ -127,11 +146,20 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::LaserTurret && 
             rightNeighbor->GetType() != LevelPiece::RocketTurret && rightNeighbor->GetType() != LevelPiece::NoEntry &&
             rightNeighbor->GetType() != LevelPiece::Tesla && rightNeighbor->GetType() != LevelPiece::Switch) {
-			Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n3(1, 0);
-			boundingLines.push_back(l3);
-			boundingNorms.push_back(n3);
+
+            bool shouldGenBounds = true;
+            TriangleBlock::Orientation triOrientation;
+            if (TriangleBlock::GetOrientation(rightNeighbor, triOrientation)) {
+                shouldGenBounds = triOrientation != TriangleBlock::UpperLeft && triOrientation != TriangleBlock::LowerLeft;
+            }
+
+            if (shouldGenBounds) {
+			    Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
+									     this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+			    Vector2D n3(1, 0);
+			    boundingLines.push_back(l3);
+			    boundingNorms.push_back(n3);
+            }
 		}
 	}
 
@@ -140,11 +168,21 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 		if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret && 
             topNeighbor->GetType() != LevelPiece::RocketTurret && topNeighbor->GetType() != LevelPiece::NoEntry &&
             topNeighbor->GetType() != LevelPiece::Tesla && topNeighbor->GetType() != LevelPiece::Switch) {
-			Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-			Vector2D n4(0, 1);
-			boundingLines.push_back(l4);
-			boundingNorms.push_back(n4);
+
+
+            bool shouldGenBounds = true;
+            TriangleBlock::Orientation triOrientation;
+            if (TriangleBlock::GetOrientation(topNeighbor, triOrientation)) {
+                shouldGenBounds = triOrientation != TriangleBlock::LowerRight && triOrientation != TriangleBlock::LowerLeft;
+            }
+
+            if (shouldGenBounds) {
+			    Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
+									     this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+			    Vector2D n4(0, 1);
+			    boundingLines.push_back(l4);
+			    boundingNorms.push_back(n4);
+            }
 		}
 	}
 

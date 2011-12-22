@@ -182,50 +182,55 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 					}
 
 					// Send the laser flying out the hypotenuse side if it hit within a certain angle
-					const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(std::min<float>(1.0f, 
+					const float angleOfIncidence = Trig::radiansToDegrees(acos(std::min<float>(1.0f, 
                         std::max<float>(-1.0f, Vector2D::Dot(-projectile->GetVelocityDirection(), collisionNormal)))));
-					const float CUTOFF_ANGLE = 15.0f;
+					static const float MIN_CUTOFF_ANGLE = 15.0f;
+                    static const float MAX_CUTOFF_ANGLE = 90.0f;
 
-					// Check to see if the collision was within the cut-off angle, if the laser
-					// almost hits the prism on the normal it will be refracted and/or split
-					// if it hits beyond the cut-off angle it will just be reflected
-					if (ANGLE_OF_INCIDENCE <= CUTOFF_ANGLE) {
+                    // Laser hit at a really wide angle... strange and should not really happen, just let the laser carry on
+                    if (angleOfIncidence <= MAX_CUTOFF_ANGLE) {
 
-						if (fabs(collisionNormal[1]) < EPSILON || fabs(collisionNormal[0]) < EPSILON) {
-							// Dealing with either the x-axis short-side or the y-axis long-side of the triangle prism:
-							// Refract the laser out the hypotenuse side of the triangle
-							projectile->SetPosition(this->GetCenter());
-							Vector2D hypNormal = TriangleBlock::GetSideNormal(true, TriangleBlock::HypotenuseSide, this->orient);
-							projectile->SetVelocity(hypNormal, projectile->GetVelocityMagnitude());
-						}
-						else {
-							// Hypotenuse collision:
-							// Split the laser in two and send it out both the long and short side of the triangle
-							Vector2D shortSideNormal = TriangleBlock::GetSideNormal(true, TriangleBlock::ShortSide, this->orient);
-							Vector2D longSideNormal  = TriangleBlock::GetSideNormal(true, TriangleBlock::LongSide, this->orient);
+					    // Check to see if the collision was within the cut-off angle, if the laser
+					    // almost hits the prism on the normal it will be refracted and/or split
+					    // if it hits beyond the cut-off angle it will just be reflected
+					    if (angleOfIncidence <= MIN_CUTOFF_ANGLE) {
 
-							// Send the current projectile out the long side, spawn a new one for the short side
-                            Projectile* newProjectile  = Projectile::CreateProjectileFromCopy(projectile); 
-                            newProjectile->SetPosition(Point2D(projectile->GetPosition()[0], this->GetCenter()[1])
-                                                       + projectile->GetHalfHeight() * shortSideNormal);
-							newProjectile->SetVelocity(shortSideNormal, projectile->GetVelocityMagnitude());
-							newProjectile->SetLastThingCollidedWith(this);
-							gameModel->AddProjectile(newProjectile);
+						    if (fabs(collisionNormal[1]) < EPSILON || fabs(collisionNormal[0]) < EPSILON) {
+							    // Dealing with either the x-axis short-side or the y-axis long-side of the triangle prism:
+							    // Refract the laser out the hypotenuse side of the triangle
+							    projectile->SetPosition(this->GetCenter());
+							    Vector2D hypNormal = TriangleBlock::GetSideNormal(true, TriangleBlock::HypotenuseSide, this->orient);
+							    projectile->SetVelocity(hypNormal, projectile->GetVelocityMagnitude());
+						    }
+						    else {
+							    // Hypotenuse collision:
+							    // Split the laser in two and send it out both the long and short side of the triangle
+							    Vector2D shortSideNormal = TriangleBlock::GetSideNormal(true, TriangleBlock::ShortSide, this->orient);
+							    Vector2D longSideNormal  = TriangleBlock::GetSideNormal(true, TriangleBlock::LongSide, this->orient);
 
-							projectile->SetPosition(Point2D(this->GetCenter()[0], projectile->GetPosition()[1])
-                                                    + projectile->GetHalfHeight() * shortSideNormal);
-							projectile->SetVelocity(longSideNormal, projectile->GetVelocityMagnitude());
-						}
-					}
-					else {
-						// Laser hit beyond the cut-off angle: reflect the laser
-						Vector2D newVelDir = Reflect(projectile->GetVelocityDirection(), collisionNormal);
-						newVelDir.Normalize();
-						
-						// Move the projectile to where it collided and change its velocity to reflect
-						projectile->SetPosition(projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection());
-						projectile->SetVelocity(newVelDir, projectile->GetVelocityMagnitude());
-					}
+							    // Send the current projectile out the long side, spawn a new one for the short side
+                                Projectile* newProjectile  = Projectile::CreateProjectileFromCopy(projectile); 
+                                newProjectile->SetPosition(Point2D(projectile->GetPosition()[0], this->GetCenter()[1])
+                                                           + projectile->GetHalfHeight() * shortSideNormal);
+							    newProjectile->SetVelocity(shortSideNormal, projectile->GetVelocityMagnitude());
+							    newProjectile->SetLastThingCollidedWith(this);
+							    gameModel->AddProjectile(newProjectile);
+
+							    projectile->SetPosition(Point2D(this->GetCenter()[0], projectile->GetPosition()[1])
+                                                        + projectile->GetHalfHeight() * shortSideNormal);
+							    projectile->SetVelocity(longSideNormal, projectile->GetVelocityMagnitude());
+						    }
+					    }
+					    else {
+						    // Laser hit beyond the cut-off angle: reflect the laser
+						    Vector2D newVelDir = Reflect(projectile->GetVelocityDirection(), collisionNormal);
+						    newVelDir.Normalize();
+    						
+						    // Move the projectile to where it collided and change its velocity to reflect
+						    projectile->SetPosition(projectile->GetPosition() + projectile->GetHalfHeight() * projectile->GetVelocityDirection());
+						    projectile->SetVelocity(newVelDir, projectile->GetVelocityMagnitude());
+					    }
+                    }
 
 					projectile->SetLastThingCollidedWith(this);
 				}
@@ -259,7 +264,10 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
  * Get the resulting reflection/refraction rays for the given hit point
  * on this prism triangle block with the given impact velocity direction.
  */
-void PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {
+void PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint,
+                                                     const Vector2D& impactDir,
+                                                     std::list<Collision::Ray2D>& rays) const {
+
 	Collision::Ray2D defaultRay(hitPoint, impactDir);	// This is what happens to the original ray
 	Vector2D negImpactDir = -impactDir;
 
@@ -291,37 +299,42 @@ void PrismTriangleBlock::GetReflectionRefractionRays(const Point2D& hitPoint, co
 	}
 
 	// Send the laser flying out the hypotenuse side if it hit within a certain angle
-	const float ANGLE_OF_INCIDENCE = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(negImpactDir, collisionNormal)))));
-	const float CUTOFF_ANGLE			 = 15.0f;
+	const float angleOfIncidence = Trig::radiansToDegrees(acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(negImpactDir, collisionNormal)))));
+	static const float MIN_CUTOFF_ANGLE = 15.0f;
+    static const float MAX_CUTOFF_ANGLE = 90.0f;
 
-	// Check to see if the collision was within the cut-off angle, if the laser
-	// almost hits the prism on the normal it will be refracted and/or split
-	// if it hits beyond the cut-off angle it will just be reflected
-	if (ANGLE_OF_INCIDENCE <= CUTOFF_ANGLE) {
+    // Laser hit at a really wide angle... strange and should not really happen, just let the laser carry on
+    if (angleOfIncidence <= MAX_CUTOFF_ANGLE) {
+	    // Check to see if the collision was within the cut-off angle, if the laser
+	    // almost hits the prism on the normal it will be refracted and/or split
+	    // if it hits beyond the cut-off angle it will just be reflected
+	    if (angleOfIncidence <= MIN_CUTOFF_ANGLE) {
 
-		if (fabs(collisionNormal[1]) < EPSILON || fabs(collisionNormal[0]) < EPSILON) {
-			// Dealing with either the x-axis short-side or the y-axis long-side of the triangle prism:
-			// Refract the laser out the hypotenuse side of the triangle
-			Vector2D hypNormal = TriangleBlock::GetSideNormal(true, TriangleBlock::HypotenuseSide, this->orient);
-			//defaultRay.SetOrigin(this->GetCenter());
-			defaultRay.SetUnitDirection(hypNormal);
-		}
-		else {
-			// Hypotenuse collision:
-			// Split the laser in two and send it out both the long and short side of the triangle
-			Vector2D shortSideNormal = TriangleBlock::GetSideNormal(true, TriangleBlock::ShortSide, this->orient);
-			Vector2D longSideNormal  = TriangleBlock::GetSideNormal(true, TriangleBlock::LongSide, this->orient);
+		    if (fabs(collisionNormal[1]) < EPSILON || fabs(collisionNormal[0]) < EPSILON) {
+			    // Dealing with either the x-axis short-side or the y-axis long-side of the triangle prism:
+			    // Refract the laser out the hypotenuse side of the triangle
+			    Vector2D hypNormal = TriangleBlock::GetSideNormal(true, TriangleBlock::HypotenuseSide, this->orient);
+			    //defaultRay.SetOrigin(this->GetCenter());
+			    defaultRay.SetUnitDirection(hypNormal);
+		    }
+		    else {
+			    // Hypotenuse collision:
+			    // Split the laser in two and send it out both the long and short side of the triangle
+			    Vector2D shortSideNormal = TriangleBlock::GetSideNormal(true, TriangleBlock::ShortSide, this->orient);
+			    Vector2D longSideNormal  = TriangleBlock::GetSideNormal(true, TriangleBlock::LongSide, this->orient);
 
-			defaultRay.SetUnitDirection(longSideNormal);
-			rays.push_back(Collision::Ray2D(hitPoint, shortSideNormal));
-		}
-	}
-	else {
-		// Laser hit beyond the cut-off angle: reflect the laser
-		Vector2D newVelDir = Reflect(impactDir, collisionNormal);
-		newVelDir.Normalize();
-		defaultRay.SetUnitDirection(newVelDir);
-	}
+			    defaultRay.SetUnitDirection(longSideNormal);
+			    rays.push_back(Collision::Ray2D(hitPoint, shortSideNormal));
+		    }
+	    }
+	    else {
+		    // Laser hit beyond the cut-off angle: reflect the laser
+		    Vector2D newVelDir = Reflect(impactDir, collisionNormal);
+		    newVelDir.Normalize();
+		    defaultRay.SetUnitDirection(newVelDir);
+	    }
+    }
+
 	rays.push_front(defaultRay);
 }
 
@@ -610,4 +623,31 @@ Vector2D TriangleBlock::GetSideNormal(bool generateReflectRefractNormals, SideTy
 	}
 
 	return Vector2D(0.0f, 0.0f);
+}
+
+bool TriangleBlock::GetOrientation(const LevelPiece* piece, Orientation& orient) {
+    switch (piece->GetType()) {
+        case LevelPiece::PrismTriangle: {
+            const PrismTriangleBlock* temp = static_cast<const PrismTriangleBlock*>(piece);
+            orient = temp->GetOrientation();
+            break;
+        }
+            
+        case LevelPiece::SolidTriangle: {
+            const SolidTriangleBlock* temp = static_cast<const SolidTriangleBlock*>(piece);
+            orient = temp->GetOrientation();
+            break;
+        }
+
+        case LevelPiece::BreakableTriangle: {
+            const BreakableTriangleBlock* temp = static_cast<const BreakableTriangleBlock*>(piece);
+            orient = temp->GetOrientation();
+            break;
+        }
+
+        default:
+            return false;
+    }
+
+    return true;
 }
