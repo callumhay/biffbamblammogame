@@ -34,7 +34,7 @@ BreakableBlock::~BreakableBlock() {
  */
 LevelPiece* BreakableBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this);
+	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
 	// When destroying a breakable there is the possiblity of dropping an item...
 	gameModel->AddPossibleItemDrop(*this);

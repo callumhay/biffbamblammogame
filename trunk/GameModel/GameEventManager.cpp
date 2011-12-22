@@ -215,10 +215,10 @@ void GameEventManager::ActionBallBallCollision(const GameBall& ball1, const Game
 }
 
 // Action for when a block is destroyed
-void GameEventManager::ActionBlockDestroyed(const LevelPiece& block) {
+void GameEventManager::ActionBlockDestroyed(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->BlockDestroyedEvent(block);
+		(*this->listenerIter)->BlockDestroyedEvent(block, method);
 	}	
 }
 

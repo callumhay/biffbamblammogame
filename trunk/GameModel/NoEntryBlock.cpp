@@ -32,7 +32,7 @@ int NoEntryBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const {
 
 LevelPiece* NoEntryBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
 	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this);
+	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
 	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 	    // EVENT: Ice was shattered

@@ -55,7 +55,7 @@ public:
 	void BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2);
 
 	// Misc game events
-	void BlockDestroyedEvent(const LevelPiece& block);
+	void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method);
 	void BallSafetyNetCreatedEvent();
 	void BallSafetyNetDestroyedEvent(const GameBall& ball);
 	void BallSafetyNetDestroyedEvent(const PlayerPaddle& paddle);

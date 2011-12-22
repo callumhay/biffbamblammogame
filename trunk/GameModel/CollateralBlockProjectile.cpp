@@ -22,7 +22,7 @@ collateralBlock(collateralBlock) {
 CollateralBlockProjectile::~CollateralBlockProjectile() {
 
 	// EVENT: Collateral block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this->collateralBlock);
+    GameEventManager::Instance()->ActionBlockDestroyed(*this->collateralBlock, LevelPiece::NotApplicableDestruction);
 
 	// Clean up the collateral block
 	delete this->collateralBlock;

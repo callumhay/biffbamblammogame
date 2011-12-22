@@ -266,10 +266,12 @@ public:
 	/**
 	 * Event triggered when a typical block is destoryed (turned into an empty space). Only occurs
 	 * once as the block is being destroyed.
-	 * Arguements: block - The block being destroyed, just before it is destroyed.
-	 */
-    virtual void BlockDestroyedEvent(const LevelPiece& block) {
+	 * Arguements: block  - The block being destroyed, just before it is destroyed.
+	 *             method - Method of block destruction.
+     */
+    virtual void BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
         UNUSED_PARAMETER(block);
+        UNUSED_PARAMETER(method);
     }
 
 	/**
