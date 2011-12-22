@@ -55,6 +55,8 @@ public:
 	Matrix4x4 GetCameraTransform() const;
 	float GetCameraFOVAngle() const;
 
+    bool GetIsLevelFlipAnimationActive() const;
+
 private:
 	// Each animation operates atomically, so we queue up animations as they are required
 	// and execute each in the order they come in, only
@@ -130,4 +132,9 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(GameTransformMgr);
 };
+
+inline bool GameTransformMgr::GetIsLevelFlipAnimationActive() const {
+    return !this->levelFlipAnimations.empty();
+}
+
 #endif
