@@ -320,13 +320,14 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
         }
         else {
             currList->ButtonPressed(pressedButton);
-            if (pressedButton == GameControl::EnterButtonAction) {
+            if (pressedButton == GameControl::EnterButtonAction || currList->GetIsItemActivated()) {
                 ItemListView::ListItem* selectedItem = currList->GetSelectedItem();
                 if (selectedItem != NULL) {
                     if (!selectedItem->GetIsLocked()) {
                         std::map<ItemListView::ListItem*, Blammopedia::Entry*>::iterator findIter = this->itemToEntryMap.find(selectedItem);
                         assert(findIter != this->itemToEntryMap.end());
                         findIter->second->SetHasBeenViewed(true);
+                        selectedItem->TurnOffNewLabel();
                     }
                 }
             }

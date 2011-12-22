@@ -544,8 +544,6 @@ void ItemListView::ItemActivated() {
         timeVals.push_back(4.0);
         this->pressEscAlphaAnim.SetLerp(timeVals, alphaVals);
         this->pressEscAlphaAnim.SetRepeat(true);
-
-        selectedItem->TurnOffNewLabel();
     }   
 }
 
