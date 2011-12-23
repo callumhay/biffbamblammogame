@@ -1795,10 +1795,21 @@ void GameLevel::InitAfterLevelLoad(GameModel* model) {
 
 float GameLevel::GetPaddleMinBound() const {
 	LevelPiece* temp = this->GetMinPaddleBoundPiece();
-	return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+    if (temp->IsNoBoundsPieceType()) {
+        return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+    }
+    else {
+	    return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+    }
 }
 
 float GameLevel::GetPaddleMaxBound() const {
     LevelPiece* temp = this->GetMaxPaddleBoundPiece();
-	return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;	
+
+    if (temp->IsNoBoundsPieceType()) {
+        return temp->GetCenter()[0] + LevelPiece::HALF_PIECE_WIDTH;
+    }
+    else {
+	    return temp->GetCenter()[0] - LevelPiece::HALF_PIECE_WIDTH;
+    }
 }
