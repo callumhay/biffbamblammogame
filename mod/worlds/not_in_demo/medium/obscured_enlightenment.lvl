@@ -1,0 +1,71 @@
+Obscured Enlightenment
+17 30
+E X(a,b) E S S S S S S S S S S S R E E 
+E E E S E E E E D(LaserBulletPaddle) E E E E S E E E 
+E E E N E E E G E G E E E N E E E 
+E E T(P,ul) N E E G E G E G E E N T(P,lr) E E 
+E E E N E G E G E G E G E N E E E 
+E T(P,ll) E N G E G E G E G E G N E T(P,ur) E 
+E E E N E Y E Y E Y E Y E N E E E 
+E E T(P,ll) N Y E Y E Y E Y E Y N T(P,ur) E E 
+E E E N O R O R O R O R O N E E E 
+E T(P,ul) E N G G G G G G G G G N E T(P,lr) E 
+E E E N G G G G G G G G G N E E E 
+E E T(P,ul) N O O O O O O O O O N T(P,lr) E E 
+E E E N Y Y Y Y Y Y Y Y Y N E E E 
+E T(P,ll) E N E G E G E G E G E N E T(P,ur) E 
+E E E N G E G E G E G E G N E E E 
+E E T(P,ll) N E G E G E G E G E N T(P,ur) E E 
+E E E N Y Y Y Y Y Y Y Y Y N E E E 
+E T(P,ul) E N O O O O O O O O O N E T(P,lr) E 
+E E E N G G G G G G G G G N E E E 
+E E T(P,ul) N G G G G G G G G G N T(P,lr) E E 
+E E E N E E E E E E E E E N E E E 
+E T(P,ll) E N E E E E E E E E E N E T(P,ur) E 
+E E E N E E E E E E E E E N E E E 
+E E T(P,ll) N E E E E E E E E E N T(P,ur) E E 
+E E E N E E E E E E E E E N E E E 
+E T(P,ul) E N E E E E E E E E E N E T(P,lr) E 
+E E E N E E E E E E E E E N X(b,a) E E 
+S F(u) S N E E E E E E E E E N S S S 
+S E E N E E E E E E E E E N E E S 
+S E E N E E E E E E E E E N E E S 
+
+STARS:
+10000
+13000
+16000
+18000
+20000
+
+PaddleGrow 0
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+1Up 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 0
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 2
+MagnetPaddle 2
+MultiBall3 2
+IceBall 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 2

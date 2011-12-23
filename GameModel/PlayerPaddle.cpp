@@ -1185,7 +1185,7 @@ bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, dou
  * as if being attracted by it.
  */
 void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesChangePerSec,
-                                                  const Point2D& centerPos, Vector2D& vectorToAugment) const {
+                                                  const Point2D& currCenter, Vector2D& vectorToAugment) const {
     // If the paddle has the magnet item active and the projectile is moving towards the paddle, then we need to
     // modify the velocity to make it move towards the paddle...
     if ((this->GetPaddleType() & PlayerPaddle::MagnetPaddle) != PlayerPaddle::MagnetPaddle) {
@@ -1193,12 +1193,12 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
     }
         
     // Also, don't keep augmenting the direction if the projectile has passed the paddle going out of bounds...
-    if (centerPos[1] < this->GetCenterPosition()[1]) {
+    if (currCenter[1] < this->GetCenterPosition()[1]) {
         return;
     }
 
     // Figure out the vector from the projectile to the paddle...
-    Vector2D projectileToPaddleVec = this->GetCenterPosition() - centerPos;
+    Vector2D projectileToPaddleVec = this->GetCenterPosition() - currCenter;
     projectileToPaddleVec.Normalize();
 
     if (Vector2D::Dot(vectorToAugment, projectileToPaddleVec) <= 0) {
@@ -1216,24 +1216,24 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
 
     float targetRotAngle = atan2(projectileToPaddleVec[1],  projectileToPaddleVec[0]);
 
+    if (currRotAngle > M_PI_DIV2) { currRotAngle -= M_PI_MULT2; }
+
+
     if (fabs(targetRotAngle - currRotAngle) <= 0.01) {
         // If the direction is already pointing at the paddle then exit immediately
         return;
     }
 
     // Figure out the shortest way to get there...
-    float targetMinusCurr = targetRotAngle - currRotAngle;
-    float currMinusTarget = currRotAngle   - targetRotAngle;
-
     float rotSgn;
-    if (fabs(targetMinusCurr) > fabs(currMinusTarget)) {
-        rotSgn = NumberFuncs::SignOf(currMinusTarget);
+    if (targetRotAngle < currRotAngle) {
+        rotSgn = -1;
     }
     else {
-        rotSgn = NumberFuncs::SignOf(targetMinusCurr);
+        rotSgn = 1;
     }
 
-    float rotationAmt = seconds * degreesChangePerSec * rotSgn;
+    float rotationAmt = rotSgn * seconds * degreesChangePerSec;
 
     Vector2D newVector(vectorToAugment);
     newVector.Rotate(rotationAmt);
