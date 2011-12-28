@@ -25,7 +25,7 @@
 #include "BlackoutItem.h"
 #include "UpsideDownItem.h"
 #include "BallSafetyNetItem.h"
-#include "OneUpItem.h"
+#include "LifeUpItem.h"
 #include "PoisonPaddleItem.h"
 #include "StickyPaddleItem.h"
 #include "PaddleCamItem.h"
@@ -61,7 +61,6 @@ GameItemFactory::GameItemFactory() {
 	itemNameToTypeMap.insert(std::make_pair(BlackoutItem::BLACKOUT_ITEM_NAME,                   GameItem::BlackoutItem));
 	itemNameToTypeMap.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,               GameItem::UpsideDownItem));
 	itemNameToTypeMap.insert(std::make_pair(BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME,       GameItem::BallSafetyNetItem));
-	itemNameToTypeMap.insert(std::make_pair(OneUpItem::ONE_UP_ITEM_NAME,                        GameItem::OneUpItem));
 	itemNameToTypeMap.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,          GameItem::PoisonPaddleItem));
 	itemNameToTypeMap.insert(std::make_pair(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME,          GameItem::StickyPaddleItem));
 	itemNameToTypeMap.insert(std::make_pair(PaddleCamItem::PADDLE_CAM_ITEM_NAME,                GameItem::PaddleCamItem));
@@ -94,7 +93,6 @@ GameItemFactory::GameItemFactory() {
 	allItemTypes.insert(GameItem::BlackoutItem);
 	allItemTypes.insert(GameItem::UpsideDownItem);
 	allItemTypes.insert(GameItem::BallSafetyNetItem);
-	allItemTypes.insert(GameItem::OneUpItem);
 	allItemTypes.insert(GameItem::PoisonPaddleItem);
 	allItemTypes.insert(GameItem::StickyPaddleItem);
 	allItemTypes.insert(GameItem::PaddleCamItem);
@@ -119,7 +117,6 @@ GameItemFactory::GameItemFactory() {
 	allPowerUpItemTypes.insert(GameItem::PaddleGrowItem);
 	allPowerUpItemTypes.insert(GameItem::BallGrowItem);
 	allPowerUpItemTypes.insert(GameItem::BallSafetyNetItem);
-	allPowerUpItemTypes.insert(GameItem::OneUpItem);
 	allPowerUpItemTypes.insert(GameItem::StickyPaddleItem);
 	allPowerUpItemTypes.insert(GameItem::LaserBeamPaddleItem);
 	allPowerUpItemTypes.insert(GameItem::RocketPaddleItem);
@@ -245,8 +242,8 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 		case GameItem::BallSafetyNetItem:
 			return new BallSafetyNetItem(spawnOrigin, gameModel);
 
-		case GameItem::OneUpItem:
-			return new OneUpItem(spawnOrigin, gameModel);
+		case GameItem::LifeUpItem:
+			return new LifeUpItem(spawnOrigin, gameModel);
 
 		case GameItem::PoisonPaddleItem:
 			return new PoisonPaddleItem(spawnOrigin, gameModel);
@@ -360,4 +357,20 @@ GameItem::ItemType GameItemFactory::CreateRandomItemTypeForCurrentLevel(GameMode
     }
 
 	return allowableItemDrops.at(randomNum);
+}
+
+GameItem::ItemDisposition GameItemFactory::GetItemTypeDisposition(const GameItem::ItemType& itemType) const {
+	if (this->allPowerUpItemTypes.find(itemType) != this->allPowerUpItemTypes.end()) {
+		return GameItem::Good;
+	}
+    // Special case for life-up item
+    if (itemType == GameItem::LifeUpItem) {
+        return GameItem::Good;
+    }
+
+	else if (this->allPowerNeutralItemTypes.find(itemType) != this->allPowerNeutralItemTypes.end()) {
+		return GameItem::Neutral;
+	}
+	
+	return GameItem::Bad;
 }

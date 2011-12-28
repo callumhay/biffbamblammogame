@@ -19,21 +19,16 @@
 
 #include "../ResourceManager.h"
 
-const Colour LivesLeftHUD::ELEMENT_BASE_COLOURS[] = {
-    Colour(1.0f, 0.0f, 0.0f), Colour(1.0f, 0.5f, 0.0f),
-    Colour(1.0f, 1.0f, 0.0f), Colour(0.6f, 1.0f, 0.0f),
-    Colour(0.0f, 1.0f, 0.0f), Colour(0.0f, 1.0f, 1.0f),
-    Colour(0.0f, 0.5f, 1.0f), Colour(0.0f, 0.0f, 1.0f),
-    Colour(0.3f, 0.0f, 1.0f), Colour(0.7f, 0.0f, 1.0f), 
-    Colour(1.0f, 0.0f, 1.0f)};
-
-LivesLeftHUD::LivesLeftHUD() : currNumLivesLeft(0), ballLifeHUDTex(NULL), 
+LivesLeftHUD::LivesLeftHUD() : currNumLivesLeft(0), heartTex(NULL), noHeartTex(NULL),
 infinityTex(NULL), infiniteLivesOn(false) {
 
-	// Load ball life HUD texture
-	this->ballLifeHUDTex = ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear);
-	assert(this->ballLifeHUDTex != NULL);
+    this->heartTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_HEART, Texture::Trilinear);
+	assert(this->heartTex != NULL);
+
+    this->noHeartTex = ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_NO_HEART, Texture::Trilinear);
+	assert(this->noHeartTex != NULL);
 
     // Load infinity character texture
     this->infinityTex = ResourceManager::GetInstance()->GetImgTextureResource(
@@ -45,53 +40,41 @@ infinityTex(NULL), infiniteLivesOn(false) {
 
 LivesLeftHUD::~LivesLeftHUD() {
 	// Delete the HUD texture
-	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->ballLifeHUDTex);
+	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->noHeartTex);
     UNUSED_VARIABLE(success);
 	assert(success);
+    
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->heartTex);
+    assert(success);
+    
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->infinityTex);
     assert(success);
 }
 
 void LivesLeftHUD::InitIdleColourInterpolations() {
-	int amountToReserve = GameModelConstants::GetInstance()->MAX_LIVES_LEFT;
-	this->idleColourAnimations.reserve(amountToReserve);
-	this->idleSizeAnimations.reserve(amountToReserve);
+	int amountToReserve = GameModelConstants::GetInstance()->MAXIMUM_POSSIBLE_LIVES;
+	
+    this->idleSizeAnimations.reserve(amountToReserve);
 	this->elementCurrAnimationTypes.resize(amountToReserve, LivesLeftHUD::IdleAnimation);
 
-	// Setup the colours for each ball life so that they change back and forth
-	// between their neighbor's colours
-	for (int i = 0; i < GameModelConstants::GetInstance()->MAX_LIVES_LEFT; i++) {
-		// Idle Colour interpolation 
-		Colour currColour(LivesLeftHUD::ELEMENT_BASE_COLOURS[i]);
-		AnimationMultiLerp<Colour> currColourAnim = AnimationMultiLerp<Colour>(Colour());
-		
-		std::vector<double> timeValues;
-		timeValues.reserve(3);
-		timeValues.push_back(0.0);
-		timeValues.push_back(1.0);
-		timeValues.push_back(2.0);
-		
-		std::vector<Colour> colourValues;
-		colourValues.reserve(3);
-		colourValues.push_back(currColour);
-		colourValues.push_back(LivesLeftHUD::ELEMENT_BASE_COLOURS[i+1]);
-		colourValues.push_back(currColour);
-
-		currColourAnim.SetRepeat(true);
-		currColourAnim.SetLerp(timeValues, colourValues);
-		
-		this->idleColourAnimations.push_back(currColourAnim);
-
+    this->creationAlphaAnimations.resize(amountToReserve);
+    this->creationSizeAnimations.resize(amountToReserve);
+    this->destructionColourAnimations.resize(amountToReserve);
+    this->destructionFallAnimations.resize(amountToReserve);
+    this->destructionRotationAnimations.resize(amountToReserve);
+ 
+	for (int i = 0; i < GameModelConstants::GetInstance()->MAXIMUM_POSSIBLE_LIVES; i++) {
 		// Idle size interpolation - these get setup every time a new ball life is added to the HUD
 		AnimationMultiLerp<float> currSizeAnim(1.0f);
 
+        std::vector<double> timeValues(3);
 		timeValues[0] = 0.0;
 		timeValues[1] = 1.0;
 		timeValues[2] = 2.0;
 		
 		std::vector<float> sizeValues(3);
 		sizeValues[0] = 1.0f;
-		sizeValues[1] = 0.85f;
+		sizeValues[1] = 1.2f;
 		sizeValues[2] = 1.0f;
 
 		currSizeAnim.SetLerp(timeValues, sizeValues);
@@ -104,10 +87,6 @@ void LivesLeftHUD::InitIdleColourInterpolations() {
  * Reinitialize the HUD to have no animations and zero lives.
  */
 void LivesLeftHUD::Reinitialize() {
-	this->creationAlphaAnimations.clear();
-	this->creationShiftAnimations.clear();
-	this->destructionColourAnimations.clear();
-	this->destructionFallAnimations.clear();
 	this->currNumLivesLeft = 0;
     this->infiniteLivesOn  = false;
 }
@@ -126,17 +105,12 @@ void LivesLeftHUD::LivesLost(int numLives) {
 		this->elementCurrAnimationTypes[i] = LivesLeftHUD::DestructionAnimation;
 
 		// Destruction animations for balls
-		ColourRGBA startColour = ColourRGBA(this->idleColourAnimations[i].GetInterpolantValue(), 1);
-		ColourRGBA endColour   = ColourRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		AnimationLerp<ColourRGBA> colourAnim(startColour);
+        ColourRGBA startColour(1.0f, 1.0f, 1.0f, 1.0f);
 		double startTime = static_cast<double>(count) / 2.0;
-		colourAnim.SetLerp(startTime, startTime + 2.0, startColour, endColour);
-		this->destructionColourAnimations[i] = colourAnim;
-
-		AnimationLerp<float> fallAnim(0.0f);
-		fallAnim.SetLerp(startTime, startTime + 2.0, 0.0f, 3*LivesLeftHUD::ELEMENT_SIZE);
-		this->destructionFallAnimations[i] = fallAnim;
-
+        double endTime   = startTime + 2.0;
+		this->destructionColourAnimations[i].SetLerp(startTime, endTime, startColour, ColourRGBA(0.0f, 0.0f, 0.0f, 0.0f));
+		this->destructionFallAnimations[i].SetLerp(startTime, endTime, 0.0f, 2.25f*LivesLeftHUD::ELEMENT_SIZE);
+        this->destructionRotationAnimations[i].SetLerp(startTime, endTime, 0.0f, 900.0f);
 		count++;
 	}
 
@@ -173,21 +147,28 @@ void LivesLeftHUD::LivesGained(int numLives) {
 		this->idleSizeAnimations[i].SetLerp(timeValues, sizeValues);
 
 		// Add creation animations
-		AnimationLerp<float> alphaAnim = AnimationLerp<float>(0.0f);
-		double startTime = static_cast<double>(count) / 2.0;
-		alphaAnim.SetLerp(startTime, startTime + 1.0, 0.0f, 1.0f);
-		this->creationAlphaAnimations[i] = alphaAnim;
+        sizeValues[0] = 0.0001f;
+        sizeValues[1] = 1.5f;
+        sizeValues[2] = 1.0f;
 
-		float startShiftLoc = 3*LivesLeftHUD::ELEMENT_SIZE;
-		AnimationLerp<float> shiftAnim = AnimationLerp<float>(startShiftLoc);
-		shiftAnim.SetLerp(startTime, startTime + 1.0, startShiftLoc, 0.0f);
-		this->creationShiftAnimations[i] = shiftAnim;
-		
+        std::vector<float> alphaValues(3);
+        alphaValues[0] = 0.0f;
+        alphaValues[1] = 1.0f;
+        alphaValues[2] = 1.0f;
+
+		double startTime = static_cast<double>(count) / 2.0;
+        timeValues[0] = startTime;
+        timeValues[1] = startTime + 0.25;
+        timeValues[2] = startTime + 0.5;
+
+        this->creationAlphaAnimations[i].SetLerp(timeValues, alphaValues);
+        this->creationSizeAnimations[i].SetLerp(timeValues, sizeValues);
+
 		count++;
 	}
 
 	this->currNumLivesLeft = livesLeftAfter;	
-	assert(this->currNumLivesLeft <= GameModelConstants::GetInstance()->MAX_LIVES_LEFT);
+    assert(this->currNumLivesLeft <= GameModelConstants::GetInstance()->MAXIMUM_POSSIBLE_LIVES);
 }
 
 /**
@@ -203,9 +184,8 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 		return;
 	}
 	
-	int currYPos = displayHeight - LivesLeftHUD::BORDER_SPACING;
-	int currXPos  = LivesLeftHUD::BORDER_SPACING;
-
+	const int currYPos = displayHeight - LivesLeftHUD::BORDER_SPACING;
+	
 	// Prepare OGL for drawing the timer
 	glPushAttrib(GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	
@@ -224,123 +204,181 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 	glPushMatrix();
 	glLoadIdentity();
 
-	// For each of the lives we draw a ball in the upper-left corner of the screen
-	for (int i = 0; i < this->currNumLivesLeft; i++) {
+    int currXPos  = LivesLeftHUD::BORDER_SPACING;
 
-		const BallElementAnimations& currAnimationType = this->elementCurrAnimationTypes[i];
-
-		const Colour* currColour = &this->idleColourAnimations[i].GetInterpolantValue();
-		const float& currSize = this->idleSizeAnimations[i].GetInterpolantValue();
-		const int outlineHalfSize = LivesLeftHUD::OUTLINE_SIZE + LivesLeftHUD::ELEMENT_HALF_SIZE;
-
-		float currAlpha = 1.0f;
-		float fallTranslation = 0.0f;
-		float shiftTranslation = 0.0f;
-
-		if (currAnimationType == LivesLeftHUD::CreationAnimation) {
-			// If the current ball element is performing its creation animation then its alpha will be
-			// affected - obtain its current alpha from the animation
-			std::map<int, AnimationLerp<float> >::iterator currAlphaAnimIter = this->creationAlphaAnimations.find(i);
-			std::map<int, AnimationLerp<float> >::iterator currShiftAnimIter = this->creationShiftAnimations.find(i);
-			
-			assert(currAlphaAnimIter != this->creationAlphaAnimations.end());
-			assert(currShiftAnimIter != this->creationShiftAnimations.end());
-			
-			currAlpha = currAlphaAnimIter->second.GetInterpolantValue();
-			shiftTranslation = currShiftAnimIter->second.GetInterpolantValue();
-
-			bool isAlphaFinished = currAlphaAnimIter->second.Tick(dT);
-			bool isShiftFinished = currShiftAnimIter->second.Tick(dT);
-
-			if (isAlphaFinished && isShiftFinished) {
-				this->creationAlphaAnimations.erase(currAlphaAnimIter);
-				this->creationShiftAnimations.erase(currShiftAnimIter);
-
-				this->elementCurrAnimationTypes[i] = LivesLeftHUD::IdleAnimation;
-			}
-		}
-		else if (currAnimationType == LivesLeftHUD::DestructionAnimation) {
-			// If the current ball is performing its destruction animation then its colour value
-			// and translation will be affected
-			std::map<int, AnimationLerp<float> >::iterator fallAnimIter				= this->destructionFallAnimations.find(i);
-			std::map<int, AnimationLerp<ColourRGBA> >::iterator colourAnimIter = this->destructionColourAnimations.find(i);
-
-			assert(fallAnimIter != this->destructionFallAnimations.end());
-			assert(colourAnimIter != this->destructionColourAnimations.end());
-
-			fallTranslation = fallAnimIter->second.GetInterpolantValue();
-			const ColourRGBA& currRGBAColour = colourAnimIter->second.GetInterpolantValue();
-			currColour = &currRGBAColour.GetColour();
-			currAlpha = currRGBAColour.A();
-
-			bool isFallAnimFinished   = fallAnimIter->second.Tick(dT);
-			bool isColourAnimFinished = colourAnimIter->second.Tick(dT);
-			if (isFallAnimFinished && isColourAnimFinished) {
-				this->destructionFallAnimations.erase(fallAnimIter);
-				this->destructionColourAnimations.erase(colourAnimIter);
-				this->elementCurrAnimationTypes[i] = LivesLeftHUD::IdleAnimation;
-				this->currNumLivesLeft--;
-			}
-		}
-
-		glPushMatrix();
-		glTranslatef(currXPos + shiftTranslation, currYPos - fallTranslation, 0.0f);
-		glScalef(currSize, currSize, currSize);
-
-		// Draw a ball life graphic in the HUD
-		this->ballLifeHUDTex->BindTexture();
-		
-		glBegin(GL_QUADS);
-		// Black outline behind the coloured graphic of the ball life HUD element
-		glColor4f(0.0f, 0.0f, 0.0f, currAlpha);
-		glTexCoord2i(0, 0); glVertex2i(-outlineHalfSize, -outlineHalfSize);
-		glTexCoord2i(1, 0); glVertex2i(outlineHalfSize, -outlineHalfSize);
-		glTexCoord2i(1, 1); glVertex2i(outlineHalfSize, outlineHalfSize);
-		glTexCoord2i(0, 1); glVertex2i(-outlineHalfSize, outlineHalfSize);
-
-		// Coloured ball life HUD element
-		glColor4f(currColour->R(), currColour->G(), currColour->B(), currAlpha);
-		glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
-		glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
-		glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
-		glTexCoord2i(0, 1); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
-		glEnd();
-		glPopMatrix();
-
-		currXPos += LivesLeftHUD::ELEMENT_OVERLAP;
-
-		this->idleSizeAnimations[i].Tick(dT);
-	}
-
-	this->ballLifeHUDTex->UnbindTexture();
-
-    // If the infinite lives toggle is on then we draw the infinity character
-    // over the top-most ball in the HUD
+    // If the infinite lives toggle is on then we draw a special HUD with the infinity character...
     if (this->infiniteLivesOn) {
-        int lastNumLivesIdx = this->currNumLivesLeft-1;
-        const BallElementAnimations& currAnimationType = this->elementCurrAnimationTypes[lastNumLivesIdx];
-        if (currAnimationType == IdleAnimation) {
-            float currSize = this->idleSizeAnimations[lastNumLivesIdx].GetInterpolantValue();
-            currSize *= 0.75f;
-            currXPos -= LivesLeftHUD::ELEMENT_OVERLAP;
+        
+        Colour currColour(1,1,1);
+        float heartCurrSize = 1.0f;
+        float currAlpha = 1.0f;
+
+	    const BallElementAnimations& currAnimationType = this->elementCurrAnimationTypes[0];
+
+        switch (currAnimationType) {
+            case LivesLeftHUD::CreationAnimation: {
+		        // If the current ball element is performing its creation animation then its alpha will be
+		        // affected - obtain its current alpha from the animation
+		        AnimationMultiLerp<float>& currAlphaAnim = this->creationAlphaAnimations[0];
+		        AnimationMultiLerp<float>& currSizeAnim  = this->creationSizeAnimations[0];
+    			
+		        currAlpha = currAlphaAnim.GetInterpolantValue();
+		        heartCurrSize = currSizeAnim.GetInterpolantValue();
+
+		        bool isAlphaFinished = currAlphaAnim.Tick(dT);
+		        bool isSizeFinished  = currSizeAnim.Tick(dT);
+
+		        if (isAlphaFinished && isSizeFinished) {
+			        this->elementCurrAnimationTypes[0] = LivesLeftHUD::IdleAnimation;
+		        }
+                break;
+	        }
+            case LivesLeftHUD::IdleAnimation:
+                heartCurrSize = this->idleSizeAnimations[0].GetInterpolantValue();
+                this->idleSizeAnimations[0].Tick(dT);
+                break;
+
+            default:
+                break;
+        }
+
+	    glPushMatrix();
+	    glTranslatef(currXPos, currYPos, 0.0f);
+        glScalef(heartCurrSize, heartCurrSize, 1.0f);
+        
+        this->heartTex->BindTexture();
+        glBegin(GL_QUADS);
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), 0.9f*currAlpha);
+        glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+        glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+        glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+        glTexCoord2i(0, 1); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+        glEnd();
+        glPopMatrix();
+        
+        currXPos += LivesLeftHUD::ELEMENT_SIZE + LivesLeftHUD::BETWEEN_SPACING;
+	    
+        glPushMatrix();
+	    glTranslatef(currXPos, currYPos, 0.0f);
+        glScalef(0.8f, 0.8f, 1.0f);
+
+        this->infinityTex->BindTexture();
+        glBegin(GL_QUADS);
+        glColor4f(1, 1, 1,  0.9f*currAlpha);
+        glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+        glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+        glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+        glTexCoord2i(0, 1); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+        glEnd();
+
+        glPopMatrix();
+    }
+    else {
+    
+        // Draw the fixed number of life placeholders
+        for (int i = 0; i < GameModelConstants::GetInstance()->MAXIMUM_POSSIBLE_LIVES; i++) {
+
+            Colour currColour(1,1,1);
+            float heartCurrSize = 1.0f;
+            float currAlpha = 1.0f;
+            float fallTranslation = 0.0f;
+            float fallRotation = 0.0f;
+
+	        const BallElementAnimations& currAnimationType = this->elementCurrAnimationTypes[i];
+
+            switch (currAnimationType) {
+                case LivesLeftHUD::CreationAnimation: {
+		            // If the current ball element is performing its creation animation then its alpha will be
+		            // affected - obtain its current alpha from the animation
+		            AnimationMultiLerp<float>& currAlphaAnim = this->creationAlphaAnimations[i];
+		            AnimationMultiLerp<float>& currSizeAnim  = this->creationSizeAnimations[i];
+        			
+		            currAlpha = currAlphaAnim.GetInterpolantValue();
+		            heartCurrSize = currSizeAnim.GetInterpolantValue();
+
+		            bool isAlphaFinished = currAlphaAnim.Tick(dT);
+		            bool isSizeFinished  = currSizeAnim.Tick(dT);
+
+		            if (isAlphaFinished && isSizeFinished) {
+			            this->elementCurrAnimationTypes[i] = LivesLeftHUD::IdleAnimation;
+		            }
+                    break;
+	            }
+                case LivesLeftHUD::DestructionAnimation: {
+		            // If the current ball is performing its destruction animation then its colour value
+		            // and translation will be affected
+		            AnimationLerp<float>& fallAnim = this->destructionFallAnimations[i];
+		            AnimationLerp<ColourRGBA>& colourAnim = this->destructionColourAnimations[i];
+                    AnimationLerp<float>& rotAnim = this->destructionRotationAnimations[i];
+
+		            fallTranslation = fallAnim.GetInterpolantValue();
+                    fallRotation = rotAnim.GetInterpolantValue();
+
+		            const ColourRGBA& currRGBAColour = colourAnim.GetInterpolantValue();
+		            currColour = currRGBAColour.GetColour();
+		            currAlpha = currRGBAColour.A();
+
+		            bool isFallAnimFinished   = fallAnim.Tick(dT);
+		            bool isColourAnimFinished = colourAnim.Tick(dT);
+                    bool isFallRotFinished    = rotAnim.Tick(dT);
+
+		            if (isFallAnimFinished && isColourAnimFinished && isFallRotFinished) {
+			            this->elementCurrAnimationTypes[i] = LivesLeftHUD::IdleAnimation;
+			            this->currNumLivesLeft--;
+		            }
+                    break;
+	            }
+
+                case LivesLeftHUD::IdleAnimation:
+                    heartCurrSize = this->idleSizeAnimations[i].GetInterpolantValue();
+                    this->idleSizeAnimations[i].Tick(dT);
+                    break;
+
+                default:
+                    break;
+            }
+
+	        glPushMatrix();
+	        glTranslatef(currXPos, currYPos, 0.0f);
+
+            if (i < this->currNumLivesLeft) {
+
+                glPushMatrix();
+                glTranslatef(0, -fallTranslation, 0);
+	            glRotatef(fallRotation, 0, 0, 1);
+                glScalef(heartCurrSize, heartCurrSize, 1.0f);
+                
+                this->heartTex->BindTexture();
+	            glBegin(GL_QUADS);
+	            glColor4f(currColour.R(), currColour.G(), currColour.B(), 0.9f*currAlpha);
+	            glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+	            glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+	            glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+	            glTexCoord2i(0, 1); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+	            glEnd();
+                glPopMatrix();
+            }
             
-            glPushMatrix();
-		    glTranslatef(currXPos, currYPos, 0.0f);
-            glScalef(currSize, currSize, currSize);
-            
-            this->infinityTex->BindTexture();
-		    glColor4f(1, 1, 1, 1);
-            glBegin(GL_QUADS);
-		    glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
-		    glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
-		    glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
-		    glTexCoord2i(0, 1); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
-		    glEnd();
-            this->infinityTex->UnbindTexture();
+            if (i >= this->currNumLivesLeft || currAnimationType == LivesLeftHUD::DestructionAnimation) {
+                
+                glScalef(0.8f, 0.8f, 1.0f);
+    	        
+                this->noHeartTex->BindTexture();
+                glBegin(GL_QUADS);
+	            glColor4f(1.0f, 1.0f, 1.0f, 0.8f);
+	            glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+	            glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
+	            glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+	            glTexCoord2i(0, 1); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
+	            glEnd();
+            }
 
             glPopMatrix();
+
+            currXPos += LivesLeftHUD::ELEMENT_SIZE + LivesLeftHUD::BETWEEN_SPACING;
         }
     }
+    this->heartTex->UnbindTexture();
 
 	// Pop modelview matrix
 	glPopMatrix();
@@ -348,9 +386,4 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 	Camera::PopWindowCoords();
 	glPopAttrib();
 
-	// Animate any animation values of the ball elements that require constant animation
-	for (std::vector<AnimationMultiLerp<Colour> >::iterator iter = this->idleColourAnimations.begin();
-		iter != this->idleColourAnimations.end(); ++iter) {
-		iter->Tick(dT);
-	}
 }

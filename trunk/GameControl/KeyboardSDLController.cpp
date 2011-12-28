@@ -469,7 +469,7 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
                 this->model->DropItem(GameItem::BlackoutItem);
                 break;
             case SDLK_1:
-                this->model->DropItem(GameItem::OneUpItem);
+                this->model->DropItem(GameItem::LifeUpItem);
                 break;
             case SDLK_2:
                 this->model->DropItem(GameItem::InvisiPaddleItem);

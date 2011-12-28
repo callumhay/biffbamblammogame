@@ -49,7 +49,7 @@ Blammopedia::Blammopedia() : lockedItemTexture(NULL) {
     this->itemEntries.insert(std::make_pair(GameItem::BlackoutItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("blackout.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::UpsideDownItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("flip.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::BallSafetyNetItem,		new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("safety_net.txt"))));
-    this->itemEntries.insert(std::make_pair(GameItem::OneUpItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("one_up.txt"))));
+    this->itemEntries.insert(std::make_pair(GameItem::LifeUpItem,				new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("life_up.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::PoisonPaddleItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("poison.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::StickyPaddleItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("sticky_paddle.txt"))));
     this->itemEntries.insert(std::make_pair(GameItem::PaddleCamItem,			new ItemEntry(BLAMMOPEDIA_ITEMS_DIR + std::string("paddle_camera.txt"))));

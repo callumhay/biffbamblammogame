@@ -1,5 +1,5 @@
 /**
- * OneUpItem.h
+ * LifeUpItem.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
@@ -9,28 +9,29 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#ifndef __ONEUPITEM_H__
-#define __ONEUPITEM_H__
+#ifndef __LIFEUPITEM_H__
+#define __LIFEUPITEM_H__
 
 #include "GameItem.h"
 #include "GameModel.h"
 
 /**
- * Item representing a free life / 1UP in the game.
+ * Item representing a life-up in the game.
  */
-class OneUpItem : public GameItem {
+class LifeUpItem : public GameItem {
 public:
-	static const char*  ONE_UP_ITEM_NAME;
-	static const double ONE_UP_TIMER_IN_SECS;
+	static const char*  LIFE_UP_ITEM_NAME;
+	static const double LIFE_UP_TIMER_IN_SECS;
 
-	OneUpItem(const Point2D &spawnOrigin, GameModel *gameModel);
-	~OneUpItem();
+	LifeUpItem(const Point2D &spawnOrigin, GameModel *gameModel);
+	~LifeUpItem();
 
 	double Activate();
 	void Deactivate();
 
 	GameItem::ItemType GetItemType() const {
-		return GameItem::OneUpItem;
+		return GameItem::LifeUpItem;
 	}
 };
-#endif
+
+#endif // __LIFEUPITEM_H__

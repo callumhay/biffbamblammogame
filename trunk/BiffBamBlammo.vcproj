@@ -1976,6 +1976,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\LifeUpItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\MagnetPaddleItem.h"
 						>
 					</File>
@@ -1985,10 +1989,6 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\OmniLaserBallItem.h"
-						>
-					</File>
-					<File
-						RelativePath=".\GameModel\OneUpItem.h"
 						>
 					</File>
 					<File
@@ -2100,6 +2100,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\LifeUpItem.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\MagnetPaddleItem.cpp"
 						>
 					</File>
@@ -2109,10 +2113,6 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\OmniLaserBallItem.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\GameModel\OneUpItem.cpp"
 						>
 					</File>
 					<File

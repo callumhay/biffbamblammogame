@@ -86,8 +86,11 @@ private:
 	int numInterimBlocksDestroyed;
     int maxInterimBlocksDestroyed;
     int numLivesLostInLevel;
-	int currLivesLeft;
-    int livesAtStartOfLevel;
+	
+    int currLivesLeft;        // Number of lives left before the player is officially dead
+    int livesAtStartOfLevel;  // Lives given to the player at the start of a level
+    int maxNumLivesAllowed;   // The maximum container for lives allowed
+
     int numGoodItemsAcquired, numNeutralItemsAcquired, numBadItemsAcquired;
     double totalLevelTimeInSeconds;
 
@@ -286,8 +289,8 @@ public:
 		int livesLeftBefore = this->currLivesLeft;
 		this->currLivesLeft = lives;
 
-		if (this->currLivesLeft > GameModelConstants::GetInstance()->MAX_LIVES_LEFT) {
-			this->currLivesLeft = GameModelConstants::GetInstance()->MAX_LIVES_LEFT;
+		if (this->currLivesLeft > this->maxNumLivesAllowed) {
+			this->currLivesLeft = this->maxNumLivesAllowed;
 		}
 		
 		if (livesLeftBefore != this->currLivesLeft && triggerEvent) {
@@ -296,8 +299,10 @@ public:
 		}
 	}
 	void SetInitialNumberOfLives(int lives) {
-		assert(lives <= GameModelConstants::GetInstance()->MAX_LIVES_LEFT);
+        assert(lives <= GameModelConstants::GetInstance()->MAXIMUM_POSSIBLE_LIVES);
 		this->currLivesLeft = lives;
+        this->maxNumLivesAllowed = lives;
+
 		// EVENT: Number of lives just changed
 		GameEventManager::Instance()->ActionLivesChanged(0, this->currLivesLeft);
 	}

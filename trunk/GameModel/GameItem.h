@@ -37,7 +37,7 @@ public:
                     LaserBeamPaddleItem, 
                     MultiBall3Item, 
                     MultiBall5Item, 
-                    OneUpItem, 
+                    LifeUpItem, 
                     PaddleCamItem, 
                     BallCamItem, 
                     PaddleGrowItem, 
