@@ -27,7 +27,8 @@
 #include "../ResourceManager.h"
 
 GameModel::GameModel(const GameModel::Difficulty& initDifficulty) : 
-currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0), livesAtStartOfLevel(0), numLivesLostInLevel(0),
+currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0),
+livesAtStartOfLevel(0), numLivesLostInLevel(0), maxNumLivesAllowed(0),
 pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false) {
 	
@@ -221,6 +222,7 @@ GameWorld* GameModel::GetWorldByName(const std::string& name) {
 void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
     switch (difficulty) {
         case GameModel::EasyDifficulty:
+
             // Disable the paddle release timer
             PlayerPaddle::SetEnablePaddleReleaseTimer(false);
             // Make the boost time longer

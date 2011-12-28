@@ -55,8 +55,9 @@ public:
 
 	const int INIT_SCORE;                       // Initial player score when starting a game
 	const int INIT_LIVES_LEFT;                  // Initial player lives when starting a game
-	const int MAX_LIVES_LEFT;                   // Maximum number of lives that a player may have at a given time
-	
+
+    const int MAXIMUM_POSSIBLE_LIVES;           // Max player lives possible at any given time during game play
+
 	const int FIRE_DAMAGE_PER_SECOND;               // The damage that fire does per second
 	const double FIRE_GLOB_DROP_CHANCE_INTERVAL;    // The interval of time in seconds over which a fire glob might be dropped from a block
 	const int FIRE_GLOB_CHANCE_MOD;                 // The 1/x where x is the value of this, of a fire glob dropping after FIRE_GLOB_DROP_CHANCE_INTERVAL seconds

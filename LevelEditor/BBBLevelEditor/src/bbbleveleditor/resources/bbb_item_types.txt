@@ -22,9 +22,6 @@ Split the most recently touched ball into 3 balls.
 + MultiBall5
 Split the most recently touched ball into 5 balls.
 
-+ 1Up
-Player gains an extra life.
-
 + PaddleGrow
 The paddle increases in size.
 

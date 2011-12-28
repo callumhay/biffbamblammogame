@@ -93,6 +93,7 @@ public:
 	const char* TEXTURE_ROCK4;
 	const char* TEXTURE_ROCK5;
 	const char* TEXTURE_CIRCLE_GRADIENT;
+    const char* TEXTURE_SPHERE;
 	const char* TEXTURE_STAR;
 	const char* TEXTURE_STAR_OUTLINE;
 	const char* TEXTURE_EVIL_STAR;
@@ -101,7 +102,8 @@ public:
 	const char* TEXTURE_EXPLOSION_RAYS;
 	const char* TEXTURE_LASER_BEAM;
 	const char* TEXTURE_UP_ARROW;
-	const char* TEXTURE_BALL_LIFE_HUD;
+    const char* TEXTURE_HEART;
+    const char* TEXTURE_NO_HEART;
 	const char* TEXTURE_SPARKLE;
 	const char* TEXTURE_SPIRAL_SMALL;
 	const char* TEXTURE_SPIRAL_MEDIUM;

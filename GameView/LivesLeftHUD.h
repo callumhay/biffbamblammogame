@@ -21,12 +21,11 @@ class Texture;
 class LivesLeftHUD {
 public:
 	static const int OUTLINE_SIZE           = 1;
-	static const int ELEMENT_SIZE           = 32;                   // Size (width and height) of the elements in the HUD
+	static const int ELEMENT_SIZE           = 40;                   // Size (width and height) of the elements in the HUD
 	static const int ELEMENT_HALF_SIZE      = ELEMENT_SIZE/2;
-	static const int ELEMENT_OVERLAP        = ELEMENT_HALF_SIZE;    // Amount of overlap for the ball elements in the HUD
 
-	static const int BORDER_SPACING     = 5 + ELEMENT_HALF_SIZE;    // Spacing between edge of the screen and the HUD
-	static const int BETWEEN_SPACING    = 3 + ELEMENT_HALF_SIZE;    // Spacing between the elements in the HUD
+	static const int BORDER_SPACING     = 5 + ELEMENT_HALF_SIZE; // Spacing between edge of the screen and the HUD
+	static const int BETWEEN_SPACING    = 5;                     // Spacing between the elements in the HUD
 
 	LivesLeftHUD();
 	~LivesLeftHUD();
@@ -41,29 +40,30 @@ public:
 private:
 	enum BallElementAnimations { CreationAnimation, IdleAnimation, DestructionAnimation };
 
-	static const Colour ELEMENT_BASE_COLOURS[];
-
 	// Ball Life Element animation values
 	std::vector<BallElementAnimations> elementCurrAnimationTypes;
 	
 	// Idle animation values
-	std::vector<AnimationMultiLerp<Colour> > idleColourAnimations;
-	std::vector<AnimationMultiLerp<float> >  idleSizeAnimations;
+	std::vector<AnimationMultiLerp<float> > idleSizeAnimations;
 
 	// Creation animation values
-	std::map<int, AnimationLerp<float> > creationAlphaAnimations;
-	std::map<int, AnimationLerp<float> > creationShiftAnimations;
+    std::vector<AnimationMultiLerp<float> > creationSizeAnimations;
+    std::vector<AnimationMultiLerp<float> > creationAlphaAnimations;
 
 	// Destruction animation values
-	std::map<int, AnimationLerp<ColourRGBA> > destructionColourAnimations;
-	std::map<int, AnimationLerp<float> > destructionFallAnimations;
+    std::vector<AnimationLerp<ColourRGBA> > destructionColourAnimations;
+	std::vector<AnimationLerp<float> >      destructionFallAnimations;
+    std::vector<AnimationLerp<float> >      destructionRotationAnimations;
 
 	int currNumLivesLeft;
-	Texture* ballLifeHUDTex;
+    Texture* heartTex;
+    Texture* noHeartTex;
     Texture* infinityTex;
     bool infiniteLivesOn;
 
 	void InitIdleColourInterpolations();
+
+    void TickState(double dT);
 
     DISALLOW_COPY_AND_ASSIGN(LivesLeftHUD);
 };

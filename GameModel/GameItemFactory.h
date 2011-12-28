@@ -91,17 +91,6 @@ inline void GameItemFactory::DeleteInstance() {
 	}
 }
 
-inline GameItem::ItemDisposition GameItemFactory::GetItemTypeDisposition(const GameItem::ItemType& itemType) const {
-	if (this->allPowerUpItemTypes.find(itemType) != this->allPowerUpItemTypes.end()) {
-		return GameItem::Good;
-	}
-	else if (this->allPowerNeutralItemTypes.find(itemType) != this->allPowerNeutralItemTypes.end()) {
-		return GameItem::Neutral;
-	}
-	
-	return GameItem::Bad;
-}
-
 inline bool GameItemFactory::IsValidItemTypeName(const std::string& itemName) const {
 	std::map<std::string, GameItem::ItemType>::const_iterator findIter = this->itemNameToTypeMap.find(itemName.c_str());
 	return (findIter != this->itemNameToTypeMap.end());

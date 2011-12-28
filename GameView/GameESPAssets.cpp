@@ -589,7 +589,7 @@ void GameESPAssets::InitESPTextures() {
 		assert(this->upArrowTex != NULL);
 	}
 	if (this->ballTex == NULL) {
-		this->ballTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BALL_LIFE_HUD, Texture::Trilinear));
+		this->ballTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SPHERE, Texture::Trilinear));
 		assert(this->ballTex != NULL);
 	}
 	if (this->targetTex == NULL) {
@@ -4417,7 +4417,7 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 			}
 			break;
 
-		case GameItem::OneUpItem: {
+		case GameItem::LifeUpItem: {
 				this->AddOneUpEffect(gameModel.GetPlayerPaddle());
 			}
 			break;
