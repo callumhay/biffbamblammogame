@@ -104,7 +104,8 @@ lightningBoltTex(NULL),
 sphereNormalsTex(NULL),
 //rectPrismTexture(NULL),
 cloudTex(NULL),
-vapourTrailTex(NULL) {
+vapourTrailTex(NULL),
+heartTex(NULL) {
 
 	this->InitESPTextures();
 	this->InitStandaloneESPEffects();
@@ -213,6 +214,8 @@ GameESPAssets::~GameESPAssets() {
 	removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->cloudTex);
 	assert(removed);
     removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->vapourTrailTex);
+    assert(removed);
+    removed = ResourceManager::GetInstance()->ReleaseTextureResource(this->heartTex);
     assert(removed);
 
 	// Delete any standalone effects
@@ -639,6 +642,10 @@ void GameESPAssets::InitESPTextures() {
     if (this->vapourTrailTex == NULL) {
         this->vapourTrailTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_VAPOUR_TRAIL, Texture::Trilinear));
         assert(this->vapourTrailTex != NULL);
+    }
+    if (this->heartTex == NULL) {
+        this->heartTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_HEART, Texture::Trilinear));
+        assert(this->heartTex != NULL);
     }
 
 	debug_opengl_state();
@@ -3643,7 +3650,7 @@ void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& posi
 
 	ESPPointEmitter* comboEffect = new ESPPointEmitter();
 	comboEffect->SetSpawnDelta(ESPInterval(-1, -1));
-	comboEffect->SetParticleLife(ESPInterval(1.8f));
+	comboEffect->SetParticleLife(ESPInterval(2.25f));
 	comboEffect->SetParticleSize(ESPInterval(0.5f, 0.75f));
 	comboEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.0f));
 	comboEffect->SetParticleAlignment(ESP::ScreenAligned);
@@ -3659,7 +3666,7 @@ void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& posi
     dpTemp.colour = Colour(0, 0, 0);
 
 	ESPOnomataParticle* textParticle = new ESPOnomataParticle(
-        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::HappyGood, GameFontAssetsManager::Small),
+        GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
         comboStrStream.str());
 	textParticle->SetDropShadow(dpTemp);
     comboEffect->AddParticle(textParticle);
@@ -4301,40 +4308,57 @@ void GameESPAssets::AddCrazyBallESPEffects(const GameBall* ball, std::vector<ESP
 /**
  * Add the effect for when the player acquires a 1UP power-up.
  */
-void GameESPAssets::AddOneUpEffect(const PlayerPaddle* paddle) {
+void GameESPAssets::AddLifeUpEffect(const PlayerPaddle* paddle) {
 	
 	Point2D paddlePos2D = paddle->GetCenterPosition();
 	Point3D paddlePos3D = Point3D(paddlePos2D[0], paddlePos2D[1], 0.0f);
 
-	// Create an emitter for the 1UP text raising from the paddle
-	ESPPointEmitter* oneUpTextEffect = new ESPPointEmitter();
+	// Create an emitter for the Life-UP! text raising from the paddle
+	ESPPointEmitter* textEffect = new ESPPointEmitter();
 	// Set up the emitter...
-	oneUpTextEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	oneUpTextEffect->SetInitialSpd(ESPInterval(2.0f));
-	oneUpTextEffect->SetParticleLife(ESPInterval(2.0f));
-	oneUpTextEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
-	oneUpTextEffect->SetParticleRotation(ESPInterval(0.0f));
-	oneUpTextEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	oneUpTextEffect->SetParticleAlignment(ESP::ScreenAligned);
-	oneUpTextEffect->SetEmitPosition(paddlePos3D);
-	oneUpTextEffect->SetEmitDirection(Vector3D(0, 1, 0));
-	oneUpTextEffect->SetParticleColour(ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R()), 
-																		 ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G()),
-																		 ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B()), ESPInterval(1.0f));
+	textEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	textEffect->SetInitialSpd(ESPInterval(2.0f));
+	textEffect->SetParticleLife(ESPInterval(2.0f));
+	textEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
+	textEffect->SetParticleRotation(ESPInterval(0.0f));
+	textEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	textEffect->SetParticleAlignment(ESP::ScreenAligned);
+	textEffect->SetEmitPosition(paddlePos3D + Vector3D(0, 0.5f*PlayerPaddle::PADDLE_WIDTH_TOTAL, 0));
+	textEffect->SetEmitDirection(Vector3D(0, 1, 0));
+	textEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1.0f));
 	// Add effectors...
-	oneUpTextEffect->AddEffector(&this->particleFader);
-	oneUpTextEffect->AddEffector(&this->particleSmallGrowth);
+	textEffect->AddEffector(&this->particleFader);
+	textEffect->AddEffector(&this->particleSmallGrowth);
 
 	// Add the single particle to the emitter...
 	DropShadow dpTemp;
 	dpTemp.amountPercentage = 0.15f;
-	dpTemp.colour = Colour(1.0f, 1.0f, 1.0f);
-	ESPOnomataParticle* oneUpTextParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::HappyGood, GameFontAssetsManager::Medium), "1UP!");
+	dpTemp.colour = Colour(0.0f, 0.0f, 0.0f);
+    ESPOnomataParticle* oneUpTextParticle = new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(
+        GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), "Life-UP!");
 	oneUpTextParticle->SetDropShadow(dpTemp);
-	oneUpTextEffect->AddParticle(oneUpTextParticle);
+	textEffect->AddParticle(oneUpTextParticle);
+    
+    // Create an emitter for the heart graphic
+    ESPPointEmitter* heartEffect = new ESPPointEmitter();
+	heartEffect->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	heartEffect->SetInitialSpd(ESPInterval(2.0f));
+	heartEffect->SetParticleLife(ESPInterval(2.0f));
+    heartEffect->SetParticleSize(ESPInterval(0.5f*PlayerPaddle::PADDLE_WIDTH_TOTAL), ESPInterval(0.5f*PlayerPaddle::PADDLE_WIDTH_TOTAL));
+	heartEffect->SetParticleRotation(ESPInterval(0.0f));
+	heartEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	heartEffect->SetParticleAlignment(ESP::ScreenAligned);
+	heartEffect->SetEmitPosition(paddlePos3D);
+	heartEffect->SetEmitDirection(Vector3D(0, 1, 0));
+	heartEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1.0f));
+	// Add effectors...
+	heartEffect->AddEffector(&this->particleFader);
+	heartEffect->AddEffector(&this->particleSmallGrowth);
+    heartEffect->SetParticles(1, this->heartTex);
 
 	// Lastly, add the new emitters to the list of active emitters in order of back to front
-	this->activeGeneralEmitters.push_back(oneUpTextEffect);
+	this->activeGeneralEmitters.push_back(heartEffect);
+    this->activeGeneralEmitters.push_back(textEffect);
 }
 
 /**
@@ -4418,7 +4442,7 @@ void GameESPAssets::SetItemEffect(const GameItem& item, const GameModel& gameMod
 			break;
 
 		case GameItem::LifeUpItem: {
-				this->AddOneUpEffect(gameModel.GetPlayerPaddle());
+                this->AddLifeUpEffect(gameModel.GetPlayerPaddle());
 			}
 			break;
 

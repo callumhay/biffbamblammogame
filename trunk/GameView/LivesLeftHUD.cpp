@@ -109,8 +109,11 @@ void LivesLeftHUD::LivesLost(int numLives) {
 		double startTime = static_cast<double>(count) / 2.0;
         double endTime   = startTime + 2.0;
 		this->destructionColourAnimations[i].SetLerp(startTime, endTime, startColour, ColourRGBA(0.0f, 0.0f, 0.0f, 0.0f));
+        this->destructionColourAnimations[i].SetInterpolantValue(startColour);
 		this->destructionFallAnimations[i].SetLerp(startTime, endTime, 0.0f, 2.25f*LivesLeftHUD::ELEMENT_SIZE);
+        this->destructionFallAnimations[i].SetInterpolantValue(0.0f);
         this->destructionRotationAnimations[i].SetLerp(startTime, endTime, 0.0f, 900.0f);
+        this->destructionRotationAnimations[i].SetInterpolantValue(0.0f);
 		count++;
 	}
 
@@ -128,7 +131,8 @@ void LivesLeftHUD::LivesGained(int numLives) {
 
 	// Prompt animations and creation of lives in the HUD
 	int livesLeftAfter = this->currNumLivesLeft + numLives;
-	int count = 0;
+    
+    int count = 0;
 	for (int i = this->currNumLivesLeft; i < livesLeftAfter; i++) {
 		this->elementCurrAnimationTypes[i] = LivesLeftHUD::CreationAnimation;
 
@@ -162,7 +166,9 @@ void LivesLeftHUD::LivesGained(int numLives) {
         timeValues[2] = startTime + 0.5;
 
         this->creationAlphaAnimations[i].SetLerp(timeValues, alphaValues);
+        this->creationAlphaAnimations[i].SetInterpolantValue(alphaValues[0]);
         this->creationSizeAnimations[i].SetLerp(timeValues, sizeValues);
+        this->creationSizeAnimations[i].SetInterpolantValue(sizeValues[0]);
 
 		count++;
 	}
@@ -317,6 +323,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 		            const ColourRGBA& currRGBAColour = colourAnim.GetInterpolantValue();
 		            currColour = currRGBAColour.GetColour();
 		            currAlpha = currRGBAColour.A();
+                    heartCurrSize = this->idleSizeAnimations[i].GetInterpolantValue();
 
 		            bool isFallAnimFinished   = fallAnim.Tick(dT);
 		            bool isColourAnimFinished = colourAnim.Tick(dT);

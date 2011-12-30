@@ -23,7 +23,7 @@ class GameFontAssetsManager {
 public:
 	// Font enumerations for use in defining the font we want
 	enum FontSize  { Small = 16, Medium = 24, Big = 32, Huge = 60 };
-	enum FontStyle { SadBadGoo, HappyGood, ExplosionBoom, ElectricZap, AllPurpose };
+	enum FontStyle { SadBadGoo, ExplosionBoom, ElectricZap, AllPurpose };
 
 	// Obtain the singleton
 	static GameFontAssetsManager* GetInstance() {

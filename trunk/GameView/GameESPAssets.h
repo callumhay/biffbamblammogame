@@ -132,6 +132,7 @@ private:
 	//Texture2D* rectPrismTexture;
 	Texture2D* cloudTex;
     Texture2D* vapourTrailTex;
+    Texture2D* heartTex;
 
 	// Ball and paddle related ESP effects
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > > ballEffects; // stores each balls set of item-related (defined by unique ID) effects
@@ -196,7 +197,7 @@ private:
 	void AddPaddleShrinkEffect();
 	void AddBallGrowEffect(const GameBall* ball);
 	void AddBallShrinkEffect(const GameBall* ball);
-	void AddOneUpEffect(const PlayerPaddle* paddle);
+	void AddLifeUpEffect(const PlayerPaddle* paddle);
 
 	void InitLaserPaddleESPEffects();
 

@@ -62,9 +62,8 @@ void GameFontAssetsManager::LoadMinimalFonts() {
 
 	sizeSet.clear();
 	sizeSet.push_back(Medium);
-	this->fonts[SadBadGoo]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_SADBAD, sizeSet, Texture::Bilinear);
-	this->fonts[HappyGood]			= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_HAPPYGOOD, sizeSet, Texture::Bilinear);
-	this->fonts[ElectricZap]		= ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, sizeSet, Texture::Bilinear);
+	this->fonts[SadBadGoo]   = ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_SADBAD, sizeSet, Texture::Bilinear);
+	this->fonts[ElectricZap] = ResourceManager::LoadFont(GameViewConstants::GetInstance()->FONT_ELECTRICZAP, sizeSet, Texture::Bilinear);
 
 	glPopAttrib();
 	this->minimalFontsLoaded = true;
