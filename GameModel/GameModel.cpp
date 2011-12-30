@@ -30,7 +30,8 @@ GameModel::GameModel(const GameModel::Difficulty& initDifficulty) :
 currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0),
 livesAtStartOfLevel(0), numLivesLostInLevel(0), maxNumLivesAllowed(0),
 pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
-nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false) {
+nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false),
+droppedLifeForMaxMultiplier(false) {
 	
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
     std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
@@ -98,6 +99,7 @@ void GameModel::ResetLevelValues(int numLives) {
 	this->SetInitialNumberOfLives(numLives);
 	this->numInterimBlocksDestroyed = 0;	// Don't use set here, we don't want an event
     this->maxInterimBlocksDestroyed = 0;
+    this->droppedLifeForMaxMultiplier = false;
     this->ResetNumAcquiredItems();
     this->ResetLevelTime();
     
@@ -830,6 +832,11 @@ void GameModel::SetNumInterimBlocksDestroyed(int value, const Point2D& pos) {
         if (oldMultiplier != newMultiplier) {
 		    GameEventManager::Instance()->ActionScoreMultiplierChanged(newMultiplier, pos);
         }
+
+        // Reset the dropped life flag if the multiplier is lower than the max multiplier
+        if (newMultiplier < 4) {
+            this->droppedLifeForMaxMultiplier = false;
+        }
 	}
 }
 
@@ -1004,6 +1011,17 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 		return;
 	}
 
+    // Special case where the multiplier is about to change (or already changed) to the max multiplier
+    // and the player is missing a life - in this case we will be dropping a life-up item
+    if (!this->droppedLifeForMaxMultiplier &&
+        this->numInterimBlocksDestroyed >= GameModelConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_NUM_BLOCKS - 1 &&
+        this->currLivesLeft < GameModelConstants::GetInstance()->MAXIMUM_POSSIBLE_LIVES) {
+
+        this->AddItemDrop(p.GetCenter(), GameItem::LifeUpItem);
+        this->droppedLifeForMaxMultiplier = true;
+        return;
+    }
+
 	// Make sure we don't drop more items than the max allowable...
 	if (this->currLiveItems.size() >= GameModelConstants::GetInstance()->MAX_LIVE_ITEMS) {
 		return;
@@ -1034,13 +1052,13 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 			return;
 		}
 		GameItem::ItemType itemType = GameItemFactory::GetInstance()->CreateRandomItemTypeForCurrentLevel(this, true);
-		this->AddItemDrop(p, itemType);
+        this->AddItemDrop(p.GetCenter(), itemType);
 	}
 }
 
-void GameModel::AddItemDrop(const LevelPiece& p, const GameItem::ItemType& itemType) {
+void GameModel::AddItemDrop(const Point2D& p, const GameItem::ItemType& itemType) {
 	// We always drop items in this manor, even if we've exceeded the max!
-	GameItem* newGameItem = GameItemFactory::GetInstance()->CreateItem(itemType, p.GetCenter(), this);
+	GameItem* newGameItem = GameItemFactory::GetInstance()->CreateItem(itemType, p, this);
 	this->currLiveItems.push_back(newGameItem);
 	// EVENT: Item has been created and added to the game
 	GameEventManager::Instance()->ActionItemSpawned(*newGameItem);

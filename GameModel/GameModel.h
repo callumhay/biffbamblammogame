@@ -86,6 +86,7 @@ private:
 	int numInterimBlocksDestroyed;
     int maxInterimBlocksDestroyed;
     int numLivesLostInLevel;
+    bool droppedLifeForMaxMultiplier;
 	
     int currLivesLeft;        // Number of lives left before the player is officially dead
     int livesAtStartOfLevel;  // Lives given to the player at the start of a level
@@ -142,9 +143,9 @@ private:
 
     void ResetScore();
 	void SetNumInterimBlocksDestroyed(int value, const Point2D& pos = Point2D());
-    int GetNumInterimBlocksDestroyed() const { return this->numInterimBlocksDestroyed; }
+    int  GetNumInterimBlocksDestroyed() const { return this->numInterimBlocksDestroyed; }
     void SetMaxConsecutiveBlocksDestroyed(int value) { this->maxInterimBlocksDestroyed = value; }
-    int GetCurrentMultiplier() const;
+    int  GetCurrentMultiplier() const;
     
 
     void ResetLevelTime() { this->totalLevelTimeInSeconds = 0; }
@@ -300,7 +301,8 @@ public:
 	}
 	void SetInitialNumberOfLives(int lives) {
         assert(lives <= GameModelConstants::GetInstance()->MAXIMUM_POSSIBLE_LIVES);
-		this->currLivesLeft = lives;
+		
+        this->currLivesLeft = lives;
         this->maxNumLivesAllowed = lives;
 
 		// EVENT: Number of lives just changed
@@ -473,7 +475,7 @@ public:
 	// *******************************************************************
 
 	void AddPossibleItemDrop(const LevelPiece& p);
-	void AddItemDrop(const LevelPiece& p, const GameItem::ItemType& itemType);
+	void AddItemDrop(const Point2D& p, const GameItem::ItemType& itemType);
 	void AddProjectile(Projectile* projectile);
 	void AddBeam(int beamType);
 

@@ -189,7 +189,7 @@ LevelPiece* ItemDropBlock::TickBeamCollision(double dT, const BeamSegment* beamS
 		this->hitPointsBeforeNextDrop = ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP;
 
 		// We now need to drop an item...
-		gameModel->AddItemDrop(*this, this->nextDropItemType);
+        gameModel->AddItemDrop(this->GetCenter(), this->nextDropItemType);
 		this->ChangeToNextItemDropType(true);
 	}
 
@@ -209,7 +209,7 @@ LevelPiece* ItemDropBlock::TickPaddleShieldCollision(double dT, const PlayerPadd
 		this->hitPointsBeforeNextDrop = ItemDropBlock::DAMAGE_UNTIL_ITEM_DROP;
 
 		// We now need to drop an item...
-		gameModel->AddItemDrop(*this, this->nextDropItemType);
+        gameModel->AddItemDrop(this->GetCenter(), this->nextDropItemType);
 		this->ChangeToNextItemDropType(true);
 	}
 

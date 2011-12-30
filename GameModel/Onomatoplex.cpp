@@ -57,7 +57,6 @@ Generator::~Generator() {
 	this->uberSingleWords.clear();
 }
 
-
 /**
  * Private helper function for specifically loading explosion type words.
  */
@@ -72,16 +71,24 @@ void Generator::LoadExplosionWords() {
 	singleWordExplosion.push_back("Floom");
 	singleWordExplosion.push_back("Ploom");
 	singleWordExplosion.push_back("Zam");
+    singleWordExplosion.push_back("Zonk");
 	singleWordExplosion.push_back("Ziff");
 	singleWordExplosion.push_back("Poof");
 	singleWordExplosion.push_back("Ploof");
+    singleWordExplosion.push_back("Bloof");
+    singleWordExplosion.push_back("Piff");
+    singleWordExplosion.push_back("Poff");
+    singleWordExplosion.push_back("Splam");
+    singleWordExplosion.push_back("Zop");
 	this->simpleSingleWords[EXPLOSION] = singleWordExplosion;
 
 	std::vector<std::string> goodSingleWordExplosion;
 	goodSingleWordExplosion.push_back("Blaam");
+    goodSingleWordExplosion.push_back("Blaamy");
 	goodSingleWordExplosion.push_back("Kabloom");
 	goodSingleWordExplosion.push_back("Kaboom");
 	goodSingleWordExplosion.push_back("Floomo");
+    goodSingleWordExplosion.push_back("Flammo");
 	goodSingleWordExplosion.push_back("Kablamm");
 	goodSingleWordExplosion.push_back("Zaam");
 	goodSingleWordExplosion.push_back("Kazaam");
@@ -90,8 +97,10 @@ void Generator::LoadExplosionWords() {
 	goodSingleWordExplosion.push_back("Ziff");
 	goodSingleWordExplosion.push_back("Biff");
 	goodSingleWordExplosion.push_back("Boomy");
+    goodSingleWordExplosion.push_back("Poofy");
 	goodSingleWordExplosion.push_back("Splazoom");
 	goodSingleWordExplosion.push_back("Powy");
+    goodSingleWordExplosion.push_back("Zoppow");
 	goodSingleWordExplosion.push_back("Splammo");
 	goodSingleWordExplosion.push_back("Sploom");
 	goodSingleWordExplosion.push_back("Pphhoom");
@@ -113,6 +122,7 @@ void Generator::LoadExplosionWords() {
 	awesomeSingleWordExplosion.push_back("BiffBammy");
 	awesomeSingleWordExplosion.push_back("Flamblam");
 	awesomeSingleWordExplosion.push_back("Explosiony");
+    awesomeSingleWordExplosion.push_back("Explooosion");
 	awesomeSingleWordExplosion.push_back("Pphoommy");
 	awesomeSingleWordExplosion.push_back("Kablaamosion");
 	awesomeSingleWordExplosion.push_back("Kazaammo");

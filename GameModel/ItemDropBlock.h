@@ -133,7 +133,7 @@ inline bool ItemDropBlock::StatusTick(double dT, GameModel* gameModel, int32_t& 
 inline void ItemDropBlock::AttemptToDropAnItem(GameModel* gameModel) {
 	// Drop an item if the item drop timer allows it...
 	if ((BlammoTime::GetSystemTimeInMillisecs() - this->timeOfLastDrop) >= ItemDropBlock::DISABLE_DROP_TIME) {
-		gameModel->AddItemDrop(*this, this->nextDropItemType);
+        gameModel->AddItemDrop(this->GetCenter(), this->nextDropItemType);
 		this->ChangeToNextItemDropType(true);
 	}
 }

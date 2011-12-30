@@ -920,12 +920,16 @@ void GameEventsListener::TeslaLightningBarrierRemovedEvent(const TeslaBlock& new
 }
 
 void GameEventsListener::LivesChangedEvent(int livesLeftBefore, int livesLeftAfter) {
-	
+	LivesLeftHUD* lifeHUD = this->display->GetAssets()->GetLifeHUD();
+
+    if (livesLeftBefore == 0) {
+        lifeHUD->Reinitialize();
+    }
+
 	// Tell the life HUD about the change in lives
 	int lifeDelta  = abs(livesLeftAfter - livesLeftBefore);
 	bool livesLost = livesLeftAfter < livesLeftBefore;
 	
-	LivesLeftHUD* lifeHUD = this->display->GetAssets()->GetLifeHUD();
 	if (livesLost) {
 		lifeHUD->LivesLost(lifeDelta);
 	}
