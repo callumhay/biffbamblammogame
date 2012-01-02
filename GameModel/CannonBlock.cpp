@@ -25,12 +25,12 @@ const float CannonBlock::CANNON_BARREL_HEIGHT				= 0.8f;
 const float CannonBlock::HALF_CANNON_BARREL_HEIGHT	= CannonBlock::CANNON_BARREL_HEIGHT / 2.0f;
 
 // Rotation will happen for some random period of time in between these values
-const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	= 0.8f;
+const double CannonBlock::MIN_ROTATION_TIME_IN_SECS	= 1.0f;
 const double CannonBlock::MAX_ROTATION_TIME_IN_SECS = 2.0f;
 
 // Rotation will occur at some random speed in between these values
-const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC = 150.0f;
-const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 450.0f;
+const float CannonBlock::MIN_ROTATION_SPD_IN_DEGS_PER_SEC = 180.0f;
+const float CannonBlock::MAX_ROTATION_SPD_IN_DEGS_PER_SEC = 500.0f;
 
 // When the rotation angle is fixed, we can still spin the cannon a whole bunch of times...
 const float CannonBlock::MIN_DEGREES_PER_FIXED_ROTATION = 0.65f;

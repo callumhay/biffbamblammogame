@@ -1,0 +1,70 @@
+Electric Fencing
+13 30
+A(1,0,d,a,b) E E E E E A(1,0,b,d,e,z) E E E E E A(1,0,e,b,c) 
+E T(R,ul) E C(247-249) E E E E E C(110-112) E T(R,ur) E 
+E E E E E E E E E E E E E 
+E E E E E E E E E E E E E 
+E E E E E E E E E E E E E 
+E X(y,l) E E E E E E E E E X(p,q) E 
+A(1,0,a,d,z) E E E E E A(1,0,z,a,b,c) E E E E E A(1,0,c,e,z) 
+S E E E E E E E E E E E S 
+S E T(R,ll) E X(l,y) E E E X(q,p) E T(R,lr) E S 
+S E E E E E E E E E E E S 
+S R O R O R O R O R O R S 
+S O R O R O R O R O R O S 
+A(1,0,g,h) E E E E E E E E E E E A(1,0,j,i) 
+E G Y G Y G Y G Y G Y G E 
+E Y G Y G Y G Y G Y G Y E 
+E G Y G Y G Y G Y G Y G E 
+E Y G Y G Y G Y G Y G Y E 
+E G Y G Y G Y G Y G Y G E 
+A(1,0,h,g) E E E E E E E E E E E A(1,0,i,j) 
+S E E E E E E E E E E E S 
+S O Y O Y O Y O Y O Y O S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+
+STARS:
+7000
+9000
+11000
+13000
+15000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 0
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 0
+BallCam 2
+MagnetPaddle 2
+MultiBall3 0
+IceBall 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 2

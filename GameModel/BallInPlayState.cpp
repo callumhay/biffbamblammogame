@@ -335,11 +335,8 @@ void BallInPlayState::Tick(double seconds) {
 			this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 			
 			// Make for damn sure that the ball is no longer colliding!
-			Vector2D tempN;
-			Collision::LineSeg2D tempLine;
-			double tempTime;
-			while (currLevel->TeslaLightningCollisionCheck(*currBall, 0.0, tempN, tempLine, tempTime)) {
-				currBall->SetCenterPosition(currBall->GetCenterPosition2D() + currBall->GetBounds().Radius() * n);
+			while (currLevel->TeslaLightningCollisionCheck(*currBall, 0.0, n, collisionLine, timeSinceCollision)) {
+				this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
 			}
 		}
 
