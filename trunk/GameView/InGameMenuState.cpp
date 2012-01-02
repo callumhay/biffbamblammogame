@@ -122,7 +122,8 @@ void InGameMenuState::RenderFrame(double dT) {
 	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), -1.0f, ColourRGBA(0.0f, 0.0f, 0.0f, 0.5f));
+	GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(),
+        -1.0f, ColourRGBA(0.0f, 0.0f, 0.0f, 0.5f));
 	
 	// Draw the menus...
 	glEnable(GL_DEPTH_TEST);

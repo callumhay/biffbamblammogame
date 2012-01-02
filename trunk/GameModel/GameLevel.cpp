@@ -1716,13 +1716,14 @@ bool GameLevel::TeslaLightningCollisionCheck(const GameBall& b, double dT, Vecto
 
 	// Change the normal slightly to make the ball reflection a bit random - make it harder on the player...
 	// Tend towards changing the normal to make a bigger reflection not a smaller one...
-    static const float MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS = Trig::degreesToRadians(80);	// Angle from the normal that's allowable
+    static const float MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS = Trig::degreesToRadians(60);	// Angle from the normal that's allowable
 	static const float MAX_ANGLE_LESS_REFLECTION_DEGS = 15.0f;
 	static const float MAX_ANGLE_MORE_REFLECTION_DEGS = 30.0f;
 	const Vector2D& ballVelocityDir = b.GetDirection();
 	// First make sure the ball velocity direction is reasonably off from the line/ reasonably close to the normal
 	// or modification could cause the ball to collide multiple times or worse
-	if (acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-ballVelocityDir, n)))) <= MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS) {
+    float radiansBetweenNormalAndBall = acos(std::min<float>(1.0f, std::max<float>(-1.0f, Vector2D::Dot(-ballVelocityDir, n))));
+	if (radiansBetweenNormalAndBall <= MIN_ANGLE_FOR_CHANGE_REFLECTION_RADS) {
 		float rotateDir = NumberFuncs::SignOf(Vector3D::cross(Vector3D(n), Vector3D(ballVelocityDir))[2]);
 		if (Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
 			// Rotate in the opposite direction (make the ball not reflect as much)
