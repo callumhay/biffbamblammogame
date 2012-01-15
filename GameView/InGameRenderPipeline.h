@@ -26,6 +26,8 @@ public:
 	void RenderFrameWithoutHUD(double dT);
 	void RenderFrame(double dT);
 
+    
+
 	// Helper functions - all of these are called by RenderFrame in the order
 	// provided below...
 	void ApplyInGameCamera(double dT);
@@ -34,6 +36,7 @@ public:
 	void RenderFinalGather(double dT);
 	void RenderHUD(double dT);
     void RenderHUDWithAlpha(double dT, float alpha);
+    void SetHUDAlpha(float alpha);
 
 private:
 	GameDisplay* display;	// Not owned by this object

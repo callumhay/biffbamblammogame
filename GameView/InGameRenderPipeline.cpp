@@ -292,8 +292,16 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 }
 
 void InGameRenderPipeline::RenderHUDWithAlpha(double dT, float alpha) {
+    this->SetHUDAlpha(alpha);
+    if (alpha > 0.0f) {
+        this->RenderHUD(dT);
+    }
+}
+
+void InGameRenderPipeline::SetHUDAlpha(float alpha) {
     GameAssets* gameAssets = this->display->GetAssets();
-    BallBoostHUD* boostHUD = gameAssets->GetBoostHUD();
-    boostHUD->SetAlpha(alpha);
-    this->RenderHUD(dT);
+
+    gameAssets->GetBoostHUD()->SetAlpha(alpha);
+    gameAssets->GetLifeHUD()->SetAlpha(alpha);
+    gameAssets->GetPointsHUD()->SetAlpha(alpha);
 }

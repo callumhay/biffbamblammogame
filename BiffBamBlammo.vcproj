@@ -912,6 +912,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxPostDeath.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxPostFirey.h"
 						>
 					</File>
@@ -989,6 +993,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxPostBulletTime.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxPostDeath.cpp"
 						>
 					</File>
 					<File

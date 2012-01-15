@@ -37,6 +37,8 @@ public:
 	void LivesGained(int numLives);
 	void Draw(double dT, int displayWidth, int displayHeight);
 
+    void SetAlpha(float alpha);
+
 private:
 	enum BallElementAnimations { CreationAnimation, IdleAnimation, DestructionAnimation };
 
@@ -61,6 +63,8 @@ private:
     Texture* infinityTex;
     bool infiniteLivesOn;
 
+    float alpha;
+
 	void InitIdleColourInterpolations();
 
     void TickState(double dT);
@@ -70,6 +74,10 @@ private:
 
 inline void LivesLeftHUD::ToggleInfiniteLivesDisplay(bool infiniteLivesOn) {
     this->infiniteLivesOn = infiniteLivesOn;
+}
+
+inline void LivesLeftHUD::SetAlpha(float alpha) {
+    this->alpha = alpha;
 }
 
 #endif

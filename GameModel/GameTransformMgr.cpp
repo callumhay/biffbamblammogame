@@ -298,7 +298,7 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 		const GameBall* deathBall = *(gameModel.GetGameBalls().begin());
 	
 		// Get the ball velocity and current camera worldspace position/translation
-		Vector2D ballVelocity2D = 0.8f * deathBall->GetVelocity();
+		Vector2D ballVelocity2D = 0.75f * deathBall->GetVelocity();
 		Vector3D currCamTranslation = this->currCamOrientation.GetTranslation();
 		
 		// Calculate the distance the ball has moved so far (if it were travelling in a straight line), in worldspace

@@ -147,7 +147,12 @@ public:
 	void SetTopLeftCorner(const Point2D& p) {
 		this->topLeftCorner = p;
 	}
-	void SetCenteredOnScreen(int screenWidth, int screenHeight);
+	void SetTopLeftCorner(float x, float y) {
+		this->topLeftCorner[0] = x;
+        this->topLeftCorner[1] = y;
+	}
+    
+    void SetCenteredOnScreen(int screenWidth, int screenHeight);
 
 	void Draw(double dT, int windowWidth, int windowHeight);
 	void DebugDraw();
@@ -179,6 +184,8 @@ public:
 		}
 	}
 
+    virtual float GetMenuItemPadding() const;
+
 protected:
 	static const float UP_DOWN_ARROW_HEIGHT;
 	static const float UP_DOWN_ARROW_TOP_PADDING;
@@ -206,7 +213,6 @@ protected:
 
 	MenuAlignment alignment;
 
-	virtual float GetMenuItemPadding() const;
 	virtual void DrawMenuBackground(double dT);
 	virtual void DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem, int windowWidth, int windowHeight) { 
 		menuItem.Draw(dT, pos, windowWidth, windowHeight); 

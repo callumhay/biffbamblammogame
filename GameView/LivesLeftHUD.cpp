@@ -20,7 +20,7 @@
 #include "../ResourceManager.h"
 
 LivesLeftHUD::LivesLeftHUD() : currNumLivesLeft(0), heartTex(NULL), noHeartTex(NULL),
-infinityTex(NULL), infiniteLivesOn(false) {
+infinityTex(NULL), infiniteLivesOn(false), alpha(1.0f) {
 
     this->heartTex = ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_HEART, Texture::Trilinear);
@@ -185,8 +185,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 	UNUSED_PARAMETER(displayWidth);
 	assert(this->currNumLivesLeft >= 0);
 
-	// If there are no lives left then there is nothing to draw
-	if (this->currNumLivesLeft == 0) {
+	if (this->alpha <= 0.0f) {
 		return;
 	}
 	
@@ -254,7 +253,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
         
         this->heartTex->BindTexture();
         glBegin(GL_QUADS);
-        glColor4f(currColour.R(), currColour.G(), currColour.B(), 0.9f*currAlpha);
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), this->alpha*0.9f*currAlpha);
         glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
         glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
         glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
@@ -270,7 +269,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
 
         this->infinityTex->BindTexture();
         glBegin(GL_QUADS);
-        glColor4f(1, 1, 1,  0.9f*currAlpha);
+        glColor4f(1, 1, 1,  this->alpha*0.9f*currAlpha);
         glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
         glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
         glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
@@ -357,7 +356,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
                 
                 this->heartTex->BindTexture();
 	            glBegin(GL_QUADS);
-	            glColor4f(currColour.R(), currColour.G(), currColour.B(), 0.9f*currAlpha);
+	            glColor4f(currColour.R(), currColour.G(), currColour.B(), this->alpha*0.9f*currAlpha);
 	            glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
 	            glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
 	            glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
@@ -372,7 +371,7 @@ void LivesLeftHUD::Draw(double dT, int displayWidth, int displayHeight) {
     	        
                 this->noHeartTex->BindTexture();
                 glBegin(GL_QUADS);
-	            glColor4f(1.0f, 1.0f, 1.0f, 0.8f);
+	            glColor4f(1.0f, 1.0f, 1.0f, this->alpha*0.8f);
 	            glTexCoord2i(0, 0); glVertex2i(-LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
 	            glTexCoord2i(1, 0); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, -LivesLeftHUD::ELEMENT_HALF_SIZE);
 	            glTexCoord2i(1, 1); glVertex2i(LivesLeftHUD::ELEMENT_HALF_SIZE, LivesLeftHUD::ELEMENT_HALF_SIZE);
