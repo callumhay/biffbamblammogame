@@ -263,8 +263,8 @@ void InGameMenuState::InitTopMenu() {
 	this->returnToMainItem = this->topMenu->AddMenuItem(returnToMainMenuItem);
 	
 	// The exit to desktop menu item has a verify menu...
-	tempLabelSm.SetText("Exit to Desktop");
-	tempLabelLg.SetText("Exit to Desktop");
+	tempLabelSm.SetText("Exit Game");
+	tempLabelLg.SetText("Exit Game");
 
 	VerifyMenuItem* exitToDesktopMenuItem = new VerifyMenuItem(tempLabelSm, tempLabelLg, 
 		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),

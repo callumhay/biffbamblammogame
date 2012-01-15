@@ -69,6 +69,7 @@ public:
 	const char* CGFX_FIREBALL_SHADER;
 	const char* CGFX_FULLSCREEN_POSTFIREY_SHADER;
     const char* CGFX_POSTBULLETTIME_SHADER;
+    const char* CGFX_FULLSCREEN_POSTDEATH_SHADER;
 
 	// Texture path constants *******************************
 	const char* TEXTURE_BANG1;

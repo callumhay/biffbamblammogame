@@ -447,8 +447,7 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->RenderTitle(menuCamera);
 
 	// Render the menu
-	Point2D menuTopLeftCorner = Point2D(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT);
-	this->mainMenu->SetTopLeftCorner(menuTopLeftCorner);
+	this->mainMenu->SetTopLeftCorner(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT);
 	this->mainMenu->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
     // Render created by text

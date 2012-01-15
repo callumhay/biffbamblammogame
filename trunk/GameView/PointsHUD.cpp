@@ -35,7 +35,7 @@ const int PointsHUD::SCORE_TO_MULTIPLER_HORIZONTAL_GAP  = 5;
 const int PointsHUD::ALL_STARS_WIDTH                    = (STAR_GAP * (GameLevel::MAX_STARS_PER_LEVEL-1) + STAR_SIZE * GameLevel::MAX_STARS_PER_LEVEL);
 
 PointsHUD::PointsHUD() : numStars(0), currPtScore(0), 
-ptScoreLabel(NULL), starTex(NULL), lensFlareTex(NULL), haloTex(NULL),
+ptScoreLabel(NULL), starTex(NULL), lensFlareTex(NULL), haloTex(NULL), starAlpha(1.0f),
 multiplier(new MultiplierHUD()), multiplierGage(new MultiplierGageHUD()),
 haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f), flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
 
@@ -172,7 +172,7 @@ void PointsHUD::DrawIdleStars(const Camera& camera, float rightMostX, float topM
 
         starColourAnimators[currStarIdx]->Tick(dT);
         const ColourRGBA& starColour = starColourAnimators[currStarIdx]->GetInterpolantValue();
-        glColor4fv(starColour.begin());
+        glColor4f(starColour.R(), starColour.G(), starColour.B(), starColour.A() * this->starAlpha);
 
         this->starSizeAnimators[currStarIdx]->Tick(dT);
         float sizeMultiplier = this->starSizeAnimators[currStarIdx]->GetInterpolantValue();
@@ -186,6 +186,7 @@ void PointsHUD::DrawIdleStars(const Camera& camera, float rightMostX, float topM
          iter != this->starEffectEmitters.end();) {
 
         ESPPointEmitter* emitter = *iter;
+        emitter->SetParticleAlpha(emitter->GetParticleAlpha());
         emitter->Tick(dT);
         emitter->Draw(camera);
 
@@ -363,6 +364,13 @@ void PointsHUD::SetAlpha(float alpha) {
     this->ptScoreLabel->SetAlpha(alpha);
     this->multiplier->SetAlpha(alpha);
     this->multiplierGage->SetAlpha(alpha);
+    
+    this->starAlpha = alpha;
+    for (std::list<ESPPointEmitter*>::iterator iter = this->starEffectEmitters.begin();
+         iter != this->starEffectEmitters.end();) {
+        ESPPointEmitter* currEmitter = *iter;
+        currEmitter->SetParticleAlpha(ESPInterval(alpha)); 
+    }
     //for (PointNotifyListIter iter = this->ptNotifications.begin(); iter != this->ptNotifications.end();) {
     //    PointNotification* ptNotification = *iter;
     //    ptNotification->SetAlpha(alpha);

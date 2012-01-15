@@ -36,6 +36,7 @@ public:
     static const float DEFAULT_NORMAL_SPEED;
     static void SetNormalSpeed(float speed);
     static float GetZeroSpeed() { return GameBall::ZeroSpeed; }
+    static float GetSlowestSpeed() { return GameBall::SlowestSpeed; }
     static float GetNormalSpeed() { return GameBall::NormalSpeed; }
 
 	//enum BallSpeed { ZeroSpeed = 0, SlowestSpeed = 10, SlowSpeed = 13, NormalSpeed = 16, 

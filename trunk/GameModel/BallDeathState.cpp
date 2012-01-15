@@ -16,8 +16,8 @@
 #include "GameBall.h"
 #include "GameEventManager.h"
 
-const double BallDeathState::SPIRAL_ANIMATION_TIME_TOTAL    = 1.5;	// Total time of the spiral animation in seconds
-const double BallDeathState::EXPLOSION_ANIMATION_TIME_TOTAL	= 1.0;	// Total time of the explosion animation in seconds
+const double BallDeathState::SPIRAL_ANIMATION_TIME_TOTAL    = 1.25;	// Total time of the spiral animation in seconds
+const double BallDeathState::EXPLOSION_ANIMATION_TIME_TOTAL	= 0.75;	// Total time of the explosion animation in seconds
 
 BallDeathState::BallDeathState(GameBall* lastBallToBeAlive, GameModel* gm) : 
 GameState(gm), spiralRadius(0.0f), lastBallToBeAlive(lastBallToBeAlive), timeElapsed(0.0),
@@ -131,8 +131,9 @@ void BallDeathState::ExecuteSpiralingToDeathState(double dT) {
 		// EVENT: Ball just exploded...
 		GameEventManager::Instance()->ActionLastBallExploded(*this->lastBallToBeAlive);
 
-		// Make the ball disappear as it explodes
+		// Make the ball disappear as it explodes and also (sortof) stop moving
 		this->lastBallToBeAlive->SetAlpha(0.0f);
+        this->lastBallToBeAlive->SetSpeed(GameBall::GetSlowestSpeed());
 	}
 	else {
 		timeElapsed += dT;

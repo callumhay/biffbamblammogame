@@ -55,6 +55,8 @@ public:
     void SetMultiplierCounter(int count);
     void SetMultiplier(int multiplierAmt);
     void PostPointNotification(const PointAward& pointAward);
+    
+    void SetAlpha(float alpha);
 
     static const char* GetPointNotificationName(const PointAward& pointAward);
 
@@ -186,6 +188,8 @@ private:
     ESPParticleColourEffector haloFader;
     std::list<ESPPointEmitter*> starEffectEmitters;
 
+    float starAlpha;
+
     Point2D GetStarStartPos(float displayWidth) const;
 
     void DrawMultiplier(float rightMostX, float topMostY);
@@ -194,7 +198,6 @@ private:
 
     void SetStarAcquiredAnimation(const Camera& camera, size_t starIdx);
 
-    void SetAlpha(float alpha);
     void ClearNotifications();
 
     DISALLOW_COPY_AND_ASSIGN(PointsHUD);

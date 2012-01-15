@@ -59,6 +59,13 @@ struct ESPInterval {
 	}
 };
 
+inline ESPInterval operator*(const ESPInterval& i, float f) {
+    return ESPInterval(f * i.minValue, f* i.maxValue);
+}
+inline ESPInterval operator*(float f, const ESPInterval& i) {
+    return ESPInterval(f * i.minValue, f* i.maxValue);
+}
+
 // A function with a single variable
 class ESPFunc {
 public:
