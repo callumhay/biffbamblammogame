@@ -1,0 +1,68 @@
+A healthy Serving of Blocks
+12 28
+E E E E E S S E E E E E 
+E E E E S E E S E E E E 
+E E E C(180) E E E E C(180) E E E 
+E E S E E G G E E S E E 
+S C(180) E E G E E G E E C(180) S 
+S E G G E G G E G G E S 
+S G E E G E E G E E G S 
+S Y G R O R R O R G Y S 
+S O I R O R R O R I O S 
+S E G E E E E E E G E S 
+S G Y Y Y Y Y Y Y Y G S 
+S G Y O Y O O Y O Y G S 
+S Y G O G O O G O G Y S 
+S Y G G I Y Y I G G Y S 
+S Y G O G O O G O G Y S 
+S G Y O Y O O Y O Y G S 
+S G I G Y Y Y Y G I G S 
+S G G G O R R O G G G S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+S E E E E E E E E E E S 
+
+STARS:
+9000
+12000
+17000
+23000
+25000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 0
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 2
+MultiBall3 2
+IceBall 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 1
