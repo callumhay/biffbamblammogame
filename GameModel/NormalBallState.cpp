@@ -160,9 +160,8 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
 		NEXT_TIME = 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 2.0;
 
 		float randomRotation  = Randomizer::GetInstance()->RandomNegativeOrPositive() * (45 + Randomizer::GetInstance()->RandomNumZeroToOne() * 115);
-		float currVelMag = Vector2D::Magnitude(currVelocity);
-		Vector2D newVelocity = Vector2D::Normalize(Vector2D::Rotate(randomRotation, currVelocity));
-		this->gameBall->SetVelocity(currVelMag, newVelocity);
+		Vector2D newVelocityDir = Vector2D::Normalize(Vector2D::Rotate(randomRotation, currVelocity));
+		this->gameBall->SetVelocity(this->gameBall->currSpeed, newVelocityDir);
 	}
 }
 

@@ -558,11 +558,6 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
 
-	if (!p.GetIsPaddleCameraOn()) {
-		// Draw the shield around the paddle (if it's currently activated)
-		this->paddleShield->DrawAndTick(p, camera, dT);
-	}
-
     // If the paddle is invisible then we don't draw any of the extraneous effects on it and we make sure
     // to draw it with an invisible material...
     bool paddleIsInvisible = (p.GetPaddleType() & PlayerPaddle::InvisiPaddle) == PlayerPaddle::InvisiPaddle;
@@ -636,6 +631,11 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 	glPushMatrix();
 	glTranslatef(paddleCenter[0], paddleCenter[1] + scaleHeightAdjustment, 0);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);	
+
+	if (!paddle->GetIsPaddleCameraOn()) {
+		// Draw the shield around the paddle (if it's currently activated)
+		this->paddleShield->DrawAndTick(*paddle, camera, dT);
+	}
 
 	// When the paddle has the 'sticky' power-up we attach sticky goo to its top
 	if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {	

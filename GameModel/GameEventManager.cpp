@@ -175,18 +175,18 @@ void GameEventManager::ActionBallFiredFromCannon(const GameBall& ball, const Can
 }
 
 // Action for when a rocket enters/is loaded into a cannon block
-void GameEventManager::ActionRocketEnteredCannon(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
+void GameEventManager::ActionProjectileEnteredCannon(const Projectile& projectile, const CannonBlock& cannonBlock) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->RocketEnteredCannonEvent(rocket, cannonBlock);
+		(*this->listenerIter)->ProjectileEnteredCannonEvent(projectile, cannonBlock);
 	}	
 }
 
 // Action for when the rocket is fired from a cannon block
-void GameEventManager::ActionRocketFiredFromCannon(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
+void GameEventManager::ActionProjectileFiredFromCannon(const Projectile& projectile, const CannonBlock& cannonBlock) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
-		(*this->listenerIter)->RocketFiredFromCannonEvent(rocket, cannonBlock);
+		(*this->listenerIter)->ProjectileFiredFromCannonEvent(projectile, cannonBlock);
 	}		
 }
 

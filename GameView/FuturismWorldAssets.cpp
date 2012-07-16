@@ -58,7 +58,7 @@ void FuturismWorldAssets::Tick(double dT) {
 }
 
 void FuturismWorldAssets::DrawBackgroundEffects(const Camera& camera) {
-
+    // TODO...
 }
 
 void FuturismWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight,

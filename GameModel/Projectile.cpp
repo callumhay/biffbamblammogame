@@ -17,6 +17,7 @@
 #include "TurretRocketProjectile.h"
 #include "BallLaserProjectile.h"
 #include "LaserTurretProjectile.h"
+#include "PaddleMineProjectile.h"
 #include "GameModel.h"
 
 // Projectile ====================================================================================================================
@@ -42,7 +43,8 @@ void Projectile::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel&
 
 Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
     assert(p != NULL);
-	switch (p->GetType()) {
+	
+    switch (p->GetType()) {
 		case Projectile::PaddleLaserBulletProjectile:
 			return new PaddleLaserProjectile(*static_cast<const PaddleLaserProjectile*>(p));
         case Projectile::BallLaserBulletProjectile:
@@ -53,6 +55,8 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
             return new PaddleRocketProjectile(*static_cast<const PaddleRocketProjectile*>(p));
         case Projectile::RocketTurretBulletProjectile:
             return new TurretRocketProjectile(*static_cast<const TurretRocketProjectile*>(p));
+        case Projectile::PaddleMineBulletProjectile:
+            return new PaddleMineProjectile(*static_cast<const PaddleMineProjectile*>(p));
         default:
 			assert(false);
 			break;

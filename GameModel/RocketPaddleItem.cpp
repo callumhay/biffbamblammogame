@@ -27,22 +27,6 @@ double RocketPaddleItem::Activate() {
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	assert(paddle != NULL);
 
-	// Kill other laser beam paddle timers
-	std::list<GameItemTimer*>& activeTimers = this->gameModel->GetActiveTimers();
-
-	for (std::list<GameItemTimer*>::iterator iter = activeTimers.begin(); iter != activeTimers.end();) {
-		GameItemTimer* currTimer = *iter;
-		if (currTimer->GetTimerItemType() == GameItem::RocketPaddleItem) {
-			delete currTimer;
-			currTimer = NULL;
-			iter = activeTimers.erase(iter);
-		}
-		else {
-			++iter;
-		}
-	}
-
-	// Make the paddle have laser beam blasting abilities
 	paddle->AddPaddleType(PlayerPaddle::RocketPaddle);
 
 	GameItem::Activate();

@@ -450,20 +450,22 @@ void GameEventsListener::BallFiredFromCannonEvent(const GameBall& ball, const Ca
 }
 
 
-void GameEventsListener::RocketEnteredCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
-	UNUSED_PARAMETER(rocket);
+void GameEventsListener::ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
 	UNUSED_PARAMETER(cannonBlock);
 
-	// Suspend certain elements of the rocket projectile until it's fired back out of the cannon...
-	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
-	// Start the sound of the cannon rotating
-	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask);
-	
-	debug_output("EVENT: Rocket entered cannon block");
+    if (projectile.IsRocket()) {
+        // TODO: Fix sounds to be bound to particular game objects and not be global effects/masks!
+
+	    // Suspend certain elements of the rocket projectile until it's fired back out of the cannon...
+	    this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
+	    // Start the sound of the cannon rotating
+	    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask);
+    }
+
+	debug_output("EVENT: Projectile entered cannon block");
 }
 
-void GameEventsListener::RocketFiredFromCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
-	UNUSED_PARAMETER(rocket);
+void GameEventsListener::ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
 
 	// Add the blast effect of the rocket exiting the cannon
 	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(
@@ -472,10 +474,15 @@ void GameEventsListener::RocketFiredFromCannonEvent(const RocketProjectile& rock
 	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldSoundCannonBlockRotatingMask);
 	// .. and the sound for the blast
 	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundCannonBlockFiredEvent, GameSoundAssets::LoudVolume);
-	// ... and for the rocket moving mask again
-	this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
 
-	debug_output("EVENT: Rocket fired out of cannon block");
+    if (projectile.IsRocket()) {
+        // TODO: Fix sounds to be bound to particular game objects and not be global effects/masks!
+
+	    // ... and for the rocket moving mask again
+	    this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldSoundRocketMovingMask);
+    }
+
+	debug_output("EVENT: Projectile fired out of cannon block");
 }
 
 void GameEventsListener::BallHitTeslaLightningArcEvent(const GameBall& ball, const TeslaBlock& teslaBlock1, const TeslaBlock& teslaBlock2) {

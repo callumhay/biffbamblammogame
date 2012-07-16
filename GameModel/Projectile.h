@@ -28,7 +28,7 @@ class Projectile {
 public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
                           CollateralBlockProjectile, PaddleRocketBulletProjectile, RocketTurretBulletProjectile,
-                          FireGlobProjectile };
+                          FireGlobProjectile, PaddleMineBulletProjectile };
 
 	virtual ~Projectile();
 	virtual void Tick(double seconds, const GameModel& model) = 0;
@@ -89,7 +89,7 @@ protected:
 	
 	float currWidth;
 	float currHeight;
-	Point2D position;			// Position of the projectile in game units
+	Point2D position;	    // Position of the projectile in game units
 	Vector2D velocityDir;	// Velocity direction of the projectile
 	Vector2D rightVec;		// Unit vector pointing outwards to the right of the particle, perpendicular to the velocity direction
 	float velocityMag;		// Velocity magnitude of the projectile in game units / second
