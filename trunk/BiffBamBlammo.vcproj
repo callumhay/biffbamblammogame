@@ -2004,6 +2004,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PaddleMineLauncherItem.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleSizeItem.h"
 						>
 					</File>
@@ -2128,6 +2132,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PaddleMineLauncherItem.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleSizeItem.cpp"
 						>
 					</File>
@@ -2192,6 +2200,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\PaddleMineProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleRocketProjectile.h"
 						>
 					</File>
@@ -2233,6 +2245,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\PaddleLaserProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\PaddleMineProjectile.cpp"
 						>
 					</File>
 					<File

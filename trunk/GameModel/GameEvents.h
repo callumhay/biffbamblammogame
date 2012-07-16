@@ -227,24 +227,24 @@ public:
     }
 
 	/**
-	 * Event triggered when a rocket enters a cannon block. Only occurs once as the rocket is JUST being
+	 * Event triggered when a projectile enters a cannon block. Only occurs once as the projectile is JUST being
 	 * loaded into the barrel of the cannon.
-	 * Arguements: rocket      - The rocket being loaded by the cannon.
+	 * Arguements: projectile  - The projectile being loaded by the cannon.
 	 *             cannonBlock - The cannon block loading the rocket. 
 	 */
-    virtual void RocketEnteredCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
-        UNUSED_PARAMETER(rocket);
+    virtual void ProjectileEnteredCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
+        UNUSED_PARAMETER(projectile);
         UNUSED_PARAMETER(cannonBlock);
     }
 
 	/**
-	 * Event triggered when a rocket is fired out of a cannon block. Only occurs once as the rocket is JUST being
+	 * Event triggered when a projectile is fired out of a cannon block. Only occurs once as the projectile is JUST being
 	 * fired out of the barrel of the cannon.
-	 * Arguements: rocket      - The rocket being fired out of the cannon.
+	 * Arguements: projectile  - The rocket being fired out of the cannon.
 	 *             cannonBlock - The cannon block firing the rocket. 
 	 */
-    virtual void RocketFiredFromCannonEvent(const RocketProjectile& rocket, const CannonBlock& cannonBlock) {
-        UNUSED_PARAMETER(rocket);
+    virtual void ProjectileFiredFromCannonEvent(const Projectile& projectile, const CannonBlock& cannonBlock) {
+        UNUSED_PARAMETER(projectile);
         UNUSED_PARAMETER(cannonBlock);
     }
 

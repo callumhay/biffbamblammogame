@@ -52,7 +52,9 @@ public:
 
 	enum PaddleType { NormalPaddle = 0x00000000, LaserBulletPaddle = 0x00000001, PoisonPaddle = 0x00000002, 
                       StickyPaddle = 0x00000004, LaserBeamPaddle = 0x00000008, RocketPaddle = 0x00000010, 
-                      ShieldPaddle = 0x00000020, InvisiPaddle = 0x00000040, MagnetPaddle = 0x00000080 };
+                      ShieldPaddle = 0x00000020, InvisiPaddle = 0x00000040, MagnetPaddle = 0x00000080,
+                      MineLauncherPaddle = 0x00000100 };
+
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
 	PlayerPaddle(float minBound, float maxBound);

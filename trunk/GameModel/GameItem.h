@@ -57,6 +57,7 @@ public:
                     OmniLaserBallItem,
                     InvisiPaddleItem,
                     MagnetPaddleItem,
+                    MineLauncherPaddleItem,
 
                     RandomItem // MAKE SURE RANDOM ITEM IS ALWAYS THE LAST ONE!!
 	};

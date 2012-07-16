@@ -89,7 +89,7 @@ void RocketProjectile::Tick(double seconds, const GameModel& model) {
 			this->position = this->position + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
 
 			// EVENT: Rocket has officially been fired from the cannon
-			GameEventManager::Instance()->ActionRocketFiredFromCannon(*this, *this->cannonBlock);
+			GameEventManager::Instance()->ActionProjectileFiredFromCannon(*this, *this->cannonBlock);
 
 			this->cannonBlock = NULL;
 		}
@@ -120,5 +120,5 @@ void RocketProjectile::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
 	this->cannonBlock = cannonBlock;
 
 	// EVENT: The rocket is officially loaded into the cannon block
-	GameEventManager::Instance()->ActionRocketEnteredCannon(*this, *cannonBlock);
+	GameEventManager::Instance()->ActionProjectileEnteredCannon(*this, *cannonBlock);
 }
