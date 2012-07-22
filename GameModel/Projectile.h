@@ -2,7 +2,7 @@
  * Projectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011-2011
+ * Callum Hay, 2011-2012
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -20,6 +20,7 @@
 
 class LevelPiece;
 class GameModel;
+class SafetyNet;
 
 /**
  * An 'abstract class' for representing in-game projectiles.
@@ -40,6 +41,14 @@ public:
 
     virtual float GetZOffset() const { return 0.0f; }
 
+    virtual bool BlastsThroughSafetyNets() const { return true; }
+    virtual bool IsDestroyedBySafetyNets() const { return false; }
+
+    virtual void SafetyNetCollisionOccurred(SafetyNet* safetyNet) { this->SetLastThingCollidedWith(safetyNet); };
+    virtual void LevelPieceCollisionOccurred(LevelPiece* block)   { this->SetLastThingCollidedWith(block); };
+
+    virtual bool ModifyLevelUpdate(double dT, GameModel&) { UNUSED_PARAMETER(dT); return false; };
+
     void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
 
 	float GetWidth() const { return this->currWidth; }
@@ -54,7 +63,8 @@ public:
 	const Vector2D& GetVelocityDirection() const { return this->velocityDir; }
 	float GetVelocityMagnitude() const { return this->velocityMag; }
 
-	virtual void SetPosition(const Point2D& pos) { this->position = pos; } 
+	virtual void SetPosition(const Point2D& pos) { this->position = pos; }
+
 	void SetVelocity(const Vector2D& velocityDir, float velocityMag) { 
 		this->velocityDir = velocityDir;
 		this->velocityMag = velocityMag;

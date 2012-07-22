@@ -48,7 +48,7 @@ public:
 
     enum DestructionMethod { NotApplicableDestruction, RegularDestruction, LaserProjectileDestruction, RocketDestruction, LaserBeamDestruction,
                              CollateralDestruction, PaddleShieldDestruction, BombDestruction, FireDestruction,
-                             TeslaDestruction }; 
+                             TeslaDestruction, MineDestruction }; 
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
                           Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop,
@@ -111,6 +111,8 @@ public:
 
     virtual int GetPointsOnChange(const LevelPiece& changeToPiece) const = 0;
 
+    virtual bool ProjectileIsDestroyedOnCollision(Projectile* projectile) const;
+
     virtual bool IsAIPiece() const { return false; }
     virtual void AITick(double dT, GameModel* gameModel) { UNUSED_PARAMETER(dT); UNUSED_PARAMETER(gameModel); }
     
@@ -127,6 +129,10 @@ public:
 	void RemoveStatus(const PieceStatus& status);
 	void RemoveStatuses(int32_t statusMask);
 
+    // Projectile attachment functionality
+    void AttachProjectile(PaddleMineProjectile* p);
+    void DetachProjectile(PaddleMineProjectile* p);
+
 	// Debug Stuffs
 	void DebugDraw() const;
 
@@ -137,6 +143,8 @@ protected:
 	BoundingLines bounds;     // The bounding box, rep. as lines forming the boundry of this, kept in world space
     
     TriggerID triggerID;
+
+    std::set<PaddleMineProjectile*> attachedProjectiles; // Any projectiles that have latched on to this piece
 
 	// Pointers to any neighboring level pieces to this one - if a neighbor does not
 	// exist it will be NULL - these get initialized/set with any call to UpdateBounds.
@@ -163,7 +171,7 @@ protected:
 
 	void DoIceCubeReflectRefractLaserBullets(Projectile* projectile, GameModel* gameModel) const;
 	void GetIceCubeReflectionRefractionRays(const Point2D& currCenter, const Vector2D& currDir, 
-																					std::list<Collision::Ray2D>& rays) const;
+	    std::list<Collision::Ray2D>& rays) const;
 
 private:
 	DISALLOW_COPY_AND_ASSIGN(LevelPiece);
@@ -298,9 +306,9 @@ inline bool LevelPiece::HasStatus(const PieceStatus& status) const {
 }
 
 inline void LevelPiece::SetBounds(const BoundingLines& bounds, const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-																  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-																	const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-																	const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
+                                  const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
+                                  const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
+                                  const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
 	this->bounds = bounds;
 	this->leftNeighbor        = leftNeighbor;
 	this->bottomNeighbor      = bottomNeighbor;
@@ -310,6 +318,16 @@ inline void LevelPiece::SetBounds(const BoundingLines& bounds, const LevelPiece*
 	this->topLeftNeighbor     = topLeftNeighbor;
 	this->bottomRightNeighbor = bottomRightNeighbor;
 	this->bottomLeftNeighbor  = bottomLeftNeighbor;
+}
+
+inline void LevelPiece::AttachProjectile(PaddleMineProjectile* p) {
+    assert(p != NULL);
+    this->attachedProjectiles.insert(p);
+}
+
+inline void LevelPiece::DetachProjectile(PaddleMineProjectile* p) {
+    assert(p != NULL);
+    this->attachedProjectiles.erase(p);
 }
 
 #endif

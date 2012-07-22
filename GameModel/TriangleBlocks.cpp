@@ -247,6 +247,10 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 		    resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
 			break;
 
+        case Projectile::PaddleMineBulletProjectile:
+            // A mine will just come to rest on the block.
+            break;
+
 		case Projectile::FireGlobProjectile:
 			// Fire glob will just extinguish
 			break;

@@ -22,6 +22,8 @@
 #include "PointAward.h"
 #include "BallBoostModel.h"
 #include "GameProgressIO.h"
+#include "SafetyNet.h"
+#include "PaddleMineProjectile.h"
 
 #include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
@@ -31,7 +33,7 @@ currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLi
 livesAtStartOfLevel(0), numLivesLostInLevel(0), maxNumLivesAllowed(0),
 pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false),
-droppedLifeForMaxMultiplier(false) {
+droppedLifeForMaxMultiplier(false), safetyNet(NULL) {
 	
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
     std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
@@ -102,6 +104,7 @@ void GameModel::ResetLevelValues(int numLives) {
     this->droppedLifeForMaxMultiplier = false;
     this->ResetNumAcquiredItems();
     this->ResetLevelTime();
+    this->DestroySafetyNet();
     
 	// Clear up the model
     this->ClearStatusUpdatePieces();
@@ -151,6 +154,7 @@ void GameModel::ClearGameState() {
 	this->ClearActiveTimers();
 	this->ClearProjectiles();
 	this->ClearBeams();
+    this->DestroySafetyNet();
 
 	// Delete the state
 	delete this->currState;
@@ -268,6 +272,24 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
     this->difficulty = difficulty;
 }
 
+bool GameModel::ActivateSafetyNet() {
+    if (this->safetyNet != NULL) {
+        return false;
+    }
+
+    this->safetyNet = new SafetyNet(*this->GetCurrentLevel());
+    // EVENT: We just created a brand new ball safety net...
+	GameEventManager::Instance()->ActionBallSafetyNetCreated();
+    return true;
+}
+
+void GameModel::DestroySafetyNet() {
+    if (this->safetyNet != NULL) {
+        delete this->safetyNet;
+        this->safetyNet = NULL;
+    }
+}
+
 /**
  * Called when a collision occurs between a projectile and a level piece.
  * Deals with all the important effects a collision could have on the game model.
@@ -278,6 +300,9 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
 	assert(p->GetType() != LevelPiece::Empty);
 
 	bool alreadyCollided = projectile->IsLastThingCollidedWith(p);
+    if (!alreadyCollided) {
+        projectile->LevelPieceCollisionOccurred(p);
+    }
 
 	// Collide the projectile with the piece...
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, projectile); 	// WARNING: This can destroy p.
@@ -506,7 +531,7 @@ void GameModel::DoPieceStatusUpdates(double dT) {
 /**
  * Execute projectile collisions on everything relevant that's in play in the game model.
  */
-void GameModel::DoProjectileCollisions() {
+void GameModel::DoProjectileCollisions(double dT) {
 
 #define PROJECTILE_CLEANUP(p) GameEventManager::Instance()->ActionProjectileRemoved(*p); \
                               delete p; \
@@ -532,7 +557,7 @@ void GameModel::DoProjectileCollisions() {
 			this->CollisionOccurred(currProjectile, this->playerPaddle);
 
 			// Destroy the projectile if necessary
-			destroyProjectile = !this->playerPaddle->ProjectilePassesThrough(*currProjectile);
+			destroyProjectile = this->playerPaddle->ProjectileIsDestroyedOnCollision(*currProjectile);
 			if (destroyProjectile) {
 				iter = gameProjectiles.erase(iter);
 				PROJECTILE_CLEANUP(currProjectile);
@@ -545,26 +570,49 @@ void GameModel::DoProjectileCollisions() {
 		}
 
 		// Check to see if the projectile collided with a safety net (if one is active)
-		if (currLevel->ProjectileSafetyNetCollisionCheck(*currProjectile, projectileBoundingLines)) {
-			// This doesn't destroy projectiles currently
-			++iter;
-			continue;
-		}
+        if (this->IsSafetyNetActive()) {
+            if (this->safetyNet->ProjectileCollisionCheck(projectileBoundingLines)) {
+                
+                currProjectile->SafetyNetCollisionOccurred(this->safetyNet);
+                
+                // EVENT: The projectile was just destroyed by the safety net
+                GameEventManager::Instance()->ActionProjectileSafetyNetCollision(*currProjectile, *this->safetyNet);
+
+                if (currProjectile->BlastsThroughSafetyNets()) {
+                    this->DestroySafetyNet();
+                    // EVENT: The projectile just destroyed the safety net
+                    GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currProjectile);
+                }
+
+                // Check to see if the projectile will be destroyed due to the collision...
+                if (currProjectile->IsDestroyedBySafetyNets()) {
+                    iter = gameProjectiles.erase(iter);
+				    PROJECTILE_CLEANUP(currProjectile);
+				    continue;
+                }
+
+			    ++iter;
+			    continue;
+		    }
+        }
 
         // Check if the projectile collided with any tesla lightning arcs...
         if (currLevel->IsDestroyedByTelsaLightning(*currProjectile)) {
             if (currLevel->TeslaLightningCollisionCheck(projectileBoundingLines)) {
+                
                 // In the special case of a rocket projectile we cause an explosion...
                 if (currProjectile->IsRocket()) {
                     std::set<LevelPiece*> collisionPieces = 
                         this->GetCurrentLevel()->GetLevelPieceCollisionCandidates(currProjectile->GetPosition(), EPSILON);
-                    if (collisionPieces.empty()) {
-                        assert(false);
-                    }
-                    else {
+                    if (!collisionPieces.empty()) {
                         assert(dynamic_cast<RocketProjectile*>(currProjectile) != NULL);
                         currLevel->RocketExplosion(this, static_cast<RocketProjectile*>(currProjectile), *collisionPieces.begin());
                     }
+                }
+                // In the other special case of a mine projectile we cause an explosion...
+                else if (currProjectile->GetType() == Projectile::PaddleMineBulletProjectile) {
+                    assert(dynamic_cast<PaddleMineProjectile*>(currProjectile) != NULL);
+                    currLevel->MineExplosion(this, static_cast<PaddleMineProjectile*>(currProjectile));
                 }
 
 			    // Despose of the projectile...
@@ -584,10 +632,10 @@ void GameModel::DoProjectileCollisions() {
 			didCollide = currPiece->CollisionCheck(projectileBoundingLines, currProjectile->GetVelocityDirection());
 			if (didCollide) {
 				// This needs to be before the call to CollisionOccurred or else the currPiece may already be destroyed.
-				destroyProjectile = !currPiece->ProjectilePassesThrough(currProjectile);
 				this->CollisionOccurred(currProjectile, currPiece);	
 
 				// Check to see if the collision is supposed to destroy the projectile
+                destroyProjectile = currPiece->ProjectileIsDestroyedOnCollision(currProjectile);
 				if (destroyProjectile) {
 					// Despose of the projectile...
 					iter = gameProjectiles.erase(iter);
@@ -599,6 +647,14 @@ void GameModel::DoProjectileCollisions() {
 						// (and we may have destroyed the projectile anyway).
 			}
 		}
+
+        // Lastly we perform a modify level update for the projectile - certain projectiles can act
+        // 'intelligently' based on the level state and cause alteration to it as well
+        if (currProjectile->ModifyLevelUpdate(dT, *this)) {
+            iter = gameProjectiles.erase(iter);
+		    PROJECTILE_CLEANUP(currProjectile);
+		    continue;
+        }
 
 		if (incIter) {
 			++iter;

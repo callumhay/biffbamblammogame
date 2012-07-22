@@ -36,6 +36,7 @@
 #include "Projectile.h"
 #include "PointAward.h"
 #include "PaddleRocketProjectile.h"
+#include "PaddleMineProjectile.h"
 
 #include "../BlammoEngine/StringHelper.h"
 
@@ -85,8 +86,7 @@ GameLevel::GameLevel(size_t levelNumber, const std::string& filepath, const std:
 levelNum(levelNumber),
 currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum),
-piecesLeft(numBlocks), ballSafetyNetActive(false), 
-filepath(filepath), levelName(levelName), highScore(0) {
+piecesLeft(numBlocks), filepath(filepath), levelName(levelName), highScore(0) {
 
 	assert(!filepath.empty());
 	assert(pieces.size() > 0);
@@ -94,18 +94,6 @@ filepath(filepath), levelName(levelName), highScore(0) {
 	// Set the dimensions of the level
 	this->width = pieces[0].size();
 	this->height = pieces.size();
-
-	// Create the safety net bounding line for this level
-	std::vector<Collision::LineSeg2D> lines;
-	lines.reserve(1);
-	Collision::LineSeg2D safetyNetLine(Point2D(0.0f, -LevelPiece::HALF_PIECE_HEIGHT), Point2D(this->GetLevelUnitWidth(), -LevelPiece::HALF_PIECE_HEIGHT));
-	lines.push_back(safetyNetLine);
-
-	std::vector<Vector2D> normals;
-	normals.reserve(1);
-	normals.push_back(Vector2D(0, 1));
-	
-	this->safetyNetBounds = BoundingLines(lines, normals);
 
     // Initialize triggerable and AI pieces...
     for (size_t row = 0; row < this->height; row++) {
@@ -1242,6 +1230,37 @@ std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(float 
 	return affectedPieces;
 }
 
+void GameLevel::MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine) {
+    assert(gameModel != NULL);
+    assert(mine != NULL);
+
+    const Point2D& minePosition = mine->GetPosition();
+    float explosionRadius = mine->GetExplosionRadius();
+    
+    std::set<LevelPiece*> affectedPieces =
+        this->GetLevelPieceCollisionCandidates(minePosition, explosionRadius);
+
+	// Go through each affected piece and destroy it if we can
+	for (std::set<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
+		LevelPiece* currAffectedPiece = *iter;
+		if (currAffectedPiece != NULL && currAffectedPiece->CanBeDestroyedByBall()) {
+			LevelPiece* resultPiece = currAffectedPiece->Destroy(gameModel, LevelPiece::MineDestruction);
+            
+            if (resultPiece != currAffectedPiece) {
+			    // Update all the affected pieces again...
+			    affectedPieces = this->GetLevelPieceCollisionCandidates(minePosition, explosionRadius);
+			    iter = affectedPieces.begin();
+                continue;
+            }
+
+		}
+		++iter;
+	}
+
+	// EVENT: Mine exploded!!
+	GameEventManager::Instance()->ActionMineExploded(*mine);
+}
+
 /**
  * Activates the triggerable level piece with the given trigger ID (if it exists).
  */
@@ -1477,67 +1496,6 @@ void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::s
 	}
 }
 
-/**
- * Do a collision check with the ball safety net if it's active.
- * Returns: true on collision (when active) and the normal and distance values, false otherwise.
- */
-bool GameLevel::BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
-	// Fast exit if there's no safety net active
-	if (!this->ballSafetyNetActive){ 
-		return false;
-	}
-
-	// Test for collision, if there was one then we kill the safety net
-	bool didCollide = this->safetyNetBounds.Collide(dT, b.GetBounds(), b.GetVelocity(), n, collisionLine, timeSinceCollision);
-	if (didCollide) {
-		this->ballSafetyNetActive = false;
-		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(b);
-	}
-
-	return didCollide;
-}
-
-bool GameLevel::PaddleSafetyNetCollisionCheck(const PlayerPaddle& p) {
-	// Fast exit if there's no safety net active
-	if (!this->ballSafetyNetActive){ 
-		return false;
-	}
-	
-	// Test for collision, if there was one then we kill the safety net
-	bool didCollide = p.CollisionCheck(this->safetyNetBounds, false);
-	if (didCollide) {
-		this->ballSafetyNetActive = false;
-		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(p);
-	}
-
-	return didCollide;
-}
-
-bool GameLevel::ProjectileSafetyNetCollisionCheck(const Projectile& p, const BoundingLines& projectileBoundingLines) {
-	// Fast exit if there's no safety net active
-	if (!this->ballSafetyNetActive){ 
-		return false;
-	}
-
-	// Make sure the projectile is a type that we want being able to destroy a safety net
-	bool isProjectileThatBreaksSafetyNet = (p.GetType() == Projectile::FireGlobProjectile) ||
-        (p.GetType() == Projectile::CollateralBlockProjectile) || (p.GetType() == Projectile::RocketTurretBulletProjectile) ||
-        (p.GetType() == Projectile::PaddleRocketBulletProjectile);
-
-	if (!isProjectileThatBreaksSafetyNet){ 
-		return false;
-	}
-	
-	// Test for collision, if there was one then we kill the safety net
-	bool didCollide = projectileBoundingLines.CollisionCheck(this->safetyNetBounds);
-	if (didCollide) {
-		this->ballSafetyNetActive = false;
-		GameEventManager::Instance()->ActionBallSafetyNetDestroyed(p);
-	}
-
-	return didCollide;
-}
-
 // Add a newly activated lightning barrier for the tesla block
 void GameLevel::AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2) {
 	// Check to see if the barrier already exists, if it does then just exit with no change
@@ -1767,6 +1725,7 @@ bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
         case Projectile::CollateralBlockProjectile:
         case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
+        case Projectile::PaddleMineBulletProjectile:
             return true;
 
         default:

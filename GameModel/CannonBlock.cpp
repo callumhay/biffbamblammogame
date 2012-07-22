@@ -18,6 +18,7 @@
 #include "EmptySpaceBlock.h"
 #include "GameTransformMgr.h"
 #include "PaddleRocketProjectile.h"
+#include "PaddleMineProjectile.h"
 
 const float CannonBlock::CANNON_BARREL_LENGTH				= 1.20f;
 const float CannonBlock::HALF_CANNON_BARREL_LENGTH	= CannonBlock::CANNON_BARREL_LENGTH	/ 2.0f;
@@ -37,14 +38,14 @@ const float CannonBlock::MIN_DEGREES_PER_FIXED_ROTATION = 0.65f;
 const float CannonBlock::MAX_DEGREES_PER_FIXED_ROTATION = 1.2f;
 
 CannonBlock::CannonBlock(unsigned int wLoc, unsigned int hLoc, int setRotation) : LevelPiece(wLoc, hLoc), 
-rotationInterval(setRotation, setRotation), loadedBall(NULL), loadedRocket(NULL), currRotationFromXInDegs(0.0f),
+rotationInterval(setRotation, setRotation), loadedBall(NULL), loadedProjectile(NULL), currRotationFromXInDegs(0.0f),
 currRotationSpeed(0.0f), elapsedRotationTime(0.0), totalRotationTime(0.0) {
     assert(setRotation >= 0 && setRotation <= 359);
 }
 
 CannonBlock::CannonBlock(unsigned int wLoc, unsigned int hLoc, 
                          const std::pair<int, int>& rotationInterval) : LevelPiece(wLoc, hLoc), 
-rotationInterval(rotationInterval), loadedBall(NULL), loadedRocket(NULL), currRotationFromXInDegs(0.0f),
+rotationInterval(rotationInterval), loadedBall(NULL), loadedProjectile(NULL), currRotationFromXInDegs(0.0f),
 currRotationSpeed(0.0f), elapsedRotationTime(0.0), totalRotationTime(0.0) {
     
 	assert(rotationInterval.first >= 0 && rotationInterval.first <= 359);
@@ -185,13 +186,24 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			// the rocket gets captured by the cannon block and shot somewhere else...
 			if (!projectile->IsLastThingCollidedWith(this) && !this->GetIsLoaded()) {
 				PaddleRocketProjectile* rocketProjectile = static_cast<PaddleRocketProjectile*>(projectile);
-				assert(rocketProjectile != NULL);
 				this->SetupCannonFireTimeAndDirection();
 				rocketProjectile->LoadIntoCannonBlock(this);
 				rocketProjectile->SetLastThingCollidedWith(this);
-				this->loadedRocket = rocketProjectile;
+				this->loadedProjectile = rocketProjectile;
 			}
 			break;
+
+        case Projectile::PaddleMineBulletProjectile:
+            // If the cannon isn't already loaded with a projectile then
+			// the mine gets captured by the cannon block and shot somewhere else...
+			if (!projectile->IsLastThingCollidedWith(this) && !this->GetIsLoaded()) {
+				PaddleMineProjectile* mineProjectile = static_cast<PaddleMineProjectile*>(projectile);
+				this->SetupCannonFireTimeAndDirection();
+				mineProjectile->LoadIntoCannonBlock(this);
+				mineProjectile->SetLastThingCollidedWith(this);
+				this->loadedProjectile = mineProjectile;
+			}
+            break;
 
 		case Projectile::FireGlobProjectile:
 			// Fire glob just extinguishes...
@@ -224,7 +236,7 @@ bool CannonBlock::RotateAndEventuallyFire(double dT) {
 		}
 		this->elapsedRotationTime = this->totalRotationTime;
 		this->loadedBall = NULL;
-		this->loadedRocket = NULL;
+		this->loadedProjectile = NULL;
 		return true;
 	}
 

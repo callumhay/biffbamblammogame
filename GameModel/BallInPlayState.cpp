@@ -20,6 +20,7 @@
 #include "GameItemFactory.h"
 #include "Beam.h"
 #include "BallBoostModel.h"
+#include "SafetyNet.h"
 
 BallInPlayState::BallInPlayState(GameModel* gm) : 
 GameState(gm), timeSinceGhost(DBL_MAX) {
@@ -111,7 +112,6 @@ void BallInPlayState::Tick(double seconds) {
 	bool didCollideWithPaddle = false;
 	bool didCollideWithBlock = false;
 	bool didCollideWithTeslaLightning = false;
-	bool didCollideWithballSafetyNet  = false;
 	
 	GameBall* ballToMoveToFront = NULL;																	// The last ball to hit the paddle is the one with priority for item effects
 	std::list<std::list<GameBall*>::iterator> ballsToRemove;						// The balls that are no longer in play and will be removed
@@ -320,10 +320,17 @@ void BallInPlayState::Tick(double seconds) {
 		}
 
 		// Ball Safety Net Collisions:
-		didCollideWithballSafetyNet = currLevel->BallSafetyNetCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
-		if (didCollideWithballSafetyNet) {
-			this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
-		}
+        if (this->gameModel->IsSafetyNetActive()) {
+		    if (this->gameModel->safetyNet->BallCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision)) {
+                
+                this->gameModel->DestroySafetyNet();
+
+                // EVENT: The ball just destroyed the safety net
+                GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*currBall);
+
+			    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+		    }
+        }
 
 		// Ball - tesla lightning arc collisions:
 		didCollideWithTeslaLightning = currLevel->TeslaLightningCollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
@@ -402,20 +409,22 @@ void BallInPlayState::Tick(double seconds) {
 
 	// Quick check to see if the paddle collided with the safety net - this will just register necessary
 	// events and destroy the net if it exists and there is a collision
-	currLevel->PaddleSafetyNetCollisionCheck(*paddle);
+	if (this->gameModel->IsSafetyNetActive()) {   
+        if (this->gameModel->safetyNet->PaddleCollisionCheck(*paddle)) {
+            this->gameModel->DestroySafetyNet();
+            
+            // EVENT: The paddle just destroyed the safety net
+            GameEventManager::Instance()->ActionBallSafetyNetDestroyed(*paddle);
+        }
+    }
 
-	// Paddle-block collisions / boundry update (so that the paddle crashes into potential blocks at its sides):
-	// This may cause the level to end since the paddle shield can destroy blocks, in such a case we exit immediately
-	// since this state is now destroyed.
-	//bool stateChanged = 
+	// Paddle-block collisions / boundry update (so that the paddle crashes into potential blocks at its sides).
     this->DoUpdateToPaddleBoundriesAndCollisions(seconds, false);
-	//if (stateChanged) {
-	//	return;
-	//}
 
 	// Projectile Collisions:
-	this->gameModel->DoProjectileCollisions();
-	// Tick/update any level pieces that require it...
+	this->gameModel->DoProjectileCollisions(seconds);
+	
+    // Tick/update any level pieces that require it...
 	this->gameModel->DoPieceStatusUpdates(seconds);
 
     // Update the boost model for the ball(s)

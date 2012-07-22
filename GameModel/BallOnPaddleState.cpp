@@ -82,7 +82,7 @@ void BallOnPaddleState::Tick(double seconds) {
 	this->DoUpdateToPaddleBoundriesAndCollisions(seconds, true);
 
 	// Projectile Collisions:
-	this->gameModel->DoProjectileCollisions();
+	this->gameModel->DoProjectileCollisions(seconds);
 	// Tick/update any level pieces that require it...
 	this->gameModel->DoPieceStatusUpdates(seconds);
 

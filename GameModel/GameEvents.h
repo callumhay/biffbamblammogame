@@ -25,6 +25,8 @@
 #include "Beam.h"
 #include "PointAward.h"
 #include "BallBoostModel.h"
+#include "SafetyNet.h"
+#include "PaddleMineProjectile.h"
 
 class Point2D;
 class GameBall;
@@ -32,6 +34,7 @@ class PlayerPaddle;
 class GameItemTimer;
 class Projectile;
 class RocketProjectile;
+
 
 class GameEvents {
 public:
@@ -168,6 +171,13 @@ public:
 	 *             block      - The block being affected by the projectile.
 	 */
     virtual void ProjectileBlockCollisionEvent(const Projectile& projectile, const LevelPiece& block) { UNUSED_PARAMETER(projectile); UNUSED_PARAMETER(block); }
+
+    /**
+     * Event triggered when a projectile collides with the safety net. Occurs once just as the projectile collides.
+     * Arguements: projectile - The projectile that collided with the safety net.
+     *             safetyNet  - The safety net that was collided with.
+     */
+    virtual void ProjectileSafetyNetCollisionEvent(const Projectile& projectile, const SafetyNet& safetyNet) { UNUSED_PARAMETER(projectile); UNUSED_PARAMETER(safetyNet); }
 
 	/**
 	 * Event triggered when a projectile hits the paddle shield and is deflected by it. Occurs once right after
@@ -447,10 +457,16 @@ public:
     virtual void ProjectileRemovedEvent(const Projectile& projectile) { UNUSED_PARAMETER(projectile); }
 
 	/**
-	 * Event triggered when the rocket explodes. Only occurs once just as it explodes.
+	 * Event triggered when a rocket explodes. Only occurs once just as it explodes.
 	 * Arguements: rocket - The rocket do'n the explod'n.
 	 */
     virtual void RocketExplodedEvent(const PaddleRocketProjectile& rocket) { UNUSED_PARAMETER(rocket); } 
+
+	/**
+	 * Event triggered when a mine explodes. Only occurs once just as it explodes.
+	 * Arguements: mine - The mine that is exploding.
+	 */
+    virtual void MineExplodedEvent(const PaddleMineProjectile& mine) { UNUSED_PARAMETER(mine); }
 
 	/**
 	 * Event triggered when a new beam is spawned. Only occurs once per spawned beam.

@@ -95,20 +95,6 @@ public:
     void GetLevelPieceColliders(const Collision::Ray2D& ray, const std::set<const LevelPiece*>& ignorePieces,
         const std::set<LevelPiece::LevelPieceType>& ignorePieceTypes, std::list<LevelPiece*>& result, float toleranceRadius = 0.0f) const;
 
-	// Get whether or not the ball safety net is currently active
-	bool IsBallSafetyNetActive() const {
-		return this->ballSafetyNetActive;
-	}
-	/**
-	 * Toggle whether the ball safety net is on or not.
-	 */
-	void ToggleBallSafetyNet(bool isActive) {
-		this->ballSafetyNetActive = isActive;
-	}
-	bool BallSafetyNetCollisionCheck(const GameBall& b, double dT, Vector2D& n, Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
-	bool PaddleSafetyNetCollisionCheck(const PlayerPaddle& p);
-	bool ProjectileSafetyNetCollisionCheck(const Projectile& p, const BoundingLines& projectileBoundingLines);
-
 	// Ability to add/remove tesla lightning barriers
 	void AddTeslaLightningBarrier(GameModel* gameModel, const TeslaBlock* block1, const TeslaBlock* block2);
 	void RemoveTeslaLightningBarrier(const TeslaBlock* block1, const TeslaBlock* block2);
@@ -159,9 +145,12 @@ public:
 
 	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter,
                       const LevelPiece::DestructionMethod& method);
-	LevelPiece* RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece);
+	
+    LevelPiece* RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece);
     void RocketExplosionNoPieces(const Projectile* rocket);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
+
+    void MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine);
 
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);
     const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;
@@ -186,7 +175,6 @@ private:
 
     std::set<LevelPiece*> aiEntities;
 
-	BoundingLines safetyNetBounds;
 	std::string filepath;
 	std::string levelName;
 
@@ -198,12 +186,9 @@ private:
     std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
 
     // Persistant scoring variables - used to mark previously saved scores and calculate high scores
-    long starAwardScores[5];   // Scores where stars are awarded
-    long highScore;            // Current high score for this level
-
+    long starAwardScores[5];  // Scores where stars are awarded
+    long highScore;           // Current high score for this level
     bool newHighScore;        // If a new high score was achieved on the last play through of this level
-    bool ballSafetyNetActive;
-	//bool isLocked;    // Whether this level has been unlocked or not
 
 	GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
 		const std::vector<std::vector<LevelPiece*> >& pieces, const std::vector<GameItem::ItemType>& allowedDropTypes,

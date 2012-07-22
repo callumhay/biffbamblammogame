@@ -255,6 +255,13 @@ namespace Collision {
 		return true;
 	}
 
+    inline bool IsCollision(const Circle2D& c1, const Circle2D& c2) {
+        Vector2D d = c1.Center() - c2.Center();
+        float distSqr = Vector2D::Dot(d, d);
+        float radiusSum = c1.Radius() + c2.Radius();
+        return distSqr <= (radiusSum * radiusSum);
+    }
+
 	/**
 	 * Test whether a circle and 2D aabb collide.
 	 * Returns: true on collision, false otherwise.

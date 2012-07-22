@@ -256,6 +256,10 @@ LevelPiece* LaserTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile
 			}
 			break;
 
+        case Projectile::PaddleMineBulletProjectile:
+            // A mine will just come to rest on the block.
+            break;
+
 		case Projectile::CollateralBlockProjectile:
 			// Completely destroy the block...
             newPiece = this->Destroy(gameModel, LevelPiece::CollateralDestruction);

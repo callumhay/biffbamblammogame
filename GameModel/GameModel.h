@@ -34,6 +34,7 @@ class BallInPlayState;
 class CollateralBlock;
 class LevelStartState;
 class PointAward;
+class SafetyNet;
 
 class GameModel {
 public:
@@ -63,7 +64,8 @@ private:
 	// Player-controllable game assets
 	PlayerPaddle* playerPaddle;                         // The one and only player paddle
 	std::list<GameBall*> balls;                         // Current set of balls active in the game
-	std::list<Projectile*> projectiles;                 // Projectiles spawned as the game is played
+	SafetyNet* safetyNet;                               // The ball safety net
+    std::list<Projectile*> projectiles;                 // Projectiles spawned as the game is played
 	std::list<Beam*> beams;                             // Beams spawned as the game is played
 	std::map<LevelPiece*, int32_t> statusUpdatePieces;  // Pieces that require updating every frame due to status effects
     BallBoostModel* boostModel;                         // This is only not NULL when the ball is in play - it contains the model/state for ball boosting
@@ -132,7 +134,7 @@ private:
 	void BallPaddleCollisionOccurred(GameBall& ball);
 	void BallDied(GameBall* deadBall, bool& stateChanged);
 	void DoPieceStatusUpdates(double dT);
-	void DoProjectileCollisions();
+	void DoProjectileCollisions(double dT);
 	
 	bool IsOutOfGameBounds(const Point2D& pos);
 
@@ -221,6 +223,10 @@ public:
 			this->nextState = NULL;
 		}
 	}
+
+    bool IsSafetyNetActive() const { return this->safetyNet != NULL; }
+    bool ActivateSafetyNet();
+    void DestroySafetyNet();
 
 	// General public methods for the model ********************************
 	void Tick(double seconds);

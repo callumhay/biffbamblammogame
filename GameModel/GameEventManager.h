@@ -36,6 +36,7 @@ class Beam;
 class RocketProjectile;
 class PointAward;
 class BallBoostModel;
+class PaddleMineProjectile;
 
 /**
  * This class is intended to provide hooks for any view that wants to know
@@ -66,6 +67,7 @@ public:
 	void ActionBallShot(const GameBall& shotBall);
     void ActionPaddleWeaponFired();
 	void ActionProjectileBlockCollision(const Projectile& projectile, const LevelPiece& block);
+    void ActionProjectileSafetyNetCollision(const Projectile& projectile, const SafetyNet& safetyNet);
 	void ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block);
 	void ActionBallPortalBlockTeleport(const GameBall& ball, const PortalBlock& enterPortal);
 	void ActionProjectilePortalBlockTeleport(const Projectile& projectile, const PortalBlock& enterPortal);
@@ -105,6 +107,7 @@ public:
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);
 	void ActionRocketExploded(const PaddleRocketProjectile& rocket);
+    void ActionMineExploded(const PaddleMineProjectile& mine);
 
 	void ActionBeamSpawned(const Beam& beam);
 	void ActionBeamChanged(const Beam& beam);

@@ -260,6 +260,10 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 
 			break;
 
+        case Projectile::PaddleMineBulletProjectile:
+            // A mine will just come to rest on the block.
+            break;
+
 		case Projectile::FireGlobProjectile:
 			// Fire glob just extinguishes on a solid block, unless it's frozen in an ice cube;
 			// in that case, unfreeze a frozen solid block

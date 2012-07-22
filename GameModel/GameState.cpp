@@ -91,20 +91,6 @@ bool GameState::DoUpdateToPaddleBoundriesAndCollisions(double dT, bool doAttache
             LevelPiece* resultingPiece = currPiece->CollisionOccurred(this->gameModel, *paddle);
             UNUSED_VARIABLE(resultingPiece);
             assert(resultingPiece == currPiece);
-
-			/*
-			if ((paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-				LevelPiece* resultingPiece = currPiece->TickPaddleShieldCollision(dT, *paddle, this->gameModel);
-				// Check to see if the level is done
-				if (currentLevel->IsLevelComplete()) {
-					// The level was completed, move to the level completed state
-					this->gameModel->SetNextState(new LevelCompleteState(this->gameModel));
-					// We signify to the caller that the state has changed...
-					return true;
-				}
-			}
-			*/
-
 		}
 	}
 

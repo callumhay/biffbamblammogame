@@ -18,6 +18,7 @@
 #include "GameModelConstants.h"
 #include "Beam.h"
 #include "PaddleLaserProjectile.h"
+#include "PaddleMineProjectile.h"
 
 const LevelPiece::TriggerID LevelPiece::NO_TRIGGER_ID = -1;
 
@@ -40,6 +41,17 @@ LevelPiece::~LevelPiece() {
 	// We need to be sure to obliterate any status effects that might be linguring on the level piece -
 	// this emits an important event to any model listeners to remove those effects as well!
 	this->RemoveAllStatus();
+
+    // Make sure we remove all attached projectiles as well
+    // NOTE: DO NOT USE ITERATORS HERE SINCE THE MINE PROJECTILE DETACHES ITSELF IN THE SetAsFalling call
+    while (!this->attachedProjectiles.empty()) {
+                 
+        PaddleMineProjectile* p = *this->attachedProjectiles.begin();
+        p->SetLastThingCollidedWith(NULL);
+        p->SetAsFalling();
+        this->DetachProjectile(p); // This is redundant and will be ignored, just here for robustness
+    }
+    this->attachedProjectiles.clear();
 }
 
 // Static function to determine if the piece type given is valid
@@ -137,6 +149,21 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor,
                                   rightNeighbor, topNeighbor, topRightNeighbor, topLeftNeighbor, 
                                   bottomRightNeighbor, bottomLeftNeighbor);
+}
+
+
+bool LevelPiece::ProjectileIsDestroyedOnCollision(Projectile* projectile) const {
+    switch (projectile->GetType()) {
+
+        case Projectile::PaddleMineBulletProjectile:
+            // Mines are never destroyed by collisions with blocks, ever.
+            return false;
+
+        default:
+            break;
+    }
+
+    return !this->ProjectilePassesThrough(projectile);
 }
 
 void LevelPiece::AddStatus(const PieceStatus& status) {

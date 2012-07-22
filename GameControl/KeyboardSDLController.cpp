@@ -484,7 +484,7 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
                 this->model->DropItem(GameItem::MultiBall5Item);
                 break;
             case SDLK_6:
-                // ...
+                this->model->DropItem(GameItem::MineLauncherPaddleItem);
                 break;
             case SDLK_7:
                 // ...
@@ -496,6 +496,7 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
                 this->model->DropItem(GameItem::OmniLaserBallItem);
                 break;
             
+
             case SDLK_BACKSLASH:
                 this->model->DropItem(GameItem::RandomItem);
                 break;
@@ -505,7 +506,7 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
             case SDLK_COMMA:
                 this->model->TogglePause(GameModel::PauseBall);
                 break;
-
+            
             
             default:
                 break;

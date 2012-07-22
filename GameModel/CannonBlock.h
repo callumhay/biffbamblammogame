@@ -95,7 +95,6 @@ public:
 	float GetCurrentCannonAngleInDegs() const;
 	Point2D GetEndOfBarrelPoint() const;
 	const GameBall* GetLoadedBall() const;
-	const PaddleRocketProjectile* GetLoadedRocket() const;
 	bool GetIsLoaded() const;
 
 	bool GetHasRandomRotation() const;
@@ -112,7 +111,7 @@ private:
 	static const float MAX_DEGREES_PER_FIXED_ROTATION;
 
 	GameBall* loadedBall;
-	PaddleRocketProjectile* loadedRocket;
+    Projectile* loadedProjectile;
 
 	float currRotationFromXInDegs;	// The current rotation from the x-axis (default position) in degrees
 	float currRotationSpeed;		// The current rotation speed of the cannon
@@ -167,12 +166,8 @@ inline const GameBall* CannonBlock::GetLoadedBall() const {
 	return this->loadedBall;
 }
 
-inline const PaddleRocketProjectile* CannonBlock::GetLoadedRocket() const {
-	return this->loadedRocket;
-}
-
 inline bool CannonBlock::GetIsLoaded() const {
-	return (this->loadedBall != NULL) || (this->loadedRocket != NULL);
+	return (this->loadedBall != NULL) || (this->loadedProjectile != NULL);
 }
 
 // Gets whether this cannon block fires in random directions or not
