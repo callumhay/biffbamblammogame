@@ -108,6 +108,7 @@ void RocketProjectile::Tick(double seconds, const GameModel& model) {
         this->currYRotationSpd = std::min<float>(this->GetMaxRotationVelocityMagnitude(), this->currYRotationSpd + dA);
 		dV = static_cast<float>(seconds * this->currYRotationSpd);
 		this->currYRotation += dV;
+        this->currYRotation = fmod(this->currYRotation, 360.0f);
 	}
 }
 

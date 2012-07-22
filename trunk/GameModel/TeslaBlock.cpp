@@ -151,6 +151,10 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			}
 			break;
 
+        case Projectile::PaddleMineBulletProjectile:
+            // A mine will just come to rest on the block.
+            break;
+
 		case Projectile::FireGlobProjectile:
 			// Fire glob will just extinguish
 			break;

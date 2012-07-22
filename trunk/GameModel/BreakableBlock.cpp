@@ -269,6 +269,10 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, Projectile* 
 			newPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
 			break;
 
+        case Projectile::PaddleMineBulletProjectile:
+            // A mine will just come to rest on the block.
+            break;
+
 		case Projectile::FireGlobProjectile:
 			if (!projectile->IsLastThingCollidedWith(this)) {
 				// This piece may catch on fire...

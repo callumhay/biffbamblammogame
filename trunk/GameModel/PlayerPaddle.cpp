@@ -14,6 +14,7 @@
 #include "GameEventManager.h"
 #include "GameModelConstants.h"
 #include "PaddleLaserProjectile.h"
+#include "PaddleMineProjectile.h"
 #include "Beam.h"
 #include "FireGlobProjectile.h"
 
@@ -51,6 +52,7 @@ const int PlayerPaddle::DEFLECTION_DEGREE_ANGLE = 20; // TODO: Fix this...
 
 // Delay between shots of the laser
 const double PlayerPaddle::PADDLE_LASER_BULLET_DELAY = 0.3;
+const double PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY  = 0.75;
 
 // The default amount of damage the the paddle shield does to a block, when colliding with the block, per second
 const int PlayerPaddle::DEFAULT_SHIELD_DMG_PER_SECOND = 90;
@@ -62,6 +64,7 @@ PlayerPaddle::PlayerPaddle() :
 centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDirection(0.0f), 
 maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_ACCELERATION), 
 decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
+timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
 attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f) {
 	this->ResetPaddle();
@@ -83,6 +86,7 @@ PlayerPaddle::~PlayerPaddle() {
 // Reset the dimensions and position of this paddle (e.g., after death, start of a level).
 void PlayerPaddle::ResetPaddle() {
 	this->timeSinceLastLaserBlast = 0.0;
+    this->timeSinceLastMineLaunch = 0.0;
 	this->laserBeamTimer = 0.0;
 	this->currSize = PlayerPaddle::NormalSize;
 	this->centerPos = this->GetDefaultCenterPosition();
@@ -336,6 +340,9 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 	if (this->timeSinceLastLaserBlast < PADDLE_LASER_BULLET_DELAY) {
 		this->timeSinceLastLaserBlast += seconds;
 	}
+    if (this->timeSinceLastMineLaunch < PADDLE_MINE_LAUNCH_DELAY) {
+        this->timeSinceLastMineLaunch += seconds;
+    }
 
 	// Figure out what the current acceleration is based on whether the player
 	// is currently telling the paddle to move or not
@@ -595,7 +602,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
         // EVENT: Paddle just fired a rocket
         GameEventManager::Instance()->ActionPaddleWeaponFired();
 	}
-	// Check for laser beam paddle 
+	// Check for laser beam paddle - this has secondary priority
 	else if ((this->GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle && !this->isFiringBeam) {
 		// We add the beam to the game model, the rest will be taken care of by the beam and model
 		gameModel->AddBeam(Beam::PaddleLaserBeam);
@@ -603,33 +610,64 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
         // EVENT: Paddle just fired a beam
         GameEventManager::Instance()->ActionPaddleWeaponFired();
 	}
-	// Check for laser bullet paddle (shoots little laser bullets from the paddle)
-	else if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
-		// Make sure we are allowed to fire a new laser bullet
-		if (this->timeSinceLastLaserBlast >= PADDLE_LASER_BULLET_DELAY) {
+	
+    else {
+        // All of the rest are basic, multiple shot projectiles that should all execute simultaneously
 
-			// Calculate the width and height of the laser bullet based on the size of the paddle...
-			float projectileWidth  = this->GetPaddleScaleFactor() * PaddleLaserProjectile::WIDTH_DEFAULT;
-			float projectileHeight = this->GetPaddleScaleFactor() * PaddleLaserProjectile::HEIGHT_DEFAULT;
+        // Check for laser bullet paddle (shoots little laser bullets from the paddle)
+        if ((this->GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
+		    // Make sure we are allowed to fire a new laser bullet
+		    if (this->timeSinceLastLaserBlast >= PADDLE_LASER_BULLET_DELAY) {
 
-			// Create the right type of projectile in the right place
-			Projectile* newProjectile = new PaddleLaserProjectile(
-				this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight));
-            newProjectile->SetLastThingCollidedWith(this);
+			    // Calculate the width and height of the laser bullet based on the size of the paddle...
+			    float projectileWidth  = this->GetPaddleScaleFactor() * PaddleLaserProjectile::WIDTH_DEFAULT;
+			    float projectileHeight = this->GetPaddleScaleFactor() * PaddleLaserProjectile::HEIGHT_DEFAULT;
 
-			// Modify the fired bullet based on the current paddle's properties...
-			newProjectile->SetWidth(projectileWidth);
-			newProjectile->SetHeight(projectileHeight);
+			    // Create the right type of projectile in the right place
+			    Projectile* newProjectile = new PaddleLaserProjectile(
+				    this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight));
+                newProjectile->SetLastThingCollidedWith(this);
 
-			// Fire ze laser bullet! - tell the model about it
-			gameModel->AddProjectile(newProjectile);
+			    // Modify the fired bullet based on the current paddle's properties...
+			    newProjectile->SetWidth(projectileWidth);
+			    newProjectile->SetHeight(projectileHeight);
 
-			// Reset the timer for the next laser blast
-			this->timeSinceLastLaserBlast = 0;
+			    // Fire ze laser bullet! - tell the model about it
+			    gameModel->AddProjectile(newProjectile);
 
-            // EVENT: Paddle just fired a laser bullet
-            GameEventManager::Instance()->ActionPaddleWeaponFired();
-		}
+			    // Reset the timer for the next laser blast
+			    this->timeSinceLastLaserBlast = 0.0;
+
+                // EVENT: Paddle just fired a laser bullet
+                GameEventManager::Instance()->ActionPaddleWeaponFired();
+		    }
+        }
+
+        // Check for mine launcher paddle (shoots explosive mines from the paddle)
+        if ((this->GetPaddleType() & PlayerPaddle::MineLauncherPaddle) == PlayerPaddle::MineLauncherPaddle) {
+            if (this->timeSinceLastMineLaunch >= PADDLE_MINE_LAUNCH_DELAY) {
+
+			    // Calculate the width and height of the mine based on the size of the paddle...
+			    float projectileWidth  = this->GetPaddleScaleFactor() * PaddleMineProjectile::PADDLEMINE_WIDTH_DEFAULT;
+			    float projectileHeight = this->GetPaddleScaleFactor() * PaddleMineProjectile::PADDLEMINE_HEIGHT_DEFAULT;
+
+			    // Create the right type of projectile in the right place
+			    Projectile* newProjectile = new PaddleMineProjectile(
+				    this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight),
+                    Vector2D::Normalize(this->GetUpVector()), projectileWidth, projectileHeight);
+               
+                newProjectile->SetLastThingCollidedWith(this);
+
+			    // Launch ze mine! - tell the model about it
+			    gameModel->AddProjectile(newProjectile);
+
+                this->timeSinceLastMineLaunch = 0.0;
+
+                // EVENT: Paddle just launched a mine
+                GameEventManager::Instance()->ActionPaddleWeaponFired();
+            }
+        }
+
 	}
 
 	// TODO: other paddle shooting abilities go here...
@@ -706,6 +744,11 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 			this->RocketProjectileCollision(gameModel, *static_cast<const RocketProjectile*>(&projectile));
 			break;
 
+        case Projectile::PaddleMineBulletProjectile:
+            assert(dynamic_cast<const PaddleMineProjectile*>(&projectile) != NULL);
+            this->MineProjectileCollision(gameModel, *static_cast<const PaddleMineProjectile*>(&projectile));
+            break;
+
 		case Projectile::FireGlobProjectile:
 			this->FireGlobProjectileCollision(projectile);
 			break;
@@ -730,7 +773,8 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:
             case Projectile::RocketTurretBulletProjectile:
-            case Projectile::LaserTurretBulletProjectile: {
+            case Projectile::LaserTurretBulletProjectile:
+            case Projectile::PaddleMineBulletProjectile: {
 
 		        // If the projectile is moving generally upwards and away from the paddle then we ignore this entirely...
 		        if (acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
@@ -996,6 +1040,16 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 	}
 }
 
+void PlayerPaddle::MineProjectileCollision(GameModel* gameModel, const PaddleMineProjectile& projectile) {
+    float currHeight = 2.0f * this->GetHalfHeight();
+    this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 3.5f, 3.0f * currHeight, 2.0f * currHeight, 70.0f);
+    
+    // Mine explosion!
+    GameLevel* currentLevel = gameModel->GetCurrentLevel();
+	assert(currentLevel != NULL);
+	currentLevel->MineExplosion(gameModel, &projectile);
+}
+
 void PlayerPaddle::FireGlobProjectileCollision(const Projectile& projectile) {
 	assert(projectile.GetType() == Projectile::FireGlobProjectile);
 	const FireGlobProjectile* fireGlobProjectile = static_cast<const FireGlobProjectile*>(&projectile);
@@ -1250,4 +1304,76 @@ void PlayerPaddle::AugmentDirectionOnPaddleMagnet(double seconds, float degreesC
     }
 
     vectorToAugment = newVector;
+}
+
+// Obtain an AABB encompassing the entire paddle's current collision area
+Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) const {
+	Point2D minPt, maxPt;
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		Vector2D sphereRadiusVec(this->GetHalfWidthTotal(), this->GetHalfWidthTotal());
+		sphereRadiusVec = 1.2f * sphereRadiusVec;
+		minPt = this->GetCenterPosition() - sphereRadiusVec;
+		maxPt = this->GetCenterPosition() + sphereRadiusVec;
+	}
+	else {
+		Vector2D halfWidthHeight(this->GetHalfWidthTotal(), this->GetHalfHeight());
+		halfWidthHeight = 1.2f * halfWidthHeight;
+		minPt = this->GetCenterPosition() - halfWidthHeight;
+		maxPt = this->GetCenterPosition() + halfWidthHeight;
+	}
+
+	Collision::AABB2D paddleAABB(minPt, maxPt);
+	if (includeAttachedBall && this->HasBallAttached()) {
+		const Collision::Circle2D& ballBounds = this->GetAttachedBall()->GetBounds();
+		Vector2D ballRadiusVec(ballBounds.Radius(), ballBounds.Radius());
+		ballRadiusVec = 1.2f * ballRadiusVec;
+		paddleAABB.AddPoint(ballBounds.Center() + ballRadiusVec);
+		paddleAABB.AddPoint(ballBounds.Center() - ballRadiusVec);
+	}
+
+	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+		Point2D rocketSpawnPos;
+		float rocketHeight, rocketWidth;
+		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
+		Vector2D widthHeightVec(rocketWidth/1.5f, rocketHeight/1.5f);
+
+		paddleAABB.AddPoint(rocketSpawnPos - widthHeightVec);
+		paddleAABB.AddPoint(rocketSpawnPos + widthHeightVec);
+	}
+
+	return paddleAABB;
+}
+
+/**
+ * Check to see if the given set of bounding lines collides with this paddle.
+ */
+bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds,
+                                         bool includeAttachedBallCheck) const {
+	bool didCollide = false;
+	// If the paddle has a shield around it do the collision with the shield
+	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
+		didCollide = bounds.CollisionCheck(this->CreatePaddleShieldBounds());
+	}
+	else {
+		didCollide = this->bounds.CollisionCheck(bounds);
+	}
+
+	if (includeAttachedBallCheck && !didCollide && this->HasBallAttached()) {
+		didCollide = bounds.CollisionCheck(this->GetAttachedBall()->GetBounds());
+	}
+
+	// If there's a rocket attached we need to check for collisions with it!
+    if (!didCollide) {
+        if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
+		    Point2D rocketSpawnPos;
+		    float rocketHeight, rocketWidth;
+		    this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
+		    Vector2D widthHeightVec(rocketWidth/1.5f, rocketHeight/1.5f);
+
+		    Collision::AABB2D rocketAABB(rocketSpawnPos - widthHeightVec, rocketSpawnPos + widthHeightVec);
+		    didCollide = bounds.CollisionCheck(rocketAABB);
+        }
+	}
+   
+	return didCollide;
 }

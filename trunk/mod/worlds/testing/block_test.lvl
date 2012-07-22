@@ -9,9 +9,9 @@ S E E E E E E E E E E E E E E E E S
 S E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
 S H J E E E E E E E E E E E E E E S 
-S S S S E E E E E E E E E E E E E S 
+S S S S P E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
-S R O Y G A(0,1,a,b) B C(180) X(c,d) I L D(all){1} W(1) P N F(d) E S 
+S R O Y G A(0,1,a,b) B C(180) X(c,d) I L D(all){1} W(1) T(P,ul) T(P,ur) N F(d) S 
 S E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 
 S E E E E E E E E E E E E E E E E S 

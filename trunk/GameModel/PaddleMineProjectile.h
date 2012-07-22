@@ -13,6 +13,8 @@
 #define __PADDLEMINEPROJECTILE_H__
 
 #include "Projectile.h"
+#include "SafetyNet.h"
+#include "LevelPiece.h"
 
 class CannonBlock;
 
@@ -28,6 +30,8 @@ public:
 	PaddleMineProjectile(const PaddleMineProjectile& copy);
     ~PaddleMineProjectile();
     
+    void Land(const Point2D& landingPt);
+
 	void Tick(double seconds, const GameModel& model);
 	BoundingLines BuildBoundingLines() const;
 
@@ -44,30 +48,103 @@ public:
     bool IsRocket() const { return false; }
     bool IsRefractableOrReflectable() const { return false; }
 
+    bool BlastsThroughSafetyNets() const { return false; }
+    bool IsDestroyedBySafetyNets() const { return false;  }
+
+    bool ModifyLevelUpdate(double dT, GameModel& model);
+
+    void SafetyNetCollisionOccurred(SafetyNet* safetyNet);
+    void LevelPieceCollisionOccurred(LevelPiece* block);
+
 	void LoadIntoCannonBlock(CannonBlock* cannonBlock);
     bool IsLoadedInCannonBlock() const { return this->cannonBlock != NULL; }
 
     float GetVisualScaleFactor() const { return this->GetWidth() / this->GetDefaultWidth(); }
     
-    float GetAccelerationMagnitude() const { return 100.0f; }
-    float GetRotationAccelerationMagnitude() const { return 360.0f; }
+    void SetAsFalling();
 
-    float GetMaxVelocityMagnitude() const { return 20.0f; }
-    float GetMaxRotationVelocityMagnitude() const { return 400.0f; }
+    float GetAccelerationMagnitude() const { return this->acceleration; }
+    float GetRotationAccelerationMagnitude() const { return 300.0f; }
+
+    float GetMaxVelocityMagnitude() const { return 15.0f; }
+    float GetMaxRotationVelocityMagnitude() const { return 225.0f; }
 
     float GetDefaultHeight() const { return PADDLEMINE_HEIGHT_DEFAULT; }
     float GetDefaultWidth() const  { return PADDLEMINE_WIDTH_DEFAULT;  }
+
+    float GetCurrentRotation() const { return this->currRotation; }
+
+    float GetExplosionRadius() const { return MINE_DEFAULT_EXPLOSION_RADIUS * this->GetVisualScaleFactor(); }
+    float GetProximityRadius() const { return MINE_DEFAULT_PROXIMITY_RADIUS * this->GetVisualScaleFactor(); }
+
+    bool GetIsArmed() const { return this->isArmed; }
+    bool GetIsAttachedToSafetyNet() const { return this->attachedToNet != NULL; }
+    bool GetIsAttachedToLevelPiece() const { return this->attachedToPiece != NULL; }
 
 private:
 	static const Vector2D MINE_DEFAULT_VELOCITYDIR;
 	static const Vector2D MINE_DEFAULT_RIGHTDIR;
 
+    static const float MINE_DEFAULT_ACCEL;
+
+    static const float MINE_DEFAULT_EXPLOSION_RADIUS;
+    static const float MINE_DEFAULT_PROXIMITY_RADIUS;
+
+    static const double MINE_MIN_COUNTDOWN_TIME;
+    static const double MINE_MAX_COUNTDOWN_TIME;
+
     // When the mine is loaded into a cannon block this will not be NULL
 	CannonBlock* cannonBlock;
 
-	// Rotation of the mine as it moves
+    // When the mine is attached to other objects one of these will not be NULL
+    LevelPiece* attachedToPiece;
+    SafetyNet* attachedToNet;
+
+    // Extra Mine kinematics
+    float acceleration;
+
 	float currRotationSpd;
 	float currRotation;
+
+    // Whether the mine has attached/latched on to something and ready to blow up yet
+    bool isArmed;
+    bool proximityAlerted;
+    float proximityAlertCountdown;
+
+    void BeginProximityExplosionCountdown();
+    void DetachFromAnyAttachedObject();
 };
+
+inline void PaddleMineProjectile::SetAsFalling() {
+    this->SetVelocity(Vector2D(0, -1), 0.0f);
+    this->acceleration = 9.8f;
+    this->DetachFromAnyAttachedObject();
+}
+
+inline void PaddleMineProjectile::Land(const Point2D& landingPt) {
+    this->SetVelocity(Vector2D(0, 0), 0.0f);
+    this->acceleration    = 0.0f;
+    this->currRotationSpd = 0.0f;
+    this->SetPosition(landingPt);
+    this->isArmed = true;
+}
+
+inline void PaddleMineProjectile::SafetyNetCollisionOccurred(SafetyNet* safetyNet) {
+    assert(safetyNet != NULL);
+
+    this->Land(safetyNet->GetBounds().ClosestPoint(this->GetPosition()));
+    Projectile::SafetyNetCollisionOccurred(safetyNet);
+    safetyNet->AttachProjectile(this);
+    this->attachedToNet = safetyNet;
+}
+
+inline void PaddleMineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
+    assert(block != NULL);
+
+    this->Land(block->GetBounds().ClosestPoint(this->GetPosition()));
+    Projectile::LevelPieceCollisionOccurred(block);
+    block->AttachProjectile(this);
+    this->attachedToPiece = block;
+}
 
 #endif // __PADDLEMINEPROJECTILE_H__

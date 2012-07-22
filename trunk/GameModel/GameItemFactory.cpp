@@ -40,42 +40,44 @@
 #include "OmniLaserBallItem.h"
 #include "InvisiPaddleItem.h"
 #include "MagnetPaddleItem.h"
+#include "PaddleMineLauncherItem.h"
 #include "RandomItem.h"
 
 GameItemFactory* GameItemFactory::instance = NULL;
 
 GameItemFactory::GameItemFactory() {
 	// Initialize the mapping of game item names to types
-	itemNameToTypeMap.insert(std::make_pair(BallSpeedItem::FAST_BALL_ITEM_NAME,                 GameItem::BallSpeedUpItem));
-	itemNameToTypeMap.insert(std::make_pair(BallSpeedItem::SLOW_BALL_ITEM_NAME,                 GameItem::BallSlowDownItem));
-	itemNameToTypeMap.insert(std::make_pair(UberBallItem::UBER_BALL_ITEM_NAME,                  GameItem::UberBallItem));
-	itemNameToTypeMap.insert(std::make_pair(InvisiBallItem::INVISI_BALL_ITEM_NAME,              GameItem::InvisiBallItem));
-	itemNameToTypeMap.insert(std::make_pair(GhostBallItem::GHOST_BALL_ITEM_NAME,                GameItem::GhostBallItem));
-	itemNameToTypeMap.insert(std::make_pair(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,            GameItem::LaserBulletPaddleItem));
-	itemNameToTypeMap.insert(std::make_pair(MultiBallItem::MULTI3_BALL_ITEM_NAME,               GameItem::MultiBall3Item));
-	itemNameToTypeMap.insert(std::make_pair(MultiBallItem::MULTI5_BALL_ITEM_NAME,               GameItem::MultiBall5Item));
-	itemNameToTypeMap.insert(std::make_pair(PaddleSizeItem::PADDLE_GROW_ITEM_NAME,              GameItem::PaddleGrowItem));
-	itemNameToTypeMap.insert(std::make_pair(PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME,            GameItem::PaddleShrinkItem));
-	itemNameToTypeMap.insert(std::make_pair(BallSizeItem::BALL_SHRINK_ITEM_NAME,                GameItem::BallShrinkItem));
-	itemNameToTypeMap.insert(std::make_pair(BallSizeItem::BALL_GROW_ITEM_NAME,                  GameItem::BallGrowItem));
-	itemNameToTypeMap.insert(std::make_pair(BlackoutItem::BLACKOUT_ITEM_NAME,                   GameItem::BlackoutItem));
-	itemNameToTypeMap.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,               GameItem::UpsideDownItem));
-	itemNameToTypeMap.insert(std::make_pair(BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME,       GameItem::BallSafetyNetItem));
-	itemNameToTypeMap.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,          GameItem::PoisonPaddleItem));
-	itemNameToTypeMap.insert(std::make_pair(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME,          GameItem::StickyPaddleItem));
-	itemNameToTypeMap.insert(std::make_pair(PaddleCamItem::PADDLE_CAM_ITEM_NAME,                GameItem::PaddleCamItem));
-	itemNameToTypeMap.insert(std::make_pair(BallCamItem::BALL_CAM_ITEM_NAME,                    GameItem::BallCamItem));
-	itemNameToTypeMap.insert(std::make_pair(LaserBeamPaddleItem::LASER_BEAM_PADDLE_ITEM_NAME,   GameItem::LaserBeamPaddleItem));
-	itemNameToTypeMap.insert(std::make_pair(GravityBallItem::GRAVITY_BALL_ITEM_NAME,            GameItem::GravityBallItem));
-	itemNameToTypeMap.insert(std::make_pair(RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME,          GameItem::RocketPaddleItem));
-	itemNameToTypeMap.insert(std::make_pair(CrazyBallItem::CRAZY_BALL_ITEM_NAME,                GameItem::CrazyBallItem));
-	itemNameToTypeMap.insert(std::make_pair(ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME,          GameItem::ShieldPaddleItem));
-	itemNameToTypeMap.insert(std::make_pair(FireBallItem::FIRE_BALL_ITEM_NAME,                  GameItem::FireBallItem));
-	itemNameToTypeMap.insert(std::make_pair(IceBallItem::ICE_BALL_ITEM_NAME,                    GameItem::IceBallItem));
-    itemNameToTypeMap.insert(std::make_pair(OmniLaserBallItem::OMNI_LASER_BALL_ITEM_NAME,       GameItem::OmniLaserBallItem));
-    itemNameToTypeMap.insert(std::make_pair(InvisiPaddleItem::INVISI_PADDLE_ITEM_NAME,          GameItem::InvisiPaddleItem));
-    itemNameToTypeMap.insert(std::make_pair(MagnetPaddleItem::MAGNET_PADDLE_ITEM_NAME,          GameItem::MagnetPaddleItem));
-	itemNameToTypeMap.insert(std::make_pair(RandomItem::RANDOM_ITEM_NAME,                       GameItem::RandomItem));
+	itemNameToTypeMap.insert(std::make_pair(BallSpeedItem::FAST_BALL_ITEM_NAME,                     GameItem::BallSpeedUpItem));
+	itemNameToTypeMap.insert(std::make_pair(BallSpeedItem::SLOW_BALL_ITEM_NAME,                     GameItem::BallSlowDownItem));
+	itemNameToTypeMap.insert(std::make_pair(UberBallItem::UBER_BALL_ITEM_NAME,                      GameItem::UberBallItem));
+	itemNameToTypeMap.insert(std::make_pair(InvisiBallItem::INVISI_BALL_ITEM_NAME,                  GameItem::InvisiBallItem));
+	itemNameToTypeMap.insert(std::make_pair(GhostBallItem::GHOST_BALL_ITEM_NAME,                    GameItem::GhostBallItem));
+	itemNameToTypeMap.insert(std::make_pair(LaserPaddleItem::LASER_PADDLE_ITEM_NAME,                GameItem::LaserBulletPaddleItem));
+	itemNameToTypeMap.insert(std::make_pair(MultiBallItem::MULTI3_BALL_ITEM_NAME,                   GameItem::MultiBall3Item));
+	itemNameToTypeMap.insert(std::make_pair(MultiBallItem::MULTI5_BALL_ITEM_NAME,                   GameItem::MultiBall5Item));
+	itemNameToTypeMap.insert(std::make_pair(PaddleSizeItem::PADDLE_GROW_ITEM_NAME,                  GameItem::PaddleGrowItem));
+	itemNameToTypeMap.insert(std::make_pair(PaddleSizeItem::PADDLE_SHRINK_ITEM_NAME,                GameItem::PaddleShrinkItem));
+	itemNameToTypeMap.insert(std::make_pair(BallSizeItem::BALL_SHRINK_ITEM_NAME,                    GameItem::BallShrinkItem));
+	itemNameToTypeMap.insert(std::make_pair(BallSizeItem::BALL_GROW_ITEM_NAME,                      GameItem::BallGrowItem));
+	itemNameToTypeMap.insert(std::make_pair(BlackoutItem::BLACKOUT_ITEM_NAME,                       GameItem::BlackoutItem));
+	itemNameToTypeMap.insert(std::make_pair(UpsideDownItem::UPSIDEDOWN_ITEM_NAME,                   GameItem::UpsideDownItem));
+	itemNameToTypeMap.insert(std::make_pair(BallSafetyNetItem::BALL_SAFETY_NET_ITEM_NAME,           GameItem::BallSafetyNetItem));
+	itemNameToTypeMap.insert(std::make_pair(PoisonPaddleItem::POISON_PADDLE_ITEM_NAME,              GameItem::PoisonPaddleItem));
+	itemNameToTypeMap.insert(std::make_pair(StickyPaddleItem::STICKY_PADDLE_ITEM_NAME,              GameItem::StickyPaddleItem));
+	itemNameToTypeMap.insert(std::make_pair(PaddleCamItem::PADDLE_CAM_ITEM_NAME,                    GameItem::PaddleCamItem));
+	itemNameToTypeMap.insert(std::make_pair(BallCamItem::BALL_CAM_ITEM_NAME,                        GameItem::BallCamItem));
+	itemNameToTypeMap.insert(std::make_pair(LaserBeamPaddleItem::LASER_BEAM_PADDLE_ITEM_NAME,       GameItem::LaserBeamPaddleItem));
+	itemNameToTypeMap.insert(std::make_pair(GravityBallItem::GRAVITY_BALL_ITEM_NAME,                GameItem::GravityBallItem));
+	itemNameToTypeMap.insert(std::make_pair(RocketPaddleItem::ROCKET_PADDLE_ITEM_NAME,              GameItem::RocketPaddleItem));
+	itemNameToTypeMap.insert(std::make_pair(CrazyBallItem::CRAZY_BALL_ITEM_NAME,                    GameItem::CrazyBallItem));
+	itemNameToTypeMap.insert(std::make_pair(ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME,              GameItem::ShieldPaddleItem));
+	itemNameToTypeMap.insert(std::make_pair(FireBallItem::FIRE_BALL_ITEM_NAME,                      GameItem::FireBallItem));
+	itemNameToTypeMap.insert(std::make_pair(IceBallItem::ICE_BALL_ITEM_NAME,                        GameItem::IceBallItem));
+    itemNameToTypeMap.insert(std::make_pair(OmniLaserBallItem::OMNI_LASER_BALL_ITEM_NAME,           GameItem::OmniLaserBallItem));
+    itemNameToTypeMap.insert(std::make_pair(InvisiPaddleItem::INVISI_PADDLE_ITEM_NAME,              GameItem::InvisiPaddleItem));
+    itemNameToTypeMap.insert(std::make_pair(MagnetPaddleItem::MAGNET_PADDLE_ITEM_NAME,              GameItem::MagnetPaddleItem));
+    itemNameToTypeMap.insert(std::make_pair(PaddleMineLauncherItem::MINE_LAUNCHER_PADDLE_ITEM_NAME, GameItem::MineLauncherPaddleItem));
+	itemNameToTypeMap.insert(std::make_pair(RandomItem::RANDOM_ITEM_NAME,                           GameItem::RandomItem));
 	
 	// Establish the set of ALL items except the random item!
 	allItemTypes.insert(GameItem::BallSpeedUpItem);
@@ -107,6 +109,7 @@ GameItemFactory::GameItemFactory() {
     allItemTypes.insert(GameItem::OmniLaserBallItem);
     allItemTypes.insert(GameItem::InvisiPaddleItem);
     allItemTypes.insert(GameItem::MagnetPaddleItem);
+    allItemTypes.insert(GameItem::MineLauncherPaddleItem);
 	
 	// Establish the Power-up item set
 	allPowerUpItemTypes.insert(GameItem::BallSlowDownItem);
@@ -120,6 +123,7 @@ GameItemFactory::GameItemFactory() {
 	allPowerUpItemTypes.insert(GameItem::StickyPaddleItem);
 	allPowerUpItemTypes.insert(GameItem::LaserBeamPaddleItem);
 	allPowerUpItemTypes.insert(GameItem::RocketPaddleItem);
+    allPowerUpItemTypes.insert(GameItem::MineLauncherPaddleItem);
 
 	// Establish the Power-neutral item set
 	allPowerNeutralItemTypes.insert(GameItem::GhostBallItem);
@@ -286,6 +290,9 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 
         case GameItem::MagnetPaddleItem:
             return new MagnetPaddleItem(spawnOrigin, gameModel);
+
+        case GameItem::MineLauncherPaddleItem:
+            return new PaddleMineLauncherItem(spawnOrigin, gameModel);
 
 		// Random item is a very special kind of item that can't be generated anywhere else but here
 		case GameItem::RandomItem:

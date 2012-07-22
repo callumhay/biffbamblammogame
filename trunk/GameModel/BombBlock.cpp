@@ -231,6 +231,10 @@ LevelPiece* BombBlock::CollisionOccurred(GameModel* gameModel, Projectile* proje
 			resultingPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
 			break;
 
+        case Projectile::PaddleMineBulletProjectile:
+            // A mine will just come to rest on the block.
+            break;
+
 		case Projectile::FireGlobProjectile:
 			// Fire glob just extinguishes on a bomb block, unless it's frozen in an ice cube;
 			// in that case, unfreeze a frozen bomb block

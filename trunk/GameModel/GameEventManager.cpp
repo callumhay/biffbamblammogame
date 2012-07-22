@@ -143,6 +143,13 @@ void GameEventManager::ActionProjectileBlockCollision(const Projectile& projecti
 	}	
 }
 
+void GameEventManager::ActionProjectileSafetyNetCollision(const Projectile& projectile, const SafetyNet& safetyNet) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->ProjectileSafetyNetCollisionEvent(projectile, safetyNet);
+	}
+}
+
 // Action for when the ball collides with a block in the level
 void GameEventManager::ActionBallBlockCollision(const GameBall& ball, const LevelPiece& block) {
 	this->listenerIter = this->eventListeners.begin();
@@ -423,6 +430,14 @@ void GameEventManager::ActionRocketExploded(const PaddleRocketProjectile& rocket
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->RocketExplodedEvent(rocket);
+	}	
+}
+
+// Action for when an armed mine explodes
+void GameEventManager::ActionMineExploded(const PaddleMineProjectile& mine) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->MineExplodedEvent(mine);
 	}	
 }
 

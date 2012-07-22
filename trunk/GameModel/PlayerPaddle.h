@@ -25,6 +25,7 @@
 
 class GameModel;
 class GameBall;
+class PaddleMineProjectile;
 
 // Represents the player controlled paddle shaped as follows:
 //                -------------
@@ -44,6 +45,9 @@ public:
 	static const float DEFAULT_DECCELERATION;
 	static const float POISON_SPEED_DIMINISH;
 	static const int DEFLECTION_DEGREE_ANGLE;
+
+	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
+    static const double PADDLE_MINE_LAUNCH_DELAY;   // Delay between launches of mines
 
 	static const Vector2D DEFAULT_PADDLE_UP_VECTOR;
 	static const Vector2D DEFAULT_PADDLE_RIGHT_VECTOR;
@@ -210,6 +214,7 @@ public:
 
 	void HitByProjectile(GameModel* gameModel, const Projectile& projectile);
 	bool ProjectilePassesThrough(const Projectile& projectile);
+    bool ProjectileIsDestroyedOnCollision(const Projectile& projectile) { return !this->ProjectilePassesThrough(projectile); }
 	void ModifyProjectileTrajectory(Projectile& projectile);
 
 	void UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAttachedBallCollision);
@@ -256,8 +261,6 @@ private:
 
 	static const int AVG_OVER_TICKS  = 60;
 	
-	static const double PADDLE_LASER_BULLET_DELAY;	// Delay between shots of the laser bullet
-
     static bool paddleBallReleaseTimerEnabled;
     static bool paddleBallReleaseEnabled;
 
@@ -293,6 +296,7 @@ private:
 
 	BoundingLines bounds;						// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
 	
+    double timeSinceLastMineLaunch; // Time since the last launch of a mine projectile
 	double timeSinceLastLaserBlast;	// Time since the last laser projectile/bullet was fired
 	double laserBeamTimer;					// Time left on the laser beam power-up
 
@@ -314,6 +318,7 @@ private:
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
 	void RocketProjectileCollision(GameModel* gameModel, const RocketProjectile& projectile);
+    void MineProjectileCollision(GameModel* gameModel, const PaddleMineProjectile& projectile);
 	void FireGlobProjectileCollision(const Projectile& projectile);
 	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter);
 	void SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, double totalHitEffectTime, 
@@ -397,38 +402,6 @@ inline bool PlayerPaddle::CollisionCheck(const GameBall& ball, double dT, Vector
 	}
 }
 
-/**
- * Check to see if the given set of bounding lines collides with this paddle.
- */
-inline bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds,
-                                         bool includeAttachedBallCheck) const {
-	bool didCollide = false;
-	// If the paddle has a shield around it do the collision with the shield
-	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		didCollide = bounds.CollisionCheck(this->CreatePaddleShieldBounds());
-	}
-	else {
-		didCollide = this->bounds.CollisionCheck(bounds);
-	}
-
-	if (includeAttachedBallCheck && !didCollide && this->HasBallAttached()) {
-		didCollide = bounds.CollisionCheck(this->GetAttachedBall()->GetBounds());
-	}
-
-	// If there's a rocket attached we need to check for collisions with it!
-	if (!didCollide && (this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
-		Point2D rocketSpawnPos;
-		float rocketHeight, rocketWidth;
-		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
-		Vector2D widthHeightVec(rocketWidth/1.5f, rocketHeight/1.5f);
-
-		Collision::AABB2D rocketAABB(rocketSpawnPos - widthHeightVec, rocketSpawnPos + widthHeightVec);
-		didCollide = bounds.CollisionCheck(rocketAABB);
-	}
-	
-	return didCollide;
-}
-
 // Check for a collision with the given projectile
 inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& projectile,
                                                        const BoundingLines& bounds) const {
@@ -437,7 +410,8 @@ inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& project
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
-            // The rocket can only collide with the paddle if it's NOT going upwards into the level
+        case Projectile::PaddleMineBulletProjectile:
+            // These projectiles can only collide with the paddle if it's NOT going upwards into the level
             if (Vector2D::Dot(projectile.GetVelocityDirection(), this->GetUpVector()) <= 0) {
                 return this->CollisionCheck(bounds, true);
             }
@@ -461,12 +435,14 @@ inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) 
             case Projectile::PaddleRocketBulletProjectile:
             case Projectile::RocketTurretBulletProjectile:
             case Projectile::LaserTurretBulletProjectile:
+            case Projectile::PaddleMineBulletProjectile:
                 return true;
             default:
                 break;
         }
 
 	}
+
 	return false;
 }
 
@@ -474,44 +450,6 @@ inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) 
 // the paddle.
 inline Collision::Circle2D PlayerPaddle::CreatePaddleShieldBounds() const {
 	return Collision::Circle2D(this->GetCenterPosition(), this->GetHalfWidthTotal());
-}
-
-// Obtain an AABB encompassing the entire paddle's current collision area
-inline Collision::AABB2D PlayerPaddle::GetPaddleAABB(bool includeAttachedBall) const {
-	Point2D minPt, maxPt;
-	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
-		Vector2D sphereRadiusVec(this->GetHalfWidthTotal(), this->GetHalfWidthTotal());
-		sphereRadiusVec = 1.2f * sphereRadiusVec;
-		minPt = this->GetCenterPosition() - sphereRadiusVec;
-		maxPt = this->GetCenterPosition() + sphereRadiusVec;
-	}
-	else {
-		Vector2D halfWidthHeight(this->GetHalfWidthTotal(), this->GetHalfHeight());
-		halfWidthHeight = 1.2f * halfWidthHeight;
-		minPt = this->GetCenterPosition() - halfWidthHeight;
-		maxPt = this->GetCenterPosition() + halfWidthHeight;
-	}
-
-	Collision::AABB2D paddleAABB(minPt, maxPt);
-	if (includeAttachedBall && this->HasBallAttached()) {
-		const Collision::Circle2D& ballBounds = this->GetAttachedBall()->GetBounds();
-		Vector2D ballRadiusVec(ballBounds.Radius(), ballBounds.Radius());
-		ballRadiusVec = 1.2f * ballRadiusVec;
-		paddleAABB.AddPoint(ballBounds.Center() + ballRadiusVec);
-		paddleAABB.AddPoint(ballBounds.Center() - ballRadiusVec);
-	}
-
-	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
-		Point2D rocketSpawnPos;
-		float rocketHeight, rocketWidth;
-		this->GenerateRocketDimensions(rocketSpawnPos, rocketWidth, rocketHeight);
-		Vector2D widthHeightVec(rocketWidth/1.5f, rocketHeight/1.5f);
-
-		paddleAABB.AddPoint(rocketSpawnPos - widthHeightVec);
-		paddleAABB.AddPoint(rocketSpawnPos + widthHeightVec);
-	}
-
-	return paddleAABB;
 }
 
 // Applies an immediate impulse force along the x-axis (movement axis of the paddle)

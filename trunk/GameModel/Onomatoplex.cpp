@@ -80,6 +80,7 @@ void Generator::LoadExplosionWords() {
     singleWordExplosion.push_back("Poff");
     singleWordExplosion.push_back("Splam");
     singleWordExplosion.push_back("Zop");
+    singleWordExplosion.push_back("Zorp");
 	this->simpleSingleWords[EXPLOSION] = singleWordExplosion;
 
 	std::vector<std::string> goodSingleWordExplosion;
@@ -106,6 +107,7 @@ void Generator::LoadExplosionWords() {
 	goodSingleWordExplosion.push_back("Pphhoom");
 	goodSingleWordExplosion.push_back("Kurfloom");
 	goodSingleWordExplosion.push_back("Kurflaam");
+    goodSingleWordExplosion.push_back("Zorpowow");
 	this->goodSingleWords[EXPLOSION] = goodSingleWordExplosion;
 
 	std::vector<std::string> awesomeSingleWordExplosion;
@@ -127,6 +129,7 @@ void Generator::LoadExplosionWords() {
 	awesomeSingleWordExplosion.push_back("Kablaamosion");
 	awesomeSingleWordExplosion.push_back("Kazaammo");
 	awesomeSingleWordExplosion.push_back("Kazaammy");
+    awesomeSingleWordExplosion.push_back("Zorpowowy");
 	this->awesomeSingleWords[EXPLOSION] = awesomeSingleWordExplosion;
 
 	std::vector<std::string> uberSingleWordExplosion;
@@ -141,6 +144,7 @@ void Generator::LoadExplosionWords() {
 	uberEndFixExplosion.push_back("inator");
 	uberEndFixExplosion.push_back("plosion");
 	uberEndFixExplosion.push_back("afrazz");
+    uberEndFixExplosion.push_back("nation");
 
 	for (std::vector<std::string>::iterator iterEnd = uberEndFixExplosion.begin(); iterEnd != uberEndFixExplosion.end(); ++iterEnd) {
 		for (std::vector<std::string>::iterator iter = goodSingleWordExplosion.begin(); iter != goodSingleWordExplosion.end(); ++iter) {

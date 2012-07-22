@@ -28,6 +28,9 @@ public:
     }
     float GetDamage() const { return 90.0f; }
 
+    bool BlastsThroughSafetyNets() const { return false; }
+    bool IsDestroyedBySafetyNets() const { return true;  }
+
 private:
     // Disallow assignment
     void operator=(const LaserBulletProjectile& copy);

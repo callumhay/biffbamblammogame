@@ -153,6 +153,10 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 			this->AttemptToDropAnItem(gameModel);
 			break;
 
+        case Projectile::PaddleMineBulletProjectile:
+            // A mine will just come to rest on the block.
+            break;
+
 		case Projectile::FireGlobProjectile:
 			// Fire glob just extinguishes on a item drop block, unless it's frozen in an ice cube;
 			// in that case, unfreeze a frozen item drop block

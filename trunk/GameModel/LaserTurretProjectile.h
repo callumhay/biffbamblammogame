@@ -19,7 +19,7 @@ public:
 	static const float HEIGHT_DEFAULT;
 	static const float WIDTH_DEFAULT;
 
-    explicit LaserTurretProjectile(const Point2D& spawnLoc, const Vector2D& dir);
+    LaserTurretProjectile(const Point2D& spawnLoc, const Vector2D& dir);
     LaserTurretProjectile(const LaserTurretProjectile& copy);
     ~LaserTurretProjectile();
 
@@ -28,6 +28,9 @@ public:
     }
 
     float GetDamage() const { return 80.0f; }
+
+    bool BlastsThroughSafetyNets() const { return false; }
+    bool IsDestroyedBySafetyNets() const { return true;  }
 
 private:
     // Disallow assignment
