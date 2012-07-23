@@ -23,8 +23,8 @@ const Vector2D PaddleMineProjectile::MINE_DEFAULT_RIGHTDIR    = Vector2D(1, 0);
 
 const float PaddleMineProjectile::MINE_DEFAULT_ACCEL = 80.0f;
 
-const float PaddleMineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.80f * LevelPiece::PIECE_WIDTH;
-const float PaddleMineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.10f * LevelPiece::PIECE_WIDTH;
+const float PaddleMineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.5f * LevelPiece::PIECE_HEIGHT;
+const float PaddleMineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.00f * LevelPiece::PIECE_WIDTH;
 
 const double PaddleMineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.5;
 const double PaddleMineProjectile::MINE_MAX_COUNTDOWN_TIME = 3.5;
@@ -114,13 +114,13 @@ BoundingLines PaddleMineProjectile::BuildBoundingLines() const {
 		return BoundingLines();
 	}
 
-	const Vector2D& UP_DIR    = this->GetVelocityDirection();
-	const Vector2D& RIGHT_DIR = this->GetRightVectorDirection();
+	const Vector2D& UP_DIR    = PaddleMineProjectile::MINE_DEFAULT_VELOCITYDIR;
+	const Vector2D& RIGHT_DIR = PaddleMineProjectile::MINE_DEFAULT_RIGHTDIR;
 
-	Point2D topRight = this->GetPosition() + this->GetHalfHeight()*UP_DIR + 0.9f*this->GetHalfWidth()*RIGHT_DIR;
+	Point2D topRight    = this->GetPosition() + this->GetHalfHeight()*UP_DIR + this->GetHalfWidth()*RIGHT_DIR;
 	Point2D bottomRight = topRight - this->GetHeight()*UP_DIR;
-	Point2D topLeft = topRight - this->GetWidth()*RIGHT_DIR;
-	Point2D bottomLeft = topLeft - this->GetHeight()*UP_DIR;
+	Point2D topLeft     = topRight - this->GetWidth()*RIGHT_DIR;
+	Point2D bottomLeft  = topLeft - this->GetHeight()*UP_DIR;
 
 	std::vector<Collision::LineSeg2D> sideBounds;
 	sideBounds.reserve(2);
@@ -217,12 +217,9 @@ bool PaddleMineProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
         for (std::list<Projectile*>::const_iterator iter = projectiles.begin(); iter != projectiles.end(); ++iter) {
             const Projectile* projectile = *iter;
             
-            // Ignore other armed mines
+            // Ignore other mines
             if (projectile->GetType() == Projectile::PaddleMineBulletProjectile) {
-                const PaddleMineProjectile* otherMine = static_cast<const PaddleMineProjectile*>(projectile);
-                if (projectile == this || otherMine->GetIsArmed()) {
-                    continue;
-                }
+                continue;
             }
 
             // Ignore light beams / lasers

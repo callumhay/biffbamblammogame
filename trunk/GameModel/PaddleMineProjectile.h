@@ -132,7 +132,7 @@ inline void PaddleMineProjectile::Land(const Point2D& landingPt) {
 inline void PaddleMineProjectile::SafetyNetCollisionOccurred(SafetyNet* safetyNet) {
     assert(safetyNet != NULL);
 
-    this->Land(safetyNet->GetBounds().ClosestPoint(this->GetPosition()));
+    this->Land(safetyNet->GetBounds().ClosestPoint(this->GetPosition()) + Vector2D(0, SafetyNet::SAFETY_NET_HEIGHT / 2.0f));
     Projectile::SafetyNetCollisionOccurred(safetyNet);
     safetyNet->AttachProjectile(this);
     this->attachedToNet = safetyNet;

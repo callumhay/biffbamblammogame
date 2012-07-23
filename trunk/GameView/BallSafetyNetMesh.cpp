@@ -15,6 +15,7 @@
 #include "CgFxPhong.h"
 
 #include "../GameModel/LevelPiece.h"
+#include "../GameModel/SafetyNet.h"
 
 #include "../ResourceManager.h"
 #include "../BlammoEngine/CgFxEffect.h"
@@ -22,7 +23,7 @@
 #include "../BlammoEngine/Camera.h"
 #include "../BlammoEngine/Light.h"
 
-const float BallSafetyNetMesh::SAFETY_NET_HEIGHT	= 1.0f;
+const float BallSafetyNetMesh::SAFETY_NET_HEIGHT	= SafetyNet::SAFETY_NET_HEIGHT;
 const float BallSafetyNetMesh::SAFETY_NET_DEPTH		= 1.25f;
 
 BallSafetyNetMesh::BallSafetyNetMesh() : shadingMaterial(NULL), displayListID(0), leftPieceDispListID(0),

@@ -631,11 +631,14 @@ void GameModel::DoProjectileCollisions(double dT) {
 			// Test for a collision between the projectile and current level piece
 			didCollide = currPiece->CollisionCheck(projectileBoundingLines, currProjectile->GetVelocityDirection());
 			if (didCollide) {
-				// This needs to be before the call to CollisionOccurred or else the currPiece may already be destroyed.
-				this->CollisionOccurred(currProjectile, currPiece);	
+
+				// WARNING/IMPORTANT!!!! This needs to be before the call to CollisionOccurred or else the
+                // currPiece may already be destroyed.
+				destroyProjectile = currPiece->ProjectileIsDestroyedOnCollision(currProjectile);
+
+                this->CollisionOccurred(currProjectile, currPiece);	
 
 				// Check to see if the collision is supposed to destroy the projectile
-                destroyProjectile = currPiece->ProjectileIsDestroyedOnCollision(currProjectile);
 				if (destroyProjectile) {
 					// Despose of the projectile...
 					iter = gameProjectiles.erase(iter);
@@ -650,7 +653,7 @@ void GameModel::DoProjectileCollisions(double dT) {
 
         // Lastly we perform a modify level update for the projectile - certain projectiles can act
         // 'intelligently' based on the level state and cause alteration to it as well
-        if (currProjectile->ModifyLevelUpdate(dT, *this)) {
+        if (currProjectile != NULL && currProjectile->ModifyLevelUpdate(dT, *this)) {
             iter = gameProjectiles.erase(iter);
 		    PROJECTILE_CLEANUP(currProjectile);
 		    continue;
