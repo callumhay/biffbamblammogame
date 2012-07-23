@@ -27,6 +27,9 @@ class PaddleMineProjectile;
  */
 class SafetyNet {
 public:
+    static const float SAFETY_NET_HEIGHT;
+    static const float SAFETY_NET_HALF_HEIGHT;
+
     SafetyNet(const GameLevel& currLevel);
     ~SafetyNet();
 

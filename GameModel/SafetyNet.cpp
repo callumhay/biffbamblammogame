@@ -13,6 +13,9 @@
 #include "GameLevel.h"
 #include "PaddleMineProjectile.h"
 
+const float SafetyNet::SAFETY_NET_HEIGHT      = 1.0f;
+const float SafetyNet::SAFETY_NET_HALF_HEIGHT = SafetyNet::SAFETY_NET_HEIGHT / 2.0f;
+
 SafetyNet::SafetyNet(const GameLevel& currLevel) {
 
 	// Create the safety net bounding line for this level

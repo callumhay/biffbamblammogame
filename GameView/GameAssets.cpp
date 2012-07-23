@@ -620,13 +620,16 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 	// Camera mode is exempt from this because the attachment would seriously get in the view of the player
 	if (!p.GetIsPaddleCameraOn()) {
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		if ((p.GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
-			// Draw attachment (gun) mesh
+
+        // Draw the various active attachements...
+        if ((p.GetPaddleType() & PlayerPaddle::LaserBulletPaddle) == PlayerPaddle::LaserBulletPaddle) {
 			this->paddleLaserAttachment->Draw(dT, p, camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
-        
+
         glPushMatrix();
         glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
+        glRotatef(p.GetZRotation(), 0, 0, 1);
+       
 		if ((p.GetPaddleType() & PlayerPaddle::LaserBeamPaddle) == PlayerPaddle::LaserBeamPaddle) {
 			this->paddleBeamAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
@@ -1267,9 +1270,7 @@ void GameAssets::MineExplosion(const PaddleMineProjectile& mine, Camera& camera)
     GameControllerManager::GetInstance()->VibrateControllers(forcePercentage,
         BBBGameController::SoftVibration, BBBGameController::SoftVibration);
 
-	this->flashHUD->Activate(0.5, 0.333f);
-
-	// Play the explosion sound
+	// TODO: Play the explosion sound
 	//this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundMineExplodedEvent, GameSoundAssets::LoudVolume);
 }
 

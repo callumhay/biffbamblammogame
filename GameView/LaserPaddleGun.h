@@ -34,11 +34,13 @@ public:
 	inline void Draw(double dT, const PlayerPaddle& p, const Camera& camera, CgFxEffectBase* replacementMat,
                      const BasicPointLight& keyLight, const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 		float paddleScaleFactor = p.GetPaddleScaleFactor();
+      
 		this->laserGunRecoilAnim.Tick(dT);
 
 		glPushMatrix();
 		glTranslatef(0, 0, this->laserGunRecoilAnim.GetInterpolantValue());	// Animate recoil on fire
 		glScalef(paddleScaleFactor, paddleScaleFactor, paddleScaleFactor);
+        glRotatef(p.GetZRotation(), 0, 0, 1);
 		this->laserGunMesh->Draw(camera, replacementMat, keyLight, fillLight, ballLight);
 		glPopMatrix();
 	}

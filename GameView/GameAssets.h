@@ -22,6 +22,7 @@
 #include "../GameModel/PlayerPaddle.h"
 #include "../GameModel/GameItem.h"
 #include "../GameModel/GameItemTimer.h"
+#include "../GameModel/SafetyNet.h"
 
 #include "../GameSound/GameSoundAssets.h"
 
@@ -242,7 +243,7 @@ inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, c
         GameLevel* currLevel = gameModel.GetCurrentLevel();
         
         glPushMatrix();
-		glTranslatef(-currLevel->GetLevelUnitWidth() / 2.0f, -(currLevel->GetLevelUnitHeight() / 2.0f + LevelPiece::HALF_PIECE_HEIGHT), 0.0f);
+		glTranslatef(-currLevel->GetLevelUnitWidth() / 2.0f, -(currLevel->GetLevelUnitHeight() / 2.0f + SafetyNet::SAFETY_NET_HALF_HEIGHT), 0.0f);
 		this->ballSafetyNet->Draw(dT, camera, fgKeyLight, fgFillLight, ballLight);
 		glPopMatrix();
 	}
