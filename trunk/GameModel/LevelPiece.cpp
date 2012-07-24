@@ -156,7 +156,7 @@ bool LevelPiece::ProjectileIsDestroyedOnCollision(Projectile* projectile) const 
     switch (projectile->GetType()) {
 
         case Projectile::PaddleMineBulletProjectile:
-            // Mines are never destroyed by collisions with blocks, ever.
+            // Mines are typically not destroyed by collisions with blocks.
             return false;
 
         default:

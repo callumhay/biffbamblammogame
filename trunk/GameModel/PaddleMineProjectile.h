@@ -108,16 +108,19 @@ private:
 
     // Whether the mine has attached/latched on to something and ready to blow up yet
     bool isArmed;
+    bool isFalling;
     bool proximityAlerted;
     float proximityAlertCountdown;
 
     void BeginProximityExplosionCountdown();
+    void StopAndResetProximityExplosionCountdown();
     void DetachFromAnyAttachedObject();
 };
 
 inline void PaddleMineProjectile::SetAsFalling() {
     this->SetVelocity(Vector2D(0, -1), 0.0f);
     this->acceleration = 9.8f;
+    this->isFalling = true;
     this->DetachFromAnyAttachedObject();
 }
 
@@ -127,6 +130,8 @@ inline void PaddleMineProjectile::Land(const Point2D& landingPt) {
     this->currRotationSpd = 0.0f;
     this->SetPosition(landingPt);
     this->isArmed = true;
+    this->isFalling = false;
+    this->StopAndResetProximityExplosionCountdown();
 }
 
 inline void PaddleMineProjectile::SafetyNetCollisionOccurred(SafetyNet* safetyNet) {
@@ -141,8 +146,14 @@ inline void PaddleMineProjectile::SafetyNetCollisionOccurred(SafetyNet* safetyNe
 inline void PaddleMineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
     assert(block != NULL);
 
+    // We don't 'land' the mine and set an attached block if the mine is being loaded into a cannon
+    // or if it just can't collide with the block
+    if (block->GetType() == LevelPiece::Cannon || block->IsNoBoundsPieceType()) {
+        return;
+    }
+
     this->Land(block->GetBounds().ClosestPoint(this->GetPosition()));
-    Projectile::LevelPieceCollisionOccurred(block);
+    this->SetLastThingCollidedWith(block);
     block->AttachProjectile(this);
     this->attachedToPiece = block;
 }

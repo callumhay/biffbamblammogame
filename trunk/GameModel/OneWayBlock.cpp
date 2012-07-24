@@ -113,7 +113,11 @@ LevelPiece* OneWayBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruc
 			assert(success);
 	}
 
-	// When destroying a breakable there is the possiblity of dropping an item...
+    // Only collateral blocks and tesla lightning can destroy a one-way block
+    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
+        return this;
+    }
+
 	gameModel->AddPossibleItemDrop(*this);
 
 	// Tell the level that this piece has changed to empty...

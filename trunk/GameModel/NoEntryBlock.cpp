@@ -42,7 +42,11 @@ LevelPiece* NoEntryBlock::Destroy(GameModel* gameModel, const LevelPiece::Destru
 	    assert(success);
 	}
 
-	// When destroying a breakable there is the possiblity of dropping an item...
+    // Only collateral blocks and tesla lightning can destroy a no-entry block
+    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
+        return this;
+    }
+
 	gameModel->AddPossibleItemDrop(*this);
 
 	// Tell the level that this piece has changed to empty...

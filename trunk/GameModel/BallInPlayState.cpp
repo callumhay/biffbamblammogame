@@ -123,8 +123,7 @@ void BallInPlayState::Tick(double seconds) {
 #endif
 
 	// Gravity vector in world space
-	Vector3D worldGravityDir = this->gameModel->GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
-	worldGravityDir.Normalize();
+	Vector3D worldGravityDir = this->gameModel->GetGravityDir();
 	Vector2D worldGravity2D(worldGravityDir[0], worldGravityDir[1]);
 
 	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {

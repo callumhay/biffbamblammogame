@@ -378,6 +378,12 @@ public:
         return this->balls;
     }
 
+    Vector3D GetGravityDir() {
+        Vector3D gravityDir = this->GetTransformInfo()->GetGameTransform() * Vector3D(0, -1, 0);
+	    gravityDir.Normalize();
+        return gravityDir;
+    }
+
 	// Paddle and ball related manipulators *********************************
 
 	// Move the paddle a distance in either positive or negative X direction.

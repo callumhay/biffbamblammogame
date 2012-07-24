@@ -21,6 +21,12 @@ PrismBlock::~PrismBlock() {
 }
 
 LevelPiece* PrismBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
+
+    // Only collateral blocks and tesla lightning can destroy a prism block
+    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
+        return this;
+    }
+
 	// EVENT: Block is being destroyed
 	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 

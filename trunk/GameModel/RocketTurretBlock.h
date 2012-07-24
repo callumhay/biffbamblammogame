@@ -12,9 +12,9 @@
 #ifndef __ROCKETTURRETBLOCK_H__
 #define __ROCKETTURRETBLOCK_H__
 
-#include "LevelPiece.h"
+#include "TurretBlock.h"
 
-class RocketTurretBlock : public LevelPiece {
+class RocketTurretBlock : public TurretBlock {
 public:
     static const float BALL_DAMAGE_AMOUNT;
     static const float ONE_MORE_BALL_HIT_LIFE_PERCENT;
@@ -31,38 +31,11 @@ public:
 
 	LevelPieceType GetType() const { return LevelPiece::RocketTurret; }
 
-	bool IsNoBoundsPieceType() const { return false; }
-	bool BallBouncesOffWhenHit() const { return true; }
-	bool MustBeDestoryedToEndLevel() const { return false; }
-	bool CanBeDestroyedByBall() const { return true; }
-    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const { return true; }
-    bool BallBlastsThrough(const GameBall& b) const { UNUSED_PARAMETER(b); return false; }
-    bool GhostballPassesThrough() const { return false; }
-
-    bool IsLightReflectorRefractor() const {
-		// When frozen in ice a block can reflect/refract lasers and the like
-		return this->HasStatus(LevelPiece::IceCubeStatus);
-	}
-
 	bool ProjectilePassesThrough(Projectile* projectile) const;
     int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
-    bool IsAIPiece() const { return true; }
-
-	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-                      const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-                      const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-                      const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
-
-
 	// Collision related stuffs
-	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);	
-	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
-	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
-	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
-
-	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses); 
 
     void AITick(double dT, GameModel* gameModel);
 
@@ -70,7 +43,6 @@ public:
     void GetFiringDirection(Vector2D& unitDir) const;
     float GetRotationDegreesFromX() const;
     float GetBarrelRecoilAmount() const;
-    float GetHealthPercent() const;
 
     bool HasRocketLoaded() const {
         return (this->barrelState == BarrelForwardRocketLoading || this->barrelState == BarrelForwardRocketLoaded);
@@ -132,33 +104,18 @@ private:
     void SetBarrelState(const BarrelAnimationState& state, GameModel* model);
     void UpdateBarrelState(double dT, bool isAllowedToFire, GameModel* model);
 
-    bool IsDead() const { return this->currLifePoints <= 0; }
-    
     void CanSeeAndFireAtPaddle(const GameModel* model, bool& canSeePaddle, bool& canFireAtPaddle) const;
-    LevelPiece* DiminishPiece(float dmgAmount, GameModel* model, const LevelPiece::DestructionMethod& method);
     void UpdateSpeed();
 
     DISALLOW_COPY_AND_ASSIGN(RocketTurretBlock);
 };
 
-inline bool RocketTurretBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
-	UNUSED_PARAMETER(dT);
-	UNUSED_PARAMETER(gameModel);
-	assert(gameModel != NULL);
-
-	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
-	return false;
-}
-
 inline float RocketTurretBlock::GetRotationDegreesFromX() const {
     return this->currRotationFromXInDegs;
 }
+
 inline float RocketTurretBlock::GetBarrelRecoilAmount() const {
     return this->barrelMovementAnim.GetInterpolantValue();
-}
-
-inline float RocketTurretBlock::GetHealthPercent() const {
-    return this->currLifePoints / static_cast<float>(PIECE_STARTING_LIFE_POINTS);
 }
 
 inline RocketTurretBlock::TurretAIState RocketTurretBlock::GetTurretAIState() const {

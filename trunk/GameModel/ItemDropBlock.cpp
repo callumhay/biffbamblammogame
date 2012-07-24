@@ -64,24 +64,30 @@ LevelPiece* ItemDropBlock::Destroy(GameModel* gameModel, const LevelPiece::Destr
 		assert(success);
 	}
 
-	// Drop one last item before death...
-	this->timeOfLastDrop = 0;
-	this->AttemptToDropAnItem(gameModel);
+    // Only collateral blocks and tesla lighting can destroy this block, otherwise the block is just triggered
+    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
+        this->Triggered(gameModel);
+        return this;
+    }
 
-	// EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
+    // Drop one last item before death...
+    this->timeOfLastDrop = 0;
+    this->AttemptToDropAnItem(gameModel);
 
-	// Tell the level that this piece has changed to empty...
-	GameLevel* level = gameModel->GetCurrentLevel();
-	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece, method);
+    // EVENT: Block is being destroyed
+    GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
 
-	// Obliterate all that is left of this block...
-	LevelPiece* tempThis = this;
-	delete tempThis;
-	tempThis = NULL;
+    // Tell the level that this piece has changed to empty...
+    GameLevel* level = gameModel->GetCurrentLevel();
+    LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
+    level->PieceChanged(gameModel, this, emptyPiece, method);
 
-	return emptyPiece;
+    // Obliterate all that is left of this block...
+    LevelPiece* tempThis = this;
+    delete tempThis;
+    tempThis = NULL;
+
+    return emptyPiece;
 }
 
 // When balls collide with the item drop block it causes an item to fall from the block

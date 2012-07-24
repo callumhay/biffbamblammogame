@@ -45,7 +45,7 @@ public:
     virtual bool IsDestroyedBySafetyNets() const { return false; }
 
     virtual void SafetyNetCollisionOccurred(SafetyNet* safetyNet) { this->SetLastThingCollidedWith(safetyNet); };
-    virtual void LevelPieceCollisionOccurred(LevelPiece* block)   { this->SetLastThingCollidedWith(block); };
+    virtual void LevelPieceCollisionOccurred(LevelPiece* block)   { UNUSED_PARAMETER(block); };
 
     virtual bool ModifyLevelUpdate(double dT, GameModel&) { UNUSED_PARAMETER(dT); return false; };
 
