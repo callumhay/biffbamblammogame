@@ -1151,10 +1151,7 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
 LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const RocketProjectile* rocket, LevelPiece* hitPiece) {
 	
 	// Destroy the hit piece if we can...
-	LevelPiece* resultPiece = hitPiece;
-	if (hitPiece->CanBeDestroyedByBall()) {
-        resultPiece = hitPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
-	}
+	LevelPiece* resultPiece = hitPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
 
 	// Grab all the pieces that are going to be affected around the central given hit piece
 	// NOTE: If a piece doesn't exist (i.e., the bounds of the level are hit then the piece
@@ -1168,7 +1165,7 @@ LevelPiece* GameLevel::RocketExplosion(GameModel* gameModel, const RocketProject
 	// Go through each affected piece and destroy it if we can
 	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
 		LevelPiece* currAffectedPiece = *iter;
-		if (currAffectedPiece != NULL && currAffectedPiece->CanBeDestroyedByBall()) {
+		if (currAffectedPiece != NULL) {
 			LevelPiece* resultPiece = currAffectedPiece->Destroy(gameModel, LevelPiece::RocketDestruction);
             if (resultPiece != currAffectedPiece) {
 			    // Update all the affected pieces again...
@@ -1230,6 +1227,15 @@ std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(float 
 	return affectedPieces;
 }
 
+LevelPiece* GameLevel::MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine, LevelPiece* hitPiece) {
+	// Destroy the hit piece if we can...
+	LevelPiece* resultPiece = hitPiece->Destroy(gameModel, LevelPiece::MineDestruction);
+
+    this->MineExplosion(gameModel, mine);
+
+    return resultPiece;
+}
+
 void GameLevel::MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine) {
     assert(gameModel != NULL);
     assert(mine != NULL);
@@ -1243,7 +1249,7 @@ void GameLevel::MineExplosion(GameModel* gameModel, const PaddleMineProjectile* 
 	// Go through each affected piece and destroy it if we can
 	for (std::set<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
 		LevelPiece* currAffectedPiece = *iter;
-		if (currAffectedPiece != NULL && currAffectedPiece->CanBeDestroyedByBall()) {
+		if (currAffectedPiece != NULL) {
 			LevelPiece* resultPiece = currAffectedPiece->Destroy(gameModel, LevelPiece::MineDestruction);
             
             if (resultPiece != currAffectedPiece) {

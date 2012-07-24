@@ -41,6 +41,12 @@ void MineMeshManager::Draw(double dT, const Camera& camera, const BasicPointLigh
 
 void MineMeshManager::MineInstance::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
                                          const BasicPointLight& fillLight, const BasicPointLight& ballLight, Mesh* mineMesh) {
+
+    // Don't draw the mine while it's loaded in a cannon
+    if (this->mine->IsLoadedInCannonBlock()) {
+        return;
+    }
+
     glPushMatrix();
 
     const Point2D& position = this->mine->GetPosition();

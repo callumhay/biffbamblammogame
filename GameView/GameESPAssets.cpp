@@ -3994,7 +3994,7 @@ void GameESPAssets::AddMineBlastEffect(const PaddleMineProjectile& mine, const P
 	explosionEffect->SetParticleRotation(ESPInterval(-180.0f, 179.9999999f));
 
     float mineSizeFactor = mine.GetVisualScaleFactor();
-    float size = 2*mine.GetExplosionRadius();
+    float size = 3*mine.GetExplosionRadius(); // We make the size a bit bigger than it should be to make it more noticable
 	explosionEffect->SetParticleSize(ESPInterval(size));
 
 	// Add effectors to the bang effect
@@ -4012,7 +4012,7 @@ void GameESPAssets::AddMineBlastEffect(const PaddleMineProjectile& mine, const P
 	bangOnoEffect->SetSpawnDelta(ESPInterval(-1));
 	bangOnoEffect->SetInitialSpd(ESPInterval(0.0f));
 	bangOnoEffect->SetParticleLife(bangOnoLifeInterval);
-	bangOnoEffect->SetParticleSize(ESPInterval(mineSizeFactor * 1.0f));
+	bangOnoEffect->SetParticleSize(ESPInterval(mineSizeFactor));
 	bangOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bangOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));
 	bangOnoEffect->SetParticleAlignment(ESP::ScreenAligned);

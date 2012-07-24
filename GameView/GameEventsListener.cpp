@@ -429,6 +429,7 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
 			// TODO? Maybe a neat rotating sparkle or line epicenter effect?
 			break;
 
+        case Projectile::PaddleMineBulletProjectile:
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
 		case Projectile::CollateralBlockProjectile: {

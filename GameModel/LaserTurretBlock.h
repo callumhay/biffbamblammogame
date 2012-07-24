@@ -12,9 +12,9 @@
 #ifndef __LASERTURRETBLOCK_H__
 #define __LASERTURRETBLOCK_H__
 
-#include "LevelPiece.h"
+#include "TurretBlock.h"
 
-class LaserTurretBlock : public LevelPiece {
+class LaserTurretBlock : public TurretBlock {
 public:
     static const float BALL_DAMAGE_AMOUNT;
     static const float ONE_MORE_BALL_HIT_LIFE_PERCENT;
@@ -25,7 +25,6 @@ public:
     static const float BARREL_OFFSET_ALONG_Z;
     static const float BARREL_OFFSET_EXTENT_ALONG_Y;
     
-
     enum TurretAIState { IdleTurretState = 0, SeekingTurretState, TargetFoundTurretState, TargetLostTurretState };
     enum BarrelAnimationState { OneForwardTwoBack = 0, OneFiringTwoReloading, TwoForwardOneBack, TwoFiringOneReloading };
 
@@ -34,38 +33,11 @@ public:
 
 	LevelPieceType GetType() const { return LevelPiece::LaserTurret; }
 
-	bool IsNoBoundsPieceType() const { return false; }
-	bool BallBouncesOffWhenHit() const { return true; }
-	bool MustBeDestoryedToEndLevel() const { return false; }
-	bool CanBeDestroyedByBall() const { return true; }
-    bool CanChangeSelfOrOtherPiecesWhenHitByBall() const { return true; }
-    bool BallBlastsThrough(const GameBall& b) const { UNUSED_PARAMETER(b); return false; }
-    bool GhostballPassesThrough() const { return false; }
-
-	bool IsLightReflectorRefractor() const {
-		// When frozen in ice a block can reflect/refract lasers and the like
-		return this->HasStatus(LevelPiece::IceCubeStatus);
-	}
-
 	bool ProjectilePassesThrough(Projectile* projectile) const;
     int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
-    bool IsAIPiece() const { return true; }
-
-	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-                      const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-                      const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-                      const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor);
-
-
 	// Collision related stuffs
-	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);	
-	LevelPiece* CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	LevelPiece* CollisionOccurred(GameModel* gameModel, Projectile* projectile);
-	LevelPiece* TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
-	LevelPiece* TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel);
-
-	bool StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses); 
 
     void AITick(double dT, GameModel* gameModel);
 
@@ -75,8 +47,6 @@ public:
     float GetRotationDegreesFromX() const;
     float GetBarrel1RecoilAmount() const;
     float GetBarrel2RecoilAmount() const;
-
-    float GetHealthPercent() const;
 
     LaserTurretBlock::TurretAIState GetTurretAIState() const;
     LaserTurretBlock::BarrelAnimationState GetBarrelState() const;
@@ -132,22 +102,11 @@ private:
     void GetFiringDirection(Vector2D& unitDir) const;
     void CanSeeAndFireAtPaddle(const GameModel* model, bool& canSeePaddle, bool& canFireAtPaddle) const;
 
-    LevelPiece* DiminishPiece(float dmgAmount, GameModel* model, const LevelPiece::DestructionMethod& method);
-    bool IsDead() const { return this->currLifePoints <= 0; }
-
     void UpdateSpeed();
 
     DISALLOW_COPY_AND_ASSIGN(LaserTurretBlock);
 };
 
-inline bool LaserTurretBlock::StatusTick(double dT, GameModel* gameModel, int32_t& removedStatuses) {
-	UNUSED_PARAMETER(dT);
-	UNUSED_PARAMETER(gameModel);
-	assert(gameModel != NULL);
-
-	removedStatuses = static_cast<int32_t>(LevelPiece::NormalStatus);
-	return false;
-}
 
 inline float LaserTurretBlock::GetRotationDegreesFromX() const {
     return this->currRotationFromXInDegs;
@@ -157,10 +116,6 @@ inline float LaserTurretBlock::GetBarrel1RecoilAmount() const {
 }
 inline float LaserTurretBlock::GetBarrel2RecoilAmount() const {
     return this->barrel2RecoilAnim.GetInterpolantValue();
-}
-
-inline float LaserTurretBlock::GetHealthPercent() const {
-    return this->currLifePoints / static_cast<float>(PIECE_STARTING_LIFE_POINTS);
 }
 
 inline LaserTurretBlock::TurretAIState LaserTurretBlock::GetTurretAIState() const {

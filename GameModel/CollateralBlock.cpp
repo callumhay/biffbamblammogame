@@ -62,7 +62,7 @@ LevelPiece* CollateralBlock::Destroy(GameModel* gameModel, const LevelPiece::Des
         UNUSED_VARIABLE(success);
 		assert(success);
 	}
-    else if (method == LevelPiece::RocketDestruction) {
+    else if (method == LevelPiece::RocketDestruction || method == LevelPiece::MineDestruction) {
         return this->Detonate(gameModel);
     }
 

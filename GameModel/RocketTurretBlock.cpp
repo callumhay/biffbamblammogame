@@ -16,6 +16,7 @@
 #include "EmptySpaceBlock.h"
 #include "Beam.h"
 #include "TurretRocketProjectile.h"
+#include "PaddleMineProjectile.h"
 
 const float RocketTurretBlock::BALL_DAMAGE_AMOUNT = static_cast<float>(RocketTurretBlock::PIECE_STARTING_LIFE_POINTS) / 6.0f;
 
@@ -47,7 +48,7 @@ const int RocketTurretBlock::LOST_AND_FOUND_MIN_NUM_LOOK_TIMES = 2;
 const int RocketTurretBlock::LOST_AND_FOUND_MAX_NUM_LOOK_TIMES = 5;
 
 RocketTurretBlock::RocketTurretBlock(unsigned int wLoc, unsigned int hLoc) :
-LevelPiece(wLoc, hLoc), currLifePoints(RocketTurretBlock::PIECE_STARTING_LIFE_POINTS),
+TurretBlock(wLoc, hLoc, RocketTurretBlock::PIECE_STARTING_LIFE_POINTS), 
 currTurretState(SeekingTurretState), currRotationFromXInDegs(Randomizer::GetInstance()->RandomUnsignedInt() % 360), currRotationSpd(0.0f),
 lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0) {
 
@@ -107,128 +108,6 @@ int RocketTurretBlock::GetPointsOnChange(const LevelPiece& changeToPiece) const 
     return 0;
 }
 
-void RocketTurretBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,
-                                     const LevelPiece* rightNeighbor, const LevelPiece* topNeighbor,
-                                     const LevelPiece* topRightNeighbor, const LevelPiece* topLeftNeighbor,
-                                     const LevelPiece* bottomRightNeighbor, const LevelPiece* bottomLeftNeighbor) {
-
-    // Set the bounding lines for a rectangular block
-    std::vector<Collision::LineSeg2D> boundingLines;
-    std::vector<Vector2D>  boundingNorms;
-
-    // Left boundry of the piece
-    if (leftNeighbor != NULL) {
-        if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::LaserTurret &&
-            leftNeighbor->GetType() != LevelPiece::Breakable && leftNeighbor->GetType() != LevelPiece::RocketTurret) {
-                Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
-                    this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-                Vector2D n1(-1, 0);
-                boundingLines.push_back(l1);
-                boundingNorms.push_back(n1);
-        }
-    }
-
-    // Bottom boundry of the piece
-    if (bottomNeighbor != NULL) {
-        if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::LaserTurret &&
-            bottomNeighbor->GetType() != LevelPiece::Breakable && bottomNeighbor->GetType() != LevelPiece::RocketTurret) {
-                Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-                    this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
-                Vector2D n2(0, -1);
-                boundingLines.push_back(l2);
-                boundingNorms.push_back(n2);
-        }
-    }
-
-    // Right boundry of the piece
-    if (rightNeighbor != NULL) {
-        if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::LaserTurret &&
-            rightNeighbor->GetType() != LevelPiece::Breakable && rightNeighbor->GetType() != LevelPiece::RocketTurret) {
-                Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
-                    this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-                Vector2D n3(1, 0);
-                boundingLines.push_back(l3);
-                boundingNorms.push_back(n3);
-        }
-    }
-
-    // Top boundry of the piece
-    if (topNeighbor != NULL) {
-        if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret &&
-            topNeighbor->GetType() != LevelPiece::Breakable && topNeighbor->GetType() != LevelPiece::RocketTurret) {
-                Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-                    this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
-                Vector2D n4(0, 1);
-                boundingLines.push_back(l4);
-                boundingNorms.push_back(n4);
-        }
-    }
-
-    this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
-        topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, bottomLeftNeighbor);
-}
-
-LevelPiece* RocketTurretBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
-	// Check to see if the block is frozen...
-	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-        // EVENT: Ice was shattered
-        GameEventManager::Instance()->ActionBlockIceShattered(*this);
-        bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-        UNUSED_VARIABLE(success);
-        assert(success);
-	}
-
-    if (method == LevelPiece::RocketDestruction && !this->IsDead()) {
-        return this;
-    }
-    
-    // EVENT: Block is being destroyed
-	GameEventManager::Instance()->ActionBlockDestroyed(*this, method);
-
-	// Tell the level that this piece has changed to empty...
-	GameLevel* level = gameModel->GetCurrentLevel();
-	LevelPiece* emptyPiece = new EmptySpaceBlock(this->wIndex, this->hIndex);
-	level->PieceChanged(gameModel, this, emptyPiece, method);
-
-	// Obliterate all that is left of this block...
-	LevelPiece* tempThis = this;
-	delete tempThis;
-	tempThis = NULL;
-
-	return emptyPiece;
-}
-
-LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-
-	LevelPiece* resultingPiece = this;
-	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
-	if (isIceBall) {
-		this->FreezePieceInIce(gameModel);
-	}
-	else {
-		bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
-		if (isFireBall) {
-			// Unfreeze a frozen block if it gets hit by a fireball
-			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
-                UNUSED_VARIABLE(success);
-				assert(success);
-			}
-            else {
-                resultingPiece = this->DiminishPiece(RocketTurretBlock::BALL_DAMAGE_AMOUNT,
-                    gameModel, LevelPiece::RegularDestruction);
-            }
-		}
-        else {
-            resultingPiece = this->DiminishPiece(RocketTurretBlock::BALL_DAMAGE_AMOUNT,
-                gameModel, LevelPiece::RegularDestruction);
-        }
-	}
-
-    ball.SetLastPieceCollidedWith(resultingPiece);
-    return resultingPiece;
-}
-
 LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
 	assert(gameModel != NULL);
 	assert(projectile != NULL);
@@ -273,17 +152,31 @@ LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, Projectil
 
             LevelPiece* tempPiece = this->DiminishPiece(projectile->GetDamage(), gameModel, LevelPiece::RocketDestruction);
 
-            assert(dynamic_cast<RocketProjectile*>(projectile) != NULL);
-			newPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<RocketProjectile*>(projectile), this);
+            assert(dynamic_cast<const RocketProjectile*>(projectile) != NULL);
+			newPiece = gameModel->GetCurrentLevel()->RocketExplosion(gameModel, static_cast<const RocketProjectile*>(projectile), tempPiece);
 
             assert(tempPiece == newPiece);
-            UNUSED_VARIABLE(tempPiece);
             break;
         }
 
-        case Projectile::PaddleMineBulletProjectile:
-            // A mine will just come to rest on the block.
+        case Projectile::PaddleMineBulletProjectile: {
+            // A mine will blow up on contact
+			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
+				// EVENT: Ice was shattered
+				GameEventManager::Instance()->ActionBlockIceShattered(*this);
+				bool success = gameModel->RemoveStatusForLevelPiece(this, LevelPiece::IceCubeStatus);
+                UNUSED_VARIABLE(success);
+				assert(success);
+			}
+
+            LevelPiece* tempPiece = this->DiminishPiece(projectile->GetDamage(), gameModel, LevelPiece::MineDestruction);
+
+            assert(dynamic_cast<const PaddleMineProjectile*>(projectile) != NULL);
+            newPiece = gameModel->GetCurrentLevel()->MineExplosion(gameModel, static_cast<const PaddleMineProjectile*>(projectile), tempPiece);
+            
+            assert(tempPiece == newPiece);
             break;
+        }
 
 		case Projectile::FireGlobProjectile:
 			// Fire glob just extinguishes on a laser turret block, unless it's frozen in an ice cube;
@@ -300,34 +193,6 @@ LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, Projectil
 			break;
 	}
 
-	return newPiece;
-}
-
-LevelPiece* RocketTurretBlock::TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) {
-	assert(beamSegment != NULL);
-	assert(gameModel != NULL);
-	
-	// If the piece is frozen in ice we don't hurt it, instead it will refract the laser beams...
-	if (this->HasStatus(LevelPiece::IceCubeStatus)) {
-		return this;
-	}
-
-	LevelPiece* newPiece = this->DiminishPiece(
-        static_cast<float>(dT * static_cast<double>(beamSegment->GetDamagePerSecond())),
-        gameModel, LevelPiece::LaserBeamDestruction);
-	return newPiece;
-}
-
-/**
- * Tick the collision with the paddle shield - the shield will eat away at the block until it's destroyed.
- * Returns: The block that this block is/has become.
- */
-LevelPiece* RocketTurretBlock::TickPaddleShieldCollision(double dT, const PlayerPaddle& paddle, GameModel* gameModel) {
-	assert(gameModel != NULL);
-	
-	LevelPiece* newPiece = this->DiminishPiece(
-        static_cast<float>(dT * static_cast<double>(paddle.GetShieldDamagePerSecond())),
-        gameModel, LevelPiece::PaddleShieldDestruction);
 	return newPiece;
 }
 
@@ -653,14 +518,6 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
 
     canSeePaddle    = false;
     canFireAtPaddle = false;
-}
-
-LevelPiece* RocketTurretBlock::DiminishPiece(float dmgAmount, GameModel* model, const LevelPiece::DestructionMethod& method) {
-    currLifePoints -= dmgAmount;
-    if (currLifePoints <= 0.0f) {
-        return this->Destroy(model, method);
-    }
-    return this;
 }
 
 void RocketTurretBlock::UpdateSpeed() {

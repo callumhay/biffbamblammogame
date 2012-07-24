@@ -23,14 +23,14 @@ const Vector2D PaddleMineProjectile::MINE_DEFAULT_RIGHTDIR    = Vector2D(1, 0);
 
 const float PaddleMineProjectile::MINE_DEFAULT_ACCEL = 80.0f;
 
-const float PaddleMineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.5f * LevelPiece::PIECE_HEIGHT;
+const float PaddleMineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.9f * LevelPiece::PIECE_HEIGHT;
 const float PaddleMineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.00f * LevelPiece::PIECE_WIDTH;
 
 const double PaddleMineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.5;
 const double PaddleMineProjectile::MINE_MAX_COUNTDOWN_TIME = 3.5;
 
 PaddleMineProjectile::PaddleMineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height) :
-Projectile(spawnLoc, width, height), cannonBlock(NULL), acceleration(MINE_DEFAULT_ACCEL), isArmed(false),
+Projectile(spawnLoc, width, height), cannonBlock(NULL), acceleration(MINE_DEFAULT_ACCEL), isArmed(false), isFalling(false),
 proximityAlerted(false), proximityAlertCountdown(std::numeric_limits<float>::max()),
 attachedToPiece(NULL), attachedToNet(NULL) {
 
@@ -53,7 +53,7 @@ attachedToPiece(NULL), attachedToNet(NULL) {
 
 PaddleMineProjectile::PaddleMineProjectile(const PaddleMineProjectile& copy) : Projectile(copy),
 cannonBlock(copy.cannonBlock), currRotationSpd(copy.currRotationSpd),
-currRotation(copy.currRotation), acceleration(copy.acceleration), isArmed(copy.isArmed),
+currRotation(copy.currRotation), acceleration(copy.acceleration), isArmed(copy.isArmed), isFalling(copy.isFalling),
 proximityAlerted(copy.proximityAlerted), proximityAlertCountdown(copy.proximityAlertCountdown),
 attachedToNet(copy.attachedToNet), attachedToPiece(copy.attachedToPiece) {
 
@@ -88,23 +88,23 @@ void PaddleMineProjectile::Tick(double seconds, const GameModel& model) {
 	else {
         // Make sure that there's a velocity or magnitude before doing all the calcuations
         // for those things...
-        float dA, dV;
+
         if (this->GetVelocityMagnitude() != 0.0f || this->GetAccelerationMagnitude() != 0.0f) {
             this->AugmentDirectionOnPaddleMagnet(seconds, model, 60.0f);
 
 	        // Update the rocket's velocity and position
-            dA = seconds * this->GetAccelerationMagnitude();
+            float dA = seconds * this->GetAccelerationMagnitude();
             this->velocityMag = std::min<float>(this->GetMaxVelocityMagnitude(), this->velocityMag + dA);
-	        dV = seconds * this->velocityMag;
+	        float dV = seconds * this->velocityMag;
 	        this->SetPosition(this->GetPosition() + dV * this->velocityDir);
-        }
 
-        // We are always rotating the mine, update the mine's rotation
-        dA = seconds * this->GetRotationAccelerationMagnitude();
-        this->currRotationSpd = std::min<float>(this->GetMaxRotationVelocityMagnitude(), this->currRotationSpd + dA);
-		dV = static_cast<float>(seconds * this->currRotationSpd);
-		this->currRotation += dV;
-        this->currRotation = fmod(this->currRotation, 360.0f);
+            // Update the mine's rotation
+            dA = seconds * this->GetRotationAccelerationMagnitude();
+            this->currRotationSpd = std::min<float>(this->GetMaxRotationVelocityMagnitude(), this->currRotationSpd + dA);
+		    dV = static_cast<float>(seconds * this->currRotationSpd);
+		    this->currRotation += dV;
+            this->currRotation = fmod(this->currRotation, 360.0f);
+        }
 	}
 }
 
@@ -123,11 +123,13 @@ BoundingLines PaddleMineProjectile::BuildBoundingLines() const {
 	Point2D bottomLeft  = topLeft - this->GetHeight()*UP_DIR;
 
 	std::vector<Collision::LineSeg2D> sideBounds;
-	sideBounds.reserve(2);
+	sideBounds.reserve(4);
 	sideBounds.push_back(Collision::LineSeg2D(topLeft, bottomLeft));
 	sideBounds.push_back(Collision::LineSeg2D(topRight, bottomRight));
+	sideBounds.push_back(Collision::LineSeg2D(topRight, topLeft));
+	sideBounds.push_back(Collision::LineSeg2D(bottomRight, bottomLeft));
 	std::vector<Vector2D> normBounds;
-	normBounds.resize(2);
+	normBounds.resize(4);
 
 	return BoundingLines(sideBounds, normBounds);
 }
@@ -140,6 +142,8 @@ void PaddleMineProjectile::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
     this->acceleration = 0.0f;
 	this->position    = cannonBlock->GetCenter();
 	this->cannonBlock = cannonBlock;
+    this->isArmed   = false;
+    this->isFalling = false;
 
 	// EVENT: The mine is officially loaded into the cannon block
 	GameEventManager::Instance()->ActionProjectileEnteredCannon(*this, *cannonBlock);
@@ -157,6 +161,12 @@ bool PaddleMineProjectile::ModifyLevelUpdate(double dT, GameModel& model) {
         return true;
     }
     
+    // Check to see if we are falling, if so then make sure we are falling with gravity...
+    if (this->isFalling) {
+        Vector3D gravityDir = model.GetGravityDir();
+        this->SetVelocity(Vector2D(gravityDir[0], gravityDir[1]), this->GetVelocityMagnitude());
+    }
+
     // The mine will only make modifications to the level (i.e., act as a mine and possibly explode)
     // when it is armed and not inside a cannon block, otherwise we just exit immediately
     if (!this->GetIsArmed() || this->IsLoadedInCannonBlock()) {
@@ -241,6 +251,11 @@ void PaddleMineProjectile::BeginProximityExplosionCountdown() {
     this->proximityAlerted = true;
     this->proximityAlertCountdown = MINE_MIN_COUNTDOWN_TIME + Randomizer::GetInstance()->RandomNumZeroToOne() *
         (MINE_MAX_COUNTDOWN_TIME - MINE_MIN_COUNTDOWN_TIME);
+}
+
+void PaddleMineProjectile::StopAndResetProximityExplosionCountdown() {
+    this->proximityAlerted = false;
+    this->proximityAlertCountdown = std::numeric_limits<float>::max();
 }
 
 void PaddleMineProjectile::DetachFromAnyAttachedObject() {

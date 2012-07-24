@@ -69,6 +69,11 @@ LevelPiece* SolidBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruct
 			assert(success);
 	}
 
+    // Only collateral blocks and tesla lightning can destroy a solid block
+    if (method != LevelPiece::CollateralDestruction && method != LevelPiece::TeslaDestruction) {
+        return this;
+    }
+
 	// When destroying a breakable there is the possiblity of dropping an item...
 	gameModel->AddPossibleItemDrop(*this);
 

@@ -1771,6 +1771,10 @@
 						RelativePath=".\GameModel\TriangleBlocks.h"
 						>
 					</File>
+					<File
+						RelativePath=".\GameModel\TurretBlock.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Source Files"
@@ -1841,6 +1845,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\TriangleBlocks.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\TurretBlock.cpp"
 						>
 					</File>
 				</Filter>

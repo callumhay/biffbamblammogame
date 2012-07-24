@@ -150,6 +150,7 @@ public:
     void RocketExplosionNoPieces(const Projectile* rocket);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
 
+    LevelPiece* MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine, LevelPiece* hitPiece);
     void MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine);
 
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);

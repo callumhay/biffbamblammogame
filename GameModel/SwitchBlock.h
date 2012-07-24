@@ -106,9 +106,10 @@ inline void SwitchBlock::Triggered(GameModel* gameModel) {
     this->SwitchPressed(gameModel);
 }
 
+// Nothing can destroy a switch block.
 inline LevelPiece* SwitchBlock::Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method) {
-	UNUSED_PARAMETER(gameModel);
     UNUSED_PARAMETER(method);
+    this->Triggered(gameModel);
 	return this;
 }
 
