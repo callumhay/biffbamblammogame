@@ -23,8 +23,12 @@ class CannonBlock;
  */
 class PaddleMineProjectile : public Projectile {
 public:
+
 	static const float PADDLEMINE_HEIGHT_DEFAULT;
 	static const float PADDLEMINE_WIDTH_DEFAULT;
+
+    static const double MINE_MIN_COUNTDOWN_TIME;
+    static const double MINE_MAX_COUNTDOWN_TIME;
 
 	PaddleMineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height);
 	PaddleMineProjectile(const PaddleMineProjectile& copy);
@@ -67,7 +71,7 @@ public:
     float GetRotationAccelerationMagnitude() const { return 300.0f; }
 
     float GetMaxVelocityMagnitude() const { return 15.0f; }
-    float GetMaxRotationVelocityMagnitude() const { return 225.0f; }
+    float GetMaxRotationVelocityMagnitude() const { return 168.0f; }
 
     float GetDefaultHeight() const { return PADDLEMINE_HEIGHT_DEFAULT; }
     float GetDefaultWidth() const  { return PADDLEMINE_WIDTH_DEFAULT;  }
@@ -76,8 +80,11 @@ public:
 
     float GetExplosionRadius() const { return MINE_DEFAULT_EXPLOSION_RADIUS * this->GetVisualScaleFactor(); }
     float GetProximityRadius() const { return MINE_DEFAULT_PROXIMITY_RADIUS * this->GetVisualScaleFactor(); }
+    float GetProximityCountdownInSeconds() const { return this->proximityAlertCountdown; }
 
     bool GetIsArmed() const { return this->isArmed; }
+    bool GetIsProximityAlerted() const { return this->proximityAlerted; }
+
     bool GetIsAttachedToSafetyNet() const { return this->attachedToNet != NULL; }
     bool GetIsAttachedToLevelPiece() const { return this->attachedToPiece != NULL; }
 
@@ -89,9 +96,6 @@ private:
 
     static const float MINE_DEFAULT_EXPLOSION_RADIUS;
     static const float MINE_DEFAULT_PROXIMITY_RADIUS;
-
-    static const double MINE_MIN_COUNTDOWN_TIME;
-    static const double MINE_MAX_COUNTDOWN_TIME;
 
     // When the mine is loaded into a cannon block this will not be NULL
 	CannonBlock* cannonBlock;

@@ -26,8 +26,8 @@ const float PaddleMineProjectile::MINE_DEFAULT_ACCEL = 80.0f;
 const float PaddleMineProjectile::MINE_DEFAULT_EXPLOSION_RADIUS = 0.9f * LevelPiece::PIECE_HEIGHT;
 const float PaddleMineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.00f * LevelPiece::PIECE_WIDTH;
 
-const double PaddleMineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.5;
-const double PaddleMineProjectile::MINE_MAX_COUNTDOWN_TIME = 3.5;
+const double PaddleMineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.75;
+const double PaddleMineProjectile::MINE_MAX_COUNTDOWN_TIME = 3.75;
 
 PaddleMineProjectile::PaddleMineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height) :
 Projectile(spawnLoc, width, height), cannonBlock(NULL), acceleration(MINE_DEFAULT_ACCEL), isArmed(false), isFalling(false),

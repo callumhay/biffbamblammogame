@@ -47,6 +47,12 @@ public:
 	ESPParticleScaleEffector(const ScaleEffect& effect);
 	~ESPParticleScaleEffector();
 
+    void ResetScaleEffect(const ScaleEffect& effect) {
+        assert(this->effect.isInit);
+        this->effect = effect;
+        this->effect.isInit = true;
+    }
+
 	virtual void AffectParticleOnTick(double dT, ESPParticle* particle);
 };
 #endif
