@@ -94,6 +94,9 @@ public:
 	const char* TEXTURE_ROCK4;
 	const char* TEXTURE_ROCK5;
 	const char* TEXTURE_CIRCLE_GRADIENT;
+    const char* TEXTURE_CLEAN_CIRCLE_GRADIENT;
+    const char* TEXTURE_HOOP;
+    const char* TEXTURE_OUTLINED_HOOP;
     const char* TEXTURE_SPHERE;
 	const char* TEXTURE_STAR;
 	const char* TEXTURE_STAR_OUTLINE;

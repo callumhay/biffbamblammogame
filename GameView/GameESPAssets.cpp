@@ -4700,7 +4700,6 @@ void GameESPAssets::DrawUberBallEffects(double dT, const Camera& camera, const G
 	}
 	std::vector<ESPPointEmitter*>& uberBallEffectList = this->ballEffects[&ball][GameItem::UberBallItem];
 
-	Vector2D ballDir = ball.GetDirection();
 	Point2D ballPos  = ball.GetBounds().Center();
 
 	glPushMatrix();

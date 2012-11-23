@@ -453,9 +453,7 @@ void ESPEmitter::SetParticleSize(const ESPInterval& particleSizeX, const ESPInte
 	}
 }
 void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
-	this->particleSize[0] = particleSize;
-	this->particleSize[1] = particleSize;
-	this->makeSizeConstraintsEqual = true;
+	this->SetParticleSpawnSize(particleSize);
 
     float value = particleSize.MeanValueInInterval();
 	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
@@ -463,6 +461,13 @@ void ESPEmitter::SetParticleSize(const ESPInterval& particleSize) {
         currParticle->SetScale(value, value);
 	}
 }
+
+void ESPEmitter::SetParticleSpawnSize(const ESPInterval& particleSize) {
+	this->particleSize[0] = particleSize;
+	this->particleSize[1] = particleSize;
+	this->makeSizeConstraintsEqual = true;
+}
+
 /**
  * Sets the inclusive interval of random possible values that represent the initial
  * rotation (in degrees) of particles in this emitter.
