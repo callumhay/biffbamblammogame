@@ -23,6 +23,7 @@
 #include "Projectile.h"
 #include "PaddleRocketProjectile.h"
 
+
 class GameModel;
 class GameBall;
 class PaddleMineProjectile;
@@ -252,6 +253,8 @@ public:
     static bool GetIsPaddleReleaseEnabled() {
         return PlayerPaddle::paddleBallReleaseEnabled;
     }
+
+    float GetMineProjectileStartingHeightRelativeToPaddle() const;
 
 private:
 	// Default values for the dimensions of the paddle

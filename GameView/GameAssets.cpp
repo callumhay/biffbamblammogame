@@ -634,6 +634,7 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
 			this->paddleBeamAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
         if ((p.GetPaddleType() & PlayerPaddle::MineLauncherPaddle) == PlayerPaddle::MineLauncherPaddle) {
+            this->mineMeshMgr->DrawLoadingMine(dT, p, camera, paddleKeyLight, paddleFillLight, ballLight);
 			this->paddleMineAttachment->Draw(camera, paddleReplacementMat, paddleKeyLight, paddleFillLight, ballLight);
 		}
         glPopMatrix();

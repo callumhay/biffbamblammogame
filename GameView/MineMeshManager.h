@@ -18,6 +18,7 @@
 #include "../ESPEngine/ESP.h"
 
 class PaddleMineProjectile;
+class PlayerPaddle;
 
 class MineMeshManager {
 public:
@@ -25,6 +26,8 @@ public:
     ~MineMeshManager();
 
     void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawLoadingMine(double dT, const PlayerPaddle& paddle, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     
     void AddMineProjectile(const PaddleMineProjectile* mine);
@@ -38,6 +41,8 @@ private:
     Texture2D* pulseTexture;
     Texture2D* triggeredTexture;
     
+    double timeSinceLastMineLaunch;
+
     class MineInstance {
     public:
         MineInstance(const PaddleMineProjectile* mine, Texture2D* trailTexture,
@@ -78,6 +83,7 @@ inline void MineMeshManager::AddMineProjectile(const PaddleMineProjectile* mine)
     assert(this->mineInstanceMap.find(mine) == this->mineInstanceMap.end());
     this->mineInstanceMap.insert(std::make_pair(mine,
         new MineInstance(mine, this->trailTexture, this->pulseTexture, this->triggeredTexture)));
+    this->timeSinceLastMineLaunch = 0.0;
 }
 
 inline void MineMeshManager::RemoveMineProjectile(const PaddleMineProjectile* mine) {

@@ -653,7 +653,7 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 
 			    // Create the right type of projectile in the right place
 			    Projectile* newProjectile = new PaddleMineProjectile(
-				    this->GetCenterPosition() + Vector2D(0, this->currHalfHeight + 0.5f * projectileHeight),
+				    this->GetCenterPosition() + Vector2D(0, this->GetMineProjectileStartingHeightRelativeToPaddle()),
                     Vector2D::Normalize(this->GetUpVector()), projectileWidth, projectileHeight);
                
                 newProjectile->SetLastThingCollidedWith(this);
@@ -904,6 +904,11 @@ void PlayerPaddle::DebugDraw() const {
 	glPushMatrix();
 	this->bounds.DebugDraw();
 	glPopMatrix();
+}
+
+float PlayerPaddle::GetMineProjectileStartingHeightRelativeToPaddle() const {
+    return this->currHalfHeight + 0.5f * this->GetPaddleScaleFactor() *
+        PaddleMineProjectile::PADDLEMINE_HEIGHT_DEFAULT;
 }
 
 /**
