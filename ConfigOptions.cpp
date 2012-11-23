@@ -19,6 +19,7 @@ const char* ConfigOptions::WINDOW_FULLSCREEN_VAR  = "fullscreen";
 const char* ConfigOptions::WINDOW_VSYNC_VAR       = "vsync";
 const char* ConfigOptions::VOLUME_VAR             = "volume";
 const char* ConfigOptions::DIFFICULTY_VAR         = "difficulty";
+const char* ConfigOptions::INVERT_BALL_BOOST_VAR  = "invert_ball_boost";
 
 const int ConfigOptions::MIN_WINDOW_SIZE	= 480;
 const int ConfigOptions::MAX_WINDOW_SIZE	= 2048;
@@ -30,6 +31,7 @@ const int  ConfigOptions::DEFAULT_WINDOW_HEIGHT                 = 768;
 const bool ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE		        = false;
 const bool ConfigOptions::DEFAULT_VSYNC_TOGGLE                  = false;
 const int  ConfigOptions::DEFAULT_VOLUME                        = ConfigOptions::MAX_VOLUME;
+const bool ConfigOptions::DEFAULT_INVERT_BALL_BOOST_TOGGLE      = false;
 const GameModel::Difficulty ConfigOptions::DEFAULT_DIFFICULTY   = GameModel::MediumDifficulty;
 
 const char* ConfigOptions::EASY_DIFFICULTY_STR      = "easy";
@@ -38,7 +40,7 @@ const char* ConfigOptions::HARD_DIFFICULTY_STR      = "hard";
 
 ConfigOptions::ConfigOptions() : windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT),
 fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), volume(ConfigOptions::DEFAULT_VOLUME),
-difficulty(DEFAULT_DIFFICULTY) {
+invertBallBoost(DEFAULT_INVERT_BALL_BOOST_TOGGLE), difficulty(DEFAULT_DIFFICULTY) {
 }
 
 /**
@@ -144,6 +146,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 				cfgOptions->vSyncIsOn = true;
 			}
 		}
+        // Volume config
 		else if (currStr == ConfigOptions::VOLUME_VAR) {
 			READ_IN_FILE_FAIL(inFile, skipEquals);
 
@@ -152,6 +155,21 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 			READ_IN_FILE_FAIL(inFile, volume);
 			cfgOptions->volume = std::max<int>(ConfigOptions::MIN_VOLUME, std::min<int>(ConfigOptions::MAX_VOLUME, volume));
 		}
+        // Inverted ball boosting config
+        else if (currStr == ConfigOptions::INVERT_BALL_BOOST_VAR) {
+			READ_IN_FILE_FAIL(inFile, skipEquals);
+
+			// Read in whether the frames are synced with the monitor
+			int isInverted = ConfigOptions::DEFAULT_INVERT_BALL_BOOST_TOGGLE ? 1 : 0;
+			inFile >> isInverted;
+
+			if (isInverted == 0) {
+                cfgOptions->invertBallBoost = false;
+			}
+			else {
+				cfgOptions->invertBallBoost = true;
+			}
+        }
         else if (currStr == ConfigOptions::DIFFICULTY_VAR) {
             READ_IN_FILE_FAIL(inFile, skipEquals);
             
@@ -193,8 +211,8 @@ bool ConfigOptions::WriteConfigOptionsToFile() const {
 	outFile << "// This is the Biff! Bam!! Blammo!?! game configuration file, it is used to initialize"	<< std::endl;
 	outFile << "// various game options (video, audio, etc.) at startup. To change the options you may"	<< std::endl; 
 	outFile << "// configure them manually in-game via the \"Options\" menu or manually, by following"	<< std::endl;
-	outFile << "// the guidelines below."																																<< std::endl;
-	outFile << "// Remember to always leave spaces between '=' characters!"															<< std::endl;
+	outFile << "// the guidelines below." << std::endl;
+	outFile << "// Remember to always leave spaces between '=' characters!" << std::endl;
 	outFile << std::endl;
 	
 	// Write the window dimensions
@@ -218,12 +236,19 @@ bool ConfigOptions::WriteConfigOptionsToFile() const {
 	outFile << ConfigOptions::VOLUME_VAR << " = " << (this->volume) << std::endl;
 	outFile << std::endl;
 	
+    // Inverted ball boosting option
+    outFile << "// Inverted ball boosting (0 - off, 1 - on)" << std::endl;
+    outFile << ConfigOptions::INVERT_BALL_BOOST_VAR << " = " << (this->invertBallBoost ? "1" : "0") << std::endl;
+    outFile << std::endl;
+
+    // Difficulty option
     std::string difficultyString;
     bool success = this->DifficultyToString(this->difficulty, difficultyString);
     assert(success);
 
     outFile << "// Difficulty of the game {easy, medium, hard}" << std::endl;
     outFile << ConfigOptions::DIFFICULTY_VAR << " = " << difficultyString << std::endl;
+    //outFile << std::endl;
 
 	outFile.close();
 	return success;

@@ -22,7 +22,7 @@
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameWorld.h"
 
-const char* SelectWorldMenuState::WORLD_SELECT_TITLE = "Select a World...";
+const char* SelectWorldMenuState::WORLD_SELECT_TITLE = "Select a Movement...";
 const float SelectWorldMenuState::MENU_ITEM_HORIZ_GAP = 50;
 
 SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display) : 
@@ -330,7 +330,7 @@ selectedLabel(NULL), baseSize(size), isSelected(false), sizeAnim(size) {
     assert(this->image != NULL);
     
     std::stringstream labelTextStream;
-    labelTextStream << "World " << worldNumber << ": " << world->GetName();
+    labelTextStream << world->GetName();
     
     float slightlyBiggerSize = size + 0.75f * SelectWorldMenuState::MENU_ITEM_HORIZ_GAP;
     this->label = new TextLabel2DFixedWidth(

@@ -103,6 +103,8 @@ private:
 	bool gameIsEntirelyPaused;
 	bool gameStateIsPaused;
 
+    bool ballBoostIsInverted;
+
 	// Item related tracking variables *******************
 	bool areControlsFlipped;
 	bool isBlackoutActive;										// Is the game currently blacked out?
@@ -171,7 +173,7 @@ private:
     void ResetLevelValues(int numLives);
 
 public:
-    GameModel(const GameModel::Difficulty& initDifficulty);
+    GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted);
 	~GameModel();
 
     bool IsCurrentLevelTheTutorialLevel() const {
@@ -439,7 +441,8 @@ public:
     const BallBoostModel* GetBallBoostModel() const {
         return this->boostModel;
     }
-
+    bool GetIsBallBoostInverted() const { return this->ballBoostIsInverted; }
+    void SetInvertBallBoostDir(bool isInverted);
     float GetPercentBallReleaseTimerElapsed() const;
 
 	// Pauses the game

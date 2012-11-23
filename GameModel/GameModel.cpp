@@ -28,12 +28,12 @@
 #include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
 
-GameModel::GameModel(const GameModel::Difficulty& initDifficulty) : 
+GameModel::GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted) : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0),
 livesAtStartOfLevel(0), numLivesLostInLevel(0), maxNumLivesAllowed(0),
 pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false),
-droppedLifeForMaxMultiplier(false), safetyNet(NULL) {
+droppedLifeForMaxMultiplier(false), safetyNet(NULL), ballBoostIsInverted(ballBoostIsInverted) {
 	
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
     std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
@@ -377,6 +377,13 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 float GameModel::GetTimeDialationFactor() const {
     if (this->boostModel == NULL) { return 1.0f; }
     return this->boostModel->GetTimeDialationFactor();
+}
+
+void GameModel::SetInvertBallBoostDir(bool isInverted) {
+    this->ballBoostIsInverted = isInverted;
+    if (this->boostModel != NULL) {
+        this->boostModel->SetInvertBallBoostDir(isInverted);
+    }
 }
 
 void GameModel::BallPaddleCollisionOccurred(GameBall& ball) {

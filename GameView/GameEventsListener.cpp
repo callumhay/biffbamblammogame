@@ -66,7 +66,7 @@ void GameEventsListener::GameCompletedEvent() {
 }
 
 void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
-	debug_output("EVENT: World started");
+	debug_output("EVENT: Movement/World started");
 	
 	// Show a loading screen for loading up the assets for the next in-game world...
 	//unsigned int numLevelsInWorld = world.GetAllLevelsInWorld().size();
@@ -85,7 +85,7 @@ void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {
 	
 	// Stop world background music (if it's still going)
 	this->display->GetAssets()->GetSoundAssets()->StopWorldSound(GameSoundAssets::WorldBackgroundMusic);
-	debug_output("EVENT: World completed");
+	debug_output("EVENT: Movement/World completed");
 }
 
 void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLevel& level) {
@@ -824,7 +824,8 @@ void GameEventsListener::SwitchBlockActivatedEvent(const SwitchBlock& switchBloc
 void GameEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boostModel) {
     this->display->GetAssets()->GetFBOAssets()->UpdateBulletTimeState(boostModel);
 
-    if (boostModel.GetBulletTimeState() == BallBoostModel::BulletTimeFadeIn) {
+    if (boostModel.GetBulletTimeState() == BallBoostModel::BulletTimeFadeIn ||
+        boostModel.GetBulletTimeState() == BallBoostModel::BulletTimeFadeOut ) {
         // Reset the effects for the bullet time direction
         this->display->GetAssets()->GetESPAssets()->ResetBulletTimeBallBoostEffects();
     }

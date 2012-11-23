@@ -30,7 +30,7 @@ const Colour InGameMenuState::MENU_ITEM_GREYED_COLOUR	= Colour(0.5f, 0.5f, 0.5f)
 InGameMenuState::InGameMenuState(GameDisplay* display, DisplayState* returnToDisplayState) : 
 DisplayState(display), renderPipeline(display), nextAction(InGameMenuState::Nothing),
 topMenu(NULL), topMenuEventHandler(NULL), verifyMenuEventHandler(NULL), difficultyEventHandler(NULL),
-returnToDisplayState(returnToDisplayState) {
+invertBallBoostHandler(NULL), returnToDisplayState(returnToDisplayState) {
 
 	// Pause all world sounds
 	this->display->GetAssets()->GetSoundAssets()->PauseWorldSounds();
@@ -52,6 +52,8 @@ InGameMenuState::~InGameMenuState() {
 	this->verifyMenuEventHandler = NULL;
     delete this->difficultyEventHandler;
     this->difficultyEventHandler = NULL;
+    delete this->invertBallBoostHandler;
+    this->invertBallBoostHandler = NULL;
 }
 
 /**
@@ -193,6 +195,7 @@ void InGameMenuState::InitTopMenu() {
 	this->topMenuEventHandler    = new TopMenuEventHandler(this);
 	this->verifyMenuEventHandler = new VerifyMenuEventHandler(this);
     this->difficultyEventHandler = new DifficultyEventHandler(this);
+    this->invertBallBoostHandler = new InvertBallBoostEventHandler(this);
 
 	// Setup the top menu attributes
 	this->topMenu = new GameMenu();
@@ -211,8 +214,10 @@ void InGameMenuState::InitTopMenu() {
     static const char* VERIFY_MENU_NO   = "NOoo!";
 
     // Resume Item...
-	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  "Resume");
-	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),     "Resume");
+	TextLabel2D tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
+        GameFontAssetsManager::Medium), "Resume");
+	TextLabel2D tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
+        GameFontAssetsManager::Big),    "Resume");
 	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
 	tempLabelSm.SetScale(textScaleFactor);
 	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
@@ -235,6 +240,17 @@ void InGameMenuState::InitTopMenu() {
 	restartLevelItem->SetEventHandler(this->verifyMenuEventHandler);
 
     this->restartItem = this->topMenu->AddMenuItem(restartLevelItem);
+
+    // Invert ball boost Item...
+    tempLabelSm.SetText("Invert Ball Boost");
+    tempLabelLg.SetText("Invert Ball Boost");
+    std::vector<std::string> invertOptions = ConfigOptions::GetOnOffItems();
+
+    this->invertBallBoostMenuItem = new SelectionListMenuItem(tempLabelSm, tempLabelLg, invertOptions);
+    this->invertBallBoostMenuItem->SetSelectedItem(this->cfgOptions.GetInvertBallBoost() ? 1 : 0);
+    this->invertBallBoostMenuItem->SetEventHandler(this->invertBallBoostHandler);
+
+    this->invertBallBoostItem = this->topMenu->AddMenuItem(this->invertBallBoostMenuItem);
 
     // Difficulty Item...
     tempLabelSm.SetText("Difficulty");
@@ -303,6 +319,14 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemInde
         if (!gameModel->IsCurrentLevelTheTutorialLevel()) {
             gameModel->SetDifficulty(difficultyToSet);
         }
+    }
+    else if (itemIndex == this->inGameMenuState->invertBallBoostItem) {
+        GameModel* gameModel = this->inGameMenuState->display->GetModel();
+
+        bool isInverted = ConfigOptions::IsOnItemSelected(
+            this->inGameMenuState->invertBallBoostMenuItem->GetSelectedItemIndex());
+        gameModel->SetInvertBallBoostDir(isInverted);
+        this->inGameMenuState->cfgOptions.SetInvertBallBoost(isInverted);
     }
     else {
         return;
