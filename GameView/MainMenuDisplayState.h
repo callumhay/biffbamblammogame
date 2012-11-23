@@ -77,6 +77,7 @@ private:
 	int optionsResolutionIndex;
 	int optionsSoundVolumeIndex;
     //int optionsControllerSensitivityIndex;
+    int optionsInvertBallBoostIndex;
     int optionsDifficultyIndex;
 
 	// Indents and spacing
@@ -104,6 +105,7 @@ private:
 	SelectionListMenuItem* resolutionMenuItem;
 	SelectionListMenuItem* vSyncMenuItem;
 	AmountScrollerMenuItem* soundVolumeMenuItem;
+    SelectionListMenuItem* invertBallBoostItem;
     SelectionListMenuItem* difficultyItem;
     //AmountScrollerMenuItem* controllerSensitivityItem;
 
