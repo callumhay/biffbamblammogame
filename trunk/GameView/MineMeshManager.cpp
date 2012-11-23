@@ -13,8 +13,10 @@
 #include "GameViewConstants.h"
 
 #include "../GameModel/PaddleMineProjectile.h"
+#include "../GameModel/PlayerPaddle.h"
 
-MineMeshManager::MineMeshManager() : mineMesh(NULL), trailTexture(NULL), pulseTexture(NULL) {
+MineMeshManager::MineMeshManager() : mineMesh(NULL), trailTexture(NULL), pulseTexture(NULL),
+timeSinceLastMineLaunch(0.0) {
     
     this->mineMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->MINE_MESH);
     assert(this->mineMesh != NULL);
@@ -49,9 +51,11 @@ MineMeshManager::~MineMeshManager() {
 }
 
 
-void MineMeshManager::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                           const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+void MineMeshManager::Draw(double dT, const Camera& camera,
+                           const BasicPointLight& keyLight, const BasicPointLight& fillLight,
+                           const BasicPointLight& ballLight) {
 
+    
     glPushAttrib(GL_COLOR_BUFFER_BIT);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     for (MineInstanceMapConstIter iter = this->mineInstanceMap.begin(); iter != this->mineInstanceMap.end(); ++iter) {
@@ -59,6 +63,27 @@ void MineMeshManager::Draw(double dT, const Camera& camera, const BasicPointLigh
         mineInstance->Draw(dT, camera, keyLight, fillLight, ballLight, this->mineMesh);
     }
     glPopAttrib();
+}
+
+void MineMeshManager::DrawLoadingMine(double dT, const PlayerPaddle& paddle, const Camera& camera,
+                                      const BasicPointLight& keyLight, const BasicPointLight& fillLight,
+                                      const BasicPointLight& ballLight) {
+
+    
+    assert((paddle.GetPaddleType() & PlayerPaddle::MineLauncherPaddle) == PlayerPaddle::MineLauncherPaddle);
+
+    // Draw the loaded/loading mine in the attachment on the paddle (if there is one)
+    float mineStartHeight  = paddle.GetHalfHeight();
+    float mineFinishHeight = paddle.GetMineProjectileStartingHeightRelativeToPaddle();
+    float currMineHeight = NumberFuncs::LerpOverTime<float>(0.0, PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY,
+        mineStartHeight, mineFinishHeight, std::min<double>(this->timeSinceLastMineLaunch, PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY));
+
+    glPushMatrix();
+    glTranslatef(0.0f, currMineHeight, 0.0f);
+    this->mineMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    this->timeSinceLastMineLaunch += dT;
 }
 
 MineMeshManager::MineInstance::MineInstance(const PaddleMineProjectile* mine,
