@@ -95,7 +95,7 @@ selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderA
 
     Colour titleColour(0.4f, 0.6f, 0.8f); // Steel blue
     std::stringstream worldLabelTxt;
-    worldLabelTxt << "World " << this->world->GetWorldNumber() << ": " << this->world->GetName();
+    worldLabelTxt << "Movement " << this->world->GetWorldNumber() << ": " << this->world->GetName();
     this->worldLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Huge), worldLabelTxt.str());
     this->worldLabel->SetColour(titleColour);

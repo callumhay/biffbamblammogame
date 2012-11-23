@@ -33,7 +33,8 @@ const float BallBoostModel::INV_MIN_TIME_DIALATION_FACTOR   = 1.0f / MIN_TIME_DI
 
 BallBoostModel::BallBoostModel(GameModel* gameModel) : 
 ballBoostDir(0,0), numAvailableBoosts(0), gameModel(gameModel),
-currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0), currBoostChargeTime(0.0) {
+currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0), currBoostChargeTime(0.0),
+isBallBoostInverted(gameModel->GetIsBallBoostInverted()) {
 
     // Setup the initial states for the various animations...
     timeDialationAnim.SetInterpolantValue(1.0f);
@@ -128,17 +129,20 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
             // start up bullet time...
             this->SetCurrentState(BulletTimeFadeIn);
         }
-
         this->ballBoostDir[0] = x;
         this->ballBoostDir[1] = y;
 
         // Make sure the boost direction is normalized
         this->ballBoostDir.Normalize();
+
+        if (!this->isBallBoostInverted) {
+            this->ballBoostDir = -this->ballBoostDir;
+        }
     }
     else {
         // Boosting is disallowed currently, make sure the members are properly set
-        this->ballBoostDir[0]       = 0.0f;
-        this->ballBoostDir[1]       = 0.0f;
+        this->ballBoostDir[0] = 0.0f;
+        this->ballBoostDir[1] = 0.0f;
         this->SetCurrentState(NotInBulletTime);
     }
 }

@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 
-		model = new GameModel(initCfgOptions.GetDifficulty());
+        model = new GameModel(initCfgOptions.GetDifficulty(), initCfgOptions.GetInvertBallBoost());
 		display = new GameDisplay(model, initCfgOptions.GetWindowWidth(), initCfgOptions.GetWindowHeight());
 
 		// Initialize all controllers that we can...

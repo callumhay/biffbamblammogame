@@ -67,6 +67,8 @@ public:
     float GetBoostChargePercentage() const;
     int GetNumAvailableBoosts() const;
 
+    void SetInvertBallBoostDir(bool isInverted);
+
     void DebugDraw() const;
 
 private:
@@ -83,6 +85,8 @@ private:
     Collision::AABB2D ballZoomBounds;   // The 2D rectangle that holds all balls when bullet-time is activated for a ball boost
 
     double currBoostChargeTime;  // Total time counted (in seconds) towards charging the next boost
+
+    bool isBallBoostInverted;  // Whether ball boosting controls are inverted or not
 
     void SetCurrentState(const BulletTimeState& newState);
     void RecalculateBallZoomBounds();
@@ -197,6 +201,10 @@ inline float BallBoostModel::GetBoostChargePercentage() const {
  */
 inline int BallBoostModel::GetNumAvailableBoosts() const {
     return this->numAvailableBoosts;
+}
+
+inline void BallBoostModel::SetInvertBallBoostDir(bool isInverted) {
+    this->isBallBoostInverted = isInverted;
 }
 
 #endif // __BALLBOOSTMODEL_H__

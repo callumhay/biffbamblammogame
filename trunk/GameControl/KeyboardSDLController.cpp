@@ -200,7 +200,7 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
         }
 
         if (boostModel->IsInBulletTime()) {
-            Vector2D previousBoostDir = -boostModel->GetBallBoostDirection();
+            Vector2D previousBoostDir = boostModel->GetBallBoostDirection();
 
             // Calculate the angular difference from the previous mouse position to the current,
             // this, added to the previous boost direction, determines the special direction used for ball boosting

@@ -49,6 +49,7 @@ public:
 	inline bool GetIsFullscreenOn() const { return this->fullscreenIsOn; }
 	inline bool GetIsVSyncOn() const { return this->vSyncIsOn; }
 	inline int GetVolume() const { return this->volume; }
+    inline bool GetInvertBallBoost() const { return this->invertBallBoost; }
     inline GameModel::Difficulty GetDifficulty() const { return this->difficulty; }
 
 	// Setter functions for all the configuration options
@@ -67,9 +68,8 @@ public:
 		assert(volume >= MIN_VOLUME && volume <= MAX_VOLUME);
 		this->volume = std::max<int>(MIN_VOLUME, std::min<int>(MAX_VOLUME, volume));
 	}
-    inline void SetDifficulty(GameModel::Difficulty difficulty) {
-        this->difficulty = difficulty;
-    }
+    inline void SetInvertBallBoost(bool isInverted) { this->invertBallBoost = isInverted; }
+    inline void SetDifficulty(GameModel::Difficulty difficulty) { this->difficulty = difficulty; }
 
     static std::vector<std::string> GetDifficultyItems() {
         std::vector<std::string> difficultyItems;
@@ -83,6 +83,15 @@ public:
     static bool DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr);
     static bool StringToDifficulty(const std::string& difficultyStr, GameModel::Difficulty& difficulty);
 
+    static std::vector<std::string> GetOnOffItems() {
+        std::vector<std::string> onOffItems;
+        onOffItems.reserve(2);
+        onOffItems.push_back("Off");
+        onOffItems.push_back("On");
+        return onOffItems;
+    }
+    static bool IsOnItemSelected(int idx) { return idx == 1; }
+
 private:
 	// Filepath to the game's .ini file
 	static const char* INI_FILEPATH;
@@ -93,6 +102,7 @@ private:
 	static const char* WINDOW_FULLSCREEN_VAR;
 	static const char* WINDOW_VSYNC_VAR;
 	static const char* VOLUME_VAR;
+    static const char* INVERT_BALL_BOOST_VAR;
     static const char* DIFFICULTY_VAR;
 
 	// Default values for each initialization variable
@@ -101,6 +111,7 @@ private:
 	static const bool DEFAULT_FULLSCREEN_TOGGLE;
 	static const bool DEFAULT_VSYNC_TOGGLE;
 	static const int  DEFAULT_VOLUME;
+    static const bool DEFAULT_INVERT_BALL_BOOST_TOGGLE;
     static const GameModel::Difficulty DEFAULT_DIFFICULTY;
 
 	// Variables for storing the configuration values in memory
@@ -108,6 +119,7 @@ private:
 	bool fullscreenIsOn;
 	bool vSyncIsOn;
 	int volume;
+    bool invertBallBoost;
     GameModel::Difficulty difficulty;
 
 	static ConfigOptions* ReadConfigOptionsFromFile();

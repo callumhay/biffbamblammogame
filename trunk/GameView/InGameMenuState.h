@@ -66,10 +66,12 @@ private:
     int resumeItem;
     int restartItem;
 	//int audioMenu;
+    int invertBallBoostItem;
     int difficultyItem;
 	int returnToMainItem;
 	int exitToDesktopItem;
 
+    SelectionListMenuItem* invertBallBoostMenuItem;
     SelectionListMenuItem* difficultyMenuItem;
 
 	void InitTopMenu();
@@ -104,6 +106,17 @@ private:
 		InGameMenuState* inGameMenuState;
 	};
 
+    class InvertBallBoostEventHandler : public GameMenuItemEventHandler {
+    public:
+        InvertBallBoostEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
+        void MenuItemScrolled() {};
+        void MenuItemEnteredAndSet() {};
+        void MenuItemCancelled() {};
+
+	private:
+		InGameMenuState* inGameMenuState;
+    };
+
     class DifficultyEventHandler : public GameMenuItemEventHandler {
     public:
         DifficultyEventHandler(InGameMenuState *inGameMenuState) : inGameMenuState(inGameMenuState) {}
@@ -117,7 +130,9 @@ private:
 
 	TopMenuEventHandler* topMenuEventHandler;
 	VerifyMenuEventHandler* verifyMenuEventHandler;
+    InvertBallBoostEventHandler* invertBallBoostHandler;
     DifficultyEventHandler* difficultyEventHandler;
+    
 
 	DISALLOW_COPY_AND_ASSIGN(InGameMenuState);
 };
