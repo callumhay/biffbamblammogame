@@ -337,8 +337,8 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	this->optionsResolutionIndex = this->optionsSubMenu->AddMenuItem(this->resolutionMenuItem);
 
 	// Add a sound volume option
-	subMenuLabelSm.SetText("Game Volume");
-	subMenuLabelLg.SetText("Game Volume");
+	subMenuLabelSm.SetText("Volume");
+	subMenuLabelLg.SetText("Volume");
 
 	int currentVolume = cfgOptions.GetVolume(); // Determine the volume of the sound...
 	this->soundVolumeMenuItem = new AmountScrollerMenuItem(subMenuLabelSm, subMenuLabelLg,
@@ -357,8 +357,22 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
     //this->controllerSensitivityItem->SetConstantChangeFeedback(true);
     //this->optionsControllerSensitivityIndex = this->optionsSubMenu->AddMenuItem(this->controllerSensitivityItem);
 
-	subMenuLabelSm.SetText("Game Difficulty");
-	subMenuLabelLg.SetText("Game Difficulty");
+
+    // Inverting ball boost option
+	subMenuLabelSm.SetText("Invert Ball Boost");
+	subMenuLabelLg.SetText("Invert Ball Boost");
+    std::vector<std::string> invertOptions = ConfigOptions::GetOnOffItems();
+
+    this->invertBallBoostItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, invertOptions);
+    this->invertBallBoostItem->SetSelectedItem(this->cfgOptions.GetInvertBallBoost() ? 1 : 0);
+    this->invertBallBoostItem->SetEventHandler(this->itemsEventHandler);
+
+    this->optionsInvertBallBoostIndex = this->optionsSubMenu->AddMenuItem(this->invertBallBoostItem);
+
+
+    // Difficulty option
+	subMenuLabelSm.SetText("Difficulty");
+	subMenuLabelLg.SetText("Difficulty");
     std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
 
     this->difficultyItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, difficultyOptions);
@@ -807,6 +821,14 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 			this->mainMenuState->cfgOptions.SetIsVSyncOn(false);
 		}
 	}
+    else if (itemIndex == this->mainMenuState->optionsInvertBallBoostIndex) {
+        int currSelectionIdx = this->mainMenuState->invertBallBoostItem->GetSelectedItemIndex();
+        bool isInverted = ConfigOptions::IsOnItemSelected(currSelectionIdx);
+
+        GameModel* gameModel = this->mainMenuState->display->GetModel();
+        gameModel->SetInvertBallBoostDir(isInverted);
+        this->mainMenuState->cfgOptions.SetInvertBallBoost(isInverted);
+    }
     else if (itemIndex == this->mainMenuState->optionsDifficultyIndex) {
         int currSelectionIdx = this->mainMenuState->difficultyItem->GetSelectedItemIndex();
         GameModel::Difficulty difficultyToSet = static_cast<GameModel::Difficulty>(currSelectionIdx);
