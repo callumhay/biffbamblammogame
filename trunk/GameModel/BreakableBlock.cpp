@@ -350,7 +350,7 @@ bool BreakableBlock::StatusTick(double dT, GameModel* gameModel, int32_t& remove
 }
 
 // Determine whether the given projectile will pass through this block...
-bool BreakableBlock::ProjectilePassesThrough(Projectile* projectile) const {
+bool BreakableBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 		
 		case Projectile::PaddleLaserBulletProjectile:

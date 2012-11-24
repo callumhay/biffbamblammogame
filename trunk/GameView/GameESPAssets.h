@@ -209,7 +209,8 @@ private:
 	void AddRocketProjectileEffects(const RocketProjectile& projectile);
 	void AddFireGlobProjectileEffects(const Projectile& projectile);
     
-    void AddPaddleMineFiredEffects(const PaddleMineProjectile& projectile);
+    void AddPaddleMineFiredEffects(const GameModel& gameModel, const PaddleMineProjectile& projectile);
+    void AddPaddleMineAttachedEffects(const Projectile& projectile);
 
 	void AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
 

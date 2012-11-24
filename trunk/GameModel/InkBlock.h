@@ -66,7 +66,7 @@ public:
 		return this->HasStatus(LevelPiece::IceCubeStatus);
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile) const;
+	bool ProjectilePassesThrough(const Projectile* projectile) const;
     int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
 	void UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bottomNeighbor,

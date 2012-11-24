@@ -70,7 +70,7 @@ public:
 		return false;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile) const;
+	bool ProjectilePassesThrough(const Projectile* projectile) const;
     int GetPointsOnChange(const LevelPiece& changeToPiece) const {
         UNUSED_PARAMETER(changeToPiece);
         return 0; 

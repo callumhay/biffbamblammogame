@@ -30,7 +30,7 @@ rotationSgn(Randomizer::GetInstance()->RandomNegativeOrPositive()) {
 CollateralBlock::~CollateralBlock() {
 }
 
-bool CollateralBlock::ProjectilePassesThrough(Projectile* projectile) const {
+bool CollateralBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 
 		case Projectile::PaddleLaserBulletProjectile:

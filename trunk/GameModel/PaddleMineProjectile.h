@@ -150,6 +150,11 @@ inline void PaddleMineProjectile::SafetyNetCollisionOccurred(SafetyNet* safetyNe
 inline void PaddleMineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
     assert(block != NULL);
 
+    // If the mine is already attached to a piece then ignore this
+    if (this->attachedToPiece != NULL) {
+        return;
+    }
+
     // We don't 'land' the mine and set an attached block if the mine is being loaded into a cannon
     // or if it just can't collide with the block
     if (block->GetType() == LevelPiece::Cannon || block->IsNoBoundsPieceType()) {

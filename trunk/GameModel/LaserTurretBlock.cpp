@@ -73,7 +73,7 @@ LaserTurretBlock::~LaserTurretBlock() {
 }
 
 // Determine whether the given projectile will pass through this block...
-bool LaserTurretBlock::ProjectilePassesThrough(Projectile* projectile) const {
+bool LaserTurretBlock::ProjectilePassesThrough(const Projectile* projectile) const {
     switch (projectile->GetType()) {
 
         case Projectile::LaserTurretBulletProjectile:

@@ -174,7 +174,7 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
     */
 }
 
-bool SwitchBlock::ProjectilePassesThrough(Projectile* projectile) const {
+bool SwitchBlock::ProjectilePassesThrough(const Projectile* projectile) const {
     switch (projectile->GetType()) {	
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:

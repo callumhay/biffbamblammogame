@@ -1321,7 +1321,9 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
-            // TODO...
+            if (!block.ProjectileIsDestroyedOnCollision(&projectile)) {
+                this->AddPaddleMineAttachedEffects(projectile);
+            }
             break;
 
 		case Projectile::CollateralBlockProjectile:
@@ -1343,6 +1345,9 @@ void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projecti
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
             this->AddLaserHitWallEffect(projectile.GetPosition());
+            break;
+        case Projectile::PaddleMineBulletProjectile:
+            this->AddPaddleMineAttachedEffects(projectile);
             break;
         default:
             break;
@@ -2788,7 +2793,7 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 
         case Projectile::PaddleMineBulletProjectile:
             assert(dynamic_cast<const PaddleMineProjectile*>(&projectile) != NULL);
-            this->AddPaddleMineFiredEffects(*static_cast<const PaddleMineProjectile*>(&projectile));
+            this->AddPaddleMineFiredEffects(gameModel, *static_cast<const PaddleMineProjectile*>(&projectile));
             break;
 
 		case Projectile::CollateralBlockProjectile:
@@ -3462,8 +3467,101 @@ void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
 	projectileEmitters.push_back(fireRock);
 }
 
-void GameESPAssets::AddPaddleMineFiredEffects(const PaddleMineProjectile& projectile) {
+// Effects for when a mine is fired from the player paddle.
+void GameESPAssets::AddPaddleMineFiredEffects(const GameModel& gameModel, 
+                                              const PaddleMineProjectile& projectile) {
+
+    const Point2D& projectilePos2D  = projectile.GetPosition();
+    const Vector2D& projectileDir2D = projectile.GetVelocityDirection();
+    PlayerPaddle* paddle = gameModel.GetPlayerPaddle();
+
+	// We only do the mine onomatopiea if we aren't in a special camera mode...
+	if (!paddle->GetIsPaddleCameraOn() && !GameBall::GetIsBallCameraOn()) {
+		
+        // Create mine launch onomatopeia
+		ESPPointEmitter* launchOnoEffect = new ESPPointEmitter();
+		// Set up the emitter...
+		launchOnoEffect->SetSpawnDelta(ESPInterval(-1));
+		launchOnoEffect->SetInitialSpd(ESPInterval(0.5f, 1.5f));
+		launchOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.25f));
+		launchOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.7f));
+		launchOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+		launchOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+		launchOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+		launchOnoEffect->SetEmitPosition(Point3D(projectilePos2D));
+		launchOnoEffect->SetEmitDirection(Vector3D(projectileDir2D));
+		launchOnoEffect->SetEmitAngleInDegrees(45);
+		launchOnoEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+		
+		// Add effectors...
+		launchOnoEffect->AddEffector(&this->particleFader);
+		launchOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+		// Add the single particle to the emitter...
+		DropShadow dpTemp;
+		dpTemp.colour = Colour(0,0,0);
+		dpTemp.amountPercentage = 0.10f;
+		ESPOnomataParticle* launchOnoParticle = 
+            new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+                                                                                 GameFontAssetsManager::Small));
+		launchOnoParticle->SetDropShadow(dpTemp);
+		launchOnoParticle->SetOnomatoplexSound(Onomatoplex::LAUNCH, Onomatoplex::GOOD);
+		launchOnoEffect->AddParticle(launchOnoParticle);
+		
+		this->activeGeneralEmitters.push_back(launchOnoEffect);
+    }
+
+	// Create a dispertion of sparks coming out of the paddle
+	ESPPointEmitter* particleSparks = new ESPPointEmitter();
+	particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	particleSparks->SetInitialSpd(ESPInterval(3.0f, 5.25f));
+	particleSparks->SetParticleLife(ESPInterval(0.25f, 0.55f));
+    particleSparks->SetParticleSize(ESPInterval(PaddleMineProjectile::PADDLEMINE_WIDTH_DEFAULT / 4.0f, PaddleMineProjectile::PADDLEMINE_WIDTH_DEFAULT / 3.0f));
+	particleSparks->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	particleSparks->SetEmitAngleInDegrees(25);
+    particleSparks->SetParticleAlignment(ESP::ScreenAligned);
+    particleSparks->SetEmitPosition(Point3D(0, 0, 0));
+    particleSparks->SetEmitDirection(Vector3D(paddle->GetUpVector()));
+	particleSparks->AddEffector(&this->particleFader);
+	particleSparks->SetParticles(15, this->circleGradientTex);    
     
+    this->activePaddleEmitters.push_back(particleSparks);
+}
+
+void GameESPAssets::AddPaddleMineAttachedEffects(const Projectile& projectile) {
+
+    const Point2D& projectilePos2D  = projectile.GetPosition();
+
+    // Create mine launch onomatopeia
+	ESPPointEmitter* attachOnoEffect = new ESPPointEmitter();
+	// Set up the emitter...
+	attachOnoEffect->SetSpawnDelta(ESPInterval(-1));
+	attachOnoEffect->SetInitialSpd(ESPInterval(0.0f));
+	attachOnoEffect->SetParticleLife(ESPInterval(0.75f, 1.1f));
+	attachOnoEffect->SetParticleSize(ESPInterval(0.4f, 0.7f));
+	attachOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
+	attachOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	attachOnoEffect->SetParticleAlignment(ESP::ScreenAligned);
+	attachOnoEffect->SetEmitPosition(Point3D(projectilePos2D));
+	attachOnoEffect->SetEmitAngleInDegrees(45);
+	attachOnoEffect->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+	
+	// Add effectors...
+	attachOnoEffect->AddEffector(&this->particleFader);
+	attachOnoEffect->AddEffector(&this->particleSmallGrowth);
+
+	// Add the single particle to the emitter...
+	DropShadow dpTemp;
+	dpTemp.colour = Colour(0,0,0);
+	dpTemp.amountPercentage = 0.10f;
+	ESPOnomataParticle* attachOnoParticle = 
+        new ESPOnomataParticle(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+                                                                             GameFontAssetsManager::Small));
+	attachOnoParticle->SetDropShadow(dpTemp);
+	attachOnoParticle->SetOnomatoplexSound(Onomatoplex::ATTACH, Onomatoplex::GOOD);
+	attachOnoEffect->AddParticle(attachOnoParticle);
+	
+	this->activeGeneralEmitters.push_back(attachOnoEffect);
 }
 
 /**

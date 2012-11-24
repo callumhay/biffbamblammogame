@@ -32,7 +32,7 @@ public:
 		return this->HasStatus(LevelPiece::IceCubeStatus);
 	}
 
-	bool ProjectileIsDestroyedOnCollision(Projectile* projectile) const;
+	bool ProjectileIsDestroyedOnCollision(const Projectile* projectile) const;
 
     bool IsAIPiece() const { return true; } // All turrets are AI driven
 

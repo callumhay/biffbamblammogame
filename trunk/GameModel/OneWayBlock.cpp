@@ -63,7 +63,7 @@ bool OneWayBlock::ConvertCharToOneWayDir(const char& oneWayChar, OneWayBlock::On
 }
 
 // Determine whether the given projectile will pass through this block...
-bool OneWayBlock::ProjectilePassesThrough(Projectile* projectile) const {
+bool OneWayBlock::ProjectilePassesThrough(const Projectile* projectile) const {
     if (this->IsGoingTheOneWay(projectile->GetVelocityDirection())) {
         return true;
     }

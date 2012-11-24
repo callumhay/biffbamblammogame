@@ -66,7 +66,7 @@ public:
 		return false;
 	}
 
-	bool ProjectilePassesThrough(Projectile* projectile) const;
+	bool ProjectilePassesThrough(const Projectile* projectile) const;
     int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
 	LevelPiece* Destroy(GameModel* gameModel, const LevelPiece::DestructionMethod& method);

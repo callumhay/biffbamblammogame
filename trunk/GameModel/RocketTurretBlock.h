@@ -31,7 +31,7 @@ public:
 
 	LevelPieceType GetType() const { return LevelPiece::RocketTurret; }
 
-	bool ProjectilePassesThrough(Projectile* projectile) const;
+	bool ProjectilePassesThrough(const Projectile* projectile) const;
     int GetPointsOnChange(const LevelPiece& changeToPiece) const;
 
 	// Collision related stuffs

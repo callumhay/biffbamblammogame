@@ -28,7 +28,7 @@ public:
     bool CanChangeSelfOrOtherPiecesWhenHitByBall() const { return false; }
     bool BallBlastsThrough(const GameBall& b) const { UNUSED_PARAMETER(b); return false; }
 	bool GhostballPassesThrough() const { return false; }
-    bool ProjectilePassesThrough(Projectile* projectile) const { UNUSED_PARAMETER(projectile); return true; }
+    bool ProjectilePassesThrough(const Projectile* projectile) const { UNUSED_PARAMETER(projectile); return true; }
 	bool IsLightReflectorRefractor() const {
 		// When frozen in ice a block can reflect/refract lasers and the like
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {

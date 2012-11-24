@@ -22,7 +22,7 @@ LevelPiece(wLoc, hLoc), currLifePoints(life), startingLifePoints(life) {
 TurretBlock::~TurretBlock() {
 }
 
-bool TurretBlock::ProjectileIsDestroyedOnCollision(Projectile* projectile) const {
+bool TurretBlock::ProjectileIsDestroyedOnCollision(const Projectile* projectile) const {
     switch (projectile->GetType()) {
 
         case Projectile::PaddleMineBulletProjectile:
