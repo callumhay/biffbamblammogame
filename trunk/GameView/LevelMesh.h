@@ -20,6 +20,8 @@
 #include "../BlammoEngine/ObjReader.h"
 #include "../BlammoEngine/Light.h"
 
+#include "../ESPEngine/ESP.h"
+
 #include "../GameModel/GameWorld.h"
 #include "../GameModel/GameLevel.h"
 #include "../GameModel/LevelPiece.h"
@@ -56,6 +58,8 @@ public:
 	void LevelPieceStatusAdded(const LevelPiece& piece, const LevelPiece::PieceStatus& status);
 	void LevelPieceStatusRemoved(const LevelPiece& piece, const LevelPiece::PieceStatus& status);
 	void LevelPieceAllStatusRemoved(const LevelPiece& piece);
+
+    void LevelIsAlmostComplete();
 
     void SwitchActivated(const SwitchBlock* block, const GameLevel* currLevel);
     void LaserTurretAIStateChanged(const LaserTurretBlock* block, const LaserTurretBlock::TurretAIState& oldState,
@@ -95,6 +99,10 @@ private:
 	// Style-specific level pieces
 	Mesh* styleBlock;
 
+    // Misc. effects/texture pointers
+    Texture2D* remainingPieceGlowTexture;
+    ESPParticleScaleEffector remainingPiecePulser;
+
 	// The unique identifiers of, and associated materials of the level piece meshes
 	std::map<std::string, CgFxMaterialEffect*> levelMaterials;
 
@@ -104,6 +112,8 @@ private:
 	std::map<const LevelPiece*, std::map<CgFxMaterialEffect*, GLuint> > pieceDisplayLists;
 	// Special effects always present for specific level pieces
 	std::map<const LevelPiece*, std::list<ESPEmitter*> > pieceEmitterEffects;
+    // Effects for the last couple of pieces left in the level, to highlight them for the player
+    std::map<const LevelPiece*, ESPEmitter*> lastPieceEffects;
 
 	// Block status rendering object
 	BlockStatusEffectRenderer* statusEffectRenderer;

@@ -2763,7 +2763,8 @@ void GameESPAssets::TurnOffCurrentItemDropStars() {
 }
 
 /**
- * Adds an effect for a active projectile in-game.
+ * Adds an effect for a active projectile in-game. This function is called when the projectile is
+ * first created (i.e., shot into existance).
  */
 void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projectile& projectile) {
 	switch (projectile.GetType()) {
@@ -2786,7 +2787,8 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
-            // TODO...
+            assert(dynamic_cast<const PaddleMineProjectile*>(&projectile) != NULL);
+            this->AddPaddleMineFiredEffects(*static_cast<const PaddleMineProjectile*>(&projectile));
             break;
 
 		case Projectile::CollateralBlockProjectile:
@@ -3458,6 +3460,10 @@ void GameESPAssets::AddFireGlobProjectileEffects(const Projectile& projectile) {
 	projectileEmitters.push_back(fireBallEmitterTrail);
 	projectileEmitters.push_back(fireRockAura);
 	projectileEmitters.push_back(fireRock);
+}
+
+void GameESPAssets::AddPaddleMineFiredEffects(const PaddleMineProjectile& projectile) {
+    
 }
 
 /**

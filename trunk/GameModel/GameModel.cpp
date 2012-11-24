@@ -33,7 +33,7 @@ currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLi
 livesAtStartOfLevel(0), numLivesLostInLevel(0), maxNumLivesAllowed(0),
 pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false),
-droppedLifeForMaxMultiplier(false), safetyNet(NULL), ballBoostIsInverted(ballBoostIsInverted) {
+droppedLifeForMaxMultiplier(false), safetyNet(NULL), ballBoostIsInverted(ballBoostIsInverted), difficulty(initDifficulty) {
 	
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
     std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
@@ -118,6 +118,26 @@ void GameModel::ResetLevelValues(int numLives) {
     this->ResetLevelTime();
     this->ResetNumAcquiredItems();
     this->ResetLivesLostCounter();
+}
+
+void GameModel::PerformLevelCompletionChecks() {
+    GameWorld* currWorld = this->GetCurrentWorld();
+    GameLevel* currLevel = currWorld->GetCurrentLevel();
+	
+    if (currLevel->IsLevelComplete()) {
+		// The level was completed, move to the level completed state
+		this->SetNextState(GameState::LevelCompleteStateType);
+	}
+    else if (currLevel->IsLevelAlmostComplete()) {
+        currLevel->SignalLevelAlmostCompleteEvent();
+
+        // When a level is almost complete we decrease the amount of time it takes for a boost to
+        // charge so that the player doesn't feel like they have to wait too long to finish
+        if (this->boostModel != NULL) {
+            this->boostModel->SetBoostChargeTime(BallBoostModel::LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS);
+        }
+    }
+
 }
 
 /**
@@ -212,6 +232,8 @@ void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum, bool sendNew
 
     // Reload all progress numbers
     this->progressLoadedSuccessfully = GameProgressIO::LoadGameProgress(this);
+
+    this->PerformLevelCompletionChecks();
 }
 
 // Get the world with the given name in this model, NULL if no such world exists
@@ -226,6 +248,28 @@ GameWorld* GameModel::GetWorldByName(const std::string& name) {
 }
 
 void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
+    static const float EASY_DIFFICULTY_BALL_SPEED_DELTA = -1.33f;
+    static const float MED_DIFFICULTY_BALL_SPEED_DELTA  = 0.0f;
+    static const float HARD_DIFFICULTY_BALL_SPEED_DELTA = 1.5f;
+
+    //float ballSpeedDeltaBefore = 0.0f;
+    //float ballSpeedDeltaAfter  = 0.0f;
+
+    //switch (this->GetDifficulty()) {
+    //    case GameModel::EasyDifficulty:
+    //        ballSpeedDeltaBefore = EASY_DIFFICULTY_BALL_SPEED_DELTA;
+    //        break;
+    //    case GameModel::MediumDifficulty:
+    //        ballSpeedDeltaBefore = MED_DIFFICULTY_BALL_SPEED_DELTA;
+    //        break;
+    //    case GameModel::HardDifficulty:
+    //        ballSpeedDeltaBefore = HARD_DIFFICULTY_BALL_SPEED_DELTA;
+    //        break;
+    //    default:
+    //        assert(false);
+    //        return;
+    //}
+
     switch (difficulty) {
         case GameModel::EasyDifficulty:
 
@@ -234,10 +278,11 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
             // Make the boost time longer
             BallBoostModel::SetMaxBulletTimeDuration(4.0);
             // Make ball speed slower
-            GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED - 1.33f);
+            GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + EASY_DIFFICULTY_BALL_SPEED_DELTA);
 
             // Make chance of nice item drops higher (done automatically in GameItemFactory)
 
+            //ballSpeedDeltaAfter = EASY_DIFFICULTY_BALL_SPEED_DELTA;
             break;
         
         case GameModel::MediumDifficulty:
@@ -246,10 +291,11 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
             // Make the boost time typical
             BallBoostModel::SetMaxBulletTimeDuration(2.0);
             // Make ball speed normal
-            GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED);
+            GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + MED_DIFFICULTY_BALL_SPEED_DELTA);
 
             // Make item drops normal random (done automatically in GameItemFactory)
 
+            //ballSpeedDeltaAfter = MED_DIFFICULTY_BALL_SPEED_DELTA;
             break;
         
         case GameModel::HardDifficulty:
@@ -258,10 +304,11 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
             // Make the boost time short
             BallBoostModel::SetMaxBulletTimeDuration(1.25);
             // Make ball speed faster
-            GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + 1.5f);
+            GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + HARD_DIFFICULTY_BALL_SPEED_DELTA);
             
             // Make chance of not-so-nice item drops higher (done automatically in GameItemFactory)
 
+            //ballSpeedDeltaAfter = HARD_DIFFICULTY_BALL_SPEED_DELTA;
             break;
 
         default:
@@ -270,6 +317,17 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
 
     }
     this->difficulty = difficulty;
+
+    // If the ball(s) are in play then we automatically increase/decrease it's speed by the delta in
+    // the difficulty change...
+    // DONT DO THIS - THE PLAYER CAN CHEAT!!!
+    //if (this->currState != NULL && this->currState->GetType() == GameState::BallInPlayStateType) {
+    //    float ballSpeedDelta = ballSpeedDeltaAfter - ballSpeedDeltaBefore;
+    //    for (std::list<GameBall*>::iterator iter = this->balls.begin(); iter != this->balls.end(); ++iter) {
+    //        GameBall* currBall = *iter;
+    //        currBall->SetSpeed(currBall->GetSpeed() + ballSpeedDelta);
+    //    }
+    //}
 }
 
 bool GameModel::ActivateSafetyNet() {
@@ -313,12 +371,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
 	}
 
 	// Check to see if the level is done
-	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
-	if (currLevel->IsLevelComplete()) {
-
-		// The level was completed, move to the level completed state
-        this->SetNextState(GameState::LevelCompleteStateType);
-	}
+	this->PerformLevelCompletionChecks();
 }
 
 void GameModel::CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle) {
@@ -329,12 +382,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle) 
 	paddle->HitByProjectile(this, *projectile);
 
 	// Check to see if the level is done
-	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
-	if (currLevel->IsLevelComplete()) {
-
-		// The level was completed, move to the level completed state
-		this->SetNextState(GameState::LevelCompleteStateType);
-	}
+    this->PerformLevelCompletionChecks();
 }
 
 /**
@@ -349,10 +397,9 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	// EVENT: Ball-Block Collision
 	GameEventManager::Instance()->ActionBallBlockCollision(ball, *p);
 
-	// Collide the ball with the level piece directly, then if there was a change
-	// tell the level about it
-	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
-	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, ball);	// WARNING: This can destroy p.
+	// Collide the ball with the level piece directly
+	//LevelPiece* pieceAfterCollision =
+    p->CollisionOccurred(this, ball); // WARNING: This can destroy p.
 	ball.BallCollided();
 
 	// If the ball is attached to the paddle then we always set the last piece it collided with to NULL
@@ -363,15 +410,12 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 
 	// Check to see if the ball is being teleported in ball-camera mode - in this case
 	// we move into a new game state to play the wormhole minigame
-	if (pieceAfterCollision->GetType() == LevelPiece::Portal && ball.GetIsBallCameraOn()) {
+	//if (pieceAfterCollision->GetType() == LevelPiece::Portal && ball.GetIsBallCameraOn()) {
 		// TODO
-	}
+	//}
 
 	// Check to see if the level is done
-	if (currLevel->IsLevelComplete()) {
-		// The level was completed, move to the level completed state
-		this->SetNextState(GameState::LevelCompleteStateType);
-	}
+	this->PerformLevelCompletionChecks();
 }
 
 float GameModel::GetTimeDialationFactor() const {
@@ -528,11 +572,7 @@ void GameModel::DoPieceStatusUpdates(double dT) {
 	this->doingPieceStatusListIteration = false;
 
 	// Check to see if the level is done
-	GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
-	if (currLevel->IsLevelComplete()) {
-		// The level was completed, move to the level completed state
-		this->SetNextState(GameState::LevelCompleteStateType);
-	}
+	this->PerformLevelCompletionChecks();
 }
 
 /**
@@ -674,11 +714,7 @@ void GameModel::DoProjectileCollisions(double dT) {
 #undef PROJECTILE_CLEANUP
 
 	// Check to see if the level is done
-    if (currLevel->IsLevelComplete()) {
-		// The level was completed, move to the level completed state
-		this->SetNextState(GameState::LevelCompleteStateType);
-	}
-
+    this->PerformLevelCompletionChecks();
 }
 
 /**
@@ -812,10 +848,7 @@ void GameModel::UpdateActiveBeams(double seconds) {
 				LevelPiece* resultPiece = collidingPiece->TickBeamCollision(seconds, currentBeamSeg, this);
 				
 				// Check to see if the level is done
-				if (currentLevel->IsLevelComplete()) {
-					// The level was completed, move to the level completed state
-					this->SetNextState(GameState::LevelCompleteStateType);
-				}
+				this->PerformLevelCompletionChecks();
 
 				// HACK: If we destroy a piece get out of this loop - so that if the piece is attached to
 				// another beam segment we don't try to access it and we update collisions

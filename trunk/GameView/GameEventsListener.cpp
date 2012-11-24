@@ -109,8 +109,15 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 	    this->display->AddStateToQueue(DisplayState::InGame);
     }
 
-	debug_output("EVENT: Level started");
+    debug_output("EVENT: Level started");
+}
 
+void GameEventsListener::LevelAlmostCompleteEvent(const GameLevel& level) {
+	UNUSED_PARAMETER(level);
+
+    this->display->GetAssets()->GetCurrentLevelMesh()->LevelIsAlmostComplete();
+
+	debug_output("EVENT: Level almost complete");
 }
 
 void GameEventsListener::LevelCompletedEvent(const GameWorld& world, const GameLevel& level) {

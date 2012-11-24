@@ -71,6 +71,13 @@ public:
 	 */
     virtual void LevelStartedEvent(const GameWorld& world, const GameLevel& level) { UNUSED_PARAMETER(world); UNUSED_PARAMETER(level); }
 
+    /**
+	 * Event occurs when a level is ALMOST finished (i.e., a few more blocks are left). This event occurs once just as a
+     * certain threshold of blocks left is reached.
+	 * Arguments: level - The level that is almost complete.
+	 */
+    virtual void LevelAlmostCompleteEvent(const GameLevel& level) { UNUSED_PARAMETER(level); }
+
 	/**
 	 * Event occurs when a level is finished. This event occurs once just as the level finishes.
 	 * Arguments: world - The world of the level that just finished.

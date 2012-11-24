@@ -510,6 +510,13 @@ void GameEventManager::ActionLevelStarted(const GameWorld& world, const GameLeve
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->LevelStartedEvent(world, level);
+    }
+}
+
+void GameEventManager::ActionLevelAlmostComplete(const GameLevel& level) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->LevelAlmostCompleteEvent(level);
 	}	
 }
 

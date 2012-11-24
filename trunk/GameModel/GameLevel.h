@@ -66,6 +66,8 @@ public:
 	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 9;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;
 
+    static const int NUM_PIECES_FOR_ALMOST_COMPLETE = 2;
+
 	~GameLevel();
 
 	// Used to create a level from file
@@ -132,6 +134,14 @@ public:
 	bool IsLevelComplete() const {
 		return this->piecesLeft == 0;
 	}
+    bool IsLevelAlmostComplete() const {
+        return this->piecesLeft <= GameLevel::NUM_PIECES_FOR_ALMOST_COMPLETE;
+    }
+    void SignalLevelAlmostCompleteEvent();
+
+    size_t GetNumPiecesLeft() const {
+        return this->piecesLeft;
+    }
 
 	const std::string& GetFilepath() const {
 		return this->filepath;
@@ -183,6 +193,8 @@ private:
 	size_t piecesLeft;                  // Pieces left before the end of the level
 	size_t width, height;               // Size values for the level
     size_t randomItemProbabilityNum;    // A number >= 0 for random item probability in the level
+
+    bool levelAlmostCompleteSignaled; // Whether or not the event for the level being almost completed has already been signaled
 
     std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
 
