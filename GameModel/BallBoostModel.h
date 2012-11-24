@@ -35,7 +35,9 @@ public:
     static const double BULLET_TIME_FADE_IN_SECONDS;
     static const double BULLET_TIME_FADE_OUT_SECONDS;
 
-    
+    static const double DEFAULT_BOOST_CHARGE_TIME_SECONDS;
+    static const double LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS;
+
     static void SetMaxBulletTimeDuration(double seconds);
     static double GetMaxBulletTimeDuration();
 
@@ -67,12 +69,14 @@ public:
     float GetBoostChargePercentage() const;
     int GetNumAvailableBoosts() const;
 
+    void SetBoostChargeTime(double timeInSeconds);
+    double GetBoostChargeTime() const;
+
     void SetInvertBallBoostDir(bool isInverted);
 
     void DebugDraw() const;
 
 private:
-    static const float BOOST_CHARGE_TIME_SECONDS;
     static double BULLET_TIME_MAX_DURATION_SECONDS;
 
     BulletTimeState currState;                  // The current bullet time state
@@ -84,7 +88,8 @@ private:
     Vector2D ballBoostDir;              // The direction to boost the ball in when the player triggers it - NOT necessarily normalized!
     Collision::AABB2D ballZoomBounds;   // The 2D rectangle that holds all balls when bullet-time is activated for a ball boost
 
-    double currBoostChargeTime;  // Total time counted (in seconds) towards charging the next boost
+    double elapsedBoostChargeTime;  // Total time elapsed (in seconds) towards charging the next boost
+    double boostChargeTime;         // Currently set amount of time it takes for a boost to be gained
 
     bool isBallBoostInverted;  // Whether ball boosting controls are inverted or not
 
@@ -193,7 +198,7 @@ inline float BallBoostModel::GetBoostChargePercentage() const {
     if (this->numAvailableBoosts == TOTAL_NUM_BOOSTS) {
         return 1.0f;
     }
-    return static_cast<float>(this->currBoostChargeTime / BOOST_CHARGE_TIME_SECONDS);
+    return static_cast<float>(this->elapsedBoostChargeTime / this->boostChargeTime);
 }
 
 /**
@@ -201,6 +206,14 @@ inline float BallBoostModel::GetBoostChargePercentage() const {
  */
 inline int BallBoostModel::GetNumAvailableBoosts() const {
     return this->numAvailableBoosts;
+}
+
+inline void BallBoostModel::SetBoostChargeTime(double timeInSeconds) {
+    this->boostChargeTime = timeInSeconds;
+}
+
+inline double BallBoostModel::GetBoostChargeTime() const {
+    return this->boostChargeTime;
 }
 
 inline void BallBoostModel::SetInvertBallBoostDir(bool isInverted) {

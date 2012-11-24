@@ -86,7 +86,8 @@ GameLevel::GameLevel(size_t levelNumber, const std::string& filepath, const std:
 levelNum(levelNumber),
 currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum),
-piecesLeft(numBlocks), filepath(filepath), levelName(levelName), highScore(0) {
+piecesLeft(numBlocks), filepath(filepath), levelName(levelName), highScore(0),
+levelAlmostCompleteSignaled(false) {
 
 	assert(!filepath.empty());
 	assert(pieces.size() > 0);
@@ -1058,6 +1059,19 @@ void GameLevel::UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces
 	pieces[hIndex][wIndex]->UpdateBounds(leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
                                          topRightNeighbor, topLeftNeighbor, bottomRightNeighbor, 
                                          bottomLeftNeighbor);
+}
+
+void GameLevel::SignalLevelAlmostCompleteEvent() {
+    // If we've already signaled it then just exit
+    if (this->levelAlmostCompleteSignaled) {
+        return;
+    }
+
+    if (this->IsLevelAlmostComplete()) {
+        // EVENT: The level just hit the 'Almost Complete' mark
+        GameEventManager::Instance()->ActionLevelAlmostComplete(*this);
+        this->levelAlmostCompleteSignaled = true;
+    }
 }
 
 /**

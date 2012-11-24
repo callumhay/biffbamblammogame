@@ -172,6 +172,8 @@ private:
     
     void ResetLevelValues(int numLives);
 
+    void PerformLevelCompletionChecks();
+
 public:
     GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted);
 	~GameModel();

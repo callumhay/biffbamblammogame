@@ -208,6 +208,8 @@ private:
 	void AddCollateralProjectileEffects(const Projectile& projectile);
 	void AddRocketProjectileEffects(const RocketProjectile& projectile);
 	void AddFireGlobProjectileEffects(const Projectile& projectile);
+    
+    void AddPaddleMineFiredEffects(const PaddleMineProjectile& projectile);
 
 	void AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
 

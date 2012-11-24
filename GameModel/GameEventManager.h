@@ -120,7 +120,8 @@ public:
 	void ActionWorldStarted(const GameWorld& world);
 	void ActionWorldCompleted(const GameWorld& world);
 	void ActionLevelStarted(const GameWorld& world, const GameLevel& level);
-	void ActionLevelCompleted(const GameWorld& world, const GameLevel& level);
+	void ActionLevelAlmostComplete(const GameLevel& level);
+    void ActionLevelCompleted(const GameWorld& world, const GameLevel& level);
 	
 	void ActionLivesChanged(int livesLeftBefore, int livesLeftAfter);
 

@@ -28,6 +28,7 @@ public:
 	void WorldStartedEvent(const GameWorld& world);
 	void WorldCompletedEvent(const GameWorld& world);
 	void LevelStartedEvent(const GameWorld& world, const GameLevel& level);
+    void LevelAlmostCompleteEvent(const GameLevel& level);
 	void LevelCompletedEvent(const GameWorld& world, const GameLevel& level);
 
 	// Paddle related events

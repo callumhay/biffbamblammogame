@@ -22,8 +22,6 @@
 #include "LaserTurretBlockMesh.h"
 #include "RocketTurretBlockMesh.h"
 
-#include "../ESPEngine/ESPEmitter.h"
-
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Matrix.h"
@@ -45,8 +43,15 @@ LevelMesh::LevelMesh(const GameWorldAssets& gameWorldAssets, const GameItemAsset
 styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkBlock(NULL), portalBlock(NULL),
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
-oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), statusEffectRenderer(NULL) {
+oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), statusEffectRenderer(NULL), remainingPieceGlowTexture(NULL),
+remainingPiecePulser(0,0) {
 	
+    this->remainingPieceGlowTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
+    assert(this->remainingPieceGlowTexture != NULL);
+    ScaleEffect pulseSettings(0.75f, 1.8f);
+    this->remainingPiecePulser = ESPParticleScaleEffector(pulseSettings);
+
 	// Load the basic block and all other block types that stay consistent between worlds
 	this->basicBlock					= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BASIC_BLOCK_MESH_PATH);
 	this->bombBlock						= ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->BOMB_BLOCK_MESH);
@@ -152,6 +157,9 @@ LevelMesh::~LevelMesh() {
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->triangleBlockUR);
     assert(success);
 
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->remainingPieceGlowTexture);
+	assert(success);
+
     UNUSED_VARIABLE(success);
 
 	// Delete the status effect renderer
@@ -204,6 +212,16 @@ void LevelMesh::Flush() {
 		emitterList.clear();
 	}
 	this->pieceEmitterEffects.clear();
+
+    // Delete any emitters for the final pieces in the level
+    for (std::map<const LevelPiece*, ESPEmitter*>::iterator iter = this->lastPieceEffects.begin();
+		iter != this->lastPieceEffects.end(); ++iter) {
+
+        ESPEmitter* emitter = iter->second;
+        delete emitter;
+        emitter = NULL;
+    }
+    this->lastPieceEffects.clear();
 
 	this->cannonBlock->Flush();
 	this->collateralBlock->Flush();
@@ -378,6 +396,16 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 	// Based on the new piece type we re-create a display list
 	Vector3D translation(-this->currLevel->GetLevelUnitWidth()/2.0f, -this->currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
 	this->CreateDisplayListsForPiece(&pieceAfter, translation);
+
+    // Remove any last-remaining-piece special effects as well
+    std::map<const LevelPiece*, ESPEmitter*>::iterator lastPieceIter = this->lastPieceEffects.find(&pieceBefore);
+    if (lastPieceIter != this->lastPieceEffects.end()) {
+        ESPEmitter* emitter = lastPieceIter->second;
+        delete emitter;
+        emitter = NULL;
+        this->lastPieceEffects.erase(lastPieceIter);
+    }
+
 }
 
 void LevelMesh::RemovePiece(const LevelPiece& piece) {
@@ -448,6 +476,16 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 	this->portalBlock->SetSceneTexture(sceneTexture);
 	this->portalBlock->Tick(dT);
 
+    // Draw any 'remaining pieces' effects
+    ESPEmitter* emitter = NULL;
+    for (std::map<const LevelPiece*, ESPEmitter*>::iterator iter = this->lastPieceEffects.begin();
+         iter != this->lastPieceEffects.end(); ++iter) {
+
+        emitter = iter->second;
+		emitter->Tick(dT);
+		emitter->Draw(camera);
+    }
+
 	// Go through each material and draw all the display lists corresponding to it
 	CgFxMaterialEffect* currEffect = NULL;
 	for (std::map<CgFxMaterialEffect*, std::vector<GLuint> >::const_iterator iter = this->displayListsPerMaterial.begin();
@@ -471,7 +509,6 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
     this->rocketTurretBlock->Draw(dT, camera, keyLight, fillLight, ballLight);
 	glPopMatrix();
 
-	ESPEmitter* emitter = NULL;
 	for (std::map<const LevelPiece*, std::list<ESPEmitter*> >::iterator pieceIter = this->pieceEmitterEffects.begin();
 		pieceIter != this->pieceEmitterEffects.end(); ++pieceIter) {
 
@@ -662,6 +699,56 @@ const std::map<std::string, MaterialGroup*>* LevelMesh::GetMaterialGrpsForPieceT
 	return NULL;
 }
 
+void LevelMesh::LevelIsAlmostComplete() {
+    assert(this->lastPieceEffects.empty());
+
+    // Add effects to the last pieces that need to be broken to end the level:
+    // This highlights them for the player
+    
+    // Get a list of the remaining pieces...
+    std::list<const LevelPiece*> remainingVitalPieces;
+    const std::vector<std::vector<LevelPiece*> >& levelPieces = this->currLevel->GetCurrentLevelLayout();
+    for (std::vector<std::vector<LevelPiece*> >::const_iterator iter1 = levelPieces.begin(); iter1 != levelPieces.end(); ++iter1) {
+        const std::vector<LevelPiece*>& row = *iter1;
+        for (std::vector<LevelPiece*>::const_iterator iter2 = row.begin(); iter2 != row.end(); ++iter2) {
+            const LevelPiece* currPiece = *iter2;
+
+            if (currPiece->MustBeDestoryedToEndLevel()) {
+                remainingVitalPieces.push_back(currPiece);
+            }
+        }
+
+        if (remainingVitalPieces.size() == this->currLevel->GetNumPiecesLeft()) {
+            break;
+        }
+    }
+
+    Vector2D levelTransform = Vector2D(-this->currLevel->GetLevelUnitWidth() / 2.0f, -this->currLevel->GetLevelUnitHeight() / 2.0f);
+
+    // Place the highlight effect on each of the remaining pieces
+    for (std::list<const LevelPiece*>::iterator iter = remainingVitalPieces.begin();
+        iter != remainingVitalPieces.end(); ++iter) {
+
+        const LevelPiece* piece = *iter;
+
+        ESPPointEmitter* glowPulseEffect = new ESPPointEmitter();
+	    glowPulseEffect->SetSpawnDelta(ESPInterval(-1));
+	    glowPulseEffect->SetInitialSpd(ESPInterval(0));
+	    glowPulseEffect->SetParticleLife(ESPInterval(-1));
+        glowPulseEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH), ESPInterval(LevelPiece::PIECE_HEIGHT));
+	    glowPulseEffect->SetEmitAngleInDegrees(0);
+	    glowPulseEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	    glowPulseEffect->SetParticleAlignment(ESP::ScreenAligned);
+        glowPulseEffect->SetEmitPosition(Point3D(piece->GetCenter() + levelTransform));
+	    glowPulseEffect->SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(0.75f));
+	    glowPulseEffect->AddEffector(&this->remainingPiecePulser);
+	    glowPulseEffect->SetParticles(1, this->remainingPieceGlowTexture);
+
+        this->lastPieceEffects.insert(std::make_pair(piece, glowPulseEffect));
+    }
+
+}
+
 void LevelMesh::SwitchActivated(const SwitchBlock* block, const GameLevel* currLevel) {
     this->switchBlock->SwitchBlockActivated(block, currLevel->GetTriggerableLevelPiece(block->GetIDTriggeredBySwitch()));
 }
@@ -696,6 +783,13 @@ void LevelMesh::SetLevelAlpha(float alpha) {
 		MaterialProperties* matProperties = currMatEffect->GetProperties();
 		matProperties->alphaMultiplier = alpha;
 	}
+
+    for (std::map<const LevelPiece*, ESPEmitter*>::iterator iter = this->lastPieceEffects.begin();
+         iter != this->lastPieceEffects.end(); ++iter) {
+
+        ESPEmitter* emitter = iter->second;
+		emitter->SetParticleAlpha(ESPInterval(alpha));
+    }
 
 	// Make sure all other materials (inside certain special meshes) also get their alpha multiplier set
 	this->portalBlock->SetAlphaMultiplier(alpha);

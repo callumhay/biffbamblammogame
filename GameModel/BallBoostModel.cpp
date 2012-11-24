@@ -23,8 +23,10 @@ const double BallBoostModel::DEFAULT_BULLET_TIME_DURATION = 1.3;
 // The maximum duration of bullet time before the ball is automatically boosted
 double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS = BallBoostModel::DEFAULT_BULLET_TIME_DURATION;
 
-// Amount of time it takes for a ball boost to charge
-const float BallBoostModel::BOOST_CHARGE_TIME_SECONDS = 15.0f;
+// Amount of time it takes for a ball boost to charge (default)
+const double BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS = 15.0;
+// When the level is almost complete we give players more readily available boosts so they can finish quicker
+const double BallBoostModel::LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS = BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS / 2.0;
 
 // The time dialation factor used (multiplies the delta time of each game frame)
 // when full bullet time is active
@@ -33,12 +35,19 @@ const float BallBoostModel::INV_MIN_TIME_DIALATION_FACTOR   = 1.0f / MIN_TIME_DI
 
 BallBoostModel::BallBoostModel(GameModel* gameModel) : 
 ballBoostDir(0,0), numAvailableBoosts(0), gameModel(gameModel),
-currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0), currBoostChargeTime(0.0),
-isBallBoostInverted(gameModel->GetIsBallBoostInverted()) {
+currState(NotInBulletTime), timeDialationAnim(1.0f), totalBulletTimeElapsed(0.0), elapsedBoostChargeTime(0.0),
+isBallBoostInverted(gameModel->GetIsBallBoostInverted()),
+boostChargeTime(BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS) {
 
     // Setup the initial states for the various animations...
     timeDialationAnim.SetInterpolantValue(1.0f);
     timeDialationAnim.SetRepeat(false);
+
+    // Figure out whether we should speed up the boost charge time or not based on how many blocks are left
+    // in the current level...
+    if (gameModel->GetCurrentLevel()->IsLevelAlmostComplete()) {
+        this->boostChargeTime = BallBoostModel::LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS;
+    }
 
 }
 
@@ -59,9 +68,9 @@ void BallBoostModel::Tick(double dT) {
             // Increment the time towards the next boost and add any new boosts if
             // the charge time has been hit/exceeded
             if (this->numAvailableBoosts < TOTAL_NUM_BOOSTS) {
-                this->currBoostChargeTime += dT;
-                if (this->currBoostChargeTime >= BOOST_CHARGE_TIME_SECONDS) {
-                    this->currBoostChargeTime = 0.0;
+                this->elapsedBoostChargeTime += dT;
+                if (this->elapsedBoostChargeTime >= this->boostChargeTime) {
+                    this->elapsedBoostChargeTime = 0.0;
                     this->numAvailableBoosts++;
                     // EVENT: New ball boost gained
                     GameEventManager::Instance()->ActionBallBoostGained();
