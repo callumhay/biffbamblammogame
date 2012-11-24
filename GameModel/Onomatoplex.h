@@ -17,7 +17,20 @@
 
 namespace Onomatoplex {
 
-enum SoundType {EXPLOSION = 0, BOUNCE = 1, ELECTRIC = 2, SMOKE = 3, BADSAD = 4, SHOT = 5, GOODHAPPY = 6, GOO = 7, SHATTER = 8, CRAZY = 9};
+enum SoundType {
+    EXPLOSION = 0,
+    BOUNCE = 1,
+    ELECTRIC = 2,
+    SMOKE = 3,
+    BADSAD = 4,
+    SHOT = 5,
+    GOODHAPPY = 6,
+    GOO = 7,
+    SHATTER = 8,
+    CRAZY = 9,
+    LAUNCH = 10,
+    ATTACH = 11
+};
 enum Extremeness {WEAK = 0, NORMAL = 1, PRETTY_GOOD = 2, GOOD = 3, AWESOME = 4, SUPER_AWESOME = 5, UBER = 6};
 
 static const int NumSoundTypes = 8;
@@ -77,6 +90,8 @@ private:
 	void LoadGooWords();
 	void LoadShatterWords();
 	void LoadCrazyWords();
+    void LoadLaunchWords();
+    void LoadAttachWords();
 
 	// Punctuation structures and functions
 	static const char* DEFAULT_END_PUNCTUATION;

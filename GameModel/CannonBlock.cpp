@@ -57,7 +57,7 @@ CannonBlock::~CannonBlock() {
 }
 
 // Determine whether the given projectile will pass through this block...
-bool CannonBlock::ProjectilePassesThrough(Projectile* projectile) const {
+bool CannonBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	return projectile->IsRocket();
 }
 

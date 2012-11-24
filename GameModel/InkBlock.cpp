@@ -81,7 +81,7 @@ void InkBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* bo
 }
 
 // Determine whether the given projectile will pass through this block...
-bool InkBlock::ProjectilePassesThrough(Projectile* projectile) const {
+bool InkBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 
 		case Projectile::PaddleLaserBulletProjectile:

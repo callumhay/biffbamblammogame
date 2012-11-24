@@ -31,7 +31,7 @@ public:
 	bool BallBlastsThrough(const GameBall& b) const;
 	bool GhostballPassesThrough() const;
 	bool IsLightReflectorRefractor() const;
-	bool ProjectilePassesThrough(Projectile* projectile) const;
+	bool ProjectilePassesThrough(const Projectile* projectile) const;
 
     int GetPointsOnChange(const LevelPiece& changeToPiece) const {
         UNUSED_PARAMETER(changeToPiece);

@@ -63,7 +63,7 @@ public:
         return true; // Ghost ball can float through them, why not?
     }
 
-    bool ProjectilePassesThrough(Projectile* projectile) const {
+    bool ProjectilePassesThrough(const Projectile* projectile) const {
         return projectile->IsRefractableOrReflectable();
     }
 

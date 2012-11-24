@@ -31,7 +31,7 @@ timeOfLastDrop(0) {
 ItemDropBlock::~ItemDropBlock() {
 }
 
-bool ItemDropBlock::ProjectilePassesThrough(Projectile* projectile) const {
+bool ItemDropBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 		
 		case Projectile::PaddleLaserBulletProjectile:

@@ -47,6 +47,8 @@ Generator::Generator() {
 	this->LoadGooWords();
 	this->LoadShatterWords();
 	this->LoadCrazyWords();
+    this->LoadLaunchWords();
+    this->LoadAttachWords();
 }
 
 // Destructor, deletes singleton, cleans up dictionaries
@@ -575,7 +577,7 @@ void Generator::LoadGoodHappyWords() {
  */
 void Generator::LoadGooWords() {
 	std::vector<std::string> gooSimpleSingleWords;
-	gooSimpleSingleWords.reserve(12);
+	gooSimpleSingleWords.reserve(13);
 	gooSimpleSingleWords.push_back("Splat");
 	gooSimpleSingleWords.push_back("Goo");
 	gooSimpleSingleWords.push_back("Gack");
@@ -589,6 +591,7 @@ void Generator::LoadGooWords() {
 	gooSimpleSingleWords.push_back("Goop");
 	gooSimpleSingleWords.push_back("Blob");
 	gooSimpleSingleWords.push_back("Blop");
+    gooSimpleSingleWords.push_back("Ptooey");
 	this->simpleSingleWords[GOO] = gooSimpleSingleWords;
 
 	std::vector<std::string> gooGoodSingleWords;
@@ -664,6 +667,7 @@ void Generator::LoadCrazyWords() {
 	std::vector<std::string> crazySimpleWords;
 	//crazySimpleWords.push_back("Waka");
 	//crazySimpleWords.push_back("Wee");
+    crazySimpleWords.reserve(3);
 	crazySimpleWords.push_back("?");
 	crazySimpleWords.push_back("!");
 	//crazySimpleWords.push_back("Mummble");
@@ -679,9 +683,55 @@ void Generator::LoadCrazyWords() {
 	crazySimpleWords.push_back("");
 
 	this->simpleSingleWords[CRAZY]  = crazySimpleWords;
-	this->goodSingleWords[CRAZY]		= crazySimpleWords;
+	this->goodSingleWords[CRAZY]	= crazySimpleWords;
 	this->awesomeSingleWords[CRAZY] = crazySimpleWords;
-	this->uberSingleWords[CRAZY]		= crazySimpleWords;
+	this->uberSingleWords[CRAZY]	= crazySimpleWords;
+}
+
+void Generator::LoadLaunchWords() {
+    std::vector<std::string> launchSimpleWords;
+    launchSimpleWords.reserve(9);
+    
+    launchSimpleWords.push_back("Launch");
+    launchSimpleWords.push_back("Woosh");
+    launchSimpleWords.push_back("Ploong");
+    launchSimpleWords.push_back("Floong");
+    launchSimpleWords.push_back("Pwoosh");
+    launchSimpleWords.push_back("Fling");
+    launchSimpleWords.push_back("Spoop");
+    launchSimpleWords.push_back("Poop");
+    launchSimpleWords.push_back("Ptooey");
+
+	this->simpleSingleWords[LAUNCH]  = launchSimpleWords;
+	this->goodSingleWords[LAUNCH]	 = launchSimpleWords;
+	this->awesomeSingleWords[LAUNCH] = launchSimpleWords;
+	this->uberSingleWords[LAUNCH]	 = launchSimpleWords;
+}
+
+void Generator::LoadAttachWords() {
+    std::vector<std::string> attachSimpleWords;
+    attachSimpleWords.reserve(15);
+
+    attachSimpleWords.push_back("Kachunk");
+    attachSimpleWords.push_back("Clunk");
+    attachSimpleWords.push_back("Chunk");
+    attachSimpleWords.push_back("Plunk");
+    attachSimpleWords.push_back("Fasten");
+    attachSimpleWords.push_back("Attach");
+    attachSimpleWords.push_back("Kaclunk");
+    attachSimpleWords.push_back("Blomp");
+    attachSimpleWords.push_back("Glomp");
+    attachSimpleWords.push_back("Shlomp");
+    attachSimpleWords.push_back("Kurblomp");
+    attachSimpleWords.push_back("Kurchunk");
+    attachSimpleWords.push_back("Kurclunk");
+    attachSimpleWords.push_back("Kurplunk");
+    attachSimpleWords.push_back("Kurshlomp");
+
+	this->simpleSingleWords[ATTACH]  = attachSimpleWords;
+	this->goodSingleWords[ATTACH]	 = attachSimpleWords;
+	this->awesomeSingleWords[ATTACH] = attachSimpleWords;
+	this->uberSingleWords[ATTACH]	 = attachSimpleWords;
 }
 
 /*

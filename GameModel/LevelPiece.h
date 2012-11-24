@@ -107,12 +107,12 @@ public:
     virtual bool CanChangeSelfOrOtherPiecesWhenHitByBall() const = 0;
 	virtual bool BallBlastsThrough(const GameBall& b) const = 0;
 	virtual bool GhostballPassesThrough() const = 0;
-	virtual bool ProjectilePassesThrough(Projectile* projectile) const = 0;
+	virtual bool ProjectilePassesThrough(const Projectile* projectile) const = 0;
 	virtual bool IsLightReflectorRefractor() const = 0;
 
     virtual int GetPointsOnChange(const LevelPiece& changeToPiece) const = 0;
 
-    virtual bool ProjectileIsDestroyedOnCollision(Projectile* projectile) const;
+    virtual bool ProjectileIsDestroyedOnCollision(const Projectile* projectile) const;
 
     virtual bool IsAIPiece() const { return false; }
     virtual void AITick(double dT, GameModel* gameModel) { UNUSED_PARAMETER(dT); UNUSED_PARAMETER(gameModel); }

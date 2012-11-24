@@ -152,7 +152,7 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 }
 
 
-bool LevelPiece::ProjectileIsDestroyedOnCollision(Projectile* projectile) const {
+bool LevelPiece::ProjectileIsDestroyedOnCollision(const Projectile* projectile) const {
     switch (projectile->GetType()) {
 
         case Projectile::PaddleMineBulletProjectile:

@@ -65,7 +65,7 @@ public:
 	}
 
 	// Determine whether the given projectile will pass through this block...
-	bool ProjectilePassesThrough(Projectile* projectile) const {
+	bool ProjectilePassesThrough(const Projectile* projectile) const {
 		UNUSED_PARAMETER(projectile);
 		return false;
 	}

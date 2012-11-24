@@ -149,9 +149,11 @@ void MineMeshManager::MineInstance::Draw(double dT, const Camera& camera, const 
     const Point2D& position = this->mine->GetPosition();
 
     // Draw the trail emitter for the mine
-    if (this->mine->GetVelocityMagnitude() <= EPSILON || Vector2D::Dot(this->mine->GetVelocityDirection(), Vector2D(0, 1)) <= 0) {
+    if (this->mine->IsLoadedInCannonBlock() ||
+        this->mine->GetVelocityMagnitude() <= EPSILON && Vector2D::Dot(this->mine->GetVelocityDirection(), Vector2D(0, 1)) <= 0) {
         this->trailEmitter.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
     }
+ 
     this->trailEmitter.SetParticleSpawnSize(ESPInterval(mine->GetWidth()));
     this->trailEmitter.SetEmitPosition(Point3D(position[0], position[1], 0.0f));
     this->trailEmitter.Draw(camera);
