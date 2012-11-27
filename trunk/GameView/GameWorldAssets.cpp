@@ -17,15 +17,15 @@
 
 const float GameWorldAssets::COLOUR_CHANGE_TIME = 10.0f;	// Amount of time in seconds to change from one colour to the next
 const Colour GameWorldAssets::COLOUR_CHANGE_LIST[DecoWorldAssets::NUM_COLOUR_CHANGES] = {
-    Colour(0.4375f, 0.5f, 0.5647f),							// slate greyish-blue
+    Colour(0.4375f, 0.5f, 0.5647f),					// slate greyish-blue
     Colour(0.2745098f, 0.5098039f, 0.70588f),		// steel blue
-    Colour(0.28235f, 0.2392f, 0.545098f),				// slate purple-blue
+    Colour(0.28235f, 0.2392f, 0.545098f),			// slate purple-blue
     Colour(0.51372549f, 0.4352941f, 1.0f),			// slate purple
-    Colour(0.8588235f, 0.439215686f, 0.57647f),	// pale violet
-    Colour(0.8f, 0.55686f, 0.55686f),						// rosy brown 
-    Colour(0.7215686f, 0.52549f, 0.043f),				// goldenrod
+    Colour(0.8588235f, 0.439215686f, 0.57647f),	    // pale violet
+    Colour(0.8f, 0.55686f, 0.55686f),				// rosy brown 
+    Colour(0.7215686f, 0.52549f, 0.043f),			// goldenrod
     Colour(0.4196f, 0.5568627f, 0.1372549f),		// olive
-    Colour(0.4f, 0.8039215f, 0.666667f),				// deep aquamarine
+    Colour(0.4f, 0.8039215f, 0.666667f),			// deep aquamarine
     Colour(0.3725f, 0.6196078f, 0.62745098f)		// cadet (olive-) blue
 };
 
@@ -52,9 +52,6 @@ GameWorldAssets::GameWorldAssets(Skybox* skybox, Mesh* bg, Mesh* paddle, Mesh* s
 
 	this->currBGMeshColourAnim.SetRepeat(true);
 	this->currBGMeshColourAnim.SetLerp(timeValues, colourValues);
-
-
-
 }
 
 GameWorldAssets::~GameWorldAssets() {

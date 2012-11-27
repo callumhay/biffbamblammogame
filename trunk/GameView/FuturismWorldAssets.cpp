@@ -15,62 +15,159 @@
 // TODO: Get rid of this
 #include "DecoSkybox.h"
 
+#define STARTING_BACK_BEAM_ANGLE  18.0f
+#define STARTING_FRONT_BEAM_ANGLE -15.0f
+
 FuturismWorldAssets::FuturismWorldAssets() :
 GameWorldAssets(new DecoSkybox(),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->FUTURISM_BACKGROUND_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->FUTURISM_PADDLE_MESH),
     ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->FUTURISM_BLOCK_MESH)),
 
-rotateEffectorCW(0, 5, ESPParticleRotateEffector::CLOCKWISE),
-rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
+beamMesh(ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->SKYBEAM_MESH)),
+backBeamEffect(new CgFxVolumetricEffect()),
+frontBeamEffect(new CgFxVolumetricEffect()),
+
+rotBackLeftBeam1(STARTING_BACK_BEAM_ANGLE),
+rotBackLeftBeam2(STARTING_BACK_BEAM_ANGLE),
+rotBackLeftBeam3(STARTING_BACK_BEAM_ANGLE),
+rotBackRightBeam1(-STARTING_BACK_BEAM_ANGLE),
+rotBackRightBeam2(-STARTING_BACK_BEAM_ANGLE),
+rotBackRightBeam3(-STARTING_BACK_BEAM_ANGLE),
+
+rotFrontLeftBeam1(STARTING_FRONT_BEAM_ANGLE),
+rotFrontLeftBeam2(STARTING_FRONT_BEAM_ANGLE),
+rotFrontLeftBeam3(STARTING_FRONT_BEAM_ANGLE),
+rotFrontRightBeam1(-STARTING_FRONT_BEAM_ANGLE),
+rotFrontRightBeam2(-STARTING_FRONT_BEAM_ANGLE),
+rotFrontRightBeam3(-STARTING_FRONT_BEAM_ANGLE)
+
+//rotateEffectorCW(0, 5, ESPParticleRotateEffector::CLOCKWISE),
+//rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
 {
+	// Setup the beam effects
+	this->backBeamEffect->SetColour(Colour(1, 1, 1));
+	this->backBeamEffect->SetFadeExponent(1.5f);
+	this->backBeamEffect->SetScale(0.025f);
+	this->backBeamEffect->SetFrequency(3.0f);
+	this->backBeamEffect->SetAlphaMultiplier(0.7f);
+
+	this->frontBeamEffect->SetColour(Colour(1, 1, 1));
+	this->frontBeamEffect->SetFadeExponent(2.25f);
+	this->frontBeamEffect->SetScale(0.05f);
+	this->frontBeamEffect->SetFrequency(4.0f);
+	this->frontBeamEffect->SetAlphaMultiplier(0.45f);
+
     this->InitializeTextures();
     this->InitializeEmitters();
+    this->InitializeAnimations();
 }
 
 FuturismWorldAssets::~FuturismWorldAssets() {
-    bool success = false;
-    for (std::vector<Texture2D*>::iterator iter = this->shardTextures.begin();
-         iter != this->shardTextures.end(); ++iter) {
-        success = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-        assert(success);
-    }
-    this->shardTextures.clear();
+    bool success = true;
+    
+    // Clean up effects
+    delete this->backBeamEffect;
+    this->backBeamEffect = NULL;
 
-    for (std::vector<ESPVolumeEmitter*>::iterator iter = this->shardEmitters.begin();
-         iter != this->shardEmitters.end(); ++iter) {
-        ESPVolumeEmitter* currEmitter = *iter;
-        delete currEmitter;
-        currEmitter = NULL;
+    delete this->frontBeamEffect;
+    this->frontBeamEffect = NULL;
+
+    // Clean up animations
+    for (int i = 0; i < static_cast<int>(this->beamAnimators.size()); i++) {
+        AnimationMultiLerp<float>* animator = this->beamAnimators[i];
+        delete animator;
+        animator = NULL;
     }
-    this->shardEmitters.clear();
+    this->beamAnimators.clear();
+
+    // Clean up meshes
+    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->beamMesh);
+    assert(success);
 
     UNUSED_VARIABLE(success);
 }
 
-void FuturismWorldAssets::Tick(double dT) {
-    GameWorldAssets::Tick(dT);
 
-    for (std::vector<ESPVolumeEmitter*>::iterator iter = this->shardEmitters.begin();
-         iter != this->shardEmitters.end(); ++iter) {
-        (*iter)->Tick(dT);
+void FuturismWorldAssets::TickSkybeams(double dT) {
+    for (int i = 0; i < static_cast<int>(this->beamAnimators.size()); i++) {
+        this->beamAnimators[i]->Tick(dT);
     }
 }
 
 void FuturismWorldAssets::DrawBackgroundEffects(const Camera& camera) {
-    // TODO...
+	static const float BACK_BEAM_Z_OFFSET = -95.0f;
+    static const float BACK_BEAM_X_OFFSET = 5.0f;
+    static const float BACK_BEAM_SPACING  = 8.0f;
+    
+    static const float FRONT_BEAM_Z_OFFSET = -25.0f;
+    static const float FRONT_BEAM_X_OFFSET = 8.0f;
+    static const float FRONT_BEAM_SPACING  = 8.0f;
+
+    float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+	if (currBGAlpha == 0) {
+		return;
+	}
+	
+	glPushAttrib(GL_CURRENT_BIT);
+    static const float BEAM_AMT = 0.95f;
+    glColor4f(BEAM_AMT, BEAM_AMT, BEAM_AMT, std::min<float>(currBGAlpha, 0.85f));  
+
+	// Draw futurism background beams:
+
+    // Back Beams (3 beams on each side, behind the buildings)
+    glPushMatrix();
+	glTranslatef(-BACK_BEAM_X_OFFSET, -30.0f, BACK_BEAM_Z_OFFSET);
+
+    // Left back beams...
+    this->DrawBackBeam(camera, this->rotBackLeftBeam1);
+    glTranslatef(-BACK_BEAM_SPACING, 0.0f, 0.0f);
+    this->DrawBackBeam(camera, this->rotBackLeftBeam2);
+    glTranslatef(-BACK_BEAM_SPACING, 0.0f, 0.0f);
+    this->DrawBackBeam(camera, this->rotBackLeftBeam3);
+    
+    glTranslatef(2*BACK_BEAM_X_OFFSET + 2*BACK_BEAM_SPACING, 0.0f, 0.0f);
+
+    // Right back beams...
+    this->DrawBackBeam(camera, this->rotBackRightBeam1);
+    glTranslatef(BACK_BEAM_SPACING, 0.0f, 0.0f);
+    this->DrawBackBeam(camera, this->rotBackRightBeam2);
+    glTranslatef(BACK_BEAM_SPACING, 0.0f, 0.0f);
+    this->DrawBackBeam(camera, this->rotBackRightBeam3);
+
+    glPopMatrix();
+
+
+    // Front beams (3 beams on each side, infront of buildings)
+    glPushMatrix();
+    glTranslatef(-FRONT_BEAM_X_OFFSET, -50.0f, FRONT_BEAM_Z_OFFSET);
+
+    // Left front beams...
+    this->DrawFrontBeam(camera, this->rotFrontLeftBeam1);
+    glTranslatef(-FRONT_BEAM_SPACING, 0.0f, 0.0f);
+    this->DrawFrontBeam(camera, this->rotFrontLeftBeam2);
+    glTranslatef(-FRONT_BEAM_SPACING, 0.0f, 0.0f);
+    this->DrawFrontBeam(camera, this->rotFrontLeftBeam3);
+
+    glTranslatef(2*FRONT_BEAM_X_OFFSET + 2*FRONT_BEAM_SPACING, 0.0f, 0.0f);
+
+    // Right front beams...
+    this->DrawFrontBeam(camera, this->rotFrontRightBeam1);
+    glTranslatef(FRONT_BEAM_SPACING, 0.0f, 0.0f);
+    this->DrawFrontBeam(camera, this->rotFrontRightBeam2);
+    glTranslatef(FRONT_BEAM_SPACING, 0.0f, 0.0f);
+    this->DrawFrontBeam(camera, this->rotFrontRightBeam3);
+
+
+    glPopMatrix();
+    
+    glPopAttrib();
 }
 
 void FuturismWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight,
                                               const BasicPointLight& bgFillLight) {
 
     const Colour& currBGModelColour = this->currBGMeshColourAnim.GetInterpolantValue();
-
-    // Draw background sprites first
-    for (std::vector<ESPVolumeEmitter*>::iterator iter = this->shardEmitters.begin();
-         iter != this->shardEmitters.end(); ++iter) {
-        (*iter)->Draw(camera);
-    }
 
     // Draw the model with the current background colour
 	glPushAttrib(GL_CURRENT_BIT);
@@ -89,100 +186,269 @@ void FuturismWorldAssets::ResetToInitialState() {
 }
 
 void FuturismWorldAssets::InitializeTextures() {
-    assert(this->shardTextures.empty());
-    
-    this->shardTextures.reserve(4);
-
-    Texture2D* shardTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_FUTURISM_SHARD_1, Texture::Trilinear));
-    assert(shardTex != NULL);
-    this->shardTextures.push_back(shardTex);
-
-    shardTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_FUTURISM_SHARD_2, Texture::Trilinear));
-    assert(shardTex != NULL);
-    this->shardTextures.push_back(shardTex);
-
-    shardTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_FUTURISM_SHARD_3, Texture::Trilinear));
-    assert(shardTex != NULL);
-    this->shardTextures.push_back(shardTex);
-
-    shardTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_FUTURISM_SHARD_4, Texture::Trilinear));
-    assert(shardTex != NULL);
-    this->shardTextures.push_back(shardTex);
+   // TODO
 }
 
 void FuturismWorldAssets::InitializeEmitters() {
-    assert(this->shardEmitters.empty());
     
-    this->shardEmitters.reserve(this->shardTextures.size());
+}
 
-	// Setup the spiral emitters that come out at the very back, behind the buildings
-	ESPInterval emitterSpawn(0.6f, 1.2f);
-	ESPInterval emitterLife(20.0f, 25.0f);
-	ESPInterval emitterSpd(5.0f, 7.0f);
+void FuturismWorldAssets::InitializeAnimations() {
+    assert(this->beamAnimators.empty());
 
-    ESPInterval xSize(6.0f, 12.0f);
-    ESPInterval ySize(3.0f, 6.0f);
+    AnimationMultiLerp<float>* animation = NULL;
 
-	const Point3D minPt(-60.0f, -30.0f, -80.0f);
-	const Point3D maxPt(60.0f, -25.0f, -67.0f);
+    static const float BACK_BEAM_SWEAP_ANGLE_MAX = 45.0f;
+    static const float BACK_BEAM_SWEAP_ANGLE_MED = BACK_BEAM_SWEAP_ANGLE_MAX - 10.0f;
+    static const float BACK_BEAM_SWEAP_ANGLE_MIN = BACK_BEAM_SWEAP_ANGLE_MED - 10.0f;
 
-    Colour shardColour(1,1,1);
+    std::vector<double> backTimes3;
+    backTimes3.reserve(5);
+    backTimes3.push_back(0.0);
+    backTimes3.push_back(3.0);
+    backTimes3.push_back(8.0);
+    backTimes3.push_back(12.0);
+    backTimes3.push_back(13.0);
 
-    for (int i = 0; i < 3; i++) {
-        Texture2D* shardTexture = this->shardTextures[i];
-        assert(shardTexture != NULL);
+    std::vector<double> backTimes2;
+    backTimes2.reserve(6);
+    backTimes2.push_back(0.0);
+    backTimes2.push_back(1.0);
+    backTimes2.push_back(4.0);
+    backTimes2.push_back(7.0);
+    backTimes2.push_back(11.0);
+    backTimes2.push_back(13.0);
 
-        ESPVolumeEmitter* shardEmitter = new ESPVolumeEmitter();
-	    shardEmitter->SetSpawnDelta(emitterSpawn);
-	    shardEmitter->SetInitialSpd(emitterSpd);
-	    shardEmitter->SetParticleLife(emitterLife);
-	    shardEmitter->SetParticleSize(xSize, ySize);
-	    shardEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	    shardEmitter->SetEmitVolume(minPt, maxPt);
-	    shardEmitter->SetEmitDirection(Vector3D(0, 1, 0));
-	    shardEmitter->SetParticleAlignment(ESP::ScreenAligned);
-	    shardEmitter->SetParticleColour(ESPInterval(shardColour.R()), ESPInterval(shardColour.G()), ESPInterval(shardColour.B()), ESPInterval(0.5f, 1.0f));
-	    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-		    shardEmitter->AddEffector(&this->rotateEffectorCW);
-	    }
-	    else {
-		    shardEmitter->AddEffector(&this->rotateEffectorCCW);
-	    }
-        shardEmitter->SetParticles(20, shardTexture);
-        this->shardEmitters.push_back(shardEmitter);
+    std::vector<double> backTimes1;
+    backTimes1.reserve(6);
+    backTimes1.push_back(0.0);
+    backTimes1.push_back(2.0);
+    backTimes1.push_back(4.0);
+    backTimes1.push_back(6.0);
+    backTimes1.push_back(10.0);
+    backTimes1.push_back(13.0);
+
+    // Back Left Beams ***********************************************************
+    {
+        std::vector<float> angles;
+        angles.reserve(5);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE + BACK_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE + BACK_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotBackLeftBeam3);
+        animation->SetLerp(backTimes3, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
     }
 
-    ESPVolumeEmitter* shardEmitter = new ESPVolumeEmitter();
-	shardEmitter->SetSpawnDelta(emitterSpawn);
-	shardEmitter->SetInitialSpd(emitterSpd);
-	shardEmitter->SetParticleLife(emitterLife);
-	shardEmitter->SetParticleSize(ESPInterval(3.0f, 8.0f));
-	shardEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
-	shardEmitter->SetEmitVolume(minPt, maxPt);
-	shardEmitter->SetEmitDirection(Vector3D(0, 1, 0));
-	shardEmitter->SetParticleAlignment(ESP::ScreenAligned);
-	shardEmitter->SetParticleColour(ESPInterval(shardColour.R()), ESPInterval(shardColour.G()), ESPInterval(shardColour.B()), ESPInterval(0.5f, 1.0f));
-	if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-		shardEmitter->AddEffector(&this->rotateEffectorCW);
-	}
-	else {
-		shardEmitter->AddEffector(&this->rotateEffectorCCW);
-	}
-    shardEmitter->SetParticles(20, this->shardTextures[3]);
+    {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE + BACK_BEAM_SWEAP_ANGLE_MED);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE + BACK_BEAM_SWEAP_ANGLE_MED);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
 
-    this->shardEmitters.push_back(shardEmitter);
+        animation = new AnimationMultiLerp<float>(&this->rotBackLeftBeam2);
+        animation->SetLerp(backTimes2, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
 
-	// Tick all the emitters for a bit to get them to look like they've been spawning for awhile
-	for (unsigned int i = 0; i < 60; i++) {
-        for (std::vector<ESPVolumeEmitter*>::iterator iter = this->shardEmitters.begin();
-             iter != this->shardEmitters.end(); ++iter) {
-            ESPVolumeEmitter* currEmitter = *iter;
-            currEmitter->Tick(0.5);
-        }
-	}
+   {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE + BACK_BEAM_SWEAP_ANGLE_MIN);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE + BACK_BEAM_SWEAP_ANGLE_MIN);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(STARTING_BACK_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotBackLeftBeam1);
+        animation->SetLerp(backTimes1, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
+
+    // Back Right Beams ***********************************************************
+    {
+        std::vector<float> angles;
+        angles.reserve(5);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE - BACK_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE - BACK_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotBackRightBeam3);
+        animation->SetLerp(backTimes3, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
+
+    {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE - BACK_BEAM_SWEAP_ANGLE_MED);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE - BACK_BEAM_SWEAP_ANGLE_MED);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotBackRightBeam2);
+        animation->SetLerp(backTimes2, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
+
+   {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE - BACK_BEAM_SWEAP_ANGLE_MIN);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE - BACK_BEAM_SWEAP_ANGLE_MIN);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+        angles.push_back(-STARTING_BACK_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotBackRightBeam1);
+        animation->SetLerp(backTimes1, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
+    
+    static const float FRONT_BEAM_SWEAP_ANGLE_MAX = 45.0f;
+
+    std::vector<double> frontTimes3;
+    frontTimes3.reserve(6);
+    frontTimes3.push_back(0.0);
+    frontTimes3.push_back(1.0);
+    frontTimes3.push_back(8.0);
+    frontTimes3.push_back(14.0);
+    frontTimes3.push_back(19.0);
+    frontTimes3.push_back(20.0);
+
+    std::vector<double> frontTimes2;
+    frontTimes2.reserve(6);
+    frontTimes2.push_back(0.0);
+    frontTimes2.push_back(2.0);
+    frontTimes2.push_back(9.0);
+    frontTimes2.push_back(13.0);
+    frontTimes2.push_back(18.0);
+    frontTimes2.push_back(20.0);
+
+    std::vector<double> frontTimes1;
+    frontTimes1.reserve(6);
+    frontTimes1.push_back(0.0);
+    frontTimes1.push_back(3.0);
+    frontTimes1.push_back(10.0);
+    frontTimes1.push_back(12.0);
+    frontTimes1.push_back(17.0);
+    frontTimes1.push_back(20.0);
+
+    // Front Left Beams ***********************************************************
+    {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE + FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE + FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotFrontLeftBeam3);
+        animation->SetLerp(frontTimes3, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
+
+    {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE + FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE + FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotFrontLeftBeam2);
+        animation->SetLerp(frontTimes2, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
+
+   {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE + FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE + FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(STARTING_FRONT_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotFrontLeftBeam1);
+        animation->SetLerp(frontTimes1, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
+
+    // Front Right Beams ***********************************************************
+    {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE - FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE - FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotFrontRightBeam3);
+        animation->SetLerp(frontTimes3, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
+
+    {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE - FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE - FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotFrontRightBeam2);
+        animation->SetLerp(frontTimes2, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
+
+   {
+        std::vector<float> angles;
+        angles.reserve(6);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE - FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE - FRONT_BEAM_SWEAP_ANGLE_MAX);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+        angles.push_back(-STARTING_FRONT_BEAM_ANGLE);
+
+        animation = new AnimationMultiLerp<float>(&this->rotFrontRightBeam1);
+        animation->SetLerp(frontTimes1, angles);
+        animation->SetRepeat(true);
+        this->beamAnimators.push_back(animation);
+    }
 
 }
