@@ -207,7 +207,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     // Tutorial hints for boosting
     ButtonTutorialHint* startingToBoostHint = new ButtonTutorialHint(tutorialAssets, "");
-    startingToBoostHint->SetActionName("Boost Mode = Hold ", false);
+    startingToBoostHint->SetActionName("Enter Boost Mode : Hold ", false);
     startingToBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     startingToBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
     startingToBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - startingToBoostHint->GetWidth()) / 2.0f,
@@ -217,7 +217,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->tutorialHints.push_back(startingToBoostHint);
 
     ButtonTutorialHint* holdBoostHint = new ButtonTutorialHint(tutorialAssets, "");
-    holdBoostHint->SetActionName("Hold and Move ", false);
+    holdBoostHint->SetActionName("Now, hold and move ", false);
     holdBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     holdBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
     holdBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - holdBoostHint->GetWidth()) / 2.0f,
@@ -226,7 +226,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->tutorialListener->SetHoldBoostHint(holdBoostHint);
     this->tutorialHints.push_back(holdBoostHint);
 
-    ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "Boost");
+    ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "Perform Boost");
 
     xboxButtonTypes.clear();
     xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
@@ -246,6 +246,8 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->tutorialListener->SetDoBoostHint(doBoostHint);
     this->tutorialHints.push_back(doBoostHint);
 
+/*
+    // TODO: REMOVE ALL POP-UP HINTS AND REPLACE WITH BUTTON HINTS!!!!
 
     // Pop-up tutorial hints - these pause the game and explain to the user how to play
     static const float TITLE_TEXT_SCALE = 1.33f;
@@ -312,4 +314,5 @@ void InTutorialGameDisplayState::InitTutorialHints() {
 
     this->tutorialListener->SetMultiplierPopupHint(multPopupHint);
     this->tutorialHints.push_back(multPopupHint);
+    */
 }
