@@ -141,7 +141,6 @@ void FuturismWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 
     glPopMatrix();
 
-
     // Front beams (3 beams on each side, infront of buildings)
     glPushMatrix();
     glTranslatef(-FRONT_BEAM_X_OFFSET, -50.0f, FRONT_BEAM_Z_OFFSET);

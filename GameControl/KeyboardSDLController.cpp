@@ -132,7 +132,7 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
     unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
     const Camera& camera = this->display->GetCamera();
     Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
-    Vector2D boostDir = Vector2D(x,openGLYCoord) - windowCenterPos;
+    Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
     if (boostDir.IsZero()) {
         boostDir[0] = 1;
     }
@@ -205,6 +205,14 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
             // Calculate the angular difference from the previous mouse position to the current,
             // this, added to the previous boost direction, determines the special direction used for ball boosting
             const Camera& camera = this->display->GetCamera();
+
+            Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
+            Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
+            if (boostDir.IsZero()) {
+                boostDir[0] = 1;
+            }
+
+            /*
             Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
 
             Vector2D previousMousePos(x - relX, openGLYCoord - openGLRelYCoord);
@@ -220,11 +228,13 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
             previousBoostDir.Rotate(sign * Trig::radiansToDegrees(angleInRadians));
             previousBoostDir = 1000 * previousBoostDir;
 
+            
+
             if (previousBoostDir.IsZero()) {
                 return;
             }
-
-            this->display->SpecialDirectionPressed(previousBoostDir[0], previousBoostDir[1]);
+            */
+            this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
         }
     }
 }

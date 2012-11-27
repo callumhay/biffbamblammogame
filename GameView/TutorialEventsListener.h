@@ -39,6 +39,7 @@ public:
     void PaddleWeaponFiredEvent();
     void LivesChangedEvent(int livesLeftBefore, int livesLeftAfter);
     void AllBallsDeadEvent(int livesLeft);
+    void LastBallAboutToDieEvent(const GameBall& lastBallToDie);
 
     void BallBoostGainedEvent();
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
@@ -51,10 +52,7 @@ public:
     void SetStartBoostHint(ButtonTutorialHint* hint) { this->startBoostHint = hint; }
     void SetDoBoostHint(ButtonTutorialHint* hint)    { this->doBoostHint = hint; }
     void SetHoldBoostHint(ButtonTutorialHint* hint)  { this->holdBoostHint = hint; }
-
-    void SetBoostPopupHint(PopupTutorialHint* hint)      { this->boostPopupHint = hint; }
-    void SetMultiplierPopupHint(PopupTutorialHint* hint) { this->multiplierPopupHint = hint; }
-        
+     
 private:
     GameDisplay* display;
 
@@ -77,9 +75,6 @@ private:
     ButtonTutorialHint* startBoostHint;
     ButtonTutorialHint* doBoostHint;
     ButtonTutorialHint* holdBoostHint;
-
-    PopupTutorialHint* boostPopupHint;
-    PopupTutorialHint* multiplierPopupHint;
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
 };
