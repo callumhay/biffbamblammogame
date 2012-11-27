@@ -56,6 +56,10 @@ private:
 
     std::vector<AnimationMultiLerp<float>*> beamAnimators; 
 
+    Texture2D* futurismTriangleTex;
+    ESPVolumeEmitter triangleEmitterSm, triangleEmitterMed, triangleEmitterLg;
+    ESPParticleColourEffector triangleFader;
+
     void InitializeTextures();
     void InitializeEmitters();
     void InitializeAnimations();
@@ -68,8 +72,18 @@ inline GameWorld::WorldStyle FuturismWorldAssets::GetStyle() const {
 }
 
 inline void FuturismWorldAssets::Tick(double dT) {
-    GameWorldAssets::Tick(dT);
     this->TickSkybeams(dT);
+
+    float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+    this->triangleEmitterSm.SetParticleAlpha(ESPInterval(currBGAlpha));
+    this->triangleEmitterMed.SetParticleAlpha(ESPInterval(currBGAlpha));
+    this->triangleEmitterLg.SetParticleAlpha(ESPInterval(currBGAlpha));
+
+    this->triangleEmitterSm.Tick(dT);
+    this->triangleEmitterMed.Tick(dT);
+    this->triangleEmitterLg.Tick(dT);
+
+    GameWorldAssets::Tick(dT);
 }
 
 inline void FuturismWorldAssets::DrawFrontBeam(const Camera& camera, float rotationAmt) {
