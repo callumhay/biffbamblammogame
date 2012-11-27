@@ -43,7 +43,7 @@ private:
 	enum RotationState { RotateCW, RotateCCW };		// CCW is moving in postive degrees, CW is negative...
 
 	double rotationLimitfg, rotationLimitbg;		// Limit of the arc of rotation for the beams
-	double rotationSpd;													// Rotation speed of beams in degrees/second
+	double rotationSpd;								// Rotation speed of beams in degrees/second
 	
 	// Current rotation amount of each beam and state
 	double beamRotationfg1, beamRotationfg2, beamRotationbg1, beamRotationbg2;				
