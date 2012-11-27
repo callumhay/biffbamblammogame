@@ -40,10 +40,10 @@ rotFrontLeftBeam2(STARTING_FRONT_BEAM_ANGLE),
 rotFrontLeftBeam3(STARTING_FRONT_BEAM_ANGLE),
 rotFrontRightBeam1(-STARTING_FRONT_BEAM_ANGLE),
 rotFrontRightBeam2(-STARTING_FRONT_BEAM_ANGLE),
-rotFrontRightBeam3(-STARTING_FRONT_BEAM_ANGLE)
+rotFrontRightBeam3(-STARTING_FRONT_BEAM_ANGLE),
 
-//rotateEffectorCW(0, 5, ESPParticleRotateEffector::CLOCKWISE),
-//rotateEffectorCCW(0, 5, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
+futurismTriangleTex(NULL),
+triangleFader(0.0f, 1.0f)
 {
 	// Setup the beam effects
 	this->backBeamEffect->SetColour(Colour(1, 1, 1));
@@ -85,6 +85,9 @@ FuturismWorldAssets::~FuturismWorldAssets() {
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->beamMesh);
     assert(success);
 
+    // Clean up textures
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->futurismTriangleTex);
+
     UNUSED_VARIABLE(success);
 }
 
@@ -96,6 +99,12 @@ void FuturismWorldAssets::TickSkybeams(double dT) {
 }
 
 void FuturismWorldAssets::DrawBackgroundEffects(const Camera& camera) {
+
+	float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
+	if (currBGAlpha == 0) {
+		return;
+	}
+
 	static const float BACK_BEAM_Z_OFFSET = -95.0f;
     static const float BACK_BEAM_X_OFFSET = 5.0f;
     static const float BACK_BEAM_SPACING  = 8.0f;
@@ -103,11 +112,6 @@ void FuturismWorldAssets::DrawBackgroundEffects(const Camera& camera) {
     static const float FRONT_BEAM_Z_OFFSET = -25.0f;
     static const float FRONT_BEAM_X_OFFSET = 8.0f;
     static const float FRONT_BEAM_SPACING  = 8.0f;
-
-    float currBGAlpha = this->bgFadeAnim.GetInterpolantValue();
-	if (currBGAlpha == 0) {
-		return;
-	}
 	
 	glPushAttrib(GL_CURRENT_BIT);
     static const float BEAM_AMT = 0.95f;
@@ -167,6 +171,11 @@ void FuturismWorldAssets::DrawBackgroundEffects(const Camera& camera) {
 void FuturismWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicPointLight& bgKeyLight,
                                               const BasicPointLight& bgFillLight) {
 
+    // Draw the triangle projectiles...
+    this->triangleEmitterSm.Draw(camera);
+    this->triangleEmitterMed.Draw(camera);
+    this->triangleEmitterLg.Draw(camera);
+
     const Colour& currBGModelColour = this->currBGMeshColourAnim.GetInterpolantValue();
 
     // Draw the model with the current background colour
@@ -186,11 +195,66 @@ void FuturismWorldAssets::ResetToInitialState() {
 }
 
 void FuturismWorldAssets::InitializeTextures() {
-   // TODO
+   assert(this->futurismTriangleTex == NULL);
+   this->futurismTriangleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+       GameViewConstants::GetInstance()->TEXTURE_FUTURISM_TRIANGLE, Texture::Trilinear, GL_TEXTURE_2D));
+	assert(this->futurismTriangleTex != NULL);
 }
 
 void FuturismWorldAssets::InitializeEmitters() {
-    
+
+	static const int NUM_PARTICLES_PER_EMITTER = 25;
+	ESPInterval triangleLife(20.0f, 25.0f);
+    ESPInterval triangleSpawn(triangleLife.minValue / NUM_PARTICLES_PER_EMITTER, triangleLife.maxValue / NUM_PARTICLES_PER_EMITTER);
+	ESPInterval triangleSpd(5.0f, 7.0f);
+
+	Colour spiralColour = COLOUR_CHANGE_LIST[0];
+
+	Point3D triangleMinPt(-80.0f, -45.0f, -70.0f);
+	Point3D triangleMaxPt(80.0f, -40.0f, -65.0f);
+
+    this->triangleEmitterSm.SetSpawnDelta(triangleSpawn);
+	this->triangleEmitterSm.SetInitialSpd(triangleSpd);
+	this->triangleEmitterSm.SetParticleLife(triangleLife);
+	this->triangleEmitterSm.SetParticleSize(ESPInterval(10.0f), ESPInterval(5.0f));
+	this->triangleEmitterSm.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->triangleEmitterSm.SetEmitVolume(triangleMinPt, triangleMaxPt);
+	this->triangleEmitterSm.SetEmitDirection(Vector3D(0, 1, 0));
+	this->triangleEmitterSm.SetParticleAlignment(ESP::ScreenAligned);
+	this->triangleEmitterSm.SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    this->triangleEmitterSm.AddEffector(&this->triangleFader);
+    this->triangleEmitterSm.SetParticles(NUM_PARTICLES_PER_EMITTER, this->futurismTriangleTex);
+	
+	this->triangleEmitterMed.SetSpawnDelta(triangleSpawn);
+	this->triangleEmitterMed.SetInitialSpd(triangleSpd);
+	this->triangleEmitterMed.SetParticleLife(triangleLife);
+	this->triangleEmitterMed.SetParticleSize(ESPInterval(22.0f), ESPInterval(11.0f));
+	this->triangleEmitterMed.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->triangleEmitterMed.SetEmitVolume(triangleMinPt, triangleMaxPt);
+	this->triangleEmitterMed.SetEmitDirection(Vector3D(0, 1, 0));
+	this->triangleEmitterMed.SetParticleAlignment(ESP::ScreenAligned);
+	this->triangleEmitterMed.SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    this->triangleEmitterMed.AddEffector(&this->triangleFader);
+	this->triangleEmitterMed.SetParticles(NUM_PARTICLES_PER_EMITTER, this->futurismTriangleTex);
+
+	this->triangleEmitterLg.SetSpawnDelta(triangleSpawn);
+	this->triangleEmitterLg.SetInitialSpd(triangleSpd);
+	this->triangleEmitterLg.SetParticleLife(triangleLife);
+	this->triangleEmitterLg.SetParticleSize(ESPInterval(38.0f), ESPInterval(19.0f));
+	this->triangleEmitterLg.SetRadiusDeviationFromCenter(ESPInterval(0.0f));
+	this->triangleEmitterLg.SetEmitVolume(triangleMinPt, triangleMaxPt);
+	this->triangleEmitterLg.SetEmitDirection(Vector3D(0, 1, 0));
+	this->triangleEmitterLg.SetParticleAlignment(ESP::ScreenAligned);
+	this->triangleEmitterLg.SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
+    this->triangleEmitterLg.AddEffector(&this->triangleFader);
+	this->triangleEmitterLg.SetParticles(NUM_PARTICLES_PER_EMITTER, this->futurismTriangleTex);
+
+	// Tick all the emitters for a bit to get them to look like they've been spawning for awhile
+	for (int i = 0; i < 60; i++) {
+		this->triangleEmitterSm.Tick(0.5);
+		this->triangleEmitterMed.Tick(0.5);
+		this->triangleEmitterLg.Tick(0.5);
+	}
 }
 
 void FuturismWorldAssets::InitializeAnimations() {
