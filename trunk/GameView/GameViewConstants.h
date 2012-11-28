@@ -171,6 +171,10 @@ public:
     const char* TEXTURE_BOOST_HUD_TUTORIAL;
     const char* TEXTURE_MULTIPLIER_TUTORIAL;
 
+    const char* TEXTURE_BOOST_TUTORIAL_ITEM;
+    const char* TEXTURE_MULTIPLIER_TUTORIAL_ITEM;
+    const char* TEXTURE_LIFE_TUTORIAL_ITEM;
+
     enum XBoxButtonType { XBoxPushButton, XBoxAnalogStick, XBoxTrigger };
     enum KeyboardButtonType { KeyboardChar, KeyboardSpaceBar };
     enum MouseButtonType { LeftMouseButton, RightMouseButton };

@@ -18,10 +18,9 @@
 
 const double PopupTutorialHint::UNSHOW_TIME = 0.33;
 
-PopupTutorialHint::PopupTutorialHint(GameModel* gameModel, size_t width) : 
-TutorialHint(), gameModel(gameModel), pane(NULL), timeToUnshow(0.0), paneHandler(NULL) {
+PopupTutorialHint::PopupTutorialHint(size_t width) : 
+TutorialHint(), pane(NULL), timeToUnshow(0.0), paneHandler(NULL) {
 
-    assert(gameModel != NULL);
     this->paneHandler = new PaneHandler(this);
     this->pane = new DecoratorOverlayPane(this->paneHandler, width, 
         GameViewConstants::GetInstance()->TUTORIAL_PANE_COLOUR);
@@ -48,9 +47,6 @@ void PopupTutorialHint::Show(double delayInSeconds, double fadeInTimeInSeconds) 
         this->listener->OnTutorialHintShown();
     }
 
-    // Pause the game
-    this->gameModel->SetPause(GameModel::PauseGame);
-
     this->isShown = true;
 }
 
@@ -64,9 +60,6 @@ void PopupTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSecond
     if (this->listener != NULL) {
         this->listener->OnTutorialHintUnshown();
     }
-
-    // Unpause the game
-    this->gameModel->UnsetPause(GameModel::PauseGame);
 
     this->isShown = false;
 }

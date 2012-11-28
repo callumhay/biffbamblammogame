@@ -2,7 +2,7 @@
  * ItemListView.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2010
+ * Callum Hay, 2012
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -22,6 +22,7 @@ class Camera;
 class TextLabel2D;
 class TextLabel2DFixedWidth;
 class KeyboardHelperLabel;
+class PopupTutorialHint;
 
 class ItemListView {
 public:
@@ -29,66 +30,112 @@ public:
     static const int DEFAULT_NUM_ITEMS_PER_ROW;
     static const int MAX_ITEM_WIDTH;
     static const int MIN_ITEM_WIDTH;
+    static const int MAX_ITEMS_PER_ROW;
     static const int HORIZ_ITEM_ACTIVATED_BORDER;
     static const int BLACK_BORDER_HEIGHT;
 
 	class ListItem {
 	public:
-		ListItem(const ItemListView* parent, size_t index, const std::string& name, 
-                 const std::string& description, const std::string& finePrint, const Colour& colour,
-                 const Texture* itemTexture, bool isLocked, bool hasBeenViewed);
-		~ListItem();
+		ListItem(const ItemListView* parent, size_t index, const std::string& name,
+            const Texture* itemTexture, bool isLocked);
+		virtual ~ListItem();
 
-        void Tick(double dT);
+        virtual void Activated() {};
+        virtual void Deactivated() {};
+
+        virtual void Tick(double dT);
+        virtual void DrawAsActivated(double dT, const Camera& camera) = 0;
+        virtual void TurnOffNewLabel() {};
+        virtual void DrawNewLabel(float bottomLeftX, float bottomLeftY, size_t width, size_t height, float alpha, float scale);
+        virtual Colour GetColour() const = 0;
+
         void DrawSelection(const Camera& camera, size_t width, size_t height, 
                            float alphaOrange, float alphaYellow, float scale, float otherScale);
 
 		void DrawItem(const Camera& camera, size_t width, size_t height, float alpha, float scale);
         void DrawItem(const Camera& camera, size_t width, size_t height, float alpha);
-        void DrawNewLabel(float bottomLeftX, float bottomLeftY, size_t width, size_t height, float alpha, float scale);
 
         void SetSelected(bool isSelected);
-        void TurnOffNewLabel();
-
-        const Colour& GetColour() const { return this->colour; }
-		TextLabel2D* GetNameLbl() const { return this->nameLbl; }
-        TextLabel2DFixedWidth* GetDescriptionLbl() const { return this->descriptionLbl; }
-        TextLabel2DFixedWidth* GetFinePrintLbl() const { return this->finePrintLbl; }
 
         size_t GetIndex() const { return this->index; }
+        TextLabel2D* GetNameLbl() const { return this->nameLbl; }
         bool GetIsLocked() const { return this->isLocked; }
 
-	private:
+	protected:
+        const ItemListView* parent;
         size_t index;
-		bool isLocked;
-        Colour colour;
-        TextLabel2D* nameLbl;
-        TextLabel2DFixedWidth* descriptionLbl;
-        TextLabel2DFixedWidth* finePrintLbl;
-        TextLabel2D* newLbl;
+        bool isLocked;
 		const Texture* texture;
-
+        TextLabel2D* nameLbl;
         float halfSelectionBorderSize;
 
         AnimationLerp<float> sizeAnimation;
-        AnimationMultiLerp<Colour> newColourFlashAnimation;
-
+        
         void DrawItemQuadBottomLeft(size_t width, size_t height);
         void DrawItemQuadCenter(float width, float height);
 
 		DISALLOW_COPY_AND_ASSIGN(ListItem);
 	};
 
+    class BlammopediaListItem : public ListItem {
+	public:
+        BlammopediaListItem(const ItemListView* parent, size_t index, const std::string& name,
+                 const std::string& description, const std::string& finePrint, const Colour& colour,
+                 const Texture* itemTexture, bool isLocked, bool hasBeenViewed);
+		~BlammopediaListItem();
 
-	ItemListView(size_t width);
+        void Tick(double dT);
+        void DrawAsActivated(double dT, const Camera& camera);
+        void TurnOffNewLabel();
+        void DrawNewLabel(float bottomLeftX, float bottomLeftY, size_t width, size_t height, float alpha, float scale);
+
+        Colour GetColour() const { return this->colour; }
+        TextLabel2DFixedWidth* GetDescriptionLbl() const { return this->descriptionLbl; }
+        TextLabel2DFixedWidth* GetFinePrintLbl() const { return this->finePrintLbl; }
+
+	private:
+        Colour colour;
+        TextLabel2DFixedWidth* descriptionLbl;
+        TextLabel2DFixedWidth* finePrintLbl;
+        TextLabel2D* newLbl;
+
+        AnimationMultiLerp<Colour> newColourFlashAnimation;
+
+		DISALLOW_COPY_AND_ASSIGN(BlammopediaListItem);
+	};
+
+    class TutorialListItem : public ListItem {
+    public:
+        TutorialListItem(const ItemListView* parent, size_t index, const std::string& name,
+            PopupTutorialHint* tutorialPopup, const Texture* itemTexture);
+        ~TutorialListItem();
+
+        void Activated();
+        void Deactivated();
+
+        void Tick(double dT);
+        void DrawAsActivated(double dT, const Camera& camera);
+
+        Colour GetColour() const { return Colour(1.0f, 1.0f, 1.0f); }
+
+    private:
+        PopupTutorialHint* tutorialPopup;
+
+        DISALLOW_COPY_AND_ASSIGN(TutorialListItem);
+    };
+
+
+	ItemListView(size_t width, size_t height);
 	~ItemListView();
 
-    void Tick(double dT);
-	void Draw(const Camera& camera);
+
+	void Draw(double dT, const Camera& camera);
     void DrawPost(const Camera& camera);
 
-    ItemListView::ListItem* AddItem(const std::string& name, const std::string& description, const std::string& finePrint,
+    ItemListView::ListItem* AddBlammopediaItem(const std::string& name, const std::string& description, const std::string& finePrint,
                                     const Colour& colour, const Texture* itemTexture, bool isLocked, bool hasBeenViewed);
+    ItemListView::ListItem* AddTutorialItem(const std::string& name, const Texture* itemTexture, PopupTutorialHint* item);
+
     void SetSelectedItemIndex(int index);
 	ItemListView::ListItem* GetSelectedItem() const;
     bool GetIsItemActivated() const;
@@ -106,7 +153,7 @@ private:
 	size_t horizontalBorder, verticalBorder;
 	size_t horizontalGap, verticalGap;
 	size_t itemPixelWidth, itemPixelHeight;
-    size_t listWidth;
+    const size_t listWidth, listHeight;
     int numItemsPerRow;
 
     KeyboardHelperLabel* keyLabel;
@@ -150,6 +197,8 @@ private:
     void StartLockedAnimation();
 
     void SetSelection(int index);
+
+    void Tick(double dT);
 
 	DISALLOW_COPY_AND_ASSIGN(ItemListView);
 };

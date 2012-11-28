@@ -17,7 +17,7 @@
 
 class PopupTutorialHint : public TutorialHint {
 public:
-    PopupTutorialHint(GameModel* gameModel, size_t width);
+    PopupTutorialHint(size_t width);
     ~PopupTutorialHint();
 
     DecoratorOverlayPane* GetPane() const {
@@ -32,6 +32,7 @@ public:
     void Show(double delayInSeconds, double fadeInTimeInSeconds);
     void Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow = false);
 
+    void JustTick(double dT);
     void Draw(double dT, const Camera& camera, bool drawWithDepth = false, float depth = 0.0f);
 
 private:
@@ -47,7 +48,6 @@ private:
         PopupTutorialHint* popupHint;
     };
 
-    GameModel* gameModel;
     DecoratorOverlayPane* pane;
     OverlayPaneEventHandler* paneHandler;
 

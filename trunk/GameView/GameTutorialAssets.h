@@ -39,6 +39,10 @@ public:
     const Texture2D* GetBoostTutorialDirTexture() const;
     const Texture2D* GetMultiplierTutorialTexture() const;
 
+    const Texture2D* GetBoostTutorialItemTexture() const;
+    const Texture2D* GetMultiplierTutorialItemTexture() const;
+    const Texture2D* GetLifeTutorialItemTexture() const;
+
 private:
     Texture2D* xbox360ButtonTex;
     Texture2D* xbox360AnalogStickTex;
@@ -51,6 +55,10 @@ private:
     Texture2D* boostTutorialHUDTex;
     Texture2D* boostTutorialDirTex;
     Texture2D* multiplierTutorialTex;
+
+    Texture2D* boostTutorialItemTex;
+    Texture2D* multiplierTutorialItemTex;
+    Texture2D* lifeTutorialItemTex;
 
     void Init();
     void Release();
@@ -96,6 +104,18 @@ inline const Texture2D* GameTutorialAssets::GetBoostTutorialDirTexture() const {
 
 inline const Texture2D* GameTutorialAssets::GetMultiplierTutorialTexture() const {
     return this->multiplierTutorialTex;
+}
+
+inline const Texture2D* GameTutorialAssets::GetBoostTutorialItemTexture() const {
+    return this->boostTutorialItemTex;
+}
+
+inline const Texture2D* GameTutorialAssets::GetMultiplierTutorialItemTexture() const {
+    return this->multiplierTutorialItemTex;
+}
+
+inline const Texture2D* GameTutorialAssets::GetLifeTutorialItemTexture() const {
+    return this->lifeTutorialItemTex;
 }
 
 #endif // __GAMETUTORIALASSETS_H__
