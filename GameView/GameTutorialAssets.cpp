@@ -117,6 +117,20 @@ void GameTutorialAssets::Init() {
     this->multiplierTutorialTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_TUTORIAL, Texture::Trilinear));
     assert(this->boostTutorialDirTex != NULL);
+
+
+    this->boostTutorialItemTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_BOOST_TUTORIAL_ITEM, Texture::Trilinear));
+    assert(this->boostTutorialHUDTex != NULL);
+
+    this->multiplierTutorialItemTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_MULTIPLIER_TUTORIAL_ITEM, Texture::Trilinear));
+    assert(this->boostTutorialDirTex != NULL);
+    
+    this->lifeTutorialItemTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_LIFE_TUTORIAL_ITEM, Texture::Trilinear));
+    assert(this->boostTutorialDirTex != NULL);
+
 }
 
 void GameTutorialAssets::Release() {
@@ -141,5 +155,12 @@ void GameTutorialAssets::Release() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->boostTutorialDirTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierTutorialTex);
+    assert(success);
+
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->boostTutorialItemTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierTutorialItemTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lifeTutorialItemTex);
     assert(success);
 }

@@ -43,8 +43,6 @@ public:
 private:
     static const int ITEM_NAME_BORDER_SIZE;
     static const int TOTAL_MENU_HEIGHT;
-	static const size_t ITEMS_LIST_VIEW_INDEX;
-	static const size_t BLOCKS_LIST_VIEW_INDEX;
 
 	size_t currListViewIndex;
 	std::vector<ItemListView*> listViews;
@@ -54,13 +52,15 @@ private:
     TextLabel2D selectedItemNameLbl;
 
     std::map<ItemListView::ListItem*, Blammopedia::Entry*> itemToEntryMap;
+    //std::map<ItemListView::ListItem*, PopupTutorialHint*> itemToTutorialMap;
 
     // Menu items and states
-    static const int NO_MENU_ITEM_INDEX     = -1;
-    static const int ITEMS_MENU_ITEM_INDEX  = 0; 
-    static const int BLOCK_MENU_ITEM_INDEX  = 1;
-    static const int BACK_MENU_ITEM_INDEX   = 2;
-    static const int TOTAL_NUM_MENU_ITEMS   = 3;
+    static const int NO_MENU_ITEM_INDEX       = -1;
+    static const int GAMEPLAY_MENU_ITEM_INDEX = 0;
+    static const int ITEMS_MENU_ITEM_INDEX    = 1; 
+    static const int BLOCK_MENU_ITEM_INDEX    = 2;
+    static const int BACK_MENU_ITEM_INDEX     = 3;
+    static const int TOTAL_NUM_MENU_ITEMS     = 4;
     
     static const char* LOCKED_NAME;
 
@@ -73,15 +73,13 @@ private:
 
     int currMenuItemIndex;
     std::vector<TextLabel2D*> blammoMenuLabels;
-    //TextLabel2D backMenuItem;
-    //TextLabel2D itemListMenuItem;
-    //TextLabel2D blockListMenuItem;
 
     AnimationLerp<float> itemSelTabAnim;     // Animation for when an item is selected in the menu and the tab to highlight it moves
     AnimationMultiLerp<float> itemHighlightWiggle; // Animation to wiggle the highlighted item
 
     bool goBackToMainMenu;
 
+    ItemListView* BuildGameplayListView();
 	ItemListView* BuildGameItemsListView(Blammopedia* blammopedia);
 	ItemListView* BuildGameBlockListView(Blammopedia* blammopedia);
 

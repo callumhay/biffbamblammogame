@@ -12,11 +12,12 @@
 #include "BlammopediaState.h"
 #include "GameDisplay.h"
 #include "GameViewConstants.h"
-
+#include "PopupTutorialHint.h"
+#include "GameAssets.h"
+#include "GameTutorialAssets.h"
 #include "GameFontAssetsManager.h"
 
 #include "../ResourceManager.h"
-
 
 #include "../BlammoEngine/Texture2D.h"
 #include "../BlammoEngine/GeometryMaker.h"
@@ -52,7 +53,8 @@ goBackToMainMenu(false) {
 
     Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
     assert(blammopedia != NULL);
-	this->listViews.reserve(2);
+	this->listViews.reserve(3);
+    this->listViews.push_back(this->BuildGameplayListView());
 	this->listViews.push_back(this->BuildGameItemsListView(blammopedia));
 	this->listViews.push_back(this->BuildGameBlockListView(blammopedia));
 
@@ -60,6 +62,15 @@ goBackToMainMenu(false) {
         GameFontAssetsManager::Medium));
     this->selectedItemNameLbl.SetColour(Colour(1, 0.65f, 0));
     this->selectedItemNameLbl.SetDropShadow(Colour(0,0,0), 0.125f);
+
+    TextLabel2D* gameplayMenuItem = new TextLabel2D();
+    gameplayMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
+        GameFontAssetsManager::Small));
+    gameplayMenuItem->SetText("Gameplay");
+    gameplayMenuItem->SetColour(IDLE_COLOUR);
+    gameplayMenuItem->SetDropShadow(Colour(0,0,0), NO_SELECTION_DROP_SHADOW_AMT);
+
+    float gameplayMenuItemScaledWidth  = BlammopediaState::SELECTION_SCALE * gameplayMenuItem->GetLastRasterWidth();
 
     TextLabel2D* itemListMenuItem = new TextLabel2D();
     itemListMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
@@ -79,8 +90,14 @@ goBackToMainMenu(false) {
 
     float blockMenuItemScaledWidth = BlammopediaState::SELECTION_SCALE *  blockMenuItem->GetLastRasterWidth();
 
-    float startMenuItemsX = (camera.GetWindowWidth() - itemListMenuItemScaledWidth - blockMenuItemScaledWidth - 2 * LABEL_ITEM_GAP)/2;
-    float topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - itemListMenuItem->GetHeight()) / 2.0f + itemListMenuItem->GetHeight();
+    float startMenuItemsX = (camera.GetWindowWidth() - gameplayMenuItemScaledWidth - itemListMenuItemScaledWidth - blockMenuItemScaledWidth - 2 * LABEL_ITEM_GAP)/2;
+    float topLeftY = 0.0f;
+    
+    topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - gameplayMenuItem->GetHeight()) / 2.0f + gameplayMenuItem->GetHeight();
+    gameplayMenuItem->SetTopLeftCorner(Point2D(startMenuItemsX, topLeftY));
+    startMenuItemsX += gameplayMenuItem->GetLastRasterWidth() + LABEL_ITEM_GAP;
+
+    topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - itemListMenuItem->GetHeight()) / 2.0f + itemListMenuItem->GetHeight();
     itemListMenuItem->SetTopLeftCorner(Point2D(startMenuItemsX, topLeftY));
     startMenuItemsX += itemListMenuItem->GetLastRasterWidth() + LABEL_ITEM_GAP;
 
@@ -96,7 +113,6 @@ goBackToMainMenu(false) {
     backMenuItem->SetDropShadow(Colour(0,0,0), NO_SELECTION_DROP_SHADOW_AMT);
     topLeftY = (BlammopediaState::TOTAL_MENU_HEIGHT - backMenuItem->GetHeight()) / 2.0f + backMenuItem->GetHeight();
     backMenuItem->SetTopLeftCorner(BlammopediaState::ITEM_NAME_BORDER_SIZE, topLeftY);
-
 
     static const double TIME_INTERVAL_AMT = 0.15;
     static const float  WIGGLE_INTERVAL_AMT = 4.0f;
@@ -117,11 +133,12 @@ goBackToMainMenu(false) {
     this->itemHighlightWiggle.SetInterpolantValue(0.0f);
 
     this->blammoMenuLabels.resize(TOTAL_NUM_MENU_ITEMS);
-    this->blammoMenuLabels[ITEMS_MENU_ITEM_INDEX]  = itemListMenuItem;
-    this->blammoMenuLabels[BLOCK_MENU_ITEM_INDEX]  = blockMenuItem;
-    this->blammoMenuLabels[BACK_MENU_ITEM_INDEX]   = backMenuItem;
+    this->blammoMenuLabels[GAMEPLAY_MENU_ITEM_INDEX] = gameplayMenuItem;
+    this->blammoMenuLabels[ITEMS_MENU_ITEM_INDEX]    = itemListMenuItem;
+    this->blammoMenuLabels[BLOCK_MENU_ITEM_INDEX]    = blockMenuItem;
+    this->blammoMenuLabels[BACK_MENU_ITEM_INDEX]     = backMenuItem;
 
-    this->SetBlammoMenuItemHighlighted(ITEMS_MENU_ITEM_INDEX);
+    this->SetBlammoMenuItemHighlighted(GAMEPLAY_MENU_ITEM_INDEX);
     this->SetBlammoMenuItemSelection();
 
     debug_opengl_state();
@@ -149,7 +166,7 @@ void BlammopediaState::RenderFrame(double dT) {
     
     ItemListView* currListView = this->GetCurrentListView();
     assert(currListView != NULL);
-    currListView->Tick(dT);
+    //currListView->Tick(dT);
 
     ItemListView::ListItem* currItem = currListView->GetSelectedItem();
 
@@ -170,31 +187,12 @@ void BlammopediaState::RenderFrame(double dT) {
     glPushMatrix();
 	glLoadIdentity();
 
-    // Now draw the currently selected list of the blammopedia...
-    glPushMatrix();
-    glTranslatef(0, camera.GetWindowHeight(), 0);
-    
-    currListView->Draw(camera);
-    glPopMatrix();
-
-    // If the user is currently selecting stuff from the menu then we grey out the list view
-    /*
-    if (this->currMenuItemIndex != NO_MENU_ITEM_INDEX) {
-        glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
-        glBegin(GL_QUADS);
-        glVertex2i(0, TOTAL_MENU_HEIGHT);
-        glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
-        glVertex2i(camera.GetWindowWidth(), camera.GetWindowHeight());
-        glVertex2i(0, camera.GetWindowHeight());
-        glEnd();
-    }
-    */
-
     this->itemSelTabAnim.Tick(dT);
 
     // Check to see if an item is activated from the current blammopedia list, if it is then it will
     // draw over the entire screen and we don't need to draw all the other stuff
     if (!currListView->GetIsItemActivated()) {
+
         // Draw the bottom menu background
         glColor4f(1, 0.65f, 0, 1.0f);
         glBegin(GL_QUADS);
@@ -267,13 +265,22 @@ void BlammopediaState::RenderFrame(double dT) {
         }
         
         // Draw the labels
-        for (std::vector<TextLabel2D*>::iterator iter = this->blammoMenuLabels.begin(); iter != this->blammoMenuLabels.end(); ++iter) {
+        for (std::vector<TextLabel2D*>::iterator iter = this->blammoMenuLabels.begin();
+             iter != this->blammoMenuLabels.end(); ++iter) {
+
             TextLabel2D* label = *iter;
             label->Draw();
         }
     }
 
     currListView->DrawPost(camera);
+
+    // Now draw the currently selected list of the blammopedia...
+    glPushMatrix();
+    glLoadIdentity();
+    glTranslatef(0, camera.GetWindowHeight(), 0);
+    currListView->Draw(dT, camera);
+    glPopMatrix();
 
     glPopMatrix();
     Camera::PopWindowCoords();
@@ -324,10 +331,14 @@ void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedBut
                 ItemListView::ListItem* selectedItem = currList->GetSelectedItem();
                 if (selectedItem != NULL) {
                     if (!selectedItem->GetIsLocked()) {
+                
                         std::map<ItemListView::ListItem*, Blammopedia::Entry*>::iterator findIter = this->itemToEntryMap.find(selectedItem);
-                        assert(findIter != this->itemToEntryMap.end());
-                        findIter->second->SetHasBeenViewed(true);
+                        if (findIter != this->itemToEntryMap.end()) {
+                            // Check if it's an item or block type of blammopedia entry...
+                            findIter->second->SetHasBeenViewed(true);
+                        }
                         selectedItem->TurnOffNewLabel();
+                        
                     }
                 }
             }
@@ -386,9 +397,80 @@ void BlammopediaState::ButtonReleased(const GameControl::ActionButton& releasedB
 	UNUSED_PARAMETER(releasedButton);
 }
 
+ItemListView* BlammopediaState::BuildGameplayListView() {
+
+    GameTutorialAssets* tutorialAssets = this->display->GetAssets()->GetTutorialAssets();
+
+    const Camera& camera = this->display->GetCamera();
+    ItemListView* itemsListView = new ItemListView(camera.GetWindowWidth(), camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+
+    static const float TITLE_TEXT_SCALE = 1.33f;
+    static const float BODY_TEXT_SCALE  = 0.75f;
+    static const size_t POPUP_TUTORIAL_HINT_WIDTH = 700;
+
+    // Tutorial item: Boosting
+    PopupTutorialHint* boostPopupHint = new PopupTutorialHint(POPUP_TUTORIAL_HINT_WIDTH);
+    DecoratorOverlayPane* boostPopupPane = boostPopupHint->GetPane();
+    boostPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
+    boostPopupPane->AddText("Ball Boosting", Colour(1,1,1), TITLE_TEXT_SCALE);
+    boostPopupPane->SetLayoutType(DecoratorOverlayPane::TwoColumn);
+    boostPopupPane->AddText(
+        std::string("During gameplay the boost gauge in the top-left will fill up making boosts available."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
+
+    const Texture2D* boostHUDImg = tutorialAssets->GetBoostTutorialHUDTexture();
+    boostPopupPane->AddImage(256, boostHUDImg);
+
+    boostPopupPane->AddText(
+        std::string("Activate it by holding down the right analog stick or the left mouse button. ") +
+        std::string("This will momentarily slow down time so you can redirect the ball. Simply let go to cancel the boost."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
+
+    const Texture2D* boostDirImg = tutorialAssets->GetBoostTutorialDirTexture();
+    boostPopupPane->AddImage(256, boostDirImg);
+
+    boostPopupPane->AddText(std::string("Either way, act quickly because the ball's got places to be."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
+
+    ItemListView::ListItem* boostingTutorialItem = itemsListView->AddTutorialItem(
+        "Tutorial: Boosting", tutorialAssets->GetBoostTutorialItemTexture(), boostPopupHint);
+    assert(boostingTutorialItem != NULL);
+    
+    // Tutorial item: Multipliers
+    PopupTutorialHint* multPopupHint  = new PopupTutorialHint(POPUP_TUTORIAL_HINT_WIDTH);
+    DecoratorOverlayPane* multPopupPane = multPopupHint->GetPane();
+    multPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
+    multPopupPane->AddText(std::string("Points and Multipliers"), Colour(1,1,1), TITLE_TEXT_SCALE);
+    multPopupPane->SetLayoutType(DecoratorOverlayPane::TwoColumn);
+    multPopupPane->AddText(
+        std::string("Maximize your pointage by consecutively destroying blocks to earn higher multipliers."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
+
+    const Texture2D* multiplierImg = tutorialAssets->GetMultiplierTutorialTexture();
+    multPopupPane->AddImage(256, multiplierImg);
+
+    multPopupPane->AddText(
+        std::string("Any multiplier will reset when a ball hits the paddle or when you lose your balls."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
+    multPopupPane->AddText(
+        std::string("Though tempting to use, certain beneficial items (lasers!) will limit your score."),
+        Colour(1,1,1), BODY_TEXT_SCALE);
+
+    ItemListView::ListItem* multiplierTutorialItem = itemsListView->AddTutorialItem(
+        "Tutorial: Points and Multipliers", tutorialAssets->GetMultiplierTutorialItemTexture(), multPopupHint);
+    assert(multiplierTutorialItem != NULL);
+
+    // Tutorial item: Life
+    // TODO
+    
+    itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
+    itemsListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
+	return itemsListView;
+}
+
 ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia) {
 	const Camera& camera = this->display->GetCamera();
-	ItemListView* itemsListView = new ItemListView(camera.GetWindowWidth());
+    ItemListView* itemsListView = new ItemListView(camera.GetWindowWidth(), camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
 	
 	// Add each item in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
@@ -415,7 +497,7 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
             currName = LOCKED_NAME;
             currDesc = "";
         }
-        ItemListView::ListItem* listItem = itemsListView->AddItem(currName, currDesc, finePrint, itemColour, texture,
+        ItemListView::ListItem* listItem = itemsListView->AddBlammopediaItem(currName, currDesc, finePrint, itemColour, texture,
             itemEntry->GetIsLocked(), itemEntry->GetHasBeenViewed());
 
         this->itemToEntryMap.insert(std::make_pair(listItem, itemEntry));
@@ -428,7 +510,7 @@ ItemListView* BlammopediaState::BuildGameItemsListView(Blammopedia* blammopedia)
 
 ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia) {
 	const Camera& camera = this->display->GetCamera();
-	ItemListView* blockListView = new ItemListView(camera.GetWindowWidth());
+	ItemListView* blockListView = new ItemListView(camera.GetWindowWidth(), camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);
 
 	// Add each block in the game to the list... check each one to see if it has been unlocked,
 	// if not then just place a 'locked' texture...
@@ -448,10 +530,10 @@ ItemListView* BlammopediaState::BuildGameBlockListView(Blammopedia* blammopedia)
         else {
             currName = LOCKED_NAME;
         }
-        ItemListView::ListItem* listItem = blockListView->AddItem(currName, currDesc, finePrint, Colour(0.3f, 0.6f, 0.85f), texture,
+        ItemListView::ListItem* listItem = blockListView->AddBlammopediaItem(currName, currDesc, finePrint, Colour(0.3f, 0.6f, 0.85f), texture,
             blockEntry->GetIsLocked(), blockEntry->GetHasBeenViewed());
 
-        itemToEntryMap.insert(std::make_pair(listItem, blockEntry));
+        this->itemToEntryMap.insert(std::make_pair(listItem, blockEntry));
     }
 
 	blockListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);

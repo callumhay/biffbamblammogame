@@ -2,7 +2,7 @@
  * ItemListView.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2010
+ * Callum Hay, 2012
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -13,6 +13,7 @@
 #include "GameFontAssetsManager.h"
 #include "GameViewConstants.h"
 #include "KeyboardHelperLabel.h"
+#include "PopupTutorialHint.h"
 
 #include "../BlammoEngine/Texture.h"
 #include "../BlammoEngine/Camera.h"
@@ -24,13 +25,14 @@
 
 const int ItemListView::NO_ITEM_SELECTED_INDEX      = -1;
 const int ItemListView::DEFAULT_NUM_ITEMS_PER_ROW   = 4;
-const int ItemListView::MAX_ITEM_WIDTH              = 200;
+const int ItemListView::MAX_ITEM_WIDTH              = 512;
 const int ItemListView::MIN_ITEM_WIDTH              = 70;
+const int ItemListView::MAX_ITEMS_PER_ROW           = 8;
 
 const int ItemListView::BLACK_BORDER_HEIGHT         = 100;
 const int ItemListView::HORIZ_ITEM_ACTIVATED_BORDER = 50;
 
-ItemListView::ItemListView(size_t width) : listWidth(width),
+ItemListView::ItemListView(size_t width, size_t height) : listWidth(width), listHeight(height),
 selectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX), 
 itemIsActivated(false), nonActivatedItemsFadeAnim(1), activatedItemFadeAnim(1), 
 activatedItemGrowAnim(1), blackBorderAnim(0.0f), activatedItemXPicAnim(width + 1), keyLabel(NULL),
@@ -133,7 +135,9 @@ void ItemListView::Tick(double dT) {
     }
 }
 
-void ItemListView::Draw(const Camera& camera) {
+void ItemListView::Draw(double dT, const Camera& camera) {
+    this->Tick(dT);
+
 	glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_COLOR_BUFFER_BIT);
 	
 	glDisable(GL_LIGHTING);
@@ -198,110 +202,14 @@ void ItemListView::Draw(const Camera& camera) {
     float activatedItemAlpha = this->activatedItemAlphaAnim.GetInterpolantValue();
     if (activatedItemAlpha > 0 && this->GetSelectedItem() != NULL) {
 
-        const Colour& itemColour = this->GetSelectedItem()->GetColour();
-        TextLabel2D* nameLbl = this->GetSelectedItem()->GetNameLbl();
-        TextLabel2DFixedWidth* descLbl = this->GetSelectedItem()->GetDescriptionLbl();
-        TextLabel2DFixedWidth* finePrintLbl = this->GetSelectedItem()->GetFinePrintLbl();
-        assert(nameLbl != NULL);
-        assert(descLbl != NULL);
-        assert(finePrintLbl != NULL);
-
-        static const float PIC_TITLE_GAP = 40;
-        static const float FINE_PRINT_DESC_GAP = 30;
-        static const float STRIPE_BORDER = 20;
-        
-        //float totalItemDisplayHeight = (this->itemPixelHeight + PIC_TITLE_GAP + descLbl->GetHeight() +
-        //    FINE_PRINT_DESC_GAP + finePrintLbl->GetHeight());
-        float itemPicX = this->activatedItemXPicAnim.GetInterpolantValue();
-
-        //float interiorHeight = (camera.GetWindowHeight() - (2 * ItemListView::BLACK_BORDER_HEIGHT) - totalItemDisplayHeight) / 2.0f;
-        float itemAndTitleYTopLeftCorner = camera.GetWindowHeight() - 2*ItemListView::BLACK_BORDER_HEIGHT;
-        float itemAndTitleYUnderPic = itemAndTitleYTopLeftCorner - this->itemPixelHeight;
-            
-        glPushMatrix();
-        glLoadIdentity();
-        
-        glDisable(GL_TEXTURE_2D);
-
-        // Draw the stripe background for the title
-        glColor4f(itemColour.R(), itemColour.G(), itemColour.B(), activatedItemAlpha);
-        glBegin(GL_QUADS);
-        glVertex2f(0, itemAndTitleYTopLeftCorner + STRIPE_BORDER);
-        glVertex2f(0, itemAndTitleYUnderPic - STRIPE_BORDER);
-        glVertex2f(camera.GetWindowWidth(), itemAndTitleYUnderPic - STRIPE_BORDER);
-        glVertex2f(camera.GetWindowWidth(), itemAndTitleYTopLeftCorner + STRIPE_BORDER);
-        glEnd();
-
-        glLineWidth(3.0f);
-        glColor4f(0, 0, 0, activatedItemAlpha);
-        glBegin(GL_LINES);
-        glVertex2f(0, itemAndTitleYTopLeftCorner + STRIPE_BORDER);
-        glVertex2f(camera.GetWindowWidth(), itemAndTitleYTopLeftCorner + STRIPE_BORDER);
-        glVertex2f(0, itemAndTitleYUnderPic - STRIPE_BORDER);
-        glVertex2f(camera.GetWindowWidth(), itemAndTitleYUnderPic - STRIPE_BORDER);
-        glEnd();
-
-        // Draw next arrows if there are other items the player could select
-        if (this->nonLockedItemsMap.size() > 1) {
-            static const float HORIZ_BORDER = 10.0f;
-            static const float VERT_BORDER  = 10.0f;
-            static const float TRI_SIZE_HORIZ = 30.0f;
-            static const float TRI_SIZE_VERT  = 60.0f;
-
-            const ColourRGBA& arrowColour = arrowFlashAnim.GetInterpolantValue();
-
-            glBegin(GL_TRIANGLES);
-            glColor4f(arrowColour.R(), arrowColour.G(), arrowColour.B(), arrowColour.A()*activatedItemAlpha);
-
-            glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
-            glVertex2f(HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
-            glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
-            
-            glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
-            glVertex2f(camera.GetWindowWidth() - HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
-            glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
-
-            glEnd();
-
-            //glColor4f(0, 0, 0, arrowColour.A());
-            //glBegin(GL_LINE_LOOP);
-            //glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
-            //glVertex2f(HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
-            //glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
-            //glEnd();
-            //glBegin(GL_LINE_LOOP);
-            //glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
-            //glVertex2f(camera.GetWindowWidth() - HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
-            //glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
-            //glEnd();
-
-        }
-
-
-        glPushMatrix();
-        glTranslatef(itemPicX, itemAndTitleYUnderPic, 0);
-        this->GetSelectedItem()->DrawItem(camera, this->itemPixelWidth, this->itemPixelHeight, activatedItemAlpha);
-        glPopMatrix();
-
-        nameLbl->SetTopLeftCorner(itemPicX + this->itemPixelWidth + PIC_TITLE_GAP, itemAndTitleYUnderPic + 1.2f * nameLbl->GetHeight());
-        nameLbl->SetAlpha(activatedItemAlpha);
-        nameLbl->Draw();
-
-        descLbl->SetTopLeftCorner(itemPicX, itemAndTitleYUnderPic - PIC_TITLE_GAP);
-        descLbl->SetAlpha(activatedItemAlpha);
-        descLbl->Draw();
-
-        finePrintLbl->SetTopLeftCorner(itemPicX, itemAndTitleYUnderPic - PIC_TITLE_GAP - descLbl->GetHeight() - FINE_PRINT_DESC_GAP);
-        finePrintLbl->SetAlpha(activatedItemAlpha);
-        finePrintLbl->Draw();
-
-        glPopMatrix();
+        this->GetSelectedItem()->DrawAsActivated(dT, camera);
     }
 
     glPopAttrib();
 }
 
 void ItemListView::DrawPost(const Camera& camera) {
+
     float blackBorderAmt = this->blackBorderAnim.GetInterpolantValue();
     if (blackBorderAmt > 0) {
         // Draw the description, picture, title of the currently activated blammopedia item entry...
@@ -352,17 +260,30 @@ void ItemListView::DrawPost(const Camera& camera) {
 }
 
 // Adds a new list item to the end of the current list 
-ItemListView::ListItem* ItemListView::AddItem(const std::string& name, const std::string& description, 
-                                              const std::string& finePrint, const Colour& colour,
-                                              const Texture* itemTexture, bool isLocked, bool hasBeenViewed) {
+ItemListView::ListItem* ItemListView::AddBlammopediaItem(const std::string& name, const std::string& description, 
+                                                         const std::string& finePrint, const Colour& colour,
+                                                         const Texture* itemTexture, bool isLocked, bool hasBeenViewed) {
 
-    ItemListView::ListItem* newItem = new ItemListView::ListItem(this, 
-        this->items.size(), name, description, finePrint, colour, itemTexture, isLocked, hasBeenViewed);
+    ItemListView::ListItem* newItem = 
+        new ItemListView::BlammopediaListItem(this, this->items.size(), name,
+        description, finePrint, colour, itemTexture, isLocked, hasBeenViewed);
 	this->items.push_back(newItem);
 
     if (!isLocked) {
         this->nonLockedItemsMap.insert(std::make_pair(newItem->GetIndex(), newItem));
     }
+
+	return newItem;
+}
+
+ItemListView::ListItem* ItemListView::AddTutorialItem(const std::string& name, const Texture* itemTexture,
+                                                      PopupTutorialHint* item) {
+
+    ItemListView::ListItem* newItem = new ItemListView::TutorialListItem(this, 
+        this->items.size(), name, item, itemTexture);
+	this->items.push_back(newItem);
+
+    this->nonLockedItemsMap.insert(std::make_pair(newItem->GetIndex(), newItem));
 
 	return newItem;
 }
@@ -386,8 +307,29 @@ void ItemListView::AdjustSizeToHeight(size_t height) {
         
         this->itemPixelWidth = itemWidth;
         this->itemPixelHeight = this->itemPixelWidth / 2;
+        if (this->numItemsPerRow > MAX_ITEMS_PER_ROW) {
+            break;
+        }
     }
     
+    if (static_cast<int>(this->items.size()) < this->numItemsPerRow) {
+        // Change the sizes to fill in the row...
+        int totalItemWidth = this->listWidth - (static_cast<int>(this->items.size()) - 1) * this->horizontalGap - 2 * this->horizontalBorder;
+        this->itemPixelWidth = totalItemWidth / static_cast<int>(this->items.size());
+        if (this->itemPixelWidth > MAX_ITEM_WIDTH) {
+            this->itemPixelWidth = MAX_ITEM_WIDTH;
+        }
+        
+        this->itemPixelHeight = this->itemPixelWidth / 2;
+
+        // Center horizontally if there's only one row...
+        this->horizontalBorder = (this->listWidth - (static_cast<int>(this->items.size()) - 1) * this->horizontalGap -
+            this->items.size() * this->itemPixelWidth) / 2;
+    }
+
+    // Center the menu vertically
+    int numRows = ceilf(static_cast<float>(this->items.size())/static_cast<float>(this->numItemsPerRow));
+    this->verticalBorder = (this->listHeight - (numRows - 1) * this->verticalGap - numRows * this->itemPixelHeight) / 2;
 }
 
 void ItemListView::ButtonPressed(const GameControl::ActionButton& pressedButton) {
@@ -544,6 +486,8 @@ void ItemListView::ItemActivated() {
         timeVals.push_back(4.0);
         this->pressEscAlphaAnim.SetLerp(timeVals, alphaVals);
         this->pressEscAlphaAnim.SetRepeat(true);
+
+        selectedItem->Activated();
     }   
 }
 
@@ -574,6 +518,8 @@ void ItemListView::ItemDeactivated() {
         this->pressEscAlphaAnim.ClearLerp();
         this->pressEscAlphaAnim.SetRepeat(false);
         this->pressEscAlphaAnim.SetInterpolantValue(0.0f);
+
+        this->GetSelectedItem()->Deactivated();
     }
 }
 
@@ -628,73 +574,31 @@ void ItemListView::SetSelection(int index) {
 
 // ListItem Methods --------------------------------------------------------------------------
 
-ItemListView::ListItem::ListItem(const ItemListView* parent, size_t index, const std::string& name, 
-                                 const std::string& description, const std::string& finePrint,
-                                 const Colour& colour, const Texture* itemTexture, bool isLocked, bool hasBeenViewed) : 
-texture(itemTexture), isLocked(isLocked), colour(colour), index(index),
-nameLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), name)), 
-descriptionLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
-               GameFontAssetsManager::Big), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, description)),
-finePrintLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
-             GameFontAssetsManager::Medium), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, finePrint)),
-newLbl(NULL)
+ItemListView::ListItem::ListItem(const ItemListView* parent, size_t index, const std::string& name,
+                                 const Texture* itemTexture, bool isLocked) : 
+parent(parent), texture(itemTexture), index(index), isLocked(isLocked),
+nameLbl(new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), name))
 {
 	assert(parent != NULL);
     assert(itemTexture != NULL);
 
     this->nameLbl->SetColour(Colour(1,1,1));
     this->nameLbl->SetDropShadow(Colour(0,0,0), 0.1f);
-    this->descriptionLbl->SetColour(Colour(0,0,0));
-    this->descriptionLbl->SetLineSpacing(10.0f);
 
     this->halfSelectionBorderSize = static_cast<float>(parent->GetSmallestBorderSize()) / 2.0f;
 
     this->sizeAnimation = AnimationLerp<float>(1.0f);
     this->sizeAnimation.SetInterpolantValue(1.0f);
     this->sizeAnimation.SetRepeat(false);
-
-    if (!isLocked && !hasBeenViewed) {
-        this->newLbl = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
-            GameFontAssetsManager::Medium), "NEW");
-
-	    std::vector<double> timeVals;
-	    timeVals.reserve(3);
-	    timeVals.push_back(0.0);
-	    timeVals.push_back(0.5);
-	    timeVals.push_back(1.0);
-	    std::vector<Colour> colourVals;
-	    colourVals.reserve(3);
-	    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
-	    colourVals.push_back(Colour(1.0f, 0.8f, 0.0f));
-	    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
-	    this->newColourFlashAnimation.SetLerp(timeVals, colourVals);
-	    this->newColourFlashAnimation.SetRepeat(true);
-
-        this->newLbl->SetColour(this->newColourFlashAnimation.GetInterpolantValue());
-        this->newLbl->SetDropShadow(Colour(0,0,0), 0.1f);
-    }
 }
 
 ItemListView::ListItem::~ListItem() {
     delete this->nameLbl;
     this->nameLbl = NULL;
-    delete this->descriptionLbl;
-    this->descriptionLbl = NULL;
-    delete this->finePrintLbl;
-    this->finePrintLbl = NULL;
-
-    if (this->newLbl != NULL) {
-        delete this->newLbl;
-        this->newLbl = NULL;
-    }
 }
 
 void ItemListView::ListItem::Tick(double dT) {
     this->sizeAnimation.Tick(dT);
-    if (this->newLbl != NULL) {
-        this->newColourFlashAnimation.Tick(dT);
-        this->newLbl->SetColour(this->newColourFlashAnimation.GetInterpolantValue());
-    }
 }
 
 void ItemListView::ListItem::DrawSelection(const Camera& camera, 
@@ -773,21 +677,10 @@ void ItemListView::ListItem::DrawItem(const Camera& camera, size_t width, size_t
     glPopMatrix();
 }
 
-void ItemListView::ListItem::DrawNewLabel(float bottomLeftX, float bottomLeftY,
-                                          size_t width, size_t height,
-                                          float alpha, float scale) {
-    UNUSED_PARAMETER(height);
-    if (this->newLbl == NULL) {
-        return;
-    }
-
-    this->newLbl->SetTopLeftCorner(bottomLeftX + width - this->newLbl->GetLastRasterWidth(),
-                                   bottomLeftY + this->newLbl->GetHeight());
-    this->newLbl->SetAlpha(alpha);
-    this->newLbl->SetScale(scale);
-
-    this->newLbl->Draw();
+void ItemListView::ListItem::DrawNewLabel(float, float,size_t, size_t, float, float) {
 }
+
+
 
 void ItemListView::ListItem::SetSelected(bool isSelected) {
     if (isSelected) {
@@ -797,13 +690,6 @@ void ItemListView::ListItem::SetSelected(bool isSelected) {
     else {
         this->sizeAnimation.SetLerp(0.2, 1.0f);
         this->sizeAnimation.SetRepeat(false);
-    }
-}
-
-void ItemListView::ListItem::TurnOffNewLabel() {
-    if (this->newLbl != NULL) {
-        delete this->newLbl;
-        this->newLbl = NULL;
     }
 }
 
@@ -833,4 +719,190 @@ void ItemListView::ListItem::DrawItemQuadCenter(float width, float height) {
     glTexCoord2i(0, 0);
 	glVertex2f(-halfWidth, -halfHeight);
 	glEnd();
+}
+
+ItemListView::BlammopediaListItem::BlammopediaListItem(const ItemListView* parent, size_t index, const std::string& name, 
+                                                       const std::string& description, const std::string& finePrint, const Colour& colour,
+                                                       const Texture* itemTexture, bool isLocked, bool hasBeenViewed) :
+ListItem(parent, index, name, itemTexture, isLocked), colour(colour), newLbl(NULL),
+descriptionLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+               GameFontAssetsManager::Big), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, description)),
+finePrintLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
+             GameFontAssetsManager::Medium), parent->GetListWidth() - 2*ItemListView::HORIZ_ITEM_ACTIVATED_BORDER, finePrint))
+{
+
+
+    this->descriptionLbl->SetColour(Colour(0,0,0));
+    this->descriptionLbl->SetLineSpacing(10.0f);
+
+    if (!isLocked && !hasBeenViewed) {
+        this->newLbl = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
+            GameFontAssetsManager::Medium), "NEW");
+
+	    std::vector<double> timeVals;
+	    timeVals.reserve(3);
+	    timeVals.push_back(0.0);
+	    timeVals.push_back(0.5);
+	    timeVals.push_back(1.0);
+	    std::vector<Colour> colourVals;
+	    colourVals.reserve(3);
+	    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+	    colourVals.push_back(Colour(1.0f, 0.8f, 0.0f));
+	    colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+	    this->newColourFlashAnimation.SetLerp(timeVals, colourVals);
+	    this->newColourFlashAnimation.SetRepeat(true);
+
+        this->newLbl->SetColour(this->newColourFlashAnimation.GetInterpolantValue());
+        this->newLbl->SetDropShadow(Colour(0,0,0), 0.1f);
+    }
+}
+
+ItemListView::BlammopediaListItem::~BlammopediaListItem() {
+    delete this->descriptionLbl;
+    this->descriptionLbl = NULL;
+    delete this->finePrintLbl;
+    this->finePrintLbl = NULL;
+
+    if (this->newLbl != NULL) {
+        delete this->newLbl;
+        this->newLbl = NULL;
+    }
+}
+
+void ItemListView::BlammopediaListItem::Tick(double dT) {
+    ListItem::Tick(dT);
+    if (this->newLbl != NULL) {
+        this->newColourFlashAnimation.Tick(dT);
+        this->newLbl->SetColour(this->newColourFlashAnimation.GetInterpolantValue());
+    }
+}
+
+void ItemListView::BlammopediaListItem::DrawAsActivated(double dT, const Camera& camera) {
+    UNUSED_PARAMETER(dT);
+
+    static const float PIC_TITLE_GAP = 40;
+    static const float FINE_PRINT_DESC_GAP = 30;
+    static const float STRIPE_BORDER = 20;
+    
+    float itemPicX = this->parent->activatedItemXPicAnim.GetInterpolantValue();
+    float itemAndTitleYTopLeftCorner = camera.GetWindowHeight() - 2*ItemListView::BLACK_BORDER_HEIGHT;
+    float itemAndTitleYUnderPic      = itemAndTitleYTopLeftCorner - this->parent->itemPixelHeight;
+
+    float activatedItemAlpha = this->parent->activatedItemAlphaAnim.GetInterpolantValue();
+
+    glPushMatrix();
+    glLoadIdentity();
+    
+    glDisable(GL_TEXTURE_2D);
+
+    // Draw the stripe background for the title
+    glColor4f(this->colour.R(), this->colour.G(), this->colour.B(), activatedItemAlpha);
+    glBegin(GL_QUADS);
+    glVertex2f(0, itemAndTitleYTopLeftCorner + STRIPE_BORDER);
+    glVertex2f(0, itemAndTitleYUnderPic - STRIPE_BORDER);
+    glVertex2f(camera.GetWindowWidth(), itemAndTitleYUnderPic - STRIPE_BORDER);
+    glVertex2f(camera.GetWindowWidth(), itemAndTitleYTopLeftCorner + STRIPE_BORDER);
+    glEnd();
+
+    glLineWidth(3.0f);
+    glColor4f(0, 0, 0, activatedItemAlpha);
+    glBegin(GL_LINES);
+    glVertex2f(0, itemAndTitleYTopLeftCorner + STRIPE_BORDER);
+    glVertex2f(camera.GetWindowWidth(), itemAndTitleYTopLeftCorner + STRIPE_BORDER);
+    glVertex2f(0, itemAndTitleYUnderPic - STRIPE_BORDER);
+    glVertex2f(camera.GetWindowWidth(), itemAndTitleYUnderPic - STRIPE_BORDER);
+    glEnd();
+
+    // Draw next arrows if there are other items the player could select
+    if (this->parent->nonLockedItemsMap.size() > 1) {
+
+        static const float HORIZ_BORDER = 10.0f;
+        static const float VERT_BORDER  = 10.0f;
+        static const float TRI_SIZE_HORIZ = 30.0f;
+        static const float TRI_SIZE_VERT  = 60.0f;
+
+        const ColourRGBA& arrowColour = this->parent->arrowFlashAnim.GetInterpolantValue();
+
+        glBegin(GL_TRIANGLES);
+        glColor4f(arrowColour.R(), arrowColour.G(), arrowColour.B(), arrowColour.A()*activatedItemAlpha);
+
+        glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
+        glVertex2f(HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
+        glVertex2f(HORIZ_BORDER + TRI_SIZE_HORIZ, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
+        
+        glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER);
+        glVertex2f(camera.GetWindowWidth() - HORIZ_BORDER, ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT/2);
+        glVertex2f(camera.GetWindowWidth() - (HORIZ_BORDER + TRI_SIZE_HORIZ), ItemListView::BLACK_BORDER_HEIGHT + VERT_BORDER + TRI_SIZE_VERT);
+
+        glEnd();
+    }
+
+    glPushMatrix();
+    glTranslatef(itemPicX, itemAndTitleYUnderPic, 0);
+    this->parent->GetSelectedItem()->DrawItem(camera, this->parent->itemPixelWidth, this->parent->itemPixelHeight, activatedItemAlpha);
+    glPopMatrix();
+
+    this->nameLbl->SetTopLeftCorner(itemPicX + this->parent->itemPixelWidth + PIC_TITLE_GAP, itemAndTitleYUnderPic + 1.2f * nameLbl->GetHeight());
+    this->nameLbl->SetAlpha(activatedItemAlpha);
+    this->nameLbl->Draw();
+
+    this->descriptionLbl->SetTopLeftCorner(itemPicX, itemAndTitleYUnderPic - PIC_TITLE_GAP);
+    this->descriptionLbl->SetAlpha(activatedItemAlpha);
+    this->descriptionLbl->Draw();
+
+    this->finePrintLbl->SetTopLeftCorner(itemPicX, itemAndTitleYUnderPic - PIC_TITLE_GAP - this->descriptionLbl->GetHeight() - FINE_PRINT_DESC_GAP);
+    this->finePrintLbl->SetAlpha(activatedItemAlpha);
+    this->finePrintLbl->Draw();
+
+    glPopMatrix();
+}
+
+void ItemListView::BlammopediaListItem::DrawNewLabel(float bottomLeftX, float bottomLeftY,
+                                          size_t width, size_t height,
+                                          float alpha, float scale) {
+    UNUSED_PARAMETER(height);
+    if (this->newLbl == NULL) {
+        return;
+    }
+
+    this->newLbl->SetTopLeftCorner(bottomLeftX + width - this->newLbl->GetLastRasterWidth(),
+                                   bottomLeftY + this->newLbl->GetHeight());
+    this->newLbl->SetAlpha(alpha);
+    this->newLbl->SetScale(scale);
+
+    this->newLbl->Draw();
+}
+
+void ItemListView::BlammopediaListItem::TurnOffNewLabel() {
+    if (this->newLbl != NULL) {
+        delete this->newLbl;
+        this->newLbl = NULL;
+    }
+}
+
+ItemListView::TutorialListItem::TutorialListItem(const ItemListView* parent, size_t index, const std::string& name,
+                                                 PopupTutorialHint* tutorialPopup, const Texture* itemTexture) :
+ListItem(parent, index, name, itemTexture, false), tutorialPopup(tutorialPopup) {
+    assert(tutorialPopup != NULL);
+
+}
+
+ItemListView::TutorialListItem::~TutorialListItem() {
+    delete this->tutorialPopup;
+    this->tutorialPopup = NULL;
+}
+
+void ItemListView::TutorialListItem::Activated() {
+    this->tutorialPopup->Show(0.0, 1.0);
+}
+
+void ItemListView::TutorialListItem::Deactivated() {
+    this->tutorialPopup->Unshow(0.0, 1.0);
+}
+
+void ItemListView::TutorialListItem::Tick(double) {
+}
+
+void ItemListView::TutorialListItem::DrawAsActivated(double dT, const Camera& camera) {
+    this->tutorialPopup->Draw(dT, camera);
 }

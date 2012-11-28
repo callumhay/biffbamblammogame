@@ -249,12 +249,14 @@ void DecoratorOverlayPane::Draw(double dT, size_t windowWidth, size_t windowHeig
         
 	    glEnable(GL_BLEND);
 	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    	
+    	glDisable(GL_TEXTURE_2D);
+
         glPushMatrix();
         glScalef(scale, scale, 1.0f);
 
         // Draw the background of the pane
         glPolygonMode(GL_FRONT, GL_FILL);
+
         glColor4f(this->bgColour.R(), this->bgColour.G(), this->bgColour.B(), bgAlpha);
         GameMenu::DrawBackgroundQuad(halfTotalWidth, halfTotalHeight);
         
