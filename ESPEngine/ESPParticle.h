@@ -120,6 +120,10 @@ public:
 		this->alpha = alpha;
 	}
 
+    void ResetLifespanLength(double secs) {
+        this->totalLifespan   = secs;
+        this->currLifeElapsed = 0.0;
+    }
 	double GetLifespanLength() const {
 		return this->totalLifespan;
 	}

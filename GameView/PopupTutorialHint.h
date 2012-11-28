@@ -32,7 +32,7 @@ public:
     void Show(double delayInSeconds, double fadeInTimeInSeconds);
     void Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow = false);
 
-    void Draw(double dT, const Camera& camera);
+    void Draw(double dT, const Camera& camera, bool drawWithDepth = false, float depth = 0.0f);
 
 private:
     static const double UNSHOW_TIME;

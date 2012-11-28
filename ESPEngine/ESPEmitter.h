@@ -89,6 +89,7 @@ public:
 
 	void AddEffector(ESPParticleEffector* effector);
 	void RemoveEffector(ESPParticleEffector* const effector);
+    void ClearEffectors();
 	void AddEventHandler(ESPEmitterEventHandler* eventHandler);
 
 	void AddParticle(ESPParticle* particle);

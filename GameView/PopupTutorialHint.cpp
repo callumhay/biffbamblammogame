@@ -71,7 +71,7 @@ void PopupTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSecond
     this->isShown = false;
 }
 
-void PopupTutorialHint::Draw(double dT, const Camera& camera) {
+void PopupTutorialHint::Draw(double dT, const Camera& camera, bool, float) {
     this->pane->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
 
     if (this->pane->IsFinished()) {

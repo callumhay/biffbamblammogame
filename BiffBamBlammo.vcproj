@@ -804,6 +804,10 @@
 					RelativePath=".\GameView\TutorialHintListeners.h"
 					>
 				</File>
+				<File
+					RelativePath=".\GameView\TutorialInGameRenderPipeline.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
@@ -870,6 +874,10 @@
 				</File>
 				<File
 					RelativePath=".\GameView\TutorialEventsListener.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GameView\TutorialInGameRenderPipeline.cpp"
 					>
 				</File>
 			</Filter>

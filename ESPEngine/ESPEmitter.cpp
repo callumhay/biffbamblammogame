@@ -434,6 +434,12 @@ void ESPEmitter::SetInitialSpd(const ESPInterval& initialSpd) {
  */
 void ESPEmitter::SetParticleLife(const ESPInterval& particleLife) {
 	this->particleLifetime.CopyFromInterval(particleLife);
+	
+    // Go through any already assigned particles and set the lifespan...
+	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+		ESPParticle* currParticle = *iter;
+		currParticle->ResetLifespanLength(particleLife.RandomValueInInterval());
+	}
 }
 
 /**
@@ -585,6 +591,10 @@ void ESPEmitter::AddParticle(ESPParticle* particle) {
 void ESPEmitter::RemoveEffector(ESPParticleEffector* const effector) {
 	assert(effector != NULL);
 	this->effectors.remove(effector);
+}
+
+void ESPEmitter::ClearEffectors() {
+    this->effectors.clear();
 }
 
 /**

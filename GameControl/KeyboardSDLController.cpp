@@ -187,11 +187,11 @@ void KeyboardSDLController::MouseButtonUp(unsigned int button) {
  * upper-left corner as the origin.
  */
 void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX, int relY) {
+    UNUSED_PARAMETER(relX);
+    UNUSED_PARAMETER(relY);
+
     // Convert to OpenGL screen-space coordinates system (origin in lower-left corner)...
     unsigned int openGLYCoord = this->display->GetCamera().GetWindowHeight() - y;
-    //debug_output("Mouse motion (absolute): " << x << ", " << openGLYCoord);
-    int openGLRelYCoord = -relY;
-    //debug_output("Mouse motion (relative): " << relX << ", " << openGLRelYCoord);
 
     if (this->model->GetCurrentStateType() == GameState::BallInPlayStateType) {
         const BallBoostModel* boostModel = this->model->GetBallBoostModel();
@@ -212,28 +212,6 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
                 boostDir[0] = 1;
             }
 
-            /*
-            Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
-
-            Vector2D previousMousePos(x - relX, openGLYCoord - openGLRelYCoord);
-            previousMousePos = previousMousePos - windowCenterPos;
-            previousMousePos.Normalize();
-
-            Vector2D currMousePos(x, openGLYCoord);
-            currMousePos = currMousePos - windowCenterPos;
-            currMousePos.Normalize();
-            
-            float angleInRadians = acos(Vector2D::Dot(previousMousePos, currMousePos));
-            float sign = NumberFuncs::SignOf(Vector3D::cross(Vector3D(previousMousePos), Vector3D(currMousePos))[2]);
-            previousBoostDir.Rotate(sign * Trig::radiansToDegrees(angleInRadians));
-            previousBoostDir = 1000 * previousBoostDir;
-
-            
-
-            if (previousBoostDir.IsZero()) {
-                return;
-            }
-            */
             this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
         }
     }
