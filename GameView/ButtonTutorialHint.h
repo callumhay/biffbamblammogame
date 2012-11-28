@@ -48,7 +48,8 @@ public:
     void Show(double delayInSeconds, double fadeInTimeInSeconds);
     void Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow = false);
 
-    void Draw(double dT, const Camera& camera, bool drawWithDepth = false, float depth = 0.0f);
+    void Tick(double dT);
+    void Draw(const Camera& camera, bool drawWithDepth = false, float depth = 0.0f);
 
 private:
     static const float BUTTON_SCALE_MULTIPLIER;

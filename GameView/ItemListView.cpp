@@ -202,7 +202,7 @@ void ItemListView::Draw(double dT, const Camera& camera) {
     float activatedItemAlpha = this->activatedItemAlphaAnim.GetInterpolantValue();
     if (activatedItemAlpha > 0 && this->GetSelectedItem() != NULL) {
 
-        this->GetSelectedItem()->DrawAsActivated(dT, camera);
+        this->GetSelectedItem()->DrawAsActivated(camera);
     }
 
     glPopAttrib();
@@ -777,8 +777,7 @@ void ItemListView::BlammopediaListItem::Tick(double dT) {
     }
 }
 
-void ItemListView::BlammopediaListItem::DrawAsActivated(double dT, const Camera& camera) {
-    UNUSED_PARAMETER(dT);
+void ItemListView::BlammopediaListItem::DrawAsActivated(const Camera& camera) {
 
     static const float PIC_TITLE_GAP = 40;
     static const float FINE_PRINT_DESC_GAP = 30;
@@ -893,16 +892,19 @@ ItemListView::TutorialListItem::~TutorialListItem() {
 }
 
 void ItemListView::TutorialListItem::Activated() {
-    this->tutorialPopup->Show(0.0, 1.0);
+    this->tutorialPopup->Show(0.0, 2.0);
 }
 
 void ItemListView::TutorialListItem::Deactivated() {
-    this->tutorialPopup->Unshow(0.0, 1.0);
+    this->tutorialPopup->Unshow(0.0, 0.6);
 }
 
-void ItemListView::TutorialListItem::Tick(double) {
+void ItemListView::TutorialListItem::Tick(double dT) {
+    ListItem::Tick(dT);
+    
+    this->tutorialPopup->Tick(dT);
 }
 
-void ItemListView::TutorialListItem::DrawAsActivated(double dT, const Camera& camera) {
-    this->tutorialPopup->Draw(dT, camera);
+void ItemListView::TutorialListItem::DrawAsActivated(const Camera& camera) {
+    this->tutorialPopup->Draw(camera);
 }

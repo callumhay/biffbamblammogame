@@ -309,18 +309,22 @@ void ButtonTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSecon
     this->isShown = false;
 }
 
-void ButtonTutorialHint::Draw(double dT, const Camera& camera, bool drawWithDepth, float depth) {
+void ButtonTutorialHint::Tick(double dT) {
+    this->fadeAnim.Tick(dT);
+    if (this->flashAnim != NULL) {
+        this->flashAnim->Tick(dT);
+    }
+}
+
+void ButtonTutorialHint::Draw(const Camera& camera, bool drawWithDepth, float depth) {
     UNUSED_PARAMETER(camera);
 
     float alpha = this->fadeAnim.GetInterpolantValue();
-    this->fadeAnim.Tick(dT);
-
     if (alpha <= 0) {
         return;
     }
 
     if (this->flashAnim != NULL) {
-        this->flashAnim->Tick(dT);
         this->actionLabel.SetColour(this->flashAnim->GetInterpolantValue());
     }
     else {

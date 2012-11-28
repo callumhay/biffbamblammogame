@@ -44,7 +44,7 @@ public:
         virtual void Deactivated() {};
 
         virtual void Tick(double dT);
-        virtual void DrawAsActivated(double dT, const Camera& camera) = 0;
+        virtual void DrawAsActivated(const Camera& camera) = 0;
         virtual void TurnOffNewLabel() {};
         virtual void DrawNewLabel(float bottomLeftX, float bottomLeftY, size_t width, size_t height, float alpha, float scale);
         virtual Colour GetColour() const = 0;
@@ -85,7 +85,7 @@ public:
 		~BlammopediaListItem();
 
         void Tick(double dT);
-        void DrawAsActivated(double dT, const Camera& camera);
+        void DrawAsActivated(const Camera& camera);
         void TurnOffNewLabel();
         void DrawNewLabel(float bottomLeftX, float bottomLeftY, size_t width, size_t height, float alpha, float scale);
 
@@ -114,7 +114,7 @@ public:
         void Deactivated();
 
         void Tick(double dT);
-        void DrawAsActivated(double dT, const Camera& camera);
+        void DrawAsActivated(const Camera& camera);
 
         Colour GetColour() const { return Colour(1.0f, 1.0f, 1.0f); }
 
