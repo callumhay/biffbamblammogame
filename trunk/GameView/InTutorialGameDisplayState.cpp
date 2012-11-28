@@ -94,7 +94,8 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
     for (std::vector<TutorialHint*>::iterator iter = this->noDepthTutorialHints.begin();
          iter != this->noDepthTutorialHints.end(); ++iter) {
         TutorialHint* hint = *iter;
-        hint->Draw(actualDt, camera);
+        hint->Draw(camera);
+        hint->Tick(actualDt);
     }
 
     this->boostCountdownHUD.Draw(camera, *this->display->GetModel(), actualDt);

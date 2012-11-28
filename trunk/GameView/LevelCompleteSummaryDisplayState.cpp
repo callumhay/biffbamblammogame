@@ -381,8 +381,9 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     if (this->difficultyChoicePane != NULL) {
-        this->difficultyChoicePane->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
-        
+        this->difficultyChoicePane->Draw(camera.GetWindowWidth(), camera.GetWindowHeight());
+        this->difficultyChoicePane->Tick(dT);
+
         // If the difficulty pane is done, clean it up
         if (this->difficultyChoicePane->IsFinished()) {
             delete this->difficultyChoicePane;

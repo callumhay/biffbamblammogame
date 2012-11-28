@@ -13,7 +13,7 @@
 #include "TutorialHintListeners.h"
 #include "GameViewConstants.h"
 
-#include "../BlammoEngine/Camera.h"
+
 #include "../GameModel/GameModel.h"
 
 const double PopupTutorialHint::UNSHOW_TIME = 0.33;
@@ -64,11 +64,11 @@ void PopupTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSecond
     this->isShown = false;
 }
 
-void PopupTutorialHint::Draw(double dT, const Camera& camera, bool, float) {
-    this->pane->Draw(dT, camera.GetWindowWidth(), camera.GetWindowHeight());
+void PopupTutorialHint::Tick(double dT) {
+    this->pane->Tick(dT);
 
     if (this->pane->IsFinished()) {
-        if (timeToUnshow >= UNSHOW_TIME) {
+        if (this->timeToUnshow >= UNSHOW_TIME) {
             this->Unshow(0.0, 0.0);
         }
         timeToUnshow += dT;

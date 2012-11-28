@@ -15,6 +15,8 @@
 #include "TutorialHint.h"
 #include "DecoratorOverlayPane.h"
 
+#include "../BlammoEngine/Camera.h"
+
 class PopupTutorialHint : public TutorialHint {
 public:
     PopupTutorialHint(size_t width);
@@ -32,8 +34,8 @@ public:
     void Show(double delayInSeconds, double fadeInTimeInSeconds);
     void Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow = false);
 
-    void JustTick(double dT);
-    void Draw(double dT, const Camera& camera, bool drawWithDepth = false, float depth = 0.0f);
+    void Tick(double dT);
+    void Draw(const Camera& camera, bool drawWithDepth = false, float depth = 0.0f);
 
 private:
     static const double UNSHOW_TIME;
@@ -55,5 +57,8 @@ private:
     DISALLOW_COPY_AND_ASSIGN(PopupTutorialHint);
 };
 
+inline void PopupTutorialHint::Draw(const Camera& camera, bool, float) {
+    this->pane->Draw(camera.GetWindowWidth(), camera.GetWindowHeight());
+}
 
 #endif // __POPUPTUTORIALHINT_H__

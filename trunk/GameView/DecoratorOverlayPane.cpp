@@ -31,16 +31,22 @@ selectedIdx(-1), optionActive(false),
 OPTION_IDLE_COLOUR(0.75f, 0.75f, 0.75f),
 OPTION_SEL_COLOUR(1.0f, 1.0f, 1.0f),
 OPTION_ACTIVE_COLOUR(1, 0.8f, 0),
-bgColour(bgColour), layout(DecoratorOverlayPane::Centered) {
+bgColour(bgColour),
+layout(DecoratorOverlayPane::Centered),
+scaleAnimation(0.001f),
+fgFadeAnimation(0.0f),
+bgFadeAnimation(0.0f) {
 
     assert(handler != NULL);
 
     this->fgFadeAnimation.ClearLerp();
     this->fgFadeAnimation.SetInterpolantValue(0.0f);
     this->fgFadeAnimation.SetRepeat(false);
+    
     this->bgFadeAnimation.ClearLerp();
     this->bgFadeAnimation.SetInterpolantValue(0.0f);
     this->bgFadeAnimation.SetRepeat(false);
+
     this->scaleAnimation.ClearLerp();
     this->scaleAnimation.SetInterpolantValue(0.001f);
     this->scaleAnimation.SetRepeat(false);
@@ -218,12 +224,21 @@ void DecoratorOverlayPane::Show(double timeInSecs) {
 }
 
 void DecoratorOverlayPane::Hide(double timeInSecs) {
-    this->fgFadeAnimation.SetLerp(timeInSecs*0.5f, 0.0f);
-    this->bgFadeAnimation.SetLerp(timeInSecs*0.5f, timeInSecs, this->bgFadeAnimation.GetInterpolantValue(), 0.0f);
-    this->scaleAnimation.SetLerp(timeInSecs*0.5f, timeInSecs, this->scaleAnimation.GetInterpolantValue(), 0.001f); 
+    this->fgFadeAnimation.SetLerp(0.5f*timeInSecs, 0.0f);
+    this->bgFadeAnimation.SetLerp(0.5f*timeInSecs, timeInSecs, 1.0f, 0.0f);
+    this->scaleAnimation.SetLerp(0.5f*timeInSecs, timeInSecs, 1.0f, 0.001f); 
 }
 
-void DecoratorOverlayPane::Draw(double dT, size_t windowWidth, size_t windowHeight) {
+void DecoratorOverlayPane::Tick(double dT) {
+    this->arrowPulseAnimation.Tick(dT);
+    this->upAndDownAnimation.Tick(dT);
+
+    this->fgFadeAnimation.Tick(dT);
+    this->bgFadeAnimation.Tick(dT);
+    this->scaleAnimation.Tick(dT);
+}
+
+void DecoratorOverlayPane::Draw(size_t windowWidth, size_t windowHeight) {
 
     float totalHeight       = std::max<float>(abs(this->currYPos), abs(this->currImgYPos)) + Y_BORDER;
     float halfTotalHeight   = totalHeight / 2.0f;
@@ -298,9 +313,6 @@ void DecoratorOverlayPane::Draw(double dT, size_t windowWidth, size_t windowHeig
             image->Draw(fgAlpha, labelXTranslation, labelYTranslation);
         }
         
-        this->arrowPulseAnimation.Tick(dT);
-        this->upAndDownAnimation.Tick(dT);
-
         assert(this->selectableOptions.size() == this->selectedSelectableOptions.size());
         for (size_t i = 0; i < this->selectableOptions.size(); i++) {
             
@@ -337,10 +349,6 @@ void DecoratorOverlayPane::Draw(double dT, size_t windowWidth, size_t windowHeig
         glPopMatrix();
         Camera::PopWindowCoords();
     }
-
-    this->fgFadeAnimation.Tick(dT);
-    this->bgFadeAnimation.Tick(dT);
-    this->scaleAnimation.Tick(dT);
 }
 
 void DecoratorOverlayPane::ButtonPressed(const GameControl::ActionButton& pressedButton) {

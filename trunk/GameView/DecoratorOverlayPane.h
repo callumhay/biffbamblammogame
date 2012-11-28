@@ -43,7 +43,8 @@ public:
     void Show(double timeInSecs);
     void Hide(double timeInSecs);
 
-    void Draw(double dT, size_t windowWidth, size_t windowHeight);
+    void Tick(double dT);
+    void Draw(size_t windowWidth, size_t windowHeight);
 
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 
