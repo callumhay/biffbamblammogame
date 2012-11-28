@@ -40,7 +40,7 @@ public:
     virtual void Show(double delayInSeconds, double fadeInTimeInSeconds) = 0;
     virtual void Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow = false) = 0;
 
-    virtual void Draw(double dT, const Camera& camera) = 0;
+    virtual void Draw(double dT, const Camera& camera, bool drawWithDepth = false, float depth = 0.0f) = 0;
 
 protected:
     static const float FADE_IN_SCALE_START;

@@ -88,6 +88,9 @@ public:
 	const ColourRGBA& GetColour() const {
 		return this->colour;
 	}
+    float GetAlpha() const {
+        return this->colour[3];
+    }
 
 protected:
     float scale;

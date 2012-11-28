@@ -21,6 +21,8 @@
 
 const float ButtonTutorialHint::BUTTON_SCALE_MULTIPLIER = 2.0f;
 
+#define ACTION_LABEL_DEFAULT_COLOUR Colour(0.3882f, 0.72157f, 1.0f)
+
 ButtonTutorialHint::ButtonTutorialHint(const GameTutorialAssets* tutorialAssets,
                                        const std::string& action) : 
 TutorialHint(), tutorialAssets(tutorialAssets),
@@ -30,32 +32,34 @@ orLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::Exp
 GameFontAssetsManager::Medium), " or  "),
 commaLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
 GameFontAssetsManager::Medium), ","),
-mouseLabel(NULL) {
+mouseLabel(NULL), flashAnim(NULL), alphaWhenShowing(1.0f) {
 
     assert(tutorialAssets != NULL);
 
     this->SetActionName(action);
-    this->actionLabel.SetColour(Colour(0.3882f, 0.72157f, 1.0f));
+    this->actionLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
     this->actionLabel.SetDropShadow(Colour(0,0,0), 0.10f);
 
     orLabel.SetScale(0.75f);
-    orLabel.SetColour(Colour(0.3882f, 0.72157f, 1.0f));
+    orLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
     orLabel.SetDropShadow(Colour(0,0,0), 0.10f);
-    commaLabel.SetColour(Colour(0.3882f, 0.72157f, 1.0f));
+    commaLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
     commaLabel.SetDropShadow(Colour(0,0,0), 0.07f);
 
     this->fadeAnim.ClearLerp();
     this->fadeAnim.SetInterpolantValue(0.0f);
     this->fadeAnim.SetRepeat(false);
-    //this->scaleAnim.ClearLerp();
-    //this->scaleAnim.SetInterpolantValue(0.0f);
-    //this->scaleAnim.SetRepeat(false);
 }
 
 ButtonTutorialHint::~ButtonTutorialHint() {
     this->ClearKeyboardKeyLabels();
     this->ClearXBoxLabels();
     this->ClearMouseLabel();
+
+    if (this->flashAnim != NULL) {
+        delete this->flashAnim;
+        this->flashAnim = NULL;
+    }
 }
 
 void ButtonTutorialHint::ClearKeyboardKeyLabels() {
@@ -214,6 +218,34 @@ void ButtonTutorialHint::SetMouseButton(GameViewConstants::MouseButtonType butto
 #endif
 }
 
+void ButtonTutorialHint::SetFlashing(bool on) {
+    if (on) {
+        if (this->flashAnim == NULL) {
+            this->flashAnim = new AnimationMultiLerp<Colour>();
+
+            std::vector<double> timeVals;
+            timeVals.reserve(3);
+            timeVals.push_back(0.0);
+            timeVals.push_back(0.5);
+            timeVals.push_back(1.0);
+            std::vector<Colour> colourVals;
+            colourVals.reserve(3);
+            colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+            colourVals.push_back(Colour(1.0f, 0.8f, 0.0f));
+            colourVals.push_back(Colour(0.0f, 0.6f, 0.9f));
+
+            this->flashAnim->SetLerp(timeVals, colourVals);
+            this->flashAnim->SetRepeat(true);
+        }
+    }
+    else {
+        if (this->flashAnim != NULL) {
+            delete this->flashAnim;
+            this->flashAnim = NULL;
+        }
+    }
+}
+
 float ButtonTutorialHint::GetHeight() const {
     return this->actionLabel.GetHeight() * BUTTON_SCALE_MULTIPLIER;
 }
@@ -254,10 +286,8 @@ float ButtonTutorialHint::GetWidth() const {
 void ButtonTutorialHint::Show(double delayInSeconds, double fadeInTimeInSeconds) {
     if (this->isShown) { return; }
 
-    this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeInTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 1.0f);
+    this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeInTimeInSeconds, this->fadeAnim.GetInterpolantValue(), this->alphaWhenShowing);
     this->fadeAnim.SetRepeat(false);
-    //this->scaleAnim.SetLerp(delayInSeconds, delayInSeconds+fadeInTimeInSeconds, TutorialHint::FADE_IN_SCALE_START, 1.0f);
-    //this->scaleAnim.SetRepeat(false);
 
     if (this->listener != NULL) {
         this->listener->OnTutorialHintShown();
@@ -271,8 +301,6 @@ void ButtonTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSecon
 
     this->fadeAnim.SetLerp(delayInSeconds, delayInSeconds+fadeOutTimeInSeconds, this->fadeAnim.GetInterpolantValue(), 0.0f);
     this->fadeAnim.SetRepeat(false);
-    //this->scaleAnim.SetLerp(delayInSeconds, fadeOutTimeInSeconds, this->scaleAnim.GetInterpolantValue(), TutorialHint::FADE_OUT_SCALE_END);
-    //this->scaleAnim.SetRepeat(false);
 
     if (this->listener != NULL) {
         this->listener->OnTutorialHintUnshown();
@@ -281,7 +309,7 @@ void ButtonTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSecon
     this->isShown = false;
 }
 
-void ButtonTutorialHint::Draw(double dT, const Camera& camera) {
+void ButtonTutorialHint::Draw(double dT, const Camera& camera, bool drawWithDepth, float depth) {
     UNUSED_PARAMETER(camera);
 
     float alpha = this->fadeAnim.GetInterpolantValue();
@@ -291,14 +319,22 @@ void ButtonTutorialHint::Draw(double dT, const Camera& camera) {
         return;
     }
 
-    float scale = 1.0f;//this->scaleAnim.GetInterpolantValue();
+    if (this->flashAnim != NULL) {
+        this->flashAnim->Tick(dT);
+        this->actionLabel.SetColour(this->flashAnim->GetInterpolantValue());
+    }
+    else {
+        this->actionLabel.SetColour(ACTION_LABEL_DEFAULT_COLOUR);
+    }
+
+    float scale = 1.0f;
     const Point2D& topLeftCorner = this->actionLabel.GetTopLeftCorner();
     float currX = topLeftCorner[0] + this->actionLabel.GetLastRasterWidth();
     const float actualCenterY = topLeftCorner[1] - this->actionLabel.GetHeight()/2.0f;
 
     // Draw the action label...
     this->actionLabel.SetAlpha(alpha);
-    this->actionLabel.Draw();
+    this->actionLabel.Draw(drawWithDepth, depth);
 
     float commaHeightDiv2 = this->commaLabel.GetHeight()/2.0f;
     float buttonLabelDiv2 = 0;
@@ -312,12 +348,12 @@ void ButtonTutorialHint::Draw(double dT, const Camera& camera) {
         ButtonGlyphLabel* buttonLabel = *iter;
         buttonLabelDiv2 = buttonLabel->GetWidth() / 2.0f;
         currX += buttonLabelDiv2;
-        buttonLabel->Draw(currX, actualCenterY, scale, alpha);
+        buttonLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
         currX += buttonLabelDiv2;
 
         if (count != this->xboxLabels.size()-1 && this->xboxLabels.size() > 1) {
             this->commaLabel.SetTopLeftCorner(currX, actualCenterY + commaHeightDiv2);
-            this->commaLabel.Draw();
+            this->commaLabel.Draw(drawWithDepth, depth);
             currX += this->commaLabel.GetLastRasterWidth();
         }
     }
@@ -326,7 +362,7 @@ void ButtonTutorialHint::Draw(double dT, const Camera& camera) {
         // Draw an 'or' label next to the xbox button label...
         this->orLabel.SetTopLeftCorner(currX, actualCenterY + this->orLabel.GetHeight()/2.0f);
         this->orLabel.SetAlpha(alpha);
-        this->orLabel.Draw();
+        this->orLabel.Draw(drawWithDepth, depth);
         currX += this->orLabel.GetLastRasterWidth();
     }
 
@@ -338,12 +374,12 @@ void ButtonTutorialHint::Draw(double dT, const Camera& camera) {
         ButtonGlyphLabel* buttonLabel = *iter;
         buttonLabelDiv2 = buttonLabel->GetWidth() / 2.0f;
         currX += buttonLabelDiv2;
-        buttonLabel->Draw(currX, actualCenterY, scale, alpha);
+        buttonLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
         currX += buttonLabelDiv2;
         
         if (count != this->keyboardKeyLabels.size()-1 && this->keyboardKeyLabels.size() > 1) {
             this->commaLabel.SetTopLeftCorner(currX, actualCenterY + commaHeightDiv2);
-            this->commaLabel.Draw();
+            this->commaLabel.Draw(drawWithDepth, depth);
             currX += this->commaLabel.GetLastRasterWidth();
         }
     }
@@ -353,11 +389,11 @@ void ButtonTutorialHint::Draw(double dT, const Camera& camera) {
             // Draw an 'or' label...
             this->orLabel.SetTopLeftCorner(currX, actualCenterY + this->orLabel.GetHeight()/2.0f);
             this->orLabel.SetAlpha(alpha);
-            this->orLabel.Draw();
+            this->orLabel.Draw(drawWithDepth, depth);
             currX += this->orLabel.GetLastRasterWidth();
         }
         currX += this->mouseLabel->GetWidth() / 2.0f;
-        this->mouseLabel->Draw(currX, actualCenterY, scale, alpha);
+        this->mouseLabel->Draw(currX, actualCenterY, scale, alpha, drawWithDepth, depth);
     }
 }
 
@@ -384,11 +420,13 @@ void ButtonTutorialHint::ButtonGlyphLabel::SetDimensions(float height, float off
     this->labelOffsetY = offsetY;
 }
 
-void ButtonTutorialHint::ButtonGlyphLabel::Draw(float centerX, float centerY, float scale, float alpha) {
+void ButtonTutorialHint::ButtonGlyphLabel::Draw(float centerX, float centerY, float scale, float alpha,
+                                                bool drawWithDepth, float depth) {
+
     float widthHeightRatio = static_cast<float>(this->buttonTexture->GetWidth()) / static_cast<float>(this->buttonTexture->GetHeight());
 
     glPushMatrix();
-    glTranslatef(centerX, centerY, 0.0f);
+    glTranslatef(centerX, centerY, depth);
     glScalef(widthHeightRatio*scale*this->height, scale*this->height, 1.0f);
 
     glColor4f(this->buttonColour.R(), this->buttonColour.G(), this->buttonColour.B(), alpha);
@@ -403,5 +441,5 @@ void ButtonTutorialHint::ButtonGlyphLabel::Draw(float centerX, float centerY, fl
 
     this->buttonLabel.SetTopLeftCorner(topLeftX + this->labelOffsetX, topLeftY + this->labelOffsetY);
     this->buttonLabel.SetAlpha(alpha);
-    this->buttonLabel.Draw();
+    this->buttonLabel.Draw(drawWithDepth, depth);
 }

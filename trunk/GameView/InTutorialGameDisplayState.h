@@ -12,8 +12,12 @@
 #ifndef __INTUTORIALGAMEDISPLAYSTATE_H__
 #define __INTUTORIALGAMEDISPLAYSTATE_H__
 
+#include "../BlammoEngine/TextLabel.h"
+
+#include "../ESPEngine/ESP.h"
+
 #include "DisplayState.h"
-#include "InGameRenderPipeline.h"
+#include "TutorialInGameRenderPipeline.h"
 #include "BoostCountdownHUD.h"
 
 class TutorialHint;
@@ -42,9 +46,10 @@ public:
 	DisplayState::DisplayStateType GetType() const;
 
 private:
-	InGameRenderPipeline renderPipeline;
+	TutorialInGameRenderPipeline renderPipeline;
     TutorialEventsListener* tutorialListener;
-    std::vector<TutorialHint*> tutorialHints;
+    std::vector<TutorialHint*> noDepthTutorialHints;
+
     BoostCountdownHUD boostCountdownHUD;
 
     void InitTutorialHints();

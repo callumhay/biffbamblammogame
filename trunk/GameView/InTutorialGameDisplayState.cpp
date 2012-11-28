@@ -19,6 +19,7 @@
 #include "ButtonTutorialHint.h"
 #include "PopupTutorialHint.h"
 #include "LivesLeftHUD.h"
+#include "BallBoostHUD.h"
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
 DisplayState(display), renderPipeline(display),
@@ -56,13 +57,13 @@ InTutorialGameDisplayState::~InTutorialGameDisplayState() {
     this->display->GetAssets()->GetLifeHUD()->ToggleInfiniteLivesDisplay(false);
 
     // Clean up all the tutorial hints
-    for (std::vector<TutorialHint*>::iterator iter = this->tutorialHints.begin();
-         iter != this->tutorialHints.end(); ++iter) {
+    for (std::vector<TutorialHint*>::iterator iter = this->noDepthTutorialHints.begin();
+         iter != this->noDepthTutorialHints.end(); ++iter) {
         TutorialHint* hint = *iter;
         delete hint;
         hint = NULL;
     }
-    this->tutorialHints.clear();
+    this->noDepthTutorialHints.clear();
 
     // Unregister and delete the tutorial events listener
     GameEventManager::Instance()->UnregisterGameEventListener(this->tutorialListener);
@@ -71,8 +72,12 @@ InTutorialGameDisplayState::~InTutorialGameDisplayState() {
 }
 
 void InTutorialGameDisplayState::RenderFrame(double dT) {
-	this->renderPipeline.RenderFrame(dT);
-    
+    GameModel* gameModel = this->display->GetModel();
+	double actualDt = dT / gameModel->GetTimeDialationFactor();
+    Camera& camera = this->display->GetCamera();
+
+    this->renderPipeline.RenderFrame(dT);
+
     // Update and draw tutorial graphics hints
     glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
 
@@ -85,15 +90,14 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-
-    double actualDt = dT / this->display->GetModel()->GetTimeDialationFactor();
-    for (std::vector<TutorialHint*>::iterator iter = this->tutorialHints.begin();
-         iter != this->tutorialHints.end(); ++iter) {
+    
+    for (std::vector<TutorialHint*>::iterator iter = this->noDepthTutorialHints.begin();
+         iter != this->noDepthTutorialHints.end(); ++iter) {
         TutorialHint* hint = *iter;
-        hint->Draw(actualDt, this->display->GetCamera());
+        hint->Draw(actualDt, camera);
     }
 
-    this->boostCountdownHUD.Draw(this->display->GetCamera(), *this->display->GetModel(), actualDt);
+    this->boostCountdownHUD.Draw(camera, *this->display->GetModel(), actualDt);
 
     glPopMatrix();
 
@@ -137,7 +141,7 @@ void InTutorialGameDisplayState::DisplaySizeChanged(int width, int height) {
 }
 
 void InTutorialGameDisplayState::InitTutorialHints() {
-    assert(this->tutorialHints.empty());
+    assert(this->noDepthTutorialHints.empty());
     assert(this->tutorialListener != NULL);
 
     GameTutorialAssets* tutorialAssets = this->display->GetAssets()->GetTutorialAssets();
@@ -167,7 +171,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
         movePaddleHint->GetHeight() + 150.0f);
 
     this->tutorialListener->SetMovePaddleHint(movePaddleHint);
-    this->tutorialHints.push_back(movePaddleHint);
+    this->noDepthTutorialHints.push_back(movePaddleHint);
     
     // Tutorial hint for firing the ball
     ButtonTutorialHint* shootBallHint = new ButtonTutorialHint(tutorialAssets, "Shoot Ball");
@@ -176,7 +180,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     shootBallHint->SetTopLeftCorner((camera.GetWindowWidth() - shootBallHint->GetWidth()) / 2.0f, shootBallHint->GetHeight() + 150.0f);
     
     this->tutorialListener->SetShootBallHint(shootBallHint);
-    this->tutorialHints.push_back(shootBallHint);
+    this->noDepthTutorialHints.push_back(shootBallHint);
 
     // Tutorial hint for firing weapons
     ButtonTutorialHint* fireWeaponHint = new ButtonTutorialHint(tutorialAssets, "Fire Weapons");
@@ -200,21 +204,29 @@ void InTutorialGameDisplayState::InitTutorialHints() {
         fireWeaponHint->GetHeight() + 150.0f);
     
     this->tutorialListener->SetFireWeaponHint(fireWeaponHint);
-    this->tutorialHints.push_back(fireWeaponHint);
+    this->noDepthTutorialHints.push_back(fireWeaponHint);
 
     // Tutorial hint for falling items
     // TODO ?
 
     // Tutorial hints for boosting
+    ButtonTutorialHint* boostAvailableHint = new ButtonTutorialHint(tutorialAssets, "");
+    boostAvailableHint->SetActionName("Boost Available!", false);
+    boostAvailableHint->SetFlashing(true);
+    boostAvailableHint->SetTopLeftCorner(BallBoostHUD::H_BORDER_SPACING,
+        camera.GetWindowHeight() - (BallBoostHUD::V_BORDER_SPACING + BallBoostHUD::BALL_BOOST_HUD_HEIGHT + 10));
+    this->tutorialListener->SetBoostAvailableHint(boostAvailableHint);
+    this->noDepthTutorialHints.push_back(boostAvailableHint);
+
     ButtonTutorialHint* startingToBoostHint = new ButtonTutorialHint(tutorialAssets, "");
-    startingToBoostHint->SetActionName("Enter Boost Mode : Hold ", false);
+    startingToBoostHint->SetActionName("Boost Mode = Hold ", false);
     startingToBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     startingToBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
     startingToBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - startingToBoostHint->GetWidth()) / 2.0f,
         startingToBoostHint->GetHeight() + 200.0f);
 
     this->tutorialListener->SetStartBoostHint(startingToBoostHint);
-    this->tutorialHints.push_back(startingToBoostHint);
+    this->noDepthTutorialHints.push_back(startingToBoostHint);
 
     ButtonTutorialHint* holdBoostHint = new ButtonTutorialHint(tutorialAssets, "");
     holdBoostHint->SetActionName("Now, hold and move ", false);
@@ -224,9 +236,9 @@ void InTutorialGameDisplayState::InitTutorialHints() {
         camera.GetWindowHeight() - 100.0f);
 
     this->tutorialListener->SetHoldBoostHint(holdBoostHint);
-    this->tutorialHints.push_back(holdBoostHint);
+    this->noDepthTutorialHints.push_back(holdBoostHint);
 
-    ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "Perform Boost");
+    ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "Perform Boost = ");
 
     xboxButtonTypes.clear();
     xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
@@ -244,75 +256,31 @@ void InTutorialGameDisplayState::InitTutorialHints() {
         doBoostHint->GetHeight() + 100.0f);
 
     this->tutorialListener->SetDoBoostHint(doBoostHint);
-    this->tutorialHints.push_back(doBoostHint);
+    this->noDepthTutorialHints.push_back(doBoostHint);
 
-/*
-    // TODO: REMOVE ALL POP-UP HINTS AND REPLACE WITH BUTTON HINTS!!!!
-
-    // Pop-up tutorial hints - these pause the game and explain to the user how to play
-    static const float TITLE_TEXT_SCALE = 1.33f;
-    static const float BODY_TEXT_SCALE  = 0.75f;
-    static const size_t POPUP_TUTORIAL_HINT_WIDTH = 700;
-
-    GameModel* gameModel = this->display->GetModel();
+    // The Points hint is hidden behind the first layer of blocks and is uncovered as the level is played
+    TextLabel2D pointHintTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
+        GameFontAssetsManager::Small), "The longer the ball is in play = More points"); 
+    pointHintTextLabel.SetColour(Colour(0.3882f, 0.72157f, 1.0f));
+    pointHintTextLabel.SetDropShadow(Colour(0,0,0), 0.10f);
     
-    // Boosting tutorial hint pop-up
-    PopupTutorialHint* boostPopupHint = new PopupTutorialHint(gameModel, POPUP_TUTORIAL_HINT_WIDTH);
-    boostPopupHint->SetListener(new BoostPopupHintListener(startingToBoostHint));
-    DecoratorOverlayPane* boostPopupPane = boostPopupHint->GetPane();
-    boostPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
-    boostPopupPane->AddText("Ball Boosting", Colour(1,1,1), TITLE_TEXT_SCALE);
-    boostPopupPane->SetLayoutType(DecoratorOverlayPane::TwoColumn);
-    boostPopupPane->AddText(
-        std::string("During gameplay the boost gauge in the top-left will fill up making boosts available."),
-        Colour(1,1,1), BODY_TEXT_SCALE);
+    //const GameLevel* level = this->display->GetModel()->GetCurrentLevel();
+    ESPPointEmitter* pointsTutorialHintEmitter = this->renderPipeline.AddEmbededTutorialHint(
+        Point3D(LevelPiece::PIECE_WIDTH * 5.0f, LevelPiece::PIECE_HEIGHT * 15.5f, LevelPiece::PIECE_DEPTH + 1.0f),
+        pointHintTextLabel, true);
+    assert(pointsTutorialHintEmitter != NULL);
 
-    const Texture2D* boostHUDImg = tutorialAssets->GetBoostTutorialHUDTexture();
-    boostPopupPane->AddImage(256, boostHUDImg);
+    this->tutorialListener->SetPointsHintEmitter(pointsTutorialHintEmitter);
 
-    boostPopupPane->AddText(
-        std::string("Activate it by holding down the right analog stick or the left mouse button. ") +
-        std::string("This will momentarily slow down time so you can redirect the ball. Simply let go to cancel the boost."),
-        Colour(1,1,1), BODY_TEXT_SCALE);
+    // Add a hint about points...
+    /*
+    ButtonTutorialHint* pointsHint = new ButtonTutorialHint(tutorialAssets, "");
+    pointsHint->SetActionName("The longer the ball is in play = More points", false);
+    pointsHint->SetAlphaWhenShowing(0.75f);
+    pointsHint->SetTopLeftCorner((camera.GetWindowWidth() - pointsHint->GetWidth()) / 2.0f,
+        camera.GetWindowHeight() - 200.0f);
 
-    const Texture2D* boostDirImg = tutorialAssets->GetBoostTutorialDirTexture();
-    boostPopupPane->AddImage(256, boostDirImg);
-
-    boostPopupPane->AddText(std::string("Either way, act quickly because the ball's got places to be."),
-        Colour(1,1,1), BODY_TEXT_SCALE);
-
-    std::vector<std::string> continueOption;
-    continueOption.reserve(1);
-    continueOption.push_back("Continue");
-    boostPopupPane->SetSelectableOptions(continueOption, 0);
-
-    this->tutorialListener->SetBoostPopupHint(boostPopupHint);
-    this->tutorialHints.push_back(boostPopupHint);
-
-    // Multiplier tutorial hint pop-up
-    PopupTutorialHint* multPopupHint  = new PopupTutorialHint(gameModel, POPUP_TUTORIAL_HINT_WIDTH);
-    //multPopupHint->SetListener(...);
-    DecoratorOverlayPane* multPopupPane = multPopupHint->GetPane();
-    multPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
-    multPopupPane->AddText(std::string("Points and Multipliers"), Colour(1,1,1), TITLE_TEXT_SCALE);
-    multPopupPane->SetLayoutType(DecoratorOverlayPane::TwoColumn);
-    multPopupPane->AddText(
-        std::string("Maximize your pointage by consecutively destroying blocks to earn higher multipliers."),
-        Colour(1,1,1), BODY_TEXT_SCALE);
-
-    const Texture2D* multiplierImg = tutorialAssets->GetMultiplierTutorialTexture();
-    multPopupPane->AddImage(256, multiplierImg);
-
-    multPopupPane->AddText(
-        std::string("Any multiplier will reset when a ball hits the paddle or when you lose your balls."),
-        Colour(1,1,1), BODY_TEXT_SCALE);
-    multPopupPane->AddText(
-        std::string("Though tempting to use, certain beneficial items (lasers!) will limit your score."),
-        Colour(1,1,1), BODY_TEXT_SCALE);
-
-    multPopupPane->SetSelectableOptions(continueOption, 0);
-
-    this->tutorialListener->SetMultiplierPopupHint(multPopupHint);
-    this->tutorialHints.push_back(multPopupHint);
+    this->tutorialListener->SetPointsHint(pointsHint);
+    this->depthTutorialHints.push_back(pointsHint);
     */
 }

@@ -2,7 +2,7 @@
  * InGameRenderPipeline.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2012
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -33,13 +33,9 @@ InGameRenderPipeline::~InGameRenderPipeline() {
 }
 	
 void InGameRenderPipeline::RenderFrameWithoutHUD(double dT) {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	// Tick the assets (update them for amount of elapsed time dT).
-	this->display->GetAssets()->Tick(dT);
-
+	this->SetupRenderFrame(dT);
 	this->ApplyInGameCamera(dT);
+
 	FBObj* backgroundFBO = this->RenderBackgroundToFBO(dT);
 	this->RenderForegroundToFBO(backgroundFBO, dT);
 	this->RenderFinalGather(dT);
@@ -48,6 +44,14 @@ void InGameRenderPipeline::RenderFrameWithoutHUD(double dT) {
 void InGameRenderPipeline::RenderFrame(double dT) {
 	this->RenderFrameWithoutHUD(dT);
 	this->RenderHUD(dT);
+}
+
+void InGameRenderPipeline::SetupRenderFrame(double dT) {
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	// Tick the assets (update them for amount of elapsed time dT).
+	this->display->GetAssets()->Tick(dT);
 }
 
 // Apply the in-game camera to the current world - this places the player camera in the correct
@@ -144,7 +148,11 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
-	// Paddle...
+
+    // Special embedded labels...
+    this->DrawSpecialEmbeddedLabels(dT);
+
+    // Paddle...
 	this->display->GetAssets()->DrawPaddle(dT, *gameModel->GetPlayerPaddle(), camera);
 	glPopMatrix();
 
@@ -229,7 +237,7 @@ void InGameRenderPipeline::RenderFinalGather(double dT) {
 	Matrix4x4 gameTransform = gameModel->GetTransformInfo()->GetGameTransform();
 	glMultMatrixf(gameTransform.begin());
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], negHalfLevelDim[2]);
-	
+
 	// Draw the dropping items if in the last pass
 	if (fboAssets->DrawItemsInLastPass()) {
 		std::list<GameItem*>& gameItems = gameModel->GetLiveItems();
@@ -306,4 +314,6 @@ void InGameRenderPipeline::SetHUDAlpha(float alpha) {
     gameAssets->GetBoostHUD()->SetAlpha(alpha);
     gameAssets->GetLifeHUD()->SetAlpha(alpha);
     gameAssets->GetPointsHUD()->SetAlpha(alpha);
+
+    this->SetSpecialLabelsAlpha(alpha);
 }

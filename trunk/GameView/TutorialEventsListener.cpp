@@ -17,7 +17,8 @@
 
 TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
-shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), doBoostHint(NULL), holdBoostHint(NULL) {
+shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), doBoostHint(NULL), holdBoostHint(NULL),
+boostAvailableHint(NULL), fadeEffector(1, 0) {
     assert(display != NULL);
 }
 
@@ -31,6 +32,7 @@ void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pres
 
         case GameControl::LeftButtonAction:
         case GameControl::RightButtonAction:
+            
             if (!this->movePaddleHintUnshown) {
                 this->movePaddleHint->Unshow(0.0, 0.25);
                 this->movePaddleHintUnshown = true;
@@ -45,6 +47,39 @@ void TutorialEventsListener::ButtonPressed(const GameControl::ActionButton& pres
 
 void TutorialEventsListener::MousePressed(const GameControl::MouseButton& pressedButton) {
     UNUSED_PARAMETER(pressedButton);
+}
+
+void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
+    UNUSED_PARAMETER(block);
+    UNUSED_PARAMETER(method);
+
+    this->numBlocksDestroyed++;
+
+    // Check to see whether the points tutorial hint has already been faded...
+    if (!this->pointsTutorialHintEmitter->IsDead()) {
+        // Figure out when to fade the points hint...
+        
+        // The following block indices must be empty to make the points hint disappear:
+        // row idx 14 - 16
+        // col idx 1 - 8
+        const GameLevel* level = this->display->GetModel()->GetCurrentLevel();
+        const std::vector<std::vector<LevelPiece*> >& levelPieces = level->GetCurrentLevelLayout();
+        bool blockIndicesAllEmpty = true;
+
+        for (int row = 14; row <= 16 && blockIndicesAllEmpty; row++) {
+            for (int col = 1; col <= 8 && blockIndicesAllEmpty; col++) {
+                if (levelPieces[row][col]->GetType() != LevelPiece::Empty) {
+                    blockIndicesAllEmpty = false;
+                }
+            }
+        }
+
+        if (blockIndicesAllEmpty) {
+            this->pointsTutorialHintEmitter->SetParticleLife(ESPInterval(3.0f));
+            this->pointsTutorialHintEmitter->ClearEffectors();
+            this->pointsTutorialHintEmitter->AddEffector(&this->fadeEffector);
+        }
+    }
 }
 
 void TutorialEventsListener::ItemActivatedEvent(const GameItem& item) {
@@ -70,6 +105,7 @@ void TutorialEventsListener::BallBoostGainedEvent() {
     
     if (boostModel->GetNumAvailableBoosts() == 1) {
         this->startBoostHint->Show(0.0, 0.5);
+        this->boostAvailableHint->Show(0.0, 0.5);
     }
 }
 
@@ -85,14 +121,22 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
             this->startBoostHint->Unshow(0.0, 0.5);
             this->doBoostHint->Show(0.0, 0.5);
             this->holdBoostHint->Show(0.0, 0.5);
+            this->boostAvailableHint->Unshow(0.0, 0.5);
+
         case BallBoostModel::BulletTime:
 
             break;
 
         case BallBoostModel::BulletTimeFadeOut:
+
             this->doBoostHint->Unshow(0.0, 0.5);
             this->holdBoostHint->Unshow(0.0, 0.5);
+
+            if (boostModel.GetNumAvailableBoosts() > 0) {
+                this->boostAvailableHint->Show(0.0, 0.5);
+            }
             break;
+
         default:
             assert(false);
             break;

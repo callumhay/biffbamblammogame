@@ -16,6 +16,8 @@
 #include "../GameControl/BBBGameController.h"
 #include "../GameSound/GameSoundAssets.h"
 
+#include "../ESPEngine/ESP.h"
+
 #include "ButtonTutorialHint.h"
 #include "PopupTutorialHint.h"
 
@@ -52,7 +54,10 @@ public:
     void SetStartBoostHint(ButtonTutorialHint* hint) { this->startBoostHint = hint; }
     void SetDoBoostHint(ButtonTutorialHint* hint)    { this->doBoostHint = hint; }
     void SetHoldBoostHint(ButtonTutorialHint* hint)  { this->holdBoostHint = hint; }
-     
+    void SetBoostAvailableHint(ButtonTutorialHint* hint)  { this->boostAvailableHint = hint; }
+    
+    void SetPointsHintEmitter(ESPPointEmitter* hint) { this->pointsTutorialHintEmitter = hint; }
+
 private:
     GameDisplay* display;
 
@@ -75,6 +80,10 @@ private:
     ButtonTutorialHint* startBoostHint;
     ButtonTutorialHint* doBoostHint;
     ButtonTutorialHint* holdBoostHint;
+    ButtonTutorialHint* boostAvailableHint;
+
+    ESPPointEmitter* pointsTutorialHintEmitter;
+    ESPParticleColourEffector fadeEffector;
 
     DISALLOW_COPY_AND_ASSIGN(TutorialEventsListener);
 };
@@ -82,12 +91,6 @@ private:
 inline void TutorialEventsListener::BallShotEvent(const GameBall& shotBall) {
     UNUSED_PARAMETER(shotBall);
     this->shootBallHint->Unshow(0.0, 0.5);
-}
-
-inline void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const LevelPiece::DestructionMethod& method) {
-    UNUSED_PARAMETER(block);
-    UNUSED_PARAMETER(method);
-    this->numBlocksDestroyed++;
 }
 
 inline void TutorialEventsListener::PaddleWeaponFiredEvent() {

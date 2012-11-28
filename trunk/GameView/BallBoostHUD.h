@@ -27,6 +27,16 @@ class Camera;
 
 class BallBoostHUD {
 public:
+    static const int LIVES_BOOST_GAP  = 10;
+
+    static const int H_BORDER_SPACING = LivesLeftHUD::BORDER_SPACING;
+    static const int V_BORDER_SPACING = LivesLeftHUD::BORDER_SPACING + LivesLeftHUD::ELEMENT_SIZE + LIVES_BOOST_GAP;
+
+    static const int BALL_BOOST_HUD_HEIGHT = 42;
+    static const int BALL_BOOST_HUD_WIDTH  = 4 * BALL_BOOST_HUD_HEIGHT;
+    static const int BALL_BOOST_HUD_HALF_HEIGHT = BALL_BOOST_HUD_HEIGHT / 2;
+    static const int BALL_BOOST_HUD_HALF_WIDTH  = BALL_BOOST_HUD_WIDTH  / 2;
+
     BallBoostHUD(int displayHeight);
     ~BallBoostHUD();
 
@@ -41,15 +51,6 @@ public:
     void SetAlpha(float alpha);
 
 private:
-    static const int LIVES_BOOST_GAP  = 10;
-    static const int H_BORDER_SPACING = LivesLeftHUD::BORDER_SPACING;
-    static const int V_BORDER_SPACING = LivesLeftHUD::BORDER_SPACING + LivesLeftHUD::ELEMENT_SIZE + LIVES_BOOST_GAP;
-
-    static const int BALL_BOOST_HUD_HEIGHT = 42;
-    static const int BALL_BOOST_HUD_WIDTH  = 4 * BALL_BOOST_HUD_HEIGHT;
-    static const int BALL_BOOST_HUD_HALF_HEIGHT = BALL_BOOST_HUD_HEIGHT / 2;
-    static const int BALL_BOOST_HUD_HALF_WIDTH  = BALL_BOOST_HUD_WIDTH  / 2;
-
     static const float BALL_FILL_START_PERCENT;
     static const float BALL_FILL_END_PERCENT;
     static const float BALL_FILL_DIFF_PERCENT;
