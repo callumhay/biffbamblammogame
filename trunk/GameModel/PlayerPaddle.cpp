@@ -320,7 +320,7 @@ void PlayerPaddle::FireAttachedProjectile() {
 	// Move the ball so it's no longer colliding...
     Collision::Circle2D projectileCircleBounds = projectileToFire->BuildBoundingLines().GenerateCircleFromLines();
 	projectileToFire->SetPosition(projectileToFire->GetPosition() + projectileCircleBounds.Radius() * launchNormal);
-	projectileToFire->SetVelocity(launchNormal, 15.0f);
+	projectileToFire->SetVelocity(launchNormal, PaddleMineProjectile::MAX_VELOCITY);
     projectileToFire->DetachFromPaddle();
 }
 

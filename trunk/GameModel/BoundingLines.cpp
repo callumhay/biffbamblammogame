@@ -20,6 +20,10 @@ BoundingLines::~BoundingLines() {
 }
 
 Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
+    if (this->lines.empty()) {
+        return Collision::AABB2D();
+    }
+
 	std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin();
 	const Collision::LineSeg2D& firstLine = *thisIter;
 

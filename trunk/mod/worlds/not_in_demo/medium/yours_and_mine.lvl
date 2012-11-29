@@ -1,11 +1,11 @@
 Yours and Mine
 17 22
 S S S S S S S S S S S S S S S S S 
-S E E D(StickyPaddle) E E C(180) E E D(MineLauncherPaddle) E E S E E E S 
+S E E E E E C(180) E E E E E S E E E S 
 S E E E E E E E E E E E S E E E S 
 S G G G G G G G G G G G S E E E S 
-S G G Y Y Y Y Y Y Y G G S E E E S 
-S Y Y O Y Y Y Y Y O Y Y S E R E S 
+S G G Y Y Y Y Y Y Y G G S C(90) E C(180) S 
+S Y Y O Y Y Y Y Y O Y Y S E E E S 
 S Y Y O O R R R O O Y Y S E E E S 
 S E E E E B R E E E E E S E E E S 
 S E I E E E E E E E I E S E E E S 
@@ -18,10 +18,10 @@ S G Y G O G R G O G Y G S E E E S
 S G G G G G G G G G G G S E E E S 
 S E E E E E E E E E E E S E E E S 
 S E E E E E E E E E E E S E E E S 
-S E E E E E E E E E E E N N N N S 
-S E E E E E E E E E E E N E E E S 
-S E E E E E E E E E E E N E E E S 
-S E E E E E E E E E E E N E E E S 
+S E E E E E E E E E E E N N S E S 
+S E E E E E E E E E E E N E S E S 
+S E E E E E E E E E E E N E S R S 
+S E E E E E E E E E E E N E E S S 
 
 STARS:
 6000
@@ -30,12 +30,12 @@ STARS:
 19000
 22000
 
-PaddleGrow 2
+PaddleGrow 0
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-BallGrow 2
 UberBall 2
+BallGrow 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0

@@ -248,10 +248,23 @@ inline int GameLevel::GetNumStarsForScore(long score) const {
 }
 
 inline LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
-    return this->currentLevelPieces[0][0];
+    int col = this->currentLevelPieces[0].size()/2;
+    for (; col >= 0; col--) {
+        if (this->currentLevelPieces[0][col]->GetType() == LevelPiece::Solid) {
+            break;
+        }
+    }
+    return this->currentLevelPieces[0][col];
 }
 inline LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
-    return this->currentLevelPieces[0][this->width-1];
+    int col = this->currentLevelPieces[0].size()/2;
+    for (; col < static_cast<int>(this->currentLevelPieces[0].size()); col++) {
+        if (this->currentLevelPieces[0][col]->GetType() == LevelPiece::Solid) {
+            break;
+        }
+    }
+
+    return this->currentLevelPieces[0][col];
 }
 
 #endif
