@@ -40,8 +40,8 @@ public:
     void AddImage(size_t width, const Texture* image);
     void SetSelectableOptions(const std::vector<std::string>& options, int defaultIdx);
 
-    void Show(double timeInSecs);
-    void Hide(double timeInSecs);
+    void Show(double delayInSecs, double timeInSecs);
+    void Hide(double delayInSecs, double timeInSecs);
 
     void Tick(double dT);
     void Draw(size_t windowWidth, size_t windowHeight);

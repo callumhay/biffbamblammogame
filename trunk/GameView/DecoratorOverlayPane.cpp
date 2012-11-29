@@ -217,16 +217,16 @@ void DecoratorOverlayPane::SetSelectableOptions(const std::vector<std::string>& 
     this->selectedIdx = defaultIdx;
 }
 
-void DecoratorOverlayPane::Show(double timeInSecs) {
-    this->fgFadeAnimation.SetLerp(timeInSecs*0.6f, timeInSecs, 0.0f, 1.0f);
-    this->bgFadeAnimation.SetLerp(0.0, timeInSecs, 0.0f, 1.0f);
-    this->scaleAnimation.SetLerp(0.0, timeInSecs*0.6f, 0.001f, 1.0f); 
+void DecoratorOverlayPane::Show(double delayInSecs, double timeInSecs) {
+    this->fgFadeAnimation.SetLerp(delayInSecs + timeInSecs*0.6f, delayInSecs + timeInSecs, 0.0f, 1.0f);
+    this->bgFadeAnimation.SetLerp(delayInSecs, delayInSecs + timeInSecs, 0.0f, 1.0f);
+    this->scaleAnimation.SetLerp(delayInSecs, delayInSecs + timeInSecs*0.6f, 0.001f, 1.0f); 
 }
 
-void DecoratorOverlayPane::Hide(double timeInSecs) {
-    this->fgFadeAnimation.SetLerp(0.5f*timeInSecs, 0.0f);
-    this->bgFadeAnimation.SetLerp(0.5f*timeInSecs, timeInSecs, 1.0f, 0.0f);
-    this->scaleAnimation.SetLerp(0.5f*timeInSecs, timeInSecs, 1.0f, 0.001f); 
+void DecoratorOverlayPane::Hide(double delayInSecs, double timeInSecs) {
+    this->fgFadeAnimation.SetLerp(delayInSecs, delayInSecs + 0.5f*timeInSecs, this->fgFadeAnimation.GetInterpolantValue(), 0.0f);
+    this->bgFadeAnimation.SetLerp(delayInSecs + 0.5f*timeInSecs, delayInSecs + timeInSecs, 1.0f, 0.0f);
+    this->scaleAnimation.SetLerp(delayInSecs + 0.5f*timeInSecs, delayInSecs + timeInSecs, 1.0f, 0.001f); 
 }
 
 void DecoratorOverlayPane::Tick(double dT) {
