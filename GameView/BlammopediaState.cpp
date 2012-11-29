@@ -448,8 +448,8 @@ ItemListView* BlammopediaState::BuildGameplayListView() {
     boostPopupPane->AddImage(256, boostHUDImg);
 
     boostPopupPane->AddText(
-        std::string("Activate a boost by holding down the right analog stick or the left mouse button. ") +
-        std::string("This will momentarily slow down time so you can redirect the ball. Letting go will cancel the boost."),
+        std::string("Activate a boost by holding down the right analog stick or the left mouse button, letting go will cancel the boost.") +
+        std::string("When activated, time will be slowed down momentarily, allowing you to redirect the ball."),
         Colour(1,1,1), BODY_TEXT_SCALE);
 
     const Texture2D* boostDirImg = tutorialAssets->GetBoostTutorialDirTexture();
