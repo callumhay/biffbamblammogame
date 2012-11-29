@@ -2,7 +2,7 @@
  * GameTutorialAssets.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2012
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -119,6 +119,15 @@ void GameTutorialAssets::Init() {
     assert(this->boostTutorialDirTex != NULL);
 
 
+    this->lifeTutorialHUDTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_LIFE_HUD_TUTORIAL, Texture::Trilinear));
+    assert(this->boostTutorialHUDTex != NULL);
+    
+    this->lifeTutorialItemDropTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_LIFE_ITEM_DROP_TUTORIAL, Texture::Trilinear));
+    assert(this->boostTutorialDirTex != NULL);
+
+
     this->boostTutorialItemTex = dynamic_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_BOOST_TUTORIAL_ITEM, Texture::Trilinear));
     assert(this->boostTutorialHUDTex != NULL);
@@ -155,6 +164,11 @@ void GameTutorialAssets::Release() {
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->boostTutorialDirTex);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->multiplierTutorialTex);
+    assert(success);
+
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lifeTutorialHUDTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lifeTutorialItemDropTex);
     assert(success);
 
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->boostTutorialItemTex);
