@@ -71,7 +71,7 @@ void StickyPaddleItem::Deactivate() {
 	PlayerPaddle* paddle = this->gameModel->GetPlayerPaddle();
 	assert(paddle != NULL);
 
-	paddle->ShootBall();
+	paddle->ReleaseEverythingAttached();
 	paddle->RemovePaddleType(PlayerPaddle::StickyPaddle);
 
 	this->isActive = false;

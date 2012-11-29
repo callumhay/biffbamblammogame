@@ -1,0 +1,63 @@
+Yours and Mine
+19 22
+S S S S S S S S S S S S S S S S S S S 
+S E E E D(StickyPaddle) E E C(180) E E D(MineLauncherPaddle) E E E S E E E S 
+S E E E E E E E E E E E E E S E E E S 
+S G G G G G G G G G G G G G S E R E S 
+S Y Y Y Y Y Y Y Y Y Y Y Y Y S E E E S 
+S O O O Y Y Y Y Y Y Y O O O S E E E S 
+S O O O O R R R R R O O O O S E E E S 
+S E E E E E R R R E E E E E S E E E S 
+S E E E E E E E E E E E E E S E E E S 
+S Y Y Y Y Y Y Y Y Y Y Y Y Y S E E E S 
+S Y O Y R Y O Y R Y O Y R Y S E E E S 
+S Y Y Y Y Y Y Y Y Y Y Y Y Y S E E E S 
+S E E E E E E E E E E E E E S E E E S 
+S G G G G G G G G G G G G G S E E E S 
+S G Y G O G Y G O G Y G O G S E E E S 
+S G G G G G G G G G G G G G S E E E S 
+S E E E E E E E E E E E E E S E E E S 
+S E E E E E E E E E E E E E S E E E S 
+S E E E E E E E E E E E E E N N N N S 
+S E E E E E E E E E E E E E N E E E S 
+S E E E E E E E E E E E E E N E E E S 
+S E E E E E E E E E E E E E N E E E S 
+
+STARS:
+1000
+5000
+10000
+20000
+30000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 0
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 2
+RocketPaddle 0
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 2
+MagnetPaddle 2
+MultiBall3 2
+IceBall 2
+MineLauncherPaddle 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 2

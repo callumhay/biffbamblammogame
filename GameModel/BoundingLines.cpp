@@ -65,6 +65,73 @@ Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
 	return Collision::AABB2D(Point2D(minX, minY), Point2D(maxX, maxY));
 }
 
+Collision::Circle2D BoundingLines::GenerateCircleFromLines() const {
+    if (this->lines.empty()) {
+        return Collision::Circle2D(Point2D(0,0), 0.0f);
+    }
+
+	std::vector<Collision::LineSeg2D>::const_iterator thisIter = this->lines.begin();
+	const Collision::LineSeg2D& firstLine = *thisIter;
+
+	Point2D minX = firstLine.P1();
+	Point2D maxX = firstLine.P1();
+	Point2D minY = firstLine.P1();
+	Point2D maxY = firstLine.P1();
+
+    // Calculate the min and max along the x and y axes
+	while (thisIter != this->lines.end()) {
+		const Collision::LineSeg2D& currThisLine = *thisIter;
+		// First point on the line...
+		if (currThisLine.P1()[0] < minX[0]) {
+			minX = currThisLine.P1();
+		}
+		if (currThisLine.P1()[0] > maxX[0]) {
+			maxX = currThisLine.P1();
+		}
+		if (currThisLine.P1()[1] < minY[1]) {
+			minY = currThisLine.P1();
+		}
+		if (currThisLine.P1()[1] > maxY[1]) {
+			maxY = currThisLine.P1();
+		}
+
+		// Second point on the line...
+		if (currThisLine.P2()[0] < minX[0]) {
+			minX = currThisLine.P2();
+		}
+		if (currThisLine.P2()[0] > maxX[0]) {
+			maxX = currThisLine.P2();
+		}
+		if (currThisLine.P2()[1] < minY[1]) {
+			minY = currThisLine.P2();
+		}
+		if (currThisLine.P2()[1] > maxY[1]) {
+			maxY = currThisLine.P2();
+		}
+
+		++thisIter;
+    }
+    
+    // Compute max squared distances along x and y axes
+    float dist2x = Vector2D::Dot(maxX - minX, maxX - minX);
+    float dist2y = Vector2D::Dot(maxY - minY, maxY - minY);
+
+    Point2D min = minX;
+    Point2D max = maxX;
+
+    if (dist2y > dist2x) {
+        min = minY;
+        max = maxY;
+    }
+
+    Point2D center =  0.5f * (min + Vector2D(max[0], max[1]));
+    float radius = Vector2D::Dot(max - center, max - center);
+    assert(radius > 0.0);
+    radius = sqrt(radius);
+    
+    return Collision::Circle2D(center, radius); 
+}
+
 /**
  * Test collision between the bounding lines of this and the given circle c.
  * Return: The average normal for the lines that the given circle collided with in the value n. 

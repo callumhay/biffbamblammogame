@@ -378,7 +378,8 @@ void GameModel::CollisionOccurred(Projectile* projectile, PlayerPaddle* paddle) 
 	assert(projectile != NULL);
 	assert(paddle != NULL);
 
-	// Tell the paddle it got hit by a projectile
+    // Inform the projectile and paddle of the collision
+    projectile->PaddleCollisionOccurred(paddle);
 	paddle->HitByProjectile(this, *projectile);
 
 	// Check to see if the level is done

@@ -185,7 +185,7 @@ public:
 		// be more natural to the vision of the paddle cam
 		this->SetDimensions(this->currSize);
 		if (!isPaddleCamOn) {
-			this->MoveAttachedBallToNewBounds(dT);
+			this->MoveAttachedObjectsToNewBounds(dT);
 		}
 	}
 	bool GetIsPaddleCameraOn() const {
@@ -200,8 +200,12 @@ public:
 	// Attach/detach ball functions
 	void Shoot(GameModel* gameModel);
     void ShootBall();
-	bool AttachBall(GameBall* ball);
+    void ReleaseEverythingAttached();
 	
+    bool AttachBall(GameBall* ball);
+    void AttachProjectile(Projectile* projectile);
+    void DetachProjectile(Projectile* projectile);
+
 	/** 
 	 * Whether or not this paddle has a ball currently attached to it.
 	 * Returns: true if there's a ball resting on the paddle, false otherwise.
@@ -213,9 +217,13 @@ public:
 		return this->attachedBall;
 	}
 
+    bool HasProjectileAttached() const {
+        return !this->attachedProjectiles.empty();
+    }
+
 	void HitByProjectile(GameModel* gameModel, const Projectile& projectile);
 	bool ProjectilePassesThrough(const Projectile& projectile);
-    bool ProjectileIsDestroyedOnCollision(const Projectile& projectile) { return !this->ProjectilePassesThrough(projectile); }
+    bool ProjectileIsDestroyedOnCollision(const Projectile& projectile);
 	void ModifyProjectileTrajectory(Projectile& projectile);
 
 	void UpdateBoundsByPieceCollision(const LevelPiece& p, bool doAttachedBallCollision);
@@ -305,6 +313,8 @@ private:
 
 	GameBall* attachedBall;	// When a ball is resting on the paddle it will occupy this variable
 
+    std::list<Projectile*> attachedProjectiles;
+
 	bool isPaddleCamActive;	// Whether or not the camera is inside the paddle
 	bool isFiringBeam;			// Whether this paddle is firing the laser beam
 
@@ -316,7 +326,8 @@ private:
 	void SetDimensions(PlayerPaddle::PaddleSize size);
 	void SetPaddleSize(PlayerPaddle::PaddleSize size);
 	void FireAttachedBall();
-	void MoveAttachedBallToNewBounds(double dT);
+    void FireAttachedProjectile();
+	void MoveAttachedObjectsToNewBounds(double dT);
 
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
