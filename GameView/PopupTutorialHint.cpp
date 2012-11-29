@@ -42,7 +42,7 @@ void PopupTutorialHint::Show(double delayInSeconds, double fadeInTimeInSeconds) 
     UNUSED_PARAMETER(delayInSeconds);
     if (this->isShown) { return; }
     
-    this->pane->Show(fadeInTimeInSeconds);
+    this->pane->Show(delayInSeconds, fadeInTimeInSeconds);
     if (this->listener != NULL) {
         this->listener->OnTutorialHintShown();
     }
@@ -51,11 +51,10 @@ void PopupTutorialHint::Show(double delayInSeconds, double fadeInTimeInSeconds) 
 }
 
 void PopupTutorialHint::Unshow(double delayInSeconds, double fadeOutTimeInSeconds, bool overridePrevUnshow) {
-    UNUSED_PARAMETER(delayInSeconds);
     if (!this->isShown && !overridePrevUnshow) { return; }
     
     if (!this->pane->IsFinished()) {
-        this->pane->Hide(fadeOutTimeInSeconds);
+        this->pane->Hide(delayInSeconds, fadeOutTimeInSeconds);
     }
     if (this->listener != NULL) {
         this->listener->OnTutorialHintUnshown();
@@ -78,5 +77,5 @@ void PopupTutorialHint::Tick(double dT) {
 // Event handler for when an option is selected in the pop-up hint's pane
 void PopupTutorialHint::PaneHandler::OptionSelected(const std::string& optionText) {
     UNUSED_PARAMETER(optionText);
-    this->popupHint->GetPane()->Hide(1.0);
+    this->popupHint->GetPane()->Hide(0.0, 1.0);
 }

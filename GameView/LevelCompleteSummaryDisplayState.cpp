@@ -329,7 +329,7 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
 
         this->difficultyChoicePane->SetSelectableOptions(difficultyOptions, static_cast<int>(difficulty));
 
-        this->difficultyChoicePane->Show(SHOW_DIFFICULTY_CHOICE_PANE_TIME);
+        this->difficultyChoicePane->Show(0.0, SHOW_DIFFICULTY_CHOICE_PANE_TIME);
     }
 }
 
@@ -707,7 +707,7 @@ void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionBu
         this->difficultyChoicePane->ButtonPressed(pressedButton);
         
         if (this->difficultyChoicePane->IsOptionSelectedAndActive()) {
-            this->difficultyChoicePane->Hide(HIDE_DIFFICULTY_CHOICE_PANE_TIME);
+            this->difficultyChoicePane->Hide(0.0, HIDE_DIFFICULTY_CHOICE_PANE_TIME);
         }
 
     }

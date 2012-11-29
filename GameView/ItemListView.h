@@ -48,6 +48,7 @@ public:
         virtual void TurnOffNewLabel() {};
         virtual void DrawNewLabel(float bottomLeftX, float bottomLeftY, size_t width, size_t height, float alpha, float scale);
         virtual Colour GetColour() const = 0;
+        virtual bool DrawBorderOnActivation() const = 0;
 
         void DrawSelection(const Camera& camera, size_t width, size_t height, 
                            float alphaOrange, float alphaYellow, float scale, float otherScale);
@@ -88,6 +89,7 @@ public:
         void DrawAsActivated(const Camera& camera);
         void TurnOffNewLabel();
         void DrawNewLabel(float bottomLeftX, float bottomLeftY, size_t width, size_t height, float alpha, float scale);
+        bool DrawBorderOnActivation() const { return true; }
 
         Colour GetColour() const { return this->colour; }
         TextLabel2DFixedWidth* GetDescriptionLbl() const { return this->descriptionLbl; }
@@ -115,6 +117,7 @@ public:
 
         void Tick(double dT);
         void DrawAsActivated(const Camera& camera);
+        bool DrawBorderOnActivation() const { return false; }
 
         Colour GetColour() const { return Colour(1.0f, 1.0f, 1.0f); }
 

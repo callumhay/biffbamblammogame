@@ -198,10 +198,8 @@ void ItemListView::Draw(double dT, const Camera& camera) {
             this->itemPixelWidth, this->itemPixelHeight, selectedItemAlpha, scalingFactor);
     }
 
-    
     float activatedItemAlpha = this->activatedItemAlphaAnim.GetInterpolantValue();
     if (activatedItemAlpha > 0 && this->GetSelectedItem() != NULL) {
-
         this->GetSelectedItem()->DrawAsActivated(camera);
     }
 
@@ -212,39 +210,55 @@ void ItemListView::DrawPost(const Camera& camera) {
 
     float blackBorderAmt = this->blackBorderAnim.GetInterpolantValue();
     if (blackBorderAmt > 0) {
-        // Draw the description, picture, title of the currently activated blammopedia item entry...
-        float screenWidth = camera.GetWindowWidth();
-        float screenHeight = camera.GetWindowHeight();
-        float topBorderBottomY = screenHeight - blackBorderAmt;
+
+        // Only draw the border if the item allows it
+        ListItem* selectedItem = this->GetSelectedItem();
+        if (selectedItem == NULL) {
+            assert(false);        
+            return;
+        }
 
         glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_LINE_BIT | GL_COLOR_BUFFER_BIT);
 
-	    glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
-	    glPolygonMode(GL_FRONT, GL_FILL);
+        glPolygonMode(GL_FRONT, GL_FILL);
 
         glEnable(GL_BLEND);
-	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glPushMatrix();
         glLoadIdentity();
 
-        glColor4f(0, 0, 0, 1);
-        glBegin(GL_QUADS);
+        if (selectedItem->DrawBorderOnActivation()) {
+            float screenWidth = camera.GetWindowWidth();
+            float screenHeight = camera.GetWindowHeight();
+            float topBorderBottomY = screenHeight - blackBorderAmt;
 
-        // Top Black Border
-        glVertex2i(screenWidth, screenHeight);
-        glVertex2i(0, screenHeight);
-        glVertex2i(0, topBorderBottomY);
-        glVertex2i(screenWidth, topBorderBottomY);
-        
-        // Bottom Black Border
-        glVertex2i(screenWidth, blackBorderAmt);
-        glVertex2i(0, blackBorderAmt);
-        glVertex2i(0, 0);
-        glVertex2i(screenWidth, 0);
 
-        glEnd();
+
+            glColor4f(0, 0, 0, 1);
+            glBegin(GL_QUADS);
+
+            // Top Black Border
+            glVertex2i(screenWidth, screenHeight);
+            glVertex2i(0, screenHeight);
+            glVertex2i(0, topBorderBottomY);
+            glVertex2i(screenWidth, topBorderBottomY);
+            
+            // Bottom Black Border
+            glVertex2i(screenWidth, blackBorderAmt);
+            glVertex2i(0, blackBorderAmt);
+            glVertex2i(0, 0);
+            glVertex2i(screenWidth, 0);
+
+            glEnd();
+
+            this->keyLabel->SetBeforeAndAfterTextColour(Colour(1,1,1));
+        }
+        else {
+            this->keyLabel->SetBeforeAndAfterTextColour(Colour(0,0,0));
+        }
 
         // Draw the keyboard key for escaping the entry pop-up
         static const float X_TEXT_LOC = 20;
@@ -892,7 +906,7 @@ ItemListView::TutorialListItem::~TutorialListItem() {
 }
 
 void ItemListView::TutorialListItem::Activated() {
-    this->tutorialPopup->Show(0.0, 2.0);
+    this->tutorialPopup->Show(1.0, 0.75);
 }
 
 void ItemListView::TutorialListItem::Deactivated() {
