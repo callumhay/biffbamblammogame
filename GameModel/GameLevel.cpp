@@ -1364,14 +1364,18 @@ std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Point2D&
  */
 std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Projectile& p) const {
 	const Point2D& projectileCenter = p.GetPosition();
+    Collision::AABB2D projectileAABB = p.BuildBoundingLines().GenerateAABBFromLines();
+
 
 	// Find the non-rounded max and min indices to look at along the x and y axis
-	float xDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[0]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[0]);
-	float xIndexMax = ceilf((projectileCenter[0] + xDelta) / LevelPiece::PIECE_WIDTH); 
+	//float xDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[0]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[0]);
+    float xDelta    = projectileAABB.GetWidth() / 2.0f;
+    float xIndexMax = ceilf((projectileCenter[0] + xDelta) / LevelPiece::PIECE_WIDTH); 
 	float xIndexMin = floorf((projectileCenter[0] - xDelta) / LevelPiece::PIECE_WIDTH);
 	
-	float yDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[1]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[1]);
-	float yIndexMax = ceilf((projectileCenter[1] + yDelta) / LevelPiece::PIECE_HEIGHT);
+	//float yDelta = p.GetHalfWidth() * fabs(p.GetRightVectorDirection()[1]) + p.GetHalfHeight() * fabs(p.GetVelocityDirection()[1]);
+    float yDelta    = projectileAABB.GetHeight() / 2.0f;
+    float yIndexMax = ceilf((projectileCenter[1] + yDelta) / LevelPiece::PIECE_HEIGHT);
 	float yIndexMin = floorf((projectileCenter[1] - yDelta) / LevelPiece::PIECE_HEIGHT);
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);

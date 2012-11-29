@@ -358,12 +358,13 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
 	assert(p->GetType() != LevelPiece::Empty);
 
 	bool alreadyCollided = projectile->IsLastThingCollidedWith(p) || projectile->IsAttachedToSomething();
-    if (!alreadyCollided) {
-        projectile->LevelPieceCollisionOccurred(p);
-    }
 
 	// Collide the projectile with the piece...
 	LevelPiece* pieceAfterCollision = p->CollisionOccurred(this, projectile); 	// WARNING: This can destroy p.
+
+    if (!alreadyCollided) {
+        projectile->LevelPieceCollisionOccurred(p);
+    }
 
 	// EVENT: First-time Projectile-Block Collision
 	if (!alreadyCollided) {

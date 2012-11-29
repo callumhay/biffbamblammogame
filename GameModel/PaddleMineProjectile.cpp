@@ -29,7 +29,7 @@ const float PaddleMineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.00f * LevelP
 const double PaddleMineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.75;
 const double PaddleMineProjectile::MINE_MAX_COUNTDOWN_TIME = 3.75;
 
-const float PaddleMineProjectile::MAX_VELOCITY = 15.0f;
+const float PaddleMineProjectile::MAX_VELOCITY = 13.0f;
 
 PaddleMineProjectile::PaddleMineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height) :
 Projectile(spawnLoc, width, height), cannonBlock(NULL), acceleration(MINE_DEFAULT_ACCEL), isArmed(false), isFalling(false),
@@ -77,9 +77,9 @@ void PaddleMineProjectile::Tick(double seconds, const GameModel& model) {
 		bool cannonHasFired = this->cannonBlock->RotateAndEventuallyFire(seconds);
 		if (cannonHasFired) {
 			// Set the velocity in the direction the cannon has fired in
-            this->velocityMag = 0.25f * this->GetMaxVelocityMagnitude();
+            this->velocityMag = this->GetMaxVelocityMagnitude();
 			this->velocityDir = this->cannonBlock->GetCurrentCannonDirection();
-            this->acceleration = MINE_DEFAULT_ACCEL;
+            this->acceleration = 0.0;
 			this->position = this->position + CannonBlock::HALF_CANNON_BARREL_LENGTH * this->velocityDir;
 
 			// EVENT: Mine has officially been fired from the cannon
@@ -275,13 +275,11 @@ void PaddleMineProjectile::DetachFromAnyAttachedObject() {
         this->attachedToNet->DetachProjectile(this);
         this->attachedToNet = NULL;
         assert(this->attachedToPiece == NULL);
-        assert(this->attachedToPaddle == NULL);
     }
     if (this->attachedToPiece != NULL) {
         this->attachedToPiece->DetachProjectile(this);
         this->attachedToPiece = NULL;
         assert(this->attachedToNet == NULL);
-        assert(this->attachedToPaddle == NULL);
     }
     if (this->attachedToPaddle != NULL) {
         this->attachedToPaddle->DetachProjectile(this);
