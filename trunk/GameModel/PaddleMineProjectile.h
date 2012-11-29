@@ -15,6 +15,7 @@
 #include "Projectile.h"
 #include "SafetyNet.h"
 #include "LevelPiece.h"
+#include "PlayerPaddle.h"
 
 class CannonBlock;
 
@@ -29,6 +30,8 @@ public:
 
     static const double MINE_MIN_COUNTDOWN_TIME;
     static const double MINE_MAX_COUNTDOWN_TIME;
+
+    static const float MAX_VELOCITY;
 
 	PaddleMineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height);
 	PaddleMineProjectile(const PaddleMineProjectile& copy);
@@ -59,6 +62,9 @@ public:
 
     void SafetyNetCollisionOccurred(SafetyNet* safetyNet);
     void LevelPieceCollisionOccurred(LevelPiece* block);
+    void PaddleCollisionOccurred(PlayerPaddle* paddle);
+
+    void DetachFromPaddle();
 
 	void LoadIntoCannonBlock(CannonBlock* cannonBlock);
     bool IsLoadedInCannonBlock() const { return this->cannonBlock != NULL; }
@@ -70,7 +76,7 @@ public:
     float GetAccelerationMagnitude() const { return this->acceleration; }
     float GetRotationAccelerationMagnitude() const { return 300.0f; }
 
-    float GetMaxVelocityMagnitude() const { return 15.0f; }
+    float GetMaxVelocityMagnitude() const { return MAX_VELOCITY; }
     float GetMaxRotationVelocityMagnitude() const { return 168.0f; }
 
     float GetDefaultHeight() const { return PADDLEMINE_HEIGHT_DEFAULT; }
@@ -87,6 +93,7 @@ public:
 
     bool GetIsAttachedToSafetyNet() const { return this->attachedToNet != NULL; }
     bool GetIsAttachedToLevelPiece() const { return this->attachedToPiece != NULL; }
+    bool GetIsAttachedToPaddle() const { return this->attachedToPaddle != NULL; }
 
 private:
 	static const Vector2D MINE_DEFAULT_VELOCITYDIR;
@@ -103,6 +110,7 @@ private:
     // When the mine is attached to other objects one of these will not be NULL
     LevelPiece* attachedToPiece;
     SafetyNet* attachedToNet;
+    PlayerPaddle* attachedToPaddle;
 
     // Extra Mine kinematics
     float acceleration;
@@ -141,6 +149,11 @@ inline void PaddleMineProjectile::Land(const Point2D& landingPt) {
 inline void PaddleMineProjectile::SafetyNetCollisionOccurred(SafetyNet* safetyNet) {
     assert(safetyNet != NULL);
 
+    // If the mine is already attached to the safety net then ignore this
+    if (this->attachedToNet == safetyNet) {
+        return;
+    }
+
     this->Land(safetyNet->GetBounds().ClosestPoint(this->GetPosition()) + Vector2D(0, SafetyNet::SAFETY_NET_HEIGHT / 2.0f));
     Projectile::SafetyNetCollisionOccurred(safetyNet);
     safetyNet->AttachProjectile(this);
@@ -165,6 +178,19 @@ inline void PaddleMineProjectile::LevelPieceCollisionOccurred(LevelPiece* block)
     this->SetLastThingCollidedWith(block);
     block->AttachProjectile(this);
     this->attachedToPiece = block;
+}
+
+inline void PaddleMineProjectile::PaddleCollisionOccurred(PlayerPaddle* paddle) {
+    assert(paddle != NULL);
+
+    if (this->attachedToPaddle != NULL) {
+        return;
+    }
+
+    this->Land(paddle->GetBounds().ClosestPoint(this->GetPosition()));
+    this->SetLastThingCollidedWith(paddle);
+    paddle->AttachProjectile(this);
+    this->attachedToPaddle = paddle;
 }
 
 #endif // __PADDLEMINEPROJECTILE_H__

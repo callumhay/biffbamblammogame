@@ -211,8 +211,16 @@ void GameEventsListener::PaddleHitWallEvent(const PlayerPaddle& paddle, const Po
 }
 
 void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, const Projectile& projectile) {
-	// Add the hurting effects...
+	
+    // No hurting effects if paddle has sticky effect and the projectile is a mine...
+    if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
+        projectile.GetType() == Projectile::PaddleMineBulletProjectile) {
+        return;
+    }
+
+    // Add the hurting effects...
 	this->display->GetAssets()->PaddleHurtByProjectile(paddle, projectile);
+
 	debug_output("EVENT: Paddle hit by projectile");
 }
 

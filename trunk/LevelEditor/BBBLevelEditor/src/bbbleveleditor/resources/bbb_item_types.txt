@@ -31,6 +31,9 @@ The paddle gains a sticky coating that makes a ball stick to it so that it may b
 + UberBall
 The ball gains the ability to blast through level pieces that only require one hit to destroy.
 
++ MineLauncherPaddle
+The paddle gains the ability to launch proximity mines that latch onto blocks (and other things).
+
 
 ~ GhostBall
 The ball will randomly phase through breakable blocks.

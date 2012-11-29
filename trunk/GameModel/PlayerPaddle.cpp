@@ -100,6 +100,7 @@ void PlayerPaddle::ResetPaddle() {
 	this->acceleration  = PlayerPaddle::DEFAULT_ACCELERATION; 
 	this->decceleration = PlayerPaddle::DEFAULT_DECCELERATION;
 	this->impulse = 0.0f;
+    this->attachedProjectiles.clear();
 
 	this->SetupAnimations();
 	// This will set the dimensions the the default and regenerate the bounds of the paddle
@@ -211,9 +212,9 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 	assert(this->currScaleFactor > 0.0f);
 
 	// Update all of the dimension values for the new scale factor
-	this->currHalfHeight			= this->currScaleFactor * PlayerPaddle::PADDLE_HALF_HEIGHT;
-	this->currHalfWidthTotal	= this->currScaleFactor * PlayerPaddle::PADDLE_HALF_WIDTH;
-	this->currHalfWidthFlat		= this->currScaleFactor * PlayerPaddle::PADDLE_WIDTH_FLAT_TOP * 0.5f;
+	this->currHalfHeight      = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_HEIGHT;
+	this->currHalfWidthTotal  = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_WIDTH;
+	this->currHalfWidthFlat	  = this->currScaleFactor * PlayerPaddle::PADDLE_WIDTH_FLAT_TOP * 0.5f;
 	this->currHalfDepthTotal  = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_DEPTH;
 	
 	// The momentum of the paddle will change as well - we do a physics hack here where the acceleration/decceleration
@@ -246,7 +247,7 @@ void PlayerPaddle::SetPaddleSize(PlayerPaddle::PaddleSize size) {
  * Private helper function that shoots the ball attached to the player paddle.
  */
 void PlayerPaddle::FireAttachedBall() {
-	assert(this->attachedBall != NULL);
+    assert(this->HasBallAttached());
 
 	// Set the ball's new trajectory in order for it to leave the paddle
 	Vector2D ballReleaseDir = GameBall::STD_INIT_VEL_DIR;
@@ -300,27 +301,59 @@ void PlayerPaddle::FireAttachedBall() {
 	this->attachedBall = NULL;
 }
 
+void PlayerPaddle::FireAttachedProjectile() {
+    assert(this->HasProjectileAttached());
+
+	// Set the projectile's new trajectory in order for it to leave the paddle
+	Vector2D releaseDir = GameBall::STD_INIT_VEL_DIR;
+	// Get the paddle's velocity
+	Vector2D avgPaddleVel = this->GetVelocity();
+
+    Projectile* projectileToFire = this->attachedProjectiles.front();
+    this->attachedProjectiles.pop_front();
+    assert(projectileToFire != NULL);
+
+	std::vector<int> indices = this->bounds.ClosestCollisionIndices(projectileToFire->GetPosition(), 0.01f);
+	assert(indices.size() > 0);
+	const Vector2D& launchNormal = this->bounds.GetNormal(indices[0]);
+
+	// Move the ball so it's no longer colliding...
+    Collision::Circle2D projectileCircleBounds = projectileToFire->BuildBoundingLines().GenerateCircleFromLines();
+	projectileToFire->SetPosition(projectileToFire->GetPosition() + projectileCircleBounds.Radius() * launchNormal);
+	projectileToFire->SetVelocity(launchNormal, 15.0f);
+    projectileToFire->DetachFromPaddle();
+}
+
 /**
  * Private helper function used to solve the issue where a ball that is attached
  * to the paddle when the paddle boundries change doesn't get moved to the new boundries.
  * e.g., when in paddle cam mode and then changing back while the sticky paddle is active.
  */
-void PlayerPaddle::MoveAttachedBallToNewBounds(double dT) {
+void PlayerPaddle::MoveAttachedObjectsToNewBounds(double dT) {
 	UNUSED_PARAMETER(dT);
 
-	if (!this->HasBallAttached()) {
-		return;
-	}
+	if (this->HasBallAttached()) {
+	    // Make sure the attached ball is sitting on the bounding lines and not inside the paddle...
+	    // Move the ball along the up vector until its no longer hitting...
+        assert(this->attachedBall != NULL);
+	    Point2D closestPtOnBounds = Collision::ClosestPoint(this->attachedBall->GetCenterPosition2D(), this->bounds.GetLine(0));
+	    this->attachedBall->SetCenterPosition(closestPtOnBounds + this->attachedBall->GetBounds().Radius() * this->GetUpVector());
+    }
 
-	// We need to be careful when the collision boundries get changed the ball position could
-	// be compromised; we need to make sure the ball also moves to be on the 
-	// outside of the new paddle boundries
-	assert(this->attachedBall != NULL);
+    if (this->HasProjectileAttached()) {
+        Point2D closestPtOnBounds;
 
-	// Make sure the attached ball is sitting on the bounding lines and not inside the paddle...
-	// Move the ball along the up vector until its no longer hitting...
-	Point2D closestPtOnBounds = Collision::ClosestPoint(this->attachedBall->GetCenterPosition2D(), this->bounds.GetLine(0));
-	this->attachedBall->SetCenterPosition(closestPtOnBounds + this->attachedBall->GetBounds().Radius() * this->GetUpVector());
+        for (std::list<Projectile*>::iterator iter = this->attachedProjectiles.begin();
+             iter != this->attachedProjectiles.end(); ++iter) {
+
+            Projectile* attachedProjectile = *iter;
+            assert(attachedProjectile != NULL);
+            
+            closestPtOnBounds = Collision::ClosestPoint(attachedProjectile->GetPosition(), this->bounds.GetLine(0));
+            Collision::Circle2D bounds = attachedProjectile->BuildBoundingLines().GenerateCircleFromLines();
+	        attachedProjectile->SetPosition(closestPtOnBounds + bounds.Radius() * this->GetUpVector());
+        }
+    }
 }
 
 void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gameModel) {
@@ -369,13 +402,13 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 	float maxNewXPos = newCenterX + this->currHalfWidthTotal;
 	Point2D oldPaddleCenter = this->centerPos;
 	
-	float halfWidthTotalWithBallMin = this->currHalfWidthTotal;
-	float halfWidthTotalWithBallMax = this->currHalfWidthTotal;
+	float halfWidthTotalWithAttachedMin = this->currHalfWidthTotal;
+	float halfWidthTotalWithAttachedMax = this->currHalfWidthTotal;
 
-	// If a ball is attached, it could affect the min and max x boundries of the paddle so 
-	// adjust the boundries based on the position of the ball on the paddle
-	bool ballIsAttached = this->attachedBall != NULL;
-	if (ballIsAttached) {	
+	// If a ball or projectile is attached, it could affect the min and max x boundries of the paddle so 
+	// adjust the boundries based on the position of the object(s) on the paddle
+    if (this->HasBallAttached()) {
+        
 		float ballX = this->attachedBall->GetBounds().Center()[0] + distanceTravelled;
 		float slightlyBiggerRadius = 1.05f * this->attachedBall->GetBounds().Radius();
 		float ballMinX = ballX - slightlyBiggerRadius;
@@ -384,18 +417,49 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 		// If it's the case that the ball increases the size of the paddle on the -x dir
 		// then accomodate this, same goes for +x direction
 		if (ballMinX < minNewXPos) {
-			halfWidthTotalWithBallMin += (minNewXPos - ballMinX);
+			halfWidthTotalWithAttachedMin += (minNewXPos - ballMinX);
 			minNewXPos = ballMinX;
 		}
 		else if (ballMaxX > maxNewXPos) {
-			halfWidthTotalWithBallMax += (ballMaxX - maxNewXPos);
+			halfWidthTotalWithAttachedMax += (ballMaxX - maxNewXPos);
 			maxNewXPos = ballMaxX;
 		}
 	}
 
+    if (this->HasProjectileAttached()) {
+        Projectile* attachedProjectile;
+        float projectileX, slightlyBiggerHalfWidth, projectileMinX, projectileMaxX;
+
+        for (std::list<Projectile*>::iterator iter = this->attachedProjectiles.begin();
+             iter != this->attachedProjectiles.end(); ++iter) {
+        
+            attachedProjectile = *iter;
+            assert(attachedProjectile != NULL);
+            
+            Collision::Circle2D projectileCircleBounds = attachedProjectile->BuildBoundingLines().GenerateCircleFromLines();
+            
+            projectileX = attachedProjectile->GetPosition()[0] + distanceTravelled;
+            slightlyBiggerHalfWidth = 1.05f * projectileCircleBounds.Radius()/2.0f;
+            projectileMinX = projectileX - slightlyBiggerHalfWidth;
+            projectileMaxX = projectileX + slightlyBiggerHalfWidth;
+
+		    // If it's the case that the projectile increases the size of the paddle on the -x dir
+		    // then accomodate this, same goes for +x direction
+		    if (projectileMinX < minNewXPos) {
+			    halfWidthTotalWithAttachedMin += (minNewXPos - projectileMinX);
+			    minNewXPos = projectileMinX;
+		    }
+		    else if (projectileMaxX > maxNewXPos) {
+			    halfWidthTotalWithAttachedMax += (projectileMaxX - maxNewXPos);
+			    maxNewXPos = projectileMaxX;
+		    }
+
+        }
+    }
+
 	if (minNewXPos - EPSILON <= this->minBound) {
 		// The paddle bumped into the left wall
-		this->centerPos[0] = this->minBound + halfWidthTotalWithBallMin;
+		this->centerPos[0] = this->minBound + halfWidthTotalWithAttachedMin;
 		
 		// Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
 		if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
@@ -408,14 +472,16 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
             }
 
 			// EVENT: paddle hit left wall for first time
-			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-halfWidthTotalWithBallMin, 0));
+            /// <summary> Default constructor. </summary>
+            /// <remarks> Beowulf, 29/11/2012. </remarks>
+			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-halfWidthTotalWithAttachedMin, 0));
 		}
 
 		this->hitWall = true;
 	}
 	else if (maxNewXPos + EPSILON > this->maxBound) {
 		// The paddle bumped into the right wall
-		this->centerPos[0] = this->maxBound - halfWidthTotalWithBallMax;
+		this->centerPos[0] = this->maxBound - halfWidthTotalWithAttachedMax;
 		
 		// Only do the event if the paddle hit the wall for the 'first' time and is on the normal plane of movement
 		if (!this->hitWall && this->moveDownAnimation.GetInterpolantValue() == 0.0) {
@@ -432,7 +498,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
             }
 
 			// EVENT: paddle hit right wall for first time
-			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(halfWidthTotalWithBallMax, 0));
+			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(halfWidthTotalWithAttachedMax, 0));
 		}
 		this->hitWall = true;
 	}
@@ -461,12 +527,25 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 	}
 
 	// If there is a ball attached then we need to move it around with the paddle
-	if (ballIsAttached) {
+    if (this->HasBallAttached()) {
 		// We need to figure out what the distance is from the paddle center-top to the ball center
 		Vector2D paddleTopCenterToBallCenter = this->attachedBall->GetBounds().Center() - (startingCenterPos + Vector2D(0, this->GetHalfHeight()));
 		// Maintain the vector obtained above in the new position of the paddle
 		this->attachedBall->SetCenterPosition(this->centerPos + Vector2D(0, this->GetHalfHeight()) + paddleTopCenterToBallCenter);
 	}
+    if (this->HasProjectileAttached()) {
+        Projectile* attachedProjectile;
+        Vector2D paddleTopCenterToProjectileCenter;
+        Point2D topOfPaddle = (startingCenterPos + Vector2D(0, this->GetHalfHeight()));
+
+        for (std::list<Projectile*>::iterator iter = this->attachedProjectiles.begin();
+             iter != this->attachedProjectiles.end(); ++iter) {
+        
+            attachedProjectile = *iter;
+            paddleTopCenterToProjectileCenter = attachedProjectile->GetPosition() - topOfPaddle;
+            attachedProjectile->SetPosition(this->centerPos + Vector2D(0, this->GetHalfHeight()) + paddleTopCenterToProjectileCenter);
+        }
+    }
 
 	// Check to see if the center position changed or its rotation changed, if so then regenerate the bounds
 	if (startingCenterPos != this->centerPos || startingZRotation != this->rotAngleZAnimation.GetInterpolantValue()) {
@@ -514,11 +593,11 @@ bool PlayerPaddle::DecreasePaddleSize() {
 void PlayerPaddle::RemovePaddleType(const PaddleType& type) {
 	this->currType = this->currType & ~type;
 	switch (type) {
-			case PlayerPaddle::PoisonPaddle:
-				this->maxSpeed += PlayerPaddle::POISON_SPEED_DIMINISH;
-				break;
-			default:
-				break;
+		case PlayerPaddle::PoisonPaddle:
+			this->maxSpeed += PlayerPaddle::POISON_SPEED_DIMINISH;
+			break;
+		default:
+			break;
 	}
 }
 
@@ -556,6 +635,16 @@ void PlayerPaddle::ShootBall() {
 	}
 }
 
+void PlayerPaddle::ReleaseEverythingAttached() {
+    // Release any attached ball
+    this->ShootBall();
+    
+    // Release all attached projectiles
+    while (!this->attachedProjectiles.empty()) {
+        this->FireAttachedProjectile();
+    }
+}
+
 /**
  * This will fire any weapons or abilities that paddle currently has - if none
  * exist then this function does nothing.
@@ -568,6 +657,10 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
 		this->FireAttachedBall();
 		return;
 	}
+    else if (this->HasProjectileAttached()) {
+        this->FireAttachedProjectile();
+        return;
+    }
 	
 	// Check for the rocket paddle (this has top priority)
 	if ((this->GetPaddleType() & PlayerPaddle::RocketPaddle) == PlayerPaddle::RocketPaddle) {
@@ -713,6 +806,16 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 	this->attachedBall->SetLastThingCollidedWith(this);
 
 	return true;
+}
+
+void PlayerPaddle::AttachProjectile(Projectile* projectile) {
+    assert(projectile != NULL);
+    this->attachedProjectiles.push_back(projectile);
+}
+
+void PlayerPaddle::DetachProjectile(Projectile* projectile){
+    assert(projectile != NULL);
+    this->attachedProjectiles.remove(projectile);
 }
 
 // Called when the paddle is hit by a projectile
@@ -1046,6 +1149,12 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 }
 
 void PlayerPaddle::MineProjectileCollision(GameModel* gameModel, const PaddleMineProjectile& projectile) {
+    
+    // There is only an explosion if the paddle doesn't have sticky paddle activated 
+    if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
+        return;
+    }
+
     float currHeight = 2.0f * this->GetHalfHeight();
     this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 3.5f, 3.0f * currHeight, 2.0f * currHeight, 70.0f);
     
@@ -1381,4 +1490,16 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds,
 	}
    
 	return didCollide;
+}
+
+bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile) {
+    // Special case: sticky paddles always attach mines to themselves
+    if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
+        projectile.GetType() == Projectile::PaddleMineBulletProjectile) {
+
+        return false;
+    }
+
+    return !this->ProjectilePassesThrough(projectile); 
+
 }

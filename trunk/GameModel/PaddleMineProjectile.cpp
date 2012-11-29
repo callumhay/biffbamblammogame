@@ -29,10 +29,12 @@ const float PaddleMineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS = 1.00f * LevelP
 const double PaddleMineProjectile::MINE_MIN_COUNTDOWN_TIME = 1.75;
 const double PaddleMineProjectile::MINE_MAX_COUNTDOWN_TIME = 3.75;
 
+const float PaddleMineProjectile::MAX_VELOCITY = 15.0f;
+
 PaddleMineProjectile::PaddleMineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height) :
 Projectile(spawnLoc, width, height), cannonBlock(NULL), acceleration(MINE_DEFAULT_ACCEL), isArmed(false), isFalling(false),
 proximityAlerted(false), proximityAlertCountdown(std::numeric_limits<float>::max()),
-attachedToPiece(NULL), attachedToNet(NULL) {
+attachedToPiece(NULL), attachedToNet(NULL), attachedToPaddle(NULL) {
 
     if (velDir.IsZero()) {
         assert(false);
@@ -55,11 +57,12 @@ PaddleMineProjectile::PaddleMineProjectile(const PaddleMineProjectile& copy) : P
 cannonBlock(copy.cannonBlock), currRotationSpd(copy.currRotationSpd),
 currRotation(copy.currRotation), acceleration(copy.acceleration), isArmed(copy.isArmed), isFalling(copy.isFalling),
 proximityAlerted(copy.proximityAlerted), proximityAlertCountdown(copy.proximityAlertCountdown),
-attachedToNet(copy.attachedToNet), attachedToPiece(copy.attachedToPiece) {
+attachedToNet(copy.attachedToNet), attachedToPiece(copy.attachedToPiece), attachedToPaddle(copy.attachedToPaddle) {
 
     assert(cannonBlock == NULL);
     assert(attachedToPiece == NULL);
     assert(attachedToNet == NULL);
+    assert(attachedToPaddle == NULL);
 }
 
 PaddleMineProjectile::~PaddleMineProjectile() {
@@ -258,15 +261,32 @@ void PaddleMineProjectile::StopAndResetProximityExplosionCountdown() {
     this->proximityAlertCountdown = std::numeric_limits<float>::max();
 }
 
+void PaddleMineProjectile::DetachFromPaddle() {
+    if (this->attachedToPaddle != NULL) {
+        this->attachedToPaddle->DetachProjectile(this);
+        this->attachedToPaddle = NULL;
+        assert(this->attachedToNet == NULL);
+        assert(this->attachedToPiece == NULL);
+    }
+}
+
 void PaddleMineProjectile::DetachFromAnyAttachedObject() {
     if (this->attachedToNet != NULL) {
         this->attachedToNet->DetachProjectile(this);
         this->attachedToNet = NULL;
         assert(this->attachedToPiece == NULL);
+        assert(this->attachedToPaddle == NULL);
     }
     if (this->attachedToPiece != NULL) {
         this->attachedToPiece->DetachProjectile(this);
         this->attachedToPiece = NULL;
         assert(this->attachedToNet == NULL);
+        assert(this->attachedToPaddle == NULL);
+    }
+    if (this->attachedToPaddle != NULL) {
+        this->attachedToPaddle->DetachProjectile(this);
+        this->attachedToPaddle = NULL;
+        assert(this->attachedToNet == NULL);
+        assert(this->attachedToPiece == NULL);
     }
 }

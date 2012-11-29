@@ -193,17 +193,26 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			}
 			break;
 
-        case Projectile::PaddleMineBulletProjectile:
-            // If the cannon isn't already loaded with a projectile then
-			// the mine gets captured by the cannon block and shot somewhere else...
-			if (!projectile->IsLastThingCollidedWith(this) && !this->GetIsLoaded()) {
-				PaddleMineProjectile* mineProjectile = static_cast<PaddleMineProjectile*>(projectile);
-				this->SetupCannonFireTimeAndDirection();
-				mineProjectile->LoadIntoCannonBlock(this);
-				mineProjectile->SetLastThingCollidedWith(this);
-				this->loadedProjectile = mineProjectile;
-			}
+        case Projectile::PaddleMineBulletProjectile: {
+            PaddleMineProjectile* mineProjectile = static_cast<PaddleMineProjectile*>(projectile);
+            
+            if (!projectile->IsLastThingCollidedWith(this)) {
+                // If the cannon isn't already loaded with a projectile then
+			    // the mine gets captured by the cannon block and shot somewhere else...
+			    if (this->GetIsLoaded()) {
+                    // Change the trajectory of the mine by making it fall...
+                    mineProjectile->SetAsFalling();
+                }
+                else {
+				    this->SetupCannonFireTimeAndDirection();
+				    mineProjectile->LoadIntoCannonBlock(this);
+				    this->loadedProjectile = mineProjectile;
+			    }
+
+                mineProjectile->SetLastThingCollidedWith(this);
+            }
             break;
+        }
 
 		case Projectile::FireGlobProjectile:
 			// Fire glob just extinguishes...

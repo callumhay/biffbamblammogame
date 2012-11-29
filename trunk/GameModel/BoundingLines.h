@@ -33,6 +33,7 @@ public:
 	}
 
 	Collision::AABB2D GenerateAABBFromLines() const;
+    Collision::Circle2D GenerateCircleFromLines() const;
 
 	bool Collide(double dT, const Collision::Circle2D& c, const Vector2D& velocity, Vector2D& n, 
 							 Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
