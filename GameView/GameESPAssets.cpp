@@ -5101,7 +5101,6 @@ void GameESPAssets::DrawBulletTimeBallsBoostEffects(double dT, const Camera& cam
     const Vector2D& boostDir  = boostModel->GetBallBoostDirection();
 
     float rotationAngleInDegs = Trig::radiansToDegrees(atan2(-boostDir[1], -boostDir[0]));
-    std::cout << boostDir[0] << ", " << boostDir[1] << std::endl;
 
     // Tick the effect...
     float actualTickAmt = dT * boostModel->GetInverseTimeDialation();

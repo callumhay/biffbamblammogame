@@ -2,7 +2,7 @@
  * GameTutorialAssets.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2012
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
@@ -39,6 +39,9 @@ public:
     const Texture2D* GetBoostTutorialDirTexture() const;
     const Texture2D* GetMultiplierTutorialTexture() const;
 
+    const Texture2D* GetLifeTutorialHUDTexture() const;
+    const Texture2D* GetLifeTutorialItemDropTexture() const;
+
     const Texture2D* GetBoostTutorialItemTexture() const;
     const Texture2D* GetMultiplierTutorialItemTexture() const;
     const Texture2D* GetLifeTutorialItemTexture() const;
@@ -55,6 +58,9 @@ private:
     Texture2D* boostTutorialHUDTex;
     Texture2D* boostTutorialDirTex;
     Texture2D* multiplierTutorialTex;
+
+    Texture2D* lifeTutorialHUDTex;
+    Texture2D* lifeTutorialItemDropTex;
 
     Texture2D* boostTutorialItemTex;
     Texture2D* multiplierTutorialItemTex;
@@ -104,6 +110,14 @@ inline const Texture2D* GameTutorialAssets::GetBoostTutorialDirTexture() const {
 
 inline const Texture2D* GameTutorialAssets::GetMultiplierTutorialTexture() const {
     return this->multiplierTutorialTex;
+}
+
+inline const Texture2D* GameTutorialAssets::GetLifeTutorialHUDTexture() const {
+    return this->lifeTutorialHUDTex;
+}
+
+inline const Texture2D* GameTutorialAssets::GetLifeTutorialItemDropTexture() const {
+    return this->lifeTutorialItemDropTex;
 }
 
 inline const Texture2D* GameTutorialAssets::GetBoostTutorialItemTexture() const {

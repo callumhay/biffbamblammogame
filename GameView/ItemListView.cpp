@@ -328,7 +328,7 @@ void ItemListView::AdjustSizeToHeight(size_t height) {
     
     if (static_cast<int>(this->items.size()) < this->numItemsPerRow) {
         // Change the sizes to fill in the row...
-        int totalItemWidth = this->listWidth - (static_cast<int>(this->items.size()) - 1) * this->horizontalGap - 2 * this->horizontalBorder;
+        int totalItemWidth = this->listWidth - (static_cast<int>(this->items.size()) + 1) * this->horizontalGap - 2 * this->horizontalBorder;
         this->itemPixelWidth = totalItemWidth / static_cast<int>(this->items.size());
         if (this->itemPixelWidth > MAX_ITEM_WIDTH) {
             this->itemPixelWidth = MAX_ITEM_WIDTH;
