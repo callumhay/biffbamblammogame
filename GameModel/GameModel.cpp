@@ -357,7 +357,7 @@ void GameModel::CollisionOccurred(Projectile* projectile, LevelPiece* p) {
 	assert(p != NULL);
 	assert(p->GetType() != LevelPiece::Empty);
 
-	bool alreadyCollided = projectile->IsLastThingCollidedWith(p);
+	bool alreadyCollided = projectile->IsLastThingCollidedWith(p) || projectile->IsAttachedToSomething();
     if (!alreadyCollided) {
         projectile->LevelPieceCollisionOccurred(p);
     }

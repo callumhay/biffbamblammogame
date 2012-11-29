@@ -1,41 +1,41 @@
 Yours and Mine
-19 22
-S S S S S S S S S S S S S S S S S S S 
-S E E E D(StickyPaddle) E E C(180) E E D(MineLauncherPaddle) E E E S E E E S 
-S E E E E E E E E E E E E E S E E E S 
-S G G G G G G G G G G G G G S E R E S 
-S Y Y Y Y Y Y Y Y Y Y Y Y Y S E E E S 
-S O O O Y Y Y Y Y Y Y O O O S E E E S 
-S O O O O R R R R R O O O O S E E E S 
-S E E E E E R R R E E E E E S E E E S 
-S E E E E E E E E E E E E E S E E E S 
-S Y Y Y Y Y Y Y Y Y Y Y Y Y S E E E S 
-S Y O Y R Y O Y R Y O Y R Y S E E E S 
-S Y Y Y Y Y Y Y Y Y Y Y Y Y S E E E S 
-S E E E E E E E E E E E E E S E E E S 
-S G G G G G G G G G G G G G S E E E S 
-S G Y G O G Y G O G Y G O G S E E E S 
-S G G G G G G G G G G G G G S E E E S 
-S E E E E E E E E E E E E E S E E E S 
-S E E E E E E E E E E E E E S E E E S 
-S E E E E E E E E E E E E E N N N N S 
-S E E E E E E E E E E E E E N E E E S 
-S E E E E E E E E E E E E E N E E E S 
-S E E E E E E E E E E E E E N E E E S 
+17 22
+S S S S S S S S S S S S S S S S S 
+S E E D(StickyPaddle) E E C(180) E E D(MineLauncherPaddle) E E S E E E S 
+S E E E E E E E E E E E S E E E S 
+S G G G G G G G G G G G S E E E S 
+S G G Y Y Y Y Y Y Y G G S E E E S 
+S Y Y O Y Y Y Y Y O Y Y S E R E S 
+S Y Y O O R R R O O Y Y S E E E S 
+S E E E E B R E E E E E S E E E S 
+S E I E E E E E E E I E S E E E S 
+S Y Y Y Y Y Y Y Y Y Y Y S E E E S 
+S Y R Y R Y Y Y O Y O Y S E E E S 
+S Y Y Y Y Y Y Y Y Y Y Y S E E E S 
+S E E E E E E E E E E E S E E E S 
+S G G G G G G G G G G G S E E E S 
+S G Y G O G R G O G Y G S E E E S 
+S G G G G G G G G G G G S E E E S 
+S E E E E E E E E E E E S E E E S 
+S E E E E E E E E E E E S E E E S 
+S E E E E E E E E E E E N N N N S 
+S E E E E E E E E E E E N E E E S 
+S E E E E E E E E E E E N E E E S 
+S E E E E E E E E E E E N E E E S 
 
 STARS:
-1000
-5000
+6000
 10000
-20000
-30000
+16000
+19000
+22000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0

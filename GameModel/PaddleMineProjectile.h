@@ -95,6 +95,12 @@ public:
     bool GetIsAttachedToLevelPiece() const { return this->attachedToPiece != NULL; }
     bool GetIsAttachedToPaddle() const { return this->attachedToPaddle != NULL; }
 
+    bool IsAttachedToSomething() const {
+        return this->GetIsAttachedToSafetyNet()  ||
+               this->GetIsAttachedToLevelPiece() ||
+               this->GetIsAttachedToPaddle();
+    }
+
 private:
 	static const Vector2D MINE_DEFAULT_VELOCITYDIR;
 	static const Vector2D MINE_DEFAULT_RIGHTDIR;

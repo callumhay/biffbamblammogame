@@ -52,6 +52,7 @@ public:
     virtual bool ModifyLevelUpdate(double dT, GameModel&) { UNUSED_PARAMETER(dT); return false; };
 
     virtual void DetachFromPaddle() {};
+    virtual bool IsAttachedToSomething() const { return false; };
 
     void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
 
