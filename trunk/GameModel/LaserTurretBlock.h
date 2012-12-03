@@ -53,7 +53,7 @@ public:
 
 private:
     static const int POINTS_ON_BLOCK_DESTROYED  = 800;
-    static const int PIECE_STARTING_LIFE_POINTS = 600;
+    static const int PIECE_STARTING_LIFE_POINTS = 500;
     
     static const float MAX_ROTATION_SPEED_IN_DEGS_PER_SEC;
     static const float ROTATION_ACCEL_IN_DEGS_PER_SEC_SQRD;

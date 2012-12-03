@@ -1204,6 +1204,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\MineTurretBlockMesh.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\PortalBlockMesh.h"
 						>
 					</File>
@@ -1225,6 +1229,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\TeslaBlockMesh.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\TurretBlockMesh.h"
 						>
 					</File>
 				</Filter>
@@ -1252,6 +1260,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\MineTurretBlockMesh.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\PortalBlockMesh.cpp"
 						>
 					</File>
@@ -1273,6 +1285,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\TeslaBlockMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\TurretBlockMesh.cpp"
 						>
 					</File>
 				</Filter>
@@ -1744,6 +1760,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\MineTurretBlock.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\NoEntryBlock.h"
 						>
 					</File>
@@ -1817,6 +1837,10 @@
 					</File>
 					<File
 						RelativePath=".\GameModel\LevelPiece.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\MineTurretBlock.cpp"
 						>
 					</File>
 					<File
@@ -2236,6 +2260,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\MineProjectile.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\MineTurretProjectile.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleLaserProjectile.h"
 						>
 					</File>
@@ -2256,7 +2288,7 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameModel\TurretRocketProjectile.h"
+						RelativePath=".\GameModel\RocketTurretProjectile.h"
 						>
 					</File>
 				</Filter>
@@ -2284,6 +2316,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\MineProjectile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\MineTurretProjectile.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\PaddleLaserProjectile.cpp"
 						>
 					</File>
@@ -2304,7 +2344,7 @@
 						>
 					</File>
 					<File
-						RelativePath=".\GameModel\TurretRocketProjectile.cpp"
+						RelativePath=".\GameModel\RocketTurretProjectile.cpp"
 						>
 					</File>
 				</Filter>

@@ -52,7 +52,7 @@ public:
 
 	enum LevelPieceType { Breakable, Solid, Empty, Bomb, SolidTriangle, BreakableTriangle, 
                           Ink, Prism, Portal, PrismTriangle, Cannon, Collateral, Tesla, ItemDrop,
-                          Switch, OneWay, NoEntry, LaserTurret, RocketTurret };
+                          Switch, OneWay, NoEntry, LaserTurret, RocketTurret, MineTurret };
 
 	virtual LevelPieceType GetType() const = 0;
     static bool IsValidLevelPieceType(int pieceType);
@@ -131,8 +131,8 @@ public:
 	void RemoveStatuses(int32_t statusMask);
 
     // Projectile attachment functionality
-    void AttachProjectile(PaddleMineProjectile* p);
-    void DetachProjectile(PaddleMineProjectile* p);
+    void AttachProjectile(MineProjectile* p);
+    void DetachProjectile(MineProjectile* p);
 
 	// Debug Stuffs
 	void DebugDraw() const;
@@ -145,7 +145,7 @@ protected:
     
     TriggerID triggerID;
 
-    std::set<PaddleMineProjectile*> attachedProjectiles; // Any projectiles that have latched on to this piece
+    std::set<MineProjectile*> attachedProjectiles; // Any projectiles that have latched on to this piece
 
 	// Pointers to any neighboring level pieces to this one - if a neighbor does not
 	// exist it will be NULL - these get initialized/set with any call to UpdateBounds.
@@ -321,12 +321,12 @@ inline void LevelPiece::SetBounds(const BoundingLines& bounds, const LevelPiece*
 	this->bottomLeftNeighbor  = bottomLeftNeighbor;
 }
 
-inline void LevelPiece::AttachProjectile(PaddleMineProjectile* p) {
+inline void LevelPiece::AttachProjectile(MineProjectile* p) {
     assert(p != NULL);
     this->attachedProjectiles.insert(p);
 }
 
-inline void LevelPiece::DetachProjectile(PaddleMineProjectile* p) {
+inline void LevelPiece::DetachProjectile(MineProjectile* p) {
     assert(p != NULL);
     this->attachedProjectiles.erase(p);
 }

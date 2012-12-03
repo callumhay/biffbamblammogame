@@ -473,7 +473,7 @@ public:
 	 * Event triggered when a mine explodes. Only occurs once just as it explodes.
 	 * Arguements: mine - The mine that is exploding.
 	 */
-    virtual void MineExplodedEvent(const PaddleMineProjectile& mine) { UNUSED_PARAMETER(mine); }
+    virtual void MineExplodedEvent(const MineProjectile& mine) { UNUSED_PARAMETER(mine); }
 
 	/**
 	 * Event triggered when a new beam is spawned. Only occurs once per spawned beam.
@@ -617,7 +617,8 @@ public:
      *             oldState - The state that the block used to have.
      *             newState - The state that the block changed to.
      */
-    virtual void RocketTurretAIStateChangedEvent(const RocketTurretBlock& block, RocketTurretBlock::TurretAIState oldState,
+    virtual void RocketTurretAIStateChangedEvent(const RocketTurretBlock& block,
+                                                 RocketTurretBlock::TurretAIState oldState,
                                                  RocketTurretBlock::TurretAIState newState) {
         UNUSED_PARAMETER(block);
         UNUSED_PARAMETER(oldState);
@@ -629,6 +630,29 @@ public:
      * Arguements: block - the rocket turret block that fired.
      */
     virtual void RocketFiredByTurretEvent(const RocketTurretBlock& block) {
+        UNUSED_PARAMETER(block);
+    }
+
+    /**
+     * Event triggered when the mine turret AI state of a particular block changes.
+     * Only occurs once per change.
+     * Arguements: block - The block with the changed state.
+     *             oldState - The state that the block used to have.
+     *             newState - The state that the block changed to.
+     */
+    virtual void MineTurretAIStateChangedEvent(const MineTurretBlock& block,
+                                               MineTurretBlock::TurretAIState oldState,
+                                               MineTurretBlock::TurretAIState newState) {
+        UNUSED_PARAMETER(block);
+        UNUSED_PARAMETER(oldState);
+        UNUSED_PARAMETER(newState);
+    }
+
+    /**
+     * Event triggered when the mine turret fires a rocket.
+     * Arguements: block - the mine turret block that fired.
+     */
+    virtual void MineFiredByTurretEvent(const MineTurretBlock& block) {
         UNUSED_PARAMETER(block);
     }
 };

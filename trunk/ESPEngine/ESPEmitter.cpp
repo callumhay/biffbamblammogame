@@ -432,14 +432,16 @@ void ESPEmitter::SetInitialSpd(const ESPInterval& initialSpd) {
  * Sets the inclusive interval of random possible values that represent the
  * lifetime (in seconds) of particles in this emitter.
  */
-void ESPEmitter::SetParticleLife(const ESPInterval& particleLife) {
+void ESPEmitter::SetParticleLife(const ESPInterval& particleLife, bool affectLiveParticles) {
 	this->particleLifetime.CopyFromInterval(particleLife);
 	
     // Go through any already assigned particles and set the lifespan...
-	for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
-		ESPParticle* currParticle = *iter;
-		currParticle->ResetLifespanLength(particleLife.RandomValueInInterval());
-	}
+    if (affectLiveParticles) {
+	    for (std::list<ESPParticle*>::iterator iter = this->aliveParticles.begin(); iter != this->aliveParticles.end(); ++iter) {
+		    ESPParticle* currParticle = *iter;
+		    currParticle->ResetLifespanLength(particleLife.RandomValueInInterval());
+	    }
+    }
 }
 
 /**

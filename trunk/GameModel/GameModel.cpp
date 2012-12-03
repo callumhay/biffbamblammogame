@@ -659,9 +659,10 @@ void GameModel::DoProjectileCollisions(double dT) {
                     }
                 }
                 // In the other special case of a mine projectile we cause an explosion...
-                else if (currProjectile->GetType() == Projectile::PaddleMineBulletProjectile) {
-                    assert(dynamic_cast<PaddleMineProjectile*>(currProjectile) != NULL);
-                    currLevel->MineExplosion(this, static_cast<PaddleMineProjectile*>(currProjectile));
+                else if (currProjectile->GetType() == Projectile::PaddleMineBulletProjectile ||
+                         currProjectile->GetType() == Projectile::MineTurretBulletProjectile) {
+                    assert(dynamic_cast<MineProjectile*>(currProjectile) != NULL);
+                    currLevel->MineExplosion(this, static_cast<MineProjectile*>(currProjectile));
                 }
 
 			    // Despose of the projectile...

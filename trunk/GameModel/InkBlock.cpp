@@ -198,6 +198,7 @@ LevelPiece* InkBlock::CollisionOccurred(GameModel* gameModel, Projectile* projec
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
             // A mine will just come to rest on the block.
             break;
 

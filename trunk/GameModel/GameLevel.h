@@ -49,6 +49,7 @@ public:
     static const char NO_ENTRY_BLOCK_CHAR;
     static const char LASER_TURRET_BLOCK_CHAR;
     static const char ROCKET_TURRET_BLOCK_CHAR;
+    static const char MINE_TURRET_BLOCK_CHAR;
 	
 	static const char TRIANGLE_BLOCK_CHAR;
 	static const char TRI_UPPER_CORNER;
@@ -160,8 +161,8 @@ public:
     void RocketExplosionNoPieces(const Projectile* rocket);
 	std::vector<LevelPiece*> GetRocketExplosionAffectedLevelPieces(float rocketSizeFactor, size_t hIndex, size_t wIndex);
 
-    LevelPiece* MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine, LevelPiece* hitPiece);
-    void MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine);
+    LevelPiece* MineExplosion(GameModel* gameModel, const MineProjectile* mine, LevelPiece* hitPiece);
+    void MineExplosion(GameModel* gameModel, const MineProjectile* mine);
 
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);
     const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;

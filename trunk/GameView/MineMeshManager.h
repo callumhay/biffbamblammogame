@@ -17,7 +17,7 @@
 
 #include "../ESPEngine/ESP.h"
 
-class PaddleMineProjectile;
+class MineProjectile;
 class PlayerPaddle;
 
 class MineMeshManager {
@@ -30,8 +30,8 @@ public:
     void DrawLoadingMine(double dT, const PlayerPaddle& paddle, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
     
-    void AddMineProjectile(const PaddleMineProjectile* mine);
-    void RemoveMineProjectile(const PaddleMineProjectile* mine);
+    void AddMineProjectile(const MineProjectile* mine);
+    void RemoveMineProjectile(const MineProjectile* mine);
 
 private:
     Mesh* mineMesh;
@@ -45,7 +45,7 @@ private:
 
     class MineInstance {
     public:
-        MineInstance(const PaddleMineProjectile* mine, Texture2D* trailTexture,
+        MineInstance(const MineProjectile* mine, Texture2D* trailTexture,
             Texture2D* pulseTexture, Texture2D* triggeredTexture);
         ~MineInstance();
 
@@ -53,7 +53,7 @@ private:
             const BasicPointLight& fillLight, const BasicPointLight& ballLight, Mesh* mineMesh);
 
     private:
-        const PaddleMineProjectile* mine;
+        const MineProjectile* mine;
         AnimationMultiLerp<float> glowAnim;
         
         ESPParticleColourEffector trailFader;
@@ -70,7 +70,7 @@ private:
         ESPPointEmitter triggeredPulseEmitter;
 
     };
-    typedef std::map<const PaddleMineProjectile*, MineInstance*> MineInstanceMap;
+    typedef std::map<const MineProjectile*, MineInstance*> MineInstanceMap;
     typedef MineInstanceMap::iterator MineInstanceMapIter;
     typedef MineInstanceMap::const_iterator MineInstanceMapConstIter;
     MineInstanceMap mineInstanceMap;
@@ -79,14 +79,14 @@ private:
     DISALLOW_COPY_AND_ASSIGN(MineMeshManager);
 };
 
-inline void MineMeshManager::AddMineProjectile(const PaddleMineProjectile* mine) {
+inline void MineMeshManager::AddMineProjectile(const MineProjectile* mine) {
     assert(this->mineInstanceMap.find(mine) == this->mineInstanceMap.end());
     this->mineInstanceMap.insert(std::make_pair(mine,
         new MineInstance(mine, this->trailTexture, this->pulseTexture, this->triggeredTexture)));
     this->timeSinceLastMineLaunch = 0.0;
 }
 
-inline void MineMeshManager::RemoveMineProjectile(const PaddleMineProjectile* mine) {
+inline void MineMeshManager::RemoveMineProjectile(const MineProjectile* mine) {
     MineInstanceMapIter findIter = this->mineInstanceMap.find(mine);
     assert(findIter != this->mineInstanceMap.end());
     delete findIter->second;

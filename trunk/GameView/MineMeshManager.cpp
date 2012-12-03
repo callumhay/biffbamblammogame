@@ -86,8 +86,9 @@ void MineMeshManager::DrawLoadingMine(double dT, const PlayerPaddle& paddle, con
     this->timeSinceLastMineLaunch += dT;
 }
 
-MineMeshManager::MineInstance::MineInstance(const PaddleMineProjectile* mine,
-                                            Texture2D* trailTexture, Texture2D* pulseTexture, Texture2D* triggeredTexture) :
+MineMeshManager::MineInstance::MineInstance(const MineProjectile* mine,
+                                            Texture2D* trailTexture, Texture2D* pulseTexture,
+                                            Texture2D* triggeredTexture) :
 mine(mine), trailFader(Colour(1.0f,1.0f,1.0f), 0.6f, 0), pulseFader(ColourRGBA(0,1,0,1), ColourRGBA(1,0,0,0.1f)),
 particleShrinkToNothing(1, 0), pulseGrower(1.0f, 4.0f), fastPulser(0,0) {
 

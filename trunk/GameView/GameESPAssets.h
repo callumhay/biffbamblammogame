@@ -254,7 +254,7 @@ public:
     void AddBallAcquiredBoostEffect(const GameBall& ball, const Colour& colour);
 
     void AddRocketBlastEffect(float rocketSizeFactor, const Point2D& loc);
-    void AddMineBlastEffect(const PaddleMineProjectile& mine, const Point2D& loc);
+    void AddMineBlastEffect(const MineProjectile& mine, const Point2D& loc);
 
 	ESPPointEmitter* CreateBallBounceEffect(const GameBall& ball, Onomatoplex::SoundType soundType); 
 	void AddBounceLevelPieceEffect(const GameBall& ball, const LevelPiece& block);

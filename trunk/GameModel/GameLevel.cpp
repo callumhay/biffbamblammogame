@@ -32,6 +32,7 @@
 #include "NoEntryBlock.h"
 #include "LaserTurretBlock.h"
 #include "RocketTurretBlock.h"
+#include "MineTurretBlock.h"
 #include "GameModel.h"
 #include "Projectile.h"
 #include "PointAward.h"
@@ -63,6 +64,7 @@ const char GameLevel::ONE_WAY_BLOCK_CHAR        = 'F';
 const char GameLevel::NO_ENTRY_BLOCK_CHAR       = 'N';
 const char GameLevel::LASER_TURRET_BLOCK_CHAR   = 'H';
 const char GameLevel::ROCKET_TURRET_BLOCK_CHAR  = 'J';
+const char GameLevel::MINE_TURRET_BLOCK_CHAR    = 'M';
 
 const char GameLevel::TRIANGLE_BLOCK_CHAR	= 'T';
 const char GameLevel::TRI_UPPER_CORNER		= 'u';
@@ -807,6 +809,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
                     newPiece = new RocketTurretBlock(pieceWLoc, pieceHLoc);
                     break;
 
+                case GameLevel::MINE_TURRET_BLOCK_CHAR:
+                    // M - Mine Turret Block
+                    newPiece = new MineTurretBlock(pieceWLoc, pieceHLoc);
+                    break;
+
 				default:
 					debug_output("ERROR: Invalid level interior value: " << currBlock << " at width = " << pieceWLoc << ", height = " << pieceHLoc);
 					delete inFile;
@@ -1241,7 +1248,7 @@ std::vector<LevelPiece*> GameLevel::GetRocketExplosionAffectedLevelPieces(float 
 	return affectedPieces;
 }
 
-LevelPiece* GameLevel::MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine, LevelPiece* hitPiece) {
+LevelPiece* GameLevel::MineExplosion(GameModel* gameModel, const MineProjectile* mine, LevelPiece* hitPiece) {
 	// Destroy the hit piece if we can...
 	LevelPiece* resultPiece = hitPiece->Destroy(gameModel, LevelPiece::MineDestruction);
 
@@ -1250,7 +1257,7 @@ LevelPiece* GameLevel::MineExplosion(GameModel* gameModel, const PaddleMineProje
     return resultPiece;
 }
 
-void GameLevel::MineExplosion(GameModel* gameModel, const PaddleMineProjectile* mine) {
+void GameLevel::MineExplosion(GameModel* gameModel, const MineProjectile* mine) {
     assert(gameModel != NULL);
     assert(mine != NULL);
 
@@ -1750,6 +1757,7 @@ bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
         case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
             return true;
 
         default:

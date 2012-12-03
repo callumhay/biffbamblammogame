@@ -1,5 +1,5 @@
 /**
- * TurretRocketProjectile.cpp
+ * RocketTurretProjectile.cpp
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
@@ -9,15 +9,15 @@
  * resulting work only under the same or similar licence to this one.
  */
 
-#include "TurretRocketProjectile.h"
+#include "RocketTurretProjectile.h"
 #include "RocketTurretBlock.h"
 
-const float TurretRocketProjectile::TURRETROCKET_WIDTH_DEFAULT  = 0.41f;
-const float TurretRocketProjectile::TURRETROCKET_HEIGHT_DEFAULT = 0.72f;
+const float RocketTurretProjectile::TURRETROCKET_WIDTH_DEFAULT  = 0.41f;
+const float RocketTurretProjectile::TURRETROCKET_HEIGHT_DEFAULT = 0.72f;
 
-TurretRocketProjectile::TurretRocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir) :
+RocketTurretProjectile::RocketTurretProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir) :
 RocketProjectile(spawnLoc, rocketVelDir, TURRETROCKET_WIDTH_DEFAULT, TURRETROCKET_HEIGHT_DEFAULT) {
 }
 
-TurretRocketProjectile::~TurretRocketProjectile() {
+RocketTurretProjectile::~RocketTurretProjectile() {
 }

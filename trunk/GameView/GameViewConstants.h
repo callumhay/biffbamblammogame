@@ -293,6 +293,8 @@ public:
     const char* LASER_TURRET_BARREL_2_MESH;
     const char* ROCKET_TURRET_HEAD_MESH;
     const char* ROCKET_TURRET_BARREL_MESH;
+    const char* MINE_TURRET_HEAD_MESH;
+    const char* MINE_TURRET_BARREL_MESH;
     const char* MINE_MESH;
 
 	const char* SKYBOX_MESH;

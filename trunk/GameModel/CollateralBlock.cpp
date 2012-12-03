@@ -151,6 +151,7 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
             // A mine will just come to rest on the block.
             break;
 

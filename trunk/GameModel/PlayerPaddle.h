@@ -27,6 +27,8 @@
 class GameModel;
 class GameBall;
 class PaddleMineProjectile;
+class MineTurretProjectile;
+class MineProjectile;
 
 // Represents the player controlled paddle shaped as follows:
 //                -------------
@@ -332,7 +334,7 @@ private:
 	void CollateralBlockProjectileCollision(const Projectile& projectile);
 	void LaserBulletProjectileCollision(const Projectile& projectile);
 	void RocketProjectileCollision(GameModel* gameModel, const RocketProjectile& projectile);
-    void MineProjectileCollision(GameModel* gameModel, const PaddleMineProjectile& projectile);
+    void MineProjectileCollision(GameModel* gameModel, const MineProjectile& projectile);
 	void FireGlobProjectileCollision(const Projectile& projectile);
 	float GetPercentNearPaddleCenter(const Point2D& projectileCenter, float& distFromCenter);
 	void SetPaddleHitByProjectileAnimation(const Point2D& projectileCenter, double totalHitEffectTime, 
@@ -425,6 +427,7 @@ inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& project
         case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
             // These projectiles can only collide with the paddle if it's NOT going upwards into the level
             if (Vector2D::Dot(projectile.GetVelocityDirection(), this->GetUpVector()) <= 0) {
                 return this->CollisionCheck(bounds, true);
@@ -450,6 +453,7 @@ inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) 
             case Projectile::RocketTurretBulletProjectile:
             case Projectile::LaserTurretBulletProjectile:
             case Projectile::PaddleMineBulletProjectile:
+            case Projectile::MineTurretBulletProjectile:
                 return true;
             default:
                 break;

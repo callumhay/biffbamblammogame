@@ -13,44 +13,12 @@
 #include "GameViewConstants.h"
 #include "GameFontAssetsManager.h"
 
-#include "../GameModel/TurretRocketProjectile.h"
+#include "../GameModel/RocketTurretProjectile.h"
 
 #include "../ResourceManager.h"
 
-RocketTurretBlockMesh::RocketTurretBlockMesh() : barrelMesh(NULL),
-headMesh(NULL), baseMesh(NULL), glowTexture(NULL), sparkleTexture(NULL), rocketMesh(NULL) {
+RocketTurretBlockMesh::RocketTurretBlockMesh() : TurretBlockMesh(), barrelMesh(NULL), headMesh(NULL), rocketMesh(NULL) {
     this->LoadMesh();
-
-	if (this->smokeTextures.empty()) {
-		this->smokeTextures.reserve(6);
-		Texture2D* temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE1, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE2, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE3, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE4, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE5, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);
-		temp = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_SMOKE6, Texture::Trilinear));
-		assert(temp != NULL);
-		this->smokeTextures.push_back(temp);	
-	}
-
-    this->glowTexture = static_cast<Texture2D*>(
-        ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_CIRCLE_GRADIENT, Texture::Trilinear));
-    assert(this->glowTexture != NULL);
-    this->sparkleTexture = static_cast<Texture2D*>(
-        ResourceManager::GetInstance()->GetImgTextureResource(
-        GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
-    assert(this->sparkleTexture != NULL);
 
     std::vector<float> values;
     values.reserve(3);
@@ -75,26 +43,10 @@ RocketTurretBlockMesh::~RocketTurretBlockMesh() {
 	assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->headMesh);
 	assert(success);
-    success = ResourceManager::GetInstance()->ReleaseMeshResource(this->baseMesh);
-    assert(success);
-
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->rocketMesh);
     assert(success);
 
     UNUSED_VARIABLE(success);
-
-	for (std::vector<Texture2D*>::iterator iter = this->smokeTextures.begin();
-		iter != this->smokeTextures.end(); ++iter) {
-		
-		success = ResourceManager::GetInstance()->ReleaseTextureResource(*iter);
-		assert(success);	
-	}
-	this->smokeTextures.clear();
-
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->glowTexture);
-    assert(success);
-    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTexture);
-    assert(success);
 }
 
 void RocketTurretBlockMesh::Flush() {
@@ -208,24 +160,15 @@ void RocketTurretBlockMesh::RocketShotByBlock(const RocketTurretBlock* block) {
     currBlockData->RocketShotByBlock();
 }
 
-// Loads all the mesh assets for the laser turret block mesh
+// Loads all the mesh assets for the rocket turret block mesh
 void RocketTurretBlockMesh::LoadMesh() {
 	assert(this->barrelMesh == NULL);
     assert(this->headMesh == NULL);
-	assert(this->baseMesh == NULL);
-	assert(this->materialGroups.size() == 0);
+    assert(this->rocketMesh == NULL);
 
     // Load the rocket mesh
     this->rocketMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TURRET_ROCKET_MESH);
     assert(this->rocketMesh != NULL);
-
-    // Load the base mesh
-    this->baseMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->TURRET_BASE_MESH);
-    assert(this->baseMesh != NULL);
-    const std::map<std::string, MaterialGroup*>& baseMatGrps = this->baseMesh->GetMaterialGroups();
-    this->materialGroups.insert(baseMatGrps.begin(), baseMatGrps.end());
-
-    assert(this->materialGroups.size() > 0);
 
     // Load the head mesh (holds the turret's barrel)
     this->headMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->ROCKET_TURRET_HEAD_MESH);
@@ -426,19 +369,6 @@ void RocketTurretBlockMesh::BlockData::BlockStateChanged(const RocketTurretBlock
         }
 
         case RocketTurretBlock::SeekingTurretState: {
-            /*
-            if (oldState != RocketTurretBlock::IdleTurretState) {
-                this->emoteLabel->SetText("...");
-                this->emoteLabel->SetColour(Colour(1,1,1));
-                
-                std::vector<float> values;
-                std::vector<double> times;
-                BlockData::InitTimeValueEmoteAnimVectors(times, values, 3.0f);
-
-                this->emoteScaleAnim.SetLerp(times, values);
-                this->emoteScaleAnim.SetRepeat(false);
-            }
-            */
             break;
         }
 

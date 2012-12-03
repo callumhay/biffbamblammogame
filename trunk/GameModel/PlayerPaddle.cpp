@@ -848,8 +848,9 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
-            assert(dynamic_cast<const PaddleMineProjectile*>(&projectile) != NULL);
-            this->MineProjectileCollision(gameModel, *static_cast<const PaddleMineProjectile*>(&projectile));
+        case Projectile::MineTurretBulletProjectile:
+            assert(dynamic_cast<const MineProjectile*>(&projectile) != NULL);
+            this->MineProjectileCollision(gameModel, *static_cast<const MineProjectile*>(&projectile));
             break;
 
 		case Projectile::FireGlobProjectile:
@@ -877,7 +878,8 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
             case Projectile::PaddleRocketBulletProjectile:
             case Projectile::RocketTurretBulletProjectile:
             case Projectile::LaserTurretBulletProjectile:
-            case Projectile::PaddleMineBulletProjectile: {
+            case Projectile::PaddleMineBulletProjectile:
+            case Projectile::MineTurretBulletProjectile: {
 
 		        // If the projectile is moving generally upwards and away from the paddle then we ignore this entirely...
 		        if (acos(std::max<float>(-1.0f, std::min<float>(1.0f, 
@@ -1148,7 +1150,7 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 	}
 }
 
-void PlayerPaddle::MineProjectileCollision(GameModel* gameModel, const PaddleMineProjectile& projectile) {
+void PlayerPaddle::MineProjectileCollision(GameModel* gameModel, const MineProjectile& projectile) {
     
     // There is only an explosion if the paddle doesn't have sticky paddle activated 
     if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
@@ -1495,7 +1497,8 @@ bool PlayerPaddle::CollisionCheck(const BoundingLines& bounds,
 bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile) {
     // Special case: sticky paddles always attach mines to themselves
     if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
-        projectile.GetType() == Projectile::PaddleMineBulletProjectile) {
+        (projectile.GetType() == Projectile::PaddleMineBulletProjectile ||
+         projectile.GetType() == Projectile::MineTurretBulletProjectile)) {
 
         return false;
     }

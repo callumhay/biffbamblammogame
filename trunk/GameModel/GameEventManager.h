@@ -16,6 +16,7 @@
 #include "LevelPiece.h"
 #include "LaserTurretBlock.h"
 #include "RocketTurretBlock.h"
+#include "MineTurretBlock.h"
 
 class GameEvents;
 class GameBall;
@@ -107,7 +108,7 @@ public:
 	void ActionProjectileSpawned(const Projectile& projectile);
 	void ActionProjectileRemoved(const Projectile& projectile);
 	void ActionRocketExploded(const PaddleRocketProjectile& rocket);
-    void ActionMineExploded(const PaddleMineProjectile& mine);
+    void ActionMineExploded(const MineProjectile& mine);
 
 	void ActionBeamSpawned(const Beam& beam);
 	void ActionBeamChanged(const Beam& beam);
@@ -139,6 +140,9 @@ public:
     void ActionRocketTurretAIStateChanged(const RocketTurretBlock& block, RocketTurretBlock::TurretAIState oldState,
         RocketTurretBlock::TurretAIState newState);
     void ActionRocketFiredByTurret(const RocketTurretBlock& block);
+    void ActionMineTurretAIStateChanged(const MineTurretBlock& block, MineTurretBlock::TurretAIState oldState,
+        MineTurretBlock::TurretAIState newState);
+    void ActionMineFiredByTurret(const MineTurretBlock& block);
     
 
 protected:

@@ -27,6 +27,7 @@
 #include "../GameModel/LevelPiece.h"
 #include "../GameModel/ItemDropBlock.h"
 #include "../GameModel/LaserTurretBlock.h"
+#include "../GameModel/MineTurretBlock.h"
 
 class GameWorldAssets;
 class Mesh;
@@ -38,6 +39,7 @@ class TeslaBlockMesh;
 class SwitchBlockMesh;
 class LaserTurretBlockMesh;
 class RocketTurretBlockMesh;
+class MineTurretBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
 
@@ -67,7 +69,10 @@ public:
     void LaserFired(const LaserTurretBlock* block);
     void RocketTurretAIStateChanged(const RocketTurretBlock* block, const RocketTurretBlock::TurretAIState& oldState,
         const RocketTurretBlock::TurretAIState& newState);
+    void MineTurretAIStateChanged(const MineTurretBlock* block, const MineTurretBlock::TurretAIState& oldState,
+        const MineTurretBlock::TurretAIState& newState);
     void RocketFired(const RocketTurretBlock* block);
+    void MineFired(const MineTurretBlock* block);
 
 	void SetLevelAlpha(float alpha);
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);
@@ -90,6 +95,7 @@ private:
     SwitchBlockMesh* switchBlock;
     LaserTurretBlockMesh* laserTurretBlock;
     RocketTurretBlockMesh* rocketTurretBlock;
+    MineTurretBlockMesh* mineTurretBlock;
     Mesh* noEntryBlock;
     Mesh* oneWayUpBlock;
     Mesh* oneWayDownBlock;

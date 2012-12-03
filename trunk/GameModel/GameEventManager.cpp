@@ -434,7 +434,7 @@ void GameEventManager::ActionRocketExploded(const PaddleRocketProjectile& rocket
 }
 
 // Action for when an armed mine explodes
-void GameEventManager::ActionMineExploded(const PaddleMineProjectile& mine) {
+void GameEventManager::ActionMineExploded(const MineProjectile& mine) {
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->MineExplodedEvent(mine);
@@ -614,5 +614,22 @@ void GameEventManager::ActionRocketFiredByTurret(const RocketTurretBlock& block)
 	this->listenerIter = this->eventListeners.begin();
 	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
 		(*this->listenerIter)->RocketFiredByTurretEvent(block);
+	}
+}
+
+void GameEventManager::ActionMineTurretAIStateChanged(const MineTurretBlock& block,
+                                                      MineTurretBlock::TurretAIState oldState,
+                                                      MineTurretBlock::TurretAIState newState) {
+
+    this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->MineTurretAIStateChangedEvent(block, oldState, newState);
+	}
+}
+
+void GameEventManager::ActionMineFiredByTurret(const MineTurretBlock& block) {
+	this->listenerIter = this->eventListeners.begin();
+	for (; this->listenerIter != this->eventListeners.end(); ++this->listenerIter) {
+		(*this->listenerIter)->MineFiredByTurretEvent(block);
 	}
 }
