@@ -17,7 +17,7 @@
 #include "BoundingLines.h"
 
 class GameLevel;
-class PaddleMineProjectile;
+class MineProjectile;
 
 /**
  * Class for representing the safety net formed below the paddle when
@@ -40,12 +40,12 @@ public:
 	bool PaddleCollisionCheck(const PlayerPaddle& p);
 	bool ProjectileCollisionCheck(const BoundingLines& projectileBoundingLines);
 
-    void AttachProjectile(PaddleMineProjectile* p);
-    void DetachProjectile(PaddleMineProjectile* p);
+    void AttachProjectile(MineProjectile* p);
+    void DetachProjectile(MineProjectile* p);
     
 private:
     BoundingLines bounds;
-    std::set<PaddleMineProjectile*> attachedProjectiles;
+    std::set<MineProjectile*> attachedProjectiles;
 
     DISALLOW_COPY_AND_ASSIGN(SafetyNet);
 };
@@ -66,12 +66,12 @@ inline bool SafetyNet::ProjectileCollisionCheck(const BoundingLines& projectileB
 	return projectileBoundingLines.CollisionCheck(this->bounds);
 }
 
-inline void SafetyNet::AttachProjectile(PaddleMineProjectile* p) {
+inline void SafetyNet::AttachProjectile(MineProjectile* p) {
     assert(p != NULL);
     this->attachedProjectiles.insert(p);
 }
 
-inline void SafetyNet::DetachProjectile(PaddleMineProjectile* p) {
+inline void SafetyNet::DetachProjectile(MineProjectile* p) {
     assert(p != NULL);
     this->attachedProjectiles.erase(p);
 }

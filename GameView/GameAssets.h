@@ -155,7 +155,7 @@ public:
 
 	void PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projectile& projectile);
 	void RocketExplosion(const RocketProjectile& rocket, Camera& camera);
-    void MineExplosion(const PaddleMineProjectile& mine, Camera& camera);
+    void MineExplosion(const MineProjectile& mine, Camera& camera);
 
 private:
 	GameWorldAssets* worldAssets;	    // World-related assets

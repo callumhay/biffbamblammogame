@@ -1275,6 +1275,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
                 case LevelPiece::Switch:
                 case LevelPiece::LaserTurret:
                 case LevelPiece::RocketTurret:
+                case LevelPiece::MineTurret:
 					{
 						bool blockIsFrozen = block.HasStatus(LevelPiece::IceCubeStatus);
 						Point2D midPoint = Point2D::GetMidPoint(projectile.GetPosition(), block.GetCenter()); 
@@ -1321,6 +1322,7 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
             if (!block.ProjectileIsDestroyedOnCollision(&projectile)) {
                 this->AddPaddleMineAttachedEffects(projectile);
             }
@@ -1341,14 +1343,18 @@ void GameESPAssets::AddBlockHitByProjectileEffect(const Projectile& projectile, 
 
 void GameESPAssets::AddSafetyNetHitByProjectileEffect(const Projectile& projectile) {
     switch (projectile.GetType()) {
+
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
             this->AddLaserHitWallEffect(projectile.GetPosition());
             break;
+
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
             this->AddPaddleMineAttachedEffects(projectile);
             break;
+
         default:
             break;
     }
@@ -1674,6 +1680,7 @@ void GameESPAssets::AddBasicBlockBreakEffect(const LevelPiece& block) {
         case LevelPiece::NoEntry:
         case LevelPiece::LaserTurret:
         case LevelPiece::RocketTurret:
+        case LevelPiece::MineTurret:
 			severity = Onomatoplex::SUPER_AWESOME;
 			this->activeGeneralEmitters.push_back(this->CreateBlockBreakSmashyBits(emitCenter, ESPInterval(0.6f, 1.0f), 
 																						ESPInterval(0.5f, 1.0f), ESPInterval(0.0f, 0.0f), false, 20));
@@ -2582,6 +2589,7 @@ void GameESPAssets::AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, c
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
             // NOTE: THIS IS TAKEN CARE OF BY THE MineExplodedEvent
             break;
 
@@ -2794,6 +2802,10 @@ void GameESPAssets::AddProjectileEffect(const GameModel& gameModel, const Projec
         case Projectile::PaddleMineBulletProjectile:
             assert(dynamic_cast<const PaddleMineProjectile*>(&projectile) != NULL);
             this->AddPaddleMineFiredEffects(gameModel, *static_cast<const PaddleMineProjectile*>(&projectile));
+            break;
+
+        case Projectile::MineTurretBulletProjectile:
+            // TODO... ?
             break;
 
 		case Projectile::CollateralBlockProjectile:
@@ -4078,7 +4090,7 @@ void GameESPAssets::AddRocketBlastEffect(float rocketSizeFactor, const Point2D& 
 	this->activeGeneralEmitters.push_back(bangOnoEffect);
 }
 
-void GameESPAssets::AddMineBlastEffect(const PaddleMineProjectile& mine, const Point2D& loc) {
+void GameESPAssets::AddMineBlastEffect(const MineProjectile& mine, const Point2D& loc) {
 	ESPInterval bangLifeInterval	= ESPInterval(1.0f);
 	ESPInterval bangOnoLifeInterval	= ESPInterval(bangLifeInterval.maxValue + 0.4f);
 	Point3D emitCenter(loc);

@@ -181,3 +181,8 @@ H
 Rocket_Turret
 rocket_turret.png
 J
+
+Mine_Turret
+mine_turret.png
+M
+

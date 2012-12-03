@@ -214,7 +214,8 @@ void GameEventsListener::PaddleHitByProjectileEvent(const PlayerPaddle& paddle, 
 	
     // No hurting effects if paddle has sticky effect and the projectile is a mine...
     if ((paddle.GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
-        projectile.GetType() == Projectile::PaddleMineBulletProjectile) {
+        (projectile.GetType() == Projectile::PaddleMineBulletProjectile ||
+         projectile.GetType() == Projectile::MineTurretBulletProjectile)) {
         return;
     }
 
@@ -445,6 +446,7 @@ void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& pr
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
 		case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
 		case Projectile::CollateralBlockProjectile: {
@@ -560,6 +562,7 @@ void GameEventsListener::BlockDestroyedEvent(const LevelPiece& block, const Leve
         
         case LevelPiece::LaserTurret:
         case LevelPiece::RocketTurret:
+        case LevelPiece::MineTurret:
 			if (wasFrozen) {
 				// Add ice break effect
 				this->display->GetAssets()->GetESPAssets()->AddIceCubeBlockBreakEffect(block, block.GetColour());
@@ -902,7 +905,7 @@ void GameEventsListener::RocketExplodedEvent(const PaddleRocketProjectile& rocke
 	debug_output("EVENT: Rocket exploded");
 }
 
-void GameEventsListener::MineExplodedEvent(const PaddleMineProjectile& mine) {
+void GameEventsListener::MineExplodedEvent(const MineProjectile& mine) {
     this->display->GetAssets()->MineExplosion(mine, this->display->GetCamera());
 	debug_output("EVENT: Mine exploded");
 }
@@ -1056,7 +1059,7 @@ void GameEventsListener::RocketTurretAIStateChangedEvent(const RocketTurretBlock
                                                          RocketTurretBlock::TurretAIState newState) {
 
     this->display->GetAssets()->GetCurrentLevelMesh()->RocketTurretAIStateChanged(&block, oldState, newState);
-    debug_output("EVENT: Rocket Turret fired a laser.");
+    debug_output("EVENT: Rocket Turret AI state changed.");
 }
 
 void GameEventsListener::RocketFiredByTurretEvent(const RocketTurretBlock& block) {
@@ -1069,6 +1072,29 @@ void GameEventsListener::RocketFiredByTurretEvent(const RocketTurretBlock& block
 	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(endOfBarrelPt, barrelDir);
 
     debug_output("EVENT: Rocket Turret fired a rocket.");
+}
+
+void GameEventsListener::MineTurretAIStateChangedEvent(const MineTurretBlock& block,
+                                                       MineTurretBlock::TurretAIState oldState,
+                                                       MineTurretBlock::TurretAIState newState) {
+
+    this->display->GetAssets()->GetCurrentLevelMesh()->MineTurretAIStateChanged(&block, oldState, newState);
+    debug_output("EVENT: Mine Turret AI state changed.");
+}
+
+void GameEventsListener::MineFiredByTurretEvent(const MineTurretBlock& block) {
+    this->display->GetAssets()->GetCurrentLevelMesh()->MineFired(&block);
+
+    /*
+    // TODO...
+    Point3D endOfBarrelPt;
+    Vector2D barrelDir;
+    block.GetBarrelInfo(endOfBarrelPt, barrelDir);
+
+	this->display->GetAssets()->GetESPAssets()->AddCannonFireEffect(endOfBarrelPt, barrelDir);
+    */
+
+    debug_output("EVENT: Mine Turret fired a mine.");
 }
 
 /**

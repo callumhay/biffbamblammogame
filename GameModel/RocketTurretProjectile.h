@@ -1,5 +1,5 @@
 /**
- * TurretRocketProjectile.h
+ * RocketTurretProjectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
  * Callum Hay, 2011
@@ -15,13 +15,13 @@
 #include "RocketProjectile.h"
 #include "RocketTurretBlock.h"
 
-class TurretRocketProjectile : public RocketProjectile {
+class RocketTurretProjectile : public RocketProjectile {
 public:
 	static const float TURRETROCKET_HEIGHT_DEFAULT;
 	static const float TURRETROCKET_WIDTH_DEFAULT;
 
-	TurretRocketProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir);
-	~TurretRocketProjectile();
+	RocketTurretProjectile(const Point2D& spawnLoc, const Vector2D& rocketVelDir);
+	~RocketTurretProjectile();
     
     ProjectileType GetType() const { return Projectile::RocketTurretBulletProjectile; }
 

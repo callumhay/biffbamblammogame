@@ -1124,9 +1124,10 @@ void GameAssets::AddProjectile(const GameModel& gameModel, const Projectile& pro
 			this->FireRocket(*static_cast<const RocketProjectile*>(&projectile));
 			break;
 
-        case Projectile::PaddleMineBulletProjectile: {
+        case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile: {
             // Notify the mine manager...
-            const PaddleMineProjectile* mine = static_cast<const PaddleMineProjectile*>(&projectile);
+            const MineProjectile* mine = static_cast<const MineProjectile*>(&projectile);
             this->mineMeshMgr->AddMineProjectile(mine);
             break;
         }
@@ -1158,9 +1159,10 @@ void GameAssets::RemoveProjectile(const Projectile& projectile) {
             this->espAssets->AddFireGlobDestroyedEffect(projectile);
             break;
 
-        case Projectile::PaddleMineBulletProjectile: {
+        case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile: {
             // Notify the mine manager...
-            const PaddleMineProjectile* mine = static_cast<const PaddleMineProjectile*>(&projectile);
+            const MineProjectile* mine = static_cast<const MineProjectile*>(&projectile);
             this->mineMeshMgr->RemoveMineProjectile(mine);
             break;
         }
@@ -1211,6 +1213,7 @@ void GameAssets::PaddleHurtByProjectile(const PlayerPaddle& paddle, const Projec
 
         case Projectile::RocketTurretBulletProjectile:
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
             intensity = PlayerHurtHUD::ModeratePain;
             break;
 
@@ -1262,7 +1265,7 @@ void GameAssets::RocketExplosion(const RocketProjectile& rocket, Camera& camera)
 	this->soundAssets->PlayWorldSound(GameSoundAssets::WorldSoundRocketExplodedEvent, GameSoundAssets::VeryLoudVolume);
 }
 
-void GameAssets::MineExplosion(const PaddleMineProjectile& mine, Camera& camera) {
+void GameAssets::MineExplosion(const MineProjectile& mine, Camera& camera) {
     this->espAssets->AddMineBlastEffect(mine, mine.GetPosition());
 
 	// Add a camera/controller shake and flash for when the mine explodes...

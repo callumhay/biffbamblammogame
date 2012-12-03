@@ -37,7 +37,7 @@ SafetyNet::~SafetyNet() {
     // NOTE: DO NOT USE ITERATORS HERE SINCE THE MINE PROJECTILE DETACHES ITSELF IN THE SetAsFalling call
     while (!this->attachedProjectiles.empty()) {
        
-        PaddleMineProjectile* p = *this->attachedProjectiles.begin();
+        MineProjectile* p = *this->attachedProjectiles.begin();
         p->SetLastThingCollidedWith(NULL);
         p->SetAsFalling();
         this->DetachProjectile(p); // This is redundant and will be ignored, just here for robustness

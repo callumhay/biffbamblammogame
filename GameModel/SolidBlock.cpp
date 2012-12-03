@@ -106,7 +106,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	if (leftNeighbor != NULL) {
 		if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::LaserTurret && 
             leftNeighbor->GetType() != LevelPiece::RocketTurret && leftNeighbor->GetType() != LevelPiece::NoEntry &&
-            leftNeighbor->GetType() != LevelPiece::Tesla && leftNeighbor->GetType() != LevelPiece::Switch) {
+            leftNeighbor->GetType() != LevelPiece::Tesla && leftNeighbor->GetType() != LevelPiece::Switch &&
+            leftNeighbor->GetType() != LevelPiece::MineTurret) {
 
             bool shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
@@ -128,7 +129,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	if (bottomNeighbor != NULL) {
 		if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::LaserTurret && 
             bottomNeighbor->GetType() != LevelPiece::RocketTurret && bottomNeighbor->GetType() != LevelPiece::NoEntry &&
-            bottomNeighbor->GetType() != LevelPiece::Tesla && bottomNeighbor->GetType() != LevelPiece::Switch) {
+            bottomNeighbor->GetType() != LevelPiece::Tesla && bottomNeighbor->GetType() != LevelPiece::Switch &&
+            bottomNeighbor->GetType() != LevelPiece::MineTurret) {
 
             bool shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
@@ -150,7 +152,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	if (rightNeighbor != NULL) {
 		if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::LaserTurret && 
             rightNeighbor->GetType() != LevelPiece::RocketTurret && rightNeighbor->GetType() != LevelPiece::NoEntry &&
-            rightNeighbor->GetType() != LevelPiece::Tesla && rightNeighbor->GetType() != LevelPiece::Switch) {
+            rightNeighbor->GetType() != LevelPiece::Tesla && rightNeighbor->GetType() != LevelPiece::Switch &&
+            rightNeighbor->GetType() != LevelPiece::MineTurret) {
 
             bool shouldGenBounds = true;
             TriangleBlock::Orientation triOrientation;
@@ -172,7 +175,8 @@ void SolidBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	if (topNeighbor != NULL) {
 		if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::LaserTurret && 
             topNeighbor->GetType() != LevelPiece::RocketTurret && topNeighbor->GetType() != LevelPiece::NoEntry &&
-            topNeighbor->GetType() != LevelPiece::Tesla && topNeighbor->GetType() != LevelPiece::Switch) {
+            topNeighbor->GetType() != LevelPiece::Tesla && topNeighbor->GetType() != LevelPiece::Switch &&
+            topNeighbor->GetType() != LevelPiece::MineTurret) {
 
 
             bool shouldGenBounds = true;
@@ -265,6 +269,7 @@ LevelPiece* SolidBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 			break;
 
         case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile:
             // A mine will just come to rest on the block.
             break;
 

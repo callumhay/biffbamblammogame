@@ -71,7 +71,7 @@ public:
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);
 	void SetSpawnDelta(const ESPInterval& spawnDelta);
 	void SetInitialSpd(const ESPInterval& initialSpd);
-	void SetParticleLife(const ESPInterval& particleLife);
+	void SetParticleLife(const ESPInterval& particleLife, bool affectLiveParticles = false);
 
 	void SetParticleSize(const ESPInterval& particleSizeX, const ESPInterval& particleSizeY);
 	void SetParticleSize(const ESPInterval& particleSize);

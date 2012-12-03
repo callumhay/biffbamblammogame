@@ -193,8 +193,9 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 			}
 			break;
 
-        case Projectile::PaddleMineBulletProjectile: {
-            PaddleMineProjectile* mineProjectile = static_cast<PaddleMineProjectile*>(projectile);
+        case Projectile::PaddleMineBulletProjectile:
+        case Projectile::MineTurretBulletProjectile: {
+            MineProjectile* mineProjectile = static_cast<MineProjectile*>(projectile);
             
             if (!projectile->IsLastThingCollidedWith(this)) {
                 // If the cannon isn't already loaded with a projectile then

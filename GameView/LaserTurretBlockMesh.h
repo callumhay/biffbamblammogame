@@ -12,6 +12,8 @@
 #ifndef __LASERTURRETBLOCKMESH_H__
 #define __LASERTURRETBLOCKMESH_H__
 
+#include "TurretBlockMesh.h"
+
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Algebra.h"
 #include "../BlammoEngine/Mesh.h"
@@ -22,7 +24,7 @@
 
 // A holder for the mesh assets of the LaserTurretBlock, this class holds all of the current
 // level's blocks and draws the interactive parts of them.
-class LaserTurretBlockMesh {
+class LaserTurretBlockMesh : public TurretBlockMesh {
 public:
 	LaserTurretBlockMesh();
 	~LaserTurretBlockMesh();
@@ -30,7 +32,6 @@ public:
 	void Flush();
 	void AddLaserTurretBlock(const LaserTurretBlock* laserTurretBlock);
 	void RemoveLaserTurretBlock(const LaserTurretBlock* laserTurretBlock);
-	const std::map<std::string, MaterialGroup*>& GetMaterialGroups() const;
 
 	void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
@@ -91,18 +92,11 @@ private:
     
     BlockCollection blocks;  // A list of all the laser turret blocks that are currently present in the game
 
-	std::map<std::string, MaterialGroup*> materialGroups; // Material groups for the static parts of the laser turret block mesh
-	
     // Meshes for the two barrels of the laser turret block - these are
     // kept separate for animation purposes
     Mesh* barrel1Mesh;
     Mesh* barrel2Mesh;
     Mesh* headMesh;
-    Mesh* baseMesh;
-
-    std::vector<Texture2D*> smokeTextures;
-    Texture2D* glowTexture;
-    Texture2D* sparkleTexture;
 
     AnimationMultiLerp<float> lightPulseAnim;
 
@@ -110,10 +104,6 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(LaserTurretBlockMesh);
 };
-
-inline const std::map<std::string, MaterialGroup*>& LaserTurretBlockMesh::GetMaterialGroups() const {
-	return this->materialGroups;
-}
 
 inline float LaserTurretBlockMesh::BlockData::GetFlashIntensity() const {
     return this->redColourMultiplierAnim.GetInterpolantValue();

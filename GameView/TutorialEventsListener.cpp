@@ -75,7 +75,7 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
         }
 
         if (blockIndicesAllEmpty) {
-            this->pointsTutorialHintEmitter->SetParticleLife(ESPInterval(3.0f));
+            this->pointsTutorialHintEmitter->SetParticleLife(ESPInterval(3.0f), true);
             this->pointsTutorialHintEmitter->ClearEffectors();
             this->pointsTutorialHintEmitter->AddEffector(&this->fadeEffector);
         }

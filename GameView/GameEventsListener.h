@@ -84,7 +84,7 @@ public:
 	void ProjectileSpawnedEvent(const Projectile& projectile);
 	void ProjectileRemovedEvent(const Projectile& projectile);
 	void RocketExplodedEvent(const PaddleRocketProjectile& rocket);
-    void MineExplodedEvent(const PaddleMineProjectile& mine);
+    void MineExplodedEvent(const MineProjectile& mine);
 	void BeamSpawnedEvent(const Beam& beam);
 	void BeamChangedEvent(const Beam& beam);
 	void BeamRemovedEvent(const Beam& beam);
@@ -108,6 +108,9 @@ public:
     void RocketTurretAIStateChangedEvent(const RocketTurretBlock& block,
         RocketTurretBlock::TurretAIState oldState, RocketTurretBlock::TurretAIState newState);
     void RocketFiredByTurretEvent(const RocketTurretBlock& block);
+    void MineTurretAIStateChangedEvent(const MineTurretBlock& block,
+        MineTurretBlock::TurretAIState oldState, MineTurretBlock::TurretAIState newState);
+    void MineFiredByTurretEvent(const MineTurretBlock& block);
 
 private:
 	GameDisplay* display;
