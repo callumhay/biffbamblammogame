@@ -40,7 +40,8 @@ public:
         this->gameModel->ResetNumAcquiredItems();
         this->gameModel->ResetLevelTime();
 
-        this->gameModel->livesAtStartOfLevel = this->gameModel->GetLivesLeft();
+        // Reset the number of lives to be 3...
+        this->gameModel->ResetLevelValues(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
 
         // Place the ball back on the paddle, and let the level begin!
         this->gameModel->SetNextState(GameState::BallOnPaddleStateType);
