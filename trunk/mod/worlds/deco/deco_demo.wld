@@ -4,8 +4,7 @@ Deco
 
 resources/textures/deco_world_select_256x256.jpg
 
-resources/worlds/demo_levels/a_brief_intro_to_blammo.lvl
-resources/worlds/demo_levels/simple_beginnings.lvl
+resources/worlds/demo_levels/introductions.lvl
 resources/worlds/demo_levels/collateral_damage.lvl
 resources/worlds/demo_levels/spike_jonze.lvl
 resources/worlds/demo_levels/a_sticky_situation.lvl

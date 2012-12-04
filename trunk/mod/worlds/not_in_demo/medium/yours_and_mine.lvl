@@ -4,7 +4,7 @@ E E S S S S S S S S S S S S S S S
 E E S E E E E E E E E E S E E E S 
 E E S E E D(StickyPaddle) E E E M E E S E E E S 
 S S S E E E E E E E E E S E E E S 
-S D(LaserBulletPaddle) S N N N N N N F(d) N N S C(90) E C(180) S 
+S D(LaserBulletPaddle) S F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) F(d) S C(90) E C(180) S 
 S G Y O G Y Y Y G O Y G S E E E S 
 S G Y O O R R R O O Y G S E E E S 
 S E E E E B R E E E E E S E E E S 

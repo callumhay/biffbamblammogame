@@ -17,7 +17,7 @@
 
 TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
-shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), doBoostHint(NULL), holdBoostHint(NULL),
+finishedPointsHint(false), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), doBoostHint(NULL), holdBoostHint(NULL),
 boostAvailableHint(NULL), fadeEffector(1, 0) {
     assert(display != NULL);
 }
@@ -56,7 +56,7 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
     this->numBlocksDestroyed++;
 
     // Check to see whether the points tutorial hint has already been faded...
-    if (!this->pointsTutorialHintEmitter->IsDead()) {
+    if (!this->finishedPointsHint) {
         // Figure out when to fade the points hint...
         
         // The following block indices must be empty to make the points hint disappear:
@@ -66,7 +66,7 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
         const std::vector<std::vector<LevelPiece*> >& levelPieces = level->GetCurrentLevelLayout();
         bool blockIndicesAllEmpty = true;
 
-        for (int row = 14; row <= 16 && blockIndicesAllEmpty; row++) {
+        for (int row = 14; row <= 15 && blockIndicesAllEmpty; row++) {
             for (int col = 1; col <= 8 && blockIndicesAllEmpty; col++) {
                 if (levelPieces[row][col]->GetType() != LevelPiece::Empty) {
                     blockIndicesAllEmpty = false;
@@ -78,6 +78,7 @@ void TutorialEventsListener::BlockDestroyedEvent(const LevelPiece& block, const 
             this->pointsTutorialHintEmitter->SetParticleLife(ESPInterval(3.0f), true);
             this->pointsTutorialHintEmitter->ClearEffectors();
             this->pointsTutorialHintEmitter->AddEffector(&this->fadeEffector);
+            this->finishedPointsHint = true;
         }
     }
 }

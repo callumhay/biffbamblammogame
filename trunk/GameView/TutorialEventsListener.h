@@ -72,6 +72,7 @@ private:
     bool fireWeaponAlreadyShown;
     bool boostPopupHintAlreadyShown;
     bool multPopupHintAlreadyShown;
+    bool finishedPointsHint;
 
     // Tutorial hints
     ButtonTutorialHint* movePaddleHint;
