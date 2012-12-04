@@ -4,16 +4,23 @@ Deco
 
 resources/textures/deco_world_select_256x256.jpg
 
-# Simple intro blocks: solids, breakables, bombs
+# Simple intro/tutorial level
 resources/worlds/levels/easy/introductions.lvl
+
+# Teaching/Encouraging boosting (with just breakables)
 resources/worlds/levels/easy/boost_a_move.lvl
+
+# Bomb block intro
 resources/worlds/levels/easy/bombs_are_your_friend.lvl
-
-# Teaching/Encouraging boosting
-resources/worlds/levels/easy/boost_your_way_to_victory.lvl
-
 resources/worlds/levels/easy/chain_of_boom.lvl
 
+# Teaching/Encouraging boosting (with breakables and bombs)
+resources/worlds/levels/easy/boost_your_way_to_victory.lvl
+
+# One-way block intro levels
+resources/worlds/levels/easy/one_way_street.lvl
+resources/worlds/levels/easy/two_step.lvl
+#... another boosting level...
 
 
 # Ink block intro levels
@@ -21,33 +28,61 @@ resources/worlds/levels/easy/heres_ink_in_ur_eye.lvl
 resources/worlds/levels/easy/blow_up_before_gooing.lvl
 
 
-# One-way block intro levels
-resources/worlds/levels/easy/one_way_street.lvl
+
+
+# Ink + one-way + bomb
 resources/worlds/levels/easy/shelf_life.lvl
+
+
+
+
+
+# Collateral block intro levels
+resources/worlds/levels/easy/collateral_damage.lvl
+# Collateral + bomb
+resources/worlds/levels/medium/watch_for_falling_objects.lvl
+# Collateral + bomb + ink
+resources/worlds/levels/medium/death_from_above.lvl
+
+
+
+
 
 # Cannon block intro levels
 resources/worlds/levels/easy/a_brief_intro_to_cannons.lvl
 resources/worlds/levels/easy/a_healthy_serving_of_blocks.lvl
 
 
-# Collateral block intro levels
+# Cannon + one-way
+resources/worlds/levels/easy/upward_not_forward_and_always_twirling.lvl
+
 
 
 # Prism block intro levels
 resources/worlds/levels/easy/intro_to_prisms.lvl
+resources/worlds/levels/medium/dividing_lines.lvl
+
+# Item drop block intro level(s)
+resources/worlds/levels/medium/a_sticky_situation.lvl
+
+
+# Tesla block intro levels
+resources/worlds/levels/easy/electric_access.lvl
+
+
+# Portal block intro levels
+resources/worlds/levels/medium/shutin.lvl
 
 
 # TODO...
-resources/worlds/levels/easy/collateral_damage.lvl
 resources/worlds/levels/medium/spike_jonze.lvl
-resources/worlds/levels/medium/a_sticky_situation.lvl
-resources/worlds/levels/medium/shutin.lvl
-resources/worlds/levels/medium/dividing_lines.lvl
+
+
+
 
 
 
 # Testing Levels
-
 resources/worlds/testing/an_almost_empty_level.lvl
 resources/worlds/testing/block_test.lvl
 resources/worlds/testing/turret_test.lvl
@@ -56,19 +91,25 @@ resources/worlds/testing/turret_test.lvl
 
 
 
-resources/worlds/levels/easy/electric_access.lvl
-
-
-
-
-
-
 # These need to be moved to another world!
-resources/worlds/levels/medium/death_from_above.lvl
-resources/worlds/levels/medium/freezing_hot.lvl
-resources/worlds/levels/medium/watch_for_falling_objects.lvl
 
+
+# Turret levels
 resources/worlds/levels/medium/cannon_peekaboo.lvl
+
+
+
+
+
+# Fireball Item
+
+# Iceball Item
+
+
+resources/worlds/levels/medium/freezing_hot.lvl
+
+
+
 resources/worlds/levels/medium/ahead_by_a_sentry.lvl
 resources/worlds/levels/medium/obtusely_oblique.lvl
 resources/worlds/levels/medium/obscured_enlightenment.lvl

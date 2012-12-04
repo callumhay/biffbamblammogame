@@ -195,7 +195,10 @@ LevelPiece* BreakableBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel* 
  */
 LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	assert(gameModel != NULL);
-    if (ball.IsLastPieceCollidedWith(this) && ball.GetTimeSinceLastCollision() < 0.01) {
+    // Make sure we don't do a double collision - check to make sure the ball hasn't already
+    // collided with this block and also that we're not in the same game time tick since the last
+    // collision of the ball
+    if (ball.IsLastPieceCollidedWith(this) && ball.GetTimeSinceLastCollision() < 0.067) {
         return this;
     }
 
@@ -205,6 +208,7 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
 	// otherwise we apply the "on fire" status to the piece and leave it at that
 	bool isFireBall = ((ball.GetBallType() & GameBall::FireBall) == GameBall::FireBall);
 	bool isIceBall  = ((ball.GetBallType() & GameBall::IceBall) == GameBall::IceBall);
+
 	if (!isFireBall && !isIceBall) {
 		if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 			// EVENT: Ice was shattered
