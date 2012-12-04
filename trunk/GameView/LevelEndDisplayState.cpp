@@ -20,10 +20,11 @@
 #include "../GameModel/GameModel.h"
 #include "../BlammoEngine/Camera.h"
 
+const double LevelEndDisplayState::RENDER_A_BIT_MORE_TIME = 0.15;
 const double LevelEndDisplayState::FADE_TIME = 2.0;
 
 LevelEndDisplayState::LevelEndDisplayState(GameDisplay* display) : DisplayState(display),
-renderPipeline(display) {
+renderPipeline(display), renderABitMoreCount(0.0) {
     // Update the points HUD with the latest score (this makes sure that the last block's points are counted).
     //this->display->GetAssets()->GetPointsHUD()->DoImmediatePointAnimation();
 
@@ -33,13 +34,23 @@ renderPipeline(display) {
 	this->fadeToWhiteAnimation.SetLerp(0.0, LevelEndDisplayState::FADE_TIME, 0.0f, 1.0f);
 	this->fadeToWhiteAnimation.SetRepeat(false);
 	this->fadeToWhiteAnimation.SetInterpolantValue(0.0f);
-
 }
 
 LevelEndDisplayState::~LevelEndDisplayState() {
 }
 
 void LevelEndDisplayState::RenderFrame(double dT) {
+
+    if (this->renderABitMoreCount <= LevelEndDisplayState::RENDER_A_BIT_MORE_TIME) {
+        this->renderPipeline.RenderFrame(dT);
+#ifdef _DEBUG
+	    this->DebugDrawBounds();
+	    this->display->GetAssets()->DebugDrawLights();
+#endif
+        this->renderABitMoreCount += dT;
+        return;
+    }
+
 	const Camera& camera = this->display->GetCamera();
 
 	// Clear the screen to a white background
@@ -68,6 +79,11 @@ void LevelEndDisplayState::RenderFrame(double dT) {
 	glPopAttrib();
 
 	if (fadeIsDone) {
+	    // Kill all effects that may have previously been occuring...
+	    this->display->GetAssets()->DeactivateMiscEffects();
+        // Kill all particles...
+        this->display->GetAssets()->GetESPAssets()->RemoveAllProjectileEffects();
+
         // Update the game model until there's a new queued state
         while (!this->display->SetCurrentStateAsNextQueuedState()) {
             this->display->UpdateModel(dT);

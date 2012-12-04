@@ -36,6 +36,16 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 
     GameModel* gameModel = this->display->GetModel();
     
+    // Make sure the ball is in the center of the level, on top of the paddle
+	GameBall* ball = this->display->GetModel()->GetGameBalls().front();
+	assert(ball != NULL);
+    const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
+    assert(paddle != NULL);
+
+    Vector2D disp = Vector2D(0.0f, ball->GetBounds().Radius() + paddle->GetHalfHeight() + 0.1f);
+	Point2D ballLoc = paddle->GetCenterPosition() + disp;
+    ball->SetCenterPosition(ballLoc);
+
     // Make sure the game is in the "BallOnPaddleState" before going through with the 
     // initialization for the visuals
     this->display->GetModel()->UnsetPause(GameModel::PauseGame);
@@ -91,7 +101,6 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	this->blockFadeInAnimation.SetRepeat(false);
 	this->blockFadeInAnimation.SetInterpolantValue(0.0f);
 
-	const PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
 	float paddleAnimMoveDist   = 0.33f * std::max<float>(level->GetLevelUnitWidth(), level->GetLevelUnitHeight());
 	float paddleStartPos       = paddle->GetCenterPosition()[1] - paddleAnimMoveDist;
 	double endOfPaddleMove     = endOfBlockFadeIn + 0.15;
@@ -105,8 +114,6 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 	this->ballFadeInAnimation.SetInterpolantValue(0.0f);
 
 	Vector2D negHalfLevelDim = -0.5 * this->display->GetModel()->GetLevelUnitDimensions();
-	const GameBall* ball = this->display->GetModel()->GetGameBalls().front();
-	assert(ball != NULL);
 	Point3D emitCenter(ball->GetCenterPosition2D() + negHalfLevelDim, 0.0f);
 
 	//const Texture2D* fullscreenTex = this->display->GetAssets()->GetFBOAssets()->GetPostFullSceneFBO()->GetFBOTexture();

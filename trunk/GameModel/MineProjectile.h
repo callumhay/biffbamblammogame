@@ -43,6 +43,8 @@ public:
 
     virtual float GetDamage() const = 0;
 
+    virtual float GetProximityRadius() const { return MINE_DEFAULT_PROXIMITY_RADIUS * this->GetVisualScaleFactor(); }
+
     bool IsRocket() const { return false; }
     bool IsRefractableOrReflectable() const { return false; }
 
@@ -76,7 +78,6 @@ public:
     float GetCurrentRotation() const { return this->currRotation; }
 
     float GetExplosionRadius() const { return MINE_DEFAULT_EXPLOSION_RADIUS * this->GetVisualScaleFactor(); }
-    float GetProximityRadius() const { return MINE_DEFAULT_PROXIMITY_RADIUS * this->GetVisualScaleFactor(); }
     float GetProximityCountdownInSeconds() const { return this->proximityAlertCountdown; }
 
     bool GetIsArmed() const { return this->isArmed; }

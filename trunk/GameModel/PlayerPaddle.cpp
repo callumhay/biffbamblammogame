@@ -472,8 +472,6 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
             }
 
 			// EVENT: paddle hit left wall for first time
-            /// <summary> Default constructor. </summary>
-            /// <remarks> Beowulf, 29/11/2012. </remarks>
 			GameEventManager::Instance()->ActionPaddleHitWall(*this, this->centerPos + Vector2D(-halfWidthTotalWithAttachedMin, 0));
 		}
 
