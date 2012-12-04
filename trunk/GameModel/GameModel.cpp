@@ -162,7 +162,7 @@ void GameModel::BeginOrRestartGame() {
 
 void GameModel::ResetCurrentLevel() {
     this->SetNextState(GameState::LevelStartStateType);
-    this->ResetLevelValues(this->GetLivesAtStartOfLevel());
+    this->ResetLevelValues(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
     this->SetCurrentWorldAndLevel(this->currWorldNum, static_cast<int>(this->GetCurrentLevel()->GetLevelNumIndex()), false);
 }
 
@@ -1024,6 +1024,9 @@ void GameModel::ClearLiveItems() {
 		currItem = NULL;
 	}
 	this->currLiveItems.clear();
+
+    // Remove any safety net that might be active
+    this->DestroySafetyNet();
 }
 /**
  * Clears all of the active timers in the game.
