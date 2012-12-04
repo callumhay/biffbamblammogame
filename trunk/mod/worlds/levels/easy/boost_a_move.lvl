@@ -1,23 +1,23 @@
-Boosting Your Way to Victory
+Boost A Move
 11 28
 S S S S S S S S S S S 
-S G G G G G G G B G S 
-S G G G G G G G G B S 
-S Y Y Y Y Y Y S B G S 
-S Y Y Y Y Y Y S G G S 
-S B O B O B O S S G S 
-S R R R R R T(R,ul) E T(S,ur) S S 
-S E E E E E E E E T(S,ur) S 
-S E E E E E E E E E S 
-S E E E E E E E E E S 
-S R R R R R R R E E S 
-S O B O B O B R E E S 
-S G Y G Y G Y R E E S 
-S R R R R R R R E E S 
-S T(R,ul) E E E E E E E E S 
-S E E E E E E E E E S 
-S E E E E E E E E T(R,lr) S 
-S E E T(R,ur) R R R R R R S 
+S E E G G E E E E E S 
+S E E G G E E E E E S 
+S E E Y Y E E E E E S 
+S E E O O E E E E E S 
+S E E S R G G G G G S 
+S E E S R Y G Y G Y S 
+S E E S R G Y G Y G S 
+S E E S R Y G Y G Y S 
+S E E S R G O G O G S 
+S E E S R O G O G O S 
+S E E S R G O G O G S 
+S E E S R R G R G R S 
+S E E S R G R G R G S 
+S E E S R R G R G R S 
+S E E S R R R R R R S 
+S E E S R R R R R R S 
+S E E S R R R R R R S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -30,26 +30,26 @@ S E E E E E E E E E S
 S E E E E E E E E E S 
 
 STARS:
-13000
-17000
-20000
-26000
-34050
+4500
+7500
+9500
+13500
+18000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
-Blackout 2
-UberBall 1
+Blackout 0
+UberBall 0
 BallGrow 0
 StickyPaddle 2
-ShieldPaddle 2
+ShieldPaddle 0
 LaserBulletPaddle 0
 PaddleShrink 2
 InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 0
-OmniLaserBall 1
+OmniLaserBall 0
 FireBall 0
 RocketPaddle 0
 GhostBall 0
@@ -58,12 +58,12 @@ UpsideDown 2
 MultiBall5 0
 BallCam 0
 MagnetPaddle 2
-MultiBall3 0
+MultiBall3 2
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 2
-GravityBall 1
+GravityBall 2
 CrazyBall 0
-Random 0
+Random 2
 FastBall 2
 PaddleCam 0
