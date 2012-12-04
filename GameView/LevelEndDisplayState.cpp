@@ -41,6 +41,8 @@ LevelEndDisplayState::~LevelEndDisplayState() {
 
 void LevelEndDisplayState::RenderFrame(double dT) {
 
+    // We keep rendering the game for a tiny bit of time so that the player can
+    // see the destruction of the final block(s) that ended the level
     if (this->renderABitMoreCount <= LevelEndDisplayState::RENDER_A_BIT_MORE_TIME) {
         this->renderPipeline.RenderFrame(dT);
 #ifdef _DEBUG
