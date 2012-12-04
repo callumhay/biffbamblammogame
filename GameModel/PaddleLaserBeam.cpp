@@ -15,8 +15,8 @@
 #include "PortalBlock.h"
 #include "GameEventManager.h"
 
-const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS	= 10;		// Length of time for the beam to be firing
-const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND				  = 150;	// Damage per second that the paddle laser does to blocks and stuff																															// NOTE: a typical block has about 100 life
+const double PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS = 10;  // Length of time for the beam to be firing
+const int PaddleLaserBeam::BASE_DAMAGE_PER_SECOND         = 120; // Damage per second that the paddle laser does to blocks and stuff																															// NOTE: a typical block has about 100 life
 
 PaddleLaserBeam::PaddleLaserBeam(PlayerPaddle* paddle, const GameLevel* level) : 
 Beam(Beam::PaddleLaserBeam, PaddleLaserBeam::BASE_DAMAGE_PER_SECOND, PaddleLaserBeam::BEAM_EXPIRE_TIME_IN_SECONDS), 
@@ -43,8 +43,8 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 
 	// Create the very first beam part that shoots out of the paddle towards the level
 	const float INITIAL_BEAM_RADIUS  = this->paddle->GetHalfFlatTopWidth()/2.0f;
-	const Point2D BEAM_ORIGIN				 = this->paddle->GetCenterPosition() + Vector2D(0, this->paddle->GetHalfHeight());
-	const Vector2D BEAM_UNIT_DIR		 = this->paddle->GetUpVector();
+	const Point2D BEAM_ORIGIN        = this->paddle->GetCenterPosition() + Vector2D(0, this->paddle->GetHalfHeight());
+	const Vector2D BEAM_UNIT_DIR     = this->paddle->GetUpVector();
 
 	// The current damage is determined by a ratio of the normal paddle width to its current width and
 	// the typical base-damage that this beam does
@@ -80,15 +80,14 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 		}
 
 		firstBeamSeg = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN, Vector2D::Rotate(rotateBeamCenterBeamAmt, BEAM_UNIT_DIR)), 
-																   centerBeamRadiusAmt * INITIAL_BEAM_RADIUS, 
-																	 centerBeamRadiusAmt * this->baseDamagePerSecond, NULL);
+		    centerBeamRadiusAmt * INITIAL_BEAM_RADIUS, centerBeamRadiusAmt * this->baseDamagePerSecond, NULL);
 
 		Vector2D adjustBeamOriginAmt(paddle->GetHalfFlatTopWidth()*0.5, 0.0f);
 		BeamSegment* refractSeg1 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN - adjustBeamOriginAmt, Vector2D::Rotate(rotateBeamRefract1Amt, BEAM_UNIT_DIR)), 
-																						   beamRefract1RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract1RadiusAmt * this->baseDamagePerSecond, NULL);
+		    beamRefract1RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract1RadiusAmt * this->baseDamagePerSecond, NULL);
 		newBeamSegs.push_back(refractSeg1);
 		BeamSegment* refractSeg2 = new BeamSegment(Collision::Ray2D(BEAM_ORIGIN + adjustBeamOriginAmt, Vector2D::Rotate(rotateBeamRefract2Amt, BEAM_UNIT_DIR)), 
-																							 beamRefract2RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract2RadiusAmt * this->baseDamagePerSecond, NULL);
+		    beamRefract2RadiusAmt * INITIAL_BEAM_RADIUS, beamRefract2RadiusAmt * this->baseDamagePerSecond, NULL);
 		newBeamSegs.push_back(refractSeg2);
 	}
 	else {

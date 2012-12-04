@@ -15,7 +15,7 @@
 #include "GameItemTimer.h"
 
 const char* OmniLaserBallItem::OMNI_LASER_BALL_ITEM_NAME      = "OmniLaserBall";
-const double OmniLaserBallItem::OMNI_LASER_BALL_TIMER_IN_SECS = 20.0;
+const double OmniLaserBallItem::OMNI_LASER_BALL_TIMER_IN_SECS = 16.0;
 
 OmniLaserBallItem::OmniLaserBallItem(const Point2D &spawnOrigin, GameModel *gameModel) : 
 GameItem(OMNI_LASER_BALL_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {

@@ -433,6 +433,9 @@ void GameTransformMgr::StartLevelFlipAnimation(double dT, GameModel& gameModel) 
 	// Find any existing animations and hault them elegantly
 	this->levelFlipAnimations.clear();
 
+    // Pause the game while we flip the level
+    gameModel.SetPause(GameModel::PauseState);
+
 	// Setup the animations for flipping
 	int finalDegRotX = this->isFlipped ? 0 : 180;
 	double percentFlippedX = abs(finalDegRotX - this->currGameDegRotX) / 180.0;
@@ -484,6 +487,9 @@ void GameTransformMgr::FinishLevelFlipAnimaiton(double dT, GameModel& gameModel)
 
 	// Pop the animation off the queue
 	this->animationQueue.pop_front();
+
+    // Unpause the game now that the flip is complete
+    gameModel.UnsetPause(GameModel::PauseState);
 }
 
 /**

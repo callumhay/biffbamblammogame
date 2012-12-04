@@ -8,7 +8,7 @@ S E S G Y G S G Y G S E S
 S E Y E O E E E O E Y E S 
 S E Y E E E O E E E Y E S 
 S G G G G G Y G G G G G S 
-S G I G L G B G L G I G S 
+S G O G L G B G L G O G S 
 S G G G S G Y G S G G G S 
 S E Y E E E O E E E Y E S 
 S E Y E O E E E O E Y E S 
@@ -38,8 +38,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -58,6 +58,7 @@ BallCam 2
 MagnetPaddle 2
 MultiBall3 2
 IceBall 2
+MineLauncherPaddle 2
 SlowBall 2
 GravityBall 2
 CrazyBall 0
