@@ -4,9 +4,9 @@ Deco
 
 resources/textures/deco_world_select_256x256.jpg
 
-resources/worlds/demo_levels/introductions.lvl
-resources/worlds/demo_levels/collateral_damage.lvl
-resources/worlds/demo_levels/spike_jonze.lvl
-resources/worlds/demo_levels/a_sticky_situation.lvl
-resources/worlds/demo_levels/shutin.lvl
-resources/worlds/demo_levels/dividing_lines.lvl
+resources/worlds/levels/easy/introductions.lvl
+resources/worlds/levels/easy/collateral_damage.lvl
+resources/worlds/levels/medium/spike_jonze.lvl
+resources/worlds/levels/medium/a_sticky_situation.lvl
+resources/worlds/levels/medium/shutin.lvl
+resources/worlds/levels/medium/dividing_lines.lvl
