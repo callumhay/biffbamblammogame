@@ -49,7 +49,8 @@ const int MineTurretBlock::LOST_AND_FOUND_MAX_NUM_LOOK_TIMES = 6;
 MineTurretBlock::MineTurretBlock(unsigned int wLoc, unsigned int hLoc) :
 TurretBlock(wLoc, hLoc, MineTurretBlock::PIECE_STARTING_LIFE_POINTS), 
 currTurretState(SeekingTurretState), currRotationFromXInDegs(Randomizer::GetInstance()->RandomUnsignedInt() % 360), currRotationSpd(0.0f),
-lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0) {
+lostAndFoundTimeCounter(0.0), numSearchTimesCounter(0), numTimesToSearch(0),
+currBarrelAxisRotation(Randomizer::GetInstance()->RandomUnsignedInt() % 360) {
 
     this->SetBarrelState(BarrelForwardMineLoaded, NULL);
 
@@ -80,8 +81,7 @@ bool MineTurretBlock::ProjectilePassesThrough(const Projectile* projectile) cons
             }
             break;
 
-        case Projectile::RocketTurretBulletProjectile:
-            // Rockets shot from this turret should not be destroyed by this turret!
+        case Projectile::MineTurretBulletProjectile:
             if (projectile->IsLastThingCollidedWith(this)) {
                 return true;
             }
@@ -134,11 +134,8 @@ LevelPiece* MineTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 
 
         case Projectile::RocketTurretBulletProjectile:
-            // Deal with rockets that have been fired from the barrel of this turret - they
-            // shouldn't collide with this block!
-            if (projectile->IsLastThingCollidedWith(this)) {
-                return this;
-            }
+            break;
+
         case Projectile::PaddleRocketBulletProjectile: {
 
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
@@ -158,8 +155,14 @@ LevelPiece* MineTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile*
             break;
         }
 
-        case Projectile::PaddleMineBulletProjectile:
-        case Projectile::MineTurretBulletProjectile: {
+        case Projectile::MineTurretBulletProjectile:
+            // Deal with mines that have been fired from the barrel of this turret - they
+            // shouldn't collide with this block!
+            if (projectile->IsLastThingCollidedWith(this)) {
+                break;
+            }
+        case Projectile::PaddleMineBulletProjectile: {
+            
             // A mine will blow up on contact
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				// EVENT: Ice was shattered
@@ -240,8 +243,10 @@ bool MineTurretBlock::ExecutePaddleSeekingAI(double dT, const GameModel* model) 
 
     this->UpdateSpeed();
     float rotationAmt = dT * currRotationSpd;
+
     this->currRotationFromXInDegs += rotationAmt;
-    
+    this->currBarrelAxisRotation += rotationAmt;
+
     bool canSeePaddle, canFireAtPaddle;
     this->CanSeeAndFireAtPaddle(model, canSeePaddle, canFireAtPaddle);
     
@@ -487,8 +492,6 @@ void MineTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canSee
         ignoreTypes.insert(LevelPiece::NoEntry);
         ignoreTypes.insert(LevelPiece::Empty);
         ignoreTypes.insert(LevelPiece::Cannon);
-        ignoreTypes.insert(LevelPiece::Prism);
-        ignoreTypes.insert(LevelPiece::PrismTriangle);
         ignoreTypes.insert(LevelPiece::Portal);
         ignoreTypes.insert(LevelPiece::OneWay);
 

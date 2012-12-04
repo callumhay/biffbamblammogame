@@ -15,9 +15,6 @@
 #include "LevelPiece.h"
 #include "GameModel.h"
 
-const float PaddleMineProjectile::PADDLEMINE_HEIGHT_DEFAULT = 0.8f;
-const float PaddleMineProjectile::PADDLEMINE_WIDTH_DEFAULT  = 0.8f;
-
 PaddleMineProjectile::PaddleMineProjectile(const Point2D& spawnLoc, const Vector2D& velDir,
                                            float width, float height) :
 MineProjectile(spawnLoc, velDir, width, height) {

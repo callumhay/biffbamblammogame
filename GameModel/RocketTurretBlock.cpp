@@ -139,7 +139,7 @@ LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, Projectil
             // Deal with rockets that have been fired from the barrel of this turret - they
             // shouldn't collide with this block!
             if (projectile->IsLastThingCollidedWith(this)) {
-                return this;
+                break;
             }
         case Projectile::PaddleRocketBulletProjectile: {
 
@@ -162,6 +162,7 @@ LevelPiece* RocketTurretBlock::CollisionOccurred(GameModel* gameModel, Projectil
 
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile: {
+
             // A mine will blow up on contact
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				// EVENT: Ice was shattered
@@ -488,8 +489,6 @@ void RocketTurretBlock::CanSeeAndFireAtPaddle(const GameModel* model, bool& canS
         ignoreTypes.insert(LevelPiece::NoEntry);
         ignoreTypes.insert(LevelPiece::Empty);
         ignoreTypes.insert(LevelPiece::Cannon);
-        ignoreTypes.insert(LevelPiece::Prism);
-        ignoreTypes.insert(LevelPiece::PrismTriangle);
         ignoreTypes.insert(LevelPiece::Portal);
         ignoreTypes.insert(LevelPiece::OneWay);
 

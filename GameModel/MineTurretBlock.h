@@ -43,6 +43,7 @@ public:
     void GetFiringDirection(Vector2D& unitDir) const;
     float GetRotationDegreesFromX() const;
     float GetBarrelRecoilAmount() const;
+    float GetBarrelAxisRotationDegrees() const;
 
     bool HasMineLoaded() const {
         return (this->barrelState == BarrelForwardMineLoading || this->barrelState == BarrelForwardMineLoaded);
@@ -85,6 +86,7 @@ private:
     float currRotationFromXInDegs;
     float currRotationSpd;
     float currRotationAccel;
+    float currBarrelAxisRotation;
 
     double lostAndFoundTimeCounter;
     double nextLostAndFoundSeekTime;
@@ -112,6 +114,10 @@ private:
 
 inline float MineTurretBlock::GetRotationDegreesFromX() const {
     return this->currRotationFromXInDegs;
+}
+
+inline float MineTurretBlock::GetBarrelAxisRotationDegrees() const {
+    return this->currBarrelAxisRotation;
 }
 
 inline float MineTurretBlock::GetBarrelRecoilAmount() const {

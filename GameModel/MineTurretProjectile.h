@@ -17,8 +17,8 @@
 class MineTurretProjectile : public MineProjectile {
 
 public:
-	static const float HEIGHT_DEFAULT;
-	static const float WIDTH_DEFAULT;
+	static const float TURRET_MINE_HEIGHT;
+	static const float TURRET_MINE_WIDTH;
 
 	MineTurretProjectile(const Point2D& spawnLoc, const Vector2D& velDir);
 	MineTurretProjectile(const MineTurretProjectile& copy);
@@ -29,9 +29,6 @@ public:
     }
 
     float GetDamage() const { return 200.0f; }
- 
-    float GetDefaultHeight() const { return MineTurretProjectile::HEIGHT_DEFAULT; }
-    float GetDefaultWidth() const  { return MineTurretProjectile::WIDTH_DEFAULT;  }
 };
 
 #endif // __MINETURRETPROJECTILE_H__

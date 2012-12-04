@@ -27,6 +27,10 @@ bool TurretBlock::ProjectileIsDestroyedOnCollision(const Projectile* projectile)
 
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile:
+            if (projectile->IsLastThingCollidedWith(this)) {
+                break;
+            }
+
             // Mines are destroyed by collisions with turrets.
             return true;
 

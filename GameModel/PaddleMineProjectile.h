@@ -20,9 +20,6 @@
 class PaddleMineProjectile : public MineProjectile {
 
 public:
-	static const float PADDLEMINE_HEIGHT_DEFAULT;
-	static const float PADDLEMINE_WIDTH_DEFAULT;
-
 	PaddleMineProjectile(const Point2D& spawnLoc, const Vector2D& velDir, float width, float height);
 	PaddleMineProjectile(const PaddleMineProjectile& copy);
     ~PaddleMineProjectile();
@@ -36,9 +33,6 @@ public:
         // this is used to determine how much it will destroy.
         return (this->GetWidth() / this->GetDefaultWidth()) * 200.0f;
     }
- 
-    float GetDefaultHeight() const { return PaddleMineProjectile::PADDLEMINE_HEIGHT_DEFAULT; }
-    float GetDefaultWidth() const  { return PaddleMineProjectile::PADDLEMINE_WIDTH_DEFAULT;  }
 };
 
 #endif // __PADDLEMINEPROJECTILE_H__

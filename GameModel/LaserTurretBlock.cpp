@@ -121,11 +121,11 @@ LevelPiece* LaserTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile
             // Deal with lasers that have been fired from the barrels of this turret - they
             // shouldn't collide with this block!
             if (projectile->IsLastThingCollidedWith(this)) {
-                return this;
+                break;
             }
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
-        
+
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				this->DoIceCubeReflectRefractLaserBullets(projectile, gameModel);
 			}
@@ -137,6 +137,7 @@ LevelPiece* LaserTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile
 
         case Projectile::PaddleMineBulletProjectile:
         case Projectile::MineTurretBulletProjectile: {
+
             // A mine will blow up on contact
 			if (this->HasStatus(LevelPiece::IceCubeStatus)) {
 				// EVENT: Ice was shattered
