@@ -3528,7 +3528,7 @@ void GameESPAssets::AddPaddleMineFiredEffects(const GameModel& gameModel,
 	particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	particleSparks->SetInitialSpd(ESPInterval(3.0f, 5.25f));
 	particleSparks->SetParticleLife(ESPInterval(0.25f, 0.55f));
-    particleSparks->SetParticleSize(ESPInterval(PaddleMineProjectile::PADDLEMINE_WIDTH_DEFAULT / 4.0f, PaddleMineProjectile::PADDLEMINE_WIDTH_DEFAULT / 3.0f));
+    particleSparks->SetParticleSize(ESPInterval(MineProjectile::WIDTH_DEFAULT / 4.0f, MineProjectile::WIDTH_DEFAULT / 3.0f));
 	particleSparks->SetParticleColour(ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f), ESPInterval(1.0f));
 	particleSparks->SetEmitAngleInDegrees(25);
     particleSparks->SetParticleAlignment(ESP::ScreenAligned);

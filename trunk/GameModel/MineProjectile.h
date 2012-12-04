@@ -24,6 +24,9 @@ class CannonBlock;
  */
 class MineProjectile : public Projectile {
 public:
+	static const float HEIGHT_DEFAULT;
+	static const float WIDTH_DEFAULT;
+
     static const double MINE_MIN_COUNTDOWN_TIME;
     static const double MINE_MAX_COUNTDOWN_TIME;
 
@@ -64,11 +67,11 @@ public:
     float GetAccelerationMagnitude() const { return this->acceleration; }
     float GetRotationAccelerationMagnitude() const { return 300.0f; }
 
-    float GetMaxVelocityMagnitude() const { return MAX_VELOCITY; }
+    float GetMaxVelocityMagnitude() const { return MineProjectile::MAX_VELOCITY; }
     float GetMaxRotationVelocityMagnitude() const { return 168.0f; }
 
-    virtual float GetDefaultHeight() const = 0;
-    virtual float GetDefaultWidth() const  = 0;
+    float GetDefaultHeight() const { return MineProjectile::HEIGHT_DEFAULT; };
+    float GetDefaultWidth() const  { return MineProjectile::WIDTH_DEFAULT;  };
 
     float GetCurrentRotation() const { return this->currRotation; }
 
@@ -166,6 +169,14 @@ inline void MineProjectile::LevelPieceCollisionOccurred(LevelPiece* block) {
     // We don't 'land' the mine and set an attached block if the mine is being loaded into a cannon
     // or if it just can't collide with the block
     if (block->GetType() == LevelPiece::Cannon || block->IsNoBoundsPieceType()) {
+        return;
+    }
+
+    // We don't land the mine on blocks that mines destroy (turrets)
+    if (block->GetType() == LevelPiece::LaserTurret ||
+        block->GetType() == LevelPiece::RocketTurret ||
+        block->GetType() == LevelPiece::MineTurret) {
+
         return;
     }
 

@@ -15,6 +15,9 @@
 #include "LevelPiece.h"
 #include "GameModel.h"
 
+const float MineProjectile::HEIGHT_DEFAULT = 0.8f;
+const float MineProjectile::WIDTH_DEFAULT  = 0.8f;
+
 const Vector2D MineProjectile::MINE_DEFAULT_VELOCITYDIR = Vector2D(0, 1);
 const Vector2D MineProjectile::MINE_DEFAULT_RIGHTDIR    = Vector2D(1, 0);
 

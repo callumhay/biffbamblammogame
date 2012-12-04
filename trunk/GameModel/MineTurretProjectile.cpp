@@ -11,11 +11,12 @@
 
 #include "MineTurretProjectile.h"
 
-const float MineTurretProjectile::HEIGHT_DEFAULT = 0.45f;
-const float MineTurretProjectile::WIDTH_DEFAULT  = 0.45f;
+const float MineTurretProjectile::TURRET_MINE_HEIGHT = 0.65f;
+const float MineTurretProjectile::TURRET_MINE_WIDTH  = 0.65f;
 
 MineTurretProjectile::MineTurretProjectile(const Point2D& spawnLoc, const Vector2D& velDir) :
-MineProjectile(spawnLoc, velDir, MineTurretProjectile::WIDTH_DEFAULT, MineTurretProjectile::HEIGHT_DEFAULT) {
+MineProjectile(spawnLoc, velDir, MineTurretProjectile::TURRET_MINE_WIDTH, MineTurretProjectile::TURRET_MINE_HEIGHT) {
+    this->velocityMag = MineProjectile::MAX_VELOCITY;
 }
 
 MineTurretProjectile::MineTurretProjectile(const MineTurretProjectile& copy) : MineProjectile(copy) {

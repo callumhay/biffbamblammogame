@@ -86,6 +86,8 @@ void MineMeshManager::DrawLoadingMine(double dT, const PlayerPaddle& paddle, con
     this->timeSinceLastMineLaunch += dT;
 }
 
+#define TRAIL_EMITTER_DELTA_TIME 0.005f
+
 MineMeshManager::MineInstance::MineInstance(const MineProjectile* mine,
                                             Texture2D* trailTexture, Texture2D* pulseTexture,
                                             Texture2D* triggeredTexture) :
@@ -96,7 +98,7 @@ particleShrinkToNothing(1, 0), pulseGrower(1.0f, 4.0f), fastPulser(0,0) {
 
     bool result = true;
 
-	this->trailEmitter.SetSpawnDelta(ESPInterval(0.005f));
+	this->trailEmitter.SetSpawnDelta(ESPInterval(TRAIL_EMITTER_DELTA_TIME));
 	this->trailEmitter.SetInitialSpd(ESPInterval(0.0f));
 	this->trailEmitter.SetParticleLife(ESPInterval(0.35f));
 	this->trailEmitter.SetParticleSize(ESPInterval(1.3f), ESPInterval(1.3f));
@@ -153,6 +155,9 @@ void MineMeshManager::MineInstance::Draw(double dT, const Camera& camera, const 
     if (this->mine->IsLoadedInCannonBlock() ||
         this->mine->GetVelocityMagnitude() <= EPSILON && Vector2D::Dot(this->mine->GetVelocityDirection(), Vector2D(0, 1)) <= 0) {
         this->trailEmitter.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+    }
+    else {
+        this->trailEmitter.SetSpawnDelta(ESPInterval(TRAIL_EMITTER_DELTA_TIME));
     }
  
     this->trailEmitter.SetParticleSpawnSize(ESPInterval(mine->GetWidth()));

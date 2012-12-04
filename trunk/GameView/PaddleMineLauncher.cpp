@@ -16,7 +16,7 @@
 
 PaddleMineLauncher::PaddleMineLauncher() : paddleMineAttachmentMesh(NULL), mineMesh(NULL) {
     this->loadingMineAnim.SetInterpolantValue(0.0f);
-    this->loadingMineAnim.SetLerp(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY*0.9, PaddleMineProjectile::PADDLEMINE_HEIGHT_DEFAULT);
+    this->loadingMineAnim.SetLerp(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY*0.9, MineProjectile::HEIGHT_DEFAULT);
 
     this->paddleMineAttachmentMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->PADDLE_MINE_ATTACHMENT_MESH);
     assert(this->paddleMineAttachmentMesh != NULL);

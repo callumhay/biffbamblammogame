@@ -117,6 +117,16 @@ void MineTurretBlockMesh::Draw(double dT, const Camera& camera, const BasicPoint
         // Draw moving geometry for the current block...
         glPushMatrix();
         glTranslatef(currBlock->GetBarrelRecoilAmount(), 0, 0);
+        
+        // Translate the barrel to the x-axis, rotate and then translate back
+        glTranslatef(0, 
+                     MineTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y,
+                     MineTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Z);
+        glRotatef(currBlock->GetBarrelAxisRotationDegrees(), 1, 0, 0);
+        glTranslatef(0, 
+                     -MineTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Y,
+                     -MineTurretBlock::BARREL_OFFSET_EXTENT_ALONG_Z);
+
         this->barrelMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
 

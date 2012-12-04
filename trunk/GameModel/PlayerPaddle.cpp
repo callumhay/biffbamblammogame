@@ -741,8 +741,8 @@ void PlayerPaddle::Shoot(GameModel* gameModel) {
             if (this->timeSinceLastMineLaunch >= PADDLE_MINE_LAUNCH_DELAY) {
 
 			    // Calculate the width and height of the mine based on the size of the paddle...
-			    float projectileWidth  = this->GetPaddleScaleFactor() * PaddleMineProjectile::PADDLEMINE_WIDTH_DEFAULT;
-			    float projectileHeight = this->GetPaddleScaleFactor() * PaddleMineProjectile::PADDLEMINE_HEIGHT_DEFAULT;
+			    float projectileWidth  = this->GetPaddleScaleFactor() * MineProjectile::WIDTH_DEFAULT;
+			    float projectileHeight = this->GetPaddleScaleFactor() * MineProjectile::HEIGHT_DEFAULT;
 
 			    // Create the right type of projectile in the right place
 			    Projectile* newProjectile = new PaddleMineProjectile(
@@ -1012,8 +1012,7 @@ void PlayerPaddle::DebugDraw() const {
 }
 
 float PlayerPaddle::GetMineProjectileStartingHeightRelativeToPaddle() const {
-    return this->currHalfHeight + 0.5f * this->GetPaddleScaleFactor() *
-        PaddleMineProjectile::PADDLEMINE_HEIGHT_DEFAULT;
+    return this->currHalfHeight + 0.5f * this->GetPaddleScaleFactor() * MineProjectile::HEIGHT_DEFAULT;
 }
 
 /**
