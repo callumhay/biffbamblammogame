@@ -37,7 +37,10 @@ public:
 	DisplayState::DisplayStateType GetType() const;
 
 private:
+    static const double RENDER_A_BIT_MORE_TIME;
 	static const double FADE_TIME;
+
+    double renderABitMoreCount;
 
 	InGameRenderPipeline renderPipeline;
 	AnimationLerp<float> fadeToWhiteAnimation;

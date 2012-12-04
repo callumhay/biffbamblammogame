@@ -29,6 +29,8 @@ public:
     }
 
     float GetDamage() const { return 200.0f; }
+
+    float GetProximityRadius() const { return MineProjectile::MINE_DEFAULT_PROXIMITY_RADIUS; };
 };
 
 #endif // __MINETURRETPROJECTILE_H__
