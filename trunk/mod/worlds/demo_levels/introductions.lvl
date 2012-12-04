@@ -1,12 +1,12 @@
-A Brief Introduction to Blammo
+Introductions
 10 26
 S S S S S S S S S S 
 S E E E E E E E E S 
 S E E E E E E E E S 
 S G G G G G G G G S 
 S G G G G G G G G S 
-S G G G G G G G G S 
-S G G G Y Y G G G S 
+S Y G Y G G Y G Y S 
+S G Y G Y Y G Y G S 
 S E E E O R E E E S 
 S G G G Y Y G G G S 
 S G G G G G G G G S 
@@ -28,18 +28,18 @@ S E E E E E E E E S
 S E E E E E E E E S 
 
 STARS:
-1000
-3000
-5000
-8000
-9000
+1500
+3500
+5500
+8500
+9500
 
 PaddleGrow 3
 PoisonPaddle 0
 BallSafetyNet 3
 Blackout 0
-BallGrow 3
 UberBall 0
+BallGrow 3
 StickyPaddle 0
 ShieldPaddle 0
 LaserBulletPaddle 3
@@ -55,8 +55,10 @@ BallShrink 2
 UpsideDown 0
 MultiBall5 0
 BallCam 0
+MagnetPaddle 2
 MultiBall3 0
 IceBall 0
+MineLauncherPaddle 0
 SlowBall 3
 GravityBall 0
 CrazyBall 0
