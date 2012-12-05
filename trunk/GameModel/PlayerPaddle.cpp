@@ -1138,7 +1138,7 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 	assert(currentLevel != NULL);
 
 	// Figure out the position in space where the rocket hit and find what block is at that position...
-	std::set<LevelPiece*> levelPieces = currentLevel->GetLevelPieceCollisionCandidates(projectile.GetPosition(), EPSILON);
+	std::set<LevelPiece*> levelPieces = currentLevel->GetLevelPieceCollisionCandidatesNoSort(projectile.GetPosition(), EPSILON);
 	if (!levelPieces.empty()) {
 		currentLevel->RocketExplosion(gameModel, &projectile, *levelPieces.begin());
 	}

@@ -101,10 +101,14 @@ protected:
     static const int POINTS_ON_YELLOW_TO_GREEN_HIT  = 150;
 	static const int POINTS_ON_BLOCK_DESTROYED	    = 100;   // Points obtained when you destory a breakable block
 
+    static const double ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS;
+
 	float currLifePoints;	// Current life points of this block
 
 	enum BreakablePieceType { GreenBreakable = 'G', YellowBreakable = 'Y', OrangeBreakable = 'O', RedBreakable = 'R' }; 
 	BreakablePieceType pieceType;
+
+    double timeOfLastBallCollision;
 
 	static BreakablePieceType GetDecrementedPieceType(BreakablePieceType breakableType);
 	static Colour GetColourOfBreakableType(BreakablePieceType breakableType);

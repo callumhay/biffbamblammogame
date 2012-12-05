@@ -20,15 +20,14 @@ resources/worlds/levels/easy/boost_your_way_to_victory.lvl
 # One-way block intro levels
 resources/worlds/levels/easy/one_way_street.lvl
 resources/worlds/levels/easy/two_step.lvl
-#... another boosting level...
+
+# Teaching/Encouraging boosting (with one-ways, breakables, and bombs)
+resources/worlds/levels/easy/spiral_navigator.lvl.
 
 
 # Ink block intro levels
 resources/worlds/levels/easy/heres_ink_in_ur_eye.lvl
 resources/worlds/levels/easy/blow_up_before_gooing.lvl
-
-
-
 
 # Ink + one-way + bomb
 resources/worlds/levels/easy/shelf_life.lvl

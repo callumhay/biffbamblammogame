@@ -1,0 +1,74 @@
+Spiral Navigator
+16 33
+S S S S S S S S S S S S S S E E 
+S E E E E E E E E E E E E T(S,ur) S E 
+S G E G E E E E E E E E E E T(S,ur) S 
+S E B E E E E E E E E E E E E S 
+S G E G E E E E E E E E E E E S 
+S E Y E S F(u) F(u) S S S S S E E E S 
+S Y B Y S E E E E E E F(r) E E E S 
+S E Y E S E E E E E E F(r) E E E S 
+S Y E Y S E E E E E E S E E E S 
+S E B E S E E E E E E S E E E S 
+S Y E Y F(l) E E E S G B S E E E S 
+S E G E F(l) E E E T(S,ur) F(d) F(d) S E E E S 
+S G B G F(l) E E E E E E E E E E S 
+S E G E F(l) E E E E E E E E E E S 
+S G E G S E E E E E E E E E E S 
+S E B E S T(S,ll) E E E E E E E E T(S,lr) S 
+S Y Y Y S S S F(d) F(d) F(d) F(d) F(d) S S S S 
+S G G Y Y R R E E E E E E S E E 
+S G G G Y R R B E E E E E S E E 
+S G G G Y R R R R R R R R S E E 
+S G G G Y R R R R R R R R S E E 
+S G G G Y O O O O O O O O S E E 
+S G G G Y O O O O O O O O S E E 
+S G G G Y R R R R R R R R S E E 
+S E E E E E E E E E E E E S E E 
+S E E E E E E E E E E E E S E E 
+S E E E E E E E E E E E E S E E 
+S E E E E E E E E E E E E S E E 
+S E E E E E E E E E E E E S E E 
+S E E E E E E E E E E E E S E E 
+S E E E E E E E E E E E E S E E 
+S E E E E E E E E E E E E S E E 
+S E E E E E E E E E E E E S E E 
+
+STARS:
+12000
+18000
+20000
+25000
+27950
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 0
+BallCam 0
+MagnetPaddle 1
+MultiBall3 1
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 3
+GravityBall 2
+CrazyBall 0
+Random 2
+FastBall 0
+PaddleCam 0

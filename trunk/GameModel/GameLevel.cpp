@@ -1264,11 +1264,11 @@ void GameLevel::MineExplosion(GameModel* gameModel, const MineProjectile* mine) 
     const Point2D& minePosition = mine->GetPosition();
     float explosionRadius = mine->GetExplosionRadius();
     
-    std::set<LevelPiece*> affectedPieces =
+    std::vector<LevelPiece*> affectedPieces =
         this->GetLevelPieceCollisionCandidates(minePosition, explosionRadius);
 
 	// Go through each affected piece and destroy it if we can
-	for (std::set<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
+	for (std::vector<LevelPiece*>::iterator iter = affectedPieces.begin(); iter != affectedPieces.end(); ) {
 		LevelPiece* currAffectedPiece = *iter;
 		if (currAffectedPiece != NULL) {
 			LevelPiece* resultPiece = currAffectedPiece->Destroy(gameModel, LevelPiece::MineDestruction);
@@ -1344,21 +1344,63 @@ std::set<LevelPiece*> GameLevel::IndexCollisionCandidates(float xIndexMin, float
 	return colliders;
 }
 
+// Used for sorting (using STL)...
+struct PieceAndSqrDist {
+    LevelPiece* piece;
+    float sqrDist;
+    PieceAndSqrDist(LevelPiece* piece, float sqrDist) : piece(piece), sqrDist(sqrDist) {}
+
+};
+
+bool ComparePieceAndSqrDist(const PieceAndSqrDist& e1, const PieceAndSqrDist& e2) {
+  return e1.sqrDist < e2.sqrDist;
+}
+
 /** 
  * Public function for obtaining the level pieces that may currently be
  * in collision with the given gameball.
  * Returns: array of unique LevelPieces that are possibly colliding with b.
  */
-std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Point2D& center, float radius) const {
+std::vector<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidates(const Point2D& center, float radius) const {
 
 	// Get the ball boundry and use it to figure out what levelpieces are relevant
 	// Find the non-rounded max and min indices to look at along the x and y axis
 	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
-	float xIndexMax = floorf(xNonAdjustedIndex + radius);//ceilf(xNonAdjustedIndex + radius); 
+	float xIndexMax = floorf(xNonAdjustedIndex + radius); 
 	float xIndexMin = floorf(xNonAdjustedIndex - radius);
 	
 	float yNonAdjustedIndex = center[1] / LevelPiece::PIECE_HEIGHT;
-	float yIndexMax = floorf(yNonAdjustedIndex + radius);//ceilf(yNonAdjustedIndex + radius);
+	float yIndexMax = floorf(yNonAdjustedIndex + radius);
+	float yIndexMin = floorf(yNonAdjustedIndex - radius);
+
+	std::set<LevelPiece*> candidateSet = this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
+    std::vector<PieceAndSqrDist> tempSortVec;
+    tempSortVec.reserve(candidateSet.size());
+
+    for (std::set<LevelPiece*>::const_iterator iter = candidateSet.begin(); iter != candidateSet.end(); ++iter) {
+        LevelPiece* currPiece = *iter;
+        tempSortVec.push_back(PieceAndSqrDist(currPiece, Point2D::SqDistance(center, currPiece->GetBounds().ClosestPoint(center))));
+    }
+    
+    std::sort(tempSortVec.begin(), tempSortVec.end(), ComparePieceAndSqrDist);
+    
+    std::vector<LevelPiece*> result;
+    for (std::vector<PieceAndSqrDist>::const_iterator iter = tempSortVec.begin(); iter != tempSortVec.end(); ++iter) {
+        result.push_back(iter->piece);
+    }
+
+    return result;
+}
+
+std::set<LevelPiece*> GameLevel::GetLevelPieceCollisionCandidatesNoSort(const Point2D& center, float radius) const {
+	// Get the ball boundry and use it to figure out what levelpieces are relevant
+	// Find the non-rounded max and min indices to look at along the x and y axis
+	float xNonAdjustedIndex = center[0] / LevelPiece::PIECE_WIDTH;
+	float xIndexMax = floorf(xNonAdjustedIndex + radius); 
+	float xIndexMin = floorf(xNonAdjustedIndex - radius);
+	
+	float yNonAdjustedIndex = center[1] / LevelPiece::PIECE_HEIGHT;
+	float yIndexMax = floorf(yNonAdjustedIndex + radius);
 	float yIndexMin = floorf(yNonAdjustedIndex - radius);
 
 	return this->IndexCollisionCandidates(xIndexMin, xIndexMax, yIndexMin, yIndexMax);
@@ -1434,7 +1476,7 @@ LevelPiece* GameLevel::GetLevelPieceFirstCollider(const Collision::Ray2D& ray,
 		currSamplePoint = ray.GetPointAlongRayFromOrigin(i * STEP_SIZE);
 		
 		// Indices of the sampled level piece can be found using the point...
-		std::set<LevelPiece*> collisionCandidates = this->GetLevelPieceCollisionCandidates(currSamplePoint, toleranceRadius);
+		std::set<LevelPiece*> collisionCandidates = this->GetLevelPieceCollisionCandidatesNoSort(currSamplePoint, toleranceRadius);
 		float minRayT = FLT_MAX;
 		for (std::set<LevelPiece*>::iterator iter = collisionCandidates.begin(); iter != collisionCandidates.end(); ++iter) {
 			
@@ -1500,7 +1542,7 @@ void GameLevel::GetLevelPieceColliders(const Collision::Ray2D& ray, const std::s
         }
 
 		// Indices of the sampled level piece can be found using the point...
-		std::set<LevelPiece*> collisionCandidates = this->GetLevelPieceCollisionCandidates(currSamplePoint, toleranceRadius);
+		std::set<LevelPiece*> collisionCandidates = this->GetLevelPieceCollisionCandidatesNoSort(currSamplePoint, toleranceRadius);
 		for (std::set<LevelPiece*>::iterator iter = collisionCandidates.begin(); iter != collisionCandidates.end(); ++iter) {
 			
 			LevelPiece* currSamplePiece = *iter;

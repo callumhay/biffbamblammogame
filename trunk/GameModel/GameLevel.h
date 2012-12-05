@@ -89,7 +89,8 @@ public:
 		return this->randomItemProbabilityNum;
 	}
 
-	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Point2D& center, float radius) const;
+	std::vector<LevelPiece*> GetLevelPieceCollisionCandidates(const Point2D& center, float radius) const;
+    std::set<LevelPiece*> GetLevelPieceCollisionCandidatesNoSort(const Point2D& center, float radius) const;
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const Projectile& p) const;
 	std::set<LevelPiece*> GetLevelPieceCollisionCandidates(const PlayerPaddle& p, bool includeAttachedBall) const;
 
