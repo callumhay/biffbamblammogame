@@ -1,0 +1,71 @@
+Fruit Filling
+15 30
+E E E E E E E E E S S S S S S 
+E E E S S S S S S T(S,ul) E E E E S 
+E E E S E E E E E E E E E E S 
+E E E S L E E E E E L E I B S 
+E E E S S Y Y Y Y Y S R Y Y S 
+S S S S S Y Y Y Y Y S G G G S 
+S Y Y Y S G Y Y Y Y S E E E S 
+S Y Y G S G G Y Y Y S E E E S 
+S Y Y Y S Y G Y Y Y S E E E S 
+S Y Y Y S Y Y G Y Y S B I L S 
+S Y Y Y S Y Y R R Y S Y Y S S 
+S Y Y Y S Y R R R R S G G G S 
+S Y Y Y S Y R R R R S E E E S 
+S Y Y Y S Y R R R R S E E E S 
+S Y Y Y S Y R R R R S L I B S 
+S Y Y Y S Y R R R R S S Y Y S 
+S G G G S Y Y R R Y S G G G S 
+S G G G S Y Y Y Y Y S G G G S 
+S G G G S F(d) F(d) F(d) F(d) F(d) S G G G S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 0
+StickyPaddle 3
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 2
+MagnetPaddle 2
+MultiBall3 2
+IceBall 2
+MineLauncherPaddle 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 2

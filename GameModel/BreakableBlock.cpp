@@ -17,11 +17,11 @@
 #include "GameEventManager.h"
 #include "FireGlobProjectile.h"
 
-const double BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS = 0.08;
+const double BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS = 67;
 
 BreakableBlock::BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLifePoints(PIECE_STARTING_LIFE_POINTS),
-fireGlobTimeCounter(0.0), timeOfLastBallCollision(0.0) {
+fireGlobTimeCounter(0.0), timeOfLastBallCollision() {
 	assert(IsValidBreakablePieceType(type));
 
 	this->colour = ColourRGBA(BreakableBlock::GetColourOfBreakableType(this->pieceType), 1.0f);
@@ -161,6 +161,7 @@ LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel, const LevelPiece
 		case GreenBreakable:
 			newPiece = this->Destroy(gameModel, method);
 			break;
+
 		default:
 			// By default any other type of block is simply decremented
 			this->DecrementPieceType();
@@ -170,6 +171,7 @@ LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel, const LevelPiece
 			}
 			newPiece = this;
 			break;
+
 	}
 	assert(newPiece != NULL);
 	return newPiece;
@@ -203,12 +205,12 @@ LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ba
     // Make sure we don't do a double collision - check to make sure the ball hasn't already
     // collided with this block and also that we're not in the same game time tick since the last
     // collision of the ball
-    if (ball.IsLastPieceCollidedWith(this) && ball.GetTimeSinceLastCollision() < BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS) {
+    if (ball.IsLastPieceCollidedWith(this) && ball.GetTimeSinceLastCollision() < (BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS/1000.0)) {
         this->timeOfLastBallCollision = currSystemTime;
         return this;
     }
     
-    if ((currSystemTime - this->timeOfLastBallCollision) < BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS) {
+    if ((currSystemTime - this->timeOfLastBallCollision) < BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS_IN_MS) {
         this->timeOfLastBallCollision = currSystemTime;
         return this;
     }
