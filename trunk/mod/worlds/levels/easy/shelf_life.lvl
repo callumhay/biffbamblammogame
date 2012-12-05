@@ -3,21 +3,21 @@ Shelf Life
 S S S S S S S S S S S S S 
 S E E E E E E E E E E E S 
 S G G G G G G G G G E E S 
-S G R O O O Y Y Y G E E S 
-S G R O O O Y Y Y G E E S 
+S G Y Y Y O Y Y Y G E E S 
+S G Y Y Y O Y Y Y G E E S 
 S G G G G G G G G G E E S 
 S F(d) F(d) S S S S S S S E E S 
 S E E G G G G E E E G G S 
-S G G Y Y O G E G G G G S 
-S G G Y Y O G E G B I G S 
+S G G Y Y O R E G G G G S 
+S G G Y Y O R E G B I G S 
 S E E G G G G E G G G G S 
 S F(u) F(u) S S S S E E E E E S 
 S G G G E E E G G G G G S 
-S G Y G E G G G G G G G S 
-S G Y G E G G G G B I G S 
+S G Y O E G G G G G G G S 
+S G Y O E G B I G B I G S 
 S G G G E G G G G G G G S 
 S S S S O G G G G G G G S 
-S E E E E E E E E E E E S 
+S E E E I E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -55,7 +55,7 @@ GhostBall 2
 BallShrink 2
 UpsideDown 2
 MultiBall5 2
-BallCam 2
+BallCam 0
 MagnetPaddle 2
 MultiBall3 2
 IceBall 2
@@ -65,4 +65,4 @@ GravityBall 2
 CrazyBall 2
 Random 2
 FastBall 2
-PaddleCam 2
+PaddleCam 0

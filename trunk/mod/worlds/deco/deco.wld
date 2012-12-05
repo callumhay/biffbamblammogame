@@ -33,18 +33,31 @@ resources/worlds/levels/easy/blow_up_before_gooing.lvl
 resources/worlds/levels/easy/shelf_life.lvl
 
 
-
-
-
 # Collateral block intro levels
+resources/worlds/levels/easy/watch_for_falling_objects.lvl
 resources/worlds/levels/easy/collateral_damage.lvl
-# Collateral + bomb
-resources/worlds/levels/medium/watch_for_falling_objects.lvl
+
+# Teaching/Encouraging boosting (with collaterals, breakables, and bombs)
+resources/worlds/levels/easy/fruit_filling.lvl
+
+
+# Filler levels that combine all previous elements...
+
+
 # Collateral + bomb + ink
 resources/worlds/levels/medium/death_from_above.lvl
 
 
 
+# END OF MOVEMENT
+
+# Item drop block intro levels
+resources/worlds/levels/medium/a_sticky_situation.lvl
+# MORE GOES HERE
+
+
+# Switch block intro levels
+# TODO
 
 
 # Cannon block intro levels
@@ -61,8 +74,6 @@ resources/worlds/levels/easy/upward_not_forward_and_always_twirling.lvl
 resources/worlds/levels/easy/intro_to_prisms.lvl
 resources/worlds/levels/medium/dividing_lines.lvl
 
-# Item drop block intro level(s)
-resources/worlds/levels/medium/a_sticky_situation.lvl
 
 
 # Tesla block intro levels

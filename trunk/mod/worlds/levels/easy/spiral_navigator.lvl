@@ -13,7 +13,7 @@ S E B E S E E E E E E S E E E S
 S Y E Y F(l) E E E S G B S E E E S 
 S E G E F(l) E E E T(S,ur) F(d) F(d) S E E E S 
 S G B G F(l) E E E E E E E E E E S 
-S E G E F(l) E E E E E E E E E E S 
+S E G E S E E E E E E E E E E S 
 S G E G S E E E E E E E E E E S 
 S E B E S T(S,ll) E E E E E E E E T(S,lr) S 
 S Y Y Y S S S F(d) F(d) F(d) F(d) F(d) S S S S 
@@ -46,7 +46,7 @@ PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
 UberBall 2
-BallGrow 2
+BallGrow 0
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -58,7 +58,7 @@ OmniLaserBall 0
 FireBall 0
 RocketPaddle 2
 GhostBall 2
-BallShrink 2
+BallShrink 3
 UpsideDown 2
 MultiBall5 0
 BallCam 0
