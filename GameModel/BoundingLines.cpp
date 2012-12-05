@@ -168,7 +168,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     double currTimeSinceCollision = dT - sampleIncTime;
 
     // Keep track of all the indices collided with and the collision point collided at
-    std::list<size_t> collisionList;
+    std::list<size_t> collisionLineIdxs;
+    std::list<Point2D> collisionPts;
     Point2D collisionPt;
     bool isCollision = false;
 
@@ -179,7 +180,8 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
             bool tempIsCollision = Collision::GetCollisionPoint(Collision::Circle2D(currSamplePt, c.Radius()), 
                                                                 this->lines[lineIdx], collisionPt);
             if (tempIsCollision) {
-                collisionList.push_back(lineIdx);
+                collisionLineIdxs.push_back(lineIdx);
+                collisionPts.push_back(Collision::ClosestPoint(currSamplePt, this->lines[lineIdx]));
                 isCollision = true;
             }
         }
@@ -191,41 +193,63 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     if (!isCollision) {
         return false;
     }
-    assert(!collisionList.empty());
+    assert(!collisionLineIdxs.empty());
     timeSinceCollision = currTimeSinceCollision;
 
     if (zeroVelocity) {
-        n = this->normals[collisionList.front()];
-        collisionLine = this->lines[collisionList.front()];
+        n = this->normals[collisionLineIdxs.front()];
+        collisionLine = this->lines[collisionLineIdxs.front()];
     }
     else {
-        // Calculate the normal of the collision along with the line segment where the collision occurred...
-        // Find a line with a normal that is pointing the most opposite to the velocity...
-        Vector2D nVelocity = Vector2D::Normalize(velocity);
 
-        // Go through all of the collision list and find the lowest possible dot product value
-        // for collision between the given velocity and the normal of the colliding line
-        float lowestDotProduct = FLT_MAX;
-        for (std::list<size_t>::const_iterator iter = collisionList.begin(); 
-             iter != collisionList.end(); ++iter) {
+        // Figure out which collision line was closest to the center of the circle that is colliding,
+        // the closest boundry (or boundries within some delta) will be the one's we choose to collide with
+        float lowestSqrDist = FLT_MAX;
+        float currSqrDist = 0.0f;
+        std::list<size_t>::const_iterator lineIdxIter = collisionLineIdxs.begin();
+        std::list<Point2D>::const_iterator ptIter     = collisionPts.begin();
+        
+        // First pass: Get the lowest square distance between the circle's center and the lines of all the collisions...
+        for (;lineIdxIter != collisionLineIdxs.end() && ptIter != collisionPts.end(); ++lineIdxIter, ++ptIter) {
             
-            const Vector2D& currNormal = this->normals[*iter];
-            lowestDotProduct = std::min<float>(lowestDotProduct, Vector2D::Dot(currNormal, nVelocity));
+            const Point2D& currCollisionPt = *ptIter;
+            currSqrDist = Point2D::SqDistance(currSamplePt, currCollisionPt);
+            if (currSqrDist < lowestSqrDist) {
+                lowestSqrDist = currSqrDist;
+            }
+        }
+
+        // Second pass: compare to the lowest square distance within some epsilon radius, the points that
+        // are within that radius count as collision points, all others are discarded
+        lineIdxIter = collisionLineIdxs.begin();
+        ptIter      = collisionPts.begin();
+        static const float SQR_EPSILON_RADIUS = 0.075 * 0.075;
+        lowestSqrDist = lowestSqrDist + SQR_EPSILON_RADIUS;
+        while (lineIdxIter != collisionLineIdxs.end() && ptIter != collisionPts.end()) {
+            
+            const Point2D& currCollisionPt = *ptIter;
+            currSqrDist = Point2D::SqDistance(currSamplePt, currCollisionPt);
+            
+            if (currSqrDist > lowestSqrDist) {
+                lineIdxIter = collisionLineIdxs.erase(lineIdxIter);
+                ptIter      = collisionPts.erase(ptIter);
+            }
+            else {
+                ++lineIdxIter;
+                ++ptIter;
+            }
         }
 
         // Go through the collision list again, this time accumulate the normals that are closest
         // to the opposite of the velocity...
-        float tempDotProductVal;
-        for (std::list<size_t>::const_iterator iter = collisionList.begin(); 
-             iter != collisionList.end(); ++iter) {
+        for (std::list<size_t>::const_iterator iter = collisionLineIdxs.begin(); 
+             iter != collisionLineIdxs.end(); ++iter) {
         
             const Vector2D& currNormal = this->normals[*iter];
-            tempDotProductVal = Vector2D::Dot(currNormal, nVelocity);
-            if (fabs(tempDotProductVal - lowestDotProduct) < 0.1) {
-                n = n + currNormal;
-            }
+            n = n + currNormal;
         }
     }
+
     if (n == Vector2D(0,0)) { return false; }
     n.Normalize();
 

@@ -152,7 +152,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	if (leftNeighbor != NULL) {
         if (leftNeighbor->GetType() != LevelPiece::Solid && leftNeighbor->GetType() != LevelPiece::OneWay &&
             leftNeighbor->GetType() != LevelPiece::LaserTurret && leftNeighbor->GetType() != LevelPiece::RocketTurret &&
-            leftNeighbor->GetType() != LevelPiece::MineTurret) {
+            leftNeighbor->GetType() != LevelPiece::MineTurret && leftNeighbor->GetType() != LevelPiece::Breakable) {
 			Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n1(-1, 0);
@@ -165,7 +165,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	if (bottomNeighbor != NULL) {
 		if (bottomNeighbor->GetType() != LevelPiece::Solid && bottomNeighbor->GetType() != LevelPiece::OneWay &&
             bottomNeighbor->GetType() != LevelPiece::LaserTurret && bottomNeighbor->GetType() != LevelPiece::RocketTurret &&
-            bottomNeighbor->GetType() != LevelPiece::MineTurret) {
+            bottomNeighbor->GetType() != LevelPiece::MineTurret && bottomNeighbor->GetType() != LevelPiece::Breakable) {
 			Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n2(0, -1);
@@ -178,7 +178,7 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	if (rightNeighbor != NULL) {
 		if (rightNeighbor->GetType() != LevelPiece::Solid && rightNeighbor->GetType() != LevelPiece::OneWay &&
             rightNeighbor->GetType() != LevelPiece::LaserTurret && rightNeighbor->GetType() != LevelPiece::RocketTurret &&
-            rightNeighbor->GetType() != LevelPiece::MineTurret) {
+            rightNeighbor->GetType() != LevelPiece::MineTurret && rightNeighbor->GetType() != LevelPiece::Breakable) {
 			Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 									 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n3(1, 0);
@@ -191,9 +191,9 @@ void OneWayBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 	if (topNeighbor != NULL) {
 		if (topNeighbor->GetType() != LevelPiece::Solid && topNeighbor->GetType() != LevelPiece::OneWay &&
             topNeighbor->GetType() != LevelPiece::LaserTurret && topNeighbor->GetType() != LevelPiece::RocketTurret &&
-            topNeighbor->GetType() != LevelPiece::MineTurret) {
+            topNeighbor->GetType() != LevelPiece::MineTurret && topNeighbor->GetType() != LevelPiece::Breakable) {
 			Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
-									 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
+								    this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 			Vector2D n4(0, 1);
 			boundingLines.push_back(l4);
 			boundingNorms.push_back(n4);
@@ -290,3 +290,23 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 
 	return resultingPiece;
 }
+
+
+//int OneWayBlock::GetBlockingBoundIndex() const {
+//    switch (this->dirType) {
+//        case OneWayBlock::OneWayUp:
+//            return OneWayBlock::TOP_BOUNDRY_IDX;
+//        case OneWayBlock::OneWayDown:
+//            return OneWayBlock::BOTTOM_BOUNDRY_IDX;
+//        case OneWayBlock::OneWayLeft:
+//            return OneWayBlock::LEFT_BOUNDRY_IDX;
+//        case OneWayBlock::OneWayRight:
+//            return OneWayBlock::RIGHT_BOUNDRY_IDX;
+//        default:
+//            assert(false);
+//            break;
+//    }
+//
+//    assert(false);
+//    return -1;
+//}

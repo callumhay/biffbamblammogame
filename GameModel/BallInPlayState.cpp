@@ -226,11 +226,11 @@ void BallInPlayState::Tick(double seconds) {
 		if (currBall->CanCollideWithBlocks()) {
 			// Check for ball collision with level pieces
 			// Get the small set of levelpieces based on the position of the ball...
-			std::set<LevelPiece*> collisionPieces = 
+			std::vector<LevelPiece*> collisionPieces = 
                 currLevel->GetLevelPieceCollisionCandidates(currBall->GetBounds().Center(), 
                                                             currBall->GetBounds().Radius());
 
-			for (std::set<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); 
+			for (std::vector<LevelPiece*>::iterator pieceIter = collisionPieces.begin(); 
                 pieceIter != collisionPieces.end(); ++pieceIter) {
 				
 				LevelPiece *currPiece = *pieceIter;

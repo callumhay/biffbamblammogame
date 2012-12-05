@@ -17,9 +17,11 @@
 #include "GameEventManager.h"
 #include "FireGlobProjectile.h"
 
+const double BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS = 0.08;
+
 BreakableBlock::BreakableBlock(char type, unsigned int wLoc, unsigned int hLoc) : 
 LevelPiece(wLoc, hLoc), pieceType(static_cast<BreakablePieceType>(type)), currLifePoints(PIECE_STARTING_LIFE_POINTS),
-fireGlobTimeCounter(0.0) {
+fireGlobTimeCounter(0.0), timeOfLastBallCollision(0.0) {
 	assert(IsValidBreakablePieceType(type));
 
 	this->colour = ColourRGBA(BreakableBlock::GetColourOfBreakableType(this->pieceType), 1.0f);
@@ -195,12 +197,23 @@ LevelPiece* BreakableBlock::EatAwayAtPiece(double dT, int dmgPerSec, GameModel* 
  */
 LevelPiece* BreakableBlock::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
 	assert(gameModel != NULL);
+    
+    long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
+
     // Make sure we don't do a double collision - check to make sure the ball hasn't already
     // collided with this block and also that we're not in the same game time tick since the last
     // collision of the ball
-    if (ball.IsLastPieceCollidedWith(this) && ball.GetTimeSinceLastCollision() < 0.067) {
+    if (ball.IsLastPieceCollidedWith(this) && ball.GetTimeSinceLastCollision() < BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS) {
+        this->timeOfLastBallCollision = currSystemTime;
         return this;
     }
+    
+    if ((currSystemTime - this->timeOfLastBallCollision) < BreakableBlock::ALLOWABLE_TIME_BETWEEN_BALL_COLLISIONS) {
+        this->timeOfLastBallCollision = currSystemTime;
+        return this;
+    }
+
+    this->timeOfLastBallCollision = currSystemTime;
 
 	LevelPiece* newPiece = this;
 	
