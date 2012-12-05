@@ -147,7 +147,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
 							Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
 
 
-    static const int NUM_COLLISON_SAMPLES = 15;
+    static const int NUM_COLLISON_SAMPLES = 16;
 
     bool zeroVelocity = (velocity == Vector2D(0.0f, 0.0f));
     int numCollisionSamples;
@@ -160,12 +160,11 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
     
     // Figure out the distance along the vector travelled since the last collision
     // to take each sample at...
-    Vector2D adjustedVelocity =  1.1f * velocity;
-    Vector2D sampleIncDist = dT * adjustedVelocity / static_cast<float>(numCollisionSamples+1);
-    double   sampleIncTime = dT / static_cast<double>(numCollisionSamples+1);
+    Vector2D sampleIncDist = dT * velocity / static_cast<float>(numCollisionSamples);
+    double   sampleIncTime = dT / static_cast<double>(numCollisionSamples);
 
-    Point2D currSamplePt = c.Center() - (dT * adjustedVelocity) + sampleIncDist;
-    double currTimeSinceCollision = dT - sampleIncTime;
+    Point2D currSamplePt = c.Center();
+    double currTimeSinceCollision = 0.0;
 
     // Keep track of all the indices collided with and the collision point collided at
     std::list<size_t> collisionLineIdxs;
@@ -187,7 +186,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         }
         if (isCollision) { break; }
         currSamplePt = currSamplePt + sampleIncDist;
-        currTimeSinceCollision -= sampleIncTime;
+        currTimeSinceCollision += sampleIncTime;
     }
 
     if (!isCollision) {
@@ -223,7 +222,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
         // are within that radius count as collision points, all others are discarded
         lineIdxIter = collisionLineIdxs.begin();
         ptIter      = collisionPts.begin();
-        static const float SQR_EPSILON_RADIUS = 0.075 * 0.075;
+        static const float SQR_EPSILON_RADIUS = 0.08 * 0.08;
         lowestSqrDist = lowestSqrDist + SQR_EPSILON_RADIUS;
         while (lineIdxIter != collisionLineIdxs.end() && ptIter != collisionPts.end()) {
             
@@ -240,8 +239,7 @@ bool BoundingLines::Collide(double dT, const Collision::Circle2D& c, const Vecto
             }
         }
 
-        // Go through the collision list again, this time accumulate the normals that are closest
-        // to the opposite of the velocity...
+        // Accumulate the normals
         for (std::list<size_t>::const_iterator iter = collisionLineIdxs.begin(); 
              iter != collisionLineIdxs.end(); ++iter) {
         
