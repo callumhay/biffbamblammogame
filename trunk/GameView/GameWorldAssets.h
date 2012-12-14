@@ -83,20 +83,27 @@ public:
 
 protected:
 	static const float COLOUR_CHANGE_TIME;
-	static const int NUM_COLOUR_CHANGES = 10;
-	static const Colour COLOUR_CHANGE_LIST[NUM_COLOUR_CHANGES];
-
-	Skybox* skybox;				// Skybox mesh and effect
-	Mesh* background;			// Meshes that make up the background scenery
-	Mesh* playerPaddle;		// Currently loaded player paddle mesh
-	Mesh* styleBlock;
+    
+	Skybox* skybox;      // Skybox mesh and effect
+	Mesh* background;    // Meshes that make up the background scenery
+	Mesh* playerPaddle;  // Currently loaded player paddle mesh
+	Mesh* styleBlock;    // Currently loaded solid block mesh
 
 	AnimationMultiLerp<float> bgFadeAnim;			  // Fade animation (for the alpha) for when the background is being fadeded in/out
 	AnimationMultiLerp<Colour> currBGMeshColourAnim;  // Colour animation progression of the background mesh
 
+    const Colour& GetColourChangeListAt(int i) const;
+    void UpdateColourChangeList(const std::vector<Colour>& newList);
 
 private:
+    std::vector<Colour> colourChangeList;
+
     DISALLOW_COPY_AND_ASSIGN(GameWorldAssets);
 
 };
+
+inline const Colour& GameWorldAssets::GetColourChangeListAt(int i) const {
+    return this->colourChangeList[i];
+}
+
 #endif

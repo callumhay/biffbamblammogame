@@ -184,15 +184,6 @@ void FuturismWorldAssets::DrawBackgroundModel(const Camera& camera, const BasicP
 	glPopAttrib();
 }
 
-void FuturismWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
-    GameWorldAssets::FadeBackground(fadeout, fadeTime);
-}
-
-void FuturismWorldAssets::ResetToInitialState() {
-    GameWorldAssets::ResetToInitialState();
-
-}
-
 void FuturismWorldAssets::InitializeTextures() {
    assert(this->futurismTriangleTex == NULL);
    this->futurismTriangleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
@@ -206,8 +197,6 @@ void FuturismWorldAssets::InitializeEmitters() {
 	ESPInterval triangleLife(20.0f, 25.0f);
     ESPInterval triangleSpawn(triangleLife.minValue / NUM_PARTICLES_PER_EMITTER, triangleLife.maxValue / NUM_PARTICLES_PER_EMITTER);
 	ESPInterval triangleSpd(5.0f, 7.0f);
-
-	Colour spiralColour = COLOUR_CHANGE_LIST[0];
 
 	Point3D triangleMinPt(-80.0f, -45.0f, -70.0f);
 	Point3D triangleMaxPt(80.0f, -40.0f, -65.0f);

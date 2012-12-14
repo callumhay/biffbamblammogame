@@ -89,6 +89,7 @@ private:
     void GoBackToWorldSelectMenu();
     void GoToStartLevel();
     void SetupLevelPages();
+    void ClearLevelPages();
 
     void MoveSelectionX(bool right);
     void MoveSelectionY(bool up);

@@ -1,20 +1,20 @@
-Boost A Move
+Boost-A-Move
 11 28
 S S S S S S S S S S S 
-S E E G G E E E E E S 
-S E E G G E E E E E S 
+S E E Y Y E E E E E S 
+S E E O O E E E E E S 
 S E E Y Y E E E E E S 
 S E E O O E E E E E S 
 S E E S R G G G G G S 
 S E E S R Y G Y G Y S 
 S E E S R G Y G Y G S 
 S E E S R Y G Y G Y S 
-S E E S R G O G O G S 
-S E E S R O G O G O S 
-S E E S R G O G O G S 
-S E E S R R G R G R S 
-S E E S R G R G R G S 
-S E E S R R G R G R S 
+S E E S R G Y G Y G S 
+S E E S R Y G Y G Y S 
+S E E S R G Y G Y G S 
+S E E S R Y G Y G Y S 
+S E E S R G Y G Y G S 
+S E E S R Y G Y G Y S 
 S E E S R R R R R R S 
 S E E S R R R R R R S 
 S E E S R R R R R R S 
@@ -30,18 +30,18 @@ S E E E E E E E E E S
 S E E E E E E E E E S 
 
 STARS:
-4500
-7500
-9500
-13500
-18000
+4000
+7000
+9000
+13000
+17000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 0
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 2
 ShieldPaddle 0
 LaserBulletPaddle 0

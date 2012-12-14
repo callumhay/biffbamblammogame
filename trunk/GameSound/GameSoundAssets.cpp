@@ -97,6 +97,9 @@ void GameSoundAssets::LoadSoundPallet(GameSoundAssets::SoundPallet pallet) {
 		case GameSoundAssets::MainMenuSoundPallet:
 			this->LoadMainMenuSounds();
 			break;
+        case GameSoundAssets::ClassicalSoundPallet:
+            // TODO
+            break;
 		case GameSoundAssets::DecoWorldSoundPallet:
 			this->LoadDecoWorldSounds();
 			break;
@@ -467,6 +470,8 @@ bool GameSoundAssets::IsMusicSound(int soundType) {
  */
 GameSoundAssets::SoundPallet GameSoundAssets::GetSoundPalletFromWorldStyle(GameWorld::WorldStyle style) {
 	switch (style) {
+        case GameWorld::Classical:
+            return GameSoundAssets::ClassicalSoundPallet;
 		case GameWorld::Deco:
 			return GameSoundAssets::DecoWorldSoundPallet;
         case GameWorld::Futurism:

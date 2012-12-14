@@ -26,7 +26,7 @@ class GameTransformMgr;
 // actually loaded - it can be loaded and unloaded from memory on demand.
 class GameWorld {
 public:
-	enum WorldStyle { None = -1, Deco = 0, Futurism = 1 };
+	enum WorldStyle { None = -1, Classical = 0, Deco = 1, Futurism = 2 };
 
 	static bool IsValidWorldStyle(const std::string &s);
 	static WorldStyle GetWorldStyleFromString(const std::string &s);
@@ -68,17 +68,23 @@ public:
     int GetWorldNumber() const {
         return this->GetWorldIndex() + 1;
     }
+
 	WorldStyle GetStyle() const {
 		assert(this->isLoaded);
 		return this->style;
 	}
+
 	const std::string& GetName() const {
 		assert(this->isLoaded);
 		return this->name;
 	}
+
     const std::string& GetImageFilepath() const {
         assert(this->isLoaded);
         return this->imageFilepath;
+    }
+    const std::string& GetWorldFilepath() const {
+        return this->worldFilepath;
     }
 
 	void IncrementLevel(GameModel* model);

@@ -14,6 +14,8 @@
 
 #include "../BlammoEngine/BasicIncludes.h"
 
+#include "../GameModel/GameWorld.h"
+
 class GameModel;
 
 /** 
@@ -23,6 +25,11 @@ class GameProgressIO {
 public:
     static bool LoadGameProgress(GameModel* model);
     static bool SaveGameProgress(const GameModel* model);
+
+#ifdef _DEBUG
+    static bool SaveFullProgressOfGame(const GameModel* model);
+    static bool SaveFullProgressOfWorld(const GameModel* model, const GameWorld::WorldStyle& worldStyle);
+#endif
 
 private:
     static const char* PROGRESS_FILENAME;

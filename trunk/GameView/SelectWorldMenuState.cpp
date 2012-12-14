@@ -21,6 +21,7 @@
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameWorld.h"
+#include "../GameModel/GameProgressIO.h"
 
 const char* SelectWorldMenuState::WORLD_SELECT_TITLE = "Select a Movement...";
 const float SelectWorldMenuState::MENU_ITEM_HORIZ_GAP = 50;
@@ -212,10 +213,18 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
             }
 
             break;
+#ifdef _DEBUG
+        case GameControl::SpecialCheatButtonAction:
+            // Unlock all levels in the game...
+            // (You need to restart the game for this to take effect)
+            GameProgressIO::SaveFullProgressOfGame(this->display->GetModel());
+            break;
+#endif
 
         default:
             break;
     }
+
 }
 
 void SelectWorldMenuState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
