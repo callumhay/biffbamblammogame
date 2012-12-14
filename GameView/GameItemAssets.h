@@ -70,7 +70,7 @@ private:
 	public:
 		enum TimerState { TimerStarting, TimerRunning, TimerAlmostDone, TimerStopping, TimerDead };
 
-		static const int TIMER_VERTICAL_SPACING = 5;
+		static const int BETWEEN_TIMER_SPACING = 5;
 
 		ItemTimerHUDElement(GameItemAssets* itemAssets, const GameItemTimer* itemTimer);
 		~ItemTimerHUDElement();

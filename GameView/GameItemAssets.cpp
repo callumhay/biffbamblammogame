@@ -117,24 +117,24 @@ void GameItemAssets::DrawTimers(double dT, const Camera& camera) {
 	}
 
 	const int displayWidth = camera.GetWindowWidth();
-	const int displayHeight = camera.GetWindowHeight();
+	//const int displayHeight = camera.GetWindowHeight();
 
 	// Spacing along the vertical between timer graphics (in pixels)
 	// Spacing along the horizontal of timer graphics distanced from the right edge of the game window (in pixels)
- 	const int TIMER_HORIZONTAL_SPACING = displayWidth / 50;
+ 	const int TIMER_BORDER_SPACING = 8;
 
 	// There is only a max restriction on height, width follows based on the timer texture's width-to-height ratio
-	const int MAX_TIMER_HEIGHT_SPACED = 60;
-	// The timer height including spacing (includes spaces of TIMER_VERTICAL_SPACING at the bottom of timer)
-	const int TIMER_HEIGHT_SPACED			= std::min<int>(MAX_TIMER_HEIGHT_SPACED, displayHeight / static_cast<int>(this->activeItemTimers.size()));
-	const int TIMER_HEIGHT_NON_SPACED	= TIMER_HEIGHT_SPACED - ItemTimerHUDElement::TIMER_VERTICAL_SPACING;
+	const int MAX_TIMER_SIZE_SPACED = 80;
+	// The timer size including spacing (includes spaces of BETWEEN_TIMER_SPACING at the bottom of timer)
+	const int TIMER_SIZE_SPACED     = std::min<int>(MAX_TIMER_SIZE_SPACED, displayWidth / static_cast<int>(this->activeItemTimers.size()));
+	const int TIMER_SIZE_NON_SPACED = TIMER_SIZE_SPACED - ItemTimerHUDElement::BETWEEN_TIMER_SPACING;
 
-	// Tracked height at which to draw the next timer graphic
-	int currYPos	= displayHeight - ((displayHeight - (static_cast<int>(this->activeItemTimers.size()) * TIMER_HEIGHT_SPACED)) / 2);
+	// Tracked width at which to draw the next timer graphic
+	int currXPos = displayWidth - ((displayWidth - (static_cast<int>(this->activeItemTimers.size()) * TIMER_SIZE_NON_SPACED) - 
+        (static_cast<int>(this->activeItemTimers.size()-1) * ItemTimerHUDElement::BETWEEN_TIMER_SPACING)) / 2) - TIMER_SIZE_NON_SPACED/2;
 
 	// Prepare OGL for drawing the timer
-	glPushAttrib(GL_TEXTURE_BIT | GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | 
-							 GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+	glPushAttrib(GL_TEXTURE_BIT | GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	
 	// Make world coordinates equal window coordinates
 	Camera::PushWindowCoords();
@@ -158,16 +158,13 @@ void GameItemAssets::DrawTimers(double dT, const Camera& camera) {
 		assert(currHUDElement != NULL);
 
 		// Calculate the width and height as well as the x, y location of the HUD element for drawing
-		int height = TIMER_HEIGHT_NON_SPACED;
-		int width	= height * currHUDElement->GetTextureWidth() / currHUDElement->GetTextureHeight();
-		int halfHeight = height / 2;
-		currYPos -= halfHeight;
+		int width  = TIMER_SIZE_NON_SPACED;
+        int height = width * currHUDElement->GetTextureHeight() / currHUDElement->GetTextureWidth();
+        int halfWidth = width / 2;
 
-		int currXPos = displayWidth - width - TIMER_HORIZONTAL_SPACING;
-		currHUDElement->Draw(dT, camera, currXPos, currYPos, width, height);
-
-		// Add spacing under the timer 
-		currYPos -= (halfHeight + ItemTimerHUDElement::TIMER_VERTICAL_SPACING);
+        currXPos -= halfWidth;
+		currHUDElement->Draw(dT, camera, currXPos, TIMER_BORDER_SPACING, width, height);
+		currXPos -= halfWidth + ItemTimerHUDElement::BETWEEN_TIMER_SPACING;
 	}
 
 	glPopMatrix();

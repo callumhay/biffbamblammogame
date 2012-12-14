@@ -13,7 +13,7 @@
 #include "GameModel.h"
 
 const char* ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME	      = "ShieldPaddle";
-const double ShieldPaddleItem::SHIELD_PADDLE_TIMER_IN_SECS  = 45.0;
+const double ShieldPaddleItem::SHIELD_PADDLE_TIMER_IN_SECS  = 35.0;
 
 ShieldPaddleItem::ShieldPaddleItem(const Point2D &spawnOrigin, GameModel *gameModel) :
 GameItem(ShieldPaddleItem::SHIELD_PADDLE_ITEM_NAME, spawnOrigin, gameModel, GameItem::Neutral) {
