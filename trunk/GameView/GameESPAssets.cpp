@@ -3221,9 +3221,9 @@ void GameESPAssets::AddTimerHUDEffect(GameItem::ItemType type, GameItem::ItemDis
 	}
 
 	const ESPInterval starSpawnDelta(0.02f, 0.06f);
-	const ESPInterval starInitialSpd(60.0f, 80.0f);
+	const ESPInterval starInitialSpd(40.0f, 60.0f);
 	const ESPInterval starLife(2.0f, 2.5f);
-	const ESPInterval starSize(15.0f, 40.0f); // In pixels on the screen...
+	const ESPInterval starSize(5.0f, 15.0f); // In pixels on the screen...
 
 	ESPPointEmitter* solidStarEmitter = new ESPPointEmitter();
 	solidStarEmitter->SetSpawnDelta(starSpawnDelta);
