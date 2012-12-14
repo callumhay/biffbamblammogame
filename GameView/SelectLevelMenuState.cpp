@@ -23,6 +23,7 @@
 
 #include "../GameModel/GameModel.h"
 #include "../GameModel/GameWorld.h"
+#include "../GameModel/GameProgressIO.h"
 
 static const float BORDER_GAP = 10;
 
@@ -137,12 +138,7 @@ SelectLevelMenuState::~SelectLevelMenuState() {
     delete this->keyEscLabel;
     this->keyEscLabel = NULL;
 
-    for (size_t i = 0; i < this->pages.size(); i++) {
-        LevelMenuPage* page = this->pages[i];
-        delete page;
-        page = NULL;
-    }
-    this->pages.clear();
+    this->ClearLevelPages();
 
     bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTexture);
     assert(success);
@@ -311,9 +307,18 @@ void SelectLevelMenuState::ButtonPressed(const GameControl::ActionButton& presse
             this->MoveSelectionY(false);
             break;
 
+#ifdef _DEBUG
+        case GameControl::SpecialCheatButtonAction:
+            // Unlock all levels in the current movement...
+            // (You need to restart the game for this to take effect)
+            GameProgressIO::SaveFullProgressOfWorld(this->display->GetModel(), this->world->GetStyle());
+            break;
+#endif
+
         default:
             break;
     }
+
 }
 
 void SelectLevelMenuState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
@@ -582,6 +587,8 @@ void SelectLevelMenuState::GoToStartLevel() {
 }
 
 void SelectLevelMenuState::SetupLevelPages() {
+    this->ClearLevelPages();
+
     const Camera& camera = this->display->GetCamera();
 
     static const int TITLE_TO_ITEM_Y_GAP_SIZE = 57;
@@ -630,7 +637,7 @@ void SelectLevelMenuState::SetupLevelPages() {
                 Point2D(itemX, itemY), this->starTexture, !noScoreEncountered);
             this->pages[this->pages.size()-1]->AddLevelItem(levelItem);
             
-            if (currLevel->GetHighScore() == 0) {
+            if (currLevel->GetIsLevelComplete() == 0) {
                 noScoreEncountered = true;
             }
 
@@ -683,6 +690,15 @@ void SelectLevelMenuState::SetupLevelPages() {
     this->totalNumStarsLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Medium), totalNumStarsTxt.str());
     this->totalNumStarsLabel->SetColour(Colour(0,0,0));
+}
+
+void SelectLevelMenuState::ClearLevelPages() {
+    for (size_t i = 0; i < this->pages.size(); i++) {
+        LevelMenuPage* page = this->pages[i];
+        delete page;
+        page = NULL;
+    }
+    this->pages.clear();
 }
 
 void SelectLevelMenuState::MoveSelectionX(bool right) {

@@ -71,6 +71,14 @@ inline GameWorld::WorldStyle FuturismWorldAssets::GetStyle() const {
     return GameWorld::Futurism;
 }
 
+inline void FuturismWorldAssets::FadeBackground(bool fadeout, float fadeTime) {
+    GameWorldAssets::FadeBackground(fadeout, fadeTime);
+}
+
+inline void FuturismWorldAssets::ResetToInitialState() {
+    GameWorldAssets::ResetToInitialState();
+}
+
 inline void FuturismWorldAssets::Tick(double dT) {
     this->TickSkybeams(dT);
 

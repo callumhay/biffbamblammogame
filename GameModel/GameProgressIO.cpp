@@ -116,3 +116,94 @@ bool GameProgressIO::SaveGameProgress(const GameModel* model) {
  
     return true;
 }
+
+#ifdef _DEBUG
+
+bool GameProgressIO::SaveFullProgressOfGame(const GameModel* model) {
+    if (model == NULL) {
+        assert(false);
+        return false;
+    }
+
+    std::ofstream outFile((ResourceManager::GetLoadDir() + std::string(PROGRESS_FILENAME)).c_str(), std::ios::out | std::ios::binary);
+    if (!outFile.is_open()) {
+        return false;
+    }
+
+    // Number of worlds...
+    const std::vector<GameWorld*>& gameWorlds = model->GetGameWorlds();
+    outFile << gameWorlds.size() << std::endl;
+
+    for (size_t worldIdx = 0; worldIdx < gameWorlds.size(); worldIdx++) {
+        const GameWorld* currWorld = gameWorlds.at(worldIdx);
+        assert(currWorld != NULL);
+
+        // World index followed by scope
+        outFile << currWorld->GetName() << std::endl;
+
+        const std::vector<GameLevel*>& worldLevels = currWorld->GetAllLevelsInWorld();
+        size_t numLevels = currWorld->GetNumLevels();
+        
+        // Number of levels of progress
+        outFile << numLevels << std::endl;
+        for (size_t levelIdx = 0; levelIdx < numLevels; levelIdx++) {
+            const GameLevel* currLevel = worldLevels.at(levelIdx);
+            assert(currLevel != NULL);
+            
+            // Store each unlocked level's high-score
+            outFile << currLevel->GetName() << std::endl;
+            outFile << std::max<long>(1, currLevel->GetHighScore()) << std::endl;
+        }
+    }
+    outFile.close();
+ 
+    return true;
+}
+
+bool GameProgressIO::SaveFullProgressOfWorld(const GameModel* model, const GameWorld::WorldStyle& worldStyle) {
+    if (model == NULL) {
+        assert(false);
+        return false;
+    }
+
+    std::ofstream outFile((ResourceManager::GetLoadDir() + std::string(PROGRESS_FILENAME)).c_str(), std::ios::out | std::ios::binary);
+    if (!outFile.is_open()) {
+        return false;
+    }
+
+    // Number of worlds...
+    const std::vector<GameWorld*>& gameWorlds = model->GetGameWorlds();
+    outFile << gameWorlds.size() << std::endl;
+
+    for (size_t worldIdx = 0; worldIdx < gameWorlds.size(); worldIdx++) {
+        const GameWorld* currWorld = gameWorlds.at(worldIdx);
+        assert(currWorld != NULL);
+
+        // World index followed by scope
+        outFile << currWorld->GetName() << std::endl;
+
+        const std::vector<GameLevel*>& worldLevels = currWorld->GetAllLevelsInWorld();
+        size_t numLevels = currWorld->GetNumLevels();
+        
+        // Number of levels of progress
+        outFile << numLevels << std::endl;
+        for (size_t levelIdx = 0; levelIdx < numLevels; levelIdx++) {
+            const GameLevel* currLevel = worldLevels.at(levelIdx);
+            assert(currLevel != NULL);
+            
+            // Store each unlocked level's high-score
+            outFile << currLevel->GetName() << std::endl;
+            if (currWorld->GetStyle() == worldStyle) {
+                outFile << std::max<long>(1, currLevel->GetHighScore()) << std::endl;
+            }
+            else {
+                outFile << currLevel->GetHighScore() << std::endl;
+            }
+        }
+    }
+    outFile.close();
+ 
+    return true;
+}
+
+#endif // _DEBUG

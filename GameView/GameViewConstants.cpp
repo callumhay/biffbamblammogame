@@ -280,6 +280,15 @@ ONE_WAY_BLOCK_RIGHT_MESH(MESH_DIRECTORY "/one_way_block_right.obj"),
 
 SKYBEAM_MESH(MESH_DIRECTORY "/skybeam.obj"),
 
+// PRE-MODERNISM
+// Classical Asset Paths
+CLASSICAL_PADDLE_MESH(MESH_DIRECTORY "/classical_paddle.obj"),
+CLASSICAL_BACKGROUND_MESH(MESH_DIRECTORY "/classical_background.obj"),
+CLASSICAL_BLOCK_MESH(MESH_DIRECTORY "/classical_block.obj"),
+
+// ... Renaissance ...
+
+// MODERNISM
 // Deco Asset Paths
 DECO_PADDLE_MESH(MESH_DIRECTORY "/deco_paddle.obj"),
 DECO_BACKGROUND_MESH(MESH_DIRECTORY "/deco_background.obj"),
@@ -289,6 +298,12 @@ DECO_BLOCK_MESH(MESH_DIRECTORY "/deco_block.obj"),
 FUTURISM_PADDLE_MESH(MESH_DIRECTORY "/futurism_paddle.obj"),
 FUTURISM_BACKGROUND_MESH(MESH_DIRECTORY "/futurism_background.obj"),
 FUTURISM_BLOCK_MESH(MESH_DIRECTORY "/futurism_block.obj")
+
+// ...
+
+// POST-MODERNISM
+// ...
+
 {
 }
 

@@ -15,7 +15,7 @@
 class GameControl {
 public:
     enum ActionButton { UpButtonAction, DownButtonAction, LeftButtonAction, RightButtonAction, 
-                        EnterButtonAction, EscapeButtonAction, PauseButtonAction,
+                        EnterButtonAction, EscapeButtonAction, PauseButtonAction, SpecialCheatButtonAction,
                         OtherButtonAction};
 
     enum MouseButton { LeftMouseButton, RightMouseButton };

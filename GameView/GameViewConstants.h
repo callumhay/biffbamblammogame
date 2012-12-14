@@ -316,6 +316,11 @@ public:
     // GENERAL
     const char* SKYBEAM_MESH;
 
+    // CLASSICAL WORLD
+    const char* CLASSICAL_PADDLE_MESH;
+    const char* CLASSICAL_BACKGROUND_MESH;
+    const char* CLASSICAL_BLOCK_MESH;
+
 	// DECO WORLD
 	const char* DECO_PADDLE_MESH;
 	const char* DECO_BACKGROUND_MESH;

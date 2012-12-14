@@ -1300,6 +1300,10 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameView\ClassicalWorldAssets.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\DecoWorldAssets.h"
 						>
 					</File>
@@ -1343,6 +1347,10 @@
 				<Filter
 					Name="Source Files"
 					>
+					<File
+						RelativePath=".\GameView\ClassicalWorldAssets.cpp"
+						>
+					</File>
 					<File
 						RelativePath=".\GameView\DecoWorldAssets.cpp"
 						>

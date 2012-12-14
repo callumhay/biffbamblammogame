@@ -31,7 +31,7 @@ class GameSoundAssets {
 public:
 	static const int MAX_MIX_GAME_SOUNDS;
 
-	enum SoundPallet { MainMenuSoundPallet, DecoWorldSoundPallet, FuturismWorldSoundPallet };
+	enum SoundPallet { MainMenuSoundPallet, ClassicalSoundPallet, DecoWorldSoundPallet, FuturismWorldSoundPallet };
 
 	// Main Menu Event, Mask and Music Sounds
 	enum MainMenuSound { 

@@ -4,52 +4,6 @@ Deco
 
 resources/textures/deco_world_select_256x256.jpg
 
-# Simple intro/tutorial level
-resources/worlds/levels/easy/introductions.lvl
-
-# Teaching/Encouraging boosting (with just breakables)
-resources/worlds/levels/easy/boost_a_move.lvl
-
-# Bomb block intro
-resources/worlds/levels/easy/bombs_are_your_friend.lvl
-resources/worlds/levels/easy/chain_of_boom.lvl
-
-# Teaching/Encouraging boosting (with breakables and bombs)
-resources/worlds/levels/easy/boost_your_way_to_victory.lvl
-
-# One-way block intro levels
-resources/worlds/levels/easy/one_way_street.lvl
-resources/worlds/levels/easy/two_step.lvl
-
-# Teaching/Encouraging boosting (with one-ways, breakables, and bombs)
-resources/worlds/levels/easy/spiral_navigator.lvl.
-
-
-# Ink block intro levels
-resources/worlds/levels/easy/heres_ink_in_ur_eye.lvl
-resources/worlds/levels/easy/blow_up_before_gooing.lvl
-
-# Ink + one-way + bomb
-resources/worlds/levels/easy/shelf_life.lvl
-
-
-# Collateral block intro levels
-resources/worlds/levels/easy/watch_for_falling_objects.lvl
-resources/worlds/levels/easy/collateral_damage.lvl
-
-# Teaching/Encouraging boosting (with collaterals, breakables, and bombs)
-resources/worlds/levels/easy/fruit_filling.lvl
-
-
-# Filler levels that combine all previous elements...
-
-
-# Collateral + bomb + ink
-resources/worlds/levels/medium/death_from_above.lvl
-
-
-
-# END OF MOVEMENT
 
 # Item drop block intro levels
 resources/worlds/levels/medium/a_sticky_situation.lvl
@@ -84,24 +38,9 @@ resources/worlds/levels/easy/electric_access.lvl
 resources/worlds/levels/medium/shutin.lvl
 
 
-# TODO...
-resources/worlds/levels/medium/spike_jonze.lvl
 
 
-
-
-
-
-# Testing Levels
-resources/worlds/testing/an_almost_empty_level.lvl
-resources/worlds/testing/block_test.lvl
-resources/worlds/testing/turret_test.lvl
-
-
-
-
-
-# These need to be moved to another world!
+# These need to be moved around...!
 
 
 # Turret levels
@@ -148,5 +87,11 @@ resources/worlds/levels/hard/magnet_attack.lvl
 
 # Bonus Levels
 resources/worlds/levels/easy/invader.lvl
+
+# Testing Levels
+resources/worlds/testing/an_almost_empty_level.lvl
+resources/worlds/testing/block_test.lvl
+resources/worlds/testing/turret_test.lvl
+resources/worlds/testing/see_the_background.lvl
 
 

@@ -170,7 +170,10 @@ GameLevel* GameWorld::GetLevelByName(const std::string& name) {
  * Returns: true if s is a world style string, false otherwise.
  */
 bool GameWorld::IsValidWorldStyle(const std::string &s) {
-	if (s == "Deco") {
+    if (s == "Classical") {
+        return true;
+    }
+    else if (s == "Deco") {
 		return true;
 	}
 	else if (s == "Futurism") {
@@ -188,7 +191,10 @@ bool GameWorld::IsValidWorldStyle(const std::string &s) {
  */
 GameWorld::WorldStyle GameWorld::GetWorldStyleFromString(const std::string &s) {
 	GameWorld::WorldStyle ret = None;
-	if (s == "Deco") {
+    if (s == "Classical") {
+        ret = Classical;
+    }
+    else if (s == "Deco") {
 		ret = Deco;
 	}
 	else if (s == "Futurism") {

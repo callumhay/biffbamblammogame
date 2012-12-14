@@ -17,7 +17,6 @@
 #include "../ResourceManager.h"
 
 
-
 // Basic constructor: Load all the basic assets for the deco world...
 DecoWorldAssets::DecoWorldAssets() : 
 GameWorldAssets(new DecoSkybox(),
@@ -97,7 +96,7 @@ void DecoWorldAssets::InitializeEmitters() {
 	ESPInterval spiralLife(20.0f, 25.0f);
 	ESPInterval spiralSpd(5.0f, 7.0f);
 
-	Colour spiralColour = COLOUR_CHANGE_LIST[0];
+	const Colour& spiralColour = this->GetColourChangeListAt(0);
 
 	Point3D spiralMinPt(-70.0f, -30.0f, -70.0f);
 	Point3D spiralMaxPt(70.0f, -25.0f, -65.0f);

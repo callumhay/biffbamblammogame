@@ -168,6 +168,7 @@ public:
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);
     const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;
 
+    bool GetIsLevelComplete() const;
     long GetHighScore() const;
     void SetHighScore(long highScore);
     bool GetHasNewHighScore() const;
@@ -224,6 +225,10 @@ inline const LevelPiece* GameLevel::GetTriggerableLevelPiece(const LevelPiece::T
     return findIter->second;
 }
 
+inline bool GameLevel::GetIsLevelComplete() const {
+    return this->highScore > 0;
+}
+
 inline long GameLevel::GetHighScore() const {
     return this->highScore;
 }
@@ -250,8 +255,8 @@ inline int GameLevel::GetNumStarsForScore(long score) const {
 }
 
 inline LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
-    int col = this->currentLevelPieces[0].size()/2;
-    for (; col >= 0; col--) {
+    int col = static_cast<int>(this->currentLevelPieces[0].size()) / 2;
+    for (; col > 0; col--) {
         if (this->currentLevelPieces[0][col]->GetType() == LevelPiece::Solid) {
             break;
         }
@@ -259,8 +264,8 @@ inline LevelPiece* GameLevel::GetMinPaddleBoundPiece() const {
     return this->currentLevelPieces[0][col];
 }
 inline LevelPiece* GameLevel::GetMaxPaddleBoundPiece() const {
-    int col = this->currentLevelPieces[0].size()/2;
-    for (; col < static_cast<int>(this->currentLevelPieces[0].size()); col++) {
+    int col = static_cast<int>(this->currentLevelPieces[0].size()) / 2;
+    for (; col < static_cast<int>(this->currentLevelPieces[0].size())-1; col++) {
         if (this->currentLevelPieces[0][col]->GetType() == LevelPiece::Solid) {
             break;
         }
