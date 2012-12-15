@@ -100,7 +100,10 @@ public:
 
     //protected:
     //	BoundingLines reflectRefractBounds;	// Bounds used for reflection/refraction of beams
-
-
 };
+
+inline bool PrismBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
+	return this->bounds.CollisionCheck(ray, rayT);
+}
+
 #endif // __PRISMBLOCK_H__

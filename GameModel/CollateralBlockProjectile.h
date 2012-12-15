@@ -33,7 +33,7 @@ public:
     ProjectileType GetType() const {
         return Projectile::CollateralBlockProjectile;
     }
-    float GetDamage() const { return 9999.9999f; }
+    float GetDamage() const { return 9999.99f; }
 
     void SetPosition(const Point2D& pos);
 
