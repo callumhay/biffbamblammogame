@@ -2357,6 +2357,42 @@
 					</File>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="Bosses"
+				>
+				<Filter
+					Name="Header Files"
+					>
+					<File
+						RelativePath=".\GameModel\Boss.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossBodyPart.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossWeakpoint.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Source Files"
+					>
+					<File
+						RelativePath=".\GameModel\Boss.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossBodyPart.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossWeakpoint.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="physfs"

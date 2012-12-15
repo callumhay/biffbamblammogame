@@ -124,10 +124,6 @@ void PrismBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
     //this->reflectRefractBounds = BoundingLines(reflectRefractBoundingLines, reflectRefractBoundingNorms);
 }
 
-bool PrismBlock::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-	return this->bounds.CollisionCheck(ray, rayT);
-}
-
 /**
  * Called when the prism block is hit by a projectile.
  * The prism block tends to reflect and refract laser projectiles fired at it.

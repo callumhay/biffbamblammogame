@@ -223,6 +223,8 @@ public:
         return !this->attachedProjectiles.empty();
     }
 
+    //void HitByBoss(const BossBodyPart& bossPart);
+
 	void HitByProjectile(GameModel* gameModel, const Projectile& projectile);
 	bool ProjectilePassesThrough(const Projectile& projectile);
     bool ProjectileIsDestroyedOnCollision(const Projectile& projectile);
