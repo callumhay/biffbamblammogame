@@ -15,6 +15,8 @@
 #include "LevelPiece.h"
 #include "Projectile.h"
 #include "GameItem.h"
+#include "GameWorld.h"
+#include "Boss.h"
 
 #include <string>
 #include <vector>
@@ -57,6 +59,8 @@ public:
 	static const char TRI_LEFT_CORNER;
 	static const char TRI_RIGHT_CORNER;
 
+    static const char* BOSS_LEVEL_KEYWORD;
+
 	static const char* ALL_ITEM_TYPES_KEYWORD;
 	static const char* POWERUP_ITEM_TYPES_KEYWORD;
 	static const char* POWERNEUTRAL_ITEM_TYPES_KEYWORD;
@@ -72,7 +76,7 @@ public:
 	~GameLevel();
 
 	// Used to create a level from file
-	static GameLevel* CreateGameLevelFromFile(size_t levelNumber, std::string filepath);
+	static GameLevel* CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelNumber, std::string filepath);
 
 	/**
 	 * Obtain the set of pieces making up the current state of the level.
@@ -134,9 +138,15 @@ public:
 	}
 
 	bool IsLevelComplete() const {
+        if (this->GetHasBoss()) {
+            return this->boss->GetIsDead();
+        }
 		return this->piecesLeft == 0;
 	}
     bool IsLevelAlmostComplete() const {
+        if (this->GetHasBoss()) {
+            return false;
+        }
         return this->piecesLeft <= GameLevel::NUM_PIECES_FOR_ALMOST_COMPLETE;
     }
     void SignalLevelAlmostCompleteEvent();
@@ -177,6 +187,13 @@ public:
     int GetNumStarsForScore(long score) const;
     int GetHighScoreNumStars() const { return this->GetNumStarsForScore(this->highScore); }
 
+    Boss* GetBoss() const {
+        return this->boss;
+    }
+    bool GetHasBoss() const {
+        return (this->boss != NULL);
+    }
+
     void TickAIEntities(double dT, GameModel* gameModel);
 
 private:
@@ -201,15 +218,24 @@ private:
 
     std::vector<GameItem::ItemType> allowedDropTypes;	// The random allowed drop types that come from destroyed blocks in this level
 
+    Boss* boss; // If the current level has a boss, this is a pointer to it, otherwise it will be NULL
+
     // Persistant scoring variables - used to mark previously saved scores and calculate high scores
     long starAwardScores[5];  // Scores where stars are awarded
     long highScore;           // Current high score for this level
     bool newHighScore;        // If a new high score was achieved on the last play through of this level
 
+    // Constructor for non-boss levels
 	GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
 		const std::vector<std::vector<LevelPiece*> >& pieces, const std::vector<GameItem::ItemType>& allowedDropTypes,
         size_t randomItemProbabilityNum, long* starAwardScores);
-	
+	// Constructor for boss levels
+    GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, 
+		const std::vector<std::vector<LevelPiece*> >& pieces, Boss* boss, const std::vector<GameItem::ItemType>& allowedDropTypes,
+        size_t randomItemProbabilityNum);
+
+    void InitPieces(const std::vector<std::vector<LevelPiece*> >& pieces);
+
 	static void UpdatePiece(const std::vector<std::vector<LevelPiece*> >& pieces, size_t hIndex, size_t wIndex);
 	std::set<LevelPiece*> IndexCollisionCandidates(float xIndexMin, float xIndexMax, float yIndexMin, float yIndexMax) const;
 	static void CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& levelPieces);
@@ -235,7 +261,6 @@ inline long GameLevel::GetHighScore() const {
 
 inline void GameLevel::SetHighScore(long highScore) {
     this->highScore = highScore;
-    // TODO: Save game progress to file
 }
 
 // Get whether this level has a new high score due to its most recent play-through this game

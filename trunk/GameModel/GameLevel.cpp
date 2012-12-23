@@ -38,6 +38,7 @@
 #include "PointAward.h"
 #include "PaddleRocketProjectile.h"
 #include "PaddleMineProjectile.h"
+#include "Boss.h"
 
 #include "../BlammoEngine/StringHelper.h"
 
@@ -72,6 +73,8 @@ const char GameLevel::TRI_LOWER_CORNER		= 'l';
 const char GameLevel::TRI_LEFT_CORNER       = 'l';
 const char GameLevel::TRI_RIGHT_CORNER		= 'r';
 
+const char* GameLevel::BOSS_LEVEL_KEYWORD = "boss";
+
 const char* GameLevel::ALL_ITEM_TYPES_KEYWORD               = "all";
 const char* GameLevel::POWERUP_ITEM_TYPES_KEYWORD           = "powerups";
 const char* GameLevel::POWERNEUTRAL_ITEM_TYPES_KEYWORD      = "powerneutrals";
@@ -84,17 +87,64 @@ GameLevel::GameLevel(size_t levelNumber, const std::string& filepath, const std:
                      unsigned int numBlocks, 
                      const std::vector<std::vector<LevelPiece*> >& pieces,
                      const std::vector<GameItem::ItemType>& allowedDropTypes, 
-                     size_t randomItemProbabilityNum, long* starAwardScores): 
-levelNum(levelNumber),
-currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
-randomItemProbabilityNum(randomItemProbabilityNum),
-piecesLeft(numBlocks), filepath(filepath), levelName(levelName), highScore(0),
-levelAlmostCompleteSignaled(false) {
+                     size_t randomItemProbabilityNum, long* starAwardScores) :
+
+levelNum(levelNumber), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
+randomItemProbabilityNum(randomItemProbabilityNum), piecesLeft(numBlocks),
+filepath(filepath), levelName(levelName), highScore(0),
+levelAlmostCompleteSignaled(false), boss(NULL) {
 
 	assert(!filepath.empty());
-	assert(pieces.size() > 0);
 	
-	// Set the dimensions of the level
+    this->InitPieces(pieces);
+
+    // Set all of the star reward milestone scores
+    for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+        this->starAwardScores[i] = starAwardScores[i];
+    }
+}
+
+GameLevel::GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName,
+                     const std::vector<std::vector<LevelPiece*> >& pieces, Boss* boss,
+                     const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum) :
+
+levelNum(levelNumber), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
+randomItemProbabilityNum(randomItemProbabilityNum),
+piecesLeft(0), filepath(filepath), levelName(levelName), highScore(0),
+levelAlmostCompleteSignaled(false), boss(boss) {
+
+    assert(!filepath.empty());
+	
+    this->InitPieces(pieces);
+
+    // Set all of the star reward milestone scores to zero, they aren't used in boss fight levels
+    for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
+        this->starAwardScores[i] = 0;
+    }
+}
+
+// Destructor, clean up heap stuffs
+GameLevel::~GameLevel() {
+	// Clean up level pieces
+	for (size_t i = 0; i < this->currentLevelPieces.size(); i++) {
+		for (size_t j = 0; j < this->currentLevelPieces[i].size(); j++) {
+			delete this->currentLevelPieces[i][j];
+			this->currentLevelPieces[i][j] = NULL;
+		}
+		this->currentLevelPieces[i].clear();
+	}
+	this->currentLevelPieces.clear();
+
+    if (this->boss != NULL) {
+        delete this->boss;
+        this->boss = NULL;
+    }
+}
+
+void GameLevel::InitPieces(const std::vector<std::vector<LevelPiece*> >& pieces) {
+    assert(pieces.size() > 0);
+    
+    // Set the dimensions of the level
 	this->width = pieces[0].size();
 	this->height = pieces.size();
 
@@ -110,11 +160,6 @@ levelAlmostCompleteSignaled(false) {
                 aiEntities.insert(currPiece);
             }
         }
-    }
-
-    // Set all of the star reward milestone scores
-    for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
-        this->starAwardScores[i] = starAwardScores[i];
     }
 
     // When a no-entry block is in the paddle area we make its partially visible to indicate
@@ -136,40 +181,50 @@ levelAlmostCompleteSignaled(false) {
             }
         }
     }
-
 }
 
-// Destructor, clean up heap stuffs
-GameLevel::~GameLevel() {
-	// Clean up level pieces
-	for (size_t i = 0; i < this->currentLevelPieces.size(); i++) {
-		for (size_t j = 0; j < this->currentLevelPieces[i].size(); j++) {
-			delete this->currentLevelPieces[i][j];
-			this->currentLevelPieces[i][j] = NULL;
-		}
-		this->currentLevelPieces[i].clear();
-	}
-	this->currentLevelPieces.clear();
-}
-
-GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string filepath) {
+GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelNumber, std::string filepath) {
 	std::stringstream* inFile = ResourceManager::GetInstance()->FilepathToInOutStream(filepath);
 	if (inFile == NULL) {
 		assert(false);
 		return NULL;
 	}
 
-	// Read in the level name
-	std::string levelName("");
-	while (levelName.empty()) {
-		if (!std::getline(*inFile, levelName)) {
-			debug_output("ERROR: Error reading in level name for file: " << filepath);
+    std::string levelName("");
+
+    // Attempt to read in the boss keyword (it may or may not be there, if it isn't then the
+    // level is not a boss level by default).
+    bool levelHasBoss = false;
+    std::string bossKeyword("");
+    while (bossKeyword.empty()) {
+		if (!std::getline(*inFile, bossKeyword)) {
+			debug_output("ERROR: Error reading the start of the level file: " << filepath);
 			delete inFile;
 			inFile = NULL;
 			return NULL;
 		}
-		levelName = stringhelper::trim(levelName);
+		bossKeyword = stringhelper::trim(bossKeyword);
 	}
+    if (bossKeyword.compare(BOSS_LEVEL_KEYWORD) == 0) {
+        levelHasBoss = true;
+
+	    // Read in the level name
+	    while (levelName.empty()) {
+		    if (!std::getline(*inFile, levelName)) {
+			    debug_output("ERROR: Error reading in level name for file: " << filepath);
+			    delete inFile;
+			    inFile = NULL;
+			    return NULL;
+		    }
+		    levelName = stringhelper::trim(levelName);
+	    }
+
+    }
+    else {
+        // Not the boss keyword... that means that the there is no boss keyword and instead we
+        // just read in the level name
+        levelName = bossKeyword;
+    }
 
 	// Read in the file width and height
 	int width = 0;
@@ -994,7 +1049,21 @@ GameLevel* GameLevel::CreateGameLevelFromFile(size_t levelNumber, std::string fi
 		}
 	}
 
-	return new GameLevel(levelNumber, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum, starAwardScores);
+    // Build the level based on whether it has a boss or not
+    if (levelHasBoss) {
+        Boss* boss = Boss::BuildStyleBoss(style);
+        if (boss == NULL) {
+            assert(false);
+            GameLevel::CleanUpFileReadData(levelPieces);
+            return NULL;
+        }
+    
+        return new GameLevel(levelNumber, filepath, levelName, levelPieces, boss, allowedDropTypes, randomItemProbabilityNum);
+
+    }
+    else {
+	    return new GameLevel(levelNumber, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum, starAwardScores);
+    }
 }
 
 void GameLevel::CleanUpFileReadData(std::vector<std::vector<LevelPiece*> >& levelPieces) {
@@ -1309,6 +1378,11 @@ void GameLevel::TickAIEntities(double dT, GameModel* gameModel) {
         LevelPiece* currAIEntity = *iter;
         assert(currAIEntity != NULL);
         currAIEntity->AITick(dT, gameModel);
+    }
+
+    // Update any active boss in this level
+    if (this->GetHasBoss()) {
+        this->boss->Tick(dT, gameModel);
     }
 }
 

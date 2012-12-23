@@ -20,6 +20,23 @@ BossBodyPart(bounds), currLifePoints(lifePoints), dmgOnBallHit(dmgOnBallHit) {
 BossWeakpoint::~BossWeakpoint() {
 }
 
+/**
+ * Builds a BossWeakpoint body part from the given BossBodyPart and other information.
+ */
+BossWeakpoint* BossWeakpoint::BuildWeakpoint(BossBodyPart* part, float lifePoints, float dmgOnBallHit) {
+    if (part == NULL) {
+        assert(false);
+        return NULL;
+    }
+
+    BossWeakpoint* result = new BossWeakpoint(lifePoints, dmgOnBallHit, part->GetLocalBounds());
+    result->worldTransform  = part->GetWorldTransform();
+    result->velocityMagAnim = part->GetVelocityMagAnim();
+    result->movementDirAnim = part->GetMovementDirAnim();
+
+    return result;
+}
+
 void BossWeakpoint::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
     assert(gameModel != NULL);
     UNUSED_PARAMETER(ball);

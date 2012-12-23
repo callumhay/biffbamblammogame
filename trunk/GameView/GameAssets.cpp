@@ -671,7 +671,7 @@ void GameAssets::DrawPaddlePostEffects(double dT, GameModel& gameModel, const Ca
 
 	// When the paddle has the 'sticky' power-up (and doesnt have a shield on) we attach sticky goo to its top
 	if ((paddle->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle &&
-         paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle != PlayerPaddle::ShieldPaddle) {
+        (paddle->GetPaddleType() & PlayerPaddle::ShieldPaddle) != PlayerPaddle::ShieldPaddle) {
 
 		// Set the texture for the refraction in the goo - be careful here, we can't get
 		// the 'post full scene' fbo because we are currently in the middle of drawing to it

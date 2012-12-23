@@ -16,7 +16,16 @@ BoundingLines::BoundingLines(const std::vector<Collision::LineSeg2D>& lines, con
 	assert(lines.size() == norms.size());
 }
 
+BoundingLines::BoundingLines(const BoundingLines& copy) : lines(copy.lines), normals(copy.normals) {
+}
+
 BoundingLines::~BoundingLines() {
+}
+
+void BoundingLines::AddBound(const Collision::LineSeg2D& line, const Vector2D& norm) {
+    this->lines.push_back(line);
+    this->normals.push_back(norm);
+    this->normals.back().Normalize();
 }
 
 Collision::AABB2D BoundingLines::GenerateAABBFromLines() const {
@@ -564,6 +573,34 @@ void BoundingLines::TranslateBounds(const Vector2D& translation) {
 		Collision::LineSeg2D& currLineSeg = *iter;
 		currLineSeg.Translate(translation);
 	}
+}
+
+void BoundingLines::Transform(const Matrix4x4& transform) {
+
+    // Transform each line...
+	for (std::vector<Collision::LineSeg2D>::iterator iter = this->lines.begin(); iter != this->lines.end(); ++iter) {
+		Collision::LineSeg2D& currLineSeg = *iter;
+		currLineSeg.Transform(transform);
+	}
+
+    // Transform each normal...
+	for (std::vector<Vector2D>::iterator iter = this->normals.begin(); iter != this->normals.end(); ++iter) {
+		Vector2D& currNormal = *iter;
+        Vector3D temp = transform * Vector3D(currNormal[0], currNormal[1], 0.0f);
+        currNormal = Vector2D(temp[0], temp[1]);
+        currNormal.Normalize();
+	}
+}
+
+BoundingLines& BoundingLines::operator=(const BoundingLines& copy) {
+    if (this == &copy) {
+        return (*this);
+    }
+
+    this->lines = copy.lines;
+    this->normals = copy.normals;
+
+    return (*this);
 }
 
 void BoundingLines::DebugDraw() const {

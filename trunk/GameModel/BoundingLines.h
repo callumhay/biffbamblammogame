@@ -2,7 +2,7 @@
  * BoundingLines.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011
+ * Callum Hay, 2012
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the
@@ -26,7 +26,10 @@ private:
 public:
 	BoundingLines(){};
 	BoundingLines(const std::vector<Collision::LineSeg2D>& lines, const std::vector<Vector2D>& norms);
+    BoundingLines(const BoundingLines& copy);
 	~BoundingLines();
+
+    void AddBound(const Collision::LineSeg2D& line, const Vector2D& norm);
 
 	size_t GetNumLines() const {
 		return this->lines.size();
@@ -58,17 +61,18 @@ public:
 	
 	void RotateLinesAndNormals(float angleInDegs, const Point2D& rotationCenter);
 	void TranslateBounds(const Vector2D& translation);
+    void Transform(const Matrix4x4& transform);
 
 	// Get the line at the given index within this set of bounding lines
 	// Precondition: The given index must be within bounds of the number of lines.
-	inline const Collision::LineSeg2D& GetLine(int index) const {
+	const Collision::LineSeg2D& GetLine(int index) const {
 		assert(index < static_cast<int>(lines.size()) && index >= 0);
 		return this->lines[index];
 	}
 
 	// Get the normal at the given index within this set of bounding lines
 	// Precondition: The given index must be within bounds of the number of lines.
-	inline const Vector2D& GetNormal(int index) const {
+	const Vector2D& GetNormal(int index) const {
 		assert(index < static_cast<int>(normals.size()) && index >= 0);
 		return this->normals[index];
 	}
@@ -88,6 +92,8 @@ public:
         this->lines.push_back(line);
         this->normals.push_back(normal);
     }
+
+    BoundingLines& operator=(const BoundingLines& copy);
 
 	// Debug stuffs
 	void DebugDraw() const;

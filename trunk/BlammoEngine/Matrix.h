@@ -181,6 +181,18 @@ public:
 		return r;
 	}
 
+	static Matrix4x4 rotationZMatrix(float angleInDegs) {
+		float radAngle = Trig::degreesToRadians(angleInDegs);
+		Vector4D row1 = Vector4D(cos(radAngle), -sin(radAngle), 0, 0);
+		Vector4D row2 = Vector4D(sin(radAngle), cos(radAngle), 0, 0);
+		Vector4D row3 = Vector4D(0, 0, 1, 0);
+		Vector4D row4 = Vector4D(0, 0, 0, 1);
+
+		// Create and return the matrix based on the values calculated
+		Matrix4x4 r(row1, row2, row3, row4);
+		return r;
+	}
+
 	static Matrix4x4 rotationMatrix(float angleInRads, const Vector3D& rotationVec) {
 		Vector3D unitRotVec = Vector3D::Normalize(rotationVec);
 		if (unitRotVec == Vector3D(0,0,0)) {
@@ -264,7 +276,7 @@ inline Matrix4x4 operator *(const Matrix4x4& a, const Matrix4x4& b)
   return ret;
 }
 
-inline Vector3D operator *(const Matrix4x4& m, const Vector3D& v) {
+inline Vector3D operator*(const Matrix4x4& m, const Vector3D& v) {
 	Vector3D ret;
 
 	for (int i = 0; i < 3; i++) {
@@ -281,7 +293,7 @@ inline Vector3D operator *(const Matrix4x4& m, const Vector3D& v) {
 	return ret;
 }
 
-inline Point3D operator *(const Matrix4x4& m, const Point3D& p) {
+inline Point3D operator*(const Matrix4x4& m, const Point3D& p) {
 	Point3D ret;
 	Vector4D temp = Vector4D(p[0], p[1], p[2], 1);
 	

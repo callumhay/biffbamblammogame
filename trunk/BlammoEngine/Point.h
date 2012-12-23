@@ -96,6 +96,9 @@ inline std::ostream& operator <<(std::ostream& os, const Point2D& p)
 inline Point2D operator +(const Point2D& a, const Vector2D& b) {
   return Point2D(a[0]+b[0], a[1]+b[1]);
 }
+inline Point2D operator +(const Vector2D& a, const Point2D& b) {
+  return Point2D(a[0]+b[0], a[1]+b[1]);
+}
 inline Vector2D operator -(const Point2D& a, const Point2D& b) {
   return Vector2D(a[0]-b[0], a[1]-b[1]);
 }

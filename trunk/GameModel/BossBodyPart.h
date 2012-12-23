@@ -12,9 +12,7 @@
 #ifndef __BOSSBODYPART_H__
 #define __BOSSBODYPART_H__
 
-#include "../BlammoEngine/Animation.h"
-#include "../BlammoEngine/Collision.h"
-
+#include "AbstractBossBodyPart.h"
 #include "BoundingLines.h"
 #include "GameBall.h"
 #include "PlayerPaddle.h"
@@ -23,21 +21,25 @@ class Projectile;
 class BeamSegment;
 class GameModel;
 
-class BossBodyPart {
+class BossBodyPart : public AbstractBossBodyPart {
 public:
-    BossBodyPart(const BoundingLines& bounds);
+    BossBodyPart(const BoundingLines& localBounds);
     virtual ~BossBodyPart();
 
-    void Tick(double dT);
+    const BoundingLines& GetLocalBounds() const;
+    BoundingLines GetWorldBounds() const;
 
-	bool CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-        Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
-	bool CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
-	bool CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
-	bool CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
+    void Tick(double dT, GameModel* gameModel);
 
-    void SetMovementAnimation(const AnimationMultiLerp<float>& velocityAnim,
-        const AnimationMultiLerp<Vector2D>& movementAnim);
+	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
+        Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
+	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT);
+	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir);
+	BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir);
+
+    void Translate(const Vector3D& t);
+    void RotateZ(float rotZDegs);
+    void Transform(const Matrix4x4& m);
 
 	virtual void CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile);
@@ -58,11 +60,7 @@ public:
 	//void RemoveStatuses(int32_t statusMask);
 
 protected:
-
-    AnimationMultiLerp<float> velocityMagAnim;
-    AnimationMultiLerp<Vector2D> movementDirAnim;
-
-    BoundingLines bounds;
+    BoundingLines localBounds;
 
     //int32_t pieceStatus;
 
@@ -74,33 +72,66 @@ private:
     DISALLOW_COPY_AND_ASSIGN(BossBodyPart);
 };
 
-inline bool BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
-                                         Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const {
+inline const BoundingLines& BossBodyPart::GetLocalBounds() const {
+    return this->localBounds;
+}
+
+inline BoundingLines BossBodyPart::GetWorldBounds() const {
+    BoundingLines worldBounds(localBounds);
+    worldBounds.Transform(this->worldTransform);
+    return worldBounds;
+}
+
+inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
+                                                  Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
 	if (ball.IsLastThingCollidedWith(this)) {
 		return false;
 	}
 
-	return this->bounds.Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision);
+    if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision)) {
+        return this;
+    }
+    return NULL;
 }
 
-inline bool BossBodyPart::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-    return this->bounds.CollisionCheck(ray, rayT);
+inline BossBodyPart* BossBodyPart::CollisionCheck(const Collision::Ray2D& ray, float& rayT) {
+    if (this->GetWorldBounds().CollisionCheck(ray, rayT)) {
+        return this;
+    }
+    return NULL;
 }
 
-inline bool BossBodyPart::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
+inline BossBodyPart* BossBodyPart::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) {
     UNUSED_PARAMETER(velDir);
-    return this->bounds.CollisionCheck(boundingLines);
+    if (this->GetWorldBounds().CollisionCheck(boundingLines)) {
+        return this;
+    }
+    return NULL;
 }
 
-inline bool BossBodyPart::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {
+inline BossBodyPart* BossBodyPart::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) {
     UNUSED_PARAMETER(velDir);
-	return this->bounds.CollisionCheck(c);
+    if (this->GetWorldBounds().CollisionCheck(c)) {
+        return this;
+    }
+    return NULL;
 }
 
-inline void BossBodyPart::SetMovementAnimation(const AnimationMultiLerp<float>& velocityAnim, 
-                                               const AnimationMultiLerp<Vector2D>& movementAnim) {
-    this->velocityMagAnim = velocityAnim;
-    this->movementDirAnim = movementAnim;
+inline void BossBodyPart::Translate(const Vector3D& t) {
+    this->worldTransform = Matrix4x4::translationMatrix(t) * this->worldTransform;
+}
+
+inline void BossBodyPart::RotateZ(float rotZDegs) {
+    if (fabs(rotZDegs) < EPSILON) {
+        return;
+    }
+
+    Matrix4x4 rotMatrix = Matrix4x4::rotationZMatrix(rotZDegs);
+    this->worldTransform = rotMatrix * this->worldTransform;
+}
+
+inline void BossBodyPart::Transform(const Matrix4x4& m) {
+    this->worldTransform = m * this->worldTransform;
 }
 
 inline bool BossBodyPart::GetIsDestroyed() const {

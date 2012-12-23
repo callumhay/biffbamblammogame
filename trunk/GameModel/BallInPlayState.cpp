@@ -129,9 +129,6 @@ void BallInPlayState::Tick(double seconds) {
 	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
 		GameBall *currBall = *iter;
 
-		// Update the current ball
-		//currBall->Tick(seconds, worldGravity2D);
-
 		// Check for death (ball went out of bounds)
 		if (this->gameModel->IsOutOfGameBounds(currBall->GetBounds().Center())) {
 			if (gameBalls.size() == 1) {
@@ -223,7 +220,8 @@ void BallInPlayState::Tick(double seconds) {
         }
 
 		// Make sure the ball can collide with level pieces (blocks) before running the block collision simulation
-		if (currBall->CanCollideWithBlocks()) {
+		if (currBall->CanCollideWithBlocksAndBosses()) {
+
 			// Check for ball collision with level pieces
 			// Get the small set of levelpieces based on the position of the ball...
 			std::vector<LevelPiece*> collisionPieces = 
@@ -237,6 +235,7 @@ void BallInPlayState::Tick(double seconds) {
                 
 				didCollideWithBlock = currPiece->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
 				if (didCollideWithBlock) {
+
 					// Check to see if the ball is a ghost ball, if so there's a chance the ball will 
 					// lose its ability to collide for 1 second, also check to see if we're already in ghost mode
 					// if so we won't collide with anything (except solid blocks)...
@@ -316,7 +315,27 @@ void BallInPlayState::Tick(double seconds) {
                     }
                 }
 			}
-		}
+
+            // Now do boss collisions with the ball...
+            if (currLevel->GetHasBoss()) {
+                Boss* boss = currLevel->GetBoss();
+                assert(boss != NULL);
+                
+                BossBodyPart* collisionBossPart = boss->CollisionCheck(*currBall, seconds, n, collisionLine, timeSinceCollision);
+                if (collisionBossPart != NULL) {
+                    // NOTE: For bosses, ghostballs never pass through.
+                    // NOTE: For bosses we don't worry about issues with the paddle having a ball on it.
+
+                    // First, make the ball react to the collision
+                    this->DoBallCollision(*currBall, n, collisionLine, seconds, timeSinceCollision);
+
+                    // Now make the boss react to the collision...
+                    this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
+                }
+
+            }
+
+        }
 
 		// Ball Safety Net Collisions:
         if (this->gameModel->IsSafetyNetActive()) {

@@ -74,7 +74,7 @@ rotationInDegs(gameBall.rotationInDegs), ballballCollisionsDisabledTimer(0.0), l
 zCenterPos(gameBall.zCenterPos), contributingGravityColour(gameBall.contributingGravityColour), 
 contributingCrazyColour(gameBall.contributingCrazyColour), contributingIceColour(gameBall.contributingIceColour),
 timeSinceLastCollision(gameBall.timeSinceLastCollision), boostSpdDecreaseCounter(gameBall.boostSpdDecreaseCounter),
-blockCollisionsDisabled(false),
+blockAndBossCollisionsDisabled(false),
 paddleCollisionsDisabled(false), impulseAmount(gameBall.impulseAmount), 
 impulseDeceleration(gameBall.impulseDeceleration), 
 impulseSpdDecreaseCounter(gameBall.impulseSpdDecreaseCounter),
@@ -130,7 +130,7 @@ void GameBall::ResetBallAttributes() {
 	this->colourAnimation = AnimationLerp<ColourRGBA>(&this->colour);
 	this->colourAnimation.SetRepeat(false);
 
-	this->blockCollisionsDisabled = false;
+	this->blockAndBossCollisionsDisabled = false;
 	this->paddleCollisionsDisabled = false;
 	this->ballballCollisionsDisabledTimer = 0.0;
 	this->timeSinceLastCollision = 0.0;

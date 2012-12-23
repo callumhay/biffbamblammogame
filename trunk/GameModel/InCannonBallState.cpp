@@ -27,7 +27,7 @@ BallState(ball), cannonBlock(cannonBlock), previousState(prevState) {
 
 	// The ball also should be ignoring collisions until it's fired back out of the cannon
 	this->gameBall->SetBallBallCollisionsDisabled();
-	this->gameBall->SetBallBlockCollisionsDisabled();
+	this->gameBall->SetBallBlockAndBossCollisionsDisabled();
 
 }
 
@@ -68,7 +68,7 @@ void InCannonBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDi
 
 		// Restore ball state information that was changed during this state's operations
 		this->gameBall->SetBallBallCollisionsEnabled();
-		this->gameBall->SetBallBlockCollisionsEnabled();
+		this->gameBall->SetBallBlockAndBossCollisionsEnabled();
 
 		// EVENT: Ball has officially been fired from the cannon
 		GameEventManager::Instance()->ActionBallFiredFromCannon(*this->gameBall, *this->cannonBlock);
