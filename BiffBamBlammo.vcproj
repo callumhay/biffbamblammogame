@@ -2364,7 +2364,15 @@
 					Name="Header Files"
 					>
 					<File
+						RelativePath=".\GameModel\AbstractBossBodyPart.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\Boss.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\BossAIState.h"
 						>
 					</File>
 					<File
@@ -2372,7 +2380,19 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\BossCompositeBodyPart.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\BossWeakpoint.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\ClassicalBoss.h"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\ClassicalBossAIStates.h"
 						>
 					</File>
 				</Filter>
@@ -2388,7 +2408,19 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameModel\BossCompositeBodyPart.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\GameModel\BossWeakpoint.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\ClassicalBoss.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameModel\ClassicalBossAIStates.cpp"
 						>
 					</File>
 				</Filter>

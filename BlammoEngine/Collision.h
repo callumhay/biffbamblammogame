@@ -96,6 +96,7 @@ namespace Collision {
 
 		void Rotate(float angleInDegs, const Point2D& rotationCenter);
 		void Translate(const Vector2D& translation);
+        void Transform(const Matrix4x4& transform);
 
 	};
 
@@ -112,6 +113,17 @@ namespace Collision {
 		this->SetP1(this->p1 + translation);
 		this->SetP2(this->p2 + translation);
 	}
+
+    inline void LineSeg2D::Transform(const Matrix4x4& transform) {
+        Point3D tempP1(this->p1);
+        Point3D tempP2(this->p2);
+
+        tempP1 = transform * tempP1;
+        tempP2 = transform * tempP2;
+
+        this->SetP1(Point2D(tempP1[0], tempP1[1]));
+        this->SetP2(Point2D(tempP2[0], tempP2[1]));
+    }
 
 	class LineSeg3D {
 

@@ -14,11 +14,12 @@
 
 #include "BossBodyPart.h"
 
-
 class BossWeakpoint : public BossBodyPart {
 public:
     BossWeakpoint(float lifePoints, float dmgOnBallHit, const BoundingLines& bounds);
     ~BossWeakpoint();
+
+    static BossWeakpoint* BuildWeakpoint(BossBodyPart* part, float lifePoints, float dmgOnBallHit);
 
     // Inherited functions from BossBodyPart
 	void CollisionOccurred(GameModel* gameModel, GameBall& ball);

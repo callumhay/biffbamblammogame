@@ -11,26 +11,22 @@
 
 #include "BossBodyPart.h"
 
-BossBodyPart::BossBodyPart(const BoundingLines& bounds) : bounds(bounds) {
-
-    this->velocityMagAnim.ClearLerp();
-    this->velocityMagAnim.SetInterpolantValue(0.0f);
-
-    this->movementDirAnim.ClearLerp();
-    this->movementDirAnim.SetInterpolantValue(Vector2D(0.0f, 0.0f));
+BossBodyPart::BossBodyPart(const BoundingLines& localBounds) :
+AbstractBossBodyPart(), localBounds(localBounds) {
 }
 
 BossBodyPart::~BossBodyPart() {
 
 }
 
-void BossBodyPart::Tick(double dT) {
-    this->velocityMagAnim.Tick(dT);
-    this->movementDirAnim.Tick(dT);
+void BossBodyPart::Tick(double dT, GameModel* gameModel) {
+    UNUSED_PARAMETER(gameModel);
 
     // Move the body part by whatever velocity is currently set by its movement animation
-    Vector2D dMovement = (dT * this->velocityMagAnim.GetInterpolantValue()) * this->movementDirAnim.GetInterpolantValue();
-    this->bounds.TranslateBounds(dMovement);
+    this->velocityMagAnim.Tick(dT);
+    this->movementDirAnim.Tick(dT);
+    Vector3D dMovement = (dT * this->velocityMagAnim.GetInterpolantValue()) * this->movementDirAnim.GetInterpolantValue();
+    this->Translate(dMovement);
 }
 
 void BossBodyPart::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
@@ -99,6 +95,7 @@ void BossBodyPart::TickBeamCollision(double dT, const BeamSegment* beamSegment, 
 
 //void BossBodyPart::TickStatus(double dT, GameModel* gameModel, int32_t& removedStatuses) {  
 //}
+
 
 void BossBodyPart::GetFrozenReflectionRefractionRays(const Point2D& impactPt, const Vector2D& currDir,
                                                      std::list<Collision::Ray2D>& rays) const {

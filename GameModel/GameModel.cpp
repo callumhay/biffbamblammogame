@@ -137,7 +137,6 @@ void GameModel::PerformLevelCompletionChecks() {
             this->boostModel->SetBoostChargeTime(BallBoostModel::LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS);
         }
     }
-
 }
 
 /**
@@ -414,6 +413,30 @@ void GameModel::CollisionOccurred(GameBall& ball, LevelPiece* p) {
 	//if (pieceAfterCollision->GetType() == LevelPiece::Portal && ball.GetIsBallCameraOn()) {
 		// TODO
 	//}
+
+	// Check to see if the level is done
+	this->PerformLevelCompletionChecks();
+}
+
+/**
+ * Called when a collision occurs between a ball and a part of a boss in the current level.
+ */
+void GameModel::CollisionOccurred(GameBall& ball, Boss* boss, BossBodyPart* bossPart) {
+    assert(boss != NULL);
+    assert(bossPart != NULL);
+
+    // EVENT: Ball-Boss Collision
+    //GameEventManager::Instance()->ActionBallBossCollision(ball, *boss, *bossPart);
+
+    // Collide the ball with the boss
+    boss->CollisionOccurred(this, ball, bossPart);
+    ball.BallCollided();
+
+	// If the ball is attached to the paddle then we always set the last piece it collided with to NULL
+	// This ensures that the ball ALWAYS collides with everything in its way while on the paddle
+	if (this->playerPaddle->GetAttachedBall() == &ball) {
+		ball.SetLastPieceCollidedWith(NULL);
+	}
 
 	// Check to see if the level is done
 	this->PerformLevelCompletionChecks();
@@ -876,7 +899,6 @@ void GameModel::UpdateActiveBeams(double seconds) {
 			++beamIter;
 		}
 	}
-
 }
 
 // Increment the player's score in the game

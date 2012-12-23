@@ -148,6 +148,8 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 			}
 		}
 
+        // TODO: Bosses...
+
 		// The current beam segment has had its collisions taken care of and is now properly
 		// setup, insert it into the list of beam segments associated with this beam
 		this->beamParts.push_back(currBeamSegment);
@@ -171,8 +173,6 @@ void PaddleLaserBeam::UpdateCollisions(const GameLevel* level) {
 		this->CleanUpBeam(this->beamParts);
 		this->beamParts = oldBeamSegments;
 	}
-
-	
 }
 
 /**

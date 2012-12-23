@@ -152,14 +152,14 @@ public:
 		return !this->paddleCollisionsDisabled;
 	}
 	
-	void SetBallBlockCollisionsDisabled() {
-		this->blockCollisionsDisabled = true;
+	void SetBallBlockAndBossCollisionsDisabled() {
+		this->blockAndBossCollisionsDisabled = true;
 	}
-	void SetBallBlockCollisionsEnabled() {
-		this->blockCollisionsDisabled = false;
+	void SetBallBlockAndBossCollisionsEnabled() {
+		this->blockAndBossCollisionsDisabled = false;
 	}
-	bool CanCollideWithBlocks() const {
-		return !this->blockCollisionsDisabled;
+	bool CanCollideWithBlocksAndBosses() const {
+		return !this->blockAndBossCollisionsDisabled;
 	}
 
 
@@ -376,7 +376,7 @@ private:
 	float currScaleFactor;      // The scale difference between the ball's current size and its default size
 
 	double ballballCollisionsDisabledTimer;	// If > 0 then collisions among this ball and other balls are disabled
-	bool blockCollisionsDisabled;
+	bool blockAndBossCollisionsDisabled;
 	bool paddleCollisionsDisabled;
 
 	double timeSinceLastCollision;
@@ -428,7 +428,7 @@ inline bool GameBall::IsBallAllowedToBoost() const {
 
 inline bool GameBall::IsBallAllowedToBoostIgnoreAlreadyBoosting() const {
     return (!this->IsLoadedInCannonBlock() && !this->GetIsBallCameraOn() &&
-            !this->blockCollisionsDisabled && !this->paddleCollisionsDisabled &&
+            !this->blockAndBossCollisionsDisabled && !this->paddleCollisionsDisabled &&
             !currDir.IsZero());
 }
 
