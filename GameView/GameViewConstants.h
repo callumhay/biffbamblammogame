@@ -320,6 +320,14 @@ public:
     const char* CLASSICAL_PADDLE_MESH;
     const char* CLASSICAL_BACKGROUND_MESH;
     const char* CLASSICAL_BLOCK_MESH;
+    // CLASSICAL BOSS
+    const char* CLASSICAL_BOSS_ARM_MESH;
+    const char* CLASSICAL_BOSS_ARM_SQUARE_MESH;
+    const char* CLASSICAL_BOSS_BASE_MESH;
+    const char* CLASSICAL_BOSS_BODY_COLUMN_MESH;
+    const char* CLASSICAL_BOSS_EYE_MESH;
+    const char* CLASSICAL_BOSS_PEDIMENT_MESH;
+    const char* CLASSICAL_BOSS_TABLATURE_MESH;
 
 	// DECO WORLD
 	const char* DECO_PADDLE_MESH;
