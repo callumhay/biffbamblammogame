@@ -353,6 +353,15 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
             }
 		}
 	}
+
+    // Load the boss, if there is one...
+    if (currLevel->GetHasBoss()) {
+        
+
+    }
+    else {
+        this->bossMesh = NULL;
+    }
 }
 
 /**

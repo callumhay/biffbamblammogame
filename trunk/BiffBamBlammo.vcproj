@@ -1292,6 +1292,22 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="Bosses"
+					>
+					<Filter
+						Name="Header Files"
+						>
+						<File
+							RelativePath=".\GameView\BossMesh.h"
+							>
+						</File>
+					</Filter>
+					<Filter
+						Name="Source Files"
+						>
+					</Filter>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Asset Classes"
