@@ -4,10 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,6 +29,10 @@ public class EditLevelPropertiesDialog extends JDialog {
 	
 	private BBBLevelEditDocumentWindow docWindow;
 	private JTextField levelNameTxtField;
+	
+	private JCheckBox hasBossChkBox;
+	
+	private JPanel starPanel;
 	
 	private JSpinner firstStarPtAmtSpinner;
 	private JSpinner secondStarPtAmtSpinner;
@@ -89,25 +97,41 @@ public class EditLevelPropertiesDialog extends JDialog {
 		});
 		
 		// Setup the star points panel - for defining the point milestones for stars
-		JPanel starPanel = new JPanel();
+		this.starPanel = new JPanel();
 		TitledBorder starBorder = BorderFactory.createTitledBorder("Star Point Milestones"); 
-		starPanel.setBorder(starBorder);
-		starPanel.setLayout(new GridLayout(5, 2));
-		starPanel.add(new JLabel("First Star Point Amount:"));
-		starPanel.add(this.firstStarPtAmtSpinner);
-		starPanel.add(new JLabel("Second Star Point Amount:"));
-		starPanel.add(this.secondStarPtAmtSpinner);
-		starPanel.add(new JLabel("Third Star Point Amount:"));
-		starPanel.add(this.thirdStarPtAmtSpinner);
-		starPanel.add(new JLabel("Fourth Star Point Amount:"));
-		starPanel.add(this.fourthStarPtAmtSpinner);
-		starPanel.add(new JLabel("Fifth Star Point Amount:"));
-		starPanel.add(this.fifthStarPtAmtSpinner);
+		this.starPanel.setBorder(starBorder);
+		this.starPanel.setLayout(new GridLayout(5, 2));
+		this.starPanel.add(new JLabel("First Star Point Amount:"));
+		this.starPanel.add(this.firstStarPtAmtSpinner);
+		this.starPanel.add(new JLabel("Second Star Point Amount:"));
+		this.starPanel.add(this.secondStarPtAmtSpinner);
+		this.starPanel.add(new JLabel("Third Star Point Amount:"));
+		this.starPanel.add(this.thirdStarPtAmtSpinner);
+		this.starPanel.add(new JLabel("Fourth Star Point Amount:"));
+		this.starPanel.add(this.fourthStarPtAmtSpinner);
+		this.starPanel.add(new JLabel("Fifth Star Point Amount:"));
+		this.starPanel.add(this.fifthStarPtAmtSpinner);
+		
+		this.hasBossChkBox = new JCheckBox("Boss Level?");
+		this.hasBossChkBox.addItemListener(new ItemListener() {
+
+
+			@Override
+			public void itemStateChanged(ItemEvent evt) {
+				hasBossChkBoxChangedActionPerformed(evt);
+			}
+        });
+		this.hasBossChkBox.setSelected(this.docWindow.getHasBoss());
+		
+		JPanel chkBoxPanel = new JPanel();
+		chkBoxPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		chkBoxPanel.add(this.hasBossChkBox);
 		
 		JPanel bodyPanel = new JPanel();
 		bodyPanel.setLayout(new BoxLayout(bodyPanel, BoxLayout.Y_AXIS));
 		bodyPanel.add(namePanel);
-		bodyPanel.add(starPanel);
+		bodyPanel.add(chkBoxPanel);
+		bodyPanel.add(this.starPanel);
 		
 		this.setLayout(new BorderLayout());
 		this.add(bodyPanel, BorderLayout.CENTER);
@@ -141,9 +165,18 @@ public class EditLevelPropertiesDialog extends JDialog {
 		this.setLocation(new Point((parentWidth - this.getWidth()) / 2, (parentHeight - this.getHeight()) / 2));
 	}
 	
-	private void nameTextFieldChangedActionPerformed(java.awt.event.ActionEvent evt) {
+	private void nameTextFieldChangedActionPerformed(ActionEvent evt) {
 	}
-	
+	private void hasBossChkBoxChangedActionPerformed(ItemEvent evt) {
+		if (evt.getItemSelectable() == this.hasBossChkBox) {
+			boolean enableStarAmts = !this.hasBossChkBox.isSelected();
+			this.firstStarPtAmtSpinner.setEnabled(enableStarAmts);
+			this.secondStarPtAmtSpinner.setEnabled(enableStarAmts);
+			this.thirdStarPtAmtSpinner.setEnabled(enableStarAmts);
+			this.fourthStarPtAmtSpinner.setEnabled(enableStarAmts);
+			this.fifthStarPtAmtSpinner.setEnabled(enableStarAmts);
+		}
+	}
 	
 	
 	private void starPointSpinnerChanged(ChangeEvent evt) {
@@ -195,22 +228,35 @@ public class EditLevelPropertiesDialog extends JDialog {
 		
 		this.docWindow.setLevelName(this.levelNameTxtField.getText());
 
-
-		SpinnerNumberModel firstStarNumModel = (SpinnerNumberModel)this.firstStarPtAmtSpinner.getModel();
-		SpinnerNumberModel secondStarNumModel = (SpinnerNumberModel)this.secondStarPtAmtSpinner.getModel();
-		SpinnerNumberModel thirdStarNumModel = (SpinnerNumberModel)this.thirdStarPtAmtSpinner.getModel();
-		SpinnerNumberModel fourthStarNumModel = (SpinnerNumberModel)this.fourthStarPtAmtSpinner.getModel();
-		SpinnerNumberModel fifthStarNumModel = (SpinnerNumberModel)this.fifthStarPtAmtSpinner.getModel();
+		boolean hasBoss = this.hasBossChkBox.isSelected();
 		
 		int[] starPointAmts = new int[5];
-		starPointAmts[0] = firstStarNumModel.getNumber().intValue();
-		starPointAmts[1] = secondStarNumModel.getNumber().intValue();
-		starPointAmts[2] = thirdStarNumModel.getNumber().intValue();
-		starPointAmts[3] = fourthStarNumModel.getNumber().intValue();
-		starPointAmts[4] = fifthStarNumModel.getNumber().intValue();
-		this.docWindow.setStarPointAmounts(starPointAmts);
-		// TODO: Set the point amounts...
+		if (hasBoss) {
+			// If there's a boss then there are no stars...
+			starPointAmts[0] = 0;
+			starPointAmts[1] = 0;
+			starPointAmts[2] = 0;
+			starPointAmts[3] = 0;
+			starPointAmts[4] = 0;
+		}
+		else {
+			SpinnerNumberModel firstStarNumModel = (SpinnerNumberModel)this.firstStarPtAmtSpinner.getModel();
+			SpinnerNumberModel secondStarNumModel = (SpinnerNumberModel)this.secondStarPtAmtSpinner.getModel();
+			SpinnerNumberModel thirdStarNumModel = (SpinnerNumberModel)this.thirdStarPtAmtSpinner.getModel();
+			SpinnerNumberModel fourthStarNumModel = (SpinnerNumberModel)this.fourthStarPtAmtSpinner.getModel();
+			SpinnerNumberModel fifthStarNumModel = (SpinnerNumberModel)this.fifthStarPtAmtSpinner.getModel();
+			
+			
+			starPointAmts[0] = firstStarNumModel.getNumber().intValue();
+			starPointAmts[1] = secondStarNumModel.getNumber().intValue();
+			starPointAmts[2] = thirdStarNumModel.getNumber().intValue();
+			starPointAmts[3] = fourthStarNumModel.getNumber().intValue();
+			starPointAmts[4] = fifthStarNumModel.getNumber().intValue();
+		}
 		
+		this.docWindow.setStarPointAmounts(starPointAmts);
+		this.docWindow.setHasBoss(hasBoss);
+
 		this.setVisible(false);
 	}
 	

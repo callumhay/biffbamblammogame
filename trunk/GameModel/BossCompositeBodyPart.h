@@ -48,6 +48,10 @@ public:
 
     bool GetIsDestroyed() const;
 
+#ifdef _DEBUG
+    void DebugDraw() const;
+#endif
+
 private:
     std::vector<AbstractBossBodyPart*> childParts;
 

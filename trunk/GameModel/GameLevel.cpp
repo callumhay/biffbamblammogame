@@ -222,7 +222,7 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
     }
     else {
         // Not the boss keyword... that means that the there is no boss keyword and instead we
-        // just read in the level name
+        // have just read in the level name
         levelName = bossKeyword;
     }
 

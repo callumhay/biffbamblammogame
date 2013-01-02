@@ -1302,10 +1302,22 @@
 							RelativePath=".\GameView\BossMesh.h"
 							>
 						</File>
+						<File
+							RelativePath=".\GameView\ClassicalBossMesh.h"
+							>
+						</File>
 					</Filter>
 					<Filter
 						Name="Source Files"
 						>
+						<File
+							RelativePath=".\GameView\BossMesh.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\GameView\ClassicalBossMesh.cpp"
+							>
+						</File>
 					</Filter>
 				</Filter>
 			</Filter>

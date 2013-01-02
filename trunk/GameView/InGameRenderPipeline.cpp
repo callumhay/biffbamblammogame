@@ -160,6 +160,9 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	const GameLevel* currLevel = gameModel->GetCurrentLevel();
 	this->display->GetAssets()->DrawLevelPieces(dT, currLevel, camera);
 
+    // Bosses
+    this->display->GetAssets()->DrawBoss(dT, currLevel, camera);
+
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 

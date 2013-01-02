@@ -35,6 +35,8 @@ public class BBBLevelEditDocumentWindow extends JInternalFrame
 implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private static final long serialVersionUID = 1L;
 	
+	private static final String BOSS_KEYWORD = "boss";
+	
 	private BBBLevelEditMainWindow levelEditWindow = null;
 	private String levelName = "";
 	private String fileName = "";
@@ -44,6 +46,8 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 	private boolean hasBeenModified = false;
 	
 	private boolean paintingPieces = false;
+	
+	private boolean levelHasBoss = false;
 	private int[] starPointAmounts = new int[5];
 	
 	private JPanel levelDisplayPanel;           // panel where the level is displayed
@@ -95,6 +99,13 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		
 		this.setupUI();
 		this.initDefaultPieces();
+	}
+	
+	public boolean getHasBoss() {
+		return this.levelHasBoss;
+	}
+	public void setHasBoss(boolean hasBoss) {
+		this.levelHasBoss = hasBoss;
 	}
 	
 	public int[] getStarPointAmounts() {
@@ -309,12 +320,26 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 			try {
 				levelFileScanner = new Scanner(this.savedFileOnDisk);
 				boolean goodFormat = true;
-				// Start by reading the name...
+				
+				// Start by reading whether there's a boss and then the level name...
 				goodFormat = levelFileScanner.hasNextLine();
 				if (!goodFormat) {
 					throw new Exception();
 				}
-				this.levelName = levelFileScanner.nextLine();
+				String bossOrLevelName = levelFileScanner.nextLine();
+				if (bossOrLevelName.compareToIgnoreCase(BOSS_KEYWORD) == 0) {
+					this.levelHasBoss = true;
+					
+					goodFormat = levelFileScanner.hasNextLine();
+					if (!goodFormat) {
+						throw new Exception();
+					}
+					this.levelName = levelFileScanner.nextLine();
+				}
+				else {
+					this.levelHasBoss = false;
+					this.levelName = bossOrLevelName;
+				}
 				
 				// ...width and height of the level
 				goodFormat = levelFileScanner.hasNextInt();
@@ -495,7 +520,12 @@ implements MouseMotionListener, MouseListener, InternalFrameListener {
 		try {
 			levelFileWriter = new FileWriter(this.savedFileOnDisk);
 			
-			// File starts with the name of the level and the width and height of the level...
+			// File starts with whether there's a boss... 
+			if (this.levelHasBoss) {
+				levelFileWriter.write(BOSS_KEYWORD + "\r\n");
+			}
+			
+			// The name of the level and the width and height of the level...
 			levelFileWriter.write(this.levelName + "\r\n");
 			levelFileWriter.write(this.currWidth + " " + this.currHeight + "\r\n");
 			

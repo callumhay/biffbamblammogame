@@ -68,6 +68,7 @@ private:
 
     Texture* arrowTexture;
     Texture* starTexture;
+    Texture* bossIconTexture;
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
 
@@ -95,23 +96,23 @@ private:
     void MoveSelectionY(bool up);
     int GetNumItemsOnRow(int rowIdx);
 
-    class LevelMenuItem {
+    class AbstractLevelMenuItem {
     public:
-        LevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner, const Texture* starTexture, bool isEnabled);
-        ~LevelMenuItem();
-        
+        AbstractLevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner, bool isEnabled);
+        virtual ~AbstractLevelMenuItem();
+
         const Point2D& GetTopLeftCorner() const { return this->topLeftCorner; }
         const float GetWidth() const { return this->width; }
-        float GetHeight() const;
         const GameLevel* GetLevel() const { return this->level; }
         bool GetIsEnabled() const { return this->isEnabled; }
 
-        void Draw(const Camera& camera, double dT, bool isSelected);
+        virtual float GetHeight() const = 0;
+        virtual void Draw(const Camera& camera, double dT, bool isSelected) = 0;
 
-    private:
+    protected:
         static const float NUM_TO_NAME_GAP;
-        static const float NUM_TO_HIGH_SCORE_Y_GAP;
-        static const float HIGH_SCORE_TO_STAR_Y_GAP;
+        static const float DISABLED_GREY_AMT;
+
         Point2D topLeftCorner;
         float width;
 
@@ -119,18 +120,58 @@ private:
         bool isEnabled;
         bool isSelected;
 
+        TextLabel2D* numLabel;
+        TextLabel2DFixedWidth* nameLabel;
+        TextLabel2D* lockedLabel;
+
+        DISALLOW_COPY_AND_ASSIGN(AbstractLevelMenuItem);
+    };
+
+    class LevelMenuItem : public AbstractLevelMenuItem {
+    public:
+        LevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner,
+            bool isEnabled, const Texture* starTexture);
+        ~LevelMenuItem();
+        
+        float GetHeight() const;
+
+        void Draw(const Camera& camera, double dT, bool isSelected);
+
+    private:
+        static const float NUM_TO_HIGH_SCORE_Y_GAP;
+        static const float HIGH_SCORE_TO_STAR_Y_GAP;
+
         GLuint starDisplayList;
         float starSize;
 
-        TextLabel2D* numLabel;
-        TextLabel2DFixedWidth* nameLabel;
         TextLabel2D* highScoreLabel; 
-
-        TextLabel2D* lockedLabel;
 
         const Texture* starTexture;
         
         DISALLOW_COPY_AND_ASSIGN(LevelMenuItem);
+    };
+
+    class BossLevelMenuItem : public AbstractLevelMenuItem {
+    public:
+        BossLevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner,
+            bool isEnabled, const Texture* bossTexture);
+        ~BossLevelMenuItem();
+
+        float GetHeight() const;
+        void Draw(const Camera& camera, double dT, bool isSelected);
+
+    private:
+        static const float BOSS_ICON_GAP;
+        static const float NUM_TO_BOSS_NAME_GAP;
+        static const float BOSS_NAME_ICON_GAP;
+
+        GLuint bossIconDisplayList;
+        float bossIconSize;
+
+        TextLabel2D* bossLabel;
+        const Texture* bossTexture;
+
+        DISALLOW_COPY_AND_ASSIGN(BossLevelMenuItem);
     };
 
     class LevelMenuPage {
@@ -139,19 +180,19 @@ private:
         ~LevelMenuPage();
         
         size_t GetSelectedItemIndex() const { return this->selectedItem; }
-        LevelMenuItem* GetSelectedItem() const { return this->levelItems[this->selectedItem]; }
+        AbstractLevelMenuItem* GetSelectedItem() const { return this->levelItems[this->selectedItem]; }
         size_t GetNumLevelItems() const { return this->levelItems.size(); }
 
         void SetSelectedItemIndex(size_t idx) { assert(idx < this->levelItems.size()); this->selectedItem = idx; }
-        void AddLevelItem(LevelMenuItem* item) { assert(item != NULL); this->levelItems.push_back(item); }
+        void AddLevelItem(AbstractLevelMenuItem* item) { assert(item != NULL); this->levelItems.push_back(item); }
         void Draw(const Camera& camera, double dT);
         
-        const LevelMenuItem* GetFirstItem() const { return this->levelItems.front(); }
-        const LevelMenuItem* GetLastItem() const { return this->levelItems.back(); }
+        const AbstractLevelMenuItem* GetFirstItem() const { return this->levelItems.front(); }
+        const AbstractLevelMenuItem* GetLastItem() const { return this->levelItems.back(); }
 
     private:
         size_t selectedItem;
-        std::vector<LevelMenuItem*> levelItems;
+        std::vector<AbstractLevelMenuItem*> levelItems;
     };
 
     int numItemsPerRow;

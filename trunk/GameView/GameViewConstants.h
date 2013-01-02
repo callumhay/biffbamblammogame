@@ -128,6 +128,7 @@ public:
 	const char* TEXTURE_FULLSCREEN_FROST;
     const char* TEXTURE_VAPOUR_TRAIL;
     const char* TEXTURE_FUTURISM_TRIANGLE;
+    const char* TEXTURE_BOSS_ICON;
 
     const char* TEXTURE_MULTIPLIER_BANG;
     const char* TEXTURE_MULTIPLIER_GAGE_OUTLINE;

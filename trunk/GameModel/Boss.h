@@ -44,6 +44,11 @@ public:
 	virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
     virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
 
+    // DEBUGGING...
+#ifdef _DEBUG
+    void DebugDraw() const;
+#endif
+
 protected:
     BossAIState* currAIState;
     BossAIState* nextAIState;
