@@ -433,6 +433,7 @@ ItemListView* BlammopediaState::BuildGameplayListView() {
     ItemListView::ListItem* lifeTutorialItem = itemsListView->AddTutorialItem(
         "Tutorial: Life and Death", tutorialAssets->GetLifeTutorialItemTexture(), lifePopupHint);
     assert(lifeTutorialItem != NULL);
+    UNUSED_VARIABLE(lifeTutorialItem);
 
     // Tutorial item: Boosting
     PopupTutorialHint* boostPopupHint = new PopupTutorialHint(POPUP_TUTORIAL_HINT_WIDTH);
@@ -462,6 +463,7 @@ ItemListView* BlammopediaState::BuildGameplayListView() {
     ItemListView::ListItem* boostingTutorialItem = itemsListView->AddTutorialItem(
         "Tutorial: Boosting", tutorialAssets->GetBoostTutorialItemTexture(), boostPopupHint);
     assert(boostingTutorialItem != NULL);
+    UNUSED_VARIABLE(boostingTutorialItem);
     
     // Tutorial item: Multipliers
     PopupTutorialHint* multPopupHint  = new PopupTutorialHint(POPUP_TUTORIAL_HINT_WIDTH);
@@ -486,7 +488,7 @@ ItemListView* BlammopediaState::BuildGameplayListView() {
     ItemListView::ListItem* multiplierTutorialItem = itemsListView->AddTutorialItem(
         "Tutorial: Points and Multipliers", tutorialAssets->GetMultiplierTutorialItemTexture(), multPopupHint);
     assert(multiplierTutorialItem != NULL);
-
+    UNUSED_VARIABLE(multiplierTutorialItem);
     
     itemsListView->SetSelectedItemIndex(ItemListView::NO_ITEM_SELECTED_INDEX);
     itemsListView->AdjustSizeToHeight(camera.GetWindowHeight() - TOTAL_MENU_HEIGHT);

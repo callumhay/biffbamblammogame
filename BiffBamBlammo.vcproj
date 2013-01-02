@@ -124,6 +124,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)include/physfs&quot;;&quot;$(ProjectDir)include/zlib&quot;;&quot;$(ProjectDir)include/al&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
@@ -151,9 +152,9 @@
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)lib&quot;"
 				IgnoreDefaultLibraryNames="libc.lib"
 				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
+				SubSystem="1"
+				OptimizeReferences="0"
+				EnableCOMDATFolding="0"
 				TargetMachine="1"
 			/>
 			<Tool

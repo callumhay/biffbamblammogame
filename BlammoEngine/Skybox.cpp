@@ -25,6 +25,7 @@ Skybox::~Skybox() {
 	// Release the skybox texture
 	bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->skyboxTex);
 	assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 /**

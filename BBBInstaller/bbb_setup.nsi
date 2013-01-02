@@ -129,6 +129,7 @@ Section -post SEC0002
     SetOutPath $INSTDIR
 	CreateDirectory $SMPROGRAMS\$StartMenuGroup
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^UninstallLink).lnk" $INSTDIR\bbb_uninstaller.exe
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^ExeLink).lnk" "$INSTDIR\BiffBamBlammo.exe"
     !insertmacro MUI_STARTMENU_WRITE_END
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayName "$(^Name)"
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayVersion "${VERSION}"

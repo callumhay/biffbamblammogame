@@ -234,7 +234,7 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF
 	for (unsigned int i = 0; i < heightsInPixels.size(); i++) {
 		TextureFontSet* newFontSet = new TextureFontSet();
 		unsigned int currHeight = heightsInPixels[i];
-		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight, filterType);
+		TextureFontSet::CreateTextureFromFontLib(newFontSet, face, currHeight, filterType);
 		
 		assert(newFontSet != NULL);
 		assert(newFontSets.find(currHeight) == newFontSets.end());
@@ -304,7 +304,7 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromTTF
 	for (unsigned int i = 0; i < heightsInPixels.size(); i++) {
 		TextureFontSet* newFontSet = new TextureFontSet();
 		unsigned int currHeight = heightsInPixels[i];
-		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight, filterType);
+		TextureFontSet::CreateTextureFromFontLib(newFontSet, face, currHeight, filterType);
 		
 		assert(newFontSet != NULL);
 		assert(newFontSets.find(currHeight) == newFontSets.end());
@@ -354,7 +354,7 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromBuf
 	for (unsigned int i = 0; i < heightsInPixels.size(); i++) {
 		TextureFontSet* newFontSet = new TextureFontSet();
 		unsigned int currHeight = heightsInPixels[i];
-		TextureFontSet::CreateTextureFromFontLib(newFontSet, library, face, currHeight, filterType);
+		TextureFontSet::CreateTextureFromFontLib(newFontSet, face, currHeight, filterType);
 		
 		assert(newFontSet != NULL);
 		assert(newFontSets.find(currHeight) == newFontSets.end());
@@ -376,10 +376,9 @@ std::map<unsigned int, TextureFontSet*> TextureFontSet::CreateTextureFontFromBuf
  * Returns: A new TextureFontSet of the particular font if all goes well, otherwise it will
  * return NULL.
  */
-void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library,
+void TextureFontSet::CreateTextureFromFontLib(TextureFontSet* newFontSet,
                                               FT_Face face, unsigned int heightInPixels,
 											  Texture::TextureFilterType filterType) {
-	assert(library != NULL);
 	assert(face != NULL);
 
 	// FreeType Measures Font Size In Terms Of 1/64ths Of Pixels.  

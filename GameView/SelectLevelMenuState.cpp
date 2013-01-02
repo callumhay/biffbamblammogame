@@ -862,7 +862,7 @@ lockedLabel(NULL), level(level), topLeftCorner(topLeftCorner), width(width), isE
             GameFontAssetsManager::Huge), "LOCKED");
         this->lockedLabel->SetColour(Colour(1,0,0));
         this->lockedLabel->SetDropShadow(Colour(0,0,0), 0.07f);
-        this->lockedLabel->SetTopLeftCorner(this->nameLabel->GetTopLeftCorner()[0],
+        this->lockedLabel->SetTopLeftCorner(this->topLeftCorner[0] + std::max<float>(5, (width - this->lockedLabel->GetLastRasterWidth())/ 2.0f),
             this->numLabel->GetTopLeftCorner()[1] - (5 + this->numLabel->GetHeight()));
     }
 
