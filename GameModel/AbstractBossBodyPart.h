@@ -60,6 +60,10 @@ public:
 
     const Matrix4x4& GetWorldTransform() const { return this->worldTransform; };
 
+#ifdef _DEBUG
+    virtual void DebugDraw() const = 0;
+#endif
+
 protected:
     Matrix4x4 worldTransform;
 

@@ -102,3 +102,11 @@ void Boss::SetCurrentAIStateImmediately(BossAIState* newState) {
 	}
 	this->currAIState = newState;
 }
+
+#ifdef _DEBUG
+void Boss::DebugDraw() const {
+    if (this->root != NULL) {
+        this->root->DebugDraw();
+    }
+}
+#endif

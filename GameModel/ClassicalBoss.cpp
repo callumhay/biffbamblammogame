@@ -85,6 +85,7 @@ void ClassicalBoss::Init() {
                 eye->Translate(eyeTranslation);
 
                 this->alivePartsRoot->AddBodyPart(eye);
+                this->eyeIdx = this->bodyParts.size();
                 this->bodyParts.push_back(eye);
             }
 
@@ -107,6 +108,7 @@ void ClassicalBoss::Init() {
                 pediment->Translate(pedimentTranslation);
 
                 this->alivePartsRoot->AddBodyPart(pediment);
+                this->pedimentIdx = this->bodyParts.size();
                 this->bodyParts.push_back(pediment);
             }
 

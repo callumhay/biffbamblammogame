@@ -82,6 +82,7 @@ public:
 	void DrawBackgroundEffects(const Camera& camera);
 
 	void DrawLevelPieces(double dT, const GameLevel* currLevel, const Camera& camera);
+    void DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera);
 	void DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel);
 	void DrawStatusEffects(double dT, const Camera& camera);
 	void DrawItem(double dT, const Camera& camera, const GameItem& gameItem);
@@ -231,7 +232,19 @@ inline void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, c
 
 	BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera, this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight, ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
+	this->GetCurrentLevelMesh()->DrawPieces(worldTransform, dT, camera,
+        this->lightAssets->GetIsBlackOutActive(), fgKeyLight, fgFillLight,
+        ballLight, this->fboAssets->GetPostFullSceneFBO()->GetFBOTexture());
+}
+
+inline void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera) {
+
+    if (currLevel->GetHasBoss()) {
+	    BasicPointLight fgKeyLight, fgFillLight, ballLight;
+	    this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
+        // TODO: What about if the lights are off??
+        this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight);
+    }
 }
 
 inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, const GameModel& gameModel) {

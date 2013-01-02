@@ -176,3 +176,12 @@ bool BossCompositeBodyPart::GetIsDestroyed() const {
     }
     return true;
 }
+
+#ifdef _DEBUG
+void BossCompositeBodyPart::DebugDraw() const {
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        const AbstractBossBodyPart* part = this->childParts[i];
+        part->DebugDraw();
+    }
+}
+#endif

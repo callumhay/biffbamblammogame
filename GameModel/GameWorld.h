@@ -70,7 +70,6 @@ public:
     }
 
 	WorldStyle GetStyle() const {
-		assert(this->isLoaded);
 		return this->style;
 	}
 

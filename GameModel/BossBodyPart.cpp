@@ -103,3 +103,9 @@ void BossBodyPart::GetFrozenReflectionRefractionRays(const Point2D& impactPt, co
     // TODO.. do this based on the bounds of the body part...
     
 }
+
+#ifdef _DEBUG
+void BossBodyPart::DebugDraw() const {
+    this->GetWorldBounds().DebugDraw();
+}
+#endif

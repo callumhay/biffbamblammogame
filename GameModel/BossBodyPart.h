@@ -59,6 +59,10 @@ public:
 	//void RemoveStatus(const PieceStatus& status);
 	//void RemoveStatuses(int32_t statusMask);
 
+#ifdef _DEBUG
+    void DebugDraw() const;
+#endif
+
 protected:
     BoundingLines localBounds;
 

@@ -22,6 +22,7 @@
 #include "LaserTurretBlockMesh.h"
 #include "RocketTurretBlockMesh.h"
 #include "MineTurretBlockMesh.h"
+#include "BossMesh.h"
 
 #include "../BlammoEngine/BasicIncludes.h"
 #include "../BlammoEngine/Vector.h"
@@ -45,7 +46,7 @@ styleBlock(NULL), basicBlock(NULL), bombBlock(NULL), triangleBlockUR(NULL), inkB
 prismBlockDiamond(NULL), prismBlockTriangleUR(NULL), cannonBlock(NULL), collateralBlock(NULL),
 teslaBlock(NULL), switchBlock(NULL), noEntryBlock(NULL), oneWayUpBlock(NULL), oneWayDownBlock(NULL), oneWayLeftBlock(NULL), 
 oneWayRightBlock(NULL), laserTurretBlock(NULL), rocketTurretBlock(NULL), mineTurretBlock(NULL), statusEffectRenderer(NULL), remainingPieceGlowTexture(NULL),
-remainingPiecePulser(0,0) {
+remainingPiecePulser(0,0), bossMesh(NULL) {
 	
     this->remainingPieceGlowTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
@@ -237,6 +238,12 @@ void LevelMesh::Flush() {
     this->rocketTurretBlock->Flush();
     this->mineTurretBlock->Flush();
 
+    // Clear any boss mesh
+    if (this->bossMesh != NULL) {
+        delete this->bossMesh;
+        this->bossMesh = NULL;
+    }
+
 	// Clear the current level pointer
 	this->currLevel = NULL;
 }
@@ -355,13 +362,12 @@ void LevelMesh::LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameI
 	}
 
     // Load the boss, if there is one...
+    assert(this->bossMesh == NULL);
     if (currLevel->GetHasBoss()) {
-        
+        this->bossMesh = BossMesh::Build(gameWorldAssets.GetStyle(), currLevel->GetBoss());
+        assert(this->bossMesh != NULL);
+    }
 
-    }
-    else {
-        this->bossMesh = NULL;
-    }
 }
 
 /**
@@ -549,6 +555,14 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 		}
 	}
 
+}
+
+void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
+                         const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+
+    assert(this->bossMesh != NULL);
+    this->bossMesh->Tick(dT);
+    this->bossMesh->Draw(camera, keyLight, fillLight, ballLight);
 }
 
 /**

@@ -49,7 +49,10 @@ resources/worlds/levels/medium/death_from_above.lvl
 
 
 
-# END OF MOVEMENT
+# Boss
+resources/worlds/levels/bosses/pediment_head.lvl
+
+# END OF MOVEMENT ---------------------------------------
 
 
 # TODO...

@@ -24,6 +24,10 @@ class ClassicalBoss : public Boss {
 public:
     ~ClassicalBoss();
 
+    const BossBodyPart* GetEye() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->eyeIdx]); }
+    const BossBodyPart* GetPediment() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->pedimentIdx]); }
+    //const BossBodyPart* 
+
     // Inherited from Boss
     bool GetIsDead() const;
 	void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
@@ -34,23 +38,10 @@ private:
     BossCompositeBodyPart* deadPartsRoot;
     BossCompositeBodyPart* alivePartsRoot;
 
+    size_t eyeIdx;
+    size_t pedimentIdx;
     size_t leftArmIdx, leftArmSquareIdx;
     size_t rightArmIdx, rightArmSquareIdx;
-
-    /*
-    // Important body parts of the boss based on state...
-    
-    // ArmsBodyHead State
-    BossWeakpoint* leftArmSquareWeakpoint;
-    BossWeakpoint* rightArmSquareWeakpoint;
-    BossCompositeBodyPart* leftArm;
-    BossCompositeBodyPart* rightArm;
-
-    // BodyHead State
-    std::vector<BossWeakpoint*> columnWeakpoints;
-    // Head State
-    BossWeakpoint* eyeWeakpoint;
-    */
 
     ClassicalBoss();
     void BuildArm(const Vector3D& armTranslation, size_t& armIdx, size_t& squareIdx);

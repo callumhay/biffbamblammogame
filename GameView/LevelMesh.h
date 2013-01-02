@@ -42,6 +42,7 @@ class RocketTurretBlockMesh;
 class MineTurretBlockMesh;
 class MaterialGroup;
 class ESPEmitter;
+class BossMesh;
 
 class LevelMesh {
 public:
@@ -54,6 +55,8 @@ public:
 	void DrawPieces(const Vector3D& worldTranslation, double dT, const Camera& camera, bool lightsAreOut, const BasicPointLight& keyLight, 
 	    const BasicPointLight& fillLight, const BasicPointLight& ballLight, const Texture2D* sceneTexture);
 	void DrawStatusEffects(double dT, const Camera& camera, const Texture2D* sceneTexture);
+    void DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
 	void LoadNewLevel(const GameWorldAssets& gameWorldAssets, const GameItemAssets& gameItemAssets, const GameLevel& level);
 
@@ -104,6 +107,9 @@ private:
 
 	// Style-specific level pieces
 	Mesh* styleBlock;
+
+    // Boss (if there is one)
+    BossMesh* bossMesh;
 
     // Misc. effects/texture pointers
     Texture2D* remainingPieceGlowTexture;
