@@ -81,6 +81,23 @@ void Boss::Tick(double dT, GameModel* gameModel) {
     this->UpdateAIState();
 }
 
+void Boss::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
+    collisionPart->CollisionOccurred(gameModel, ball);
+    ball.SetLastThingCollidedWith(collisionPart);
+    this->currAIState->CollisionOccurred(gameModel, ball, collisionPart);
+}
+
+void Boss::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
+    collisionPart->CollisionOccurred(gameModel, projectile);
+    projectile->SetLastThingCollidedWith(collisionPart);
+    this->currAIState->CollisionOccurred(gameModel, projectile, collisionPart);
+}
+
+void Boss::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart) {
+    collisionPart->CollisionOccurred(gameModel, paddle);
+    this->currAIState->CollisionOccurred(gameModel, paddle, collisionPart);
+}
+
 void Boss::SetNextAIState(BossAIState* nextState) {
     if (this->nextAIState != NULL) {
     	delete this->nextAIState;

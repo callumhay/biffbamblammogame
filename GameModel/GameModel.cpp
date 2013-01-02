@@ -1183,6 +1183,7 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 }
 
 void GameModel::AddItemDrop(const Point2D& p, const GameItem::ItemType& itemType) {
+    
 	// We always drop items in this manor, even if we've exceeded the max!
 	GameItem* newGameItem = GameItemFactory::GetInstance()->CreateItem(itemType, p, this);
 	this->currLiveItems.push_back(newGameItem);

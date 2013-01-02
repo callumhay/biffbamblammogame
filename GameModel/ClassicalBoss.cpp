@@ -133,6 +133,7 @@ void ClassicalBoss::Init() {
                     topLeftTablature->RotateZ(180);
                     topLeftTablature->Translate(Vector3D(-5.101f, 2.854f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(topLeftTablature);
+                    this->topLeftTablatureIdx = this->bodyParts.size();
                     this->bodyParts.push_back(topLeftTablature);
                 }
 
@@ -142,6 +143,7 @@ void ClassicalBoss::Init() {
                     topRightTablature->RotateZ(180);
                     topRightTablature->Translate(Vector3D(5.101f, 2.854f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(topRightTablature);
+                    this->topRightTablatureIdx = this->bodyParts.size();
                     this->bodyParts.push_back(topRightTablature);
                 }
 
@@ -150,6 +152,7 @@ void ClassicalBoss::Init() {
                     BossBodyPart* bottomLeftTablature = new BossBodyPart(tablatureBounds);
                     bottomLeftTablature->Translate(Vector3D(-5.101f, -2.854f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(bottomLeftTablature);
+                    this->bottomLeftTablatureIdx = this->bodyParts.size();
                     this->bodyParts.push_back(bottomLeftTablature);
                 }
 
@@ -158,6 +161,7 @@ void ClassicalBoss::Init() {
                     BossBodyPart* bottomLeftTablature = new BossBodyPart(tablatureBounds);
                     bottomLeftTablature->Translate(Vector3D(5.101f, -2.854f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(bottomLeftTablature);
+                    this->bottomRightTablatureIdx = this->bodyParts.size();
                     this->bodyParts.push_back(bottomLeftTablature);
                 }
             }
@@ -180,6 +184,7 @@ void ClassicalBoss::Init() {
                     BossBodyPart* leftBodyColumn1 = new BossBodyPart(columnBounds);
                     leftBodyColumn1->Translate(Vector3D(-7.275f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(leftBodyColumn1);
+                    this->leftCol1Idx = this->bodyParts.size();
                     this->bodyParts.push_back(leftBodyColumn1);
                 }
                 // leftBodyColumn2
@@ -187,6 +192,7 @@ void ClassicalBoss::Init() {
                     BossBodyPart* leftBodyColumn2 = new BossBodyPart(columnBounds);
                     leftBodyColumn2->Translate(Vector3D(-5.101f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(leftBodyColumn2);
+                    this->leftCol2Idx = this->bodyParts.size();
                     this->bodyParts.push_back(leftBodyColumn2);
                 }
                 // leftBodyColumn3
@@ -194,6 +200,7 @@ void ClassicalBoss::Init() {
                     BossBodyPart* leftBodyColumn3 = new BossBodyPart(columnBounds);
                     leftBodyColumn3->Translate(Vector3D(-2.927f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(leftBodyColumn3);
+                    this->leftCol3Idx = this->bodyParts.size();
                     this->bodyParts.push_back(leftBodyColumn3);
                 }
 
@@ -202,6 +209,7 @@ void ClassicalBoss::Init() {
                     BossBodyPart* rightBodyColumn1 = new BossBodyPart(columnBounds);
                     rightBodyColumn1->Translate(Vector3D(7.275f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(rightBodyColumn1);
+                    this->rightCol1Idx = this->bodyParts.size();
                     this->bodyParts.push_back(rightBodyColumn1);
                 }
                 // rightBodyColumn2
@@ -209,6 +217,7 @@ void ClassicalBoss::Init() {
                     BossBodyPart* rightBodyColumn2 = new BossBodyPart(columnBounds);
                     rightBodyColumn2->Translate(Vector3D(5.101f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(rightBodyColumn2);
+                    this->rightCol2Idx = this->bodyParts.size();
                     this->bodyParts.push_back(rightBodyColumn2);
                 }
                 // rightBodyColumn3
@@ -216,6 +225,7 @@ void ClassicalBoss::Init() {
                     BossBodyPart* rightBodyColumn3 = new BossBodyPart(columnBounds);
                     rightBodyColumn3->Translate(Vector3D(2.927f, 0.0f, 0.0f));
                     this->alivePartsRoot->AddBodyPart(rightBodyColumn3);
+                    this->rightCol3Idx = this->bodyParts.size();
                     this->bodyParts.push_back(rightBodyColumn3);
                 }
             }
@@ -236,22 +246,26 @@ void ClassicalBoss::Init() {
                 BossBodyPart* base = new BossBodyPart(baseBounds);
                 base->Translate(Vector3D(0.0f, -4.596f, 0.0f));
                 this->alivePartsRoot->AddBodyPart(base);
+                this->baseIdx = this->bodyParts.size();
                 this->bodyParts.push_back(base);
             }
 
             // leftArm
-            this->BuildArm(Vector3D(-10.246f, 0.0f, 0.0f), this->leftArmIdx, this->leftArmSquareIdx);
+            this->BuildArm(Vector3D(-10.246f, 0.0f, 0.0f), this->leftArmIdx, this->leftRestOfArmIdx, this->leftArmSquareIdx);
 
             // rightArm
-            this->BuildArm(Vector3D(10.246f, 0.0f, 0.0f), this->rightArmIdx, this->rightArmSquareIdx);
+            this->BuildArm(Vector3D(10.246f, 0.0f, 0.0f), this->rightArmIdx, this->rightRestOfArmIdx, this->rightArmSquareIdx);
 
         } // end alivePartsRoot
     } // end root
 
+    // Transform the boss into level space...
+
+
     this->SetNextAIState(new ArmsBodyHeadAI(this));
 }
 
-void ClassicalBoss::BuildArm(const Vector3D& armTranslation, size_t& armIdx, size_t& squareIdx) {
+void ClassicalBoss::BuildArm(const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx) {
 
     static const float SQUARE_SIZE      = 2.445f;
     static const float HALF_SQUARE_SIZE = SQUARE_SIZE / 2.0f;
@@ -260,11 +274,6 @@ void ClassicalBoss::BuildArm(const Vector3D& armTranslation, size_t& armIdx, siz
     static const float SUPPORT_HEIGHT = 0.652f;
     static const float HALF_SUPPORT_WIDTH = SUPPORT_WIDTH / 2.0f;
     static const float HALF_SUPPORT_HEIGHT = SUPPORT_HEIGHT / 2.0f;
-
-    static const float ARM_COLUMN_WIDTH  = 2.589f;
-    static const float ARM_COLUMN_HEIGHT = 5.911f;
-    static const float HALF_ARM_COLUMN_WIDTH  = ARM_COLUMN_WIDTH / 2.0f;
-    static const float HALF_ARM_COLUMN_HEIGHT = ARM_COLUMN_HEIGHT / 2.0f;
 
     BossCompositeBodyPart* arm = new BossCompositeBodyPart();
     this->alivePartsRoot->AddBodyPart(arm);
@@ -290,14 +299,63 @@ void ClassicalBoss::BuildArm(const Vector3D& armTranslation, size_t& armIdx, siz
         bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_SUPPORT_WIDTH, HALF_SUPPORT_HEIGHT),   translation + Point2D(HALF_SUPPORT_WIDTH, -HALF_SUPPORT_HEIGHT)),  Vector2D(1, 0));  // Right
     
         // Column
-        translation[1] = -HALF_ARM_COLUMN_HEIGHT;
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_ARM_COLUMN_WIDTH, HALF_ARM_COLUMN_HEIGHT),  translation + Point2D(HALF_ARM_COLUMN_WIDTH, HALF_ARM_COLUMN_HEIGHT)),   Vector2D(0, 1));  // Top
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_ARM_COLUMN_WIDTH, -HALF_ARM_COLUMN_HEIGHT), translation + Point2D(HALF_ARM_COLUMN_WIDTH, -HALF_ARM_COLUMN_HEIGHT)),  Vector2D(0, -1)); // Bottom
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_ARM_COLUMN_WIDTH, HALF_ARM_COLUMN_HEIGHT),  translation + Point2D(-HALF_ARM_COLUMN_WIDTH, -HALF_ARM_COLUMN_HEIGHT)), Vector2D(-1, 0)); // Left
-        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_ARM_COLUMN_WIDTH, HALF_ARM_COLUMN_HEIGHT),   translation + Point2D(HALF_ARM_COLUMN_WIDTH, -HALF_ARM_COLUMN_HEIGHT)),  Vector2D(1, 0));  // Right
+        static const float COLUMN_TOP_BASE_WIDTH = 2.375f;
+        static const float COLUMN_TOP_BASE_HEIGHT = 0.292f;
+        static const float HALF_COLUMN_TOP_BASE_WIDTH  = COLUMN_TOP_BASE_WIDTH / 2.0f;
+        static const float HALF_COLUMN_TOP_BASE_HEIGHT = COLUMN_TOP_BASE_HEIGHT / 2.0f;
+
+        static const float COLUMN_TAPERED_TOP_TOP_WIDTH  = COLUMN_TOP_BASE_WIDTH;
+        static const float COLUMN_TAPERED_TOP_HEIGHT = 0.207f;
+        static const float COLUMN_TAPERED_TOP_BOTTOM_WIDTH = 1.599f;
+        static const float HALF_COLUMN_TAPERED_TOP_TOP_WIDTH = COLUMN_TAPERED_TOP_TOP_WIDTH / 2.0f;
+        static const float HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH = COLUMN_TAPERED_TOP_BOTTOM_WIDTH / 2.0f;
+        static const float HALF_COLUMN_TAPERED_TOP_HEIGHT = COLUMN_TAPERED_TOP_HEIGHT / 2.0f;
+
+        static const float COLUMN_HEIGHT = 4.792f;
+        static const float COLUMN_TOP_WIDTH     = COLUMN_TAPERED_TOP_BOTTOM_WIDTH;
+        static const float COLUMN_BOTTOM_WIDTH  = 2.375f;
+        static const float HALF_COLUMN_HEIGHT = COLUMN_HEIGHT / 2.0f;
+        static const float HALF_COLUMN_TOP_WIDTH  = COLUMN_TOP_WIDTH  / 2.0f;
+        static const float HALF_COLUMN_BOTTOM_WIDTH  = COLUMN_BOTTOM_WIDTH  / 2.0f;
+
+        static const float COLUMN_BOTTOM_BASE_WIDTH = COLUMN_BOTTOM_WIDTH;
+        static const float COLUMN_BOTTOM_BASE_HEIGHT = 0.621f;
+        static const float HALF_COLUMN_BOTTOM_BASE_WIDTH = COLUMN_BOTTOM_BASE_WIDTH / 2.0f;
+        static const float HALF_COLUMN_BOTTOM_BASE_HEIGHT = COLUMN_BOTTOM_BASE_HEIGHT / 2.0f;
+        
+        // Top part of the column
+        translation[1] = -HALF_COLUMN_TOP_BASE_HEIGHT;
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TOP_BASE_WIDTH, HALF_COLUMN_TOP_BASE_HEIGHT),  translation + Point2D(HALF_COLUMN_TOP_BASE_WIDTH, HALF_COLUMN_TOP_BASE_HEIGHT)),   Vector2D(0, 1));  // Top
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TOP_BASE_WIDTH, -HALF_COLUMN_TOP_BASE_HEIGHT), translation + Point2D(HALF_COLUMN_TOP_BASE_WIDTH, -HALF_COLUMN_TOP_BASE_HEIGHT)),  Vector2D(0, -1)); // Bottom
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TOP_BASE_WIDTH, HALF_COLUMN_TOP_BASE_HEIGHT),  translation + Point2D(-HALF_COLUMN_TOP_BASE_WIDTH, -HALF_COLUMN_TOP_BASE_HEIGHT)), Vector2D(-1, 0)); // Left
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_TOP_BASE_WIDTH, HALF_COLUMN_TOP_BASE_HEIGHT),   translation + Point2D(HALF_COLUMN_TOP_BASE_WIDTH, -HALF_COLUMN_TOP_BASE_HEIGHT)),  Vector2D(1, 0));  // Right
     
+        // Tapered part of the column
+        translation[1] = -(COLUMN_TOP_BASE_HEIGHT + HALF_COLUMN_TAPERED_TOP_HEIGHT);
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TAPERED_TOP_TOP_WIDTH, HALF_COLUMN_TAPERED_TOP_HEIGHT),     translation + Point2D(HALF_COLUMN_TAPERED_TOP_TOP_WIDTH, HALF_COLUMN_TAPERED_TOP_HEIGHT)),      Vector2D(0, 1));            // Top
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH, -HALF_COLUMN_TAPERED_TOP_HEIGHT), translation + Point2D(HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH, -HALF_COLUMN_TAPERED_TOP_HEIGHT)),  Vector2D(0, -1));   // Bottom
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TAPERED_TOP_TOP_WIDTH, HALF_COLUMN_TAPERED_TOP_HEIGHT),     translation + Point2D(-HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH, -HALF_COLUMN_TAPERED_TOP_HEIGHT)), Vector2D(-COLUMN_TAPERED_TOP_HEIGHT, HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH - HALF_COLUMN_TAPERED_TOP_TOP_WIDTH)); // Left diagonal
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_TAPERED_TOP_TOP_WIDTH, HALF_COLUMN_TAPERED_TOP_HEIGHT),      translation + Point2D(HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH, -HALF_COLUMN_TAPERED_TOP_HEIGHT)),  Vector2D(COLUMN_TAPERED_TOP_HEIGHT, HALF_COLUMN_TAPERED_TOP_BOTTOM_WIDTH - HALF_COLUMN_TAPERED_TOP_TOP_WIDTH));    // Right diagonal
+
+        // Middle part of the column
+        translation[1] = -(COLUMN_TOP_BASE_HEIGHT + COLUMN_TAPERED_TOP_HEIGHT + HALF_COLUMN_HEIGHT);
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TOP_WIDTH, HALF_COLUMN_HEIGHT),     translation + Point2D(HALF_COLUMN_TOP_WIDTH, HALF_COLUMN_HEIGHT)),      Vector2D(0, 1));            // Top
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_BOTTOM_WIDTH, -HALF_COLUMN_HEIGHT), translation + Point2D(HALF_COLUMN_BOTTOM_WIDTH, -HALF_COLUMN_HEIGHT)),  Vector2D(0, -1));   // Bottom
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_TOP_WIDTH, HALF_COLUMN_HEIGHT),     translation + Point2D(-HALF_COLUMN_BOTTOM_WIDTH, -HALF_COLUMN_HEIGHT)), Vector2D(-COLUMN_HEIGHT, HALF_COLUMN_BOTTOM_WIDTH - HALF_COLUMN_TOP_WIDTH)); // Left diagonal
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_TOP_WIDTH, HALF_COLUMN_HEIGHT),      translation + Point2D(HALF_COLUMN_BOTTOM_WIDTH, -HALF_COLUMN_HEIGHT)),  Vector2D(COLUMN_HEIGHT, HALF_COLUMN_BOTTOM_WIDTH - HALF_COLUMN_TOP_WIDTH));    // Right diagonal
+
+        // Bottom part of the column
+        translation[1] = -(COLUMN_TOP_BASE_HEIGHT + COLUMN_TAPERED_TOP_HEIGHT + COLUMN_HEIGHT + HALF_COLUMN_BOTTOM_BASE_HEIGHT);
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_BOTTOM_BASE_WIDTH, HALF_COLUMN_BOTTOM_BASE_HEIGHT),  translation + Point2D(HALF_COLUMN_BOTTOM_BASE_WIDTH, HALF_COLUMN_BOTTOM_BASE_HEIGHT)),   Vector2D(0, 1));  // Top
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_BOTTOM_BASE_WIDTH, -HALF_COLUMN_BOTTOM_BASE_HEIGHT), translation + Point2D(HALF_COLUMN_BOTTOM_BASE_WIDTH, -HALF_COLUMN_BOTTOM_BASE_HEIGHT)),  Vector2D(0, -1)); // Bottom
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_BOTTOM_BASE_WIDTH, HALF_COLUMN_BOTTOM_BASE_HEIGHT),  translation + Point2D(-HALF_COLUMN_BOTTOM_BASE_WIDTH, -HALF_COLUMN_BOTTOM_BASE_HEIGHT)), Vector2D(-1, 0)); // Left
+        bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_BOTTOM_BASE_WIDTH, HALF_COLUMN_BOTTOM_BASE_HEIGHT),   translation + Point2D(HALF_COLUMN_BOTTOM_BASE_WIDTH, -HALF_COLUMN_BOTTOM_BASE_HEIGHT)),  Vector2D(1, 0));  // Right
+    
+        
+
         BossBodyPart* armBase = new BossBodyPart(bounds);
         arm->AddBodyPart(armBase);
+        restOfArmIdx = this->bodyParts.size();
         this->bodyParts.push_back(armBase);
     }
 
@@ -319,15 +377,20 @@ void ClassicalBoss::BuildArm(const Vector3D& armTranslation, size_t& armIdx, siz
     arm->Translate(armTranslation);
 }
 
+std::vector<const BossBodyPart*> ClassicalBoss::GetBodyColumns() const {
+    std::vector<const BossBodyPart*> columns;
+    columns.reserve(6);
+    
+    columns.push_back(static_cast<const BossBodyPart*>(this->bodyParts[this->leftCol1Idx]));
+    columns.push_back(static_cast<const BossBodyPart*>(this->bodyParts[this->leftCol2Idx]));
+    columns.push_back(static_cast<const BossBodyPart*>(this->bodyParts[this->leftCol3Idx]));
+    columns.push_back(static_cast<const BossBodyPart*>(this->bodyParts[this->rightCol1Idx]));
+    columns.push_back(static_cast<const BossBodyPart*>(this->bodyParts[this->rightCol2Idx]));
+    columns.push_back(static_cast<const BossBodyPart*>(this->bodyParts[this->rightCol3Idx]));
+
+    return columns;
+}
+
 bool ClassicalBoss::GetIsDead() const {
     return false; // TODO
-}
-
-void ClassicalBoss::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
-}
-
-void ClassicalBoss::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
-}
-
-void ClassicalBoss::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart) {
 }

@@ -557,12 +557,15 @@ void LevelMesh::DrawPieces(const Vector3D& worldTranslation, double dT, const Ca
 
 }
 
-void LevelMesh::DrawBoss(double dT, const Camera& camera, const BasicPointLight& keyLight,
+void LevelMesh::DrawBoss(const Vector3D& worldTranslation, double dT, const Camera& camera, const BasicPointLight& keyLight,
                          const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
 
     assert(this->bossMesh != NULL);
+	glPushMatrix();
+	glTranslatef(worldTranslation[0], worldTranslation[1], worldTranslation[2]);
     this->bossMesh->Tick(dT);
     this->bossMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
 }
 
 /**

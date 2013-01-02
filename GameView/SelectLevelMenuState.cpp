@@ -1098,8 +1098,7 @@ SelectLevelMenuState::BossLevelMenuItem::~BossLevelMenuItem() {
 }
 
 float SelectLevelMenuState::BossLevelMenuItem::GetHeight() const {
-    return this->numLabel->GetHeight() + NUM_TO_BOSS_NAME_GAP +
-        this->nameLabel->GetHeight() + BOSS_NAME_ICON_GAP + this->bossIconSize;
+    return this->bossLabel->GetHeight() + NUM_TO_BOSS_NAME_GAP + this->nameLabel->GetHeight();
 }
 
 void SelectLevelMenuState::BossLevelMenuItem::Draw(const Camera& camera, double dT, bool isSelected) {

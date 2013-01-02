@@ -36,13 +36,15 @@ public:
 	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
 	BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
 
+    void Translate(const Vector3D& t);
+
     void Tick(double dT, GameModel* gameModel);
 
     virtual bool GetIsDead() const = 0;
 
-	virtual void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
-	virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
-    virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
+	void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
+	void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
+    void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
 
     // DEBUGGING...
 #ifdef _DEBUG
@@ -69,6 +71,10 @@ private:
     DISALLOW_COPY_AND_ASSIGN(Boss);
 };
 
+inline void Boss::Translate(const Vector3D& t) {
+    this->root->Translate(t);
+}
+
 inline BossBodyPart* Boss::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                           Collision::LineSeg2D& collisionLine,
                                           double& timeSinceCollision) const {
@@ -86,18 +92,6 @@ inline BossBodyPart* Boss::CollisionCheck(const BoundingLines& boundingLines, co
 
 inline BossBodyPart* Boss::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {
     return this->root->CollisionCheck(c, velDir);
-}
-
-inline void Boss::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
-    collisionPart->CollisionOccurred(gameModel, ball);
-}
-
-inline void Boss::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
-    collisionPart->CollisionOccurred(gameModel, projectile);
-}
-
-inline void Boss::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart) {
-    collisionPart->CollisionOccurred(gameModel, paddle);
 }
 
 #endif // __BOSS_H__

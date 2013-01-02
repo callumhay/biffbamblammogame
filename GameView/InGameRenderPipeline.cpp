@@ -274,11 +274,14 @@ void InGameRenderPipeline::RenderHUD(double dT) {
 	const int DISPLAY_WIDTH  = camera.GetWindowWidth();
 	const int DISPLAY_HEIGHT = camera.GetWindowHeight();
 
-	// Draw the points in the top-right corner of the display
-    PointsHUD* pointsHUD = gameAssets->GetPointsHUD();
-    //pointsHUD->SetScore(gameModel->GetScore());
-    //pointsHUD->SetMultiplier(gameModel->GetMultiplier());
-    pointsHUD->Draw(camera, DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
+    // Draw the points HUD
+    // NOTE: No points or multipliers for boss levels
+    const GameLevel* currLevel = gameModel->GetCurrentLevel();
+    if (!currLevel->GetHasBoss()) {
+	    // Draw the points in the top-right corner of the display
+        PointsHUD* pointsHUD = gameAssets->GetPointsHUD();
+        pointsHUD->Draw(camera, DISPLAY_WIDTH, DISPLAY_HEIGHT, dT);
+    }
 
 	// Draw the number of lives left in the top-left corner of the display
 	gameAssets->GetLifeHUD()->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
