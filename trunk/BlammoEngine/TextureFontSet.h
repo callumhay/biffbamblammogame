@@ -58,7 +58,7 @@ private:
 	std::vector<Texture2D*> charTextures;   // Holds each character as a texture
 	GLuint baseDisplayList;
 
-	static void CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Library library, FT_Face face, unsigned int heightInPixels, Texture::TextureFilterType filterType);
+	static void CreateTextureFromFontLib(TextureFontSet* newFontSet, FT_Face face, unsigned int heightInPixels, Texture::TextureFilterType filterType);
 
     DISALLOW_COPY_AND_ASSIGN(TextureFontSet);
 };

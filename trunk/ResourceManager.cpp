@@ -1050,12 +1050,14 @@ char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, long 
 	if (doesExist == 0) {
 		debug_output("File not found: " << filepath);
 		debug_physfs_state(NULL);
+        std::cout << "FAILED TO FIND FILE: " << filepath << std::endl;
 		return NULL;
 	}
 
 	// Open the file for reading
 	PHYSFS_File* fileHandle = PHYSFS_openRead(filepath.c_str());
 	if (fileHandle == NULL) {
+        std::cout << "FAILED TO OPEN FILE HANDLE: " << filepath << std::endl;
 		return NULL;
 	}
 
@@ -1069,6 +1071,7 @@ char* ResourceManager::FilepathToMemoryBuffer(const std::string &filepath, long 
 		delete[] fileBuffer;
 		fileBuffer = NULL;
 		debug_output("Error reading file to bytes: " << filepath);
+        std::cout << "FAILED TO READ FILE: " << filepath << std::endl;
 		return NULL;
 	}
 	fileBuffer[fileLength] = '\0';

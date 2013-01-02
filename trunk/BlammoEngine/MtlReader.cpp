@@ -101,6 +101,7 @@ std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFile(const std
  * Returns: list of material effects on success, empty map otherwise.
  */
 std::map<std::string, CgFxMaterialEffect*> MtlReader::ReadMaterialFileFromStream(const std::string &filepath, std::istream &inFile) {
+    UNUSED_PARAMETER(filepath);
 
 	std::map<std::string, CgFxMaterialEffect*> materials;
 	std::map<std::string, MaterialProperties*> matProperties;
