@@ -316,7 +316,7 @@ void SelectWorldMenuState::Init(int selectedIdx) {
 
     timeVals.clear();
     timeVals.push_back(0.0);
-    timeVals.push_back(2.0);
+    timeVals.push_back(1.0);
     std::vector<float> scaleVals;
     scaleVals.push_back(0.0f);
     scaleVals.push_back(2*MENU_ITEM_HORIZ_GAP);
