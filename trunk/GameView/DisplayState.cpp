@@ -105,7 +105,16 @@ void DisplayState::DebugDrawBounds() {
         boostModel->DebugDraw();
     }
 
+    // Draw the debug bounds of any boss
+    const GameLevel* currLevel = this->display->GetModel()->GetCurrentLevel();
+    const Boss* boss = currLevel->GetBoss();
+    if (boss != NULL) {
+        boss->DebugDraw();
+    }
+
+
 	glPopMatrix();
+
 	debug_opengl_state();
 }
 #endif

@@ -308,6 +308,15 @@ GameItem* GameItemFactory::CreateItem(GameItem::ItemType type, const Point2D &sp
 
 GameItem* GameItemFactory::CreateRandomItemForCurrentLevel(const Point2D &spawnOrigin, GameModel *gameModel, bool allowRandomItemType) const {
 	assert(gameModel != NULL);
+    
+    // Check the special case where no item drops are allowed for the current level...
+    const GameLevel* currGameLevel = gameModel->GetCurrentLevel();
+	assert(currGameLevel != NULL);
+	const std::vector<GameItem::ItemType>& allowableItemDrops = currGameLevel->GetAllowableItemDropTypes();
+    if (allowableItemDrops.empty()) {
+        return NULL;
+    }
+
 	GameItem::ItemType randomItemType = GameItemFactory::CreateRandomItemTypeForCurrentLevel(gameModel, allowRandomItemType);
 	return GameItemFactory::CreateItem(randomItemType, spawnOrigin, gameModel);
 }

@@ -78,19 +78,100 @@ void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLig
 
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // worldspace locations...
+
+    // Eye...
     const BossBodyPart* eye = this->boss->GetEye();
     assert(eye != NULL);
-    
     glPushMatrix();
     glMultMatrixf(eye->GetWorldTransform().begin());
     this->eyeMesh->Draw(camera, keyLight, fillLight, ballLight);
     glPopMatrix();
 
+    // Pediment...
     const BossBodyPart* pediment = this->boss->GetPediment();
     assert(pediment != NULL);
     glPushMatrix();
     glMultMatrixf(pediment->GetWorldTransform().begin());
     this->pedimentMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    // Tablatures
+    const BossBodyPart* topLeftTab  = this->boss->GetTopLeftTablature();
+    const BossBodyPart* topRightTab = this->boss->GetTopRightTablature();
+    const BossBodyPart* bottomLeftTab  = this->boss->GetBottomLeftTablature();
+    const BossBodyPart* bottomRightTab = this->boss->GetBottomRightTablature();
+    assert(topLeftTab != NULL);
+    assert(topRightTab != NULL);
+    assert(bottomLeftTab != NULL);
+    assert(bottomRightTab != NULL);
+
+    glPushMatrix();
+    glMultMatrixf(topLeftTab->GetWorldTransform().begin());
+    this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    glPushMatrix();
+    glMultMatrixf(topRightTab->GetWorldTransform().begin());
+    this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    glPushMatrix();
+    glMultMatrixf(bottomLeftTab->GetWorldTransform().begin());
+    this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    glPushMatrix();
+    glMultMatrixf(bottomRightTab->GetWorldTransform().begin());
+    this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    // Columns
+    std::vector<const BossBodyPart*> columns = this->boss->GetBodyColumns();
+    for (int i = 0; i < static_cast<int>(columns.size()); i++) {
+        const BossBodyPart* column = columns[i];
+        assert(column != NULL);
+        glPushMatrix();
+        glMultMatrixf(column->GetWorldTransform().begin());
+        this->columnMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
+
+    // Base
+    const BossBodyPart* base = this->boss->GetBase();
+    assert(base != NULL);
+    glPushMatrix();
+    glMultMatrixf(base->GetWorldTransform().begin());
+    this->baseMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    // Arms
+    const BossBodyPart* leftRestOfArm  = this->boss->GetLeftRestOfArm();
+    const BossBodyPart* rightRestOfArm = this->boss->GetRightRestOfArm();
+    const BossBodyPart* leftArmSquare  = this->boss->GetLeftArmSquare();
+    const BossBodyPart* rightArmSquare = this->boss->GetRightArmSquare();
+    assert(leftRestOfArm != NULL);
+    assert(rightRestOfArm != NULL);
+    assert(leftArmSquare != NULL);
+    assert(rightArmSquare != NULL);
+
+    glPushMatrix();
+    glMultMatrixf(leftRestOfArm->GetWorldTransform().begin());
+    this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    glPushMatrix();
+    glMultMatrixf(rightRestOfArm->GetWorldTransform().begin());
+    this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    glPushMatrix();
+    glMultMatrixf(leftArmSquare->GetWorldTransform().begin());
+    this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+    glPopMatrix();
+
+    glPushMatrix();
+    glMultMatrixf(rightArmSquare->GetWorldTransform().begin());
+    this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
     glPopMatrix();
 
 }

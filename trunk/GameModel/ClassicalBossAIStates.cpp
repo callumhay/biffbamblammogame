@@ -16,10 +16,9 @@ using namespace classicalbossai;
 
 // BEGIN ArmsBodyHeadAI ************************************************************
 
-ArmsBodyHeadAI::ArmsBodyHeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss) {
+ArmsBodyHeadAI::ArmsBodyHeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), currState(FollowPaddleAIState) {
     // Grab the parts of the boss that matter to this AI state...
     //this->boss->
-
 
 }
 
@@ -54,6 +53,7 @@ void ArmsBodyHeadAI::UpdateState(double dT) {
         case MoveRightLaserAIState:
         case HurtAIState:
         case LostArmsAngryAIState:
+            break;
 
         default:
             assert(false);

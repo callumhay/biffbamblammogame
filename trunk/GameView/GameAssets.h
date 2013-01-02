@@ -240,10 +240,12 @@ inline void GameAssets::DrawLevelPieces(double dT, const GameLevel* currLevel, c
 inline void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Camera& camera) {
 
     if (currLevel->GetHasBoss()) {
+        Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
+
 	    BasicPointLight fgKeyLight, fgFillLight, ballLight;
 	    this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
         // TODO: What about if the lights are off??
-        this->GetCurrentLevelMesh()->DrawBoss(dT, camera, fgKeyLight, fgFillLight, ballLight);
+        this->GetCurrentLevelMesh()->DrawBoss(worldTransform, dT, camera, fgKeyLight, fgFillLight, ballLight);
     }
 }
 
