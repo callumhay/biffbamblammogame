@@ -1,29 +1,29 @@
 Two Step
 17 24
 E E E E E E E E S S S S S S S S S 
-E E E E S S S S S E E E O E E E S 
-E E E E S E E E F(l) E E E O E E E S 
-E E E E S E G E F(l) Y G Y O G G G S 
-E E E E S E Y E F(l) R B R O G G G S 
-E E E E S E G E F(l) R R R O G G G S 
-E E E E S E E E F(l) O O O O G G G S 
-E E E E S F(d) F(d) F(d) S O O O O E E E S 
-S S S S S E E E R E E E E E E E S 
-S E E E F(l) E E E R E E E E E E E S 
-S E G E F(l) Y G Y R G Y G Y G Y G S 
-S E Y E F(l) R B R R Y G G G G G Y S 
-S E G E F(l) R R R R G Y G G G Y G S 
-S E E E F(l) O O O R Y G G G G G Y S 
-S F(d) F(d) F(d) S O O O R G Y G Y G Y G S 
-S E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E S 
-S E E E E E E E E E E E E E E E S 
+E E E E S S S S S E E E E E E E S 
+E E E E S E E E F(l) E E E E E E E S 
+E E E E S E G E F(l) E E E E E E E S 
+E E E E S E Y E F(l) R B R E E E E S 
+E E E E S E G E F(l) R R R G E G E S 
+E E E E S E E E F(l) G E G E G E G S 
+E E E E S F(d) F(d) F(d) S E G E G E G E S 
+S S S S S E E E R G E G E G E G S 
+S E E E F(l) E E E R E G E G E G E S 
+S E G E F(l) E E E R G E G E G E G S 
+S E Y E F(l) B B B R E G E G E G E S 
+S E G E F(l) R R R R G E G E G E G S 
+S E E E F(l) O O O O E G E G E G E S 
+S F(d) F(d) F(d) S Y Y Y Y G E G E G E G S 
+S E E E F(r) E E E E E E E E E E E S 
+S E E E F(r) E E E E E E E E E E E S 
+S E E E F(r) E E E E E E E E E E E S 
+S T(S,ll) E E F(r) E E E E E E E E E E E S 
+E S T(S,ll) E F(r) E E E E E E E E E E E S 
+E E S T(S,ll) F(r) E E E E E E E E E E E S 
+E E E S S E E E E E E E E E E E S 
+E E E E S E E E E E E E E E E E S 
+E E E E S E E E E E E E E E E E S 
 
 STARS:
 10000
@@ -36,8 +36,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2

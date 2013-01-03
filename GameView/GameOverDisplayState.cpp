@@ -240,7 +240,6 @@ void GameOverDisplayState::SetupMenu() {
 
 	// Set up the handlers
 	this->topMenuEventHandler    = new TopMenuEventHandler(this);
-	//this->verifyMenuEventHandler = new VerifyMenuEventHandler(this);
 
     this->gameOverMenu = new GameMenu();
 	this->gameOverMenu->AddEventHandler(this->topMenuEventHandler);
@@ -274,15 +273,24 @@ void GameOverDisplayState::SetupMenu() {
     this->menuHeight += tempLabelLg.GetHeight() + this->gameOverMenu->GetMenuItemPadding();
 
     // Exit game...
-	tempLabelSm.SetText("Exit Game");
-	tempLabelLg.SetText("Exit Game");
-    this->exitGameItem = this->gameOverMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+	tempLabelSm.SetText("Rage Quit");
+	tempLabelLg.SetText("Rage Quit");
+
+   
+	VerifyMenuItem* exitMenuItem = new VerifyMenuItem(tempLabelSm, tempLabelLg, 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big),
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
+	exitMenuItem->SetVerifyMenuColours(Colour(1,1,1), Colour(0.5f, 0.5f, 0.5f), Colour(1,1,1));
+	exitMenuItem->SetVerifyMenuText("Are you sure you want to quit?", "Yes", "No");
+	//exitMenuItem->SetEventHandler(???);
+
+    this->exitGameItem = this->gameOverMenu->AddMenuItem(exitMenuItem);
     this->maxMenuItemWidth = std::max<float>(this->maxMenuItemWidth, tempLabelLg.GetLastRasterWidth());
     this->menuHeight += tempLabelLg.GetHeight();
 
 	this->gameOverMenu->SetSelectedMenuItem(this->retryMenuItem);
 }
-
 
 void GameOverDisplayState::TopMenuEventHandler::GameMenuItemHighlightedEvent(int itemIndex) {
     UNUSED_PARAMETER(itemIndex);
@@ -292,16 +300,10 @@ void GameOverDisplayState::TopMenuEventHandler::GameMenuItemActivatedEvent(int i
 	// Play the sound effect assoicated with menu item selection/activation
 	//GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
     
-    //if (itemIndex == this->state->retryMenuItem) {
-    //}
-    //else if (itemIndex == this->state->backToMainMenuItem) {
-    //}
-    //else {
-    //    assert(itemIndex == this->state->exitGameItem);
-    //}
-
-    this->state->selectedAndActivatedItem = itemIndex;
-    this->state->SetState(FadeOutState);
+    if (itemIndex != this->state->exitGameItem) {
+        this->state->selectedAndActivatedItem = itemIndex;
+        this->state->SetState(FadeOutState);
+    }
 }
 
 void GameOverDisplayState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemIndex) {
@@ -309,7 +311,14 @@ void GameOverDisplayState::TopMenuEventHandler::GameMenuItemChangedEvent(int ite
 }
 
 void GameOverDisplayState::TopMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
-    UNUSED_PARAMETER(itemIndex);
+    if (itemIndex == this->state->exitGameItem) {
+
+        //GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
+		//soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemVerifyAndSelectEvent);
+
+        // We exit the game if the exit game item has both been activated and verified...
+		this->state->display->QuitGame();
+    }
 }
 
 void GameOverDisplayState::TopMenuEventHandler::EscMenu() {

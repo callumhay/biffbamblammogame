@@ -90,21 +90,8 @@ private:
 		GameOverDisplayState* state;
 	};
 
-    /*
-	class VerifyMenuEventHandler : public GameMenuItemEventHandler {
-	public:
-		VerifyMenuEventHandler(GameOverDisplayState *state) : state(state) {}
-		~VerifyMenuEventHandler() {}
-		void MenuItemScrolled();
-		void MenuItemEnteredAndSet();
-		void MenuItemCancelled();
-	private:
-		GameOverDisplayState* state;
-	};
-    */
 
 	TopMenuEventHandler* topMenuEventHandler;
-	//VerifyMenuEventHandler* verifyMenuEventHandler;
 
     DISALLOW_COPY_AND_ASSIGN(GameOverDisplayState);
 };
