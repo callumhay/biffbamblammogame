@@ -140,6 +140,9 @@ LevelPiece* InkBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructio
 	delete tempThis;
 	tempThis = NULL;
 
+    // Add to the boost meter
+    gameModel->AddPercentageToBoostMeter(0.1);
+
 	return emptyPiece;
 }
 

@@ -110,6 +110,16 @@ void TutorialEventsListener::BallBoostGainedEvent() {
     }
 }
 
+void TutorialEventsListener::BallBoostLostEvent() {
+    const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
+    if (boostModel == NULL) { return; }
+    
+    if (boostModel->GetNumAvailableBoosts() == 0) {
+        this->startBoostHint->Unshow(0.0, 0.5);
+        this->boostAvailableHint->Unshow(0.0, 0.5);
+    }
+}
+
 void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& boostModel) {
     switch (boostModel.GetBulletTimeState()) {
         case BallBoostModel::NotInBulletTime:

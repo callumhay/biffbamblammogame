@@ -345,6 +345,7 @@ GameItem::ItemType GameItemFactory::CreateRandomItemTypeForCurrentLevel(GameMode
 
             // Check for consecutive item drops...
             if (lastGeneratedItemType == GameItem::RandomItem) {
+                debug_output("Doing consecutive item drop test...");
                 if (Randomizer::GetInstance()->RandomNumZeroToOne() > GameModelConstants::GetInstance()->PROB_OF_CONSECUTIVE_SAME_ITEM_DROP) {
                     // Don't allow the consecutive drop...
                     randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size();
@@ -392,6 +393,7 @@ GameItem::ItemType GameItemFactory::CreateRandomItemTypeForCurrentLevel(GameMode
 
     GameItem::ItemType currRandomDropType = allowableItemDrops.at(randomNum);
     if (currRandomDropType == lastGeneratedItemType) {
+        debug_output("Doing consecutive item drop test...");
         if (Randomizer::GetInstance()->RandomNumZeroToOne() > GameModelConstants::GetInstance()->PROB_OF_CONSECUTIVE_SAME_ITEM_DROP) {
             // Don't allow a consecutive item drop of the same type...
             randomNum = (randomNum + (Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size())) % allowableItemDrops.size();

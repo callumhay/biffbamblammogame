@@ -24,7 +24,7 @@ const double BallBoostModel::DEFAULT_BULLET_TIME_DURATION = 1.3;
 double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS = BallBoostModel::DEFAULT_BULLET_TIME_DURATION;
 
 // Amount of time it takes for a ball boost to charge (default)
-const double BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS = 15.0;
+const double BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS = 16.0;
 // When the level is almost complete we give players more readily available boosts so they can finish quicker
 const double BallBoostModel::LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS = BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS / 2.0;
 
@@ -64,19 +64,7 @@ void BallBoostModel::Tick(double dT) {
 
         case NotInBulletTime:
             this->totalBulletTimeElapsed = 0.0;
-            
-            // Increment the time towards the next boost and add any new boosts if
-            // the charge time has been hit/exceeded
-            if (this->numAvailableBoosts < TOTAL_NUM_BOOSTS) {
-                this->elapsedBoostChargeTime += dT;
-                if (this->elapsedBoostChargeTime >= this->boostChargeTime) {
-                    this->elapsedBoostChargeTime = 0.0;
-                    this->numAvailableBoosts++;
-                    // EVENT: New ball boost gained
-                    GameEventManager::Instance()->ActionBallBoostGained();
-                }
-            }
-            
+            this->IncrementBoostChargeByTime(dT);
             break;
 
         case BulletTimeFadeIn:
@@ -297,6 +285,30 @@ void BallBoostModel::RecalculateBallZoomBounds() {
         radiusVec[0] = radiusVec[1] = currBall->GetBounds().Radius();
         this->ballZoomBounds.AddPoint(currBall->GetCenterPosition2D() - radiusVec);
         this->ballZoomBounds.AddPoint(currBall->GetCenterPosition2D() + radiusVec);
+    }
+}
+
+// Increments the time counter towards the next boost and add any new boosts if
+// the charge time has been hit/exceeded
+void BallBoostModel::IncrementBoostChargeByTime(double timeInSecs) {
+    if (this->numAvailableBoosts >= TOTAL_NUM_BOOSTS) {
+        return;
+    }
+
+    this->elapsedBoostChargeTime += timeInSecs;
+    while (this->numAvailableBoosts < TOTAL_NUM_BOOSTS &&
+           this->elapsedBoostChargeTime >= this->boostChargeTime) {
+
+        this->elapsedBoostChargeTime -= this->boostChargeTime;
+        this->numAvailableBoosts++;
+
+        // EVENT: New ball boost gained
+        GameEventManager::Instance()->ActionBallBoostGained();
+    }
+
+    assert(this->numAvailableBoosts <= TOTAL_NUM_BOOSTS);
+    if (this->numAvailableBoosts == TOTAL_NUM_BOOSTS) {
+        this->elapsedBoostChargeTime = 0.0;
     }
 }
 

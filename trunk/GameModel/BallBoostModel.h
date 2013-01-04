@@ -73,6 +73,8 @@ public:
     double GetBoostChargeTime() const;
 
     void SetInvertBallBoostDir(bool isInverted);
+    
+    void IncrementBoostChargeByPercent(double percent);
 
     void DebugDraw() const;
 
@@ -95,7 +97,9 @@ private:
 
     void SetCurrentState(const BulletTimeState& newState);
     void RecalculateBallZoomBounds();
-        
+    
+    void IncrementBoostChargeByTime(double timeInSecs);
+    
     DISALLOW_COPY_AND_ASSIGN(BallBoostModel);
 };
 
@@ -199,6 +203,10 @@ inline float BallBoostModel::GetBoostChargePercentage() const {
         return 1.0f;
     }
     return static_cast<float>(this->elapsedBoostChargeTime / this->boostChargeTime);
+}
+
+inline void BallBoostModel::IncrementBoostChargeByPercent(double percent) {
+    this->IncrementBoostChargeByTime(percent * this->boostChargeTime);
 }
 
 /**
