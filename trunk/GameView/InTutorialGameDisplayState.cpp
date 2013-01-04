@@ -53,6 +53,7 @@ tutorialListener(new TutorialEventsListener(display)), boostCountdownHUD() {
 }
 
 InTutorialGameDisplayState::~InTutorialGameDisplayState() {
+
     // Re-enable any unusual stuff that was disabled for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(true);
     PlayerPaddle::SetEnablePaddleRelease(true);

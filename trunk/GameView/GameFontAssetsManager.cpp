@@ -24,9 +24,11 @@ GameFontAssetsManager::~GameFontAssetsManager() {
 	// Delete the regular fonts
 	std::map<FontStyle, std::map<unsigned int, TextureFontSet*> >::iterator fontSetIter;
 	std::map<unsigned int, TextureFontSet*>::iterator fontIter;
-	for (fontSetIter = this->fonts.begin(); fontSetIter != this->fonts.end(); ++fontSetIter) {
+	
+    for (fontSetIter = this->fonts.begin(); fontSetIter != this->fonts.end(); ++fontSetIter) {
 		std::map<unsigned int, TextureFontSet*>& fontSet = fontSetIter->second;
-		for (fontIter = fontSet.begin(); fontIter != fontSet.end(); ++fontIter) {
+		
+        for (fontIter = fontSet.begin(); fontIter != fontSet.end(); ++fontIter) {
 			delete fontIter->second;
 			fontIter->second = NULL;
 		}
