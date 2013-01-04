@@ -36,24 +36,7 @@ nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progres
 droppedLifeForMaxMultiplier(false), safetyNet(NULL), ballBoostIsInverted(ballBoostIsInverted), difficulty(initDifficulty) {
 	
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
-    std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
-    std::string currWorldPath;
-    bool success = true;
-    while (std::getline(*inFile, currWorldPath)) {
-        currWorldPath = stringhelper::trim(currWorldPath);
-        if (!currWorldPath.empty()) {
-            GameWorld* newGameWorld = new GameWorld(GameModelConstants::GetInstance()->GetResourceWorldDir() + 
-                                                    std::string("/") + currWorldPath, *this->gameTransformInfo);
-
-            success = newGameWorld->Load();
-            assert(success);
-
-            this->worlds.push_back(newGameWorld);
-            currWorldPath.clear();
-        }
-    }
-    delete inFile;
-    inFile = NULL;
+    this->LoadWorldsFromFile();
 
     // Load data for all the worlds
     this->progressLoadedSuccessfully = GameProgressIO::LoadGameProgress(this);
@@ -80,6 +63,7 @@ GameModel::~GameModel() {
 		delete this->worlds[i];
 		this->worlds[i] = NULL;
 	}
+    this->worlds.clear();
 
 	// Delete balls and paddle
 	for (std::list<GameBall*>::iterator ballIter = this->balls.begin(); ballIter != this->balls.end(); ++ballIter) {
@@ -92,6 +76,47 @@ GameModel::~GameModel() {
 
     // The boost model should always have been destroyed by now!
     assert(this->boostModel == NULL);
+}
+
+void GameModel::GetFurthestProgressWorldAndLevel(int& worldIdx, int& levelIdx) const {
+
+    for (int i = 0; i < static_cast<int>(this->worlds.size()); i++) {
+        const GameWorld* world = this->worlds[i];
+        assert(world != NULL);
+
+        int lastLevelPassedIdx = world->GetLastLevelIndexPassed();
+
+        // If the last level passed in the world was the last level in that world then
+        // the progress goes beyond the current world...
+        // TODO: Game Completion Condition?
+        if (lastLevelPassedIdx == world->GetLastLevelIndex()) {
+            
+            // Special condition: the game has been completed, choose the very last world's level
+            if (i == static_cast<int>(this->worlds.size())-1) {
+                worldIdx = i;
+                levelIdx = lastLevelPassedIdx;
+                break;
+            }
+
+            continue;
+        }
+        else {
+            worldIdx = i;
+            if (lastLevelPassedIdx == GameWorld::NO_LEVEL_PASSED) {
+                // If no level has been passed in this world then the current progress
+                // is the first level of the current world
+                levelIdx = 0;
+            }
+            else {
+                // The next level is the one after the last level that has been passed in
+                // the current world
+                levelIdx = lastLevelPassedIdx + 1;
+            }
+            assert(levelIdx >= 0 && levelIdx <= world->GetLastLevelIndex());
+            break;
+        }
+    }
+
 }
 
 void GameModel::ResetLevelValues(int numLives) {
@@ -120,6 +145,29 @@ void GameModel::ResetLevelValues(int numLives) {
     this->ResetLivesLostCounter();
 }
 
+void GameModel::LoadWorldsFromFile() {
+    assert(this->worlds.empty());
+
+    std::istringstream* inFile = ResourceManager::GetInstance()->FilepathToInStream(GameModelConstants::GetInstance()->GetWorldDefinitonFilePath());
+    std::string currWorldPath;
+    bool success = true;
+    while (std::getline(*inFile, currWorldPath)) {
+        currWorldPath = stringhelper::trim(currWorldPath);
+        if (!currWorldPath.empty()) {
+            GameWorld* newGameWorld = new GameWorld(GameModelConstants::GetInstance()->GetResourceWorldDir() + 
+                                                    std::string("/") + currWorldPath, *this->gameTransformInfo);
+
+            success = newGameWorld->Load();
+            assert(success);
+
+            this->worlds.push_back(newGameWorld);
+            currWorldPath.clear();
+        }
+    }
+    delete inFile;
+    inFile = NULL;
+}
+
 void GameModel::PerformLevelCompletionChecks() {
     GameWorld* currWorld = this->GetCurrentWorld();
     GameLevel* currLevel = currWorld->GetCurrentLevel();
@@ -143,26 +191,17 @@ void GameModel::PerformLevelCompletionChecks() {
  * Called in order to completely reset the game state and load the
  * given zero-based index world and level number.
  */
-void GameModel::StartGameAtWorldAndLevel(int worldNum, int levelNum) {
-	this->SetCurrentWorldAndLevel(worldNum, levelNum, true);
+void GameModel::StartGameAtWorldAndLevel(int worldIdx, int levelIdx) {
+	this->SetCurrentWorldAndLevel(worldIdx, levelIdx, true);
     this->ResetLevelValues(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
     this->SetNextState(GameState::LevelStartStateType);
     this->UpdateState();
 }
 
-/**
- * Called when we want to begin/restart the model from the
- * beginning of the game, this will reinitialize the model to
- * the first world, level, etc.
- */
-void GameModel::BeginOrRestartGame() {
-    this->StartGameAtWorldAndLevel(GameModelConstants::GetInstance()->INITIAL_WORLD_NUM, 0);
-}
-
 void GameModel::ResetCurrentLevel() {
     this->SetNextState(GameState::LevelStartStateType);
     this->ResetLevelValues(GameModelConstants::GetInstance()->INIT_LIVES_LEFT);
-    this->SetCurrentWorldAndLevel(this->currWorldNum, static_cast<int>(this->GetCurrentLevel()->GetLevelNumIndex()), false);
+    this->SetCurrentWorldAndLevel(this->currWorldNum, static_cast<int>(this->GetCurrentLevel()->GetLevelIndex()), false);
 }
 
 // Called in order to make sure the game is no longer processing or generating anything
@@ -190,8 +229,20 @@ void GameModel::ClearGameState() {
     this->ResetLivesLostCounter();
 }
 
-void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum, bool sendNewWorldEvent) {
-	assert(worldNum >= 0 && worldNum < static_cast<int>(this->worlds.size()));
+void GameModel::ClearAllGameProgress() {
+    // Delete all of the loaded worlds...
+	for (size_t i = 0; i < this->worlds.size(); i++) {
+		delete this->worlds[i];
+		this->worlds[i] = NULL;
+	}
+    this->worlds.clear();
+
+    // Reload all of the worlds...
+    this->LoadWorldsFromFile();
+}
+
+void GameModel::SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNewWorldEvent) {
+	assert(worldIdx >= 0 && worldIdx < static_cast<int>(this->worlds.size()));
 	
     // NOTE: We don't unload anything since it all gets loaded when the game model is initialized
     // worlds don't take up too much memory so this is fine
@@ -200,20 +251,20 @@ void GameModel::SetCurrentWorldAndLevel(int worldNum, int levelNum, bool sendNew
 	//prevWorld->Unload();
 
 	// Get the world we want to set as current
-	GameWorld* world = this->worlds[worldNum];
+	GameWorld* world = this->worlds[worldIdx];
 	assert(world != NULL);
 	
 	// Make sure the world loaded properly.
 	if (!world->Load()) {
-		debug_output("ERROR: Could not load world " << worldNum);
+		debug_output("ERROR: Could not load world " << worldIdx);
 		assert(false);
 		return;
 	}
 
 	// Setup the world for this object and make sure the world has its zeroth (i.e., first) level set for play
-	this->currWorldNum = worldNum;
-    assert(levelNum >= 0 && levelNum < static_cast<int>(world->GetNumLevels()));
-	world->SetCurrentLevel(this, levelNum);
+	this->currWorldNum = worldIdx;
+    assert(levelIdx >= 0 && levelIdx < static_cast<int>(world->GetNumLevels()));
+	world->SetCurrentLevel(this, levelIdx);
 	GameLevel* currLevel = world->GetCurrentLevel();
 	assert(currLevel != NULL);
 
@@ -247,41 +298,24 @@ GameWorld* GameModel::GetWorldByName(const std::string& name) {
 }
 
 void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
-    static const float EASY_DIFFICULTY_BALL_SPEED_DELTA = -1.33f;
-    static const float MED_DIFFICULTY_BALL_SPEED_DELTA  = 0.0f;
-    static const float HARD_DIFFICULTY_BALL_SPEED_DELTA = 1.5f;
-
-    //float ballSpeedDeltaBefore = 0.0f;
-    //float ballSpeedDeltaAfter  = 0.0f;
-
-    //switch (this->GetDifficulty()) {
-    //    case GameModel::EasyDifficulty:
-    //        ballSpeedDeltaBefore = EASY_DIFFICULTY_BALL_SPEED_DELTA;
-    //        break;
-    //    case GameModel::MediumDifficulty:
-    //        ballSpeedDeltaBefore = MED_DIFFICULTY_BALL_SPEED_DELTA;
-    //        break;
-    //    case GameModel::HardDifficulty:
-    //        ballSpeedDeltaBefore = HARD_DIFFICULTY_BALL_SPEED_DELTA;
-    //        break;
-    //    default:
-    //        assert(false);
-    //        return;
-    //}
+    static const float EASY_DIFFICULTY_BALL_SPEED_DELTA = -1.5f;
+    static const float MED_DIFFICULTY_BALL_SPEED_DELTA  =  0.0f;
+    static const float HARD_DIFFICULTY_BALL_SPEED_DELTA =  1.5f;
 
     switch (difficulty) {
-        case GameModel::EasyDifficulty:
 
+        case GameModel::EasyDifficulty:
             // Disable the paddle release timer
             PlayerPaddle::SetEnablePaddleReleaseTimer(false);
             // Make the boost time longer
             BallBoostModel::SetMaxBulletTimeDuration(4.0);
             // Make ball speed slower
             GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + EASY_DIFFICULTY_BALL_SPEED_DELTA);
+            // Make the paddle slightly larger (1 ball default diameter larger)
+            PlayerPaddle::SetNormalScale((PlayerPaddle::PADDLE_WIDTH_TOTAL + 2.0f * GameBall::DEFAULT_BALL_RADIUS) / PlayerPaddle::PADDLE_WIDTH_TOTAL);
 
-            // Make chance of nice item drops higher (done automatically in GameItemFactory)
+            // N.B., We also make the chance of nice item drops higher (done automatically in GameItemFactory)
 
-            //ballSpeedDeltaAfter = EASY_DIFFICULTY_BALL_SPEED_DELTA;
             break;
         
         case GameModel::MediumDifficulty:
@@ -291,10 +325,11 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
             BallBoostModel::SetMaxBulletTimeDuration(2.0);
             // Make ball speed normal
             GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + MED_DIFFICULTY_BALL_SPEED_DELTA);
+            // Make the paddle standard scale
+            PlayerPaddle::SetNormalScale(1.0f);
 
-            // Make item drops normal random (done automatically in GameItemFactory)
+            // N.B., We also make the item drops normal random (done automatically in GameItemFactory)
 
-            //ballSpeedDeltaAfter = MED_DIFFICULTY_BALL_SPEED_DELTA;
             break;
         
         case GameModel::HardDifficulty:
@@ -304,10 +339,11 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
             BallBoostModel::SetMaxBulletTimeDuration(1.25);
             // Make ball speed faster
             GameBall::SetNormalSpeed(GameBall::DEFAULT_NORMAL_SPEED + HARD_DIFFICULTY_BALL_SPEED_DELTA);
-            
-            // Make chance of not-so-nice item drops higher (done automatically in GameItemFactory)
+            // Make the paddle standard scale
+            PlayerPaddle::SetNormalScale(1.0f);
 
-            //ballSpeedDeltaAfter = HARD_DIFFICULTY_BALL_SPEED_DELTA;
+            // N.B., We also make the chance of not-so-nice item drops higher (done automatically in GameItemFactory)
+
             break;
 
         default:
@@ -315,18 +351,8 @@ void GameModel::SetDifficulty(const GameModel::Difficulty& difficulty) {
             return;
 
     }
-    this->difficulty = difficulty;
 
-    // If the ball(s) are in play then we automatically increase/decrease it's speed by the delta in
-    // the difficulty change...
-    // DONT DO THIS - THE PLAYER CAN CHEAT!!!
-    //if (this->currState != NULL && this->currState->GetType() == GameState::BallInPlayStateType) {
-    //    float ballSpeedDelta = ballSpeedDeltaAfter - ballSpeedDeltaBefore;
-    //    for (std::list<GameBall*>::iterator iter = this->balls.begin(); iter != this->balls.end(); ++iter) {
-    //        GameBall* currBall = *iter;
-    //        currBall->SetSpeed(currBall->GetSpeed() + ballSpeedDelta);
-    //    }
-    //}
+    this->difficulty = difficulty;
 }
 
 bool GameModel::ActivateSafetyNet() {
@@ -1132,8 +1158,21 @@ void GameModel::RemoveActiveGameItemsForThisBallOnly(const GameBall* ball) {
  * Function for adding a possible item drop for the given level piece.
  */
 void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
+    static bool droppedItemLastTime = false;
+
+    if (droppedItemLastTime) {
+        // Do a test for consecutive item drops -- there's a probability of items not
+        // dropping consecutively
+        double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();
+        if (randomNum > GameModelConstants::GetInstance()->PROB_OF_CONSECTUIVE_ITEM_DROP) {
+            droppedItemLastTime = false;
+		    return;
+        }
+    }
+
 	// Make sure we're in a ball in play state...
 	if (this->currState->GetType() != GameState::BallInPlayStateType) {
+        droppedItemLastTime = false;
 		return;
 	}
 
@@ -1145,11 +1184,19 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 
         this->AddItemDrop(p.GetCenter(), GameItem::LifeUpItem);
         this->droppedLifeForMaxMultiplier = true;
+        droppedItemLastTime = true;
         return;
     }
 
 	// Make sure we don't drop more items than the max allowable...
 	if (this->currLiveItems.size() >= GameModelConstants::GetInstance()->MAX_LIVE_ITEMS) {
+        droppedItemLastTime = false;
+		return;
+	}
+
+	// If there are no allowable item drops for the current level then we drop nothing anyway
+	if (this->GetCurrentLevel()->GetAllowableItemDropTypes().empty()) {
+        droppedItemLastTime = false;
 		return;
 	}
 
@@ -1160,26 +1207,33 @@ void GameModel::AddPossibleItemDrop(const LevelPiece& p) {
 		const GameItem* currItem = *iter;
 		if (fabs(currItem->GetCenter()[0] - p.GetCenter()[0]) < EPSILON) {
 			if (fabs(currItem->GetCenter()[1] - p.GetCenter()[1]) < 5 * GameItem::HALF_ITEM_HEIGHT) {
+                droppedItemLastTime = false;
 				return;
 			}
 		}
 	}
 
 	// We will drop an item based on probablility, we add greater probability based off the current multiplier
-    double itemDropProb     = GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP + (0.02 * this->GetCurrentMultiplier());
-    double halfItemDropProb = itemDropProb / 2.0;
-	double randomNum        = Randomizer::GetInstance()->RandomNumZeroToOne();
+    double itemDropProb = GameModelConstants::GetInstance()->PROB_OF_ITEM_DROP + (0.0125 * this->GetCurrentMultiplier());
+
+    // We also effect the probability based on how many active item timers are currently in play:
+    // After 3 timers the probability gets lower...
+    itemDropProb -= 0.01 * std::max<int>(0, static_cast<int>(this->GetActiveTimers().size()) - 3);
+
+    // Probability must be in [0,1]
+    itemDropProb = std::max<double>(0.0, std::min<double>(1.0, itemDropProb));
+
+	double randomNum = Randomizer::GetInstance()->RandomNumZeroToOne();
 	
 	debug_output("Probability of drop: " << itemDropProb << " Number for deciding: " << randomNum);
-
-	if (randomNum < halfItemDropProb || randomNum > (1.0 - halfItemDropProb)) {
-		// If there are no allowable item drops for the current level then we drop nothing anyway
-		if (this->GetCurrentLevel()->GetAllowableItemDropTypes().empty()) {
-			return;
-		}
+	if (randomNum <= itemDropProb) {
 		GameItem::ItemType itemType = GameItemFactory::GetInstance()->CreateRandomItemTypeForCurrentLevel(this, true);
         this->AddItemDrop(p.GetCenter(), itemType);
+        droppedItemLastTime = true;
 	}
+    else {
+        droppedItemLastTime = false;
+    }
 }
 
 void GameModel::AddItemDrop(const Point2D& p, const GameItem::ItemType& itemType) {

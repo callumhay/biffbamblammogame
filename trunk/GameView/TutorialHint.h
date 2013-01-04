@@ -29,6 +29,7 @@ public:
     virtual ~TutorialHint();
 
     void SetListener(TutorialHintListener* listener);
+    bool GetIsVisible() const { return this->isShown; }
 
     // Triggers - these can do various things to the tooltip depending on how they are
     // overriden in child classes

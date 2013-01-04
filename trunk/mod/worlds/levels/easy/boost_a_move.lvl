@@ -30,11 +30,11 @@ S E E E E E E E E E S
 S E E E E E E E E E S 
 
 STARS:
-4000
-7000
-9000
-13000
-16000
+8000
+10000
+12000
+17000
+18000
 
 PaddleGrow 2
 PoisonPaddle 2
@@ -62,7 +62,7 @@ MultiBall3 2
 IceBall 0
 MineLauncherPaddle 0
 SlowBall 2
-GravityBall 2
+GravityBall 0
 CrazyBall 0
 Random 2
 FastBall 2

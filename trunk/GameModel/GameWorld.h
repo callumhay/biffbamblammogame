@@ -26,6 +26,8 @@ class GameTransformMgr;
 // actually loaded - it can be loaded and unloaded from memory on demand.
 class GameWorld {
 public:
+    static const int NO_LEVEL_PASSED;
+
 	enum WorldStyle { None = -1, Classical = 0, Deco = 1, Futurism = 2 };
 
 	static bool IsValidWorldStyle(const std::string &s);
@@ -40,6 +42,9 @@ public:
 	const std::vector<GameLevel*>& GetAllLevelsInWorld() const {
 		return this->loadedLevels;
 	}
+
+    int GetNumStarsCollectedInWorld() const;
+    int GetTotalAchievableStarsInWorld() const;
 
 	GameLevel* GetCurrentLevel() {
 		assert(this->isLoaded);
@@ -95,9 +100,9 @@ public:
 		return this->currentLevelNum == (static_cast<int>(this->loadedLevels.size()) - 1);
 	}
 
-    // TODO
-    //void SetLastLevelPassedIndex(int levelIdx);
+    void UpdateLastLevelPassedIndex();
     int GetLastLevelIndexPassed() const;
+    int GetLastLevelIndex() const;
 
 private:
 	bool isLoaded;                          // Has this world been loaded into memory or not?
@@ -105,8 +110,7 @@ private:
 	std::vector<GameLevel*> loadedLevels;	// Levels loaded into memory
 	int currentLevelNum;                    // Current level expressed as an index into loaded levels vector
 
-    static const int NO_LEVEL_PASSED;
-    int lastLevelPassed;                    // Progress indicator - has the number of the last level that was passed by the player,
+    int lastLevelPassedIndex;                    // Progress indicator - has the number of the last level that was passed by the player,
                                             // Similar to currentLevelNum, this is an index into the loadedLevels vector, if no progress
                                             // has been made in this world yet then it will be equal to NO_LEVEL_PASSED
 
@@ -124,7 +128,11 @@ private:
 
 // Gets the index of the last level that was passed (i.e., progress) of the player in this world
 inline int GameWorld::GetLastLevelIndexPassed() const {
-    return this->lastLevelPassed;
+    return this->lastLevelPassedIndex;
+}
+// Gets the index of the last level in this world
+inline int GameWorld::GetLastLevelIndex() const {
+    return static_cast<int>(this->loadedLevels.size()) - 1;
 }
 
 #endif

@@ -22,8 +22,11 @@
 #include "BallBoostHUD.h"
 
 InTutorialGameDisplayState::InTutorialGameDisplayState(GameDisplay* display) :
-DisplayState(display), renderPipeline(display),
+DisplayState(display), renderPipeline(display), beforeTutorialDifficulty(display->GetCachedDifficulty()),
 tutorialListener(new TutorialEventsListener(display)), boostCountdownHUD() {
+
+    GameModel* model = this->display->GetModel();
+    assert(model != NULL);
 
     // Disable the paddle release timer for the tutorial
     PlayerPaddle::SetEnablePaddleReleaseTimer(false);
@@ -35,7 +38,7 @@ tutorialListener(new TutorialEventsListener(display)), boostCountdownHUD() {
 
 	// Clear up any stuff to an initial state in cases where things might still 
 	// be set unchanged from a previously loaded game
-    this->display->GetModel()->SetPauseState(GameModel::NoPause);
+    model->SetPauseState(GameModel::NoPause);
 	this->display->GetCamera().ClearCameraShake();
 
     // Initialize the tutorial hints
@@ -69,6 +72,10 @@ InTutorialGameDisplayState::~InTutorialGameDisplayState() {
     GameEventManager::Instance()->UnregisterGameEventListener(this->tutorialListener);
     delete this->tutorialListener;
     this->tutorialListener = NULL;
+
+    // Place the player difficulty back to what it was before the tutorial (the level complete page
+    // will ask the player to switch their difficulty if they feel so inclined)
+    this->display->GetModel()->SetDifficulty(this->beforeTutorialDifficulty);
 }
 
 void InTutorialGameDisplayState::RenderFrame(double dT) {

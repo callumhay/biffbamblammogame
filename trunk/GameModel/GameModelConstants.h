@@ -46,9 +46,10 @@ public:
 	// -------------------------------------------------
 
 	// IN-GAME CONSTANTS -------------------------------
-	const double PROB_OF_ITEM_DROP;             // Probability multiplier used for an item that drops from a destroyed block
-	const double PROB_OF_CONSECTUIVE_ITEM_DROP;	// Probability multiplier used for consecutive item drops
-	const unsigned int MAX_LIVE_ITEMS;          // Maximum number of items dropping simulataneously
+	const double PROB_OF_ITEM_DROP;                  // Probability multiplier used for an item that drops from a destroyed block
+	const double PROB_OF_CONSECTUIVE_ITEM_DROP;      // Probability multiplier used for consecutive item drops
+    const double PROB_OF_CONSECUTIVE_SAME_ITEM_DROP; // Probability multiplier used for consecutive drops of the same type of item
+	const unsigned int MAX_LIVE_ITEMS;               // Maximum number of items dropping simulataneously
 	
 	const double PROB_OF_GHOSTBALL_BLOCK_MISS;	// Probablity the ball will go into ghost mode when it hits a block
 	const double LENGTH_OF_GHOSTMODE;           // Length of time in seconds of ghost mode
@@ -61,6 +62,8 @@ public:
 	const int FIRE_DAMAGE_PER_SECOND;               // The damage that fire does per second
 	const double FIRE_GLOB_DROP_CHANCE_INTERVAL;    // The interval of time in seconds over which a fire glob might be dropped from a block
 	const int FIRE_GLOB_CHANCE_MOD;                 // The 1/x where x is the value of this, of a fire glob dropping after FIRE_GLOB_DROP_CHANCE_INTERVAL seconds
+
+    const int MAX_MULTIPLIER;
 
     const int TWO_TIMES_MULTIPLIER_NUM_BLOCKS;      // The number of blocks that must be destroyed between paddle hits to get a 2x multiplier
     const int THREE_TIMES_MULTIPLIER_NUM_BLOCKS;    // ... 3x multiplier

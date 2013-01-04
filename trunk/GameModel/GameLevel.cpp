@@ -83,13 +83,13 @@ const char* GameLevel::POWERDOWN_ITEM_TYPES_KEYWORD         = "powerdowns";
 const char* GameLevel::STAR_POINT_MILESTONE_KEYWORD = "STARS:";
 
 // Private constructor, requires all the pieces that make up the level
-GameLevel::GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, 
+GameLevel::GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, 
                      unsigned int numBlocks, 
                      const std::vector<std::vector<LevelPiece*> >& pieces,
                      const std::vector<GameItem::ItemType>& allowedDropTypes, 
                      size_t randomItemProbabilityNum, long* starAwardScores) :
 
-levelNum(levelNumber), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
+levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum), piecesLeft(numBlocks),
 filepath(filepath), levelName(levelName), highScore(0),
 levelAlmostCompleteSignaled(false), boss(NULL) {
@@ -104,11 +104,11 @@ levelAlmostCompleteSignaled(false), boss(NULL) {
     }
 }
 
-GameLevel::GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName,
+GameLevel::GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName,
                      const std::vector<std::vector<LevelPiece*> >& pieces, Boss* boss,
                      const std::vector<GameItem::ItemType>& allowedDropTypes, size_t randomItemProbabilityNum) :
 
-levelNum(levelNumber), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
+levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum),
 piecesLeft(0), filepath(filepath), levelName(levelName), highScore(0),
 levelAlmostCompleteSignaled(false), boss(boss) {
@@ -187,7 +187,7 @@ void GameLevel::InitPieces(const std::vector<std::vector<LevelPiece*> >& pieces)
     }
 }
 
-GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelNumber, std::string filepath) {
+GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelIdx, std::string filepath) {
 	std::stringstream* inFile = ResourceManager::GetInstance()->FilepathToInOutStream(filepath);
 	if (inFile == NULL) {
 		assert(false);
@@ -1062,11 +1062,11 @@ GameLevel* GameLevel::CreateGameLevelFromFile(const GameWorld::WorldStyle& style
             return NULL;
         }
     
-        return new GameLevel(levelNumber, filepath, levelName, levelPieces, boss, allowedDropTypes, randomItemProbabilityNum);
+        return new GameLevel(levelIdx, filepath, levelName, levelPieces, boss, allowedDropTypes, randomItemProbabilityNum);
 
     }
     else {
-	    return new GameLevel(levelNumber, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum, starAwardScores);
+	    return new GameLevel(levelIdx, filepath, levelName, numVitalPieces, levelPieces, allowedDropTypes, randomItemProbabilityNum, starAwardScores);
     }
 }
 

@@ -24,7 +24,8 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
         return false;
     }
 
-    std::ifstream inFile((ResourceManager::GetLoadDir() + std::string(PROGRESS_FILENAME)).c_str(), std::ifstream::in | std::ifstream::binary);
+    std::ifstream inFile((ResourceManager::GetLoadDir() + std::string(PROGRESS_FILENAME)).c_str(),
+        std::ifstream::in | std::ifstream::binary);
     bool success = inFile.is_open();
 
 	if (success) {
@@ -36,8 +37,10 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
         std::getline(inFile, nameStr);  // finish reading the line
         
         for (int worldIdx = 0; worldIdx < numWorlds; worldIdx++) {
+
             // Read the world name
             ON_ERROR_CLEAN_UP_AND_EXIT(std::getline(inFile, nameStr));
+            
             // Look up which world we're dealing with based on the read name
             GameWorld* currWorld = model->GetWorldByName(nameStr);
             if (currWorld == NULL) {
@@ -62,8 +65,10 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
                 std::getline(inFile, nameStr);  // finish reading the line
                 currLevel->SetHighScore(highScore);
             }
-        }
 
+            currWorld->UpdateLastLevelPassedIndex();
+        }
+        
         inFile.close();
     }
     else {
@@ -114,6 +119,20 @@ bool GameProgressIO::SaveGameProgress(const GameModel* model) {
     }
     outFile.close();
  
+    return true;
+}
+
+bool GameProgressIO::WipeoutGameProgress(GameModel* model) {
+    std::ofstream outFile((ResourceManager::GetLoadDir() + std::string(PROGRESS_FILENAME)).c_str(), std::ios::out | std::ios::binary);
+    if (!outFile.is_open()) {
+        return false;
+    }
+
+    outFile << 0;
+    outFile.close();
+
+    model->ClearAllGameProgress();
+
     return true;
 }
 

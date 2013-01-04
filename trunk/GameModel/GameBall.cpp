@@ -14,7 +14,7 @@
 #include "InCannonBallState.h"
 #include "CannonBlock.h"
 
-const float GameBall::DEFAULT_NORMAL_SPEED = 15.33f;
+const float GameBall::DEFAULT_NORMAL_SPEED = 14.5f;
 
 float GameBall::ZeroSpeed    = 0.0f;
 float GameBall::NormalSpeed  = GameBall::DEFAULT_NORMAL_SPEED;

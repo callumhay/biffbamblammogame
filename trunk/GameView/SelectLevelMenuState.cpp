@@ -273,7 +273,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 		//soundAssets->StopAllSounds();
 
 		// Load all the initial stuffs for the game - this will queue up the next states that we need to go to
-        this->display->GetModel()->StartGameAtWorldAndLevel(this->world->GetWorldIndex(), selectedLevel->GetLevelNumIndex());
+        this->display->GetModel()->StartGameAtWorldAndLevel(this->world->GetWorldIndex(), selectedLevel->GetLevelIndex());
 		// Place the view into the proper state to play the game	
 		this->display->SetCurrentStateAsNextQueuedState();
     }
@@ -617,8 +617,9 @@ void SelectLevelMenuState::SetupLevelPages() {
     float itemY = camera.GetWindowHeight() - this->worldLabel->GetHeight() - VERTICAL_TITLE_GAP - TITLE_TO_ITEM_Y_GAP_SIZE;
 
     // Build the menu items for level selection
-    int totalNumStarsCollected = 0;
-    int totalNumStars = 0;
+    int totalNumStarsCollected = this->world->GetNumStarsCollectedInWorld();
+    int totalNumStars = this->world->GetTotalAchievableStarsInWorld();
+
     const std::vector<GameLevel*>& levels = this->world->GetAllLevelsInWorld();
     this->pages.push_back(new LevelMenuPage());
     AbstractLevelMenuItem* levelItem   = NULL;
@@ -640,22 +641,19 @@ void SelectLevelMenuState::SetupLevelPages() {
                     Point2D(itemX, itemY), !noScoreEncountered, this->bossIconTexture);
             }
             else {
-                totalNumStarsCollected += currLevel->GetHighScoreNumStars();
-                totalNumStars += GameLevel::MAX_STARS_PER_LEVEL;
-
                 levelItem = new LevelMenuItem(currLevelIdx+1, currLevel, itemWidth, 
                     Point2D(itemX, itemY), !noScoreEncountered, this->starTexture);
             }
 
             this->pages[this->pages.size()-1]->AddLevelItem(levelItem);
 
-            if (!currLevel->GetIsLevelComplete()) {
+            if (!currLevel->GetIsLevelPassedWithScore()) {
                 noScoreEncountered = true;
             }
 
             itemX += itemWidth + ITEM_X_GAP_SIZE;
         }
-
+ 
         assert(levelItem != NULL);
         itemX  = SIDE_TO_ITEM_GAP_SIZE;
         itemY -= ITEM_Y_GAP_SIZE + levelItem->GetHeight();

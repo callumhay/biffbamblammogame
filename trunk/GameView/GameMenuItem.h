@@ -86,6 +86,10 @@ public:
 			this->currLabel = &this->smTextLabel;
 		}
 	}
+    inline void SetText(const std::string& text) {
+        this->smTextLabel.SetText(text);
+        this->lgTextLabel.SetText(text);
+    }
 
 	virtual void Activate() {};
 	virtual void Deactivate() {};
@@ -259,10 +263,11 @@ private:
 	static const float VERIFY_MENU_OPTION_VSPACING;
 	static const float VERIFY_MENU_OPTION_WOBBLE_FREQ;	
 
-	bool verifyMenuActive;																		// Whether or not the verify menu is active or not
-	float verifyMenuWidth, verifyMenuHeight;
-	TextLabel2D descriptionLabel, confirmLabel, cancelLabel;	// Labels for the verify menu
-	VerifyMenuOption selectedOption;													// The option currently selecteded/highlighted in the verify menu
+	bool verifyMenuActive;                                   // Whether or not the verify menu is active or not
+	float verifyMenuWidth, verifyMenuHeight;                 // Dimensions of the menu
+    TextLabel2DFixedWidth descriptionLabel;
+	TextLabel2D confirmLabel, cancelLabel; // Labels for the verify menu
+	VerifyMenuOption selectedOption;                         // The option currently selecteded/highlighted in the verify menu
 	
 	const TextureFontSet* verifyDescFont;
 	const TextureFontSet* verifyIdleFont;

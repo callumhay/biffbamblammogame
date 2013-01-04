@@ -685,6 +685,7 @@ VerifyMenuItem::VerifyMenuItem(const TextLabel2D& smLabel, const TextLabel2D& lg
                                const TextureFontSet* verifyDescFont,
                                const TextureFontSet* verifyIdleFont,
                                const TextureFontSet* verifySelFont) :
+
 GameMenuItem(smLabel, lgLabel, NULL), selectedOption(VerifyMenuItem::Cancel),
 descriptionLabel(lgLabel), confirmLabel(smLabel), cancelLabel(smLabel),
 verifyMenuWidth(0), verifyMenuHeight(0), verifyMenuActive(false), 
@@ -698,6 +699,8 @@ verifyDescFont(verifyDescFont), verifyIdleFont(verifyIdleFont), verifySelFont(ve
 	this->optionItemWiggleAnim.SetInterpolantValue(0.0f);
 	this->verifyMenuBGScaleAnim.SetInterpolantValue(0.0f);
 	this->verifyMenuBGFadeAnim.SetInterpolantValue(0.0f);
+
+    this->descriptionLabel.SetFixedWidth(750);
 }
 
 VerifyMenuItem::~VerifyMenuItem() {
@@ -738,7 +741,7 @@ void VerifyMenuItem::SetVerifyMenuText(const std::string& descriptionText, const
 	this->cancelLabel.SetFont(this->verifySelFont);
 	
 	// Calculate the width and height - use the maximum possible in each case
-	this->verifyMenuWidth = std::max<float>(this->descriptionLabel.GetLastRasterWidth(), 
+    this->verifyMenuWidth = std::max<float>(this->descriptionLabel.GetWidth(), 
 		this->confirmLabel.GetLastRasterWidth() + this->cancelLabel.GetLastRasterWidth() + VerifyMenuItem::VERIFY_MENU_OPTION_HSPACING);
 	this->verifyMenuWidth += 2 * VerifyMenuItem::VERIFY_MENU_HPADDING;
 
@@ -838,8 +841,8 @@ void VerifyMenuItem::Draw(double dT, const Point2D& topLeftCorner, int windowWid
 
 	ColourRGBA temp;
 	// Draw the information/descriptive text for the menu
-	const Point2D DESC_TOP_LEFT_CORNER(MENU_MIDDLE_X - this->descriptionLabel.GetLastRasterWidth()/2.0f, 
-																		 verifyMenuTopLeft[1] - VerifyMenuItem::VERIFY_MENU_VPADDING); 
+	const Point2D DESC_TOP_LEFT_CORNER(MENU_MIDDLE_X - this->descriptionLabel.GetWidth()/2.0f, 
+	    verifyMenuTopLeft[1] - VerifyMenuItem::VERIFY_MENU_VPADDING); 
 	this->descriptionLabel.SetTopLeftCorner(DESC_TOP_LEFT_CORNER);
 	
 	temp = this->descriptionLabel.GetColour();
@@ -918,7 +921,8 @@ void VerifyMenuItem::ButtonPressed(const GameControl::ActionButton& pressedButto
 				// menu item has been verified
 				if (this->parent != NULL) {
 					this->parent->ActivatedMenuItemVerified();
-				}
+				    this->parent->DeactivateSelectedMenuItem();
+                }
 			}
 			break;
 
