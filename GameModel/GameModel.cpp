@@ -1371,6 +1371,13 @@ float GameModel::GetPercentBallReleaseTimerElapsed() const {
     return (static_cast<BallOnPaddleState*>(this->currState))->GetReleaseTimerPercentDone();
 }
 
+void GameModel::AddPercentageToBoostMeter(double percent) {
+    assert(percent >= 0.0 && percent <= 1.0);
+    if (this->boostModel != NULL) {
+        this->boostModel->IncrementBoostChargeByPercent(percent);
+    }
+}
+
 
 #ifdef _DEBUG
 void GameModel::DropItem(GameItem::ItemType itemType) {

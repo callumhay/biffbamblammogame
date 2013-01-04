@@ -24,7 +24,7 @@ TextureFontSet::TextureFontSet() : numGlyphs(0), heightInPixels(0) {
 
 TextureFontSet::~TextureFontSet() {
 	// Delete all the textures
-	for (size_t i = 0; i < this->charTextures.size(); i++) {
+	for (int i = 0; i < static_cast<int>(this->charTextures.size()); i++) {
 		delete this->charTextures[i];
 	}
 	this->charTextures.clear();

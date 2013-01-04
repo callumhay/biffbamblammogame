@@ -137,6 +137,9 @@ LevelPiece* TurretBlock::Destroy(GameModel* gameModel, const LevelPiece::Destruc
 	delete tempThis;
 	tempThis = NULL;
 
+    // Add to the boost meter
+    gameModel->AddPercentageToBoostMeter(0.2);
+
 	return emptyPiece;
 }
 

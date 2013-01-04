@@ -457,6 +457,8 @@ public:
     void SetInvertBallBoostDir(bool isInverted);
     float GetPercentBallReleaseTimerElapsed() const;
 
+    void AddPercentageToBoostMeter(double percent);
+
 	// Pauses the game
 	void SetPause(PauseType pause) {
 		this->pauseBitField |= pause;
