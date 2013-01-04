@@ -44,10 +44,7 @@ static GameSoundAssets* sound = NULL;
 static void CleanUpMVC() {
 	GameControllerManager::DeleteInstance();
 
-	if (model != NULL) {
-		delete model;
-		model = NULL;
-	}
+    // Order matters here!!!
 
 	if (display != NULL) {
 		delete display;
@@ -57,6 +54,11 @@ static void CleanUpMVC() {
 	if (sound != NULL) {
 		delete sound;
 		sound = NULL;
+	}
+
+	if (model != NULL) {
+		delete model;
+		model = NULL;
 	}
 }
 

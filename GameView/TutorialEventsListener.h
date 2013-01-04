@@ -44,6 +44,7 @@ public:
     void LastBallAboutToDieEvent(const GameBall& lastBallToDie);
 
     void BallBoostGainedEvent();
+    void BallBoostLostEvent();
     void BulletTimeStateChangedEvent(const BallBoostModel& boostModel);
     void NumStarsChangedEvent(int oldNumStars, int newNumStars);
 
