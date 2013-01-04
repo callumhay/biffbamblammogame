@@ -25,6 +25,7 @@ class GameProgressIO {
 public:
     static bool LoadGameProgress(GameModel* model);
     static bool SaveGameProgress(const GameModel* model);
+    static bool WipeoutGameProgress(GameModel* model);
 
 #ifdef _DEBUG
     static bool SaveFullProgressOfGame(const GameModel* model);

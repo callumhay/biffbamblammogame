@@ -24,6 +24,8 @@
 #include "GameMenu.h"
 #include "DisplayState.h"
 #include "BBBTitleDisplay.h"
+#include "DecoratorOverlayPane.h"
+#include "PopupTutorialHint.h"
 
 #include "../ConfigOptions.h"
 
@@ -40,6 +42,7 @@ class MainMenuDisplayState : public DisplayState {
 private:
 	// Menu text
 	static const char* NEW_GAME_MENUITEM;
+    static const char* CONTINUE_MENUITEM;
 	static const char* PLAY_LEVEL_MENUITEM;
     static const char* BLAMMOPEDIA_MENUITEM;
 	static const char* OPTIONS_MENUITEM;
@@ -64,7 +67,7 @@ private:
     BBBTitleDisplay titleDisplay;
 
 	// Indices for the main menu
-	int newGameMenuItemIndex;
+	int startGameMenuItemIndex;
 	int playLevelMenuItemIndex;
 	int optionsMenuItemIndex;
     int blammopediaItemIndex;
@@ -79,6 +82,10 @@ private:
     //int optionsControllerSensitivityIndex;
     int optionsInvertBallBoostIndex;
     int optionsDifficultyIndex;
+    int optionsEraseProgressIndex;
+
+    PopupTutorialHint* eraseSuccessfulPopup;
+    PopupTutorialHint* eraseFailedPopup;
 
 	// Indents and spacing
 	static const unsigned int MENU_X_INDENT = 50;
@@ -99,6 +106,8 @@ private:
 	
 	GameMenu* mainMenu;             // Main (top-most/parent) menu
 	GameSubMenu* optionsSubMenu;    // Options sub-menu
+
+    GameMenuItem* startGameMenuItem;
 
 	// Pointers for tracking the menu items in the options menu
 	SelectionListMenuItem* fullscreenMenuItem;
@@ -171,9 +180,7 @@ public:
 		void GameMenuItemHighlightedEvent(int itemIndex);
 		void GameMenuItemActivatedEvent(int itemIndex);
 		void GameMenuItemChangedEvent(int itemIndex);
-		void GameMenuItemVerifiedEvent(int itemIndex) {
-			UNUSED_PARAMETER(itemIndex);
-		};
+		void GameMenuItemVerifiedEvent(int itemIndex);
 		void EscMenu();
 	};
 

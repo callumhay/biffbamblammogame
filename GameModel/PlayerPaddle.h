@@ -64,6 +64,9 @@ public:
 
 	enum PaddleSize { SmallestSize = 0, SmallerSize = 1, NormalSize = 2, BiggerSize = 3, BiggestSize = 4 };
 
+    static const float DEFAULT_PADDLE_SCALE;
+    static void SetNormalScale(float scale) { assert(scale > 0.0f); PlayerPaddle::NormalSizeScale = scale; };
+
 	PlayerPaddle(float minBound, float maxBound);
 	PlayerPaddle();
 	~PlayerPaddle();
@@ -279,6 +282,7 @@ private:
     static bool paddleBallReleaseTimerEnabled;
     static bool paddleBallReleaseEnabled;
 
+    static float NormalSizeScale;
 
 	bool hitWall;					// True when the paddle hits a wall
 
@@ -345,8 +349,21 @@ private:
 	Collision::Circle2D CreatePaddleShieldBounds() const;
 	void GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const;
 
+    static float CalculateTargetScaleFactor(PlayerPaddle::PaddleSize size) {
+        int diffFromNormalSize = static_cast<int>(size) - static_cast<int>(PlayerPaddle::NormalSize);
+        return PlayerPaddle::NormalSizeScale * (PADDLE_WIDTH_TOTAL + diffFromNormalSize * PlayerPaddle::WIDTH_DIFF_PER_SIZE) / PADDLE_WIDTH_TOTAL;
+    }
+
     DISALLOW_COPY_AND_ASSIGN(PlayerPaddle);
 };
+
+/**
+ * Set the dimensions of the paddle based on an enumerated paddle size given.
+ * This will change the scale factor and bounds of the paddle.
+ */
+inline void PlayerPaddle::SetDimensions(PlayerPaddle::PaddleSize size) {
+	this->SetDimensions(PlayerPaddle::CalculateTargetScaleFactor(size));
+}
 
 inline void PlayerPaddle::Animate(double seconds) {
 	// Tick any paddle-related animations

@@ -25,7 +25,7 @@ const int GameWorld::NO_LEVEL_PASSED = -1;
  */
 GameWorld::GameWorld(std::string worldFilepath, GameTransformMgr& transformMgr) : 
 worldFilepath(worldFilepath), isLoaded(false), style(None), currentLevelNum(0),
-lastLevelPassed(GameWorld::NO_LEVEL_PASSED), transformMgr(transformMgr) {
+lastLevelPassedIndex(GameWorld::NO_LEVEL_PASSED), transformMgr(transformMgr) {
 }
 
 GameWorld::~GameWorld() {
@@ -152,6 +152,38 @@ bool GameWorld::Unload() {
 	return true;
 }
 
+int GameWorld::GetNumStarsCollectedInWorld() const {
+    int numStarsCollected = 0;
+    for (std::vector<GameLevel*>::const_iterator iter = this->loadedLevels.begin();
+         iter != this->loadedLevels.end(); ++iter) {
+
+        GameLevel* level = *iter;
+        if (level->GetHasBoss()) {
+            continue;
+        }
+        if (level->GetIsLevelPassedWithScore()) {
+            numStarsCollected += level->GetHighScoreNumStars();
+        }
+    }
+    
+    return numStarsCollected;
+}
+
+int GameWorld::GetTotalAchievableStarsInWorld() const {
+    int totalStars = 0;
+    for (std::vector<GameLevel*>::const_iterator iter = this->loadedLevels.begin();
+         iter != this->loadedLevels.end(); ++iter) {
+
+        GameLevel* level = *iter;
+        if (level->GetHasBoss()) {
+            continue;
+        }
+        totalStars += GameLevel::MAX_STARS_PER_LEVEL;
+    }
+
+    return totalStars;
+}
+
 // Get the level with the given name, NULL if no such level exists
 GameLevel* GameWorld::GetLevelByName(const std::string& name) {
     for (std::vector<GameLevel*>::const_iterator iter = this->loadedLevels.begin();
@@ -214,10 +246,10 @@ void GameWorld::IncrementLevel(GameModel* model) {
     // Make sure we keep track of the greatest level number that was
     // passed by the player (so we can save their progress later)
     if (this->currentLevelNum > 0) {
-        this->lastLevelPassed = std::max<int>(this->lastLevelPassed, this->currentLevelNum-1);
+        this->lastLevelPassedIndex = std::max<int>(this->lastLevelPassedIndex, this->currentLevelNum-1);
     }
     else if (this->currentLevelNum == 0) {
-        this->lastLevelPassed = GameWorld::NO_LEVEL_PASSED;
+        this->lastLevelPassedIndex = GameWorld::NO_LEVEL_PASSED;
     }
     else {
         assert(false);
@@ -245,4 +277,23 @@ void GameWorld::SetCurrentLevel(GameModel* model, int levelNum) {
 
 	// Setup the default transforms for the new level
 	this->transformMgr.SetupLevelCameraDefaultPosition(*this->GetCurrentLevel());
+}
+
+void GameWorld::UpdateLastLevelPassedIndex() {
+    for (int i = 0; i < static_cast<int>(this->loadedLevels.size()); i++) {
+        const GameLevel* level = this->loadedLevels[i];
+
+        if (!level->GetIsLevelPassedWithScore()) {
+            this->lastLevelPassedIndex = i - 1;
+            break;
+        }
+        else if (i == this->GetLastLevelIndex()) {
+            this->lastLevelPassedIndex = this->GetLastLevelIndex();
+            break;
+        }
+    }
+
+    if (this->lastLevelPassedIndex < 0) {
+        this->lastLevelPassedIndex = NO_LEVEL_PASSED;
+    }
 }

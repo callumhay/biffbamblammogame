@@ -2458,10 +2458,6 @@
 		<Filter
 			Name="physfs"
 			>
-			<File
-				RelativePath=".\Blammopedia.h"
-				>
-			</File>
 			<Filter
 				Name="Header Files"
 				>
@@ -2619,6 +2615,10 @@
 				Filter="h;hpp;hxx;hm;inl;inc;xsd"
 				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 				>
+				<File
+					RelativePath=".\Blammopedia.h"
+					>
+				</File>
 				<File
 					RelativePath=".\ConfigOptions.h"
 					>

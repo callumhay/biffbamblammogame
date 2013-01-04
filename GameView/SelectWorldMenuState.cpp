@@ -15,6 +15,7 @@
 #include "GameFontAssetsManager.h"
 #include "GameDisplay.h"
 #include "CgFxBloom.h"
+#include "GameViewConstants.h"
 
 #include "../BlammoEngine/TextLabel.h"
 #include "../BlammoEngine/FBObj.h"
@@ -31,7 +32,7 @@ DisplayState(display), pressEscAlphaAnim(0.0f),
 worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
 goBackToMainMenu(false), menuFBO(NULL), 
 bloomEffect(NULL), itemActivated(false), 
-goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f) {
+goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL) {
     this->Init(0);
 }
 
@@ -39,7 +40,7 @@ SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const GameWorld
 DisplayState(display), pressEscAlphaAnim(0.0f),
 worldSelectTitleLbl(NULL), keyEscLabel(NULL), 
 goBackToMainMenu(false), menuFBO(NULL), bloomEffect(NULL), itemActivated(false),
-goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f) {
+goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL) {
     assert(selectedWorld != NULL);
     this->Init(selectedWorld->GetWorldNumber()-1);
 }
@@ -63,6 +64,11 @@ SelectWorldMenuState::~SelectWorldMenuState() {
         item = NULL;
     }
     this->worldItems.clear();
+
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTexture);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 void SelectWorldMenuState::RenderFrame(double dT) {
@@ -240,6 +246,10 @@ void SelectWorldMenuState::GoBackToMainMenu() {
 
 void SelectWorldMenuState::Init(int selectedIdx) {
 
+    this->starTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear, GL_TEXTURE_2D));
+    assert(this->starTexture != NULL);
+
     this->worldSelectTitleLbl = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Huge), SelectWorldMenuState::WORLD_SELECT_TITLE);
@@ -305,7 +315,7 @@ void SelectWorldMenuState::Init(int selectedIdx) {
     this->worldItems.reserve(gameWorlds.size());
     for (size_t i = 0; i < gameWorlds.size(); i++) {
         const GameWorld* currGameWorld = gameWorlds[i];
-        WorldSelectItem* menuItem = new WorldSelectItem(currGameWorld, i+1, menuItemSize);
+        WorldSelectItem* menuItem = new WorldSelectItem(this, currGameWorld, i+1, menuItemSize);
         menuItem->SetTopLeftCorner(xCoord, yCoord);
         this->worldItems.push_back(menuItem);
 
@@ -330,8 +340,9 @@ void SelectWorldMenuState::Init(int selectedIdx) {
     this->selectionAlphaYellowAnim.SetRepeat(true);
 }
 
-SelectWorldMenuState::WorldSelectItem::WorldSelectItem(const GameWorld* world, size_t worldNumber, float size) : 
-worldNumber(worldNumber), gameWorld(world), image(NULL), label(NULL), 
+SelectWorldMenuState::WorldSelectItem::WorldSelectItem(SelectWorldMenuState* state, 
+                                                       const GameWorld* world, size_t worldNumber, float size) : 
+state(state), worldNumber(worldNumber), gameWorld(world), image(NULL), label(NULL), starTotalLabel(NULL),
 selectedLabel(NULL), baseSize(size), isSelected(false), sizeAnim(size) {
     assert(world != NULL);
 
@@ -356,6 +367,17 @@ selectedLabel(NULL), baseSize(size), isSelected(false), sizeAnim(size) {
 
     this->sizeAnim.SetInterpolantValue(this->baseSize);
     this->sizeAnim.SetRepeat(false);
+
+    // Create a label for the total number of stars collected in the world represented by this item
+    int totalNumStarsCollected = world->GetNumStarsCollectedInWorld();
+    int totalNumStars = world->GetTotalAchievableStarsInWorld();
+
+    std::stringstream totalNumStarsTxt;
+    totalNumStarsTxt << totalNumStarsCollected << "/" << totalNumStars;
+    this->starTotalLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
+        GameFontAssetsManager::Medium), totalNumStarsTxt.str());
+    this->starTotalLabel->SetColour(Colour(0,0,0));
+    this->starTotalLabel->SetScale(0.85f);
 }
 
 SelectWorldMenuState::WorldSelectItem::~WorldSelectItem() {
@@ -367,6 +389,8 @@ SelectWorldMenuState::WorldSelectItem::~WorldSelectItem() {
     this->label = NULL;
     delete this->selectedLabel;
     this->selectedLabel = NULL;
+    delete this->starTotalLabel;
+    this->starTotalLabel = NULL;
 }
 
 void SelectWorldMenuState::WorldSelectItem::SetIsSelected(bool isSelected) {
@@ -383,6 +407,14 @@ void SelectWorldMenuState::WorldSelectItem::SetIsSelected(bool isSelected) {
 
 void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT) {
     UNUSED_PARAMETER(camera);
+
+    TextLabel2DFixedWidth* currLabel = NULL;
+    if (this->isSelected) {
+        currLabel = this->selectedLabel;
+    }
+    else {
+        currLabel = this->label;
+    }
 
     this->sizeAnim.Tick(dT);
     float currSize = this->sizeAnim.GetInterpolantValue();
@@ -416,20 +448,32 @@ void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT
 	glEnd();
     glPopMatrix();
 
-    TextLabel2DFixedWidth* currLabel = NULL;
-    if (this->isSelected) {
-        currLabel = this->selectedLabel;
-    }
-    else {
-        currLabel = this->label;
-    }
-
-    static const float VERTICAL_GAP = 10;
+    static const float TITLE_VERTICAL_GAP = 10;
     float diff = (currSize - this->baseSize) / 2.0f;
     float labelX = (this->topLeftCorner[0] - diff) + ((currSize - currLabel->GetWidth()) / 2.0f);
-    float labelY = (this->topLeftCorner[1] + diff) - currSize - VERTICAL_GAP;
+    float labelY = (this->topLeftCorner[1] + diff) - currSize - TITLE_VERTICAL_GAP;
     currLabel->SetTopLeftCorner(labelX, labelY);
     currLabel->Draw();
+
+    static const float STAR_VERTICAL_GAP = 1.75f * TITLE_VERTICAL_GAP;
+    static const float STAR_ICON_HORIZONTAL_GAP = 5;
+    float starSize   = this->starTotalLabel->GetHeight();
+    float starLabelX = (this->topLeftCorner[0] - diff) + ((currSize - (this->starTotalLabel->GetLastRasterWidth() + STAR_ICON_HORIZONTAL_GAP + starSize)) / 2.0f);
+    float starLabelY = (this->topLeftCorner[1] + diff) - currSize - TITLE_VERTICAL_GAP - currLabel->GetHeight() - STAR_VERTICAL_GAP;
+    
+    const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+    
+    this->state->starTexture->BindTexture();
+    glColor4f(starColour.R(), starColour.G(), starColour.B(), 1.0f);
+    glPushMatrix();
+    glTranslatef(starLabelX, starLabelY - starSize/2.0f, 0);
+    glScalef(starSize, starSize, 1.0f); 
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+    this->state->starTexture->UnbindTexture();
+
+    this->starTotalLabel->SetTopLeftCorner(starLabelX + STAR_ICON_HORIZONTAL_GAP + starSize, starLabelY);
+    this->starTotalLabel->Draw();
 
     glPopAttrib();
 }

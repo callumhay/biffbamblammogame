@@ -116,7 +116,7 @@ private:
     bool progressLoadedSuccessfully;
 
 	// Private getters and setters ****************************************
-	void SetCurrentWorldAndLevel(int worldNum, int levelNum, bool sendNewWorldEvent);
+	void SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNewWorldEvent);
 
 	GameWorld* GetCurrentWorld() const {
 		return this->worlds[this->currWorldNum];
@@ -174,17 +174,25 @@ private:
     
     void ResetLevelValues(int numLives);
 
+    void LoadWorldsFromFile();
+
     void PerformLevelCompletionChecks();
 
 public:
     GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted);
 	~GameModel();
 
+    void GetFurthestProgressWorldAndLevel(int& worldIdx, int& levelIdx) const;
+    
+    static bool IsTutorialLevel(int worldIdx, int levelIdx) {
+        return (worldIdx == 0 && levelIdx == 0);
+    }
+
     bool IsCurrentLevelTheTutorialLevel() const {
         const GameWorld* world = this->GetCurrentWorld();
         const GameLevel* level = this->GetCurrentLevel();
         // Zeroth world, zeroth level == tutorial level
-        return (world->GetWorldIndex() == 0 && level->GetLevelNumIndex() == 0);
+        return GameModel::IsTutorialLevel(world->GetWorldIndex(), level->GetLevelIndex());
     }
 
     void IncrementScore(PointAward& pointAward);
@@ -238,10 +246,10 @@ public:
 	void Tick(double seconds);
 
 	// Level/World related queries *****************************************
-    void StartGameAtWorldAndLevel(int worldNum, int levelNum);
-	void BeginOrRestartGame();
+    void StartGameAtWorldAndLevel(int worldIdx, int levelIdx);
     void ResetCurrentLevel();
 	void ClearGameState();
+    void ClearAllGameProgress();
 	
     const std::vector<GameWorld*>& GetGameWorlds() const {
         return this->worlds;

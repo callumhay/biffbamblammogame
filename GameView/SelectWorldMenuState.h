@@ -66,7 +66,7 @@ private:
     // Inner class for representing a selectable world item in the world select menu
     class WorldSelectItem {
     public:
-        WorldSelectItem(const GameWorld* world, size_t worldNumber, float size);
+        WorldSelectItem(SelectWorldMenuState* state, const GameWorld* world, size_t worldNumber, float size);
         ~WorldSelectItem();
 
         void SetIsSelected(bool isSelected);
@@ -81,6 +81,7 @@ private:
         const GameWorld* GetWorld() const { return this->gameWorld; }
 
     private:
+        SelectWorldMenuState* state;
         bool isSelected;
         size_t worldNumber;
         const GameWorld* gameWorld;
@@ -89,6 +90,8 @@ private:
         TextLabel2DFixedWidth* selectedLabel;
         Point2D topLeftCorner;
         float baseSize;
+
+        TextLabel2D* starTotalLabel;
 
         AnimationLerp<float> sizeAnim;
 
@@ -103,6 +106,8 @@ private:
     AnimationLerp<float> goToLevelSelectMoveAnim;
     AnimationLerp<float> goToLevelSelectAlphaAnim;
 
+    Texture2D* starTexture;
+        
     void GoBackToMainMenu();
     void Init(int selectedIdx);
 

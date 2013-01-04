@@ -326,7 +326,9 @@ GameItem* GameItemFactory::CreateRandomItemForCurrentLevel(const Point2D &spawnO
  * If allowRandomItemType is set to true then a random item type may be generated as well.
  */
 GameItem::ItemType GameItemFactory::CreateRandomItemTypeForCurrentLevel(GameModel *gameModel, bool allowRandomItemType) const {
-	assert(gameModel != NULL);
+    assert(gameModel != NULL);
+
+    static GameItem::ItemType lastGeneratedItemType = GameItem::MultiBall5Item;
 
 	// Grab the current game level and get the allowable item drops for it
 	const GameLevel* currGameLevel = gameModel->GetCurrentLevel();
@@ -337,9 +339,25 @@ GameItem::ItemType GameItemFactory::CreateRandomItemTypeForCurrentLevel(GameMode
 	// If we've enabled generation of random items then we allow the possible generatation of one...
 	size_t randomNum = 0;
 	if (allowRandomItemType) {
+
 		randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % (allowableItemDrops.size() + currGameLevel->GetRandomItemDropProbabilityNum());
 		if (randomNum >= allowableItemDrops.size()) {
-			return GameItem::RandomItem;
+
+            // Check for consecutive item drops...
+            if (lastGeneratedItemType == GameItem::RandomItem) {
+                if (Randomizer::GetInstance()->RandomNumZeroToOne() > GameModelConstants::GetInstance()->PROB_OF_CONSECUTIVE_SAME_ITEM_DROP) {
+                    // Don't allow the consecutive drop...
+                    randomNum = Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size();
+                }
+                else {
+                    lastGeneratedItemType = GameItem::RandomItem;
+			        return lastGeneratedItemType;
+                }
+            }
+            else {
+                lastGeneratedItemType = GameItem::RandomItem;
+			    return lastGeneratedItemType;
+            }
 		}
 	}
 	else {
@@ -372,7 +390,17 @@ GameItem::ItemType GameItemFactory::CreateRandomItemTypeForCurrentLevel(GameMode
             break;
     }
 
-	return allowableItemDrops.at(randomNum);
+    GameItem::ItemType currRandomDropType = allowableItemDrops.at(randomNum);
+    if (currRandomDropType == lastGeneratedItemType) {
+        if (Randomizer::GetInstance()->RandomNumZeroToOne() > GameModelConstants::GetInstance()->PROB_OF_CONSECUTIVE_SAME_ITEM_DROP) {
+            // Don't allow a consecutive item drop of the same type...
+            randomNum = (randomNum + (Randomizer::GetInstance()->RandomUnsignedInt() % allowableItemDrops.size())) % allowableItemDrops.size();
+            currRandomDropType = allowableItemDrops.at(randomNum);
+        }
+    }
+
+    lastGeneratedItemType = currRandomDropType;
+	return lastGeneratedItemType;
 }
 
 GameItem::ItemDisposition GameItemFactory::GetItemTypeDisposition(const GameItem::ItemType& itemType) const {

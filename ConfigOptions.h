@@ -75,13 +75,10 @@ public:
         std::vector<std::string> difficultyItems;
         difficultyItems.reserve(3);
         difficultyItems.push_back("Easy");
-        difficultyItems.push_back("Medium");
+        difficultyItems.push_back("Normal");
         difficultyItems.push_back("Hard");
         return difficultyItems;
     }
-
-    static bool DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr);
-    static bool StringToDifficulty(const std::string& difficultyStr, GameModel::Difficulty& difficulty);
 
     static std::vector<std::string> GetOnOffItems() {
         std::vector<std::string> onOffItems;
@@ -121,6 +118,10 @@ private:
 	int volume;
     bool invertBallBoost;
     GameModel::Difficulty difficulty;
+
+    static bool DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr);
+    static bool StringToDifficulty(const std::string& difficultyStr, GameModel::Difficulty& difficulty);
+
 
 	static ConfigOptions* ReadConfigOptionsFromFile();
 	bool WriteConfigOptionsToFile() const;

@@ -60,6 +60,10 @@ const int PlayerPaddle::DEFAULT_SHIELD_DMG_PER_SECOND = 90;
 bool PlayerPaddle::paddleBallReleaseTimerEnabled = true;
 bool PlayerPaddle::paddleBallReleaseEnabled      = true;
 
+const float PlayerPaddle::DEFAULT_PADDLE_SCALE = 1.0f;
+
+float PlayerPaddle::NormalSizeScale = PlayerPaddle::DEFAULT_PADDLE_SCALE;
+
 PlayerPaddle::PlayerPaddle() : 
 centerPos(0.0f, 0.0f), minBound(0.0f), maxBound(0.0f), currSpeed(0.0f), lastDirection(0.0f), 
 maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_ACCELERATION), 
@@ -195,15 +199,6 @@ void PlayerPaddle::RegenerateBounds() {
 }
 
 /**
- * Set the dimensions of the paddle based on an enumerated paddle size given.
- * This will change the scale factor and bounds of the paddle.
- */
-void PlayerPaddle::SetDimensions(PlayerPaddle::PaddleSize size) {
-	int diffFromNormalSize = static_cast<int>(size) - static_cast<int>(PlayerPaddle::NormalSize);
-	this->SetDimensions((PADDLE_WIDTH_TOTAL + diffFromNormalSize * PlayerPaddle::WIDTH_DIFF_PER_SIZE) / PADDLE_WIDTH_TOTAL);
-}
-
-/**
  * Set the dimensions of the paddle based on a scale factor given.
  * This will change the scale factor and bounds of the paddle.
  */
@@ -212,21 +207,25 @@ void PlayerPaddle::SetDimensions(float newScaleFactor) {
 	assert(this->currScaleFactor > 0.0f);
 
 	// Update all of the dimension values for the new scale factor
-	this->currHalfHeight      = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_HEIGHT;
-	this->currHalfWidthTotal  = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_WIDTH;
-	this->currHalfWidthFlat	  = this->currScaleFactor * PlayerPaddle::PADDLE_WIDTH_FLAT_TOP * 0.5f;
-	this->currHalfDepthTotal  = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_DEPTH;
+	this->currHalfHeight     = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_HEIGHT;
+	this->currHalfWidthTotal = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_WIDTH;
+	this->currHalfWidthFlat	 = this->currScaleFactor * PlayerPaddle::PADDLE_WIDTH_FLAT_TOP * 0.5f;
+	this->currHalfDepthTotal = this->currScaleFactor * PlayerPaddle::PADDLE_HALF_DEPTH;
 	
 	// The momentum of the paddle will change as well - we do a physics hack here where the acceleration/decceleration
 	// are effected directly by the inverse scale factor of the paddle
-	float intensifier = 1.0f;
-	if (this->currScaleFactor != 1.0f) {
-		intensifier = 1.25f;
-	}
-	float invCurrScaleFactor = 1.0f / (intensifier * this->currScaleFactor);
-	this->acceleration  = invCurrScaleFactor * PlayerPaddle::DEFAULT_ACCELERATION;
-	this->decceleration = invCurrScaleFactor * PlayerPaddle::DEFAULT_DECCELERATION;
-
+	if (this->currScaleFactor != PlayerPaddle::NormalSizeScale) {
+		static const float INTENSIFIER = 1.2f;
+	
+	    float invCurrScaleFactor = 1.0f / (INTENSIFIER * this->currScaleFactor);
+	    this->acceleration  = invCurrScaleFactor * PlayerPaddle::DEFAULT_ACCELERATION;
+	    this->decceleration = invCurrScaleFactor * PlayerPaddle::DEFAULT_DECCELERATION;
+    }
+    else {
+    	this->acceleration  = PlayerPaddle::DEFAULT_ACCELERATION;
+	    this->decceleration = PlayerPaddle::DEFAULT_DECCELERATION;
+    }
+    
 	this->RegenerateBounds();
 }
 
@@ -517,8 +516,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 	*/
 
 	// Change the size gradually (lerp based on some constant time) if need be...
-	int diffFromNormalSize = static_cast<int>(this->currSize) - static_cast<int>(PlayerPaddle::NormalSize);
-	float targetScaleFactor = (PADDLE_WIDTH_TOTAL + diffFromNormalSize * PlayerPaddle::WIDTH_DIFF_PER_SIZE) / PADDLE_WIDTH_TOTAL;
+    float targetScaleFactor = PlayerPaddle::CalculateTargetScaleFactor(this->currSize);
 	float scaleFactorDiff = targetScaleFactor - this->currScaleFactor;
 	if (scaleFactorDiff != 0.0f) {
 		this->SetDimensions(this->currScaleFactor + ((scaleFactorDiff * seconds) / SECONDS_TO_CHANGE_SIZE));

@@ -16,6 +16,11 @@ TextLabel::TextLabel() : font(NULL), colour(ColourRGBA(0, 0, 0, 1)),
 topLeftCorner(Point2D(0, 0)), scale(1.0f) {
 }
 
+TextLabel::TextLabel(const TextLabel& copy) : scale(copy.scale), colour(copy.colour), dropShadow(copy.dropShadow),
+topLeftCorner(copy.topLeftCorner), font(copy.font) {
+
+}
+
 TextLabel::TextLabel(const TextureFontSet* font) : font(font),
 colour(ColourRGBA(0, 0, 0, 1)), topLeftCorner(Point2D(0, 0)), scale(1.0f) {
 }
@@ -123,6 +128,10 @@ TextLabel2DFixedWidth::TextLabel2DFixedWidth(const TextureFontSet* font,
 TextLabel(font), alignment(TextLabel2DFixedWidth::LeftAligned), fixedWidth(width), lineSpacing(8.0f) {
     assert(font != NULL);
     this->SetText(text);
+}
+
+TextLabel2DFixedWidth::TextLabel2DFixedWidth(const TextLabel2D& label) :
+TextLabel(label), alignment(TextLabel2DFixedWidth::LeftAligned), fixedWidth(label.GetLastRasterWidth()), lineSpacing(8.0f) {
 }
 
 TextLabel2DFixedWidth::~TextLabel2DFixedWidth() {

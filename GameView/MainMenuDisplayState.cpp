@@ -20,6 +20,7 @@
 
 #include "../BlammoEngine/FBObj.h"
 #include "../GameModel/GameModel.h"
+#include "../GameModel/GameProgressIO.h"
 #include "../GameControl/GameControllerManager.h"
 #include "../GameSound/GameSoundAssets.h"
 #include "../ESPEngine/ESPOnomataParticle.h"
@@ -32,6 +33,7 @@ const size_t MainMenuDisplayState::TOTAL_NUM_BANG_EFFECTS = 10;
 
 // Menu items
 const char* MainMenuDisplayState::NEW_GAME_MENUITEM		= "New Game";
+const char* MainMenuDisplayState::CONTINUE_MENUITEM     = "Continue";
 const char* MainMenuDisplayState::PLAY_LEVEL_MENUITEM	= "Level Select";
 const char* MainMenuDisplayState::OPTIONS_MENUITEM		= "Options";
 const char* MainMenuDisplayState::BLAMMOPEDIA_MENUITEM  = "Blammopedia";
@@ -47,10 +49,10 @@ const Colour MainMenuDisplayState::SUBMENU_ITEM_ACTIVE_COLOUR	= Colour(1, 1, 1);
 const float MainMenuDisplayState::CAM_DIST_FROM_ORIGIN = 20.0f;
 
 MainMenuDisplayState::MainMenuDisplayState(GameDisplay* display) : 
-DisplayState(display), mainMenu(NULL), optionsSubMenu(NULL), 
+DisplayState(display), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(NULL), 
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NULL), particleEventHandler(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false),
-menuFBO(NULL), bloomEffect(NULL),
+menuFBO(NULL), bloomEffect(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
 particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f),
 madeByTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
@@ -106,6 +108,21 @@ titleDisplay(1.0f)
 		this->deadBangEffects.push_back(new ESPPointEmitter());
 		this->deadOnoEffects.push_back(new ESPPointEmitter());
 	}
+
+    static const int POPUP_WIDTH = 750;
+    std::vector<std::string> selectableOptions;
+    selectableOptions.push_back("Ok");
+    this->eraseSuccessfulPopup = new PopupTutorialHint(POPUP_WIDTH);
+    DecoratorOverlayPane* eraseSuccessPopupPane = this->eraseSuccessfulPopup->GetPane();
+    eraseSuccessPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
+    eraseSuccessPopupPane->AddText("Progress erase successful.", Colour(1,1,1), 1.0f);
+    eraseSuccessPopupPane->SetSelectableOptions(selectableOptions, 0);
+ 
+    this->eraseFailedPopup = new PopupTutorialHint(POPUP_WIDTH);
+    DecoratorOverlayPane* eraseFailedPopupPane = this->eraseFailedPopup->GetPane();
+    eraseFailedPopupPane->SetLayoutType(DecoratorOverlayPane::Centered);
+    eraseFailedPopupPane->AddText("Progress erase failed.", Colour(1,1,1), 1.0f);
+    eraseFailedPopupPane->SetSelectableOptions(selectableOptions, 0);
 }
 
 MainMenuDisplayState::~MainMenuDisplayState() {
@@ -158,6 +175,11 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 		delete *iter;
 	}
 	this->deadOnoEffects.clear();
+
+    delete this->eraseSuccessfulPopup;
+    this->eraseSuccessfulPopup = NULL;
+    delete this->eraseFailedPopup;
+    this->eraseFailedPopup = NULL;
 }
 
 /**
@@ -201,15 +223,30 @@ void MainMenuDisplayState::InitializeMainMenu()  {
 	const Colour dropShadowColour = Colour(0, 0, 0);
 
 	// Add items to the menu in their order (first to last)
-	TextLabel2D tempLabelSm(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),  NEW_GAME_MENUITEM);
-	TextLabel2D tempLabelLg(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
+
+	TextLabel2D tempLabelSm;
+    TextLabel2D tempLabelLg;
+
+    // "New Game" if no game has already been started, otherwise we use "Continue"...
+    int furthestWorldIdx, furthestLevelIdx;
+    this->display->GetModel()->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+
+    if (this->display->GetModel()->IsTutorialLevel(furthestWorldIdx, furthestLevelIdx)) {
+        tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), NEW_GAME_MENUITEM);
+        tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), NEW_GAME_MENUITEM);
+    }
+    else {
+        tempLabelSm = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), CONTINUE_MENUITEM);
+        tempLabelLg = TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), CONTINUE_MENUITEM);
+    }
 
 	tempLabelSm.SetDropShadow(dropShadowColour, dropShadowAmtSm);
 	tempLabelSm.SetScale(textScaleFactor);
 	tempLabelLg.SetDropShadow(dropShadowColour, dropShadowAmtLg);
 	tempLabelLg.SetScale(textScaleFactor);
 
-	this->newGameMenuItemIndex = this->mainMenu->AddMenuItem(tempLabelSm, tempLabelLg, NULL);
+    this->startGameMenuItem = new GameMenuItem(tempLabelSm, tempLabelLg, NULL);
+    this->startGameMenuItemIndex = this->mainMenu->AddMenuItem(this->startGameMenuItem);
 
 	tempLabelSm.SetText(PLAY_LEVEL_MENUITEM);
 	tempLabelLg.SetText(PLAY_LEVEL_MENUITEM);
@@ -250,7 +287,7 @@ void MainMenuDisplayState::InitializeMainMenu()  {
 	exitMenuItem->SetEventHandler(this->itemsEventHandler);
 	this->exitGameMenuItemIndex = this->mainMenu->AddMenuItem(exitMenuItem);
 
-	this->mainMenu->SetSelectedMenuItem(this->newGameMenuItemIndex);
+	this->mainMenu->SetSelectedMenuItem(this->startGameMenuItemIndex);
 	debug_opengl_state();
 }
 
@@ -380,6 +417,21 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
 	this->difficultyItem->SetEventHandler(this->itemsEventHandler);
 	this->optionsDifficultyIndex = this->optionsSubMenu->AddMenuItem(this->difficultyItem);
 
+
+    // Erase game progress data option
+	subMenuLabelSm.SetText("Erase Progress Data...");
+	subMenuLabelLg.SetText("Erase Progress Data...");
+
+    VerifyMenuItem* eraseProgressItem = new VerifyMenuItem(subMenuLabelSm, subMenuLabelLg,
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
+		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
+	eraseProgressItem->SetVerifyMenuColours(Colour(1,1,1), Colour(0.5f, 0.5f, 0.5f), Colour(1,1,1));
+	eraseProgressItem->SetVerifyMenuText("If you do this all of your progress will be lost. Are you sure you want to proceed? ", "Yes", "No");
+    eraseProgressItem->SetEventHandler(this->itemsEventHandler);
+    this->optionsEraseProgressIndex = this->optionsSubMenu->AddMenuItem(eraseProgressItem);
+
+
 	// Add an option for getting out of the menu
 	subMenuLabelSm.SetText("Back");
 	subMenuLabelLg.SetText("Back");
@@ -417,10 +469,12 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 		    GameSoundAssets* soundAssets = this->display->GetAssets()->GetSoundAssets();
 		    soundAssets->StopAllSounds();
 
-		    // Load all the initial stuffs for the game - this will queue up the next states that we need to go to
-		    this->display->GetModel()->BeginOrRestartGame();
+		    // Start the game at the furthest level of player progress - this will queue up the next states that we need to go to
+            int furthestWorldIdx, furthestLevelIdx;
+            this->display->GetModel()->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+		    this->display->GetModel()->StartGameAtWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
 
-		    // Place the view into the proper state to play the game	
+		    // Place the view into the proper state to play the game
 		    this->display->SetCurrentStateAsNextQueuedState();
 
 		    return;
@@ -473,6 +527,12 @@ void MainMenuDisplayState::RenderFrame(double dT) {
     this->licenseLabel.SetTopLeftCorner(DISPLAY_WIDTH - (this->licenseLabel.GetLastRasterWidth() + NAME_LICENCE_X_PADDING),
         this->licenseLabel.GetHeight() + NAME_LICENCE_Y_PADDING);
     this->licenseLabel.Draw();
+
+    // Render any extra pop-up stuff
+    this->eraseSuccessfulPopup->Tick(dT);
+    this->eraseFailedPopup->Tick(dT);
+    this->eraseSuccessfulPopup->Draw(menuCamera);
+    this->eraseFailedPopup->Draw(menuCamera);
 
 	// Fade-in/out overlay
     this->DrawFadeOverlay(DISPLAY_WIDTH, DISPLAY_HEIGHT, this->fadeAnimation.GetInterpolantValue());
@@ -660,13 +720,23 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
 void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	assert(this->mainMenu != NULL);
 	// Tell the main menu about the key pressed event
-	this->mainMenu->ButtonPressed(pressedButton);
+    if (this->eraseFailedPopup->GetIsVisible() || this->eraseSuccessfulPopup->GetIsVisible()) {
+        this->eraseSuccessfulPopup->ButtonPressed(pressedButton);
+        this->eraseFailedPopup->ButtonPressed(pressedButton);
+    }
+    else {
+	    this->mainMenu->ButtonPressed(pressedButton);
+    }
 }
 
 void MainMenuDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {
 	assert(this->mainMenu != NULL);
 	// Tell the main menu about the key pressed event
-	this->mainMenu->ButtonReleased(releasedButton);
+    if (this->eraseFailedPopup->GetIsVisible() || this->eraseSuccessfulPopup->GetIsVisible()) {
+    }
+    else {
+        this->mainMenu->ButtonReleased(releasedButton);
+    }
 }
 
 void MainMenuDisplayState::DisplaySizeChanged(int width, int height) {
@@ -691,8 +761,9 @@ void MainMenuDisplayState::MainMenuEventHandler::GameMenuItemActivatedEvent(int 
 	GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 	
 	// Do the actual selection of the item
-	if (itemIndex == this->mainMenuState->newGameMenuItemIndex) {
-		debug_output("Selected " << NEW_GAME_MENUITEM << " from menu");
+	if (itemIndex == this->mainMenuState->startGameMenuItemIndex) {
+        
+		debug_output("Selected " << this->mainMenuState->mainMenu->GetMenuItemAt(itemIndex)->GetCurrLabel()->GetText() << " from menu");
 		soundAssets->PlayMainMenuSound(GameSoundAssets::MainMenuItemVerifyAndSelectEvent);
 		this->mainMenuState->changeToPlayGameState = true;
 		this->mainMenuState->fadeAnimation.SetLerp(0.0, 2.0, 0.0f, 1.0f);
@@ -857,6 +928,7 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 		//GameSoundAssets* soundAssets = this->mainMenuState->display->GetAssets()->GetSoundAssets();
 		GameSoundAssets::SetGameVolume(volumeLevel);
 	}
+
     /*
     else if (itemIndex == this->mainMenuState->optionsControllerSensitivityIndex) {
         // Controller sensitivity option...
@@ -874,6 +946,22 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
 
 	// A configuration option has changed - rewrite the configuration file to accomodate the change
 	ResourceManager::GetInstance()->WriteConfigurationOptionsToFile(this->mainMenuState->cfgOptions);
+}
+
+void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemVerifiedEvent(int itemIndex) {
+    if (itemIndex == this->mainMenuState->optionsEraseProgressIndex) {
+        // The player has decided to decimate all of their progress...
+        bool success = GameProgressIO::WipeoutGameProgress(this->mainMenuState->display->GetModel());
+        
+        if (success) {
+            this->mainMenuState->eraseSuccessfulPopup->Show(0.0, 0.5);
+            // Set the start game menu item to be "New Game"
+            this->mainMenuState->startGameMenuItem->SetText(MainMenuDisplayState::NEW_GAME_MENUITEM);
+        }
+        else {
+            this->mainMenuState->eraseFailedPopup->Show(0.0, 0.5);
+        }
+    }
 }
 
 void MainMenuDisplayState::OptionsSubMenuEventHandler::EscMenu() {

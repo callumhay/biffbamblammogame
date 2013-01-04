@@ -25,11 +25,13 @@ struct DropShadow {
 	float scale;
 	Colour colour;
 	DropShadow(): amountPercentage(0.0f), colour(Colour(0,0,0)), isSet(false), scale(1.0f) {}
+    DropShadow(const DropShadow& copy) : isSet(copy.isSet), amountPercentage(copy.amountPercentage), scale(copy.scale), colour(copy.colour) {}
 };
 
 class TextLabel {
 public:
     TextLabel();
+    TextLabel(const TextLabel& copy);
     TextLabel(const TextureFontSet* font);
     virtual ~TextLabel();
 
@@ -149,7 +151,8 @@ class TextLabel2DFixedWidth : public TextLabel {
 public:
     enum Alignment { CenterAligned, LeftAligned, RightAligned };
 
-    TextLabel2DFixedWidth(const TextureFontSet* font, float width, const std::string& text); 
+    TextLabel2DFixedWidth(const TextureFontSet* font, float width, const std::string& text);
+    TextLabel2DFixedWidth(const TextLabel2D& label);
     ~TextLabel2DFixedWidth();
 
 	size_t GetHeight() const {

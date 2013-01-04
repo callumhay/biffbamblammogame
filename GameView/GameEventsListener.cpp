@@ -103,6 +103,9 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 
     // Queue the tutorial in-game state if this is the first world and first level of the game...
     if (this->display->GetModel()->IsCurrentLevelTheTutorialLevel()) {
+        // Cache the difficulty and change it to medium/normal
+        this->display->SetCachedDifficulty(this->display->GetModel()->GetDifficulty());
+        this->display->GetModel()->SetDifficulty(GameModel::MediumDifficulty);
         this->display->AddStateToQueue(DisplayState::InTutorialGame);
     }
     else {

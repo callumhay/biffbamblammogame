@@ -68,7 +68,7 @@ public:
 
     static const char* STAR_POINT_MILESTONE_KEYWORD;
 
-	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 9;
+	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 10;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;
 
     static const int NUM_PIECES_FOR_ALMOST_COMPLETE = 2;
@@ -76,7 +76,7 @@ public:
 	~GameLevel();
 
 	// Used to create a level from file
-	static GameLevel* CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelNumber, std::string filepath);
+	static GameLevel* CreateGameLevelFromFile(const GameWorld::WorldStyle& style, size_t levelIdx, std::string filepath);
 
 	/**
 	 * Obtain the set of pieces making up the current state of the level.
@@ -163,7 +163,7 @@ public:
 	}
 
     // Get the zero-based level number/index in its world
-    size_t GetLevelNumIndex() const { return this->levelNum; }
+    size_t GetLevelIndex() const { return this->levelIdx; }
 
 	void PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore, LevelPiece* pieceAfter,
                       const LevelPiece::DestructionMethod& method);
@@ -178,7 +178,7 @@ public:
     void ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID, GameModel* gameModel);
     const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;
 
-    bool GetIsLevelComplete() const;
+    bool GetIsLevelPassedWithScore() const;
     long GetHighScore() const;
     void SetHighScore(long highScore);
     bool GetHasNewHighScore() const;
@@ -209,7 +209,7 @@ private:
 	std::string filepath;
 	std::string levelName;
 
-    size_t levelNum;                    // The zero-based index of this level in its world
+    size_t levelIdx;                    // The zero-based index of this level in its world
 	size_t piecesLeft;                  // Pieces left before the end of the level
 	size_t width, height;               // Size values for the level
     size_t randomItemProbabilityNum;    // A number >= 0 for random item probability in the level
@@ -226,11 +226,11 @@ private:
     bool newHighScore;        // If a new high score was achieved on the last play through of this level
 
     // Constructor for non-boss levels
-	GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
+	GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
 		const std::vector<std::vector<LevelPiece*> >& pieces, const std::vector<GameItem::ItemType>& allowedDropTypes,
         size_t randomItemProbabilityNum, long* starAwardScores);
 	// Constructor for boss levels
-    GameLevel(size_t levelNumber, const std::string& filepath, const std::string& levelName, 
+    GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, 
 		const std::vector<std::vector<LevelPiece*> >& pieces, Boss* boss, const std::vector<GameItem::ItemType>& allowedDropTypes,
         size_t randomItemProbabilityNum);
 
@@ -251,7 +251,7 @@ inline const LevelPiece* GameLevel::GetTriggerableLevelPiece(const LevelPiece::T
     return findIter->second;
 }
 
-inline bool GameLevel::GetIsLevelComplete() const {
+inline bool GameLevel::GetIsLevelPassedWithScore() const {
     return this->highScore > 0;
 }
 

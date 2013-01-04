@@ -58,6 +58,10 @@ public:
 		return this->currState->GetType();
 	}
 
+    // Only used for the tutorial
+    void SetCachedDifficulty(const GameModel::Difficulty& difficulty) { this->cachedDifficulty = difficulty; }
+    GameModel::Difficulty GetCachedDifficulty() { return this->cachedDifficulty; }
+
 	void ChangeDisplaySize(int w, int h);
 	void Render(double dT);
     void UpdateModel(double dT);
@@ -124,6 +128,9 @@ private:
 
 	bool gameReinitialized;		// Whether or not we should reinitialize the whole game (recreate the window, etc.)
 	bool gameExited;  				// Whether or not the game has been exited
+
+    GameModel::Difficulty cachedDifficulty; // Bit of a hack - used to cache difficulty for when we need to back it up
+                                            // for the tutorial level
 
 	// Functions for Action Listeners
 	void SetupActionListeners();

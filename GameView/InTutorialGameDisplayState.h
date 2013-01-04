@@ -16,6 +16,8 @@
 
 #include "../ESPEngine/ESP.h"
 
+#include "../GameModel/GameModel.h"
+
 #include "DisplayState.h"
 #include "TutorialInGameRenderPipeline.h"
 #include "BoostCountdownHUD.h"
@@ -46,6 +48,8 @@ public:
 	DisplayState::DisplayStateType GetType() const;
 
 private:
+    GameModel::Difficulty beforeTutorialDifficulty;
+
 	TutorialInGameRenderPipeline renderPipeline;
     TutorialEventsListener* tutorialListener;
     std::vector<TutorialHint*> noDepthTutorialHints;

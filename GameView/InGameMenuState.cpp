@@ -252,16 +252,22 @@ void InGameMenuState::InitTopMenu() {
 
     this->invertBallBoostItem = this->topMenu->AddMenuItem(this->invertBallBoostMenuItem);
 
-    // Difficulty Item...
-    tempLabelSm.SetText("Difficulty");
-	tempLabelLg.SetText("Difficulty");
-    std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
+    // We don't allow a difficulty item to be part of the menu if the player is in the tutorial
+    if (this->returnToDisplayState->GetType() == DisplayState::InTutorialGame) {
+        this->difficultyItem = GameMenu::NO_MENU_ITEM_INDEX;
+    }
+    else {
+        // Add the difficulty item to the menu...
+        tempLabelSm.SetText("Difficulty");
+	    tempLabelLg.SetText("Difficulty");
+        std::vector<std::string> difficultyOptions = ConfigOptions::GetDifficultyItems();
 
-    this->difficultyMenuItem = new SelectionListMenuItem(tempLabelSm, tempLabelLg, difficultyOptions);
-    this->difficultyMenuItem->SetSelectedItem(static_cast<int>(this->cfgOptions.GetDifficulty()));
-    this->difficultyMenuItem->SetEventHandler(this->difficultyEventHandler);
+        this->difficultyMenuItem = new SelectionListMenuItem(tempLabelSm, tempLabelLg, difficultyOptions);
+        this->difficultyMenuItem->SetSelectedItem(static_cast<int>(this->cfgOptions.GetDifficulty()));
+        this->difficultyMenuItem->SetEventHandler(this->difficultyEventHandler);
 
-    this->difficultyItem = this->topMenu->AddMenuItem(this->difficultyMenuItem); 
+        this->difficultyItem = this->topMenu->AddMenuItem(this->difficultyMenuItem); 
+    }
 
 	// The exit/return to main menu item has a verify menu...
 	tempLabelSm.SetText("Return to Main Menu");
