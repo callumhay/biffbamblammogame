@@ -111,17 +111,22 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
 
+    bool shouldGenBounds = false;
+
 	// Left boundry of the piece
-    if (leftNeighbor != NULL && leftNeighbor->GetType() != LevelPiece::Solid) {
+    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->GetType() != LevelPiece::Solid);
+    if (shouldGenBounds) {
 		Collision::LineSeg2D l1(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT), 
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n1(-1, 0);
 		boundingLines.push_back(l1);
 		boundingNorms.push_back(n1);
-	}
+    }
+
 
 	// Bottom boundry of the piece
-	if (bottomNeighbor != NULL && bottomNeighbor->GetType() != LevelPiece::Solid) {
+    shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->GetType() != LevelPiece::Solid);
+	if (shouldGenBounds) {
 		Collision::LineSeg2D l2(this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n2(0, -1);
@@ -130,7 +135,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Right boundry of the piece
-	if (rightNeighbor != NULL && rightNeighbor->GetType() != LevelPiece::Solid) {
+    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->GetType() != LevelPiece::Solid);
+	if (shouldGenBounds) {
 		Collision::LineSeg2D l3(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, -LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n3(1, 0);
@@ -139,7 +145,8 @@ void LevelPiece::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	}
 
 	// Top boundry of the piece
-	if (topNeighbor != NULL && topNeighbor->GetType() != LevelPiece::Solid) {
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->GetType() != LevelPiece::Solid);
+	if (shouldGenBounds) {
 		Collision::LineSeg2D l4(this->center + Vector2D(LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT),
 								 this->center + Vector2D(-LevelPiece::HALF_PIECE_WIDTH, LevelPiece::HALF_PIECE_HEIGHT));
 		Vector2D n4(0, 1);

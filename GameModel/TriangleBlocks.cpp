@@ -359,15 +359,14 @@ BoundingLines TriangleBlock::CreateTriangleBounds(bool generateReflectRefractNor
     Vector2D longSideNorm, shortSideNorm, hypSideNorm;
     Collision::LineSeg2D shortSide, longSide, hypSide;
 
-    bool topNeighborNotSolid	= topNeighbor != NULL     && (topNeighbor->GetType()    != LevelPiece::Solid &&
+    bool topNeighborNotSolid	= topNeighbor == NULL     || (topNeighbor->GetType()    != LevelPiece::Solid &&
                                                               topNeighbor->GetType()    != LevelPiece::Breakable);
-    bool bottomNeighborNotSolid	= bottomNeighbor != NULL  && (bottomNeighbor->GetType() != LevelPiece::Solid &&
+    bool bottomNeighborNotSolid	= bottomNeighbor == NULL  || (bottomNeighbor->GetType() != LevelPiece::Solid &&
                                                               bottomNeighbor->GetType() != LevelPiece::Breakable);
-    bool leftNeighborNotSolid   = leftNeighbor != NULL    && (leftNeighbor->GetType()   != LevelPiece::Solid &&
+    bool leftNeighborNotSolid   = leftNeighbor == NULL    || (leftNeighbor->GetType()   != LevelPiece::Solid &&
                                                               leftNeighbor->GetType()   != LevelPiece::Breakable);
-    bool rightNeighborNotSolid  = rightNeighbor != NULL   && (rightNeighbor->GetType()  != LevelPiece::Solid &&
+    bool rightNeighborNotSolid  = rightNeighbor == NULL   || (rightNeighbor->GetType()  != LevelPiece::Solid &&
                                                               rightNeighbor->GetType()  != LevelPiece::Breakable);
-
 
     // Triangle neighbor cases...
     if (topNeighbor != NULL && TriangleBlock::IsTriangleType(*topNeighbor)) {
