@@ -63,7 +63,7 @@ void GameOverDisplayState::ButtonPressed(const GameControl::ActionButton& presse
 void GameOverDisplayState::UpdateAndDrawState(double dT) {
 	const Camera& camera = this->display->GetCamera();
 	
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glPushAttrib(GL_ENABLE_BIT);

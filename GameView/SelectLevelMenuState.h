@@ -50,7 +50,7 @@ public:
 	DisplayState::DisplayStateType GetType() const;
 
 private:
-    static const int HORIZONTAL_TITLE_GAP = 20;
+    static const int HORIZONTAL_TITLE_GAP = 60;
     static const int VERTICAL_TITLE_GAP   = 30;
 
     const GameWorld* world;
@@ -69,6 +69,7 @@ private:
     Texture* arrowTexture;
     Texture* starTexture;
     Texture* bossIconTexture;
+    Texture2D* starryBG;
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
 
@@ -105,24 +106,26 @@ private:
         const float GetWidth() const { return this->width; }
         const GameLevel* GetLevel() const { return this->level; }
         bool GetIsEnabled() const { return this->isEnabled; }
+        float GetHeight() const;
 
-        virtual float GetHeight() const = 0;
         virtual void Draw(const Camera& camera, double dT, bool isSelected) = 0;
 
     protected:
         static const float NUM_TO_NAME_GAP;
         static const float DISABLED_GREY_AMT;
+        static const float WIDTH_TO_HEIGHT_RATIO;
 
         Point2D topLeftCorner;
         float width;
 
         const GameLevel* level;
         bool isEnabled;
-        bool isSelected;
 
         TextLabel2D* numLabel;
         TextLabel2DFixedWidth* nameLabel;
         TextLabel2D* lockedLabel;
+
+        void DrawBG(bool isSelected);
 
         DISALLOW_COPY_AND_ASSIGN(AbstractLevelMenuItem);
     };
@@ -133,8 +136,6 @@ private:
             bool isEnabled, const Texture* starTexture);
         ~LevelMenuItem();
         
-        float GetHeight() const;
-
         void Draw(const Camera& camera, double dT, bool isSelected);
 
     private:
@@ -157,7 +158,6 @@ private:
             bool isEnabled, const Texture* bossTexture);
         ~BossLevelMenuItem();
 
-        float GetHeight() const;
         void Draw(const Camera& camera, double dT, bool isSelected);
 
     private:

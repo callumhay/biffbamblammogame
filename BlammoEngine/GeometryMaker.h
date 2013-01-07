@@ -154,5 +154,42 @@ public:
 	};
 
 
+	inline void DrawTiledFullScreenQuad(int width, int height, float tilingX, float tilingY,
+        const ColourRGBA& colour = ColourRGBA(1,1,1,1)) {
+		glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_CURRENT_BIT |
+            GL_TRANSFORM_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluOrtho2D(0, width, 0, height);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glPolygonMode(GL_FRONT, GL_FILL);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_ALWAYS);
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+
+		glColor4f(colour.R(), colour.G(), colour.B(), colour.A());
+		glBegin(GL_QUADS);
+				glTexCoord2f(0, 0); glVertex2f(0, 0);
+				glTexCoord2f(tilingX, 0); glVertex2f(width, 0);
+				glTexCoord2f(tilingX, tilingY); glVertex2f(width, height);
+				glTexCoord2f(0, tilingY); glVertex2f(0, height);
+		glEnd();
+
+		glPopMatrix();
+
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glPopAttrib();
+
+		debug_opengl_state();
+	};
+
 };
 #endif

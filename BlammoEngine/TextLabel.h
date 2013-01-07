@@ -50,6 +50,9 @@ public:
 		this->dropShadow.colour = c;
 		this->dropShadow.amountPercentage = percentAmt;
 	}
+    void SetDropShadowColour(const Colour& c) {
+        this->dropShadow.colour = c;
+    }
 	void SetDropShadowAmount(float percentAmt) {
 		this->dropShadow.amountPercentage = percentAmt;
 	}

@@ -63,7 +63,7 @@ inline void DisplayState::DrawFadeOverlay(int width, int height, float alpha) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     GeometryMaker::GetInstance()->DrawFullScreenQuad(width, height, 1.0f, 
-                                                     ColourRGBA(1, 1, 1, alpha));
+                                                     ColourRGBA(0, 0, 0, alpha));
     glPopAttrib();
 }
 

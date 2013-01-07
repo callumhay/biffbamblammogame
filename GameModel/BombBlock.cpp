@@ -169,6 +169,9 @@ LevelPiece* BombBlock::Destroy(GameModel* gameModel, const LevelPiece::Destructi
 	LevelPiece* tempThis = this;
 	delete tempThis;
 	tempThis = NULL;
+    
+    // Charge up the boost meter a little bit
+    gameModel->AddPercentageToBoostMeter(0.05);
 
 	return emptyPieceForBomb;
 }

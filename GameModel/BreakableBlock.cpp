@@ -52,7 +52,7 @@ LevelPiece* BreakableBlock::Destroy(GameModel* gameModel, const LevelPiece::Dest
 	tempThis = NULL;
 
     // Add to the ball boost meter...
-    gameModel->AddPercentageToBoostMeter(0.033);
+    gameModel->AddPercentageToBoostMeter(0.025);
 
 	return emptyPiece;
 }
@@ -174,7 +174,7 @@ LevelPiece* BreakableBlock::DiminishPiece(GameModel* gameModel, const LevelPiece
 			}
 			newPiece = this;
 
-            gameModel->AddPercentageToBoostMeter(0.015);
+            gameModel->AddPercentageToBoostMeter(0.01);
 			
             break;
 

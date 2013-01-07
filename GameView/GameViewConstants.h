@@ -38,6 +38,8 @@ public:
 
 	// Constant listing...
 
+    static const int STARRY_BG_TILE_MULTIPLIER = 2;
+
 	// Asset file path constants ***************************
 	const char* RESOURCE_DIR;
 	const char* FONT_DIR;

@@ -38,54 +38,54 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
 	// Load SDL, make sure the window is centered
 	putenv("SDL_VIDEO_CENTERED=1");
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
-    debug_output("Unable to initialize SDL: " << SDL_GetError());
-		std::cerr << "Unable to initialize SDL: " << SDL_GetError();
-    return false;
-  }
+        debug_output("Unable to initialize SDL: " << SDL_GetError());
+		    std::cerr << "Unable to initialize SDL: " << SDL_GetError();
+        return false;
+    }
 	
 	// Load the SDL Audio Mixer
-  static const int audio_rate = 44100;
-  static const Uint16 audio_format = AUDIO_S16SYS; // 16-bit stereo
-  static const int audio_channels = 2;
-  static const int audio_buffers = 2048;
+    static const int audio_rate = 44100;
+    static const Uint16 audio_format = AUDIO_S16SYS; // 16-bit stereo
+    static const int audio_channels = 2;
+    static const int audio_buffers = 2048;
 
 	if (Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers)) {
 		debug_output("Unable to open SDL audio: " << SDL_GetError());
 		std::cerr << "Unable to open SDL audio: " << SDL_GetError();
-    return false;
-  }
+        return false;
+    }
 	
 	int resultAudioRate, resultAudioChannels;
 	Uint16 resultAudioFormat;
 	Mix_QuerySpec(&resultAudioRate, &resultAudioFormat, &resultAudioChannels);
 	debug_output("SDL Audio Information:" << std::endl << 
-		           "Audio rate: " << resultAudioRate << "Hz" << std::endl <<
-							 "Audio channels: " << resultAudioChannels << std::endl);
+                 "Audio rate: " << resultAudioRate << "Hz" << std::endl <<
+                 "Audio channels: " << resultAudioChannels << std::endl);
 		           
 
 	// Don't show the mouse cursor unless we're in debug mode
 #ifdef _DEBUG
 	SDL_ShowCursor(1);
 #else
-	SDL_ShowCursor(1);
+	//SDL_ShowCursor(1);
     // TODO: Show the cursor as a graphic/effect of some sort in the menu and game
     // and hide the normal one...
-    //SDL_ShowCursor(0);
+    SDL_ShowCursor(0);
 #endif
 
-	SDL_WM_SetCaption(WindowManager::WINDOW_TITLE, WindowManager::WINDOW_TITLE);
+    SDL_WM_SetCaption(WindowManager::WINDOW_TITLE, WindowManager::WINDOW_TITLE);
 
-  // To use OpenGL, you need to get some information first,
-  const SDL_VideoInfo *info = SDL_GetVideoInfo();
-  if (!info) {
+    // To use OpenGL, you need to get some information first,
+    const SDL_VideoInfo *info = SDL_GetVideoInfo();
+    if (!info) {
     // This should never happen...
-		debug_output("Video query failed: " << SDL_GetError() << std::endl);
-		std::cerr << "Video query failed: " << SDL_GetError() << std::endl;
+	    debug_output("Video query failed: " << SDL_GetError() << std::endl);
+	    std::cerr << "Video query failed: " << SDL_GetError() << std::endl;
     return false;
-  }
-  this->bitsPerPixel = info->vfmt->BitsPerPixel;
+    }
+    this->bitsPerPixel = info->vfmt->BitsPerPixel;
 
-  // Set colour bits...
+    // Set colour bits...
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,  8);
@@ -93,7 +93,7 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
   
 	// Set colour depth
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-  // Double buffering
+    // Double buffering
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	// .. OTHER STUFF HERE
 
@@ -101,15 +101,23 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
 	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, GameDisplay::NUM_MULTISAMPLES);
 
-  // Set the draw surface...
+    // Set the draw surface...
 	unsigned int videoFlags = WindowManager::DEFAULT_VIDEO_FLAGS | (isFullscreen ? SDL_FULLSCREEN : NULL);
 	this->videoSurface = SDL_SetVideoMode(width, height, bitsPerPixel, videoFlags);
 	if (this->videoSurface == NULL) {
+
 		debug_output("Unable to set video mode: " << SDL_GetError());
 		std::cerr << "Unable to set video mode: " << SDL_GetError();
-    return false;
-  }
+        return false;
+    }
 	
+    // Draw black
+    glViewport(0, 0, width, height);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearDepth(1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    SDL_GL_SwapBuffers();
+
 	SDL_Surface* icon = SDL_LoadBMP(WindowManager::ICON_FILEPATH);
 	SDL_SetColorKey(icon, SDL_SRCCOLORKEY, SDL_MapRGB(icon->format, 255, 0, 255));
 	SDL_WM_SetIcon(icon, NULL);

@@ -53,10 +53,12 @@ private:
 	TextLabel2D nowEnteringLabel;
 	TextLabel2D pressAnyKeyLabel;
 
+    Texture2D* starryBG;
+
 	bool waitingForKeyPress;
 	
-	AnimationLerp<float> fadeAnimation;							// Animation for fading to white - represents alpha fade value
-	AnimationLerp<float> showHeaderAnimation;				// Animation for wipe-fadein of the header
+	AnimationLerp<float> fadeAnimation;			 // Animation for fading to white - represents alpha fade value
+	AnimationLerp<float> showHeaderAnimation;	 // Animation for wipe-fadein of the header
 	AnimationLerp<float> titleFadeIn;
 	AnimationLerp<float> titleMoveIn;
 	AnimationMultiLerp<Colour> footerColourAnimation;

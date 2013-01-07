@@ -196,7 +196,7 @@ bool BallBoostModel::BallBoosterPressed() {
     this->numAvailableBoosts--;
     assert(this->numAvailableBoosts >= 0);
     // EVENT: Ball Boost lost
-    GameEventManager::Instance()->ActionBallBoostLost(false);
+    GameEventManager::Instance()->ActionBallBoostLost(this->numAvailableBoosts == 0);
 
     // End the bullet time state...
     this->SetCurrentState(BulletTimeFadeOut);

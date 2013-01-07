@@ -235,8 +235,6 @@ void ItemListView::DrawPost(const Camera& camera) {
             float screenHeight = camera.GetWindowHeight();
             float topBorderBottomY = screenHeight - blackBorderAmt;
 
-
-
             glColor4f(0, 0, 0, 1);
             glBegin(GL_QUADS);
 
@@ -253,12 +251,9 @@ void ItemListView::DrawPost(const Camera& camera) {
             glVertex2i(screenWidth, 0);
 
             glEnd();
+        }
 
-            this->keyLabel->SetBeforeAndAfterTextColour(Colour(1,1,1));
-        }
-        else {
-            this->keyLabel->SetBeforeAndAfterTextColour(Colour(0,0,0));
-        }
+        this->keyLabel->SetBeforeAndAfterTextColour(Colour(1,1,1));
 
         // Draw the keyboard key for escaping the entry pop-up
         static const float X_TEXT_LOC = 20;
@@ -339,6 +334,7 @@ void ItemListView::AdjustSizeToHeight(size_t height) {
         // Center horizontally if there's only one row...
         this->horizontalBorder = (this->listWidth - (static_cast<int>(this->items.size()) - 1) * this->horizontalGap -
             this->items.size() * this->itemPixelWidth) / 2;
+        this->numItemsPerRow = static_cast<int>(this->items.size());
     }
 
     // Center the menu vertically
@@ -746,8 +742,10 @@ finePrintLbl(new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->Get
 {
 
 
-    this->descriptionLbl->SetColour(Colour(0,0,0));
+    this->descriptionLbl->SetColour(Colour(1.0f, 1.0f, 1.0f));
     this->descriptionLbl->SetLineSpacing(10.0f);
+    this->finePrintLbl->SetColour(Colour(1.0f, 1.0f, 1.0f));
+    this->finePrintLbl->SetLineSpacing(10.0f);
 
     if (!isLocked && !hasBeenViewed) {
         this->newLbl = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
