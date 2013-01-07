@@ -1,22 +1,22 @@
 Chain of BOOM
 11 25
 E T(S,lr) S S S S S S S T(S,ll) E 
-T(S,lr) T(S,ul) B R E R E R B T(S,ur) T(S,ll) 
-S R R B R B R B R R S 
-S B O O B O B O O B S 
-S R B Y Y B Y Y B R S 
-S B O Y G E G Y O B S 
+T(S,lr) T(S,ul) E R B R B R E T(S,ur) T(S,ll) 
+S R R E R B R E R R S 
+S B O O B R B O O B S 
+S R B Y R R R Y B R S 
+S B O Y G B G Y O B S 
 S R B Y G E G Y B R S 
 S B O Y G E G Y O B S 
+S R O Y G E G Y O R S 
 S R B Y G E G Y B R S 
-S B O Y G E G Y O B S 
 S R O Y G E G Y O R S 
 S B O Y G E G Y O B S 
 S R B Y G E G Y B R S 
 S B O Y G E G Y O B S 
 S R B Y G E G Y B R S 
 S B O Y G G G Y O B S 
-S R O O Y Y Y O O R S 
+S R O O Y G Y O O R S 
 S E E E G G G E E E S 
 S E E E E E E E E E S 
 S E E E E E E E E E S 
@@ -27,18 +27,18 @@ S E E E E E E E E E S
 S E E E E E E E E E S 
 
 STARS:
-40000
-60000
-70000
-80000
+68000
+73000
+82000
 95000
+101000
 
 PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 2
 BallGrow 2
+UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0

@@ -35,7 +35,7 @@ private:
     static const int MAX_BULLETS_AT_A_TIME;
 
     double timeSinceLastOmniBullets;
-	void ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity);
+	void ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity, GameModel* gameModel);
     void AttemptFireOfOmniBullets(double dT, GameModel* gameModel);
 
     DISALLOW_COPY_AND_ASSIGN(NormalBallState);
