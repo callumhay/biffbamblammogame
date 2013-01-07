@@ -53,6 +53,7 @@ private:
     static const float SCORE_LABEL_SIDE_PADDING;
 
     static const double POINTS_PER_SECOND;
+    static const double MAX_TALLY_TIME_IN_SECS;
     static const double PER_SCORE_VALUE_FADE_IN_TIME;
 
     static const double SHOW_DIFFICULTY_CHOICE_PANE_TIME;

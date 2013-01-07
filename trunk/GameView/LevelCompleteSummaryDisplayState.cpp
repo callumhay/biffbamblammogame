@@ -34,7 +34,8 @@ const float LevelCompleteSummaryDisplayState::STAR_SIZE                         
 const float LevelCompleteSummaryDisplayState::STAR_HORIZONTAL_GAP                            = 10.0f;
 const float LevelCompleteSummaryDisplayState::SCORE_LABEL_SIDE_PADDING                       = 100.0f;
 
-const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND                = 20000;
+const double LevelCompleteSummaryDisplayState::MAX_TALLY_TIME_IN_SECS           = 4.0;
+const double LevelCompleteSummaryDisplayState::POINTS_PER_SECOND                = 10000;
 const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     = 0.25;
 
 const double LevelCompleteSummaryDisplayState::SHOW_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
@@ -206,7 +207,8 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
     // Setup the animation for the score
     static const double START_TALLEY_TIME = nextEndTime + 0.5;
     double gameScore = static_cast<double>(gameModel->GetScore());
-    double totalTime = gameScore / POINTS_PER_SECOND;
+    double totalTime = std::min<double>(MAX_TALLY_TIME_IN_SECS, gameScore / POINTS_PER_SECOND);
+
     this->scoreValueAnimation.SetInterpolantValue(0.0);
     this->scoreValueAnimation.SetLerp(START_TALLEY_TIME, START_TALLEY_TIME+totalTime, 0.0, gameScore);
     this->scoreValueAnimation.SetRepeat(false);
@@ -222,8 +224,7 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
     this->scoreValueLabel.SetText(initScoreValueStrStream.str());
     
     const float totalScoreXSize = this->totalScoreLabel.GetLastRasterWidth() +
-        TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING + this->scoreValueLabel.GetLastRasterWidth();
-
+        TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING + this->maxScoreValueWidth;
     float totalScoreXPos = (camera.GetWindowWidth() - totalScoreXSize) / 2.0f;
     float scoreStartX = -(this->maxScoreValueWidth + this->totalScoreLabel.GetLastRasterWidth() +
         2*TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING);
