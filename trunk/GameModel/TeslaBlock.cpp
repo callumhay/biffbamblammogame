@@ -54,48 +54,46 @@ void TeslaBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece* 
 	std::vector<Collision::LineSeg2D> boundingLines;
 	std::vector<Vector2D>  boundingNorms;
 
+    bool shouldGenBounds = false;
+
 	// Left boundry of the piece
-	if (leftNeighbor != NULL) {
-        if (leftNeighbor->GetType() != LevelPiece::Solid) {
-		    Collision::LineSeg2D l1(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND), 
-								     this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
-		    Vector2D n1(-1, 0);
-		    boundingLines.push_back(l1);
-		    boundingNorms.push_back(n1);
-        }
+    shouldGenBounds = (leftNeighbor == NULL || leftNeighbor->GetType() != LevelPiece::Solid);
+    if (shouldGenBounds) {
+	    Collision::LineSeg2D l1(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND), 
+							     this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
+	    Vector2D n1(-1, 0);
+	    boundingLines.push_back(l1);
+	    boundingNorms.push_back(n1);
 	}
 
 	// Bottom boundry of the piece
-	if (bottomNeighbor != NULL) {
-        if (bottomNeighbor->GetType() != LevelPiece::Solid) {
-		    Collision::LineSeg2D l2(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
-								     this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
-		    Vector2D n2(0, -1);
-		    boundingLines.push_back(l2);
-		    boundingNorms.push_back(n2);
-        }
+	shouldGenBounds = (bottomNeighbor == NULL || bottomNeighbor->GetType() != LevelPiece::Solid);
+    if (shouldGenBounds) {
+        Collision::LineSeg2D l2(this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
+						         this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND));
+        Vector2D n2(0, -1);
+        boundingLines.push_back(l2);
+        boundingNorms.push_back(n2);
 	}
 
 	// Right boundry of the piece
-	if (rightNeighbor != NULL) {
-        if (rightNeighbor->GetType() != LevelPiece::Solid) {
-		    Collision::LineSeg2D l3(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
-								     this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
-		    Vector2D n3(1, 0);
-		    boundingLines.push_back(l3);
-		    boundingNorms.push_back(n3);
-        }
+    shouldGenBounds = (rightNeighbor == NULL || rightNeighbor->GetType() != LevelPiece::Solid);
+    if (shouldGenBounds) {
+	    Collision::LineSeg2D l3(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, -HALF_TESLA_HEIGHT_BOUND),
+							     this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
+	    Vector2D n3(1, 0);
+	    boundingLines.push_back(l3);
+	    boundingNorms.push_back(n3);
 	}
 
 	// Top boundry of the piece
-	if (topNeighbor != NULL) {
-        if (topNeighbor->GetType() != LevelPiece::Solid) {
-		    Collision::LineSeg2D l4(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND),
-								     this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
-		    Vector2D n4(0, 1);
-		    boundingLines.push_back(l4);
-		    boundingNorms.push_back(n4);
-        }
+    shouldGenBounds = (topNeighbor == NULL || topNeighbor->GetType() != LevelPiece::Solid);
+    if (shouldGenBounds) {
+	    Collision::LineSeg2D l4(this->center + Vector2D(HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND),
+							     this->center + Vector2D(-HALF_TESLA_WIDTH_BOUND, HALF_TESLA_HEIGHT_BOUND));
+	    Vector2D n4(0, 1);
+	    boundingLines.push_back(l4);
+	    boundingNorms.push_back(n4);
 	}
 
 	this->SetBounds(BoundingLines(boundingLines, boundingNorms), leftNeighbor, bottomNeighbor, rightNeighbor, topNeighbor, 
