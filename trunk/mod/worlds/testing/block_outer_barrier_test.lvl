@@ -1,0 +1,71 @@
+Block Outer Barrier Test
+15 30
+N S S D(all) S C(0) S S P S N S W(0) S S 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E C(0) 
+S E E E E E E E E E E E E E S 
+A(0,1,b,a) E E E E E E E E E E E E E A(0,1,a,b) 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+N E E E E E E E E E E E E E P 
+S E E E E E E E E E E E E E S 
+S E E E E G G G G G E E E E T(S,ul) 
+T(P,ul) E E E E E E E E E E E E E T(P,ul) 
+S E E E E E E E E E E E E E T(S,ur) 
+T(P,ur) E E E E E E E E E E E E E T(S,lr) 
+S E E E E E E E E E E E E E T(P,ur) 
+C(0) E E E E E E E E E E E E E T(S,lr) 
+S E E E E E E E E E E E E E S 
+P E E E E E E E E E E E E E T(P,ll) 
+S E E E E E E E E E E E E E S 
+T(P,ll) E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E T(P,lr) 
+S E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E N 
+T(P,lr) E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+T(S,ur) E E E E E E E E E E E E E W(0) 
+T(S,ul) E E E E E E E E E E E E E S 
+T(S,ll) E E E E E E E E E E E E E T(S,ll) 
+T(S,lr) E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E S 
+W(0) E E E E E E E E E E E E E S 
+
+STARS:
+100
+500
+1000
+2000
+5000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+BallGrow 2
+UberBall 2
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 2
+RocketPaddle 2
+GhostBall 2
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 2
+MagnetPaddle 2
+MultiBall3 2
+IceBall 2
+MineLauncherPaddle 2
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 2
