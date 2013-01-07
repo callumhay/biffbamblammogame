@@ -40,6 +40,7 @@ GameESPAssets::GameESPAssets() :
 particleFader(1, 0),
 particleBoostFader(0.8f, 0.0f),
 particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
+particleFireFastColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 0.8f), ColourRGBA(0.5f, 0.0f, 0.0f, 0.0f)),
 fireBallColourFader(ColourRGBA(1.0f, 1.0f, 0.0f, 1.0f), ColourRGBA(0.4f, 0.15f, 0.0f, 0.2f)),
 iceBallColourFader(ColourRGBA(GameModelConstants::GetInstance()->ICE_BALL_COLOUR, 1.0f), ColourRGBA(1.0f, 1.0f, 1.0f, 0.1f)),
 particleCloudColourFader(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f), ColourRGBA(0.7f, 0.7f, 0.7f, 0.0f)),
@@ -1955,14 +1956,14 @@ void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 	bombExplodeFireEffect2->SetSpawnDelta(ESPInterval(0.005f));
 	bombExplodeFireEffect2->SetNumParticleLives(1);
 	bombExplodeFireEffect2->SetInitialSpd(ESPInterval(3.0f, 3.3f));
-	bombExplodeFireEffect2->SetParticleLife(ESPInterval(0.5f, 4.0f));
-	bombExplodeFireEffect2->SetParticleSize(ESPInterval(1.0f, 3.0f));
+	bombExplodeFireEffect2->SetParticleLife(ESPInterval(0.5f, 2.75f));
+	bombExplodeFireEffect2->SetParticleSize(ESPInterval(1.0f, 2.8f));
 	bombExplodeFireEffect2->SetRadiusDeviationFromCenter(ESPInterval(1.0f));
 	bombExplodeFireEffect2->SetParticleAlignment(ESP::ScreenAligned);
 	bombExplodeFireEffect2->SetEmitPosition(emitCenter);
 	bombExplodeFireEffect2->SetEmitAngleInDegrees(180);
 	bombExplodeFireEffect2->SetParticles(GameESPAssets::NUM_EXPLOSION_FIRE_CLOUD_PARTICLES, this->explosionTex);
-	bombExplodeFireEffect2->AddEffector(&this->particleFireColourFader);
+	bombExplodeFireEffect2->AddEffector(&this->particleFireFastColourFader);
 	bombExplodeFireEffect2->AddEffector(&this->particleLargeGrowth);
 
 	// Create an emitter for the sound of onomatopeia of the exploding bomb
@@ -1970,7 +1971,7 @@ void GameESPAssets::AddBombBlockBreakEffect(const LevelPiece& bomb) {
 	// Set up the emitter...
 	bombOnoEffect->SetSpawnDelta(ESPInterval(-1, -1));
 	bombOnoEffect->SetInitialSpd(ESPInterval(0.0f, 0.0f));
-	bombOnoEffect->SetParticleLife(ESPInterval(2.0f, 2.5f));
+	bombOnoEffect->SetParticleLife(ESPInterval(2.0f, 2.25f));
 	bombOnoEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
 	bombOnoEffect->SetParticleRotation(ESPInterval(-20.0f, 20.0f));
 	bombOnoEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.2f));

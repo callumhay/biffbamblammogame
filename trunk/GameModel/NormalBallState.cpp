@@ -85,7 +85,7 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
 
 	    // Crazy ball manipulates the direction and acceleration of the ball... *unless it's attached to a paddle
 	    if ((this->gameBall->GetBallType() & GameBall::CrazyBall) == GameBall::CrazyBall) {
-		    this->ApplyCrazyBallVelocityChange(seconds, currVelocity);
+		    this->ApplyCrazyBallVelocityChange(seconds, currVelocity, gameModel);
 	    }
     }
 
@@ -137,7 +137,7 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
 
 // Apply the crazy ball item's effect to the velocity of the ball by changing it somewhat randomly
 // and strangely to make it difficult to track where the ball will go
-void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity) {
+void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelocity, GameModel* gameModel) {
 	static double TIME_TRACKER = 0.0;
 	static double NEXT_TIME    = 0.0;
 	static const double WAIT_TIME_BETWEEN_COLLISIONS = 1.00;
@@ -156,12 +156,38 @@ void NormalBallState::ApplyCrazyBallVelocityChange(double dT, Vector2D& currVelo
 
 	// After some accumlated interval of time, do a random velocity change
 	if (TIME_TRACKER >= NEXT_TIME && this->gameBall->GetTimeSinceLastCollision() > WAIT_TIME_BETWEEN_COLLISIONS) {
+
 		TIME_TRACKER = 0.0;
 		NEXT_TIME = 1.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 2.0;
 
-		float randomRotation  = Randomizer::GetInstance()->RandomNegativeOrPositive() * (45 + Randomizer::GetInstance()->RandomNumZeroToOne() * 115);
-		Vector2D newVelocityDir = Vector2D::Normalize(Vector2D::Rotate(randomRotation, currVelocity));
-		this->gameBall->SetVelocity(this->gameBall->currSpeed, newVelocityDir);
+        // Special case: if the crazy ball is outside of the tight bounds around the level (other than the
+        // bottom) then it won't try to go back in
+        const GameLevel* currLevel = gameModel->GetCurrentLevel();
+        assert(currLevel != NULL);
+
+        float levelWidth = currLevel->GetLevelUnitWidth();
+        float levelHeight = currLevel->GetLevelUnitHeight();
+        const Point2D& ballCenter = this->gameBall->GetBounds().Center();
+
+        Vector2D newVelocityDir;
+        if (ballCenter[1] > levelHeight) {
+            float randomRotation = Randomizer::GetInstance()->RandomNegativeOrPositive() * (45.0f * Randomizer::GetInstance()->RandomNumZeroToOne());
+            newVelocityDir = Vector2D::Normalize(Vector2D::Rotate(randomRotation, Vector2D(0, 1)));
+        }
+        else if (ballCenter[0] < 0.0) {
+            float randomRotation = Randomizer::GetInstance()->RandomNegativeOrPositive() * (45.0f * Randomizer::GetInstance()->RandomNumZeroToOne());
+            newVelocityDir = Vector2D::Normalize(Vector2D::Rotate(randomRotation, Vector2D(-1, 0)));
+        }
+        else if (ballCenter[0] > levelWidth) {
+            float randomRotation = Randomizer::GetInstance()->RandomNegativeOrPositive() * (45.0f * Randomizer::GetInstance()->RandomNumZeroToOne());
+            newVelocityDir = Vector2D::Normalize(Vector2D::Rotate(randomRotation, Vector2D(1, 0)));
+        }
+        else {
+		    float randomRotation  = Randomizer::GetInstance()->RandomNegativeOrPositive() * (45 + Randomizer::GetInstance()->RandomNumZeroToOne() * 115);
+		    newVelocityDir = Vector2D::Normalize(Vector2D::Rotate(randomRotation, currVelocity));
+        }
+
+        this->gameBall->SetVelocity(this->gameBall->currSpeed, newVelocityDir);
 	}
 }
 

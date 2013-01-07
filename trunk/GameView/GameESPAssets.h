@@ -64,6 +64,7 @@ private:
 	ESPParticleColourEffector particleFader;
     ESPParticleColourEffector particleBoostFader;
 	ESPParticleColourEffector particleFireColourFader;
+    ESPParticleColourEffector particleFireFastColourFader;
 	ESPParticleColourEffector fireBallColourFader;
 	ESPParticleColourEffector iceBallColourFader;
 	ESPParticleColourEffector particleCloudColourFader;
