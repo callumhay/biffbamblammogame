@@ -63,6 +63,8 @@ private:
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
 
+    Texture2D* starryBG;
+
     // Inner class for representing a selectable world item in the world select menu
     class WorldSelectItem {
     public:

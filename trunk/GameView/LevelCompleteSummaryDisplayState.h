@@ -43,7 +43,6 @@ private:
     static const double FOOTER_FLASH_TIME;
     static const float FOOTER_VERTICAL_PADDING;
     static const float LEVEL_NAME_HORIZONTAL_PADDING;
-    static const float HEADER_LEVEL_NAME_VERTICAL_PADDING;
     static const float HEADER_INBETWEEN_VERTICAL_PADDING;
     static const float TOTAL_SCORE_VALUE_INBETWEEN_HORIZONTAL_PADDING;
     static const float HEADER_SCORE_INBETWEEN_VERTICAL_PADDING;
@@ -67,9 +66,9 @@ private:
     AnimationLerp<float> levelCompleteTextScaleAnimation;
     AnimationLerp<float> newHighScoreFade;
     
-    AnimationLerp<float> maxBlocksFadeIn;
-    AnimationLerp<float> numItemsFadeIn;
-    AnimationLerp<float> totalTimeFadeIn;
+    //AnimationLerp<float> maxBlocksFadeIn;
+    //AnimationLerp<float> numItemsFadeIn;
+    //AnimationLerp<float> totalTimeFadeIn;
 
     AnimationMultiLerp<Colour> footerColourAnimation;
     std::vector<AnimationLerp<float>* > starAnimations;
@@ -82,14 +81,12 @@ private:
     TextLabel2DFixedWidth* levelNameLabel;
 
     // Statistics labels
-    TextLabel2DFixedWidth* maxBlocksTextLabel;
-    TextLabel2D maxBlocksValueLabel;
-
-    TextLabel2DFixedWidth* itemsAcquiredTextLabel;
-    TextLabel2D itemsAcquiredValueLabel;
-
-    TextLabel2DFixedWidth* levelTimeTextLabel;
-    TextLabel2D levelTimeValueLabel;
+    //TextLabel2DFixedWidth* maxBlocksTextLabel;
+    //TextLabel2D maxBlocksValueLabel;
+    //TextLabel2DFixedWidth* itemsAcquiredTextLabel;
+    //TextLabel2D itemsAcquiredValueLabel;
+    //TextLabel2DFixedWidth* levelTimeTextLabel;
+    //TextLabel2D levelTimeValueLabel;
 
     TextLabel2D totalScoreLabel;
     TextLabel2D scoreValueLabel;
@@ -100,6 +97,7 @@ private:
     Texture* starTexture;
     Texture* glowTexture;
     Texture* sparkleTexture;
+    Texture2D* starryBG;
     std::vector<ESPPointEmitter*> starBgEmitters;
     std::vector<ESPPointEmitter*> starFgEmitters;
     ESPParticleRotateEffector starBgRotator;
@@ -119,9 +117,9 @@ private:
     void DrawLevelNameLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawLevelCompleteLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawStars(double dT, float currYPos, float screenWidth, float screenHeight);
-    void DrawMaxBlocksLabel(float currYPos, float screenWidth);
-    void DrawNumItemsLabel(float currYPos, float screenWidth);
-    void DrawTotalTimeLabel(float currYPos, float screenWidth);
+    //void DrawMaxBlocksLabel(float currYPos, float screenWidth);
+    //void DrawNumItemsLabel(float currYPos, float screenWidth);
+    //void DrawTotalTimeLabel(float currYPos, float screenWidth);
     void DrawTotalScoreLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawPressAnyKeyTextFooter(float screenWidth);
 

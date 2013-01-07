@@ -64,6 +64,9 @@ private:
 	ESPPointEmitter* shockwaveEmitter;
 	ESPPointEmitter* starEmitter;
 
+    Texture2D* starryBG;
+
+    DISALLOW_COPY_AND_ASSIGN(LevelStartDisplayState);
 };
 
 inline void LevelStartDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {

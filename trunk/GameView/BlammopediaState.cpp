@@ -40,7 +40,7 @@ const float BlammopediaState::LABEL_ITEM_GAP = 50;
 
 BlammopediaState::BlammopediaState(GameDisplay* display) : 
 DisplayState(display), currMenuItemIndex(NO_MENU_ITEM_INDEX), currListViewIndex(0), 
-goBackToMainMenu(false) {
+goBackToMainMenu(false), starryBG(NULL) {
 
     this->itemSelTabAnim.SetInterpolantValue(0.0f);
     this->itemSelTabAnim.SetRepeat(false);
@@ -62,6 +62,10 @@ goBackToMainMenu(false) {
         GameFontAssetsManager::Medium));
     this->selectedItemNameLbl.SetColour(Colour(1, 0.65f, 0));
     this->selectedItemNameLbl.SetDropShadow(Colour(0,0,0), 0.125f);
+
+    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
+    assert(this->starryBG != NULL);
 
     TextLabel2D* gameplayMenuItem = new TextLabel2D();
     gameplayMenuItem->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
@@ -159,6 +163,11 @@ BlammopediaState::~BlammopediaState() {
         label = NULL;
     }
     this->blammoMenuLabels.clear();
+
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 void BlammopediaState::RenderFrame(double dT) {
@@ -170,13 +179,20 @@ void BlammopediaState::RenderFrame(double dT) {
 
     ItemListView::ListItem* currItem = currListView->GetSelectedItem();
 
-	// Clear the screen to a white background
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	// Clear the screen
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
     glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Draw the starry background...
+    this->starryBG->BindTexture();
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
+    this->starryBG->UnbindTexture();
 
     static const float LINE_WIDTH = 2.0f;
     glLineWidth(LINE_WIDTH);
@@ -193,20 +209,6 @@ void BlammopediaState::RenderFrame(double dT) {
     // draw over the entire screen and we don't need to draw all the other stuff
     if (!currListView->GetIsItemActivated()) {
 
-        // Draw the bottom menu background
-        glColor4f(1, 0.65f, 0, 1.0f);
-        glBegin(GL_QUADS);
-        glVertex2i(0, 0);
-        glVertex2i(camera.GetWindowWidth(), 0);
-        glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
-        glVertex2i(0, TOTAL_MENU_HEIGHT);
-        glEnd();
-        glColor4f(0, 0, 0, 1.0f);
-        glBegin(GL_LINES);
-        glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
-        glVertex2i(0, TOTAL_MENU_HEIGHT);
-        glEnd();
-
         if (this->currMenuItemIndex < static_cast<int>(this->blammoMenuLabels.size())) {
             float tabHeightScale = this->itemSelTabAnim.GetInterpolantValue();
 
@@ -216,27 +218,42 @@ void BlammopediaState::RenderFrame(double dT) {
             float bottomY = selectedLabel->GetTopLeftCorner()[1] - selectedLabel->GetHeight() - 10;
             float animatedBottomY = (1.0f - tabHeightScale) * (TOTAL_MENU_HEIGHT + LINE_WIDTH) + tabHeightScale * bottomY;
 
-            glColor4f(1,1,1,1);
+            glColor4f(0,0,0,0);
             glBegin(GL_QUADS);
-            glVertex2i(quadLeftX,  animatedBottomY);
-            glVertex2i(quadRightX, animatedBottomY);
-            glVertex2i(quadRightX, (TOTAL_MENU_HEIGHT + LINE_WIDTH));
-            glVertex2i(quadLeftX,  (TOTAL_MENU_HEIGHT + LINE_WIDTH));
+            glVertex3i(quadLeftX,  animatedBottomY, 1);
+            glVertex3i(quadRightX, animatedBottomY, 1);
+            glVertex3i(quadRightX, (TOTAL_MENU_HEIGHT + LINE_WIDTH), 1);
+            glVertex3i(quadLeftX,  (TOTAL_MENU_HEIGHT + LINE_WIDTH), 1);
             glEnd();
 
             animatedBottomY = (1.0f - tabHeightScale) * TOTAL_MENU_HEIGHT + tabHeightScale * bottomY;
-            glColor4f(0, 0, 0, 1.0f);
+            glColor4f(0.4f, 0.6f, 0.8f, 1.0f);
             glBegin(GL_LINES);
-            glVertex2i(quadLeftX,  animatedBottomY);
-            glVertex2i(quadRightX, animatedBottomY);
+            glVertex3i(quadLeftX,  animatedBottomY, 1);
+            glVertex3i(quadRightX, animatedBottomY, 1);
 
-            glVertex2i(quadRightX, animatedBottomY);
-            glVertex2i(quadRightX, TOTAL_MENU_HEIGHT);
+            glVertex3i(quadRightX, animatedBottomY, 1);
+            glVertex3i(quadRightX, TOTAL_MENU_HEIGHT, 1);
 
-            glVertex2i(quadLeftX, TOTAL_MENU_HEIGHT);
-            glVertex2i(quadLeftX,  animatedBottomY);
+            glVertex3i(quadLeftX, TOTAL_MENU_HEIGHT, 1);
+            glVertex3i(quadLeftX,  animatedBottomY, 1);
+
             glEnd();
         }
+
+        // Draw the bottom menu background
+        glColor4f(1.0f, 0.65f, 0.0f, 1.0f);
+        glBegin(GL_QUADS);
+        glVertex3i(0, 0, 0);
+        glVertex3i(camera.GetWindowWidth(), 0, 0);
+        glVertex3i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT, 0);
+        glVertex3i(0, TOTAL_MENU_HEIGHT, 0);
+        glEnd();
+        glColor4f(0.4f, 0.6f, 0.8f, 1.0f);
+        glBegin(GL_LINES);
+        glVertex2i(camera.GetWindowWidth(), TOTAL_MENU_HEIGHT);
+        glVertex2i(0, TOTAL_MENU_HEIGHT);
+        glEnd();
 
         if (currItem != NULL) {
             // Draw the name of the currently selected item in the active blammopedia list...

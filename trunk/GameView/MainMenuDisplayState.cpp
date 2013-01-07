@@ -53,7 +53,7 @@ DisplayState(display), mainMenu(NULL), startGameMenuItem(NULL), optionsSubMenu(N
 mainMenuEventHandler(NULL), optionsMenuEventHandler(NULL), itemsEventHandler(NULL), particleEventHandler(NULL),
 changeToPlayGameState(false), changeToBlammopediaState(false), changeToLevelSelectState(false),
 menuFBO(NULL), bloomEffect(NULL), eraseSuccessfulPopup(NULL), eraseFailedPopup(NULL),
-particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f),
+particleSmallGrowth(1.0f, 1.3f), particleMediumGrowth(1.0f, 1.6f), starryBG(NULL),
 madeByTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small), 
                 GameViewConstants::GetInstance()->GAME_CREDITS_TEXT),
 licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small),
@@ -61,9 +61,9 @@ licenseLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager
 titleDisplay(1.0f)
 {
 
-    this->madeByTextLabel.SetColour(Colour(0,0,0));
+    this->madeByTextLabel.SetColour(Colour(1,1,1));
     this->madeByTextLabel.SetScale(this->display->GetTextScalingFactor());
-    this->licenseLabel.SetColour(Colour(0.33f, 0.33f, 0.33f));
+    this->licenseLabel.SetColour(Colour(0.66f, 0.66f, 0.66f));
     this->licenseLabel.SetScale(0.75f * this->display->GetTextScalingFactor());
 
 	// Make sure the game state is cleared
@@ -74,6 +74,10 @@ titleDisplay(1.0f)
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG1, Texture2D::Trilinear, GL_TEXTURE_2D));
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG2, Texture2D::Trilinear, GL_TEXTURE_2D));
 	this->bangTextures.push_back(ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_BANG3, Texture2D::Trilinear, GL_TEXTURE_2D));
+
+    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
+    assert(this->starryBG != NULL);
 
 	// Setup any emitter/sprite/particle effects
 	this->InitializeESPEffects();
@@ -152,11 +156,15 @@ MainMenuDisplayState::~MainMenuDisplayState() {
 	this->bloomEffect = NULL;
 
 	// Release texture assets that we no longer need
+    bool success = false;
 	for (size_t i = 0; i < this->bangTextures.size(); i++) {
-		bool releaseTexSuccess = ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTextures[i]);
-        UNUSED_VARIABLE(releaseTexSuccess);
-		assert(releaseTexSuccess);
+		success = ResourceManager::GetInstance()->ReleaseTextureResource(this->bangTextures[i]);
+		assert(success);
 	}
+
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
+    assert(success);
+    UNUSED_VARIABLE(success);
 
 	// Clean up any left over emitters
 	for (std::list<ESPPointEmitter*>::iterator iter = this->aliveBangEffects.begin(); iter != this->aliveBangEffects.end(); ++iter) {
@@ -504,8 +512,15 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->menuFBO->BindFBObj();
 
 	// Render background stuffs (behind the menu)
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Draw the starry background...
+    this->starryBG->BindTexture();
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(DISPLAY_WIDTH, DISPLAY_HEIGHT, 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(DISPLAY_WIDTH) / static_cast<float>(this->starryBG->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(DISPLAY_HEIGHT) / static_cast<float>(this->starryBG->GetHeight()));
+    this->starryBG->UnbindTexture();
 
 	Camera menuCamera(camera.GetWindowWidth(), camera.GetWindowHeight());
 	menuCamera.SetPerspective();

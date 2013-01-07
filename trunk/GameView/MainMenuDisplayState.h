@@ -104,6 +104,8 @@ private:
 
 	std::vector<Texture*> bangTextures;
 	
+    Texture2D* starryBG;
+
 	GameMenu* mainMenu;             // Main (top-most/parent) menu
 	GameSubMenu* optionsSubMenu;    // Options sub-menu
 

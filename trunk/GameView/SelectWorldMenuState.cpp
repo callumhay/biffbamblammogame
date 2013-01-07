@@ -68,6 +68,8 @@ SelectWorldMenuState::~SelectWorldMenuState() {
     bool success = false;
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starTexture);
     assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
+    assert(success);
     UNUSED_VARIABLE(success);
 }
 
@@ -77,8 +79,15 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 
     // Bind the menu's FrameBufferObject - we use this to do Bloom on the menu
 	this->menuFBO->BindFBObj();
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Draw the starry background...
+    this->starryBG->BindTexture();
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
+    this->starryBG->UnbindTexture();
 
 	// Draw in window coordinates
 	Camera::PushWindowCoords();
@@ -87,7 +96,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 	glLoadIdentity();
 
     // Draw the title...
-    static const int HORIZONTAL_TITLE_GAP = 20;
+    static const int HORIZONTAL_TITLE_GAP = 60;
     static const int VERTICAL_TITLE_GAP   = 30;
     this->worldSelectTitleLbl->SetTopLeftCorner(HORIZONTAL_TITLE_GAP, camera.GetWindowHeight() - VERTICAL_TITLE_GAP);
     this->worldSelectTitleLbl->Draw();
@@ -126,7 +135,6 @@ void SelectWorldMenuState::RenderFrame(double dT) {
 	// Do bloom on the menu and draw it
 	this->bloomEffect->Draw(camera.GetWindowWidth(), camera.GetWindowHeight(), dT);
 	
-
     if (this->itemActivated) {
         bool animDone = this->goToLevelSelectAlphaAnim.Tick(dT);
         animDone &= this->goToLevelSelectMoveAnim.Tick(dT);
@@ -134,7 +142,7 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         float moveAmt  = this->goToLevelSelectMoveAnim.GetInterpolantValue();  
         float alphaAmt = this->goToLevelSelectAlphaAnim.GetInterpolantValue();
 
-	    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         Camera::PushWindowCoords();
@@ -149,17 +157,38 @@ void SelectWorldMenuState::RenderFrame(double dT) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+        float screenWidth = camera.GetWindowWidth();
+        float screenHeight = camera.GetWindowHeight();
+        float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(this->starryBG->GetWidth()));
+        float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(this->starryBG->GetHeight()));
+
+        this->starryBG->BindTexture();
+        glColor4f(1,1,1,1);
+        glBegin(GL_QUADS);
+            glTexCoord2f(0, 0);
+	        glVertex2f(-moveAmt, 0);
+            glTexCoord2f(2*totalTexU, 0);
+	        glVertex2f(2*camera.GetWindowWidth() - moveAmt, 0);
+            glTexCoord2f(2*totalTexU, totalTexV);
+            glVertex2f(2*camera.GetWindowWidth() - moveAmt, camera.GetWindowHeight());
+	        glTexCoord2f(0, totalTexV);
+            glVertex2f(-moveAmt, camera.GetWindowHeight());
+        glEnd();
+        this->starryBG->UnbindTexture();
+
+        /// <summary> Default constructor. </summary>
+        /// <remarks> Beowulf, 07/01/2013. </remarks>
         this->menuFBO->GetFBOTexture()->BindTexture();
         glColor4f(1,1,1,alphaAmt);
         glBegin(GL_QUADS);
-	        glTexCoord2i(1, 0);
-            glVertex2i(camera.GetWindowWidth() - moveAmt, 0);
-	        glTexCoord2i(1, 1);
-            glVertex2i(camera.GetWindowWidth() - moveAmt, camera.GetWindowHeight());
-	        glTexCoord2i(0, 1);
-	        glVertex2i(-moveAmt, camera.GetWindowHeight());
-            glTexCoord2i(0, 0);
-	        glVertex2i(-moveAmt, 0);
+	        glTexCoord2f(1, 0);
+            glVertex2f(camera.GetWindowWidth() - moveAmt, 0);
+	        glTexCoord2f(1, 1);
+            glVertex2f(camera.GetWindowWidth() - moveAmt, camera.GetWindowHeight());
+	        glTexCoord2f(0, 1);
+	        glVertex2f(-moveAmt, camera.GetWindowHeight());
+            glTexCoord2f(0, 0);
+	        glVertex2f(-moveAmt, 0);
         glEnd();
         this->menuFBO->GetFBOTexture()->UnbindTexture();
         
@@ -246,6 +275,11 @@ void SelectWorldMenuState::GoBackToMainMenu() {
 
 void SelectWorldMenuState::Init(int selectedIdx) {
 
+    // Load background texture
+    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+    GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
+    assert(this->starryBG != NULL);
+
     this->starTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
         GameViewConstants::GetInstance()->TEXTURE_STAR, Texture::Trilinear, GL_TEXTURE_2D));
     assert(this->starTexture != NULL);
@@ -254,10 +288,10 @@ void SelectWorldMenuState::Init(int selectedIdx) {
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Huge), SelectWorldMenuState::WORLD_SELECT_TITLE);
     this->worldSelectTitleLbl->SetColour(Colour(0.4f, 0.6f, 0.8f)); // Steel blue
-    this->worldSelectTitleLbl->SetDropShadow(Colour(0,0,0), 0.1f);
+    this->worldSelectTitleLbl->SetDropShadow(Colour(1,1,1), 0.05f);
     
     this->keyEscLabel = new KeyboardHelperLabel(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium, "Press", "Esc", "to Return");
-    this->keyEscLabel->SetBeforeAndAfterTextColour(Colour(0,0,0));
+    this->keyEscLabel->SetBeforeAndAfterTextColour(Colour(1,1,1));
 
     this->fadeAnimation.SetLerp(0.0, 0.5f, 1.0f, 0.0f);
 	this->fadeAnimation.SetRepeat(false);
@@ -356,13 +390,13 @@ selectedLabel(NULL), baseSize(size), isSelected(false), sizeAnim(size) {
     this->label = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
         slightlyBiggerSize, labelTextStream.str());
-    this->label->SetColour(Colour(0, 0, 0));
+    this->label->SetColour(Colour(1.0f, 0.65f, 0.0f));
     
     this->selectedLabel = new TextLabel2DFixedWidth(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium),
         slightlyBiggerSize, labelTextStream.str());
     this->selectedLabel->SetDropShadow(Colour(0,0,0), 0.08f);
-    this->selectedLabel->SetColour(Colour(1.0f, 0.4f, 0.0f));
+    this->selectedLabel->SetColour(Colour(1, 1, 0));
     this->selectedLabel->SetScale(1.1f);
 
     this->sizeAnim.SetInterpolantValue(this->baseSize);
@@ -376,7 +410,7 @@ selectedLabel(NULL), baseSize(size), isSelected(false), sizeAnim(size) {
     totalNumStarsTxt << totalNumStarsCollected << "/" << totalNumStars;
     this->starTotalLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, 
         GameFontAssetsManager::Medium), totalNumStarsTxt.str());
-    this->starTotalLabel->SetColour(Colour(0,0,0));
+    this->starTotalLabel->SetColour(Colour(1,1,1));
     this->starTotalLabel->SetScale(0.85f);
 }
 

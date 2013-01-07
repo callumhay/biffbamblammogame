@@ -110,11 +110,8 @@ void TutorialEventsListener::BallBoostGainedEvent() {
     }
 }
 
-void TutorialEventsListener::BallBoostLostEvent() {
-    const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
-    if (boostModel == NULL) { return; }
-    
-    if (boostModel->GetNumAvailableBoosts() == 0) {
+void TutorialEventsListener::BallBoostLostEvent(bool allBoostsLost) {
+    if (allBoostsLost) {
         this->startBoostHint->Unshow(0.0, 0.5);
         this->boostAvailableHint->Unshow(0.0, 0.5);
     }

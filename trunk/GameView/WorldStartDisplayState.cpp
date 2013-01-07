@@ -12,6 +12,9 @@
 #include "WorldStartDisplayState.h"
 #include "GameDisplay.h"
 #include "GameFontAssetsManager.h"
+#include "GameViewConstants.h"
+
+#include "../ResourceManager.h"
 
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../GameModel/GameModel.h"
@@ -22,7 +25,7 @@ const double WorldStartDisplayState::FOOTER_FLASH_TIME					= 0.5;		// Time to sw
 const float  WorldStartDisplayState::HEADER_WIPE_FADE_QUAD_SIZE = 110.0f;	// Size of the gradient quad used to wipe in the header
 
 WorldStartDisplayState::WorldStartDisplayState(GameDisplay* display) : DisplayState(display),
-waitingForKeyPress(false), 
+waitingForKeyPress(false), starryBG(NULL),
 worldNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Huge), ""),
 nowEnteringLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "Now Entering..."),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "- Press Any Key to Continue -"){
@@ -30,7 +33,12 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 	// Pause all game play elements in the game model
     this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall | GameModel::PauseState);
 
-	// Setup the fade animation to be inactive to start off
+    // Load background texture
+    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+    GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
+    assert(this->starryBG != NULL);
+
+	// Setup the fade animation to be inactive to start
 	this->fadeAnimation.SetInterpolantValue(0.0f);
 	this->fadeAnimation.SetLerp(0.0f, 0.0f, 0.0f, 0.0f);
 	this->fadeAnimation.SetRepeat(false);
@@ -62,12 +70,12 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 	// Create a label for the current world name...
 	const std::string& worldName = this->display->GetModel()->GetCurrentWorldName();
 	this->worldNameLabel.SetText(worldName);
-	this->worldNameLabel.SetDropShadow(Colour(0, 0, 0), 0.12f);
+	this->worldNameLabel.SetDropShadow(Colour(1, 1, 1), 0.075f);
 	this->worldNameLabel.SetColour(Colour(1.0f, 0.5f, 0.0f));			// Orange
 	this->worldNameLabel.SetScale(this->display->GetTextScalingFactor());
 
 	// Setup the label for the Now entering text...
-	this->nowEnteringLabel.SetDropShadow(Colour(0, 0, 0), 0.12f);
+	this->nowEnteringLabel.SetDropShadow(Colour(1, 1, 1), 0.075f);
 	this->nowEnteringLabel.SetColour(Colour(0.39f, 0.72f, 1.0f));	// Steel blue colour
 	this->nowEnteringLabel.SetScale(1.25 * this->display->GetTextScalingFactor());
 
@@ -80,14 +88,25 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 }
 
 WorldStartDisplayState::~WorldStartDisplayState() {
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 void WorldStartDisplayState::RenderFrame(double dT) {
 	const Camera& camera   = this->display->GetCamera();
 	
-	// Clear the screen to a white background
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	// Clear the screen
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    // Draw the starry background...
+    this->starryBG->BindTexture();
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
+    this->starryBG->UnbindTexture();
 
 	// Draw the splash screen for the current world...
 	Camera::PushWindowCoords();
@@ -120,8 +139,14 @@ void WorldStartDisplayState::RenderFrame(double dT) {
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 1.0f, 
-                                                         ColourRGBA(1, 1, 1, fadeValue));
+
+        this->starryBG->BindTexture();
+        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
+            ColourRGBA(1, 1, 1, fadeValue));
+        this->starryBG->UnbindTexture();
+
 		glPopAttrib();
 
 		if (isFadeAnimationDone) {
@@ -178,7 +203,7 @@ void WorldStartDisplayState::DrawNowEnteringTextHeader(float screenWidth, float 
 	const ColourRGBA& labelColour = this->nowEnteringLabel.GetColour();
 	
 	glBegin(GL_LINES);
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	glVertex2f(dropShadowPercent, -dropShadowPercent);
 	glVertex2f(screenWidth - (2 * HORIZONTAL_PADDING + nowEnteringTextWidth + NOW_ENTERING_TO_LINE_PADDING) + dropShadowPercent, -dropShadowPercent);
 
@@ -195,31 +220,44 @@ void WorldStartDisplayState::DrawNowEnteringTextHeader(float screenWidth, float 
 	glPushMatrix();
 	glTranslatef(0.0f, screenHeight, 0.0f);
 
-	const float quadHeight						= nowEnteringTextHeight + 2 * VERTICAL_PADDING;
+	const float quadHeight			  = nowEnteringTextHeight + 2 * VERTICAL_PADDING;
 	const float currOpaqueQuadWidth	  = screenWidth + HEADER_WIPE_FADE_QUAD_SIZE - this->showHeaderAnimation.GetInterpolantValue();
 
 	// Draw the header fade in quads - 2 quads, one is totally opaque and starts covering the entire
-	// header, the other quad is a gradiant from white to transparent and it moves along the header
+	// header, the other quad is a gradiant from opaque to transparent and it moves along the header
 	// over time, revealing it as it goes (wipe fade in)
-	glBegin(GL_QUADS);
+    this->starryBG->BindTexture();
+    glBegin(GL_QUADS);
+
+    float totalTexU = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenWidth / static_cast<float>(this->starryBG->GetWidth()));
+    float totalTexV = (GameViewConstants::STARRY_BG_TILE_MULTIPLIER * screenHeight / static_cast<float>(this->starryBG->GetHeight()));
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	if (currOpaqueQuadWidth > 0.0f) {
-		// Completely white, opaque quad
+		// Opaque quad
+        glTexCoord2f(0.0f, totalTexV);
 		glVertex2f(0.0f, 0.0f);
+        glTexCoord2f(0.0f, totalTexV - quadHeight * totalTexV / screenHeight);
 		glVertex2f(0.0f, -quadHeight);
+        glTexCoord2f(currOpaqueQuadWidth * totalTexU / screenWidth, totalTexV - quadHeight * totalTexV / screenHeight);
 		glVertex2f(currOpaqueQuadWidth, -quadHeight);
+        glTexCoord2f(currOpaqueQuadWidth * totalTexU / screenWidth, totalTexV);
 		glVertex2f(currOpaqueQuadWidth, 0.0f);
 	}
 
 	// Gradient quad used to do the wipe
+    glTexCoord2f(currOpaqueQuadWidth * totalTexU / screenWidth, totalTexV);
 	glVertex2f(currOpaqueQuadWidth, 0.0f);
+    glTexCoord2f(currOpaqueQuadWidth * totalTexU / screenWidth, totalTexV - quadHeight * totalTexV / screenHeight);
 	glVertex2f(currOpaqueQuadWidth, -quadHeight);
 	glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+    glTexCoord2f((currOpaqueQuadWidth + HEADER_WIPE_FADE_QUAD_SIZE) * totalTexU / screenWidth, totalTexV - quadHeight * totalTexV / screenHeight);
 	glVertex2f(currOpaqueQuadWidth + HEADER_WIPE_FADE_QUAD_SIZE, -quadHeight);
+    glTexCoord2f((currOpaqueQuadWidth + HEADER_WIPE_FADE_QUAD_SIZE) * totalTexU / screenWidth, totalTexV);
 	glVertex2f(currOpaqueQuadWidth + HEADER_WIPE_FADE_QUAD_SIZE, 0.0f);
 
 	glEnd();
+    this->starryBG->UnbindTexture();
 
 	glPopMatrix();
 

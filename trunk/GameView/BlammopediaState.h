@@ -51,6 +51,8 @@ private:
 
     TextLabel2D selectedItemNameLbl;
 
+    Texture2D* starryBG;
+
     std::map<ItemListView::ListItem*, Blammopedia::Entry*> itemToEntryMap;
     //std::map<ItemListView::ListItem*, PopupTutorialHint*> itemToTutorialMap;
 

@@ -13,6 +13,9 @@
 #include "GameFontAssetsManager.h"
 #include "CgFxBloom.h"
 #include "GameDisplay.h"
+#include "GameViewConstants.h"
+
+#include "../ResourceManager.h"
 
 #include "../ESPEngine/ESPUtil.h"
 
@@ -21,7 +24,6 @@
 
 LoadingScreen* LoadingScreen::instance = NULL;
 
-const char* LoadingScreen::LOADING_TEXT = "Loading ...";
 const float LoadingScreen::GAP_PIXELS	= 20.0f;
 
 const int LoadingScreen::LOADING_BAR_WIDTH	= 550;
@@ -29,22 +31,20 @@ const int LoadingScreen::LOADING_BAR_HEIGHT = 50;
 const char* LoadingScreen::ABSURD_LOADING_DESCRIPTION = "ABSURD";
 
 LoadingScreen::LoadingScreen() : loadingScreenOn(false), width(0), height(0), 
-numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(NULL) {
+numExpectedUpdates(0), numCallsToUpdate(0), loadingScreenFBO(NULL), bloomEffect(NULL), starryBG(NULL) {
 	// At the very least we need fonts to display info on the loading screen...
 	GameFontAssetsManager::GetInstance()->LoadMinimalFonts();
 	
-	// Create our various labels...
-	const TextureFontSet* loadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Small);
-	assert(loadingFont != NULL);
-    this->loadingLabel = TextLabel2D(loadingFont, LoadingScreen::LOADING_TEXT);
-	this->loadingLabel.SetColour(Colour(0.457, 0.695, 0.863));
-	this->loadingLabel.SetDropShadow(Colour(0,0,0), 0.10);
-
-	const TextureFontSet* itemLoadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium);
+	const TextureFontSet* itemLoadingFont = GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
+        GameFontAssetsManager::Medium);
 	assert(itemLoadingFont != NULL);
     this->itemLoadingLabel = TextLabel2D(itemLoadingFont, "");
 	this->itemLoadingLabel.SetColour(Colour(0, 0, 0));
 	this->itemLoadingLabel.SetDropShadow(Colour(0,0,0), 0.05);
+
+    this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
+    assert(this->starryBG != NULL);
 
 	// Load the absurd descriptions...
 	this->absurdLoadingDescriptions.reserve(30);
@@ -83,6 +83,11 @@ LoadingScreen::~LoadingScreen() {
 		delete this->bloomEffect;
 		this->bloomEffect = NULL;
 	}
+
+    bool success = false;
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
+    assert(success);
+    UNUSED_VARIABLE(success);
 }
 
 /**
@@ -116,19 +121,25 @@ void LoadingScreen::RenderLoadingScreen() {
 	// Bind the FBO so we draw the loading screen into it
 	this->loadingScreenFBO->BindFBObj();
 
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Draw the starry background...
+    this->starryBG->BindTexture();
+    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(this->width, this->height, 
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(this->width) / static_cast<float>(this->starryBG->GetWidth()),
+        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(this->height) / static_cast<float>(this->starryBG->GetHeight()));
+    this->starryBG->UnbindTexture();
 
 	// Draw the loading/progress bar
 	this->DrawLoadingBar();
 
 	// Draw labels for loading screen
-	this->loadingLabel.Draw();
 	this->itemLoadingLabel.Draw();
 
 	// Unbind the FBO, add bloom and draw it as a texture on a full screen quad
 	this->loadingScreenFBO->UnbindFBObj();
-	this->bloomEffect->Draw(width, height, 0.0f);
+	this->bloomEffect->Draw(this->width, this->height, 0.0f);
 
 	this->loadingScreenFBO->GetFBOTexture()->RenderTextureToFullscreenQuad(1);
 
@@ -172,24 +183,21 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 	this->SetupFullscreenEffect(width, height);
 
 	this->numCallsToUpdate = 0;
-	this->numExpectedUpdates = numExpectedUpdates;
+	this->numExpectedUpdates = numExpectedUpdates + 1;
 	this->width = width;
 	this->height = height;
-	this->loadingLabel.SetTopLeftCorner(0 + GAP_PIXELS, this->loadingLabel.GetHeight() + GAP_PIXELS);
-	
+
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	
 	// Initialize basic OpenGL state
 	LoadingScreen::InitOpenGLForLoadingScreen();
 
 	this->loadingScreenFBO->BindFBObj();
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	debug_opengl_state();
 	
-	this->loadingLabel.Draw();
-	debug_opengl_state();
 	this->DrawLoadingBar();
 
 	this->loadingScreenFBO->UnbindFBObj();
@@ -205,10 +213,7 @@ void LoadingScreen::StartShowLoadingScreen(int width, int height, unsigned int n
 
 	this->loadingScreenOn = true;
 	
-#ifndef _DEBUG
-	// Just to get things up and running initially, give time for user to see loading screen
-	SDL_Delay(500);
-#endif
+    this->UpdateLoadingScreen(LoadingScreen::ABSURD_LOADING_DESCRIPTION);
 }
 
 /**
@@ -230,9 +235,9 @@ void LoadingScreen::UpdateLoadingScreen(std::string loadingStr) {
 	}
 
 	// Set the loading text label
-	ESPInterval randColourR(0.25f, 0.8f);
-	ESPInterval randColourG(0.25f, 0.8f);
-	ESPInterval randColourB(0.25f, 0.8f);
+	ESPInterval randColourR(0.4f, 1.0f);
+	ESPInterval randColourG(0.4f, 1.0f);
+	ESPInterval randColourB(0.4f, 1.0f);
 	this->itemLoadingLabel.SetColour(Colour(randColourR.RandomValueInInterval(), randColourG.RandomValueInInterval(), randColourB.RandomValueInInterval()));
 	this->itemLoadingLabel.SetText(loadingStr);
 
@@ -302,7 +307,7 @@ void LoadingScreen::DrawLoadingBar() {
 	glPolygonMode(GL_FRONT, GL_LINE);
 	glLineWidth(4.0f);
 	glPointSize(3.0f);
-	glColor4f(0, 0, 0, 1);
+	glColor4f(1, 1, 1, 1);
 	
 	glBegin(GL_LINE_LOOP);
 	glVertex2f(loadingBarUpperLeft[0], loadingBarUpperLeft[1]);
