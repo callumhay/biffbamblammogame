@@ -18,8 +18,10 @@
 #include "../GameModel/GameItem.h"
 #include "../GameModel/BallBoostModel.h"
 
+const double KeyboardSDLController::TIME_TO_MAX_SPEED = 0.33;
+
 KeyboardSDLController::KeyboardSDLController(GameModel* model, GameDisplay* display) :
-BBBGameController(model, display), specialDirOn(false) {
+BBBGameController(model, display), specialDirOn(false), dirHeldDownTimeCounter(0.0) {
 	for (int i = 0; i < SDLK_LAST; i++) {
 		this->keyPressed[i] = false;
 	}
@@ -69,17 +71,21 @@ bool KeyboardSDLController::ProcessState() {
 void KeyboardSDLController::Sync(size_t frameID, double dT) {
 	UNUSED_PARAMETER(dT);
 
+    static const float ADDED_PADDLE_MOVE_MAG = 0.1f;
+
 	// Paddle controls (NOTE: the else is to make the feedback more exacting)
     if (this->keyPressed[SDLK_LEFT] || this->keyPressed[SDLK_a]) {
 		PlayerPaddle::PaddleMovement leftDir = this->model->AreControlsFlipped() ? PlayerPaddle::RightPaddleMovement : PlayerPaddle::LeftPaddleMovement;
-		this->model->MovePaddle(frameID, leftDir);
+        this->model->MovePaddle(frameID, leftDir, std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED));
+        this->dirHeldDownTimeCounter += dT;
 	}
 	else if (this->keyPressed[SDLK_RIGHT] || this->keyPressed[SDLK_d]) {
 		PlayerPaddle::PaddleMovement rightDir = this->model->AreControlsFlipped() ? PlayerPaddle::LeftPaddleMovement : PlayerPaddle::RightPaddleMovement;
-		this->model->MovePaddle(frameID, rightDir);
+		this->model->MovePaddle(frameID, rightDir, std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED));
+        this->dirHeldDownTimeCounter += dT;
 	}
 	else {
-		this->model->MovePaddle(frameID, PlayerPaddle::NoPaddleMovement);
+		this->model->MovePaddle(frameID, PlayerPaddle::NoPaddleMovement, 0.0);
 	}
 
 	// Execute any debug functionality for when a button is held down...
@@ -247,7 +253,8 @@ void KeyboardSDLController::ExecuteDisplayKeyPressedNotifications(SDLKey key) {
         case SDLK_LEFTBRACKET:
 		case SDLK_LEFTPAREN:
 		case SDLK_KP4:
-			this->display->ButtonPressed(GameControl::LeftButtonAction);
+            this->display->ButtonPressed(GameControl::LeftButtonAction);
+            this->dirHeldDownTimeCounter = 0.0;
 			break;
 
 		case SDLK_RIGHT:
@@ -256,6 +263,7 @@ void KeyboardSDLController::ExecuteDisplayKeyPressedNotifications(SDLKey key) {
 		case SDLK_RIGHTPAREN:
 		case SDLK_KP6:
 			this->display->ButtonPressed(GameControl::RightButtonAction);
+            this->dirHeldDownTimeCounter = 0.0;
 			break;
 
 		case SDLK_RETURN:
@@ -307,6 +315,7 @@ void KeyboardSDLController::ExecuteDisplayKeyReleasedNotifications(SDLKey key) {
 		case SDLK_LEFTPAREN:
 		case SDLK_KP4:
 			this->display->ButtonReleased(GameControl::LeftButtonAction);
+            this->dirHeldDownTimeCounter = 0.0;
 			break;
 
 		case SDLK_RIGHT:
@@ -314,6 +323,7 @@ void KeyboardSDLController::ExecuteDisplayKeyReleasedNotifications(SDLKey key) {
 		case SDLK_RIGHTPAREN:
 		case SDLK_KP6:
 			this->display->ButtonReleased(GameControl::RightButtonAction);
+            this->dirHeldDownTimeCounter = 0.0;
 			break;
 
 		case SDLK_RETURN:

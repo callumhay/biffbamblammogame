@@ -318,7 +318,11 @@ void BlammopediaState::RenderFrame(double dT) {
     debug_opengl_state();
 }
 
-void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void BlammopediaState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                     const GameControl::ActionMagnitude& magnitude) {
+
+    UNUSED_PARAMETER(magnitude);
+
     if (this->goBackToMainMenu) {
         return;
     }

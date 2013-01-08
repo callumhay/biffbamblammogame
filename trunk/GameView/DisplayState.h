@@ -33,7 +33,7 @@ public:
     virtual bool AllowsGameModelUpdates() const = 0;
 	virtual void RenderFrame(double dT) = 0;
 
-	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton)   = 0;
+	virtual void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude)   = 0;
 	virtual void ButtonReleased(const GameControl::ActionButton& releasedButton) = 0;
     virtual void MousePressed(const GameControl::MouseButton& pressedButton)     = 0;
     virtual void MouseReleased(const GameControl::MouseButton& releasedButton)    = 0;

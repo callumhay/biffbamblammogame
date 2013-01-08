@@ -747,7 +747,11 @@ void LevelCompleteSummaryDisplayState::DifficultyPaneEventHandler::OptionSelecte
     }
 }
 
-void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void LevelCompleteSummaryDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                                     const GameControl::ActionMagnitude& magnitude) {
+
+    UNUSED_PARAMETER(magnitude);
+
     if (this->difficultyChoicePane != NULL) {
         this->difficultyChoicePane->ButtonPressed(pressedButton);
         

@@ -215,7 +215,11 @@ void SelectWorldMenuState::RenderFrame(double dT) {
     debug_opengl_state();
 }
 
-void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                         const GameControl::ActionMagnitude& magnitude) {
+
+    UNUSED_PARAMETER(magnitude);
+
     switch (pressedButton) {
         case GameControl::EscapeButtonAction:
             this->GoBackToMainMenu();

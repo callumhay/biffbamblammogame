@@ -31,6 +31,10 @@ public:
 	void Sync(size_t frameID, double dT);
 
 private:
+    static const double TIME_TO_MAX_SPEED;
+
+    double dirHeldDownTimeCounter;
+
     bool specialDirOn;
 
 	bool keyPressed[SDLK_LAST];

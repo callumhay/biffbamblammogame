@@ -51,7 +51,11 @@ void InGameDisplayState::RenderFrame(double dT) {
 
 }
 
-void InGameDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void InGameDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                       const GameControl::ActionMagnitude& magnitude) {
+
+    UNUSED_PARAMETER(magnitude);
+
 	// We only interpret one key press - when the user wants to access the in-game menu...
 	if (pressedButton == GameControl::EscapeButtonAction || pressedButton == GameControl::PauseButtonAction) {
 		// Go to the next state

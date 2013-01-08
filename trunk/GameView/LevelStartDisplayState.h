@@ -30,7 +30,7 @@ public:
 
 	void RenderFrame(double dT);
 
-	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
     void MousePressed(const GameControl::MouseButton& pressedButton) { UNUSED_PARAMETER(pressedButton); };
     void MouseReleased(const GameControl::MouseButton& releasedButton) { UNUSED_PARAMETER(releasedButton); };
@@ -69,8 +69,10 @@ private:
     DISALLOW_COPY_AND_ASSIGN(LevelStartDisplayState);
 };
 
-inline void LevelStartDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+inline void LevelStartDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                                  const GameControl::ActionMagnitude& magnitude) {
 	UNUSED_PARAMETER(pressedButton);
+    UNUSED_PARAMETER(magnitude);
 }
 
 inline void LevelStartDisplayState::ButtonReleased(const GameControl::ActionButton& releasedButton) {

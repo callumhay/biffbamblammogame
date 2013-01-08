@@ -13,6 +13,7 @@
 #define __XBOX360GAMECONTROLLER_H__
 
 #include "BBBGameController.h"
+#include "GameControl.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -61,6 +62,8 @@ private:
 	double vibrateTimeTracker;
 	double vibrateLengthInSeconds;
 
+    float directionMagnitudePercent;
+
 	void NotInGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState);
 	void InGameOnProcessStateSpecificActions(const XINPUT_STATE& controllerState);
 
@@ -70,6 +73,7 @@ private:
 	void DebugRepeatActions();
 
     static float GetSensitivityFraction();
+    static GameControl::ActionMagnitude GetMagnitudeForThumbpad(int16_t value);
 
 	DISALLOW_COPY_AND_ASSIGN(XBox360Controller);
 };

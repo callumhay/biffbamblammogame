@@ -123,7 +123,10 @@ void InTutorialGameDisplayState::RenderFrame(double dT) {
 #endif
 }
 
-void InTutorialGameDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void InTutorialGameDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                               const GameControl::ActionMagnitude& magnitude) {
+
+    UNUSED_PARAMETER(magnitude);
     this->tutorialListener->ButtonPressed(pressedButton);
     
     // When the user wants to access the in-game menu...
