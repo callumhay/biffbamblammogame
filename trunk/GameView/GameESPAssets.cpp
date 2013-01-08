@@ -35,6 +35,7 @@
 #include "../BlammoEngine/Plane.h"
 
 #include "../ResourceManager.h"
+#include "../Blammopedia.h"
 
 GameESPAssets::GameESPAssets() : 
 particleFader(1, 0),
@@ -4330,9 +4331,36 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		result = absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, this->circleGradientTex);
 		assert(result);
 		
+        // Name of the acquired item effect
+        ESPPointEmitter* itemNameEffect = new ESPPointEmitter();
+	    // Set up the emitter...
+	    itemNameEffect->SetSpawnDelta(ESPInterval(-1, -1));
+	    itemNameEffect->SetInitialSpd(ESPInterval(1.1f));
+        itemNameEffect->SetEmitDirection(Vector3D(0, 1, 0));
+	    itemNameEffect->SetParticleLife(ESPInterval(2.4f));
+	    itemNameEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
+	    itemNameEffect->SetParticleAlignment(ESP::ScreenAligned);
+        itemNameEffect->SetEmitPosition(Point3D(0, 2.75f * paddle.GetHalfHeight(), 0));
+	    itemNameEffect->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(1));
+	    itemNameEffect->AddEffector(&this->particleFader);
+	    itemNameEffect->AddEffector(&this->particleSmallGrowth);
+
+        Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
+        assert(blammopedia != NULL);
+        const Blammopedia::ItemEntry* itemEntry = blammopedia->GetItemEntry(item.GetItemType());
+        assert(itemEntry != NULL);
+
+        TextLabel2D itemNameTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
+            GameFontAssetsManager::Small), itemEntry->GetName());
+        itemNameTextLabel.SetDropShadow(Colour(0, 0, 0), 0.05f);
+
+        itemNameEffect->SetParticles(1, itemNameTextLabel);
+
+
 		this->activePaddleEmitters.push_back(haloExpandingAura);
 		this->activePaddleEmitters.push_back(paddlePulsingAura);
 		this->activePaddleEmitters.push_back(absorbGlowSparks);
+        this->activePaddleEmitters.push_back(itemNameEffect);
 	}
 }
 

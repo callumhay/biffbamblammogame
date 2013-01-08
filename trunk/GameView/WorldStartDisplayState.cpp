@@ -70,7 +70,7 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 	// Create a label for the current world name...
 	const std::string& worldName = this->display->GetModel()->GetCurrentWorldName();
 	this->worldNameLabel.SetText(worldName);
-	this->worldNameLabel.SetDropShadow(Colour(1, 1, 1), 0.075f);
+	this->worldNameLabel.SetDropShadow(Colour(0, 0, 0), 0.05f);
 	this->worldNameLabel.SetColour(Colour(1.0f, 0.5f, 0.0f));			// Orange
 	this->worldNameLabel.SetScale(this->display->GetTextScalingFactor());
 
