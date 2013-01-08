@@ -3792,9 +3792,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	this->activeGeneralEmitters.push_back(particleSparks);
 }
 
-void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& position) {
-    
-	// The effect is a basic onomatopeia multiplier word e.g., "Combo (2x)!"
+ESPPointEmitter* GameESPAssets::CreateMultiplierComboEffect(int multiplier, const Point2D& position) {
     std::stringstream comboStrStream;
     comboStrStream << "Combo (" << multiplier << "x)!";
 
@@ -3821,7 +3819,14 @@ void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& posi
 	textParticle->SetDropShadow(dpTemp);
     comboEffect->AddParticle(textParticle);
 
-    this->activeGeneralEmitters.push_back(comboEffect);
+    return comboEffect;
+}
+
+void GameESPAssets::AddMultiplierComboEffect(int multiplier, const Point2D& position,
+                                             const PlayerPaddle& paddle) {  
+
+    this->activeGeneralEmitters.push_back(this->CreateMultiplierComboEffect(multiplier, position));
+    this->activeGeneralEmitters.push_back(this->CreateMultiplierComboEffect(multiplier, paddle.GetCenterPosition()));
 }
 
 // This is currently not in use...
@@ -4352,7 +4357,7 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 
         TextLabel2D itemNameTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
             GameFontAssetsManager::Small), itemEntry->GetName());
-        itemNameTextLabel.SetDropShadow(Colour(0, 0, 0), 0.05f);
+        itemNameTextLabel.SetDropShadow(Colour(0, 0, 0), 0.08f);
 
         itemNameEffect->SetParticles(1, itemNameTextLabel);
 
