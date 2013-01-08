@@ -262,7 +262,7 @@ void BlammopediaState::RenderFrame(double dT) {
                 this->selectedItemNameLbl.SetColour(Colour(0.66f, 0.66f, 0.66f));
             }
             else {
-                this->selectedItemNameLbl.SetColour(currItem->GetColour());
+                this->selectedItemNameLbl.SetColour(Colour(1.0f, 1.0f, 1.0f));
             }
             this->selectedItemNameLbl.SetText(currItem->GetNameLbl()->GetText());
             this->selectedItemNameLbl.SetTopLeftCorner(camera.GetWindowWidth() - 

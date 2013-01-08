@@ -209,7 +209,9 @@ void InGameMenuState::InitTopMenu() {
 	const float dropShadowAmtLg = 0.10f;
 	const Colour dropShadowColour = Colour(0.0f, 0.0f, 0.0f);
 
-    static const char* VERIFY_MENU_TEXT = "All progress in this level will be lost, exit to the main menu?";
+    static const char* VERIFY_EXIT_TO_MAIN_MENU_TEXT = "All progress in this level will be lost, exit to the main menu?";
+    static const char* VERIFY_RESTART_TEXT           = "Are you sure you want to restart this level?";
+    static const char* VERIFY_EXIT_TO_DESKTOP_TEXT   = "All progress in this level will be lost, are you sure you want to exit the game?";
     static const char* VERIFY_MENU_YES  = "Yes!";
     static const char* VERIFY_MENU_NO   = "NOoo!";
 
@@ -236,7 +238,7 @@ void InGameMenuState::InitTopMenu() {
 		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
 
 	restartLevelItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
-	restartLevelItem->SetVerifyMenuText(VERIFY_MENU_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
+	restartLevelItem->SetVerifyMenuText(VERIFY_RESTART_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
 	restartLevelItem->SetEventHandler(this->verifyMenuEventHandler);
 
     this->restartItem = this->topMenu->AddMenuItem(restartLevelItem);
@@ -279,7 +281,7 @@ void InGameMenuState::InitTopMenu() {
 		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
 
 	returnToMainMenuItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
-	returnToMainMenuItem->SetVerifyMenuText(VERIFY_MENU_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
+	returnToMainMenuItem->SetVerifyMenuText(VERIFY_EXIT_TO_MAIN_MENU_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
 	returnToMainMenuItem->SetEventHandler(this->verifyMenuEventHandler);
 
 	this->returnToMainItem = this->topMenu->AddMenuItem(returnToMainMenuItem);
@@ -294,7 +296,7 @@ void InGameMenuState::InitTopMenu() {
 		GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium));
 
 	exitToDesktopMenuItem->SetVerifyMenuColours(Colour(1,1,1), InGameMenuState::MENU_ITEM_GREYED_COLOUR, Colour(1,1,1));
-	exitToDesktopMenuItem->SetVerifyMenuText(VERIFY_MENU_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
+	exitToDesktopMenuItem->SetVerifyMenuText(VERIFY_EXIT_TO_DESKTOP_TEXT, VERIFY_MENU_YES, VERIFY_MENU_NO);
 	exitToDesktopMenuItem->SetEventHandler(this->verifyMenuEventHandler);
 
 	this->exitToDesktopItem = this->topMenu->AddMenuItem(exitToDesktopMenuItem);
