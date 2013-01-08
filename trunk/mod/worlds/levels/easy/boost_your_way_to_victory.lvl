@@ -5,7 +5,7 @@ S G G G G G G G B G S
 S G G G G G G G G B S 
 S Y Y Y Y Y Y S B G S 
 S Y Y Y Y Y Y S G G S 
-S B O B O B O S S G S 
+S B O B O B O S S S S 
 S R R R R R T(R,ul) E T(S,ur) S S 
 S E E E E E E E E T(S,ur) S 
 S E E E E E E E E E S 
@@ -40,8 +40,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
-UberBall 1
 BallGrow 0
+UberBall 1
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 0

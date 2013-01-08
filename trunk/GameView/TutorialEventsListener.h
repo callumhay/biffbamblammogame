@@ -71,7 +71,7 @@ private:
     // int numTimesShootHintShown;
     bool movePaddleHintUnshown;
     bool fireWeaponAlreadyShown;
-    bool boostPopupHintAlreadyShown;
+    bool keepShowingBoostHint;
     bool multPopupHintAlreadyShown;
     bool finishedPointsHint;
 
