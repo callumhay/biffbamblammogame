@@ -1,0 +1,69 @@
+Inky Access
+17 28
+S S S S S S S S S S S S S S S S S 
+S E E E E E R E E E R E E E E E S 
+S E B G G E B I E I B E G G B E S 
+S E G I G E R E E E R E G I G E S 
+S E G G G E B I E I B E G G G E S 
+S E E E E E R E E E R E E E E E S 
+S E E E E E Y G G G Y E E E E E S 
+S E E E E E F(r) E E E F(l) E E E E E S 
+S E G G B E F(r) E I E F(l) E B G G E S 
+S E G I G E F(r) E B E F(l) E G I G E S 
+S E G G G E F(r) E I E F(l) E G G G E S 
+S E E E E E F(r) E E E F(l) E E E E E S 
+S E E E E E F(r) G G G F(l) E E E E E S 
+S E E E E E F(r) E E E F(l) E E E E E S 
+S E B G G E F(r) E I E F(l) E G G B E S 
+S E G I G E F(r) E B E F(l) E G I G E S 
+S E G G G E F(r) E I E F(l) E G G G E S 
+S E E E E E F(r) E E E F(l) E E E E E S 
+S R R R R R F(r) G G G F(l) R R R R R S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+S E E E E E E E E E E E E E E E S 
+
+STARS:
+26000
+32000
+35000
+42000
+50000
+
+PaddleGrow 2
+PoisonPaddle 2
+BallSafetyNet 2
+Blackout 2
+UberBall 2
+BallGrow 0
+StickyPaddle 2
+ShieldPaddle 2
+LaserBulletPaddle 2
+PaddleShrink 2
+InvisiPaddle 2
+InvisiBall 2
+LaserBeamPaddle 2
+OmniLaserBall 2
+FireBall 0
+RocketPaddle 2
+GhostBall 0
+BallShrink 2
+UpsideDown 2
+MultiBall5 2
+BallCam 0
+MagnetPaddle 2
+MultiBall3 2
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 2
+GravityBall 2
+CrazyBall 2
+Random 2
+FastBall 2
+PaddleCam 0

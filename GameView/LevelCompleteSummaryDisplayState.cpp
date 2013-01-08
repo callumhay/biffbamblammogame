@@ -500,8 +500,14 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		GeometryMaker::GetInstance()->DrawFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 1.0f, 
-                                                         ColourRGBA(1, 1, 1, fadeValue));
+
+        this->starryBG->BindTexture();
+        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()),
+            ColourRGBA(1, 1, 1, fadeValue));
+        this->starryBG->UnbindTexture();
+
 		glPopAttrib();
 
         if (fadeIsDone) {
