@@ -245,13 +245,13 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     holdBoostHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
     holdBoostHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
     holdBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - holdBoostHint->GetWidth()) / 2.0f,
-        camera.GetWindowHeight() - 100.0f);
+        camera.GetWindowHeight()/2.0f + 150.0f);
 
     this->tutorialListener->SetHoldBoostHint(holdBoostHint);
     this->noDepthTutorialHints.push_back(holdBoostHint);
 
-    ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "Perform Boost = ");
-
+    ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "");
+    doBoostHint->SetActionName("Perform Boost = ", false);
     xboxButtonTypes.clear();
     xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
     xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
@@ -265,7 +265,7 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     doBoostHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
     doBoostHint->SetMouseButton(GameViewConstants::RightMouseButton, "RMB");
     doBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - doBoostHint->GetWidth()) / 2.0f,
-        doBoostHint->GetHeight() + 100.0f);
+        camera.GetWindowHeight()/2.0f - 150.0f);
 
     this->tutorialListener->SetDoBoostHint(doBoostHint);
     this->noDepthTutorialHints.push_back(doBoostHint);

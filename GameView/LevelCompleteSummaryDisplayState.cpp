@@ -305,7 +305,7 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
 
         GameModel::Difficulty difficulty = GameModel::MediumDifficulty;
         if (numLivesLost <= 2) {
-            if (numStars >= 3) {
+            if (numStars >= 4) {
                 if (maxConsecutiveBlocks >= GameModelConstants::GetInstance()->FOUR_TIMES_MULTIPLIER_NUM_BLOCKS) {
                     if (numLivesLost <= 1) {
                         difficulty = GameModel::HardDifficulty;
@@ -315,11 +315,19 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
                     }
                 }
                 else {
-                    difficulty = GameModel::MediumDifficulty;
+                    if (numLivesLost == 2) {
+                        difficulty = GameModel::EasyDifficulty;
+                    }
+                    else {
+                        difficulty = GameModel::MediumDifficulty;
+                    }
                 }
             }
             else {
-                if (numLivesLost <= 1) {
+                if (numLivesLost == 0) {
+                    difficulty = GameModel::HardDifficulty;
+                }
+                else if (numLivesLost == 1) {
                     difficulty = GameModel::MediumDifficulty;
                 }
                 else {

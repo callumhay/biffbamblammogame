@@ -701,6 +701,7 @@ verifyDescFont(verifyDescFont), verifyIdleFont(verifyIdleFont), verifySelFont(ve
 	this->verifyMenuBGFadeAnim.SetInterpolantValue(0.0f);
 
     this->descriptionLabel.SetFixedWidth(750);
+    this->descriptionLabel.SetAlignment(TextLabel2DFixedWidth::CenterAligned);
 }
 
 VerifyMenuItem::~VerifyMenuItem() {
