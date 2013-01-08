@@ -71,9 +71,9 @@ bool KeyboardSDLController::ProcessState() {
 void KeyboardSDLController::Sync(size_t frameID, double dT) {
 	UNUSED_PARAMETER(dT);
 
-    static const float ADDED_PADDLE_MOVE_MAG = 0.1f;
+    static const float ADDED_PADDLE_MOVE_MAG = 0.2f;
 
-	// Paddle controls (NOTE: the else is to make the feedback more exacting)
+	// Paddle controls (NOTE: the else is to make the feedback more exact)
     if (this->keyPressed[SDLK_LEFT] || this->keyPressed[SDLK_a]) {
 		PlayerPaddle::PaddleMovement leftDir = this->model->AreControlsFlipped() ? PlayerPaddle::RightPaddleMovement : PlayerPaddle::LeftPaddleMovement;
         this->model->MovePaddle(frameID, leftDir, std::min<float>(1.0, ADDED_PADDLE_MOVE_MAG + this->dirHeldDownTimeCounter / KeyboardSDLController::TIME_TO_MAX_SPEED));
