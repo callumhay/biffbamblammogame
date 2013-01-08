@@ -1033,7 +1033,8 @@ void GameEventsListener::ScoreMultiplierChangedEvent(int newMultiplier, const Po
 
     // Indicate the change in multiplier where it happens in the level...
     if (newMultiplier > 1) {
-        this->display->GetAssets()->GetESPAssets()->AddMultiplierComboEffect(newMultiplier, position);
+        this->display->GetAssets()->GetESPAssets()->AddMultiplierComboEffect(newMultiplier, position, 
+            *this->display->GetModel()->GetPlayerPaddle());
     }
 
 	debug_output("EVENT: Score Multiplier Change: " << newMultiplier); 

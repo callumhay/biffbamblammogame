@@ -13,6 +13,7 @@
 #include "NormalBallState.h"
 #include "InCannonBallState.h"
 #include "CannonBlock.h"
+#include "GameModel.h"
 
 const float GameBall::DEFAULT_NORMAL_SPEED = 14.5f;
 
@@ -199,6 +200,20 @@ void GameBall::SetBallState(BallState* state, bool deletePrevState) {
 	}
 	this->currState = state;
 }
+
+void GameBall::AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec) {
+    const PlayerPaddle* paddle = model.GetPlayerPaddle();
+
+    // If the ball is moving upwards in the level AT ALL then we don't effect it
+    if (Vector2D::Dot(this->currDir, Vector2D(0,1)) >= 0) {
+        return;
+    }
+
+    // If the paddle has the magnet item active and the projectile is moving towards the paddle, then we need to
+    // modify the velocity to make it move towards the paddle...
+    paddle->AugmentDirectionOnPaddleMagnet(seconds, degreesChangePerSec, this->GetBounds().Center(), this->currDir);
+}
+
 
 Onomatoplex::Extremeness GameBall::GetOnomatoplexExtremeness() const {
 	Onomatoplex::Extremeness result;

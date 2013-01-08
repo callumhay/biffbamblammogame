@@ -230,6 +230,8 @@ private:
 	ESPPointEmitter* CreateBeamFallingBitEffect();
 	ESPPointEmitter* CreateBeamFlareEffect();
 
+    ESPPointEmitter* CreateMultiplierComboEffect(int multiplier, const Point2D& position);
+
 	void DrawProjectileEmitter(double dT, const Camera& camera, const Projectile& projectile, ESPPointEmitter* projectileEmitter);
 
 	std::map<const GameBall*, std::map<GameItem::ItemType, std::vector<ESPPointEmitter*> > >::iterator EnsureBallEffectsList(const GameBall& ball);
@@ -245,7 +247,7 @@ public:
 		bool gravity = true, size_t numParticles = 10);
 
 
-    void AddMultiplierComboEffect(int multiplier, const Point2D& position);
+    void AddMultiplierComboEffect(int multiplier, const Point2D& position, const PlayerPaddle& paddle);
     //void AddPointAwardEffect(const PointAward& pointAward, const PlayerPaddle& paddle);
 
 	// Specific effects that can be made to occur in the game

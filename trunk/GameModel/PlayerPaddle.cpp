@@ -767,6 +767,16 @@ bool PlayerPaddle::AttachBall(GameBall* ball) {
 		return false;
 	}
 
+    // If the ball is directly below the paddle then we don't attach it
+    const Point2D& ballCenter = ball->GetBounds().Center();
+    if (ballCenter[0] <= this->GetCenterPosition()[0] + this->GetHalfWidthTotal() &&
+        ballCenter[0] >= this->GetCenterPosition()[0] - this->GetHalfDepthTotal()) {
+
+        if (ballCenter[1] <= this->GetCenterPosition()[1] - 0.8f*this->GetHalfHeight()) {
+            return false;
+        }
+    }
+
 	// Attach the ball
 	this->attachedBall = ball;
 	// Reset the ball so that it has no previous record of the level piece it last hit

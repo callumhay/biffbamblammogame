@@ -404,6 +404,8 @@ private:
 	void SetBallSize(GameBall::BallSize size);
 	void SetBallState(BallState* state, bool deletePrevState);
 
+    void AugmentDirectionOnPaddleMagnet(double seconds, const GameModel& model, float degreesChangePerSec);
+
 };
 
 inline const CannonBlock* GameBall::GetCannonBlock() const {

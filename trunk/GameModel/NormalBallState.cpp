@@ -31,7 +31,10 @@ BallState* NormalBallState::Clone(GameBall* newBall) const {
 }
 
 void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir, GameModel* gameModel) {
-	// Update the position of the ball based on its velocity (and if applicable, acceleration)
+	// Update based on any active paddle magnet
+    this->gameBall->AugmentDirectionOnPaddleMagnet(seconds, *gameModel, 80.0f);
+    
+    // Update the position of the ball based on its velocity (and if applicable, acceleration)
 	Vector2D currVelocity;
 
     if (this->gameBall->IsBallBoosting()) {
@@ -52,6 +55,7 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
         this->gameBall->gravitySpeed = this->gameBall->currSpeed;
     }
     else {
+
         // When the ball has gravity augment the velocity to constantly be accelerating downwards,
         // in the case of when it's attached to the paddle, don't do this
 	    if ((this->gameBall->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall &&
