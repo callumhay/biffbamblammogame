@@ -31,7 +31,7 @@ public:
 
 	void RenderFrame(double dT);
 
-	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+	void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
     void MousePressed(const GameControl::MouseButton& pressedButton) { UNUSED_PARAMETER(pressedButton); };
     void MouseReleased(const GameControl::MouseButton& releasedButton) { UNUSED_PARAMETER(releasedButton); };

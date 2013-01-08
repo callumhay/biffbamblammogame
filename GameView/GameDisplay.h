@@ -85,7 +85,7 @@ public:
 
 	// Enumeration of the various actions that can be sent to the GameDisplay
 	// to inform it of inputs from the user in a general way
-	void ButtonPressed(const GameControl::ActionButton& pressedButton);
+    void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude = GameControl::FullMagnitude);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
     void MousePressed(const GameControl::MouseButton& pressedButton);
     void MouseReleased(const GameControl::MouseButton& releasedButton);
@@ -169,8 +169,8 @@ inline void GameDisplay::UpdateModel(double dT) {
     this->model->UpdateState();
 }
 
-inline void GameDisplay::ButtonPressed(const GameControl::ActionButton& pressedButton) {
-	this->currState->ButtonPressed(pressedButton);
+inline void GameDisplay::ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude) {
+	this->currState->ButtonPressed(pressedButton, magnitude);
 }
 
 inline void GameDisplay::ButtonReleased(const GameControl::ActionButton& releasedButton) {

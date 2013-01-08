@@ -141,8 +141,10 @@ void GameCompleteDisplayState::RenderFrame(double dT) {
 
 }
 
-void GameCompleteDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void GameCompleteDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                             const GameControl::ActionMagnitude& magnitude) {
 	UNUSED_PARAMETER(pressedButton);
+    UNUSED_PARAMETER(magnitude);
     
     // Only accept button presses after the fade-in
     if (this->fadeAnim.GetInterpolantValue() == 0.0f) {

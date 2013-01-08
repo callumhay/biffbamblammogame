@@ -162,8 +162,11 @@ void InGameMenuState::CleanUpReturnToDisplayState() {
 /**
  * Called whenever a key is pressed while in this state.
  */
-void InGameMenuState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
-	assert(this->topMenu != NULL);
+void InGameMenuState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                    const GameControl::ActionMagnitude& magnitude) {
+	
+    UNUSED_PARAMETER(magnitude);                                    
+    assert(this->topMenu != NULL);
 
 	// If the pause button is hit again then just exit this menu back to the game...
 	if (pressedButton == GameControl::PauseButtonAction) {

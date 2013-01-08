@@ -29,7 +29,7 @@ public:
 	virtual GameState::GameStateType GetType() const = 0;
 	virtual void Tick(double seconds) = 0;
 	virtual void BallReleaseKeyPressed() = 0;
-	virtual void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement);
+	virtual void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement, float magnitudePercent);
     virtual void BallBoostDirectionPressed(int x, int y);
     virtual void BallBoostDirectionReleased();
 

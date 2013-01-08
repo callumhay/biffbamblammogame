@@ -732,8 +732,12 @@ void MainMenuDisplayState::InsertBangEffectIntoBGEffects(float minX, float maxX,
  * Directly read key presses to manipulate the selections
  * in the main menu.
  */
-void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void MainMenuDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                         const GameControl::ActionMagnitude& magnitude) {
+
+    UNUSED_PARAMETER(magnitude);
 	assert(this->mainMenu != NULL);
+
 	// Tell the main menu about the key pressed event
     if (this->eraseFailedPopup->GetIsVisible() || this->eraseSuccessfulPopup->GetIsVisible()) {
         this->eraseSuccessfulPopup->ButtonPressed(pressedButton);

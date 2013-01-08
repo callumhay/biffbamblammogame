@@ -42,7 +42,7 @@ const float PlayerPaddle::SECONDS_TO_CHANGE_SIZE = 0.5f;
 const float PlayerPaddle::DEFAULT_MAX_SPEED = 26.0f;
 // Default acceleration/decceleration of the paddle (units/sec^2)
 const float PlayerPaddle::DEFAULT_ACCELERATION  = 138.0f;
-const float PlayerPaddle::DEFAULT_DECCELERATION = -150.0f;
+const float PlayerPaddle::DEFAULT_DECCELERATION = -160.0f;
 
 // Speed amount to diminish from the max speed when the paddle is poisoned
 const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 3.0f;
@@ -391,7 +391,13 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 			currAcceleration = this->decceleration;
 		}
 		this->currSpeed = std::max<float>(0.0f, std::min<float>(this->maxSpeed, this->currSpeed + currAcceleration * seconds + this->impulse * seconds));
-		distanceTravelled = this->GetSpeed() * seconds;
+		
+        // If the poison paddle is active then the speed is diminished...
+        if ((this->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle) {
+            this->currSpeed = std::max<float>(0.0f, this->currSpeed - PlayerPaddle::POISON_SPEED_DIMINISH);
+        }
+        
+        distanceTravelled = this->GetSpeed() * seconds;
 	}
 
 	float newCenterX = this->centerPos[0] + distanceTravelled /*+ this->impulse*/;
@@ -577,24 +583,10 @@ bool PlayerPaddle::DecreasePaddleSize() {
 
  void PlayerPaddle::AddPaddleType(const PaddleType& type) {
 		this->currType = this->currType | type;
-		switch (type) {
-			case PlayerPaddle::PoisonPaddle:
-				this->maxSpeed -= PlayerPaddle::POISON_SPEED_DIMINISH;
-				break;
-			default:
-				break;
-		}
 	}
 
 void PlayerPaddle::RemovePaddleType(const PaddleType& type) {
 	this->currType = this->currType & ~type;
-	switch (type) {
-		case PlayerPaddle::PoisonPaddle:
-			this->maxSpeed += PlayerPaddle::POISON_SPEED_DIMINISH;
-			break;
-		default:
-			break;
-	}
 }
 
 // Tells the paddle that it has started to fire the laser beam (or has stopped firing the laser beam)

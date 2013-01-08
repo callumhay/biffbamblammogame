@@ -315,7 +315,11 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     debug_opengl_state();
 }
 
-void SelectLevelMenuState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void SelectLevelMenuState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                         const GameControl::ActionMagnitude& magnitude) {
+
+    UNUSED_PARAMETER(magnitude);
+
     if (goBackToWorldSelectMenu || goToStartLevel) {
         return;
     }

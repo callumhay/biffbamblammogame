@@ -38,8 +38,9 @@ public:
 
 	void Tick(double seconds);
 	void BallReleaseKeyPressed() {}
-	void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement) {
+	void MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement, float magnitudePercent) {
 		UNUSED_PARAMETER(paddleMovement);
+        UNUSED_PARAMETER(magnitudePercent);
 	}
 
 private:

@@ -62,8 +62,8 @@ void BallWormholeState::Tick(double seconds) {
 // The player can manipulate the direction of the ball as it moves through
 // the wormhole by pushing it up, down, left or right in order to accomplish
 // tasks and solve puzzles...
-void BallWormholeState::MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement) {
+void BallWormholeState::MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement, float magnitudePercent) {
 	UNUSED_PARAMETER(paddleMovement);
-
+    UNUSED_PARAMETER(magnitudePercent);
 	// TODO
 }

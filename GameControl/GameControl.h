@@ -18,6 +18,8 @@ public:
                         EnterButtonAction, EscapeButtonAction, PauseButtonAction, SpecialCheatButtonAction,
                         OtherButtonAction};
 
+    enum ActionMagnitude { ZeroMagnitude, SmallMagnitude, NormalMagnitude, LargeMagnitude, FullMagnitude };
+
     enum MouseButton { LeftMouseButton, RightMouseButton };
 
 private:

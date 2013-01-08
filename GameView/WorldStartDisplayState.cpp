@@ -156,8 +156,12 @@ void WorldStartDisplayState::RenderFrame(double dT) {
 	}
 }
 
-void WorldStartDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton) {
+void WorldStartDisplayState::ButtonPressed(const GameControl::ActionButton& pressedButton,
+                                           const GameControl::ActionMagnitude& magnitude) {
+
 	UNUSED_PARAMETER(pressedButton);
+    UNUSED_PARAMETER(magnitude);
+
     this->AnyKeyWasPressed();
 }
 

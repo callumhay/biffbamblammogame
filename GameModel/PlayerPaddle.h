@@ -120,10 +120,11 @@ public:
 	void Animate(double seconds);
 
 	enum PaddleMovement { LeftPaddleMovement = -1, NoPaddleMovement = 0, RightPaddleMovement = 1 };
-	void ControlPaddleMovement(const PaddleMovement& movement) {
+	void ControlPaddleMovement(const PaddleMovement& movement, float magnitudePercent) {
 		this->moveButtonDown = (movement != NoPaddleMovement);
 		if (this->moveButtonDown) {
 			this->lastDirection = static_cast<float>(movement);
+            this->maxSpeed = magnitudePercent * PlayerPaddle::DEFAULT_MAX_SPEED;
 		}
 	}
 	float GetLastMovingDirection() const {

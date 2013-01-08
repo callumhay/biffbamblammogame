@@ -56,8 +56,8 @@ GameState* GameState::Build(const GameState::GameStateType& stateType, GameModel
 /**
  * Default action here is to just move the paddle around.
  */
-void GameState::MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement) {
-	this->gameModel->GetPlayerPaddle()->ControlPaddleMovement(paddleMovement);
+void GameState::MovePaddleKeyPressed(const PlayerPaddle::PaddleMovement& paddleMovement, float magnitudePercent) {
+	this->gameModel->GetPlayerPaddle()->ControlPaddleMovement(paddleMovement, magnitudePercent);
 }
 
 /**
