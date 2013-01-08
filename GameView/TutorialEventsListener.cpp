@@ -17,7 +17,8 @@
 
 TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
-finishedPointsHint(false), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), doBoostHint(NULL), holdBoostHint(NULL),
+finishedPointsHint(false), keepShowingBoostHint(true), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), 
+doBoostHint(NULL), holdBoostHint(NULL),
 boostAvailableHint(NULL), fadeEffector(1, 0) {
     assert(display != NULL);
 }
@@ -104,13 +105,14 @@ void TutorialEventsListener::BallBoostGainedEvent() {
     const BallBoostModel* boostModel = this->display->GetModel()->GetBallBoostModel();
     if (boostModel == NULL) { return; }
     
-    if (boostModel->GetNumAvailableBoosts() == 1) {
+    if (boostModel->GetNumAvailableBoosts() == 1 && this->keepShowingBoostHint) {
         this->startBoostHint->Show(0.0, 0.5);
         this->boostAvailableHint->Show(0.0, 0.5);
     }
 }
 
 void TutorialEventsListener::BallBoostLostEvent(bool allBoostsLost) {
+    this->keepShowingBoostHint = false;
     if (allBoostsLost) {
         this->startBoostHint->Unshow(0.0, 0.5);
         this->boostAvailableHint->Unshow(0.0, 0.5);
@@ -127,8 +129,10 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
         case BallBoostModel::BulletTimeFadeIn:
             // Show the hint for telling the user how to boost the ball while in bullet time
             this->startBoostHint->Unshow(0.0, 0.5);
-            this->doBoostHint->Show(0.0, 0.5);
-            this->holdBoostHint->Show(0.0, 0.5);
+            if (this->keepShowingBoostHint) {
+                this->doBoostHint->Show(0.0, 0.5);
+                this->holdBoostHint->Show(0.0, 0.5);
+            }
             this->boostAvailableHint->Unshow(0.0, 0.5);
 
         case BallBoostModel::BulletTime:
@@ -140,7 +144,7 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
             this->doBoostHint->Unshow(0.0, 0.5);
             this->holdBoostHint->Unshow(0.0, 0.5);
 
-            if (boostModel.GetNumAvailableBoosts() > 0) {
+            if (boostModel.GetNumAvailableBoosts() > 0 && this->keepShowingBoostHint) {
                 this->boostAvailableHint->Show(0.0, 0.5);
             }
             break;
