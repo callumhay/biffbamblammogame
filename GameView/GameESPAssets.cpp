@@ -4226,6 +4226,54 @@ void GameESPAssets::AddEnergyShieldHitEffect(const Point2D& shieldCenter, const 
 	this->activeGeneralEmitters.push_back(onomataEffect);
 }
 
+ESPPointEmitter* GameESPAssets::CreateItemNameEffect(const PlayerPaddle& paddle, const GameItem& item) {
+
+    ESPInterval redColour(0), greenColour(0), blueColour(0);
+	switch (item.GetItemDisposition()) {
+		case GameItem::Good:
+			redColour	= ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.G());
+			blueColour	= ESPInterval(GameViewConstants::GetInstance()->ITEM_GOOD_COLOUR.B());
+			break;
+		case GameItem::Bad:
+			redColour	= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.G());
+			blueColour	= ESPInterval(GameViewConstants::GetInstance()->ITEM_BAD_COLOUR.B());
+			break;
+		case GameItem::Neutral:
+			redColour	= ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.R());
+			greenColour = ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.G());
+			blueColour	= ESPInterval(GameViewConstants::GetInstance()->ITEM_NEUTRAL_COLOUR.B());
+		default:
+			break;
+	}
+
+    ESPPointEmitter* itemNameEffect = new ESPPointEmitter();
+    itemNameEffect->SetSpawnDelta(ESPInterval(-1, -1));
+    itemNameEffect->SetInitialSpd(ESPInterval(1.1f));
+    itemNameEffect->SetEmitDirection(Vector3D(0, 1, 0));
+    itemNameEffect->SetParticleLife(ESPInterval(2.4f));
+    itemNameEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
+    itemNameEffect->SetParticleAlignment(ESP::ScreenAligned);
+    itemNameEffect->SetEmitPosition(Point3D(0, 2.75f * paddle.GetHalfHeight(), 0));
+    itemNameEffect->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(1));
+    itemNameEffect->AddEffector(&this->particleFader);
+    itemNameEffect->AddEffector(&this->particleSmallGrowth);
+
+    Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
+    assert(blammopedia != NULL);
+    const Blammopedia::ItemEntry* itemEntry = blammopedia->GetItemEntry(item.GetItemType());
+    assert(itemEntry != NULL);
+
+    TextLabel2D itemNameTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
+        GameFontAssetsManager::Small), itemEntry->GetName());
+    itemNameTextLabel.SetDropShadow(Colour(0, 0, 0), 0.08f);
+
+    itemNameEffect->SetParticles(1, itemNameTextLabel);
+
+    return itemNameEffect;
+}
+
 /**
  * Adds an effect for when a dropping item is acquired by the player paddle -
  * depending on the item type we create the effect.
@@ -4336,36 +4384,19 @@ void GameESPAssets::AddItemAcquiredEffect(const Camera& camera, const PlayerPadd
 		result = absorbGlowSparks->SetParticles(NUM_ITEM_ACQUIRED_SPARKS, this->circleGradientTex);
 		assert(result);
 		
-        // Name of the acquired item effect
-        ESPPointEmitter* itemNameEffect = new ESPPointEmitter();
-	    // Set up the emitter...
-	    itemNameEffect->SetSpawnDelta(ESPInterval(-1, -1));
-	    itemNameEffect->SetInitialSpd(ESPInterval(1.1f));
-        itemNameEffect->SetEmitDirection(Vector3D(0, 1, 0));
-	    itemNameEffect->SetParticleLife(ESPInterval(2.4f));
-	    itemNameEffect->SetParticleSize(ESPInterval(1.0f, 1.0f), ESPInterval(1.0f, 1.0f));
-	    itemNameEffect->SetParticleAlignment(ESP::ScreenAligned);
-        itemNameEffect->SetEmitPosition(Point3D(0, 2.75f * paddle.GetHalfHeight(), 0));
-	    itemNameEffect->SetParticleColour(redColour, greenColour, blueColour, ESPInterval(1));
-	    itemNameEffect->AddEffector(&this->particleFader);
-	    itemNameEffect->AddEffector(&this->particleSmallGrowth);
-
-        Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
-        assert(blammopedia != NULL);
-        const Blammopedia::ItemEntry* itemEntry = blammopedia->GetItemEntry(item.GetItemType());
-        assert(itemEntry != NULL);
-
-        TextLabel2D itemNameTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose,
-            GameFontAssetsManager::Small), itemEntry->GetName());
-        itemNameTextLabel.SetDropShadow(Colour(0, 0, 0), 0.08f);
-
-        itemNameEffect->SetParticles(1, itemNameTextLabel);
-
+        ESPPointEmitter* itemNameEffect = NULL;
+        if (item.GetItemType() != GameItem::RandomItem) {
+           itemNameEffect = this->CreateItemNameEffect(paddle, item);
+           assert(itemNameEffect != NULL);
+        }
 
 		this->activePaddleEmitters.push_back(haloExpandingAura);
 		this->activePaddleEmitters.push_back(paddlePulsingAura);
 		this->activePaddleEmitters.push_back(absorbGlowSparks);
-        this->activePaddleEmitters.push_back(itemNameEffect);
+
+        if (itemNameEffect != NULL) {
+            this->activePaddleEmitters.push_back(itemNameEffect);
+        }
 	}
 }
 
