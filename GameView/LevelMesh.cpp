@@ -425,15 +425,16 @@ void LevelMesh::ChangePiece(const LevelPiece& pieceBefore, const LevelPiece& pie
 	Vector3D translation(-this->currLevel->GetLevelUnitWidth()/2.0f, -this->currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
 	this->CreateDisplayListsForPiece(&pieceAfter, translation);
 
-    // Remove any last-remaining-piece special effects as well
-    std::map<const LevelPiece*, ESPEmitter*>::iterator lastPieceIter = this->lastPieceEffects.find(&pieceBefore);
-    if (lastPieceIter != this->lastPieceEffects.end()) {
-        ESPEmitter* emitter = lastPieceIter->second;
-        delete emitter;
-        emitter = NULL;
-        this->lastPieceEffects.erase(lastPieceIter);
+    // Remove any last-remaining-piece special effects as well (if the piece became empty)
+    if (pieceAfter.GetType() == LevelPiece::Empty) {
+        std::map<const LevelPiece*, ESPEmitter*>::iterator lastPieceIter = this->lastPieceEffects.find(&pieceBefore);
+        if (lastPieceIter != this->lastPieceEffects.end()) {
+            ESPEmitter* emitter = lastPieceIter->second;
+            delete emitter;
+            emitter = NULL;
+            this->lastPieceEffects.erase(lastPieceIter);
+        }
     }
-
 }
 
 void LevelMesh::RemovePiece(const LevelPiece& piece) {
@@ -784,7 +785,7 @@ void LevelMesh::LevelIsAlmostComplete() {
 	    glowPulseEffect->SetSpawnDelta(ESPInterval(-1));
 	    glowPulseEffect->SetInitialSpd(ESPInterval(0));
 	    glowPulseEffect->SetParticleLife(ESPInterval(-1));
-        glowPulseEffect->SetParticleSize(ESPInterval(LevelPiece::PIECE_WIDTH), ESPInterval(LevelPiece::PIECE_HEIGHT));
+        glowPulseEffect->SetParticleSize(ESPInterval(1.2f*LevelPiece::PIECE_WIDTH), ESPInterval(1.2f*LevelPiece::PIECE_HEIGHT));
 	    glowPulseEffect->SetEmitAngleInDegrees(0);
 	    glowPulseEffect->SetRadiusDeviationFromCenter(ESPInterval(0.0f));
 	    glowPulseEffect->SetParticleAlignment(ESP::ScreenAligned);
