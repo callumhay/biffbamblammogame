@@ -60,6 +60,7 @@ void NormalBallState::Tick(double seconds, const Vector2D& worldSpaceGravityDir,
         // in the case of when it's attached to the paddle, don't do this
 	    if ((this->gameBall->GetBallType() & GameBall::GraviBall) == GameBall::GraviBall &&
             gameModel->GetPlayerPaddle()->GetAttachedBall() != this->gameBall) {
+
 		    // Keep track of the last gravity speed calculated based on the gravity pulling the ball down
 		    // The gravitySpeed variable is basically a mirror of currSpeed but it tracks 
 		    // the speed of the ball as it gets pulled down by gravity - currSpeed does not do this

@@ -51,7 +51,6 @@ public:
 	static const float MIN_BALL_ANGLE_IN_DEGS;
 	static const float MIN_BALL_ANGLE_IN_RADS;
 
-	static const Vector2D STD_INIT_VEL_DIR;
 	// The largest possible random angle of release (for the ball) from a still paddle, in degrees
 	static const int STILL_RAND_RELEASE_DEG  = 3;
 	static const int MOVING_RAND_RELEASE_DEG = 3;
@@ -197,11 +196,7 @@ public:
 		return this->currSpeed;
 	}
 	// Set the current speed of this ball
-	void SetSpeed(float speed) {
-
-		this->currSpeed    = speed;
-		this->gravitySpeed = speed;
-	}
+	void SetSpeed(float speed);
 
     void TurnOffBoost() {
         this->boostSpdDecreaseCounter = BOOST_TEMP_SPD_INCREASE_AMT;

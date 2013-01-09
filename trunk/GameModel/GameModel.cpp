@@ -468,6 +468,17 @@ void GameModel::CollisionOccurred(GameBall& ball, Boss* boss, BossBodyPart* boss
 	this->PerformLevelCompletionChecks();
 }
 
+void GameModel::BallBoostDirectionPressed(int x, int y) {
+	if (this->currState != NULL) {
+		this->currState->BallBoostDirectionPressed(x, y);
+	}
+}
+void GameModel::BallBoostDirectionReleased() {
+	if (this->currState != NULL) {
+		this->currState->BallBoostDirectionReleased();
+	}
+}
+
 float GameModel::GetTimeDialationFactor() const {
     if (this->boostModel == NULL) { return 1.0f; }
     return this->boostModel->GetTimeDialationFactor();
