@@ -228,18 +228,6 @@ void KeyboardSDLController::MouseMotion(unsigned int x, unsigned int y, int relX
  */
 void KeyboardSDLController::ExecuteDisplayKeyPressedNotifications(SDLKey key) {
 
-    /*
-    Vector2D specialDir(0,0);
-    this->GetSpecialDirectionVector(specialDir);
-    if (!specialDir.IsZero()) {
-        this->display->SpecialDirectionPressed(specialDir[0], specialDir[1]);
-        this->specialDirOn = true;
-        if (this->keyPressed[SDLK_SPACE]) {
-            this->model->ShootActionReleaseUse();
-        }
-    }
-    */
-
 	switch (key) {
 		case SDLK_DOWN:
 			this->display->ButtonPressed(GameControl::DownButtonAction);
@@ -284,23 +272,6 @@ void KeyboardSDLController::ExecuteDisplayKeyPressedNotifications(SDLKey key) {
  * Informs the display about a key released event in this controller.
  */
 void KeyboardSDLController::ExecuteDisplayKeyReleasedNotifications(SDLKey key) {
-
-    /*
-    Vector2D specialDir(0,0);
-    this->GetSpecialDirectionVector(specialDir);
-
-    if (!specialDir.IsZero()) {
-        this->display->SpecialDirectionPressed(specialDir[0], specialDir[1]);
-        this->specialDirOn = true;
-        if (this->keyPressed[SDLK_SPACE]) {
-            this->model->ShootActionReleaseUse();
-        }
-    }
-    else if (this->specialDirOn) {
-        this->display->SpecialDirectionReleased();
-        this->specialDirOn = false;
-    }
-    */
 
 	switch (key) {
 		case SDLK_DOWN:

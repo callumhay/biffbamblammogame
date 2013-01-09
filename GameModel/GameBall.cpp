@@ -40,9 +40,6 @@ const float GameBall::RADIUS_DIFF_PER_SIZE	 = GameBall::DEFAULT_BALL_RADIUS / 3.
 // Maximum rotation speed of the ball
 const float GameBall::MAX_ROATATION_SPEED	= 70;
 
-// Typical initial velocity for the ball when released from the player paddle
-const Vector2D GameBall::STD_INIT_VEL_DIR = Vector2D(0, GameBall::NormalSpeed);
-
 // Temporary speed increase gained by boosting the ball
 const float GameBall::BOOST_TEMP_SPD_INCREASE_AMT = 7.0f;
 
@@ -277,7 +274,7 @@ void GameBall::LoadIntoCannonBlock(CannonBlock* cannonBlock) {
 }
 
 void GameBall::ApplyImpulseForce(float impulseAmt, float deceleration) {
-    if (this->impulseSpdDecreaseCounter < this->impulseAmount) {
+    if (this->impulseSpdDecreaseCounter < this->impulseAmount || impulseAmt == 0.0) {
         // Ignore the impulse if there already is one
         return;
     }
@@ -286,4 +283,9 @@ void GameBall::ApplyImpulseForce(float impulseAmt, float deceleration) {
     this->impulseAmount = impulseAmt;
     this->impulseDeceleration = fabs(deceleration); // keep it positive when memoized
     this->impulseSpdDecreaseCounter = 0.0f;
+}
+
+void GameBall::SetSpeed(float speed) {
+	this->currSpeed = speed;
+	this->gravitySpeed = speed;
 }

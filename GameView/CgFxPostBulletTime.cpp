@@ -46,6 +46,7 @@ CgFxPostBulletTime::~CgFxPostBulletTime() {
 }
 
 void CgFxPostBulletTime::UpdateBulletTimeState(const BallBoostModel& boostModel) {
+
     static const float FADE_IN_DESATURATION     = 0.6f;
     static const float FADE_IN_SAMPLE_DISTANCE  = 0.25f;
     static const float FADE_IN_SAMPLE_STRENGTH  = 2.0f;
@@ -56,8 +57,6 @@ void CgFxPostBulletTime::UpdateBulletTimeState(const BallBoostModel& boostModel)
     static const float MAX_DESATURATION     = 0.85f;
     static const float MAX_SAMPLE_DISTANCE  = 0.60f;
     static const float MAX_SAMPLE_STRENGTH  = 4.5f;
-
-
 
     switch (boostModel.GetBulletTimeState()) {
         case BallBoostModel::NotInBulletTime:

@@ -434,22 +434,9 @@ public:
 		}
 	}
 
-    void BallBoostDirectionPressed(int x, int y) {
-		// Can only do this if the state exists and is not paused
-		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
-		   (this->pauseBitField & GameModel::PauseState) == 0x0 &&
-           (this->pauseBitField & GameModel::PauseGame) == 0x0) {
-			this->currState->BallBoostDirectionPressed(x, y);
-		}
-    }
-    void BallBoostDirectionReleased() {
-		// Can only do this if the state exists and is not paused
-		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
-		   (this->pauseBitField & GameModel::PauseState) == 0x0 &&
-           (this->pauseBitField & GameModel::PauseGame) == 0x0) {
-			this->currState->BallBoostDirectionReleased();
-		}
-    }
+    void BallBoostDirectionPressed(int x, int y);
+    void BallBoostDirectionReleased();
+
     float GetTimeDialationFactor() const;
     const BallBoostModel* GetBallBoostModel() const {
         return this->boostModel;

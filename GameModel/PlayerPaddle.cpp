@@ -45,7 +45,7 @@ const float PlayerPaddle::DEFAULT_ACCELERATION  = 138.0f;
 const float PlayerPaddle::DEFAULT_DECCELERATION = -160.0f;
 
 // Speed amount to diminish from the max speed when the paddle is poisoned
-const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 3.0f;
+const float PlayerPaddle::POISON_SPEED_DIMINISH = PlayerPaddle::DEFAULT_MAX_SPEED / 4.0f;
 
 // The coefficent angle change of the ball when deflected by a moving paddle
 const int PlayerPaddle::DEFLECTION_DEGREE_ANGLE = 20; // TODO: Fix this...
@@ -249,45 +249,36 @@ void PlayerPaddle::FireAttachedBall() {
     assert(this->HasBallAttached());
 
 	// Set the ball's new trajectory in order for it to leave the paddle
-	Vector2D ballReleaseDir = GameBall::STD_INIT_VEL_DIR;
+    Vector2D ballReleaseDir = this->GetUpVector();
 
 	// Get the paddle's velocity
-	Vector2D avgPaddleVel = this->GetVelocity();
+    Vector2D avgPaddleVelDir = this->GetVelocity();
 
-	// Check for the sticky paddle - in the case of the sticky paddle we want the ball to not get stuck again..
+	// Check for the sticky paddle... trajectory will be based on the normal of the surface that the ball is stuck to
 	if ((this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
-		std::vector<int> indices = this->bounds.ClosestCollisionIndices(this->attachedBall->GetCenterPosition2D(), 0.01f);
+		
+        std::vector<int> indices = this->bounds.ClosestCollisionIndices(this->attachedBall->GetCenterPosition2D(), 0.01f);
 		assert(indices.size() > 0);
-		const Vector2D& launchNormal = this->bounds.GetNormal(indices[0]);
-
-		// Move the ball so it's no longer colliding...
-		this->attachedBall->SetCenterPosition(this->attachedBall->GetCenterPosition2D() + this->attachedBall->GetBounds().Radius() * launchNormal);
-		this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), launchNormal);
+		
+        ballReleaseDir = Vector2D::Rotate(this->GetZRotation(), this->bounds.GetNormal(indices[0]));
 	}
-	else {
-		// Check to see if the paddle is moving, if not just use a random angle
-        if (fabs(avgPaddleVel[0]) <= EPSILON || this->centerPos[0] >= (this->maxBound - this->GetHalfWidthTotal() - EPSILON) ||
-            this->centerPos[0] <= (this->minBound + this->GetHalfWidthTotal() + EPSILON)) {
-			// Add some randomness to the velocity by deviating a straight-up shot by some random angle
-			float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::STILL_RAND_RELEASE_DEG;		
-			ballReleaseDir = Vector2D::Rotate(randomAngleInDegs, ballReleaseDir);
-		}
-		else {
-			// The paddle appears to be moving, modify the ball's release velocity
-			// to reflect some of this movement
-			float multiplier = PlayerPaddle::DEFAULT_MAX_SPEED / static_cast<float>(GameBall::GetNormalSpeed());
-			Vector2D newBallDir = Vector2D::Normalize(ballReleaseDir + multiplier * avgPaddleVel);
-			
-			// and, of course, add some randomness...
-			float randomAngleInDegs = static_cast<float>(Randomizer::GetInstance()->RandomNumNegOneToOne()) * GameBall::MOVING_RAND_RELEASE_DEG;		
-			ballReleaseDir = Vector2D::Rotate(randomAngleInDegs, newBallDir);
-		}
 
-		ballReleaseDir.Normalize();
+    // Check to see if the paddle has crashed into a wall or is touching it, in this case we reduce
+    // the paddle velocity to zero
+    float absPaddleSpd = fabs(this->GetSpeed());
+    if (this->centerPos[0] >= (this->maxBound - this->GetHalfWidthTotal() - EPSILON) ||
+        this->centerPos[0] <= (this->minBound + this->GetHalfWidthTotal() + EPSILON)) {
 
-		// Set the ball velocity (tragectory it will leave the paddle on)
-		this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), ballReleaseDir);
-	}
+        avgPaddleVelDir[0] = 0.0f;
+        absPaddleSpd = 0.0f;
+    }
+
+    // Modify the ball's release velocity to reflect the paddle's movement
+    ballReleaseDir = Vector2D::Normalize(ballReleaseDir + 0.25f * avgPaddleVelDir);
+
+	// Set the ball velocity (tragectory it will leave the paddle on)
+	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), ballReleaseDir);
+    this->attachedBall->ApplyImpulseForce(0.5f * absPaddleSpd, absPaddleSpd); 
 
 	// Re-enable the ball's collisions
 	this->attachedBall->SetBallBallCollisionsEnabled();
@@ -304,7 +295,7 @@ void PlayerPaddle::FireAttachedProjectile() {
     assert(this->HasProjectileAttached());
 
 	// Set the projectile's new trajectory in order for it to leave the paddle
-	Vector2D releaseDir = GameBall::STD_INIT_VEL_DIR;
+    Vector2D releaseDir = this->GetUpVector();
 	// Get the paddle's velocity
 	Vector2D avgPaddleVel = this->GetVelocity();
 
@@ -393,11 +384,12 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 		this->currSpeed = std::max<float>(0.0f, std::min<float>(this->maxSpeed, this->currSpeed + currAcceleration * seconds + this->impulse * seconds));
 		
         // If the poison paddle is active then the speed is diminished...
+        float tempSpd = this->currSpeed;
         if ((this->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle) {
-            this->currSpeed = std::max<float>(0.0f, this->currSpeed - PlayerPaddle::POISON_SPEED_DIMINISH);
+            tempSpd = std::max<float>(0.0f, tempSpd - PlayerPaddle::POISON_SPEED_DIMINISH);
         }
         
-        distanceTravelled = this->GetSpeed() * seconds;
+        distanceTravelled = tempSpd * this->lastDirection * seconds;
 	}
 
 	float newCenterX = this->centerPos[0] + distanceTravelled /*+ this->impulse*/;
