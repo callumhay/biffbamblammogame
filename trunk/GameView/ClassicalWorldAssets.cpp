@@ -130,7 +130,7 @@ void ClassicalWorldAssets::InitializeEmitters() {
     static const float X_FLAME2_POS = -8.38f;
     static const float Y_FLAME_POS = 6.24f;
     static const float Y_FLAME_POS_WITH_OFFSET = Y_FLAME_POS - 0.75f;
-    static const float Z_FLAME_POS  = -9.25f;
+    static const float Z_FLAME_POS  = -11.25f;
 
     static const float FLAME_FREQ = 0.25f;
     static const float FLAME_SCALE = 0.33f;
