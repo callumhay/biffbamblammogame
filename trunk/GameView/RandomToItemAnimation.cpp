@@ -11,6 +11,8 @@
 
 #include "RandomToItemAnimation.h"
 #include "GameViewConstants.h"
+#include "GameESPAssets.h"
+
 #include "../Blammopedia.h"
 
 #include "../GameModel/GameModel.h"
@@ -23,32 +25,31 @@
 #include "../BlammoEngine/GeometryMaker.h"
 #include "../ResourceManager.h"
 
-RandomToItemAnimation::RandomToItemAnimation() :
-randomItemTexture(NULL), currItemFromRandomTexture(NULL), isAnimating(false) {
-	Blammopedia* blammopedia = ResourceManager::GetInstance()->GetBlammopedia();
-	assert(blammopedia != NULL);
-	const Blammopedia::ItemEntry* randomItemEntry = blammopedia->GetItemEntry(GameItem::RandomItem);
-	assert(randomItemEntry != NULL);
-	this->randomItemTexture = randomItemEntry->GetItemTexture();
-	assert(randomItemTexture != NULL);
+RandomToItemAnimation::RandomToItemAnimation() : currItemFromRandomTexture(NULL),
+isAnimating(false), itemNameEffect(NULL) {
 
-	this->initialFadeInAnim.SetInterpolantValue(0.0f);
-	this->initialFadeInAnim.SetRepeat(false);
-	this->randomFadeOutItemFadeInAnim.SetInterpolantValue(0.0f);
-	this->randomFadeOutItemFadeInAnim.SetRepeat(false);
-	this->finalFadeOutAnim.SetInterpolantValue(0.0f);
-	this->finalFadeOutAnim.SetRepeat(false);
+	this->fadeAnim.SetInterpolantValue(0.0f);
+	this->fadeAnim.SetRepeat(false);
 	this->itemMoveAnim.SetInterpolantValue(Point2D(0.0f, 0.0f));
 	this->itemMoveAnim.SetRepeat(false);
+    this->scaleAnim.SetInterpolantValue(0.0f);
+    this->scaleAnim.SetRepeat(false);
 }
 
 RandomToItemAnimation::~RandomToItemAnimation() {
 	//bool success = ResourceManager::GetInstance()->ReleaseTextureResource(this->randomItemTexture);
 	//assert(success);
+    if (this->itemNameEffect != NULL) {
+        delete this->itemNameEffect;
+        this->itemNameEffect = NULL;
+    }
 }
 
-void RandomToItemAnimation::Start(const Texture* gameItemTexture, const GameModel& gameModel) {
+void RandomToItemAnimation::Start(const GameItem& actualItem, const Texture* gameItemTexture,
+                                  const GameModel& gameModel, GameESPAssets* espAssets) {
+
 	assert(gameItemTexture != NULL);
+    assert(espAssets != NULL);
 
 	const PlayerPaddle& paddle = *gameModel.GetPlayerPaddle();
 
@@ -58,52 +59,49 @@ void RandomToItemAnimation::Start(const Texture* gameItemTexture, const GameMode
 	}
 	this->currItemFromRandomTexture = gameItemTexture;
 	
-	// Setup all of the animations:
-	
-	static const double TOTAL_FADE_OUT_TO_FADE_IN_TIME = 1.25;
-	static const double TOTAL_INITIAL_FADE_IN_TIME     = 0.33;
-	static const double TOTAL_FINAL_FADE_OUT_TIME      = 0.33;
-	static const double TOTAL_ANIMATION_TIME = TOTAL_FADE_OUT_TO_FADE_IN_TIME + TOTAL_INITIAL_FADE_IN_TIME +
-		                                         TOTAL_FINAL_FADE_OUT_TIME;
+	// Setup all of the animations
+	static const double TOTAL_ANIMATION_TIME = 2.25;
 
-	// Start with a fade in of the random item...
-	this->initialFadeInAnim.SetLerp(0.0, TOTAL_INITIAL_FADE_IN_TIME, 0.0f, 1.0f);
-	this->initialFadeInAnim.SetInterpolantValue(0.0f);
-
-	Vector2D halfLevelDim = 0.5f * gameModel.GetLevelUnitDimensions();
+    float startYPos = 2*paddle.GetHalfHeight() + GameItem::ITEM_HEIGHT;
+    float endYPos   = 2*paddle.GetHalfHeight() + 4*GameItem::ITEM_HEIGHT;
+    float distance  = fabs(endYPos - startYPos);
+    float speed     = static_cast<float>(distance / TOTAL_ANIMATION_TIME);
 
 	// Move it over the course of the entire animation
-	Point2D startLocation = Point2D(-1.5f * paddle.GetHalfWidthTotal() + halfLevelDim[0], -(paddle.GetHalfHeight() + 0.5f * GameItem::ITEM_HEIGHT));
-	Point2D endLocation   = Point2D( 1.5f * paddle.GetHalfWidthTotal() + halfLevelDim[0], -(paddle.GetHalfHeight() + 0.5f * GameItem::ITEM_HEIGHT));
-	this->itemMoveAnim.SetLerp(TOTAL_INITIAL_FADE_IN_TIME, TOTAL_FADE_OUT_TO_FADE_IN_TIME + TOTAL_INITIAL_FADE_IN_TIME, startLocation, endLocation);
+    Point2D startLocation = Point2D(paddle.GetCenterPosition()[0], startYPos);
+    Point2D endLocation   = Point2D(paddle.GetCenterPosition()[0], endYPos);
+	this->itemMoveAnim.SetLerp(0.0, TOTAL_ANIMATION_TIME, startLocation, endLocation);
 	this->itemMoveAnim.SetInterpolantValue(startLocation);
 
-	// ...and fade it out as we fade the actual item in
-	double endOfFadeOutFadeIn = TOTAL_INITIAL_FADE_IN_TIME + TOTAL_FADE_OUT_TO_FADE_IN_TIME;
-	this->randomFadeOutItemFadeInAnim.SetLerp(TOTAL_INITIAL_FADE_IN_TIME, endOfFadeOutFadeIn, 1.0f, 0.0f);
-	this->randomFadeOutItemFadeInAnim.SetInterpolantValue(1.0f);
+	// Fade out while continuing to move
+	this->fadeAnim.SetLerp(0.0, TOTAL_ANIMATION_TIME, 1.0f, 0.0f);
+	this->fadeAnim.SetInterpolantValue(1.0f);
 
-	// And finish with a fade out while continuing to move
-	this->finalFadeOutAnim.SetLerp(endOfFadeOutFadeIn, TOTAL_ANIMATION_TIME, 1.0f, 0.0f);
-	this->finalFadeOutAnim.SetInterpolantValue(1.0f);
+    // Scale while moving
+    this->scaleAnim.SetLerp(0.0f, TOTAL_ANIMATION_TIME, 1.0f, 1.5f);
+    this->scaleAnim.SetInterpolantValue(1.0f);
+
+    this->itemNameEffect = espAssets->CreateItemNameEffect(paddle, actualItem);
+    assert(this->itemNameEffect != NULL);
+    this->itemNameEffect->SetInitialSpd(ESPInterval(speed));
+    this->itemNameEffect->SetEmitPosition(Point3D(paddle.GetCenterPosition()[0], 2*paddle.GetHalfHeight() + 2.5*GameItem::ITEM_HEIGHT, 0.0f));
+    this->itemNameEffect->SetParticleLife(ESPInterval(TOTAL_ANIMATION_TIME));
 
 	this->isAnimating = true;
 }
 
 void RandomToItemAnimation::Stop() {
 	this->isAnimating = false;
+    if (this->itemNameEffect != NULL) {
+        delete this->itemNameEffect;
+        this->itemNameEffect = NULL;
+    }
 }
 
 void RandomToItemAnimation::Draw(const Camera& camera, double dT) {
 	if (!this->isAnimating) {
 		return;
 	}
-
-	// Tick all the animations
-	this->initialFadeInAnim.Tick(dT);
-	this->randomFadeOutItemFadeInAnim.Tick(dT);
-	this->isAnimating = !this->finalFadeOutAnim.Tick(dT);
-	this->itemMoveAnim.Tick(dT);
 
 	// Generate a screen align matrix
 	Matrix4x4 screenAlignMatrix = camera.GenerateScreenAlignMatrix();
@@ -118,35 +116,22 @@ void RandomToItemAnimation::Draw(const Camera& camera, double dT) {
 	const Point2D& movePt = this->itemMoveAnim.GetInterpolantValue();
 	glPushMatrix();
 	glTranslatef(movePt[0], movePt[1], 0.0f);
-	float randomItemAlpha = this->initialFadeInAnim.GetInterpolantValue() * this->finalFadeOutAnim.GetInterpolantValue() * this->randomFadeOutItemFadeInAnim.GetInterpolantValue();
-	float actualItemAlpha = (1.0f - this->randomFadeOutItemFadeInAnim.GetInterpolantValue()) * this->finalFadeOutAnim.GetInterpolantValue();
+    
+    float actualItemAlpha = this->fadeAnim.GetInterpolantValue();
+    float itemScale = this->scaleAnim.GetInterpolantValue();
 
 	glMultMatrixf(screenAlignMatrix.begin());
-    glScalef(GameItem::ITEM_WIDTH, GameItem::ITEM_HEIGHT, 1.0f);
-
-	bool didDraw = false;
-	float alphaOfDraw = 0.0f;
-
-	if (randomItemAlpha > 0.0f && actualItemAlpha < 1.0f) {
-		glColor4f(1.0f, 1.0f, 1.0f, randomItemAlpha);
-		this->randomItemTexture->BindTexture();
-		GeometryMaker::GetInstance()->DrawQuad();
-		didDraw = true;
-		alphaOfDraw = randomItemAlpha;
-	}
+    glScalef(itemScale*2, itemScale, 1.0f);
 
 	if (actualItemAlpha > 0.0f) {
-		glColor4f(1.0f, 1.0f, 1.0f, actualItemAlpha);
+		// Item
+        glColor4f(1.0f, 1.0f, 1.0f, actualItemAlpha);
 		this->currItemFromRandomTexture->BindTexture();
 		GeometryMaker::GetInstance()->DrawQuad();
-		didDraw = true;
-		alphaOfDraw = std::max<float>(alphaOfDraw, actualItemAlpha);
-	}
 
-	// Draw the outlines...
-	if (didDraw) {
+        // Outline
 		glLineWidth(2.0f);
-		glColor4f(0.0f, 0.0f, 0.0f, alphaOfDraw);
+		glColor4f(0.0f, 0.0f, 0.0f, actualItemAlpha);
 		glPolygonMode(GL_FRONT, GL_LINE);
 		GeometryMaker::GetInstance()->DrawQuad();
 	}
@@ -154,5 +139,18 @@ void RandomToItemAnimation::Draw(const Camera& camera, double dT) {
 	glPopMatrix();
 	glPopAttrib();
 
-	
+    this->itemNameEffect->Draw(camera);
+    this->itemNameEffect->Tick(dT);
+
+	// Tick all the animations
+	this->fadeAnim.Tick(dT);
+    this->scaleAnim.Tick(dT);
+	this->isAnimating = !this->fadeAnim.Tick(dT);
+	this->itemMoveAnim.Tick(dT);
+
+    if (!this->isAnimating) {
+        assert(this->itemNameEffect != NULL);
+        delete this->itemNameEffect;
+        this->itemNameEffect = NULL;
+    }
 }

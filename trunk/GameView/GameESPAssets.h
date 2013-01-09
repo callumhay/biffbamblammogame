@@ -282,7 +282,8 @@ public:
 	void AddBallExplodedEffect(const GameBall* ball);
 	void AddPaddleHitWallEffect(const PlayerPaddle& paddle, const Point2D& hitLoc);
 	void AddPaddleHitByProjectileEffect(const PlayerPaddle& paddle, const Projectile& projectile);
-	void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
+	ESPPointEmitter* CreateItemNameEffect(const PlayerPaddle& paddle, const GameItem& item);
+    void AddItemAcquiredEffect(const Camera& camera, const PlayerPaddle& paddle, const GameItem& item);
 	void SetItemEffect(const GameItem& item, const GameModel& gameModel);
 	void AddItemDropEffect(const GameItem& item, bool showStars);
 	void RemoveItemDropEffect(const GameItem& item);

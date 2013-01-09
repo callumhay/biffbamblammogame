@@ -20,6 +20,8 @@ class Texture;
 class Texture2D;
 class GameModel;
 class Camera;
+class GameESPAssets;
+class ESPPointEmitter;
 
 /**
  * Class that provides the animation for showing a random item (just picked up by the paddle)
@@ -30,7 +32,8 @@ public:
 	RandomToItemAnimation();
 	~RandomToItemAnimation();
 
-	void Start(const Texture* gameItemTexture, const GameModel& gameModel);
+	void Start(const GameItem& actualItem, const Texture* gameItemTexture,
+        const GameModel& gameModel, GameESPAssets* espAssets);
 	void Stop();
 
 	void Draw(const Camera& camera, double dT);
@@ -38,14 +41,13 @@ public:
 	bool GetIsActive() const { return this->isAnimating; }
 
 private:
-	const Texture2D* randomItemTexture;
 	const Texture* currItemFromRandomTexture;
 
 	bool isAnimating;
-	AnimationLerp<float> initialFadeInAnim;
-	AnimationLerp<float> randomFadeOutItemFadeInAnim;	// Holds a value 1 to 0 (1 is full alpha for fade out item and no alpha for fade in)
-	AnimationLerp<float> finalFadeOutAnim;
+	AnimationLerp<float> fadeAnim;
+    AnimationLerp<float> scaleAnim;
 	AnimationLerp<Point2D> itemMoveAnim;
+    ESPPointEmitter* itemNameEffect;
 };
 
 #endif // __RANDOMTOITEMANIMATION_H__

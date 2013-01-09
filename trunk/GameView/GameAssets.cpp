@@ -1331,7 +1331,7 @@ void GameAssets::ActivateRandomItemEffects(const GameModel& gameModel, const Gam
 	// Figure out the item texture associated with the actual item...
 	Texture2D* actualItemTexture = this->itemAssets->GetItemTexture(actualItem.GetItemType());
 	// This will start and animation that shows to the player what the random item has become
-	this->randomToItemAnimation.Start(actualItemTexture, gameModel);
+    this->randomToItemAnimation.Start(actualItem, actualItemTexture, gameModel, this->espAssets);
 }
 
 /**
