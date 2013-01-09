@@ -71,7 +71,7 @@ public:
 	static const int OUT_OF_BOUNDS_BUFFER_SPACE = 10;
 	static const int Y_COORD_OF_DEATH = -OUT_OF_BOUNDS_BUFFER_SPACE;
 
-    static const int NUM_PIECES_FOR_ALMOST_COMPLETE = 2;
+    static const int NUM_PIECES_FOR_ALMOST_COMPLETE = 3;
 
 	~GameLevel();
 
