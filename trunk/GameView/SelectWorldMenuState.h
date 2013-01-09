@@ -13,6 +13,7 @@
 #define __SELECTWORLDMENUSTATE_H__
 
 #include "DisplayState.h"
+#include "CgFxGreyscale.h"
 #include "../BlammoEngine/Animation.h"
 
 class TextLabel2D;
@@ -64,11 +65,13 @@ private:
 	FBObj* menuFBO;
 
     Texture2D* starryBG;
+    Texture2D* padlockTex;
 
     // Inner class for representing a selectable world item in the world select menu
     class WorldSelectItem {
     public:
-        WorldSelectItem(SelectWorldMenuState* state, const GameWorld* world, size_t worldNumber, float size);
+        WorldSelectItem(SelectWorldMenuState* state, const GameWorld* world, size_t worldNumber,
+            float size, bool isLocked);
         ~WorldSelectItem();
 
         void SetIsSelected(bool isSelected);
@@ -85,9 +88,10 @@ private:
     private:
         SelectWorldMenuState* state;
         bool isSelected;
+        bool isLocked;
         size_t worldNumber;
         const GameWorld* gameWorld;
-        Texture* image;
+        Texture2D* image;
         TextLabel2DFixedWidth* label;
         TextLabel2DFixedWidth* selectedLabel;
         Point2D topLeftCorner;
@@ -109,7 +113,9 @@ private:
     AnimationLerp<float> goToLevelSelectAlphaAnim;
 
     Texture2D* starTexture;
-        
+    
+    CgFxGreyscale greyscaleEffect;
+
     void GoBackToMainMenu();
     void Init(int selectedIdx);
 

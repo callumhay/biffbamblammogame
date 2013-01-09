@@ -89,8 +89,10 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 
 WorldStartDisplayState::~WorldStartDisplayState() {
     bool success = false;
+    
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
     assert(success);
+
     UNUSED_VARIABLE(success);
 }
 
