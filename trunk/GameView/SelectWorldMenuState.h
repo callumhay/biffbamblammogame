@@ -85,7 +85,12 @@ private:
 
         const GameWorld* GetWorld() const { return this->gameWorld; }
 
+        bool GetIsLocked() const { return this->isLocked; }
+        void ExecuteLockedAnimation();
+
     private:
+        static const float PADLOCK_SCALE;
+
         SelectWorldMenuState* state;
         bool isSelected;
         bool isLocked;
@@ -100,6 +105,7 @@ private:
         TextLabel2D* starTotalLabel;
 
         AnimationLerp<float> sizeAnim;
+        AnimationMultiLerp<float> lockedAnim;
 
         DISALLOW_COPY_AND_ASSIGN(WorldSelectItem);  
     };

@@ -245,12 +245,20 @@ void SelectWorldMenuState::ButtonPressed(const GameControl::ActionButton& presse
 
         case GameControl::EnterButtonAction:
             {
-                const Camera& camera = this->display->GetCamera();
-                this->itemActivated = true;
-                this->goToLevelSelectAlphaAnim.SetLerp(0.5, 0.0);
-                this->goToLevelSelectAlphaAnim.SetRepeat(false);
-                this->goToLevelSelectMoveAnim.SetLerp(0.5, camera.GetWindowWidth());
-                this->goToLevelSelectMoveAnim.SetRepeat(false);
+                WorldSelectItem* selectedItem = this->worldItems[this->selectedItemIdx];
+                assert(selectedItem != NULL);
+                if (selectedItem->GetIsLocked()) {
+                    // The world is locked... do an animation to shake it around a bit
+                    selectedItem->ExecuteLockedAnimation();
+                }
+                else {
+                    const Camera& camera = this->display->GetCamera();
+                    this->itemActivated = true;
+                    this->goToLevelSelectAlphaAnim.SetLerp(0.5, 0.0);
+                    this->goToLevelSelectAlphaAnim.SetRepeat(false);
+                    this->goToLevelSelectMoveAnim.SetLerp(0.5, camera.GetWindowWidth());
+                    this->goToLevelSelectMoveAnim.SetRepeat(false);
+                }
             }
 
             break;
@@ -390,6 +398,8 @@ void SelectWorldMenuState::Init(int selectedIdx) {
     this->selectionAlphaYellowAnim.SetRepeat(true);
 }
 
+const float SelectWorldMenuState::WorldSelectItem::PADLOCK_SCALE = 1.0f / 1.75f;
+
 SelectWorldMenuState::WorldSelectItem::WorldSelectItem(SelectWorldMenuState* state, const GameWorld* world,
                                                        size_t worldNumber, float size, bool isLocked) :
 
@@ -441,10 +451,8 @@ selectedLabel(NULL), baseSize(size), isSelected(false), isLocked(isLocked), size
     this->image = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(world->GetImageFilepath(), Texture::Trilinear, GL_TEXTURE_2D));
     assert(this->image != NULL);
 
-    Colour outlineColour(0,0,0);
-    if (this->isLocked) {
-        outlineColour = Colour(0.2f, 0.2f, 0.2f);
-    }
+    this->lockedAnim.ClearLerp();
+    this->lockedAnim.SetInterpolantValue(0);
 }
 
 SelectWorldMenuState::WorldSelectItem::~WorldSelectItem() {
@@ -487,6 +495,8 @@ void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT
     this->sizeAnim.Tick(dT);
     float currSize = this->sizeAnim.GetInterpolantValue();
 
+    this->lockedAnim.Tick(dT);
+    float currShakeX = this->lockedAnim.GetInterpolantValue();
 
     glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT | GL_ENABLE_BIT);
 
@@ -533,7 +543,8 @@ void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT
         // When locked, draw the padlock over the world image
         glColor4f(1,1,1,1);
         glPushMatrix();
-        float fractSize = currSize / 1.75f;
+        float fractSize = PADLOCK_SCALE * currSize;
+        glTranslatef(currShakeX, 0.0f, 0.0f);
         glScalef(fractSize, fractSize, 1);
         this->state->padlockTex->BindTexture();
         GeometryMaker::GetInstance()->DrawQuad();
@@ -608,4 +619,30 @@ void SelectWorldMenuState::WorldSelectItem::DrawSelectionBorder(const Camera& ca
     glPopMatrix();
 
     glPopAttrib();
+}
+
+void SelectWorldMenuState::WorldSelectItem::ExecuteLockedAnimation() {
+    
+    std::vector<double> timeValues;
+    timeValues.push_back(0.0);
+    timeValues.push_back(0.01);
+    timeValues.push_back(0.025);
+    timeValues.push_back(0.07);
+    timeValues.push_back(0.10);
+    timeValues.push_back(0.13);
+    timeValues.push_back(0.18);
+    timeValues.push_back(0.2);
+
+    std::vector<float> movementValues;
+    float maxMove = 0.25f * PADLOCK_SCALE * this->sizeAnim.GetInterpolantValue();
+    movementValues.push_back(0.0f);
+    movementValues.push_back(maxMove * 0.9f);
+    movementValues.push_back(-maxMove * 0.1f);
+    movementValues.push_back(-maxMove);
+    movementValues.push_back(maxMove * 0.5f);
+    movementValues.push_back(maxMove);
+    movementValues.push_back(-0.2f * maxMove);
+    movementValues.push_back(0.0f);
+    this->lockedAnim.SetLerp(timeValues, movementValues);
+    this->lockedAnim.SetRepeat(false);
 }
