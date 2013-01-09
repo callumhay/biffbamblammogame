@@ -480,6 +480,10 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 		    // Start the game at the furthest level of player progress - this will queue up the next states that we need to go to
             int furthestWorldIdx, furthestLevelIdx;
             this->display->GetModel()->GetFurthestProgressWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
+            
+            // WARNING: We MUST add the world start state to the state queue before calling StartGameAtWorldAndLevel
+            // or it will take place AFTER the level start state!!!
+            this->display->AddStateToQueue(DisplayState::WorldStart);
 		    this->display->GetModel()->StartGameAtWorldAndLevel(furthestWorldIdx, furthestLevelIdx);
 
 		    // Place the view into the proper state to play the game
