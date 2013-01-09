@@ -581,10 +581,10 @@ void GameAssets::DrawPaddle(double dT, const PlayerPaddle& p, const Camera& came
     else {
 	    // Draw any effects on the paddle (e.g., item acquiring effects)
 	    this->espAssets->DrawBackgroundPaddleEffects(dT, camera);
+    }
 
-        if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::MagnetPaddle) == PlayerPaddle::MagnetPaddle) {
-            this->magnetPaddleEffect->Draw(dT, p);
-        }
+    if (!p.GetIsPaddleCameraOn() && (p.GetPaddleType() & PlayerPaddle::MagnetPaddle) == PlayerPaddle::MagnetPaddle) {
+        this->magnetPaddleEffect->Draw(dT, p);
     }
 
 	// Draw the paddle

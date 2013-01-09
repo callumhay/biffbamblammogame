@@ -77,7 +77,6 @@ void GameEventsListener::WorldStartedEvent(const GameWorld& world) {
 	LoadingScreen::GetInstance()->EndShowingLoadingScreen();
 
 	//this->display->GetAssets()->GetSoundAssets()->PlayWorldSound(GameSoundAssets::WorldBackgroundMusic);
-	this->display->AddStateToQueue(DisplayState::WorldStart);
 }
 
 void GameEventsListener::WorldCompletedEvent(const GameWorld& world) {

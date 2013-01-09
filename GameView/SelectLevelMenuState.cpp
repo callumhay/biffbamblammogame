@@ -298,6 +298,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 
     // Handle the case where the player selected a level
     if (this->goToStartLevel && fadeDone) {
+
         // Start the currently selected level
         AbstractLevelMenuItem* selectedLevelItem = this->pages[this->selectedPage]->GetSelectedItem();
         const GameLevel* selectedLevel = selectedLevelItem->GetLevel();

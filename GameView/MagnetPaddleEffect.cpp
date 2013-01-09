@@ -55,6 +55,11 @@ void MagnetPaddleEffect::Reset() {
 
 void MagnetPaddleEffect::Draw(double dT, const PlayerPaddle& p) {
     float scaleFactor = p.GetPaddleScaleFactor();
+    float alphaMultiplier = 1.0f;
+
+    if ((p.GetPaddleType() & PlayerPaddle::InvisiPaddle) == PlayerPaddle::InvisiPaddle) {
+        alphaMultiplier = 0.1f;
+    }
 
     switch (currState) {
 
@@ -88,11 +93,11 @@ void MagnetPaddleEffect::Draw(double dT, const PlayerPaddle& p) {
             break;
     }
     
-    this->DrawLines(scaleFactor);
+    this->DrawLines(scaleFactor, alphaMultiplier);
 }
 
 
-void MagnetPaddleEffect::DrawLines(float scaleFactor) {
+void MagnetPaddleEffect::DrawLines(float scaleFactor, float alphaMultiplier) {
 
     glPushAttrib(GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
 
@@ -113,7 +118,7 @@ void MagnetPaddleEffect::DrawLines(float scaleFactor) {
         
         float halfCurrWidth  = currWidth  / 2.0f;
 
-        glColor4f(1, 1, 1, 0.6f * this->GetAlphaFromTime(currTime));
+        glColor4f(1, 1, 1, 0.6f * alphaMultiplier * this->GetAlphaFromTime(currTime));
 
         glPushMatrix();
         glTranslatef(halfCurrWidth, 0.0f, 0.0f);
