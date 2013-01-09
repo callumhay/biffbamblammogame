@@ -72,6 +72,7 @@ public:
 	const char* CGFX_FULLSCREEN_POSTFIREY_SHADER;
     const char* CGFX_POSTBULLETTIME_SHADER;
     const char* CGFX_FULLSCREEN_POSTDEATH_SHADER;
+    const char* CGFX_GREYSCALE_SHADER;
 
 	// Texture path constants *******************************
 	const char* TEXTURE_BANG1;
@@ -131,6 +132,7 @@ public:
     const char* TEXTURE_VAPOUR_TRAIL;
     const char* TEXTURE_FUTURISM_TRIANGLE;
     const char* TEXTURE_BOSS_ICON;
+    const char* TEXTURE_PADLOCK;
 
     const char* TEXTURE_MULTIPLIER_BANG;
     const char* TEXTURE_MULTIPLIER_GAGE_OUTLINE;

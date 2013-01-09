@@ -917,6 +917,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\CgFxGreyscale.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\CgFxInkBlock.h"
 						>
 					</File>
@@ -998,6 +1002,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\CgFxGaussianBlur.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\CgFxGreyscale.cpp"
 						>
 					</File>
 					<File
