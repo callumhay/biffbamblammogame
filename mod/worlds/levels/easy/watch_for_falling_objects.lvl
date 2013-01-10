@@ -1,21 +1,21 @@
 Watch for Falling Objects
 13 26
 S S S S S S S S S S S S S 
-S E E G Y G Y G Y G E E S 
-S E G G Y G G G Y G G E S 
-S E L G Y G L G Y G L E S 
-S E S G Y G S G Y G S E S 
-S E Y E O E E E O E Y E S 
-S E Y E E E O E E E Y E S 
+S E E E E G E G E E E E S 
+S E G G G G G G G G G E S 
+S E L G E G L G E G L E S 
+S E S G G G S G G G S E S 
+S E E E Y E E E Y E E E S 
+S E G E E E Y E E E G E S 
 S G G G G G Y G G G G G S 
-S G O G L G B G L G O G S 
+S E E G L G B G L G E E S 
 S G G G S G Y G S G G G S 
-S E Y E E E O E E E Y E S 
-S E Y E O E E E O E Y E S 
-S G Y G Y G Y G Y G Y G S 
-S G L G Y G L G Y G L G S 
-S G S G Y G S G Y G S G S 
-S G Y G Y G Y G Y G Y G S 
+S E G E E E Y E E E G E S 
+S E E E G E E E G E E E S 
+S G Y G G G Y G G G Y G S 
+S G L G E G L G E G L G S 
+S G S G G G S G G G S G S 
+S E Y E E E Y E E E Y E S 
 S E Y E E E Y E E E Y E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -38,8 +38,8 @@ PaddleGrow 2
 PoisonPaddle 2
 BallSafetyNet 2
 Blackout 2
+UberBall 1
 BallGrow 2
-UberBall 2
 StickyPaddle 2
 ShieldPaddle 2
 LaserBulletPaddle 2
@@ -48,20 +48,20 @@ InvisiPaddle 2
 InvisiBall 2
 LaserBeamPaddle 2
 OmniLaserBall 2
-FireBall 2
+FireBall 0
 RocketPaddle 2
-GhostBall 2
+GhostBall 0
 BallShrink 2
 UpsideDown 2
 MultiBall5 2
-BallCam 2
+BallCam 0
 MagnetPaddle 2
 MultiBall3 2
-IceBall 2
-MineLauncherPaddle 2
+IceBall 0
+MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2
 CrazyBall 0
 Random 2
 FastBall 2
-PaddleCam 2
+PaddleCam 0

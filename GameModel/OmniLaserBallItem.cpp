@@ -42,9 +42,12 @@ double OmniLaserBallItem::Activate() {
 	}
 
 	// Make the ball have omni-laser shooting abilities
-    GameBall* ball = this->GetBallAffected();
-    assert(ball != NULL);
-    ball->AddBallType(GameBall::OmniLaserBulletBall);
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
+    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+	    GameBall* affectedBall = *iter;
+	    assert(affectedBall != NULL);
+        affectedBall->AddBallType(GameBall::OmniLaserBulletBall);
+    }
 
 	GameItem::Activate();
 	return OmniLaserBallItem::OMNI_LASER_BALL_TIMER_IN_SECS;

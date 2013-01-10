@@ -41,17 +41,19 @@ double UberBallItem::Activate() {
 	}
 	// Remove the uberball timers from the list of active timers
 	for (unsigned int i = 0; i < removeTimers.size(); i++) {
-			GameItemTimer* currTimer = removeTimers[i];
-			activeTimers.remove(currTimer);
-			delete currTimer;
-			currTimer = NULL;
+	    GameItemTimer* currTimer = removeTimers[i];
+	    activeTimers.remove(currTimer);
+	    delete currTimer;
+	    currTimer = NULL;
 	}
 
 	// Make the last ball to hit the paddle das uber ball, ja!
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	GameBall* affectedBall = *gameBalls.begin();
-	assert(affectedBall != NULL);
-	affectedBall->AddBallType(GameBall::UberBall);
+    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+	    GameBall* affectedBall = *iter;
+	    assert(affectedBall != NULL);
+	    affectedBall->AddBallType(GameBall::UberBall);
+    }
 
 	GameItem::Activate();
 	return UberBallItem::UBER_BALL_TIMER_IN_SECS;

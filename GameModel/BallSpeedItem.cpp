@@ -87,21 +87,23 @@ double BallSpeedItem::Activate() {
 
 	// Activate the actual effect of this speed-ball item for the last ball to hit the paddle
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	GameBall* affectedBall = *gameBalls.begin();
-	assert(affectedBall != NULL);
+    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+	    GameBall* affectedBall = *iter;
+	    assert(affectedBall != NULL);
 
-	// Figure out how the item will effect the ball's speed
-	switch (this->spdType) {
-		case FastBall:
-			affectedBall->IncreaseSpeed();
-			break;
-		case SlowBall:
-			affectedBall->DecreaseSpeed();
-			break;
-		default:
-			assert(false);
-			break;
-	}
+	    // Figure out how the item will effect the ball's speed
+	    switch (this->spdType) {
+		    case FastBall:
+			    affectedBall->IncreaseSpeed();
+			    break;
+		    case SlowBall:
+			    affectedBall->DecreaseSpeed();
+			    break;
+		    default:
+			    assert(false);
+			    break;
+	    }
+    }
 
 	GameItem::Activate();
 	return BallSpeedItem::BALL_SPEED_TIMER_IN_SECS;

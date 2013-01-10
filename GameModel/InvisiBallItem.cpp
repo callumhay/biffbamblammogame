@@ -47,9 +47,11 @@ double InvisiBallItem::Activate() {
 
 	// Make the last ball to hit the paddle invisible!
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	GameBall* affectedBall = *gameBalls.begin();
-	assert(affectedBall != NULL);
-	affectedBall->AddBallType(GameBall::InvisiBall);
+    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+	    GameBall* affectedBall = *iter;
+	    assert(affectedBall != NULL);
+	    affectedBall->AddBallType(GameBall::InvisiBall);
+    }
 
 	GameItem::Activate();
 	return InvisiBallItem::INVISI_BALL_TIMER_IN_SECS;

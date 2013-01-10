@@ -43,11 +43,6 @@ public:
 	}
 
 private:
-    GameBall* GetBallAffected() {
-		assert(this->gameModel->GetGameBalls().size() > 0);
-		return *this->gameModel->GetGameBalls().begin();
-	}
-
     DISALLOW_COPY_AND_ASSIGN(OmniLaserBallItem);
 
 };

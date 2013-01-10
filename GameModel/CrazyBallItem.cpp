@@ -26,12 +26,14 @@ double CrazyBallItem::Activate() {
 
 	// Make the last ball to hit the paddle into a crazy ball
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	GameBall* affectedBall = *gameBalls.begin();
-	assert(affectedBall != NULL);
-	
-	// Make the ball crazy, but slow it down a bit as well (in order to accomodate the craziness)
-	affectedBall->AddBallType(GameBall::CrazyBall);
-	//affectedBall->DecreaseSpeed();
+	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+        GameBall* affectedBall = *iter;
+	    assert(affectedBall != NULL);
+    	
+	    // Make the ball crazy, but slow it down a bit as well (in order to accomodate the craziness)
+	    affectedBall->AddBallType(GameBall::CrazyBall);
+	    //affectedBall->DecreaseSpeed();
+    }
 
 	GameItem::Activate();
 	return CrazyBallItem::CRAZY_BALL_TIMER_IN_SECS;

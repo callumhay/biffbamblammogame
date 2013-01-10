@@ -250,8 +250,8 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     this->tutorialListener->SetHoldBoostHint(holdBoostHint);
     this->noDepthTutorialHints.push_back(holdBoostHint);
 
-    ButtonTutorialHint* doBoostHint = new ButtonTutorialHint(tutorialAssets, "");
-    doBoostHint->SetActionName("Perform Boost = ", false);
+    ButtonTutorialHint* doBoostPressToReleaseHint = new ButtonTutorialHint(tutorialAssets, "");
+    doBoostPressToReleaseHint->SetActionName("Perform Boost = ", false);
     xboxButtonTypes.clear();
     xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
     xboxButtonTypes.push_back(GameViewConstants::XBoxTrigger);
@@ -262,13 +262,23 @@ void InTutorialGameDisplayState::InitTutorialHints() {
     buttonColours.push_back(Colour(1,1,1));
     buttonColours.push_back(Colour(1,1,1));
 
-    doBoostHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
-    doBoostHint->SetMouseButton(GameViewConstants::RightMouseButton, "RMB");
-    doBoostHint->SetTopLeftCorner((camera.GetWindowWidth() - doBoostHint->GetWidth()) / 2.0f,
+    doBoostPressToReleaseHint->SetXBoxButtons(xboxButtonTypes, buttonTexts, buttonColours);
+    doBoostPressToReleaseHint->SetMouseButton(GameViewConstants::RightMouseButton, "RMB");
+    doBoostPressToReleaseHint->SetTopLeftCorner((camera.GetWindowWidth() - doBoostPressToReleaseHint->GetWidth()) / 2.0f,
         camera.GetWindowHeight()/2.0f - 150.0f);
 
-    this->tutorialListener->SetDoBoostHint(doBoostHint);
-    this->noDepthTutorialHints.push_back(doBoostHint);
+    this->tutorialListener->SetDoBoostPressToReleaseHint(doBoostPressToReleaseHint);
+    this->noDepthTutorialHints.push_back(doBoostPressToReleaseHint);
+
+    ButtonTutorialHint* doBoostSlingshotHint = new ButtonTutorialHint(tutorialAssets, "");
+    doBoostSlingshotHint->SetActionName("Perform Boost = Release ", false);
+    doBoostSlingshotHint->SetXBoxButton(GameViewConstants::XBoxAnalogStick, "Right Analog", Colour(1,1,1));
+    doBoostSlingshotHint->SetMouseButton(GameViewConstants::LeftMouseButton, "LMB");
+    doBoostSlingshotHint->SetTopLeftCorner((camera.GetWindowWidth() - doBoostPressToReleaseHint->GetWidth()) / 2.0f,
+        camera.GetWindowHeight()/2.0f - 150.0f);
+
+    this->tutorialListener->SetDoBoostSlingshotHint(doBoostSlingshotHint);
+    this->noDepthTutorialHints.push_back(doBoostSlingshotHint);
 
     // The Points hint is hidden behind the first layer of blocks and is uncovered as the level is played
     TextLabel2D pointHintTextLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom,
