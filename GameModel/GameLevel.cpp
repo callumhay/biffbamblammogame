@@ -1198,6 +1198,10 @@ void GameLevel::PieceChanged(GameModel* gameModel, LevelPiece* pieceBefore,
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex); // bottom
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex, wIndex+1); // right
 		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex); // top
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex-1); // top-left
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex-1, wIndex-1); // bottom-left
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex+1); // top-right
+		GameLevel::UpdatePiece(this->currentLevelPieces, hIndex+1, wIndex+1); // top-right
 
         // Check to see if the piece is inside the list of triggerables...
         if (pieceBefore->GetHasTriggerID()) {
