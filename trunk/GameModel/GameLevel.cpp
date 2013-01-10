@@ -91,7 +91,7 @@ GameLevel::GameLevel(size_t levelIdx, const std::string& filepath, const std::st
 
 levelIdx(levelIdx), currentLevelPieces(pieces), allowedDropTypes(allowedDropTypes), 
 randomItemProbabilityNum(randomItemProbabilityNum), piecesLeft(numBlocks),
-filepath(filepath), levelName(levelName), highScore(0),
+filepath(filepath), levelName(levelName), prevHighScore(0), highScore(0),
 levelAlmostCompleteSignaled(false), boss(NULL) {
 
 	assert(!filepath.empty());

@@ -63,7 +63,7 @@ bool GameProgressIO::LoadGameProgress(GameModel* model) {
                 // Read the high-score for the level and set it
                 ON_ERROR_CLEAN_UP_AND_EXIT(inFile >> highScore);
                 std::getline(inFile, nameStr);  // finish reading the line
-                currLevel->SetHighScore(highScore);
+                currLevel->SetHighScore(highScore, true);
             }
 
             currWorld->UpdateLastLevelPassedIndex();
