@@ -233,6 +233,10 @@ public:
 	std::vector<T> GetInterpolationValues() const {
 		return this->interpolationPts;
 	}
+    bool GetHasInterpolationSet() const {
+        return !this->interpolationPts.empty();
+    }
+    
 
 	void SetInitialInterpolationValue(const T& value) {
 		assert(this->interpolationPts.size() > 0);

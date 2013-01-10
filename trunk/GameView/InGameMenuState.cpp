@@ -247,15 +247,15 @@ void InGameMenuState::InitTopMenu() {
     this->restartItem = this->topMenu->AddMenuItem(restartLevelItem);
 
     // Invert ball boost Item...
-    tempLabelSm.SetText("Invert Ball Boost");
-    tempLabelLg.SetText("Invert Ball Boost");
-    std::vector<std::string> invertOptions = ConfigOptions::GetOnOffItems();
+    //tempLabelSm.SetText("Invert Ball Boost");
+    //tempLabelLg.SetText("Invert Ball Boost");
+    //std::vector<std::string> invertOptions = ConfigOptions::GetOnOffItems();
 
-    this->invertBallBoostMenuItem = new SelectionListMenuItem(tempLabelSm, tempLabelLg, invertOptions);
-    this->invertBallBoostMenuItem->SetSelectedItem(this->cfgOptions.GetInvertBallBoost() ? 1 : 0);
-    this->invertBallBoostMenuItem->SetEventHandler(this->invertBallBoostHandler);
+    //this->invertBallBoostMenuItem = new SelectionListMenuItem(tempLabelSm, tempLabelLg, invertOptions);
+    //this->invertBallBoostMenuItem->SetSelectedItem(this->cfgOptions.GetInvertBallBoost() ? 1 : 0);
+    //this->invertBallBoostMenuItem->SetEventHandler(this->invertBallBoostHandler);
 
-    this->invertBallBoostItem = this->topMenu->AddMenuItem(this->invertBallBoostMenuItem);
+    //this->invertBallBoostItem = this->topMenu->AddMenuItem(this->invertBallBoostMenuItem);
 
     // We don't allow a difficulty item to be part of the menu if the player is in the tutorial
     if (this->returnToDisplayState->GetType() == DisplayState::InTutorialGame) {
@@ -331,14 +331,14 @@ void InGameMenuState::TopMenuEventHandler::GameMenuItemChangedEvent(int itemInde
             gameModel->SetDifficulty(difficultyToSet);
         }
     }
-    else if (itemIndex == this->inGameMenuState->invertBallBoostItem) {
-        GameModel* gameModel = this->inGameMenuState->display->GetModel();
+    //else if (itemIndex == this->inGameMenuState->invertBallBoostItem) {
+    //    GameModel* gameModel = this->inGameMenuState->display->GetModel();
 
-        bool isInverted = ConfigOptions::IsOnItemSelected(
-            this->inGameMenuState->invertBallBoostMenuItem->GetSelectedItemIndex());
-        gameModel->SetInvertBallBoostDir(isInverted);
-        this->inGameMenuState->cfgOptions.SetInvertBallBoost(isInverted);
-    }
+    //    bool isInverted = ConfigOptions::IsOnItemSelected(
+    //        this->inGameMenuState->invertBallBoostMenuItem->GetSelectedItemIndex());
+    //    gameModel->SetInvertBallBoostDir(isInverted);
+    //    this->inGameMenuState->cfgOptions.SetInvertBallBoost(isInverted);
+    //}
     else {
         return;
     }

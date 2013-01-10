@@ -81,6 +81,7 @@ private:
 	int optionsSoundVolumeIndex;
     //int optionsControllerSensitivityIndex;
     int optionsInvertBallBoostIndex;
+    int optionsBallBoostModeIndex;
     int optionsDifficultyIndex;
     int optionsEraseProgressIndex;
 
@@ -117,6 +118,7 @@ private:
 	SelectionListMenuItem* vSyncMenuItem;
 	AmountScrollerMenuItem* soundVolumeMenuItem;
     SelectionListMenuItem* invertBallBoostItem;
+    SelectionListMenuItem* ballBoostModeItem;
     SelectionListMenuItem* difficultyItem;
     //AmountScrollerMenuItem* controllerSensitivityItem;
 

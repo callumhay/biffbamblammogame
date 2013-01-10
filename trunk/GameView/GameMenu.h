@@ -155,8 +155,11 @@ public:
 		this->topLeftCorner[0] = x;
         this->topLeftCorner[1] = y;
 	}
-    
+    const Point2D& GetTopLeftCorner() const { return this->topLeftCorner; }
+
     void SetCenteredOnScreen(int screenWidth, int screenHeight);
+
+    float GetHeight() const { return this->menuHeight; }
 
 	void Draw(double dT, int windowWidth, int windowHeight);
 	void DebugDraw();

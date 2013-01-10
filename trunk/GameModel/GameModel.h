@@ -29,6 +29,7 @@
 #include "GameItemFactory.h"
 #include "Projectile.h"
 #include "GameTransformMgr.h"
+#include "BallBoostModel.h"
 
 class BallInPlayState;
 class CollateralBlock;
@@ -76,6 +77,9 @@ private:
 
     // Difficulty setting of the game
     GameModel::Difficulty difficulty;
+
+    // Set Boost mode
+    BallBoostModel::BallBoostMode ballBoostMode;
 
 	// Items that are currently available to be picked up in-game
 	std::list<GameItem*> currLiveItems;
@@ -179,7 +183,8 @@ private:
     void PerformLevelCompletionChecks();
 
 public:
-    GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted);
+    GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted,
+        const BallBoostModel::BallBoostMode& ballBoostMode);
 	~GameModel();
 
     void GetFurthestProgressWorldAndLevel(int& worldIdx, int& levelIdx) const;
@@ -433,6 +438,9 @@ public:
 			this->currState->BallReleaseKeyPressed();
 		}
 	}
+
+    const BallBoostModel::BallBoostMode& GetBallBoostMode() const { return this->ballBoostMode; }
+    void SetBallBoostMode(const BallBoostModel::BallBoostMode& mode) { this->ballBoostMode = mode; }
 
     void BallBoostDirectionPressed(int x, int y);
     void BallBoostDirectionReleased();

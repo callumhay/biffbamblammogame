@@ -411,8 +411,18 @@ void MainMenuDisplayState::InitializeOptionsSubMenu() {
     this->invertBallBoostItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, invertOptions);
     this->invertBallBoostItem->SetSelectedItem(this->cfgOptions.GetInvertBallBoost() ? 1 : 0);
     this->invertBallBoostItem->SetEventHandler(this->itemsEventHandler);
-
     this->optionsInvertBallBoostIndex = this->optionsSubMenu->AddMenuItem(this->invertBallBoostItem);
+
+
+    // Ball boosting mode option
+	subMenuLabelSm.SetText("Ball Boost Mode");
+	subMenuLabelLg.SetText("Ball Boost Mode");
+    std::vector<std::string> boostModeOptions = ConfigOptions::GetBallBoostModeItems();
+    
+    this->ballBoostModeItem = new SelectionListMenuItem(subMenuLabelSm, subMenuLabelLg, boostModeOptions);
+    this->ballBoostModeItem->SetSelectedItem(static_cast<int>(this->cfgOptions.GetBallBoostMode()));
+    this->ballBoostModeItem->SetEventHandler(this->itemsEventHandler);
+    this->optionsBallBoostModeIndex = this->optionsSubMenu->AddMenuItem(this->ballBoostModeItem);
 
 
     // Difficulty option
@@ -533,8 +543,9 @@ void MainMenuDisplayState::RenderFrame(double dT) {
 	this->RenderBackgroundEffects(dT, menuCamera);
 	this->RenderTitle(menuCamera);
 
+    // Figure out where the menu needs to be to ensure it doesn't clip with the bottom of the screen...
+    this->mainMenu->SetTopLeftCorner(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT * this->display->GetTextScalingFactor());
 	// Render the menu
-	this->mainMenu->SetTopLeftCorner(MENU_X_INDENT, DISPLAY_HEIGHT - MENU_Y_INDENT);
 	this->mainMenu->Draw(dT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
     // Render created by text
@@ -922,6 +933,13 @@ void MainMenuDisplayState::OptionsSubMenuEventHandler::GameMenuItemChangedEvent(
         GameModel* gameModel = this->mainMenuState->display->GetModel();
         gameModel->SetInvertBallBoostDir(isInverted);
         this->mainMenuState->cfgOptions.SetInvertBallBoost(isInverted);
+    }
+    else if (itemIndex == this->mainMenuState->optionsBallBoostModeIndex) {
+        int currSelectionIdx = this->mainMenuState->ballBoostModeItem->GetSelectedItemIndex();
+        BallBoostModel::BallBoostMode modeToSet = static_cast<BallBoostModel::BallBoostMode>(currSelectionIdx);
+
+        this->mainMenuState->cfgOptions.SetBallBoostMode(modeToSet);
+        this->mainMenuState->display->GetModel()->SetBallBoostMode(modeToSet);
     }
     else if (itemIndex == this->mainMenuState->optionsDifficultyIndex) {
         int currSelectionIdx = this->mainMenuState->difficultyItem->GetSelectedItemIndex();

@@ -710,7 +710,8 @@ void GameSubMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, cons
 }
 
 void GameSubMenu::DrawMenuItem(double dT, const Point2D& pos, GameMenuItem& menuItem, int windowWidth, int windowHeight) {
-	ColourRGBA textColour = menuItem.GetTextColour();
+    this->topLeftCorner = pos;
+    ColourRGBA textColour = menuItem.GetTextColour();
 	textColour[3] = this->menuItemOpenFadeIn.GetInterpolantValue();
 	menuItem.SetTextColour(textColour);
 	menuItem.Draw(dT, pos, windowWidth, windowHeight);

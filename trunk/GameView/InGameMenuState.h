@@ -65,8 +65,6 @@ private:
 	
     int resumeItem;
     int restartItem;
-	//int audioMenu;
-    int invertBallBoostItem;
     int difficultyItem;
 	int returnToMainItem;
 	int exitToDesktopItem;

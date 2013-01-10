@@ -13,9 +13,11 @@
 #define __CONFIGOPTIONS_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
-#include "../GameModel/GameModel.h"
-#include "ResourceManager.h"
 
+#include "../GameModel/GameModel.h"
+#include "../GameModel/BallBoostModel.h"
+
+#include "ResourceManager.h"
 
 /**
  * Stores data for initializing video, audio, etc. options,
@@ -50,6 +52,7 @@ public:
 	inline bool GetIsVSyncOn() const { return this->vSyncIsOn; }
 	inline int GetVolume() const { return this->volume; }
     inline bool GetInvertBallBoost() const { return this->invertBallBoost; }
+    inline BallBoostModel::BallBoostMode GetBallBoostMode() const { return this->ballBoostMode; }
     inline GameModel::Difficulty GetDifficulty() const { return this->difficulty; }
 
 	// Setter functions for all the configuration options
@@ -68,25 +71,15 @@ public:
 		assert(volume >= MIN_VOLUME && volume <= MAX_VOLUME);
 		this->volume = std::max<int>(MIN_VOLUME, std::min<int>(MAX_VOLUME, volume));
 	}
+    
     inline void SetInvertBallBoost(bool isInverted) { this->invertBallBoost = isInverted; }
+    inline void SetBallBoostMode(BallBoostModel::BallBoostMode mode) { this->ballBoostMode = mode; }
     inline void SetDifficulty(GameModel::Difficulty difficulty) { this->difficulty = difficulty; }
 
-    static std::vector<std::string> GetDifficultyItems() {
-        std::vector<std::string> difficultyItems;
-        difficultyItems.reserve(3);
-        difficultyItems.push_back("Easy");
-        difficultyItems.push_back("Normal");
-        difficultyItems.push_back("Hard");
-        return difficultyItems;
-    }
+    static std::vector<std::string> GetDifficultyItems();
+    static std::vector<std::string> GetBallBoostModeItems();
+    static std::vector<std::string> GetOnOffItems();
 
-    static std::vector<std::string> GetOnOffItems() {
-        std::vector<std::string> onOffItems;
-        onOffItems.reserve(2);
-        onOffItems.push_back("Off");
-        onOffItems.push_back("On");
-        return onOffItems;
-    }
     static bool IsOnItemSelected(int idx) { return idx == 1; }
 
 private:
@@ -100,6 +93,7 @@ private:
 	static const char* WINDOW_VSYNC_VAR;
 	static const char* VOLUME_VAR;
     static const char* INVERT_BALL_BOOST_VAR;
+    static const char* BALL_BOOST_MODE_VAR;
     static const char* DIFFICULTY_VAR;
 
 	// Default values for each initialization variable
@@ -109,6 +103,7 @@ private:
 	static const bool DEFAULT_VSYNC_TOGGLE;
 	static const int  DEFAULT_VOLUME;
     static const bool DEFAULT_INVERT_BALL_BOOST_TOGGLE;
+    static const BallBoostModel::BallBoostMode DEFAULT_BALL_BOOST_MODE;
     static const GameModel::Difficulty DEFAULT_DIFFICULTY;
 
 	// Variables for storing the configuration values in memory
@@ -117,19 +112,24 @@ private:
 	bool vSyncIsOn;
 	int volume;
     bool invertBallBoost;
+    BallBoostModel::BallBoostMode ballBoostMode;
     GameModel::Difficulty difficulty;
+
+    static bool BallBoostModeToString(const BallBoostModel::BallBoostMode& mode, std::string& modeStr);
+    static bool StringToBallBoostMode(const std::string& modeStr, BallBoostModel::BallBoostMode& mode);
 
     static bool DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr);
     static bool StringToDifficulty(const std::string& difficultyStr, GameModel::Difficulty& difficulty);
 
-
 	static ConfigOptions* ReadConfigOptionsFromFile();
 	bool WriteConfigOptionsToFile() const;
 
+    static const char* SLINGSHOT_STR;
+    static const char* PRESS_TO_RELEASE_STR;
+        
     static const char* EASY_DIFFICULTY_STR;
     static const char* MEDIUM_DIFFICULTY_STR;
     static const char* HARD_DIFFICULTY_STR;
-
 };
 
 #endif

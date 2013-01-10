@@ -19,6 +19,7 @@ const char* ConfigOptions::WINDOW_FULLSCREEN_VAR  = "fullscreen";
 const char* ConfigOptions::WINDOW_VSYNC_VAR       = "vsync";
 const char* ConfigOptions::VOLUME_VAR             = "volume";
 const char* ConfigOptions::DIFFICULTY_VAR         = "difficulty";
+const char* ConfigOptions::BALL_BOOST_MODE_VAR    = "ball_boost_mode";
 const char* ConfigOptions::INVERT_BALL_BOOST_VAR  = "invert_ball_boost";
 
 const int ConfigOptions::MIN_WINDOW_SIZE	= 480;
@@ -32,7 +33,11 @@ const bool ConfigOptions::DEFAULT_FULLSCREEN_TOGGLE		        = false;
 const bool ConfigOptions::DEFAULT_VSYNC_TOGGLE                  = false;
 const int  ConfigOptions::DEFAULT_VOLUME                        = ConfigOptions::MAX_VOLUME;
 const bool ConfigOptions::DEFAULT_INVERT_BALL_BOOST_TOGGLE      = false;
-const GameModel::Difficulty ConfigOptions::DEFAULT_DIFFICULTY   = GameModel::MediumDifficulty;
+const BallBoostModel::BallBoostMode ConfigOptions::DEFAULT_BALL_BOOST_MODE = BallBoostModel::Slingshot;
+const GameModel::Difficulty ConfigOptions::DEFAULT_DIFFICULTY              = GameModel::MediumDifficulty;
+
+const char* ConfigOptions::SLINGSHOT_STR        = "slingshot";
+const char* ConfigOptions::PRESS_TO_RELEASE_STR = "press_to_release";
 
 const char* ConfigOptions::EASY_DIFFICULTY_STR      = "easy";
 const char* ConfigOptions::MEDIUM_DIFFICULTY_STR    = "medium";
@@ -40,7 +45,7 @@ const char* ConfigOptions::HARD_DIFFICULTY_STR      = "hard";
 
 ConfigOptions::ConfigOptions() : windowWidth(DEFAULT_WINDOW_WIDTH), windowHeight(DEFAULT_WINDOW_HEIGHT),
 fullscreenIsOn(DEFAULT_FULLSCREEN_TOGGLE), vSyncIsOn(DEFAULT_VSYNC_TOGGLE), volume(ConfigOptions::DEFAULT_VOLUME),
-invertBallBoost(DEFAULT_INVERT_BALL_BOOST_TOGGLE), difficulty(DEFAULT_DIFFICULTY) {
+invertBallBoost(DEFAULT_INVERT_BALL_BOOST_TOGGLE), ballBoostMode(DEFAULT_BALL_BOOST_MODE), difficulty(DEFAULT_DIFFICULTY) {
 }
 
 /**
@@ -62,6 +67,31 @@ void ConfigOptions::SetResolutionByString(const std::string& resStr) {
 
 	this->SetWindowWidth(winWidth);
 	this->SetWindowHeight(winHeight);
+}
+
+std::vector<std::string> ConfigOptions::GetDifficultyItems() {
+    std::vector<std::string> difficultyItems;
+    difficultyItems.reserve(3);
+    difficultyItems.push_back("Easy");
+    difficultyItems.push_back("Normal");
+    difficultyItems.push_back("Hard");
+    return difficultyItems;
+}
+
+std::vector<std::string> ConfigOptions::GetBallBoostModeItems() {
+    std::vector<std::string> boostModeItems;
+    boostModeItems.reserve(2);
+    boostModeItems.push_back("Slingshot");
+    boostModeItems.push_back("Press-to-release");
+    return boostModeItems;
+}
+
+std::vector<std::string> ConfigOptions::GetOnOffItems() {
+    std::vector<std::string> onOffItems;
+    onOffItems.reserve(2);
+    onOffItems.push_back("Off");
+    onOffItems.push_back("On");
+    return onOffItems;
 }
 
 /**
@@ -159,7 +189,7 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
         else if (currStr == ConfigOptions::INVERT_BALL_BOOST_VAR) {
 			READ_IN_FILE_FAIL(inFile, skipEquals);
 
-			// Read in whether the frames are synced with the monitor
+			// Read in whether the ball boost controls are inverted or not
 			int isInverted = ConfigOptions::DEFAULT_INVERT_BALL_BOOST_TOGGLE ? 1 : 0;
 			inFile >> isInverted;
 
@@ -169,6 +199,20 @@ ConfigOptions* ConfigOptions::ReadConfigOptionsFromFile() {
 			else {
 				cfgOptions->invertBallBoost = true;
 			}
+        }
+        else if (currStr == ConfigOptions::BALL_BOOST_MODE_VAR) {
+            READ_IN_FILE_FAIL(inFile, skipEquals);
+
+            std::string boostModeStr;
+            bool success = ConfigOptions::BallBoostModeToString(ConfigOptions::DEFAULT_BALL_BOOST_MODE, boostModeStr);
+            assert(success);
+
+            READ_IN_FILE_FAIL(inFile, boostModeStr);
+
+            success = ConfigOptions::StringToBallBoostMode(boostModeStr, cfgOptions->ballBoostMode);
+            if (!success) { 
+                cfgOptions->ballBoostMode = ConfigOptions::DEFAULT_BALL_BOOST_MODE;
+            }
         }
         else if (currStr == ConfigOptions::DIFFICULTY_VAR) {
             READ_IN_FILE_FAIL(inFile, skipEquals);
@@ -206,6 +250,8 @@ bool ConfigOptions::WriteConfigOptionsToFile() const {
 		return false;
 	}
 
+    bool success = true;
+
 	// Write all the configuration values (and comments along with them):
 	// Write a description of what this file is for...
 	outFile << "// This is the Biff! Bam!! Blammo!?! game configuration file, it is used to initialize"	<< std::endl;
@@ -241,9 +287,18 @@ bool ConfigOptions::WriteConfigOptionsToFile() const {
     outFile << ConfigOptions::INVERT_BALL_BOOST_VAR << " = " << (this->invertBallBoost ? "1" : "0") << std::endl;
     outFile << std::endl;
 
+    // Ball boost mode option
+    std::string ballBoostModeString;
+    success &= this->BallBoostModeToString(this->ballBoostMode, ballBoostModeString);
+    assert(success);
+
+    outFile << "// Ball boost mode {slingshot, press_to_release}" << std::endl;
+    outFile << ConfigOptions::BALL_BOOST_MODE_VAR << " = " << ballBoostModeString << std::endl;
+    outFile << std::endl;
+
     // Difficulty option
     std::string difficultyString;
-    bool success = this->DifficultyToString(this->difficulty, difficultyString);
+    success &= this->DifficultyToString(this->difficulty, difficultyString);
     assert(success);
 
     outFile << "// Difficulty of the game {easy, medium, hard}" << std::endl;
@@ -252,6 +307,36 @@ bool ConfigOptions::WriteConfigOptionsToFile() const {
 
 	outFile.close();
 	return success;
+}
+
+bool ConfigOptions::BallBoostModeToString(const BallBoostModel::BallBoostMode& mode, std::string& modeStr) {
+    switch (mode) {
+        case BallBoostModel::Slingshot:
+            modeStr = ConfigOptions::SLINGSHOT_STR;
+            break;
+        case BallBoostModel::PressToRelease:
+            modeStr = ConfigOptions::PRESS_TO_RELEASE_STR;
+            break;
+        default:
+            assert(false);
+            return false;
+    }
+
+    return true;
+}
+
+bool ConfigOptions::StringToBallBoostMode(const std::string& modeStr, BallBoostModel::BallBoostMode& mode) {
+    if (modeStr.compare(ConfigOptions::SLINGSHOT_STR) == 0) {
+        mode = BallBoostModel::Slingshot;
+    }
+    else if (modeStr.compare(ConfigOptions::PRESS_TO_RELEASE_STR) == 0) {
+        mode = BallBoostModel::PressToRelease;
+    }
+    else {
+        return false;
+    }
+
+    return true;
 }
 
 bool ConfigOptions::DifficultyToString(const GameModel::Difficulty& difficulty, std::string& difficultyStr) {

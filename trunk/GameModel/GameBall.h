@@ -416,15 +416,14 @@ inline bool GameBall::IsLoadedInCannonBlock() const {
  * Returns: true if allowed to boost, false otherwise.
  */
 inline bool GameBall::IsBallAllowedToBoost() const {
-    // We don't allow boosting if the ball is already being boosted, inside a cannon or
-    // the camera is inside the ball
+    // We don't allow boosting if the ball is already being boosted...
     return (!this->IsBallBoosting() && this->IsBallAllowedToBoostIgnoreAlreadyBoosting());
 }
 
 inline bool GameBall::IsBallAllowedToBoostIgnoreAlreadyBoosting() const {
     return (!this->IsLoadedInCannonBlock() && !this->GetIsBallCameraOn() &&
             !this->blockAndBossCollisionsDisabled && !this->paddleCollisionsDisabled &&
-            !currDir.IsZero());
+            !currDir.IsZero() && this->GetSpeed() != 0.0f);
 }
 
 /**
