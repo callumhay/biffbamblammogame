@@ -35,14 +35,6 @@ public:
  * by the user.
  */
 class GameMenuItem {
-protected:
-	GameMenu* parent;
-	GameSubMenu* subMenu;
-	TextLabel2D* currLabel;
-	TextLabel2D smTextLabel, lgTextLabel;
-	AnimationMultiLerp<float> wiggleAnimation;
-	GameMenuItemEventHandler* eventHandler;
-
 public:
 	static const float MENU_ITEM_WOBBLE_AMT_LARGE;
 	static const float MENU_ITEM_WOBBLE_AMT_SMALL;
@@ -105,6 +97,17 @@ public:
 	inline const ColourRGBA& GetTextColour() const {
 		return this->currLabel->GetColour();
 	}
+
+    virtual bool IsLeftRightScrollable() const { return false; }
+
+protected:
+	GameMenu* parent;
+	GameSubMenu* subMenu;
+	TextLabel2D* currLabel;
+	TextLabel2D smTextLabel, lgTextLabel;
+	AnimationMultiLerp<float> wiggleAnimation;
+	GameMenuItemEventHandler* eventHandler;
+
 };
 
 /**
@@ -151,6 +154,8 @@ public:
     float GetWidth(bool useMax) const;
 	void Activate();
 
+    bool IsLeftRightScrollable() const { return (this->selectionList.size() > 1); }
+
 private:
 	static const int NO_SELECTION = -1;
 
@@ -165,7 +170,7 @@ private:
 	float maxWidth;	// The maximum width of this menu item
 
 	void DrawSelectionArrow(const Point2D& topLeftCorner, float arrowHeight, bool isLeftPointing);
-
+    void EscapeFromMenuItem(bool saveChange);
     DISALLOW_COPY_AND_ASSIGN(SelectionListMenuItem);
 };
 
@@ -194,6 +199,8 @@ public:
 	void ButtonPressed(const GameControl::ActionButton& pressedButton);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
     float GetWidth(bool useMax) const { UNUSED_PARAMETER(useMax); return this->maxWidth; }
+
+    bool IsLeftRightScrollable() const { return true; }
 
 private:
 	static const float INTERIOR_PADDING_TEXT_ARROWS;
@@ -229,6 +236,8 @@ private:
 		this->previouslySelectedValue = this->currentValue;
 	}
 	void Deactivate() { this->isActive = false; }
+
+    void EscapeFromMenuItem(bool saveChange);
 
 };
 

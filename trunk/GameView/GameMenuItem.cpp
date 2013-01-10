@@ -333,31 +333,25 @@ void SelectionListMenuItem::ButtonPressed(const GameControl::ActionButton& press
 			break;
 
 		case GameControl::EnterButtonAction:
-			// When return is hit, the selection is locked and results in a change in the menu item
-			// tell the parent about this in order to send out a change event
-			if (this->parent != NULL) {
-				if (this->selectedIndex != this->previouslySelectedIndex) {
-					this->parent->ActivatedMenuItemChanged();
-				}
-				parent->DeactivateSelectedMenuItem();
-			}
-			
-			if (this->eventHandler != NULL) {
-				this->eventHandler->MenuItemEnteredAndSet();
-			}
+            this->EscapeFromMenuItem(true);
 			break;
 
-		case GameControl::EscapeButtonAction:
-			// If the user hits ESC then we deselect the currently selected item (i.e., this one)
-			// and we make sure the selection inside the item doesn't change
-			this->selectedIndex = this->previouslySelectedIndex;
-			if (this->parent != NULL) {
-				this->parent->DeactivateSelectedMenuItem();
-			}
+        case GameControl::UpButtonAction:
+            this->EscapeFromMenuItem(true);
+            if (this->parent != NULL) {
+                this->parent->ButtonPressed(GameControl::UpButtonAction);
+            }
+            break;
 
-			if (this->eventHandler != NULL) {
-				this->eventHandler->MenuItemCancelled();
-			}
+        case GameControl::DownButtonAction:
+            this->EscapeFromMenuItem(true);
+            if (this->parent != NULL) {
+                this->parent->ButtonPressed(GameControl::DownButtonAction);
+            }
+            break;
+
+		case GameControl::EscapeButtonAction:
+			this->EscapeFromMenuItem(false);
 			break;
 
 		default:
@@ -365,6 +359,33 @@ void SelectionListMenuItem::ButtonPressed(const GameControl::ActionButton& press
 	}
 
 	assert(this->selectedIndex >= 0 && this->selectedIndex < static_cast<int>(this->selectionList.size()));
+}
+
+void SelectionListMenuItem::EscapeFromMenuItem(bool saveChange) {
+	
+    if (saveChange) {
+		// When return is hit, the value is locked and results in a change in the menu item
+		// tell the parent about this in order to send out a change event
+		if (this->parent != NULL) {
+			if (this->selectedIndex != this->previouslySelectedIndex) {
+				this->parent->ActivatedMenuItemChanged();
+			}
+			this->parent->DeactivateSelectedMenuItem();
+		}
+		if (this->eventHandler != NULL) {
+			this->eventHandler->MenuItemEnteredAndSet();
+		}
+    }
+    else {
+        // If the user hits ESC then we sure the selection inside the item doesn't change
+	    this->selectedIndex = this->previouslySelectedIndex;
+	    if (this->parent != NULL) {
+		    this->parent->DeactivateSelectedMenuItem();
+	    }
+	    if (this->eventHandler != NULL) {
+		    this->eventHandler->MenuItemCancelled();
+	    }
+    }
 }
 
 /**
@@ -543,35 +564,57 @@ void AmountScrollerMenuItem::ButtonPressed(const GameControl::ActionButton& pres
 			break;
 
 		case GameControl::EnterButtonAction:
-			// When return is hit, the value is locked and results in a change in the menu item
-			// tell the parent about this in order to send out a change event
-			if (this->parent != NULL) {
-				if (this->currentValue != this->previouslySelectedValue) {
-					this->parent->ActivatedMenuItemChanged();
-				}
-				this->parent->DeactivateSelectedMenuItem();
-			}
-			if (this->eventHandler != NULL) {
-				this->eventHandler->MenuItemEnteredAndSet();
-			}
+			this->EscapeFromMenuItem(true);
 			break;
 
-		case GameControl::EscapeButtonAction:
-			// If the user hits ESC then we sure the selection inside the item doesn't change
-			this->ChangeScrollerValue(this->previouslySelectedValue - this->currentValue);
-			if (this->parent != NULL) {
-				this->parent->DeactivateSelectedMenuItem();
-			}
+        case GameControl::UpButtonAction:
+            this->EscapeFromMenuItem(true);
+            if (this->parent != NULL) {
+                this->parent->ButtonPressed(GameControl::UpButtonAction);
+            }
+            break;
 
-			if (this->eventHandler != NULL) {
-				this->eventHandler->MenuItemCancelled();
-			}
+        case GameControl::DownButtonAction:
+            this->EscapeFromMenuItem(true);
+            if (this->parent != NULL) {
+                this->parent->ButtonPressed(GameControl::DownButtonAction);
+            }
+            break;
+		case GameControl::EscapeButtonAction:
+            this->EscapeFromMenuItem(true);
 			break;
 
 		default:
 			// Do nothing
 			break;
 	}
+}
+
+void AmountScrollerMenuItem::EscapeFromMenuItem(bool saveChange) {
+	
+    if (saveChange) {
+		// When return is hit, the value is locked and results in a change in the menu item
+		// tell the parent about this in order to send out a change event
+		if (this->parent != NULL) {
+			if (this->currentValue != this->previouslySelectedValue) {
+				this->parent->ActivatedMenuItemChanged();
+			}
+			this->parent->DeactivateSelectedMenuItem();
+		}
+		if (this->eventHandler != NULL) {
+			this->eventHandler->MenuItemEnteredAndSet();
+		}
+    }
+    else {
+        // If the user hits ESC then we sure the selection inside the item doesn't change
+	    this->ChangeScrollerValue(this->previouslySelectedValue - this->currentValue);
+	    if (this->parent != NULL) {
+		    this->parent->DeactivateSelectedMenuItem();
+	    }
+	    if (this->eventHandler != NULL) {
+		    this->eventHandler->MenuItemCancelled();
+	    }
+    }
 }
 
 void AmountScrollerMenuItem::ButtonReleased(const GameControl::ActionButton& releasedButton) {

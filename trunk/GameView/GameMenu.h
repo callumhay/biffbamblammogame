@@ -239,6 +239,9 @@ protected:
 		this->SetSelectedMenuItem((this->selectedMenuItemIndex + 1) % this->menuItems.size());
 	}
 
+    void LeftAction();
+    void RightAction();
+
 private:
 	void SetupAnimations();
 };
