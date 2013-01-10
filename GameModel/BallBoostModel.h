@@ -17,13 +17,15 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Collision.h"
 #include "GameBall.h"
-#include "GameModel.h"
+
+class GameModel;
 
 /**
  * Encapsulates the model/state of the ball boost for the GameModel.
  */
 class BallBoostModel {
 public:
+    enum BallBoostMode { Slingshot = 0, PressToRelease = 1 };
     enum BulletTimeState { NotInBulletTime, BulletTimeFadeIn, BulletTime, BulletTimeFadeOut };
     
     static const int TOTAL_NUM_BOOSTS = 3;
@@ -100,6 +102,8 @@ private:
     
     void IncrementBoostChargeByTime(double timeInSecs);
     
+    void ReleaseBulletTime();
+
     DISALLOW_COPY_AND_ASSIGN(BallBoostModel);
 };
 
@@ -136,37 +140,6 @@ inline const Vector2D& BallBoostModel::GetBallBoostDirection() const {
  */
 inline const Collision::AABB2D& BallBoostModel::GetBallZoomBounds() const {
     return this->ballZoomBounds;
-}
-
-/**
- * Get the total number of balls currently in play.
- */
-inline size_t BallBoostModel::GetCurrentNumBalls() const {
-    return this->gameModel->GetGameBalls().size();
-}
-
-/**
- * Gets the list of balls that will be / are being boosted by this.
- */
-inline const std::list<GameBall*>& BallBoostModel::GetBalls() const {
-    return this->gameModel->GetGameBalls();
-}
-
-/**
- * Gets the number of balls that could boost currently.
- * Returns: The number of boostable balls in play.
- */
-inline int BallBoostModel::GetNumBallsAllowedToBoost() const {
-    int count = 0;
-    const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
-    for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
-        const GameBall* currBall = *iter;
-        if (currBall->IsBallAllowedToBoost()) {
-            count++;
-        }
-    }
-
-    return count;
 }
 
 /**

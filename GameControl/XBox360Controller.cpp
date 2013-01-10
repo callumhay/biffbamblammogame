@@ -168,15 +168,18 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
     // Special stuff (ball bullet time)...
     if (abs(controllerState.Gamepad.sThumbRX) > (XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) ||
         abs(controllerState.Gamepad.sThumbRY) > (XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)) {
+
+
         this->display->SpecialDirectionPressed(controllerState.Gamepad.sThumbRX, 
                                                controllerState.Gamepad.sThumbRY);
-        this->specialDirOn = true;
+        //this->specialDirOn = true;
+
     }
     else {
-        if (this->specialDirOn) {
-            this->display->SpecialDirectionReleased();
-            this->specialDirOn = false;
-        }
+        //if (this->specialDirOn) {
+        this->display->SpecialDirectionReleased();
+            //this->specialDirOn = false;
+        //}
     }
 }
 

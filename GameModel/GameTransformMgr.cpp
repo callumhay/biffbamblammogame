@@ -984,22 +984,22 @@ void GameTransformMgr::FinishBallDeathAnimation(double dT, GameModel& gameModel)
 bool GameTransformMgr::TickBulletTimeCamAnimation(double dT, GameModel& gameModel) {
     UNUSED_PARAMETER(gameModel);
 
+    // Grab the current transform animation information from the front of the queue
+    TransformAnimation& bulletTimeAnim = this->animationQueue.front();
+    assert(bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation || 
+           bulletTimeAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
+
     const BallBoostModel* currBoostModel = gameModel.GetBallBoostModel();
     float invTimeDialation = 1.0f;   
-    if (currBoostModel != NULL) {
-        invTimeDialation = currBoostModel->GetInverseTimeDialation();
-    
-	    // Grab the current transform animation information from the front of the queue
-	    TransformAnimation& ballDeathAnim = this->animationQueue.front();
-	    assert(ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation || 
-               ballDeathAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
+    if (currBoostModel != NULL && currBoostModel->GetBulletTimeState() != BallBoostModel::NotInBulletTime) {
 
-	    if (ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
+        invTimeDialation = currBoostModel->GetInverseTimeDialation();
+
+	    if (bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
             const Collision::AABB2D& ballBounds = currBoostModel->GetBallZoomBounds();
             const GameLevel* currLevel = gameModel.GetCurrentLevel();
 	        Vector2D halfLevelDim	   = 0.5f * Vector2D(currLevel->GetLevelUnitWidth(), currLevel->GetLevelUnitHeight());
             Point2D ballsCenter        = ballBounds.GetCenter() - halfLevelDim;
-
 
             Vector3D translation1 = this->GetGameTransform() * Vector3D(ballsCenter[0], ballsCenter[1], 
                 this->bulletTimeCamAnimation.GetInterpolationValue(1).GetTranslation()[2]);
@@ -1011,6 +1011,13 @@ bool GameTransformMgr::TickBulletTimeCamAnimation(double dT, GameModel& gameMode
             this->bulletTimeCamAnimation.SetFinalInterpolationValue(Orientation3D(translation2, 
                 this->bulletTimeCamAnimation.GetFinalInterpolationValue().GetRotation()));
         }
+    }
+    else if (bulletTimeAnim.type != GameTransformMgr::FromBulletTimeCamAnimation &&
+             this->bulletTimeCamAnimation.GetHasInterpolationSet()) {
+
+        // Somehow boosting got cancelled, fade out of the bullet time and back to normal gameplay
+        this->bulletTimeCamAnimation.SetInterpolantValue(this->bulletTimeCamAnimation.GetFinalInterpolationValue());
+        this->SetBulletTimeCamera(false);
     }
 
     // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
@@ -1098,18 +1105,10 @@ void GameTransformMgr::FinishBulletTimeCamAnimation(double dT, GameModel& gameMo
     UNUSED_PARAMETER(gameModel);
 
 	// Grab the current transform animation information from the front of the queue
-	TransformAnimation& ballDeathAnim = this->animationQueue.front();
-    UNUSED_VARIABLE(ballDeathAnim);
-	assert(ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation || 
-           ballDeathAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
-	/*
-	if (ballDeathAnim.type == GameTransformMgr::ToBulletTimeCamAnimation) {
-		this->isBulletTimeCamOn = true;
-	}
-	else {
-		this->isBulletTimeCamOn = false;
-	}
-    */
+	TransformAnimation& bulletTimeAnim = this->animationQueue.front();
+    UNUSED_VARIABLE(bulletTimeAnim);
+	assert(bulletTimeAnim.type == GameTransformMgr::ToBulletTimeCamAnimation || 
+           bulletTimeAnim.type == GameTransformMgr::FromBulletTimeCamAnimation);
 
 	// Pop the animation off the queue
 	this->animationQueue.pop_front();

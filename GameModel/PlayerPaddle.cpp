@@ -260,12 +260,12 @@ void PlayerPaddle::FireAttachedBall() {
         std::vector<int> indices = this->bounds.ClosestCollisionIndices(this->attachedBall->GetCenterPosition2D(), 0.01f);
 		assert(indices.size() > 0);
 		
-        ballReleaseDir = Vector2D::Rotate(this->GetZRotation(), this->bounds.GetNormal(indices[0]));
+        ballReleaseDir = 2*Vector2D::Rotate(this->GetZRotation(), this->bounds.GetNormal(indices[0]));
 	}
 
     // Check to see if the paddle has crashed into a wall or is touching it, in this case we reduce
     // the paddle velocity to zero
-    float absPaddleSpd = fabs(this->GetSpeed());
+    float absPaddleSpd = fabs(avgPaddleVelDir[0]);
     if (this->centerPos[0] >= (this->maxBound - this->GetHalfWidthTotal() - EPSILON) ||
         this->centerPos[0] <= (this->minBound + this->GetHalfWidthTotal() + EPSILON)) {
 
@@ -274,13 +274,13 @@ void PlayerPaddle::FireAttachedBall() {
     }
 
     // Modify the ball's release velocity to reflect the paddle's movement
-    ballReleaseDir = Vector2D::Normalize(ballReleaseDir + 0.25f * avgPaddleVelDir);
+    ballReleaseDir = Vector2D::Normalize(ballReleaseDir + 0.2f * avgPaddleVelDir);
 
 	// Set the ball velocity (tragectory it will leave the paddle on)
 	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), ballReleaseDir);
     
     // Add a brief impulse to the ball's velocity to give the launch a more viseral feeling
-    float impulse = 0.9f * absPaddleSpd;
+    float impulse = 0.62f * absPaddleSpd;
     this->attachedBall->ApplyImpulseForce(impulse, impulse); 
 
 	// Re-enable the ball's collisions
@@ -350,6 +350,7 @@ void PlayerPaddle::MoveAttachedObjectsToNewBounds(double dT) {
 }
 
 void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gameModel) {
+
 	Point2D startingCenterPos = this->centerPos;
 	Point2D defaultCenterPos = this->GetDefaultCenterPosition();
 
@@ -384,7 +385,8 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 		else {
 			currAcceleration = this->decceleration;
 		}
-		this->currSpeed = std::max<float>(0.0f, std::min<float>(this->maxSpeed, this->currSpeed + currAcceleration * seconds + this->impulse * seconds));
+		this->currSpeed = std::max<float>(0.0f, std::min<float>(this->maxSpeed, 
+            this->currSpeed + currAcceleration * seconds + this->impulse * seconds));
 		
         // If the poison paddle is active then the speed is diminished...
         float tempSpd = this->currSpeed;
@@ -395,7 +397,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
         distanceTravelled = tempSpd * this->lastDirection * seconds;
 	}
 
-	float newCenterX = this->centerPos[0] + distanceTravelled /*+ this->impulse*/;
+	float newCenterX = this->centerPos[0] + distanceTravelled;
 	this->impulse = 0.0f;
 
 	float minNewXPos = newCenterX - this->currHalfWidthTotal;

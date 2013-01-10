@@ -28,12 +28,14 @@
 #include "../BlammoEngine/StringHelper.h"
 #include "../ResourceManager.h"
 
-GameModel::GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted) : 
+GameModel::GameModel(const GameModel::Difficulty& initDifficulty, bool ballBoostIsInverted,
+                     const BallBoostModel::BallBoostMode& ballBoostMode) : 
 currWorldNum(0), currState(NULL), currPlayerScore(0), numStarsAwarded(0), currLivesLeft(0),
 livesAtStartOfLevel(0), numLivesLostInLevel(0), maxNumLivesAllowed(0),
 pauseBitField(GameModel::NoPause), isBlackoutActive(false), areControlsFlipped(false), gameTransformInfo(new GameTransformMgr()), 
 nextState(NULL), boostModel(NULL), doingPieceStatusListIteration(false), progressLoadedSuccessfully(false),
-droppedLifeForMaxMultiplier(false), safetyNet(NULL), ballBoostIsInverted(ballBoostIsInverted), difficulty(initDifficulty) {
+droppedLifeForMaxMultiplier(false), safetyNet(NULL), ballBoostIsInverted(ballBoostIsInverted), difficulty(initDifficulty),
+ballBoostMode(ballBoostMode) {
 	
 	// Initialize the worlds for the game - the set of worlds can be found in the world definition file
     this->LoadWorldsFromFile();
@@ -46,6 +48,7 @@ droppedLifeForMaxMultiplier(false), safetyNet(NULL), ballBoostIsInverted(ballBoo
 	this->balls.push_back(new GameBall());
 
     this->SetDifficulty(initDifficulty);
+    this->SetBallBoostMode(ballBoostMode);
 }
 
 GameModel::~GameModel() {

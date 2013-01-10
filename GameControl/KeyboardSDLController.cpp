@@ -18,7 +18,7 @@
 #include "../GameModel/GameItem.h"
 #include "../GameModel/BallBoostModel.h"
 
-const double KeyboardSDLController::TIME_TO_MAX_SPEED = 0.33;
+const double KeyboardSDLController::TIME_TO_MAX_SPEED = 0.2;
 
 KeyboardSDLController::KeyboardSDLController(GameModel* model, GameDisplay* display) :
 BBBGameController(model, display), specialDirOn(false), dirHeldDownTimeCounter(0.0) {

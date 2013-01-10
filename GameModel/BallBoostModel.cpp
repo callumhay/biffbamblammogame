@@ -68,6 +68,11 @@ void BallBoostModel::Tick(double dT) {
             break;
 
         case BulletTimeFadeIn:
+            if (!this->IsBallAvailableForBoosting() || !this->IsBoostAvailable()) {
+                this->ReleaseBulletTime();
+                break;
+            }
+
             // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
             animationDone = this->timeDialationAnim.Tick(this->GetInverseTimeDialation() * dT);
 
@@ -80,6 +85,11 @@ void BallBoostModel::Tick(double dT) {
             break;
 
         case BulletTime:
+            if (!this->IsBallAvailableForBoosting() || !this->IsBoostAvailable()) {
+                this->ReleaseBulletTime();
+                break;
+            }
+
             // Increment the total bullet time counter, if it exceeds the max allowed bullet time
             // then we automatically boost the ball in its current direction
             // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
@@ -126,26 +136,43 @@ void BallBoostModel::BallBoostDirectionPressed(float x, float y) {
             // start up bullet time...
             this->SetCurrentState(BulletTimeFadeIn);
         }
-        this->ballBoostDir[0] = x;
-        this->ballBoostDir[1] = y;
+
+        Vector2D newBallBoostDir(x, y);
 
         // Make sure the boost direction is normalized
-        this->ballBoostDir.Normalize();
+        newBallBoostDir.Normalize();
 
         if (!this->isBallBoostInverted) {
-            this->ballBoostDir = -this->ballBoostDir;
+            newBallBoostDir = -newBallBoostDir;
+        }
+
+        // Don't let the direction change dramatically
+        if (Vector2D::Dot(this->ballBoostDir, newBallBoostDir) >= 0) {
+            this->ballBoostDir = newBallBoostDir;
         }
     }
     else {
-        // Boosting is disallowed currently, make sure the members are properly set
-        this->ballBoostDir[0] = 0.0f;
-        this->ballBoostDir[1] = 0.0f;
-        this->SetCurrentState(NotInBulletTime);
+        // Boosting is disallowed currently...
+        this->ReleaseBulletTime();
     }
 }
 
 void BallBoostModel::BallBoostDirectionReleased() {
     if (this->currState != NotInBulletTime) {
+
+        // If slingshot mode is active then this will execute the ball boost...
+        if (this->gameModel->GetBallBoostMode() == BallBoostModel::Slingshot) {
+            this->BallBoosterPressed();
+            return;
+        }
+
+        this->ReleaseBulletTime();
+    }
+}
+
+void BallBoostModel::ReleaseBulletTime() {
+    if (this->currState != NotInBulletTime) {
+
         // The player has decided to NOT boost at this time, clean up the about-to-boost state
         this->ballBoostDir[0] = 0.0f;
         this->ballBoostDir[1] = 0.0f;
@@ -189,8 +216,8 @@ bool BallBoostModel::BallBoosterPressed() {
     // EVENT: Ball(s) have been boosted
     GameEventManager::Instance()->ActionBallBoostExecuted(*this);
 
-    // Force a release of the boost direction and the entire boosting state
-    this->BallBoostDirectionReleased();
+    // Force a release of the bullet time state
+    this->ReleaseBulletTime();
 
     // A boost was just expended...
     this->numAvailableBoosts--;
@@ -200,6 +227,37 @@ bool BallBoostModel::BallBoosterPressed() {
     GameEventManager::Instance()->ActionBallBoostLost(this->numAvailableBoosts == 0);
 
     return ballWasBoosted;
+}
+
+/**
+ * Get the total number of balls currently in play.
+ */
+size_t BallBoostModel::GetCurrentNumBalls() const {
+    return this->gameModel->GetGameBalls().size();
+}
+
+/**
+ * Gets the list of balls that will be / are being boosted by this.
+ */
+const std::list<GameBall*>& BallBoostModel::GetBalls() const {
+    return this->gameModel->GetGameBalls();
+}
+
+/**
+ * Gets the number of balls that could boost currently.
+ * Returns: The number of boostable balls in play.
+ */
+int BallBoostModel::GetNumBallsAllowedToBoost() const {
+    int count = 0;
+    const std::list<GameBall*>& balls = this->gameModel->GetGameBalls();
+    for (std::list<GameBall*>::const_iterator iter = balls.begin(); iter != balls.end(); ++iter) {
+        const GameBall* currBall = *iter;
+        if (currBall->IsBallAllowedToBoost()) {
+            count++;
+        }
+    }
+
+    return count;
 }
 
 /**

@@ -138,7 +138,11 @@ public:
 	}
 
 	float GetSpeed() const {
-		return this->lastDirection * this->currSpeed;
+        float tempSpd = this->currSpeed;
+        if ((this->GetPaddleType() & PlayerPaddle::PoisonPaddle) == PlayerPaddle::PoisonPaddle) {
+            tempSpd = std::max<float>(0.0f, tempSpd - PlayerPaddle::POISON_SPEED_DIMINISH);
+        }
+        return this->lastDirection * tempSpd;
 	}
 
 	Vector2D GetVelocity() const {
