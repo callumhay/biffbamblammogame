@@ -70,6 +70,7 @@ private:
     Texture* starTexture;
     Texture* bossIconTexture;
     Texture2D* starryBG;
+    Texture2D* padlockTexture;
 	CgFxBloom* bloomEffect;
 	FBObj* menuFBO;
 
@@ -99,21 +100,26 @@ private:
 
     class AbstractLevelMenuItem {
     public:
-        AbstractLevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner, bool isEnabled);
+        AbstractLevelMenuItem(SelectLevelMenuState* state, int levelNum, const GameLevel* level,
+            float width, const Point2D& topLeftCorner, bool isEnabled);
         virtual ~AbstractLevelMenuItem();
 
         const Point2D& GetTopLeftCorner() const { return this->topLeftCorner; }
         const float GetWidth() const { return this->width; }
         const GameLevel* GetLevel() const { return this->level; }
         bool GetIsEnabled() const { return this->isEnabled; }
-        float GetHeight() const;
+        virtual float GetHeight() const = 0;
 
         virtual void Draw(const Camera& camera, double dT, bool isSelected) = 0;
+
+        void ExecuteLockedAnimation();
 
     protected:
         static const float NUM_TO_NAME_GAP;
         static const float DISABLED_GREY_AMT;
-        static const float WIDTH_TO_HEIGHT_RATIO;
+        static const float PADLOCK_SCALE;
+
+        SelectLevelMenuState* state;
 
         Point2D topLeftCorner;
         float width;
@@ -123,20 +129,23 @@ private:
 
         TextLabel2D* numLabel;
         TextLabel2DFixedWidth* nameLabel;
-        TextLabel2D* lockedLabel;
+
+        AnimationMultiLerp<float> lockedAnim;
 
         void DrawBG(bool isSelected);
+        void DrawPadlock(double dT);
 
         DISALLOW_COPY_AND_ASSIGN(AbstractLevelMenuItem);
     };
 
     class LevelMenuItem : public AbstractLevelMenuItem {
     public:
-        LevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner,
-            bool isEnabled, const Texture* starTexture);
+        LevelMenuItem(SelectLevelMenuState* state, int levelNum, const GameLevel* level,
+            float width, const Point2D& topLeftCorner, bool isEnabled, const Texture* starTexture);
         ~LevelMenuItem();
         
         void Draw(const Camera& camera, double dT, bool isSelected);
+        float GetHeight() const;
 
     private:
         static const float NUM_TO_HIGH_SCORE_Y_GAP;
@@ -154,11 +163,12 @@ private:
 
     class BossLevelMenuItem : public AbstractLevelMenuItem {
     public:
-        BossLevelMenuItem(int levelNum, const GameLevel* level, float width, const Point2D& topLeftCorner,
-            bool isEnabled, const Texture* bossTexture);
+        BossLevelMenuItem(SelectLevelMenuState* state, int levelNum, const GameLevel* level,
+            float width, float height, const Point2D& topLeftCorner, bool isEnabled, const Texture* bossTexture);
         ~BossLevelMenuItem();
 
         void Draw(const Camera& camera, double dT, bool isSelected);
+        float GetHeight() const;
 
     private:
         static const float BOSS_ICON_GAP;
@@ -167,6 +177,7 @@ private:
 
         GLuint bossIconDisplayList;
         float bossIconSize;
+        float height;
 
         TextLabel2D* bossLabel;
         const Texture* bossTexture;
