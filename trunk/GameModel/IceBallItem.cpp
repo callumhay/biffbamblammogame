@@ -50,11 +50,13 @@ double IceBallItem::Activate() {
 		}
 	}
 
-	// Make the last ball to hit the paddle into a fire ball
+	// Apply to all balls...
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	GameBall* affectedBall = *gameBalls.begin();
-	assert(affectedBall != NULL);
-	affectedBall->AddBallType(GameBall::IceBall);
+    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+	    GameBall* affectedBall = *iter;
+	    assert(affectedBall != NULL);
+	    affectedBall->AddBallType(GameBall::IceBall);
+    }
 
 	GameItem::Activate();
 	return IceBallItem::ICE_BALL_TIMER_IN_SECS;

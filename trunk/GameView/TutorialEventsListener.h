@@ -53,7 +53,8 @@ public:
     void SetShootBallHint(ButtonTutorialHint* hint)  { this->shootBallHint = hint; }
     void SetFireWeaponHint(ButtonTutorialHint* hint) { this->fireWeaponHint = hint; }
     void SetStartBoostHint(ButtonTutorialHint* hint) { this->startBoostHint = hint; }
-    void SetDoBoostHint(ButtonTutorialHint* hint)    { this->doBoostHint = hint; }
+    void SetDoBoostPressToReleaseHint(ButtonTutorialHint* hint)    { this->doBoostPressToReleaseHint = hint; }
+    void SetDoBoostSlingshotHint(ButtonTutorialHint* hint)    { this->doBoostSlingshotHint = hint; }
     void SetHoldBoostHint(ButtonTutorialHint* hint)  { this->holdBoostHint = hint; }
     void SetBoostAvailableHint(ButtonTutorialHint* hint)  { this->boostAvailableHint = hint; }
     
@@ -80,7 +81,8 @@ private:
     ButtonTutorialHint* shootBallHint;
     ButtonTutorialHint* fireWeaponHint;
     ButtonTutorialHint* startBoostHint;
-    ButtonTutorialHint* doBoostHint;
+    ButtonTutorialHint* doBoostPressToReleaseHint;
+    ButtonTutorialHint* doBoostSlingshotHint;
     ButtonTutorialHint* holdBoostHint;
     ButtonTutorialHint* boostAvailableHint;
 

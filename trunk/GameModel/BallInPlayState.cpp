@@ -113,9 +113,10 @@ void BallInPlayState::Tick(double seconds) {
 	bool didCollideWithBlock = false;
 	bool didCollideWithTeslaLightning = false;
 	
-	GameBall* ballToMoveToFront = NULL;																	// The last ball to hit the paddle is the one with priority for item effects
-	std::list<std::list<GameBall*>::iterator> ballsToRemove;						// The balls that are no longer in play and will be removed
-	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();	// The current set of balls in play
+    // The last ball to hit the paddle is the one with priority for item effects
+	GameBall* ballToMoveToFront = NULL;
+	// The current set of balls in play
+	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
 
 #ifdef _DEBUG
 	// Pause the ball from moving
@@ -126,9 +127,10 @@ void BallInPlayState::Tick(double seconds) {
 	Vector3D worldGravityDir = this->gameModel->GetGravityDir();
 	Vector2D worldGravity2D(worldGravityDir[0], worldGravityDir[1]);
 
-	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+    // Clear out any dead balls...
+	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end();) {
 		GameBall *currBall = *iter;
-
+    
 		// Check for death (ball went out of bounds)
 		if (this->gameModel->IsOutOfGameBounds(currBall->GetBounds().Center())) {
 			if (gameBalls.size() == 1) {
@@ -136,11 +138,36 @@ void BallInPlayState::Tick(double seconds) {
 				return;
 			}
 			else {
-				// The ball is now dead and needs to be removed from the game
-				ballsToRemove.push_back(iter);
-				continue;
+				// The ball is now dead and needs to be removed from the game...
+
+		        // EVENT: Ball died
+		        GameEventManager::Instance()->ActionBallDied(*currBall);
+
+		        // SPECIAL CASE:
+		        // We need to be very careful - if the player is in ball camera mode but there are multiple balls and the one
+		        // that the camera is in just died then we need to deactivate ball camera mode but keep the player alive!
+		        if (currBall == GameBall::GetBallCameraBall()) {
+			        // Deactivate the ball camera item!!!
+			        bool wasRemoved = this->gameModel->RemoveActiveGameItemsOfGivenType(GameItem::BallCamItem);
+                    UNUSED_VARIABLE(wasRemoved);
+			        assert(wasRemoved);
+		        }
+
+                this->gameModel->RemoveActiveGameItemsForThisBallOnly(currBall);
+
+		        iter = gameBalls.erase(iter);
+		        delete currBall;
+		        currBall = NULL;
+                continue;
 			}
 		}
+
+        ++iter;
+    }
+
+
+	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+		GameBall *currBall = *iter;
 
 		// Check to see if the ball is allowed to collide with paddles, if so run the ball-paddle
 		// collision simulation
@@ -382,32 +409,6 @@ void BallInPlayState::Tick(double seconds) {
 		}
 	}
 	
-	// Get rid of all the balls that went out of bounds / are now dead
-	for (std::list<std::list<GameBall*>::iterator>::iterator iter = ballsToRemove.begin();
-         iter != ballsToRemove.end(); ++iter) {
-
-		GameBall* ballToDestroy = (**iter);
-
-		// EVENT: Ball died
-		GameEventManager::Instance()->ActionBallDied(*ballToDestroy);
-
-		// SPECIAL CASE:
-		// We need to be very careful - if the player is in ball camera mode but there are multiple balls and the one
-		// that the camera is in just died then we need to deactivate ball camera mode but keep the player alive!
-		if (ballToDestroy == GameBall::GetBallCameraBall()) {
-			// Deactivate the ball camera item!!!
-			bool wasRemoved = this->gameModel->RemoveActiveGameItemsOfGivenType(GameItem::BallCamItem);
-            UNUSED_VARIABLE(wasRemoved);
-			assert(wasRemoved);
-		}
-
-        this->gameModel->RemoveActiveGameItemsForThisBallOnly(ballToDestroy);
-
-		gameBalls.erase(*iter);
-		delete ballToDestroy;
-		ballToDestroy = NULL;
-	}
-
 	// Move the last ball that hit the paddle to the front of the list of balls
 	if (ballToMoveToFront != NULL) {
 		gameBalls.remove(ballToMoveToFront);

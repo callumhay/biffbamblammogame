@@ -52,9 +52,11 @@ double FireBallItem::Activate() {
 
 	// Make the last ball to hit the paddle into a fire ball
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	GameBall* affectedBall = *gameBalls.begin();
-	assert(affectedBall != NULL);
-	affectedBall->AddBallType(GameBall::FireBall);
+    for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+	    GameBall* affectedBall = *iter;
+	    assert(affectedBall != NULL);
+	    affectedBall->AddBallType(GameBall::FireBall);
+    }
 
 	GameItem::Activate();
 	return FireBallItem::FIRE_BALL_TIMER_IN_SECS;

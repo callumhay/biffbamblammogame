@@ -18,7 +18,7 @@
 TutorialEventsListener::TutorialEventsListener(GameDisplay* display) : display(display),
 numBlocksDestroyed(0), movePaddleHint(NULL), movePaddleHintUnshown(false), fireWeaponAlreadyShown(false),
 finishedPointsHint(false), keepShowingBoostHint(true), shootBallHint(NULL), fireWeaponHint(NULL), startBoostHint(NULL), 
-doBoostHint(NULL), holdBoostHint(NULL),
+doBoostPressToReleaseHint(NULL), doBoostSlingshotHint(NULL), holdBoostHint(NULL),
 boostAvailableHint(NULL), fadeEffector(1, 0) {
     assert(display != NULL);
 }
@@ -130,7 +130,12 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
             // Show the hint for telling the user how to boost the ball while in bullet time
             this->startBoostHint->Unshow(0.0, 0.5);
             if (this->keepShowingBoostHint) {
-                this->doBoostHint->Show(0.0, 0.5);
+                if (this->display->GetModel()->GetBallBoostMode() == BallBoostModel::Slingshot) {
+                    this->doBoostSlingshotHint->Show(0.0, 0.5);
+                }
+                else {
+                    this->doBoostPressToReleaseHint->Show(0.0, 0.5);
+                }
                 this->holdBoostHint->Show(0.0, 0.5);
             }
             this->boostAvailableHint->Unshow(0.0, 0.5);
@@ -140,8 +145,8 @@ void TutorialEventsListener::BulletTimeStateChangedEvent(const BallBoostModel& b
             break;
 
         case BallBoostModel::BulletTimeFadeOut:
-
-            this->doBoostHint->Unshow(0.0, 0.5);
+            this->doBoostSlingshotHint->Unshow(0.0, 0.5);
+            this->doBoostPressToReleaseHint->Unshow(0.0, 0.5);
             this->holdBoostHint->Unshow(0.0, 0.5);
 
             if (boostModel.GetNumAvailableBoosts() > 0 && this->keepShowingBoostHint) {
@@ -173,7 +178,8 @@ void TutorialEventsListener::AllBallsDeadEvent(int livesLeft) {
 
     // If all balls died then we should unshow all the tutorial hints for ball boosting
     this->startBoostHint->Unshow(0.0, 0.5);
-    this->doBoostHint->Unshow(0.0, 0.5);
+    this->doBoostSlingshotHint->Unshow(0.0, 0.5);
+    this->doBoostPressToReleaseHint->Unshow(0.0, 0.5);
     this->holdBoostHint->Unshow(0.0, 0.5);
 }
 
@@ -182,7 +188,8 @@ void TutorialEventsListener::LastBallAboutToDieEvent(const GameBall& lastBallToD
 
     // If all balls died (or are about to) then we should unshow all the tutorial hints for ball boosting
     this->startBoostHint->Unshow(0.0, 0.5);
-    this->doBoostHint->Unshow(0.0, 0.5);
+    this->doBoostSlingshotHint->Unshow(0.0, 0.5);
+    this->doBoostPressToReleaseHint->Unshow(0.0, 0.5);
     this->holdBoostHint->Unshow(0.0, 0.5);
 }
 

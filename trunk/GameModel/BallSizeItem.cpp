@@ -29,23 +29,24 @@ BallSizeItem::~BallSizeItem() {
 double BallSizeItem::Activate() {
 	this->isActive = true;
 
+    bool ballSizeChanged = false;
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
-	GameBall* affectedBall = *gameBalls.begin();
-	assert(affectedBall != NULL);
+	for (std::list<GameBall*>::iterator iter = gameBalls.begin(); iter != gameBalls.end(); ++iter) {
+        GameBall* affectedBall = *iter;
+	    assert(affectedBall != NULL);
 
-	bool ballSizeChanged = false;
-
-	switch(this->sizeChangeType) {
-		case ShrinkBall:
-			ballSizeChanged = affectedBall->DecreaseBallSize();
-			break;
-		case GrowBall:
-			ballSizeChanged = affectedBall->IncreaseBallSize();
-			break;
-		default:
-			assert(false);
-			break;
-	}
+	    switch(this->sizeChangeType) {
+		    case ShrinkBall:
+			    ballSizeChanged |= affectedBall->DecreaseBallSize();
+			    break;
+		    case GrowBall:
+			    ballSizeChanged |= affectedBall->IncreaseBallSize();
+			    break;
+		    default:
+			    assert(false);
+			    break;
+	    }
+    }
 
 	// Nothing gets activated if there was no effect...
 	if (ballSizeChanged) {
