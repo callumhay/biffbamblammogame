@@ -193,6 +193,32 @@ void GameMenu::DrawSelectionIndicator(double dT, const Point2D& itemPos, const G
 	this->selArrowFadeAnim.Tick(dT);
 }
 
+void GameMenu::LeftAction() {
+    if (this->isSelectedItemActivated) {
+        return;
+    }
+
+    GameMenuItem* highlightedItem = this->menuItems[this->selectedMenuItemIndex];
+    assert(highlightedItem != NULL);
+    if (highlightedItem->IsLeftRightScrollable()) {
+        this->ActivateSelectedMenuItem();
+        highlightedItem->ButtonPressed(GameControl::LeftButtonAction);
+    }
+}
+
+void GameMenu::RightAction() {
+    if (this->isSelectedItemActivated) {
+        return;
+    }
+
+    GameMenuItem* highlightedItem = this->menuItems[this->selectedMenuItemIndex];
+    assert(highlightedItem != NULL);
+    if (highlightedItem->IsLeftRightScrollable()) {
+        this->ActivateSelectedMenuItem();
+        highlightedItem->ButtonPressed(GameControl::RightButtonAction);
+    }
+}
+
 /**
  * Sets this menu to be centered on the screen given the screen width and height.
  */
@@ -374,7 +400,15 @@ void GameMenu::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 	// If we managed to get here then the key press is specific to this menu,
 	// handle the input by changing the menu according to the key pressed.
 	switch(pressedButton) {
-		
+        
+        case GameControl::LeftButtonAction:
+            currentMenu->LeftAction();
+            break;
+
+        case GameControl::RightButtonAction:
+            currentMenu->RightAction();
+            break;
+
 		case GameControl::DownButtonAction:
 			currentMenu->DownAction();
 			break;
@@ -388,7 +422,9 @@ void GameMenu::ButtonPressed(const GameControl::ActionButton& pressedButton) {
 			break;
 
 		case GameControl::EscapeButtonAction:
-			for (std::list<GameMenuEventHandler*>::iterator iter = currentMenu->eventHandlers.begin(); iter != currentMenu->eventHandlers.end(); ++iter) {
+			for (std::list<GameMenuEventHandler*>::iterator iter = currentMenu->eventHandlers.begin();
+                 iter != currentMenu->eventHandlers.end(); ++iter) {
+
 				(*iter)->EscMenu();
 			}
 			break;
