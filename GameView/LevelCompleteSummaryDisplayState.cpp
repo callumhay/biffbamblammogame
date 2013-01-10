@@ -61,6 +61,11 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
 
+    
+    //gameModel->GetNumStarsAwarded()
+
+
+
     // Save game progress
     this->gameProgressWasSaved = GameProgressIO::SaveGameProgress(gameModel);
 

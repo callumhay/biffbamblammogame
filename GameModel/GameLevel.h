@@ -179,10 +179,14 @@ public:
     const LevelPiece* GetTriggerableLevelPiece(const LevelPiece::TriggerID& triggerID) const;
 
     bool GetIsLevelPassedWithScore() const;
+    
+    long GetPrevHighScore() const;
+ 
     long GetHighScore() const;
-    void SetHighScore(long highScore);
+    void SetHighScore(long highScore, bool setPrevAsWell);
+
     bool GetHasNewHighScore() const;
-    void SetNewHighScore(bool newHighScore);
+    void SetNewHighScore(bool hasNewHighScore);
 
     int GetNumStarsForScore(long score) const;
     int GetHighScoreNumStars() const { return this->GetNumStarsForScore(this->highScore); }
@@ -222,8 +226,9 @@ private:
 
     // Persistant scoring variables - used to mark previously saved scores and calculate high scores
     long starAwardScores[5];  // Scores where stars are awarded
+    long prevHighScore;
     long highScore;           // Current high score for this level
-    bool newHighScore;        // If a new high score was achieved on the last play through of this level
+    bool hasNewHighScore;     // If a new high score was achieved on the last play through of this level
 
     // Constructor for non-boss levels
 	GameLevel(size_t levelIdx, const std::string& filepath, const std::string& levelName, unsigned int numBlocks, 
@@ -255,20 +260,30 @@ inline bool GameLevel::GetIsLevelPassedWithScore() const {
     return this->highScore > 0;
 }
 
+inline long GameLevel::GetPrevHighScore() const {
+    return this->prevHighScore;
+}
+
 inline long GameLevel::GetHighScore() const {
     return this->highScore;
 }
 
-inline void GameLevel::SetHighScore(long highScore) {
+inline void GameLevel::SetHighScore(long highScore, bool setPrevAsWell) {
+    if (setPrevAsWell) {
+        this->prevHighScore = highScore;
+    }
+    else {
+        this->prevHighScore = this->highScore;
+    }
     this->highScore = highScore;
 }
 
 // Get whether this level has a new high score due to its most recent play-through this game
 inline bool GameLevel::GetHasNewHighScore() const {
-    return this->newHighScore;
+    return this->hasNewHighScore;
 }
-inline void GameLevel::SetNewHighScore(bool newHighScore) {
-    this->newHighScore = newHighScore;
+inline void GameLevel::SetNewHighScore(bool hasNewHighScore) {
+    this->hasNewHighScore = hasNewHighScore;
 }
 
 inline int GameLevel::GetNumStarsForScore(long score) const {

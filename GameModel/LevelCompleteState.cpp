@@ -26,7 +26,7 @@ LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
 
     // Special case: Boss levels, when completed indicate that they were completed by storing a highscore > 0.
     if (currLevel->GetHasBoss()) {
-        currLevel->SetHighScore(std::numeric_limits<long>::max());
+        currLevel->SetHighScore(std::numeric_limits<long>::max(), false);
         // TODO: wait for boss death animation?...
     }
     else {
@@ -34,7 +34,7 @@ LevelCompleteState::LevelCompleteState(GameModel* gm) : GameState(gm) {
         // Check to see whether the highscore for the level was beaten...
         if (currLevel->GetHighScore() < gm->GetScore()) {
             // Set the new high score for the level and indicate that the high score was beaten
-            currLevel->SetHighScore(gm->GetScore());
+            currLevel->SetHighScore(gm->GetScore(), false);
             currLevel->SetNewHighScore(true);
         }
         else {
