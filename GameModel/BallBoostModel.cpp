@@ -195,11 +195,9 @@ bool BallBoostModel::BallBoosterPressed() {
     // A boost was just expended...
     this->numAvailableBoosts--;
     assert(this->numAvailableBoosts >= 0);
+
     // EVENT: Ball Boost lost
     GameEventManager::Instance()->ActionBallBoostLost(this->numAvailableBoosts == 0);
-
-    // End the bullet time state...
-    this->SetCurrentState(BulletTimeFadeOut);
 
     return ballWasBoosted;
 }
@@ -234,6 +232,10 @@ bool BallBoostModel::IsBallAvailableForBoosting() const {
  * member itself.
  */
 void BallBoostModel::SetCurrentState(const BulletTimeState& newState) {
+    if (newState == this->currState) {
+        return;
+    }
+
     switch (newState) {
         case NotInBulletTime:
             this->timeDialationAnim.SetInterpolantValue(1.0f);

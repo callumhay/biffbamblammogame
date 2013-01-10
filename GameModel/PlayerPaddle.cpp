@@ -278,7 +278,10 @@ void PlayerPaddle::FireAttachedBall() {
 
 	// Set the ball velocity (tragectory it will leave the paddle on)
 	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), ballReleaseDir);
-    this->attachedBall->ApplyImpulseForce(0.5f * absPaddleSpd, absPaddleSpd); 
+    
+    // Add a brief impulse to the ball's velocity to give the launch a more viseral feeling
+    float impulse = 0.9f * absPaddleSpd;
+    this->attachedBall->ApplyImpulseForce(impulse, impulse); 
 
 	// Re-enable the ball's collisions
 	this->attachedBall->SetBallBallCollisionsEnabled();

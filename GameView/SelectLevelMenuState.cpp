@@ -30,7 +30,7 @@ static const float BORDER_GAP = 10;
 SelectLevelMenuState::SelectLevelMenuState(GameDisplay* display, const GameWorld* world) : 
 DisplayState(display), worldLabel(NULL), world(world), pressEscAlphaAnim(0.0f), 
 goBackToWorldSelectMenu(false), goToStartLevel(false), goBackMenuMoveAnim(0.0f), goBackMenuAlphaAnim(1.0f), starTexture(NULL),
-bossIconTexture(NULL), arrowTexture(NULL), nextPgArrowEmitter(NULL), prevPgArrowEmitter(NULL), starryBG(NULL),
+bossIconTexture(NULL), arrowTexture(NULL), nextPgArrowEmitter(NULL), prevPgArrowEmitter(NULL), starryBG(NULL), padlockTexture(NULL),
 selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderAddAnim(0.0f), totalNumStarsLabel(NULL) {
 
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(
@@ -47,6 +47,10 @@ selectionAlphaOrangeAnim(0.0f), selectionAlphaYellowAnim(0.0f), selectionBorderA
     this->starryBG = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
     GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
     assert(this->starryBG != NULL);
+
+    this->padlockTexture = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+    GameViewConstants::GetInstance()->TEXTURE_PADLOCK, Texture::Trilinear));
+    assert(this->padlockTexture != NULL);
 
     std::vector<ColourRGBA> arrowColours;
     arrowColours.reserve(3);
@@ -156,6 +160,8 @@ SelectLevelMenuState::~SelectLevelMenuState() {
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
     assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->padlockTexture);
+    assert(success);
     UNUSED_VARIABLE(success);
 
     delete this->nextPgArrowEmitter;
@@ -176,11 +182,13 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw the starry background...
-    this->starryBG->BindTexture();
-    GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
-        GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
-    this->starryBG->UnbindTexture();
+    if (!this->goBackToWorldSelectMenu) {
+        this->starryBG->BindTexture();
+        GeometryMaker::GetInstance()->DrawTiledFullScreenQuad(camera.GetWindowWidth(), camera.GetWindowHeight(), 
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowWidth()) / static_cast<float>(this->starryBG->GetWidth()),
+            GameViewConstants::STARRY_BG_TILE_MULTIPLIER * static_cast<float>(camera.GetWindowHeight()) / static_cast<float>(this->starryBG->GetHeight()));
+        this->starryBG->UnbindTexture();
+    }
 
 	// Draw in window coordinates
 	Camera::PushWindowCoords();
@@ -193,7 +201,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     this->worldLabel->Draw();
 
     // Draw the title strip
-    this->DrawTitleStrip(camera);
+    //this->DrawTitleStrip(camera);
 
     // Draw the "Press esc to go back" stuff
     this->keyEscLabel->SetAlpha(this->pressEscAlphaAnim.GetInterpolantValue());
@@ -226,6 +234,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
     this->menuFBO->UnbindFBObj();
 
     if (this->goBackToWorldSelectMenu) {
+
         bool animDone = this->goBackMenuAlphaAnim.Tick(dT);
         animDone &= this->goBackMenuMoveAnim.Tick(dT);
         
@@ -246,6 +255,7 @@ void SelectLevelMenuState::RenderFrame(double dT) {
         glPolygonMode(GL_FRONT, GL_FILL);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_DEPTH_TEST);
 
         float screenWidth = camera.GetWindowWidth();
         float screenHeight = camera.GetWindowHeight();
@@ -264,7 +274,6 @@ void SelectLevelMenuState::RenderFrame(double dT) {
 	        glTexCoord2f(0, totalTexV);
             glVertex2f(-camera.GetWindowWidth() + moveAmt, camera.GetWindowHeight());
         glEnd();
-        this->starryBG->UnbindTexture();
 
         this->menuFBO->GetFBOTexture()->BindTexture();
         glColor4f(1,1,1,alphaAmt);
@@ -331,7 +340,6 @@ void SelectLevelMenuState::ButtonPressed(const GameControl::ActionButton& presse
             break;
 
         case GameControl::EnterButtonAction:
-            // Start up the currently selected world (if it's enabled)
             this->GoToStartLevel();
             break;
 
@@ -618,7 +626,9 @@ void SelectLevelMenuState::GoBackToWorldSelectMenu() {
 }
 
 void SelectLevelMenuState::GoToStartLevel() {
-    if (this->pages[this->selectedPage]->GetSelectedItem()->GetIsEnabled()) {
+    AbstractLevelMenuItem* selectedItem = this->pages[this->selectedPage]->GetSelectedItem();
+    assert(selectedItem != NULL);
+    if (selectedItem->GetIsEnabled()) {
         // Finishing animation for starting the level
         this->fadeAnimation.SetLerp(0.5f, 1.0f);
 	    this->fadeAnimation.SetRepeat(false);
@@ -627,7 +637,7 @@ void SelectLevelMenuState::GoToStartLevel() {
     }
     else {
         // Play animation to indicate/show that the level is disabled
-        // TODO
+        selectedItem->ExecuteLockedAnimation();
     }
 }
 
@@ -666,6 +676,8 @@ void SelectLevelMenuState::SetupLevelPages() {
     int numRows = static_cast<int>(ceil(static_cast<float>(levels.size()) / static_cast<float>(numItemsPerRow)));
     bool noScoreEncountered = false;
 
+    float standardHeight = 0.0f;
+
     for (int row = 0; row < numRows; row++) {
         for (int col = 0; col < numItemsPerRow; col++) {
             int currLevelIdx = row * numItemsPerRow + col;
@@ -677,12 +689,13 @@ void SelectLevelMenuState::SetupLevelPages() {
             assert(currLevel != NULL);
 
             if (currLevel->GetHasBoss()) {
-                levelItem = new BossLevelMenuItem(currLevelIdx+1, currLevel, itemWidth, 
+                levelItem = new BossLevelMenuItem(this, currLevelIdx+1, currLevel, itemWidth, standardHeight,
                     Point2D(itemX, itemY), !noScoreEncountered, this->bossIconTexture);
             }
             else {
-                levelItem = new LevelMenuItem(currLevelIdx+1, currLevel, itemWidth, 
+                levelItem = new LevelMenuItem(this, currLevelIdx+1, currLevel, itemWidth, 
                     Point2D(itemX, itemY), !noScoreEncountered, this->starTexture);
+                standardHeight = levelItem->GetHeight();
             }
 
             this->pages[this->pages.size()-1]->AddLevelItem(levelItem);
@@ -792,8 +805,7 @@ void SelectLevelMenuState::MoveSelectionX(bool right) {
 
     if (fallThrough) {
         int currRowIndex  = selectedItem / this->numItemsPerRow;
-        int numItemsOnRow = this->GetNumItemsOnRow(currRowIndex);
-        int wrapAroundX   = (numItemsOnRow + (selectedItem - currRowIndex * this->numItemsPerRow) + x) % numItemsOnRow;
+        int wrapAroundX   = (this->numItemsPerRow + (selectedItem - currRowIndex * this->numItemsPerRow) + x) % this->numItemsPerRow;
 
         bool isFirstItemInRow = (selectedItem % this->numItemsPerRow) == 0;
         bool isLastItemInRow  = (selectedItem % this->numItemsPerRow) == static_cast<size_t>(this->numItemsPerRow-1);
@@ -852,12 +864,14 @@ int SelectLevelMenuState::GetNumItemsOnRow(int rowIdx) {
 
 const float SelectLevelMenuState::AbstractLevelMenuItem::NUM_TO_NAME_GAP = 8;
 const float SelectLevelMenuState::AbstractLevelMenuItem::DISABLED_GREY_AMT = 0.78f;
-const float SelectLevelMenuState::AbstractLevelMenuItem::WIDTH_TO_HEIGHT_RATIO = 0.41f;
+const float SelectLevelMenuState::AbstractLevelMenuItem::PADLOCK_SCALE = 0.85f;
 
-SelectLevelMenuState::AbstractLevelMenuItem::AbstractLevelMenuItem(int levelNum, const GameLevel* level, float width,
+SelectLevelMenuState::AbstractLevelMenuItem::AbstractLevelMenuItem(SelectLevelMenuState* state,
+                                                                   int levelNum, const GameLevel* level, float width,
                                                                    const Point2D& topLeftCorner, bool isEnabled) :
-lockedLabel(NULL), level(level), topLeftCorner(topLeftCorner), width(width), isEnabled(isEnabled) {
+state(state), level(level), topLeftCorner(topLeftCorner), width(width), isEnabled(isEnabled) {
 
+    assert(state != NULL);
     assert(level != NULL);
     assert(levelNum > 0);
 
@@ -868,7 +882,6 @@ lockedLabel(NULL), level(level), topLeftCorner(topLeftCorner), width(width), isE
 
     this->numLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
         GameFontAssetsManager::Huge), levelNumStr.str());
-    this->numLabel->SetDropShadow(Colour(0.0f, 0.0f, 0.0f), 0.04f);
     this->numLabel->SetTopLeftCorner(this->topLeftCorner);
 
     float nameLabelWidth = width - NUM_TO_NAME_GAP - this->numLabel->GetLastRasterWidth();
@@ -892,19 +905,15 @@ lockedLabel(NULL), level(level), topLeftCorner(topLeftCorner), width(width), isE
     if (isEnabled) {
         this->nameLabel->SetColour(Colour(0,0,0));
         this->numLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
+        this->numLabel->SetDropShadow(Colour(0.0f, 0.0f, 0.0f), 0.04f);
     }
     else {
         this->nameLabel->SetColour(DISABLED_COLOUR);
         this->numLabel->SetColour(DISABLED_COLOUR);
-
-        this->lockedLabel = new TextLabel2D(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, 
-            GameFontAssetsManager::Huge), "LOCKED");
-        this->lockedLabel->SetColour(Colour(1,0,0));
-        this->lockedLabel->SetDropShadow(Colour(0,0,0), 0.07f);
-        this->lockedLabel->SetTopLeftCorner(this->topLeftCorner[0] + std::max<float>(5, (width - this->lockedLabel->GetLastRasterWidth())/ 2.0f),
-            this->numLabel->GetTopLeftCorner()[1] - (5 + this->numLabel->GetHeight()));
     }
 
+    this->lockedAnim.ClearLerp();
+    this->lockedAnim.SetInterpolantValue(0);
 }
 
 SelectLevelMenuState::AbstractLevelMenuItem::~AbstractLevelMenuItem() {
@@ -912,11 +921,6 @@ SelectLevelMenuState::AbstractLevelMenuItem::~AbstractLevelMenuItem() {
     this->numLabel = NULL;
     delete this->nameLabel;
     this->nameLabel = NULL;
-
-    if (this->lockedLabel != NULL) {
-        delete this->lockedLabel;
-        this->lockedLabel = NULL;
-    }
 }
 
 void SelectLevelMenuState::AbstractLevelMenuItem::DrawBG(bool isSelected) {
@@ -945,17 +949,62 @@ void SelectLevelMenuState::AbstractLevelMenuItem::DrawBG(bool isSelected) {
     }
 }
 
-float SelectLevelMenuState::AbstractLevelMenuItem::GetHeight() const {
-    return WIDTH_TO_HEIGHT_RATIO * this->GetWidth();
+void SelectLevelMenuState::AbstractLevelMenuItem::DrawPadlock(double dT) {
+    this->lockedAnim.Tick(dT);
+    float lockMoveX = this->lockedAnim.GetInterpolantValue();
+    
+    glPushAttrib(GL_CURRENT_BIT);
+        
+    glColor4f(1,1,1,1);
+    glPushMatrix();
+    glTranslatef(lockMoveX + this->topLeftCorner[0] + this->GetWidth()/2, this->topLeftCorner[1] - this->GetHeight()/2, 0.0f);
+    
+    float padlockScale = PADLOCK_SCALE * this->GetHeight();
+    glScalef(padlockScale, padlockScale, 1.0f);
+    
+    this->state->padlockTexture->BindTexture();
+    GeometryMaker::GetInstance()->DrawQuad();
+    this->state->padlockTexture->UnbindTexture();
+
+    glPopMatrix();
+
+    glPopAttrib();
+}
+
+void SelectLevelMenuState::AbstractLevelMenuItem::ExecuteLockedAnimation() {
+    
+    std::vector<double> timeValues;
+    timeValues.push_back(0.0);
+    timeValues.push_back(0.01);
+    timeValues.push_back(0.025);
+    timeValues.push_back(0.07);
+    timeValues.push_back(0.10);
+    timeValues.push_back(0.13);
+    timeValues.push_back(0.18);
+    timeValues.push_back(0.2);
+
+    std::vector<float> movementValues;
+    float maxMove = 0.25f * PADLOCK_SCALE * this->GetHeight();
+    movementValues.push_back(0.0f);
+    movementValues.push_back(maxMove * 0.9f);
+    movementValues.push_back(-maxMove * 0.1f);
+    movementValues.push_back(-maxMove);
+    movementValues.push_back(maxMove * 0.5f);
+    movementValues.push_back(maxMove);
+    movementValues.push_back(-0.2f * maxMove);
+    movementValues.push_back(0.0f);
+    this->lockedAnim.SetLerp(timeValues, movementValues);
+    this->lockedAnim.SetRepeat(false);
 }
 
 const float SelectLevelMenuState::LevelMenuItem::NUM_TO_HIGH_SCORE_Y_GAP = 5;
 const float SelectLevelMenuState::LevelMenuItem::HIGH_SCORE_TO_STAR_Y_GAP = 4;
 
-SelectLevelMenuState::LevelMenuItem::LevelMenuItem(int levelNum, const GameLevel* level, 
+SelectLevelMenuState::LevelMenuItem::LevelMenuItem(SelectLevelMenuState* state,
+                                                   int levelNum, const GameLevel* level, 
                                                    float width, const Point2D& topLeftCorner, 
                                                    bool isEnabled, const Texture* starTexture) : 
-AbstractLevelMenuItem(levelNum, level, width, topLeftCorner, isEnabled), starTexture(starTexture) {
+AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), starTexture(starTexture) {
 
     const Colour DISABLED_COLOUR(
         SelectLevelMenuState::AbstractLevelMenuItem::DISABLED_GREY_AMT,
@@ -973,14 +1022,16 @@ AbstractLevelMenuItem(levelNum, level, width, topLeftCorner, isEnabled), starTex
     this->highScoreLabel->SetTopLeftCorner(this->nameLabel->GetTopLeftCorner()[0],
         this->numLabel->GetTopLeftCorner()[1] - (NUM_TO_HIGH_SCORE_Y_GAP + this->numLabel->GetHeight()));
 
+    Colour starMultiplyColour(1,1,1);
     if (!isEnabled) {
         this->highScoreLabel->SetColour(DISABLED_COLOUR);
+        starMultiplyColour = DISABLED_COLOUR;
     }
 
     this->starDisplayList = glGenLists(1);
     glNewList(this->starDisplayList, GL_COMPILE);
 
-    glPushAttrib(GL_CURRENT_BIT);
+    glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT);
     glPushMatrix();
 
     static const float STAR_GAP = 5;
@@ -1015,6 +1066,9 @@ AbstractLevelMenuItem(levelNum, level, width, topLeftCorner, isEnabled), starTex
         }
     }
     else {
+        GLfloat envColour[4] = { 1.0, 1.0, 1.0, 1.0 };
+        glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColour);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
         glColor4f(DISABLED_COLOUR.R(), DISABLED_COLOUR.G(), DISABLED_COLOUR.B(), 1.0f);
         for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
             glTranslatef(STAR_GAP + starSize, 0, 0);
@@ -1043,25 +1097,14 @@ SelectLevelMenuState::LevelMenuItem::~LevelMenuItem() {
     this->starDisplayList = 0;
 }
 
+float SelectLevelMenuState::LevelMenuItem::GetHeight() const {
+    return this->numLabel->GetHeight() + NUM_TO_HIGH_SCORE_Y_GAP +
+           this->highScoreLabel->GetHeight() + HIGH_SCORE_TO_STAR_Y_GAP + this->starSize;
+}
 
 void SelectLevelMenuState::LevelMenuItem::Draw(const Camera& camera, double dT, bool isSelected) {
     UNUSED_PARAMETER(camera);
     UNUSED_PARAMETER(dT);
-
-    /*
-    if (this->isEnabled) {
-        if (isSelected) {
-            this->numLabel->SetDropShadowColour(Colour(0,0,0));
-            this->nameLabel->SetColour(Colour(0,0,0));
-            this->highScoreLabel->SetColour(Colour(0.25, 0.25, 0.25));
-        }
-        else {
-            this->numLabel->SetDropShadowColour(Colour(1,1,1));
-            this->nameLabel->SetColour(Colour(1,1,1));
-            this->highScoreLabel->SetColour(Colour(0.75, 0.75, 0.75));
-        }
-    }
-    */
 
     this->DrawBG(isSelected);
 
@@ -1075,12 +1118,11 @@ void SelectLevelMenuState::LevelMenuItem::Draw(const Camera& camera, double dT, 
     // Draw the number of stars earned for the level
     glCallList(this->starDisplayList);
 
+    // When locked, draw the padlock
     if (!this->isEnabled) {
-        assert(this->lockedLabel != NULL);
-        this->lockedLabel->Draw(15.0f);
+        this->DrawPadlock(dT);
     }
 }
-
 
 SelectLevelMenuState::LevelMenuPage::~LevelMenuPage() {
     for (size_t i = 0; i < this->levelItems.size(); i++) {
@@ -1095,10 +1137,11 @@ const float SelectLevelMenuState::BossLevelMenuItem::BOSS_ICON_GAP        = 5.0f
 const float SelectLevelMenuState::BossLevelMenuItem::NUM_TO_BOSS_NAME_GAP = 10.0f;
 const float SelectLevelMenuState::BossLevelMenuItem::BOSS_NAME_ICON_GAP   = 4.0f;
 
-SelectLevelMenuState::BossLevelMenuItem::BossLevelMenuItem(int levelNum, const GameLevel* level,
-                                                           float width, const Point2D& topLeftCorner,
+SelectLevelMenuState::BossLevelMenuItem::BossLevelMenuItem(SelectLevelMenuState* state,
+                                                           int levelNum, const GameLevel* level,
+                                                           float width, float height, const Point2D& topLeftCorner,
                                                            bool isEnabled, const Texture* bossTexture) :
-AbstractLevelMenuItem(levelNum, level, width, topLeftCorner, isEnabled), bossTexture(bossTexture) {
+AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), height(height), bossTexture(bossTexture) {
     assert(bossTexture != NULL);
     
     const Colour DISABLED_COLOUR(
@@ -1112,6 +1155,11 @@ AbstractLevelMenuItem(levelNum, level, width, topLeftCorner, isEnabled), bossTex
     this->bossLabel = new TextLabel2D(
         GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "BOSS");
     this->bossLabel->SetTopLeftCorner(bossXPos, bossYPos);
+    this->bossLabel->SetScale(std::min<float>(1.0f, (width - (2*BORDER_GAP + 2*NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetHeight())) / 
+        this->bossLabel->GetLastRasterWidth()));
+
+    this->bossIconSize = this->bossLabel->GetHeight();
+    float halfBossIconSize = bossIconSize / 2.0f;
 
     // Boss Icon Stuff
     this->bossIconDisplayList = glGenLists(1);
@@ -1119,9 +1167,6 @@ AbstractLevelMenuItem(levelNum, level, width, topLeftCorner, isEnabled), bossTex
 
     glPushAttrib(GL_CURRENT_BIT);
     glPushMatrix();
-
-    this->bossIconSize = this->bossLabel->GetHeight();
-    float halfBossIconSize = bossIconSize / 2.0f;
 
     float iconXPos = this->topLeftCorner[0] + this->width - (this->width - (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetLastRasterWidth())) / 2.0f;
     float iconYPos = this->topLeftCorner[1] - halfBossIconSize;
@@ -1153,7 +1198,9 @@ AbstractLevelMenuItem(levelNum, level, width, topLeftCorner, isEnabled), bossTex
     this->nameLabel->SetFont(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big));
     this->nameLabel->SetTopLeftCorner(bossXPos,
         this->topLeftCorner[1] - (NUM_TO_BOSS_NAME_GAP + std::max<float>(this->bossLabel->GetHeight(), this->bossIconSize)));
-    
+    this->nameLabel->SetScale(std::min<float>(1.0f, (this->width - (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth())) / this->nameLabel->GetWidth()));
+    this->nameLabel->SetFixedWidth((this->width - (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth())));
+
     if (isEnabled) {
         this->bossLabel->SetColour(Colour(1, 0, 0));
         this->bossLabel->SetDropShadow(Colour(0.0f, 0.0f, 0.0f), 0.04f);
@@ -1183,8 +1230,13 @@ void SelectLevelMenuState::BossLevelMenuItem::Draw(const Camera& camera, double 
     // Draw the boss icon
     glCallList(this->bossIconDisplayList);
 
+    // When locked, draw the padlock
     if (!this->isEnabled) {
-        assert(this->lockedLabel != NULL);
-        this->lockedLabel->Draw(15.0f);
+        this->DrawPadlock(dT);
     }
+}
+
+float SelectLevelMenuState::BossLevelMenuItem::GetHeight() const {
+    return std::max<float>(this->height, NUM_TO_BOSS_NAME_GAP + 
+        std::max<float>(this->bossLabel->GetHeight(), this->bossIconSize) + this->nameLabel->GetHeight());
 }
