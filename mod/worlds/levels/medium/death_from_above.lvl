@@ -1,21 +1,23 @@
 Death From Above
-10 26
+10 28
 S S S S S S S S S S 
+S E E E E E E E E S 
 S E L L E E L L E S 
-S E R R E E R R E S 
-S G S S E E S S G S 
-S G S S E E S S G S 
-S G S S E E S S G S 
-S G S S E E S S G S 
-S R S S R R S S R S 
+S G R R E E R R G S 
+S G R R E E R R G S 
+S G R R E E R R G S 
+S G R R E E R R G S 
+S Y R R Y Y R R Y S 
+S E E E E E E E E S 
+S E E E E E E E E S 
 S E E E E E E E E S 
 S E E L E E L E E S 
-S G Y O L L O Y G S 
-S G B O R R O B G S 
-S G Y O R R O Y G S 
-S I B O R R O B I S 
-S G Y O R R O Y G S 
-S G B O R R O B G S 
+S G Y R L L R Y G S 
+S G G R R R R G G S 
+S G Y R R R R Y G S 
+S I B R R R R B I S 
+S G Y R R R R Y G S 
+S G G R R R R G G S 
 S G G G G G G G G S 
 S E E E E E E E E S 
 S E E E E E E E E S 
@@ -28,11 +30,11 @@ S E E E E E E E E S
 S E E E E E E E E S 
 
 STARS:
-10000
-20000
-30000
-40000
-62000
+13000
+24000
+35000
+43000
+65000
 
 PaddleGrow 0
 PoisonPaddle 2
@@ -58,7 +60,7 @@ BallCam 0
 MagnetPaddle 2
 MultiBall3 2
 IceBall 0
-MineLauncherPaddle 2
+MineLauncherPaddle 0
 SlowBall 2
 GravityBall 2
 CrazyBall 2
