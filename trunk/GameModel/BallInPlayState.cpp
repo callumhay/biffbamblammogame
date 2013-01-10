@@ -462,7 +462,7 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 
 	// Calculate the time of collision and then the difference up to this point
 	// based on the velocity and then move it to that position...
-	double timeToMoveInReflectionDir = std::max<double>(0.0, dT - timeSinceCollision);
+	double timeToMoveInReflectionDir = std::max<double>(0.0, dT + timeSinceCollision);
 
 	// Make sure the ball is on the correct side of the collision line (i.e., the side that the normal is pointing in)
 	Vector2D fromLineToBall = b.GetCenterPosition2D() - collisionLine.P1();
@@ -471,18 +471,20 @@ void BallInPlayState::DoBallCollision(GameBall& b, const Vector2D& n,
 		assert(fromLineToBall != Vector2D(0, 0));
 	}
 
+    const float BALL_RADIUS  = b.GetBounds().Radius();
+    const float BALL_EPSILON = 0.001f * BALL_RADIUS;
+	// Position the ball so that it is at the location it was at when it collided...
+	b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * -b.GetVelocity());
+
 	// Make sure that the direction of the ball is against that of the normal, otherwise we adjust it to be so
 	Vector2D reflVecHat;
 	if (Vector2D::Dot(b.GetDirection(), n) >= 0) {
-		// Somehow the ball is travelling away from the normal but is hitting the line, keep its direction
-		reflVecHat = b.GetDirection();
+		// Somehow the ball is travelling away from the normal but is hitting the line...
+        
+        // Adjust the ball's velocity to be moving away (i.e., in the direction of the normal) from the line a bit more...
+        reflVecHat = Vector2D::Normalize(b.GetDirection() + 0.5f*n);
 	}
 	else {
-		// Position the ball so that it is at the location it was at when it collided...
-		const float BALL_RADIUS  = b.GetBounds().Radius();
-		const float BALL_EPSILON = 0.001f * BALL_RADIUS;
-		b.SetCenterPosition(b.GetCenterPosition2D() + (BALL_EPSILON + timeSinceCollision) * -b.GetVelocity());
-
         // Typical bounce off the normal: figure out the reflection vector
         reflVecHat = Vector2D::Normalize(Reflect(b.GetDirection(), n));
 

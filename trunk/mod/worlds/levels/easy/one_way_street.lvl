@@ -7,8 +7,8 @@ S G E G E G E G E G E G E G S
 S E G E G E G E G E G E G E S 
 S G B G B G B G B G B G B G S 
 S E G E G E G E G E G E G E S 
-S Y G Y G G T(S,lr) F(d) T(S,ll) G G Y G Y S 
-S E Y E E S T(S,ul) E T(S,ur) S E E Y E S 
+S Y G Y G G E G E G G Y G Y S 
+S E Y E E S S S S S E E Y E S 
 S G E G E F(l) E E E F(r) E G E G S 
 S E Y E E F(l) E E E F(r) E E Y E S 
 S G E G E F(l) E E E F(r) E G E G S 
