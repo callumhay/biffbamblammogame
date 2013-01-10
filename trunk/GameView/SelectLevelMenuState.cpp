@@ -1165,7 +1165,7 @@ AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), 
     this->bossIconDisplayList = glGenLists(1);
     glNewList(this->bossIconDisplayList, GL_COMPILE);
 
-    glPushAttrib(GL_CURRENT_BIT);
+    glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT);
     glPushMatrix();
 
     float iconXPos = this->topLeftCorner[0] + this->width - (this->width - (NUM_TO_NAME_GAP + this->numLabel->GetLastRasterWidth() + this->bossLabel->GetLastRasterWidth())) / 2.0f;
@@ -1179,6 +1179,9 @@ AbstractLevelMenuItem(state, levelNum, level, width, topLeftCorner, isEnabled), 
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
     else {
+        GLfloat envColour[4] = { 1.0, 1.0, 1.0, 1.0 };
+        glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColour);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
         glColor4f(DISABLED_COLOUR.R(), DISABLED_COLOUR.G(), DISABLED_COLOUR.B(), 1.0f);
     }
     glBegin(GL_QUADS);
