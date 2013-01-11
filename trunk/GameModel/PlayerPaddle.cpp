@@ -274,10 +274,14 @@ void PlayerPaddle::FireAttachedBall() {
     }
 
     // Modify the ball's release velocity to reflect the paddle's movement
-    ballReleaseDir = Vector2D::Normalize(ballReleaseDir + 0.2f * avgPaddleVelDir);
+    Vector2D newReleaseDir = Vector2D::Normalize(ballReleaseDir + 0.2f * avgPaddleVelDir);
+    ballReleaseDir.Normalize();
+    if (Vector2D::Dot(newReleaseDir, ballReleaseDir) < 0.0) {
+        newReleaseDir = Vector2D::Rotate(NumberFuncs::SignOf(Vector3D::cross(ballReleaseDir, avgPaddleVelDir)[2]) * 90, ballReleaseDir);
+    }
 
 	// Set the ball velocity (tragectory it will leave the paddle on)
-	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), ballReleaseDir);
+	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), newReleaseDir);
     
     // Add a brief impulse to the ball's velocity to give the launch a more viseral feeling
     float impulse = 0.62f * absPaddleSpd;

@@ -33,7 +33,7 @@ worldSelectTitleLbl(NULL), keyEscLabel(NULL),
 goBackToMainMenu(false), menuFBO(NULL), 
 bloomEffect(NULL), itemActivated(false), starryBG(NULL), padlockTex(NULL),
 goToLevelSelectMoveAnim(0.0f), goToLevelSelectAlphaAnim(1.0f), starTexture(NULL) {
-    this->Init(0);
+    this->Init(-1);
 }
 
 SelectWorldMenuState::SelectWorldMenuState(GameDisplay* display, const GameWorld* selectedWorld) : 
@@ -379,7 +379,13 @@ void SelectWorldMenuState::Init(int selectedIdx) {
 
         xCoord += menuItemSize + MENU_ITEM_HORIZ_GAP;
     }
-    this->selectedItemIdx = selectedIdx;
+
+    if (selectedIdx < 0) {
+        this->selectedItemIdx = furthestWorldIdx;
+    }
+    else {
+        this->selectedItemIdx = selectedIdx;
+    }
     this->worldItems[this->selectedItemIdx]->SetIsSelected(true);
 
     timeVals.clear();
@@ -516,8 +522,15 @@ void SelectWorldMenuState::WorldSelectItem::Draw(const Camera& camera, double dT
     glScalef(currSize, currSize, 1);
     
     // Draw the world image
-    this->state->greyscaleEffect.SetColourTexture(this->image);
-    this->state->greyscaleEffect.Draw(camera, GeometryMaker::GetInstance()->GetQuadDL());
+    if (this->isLocked) {
+        this->state->greyscaleEffect.SetColourTexture(this->image);
+        this->state->greyscaleEffect.Draw(camera, GeometryMaker::GetInstance()->GetQuadDL());
+    }
+    else {
+        this->image->BindTexture();
+        GeometryMaker::GetInstance()->DrawQuad();
+        this->image->UnbindTexture();
+    }
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
