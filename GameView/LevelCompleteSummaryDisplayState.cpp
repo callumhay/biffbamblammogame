@@ -47,6 +47,7 @@ DisplayState(display), waitingForKeyPress(true),
 levelNameLabel(NULL), difficultyChoicePane(NULL), difficultyChoiceHandler(NULL),
 levelCompleteLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Huge), "Level Complete!"),
 pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), "- Press Any Key to Continue -"),
+starTotalLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), ""),
 //maxBlocksTextLabel(NULL), itemsAcquiredTextLabel(NULL), levelTimeTextLabel(NULL),
 //itemsAcquiredValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), ""),
 //maxBlocksValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Medium), ""),
@@ -54,13 +55,18 @@ pressAnyKeyLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsMan
 totalScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "Score:"),
 scoreValueLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::AllPurpose, GameFontAssetsManager::Big), "0"),
 newHighScoreLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Medium), "New High Score!"),
-maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), sparkleTexture(NULL), starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
-starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEffect(1.0f, 1.5f)), gameProgressWasSaved(false), starryBG(NULL) {
+maxScoreValueWidth(0), starTexture(NULL), glowTexture(NULL), sparkleTexture(NULL), lensFlareTex(NULL), haloTex(NULL),
+starBgRotator(90.0f, ESPParticleRotateEffector::CLOCKWISE),
+starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), 
+starFgPulser(ScaleEffect(1.0f, 1.5f)), gameProgressWasSaved(false), starryBG(NULL),
+haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f), flareRotator(0, 1, ESPParticleRotateEffector::CLOCKWISE) {
     
     const Camera& camera = this->display->GetCamera();
     GameModel* gameModel = this->display->GetModel();
     assert(gameModel != NULL);
 
+    const GameLevel* completedLevel = this->display->GetModel()->GetCurrentLevel();
+    assert(completedLevel != NULL);
     
     //gameModel->GetNumStarsAwarded()
 
@@ -140,6 +146,13 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
     GameViewConstants::GetInstance()->TEXTURE_STARFIELD, Texture::Trilinear));
     assert(this->starryBG != NULL);
 
+    this->lensFlareTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_LENSFLARE, Texture::Trilinear, GL_TEXTURE_2D));
+    assert(this->lensFlareTex != NULL);
+    this->haloTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_HALO, Texture::Trilinear, GL_TEXTURE_2D));
+    assert(this->lensFlareTex != NULL);
+
 	// Pause all game play elements in the game model
 	gameModel->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
 
@@ -187,9 +200,27 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
 
     this->levelNameLabel = new TextLabel2DFixedWidth(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManager::ExplosionBoom, GameFontAssetsManager::Big), 
         display->GetCamera().GetWindowWidth() - 2*LEVEL_NAME_HORIZONTAL_PADDING, 
-        std::string("\"") + this->display->GetModel()->GetCurrentLevel()->GetName() + std::string("\""));
+        std::string("\"") + completedLevel->GetName() + std::string("\""));
     this->levelNameLabel->SetColour(Colour(0.2f, 0.6f, 1.0f));
     this->levelNameLabel->SetDropShadow(Colour(0,0,0), this->display->GetTextScalingFactor() * 0.05f);
+
+    // We count up to the new total of stars that the player has -- this will depend on whether any
+    // new stars were awarded, to do this we need to compare the previous and current star totals for the completed level...
+    this->currStarTotal = this->display->GetModel()->GetTotalStarsCollectedInGame();
+    int numPrevLevelStars = completedLevel->GetNumStarsForScore(completedLevel->GetPrevHighScore());
+    int numCurrLevelStars = completedLevel->GetNumStarsForScore(completedLevel->GetHighScore());
+    
+    this->starAddAnimationCount = numCurrLevelStars - numPrevLevelStars;
+    assert(this->starAddAnimationCount >= 0);
+
+    //this->starAddAnimationCount = 5;
+
+    this->currStarTotal -= this->starAddAnimationCount;
+
+    std::stringstream starTotalStrStream;
+    starTotalStrStream << this->currStarTotal;
+    this->starTotalLabel.SetText(starTotalStrStream.str());
+    this->starTotalLabel.SetColour(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
 
     double nextStartTime = BEGIN_ANIM_END_TIME;
     double nextEndTime   = nextStartTime + PER_SCORE_VALUE_FADE_IN_TIME;
@@ -244,6 +275,90 @@ starFgRotator(45.0f, ESPParticleRotateEffector::CLOCKWISE), starFgPulser(ScaleEf
     this->newHighScoreFade.SetInterpolantValue(0.0f);
     this->newHighScoreFade.SetLerp(START_TALLEY_TIME+totalTime, START_TALLEY_TIME+totalTime+0.5, 0.0f, 1.0f);
     this->newHighScoreFade.SetRepeat(false);
+
+    {
+        static const double POINT_SCORE_ANIM_TIME = 0.5;
+        static const double HALF_POINT_SCORE_ANIM_TIME = POINT_SCORE_ANIM_TIME / 2.0; 
+        
+        timeVals.clear();
+        timeVals.reserve(3);
+        timeVals.push_back(HALF_POINT_SCORE_ANIM_TIME);
+        timeVals.push_back(HALF_POINT_SCORE_ANIM_TIME + HALF_POINT_SCORE_ANIM_TIME/2.0);
+        timeVals.push_back(POINT_SCORE_ANIM_TIME);
+        
+        std::vector<Colour> colourVals;
+        colourVals.reserve(3);
+        colourVals.push_back(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
+        colourVals.push_back(1.5f*GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
+        colourVals.push_back(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
+
+        this->starTotalColourAnim.SetInterpolantValue(GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR);
+        this->starTotalColourAnim.SetLerp(timeVals, colourVals);
+        this->starTotalColourAnim.SetRepeat(false);
+
+        std::vector<float> scaleVals;
+        scaleVals.reserve(3);
+        scaleVals.push_back(1.0f);
+        scaleVals.push_back(2.0f);
+        scaleVals.push_back(1.0f);
+
+        this->starTotalScaleAnim.SetInterpolantValue(1.0f);
+        this->starTotalScaleAnim.SetLerp(timeVals, scaleVals);
+        this->starTotalScaleAnim.SetRepeat(false);
+
+        timeVals.clear();
+        timeVals.reserve(4);
+        timeVals.push_back(0.0);
+        timeVals.push_back(POINT_SCORE_ANIM_TIME/10.0);
+        timeVals.push_back(POINT_SCORE_ANIM_TIME - POINT_SCORE_ANIM_TIME/10.0);
+        timeVals.push_back(POINT_SCORE_ANIM_TIME);
+
+        std::vector<float> alphaVals;
+        alphaVals.reserve(4);
+        alphaVals.push_back(0.0f);
+        alphaVals.push_back(1.0f);
+        alphaVals.push_back(1.0f);
+        alphaVals.push_back(0.0f);   
+        
+        for (int i = 0; i < this->starAddAnimationCount; i++) {
+            AnimationMultiLerp<float>* alphaAnim = new AnimationMultiLerp<float>(0.0f);
+            alphaAnim->SetInterpolantValue(0.0f);
+            alphaAnim->SetLerp(timeVals, alphaVals);
+            alphaAnim->SetRepeat(false);
+
+            this->starAddAlphaAnims.push_back(alphaAnim);
+
+            AnimationLerp<float>* moveAnim = new AnimationLerp<float>(0.0f);
+            moveAnim->SetInterpolantValue(0.0f);
+            moveAnim->SetLerp(timeVals.front(), timeVals.back(), 2.75f * this->starTotalLabel.GetHeight(), 0.0f);
+            moveAnim->SetRepeat(false);
+
+            this->starAddMoveAnims.push_back(moveAnim);
+
+            for (int j = 0; j < static_cast<int>(timeVals.size()); j++) {
+                timeVals[j] += POINT_SCORE_ANIM_TIME;
+            }
+        }
+
+        this->flareEmitter.SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+	    this->flareEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	    this->flareEmitter.SetParticleLife(ESPInterval(POINT_SCORE_ANIM_TIME*0.9f));
+	    this->flareEmitter.SetParticleSize(ESPInterval(2.0f * this->starTotalLabel.GetHeight()));
+	    this->flareEmitter.SetParticleAlignment(ESP::ScreenAligned);
+        this->flareEmitter.AddEffector(&this->flareRotator);
+        this->flareEmitter.SetParticles(1, this->lensFlareTex);
+        this->flareEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
+
+        this->haloEmitter.SetSpawnDelta(ESPEmitter::ONLY_SPAWN_ONCE);
+	    this->haloEmitter.SetInitialSpd(ESPInterval(0.0f, 0.0f));
+	    this->haloEmitter.SetParticleLife(ESPInterval(POINT_SCORE_ANIM_TIME*0.9f));
+        this->haloEmitter.SetParticleSize(ESPInterval(1.5f * this->starTotalLabel.GetHeight()));
+	    this->haloEmitter.SetParticleAlignment(ESP::ScreenAligned);
+        this->haloEmitter.AddEffector(&this->haloGrower);
+        this->haloEmitter.AddEffector(&this->haloFader);
+        this->haloEmitter.SetParticles(1, this->haloTex);
+        this->haloEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
+    }
 
     // Grab any required texture resources
     this->starTexture = ResourceManager::GetInstance()->GetImgTextureResource(GameViewConstants::GetInstance()->TEXTURE_STAR, 
@@ -377,6 +492,10 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseTextureResource(this->starryBG);
     assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->haloTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->lensFlareTex);
+    assert(success);
     UNUSED_VARIABLE(success);
 
     for (size_t i = 0; i < this->starAnimations.size(); i++) {
@@ -400,6 +519,20 @@ LevelCompleteSummaryDisplayState::~LevelCompleteSummaryDisplayState() {
         delete this->difficultyChoicePane;
         this->difficultyChoicePane = NULL;
     }
+
+    for (std::list<AnimationMultiLerp<float>*>::iterator iter = this->starAddAlphaAnims.begin();
+        iter != this->starAddAlphaAnims.end(); ++iter) {
+    
+        delete *iter;
+    }
+    this->starAddAlphaAnims.clear();
+
+    for (std::list<AnimationLerp<float>*>::iterator iter = this->starAddMoveAnims.begin();
+        iter != this->starAddMoveAnims.end(); ++iter) {
+
+        delete *iter;
+    }
+    this->starAddMoveAnims.clear();
 }
 
 void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
@@ -449,7 +582,7 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
             //this->numItemsFadeIn.Tick(dT);
             //this->totalTimeFadeIn.Tick(dT);
             
-            if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
+            if (this->starAddAnimationCount == 0) {
                 // Animate and draw the "Press any key..." label
                 this->footerColourAnimation.Tick(dT);
                 this->DrawPressAnyKeyTextFooter(camera.GetWindowWidth());
@@ -497,6 +630,8 @@ void LevelCompleteSummaryDisplayState::RenderFrame(double dT) {
             std::max<size_t>(this->itemsAcquiredTextLabel->GetHeight(), this->itemsAcquiredValueLabel.GetHeight()));
         this->DrawTotalTimeLabel(yPos, camera.GetWindowWidth());
         */
+
+        this->DrawStarTotalLabel(dT, camera.GetWindowWidth());
 
         Camera::PopWindowCoords();
     }
@@ -698,10 +833,131 @@ void LevelCompleteSummaryDisplayState::DrawPressAnyKeyTextFooter(float screenWid
 	this->pressAnyKeyLabel.Draw();
 }
 
+void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float screenWidth) {
+
+    const float STAR_ICON_SIZE = 1.75f * this->starTotalLabel.GetHeight();
+
+    static const float BORDER_GAP     = 15.0f;
+    static const float STAR_LABEL_GAP = 5.0f;
+
+    float starXPos  = screenWidth - (BORDER_GAP + STAR_ICON_SIZE/2.0f);
+    float starYPos  = FOOTER_VERTICAL_PADDING + STAR_ICON_SIZE/2.0f;
+
+    float labelXPos = screenWidth - (BORDER_GAP + STAR_ICON_SIZE + STAR_LABEL_GAP + this->starTotalLabel.GetLastRasterWidth());
+    float labelYPos = FOOTER_VERTICAL_PADDING + STAR_ICON_SIZE - (STAR_ICON_SIZE - this->starTotalLabel.GetHeight()) / 2.0f;
+
+    // Draw the total label...
+
+    this->starTotalLabel.SetTopLeftCorner(labelXPos, labelYPos);
+
+    float starScale = 1.0f;
+    const Colour& starColour = GameViewConstants::GetInstance()->ACTIVE_POINT_STAR_COLOUR;
+    Colour labelColour = starColour;
+
+    if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
+        flareEmitter.SetEmitPosition(Point3D(starXPos + STAR_ICON_SIZE*0.15f, starYPos + STAR_ICON_SIZE*0.15f, 0.0f));
+        haloEmitter.SetEmitPosition(Point3D(starXPos, starYPos, 0.0f));
+
+        this->flareEmitter.Tick(dT);
+        this->haloEmitter.Tick(dT);
+
+        this->starTotalColourAnim.Tick(dT);
+        this->starTotalScaleAnim.Tick(dT);
+
+        labelColour = this->starTotalColourAnim.GetInterpolantValue();
+        starScale   = this->starTotalScaleAnim.GetInterpolantValue();
+
+        std::stringstream starTotalStrStream;
+        starTotalStrStream << this->currStarTotal;
+        this->starTotalLabel.SetText(starTotalStrStream.str());
+
+        this->haloEmitter.Draw(this->display->GetCamera());
+    }
+    
+    this->starTotalLabel.SetColour(Colour(1,1,1));
+    this->starTotalLabel.Draw();
+
+    
+    // Draw the star...
+    glPushAttrib(GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    this->starTexture->BindTexture();
+    glColor4f(labelColour.R(), labelColour.G(), labelColour.B(), 1.0f);
+   
+    glPushMatrix();
+    glTranslatef(starXPos, starYPos, 0.0f);
+    glScalef(starScale*STAR_ICON_SIZE, starScale*STAR_ICON_SIZE, 1.0f);
+    GeometryMaker::GetInstance()->DrawQuad();
+    glPopMatrix();
+
+    // Draw the animated addition stars...
+    if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
+        this->flareEmitter.Draw(this->display->GetCamera());
+
+        assert(this->starAddAlphaAnims.size() == this->starAddMoveAnims.size());
+        
+        std::list<AnimationMultiLerp<float>*>::iterator alphaAnimIter = this->starAddAlphaAnims.begin();
+        std::list<AnimationLerp<float>*>::iterator moveAnimIter       = this->starAddMoveAnims.begin();
+
+        for (; alphaAnimIter != this->starAddAlphaAnims.end() && moveAnimIter != this->starAddMoveAnims.end();) {
+            AnimationMultiLerp<float>* alphaAnim = *alphaAnimIter;
+            AnimationLerp<float>* moveAnim       = *moveAnimIter;
+
+            bool isFinished = alphaAnim->Tick(dT) || moveAnim->Tick(dT);
+
+            float alphaValue = alphaAnim->GetInterpolantValue();
+            float moveValue  = moveAnim->GetInterpolantValue();
+
+            if (alphaValue > 0.0f) {
+                
+                this->starTexture->BindTexture();
+                glColor4f(starColour.R(), starColour.G(), starColour.B(), alphaValue);
+                glPushMatrix();
+                glTranslatef(starXPos, starYPos + moveValue, 0.0f);
+                glScalef(STAR_ICON_SIZE, STAR_ICON_SIZE, 1.0f);
+                GeometryMaker::GetInstance()->DrawQuad();
+                glPopMatrix();
+            }
+
+            if (isFinished) {
+                alphaAnimIter = this->starAddAlphaAnims.erase(alphaAnimIter);
+                moveAnimIter  = this->starAddMoveAnims.erase(moveAnimIter);
+                
+                this->starAddAnimationCount--;
+                
+                delete alphaAnim;
+                alphaAnim = NULL;
+                delete moveAnim;
+                moveAnim = NULL;
+
+                this->currStarTotal++;
+                if (this->starAddAnimationCount > 0) {
+                    this->starTotalScaleAnim.ResetToStart();
+                    this->starTotalColourAnim.ResetToStart();
+                }
+                this->haloEmitter.Reset();
+                this->flareEmitter.Reset();
+            }
+            else {
+                ++alphaAnimIter;
+                ++moveAnimIter;
+            }
+        }
+    }
+
+    glPopAttrib();
+
+}
+
 void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
 	if (this->waitingForKeyPress) {
 
-        if (this->scoreValueAnimation.GetInterpolantValue() >= this->scoreValueAnimation.GetTargetValue()) {
+        if (this->starAddAnimationCount == 0) {
             // Start the fade out animation - the user wants to start playing!
 		    this->fadeAnimation.SetLerp(LevelCompleteSummaryDisplayState::FADE_OUT_TIME, 1.0f);
             waitingForKeyPress = false;
@@ -728,6 +984,23 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
             this->newHighScoreFade.SetInterpolantValue(this->newHighScoreFade.GetTargetValue());
             this->newHighScoreFade.ClearLerp();
 
+            std::list<AnimationMultiLerp<float>*>::iterator alphaAnimIter = this->starAddAlphaAnims.begin();
+            std::list<AnimationLerp<float>*>::iterator moveAnimIter       = this->starAddMoveAnims.begin();
+            for (; alphaAnimIter != this->starAddAlphaAnims.end() && moveAnimIter != this->starAddMoveAnims.end(); ++alphaAnimIter, ++moveAnimIter) {
+                AnimationMultiLerp<float>* alphaAnim = *alphaAnimIter;
+                AnimationLerp<float>* moveAnim = *moveAnimIter;
+                delete alphaAnim;
+                delete moveAnim;
+            }
+            this->starAddAlphaAnims.clear();
+            this->starAddMoveAnims.clear();
+
+            this->starTotalColourAnim.ClearLerp();
+            this->starTotalScaleAnim.ClearLerp();
+            
+            this->currStarTotal += this->starAddAnimationCount;
+            this->starAddAnimationCount = 0;
+            
             /*
             this->maxBlocksFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
             this->maxBlocksFadeIn.ClearLerp();
