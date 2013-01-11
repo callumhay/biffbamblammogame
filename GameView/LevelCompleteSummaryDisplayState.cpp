@@ -41,6 +41,7 @@ const double LevelCompleteSummaryDisplayState::PER_SCORE_VALUE_FADE_IN_TIME     
 const double LevelCompleteSummaryDisplayState::SHOW_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
 const double LevelCompleteSummaryDisplayState::HIDE_DIFFICULTY_CHOICE_PANE_TIME = 0.75;
 
+const double LevelCompleteSummaryDisplayState::POINT_SCORE_ANIM_TIME = 0.5;
 
 LevelCompleteSummaryDisplayState::LevelCompleteSummaryDisplayState(GameDisplay* display) :
 DisplayState(display), waitingForKeyPress(true),
@@ -277,7 +278,6 @@ haloGrower(1.0f, 3.2f), haloFader(1.0f, 0.0f), flareRotator(0, 1, ESPParticleRot
     this->newHighScoreFade.SetRepeat(false);
 
     {
-        static const double POINT_SCORE_ANIM_TIME = 0.5;
         static const double HALF_POINT_SCORE_ANIM_TIME = POINT_SCORE_ANIM_TIME / 2.0; 
         
         timeVals.clear();
@@ -1001,6 +1001,9 @@ void LevelCompleteSummaryDisplayState::AnyKeyWasPressed() {
             this->currStarTotal += this->starAddAnimationCount;
             this->starAddAnimationCount = 0;
             
+            this->flareEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
+            this->haloEmitter.SimulateTicking(POINT_SCORE_ANIM_TIME);
+
             /*
             this->maxBlocksFadeIn.SetInterpolantValue(this->maxBlocksFadeIn.GetTargetValue());
             this->maxBlocksFadeIn.ClearLerp();

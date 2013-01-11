@@ -117,6 +117,8 @@ void GameSoundAssets::UnloadSoundPallet(GameSoundAssets::SoundPallet pallet) {
 		case GameSoundAssets::MainMenuSoundPallet:
 			this->UnloadMainMenuSounds();
 			break;
+        case GameSoundAssets::ClassicalSoundPallet:
+            break;
 		case GameSoundAssets::DecoWorldSoundPallet:
 			this->UnloadDecoWorldSounds();
 			break;

@@ -58,6 +58,8 @@ private:
     static const double SHOW_DIFFICULTY_CHOICE_PANE_TIME;
     static const double HIDE_DIFFICULTY_CHOICE_PANE_TIME;
 
+    static const double POINT_SCORE_ANIM_TIME;
+
     bool gameProgressWasSaved;
 
     bool waitingForKeyPress;

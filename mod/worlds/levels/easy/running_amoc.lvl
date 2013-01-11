@@ -1,0 +1,68 @@
+Running Amoc
+13 27
+S S S S S S S S S S S S S 
+S G G G G G E G G G G G S 
+S G Y G Y G E G Y G Y G S 
+S G G Y G G E G G Y G G S 
+S G Y G Y G E G Y G Y G S 
+S G G Y G G E G G Y G G S 
+S G Y G Y G E G Y G Y G S 
+S G G Y G G E G G Y G G S 
+S G Y G Y G E G Y G Y G S 
+S G G Y G G E G G Y G G S 
+S G Y G Y G E G Y G Y G S 
+S G G G G G E G G G G G S 
+S E E E E E D(LaserBulletPaddle,LaserBeamPaddle,RocketPaddle,UberBall) E E E E E S 
+S R R R R R E R R R R R S 
+S G G G G E E E G G G G S 
+S Y Y Y E E E E E Y Y Y S 
+S O O E E E E E E E O O S 
+S R E E E E E E E E E R S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+S E E E E E E E E E E E S 
+
+STARS:
+16000
+20000
+23000
+27000
+30000
+
+PaddleGrow 0
+PoisonPaddle 0
+BallSafetyNet 0
+Blackout 1
+UberBall 0
+BallGrow 0
+StickyPaddle 0
+ShieldPaddle 0
+LaserBulletPaddle 0
+PaddleShrink 1
+InvisiPaddle 0
+InvisiBall 0
+LaserBeamPaddle 0
+OmniLaserBall 0
+FireBall 0
+RocketPaddle 0
+GhostBall 0
+BallShrink 1
+UpsideDown 1
+MultiBall5 0
+BallCam 0
+MagnetPaddle 0
+MultiBall3 0
+IceBall 0
+MineLauncherPaddle 0
+SlowBall 0
+GravityBall 0
+CrazyBall 0
+Random 0
+FastBall 1
+PaddleCam 0

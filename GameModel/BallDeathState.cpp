@@ -94,6 +94,8 @@ void BallDeathState::Tick(double seconds) {
 				bool stateChanged = false;
 				this->gameModel->BallDied(this->lastBallToBeAlive, stateChanged);
 				assert(stateChanged);
+                // Place the ball off camera for the time being
+                this->lastBallToBeAlive->SetCenterPosition(Point2D(99999,99999));
 			}
 			return;
 		

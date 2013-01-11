@@ -6,7 +6,11 @@ resources/textures/deco_world_select_256x256.jpg
 
 
 # Item drop block intro levels
+resources/worlds/levels/easy/running_amoc.lvl
 resources/worlds/levels/medium/a_sticky_situation.lvl
+#resources/worlds/levels/medium/a_change_of_view.lvl
+
+
 # MORE GOES HERE
 
 
@@ -26,8 +30,6 @@ resources/worlds/levels/easy/upward_not_forward_and_always_twirling.lvl
 
 # Prism block intro levels
 resources/worlds/levels/easy/intro_to_prisms.lvl
-resources/worlds/levels/medium/dividing_lines.lvl
-
 
 
 # Tesla block intro levels
