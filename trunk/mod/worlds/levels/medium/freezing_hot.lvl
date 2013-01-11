@@ -11,13 +11,13 @@ S Y E T(R,lr) R O Y O R T(R,ll) E Y S
 S E E R O O Y O O R E E S 
 S Y E R O Y Y Y O R E Y S 
 S E E R O Y Y Y O R E E S 
-S Y E R O Y Y Y O R E Y S 
+S G E R O Y Y Y O R E G S 
 S E E R O Y Y Y O R E E S 
-S Y E T(R,ur) R Y Y Y R T(R,ul) E Y S 
+S G E T(R,ur) R Y Y Y R T(R,ul) E G S 
 S E E E R O Y O R E E E S 
 S E E E R O Y O R E E E S 
 S E E E E R R R E E E E S 
-S E E E E E R E E E E E S 
+S E G E E E R E E E G E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
 S E E E E E E E E E E E S 
@@ -39,8 +39,8 @@ PaddleGrow 0
 PoisonPaddle 0
 BallSafetyNet 0
 Blackout 0
-UberBall 0
 BallGrow 0
+UberBall 0
 StickyPaddle 0
 ShieldPaddle 0
 LaserBulletPaddle 0
@@ -59,6 +59,7 @@ BallCam 0
 MagnetPaddle 0
 MultiBall3 0
 IceBall 2
+MineLauncherPaddle 2
 SlowBall 0
 GravityBall 0
 CrazyBall 0

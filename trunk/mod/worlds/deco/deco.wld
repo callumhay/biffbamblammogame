@@ -8,10 +8,8 @@ resources/textures/deco_world_select_256x256.jpg
 # Item drop block intro levels
 resources/worlds/levels/easy/running_amoc.lvl
 resources/worlds/levels/medium/a_sticky_situation.lvl
-#resources/worlds/levels/medium/a_change_of_view.lvl
+resources/worlds/levels/medium/a_change_of_view.lvl
 
-
-# MORE GOES HERE
 
 
 # Switch block intro levels

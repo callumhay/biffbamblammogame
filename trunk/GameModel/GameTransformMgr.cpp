@@ -1012,6 +1012,7 @@ bool GameTransformMgr::TickBulletTimeCamAnimation(double dT, GameModel& gameMode
                 this->bulletTimeCamAnimation.GetFinalInterpolationValue().GetRotation()));
         }
     }
+    /*
     else if (bulletTimeAnim.type != GameTransformMgr::FromBulletTimeCamAnimation &&
              this->bulletTimeCamAnimation.GetHasInterpolationSet()) {
 
@@ -1019,6 +1020,7 @@ bool GameTransformMgr::TickBulletTimeCamAnimation(double dT, GameModel& gameMode
         this->bulletTimeCamAnimation.SetInterpolantValue(this->bulletTimeCamAnimation.GetFinalInterpolationValue());
         this->SetBulletTimeCamera(false);
     }
+    */
 
     // We need to multiply the dT by the inverse time dialation since we're currently in bullet time
 	return this->bulletTimeCamAnimation.Tick(invTimeDialation * dT);

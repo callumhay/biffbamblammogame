@@ -844,7 +844,7 @@ void LevelCompleteSummaryDisplayState::DrawStarTotalLabel(double dT, float scree
     float starYPos  = FOOTER_VERTICAL_PADDING + STAR_ICON_SIZE/2.0f;
 
     float labelXPos = screenWidth - (BORDER_GAP + STAR_ICON_SIZE + STAR_LABEL_GAP + this->starTotalLabel.GetLastRasterWidth());
-    float labelYPos = FOOTER_VERTICAL_PADDING + STAR_ICON_SIZE - (STAR_ICON_SIZE - this->starTotalLabel.GetHeight()) / 2.0f;
+    float labelYPos = FOOTER_VERTICAL_PADDING + this->starTotalLabel.GetHeight();
 
     // Draw the total label...
 
