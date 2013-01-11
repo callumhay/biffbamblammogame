@@ -234,7 +234,7 @@ void GameModel::ClearGameState() {
 
 void GameModel::ClearAllGameProgress() {
     // Delete all of the loaded worlds...
-	for (size_t i = 0; i < this->worlds.size(); i++) {
+	for (int i = 0; i < static_cast<int>(this->worlds.size()); i++) {
 		delete this->worlds[i];
 		this->worlds[i] = NULL;
 	}
@@ -242,6 +242,15 @@ void GameModel::ClearAllGameProgress() {
 
     // Reload all of the worlds...
     this->LoadWorldsFromFile();
+}
+
+int GameModel::GetTotalStarsCollectedInGame() const {
+    int total = 0;
+    for (int i = 0; i < static_cast<int>(this->worlds.size()); i++) {
+        const GameWorld* world = this->worlds[i];
+        total += world->GetNumStarsCollectedInWorld();
+    }
+    return total;
 }
 
 void GameModel::SetCurrentWorldAndLevel(int worldIdx, int levelIdx, bool sendNewWorldEvent) {

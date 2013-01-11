@@ -271,6 +271,8 @@ public:
 		return this->GetCurrentWorld()->GetName();
 	}
 	
+    int GetTotalStarsCollectedInGame() const;
+
 	Vector2D GetLevelUnitDimensions() const {
 		GameLevel* currLevel = this->GetCurrentWorld()->GetCurrentLevel();
 		assert(currLevel != NULL);

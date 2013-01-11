@@ -133,6 +133,7 @@ public:
     const char* TEXTURE_FUTURISM_TRIANGLE;
     const char* TEXTURE_BOSS_ICON;
     const char* TEXTURE_PADLOCK;
+    const char* TEXTURE_PLUS;
 
     const char* TEXTURE_MULTIPLIER_BANG;
     const char* TEXTURE_MULTIPLIER_GAGE_OUTLINE;

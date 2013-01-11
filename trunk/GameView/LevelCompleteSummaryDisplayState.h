@@ -17,9 +17,8 @@
 
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/TextLabel.h"
-#include "../ESPEngine/ESPParticleRotateEffector.h"
-#include "../ESPEngine/ESPParticleScaleEffector.h"
-#include "../ESPEngine/ESPPointEmitter.h"
+
+#include "../ESPEngine/ESP.h"
 
 class LevelCompleteSummaryDisplayState : public DisplayState {
 public:
@@ -75,11 +74,29 @@ private:
     std::vector<AnimationLerp<float>* > starAnimations;
     AnimationLerp<float> totalScoreFlyInAnimation;
     AnimationLerp<float> totalScoreFadeInAnimation;
+    
+    int starAddAnimationCount;
+    int currStarTotal;
+    std::list<AnimationMultiLerp<float>*> starAddAlphaAnims;
+    std::list<AnimationLerp<float>*> starAddMoveAnims;
+    AnimationMultiLerp<Colour> starTotalColourAnim;
+    AnimationMultiLerp<float> starTotalScaleAnim;
+
+    //ESPPointEmitter sparkEmitter;
+    ESPPointEmitter flareEmitter;
+    ESPPointEmitter haloEmitter;
+
+    ESPParticleRotateEffector flareRotator;
+    ESPParticleScaleEffector haloGrower;
+    ESPParticleColourEffector haloFader;
+
 
     TextLabel2D pressAnyKeyLabel;
     TextLabel2D levelCompleteLabel;
     TextLabel2D newHighScoreLabel;
     TextLabel2DFixedWidth* levelNameLabel;
+
+    TextLabel2D starTotalLabel;
 
     // Statistics labels
     //TextLabel2DFixedWidth* maxBlocksTextLabel;
@@ -98,9 +115,15 @@ private:
     Texture* starTexture;
     Texture* glowTexture;
     Texture* sparkleTexture;
+
+    Texture2D* lensFlareTex;
+    Texture2D* haloTex;
+
     Texture2D* starryBG;
+
     std::vector<ESPPointEmitter*> starBgEmitters;
     std::vector<ESPPointEmitter*> starFgEmitters;
+
     ESPParticleRotateEffector starBgRotator;
     ESPParticleRotateEffector starFgRotator;
     ESPParticleScaleEffector starFgPulser;
@@ -123,6 +146,7 @@ private:
     //void DrawTotalTimeLabel(float currYPos, float screenWidth);
     void DrawTotalScoreLabel(float currYPos, float screenWidth, float screenHeight);
     void DrawPressAnyKeyTextFooter(float screenWidth);
+    void DrawStarTotalLabel(double dT, float screenWidth);
 
     void AnyKeyWasPressed();
         

@@ -121,6 +121,12 @@ public:
         this->y1 = *interpolant;
     }
 
+    void ScalePlaySpeed(float scale) {
+        assert(scale > 0);
+        this->x1 *= scale;
+        this->x  *= scale;
+    }
+
 	/**
 	 * Tick the animation (i.e., animate it using linear interpolation).
 	 * Returns: true if the animation is complete, false otherwise.
@@ -237,6 +243,13 @@ public:
         return !this->interpolationPts.empty();
     }
     
+    void ScalePlaySpeed(float scale) {
+        assert(scale > 0);
+        for (int i = 0; i < static_cast<int>(this->timePts.size()); i++) {
+            this->timePts[i] *= scale;
+        }
+        this->x *= scale;
+    }
 
 	void SetInitialInterpolationValue(const T& value) {
 		assert(this->interpolationPts.size() > 0);
