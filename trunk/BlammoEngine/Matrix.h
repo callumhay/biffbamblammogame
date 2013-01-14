@@ -102,9 +102,18 @@ public:
     return Vector4D(v_[4*col], v_[1+4*col], v_[2+4*col], v_[3+4*col]);
   }
 
-	Point3D getTranslation() const {
+	Point3D getTranslationPt3D() const {
 		return Point3D(v_[12], v_[13], v_[14]);
 	}
+    Point2D getTranslationPt2D() const {
+        return Point2D(v_[12], v_[13]);
+    }
+    Vector3D getTranslationVec3D() const {
+        return Vector3D(v_[12], v_[13], v_[14]);
+    }
+    Vector2D getTranslationVec2D() const {
+        return Vector2D(v_[12], v_[13]);
+    }
 	void setTranslation(const Point3D& t) {
 		v_[12] = t[0];
 		v_[13] = t[1]; 

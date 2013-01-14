@@ -30,6 +30,12 @@ public:
 
     static Boss* BuildStyleBoss(const GameWorld::WorldStyle& style);
 
+    //Collision::AABB2D GenerateWorldAABB() const;
+
+    float GetAliveHeight() const;
+    float GetAliveWidth() const;
+    
+
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
@@ -56,10 +62,13 @@ protected:
     BossAIState* nextAIState;
 
     BossCompositeBodyPart* root;
+    BossCompositeBodyPart* deadPartsRoot;
+    BossCompositeBodyPart* alivePartsRoot;
 
     std::vector<AbstractBossBodyPart*> bodyParts;
 
     Boss();
+
     void SetNextAIState(BossAIState* nextState);
 
     virtual void Init() = 0;
@@ -70,6 +79,18 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(Boss);
 };
+
+inline float Boss::GetAliveHeight() const {
+    return this->alivePartsRoot->GenerateLocalAABB().GetHeight();
+}
+
+inline float Boss::GetAliveWidth() const {
+    return this->alivePartsRoot->GenerateLocalAABB().GetWidth();
+}
+
+//inline Collision::AABB2D Boss::GenerateWorldAABB() const {
+//    return this->alivePartsRoot->GenerateWorldAABB();
+//}
 
 inline void Boss::Translate(const Vector3D& t) {
     this->root->Translate(t);

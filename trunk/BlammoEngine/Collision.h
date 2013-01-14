@@ -28,6 +28,11 @@ namespace Collision {
         AABB2D(const Point2D &min, const Point2D &max): minCoord(min), maxCoord(max) {}
 		~AABB2D() {}
 
+        bool IsEmpty() const {
+            return this->minCoord[0] == this->maxCoord[0] &&
+                this->minCoord[1] == this->maxCoord[1];
+        }
+
 		const Point2D& GetMin() const {
 			return this->minCoord;
 		}
@@ -66,6 +71,11 @@ namespace Collision {
 				maxCoord[1] = pt[1];
 			}
 		}
+
+        void AddAABB(const AABB2D& aabb) {
+            this->AddPoint(aabb.GetMax());
+            this->AddPoint(aabb.GetMin());
+        }
 
 	};
 

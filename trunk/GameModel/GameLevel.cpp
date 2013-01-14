@@ -119,7 +119,7 @@ levelAlmostCompleteSignaled(false), boss(boss) {
     this->InitPieces(pieces);
     
     // Place the boss at the center of the level...
-    this->boss->Translate(Vector3D(this->GetLevelUnitWidth()/2.0f, this->GetLevelUnitHeight()/2.0f, 0.0f));
+    this->boss->Translate(Vector3D(this->GetLevelUnitWidth() / 2.0f, this->GetLevelUnitHeight() / 2.0f, 0.0f));
 
     // Set all of the star reward milestone scores to zero, they aren't used in boss fight levels
     for (int i = 0; i < GameLevel::MAX_STARS_PER_LEVEL; i++) {
@@ -1377,6 +1377,52 @@ void GameLevel::ActivateTriggerableLevelPiece(const LevelPiece::TriggerID& trigg
     LevelPiece* triggerPiece = findIter->second;
     assert(triggerPiece != NULL);
     triggerPiece->Triggered(gameModel);
+}
+
+/**
+ * Collides the given boss AABB with this level's simplified boundaries. If there's
+ * a collision the function returns true and the correction vector required to move the boss
+ * so that it is on the boundary (without colliding) of the level.
+ */
+bool GameLevel::CollideBossWithLevel(const Collision::AABB2D& bossAABB, Vector2D& correctionVec) const {
+    
+    // Get the simplified boundaries of the level
+    float minXBound = this->GetPaddleMinBound();
+    float maxXBound = this->GetPaddleMaxBound();
+    float minYBound = LevelPiece::PIECE_HEIGHT;
+    float maxYBound = this->GetLevelUnitHeight() - LevelPiece::PIECE_HEIGHT;
+
+    Collision::LineSeg2D leftBoundary(Point2D(minXBound, minYBound), Point2D(minXBound, maxYBound));
+    Collision::LineSeg2D rightBoundary(Point2D(maxXBound, minYBound), Point2D(maxXBound, maxYBound));
+    Collision::LineSeg2D bottomBoundary(Point2D(minXBound, minYBound), Point2D(maxXBound, minYBound));
+    Collision::LineSeg2D topBoundary(Point2D(minXBound, maxYBound), Point2D(maxXBound, maxYBound));
+
+    correctionVec[0] = 0.0f;
+    correctionVec[1] = 0.0f;
+
+    // Check each of the simplified level boundaries against the bosses' AABB
+    bool didCollide = false;
+    Point2D collisionPt;
+    
+    if (Collision::GetCollisionPoint(bossAABB, leftBoundary, collisionPt)) {
+        correctionVec[0] += collisionPt[0] - bossAABB.GetMin()[0] - EPSILON;
+        didCollide = true;
+    }
+    else if (Collision::GetCollisionPoint(bossAABB, rightBoundary, collisionPt)) {
+        correctionVec[0] += collisionPt[0] - bossAABB.GetMax()[0] - EPSILON;
+        didCollide = true;
+    }
+
+    if (Collision::GetCollisionPoint(bossAABB, bottomBoundary, collisionPt)) {
+        correctionVec[1] += collisionPt[1] - bossAABB.GetMin()[1] - EPSILON;
+        didCollide = true;
+    }
+    else if (Collision::GetCollisionPoint(bossAABB, topBoundary, collisionPt)) {
+        correctionVec[1] += collisionPt[1] - bossAABB.GetMax()[1] - EPSILON;
+        didCollide = true;
+    }
+
+    return didCollide;
 }
 
 // Tick any active AI entities in this level

@@ -644,7 +644,7 @@ void LevelMesh::CreateEmitterEffectsForPiece(const LevelPiece* piece, const Vect
 	switch (piece->GetType()) {
 		case LevelPiece::Portal:
 			// Portal block has special emitters that suck/spit particles and stuff
-			pieceEmitters = this->portalBlock->CreatePortalBlockEmitters(piece->GetColour(), fullTransform.getTranslation());
+			pieceEmitters = this->portalBlock->CreatePortalBlockEmitters(piece->GetColour(), fullTransform.getTranslationPt3D());
 			break;
 		default:
 			return;

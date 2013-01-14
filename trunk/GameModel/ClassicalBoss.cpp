@@ -18,7 +18,24 @@
 
 using namespace classicalbossai;
 
-ClassicalBoss::ClassicalBoss() : Boss(), deadPartsRoot(NULL), alivePartsRoot(NULL),
+const float ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER = 10.246f;
+const float ClassicalBoss::ARM_WIDTH = 2.4f;
+const float ClassicalBoss::HALF_ARM_WIDTH = ARM_WIDTH / 2.0f;
+const float ClassicalBoss::ARM_HEIGHT = 9.66f;
+
+const float ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED     = PlayerPaddle::DEFAULT_MAX_SPEED / 1.75f;
+const float ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION  = PlayerPaddle::DEFAULT_ACCELERATION / 3.0f;
+
+const float ClassicalBoss::BODY_HEAD_MAX_SPEED          = PlayerPaddle::DEFAULT_MAX_SPEED + 5.0f;
+const float ClassicalBoss::BODY_HEAD_ACCELERATION       = PlayerPaddle::DEFAULT_ACCELERATION;
+
+const float ClassicalBoss::PEDIMENT_MAX_SPEED    = PlayerPaddle::DEFAULT_MAX_SPEED;
+const float ClassicalBoss::PEDIMENT_ACCELERATION = PlayerPaddle::DEFAULT_ACCELERATION;
+
+const float ClassicalBoss::EYE_MAX_SPEED    = PlayerPaddle::DEFAULT_MAX_SPEED + 10.0f;
+const float ClassicalBoss::EYE_ACCELERATION = PlayerPaddle::DEFAULT_ACCELERATION + 15.0f;
+
+ClassicalBoss::ClassicalBoss() : Boss(),
 leftArmIdx(0), leftArmSquareIdx(0), rightArmIdx(0), rightArmSquareIdx(0)
 {
 }
@@ -251,18 +268,17 @@ void ClassicalBoss::Init() {
             }
 
             // leftArm
-            this->BuildArm(Vector3D(-10.246f, 0.0f, 0.0f), this->leftArmIdx, this->leftRestOfArmIdx, this->leftArmSquareIdx);
+            this->BuildArm(Vector3D(-ARM_X_TRANSLATION_FROM_CENTER, 0.0f, 0.0f), this->leftArmIdx, this->leftRestOfArmIdx, this->leftArmSquareIdx);
 
             // rightArm
-            this->BuildArm(Vector3D(10.246f, 0.0f, 0.0f), this->rightArmIdx, this->rightRestOfArmIdx, this->rightArmSquareIdx);
+            this->BuildArm(Vector3D(ARM_X_TRANSLATION_FROM_CENTER, 0.0f, 0.0f), this->rightArmIdx, this->rightRestOfArmIdx, this->rightArmSquareIdx);
 
         } // end alivePartsRoot
     } // end root
 
-    // Transform the boss into level space...
-
-
     this->SetNextAIState(new ArmsBodyHeadAI(this));
+
+    // N.B., Bosses are transformed into level space by the GameLevel when they are loaded from file.
 }
 
 void ClassicalBoss::BuildArm(const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx) {
@@ -351,8 +367,6 @@ void ClassicalBoss::BuildArm(const Vector3D& armTranslation, size_t& armIdx, siz
         bounds.AddBound(Collision::LineSeg2D(translation + Point2D(-HALF_COLUMN_BOTTOM_BASE_WIDTH, HALF_COLUMN_BOTTOM_BASE_HEIGHT),  translation + Point2D(-HALF_COLUMN_BOTTOM_BASE_WIDTH, -HALF_COLUMN_BOTTOM_BASE_HEIGHT)), Vector2D(-1, 0)); // Left
         bounds.AddBound(Collision::LineSeg2D(translation + Point2D(HALF_COLUMN_BOTTOM_BASE_WIDTH, HALF_COLUMN_BOTTOM_BASE_HEIGHT),   translation + Point2D(HALF_COLUMN_BOTTOM_BASE_WIDTH, -HALF_COLUMN_BOTTOM_BASE_HEIGHT)),  Vector2D(1, 0));  // Right
     
-        
-
         BossBodyPart* armBase = new BossBodyPart(bounds);
         arm->AddBodyPart(armBase);
         restOfArmIdx = this->bodyParts.size();

@@ -156,7 +156,7 @@ public:
 	}
 
 	Point3D GetCurrentCameraPosition() const {
-		return this->invViewMatrix.getTranslation();
+		return this->invViewMatrix.getTranslationPt3D();
 	}
 
 	// Functions for setting the camera perspective

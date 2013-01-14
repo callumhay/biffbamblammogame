@@ -314,7 +314,7 @@ GameItem* GameItemFactory::CreateRandomItemForCurrentLevel(const Point2D &spawnO
 	assert(currGameLevel != NULL);
 	const std::vector<GameItem::ItemType>& allowableItemDrops = currGameLevel->GetAllowableItemDropTypes();
     if (allowableItemDrops.empty()) {
-        return NULL;
+        return new BallSpeedItem(BallSpeedItem::SlowBall, spawnOrigin, gameModel);;
     }
 
 	GameItem::ItemType randomItemType = GameItemFactory::CreateRandomItemTypeForCurrentLevel(gameModel, allowRandomItemType);

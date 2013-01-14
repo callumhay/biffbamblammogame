@@ -259,6 +259,12 @@ void GameTransformMgr::Tick(double dT, GameModel& gameModel) {
 				break;
 
 			case GameTransformMgr::ToBallDeathAnimation:
+                
+                // If there's a level flip animation currently executing then we wait for it to finish...
+                if (!this->levelFlipAnimations.empty()) {
+                    break;
+                }
+
 			case GameTransformMgr::FromBallDeathAnimation:
 				if (currAnimation.hasStarted) {
 					bool finished = this->TickBallDeathAnimation(dT, gameModel);
@@ -464,7 +470,9 @@ void GameTransformMgr::StartLevelFlipAnimation(double dT, GameModel& gameModel) 
  * Returns: true once the animation is complete, false otherwise.
  */
 bool GameTransformMgr::TickLevelFlipAnimation(double dT) {
-	for (std::list<AnimationLerp<float> >::iterator iter = this->levelFlipAnimations.begin(); iter != this->levelFlipAnimations.end();) {
+	for (std::list<AnimationLerp<float> >::iterator iter = this->levelFlipAnimations.begin();
+         iter != this->levelFlipAnimations.end();) {
+
 		bool currAnimationFinished = iter->Tick(dT);
 		if (currAnimationFinished) {
 			iter = this->levelFlipAnimations.erase(iter);
