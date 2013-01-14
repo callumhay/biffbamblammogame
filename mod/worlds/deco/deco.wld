@@ -9,8 +9,11 @@ resources/textures/deco_world_select_256x256.jpg
 resources/worlds/levels/easy/running_amoc.lvl
 resources/worlds/levels/medium/a_sticky_situation.lvl
 resources/worlds/levels/medium/a_change_of_view.lvl
+resources/worlds/levels/medium/falling_up.lvl
 
 
+
+# A BIT MORE FILLER HERE? (drop block, ink, bomb, collateral, one-way)
 
 # Switch block intro levels
 # TODO

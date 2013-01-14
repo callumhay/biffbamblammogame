@@ -177,6 +177,48 @@ bool BossCompositeBodyPart::GetIsDestroyed() const {
     return true;
 }
 
+Collision::AABB2D BossCompositeBodyPart::GenerateLocalAABB() const {
+    int i = 0;
+    Collision::AABB2D result;
+    while (result.IsEmpty() && i < static_cast<int>(this->childParts.size())) {
+        const AbstractBossBodyPart* part = this->childParts[i];
+        result = part->GenerateLocalAABB();
+        i++;
+    }
+
+    Collision::AABB2D temp;
+    for (; i < static_cast<int>(this->childParts.size()); i++) {
+        const AbstractBossBodyPart* part = this->childParts[i];
+        temp = part->GenerateLocalAABB();
+        if (!temp.IsEmpty()) {
+            result.AddAABB(temp);
+        }
+    }
+
+    return result;
+}
+
+Collision::AABB2D BossCompositeBodyPart::GenerateWorldAABB() const {
+    int i = 0;
+    Collision::AABB2D result;
+    while (result.IsEmpty() && i < static_cast<int>(this->childParts.size())) {
+        const AbstractBossBodyPart* part = this->childParts[i];
+        result = part->GenerateWorldAABB();
+        i++;
+    }
+
+    Collision::AABB2D temp;
+    for (; i < static_cast<int>(this->childParts.size()); i++) {
+        const AbstractBossBodyPart* part = this->childParts[i];
+        temp = part->GenerateWorldAABB();
+        if (!temp.IsEmpty()) {
+            result.AddAABB(temp);
+        }
+    }
+
+    return result;
+}
+
 #ifdef _DEBUG
 void BossCompositeBodyPart::DebugDraw() const {
     for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {

@@ -197,6 +197,7 @@ public:
     bool GetHasBoss() const {
         return (this->boss != NULL);
     }
+    bool CollideBossWithLevel(const Collision::AABB2D& bossAABB, Vector2D& correctionVec) const;
 
     void TickAIEntities(double dT, GameModel* gameModel);
 

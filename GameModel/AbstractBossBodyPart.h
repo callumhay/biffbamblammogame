@@ -55,10 +55,19 @@ public:
 
     virtual bool GetIsDestroyed() const = 0;
 
+    virtual Collision::AABB2D GenerateLocalAABB() const = 0;
+    virtual Collision::AABB2D GenerateWorldAABB() const = 0;
+
     const AnimationMultiLerp<float>& GetVelocityMagAnim() const { return this->velocityMagAnim; }
     const AnimationMultiLerp<Vector3D>& GetMovementDirAnim() const { return this->movementDirAnim; }
 
-    const Matrix4x4& GetWorldTransform() const { return this->worldTransform; };
+    const Matrix4x4& GetWorldTransform() const { return this->worldTransform; }
+    Vector2D GetTranslationVec2D() const { return this->worldTransform.getTranslationVec2D(); }
+    Point2D GetTranslationPt2D() const { return this->worldTransform.getTranslationPt2D(); }
+    Point3D GetTranslationPt3D() const { return this->worldTransform.getTranslationPt3D(); }
+    void SetWorldTranslation(const Point3D& t) { this->worldTransform.setTranslation(t); }
+    
+
 
 #ifdef _DEBUG
     virtual void DebugDraw() const = 0;

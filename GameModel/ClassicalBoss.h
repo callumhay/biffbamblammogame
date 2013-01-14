@@ -14,11 +14,17 @@
 
 #include "Boss.h"
 
+namespace classicalbossai {
+class ArmsBodyHeadAI;
+}
+
 class BossBodyPart;
 class BossWeakpoint;
 class BossCompositeBodyPart;
 
 class ClassicalBoss : public Boss {
+
+    friend class classicalbossai::ArmsBodyHeadAI;
     friend Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style);
 
 public:
@@ -45,9 +51,6 @@ public:
     bool GetIsDead() const;
 
 private:
-    BossCompositeBodyPart* deadPartsRoot;
-    BossCompositeBodyPart* alivePartsRoot;
-
     size_t eyeIdx;
     size_t pedimentIdx;
     size_t baseIdx;
@@ -55,6 +58,23 @@ private:
     size_t rightArmIdx, rightRestOfArmIdx, rightArmSquareIdx;
     size_t topLeftTablatureIdx, topRightTablatureIdx, bottomLeftTablatureIdx, bottomRightTablatureIdx;
     size_t leftCol1Idx, leftCol2Idx, leftCol3Idx, rightCol1Idx, rightCol2Idx, rightCol3Idx;
+
+    static const float ARM_X_TRANSLATION_FROM_CENTER;
+    static const float ARM_WIDTH;
+    static const float HALF_ARM_WIDTH;
+    static const float ARM_HEIGHT;
+
+    static const float ARMS_BODY_HEAD_MAX_SPEED;
+    static const float ARMS_BODY_HEAD_ACCELERATION;
+
+    static const float BODY_HEAD_MAX_SPEED;
+    static const float BODY_HEAD_ACCELERATION;
+
+    static const float PEDIMENT_MAX_SPEED;
+    static const float PEDIMENT_ACCELERATION;
+    
+    static const float EYE_MAX_SPEED;
+    static const float EYE_ACCELERATION;
 
     ClassicalBoss();
     void BuildArm(const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx);

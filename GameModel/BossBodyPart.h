@@ -52,6 +52,9 @@ public:
 
     virtual bool GetIsDestroyed() const;
 
+    Collision::AABB2D GenerateLocalAABB() const;
+    Collision::AABB2D GenerateWorldAABB() const;
+
 	// Track the status of the body part, effects its properties and how it works/acts
 	//enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, FrozenStatus = 0x00000002 };
 	//bool HasStatus(const PieceStatus& status) const;
@@ -140,6 +143,14 @@ inline void BossBodyPart::Transform(const Matrix4x4& m) {
 
 inline bool BossBodyPart::GetIsDestroyed() const {
     return false;
+}
+
+inline Collision::AABB2D BossBodyPart::GenerateLocalAABB() const {
+    return this->GetLocalBounds().GenerateAABBFromLines();
+}
+
+inline Collision::AABB2D BossBodyPart::GenerateWorldAABB() const {
+    return this->GetWorldBounds().GenerateAABBFromLines();
 }
 
 #endif // __BOSSBODYPART_H__

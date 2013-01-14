@@ -48,6 +48,9 @@ public:
 
     bool GetIsDestroyed() const;
 
+    Collision::AABB2D GenerateLocalAABB() const;
+    Collision::AABB2D GenerateWorldAABB() const;
+
 #ifdef _DEBUG
     void DebugDraw() const;
 #endif

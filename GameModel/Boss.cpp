@@ -15,7 +15,8 @@
 #include "BossAIState.h"
 #include "ClassicalBoss.h"
 
-Boss::Boss() : currAIState(NULL), nextAIState(NULL), root(NULL)  {
+Boss::Boss() : currAIState(NULL), nextAIState(NULL), root(NULL), 
+deadPartsRoot(NULL), alivePartsRoot(NULL)  {
 }
 
 Boss::~Boss() {
