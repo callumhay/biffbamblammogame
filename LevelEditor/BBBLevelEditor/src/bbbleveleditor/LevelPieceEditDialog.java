@@ -297,7 +297,7 @@ public class LevelPieceEditDialog extends JDialog {
         	group.add(this.randomCannonAngleRadio);
         	group.add(this.specifyCannonAngleRadio);
         	
-        	SpinnerNumberModel spinnerModel1 = new SpinnerNumberModel(0, 0, 356, 1);
+        	SpinnerNumberModel spinnerModel1 = new SpinnerNumberModel(0, 0, 359, 1);
         	this.cannonAngleValue1 = new JSpinner(spinnerModel1);
         	this.cannonAngleValue1.setEnabled(false);
         	this.cannonAngleValue1.addChangeListener(new ChangeListener() {
@@ -306,7 +306,7 @@ public class LevelPieceEditDialog extends JDialog {
 					cannonAngleValueChanged(true, (Integer)cannonAngleValue1.getValue());
 				}
         	});
-        	SpinnerNumberModel spinnerModel2 = new SpinnerNumberModel(0, 0, 356, 1);
+        	SpinnerNumberModel spinnerModel2 = new SpinnerNumberModel(0, 0, 359, 1);
         	this.cannonAngleValue2 = new JSpinner(spinnerModel2);
         	this.cannonAngleValue2.setEnabled(false);
         	this.cannonAngleValue2.addChangeListener(new ChangeListener() {
@@ -419,6 +419,12 @@ public class LevelPieceEditDialog extends JDialog {
     	if (this.cannonAngleValue1 != null && this.cannonAngleValue2 != null) {
 	    	int cannonValue1 = (Integer)this.cannonAngleValue1.getValue();
 	    	int cannonValue2 = (Integer)this.cannonAngleValue2.getValue();
+    		
+    		if (randomCannonAngleRadio.isSelected()) {
+    			cannonValue1 = 0;
+    			cannonValue2 = 359;
+    		}
+    		
 	    	if (cannonValue1 > cannonValue2) {
 	    		cannonValue1 = cannonValue2;
 	    	}

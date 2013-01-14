@@ -136,9 +136,7 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
 
     // Draw the fills that are currently present in the HUD - these will only be present
     // if there's a boost model present
-    
-
-    if (model != NULL && this->tempFillLostAnim.GetInterpolantValue() == 0.0f) {
+    if (model != NULL) {
         float percentBallFill = model->GetBoostChargePercentage();
         
         this->ballFillTex->BindTexture();
@@ -169,7 +167,8 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
         glTexCoord2d(0, texCoord); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, ballFillHeight);
         glEnd();
     }
-    else if (this->tempFillLostAnim.GetInterpolantValue() > 0.0f) {
+
+    if (this->tempFillLostAnim.GetInterpolantValue() > 0.0f) {
         this->tempFillLostAnim.Tick(dT);
 
         float fIntPart;
@@ -211,6 +210,7 @@ void BallBoostHUD::Draw(const Camera& camera, const BallBoostModel* model,
         glTexCoord2d(0, texCoord); glVertex2d(-BALL_BOOST_HUD_HALF_WIDTH, ballFillHeight);
         glEnd();
     }
+
 
     // Draw the HUD outline over the fill stuffs...
     this->ballHUDOutlineTex->BindTexture();
