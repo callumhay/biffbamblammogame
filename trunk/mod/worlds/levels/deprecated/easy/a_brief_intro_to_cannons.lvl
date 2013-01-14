@@ -9,22 +9,22 @@ S E E E S R R R R R R G G G S
 S E E E S E E E E E E E E E S 
 S R B R S E E E E I E E E E S 
 S E R E S E E E E E E E E E S 
-S E E E S O R O R O R G Y G S 
-S E E E S Y O Y O Y O Y O Y S 
-S E E E F(l) E E E S O Y O Y O S 
-S C(180) E E O E E C(270) S Y O Y O Y S 
-S E E E F(l) E E E S G Y G Y G S 
-S E E E S Y G Y G Y G Y G Y S 
-S E E E S G Y G Y G Y G Y G S 
+S E E E S E E E E E E G Y G S 
+S E E E S E E E E Y E Y E Y S 
+S E E E F(l) E E E E E Y E Y E S 
+S C(180) E E F(l) E E E E Y E Y E Y S 
+S E E E F(l) E E E E G E G Y G S 
+S E E E S E G E G E G E G E S 
+S E E E S G E G E G E G E G S 
 S E E E S E E E E E E E E E S 
 S E E E S E E E E E E E E E S 
 S B B B S E E E E E E E E E S 
 S R R R S E E E E E E E E E S 
-E E E E F(r) E E E E E E E E E S 
-E E E E F(r) E E E E E E E E E S 
-E E E E F(r) E E E E E E E E E S 
-E E C(90) E F(r) E E E E E E E E E S 
-E C(90) E E F(r) E E E E E E E E E S 
+S E E E F(r) E E E E E E E E E S 
+S E C(91-105) E F(r) E E E E E E E E E S 
+S E E E F(r) E E E E E E E E E S 
+S E E E F(r) E E E E E E E E E S 
+S S S S S E E E E E E E E E S 
 
 STARS:
 3000
@@ -57,6 +57,7 @@ BallCam 1
 MagnetPaddle 2
 MultiBall3 2
 IceBall 2
+MineLauncherPaddle 2
 SlowBall 2
 GravityBall 2
 CrazyBall 0

@@ -12,29 +12,30 @@ resources/worlds/levels/medium/a_change_of_view.lvl
 resources/worlds/levels/medium/falling_up.lvl
 
 
-
 # A BIT MORE FILLER HERE? (drop block, ink, bomb, collateral, one-way)
+
+
+# Cannon block intro levels
+resources/worlds/levels/easy/shot_down.lvl
+resources/worlds/levels/easy/upward_not_forward_and_always_twirling.lvl
+
+
+
+
+
+
+
+# Tesla block intro levels
+resources/worlds/levels/easy/electric_access.lvl
+
 
 # Switch block intro levels
 # TODO
 
 
-# Cannon block intro levels
-resources/worlds/levels/easy/a_brief_intro_to_cannons.lvl
-resources/worlds/levels/easy/a_healthy_serving_of_blocks.lvl
-
-
-# Cannon + one-way
-resources/worlds/levels/easy/upward_not_forward_and_always_twirling.lvl
-
-
-
 # Prism block intro levels
 resources/worlds/levels/easy/intro_to_prisms.lvl
 
-
-# Tesla block intro levels
-resources/worlds/levels/easy/electric_access.lvl
 
 
 # Portal block intro levels
