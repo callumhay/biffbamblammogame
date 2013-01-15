@@ -51,6 +51,8 @@ public:
     Collision::AABB2D GenerateLocalAABB() const;
     Collision::AABB2D GenerateWorldAABB() const;
 
+    void SetWorldTransform(const Matrix4x4& m);
+
 #ifdef _DEBUG
     void DebugDraw() const;
 #endif
