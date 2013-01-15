@@ -119,6 +119,16 @@ void BossCompositeBodyPart::Translate(const Vector3D& t) {
     }
 }
 
+void BossCompositeBodyPart::SetWorldTransform(const Matrix4x4& m) {
+
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->SetWorldTransform(part->GetWorldTransform() * this->worldTransform.inverse() * m);
+    }
+    
+    this->worldTransform = m;
+}
+
 void BossCompositeBodyPart::RotateZ(float rotZDegs) {
     if (fabs(rotZDegs) < EPSILON) {
         return;
