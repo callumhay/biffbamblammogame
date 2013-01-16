@@ -1394,7 +1394,6 @@ bool GameLevel::CollideBossWithLevel(const Collision::AABB2D& bossAABB, Vector2D
 
     Collision::LineSeg2D leftBoundary(Point2D(minXBound, minYBound), Point2D(minXBound, maxYBound));
     Collision::LineSeg2D rightBoundary(Point2D(maxXBound, minYBound), Point2D(maxXBound, maxYBound));
-    Collision::LineSeg2D bottomBoundary(Point2D(minXBound, minYBound), Point2D(maxXBound, minYBound));
     Collision::LineSeg2D topBoundary(Point2D(minXBound, maxYBound), Point2D(maxXBound, maxYBound));
 
     correctionVec[0] = 0.0f;
@@ -1413,11 +1412,11 @@ bool GameLevel::CollideBossWithLevel(const Collision::AABB2D& bossAABB, Vector2D
         didCollide = true;
     }
 
-    if (Collision::GetCollisionPoint(bossAABB, bottomBoundary, collisionPt)) {
-        correctionVec[1] += collisionPt[1] - bossAABB.GetMin()[1] - EPSILON;
-        didCollide = true;
-    }
-    else if (Collision::GetCollisionPoint(bossAABB, topBoundary, collisionPt)) {
+    //if (Collision::GetCollisionPoint(bossAABB, bottomBoundary, collisionPt)) {
+    //    correctionVec[1] += collisionPt[1] - bossAABB.GetMin()[1] - EPSILON;
+    //    didCollide = true;
+    //}
+    if (Collision::GetCollisionPoint(bossAABB, topBoundary, collisionPt)) {
         correctionVec[1] += collisionPt[1] - bossAABB.GetMax()[1] - EPSILON;
         didCollide = true;
     }
@@ -1917,6 +1916,8 @@ bool GameLevel::TeslaLightningCollisionCheck(const BoundingLines& bounds) const 
 // Whether or not the given projectile is destroyed by collision with a tesla lightning arc
 bool GameLevel::IsDestroyedByTelsaLightning(const Projectile& p) const {
     switch (p.GetType()) {
+
+        case Projectile::BossLaserBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

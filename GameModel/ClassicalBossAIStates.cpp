@@ -11,22 +11,81 @@
 
 #include "ClassicalBossAIStates.h"
 #include "ClassicalBoss.h"
+#include "BossWeakpoint.h"
 #include "GameModel.h"
 #include "PlayerPaddle.h"
+#include "BossLaserProjectile.h"
 
 using namespace classicalbossai;
 
+// BEGIN ClassicalBossAI ***********************************************************
+
+ClassicalBossAI::ClassicalBossAI(ClassicalBoss* boss) : BossAIState(), boss(boss) {
+    assert(boss != NULL);
+}
+
+ClassicalBossAI::~ClassicalBossAI() {
+    this->boss = NULL;
+}
+
+void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
+    assert(gameModel != NULL);
+    
+    const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
+    assert(paddle != NULL);
+    
+    static const float ANGLE_BETWEEN_LASERS_IN_DEGS = 15.0f;
+
+    // The boss will fire a spray of laser bullets from its eye, in the general direction of the paddle...
+    Point2D eyePos    = this->boss->GetEye()->GetTranslationPt2D();
+    Point2D paddlePos = paddle->GetCenterPosition();
+
+    Vector2D initLaserDir = Vector2D::Normalize(paddlePos - eyePos);
+    Vector2D currLaserDir = initLaserDir;
+
+    // Middle laser shot directly towards the paddle...
+    gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
+
+    // Right fan-out of lasers
+    currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
+    currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
+
+    // Left fan-out of lasers
+    currLaserDir = initLaserDir;
+    currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
+    currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
+}
+
+// END ClassicalBossAI *************************************************************
+
 // BEGIN ArmsBodyHeadAI ************************************************************
+
+const float ArmsBodyHeadAI::ARM_LIFE_POINTS = 300.0f;
+const float ArmsBodyHeadAI::ARM_BALL_DAMAGE = 100.0f;
+
+const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
 
 ArmsBodyHeadAI::ArmsBodyHeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), currState(ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState),
 leftArm(NULL), rightArm(NULL), leftArmSqrWeakpt(NULL), rightArmSqrWeakpt(NULL), currVel(0.0f, 0.0f), desiredVel(0.0f, 0.0f),
-countdownToNextState(0.0), countdownToAttack(0.0) {
+countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0) {
     
     // Grab the parts of the boss that matter to this AI state...
     this->leftArm  = static_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->leftArmIdx]);
     this->rightArm = static_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->rightArmIdx]);
-    this->leftArmSqrWeakpt  = static_cast<BossBodyPart*>(boss->bodyParts[boss->leftArmSquareIdx]);
-    this->rightArmSqrWeakpt = static_cast<BossBodyPart*>(boss->bodyParts[boss->rightArmSquareIdx]);
+    
+    // Turn the squares on both arms into weakpoints...
+    boss->ConvertAliveBodyPartToWeakpoint(boss->leftArmSquareIdx, ArmsBodyHeadAI::ARM_LIFE_POINTS, ArmsBodyHeadAI::ARM_BALL_DAMAGE);
+    boss->ConvertAliveBodyPartToWeakpoint(boss->rightArmSquareIdx, ArmsBodyHeadAI::ARM_LIFE_POINTS, ArmsBodyHeadAI::ARM_BALL_DAMAGE);
+    
+    assert(dynamic_cast<BossWeakpoint*>(boss->bodyParts[boss->leftArmSquareIdx])  != NULL);
+    assert(dynamic_cast<BossWeakpoint*>(boss->bodyParts[boss->rightArmSquareIdx]) != NULL);
+
+    this->leftArmSqrWeakpt  = static_cast<BossWeakpoint*>(boss->bodyParts[boss->leftArmSquareIdx]);
+    this->rightArmSqrWeakpt = static_cast<BossWeakpoint*>(boss->bodyParts[boss->rightArmSquareIdx]);
 
     assert(this->leftArm != NULL && this->rightArm != NULL && this->leftArmSqrWeakpt != NULL &&
         this->rightArmSqrWeakpt != NULL);
@@ -161,6 +220,7 @@ void ArmsBodyHeadAI::SetState(AIState newState) {
             break;
 
         case ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState:
+            this->laserSprayCountdown  = ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS;
             this->countdownToNextState = this->GenerateBasicMoveTime();
             break;
 
@@ -203,11 +263,9 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
         case ArmsBodyHeadAI::ChanceAIState:
             break;
 
-        case ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState: {
-            const GameLevel* level = gameModel->GetCurrentLevel();
-            this->ExecuteBasicMovementState(dT, level);
+        case ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState:
+            this->ExecuteBasicMoveAndLaserSprayState(dT, gameModel);
             break;
-        }
 
         case ArmsBodyHeadAI::ChasePaddleAIState: {
             const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
@@ -243,21 +301,26 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
 
 void ArmsBodyHeadAI::UpdateMovement(double dT, GameModel* gameModel) {
     // Figure out how much to move and update the position of the boss
-    Vector2D dMovement = dT * this->currVel;
-    this->boss->alivePartsRoot->Translate(Vector3D(dMovement));
+    if (!this->currVel.IsZero()) {
+        Vector2D dMovement = dT * this->currVel;
+        this->boss->alivePartsRoot->Translate(Vector3D(dMovement));
 
-    // Update the position of the boss based on whether it is now colliding with the boundaries/walls of the level
-    const GameLevel* level = gameModel->GetCurrentLevel();
-    Vector2D correctionVec;
-    if (!this->currVel.IsZero() && level->CollideBossWithLevel(this->boss->alivePartsRoot->GenerateWorldAABB(), correctionVec)) {
-        this->boss->alivePartsRoot->Translate(Vector3D(correctionVec));
+        // Update the position of the boss based on whether it is now colliding with the boundaries/walls of the level
+        const GameLevel* level = gameModel->GetCurrentLevel();
+        Vector2D correctionVec;
+        if (level->CollideBossWithLevel(this->boss->alivePartsRoot->GenerateWorldAABB(), correctionVec)) {
+            this->boss->alivePartsRoot->Translate(Vector3D(correctionVec));
+        }
     }
 
     // Update the speed based on the acceleration
     this->currVel = this->currVel + dT * this->GetAcceleration();
 }
 
-void ArmsBodyHeadAI::ExecuteBasicMovementState(double dT, const GameLevel* level) {
+void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameModel) {
+    assert(gameModel != NULL);
+
+    const GameLevel* level = gameModel->GetCurrentLevel();
     assert(level != NULL);
 
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
@@ -294,10 +357,15 @@ void ArmsBodyHeadAI::ExecuteBasicMovementState(double dT, const GameLevel* level
         
         bool goToChaseState = true;
         
-        // How much damage has been done so far?
+        // How much damage has been done so far? These two percentages will maximally add to 2.0
+        float percentLeftArm  = this->leftArmSqrWeakpt->GetCurrentLifePercentage();
+        float percentRightArm = this->rightArmSqrWeakpt->GetCurrentLifePercentage();
         
         // Laser barrages will happen more frequently when the boss has taken more damage...
-
+        float totalLifePercent = (percentLeftArm + percentRightArm) / 2.0f;
+        if (Randomizer::GetInstance()->RandomNumZeroToOne() >= (totalLifePercent - 0.1f)) {
+            goToChaseState = false;
+        }
         
         if (goToChaseState) {
             this->SetState(ArmsBodyHeadAI::ChasePaddleAIState);
@@ -310,6 +378,16 @@ void ArmsBodyHeadAI::ExecuteBasicMovementState(double dT, const GameLevel* level
     else {
         this->countdownToNextState -= dT;
     }
+
+    // Fire ze lasers (if the countdown is done)
+    if (this->laserSprayCountdown <= 0.0) {
+        this->ExecuteLaserSpray(gameModel);
+        this->laserSprayCountdown = ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS;
+    }
+    else {
+        this->laserSprayCountdown -= dT;
+    }
+
 }
 
 void ArmsBodyHeadAI::ExecuteFollowPaddleState(double dT, const PlayerPaddle* paddle) {
@@ -344,12 +422,7 @@ void ArmsBodyHeadAI::ExecuteFollowPaddleState(double dT, const PlayerPaddle* pad
 
         // Attack immediately!
         if (allowedToAttack) {
-            if (bossToPaddleVec[0] < 0) {
-                this->SetState(ArmsBodyHeadAI::AttackLeftArmAIState);
-            }
-            else {
-                this->SetState(ArmsBodyHeadAI::AttackRightArmAIState);
-            }
+            this->SetState(this->DetermineNextArmAttackState(bossToPaddleVec));
         }
         return;
     }
@@ -377,12 +450,7 @@ void ArmsBodyHeadAI::ExecuteFollowPaddleState(double dT, const PlayerPaddle* pad
     // Check to see if we should go into an attack state yet
     if (this->countdownToAttack <= 0.0) {
         if (allowedToAttack) {
-            if (bossToPaddleVec[0] < 0) {
-                this->SetState(ArmsBodyHeadAI::AttackLeftArmAIState);
-            }
-            else {
-                this->SetState(ArmsBodyHeadAI::AttackRightArmAIState);
-            }
+            this->SetState(this->DetermineNextArmAttackState(bossToPaddleVec));
         }
     }
     else {
@@ -451,5 +519,31 @@ float ArmsBodyHeadAI::GetFollowAndAttackHeight() const {
 float ArmsBodyHeadAI::GetMaxArmAttackYMovement() const {
     return 0.7f * ClassicalBoss::ARM_HEIGHT;
 }
+
+ArmsBodyHeadAI::AIState ArmsBodyHeadAI::DetermineNextArmAttackState(const Vector2D& bossToPaddleVec) const {
+    // How much damage has been done so far? These two percentages will maximally add to 2.0
+    float percentLeftArm  = this->leftArmSqrWeakpt->GetCurrentLifePercentage();
+    float percentRightArm = this->rightArmSqrWeakpt->GetCurrentLifePercentage();
+    float totalLifePercent = (percentLeftArm + percentRightArm) / 2.0f;
+    
+    bool doBothArmAttack = false;
+    if (Randomizer::GetInstance()->RandomNumZeroToOne() >= (totalLifePercent - 0.05f)) {
+        doBothArmAttack = true;
+    }
+
+    if (doBothArmAttack) {
+        return ArmsBodyHeadAI::AttackBothArmsAIState;
+    }
+    else {
+        if (bossToPaddleVec[0] < 0) {
+            return ArmsBodyHeadAI::AttackLeftArmAIState;
+        }
+        else {
+            return ArmsBodyHeadAI::AttackRightArmAIState;
+        }
+    }
+}
+
+void ExecuteLaserSpray(GameModel* gameModel);
 
 // END ArmsBodyHeadAI **************************************************************

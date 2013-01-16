@@ -16,17 +16,6 @@ AbstractBossBodyPart(), localBounds(localBounds) {
 }
 
 BossBodyPart::~BossBodyPart() {
-
-}
-
-void BossBodyPart::Tick(double dT, GameModel* gameModel) {
-    UNUSED_PARAMETER(gameModel);
-
-    // Move the body part by whatever velocity is currently set by its movement animation
-    this->velocityMagAnim.Tick(dT);
-    this->movementDirAnim.Tick(dT);
-    Vector3D dMovement = (dT * this->velocityMagAnim.GetInterpolantValue()) * this->movementDirAnim.GetInterpolantValue();
-    this->Translate(dMovement);
 }
 
 void BossBodyPart::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
@@ -91,6 +80,13 @@ void BossBodyPart::TickBeamCollision(double dT, const BeamSegment* beamSegment, 
 
 	assert(beamSegment != NULL);
 	assert(gameModel != NULL);
+}
+
+bool BossBodyPart::IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const {
+    if (this == part) {
+        return true;
+    }
+    return false;
 }
 
 //void BossBodyPart::TickStatus(double dT, GameModel* gameModel, int32_t& removedStatuses) {  

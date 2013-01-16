@@ -391,6 +391,38 @@ void ClassicalBoss::BuildArm(const Vector3D& armTranslation, size_t& armIdx, siz
     arm->Translate(armTranslation);
 }
 
+void ClassicalBoss::ConvertAliveBodyPartToWeakpoint(size_t index, float lifePoints, float ballDmgOnHit) {
+    assert(index < this->bodyParts.size());
+
+    AbstractBossBodyPart* bodyPart = this->bodyParts[index];
+    assert(bodyPart != NULL);
+    if (dynamic_cast<BossBodyPart*>(bodyPart) == NULL ||
+        dynamic_cast<BossWeakpoint*>(bodyPart) != NULL ||
+        !this->alivePartsRoot->IsOrContainsPart(bodyPart, true)) {
+
+        assert(false);
+        return;
+    }
+
+    // Create a weakpoint part
+    BossWeakpoint* weakpointBodyPart = BossWeakpoint::BuildWeakpoint(static_cast<BossBodyPart*>(bodyPart), lifePoints, ballDmgOnHit);
+    assert(weakpointBodyPart != NULL);
+    
+    AbstractBossBodyPart* parentPart = this->alivePartsRoot->SearchForParent(bodyPart);
+    if (parentPart != NULL) {
+        assert(dynamic_cast<BossCompositeBodyPart*>(parentPart) != NULL);
+        
+        BossCompositeBodyPart* compositeParentPart = static_cast<BossCompositeBodyPart*>(parentPart);
+        compositeParentPart->RemoveBodyPart(bodyPart);
+        compositeParentPart->AddBodyPart(weakpointBodyPart);
+    }
+
+    delete bodyPart;
+    bodyPart = NULL;
+
+    this->bodyParts[index] = weakpointBodyPart;
+}
+
 std::vector<const BossBodyPart*> ClassicalBoss::GetBodyColumns() const {
     std::vector<const BossBodyPart*> columns;
     columns.reserve(6);

@@ -19,6 +19,7 @@
 #include "LaserTurretProjectile.h"
 #include "PaddleMineProjectile.h"
 #include "MineTurretProjectile.h"
+#include "BossLaserProjectile.h"
 #include "GameModel.h"
 
 // Projectile ====================================================================================================================
@@ -46,6 +47,8 @@ Projectile* Projectile::CreateProjectileFromCopy(const Projectile* p) {
     assert(p != NULL);
 	
     switch (p->GetType()) {
+        case Projectile::BossLaserBulletProjectile:
+            return new BossLaserProjectile(*static_cast<const BossLaserProjectile*>(p));
 		case Projectile::PaddleLaserBulletProjectile:
 			return new PaddleLaserProjectile(*static_cast<const PaddleLaserProjectile*>(p));
         case Projectile::BallLaserBulletProjectile:

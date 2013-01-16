@@ -30,7 +30,8 @@ class Projectile {
 public:
 	enum ProjectileType { PaddleLaserBulletProjectile, BallLaserBulletProjectile, LaserTurretBulletProjectile,
                           CollateralBlockProjectile, PaddleRocketBulletProjectile, RocketTurretBulletProjectile,
-                          FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile };
+                          FireGlobProjectile, PaddleMineBulletProjectile, MineTurretBulletProjectile,
+                          BossLaserBulletProjectile };
 
 	virtual ~Projectile();
 	virtual void Tick(double seconds, const GameModel& model) = 0;

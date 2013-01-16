@@ -71,6 +71,7 @@ MineTurretBlock::~MineTurretBlock() {
 bool MineTurretBlock::ProjectilePassesThrough(const Projectile* projectile) const {
     switch (projectile->GetType()) {
 
+        case Projectile::BossLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
@@ -114,6 +115,7 @@ LevelPiece* MineTurretBlock::CollisionOccurred(GameModel* gameModel, Projectile*
     LevelPiece* newPiece = this;
 	switch (projectile->GetType()) {
 
+        case Projectile::BossLaserBulletProjectile:
 	    case Projectile::LaserTurretBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:

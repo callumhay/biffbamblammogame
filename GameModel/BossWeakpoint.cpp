@@ -14,7 +14,7 @@
 #include "Beam.h"
 
 BossWeakpoint::BossWeakpoint(float lifePoints, float dmgOnBallHit, const BoundingLines& bounds) :
-BossBodyPart(bounds), currLifePoints(lifePoints), dmgOnBallHit(dmgOnBallHit) {
+BossBodyPart(bounds), totalLifePoints(lifePoints), currLifePoints(lifePoints), dmgOnBallHit(dmgOnBallHit) {
 }
 
 BossWeakpoint::~BossWeakpoint() {
@@ -31,8 +31,6 @@ BossWeakpoint* BossWeakpoint::BuildWeakpoint(BossBodyPart* part, float lifePoint
 
     BossWeakpoint* result = new BossWeakpoint(lifePoints, dmgOnBallHit, part->GetLocalBounds());
     result->worldTransform  = part->GetWorldTransform();
-    result->velocityMagAnim = part->GetVelocityMagAnim();
-    result->movementDirAnim = part->GetMovementDirAnim();
 
     return result;
 }
@@ -73,6 +71,9 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projecti
         case Projectile::FireGlobProjectile:
 
             this->Diminish(projectile->GetDamage(), gameModel);
+            break;
+
+        case Projectile::BossLaserBulletProjectile:
             break;
 
         default:

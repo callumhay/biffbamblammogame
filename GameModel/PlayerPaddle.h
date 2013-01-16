@@ -447,6 +447,7 @@ inline bool PlayerPaddle::CollisionCheckWithProjectile(const Projectile& project
                                                        const BoundingLines& bounds) const {
     switch (projectile.GetType()) {
 
+        case Projectile::BossLaserBulletProjectile:
         case Projectile::PaddleLaserBulletProjectile:
         case Projectile::PaddleRocketBulletProjectile:
         case Projectile::RocketTurretBulletProjectile:
@@ -471,6 +472,7 @@ inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) 
 
         switch (projectile.GetType()) {
 
+            case Projectile::BossLaserBulletProjectile:
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:
