@@ -435,7 +435,10 @@ void GameEventsListener::BallPortalBlockTeleportEvent(const GameBall& ball, cons
 }
 
 void GameEventsListener::ProjectilePortalBlockTeleportEvent(const Projectile& projectile, const PortalBlock& enterPortal) {
-	switch (projectile.GetType()) {
+	
+    switch (projectile.GetType()) {
+
+        case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

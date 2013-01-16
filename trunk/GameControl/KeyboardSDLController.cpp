@@ -114,22 +114,10 @@ void KeyboardSDLController::KeyUp(SDLKey key) {
 
 void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x, unsigned int y) {
 
-    // Always relay the signal to the display
-    switch (button) {
-        case SDL_BUTTON_LEFT:
-            this->display->MousePressed(GameControl::LeftMouseButton);
-            break;
-
-        case SDL_BUTTON_RIGHT:
-            this->display->MousePressed(GameControl::RightMouseButton);
-            break;
-        default:
-            break;
-    }
-
     if (this->model->GetCurrentStateType() != GameState::BallInPlayStateType) {
         return;
     }
+
     const BallBoostModel* boostModel = this->model->GetBallBoostModel();
     if (boostModel == NULL) {
         return;
@@ -139,6 +127,7 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
     const Camera& camera = this->display->GetCamera();
     Vector2D windowCenterPos(camera.GetWindowWidth()/2, camera.GetWindowHeight()/2);
     Vector2D boostDir = Vector2D(x, openGLYCoord) - windowCenterPos;
+
     if (boostDir.IsZero()) {
         boostDir[0] = 1;
     }
@@ -152,7 +141,6 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
                 this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
             }
             this->display->MousePressed(GameControl::LeftMouseButton);
-            //debug_output("Left button pressed.");
             break;
 
         case SDL_BUTTON_RIGHT:
@@ -163,8 +151,8 @@ void KeyboardSDLController::MouseButtonDown(unsigned int button, unsigned int x,
                 this->display->SpecialDirectionPressed(boostDir[0], boostDir[1]);
             }
             this->display->MousePressed(GameControl::RightMouseButton);
-            //debug_output("Right button pressed.");
             break;
+
         default:
             break;
     }

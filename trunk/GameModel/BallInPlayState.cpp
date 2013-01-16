@@ -359,7 +359,6 @@ void BallInPlayState::Tick(double seconds) {
                     // Now make the boss react to the collision...
                     this->gameModel->CollisionOccurred(*currBall, boss, collisionBossPart);
                 }
-
             }
 
         }

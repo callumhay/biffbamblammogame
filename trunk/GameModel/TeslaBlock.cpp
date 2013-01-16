@@ -125,6 +125,7 @@ LevelPiece* TeslaBlock::CollisionOccurred(GameModel* gameModel, Projectile* proj
 	GameLevel* currLevel = gameModel->GetCurrentLevel();
 	switch (projectile->GetType()) {
 		
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

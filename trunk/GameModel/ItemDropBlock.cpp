@@ -34,6 +34,7 @@ ItemDropBlock::~ItemDropBlock() {
 bool ItemDropBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 		
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
@@ -130,6 +131,7 @@ LevelPiece* ItemDropBlock::CollisionOccurred(GameModel* gameModel, Projectile* p
 
 	switch (projectile->GetType()) {
 
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

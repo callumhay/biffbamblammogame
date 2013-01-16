@@ -78,6 +78,7 @@ private:
 
     ClassicalBoss();
     void BuildArm(const Vector3D& armTranslation, size_t& armIdx, size_t& restOfArmIdx, size_t& squareIdx);
+    void ConvertAliveBodyPartToWeakpoint(size_t index, float lifePoints, float ballDmgOnHit);
 
     // Inherited from Boss
     void Init();

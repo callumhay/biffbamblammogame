@@ -172,14 +172,14 @@ void XBox360Controller::InGameOnProcessStateSpecificActions(const XINPUT_STATE& 
 
         this->display->SpecialDirectionPressed(controllerState.Gamepad.sThumbRX, 
                                                controllerState.Gamepad.sThumbRY);
-        //this->specialDirOn = true;
+        this->specialDirOn = true;
 
     }
     else {
-        //if (this->specialDirOn) {
-        this->display->SpecialDirectionReleased();
-            //this->specialDirOn = false;
-        //}
+        if (this->specialDirOn) {
+            this->display->SpecialDirectionReleased();
+            this->specialDirOn = false;
+        }
     }
 }
 

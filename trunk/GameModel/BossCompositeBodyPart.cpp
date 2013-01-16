@@ -18,6 +18,16 @@ BossCompositeBodyPart::BossCompositeBodyPart() : AbstractBossBodyPart() {
 BossCompositeBodyPart::~BossCompositeBodyPart() {
 }
 
+void BossCompositeBodyPart::RemoveBodyPart(AbstractBossBodyPart* part) {
+    std::vector<AbstractBossBodyPart*>::iterator findIter = this->childParts.begin();
+    for (; findIter != this->childParts.end(); ++findIter) {
+        if (*findIter == part) {
+            this->childParts.erase(findIter);
+            return;
+        }
+    }
+}
+
 BossBodyPart* BossCompositeBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                                     Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
 
@@ -43,21 +53,6 @@ BossBodyPart* BossCompositeBodyPart::CollisionCheck(const GameBall& ball, double
 
     timeSinceCollision = bestTimeSinceCollision;
     return bestChoice;
-}
-
-void BossCompositeBodyPart::Tick(double dT, GameModel* gameModel) {
-
-    // Move the body part by whatever velocity is currently set by its movement animation
-    this->velocityMagAnim.Tick(dT);
-    this->movementDirAnim.Tick(dT);
-    Vector3D dMovement = (dT * this->velocityMagAnim.GetInterpolantValue()) * this->movementDirAnim.GetInterpolantValue();
-    this->Translate(dMovement);
-
-    // Tick all of the composite parts
-    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
-        AbstractBossBodyPart* part = this->childParts[i];
-        part->Tick(dT, gameModel);
-    }
 }
 
 BossBodyPart* BossCompositeBodyPart::CollisionCheck(const Collision::Ray2D& ray, float& rayT) {
@@ -173,6 +168,48 @@ void BossCompositeBodyPart::TickBeamCollision(double dT, const BeamSegment* beam
         AbstractBossBodyPart* part = this->childParts[i];
         part->TickBeamCollision(dT, beamSegment, gameModel);
     }
+}
+
+bool BossCompositeBodyPart::IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const {
+    if (this == part) {
+        return true;
+    }
+
+    if (recursiveSearch) {
+
+        for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+            AbstractBossBodyPart* currPart = this->childParts[i];
+            if (part == currPart || currPart->IsOrContainsPart(part, true)) {
+                return true;
+            }
+        }
+    }
+    else {
+        for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+            AbstractBossBodyPart* currPart = this->childParts[i];
+            if (part == currPart) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+AbstractBossBodyPart* BossCompositeBodyPart::SearchForParent(AbstractBossBodyPart* part) {
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* currPart = this->childParts[i];
+        if (part == currPart) {
+            return this;
+        }
+        else {
+            AbstractBossBodyPart* result = currPart->SearchForParent(part);
+            if (result != NULL) {
+                return result;
+            }
+        }
+    }
+
+    return NULL;
 }
 
 //void TickStatus(double dT, GameModel* gameModel, int32_t& removedStatuses);

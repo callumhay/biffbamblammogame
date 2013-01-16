@@ -29,8 +29,6 @@ public:
     const BoundingLines& GetLocalBounds() const;
     BoundingLines GetWorldBounds() const;
 
-    void Tick(double dT, GameModel* gameModel);
-
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT);
@@ -49,6 +47,8 @@ public:
 	virtual void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
     
     //virtual void TickStatus(double dT, GameModel* gameModel, int32_t& removedStatuses);
+
+    bool IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const;
 
     virtual bool GetIsDestroyed() const;
 

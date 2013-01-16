@@ -70,9 +70,7 @@ Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style) {
 }
 
 void Boss::Tick(double dT, GameModel* gameModel) {
-    // Tick the body parts of the boss
-    this->root->Tick(dT, gameModel);
-    
+
     // Tick the current state of the boss
     if (this->currAIState != NULL) {
         this->currAIState->Tick(dT, gameModel);

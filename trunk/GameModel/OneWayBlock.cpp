@@ -70,6 +70,7 @@ bool OneWayBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 
 	switch (projectile->GetType()) {
 
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
@@ -241,6 +242,7 @@ LevelPiece* OneWayBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 
 	switch (projectile->GetType()) {
 		
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

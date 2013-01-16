@@ -170,6 +170,8 @@ LevelPiece* CannonBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
 	LevelPiece* resultingPiece = this;
 
 	switch (projectile->GetType()) {
+
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

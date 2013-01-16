@@ -27,10 +27,9 @@ public:
 
     void SetBodyParts(const std::vector<AbstractBossBodyPart*>& parts);
     void AddBodyPart(AbstractBossBodyPart* part);
+    void RemoveBodyPart(AbstractBossBodyPart* part); // Not recursive
 
     // Inherited from AbstractBossBodyPart
-    void Tick(double dT, GameModel* gameModel);
-
     BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT);
@@ -45,6 +44,9 @@ public:
 	void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
     
     //void TickStatus(double dT, GameModel* gameModel, int32_t& removedStatuses);
+
+    bool IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const;
+    AbstractBossBodyPart* SearchForParent(AbstractBossBodyPart* part);
 
     bool GetIsDestroyed() const;
 

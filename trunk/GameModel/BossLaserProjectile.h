@@ -1,32 +1,33 @@
 /**
- * PaddleLaserProjectile.h
+ * BossLaserProjectile.h
  *
  * (cc) Creative Commons Attribution-Noncommercial 3.0 Licence
- * Callum Hay, 2011-2013
+ * Callum Hay, 2013
  *
  * You may not use this work for commercial purposes.
  * If you alter, transform, or build upon this work, you may distribute the 
  * resulting work only under the same or similar licence to this one.
  */
 
-#ifndef __PADDLELASERPROJECTILE_H__
-#define __PADDLELASERPROJECTILE_H__
+#ifndef __BOSSLASERPROJECTILE_H__
+#define __BOSSLASERPROJECTILE_H__
 
 #include "LaserBulletProjectile.h"
 
-class PaddleLaserProjectile : public LaserBulletProjectile {
+class BossLaserProjectile : public LaserBulletProjectile {
 public:
 	static const float HEIGHT_DEFAULT;
 	static const float WIDTH_DEFAULT;
 
-    explicit PaddleLaserProjectile(const Point2D& spawnLoc);
-    PaddleLaserProjectile(const PaddleLaserProjectile& copy);
-    ~PaddleLaserProjectile();
+    explicit BossLaserProjectile(const Point2D& spawnLoc);
+    BossLaserProjectile(const Point2D& spawnLoc, const Vector2D& dirVec);
+    BossLaserProjectile(const BossLaserProjectile& copy);
+    ~BossLaserProjectile();
 
     ProjectileType GetType() const {
-        return Projectile::PaddleLaserBulletProjectile;
+        return Projectile::BossLaserBulletProjectile;
     }
-    float GetDamage() const { return 90.0f; }
+    float GetDamage() const { return 0.0f; }
 
     bool BlastsThroughSafetyNets() const { return false; }
     bool IsDestroyedBySafetyNets() const { return true;  }
@@ -36,4 +37,4 @@ private:
     void operator=(const LaserBulletProjectile& copy);
 };
 
-#endif // __PADDLELASERPROJECTILE_H__
+#endif // __BOSSLASERPROJECTILE_H__

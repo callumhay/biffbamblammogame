@@ -16,11 +16,13 @@
 #include "../BlammoEngine/Vector.h"
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Animation.h"
+#include "../BlammoEngine/Matrix.h"
 
 #include "BossAIState.h"
 
 class ClassicalBoss;
 class BossBodyPart;
+class BossWeakpoint;
 class BossCompositeBodyPart;
 class PlayerPaddle;
 class GameLevel;
@@ -32,11 +34,14 @@ namespace classicalbossai {
  */
 class ClassicalBossAI : public BossAIState {
 public:
-    ClassicalBossAI(ClassicalBoss* boss) : BossAIState(), boss(boss) { assert(boss != NULL); };
-    virtual ~ClassicalBossAI() { this->boss = NULL; };
+    ClassicalBossAI(ClassicalBoss* boss);
+    virtual ~ClassicalBossAI();
 
 protected:
     ClassicalBoss* boss;
+
+    // Attack routines
+    void ExecuteLaserSpray(GameModel* gameModel);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(ClassicalBossAI);
@@ -55,48 +60,57 @@ public:
     void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
 
 private:
+    static const float ARM_LIFE_POINTS;
+    static const float ARM_BALL_DAMAGE;
+
     BossCompositeBodyPart* leftArm;
     BossCompositeBodyPart* rightArm;
 
-    BossBodyPart* leftArmSqrWeakpt;
-    BossBodyPart* rightArmSqrWeakpt;
+    BossWeakpoint* leftArmSqrWeakpt;
+    BossWeakpoint* rightArmSqrWeakpt;
 
     Vector2D currVel;
     Vector2D desiredVel;
 
-    enum AIState { ChanceAIState, BasicMovementAIState, FollowPaddleAIState, AttackLeftArmAIState,
-                   AttackRightArmAIState, AttackBothArmsAIState, FarLeftPrepLaserAIState,
-                   FarRightPrepLaserAIState, MoveLeftLaserAIState, MoveRightLaserAIState,
+    enum AIState { ChanceAIState, BasicMoveAndLaserSprayAIState, ChasePaddleAIState, 
+                   AttackLeftArmAIState, AttackRightArmAIState, AttackBothArmsAIState,
+                   PrepLaserAIState, MoveAndBarrageWithLaserAIState,
                    HurtAIState, LostArmsAngryAIState };
 
     // AIState Variables -----------------------------------------------------------
     AIState currState;
 
-    // BasicMovementAIState
-
-    // FollowPaddleAIState
+    // BasicMoveAndLaserSprayAIState
+    static const double LASER_SPRAY_RESET_TIME_IN_SECS;
+    double laserSprayCountdown;
+    double countdownToNextState;
+    // ChasePaddleAIState
     double countdownToAttack;
     // AttackLeftArmAIState, AttackRightArmAIState, AttackBothArmsAIState
     AnimationMultiLerp<float> armShakeAnim;
     AnimationMultiLerp<float> armAttackYMovementAnim;
-    Point3D leftArmStartWorldPos;
-    Point3D rightArmStartWorldPos;
+    Matrix4x4 leftArmStartWorldT;
+    Matrix4x4 rightArmStartWorldT;
     // -----------------------------------------------------------------------------
 
     void SetState(AIState newState);
     void UpdateState(double dT, GameModel* gameModel);
     void UpdateMovement(double dT, GameModel* gameModel);
-    void ExecuteBasicMovementState(double dT, const GameLevel* level);
+    void ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameModel);
     void ExecuteFollowPaddleState(double dT, const PlayerPaddle* paddle);
     void ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking);
 
+    // Basic boss attribute getters
     float GetMaxSpeed() const;
     Vector2D GetAcceleration() const;
 
-    double GenerateFollowTime() const { return 4.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
+    // Helper functions for generating various pieces of data across states
+    double GenerateBasicMoveTime() const { return 10.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
+    double GenerateFollowTime() const { return 5.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
     float GetBasicMovementHeight(const GameLevel* level) const;
     float GetFollowAndAttackHeight() const;
     float GetMaxArmAttackYMovement() const;
+    ArmsBodyHeadAI::AIState DetermineNextArmAttackState(const Vector2D& bossToPaddleVec) const;
 
     DISALLOW_COPY_AND_ASSIGN(ArmsBodyHeadAI);
 };

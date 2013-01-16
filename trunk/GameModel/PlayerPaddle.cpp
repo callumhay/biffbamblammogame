@@ -834,6 +834,7 @@ void PlayerPaddle::HitByProjectile(GameModel* gameModel, const Projectile& proje
 			this->CollateralBlockProjectileCollision(projectile);
 			break;
 
+        case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
@@ -872,6 +873,7 @@ void PlayerPaddle::ModifyProjectileTrajectory(Projectile& projectile) {
 	if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle) {
         switch (projectile.GetType()) {
 
+            case Projectile::BossLaserBulletProjectile:
             case Projectile::BallLaserBulletProjectile:
             case Projectile::PaddleLaserBulletProjectile:
             case Projectile::PaddleRocketBulletProjectile:

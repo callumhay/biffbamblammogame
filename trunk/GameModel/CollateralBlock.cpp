@@ -33,6 +33,7 @@ CollateralBlock::~CollateralBlock() {
 bool CollateralBlock::ProjectilePassesThrough(const Projectile* projectile) const {
 	switch (projectile->GetType()) {
 
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
@@ -125,6 +126,8 @@ LevelPiece* CollateralBlock::CollisionOccurred(GameModel* gameModel, Projectile*
 	LevelPiece* newLevelPiece = this;
 
 	switch (projectile->GetType()) {
+
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

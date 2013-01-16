@@ -21,6 +21,8 @@ public:
 
     static BossWeakpoint* BuildWeakpoint(BossBodyPart* part, float lifePoints, float dmgOnBallHit);
 
+    float GetCurrentLifePercentage() const;
+
     // Inherited functions from BossBodyPart
 	void CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile);
@@ -29,6 +31,7 @@ public:
     bool GetIsDestroyed() const;
     
 private:
+    const float totalLifePoints;
     float currLifePoints;
     float dmgOnBallHit;
     
@@ -36,6 +39,11 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(BossWeakpoint);
 };
+
+inline float BossWeakpoint::GetCurrentLifePercentage() const {
+    assert(this->currLifePoints <= this->totalLifePoints);
+    return std::max<float>(0.0f, this->currLifePoints / this->totalLifePoints);
+}
 
 inline bool BossWeakpoint::GetIsDestroyed() const {
     return (this->currLifePoints <= 0);

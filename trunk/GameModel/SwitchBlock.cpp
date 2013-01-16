@@ -173,7 +173,9 @@ void SwitchBlock::UpdateBounds(const LevelPiece* leftNeighbor, const LevelPiece*
 }
 
 bool SwitchBlock::ProjectilePassesThrough(const Projectile* projectile) const {
-    switch (projectile->GetType()) {	
+    switch (projectile->GetType()) {
+
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:
@@ -228,6 +230,8 @@ LevelPiece* SwitchBlock::CollisionOccurred(GameModel* gameModel, Projectile* pro
     // Figure out which switch(es) is/are being affected by the projectile
     LevelPiece* resultingPiece = this;
 	switch (projectile->GetType()) {
+
+        case Projectile::BossLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile:

@@ -141,6 +141,7 @@ LevelPiece* PrismTriangleBlock::CollisionOccurred(GameModel* gameModel, Projecti
 
 	switch (projectile->GetType()) {
 
+        case Projectile::BossLaserBulletProjectile:
         case Projectile::BallLaserBulletProjectile:
 		case Projectile::PaddleLaserBulletProjectile:
         case Projectile::LaserTurretBulletProjectile: {
