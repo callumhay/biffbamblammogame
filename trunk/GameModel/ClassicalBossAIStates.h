@@ -59,9 +59,15 @@ public:
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
     void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
 
+    bool CanHurtPaddleWithBody() const { return this->isAttackingWithArm; }
+
 private:
+    static const float BOSS_HEIGHT;
+    static const float BOSS_WIDTH;
     static const float ARM_LIFE_POINTS;
     static const float ARM_BALL_DAMAGE;
+
+    static const double ARM_ATTACK_DELTA_T;
 
     BossCompositeBodyPart* leftArm;
     BossCompositeBodyPart* rightArm;
@@ -71,6 +77,8 @@ private:
 
     Vector2D currVel;
     Vector2D desiredVel;
+
+    bool isAttackingWithArm;
 
     enum AIState { ChanceAIState, BasicMoveAndLaserSprayAIState, ChasePaddleAIState, 
                    AttackLeftArmAIState, AttackRightArmAIState, AttackBothArmsAIState,
@@ -97,7 +105,7 @@ private:
     void UpdateState(double dT, GameModel* gameModel);
     void UpdateMovement(double dT, GameModel* gameModel);
     void ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameModel);
-    void ExecuteFollowPaddleState(double dT, const PlayerPaddle* paddle);
+    void ExecuteChasePaddleState(double dT, const PlayerPaddle* paddle);
     void ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking);
 
     // Basic boss attribute getters

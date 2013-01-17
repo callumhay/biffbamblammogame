@@ -33,6 +33,7 @@ public:
 
     virtual BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision) = 0;
+    virtual BossBodyPart* CollisionCheck(const PlayerPaddle& paddle) = 0;
 	virtual BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT) = 0;
 	virtual BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) = 0;
 	virtual BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) = 0;

@@ -118,6 +118,31 @@ void BallInPlayState::Tick(double seconds) {
 	// The current set of balls in play
 	std::list<GameBall*>& gameBalls = this->gameModel->GetGameBalls();
 
+    // Boss collisions with the paddle
+    if (currLevel->GetHasBoss()) {
+        Boss* boss = currLevel->GetBoss();
+        assert(boss != NULL);
+        
+        BossBodyPart* collisionBossPart = boss->CollisionCheck(*paddle);
+        if (collisionBossPart != NULL) {
+            
+            boss->CollisionOccurred(this->gameModel, *paddle, collisionBossPart);
+            if (boss->CanHurtPaddleWithBody()) {
+                paddle->HitByBoss(*collisionBossPart);
+            }
+
+            // Make sure the paddle is no longer colliding with the boss
+            Collision::AABB2D bossAABB = collisionBossPart->GenerateWorldAABB();
+            float distXToPaddleCenter = paddle->GetCenterPosition()[0] - bossAABB.GetCenter()[0];
+            if (distXToPaddleCenter < 0) {
+                paddle->SetCenterPosition(Point2D(bossAABB.GetMin()[0] - paddle->GetHalfWidthTotal() - EPSILON, paddle->GetCenterPosition()[1]));
+            }
+            else {
+                paddle->SetCenterPosition(Point2D(bossAABB.GetMax()[0] + paddle->GetHalfWidthTotal() + EPSILON, paddle->GetCenterPosition()[1]));
+            }
+        }
+    }
+
 #ifdef _DEBUG
 	// Pause the ball from moving
 	if ((this->gameModel->GetPauseState() & GameModel::PauseBall) == NULL) {
@@ -319,7 +344,9 @@ void BallInPlayState::Tick(double seconds) {
 						// Make sure it's normalized (just use signof function to get either -1 or 1)
 						xRecoilDir = NumberFuncs::SignOf(xRecoilDir);
 						// Now we need to apply an impulse to the paddle in the direction of the recoil...
-                        paddle->ApplyImpulseForce(std::max<float>(PlayerPaddle::DEFAULT_MAX_SPEED/2.0f * xRecoilDir, fabs(paddle->GetSpeed()) * xRecoilDir));
+
+                        float impulseAmt = std::max<float>(PlayerPaddle::DEFAULT_MAX_SPEED/2.0f * xRecoilDir, fabs(paddle->GetSpeed()) * xRecoilDir);
+                        paddle->ApplyImpulseForce(impulseAmt, 2*impulseAmt);
 					}
 					else {
 						// Make the ball react to the collision
@@ -407,7 +434,7 @@ void BallInPlayState::Tick(double seconds) {
 			}
 		}
 	}
-	
+
 	// Move the last ball that hit the paddle to the front of the list of balls
 	if (ballToMoveToFront != NULL) {
 		gameBalls.remove(ballToMoveToFront);

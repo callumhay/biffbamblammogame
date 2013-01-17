@@ -55,6 +55,19 @@ BossBodyPart* BossCompositeBodyPart::CollisionCheck(const GameBall& ball, double
     return bestChoice;
 }
 
+BossBodyPart* BossCompositeBodyPart::CollisionCheck(const PlayerPaddle& paddle) {
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        BossBodyPart* result = part->CollisionCheck(paddle);
+        
+        if (result != NULL) {
+            return result;
+        }
+    }
+
+    return NULL;
+}
+
 BossBodyPart* BossCompositeBodyPart::CollisionCheck(const Collision::Ray2D& ray, float& rayT) {
     float bestRayT = FLT_MAX;
     BossBodyPart* bestChoice = NULL;

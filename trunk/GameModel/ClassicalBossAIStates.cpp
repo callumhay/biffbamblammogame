@@ -51,9 +51,13 @@ void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
     currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
+    currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
 
     // Left fan-out of lasers
     currLaserDir = initLaserDir;
+    currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
+    gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
     currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
     currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
@@ -64,14 +68,19 @@ void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
 
 // BEGIN ArmsBodyHeadAI ************************************************************
 
+const float ArmsBodyHeadAI::BOSS_HEIGHT = 13.0f;
+const float ArmsBodyHeadAI::BOSS_WIDTH = 23.8f;
+
 const float ArmsBodyHeadAI::ARM_LIFE_POINTS = 300.0f;
 const float ArmsBodyHeadAI::ARM_BALL_DAMAGE = 100.0f;
 
 const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
 
+const double ArmsBodyHeadAI::ARM_ATTACK_DELTA_T = 0.4;
+
 ArmsBodyHeadAI::ArmsBodyHeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), currState(ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState),
 leftArm(NULL), rightArm(NULL), leftArmSqrWeakpt(NULL), rightArmSqrWeakpt(NULL), currVel(0.0f, 0.0f), desiredVel(0.0f, 0.0f),
-countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0) {
+countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0), isAttackingWithArm(false) {
     
     // Grab the parts of the boss that matter to this AI state...
     this->leftArm  = static_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->leftArmIdx]);
@@ -174,7 +183,7 @@ countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0) {
         std::vector<double> timeValues;
         timeValues.reserve(5);
         timeValues.push_back(0.0);
-        timeValues.push_back(0.4);
+        timeValues.push_back(ARM_ATTACK_DELTA_T);
         timeValues.push_back(0.48);
         timeValues.push_back(1.0);
         timeValues.push_back(2.5);
@@ -191,7 +200,7 @@ countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0) {
         this->armAttackYMovementAnim.SetRepeat(false);
     }
 
-    this->SetState(ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState);
+    this->SetState(ArmsBodyHeadAI::ChasePaddleAIState);//BasicMoveAndLaserSprayAIState);
 }
 
 ArmsBodyHeadAI::~ArmsBodyHeadAI() {
@@ -269,7 +278,7 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
 
         case ArmsBodyHeadAI::ChasePaddleAIState: {
             const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
-            this->ExecuteFollowPaddleState(dT, paddle);
+            this->ExecuteChasePaddleState(dT, paddle);
             break;
         }
 
@@ -328,14 +337,18 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
     // The basic movement state occurs further away from the paddle, closer to the top of the level.
     // Make sure we've moved up high enough...
     float avgBasicMoveHeight = this->GetBasicMovementHeight(level);
-    float upDownDistance     = this->boss->GetAliveHeight() / 5.0f;
+    float upDownDistance     = ArmsBodyHeadAI::BOSS_HEIGHT / 6.0f;
     float moveToTopDiff      = avgBasicMoveHeight - bossPos[1];
     
     if (bossPos[1] < avgBasicMoveHeight - upDownDistance) {
         this->desiredVel[1] = this->GetMaxSpeed() / 2.0f;
     }
-    if (bossPos[1] > avgBasicMoveHeight + upDownDistance) {
+    else if (bossPos[1] > avgBasicMoveHeight + upDownDistance) {
         this->desiredVel[1] = -this->GetMaxSpeed() / 2.0f;
+    }
+    
+    if (fabs(this->desiredVel[1]) < EPSILON) {
+        this->desiredVel[1] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed() / 1.25f;
     }
         
     // Side-to-side movement is basic back and forth linear translation...
@@ -390,7 +403,7 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
 
 }
 
-void ArmsBodyHeadAI::ExecuteFollowPaddleState(double dT, const PlayerPaddle* paddle) {
+void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, const PlayerPaddle* paddle) {
     assert(paddle != NULL);
 
     const Point2D& paddlePos = paddle->GetCenterPosition();
@@ -400,9 +413,7 @@ void ArmsBodyHeadAI::ExecuteFollowPaddleState(double dT, const PlayerPaddle* pad
 
     // Make sure the boss is at the right height from the paddle...
     if (bossPos[1] > this->GetFollowAndAttackHeight()) {
-        if (bossPos[1] > this->GetFollowAndAttackHeight()) {
-            this->desiredVel[1] = -this->GetMaxSpeed() / 2.0f;
-        }
+        this->desiredVel[1] = -this->GetMaxSpeed() / 2.0f;
     }
     else {
         this->currVel[1]    = 0.0f;
@@ -485,8 +496,18 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
         if (isRightArmAttacking) {
             this->rightArm->SetWorldTransform(Matrix4x4::translationMatrix(Vector3D(0.0f, armYMovement, 0.0f)) * this->rightArmStartWorldT);
         }
+
+        // If the arm is moving downward then we are in the midst of attacking, set a flag to
+        // indicate that the boss can hurt the paddle while it attacks
+        if (this->armAttackYMovementAnim.GetCurrentTimeValue() <= ARM_ATTACK_DELTA_T) {
+            this->isAttackingWithArm = true;
+        }
+        else {
+            this->isAttackingWithArm = false;
+        }
         
         if (attackIsDone) {
+            this->isAttackingWithArm = false;
             this->leftArm->SetWorldTransform(this->leftArmStartWorldT);
             this->rightArm->SetWorldTransform(this->rightArmStartWorldT);
             this->SetState(ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState);
@@ -509,11 +530,11 @@ Vector2D ArmsBodyHeadAI::GetAcceleration() const {
 }
 
 float ArmsBodyHeadAI::GetBasicMovementHeight(const GameLevel* level) const {
-    return level->GetLevelUnitHeight() - 1.25f * this->boss->GetAliveHeight();
+    return level->GetLevelUnitHeight() - ArmsBodyHeadAI::BOSS_HEIGHT;
 }
 
 float ArmsBodyHeadAI::GetFollowAndAttackHeight() const {
-    return 0.8f * this->GetMaxArmAttackYMovement() + this->boss->GetAliveHeight() / 2.0f;
+    return 0.8f * this->GetMaxArmAttackYMovement() + ArmsBodyHeadAI::BOSS_HEIGHT / 2.0f;
 }
 
 float ArmsBodyHeadAI::GetMaxArmAttackYMovement() const {

@@ -38,6 +38,7 @@ public:
 
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
+    BossBodyPart* CollisionCheck(const PlayerPaddle& paddle) const;
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT) const;
 	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const;
 	BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const;
@@ -51,6 +52,8 @@ public:
 	void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
     void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
+
+    bool CanHurtPaddleWithBody() const;
 
     // DEBUGGING...
 #ifdef _DEBUG
@@ -101,6 +104,10 @@ inline BossBodyPart* Boss::CollisionCheck(const GameBall& ball, double dT, Vecto
                                           double& timeSinceCollision) const {
 
     return this->root->CollisionCheck(ball, dT, n, collisionLine, timeSinceCollision);
+}
+
+inline BossBodyPart* Boss::CollisionCheck(const PlayerPaddle& paddle) const {
+    return this->root->CollisionCheck(paddle);
 }
 
 inline BossBodyPart* Boss::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {

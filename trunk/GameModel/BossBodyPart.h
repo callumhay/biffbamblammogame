@@ -31,6 +31,7 @@ public:
 
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
+    BossBodyPart* CollisionCheck(const PlayerPaddle& paddle);
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT);
 	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir);
 	BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir);
@@ -96,6 +97,14 @@ inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double d
 	}
 
     if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision)) {
+        return this;
+    }
+    return NULL;
+}
+
+inline BossBodyPart* BossBodyPart::CollisionCheck(const PlayerPaddle& paddle) {
+
+    if (this->GetWorldBounds().CollisionCheck(paddle.GetBounds().GenerateAABBFromLines())) {
         return this;
     }
     return NULL;

@@ -29,6 +29,7 @@ class GameBall;
 class PaddleMineProjectile;
 class MineTurretProjectile;
 class MineProjectile;
+class BossBodyPart;
 
 // Represents the player controlled paddle shaped as follows:
 //                -------------
@@ -149,13 +150,6 @@ public:
 		return Vector2D(this->GetSpeed(), 0);
 	}
 
-	//float GetAverageSpeed() const {
-		//return this->avgSpeed;
-	//}
-	//Vector2D GetAverageVelocity() const {
-	//	return Vector2D(this->avgSpeed, 0);
-	//}
-
 	// Paddle size set/get functions
 	const PaddleSize& GetPaddleSize() const {
 		return this->currSize;
@@ -164,7 +158,7 @@ public:
 		return this->currScaleFactor;
 	}
 
-	void ApplyImpulseForce(float xDirectionalForce);
+	void ApplyImpulseForce(float xDirectionalForce, float deaccel);
 
 	// Paddle colour set/get functions
 	const ColourRGBA& GetColour() const {
@@ -231,8 +225,7 @@ public:
         return !this->attachedProjectiles.empty();
     }
 
-    //void HitByBoss(const BossBodyPart& bossPart);
-
+    void HitByBoss(const BossBodyPart& bossPart);
 	void HitByProjectile(GameModel* gameModel, const Projectile& projectile);
 	bool ProjectilePassesThrough(const Projectile& projectile);
     bool ProjectileIsDestroyedOnCollision(const Projectile& projectile);
@@ -309,14 +302,17 @@ private:
 	float currSpeed;      // The current absolute value speed of the paddle in units per second
 	float lastDirection;  // Used to store the last direction the user told the paddle to move in (-1 for left, 1 for right, 0 for no movement)
 	bool moveButtonDown;  // Whether the move button is being held down currently
-	float impulse;        // When there's an immediate impulse applied to the paddle we need to use this and add it directly to the position
-                          // of the paddle (and then immediately reset it to zero)
+
+	float impulse;              // When there's an immediate impulse applied to the paddle
+    float impulseDeceleration;
+    float impulseSpdDecreaseCounter;
 
 	// Colour and animation
-	ColourRGBA colour;															// The colour multiply of the paddle, including its visibility/alpha
+	ColourRGBA colour;									// The colour multiply of the paddle, including its visibility/alpha
 	AnimationLerp<ColourRGBA> colourAnimation;			// Animation associated with the colour
 	AnimationMultiLerp<float> moveDownAnimation;		// Animation for when the paddle is being pushed down by the laser beam (away from the level)
 	AnimationMultiLerp<float> rotAngleZAnimation;		// Animation for rotating the paddle on the plane that the game is played, default angle is zero (pointing up)
+    const void* lastEntityThatHurtHitPaddle;            // Pointer to the last entity that hit the paddle
 
 	BoundingLines bounds;						// Collision bounds of the paddle, kept in paddle space (paddle center is 0,0)
 	
@@ -494,13 +490,6 @@ inline bool PlayerPaddle::ProjectilePassesThrough(const Projectile& projectile) 
 // the paddle.
 inline Collision::Circle2D PlayerPaddle::CreatePaddleShieldBounds() const {
 	return Collision::Circle2D(this->GetCenterPosition(), this->GetHalfWidthTotal());
-}
-
-// Applies an immediate impulse force along the x-axis (movement axis of the paddle)
-inline void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce) {
-	assert(xDirectionalForce != 0.0f);
-	this->lastDirection = NumberFuncs::SignOf(xDirectionalForce);
-	this->impulse = xDirectionalForce;
 }
 
 inline void PlayerPaddle::GenerateRocketDimensions(Point2D& spawnPos, float& width, float& height) const {
