@@ -41,6 +41,8 @@ public:
     void RotateZ(float rotZDegs);
     void Transform(const Matrix4x4& m);
 
+    void SetLocalTranslation(const Vector3D& t);
+
     void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 	void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
     

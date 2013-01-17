@@ -40,6 +40,8 @@ public:
     void RotateZ(float rotZDegs);
     void Transform(const Matrix4x4& m);
 
+    void SetLocalTranslation(const Vector3D& t);
+
 	virtual void CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile);
     virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
@@ -148,6 +150,15 @@ inline void BossBodyPart::RotateZ(float rotZDegs) {
 
 inline void BossBodyPart::Transform(const Matrix4x4& m) {
     this->worldTransform = m * this->worldTransform;
+}
+
+inline void BossBodyPart::SetLocalTranslation(const Vector3D& t) {
+    // Remove the previous local translation from the world transform
+    this->worldTransform = Matrix4x4::translationMatrix(-this->localTranslation) * this->worldTransform;
+    
+    // Change the local translation and apply it to the world transform
+    this->localTranslation = t;
+    this->worldTransform = Matrix4x4::translationMatrix(this->localTranslation) * this->worldTransform;
 }
 
 inline bool BossBodyPart::GetIsDestroyed() const {

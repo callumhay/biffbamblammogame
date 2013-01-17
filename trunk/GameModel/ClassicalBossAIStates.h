@@ -75,6 +75,7 @@ private:
     BossWeakpoint* leftArmSqrWeakpt;
     BossWeakpoint* rightArmSqrWeakpt;
 
+
     Vector2D currVel;
     Vector2D desiredVel;
 
@@ -92,13 +93,15 @@ private:
     static const double LASER_SPRAY_RESET_TIME_IN_SECS;
     double laserSprayCountdown;
     double countdownToNextState;
+    
     // ChasePaddleAIState
     double countdownToAttack;
+    AIState nextAttackState;
+    double temptAttackCountdown;
+
     // AttackLeftArmAIState, AttackRightArmAIState, AttackBothArmsAIState
     AnimationMultiLerp<float> armShakeAnim;
     AnimationMultiLerp<float> armAttackYMovementAnim;
-    Matrix4x4 leftArmStartWorldT;
-    Matrix4x4 rightArmStartWorldT;
     // -----------------------------------------------------------------------------
 
     void SetState(AIState newState);
@@ -114,7 +117,8 @@ private:
 
     // Helper functions for generating various pieces of data across states
     double GenerateBasicMoveTime() const { return 10.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
-    double GenerateFollowTime() const { return 5.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
+    double GenerateChaseTime() const { return 8.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
+    double GenerateTemptAttackTime() const { return 0.66; }
     float GetBasicMovementHeight(const GameLevel* level) const;
     float GetFollowAndAttackHeight() const;
     float GetMaxArmAttackYMovement() const;

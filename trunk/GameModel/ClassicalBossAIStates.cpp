@@ -74,13 +74,14 @@ const float ArmsBodyHeadAI::BOSS_WIDTH = 23.8f;
 const float ArmsBodyHeadAI::ARM_LIFE_POINTS = 300.0f;
 const float ArmsBodyHeadAI::ARM_BALL_DAMAGE = 100.0f;
 
-const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
+const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.65;
 
 const double ArmsBodyHeadAI::ARM_ATTACK_DELTA_T = 0.4;
 
 ArmsBodyHeadAI::ArmsBodyHeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), currState(ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState),
 leftArm(NULL), rightArm(NULL), leftArmSqrWeakpt(NULL), rightArmSqrWeakpt(NULL), currVel(0.0f, 0.0f), desiredVel(0.0f, 0.0f),
-countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0), isAttackingWithArm(false) {
+countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0), isAttackingWithArm(false),
+nextAttackState(ArmsBodyHeadAI::AttackBothArmsAIState), temptAttackCountdown(0.0) {
     
     // Grab the parts of the boss that matter to this AI state...
     this->leftArm  = static_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->leftArmIdx]);
@@ -175,7 +176,7 @@ countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0), isA
         movementValues.push_back(0.0f);
 
         this->armShakeAnim.SetLerp(timeValues, movementValues);
-        this->armShakeAnim.SetRepeat(false);
+        this->armShakeAnim.SetRepeat(true);
     }
 
     // Setup the arm attack animation
@@ -234,7 +235,10 @@ void ArmsBodyHeadAI::SetState(AIState newState) {
             break;
 
         case ArmsBodyHeadAI::ChasePaddleAIState:
-            this->countdownToAttack = this->GenerateFollowTime();
+            this->armShakeAnim.ResetToStart();
+            this->armShakeAnim.SetRepeat(true);
+            this->temptAttackCountdown = this->GenerateTemptAttackTime();
+            this->countdownToAttack    = this->GenerateChaseTime();
             break;
 
         case ArmsBodyHeadAI::AttackLeftArmAIState:
@@ -243,9 +247,9 @@ void ArmsBodyHeadAI::SetState(AIState newState) {
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
             this->armShakeAnim.ResetToStart();
+            this->armShakeAnim.SetRepeat(false);
             this->armAttackYMovementAnim.ResetToStart();
-            this->leftArmStartWorldT  = this->leftArm->GetWorldTransform();
-            this->rightArmStartWorldT = this->rightArm->GetWorldTransform();
+            this->armAttackYMovementAnim.SetRepeat(false);
             break;
 
         case ArmsBodyHeadAI::PrepLaserAIState:
@@ -311,14 +315,19 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
 void ArmsBodyHeadAI::UpdateMovement(double dT, GameModel* gameModel) {
     // Figure out how much to move and update the position of the boss
     if (!this->currVel.IsZero()) {
+        
         Vector2D dMovement = dT * this->currVel;
+        Matrix4x4 movementMatrix = Matrix4x4::translationMatrix(Vector3D(dMovement));
+
         this->boss->alivePartsRoot->Translate(Vector3D(dMovement));
 
         // Update the position of the boss based on whether it is now colliding with the boundaries/walls of the level
         const GameLevel* level = gameModel->GetCurrentLevel();
         Vector2D correctionVec;
         if (level->CollideBossWithLevel(this->boss->alivePartsRoot->GenerateWorldAABB(), correctionVec)) {
-            this->boss->alivePartsRoot->Translate(Vector3D(correctionVec));
+            
+            Vector3D correctionVec3D(correctionVec);
+            this->boss->alivePartsRoot->Translate(correctionVec3D);
         }
     }
 
@@ -348,7 +357,7 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
     }
     
     if (fabs(this->desiredVel[1]) < EPSILON) {
-        this->desiredVel[1] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed() / 1.25f;
+        this->desiredVel[1] = this->GetMaxSpeed() / 2.0f;
     }
         
     // Side-to-side movement is basic back and forth linear translation...
@@ -384,6 +393,8 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
             this->SetState(ArmsBodyHeadAI::ChasePaddleAIState);
         }
         else {
+            this->currVel    = Vector2D(0,0);
+            this->desiredVel = Vector2D(0,0);
             this->SetState(ArmsBodyHeadAI::PrepLaserAIState);
         }
 
@@ -425,37 +436,71 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, const PlayerPaddle* padd
     Vector2D bossToPaddleVec   = paddlePos - bossPos;
     
     // Check to see if we can attack yet (If we're anywhere near the paddle then perform the attack)
-    float absBossToPaddleXDist = fabs(bossToPaddleVec[0]);
-    if (absBossToPaddleXDist <= (ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER + ClassicalBoss::HALF_ARM_WIDTH) &&
-        absBossToPaddleXDist >= (ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER - ClassicalBoss::HALF_ARM_WIDTH)) {
+    
+    Collision::AABB2D paddleAABB   = paddle->GetBounds().GenerateAABBFromLines();
+    Collision::AABB2D leftArmAABB  = this->leftArmSqrWeakpt->GetWorldBounds().GenerateAABBFromLines();
+    Collision::AABB2D rightArmAABB = this->rightArmSqrWeakpt->GetWorldBounds().GenerateAABBFromLines();
+
+    if ((paddleAABB.GetMin()[0] >= leftArmAABB.GetMin()[0] && paddleAABB.GetMin()[0] <= leftArmAABB.GetMax()[0]) || 
+        (paddleAABB.GetMax()[0] <= leftArmAABB.GetMax()[0] && paddleAABB.GetMax()[0] >= leftArmAABB.GetMin()[0]) ||
+        (paddleAABB.GetMin()[0] >= rightArmAABB.GetMin()[0] && paddleAABB.GetMin()[0] <= rightArmAABB.GetMax()[0]) || 
+        (paddleAABB.GetMax()[0] <= rightArmAABB.GetMax()[0] && paddleAABB.GetMax()[0] >= rightArmAABB.GetMin()[0])) {
 
         this->desiredVel[0] = 0.0f;
+        this->currVel[0]    = 0.0f;
 
-        // Attack immediately!
         if (allowedToAttack) {
-            this->SetState(this->DetermineNextArmAttackState(bossToPaddleVec));
+
+            // Use a timer here to make the player 'tempt' the boss to attack with its arm(s)
+            if (this->temptAttackCountdown <= 0.0) {
+                this->leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+                this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+                this->SetState(this->nextAttackState);
+                return;
+            }
+            else {
+                // Shake the appropriate arm and set it up as the next attack state...
+                this->nextAttackState = this->DetermineNextArmAttackState(bossToPaddleVec);
+
+                float shakeAmt = this->armShakeAnim.GetInterpolantValue();
+                this->armShakeAnim.Tick(dT);
+
+                if (this->nextAttackState == AttackLeftArmAIState || this->nextAttackState == AttackBothArmsAIState) {
+                    this->leftArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+                }
+                if (this->nextAttackState == AttackRightArmAIState || this->nextAttackState == AttackBothArmsAIState) {
+                    this->rightArm->SetLocalTranslation(Vector3D(shakeAmt, 0.0f, 0.0f));
+                }
+            }
+            this->temptAttackCountdown -= dT;
         }
-        return;
-    }
-    else if (absBossToPaddleXDist > ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER + ClassicalBoss::HALF_ARM_WIDTH) {
-        this->desiredVel[0] = NumberFuncs::SignOf(bossToPaddleVec[0]) * this->GetMaxSpeed();
     }
     else {
-        // Determine the closest arm to use
-        float xDirSignToPaddle = 0.0f;
-        if (absBossToPaddleXDist < EPSILON) {
-            xDirSignToPaddle = ((Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) ? 1 : -1);
-        }
-        else if (bossToPaddleVec[0] < 0) {
-            // Move the boss away from the paddle
-            xDirSignToPaddle = 1.0f;
+        this->temptAttackCountdown = this->GenerateTemptAttackTime();
+        this->leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+        this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+
+        float absBossToPaddleXDist = fabs(bossToPaddleVec[0]);
+        if (absBossToPaddleXDist > ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER + ClassicalBoss::HALF_ARM_WIDTH) {
+            this->desiredVel[0] = NumberFuncs::SignOf(bossToPaddleVec[0]) * this->GetMaxSpeed();
         }
         else {
-            xDirSignToPaddle = -1.0f;
-        }
+            // Determine the closest arm to use
+            float xDirSignToPaddle = 0.0f;
+            if (absBossToPaddleXDist < EPSILON) {
+                xDirSignToPaddle = ((Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) ? 1 : -1);
+            }
+            else if (bossToPaddleVec[0] < 0) {
+                // Move the boss away from the paddle
+                xDirSignToPaddle = 1.0f;
+            }
+            else {
+                xDirSignToPaddle = -1.0f;
+            }
 
-        // Set the direction of the boss so that it chases the paddle around a bit...
-        this->desiredVel[0] = xDirSignToPaddle * this->GetMaxSpeed();
+            // Set the direction of the boss so that it chases the paddle around a bit...
+            this->desiredVel[0] = xDirSignToPaddle * this->GetMaxSpeed();
+        }
     }
 
     // Check to see if we should go into an attack state yet
@@ -472,15 +517,15 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, const PlayerPaddle* padd
 void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking) {
     
     bool armIsDoneShaking = this->armShakeAnim.Tick(dT);
-    if (!armIsDoneShaking) {
+    if (this->temptAttackCountdown > 0 && !armIsDoneShaking) {
         float shakingMovement = this->armShakeAnim.GetInterpolantValue();
 
         // Animate the arm we are attacking with -- it's shaking to indicate the incoming attack
         if (isLeftArmAttacking) {
-            this->leftArm->SetWorldTransform(Matrix4x4::translationMatrix(Vector3D(shakingMovement, 0.0f, 0.0f)) * this->leftArmStartWorldT);
+            this->leftArm->SetLocalTranslation(Vector3D(shakingMovement, 0.0f, 0.0f));
         }
         if (isRightArmAttacking) {
-            this->rightArm->SetWorldTransform(Matrix4x4::translationMatrix(Vector3D(shakingMovement, 0.0f, 0.0f)) * this->rightArmStartWorldT);
+            this->rightArm->SetLocalTranslation(Vector3D(shakingMovement, 0.0f, 0.0f));
         }
     }
     else {
@@ -491,10 +536,10 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
         // Move the arm based on the attack animation
         float armYMovement = this->armAttackYMovementAnim.GetInterpolantValue();
         if (isLeftArmAttacking) {
-            this->leftArm->SetWorldTransform(Matrix4x4::translationMatrix(Vector3D(0.0f, armYMovement, 0.0f)) * this->leftArmStartWorldT);
+            this->leftArm->SetLocalTranslation(Vector3D(0.0f, armYMovement, 0.0f));
         }
         if (isRightArmAttacking) {
-            this->rightArm->SetWorldTransform(Matrix4x4::translationMatrix(Vector3D(0.0f, armYMovement, 0.0f)) * this->rightArmStartWorldT);
+            this->rightArm->SetLocalTranslation(Vector3D(0.0f, armYMovement, 0.0f));
         }
 
         // If the arm is moving downward then we are in the midst of attacking, set a flag to
@@ -508,8 +553,8 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
         
         if (attackIsDone) {
             this->isAttackingWithArm = false;
-            this->leftArm->SetWorldTransform(this->leftArmStartWorldT);
-            this->rightArm->SetWorldTransform(this->rightArmStartWorldT);
+            this->leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
+            this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
             this->SetState(ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState);
             return;
         }
@@ -548,7 +593,7 @@ ArmsBodyHeadAI::AIState ArmsBodyHeadAI::DetermineNextArmAttackState(const Vector
     float totalLifePercent = (percentLeftArm + percentRightArm) / 2.0f;
     
     bool doBothArmAttack = false;
-    if (Randomizer::GetInstance()->RandomNumZeroToOne() >= (totalLifePercent - 0.05f)) {
+    if (totalLifePercent < 0.5) {
         doBothArmAttack = true;
     }
 
@@ -564,7 +609,5 @@ ArmsBodyHeadAI::AIState ArmsBodyHeadAI::DetermineNextArmAttackState(const Vector
         }
     }
 }
-
-void ExecuteLaserSpray(GameModel* gameModel);
 
 // END ArmsBodyHeadAI **************************************************************

@@ -136,9 +136,11 @@ void BallInPlayState::Tick(double seconds) {
             float distXToPaddleCenter = paddle->GetCenterPosition()[0] - bossAABB.GetCenter()[0];
             if (distXToPaddleCenter < 0) {
                 paddle->SetCenterPosition(Point2D(bossAABB.GetMin()[0] - paddle->GetHalfWidthTotal() - EPSILON, paddle->GetCenterPosition()[1]));
+                paddle->ApplyImpulseForce(-PlayerPaddle::DEFAULT_MAX_SPEED, 4*PlayerPaddle::DEFAULT_MAX_SPEED);
             }
             else {
                 paddle->SetCenterPosition(Point2D(bossAABB.GetMax()[0] + paddle->GetHalfWidthTotal() + EPSILON, paddle->GetCenterPosition()[1]));
+                paddle->ApplyImpulseForce(PlayerPaddle::DEFAULT_MAX_SPEED, 4*PlayerPaddle::DEFAULT_MAX_SPEED);
             }
         }
     }
