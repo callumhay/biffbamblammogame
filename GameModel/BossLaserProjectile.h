@@ -18,6 +18,7 @@ class BossLaserProjectile : public LaserBulletProjectile {
 public:
 	static const float HEIGHT_DEFAULT;
 	static const float WIDTH_DEFAULT;
+    static const float SPD_DEFAULT;
 
     explicit BossLaserProjectile(const Point2D& spawnLoc);
     BossLaserProjectile(const Point2D& spawnLoc, const Vector2D& dirVec);

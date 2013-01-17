@@ -53,8 +53,6 @@ void BossBodyPart::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle)
     if (this->GetIsDestroyed()) {
         return;
     }
-
-    //paddle.HitByBoss(this);
 }
 
 void BossBodyPart::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {

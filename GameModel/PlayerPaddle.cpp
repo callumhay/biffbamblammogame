@@ -17,6 +17,7 @@
 #include "PaddleMineProjectile.h"
 #include "Beam.h"
 #include "FireGlobProjectile.h"
+#include "BossBodyPart.h"
 
 // Default values for the size of the paddle
 const float PlayerPaddle::PADDLE_WIDTH_TOTAL = 3.5f;
@@ -70,7 +71,8 @@ maxSpeed(PlayerPaddle::DEFAULT_MAX_SPEED), acceleration(PlayerPaddle::DEFAULT_AC
 decceleration(PlayerPaddle::DEFAULT_DECCELERATION), timeSinceLastLaserBlast(PADDLE_LASER_BULLET_DELAY), 
 timeSinceLastMineLaunch(PlayerPaddle::PADDLE_MINE_LAUNCH_DELAY),
 moveButtonDown(false), hitWall(false), currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), 
-attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f) {
+attachedBall(NULL), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
+impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL) {
 	this->ResetPaddle();
 }
 
@@ -78,7 +80,8 @@ PlayerPaddle::PlayerPaddle(float minBound, float maxBound) :
 centerPos(0.0f, 0.0f), currSpeed(0.0f), lastDirection(0.0f), moveButtonDown(false), 
 acceleration(PlayerPaddle::DEFAULT_ACCELERATION), decceleration(PlayerPaddle::DEFAULT_DECCELERATION),
 currType(NormalPaddle), currSize(PlayerPaddle::NormalSize), attachedBall(NULL),
-hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f) {
+hitWall(false), isPaddleCamActive(false), colour(1,1,1,1), isFiringBeam(false), impulse(0.0f),
+impulseDeceleration(0.0f), impulseSpdDecreaseCounter(0.0f), lastEntityThatHurtHitPaddle(NULL) {
 
 	this->SetupAnimations();
 	this->SetNewMinMaxLevelBound(minBound, maxBound); // resets the paddle
@@ -104,6 +107,9 @@ void PlayerPaddle::ResetPaddle() {
 	this->acceleration  = PlayerPaddle::DEFAULT_ACCELERATION; 
 	this->decceleration = PlayerPaddle::DEFAULT_DECCELERATION;
 	this->impulse = 0.0f;
+    this->impulseDeceleration = 0.0f;
+    this->impulseSpdDecreaseCounter = 0.0f;
+    this->lastEntityThatHurtHitPaddle = NULL;
     this->attachedProjectiles.clear();
 
 	this->SetupAnimations();
@@ -284,8 +290,8 @@ void PlayerPaddle::FireAttachedBall() {
 	this->attachedBall->SetVelocity(this->attachedBall->GetSpeed(), newReleaseDir);
     
     // Add a brief impulse to the ball's velocity to give the launch a more viseral feeling
-    float impulse = 0.62f * absPaddleSpd;
-    this->attachedBall->ApplyImpulseForce(impulse, impulse); 
+    float ballImpulse = 0.62f * absPaddleSpd;
+    this->attachedBall->ApplyImpulseForce(ballImpulse, ballImpulse); 
 
 	// Re-enable the ball's collisions
 	this->attachedBall->SetBallBallCollisionsEnabled();
@@ -389,8 +395,7 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
 		else {
 			currAcceleration = this->decceleration;
 		}
-		this->currSpeed = std::max<float>(0.0f, std::min<float>(this->maxSpeed, 
-            this->currSpeed + currAcceleration * seconds + this->impulse * seconds));
+		this->currSpeed = std::max<float>(0.0f, std::min<float>(this->maxSpeed, this->currSpeed + currAcceleration * seconds));
 		
         // If the poison paddle is active then the speed is diminished...
         float tempSpd = this->currSpeed;
@@ -398,12 +403,18 @@ void PlayerPaddle::Tick(double seconds, bool pausePaddleMovement, GameModel& gam
             tempSpd = std::max<float>(0.0f, tempSpd - PlayerPaddle::POISON_SPEED_DIMINISH);
         }
         
+        // Apply impulse (if any)...
+        tempSpd += (this->impulse - this->impulseSpdDecreaseCounter);
+        this->impulseSpdDecreaseCounter += this->impulseDeceleration * seconds;
+        if (fabs(this->impulseSpdDecreaseCounter) > fabs(this->impulse)) {
+            this->impulse = 0.0f;
+            this->impulseSpdDecreaseCounter = 0.0f;
+        }
+
         distanceTravelled = tempSpd * this->lastDirection * seconds;
 	}
 
 	float newCenterX = this->centerPos[0] + distanceTravelled;
-	this->impulse = 0.0f;
-
 	float minNewXPos = newCenterX - this->currHalfWidthTotal;
 	float maxNewXPos = newCenterX + this->currHalfWidthTotal;
 	Point2D oldPaddleCenter = this->centerPos;
@@ -592,29 +603,6 @@ void PlayerPaddle::RemovePaddleType(const PaddleType& type) {
 
 // Tells the paddle that it has started to fire the laser beam (or has stopped firing the laser beam)
 void PlayerPaddle::SetIsLaserBeamFiring(bool isFiring) {
-	/*
-	// We don't push the paddle down while firing the laser any more cause it's annoying and
-	// it breaks the safety net, which is annoying and not fun.
-	if (isFiring) {
-
-		// Start up the animation that pushes the paddle down (as if reacting to the sheer
-		// force of the beam pressing down on it)
-		std::vector<double> times;
-		times.reserve(2);
-		times.push_back(0.0f);
-		times.push_back(0.05f);
-
-		std::vector<float> values;
-		values.reserve(2);
-		values.push_back(this->moveDownAnimation.GetInterpolantValue());
-		values.push_back(PlayerPaddle::PADDLE_HEIGHT_TOTAL);
-
-		this->moveDownAnimation.SetLerp(times, values);	// Blended lerp??
-	}
-	else {
-		this->moveDownAnimation.AppendLerp(0.1, 0.0f);
-	}
-	*/
 	this->isFiringBeam = isFiring;
 }
 
@@ -815,6 +803,90 @@ void PlayerPaddle::AttachProjectile(Projectile* projectile) {
 void PlayerPaddle::DetachProjectile(Projectile* projectile){
     assert(projectile != NULL);
     this->attachedProjectiles.remove(projectile);
+}
+
+void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
+
+    Collision::AABB2D bossAABB = bossPart.GenerateWorldAABB();
+    float distXToPaddleCenter = this->GetCenterPosition()[0] - bossAABB.GetCenter()[0];
+
+    // Check to see if the paddle is still reeling from a previous hit, if so then
+    // ignore this one
+    if (this->moveDownAnimation.GetInterpolantValue() != 0.0 ||
+        this->rotAngleZAnimation.GetInterpolantValue() != 0.0 &&
+        this->lastEntityThatHurtHitPaddle == &bossPart) {
+
+        // Just make sure the paddle isn't touching the boss anymore...
+        if (distXToPaddleCenter < 0) {
+            this->SetCenterPosition(Point2D(bossAABB.GetMin()[0] - this->GetHalfWidthTotal(), this->GetCenterPosition()[1]));
+        }
+        else {
+            this->SetCenterPosition(Point2D(bossAABB.GetMax()[0] + this->GetHalfWidthTotal(), this->GetCenterPosition()[1]));
+        }
+
+        return;
+    }
+
+    float distFromCenter = 0.0f;
+    
+	// Find percent distance from edge to center of the paddle
+    float percentNearCenter = this->GetPercentNearPaddleCenter(
+        Point2D(bossAABB.GetCenter()[0] + NumberFuncs::SignOf(distXToPaddleCenter) * bossAABB.GetWidth()/4, bossAABB.GetCenter()[1]), distFromCenter);
+	float percentNearEdge = 1.0 - percentNearCenter;
+
+	static const float MAX_HIT_ROTATION = 80.0f;
+	
+	float rotationAmount = percentNearEdge * MAX_HIT_ROTATION;
+	if (distFromCenter > 0.0) {
+		// The boss hit the 'right' side of the paddle (typically along the positive x-axis)
+		rotationAmount *= -1.0f;
+    }
+
+	// Set up the paddle to move down (and eventually back up) and rotate out of position then eventually back into its position
+	static const double HIT_EFFECT_TIME = 2.5;
+	std::vector<double> times;
+	times.reserve(3);
+	times.push_back(0.0f);
+	times.push_back(0.05f);
+	times.push_back(HIT_EFFECT_TIME);
+
+	static const float MIN_MOVE_DOWN_AMT = 3.0f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+	float totalMaxMoveDown = MIN_MOVE_DOWN_AMT + percentNearCenter * 2.25f * PlayerPaddle::PADDLE_HEIGHT_TOTAL;
+
+	std::vector<float> moveDownValues;
+	moveDownValues.reserve(3);
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue());
+	moveDownValues.push_back(this->moveDownAnimation.GetInterpolantValue() + totalMaxMoveDown);
+	moveDownValues.push_back(0.0f);
+
+	this->moveDownAnimation.SetLerp(times, moveDownValues);
+    this->moveDownAnimation.Tick(0.001);
+
+	times.clear();
+	times.reserve(5);
+	times.push_back(0.0f);
+	times.push_back(0.05f);
+	times.push_back(0.5f);
+	times.push_back(1.0f);
+	times.push_back(HIT_EFFECT_TIME);
+
+	std::vector<float> rotationValues;
+	rotationValues.reserve(5);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue());
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + rotationAmount);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() - 0.25f * rotationAmount);
+	rotationValues.push_back(this->rotAngleZAnimation.GetInterpolantValue() + 0.75f * rotationAmount);
+	rotationValues.push_back(0.0f);
+
+	this->rotAngleZAnimation.SetLerp(times, rotationValues);
+    this->rotAngleZAnimation.Tick(0.001);
+
+    this->lastEntityThatHurtHitPaddle = &bossPart;
+
+    // Push the paddle away from the boss by changing its velocity...
+    //this->SetCenterPosition(this->GetCenterPosition() + Vector2D(distFromCenter, 0.0f));
+    float impulseAmt = NumberFuncs::SignOf(distXToPaddleCenter) * percentNearEdge * 2.0f * PlayerPaddle::DEFAULT_MAX_SPEED;
+    this->ApplyImpulseForce(impulseAmt, 2*impulseAmt);
 }
 
 // Called when the paddle is hit by a projectile
@@ -1073,6 +1145,8 @@ void PlayerPaddle::CollateralBlockProjectileCollision(const Projectile& projecti
 	rotationValues.push_back(0.0f);
 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
+
+    this->lastEntityThatHurtHitPaddle = &projectile;
 }
 
 // A laser bullet just collided with the paddle...
@@ -1136,6 +1210,8 @@ void PlayerPaddle::RocketProjectileCollision(GameModel* gameModel, const RocketP
 
 	this->rotAngleZAnimation.SetLerp(times, rotationValues);
 
+    this->lastEntityThatHurtHitPaddle = &projectile;
+
 	// Rocket explosion!!
 	GameLevel* currentLevel = gameModel->GetCurrentLevel();
 	assert(currentLevel != NULL);
@@ -1159,7 +1235,8 @@ void PlayerPaddle::MineProjectileCollision(GameModel* gameModel, const MineProje
 
     float currHeight = 2.0f * this->GetHalfHeight();
     this->SetPaddleHitByProjectileAnimation(projectile.GetPosition(), 3.5f, 3.0f * currHeight, 2.0f * currHeight, 70.0f);
-    
+    this->lastEntityThatHurtHitPaddle = &projectile;
+
     // Mine explosion!
     GameLevel* currentLevel = gameModel->GetCurrentLevel();
 	assert(currentLevel != NULL);
@@ -1188,6 +1265,8 @@ void PlayerPaddle::FireGlobProjectileCollision(const Projectile& projectile) {
 			assert(false);
 			break;
 	}
+
+    this->lastEntityThatHurtHitPaddle = &projectile;
 }
 
 // Get an idea of how close the given projectile is to the center of the paddle as a percentage
@@ -1257,60 +1336,6 @@ void PlayerPaddle::SetPaddleHitByProjectileAnimation(const Point2D& projectileCe
 }
 
 /**
- * Calculates the number of points the player will get when the paddle hits the ball.
- * Each point amount is added to a list with a possible description of what the points were for.
- */
-/*
-std::list<PointAward> PlayerPaddle::GetPointsForHittingBall(const GameBall& ball) const {
-    std::list<PointAward> pointPairs;
-
-    // Make sure we only award points for a single paddle ball contact - multiple can occur when the player
-    // is moving the paddle into the ball
-    static long timeSinceLastPtsAwarded = 0;
-	long currSystemTime = BlammoTime::GetSystemTimeInMillisecs();
-    if ((currSystemTime - timeSinceLastPtsAwarded) < 100) {
-        return pointPairs;
-    }
-    if ((this->GetPaddleType() & PlayerPaddle::ShieldPaddle) == PlayerPaddle::ShieldPaddle ||
-        (this->GetPaddleType() & PlayerPaddle::StickyPaddle) == PlayerPaddle::StickyPaddle) {
-        // No points are awarded if there's a shield on the paddle or if it's sticky
-        return pointPairs;
-    }
-    
-    // Two major things factor into this: 
-    // 1. How far the ball is from the paddle center (further = more points); exception: bullseye bonus (very close to center)
-    // 2. How fast the paddle is moving when it hits the ball (faster = more points)
-    float centerDiff = fabs(this->GetCenterPosition()[0] - ball.GetCenterPosition2D()[0]);
-    float paddleSpdDiff = (this->maxSpeed - this->currSpeed);
-    assert(centerDiff >= 0.0f);
-    assert(paddleSpdDiff >= 0.0f);
-
-    // Award the points for distance from the paddle center
-    static const int DAREDEVIL_BONUS_POINTS = 200;
-    //static const int BULLSEYE_BONUS_POINTS  = 100;
-    //float oneFifthHalfWidth = this->GetHalfDepthTotal() / 5.0f;
-
-    // Check for the bullseye bonus
-    //if (centerDiff < oneFifthHalfWidth) {
-    //    pointPairs.push_back(PointAward(BULLSEYE_BONUS_POINTS, ScoreTypes::PaddleBullseyeBonus, ball.GetCenterPosition2D()));
-    //}
-    if (centerDiff > (0.5f * ball.GetBounds().Radius() + this->GetHalfWidthTotal())) {
-        // Bonus points are awarded if the player JUST hit the ball on the edge of the paddle
-        pointPairs.push_back(PointAward(DAREDEVIL_BONUS_POINTS, ScoreTypes::PaddleDaredevilBonus, ball.GetCenterPosition2D()));
-    }
-
-    // Award points for paddle speed
-    static const int SPEED_BONUS_POINTS = 50;
-    if (paddleSpdDiff <= EPSILON) {
-        pointPairs.push_back(PointAward(SPEED_BONUS_POINTS, ScoreTypes::SpeedyPaddleBonus, ball.GetCenterPosition2D()));
-    }
-
-    timeSinceLastPtsAwarded = currSystemTime;
-    return pointPairs;
-}
-*/
-
-/**
  * Used to detect and react to situations where the ball is forced up against a wall by the paddle.
  */
 bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, double dT) {
@@ -1329,7 +1354,8 @@ bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, dou
         // Check for the paddle collision...
         if (this->CollisionCheck(ball, dT, normal, collisionLine, timeSinceCollision)) {
             // The paddle is also colliding - we want to push the paddle back so that it is no longer colliding...
-            this->ApplyImpulseForce(std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed()));
+            float impulseAmt = std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed());
+            this->ApplyImpulseForce(impulseAmt, 3*impulseAmt);
             return true;
         }
         
@@ -1341,7 +1367,8 @@ bool PlayerPaddle::UpdateForOpposingForceBallCollision(const GameBall& ball, dou
         // Check for the paddle collision...
         if (this->CollisionCheck(ball, dT, normal, collisionLine, timeSinceCollision)) {
             // The paddle is also colliding - we want to push the paddle back so that it is no longer colliding...
-            this->ApplyImpulseForce(std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed()));
+            float impulseAmt = std::max<float>(DEFAULT_MAX_SPEED/2, this->GetSpeed());
+            this->ApplyImpulseForce(impulseAmt, 3*impulseAmt);
             return true;
         }
     }
@@ -1505,4 +1532,12 @@ bool PlayerPaddle::ProjectileIsDestroyedOnCollision(const Projectile& projectile
 
     return !this->ProjectilePassesThrough(projectile); 
 
+}
+
+void PlayerPaddle::ApplyImpulseForce(float xDirectionalForce, float deaccel) {
+	assert(xDirectionalForce != 0.0f);
+	this->lastDirection = 1;
+	this->impulse = xDirectionalForce;
+    this->impulseDeceleration = deaccel;
+    this->impulseSpdDecreaseCounter = 0.0f;
 }

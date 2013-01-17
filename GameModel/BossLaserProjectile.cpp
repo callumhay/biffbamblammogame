@@ -13,13 +13,14 @@
 
 const float BossLaserProjectile::HEIGHT_DEFAULT	= 1.2f;  // Height of a laser projectile in game units
 const float BossLaserProjectile::WIDTH_DEFAULT	= 0.5f;  // Width of a laser projectile in game units 
+const float BossLaserProjectile::SPD_DEFAULT = 13.0f;
 
 BossLaserProjectile::BossLaserProjectile(const Point2D& spawnLoc) :
-LaserBulletProjectile(spawnLoc, WIDTH_DEFAULT, HEIGHT_DEFAULT, 10.0f, Vector2D(0, -1)) { 
+LaserBulletProjectile(spawnLoc, WIDTH_DEFAULT, HEIGHT_DEFAULT, SPD_DEFAULT, Vector2D(0, -1)) { 
 }
 
 BossLaserProjectile::BossLaserProjectile(const Point2D& spawnLoc, const Vector2D& dirVec) :
-LaserBulletProjectile(spawnLoc, WIDTH_DEFAULT, HEIGHT_DEFAULT, 10.0f, dirVec) { 
+LaserBulletProjectile(spawnLoc, WIDTH_DEFAULT, HEIGHT_DEFAULT, SPD_DEFAULT, dirVec) { 
 }
 
 BossLaserProjectile::BossLaserProjectile(const BossLaserProjectile& copy) :

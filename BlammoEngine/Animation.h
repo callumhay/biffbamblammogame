@@ -272,7 +272,9 @@ public:
 		assert(idx < this->interpolationPts.size());
 		return this->interpolationPts[idx];
     }
-
+    double GetCurrentTimeValue() const {
+        return this->x;
+    }
 	std::vector<double> GetTimeValues() const {
 		return this->timePts;
 	}

@@ -97,6 +97,13 @@ void Boss::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBod
     this->currAIState->CollisionOccurred(gameModel, paddle, collisionPart);
 }
 
+bool Boss::CanHurtPaddleWithBody() const {
+    if (this->currAIState != NULL) {
+        return this->currAIState->CanHurtPaddleWithBody();
+    }
+    return false;
+}
+
 void Boss::SetNextAIState(BossAIState* nextState) {
     if (this->nextAIState != NULL) {
     	delete this->nextAIState;

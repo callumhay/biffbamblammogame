@@ -32,6 +32,7 @@ public:
     // Inherited from AbstractBossBodyPart
     BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
+    BossBodyPart* CollisionCheck(const PlayerPaddle& paddle);
 	BossBodyPart* CollisionCheck(const Collision::Ray2D& ray, float& rayT);
 	BossBodyPart* CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir);
 	BossBodyPart* CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir);
