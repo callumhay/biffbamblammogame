@@ -43,6 +43,10 @@ protected:
     // Attack routines
     void ExecuteLaserSpray(GameModel* gameModel);
 
+    // Shared movement data getters
+    float GetBossMovementMinXBound(const GameLevel* level, float bossWidth) const;
+    float GetBossMovementMaxXBound(const GameLevel* level, float bossWidth) const;
+
 private:
     DISALLOW_COPY_AND_ASSIGN(ClassicalBossAI);
 };
@@ -64,6 +68,7 @@ public:
 private:
     static const float BOSS_HEIGHT;
     static const float BOSS_WIDTH;
+    static const float HALF_BOSS_WIDTH;
     static const float ARM_LIFE_POINTS;
     static const float ARM_BALL_DAMAGE;
 
@@ -75,13 +80,12 @@ private:
     BossWeakpoint* leftArmSqrWeakpt;
     BossWeakpoint* rightArmSqrWeakpt;
 
-
     Vector2D currVel;
     Vector2D desiredVel;
 
     bool isAttackingWithArm;
 
-    enum AIState { ChanceAIState, BasicMoveAndLaserSprayAIState, ChasePaddleAIState, 
+    enum AIState { BasicMoveAndLaserSprayAIState, ChasePaddleAIState, 
                    AttackLeftArmAIState, AttackRightArmAIState, AttackBothArmsAIState,
                    PrepLaserAIState, MoveAndBarrageWithLaserAIState,
                    HurtAIState, LostArmsAngryAIState };
@@ -102,14 +106,24 @@ private:
     // AttackLeftArmAIState, AttackRightArmAIState, AttackBothArmsAIState
     AnimationMultiLerp<float> armShakeAnim;
     AnimationMultiLerp<float> armAttackYMovementAnim;
+
+    // ExecutePrepLaserState
+    double countdownToLaserBarrage;
+    float movingDir;
+
+    // MoveAndBarrageWithLaserAIState
+    double laserShootTimer;
+    std::vector<float> laserAngles;
     // -----------------------------------------------------------------------------
 
     void SetState(AIState newState);
     void UpdateState(double dT, GameModel* gameModel);
     void UpdateMovement(double dT, GameModel* gameModel);
     void ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameModel);
-    void ExecuteChasePaddleState(double dT, const PlayerPaddle* paddle);
+    void ExecuteChasePaddleState(double dT, GameModel* gameModel);
     void ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking);
+    void ExecutePrepLaserState(double dT, GameModel* gameModel);
+    void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
 
     // Basic boss attribute getters
     float GetMaxSpeed() const;
@@ -118,10 +132,15 @@ private:
     // Helper functions for generating various pieces of data across states
     double GenerateBasicMoveTime() const { return 10.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
     double GenerateChaseTime() const { return 8.0 + Randomizer::GetInstance()->RandomNumZeroToOne() * 5.0; }
-    double GenerateTemptAttackTime() const { return 0.66; }
+    double GenerateTemptAttackTime() const { return 1.0; }
+    double GetLaserChargeTime() const { return 1.5; }
+    double GetTimeBetweenLaserBarrageShots() const { return 0.1 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.1; }
+    
     float GetBasicMovementHeight(const GameLevel* level) const;
     float GetFollowAndAttackHeight() const;
     float GetMaxArmAttackYMovement() const;
+    float GetPrepLaserHeight(const GameLevel* level) const;
+
     ArmsBodyHeadAI::AIState DetermineNextArmAttackState(const Vector2D& bossToPaddleVec) const;
 
     DISALLOW_COPY_AND_ASSIGN(ArmsBodyHeadAI);

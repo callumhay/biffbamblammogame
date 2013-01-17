@@ -24,16 +24,20 @@ public:
     float GetCurrentLifePercentage() const;
 
     // Inherited functions from BossBodyPart
+    void Tick(double dT);
 	void CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile);
     //void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
     void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
     bool GetIsDestroyed() const;
+    ColourRGBA GetColour() const;
     
 private:
+    AnimationMultiLerp<Colour> colourAnim; 
     const float totalLifePoints;
     float currLifePoints;
     float dmgOnBallHit;
+
     
     void Diminish(float damageAmt, GameModel* gameModel);
 
@@ -47,6 +51,10 @@ inline float BossWeakpoint::GetCurrentLifePercentage() const {
 
 inline bool BossWeakpoint::GetIsDestroyed() const {
     return (this->currLifePoints <= 0);
+}
+
+inline ColourRGBA BossWeakpoint::GetColour() const {
+    return ColourRGBA(this->colourAnim.GetInterpolantValue(), 1.0f);
 }
 
 #endif // __BOSSWEAKPOINT_H__

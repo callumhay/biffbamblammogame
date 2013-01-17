@@ -29,6 +29,8 @@ public:
     const BoundingLines& GetLocalBounds() const;
     BoundingLines GetWorldBounds() const;
 
+    virtual void Tick(double dT) { UNUSED_PARAMETER(dT); } 
+
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
     BossBodyPart* CollisionCheck(const PlayerPaddle& paddle);
@@ -54,8 +56,8 @@ public:
     bool IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const;
 
     virtual bool GetIsDestroyed() const;
+    virtual ColourRGBA GetColour() const { return ColourRGBA(1,1,1,1); }
 
-    Collision::AABB2D GenerateLocalAABB() const;
     Collision::AABB2D GenerateWorldAABB() const;
 
 	// Track the status of the body part, effects its properties and how it works/acts
@@ -163,10 +165,6 @@ inline void BossBodyPart::SetLocalTranslation(const Vector3D& t) {
 
 inline bool BossBodyPart::GetIsDestroyed() const {
     return false;
-}
-
-inline Collision::AABB2D BossBodyPart::GenerateLocalAABB() const {
-    return this->GetLocalBounds().GenerateAABBFromLines();
 }
 
 inline Collision::AABB2D BossBodyPart::GenerateWorldAABB() const {

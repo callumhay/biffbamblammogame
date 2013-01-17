@@ -84,16 +84,12 @@ private:
 };
 
 inline float Boss::GetAliveHeight() const {
-    return this->alivePartsRoot->GenerateLocalAABB().GetHeight();
+    return this->alivePartsRoot->GenerateWorldAABB().GetHeight();
 }
 
 inline float Boss::GetAliveWidth() const {
-    return this->alivePartsRoot->GenerateLocalAABB().GetWidth();
+    return this->alivePartsRoot->GenerateWorldAABB().GetWidth();
 }
-
-//inline Collision::AABB2D Boss::GenerateWorldAABB() const {
-//    return this->alivePartsRoot->GenerateWorldAABB();
-//}
 
 inline void Boss::Translate(const Vector3D& t) {
     this->root->Translate(t);

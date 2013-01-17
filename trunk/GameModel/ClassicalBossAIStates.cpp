@@ -62,6 +62,15 @@ void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
     currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
+
+}
+
+float ClassicalBossAI::GetBossMovementMinXBound(const GameLevel* level, float bossWidth) const {
+    return bossWidth / 1.4f + LevelPiece::PIECE_WIDTH;
+}
+
+float ClassicalBossAI::GetBossMovementMaxXBound(const GameLevel* level, float bossWidth) const {
+    return level->GetLevelUnitWidth() - this->GetBossMovementMinXBound(level, bossWidth);
 }
 
 // END ClassicalBossAI *************************************************************
@@ -69,19 +78,20 @@ void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
 // BEGIN ArmsBodyHeadAI ************************************************************
 
 const float ArmsBodyHeadAI::BOSS_HEIGHT = 13.0f;
-const float ArmsBodyHeadAI::BOSS_WIDTH = 23.8f;
+const float ArmsBodyHeadAI::BOSS_WIDTH = 25.0f;
+const float ArmsBodyHeadAI::HALF_BOSS_WIDTH = ArmsBodyHeadAI::BOSS_WIDTH / 2.0f;
 
 const float ArmsBodyHeadAI::ARM_LIFE_POINTS = 300.0f;
 const float ArmsBodyHeadAI::ARM_BALL_DAMAGE = 100.0f;
 
-const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.65;
+const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.4;
 
 const double ArmsBodyHeadAI::ARM_ATTACK_DELTA_T = 0.4;
 
 ArmsBodyHeadAI::ArmsBodyHeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), currState(ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState),
 leftArm(NULL), rightArm(NULL), leftArmSqrWeakpt(NULL), rightArmSqrWeakpt(NULL), currVel(0.0f, 0.0f), desiredVel(0.0f, 0.0f),
 countdownToNextState(0.0), countdownToAttack(0.0), laserSprayCountdown(0.0), isAttackingWithArm(false),
-nextAttackState(ArmsBodyHeadAI::AttackBothArmsAIState), temptAttackCountdown(0.0) {
+nextAttackState(ArmsBodyHeadAI::AttackBothArmsAIState), temptAttackCountdown(0.0), countdownToLaserBarrage(0.0) {
     
     // Grab the parts of the boss that matter to this AI state...
     this->leftArm  = static_cast<BossCompositeBodyPart*>(boss->bodyParts[boss->leftArmIdx]);
@@ -99,6 +109,15 @@ nextAttackState(ArmsBodyHeadAI::AttackBothArmsAIState), temptAttackCountdown(0.0
 
     assert(this->leftArm != NULL && this->rightArm != NULL && this->leftArmSqrWeakpt != NULL &&
         this->rightArmSqrWeakpt != NULL);
+
+    // Setup laser barrage angles
+    const float angleIncrement = 17;
+    this->laserAngles.reserve(5);
+    this->laserAngles.push_back(-2*angleIncrement);
+    this->laserAngles.push_back(-angleIncrement);
+    this->laserAngles.push_back(0);
+    this->laserAngles.push_back(angleIncrement);
+    this->laserAngles.push_back(2*angleIncrement);
 
     // Setup arm shaking animation
     {
@@ -201,7 +220,7 @@ nextAttackState(ArmsBodyHeadAI::AttackBothArmsAIState), temptAttackCountdown(0.0
         this->armAttackYMovementAnim.SetRepeat(false);
     }
 
-    this->SetState(ArmsBodyHeadAI::ChasePaddleAIState);//BasicMoveAndLaserSprayAIState);
+    this->SetState(ArmsBodyHeadAI::PrepLaserAIState);//BasicMoveAndLaserSprayAIState);
 }
 
 ArmsBodyHeadAI::~ArmsBodyHeadAI() {
@@ -224,10 +243,8 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddl
 }
 
 void ArmsBodyHeadAI::SetState(AIState newState) {
-    switch (newState) {
 
-        case ArmsBodyHeadAI::ChanceAIState:
-            break;
+    switch (newState) {
 
         case ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState:
             this->laserSprayCountdown  = ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS;
@@ -253,8 +270,12 @@ void ArmsBodyHeadAI::SetState(AIState newState) {
             break;
 
         case ArmsBodyHeadAI::PrepLaserAIState:
+            this->countdownToLaserBarrage = this->GetLaserChargeTime();
+            this->movingDir = Randomizer::GetInstance()->RandomNegativeOrPositive();
             break;
         case ArmsBodyHeadAI::MoveAndBarrageWithLaserAIState:
+            this->laserShootTimer = 0.0;
+            this->movingDir = -this->movingDir;
             break;
 
         case ArmsBodyHeadAI::HurtAIState:
@@ -271,20 +292,16 @@ void ArmsBodyHeadAI::SetState(AIState newState) {
 }
 
 void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
-    switch (this->currState) {
 
-        case ArmsBodyHeadAI::ChanceAIState:
-            break;
+    switch (this->currState) {
 
         case ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState:
             this->ExecuteBasicMoveAndLaserSprayState(dT, gameModel);
             break;
 
-        case ArmsBodyHeadAI::ChasePaddleAIState: {
-            const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
-            this->ExecuteChasePaddleState(dT, paddle);
+        case ArmsBodyHeadAI::ChasePaddleAIState:
+            this->ExecuteChasePaddleState(dT, gameModel);
             break;
-        }
 
         case ArmsBodyHeadAI::AttackLeftArmAIState:
             this->ExecuteArmAttackState(dT, true, false);
@@ -297,8 +314,10 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
             break;
 
         case ArmsBodyHeadAI::PrepLaserAIState:
+            this->ExecutePrepLaserState(dT, gameModel);
             break;
         case ArmsBodyHeadAI::MoveAndBarrageWithLaserAIState:
+            this->ExecuteMoveAndBarrageWithLaserState(dT, gameModel);
             break;
 
         case ArmsBodyHeadAI::HurtAIState:
@@ -361,16 +380,15 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
     }
         
     // Side-to-side movement is basic back and forth linear translation...
-    float bossWidth = this->boss->GetAliveWidth();
-    if (bossPos[0] <= bossWidth) {
-        this->desiredVel[0] = this->GetMaxSpeed() / 1.25f;
+    if (bossPos[0] <= this->GetBossMovementMinXBound(level, BOSS_WIDTH)) {
+        this->desiredVel[0] = this->GetMaxSpeed() / 1.33f;
     }
-    else if (bossPos[0] >= level->GetLevelUnitWidth() - bossWidth) {
-        this->desiredVel[0] = -this->GetMaxSpeed() / 1.25f;
+    else if (bossPos[0] >= this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
+        this->desiredVel[0] = -this->GetMaxSpeed() / 1.33f;
     }
     
     if (fabs(this->desiredVel[0]) < EPSILON) {
-        this->desiredVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed() / 1.25f;
+        this->desiredVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed() / 1.33f;
     }
 
     if (this->countdownToNextState <= 0.0) {
@@ -414,8 +432,13 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
 
 }
 
-void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, const PlayerPaddle* paddle) {
+void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, GameModel* gameModel) {
+    assert(gameModel != NULL);
+
+    const PlayerPaddle* paddle = gameModel->GetPlayerPaddle();
     assert(paddle != NULL);
+    const GameLevel* level = gameModel->GetCurrentLevel();
+    assert(level != NULL);
 
     const Point2D& paddlePos = paddle->GetCenterPosition();
     Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
@@ -476,7 +499,6 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, const PlayerPaddle* padd
         }
     }
     else {
-        this->temptAttackCountdown = this->GenerateTemptAttackTime();
         this->leftArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
         this->rightArm->SetLocalTranslation(Vector3D(0.0f, 0.0f, 0.0f));
 
@@ -501,6 +523,18 @@ void ArmsBodyHeadAI::ExecuteChasePaddleState(double dT, const PlayerPaddle* padd
             // Set the direction of the boss so that it chases the paddle around a bit...
             this->desiredVel[0] = xDirSignToPaddle * this->GetMaxSpeed();
         }
+    }
+
+    // Make sure the boss isn't to far to either side...
+    if (bossPos[0] < this->GetBossMovementMinXBound(level, BOSS_WIDTH)) {
+        this->desiredVel[0] = 0.0f;
+        this->currVel[0] = 0.0f;
+        this->boss->alivePartsRoot->Translate(Vector3D(this->GetBossMovementMinXBound(level, BOSS_WIDTH) - bossPos[0], 0.0f, 0.0f));
+    }
+    else if (bossPos[0] > this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
+        this->desiredVel[0] = 0.0f;
+        this->currVel[0] = 0.0f;
+        this->boss->alivePartsRoot->Translate(Vector3D(this->GetBossMovementMaxXBound(level, BOSS_WIDTH) - bossPos[0], 0.0f, 0.0f));
     }
 
     // Check to see if we should go into an attack state yet
@@ -561,6 +595,98 @@ void ArmsBodyHeadAI::ExecuteArmAttackState(double dT, bool isLeftArmAttacking, b
     }
 }
 
+void ArmsBodyHeadAI::ExecutePrepLaserState(double dT, GameModel* gameModel) {
+    assert(gameModel != NULL);
+
+    const GameLevel* level = gameModel->GetCurrentLevel();
+    assert(level != NULL);
+
+    // Make sure the boss is at the proper height in the level for firing the laser
+    Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
+
+    bool allowedToAttack = true;
+
+    // Make sure the boss is at the correct height...
+    const float laserPrepHeight = this->GetPrepLaserHeight(level);
+    if (bossPos[1] > laserPrepHeight + LevelPiece::PIECE_HEIGHT) {
+        this->desiredVel[1] = -this->GetMaxSpeed() / 3.0f;
+        allowedToAttack = false;
+    }
+    else if (bossPos[1] < laserPrepHeight - LevelPiece::PIECE_HEIGHT) {
+        this->desiredVel[1] = this->GetMaxSpeed() / 3.0f;
+        allowedToAttack = false;
+    }
+
+    // Make sure the boss is at the correct side of the level
+    if (bossPos[0] > this->GetBossMovementMinXBound(level, BOSS_WIDTH) && 
+        bossPos[0] < this->GetBossMovementMaxXBound(level, BOSS_WIDTH)) {
+
+        this->desiredVel[0] = this->movingDir * this->GetMaxSpeed();
+        allowedToAttack = false;
+    }
+
+    if (allowedToAttack) {
+        this->currVel    = Vector2D(0.0f, 0.0f);
+        this->desiredVel = Vector2D(0.0f, 0.0f);
+
+        // Charge up the laser barrage...
+        if (this->countdownToLaserBarrage <= 0.0) {
+            this->SetState(ArmsBodyHeadAI::MoveAndBarrageWithLaserAIState);
+        }
+        else {
+            if (this->countdownToLaserBarrage == this->GetLaserChargeTime()) {
+                // EVENT: Charging for laser barrage...
+                // TODO
+            }
+            this->countdownToLaserBarrage -= dT;
+        }
+    }
+}
+
+
+void ArmsBodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel) {
+    assert(gameModel != NULL);
+
+    const GameLevel* level = gameModel->GetCurrentLevel();
+    assert(level != NULL);
+
+    this->desiredVel[1] = 0.0f;
+    this->currVel[1] = 0.0f;
+
+    Point2D bossPos = this->boss->alivePartsRoot->GetTranslationPt2D();
+
+    // Start moving across the entire screen firing lasers
+    bool finishedMoving = movingDir < 0 && bossPos[0] <= this->GetBossMovementMinXBound(level, BOSS_WIDTH) ||
+                          movingDir > 0 && bossPos[0] >= this->GetBossMovementMaxXBound(level, BOSS_WIDTH);
+
+    if (finishedMoving) {
+        this->desiredVel[0] = 0.0f;
+        this->currVel[0] = 0.0f;
+
+        // We're finished moving, leave this state
+        this->SetState(ArmsBodyHeadAI::ChasePaddleAIState);
+    }
+    else {
+        this->desiredVel[0] = this->movingDir * this->GetMaxSpeed() / 5.5f;
+    }
+
+    // Determine whether we're shooting a laser
+    if (this->laserShootTimer <= 0.0) {
+        // Fire a laser downwards within a small cone
+        Vector2D laserDir(0, -1);
+        laserDir.Rotate(this->laserAngles[Randomizer::GetInstance()->RandomUnsignedInt() % this->laserAngles.size()]);
+
+        Point2D eyePos = this->boss->GetEye()->GetTranslationPt2D();
+        gameModel->AddProjectile(new BossLaserProjectile(eyePos, laserDir));
+
+        this->laserShootTimer = this->GetTimeBetweenLaserBarrageShots();
+    }
+    else {
+        this->laserShootTimer -= dT;
+    }
+
+}
+
 float ArmsBodyHeadAI::GetMaxSpeed() const {
     return ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED;
 }
@@ -584,6 +710,10 @@ float ArmsBodyHeadAI::GetFollowAndAttackHeight() const {
 
 float ArmsBodyHeadAI::GetMaxArmAttackYMovement() const {
     return 0.7f * ClassicalBoss::ARM_HEIGHT;
+}
+
+float ArmsBodyHeadAI::GetPrepLaserHeight(const GameLevel* level) const {
+    return level->GetLevelUnitHeight() - ArmsBodyHeadAI::BOSS_HEIGHT;
 }
 
 ArmsBodyHeadAI::AIState ArmsBodyHeadAI::DetermineNextArmAttackState(const Vector2D& bossToPaddleVec) const {

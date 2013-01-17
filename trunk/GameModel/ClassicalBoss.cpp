@@ -18,7 +18,7 @@
 
 using namespace classicalbossai;
 
-const float ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER = 10.246f;
+const float ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER = 10.25f;
 const float ClassicalBoss::ARM_WIDTH = 2.4f;
 const float ClassicalBoss::HALF_ARM_WIDTH = ARM_WIDTH / 2.0f;
 const float ClassicalBoss::ARM_HEIGHT = 9.66f;
@@ -267,12 +267,12 @@ void ClassicalBoss::Init() {
                 this->bodyParts.push_back(base);
             }
 
-            // leftArm
-            this->BuildArm(Vector3D(-ARM_X_TRANSLATION_FROM_CENTER, 0.0f, 0.0f), this->leftArmIdx, this->leftRestOfArmIdx, this->leftArmSquareIdx);
+            // leftArm 
+            this->BuildArm(Vector3D(-ARM_X_TRANSLATION_FROM_CENTER, -0.834f, 0.0f), this->leftArmIdx, this->leftRestOfArmIdx, this->leftArmSquareIdx);
 
             // rightArm
-            this->BuildArm(Vector3D(ARM_X_TRANSLATION_FROM_CENTER, 0.0f, 0.0f), this->rightArmIdx, this->rightRestOfArmIdx, this->rightArmSquareIdx);
-
+            this->BuildArm(Vector3D(ARM_X_TRANSLATION_FROM_CENTER, -0.834f, 0.0f), this->rightArmIdx, this->rightRestOfArmIdx, this->rightArmSquareIdx);
+ 
         } // end alivePartsRoot
     } // end root
 

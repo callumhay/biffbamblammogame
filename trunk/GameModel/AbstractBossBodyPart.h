@@ -31,6 +31,8 @@ public:
     AbstractBossBodyPart();
     virtual ~AbstractBossBodyPart();
 
+    virtual void Tick(double dT) = 0;
+
     virtual BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision) = 0;
     virtual BossBodyPart* CollisionCheck(const PlayerPaddle& paddle) = 0;
@@ -51,7 +53,6 @@ public:
 
     virtual bool GetIsDestroyed() const = 0;
 
-    virtual Collision::AABB2D GenerateLocalAABB() const = 0;
     virtual Collision::AABB2D GenerateWorldAABB() const = 0;
 
     const Matrix4x4& GetWorldTransform() const { return this->worldTransform; }
