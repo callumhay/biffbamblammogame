@@ -74,17 +74,21 @@ void ClassicalBossMesh::Tick(double dT) {
 void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLight,
                              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // worldspace locations...
+
+    ColourRGBA currColour(1,1,1,1);
 
     // Eye...
     const BossBodyPart* eye = this->boss->GetEye();
     assert(eye != NULL);
     glPushMatrix();
     glMultMatrixf(eye->GetWorldTransform().begin());
+    
+    currColour = eye->GetColour();
+    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
     this->eyeMesh->Draw(camera, keyLight, fillLight, ballLight);
+    
     glPopMatrix();
 
     // Pediment...
@@ -92,7 +96,11 @@ void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLig
     assert(pediment != NULL);
     glPushMatrix();
     glMultMatrixf(pediment->GetWorldTransform().begin());
+    
+    currColour = pediment->GetColour();
+    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
     this->pedimentMesh->Draw(camera, keyLight, fillLight, ballLight);
+    
     glPopMatrix();
 
     // Tablatures
@@ -105,9 +113,15 @@ void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLig
     assert(bottomLeftTab != NULL);
     assert(bottomRightTab != NULL);
 
+    // All tablatures have the same colour...
+    currColour = topLeftTab->GetColour();
+    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+
     glPushMatrix();
     glMultMatrixf(topLeftTab->GetWorldTransform().begin());
+    
     this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+
     glPopMatrix();
 
     glPushMatrix();
@@ -126,7 +140,13 @@ void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLig
     glPopMatrix();
 
     // Columns
-    std::vector<const BossBodyPart*> columns = this->boss->GetBodyColumns();
+
+    // All columns have the same colour
+    std::vector<const BossBodyPart*> columns = this->boss->GetBodyColumns();   
+
+    currColour = columns.front()->GetColour();
+    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+
     for (int i = 0; i < static_cast<int>(columns.size()); i++) {
         const BossBodyPart* column = columns[i];
         assert(column != NULL);
@@ -141,7 +161,11 @@ void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLig
     assert(base != NULL);
     glPushMatrix();
     glMultMatrixf(base->GetWorldTransform().begin());
+
+    currColour = base->GetColour();
+    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
     this->baseMesh->Draw(camera, keyLight, fillLight, ballLight);
+    
     glPopMatrix();
 
     // Arms
@@ -154,24 +178,42 @@ void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLig
     assert(leftArmSquare != NULL);
     assert(rightArmSquare != NULL);
 
+
+
     glPushMatrix();
     glMultMatrixf(leftRestOfArm->GetWorldTransform().begin());
+
+    currColour = leftRestOfArm->GetColour();
+    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
     this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
+
     glPopMatrix();
 
     glPushMatrix();
     glMultMatrixf(rightRestOfArm->GetWorldTransform().begin());
+
+    currColour = rightRestOfArm->GetColour();
+    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
     this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
+
     glPopMatrix();
 
     glPushMatrix();
     glMultMatrixf(leftArmSquare->GetWorldTransform().begin());
+
+    currColour = leftArmSquare->GetColour();
+    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
     this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+
     glPopMatrix();
 
     glPushMatrix();
     glMultMatrixf(rightArmSquare->GetWorldTransform().begin());
+
+    currColour = rightArmSquare->GetColour();
+    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
     this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+
     glPopMatrix();
 
 }

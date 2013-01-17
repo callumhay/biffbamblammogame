@@ -28,6 +28,13 @@ void BossCompositeBodyPart::RemoveBodyPart(AbstractBossBodyPart* part) {
     }
 }
 
+void BossCompositeBodyPart::Tick(double dT) {
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->Tick(dT);
+    }
+}
+
 BossBodyPart* BossCompositeBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                                     Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
 
@@ -247,27 +254,6 @@ bool BossCompositeBodyPart::GetIsDestroyed() const {
         }
     }
     return true;
-}
-
-Collision::AABB2D BossCompositeBodyPart::GenerateLocalAABB() const {
-    int i = 0;
-    Collision::AABB2D result;
-    while (result.IsEmpty() && i < static_cast<int>(this->childParts.size())) {
-        const AbstractBossBodyPart* part = this->childParts[i];
-        result = part->GenerateLocalAABB();
-        i++;
-    }
-
-    Collision::AABB2D temp;
-    for (; i < static_cast<int>(this->childParts.size()); i++) {
-        const AbstractBossBodyPart* part = this->childParts[i];
-        temp = part->GenerateLocalAABB();
-        if (!temp.IsEmpty()) {
-            result.AddAABB(temp);
-        }
-    }
-
-    return result;
 }
 
 Collision::AABB2D BossCompositeBodyPart::GenerateWorldAABB() const {

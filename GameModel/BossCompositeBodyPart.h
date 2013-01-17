@@ -30,6 +30,7 @@ public:
     void RemoveBodyPart(AbstractBossBodyPart* part); // Not recursive
 
     // Inherited from AbstractBossBodyPart
+    void Tick(double dT);
     BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
     BossBodyPart* CollisionCheck(const PlayerPaddle& paddle);
@@ -53,7 +54,6 @@ public:
 
     bool GetIsDestroyed() const;
 
-    Collision::AABB2D GenerateLocalAABB() const;
     Collision::AABB2D GenerateWorldAABB() const;
 
     void SetWorldTransform(const Matrix4x4& m);

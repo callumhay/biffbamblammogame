@@ -15,6 +15,23 @@
 
 BossWeakpoint::BossWeakpoint(float lifePoints, float dmgOnBallHit, const BoundingLines& bounds) :
 BossBodyPart(bounds), totalLifePoints(lifePoints), currLifePoints(lifePoints), dmgOnBallHit(dmgOnBallHit) {
+
+    std::vector<double> timeValues;
+    timeValues.reserve(3);
+    timeValues.push_back(0.0);
+    timeValues.push_back(1.0);
+    timeValues.push_back(2.0);
+    
+    std::vector<Colour> colourValues;
+    colourValues.reserve(3);
+    colourValues.push_back(Colour(1.0f, 0.9f, 0.9f));
+    colourValues.push_back(Colour(1.0f, 0.25f, 0.25f));
+    colourValues.push_back(Colour(1.0f, 0.9f, 0.9f));
+
+    this->colourAnim.SetLerp(timeValues, colourValues);
+    this->colourAnim.SetRepeat(true);
+    this->colourAnim.SetInitialInterpolationValue(Colour(1.0f, 0.9f, 0.9f));
+
 }
 
 BossWeakpoint::~BossWeakpoint() {
@@ -33,6 +50,10 @@ BossWeakpoint* BossWeakpoint::BuildWeakpoint(BossBodyPart* part, float lifePoint
     result->worldTransform  = part->GetWorldTransform();
 
     return result;
+}
+
+void BossWeakpoint::Tick(double dT) {
+    this->colourAnim.Tick(dT);
 }
 
 void BossWeakpoint::CollisionOccurred(GameModel* gameModel, GameBall& ball) {

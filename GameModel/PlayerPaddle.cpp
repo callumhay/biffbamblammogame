@@ -819,11 +819,9 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
         // Just make sure the paddle isn't touching the boss anymore...
         if (distXToPaddleCenter < 0) {
             this->SetCenterPosition(Point2D(bossAABB.GetMin()[0] - this->GetHalfWidthTotal(), this->GetCenterPosition()[1]));
-            this->ApplyImpulseForce(-PlayerPaddle::DEFAULT_MAX_SPEED, 4*PlayerPaddle::DEFAULT_MAX_SPEED);
         }
         else {
             this->SetCenterPosition(Point2D(bossAABB.GetMax()[0] + this->GetHalfWidthTotal(), this->GetCenterPosition()[1]));
-            this->ApplyImpulseForce(PlayerPaddle::DEFAULT_MAX_SPEED, 4*PlayerPaddle::DEFAULT_MAX_SPEED);
         }
 
         return;
