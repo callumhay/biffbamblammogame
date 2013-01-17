@@ -159,6 +159,18 @@ void BossCompositeBodyPart::Transform(const Matrix4x4& m) {
     }
 }
 
+void BossCompositeBodyPart::SetLocalTranslation(const Vector3D& t) {
+    Matrix4x4 changeTransform = Matrix4x4::translationMatrix(t) * Matrix4x4::translationMatrix(-this->localTranslation);
+
+    this->worldTransform = changeTransform * this->worldTransform;
+    this->localTranslation = t;
+
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->Transform(changeTransform);
+    }
+}
+
 void BossCompositeBodyPart::GetReflectionRefractionRays(const Point2D& hitPoint,
                                                         const Vector2D& impactDir,
                                                         std::list<Collision::Ray2D>& rays) const {

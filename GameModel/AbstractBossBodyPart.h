@@ -42,6 +42,8 @@ public:
     virtual void RotateZ(float rotZDegs)       = 0;
     virtual void Transform(const Matrix4x4& m) = 0;
 
+    virtual void SetLocalTranslation(const Vector3D& t) = 0;
+
     virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const = 0;
 	virtual void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) = 0;
     
@@ -69,6 +71,7 @@ public:
 
 protected:
     Matrix4x4 worldTransform;
+    Vector3D localTranslation;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(AbstractBossBodyPart);
