@@ -46,7 +46,7 @@ public:
 	// PauseGame: Pauses the entire game - should be used when the user pauses the game.
 	// AllPause: All possible pauses are active
 	enum PauseType { NoPause = 0x00000000, PauseState = 0x00000001, PausePaddle = 0x00000002, 
-                     PauseGame = 0x80000000, PauseBall = 0x00000004, AllPause = 0xFFFFFFFF };
+                     PauseGame = 0x80000000, PauseBall = 0x00000004, PauseAI = 0x00000008, AllPause = 0xFFFFFFFF };
 
     
     // Difficulty of the game:
@@ -563,7 +563,11 @@ inline void GameModel::Tick(double seconds) {
 
 	if (currState != NULL) {
 		if ((this->pauseBitField & GameModel::PauseState) == 0x00000000) {
-            this->GetCurrentLevel()->TickAIEntities(seconds, this);
+            
+            if ((this->pauseBitField & GameModel::PauseAI) == 0x00000000) {
+                this->GetCurrentLevel()->TickAIEntities(seconds, this);
+            }
+            
             this->currState->Tick(seconds);
             this->totalLevelTimeInSeconds += seconds;
 		}

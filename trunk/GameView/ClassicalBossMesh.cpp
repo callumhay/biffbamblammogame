@@ -178,8 +178,6 @@ void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLig
     assert(leftArmSquare != NULL);
     assert(rightArmSquare != NULL);
 
-
-
     glPushMatrix();
     glMultMatrixf(leftRestOfArm->GetWorldTransform().begin());
 

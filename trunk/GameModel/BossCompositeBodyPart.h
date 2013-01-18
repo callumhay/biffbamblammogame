@@ -43,6 +43,8 @@ public:
     void Transform(const Matrix4x4& m);
 
     void SetLocalTranslation(const Vector3D& t);
+    void SetLocalZRotation(float zRotInDegs);
+    void SetLocalTransform(const Vector3D& translation, float zRotInDegs);
 
     void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 	void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
@@ -53,17 +55,21 @@ public:
     AbstractBossBodyPart* SearchForParent(AbstractBossBodyPart* part);
 
     bool GetIsDestroyed() const;
+    void SetAsDestroyed();
 
     Collision::AABB2D GenerateWorldAABB() const;
 
     void SetWorldTransform(const Matrix4x4& m);
 
+    void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim);
+        
 #ifdef _DEBUG
     void DebugDraw() const;
 #endif
 
 private:
     std::vector<AbstractBossBodyPart*> childParts;
+    bool isDestroyed;
 
     DISALLOW_COPY_AND_ASSIGN(BossCompositeBodyPart);
 };

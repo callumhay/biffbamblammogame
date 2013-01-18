@@ -69,6 +69,10 @@ private:
     static const float BOSS_HEIGHT;
     static const float BOSS_WIDTH;
     static const float HALF_BOSS_WIDTH;
+
+    static const float ARM_HEIGHT;
+    static const float ARM_WIDTH;
+
     static const float ARM_LIFE_POINTS;
     static const float ARM_BALL_DAMAGE;
 
@@ -85,10 +89,12 @@ private:
 
     bool isAttackingWithArm;
 
+    AnimationMultiLerp<float> armAlphaFadeoutAnim;
+
     enum AIState { BasicMoveAndLaserSprayAIState, ChasePaddleAIState, 
                    AttackLeftArmAIState, AttackRightArmAIState, AttackBothArmsAIState,
                    PrepLaserAIState, MoveAndBarrageWithLaserAIState,
-                   HurtAIState, LostArmsAngryAIState };
+                   HurtLeftArmAIState, HurtRightArmAIState, LostArmsAngryAIState };
 
     // AIState Variables -----------------------------------------------------------
     AIState currState;
@@ -114,6 +120,12 @@ private:
     // MoveAndBarrageWithLaserAIState
     double laserShootTimer;
     std::vector<float> laserAngles;
+    
+    // HurtLeftArmAIState, HurtRightArmAIState
+    AnimationMultiLerp<float> hurtAlphaAnim;
+    AnimationMultiLerp<Vector3D> leftArmHurtMoveAnim;
+    AnimationMultiLerp<Vector3D> rightArmHurtMoveAnim;
+
     // -----------------------------------------------------------------------------
 
     void SetState(AIState newState);
@@ -124,6 +136,7 @@ private:
     void ExecuteArmAttackState(double dT, bool isLeftArmAttacking, bool isRightArmAttacking);
     void ExecutePrepLaserState(double dT, GameModel* gameModel);
     void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
+    void ExecuteHurtArmState(double dT, bool isLeftArm);
 
     // Basic boss attribute getters
     float GetMaxSpeed() const;
@@ -142,6 +155,9 @@ private:
     float GetPrepLaserHeight(const GameLevel* level) const;
 
     ArmsBodyHeadAI::AIState DetermineNextArmAttackState(const Vector2D& bossToPaddleVec) const;
+
+    AnimationMultiLerp<Vector3D> GenerateArmDeathTranslationAnimation(bool isLeftArm) const;
+    AnimationMultiLerp<float> GenerateArmDeathRotationAnimation(bool isLeftArm) const;
 
     DISALLOW_COPY_AND_ASSIGN(ArmsBodyHeadAI);
 };

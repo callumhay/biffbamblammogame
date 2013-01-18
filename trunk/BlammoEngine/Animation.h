@@ -275,7 +275,7 @@ public:
     double GetCurrentTimeValue() const {
         return this->x;
     }
-	std::vector<double> GetTimeValues() const {
+	const std::vector<double>& GetTimeValues() const {
 		return this->timePts;
 	}
 

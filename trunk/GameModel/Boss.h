@@ -35,7 +35,6 @@ public:
     float GetAliveHeight() const;
     float GetAliveWidth() const;
     
-
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision) const;
     BossBodyPart* CollisionCheck(const PlayerPaddle& paddle) const;
@@ -99,23 +98,23 @@ inline BossBodyPart* Boss::CollisionCheck(const GameBall& ball, double dT, Vecto
                                           Collision::LineSeg2D& collisionLine,
                                           double& timeSinceCollision) const {
 
-    return this->root->CollisionCheck(ball, dT, n, collisionLine, timeSinceCollision);
+    return this->alivePartsRoot->CollisionCheck(ball, dT, n, collisionLine, timeSinceCollision);
 }
 
 inline BossBodyPart* Boss::CollisionCheck(const PlayerPaddle& paddle) const {
-    return this->root->CollisionCheck(paddle);
+    return this->alivePartsRoot->CollisionCheck(paddle);
 }
 
 inline BossBodyPart* Boss::CollisionCheck(const Collision::Ray2D& ray, float& rayT) const {
-    return this->root->CollisionCheck(ray, rayT);
+    return this->alivePartsRoot->CollisionCheck(ray, rayT);
 }
 
 inline BossBodyPart* Boss::CollisionCheck(const BoundingLines& boundingLines, const Vector2D& velDir) const {
-    return this->root->CollisionCheck(boundingLines, velDir);
+    return this->alivePartsRoot->CollisionCheck(boundingLines, velDir);
 }
 
 inline BossBodyPart* Boss::CollisionCheck(const Collision::Circle2D& c, const Vector2D& velDir) const {
-    return this->root->CollisionCheck(c, velDir);
+    return this->alivePartsRoot->CollisionCheck(c, velDir);
 }
 
 #endif // __BOSS_H__
