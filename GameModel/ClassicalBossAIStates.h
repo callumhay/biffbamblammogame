@@ -17,6 +17,7 @@
 #include "../BlammoEngine/Point.h"
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Matrix.h"
+#include "../BlammoEngine/Colour.h"
 
 #include "BossAIState.h"
 
@@ -89,7 +90,7 @@ private:
 
     bool isAttackingWithArm;
 
-    AnimationMultiLerp<float> armAlphaFadeoutAnim;
+    AnimationMultiLerp<ColourRGBA> armAlphaFadeoutAnim;
 
     enum AIState { BasicMoveAndLaserSprayAIState, ChasePaddleAIState, 
                    AttackLeftArmAIState, AttackRightArmAIState, AttackBothArmsAIState,
@@ -122,7 +123,7 @@ private:
     std::vector<float> laserAngles;
     
     // HurtLeftArmAIState, HurtRightArmAIState
-    AnimationMultiLerp<float> hurtAlphaAnim;
+    AnimationMultiLerp<ColourRGBA> hurtColourAnim;
     AnimationMultiLerp<Vector3D> leftArmHurtMoveAnim;
     AnimationMultiLerp<Vector3D> rightArmHurtMoveAnim;
 

@@ -35,6 +35,8 @@ public:
     ColourRGBA GetColour() const;
     void SetAsDestroyed();
 
+    void ColourAnimationFinished();
+
 private:
     const float totalLifePoints;
     float currLifePoints;
@@ -43,6 +45,7 @@ private:
     double invulnerableTimer;
 
     void Diminish(float damageAmt, GameModel* gameModel);
+    void SetFlashingColourAnim();
 
     DISALLOW_COPY_AND_ASSIGN(BossWeakpoint);
 };
