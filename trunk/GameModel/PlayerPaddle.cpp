@@ -885,8 +885,8 @@ void PlayerPaddle::HitByBoss(const BossBodyPart& bossPart) {
 
     // Push the paddle away from the boss by changing its velocity...
     //this->SetCenterPosition(this->GetCenterPosition() + Vector2D(distFromCenter, 0.0f));
-    float impulseAmt = NumberFuncs::SignOf(distXToPaddleCenter) * percentNearEdge * 2.0f * PlayerPaddle::DEFAULT_MAX_SPEED;
-    this->ApplyImpulseForce(impulseAmt, 2*impulseAmt);
+    float impulseAmt = 0.5f * NumberFuncs::SignOf(distXToPaddleCenter) * percentNearEdge * PlayerPaddle::DEFAULT_MAX_SPEED;
+    this->ApplyImpulseForce(impulseAmt, 3*impulseAmt);
 }
 
 // Called when the paddle is hit by a projectile

@@ -65,6 +65,8 @@ public:
 
     Collision::AABB2D GenerateWorldAABB() const;
 
+    virtual void ColourAnimationFinished() {};
+
 	// Track the status of the body part, effects its properties and how it works/acts
 	//enum PieceStatus { NormalStatus = 0x00000000, OnFireStatus = 0x00000001, FrozenStatus = 0x00000002 };
 	//bool HasStatus(const PieceStatus& status) const;
@@ -105,7 +107,9 @@ inline BoundingLines BossBodyPart::GetWorldBounds() const {
 
 inline void BossBodyPart::Tick(double dT) {
     AbstractBossBodyPart::Tick(dT);
-    this->rgbaAnim.Tick(dT);
+    if (this->rgbaAnim.Tick(dT)) {
+        this->ColourAnimationFinished();
+    }
 }
 
 inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,

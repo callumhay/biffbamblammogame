@@ -19,20 +19,7 @@ BossWeakpoint::BossWeakpoint(float lifePoints, float dmgOnBallHit, const Boundin
 BossBodyPart(bounds), totalLifePoints(lifePoints), currLifePoints(lifePoints), dmgOnBallHit(dmgOnBallHit),
 invulnerableTimer(0.0) {
 
-    std::vector<double> timeValues;
-    timeValues.reserve(3);
-    timeValues.push_back(0.0);
-    timeValues.push_back(1.0);
-    timeValues.push_back(2.0);
-    
-    std::vector<ColourRGBA> colourValues;
-    colourValues.reserve(3);
-    colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 1.0f));
-    colourValues.push_back(ColourRGBA(1.0f, 0.25f, 0.25f, 1.0f));
-    colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 1.0f));
-
-    this->rgbaAnim.SetLerp(timeValues, colourValues);
-    this->rgbaAnim.SetRepeat(true);
+    this->SetFlashingColourAnim();
 }
 
 BossWeakpoint::~BossWeakpoint() {
@@ -55,8 +42,6 @@ BossWeakpoint* BossWeakpoint::BuildWeakpoint(BossBodyPart* part, float lifePoint
 
 void BossWeakpoint::Tick(double dT) {
     BossBodyPart::Tick(dT);
-    this->colourAnim.Tick(dT);
-
     this->invulnerableTimer = std::max<double>(0.0, this->invulnerableTimer - dT);
 }
 
@@ -133,4 +118,27 @@ void BossWeakpoint::Diminish(float damageAmt, GameModel* gameModel) {
     else {
         this->invulnerableTimer = BossWeakpoint::INVULNERABLE_TIME_IN_SECS;
     }
+}
+
+void BossWeakpoint::ColourAnimationFinished() {
+    if (!this->GetIsDestroyed()) {
+        this->SetFlashingColourAnim();
+    }
+}
+
+void BossWeakpoint::SetFlashingColourAnim() {
+    std::vector<double> timeValues;
+    timeValues.reserve(3);
+    timeValues.push_back(0.0);
+    timeValues.push_back(1.0);
+    timeValues.push_back(2.0);
+    
+    std::vector<ColourRGBA> colourValues;
+    colourValues.reserve(3);
+    colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 1.0f));
+    colourValues.push_back(ColourRGBA(1.0f, 0.25f, 0.25f, 1.0f));
+    colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 1.0f));
+
+    this->rgbaAnim.SetLerp(timeValues, colourValues);
+    this->rgbaAnim.SetRepeat(true);
 }
