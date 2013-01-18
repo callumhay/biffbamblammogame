@@ -12,47 +12,12 @@
 #include "BossBodyPart.h"
 
 BossBodyPart::BossBodyPart(const BoundingLines& localBounds) :
-AbstractBossBodyPart(), localBounds(localBounds) {
+AbstractBossBodyPart(), localBounds(localBounds), isDestroyed(false) {
+    rgbaAnim.SetInterpolantValue(ColourRGBA(1,1,1,1));
+    rgbaAnim.SetRepeat(false);
 }
 
 BossBodyPart::~BossBodyPart() {
-}
-
-void BossBodyPart::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
-    assert(gameModel != NULL);
-
-    UNUSED_PARAMETER(gameModel);
-
-    if (this->GetIsDestroyed()) {
-        return;
-    }
-
-    // TODO...
-
-    //ball.SetLastThingCollidedWith(this);
-}
-
-void BossBodyPart::CollisionOccurred(GameModel* gameModel, Projectile* projectile) {
-    assert(gameModel != NULL);
-	assert(projectile != NULL);
-
-    UNUSED_PARAMETER(gameModel);
-
-    if (this->GetIsDestroyed()) {
-        return;
-    }
-
-    // TODO...
-
-    //projectile->SetLastThingCollidedWith(this);
-}
-
-void BossBodyPart::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) {
-    assert(gameModel != NULL);
-
-    if (this->GetIsDestroyed()) {
-        return;
-    }
 }
 
 void BossBodyPart::GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const {

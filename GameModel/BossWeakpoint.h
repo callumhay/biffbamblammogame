@@ -16,12 +16,15 @@
 
 class BossWeakpoint : public BossBodyPart {
 public:
+    static const double INVULNERABLE_TIME_IN_SECS;
+
     BossWeakpoint(float lifePoints, float dmgOnBallHit, const BoundingLines& bounds);
     ~BossWeakpoint();
 
     static BossWeakpoint* BuildWeakpoint(BossBodyPart* part, float lifePoints, float dmgOnBallHit);
 
     float GetCurrentLifePercentage() const;
+    bool IsCurrentlyInvulnerable() const;
 
     // Inherited functions from BossBodyPart
     void Tick(double dT);
@@ -29,16 +32,16 @@ public:
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile);
     //void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
     void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
-    bool GetIsDestroyed() const;
     ColourRGBA GetColour() const;
-    
+    void SetAsDestroyed();
+
 private:
-    AnimationMultiLerp<Colour> colourAnim; 
     const float totalLifePoints;
     float currLifePoints;
     float dmgOnBallHit;
 
-    
+    double invulnerableTimer;
+
     void Diminish(float damageAmt, GameModel* gameModel);
 
     DISALLOW_COPY_AND_ASSIGN(BossWeakpoint);
@@ -49,12 +52,17 @@ inline float BossWeakpoint::GetCurrentLifePercentage() const {
     return std::max<float>(0.0f, this->currLifePoints / this->totalLifePoints);
 }
 
-inline bool BossWeakpoint::GetIsDestroyed() const {
-    return (this->currLifePoints <= 0);
+inline bool BossWeakpoint::IsCurrentlyInvulnerable() const {
+    return this->invulnerableTimer > 0.0;
 }
 
 inline ColourRGBA BossWeakpoint::GetColour() const {
-    return ColourRGBA(this->colourAnim.GetInterpolantValue(), 1.0f);
+    return this->rgbaAnim.GetInterpolantValue();
+}
+
+inline void BossWeakpoint::SetAsDestroyed() {
+    BossBodyPart::SetAsDestroyed();
+    this->currLifePoints = 0.0f;
 }
 
 #endif // __BOSSWEAKPOINT_H__

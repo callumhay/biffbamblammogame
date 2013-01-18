@@ -18,7 +18,7 @@
 
 using namespace classicalbossai;
 
-const float ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER = 10.25f;
+const float ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER = 10.3f;
 const float ClassicalBoss::ARM_WIDTH = 2.4f;
 const float ClassicalBoss::HALF_ARM_WIDTH = ARM_WIDTH / 2.0f;
 const float ClassicalBoss::ARM_HEIGHT = 9.66f;
@@ -268,10 +268,10 @@ void ClassicalBoss::Init() {
             }
 
             // leftArm 
-            this->BuildArm(Vector3D(-ARM_X_TRANSLATION_FROM_CENTER, -0.834f, 0.0f), this->leftArmIdx, this->leftRestOfArmIdx, this->leftArmSquareIdx);
+            this->BuildArm(Vector3D(-ARM_X_TRANSLATION_FROM_CENTER, 0.834f, 0.0f), this->leftArmIdx, this->leftRestOfArmIdx, this->leftArmSquareIdx);
 
             // rightArm
-            this->BuildArm(Vector3D(ARM_X_TRANSLATION_FROM_CENTER, -0.834f, 0.0f), this->rightArmIdx, this->rightRestOfArmIdx, this->rightArmSquareIdx);
+            this->BuildArm(Vector3D(ARM_X_TRANSLATION_FROM_CENTER, 0.834f, 0.0f), this->rightArmIdx, this->rightRestOfArmIdx, this->rightArmSquareIdx);
  
         } // end alivePartsRoot
     } // end root
@@ -421,6 +421,27 @@ void ClassicalBoss::ConvertAliveBodyPartToWeakpoint(size_t index, float lifePoin
     bodyPart = NULL;
 
     this->bodyParts[index] = weakpointBodyPart;
+}
+
+void ClassicalBoss::ConvertAliveBodyPartToDeadBodyPart(size_t index) {
+    assert(index < this->bodyParts.size());
+
+    // Make sure the body part exists as an alive part of this boss,
+    // the parent better be the alivePartsRoot too.
+    AbstractBossBodyPart* bodyPart = this->bodyParts[index];
+    assert(bodyPart != NULL);
+    if (!this->alivePartsRoot->IsOrContainsPart(bodyPart, true) ||
+        this->alivePartsRoot->SearchForParent(bodyPart) != this->alivePartsRoot) {
+        assert(false);
+        return;
+    }
+
+    // Move it from the alivePartsRoot to the deadPartsRoot
+    this->alivePartsRoot->RemoveBodyPart(bodyPart);
+    this->deadPartsRoot->AddBodyPart(bodyPart);
+
+    // Find all weakpoints and turn them off
+    bodyPart->SetAsDestroyed();
 }
 
 std::vector<const BossBodyPart*> ClassicalBoss::GetBodyColumns() const {

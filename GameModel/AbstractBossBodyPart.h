@@ -16,6 +16,7 @@
 #include "../BlammoEngine/Animation.h"
 #include "../BlammoEngine/Collision.h"
 #include "../BlammoEngine/Matrix.h"
+#include "../BlammoEngine/Colour.h"
 
 class GameBall;
 class BoundingLines;
@@ -31,7 +32,7 @@ public:
     AbstractBossBodyPart();
     virtual ~AbstractBossBodyPart();
 
-    virtual void Tick(double dT) = 0;
+    virtual void Tick(double dT);
 
     virtual BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision) = 0;
@@ -45,6 +46,10 @@ public:
     virtual void Transform(const Matrix4x4& m) = 0;
 
     virtual void SetLocalTranslation(const Vector3D& t) = 0;
+    virtual void SetLocalZRotation(float zRotInDegs)    = 0;
+    virtual void SetLocalTransform(const Vector3D& translation, float zRotInDegs) = 0;
+    void AnimateLocalTranslation(const AnimationMultiLerp<Vector3D>& animation);
+    void AnimateLocalZRotation(const AnimationMultiLerp<float>& animationZDegs);
 
     virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const = 0;
 	virtual void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) = 0;
@@ -52,6 +57,7 @@ public:
     //virtual void TickStatus(double dT, GameModel* gameModel, int32_t& removedStatuses) = 0;
 
     virtual bool GetIsDestroyed() const = 0;
+    virtual void SetAsDestroyed() = 0;
 
     virtual Collision::AABB2D GenerateWorldAABB() const = 0;
 
@@ -66,23 +72,65 @@ public:
 
     virtual AbstractBossBodyPart* SearchForParent(AbstractBossBodyPart* part) { UNUSED_PARAMETER(part); return NULL; }
 
+    virtual void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim) = 0;
+        
 #ifdef _DEBUG
     virtual void DebugDraw() const = 0;
 #endif
 
 protected:
     Matrix4x4 worldTransform;
+
     Vector3D localTranslation;
+    float localZRotation;
+
+    AnimationMultiLerp<Vector3D> transAnim;
+    AnimationMultiLerp<float> zRotAnim;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(AbstractBossBodyPart);
 };
 
-inline AbstractBossBodyPart::AbstractBossBodyPart() {
+inline AbstractBossBodyPart::AbstractBossBodyPart() : localZRotation(0.0f), localTranslation(0.0f, 0.0f, 0.0f) {
+    this->transAnim.ClearLerp();
+    this->transAnim.SetInterpolantValue(Vector3D(0,0,0));
+    this->transAnim.SetRepeat(false);
+    this->zRotAnim.ClearLerp();
+    this->zRotAnim.SetInterpolantValue(0.0f);
+    this->zRotAnim.SetRepeat(false);
 }
 
 inline AbstractBossBodyPart::~AbstractBossBodyPart() {
 }
 
+inline void AbstractBossBodyPart::Tick(double dT) {
+
+    bool isFinishedRot   = this->zRotAnim.Tick(dT);
+    bool isFinishedTrans = this->transAnim.Tick(dT);
+
+    if (!isFinishedRot && !isFinishedTrans) {
+        float currZRot = this->zRotAnim.GetInterpolantValue();
+        const Vector3D& currTranslation = this->transAnim.GetInterpolantValue();
+        this->SetLocalTransform(currTranslation, currZRot);
+    }
+    else {
+        if (!isFinishedRot) {
+            float currZRot = this->zRotAnim.GetInterpolantValue();
+            this->SetLocalZRotation(currZRot);
+        }
+        if (!isFinishedTrans) {
+            const Vector3D& currTranslation = this->transAnim.GetInterpolantValue();
+            this->SetLocalTranslation(currTranslation);
+        }
+    }
+}
+
+inline void AbstractBossBodyPart::AnimateLocalTranslation(const AnimationMultiLerp<Vector3D>& animation) {
+    this->transAnim = animation;
+}
+
+inline void AbstractBossBodyPart::AnimateLocalZRotation(const AnimationMultiLerp<float>& animationZDegs){
+    this->zRotAnim = animationZDegs;
+}
 
 #endif // __ABSTRACTBOSSBODYPART_H__

@@ -13,8 +13,11 @@
 #include "Projectile.h"
 #include "Beam.h"
 
+const double BossWeakpoint::INVULNERABLE_TIME_IN_SECS = 1.5;
+
 BossWeakpoint::BossWeakpoint(float lifePoints, float dmgOnBallHit, const BoundingLines& bounds) :
-BossBodyPart(bounds), totalLifePoints(lifePoints), currLifePoints(lifePoints), dmgOnBallHit(dmgOnBallHit) {
+BossBodyPart(bounds), totalLifePoints(lifePoints), currLifePoints(lifePoints), dmgOnBallHit(dmgOnBallHit),
+invulnerableTimer(0.0) {
 
     std::vector<double> timeValues;
     timeValues.reserve(3);
@@ -22,16 +25,14 @@ BossBodyPart(bounds), totalLifePoints(lifePoints), currLifePoints(lifePoints), d
     timeValues.push_back(1.0);
     timeValues.push_back(2.0);
     
-    std::vector<Colour> colourValues;
+    std::vector<ColourRGBA> colourValues;
     colourValues.reserve(3);
-    colourValues.push_back(Colour(1.0f, 0.9f, 0.9f));
-    colourValues.push_back(Colour(1.0f, 0.25f, 0.25f));
-    colourValues.push_back(Colour(1.0f, 0.9f, 0.9f));
+    colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 1.0f));
+    colourValues.push_back(ColourRGBA(1.0f, 0.25f, 0.25f, 1.0f));
+    colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 1.0f));
 
-    this->colourAnim.SetLerp(timeValues, colourValues);
-    this->colourAnim.SetRepeat(true);
-    this->colourAnim.SetInitialInterpolationValue(Colour(1.0f, 0.9f, 0.9f));
-
+    this->rgbaAnim.SetLerp(timeValues, colourValues);
+    this->rgbaAnim.SetRepeat(true);
 }
 
 BossWeakpoint::~BossWeakpoint() {
@@ -53,14 +54,17 @@ BossWeakpoint* BossWeakpoint::BuildWeakpoint(BossBodyPart* part, float lifePoint
 }
 
 void BossWeakpoint::Tick(double dT) {
+    BossBodyPart::Tick(dT);
     this->colourAnim.Tick(dT);
+
+    this->invulnerableTimer = std::max<double>(0.0, this->invulnerableTimer - dT);
 }
 
 void BossWeakpoint::CollisionOccurred(GameModel* gameModel, GameBall& ball) {
     assert(gameModel != NULL);
     UNUSED_PARAMETER(ball);
 
-    if (this->GetIsDestroyed()) {
+    if (this->GetIsDestroyed() || this->IsCurrentlyInvulnerable()) {
         return;
     }
 
@@ -71,7 +75,7 @@ void BossWeakpoint::CollisionOccurred(GameModel* gameModel, Projectile* projecti
     assert(gameModel != NULL);
     assert(projectile != NULL);
 
-    if (this->GetIsDestroyed()) {
+    if (this->GetIsDestroyed() || this->IsCurrentlyInvulnerable()) {
         return;
     }
 
@@ -115,5 +119,18 @@ void BossWeakpoint::TickBeamCollision(double dT, const BeamSegment* beamSegment,
 
 void BossWeakpoint::Diminish(float damageAmt, GameModel* gameModel) {
     UNUSED_PARAMETER(gameModel);
+    
+    // If the boss is invulnerable then we don't do damage
+    if (this->IsCurrentlyInvulnerable() || damageAmt <= 0.0f) {
+        return;
+    }
+    
     this->currLifePoints = std::max<float>(0.0f, this->currLifePoints - damageAmt);
+    if (this->currLifePoints <= 0.0) {
+        this->isDestroyed = true;
+        this->invulnerableTimer = 0.0;
+    }
+    else {
+        this->invulnerableTimer = BossWeakpoint::INVULNERABLE_TIME_IN_SECS;
+    }
 }

@@ -83,8 +83,10 @@ void Boss::Tick(double dT, GameModel* gameModel) {
 }
 
 void Boss::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
-    collisionPart->CollisionOccurred(gameModel, ball);
     ball.SetLastThingCollidedWith(collisionPart);
+
+    // NOTE: Make sure the part is collided with FIRST - it informs the current state
+    collisionPart->CollisionOccurred(gameModel, ball);
     this->currAIState->CollisionOccurred(gameModel, ball, collisionPart);
 }
 

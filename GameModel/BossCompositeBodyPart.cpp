@@ -29,6 +29,7 @@ void BossCompositeBodyPart::RemoveBodyPart(AbstractBossBodyPart* part) {
 }
 
 void BossCompositeBodyPart::Tick(double dT) {
+    AbstractBossBodyPart::Tick(dT);
     for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         AbstractBossBodyPart* part = this->childParts[i];
         part->Tick(dT);
@@ -144,6 +145,13 @@ void BossCompositeBodyPart::SetWorldTransform(const Matrix4x4& m) {
     this->worldTransform = m;
 }
 
+void BossCompositeBodyPart::AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim) {
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->AnimateColourRGBA(rgbaAnim);
+    }
+}
+
 void BossCompositeBodyPart::RotateZ(float rotZDegs) {
     if (fabs(rotZDegs) < EPSILON) {
         return;
@@ -167,10 +175,45 @@ void BossCompositeBodyPart::Transform(const Matrix4x4& m) {
 }
 
 void BossCompositeBodyPart::SetLocalTranslation(const Vector3D& t) {
-    Matrix4x4 changeTransform = Matrix4x4::translationMatrix(t) * Matrix4x4::translationMatrix(-this->localTranslation);
+    Matrix4x4 changeTransform = 
+        Matrix4x4::rotationZMatrix(this->localZRotation) *
+        Matrix4x4::translationMatrix(t) * 
+        Matrix4x4::rotationZMatrix(-this->localZRotation) * 
+        Matrix4x4::translationMatrix(-this->localTranslation);
 
     this->worldTransform = changeTransform * this->worldTransform;
     this->localTranslation = t;
+
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->Transform(changeTransform);
+    }
+}
+
+void BossCompositeBodyPart::SetLocalZRotation(float zRotInDegs) {
+    Matrix4x4 changeTransform = 
+        Matrix4x4::rotationZMatrix(zRotInDegs) *
+        Matrix4x4::rotationZMatrix(-this->localZRotation);
+
+    this->worldTransform = changeTransform * this->worldTransform;
+    this->localZRotation = zRotInDegs;
+
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->Transform(changeTransform);
+    }
+}
+
+void BossCompositeBodyPart::SetLocalTransform(const Vector3D& translation, float zRotInDegs) {
+    Matrix4x4 changeTransform = 
+        Matrix4x4::rotationZMatrix(zRotInDegs) *
+        Matrix4x4::translationMatrix(translation) * 
+        Matrix4x4::rotationZMatrix(-this->localZRotation) * 
+        Matrix4x4::translationMatrix(-this->localTranslation);
+
+    this->worldTransform = changeTransform * this->worldTransform;
+    this->localTranslation = translation;
+    this->localZRotation   = zRotInDegs;
 
     for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
         AbstractBossBodyPart* part = this->childParts[i];
@@ -254,6 +297,13 @@ bool BossCompositeBodyPart::GetIsDestroyed() const {
         }
     }
     return true;
+}
+
+void BossCompositeBodyPart::SetAsDestroyed() {
+    for (int i = 0; i < static_cast<int>(this->childParts.size()); i++) {
+        AbstractBossBodyPart* part = this->childParts[i];
+        part->SetAsDestroyed();
+    }
 }
 
 Collision::AABB2D BossCompositeBodyPart::GenerateWorldAABB() const {

@@ -464,7 +464,9 @@ void KeyboardSDLController::DebugKeyDownActions(SDLKey key) {
             case SDLK_COMMA:
                 this->model->TogglePause(GameModel::PauseBall);
                 break;
-            
+            case SDLK_PERIOD:
+                this->model->TogglePause(GameModel::PauseAI);
+                break;
             
             default:
                 break;

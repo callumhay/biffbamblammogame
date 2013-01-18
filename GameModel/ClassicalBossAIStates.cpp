@@ -66,6 +66,7 @@ void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
 }
 
 float ClassicalBossAI::GetBossMovementMinXBound(const GameLevel* level, float bossWidth) const {
+    UNUSED_PARAMETER(level);
     return bossWidth / 1.4f + LevelPiece::PIECE_WIDTH;
 }
 
@@ -80,6 +81,9 @@ float ClassicalBossAI::GetBossMovementMaxXBound(const GameLevel* level, float bo
 const float ArmsBodyHeadAI::BOSS_HEIGHT = 13.0f;
 const float ArmsBodyHeadAI::BOSS_WIDTH = 25.0f;
 const float ArmsBodyHeadAI::HALF_BOSS_WIDTH = ArmsBodyHeadAI::BOSS_WIDTH / 2.0f;
+
+const float ArmsBodyHeadAI::ARM_HEIGHT = 9.66f;
+const float ArmsBodyHeadAI::ARM_WIDTH  = 3.097f;
 
 const float ArmsBodyHeadAI::ARM_LIFE_POINTS = 300.0f;
 const float ArmsBodyHeadAI::ARM_BALL_DAMAGE = 100.0f;
@@ -220,6 +224,99 @@ nextAttackState(ArmsBodyHeadAI::AttackBothArmsAIState), temptAttackCountdown(0.0
         this->armAttackYMovementAnim.SetRepeat(false);
     }
 
+    // Setup the arm fade-out animation (for when an arm falls off and dies)
+    {
+        static const double FIRST_FADE_OUT_TIME = 5.0;
+        std::vector<double> timeValues;
+        timeValues.reserve(13);
+        timeValues.push_back(0.0);
+        timeValues.push_back(FIRST_FADE_OUT_TIME);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 0.1);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 0.2);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 0.3);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 0.4);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 0.5);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 0.6);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 0.7);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 0.8);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 0.9);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 1.0);
+        timeValues.push_back(FIRST_FADE_OUT_TIME + 1.1);
+
+        static const float FIRST_ALPHA_FADE_OUT_VALUE  = 0.15f;
+        static const float SECOND_ALPHA_FADE_OUT_VALUE = FIRST_ALPHA_FADE_OUT_VALUE - 0.1f;
+        std::vector<float> alphaValues;
+        alphaValues.reserve(timeValues.size());
+        alphaValues.push_back(1.0f);
+        alphaValues.push_back(FIRST_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(SECOND_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(FIRST_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(SECOND_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(FIRST_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(SECOND_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(FIRST_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(SECOND_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(FIRST_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(SECOND_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(FIRST_ALPHA_FADE_OUT_VALUE);
+        alphaValues.push_back(0.0f);
+
+        this->armAlphaFadeoutAnim.SetLerp(timeValues, alphaValues);
+        this->armAlphaFadeoutAnim.SetRepeat(false);
+    }
+
+    {
+        static const int NUM_FLASHES = 10;
+        
+        std::vector<double> timeValues;
+        timeValues.reserve(2*NUM_FLASHES + 1);
+        std::vector<float> alphaValues;
+        alphaValues.reserve(timeValues.size());
+        
+        double timeInc = BossWeakpoint::INVULNERABLE_TIME_IN_SECS / static_cast<double>(2*NUM_FLASHES);
+        double timeCount = 0.0;
+        
+        for (int i = 0; i <= 2*NUM_FLASHES; i++) {
+            timeValues.push_back(timeCount);
+            timeCount += timeInc;
+        }
+        for (int i = 0; i < NUM_FLASHES; i++) {
+            alphaValues.push_back(1.0f);
+            alphaValues.push_back(0.25f);
+        }
+        alphaValues.push_back(1.0f);
+
+        this->hurtAlphaAnim.SetLerp(timeValues, alphaValues);
+        this->hurtAlphaAnim.SetRepeat(false);
+
+        timeValues.clear();
+        timeValues.reserve(4);
+        timeValues.push_back(0.0);
+        timeValues.push_back(0.15);
+        timeValues.push_back(0.2);
+        timeValues.push_back(0.22);
+        
+        std::vector<Vector3D> moveValues;
+        moveValues.reserve(timeValues.size());
+        moveValues.push_back(Vector3D(0,0,0));
+        moveValues.push_back(Vector3D(BOSS_WIDTH/3.0f, LevelPiece::PIECE_HEIGHT, 0.0f));
+        moveValues.push_back(Vector3D(BOSS_WIDTH/4.0f, 0.0f, 0.0f));
+        moveValues.push_back(Vector3D(0.0f, 0.0f, 0.0f));
+
+        this->leftArmHurtMoveAnim.SetLerp(timeValues, moveValues);
+        this->leftArmHurtMoveAnim.SetRepeat(false);
+
+        moveValues.clear();
+        moveValues.reserve(timeValues.size());
+        moveValues.push_back(Vector3D(0,0,0));
+        moveValues.push_back(Vector3D(-BOSS_WIDTH/3.0f, LevelPiece::PIECE_HEIGHT, 0.0f));
+        moveValues.push_back(Vector3D(-BOSS_WIDTH/4.0f, 0.0f, 0.0f));
+        moveValues.push_back(Vector3D(0.0f, 0.0f, 0.0f));
+
+        this->rightArmHurtMoveAnim.SetLerp(timeValues, moveValues);
+        this->rightArmHurtMoveAnim.SetRepeat(false);
+    }
+
     this->SetState(ArmsBodyHeadAI::PrepLaserAIState);//BasicMoveAndLaserSprayAIState);
 }
 
@@ -234,12 +331,67 @@ void ArmsBodyHeadAI::Tick(double dT, GameModel* gameModel) {
 }
 
 void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
+    UNUSED_PARAMETER(ball);
+    UNUSED_PARAMETER(gameModel);
+
+    assert(collisionPart != NULL);
+
+    // Check to see if the ball hit one of the weakspots...
+    if (collisionPart == this->rightArmSqrWeakpt) {
+
+        // Check to see if the arm is dead, if it is then we change its state in the body of the boss
+        if (this->rightArmSqrWeakpt->GetIsDestroyed()) {
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(boss->rightArmIdx);
+            
+            // Animate the right arm to fade out and "fall off" the body
+            this->rightArm->AnimateAlpha(this->armAlphaFadeoutAnim);
+
+            AnimationMultiLerp<Vector3D> armDeathTransAnim = this->GenerateArmDeathTranslationAnimation(false);
+            this->rightArm->AnimateLocalTranslation(armDeathTransAnim);
+
+            AnimationMultiLerp<float> armDeathRotAnim = this->GenerateArmDeathRotationAnimation(false);
+            this->rightArm->AnimateLocalZRotation(armDeathRotAnim);
+
+            this->rightArmSqrWeakpt = NULL;
+        }
+        if (this->currState != ArmsBodyHeadAI::HurtRightArmAIState) {
+            this->SetState(ArmsBodyHeadAI::HurtRightArmAIState);
+        }
+    }
+    else if (collisionPart == this->leftArmSqrWeakpt) {
+
+        // Check to see if the arm is dead, if it is then we change its state in the body of the boss
+        if (this->leftArmSqrWeakpt->GetIsDestroyed()) {
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(boss->leftArmIdx);
+            
+            // Animate the left arm to fade out and "fall off" the body
+            this->leftArm->AnimateAlpha(this->armAlphaFadeoutAnim);
+
+            AnimationMultiLerp<Vector3D> armDeathTransAnim = this->GenerateArmDeathTranslationAnimation(true);
+            this->leftArm->AnimateLocalTranslation(armDeathTransAnim);
+
+            AnimationMultiLerp<float> armDeathRotAnim = this->GenerateArmDeathRotationAnimation(true);
+            this->leftArm->AnimateLocalZRotation(armDeathRotAnim);
+
+            this->leftArmSqrWeakpt = NULL;
+        }
+
+        if (this->currState != ArmsBodyHeadAI::HurtLeftArmAIState) {
+            this->SetState(ArmsBodyHeadAI::HurtLeftArmAIState);
+        }
+    }
 }
 
 void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
+    UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(projectile);
+    UNUSED_PARAMETER(collisionPart);
 }
 
 void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart) {
+    UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(paddle);
+    UNUSED_PARAMETER(collisionPart);
 }
 
 void ArmsBodyHeadAI::SetState(AIState newState) {
@@ -278,8 +430,17 @@ void ArmsBodyHeadAI::SetState(AIState newState) {
             this->movingDir = -this->movingDir;
             break;
 
-        case ArmsBodyHeadAI::HurtAIState:
+        case ArmsBodyHeadAI::HurtLeftArmAIState:
+            this->hurtAlphaAnim.ResetToStart();
+            this->boss->alivePartsRoot->AnimateAlpha(this->hurtAlphaAnim);
+            this->leftArmHurtMoveAnim.ResetToStart();
             break;
+        case ArmsBodyHeadAI::HurtRightArmAIState:
+            this->hurtAlphaAnim.ResetToStart();
+            this->boss->alivePartsRoot->AnimateAlpha(this->hurtAlphaAnim);
+            this->rightArmHurtMoveAnim.ResetToStart();
+            break;
+
         case ArmsBodyHeadAI::LostArmsAngryAIState:
             break;
 
@@ -320,8 +481,13 @@ void ArmsBodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
             this->ExecuteMoveAndBarrageWithLaserState(dT, gameModel);
             break;
 
-        case ArmsBodyHeadAI::HurtAIState:
+        case ArmsBodyHeadAI::HurtLeftArmAIState:
+            this->ExecuteHurtArmState(dT, true);
             break;
+        case ArmsBodyHeadAI::HurtRightArmAIState:
+            this->ExecuteHurtArmState(dT, false);
+            break;
+
         case ArmsBodyHeadAI::LostArmsAngryAIState:
             break;
 
@@ -366,8 +532,7 @@ void ArmsBodyHeadAI::ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* ga
     // Make sure we've moved up high enough...
     float avgBasicMoveHeight = this->GetBasicMovementHeight(level);
     float upDownDistance     = ArmsBodyHeadAI::BOSS_HEIGHT / 6.0f;
-    float moveToTopDiff      = avgBasicMoveHeight - bossPos[1];
-    
+
     if (bossPos[1] < avgBasicMoveHeight - upDownDistance) {
         this->desiredVel[1] = this->GetMaxSpeed() / 2.0f;
     }
@@ -687,6 +852,38 @@ void ArmsBodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* g
 
 }
 
+void ArmsBodyHeadAI::ExecuteHurtArmState(double dT, bool isLeftArm) {
+    bool isFinished = false;
+    if (isLeftArm) {
+        isFinished = this->leftArmHurtMoveAnim.Tick(dT);
+        this->leftArm->SetLocalTranslation(this->leftArmHurtMoveAnim.GetInterpolantValue());
+    }
+    else {
+        isFinished = this->rightArmHurtMoveAnim.Tick(dT);
+        this->rightArm->SetLocalTranslation(this->leftArmHurtMoveAnim.GetInterpolantValue());
+    }
+
+    if (isFinished) {
+        this->leftArm->SetLocalTranslation(Vector3D(0,0,0));
+        this->rightArm->SetLocalTranslation(Vector3D(0,0,0));
+
+        // Check to see if both arms are now gone, if they are then we move to a special state
+        if (this->leftArm->GetIsDestroyed() && this->rightArm->GetIsDestroyed()) {
+            this->SetState(ArmsBodyHeadAI::LostArmsAngryAIState);
+        }
+        else {
+
+            // ... otherwise we continue with the current AI routine by choosing a random state from it...
+            if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+                this->SetState(ArmsBodyHeadAI::ChasePaddleAIState);
+            }
+            else {
+                this->SetState(ArmsBodyHeadAI::BasicMoveAndLaserSprayAIState);
+            }
+        }
+    }
+}
+
 float ArmsBodyHeadAI::GetMaxSpeed() const {
     return ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED;
 }
@@ -738,6 +935,48 @@ ArmsBodyHeadAI::AIState ArmsBodyHeadAI::DetermineNextArmAttackState(const Vector
             return ArmsBodyHeadAI::AttackRightArmAIState;
         }
     }
+}
+
+AnimationMultiLerp<Vector3D> ArmsBodyHeadAI::GenerateArmDeathTranslationAnimation(bool isLeftArm) const {
+    double lastTimeValue = this->armAlphaFadeoutAnim.GetTimeValues().back();
+    std::vector<double> timeValues;
+    timeValues.reserve(2);
+    timeValues.push_back(0.0);
+    timeValues.push_back(lastTimeValue);
+
+    std::vector<Vector3D> moveValues;
+    moveValues.reserve(timeValues.size());
+    moveValues.push_back(Vector3D(0,0,0));
+    moveValues.push_back(Vector3D((isLeftArm ? -1 : 1) * 2 * ArmsBodyHeadAI::ARM_WIDTH, -ArmsBodyHeadAI::ARM_HEIGHT, 0.0f));
+
+    AnimationMultiLerp<Vector3D> armDeathTransAnim;
+    armDeathTransAnim.SetLerp(timeValues, moveValues);
+    armDeathTransAnim.SetRepeat(false);
+    armDeathTransAnim.SetInterpolantValue(Vector3D(0,0,0));
+
+    return armDeathTransAnim;
+}
+
+AnimationMultiLerp<float> ArmsBodyHeadAI::GenerateArmDeathRotationAnimation(bool isLeftArm) const {
+    double lastTimeValue = this->armAlphaFadeoutAnim.GetTimeValues().back();
+    std::vector<double> timeValues;
+    timeValues.reserve(3);
+    timeValues.push_back(0.0);
+    timeValues.push_back(lastTimeValue / 2.0);
+    timeValues.push_back(lastTimeValue);
+
+    std::vector<float> rotationValues;
+    rotationValues.reserve(timeValues.size());
+    rotationValues.push_back(0.0f);
+    rotationValues.push_back(isLeftArm ? 90.0f : -90.0f);
+    rotationValues.push_back(isLeftArm ? 100.0f : -100.0f);
+
+    AnimationMultiLerp<float> armDeathRotAnim;
+    armDeathRotAnim.SetLerp(timeValues, rotationValues);
+    armDeathRotAnim.SetRepeat(false);
+    armDeathRotAnim.SetInterpolantValue(0.0f);
+
+    return armDeathRotAnim;
 }
 
 // END ArmsBodyHeadAI **************************************************************

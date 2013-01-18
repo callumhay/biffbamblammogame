@@ -1412,14 +1412,16 @@ bool GameLevel::CollideBossWithLevel(const Collision::AABB2D& bossAABB, Vector2D
         didCollide = true;
     }
 
-    //if (Collision::GetCollisionPoint(bossAABB, bottomBoundary, collisionPt)) {
-    //    correctionVec[1] += collisionPt[1] - bossAABB.GetMin()[1] - EPSILON;
-    //    didCollide = true;
-    //}
     if (Collision::GetCollisionPoint(bossAABB, topBoundary, collisionPt)) {
         correctionVec[1] += collisionPt[1] - bossAABB.GetMax()[1] - EPSILON;
         didCollide = true;
     }
+
+    // TODO
+    //if (didCollide) {
+        // EVENT: The boss hit one of the level's walls
+        //GameEventManager::Instance()->ActionBossHitWall();
+    //}
 
     return didCollide;
 }

@@ -29,7 +29,7 @@ public:
     const BoundingLines& GetLocalBounds() const;
     BoundingLines GetWorldBounds() const;
 
-    virtual void Tick(double dT) { UNUSED_PARAMETER(dT); } 
+    virtual void Tick(double dT);
 
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
@@ -43,10 +43,12 @@ public:
     void Transform(const Matrix4x4& m);
 
     void SetLocalTranslation(const Vector3D& t);
+    void SetLocalZRotation(float zRotInDegs);
+    void SetLocalTransform(const Vector3D& translation, float zRotInDegs);
 
-	virtual void CollisionOccurred(GameModel* gameModel, GameBall& ball);
-	virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile);
-    virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
+    virtual void CollisionOccurred(GameModel* gameModel, GameBall& ball) { UNUSED_PARAMETER(gameModel); UNUSED_PARAMETER(ball); }
+    virtual void CollisionOccurred(GameModel* gameModel, Projectile* projectile) { UNUSED_PARAMETER(gameModel); UNUSED_PARAMETER(projectile); }
+    virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle) { UNUSED_PARAMETER(gameModel); UNUSED_PARAMETER(paddle); }
 
     virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const;
 	virtual void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
@@ -55,8 +57,11 @@ public:
 
     bool IsOrContainsPart(AbstractBossBodyPart* part, bool recursiveSearch) const;
 
-    virtual bool GetIsDestroyed() const;
-    virtual ColourRGBA GetColour() const { return ColourRGBA(1,1,1,1); }
+    bool GetIsDestroyed() const;
+    virtual void SetAsDestroyed();
+
+    virtual ColourRGBA GetColour() const { return this->rgbaAnim.GetInterpolantValue(); }
+    void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim);
 
     Collision::AABB2D GenerateWorldAABB() const;
 
@@ -67,12 +72,16 @@ public:
 	//void RemoveStatus(const PieceStatus& status);
 	//void RemoveStatuses(int32_t statusMask);
 
+
 #ifdef _DEBUG
     void DebugDraw() const;
 #endif
 
 protected:
+    bool isDestroyed;
     BoundingLines localBounds;
+
+    AnimationMultiLerp<ColourRGBA> rgbaAnim;
 
     //int32_t pieceStatus;
 
@@ -94,12 +103,13 @@ inline BoundingLines BossBodyPart::GetWorldBounds() const {
     return worldBounds;
 }
 
+inline void BossBodyPart::Tick(double dT) {
+    AbstractBossBodyPart::Tick(dT);
+    this->rgbaAnim.Tick(dT);
+}
+
 inline BossBodyPart* BossBodyPart::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
                                                   Collision::LineSeg2D& collisionLine, double& timeSinceCollision) {
-	if (ball.IsLastThingCollidedWith(this)) {
-		return false;
-	}
-
     if (this->GetWorldBounds().Collide(dT, ball.GetBounds(), ball.GetVelocity(), n, collisionLine, timeSinceCollision)) {
         return this;
     }
@@ -155,20 +165,52 @@ inline void BossBodyPart::Transform(const Matrix4x4& m) {
 }
 
 inline void BossBodyPart::SetLocalTranslation(const Vector3D& t) {
-    // Remove the previous local translation from the world transform
-    this->worldTransform = Matrix4x4::translationMatrix(-this->localTranslation) * this->worldTransform;
+    // Remove the previous local rotation and translation from the world transform
+    this->worldTransform = Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::translationMatrix(-this->localTranslation) * this->worldTransform;
     
-    // Change the local translation and apply it to the world transform
+    // Change the local translation and apply it back to the world transform (along with the local rotation)
     this->localTranslation = t;
-    this->worldTransform = Matrix4x4::translationMatrix(this->localTranslation) * this->worldTransform;
+    this->worldTransform = Matrix4x4::rotationZMatrix(this->localZRotation) *
+        Matrix4x4::translationMatrix(this->localTranslation) * this->worldTransform;
+}
+
+inline void BossBodyPart::SetLocalZRotation(float zRotInDegs) {
+    // Remove the previous rotation...
+    this->worldTransform = Matrix4x4::rotationZMatrix(-this->localZRotation) * this->worldTransform;
+
+    // Change the local z-axis rotation and apply it back to the world transform
+    this->localZRotation = zRotInDegs;
+    this->worldTransform = Matrix4x4::rotationZMatrix(this->localZRotation) * this->worldTransform;
+}
+
+inline void BossBodyPart::SetLocalTransform(const Vector3D& translation, float zRotInDegs) {
+    // Remove the previous local rotation and translation from the world transform
+    this->worldTransform = Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::translationMatrix(-this->localTranslation) * this->worldTransform;
+    
+    // Change the local translation and apply it back to the world transform (along with the local rotation)
+    this->localTranslation = translation;
+    this->localZRotation   = zRotInDegs;
+    this->worldTransform = Matrix4x4::rotationZMatrix(this->localZRotation) *
+        Matrix4x4::translationMatrix(this->localTranslation) * this->worldTransform;
+}
+
+inline void BossBodyPart::AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim) {
+    this->rgbaAnim = rgbaAnim;
 }
 
 inline bool BossBodyPart::GetIsDestroyed() const {
-    return false;
+    return this->isDestroyed;
+}
+
+inline void BossBodyPart::SetAsDestroyed() {
+    this->isDestroyed = true;
 }
 
 inline Collision::AABB2D BossBodyPart::GenerateWorldAABB() const {
     return this->GetWorldBounds().GenerateAABBFromLines();
 }
+
 
 #endif // __BOSSBODYPART_H__
