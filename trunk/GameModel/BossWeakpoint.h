@@ -27,12 +27,12 @@ public:
     bool IsCurrentlyInvulnerable() const;
 
     // Inherited functions from BossBodyPart
+    AbstractBossBodyPart::Type GetType() const { return AbstractBossBodyPart::WeakpointBodyPart; }
     void Tick(double dT);
 	void CollisionOccurred(GameModel* gameModel, GameBall& ball);
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile);
     //void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle);
     void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel);
-    ColourRGBA GetColour() const;
     void SetAsDestroyed();
 
     void ColourAnimationFinished();
@@ -57,10 +57,6 @@ inline float BossWeakpoint::GetCurrentLifePercentage() const {
 
 inline bool BossWeakpoint::IsCurrentlyInvulnerable() const {
     return this->invulnerableTimer > 0.0;
-}
-
-inline ColourRGBA BossWeakpoint::GetColour() const {
-    return this->rgbaAnim.GetInterpolantValue();
 }
 
 inline void BossWeakpoint::SetAsDestroyed() {

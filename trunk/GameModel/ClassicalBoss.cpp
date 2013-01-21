@@ -22,6 +22,7 @@ const float ClassicalBoss::ARM_X_TRANSLATION_FROM_CENTER = 10.3f;
 const float ClassicalBoss::ARM_WIDTH = 2.4f;
 const float ClassicalBoss::HALF_ARM_WIDTH = ARM_WIDTH / 2.0f;
 const float ClassicalBoss::ARM_HEIGHT = 9.66f;
+const float ClassicalBoss::HALF_ARM_HEIGHT = ARM_HEIGHT / 2.0f;
 
 const float ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED     = PlayerPaddle::DEFAULT_MAX_SPEED / 1.75f;
 const float ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION  = PlayerPaddle::DEFAULT_ACCELERATION / 3.0f;

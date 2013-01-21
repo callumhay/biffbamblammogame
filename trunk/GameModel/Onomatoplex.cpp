@@ -83,6 +83,8 @@ void Generator::LoadExplosionWords() {
     singleWordExplosion.push_back("Splam");
     singleWordExplosion.push_back("Zop");
     singleWordExplosion.push_back("Zorp");
+    singleWordExplosion.push_back("Whoap");
+    singleWordExplosion.push_back("Whoop");
 	this->simpleSingleWords[EXPLOSION] = singleWordExplosion;
 
 	std::vector<std::string> goodSingleWordExplosion;

@@ -31,3 +31,4 @@
 #include "ESPParticle.h"
 #include "ESPOnomataParticle.h"
 #include "ESPShaderParticle.h"
+#include "ESPAnimatedSpriteParticle.h"

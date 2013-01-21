@@ -135,6 +135,8 @@ public:
     const char* TEXTURE_PADLOCK;
     const char* TEXTURE_PLUS;
 
+    const char* TEXTURE_EXPLOSION_ANIMATION;
+
     const char* TEXTURE_MULTIPLIER_BANG;
     const char* TEXTURE_MULTIPLIER_GAGE_OUTLINE;
     const char* TEXTURE_MULTIPLIER_GAGE_GRADIENT;

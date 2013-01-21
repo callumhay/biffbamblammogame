@@ -67,6 +67,7 @@ public:
 	bool SetParticles(unsigned int numParticles, CgFxEffectBase* effect);
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text);
 	bool SetParticles(unsigned int numParticles, const TextLabel2D& text, Onomatoplex::SoundType st, Onomatoplex::Extremeness e);
+    bool SetAnimatedParticles(unsigned int numParticles, Texture2D* texture, int spriteSizeX, int spriteSizeY, double animationFPS);
 
 	void SetParticleAlignment(const ESP::ESPAlignment alignment);
 	void SetSpawnDelta(const ESPInterval& spawnDelta);

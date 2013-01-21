@@ -15,7 +15,9 @@
 #include "Boss.h"
 
 namespace classicalbossai {
+class ClassicalBossAI;
 class ArmsBodyHeadAI;
+class BodyHeadAI;
 }
 
 class BossBodyPart;
@@ -24,10 +26,17 @@ class BossCompositeBodyPart;
 
 class ClassicalBoss : public Boss {
 
+    friend class classicalbossai::ClassicalBossAI;
     friend class classicalbossai::ArmsBodyHeadAI;
+    friend class classicalbossai::BodyHeadAI;
     friend Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style);
 
 public:
+    static const float ARM_WIDTH;
+    static const float HALF_ARM_WIDTH;
+    static const float ARM_HEIGHT;
+    static const float HALF_ARM_HEIGHT;
+
     ~ClassicalBoss();
 
     const BossBodyPart* GetEye() const { return static_cast<const BossBodyPart*>(this->bodyParts[this->eyeIdx]); }
@@ -60,9 +69,6 @@ private:
     size_t leftCol1Idx, leftCol2Idx, leftCol3Idx, rightCol1Idx, rightCol2Idx, rightCol3Idx;
 
     static const float ARM_X_TRANSLATION_FROM_CENTER;
-    static const float ARM_WIDTH;
-    static const float HALF_ARM_WIDTH;
-    static const float ARM_HEIGHT;
 
     static const float ARMS_BODY_HEAD_MAX_SPEED;
     static const float ARMS_BODY_HEAD_ACCELERATION;

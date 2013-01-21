@@ -29,6 +29,7 @@ public:
     const BoundingLines& GetLocalBounds() const;
     BoundingLines GetWorldBounds() const;
 
+    virtual AbstractBossBodyPart::Type GetType() const { return AbstractBossBodyPart::BasicBodyPart; }
     virtual void Tick(double dT);
 
 	BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
@@ -60,8 +61,10 @@ public:
     bool GetIsDestroyed() const;
     virtual void SetAsDestroyed();
 
-    virtual ColourRGBA GetColour() const { return this->rgbaAnim.GetInterpolantValue(); }
+    ColourRGBA GetColour() const { return this->rgbaAnim.GetInterpolantValue(); }
+    float GetAlpha() const { return this->rgbaAnim.GetInterpolantValue().A(); }
     void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim);
+    void ResetColourRGBAAnimation();
 
     Collision::AABB2D GenerateWorldAABB() const;
 
@@ -73,7 +76,6 @@ public:
 	//void AddStatus(const PieceStatus& status);
 	//void RemoveStatus(const PieceStatus& status);
 	//void RemoveStatuses(int32_t statusMask);
-
 
 #ifdef _DEBUG
     void DebugDraw() const;
@@ -156,12 +158,7 @@ inline void BossBodyPart::Translate(const Vector3D& t) {
 }
 
 inline void BossBodyPart::RotateZ(float rotZDegs) {
-    if (fabs(rotZDegs) < EPSILON) {
-        return;
-    }
-
-    Matrix4x4 rotMatrix = Matrix4x4::rotationZMatrix(rotZDegs);
-    this->worldTransform = rotMatrix * this->worldTransform;
+    this->worldTransform = Matrix4x4::rotationZMatrix(rotZDegs) * this->worldTransform;
 }
 
 inline void BossBodyPart::Transform(const Matrix4x4& m) {
@@ -170,38 +167,49 @@ inline void BossBodyPart::Transform(const Matrix4x4& m) {
 
 inline void BossBodyPart::SetLocalTranslation(const Vector3D& t) {
     // Remove the previous local rotation and translation from the world transform
-    this->worldTransform = Matrix4x4::rotationZMatrix(-this->localZRotation) *
-        Matrix4x4::translationMatrix(-this->localTranslation) * this->worldTransform;
+    this->worldTransform = 
+        this->worldTransform *
+        Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::translationMatrix(-this->localTranslation + t) *
+        Matrix4x4::rotationZMatrix(this->localZRotation);
     
-    // Change the local translation and apply it back to the world transform (along with the local rotation)
+    // Change the local translation
     this->localTranslation = t;
-    this->worldTransform = Matrix4x4::rotationZMatrix(this->localZRotation) *
-        Matrix4x4::translationMatrix(this->localTranslation) * this->worldTransform;
 }
 
 inline void BossBodyPart::SetLocalZRotation(float zRotInDegs) {
     // Remove the previous rotation...
-    this->worldTransform = Matrix4x4::rotationZMatrix(-this->localZRotation) * this->worldTransform;
+    this->worldTransform =
+        this->worldTransform *
+        Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::rotationZMatrix(zRotInDegs);
 
-    // Change the local z-axis rotation and apply it back to the world transform
+    // Change the local z-axis rotation
     this->localZRotation = zRotInDegs;
-    this->worldTransform = Matrix4x4::rotationZMatrix(this->localZRotation) * this->worldTransform;
 }
 
 inline void BossBodyPart::SetLocalTransform(const Vector3D& translation, float zRotInDegs) {
     // Remove the previous local rotation and translation from the world transform
-    this->worldTransform = Matrix4x4::rotationZMatrix(-this->localZRotation) *
-        Matrix4x4::translationMatrix(-this->localTranslation) * this->worldTransform;
+    this->worldTransform = 
+        this->worldTransform *
+        Matrix4x4::rotationZMatrix(-this->localZRotation) *
+        Matrix4x4::translationMatrix(-this->localTranslation + translation) *
+        Matrix4x4::rotationZMatrix(zRotInDegs);
     
-    // Change the local translation and apply it back to the world transform (along with the local rotation)
+    // Change the local translation and z-axis rotation
     this->localTranslation = translation;
     this->localZRotation   = zRotInDegs;
-    this->worldTransform = Matrix4x4::rotationZMatrix(this->localZRotation) *
-        Matrix4x4::translationMatrix(this->localTranslation) * this->worldTransform;
 }
 
 inline void BossBodyPart::AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim) {
     this->rgbaAnim = rgbaAnim;
+}
+
+inline void BossBodyPart::ResetColourRGBAAnimation() {
+    this->rgbaAnim.ClearLerp();
+    this->rgbaAnim.SetInterpolantValue(ColourRGBA(1,1,1,1));
+    this->rgbaAnim.SetRepeat(false);
+    this->ColourAnimationFinished();
 }
 
 inline bool BossBodyPart::GetIsDestroyed() const {
