@@ -28,9 +28,12 @@ class BossBodyPart;
 
 class AbstractBossBodyPart {
 public:
-    
+    enum Type { BasicBodyPart, WeakpointBodyPart, CompositeBodyPart };
+
     AbstractBossBodyPart();
     virtual ~AbstractBossBodyPart();
+
+    virtual AbstractBossBodyPart::Type GetType() const = 0;
 
     virtual void Tick(double dT);
 
@@ -62,7 +65,6 @@ public:
     virtual Collision::AABB2D GenerateWorldAABB() const = 0;
 
     const Matrix4x4& GetWorldTransform() const { return this->worldTransform; }
-    virtual void SetWorldTransform(const Matrix4x4& m) { this->worldTransform = m; }
 
     Vector2D GetTranslationVec2D() const { return this->worldTransform.getTranslationVec2D(); }
     Point2D GetTranslationPt2D() const { return this->worldTransform.getTranslationPt2D(); }
@@ -73,6 +75,7 @@ public:
     virtual AbstractBossBodyPart* SearchForParent(AbstractBossBodyPart* part) { UNUSED_PARAMETER(part); return NULL; }
 
     virtual void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim) = 0;
+    virtual void ResetColourRGBAAnimation() = 0;
         
 #ifdef _DEBUG
     virtual void DebugDraw() const = 0;
@@ -91,7 +94,9 @@ private:
     DISALLOW_COPY_AND_ASSIGN(AbstractBossBodyPart);
 };
 
-inline AbstractBossBodyPart::AbstractBossBodyPart() : localZRotation(0.0f), localTranslation(0.0f, 0.0f, 0.0f) {
+inline AbstractBossBodyPart::AbstractBossBodyPart() : 
+localZRotation(0.0f), localTranslation(0.0f, 0.0f, 0.0f) {
+
     this->transAnim.ClearLerp();
     this->transAnim.SetInterpolantValue(Vector3D(0,0,0));
     this->transAnim.SetRepeat(false);

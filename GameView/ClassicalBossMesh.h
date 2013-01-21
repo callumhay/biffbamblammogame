@@ -16,14 +16,14 @@
 
 class ClassicalBoss;
 class Mesh;
+class ESPPointEmitter;
 
 class ClassicalBossMesh : public BossMesh {
 public:
     ClassicalBossMesh(ClassicalBoss* boss);
     ~ClassicalBossMesh();
 
-    void Tick(double dT);
-    void Draw(const Camera& camera, const BasicPointLight& keyLight,
+    void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
 private:
@@ -38,6 +38,14 @@ private:
     Mesh* armSquareMesh;
     Mesh* restOfArmMesh;
 
+    // Visual effects for the boss
+    ESPPointEmitter* leftArmSmokeEmitter;
+    ESPPointEmitter* rightArmSmokeEmitter;
+
+    ESPPointEmitter* leftArmExplodingEmitter;
+    ESPPointEmitter* rightArmExplodingEmitter;
+
+    void DrawEffects(double dT, const Camera& camera);
 
     DISALLOW_COPY_AND_ASSIGN(ClassicalBossMesh);
 };

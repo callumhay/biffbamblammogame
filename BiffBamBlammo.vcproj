@@ -578,6 +578,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPAnimatedSpriteParticle.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPBeam.h"
 					>
 				</File>
@@ -629,6 +633,10 @@
 			<Filter
 				Name="Source Files"
 				>
+				<File
+					RelativePath=".\ESPEngine\ESPAnimatedSpriteParticle.cpp"
+					>
+				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPBeam.cpp"
 					>

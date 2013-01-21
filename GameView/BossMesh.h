@@ -13,24 +13,39 @@
 #define __BOSSMESH_H__
 
 #include "../GameModel/GameWorld.h"
+#include "../ESPEngine/ESP.h"
 
 class Camera;
 class BasicPointLight;
 class Boss;
+class Texture2D;
 
 /**
  * The abstract superclass for all meshes/visuals of bosses in the game.
  */
 class BossMesh {
 public:
-    BossMesh() {};
-    virtual ~BossMesh() {};
+    BossMesh();
+    virtual ~BossMesh();
 
     static BossMesh* Build(const GameWorld::WorldStyle& style, Boss* boss);
-
-    virtual void Tick(double dT) = 0;
-    virtual void Draw(const Camera& camera, const BasicPointLight& keyLight,
+    
+    virtual void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight) = 0;
+
+protected:
+    // Shared visual effects and textures for bosses
+    std::vector<Texture2D*> smokeTextures;
+    Texture2D* explosionAnimTex;
+
+    ESPParticleScaleEffector  particleLargeGrowth;
+    ESPParticleScaleEffector  particleMediumGrowth;
+    ESPParticleColourEffector particleFireColourFader;
+    //ESPParticleColourEffector smokeColourFader;
+	ESPParticleRotateEffector rotateEffectorCW;
+
+    ESPPointEmitter* BuildFireSmokeEmitter(float width, float height);
+    ESPPointEmitter* BuildExplodingEmitter(float width, float height);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(BossMesh);

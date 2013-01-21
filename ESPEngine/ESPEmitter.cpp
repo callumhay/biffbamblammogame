@@ -12,6 +12,7 @@
 #include "ESPEmitter.h"
 #include "ESPShaderParticle.h"
 #include "ESPOnomataParticle.h"
+#include "ESPAnimatedSpriteParticle.h"
 #include "ESPEmitterEventHandler.h"
 
 #include "../BlammoEngine/TextLabel.h"
@@ -404,6 +405,27 @@ bool ESPEmitter::SetParticles(unsigned int numParticles, const TextLabel2D& text
 
 	return true;
 }
+
+bool ESPEmitter::SetAnimatedParticles(unsigned int numParticles, Texture2D* texture, int spriteSizeX, int spriteSizeY, double animationFPS) {
+	assert(numParticles > 0);
+	// Clean up previous emitter data
+	this->Flush();
+	
+    this->particleTexture = texture;
+
+	// Create each of the new particles
+	for (unsigned int i = 0; i < numParticles; i++) {
+		// Initialize the particle and its attributes
+		ESPAnimatedSpriteParticle* newParticle = new ESPAnimatedSpriteParticle(texture, spriteSizeX, spriteSizeY, animationFPS);
+		this->deadParticles.push_back(newParticle);
+
+		// Assign the number of lives...
+		this->particleLivesLeft[newParticle] = this->numParticleLives;
+	}
+
+	return true;
+}
+
 
 /**
  * Sets the particle alignments for this emitter.

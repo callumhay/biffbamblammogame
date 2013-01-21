@@ -320,6 +320,7 @@ inline Point3D operator*(const Matrix4x4& m, const Point3D& p) {
 }
 
 inline Matrix4x4 Matrix4x4::inverse() const {
+
   float fA0 = v_[ 0]*v_[ 5] - v_[ 1]*v_[ 4];
   float fA1 = v_[ 0]*v_[ 6] - v_[ 2]*v_[ 4];
   float fA2 = v_[ 0]*v_[ 7] - v_[ 3]*v_[ 4];

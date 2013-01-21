@@ -16,11 +16,15 @@
 
 #include "../BlammoEngine/Mesh.h"
 
+#include "../ESPEngine/ESP.h"
+
 #include "../GameModel/ClassicalBoss.h"
+#include "../GameModel/BossWeakpoint.h"
 
 ClassicalBossMesh::ClassicalBossMesh(ClassicalBoss* boss) : BossMesh(), boss(boss),
 eyeMesh(NULL), pedimentMesh(NULL), tablatureMesh(NULL), columnMesh(NULL),
-baseMesh(NULL), armSquareMesh(NULL), restOfArmMesh(NULL) {
+baseMesh(NULL), armSquareMesh(NULL), restOfArmMesh(NULL), leftArmSmokeEmitter(NULL),
+rightArmSmokeEmitter(NULL), leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL) {
 
     assert(boss != NULL);
 
@@ -39,6 +43,13 @@ baseMesh(NULL), armSquareMesh(NULL), restOfArmMesh(NULL) {
     assert(this->armSquareMesh != NULL);
     this->restOfArmMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BOSS_ARM_MESH);
     assert(this->restOfArmMesh != NULL);
+
+    // Load effects assets...
+    this->leftArmSmokeEmitter  = this->BuildFireSmokeEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+    this->rightArmSmokeEmitter = this->BuildFireSmokeEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+
+    this->leftArmExplodingEmitter  = this->BuildExplodingEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+    this->rightArmExplodingEmitter = this->BuildExplodingEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
 }
 
 ClassicalBossMesh::~ClassicalBossMesh() {
@@ -65,43 +76,50 @@ ClassicalBossMesh::~ClassicalBossMesh() {
     assert(success);
 
     UNUSED_VARIABLE(success);
+
+    delete this->leftArmSmokeEmitter;
+    this->leftArmSmokeEmitter = NULL;
+    delete this->rightArmSmokeEmitter;
+    this->rightArmSmokeEmitter = NULL;
+    delete this->leftArmExplodingEmitter;
+    this->leftArmExplodingEmitter = NULL;
+    delete this->rightArmExplodingEmitter;
+    this->rightArmExplodingEmitter = NULL;
 }
 
-void ClassicalBossMesh::Tick(double dT) {
-    // TODO?
-}
-
-void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLight,
+void ClassicalBossMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
                              const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
     
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // worldspace locations...
 
-    ColourRGBA currColour(1,1,1,1);
+    ColourRGBA currColour;
 
     // Eye...
     const BossBodyPart* eye = this->boss->GetEye();
     assert(eye != NULL);
-    glPushMatrix();
-    glMultMatrixf(eye->GetWorldTransform().begin());
-    
+
     currColour = eye->GetColour();
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-    this->eyeMesh->Draw(camera, keyLight, fillLight, ballLight);
-    
-    glPopMatrix();
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(eye->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->eyeMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
     // Pediment...
     const BossBodyPart* pediment = this->boss->GetPediment();
     assert(pediment != NULL);
-    glPushMatrix();
-    glMultMatrixf(pediment->GetWorldTransform().begin());
-    
+
     currColour = pediment->GetColour();
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-    this->pedimentMesh->Draw(camera, keyLight, fillLight, ballLight);
-    
-    glPopMatrix();
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(pediment->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->pedimentMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
     // Tablatures
     const BossBodyPart* topLeftTab  = this->boss->GetTopLeftTablature();
@@ -115,58 +133,69 @@ void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLig
 
     // All tablatures have the same colour...
     currColour = topLeftTab->GetColour();
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(topLeftTab->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
-    glPushMatrix();
-    glMultMatrixf(topLeftTab->GetWorldTransform().begin());
-    
-    this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+    currColour = topRightTab->GetColour();
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(topRightTab->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
-    glPopMatrix();
+    currColour = bottomLeftTab->GetColour();
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(bottomLeftTab->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
-    glPushMatrix();
-    glMultMatrixf(topRightTab->GetWorldTransform().begin());
-    this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
-    glPopMatrix();
-
-    glPushMatrix();
-    glMultMatrixf(bottomLeftTab->GetWorldTransform().begin());
-    this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
-    glPopMatrix();
-
-    glPushMatrix();
-    glMultMatrixf(bottomRightTab->GetWorldTransform().begin());
-    this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
-    glPopMatrix();
+    currColour = bottomRightTab->GetColour();
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(bottomRightTab->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->tablatureMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
     // Columns
-
-    // All columns have the same colour
     std::vector<const BossBodyPart*> columns = this->boss->GetBodyColumns();   
-
-    currColour = columns.front()->GetColour();
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-
     for (int i = 0; i < static_cast<int>(columns.size()); i++) {
         const BossBodyPart* column = columns[i];
         assert(column != NULL);
-        glPushMatrix();
-        glMultMatrixf(column->GetWorldTransform().begin());
-        this->columnMesh->Draw(camera, keyLight, fillLight, ballLight);
-        glPopMatrix();
+
+        currColour = column->GetColour();
+        if (currColour.A() > 0.0f) {
+            glPushMatrix();
+            glMultMatrixf(column->GetWorldTransform().begin());
+            glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+            this->columnMesh->Draw(camera, keyLight, fillLight, ballLight);
+            glPopMatrix();
+        }
     }
 
     // Base
     const BossBodyPart* base = this->boss->GetBase();
     assert(base != NULL);
-    glPushMatrix();
-    glMultMatrixf(base->GetWorldTransform().begin());
 
     currColour = base->GetColour();
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-    this->baseMesh->Draw(camera, keyLight, fillLight, ballLight);
-    
-    glPopMatrix();
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(base->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->baseMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
     // Arms
     const BossBodyPart* leftRestOfArm  = this->boss->GetLeftRestOfArm();
@@ -178,40 +207,102 @@ void ClassicalBossMesh::Draw(const Camera& camera, const BasicPointLight& keyLig
     assert(leftArmSquare != NULL);
     assert(rightArmSquare != NULL);
 
-    glPushMatrix();
-    glMultMatrixf(leftRestOfArm->GetWorldTransform().begin());
-
     currColour = leftRestOfArm->GetColour();
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-    this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
-
-    glPopMatrix();
-
-    glPushMatrix();
-    glMultMatrixf(rightRestOfArm->GetWorldTransform().begin());
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(leftRestOfArm->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
     currColour = rightRestOfArm->GetColour();
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-    this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
-
-    glPopMatrix();
-
-    glPushMatrix();
-    glMultMatrixf(leftArmSquare->GetWorldTransform().begin());
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(rightRestOfArm->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->restOfArmMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
     currColour = leftArmSquare->GetColour();
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-    this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
-
-    glPopMatrix();
-
-    glPushMatrix();
-    glMultMatrixf(rightArmSquare->GetWorldTransform().begin());
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(leftArmSquare->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
     currColour = rightArmSquare->GetColour();
-    glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
-    this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+    if (currColour.A() > 0.0f) {
+        glPushMatrix();
+        glMultMatrixf(rightArmSquare->GetWorldTransform().begin());
+        glColor4f(currColour.R(), currColour.G(), currColour.B(), currColour.A());
+        this->armSquareMesh->Draw(camera, keyLight, fillLight, ballLight);
+        glPopMatrix();
+    }
 
-    glPopMatrix();
+    this->DrawEffects(dT, camera);
+}
+
+void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
+
+    // Draw the effects for the arms of the boss when it's hurt or destroyed...
+    const BossBodyPart* leftRestOfArm  = this->boss->GetLeftRestOfArm();
+    const BossBodyPart* rightRestOfArm = this->boss->GetRightRestOfArm();
+    const BossBodyPart* leftArmSquare  = this->boss->GetLeftArmSquare();
+    const BossBodyPart* rightArmSquare = this->boss->GetRightArmSquare();
+
+    if (leftArmSquare->GetAlpha() > 0.0f) {
+        if (leftArmSquare->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            const BossWeakpoint* leftArmSqr = static_cast<const BossWeakpoint*>(leftArmSquare);
+            
+            if (!leftArmSqr->GetIsDestroyed()) {
+                if (leftArmSqr->GetCurrentLifePercentage() < 1.0) {
+                    float lifePercentage = leftArmSqr->GetCurrentLifePercentage();
+                    this->leftArmSmokeEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.5f, lifePercentage));
+                    this->leftArmSmokeEmitter->Tick(dT);
+
+                    glPushMatrix();
+                    glMultMatrixf(leftRestOfArm->GetWorldTransform().begin());
+                    this->leftArmSmokeEmitter->Draw(camera);
+                    glPopMatrix();
+                }
+            }
+            else {
+                glPushMatrix();
+                glMultMatrixf(leftRestOfArm->GetWorldTransform().begin());
+                this->leftArmExplodingEmitter->Tick(dT);
+                this->leftArmExplodingEmitter->Draw(camera);
+                glPopMatrix();
+            }
+        }
+    }
+
+    if (rightArmSquare->GetAlpha() > 0.0f) {
+        if (rightArmSquare->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+            const BossWeakpoint* rightArmSqr = static_cast<const BossWeakpoint*>(rightArmSquare);
+            if (!rightArmSqr->GetIsDestroyed()) {
+                if (rightArmSqr->GetCurrentLifePercentage() < 1.0) {
+                    float lifePercentage = rightArmSqr->GetCurrentLifePercentage();
+                    this->rightArmSmokeEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.5f, lifePercentage));
+                    this->rightArmSmokeEmitter->Tick(dT);
+
+                    glPushMatrix();
+                    glMultMatrixf(rightRestOfArm->GetWorldTransform().begin());
+                    this->rightArmSmokeEmitter->Draw(camera);
+                    glPopMatrix();
+                }
+            }
+            else {
+                glPushMatrix();
+                glMultMatrixf(rightRestOfArm->GetWorldTransform().begin());
+                this->rightArmExplodingEmitter->Tick(dT);
+                this->rightArmExplodingEmitter->Draw(camera);
+                glPopMatrix();
+            }
+        }
+    }
 
 }

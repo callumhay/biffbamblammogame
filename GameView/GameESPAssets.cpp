@@ -3797,7 +3797,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 
 	// Create a dispertion of particle bits
 	ESPPointEmitter* particleSparks = new ESPPointEmitter();
-	particleSparks->SetSpawnDelta(ESPInterval(0.01f, 0.02f));
+	particleSparks->SetSpawnDelta(ESPInterval(0.02f, 0.03f));
 	particleSparks->SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
 	particleSparks->SetInitialSpd(ESPInterval(1.5f, 4.0f));
 	particleSparks->SetParticleLife(ESPInterval(0.5f, 0.75f));
@@ -3808,7 +3808,7 @@ void GameESPAssets::AddLaserHitWallEffect(const Point2D& loc) {
 	particleSparks->SetEmitPosition(EMITTER_LOCATION);
 	particleSparks->AddEffector(&this->particleFader);
 	particleSparks->AddEffector(&this->particleMediumGrowth);
-	particleSparks->SetParticles(15, this->circleGradientTex);
+	particleSparks->SetParticles(10, this->circleGradientTex);
 
 	this->activeGeneralEmitters.push_back(lensFlareEmitter);
 	this->activeGeneralEmitters.push_back(particleSparks);

@@ -67,10 +67,10 @@ bool WindowManager::Init(int width, int height, bool isFullscreen) {
 #ifdef _DEBUG
 	SDL_ShowCursor(1);
 #else
-	//SDL_ShowCursor(1);
+	SDL_ShowCursor(1);
     // TODO: Show the cursor as a graphic/effect of some sort in the menu and game
     // and hide the normal one...
-    SDL_ShowCursor(0);
+    //SDL_ShowCursor(0);
 #endif
 
     SDL_WM_SetCaption(WindowManager::WINDOW_TITLE, WindowManager::WINDOW_TITLE);

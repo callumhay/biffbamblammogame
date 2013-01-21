@@ -30,6 +30,7 @@ public:
     void RemoveBodyPart(AbstractBossBodyPart* part); // Not recursive
 
     // Inherited from AbstractBossBodyPart
+    AbstractBossBodyPart::Type GetType() const { return AbstractBossBodyPart::CompositeBodyPart; }
     void Tick(double dT);
     BossBodyPart* CollisionCheck(const GameBall& ball, double dT, Vector2D& n,
         Collision::LineSeg2D& collisionLine, double& timeSinceCollision);
@@ -59,9 +60,8 @@ public:
 
     Collision::AABB2D GenerateWorldAABB() const;
 
-    void SetWorldTransform(const Matrix4x4& m);
-
     void AnimateColourRGBA(const AnimationMultiLerp<ColourRGBA>& rgbaAnim);
+    void ResetColourRGBAAnimation();
         
 #ifdef _DEBUG
     void DebugDraw() const;
