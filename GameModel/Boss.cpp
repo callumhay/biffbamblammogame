@@ -12,6 +12,7 @@
 #include "Boss.h"
 #include "AbstractBossBodyPart.h"
 #include "BossBodyPart.h"
+#include "BossWeakpoint.h"
 #include "BossAIState.h"
 #include "ClassicalBoss.h"
 
@@ -106,6 +107,189 @@ bool Boss::CanHurtPaddleWithBody() const {
         return this->currAIState->CanHurtPaddleWithBody();
     }
     return false;
+}
+
+AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtAndInvulnerableColourAnim() {
+    static const int NUM_FLASHES = 20;
+    
+    std::vector<double> timeValues;
+    timeValues.reserve(2*NUM_FLASHES + 1);
+    std::vector<ColourRGBA> colourValues;
+    colourValues.reserve(timeValues.size());
+    
+    double timeInc = BossWeakpoint::INVULNERABLE_TIME_IN_SECS / static_cast<double>(2*NUM_FLASHES);
+    double timeCount = 0.0;
+    
+    for (int i = 0; i <= 2*NUM_FLASHES; i++) {
+        timeValues.push_back(timeCount);
+        timeCount += timeInc;
+    }
+    for (int i = 0; i < NUM_FLASHES; i++) {
+        colourValues.push_back(ColourRGBA(1.0f, 0.25f, 0.25f, 1.0f));
+        colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 0.5f));
+    }
+    colourValues.push_back(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+
+    AnimationMultiLerp<ColourRGBA> hurtColourAnim;
+    hurtColourAnim.SetLerp(timeValues, colourValues);
+    hurtColourAnim.SetRepeat(false);
+
+    return hurtColourAnim;
+}
+
+AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtFlashAndFadeAnim(double totalAnimTime) {
+    const double FIRST_FADE_OUT_TIME = 0.5;
+    const double NUM_FLASHES = 25 * totalAnimTime / 4.0;
+    const double FLASH_TIME_INC = (totalAnimTime - FIRST_FADE_OUT_TIME) / (2*NUM_FLASHES + 1);
+
+    std::vector<double> timeValues;
+    timeValues.reserve(2 + 2*NUM_FLASHES + 1);
+    timeValues.push_back(0.0);
+    timeValues.push_back(FIRST_FADE_OUT_TIME);
+    for (int i = 0; i <= 2*NUM_FLASHES; i++) {
+        timeValues.push_back(timeValues.back() + FLASH_TIME_INC);
+    }
+
+    static const float FIRST_ALPHA_FADE_OUT_VALUE  = 0.5f;
+    static const float SECOND_ALPHA_FADE_OUT_VALUE = 0.25f;
+    std::vector<ColourRGBA> alphaValues;
+    alphaValues.reserve(timeValues.size());
+    alphaValues.push_back(ColourRGBA(1,1,1,1));
+    alphaValues.push_back(ColourRGBA(1,1,1,FIRST_ALPHA_FADE_OUT_VALUE));
+    for (int i = 0; i < NUM_FLASHES; i++) {
+        alphaValues.push_back(ColourRGBA(1.0f, 0.0f, 0.0f, SECOND_ALPHA_FADE_OUT_VALUE));
+        alphaValues.push_back(ColourRGBA(1.0f, 0.8f, 0.8f, FIRST_ALPHA_FADE_OUT_VALUE));
+    }
+    alphaValues.push_back(ColourRGBA(0.0f, 0.0f, 0.0f, 0.0f));
+
+    AnimationMultiLerp<ColourRGBA> anim;
+    anim.SetLerp(timeValues, alphaValues);
+    anim.SetRepeat(false);
+
+    return anim;
+}
+
+AnimationMultiLerp<ColourRGBA> Boss::BuildBossFinalDeathFlashAnim() {
+    const double NUM_FLASHES = 15;
+    const double FLASH_TIME_INC = 4.0 / (3*NUM_FLASHES + 1);
+
+    std::vector<double> timeValues;
+    timeValues.reserve(1 + 3*NUM_FLASHES + 1);
+    timeValues.push_back(0.0);
+    for (int i = 0; i <= 3*NUM_FLASHES; i++) {
+        timeValues.push_back(timeValues.back() + FLASH_TIME_INC);
+    }
+
+    std::vector<ColourRGBA> alphaValues;
+    alphaValues.reserve(timeValues.size());
+    alphaValues.push_back(ColourRGBA(1,1,1,1));
+    for (int i = 0; i < NUM_FLASHES; i++) {
+        alphaValues.push_back(ColourRGBA(1.0f, 0.0f, 0.0f, 0.5f));
+        alphaValues.push_back(ColourRGBA(1,1,1,1));
+        alphaValues.push_back(ColourRGBA(1.0f, 0.8f, 0.8f, 0.5f));
+    }
+    alphaValues.push_back(ColourRGBA(1,1,1,1));
+
+    AnimationMultiLerp<ColourRGBA> anim;
+    anim.SetLerp(timeValues, alphaValues);
+    anim.SetRepeat(true);
+
+    return anim;
+}
+
+AnimationMultiLerp<ColourRGBA> Boss::BuildBossAngryFlashAnim() {
+    static const double COLOUR_FLASH_TIME = 0.2;
+    
+    std::vector<double> timeVals;
+    timeVals.reserve(5);
+    timeVals.push_back(0.0);
+    timeVals.push_back(COLOUR_FLASH_TIME);
+    timeVals.push_back(2*COLOUR_FLASH_TIME);
+    timeVals.push_back(3*COLOUR_FLASH_TIME);
+    timeVals.push_back(4*COLOUR_FLASH_TIME);
+
+    std::vector<ColourRGBA> colourVals;
+    colourVals.reserve(timeVals.size());
+    colourVals.push_back(ColourRGBA(1,1,1,1));
+    colourVals.push_back(ColourRGBA(1,0,0,1));
+    colourVals.push_back(ColourRGBA(1,1,0,1));
+    colourVals.push_back(ColourRGBA(1,0,0,1));
+    colourVals.push_back(ColourRGBA(1,1,1,1));
+
+    AnimationMultiLerp<ColourRGBA> angryColourAnim;
+    angryColourAnim.SetLerp(timeVals, colourVals);
+    angryColourAnim.SetRepeat(true);
+    return angryColourAnim;
+}
+
+AnimationMultiLerp<Vector3D> Boss::BuildBossAngryShakeAnim(float shakeMagnitude) {
+    static const int NUM_SHAKES = 15;
+    static const double SHAKE_INC_TIME = 0.03;
+    
+    std::vector<double> timeVals;
+    timeVals.reserve(1 + NUM_SHAKES + 1);
+    timeVals.push_back(0.0);
+    for (int i = 0; i <= NUM_SHAKES*2; i++) {
+        timeVals.push_back(timeVals.back() + SHAKE_INC_TIME);
+    }
+
+    std::vector<Vector3D> moveVals;
+    moveVals.reserve(timeVals.size());
+    moveVals.push_back(Vector3D(0,0,0));
+    for (int i = 0; i < NUM_SHAKES; i++) {
+        float randomNum1 = Randomizer::GetInstance()->RandomNumNegOneToOne() * shakeMagnitude;
+        float randomNum2 = Randomizer::GetInstance()->RandomNumNegOneToOne() * shakeMagnitude;
+        moveVals.push_back(Vector3D(randomNum1, randomNum2, 0));
+        moveVals.push_back(Vector3D(-randomNum1, -randomNum2, 0));
+    }
+    moveVals.push_back(Vector3D(0.0f, 0.0f, 0.0f));
+    
+    AnimationMultiLerp<Vector3D> angryMoveAnim;
+    angryMoveAnim.SetLerp(timeVals, moveVals);
+    angryMoveAnim.SetRepeat(false);
+    return angryMoveAnim;
+}
+
+AnimationMultiLerp<Vector3D> Boss::BuildBossFinalDeathShakeAnim(float shakeMagnitude) {
+    AnimationMultiLerp<Vector3D> anim = Boss::BuildBossAngryShakeAnim(shakeMagnitude);
+    anim.SetRepeat(true);
+    return anim;
+}
+
+AnimationMultiLerp<Vector3D> Boss::BuildLimbFallOffTranslationAnim(double totalAnimTime, float xDist, float yDist) {
+    std::vector<double> timeValues;
+    timeValues.reserve(2);
+    timeValues.push_back(0.0);
+    timeValues.push_back(totalAnimTime);
+
+    std::vector<Vector3D> moveValues;
+    moveValues.reserve(timeValues.size());
+    moveValues.push_back(Vector3D(0,0,0));
+    moveValues.push_back(Vector3D(xDist, yDist, 0.0f));
+
+    AnimationMultiLerp<Vector3D> limbFallOffTransAnim;
+    limbFallOffTransAnim.SetLerp(timeValues, moveValues);
+    limbFallOffTransAnim.SetRepeat(false);
+
+    return limbFallOffTransAnim;
+}
+
+AnimationMultiLerp<float> Boss::BuildLimbFallOffZRotationAnim(double totalAnimTime, float rotAmtInDegs) {
+    std::vector<double> timeValues;
+    timeValues.reserve(3);
+    timeValues.push_back(0.0);
+    timeValues.push_back(totalAnimTime);
+
+    std::vector<float> rotationValues;
+    rotationValues.reserve(timeValues.size());
+    rotationValues.push_back(0.0f);
+    rotationValues.push_back(rotAmtInDegs);
+
+    AnimationMultiLerp<float> limbFallOffRotAnim;
+    limbFallOffRotAnim.SetLerp(timeValues, rotationValues);
+    limbFallOffRotAnim.SetRepeat(false);
+
+    return limbFallOffRotAnim;
 }
 
 void Boss::SetNextAIState(BossAIState* nextState) {

@@ -27,6 +27,15 @@ const float ClassicalBoss::HALF_ARM_HEIGHT = ARM_HEIGHT / 2.0f;
 const float ClassicalBoss::COLUMN_WIDTH  = 1.704f;
 const float ClassicalBoss::COLUMN_HEIGHT = 4.373f;
 
+const float ClassicalBoss::BASE_WIDTH = 18.355f;
+
+const float ClassicalBoss::TABLATURE_WIDTH = 7.621f;
+
+const float ClassicalBoss::PEDIMENT_WIDTH  = 17.823f;
+const float ClassicalBoss::PEDIMENT_HEIGHT = 3.16f;
+
+const float ClassicalBoss::EYE_WIDTH = 3.150f;
+
 const float ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED     = PlayerPaddle::DEFAULT_MAX_SPEED / 1.75f;
 const float ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION  = PlayerPaddle::DEFAULT_ACCELERATION / 3.0f;
 
@@ -90,7 +99,7 @@ void ClassicalBoss::Init() {
             // eye
             {
                 static const float HEIGHT = 1.575f;
-                static const float WIDTH  = 3.150f;
+                static const float WIDTH  = EYE_WIDTH;
                 static const float HALF_HEIGHT = HEIGHT / 2.0f;
                 static const float HALF_WIDTH  = WIDTH  / 2.0f;
 
@@ -113,8 +122,8 @@ void ClassicalBoss::Init() {
 
             // pediment
             {
-                static const float HEIGHT = 3.16f;
-                static const float WIDTH  = 17.823f;
+                static const float HEIGHT = PEDIMENT_HEIGHT;
+                static const float WIDTH  = PEDIMENT_WIDTH;
                 static const float HALF_HEIGHT = HEIGHT / 2.0f;
                 static const float HALF_WIDTH  = WIDTH  / 2.0f;
 
@@ -137,7 +146,7 @@ void ClassicalBoss::Init() {
             // *Tablature
             {
                 static const float HEIGHT = 1.334f;
-                static const float BOTTOM_WIDTH  = 7.621f;
+                static const float BOTTOM_WIDTH  = TABLATURE_WIDTH;
                 static const float TOP_WIDTH = 6.933f;
                 static const float HALF_HEIGHT = HEIGHT / 2.0f;
                 static const float HALF_BOTTOM_WIDTH  = BOTTOM_WIDTH  / 2.0f;
@@ -254,7 +263,7 @@ void ClassicalBoss::Init() {
 
             // base
             {
-                static const float WIDTH  = 18.355f;
+                static const float WIDTH  = BASE_WIDTH;
                 static const float HEIGHT = 2.150f;
                 static const float HALF_HEIGHT = HEIGHT / 2.0f;
                 static const float HALF_WIDTH  = WIDTH  / 2.0f;

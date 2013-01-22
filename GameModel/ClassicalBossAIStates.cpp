@@ -27,64 +27,7 @@ const float ClassicalBossAI::HALF_BOSS_WIDTH = ClassicalBossAI::BOSS_WIDTH / 2.0
 ClassicalBossAI::ClassicalBossAI(ClassicalBoss* boss) : BossAIState(), boss(boss),
 currState(ClassicalBossAI::BasicMoveAndLaserSprayAIState), currVel(0.0f, 0.0f), desiredVel(0.0f, 0.0f) {
     assert(boss != NULL);
-    
-    // Setup the generic hurt colour animation
-    {
-        static const int NUM_FLASHES = 16;
-        
-        std::vector<double> timeValues;
-        timeValues.reserve(2*NUM_FLASHES + 1);
-        std::vector<ColourRGBA> colourValues;
-        colourValues.reserve(timeValues.size());
-        
-        double timeInc = BossWeakpoint::INVULNERABLE_TIME_IN_SECS / static_cast<double>(2*NUM_FLASHES);
-        double timeCount = 0.0;
-        
-        for (int i = 0; i <= 2*NUM_FLASHES; i++) {
-            timeValues.push_back(timeCount);
-            timeCount += timeInc;
-        }
-        for (int i = 0; i < NUM_FLASHES; i++) {
-            colourValues.push_back(ColourRGBA(1.0f, 0.25f, 0.25f, 1.0f));
-            colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 0.5f));
-        }
-        colourValues.push_back(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f));
-
-        this->hurtColourAnim.SetLerp(timeValues, colourValues);
-        this->hurtColourAnim.SetRepeat(false);
-    }
-
-    // Setup the arm fade-out animation (for when an arm falls off and dies)
-    {
-        static const double FIRST_FADE_OUT_TIME = 0.5;
-        static const double NUM_FLASHES = 25;
-        static const double TOTAL_ANIMATION_TIME = 4.0;
-        static const double FLASH_TIME_INC = (TOTAL_ANIMATION_TIME - FIRST_FADE_OUT_TIME) / (2*NUM_FLASHES + 1);
-
-        std::vector<double> timeValues;
-        timeValues.reserve(2 + 2*NUM_FLASHES + 1);
-        timeValues.push_back(0.0);
-        timeValues.push_back(FIRST_FADE_OUT_TIME);
-        for (int i = 0; i <= 2*NUM_FLASHES; i++) {
-            timeValues.push_back(timeValues.back() + FLASH_TIME_INC);
-        }
-
-        static const float FIRST_ALPHA_FADE_OUT_VALUE  = 0.5f;
-        static const float SECOND_ALPHA_FADE_OUT_VALUE = 0.25f;
-        std::vector<ColourRGBA> alphaValues;
-        alphaValues.reserve(timeValues.size());
-        alphaValues.push_back(ColourRGBA(1,1,1,1));
-        alphaValues.push_back(ColourRGBA(1,1,1,FIRST_ALPHA_FADE_OUT_VALUE));
-        for (int i = 0; i < NUM_FLASHES; i++) {
-            alphaValues.push_back(ColourRGBA(1.0f, 0.0f, 0.0f, SECOND_ALPHA_FADE_OUT_VALUE));
-            alphaValues.push_back(ColourRGBA(1.0f, 0.8f, 0.8f, FIRST_ALPHA_FADE_OUT_VALUE));
-        }
-        alphaValues.push_back(ColourRGBA(0.0f, 0.0f, 0.0f, 0.0f));
-
-        this->limbAlphaFadeoutAnim.SetLerp(timeValues, alphaValues);
-        this->limbAlphaFadeoutAnim.SetRepeat(false);
-    }
-
+    this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(BOSS_WIDTH/20.0f);
 }
 
 ClassicalBossAI::~ClassicalBossAI() {
@@ -150,6 +93,10 @@ float ClassicalBossAI::GetPrepLaserHeight(const GameLevel* level) const {
     return level->GetLevelUnitHeight() - ClassicalBossAI::BOSS_HEIGHT;
 }
 
+float ClassicalBossAI::GetEyeRiseHeight() const {
+    return 2.0f * ClassicalBoss::PEDIMENT_HEIGHT;
+}
+
 float ClassicalBossAI::GetMaxSpeed() const {
     return ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED;
 }
@@ -197,6 +144,7 @@ const float ArmsBodyHeadAI::ARM_BALL_DAMAGE = 100.0f;
 const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
 
 const double ArmsBodyHeadAI::ARM_ATTACK_DELTA_T = 0.4;
+const double ArmsBodyHeadAI::ARM_FADE_TIME = 4.0;
 
 ArmsBodyHeadAI::ArmsBodyHeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss),
 leftArm(NULL), rightArm(NULL), leftArmSqrWeakpt(NULL), rightArmSqrWeakpt(NULL),
@@ -219,15 +167,6 @@ nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.
 
     assert(this->leftArm != NULL && this->rightArm != NULL && this->leftArmSqrWeakpt != NULL &&
         this->rightArmSqrWeakpt != NULL);
-
-    // Setup laser barrage angles
-    const float angleIncrement = 17;
-    this->laserAngles.reserve(5);
-    this->laserAngles.push_back(-2*angleIncrement);
-    this->laserAngles.push_back(-angleIncrement);
-    this->laserAngles.push_back(0);
-    this->laserAngles.push_back(angleIncrement);
-    this->laserAngles.push_back(2*angleIncrement);
 
     // Setup arm shaking animation
     {
@@ -368,52 +307,6 @@ nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.
         this->rightArmHurtMoveAnim.SetRepeat(false);
     }
 
-    {
-        static const double COLOUR_FLASH_TIME = 0.20;
-        
-        std::vector<double> timeVals;
-        timeVals.reserve(5);
-        timeVals.push_back(0.0);
-        timeVals.push_back(COLOUR_FLASH_TIME);
-        timeVals.push_back(2*COLOUR_FLASH_TIME);
-        timeVals.push_back(3*COLOUR_FLASH_TIME);
-        timeVals.push_back(4*COLOUR_FLASH_TIME);
-
-        std::vector<ColourRGBA> colourVals;
-        colourVals.reserve(timeVals.size());
-        colourVals.push_back(ColourRGBA(1,1,1,1));
-        colourVals.push_back(ColourRGBA(1,0,0,1));
-        colourVals.push_back(ColourRGBA(1,1,0,1));
-        colourVals.push_back(ColourRGBA(1,0,0,1));
-        colourVals.push_back(ColourRGBA(1,1,1,1));
-
-        this->angryColourAnim.SetLerp(timeVals, colourVals);
-        this->angryColourAnim.SetRepeat(true);
-        
-        static const int NUM_SHAKES = 15;
-        static const double SHAKE_INC_TIME = 0.03;
-        timeVals.clear();
-        timeVals.reserve(1 + NUM_SHAKES + 1);
-        timeVals.push_back(0.0);
-        for (int i = 0; i <= NUM_SHAKES*2; i++) {
-            timeVals.push_back(timeVals.back() + SHAKE_INC_TIME);
-        }
-
-        std::vector<Vector3D> moveVals;
-        moveVals.reserve(timeVals.size());
-        moveVals.push_back(Vector3D(0,0,0));
-        for (int i = 0; i < NUM_SHAKES; i++) {
-            float randomNum1 = Randomizer::GetInstance()->RandomNumNegOneToOne() * BOSS_WIDTH/20.0f;
-            float randomNum2 = Randomizer::GetInstance()->RandomNumNegOneToOne() * BOSS_WIDTH/20.0f;
-            moveVals.push_back(Vector3D(randomNum1, randomNum2, 0));
-            moveVals.push_back(Vector3D(-randomNum1, -randomNum2, 0));
-        }
-        moveVals.push_back(Vector3D(0.0f, 0.0f, 0.0f));
-        
-        this->angryMoveAnim.SetLerp(timeVals, moveVals);
-        this->angryMoveAnim.SetRepeat(false);
-    }
-
     this->SetState(ClassicalBossAI::BasicMoveAndLaserSprayAIState);
 }
 
@@ -436,13 +329,9 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
             this->boss->ConvertAliveBodyPartToDeadBodyPart(boss->rightArmIdx);
             
             // Animate the right arm to fade out and "fall off" the body
-            this->rightArm->AnimateColourRGBA(this->limbAlphaFadeoutAnim);
-
-            AnimationMultiLerp<Vector3D> armDeathTransAnim = this->GenerateArmDeathTranslationAnimation(false);
-            this->rightArm->AnimateLocalTranslation(armDeathTransAnim);
-
-            AnimationMultiLerp<float> armDeathRotAnim = this->GenerateArmDeathRotationAnimation(false);
-            this->rightArm->AnimateLocalZRotation(armDeathRotAnim);
+            this->rightArm->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(ARM_FADE_TIME));
+            this->rightArm->AnimateLocalTranslation(this->GenerateArmDeathTranslationAnimation(false));
+            this->rightArm->AnimateLocalZRotation(this->GenerateArmDeathRotationAnimation(false));
         }
         if (this->currState != ClassicalBossAI::HurtRightArmAIState) {
             this->SetState(ClassicalBossAI::HurtRightArmAIState);
@@ -458,7 +347,7 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
             this->boss->ConvertAliveBodyPartToDeadBodyPart(boss->leftArmIdx);
             
             // Animate the left arm to fade out and "fall off" the body
-            this->leftArm->AnimateColourRGBA(this->limbAlphaFadeoutAnim);
+            this->leftArm->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(ARM_FADE_TIME));
 
             AnimationMultiLerp<Vector3D> armDeathTransAnim = this->GenerateArmDeathTranslationAnimation(true);
             this->leftArm->AnimateLocalTranslation(armDeathTransAnim);
@@ -531,16 +420,14 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             debug_output("Entering HurtLeftArmAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->hurtColourAnim.ResetToStart();
-            this->boss->alivePartsRoot->AnimateColourRGBA(this->hurtColourAnim);
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
             this->leftArmHurtMoveAnim.ResetToStart();
             break;
         case ClassicalBossAI::HurtRightArmAIState:
             debug_output("Entering HurtRightArmAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->hurtColourAnim.ResetToStart();
-            this->boss->alivePartsRoot->AnimateColourRGBA(this->hurtColourAnim);
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
             this->rightArmHurtMoveAnim.ResetToStart();
             break;
 
@@ -548,8 +435,7 @@ void ArmsBodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             debug_output("Entering LostArmsAngryAIState");
             this->desiredVel = Vector2D(0,0);
             this->currVel    = Vector2D(0,0);
-            this->angryColourAnim.ResetToStart();
-            this->boss->alivePartsRoot->AnimateColourRGBA(this->angryColourAnim);
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossAngryFlashAnim());
             this->angryMoveAnim.ResetToStart();
 
             // TODO: Signal an event for boss "GRRRRAAWWRRR"...
@@ -988,9 +874,12 @@ void ArmsBodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* g
 
     // Determine whether we're shooting a laser
     if (this->laserShootTimer <= 0.0) {
+        static const float ANGLE_INC = 17;
+        static const float LASER_ANGLES[] = {-2*ANGLE_INC, -ANGLE_INC, 0.0f, ANGLE_INC, 2*ANGLE_INC };
+
         // Fire a laser downwards within a small cone
         Vector2D laserDir(0, -1);
-        laserDir.Rotate(this->laserAngles[Randomizer::GetInstance()->RandomUnsignedInt() % this->laserAngles.size()]);
+        laserDir.Rotate(LASER_ANGLES[Randomizer::GetInstance()->RandomUnsignedInt() % 5]);
 
         Point2D eyePos = this->boss->GetEye()->GetTranslationPt2D();
         gameModel->AddProjectile(new BossLaserProjectile(eyePos, laserDir));
@@ -1106,49 +995,14 @@ ClassicalBossAI::AIState ArmsBodyHeadAI::DetermineNextArmAttackState(const Vecto
 }
 
 AnimationMultiLerp<Vector3D> ArmsBodyHeadAI::GenerateArmDeathTranslationAnimation(bool isLeftArm) const {
-    double lastTimeValue = this->limbAlphaFadeoutAnim.GetTimeValues().back();
     
-    std::vector<double> timeValues;
-    timeValues.reserve(2);
-    timeValues.push_back(0.0);
-    timeValues.push_back(lastTimeValue);
-
-    Collision::AABB2D bossArmAABB = isLeftArm ? this->leftArm->GenerateWorldAABB() : this->rightArm->GenerateWorldAABB();
-
-    std::vector<Vector3D> moveValues;
-    moveValues.reserve(timeValues.size());
-    moveValues.push_back(Vector3D(0,0,0));
-    moveValues.push_back(Vector3D((isLeftArm ? -1 : 1) * 5 * ArmsBodyHeadAI::ARM_WIDTH, 
-        -2*ArmsBodyHeadAI::ARM_HEIGHT - this->boss->alivePartsRoot->GetTranslationPt2D()[1], 0.0f));
-
-    AnimationMultiLerp<Vector3D> armDeathTransAnim;
-    armDeathTransAnim.SetLerp(timeValues, moveValues);
-    armDeathTransAnim.SetRepeat(false);
-    armDeathTransAnim.SetInterpolantValue(Vector3D(0,0,0));
-
-    return armDeathTransAnim;
+    return Boss::BuildLimbFallOffTranslationAnim(ARM_FADE_TIME, 
+        (isLeftArm ? -1 : 1) * 5 * ArmsBodyHeadAI::ARM_WIDTH, 
+        -2*ArmsBodyHeadAI::ARM_HEIGHT - this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
 }
 
 AnimationMultiLerp<float> ArmsBodyHeadAI::GenerateArmDeathRotationAnimation(bool isLeftArm) const {
-    double lastTimeValue = this->limbAlphaFadeoutAnim.GetTimeValues().back();
-    std::vector<double> timeValues;
-    timeValues.reserve(3);
-    timeValues.push_back(0.0);
-    timeValues.push_back(lastTimeValue / 2.0);
-    timeValues.push_back(lastTimeValue);
-
-    std::vector<float> rotationValues;
-    rotationValues.reserve(timeValues.size());
-    rotationValues.push_back(0.0f);
-    rotationValues.push_back(isLeftArm ? 90.0f : -90.0f);
-    rotationValues.push_back(isLeftArm ? 100.0f : -100.0f);
-
-    AnimationMultiLerp<float> armDeathRotAnim;
-    armDeathRotAnim.SetLerp(timeValues, rotationValues);
-    armDeathRotAnim.SetRepeat(false);
-    armDeathRotAnim.SetInterpolantValue(0.0f);
-
-    return armDeathRotAnim;
+    return Boss::BuildLimbFallOffZRotationAnim(ARM_FADE_TIME, isLeftArm ? 100.0f : -100.0f);
 }
 
 // END ArmsBodyHeadAI **************************************************************
@@ -1159,11 +1013,15 @@ AnimationMultiLerp<float> ArmsBodyHeadAI::GenerateArmDeathRotationAnimation(bool
 const float BodyHeadAI::COLUMN_LIFE_POINTS = 100.0f;
 const float BodyHeadAI::COLUMN_BALL_DAMAGE = 100.0f;
 
+const double BodyHeadAI::COLUMN_FADE_TIME = 4.0;
+const double BodyHeadAI::BODY_FADE_TIME = COLUMN_FADE_TIME;
+
 const double BodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
 
 BodyHeadAI::BodyHeadAI(ClassicalBoss* boss) : 
 ClassicalBossAI(boss), countdownToNextState(0.0), laserSprayCountdown(0.0), numConsecutiveTimesBasicMoveExecuted(0),
-numConsecutiveBarrages(0), laserShootTimer(0) {
+numConsecutiveBarrages(0), laserShootTimer(0), lostAllColumnsWaitCountdown(0.0), base(NULL), tabBottomLeft(NULL),
+tabBottomRight(NULL), tabTopLeft(NULL), tabTopRight(NULL), pediment(NULL) {
 
     // Make all of the body columns into weakpoints on the boss
     boss->ConvertAliveBodyPartToWeakpoint(boss->leftCol1Idx,  BodyHeadAI::COLUMN_LIFE_POINTS, BodyHeadAI::COLUMN_BALL_DAMAGE);
@@ -1180,6 +1038,15 @@ numConsecutiveBarrages(0), laserShootTimer(0) {
     columnWeakpts.push_back(static_cast<BossWeakpoint*>(boss->bodyParts[boss->rightCol1Idx]));
     columnWeakpts.push_back(static_cast<BossWeakpoint*>(boss->bodyParts[boss->rightCol2Idx]));
     columnWeakpts.push_back(static_cast<BossWeakpoint*>(boss->bodyParts[boss->rightCol3Idx]));
+
+    // Grab pointers to some other relevant parts of the boss
+    this->tabTopLeft     = static_cast<BossBodyPart*>(boss->bodyParts[boss->topLeftTablatureIdx]);
+    this->tabTopRight    = static_cast<BossBodyPart*>(boss->bodyParts[boss->topRightTablatureIdx]);
+    this->tabBottomLeft  = static_cast<BossBodyPart*>(boss->bodyParts[boss->bottomLeftTablatureIdx]);
+    this->tabBottomRight = static_cast<BossBodyPart*>(boss->bodyParts[boss->bottomRightTablatureIdx]);
+    this->base           = static_cast<BossBodyPart*>(boss->bodyParts[boss->baseIdx]);
+    this->pediment       = static_cast<BossBodyPart*>(boss->bodyParts[boss->pedimentIdx]);
+    this->eye            = static_cast<BossBodyPart*>(boss->bodyParts[boss->eyeIdx]);
 
     // Setup the movement animation for when the boss loses a column
     {
@@ -1210,11 +1077,12 @@ numConsecutiveBarrages(0), laserShootTimer(0) {
         this->columnHurtMoveAnim.SetRepeat(false);
     }
 
+    this->angryMoveAnim = Boss::BuildBossAngryShakeAnim(BOSS_WIDTH/25.0f);
+
     this->SetState(ClassicalBossAI::BasicMoveAndLaserSprayAIState);
 }
 
 BodyHeadAI::~BodyHeadAI() {
-
 }
 
 void BodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
@@ -1234,7 +1102,7 @@ void BodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBod
             float ballXForceDir = (column->GetTranslationPt2D() - ball.GetCenterPosition2D())[0];
 
             // Animate the column to fade out and "fall off" the body
-            column->AnimateColourRGBA(this->limbAlphaFadeoutAnim);
+            column->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(COLUMN_FADE_TIME));
             AnimationMultiLerp<Vector3D> columnDeathTransAnim = this->GenerateColumnDeathTranslationAnimation(ballXForceDir);
             column->AnimateLocalTranslation(columnDeathTransAnim);
             AnimationMultiLerp<float> columnDeathRotAnim = this->GenerateColumnDeathRotationAnimation(ballXForceDir);
@@ -1284,14 +1152,65 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             break;
 
         case ClassicalBossAI::LostColumnAIState:
+            this->currVel = Vector2D(0,0);
+            this->desiredVel = Vector2D(0,0);
             this->columnHurtMoveAnim.ResetToStart();
             break;
 
-        case ClassicalBossAI::LostAllColumnsAIState:
+        case ClassicalBossAI::LostAllColumnsAIState: {
+            this->currVel = Vector2D(0,0);
+            this->desiredVel = Vector2D(0,0);
+            this->lostAllColumnsWaitCountdown = BODY_FADE_TIME / 2.0;
+            
+            // Kill off the rest of the body
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(this->base);
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(this->tabBottomLeft);
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(this->tabBottomRight);
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(this->tabTopLeft);
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(this->tabTopRight);
+            
+            // Animate the death of the rest of the body
+            this->base->AnimateLocalTranslation(this->GenerateBaseDeathTranslationAnimation());
+            this->base->AnimateLocalZRotation(this->GenerateBaseDeathRotationAnimation());
+
+            AnimationMultiLerp<ColourRGBA> tablatureColourAnim = Boss::BuildBossHurtFlashAndFadeAnim(COLUMN_FADE_TIME);
+
+            this->tabBottomLeft->AnimateLocalTranslation(this->GenerateTablatureDeathTranslationAnimation(true, false));
+            this->tabBottomLeft->AnimateLocalZRotation(this->GenerateTablatureDeathRotationAnimation(true));
+            this->tabBottomLeft->AnimateColourRGBA(tablatureColourAnim);
+            this->tabBottomRight->AnimateLocalTranslation(this->GenerateTablatureDeathTranslationAnimation(false, false));
+            this->tabBottomRight->AnimateLocalZRotation(this->GenerateTablatureDeathRotationAnimation(false));
+            this->tabBottomRight->AnimateColourRGBA(tablatureColourAnim);
+            this->tabTopLeft->AnimateLocalTranslation(this->GenerateTablatureDeathTranslationAnimation(true, true));
+            this->tabTopLeft->AnimateLocalZRotation(this->GenerateTablatureDeathRotationAnimation(true));
+            this->tabTopLeft->AnimateColourRGBA(tablatureColourAnim);
+            this->tabTopRight->AnimateLocalTranslation(this->GenerateTablatureDeathTranslationAnimation(false, true));
+            this->tabTopRight->AnimateLocalZRotation(this->GenerateTablatureDeathRotationAnimation(false));
+            this->tabTopRight->AnimateColourRGBA(tablatureColourAnim);
+            
             break;
+        }
+
         case ClassicalBossAI::LostBodyAngryAIState:
+            this->currVel = Vector2D(0,0);
+            this->desiredVel = Vector2D(0,0);
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossAngryFlashAnim());
+            this->angryMoveAnim.ResetToStart();
+
+            // TODO: Signal an event for boss "GRRRRAAWWRRR"...
             break;
         
+        case ClassicalBossAI::MoveToCenterOfLevelAIState: {
+            this->currVel = Vector2D(0,0);
+            this->desiredVel = Vector2D(0,0);
+            break;
+        }
+
+        case ClassicalBossAI::EyeRisesFromPedimentAIState:
+            this->currVel = Vector2D(0,0);
+            this->desiredVel = Vector2D(0,0);
+            break;
+
         default:
             assert(false);
             return;
@@ -1318,12 +1237,23 @@ void BodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
         case ClassicalBossAI::LostColumnAIState:
             this->ExecuteLostColumnState(dT);
             break;
+        
         case ClassicalBossAI::LostAllColumnsAIState:
             this->ExecuteLostAllColumnsState(dT);
             break;
+        
         case ClassicalBossAI::LostBodyAngryAIState:
+            this->ExecuteLostBodyAngryState(dT, gameModel);
             break;
         
+        case ClassicalBossAI::MoveToCenterOfLevelAIState:
+            this->ExecuteMoveToCenterOfLevelState(dT, gameModel);
+            break;
+        
+        case ClassicalBossAI::EyeRisesFromPedimentAIState:
+            this->ExecuteEyeRisesFromPedimentState(dT);
+            break;
+
         default:
             assert(false);
             return;
@@ -1536,17 +1466,96 @@ void BodyHeadAI::ExecuteLostColumnState(double dT) {
 }
 
 void BodyHeadAI::ExecuteLostAllColumnsState(double dT) {
+    this->currVel = Vector2D(0,0);
+    this->desiredVel = Vector2D(0,0);
 
+    // Wait for some of the animation of the loss of the base and tablatures to finish
+    if (this->lostAllColumnsWaitCountdown <= 0.0) {
+        // Go to the final state in the BodyHeadAI state machine
+        this->SetState(ClassicalBossAI::LostBodyAngryAIState);
+    }
+    else {
+        this->lostAllColumnsWaitCountdown -= dT;
+    }
 }
+
+void BodyHeadAI::ExecuteLostBodyAngryState(double dT, GameModel* gameModel) {
+    assert(gameModel != NULL);
+
+    this->currVel = Vector2D(0,0);
+    this->desiredVel = Vector2D(0,0);
+
+    bool isFinished = this->angryMoveAnim.Tick(dT);
+    this->boss->alivePartsRoot->SetLocalTranslation(this->angryMoveAnim.GetInterpolantValue());
+    if (isFinished) {
+
+        // Stop any colour animation that was set for this state
+        this->boss->alivePartsRoot->ResetColourRGBAAnimation();
+        // Clean up all the translations on the body of the boss for this state
+        this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
+        
+        // Move the boss to the center of the level to prep it for the final high-level AI state
+        
+        // Setup the animation to move to the center... 
+        const GameLevel* level = gameModel->GetCurrentLevel();
+        assert(level != NULL);
+        Point2D levelCenter(level->GetLevelUnitWidth() / 2.0f, level->GetLevelUnitHeight() / 2.0f);
+        Vector2D bossToCenterVec = levelCenter - this->pediment->GetTranslationPt2D();
+        
+        double travelTime = bossToCenterVec.Magnitude() / this->GetMaxSpeed();
+        this->bossToCenterOfLevelAnim.SetLerp(0.0, travelTime, Vector3D(0,0,0), Vector3D(bossToCenterVec, 0.0f));
+
+        this->SetState(ClassicalBossAI::MoveToCenterOfLevelAIState);
+    }
+}
+
+void BodyHeadAI::ExecuteMoveToCenterOfLevelState(double dT, GameModel* gameModel) { 
+    assert(gameModel != NULL);
+
+    this->currVel = Vector2D(0,0);
+    this->desiredVel = Vector2D(0,0);
+
+    bool isFinished = this->bossToCenterOfLevelAnim.Tick(dT);
+    this->boss->alivePartsRoot->SetLocalTranslation(this->bossToCenterOfLevelAnim.GetInterpolantValue());
+    if (isFinished) {
+        // Make sure the boss is centered in the level...
+        this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
+        
+        const GameLevel* level = gameModel->GetCurrentLevel();
+        assert(level != NULL);
+        Point2D levelCenter(level->GetLevelUnitWidth() / 2.0f, level->GetLevelUnitHeight() / 2.0f);
+        Vector2D translationVec = levelCenter - this->pediment->GetTranslationPt2D();
+        this->boss->alivePartsRoot->Translate(Vector3D(translationVec[0], translationVec[1], 0.0f));
+
+        // Now that the boss is centered, we make the eye emerge from the pediment in prep for the next high-level state
+        AnimationMultiLerp<ColourRGBA> angryColourAnim = Boss::BuildBossAngryFlashAnim();
+        this->eyeRiseAnim.SetLerp(0.0, angryColourAnim.GetTimeValues().back(), Vector3D(0,0,0), Vector3D(0, this->GetEyeRiseHeight(), 0));
+        this->eye->AnimateColourRGBA(angryColourAnim);
+
+        this->SetState(ClassicalBossAI::EyeRisesFromPedimentAIState);
+    }
+}
+
+void BodyHeadAI::ExecuteEyeRisesFromPedimentState(double dT) {
+    bool isFinished = this->eyeRiseAnim.Tick(dT);
+    this->eye->SetLocalTranslation(this->eyeRiseAnim.GetInterpolantValue());
+    if (isFinished) {
+        this->eye->SetLocalTranslation(Vector3D(0,0,0));
+        this->eye->Translate(Vector3D(0, this->GetEyeRiseHeight(), 0));
+
+        // Go to the next high-level AI state
+        this->boss->SetNextAIState(new HeadAI(this->boss));
+    }
+}
+
+
 
 AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateColumnDeathTranslationAnimation(float xForceDir) const {
 
-    double lastTimeValue = this->limbAlphaFadeoutAnim.GetTimeValues().back();
-    
     std::vector<double> timeValues;
     timeValues.reserve(2);
     timeValues.push_back(0.0);
-    timeValues.push_back(lastTimeValue);
+    timeValues.push_back(COLUMN_FADE_TIME);
 
     std::vector<Vector3D> moveValues;
     moveValues.reserve(timeValues.size());
@@ -1563,13 +1572,11 @@ AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateColumnDeathTranslationAnimation
 }
 
 AnimationMultiLerp<float> BodyHeadAI::GenerateColumnDeathRotationAnimation(float xForceDir) const {
-    
-    double lastTimeValue = this->limbAlphaFadeoutAnim.GetTimeValues().back();
-    
+
     std::vector<double> timeValues;
     timeValues.reserve(2);
     timeValues.push_back(0.0);
-    timeValues.push_back(lastTimeValue);
+    timeValues.push_back(COLUMN_FADE_TIME);
 
     std::vector<float> rotationValues;
     rotationValues.reserve(timeValues.size());
@@ -1584,4 +1591,353 @@ AnimationMultiLerp<float> BodyHeadAI::GenerateColumnDeathRotationAnimation(float
     return columnDeathRotAnim;
 }
 
+AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateBaseDeathTranslationAnimation() const {
+    return Boss::BuildLimbFallOffTranslationAnim(BODY_FADE_TIME, 0, 
+        -ClassicalBoss::BASE_WIDTH - this->boss->alivePartsRoot->GetTranslationPt2D()[1]);
+}
+
+AnimationMultiLerp<float> BodyHeadAI::GenerateBaseDeathRotationAnimation() const {
+    return Boss::BuildLimbFallOffZRotationAnim(BODY_FADE_TIME, Randomizer::GetInstance()->RandomNegativeOrPositive() * 160.0f);
+}
+
+AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateTablatureDeathTranslationAnimation(bool isLeft, bool isTop) const {
+    return Boss::BuildLimbFallOffTranslationAnim(BODY_FADE_TIME, (isLeft ? -1 : 1) * ClassicalBoss::TABLATURE_WIDTH, 
+        (isTop ? -1 : 1) * (-4*ClassicalBoss::TABLATURE_WIDTH - this->boss->alivePartsRoot->GetTranslationPt2D()[1]));
+}
+
+AnimationMultiLerp<float> BodyHeadAI::GenerateTablatureDeathRotationAnimation(bool isLeft) const {
+    return Boss::BuildLimbFallOffZRotationAnim(BODY_FADE_TIME, (isLeft ? -1 : 1) * 1440.0f);
+}
+
 // END BodyHeadAI ******************************************************************
+
+
+// BEGIN HeadAI ********************************************************************
+
+const float HeadAI::EYE_LIFE_POINTS = 300;
+const float HeadAI::EYE_BALL_DAMAGE = 100;
+
+HeadAI::HeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), eye(NULL), laserShootTimer(0.0), moveToNextStateCountdown(0.0) {
+    this->currVel         = Vector2D(0,0);
+    this->desiredVel      = Vector2D(0,0);
+    this->currPedimentVel = Vector2D(0,0);
+    this->currEyeVel      = Vector2D(0,0);
+
+    this->completelyDeadCountdown = this->GetDeathThroesAnimationTime();
+
+    // The eye is the last weakpoint before the boss is dead
+    this->boss->ConvertAliveBodyPartToWeakpoint(this->boss->eyeIdx, EYE_LIFE_POINTS, EYE_BALL_DAMAGE);
+    this->eye = static_cast<BossWeakpoint*>(this->boss->bodyParts[this->boss->eyeIdx]);
+
+    // The pediment is used to block the ball from the eye
+    this->pediment = static_cast<BossBodyPart*>(this->boss->bodyParts[this->boss->pedimentIdx]);
+
+    this->SetState(ClassicalBossAI::MoveAndBarrageWithLaserAIState);
+}
+
+HeadAI::~HeadAI() {
+}
+
+void HeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
+    UNUSED_PARAMETER(gameModel);
+
+    // The ball just hit the eye...
+    if (collisionPart == this->eye) {
+        
+        this->eye->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+        {
+            Vector2D ballToEyeVec = this->eye->GetTranslationPt2D() - ball.GetCenterPosition2D();
+            ballToEyeVec.Normalize();
+
+            static const double FINAL_JITTER_TIME = 0.3;
+            static const double SHAKE_INC_TIME = 0.075;
+            static const int NUM_SHAKES = (BossWeakpoint::INVULNERABLE_TIME_IN_SECS - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
+
+            std::vector<double> timeValues;
+            timeValues.clear();
+            timeValues.reserve(3 + NUM_SHAKES + 1);
+            timeValues.push_back(0.0);
+            timeValues.push_back(2.0 * FINAL_JITTER_TIME / 3.0);
+            timeValues.push_back(FINAL_JITTER_TIME);
+            for (int i = 0; i <= NUM_SHAKES*2; i++) {
+                timeValues.push_back(timeValues.back() + SHAKE_INC_TIME);
+            }
+            assert(timeValues.back() <= BossWeakpoint::INVULNERABLE_TIME_IN_SECS);
+
+            Vector2D hurtPos2D = ClassicalBoss::EYE_WIDTH * ballToEyeVec;
+            std::vector<Vector3D> moveValues;
+            moveValues.reserve(timeValues.size());
+            moveValues.push_back(Vector3D(0,0,0));
+            moveValues.push_back(Vector3D(hurtPos2D[0], hurtPos2D[1], 0.0f));
+            moveValues.push_back(Vector3D(0,0,0));
+            for (int i = 0; i < NUM_SHAKES; i++) {
+                float randomVal1 = Randomizer::GetInstance()->RandomNumNegOneToOne() * ClassicalBoss::EYE_WIDTH / 5.0f;
+                float randomVal2 = Randomizer::GetInstance()->RandomNumNegOneToOne() * ClassicalBoss::EYE_WIDTH / 5.0f;
+                moveValues.push_back(Vector3D(randomVal1, randomVal2, 0));
+                moveValues.push_back(Vector3D(-randomVal1, -randomVal2, 0));
+            }
+            moveValues.push_back(Vector3D(0.0f, 0.0f, 0.0f));
+
+            // Set up the hurt animation for the eye...
+            this->eyeHurtMoveAnim.SetLerp(timeValues, moveValues);
+            this->eyeHurtMoveAnim.SetRepeat(false);
+        }
+
+        if (this->currState != ClassicalBossAI::HurtRightArmAIState) {
+            this->SetState(ClassicalBossAI::HurtEyeAIState);
+        }
+    }
+}
+
+void HeadAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
+    UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(projectile);
+    UNUSED_PARAMETER(collisionPart);
+}
+
+void HeadAI::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart) {
+    UNUSED_PARAMETER(gameModel);
+    UNUSED_PARAMETER(paddle);
+    UNUSED_PARAMETER(collisionPart);
+}
+
+void HeadAI::SetState(ClassicalBossAI::AIState newState) {
+    switch (newState) {
+
+        case ClassicalBossAI::MoveAndBarrageWithLaserAIState:
+            this->laserShootTimer = this->GetTimeBetweenLaserBarrageShots();
+            this->moveToNextStateCountdown = this->GenerateBasicMoveTime();
+
+            if (this->eye->GetCurrentLifePercentage() <= 0.75f) {
+                this->movePedimentUpAndDown = true;
+                if (fabs(this->currPedimentVel[1]) < EPSILON) {
+                    this->currPedimentVel[1] = -this->GetMaxSpeed() / 1.25f;
+                }
+            }
+            else {
+                this->movePedimentUpAndDown = false;
+            }
+            if (fabs(this->currEyeVel[1]) < EPSILON) {
+                this->currEyeVel[1] = -this->GetMaxSpeed() / 1.25f;
+            }
+            if (fabs(this->currEyeVel[0]) < EPSILON) {
+                this->currEyeVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed();
+            }
+            if (fabs(this->currPedimentVel[0]) < EPSILON) {
+                this->currPedimentVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed();
+            }
+            break;
+
+        case ClassicalBossAI::SpinningPedimentAIState:
+            break;
+
+        case ClassicalBossAI::HurtEyeAIState:
+            debug_output("Entering HurtEyeAIState");
+            this->currPedimentVel = Vector2D(0,0);
+            this->currEyeVel = Vector2D(0,0);
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
+            this->eyeHurtMoveAnim.ResetToStart();
+            break;
+
+        case ClassicalBossAI::FinalDeathThroesAIState:
+            debug_output("Entering FinalDeathThroesAIState");
+
+            this->currPedimentVel = Vector2D(0,0);
+            this->currEyeVel = Vector2D(0,0);
+
+            // Kill off (fade out) the pediment
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(this->pediment);
+            this->pediment->AnimateColourRGBA(Boss::BuildBossHurtFlashAndFadeAnim(4.0));
+            this->pediment->AnimateLocalTranslation(Boss::BuildLimbFallOffTranslationAnim(4.0, 0.0,
+                -ClassicalBoss::PEDIMENT_WIDTH - this->pediment->GetTranslationPt2D()[1]));
+            this->pediment->AnimateLocalZRotation(Boss::BuildLimbFallOffZRotationAnim(4.0, 
+                Randomizer::GetInstance()->RandomNegativeOrPositive() * 100.0f));
+
+            this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossFinalDeathFlashAnim());
+            this->boss->alivePartsRoot->AnimateLocalTranslation(Boss::BuildBossFinalDeathShakeAnim(ClassicalBoss::EYE_WIDTH / 3.0f));
+            break;
+
+        default:
+            assert(false);
+            return;
+    }
+
+    this->currState = newState;
+}
+
+void HeadAI::UpdateState(double dT, GameModel* gameModel) {
+    switch (this->currState) {
+
+        case ClassicalBossAI::MoveAndBarrageWithLaserAIState:
+            this->ExecuteMoveAndBarrageWithLaserState(dT, gameModel);
+            break;
+
+        case ClassicalBossAI::SpinningPedimentAIState:
+            this->ExecuteSpinningPedimentState(dT);
+            break;
+
+        case ClassicalBossAI::HurtEyeAIState:
+            this->ExecuteHurtEyeState(dT);
+            break;
+
+        case ClassicalBossAI::FinalDeathThroesAIState:
+            this->ExecuteFinalDeathThroesState(dT);
+            break;
+
+        default:
+            assert(false);
+            return;
+    }
+}
+
+void HeadAI::UpdateMovement(double dT, GameModel* gameModel) {
+    ClassicalBossAI::UpdateMovement(dT, gameModel);
+
+    // Update the pediment movement and the eye movement independently...
+    Vector2D dMovement = dT * this->currEyeVel;
+    this->eye->Translate(Vector3D(dMovement));
+
+    dMovement = dT * this->currPedimentVel;
+    this->pediment->Translate(Vector3D(dMovement));
+}
+
+void HeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel) {
+    assert(gameModel != NULL);
+
+    const GameLevel* level = gameModel->GetCurrentLevel();
+    assert(level != NULL);
+
+    Point2D pedimentPos = this->pediment->GetTranslationPt2D();
+    Point2D eyePos = this->eye->GetTranslationPt2D();
+
+    // Make sure the pediment and eye are moving up and down appropriately
+    if (this->movePedimentUpAndDown) {
+        float avgBasicPedimentMoveHeight = this->GetPedimentBasicMoveHeight(level);
+        float upDownPedimentDistance     = 1.5f * ClassicalBoss::PEDIMENT_HEIGHT;
+
+        if (pedimentPos[1] < avgBasicPedimentMoveHeight - upDownPedimentDistance) {
+            this->currPedimentVel[1] = this->GetMaxSpeed() / 1.25f;
+        }
+        else if (pedimentPos[1] > avgBasicPedimentMoveHeight + upDownPedimentDistance) {
+            this->currPedimentVel[1] = -this->GetMaxSpeed() / 1.25f;
+        }
+    }
+
+    float avgBasicEyeMoveHeight = this->GetEyeBasicMoveHeight(level);
+    float upDownEyeDistance     = ClassicalBoss::PEDIMENT_HEIGHT;
+    if (eyePos[1] < avgBasicEyeMoveHeight - upDownEyeDistance) {
+        this->currEyeVel[1] = this->GetMaxSpeed() / 1.25f;
+    }
+    else if (eyePos[1] > avgBasicEyeMoveHeight + upDownEyeDistance) {
+        this->currEyeVel[1] = -this->GetMaxSpeed() / 1.25f;
+    }
+
+    // Now add the side-to-side movement of the eye and pediment
+    if (eyePos[0] <= this->GetBossMovementMinXBound(level, ClassicalBoss::EYE_WIDTH)) {
+        this->currEyeVel[0] = this->GetMaxSpeed();
+    }
+    else if (eyePos[0] >= this->GetBossMovementMaxXBound(level, ClassicalBoss::EYE_WIDTH)) {
+        this->currEyeVel[0] = -this->GetMaxSpeed();
+    }
+
+    if (pedimentPos[0] <= this->GetBossMovementMinXBound(level, ClassicalBoss::PEDIMENT_WIDTH)) {
+        this->currPedimentVel[0] = this->GetMaxSpeed();
+    }
+    else if (pedimentPos[0] >= this->GetBossMovementMaxXBound(level, ClassicalBoss::PEDIMENT_WIDTH)) {
+        this->currPedimentVel[0] = -this->GetMaxSpeed();
+    }
+
+    // Determine whether we're shooting a laser
+    if (this->laserShootTimer <= 0.0) {
+        static const float ANGLE_INC = 15;
+        static const float LASER_ANGLES[] = { -2*ANGLE_INC, -ANGLE_INC, 0.0f, ANGLE_INC, 2*ANGLE_INC };
+
+        // Fire a laser downwards within a small cone
+        Vector2D laserDir(0, -1);
+        laserDir.Rotate(LASER_ANGLES[Randomizer::GetInstance()->RandomUnsignedInt() % 5]);
+        gameModel->AddProjectile(new BossLaserProjectile(eyePos, laserDir));
+
+        this->laserShootTimer = this->GetTimeBetweenLaserBarrageShots();
+    }
+    else {
+        this->laserShootTimer -= dT;
+    }
+
+    if (this->moveToNextStateCountdown <= 0) {
+        // The next state is determined partially from the amount of life and partially from chance
+        if (this->eye->GetCurrentLifePercentage() <= 0.75f) {
+            if (this->eye->GetCurrentLifePercentage() <= 0.4f) {
+                this->SetState(ClassicalBossAI::SpinningPedimentAIState);
+            }
+            else {
+                if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
+                    this->SetState(ClassicalBossAI::SpinningPedimentAIState);
+                }
+                else {
+                    this->SetState(ClassicalBossAI::MoveAndBarrageWithLaserAIState);
+                }
+            }
+        }
+        else {
+            if (Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
+                this->SetState(ClassicalBossAI::SpinningPedimentAIState);
+            }
+            else {
+                this->SetState(ClassicalBossAI::MoveAndBarrageWithLaserAIState);
+            }
+        }
+    }
+    else {
+        this->moveToNextStateCountdown -= dT;
+    }
+}
+
+void HeadAI::ExecuteSpinningPedimentState(double dT) {
+
+}
+
+void HeadAI::ExecuteHurtEyeState(double dT) {
+    this->currPedimentVel = Vector2D(0,0);
+    this->currEyeVel = Vector2D(0,0);
+
+    bool isFinished = this->eyeHurtMoveAnim.Tick(dT);
+    this->eye->SetLocalTranslation(this->eyeHurtMoveAnim.GetInterpolantValue());
+
+
+    if (isFinished) {
+        this->eye->SetLocalTranslation(Vector3D(0,0,0));
+
+        // Check to see if the eye is destroyed
+        if (this->eye->GetIsDestroyed()) {
+            this->SetState(ClassicalBossAI::FinalDeathThroesAIState);
+        }
+        else {
+            if (this->eye->GetCurrentLifePercentage() < 0.5) {
+                this->SetState(ClassicalBossAI::SpinningPedimentAIState);
+            }
+            else {
+                if (Randomizer::GetInstance()->RandomUnsignedInt() % 3 == 0) {
+                    this->SetState(ClassicalBossAI::SpinningPedimentAIState);
+                }
+                else {
+                    this->SetState(ClassicalBossAI::MoveAndBarrageWithLaserAIState);
+                }
+            }
+        }
+    }
+}
+
+void HeadAI::ExecuteFinalDeathThroesState(double dT) {
+    this->currPedimentVel = Vector2D(0,0);
+    this->currEyeVel = Vector2D(0,0);
+
+    if (this->completelyDeadCountdown <= 0.0) {
+        // The boss is dead dead dead.
+        return;
+    }
+    else {
+        this->completelyDeadCountdown -= dT;
+    }
+}
+
+// END HeadAI **********************************************************************
