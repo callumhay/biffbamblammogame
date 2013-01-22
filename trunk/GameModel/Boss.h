@@ -54,6 +54,17 @@ public:
 
     bool CanHurtPaddleWithBody() const;
 
+    // Builders for various boss animations
+    static AnimationMultiLerp<ColourRGBA> BuildBossHurtAndInvulnerableColourAnim();
+    static AnimationMultiLerp<ColourRGBA> BuildBossHurtFlashAndFadeAnim(double totalAnimTime);
+    static AnimationMultiLerp<ColourRGBA> BuildBossFinalDeathFlashAnim();
+    static AnimationMultiLerp<ColourRGBA> BuildBossAngryFlashAnim();
+    static AnimationMultiLerp<Vector3D>   BuildBossAngryShakeAnim(float shakeMagnitude);
+    static AnimationMultiLerp<Vector3D>   BuildBossFinalDeathShakeAnim(float shakeMagnitude);
+
+    static AnimationMultiLerp<Vector3D> BuildLimbFallOffTranslationAnim(double totalAnimTime, float xDist, float yDist);
+    static AnimationMultiLerp<float> BuildLimbFallOffZRotationAnim(double totalAnimTime, float rotAmtInDegs);
+
     // DEBUGGING...
 #ifdef _DEBUG
     void DebugDraw() const;

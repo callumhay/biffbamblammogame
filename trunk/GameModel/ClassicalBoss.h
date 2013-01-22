@@ -18,6 +18,7 @@ namespace classicalbossai {
 class ClassicalBossAI;
 class ArmsBodyHeadAI;
 class BodyHeadAI;
+class HeadAI;
 }
 
 class BossBodyPart;
@@ -29,6 +30,7 @@ class ClassicalBoss : public Boss {
     friend class classicalbossai::ClassicalBossAI;
     friend class classicalbossai::ArmsBodyHeadAI;
     friend class classicalbossai::BodyHeadAI;
+    friend class classicalbossai::HeadAI;
     friend Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style);
 
 public:
@@ -38,6 +40,11 @@ public:
     static const float HALF_ARM_HEIGHT;
     static const float COLUMN_WIDTH;
     static const float COLUMN_HEIGHT;
+    static const float BASE_WIDTH;
+    static const float TABLATURE_WIDTH;
+    static const float PEDIMENT_WIDTH;
+    static const float PEDIMENT_HEIGHT;
+    static const float EYE_WIDTH;
 
     ~ClassicalBoss();
 

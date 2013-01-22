@@ -20,13 +20,13 @@
 #include "../BlammoEngine/Colour.h"
 
 #include "BossAIState.h"
+#include "GameLevel.h"
 
 class ClassicalBoss;
 class BossBodyPart;
 class BossWeakpoint;
 class BossCompositeBodyPart;
 class PlayerPaddle;
-class GameLevel;
 
 namespace classicalbossai {
 
@@ -46,6 +46,8 @@ public:
         this->UpdateMovement(dT, gameModel);
     }
 
+    virtual bool IsCompletelyDead() const { return false; }
+
 protected:
     static const float BOSS_HEIGHT;
     static const float BOSS_WIDTH;
@@ -61,11 +63,14 @@ protected:
                    AttackLeftArmAIState, AttackRightArmAIState, AttackBothArmsAIState,
                    PrepLaserAIState, MoveAndBarrageWithLaserAIState,
                    HurtLeftArmAIState, HurtRightArmAIState, LostArmsAngryAIState,
-                   LostColumnAIState, LostAllColumnsAIState, LostBodyAngryAIState };
+                   LostColumnAIState, LostAllColumnsAIState, LostBodyAngryAIState,
+                   MoveToCenterOfLevelAIState, EyeRisesFromPedimentAIState,
+                   SpinningPedimentAIState, HurtEyeAIState, FinalDeathThroesAIState};
 
     AIState currState;
-    AnimationMultiLerp<ColourRGBA> hurtColourAnim;
-    AnimationMultiLerp<ColourRGBA> limbAlphaFadeoutAnim;
+
+    AnimationMultiLerp<ColourRGBA> angryColourAnim;
+    AnimationMultiLerp<Vector3D> angryMoveAnim;
 
     // Attack routines
     void ExecuteLaserSpray(GameModel* gameModel);
@@ -76,6 +81,7 @@ protected:
     float GetBossMovementMaxXBound(const GameLevel* level, float bossWidth) const;
     float GetBasicMovementHeight(const GameLevel* level) const;
     float GetPrepLaserHeight(const GameLevel* level) const;
+    float GetEyeRiseHeight() const;
 
     // Basic boss attribute getters
     float GetMaxSpeed() const;
@@ -84,7 +90,7 @@ protected:
     // Update functions
     virtual void SetState(ClassicalBossAI::AIState newState) = 0;
     virtual void UpdateState(double dT, GameModel* gameModel) = 0;
-    void UpdateMovement(double dT, GameModel* gameModel);
+    virtual void UpdateMovement(double dT, GameModel* gameModel);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(ClassicalBossAI);
@@ -110,6 +116,7 @@ private:
     static const float ARM_BALL_DAMAGE;
 
     static const double ARM_ATTACK_DELTA_T;
+    static const double ARM_FADE_TIME;
 
     BossCompositeBodyPart* leftArm;
     BossCompositeBodyPart* rightArm;
@@ -142,15 +149,11 @@ private:
 
     // MoveAndBarrageWithLaserAIState
     double laserShootTimer;
-    std::vector<float> laserAngles;
-    
+
     // HurtLeftArmAIState, HurtRightArmAIState
     AnimationMultiLerp<Vector3D> leftArmHurtMoveAnim;
     AnimationMultiLerp<Vector3D> rightArmHurtMoveAnim;
 
-    // LostArmsAngryAIState
-    AnimationMultiLerp<ColourRGBA> angryColourAnim;
-    AnimationMultiLerp<Vector3D> angryMoveAnim;
 
     // -----------------------------------------------------------------------------
 
@@ -197,7 +200,17 @@ private:
     static const float COLUMN_LIFE_POINTS;
     static const float COLUMN_BALL_DAMAGE;
 
+    static const double COLUMN_FADE_TIME;
+    static const double BODY_FADE_TIME;
+
     std::vector<BossWeakpoint*> columnWeakpts;  // Left to right ordering
+    BossBodyPart* tabTopLeft;
+    BossBodyPart* tabTopRight;
+    BossBodyPart* tabBottomLeft;
+    BossBodyPart* tabBottomRight;
+    BossBodyPart* base;
+    BossBodyPart* pediment;
+    BossBodyPart* eye;
 
     // AIState Variables Specific to this state ---------------------------------------------------
 
@@ -218,6 +231,15 @@ private:
     // LostColumnAIState
     AnimationMultiLerp<Vector3D> columnHurtMoveAnim;
 
+    // LostAllColumnsAIState
+    double lostAllColumnsWaitCountdown;
+
+    // MoveToCenterOfLevelAIState
+    AnimationLerp<Vector3D> bossToCenterOfLevelAnim;
+    
+    // EyeRisesFromPedimentAIState
+    AnimationLerp<Vector3D> eyeRiseAnim;
+
     // --------------------------------------------------------------------------------------------
 
     void SetState(ClassicalBossAI::AIState newState);
@@ -227,7 +249,9 @@ private:
     void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
     void ExecuteLostColumnState(double dT);
     void ExecuteLostAllColumnsState(double dT);
-    //void ExecuteLostBodyAngryAIState(double dT);
+    void ExecuteLostBodyAngryState(double dT, GameModel* gameModel);
+    void ExecuteMoveToCenterOfLevelState(double dT, GameModel* gameModel);
+    void ExecuteEyeRisesFromPedimentState(double dT);
 
     double GetLaserChargeTime() const { return 1.0; }
     double GetTimeBetweenLaserBarrageShots() const { return 0.075 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.1; }
@@ -235,22 +259,64 @@ private:
     AnimationMultiLerp<Vector3D> GenerateColumnDeathTranslationAnimation(float xForceDir) const;
     AnimationMultiLerp<float> GenerateColumnDeathRotationAnimation(float xForceDir) const;
 
+    AnimationMultiLerp<Vector3D> GenerateBaseDeathTranslationAnimation() const;
+    AnimationMultiLerp<float> GenerateBaseDeathRotationAnimation() const;
+    AnimationMultiLerp<Vector3D> GenerateTablatureDeathTranslationAnimation(bool isLeft, bool isTop) const;
+    AnimationMultiLerp<float> GenerateTablatureDeathRotationAnimation(bool isLeft) const;
+
     DISALLOW_COPY_AND_ASSIGN(BodyHeadAI);
 };
 
-/*
+
 class HeadAI : public ClassicalBossAI {
 public:
-    HeadAI();
+    HeadAI(ClassicalBoss* boss);
     ~HeadAI();
 
-    void Tick(double dT, GameModel* gameModel);
+	void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
+	void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
+    void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
+
+    bool CanHurtPaddleWithBody() const { return false; }
+    bool IsCompletelyDead() const { return this->completelyDeadCountdown <= 0.0; }
+
 private:
+    static const float EYE_LIFE_POINTS;
+    static const float EYE_BALL_DAMAGE;
+
+    BossWeakpoint* eye;
+    BossBodyPart* pediment;
+
+    Vector2D currPedimentVel;
+    Vector2D currEyeVel;
+
+    // MoveAndBarrageWithLaserAIState
+    bool movePedimentUpAndDown;
+    double laserShootTimer;
+    double moveToNextStateCountdown;
+
+    // HurtEyeAIState
+    AnimationMultiLerp<Vector3D> eyeHurtMoveAnim;
+    
+    // FinalDeathThroesAIState
+    double completelyDeadCountdown;
+
+    void SetState(ClassicalBossAI::AIState newState);
+    void UpdateState(double dT, GameModel* gameModel);
+    void UpdateMovement(double dT, GameModel* gameModel);
+
+    void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
+    void ExecuteSpinningPedimentState(double dT);
+    void ExecuteHurtEyeState(double dT);
+    void ExecuteFinalDeathThroesState(double dT);
+
+    double GetDeathThroesAnimationTime() const { return 6.0; }
+    double GetTimeBetweenLaserBarrageShots() const { return 0.08 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.075; }
+    float GetPedimentBasicMoveHeight(const GameLevel* level) { return level->GetLevelUnitHeight() / 2.0f; }
+    float GetEyeBasicMoveHeight(const GameLevel* level) { return this->GetPedimentBasicMoveHeight(level) + this->GetEyeRiseHeight(); }
+
     DISALLOW_COPY_AND_ASSIGN(HeadAI);
 };
-
-
-*/
 
 };
 

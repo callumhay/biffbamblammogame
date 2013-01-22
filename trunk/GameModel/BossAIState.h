@@ -32,6 +32,7 @@ public:
     virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart)   = 0;
 
     virtual bool CanHurtPaddleWithBody() const = 0;
+    virtual bool IsCompletelyDead() const = 0;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(BossAIState);
