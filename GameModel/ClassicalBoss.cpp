@@ -24,6 +24,9 @@ const float ClassicalBoss::HALF_ARM_WIDTH = ARM_WIDTH / 2.0f;
 const float ClassicalBoss::ARM_HEIGHT = 9.66f;
 const float ClassicalBoss::HALF_ARM_HEIGHT = ARM_HEIGHT / 2.0f;
 
+const float ClassicalBoss::COLUMN_WIDTH  = 1.704f;
+const float ClassicalBoss::COLUMN_HEIGHT = 4.373f;
+
 const float ClassicalBoss::ARMS_BODY_HEAD_MAX_SPEED     = PlayerPaddle::DEFAULT_MAX_SPEED / 1.75f;
 const float ClassicalBoss::ARMS_BODY_HEAD_ACCELERATION  = PlayerPaddle::DEFAULT_ACCELERATION / 3.0f;
 
@@ -35,6 +38,7 @@ const float ClassicalBoss::PEDIMENT_ACCELERATION = PlayerPaddle::DEFAULT_ACCELER
 
 const float ClassicalBoss::EYE_MAX_SPEED    = PlayerPaddle::DEFAULT_MAX_SPEED + 10.0f;
 const float ClassicalBoss::EYE_ACCELERATION = PlayerPaddle::DEFAULT_ACCELERATION + 15.0f;
+
 
 ClassicalBoss::ClassicalBoss() : Boss(),
 leftArmIdx(0), leftArmSquareIdx(0), rightArmIdx(0), rightArmSquareIdx(0)
@@ -186,8 +190,8 @@ void ClassicalBoss::Init() {
 
             // *BodyColumnx
             {
-                static const float HEIGHT = 4.373f;
-                static const float WIDTH  = 1.704f;
+                static const float HEIGHT = COLUMN_HEIGHT;
+                static const float WIDTH  = COLUMN_WIDTH;
                 static const float HALF_HEIGHT = HEIGHT / 2.0f;
                 static const float HALF_WIDTH  = WIDTH  / 2.0f;
 
@@ -426,10 +430,12 @@ void ClassicalBoss::ConvertAliveBodyPartToWeakpoint(size_t index, float lifePoin
 
 void ClassicalBoss::ConvertAliveBodyPartToDeadBodyPart(size_t index) {
     assert(index < this->bodyParts.size());
+    this->ConvertAliveBodyPartToDeadBodyPart(this->bodyParts[index]);
+}
 
+void ClassicalBoss::ConvertAliveBodyPartToDeadBodyPart(AbstractBossBodyPart* bodyPart) {
     // Make sure the body part exists as an alive part of this boss,
     // the parent better be the alivePartsRoot too.
-    AbstractBossBodyPart* bodyPart = this->bodyParts[index];
     assert(bodyPart != NULL);
     if (!this->alivePartsRoot->IsOrContainsPart(bodyPart, true) ||
         this->alivePartsRoot->SearchForParent(bodyPart) != this->alivePartsRoot) {

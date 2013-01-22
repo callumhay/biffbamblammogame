@@ -41,10 +41,12 @@ protected:
     ESPParticleScaleEffector  particleLargeGrowth;
     ESPParticleScaleEffector  particleMediumGrowth;
     ESPParticleColourEffector particleFireColourFader;
-    //ESPParticleColourEffector smokeColourFader;
+    ESPParticleColourEffector smokeColourFader;
 	ESPParticleRotateEffector rotateEffectorCW;
+    ESPParticleRotateEffector rotateEffectorCCW;
 
-    ESPPointEmitter* BuildFireSmokeEmitter(float width, float height);
+    ESPPointEmitter* BuildFireSmokeEmitter1(float width, float height);
+    ESPPointEmitter* BuildFireSmokeEmitter2(float width, float height);
     ESPPointEmitter* BuildExplodingEmitter(float width, float height);
 
 private:

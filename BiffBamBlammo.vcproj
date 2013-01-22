@@ -618,6 +618,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ESPEngine\ESPRandomTextureParticle.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ESPEngine\ESPShaderParticle.h"
 					>
 				</File>
@@ -667,6 +671,10 @@
 				</File>
 				<File
 					RelativePath=".\ESPEngine\ESPPointToPointBeam.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ESPEngine\ESPRandomTextureParticle.cpp"
 					>
 				</File>
 				<File

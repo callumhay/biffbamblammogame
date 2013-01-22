@@ -27,6 +27,64 @@ const float ClassicalBossAI::HALF_BOSS_WIDTH = ClassicalBossAI::BOSS_WIDTH / 2.0
 ClassicalBossAI::ClassicalBossAI(ClassicalBoss* boss) : BossAIState(), boss(boss),
 currState(ClassicalBossAI::BasicMoveAndLaserSprayAIState), currVel(0.0f, 0.0f), desiredVel(0.0f, 0.0f) {
     assert(boss != NULL);
+    
+    // Setup the generic hurt colour animation
+    {
+        static const int NUM_FLASHES = 16;
+        
+        std::vector<double> timeValues;
+        timeValues.reserve(2*NUM_FLASHES + 1);
+        std::vector<ColourRGBA> colourValues;
+        colourValues.reserve(timeValues.size());
+        
+        double timeInc = BossWeakpoint::INVULNERABLE_TIME_IN_SECS / static_cast<double>(2*NUM_FLASHES);
+        double timeCount = 0.0;
+        
+        for (int i = 0; i <= 2*NUM_FLASHES; i++) {
+            timeValues.push_back(timeCount);
+            timeCount += timeInc;
+        }
+        for (int i = 0; i < NUM_FLASHES; i++) {
+            colourValues.push_back(ColourRGBA(1.0f, 0.25f, 0.25f, 1.0f));
+            colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 0.5f));
+        }
+        colourValues.push_back(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+
+        this->hurtColourAnim.SetLerp(timeValues, colourValues);
+        this->hurtColourAnim.SetRepeat(false);
+    }
+
+    // Setup the arm fade-out animation (for when an arm falls off and dies)
+    {
+        static const double FIRST_FADE_OUT_TIME = 0.5;
+        static const double NUM_FLASHES = 25;
+        static const double TOTAL_ANIMATION_TIME = 4.0;
+        static const double FLASH_TIME_INC = (TOTAL_ANIMATION_TIME - FIRST_FADE_OUT_TIME) / (2*NUM_FLASHES + 1);
+
+        std::vector<double> timeValues;
+        timeValues.reserve(2 + 2*NUM_FLASHES + 1);
+        timeValues.push_back(0.0);
+        timeValues.push_back(FIRST_FADE_OUT_TIME);
+        for (int i = 0; i <= 2*NUM_FLASHES; i++) {
+            timeValues.push_back(timeValues.back() + FLASH_TIME_INC);
+        }
+
+        static const float FIRST_ALPHA_FADE_OUT_VALUE  = 0.5f;
+        static const float SECOND_ALPHA_FADE_OUT_VALUE = 0.25f;
+        std::vector<ColourRGBA> alphaValues;
+        alphaValues.reserve(timeValues.size());
+        alphaValues.push_back(ColourRGBA(1,1,1,1));
+        alphaValues.push_back(ColourRGBA(1,1,1,FIRST_ALPHA_FADE_OUT_VALUE));
+        for (int i = 0; i < NUM_FLASHES; i++) {
+            alphaValues.push_back(ColourRGBA(1.0f, 0.0f, 0.0f, SECOND_ALPHA_FADE_OUT_VALUE));
+            alphaValues.push_back(ColourRGBA(1.0f, 0.8f, 0.8f, FIRST_ALPHA_FADE_OUT_VALUE));
+        }
+        alphaValues.push_back(ColourRGBA(0.0f, 0.0f, 0.0f, 0.0f));
+
+        this->limbAlphaFadeoutAnim.SetLerp(timeValues, alphaValues);
+        this->limbAlphaFadeoutAnim.SetRepeat(false);
+    }
+
 }
 
 ClassicalBossAI::~ClassicalBossAI() {
@@ -133,7 +191,7 @@ void ClassicalBossAI::UpdateMovement(double dT, GameModel* gameModel) {
 const float ArmsBodyHeadAI::ARM_HEIGHT = 9.66f;
 const float ArmsBodyHeadAI::ARM_WIDTH  = 3.097f;
 
-const float ArmsBodyHeadAI::ARM_LIFE_POINTS = 300.0f;
+const float ArmsBodyHeadAI::ARM_LIFE_POINTS = 200.0f;
 const float ArmsBodyHeadAI::ARM_BALL_DAMAGE = 100.0f;
 
 const double ArmsBodyHeadAI::LASER_SPRAY_RESET_TIME_IN_SECS = 1.5;
@@ -272,65 +330,12 @@ nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.
         this->armAttackYMovementAnim.SetRepeat(false);
     }
 
-    // Setup the arm fade-out animation (for when an arm falls off and dies)
     {
-        static const double FIRST_FADE_OUT_TIME = 0.5;
-        static const double NUM_FLASHES = 25;
-        static const double TOTAL_ANIMATION_TIME = 5.0;
-        static const double FLASH_TIME_INC = (TOTAL_ANIMATION_TIME - FIRST_FADE_OUT_TIME) / (2*NUM_FLASHES + 1);
-
-        std::vector<double> timeValues;
-        timeValues.reserve(2 + 2*NUM_FLASHES + 1);
-        timeValues.push_back(0.0);
-        timeValues.push_back(FIRST_FADE_OUT_TIME);
-        for (int i = 0; i <= 2*NUM_FLASHES; i++) {
-            timeValues.push_back(timeValues.back() + FLASH_TIME_INC);
-        }
-
-        static const float FIRST_ALPHA_FADE_OUT_VALUE  = 0.5f;
-        static const float SECOND_ALPHA_FADE_OUT_VALUE = 0.25f;
-        std::vector<ColourRGBA> alphaValues;
-        alphaValues.reserve(timeValues.size());
-        alphaValues.push_back(ColourRGBA(1,1,1,1));
-        alphaValues.push_back(ColourRGBA(1,1,1,FIRST_ALPHA_FADE_OUT_VALUE));
-        for (int i = 0; i < NUM_FLASHES; i++) {
-            alphaValues.push_back(ColourRGBA(1.0f, 0.0f, 0.0f, SECOND_ALPHA_FADE_OUT_VALUE));
-            alphaValues.push_back(ColourRGBA(1.0f, 0.8f, 0.8f, FIRST_ALPHA_FADE_OUT_VALUE));
-        }
-        alphaValues.push_back(ColourRGBA(0.0f, 0.0f, 0.0f, 0.0f));
-
-        this->armAlphaFadeoutAnim.SetLerp(timeValues, alphaValues);
-        this->armAlphaFadeoutAnim.SetRepeat(false);
-    }
-
-    {
-        static const int NUM_FLASHES = 16;
-        
-        std::vector<double> timeValues;
-        timeValues.reserve(2*NUM_FLASHES + 1);
-        std::vector<ColourRGBA> colourValues;
-        colourValues.reserve(timeValues.size());
-        
-        double timeInc = BossWeakpoint::INVULNERABLE_TIME_IN_SECS / static_cast<double>(2*NUM_FLASHES);
-        double timeCount = 0.0;
-        
-        for (int i = 0; i <= 2*NUM_FLASHES; i++) {
-            timeValues.push_back(timeCount);
-            timeCount += timeInc;
-        }
-        for (int i = 0; i < NUM_FLASHES; i++) {
-            colourValues.push_back(ColourRGBA(1.0f, 0.25f, 0.25f, 1.0f));
-            colourValues.push_back(ColourRGBA(1.0f, 0.9f, 0.9f, 0.5f));
-        }
-        colourValues.push_back(ColourRGBA(1.0f, 1.0f, 1.0f, 1.0f));
-
-        this->hurtColourAnim.SetLerp(timeValues, colourValues);
-        this->hurtColourAnim.SetRepeat(false);
-
         static const double FINAL_JITTER_TIME = 0.3;
         static const double SHAKE_INC_TIME = 0.075;
         static const int NUM_SHAKES = (BossWeakpoint::INVULNERABLE_TIME_IN_SECS - FINAL_JITTER_TIME) / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
 
+        std::vector<double> timeValues;
         timeValues.clear();
         timeValues.reserve(3 + NUM_SHAKES + 1);
         timeValues.push_back(0.0);
@@ -364,7 +369,7 @@ nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.
     }
 
     {
-        static const double COLOUR_FLASH_TIME = 0.25;
+        static const double COLOUR_FLASH_TIME = 0.20;
         
         std::vector<double> timeVals;
         timeVals.reserve(5);
@@ -385,8 +390,8 @@ nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.
         this->angryColourAnim.SetLerp(timeVals, colourVals);
         this->angryColourAnim.SetRepeat(true);
         
-        static const int NUM_SHAKES = 20;
-        static const double SHAKE_INC_TIME = 0.08;
+        static const int NUM_SHAKES = 15;
+        static const double SHAKE_INC_TIME = 0.03;
         timeVals.clear();
         timeVals.reserve(1 + NUM_SHAKES + 1);
         timeVals.push_back(0.0);
@@ -409,7 +414,7 @@ nextAttackState(ClassicalBossAI::AttackBothArmsAIState), temptAttackCountdown(0.
         this->angryMoveAnim.SetRepeat(false);
     }
 
-    this->SetState(ClassicalBossAI::LostArmsAngryAIState);//BasicMoveAndLaserSprayAIState);
+    this->SetState(ClassicalBossAI::BasicMoveAndLaserSprayAIState);
 }
 
 ArmsBodyHeadAI::~ArmsBodyHeadAI() {
@@ -431,7 +436,7 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
             this->boss->ConvertAliveBodyPartToDeadBodyPart(boss->rightArmIdx);
             
             // Animate the right arm to fade out and "fall off" the body
-            this->rightArm->AnimateColourRGBA(this->armAlphaFadeoutAnim);
+            this->rightArm->AnimateColourRGBA(this->limbAlphaFadeoutAnim);
 
             AnimationMultiLerp<Vector3D> armDeathTransAnim = this->GenerateArmDeathTranslationAnimation(false);
             this->rightArm->AnimateLocalTranslation(armDeathTransAnim);
@@ -453,7 +458,7 @@ void ArmsBodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, Bos
             this->boss->ConvertAliveBodyPartToDeadBodyPart(boss->leftArmIdx);
             
             // Animate the left arm to fade out and "fall off" the body
-            this->leftArm->AnimateColourRGBA(this->armAlphaFadeoutAnim);
+            this->leftArm->AnimateColourRGBA(this->limbAlphaFadeoutAnim);
 
             AnimationMultiLerp<Vector3D> armDeathTransAnim = this->GenerateArmDeathTranslationAnimation(true);
             this->leftArm->AnimateLocalTranslation(armDeathTransAnim);
@@ -1101,7 +1106,8 @@ ClassicalBossAI::AIState ArmsBodyHeadAI::DetermineNextArmAttackState(const Vecto
 }
 
 AnimationMultiLerp<Vector3D> ArmsBodyHeadAI::GenerateArmDeathTranslationAnimation(bool isLeftArm) const {
-    double lastTimeValue = this->armAlphaFadeoutAnim.GetTimeValues().back();
+    double lastTimeValue = this->limbAlphaFadeoutAnim.GetTimeValues().back();
+    
     std::vector<double> timeValues;
     timeValues.reserve(2);
     timeValues.push_back(0.0);
@@ -1113,7 +1119,7 @@ AnimationMultiLerp<Vector3D> ArmsBodyHeadAI::GenerateArmDeathTranslationAnimatio
     moveValues.reserve(timeValues.size());
     moveValues.push_back(Vector3D(0,0,0));
     moveValues.push_back(Vector3D((isLeftArm ? -1 : 1) * 5 * ArmsBodyHeadAI::ARM_WIDTH, 
-        - 4 * ArmsBodyHeadAI::ARM_HEIGHT, 0.0f));
+        -2*ArmsBodyHeadAI::ARM_HEIGHT - this->boss->alivePartsRoot->GetTranslationPt2D()[1], 0.0f));
 
     AnimationMultiLerp<Vector3D> armDeathTransAnim;
     armDeathTransAnim.SetLerp(timeValues, moveValues);
@@ -1124,7 +1130,7 @@ AnimationMultiLerp<Vector3D> ArmsBodyHeadAI::GenerateArmDeathTranslationAnimatio
 }
 
 AnimationMultiLerp<float> ArmsBodyHeadAI::GenerateArmDeathRotationAnimation(bool isLeftArm) const {
-    double lastTimeValue = this->armAlphaFadeoutAnim.GetTimeValues().back();
+    double lastTimeValue = this->limbAlphaFadeoutAnim.GetTimeValues().back();
     std::vector<double> timeValues;
     timeValues.reserve(3);
     timeValues.push_back(0.0);
@@ -1175,6 +1181,35 @@ numConsecutiveBarrages(0), laserShootTimer(0) {
     columnWeakpts.push_back(static_cast<BossWeakpoint*>(boss->bodyParts[boss->rightCol2Idx]));
     columnWeakpts.push_back(static_cast<BossWeakpoint*>(boss->bodyParts[boss->rightCol3Idx]));
 
+    // Setup the movement animation for when the boss loses a column
+    {
+        static const double SHAKE_INC_TIME = 0.075;
+        static const int NUM_SHAKES = BossWeakpoint::INVULNERABLE_TIME_IN_SECS / (2*SHAKE_INC_TIME + SHAKE_INC_TIME);
+
+        std::vector<double> timeValues;
+        timeValues.clear();
+        timeValues.reserve(1 + NUM_SHAKES + 1);
+        timeValues.push_back(0.0);
+        for (int i = 0; i <= NUM_SHAKES*2; i++) {
+            timeValues.push_back(timeValues.back() + SHAKE_INC_TIME);
+        }
+        assert(timeValues.back() <= BossWeakpoint::INVULNERABLE_TIME_IN_SECS);
+
+        std::vector<Vector3D> moveValues;
+        moveValues.reserve(timeValues.size());
+        moveValues.push_back(Vector3D(0.0f, 0.0f, 0.0f));
+        for (int i = 0; i < NUM_SHAKES; i++) {
+            float randomVal1 = Randomizer::GetInstance()->RandomNumNegOneToOne() * BOSS_WIDTH / 25.0f;
+            float randomVal2 = Randomizer::GetInstance()->RandomNumNegOneToOne() * BOSS_WIDTH / 25.0f;
+            moveValues.push_back(Vector3D(randomVal1, randomVal2, 0));
+            moveValues.push_back(Vector3D(-randomVal1, -randomVal2, 0));
+        }
+        moveValues.push_back(Vector3D(0.0f, 0.0f, 0.0f));  
+
+        this->columnHurtMoveAnim.SetLerp(timeValues, moveValues);
+        this->columnHurtMoveAnim.SetRepeat(false);
+    }
+
     this->SetState(ClassicalBossAI::BasicMoveAndLaserSprayAIState);
 }
 
@@ -1184,8 +1219,34 @@ BodyHeadAI::~BodyHeadAI() {
 
 void BodyHeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
     UNUSED_PARAMETER(gameModel);
-    UNUSED_PARAMETER(ball);
-    UNUSED_PARAMETER(collisionPart);
+    
+    // Check to see if the collision was with any of the column weakpoints
+    for (int i = 0; i < static_cast<int>(this->columnWeakpts.size()); i++) {
+        BossWeakpoint* column = this->columnWeakpts[i];
+        if (collisionPart == column) {
+            
+            // The column should now be destroyed...
+            assert(column->GetIsDestroyed());
+            
+            this->boss->ConvertAliveBodyPartToDeadBodyPart(column);
+            
+            // Get the direction of the force that the ball exerted on the column on the x-axis...
+            float ballXForceDir = (column->GetTranslationPt2D() - ball.GetCenterPosition2D())[0];
+
+            // Animate the column to fade out and "fall off" the body
+            column->AnimateColourRGBA(this->limbAlphaFadeoutAnim);
+            AnimationMultiLerp<Vector3D> columnDeathTransAnim = this->GenerateColumnDeathTranslationAnimation(ballXForceDir);
+            column->AnimateLocalTranslation(columnDeathTransAnim);
+            AnimationMultiLerp<float> columnDeathRotAnim = this->GenerateColumnDeathRotationAnimation(ballXForceDir);
+            column->AnimateLocalZRotation(columnDeathRotAnim);
+
+            if (this->currState != ClassicalBossAI::LostColumnAIState) {
+                this->SetState(ClassicalBossAI::LostColumnAIState);
+            }
+
+            break;
+        }
+    }
 }
 
 void BodyHeadAI::CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart) {
@@ -1223,7 +1284,9 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             break;
 
         case ClassicalBossAI::LostColumnAIState:
+            this->columnHurtMoveAnim.ResetToStart();
             break;
+
         case ClassicalBossAI::LostAllColumnsAIState:
             break;
         case ClassicalBossAI::LostBodyAngryAIState:
@@ -1253,8 +1316,10 @@ void BodyHeadAI::UpdateState(double dT, GameModel* gameModel) {
             break;
 
         case ClassicalBossAI::LostColumnAIState:
+            this->ExecuteLostColumnState(dT);
             break;
         case ClassicalBossAI::LostAllColumnsAIState:
+            this->ExecuteLostAllColumnsState(dT);
             break;
         case ClassicalBossAI::LostBodyAngryAIState:
             break;
@@ -1435,6 +1500,88 @@ void BodyHeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameM
     else {
         this->laserShootTimer -= dT;
     }
+}
+
+void BodyHeadAI::ExecuteLostColumnState(double dT) {
+    // No velocity in this state
+    this->currVel    = Vector2D(0,0);
+    this->desiredVel = Vector2D(0,0);
+
+    bool isFinished = this->columnHurtMoveAnim.Tick(dT);
+    this->boss->alivePartsRoot->SetLocalTranslation(this->columnHurtMoveAnim.GetInterpolantValue());
+
+    if (isFinished) {
+        this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
+        this->boss->alivePartsRoot->SetLocalTranslation(Vector3D(0,0,0));
+
+        // Check to see if both arms are now gone, if they are then we move to a special state
+        bool allColumnsDestroyed = true;
+        for (int i = 0; i < static_cast<int>(this->columnWeakpts.size()); i++) {
+            BossWeakpoint* column = this->columnWeakpts[i];
+            if (!column->GetIsDestroyed()) {
+                allColumnsDestroyed = false;
+                break;
+            }
+        }
+
+        if (allColumnsDestroyed) {
+            this->SetState(ClassicalBossAI::LostAllColumnsAIState);
+        }
+        else {
+            // Go into basic move and laser spray state
+            this->SetState(ClassicalBossAI::BasicMoveAndLaserSprayAIState);
+        }
+    }
+
+}
+
+void BodyHeadAI::ExecuteLostAllColumnsState(double dT) {
+
+}
+
+AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateColumnDeathTranslationAnimation(float xForceDir) const {
+
+    double lastTimeValue = this->limbAlphaFadeoutAnim.GetTimeValues().back();
+    
+    std::vector<double> timeValues;
+    timeValues.reserve(2);
+    timeValues.push_back(0.0);
+    timeValues.push_back(lastTimeValue);
+
+    std::vector<Vector3D> moveValues;
+    moveValues.reserve(timeValues.size());
+    moveValues.push_back(Vector3D(0,0,0));
+    moveValues.push_back(Vector3D(NumberFuncs::SignOf(xForceDir) * 8 * ClassicalBoss::COLUMN_WIDTH, 
+        -4 * ClassicalBoss::COLUMN_HEIGHT - this->boss->alivePartsRoot->GetTranslationPt2D()[1], 0.0f));
+
+    AnimationMultiLerp<Vector3D> columnDeathTransAnim;
+    columnDeathTransAnim.SetLerp(timeValues, moveValues);
+    columnDeathTransAnim.SetRepeat(false);
+    columnDeathTransAnim.SetInterpolantValue(Vector3D(0,0,0));
+
+    return columnDeathTransAnim;
+}
+
+AnimationMultiLerp<float> BodyHeadAI::GenerateColumnDeathRotationAnimation(float xForceDir) const {
+    
+    double lastTimeValue = this->limbAlphaFadeoutAnim.GetTimeValues().back();
+    
+    std::vector<double> timeValues;
+    timeValues.reserve(2);
+    timeValues.push_back(0.0);
+    timeValues.push_back(lastTimeValue);
+
+    std::vector<float> rotationValues;
+    rotationValues.reserve(timeValues.size());
+    rotationValues.push_back(0.0f);
+    rotationValues.push_back(xForceDir < 0 ? 1800.0f : -1800.0f);
+
+    AnimationMultiLerp<float> columnDeathRotAnim;
+    columnDeathRotAnim.SetLerp(timeValues, rotationValues);
+    columnDeathRotAnim.SetRepeat(false);
+    columnDeathRotAnim.SetInterpolantValue(0.0f);
+
+    return columnDeathRotAnim;
 }
 
 // END BodyHeadAI ******************************************************************

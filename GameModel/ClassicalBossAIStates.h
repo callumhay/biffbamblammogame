@@ -64,6 +64,8 @@ protected:
                    LostColumnAIState, LostAllColumnsAIState, LostBodyAngryAIState };
 
     AIState currState;
+    AnimationMultiLerp<ColourRGBA> hurtColourAnim;
+    AnimationMultiLerp<ColourRGBA> limbAlphaFadeoutAnim;
 
     // Attack routines
     void ExecuteLaserSpray(GameModel* gameModel);
@@ -117,8 +119,6 @@ private:
 
     bool isAttackingWithArm;
 
-    AnimationMultiLerp<ColourRGBA> armAlphaFadeoutAnim;
-
     // AIState Variables Specific to this state ---------------------------------------------------
 
     // BasicMoveAndLaserSprayAIState
@@ -145,7 +145,6 @@ private:
     std::vector<float> laserAngles;
     
     // HurtLeftArmAIState, HurtRightArmAIState
-    AnimationMultiLerp<ColourRGBA> hurtColourAnim;
     AnimationMultiLerp<Vector3D> leftArmHurtMoveAnim;
     AnimationMultiLerp<Vector3D> rightArmHurtMoveAnim;
 
@@ -216,6 +215,9 @@ private:
     double laserShootTimer;
     int numConsecutiveBarrages;
 
+    // LostColumnAIState
+    AnimationMultiLerp<Vector3D> columnHurtMoveAnim;
+
     // --------------------------------------------------------------------------------------------
 
     void SetState(ClassicalBossAI::AIState newState);
@@ -223,12 +225,15 @@ private:
     void ExecuteBasicMoveAndLaserSprayState(double dT, GameModel* gameModel);
     void ExecutePrepLaserState(double dT, GameModel* gameModel);
     void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
-    //void LostColumnState(double dT);
-    //void LostAllColumnsState(double dT);
-    //void LostBodyAngryAIState(double dT);
+    void ExecuteLostColumnState(double dT);
+    void ExecuteLostAllColumnsState(double dT);
+    //void ExecuteLostBodyAngryAIState(double dT);
 
     double GetLaserChargeTime() const { return 1.0; }
     double GetTimeBetweenLaserBarrageShots() const { return 0.075 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.1; }
+
+    AnimationMultiLerp<Vector3D> GenerateColumnDeathTranslationAnimation(float xForceDir) const;
+    AnimationMultiLerp<float> GenerateColumnDeathRotationAnimation(float xForceDir) const;
 
     DISALLOW_COPY_AND_ASSIGN(BodyHeadAI);
 };

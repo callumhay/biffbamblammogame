@@ -27,6 +27,7 @@ double BallBoostModel::BULLET_TIME_MAX_DURATION_SECONDS = BallBoostModel::DEFAUL
 const double BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS = 16.0;
 // When the level is almost complete we give players more readily available boosts so they can finish quicker
 const double BallBoostModel::LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS = BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS / 2.0;
+const double BallBoostModel::BOSS_LEVEL_CHARGE_TIME_SECONDS = BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS / 1.6;
 
 // The time dialation factor used (multiplies the delta time of each game frame)
 // when full bullet time is active
@@ -48,7 +49,9 @@ boostChargeTime(BallBoostModel::DEFAULT_BOOST_CHARGE_TIME_SECONDS) {
     if (gameModel->GetCurrentLevel()->IsLevelAlmostComplete()) {
         this->boostChargeTime = BallBoostModel::LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS;
     }
-
+    else if (gameModel->GetCurrentLevel()->GetHasBoss()) {
+        this->boostChargeTime = BallBoostModel::BOSS_LEVEL_CHARGE_TIME_SECONDS;
+    }
 }
 
 BallBoostModel::~BallBoostModel() {
