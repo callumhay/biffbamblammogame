@@ -39,11 +39,15 @@ private:
     Mesh* restOfArmMesh;
 
     // Visual effects for the boss
-    ESPPointEmitter* leftArmSmokeEmitter;
-    ESPPointEmitter* rightArmSmokeEmitter;
+    ESPPointEmitter* leftArmSmokeEmitter1;
+    ESPPointEmitter* leftArmSmokeEmitter2;
+    ESPPointEmitter* rightArmSmokeEmitter1;
+    ESPPointEmitter* rightArmSmokeEmitter2;
 
     ESPPointEmitter* leftArmExplodingEmitter;
     ESPPointEmitter* rightArmExplodingEmitter;
+
+    std::vector<ESPPointEmitter*> columnExplodingEmitters;
 
     void DrawEffects(double dT, const Camera& camera);
 

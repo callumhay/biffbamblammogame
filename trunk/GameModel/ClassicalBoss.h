@@ -36,6 +36,8 @@ public:
     static const float HALF_ARM_WIDTH;
     static const float ARM_HEIGHT;
     static const float HALF_ARM_HEIGHT;
+    static const float COLUMN_WIDTH;
+    static const float COLUMN_HEIGHT;
 
     ~ClassicalBoss();
 
@@ -87,6 +89,7 @@ private:
     
     void ConvertAliveBodyPartToWeakpoint(size_t index, float lifePoints, float ballDmgOnHit);
     void ConvertAliveBodyPartToDeadBodyPart(size_t index);
+    void ConvertAliveBodyPartToDeadBodyPart(AbstractBossBodyPart* bodyPart);
 
     // Inherited from Boss
     void Init();

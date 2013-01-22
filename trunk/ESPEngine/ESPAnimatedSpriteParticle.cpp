@@ -83,7 +83,6 @@ void ESPAnimatedSpriteParticle::Draw(const Camera& camera, const ESP::ESPAlignme
 	glTexCoord2f(leftTexCoord,  topTexCoord);    glVertex2f(-0.5f,  0.5f);
 	glEnd();
     
-
 	glPopMatrix();
 }
 

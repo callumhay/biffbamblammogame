@@ -21,11 +21,11 @@
 
 BossMesh::BossMesh() : explosionAnimTex(NULL),
 particleMediumGrowth(1.0f, 1.6f), particleLargeGrowth(1.0f, 2.2f),
-//smokeColourFader(ColourRGBA(0.7f, 0.7f, 0.7f, 1.0f), ColourRGBA(0.1f, 0.1f, 0.1f, 0.1f)),
-particleFireColourFader(ColourRGBA(1.0f, 1.0f, 0.1f, 1.0f), ColourRGBA(0.5f, 0.1f, 0.1f, 0.0f)),
+smokeColourFader(ColourRGBA(0.7f, 0.7f, 0.7f, 1.0f), ColourRGBA(0.1f, 0.1f, 0.1f, 0.1f)),
+particleFireColourFader(ColourRGBA(0.75f, 0.75f, 0.1f, 1.0f), ColourRGBA(0.75f, 0.2f, 0.2f, 0.0f)),
 //particleFader(1.0f, 0.0f),
-rotateEffectorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE)
-//rotateEffectorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
+rotateEffectorCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::CLOCKWISE),
+rotateEffectorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, ESPParticleRotateEffector::COUNTER_CLOCKWISE)
 {
 
     // Initialize the smoke textures...
@@ -102,7 +102,35 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
     return result;
 }
 
-ESPPointEmitter* BossMesh::BuildFireSmokeEmitter(float width, float height) {
+ESPPointEmitter* BossMesh::BuildFireSmokeEmitter1(float width, float height) {
+    float smallestDimension = std::min<float>(width, height);
+
+    static const float MAX_SPAWN_DELTA = 0.16f;
+    static const float MAX_LIFE = 1.5f;
+
+	ESPPointEmitter* smokeEmitter = new ESPPointEmitter();
+	smokeEmitter->SetSpawnDelta(ESPInterval(MAX_SPAWN_DELTA, MAX_SPAWN_DELTA));
+	smokeEmitter->SetInitialSpd(ESPInterval(1.0f, 4.0f));
+	smokeEmitter->SetParticleLife(ESPInterval(MAX_LIFE - 1.0f, MAX_LIFE));
+    smokeEmitter->SetParticleSize(ESPInterval(0.25f * smallestDimension, 0.75f * smallestDimension));
+	smokeEmitter->SetEmitAngleInDegrees(0);
+	smokeEmitter->SetEmitDirection(Vector3D(0, 1, 0));
+	smokeEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.25f * width), ESPInterval(0.0f, 0.5f * height), ESPInterval(0.0f));
+	smokeEmitter->SetParticleAlignment(ESP::ScreenAligned);
+	smokeEmitter->SetEmitPosition(Point3D(0.0f, 0.0f, 0.0f));
+	smokeEmitter->AddEffector(&this->particleFireColourFader);
+	smokeEmitter->AddEffector(&this->particleMediumGrowth);
+	smokeEmitter->AddEffector(&this->rotateEffectorCW);
+	
+    int numParticles = static_cast<int>(MAX_LIFE / MAX_SPAWN_DELTA);
+    assert(numParticles < 30);
+    bool success = smokeEmitter->SetRandomTextureParticles(numParticles, this->smokeTextures);
+	assert(success);
+    UNUSED_VARIABLE(success);
+
+    return smokeEmitter;
+}
+ESPPointEmitter* BossMesh::BuildFireSmokeEmitter2(float width, float height) {
     float smallestDimension = std::min<float>(width, height);
 
     static const float MAX_SPAWN_DELTA = 0.16f;
@@ -112,25 +140,25 @@ ESPPointEmitter* BossMesh::BuildFireSmokeEmitter(float width, float height) {
 	smokeEmitter->SetSpawnDelta(ESPInterval(MAX_SPAWN_DELTA, MAX_SPAWN_DELTA));
 	smokeEmitter->SetInitialSpd(ESPInterval(1.0f, 4.0f));
 	smokeEmitter->SetParticleLife(ESPInterval(MAX_LIFE - 1.0f, MAX_LIFE));
-    smokeEmitter->SetParticleSize(ESPInterval(0.45f * smallestDimension, 0.65f * smallestDimension));
+    smokeEmitter->SetParticleSize(ESPInterval(0.3f * smallestDimension, 0.8f * smallestDimension));
 	smokeEmitter->SetEmitAngleInDegrees(0);
 	smokeEmitter->SetEmitDirection(Vector3D(0, 1, 0));
-	smokeEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.25f * width), ESPInterval(0.0f, 0.33f * height), ESPInterval(0.0f));
+	smokeEmitter->SetRadiusDeviationFromCenter(ESPInterval(0.0f, 0.25f * width), ESPInterval(0.0f, 0.5f * height), ESPInterval(0.0f));
 	smokeEmitter->SetParticleAlignment(ESP::ScreenAligned);
 	smokeEmitter->SetEmitPosition(Point3D(0.0f, 0.0f, 0.0f));
-	smokeEmitter->AddEffector(&this->particleFireColourFader);
+	smokeEmitter->AddEffector(&this->smokeColourFader);
 	smokeEmitter->AddEffector(&this->particleLargeGrowth);
-	smokeEmitter->AddEffector(&this->rotateEffectorCW);
+	smokeEmitter->AddEffector(&this->rotateEffectorCCW);
 	
     int numParticles = static_cast<int>(MAX_LIFE / MAX_SPAWN_DELTA);
     assert(numParticles < 30);
-    bool success = smokeEmitter->SetParticles(numParticles,
-        this->smokeTextures[Randomizer::GetInstance()->RandomUnsignedInt() % this->smokeTextures.size()]);
+    bool success = smokeEmitter->SetRandomTextureParticles(numParticles, this->smokeTextures);
 	assert(success);
     UNUSED_VARIABLE(success);
 
     return smokeEmitter;
 }
+
 
 ESPPointEmitter* BossMesh::BuildExplodingEmitter(float width, float height) {
     float largestDimension = std::max<float>(width, height);

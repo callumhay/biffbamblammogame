@@ -39,6 +39,7 @@ public:
 
     static const double DEFAULT_BOOST_CHARGE_TIME_SECONDS;
     static const double LEVEL_ALMOST_COMPLETE_CHARGE_TIME_SECONDS;
+    static const double BOSS_LEVEL_CHARGE_TIME_SECONDS;
 
     static void SetMaxBulletTimeDuration(double seconds);
     static double GetMaxBulletTimeDuration();
