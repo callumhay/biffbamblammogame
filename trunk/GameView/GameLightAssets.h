@@ -23,6 +23,8 @@
 class GameLightAssets {
 	
 public:
+    static const float LIGHT_TOGGLE_TIME;
+
 	enum GameLightType { 
         FGKeyLight,         // Foreground key light  (key light affecting all foreground objects except the paddle and ball)
         FGFillLight,        // Foreground fill light (fill light affecting all foreground objects except the paddle and ball)
@@ -38,7 +40,8 @@ public:
 	GameLightAssets();
 	~GameLightAssets();
 
-	void ToggleLights(bool turnOn);
+	double ToggleLights(bool turnOn);
+
 	//void ChangeLightColour(GameLightType lightType, const Colour& newLightColour, float animationTime);
 	void StartStrobeLight(GameLightType lightType, const Colour& strobeColour, float strobeTime);
 	void StopStrobeLight(GameLightType lightType);
@@ -57,6 +60,8 @@ public:
 	bool GetIsBlackOutActive() const {
 		return this->isBlackOutActive;
 	}
+
+    static void GetBlackoutToLightsOnPieceAffectingLights(PointLight& fgKeyLight, PointLight& fgFillLight, double turnOnTime);
 
 #ifdef _DEBUG
 	void DebugDrawLights() const;

@@ -33,6 +33,8 @@ public:
     virtual void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight) = 0;
 
+    virtual double ActivateIntroAnimation() = 0;
+
 protected:
     // Shared visual effects and textures for bosses
     std::vector<Texture2D*> smokeTextures;
@@ -45,8 +47,8 @@ protected:
 	ESPParticleRotateEffector rotateEffectorCW;
     ESPParticleRotateEffector rotateEffectorCCW;
 
-    ESPPointEmitter* BuildFireSmokeEmitter1(float width, float height);
-    ESPPointEmitter* BuildFireSmokeEmitter2(float width, float height);
+    ESPPointEmitter* BuildFireEmitter(float width, float height);
+    ESPPointEmitter* BuildSmokeEmitter(float width, float height);
     ESPPointEmitter* BuildExplodingEmitter(float width, float height);
 
 private:

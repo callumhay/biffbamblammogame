@@ -15,7 +15,7 @@
 /**
  * Toggle the light on or off and fade it on or off over the given animation time frame.
  */ 
-void PointLight::SetLightOn(bool turnOn, float animationTime) {
+void PointLight::SetLightOn(bool turnOn, double animationTime) {
 	// Clear any previous light intensity animation
 	this->lightIntensityAnim.clear();
 

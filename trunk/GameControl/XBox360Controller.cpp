@@ -194,6 +194,7 @@ bool XBox360Controller::ProcessState() {
 
 	// Basic game pad buttons - functionality depends on whether we're in-game or not...
 	if (this->display->GetCurrentDisplayState() == DisplayState::InGame ||
+        this->display->GetCurrentDisplayState() == DisplayState::InGameBossLevel ||
         this->display->GetCurrentDisplayState() == DisplayState::InTutorialGame) {
 		this->InGameOnProcessStateSpecificActions(controllerState);
 	}

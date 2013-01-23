@@ -1169,24 +1169,25 @@ void BodyHeadAI::SetState(ClassicalBossAI::AIState newState) {
             this->boss->ConvertAliveBodyPartToDeadBodyPart(this->tabTopLeft);
             this->boss->ConvertAliveBodyPartToDeadBodyPart(this->tabTopRight);
             
+            AnimationMultiLerp<ColourRGBA> colourAnim = Boss::BuildBossHurtFlashAndFadeAnim(BODY_FADE_TIME);
+
             // Animate the death of the rest of the body
             this->base->AnimateLocalTranslation(this->GenerateBaseDeathTranslationAnimation());
             this->base->AnimateLocalZRotation(this->GenerateBaseDeathRotationAnimation());
-
-            AnimationMultiLerp<ColourRGBA> tablatureColourAnim = Boss::BuildBossHurtFlashAndFadeAnim(COLUMN_FADE_TIME);
+            this->base->AnimateColourRGBA(colourAnim);
 
             this->tabBottomLeft->AnimateLocalTranslation(this->GenerateTablatureDeathTranslationAnimation(true, false));
             this->tabBottomLeft->AnimateLocalZRotation(this->GenerateTablatureDeathRotationAnimation(true));
-            this->tabBottomLeft->AnimateColourRGBA(tablatureColourAnim);
+            this->tabBottomLeft->AnimateColourRGBA(colourAnim);
             this->tabBottomRight->AnimateLocalTranslation(this->GenerateTablatureDeathTranslationAnimation(false, false));
             this->tabBottomRight->AnimateLocalZRotation(this->GenerateTablatureDeathRotationAnimation(false));
-            this->tabBottomRight->AnimateColourRGBA(tablatureColourAnim);
+            this->tabBottomRight->AnimateColourRGBA(colourAnim);
             this->tabTopLeft->AnimateLocalTranslation(this->GenerateTablatureDeathTranslationAnimation(true, true));
             this->tabTopLeft->AnimateLocalZRotation(this->GenerateTablatureDeathRotationAnimation(true));
-            this->tabTopLeft->AnimateColourRGBA(tablatureColourAnim);
+            this->tabTopLeft->AnimateColourRGBA(colourAnim);
             this->tabTopRight->AnimateLocalTranslation(this->GenerateTablatureDeathTranslationAnimation(false, true));
             this->tabTopRight->AnimateLocalZRotation(this->GenerateTablatureDeathRotationAnimation(false));
-            this->tabTopRight->AnimateColourRGBA(tablatureColourAnim);
+            this->tabTopRight->AnimateColourRGBA(colourAnim);
             
             break;
         }
@@ -1529,7 +1530,7 @@ void BodyHeadAI::ExecuteMoveToCenterOfLevelState(double dT, GameModel* gameModel
 
         // Now that the boss is centered, we make the eye emerge from the pediment in prep for the next high-level state
         AnimationMultiLerp<ColourRGBA> angryColourAnim = Boss::BuildBossAngryFlashAnim();
-        this->eyeRiseAnim.SetLerp(0.0, angryColourAnim.GetTimeValues().back(), Vector3D(0,0,0), Vector3D(0, this->GetEyeRiseHeight(), 0));
+        this->eyeRiseAnim.SetLerp(0.0, 3.0, Vector3D(0,0,0), Vector3D(0, this->GetEyeRiseHeight(), 0));
         this->eye->AnimateColourRGBA(angryColourAnim);
 
         this->SetState(ClassicalBossAI::EyeRisesFromPedimentAIState);
@@ -1539,7 +1540,9 @@ void BodyHeadAI::ExecuteMoveToCenterOfLevelState(double dT, GameModel* gameModel
 void BodyHeadAI::ExecuteEyeRisesFromPedimentState(double dT) {
     bool isFinished = this->eyeRiseAnim.Tick(dT);
     this->eye->SetLocalTranslation(this->eyeRiseAnim.GetInterpolantValue());
+    
     if (isFinished) {
+        this->eye->ResetColourRGBAAnimation();
         this->eye->SetLocalTranslation(Vector3D(0,0,0));
         this->eye->Translate(Vector3D(0, this->GetEyeRiseHeight(), 0));
 
@@ -1547,8 +1550,6 @@ void BodyHeadAI::ExecuteEyeRisesFromPedimentState(double dT) {
         this->boss->SetNextAIState(new HeadAI(this->boss));
     }
 }
-
-
 
 AnimationMultiLerp<Vector3D> BodyHeadAI::GenerateColumnDeathTranslationAnimation(float xForceDir) const {
 
@@ -1717,18 +1718,15 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
             else {
                 this->movePedimentUpAndDown = false;
             }
-            if (fabs(this->currEyeVel[1]) < EPSILON) {
-                this->currEyeVel[1] = -this->GetMaxSpeed() / 1.25f;
-            }
-            if (fabs(this->currEyeVel[0]) < EPSILON) {
-                this->currEyeVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed();
-            }
-            if (fabs(this->currPedimentVel[0]) < EPSILON) {
-                this->currPedimentVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed();
-            }
+            this->UpdateEyeAndPedimentHeightMovement();
             break;
 
         case ClassicalBossAI::SpinningPedimentAIState:
+            this->movePedimentUpAndDown = false;
+            this->laserShootTimer = this->GetTimeBetweenLaserSprayShots();
+            this->moveToNextStateCountdown = this->GeneratePedimentSpinningTime();
+            this->pediment->AnimateLocalZRotation(this->GenerateSpinningPedimentRotationAnim());
+            this->UpdateEyeAndPedimentHeightMovement();
             break;
 
         case ClassicalBossAI::HurtEyeAIState:
@@ -1773,7 +1771,7 @@ void HeadAI::UpdateState(double dT, GameModel* gameModel) {
             break;
 
         case ClassicalBossAI::SpinningPedimentAIState:
-            this->ExecuteSpinningPedimentState(dT);
+            this->ExecuteSpinningPedimentState(dT, gameModel);
             break;
 
         case ClassicalBossAI::HurtEyeAIState:
@@ -1810,42 +1808,8 @@ void HeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel
     Point2D pedimentPos = this->pediment->GetTranslationPt2D();
     Point2D eyePos = this->eye->GetTranslationPt2D();
 
-    // Make sure the pediment and eye are moving up and down appropriately
-    if (this->movePedimentUpAndDown) {
-        float avgBasicPedimentMoveHeight = this->GetPedimentBasicMoveHeight(level);
-        float upDownPedimentDistance     = 1.5f * ClassicalBoss::PEDIMENT_HEIGHT;
-
-        if (pedimentPos[1] < avgBasicPedimentMoveHeight - upDownPedimentDistance) {
-            this->currPedimentVel[1] = this->GetMaxSpeed() / 1.25f;
-        }
-        else if (pedimentPos[1] > avgBasicPedimentMoveHeight + upDownPedimentDistance) {
-            this->currPedimentVel[1] = -this->GetMaxSpeed() / 1.25f;
-        }
-    }
-
-    float avgBasicEyeMoveHeight = this->GetEyeBasicMoveHeight(level);
-    float upDownEyeDistance     = ClassicalBoss::PEDIMENT_HEIGHT;
-    if (eyePos[1] < avgBasicEyeMoveHeight - upDownEyeDistance) {
-        this->currEyeVel[1] = this->GetMaxSpeed() / 1.25f;
-    }
-    else if (eyePos[1] > avgBasicEyeMoveHeight + upDownEyeDistance) {
-        this->currEyeVel[1] = -this->GetMaxSpeed() / 1.25f;
-    }
-
-    // Now add the side-to-side movement of the eye and pediment
-    if (eyePos[0] <= this->GetBossMovementMinXBound(level, ClassicalBoss::EYE_WIDTH)) {
-        this->currEyeVel[0] = this->GetMaxSpeed();
-    }
-    else if (eyePos[0] >= this->GetBossMovementMaxXBound(level, ClassicalBoss::EYE_WIDTH)) {
-        this->currEyeVel[0] = -this->GetMaxSpeed();
-    }
-
-    if (pedimentPos[0] <= this->GetBossMovementMinXBound(level, ClassicalBoss::PEDIMENT_WIDTH)) {
-        this->currPedimentVel[0] = this->GetMaxSpeed();
-    }
-    else if (pedimentPos[0] >= this->GetBossMovementMaxXBound(level, ClassicalBoss::PEDIMENT_WIDTH)) {
-        this->currPedimentVel[0] = -this->GetMaxSpeed();
-    }
+    this->PerformBasicEyeMovement(eyePos, level);
+    this->PerformBasicPedimentMovement(pedimentPos, level);
 
     // Determine whether we're shooting a laser
     if (this->laserShootTimer <= 0.0) {
@@ -1892,8 +1856,38 @@ void HeadAI::ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel
     }
 }
 
-void HeadAI::ExecuteSpinningPedimentState(double dT) {
+void HeadAI::ExecuteSpinningPedimentState(double dT, GameModel* gameModel) {
+    assert(gameModel != NULL);
 
+    const GameLevel* level = gameModel->GetCurrentLevel();
+    assert(level != NULL);
+
+    Point2D pedimentPos = this->pediment->GetTranslationPt2D();
+    Point2D eyePos = this->eye->GetTranslationPt2D();
+
+    this->PerformBasicEyeMovement(eyePos, level);
+    this->PerformBasicPedimentMovement(pedimentPos, level);
+
+    if (this->laserShootTimer <= 0) {
+        this->ExecuteLaserSpray(gameModel);
+        this->laserShootTimer = this->GetTimeBetweenLaserSprayShots();
+    }
+    else {
+        this->laserShootTimer -= dT;
+    }
+
+    if (this->moveToNextStateCountdown <= 0) {
+        this->pediment->ClearLocalZRotationAnimation();
+        if (this->eye->GetCurrentLifePercentage() <= 0.4f) {
+            this->SetState(ClassicalBossAI::SpinningPedimentAIState);
+        }
+        else {
+            this->SetState(ClassicalBossAI::MoveAndBarrageWithLaserAIState);
+        }
+    }
+    else {
+        this->moveToNextStateCountdown -= dT;
+    }
 }
 
 void HeadAI::ExecuteHurtEyeState(double dT) {
@@ -1938,6 +1932,93 @@ void HeadAI::ExecuteFinalDeathThroesState(double dT) {
     else {
         this->completelyDeadCountdown -= dT;
     }
+}
+
+void HeadAI::PerformBasicEyeMovement(const Point2D& eyePos, const GameLevel* level) {
+
+    // Up-down movement of the eye
+    float avgBasicEyeMoveHeight = this->GetEyeBasicMoveHeight(level);
+    float upDownEyeDistance     = ClassicalBoss::PEDIMENT_HEIGHT;
+    if (eyePos[1] < avgBasicEyeMoveHeight - upDownEyeDistance) {
+        this->currEyeVel[1] = this->GetMaxSpeed() / 1.25f;
+    }
+    else if (eyePos[1] > avgBasicEyeMoveHeight + upDownEyeDistance) {
+        this->currEyeVel[1] = -this->GetMaxSpeed() / 1.25f;
+    }
+
+    // Side-to-side movement of the eye
+    if (eyePos[0] <= this->GetBossMovementMinXBound(level, ClassicalBoss::EYE_WIDTH)) {
+        this->currEyeVel[0] = this->GetMaxSpeed();
+    }
+    else if (eyePos[0] >= this->GetBossMovementMaxXBound(level, ClassicalBoss::EYE_WIDTH)) {
+        this->currEyeVel[0] = -this->GetMaxSpeed();
+    }
+}
+
+void HeadAI::PerformBasicPedimentMovement(const Point2D& pedimentPos, const GameLevel* level) {
+
+    // Up-down movement of the pediment
+    if (this->movePedimentUpAndDown) {
+        float avgBasicPedimentMoveHeight = this->GetPedimentBasicMoveHeight(level);
+        float upDownPedimentDistance     = 1.5f * ClassicalBoss::PEDIMENT_HEIGHT;
+
+        if (pedimentPos[1] < avgBasicPedimentMoveHeight - upDownPedimentDistance) {
+            this->currPedimentVel[1] = this->GetMaxSpeed() / 1.25f;
+        }
+        else if (pedimentPos[1] > avgBasicPedimentMoveHeight + upDownPedimentDistance) {
+            this->currPedimentVel[1] = -this->GetMaxSpeed() / 1.25f;
+        }
+    }
+
+    // Side-to-side movement of the pediment
+    if (pedimentPos[0] <= this->GetBossMovementMinXBound(level, ClassicalBoss::PEDIMENT_WIDTH)) {
+        this->currPedimentVel[0] = this->GetMaxSpeed();
+    }
+    else if (pedimentPos[0] >= this->GetBossMovementMaxXBound(level, ClassicalBoss::PEDIMENT_WIDTH)) {
+        this->currPedimentVel[0] = -this->GetMaxSpeed();
+    }
+}
+
+void HeadAI::UpdateEyeAndPedimentHeightMovement() {
+    if (fabs(this->currEyeVel[1]) < EPSILON) {
+        this->currEyeVel[1] = -this->GetMaxSpeed() / 1.25f;
+    }
+    if (fabs(this->currEyeVel[0]) < EPSILON) {
+        this->currEyeVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed();
+    }
+    if (fabs(this->currPedimentVel[0]) < EPSILON) {
+        this->currPedimentVel[0] = Randomizer::GetInstance()->RandomNegativeOrPositive() * this->GetMaxSpeed();
+    }
+}
+
+float HeadAI::GetPedimentBasicMoveHeight(const GameLevel* level) {
+    return this->GetEyeBasicMoveHeight(level) - (ClassicalBoss::PEDIMENT_WIDTH + ClassicalBoss::PEDIMENT_HEIGHT);
+}
+
+float HeadAI::GetEyeBasicMoveHeight(const GameLevel* level) {
+    return (level->GetLevelUnitHeight() / 2.0f) + this->GetEyeRiseHeight();
+}
+
+AnimationMultiLerp<float> HeadAI::GenerateSpinningPedimentRotationAnim() {
+    static const float DEFAULT_ROT_SPD = 180.0f;
+
+    std::vector<double> timeVals;
+    timeVals.reserve(3);
+    timeVals.push_back(0.0);
+    timeVals.push_back(1.0);
+    timeVals.push_back(2.0);
+
+    std::vector<float> rotVals;
+    rotVals.reserve(timeVals.size());
+    rotVals.push_back(0.0);
+    rotVals.push_back(DEFAULT_ROT_SPD);
+    rotVals.push_back(2*DEFAULT_ROT_SPD);
+
+    AnimationMultiLerp<float> rotAnim;
+    rotAnim.SetLerp(timeVals, rotVals);
+    rotAnim.SetRepeat(true);
+
+    return rotAnim;
 }
 
 // END HeadAI **********************************************************************

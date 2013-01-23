@@ -292,6 +292,8 @@ private:
 
     // MoveAndBarrageWithLaserAIState
     bool movePedimentUpAndDown;
+
+    // MoveAndBarrageWithLaserAIState, SpinningPedimentAIState
     double laserShootTimer;
     double moveToNextStateCountdown;
 
@@ -306,14 +308,23 @@ private:
     void UpdateMovement(double dT, GameModel* gameModel);
 
     void ExecuteMoveAndBarrageWithLaserState(double dT, GameModel* gameModel);
-    void ExecuteSpinningPedimentState(double dT);
+    void ExecuteSpinningPedimentState(double dT, GameModel* gameModel);
     void ExecuteHurtEyeState(double dT);
     void ExecuteFinalDeathThroesState(double dT);
 
+    void PerformBasicEyeMovement(const Point2D& eyePos, const GameLevel* level);
+    void PerformBasicPedimentMovement(const Point2D& pedimentPos, const GameLevel* level);
+    void UpdateEyeAndPedimentHeightMovement();
+
     double GetDeathThroesAnimationTime() const { return 6.0; }
     double GetTimeBetweenLaserBarrageShots() const { return 0.08 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.075; }
-    float GetPedimentBasicMoveHeight(const GameLevel* level) { return level->GetLevelUnitHeight() / 2.0f; }
-    float GetEyeBasicMoveHeight(const GameLevel* level) { return this->GetPedimentBasicMoveHeight(level) + this->GetEyeRiseHeight(); }
+    double GetTimeBetweenLaserSprayShots() const { return 1.5; }
+    float GetPedimentBasicMoveHeight(const GameLevel* level);
+    float GetEyeBasicMoveHeight(const GameLevel* level);
+
+    double GeneratePedimentSpinningTime() const { return this->GenerateBasicMoveTime() + 1.0; }
+
+    AnimationMultiLerp<float> GenerateSpinningPedimentRotationAnim();
 
     DISALLOW_COPY_AND_ASSIGN(HeadAI);
 };

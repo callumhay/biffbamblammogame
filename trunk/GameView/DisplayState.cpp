@@ -19,6 +19,7 @@
 #include "WorldStartDisplayState.h"
 #include "InTutorialGameDisplayState.h"
 #include "InGameDisplayState.h"
+#include "InGameBossLevelDisplayState.h"
 #include "InGameMenuState.h"
 #include "LevelEndDisplayState.h"
 #include "LevelCompleteSummaryDisplayState.h"
@@ -51,6 +52,8 @@ DisplayState* DisplayState::BuildDisplayStateFromType(const DisplayStateType& ty
             return new InTutorialGameDisplayState(display);
 		case DisplayState::InGame:
 			return new InGameDisplayState(display);
+        case DisplayState::InGameBossLevel:
+            return new InGameBossLevelDisplayState(display);
 		case DisplayState::InGameMenu:
 			return new InGameMenuState(display, NULL);
 		case DisplayState::LevelEnd:

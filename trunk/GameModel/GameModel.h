@@ -200,6 +200,11 @@ public:
         return GameModel::IsTutorialLevel(world->GetWorldIndex(), level->GetLevelIndex());
     }
 
+    bool IsCurrentLevelABossLevel() const {
+        const GameLevel* level = this->GetCurrentLevel();
+        return level->GetHasBoss(); 
+    }
+
     void IncrementScore(PointAward& pointAward);
     //void IncrementScore(std::list<PointAward>& pointAwardsList);
     void IncrementNumInterimBlocksDestroyed(const Point2D& pos) { this->SetNumInterimBlocksDestroyed(this->GetNumInterimBlocksDestroyed()+1, pos); }
@@ -440,6 +445,8 @@ public:
 			this->currState->BallReleaseKeyPressed();
 		}
 	}
+
+    void ToggleAllowPaddleBallLaunching(bool allow);
 
     const BallBoostModel::BallBoostMode& GetBallBoostMode() const { return this->ballBoostMode; }
     void SetBallBoostMode(const BallBoostModel::BallBoostMode& mode) { this->ballBoostMode = mode; }

@@ -127,10 +127,16 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 
 	// Reset any HUD animations - this makes sure the animations are always displayed (e.g., the life balls fly in)
 	// at the beginning of each level
-	this->display->GetAssets()->GetLifeHUD()->Reinitialize();
-	this->display->GetAssets()->GetLifeHUD()->LivesGained(this->display->GetModel()->GetLivesLeft());
-    this->display->GetAssets()->GetBoostHUD()->Reinitialize();
-    this->display->GetAssets()->GetPointsHUD()->Reinitialize();
+    GameAssets* assets = this->display->GetAssets();
+	assets->GetLifeHUD()->Reinitialize();
+	assets->GetLifeHUD()->LivesGained(this->display->GetModel()->GetLivesLeft());
+    assets->GetBoostHUD()->Reinitialize();
+    assets->GetPointsHUD()->Reinitialize();
+
+    // Special case: If the level is a boss level then all the lights start off
+    if (level->GetHasBoss()) {
+        assets->ToggleLights(false);
+    }
 }
 
 LevelStartDisplayState::~LevelStartDisplayState() {

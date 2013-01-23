@@ -80,6 +80,8 @@ public:
 	void SetLevelAlpha(float alpha);
 	void UpdateItemDropBlock(const GameItemAssets& gameItemAssets, const ItemDropBlock& block);
 
+    double ActivateBossIntro();
+
 private:
 	const GameLevel* currLevel;
 

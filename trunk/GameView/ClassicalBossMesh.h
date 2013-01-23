@@ -14,6 +14,8 @@
 
 #include "BossMesh.h"
 
+#include "../BlammoEngine/Light.h"
+
 class ClassicalBoss;
 class Mesh;
 class ESPPointEmitter;
@@ -25,8 +27,12 @@ public:
 
     void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    double ActivateIntroAnimation();
 
 private:
+    static const double INTRO_TIME_IN_SECS;
+    static const float INTRO_SPARKLE_TIME_IN_SECS;
+
     ClassicalBoss* boss; // N.B., The pointed-to object doesn't belong to this
 
     // Mesh assets for the various body parts of the boss
@@ -38,16 +44,37 @@ private:
     Mesh* armSquareMesh;
     Mesh* restOfArmMesh;
 
-    // Visual effects for the boss
-    ESPPointEmitter* leftArmSmokeEmitter1;
-    ESPPointEmitter* leftArmSmokeEmitter2;
-    ESPPointEmitter* rightArmSmokeEmitter1;
-    ESPPointEmitter* rightArmSmokeEmitter2;
+    // Intro animations and effects
+    double introTimeCountdown;
+
+    Texture2D* sparkleTex;
+    ESPParticleScaleEffector particleGrowToSize;
+    ESPParticleRotateEffector particleTwirl;
+    ESPParticleColourEffector particleFader;
+    ESPPointEmitter introSparkle;
+    
+    Texture2D* glowTex;
+    
+    //ESPPointEmitter introLenseFlare;
+
+    // Visual effects for the boss when it's alive and active
+    ESPParticleScaleEffector eyeGlowPulser;
+    ESPPointEmitter eyePulseGlow;
+
+    ESPPointEmitter* leftArmFireEmitter;
+    ESPPointEmitter* leftArmSmokeEmitter;
+    ESPPointEmitter* rightArmFireEmitter;
+    ESPPointEmitter* rightArmSmokeEmitter;
+    ESPPointEmitter* eyeSmokeEmitter;
+    ESPPointEmitter* eyeFireEmitter;
 
     ESPPointEmitter* leftArmExplodingEmitter;
     ESPPointEmitter* rightArmExplodingEmitter;
-
     std::vector<ESPPointEmitter*> columnExplodingEmitters;
+    std::vector<ESPPointEmitter*> tablatureExplodingEmitters;
+    ESPPointEmitter* baseExplodingEmitter;
+    ESPPointEmitter* pedimentExplodingEmitter;
+    ESPPointEmitter* eyeExplodingEmitter;
 
     void DrawEffects(double dT, const Camera& camera);
 

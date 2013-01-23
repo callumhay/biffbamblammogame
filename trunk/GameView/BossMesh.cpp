@@ -102,7 +102,7 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
     return result;
 }
 
-ESPPointEmitter* BossMesh::BuildFireSmokeEmitter1(float width, float height) {
+ESPPointEmitter* BossMesh::BuildFireEmitter(float width, float height) {
     float smallestDimension = std::min<float>(width, height);
 
     static const float MAX_SPAWN_DELTA = 0.16f;
@@ -130,7 +130,7 @@ ESPPointEmitter* BossMesh::BuildFireSmokeEmitter1(float width, float height) {
 
     return smokeEmitter;
 }
-ESPPointEmitter* BossMesh::BuildFireSmokeEmitter2(float width, float height) {
+ESPPointEmitter* BossMesh::BuildSmokeEmitter(float width, float height) {
     float smallestDimension = std::min<float>(width, height);
 
     static const float MAX_SPAWN_DELTA = 0.16f;

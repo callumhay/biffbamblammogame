@@ -95,7 +95,7 @@ void ESPParticle::DrawAsPointSprite(const Camera& camera, const Vector3D& transl
 
 Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ESP::ESPAlignment alignment) {
 	Vector3D alignRightVec	= Vector3D(1, 0, 0);
-	Vector3D alignUpVec			= Vector3D(0, 1, 0);
+	Vector3D alignUpVec		= Vector3D(0, 1, 0);
 	Vector3D alignNormalVec	= Vector3D(0, 0, 1);
 	
 	Point3D camPos = cam.GetCurrentCameraPosition();
@@ -170,8 +170,14 @@ Matrix4x4 ESPParticle::GetPersonalAlignmentTransform(const Camera& cam, const ES
 			// The particle is aligned to its axis of velocity
 			// - The normal vector is from the particle center to the eye	
 			// - The up vector is the velocity vector of this particle
-			alignUpVec			= Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], -this->velocity[2]));
-			alignRightVec		= Vector3D::cross(alignUpVec, alignNormalVec);
+            if (this->velocity.length2() != 0) {
+			    alignUpVec = Vector3D::Normalize(Vector3D(-this->velocity[0], this->velocity[1], -this->velocity[2]));
+            }
+            else {
+                alignUpVec = Vector3D(0, 1, 0);
+            }
+			
+            alignRightVec		= Vector3D::cross(alignUpVec, alignNormalVec);
 			if (alignRightVec == Vector3D(0,0,0)) {
 				alignRightVec = Vector3D::cross(PARTICLE_RIGHT_VEC, alignNormalVec);
 				if (alignRightVec == Vector3D(0,0,0)) {

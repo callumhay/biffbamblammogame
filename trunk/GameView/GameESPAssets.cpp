@@ -2570,7 +2570,7 @@ void GameESPAssets::AddBasicPaddleHitByProjectileEffect(const PlayerPaddle& padd
 	}
 
 	starEmitter->AddEffector(&this->particleFader);
-	starEmitter->SetParticles(3 + (Randomizer::GetInstance()->RandomUnsignedInt() % 3), this->starTex);
+	starEmitter->SetParticles(3, this->starTex);
 
 	this->activeGeneralEmitters.push_back(starEmitter);
 }
