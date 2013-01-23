@@ -13,6 +13,8 @@
 #include "GameViewConstants.h"
 #include "GameDisplay.h"
 
+const float GameLightAssets::LIGHT_TOGGLE_TIME = 1.0f;
+
 GameLightAssets::GameLightAssets() : 
 // Foreground lights
 fgKeyLight(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION, GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_COLOUR, 0.0f),
@@ -43,9 +45,10 @@ GameLightAssets::~GameLightAssets() {
 /**
  * Toggle the lights in the game either on or off (both foreground
  * and background lights are affected).
+ * Returns: The time it takes to toggle the lights on/off.
  */
-void GameLightAssets::ToggleLights(bool turnOn) {
-	static const float LIGHT_TOGGLE_TIME = 1.0f;
+double GameLightAssets::ToggleLights(bool turnOn) {
+	
 	// For the fill and key lights of the foreground and background we simply
 	// turn them on or off...
 	this->fgKeyLight.SetLightOn(turnOn,  LIGHT_TOGGLE_TIME);
@@ -66,6 +69,8 @@ void GameLightAssets::ToggleLights(bool turnOn) {
 		this->paddleKeyLight.SetLightColourChange(GameViewConstants::GetInstance()->BLACKOUT_PADDLE_KEY_LIGHT_COLOUR, LIGHT_TOGGLE_TIME);
 		this->paddleFillLight.SetLightColourChange(GameViewConstants::GetInstance()->BLACKOUT_PADDLE_FILL_LIGHT_COLOUR, LIGHT_TOGGLE_TIME);
 	}
+
+    return LIGHT_TOGGLE_TIME;
 }
 
 /**
@@ -227,6 +232,25 @@ void GameLightAssets::GetPaddleAffectingLights(BasicPointLight& paddleKeyLight, 
 void GameLightAssets::GetBackgroundAffectingLights(BasicPointLight& bgKeyLight, BasicPointLight& bgFillLight) const {
 	this->bgKeyLight.ConvertToBasicPointLight(bgKeyLight);
 	this->bgFillLight.ConvertToBasicPointLight(bgFillLight);
+}
+
+/**
+ * Static builder function for key and fill foreground lights going from on to off over some given time period.
+ */
+void GameLightAssets::GetBlackoutToLightsOnPieceAffectingLights(PointLight& fgKeyLight,
+                                                                PointLight& fgFillLight,
+                                                                double turnOnTime) {
+
+    fgKeyLight.SetPosition(GameViewConstants::GetInstance()->DEFAULT_FG_KEY_LIGHT_POSITION);
+    fgKeyLight.SetDiffuseColour(GameViewConstants::GetInstance()->BLACKOUT_BALL_KEY_LIGHT_COLOUR);
+    fgKeyLight.SetLinearAttenuation(0.0f);
+    
+    fgFillLight.SetPosition(GameViewConstants::GetInstance()->DEFAULT_FG_FILL_LIGHT_POSITION);
+    fgFillLight.SetDiffuseColour(GameViewConstants::GetInstance()->BLACKOUT_PADDLE_FILL_LIGHT_COLOUR);
+    fgFillLight.SetLinearAttenuation(0.037f);
+
+	fgKeyLight.SetLightOn(true,  turnOnTime);
+	fgFillLight.SetLightOn(true, turnOnTime);
 }
 
 /**

@@ -1105,6 +1105,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\GameView\InGameBossLevelDisplayState.h"
+						>
+					</File>
+					<File
 						RelativePath=".\GameView\InGameDisplayState.h"
 						>
 					</File>
@@ -1162,6 +1166,10 @@
 					</File>
 					<File
 						RelativePath=".\GameView\GameOverDisplayState.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\GameView\InGameBossLevelDisplayState.cpp"
 						>
 					</File>
 					<File

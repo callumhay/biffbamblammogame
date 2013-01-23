@@ -32,6 +32,8 @@ public:
 	void Tick(double seconds);
 	void BallReleaseKeyPressed();
 
+    void ToggleAllowPaddleBallLaunching(bool allow);
+
 private:
 	bool firstTick;
     bool releaseTimerStarted;

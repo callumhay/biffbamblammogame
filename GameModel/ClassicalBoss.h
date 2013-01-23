@@ -41,10 +41,14 @@ public:
     static const float COLUMN_WIDTH;
     static const float COLUMN_HEIGHT;
     static const float BASE_WIDTH;
+    static const float BASE_HEIGHT;
     static const float TABLATURE_WIDTH;
+    static const float TABLATURE_HEIGHT;
     static const float PEDIMENT_WIDTH;
     static const float PEDIMENT_HEIGHT;
     static const float EYE_WIDTH;
+    static const float EYE_HEIGHT;
+    static const float EYE_DEPTH;
 
     ~ClassicalBoss();
 

@@ -861,3 +861,8 @@ void LevelMesh::SetLevelAlpha(float alpha) {
     this->rocketTurretBlock->SetAlphaMultiplier(alpha);
     this->mineTurretBlock->SetAlphaMultiplier(alpha);
 }
+
+double LevelMesh::ActivateBossIntro() {
+    assert(this->bossMesh != NULL);
+    return this->bossMesh->ActivateIntroAnimation();
+}

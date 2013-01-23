@@ -24,7 +24,7 @@ class DisplayState {
 
 public:
 	enum DisplayStateType { MainMenu, SelectWorldMenu, SelectLevelMenu, BlammopediaMenu, LevelStart, WorldStart, 
-                            InTutorialGame, InGame, InGameMenu, LevelEnd, LevelCompleteSummary, GameComplete, GameOver };
+                            InTutorialGame, InGame, InGameBossLevel, InGameMenu, LevelEnd, LevelCompleteSummary, GameComplete, GameOver };
 	static DisplayState* BuildDisplayStateFromType(const DisplayStateType& type, GameDisplay* display);
 
 	DisplayState(GameDisplay* display) : display(display) {}

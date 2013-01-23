@@ -114,6 +114,10 @@ public:
 	void DeactivateItemEffects(const GameModel& gameModel, const GameItem& item);
 	void DeactivateMiscEffects();
 
+    double ActivateBossIntro();
+
+    double ToggleLights(bool lightsOn);
+
 	void ActivateLastBallDeathEffects(const GameBall& lastBall);
 	void DeactivateLastBallDeathEffects();
 
@@ -267,6 +271,18 @@ inline void GameAssets::DrawSafetyNetIfActive(double dT, const Camera& camera, c
 // Draw the block status effects
 inline void GameAssets::DrawStatusEffects(double dT, const Camera& camera) {
 	this->GetCurrentLevelMesh()->DrawStatusEffects(dT, camera, this->fboAssets->GetFullSceneFBO()->GetFBOTexture());
+}
+
+/**
+ * Activates the boss intro animation.
+ * Returns: The total time of the animation.
+ */
+inline double GameAssets::ActivateBossIntro() {
+    return this->GetCurrentLevelMesh()->ActivateBossIntro();
+}
+
+inline double GameAssets::ToggleLights(bool lightsOn) {
+    return this->lightAssets->ToggleLights(lightsOn);
 }
 
 #endif

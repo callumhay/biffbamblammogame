@@ -480,6 +480,13 @@ void GameModel::CollisionOccurred(GameBall& ball, Boss* boss, BossBodyPart* boss
 	this->PerformLevelCompletionChecks();
 }
 
+void GameModel::ToggleAllowPaddleBallLaunching(bool allow) {
+    if (this->currState->GetType() == GameState::BallOnPaddleStateType) {
+        BallOnPaddleState* onPaddleState = static_cast<BallOnPaddleState*>(this->currState);
+        onPaddleState->ToggleAllowPaddleBallLaunching(allow);
+    }
+}
+
 void GameModel::BallBoostDirectionPressed(int x, int y) {
 	if (this->currState != NULL) {
 		this->currState->BallBoostDirectionPressed(x, y);

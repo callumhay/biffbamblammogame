@@ -100,14 +100,21 @@ void GameEventsListener::LevelStartedEvent(const GameWorld& world, const GameLev
 	// Queue up the state for starting a level - this will display the level name and do proper animations, fade-ins, etc.
 	this->display->AddStateToQueue(DisplayState::LevelStart);
 
-    // Queue the tutorial in-game state if this is the first world and first level of the game...
-    if (this->display->GetModel()->IsCurrentLevelTheTutorialLevel()) {
-        // Cache the difficulty and change it to medium/normal
-        this->display->SetCachedDifficulty(this->display->GetModel()->GetDifficulty());
-        this->display->GetModel()->SetDifficulty(GameModel::MediumDifficulty);
+    // Queue the tutorial in-game state if this is the first world and first level of the game,
+    // queue the boss in-game state if the level is a boss level, otherwise it's just a typical level and
+    // we queue the regular in-game display state
+    GameModel* model = this->display->GetModel();
+    if (model->IsCurrentLevelTheTutorialLevel()) {
+        // Cache the difficulty and change it to medium/normal for the tutorial level
+        this->display->SetCachedDifficulty(model->GetDifficulty());
+        model->SetDifficulty(GameModel::MediumDifficulty);
         this->display->AddStateToQueue(DisplayState::InTutorialGame);
     }
+    else if (model->IsCurrentLevelABossLevel()) {
+        this->display->AddStateToQueue(DisplayState::InGameBossLevel);
+    }
     else {
+        // Regular in-game level state
 	    this->display->AddStateToQueue(DisplayState::InGame);
     }
 

@@ -52,7 +52,9 @@ public:
     virtual void SetLocalZRotation(float zRotInDegs)    = 0;
     virtual void SetLocalTransform(const Vector3D& translation, float zRotInDegs) = 0;
     void AnimateLocalTranslation(const AnimationMultiLerp<Vector3D>& animation);
+    void ClearLocalTranslationAnimation();
     void AnimateLocalZRotation(const AnimationMultiLerp<float>& animationZDegs);
+    void ClearLocalZRotationAnimation();
 
     virtual void GetReflectionRefractionRays(const Point2D& hitPoint, const Vector2D& impactDir, std::list<Collision::Ray2D>& rays) const = 0;
 	virtual void TickBeamCollision(double dT, const BeamSegment* beamSegment, GameModel* gameModel) = 0;
@@ -66,6 +68,7 @@ public:
 
     const Matrix4x4& GetWorldTransform() const { return this->worldTransform; }
 
+    Vector3D GetTranslationVec3D() const { return this->worldTransform.getTranslationVec3D(); }
     Vector2D GetTranslationVec2D() const { return this->worldTransform.getTranslationVec2D(); }
     Point2D GetTranslationPt2D() const { return this->worldTransform.getTranslationPt2D(); }
     Point3D GetTranslationPt3D() const { return this->worldTransform.getTranslationPt3D(); }
@@ -97,12 +100,8 @@ private:
 inline AbstractBossBodyPart::AbstractBossBodyPart() : 
 localZRotation(0.0f), localTranslation(0.0f, 0.0f, 0.0f) {
 
-    this->transAnim.ClearLerp();
-    this->transAnim.SetInterpolantValue(Vector3D(0,0,0));
-    this->transAnim.SetRepeat(false);
-    this->zRotAnim.ClearLerp();
-    this->zRotAnim.SetInterpolantValue(0.0f);
-    this->zRotAnim.SetRepeat(false);
+    this->ClearLocalTranslationAnimation();
+    this->ClearLocalZRotationAnimation();
 }
 
 inline AbstractBossBodyPart::~AbstractBossBodyPart() {
@@ -134,8 +133,20 @@ inline void AbstractBossBodyPart::AnimateLocalTranslation(const AnimationMultiLe
     this->transAnim = animation;
 }
 
+inline void AbstractBossBodyPart::ClearLocalTranslationAnimation() {
+    this->transAnim.ClearLerp();
+    this->transAnim.SetInterpolantValue(Vector3D(0,0,0));
+    this->transAnim.SetRepeat(false);
+}
+
 inline void AbstractBossBodyPart::AnimateLocalZRotation(const AnimationMultiLerp<float>& animationZDegs){
     this->zRotAnim = animationZDegs;
+}
+
+inline void AbstractBossBodyPart::ClearLocalZRotationAnimation() {
+    this->zRotAnim.ClearLerp();
+    this->zRotAnim.SetInterpolantValue(0.0f);
+    this->zRotAnim.SetRepeat(false);
 }
 
 #endif // __ABSTRACTBOSSBODYPART_H__

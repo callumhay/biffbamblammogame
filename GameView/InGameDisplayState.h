@@ -26,11 +26,11 @@ class InGameDisplayState : public DisplayState {
 
 public:
 	InGameDisplayState(GameDisplay* display);
-	~InGameDisplayState();
+	virtual ~InGameDisplayState();
 
     bool AllowsGameModelUpdates() const { return true; }
 
-	void RenderFrame(double dT);
+	virtual void RenderFrame(double dT);
 
 	void ButtonPressed(const GameControl::ActionButton& pressedButton, const GameControl::ActionMagnitude& magnitude);
 	void ButtonReleased(const GameControl::ActionButton& releasedButton);
@@ -38,11 +38,12 @@ public:
     void MouseReleased(const GameControl::MouseButton& releasedButton) { UNUSED_PARAMETER(releasedButton); };
 
 	void DisplaySizeChanged(int width, int height);
-	DisplayState::DisplayStateType GetType() const;
+	virtual DisplayState::DisplayStateType GetType() const;
 
-private:
+protected:
 	InGameRenderPipeline renderPipeline;
 
+private:
 	DISALLOW_COPY_AND_ASSIGN(InGameDisplayState);
 };
 

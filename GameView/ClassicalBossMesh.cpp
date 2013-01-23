@@ -11,6 +11,7 @@
 
 #include "ClassicalBossMesh.h"
 #include "GameViewConstants.h"
+#include "GameLightAssets.h"
 
 #include "../ResourceManager.h"
 
@@ -21,13 +22,28 @@
 #include "../GameModel/ClassicalBoss.h"
 #include "../GameModel/BossWeakpoint.h"
 
+const double ClassicalBossMesh::INTRO_TIME_IN_SECS = 5.0;
+const float ClassicalBossMesh::INTRO_SPARKLE_TIME_IN_SECS = 1.2;
+
 ClassicalBossMesh::ClassicalBossMesh(ClassicalBoss* boss) : BossMesh(), boss(boss),
-eyeMesh(NULL), pedimentMesh(NULL), tablatureMesh(NULL), columnMesh(NULL),
-baseMesh(NULL), armSquareMesh(NULL), restOfArmMesh(NULL), leftArmSmokeEmitter1(NULL),
-rightArmSmokeEmitter1(NULL), leftArmSmokeEmitter2(NULL), rightArmSmokeEmitter2(NULL), 
-leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL) {
+sparkleTex(NULL), glowTex(NULL), eyeMesh(NULL), pedimentMesh(NULL), tablatureMesh(NULL), columnMesh(NULL),
+baseMesh(NULL), armSquareMesh(NULL), restOfArmMesh(NULL), leftArmFireEmitter(NULL),
+rightArmFireEmitter(NULL), leftArmSmokeEmitter(NULL), rightArmSmokeEmitter(NULL), 
+leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL), pedimentExplodingEmitter(NULL),
+eyeExplodingEmitter(NULL), eyeSmokeEmitter(NULL), eyeFireEmitter(NULL),
+particleGrowToSize(0.001f, 1.0f), particleFader(1.0f, 0.0f),
+particleTwirl(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 1, ESPParticleRotateEffector::CLOCKWISE),
+eyeGlowPulser(ScaleEffect(1.0f, 1.5f)) {
 
     assert(boss != NULL);
+
+    // Load texture assets...
+    this->sparkleTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_SPARKLE, Texture::Trilinear));
+	assert(this->sparkleTex != NULL);
+    this->glowTex = static_cast<Texture2D*>(ResourceManager::GetInstance()->GetImgTextureResource(
+        GameViewConstants::GetInstance()->TEXTURE_CLEAN_CIRCLE_GRADIENT, Texture::Trilinear));
+	assert(this->glowTex != NULL);
 
     // Load the mesh assets...
     this->eyeMesh = ResourceManager::GetInstance()->GetObjMeshResource(GameViewConstants::GetInstance()->CLASSICAL_BOSS_EYE_MESH);
@@ -46,10 +62,13 @@ leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL) {
     assert(this->restOfArmMesh != NULL);
 
     // Load effects assets...
-    this->leftArmSmokeEmitter1  = this->BuildFireSmokeEmitter1(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
-    this->leftArmSmokeEmitter2  = this->BuildFireSmokeEmitter2(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
-    this->rightArmSmokeEmitter1 = this->BuildFireSmokeEmitter1(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
-    this->rightArmSmokeEmitter2 = this->BuildFireSmokeEmitter2(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+    this->leftArmFireEmitter   = this->BuildFireEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+    this->leftArmSmokeEmitter  = this->BuildSmokeEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+    this->rightArmFireEmitter  = this->BuildFireEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+    this->rightArmSmokeEmitter = this->BuildSmokeEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
+
+    this->eyeSmokeEmitter = this->BuildSmokeEmitter(ClassicalBoss::EYE_WIDTH, ClassicalBoss::EYE_HEIGHT);
+    this->eyeFireEmitter  = this->BuildFireEmitter(ClassicalBoss::EYE_WIDTH, ClassicalBoss::EYE_HEIGHT);
 
     this->leftArmExplodingEmitter  = this->BuildExplodingEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
     this->rightArmExplodingEmitter = this->BuildExplodingEmitter(ClassicalBoss::ARM_WIDTH, ClassicalBoss::ARM_HEIGHT);
@@ -58,6 +77,15 @@ leftArmExplodingEmitter(NULL), rightArmExplodingEmitter(NULL) {
     for (int i = 0; i < 6; i++) {
         this->columnExplodingEmitters.push_back(this->BuildExplodingEmitter(ClassicalBoss::COLUMN_WIDTH, ClassicalBoss::COLUMN_HEIGHT));
     }
+
+    this->tablatureExplodingEmitters.reserve(4);
+    for (int i = 0; i < 4; i++) {
+        this->tablatureExplodingEmitters.push_back(this->BuildExplodingEmitter(ClassicalBoss::TABLATURE_WIDTH, ClassicalBoss::TABLATURE_HEIGHT));
+    }
+    
+    this->baseExplodingEmitter     = this->BuildExplodingEmitter(ClassicalBoss::BASE_WIDTH, ClassicalBoss::BASE_HEIGHT);
+    this->pedimentExplodingEmitter = this->BuildExplodingEmitter(ClassicalBoss::PEDIMENT_WIDTH, ClassicalBoss::PEDIMENT_HEIGHT);
+    this->eyeExplodingEmitter      = this->BuildExplodingEmitter(ClassicalBoss::EYE_WIDTH, ClassicalBoss::EYE_HEIGHT);
 }
 
 ClassicalBossMesh::~ClassicalBossMesh() {
@@ -68,6 +96,11 @@ ClassicalBossMesh::~ClassicalBossMesh() {
     // Release the mesh assets...
     bool success = false;
     
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->sparkleTex);
+    assert(success);
+    success = ResourceManager::GetInstance()->ReleaseTextureResource(this->glowTex);
+    assert(success);
+
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->eyeMesh);
     assert(success);
     success = ResourceManager::GetInstance()->ReleaseMeshResource(this->pedimentMesh);
@@ -85,14 +118,20 @@ ClassicalBossMesh::~ClassicalBossMesh() {
 
     UNUSED_VARIABLE(success);
 
-    delete this->leftArmSmokeEmitter1;
-    this->leftArmSmokeEmitter1 = NULL;
-    delete this->leftArmSmokeEmitter2;
-    this->leftArmSmokeEmitter2 = NULL;
-    delete this->rightArmSmokeEmitter1;
-    this->rightArmSmokeEmitter1 = NULL;
-    delete this->rightArmSmokeEmitter2;
-    this->rightArmSmokeEmitter2 = NULL;
+    delete this->leftArmFireEmitter;
+    this->leftArmFireEmitter = NULL;
+    delete this->leftArmSmokeEmitter;
+    this->leftArmSmokeEmitter = NULL;
+    delete this->rightArmFireEmitter;
+    this->rightArmFireEmitter = NULL;
+    delete this->rightArmSmokeEmitter;
+    this->rightArmSmokeEmitter = NULL;
+
+    delete this->eyeFireEmitter;
+    this->eyeFireEmitter = NULL;
+    delete this->eyeSmokeEmitter;
+    this->eyeSmokeEmitter = NULL;
+
     delete this->leftArmExplodingEmitter;
     this->leftArmExplodingEmitter = NULL;
     delete this->rightArmExplodingEmitter;
@@ -102,6 +141,17 @@ ClassicalBossMesh::~ClassicalBossMesh() {
         delete this->columnExplodingEmitters[i];
     }
     this->columnExplodingEmitters.clear();
+    for (int i = 0; i < static_cast<int>(this->tablatureExplodingEmitters.size()); i++) {
+        delete this->tablatureExplodingEmitters[i];
+    }
+    this->tablatureExplodingEmitters.clear();
+    
+    delete this->baseExplodingEmitter;
+    this->baseExplodingEmitter = NULL;
+    delete this->pedimentExplodingEmitter;
+    this->pedimentExplodingEmitter = NULL;
+    delete this->eyeExplodingEmitter;
+    this->eyeExplodingEmitter = NULL;
 }
 
 void ClassicalBossMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
@@ -263,9 +313,71 @@ void ClassicalBossMesh::Draw(double dT, const Camera& camera, const BasicPointLi
     this->DrawEffects(dT, camera);
 }
 
-void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
+double ClassicalBossMesh::ActivateIntroAnimation() {
+    
+    Point3D eyePos = this->boss->GetEye()->GetTranslationPt3D();
 
-    // Draw the effects for the arms of the boss when it's hurt or destroyed...
+	this->introSparkle.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	this->introSparkle.SetParticleLife(ESPInterval(INTRO_SPARKLE_TIME_IN_SECS));
+    this->introSparkle.SetParticleSize(ESPInterval(4*ClassicalBoss::EYE_HEIGHT));
+	this->introSparkle.SetEmitPosition(eyePos);
+	this->introSparkle.SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+	this->introSparkle.AddEffector(&this->particleGrowToSize);
+    this->introSparkle.AddEffector(&this->particleTwirl);
+    this->introSparkle.AddEffector(&this->particleFader);
+	this->introSparkle.SetParticles(1, this->sparkleTex);
+
+    // Glowing in the eye
+    this->eyePulseGlow.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	this->eyePulseGlow.SetParticleLife(ESPInterval(-1));
+	this->eyePulseGlow.SetParticleSize(ESPInterval(0.75f * ClassicalBoss::EYE_HEIGHT));
+    this->eyePulseGlow.SetParticleAlignment(ESP::ScreenAligned);
+    this->eyePulseGlow.SetEmitPosition(Point3D(0, 0, ClassicalBoss::EYE_DEPTH));
+	this->eyePulseGlow.SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.0f));
+	this->eyePulseGlow.AddEffector(&this->eyeGlowPulser);
+	this->eyePulseGlow.SetParticles(1, this->glowTex);
+
+    //GameLightAssets::GetBlackoutToLightsOnPieceAffectingLights(this->eyeIntroKeyLight, this->eyeIntroFillLight,
+    //    INTRO_TIME_IN_SECS - SPARKLE_TIME_IN_SECS);
+
+    this->introTimeCountdown = INTRO_TIME_IN_SECS;
+    return this->introTimeCountdown;
+}
+
+void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
+    const BossBodyPart* eye = this->boss->GetEye();
+
+    // Check to see if we're drawing intro effects
+    if (this->introTimeCountdown > 0.0) {
+        static const double START_GLOW_TIME = INTRO_TIME_IN_SECS - INTRO_SPARKLE_TIME_IN_SECS/1.5f;
+
+        this->introSparkle.Tick(dT);
+        this->introSparkle.Draw(camera);
+
+        if (this->introTimeCountdown < START_GLOW_TIME) {
+            glPushMatrix();
+            glMultMatrixf(eye->GetWorldTransform().begin());
+            this->eyePulseGlow.SetParticleAlpha(
+                ESPInterval(0.66f * std::max<float>(0.0f, std::min<float>(1.0f, 
+                1.0f - this->introTimeCountdown / START_GLOW_TIME))));
+            this->eyePulseGlow.Tick(dT);
+            
+            this->eyePulseGlow.Draw(camera);
+            glPopMatrix();
+        }
+
+        this->introTimeCountdown -= dT;
+        return;
+    }
+
+    // Draw the eye's glowing effect
+    glPushMatrix();
+    glMultMatrixf(eye->GetWorldTransform().begin());
+    this->eyePulseGlow.Tick(dT);
+    this->eyePulseGlow.Draw(camera);
+    glPopMatrix();
+
+    // Arm effects...
     const BossBodyPart* leftRestOfArm  = this->boss->GetLeftRestOfArm();
     const BossBodyPart* rightRestOfArm = this->boss->GetRightRestOfArm();
     const BossBodyPart* leftArmSquare  = this->boss->GetLeftArmSquare();
@@ -278,15 +390,15 @@ void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
             if (!leftArmSqr->GetIsDestroyed()) {
                 if (leftArmSqr->GetCurrentLifePercentage() < 1.0) {
                     float lifePercentage = leftArmSqr->GetCurrentLifePercentage();
-                    this->leftArmSmokeEmitter1->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
-                    this->leftArmSmokeEmitter1->Tick(dT);
-                    this->leftArmSmokeEmitter2->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
-                    this->leftArmSmokeEmitter2->Tick(dT);
+                    this->leftArmFireEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
+                    this->leftArmFireEmitter->Tick(dT);
+                    this->leftArmSmokeEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
+                    this->leftArmSmokeEmitter->Tick(dT);
 
                     glPushMatrix();
                     glMultMatrixf(leftRestOfArm->GetWorldTransform().begin());
-                    this->leftArmSmokeEmitter2->Draw(camera);
-                    this->leftArmSmokeEmitter1->Draw(camera);
+                    this->leftArmSmokeEmitter->Draw(camera);
+                    this->leftArmFireEmitter->Draw(camera);
                     glPopMatrix();
                 }
             }
@@ -307,15 +419,15 @@ void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
                 if (rightArmSqr->GetCurrentLifePercentage() < 1.0) {
                     float lifePercentage = rightArmSqr->GetCurrentLifePercentage();
                     
-                    this->rightArmSmokeEmitter1->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
-                    this->rightArmSmokeEmitter1->Tick(dT);
-                    this->rightArmSmokeEmitter2->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
-                    this->rightArmSmokeEmitter2->Tick(dT);
+                    this->rightArmFireEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
+                    this->rightArmFireEmitter->Tick(dT);
+                    this->rightArmSmokeEmitter->SetSpawnDelta(ESPInterval(lifePercentage*0.4f, lifePercentage*0.9f));
+                    this->rightArmSmokeEmitter->Tick(dT);
 
                     glPushMatrix();
                     glMultMatrixf(rightRestOfArm->GetWorldTransform().begin());
-                    this->rightArmSmokeEmitter2->Draw(camera);
-                    this->rightArmSmokeEmitter1->Draw(camera);
+                    this->rightArmSmokeEmitter->Draw(camera);
+                    this->rightArmFireEmitter->Draw(camera);
                     glPopMatrix();
                 }
             }
@@ -329,21 +441,94 @@ void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
         }
     }
 
+    // Column effects
     std::vector<const BossBodyPart*> columns = this->boss->GetBodyColumns();   
     for (int i = 0; i < static_cast<int>(columns.size()); i++) {
         const BossBodyPart* column = columns[i];
 
-        if (column->GetAlpha() > 0.0f) {
-            if (column->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
-                const BossWeakpoint* columnWeakpt = static_cast<const BossWeakpoint*>(column);
-                if (columnWeakpt->GetIsDestroyed()) {
-                    glPushMatrix();
-                    glMultMatrixf(column->GetWorldTransform().begin());
-                    this->columnExplodingEmitters[i]->Tick(dT);
-                    this->columnExplodingEmitters[i]->Draw(camera);
-                    glPopMatrix();
+        if (column->GetAlpha() > 0.0f && column->GetIsDestroyed()) {
+            glPushMatrix();
+            glMultMatrixf(column->GetWorldTransform().begin());
+            this->columnExplodingEmitters[i]->Tick(dT);
+            this->columnExplodingEmitters[i]->Draw(camera);
+            glPopMatrix();
+        }
+    }
+
+    const BossBodyPart* topLeftTab     = this->boss->GetTopLeftTablature();
+    const BossBodyPart* topRightTab    = this->boss->GetTopRightTablature();
+    const BossBodyPart* bottomLeftTab  = this->boss->GetBottomLeftTablature();
+    const BossBodyPart* bottomRightTab = this->boss->GetBottomRightTablature();
+    
+    if (topLeftTab->GetAlpha() > 0.0f && topLeftTab->GetIsDestroyed()) {
+        glPushMatrix();
+        glMultMatrixf(topLeftTab->GetWorldTransform().begin());
+        this->tablatureExplodingEmitters[0]->Tick(dT);
+        this->tablatureExplodingEmitters[0]->Draw(camera);
+        glPopMatrix();
+    }
+    if (topRightTab->GetAlpha() > 0.0f && topRightTab->GetIsDestroyed()) {
+        glPushMatrix();
+        glMultMatrixf(topRightTab->GetWorldTransform().begin());
+        this->tablatureExplodingEmitters[1]->Tick(dT);
+        this->tablatureExplodingEmitters[1]->Draw(camera);
+        glPopMatrix();
+    }
+    if (bottomLeftTab->GetAlpha() > 0.0f && bottomLeftTab->GetIsDestroyed()) {
+        glPushMatrix();
+        glMultMatrixf(bottomLeftTab->GetWorldTransform().begin());
+        this->tablatureExplodingEmitters[2]->Tick(dT);
+        this->tablatureExplodingEmitters[2]->Draw(camera);
+        glPopMatrix();
+    }
+    if (bottomRightTab->GetAlpha() > 0.0f && bottomRightTab->GetIsDestroyed()) {
+        glPushMatrix();
+        glMultMatrixf(bottomRightTab->GetWorldTransform().begin());
+        this->tablatureExplodingEmitters[3]->Tick(dT);
+        this->tablatureExplodingEmitters[3]->Draw(camera);
+        glPopMatrix();
+    }
+    
+    // Pediment effects
+    const BossBodyPart* pediment = this->boss->GetPediment();
+    if (pediment->GetAlpha() > 0.0f && pediment->GetIsDestroyed()) {
+        glPushMatrix();
+        glMultMatrixf(pediment->GetWorldTransform().begin());
+        this->pedimentExplodingEmitter->Tick(dT);
+        this->pedimentExplodingEmitter->Draw(camera);
+        glPopMatrix();
+    }
+
+    // Eye effects
+    if (eye->GetAlpha() > 0.0f && eye->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
+        
+        if (!eye->GetIsDestroyed()) {
+            const BossWeakpoint* eyeWeakpt = static_cast<const BossWeakpoint*>(eye);
+            float eyeLifePercentage = eyeWeakpt->GetCurrentLifePercentage();
+            if (eyeLifePercentage < 1.0) {
+                
+                glPushMatrix();
+                glMultMatrixf(eye->GetWorldTransform().begin());
+
+                // Draw smoke
+                this->eyeSmokeEmitter->Tick(dT);
+                this->eyeSmokeEmitter->Draw(camera);
+
+                if (eyeLifePercentage <= 0.5) {
+                    // Draw fire as well
+                    this->eyeFireEmitter->Tick(dT);
+                    this->eyeFireEmitter->Draw(camera);
                 }
+
+                glPopMatrix();
             }
+        }
+        else {
+            glPushMatrix();
+            glMultMatrixf(eye->GetWorldTransform().begin());
+            this->pedimentExplodingEmitter->Tick(dT);
+            this->pedimentExplodingEmitter->Draw(camera);
+            glPopMatrix();
         }
     }
 }

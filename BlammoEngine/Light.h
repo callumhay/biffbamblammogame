@@ -75,7 +75,7 @@ public:
 	inline void SetPosition(const Point3D& p) { this->position = p; }
 	inline void SetLinearAttenuation(float a) { this->linearAttenuation = a; }
 
-	void SetLightOn(bool turnOn, float animationTime);
+	void SetLightOn(bool turnOn, double animationTime);
 	void SetLightStrobeOn(const Colour& strobeEndColour, float strobeTime);
 	void SetLightStrobeOff();
 	void SetLightColourChange(const Colour& newColour, float changeTime);

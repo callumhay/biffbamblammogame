@@ -135,3 +135,10 @@ void BallOnPaddleState::BallReleaseKeyPressed() {
         this->gameModel->SetNextState(GameState::BallInPlayStateType);
     }
 }
+
+void BallOnPaddleState::ToggleAllowPaddleBallLaunching(bool allow) {
+    // Enable/Disable the release of the ball from the paddle
+    PlayerPaddle::SetEnablePaddleRelease(allow);
+    // Enable/Disable the timer for releasing the ball
+    PlayerPaddle::SetEnablePaddleReleaseTimer(allow);
+}
