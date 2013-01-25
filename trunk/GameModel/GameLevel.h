@@ -139,7 +139,7 @@ public:
 
 	bool IsLevelComplete() const {
         if (this->GetHasBoss()) {
-            return this->boss->GetIsDead();
+            return this->boss->GetIsLevelCompleteDead();
         }
 		return this->piecesLeft == 0;
 	}

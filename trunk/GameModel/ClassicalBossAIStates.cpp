@@ -34,6 +34,10 @@ ClassicalBossAI::~ClassicalBossAI() {
     this->boss = NULL;
 }
 
+Collision::AABB2D ClassicalBossAI::GenerateDyingAABB() const {
+    return this->boss->GetEye()->GenerateWorldAABB();
+}
+
 void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
     assert(gameModel != NULL);
     
@@ -94,7 +98,7 @@ float ClassicalBossAI::GetPrepLaserHeight(const GameLevel* level) const {
 }
 
 float ClassicalBossAI::GetEyeRiseHeight() const {
-    return 2.0f * ClassicalBoss::PEDIMENT_HEIGHT;
+    return 3.0f * ClassicalBoss::PEDIMENT_HEIGHT;
 }
 
 float ClassicalBossAI::GetMaxSpeed() const {
@@ -1624,8 +1628,6 @@ HeadAI::HeadAI(ClassicalBoss* boss) : ClassicalBossAI(boss), eye(NULL), laserSho
     this->currPedimentVel = Vector2D(0,0);
     this->currEyeVel      = Vector2D(0,0);
 
-    this->completelyDeadCountdown = this->GetDeathThroesAnimationTime();
-
     // The eye is the last weakpoint before the boss is dead
     this->boss->ConvertAliveBodyPartToWeakpoint(this->boss->eyeIdx, EYE_LIFE_POINTS, EYE_BALL_DAMAGE);
     this->eye = static_cast<BossWeakpoint*>(this->boss->bodyParts[this->boss->eyeIdx]);
@@ -1702,7 +1704,17 @@ void HeadAI::CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossB
     UNUSED_PARAMETER(collisionPart);
 }
 
+bool HeadAI::IsStateMachineFinished() const {
+    return (this->currState == ClassicalBossAI::FinalDeathThroesAIState) ||
+           (this->currState == ClassicalBossAI::HurtEyeAIState && this->eye->GetIsDestroyed());
+}
+
+
 void HeadAI::SetState(ClassicalBossAI::AIState newState) {
+
+    this->currPedimentVel = Vector2D(0,0);
+    this->currEyeVel      = Vector2D(0,0);
+
     switch (newState) {
 
         case ClassicalBossAI::MoveAndBarrageWithLaserAIState:
@@ -1731,17 +1743,12 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
 
         case ClassicalBossAI::HurtEyeAIState:
             debug_output("Entering HurtEyeAIState");
-            this->currPedimentVel = Vector2D(0,0);
-            this->currEyeVel = Vector2D(0,0);
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
             this->eyeHurtMoveAnim.ResetToStart();
             break;
 
         case ClassicalBossAI::FinalDeathThroesAIState:
             debug_output("Entering FinalDeathThroesAIState");
-
-            this->currPedimentVel = Vector2D(0,0);
-            this->currEyeVel = Vector2D(0,0);
 
             // Kill off (fade out) the pediment
             this->boss->ConvertAliveBodyPartToDeadBodyPart(this->pediment);
@@ -1752,7 +1759,6 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
                 Randomizer::GetInstance()->RandomNegativeOrPositive() * 100.0f));
 
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossFinalDeathFlashAnim());
-            this->boss->alivePartsRoot->AnimateLocalTranslation(Boss::BuildBossFinalDeathShakeAnim(ClassicalBoss::EYE_WIDTH / 3.0f));
             break;
 
         default:
@@ -1877,7 +1883,10 @@ void HeadAI::ExecuteSpinningPedimentState(double dT, GameModel* gameModel) {
     }
 
     if (this->moveToNextStateCountdown <= 0) {
+
         this->pediment->ClearLocalZRotationAnimation();
+        this->pediment->SetLocalZRotation(0.0f);
+
         if (this->eye->GetCurrentLifePercentage() <= 0.4f) {
             this->SetState(ClassicalBossAI::SpinningPedimentAIState);
         }
@@ -1896,7 +1905,6 @@ void HeadAI::ExecuteHurtEyeState(double dT) {
 
     bool isFinished = this->eyeHurtMoveAnim.Tick(dT);
     this->eye->SetLocalTranslation(this->eyeHurtMoveAnim.GetInterpolantValue());
-
 
     if (isFinished) {
         this->eye->SetLocalTranslation(Vector3D(0,0,0));
@@ -1925,13 +1933,7 @@ void HeadAI::ExecuteFinalDeathThroesState(double dT) {
     this->currPedimentVel = Vector2D(0,0);
     this->currEyeVel = Vector2D(0,0);
 
-    if (this->completelyDeadCountdown <= 0.0) {
-        // The boss is dead dead dead.
-        return;
-    }
-    else {
-        this->completelyDeadCountdown -= dT;
-    }
+    // The boss is dead dead dead.
 }
 
 void HeadAI::PerformBasicEyeMovement(const Point2D& eyePos, const GameLevel* level) {
@@ -1960,7 +1962,7 @@ void HeadAI::PerformBasicPedimentMovement(const Point2D& pedimentPos, const Game
     // Up-down movement of the pediment
     if (this->movePedimentUpAndDown) {
         float avgBasicPedimentMoveHeight = this->GetPedimentBasicMoveHeight(level);
-        float upDownPedimentDistance     = 1.5f * ClassicalBoss::PEDIMENT_HEIGHT;
+        float upDownPedimentDistance     = ClassicalBoss::PEDIMENT_HEIGHT;
 
         if (pedimentPos[1] < avgBasicPedimentMoveHeight - upDownPedimentDistance) {
             this->currPedimentVel[1] = this->GetMaxSpeed() / 1.25f;
@@ -1992,7 +1994,7 @@ void HeadAI::UpdateEyeAndPedimentHeightMovement() {
 }
 
 float HeadAI::GetPedimentBasicMoveHeight(const GameLevel* level) {
-    return this->GetEyeBasicMoveHeight(level) - (ClassicalBoss::PEDIMENT_WIDTH + ClassicalBoss::PEDIMENT_HEIGHT);
+    return level->GetLevelUnitHeight() / 2.0f - 0.1f * ClassicalBoss::PEDIMENT_WIDTH;
 }
 
 float HeadAI::GetEyeBasicMoveHeight(const GameLevel* level) {

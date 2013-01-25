@@ -23,7 +23,7 @@
 class GameLightAssets {
 	
 public:
-    static const float LIGHT_TOGGLE_TIME;
+    static const float DEFAULT_LIGHT_TOGGLE_TIME;
 
 	enum GameLightType { 
         FGKeyLight,         // Foreground key light  (key light affecting all foreground objects except the paddle and ball)
@@ -40,7 +40,8 @@ public:
 	GameLightAssets();
 	~GameLightAssets();
 
-	double ToggleLights(bool turnOn);
+	void ToggleLights(bool turnOn, double toggleTime);
+    void ToggleLightsForBossDeath(bool turnOn, double toggleTime);
 
 	//void ChangeLightColour(GameLightType lightType, const Colour& newLightColour, float animationTime);
 	void StartStrobeLight(GameLightType lightType, const Colour& strobeColour, float strobeTime);
@@ -54,14 +55,13 @@ public:
 	void GetPieceAffectingLights(BasicPointLight& fgKeyLight, BasicPointLight& fgFillLight, BasicPointLight& ballLight) const;
 	void GetBallAffectingLights(BasicPointLight& ballKeyLight, BasicPointLight& ballFillLight) const;
 	void GetPaddleAffectingLights(BasicPointLight& paddleKeyLight, BasicPointLight& paddleFillLight, BasicPointLight& ballLight) const;
-	void GetBackgroundAffectingLights(BasicPointLight& bgKeyLight, BasicPointLight& bgFillLight) const;
+	void GetBossAffectingLights(BasicPointLight& bossKeyLight, BasicPointLight& bossFillLight, BasicPointLight& ballLight) const;
+    void GetBackgroundAffectingLights(BasicPointLight& bgKeyLight, BasicPointLight& bgFillLight) const;
 	PointLight& GetBallLight() { return this->ballLight; };
 
 	bool GetIsBlackOutActive() const {
 		return this->isBlackOutActive;
 	}
-
-    static void GetBlackoutToLightsOnPieceAffectingLights(PointLight& fgKeyLight, PointLight& fgFillLight, double turnOnTime);
 
 #ifdef _DEBUG
 	void DebugDrawLights() const;
@@ -81,6 +81,8 @@ private:
 	PointLight ballKeyLight, ballFillLight;
 	// Lights just for the paddle
 	PointLight paddleKeyLight, paddleFillLight;
+    // Lights just for the boss
+    PointLight bossKeyLight, bossFillLight;
 
 	PointLight* GetLightFromType(GameLightType lightType);
 

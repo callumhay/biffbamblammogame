@@ -22,7 +22,7 @@
 #include "../GameModel/ClassicalBoss.h"
 #include "../GameModel/BossWeakpoint.h"
 
-const double ClassicalBossMesh::INTRO_TIME_IN_SECS = 5.0;
+const double ClassicalBossMesh::INTRO_TIME_IN_SECS = 3.0;
 const float ClassicalBossMesh::INTRO_SPARKLE_TIME_IN_SECS = 1.2;
 
 ClassicalBossMesh::ClassicalBossMesh(ClassicalBoss* boss) : BossMesh(), boss(boss),
@@ -85,7 +85,7 @@ eyeGlowPulser(ScaleEffect(1.0f, 1.5f)) {
     
     this->baseExplodingEmitter     = this->BuildExplodingEmitter(ClassicalBoss::BASE_WIDTH, ClassicalBoss::BASE_HEIGHT);
     this->pedimentExplodingEmitter = this->BuildExplodingEmitter(ClassicalBoss::PEDIMENT_WIDTH, ClassicalBoss::PEDIMENT_HEIGHT);
-    this->eyeExplodingEmitter      = this->BuildExplodingEmitter(ClassicalBoss::EYE_WIDTH, ClassicalBoss::EYE_HEIGHT);
+    this->eyeExplodingEmitter      = this->BuildExplodingEmitter(1.2f*ClassicalBoss::EYE_WIDTH, 1.2f*ClassicalBoss::EYE_HEIGHT);
 }
 
 ClassicalBossMesh::~ClassicalBossMesh() {
@@ -154,9 +154,46 @@ ClassicalBossMesh::~ClassicalBossMesh() {
     this->eyeExplodingEmitter = NULL;
 }
 
-void ClassicalBossMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-                             const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+double ClassicalBossMesh::ActivateIntroAnimation() {
     
+    Point3D eyePos = this->boss->GetEye()->GetTranslationPt3D();
+
+	this->introSparkle.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	this->introSparkle.SetParticleLife(ESPInterval(INTRO_SPARKLE_TIME_IN_SECS));
+    this->introSparkle.SetParticleSize(ESPInterval(4*ClassicalBoss::EYE_HEIGHT));
+	this->introSparkle.SetEmitPosition(eyePos);
+	this->introSparkle.SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
+	this->introSparkle.AddEffector(&this->particleGrowToSize);
+    this->introSparkle.AddEffector(&this->particleTwirl);
+    this->introSparkle.AddEffector(&this->particleFader);
+	this->introSparkle.SetParticles(1, this->sparkleTex);
+
+    // Glowing in the eye
+    this->eyePulseGlow.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
+	this->eyePulseGlow.SetParticleLife(ESPInterval(-1));
+	this->eyePulseGlow.SetParticleSize(ESPInterval(0.75f * ClassicalBoss::EYE_HEIGHT));
+    this->eyePulseGlow.SetParticleAlignment(ESP::ScreenAligned);
+    this->eyePulseGlow.SetEmitPosition(Point3D(0, 0, ClassicalBoss::EYE_DEPTH));
+	this->eyePulseGlow.SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.0f));
+	this->eyePulseGlow.AddEffector(&this->eyeGlowPulser);
+	this->eyePulseGlow.SetParticles(1, this->glowTex);
+
+    //GameLightAssets::GetBlackoutToLightsOnPieceAffectingLights(this->eyeIntroKeyLight, this->eyeIntroFillLight,
+    //    INTRO_TIME_IN_SECS - SPARKLE_TIME_IN_SECS);
+
+    this->introTimeCountdown = INTRO_TIME_IN_SECS;
+    return this->introTimeCountdown;
+}
+
+void ClassicalBossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
+    BossMesh::DrawPreBodyEffects(dT, camera);
+}
+
+void ClassicalBossMesh::DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
+                                 const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+    
+    UNUSED_PARAMETER(dT);
+
     // Using data from the GameModel's boss object, we draw the various pieces of the boss in their correct
     // worldspace locations...
 
@@ -309,42 +346,9 @@ void ClassicalBossMesh::Draw(double dT, const Camera& camera, const BasicPointLi
         this->baseMesh->Draw(camera, keyLight, fillLight, ballLight);
         glPopMatrix();
     }
-
-    this->DrawEffects(dT, camera);
 }
 
-double ClassicalBossMesh::ActivateIntroAnimation() {
-    
-    Point3D eyePos = this->boss->GetEye()->GetTranslationPt3D();
-
-	this->introSparkle.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	this->introSparkle.SetParticleLife(ESPInterval(INTRO_SPARKLE_TIME_IN_SECS));
-    this->introSparkle.SetParticleSize(ESPInterval(4*ClassicalBoss::EYE_HEIGHT));
-	this->introSparkle.SetEmitPosition(eyePos);
-	this->introSparkle.SetParticleColour(ESPInterval(1), ESPInterval(1), ESPInterval(1), ESPInterval(1));
-	this->introSparkle.AddEffector(&this->particleGrowToSize);
-    this->introSparkle.AddEffector(&this->particleTwirl);
-    this->introSparkle.AddEffector(&this->particleFader);
-	this->introSparkle.SetParticles(1, this->sparkleTex);
-
-    // Glowing in the eye
-    this->eyePulseGlow.SetSpawnDelta(ESPInterval(ESPEmitter::ONLY_SPAWN_ONCE));
-	this->eyePulseGlow.SetParticleLife(ESPInterval(-1));
-	this->eyePulseGlow.SetParticleSize(ESPInterval(0.75f * ClassicalBoss::EYE_HEIGHT));
-    this->eyePulseGlow.SetParticleAlignment(ESP::ScreenAligned);
-    this->eyePulseGlow.SetEmitPosition(Point3D(0, 0, ClassicalBoss::EYE_DEPTH));
-	this->eyePulseGlow.SetParticleColour(ESPInterval(1), ESPInterval(0), ESPInterval(0), ESPInterval(0.0f));
-	this->eyePulseGlow.AddEffector(&this->eyeGlowPulser);
-	this->eyePulseGlow.SetParticles(1, this->glowTex);
-
-    //GameLightAssets::GetBlackoutToLightsOnPieceAffectingLights(this->eyeIntroKeyLight, this->eyeIntroFillLight,
-    //    INTRO_TIME_IN_SECS - SPARKLE_TIME_IN_SECS);
-
-    this->introTimeCountdown = INTRO_TIME_IN_SECS;
-    return this->introTimeCountdown;
-}
-
-void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
+void ClassicalBossMesh::DrawPostBodyEffects(double dT, const Camera& camera) {
     const BossBodyPart* eye = this->boss->GetEye();
 
     // Check to see if we're drawing intro effects
@@ -369,13 +373,6 @@ void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
         this->introTimeCountdown -= dT;
         return;
     }
-
-    // Draw the eye's glowing effect
-    glPushMatrix();
-    glMultMatrixf(eye->GetWorldTransform().begin());
-    this->eyePulseGlow.Tick(dT);
-    this->eyePulseGlow.Draw(camera);
-    glPopMatrix();
 
     // Arm effects...
     const BossBodyPart* leftRestOfArm  = this->boss->GetLeftRestOfArm();
@@ -502,6 +499,14 @@ void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
     // Eye effects
     if (eye->GetAlpha() > 0.0f && eye->GetType() == AbstractBossBodyPart::WeakpointBodyPart) {
         
+        // Draw the eye's glowing effect
+        glPushMatrix();
+        glMultMatrixf(eye->GetWorldTransform().begin());
+        this->eyePulseGlow.SetParticleAlpha(eye->GetAlpha());
+        this->eyePulseGlow.Tick(dT);
+        this->eyePulseGlow.Draw(camera);
+        glPopMatrix();
+
         if (!eye->GetIsDestroyed()) {
             const BossWeakpoint* eyeWeakpt = static_cast<const BossWeakpoint*>(eye);
             float eyeLifePercentage = eyeWeakpt->GetCurrentLifePercentage();
@@ -526,9 +531,16 @@ void ClassicalBossMesh::DrawEffects(double dT, const Camera& camera) {
         else {
             glPushMatrix();
             glMultMatrixf(eye->GetWorldTransform().begin());
-            this->pedimentExplodingEmitter->Tick(dT);
-            this->pedimentExplodingEmitter->Draw(camera);
+            this->eyeExplodingEmitter->Tick(dT);
+            this->eyeExplodingEmitter->Draw(camera);
             glPopMatrix();
         }
     }
+}
+
+Point3D ClassicalBossMesh::GetBossFinalExplodingEpicenter() const {
+    // This bosses' final body part is its eye, so we return the very front-center of the eye
+    Point3D eyePos = this->boss->GetEye()->GetTranslationPt3D();
+    eyePos[2] += ClassicalBoss::EYE_DEPTH;
+    return eyePos;
 }

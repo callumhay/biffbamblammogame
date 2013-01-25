@@ -16,8 +16,12 @@
 #include "BossAIState.h"
 #include "ClassicalBoss.h"
 
+const double Boss::WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = 1.5;
+const double Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME = TOTAL_DEATH_ANIM_TIME / 1.75;
+const double Boss::TOTAL_DEATH_ANIM_TIME = 6.5;
+
 Boss::Boss() : currAIState(NULL), nextAIState(NULL), root(NULL), 
-deadPartsRoot(NULL), alivePartsRoot(NULL)  {
+deadPartsRoot(NULL), alivePartsRoot(NULL), isBossDeadAndLevelCompleted(false)  {
 }
 
 Boss::~Boss() {
@@ -70,6 +74,10 @@ Boss* Boss::BuildStyleBoss(const GameWorld::WorldStyle& style) {
     return boss;
 }
 
+Collision::AABB2D Boss::GenerateDyingAABB() const {
+    return this->currAIState->GenerateDyingAABB();
+}
+
 void Boss::Tick(double dT, GameModel* gameModel) {
     // Tick the body parts
     this->root->Tick(dT);
@@ -81,6 +89,17 @@ void Boss::Tick(double dT, GameModel* gameModel) {
 
     // Update the AI state if necessary
     this->UpdateAIState();
+}
+
+/**
+ * Queries for whether the boss is completely dead or not.
+ * Returns: true if dead, false if not.
+ */
+bool Boss::GetIsStateMachineFinished() const {
+    if (this->currAIState != NULL) {
+        return this->currAIState->IsStateMachineFinished();
+    }
+    return false;
 }
 
 void Boss::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart) {
@@ -170,29 +189,23 @@ AnimationMultiLerp<ColourRGBA> Boss::BuildBossHurtFlashAndFadeAnim(double totalA
 }
 
 AnimationMultiLerp<ColourRGBA> Boss::BuildBossFinalDeathFlashAnim() {
-    const double NUM_FLASHES = 15;
-    const double FLASH_TIME_INC = 4.0 / (3*NUM_FLASHES + 1);
-
     std::vector<double> timeValues;
-    timeValues.reserve(1 + 3*NUM_FLASHES + 1);
+    timeValues.reserve(4);
     timeValues.push_back(0.0);
-    for (int i = 0; i <= 3*NUM_FLASHES; i++) {
-        timeValues.push_back(timeValues.back() + FLASH_TIME_INC);
-    }
+    timeValues.push_back(WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME);
+    timeValues.push_back(FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME);
+    timeValues.push_back(TOTAL_DEATH_ANIM_TIME);
 
-    std::vector<ColourRGBA> alphaValues;
-    alphaValues.reserve(timeValues.size());
-    alphaValues.push_back(ColourRGBA(1,1,1,1));
-    for (int i = 0; i < NUM_FLASHES; i++) {
-        alphaValues.push_back(ColourRGBA(1.0f, 0.0f, 0.0f, 0.5f));
-        alphaValues.push_back(ColourRGBA(1,1,1,1));
-        alphaValues.push_back(ColourRGBA(1.0f, 0.8f, 0.8f, 0.5f));
-    }
-    alphaValues.push_back(ColourRGBA(1,1,1,1));
+    std::vector<ColourRGBA> colourValues;
+    colourValues.reserve(timeValues.size());
+    colourValues.push_back(ColourRGBA(1,1,1,1));
+    colourValues.push_back(ColourRGBA(1,1,1,1));
+    colourValues.push_back(ColourRGBA(0,0,0,1));
+    colourValues.push_back(ColourRGBA(0,0,0,0));
 
     AnimationMultiLerp<ColourRGBA> anim;
-    anim.SetLerp(timeValues, alphaValues);
-    anim.SetRepeat(true);
+    anim.SetLerp(timeValues, colourValues);
+    anim.SetRepeat(false);
 
     return anim;
 }

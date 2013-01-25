@@ -46,7 +46,8 @@ public:
         this->UpdateMovement(dT, gameModel);
     }
 
-    virtual bool IsCompletelyDead() const { return false; }
+    virtual bool IsStateMachineFinished() const { return false; }
+    Collision::AABB2D GenerateDyingAABB() const;
 
 protected:
     static const float BOSS_HEIGHT;
@@ -278,7 +279,7 @@ public:
     void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart);
 
     bool CanHurtPaddleWithBody() const { return false; }
-    bool IsCompletelyDead() const { return this->completelyDeadCountdown <= 0.0; }
+    bool IsStateMachineFinished() const;
 
 private:
     static const float EYE_LIFE_POINTS;
@@ -300,9 +301,6 @@ private:
     // HurtEyeAIState
     AnimationMultiLerp<Vector3D> eyeHurtMoveAnim;
     
-    // FinalDeathThroesAIState
-    double completelyDeadCountdown;
-
     void SetState(ClassicalBossAI::AIState newState);
     void UpdateState(double dT, GameModel* gameModel);
     void UpdateMovement(double dT, GameModel* gameModel);
@@ -316,7 +314,6 @@ private:
     void PerformBasicPedimentMovement(const Point2D& pedimentPos, const GameLevel* level);
     void UpdateEyeAndPedimentHeightMovement();
 
-    double GetDeathThroesAnimationTime() const { return 6.0; }
     double GetTimeBetweenLaserBarrageShots() const { return 0.08 + Randomizer::GetInstance()->RandomNumZeroToOne() * 0.075; }
     double GetTimeBetweenLaserSprayShots() const { return 1.5; }
     float GetPedimentBasicMoveHeight(const GameLevel* level);

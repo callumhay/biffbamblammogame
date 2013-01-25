@@ -15,11 +15,13 @@
 
 #include "../BlammoEngine/Texture2D.h"
 
+#include "../GameModel/GameModel.h"
+#include "../GameModel/GameLevel.h"
 #include "../GameModel/ClassicalBoss.h"
 
 #include "../ResourceManager.h"
 
-BossMesh::BossMesh() : explosionAnimTex(NULL),
+BossMesh::BossMesh() : explosionAnimTex(NULL), finalExplosionIsActive(false),
 particleMediumGrowth(1.0f, 1.6f), particleLargeGrowth(1.0f, 2.2f),
 smokeColourFader(ColourRGBA(0.7f, 0.7f, 0.7f, 1.0f), ColourRGBA(0.1f, 0.1f, 0.1f, 0.1f)),
 particleFireColourFader(ColourRGBA(0.75f, 0.75f, 0.1f, 1.0f), ColourRGBA(0.75f, 0.2f, 0.2f, 0.0f)),
@@ -55,6 +57,8 @@ rotateEffectorCCW(Randomizer::GetInstance()->RandomUnsignedInt() % 360, 0.25f, E
         GameViewConstants::GetInstance()->TEXTURE_EXPLOSION_ANIMATION, Texture::Trilinear));
     assert(this->explosionAnimTex != NULL);
 
+    this->lineAnim.ClearLerp();
+    this->flashAnim.ClearLerp();
 }
 
 BossMesh::~BossMesh() {
@@ -101,6 +105,62 @@ BossMesh* BossMesh::Build(const GameWorld::WorldStyle& style, Boss* boss) {
 
     return result;
 }
+
+double BossMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model) {
+    assert(model != NULL);
+    assert(!this->finalExplosionIsActive);
+
+    assert(delayInSecs < Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME);
+    double lineAnimTime = (Boss::FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME - delayInSecs) / 1.25 + delayInSecs;
+
+    const GameLevel* level = model->GetCurrentLevel();
+    assert(level != NULL);
+    
+    this->lineAnim.SetLerp(delayInSecs, lineAnimTime, 0.0f, 2*level->GetLevelUnitWidth());
+    this->flashAnim.SetLerp(lineAnimTime, Boss::TOTAL_DEATH_ANIM_TIME, 0.0f, 2*level->GetLevelUnitHeight());
+
+    this->finalExplosionIsActive = true;
+
+    return Boss::TOTAL_DEATH_ANIM_TIME;
+}
+
+void BossMesh::DrawPreBodyEffects(double dT, const Camera& camera) {
+    UNUSED_PARAMETER(camera);
+
+    if (this->finalExplosionIsActive) {
+        this->lineAnim.Tick(dT);
+        this->flashAnim.Tick(dT);
+
+        Point3D explosionCenter = this->GetBossFinalExplodingEpicenter();
+
+        glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
+	    glEnable(GL_BLEND);
+	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
+        glColor4f(1,1,1,1);
+
+        float lineWidth = this->lineAnim.GetInterpolantValue();
+        if (lineWidth > 0.0f) {
+
+            glBegin(GL_LINES);
+            glVertex3f(explosionCenter[0] - lineWidth, explosionCenter[1], explosionCenter[2]);
+            glVertex3f(explosionCenter[0] + lineWidth, explosionCenter[1], explosionCenter[2]);
+            glEnd();
+
+        }
+        float flashHeight = this->flashAnim.GetInterpolantValue();
+        if (flashHeight > 0.0f) {
+            glBegin(GL_QUADS);
+            glVertex3f(explosionCenter[0] - lineWidth, explosionCenter[1] - flashHeight, explosionCenter[2]);
+            glVertex3f(explosionCenter[0] + lineWidth, explosionCenter[1] - flashHeight, explosionCenter[2]);
+            glVertex3f(explosionCenter[0] + lineWidth, explosionCenter[1] + flashHeight, explosionCenter[2]);
+            glVertex3f(explosionCenter[0] - lineWidth, explosionCenter[1] + flashHeight, explosionCenter[2]);
+            glEnd();
+        }
+
+        glPopAttrib();
+    }
+}
+
 
 ESPPointEmitter* BossMesh::BuildFireEmitter(float width, float height) {
     float smallestDimension = std::min<float>(width, height);

@@ -123,7 +123,8 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 
 	const Camera& camera = this->display->GetCamera();
     GameModel* gameModel = this->display->GetModel();
-    
+	const GameLevel* currLevel = gameModel->GetCurrentLevel();
+
     Vector2D negHalfLevelDim = -0.5 * gameModel->GetLevelUnitDimensions();
 	GameFBOAssets* fboAssets = this->display->GetAssets()->GetFBOAssets();
 	FBObj* postFullSceneFBO = fboAssets->GetPostFullSceneFBO();
@@ -146,6 +147,9 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	// Tesla lightning arcs
 	this->display->GetAssets()->DrawTeslaLightning(dT, camera);
 
+    // Bosses
+    this->display->GetAssets()->DrawBoss(dT, currLevel, camera);
+
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
 
@@ -157,11 +161,7 @@ FBObj* InGameRenderPipeline::RenderForegroundToFBO(FBObj* backgroundFBO, double 
 	glPopMatrix();
 
 	// Level pieces
-	const GameLevel* currLevel = gameModel->GetCurrentLevel();
 	this->display->GetAssets()->DrawLevelPieces(dT, currLevel, camera);
-
-    // Bosses
-    this->display->GetAssets()->DrawBoss(dT, currLevel, camera);
 
 	glPushMatrix();
 	glTranslatef(negHalfLevelDim[0], negHalfLevelDim[1], 0.0f);
