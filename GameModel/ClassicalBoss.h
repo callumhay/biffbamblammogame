@@ -69,9 +69,6 @@ public:
     // Returns columns from left to right
     std::vector<const BossBodyPart*> GetBodyColumns() const;
 
-    // Inherited from Boss
-    bool GetIsDead() const;
-
 private:
     size_t eyeIdx;
     size_t pedimentIdx;

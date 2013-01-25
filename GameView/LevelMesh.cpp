@@ -866,3 +866,8 @@ double LevelMesh::ActivateBossIntro() {
     assert(this->bossMesh != NULL);
     return this->bossMesh->ActivateIntroAnimation();
 }
+
+double LevelMesh::ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model) {
+    assert(this->bossMesh != NULL);
+    return this->bossMesh->ActivateBossExplodingFlashEffects(delayInSecs, model);
+}

@@ -35,6 +35,7 @@ public:
 	void RenderFinalGather(double dT);
 	void RenderHUD(double dT);
     void RenderHUDWithAlpha(double dT, float alpha);
+
     void SetHUDAlpha(float alpha);
 
 protected:

@@ -115,8 +115,10 @@ public:
 	void DeactivateMiscEffects();
 
     double ActivateBossIntro();
+    double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model);
 
-    double ToggleLights(bool lightsOn);
+    void ToggleLights(bool lightsOn, double toggleTime);
+    void ToggleLightsForBossDeath(bool lightsOn, double toggleTime);
 
 	void ActivateLastBallDeathEffects(const GameBall& lastBall);
 	void DeactivateLastBallDeathEffects();
@@ -247,8 +249,7 @@ inline void GameAssets::DrawBoss(double dT, const GameLevel* currLevel, const Ca
         Vector3D worldTransform(-currLevel->GetLevelUnitWidth()/2.0f, -currLevel->GetLevelUnitHeight()/2.0f, 0.0f);
 
 	    BasicPointLight fgKeyLight, fgFillLight, ballLight;
-	    this->lightAssets->GetPieceAffectingLights(fgKeyLight, fgFillLight, ballLight);
-        // TODO: What about if the lights are off??
+	    this->lightAssets->GetBossAffectingLights(fgKeyLight, fgFillLight, ballLight);
         this->GetCurrentLevelMesh()->DrawBoss(worldTransform, dT, camera, fgKeyLight, fgFillLight, ballLight);
     }
 }
@@ -281,8 +282,19 @@ inline double GameAssets::ActivateBossIntro() {
     return this->GetCurrentLevelMesh()->ActivateBossIntro();
 }
 
-inline double GameAssets::ToggleLights(bool lightsOn) {
-    return this->lightAssets->ToggleLights(lightsOn);
+/**
+ * Activates the final exploding flash animation for a boss on its 'outro'.
+ * Returns: The total time of the animation, including the given delay.
+ */
+inline double GameAssets::ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model) {
+    return this->GetCurrentLevelMesh()->ActivateBossExplodingFlashEffects(delayInSecs, model);
+}
+
+inline void GameAssets::ToggleLights(bool lightsOn, double toggleTime) {
+    this->lightAssets->ToggleLights(lightsOn, toggleTime);
+}
+inline void GameAssets::ToggleLightsForBossDeath(bool lightsOn, double toggleTime) {
+    this->lightAssets->ToggleLightsForBossDeath(lightsOn, toggleTime);
 }
 
 #endif

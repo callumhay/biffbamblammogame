@@ -27,6 +27,7 @@ public:
 
     void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
         const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+
     double ActivateIntroAnimation();
 
 private:
@@ -76,7 +77,12 @@ private:
     ESPPointEmitter* pedimentExplodingEmitter;
     ESPPointEmitter* eyeExplodingEmitter;
 
-    void DrawEffects(double dT, const Camera& camera);
+    void DrawPreBodyEffects(double dT, const Camera& camera);
+    void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
+    void DrawPostBodyEffects(double dT, const Camera& camera);
+
+    Point3D GetBossFinalExplodingEpicenter() const;
 
     DISALLOW_COPY_AND_ASSIGN(ClassicalBossMesh);
 };

@@ -477,7 +477,3 @@ std::vector<const BossBodyPart*> ClassicalBoss::GetBodyColumns() const {
 
     return columns;
 }
-
-bool ClassicalBoss::GetIsDead() const {
-    return false; // TODO
-}

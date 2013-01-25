@@ -13,6 +13,7 @@
 #define __BOSSAISTATE_H__
 
 #include "../BlammoEngine/BasicIncludes.h"
+#include "../BlammoEngine/Collision.h"
 
 class GameModel;
 class BossBodyPart;
@@ -32,7 +33,8 @@ public:
     virtual void CollisionOccurred(GameModel* gameModel, PlayerPaddle& paddle, BossBodyPart* collisionPart)   = 0;
 
     virtual bool CanHurtPaddleWithBody() const = 0;
-    virtual bool IsCompletelyDead() const = 0;
+    virtual bool IsStateMachineFinished() const = 0;
+    virtual Collision::AABB2D GenerateDyingAABB() const = 0;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(BossAIState);

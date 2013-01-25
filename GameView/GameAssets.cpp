@@ -1350,7 +1350,7 @@ void GameAssets::ActivateItemEffects(const GameModel& gameModel, const GameItem&
 		case GameItem::BlackoutItem: {
 				// Turn the lights off and make only the paddle and ball visible.
 				assert(gameModel.IsBlackoutEffectActive());
-				this->lightAssets->ToggleLights(false);
+				this->lightAssets->ToggleLights(false, GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME);
 			}
 			break;
 			
@@ -1441,7 +1441,7 @@ void GameAssets::DeactivateItemEffects(const GameModel& gameModel, const GameIte
 		case GameItem::BlackoutItem: {
 				// Turn the lights back on and revert lights back to their defaults
 				assert(!gameModel.IsBlackoutEffectActive());
-				this->lightAssets->ToggleLights(true);
+				this->lightAssets->ToggleLights(true, GameLightAssets::DEFAULT_LIGHT_TOGGLE_TIME);
 			}
 		  break;
 

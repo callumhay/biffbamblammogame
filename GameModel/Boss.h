@@ -26,11 +26,15 @@ class BossAIState;
 
 class Boss {
 public:
+    static const double WAIT_BEFORE_FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME;
+    static const double FADE_TO_BLACK_FINAL_DEAD_BODY_PART_TIME;
+    static const double TOTAL_DEATH_ANIM_TIME;
+
     virtual ~Boss();
 
     static Boss* BuildStyleBoss(const GameWorld::WorldStyle& style);
 
-    //Collision::AABB2D GenerateWorldAABB() const;
+    Collision::AABB2D GenerateDyingAABB() const;
 
     float GetAliveHeight() const;
     float GetAliveWidth() const;
@@ -46,7 +50,9 @@ public:
 
     void Tick(double dT, GameModel* gameModel);
 
-    virtual bool GetIsDead() const = 0;
+    bool GetIsStateMachineFinished() const;
+    void SetIsLevelCompleteDead(bool isComplete);
+    bool GetIsLevelCompleteDead() const;
 
 	void CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPart* collisionPart);
 	void CollisionOccurred(GameModel* gameModel, Projectile* projectile, BossBodyPart* collisionPart);
@@ -87,6 +93,8 @@ protected:
     virtual void Init() = 0;
 
 private:
+    bool isBossDeadAndLevelCompleted;
+
     void UpdateAIState();
     void SetCurrentAIStateImmediately(BossAIState* newState);
 
@@ -103,6 +111,14 @@ inline float Boss::GetAliveWidth() const {
 
 inline void Boss::Translate(const Vector3D& t) {
     this->root->Translate(t);
+}
+
+inline void Boss::SetIsLevelCompleteDead(bool isComplete) {
+    this->isBossDeadAndLevelCompleted = isComplete;
+}
+
+inline bool Boss::GetIsLevelCompleteDead() const {
+    return this->isBossDeadAndLevelCompleted;
 }
 
 inline BossBodyPart* Boss::CollisionCheck(const GameBall& ball, double dT, Vector2D& n,

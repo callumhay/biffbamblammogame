@@ -135,7 +135,7 @@ levelNameLabel(GameFontAssetsManager::GetInstance()->GetFont(GameFontAssetsManag
 
     // Special case: If the level is a boss level then all the lights start off
     if (level->GetHasBoss()) {
-        assets->ToggleLights(false);
+        assets->ToggleLights(false, 0.01);
     }
 }
 

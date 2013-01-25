@@ -30,10 +30,11 @@ public:
 
     static BossMesh* Build(const GameWorld::WorldStyle& style, Boss* boss);
     
-    virtual void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
-        const BasicPointLight& fillLight, const BasicPointLight& ballLight) = 0;
+    void Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight);
 
     virtual double ActivateIntroAnimation() = 0;
+    double ActivateBossExplodingFlashEffects(double delayInSecs, const GameModel* model);
 
 protected:
     // Shared visual effects and textures for bosses
@@ -47,12 +48,32 @@ protected:
 	ESPParticleRotateEffector rotateEffectorCW;
     ESPParticleRotateEffector rotateEffectorCCW;
 
+    // Final explosion effect members
+    bool finalExplosionIsActive;
+    AnimationLerp<float> lineAnim;  // Length of each of the two lines that go out from the boss to the sides
+    AnimationLerp<float> flashAnim; // The fullscreen flash half-height
+
+    virtual void DrawPreBodyEffects(double dT, const Camera& camera);
+    virtual void DrawBody(double dT, const Camera& camera, const BasicPointLight& keyLight,
+        const BasicPointLight& fillLight, const BasicPointLight& ballLight) = 0;
+    virtual void DrawPostBodyEffects(double dT, const Camera& camera) = 0;
+
+    virtual Point3D GetBossFinalExplodingEpicenter() const = 0;
+
     ESPPointEmitter* BuildFireEmitter(float width, float height);
     ESPPointEmitter* BuildSmokeEmitter(float width, float height);
     ESPPointEmitter* BuildExplodingEmitter(float width, float height);
 
+
 private:
     DISALLOW_COPY_AND_ASSIGN(BossMesh);
 };
+
+inline void BossMesh::Draw(double dT, const Camera& camera, const BasicPointLight& keyLight,
+                           const BasicPointLight& fillLight, const BasicPointLight& ballLight) {
+    this->DrawPreBodyEffects(dT, camera);
+    this->DrawBody(dT, camera, keyLight, fillLight, ballLight);
+    this->DrawPostBodyEffects(dT, camera);
+}
 
 #endif // __BOSSMESH_H__
