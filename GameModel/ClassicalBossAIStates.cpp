@@ -62,22 +62,12 @@ void ClassicalBossAI::ExecuteLaserSpray(GameModel* gameModel) {
     currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
 
-    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-        currLaserDir.Rotate(ANGLE_BETWEEN_LASERS_IN_DEGS);
-        gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
-    }
-
     // Left fan-out of lasers
     currLaserDir = initLaserDir;
     currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
     currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
     gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
-
-    if (Randomizer::GetInstance()->RandomUnsignedInt() % 2 == 0) {
-        currLaserDir.Rotate(-ANGLE_BETWEEN_LASERS_IN_DEGS);
-        gameModel->AddProjectile(new BossLaserProjectile(eyePos, currLaserDir));
-    }
 }
 
 float ClassicalBossAI::GetBossMovementMinXBound(const GameLevel* level, float bossWidth) const {
@@ -98,7 +88,7 @@ float ClassicalBossAI::GetPrepLaserHeight(const GameLevel* level) const {
 }
 
 float ClassicalBossAI::GetEyeRiseHeight() const {
-    return 3.0f * ClassicalBoss::PEDIMENT_HEIGHT;
+    return 2.7f * ClassicalBoss::PEDIMENT_HEIGHT;
 }
 
 float ClassicalBossAI::GetMaxSpeed() const {
@@ -1647,8 +1637,11 @@ void HeadAI::CollisionOccurred(GameModel* gameModel, GameBall& ball, BossBodyPar
     // The ball just hit the eye...
     if (collisionPart == this->eye) {
         
-        this->eye->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
-        {
+        this->eyeHurtMoveAnim.ClearLerp();
+        this->eyeHurtMoveAnim.SetInterpolantValue(Vector3D(0.0f, 0.0f, 0.0f));
+        
+        if (!this->eye->GetIsDestroyed()) {
+            this->eye->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
             Vector2D ballToEyeVec = this->eye->GetTranslationPt2D() - ball.GetCenterPosition2D();
             ballToEyeVec.Normalize();
 
@@ -1744,7 +1737,6 @@ void HeadAI::SetState(ClassicalBossAI::AIState newState) {
         case ClassicalBossAI::HurtEyeAIState:
             debug_output("Entering HurtEyeAIState");
             this->boss->alivePartsRoot->AnimateColourRGBA(Boss::BuildBossHurtAndInvulnerableColourAnim());
-            this->eyeHurtMoveAnim.ResetToStart();
             break;
 
         case ClassicalBossAI::FinalDeathThroesAIState:
@@ -1940,12 +1932,12 @@ void HeadAI::PerformBasicEyeMovement(const Point2D& eyePos, const GameLevel* lev
 
     // Up-down movement of the eye
     float avgBasicEyeMoveHeight = this->GetEyeBasicMoveHeight(level);
-    float upDownEyeDistance     = ClassicalBoss::PEDIMENT_HEIGHT;
+    float upDownEyeDistance     = 1.25f * ClassicalBoss::PEDIMENT_HEIGHT;
     if (eyePos[1] < avgBasicEyeMoveHeight - upDownEyeDistance) {
-        this->currEyeVel[1] = this->GetMaxSpeed() / 1.25f;
+        this->currEyeVel[1] = this->GetMaxSpeed() / 1.1f;
     }
     else if (eyePos[1] > avgBasicEyeMoveHeight + upDownEyeDistance) {
-        this->currEyeVel[1] = -this->GetMaxSpeed() / 1.25f;
+        this->currEyeVel[1] = -this->GetMaxSpeed() / 1.1f;
     }
 
     // Side-to-side movement of the eye
@@ -1994,7 +1986,7 @@ void HeadAI::UpdateEyeAndPedimentHeightMovement() {
 }
 
 float HeadAI::GetPedimentBasicMoveHeight(const GameLevel* level) {
-    return level->GetLevelUnitHeight() / 2.0f - 0.1f * ClassicalBoss::PEDIMENT_WIDTH;
+    return level->GetLevelUnitHeight() / 2.0f - 0.115f * ClassicalBoss::PEDIMENT_WIDTH;
 }
 
 float HeadAI::GetEyeBasicMoveHeight(const GameLevel* level) {
@@ -2007,8 +1999,8 @@ AnimationMultiLerp<float> HeadAI::GenerateSpinningPedimentRotationAnim() {
     std::vector<double> timeVals;
     timeVals.reserve(3);
     timeVals.push_back(0.0);
-    timeVals.push_back(1.0);
-    timeVals.push_back(2.0);
+    timeVals.push_back(1.25);
+    timeVals.push_back(2.5);
 
     std::vector<float> rotVals;
     rotVals.reserve(timeVals.size());

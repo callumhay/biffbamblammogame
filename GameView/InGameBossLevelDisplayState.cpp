@@ -76,7 +76,7 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
             this->display->GetModel()->ToggleAllowPaddleBallLaunching(true);
             break;
 
-        case InGameBossLevelDisplayState::OutroBossState:
+        case InGameBossLevelDisplayState::OutroBossState: {
 
             // Cancel all effects...
             this->display->GetAssets()->GetItemAssets()->ClearTimers();
@@ -97,7 +97,14 @@ void InGameBossLevelDisplayState::SetBossState(BossState newState) {
 
             this->fadeObjectsAnim.ResetToStart();
 
+            PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
+            float levelWidthTimes2 = 2*this->display->GetModel()->GetCurrentLevel()->GetLevelUnitWidth();
+            paddle->UpdatePaddleBounds(-levelWidthTimes2, levelWidthTimes2);
+            this->paddlePosGetTheHellOutAnim.SetLerp(0.0, Boss::TOTAL_DEATH_ANIM_TIME, 
+                paddle->GetCenterPosition()[0], levelWidthTimes2);
+
             break;
+        }
 
         case InGameBossLevelDisplayState::VictoryBossState:
             break;
@@ -182,17 +189,23 @@ void InGameBossLevelDisplayState::ExecuteInPlayBossState(double dT) {
 
     if (boss->GetIsStateMachineFinished()) {
         // Pause the paddle and ball, the boss is defeated!
-        this->display->GetModel()->SetPauseState(GameModel::PausePaddle | GameModel::PauseBall);
+        this->display->GetModel()->SetPauseState(GameModel::PausePaddleControls | GameModel::PauseBall);
         this->SetBossState(InGameBossLevelDisplayState::OutroBossState);
     }
 }
 
 void InGameBossLevelDisplayState::ExecuteOutroBossState(double dT) {
     this->fadeObjectsAnim.Tick(dT);
+    this->paddlePosGetTheHellOutAnim.Tick(dT);
+
     float unimportantObjectsAlpha = this->fadeObjectsAnim.GetInterpolantValue();
+    float paddleXPos = this->paddlePosGetTheHellOutAnim.GetInterpolantValue();
 
     GameBall* ball  = this->display->GetModel()->GetGameBalls().front();
+    PlayerPaddle* paddle = this->display->GetModel()->GetPlayerPaddle();
     GameAssets* gameAssets = this->display->GetAssets();
+
+    paddle->SetCenterPosition(Point2D(paddleXPos, paddle->GetCenterPosition()[1]));
 
     ball->SetAlpha(unimportantObjectsAlpha);
 	gameAssets->GetCurrentLevelMesh()->SetLevelAlpha(unimportantObjectsAlpha);

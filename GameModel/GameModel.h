@@ -46,7 +46,8 @@ public:
 	// PauseGame: Pauses the entire game - should be used when the user pauses the game.
 	// AllPause: All possible pauses are active
 	enum PauseType { NoPause = 0x00000000, PauseState = 0x00000001, PausePaddle = 0x00000002, 
-                     PauseGame = 0x80000000, PauseBall = 0x00000004, PauseAI = 0x00000008, AllPause = 0xFFFFFFFF };
+                     PauseGame = 0x80000000, PauseBall = 0x00000004, PauseAI = 0x00000008, 
+                     PausePaddleControls = 0x00000010, AllPause = 0xFFFFFFFF };
 
     
     // Difficulty of the game:
@@ -431,7 +432,8 @@ public:
 		// Can only move the paddle if the state exists and is not paused
 		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
 		   (this->pauseBitField & GameModel::PauseState) == 0x0  &&
-           (this->pauseBitField & GameModel::PauseGame) == 0x0) {
+           (this->pauseBitField & GameModel::PauseGame) == 0x0 &&
+           (this->pauseBitField & GameModel::PausePaddleControls) == 0x0) {
 				 this->currState->MovePaddleKeyPressed(paddleMovement, magnitudePercent);
 		}
 	}
@@ -441,7 +443,8 @@ public:
 		// Can only release the ball if the state exists and is not paused
 		if (this->currState != NULL && (this->pauseBitField & GameModel::PausePaddle) == 0x0 &&
 			 (this->pauseBitField & GameModel::PauseState) == 0x0 &&
-             (this->pauseBitField & GameModel::PauseGame) == 0x0) {
+             (this->pauseBitField & GameModel::PauseGame) == 0x0 &&
+             (this->pauseBitField & GameModel::PausePaddleControls) == 0x0) {
 			this->currState->BallReleaseKeyPressed();
 		}
 	}

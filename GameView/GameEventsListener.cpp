@@ -898,13 +898,13 @@ void GameEventsListener::BallBoostLostEvent(bool allBoostsLost) {
 void GameEventsListener::ProjectileSpawnedEvent(const Projectile& projectile) {
 	// Tell the assets - this will spawn the appropriate sprites/projectiles and effects
 	this->display->GetAssets()->AddProjectile(*this->display->GetModel(), projectile);
-	debug_output("EVENT: Projectile spawned");
+	//debug_output("EVENT: Projectile spawned");
 }
 
 void GameEventsListener::ProjectileRemovedEvent(const Projectile& projectile) {
 	// Remove the projectile's effect
 	this->display->GetAssets()->RemoveProjectile(projectile);
-	debug_output("EVENT: Projectile removed");
+	//debug_output("EVENT: Projectile removed");
 }
 
 void GameEventsListener::RocketExplodedEvent(const PaddleRocketProjectile& rocket) {
