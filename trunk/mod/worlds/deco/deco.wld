@@ -93,9 +93,10 @@ resources/worlds/levels/hard/magnet_attack.lvl
 resources/worlds/levels/easy/invader.lvl
 
 # Testing Levels
+resources/worlds/testing/fast_points.lvl
 resources/worlds/testing/an_almost_empty_level.lvl
 resources/worlds/testing/block_test.lvl
 resources/worlds/testing/turret_test.lvl
 resources/worlds/testing/see_the_background.lvl
-
+resources/worlds/testing/block_outer_barrier_test.lvl
 

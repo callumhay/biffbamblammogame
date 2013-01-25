@@ -53,17 +53,3 @@ resources/worlds/levels/bosses/pediment_head.lvl
 
 # END OF MOVEMENT ---------------------------------------
 
-
-# TODO...
-resources/worlds/levels/medium/spike_jonze.lvl
-
-
-
-# Testing Levels
-resources/worlds/testing/fast_points.lvl
-resources/worlds/testing/an_almost_empty_level.lvl
-resources/worlds/testing/block_test.lvl
-resources/worlds/testing/turret_test.lvl
-resources/worlds/testing/see_the_background.lvl
-resources/worlds/testing/block_outer_barrier_test.lvl
-

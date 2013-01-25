@@ -45,6 +45,7 @@ private:
     // OutroBossState;
     double outroFinishCountdown;
     AnimationLerp<float> fadeObjectsAnim;
+    AnimationLerp<float> paddlePosGetTheHellOutAnim;
 
     void SetBossState(BossState newState);
     void RenderBossState(double dT);
